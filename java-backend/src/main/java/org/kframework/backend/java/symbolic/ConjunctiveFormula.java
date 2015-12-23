@@ -508,7 +508,9 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
      * This method is useful for checking if narrowing happens.
      */
     public boolean isMatching(Set<Variable> variables) {
-        return isSubstitution() && substitution.keySet().equals(variables);
+        //return isSubstitution() && substitution.keySet().equals(variables);
+        return substitution.keySet().equals(variables)
+                && equalities.stream().allMatch(e -> e.leftHandSide() instanceof LocalRewriteTerm);
     }
 
     public boolean isSubstitution() {

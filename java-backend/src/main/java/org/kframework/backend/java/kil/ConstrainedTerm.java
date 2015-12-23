@@ -11,7 +11,6 @@ import org.kframework.backend.java.rewritemachine.MatchingInstruction;
 import org.kframework.backend.java.symbolic.AbstractKMachine;
 import org.kframework.backend.java.symbolic.ConjunctiveFormula;
 import org.kframework.backend.java.symbolic.DisjunctiveFormula;
-import org.kframework.backend.java.symbolic.Equality;
 import org.kframework.backend.java.symbolic.PatternExpander;
 import org.kframework.backend.java.symbolic.SymbolicUnifier;
 import org.kframework.backend.java.symbolic.Transformer;
@@ -233,8 +232,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
 
             /* OPTIMIZATION: if no narrowing happens, the constraint remains unchanged;
              * thus, there is no need to check satisfiability or expand patterns */
-            boolean isMatching = candidate.equalities().stream()
-                    .allMatch(e -> (e.leftHandSide() instanceof LocalRewriteTerm));
+            boolean isMatching = candidate.isMatching(variables);
 
             if (!isMatching && solution.checkUnsat()) {
                 continue;

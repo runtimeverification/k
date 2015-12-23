@@ -49,10 +49,7 @@ public class BuiltinList extends Collection implements KItemCollection {
     }
 
     public boolean isElement(int index) {
-        if(index >= size())
-            return false;
-        Term e = children.get(index);
-        return isElement(e);
+        return isElement(children.get(index));
     }
 
     private boolean isElement(Term e) {
@@ -85,9 +82,7 @@ public class BuiltinList extends Collection implements KItemCollection {
 
     @Override
     public int concreteSize() {
-        int size = 0;
-        for(int i=0;i<this.size();i++) if(isElement(i)) size++;
-        return size;
+        return (int) children.stream().filter(this::isElement).count();
     }
 
     @Override

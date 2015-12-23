@@ -51,6 +51,6 @@ public class AssocTest {
 
         String actual = KOREToTreeNodes.toString(new AddBrackets(unparsingModule).addBrackets((ProductionReference) KOREToTreeNodes.apply(KOREToTreeNodes.up(unparsingModule, kResult), unparsingModule)));
 
-        assertEquals("Execution failed", "<t> <k> foo ~> .::K </k> <b> x </b> </t>", actual);
+        assertEquals("Execution failed", "<k> 1 </k>", actual);
     }
 }

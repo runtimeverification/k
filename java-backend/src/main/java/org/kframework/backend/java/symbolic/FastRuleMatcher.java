@@ -254,7 +254,12 @@ public class FastRuleMatcher {
             return empty;
         }
 
-        if (subject.isElement(subjectIndex) && pattern.isElement(patternIndex)) {
+        if (subjectIndex == subject.size() && pattern.isElement(0)) {
+            // fail
+            return empty;
+        }
+
+        if (subjectIndex < subject.size() && subject.isElement(subjectIndex) && pattern.isElement(patternIndex)) {
             ruleMask = match(subject.get(subjectIndex), pattern.get(patternIndex), ruleMask, path.$colon$colon(Pair.of(subjectIndex, subjectIndex + 1)));
             if (ruleMask.isEmpty()) {
                 // fail
