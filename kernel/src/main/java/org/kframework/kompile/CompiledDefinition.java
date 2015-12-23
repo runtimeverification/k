@@ -1,7 +1,6 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.kompile;
 
-import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.attributes.Source;
 import org.kframework.definition.Definition;
@@ -16,6 +15,7 @@ import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.file.FileUtil;
+import scala.Option;
 import scala.Tuple2;
 import scala.util.Either;
 
@@ -56,7 +56,7 @@ public class CompiledDefinition implements Serializable {
      * A function that takes a string and the source of that string and parses it as a program into KAST.
      */
     public BiFunction<String, Source, K> getProgramParser(KExceptionManager kem) {
-        return getParser(syntaxModule(), programStartSymbol, kem);
+        return getParser(programParsingModuleForModule(mainSyntaxModuleName()).get(), programStartSymbol, kem);
     }
 
     /**
@@ -73,9 +73,10 @@ public class CompiledDefinition implements Serializable {
         return kompiledDefinition.mainModule();
     }
 
-    public Module syntaxModule() {
-        String syntaxModuleName = parsedDefinition.att().<String>getOptional(Att.syntaxModule()).get();
-        return kompiledDefinition.getModule(syntaxModuleName + RuleGrammarGenerator.POSTFIX).get();
+    public String mainSyntaxModuleName() { return parsedDefinition.att().<String>getOptional(Att.syntaxModule()).get(); }
+
+    public Option<Module> programParsingModuleForModule(String syntaxModuleName) {
+        return kompiledDefinition.getModule(syntaxModuleName + RuleGrammarGenerator.POSTFIX);
     }
 
     public Module languageParsingModule() { return languageParsingModule; }
