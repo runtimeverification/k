@@ -2,6 +2,7 @@
 package org.kframework.parser.concrete2kore.generator;
 
 import org.apache.commons.collections4.trie.PatriciaTrie;
+import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.ConfigurationInfo;
@@ -73,7 +74,9 @@ public class RuleGrammarGenerator {
     public static final String RULE_LISTS = "RULE-LISTS";
 
     public static final String POSTFIX = "-PROGRAM-PARSING";
-    public static final String ID = "ID" + POSTFIX;
+
+    public static final String ID = "ID";
+    public static final String ID_PROGRAM_PARSING = ID + POSTFIX;
 
     /**
      * Initialize a grammar generator.
@@ -123,14 +126,20 @@ public class RuleGrammarGenerator {
      * @return a new module which imports the original user module and a set of marker modules.
      */
     public Module getProgramsGrammar(Module mod) {
-        // import PROGRAM-LISTS so user lists are modified to parse programs
-        scala.collection.Set<Module> modules = org.kframework.Collections.Set(mod, baseK.getModule(PROGRAM_LISTS).get());
 
-        Option<Module> idOpt = baseK.getModule(ID);
-        if(idOpt.isDefined() && !mod.equals(idOpt.get()))
-            modules = org.kframework.Collections.add(idOpt.get(), modules);
+        if(mod.name().endsWith(POSTFIX)) {
+            return mod;
+        } else {
+            // import PROGRAM-LISTS so user lists are modified to parse programs
+            scala.collection.Set<Module> modules = Set(mod, baseK.getModule(PROGRAM_LISTS).get());
 
-        return Module.apply(mod.name() + POSTFIX, modules, Set(), Att());
+            if (stream(mod.importedModules()).anyMatch(m -> m.name().equals(ID))) {
+                Module idProgramParsingModule = baseK.getModule(ID_PROGRAM_PARSING).get();
+                modules = add(idProgramParsingModule, modules);
+            }
+
+            return Module.apply(mod.name() + POSTFIX, modules, Set(), Att());
+        }
     }
 
     public static boolean isParserSort(Sort s) {

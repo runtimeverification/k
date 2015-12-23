@@ -212,7 +212,7 @@ public class Kompile {
         Module languageParsingModule = Module("LANGUAGE-PARSING",
                 Set(d.mainModule(),
                         d.getModule("K-TERM").get(),
-                        d.getModule(RuleGrammarGenerator.ID).get()), Set(), Att());
+                        d.getModule(RuleGrammarGenerator.ID_PROGRAM_PARSING).get()), Set(), Att());
         allModules.add(languageParsingModule);
         return Definition(withKSeq, immutable(allModules), d.att());
     }
