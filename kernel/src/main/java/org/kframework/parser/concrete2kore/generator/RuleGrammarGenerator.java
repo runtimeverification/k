@@ -73,7 +73,7 @@ public class RuleGrammarGenerator {
     public static final String ID = "ID";
     public static final String RULE_LISTS = "RULE-LISTS";
 
-    public static final String POSTFIX = "-PROGRAM";
+    public static final String POSTFIX = "-PROGRAM-PARSING";
 
     /**
      * Initialize a grammar generator.
