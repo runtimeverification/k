@@ -54,7 +54,7 @@ public class CompiledDefinition implements Serializable {
      * A function that takes a string and the source of that string and parses it as a program into KAST.
      */
     public BiFunction<String, Source, K> getProgramParser(KExceptionManager kem) {
-        return getParser(kompiledDefinition.mainSyntaxModule(), programStartSymbol, kem);
+        return getParser(kompiledDefinition.programParsingModule(), programStartSymbol, kem);
     }
 
     /**

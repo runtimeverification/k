@@ -212,11 +212,6 @@ public class ParserUtils {
             syntaxModule = opt.get();
         }
 
-        Module idSyntaxModule = modules.stream().filter(m -> m.name().equals(("ID"))).findFirst().get();
-
-        Module programParsingModule = Module.apply(mainModuleName + "-PROGRAM", Set(syntaxModule, idSyntaxModule), Set(), Att());
-        modules.add(programParsingModule);
-
-        return org.kframework.definition.Definition.apply(mainModule, programParsingModule, immutable(modules), Att());
+        return org.kframework.definition.Definition.apply(mainModule, syntaxModule, immutable(modules), Att());
     }
 }
