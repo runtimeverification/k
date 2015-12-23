@@ -423,7 +423,7 @@ module STRING
   syntax Int ::= rfindChar ( String , String , Int )    [function, hook(STRING.rfindChar)]
 
   syntax String ::= Float2String ( Float )              [function, hook(STRING.float2string)]
-  syntax String ::= Float2String ( Float , String )     [function, hook(STRING.floatFormat)]
+  syntax String ::= Float2String ( Float , String )     [function, klabel(FloatFormat), hook(STRING.floatFormat)]
   syntax Float  ::= String2Float ( String )             [function, hook(STRING.string2float)]
   syntax Int    ::= String2Int   ( String )             [function, hook(STRING.string2int)]
   syntax String ::= Int2String   ( Int )                [function, hook(STRING.int2string)]
