@@ -1,6 +1,7 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.kompile;
 
+import org.kframework.Collections;
 import org.kframework.attributes.Source;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
@@ -54,7 +55,7 @@ public class CompiledDefinition implements Serializable {
      * A function that takes a string and the source of that string and parses it as a program into KAST.
      */
     public BiFunction<String, Source, K> getProgramParser(KExceptionManager kem) {
-        return getParser(kompiledDefinition.programParsingModule(), programStartSymbol, kem);
+        return getParser(kompiledDefinition.mainSyntaxModule(), programStartSymbol, kem);
     }
 
     /**
@@ -113,9 +114,5 @@ public class CompiledDefinition implements Serializable {
         stream.defaultReadObject();
         cachedcompiledPatterns = new ConcurrentHashMap<>();
         cachedParsedPatterns = new ConcurrentHashMap<>();
-    }
-
-    public Module programsModule() {
-        return parsedDefinition.programParsingModule();
     }
 }

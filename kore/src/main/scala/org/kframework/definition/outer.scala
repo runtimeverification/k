@@ -46,12 +46,6 @@ case class Definition(
   assert(modules.contains(mainModule))
   assert(modules.contains(mainSyntaxModule))
 
-  // TODO: remove this method when cleaning up the way Kompile generates the parsing module
-  lazy val programParsingModule: Module = Module(
-      mainModule.name + "-PROGRAM",
-      Set(mainSyntaxModule) | modules.find(_.name == "ID").toSet,
-      Set())
-
   def getModule(name: String): Option[Module] = modules find { case m: Module => m.name == name; case _ => false }
 }
 

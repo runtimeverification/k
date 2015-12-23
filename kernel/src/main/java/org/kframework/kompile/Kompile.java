@@ -222,7 +222,7 @@ public class Kompile {
     }
 
     public Definition addProgramModule(Definition d) {
-        Module programsModule = gen.getProgramsGrammar(d.programParsingModule());
+        Module programsModule = gen.getProgramsGrammar(d.mainSyntaxModule());
         java.util.Set<Module> allModules = mutable(d.modules());
         allModules.add(programsModule);
         return Definition(d.mainModule(), programsModule, immutable(allModules));

@@ -18,9 +18,11 @@ import org.kframework.kil.Attribute;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kore.Sort;
 import org.kframework.parser.concrete2kore.ParseInModule;
+import scala.Option;
 import scala.collection.Seq;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -68,6 +70,7 @@ public class RuleGrammarGenerator {
     public static final String K_BOTTOM_SORT = "K-BOTTOM-SORT";
     public static final String AUTO_FOLLOW = "AUTO-FOLLOW";
     public static final String PROGRAM_LISTS = "PROGRAM-LISTS";
+    public static final String ID = "ID";
     public static final String RULE_LISTS = "RULE-LISTS";
 
     /**
@@ -119,8 +122,13 @@ public class RuleGrammarGenerator {
      */
     public Module getProgramsGrammar(Module mod) {
         // import PROGRAM-LISTS so user lists are modified to parse programs
-        Module newM = new Module(mod.name() + "-PROGRAM-LISTS", Set(mod, baseK.getModule(PROGRAM_LISTS).get()), Set(), Att());
-        return newM;
+        scala.collection.Set<Module> modules = org.kframework.Collections.Set(mod, baseK.getModule(PROGRAM_LISTS).get());
+
+        Option<Module> idOpt = baseK.getModule(ID);
+        if(idOpt.isDefined())
+            modules = org.kframework.Collections.add(idOpt.get(), modules);
+
+        return Module.apply(mod.name() + "-PROGRAM-LISTS", modules, Set(), Att());
     }
 
     public static boolean isParserSort(Sort s) {
