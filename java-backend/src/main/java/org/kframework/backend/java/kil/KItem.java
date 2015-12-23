@@ -96,7 +96,7 @@ public class KItem extends Term implements KItemRepresentation, HasGlobalContext
     }
 
     private KItem(Term kLabel, Term kList, Sort sort, boolean isExactSort, Set<Sort> possibleSorts, Source source, Location location) {
-        super(Kind.KITEM, source, location);
+        super(computeKind(kLabel), source, location);
         this.kLabel = kLabel;
         this.kList = kList;
         this.sort = sort;
@@ -106,8 +106,18 @@ public class KItem extends Term implements KItemRepresentation, HasGlobalContext
         this.enableCache = false;
     }
 
+    private static Kind computeKind(Term kLabel) {
+        if (kLabel instanceof KLabelConstant) {
+            String name = ((KLabelConstant) kLabel).name();
+            if (name.equals(KLabels.DOTK) || name.equals(KLabels.KSEQ)) {
+                return Kind.K;
+            }
+        }
+        return Kind.KITEM;
+    }
+
     private KItem(Term kLabel, Term kList, GlobalContext global, Stage stage, Source source, Location location, BitSet[] childrenDonCareRuleMask) {
-        super(Kind.KITEM, source, location);
+        super(computeKind(kLabel), source, location);
         this.kLabel = kLabel;
         this.kList = kList;
         this.global = global;
