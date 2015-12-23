@@ -187,7 +187,6 @@ public class Kompile {
                 .andThen(new Strategy(kompileOptions.experimental.heatCoolStrategies).addStrategyCellToRulesTransformer())
                 .andThen(func(ConcretizeCells::transformDefinition))
                 .andThen(func(this::addSemanticsModule))
-                .andThen(func(this::addProgramModule))
                 .apply(def);
     }
 
@@ -218,11 +217,6 @@ public class Kompile {
     public Definition resolveFreshConstants(Definition input) {
         return DefinitionTransformer.from(new ResolveFreshConstants(input)::resolve, "resolving !Var variables")
                 .apply(input);
-    }
-
-    public <R> Definition addProgramModule(Definition d) {
-        Set<Module> programParsingModules = stream(d.modules()).map(gen::getProgramsGrammar).collect(Collections.toSet());
-        return Definition(d.mainModule(), or(d.modules(), programParsingModules), d.att());
     }
 
     private Sentence concretizeSentence(Sentence s, Definition input) {

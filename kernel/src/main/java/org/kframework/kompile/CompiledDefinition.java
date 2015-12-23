@@ -76,7 +76,15 @@ public class CompiledDefinition implements Serializable {
     public String mainSyntaxModuleName() { return parsedDefinition.att().<String>getOptional(Att.syntaxModule()).get(); }
 
     public Option<Module> generatedProgramParsingModuleFor(String moduleName) {
-        return kompiledDefinition.getModule(moduleName + RuleGrammarGenerator.POSTFIX);
+        RuleGrammarGenerator gen = new RuleGrammarGenerator(parsedDefinition, kompileOptions.strict());
+
+        Option<Module> userProgramParsingModule = parsedDefinition.getModule(moduleName + RuleGrammarGenerator.POSTFIX);
+        if(userProgramParsingModule.isDefined()) {
+            return userProgramParsingModule;
+        } else {
+            Option<Module> moduleOption = parsedDefinition.getModule(moduleName);
+            return moduleOption.isDefined() ? Option.apply(gen.getProgramsGrammar(moduleOption.get())) : Option.empty();
+        }
     }
 
     public Module languageParsingModule() { return languageParsingModule; }
