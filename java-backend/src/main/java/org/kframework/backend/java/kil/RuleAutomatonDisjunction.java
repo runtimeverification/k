@@ -132,7 +132,7 @@ public class RuleAutomatonDisjunction extends Term implements HasGlobalContext {
 
     @Override
     public boolean isExactSort() {
-        throw new UnsupportedOperationException();
+        return false;
     }
 
     @Override
