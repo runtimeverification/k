@@ -241,7 +241,7 @@ public class FastRuleMatcher {
 
     private BitSet matchAssoc(BuiltinList subject, int subjectIndex, BuiltinList pattern, int patternIndex, BitSet ruleMask, scala.collection.immutable.List<Pair<Integer, Integer>> path) {
         assert subject.sort.equals(pattern.sort);
-        assert IntStream.range(0, subject.children.size()).allMatch(subject::isElement);
+        assert subject.isConcreteCollection();
 
         /* match prefix of elements in subject and pattern */
         if (subjectIndex == subject.size() && patternIndex == pattern.size()) {
@@ -282,17 +282,17 @@ public class FastRuleMatcher {
             which means there are no deep-nested rewrites,
             which in turn means the inaccurate paths will never be used */
             ruleMask = match(subject.range(subjectIndex, i), pattern.get(patternIndex), ruleMask, path.$colon$colon(Pair.of(subjectIndex, i)));
-            if (ruleMask.isEmpty()) {
-                // fail
-                return ruleMask;
+
+            if (!ruleMask.isEmpty()) {
+                ruleMask = matchAssoc(subject, i, pattern, patternIndex + 1, ruleMask, path);
+
+                ruleMask.stream().forEach(j -> {
+                    if (!constraints[j].simplify().isFalse()) {
+                        nestedConstraints.put(j, constraints[j]);
+                    }
+                });
             }
 
-            ruleMask = matchAssoc(subject, i, pattern, patternIndex + 1, ruleMask, path);
-            ruleMask.stream().forEach(j -> {
-                if (!constraints[j].simplify().isFalse()) {
-                    nestedConstraints.put(j, constraints[j]);
-                }
-            });
             constraints = oldConstraints;
             ruleMask = oldRuleMask;
         }

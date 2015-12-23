@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Constants;
+import org.kframework.builtin.KLabels;
 import org.kframework.kil.ASTNode;
 
 import java.util.List;
@@ -52,9 +53,11 @@ public class BuiltinList extends Collection implements KItemCollection {
         return isElement(children.get(index));
     }
 
-    private boolean isElement(Term e) {
-        assert global.getDefinition().subsorts().isSubsortedEq(sort, e.sort());
-        return !(e instanceof Variable && e.sort().equals(sort));
+    private boolean isElement(Term term) {
+        assert global.getDefinition().subsorts().isSubsortedEq(sort, term.sort());
+        return !(term instanceof Variable && term.sort().equals(sort)
+                || term instanceof RuleAutomatonDisjunction && ((RuleAutomatonDisjunction) term).disjunctions().stream().anyMatch(p -> !isElement(p.getLeft()))
+                || term instanceof KItem && ((KItem) term).kLabel().toString().equals(KLabels.KREWRITE) && !isElement(((KList) ((KItem) term).kList()).get(0)));
     }
 
     public Term range(int beginIndex, int endIndex) {
@@ -87,7 +90,7 @@ public class BuiltinList extends Collection implements KItemCollection {
 
     @Override
     public final boolean isConcreteCollection() {
-        throw new AssertionError("Unimplemented");
+        return children.stream().allMatch(this::isElement);
     }
 
     @Override
@@ -122,6 +125,13 @@ public class BuiltinList extends Collection implements KItemCollection {
         int hashCode = 1;
         hashCode = hashCode * Constants.HASH_PRIME + children.hashCode();
         return hashCode;
+    }
+
+    @Override
+    public String toString() {
+        return !isEmpty() ?
+                operatorKLabel + "(" + children.stream().map(Term::toString).collect(Collectors.joining(", ")) + ")" :
+                unitKLabel + "()";
     }
 
     @Override

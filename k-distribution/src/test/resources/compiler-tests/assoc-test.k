@@ -9,7 +9,8 @@ module ASSOC-TEST
              | "b"
 
   syntax KItem ::= foo(S)
-  rule <k> 0 => foo(`b * b` * `a * b`) </k>
+  rule <k> 0 => foo(`b * b` * `b * b`) </k>
+  rule <k> foo(``X * `b => a * a` `` * b) </k>
   rule <k> foo(`X * a` * Y) => 1 </k>
 
   configuration <k> $PGM </k>
