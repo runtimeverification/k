@@ -8,11 +8,38 @@ import org.kframework.backend.java.builtins.FloatToken;
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.StringToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
-import org.kframework.backend.java.kil.*;
+import org.kframework.backend.java.kil.BuiltinList;
+import org.kframework.backend.java.kil.BuiltinMap;
+import org.kframework.backend.java.kil.BuiltinSet;
+import org.kframework.backend.java.kil.CellCollection;
+import org.kframework.backend.java.kil.CellLabel;
+import org.kframework.backend.java.kil.Collection;
+import org.kframework.backend.java.kil.ConstrainedTerm;
+import org.kframework.backend.java.kil.Definition;
+import org.kframework.backend.java.kil.GlobalContext;
+import org.kframework.backend.java.kil.HasGlobalContext;
+import org.kframework.backend.java.kil.Hole;
+import org.kframework.backend.java.kil.InjectedKLabel;
+import org.kframework.backend.java.kil.InnerRHSRewrite;
+import org.kframework.backend.java.kil.KCollection;
+import org.kframework.backend.java.kil.KItem;
+import org.kframework.backend.java.kil.KItemProjection;
+import org.kframework.backend.java.kil.KLabel;
+import org.kframework.backend.java.kil.KLabelConstant;
+import org.kframework.backend.java.kil.KLabelFreezer;
+import org.kframework.backend.java.kil.KLabelInjection;
+import org.kframework.backend.java.kil.KList;
+import org.kframework.backend.java.kil.KSequence;
+import org.kframework.backend.java.kil.MetaVariable;
+import org.kframework.backend.java.kil.Rule;
+import org.kframework.backend.java.kil.RuleAutomatonDisjunction;
+import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermContext;
+import org.kframework.backend.java.kil.Token;
+import org.kframework.backend.java.kil.Variable;
 import org.kframework.kil.ASTNode;
 import org.kframework.utils.BitSet;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -21,7 +48,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 
 /**
@@ -36,6 +62,7 @@ import java.util.stream.Stream;
  */
 public abstract class CopyOnWriteTransformer implements Transformer {
 
+    private static final String KSEQUENCE_KLABEL = "#KSequence";
     protected final TermContext context;
 
     public CopyOnWriteTransformer(TermContext context) {
@@ -159,7 +186,7 @@ public abstract class CopyOnWriteTransformer implements Transformer {
             if (innerRHSRewrite.theRHS[i] != null)
                 theNewRHS[i] = (Term) innerRHSRewrite.theRHS[i].accept(this);
         }
-        if(Arrays.equals(theNewRHS, innerRHSRewrite.theRHS)) {
+        if (Arrays.equals(theNewRHS, innerRHSRewrite.theRHS)) {
             return innerRHSRewrite;
         } else {
             return new InnerRHSRewrite(theNewRHS);
@@ -179,10 +206,45 @@ public abstract class CopyOnWriteTransformer implements Transformer {
     public ASTNode transform(KItem kItem) {
         Term kLabel = (Term) kItem.kLabel().accept(this);
         Term kList = (Term) kItem.kList().accept(this);
+        if (kLabel.toString().equals(KSEQUENCE_KLABEL) && kList instanceof KList) {
+            KList castList = (KList) kList;
+            kList = normalizeKSeqList(castList);
+        }
         if (kLabel != kItem.kLabel() || kList != kItem.kList()) {
             kItem = KItem.of(kLabel, kList, resolveGlobalContext(kItem), kItem.getSource(), kItem.getLocation());
         }
+
         return kItem;
+    }
+
+    private Term normalizeKSeqList(KList kList) {
+        if (kList.size() > 1 && (kList.get(0) instanceof KItem) && ((KItem) (kList.get(0))).klabel().name().equals(KSEQUENCE_KLABEL)) {
+            KItem kSeq = (KItem) (kList.get(0));
+            if (kSeq.kList() instanceof KList) {
+                KList kSeqList = (KList) kSeq.klist();
+                Term rightNormalizedChild = addRightAssoc(kSeqList.get(1), kList.get(1));
+                return KList.concatenate(kSeqList.get(0), rightNormalizedChild);
+            }
+        }
+        return kList;
+    }
+
+    private Term addRightAssoc(Term term, Term toBeAdded) {
+        if (term instanceof KItem && ((KItem) term).klabel().name().equals(KSEQUENCE_KLABEL)) {
+            KItem kItem = (KItem) term;
+            if (kItem.klist() instanceof KList) {
+                KList kList = (KList) kItem.kList();
+                Term rightTerm = addRightAssoc(kList.get(1), toBeAdded);
+                return KItem.of((Term) kItem.klabel(), KList.concatenate(kList.get(0), rightTerm), kItem.globalContext(),
+                        kItem.getSource(), kItem.location());
+            }
+            return kItem;
+        }
+        //construct new KSequence Term
+        GlobalContext globalContext = term instanceof HasGlobalContext ?
+                resolveGlobalContext((HasGlobalContext) term) : context.global();
+        return KItem.of(KLabelConstant.of(KSEQUENCE_KLABEL, context.definition()), KList.concatenate(term, toBeAdded),
+                globalContext, term.getSource(), term.getLocation());
     }
 
     @Override
@@ -358,7 +420,7 @@ public abstract class CopyOnWriteTransformer implements Transformer {
     public ASTNode transform(BuiltinSet builtinSet) {
         boolean changed = false;
         BuiltinSet.Builder builder = BuiltinSet.builder(resolveGlobalContext(builtinSet));
-        for(Term element : builtinSet.elements()) {
+        for (Term element : builtinSet.elements()) {
             Term transformedElement = (Term) element.accept(this);
             builder.add(transformedElement);
             changed = changed || (transformedElement != element);
