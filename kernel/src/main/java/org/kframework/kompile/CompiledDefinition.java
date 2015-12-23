@@ -114,4 +114,8 @@ public class CompiledDefinition implements Serializable {
         cachedcompiledPatterns = new ConcurrentHashMap<>();
         cachedParsedPatterns = new ConcurrentHashMap<>();
     }
+
+    public Module programsModule() {
+        return parsedDefinition.programParsingModule();
+    }
 }
