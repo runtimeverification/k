@@ -254,7 +254,7 @@ public class FastRuleMatcher {
             return empty;
         }
 
-        if (subjectIndex == subject.size() && pattern.isElement(0)) {
+        if (subjectIndex == subject.size() && pattern.isElement(patternIndex)) {
             // fail
             return empty;
         }

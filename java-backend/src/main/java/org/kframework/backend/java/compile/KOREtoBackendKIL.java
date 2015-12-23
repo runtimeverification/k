@@ -127,9 +127,38 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
             return builder.addAll(convertedKList.getContents()).build();
         }
 
+        Optional<String> assocKLabelForUnit = getAssocKLabelForUnit(klabel);
+        if (assocKLabelForUnit.isPresent()) {
+            BuiltinList.Builder builder = BuiltinList.builder(
+                    Sort.of(module.productionsFor().get(klabel).get().head().sort().name()),
+                    KLabelConstant.of(assocKLabelForUnit.get(), global.getDefinition()),
+                    (KLabelConstant) convertedKLabel,
+                    global);
+            return builder.build();
+        }
+
+        if (klabel.name().equals(KLabels.KSEQ) || klabel.name().equals(KLabels.DOTK)) {
+            BuiltinList.Builder builder = BuiltinList.builder(
+                    Sort.KSEQUENCE,
+                    KLabelConstant.of(KLabels.KSEQ, global.getDefinition()),
+                    KLabelConstant.of(KLabels.DOTK, global.getDefinition()),
+                    global);
+            // this assumes there are no KList variables in the KList
+            return builder.addAll(convertedKList.getContents()).build();
+        }
+
         // we've encountered a regular KApply
         BitSet[] childrenDontCareRuleMask = constructDontCareRuleMask(convertedKList);
         return KItem.of(convertedKLabel, convertedKList, global, childrenDontCareRuleMask == null ? null : childrenDontCareRuleMask);
+    }
+
+    private Optional<String> getAssocKLabelForUnit(KLabel klabel) {
+        return definition.kLabelAttributes().entrySet().stream()
+                .filter(e -> e.getValue().containsKey(Attribute.keyOf(Att.assoc()))
+                        && !e.getValue().containsKey(Attribute.keyOf(Att.comm()))
+                        && e.getValue().getAttr(Attribute.keyOf(Att.unit())).equals(klabel.name()))
+                .map(e -> e.getKey())
+                .findAny();
     }
 
     /**

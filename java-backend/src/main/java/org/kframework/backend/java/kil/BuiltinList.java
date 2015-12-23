@@ -192,8 +192,8 @@ public class BuiltinList extends Collection implements KItemCollection {
                     && unitKLabel.equals(((BuiltinList) term).unitKLabel)) {
                 return addAll(((BuiltinList) term).children);
             } else {
-                if(!(term instanceof KItem && ((KItem) term).klabel().equals(this.unitKLabel))) // do not add the unit
-                    childrenBuilder.add(term);
+                //if(!(term instanceof KItem && ((KItem) term).klabel().equals(this.unitKLabel))) // do not add the unit
+                childrenBuilder.add(term);
                 return this;
             }
         }
