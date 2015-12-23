@@ -84,8 +84,8 @@ class DefinitionTransformer(moduleTransformer: Module => Module) extends (Defini
   override def apply(d: Definition): Definition = {
     definition.Definition(
       moduleTransformer(d.mainModule),
-      moduleTransformer(d.mainSyntaxModule),
-      d.entryModules map moduleTransformer)
+      d.entryModules map moduleTransformer,
+      d.att)
   }
 }
 
@@ -96,7 +96,7 @@ class SelectiveDefinitionTransformer(moduleTransformer: ModuleTransformer) exten
   override def apply(d: Definition): Definition = {
     definition.Definition(
       moduleTransformer(d.mainModule),
-      moduleTransformer(d.mainSyntaxModule),
-      d.entryModules map { m => moduleTransformer.memoization.getOrElse(m, m) })
+      d.entryModules map { m => moduleTransformer.memoization.getOrElse(m, m) },
+      d.att)
   }
 }

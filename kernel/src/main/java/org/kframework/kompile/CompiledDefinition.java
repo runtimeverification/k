@@ -2,6 +2,7 @@
 package org.kframework.kompile;
 
 import org.kframework.Collections;
+import org.kframework.attributes.Att;
 import org.kframework.attributes.Source;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
@@ -55,7 +56,7 @@ public class CompiledDefinition implements Serializable {
      * A function that takes a string and the source of that string and parses it as a program into KAST.
      */
     public BiFunction<String, Source, K> getProgramParser(KExceptionManager kem) {
-        return getParser(kompiledDefinition.mainSyntaxModule(), programStartSymbol, kem);
+        return getParser(syntaxModule(), programStartSymbol, kem);
     }
 
     /**
@@ -72,7 +73,10 @@ public class CompiledDefinition implements Serializable {
         return kompiledDefinition.mainModule();
     }
 
-    public Module syntaxModule() { return kompiledDefinition.mainSyntaxModule(); }
+    public Module syntaxModule() {
+        String syntaxModuleName = parsedDefinition.att().<String>getOptional(Att.syntaxModule()).get();
+        return kompiledDefinition.getModule(syntaxModuleName + RuleGrammarGenerator.POSTFIX).get();
+    }
 
     public Module languageParsingModule() { return languageParsingModule; }
 

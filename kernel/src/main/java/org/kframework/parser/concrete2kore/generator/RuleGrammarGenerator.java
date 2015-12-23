@@ -73,6 +73,8 @@ public class RuleGrammarGenerator {
     public static final String ID = "ID";
     public static final String RULE_LISTS = "RULE-LISTS";
 
+    public static final String POSTFIX = "-PROGRAM";
+
     /**
      * Initialize a grammar generator.
      * @param baseK A Definition containing a K module giving the syntax of K itself.
@@ -128,7 +130,7 @@ public class RuleGrammarGenerator {
         if(idOpt.isDefined())
             modules = org.kframework.Collections.add(idOpt.get(), modules);
 
-        return Module.apply(mod.name() + "-PROGRAM-LISTS", modules, Set(), Att());
+        return Module.apply(mod.name() + POSTFIX, modules, Set(), Att());
     }
 
     public static boolean isParserSort(Sort s) {

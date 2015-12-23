@@ -88,8 +88,7 @@ public class KILtoKORE extends KILTransformation<Object> {
 
         return Definition(
                 koreModules.get(mainModule.getName()),
-                koreModules.get(mainModule.getName()),
-                immutable(new HashSet<>(koreModules.values())));
+                immutable(new HashSet<>(koreModules.values())), Att());
     }
 
     public org.kframework.definition.Module apply(Module mainModule, Set<Module> allKilModules,

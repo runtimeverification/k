@@ -32,7 +32,7 @@ class TestMeta {
   }
 
   val m = Module("TEST", Set(), Set(Production("Foo", Sort("Foo"), Seq(Terminal("Bar", Seq())))))
-  val d = Definition(m, m, Set(m))
+  val d = Definition(m, Set(m), Att())
 
   val metamodule = 'Module("TEST", 'Set(),
     'Set('Production("Foo", 'Sort("Foo"), 'List('Terminal("Bar")))))

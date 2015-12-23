@@ -34,9 +34,8 @@ case class DivergingAttributesForTheSameKLabel(ps: Set[Production])
 
 case class Definition(
                        mainModule: Module,
-                       mainSyntaxModule: Module,
                        entryModules: Set[Module],
-                       att: Att = Att())
+                       att: Att)
   extends DefinitionToString with OuterKORE {
 
   private def allModules(m: Module): Set[Module] = m.imports | (m.imports flatMap allModules) + m
@@ -44,7 +43,6 @@ case class Definition(
   val modules = entryModules flatMap allModules
 
   assert(modules.contains(mainModule))
-  assert(modules.contains(mainSyntaxModule))
 
   def getModule(name: String): Option[Module] = modules find { case m: Module => m.name == name; case _ => false }
 }

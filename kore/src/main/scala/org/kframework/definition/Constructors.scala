@@ -2,6 +2,7 @@
 
 package org.kframework.definition
 
+import org.kframework.attributes.Att
 import org.kframework.{attributes, definition}
 import org.kframework.kore._
 import collection._
@@ -15,8 +16,8 @@ import collection._
 
 object Constructors {
 
-  def Definition(mainModule: Module, syntaxModule: Module, modules: Set[Module]) =
-    definition.Definition(mainModule, syntaxModule, modules)
+  def Definition(mainModule: Module, modules: Set[Module], att: Att) =
+    definition.Definition(mainModule, modules, att)
 
   def Module(name: String, imports: Set[Module], sentences: Set[Sentence], att: attributes.Att) =
     definition.Module(name, imports, sentences, att)

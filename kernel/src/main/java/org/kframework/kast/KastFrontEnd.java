@@ -96,7 +96,7 @@ public class KastFrontEnd extends FrontEnd {
             if (options.module == null) {
                 mod = def.syntaxModule();
             } else {
-                Option<org.kframework.definition.Module> mod2 = def.kompiledDefinition.getModule(options.module);
+                Option<org.kframework.definition.Module> mod2 = def.kompiledDefinition.getModule(options.module+"-#PROGRAM");
                 if (mod2.isEmpty()) {
                     throw KEMException.innerParserError("Module " + options.module + " not found. Specify a module with -m.");
                 }

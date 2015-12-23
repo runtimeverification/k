@@ -210,10 +210,10 @@ public class Kompile {
 
         Module languageParsingModule = Module("LANGUAGE-PARSING",
                 Set(d.mainModule(),
-                        d.mainSyntaxModule(),
-                        d.getModule("K-TERM").get()), Set(), Att());
+                        d.getModule("K-TERM").get(),
+                        d.getModule("ID").get()), Set(), Att());
         allModules.add(languageParsingModule);
-        return Definition(withKSeq, d.mainSyntaxModule(), immutable(allModules));
+        return Definition(withKSeq, immutable(allModules), d.att());
     }
 
     public Definition resolveFreshConstants(Definition input) {
@@ -221,11 +221,9 @@ public class Kompile {
                 .apply(input);
     }
 
-    public Definition addProgramModule(Definition d) {
-        Module programsModule = gen.getProgramsGrammar(d.mainSyntaxModule());
-        java.util.Set<Module> allModules = mutable(d.modules());
-        allModules.add(programsModule);
-        return Definition(d.mainModule(), programsModule, immutable(allModules));
+    public <R> Definition addProgramModule(Definition d) {
+        Set<Module> programParsingModules = stream(d.modules()).map(gen::getProgramsGrammar).collect(Collections.toSet());
+        return Definition(d.mainModule(), or(d.modules(), programParsingModules), d.att());
     }
 
     private Sentence concretizeSentence(Sentence s, Definition input) {
