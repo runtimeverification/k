@@ -1,6 +1,6 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 
-module KERNELC-SYNTAX-SYNTAX
+module KERNELC-SYNTAX
   imports BOOL-SYNTAX
   imports INT-SYNTAX
   imports FLOAT-SYNTAX
