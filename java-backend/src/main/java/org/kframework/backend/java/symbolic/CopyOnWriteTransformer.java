@@ -38,7 +38,6 @@ import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.kil.ASTNode;
-import org.kframework.tiny.KSeq;
 import org.kframework.utils.BitSet;
 
 import java.util.ArrayList;
@@ -224,10 +223,7 @@ public abstract class CopyOnWriteTransformer implements Transformer {
             if (kSeq.kList() instanceof KList) {
                 KList kSeqList = (KList) kSeq.klist();
                 Term rightNormalizedChild = addRightAssoc(kSeqList.get(1), kList.get(1));
-                KList.Builder builder = KList.builder();
-                builder.concatenate(kSeqList.get(0));
-                builder.concatenate(rightNormalizedChild);
-                return builder.build();
+                return KList.concatenate(kSeqList.get(0), rightNormalizedChild);
             }
         }
         return kList;
@@ -239,21 +235,15 @@ public abstract class CopyOnWriteTransformer implements Transformer {
             if (kItem.klist() instanceof KList) {
                 KList kList = (KList) kItem.kList();
                 Term rightTerm = addRightAssoc(kList.get(1), toBeAdded);
-                KList.Builder builder = KList.builder();
-                builder.concatenate(kList.get(0));
-                builder.concatenate(rightTerm);
-                return KItem.of((Term) kItem.klabel(), builder.build(), kItem.globalContext(),
+                return KItem.of((Term) kItem.klabel(), KList.concatenate(kList.get(0), rightTerm), kItem.globalContext(),
                         kItem.getSource(), kItem.location());
             }
             return kItem;
         }
         //construct new KSequence Term
-        KList.Builder builder = KList.builder();
-        builder.concatenate(term);
-        builder.concatenate(toBeAdded);
         GlobalContext globalContext = term instanceof HasGlobalContext ?
                 resolveGlobalContext((HasGlobalContext) term) : context.global();
-        return KItem.of(KLabelConstant.of(KSEQUENCE_KLABEL, context.definition()), builder.build(),
+        return KItem.of(KLabelConstant.of(KSEQUENCE_KLABEL, context.definition()), KList.concatenate(term, toBeAdded),
                 globalContext, term.getSource(), term.getLocation());
     }
 
