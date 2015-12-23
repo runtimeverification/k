@@ -99,6 +99,7 @@ module SET
   /*@ Construct an empty Set */
   syntax Set ::= ".Set"                   [function, hook(SET.unit), latex(\dotCt{Set})]
                //| "."
+  syntax Set ::= "(" Set ")" [bracket]
   /*@ Construct a singleton Set (a Set with only one element $\{ a \}$). To add
    an element $a$ to a set $A$, construct the union of the singleton set
    $\{ a \}$ and $A$ ($\{ a \} \cup A$). */
@@ -282,7 +283,8 @@ module INT
                  Int "|Int" Int                 [function, left, latex({#1}\mathrel{|_{\scriptstyle\it Int}}{#2}), hook(INT.or)]
   syntax Int ::= "minInt" "(" Int "," Int ")"   [function, smtlib(int_min), hook(INT.min)]
                | "maxInt" "(" Int "," Int ")"   [function, smtlib(int_max), hook(INT.max)]
-               | "absInt" "(" Int ")"           [function, smtlib(int_abs), klabel(absInt), hook(INT.abs)]
+               | absInt ( Int )                 [function, smtlib(int_abs), hook(INT.abs)]
+  syntax Int ::= "(" Int ")" [bracket]
 
   rule I1:Int divInt I2:Int => `I1 -Int `I1 modInt I2`` /Int I2
   requires I2 =/=Int 0
@@ -376,8 +378,8 @@ module FLOAT
 
   rule F1:Float =/=Float F2:Float => notBool `F1 ==Float F2`
 
-  syntax Float ::= Int2Float(Int, Int, Int)    [function, klabel(Int2Float), latex({\\it{}Int2Float}), hook(FLOAT.int2float)]
-  syntax Int ::= Float2Int(Float)    [function, klabel(Float2Int), latex({\\it{}Float2Int}), hook(FLOAT.float2int)]
+  syntax Float ::= Int2Float(Int, Int, Int)    [function, latex({\\it{}Int2Float}), hook(FLOAT.int2float)]
+  syntax Int ::= Float2Int(Float)    [function, latex({\\it{}Float2Int}), hook(FLOAT.float2int)]
 
   rule sqrtFloat(F:Float) => rootFloat(F, 2)
 
@@ -410,23 +412,23 @@ module STRING
 
   syntax Bool ::= String "==String" String [function, left, hook(STRING.eq)]
 
-  syntax Int ::= "lengthString" "(" String ")" [function, klabel(lengthString), hook(STRING.length)]
-  syntax String ::= "chrChar" "(" Int ")"      [function, klabel(chrChar), hook(STRING.chr)]
-  syntax Int ::= "ordChar" "(" String ")"      [function, klabel(ordChar), hook(STRING.ord)]
+  syntax Int ::= lengthString ( String ) [function, hook(STRING.length)]
+  syntax String ::= chrChar ( Int )      [function, hook(STRING.chr)]
+  syntax Int ::= ordChar ( String )      [function, hook(STRING.ord)]
 
-  syntax String ::= "substrString" "(" String "," Int "," Int ")" [function, klabel(substrString), hook(STRING.substr)]
-  syntax Int ::= "findString" "(" String "," String "," Int ")"   [function, klabel(findString), hook(STRING.find)]
-  syntax Int ::= "rfindString" "(" String "," String "," Int ")"  [function, klabel(rfindString), hook(STRING.rfind)]
-  syntax Int ::= "findChar" "(" String "," String "," Int ")"     [function, klabel(findChar), hook(STRING.findChar)]
-  syntax Int ::= "rfindChar" "(" String "," String "," Int ")"    [function, klabel(rfindChar), hook(STRING.rfindChar)]
+  syntax String ::= substrString ( String , Int , Int ) [function, hook(STRING.substr)]
+  syntax Int ::= findString ( String , String , Int )   [function, hook(STRING.find)]
+  syntax Int ::= rfindString ( String , String , Int )  [function, hook(STRING.rfind)]
+  syntax Int ::= findChar ( String , String , Int )     [function, hook(STRING.findChar)]
+  syntax Int ::= rfindChar ( String , String , Int )    [function, hook(STRING.rfindChar)]
 
-  syntax String ::= "Float2String" "(" Float ")"              [function, klabel(Float2String), hook(STRING.float2string)]
-  syntax String ::= "Float2String" "(" Float "," String ")"   [function, klabel(FloatFormat), hook(STRING.floatFormat)]
-  syntax Float  ::= "String2Float" "(" String ")"             [function, klabel(String2Float), hook(STRING.string2float)]
-  syntax Int    ::= "String2Int"   "(" String ")"             [function, klabel(String2Int), hook(STRING.string2int)]
-  syntax String ::= "Int2String"   "(" Int ")"                [function, klabel(Int2String), hook(STRING.int2string)]
-  syntax String ::= "Base2String"  "(" Int "," Int ")"        [function, klabel(Base2String), hook(STRING.base2string)]
-  syntax Int    ::= "String2Base"  "(" String "," Int ")"     [function, klabel(String2Base), hook(STRING.string2base)]
+  syntax String ::= Float2String ( Float )              [function, hook(STRING.float2string)]
+  syntax String ::= Float2String ( Float , String )     [function, hook(STRING.floatFormat)]
+  syntax Float  ::= String2Float ( String )             [function, hook(STRING.string2float)]
+  syntax Int    ::= String2Int   ( String )             [function, hook(STRING.string2int)]
+  syntax String ::= Int2String   ( Int )                [function, hook(STRING.int2string)]
+  syntax String ::= Base2String  ( Int , Int )          [function, hook(STRING.base2string)]
+  syntax Int    ::= String2Base  ( String , Int )       [function, hook(STRING.string2base)]
   syntax KItem  ::= "#parseToken"  "(" String "," String ")"  [function, hook(STRING.string2token)]
 
 
@@ -486,8 +488,8 @@ module EMPTY-ID
 
   syntax Id
 
-  syntax String ::= "Id2String" "(" Id ")"    [function, hook(STRING.token2string), klabel(Id2String)]
-  syntax Id ::= "String2Id" "(" String ")"    [function, klabel(String2Id)]
+  syntax String ::= Id2String ( Id )    [function, hook(STRING.token2string)]
+  syntax Id ::= String2Id ( String )    [function]
   rule String2Id(S:String) => #parseToken("Id", S)
 
   syntax Id ::= freshId(Int)    [freshGenerator, function]
@@ -549,7 +551,7 @@ module K-IO
                  | "#lstat" "(" String ")" [function, hook(IO.lstat), impure]
                  | "#opendir" "(" String ")" [function, hook(IO.opendir), impure]
 
-  syntax KItem ::= "#parse" "(" String "," String ")" [function, klabel(#parse), hook(IO.parse), impure]
+  syntax KItem ::= #parse ( String , String ) [function, hook(IO.parse), impure]
   syntax KItem ::= #parseInModule(String, // input
                                   String, // start symbol
                                   String) // module name
@@ -570,7 +572,7 @@ module K-IO
 // ------------------------------
 // System
 
-  syntax KItem ::= "#system" "(" String ")" [function, klabel(#system), hook(IO.system), impure]
+  syntax KItem ::= #system ( String ) [function, hook(IO.system), impure]
                  | "#systemResult" "(" Int /* exit code */ "," String /* stdout */ "," String /* stderr */ ")"
 
 endmodule
@@ -971,39 +973,40 @@ module BASIC-STRATEGY
 
     syntax Strategy ::= Hole
 
-    syntax Strategy ::= "if" Strategy "then" Strategy "else" Strategy
+    syntax Strategy ::= "(" Strategy ")"                                    [bracket]
+                        > "if" Strategy "then" Strategy "else" Strategy
                         > Strategy "*"
-                        > Strategy "||" Strategy
-                        > Strategy ";" Strategy
-                        > "(" Strategy ")"                      [bracket]
+                        > Strategy ";" Strategy                             [right]
+                        > Strategy "||" Strategy                            [right]
 
-    rule <s> S* => if S then S* else true ...</s>
 
-    rule <s> A || B => A ~> #FROZEN(THIS_CONFIGURATION) ~> #SHOLE || B ...</s> when notBool(isBool(A))
-    rule <s> A:Bool ~> #SHOLE || B => A || B ...</s>
-    rule <s> false || B => B ...</s>
-    rule <s> true || B => true ...</s>
+    rule <s> S:Strategy* => if S then S* else true ...</s>
 
-    rule <s> if true then B else C => B ...</s>
-    rule <s> if false then B else C => C ...</s>
+    rule <s> A:Strategy || B:Strategy => A ~> #FROZEN(THIS_CONFIGURATION:K) ~> #SHOLE || B ...</s> when notBool(isBool(A))
+    rule <s> A:Bool ~> #SHOLE || B:Strategy => A || B ...</s>
+    rule <s> false || B:Strategy => B ...</s>
+    rule <s> true || B:Strategy => true ...</s>
 
-    rule <s> if A then B else C => `A ~> #FROZEN(THIS_CONFIGURATION) ~> if #SHOLE then B else C` ...</s> when notBool(isBool(A))
-    rule <s> A:Bool ~> if #SHOLE then B else C => if A then B else C ...</s>
+    rule <s> if true then B:Strategy else C:Strategy => B ...</s>
+    rule <s> if false then B:Strategy else C:Strategy => C ...</s>
 
-    rule <s> false ~> #FROZEN(CONFIGURATION) => #RESTORE_CONFIGURATION(CONFIGURATION) ~> false  ...</s>
+    rule <s> if A:Strategy then B:Strategy else C:Strategy => `A ~> #FROZEN(THIS_CONFIGURATION:K) ~> if #SHOLE then B else C` ...</s> when notBool(isBool(A))
+    rule <s> A:Bool ~> if #SHOLE then B:Strategy else C:Strategy => if A then B else C ...</s>
 
-    rule <s> true ~> #FROZEN(CONFIGURATION) => true ...</s>
+    rule <s> false ~> #FROZEN(CONFIGURATION:K) => #RESTORE_CONFIGURATION(CONFIGURATION) ~> false  ...</s>
+
+    rule <s> true ~> #FROZEN(CONFIGURATION:K) => true ...</s>
 
 //    rule <s> #STUCK ~> X:StrategyApply => false ...</s>
     rule <s> X:StrategyApplied => true ...</s>
 
-    rule <s> A ; B => A ~> #SHOLE ; B ...</s> when notBool(isBool(A))
+    rule <s> A:Strategy ; B:Strategy => A ~> #SHOLE ; B ...</s> when notBool(isBool(A))
 
-    rule <s> A:Bool ~> #SHOLE ; B => A ; B ...</s>
+    rule <s> A:Bool ~> #SHOLE ; B:Strategy => A ; B ...</s>
 
-    rule <s> true ; B => B ...</s>
+    rule <s> true ; B:Strategy => B ...</s>
 
-    rule <s> false ; B => false ...</s>
+    rule <s> false ; B:Strategy => false ...</s>
 
 // the second rule is stupid -- just made to sidestep what is likely a KSEQ normalization bug
     rule <s> #STUCK ~> A:StrategyApply => false ...</s>

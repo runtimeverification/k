@@ -9,7 +9,7 @@ module EMPTY-ID
   imports LOGIC
 
   syntax Id
-  syntax Bool ::= "isId" "(" K ")"         [klabel(isId), function]
+  syntax Bool ::= isId ( K )         [function]
 endmodule
 
 module BOOL

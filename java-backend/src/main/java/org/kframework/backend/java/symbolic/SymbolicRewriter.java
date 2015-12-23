@@ -7,6 +7,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import org.kframework.Strategy;
 import org.kframework.attributes.Att;
 import org.kframework.backend.java.builtins.BoolToken;
@@ -41,6 +42,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author AndreiS
@@ -85,10 +87,13 @@ public class SymbolicRewriter {
             constrainedTerm = results.get(0);
             step++;
         }
-        KRunState finalState = new JavaKRunState(constrainedTerm, counter, Optional.of(step));
+
+        ConstrainedTerm afterVariableRename = new ConstrainedTerm(new RenameAnonymousVariables().apply(constrainedTerm.term()), constrainedTerm.termContext());
+
+        KRunState finalState = new JavaKRunState(afterVariableRename, counter, Optional.of(step));
 
         stopwatch.stop();
-        if (constrainedTerm.termContext().global().krunOptions.experimental.statistics) {
+        if (afterVariableRename.termContext().global().krunOptions.experimental.statistics) {
             System.err.println("[" + step + ", " + stopwatch + " ]");
         }
 
@@ -119,7 +124,7 @@ public class SymbolicRewriter {
                 rules.removeAll(failedRules);
 
                 Map<Rule, List<ConstrainedTerm>> rule2Results;
-                if (computeOne || !transition) {
+                if (computeOne) {
                     rule2Results = Collections.emptyMap();
                     for (Rule rule : rules) {
                         List<ConstrainedTerm> terms = computeRewriteStepByRule(subject, rule);
@@ -223,23 +228,24 @@ public class SymbolicRewriter {
 
     private List<ConstrainedTerm> fastComputeRewriteStep(ConstrainedTerm subject, boolean computeOne) {
         List<ConstrainedTerm> results = new ArrayList<>();
-        List<Pair<Substitution<Variable, Term>, Integer>> matches = theFastMatcher.mainMatch(
-                subject.term(),
+        List<Triple<ConjunctiveFormula, Boolean, Integer>> matches = theFastMatcher.mainMatch(
+                subject,
                 definition.automaton.leftHandSide(),
                 allRuleBits,
                 computeOne,
                 subject.termContext());
-        for (Pair<Substitution<Variable, Term>, Integer> pair : matches) {
-            // start the optimized substitution
-            Rule rule = definition.ruleTable.get(pair.getRight());
-
+        for (Triple<ConjunctiveFormula, Boolean, Integer> triple : matches) {
+            assert triple.getLeft().isSubstitution();
+            Rule rule = definition.ruleTable.get(triple.getRight());
             Substitution<Variable, Term> substitution =
                     rule.containsAttribute(Att.refers_THIS_CONFIGURATION()) ?
-                            pair.getLeft().plus(new Variable(KLabels.THIS_CONFIGURATION, Sort.KSEQUENCE), filterOurStrategyCell(subject.term())) :
-                            pair.getLeft();
+                            triple.getLeft().substitution().plus(new Variable(KLabels.THIS_CONFIGURATION, Sort.KSEQUENCE), filterOurStrategyCell(subject.term())) :
+                            triple.getLeft().substitution();
+            boolean isMatching = triple.getMiddle();
+            // start the optimized substitution
 
             // get a map from AST paths to (fine-grained, inner) rewrite RHSs
-            Map<scala.collection.immutable.List<Integer>, Term> rewrites = theFastMatcher.getRewrite(pair.getRight());
+            Map<scala.collection.immutable.List<Integer>, Term> rewrites = theFastMatcher.getRewrite(triple.getRight());
 
             assert (rewrites.size() > 0);
 
@@ -256,16 +262,17 @@ public class SymbolicRewriter {
                         subject.termContext());
             }
 
+            // rename rule variables in the term
+            theNew = theNew.substituteWithBinders(Variable.rename(rule.variableSet()));
 
-            /* get fresh substitutions of rule variables */
-            Map<Variable, Variable> renameSubst = Variable.rename(rule.variableSet());
-
-            /* rename rule variables in the term */
-            theNew = theNew.substituteWithBinders(renameSubst);
+            if (!isMatching) {
+                theNew = theNew.substituteAndEvaluate(substitution, subject.termContext());
+            }
 
             theNew = restoreConfigurationIfNecessary(subject, rule, theNew);
 
             results.add(new ConstrainedTerm(theNew, subject.termContext()));
+            //results.add(buildResult(rule, triple.getLeft(), subject.term(), true, subject.termContext()));
         }
 
         if (results.isEmpty()) {
@@ -589,7 +596,14 @@ public class SymbolicRewriter {
             System.err.println("[" + visited.size() + "states, " + step + "steps, " + stopwatch + "]");
         }
 
-        return searchResults;
+        List<Substitution<Variable, Term>> adaptedResults = searchResults.stream().map(r -> {
+            RenameAnonymousVariables renameAnonymousVariables = new RenameAnonymousVariables();
+            Substitution<Variable, Term> subs = new HashMapSubstitution();
+            r.forEach((k, v) -> subs.plus(renameAnonymousVariables.getRenamedVariable(k), renameAnonymousVariables.apply(v)));
+            return subs;
+        }).collect(Collectors.toList());
+
+        return adaptedResults;
     }
 
     public List<ConstrainedTerm> proveRule(
