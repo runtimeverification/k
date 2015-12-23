@@ -133,12 +133,7 @@ those were all borrowed from SIMPLE. */
 require "domains.k"
 
 module KOOL-UNTYPED-SYNTAX
-  imports KOOL-UNTYPED-COMMON
-  imports ID
-endmodule
-
-module KOOL-UNTYPED-COMMON
-  imports DOMAINS-COMMON
+  imports DOMAINS-SYNTAX
 
 /*@ \section{Syntax}
 
@@ -261,7 +256,7 @@ assignment, etc.).  Finally, we discuss in detail the
 semantics of the additional KOOL constructs. */
 
 module KOOL-UNTYPED
-  imports KOOL-UNTYPED-COMMON
+  imports KOOL-UNTYPED-SYNTAX
   imports DOMAINS
 
 /*@ \subsection{Configuration}

@@ -1,7 +1,7 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 
 module KERNELC-CONFIGURATION
-  imports KERNELC-COMMON-SYNTAX
+  imports KERNELC-SYNTAX-SYNTAX
   imports BOOL
   imports INT
   imports FLOAT

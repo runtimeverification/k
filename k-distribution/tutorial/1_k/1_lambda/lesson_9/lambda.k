@@ -62,12 +62,7 @@ require "domains.k"
 require "substitution.k"
 
 module LAMBDA-SYNTAX
-  imports LAMBDA-COMMON
-  imports ID
-endmodule
-
-module LAMBDA-COMMON
-  imports DOMAINS-COMMON
+  imports DOMAINS-SYNTAX
 
 /*@ \section{Basic Call-by-value $\lambda$-Calculus}
 
@@ -117,7 +112,7 @@ interleaved) orders.
 endmodule
 
 module LAMBDA
-  imports LAMBDA-COMMON
+  imports LAMBDA-SYNTAX
   imports DOMAINS
   imports SUBSTITUTION
 

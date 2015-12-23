@@ -3,12 +3,7 @@ require "domains.k"
 require "substitution.k"
 
 module LAMBDA-SYNTAX
-  imports LAMBDA-COMMON
-  imports ID
-endmodule
-
-module LAMBDA-COMMON
-  imports DOMAINS-COMMON
+  imports DOMAINS-SYNTAX
   syntax Val ::= Id
                | "lambda" Id "." Exp  [binder, latex(\lambda{#1}.{#2})]
   syntax Exp ::= Val
@@ -27,7 +22,7 @@ module LAMBDA-COMMON
 endmodule
 
 module LAMBDA
-  imports LAMBDA-COMMON
+  imports LAMBDA-SYNTAX
   imports DOMAINS
   imports SUBSTITUTION
 

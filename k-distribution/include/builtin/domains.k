@@ -1,14 +1,9 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
-module DOMAINS-COMMON
+module DOMAINS-SYNTAX
   imports EMPTY-ID
   imports INT-SYNTAX
   imports BOOL-SYNTAX
   imports STRING-SYNTAX
-endmodule
-
-module DOMAINS-SYNTAX
-  imports DOMAINS-COMMON
-  imports ID
 endmodule
 
 module DOMAINS

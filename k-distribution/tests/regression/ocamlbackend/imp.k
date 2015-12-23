@@ -1,7 +1,7 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 require "domains.k"
 
-module IMP-COMMON
+module IMP-SYNTAX
   imports EMPTY-ID
   imports INT-SYNTAX
   imports BOOL-SYNTAX
@@ -35,11 +35,6 @@ module IMP-COMMON
   rule if (Cond) Block => if (Cond) Block else {} [macro]
 endmodule
 
-module IMP-SYNTAX
-  imports ID
-  imports IMP-COMMON
-endmodule
-
 module IMP
   imports INT
   imports BOOL
@@ -48,7 +43,7 @@ module IMP
   imports LIST
   imports MAP
   imports SET
-  imports IMP-COMMON
+  imports IMP-SYNTAX
 
   syntax KResult ::= Int | Bool
 

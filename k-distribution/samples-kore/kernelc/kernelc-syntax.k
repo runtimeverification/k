@@ -1,6 +1,6 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 
-module KERNELC-COMMON-SYNTAX
+module KERNELC-SYNTAX-SYNTAX
   imports BOOL-SYNTAX
   imports INT-SYNTAX
   imports FLOAT-SYNTAX
@@ -131,9 +131,3 @@ module KERNELC-COMMON-SYNTAX
               | "p" [token] | "n" [token] | "s" [token] | "l" [token] | "ln" [token] | "tn" [token] | "sn" [token] | "temp" [token]
               | "min" [token] | "iterx" [token] | "itery" [token] | "change" [token]
 endmodule
-
-module KERNELC-SYNTAX
-  imports KERNELC-COMMON-SYNTAX
-  imports ID
-endmodule
-

@@ -30,12 +30,7 @@ module.  Type kompile --help to see how to tell the parser which syntax to use.
 */
 
 module LAMBDA-SYNTAX
-  imports LAMBDA-COMMON
-  imports ID
-endmodule
-
-module LAMBDA-COMMON
-  imports DOMAINS-COMMON
+  imports DOMAINS-SYNTAX
 /*@ \section{Syntax}
 We move all the LAMBDA++ syntax here. */
 
@@ -66,7 +61,7 @@ endmodule
 
 
 module LAMBDA
-  imports LAMBDA-COMMON
+  imports LAMBDA-SYNTAX
   imports DOMAINS
 
 /*@ \section{Semantics}
