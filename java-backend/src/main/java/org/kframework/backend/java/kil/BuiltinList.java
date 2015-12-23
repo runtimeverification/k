@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 /**
  * Class representing an associative list.
  */
-public class BuiltinList extends Collection implements KItemCollection {
+public class BuiltinList extends Collection implements CollectionInternalRepresentation, HasGlobalContext {
 
     /**
      * Flattened list of children.
@@ -152,6 +152,16 @@ public class BuiltinList extends Collection implements KItemCollection {
     @Override
     public List<Term> getKComponents() {
         return children;
+    }
+
+    @Override
+    public KLabel constructorLabel() {
+        return operatorKLabel;
+    }
+
+    @Override
+    public Term unit() {
+        return KItem.of(unitKLabel, KList.concatenate(), global);
     }
 
     @Override
