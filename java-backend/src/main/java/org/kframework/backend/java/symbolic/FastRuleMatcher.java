@@ -254,12 +254,12 @@ public class FastRuleMatcher {
             return empty;
         }
 
-        if (subjectIndex == subject.size() && pattern.isElement(patternIndex)) {
+        if (subjectIndex == subject.size() && pattern.isElement(patternIndex, ruleMask)) {
             // fail
             return empty;
         }
 
-        if (subjectIndex < subject.size() && subject.isElement(subjectIndex) && pattern.isElement(patternIndex)) {
+        if (subjectIndex < subject.size() && subject.isElement(subjectIndex) && pattern.isElement(patternIndex, ruleMask)) {
             ruleMask = match(subject.get(subjectIndex), pattern.get(patternIndex), ruleMask, path.$colon$colon(Pair.of(subjectIndex, subjectIndex + 1)));
             if (ruleMask.isEmpty()) {
                 // fail
@@ -267,6 +267,10 @@ public class FastRuleMatcher {
             }
 
             return matchAssoc(subject, subjectIndex + 1, pattern, patternIndex + 1, ruleMask, path);
+        }
+
+        if (pattern.isTail(patternIndex, ruleMask)) {
+            return match(subject.range(subjectIndex, subject.size()), pattern.get(patternIndex), ruleMask, path.$colon$colon(Pair.of(subjectIndex, subject.size())));
         }
 
         ListMultimap<Integer, ConjunctiveFormula> nestedConstraints = ArrayListMultimap.create();
