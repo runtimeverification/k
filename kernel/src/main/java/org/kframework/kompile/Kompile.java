@@ -162,6 +162,7 @@ public class Kompile {
 
         if (!errors.isEmpty()) {
             kem.addAllKException(errors.stream().map(e -> e.exception).collect(Collectors.toList()));
+            kem.print();
             throw KEMException.compilerError("Had " + errors.size() + " structural errors.");
         }
 
@@ -211,7 +212,7 @@ public class Kompile {
         Module languageParsingModule = Module("LANGUAGE-PARSING",
                 Set(d.mainModule(),
                         d.getModule("K-TERM").get(),
-                        d.getModule("ID").get()), Set(), Att());
+                        d.getModule(RuleGrammarGenerator.ID).get()), Set(), Att());
         allModules.add(languageParsingModule);
         return Definition(withKSeq, immutable(allModules), d.att());
     }

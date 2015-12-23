@@ -4,7 +4,7 @@ require "domains.k"
 module IMP-SYNTAX
 imports INT-SYNTAX
 imports BOOL-SYNTAX
-imports EMPTY-ID
+imports ID
 imports STRING-SYNTAX
 
   syntax AExp  ::= Int | String | Id

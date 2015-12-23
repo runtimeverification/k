@@ -70,10 +70,10 @@ public class RuleGrammarGenerator {
     public static final String K_BOTTOM_SORT = "K-BOTTOM-SORT";
     public static final String AUTO_FOLLOW = "AUTO-FOLLOW";
     public static final String PROGRAM_LISTS = "PROGRAM-LISTS";
-    public static final String ID = "ID";
     public static final String RULE_LISTS = "RULE-LISTS";
 
     public static final String POSTFIX = "-PROGRAM-PARSING";
+    public static final String ID = "ID" + POSTFIX;
 
     /**
      * Initialize a grammar generator.
@@ -127,7 +127,7 @@ public class RuleGrammarGenerator {
         scala.collection.Set<Module> modules = org.kframework.Collections.Set(mod, baseK.getModule(PROGRAM_LISTS).get());
 
         Option<Module> idOpt = baseK.getModule(ID);
-        if(idOpt.isDefined())
+        if(idOpt.isDefined() && !mod.equals(idOpt.get()))
             modules = org.kframework.Collections.add(idOpt.get(), modules);
 
         return Module.apply(mod.name() + POSTFIX, modules, Set(), Att());

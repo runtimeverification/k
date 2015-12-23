@@ -2,7 +2,7 @@
 requires "domains.k"
 
 module IMP-CORE-SYNTAX
-  imports EMPTY-ID
+  imports ID
   imports INT-SYNTAX
   imports BOOL-SYNTAX
   imports BASIC-STRATEGY
@@ -28,11 +28,6 @@ module IMP-CORE-SYNTAX
   syntax Ids ::= List{Id,","}
 
   syntax Exp ::= Pgm
-endmodule
-
-module IMP-SYNTAX
-  imports ID
-  imports IMP-CORE-SYNTAX
 endmodule
 
 module IMP

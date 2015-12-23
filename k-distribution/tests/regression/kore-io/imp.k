@@ -2,7 +2,7 @@
 require "domains.k"
 
 module IMP-SYNTAX
-  imports EMPTY-ID
+  imports ID
   imports INT-SYNTAX
   imports BOOL-SYNTAX
   imports STRING-SYNTAX

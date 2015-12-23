@@ -1,6 +1,6 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 module DOMAINS-SYNTAX
-  imports EMPTY-ID
+  imports ID
   imports INT-SYNTAX
   imports BOOL-SYNTAX
   imports STRING-SYNTAX
@@ -478,7 +478,7 @@ module ID
   syntax Id ::= r"(?<![A-Za-z0-9\\_])[A-Za-z\\_][A-Za-z0-9\\_]*"     [notInRules, token, autoReject]
 endmodule
 
-module EMPTY-ID
+module ID-PROGRAM-PARSING
   imports STRING
 
   syntax Id

@@ -5,7 +5,7 @@ module KERNELC-SYNTAX
   imports INT-SYNTAX
   imports FLOAT-SYNTAX
   imports STRING-SYNTAX
-  imports EMPTY-ID
+  imports ID
 
   syntax File ::= Globals
 
