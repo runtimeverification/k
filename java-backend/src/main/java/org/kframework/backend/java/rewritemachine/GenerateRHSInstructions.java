@@ -20,7 +20,14 @@ public class GenerateRHSInstructions extends BottomUpVisitor {
 
     @Override
     public void visit(BuiltinList node) {
-       //throw new AssertionError("should not reach this place");
+        if (node.isGround() && node.isNormal()) {
+            rhsSchedule.add(RHSInstruction.PUSH(node));
+        } else {
+            for (int i = node.size() - 1; i >= 0; i--) {
+                node.get(i).accept(this);
+            }
+            rhsSchedule.add(RHSInstruction.CONSTRUCT(new Constructor(ConstructorType.BUILTIN_LIST, node.size())));
+        }
     }
 
     @Override

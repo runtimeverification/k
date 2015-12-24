@@ -144,12 +144,6 @@ public class KAbstractRewriteMachine {
                     for (int i = 0; i < constructor.size1(); i++) {
                         builder.add(stack.pop());
                     }
-                    for (int i = 0; i < constructor.size2(); i++) {
-                        builder.addAll(stack.pop());
-                    }
-                    for (int i = 0; i < constructor.size3(); i++) {
-                        builder.add(stack.pop());
-                    }
                     stack.push(builder.build());
                     break;
                 case BUILTIN_MAP:
