@@ -25,7 +25,7 @@ public class BuiltinListOperations {
         if (list1.sort() != Sort.LIST || list2.sort() != Sort.LIST) {
             throw new IllegalArgumentException();
         }
-        return BuiltinList.concatenate(context.global(), list1, list2);
+        return BuiltinList.builder(context.global()).addAll(list1, list2).build();
     }
 
     public static Term unit(TermContext context) {
@@ -68,19 +68,19 @@ public class BuiltinListOperations {
         }
         BuiltinList builtinList = (BuiltinList) list;
 
-        int toRemoveFromLeft = IntStream.range(0, removeLeft).filter(i -> builtinList.get(i).sort().equals(builtinList.sort)).findFirst().orElse(removeLeft);
-        int toRemoveFromRight = IntStream.range(0, removeRight).filter(i -> builtinList.get(builtinList.size() - 1 - i).sort().equals(builtinList.sort)).findFirst().orElse(removeRight);
+        int toRemoveFromLeft = IntStream.range(0, removeLeft)
+                .filter(i -> builtinList.get(i).sort().equals(builtinList.sort))
+                .findFirst().orElse(removeLeft);
+        int toRemoveFromRight = IntStream.range(0, removeRight)
+                .filter(i -> builtinList.get(builtinList.size() - 1 - i).sort().equals(builtinList.sort))
+                .findFirst().orElse(removeRight);
 
         int pendingRemoveLeft = removeLeft - toRemoveFromLeft;
         int pendingRemoveRight = removeRight - toRemoveFromRight;
-
         Term subList = builtinList.range(toRemoveFromLeft, builtinList.size() - toRemoveFromRight);
 
         return (pendingRemoveLeft > 0 || pendingRemoveRight > 0) ?
-                DataStructures.listRange(
-                        subList,
-                        pendingRemoveLeft,
-                        pendingRemoveLeft, context) :
+                DataStructures.listRange(subList, pendingRemoveLeft, pendingRemoveLeft, context) :
                 subList;
     }
 

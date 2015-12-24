@@ -50,11 +50,6 @@ public class BuiltinList extends Collection implements CollectionInternalReprese
         isTailMask = new BitSet[children.size()];
     }
 
-    public static Term concatenate(GlobalContext global, Term... lists) {
-        //return new Builder(sort, operatorKLabel, unitKLabel, global).addAll(lists).build();
-        throw new UnsupportedOperationException();
-    }
-
     public boolean isElement(int index) {
         return isElement(children.get(index));
     }
