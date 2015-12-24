@@ -65,8 +65,7 @@ public class BuiltinList extends Collection implements CollectionInternalReprese
                         .map(p -> p.getRight())
                         .forEach(s -> isElementMask[index].or(s));
             } else {
-                assert children.get(index) instanceof Variable && children.get(index).sort().equals(sort)
-                        || children.get(index) instanceof BuiltinList;
+                assert isListVariable(children.get(index)) || children.get(index) instanceof BuiltinList;
             }
         }
 
@@ -77,7 +76,7 @@ public class BuiltinList extends Collection implements CollectionInternalReprese
         if (isTailMask[index] == null) {
             isTailMask[index] = BitSet.apply(mask.length());
             if (index != children.size()) {
-                if (children.get(index) instanceof Variable && children.get(index).sort().equals(sort)) {
+                if (isListVariable(children.get(index))) {
                     isTailMask[index].makeOnes(mask.length());
                 } else if (children.get(index) instanceof RuleAutomatonDisjunction) {
                     ((RuleAutomatonDisjunction) children.get(index)).getVariablesForSort(sort).stream()
@@ -111,11 +110,17 @@ public class BuiltinList extends Collection implements CollectionInternalReprese
     }
 
     private boolean isElement(Term term) {
-        assert global.getDefinition().subsorts().isSubsortedEq(sort, term.sort());
-        return !(term instanceof Variable && term.sort().equals(sort)
+        //assert global.getDefinition().subsorts().isSubsortedEq(sort, term.sort());
+        //TODO: restore the assertion after fixing variables _:K generated fom ...
+        return !(isListVariable(term)
                 || term instanceof BuiltinList
                 || term instanceof RuleAutomatonDisjunction && ((RuleAutomatonDisjunction) term).disjunctions().stream().anyMatch(p -> !isElement(p.getLeft()))
                 || term instanceof KItem && ((KItem) term).kLabel().toString().equals(KLabels.KREWRITE) && !isElement(((KList) ((KItem) term).kList()).get(0)));
+    }
+
+    private boolean isListVariable(Term term) {
+        //TODO: remove Sort.KSEQUENCE case after fixing variables _:K generated fom ...
+        return term instanceof Variable && (term.sort().equals(sort) || term.sort().equals(Sort.KSEQUENCE));
     }
 
     public Term range(int beginIndex, int endIndex) {
@@ -234,7 +239,7 @@ public class BuiltinList extends Collection implements CollectionInternalReprese
     public static Builder builder(GlobalContext global) {
         return builder(
                 Sort.LIST,
-                KLabelConstant.of("'_List_", global.getDefinition()),
+                KLabelConstant.of("_List_", global.getDefinition()),
                 KLabelConstant.of(".List", global.getDefinition()),
                 global);
     }

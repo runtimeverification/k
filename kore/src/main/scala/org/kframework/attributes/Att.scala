@@ -117,6 +117,7 @@ object Att {
   val assoc = "assoc"
   val comm = "comm"
   val unit = "unit"
+  val bag = "bag"
 }
 
 trait AttributesToString {

@@ -8,12 +8,12 @@ import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.kil.KItem;
-import org.kframework.backend.java.symbolic.AbstractUnifier;
 import org.kframework.backend.java.symbolic.ConjunctiveFormula;
 import org.kframework.builtin.KLabels;
 import org.kframework.definition.Module;
 import org.kframework.compile.ConfigurationInfo;
 import org.kframework.kil.Attribute;
+import org.kframework.kil.Attributes;
 import org.kframework.kil.Cell;
 import org.kframework.kore.Assoc;
 import org.kframework.kore.K;
@@ -115,8 +115,7 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
         KList convertedKList = KList(klist.items());
 
         // associative operator
-        if (definition.kLabelAttributesOf(klabel.name()).containsKey(Attribute.keyOf(Att.assoc())) &&
-                !definition.kLabelAttributesOf(klabel.name()).containsKey(Attribute.keyOf(Att.comm()))) {
+        if (effectivelyAssocAttributes(definition.kLabelAttributesOf(klabel.name()))) {
             // this assumes there are no KLabel variables
             BuiltinList.Builder builder = BuiltinList.builder(
                     Sort.of(module.productionsFor().get(klabel).get().head().sort().name()),
@@ -154,11 +153,14 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
 
     private Optional<String> getAssocKLabelForUnit(KLabel klabel) {
         return definition.kLabelAttributes().entrySet().stream()
-                .filter(e -> e.getValue().containsKey(Attribute.keyOf(Att.assoc()))
-                        && !e.getValue().containsKey(Attribute.keyOf(Att.comm()))
-                        && e.getValue().getAttr(Attribute.keyOf(Att.unit())).equals(klabel.name()))
+                .filter(e -> effectivelyAssocAttributes(e.getValue()) && e.getValue().getAttr(Attribute.keyOf(Att.unit())).equals(klabel.name()))
                 .map(e -> e.getKey())
                 .findAny();
+    }
+
+    private static boolean effectivelyAssocAttributes(Attributes attributes) {
+        return attributes.containsKey(Attribute.keyOf(Att.assoc())) && !attributes.containsKey(Attribute.keyOf(Att.comm()))
+                || attributes.containsKey(Attribute.keyOf(Att.bag()));
     }
 
     /**

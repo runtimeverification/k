@@ -32,28 +32,52 @@ public class BuiltinListOperations {
         return BuiltinList.builder(context.global()).build();
     }
 
-    public static Term element(Term element, TermContext context) {
-        throw new UnsupportedOperationException();
-    }
-
-    public static Term get(BuiltinList list, IntToken index, TermContext context) {
-        Term value = list.get(index.intValue());
-        if (value != null) {
-            return value;
-        } else if (list.isConcreteCollection()) {
-            return Bottom.BOTTOM;
+    public static Term get(Term list, IntToken index, TermContext context) {
+        if (list instanceof BuiltinList) {
+            BuiltinList builtinList = (BuiltinList) list;
+            Term value = builtinList.get(index.intValue());
+            if (value != null) {
+                return value;
+            } else if (builtinList.isConcreteCollection()) {
+                return Bottom.BOTTOM;
+            } else {
+                return null;
+            }
         } else {
-            return null;
+            if (list.sort() != Sort.LIST) {
+                throw new IllegalArgumentException();
+            }
+
+            if (index.intValue() == 0) {
+                return list;
+            } else {
+                throw new IndexOutOfBoundsException();
+            }
         }
     }
 
-    public static BoolToken in(Term element, BuiltinList list, TermContext context) {
-        if (list.contains(element)) {
-            return BoolToken.TRUE;
-        } else if (element.isGround() && list.isGround()) {
-            return BoolToken.FALSE;
+    public static BoolToken in(Term element, Term list, TermContext context) {
+        if (list instanceof BuiltinList) {
+            BuiltinList builtinList = (BuiltinList) list;
+            if (builtinList.contains(element)) {
+                return BoolToken.TRUE;
+            } else if (element.isGround() && builtinList.isGround()) {
+                return BoolToken.FALSE;
+            } else {
+                return null;
+            }
         } else {
-            return null;
+            if (list.sort() != Sort.LIST) {
+                throw new IllegalArgumentException();
+            }
+
+            if (list.equals(element)) {
+                return BoolToken.TRUE;
+            } else if (element.isGround() && list.isGround()) {
+                return BoolToken.FALSE;
+            } else {
+                return null;
+            }
         }
     }
 
