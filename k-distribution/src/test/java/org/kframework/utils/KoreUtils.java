@@ -115,7 +115,7 @@ public class KoreUtils {
         map.put(KToken("$PGM", Sorts.KConfigVar()), parsed);
 
         BiFunction<String, Source, K> strategyParser = compiledDef.getParser(
-                compiledDef.generatedProgramParsingModuleFor(compiledDef.mainSyntaxModuleName()).get(), KORE.Sort("Strategy"), kem);
+                compiledDef.programParsingModuleFor(compiledDef.mainSyntaxModuleName()).get(), KORE.Sort("Strategy"), kem);
 
         if (strategy != null)
             map.put(KToken("$STRATEGY", Sorts.KConfigVar()), strategyParser.apply(strategy, Source.apply("given strategy")));
