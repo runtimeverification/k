@@ -12,6 +12,7 @@ import org.kframework.kore.Sort;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.concrete2kore.ParseInModule;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
+import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.file.FileUtil;
@@ -38,19 +39,17 @@ public class CompiledDefinition implements Serializable {
     public final Definition kompiledDefinition;
     public final Sort programStartSymbol;
     public final KLabel topCellInitializer;
-    private KExceptionManager kem;
     private final Module languageParsingModule;
     private transient Map<String, Rule> cachedcompiledPatterns;
     private transient Map<String, Rule> cachedParsedPatterns;
 
 
-    public CompiledDefinition(KompileOptions kompileOptions, Definition parsedDefinition, Definition kompiledDefinition, Sort programStartSymbol, KLabel topCellInitializer, KExceptionManager kem) {
+    public CompiledDefinition(KompileOptions kompileOptions, Definition parsedDefinition, Definition kompiledDefinition, Sort programStartSymbol, KLabel topCellInitializer) {
         this.kompileOptions = kompileOptions;
         this.parsedDefinition = parsedDefinition;
         this.kompiledDefinition = kompiledDefinition;
         this.programStartSymbol = programStartSymbol;
         this.topCellInitializer = topCellInitializer;
-        this.kem = kem;
         this.languageParsingModule = kompiledDefinition.getModule("LANGUAGE-PARSING").get();
     }
 
@@ -58,7 +57,7 @@ public class CompiledDefinition implements Serializable {
      * A function that takes a string and the source of that string and parses it as a program into KAST.
      */
     public BiFunction<String, Source, K> getProgramParser(KExceptionManager kem) {
-        return getParser(programParsingModuleFor(mainSyntaxModuleName()).get(), programStartSymbol, kem);
+        return getParser(programParsingModuleFor(mainSyntaxModuleName(), kem).get(), programStartSymbol, kem);
     }
 
     /**
@@ -82,7 +81,7 @@ public class CompiledDefinition implements Serializable {
      * It automatically generates this module unless the user has already defined a module postfixed with
      * {@link RuleGrammarGenerator#POSTFIX}. In latter case, it uses the user-defined module.
      */
-    public Option<Module> programParsingModuleFor(String moduleName) {
+    public Option<Module> programParsingModuleFor(String moduleName, KExceptionManager kem) {
         RuleGrammarGenerator gen = new RuleGrammarGenerator(parsedDefinition, kompileOptions.strict());
 
         Option<Module> userProgramParsingModule = parsedDefinition.getModule(moduleName + RuleGrammarGenerator.POSTFIX);
