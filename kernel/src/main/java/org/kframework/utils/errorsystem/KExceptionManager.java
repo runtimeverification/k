@@ -157,8 +157,8 @@ public class KExceptionManager {
         register(ExceptionType.HIDDENWARNING, KExceptionGroup.INTERNAL, message, null, e, null, null);
     }
 
-    public void registerCompilerHiddenWarning(String message) {
-        register(ExceptionType.HIDDENWARNING, KExceptionGroup.COMPILER, message, null, null, null, null);
+    public void registerInternalHiddenWarning(String message) {
+        register(ExceptionType.HIDDENWARNING, KExceptionGroup.INTERNAL, message, null, null, null, null);
     }
 
     public void registerInternalHiddenWarning(String message, ASTNode node) {
