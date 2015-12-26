@@ -244,6 +244,14 @@ public class BuiltinList extends Collection implements CollectionInternalReprese
                 global);
     }
 
+    public static Builder kSequenceBuilder(GlobalContext global) {
+        return builder(
+                Sort.KSEQUENCE,
+                KLabelConstant.of(KLabels.KSEQ, global.getDefinition()),
+                KLabelConstant.of(KLabels.DOTK, global.getDefinition()),
+                global);
+    }
+
     public static class Builder {
 
         private final ImmutableList.Builder<Term> childrenBuilder = new ImmutableList.Builder<>();

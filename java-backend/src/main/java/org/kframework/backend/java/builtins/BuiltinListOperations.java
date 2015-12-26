@@ -9,6 +9,7 @@ import org.kframework.backend.java.kil.Kind;
 import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
+import org.kframework.backend.java.kil.Variable;
 
 import java.util.List;
 import java.util.stream.IntStream;
@@ -34,24 +35,38 @@ public class BuiltinListOperations {
 
     public static Term get(Term list, IntToken index, TermContext context) {
         if (list instanceof BuiltinList) {
-            BuiltinList builtinList = (BuiltinList) list;
-            Term value = builtinList.get(index.intValue());
-            if (value != null) {
-                return value;
-            } else if (builtinList.isConcreteCollection()) {
+            try {
+                BuiltinList builtinList = (BuiltinList) list;
+                if (index.intValue() >= 0) {
+                    if (IntStream.range(0, index.intValue()).allMatch(builtinList::isElement)) {
+                        return builtinList.get(index.intValue());
+                    } else {
+                        return null;
+                    }
+                } else {
+                    if (IntStream.range(builtinList.size() + index.intValue() + 1, builtinList.size()).allMatch(builtinList::isElement)) {
+                        return builtinList.get(builtinList.size() + index.intValue());
+                    } else {
+                        return null;
+                    }
+                }
+            } catch (IndexOutOfBoundsException e) {
                 return Bottom.BOTTOM;
-            } else {
-                return null;
             }
         } else {
+            /* the list must consist of exactly one element */
             if (list.sort() != Sort.LIST) {
                 throw new IllegalArgumentException();
+            }
+
+            if (list instanceof Variable) {
+                return null;
             }
 
             if (index.intValue() == 0) {
                 return list;
             } else {
-                throw new IndexOutOfBoundsException();
+                return Bottom.BOTTOM;
             }
         }
     }
@@ -93,10 +108,10 @@ public class BuiltinListOperations {
         BuiltinList builtinList = (BuiltinList) list;
 
         int toRemoveFromLeft = IntStream.range(0, removeLeft)
-                .filter(i -> builtinList.get(i).sort().equals(builtinList.sort))
+                .filter(i -> !builtinList.isElement(i))
                 .findFirst().orElse(removeLeft);
         int toRemoveFromRight = IntStream.range(0, removeRight)
-                .filter(i -> builtinList.get(builtinList.size() - 1 - i).sort().equals(builtinList.sort))
+                .filter(i -> !builtinList.isElement(builtinList.size() - 1 - i))
                 .findFirst().orElse(removeRight);
 
         int pendingRemoveLeft = removeLeft - toRemoveFromLeft;
@@ -104,7 +119,7 @@ public class BuiltinListOperations {
         Term subList = builtinList.range(toRemoveFromLeft, builtinList.size() - toRemoveFromRight);
 
         return (pendingRemoveLeft > 0 || pendingRemoveRight > 0) ?
-                DataStructures.listRange(subList, pendingRemoveLeft, pendingRemoveLeft, context) :
+                DataStructures.listRange(subList, pendingRemoveLeft, pendingRemoveRight, context) :
                 subList;
     }
 

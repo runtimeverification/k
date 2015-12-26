@@ -137,13 +137,8 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
         }
 
         if (klabel.name().equals(KLabels.KSEQ) || klabel.name().equals(KLabels.DOTK)) {
-            BuiltinList.Builder builder = BuiltinList.builder(
-                    Sort.KSEQUENCE,
-                    KLabelConstant.of(KLabels.KSEQ, global.getDefinition()),
-                    KLabelConstant.of(KLabels.DOTK, global.getDefinition()),
-                    global);
             // this assumes there are no KList variables in the KList
-            return builder.addAll(convertedKList.getContents()).build();
+            return BuiltinList.kSequenceBuilder(global).addAll(convertedKList.getContents()).build();
         }
 
         // we've encountered a regular KApply

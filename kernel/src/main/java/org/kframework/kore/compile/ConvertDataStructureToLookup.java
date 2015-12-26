@@ -321,13 +321,18 @@ public class ConvertDataStructureToLookup {
                                     KToken(Integer.toString(elementsLeft.size()), Sorts.Int()),
                                     KToken(Integer.toString(elementsRight.size()), Sorts.Int()))));
                         }
+                        KLabel elementWrapper = KLabel(m.attributesFor().apply(collectionLabel).<String>get("element").get());
                         for (int i = 0; i < elementsLeft.size(); i++) {
-                            K element = elementsLeft.get(i);
-                            state.add(KApply(KLabel("#match"), element, KApply(KLabel("List:get"), list, KToken(Integer.toString(i), Sorts.Int()))));
+                            state.add(KApply(
+                                    KLabel("#match"),
+                                    KApply(elementWrapper, elementsLeft.get(i)),
+                                    KApply(KLabel("List:get"), list, KToken(Integer.toString(i), Sorts.Int()))));
                         }
                         for (int i = 0; i < elementsRight.size(); i++) {
-                            K element = elementsRight.get(i);
-                            state.add(KApply(KLabel("#match"), element, KApply(KLabel("List:get"), list, KToken(Integer.toString(i - elementsRight.size()), Sorts.Int()))));
+                            state.add(KApply(
+                                    KLabel("#match"),
+                                    KApply(elementWrapper, elementsRight.get(i)),
+                                    KApply(KLabel("List:get"), list, KToken(Integer.toString(i - elementsRight.size()), Sorts.Int()))));
                         }
                     }
                     if (lhsOf == null) {
