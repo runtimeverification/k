@@ -4,7 +4,6 @@ package org.kframework.utils;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.kframework.backend.java.symbolic.JavaBackend;
-import org.kframework.kore.ADT;
 import org.kframework.kore.KORE;
 import org.kframework.kore.KToken;
 import org.kframework.kore.Sort;
@@ -34,7 +33,6 @@ import org.kframework.utils.options.SMTOptions;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -116,7 +114,8 @@ public class KoreUtils {
         Map<KToken, K> map = new HashMap<>();
         map.put(KToken("$PGM", Sorts.KConfigVar()), parsed);
 
-        BiFunction<String, Source, K> strategyParser = compiledDef.getParser(compiledDef.syntaxModule(), KORE.Sort("Strategy"), kem);
+        BiFunction<String, Source, K> strategyParser = compiledDef.getParser(
+                compiledDef.programParsingModuleFor(compiledDef.mainSyntaxModuleName(), kem).get(), KORE.Sort("Strategy"), kem);
 
         if (strategy != null)
             map.put(KToken("$STRATEGY", Sorts.KConfigVar()), strategyParser.apply(strategy, Source.apply("given strategy")));

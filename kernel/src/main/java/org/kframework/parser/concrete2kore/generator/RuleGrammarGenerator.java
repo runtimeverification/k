@@ -2,6 +2,7 @@
 package org.kframework.parser.concrete2kore.generator;
 
 import org.apache.commons.collections4.trie.PatriciaTrie;
+import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.ConfigurationInfo;
@@ -18,9 +19,11 @@ import org.kframework.kil.Attribute;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kore.Sort;
 import org.kframework.parser.concrete2kore.ParseInModule;
+import scala.Option;
 import scala.collection.Seq;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -70,6 +73,11 @@ public class RuleGrammarGenerator {
     public static final String PROGRAM_LISTS = "PROGRAM-LISTS";
     public static final String RULE_LISTS = "RULE-LISTS";
 
+    public static final String POSTFIX = "-PROGRAM-PARSING";
+
+    public static final String ID = "ID";
+    public static final String ID_PROGRAM_PARSING = ID + POSTFIX;
+
     /**
      * Initialize a grammar generator.
      * @param baseK A Definition containing a K module giving the syntax of K itself.
@@ -118,9 +126,20 @@ public class RuleGrammarGenerator {
      * @return a new module which imports the original user module and a set of marker modules.
      */
     public Module getProgramsGrammar(Module mod) {
-        // import PROGRAM-LISTS so user lists are modified to parse programs
-        Module newM = new Module(mod.name() + "-PROGRAM-LISTS", Set(mod, baseK.getModule(PROGRAM_LISTS).get()), Set(), Att());
-        return newM;
+
+        if(mod.name().endsWith(POSTFIX)) {
+            return mod;
+        } else {
+            // import PROGRAM-LISTS so user lists are modified to parse programs
+            scala.collection.Set<Module> modules = Set(mod, baseK.getModule(PROGRAM_LISTS).get());
+
+            if (stream(mod.importedModules()).anyMatch(m -> m.name().equals(ID))) {
+                Module idProgramParsingModule = baseK.getModule(ID_PROGRAM_PARSING).get();
+                modules = add(idProgramParsingModule, modules);
+            }
+
+            return Module.apply(mod.name() + POSTFIX, modules, Set(), Att());
+        }
     }
 
     public static boolean isParserSort(Sort s) {

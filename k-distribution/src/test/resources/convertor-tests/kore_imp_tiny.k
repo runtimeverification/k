@@ -13,7 +13,7 @@ module TEST
   import BOOL
   import LOGIC
   import INT
-  import EMPTY-ID
+  import ID
   import MAP
   import K-RESULT
 

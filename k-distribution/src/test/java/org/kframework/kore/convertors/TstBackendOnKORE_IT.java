@@ -61,5 +61,4 @@ public class TstBackendOnKORE_IT {
         assertEquals("Execution failed", "<T> <k> finish ~> . </k> </T>", actual);
 
     }
-
 }

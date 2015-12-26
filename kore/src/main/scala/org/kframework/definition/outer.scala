@@ -7,6 +7,7 @@ import javax.annotation.Nonnull
 import dk.brics.automaton.{BasicAutomata, RegExp, RunAutomaton, SpecialOperations}
 import org.kframework.POSet
 import org.kframework.attributes.Att
+import org.kframework.definition.Constructors._
 import org.kframework.kore.Unapply.{KApply, KLabel}
 import org.kframework.kore._
 import org.kframework.utils.errorsystem.KEMException
@@ -15,6 +16,7 @@ import scala.annotation.meta.param
 import scala.collection.JavaConverters._
 
 import collection._
+import scala.collection.Set
 
 trait OuterKORE
 
@@ -32,9 +34,8 @@ case class DivergingAttributesForTheSameKLabel(ps: Set[Production])
 
 case class Definition(
                        mainModule: Module,
-                       mainSyntaxModule: Module,
                        entryModules: Set[Module],
-                       att: Att = Att())
+                       att: Att)
   extends DefinitionToString with OuterKORE {
 
   private def allModules(m: Module): Set[Module] = m.imports | (m.imports flatMap allModules) + m
@@ -42,7 +43,6 @@ case class Definition(
   val modules = entryModules flatMap allModules
 
   assert(modules.contains(mainModule))
-  assert(modules.contains(mainSyntaxModule))
 
   def getModule(name: String): Option[Module] = modules find { case m: Module => m.name == name; case _ => false }
 }

@@ -2,14 +2,9 @@
 require "domains.k"
 
 module IMP-SYNTAX
-imports IMP-COMMON
-imports ID
-endmodule
-
-module IMP-COMMON
 imports INT-SYNTAX
 imports BOOL-SYNTAX
-imports EMPTY-ID
+imports ID
 imports STRING-SYNTAX
 
   syntax AExp  ::= Int | String | Id
@@ -48,7 +43,7 @@ module IMP
   imports INT
   imports BOOL
   imports STRING
-  imports IMP-COMMON
+  imports IMP-SYNTAX
 /*@ \section{Semantics}
 We next give the semantics of IMP++\@.  We start by first defining its
 configuration. */

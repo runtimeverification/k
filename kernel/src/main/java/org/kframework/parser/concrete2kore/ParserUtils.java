@@ -2,6 +2,7 @@
 package org.kframework.parser.concrete2kore;
 
 import org.apache.commons.io.FileUtils;
+import org.kframework.attributes.Att;
 import org.kframework.attributes.Source;
 import org.kframework.definition.Module;
 import org.kframework.kil.Definition;
@@ -211,6 +212,7 @@ public class ParserUtils {
         } else {
             syntaxModule = opt.get();
         }
-        return org.kframework.definition.Definition.apply(mainModule, syntaxModule, immutable(modules), Att());
+
+        return org.kframework.definition.Definition.apply(mainModule, immutable(modules), Att().add(Att.syntaxModule(), syntaxModule.name()));
     }
 }
