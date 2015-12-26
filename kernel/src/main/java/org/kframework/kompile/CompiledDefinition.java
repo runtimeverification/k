@@ -38,17 +38,19 @@ public class CompiledDefinition implements Serializable {
     public final Definition kompiledDefinition;
     public final Sort programStartSymbol;
     public final KLabel topCellInitializer;
+    private KExceptionManager kem;
     private final Module languageParsingModule;
     private transient Map<String, Rule> cachedcompiledPatterns;
     private transient Map<String, Rule> cachedParsedPatterns;
 
 
-    public CompiledDefinition(KompileOptions kompileOptions, Definition parsedDefinition, Definition kompiledDefinition, Sort programStartSymbol, KLabel topCellInitializer) {
+    public CompiledDefinition(KompileOptions kompileOptions, Definition parsedDefinition, Definition kompiledDefinition, Sort programStartSymbol, KLabel topCellInitializer, KExceptionManager kem) {
         this.kompileOptions = kompileOptions;
         this.parsedDefinition = parsedDefinition;
         this.kompiledDefinition = kompiledDefinition;
         this.programStartSymbol = programStartSymbol;
         this.topCellInitializer = topCellInitializer;
+        this.kem = kem;
         this.languageParsingModule = kompiledDefinition.getModule("LANGUAGE-PARSING").get();
     }
 
@@ -84,11 +86,18 @@ public class CompiledDefinition implements Serializable {
         RuleGrammarGenerator gen = new RuleGrammarGenerator(parsedDefinition, kompileOptions.strict());
 
         Option<Module> userProgramParsingModule = parsedDefinition.getModule(moduleName + RuleGrammarGenerator.POSTFIX);
-        if(userProgramParsingModule.isDefined()) {
+        if (userProgramParsingModule.isDefined()) {
+            kem.registerCompilerHiddenWarning("Module " + userProgramParsingModule.get().name() + " is user-defined.");
             return userProgramParsingModule;
         } else {
             Option<Module> moduleOption = parsedDefinition.getModule(moduleName);
-            return moduleOption.isDefined() ? Option.apply(gen.getProgramsGrammar(moduleOption.get())) : Option.empty();
+            Option<Module> programParsingModuleOption = moduleOption.isDefined() ?
+                    Option.apply(gen.getProgramsGrammar(moduleOption.get())) :
+                    Option.empty();
+            if (programParsingModuleOption.isDefined()) {
+                kem.registerCompilerHiddenWarning("Module " + programParsingModuleOption.get().name() + " has been automatically generated.");
+            }
+            return programParsingModuleOption;
         }
     }
 
