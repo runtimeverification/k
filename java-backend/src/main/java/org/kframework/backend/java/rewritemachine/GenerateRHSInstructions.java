@@ -26,7 +26,7 @@ public class GenerateRHSInstructions extends BottomUpVisitor {
             for (int i = node.size() - 1; i >= 0; i--) {
                 node.get(i).accept(this);
             }
-            rhsSchedule.add(RHSInstruction.CONSTRUCT(new Constructor(ConstructorType.BUILTIN_LIST, node.size())));
+            rhsSchedule.add(RHSInstruction.CONSTRUCT(new Constructor(ConstructorType.BUILTIN_LIST, node.size(), node.sort, node.operatorKLabel, node.unitKLabel)));
         }
     }
 
