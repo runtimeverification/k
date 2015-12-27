@@ -1,8 +1,8 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 require "domains.k"
 
-module IMP-COMMON
-  imports EMPTY-ID
+module IMP-SYNTAX
+  imports ID
   imports INT-SYNTAX
   imports BOOL-SYNTAX
   imports STRING-SYNTAX
@@ -32,11 +32,6 @@ module IMP-COMMON
   syntax Ids ::= List{Id,","}
 endmodule
 
-module IMP-SYNTAX
-  imports ID
-  imports IMP-COMMON
-endmodule
-
 module IMP
   imports INT
   imports BOOL
@@ -46,7 +41,7 @@ module IMP
   imports MAP
   imports SET
   imports K-IO
-  imports IMP-COMMON
+  imports IMP-SYNTAX
 
   syntax KResult ::= Int | Bool
 

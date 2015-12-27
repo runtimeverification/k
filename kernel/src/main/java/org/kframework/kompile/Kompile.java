@@ -164,7 +164,6 @@ public class Kompile {
             kem.addAllKException(errors.stream().map(e -> e.exception).collect(Collectors.toList()));
             throw KEMException.compilerError("Had " + errors.size() + " structural errors.");
         }
-
     }
 
     public Function<Definition, Definition> defaultSteps() {
@@ -188,7 +187,6 @@ public class Kompile {
                 .andThen(new Strategy(kompileOptions.experimental.heatCoolStrategies).addStrategyCellToRulesTransformer())
                 .andThen(func(ConcretizeCells::transformDefinition))
                 .andThen(func(this::addSemanticsModule))
-                .andThen(func(this::addProgramModule))
                 .apply(def);
     }
 
@@ -210,22 +208,15 @@ public class Kompile {
 
         Module languageParsingModule = Module("LANGUAGE-PARSING",
                 Set(d.mainModule(),
-                        d.mainSyntaxModule(),
-                        d.getModule("K-TERM").get()), Set(), Att());
+                        d.getModule("K-TERM").get(),
+                        d.getModule(RuleGrammarGenerator.ID_PROGRAM_PARSING).get()), Set(), Att());
         allModules.add(languageParsingModule);
-        return Definition(withKSeq, d.mainSyntaxModule(), immutable(allModules));
+        return Definition(withKSeq, immutable(allModules), d.att());
     }
 
     public Definition resolveFreshConstants(Definition input) {
         return DefinitionTransformer.from(new ResolveFreshConstants(input)::resolve, "resolving !Var variables")
                 .apply(input);
-    }
-
-    public Definition addProgramModule(Definition d) {
-        Module programsModule = gen.getProgramsGrammar(d.mainSyntaxModule());
-        java.util.Set<Module> allModules = mutable(d.modules());
-        allModules.add(programsModule);
-        return Definition(d.mainModule(), programsModule, immutable(allModules));
     }
 
     private Sentence concretizeSentence(Sentence s, Definition input) {

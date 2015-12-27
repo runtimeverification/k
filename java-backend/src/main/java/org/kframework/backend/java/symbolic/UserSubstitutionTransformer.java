@@ -32,7 +32,7 @@ public class UserSubstitutionTransformer extends PrePostTransformer {
     public static Term userSubstitution(Map<Term, Term> substitution, Term term, TermContext context) {
         if (substitution.isEmpty()) return term;
         for (Term var : substitution.keySet()) {
-            if (!context.definition().subsorts().isSubsortedEq(Sort.VARIABLE, var.sort())) {
+            if (!context.definition().subsorts().isSubsortedEq(Sort.KVARIABLE, var.sort())) {
                 throw KEMException.criticalError("All keys in substitution should be variables, found " + var + " of sort " + var.sort());
             }
         }

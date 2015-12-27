@@ -62,12 +62,7 @@ require "domains.k"
 require "substitution.k"
 
 module LAMBDA-SYNTAX
-  imports LAMBDA-COMMON
-  imports ID
-endmodule
-
-module LAMBDA-COMMON
-  imports DOMAINS-COMMON
+  imports DOMAINS-SYNTAX
 
 /*@ \section{Basic Call-by-value $\lambda$-Calculus}
 
@@ -113,19 +108,17 @@ interleaved) orders.
                | "let" Id "=" Exp "in" Exp                           // Let binder
                | "letrec" Id Id "=" Exp "in" Exp                     // Letrec
                | "mu" Id "." Exp      [binder, latex(\mu{#1}.{#2})]  // Mu
-
+  syntax KVariable ::= Id
 endmodule
 
 module LAMBDA
-  imports LAMBDA-COMMON
+  imports LAMBDA-SYNTAX
   imports DOMAINS
   imports SUBSTITUTION
 
   syntax KResult ::= Val
 
 //@ \section{$\beta$-reduction}
-
-  syntax Variable ::= Id
   rule (lambda X:Id . E:Exp) V:Val => E[V / X]
 
 /*@ \section{Integer and Boolean Builtins}

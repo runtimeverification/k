@@ -3,12 +3,7 @@
 require "domains.k"
 
 module LAMBDA-SYNTAX
-  imports LAMBDA-COMMON
-  imports ID
-endmodule
-
-module LAMBDA-COMMON
-  imports DOMAINS-COMMON
+  imports DOMAINS-SYNTAX
 
   syntax Exp ::= Id
                | "lambda" Id "." Exp  [latex(\lambda{#1}.{#2})]
@@ -32,7 +27,7 @@ module LAMBDA-COMMON
 endmodule
 
 module LAMBDA
-  imports LAMBDA-COMMON
+  imports LAMBDA-SYNTAX
   imports DOMAINS
 
   configuration <T>

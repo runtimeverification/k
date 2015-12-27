@@ -118,6 +118,7 @@ object Att {
   val comm = "comm"
   val unit = "unit"
   val bag = "bag"
+  val syntaxModule = "syntaxModule"
 }
 
 trait AttributesToString {

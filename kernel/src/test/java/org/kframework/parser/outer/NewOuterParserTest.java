@@ -5,6 +5,7 @@ package org.kframework.parser.outer;
 import com.beust.jcommander.internal.Lists;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
+import org.kframework.attributes.Att;
 import org.kframework.attributes.Source;
 import org.kframework.definition.Definition;
 import org.kframework.kore.K;
@@ -43,7 +44,7 @@ public class NewOuterParserTest {
                 Lists.newArrayList(BUILTIN_DIRECTORY),
                 true);
 
-        K kBody = ParserUtils.parseWithModule(theTextToParse, startSymbol, source, definition.mainSyntaxModule());
+        K kBody = ParserUtils.parseWithModule(theTextToParse, startSymbol, source, definition.getModule(definition.att().<String>get(Att.syntaxModule()).get()).get());
         //System.out.println(kBody);
     }
 }
