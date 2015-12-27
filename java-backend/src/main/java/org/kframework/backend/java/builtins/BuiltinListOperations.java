@@ -82,6 +82,7 @@ public class BuiltinListOperations {
                 return null;
             }
         } else {
+            /* the list must consist of exactly one element */
             if (list.sort() != Sort.LIST) {
                 throw new IllegalArgumentException();
             }
@@ -102,25 +103,44 @@ public class BuiltinListOperations {
         if (removeLeft == 0 && removeRight == 0) {
             return list;
         }
-        if (!(list instanceof BuiltinList)) {
-            return null;
+
+        if (list instanceof BuiltinList) {
+            try {
+                BuiltinList builtinList = (BuiltinList) list;
+
+                int toRemoveFromLeft = IntStream.range(0, removeLeft)
+                        .filter(i -> !builtinList.isElement(i))
+                        .findFirst().orElse(removeLeft);
+                int toRemoveFromRight = IntStream.range(0, removeRight)
+                        .filter(i -> !builtinList.isElement(builtinList.size() - 1 - i))
+                        .findFirst().orElse(removeRight);
+
+                int pendingRemoveLeft = removeLeft - toRemoveFromLeft;
+                int pendingRemoveRight = removeRight - toRemoveFromRight;
+                Term subList = builtinList.range(toRemoveFromLeft, builtinList.size() - toRemoveFromRight);
+
+                return (pendingRemoveLeft > 0 || pendingRemoveRight > 0) ?
+                        DataStructures.listRange(subList, pendingRemoveLeft, pendingRemoveRight, context) :
+                        subList;
+            } catch (IndexOutOfBoundsException e) {
+                return Bottom.BOTTOM;
+            }
+        } else {
+            /* the list must consist of exactly one element */
+            if (list.sort() != Sort.LIST) {
+                throw new IllegalArgumentException();
+            }
+
+            if (list instanceof Variable) {
+                return null;
+            }
+
+            if (removeLeft == 1 && removeRight == 0 || removeLeft == 0 && removeRight == 1) {
+                return unit(context);
+            } else {
+                return Bottom.BOTTOM;
+            }
         }
-        BuiltinList builtinList = (BuiltinList) list;
-
-        int toRemoveFromLeft = IntStream.range(0, removeLeft)
-                .filter(i -> !builtinList.isElement(i))
-                .findFirst().orElse(removeLeft);
-        int toRemoveFromRight = IntStream.range(0, removeRight)
-                .filter(i -> !builtinList.isElement(builtinList.size() - 1 - i))
-                .findFirst().orElse(removeRight);
-
-        int pendingRemoveLeft = removeLeft - toRemoveFromLeft;
-        int pendingRemoveRight = removeRight - toRemoveFromRight;
-        Term subList = builtinList.range(toRemoveFromLeft, builtinList.size() - toRemoveFromRight);
-
-        return (pendingRemoveLeft > 0 || pendingRemoveRight > 0) ?
-                DataStructures.listRange(subList, pendingRemoveLeft, pendingRemoveRight, context) :
-                subList;
     }
 
 }
