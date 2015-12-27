@@ -89,7 +89,7 @@ public class BuiltinList extends Collection implements CollectionInternalReprese
                 for (int i = index + 1; i < children.size(); i++) {
                     if (children.get(index) instanceof RuleAutomatonDisjunction) {
                         BitSet childEmptyListMask = BitSet.apply(mask.length());
-                        ((RuleAutomatonDisjunction) children.get(index)).assocDisjunctionArray[sort.ordinal()].stream()
+                        ((RuleAutomatonDisjunction) children.get(i)).assocDisjunctionArray[sort.ordinal()].stream()
                                 .filter(p -> p.getLeft().isEmpty())
                                 .map(p -> p.getRight())
                                 .forEach(s -> childEmptyListMask.or(s));
