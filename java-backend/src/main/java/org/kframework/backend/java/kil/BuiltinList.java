@@ -39,7 +39,7 @@ public class BuiltinList extends Collection implements CollectionInternalReprese
             KLabelConstant operatorKLabel,
             KLabelConstant unitKLabel,
             GlobalContext global) {
-        super(null, Kind.KITEM);
+        super(null, sort.equals(Sort.KSEQUENCE) ? Kind.K : Kind.KITEM);
         this.children = children;
         this.sort = sort;
         this.operatorKLabel = operatorKLabel;
