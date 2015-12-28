@@ -112,16 +112,12 @@ public class ParserUtils {
 
     public List<org.kframework.kil.Module> slurp(
             String definitionText,
-            File source,
+            Source source,
             File currentDirectory,
             List<File> lookupDirectories) {
-        List<DefinitionItem> items = Outer.parse(Source.apply(source.getPath()), definitionText, null);
+        List<DefinitionItem> items = Outer.parse(source, definitionText, null);
         if (options.verbose) {
-            try {
-                System.out.println("Importing: " + source.getCanonicalPath());
-            } catch (IOException e) {
-                System.out.println("Importing: " + source.getAbsolutePath());
-            }
+            System.out.println("Importing: " + source);
         }
         List<org.kframework.kil.Module> results = new ArrayList<>();
 
@@ -148,7 +144,7 @@ public class ParserUtils {
 
                 if (definitionFile.isPresent()) {
                     results.addAll(slurp(files.loadFromWorkingDirectory(definitionFile.get().getPath()),
-                            definitionFile.get(),
+                            Source.apply(definitionFile.get().getAbsolutePath()),
                             definitionFile.get().getParentFile(),
                             lookupDirectories));
                 }
@@ -163,7 +159,7 @@ public class ParserUtils {
     public Set<Module> loadModules(
             Set<Module> previousModules,
             String definitionText,
-            File source,
+            Source source,
             File currentDirectory,
             List<File> lookupDirectories,
             boolean dropQuote) {
@@ -193,6 +189,19 @@ public class ParserUtils {
             String syntaxModuleName,
             String definitionText,
             File source,
+            File currentDirectory,
+            List<File> lookupDirectories,
+            boolean dropQuote) {
+        return loadDefinition(mainModuleName, syntaxModuleName, definitionText,
+                Source.apply(source.getAbsolutePath()),
+                currentDirectory, lookupDirectories, dropQuote);
+    }
+
+    public org.kframework.definition.Definition loadDefinition(
+            String mainModuleName,
+            String syntaxModuleName,
+            String definitionText,
+            Source source,
             File currentDirectory,
             List<File> lookupDirectories,
             boolean dropQuote) {
