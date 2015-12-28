@@ -15,6 +15,7 @@
     <module>java-backend</module>
     <module>coq-backend</module>
     <module>tiny</module>
+    <module>API</module>
   </modules>
 
   <scm>
