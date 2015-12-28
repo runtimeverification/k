@@ -77,6 +77,9 @@ trait GeneratingListSubsortProductions extends Sorting {
 }
 
 object Module {
+  def apply(name: String, unresolvedLocalSentences: Set[Sentence]): Module = {
+    new Module(name, Set(), unresolvedLocalSentences, Att())
+  }
   def apply(name: String, imports: Set[Module], unresolvedLocalSentences: Set[Sentence], @(Nonnull@param) att: Att = Att()): Module = {
     new Module(name, imports, unresolvedLocalSentences, att)
   }
@@ -354,9 +357,12 @@ case class RegexTerminal(precedeRegex: String, regex: String, followRegex: Strin
   }
 }
 
+object Terminal {
+  def apply(value: String): Terminal = Terminal(value, Seq())
+}
+
 case class Terminal(value: String, followRegex: Seq[String]) extends TerminalLike // hooked
   with TerminalToString {
-  def this(value: String) = this(value, Seq())
 
   lazy val pattern = new RunAutomaton(BasicAutomata.makeString(value), false)
   lazy val followPattern =
