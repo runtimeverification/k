@@ -30,15 +30,15 @@ public class Parser {
     /**
      * Parses a string with a particular start symbol/sort.
      *
-     * @param withSort the start symbol/sort
+     * @param startSymbol the start symbol/sort
      * @param toParse  the String to parse
      * @param fromSource  the Source of the String toParse
      * @return a pair: the left projection is a parsed string as a K, if successful;
      * the right projection is the set of issues encountered while parsing
      */
     @SuppressWarnings("unchecked")
-    public Tuple2<Option<K>, Set<Warning>> apply(Sort withSort, String toParse, Source fromSource) {
-        Tuple2<Either<Set<ParseFailedException>, K>, Set<ParseFailedException>> res = parseInModule.parseString(toParse, withSort, fromSource);
+    public Tuple2<Option<K>, Set<Warning>> apply(Sort startSymbol, String toParse, Source fromSource) {
+        Tuple2<Either<Set<ParseFailedException>, K>, Set<ParseFailedException>> res = parseInModule.parseString(toParse, startSymbol, fromSource);
 
         Set<Warning> problemSet = new HashSet<>();
         problemSet.addAll((Set<Warning>) (Object) res._2());
@@ -50,13 +50,13 @@ public class Parser {
     /**
      * Parses a string with a particular start symbol/sort.
      *
-     * @param withSort the start symbol/sort
+     * @param startSymbol the start symbol/sort
      * @param toParse  the String to parse
      * @return a pair: the left projection is a parsed string as a K, if successful;
      * the right projection is the set of issues encountered while parsing
      */
-    public Tuple2<Option<K>, Set<Warning>> apply(Sort withSort, String toParse) {
-        return apply(withSort, toParse, Source.apply("generated"));
+    public Tuple2<Option<K>, Set<Warning>> apply(Sort startSymbol, String toParse) {
+        return apply(startSymbol, toParse, Source.apply("generated"));
     }
 
     public static Parser from(Module module) {
