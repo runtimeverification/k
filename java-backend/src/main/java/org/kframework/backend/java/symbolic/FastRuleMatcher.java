@@ -33,6 +33,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -254,23 +255,34 @@ public class FastRuleMatcher {
             return empty;
         }
 
-        if (subjectIndex == subject.size() && pattern.isElement(patternIndex, ruleMask)) {
-            // fail
-            return empty;
-        }
 
-        if (subjectIndex < subject.size() && subject.isElement(subjectIndex) && pattern.isElement(patternIndex, ruleMask)) {
-            ruleMask = match(subject.get(subjectIndex), pattern.get(patternIndex), ruleMask, path.$colon$colon(Pair.of(subjectIndex, subjectIndex + 1)));
-            if (ruleMask.isEmpty()) {
+        BuiltinList.ElementTailSplit patternElementTailSplit = pattern.splitElementTail(patternIndex, ruleCount);
+        if (ruleMask.subset(patternElementTailSplit.combinedMask)) {
+            BitSet elementMask;
+            if (subjectIndex == subject.size()) {
                 // fail
-                return ruleMask;
+                elementMask = empty;
+            } else {
+                assert subjectIndex < subject.size();
+                elementMask = patternElementTailSplit.elementMask.clone();
+                elementMask.and(ruleMask);
+                if (!elementMask.isEmpty()) {
+                    elementMask = match(subject.get(subjectIndex), patternElementTailSplit.element, elementMask, path.$colon$colon(Pair.of(subjectIndex, subjectIndex + 1)));
+                    if (!elementMask.isEmpty()) {
+                        elementMask = matchAssoc(subject, subjectIndex + 1, pattern, patternIndex + 1, elementMask, path);
+                    }
+                }
             }
 
-            return matchAssoc(subject, subjectIndex + 1, pattern, patternIndex + 1, ruleMask, path);
-        }
+            BitSet tailMask = patternElementTailSplit.tailMask.clone();
+            tailMask.and(ruleMask);
+            if (!tailMask.isEmpty()) {
+                tailMask = match(subject.range(subjectIndex, subject.size()), patternElementTailSplit.tail, tailMask, path.$colon$colon(Pair.of(subjectIndex, subject.size())));
+            }
 
-        if (pattern.isTail(patternIndex, ruleMask)) {
-            return match(subject.range(subjectIndex, subject.size()), pattern.get(patternIndex), ruleMask, path.$colon$colon(Pair.of(subjectIndex, subject.size())));
+            BitSet resultSet = elementMask.clone();
+            resultSet.or(tailMask);
+            return resultSet;
         }
 
         ListMultimap<Integer, ConjunctiveFormula> nestedConstraints = ArrayListMultimap.create();

@@ -2,6 +2,8 @@
 package org.kframework.backend.java.kil;
 
 import com.google.common.collect.ImmutableList;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Constants;
@@ -9,7 +11,9 @@ import org.kframework.builtin.KLabels;
 import org.kframework.kil.ASTNode;
 import org.kframework.utils.BitSet;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -27,8 +31,7 @@ public class BuiltinList extends Collection implements CollectionInternalReprese
     public final KLabelConstant unitKLabel;
     private final GlobalContext global;
 
-    private final BitSet isElementMask[];
-    private final BitSet isTailMask[];
+    private final ElementTailSplit elementTailSplits[];
 
     /**
      * Private constructor used by {@link BuiltinList.Builder}.
@@ -46,67 +49,97 @@ public class BuiltinList extends Collection implements CollectionInternalReprese
         this.unitKLabel = unitKLabel;
         this.global = global;
 
-        isElementMask = new BitSet[children.size()];
-        isTailMask = new BitSet[children.size()];
+        elementTailSplits = new ElementTailSplit[children.size()];
+    }
+
+    public static class ElementTailSplit {
+        public final Term element;
+        public final BitSet elementMask;
+        public final Term tail;
+        public final BitSet tailMask;
+        public final BitSet combinedMask;
+
+        private ElementTailSplit(Term element, BitSet elementMask, Term tail, BitSet tailMask) {
+            this.element = element;
+            this.elementMask = elementMask;
+            this.tail = tail;
+            this.tailMask = tailMask;
+            combinedMask = elementMask.clone();
+            combinedMask.or(tailMask);
+        }
+    }
+
+    public ElementTailSplit splitElementTail(int index, int bitSetLength) {
+        if (elementTailSplits[index] == null) {
+            BitSet emptyListMask = BitSet.apply(bitSetLength);
+            emptyListMask.makeOnes(bitSetLength);
+            for (int i = index + 1; i < children.size(); i++) {
+                if (children.get(index) instanceof RuleAutomatonDisjunction) {
+                    emptyListMask.and(((RuleAutomatonDisjunction) children.get(i)).assocDisjunctionArray[sort.ordinal()].stream()
+                            .filter(p -> p.getLeft().isEmpty())
+                            .map(p -> p.getRight())
+                            .findAny().orElseGet(() -> BitSet.apply(bitSetLength)));
+
+                    if (emptyListMask.isEmpty()) {
+                        break;
+                    }
+                } else {
+                    emptyListMask = BitSet.apply(bitSetLength);
+                    break;
+                }
+            }
+
+            if (isElement(index)) {
+                BitSet elementMask = BitSet.apply(bitSetLength);
+                elementMask.makeOnes(bitSetLength);
+                elementTailSplits[index] = new ElementTailSplit(
+                        children.get(index),
+                        elementMask,
+                        Bottom.BOTTOM,
+                        BitSet.apply(bitSetLength));
+            } else if (isListVariable(children.get(index))) {
+                elementTailSplits[index] = new ElementTailSplit(
+                        Bottom.BOTTOM,
+                        BitSet.apply(bitSetLength),
+                        children.get(index),
+                        emptyListMask);
+            } else if (children.get(index) instanceof RuleAutomatonDisjunction) {
+                RuleAutomatonDisjunction elementAutomatonDisjunction = new RuleAutomatonDisjunction(
+                        ((RuleAutomatonDisjunction) children.get(index)).disjunctions().stream()
+                                .filter(p -> isElement(p.getLeft()))
+                                .collect(Collectors.toList()),
+                        global);
+                BitSet elementMask = BitSet.apply(bitSetLength);
+                elementAutomatonDisjunction.disjunctions().stream()
+                        .map(p -> p.getRight())
+                        .forEach(s -> elementMask.or(s));
+
+                RuleAutomatonDisjunction tailAutomatonDisjunction = new RuleAutomatonDisjunction(
+                        ((RuleAutomatonDisjunction) children.get(index)).disjunctions().stream()
+                                .filter(p -> !isElement(p.getLeft()))
+                                .collect(Collectors.toList()),
+                        global);
+                BitSet tailMask = BitSet.apply(bitSetLength);
+                tailAutomatonDisjunction.disjunctions().stream()
+                        .map(p -> p.getRight())
+                        .forEach(s -> tailMask.or(s));
+                tailMask.and(emptyListMask);
+
+                elementTailSplits[index] = new ElementTailSplit(
+                        elementAutomatonDisjunction,
+                        elementMask,
+                        tailAutomatonDisjunction,
+                        tailMask);
+            } else {
+                assert false : "unexpected class type for builtin list " + children.get(index).getClass();
+            }
+        }
+
+        return elementTailSplits[index];
     }
 
     public boolean isElement(int index) {
         return isElement(children.get(index));
-    }
-
-    public boolean isElement(int index, BitSet mask) {
-        if (isElementMask[index] == null) {
-            isElementMask[index] = BitSet.apply(mask.length());
-            if (isElement(index)) {
-                isElementMask[index].makeOnes(mask.length());
-            } else if (children.get(index) instanceof RuleAutomatonDisjunction) {
-                ((RuleAutomatonDisjunction) children.get(index)).disjunctions().stream()
-                        .filter(p -> isElement(p.getLeft()))
-                        .map(p -> p.getRight())
-                        .forEach(s -> isElementMask[index].or(s));
-            } else {
-                assert isListVariable(children.get(index)) || children.get(index) instanceof BuiltinList;
-            }
-        }
-
-        return mask.subset(isElementMask[index]);
-    }
-
-    public boolean isTail(int index, BitSet mask) {
-        if (isTailMask[index] == null) {
-            isTailMask[index] = BitSet.apply(mask.length());
-            if (index != children.size()) {
-                if (isListVariable(children.get(index))) {
-                    isTailMask[index].makeOnes(mask.length());
-                } else if (children.get(index) instanceof RuleAutomatonDisjunction) {
-                    ((RuleAutomatonDisjunction) children.get(index)).getVariablesForSort(sort).stream()
-                            .map(p -> p.getRight())
-                            .forEach(s -> isTailMask[index].or(s));
-                } else {
-                    assert isElement(index);
-                }
-
-                for (int i = index + 1; i < children.size(); i++) {
-                    if (children.get(index) instanceof RuleAutomatonDisjunction) {
-                        BitSet childEmptyListMask = BitSet.apply(mask.length());
-                        ((RuleAutomatonDisjunction) children.get(i)).assocDisjunctionArray[sort.ordinal()].stream()
-                                .filter(p -> p.getLeft().isEmpty())
-                                .map(p -> p.getRight())
-                                .forEach(s -> childEmptyListMask.or(s));
-                        isTailMask[index].and(childEmptyListMask);
-                        if (isTailMask[index].isEmpty()) {
-                            break;
-                        }
-                    } else {
-                        isTailMask[index] = BitSet.apply(mask.length());
-                        break;
-                    }
-                }
-            } else {
-                isTailMask[index].makeOnes(mask.length());
-            }
-        }
-        return mask.subset(isTailMask[index]);
     }
 
     private boolean isElement(Term term) {
