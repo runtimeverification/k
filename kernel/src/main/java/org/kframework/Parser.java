@@ -22,10 +22,8 @@ import java.util.Set;
 @API
 public class Parser {
     private final ParseInModule parseInModule;
-    private Module module;
 
     private Parser(Module module) {
-        this.module = module;
         this.parseInModule = new ParseInModule(module);
     }
 

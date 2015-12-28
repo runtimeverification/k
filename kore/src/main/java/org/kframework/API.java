@@ -1,6 +1,6 @@
+// Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework;
 
-import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
 
