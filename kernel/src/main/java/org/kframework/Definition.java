@@ -12,6 +12,7 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 
 import java.io.File;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -43,6 +44,13 @@ public class Definition {
      * Parses the text to create a {@link Definition} object.
      */
     public static org.kframework.definition.Definition from(String definitionText, String mainModuleName, Source source) {
+        return from(definitionText, mainModuleName, source, Lists.newArrayList(Kompile.BUILTIN_DIRECTORY));
+    }
+
+    /**
+     * Parses the text to create a {@link Definition} object.
+     */
+    public static org.kframework.definition.Definition from(String definitionText, String mainModuleName, Source source, List<File> lookupDirectories) {
         File tmpDir = Files.createTempDir();
         File tempDir = new File(tmpDir.getAbsolutePath() + File.pathSeparator + "tempDir");
         File definitionDir = new File(tmpDir.getAbsolutePath() + File.pathSeparator + "definitionDir");
@@ -68,7 +76,7 @@ public class Definition {
                 definitionText,
                 source,
                 workingDir,
-                Lists.newArrayList(Kompile.BUILTIN_DIRECTORY),
+                lookupDirectories,
                 true
         );
 
