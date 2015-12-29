@@ -2,10 +2,11 @@
 package org.kframework;
 
 import org.kframework.attributes.Source;
-import org.kframework.definition.Module;
+import org.kframework.definition.*;
 import org.kframework.kore.K;
 import org.kframework.kore.Sort;
 import org.kframework.parser.concrete2kore.ParseInModule;
+import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import scala.Option;
 import scala.Tuple2;
@@ -24,14 +25,20 @@ public class Parser {
     private final ParseInModule parseInModule;
 
     private Parser(Module module) {
-        this.parseInModule = new ParseInModule(module);
+        // TODO: remove hack once the frontend is cleaner
+        if (module.name().endsWith(RuleGrammarGenerator.RULE_CELLS)) {
+            org.kframework.definition.Definition definitionWithBuiltins = Definition.from("require \"domians.k\"", "K");
+            this.parseInModule = new RuleGrammarGenerator(definitionWithBuiltins, true).getCombinedGrammar(module);
+        } else {
+            this.parseInModule = new ParseInModule(module);
+        }
     }
 
     /**
      * Parses a string with a particular start symbol/sort.
      *
      * @param startSymbol the start symbol/sort
-     * @param toParse  the String to parse
+     * @param toParse     the String to parse
      * @param fromSource  the Source of the String toParse
      * @return a pair: the left projection is a parsed string as a K, if successful;
      * the right projection is the set of issues encountered while parsing
@@ -51,7 +58,7 @@ public class Parser {
      * Parses a string with a particular start symbol/sort.
      *
      * @param startSymbol the start symbol/sort
-     * @param toParse  the String to parse
+     * @param toParse     the String to parse
      * @return a pair: the left projection is a parsed string as a K, if successful;
      * the right projection is the set of issues encountered while parsing
      */
