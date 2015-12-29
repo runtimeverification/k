@@ -30,6 +30,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 
 public class KServerFrontEnd extends FrontEnd {
@@ -60,6 +62,7 @@ public class KServerFrontEnd extends FrontEnd {
 
     private final KServerOptions options;
     private final Map<String, Injector> injectors = new HashMap<>();
+    private final ReadWriteLock lock = new ReentrantReadWriteLock();
 
     @Override
     protected int run() {
@@ -124,7 +127,14 @@ public class KServerFrontEnd extends FrontEnd {
         ThreadLocalPrintStream system_out = (ThreadLocalPrintStream) System.out;
         ThreadLocalPrintStream system_err = (ThreadLocalPrintStream) System.err;
 
-        Injector injector = injectors.get(tool);
+        Injector injector;
+
+        lock.readLock().lock();
+        try {
+            injector = injectors.get(tool);
+        } finally {
+            lock.readLock().unlock();
+        }
 
         Main launcher = injector.getInstance(Main.class);
         SimpleScope requestScope = launcher.getRequestScope();
@@ -157,8 +167,21 @@ public class KServerFrontEnd extends FrontEnd {
         if (!kserver.isLocal()) {
             context.assertLoopbackClient();
         }
-        System.setSecurityManager(null);
-        context.getNGServer().shutdown(true);
+        if (context.getArgs()[0].equals("shutdown")) {
+            System.setSecurityManager(null);
+            context.getNGServer().shutdown(true);
+        } else if (context.getArgs()[0].equals("reset")) {
+            kserver.lock.writeLock().lock();
+            try {
+                kserver.injectors.clear();
+                for (String tool : tools) {
+                    kserver.injectors.put(tool, Main.getInjector(tool));
+                }
+            } finally {
+                kserver.lock.writeLock().unlock();
+            }
+            System.gc();
+        }
     }
 
     public boolean isLocal() {
