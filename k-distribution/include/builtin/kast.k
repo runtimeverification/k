@@ -50,6 +50,7 @@ module KSEQ
                  | K "~>" K  [klabel(#KSequence), left, assoc, unit(#EmptyK), hook(org.kframework.kore.KSequence)]
   syntax left #KSequence
   syntax KBott     ::= "`" K "`"    [bracket]
+                     | "(" K ")"    [bracket]
 endmodule
 
 
