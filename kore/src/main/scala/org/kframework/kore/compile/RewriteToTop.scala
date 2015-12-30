@@ -31,7 +31,7 @@ object RewriteToTop {
   def bubbleRewriteToTopInsideCells(k: K): K = k match {
     case kapp: KApply =>
       if (isCell(kapp) && nonCell(kapp.items.get(0)))
-        KApply(kapp.klabel, ADT.KRewrite(toLeft(kapp.items.get(0)), toRight(kapp.items.get(0)), kapp.att))
+        KApply(kapp.klabel, makeRewriteIfNeeded(kapp.items.get(0)))
       else
         KApply(kapp.klabel, immutable(kapp.klist.items) map bubbleRewriteToTopInsideCells, kapp.att)
     case _ => k
@@ -51,5 +51,7 @@ object RewriteToTop {
   private def isCell(kapp: KApply): Boolean = {
     kapp.klabel.name.startsWith("<") && kapp.klabel.name.endsWith(">")
   }
+
+  private def makeRewriteIfNeeded(k: K): K = if (toLeft(k) != toRight(k)) ADT.KRewrite(toLeft(k), toRight(k)) else k
 
 }
