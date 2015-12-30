@@ -2,20 +2,17 @@
 require "domains.k"
 require "substitution.k"
 
-module LAMBDA-SYNTAX
+module LAMBDA
   imports DOMAINS-SYNTAX
+  imports DOMAINS
+  imports SUBSTITUTION
+
   syntax Val ::= Id
                | "lambda" Id "." Exp  [binder, latex(\lambda{#1}.{#2})]
   syntax Exp ::= Val
                | Exp Exp              [strict, left]
                | "(" Exp ")"          [bracket]
   syntax KVariable ::= Id
-endmodule
-
-module LAMBDA
-  imports LAMBDA-SYNTAX
-  imports DOMAINS
-  imports SUBSTITUTION
   syntax KResult ::= Val
 
   rule (lambda X:Id . E:Exp) V:Val => E[V / X]
