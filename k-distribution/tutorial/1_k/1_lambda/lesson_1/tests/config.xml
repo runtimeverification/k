@@ -8,7 +8,7 @@
     extension="lambda"
     results="."
     skip="pdf">
-
+    <kompile-option name="--syntax-module" value="LAMBDA" />
     <all-programs>
       <krun-option name="--search" />
       <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
