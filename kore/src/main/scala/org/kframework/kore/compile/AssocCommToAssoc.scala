@@ -18,7 +18,7 @@ class AssocCommToAssoc(c: Constructors[K]) extends (Module => Module) {
 
   import s._
 
-  val rwLabel: KLabel = KLabel(KLabels.KREWRITE)
+  //val rwLabel: KLabel = KLabel(KLabels.KREWRITE)
 
   override def apply(m: Module): Module = {
     Module(m.name, m.imports, m.localSentences flatMap {apply(_)(m)}, m.att)
@@ -26,7 +26,9 @@ class AssocCommToAssoc(c: Constructors[K]) extends (Module => Module) {
 
   def apply(s: Sentence)(implicit m: Module): List[Sentence] = {
     s match {
-      case r: Rule => apply(r.body) map {Rule(_, r.requires, r.ensures, r.att)}
+      case r: Rule =>
+        val rules: List[Rule] = apply(r.body) map {Rule(_, r.requires, r.ensures, r.att)}
+        rules
       case _ => List(s)
     }
   }
@@ -69,7 +71,7 @@ class AssocCommToAssoc(c: Constructors[K]) extends (Module => Module) {
 
       val convertedLHSs: List[List[K]] = if (flatLHSCollections.nonEmpty) {
         flatLHSElements.permutations.toList map {
-          _.foldRight(List(anonymousVariable(opSort))) { (e, l) => e :: anonymousVariable(opSort) :: l }
+          _.foldRight(List(anonymousVariable(opSort))) { (e, l) => anonymousVariable(opSort) :: e :: l }
         }
       } else {
         flatLHSElements.permutations.toList
