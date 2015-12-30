@@ -37,6 +37,7 @@ class AssocCommToAssoc(c: Constructors[K]) extends (Module => Module) {
         case Unapply.KApply(label: KLabel, children: List[K]) =>
           crossProduct(children map apply) map {label(_: _*)}
       }
+      case Unapply.KRewrite(left, right) => apply(left) map {KRewrite(_, right, Att())}
       case _ => List(k)
     }
   }
@@ -60,20 +61,21 @@ class AssocCommToAssoc(c: Constructors[K]) extends (Module => Module) {
 
       val (flatLHS: List[K], flatRewrites: List[K]) = flatten(kApply, kApply.klabel, unitKLabel)
       val (flatLHSElements: List[K], flatLHSCollections: List[K]) = flatLHS partition {
-        case v: SortedKVariable => !v.sort.equals(opSort);
+        case v: SortedKVariable => m.subsorts.lessThanEq(v.sort, opSort);
         case _ => true
       }
 
-      assert(flatLHSElements.size <= 1)
+      assert(flatLHSCollections forall { case v: KVariable => v.name.equals("THE_VARIABLE") })
+
       val convertedLHSs: List[List[K]] = if (flatLHSCollections.nonEmpty) {
         flatLHSElements.permutations.toList map {
-          _.foldLeft(List(assocVariable(opKLabel, 0)))((l, e) => l :+ e :+ assocVariable(opKLabel, l.size / 2 + 1))
+          _.foldRight(List(anonymousVariable(opSort))) { (e, l) => e :: anonymousVariable(opSort) :: l }
         }
       } else {
         flatLHSElements.permutations.toList
       }
 
-      val convertedRHS: List[K] = flatRewrites map {rwLabel(unitK, _)}
+      val convertedRHS: List[K] = flatRewrites map {KRewrite(unitK, _, Att())}
 
       convertedLHSs map (l => opKLabel(l ++ convertedRHS: _*))
     } else {
@@ -86,16 +88,19 @@ class AssocCommToAssoc(c: Constructors[K]) extends (Module => Module) {
       case Unapply.KApply(`op`, children: List[K]) =>
         children
           .map {flatten(_, op, unit)}
-          .reduce { (a, b) => (a._1 ++ b._1, a._1 ++ b._2) }
+          .reduce { (a, b) => (a._1 ++ b._1, a._2 ++ b._2) }
       case Unapply.KApply(`unit`, List()) =>
         (List(), List())
-      case Unapply.KApply(`rwLabel`, List(l: K, r: K)) =>
-        val (l1: List[K], l2: List[K]) = flatten(l, op, unit)
-        (l1, r :: l2)
+//      case Unapply.KApply(`rwLabel`, List(left: K, right: K)) =>
+//        val (xs: List[K], List()) = flatten(left, op, unit)
+//        (xs, List(right))
+      case Unapply.KRewrite(left: K, right: K) =>
+        val (xs: List[K], List()) = flatten(left, op, unit)
+        (xs, List(right))
       case _ => (List(k), List())
     }
   }
 
-  def assocVariable(op: KLabel, n: Int): K = KVariable("DotVar" + op.name + n)
+  def anonymousVariable(s: Sort): K = SortedADT.SortedKVariable("THE_VARIABLE", Att().add("sort", s.name))
 
 }
