@@ -119,7 +119,7 @@ class MergeRules(c: Constructors[K]) extends (Module => Module) {
   }
 
   def isEffectiveAssoc(kLabel: KLabel, module: Module) : Boolean = {
-    module.attributesFor.getOrElse(kLabel, Att()).contains(Att.assoc) && !module.attributesFor.getOrElse(kLabel, Att()).contains(Att.comm) || module.attributesFor.getOrElse(kLabel, Att()).contains(Att.bag)
+    module.attributesFor.getOrElse(kLabel, Att()).contains(Att.assoc) && (!module.attributesFor.getOrElse(kLabel, Att()).contains(Att.comm) || module.attributesFor.getOrElse(kLabel, Att()).contains(Att.bag))
   }
 
 }
