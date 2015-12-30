@@ -271,7 +271,7 @@ public class Kompile {
 
     public Definition parseDefinition(File definitionFile, String mainModuleName, String mainProgramsModule, boolean dropQuote) {
         String prelude = REQUIRE_PRELUDE_K;
-        if (kompileOptions.noPrelude) {
+        if (kompileOptions.outerParsing.noPrelude) {
             prelude = "";
         }
         Definition definition = parser.loadDefinition(
@@ -279,7 +279,7 @@ public class Kompile {
                 mainProgramsModule, prelude + FileUtil.load(definitionFile),
                 definitionFile,
                 definitionFile.getParentFile(),
-                ListUtils.union(kompileOptions.includes.stream()
+                ListUtils.union(kompileOptions.outerParsing.includes.stream()
                                 .map(files::resolveWorkingDirectory).collect(Collectors.toList()),
                         Lists.newArrayList(BUILTIN_DIRECTORY)),
                 dropQuote);

@@ -1,11 +1,7 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.kompile;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-
-import java.io.File;
-
+import com.beust.jcommander.JCommander;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,8 +15,10 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
-import com.beust.jcommander.JCommander;
-import com.google.inject.util.Providers;
+import java.io.File;
+
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class KompileOptionsTest {
@@ -36,7 +34,6 @@ public class KompileOptionsTest {
     @Before
     public void setUp() {
         options = new KompileOptions();
-        options.setFiles(Providers.of(files));
         when(files.resolveWorkingDirectory(Matchers.anyString())).thenAnswer(new Answer<File>() {
             @Override
             public File answer(InvocationOnMock invocation) throws Throwable {
@@ -47,10 +44,10 @@ public class KompileOptionsTest {
 
     private void parse(String... args) {
         new JCommander(options, args);
-        options.mainDefinitionFile();
-        options.mainModule();
+        options.outerParsing.mainDefinitionFile(files);
+        options.mainModule(files);
         options.docStyle();
-        options.syntaxModule();
+        options.syntaxModule(files);
     }
 
     @Test(expected=KEMException.class)
@@ -74,13 +71,13 @@ public class KompileOptionsTest {
     @Test
     public void testDefaultModuleName() {
         parse("foo.k");
-        assertEquals("FOO", options.mainModule());
+        assertEquals("FOO", options.mainModule(files));
     }
 
     @Test
     public void testDefaultSyntaxModuleName() {
         parse("--main-module", "BAR", "foo.k");
-        assertEquals("BAR-SYNTAX", options.syntaxModule());
+        assertEquals("BAR-SYNTAX", options.syntaxModule(files));
     }
 
     @Test
