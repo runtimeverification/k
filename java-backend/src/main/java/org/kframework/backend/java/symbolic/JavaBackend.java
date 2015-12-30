@@ -23,6 +23,7 @@ import org.kframework.kore.KORE;
 import org.kframework.kore.KSequence;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.SortedADT;
+import org.kframework.kore.compile.AssocCommToAssoc;
 import org.kframework.kore.compile.Backend;
 import org.kframework.kore.compile.ConvertDataStructureToLookup;
 import org.kframework.kore.compile.MergeRules;
@@ -84,6 +85,7 @@ public class JavaBackend implements Backend {
                 .andThen(func(dd -> markRegularRules(dd)))
                 .andThen(DefinitionTransformer.fromSentenceTransformer(new AddConfigurationRecoveryFlags(), "add refers_THIS_CONFIGURATION_marker"))
                 .andThen(DefinitionTransformer.fromSentenceTransformer(JavaBackend::markSingleVariables, "mark single variables"))
+                .andThen(new DefinitionTransformer(new AssocCommToAssoc(KORE.c())))
                 .andThen(new DefinitionTransformer(new MergeRules(KORE.c())))
                 .apply(d);
     }
