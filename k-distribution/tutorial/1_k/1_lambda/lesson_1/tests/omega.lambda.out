@@ -1,5 +1,4 @@
-Search results:
-
-Solution 1:
-V:K -->
-(lambda x . (x x)) (lambda x . (x x))
+Solution: 0
+V
+---> 
+` lambda x . ` x x ` ` lambda x . ` x x `
