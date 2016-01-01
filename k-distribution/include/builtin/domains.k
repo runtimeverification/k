@@ -11,7 +11,6 @@ module DOMAINS
   imports BOOL
   imports STRING
   imports BASIC-K
-  imports K-IO
   imports LIST
   imports MAP
   imports SET
