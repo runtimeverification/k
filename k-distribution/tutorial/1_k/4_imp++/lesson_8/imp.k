@@ -78,7 +78,6 @@ of a program using the \texttt{search} option of \texttt{krun}.
 */
 
 module IMP-SYNTAX
-imports DOMAINS-SYNTAX
 
 /*@ \section{Syntax}
 IMP++ adds several syntactic constructs to IMP\@.  Also, since the

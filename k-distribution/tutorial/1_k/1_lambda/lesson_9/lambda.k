@@ -62,7 +62,6 @@ require "domains.k"
 require "substitution.k"
 
 module LAMBDA-SYNTAX
-  imports DOMAINS-SYNTAX
 
 /*@ \section{Basic Call-by-value $\lambda$-Calculus}
 

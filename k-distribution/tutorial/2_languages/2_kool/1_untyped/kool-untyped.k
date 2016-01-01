@@ -133,7 +133,6 @@ those were all borrowed from SIMPLE. */
 require "domains.k"
 
 module KOOL-UNTYPED-SYNTAX
-  imports DOMAINS-SYNTAX
 
 /*@ \section{Syntax}
 

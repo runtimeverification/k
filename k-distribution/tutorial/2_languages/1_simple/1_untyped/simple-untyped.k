@@ -59,7 +59,6 @@ language definitions discussed in the \K tutorial.} */
 require "domains.k"
 
 module SIMPLE-UNTYPED-SYNTAX
-  imports DOMAINS-SYNTAX
 
 /*@ \section{Syntax}
 We start by defining the SIMPLE syntax.  The language constructs discussed

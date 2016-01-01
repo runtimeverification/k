@@ -3,7 +3,6 @@ require "domains.k"
 require "unification.k"
 
 module LAMBDA-SYNTAX
-  imports DOMAINS-SYNTAX
   syntax Exp ::= Int | Bool | Id
                | "(" Exp ")"                      [bracket]
                | Exp Exp                          [strict, left]
