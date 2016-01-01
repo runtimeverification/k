@@ -177,7 +177,7 @@ public class ParserUtils {
         Context context = new Context();
         new CollectProductionsVisitor(context).visitNode(def);
 
-        KILtoKORE kilToKore = new KILtoKORE(context, false, dropQuote);
+        KILtoKORE kilToKore = new KILtoKORE(context, false, dropQuote, true);
 
         HashMap<String, Module> koreModules = new HashMap<>();
         koreModules.putAll(previousModules.stream().collect(Collectors.toMap(Module::name, m -> m)));
