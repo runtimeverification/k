@@ -13,7 +13,6 @@ endmodule
 
 
 module VARLABEL
-  imports DOMAINS
   imports VARLABEL-SYNTAX
 
 

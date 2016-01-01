@@ -25,7 +25,6 @@ endmodule
 
 module LAMBDA
   imports LAMBDA-SYNTAX
-  imports DOMAINS
   imports UNIFICATION
 
   syntax Variable ::= Id

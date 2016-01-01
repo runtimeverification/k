@@ -61,7 +61,6 @@ endmodule
 
 module LAMBDA
   imports LAMBDA-SYNTAX
-  imports DOMAINS
 
 /*@ \section{Semantics}
 The next module contains the semantics of all the LAMBDA++ constructs,

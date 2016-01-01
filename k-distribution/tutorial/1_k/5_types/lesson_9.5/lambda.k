@@ -26,7 +26,6 @@ endmodule
 
 module LAMBDA
   imports LAMBDA-SYNTAX
-  imports DOMAINS
   imports UNIFICATION
   imports SUBSTITUTION
 

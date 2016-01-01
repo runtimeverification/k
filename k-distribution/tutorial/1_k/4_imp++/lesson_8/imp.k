@@ -147,7 +147,6 @@ endmodule
 
 module IMP
   imports IMP-SYNTAX
-  imports DOMAINS
 /*@ \section{Semantics}
 We next give the semantics of IMP++\@.  We start by first defining its
 configuration. */

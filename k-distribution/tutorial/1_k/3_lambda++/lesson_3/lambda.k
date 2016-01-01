@@ -25,7 +25,6 @@ endmodule
 
 module LAMBDA
   imports LAMBDA-SYNTAX
-  imports DOMAINS
 
   configuration <T>
                   <k> $PGM:Exp </k>

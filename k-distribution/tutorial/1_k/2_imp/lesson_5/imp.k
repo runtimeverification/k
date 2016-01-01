@@ -58,7 +58,6 @@ that you write and parse several interesting programs before you move to the
 semantics.  */
 
 module IMP
-  imports DOMAINS
   imports IMP-SYNTAX
 /*@ \section{Semantics}
 This module defines the semantics of IMP\@.
