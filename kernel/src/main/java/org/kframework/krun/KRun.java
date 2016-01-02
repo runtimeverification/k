@@ -108,7 +108,7 @@ public class KRun {
         if (searchResult.isEmpty()) {
             outputFile("No Search Results \n", options);
         }
-        int i = 0;
+        int i = 1;
         List<String> results = new ArrayList<>();
         for (Map<? extends KVariable, ? extends K> substitution : searchResult) {
             StringBuilder sb = new StringBuilder();

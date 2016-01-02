@@ -1,5 +1,4 @@
-Search results:
-
-Solution 1:
-V:K -->
-lambda y . ((lambda x . (lambda y . (x y))) y)
+Solution: 1
+V
+---> 
+lambda y . ` ` lambda x . lambda y . ` x y ` ` y `

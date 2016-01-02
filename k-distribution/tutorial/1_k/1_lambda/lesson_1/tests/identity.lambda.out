@@ -1,5 +1,4 @@
-Search results:
-
-Solution 1:
-V:K -->
+Solution: 1
+V
+---> 
 lambda x . x
