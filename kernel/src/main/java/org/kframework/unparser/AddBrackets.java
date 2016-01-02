@@ -66,12 +66,10 @@ public class AddBrackets {
             int position = getPosition(inner, outer);
             Sort outerSort = ((NonTerminal)outer.production().items().apply(position)).sort();
             Sort innerSort = inner.production().sort();
-            for (Tuple2<Sort, Set<Production>> sort : iterable(m.bracketProductionsFor())) {
+            for (Tuple2<Sort, scala.collection.immutable.List<Production>> sort : iterable(m.bracketProductionsFor())) {
                 boolean isCorrectOuterSort = m.subsorts().lessThanEq(sort._1(), outerSort);
                 if (isCorrectOuterSort) {
-                    Seq<Production> sortedProductions = (Seq<Production>) sort._2().toList().sortBy(func(Production::sort), m.subsorts().asOrdering());
-
-                    for (Production p : mutable(sortedProductions)) {
+                    for (Production p : mutable(sort._2())) {
                         boolean isCorrectInnerSort = stream(p.items())
                                 .filter(i -> i instanceof NonTerminal)
                                 .map(i -> (NonTerminal) i)
