@@ -17,9 +17,7 @@ object KOREToTreeNodes {
   def apply(t: K, mod: Module): Term = t match {
     case t: KToken => Constant(t.s, mod.tokenProductionsFor(Sort(t.sort.name)).head, t.att.getOptional[Location]("Location"), t.att.getOptional[Source]("Source"))
     case a: KApply =>
-      val production: Production = mod.productionsFor(KLabel(a.klabel.name)).filter(p => p.items.count(_.isInstanceOf[NonTerminal]) == a.klist.size)
-        .find(p => !p.att.contains("ignoreWhenUnparsing")).get  // TODO: hack for the ugly case when there is more than one production for a KLabel; used only for the backtick bracket and is to be avoided further
-
+      val production: Production = mod.productionsFor(KLabel(a.klabel.name)).find(p => p.items.count(_.isInstanceOf[NonTerminal]) == a.klist.size).get
       TermCons(ConsPStack.from((a.klist.items.asScala map { i: K => apply(i, mod) }).reverse asJava),
         production, t.att.getOptional[Location]("Location"), t.att.getOptional[Source]("Source"))
   }
