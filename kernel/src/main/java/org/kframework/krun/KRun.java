@@ -117,8 +117,9 @@ public class KRun {
         }
         Collections.sort(results);
         StringBuilder sb = new StringBuilder();
+        sb.append("Search results:\n\n");
         for (String solution : results) {
-            sb.append("Solution: ").append(i++).append("\n");
+            sb.append("Solution ").append(i++).append(":\n");
             sb.append(solution);
         }
         outputFile(sb.toString(), options);
@@ -212,7 +213,7 @@ public class KRun {
     /**
      * Given a substitution, represented by a map of KVariables to K, print the substitution. The printing follows the following format:
      * If Pattern is represented by a single variable, then entire substitution is printed without the pattern, else
-     * variable is printed, followed by --->, and then the substitution corresponding K.
+     * variable is printed, followed by -->, and then the substitution corresponding K.
      *
      * @param subst         A Map from KVariables to K representing the result of a match of a pattern on a configuration.
      * @param parsedPattern The parsed (not compiled) pattern object. The parsed pattern is used to
@@ -243,8 +244,8 @@ public class KRun {
                     prettyPrint(compiledDefinition, outputModes, print, value);
                     return;
                 }
-                prettyPrint(compiledDefinition, outputModes, print, variable);
-                print.accept("---> \n");
+                print.accept(variable.toString());
+                print.accept(" -->\n");
                 prettyPrint(compiledDefinition, outputModes, print, value);
             }
         }
