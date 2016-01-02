@@ -256,7 +256,6 @@ semantics of the additional KOOL constructs. */
 
 module KOOL-UNTYPED
   imports KOOL-UNTYPED-SYNTAX
-  imports K-IO
 
 /*@ \subsection{Configuration}
 

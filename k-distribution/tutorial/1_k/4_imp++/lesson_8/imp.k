@@ -147,8 +147,6 @@ endmodule
 
 module IMP
   imports IMP-SYNTAX
-  imports K-IO
-
 /*@ \section{Semantics}
 We next give the semantics of IMP++\@.  We start by first defining its
 configuration. */

@@ -244,7 +244,6 @@ endmodule
 
 module SIMPLE-UNTYPED
   imports SIMPLE-UNTYPED-SYNTAX
-  imports K-IO
 
 /*@ \section{Basic Semantic Infrastructure}
 Before one starts adding semantic rules to a \K definition, one needs to
