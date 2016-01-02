@@ -67,6 +67,7 @@ public class ResolveContexts {
     }
 
     private Stream<? extends Sentence> resolve(Context context, Module input) {
+        checkContextValidity(context);
         final SortedMap<KVariable, K> vars = new TreeMap<>((v1, v2) -> v1.name().compareTo(v2.name()));
         K body = context.body();
         K requiresHeat = context.requires();
@@ -85,9 +86,6 @@ public class ResolveContexts {
             }
             @Override
             public void apply(KRewrite k) {
-                if (heated != null) {
-                    throw KEMException.compilerError("Cannot compile a context with multiple rewrites.", context);
-                }
                 heated = k.right();
                 super.apply(k);
             }
@@ -129,5 +127,40 @@ public class ResolveContexts {
         return Stream.of(freezer,
                 Rule(KRewrite(cooled, KSequence(heated, frozen)), requiresHeat, BooleanUtils.TRUE, context.att().add("heat")),
                 Rule(KRewrite(KSequence(heated, frozen), cooled), requiresCool, BooleanUtils.TRUE, context.att().add("cool")));
+    }
+
+    private void checkContextValidity(Context context) {
+        K body = context.body();
+        new VisitK() {
+            int cntHoles = 0;
+            int cntRewrites = 0;
+            public void check(K k) {
+                apply(k);
+                if (cntHoles < 1) {
+                    throw KEMException.compilerError("Contexts must have at least one HOLE.", context);
+                }
+                if (cntRewrites > 1) {
+                    throw KEMException.compilerError("Cannot compile a context with multiple rewrites.", context);
+                }
+            }
+            @Override
+            public void apply(KVariable k) {
+                if (k.name().equals("HOLE")) {
+                    cntHoles++;
+                }
+                super.apply(k);
+            }
+            @Override
+            public void apply(KRewrite k) {
+                cntRewrites++;
+                if (!isHOLE(k.left())) {
+                    throw KEMException.compilerError("Only the HOLE can be rewritten in a context definition", context);
+                }
+                super.apply(k);
+            }
+            private boolean isHOLE(K k) {
+                return k instanceof KVariable && ((KVariable) k).name().equals("HOLE");
+            }
+        }.check(body);
     }
 }
