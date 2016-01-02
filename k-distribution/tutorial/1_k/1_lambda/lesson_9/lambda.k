@@ -62,7 +62,6 @@ require "domains.k"
 require "substitution.k"
 
 module LAMBDA-SYNTAX
-  imports DOMAINS-SYNTAX
 
 /*@ \section{Basic Call-by-value $\lambda$-Calculus}
 
@@ -113,7 +112,6 @@ endmodule
 
 module LAMBDA
   imports LAMBDA-SYNTAX
-  imports DOMAINS
   imports SUBSTITUTION
 
   syntax KResult ::= Val
