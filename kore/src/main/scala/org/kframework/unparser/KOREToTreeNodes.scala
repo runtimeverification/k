@@ -2,12 +2,13 @@ package org.kframework.unparser
 
 import org.kframework.attributes.{Location, Source}
 import org.kframework.builtin.Sorts
-import org.kframework.definition.{RegexTerminal, Module, NonTerminal, Terminal}
+import org.kframework.definition._
 import org.kframework.kore.{KApply, KToken, KVariable, _}
 import org.kframework.parser.{Constant, Term, TermCons}
 import org.pcollections.ConsPStack
 
-import scala.collection.JavaConverters._
+import collection._
+import JavaConverters._
 
 object KOREToTreeNodes {
 
@@ -15,8 +16,12 @@ object KOREToTreeNodes {
 
   def apply(t: K, mod: Module): Term = t match {
     case t: KToken => Constant(t.s, mod.tokenProductionsFor(Sort(t.sort.name)).head, t.att.getOptional[Location]("Location"), t.att.getOptional[Source]("Source"))
-    case a: KApply => TermCons(ConsPStack.from((a.klist.items.asScala map { i:K => apply(i, mod) }).reverse asJava),
-      mod.productionsFor(KLabel(a.klabel.name)).find(_.items.filter(_.isInstanceOf[NonTerminal]).size == a.klist.size).get, t.att.getOptional[Location]("Location"), t.att.getOptional[Source]("Source"))
+    case a: KApply =>
+      val production: Production = mod.productionsFor(KLabel(a.klabel.name)).filter(p => p.items.count(_.isInstanceOf[NonTerminal]) == a.klist.size)
+        .find(p => !p.att.contains("ignoreWhenUnparsing")).get  // TODO: hack for the ugly case when there is more than one production for a KLabel; used only for the backtick bracket and is to be avoided further
+
+      TermCons(ConsPStack.from((a.klist.items.asScala map { i: K => apply(i, mod) }).reverse asJava),
+        production, t.att.getOptional[Location]("Location"), t.att.getOptional[Source]("Source"))
   }
 
   def up(mod: Module)(t: K): K = t match {
@@ -53,7 +58,7 @@ object KOREToTreeNodes {
         case RegexTerminal(_, _, _) => throw new AssertionError("Unimplemented yet")
       }
       if (p.att.contains("format")) {
-        p.att.get[String]("format").get.format(unparsedItems:_*)
+        p.att.get[String]("format").get.format(unparsedItems: _*)
       } else {
         unparsedItems.mkString(" ")
       }
