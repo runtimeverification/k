@@ -19,7 +19,6 @@ import org.kframework.definition.Context;
 import org.kframework.definition.Definition;
 import org.kframework.definition.DefinitionTransformer;
 import org.kframework.definition.Module;
-import org.kframework.definition.ModuleTransformer;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.K;
@@ -27,7 +26,6 @@ import org.kframework.kore.KApply;
 import org.kframework.kore.Sort;
 import org.kframework.kore.compile.AddImplicitComputationCell;
 import org.kframework.kore.compile.ConcretizeCells;
-import org.kframework.kore.compile.GenerateSentencesFromConfigDecl;
 import org.kframework.kore.compile.GenerateSortPredicateSyntax;
 import org.kframework.kore.compile.ResolveAnonVar;
 import org.kframework.kore.compile.ResolveContexts;
@@ -49,7 +47,6 @@ import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
-import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.file.FileUtil;
@@ -68,7 +65,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
-import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -253,7 +249,7 @@ public class Kompile {
             }
         }
 
-        ResolveConfig resolveConfig = new ResolveConfig(definition.getParsedDefinition(), kompileOptions.strict());
+        ResolveConfig resolveConfig = new ResolveConfig(definition.getParsedDefinition(), kompileOptions.strict(), this::parseBubble, this::getParser);
         Module modWithConfig = resolveConfig.apply(module);
 
         gen = new RuleGrammarGenerator(definition.getParsedDefinition(), kompileOptions.strict());
@@ -316,7 +312,7 @@ public class Kompile {
             }
         }
 
-        ResolveConfig resolveConfig = new ResolveConfig(definitionWithConfigBubble, kompileOptions.strict());
+        ResolveConfig resolveConfig = new ResolveConfig(definitionWithConfigBubble, kompileOptions.strict(), this::parseBubble, this::getParser);
         Definition defWithConfig = DefinitionTransformer.from(resolveConfig, "parsing configurations").apply(definitionWithConfigBubble);
 
         gen = new RuleGrammarGenerator(defWithConfig, kompileOptions.strict());
@@ -335,71 +331,6 @@ public class Kompile {
     Map<String, ParseCache> caches;
     java.util.Set<KEMException> errors;
     RuleGrammarGenerator gen;
-
-    class ResolveConfig implements UnaryOperator<Module> {
-        private final Definition def;
-        private final RuleGrammarGenerator gen;
-
-        ResolveConfig(Definition def, boolean isStrict) {
-            this.def = def;
-            this.gen = new RuleGrammarGenerator(def, isStrict);
-        }
-
-        public Module apply(Module inputModule) {
-            if (stream(inputModule.localSentences())
-                    .filter(s -> s instanceof Bubble)
-                    .map(b -> (Bubble) b)
-                    .filter(b -> b.sentenceType().equals("config")).count() == 0)
-                return inputModule;
-
-
-            Set<Sentence> importedConfigurationSortsSubsortedToCell = stream(inputModule.productions())
-                    .filter(p -> p.att().contains("cell"))
-                    .map(p -> Production(Sort("Cell"), Seq(NonTerminal(p.sort())))).collect(Collections.toSet());
-
-            Module module = Module(inputModule.name(), (Set<Module>) inputModule.imports(),
-                    (Set<Sentence>) inputModule.localSentences().$bar(importedConfigurationSortsSubsortedToCell),
-                    inputModule.att());
-
-            Module configParserModule = gen.getConfigGrammar(module);
-
-            ParseCache cache = loadCache(configParserModule);
-            ParseInModule parser = gen.getCombinedGrammar(cache.getModule());
-
-            Set<Sentence> configDeclProductions = stream(module.localSentences())
-                    .parallel()
-                    .filter(s -> s instanceof Bubble)
-                    .map(b -> (Bubble) b)
-                    .filter(b -> b.sentenceType().equals("config"))
-                    .flatMap(b -> performParse(cache.getCache(), parser, b))
-                    .map(contents -> {
-                        KApply configContents = (KApply) contents;
-                        List<K> items = configContents.klist().items();
-                        switch (configContents.klabel().name()) {
-                        case "#ruleNoConditions":
-                            return Configuration(items.get(0), BooleanUtils.TRUE, configContents.att());
-                        case "#ruleEnsures":
-                            return Configuration(items.get(0), items.get(1), configContents.att());
-                        default:
-                            throw KEMException.compilerError("Illegal configuration with requires clause detected.", configContents);
-                        }
-                    })
-                    .flatMap(
-                            configDecl -> stream(GenerateSentencesFromConfigDecl.gen(configDecl.body(), configDecl.ensures(), configDecl.att(), parser.getExtensionModule())))
-                    .collect(Collections.toSet());
-
-            Module mapModule;
-            if (def.getModule("MAP").isDefined()) {
-                mapModule = def.getModule("MAP").get();
-            } else {
-                throw KEMException.compilerError("Module Map must be visible at the configuration declaration, in module " + module.name());
-            }
-            return Module(module.name(), (Set<Module>) module.imports().$bar(Set(mapModule)),
-                    (Set<Sentence>) module.localSentences().$bar(configDeclProductions),
-                    module.att());
-        }
-    }
-
 
     private Module resolveBubbles(Module module) {
         if (stream(module.localSentences())
@@ -503,6 +434,17 @@ public class Kompile {
         if (!_this.leftAssoc().equals(that.leftAssoc())) return false;
         if (!_this.rightAssoc().equals(that.rightAssoc())) return false;
         return _this.sortDeclarations().equals(that.sortDeclarations());
+    }
+
+    private Stream<? extends K> parseBubble(Module configParserModule, Bubble b) {
+        ParseCache cache = loadCache(configParserModule);
+        ParseInModule parser = gen.getCombinedGrammar(cache.getModule());
+        return performParse(cache.getCache(), parser, b);
+    }
+
+    private ParseInModule getParser(Module configParserModule) {
+        ParseCache cache = loadCache(configParserModule);
+        return gen.getCombinedGrammar(cache.getModule());
     }
 
     private Stream<? extends K> performParse(Map<String, ParsedSentence> cache, ParseInModule parser, Bubble b) {
