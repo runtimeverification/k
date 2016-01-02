@@ -158,7 +158,18 @@ public class ResolveContexts {
                 }
                 super.apply(k);
             }
+            // return true when k is either HOLE or #SemanticCastToX(HOLE)
             private boolean isHOLE(K k) {
+                if (k instanceof KApply) {
+                    KApply kapp = (KApply) k;
+                    return kapp.klabel().name().startsWith("#SemanticCastTo") &&
+                            kapp.klist().size() == 1 &&
+                            isHOLEVar(kapp.klist().items().get(0));
+                } else {
+                    return isHOLEVar(k);
+                }
+            }
+            private boolean isHOLEVar(K k) {
                 return k instanceof KVariable && ((KVariable) k).name().equals("HOLE");
             }
         }.check(body);
