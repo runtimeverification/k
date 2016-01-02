@@ -280,7 +280,7 @@ public class Kompile {
                 ListUtils.union(kompileOptions.includes.stream()
                                 .map(files::resolveWorkingDirectory).collect(Collectors.toList()),
                         Lists.newArrayList(BUILTIN_DIRECTORY)),
-                dropQuote);
+                dropQuote, !kompileOptions.noPrelude);
 
         boolean hasConfigDecl = stream(definition.mainModule().sentences())
                 .filter(s -> s instanceof Bubble)

@@ -196,7 +196,7 @@ public class ParserUtils {
             File source,
             File currentDirectory,
             List<File> lookupDirectories,
-            boolean dropQuote) {
+            boolean dropQuote, boolean autoIncludeDomains) {
         Set<Module> modules = loadModules(new HashSet<>(), definitionText, source, currentDirectory, lookupDirectories, dropQuote, autoIncludeDomains);
         Optional<Module> opt = modules.stream().filter(m -> m.name().equals(mainModuleName)).findFirst();
         if (!opt.isPresent()) {
