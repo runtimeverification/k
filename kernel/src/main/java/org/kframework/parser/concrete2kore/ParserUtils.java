@@ -167,7 +167,7 @@ public class ParserUtils {
             File currentDirectory,
             List<File> lookupDirectories,
             boolean dropQuote,
-            boolean autoIncludeDomains) {
+            boolean autoImportDomains) {
 
         List<org.kframework.kil.Module> kilModules =
                 slurp(definitionText, source, currentDirectory, lookupDirectories);
@@ -178,7 +178,7 @@ public class ParserUtils {
         Context context = new Context();
         new CollectProductionsVisitor(context).visitNode(def);
 
-        KILtoKORE kilToKore = new KILtoKORE(context, false, dropQuote, autoIncludeDomains);
+        KILtoKORE kilToKore = new KILtoKORE(context, false, dropQuote, autoImportDomains);
 
         HashMap<String, Module> koreModules = new HashMap<>();
         koreModules.putAll(previousModules.stream().collect(Collectors.toMap(Module::name, m -> m)));
@@ -196,8 +196,8 @@ public class ParserUtils {
             File source,
             File currentDirectory,
             List<File> lookupDirectories,
-            boolean dropQuote, boolean autoIncludeDomains) {
-        Set<Module> modules = loadModules(new HashSet<>(), definitionText, source, currentDirectory, lookupDirectories, dropQuote, autoIncludeDomains);
+            boolean dropQuote, boolean autoImportDomains) {
+        Set<Module> modules = loadModules(new HashSet<>(), definitionText, source, currentDirectory, lookupDirectories, dropQuote, autoImportDomains);
         Optional<Module> opt = modules.stream().filter(m -> m.name().equals(mainModuleName)).findFirst();
         if (!opt.isPresent()) {
             throw KEMException.compilerError("Could not find main module with name " + mainModuleName
