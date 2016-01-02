@@ -12,6 +12,7 @@ module DOMAINS
   imports STRING
   imports BASIC-K
   imports LIST
+  imports K-IO
   imports MAP
   imports SET
 endmodule
