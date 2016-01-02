@@ -1,3 +1,4 @@
+// Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.kompile;
 
 import org.kframework.Collections;
@@ -32,14 +33,12 @@ class ResolveConfig implements UnaryOperator<Module> {
     private final boolean isStrict;
     private final BiFunction<Module, Bubble, Stream<? extends K>> parseBubble;
     private Function<Module, ParseInModule> getParser;
-    private final RuleGrammarGenerator gen;
 
     ResolveConfig(Definition def, boolean isStrict, BiFunction<Module, Bubble, Stream<? extends K>> parseBubble, Function<Module, ParseInModule> getParser) {
         this.def = def;
         this.isStrict = isStrict;
         this.parseBubble = parseBubble;
         this.getParser = getParser;
-        this.gen = new RuleGrammarGenerator(def, isStrict);
     }
 
     public Module apply(Module inputModule) {
@@ -58,15 +57,14 @@ class ResolveConfig implements UnaryOperator<Module> {
                 (Set<Sentence>) inputModule.localSentences().$bar(importedConfigurationSortsSubsortedToCell),
                 inputModule.att());
 
-        Module configParserModule = gen.getConfigGrammar(module);
-        ParseInModule parser = getParser.apply(configParserModule);
+        ParseInModule parser = getParser.apply(module);
 
         Set<Sentence> configDeclProductions = stream(module.localSentences())
                 .parallel()
                 .filter(s -> s instanceof Bubble)
                 .map(b -> (Bubble) b)
                 .filter(b -> b.sentenceType().equals("config"))
-                .flatMap(b -> parseBubble.apply(configParserModule, b))
+                .flatMap(b -> parseBubble.apply(module, b))
                 .map(contents -> {
                     KApply configContents = (KApply) contents;
                     List<K> items = configContents.klist().items();

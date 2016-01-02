@@ -313,6 +313,7 @@ public class Kompile {
         }
 
         ResolveConfig resolveConfig = new ResolveConfig(definitionWithConfigBubble, kompileOptions.strict(), this::parseBubble, this::getParser);
+        gen = new RuleGrammarGenerator(definitionWithConfigBubble, kompileOptions.strict());
         Definition defWithConfig = DefinitionTransformer.from(resolveConfig, "parsing configurations").apply(definitionWithConfigBubble);
 
         gen = new RuleGrammarGenerator(defWithConfig, kompileOptions.strict());
@@ -436,14 +437,14 @@ public class Kompile {
         return _this.sortDeclarations().equals(that.sortDeclarations());
     }
 
-    private Stream<? extends K> parseBubble(Module configParserModule, Bubble b) {
-        ParseCache cache = loadCache(configParserModule);
+    private Stream<? extends K> parseBubble(Module module, Bubble b) {
+        ParseCache cache = loadCache(gen.getConfigGrammar(module));
         ParseInModule parser = gen.getCombinedGrammar(cache.getModule());
         return performParse(cache.getCache(), parser, b);
     }
 
-    private ParseInModule getParser(Module configParserModule) {
-        ParseCache cache = loadCache(configParserModule);
+    private ParseInModule getParser(Module module) {
+        ParseCache cache = loadCache(gen.getConfigGrammar(module));
         return gen.getCombinedGrammar(cache.getModule());
     }
 
