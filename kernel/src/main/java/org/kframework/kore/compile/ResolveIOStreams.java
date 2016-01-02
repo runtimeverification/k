@@ -83,11 +83,23 @@ public class ResolveIOStreams {
             if (s instanceof Production) {
                 Production p = (Production) s;
                 if (p.att().<String>get("stream").isDefined()) {
+                    checkStreamName(p.att().<String>get("stream").get());
                     productions.add(p);
                 }
             }
         }
         return productions;
+    }
+
+    private void checkStreamName(String streamName) {
+        ArrayList<String> streams = new ArrayList<String>();
+        streams.add("stdin");
+        streams.add("stdout");
+
+        if (!streams.contains(streamName)) {
+            throw KEMException.compilerError("Make sure you give the correct stream names: " + streamName +
+                    "\nIt should be one of " + streams.toString());
+        }
     }
 
     private Sentence resolveInitRule(Production p, Sentence s) {
