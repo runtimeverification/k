@@ -7,8 +7,6 @@
 \organization{University of Illinois at Urbana-Champaign}
 */
 
-require "domains.k"
-
 /*@ \section{Abstract}
 This file contains an environment-based \K semantic definition of LAMBDA++, an
 extension of the LAMBDA language (defined in Tutorial 1) with a \texttt{callcc}

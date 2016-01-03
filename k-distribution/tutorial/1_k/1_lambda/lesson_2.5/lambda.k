@@ -1,5 +1,4 @@
 // Copyright (c) 2013-2015 K Team. All Rights Reserved.
-require "domains.k"
 require "substitution.k"
 
 module LAMBDA

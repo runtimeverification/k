@@ -1,6 +1,4 @@
 // Copyright (c) 2012-2015 K Team. All Rights Reserved.
-require "domains.k"
-
 module LAMBDA
   syntax Exp ::= Id
                | "lambda" Id "." Exp  [latex(\lambda{#1}.{#2})]

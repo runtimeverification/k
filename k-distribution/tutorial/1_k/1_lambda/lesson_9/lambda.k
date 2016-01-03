@@ -58,7 +58,6 @@ color conventional C-like comments; or (2) Run the \K pre-processor
 We need the predefined substitution module, so we require it with the command
 below.  Then we should make sure that we import its module called SUBSTITUTION
 in our LAMBDA module below. */
-require "domains.k"
 require "substitution.k"
 
 module LAMBDA
