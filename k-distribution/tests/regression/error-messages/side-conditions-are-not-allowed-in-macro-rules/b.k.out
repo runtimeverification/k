@@ -1,0 +1,2 @@
+[Error] Compiler: Side conditions are not allowed in macro rules. If you are
+typing a variable, use ::.
