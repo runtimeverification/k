@@ -144,7 +144,10 @@ public class DefinitionParsing {
                 ListUtils.union(lookupDirectories.stream().map(files::resolveWorkingDirectory).collect(Collectors.toList()),
                         Lists.newArrayList(Kompile.BUILTIN_DIRECTORY)),
                 dropQuote);
+        return definition;
+    }
 
+    protected Definition resolveAllBubbles(Definition definition) {
         boolean hasConfigDecl = stream(definition.mainModule().sentences())
                 .filter(s -> s instanceof Bubble)
                 .map(b -> (Bubble) b)

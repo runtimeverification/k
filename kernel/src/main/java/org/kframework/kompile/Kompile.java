@@ -118,7 +118,9 @@ public class Kompile {
     }
 
     public Definition parseDefinition(File definitionFile, String mainModuleName, String mainProgramsModule, boolean dropQuote) {
-        return definitionParsing.parseDefinition(definitionFile, mainModuleName, mainProgramsModule, dropQuote);
+        Definition parsedDefinition = definitionParsing.parseDefinition(definitionFile, mainModuleName, mainProgramsModule, dropQuote);
+        Definition afterResolvingBubbles = definitionParsing.resolveAllBubbles(parsedDefinition);
+        return afterResolvingBubbles;
     }
 
     public Definition resolveIOStreams(Definition d) {
