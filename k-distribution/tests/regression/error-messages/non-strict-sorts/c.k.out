@@ -1,0 +1,4 @@
+[Error] Compiler: Expecting a number between 1 and 1, but found a as a strict
+position in [a]
+	Source(./c.k)
+	Location(22,18,22,35)
