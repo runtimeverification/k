@@ -1,4 +1,5 @@
-Solution: 0
-V
----> 
-` ` int -> _513 ` = ` bool -> _656 ` ` ~> _656 ~> #freezer13 ( _513 , _513 ) ~> tenv ( x |-> ` int -> _513 ` ) ~> ` ` int -> _513 ` -> _473 ` ~> tenv ( .Map )
+Search results:
+
+Solution 1:
+V:K -->
+( ( bool -> V0 ) = ( int -> V1 ) ) ~> V1 ~> #freezer8 ( V0 , f 2 ) ~> tenv ( x |-> ( bool -> V0 ) ) ~> ( bool -> V0 ) ~> tenv ( .Map )
