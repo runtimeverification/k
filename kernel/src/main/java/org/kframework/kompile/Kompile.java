@@ -1,3 +1,4 @@
+// Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.kompile;
 
 import com.google.inject.Inject;
@@ -46,6 +47,10 @@ import static org.kframework.Collections.*;
 import static org.kframework.definition.Constructors.*;
 import static scala.compat.java8.JFunction.func;
 
+/**
+ * The new compilation pipeline. Everything is just wired together and will need clean-up once we deside on design.
+ * Tracked by #1442.
+ */
 public class Kompile {
     public static final File BUILTIN_DIRECTORY = JarInfo.getKIncludeDir().resolve("builtin").toFile();
     public static final String REQUIRE_PRELUDE_K = "requires \"prelude.k\"\n";
@@ -55,7 +60,7 @@ public class Kompile {
     private final KExceptionManager kem;
     private final ParserUtils parser;
     private final Stopwatch sw;
-    private final BubbleParsing bubbleParsing;
+    private final DefinitionParsing definitionParsing;
     java.util.Set<KEMException> errors;
 
     public Kompile(KompileOptions kompileOptions, FileUtil files, KExceptionManager kem, Stopwatch sw, boolean cacheParses) {
@@ -80,7 +85,7 @@ public class Kompile {
         this.files = files;
         this.kem = kem;
         this.parser = new ParserUtils(files, kem, global);
-        this.bubbleParsing = new BubbleParsing(kompileOptions, files, kem, parser, cacheParses);
+        this.definitionParsing = new DefinitionParsing(kompileOptions, files, kem, parser, cacheParses);
         this.sw = sw;
     }
 
@@ -99,7 +104,7 @@ public class Kompile {
      */
     public CompiledDefinition run(File definitionFile, String mainModuleName, String mainProgramsModuleName, Sort programStartSymbol, Function<Definition, Definition> pipeline) {
         Definition parsedDef = parseDefinition(definitionFile, mainModuleName, mainProgramsModuleName, true);
-        sw.printIntermediate("Parse definition [" + bubbleParsing.parsedBubbles.get() + "/" + (bubbleParsing.parsedBubbles.get() + bubbleParsing.cachedBubbles.get()) + " rules]");
+        sw.printIntermediate("Parse definition [" + definitionParsing.parsedBubbles.get() + "/" + (definitionParsing.parsedBubbles.get() + definitionParsing.cachedBubbles.get()) + " rules]");
 
         checkDefinition(parsedDef);
 
@@ -112,7 +117,7 @@ public class Kompile {
     }
 
     public Definition parseDefinition(File definitionFile, String mainModuleName, String mainProgramsModule, boolean dropQuote) {
-        return bubbleParsing.parseDefinition(definitionFile, mainModuleName, mainProgramsModule, dropQuote);
+        return definitionParsing.parseDefinition(definitionFile, mainModuleName, mainProgramsModule, dropQuote);
     }
 
     public Definition resolveIOStreams(Definition d) {
@@ -149,7 +154,7 @@ public class Kompile {
     }
 
     public Rule parseRule(CompiledDefinition compiledDef, String contents, Source source) {
-        return bubbleParsing.parseRule(compiledDef, contents, source);
+        return definitionParsing.parseRule(compiledDef, contents, source);
     }
 
     private void checkDefinition(Definition parsedDef) {
@@ -195,7 +200,7 @@ public class Kompile {
     }
 
     public Module parseModule(CompiledDefinition definition, File definitionFile, boolean dropQuote) {
-        return bubbleParsing.parseModule(definition, definitionFile, dropQuote);
+        return definitionParsing.parseModule(definition, definitionFile, dropQuote);
     }
 
     private Sentence concretizeSentence(Sentence s, Definition input) {

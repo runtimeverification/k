@@ -12,7 +12,7 @@ import org.kframework.attributes.Source;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.definition.RegexTerminal;
-import org.kframework.kompile.BubbleParsing;
+import org.kframework.kompile.DefinitionParsing;
 import org.kframework.kompile.Kompile;
 import org.kframework.kore.K;
 import org.kframework.kore.Sort;
@@ -32,7 +32,7 @@ import java.util.Set;
 import static org.kframework.kore.KORE.*;
 
 public class RuleGrammarTest {
-    private final static Sort startSymbol = BubbleParsing.START_SYMBOL;
+    private final static Sort startSymbol = DefinitionParsing.START_SYMBOL;
     private RuleGrammarGenerator gen;
 
     @Before

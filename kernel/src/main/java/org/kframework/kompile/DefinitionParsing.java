@@ -51,11 +51,11 @@ import static org.kframework.definition.Constructors.*;
 import static org.kframework.kore.KORE.*;
 
 /**
- * The new compilation pipeline. Everything is just wired together and will need clean-up once we deside on design.
- * Tracked by #1442.
+ * A bundle of code doing various aspects of definition parsing.
+ * TODO: In major need of refactoring.
+ * @cos refactored this code out of Kompile but none (or close to none) of it was originally written by him.
  */
-
-public class BubbleParsing {
+public class DefinitionParsing {
     public static final Sort START_SYMBOL = Sort("RuleContent");
 
     public final KompileOptions kompileOptions;
@@ -69,7 +69,7 @@ public class BubbleParsing {
     public final AtomicInteger parsedBubbles = new AtomicInteger(0);
     public final AtomicInteger cachedBubbles = new AtomicInteger(0);
 
-    public BubbleParsing(KompileOptions kompileOptions, FileUtil files, KExceptionManager kem, ParserUtils parser, boolean cacheParses) {
+    public DefinitionParsing(KompileOptions kompileOptions, FileUtil files, KExceptionManager kem, ParserUtils parser, boolean cacheParses) {
         this.kompileOptions = kompileOptions;
         this.files = files;
         this.kem = kem;
