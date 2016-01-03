@@ -1,0 +1,20 @@
+// Copyright (c) 2015 K Team. All Rights Reserved.
+require "domains.k"
+
+module B-SYNTAX
+    syntax Pgm ::= "run"
+endmodule
+
+module B
+    imports B-SYNTAX
+
+    configuration <T>
+        <k> $PGM:Pgm </k>
+        <a> $XA:Int </a>
+        <b> $XB:Int </b>
+        <in stream="stdin"> .List </in>
+    </T>
+
+    rule run => 0
+
+endmodule
