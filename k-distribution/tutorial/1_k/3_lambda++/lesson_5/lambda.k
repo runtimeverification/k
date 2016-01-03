@@ -2,8 +2,6 @@
 require "domains.k"
 
 module LAMBDA
-  imports DOMAINS-SYNTAX
-  imports DOMAINS
   syntax Exp ::= Id
                | "lambda" Id "." Exp  [latex(\lambda{#1}.{#2})]
                | Exp Exp              [strict, left]

@@ -2,8 +2,6 @@
 require "domains.k"
 
 module LAMBDA
-  imports DOMAINS-SYNTAX
-
   syntax Val ::= Id
                | "lambda" Id "." Exp
   syntax Exp ::= Val

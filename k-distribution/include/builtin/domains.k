@@ -9,6 +9,7 @@ module DOMAINS-SYNTAX
 endmodule
 
 module DOMAINS
+  imports DOMAINS-SYNTAX
   imports INT
   imports BOOL
   imports STRING

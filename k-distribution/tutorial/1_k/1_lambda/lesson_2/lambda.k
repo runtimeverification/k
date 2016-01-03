@@ -3,8 +3,6 @@ require "domains.k"
 require "substitution.k"
 
 module LAMBDA
-  imports DOMAINS-SYNTAX
-  imports DOMAINS
   imports SUBSTITUTION
 
   syntax Val ::= Id
