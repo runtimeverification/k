@@ -12,7 +12,6 @@ module B
         <k> $PGM:Pgm </k>
         <a> $XA:Int </a>
         <b> $XB:Int </b>
-        <in stream="stdin"> .List </in>
     </T>
 
     rule run => 0

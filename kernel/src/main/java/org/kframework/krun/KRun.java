@@ -287,7 +287,9 @@ public class KRun {
 
         for (KToken inputConfigVar : inputConfigVars) {
             if (!defConfigVars.contains(inputConfigVar)) {
-                kem.registerCompilerWarning("User specified configuration variable " + inputConfigVar.s() + " which does not exist.");
+                if (!inputConfigVar.s().equals("$STDIN") && !inputConfigVar.s().equals("$IO")) {
+                    kem.registerCompilerWarning("User specified configuration variable " + inputConfigVar.s() + " which does not exist.");
+                }
             }
         }
     }
