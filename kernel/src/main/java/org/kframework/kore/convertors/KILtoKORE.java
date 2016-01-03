@@ -23,6 +23,7 @@ import org.kframework.kore.KSequence;
 import org.kframework.kore.KToken;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import scala.Enumeration.Value;
 import scala.Tuple2;
@@ -39,9 +40,7 @@ import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static org.kframework.Collections.Seq;
-import static org.kframework.Collections.Set;
-import static org.kframework.Collections.immutable;
+import static org.kframework.Collections.*;
 import static org.kframework.definition.Constructors.*;
 import static org.kframework.kore.KORE.*;
 
@@ -95,6 +94,13 @@ public class KILtoKORE extends KILTransformation<Object> {
 
     public org.kframework.definition.Module apply(Module mainModule, Set<Module> allKilModules,
                                                   Map<String, org.kframework.definition.Module> koreModules) {
+        return apply(mainModule, allKilModules, koreModules, Seq());
+    }
+
+    private org.kframework.definition.Module apply(Module mainModule, Set<Module> allKilModules,
+                                                  Map<String, org.kframework.definition.Module> koreModules,
+                                                  scala.collection.Seq<Module> visitedModules) {
+        checkCircularModuleImports(mainModule, visitedModules);
         Set<org.kframework.definition.Sentence> items = mainModule.getItems().stream()
                 .filter(j -> !(j instanceof org.kframework.kil.Import))
                 .flatMap(j -> apply(j).stream()).collect(Collectors.toSet());
@@ -122,7 +128,7 @@ public class KILtoKORE extends KILTransformation<Object> {
                         Module mod = theModule.get();
                         org.kframework.definition.Module result = koreModules.get(mod.getName());
                         if (result == null) {
-                            result = apply(mod, allKilModules, koreModules);
+                            result = apply(mod, allKilModules, koreModules, cons(mainModule, visitedModules));
                         }
                         return result;
                     } else if (koreModules.containsKey(imp.getName())) {
@@ -136,6 +142,17 @@ public class KILtoKORE extends KILTransformation<Object> {
                 inner.convertAttributes(mainModule));
         koreModules.put(newModule.name(), newModule);
         return newModule;
+    }
+
+    private static void checkCircularModuleImports(Module mainModule, scala.collection.Seq<Module> visitedModules) {
+        if (visitedModules.contains(mainModule)) {
+            String msg = "Found circularity in module imports: ";
+            for (Module m : mutable(visitedModules)) { // JavaConversions.seqAsJavaList(visitedModules)
+                msg += m.getName() + " < ";
+            }
+            msg += visitedModules.head().getName();
+            throw KEMException.compilerError(msg);
+        }
     }
 
     @SuppressWarnings("unchecked")

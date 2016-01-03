@@ -90,5 +90,10 @@
            programs="kore-context/tests"
            results="kore-context/tests" />
 
+  <include file     ="error-messages/config.xml"
+           directory="error-messages"
+           programs ="error-messages"
+           results  ="error-messages" />
+
 </tests>
 
