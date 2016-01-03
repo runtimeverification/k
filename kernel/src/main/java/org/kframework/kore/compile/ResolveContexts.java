@@ -10,6 +10,7 @@ import org.kframework.definition.Production;
 import org.kframework.definition.ProductionItem;
 import org.kframework.definition.Sentence;
 import org.kframework.kompile.KompileOptions;
+import org.kframework.kore.FindK;
 import org.kframework.kore.VisitK;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -129,30 +130,46 @@ public class ResolveContexts {
                 Rule(KRewrite(KSequence(heated, frozen), cooled), requiresCool, BooleanUtils.TRUE, context.att().add("cool")));
     }
 
-    private void checkContextValidity(Context context) {
+    /**
+     * Check validity of context.
+     *
+     * Currently the following conditions are checked:
+     * - Contexts must have at least one HOLE.
+     * - Contexts must have a single rewrite.
+     * - Only the HOLE can be rewritten in a context definition.
+     *
+     * @param context to be checked
+     */
+    public static void checkContextValidity(Context context) {
         K body = context.body();
-        new VisitK() {
-            int cntHoles = 0;
-            int cntRewrites = 0;
-            public void check(K k) {
-                apply(k);
-                if (cntHoles < 1) {
-                    throw KEMException.compilerError("Contexts must have at least one HOLE.", context);
-                }
-                if (cntRewrites > 1) {
-                    throw KEMException.compilerError("Cannot compile a context with multiple rewrites.", context);
-                }
-            }
+
+        int cntHoles = new FindK() {
             @Override
-            public void apply(KVariable k) {
+            public scala.collection.Set<K> apply(KVariable k) {
                 if (k.name().equals("HOLE")) {
-                    cntHoles++;
+                    return org.kframework.Collections.Set(k);
+                } else {
+                    return super.apply(k);
                 }
-                super.apply(k);
             }
+        }.apply(body).size();
+        if (cntHoles < 1) {
+            throw KEMException.compilerError("Contexts must have at least one HOLE.", context);
+        }
+
+        int cntRewrites = new FindK() {
+            @Override
+            public scala.collection.Set<K> apply(KRewrite k) {
+                return this.merge(org.kframework.Collections.Set(k), super.apply(k));
+            }
+        }.apply(body).size();
+        if (cntRewrites > 1) {
+            throw KEMException.compilerError("Cannot compile a context with multiple rewrites.", context);
+        }
+
+        new VisitK() {
             @Override
             public void apply(KRewrite k) {
-                cntRewrites++;
                 if (!isHOLE(k.left())) {
                     throw KEMException.compilerError("Only the HOLE can be rewritten in a context definition", context);
                 }
@@ -172,6 +189,6 @@ public class ResolveContexts {
             private boolean isHOLEVar(K k) {
                 return k instanceof KVariable && ((KVariable) k).name().equals("HOLE");
             }
-        }.check(body);
+        }.apply(body);
     }
 }
