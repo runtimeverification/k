@@ -133,7 +133,6 @@ those were all borrowed from SIMPLE. */
 require "domains.k"
 
 module KOOL-UNTYPED-SYNTAX
-  imports DOMAINS-SYNTAX
 
 /*@ \section{Syntax}
 
@@ -257,7 +256,6 @@ semantics of the additional KOOL constructs. */
 
 module KOOL-UNTYPED
   imports KOOL-UNTYPED-SYNTAX
-  imports DOMAINS
 
 /*@ \subsection{Configuration}
 
@@ -903,7 +901,7 @@ invocations see the entire object, as needed for dynamic method dispatch. */
     => lookupMember(<envStack> ListItem((Class,EnvC)) EStack </envStack>, X)
     [structural]
   rule objectClosure(<crntClass> Class:Id </crntClass>
-                     <envStack> ListItem((Class':Id,_)) => .List ...</envStack>)
+                     <envStack> ListItem((Class':Id,_::EnvCell)) => .List ...</envStack>)
        . X:Id
     when Class =/=K Class'  [structural]
 
@@ -913,11 +911,11 @@ invocations see the entire object, as needed for dynamic method dispatch. */
     [structural]*/
   rule <k> super . X => lookupMember(<envStack>EStack</envStack>, X) ...</k>
        <crntClass> Class:Id </crntClass>
-       <envStack> ListItem((Class,_)) EStack </envStack>
+       <envStack> ListItem((Class,_::EnvCell)) EStack </envStack>
     [structural]
   rule <k> super . X ...</k>
        <crntClass> Class </crntClass>
-       <envStack> ListItem((Class':Id,_)) => .List ...</envStack>
+       <envStack> ListItem((Class':Id,_::EnvCell)) => .List ...</envStack>
     when Class =/=K Class'  [structural]
 
 /*@\subsubsection{Method invocation}
@@ -958,16 +956,16 @@ method call or the array access.  */
 /*  rule <k> (super . X
             => lookupMember(<envStack>EStack</envStack>,X))(_:Exps)...</k>
        <crntClass> Class </crntClass>
-       <envStack>... (Class,_) EStack </envStack>
+       <envStack>... (Class,_::EnvCell) EStack </envStack>
     [structural]*/
   rule <k> (super . X
             => lookupMember(<envStack>EStack</envStack>,X))(_:Exps)...</k>
        <crntClass> Class </crntClass>
-       <envStack> ListItem((Class,_)) EStack </envStack>
+       <envStack> ListItem((Class,_::EnvCell)) EStack </envStack>
     [structural]
   rule <k> (super . X)(_:Exps) ...</k>
        <crntClass> Class </crntClass>
-       <envStack> ListItem((Class':Id,_)) => .List ...</envStack>
+       <envStack> ListItem((Class':Id,_::EnvCell)) => .List ...</envStack>
     when Class =/=K Class'  [structural]
 
   // TODO(KORE): fix getKLabel #1801 and context issue #1802
@@ -999,10 +997,10 @@ desired class.  It returns \texttt{true} iff it can find the class,
 otherwise it returns \texttt{false}; it only gets stuck when its first
 argument does not evaluate to an object.  */
 
-  rule objectClosure(<envStack> ListItem((C,_)) ...</envStack> _)
+  rule objectClosure(<envStack> ListItem((C,_::EnvCell)) ...</envStack> _)
        instanceOf C => true
 
-  rule objectClosure(<envStack> ListItem((C::Id,_)) => .List ...</envStack> _)
+  rule objectClosure(<envStack> ListItem((C,_::EnvCell)) => .List ...</envStack> _)
        instanceOf C'  when C =/=K C'  [structural]
 //TODO: remove the sort cast ::Id of C above, when sort inference bug fixed
 
@@ -1056,7 +1054,7 @@ member's location based on the current class of the object. */
               => lookupMember(<envStack> ListItem((Class,EnvC)) EStack </envStack>,
                               X))  [structural]
   rule lvalue(objectClosure(<crntClass> Class </crntClass>
-                            <envStack> ListItem((Class':Id,_)) => .List ...</envStack>)
+                            <envStack> ListItem((Class':Id,_::EnvCell)) => .List ...</envStack>)
               . X)
     when Class =/=K Class'  [structural]
 

@@ -91,7 +91,7 @@ public class Kompile {
         List<File> lookupDirectories = kompileOptions.includes.stream().map(files::resolveWorkingDirectory).collect(Collectors.toList());
         this.definitionParsing = new DefinitionParsing(
                 lookupDirectories, kompileOptions.strict(), kompileOptions.noPrelude, kem,
-                parser, cacheParses, files.resolveKompiled("cache.bin"));
+                parser, cacheParses, files.resolveKompiled("cache.bin"), !kompileOptions.noPrelude);
         this.sw = sw;
     }
 
@@ -130,7 +130,7 @@ public class Kompile {
     }
 
     public Definition resolveIOStreams(Definition d) {
-        return DefinitionTransformer.from(new ResolveIOStreams(d)::resolve, "resolving io streams").apply(d);
+        return DefinitionTransformer.from(new ResolveIOStreams(d, kem)::resolve, "resolving io streams").apply(d);
     }
 
     public Function<Definition, Definition> defaultSteps() {
@@ -209,7 +209,7 @@ public class Kompile {
     }
 
     public Module parseModule(CompiledDefinition definition, File definitionFile, boolean dropQuote) throws IOException {
-        return definitionParsing.parseModule(definition, definitionFile, dropQuote);
+        return definitionParsing.parseModule(definition, definitionFile, dropQuote, !kompileOptions.noPrelude);
     }
 
     private Sentence concretizeSentence(Sentence s, Definition input) {

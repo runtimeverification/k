@@ -49,12 +49,14 @@ public class KILtoKORE extends KILTransformation<Object> {
 
     private org.kframework.kil.loader.Context context;
     private final boolean doDropQuote;
+    private boolean autoImportDomains;
     private KILtoInnerKORE inner;
     private final boolean syntactic;
 
-    public KILtoKORE(org.kframework.kil.loader.Context context, boolean syntactic, boolean doDropQuote) {
+    public KILtoKORE(org.kframework.kil.loader.Context context, boolean syntactic, boolean doDropQuote, boolean autoImportDomains) {
         this.context = context;
         this.doDropQuote = doDropQuote;
+        this.autoImportDomains = autoImportDomains;
         inner = new KILtoInnerKORE(context, doDropQuote);
         this.syntactic = syntactic;
     }
@@ -101,6 +103,15 @@ public class KILtoKORE extends KILTransformation<Object> {
                 .filter(imp -> imp instanceof Import)
                 .map(imp -> (Import) imp)
                 .collect(Collectors.toSet());
+
+        boolean isPredefined = mainModule.getSource().source().contains("builtin");
+        if (autoImportDomains && !isPredefined) {
+            if (mainModule.getName().endsWith("-SYNTAX")) {
+                importedModuleNames.add(new Import("DOMAINS-SYNTAX"));
+            } else {
+                importedModuleNames.add(new Import("DOMAINS"));
+            }
+        }
 
         Set<org.kframework.definition.Module> importedModules = importedModuleNames.stream()
                 .map(imp -> {
@@ -235,14 +246,14 @@ public class KILtoKORE extends KILTransformation<Object> {
     public Value applyAssoc(String assocOrig) {
         // "left", "right", "non-assoc"
         switch (assocOrig) {
-            case "left":
-                return Associativity.Left();
-            case "right":
-                return Associativity.Right();
-            case "non-assoc":
-                return Associativity.NonAssoc();
-            default:
-                throw new AssertionError("Incorrect assoc string: " + assocOrig);
+        case "left":
+            return Associativity.Left();
+        case "right":
+            return Associativity.Right();
+        case "non-assoc":
+            return Associativity.NonAssoc();
+        default:
+            throw new AssertionError("Incorrect assoc string: " + assocOrig);
         }
     }
 
@@ -367,7 +378,7 @@ public class KILtoKORE extends KILTransformation<Object> {
         String follow = "#";
         int followIndex = regex.lastIndexOf("(?!");
         if (followIndex != -1 && regex.endsWith(")")) { // find the follow pattern at the end: (?!X)
-            if (!(followIndex > 0 && regex.charAt(followIndex-1) == '\\')) {
+            if (!(followIndex > 0 && regex.charAt(followIndex - 1) == '\\')) {
                 follow = regex.substring(followIndex + "(?!".length(), regex.length() - 1);
                 regex = regex.substring(0, followIndex);
             }

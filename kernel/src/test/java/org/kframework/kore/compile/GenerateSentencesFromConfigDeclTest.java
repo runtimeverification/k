@@ -5,15 +5,12 @@ import com.google.common.collect.Lists;
 import org.junit.Before;
 import org.junit.Test;
 import org.kframework.attributes.Att;
-import org.kframework.attributes.Source;
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.KLabels;
-import org.kframework.builtin.Labels;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.definition.Sentence;
-import org.kframework.definition.Terminal;
 import org.kframework.kil.Attribute;
 import org.kframework.kompile.Kompile;
 import org.kframework.kore.K;
@@ -55,7 +52,7 @@ public class GenerateSentencesFromConfigDeclTest {
                         definitionFile,
                         definitionFile.getParentFile(),
                         Lists.newArrayList(Kompile.BUILTIN_DIRECTORY),
-                        true);
+                        true, false);
     }
 
     @Test

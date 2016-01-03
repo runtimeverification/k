@@ -3,7 +3,6 @@
 require "domains.k"
 
 module LAMBDA-SYNTAX
-  imports DOMAINS-SYNTAX
 
   syntax Exp ::= Id
                | "lambda" Id "." Exp  [latex(\lambda{#1}.{#2})]
@@ -26,7 +25,6 @@ endmodule
 
 module LAMBDA
   imports LAMBDA-SYNTAX
-  imports DOMAINS
 
   configuration <T>
                   <k> $PGM:Exp </k>

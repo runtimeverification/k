@@ -61,11 +61,11 @@ public class KoreUtils {
         return new File(KoreUtils.class.getResource(baseName).toURI());
     }
 
-    public KoreUtils(String fileName, String mainModuleName, String mainProgramsModuleName) throws URISyntaxException, IOException {
-        this(fileName, mainModuleName, mainProgramsModuleName, false, Sorts.K(), false);
+    public KoreUtils(String fileName, String mainModuleName, String mainProgramsModuleName, boolean noPrelude) throws URISyntaxException, IOException {
+        this(fileName, mainModuleName, mainProgramsModuleName, false, Sorts.K(), false, noPrelude);
     }
 
-    public KoreUtils(String fileName, String mainModuleName, String mainProgramsModuleName, boolean search, Sort sort, boolean heatCoolStrategies) throws URISyntaxException, IOException {
+    public KoreUtils(String fileName, String mainModuleName, String mainProgramsModuleName, boolean search, Sort sort, boolean heatCoolStrategies, boolean noPrelude) throws URISyntaxException, IOException {
         kem = new KExceptionManager(new GlobalOptions());
         File definitionFile = testResource(fileName);
         KompileOptions kompileOptions = new KompileOptions();
@@ -74,6 +74,7 @@ public class KoreUtils {
         globalOptions.warnings = GlobalOptions.Warnings.ALL;
 
         kompileOptions.experimental.heatCoolStrategies = heatCoolStrategies;
+        kompileOptions.noPrelude = noPrelude;
 
         KRunOptions krunOptions = new KRunOptions();
         krunOptions.search = search;

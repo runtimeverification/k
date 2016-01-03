@@ -31,7 +31,7 @@ public class TstBackendOnKORE_IT {
     @Test
     public void kore_imp() throws IOException, URISyntaxException {
         String filename = "/convertor-tests/" + name.getMethodName() + ".k";
-        KoreUtils utils = new KoreUtils(filename, "IMP", "IMP-SYNTAX");
+        KoreUtils utils = new KoreUtils(filename, "IMP", "IMP-SYNTAX", false);
 
         String pgm = "int s, n; n = 10; while(0<=n) { s = s + n; n = n + -1; }";
 
@@ -48,7 +48,7 @@ public class TstBackendOnKORE_IT {
     @Test
     public void kore_varlabel() throws IOException, URISyntaxException {
         String filename = "/convertor-tests/" + name.getMethodName() + ".k";
-        KoreUtils utils = new KoreUtils(filename, "VARLABEL", "VARLABEL-SYNTAX");
+        KoreUtils utils = new KoreUtils(filename, "VARLABEL", "VARLABEL-SYNTAX", false);
 
         String pgm = "holder(1 +1)";
 

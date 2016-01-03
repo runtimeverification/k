@@ -57,6 +57,7 @@ import static org.kframework.kore.KORE.*;
 public class DefinitionParsing {
     public static final Sort START_SYMBOL = Sort("RuleContent");
     private final File cacheFile;
+    private boolean autoImportDomains;
 
     private boolean noPrelude;
     private final KExceptionManager kem;
@@ -76,25 +77,27 @@ public class DefinitionParsing {
             KExceptionManager kem,
             ParserUtils parser,
             boolean cacheParses,
-            File cacheFile) {
+            File cacheFile,
+            boolean autoImportDomains) {
         this.lookupDirectories = lookupDirectories;
         this.noPrelude = noPrelude;
         this.kem = kem;
         this.parser = parser;
         this.cacheParses = cacheParses;
         this.cacheFile = cacheFile;
+        this.autoImportDomains = autoImportDomains;
         this.loader = new BinaryLoader(this.kem);
         this.isStrict = isStrict;
     }
 
-    public Module parseModule(CompiledDefinition definition, File definitionFile, boolean dropQuote) throws IOException {
+    public Module parseModule(CompiledDefinition definition, File definitionFile, boolean dropQuote, boolean autoImportDomains) throws IOException {
         java.util.Set<Module> modules = parser.loadModules(
                 mutable(definition.getParsedDefinition().modules()),
                 "require " + StringUtil.enquoteCString(definitionFile.getPath()),
                 Source.apply(definitionFile.getAbsolutePath()),
                 definitionFile.getParentFile(),
                 Lists.newArrayList(Kompile.BUILTIN_DIRECTORY),
-                dropQuote);
+                dropQuote, autoImportDomains);
 
         if (modules.size() != 1) {
             throw KEMException.compilerError("Expected to find a file with 1 module: found " + modules.size() + " instead.");
@@ -142,7 +145,7 @@ public class DefinitionParsing {
                 definitionFile.getParentFile(),
                 ListUtils.union(lookupDirectories,
                         Lists.newArrayList(Kompile.BUILTIN_DIRECTORY)),
-                dropQuote);
+                dropQuote, autoImportDomains);
         return definition;
     }
 
