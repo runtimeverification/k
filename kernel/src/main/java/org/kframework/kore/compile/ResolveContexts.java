@@ -130,7 +130,17 @@ public class ResolveContexts {
                 Rule(KRewrite(KSequence(heated, frozen), cooled), requiresCool, BooleanUtils.TRUE, context.att().add("cool")));
     }
 
-    private void checkContextValidity(Context context) {
+    /**
+     * Check validity of context.
+     *
+     * Currently the following conditions are checked:
+     * - Contexts must have at least one HOLE.
+     * - Contexts must have a single rewrite.
+     * - Only the HOLE can be rewritten in a context definition.
+     *
+     * @param context to be checked
+     */
+    public static void checkContextValidity(Context context) {
         K body = context.body();
 
         int cntHoles = new FindK() {
