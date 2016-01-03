@@ -10,6 +10,7 @@ import org.kframework.definition.Production;
 import org.kframework.definition.ProductionItem;
 import org.kframework.definition.Sentence;
 import org.kframework.kompile.KompileOptions;
+import org.kframework.kore.FindK;
 import org.kframework.kore.VisitK;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -67,6 +68,7 @@ public class ResolveContexts {
     }
 
     private Stream<? extends Sentence> resolve(Context context, Module input) {
+        checkContextValidity(context);
         final SortedMap<KVariable, K> vars = new TreeMap<>((v1, v2) -> v1.name().compareTo(v2.name()));
         K body = context.body();
         K requiresHeat = context.requires();
@@ -85,9 +87,6 @@ public class ResolveContexts {
             }
             @Override
             public void apply(KRewrite k) {
-                if (heated != null) {
-                    throw KEMException.compilerError("Cannot compile a context with multiple rewrites.", context);
-                }
                 heated = k.right();
                 super.apply(k);
             }
@@ -129,5 +128,67 @@ public class ResolveContexts {
         return Stream.of(freezer,
                 Rule(KRewrite(cooled, KSequence(heated, frozen)), requiresHeat, BooleanUtils.TRUE, context.att().add("heat")),
                 Rule(KRewrite(KSequence(heated, frozen), cooled), requiresCool, BooleanUtils.TRUE, context.att().add("cool")));
+    }
+
+    /**
+     * Check validity of context.
+     *
+     * Currently the following conditions are checked:
+     * - Contexts must have at least one HOLE.
+     * - Contexts must have a single rewrite.
+     * - Only the HOLE can be rewritten in a context definition.
+     *
+     * @param context to be checked
+     */
+    public static void checkContextValidity(Context context) {
+        K body = context.body();
+
+        int cntHoles = new FindK() {
+            @Override
+            public scala.collection.Set<K> apply(KVariable k) {
+                if (k.name().equals("HOLE")) {
+                    return org.kframework.Collections.Set(k);
+                } else {
+                    return super.apply(k);
+                }
+            }
+        }.apply(body).size();
+        if (cntHoles < 1) {
+            throw KEMException.compilerError("Contexts must have at least one HOLE.", context);
+        }
+
+        int cntRewrites = new FindK() {
+            @Override
+            public scala.collection.Set<K> apply(KRewrite k) {
+                return this.merge(org.kframework.Collections.Set(k), super.apply(k));
+            }
+        }.apply(body).size();
+        if (cntRewrites > 1) {
+            throw KEMException.compilerError("Cannot compile a context with multiple rewrites.", context);
+        }
+
+        new VisitK() {
+            @Override
+            public void apply(KRewrite k) {
+                if (!isHOLE(k.left())) {
+                    throw KEMException.compilerError("Only the HOLE can be rewritten in a context definition", context);
+                }
+                super.apply(k);
+            }
+            // return true when k is either HOLE or #SemanticCastToX(HOLE)
+            private boolean isHOLE(K k) {
+                if (k instanceof KApply) {
+                    KApply kapp = (KApply) k;
+                    return kapp.klabel().name().startsWith("#SemanticCastTo") &&
+                            kapp.klist().size() == 1 &&
+                            isHOLEVar(kapp.klist().items().get(0));
+                } else {
+                    return isHOLEVar(k);
+                }
+            }
+            private boolean isHOLEVar(K k) {
+                return k instanceof KVariable && ((KVariable) k).name().equals("HOLE");
+            }
+        }.apply(body);
     }
 }
