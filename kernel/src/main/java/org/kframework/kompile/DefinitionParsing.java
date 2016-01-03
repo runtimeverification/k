@@ -198,12 +198,6 @@ public class DefinitionParsing {
     java.util.Set<KEMException> errors;
     RuleGrammarGenerator gen;
 
-    public Definition resolveNonConfigBubbles(Definition defWithConfig) {
-        gen = new RuleGrammarGenerator(defWithConfig, isStrict);
-        Definition parsedDef = DefinitionTransformer.from(this::resolveBubbles, "parsing rules").apply(defWithConfig);
-        return parsedDef;
-    }
-
     private Module resolveBubbles(Module module) {
         if (stream(module.localSentences())
                 .filter(s -> s instanceof Bubble)
