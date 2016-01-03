@@ -1,1 +1,1 @@
-<T> <k> 0 ~> . </k> <a> 1 </a> <b> 2 </b> <in> ListItem ( #buffer ( "" ) ) ListItem ( "on" ) ListItem ( #istream ( 0 ) ) </in> </T>
+<T> <k> 0 ~> . </k> <a> 1 </a> <b> 2 </b> </T>
