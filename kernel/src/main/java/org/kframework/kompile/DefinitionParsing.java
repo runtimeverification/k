@@ -147,7 +147,7 @@ public class DefinitionParsing {
         return definition;
     }
 
-    protected Definition resolveAllBubbles(Definition definition) {
+    protected Definition resolveConfigBubbles(Definition definition) {
         boolean hasConfigDecl = stream(definition.mainModule().sentences())
                 .filter(s -> s instanceof Bubble)
                 .map(b -> (Bubble) b)
@@ -184,9 +184,6 @@ public class DefinitionParsing {
         gen = new RuleGrammarGenerator(definitionWithConfigBubble, isStrict);
         Definition defWithConfig = DefinitionTransformer.from(resolveConfig, "parsing configurations").apply(definitionWithConfigBubble);
 
-        gen = new RuleGrammarGenerator(defWithConfig, isStrict);
-        Definition parsedDef = DefinitionTransformer.from(this::resolveBubbles, "parsing rules").apply(defWithConfig);
-
         if (cacheParses) {
             loader.saveOrDie(files.resolveKompiled("cache.bin"), caches);
         }
@@ -194,12 +191,18 @@ public class DefinitionParsing {
             kem.addAllKException(errors.stream().map(e -> e.exception).collect(Collectors.toList()));
             throw KEMException.compilerError("Had " + errors.size() + " parsing errors.");
         }
-        return parsedDef;
+        return defWithConfig;
     }
 
     Map<String, ParseCache> caches;
     java.util.Set<KEMException> errors;
     RuleGrammarGenerator gen;
+
+    public Definition resolveNonConfigBubbles(Definition defWithConfig) {
+        gen = new RuleGrammarGenerator(defWithConfig, isStrict);
+        Definition parsedDef = DefinitionTransformer.from(this::resolveBubbles, "parsing rules").apply(defWithConfig);
+        return parsedDef;
+    }
 
     private Module resolveBubbles(Module module) {
         if (stream(module.localSentences())
