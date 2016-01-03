@@ -100,14 +100,7 @@ public class KILtoKORE extends KILTransformation<Object> {
     private org.kframework.definition.Module apply(Module mainModule, Set<Module> allKilModules,
                                                   Map<String, org.kframework.definition.Module> koreModules,
                                                   scala.collection.Seq<Module> visitedModules) {
-        if (visitedModules.contains(mainModule)) {
-            String msg = "Found circularity in module imports: ";
-            for (Module m : mutable(visitedModules)) { // JavaConversions.seqAsJavaList(visitedModules)
-                msg += m.getName() + " < ";
-            }
-            msg += visitedModules.head().getName();
-            throw KEMException.compilerError(msg);
-        }
+        checkCircularModuleImports(mainModule, visitedModules);
         Set<org.kframework.definition.Sentence> items = mainModule.getItems().stream()
                 .filter(j -> !(j instanceof org.kframework.kil.Import))
                 .flatMap(j -> apply(j).stream()).collect(Collectors.toSet());
@@ -149,6 +142,17 @@ public class KILtoKORE extends KILTransformation<Object> {
                 inner.convertAttributes(mainModule));
         koreModules.put(newModule.name(), newModule);
         return newModule;
+    }
+
+    private static void checkCircularModuleImports(Module mainModule, scala.collection.Seq<Module> visitedModules) {
+        if (visitedModules.contains(mainModule)) {
+            String msg = "Found circularity in module imports: ";
+            for (Module m : mutable(visitedModules)) { // JavaConversions.seqAsJavaList(visitedModules)
+                msg += m.getName() + " < ";
+            }
+            msg += visitedModules.head().getName();
+            throw KEMException.compilerError(msg);
+        }
     }
 
     @SuppressWarnings("unchecked")
