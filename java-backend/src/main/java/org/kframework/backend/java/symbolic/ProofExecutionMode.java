@@ -25,9 +25,11 @@ import org.kframework.krun.KRunOptions;
 import org.kframework.krun.modes.ExecutionMode;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.Stopwatch;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -63,7 +65,12 @@ public class ProofExecutionMode implements ExecutionMode<List<K>> {
     public List<K> execute(K k, Rewriter rewriter, CompiledDefinition compiledDefinition) {
         String proofFile = options.experimental.prove;
         Kompile kompile = new Kompile(compiledDefinition.kompileOptions, globalOptions, files, kem, sw, false);
-        Module mod = kompile.parseModule(compiledDefinition, files.resolveWorkingDirectory(proofFile).getAbsoluteFile(), true);
+        Module mod = null;
+        try {
+            mod = kompile.parseModule(compiledDefinition, files.resolveWorkingDirectory(proofFile).getAbsoluteFile(), true);
+        } catch (IOException e) {
+            throw KEMException.compilerError(e.getMessage(), e);
+        }
         RewriterResult executionResult = rewriter.execute(k, Optional.<Integer>empty());
 
         ConfigurationInfo configurationInfo = new ConfigurationInfoFromModule(compiledDefinition.executionModule());

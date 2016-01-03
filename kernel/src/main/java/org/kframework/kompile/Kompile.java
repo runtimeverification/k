@@ -38,7 +38,9 @@ import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -85,12 +87,15 @@ public class Kompile {
         this.files = files;
         this.kem = kem;
         this.errors = new HashSet<>();
-        this.parser = new ParserUtils(files, kem, global);
-        this.definitionParsing = new DefinitionParsing(kompileOptions.includes, kompileOptions.strict(), kompileOptions.noPrelude, files, kem, parser, cacheParses);
+        this.parser = new ParserUtils(files::resolveWorkingDirectory, kem, global);
+        List<File> lookupDirectories = kompileOptions.includes.stream().map(files::resolveWorkingDirectory).collect(Collectors.toList());
+        this.definitionParsing = new DefinitionParsing(
+                lookupDirectories, kompileOptions.strict(), kompileOptions.noPrelude, kem,
+                parser, cacheParses, files.resolveKompiled("cache.bin"));
         this.sw = sw;
     }
 
-    public CompiledDefinition run(File definitionFile, String mainModuleName, String mainProgramsModuleName, Sort programStartSymbol) {
+    public CompiledDefinition run(File definitionFile, String mainModuleName, String mainProgramsModuleName, Sort programStartSymbol) throws IOException {
         return run(definitionFile, mainModuleName, mainProgramsModuleName, programStartSymbol, defaultSteps());
     }
 
@@ -103,7 +108,7 @@ public class Kompile {
      * @param programStartSymbol
      * @return
      */
-    public CompiledDefinition run(File definitionFile, String mainModuleName, String mainProgramsModuleName, Sort programStartSymbol, Function<Definition, Definition> pipeline) {
+    public CompiledDefinition run(File definitionFile, String mainModuleName, String mainProgramsModuleName, Sort programStartSymbol, Function<Definition, Definition> pipeline) throws IOException {
         Definition parsedDef = parseDefinition(definitionFile, mainModuleName, mainProgramsModuleName, true);
         sw.printIntermediate("Parse definition [" + definitionParsing.parsedBubbles.get() + "/" + (definitionParsing.parsedBubbles.get() + definitionParsing.cachedBubbles.get()) + " rules]");
 
@@ -117,7 +122,7 @@ public class Kompile {
         return new CompiledDefinition(kompileOptions, parsedDef, kompiledDefinition, programStartSymbol, configInfo.getDefaultCell(configInfo.topCell()).klabel());
     }
 
-    public Definition parseDefinition(File definitionFile, String mainModuleName, String mainProgramsModule, boolean dropQuote) {
+    public Definition parseDefinition(File definitionFile, String mainModuleName, String mainProgramsModule, boolean dropQuote) throws IOException {
         Definition parsedDefinition = definitionParsing.parseDefinition(definitionFile, mainModuleName, mainProgramsModule, dropQuote);
         Definition afterResolvingConfigBubbles = definitionParsing.resolveConfigBubbles(parsedDefinition);
         Definition afterResolvingAllOtherBubbles = definitionParsing.resolveNonConfigBubbles(afterResolvingConfigBubbles);
@@ -203,7 +208,7 @@ public class Kompile {
                 .apply(parsedRule);
     }
 
-    public Module parseModule(CompiledDefinition definition, File definitionFile, boolean dropQuote) {
+    public Module parseModule(CompiledDefinition definition, File definitionFile, boolean dropQuote) throws IOException {
         return definitionParsing.parseModule(definition, definitionFile, dropQuote);
     }
 

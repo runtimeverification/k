@@ -12,6 +12,7 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -23,7 +24,7 @@ public class Definition {
      * Parses the text to create a {@link Definition} object.
      * The main module of the definition will be last module defined in the text file.
      */
-    public static org.kframework.definition.Definition from(String definitionText) {
+    public static org.kframework.definition.Definition from(String definitionText) throws IOException {
         Pattern pattern = Pattern.compile("module ([A-Z_]*)");
         Matcher m = pattern.matcher(definitionText);
         if(!m.find()) {
@@ -36,21 +37,21 @@ public class Definition {
     /**
      * Parses the text to create a {@link Definition} object.
      */
-    public static org.kframework.definition.Definition from(String definitionText, String mainModuleName) {
+    public static org.kframework.definition.Definition from(String definitionText, String mainModuleName) throws IOException {
         return from(definitionText, mainModuleName, Source.apply("generated"));
     }
 
     /**
      * Parses the text to create a {@link Definition} object.
      */
-    public static org.kframework.definition.Definition from(String definitionText, String mainModuleName, Source source) {
+    public static org.kframework.definition.Definition from(String definitionText, String mainModuleName, Source source) throws IOException {
         return from(definitionText, mainModuleName, source, Lists.newArrayList(Kompile.BUILTIN_DIRECTORY));
     }
 
     /**
      * Parses the text to create a {@link Definition} object.
      */
-    public static org.kframework.definition.Definition from(String definitionText, String mainModuleName, Source source, List<File> lookupDirectories) {
+    public static org.kframework.definition.Definition from(String definitionText, String mainModuleName, Source source, List<File> lookupDirectories) throws IOException {
         File tmpDir = Files.createTempDir();
         File tempDir = new File(tmpDir.getAbsolutePath() + File.pathSeparator + "tempDir");
         File definitionDir = new File(tmpDir.getAbsolutePath() + File.pathSeparator + "definitionDir");
@@ -68,7 +69,7 @@ public class Definition {
                 Providers.of(kompiledDir),
                 globalOptions,
                 System.getenv());
-        ParserUtils parserUtils = new ParserUtils(fileUtil, kem, globalOptions);
+        ParserUtils parserUtils = new ParserUtils(fileUtil::resolveWorkingDirectory, kem, globalOptions);
 
         org.kframework.definition.Definition definition = parserUtils.loadDefinition(
                 mainModuleName,

@@ -24,7 +24,6 @@ import org.kframework.parser.concrete2kore.ParseInModule;
 import org.kframework.parser.concrete2kore.ParserUtils;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.utils.BinaryLoader;
-import org.kframework.utils.Stopwatch;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -57,9 +56,9 @@ import static org.kframework.kore.KORE.*;
  */
 public class DefinitionParsing {
     public static final Sort START_SYMBOL = Sort("RuleContent");
+    private final File cacheFile;
 
     private boolean noPrelude;
-    private final FileUtil files;
     private final KExceptionManager kem;
     private final ParserUtils parser;
     private final boolean cacheParses;
@@ -68,27 +67,27 @@ public class DefinitionParsing {
     public final AtomicInteger parsedBubbles = new AtomicInteger(0);
     public final AtomicInteger cachedBubbles = new AtomicInteger(0);
     private final boolean isStrict;
-    private final List<String> lookupDirectories;
+    private final List<File> lookupDirectories;
 
     public DefinitionParsing(
-            List<String> lookupDirectories,
+            List<File> lookupDirectories,
             boolean isStrict,
             boolean noPrelude,
-            FileUtil files,
             KExceptionManager kem,
             ParserUtils parser,
-            boolean cacheParses) {
+            boolean cacheParses,
+            File cacheFile) {
         this.lookupDirectories = lookupDirectories;
         this.noPrelude = noPrelude;
-        this.files = files;
         this.kem = kem;
         this.parser = parser;
         this.cacheParses = cacheParses;
+        this.cacheFile = cacheFile;
         this.loader = new BinaryLoader(this.kem);
         this.isStrict = isStrict;
     }
 
-    public Module parseModule(CompiledDefinition definition, File definitionFile, boolean dropQuote) {
+    public Module parseModule(CompiledDefinition definition, File definitionFile, boolean dropQuote) throws IOException {
         java.util.Set<Module> modules = parser.loadModules(
                 mutable(definition.getParsedDefinition().modules()),
                 "require " + StringUtil.enquoteCString(definitionFile.getPath()),
@@ -108,7 +107,7 @@ public class DefinitionParsing {
 
         if (cacheParses) {
             try {
-                caches = loader.load(Map.class, files.resolveKompiled("cache.bin"));
+                caches = loader.load(Map.class, cacheFile);
             } catch (FileNotFoundException e) {
             } catch (IOException | ClassNotFoundException e) {
                 kem.registerInternalHiddenWarning("Invalidating serialized cache due to corruption.", e);
@@ -122,7 +121,7 @@ public class DefinitionParsing {
         Module parsedMod = resolveNonConfigBubbles(modWithConfig, gen);
 
         if (cacheParses) {
-            loader.saveOrDie(files.resolveKompiled("cache.bin"), caches);
+            loader.saveOrDie(cacheFile, caches);
         }
         if (!errors.isEmpty()) {
             kem.addAllKException(errors.stream().map(e -> e.exception).collect(Collectors.toList()));
@@ -131,7 +130,7 @@ public class DefinitionParsing {
         return parsedMod;
     }
 
-    public Definition parseDefinition(File definitionFile, String mainModuleName, String mainProgramsModule, boolean dropQuote) {
+    public Definition parseDefinition(File definitionFile, String mainModuleName, String mainProgramsModule, boolean dropQuote) throws IOException {
         String prelude = Kompile.REQUIRE_PRELUDE_K;
         if (this.noPrelude) {
             prelude = "";
@@ -141,7 +140,7 @@ public class DefinitionParsing {
                 mainProgramsModule, prelude + FileUtil.load(definitionFile),
                 definitionFile,
                 definitionFile.getParentFile(),
-                ListUtils.union(lookupDirectories.stream().map(files::resolveWorkingDirectory).collect(Collectors.toList()),
+                ListUtils.union(lookupDirectories,
                         Lists.newArrayList(Kompile.BUILTIN_DIRECTORY)),
                 dropQuote);
         return definition;
@@ -173,7 +172,7 @@ public class DefinitionParsing {
 
         if (cacheParses) {
             try {
-                caches = loader.load(Map.class, files.resolveKompiled("cache.bin"));
+                caches = loader.load(Map.class, cacheFile);
             } catch (FileNotFoundException e) {
             } catch (IOException | ClassNotFoundException e) {
                 kem.registerInternalHiddenWarning("Invalidating serialized cache due to corruption.", e);
@@ -185,7 +184,7 @@ public class DefinitionParsing {
         Definition defWithConfig = DefinitionTransformer.from(resolveConfig, "parsing configurations").apply(definitionWithConfigBubble);
 
         if (cacheParses) {
-            loader.saveOrDie(files.resolveKompiled("cache.bin"), caches);
+            loader.saveOrDie(cacheFile, caches);
         }
         if (!errors.isEmpty()) {
             kem.addAllKException(errors.stream().map(e -> e.exception).collect(Collectors.toList()));

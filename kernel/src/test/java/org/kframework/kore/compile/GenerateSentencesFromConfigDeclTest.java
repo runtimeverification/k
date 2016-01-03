@@ -27,6 +27,7 @@ import org.kframework.utils.file.FileUtil;
 import scala.collection.Set;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
@@ -42,10 +43,10 @@ public class GenerateSentencesFromConfigDeclTest {
     Definition def;
 
     @Before
-    public void setUp() {
+    public void setUp() throws IOException {
         String definitionText;
         FileUtil files = FileUtil.testFileUtil();
-        ParserUtils parser = new ParserUtils(files, new KExceptionManager(new GlobalOptions()));
+        ParserUtils parser = new ParserUtils(files::resolveWorkingDirectory, new KExceptionManager(new GlobalOptions()));
         File definitionFile = new File(Kompile.BUILTIN_DIRECTORY.toString() + "/kast.k");
         definitionText = files.loadFromWorkingDirectory(definitionFile.getPath());
 

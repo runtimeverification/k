@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.kframework.Collections.*;
@@ -36,18 +37,16 @@ import static org.kframework.definition.Constructors.*;
  */
 public class ParserUtils {
 
-    private final FileUtil files;
     private final KExceptionManager kem;
     private final GlobalOptions options;
+    private Function<File, File> makeAbsolute;
 
-    public ParserUtils(FileUtil files, KExceptionManager kem) {
-        this.files = files;
-        this.kem = kem;
-        this.options = new GlobalOptions();
+    public ParserUtils(Function<File, File> makeAbsolute, KExceptionManager kem) {
+        this(makeAbsolute, kem, new GlobalOptions());
     }
 
-    public ParserUtils(FileUtil files, KExceptionManager kem, GlobalOptions options) {
-        this.files = files;
+    public ParserUtils(Function<File, File> makeAbsolute, KExceptionManager kem, GlobalOptions options) {
+        this.makeAbsolute = makeAbsolute;
         this.kem = kem;
         this.options = options;
     }
@@ -114,7 +113,7 @@ public class ParserUtils {
             String definitionText,
             Source source,
             File currentDirectory,
-            List<File> lookupDirectories) {
+            List<File> lookupDirectories) throws IOException {
         List<DefinitionItem> items = Outer.parse(source, definitionText, null);
         if (options.verbose) {
             System.out.println("Importing: " + source);
@@ -143,7 +142,7 @@ public class ParserUtils {
                         .filter(file -> file.exists()).findFirst();
 
                 if (definitionFile.isPresent()) {
-                    results.addAll(slurp(files.loadFromWorkingDirectory(definitionFile.get().getPath()),
+                    results.addAll(slurp(loadDefinitionText(definitionFile.get()),
                             Source.apply(definitionFile.get().getAbsolutePath()),
                             definitionFile.get().getParentFile(),
                             lookupDirectories));
@@ -156,13 +155,17 @@ public class ParserUtils {
         return results;
     }
 
+    private String loadDefinitionText(File definitionFile) throws IOException {
+        return FileUtils.readFileToString(makeAbsolute.apply(definitionFile));
+    }
+
     public Set<Module> loadModules(
             Set<Module> previousModules,
             String definitionText,
             Source source,
             File currentDirectory,
             List<File> lookupDirectories,
-            boolean dropQuote) {
+            boolean dropQuote) throws IOException {
 
         List<org.kframework.kil.Module> kilModules =
                 slurp(definitionText, source, currentDirectory, lookupDirectories);
@@ -191,7 +194,7 @@ public class ParserUtils {
             File source,
             File currentDirectory,
             List<File> lookupDirectories,
-            boolean dropQuote) {
+            boolean dropQuote) throws IOException {
         return loadDefinition(mainModuleName, syntaxModuleName, definitionText,
                 Source.apply(source.getAbsolutePath()),
                 currentDirectory, lookupDirectories, dropQuote);
@@ -204,7 +207,7 @@ public class ParserUtils {
             Source source,
             File currentDirectory,
             List<File> lookupDirectories,
-            boolean dropQuote) {
+            boolean dropQuote) throws IOException {
         Set<Module> modules = loadModules(new HashSet<>(), definitionText, source, currentDirectory, lookupDirectories, dropQuote);
         Optional<Module> opt = modules.stream().filter(m -> m.name().equals(mainModuleName)).findFirst();
         if (!opt.isPresent()) {
