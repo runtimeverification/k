@@ -86,7 +86,7 @@ public class Kompile {
         this.kem = kem;
         this.errors = new HashSet<>();
         this.parser = new ParserUtils(files, kem, global);
-        this.definitionParsing = new DefinitionParsing(kompileOptions, files, kem, parser, cacheParses);
+        this.definitionParsing = new DefinitionParsing(kompileOptions.includes, kompileOptions.strict(), kompileOptions.noPrelude, files, kem, parser, cacheParses);
         this.sw = sw;
     }
 

@@ -58,8 +58,7 @@ import static org.kframework.kore.KORE.*;
 public class DefinitionParsing {
     public static final Sort START_SYMBOL = Sort("RuleContent");
 
-    public final KompileOptions kompileOptions;
-
+    private boolean noPrelude;
     private final FileUtil files;
     private final KExceptionManager kem;
     private final ParserUtils parser;
@@ -68,14 +67,25 @@ public class DefinitionParsing {
 
     public final AtomicInteger parsedBubbles = new AtomicInteger(0);
     public final AtomicInteger cachedBubbles = new AtomicInteger(0);
+    private final boolean isStrict;
+    private final List<String> lookupDirectories;
 
-    public DefinitionParsing(KompileOptions kompileOptions, FileUtil files, KExceptionManager kem, ParserUtils parser, boolean cacheParses) {
-        this.kompileOptions = kompileOptions;
+    public DefinitionParsing(
+            List<String> lookupDirectories,
+            boolean isStrict,
+            boolean noPrelude,
+            FileUtil files,
+            KExceptionManager kem,
+            ParserUtils parser,
+            boolean cacheParses) {
+        this.lookupDirectories = lookupDirectories;
+        this.noPrelude = noPrelude;
         this.files = files;
         this.kem = kem;
         this.parser = parser;
         this.cacheParses = cacheParses;
         this.loader = new BinaryLoader(this.kem);
+        this.isStrict = isStrict;
     }
 
     public Module parseModule(CompiledDefinition definition, File definitionFile, boolean dropQuote) {
@@ -105,10 +115,10 @@ public class DefinitionParsing {
             }
         }
 
-        ResolveConfig resolveConfig = new ResolveConfig(definition.getParsedDefinition(), kompileOptions.strict(), this::parseBubble, this::getParser);
+        ResolveConfig resolveConfig = new ResolveConfig(definition.getParsedDefinition(), isStrict, this::parseBubble, this::getParser);
         Module modWithConfig = resolveConfig.apply(module);
 
-        gen = new RuleGrammarGenerator(definition.getParsedDefinition(), kompileOptions.strict());
+        gen = new RuleGrammarGenerator(definition.getParsedDefinition(), isStrict);
         Module parsedMod = resolveBubbles(modWithConfig);
 
         if (cacheParses) {
@@ -123,7 +133,7 @@ public class DefinitionParsing {
 
     public Definition parseDefinition(File definitionFile, String mainModuleName, String mainProgramsModule, boolean dropQuote) {
         String prelude = Kompile.REQUIRE_PRELUDE_K;
-        if (kompileOptions.noPrelude) {
+        if (this.noPrelude) {
             prelude = "";
         }
         Definition definition = parser.loadDefinition(
@@ -131,8 +141,7 @@ public class DefinitionParsing {
                 mainProgramsModule, prelude + FileUtil.load(definitionFile),
                 definitionFile,
                 definitionFile.getParentFile(),
-                ListUtils.union(kompileOptions.includes.stream()
-                                .map(files::resolveWorkingDirectory).collect(Collectors.toList()),
+                ListUtils.union(lookupDirectories.stream().map(files::resolveWorkingDirectory).collect(Collectors.toList()),
                         Lists.newArrayList(Kompile.BUILTIN_DIRECTORY)),
                 dropQuote);
 
@@ -168,11 +177,11 @@ public class DefinitionParsing {
             }
         }
 
-        ResolveConfig resolveConfig = new ResolveConfig(definitionWithConfigBubble, kompileOptions.strict(), this::parseBubble, this::getParser);
-        gen = new RuleGrammarGenerator(definitionWithConfigBubble, kompileOptions.strict());
+        ResolveConfig resolveConfig = new ResolveConfig(definitionWithConfigBubble, isStrict, this::parseBubble, this::getParser);
+        gen = new RuleGrammarGenerator(definitionWithConfigBubble, isStrict);
         Definition defWithConfig = DefinitionTransformer.from(resolveConfig, "parsing configurations").apply(definitionWithConfigBubble);
 
-        gen = new RuleGrammarGenerator(defWithConfig, kompileOptions.strict());
+        gen = new RuleGrammarGenerator(defWithConfig, isStrict);
         Definition parsedDef = DefinitionTransformer.from(this::resolveBubbles, "parsing rules").apply(defWithConfig);
 
         if (cacheParses) {
@@ -224,7 +233,7 @@ public class DefinitionParsing {
 
     public Rule parseRule(CompiledDefinition compiledDef, String contents, Source source) {
         errors = java.util.Collections.synchronizedSet(Sets.newHashSet());
-        gen = new RuleGrammarGenerator(compiledDef.kompiledDefinition, kompileOptions.strict());
+        gen = new RuleGrammarGenerator(compiledDef.kompiledDefinition, isStrict);
         java.util.Set<K> res = performParse(new HashMap<>(), gen.getCombinedGrammar(gen.getRuleGrammar(compiledDef.executionModule())),
                 new Bubble("rule", contents, Att().add("contentStartLine", 1).add("contentStartColumn", 1).add("Source", source.source())))
                 .collect(Collectors.toSet());
@@ -266,8 +275,8 @@ public class DefinitionParsing {
 
     private ParseCache loadCache(Module parser) {
         ParseCache cachedParser = caches.get(parser.name());
-        if (cachedParser == null || !equalsSyntax(cachedParser.getModule(), parser) || cachedParser.isStrict() != kompileOptions.strict()) {
-            cachedParser = new ParseCache(parser, kompileOptions.strict(), java.util.Collections.synchronizedMap(new HashMap<>()));
+        if (cachedParser == null || !equalsSyntax(cachedParser.getModule(), parser) || cachedParser.isStrict() != isStrict) {
+            cachedParser = new ParseCache(parser, isStrict, java.util.Collections.synchronizedMap(new HashMap<>()));
             caches.put(parser.name(), cachedParser);
         }
         return cachedParser;
