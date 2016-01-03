@@ -119,7 +119,7 @@ public class DefinitionParsing {
         Module modWithConfig = resolveConfig.apply(module);
 
         gen = new RuleGrammarGenerator(definition.getParsedDefinition(), isStrict);
-        Module parsedMod = resolveBubbles(modWithConfig);
+        Module parsedMod = resolveNonConfigBubbles(modWithConfig, gen);
 
         if (cacheParses) {
             loader.saveOrDie(files.resolveKompiled("cache.bin"), caches);
@@ -198,7 +198,13 @@ public class DefinitionParsing {
     java.util.Set<KEMException> errors;
     RuleGrammarGenerator gen;
 
-    private Module resolveBubbles(Module module) {
+    public Definition resolveNonConfigBubbles(Definition defWithConfig) {
+        RuleGrammarGenerator gen = new RuleGrammarGenerator(defWithConfig, isStrict);
+        Definition parsedDef = DefinitionTransformer.from(m -> this.resolveNonConfigBubbles(m, gen), "parsing rules").apply(defWithConfig);
+        return parsedDef;
+    }
+
+    private Module resolveNonConfigBubbles(Module module, RuleGrammarGenerator gen) {
         if (stream(module.localSentences())
                 .filter(s -> s instanceof Bubble)
                 .map(b -> (Bubble) b)

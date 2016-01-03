@@ -120,7 +120,7 @@ public class Kompile {
     public Definition parseDefinition(File definitionFile, String mainModuleName, String mainProgramsModule, boolean dropQuote) {
         Definition parsedDefinition = definitionParsing.parseDefinition(definitionFile, mainModuleName, mainProgramsModule, dropQuote);
         Definition afterResolvingConfigBubbles = definitionParsing.resolveConfigBubbles(parsedDefinition);
-        Definition afterResolvingAllOtherBubbles = DefinitionTransformer.from(definitionParsing::resolveBubbles, "parsing rules").apply(afterResolvingConfigBubbles);
+        Definition afterResolvingAllOtherBubbles = definitionParsing.resolveNonConfigBubbles(afterResolvingConfigBubbles);
         return afterResolvingAllOtherBubbles;
     }
 
