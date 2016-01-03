@@ -1,3 +1,1 @@
 [Error] Compiler: Only productions with a KLabel can be strict.
-	Source(./b.k)
-	Location(20,18,20,27)
