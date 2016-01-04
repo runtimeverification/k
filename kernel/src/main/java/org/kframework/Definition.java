@@ -24,7 +24,7 @@ public class Definition {
      * The main module of the definition will be last module defined in the text file.
      */
     public static org.kframework.definition.Definition from(String definitionText) {
-        Pattern pattern = Pattern.compile("\\smodule ([A-Z][A-Z\\-]*)");
+        Pattern pattern = Pattern.compile("(?:^|\\s)module ([A-Z][A-Z\\-]*)");
         Matcher m = pattern.matcher(definitionText);
         if(!m.find()) {
             throw new RuntimeException("Could not find any module in the definition");
