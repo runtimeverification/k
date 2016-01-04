@@ -1,19 +1,9 @@
 // Copyright (c) 2012-2015 K Team. All Rights Reserved.
-
-require "domains.k"
-
-module LAMBDA-SYNTAX
-  imports DOMAINS-SYNTAX
-
+module LAMBDA
   syntax Exp ::= Id
                | "lambda" Id "." Exp  [latex(\lambda{#1}.{#2})]
                | Exp Exp              [strict, left]
                | "(" Exp ")"          [bracket]
-endmodule
-
-module LAMBDA
-  imports LAMBDA-SYNTAX
-  imports DOMAINS
 
   configuration <T>
                   <k> $PGM:Exp </k>
@@ -36,6 +26,6 @@ module LAMBDA
        <store>... N |-> V ...</store>
 
 // Auxiliary task
-  rule <k> _:Val ~> `Rho => .K` ...</k> <env> _ => Rho </env>
+  rule <k> _:Val ~> (Rho => .) ...</k> <env> _ => Rho </env>
     [structural]
 endmodule

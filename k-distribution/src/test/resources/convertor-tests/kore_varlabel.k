@@ -2,7 +2,6 @@
 require "domains.k"
 
 module VARLABEL-SYNTAX
-  imports DOMAINS-SYNTAX
 
   syntax Exp ::= Int "+" Int
                  | Int "-" Int
@@ -14,7 +13,6 @@ endmodule
 
 
 module VARLABEL
-  imports DOMAINS
   imports VARLABEL-SYNTAX
 
 
