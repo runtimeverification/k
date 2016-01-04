@@ -19,7 +19,6 @@ import org.kframework.definition.Context;
 import org.kframework.definition.Definition;
 import org.kframework.definition.DefinitionTransformer;
 import org.kframework.definition.Module;
-import org.kframework.definition.ModuleTransformer;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.K;
@@ -49,7 +48,6 @@ import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
-import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.file.FileUtil;
@@ -191,7 +189,7 @@ public class Kompile {
     }
 
     public Definition resolveIOStreams(Definition d) {
-        return DefinitionTransformer.from(new ResolveIOStreams(d)::resolve, "resolving io streams").apply(d);
+        return DefinitionTransformer.from(new ResolveIOStreams(d, kem)::resolve, "resolving io streams").apply(d);
     }
 
     public Definition addSemanticsModule(Definition d) {
@@ -233,7 +231,7 @@ public class Kompile {
                 Source.apply(definitionFile.getAbsolutePath()),
                 definitionFile.getParentFile(),
                 Lists.newArrayList(BUILTIN_DIRECTORY),
-                dropQuote);
+                dropQuote, !kompileOptions.noPrelude);
 
         if (modules.size() != 1) {
             throw KEMException.compilerError("Expected to find a file with 1 module: found " + modules.size() + " instead.");
@@ -282,7 +280,7 @@ public class Kompile {
                 ListUtils.union(kompileOptions.includes.stream()
                                 .map(files::resolveWorkingDirectory).collect(Collectors.toList()),
                         Lists.newArrayList(BUILTIN_DIRECTORY)),
-                dropQuote);
+                dropQuote, !kompileOptions.noPrelude);
 
         boolean hasConfigDecl = stream(definition.mainModule().sentences())
                 .filter(s -> s instanceof Bubble)

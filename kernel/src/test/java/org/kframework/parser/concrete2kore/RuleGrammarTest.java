@@ -51,7 +51,7 @@ public class RuleGrammarTest {
                         definitionFile,
                         definitionFile.getParentFile(),
                         Lists.newArrayList(Kompile.BUILTIN_DIRECTORY),
-                        true);
+                        true, false);
 
         return new RuleGrammarGenerator(baseK, true);
     }

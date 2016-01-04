@@ -77,7 +77,8 @@ public class Definition {
                 source,
                 workingDir,
                 lookupDirectories,
-                true
+                true,
+                false
         );
 
         return definition;
