@@ -1,12 +1,13 @@
-<!-- Copyright (c) 2012-2014 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2012-2016 K Team. All Rights Reserved. -->
+
 ### Syntax Modules and Basic K Commands
 
-[MOVIE [4'07"]](http://youtu.be/y5Tf1EZVj8E)
+[MOVIE]
 
-Here we define our first K module, which contains the initial syntax of LAMBDA,
-and learn how to use the basic K commands.
+Here we define our first K module, which contains the initial syntax of the
+LAMBDA language, and learn how to use the basic K commands.
 
-I have just created an empty working folder, and opened a terminal window
+We have just created an empty working folder, and opened a terminal window
 (to the left) and an editor window (to the right).  We will edit our K
 definition in the right window in a file called `lambda.k`, and will call
 the K tool commands in the left window.
