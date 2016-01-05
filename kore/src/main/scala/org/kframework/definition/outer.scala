@@ -45,6 +45,13 @@ case class Definition(
   assert(modules.contains(mainModule))
 
   def getModule(name: String): Option[Module] = modules find { case m: Module => m.name == name; case _ => false }
+
+  override def hashCode = mainModule.hashCode
+
+  override def equals(that: Any) = that match {
+    case Definition(`mainModule`, `entryModules`, _) => true
+    case _ => false
+  }
 }
 
 trait Sorting {

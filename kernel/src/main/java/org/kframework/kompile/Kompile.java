@@ -228,7 +228,7 @@ public class Kompile {
         java.util.Set<Module> modules = parser.loadModules(
                 mutable(definition.getParsedDefinition().modules()),
                 "require " + StringUtil.enquoteCString(definitionFile.getPath()),
-                definitionFile,
+                Source.apply(definitionFile.getAbsolutePath()),
                 definitionFile.getParentFile(),
                 Lists.newArrayList(BUILTIN_DIRECTORY),
                 dropQuote, !kompileOptions.noPrelude);
