@@ -165,20 +165,6 @@ class Module(val name: String, val imports: Set[Module], unresolvedLocalSentence
 
   lazy val localRules: Set[Rule] = localSentences collect { case r: Rule => r }
 
-  lazy val initRules: Set[Rule] = rules.collect({ case r if r.att.contains("initializer") => r })
-
-  lazy val configVars: Set[KToken] = {
-    val transformer = new FoldK[Set[KToken]] {
-      override def apply(k: KToken): Set[KToken] = {
-        if (k.sort.name == "KConfigVar") Set(k) else unit
-      }
-      def unit = Set()
-      def merge(set1: Set[KToken], set2: Set[KToken]) = set1 | set2
-    }
-    initRules.map(r => transformer.apply(r.body))
-             .fold(transformer.unit)(transformer.merge)
-  }
-
   // Check that productions with the same klabel have identical attributes
   //  productionsFor.foreach {
   //    case (l, ps) =>
@@ -274,6 +260,22 @@ class Module(val name: String, val imports: Set[Module], unresolvedLocalSentence
 
   override def equals(that: Any) = that match {
     case m: Module => m.name == name && m.sentences == sentences
+  }
+}
+
+class ModuleView(m: Module) {
+  lazy val initRules: Set[Rule] = m.rules.collect({ case r if r.att.contains("initializer") => r })
+
+  lazy val configVars: Set[KToken] = {
+    val transformer = new FoldK[Set[KToken]] {
+      override def apply(k: KToken): Set[KToken] = {
+        if (k.sort.name == "KConfigVar") Set(k) else unit
+      }
+      def unit = Set()
+      def merge(set1: Set[KToken], set2: Set[KToken]) = set1 | set2
+    }
+    initRules.map(r => transformer.apply(r.body))
+             .fold(transformer.unit)(transformer.merge)
   }
 }
 
