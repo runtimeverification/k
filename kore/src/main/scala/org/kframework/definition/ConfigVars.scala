@@ -1,6 +1,10 @@
+// Copyright (c) 2015 K Team. All Rights Reserved.
+
 package org.kframework.definition
 
 import org.kframework.kore.{FoldK, KToken}
+
+import scala.collection.Set
 
 class ConfigVars(m: Module) {
   lazy val initRules: Set[Rule] = m.rules.collect({ case r if r.att.contains("initializer") => r })
