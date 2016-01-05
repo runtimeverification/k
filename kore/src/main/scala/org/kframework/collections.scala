@@ -41,6 +41,8 @@ object Collections {
   def add[T](e: T)(s: Set[T]): Set[T] = s + e
   def or[T](a: Set[T], b: Set[T]): Set[T] = a | b
 
+  def cons[T](e: T)(s: Seq[T]): Seq[T] = e +: s
+
   @annotation.varargs def List[T](es: T*): scala.List[T] = scala.List[T](es: _*)
   @annotation.varargs def Seq[T](es: T*) = scala.collection.immutable.Seq[T](es: _*)
   @annotation.varargs def Set[T](es: T*) = scala.collection.immutable.Set[T](es: _*)

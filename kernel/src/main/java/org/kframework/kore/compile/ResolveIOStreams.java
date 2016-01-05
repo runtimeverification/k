@@ -1,6 +1,7 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.kore.compile;
 
+import org.kframework.attributes.Location;
 import org.kframework.builtin.KLabels;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
@@ -17,6 +18,7 @@ import org.kframework.kore.Sort;
 import org.kframework.kore.TransformK;
 import org.kframework.kore.VisitK;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KExceptionManager;
 import scala.Option;
 import scala.Tuple2;
 
@@ -35,8 +37,11 @@ public class ResolveIOStreams {
 
     private final Definition definition;
 
-    public ResolveIOStreams(Definition definition) {
+    private final KExceptionManager kem;
+
+    public ResolveIOStreams(Definition definition, KExceptionManager kem) {
         this.definition = definition;
+        this.kem = kem;
     }
 
     /**
@@ -83,11 +88,23 @@ public class ResolveIOStreams {
             if (s instanceof Production) {
                 Production p = (Production) s;
                 if (p.att().<String>get("stream").isDefined()) {
+                    checkStreamName(p.att().<String>get("stream").get());
                     productions.add(p);
                 }
             }
         }
         return productions;
+    }
+
+    private void checkStreamName(String streamName) {
+        ArrayList<String> streams = new ArrayList<String>();
+        streams.add("stdin");
+        streams.add("stdout");
+
+        if (!streams.contains(streamName)) {
+            throw KEMException.compilerError("Make sure you give the correct stream names: " + streamName +
+                    "\nIt should be one of " + streams.toString());
+        }
     }
 
     private Sentence resolveInitRule(Production p, Sentence s) {
@@ -291,9 +308,11 @@ public class ResolveIOStreams {
                     String sort = wellformedAndGetSortNameOfCast(k.klist());
                     if (!sort.isEmpty()) {
                         sorts.add(sort);
-                        //} else {
-                        //    throw KEMException.compilerError("Unsupported matching pattern in stdin stream cell." +
-                        //        " Currently the supported pattern is: e.g., <in> ListItem(V:Sort) => .List ... </in>", k);
+                    } else {
+                        if (k.att().get(Location.class).isDefined()) { // warning only for user-provided rules
+                            kem.registerCompilerWarning("Unsupported matching pattern in stdin stream cell." +
+                                    "\nThe currently supported pattern is: <in> ListItem(V:Sort) => .List ... </in>", k);
+                        }
                     }
                 }
                 super.apply(k);

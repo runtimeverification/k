@@ -1,4 +1,6 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
+require "kast.k"
+
 module DOMAINS-SYNTAX
   imports ID
   imports INT-SYNTAX
@@ -7,12 +9,13 @@ module DOMAINS-SYNTAX
 endmodule
 
 module DOMAINS
+  imports DOMAINS-SYNTAX
   imports INT
   imports BOOL
   imports STRING
   imports BASIC-K
-  imports K-IO
   imports LIST
+  imports K-IO
   imports MAP
   imports SET
 endmodule

@@ -45,6 +45,13 @@ case class Definition(
   assert(modules.contains(mainModule))
 
   def getModule(name: String): Option[Module] = modules find { case m: Module => m.name == name; case _ => false }
+
+  override def hashCode = mainModule.hashCode
+
+  override def equals(that: Any) = that match {
+    case Definition(`mainModule`, `entryModules`, _) => true
+    case _ => false
+  }
 }
 
 trait Sorting {
@@ -136,11 +143,11 @@ class Module(val name: String, val imports: Set[Module], unresolvedLocalSentence
       .groupBy(_.sort)
       .map { case (s, ps) => (s, ps) }
 
-  lazy val bracketProductionsFor: Map[Sort, Set[Production]] =
+  lazy val bracketProductionsFor: Map[Sort, List[Production]] =
     productions
       .collect({ case p if p.att.contains("bracket") => p })
       .groupBy(_.sort)
-      .map { case (s, ps) => (s, ps) }
+      .map { case (s, ps) => (s, ps.toList.sortBy(_.sort)(subsorts.asOrdering)) }
 
   @transient lazy val sortFor: Map[KLabel, Sort] = productionsFor mapValues {_.head.sort}
 

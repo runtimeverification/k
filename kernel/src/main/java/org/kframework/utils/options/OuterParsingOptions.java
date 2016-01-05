@@ -39,6 +39,8 @@ public class OuterParsingOptions implements Serializable {
     @Parameter(names="-I", description="Add a directory to the search path for requires statements.", variableArity = true)
     public List<String> includes = new ArrayList<>();
 
-    @Parameter(names="--no-prelude", description="Do not implicitly require prelude.k.")
+    @Parameter(names="--no-prelude", description="Do not implicitly require prelude.k. It also deactivates automatic inclusion of the DOMAINS and DOMAINS-SYNTAX modules.")
     public boolean noPrelude = false;
+
+
 }

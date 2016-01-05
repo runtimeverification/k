@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Module;
 import org.apache.commons.collections15.ListUtils;
+import org.kframework.attributes.Source;
 import org.kframework.kompile.Kompile;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
@@ -83,7 +84,7 @@ public class KDepFrontEnd extends FrontEnd {
         }
 
         List<org.kframework.kil.Module> modules = parser.slurp(prelude + FileUtil.load(options.mainDefinitionFile(files)),
-                options.mainDefinitionFile(files),
+                Source.apply(options.mainDefinitionFile(files).getAbsolutePath()),
                 options.mainDefinitionFile(files).getParentFile(),
                 ListUtils.union(options.includes.stream()
                         .map(files::resolveWorkingDirectory).collect(Collectors.toList()),

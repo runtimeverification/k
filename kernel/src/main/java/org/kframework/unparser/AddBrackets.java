@@ -15,6 +15,7 @@ import org.kframework.parser.TermCons;
 import org.kframework.utils.errorsystem.KEMException;
 import org.pcollections.ConsPStack;
 import scala.Tuple2;
+import scala.collection.Seq;
 import scala.collection.Set;
 
 import java.util.ArrayList;
@@ -22,6 +23,7 @@ import java.util.EnumSet;
 import java.util.List;
 
 import static org.kframework.Collections.*;
+import static scala.compat.java8.JFunction.*;
 
 /**
  * Implements the naive algorithm to add brackets in order to disambiguate an unparsed AST. This algorithm executes
@@ -64,7 +66,7 @@ public class AddBrackets {
             int position = getPosition(inner, outer);
             Sort outerSort = ((NonTerminal)outer.production().items().apply(position)).sort();
             Sort innerSort = inner.production().sort();
-            for (Tuple2<Sort, Set<Production>> sort : iterable(m.bracketProductionsFor())) {
+            for (Tuple2<Sort, scala.collection.immutable.List<Production>> sort : iterable(m.bracketProductionsFor())) {
                 boolean isCorrectOuterSort = m.subsorts().lessThanEq(sort._1(), outerSort);
                 if (isCorrectOuterSort) {
                     for (Production p : mutable(sort._2())) {
