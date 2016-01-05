@@ -90,7 +90,7 @@ public class DefinitionParsing {
         this.isStrict = isStrict;
     }
 
-    public Module parseModule(CompiledDefinition definition, File definitionFile, boolean dropQuote, boolean autoImportDomains) throws IOException {
+    public Module parseModule(CompiledDefinition definition, File definitionFile, boolean dropQuote, boolean autoImportDomains) {
         java.util.Set<Module> modules = parser.loadModules(
                 mutable(definition.getParsedDefinition().modules()),
                 "require " + StringUtil.enquoteCString(definitionFile.getPath()),
@@ -133,7 +133,7 @@ public class DefinitionParsing {
         return parsedMod;
     }
 
-    public Definition parseDefinition(File definitionFile, String mainModuleName, String mainProgramsModule, boolean dropQuote) throws IOException {
+    public Definition parseDefinition(File definitionFile, String mainModuleName, String mainProgramsModule, boolean dropQuote) {
         String prelude = Kompile.REQUIRE_PRELUDE_K;
         if (this.noPrelude) {
             prelude = "";

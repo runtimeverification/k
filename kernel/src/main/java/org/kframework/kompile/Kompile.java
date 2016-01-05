@@ -95,7 +95,7 @@ public class Kompile {
         this.sw = sw;
     }
 
-    public CompiledDefinition run(File definitionFile, String mainModuleName, String mainProgramsModuleName, Sort programStartSymbol) throws IOException {
+    public CompiledDefinition run(File definitionFile, String mainModuleName, String mainProgramsModuleName, Sort programStartSymbol) {
         return run(definitionFile, mainModuleName, mainProgramsModuleName, programStartSymbol, defaultSteps());
     }
 
@@ -108,7 +108,7 @@ public class Kompile {
      * @param programStartSymbol
      * @return
      */
-    public CompiledDefinition run(File definitionFile, String mainModuleName, String mainProgramsModuleName, Sort programStartSymbol, Function<Definition, Definition> pipeline) throws IOException {
+    public CompiledDefinition run(File definitionFile, String mainModuleName, String mainProgramsModuleName, Sort programStartSymbol, Function<Definition, Definition> pipeline) {
         Definition parsedDef = parseDefinition(definitionFile, mainModuleName, mainProgramsModuleName, true);
         sw.printIntermediate("Parse definition [" + definitionParsing.parsedBubbles.get() + "/" + (definitionParsing.parsedBubbles.get() + definitionParsing.cachedBubbles.get()) + " rules]");
 
@@ -122,7 +122,7 @@ public class Kompile {
         return new CompiledDefinition(kompileOptions, parsedDef, kompiledDefinition, programStartSymbol, configInfo.getDefaultCell(configInfo.topCell()).klabel());
     }
 
-    public Definition parseDefinition(File definitionFile, String mainModuleName, String mainProgramsModule, boolean dropQuote) throws IOException {
+    public Definition parseDefinition(File definitionFile, String mainModuleName, String mainProgramsModule, boolean dropQuote) {
         Definition parsedDefinition = definitionParsing.parseDefinition(definitionFile, mainModuleName, mainProgramsModule, dropQuote);
         Definition afterResolvingConfigBubbles = definitionParsing.resolveConfigBubbles(parsedDefinition);
         Definition afterResolvingAllOtherBubbles = definitionParsing.resolveNonConfigBubbles(afterResolvingConfigBubbles);
@@ -208,7 +208,7 @@ public class Kompile {
                 .apply(parsedRule);
     }
 
-    public Module parseModule(CompiledDefinition definition, File definitionFile, boolean dropQuote) throws IOException {
+    public Module parseModule(CompiledDefinition definition, File definitionFile, boolean dropQuote) {
         return definitionParsing.parseModule(definition, definitionFile, dropQuote, !kompileOptions.noPrelude);
     }
 

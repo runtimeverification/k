@@ -15,6 +15,7 @@ import org.kframework.kore.convertors.KILtoKORE;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 
@@ -113,7 +114,7 @@ public class ParserUtils {
             String definitionText,
             Source source,
             File currentDirectory,
-            List<File> lookupDirectories) throws IOException {
+            List<File> lookupDirectories) {
         List<DefinitionItem> items = Outer.parse(source, definitionText, null);
         if (options.verbose) {
             System.out.println("Importing: " + source);
@@ -155,8 +156,12 @@ public class ParserUtils {
         return results;
     }
 
-    private String loadDefinitionText(File definitionFile) throws IOException {
-        return FileUtils.readFileToString(makeAbsolute.apply(definitionFile));
+    private String loadDefinitionText(File definitionFile) {
+        try {
+            return FileUtils.readFileToString(makeAbsolute.apply(definitionFile));
+        } catch (IOException e) {
+            throw KEMException.criticalError(e.getMessage(), e);
+        }
     }
 
     public Set<Module> loadModules(
@@ -166,7 +171,7 @@ public class ParserUtils {
             File currentDirectory,
             List<File> lookupDirectories,
             boolean dropQuote,
-            boolean autoImportDomains) throws IOException {
+            boolean autoImportDomains) {
 
         List<org.kframework.kil.Module> kilModules =
                 slurp(definitionText, source, currentDirectory, lookupDirectories);
@@ -195,7 +200,7 @@ public class ParserUtils {
             File source,
             File currentDirectory,
             List<File> lookupDirectories,
-            boolean dropQuote, boolean autoImportDomains) throws IOException {
+            boolean dropQuote, boolean autoImportDomains) {
         return loadDefinition(mainModuleName, syntaxModuleName, definitionText,
                 Source.apply(source.getAbsolutePath()),
                 currentDirectory, lookupDirectories, dropQuote, autoImportDomains);
@@ -208,7 +213,7 @@ public class ParserUtils {
             Source source,
             File currentDirectory,
             List<File> lookupDirectories,
-            boolean dropQuote, boolean autoImportDomains) throws IOException {
+            boolean dropQuote, boolean autoImportDomains) {
         Set<Module> modules = loadModules(new HashSet<>(), definitionText, source, currentDirectory, lookupDirectories, dropQuote, autoImportDomains);
         Optional<Module> opt = modules.stream().filter(m -> m.name().equals(mainModuleName)).findFirst();
         if (!opt.isPresent()) {

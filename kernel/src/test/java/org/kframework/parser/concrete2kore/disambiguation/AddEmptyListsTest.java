@@ -27,7 +27,6 @@ import scala.Tuple2;
 import scala.util.Either;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Set;
 
 import static org.kframework.kore.KORE.*;
@@ -48,7 +47,7 @@ public class AddEmptyListsTest {
     /*
      * Return a RuleGrammarGenerator which uses the default K syntax as loaded from kast.k
      */
-    private RuleGrammarGenerator makeRuleGrammarGenerator() throws IOException {
+    private RuleGrammarGenerator makeRuleGrammarGenerator() {
         String definitionText;
         FileUtil files = FileUtil.testFileUtil();
         ParserUtils parser = new ParserUtils(files::resolveWorkingDirectory, new KExceptionManager(new GlobalOptions()));

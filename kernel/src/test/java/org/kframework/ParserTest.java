@@ -10,7 +10,6 @@ import org.kframework.kore.Sort;
 import scala.Option;
 import scala.Tuple2;
 
-import java.io.IOException;
 import java.util.Set;
 
 import static org.kframework.kore.KORE.*;
@@ -23,7 +22,7 @@ public class ParserTest {
     ));
 
     @Test
-    public void simpleNoWarning() throws IOException {
+    public void simpleNoWarning() {
         Tuple2<Option<K>, Set<Warning>> actual = Parser.from(m).apply(xSort, "x");
         assertTrue("The parse should succeed, but was " + actual, actual._1().isDefined());
         assertTrue("There should be no warnings, but were: " + actual._2(), actual._2().isEmpty());
@@ -31,7 +30,7 @@ public class ParserTest {
     }
 
     @Test
-    public void simpleFailedParse() throws IOException {
+    public void simpleFailedParse() {
         Tuple2<Option<K>, Set<Warning>> actual = Parser.from(m).apply(xSort, "y");
         assertTrue("The parse should fail, but was " + actual, actual._1().isEmpty());
         assertTrue("There should be one error, but were: " + actual._2(), actual._2().size() == 1);

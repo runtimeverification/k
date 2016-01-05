@@ -27,7 +27,6 @@ import scala.Tuple2;
 import scala.util.Either;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Set;
 
 import static org.kframework.kore.KORE.*;
@@ -41,7 +40,7 @@ public class RuleGrammarTest {
         gen = makeRuleGrammarGenerator();
     }
 
-    public RuleGrammarGenerator makeRuleGrammarGenerator() throws IOException {
+    public RuleGrammarGenerator makeRuleGrammarGenerator() {
         String definitionText;
         FileUtil files = FileUtil.testFileUtil();
         ParserUtils parser = new ParserUtils(files::resolveWorkingDirectory, new KExceptionManager(new GlobalOptions()));

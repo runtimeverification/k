@@ -85,16 +85,12 @@ public class KDepFrontEnd extends FrontEnd {
         }
 
         List<org.kframework.kil.Module> modules = null;
-        try {
-            modules = parser.slurp(prelude + FileUtil.load(options.mainDefinitionFile()),
-                    Source.apply(options.mainDefinitionFile().getAbsolutePath()),
-                    options.mainDefinitionFile().getParentFile(),
-                    ListUtils.union(options.includes.stream()
-                            .map(files::resolveWorkingDirectory).collect(Collectors.toList()),
-                    Lists.newArrayList(Kompile.BUILTIN_DIRECTORY)));
-        } catch (IOException e) {
-            throw KEMException.criticalError(e.getMessage(), e);
-        }
+        modules = parser.slurp(prelude + FileUtil.load(options.mainDefinitionFile()),
+                Source.apply(options.mainDefinitionFile().getAbsolutePath()),
+                options.mainDefinitionFile().getParentFile(),
+                ListUtils.union(options.includes.stream()
+                                .map(files::resolveWorkingDirectory).collect(Collectors.toList()),
+                        Lists.newArrayList(Kompile.BUILTIN_DIRECTORY)));
         Set<File> allFiles = modules.stream().map(m -> new File(m.getSource().source())).collect(Collectors.toSet());
         System.out.println(files.resolveWorkingDirectory(".").toURI().relativize(files.resolveKompiled("timestamp").toURI()).getPath() + " : \\");
         for (File file : allFiles) {

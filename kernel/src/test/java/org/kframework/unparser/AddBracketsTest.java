@@ -37,7 +37,7 @@ public class AddBracketsTest {
         gen = makeRuleGrammarGenerator();
     }
 
-    public RuleGrammarGenerator makeRuleGrammarGenerator() throws IOException {
+    public RuleGrammarGenerator makeRuleGrammarGenerator() {
         String definitionText;
         FileUtil files = FileUtil.testFileUtil();
         ParserUtils parser = new ParserUtils(files::resolveWorkingDirectory, new KExceptionManager(new GlobalOptions()));

@@ -17,7 +17,6 @@ import org.kframework.utils.inject.JCommanderModule;
 import org.kframework.utils.inject.JCommanderModule.ExperimentalUsage;
 import org.kframework.utils.inject.JCommanderModule.Usage;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -69,11 +68,7 @@ public class KompileFrontEnd extends FrontEnd {
         Kompile kompile = new Kompile(options, files, kem, sw);
         //TODO(dwightguth): handle start symbols
         CompiledDefinition def = null;
-        try {
-            def = kompile.run(options.mainDefinitionFile(), options.mainModule(), options.syntaxModule(), Sorts.K(), koreBackend.get().steps(kompile));
-        } catch (IOException e) {
-            throw KEMException.criticalError(e.getMessage(), e);
-        }
+        def = kompile.run(options.mainDefinitionFile(), options.mainModule(), options.syntaxModule(), Sorts.K(), koreBackend.get().steps(kompile));
         loader.saveOrDie(files.resolveKompiled("compiled.bin"), def);
         koreBackend.get().accept(def);
         loader.saveOrDie(files.resolveKompiled("timestamp"), "");

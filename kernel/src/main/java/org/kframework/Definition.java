@@ -12,7 +12,6 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -24,7 +23,7 @@ public class Definition {
      * Parses the text to create a {@link Definition} object.
      * The main module of the definition will be last module defined in the text file.
      */
-    public static org.kframework.definition.Definition from(String definitionText) throws IOException {
+    public static org.kframework.definition.Definition from(String definitionText) {
         Pattern pattern = Pattern.compile("(?:^|\\s)module ([A-Z][A-Z\\-]*)");
         Matcher m = pattern.matcher(definitionText);
         if(!m.find()) {
@@ -37,21 +36,21 @@ public class Definition {
     /**
      * Parses the text to create a {@link Definition} object.
      */
-    public static org.kframework.definition.Definition from(String definitionText, String mainModuleName) throws IOException {
+    public static org.kframework.definition.Definition from(String definitionText, String mainModuleName) {
         return from(definitionText, mainModuleName, Source.apply("generated"));
     }
 
     /**
      * Parses the text to create a {@link Definition} object.
      */
-    public static org.kframework.definition.Definition from(String definitionText, String mainModuleName, Source source) throws IOException {
+    public static org.kframework.definition.Definition from(String definitionText, String mainModuleName, Source source) {
         return from(definitionText, mainModuleName, source, Lists.newArrayList(Kompile.BUILTIN_DIRECTORY));
     }
 
     /**
      * Parses the text to create a {@link Definition} object.
      */
-    public static org.kframework.definition.Definition from(String definitionText, String mainModuleName, Source source, List<File> lookupDirectories) throws IOException {
+    public static org.kframework.definition.Definition from(String definitionText, String mainModuleName, Source source, List<File> lookupDirectories) {
         File tempDir = Files.createTempDir();
         File theFileUtilTempDir = new File(tempDir.getAbsolutePath() + File.pathSeparator + "tempDir");
         File definitionDir = new File(tempDir.getAbsolutePath() + File.pathSeparator + "definitionDir");
