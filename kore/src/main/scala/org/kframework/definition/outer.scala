@@ -8,7 +8,6 @@ import dk.brics.automaton.{BasicAutomata, RegExp, RunAutomaton, SpecialOperation
 import org.kframework.POSet
 import org.kframework.attributes.Att
 import org.kframework.definition.Constructors._
-import org.kframework.kore.KToken
 import org.kframework.kore.Unapply.{KApply, KLabel}
 import org.kframework.kore._
 import org.kframework.utils.errorsystem.KEMException
@@ -260,22 +259,6 @@ class Module(val name: String, val imports: Set[Module], unresolvedLocalSentence
 
   override def equals(that: Any) = that match {
     case m: Module => m.name == name && m.sentences == sentences
-  }
-}
-
-class ModuleView(m: Module) {
-  lazy val initRules: Set[Rule] = m.rules.collect({ case r if r.att.contains("initializer") => r })
-
-  lazy val configVars: Set[KToken] = {
-    val transformer = new FoldK[Set[KToken]] {
-      override def apply(k: KToken): Set[KToken] = {
-        if (k.sort.name == "KConfigVar") Set(k) else unit
-      }
-      def unit = Set()
-      def merge(set1: Set[KToken], set2: Set[KToken]) = set1 | set2
-    }
-    initRules.map(r => transformer.apply(r.body))
-             .fold(transformer.unit)(transformer.merge)
   }
 }
 
