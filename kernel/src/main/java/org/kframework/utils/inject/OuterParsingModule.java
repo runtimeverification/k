@@ -14,7 +14,9 @@ import org.kframework.utils.options.OuterParsingOptions;
 import java.io.File;
 
 /**
- * Created by dwightguth on 12/30/15.
+ * Provides the information needed for tools that parse definitions from source to have acccess to {@link FileUtil}.
+ *
+ * Used currently by kompile, kdoc, and kdep.
  */
 public class OuterParsingModule extends AbstractModule {
 
