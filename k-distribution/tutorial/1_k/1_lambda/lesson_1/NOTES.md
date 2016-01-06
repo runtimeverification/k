@@ -1,5 +1,5 @@
 We now support the following line to the syntax module:
 
-  syntax priorities lambda_._ > __  // the priority may be beackwards ...
+  syntax priority lambda_._ > __  // exact syntax subject to change
 
-This will allow for fewer parentheses in programs. 
+This will allow for fewer parentheses in programs.
