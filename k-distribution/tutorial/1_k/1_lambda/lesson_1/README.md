@@ -7,7 +7,7 @@
 Here we define our first K module, which contains the initial syntax of the
 LAMBDA language, and learn how to use the basic K commands.
 
-We have just created an empty working folder, and opened a terminal window
+Let us create an empty working folder, and open a terminal window
 (to the left) and an editor window (to the right).  We will edit our K
 definition in the right window in a file called `lambda.k`, and will call
 the K tool commands in the left window.
