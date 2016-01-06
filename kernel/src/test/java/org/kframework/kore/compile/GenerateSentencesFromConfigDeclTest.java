@@ -5,15 +5,12 @@ import com.google.common.collect.Lists;
 import org.junit.Before;
 import org.junit.Test;
 import org.kframework.attributes.Att;
-import org.kframework.attributes.Source;
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.KLabels;
-import org.kframework.builtin.Labels;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.definition.Sentence;
-import org.kframework.definition.Terminal;
 import org.kframework.kil.Attribute;
 import org.kframework.kompile.Kompile;
 import org.kframework.kore.K;
@@ -24,7 +21,7 @@ import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
-import scala.collection.immutable.Set;
+import scala.collection.Set;
 
 import java.io.File;
 import java.util.Arrays;
@@ -51,10 +48,10 @@ public class GenerateSentencesFromConfigDeclTest {
 
         def =
                 parser.loadDefinition("K", "K", definitionText,
-                        Source.apply(definitionFile.getAbsolutePath()),
+                        definitionFile,
                         definitionFile.getParentFile(),
                         Lists.newArrayList(Kompile.BUILTIN_DIRECTORY),
-                        true);
+                        true, false);
     }
 
     @Test
@@ -78,7 +75,7 @@ public class GenerateSentencesFromConfigDeclTest {
                         Seq(NonTerminal(Sort("ThreadCellBag")), NonTerminal(Sort("ThreadCellBag"))),
                         Att().add("assoc","").add("comm","").add("unit",".ThreadCellBag")
                                 .add("element","ThreadCellBagItem").add("wrapElement","<thread>")
-                                .add("function").add("hook","BAG.concat")),
+                                .add("function").add("avoid").add("hook","BAG.concat")),
                 Production(".ThreadCellBag", Sort("ThreadCellBag"),
                         Seq(Terminal(".ThreadCellBag")),
                         Att().add("function").add("hook","BAG.unit")),

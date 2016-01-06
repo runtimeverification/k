@@ -10,6 +10,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.inject.RequestScoped;
 
 import javax.annotation.Nullable;
@@ -71,12 +72,12 @@ public class FileUtil {
         return env;
     }
 
-    public void deleteTempDir() {
+    public void deleteTempDir(KExceptionManager kem) {
         if (!options.debug) {
             try {
                 FileUtils.deleteDirectory(tempDir);
             } catch (IOException e) {
-                throw KEMException.criticalError("Failed to delete temporary directory", e);
+                kem.registerCriticalWarning("Failed to delete temporary directory", e);
             }
         }
     }

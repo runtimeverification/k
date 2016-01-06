@@ -4,12 +4,12 @@ module ID
   syntax Id ::= r"(?<![A-Za-z0-9\\_])[A-Za-z\\_][A-Za-z0-9\\_]*"     [token, autoReject]
 endmodule
 
-module EMPTY-ID
+module ID
   imports K
   imports LOGIC
 
   syntax Id
-  syntax Bool ::= "isId" "(" K ")"         [klabel(isId), function]
+  syntax Bool ::= isId ( K )         [function]
 endmodule
 
 module BOOL

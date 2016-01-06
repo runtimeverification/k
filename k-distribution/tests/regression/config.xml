@@ -68,13 +68,13 @@
            programs="kore-io/tests"
            results="kore-io/tests" />
 
-  <include file="ocamlbackend/tests/config.xml"
-           directory="ocamlbackend"
-           programs="ocamlbackend/tests"
-           results="ocamlbackend/tests" />
+  <include file="kore-cell-fragments/kool/tests/config.xml"
+           directory="kore-cell-fragments/kool"
+           programs="kore-cell-fragments/kool/tests"
+           results="kore-cell-fragments/kool/tests" />
 
-  <include file="kore-cell-fragments/imp_fragments/config.xml"
-           directory="kore-cell-fragments/imp_fragments/" />
+  <include file="kore-cell-fragments/config.xml"
+           directory="kore-cell-fragments/" />
 
   <include file="issue1724/config.xml"
            directory="issue1724"
@@ -89,6 +89,11 @@
            directory="kore-context"
            programs="kore-context/tests"
            results="kore-context/tests" />
+
+  <include file     ="error-messages/config.xml"
+           directory="error-messages"
+           programs ="error-messages"
+           results  ="error-messages" />
 
 </tests>
 

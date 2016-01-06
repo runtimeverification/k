@@ -2,7 +2,7 @@
 
 package org.kframework.kore.convertors;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.rules.TestName;

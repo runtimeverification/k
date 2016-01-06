@@ -50,7 +50,7 @@ public interface ConfigurationInfo {
      *  this method to return multiple sorts, e.g. if a particular * cell appears in multiple bags in different
      *  parts of a configuration.
      */
-    scala.collection.immutable.Set<Sort> getCellBagSortsOfCell(Sort k);
+    scala.collection.Set<Sort> getCellBagSortsOfCell(Sort k);
 
     /** The declared sort of the contents of a leaf cell */
     Sort leafCellType(Sort k);

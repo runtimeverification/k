@@ -78,12 +78,6 @@ of a program using the \texttt{search} option of \texttt{krun}.
 */
 
 module IMP-SYNTAX
-imports IMP-COMMON
-imports ID
-endmodule
-
-module IMP-COMMON
-imports DOMAINS-COMMON
 
 /*@ \section{Syntax}
 IMP++ adds several syntactic constructs to IMP\@.  Also, since the
@@ -152,8 +146,7 @@ endmodule
 
 
 module IMP
-  imports IMP-COMMON
-  imports DOMAINS
+  imports IMP-SYNTAX
 /*@ \section{Semantics}
 We next give the semantics of IMP++\@.  We start by first defining its
 configuration. */

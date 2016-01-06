@@ -1,4 +1,7 @@
 <!-- Copyright (c) 2010-2015 K Team. All Rights Reserved. -->
+[![Build Status](http://office.runtimeverification.com:8080/job/k-framework-master/badge/icon)](http://office.runtimeverification.com:8080/job/k-framework-master/)
+[![Join the chat at https://gitter.im/kframework/k](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/kframework/k?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 This is a readme file for the developers.
 
 # Prerequisites
@@ -98,7 +101,7 @@ in running the unit tests and checkstyle goals, run `mvn verify -DskipKTest` to
 skip the lengthy `ktest` execution.
 
 # Changing the KORE data structures
-If you need to change the KORE data structures (unless you are a K core developer, you probabably do not), see [Guide-for-changing-the-KORE-data-structures](https://github.com/kframework/k/wiki/Guide-for-changing-the-KORE-data-structures).
+If you need to change the KORE data structures (unless you are a K core developer, you probably do not), see [Guide-for-changing-the-KORE-data-structures](https://github.com/kframework/k/wiki/Guide-for-changing-the-KORE-data-structures).
 
 # Build the final release directory/archives
 Call `mvn install` in the base directory. This will attach an artifact to the local

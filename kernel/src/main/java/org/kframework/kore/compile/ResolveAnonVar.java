@@ -4,8 +4,7 @@ package org.kframework.kore.compile;
 import org.kframework.definition.Context;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
-import org.kframework.kore.K;
-import org.kframework.kore.KVariable;
+import org.kframework.kore.*;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -55,17 +54,17 @@ public class ResolveAnonVar {
     }
 
     void gatherVars(K term) {
-        new VisitKORE() {
+        new VisitK() {
             @Override
-            public Void apply(KVariable v) {
+            public void apply(KVariable v) {
                 vars.add(v);
-                return super.apply(v);
+                super.apply(v);
             }
         }.apply(term);
     }
 
     K transform(K term) {
-        return new TransformKORE() {
+        return new TransformK() {
             @Override
             public K apply(KVariable k) {
                 if (ANON_VAR.equals(k)) {

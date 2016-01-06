@@ -1,0 +1,2 @@
+[Error] Compiler: Make sure you give the correct stream names: stdinn
+It should be one of [stdin, stdout]

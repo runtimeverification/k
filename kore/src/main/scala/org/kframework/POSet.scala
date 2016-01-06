@@ -3,6 +3,7 @@ package org.kframework
 
 import java.util
 import java.util.Optional
+import collection._
 
 case class CircularityException[T](cycle: Seq[T]) extends Exception(cycle.mkString(" < "))
 
@@ -101,6 +102,8 @@ class POSet[T](directRelations: Set[(T, T)]) extends Serializable {
           }))
     }
   }
+
+  lazy val asOrdering: Ordering[T] = (x: T, y: T) => if (lessThanEq(x, y)) -1 else if (lessThanEq(y, x)) 1 else 0
 
   /** Return the subset of items from the argument which are not
     * less then any other item.

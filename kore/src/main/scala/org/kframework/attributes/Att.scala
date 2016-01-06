@@ -1,12 +1,13 @@
 package org.kframework.attributes
 
-import org.kframework.Collections._
 import org.kframework.builtin.Sorts
 import org.kframework.kore.Unapply._
 import org.kframework.kore.{KApply, K, KORE}
 import org.kframework.meta.{Up, Down}
 
 import scala.collection.JavaConverters._
+import collection._
+
 
 case class Att(att: Set[K]) extends AttributesToString {
 
@@ -30,7 +31,7 @@ case class Att(att: Set[K]) extends AttributesToString {
         if (cls.isInstance(x))
           x.asInstanceOf[T]
         else
-          getK(key).map(Att.down).map { _.asInstanceOf[T] }.get
+          getK(key).map(Att.down).map {_.asInstanceOf[T]}.get
       }
 
   def get[T](cls: Class[T]): Option[T] = get(cls.getName, cls)
@@ -60,18 +61,26 @@ case class Att(att: Set[K]) extends AttributesToString {
     }
 
   def +(o: Any) = new Att(att + Att.up(o))
+
   def +(k: K): Att = new Att(att + k)
+
   def +(k: String): Att = add(KORE.KApply(KORE.KLabel(k), KORE.KList(), Att()))
+
   def +(kv: (String, Any)): Att = add(KORE.KApply(KORE.KLabel(kv._1), KORE.KList(Att.up(kv._2)), Att()))
+
   def ++(that: Att) = new Att(att ++ that.att)
 
   // nice methods for Java
   def add(o: Any): Att = this + o
+
   def add(k: K): Att = this + k
+
   def add(k: String): Att = this + k
+
   def add(key: String, value: Any): Att = this + (key -> value)
 
   def stream = att.asJava.stream
+
   def addAll(that: Att) = this ++ that
 
   def remove(k: String): Att = new Att(att filter { case KApply(KLabel(`k`), _) => false; case _ => true })
@@ -89,12 +98,23 @@ object Att {
   val up = new Up(KORE, includes)
 
   implicit def asK(key: String, value: String) =
-    KORE.KApply(KORE.KLabel(key), KORE.KList(mutable(List(KORE.KToken(value, Sorts.KString, Att())))), Att())
+    KORE.KApply(KORE.KLabel(key), KORE.KList(List(KORE.KToken(value, Sorts.KString, Att())).asJava), Att())
 
   /**
     * attribute marking the top rule label
     */
   val topRule = "topRule"
+  val userList = "userList"
+  val generatedByListSubsorting = "generatedByListSubsorting"
+  val ClassFromUp = "classType"
+  val Location = "location"
+  val Function = "function"
+  val heat = "heat"
+  val cool = "cool"
+  val stuck = "#STUCK"
+  val refers_THIS_CONFIGURATION = "refers_THIS_CONFIGURATION"
+  val refers_RESTORE_CONFIGURATION = "refers_RESTORE_CONFIGURATION"
+  val syntaxModule = "syntaxModule"
 }
 
 trait AttributesToString {

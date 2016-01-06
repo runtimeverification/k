@@ -46,7 +46,7 @@ public class ParseInModule implements Serializable {
     private final Module parsingModule;
     private volatile Grammar grammar = null;
     private final boolean strict;
-    ParseInModule(Module seedModule) {
+    public ParseInModule(Module seedModule) {
         this(seedModule, seedModule, seedModule, seedModule, true);
     }
 

@@ -67,7 +67,7 @@ public abstract class AbstractUnifier implements Unifier {
         this.termContext = termContext;
         kSeqLabel = KLabelConstant.of(KLabels.KSEQ, termContext.definition());
         kDotLabel = KLabelConstant.of(KLabels.DOTK, termContext.definition());
-        kDot = KItem.of(kDotLabel, KList.concatenate(), termContext);
+        kDot = KItem.of(kDotLabel, KList.concatenate(), termContext.global());
     }
 
     void addUnificationTask(Term term, Term otherTerm) {
@@ -227,14 +227,14 @@ public abstract class AbstractUnifier implements Unifier {
 
     private Term upKSeq(Term otherTerm) {
         if (!isKSeq(otherTerm) && !isKSeqVar(otherTerm))
-            otherTerm = KItem.of(kSeqLabel, KList.concatenate(otherTerm, kDot), termContext);
+            otherTerm = KItem.of(kSeqLabel, KList.concatenate(otherTerm, kDot), termContext.global());
         return otherTerm;
     }
 
     private Term getCanonicalKSeq(Term term) {
         return stream(Assoc.flatten(kSeqLabel, Seq(term), kDotLabel).reverse())
                 .map(Term.class::cast)
-                .reduce((a, b) -> KItem.of(kSeqLabel, KList.concatenate(b, a), termContext))
+                .reduce((a, b) -> KItem.of(kSeqLabel, KList.concatenate(b, a), termContext.global()))
                 .orElse(kDot);
     }
 
@@ -280,11 +280,11 @@ public abstract class AbstractUnifier implements Unifier {
                     Term boundVars = terms.get(boundVarPosition);
                     Set<Variable> variables = boundVars.variableSet();
                     Map<Variable,Variable> freshSubstitution = Variable.rename(variables);
-                    Term freshBoundVars = boundVars.substituteWithBinders(freshSubstitution, termContext);
+                    Term freshBoundVars = boundVars.substituteWithBinders(freshSubstitution);
                     terms.set(boundVarPosition, freshBoundVars);
                     for (Integer bindingExpPosition : binderMap.get(boundVarPosition)) {
                         Term bindingExp = terms.get(bindingExpPosition-1);
-                        Term freshbindingExp = bindingExp.substituteWithBinders(freshSubstitution, termContext);
+                        Term freshbindingExp = bindingExp.substituteWithBinders(freshSubstitution);
                         terms.set(bindingExpPosition-1, freshbindingExp);
                     }
                 }

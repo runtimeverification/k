@@ -185,7 +185,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
         if (kList instanceof Variable) {
             kList = kList.sort().equals(Sort.KLIST) ? kList : KList.singleton(kList);
         }
-        return KItem.of(kLabel, kList, termContext, node.getSource(), node.getLocation());
+        return KItem.of(kLabel, kList, termContext.global(), node.getSource(), node.getLocation());
     }
 
     @Override
@@ -303,7 +303,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(org.kframework.kil.ListBuiltin node, Void _void)  {
-        BuiltinList.Builder builder = BuiltinList.builder(termContext);
+        BuiltinList.Builder builder = BuiltinList.builder(termContext.global());
         for (org.kframework.kil.Term element : node.elementsLeft()) {
             builder.addItem((Term) this.visitNode(element));
         }
@@ -318,7 +318,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(org.kframework.kil.SetBuiltin node, Void _void)  {
-        BuiltinSet.Builder builder = BuiltinSet.builder(termContext);
+        BuiltinSet.Builder builder = BuiltinSet.builder(termContext.global());
         for (org.kframework.kil.Term element : node.elements()) {
             builder.add((Term) this.visitNode(element));
         }
@@ -330,7 +330,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
 
     @Override
     public ASTNode visit(org.kframework.kil.MapBuiltin node, Void _void)  {
-        BuiltinMap.Builder builder = BuiltinMap.builder(termContext);
+        BuiltinMap.Builder builder = BuiltinMap.builder(termContext.global());
         for (Map.Entry<org.kframework.kil.Term, org.kframework.kil.Term> entry :
                 node.elements().entrySet()) {
             builder.put(
@@ -456,7 +456,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                 transformConjunction(ensures, (Term) this.visitNode(node.getEnsures()));
             }
 
-            ConjunctiveFormula lookups = ConjunctiveFormula.of(termContext);
+            ConjunctiveFormula lookups = ConjunctiveFormula.of(termContext.global());
             for (org.kframework.kil.BuiltinLookup lookup : ruleData.getLookups()) {
                 Variable base = (Variable) this.visitNode(lookup.base());
                 Term key = (Term) this.visitNode(lookup.key());
@@ -532,10 +532,10 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                     cellsToCopy,
                     ruleData.getMatchingInstructions(),
                     node,
-                    termContext);
+                    termContext.global());
 
             if (freshRules) {
-                return rule.getFreshRule(termContext);
+                return rule.renameVariables();
             }
             return rule;
         } catch (KEMException e) {
@@ -592,7 +592,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             partiallyEvaluatedRules.clear();
             for (Rule rule : Iterables.concat(definition.functionRules().values(),
                     definition.anywhereRules().values())) {
-                Rule freshRule = rule.getFreshRule(termContext);
+                Rule freshRule = rule.renameVariables();
                 Rule evaluatedRule = evaluateRule(freshRule, termContext);
                 partiallyEvaluatedRules.add(evaluatedRule);
 
@@ -649,7 +649,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
             for (Term term : rule.ensures()) {
                 ensures.add(term.evaluate(termContext));
             }
-            ConjunctiveFormula lookups = ConjunctiveFormula.of(termContext);
+            ConjunctiveFormula lookups = ConjunctiveFormula.of(termContext.global());
             for (Equality equality : rule.lookups().equalities()) {
                 lookups = lookups.add(
                         equality.leftHandSide().evaluate(termContext),
@@ -679,7 +679,7 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
                     rule.cellsToCopy(),
                     rule.matchingInstructions(),
                     rule,
-                    termContext);
+                    termContext.global());
             return newRule.equals(rule) ? origRule : newRule;
         } catch (KEMException e) {
             e.exception.addTraceFrame("while compiling rule at location " + rule.getSource() + rule.getLocation());

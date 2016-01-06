@@ -4,9 +4,7 @@ package org.kframework.kore.compile;
 import org.kframework.definition.Context;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
-import org.kframework.kore.K;
-import org.kframework.kore.KApply;
-import org.kframework.kore.KSequence;
+import org.kframework.kore.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +44,7 @@ public class LiftToKSequence {
     }
 
     public K lift(K term) {
-        K result = new TransformKORE()  {
+        K result = new TransformK()  {
             @Override
             public K apply(KApply k) {
                 List<K> children = new ArrayList<>();
@@ -69,7 +67,7 @@ public class LiftToKSequence {
     }
 
     public K lower(K term) {
-        return new TransformKORE() {
+        return new TransformK() {
             @Override
             public K apply(KSequence k) {
                 if (k.items().size() == 1) {

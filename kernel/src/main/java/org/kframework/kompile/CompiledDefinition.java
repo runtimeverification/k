@@ -1,6 +1,7 @@
 // Copyright (c) 2015 K Team. All Rights Reserved.
 package org.kframework.kompile;
 
+import org.kframework.attributes.Att;
 import org.kframework.attributes.Source;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
@@ -11,9 +12,11 @@ import org.kframework.kore.Sort;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.concrete2kore.ParseInModule;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
+import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.file.FileUtil;
+import scala.Option;
 import scala.Tuple2;
 import scala.util.Either;
 
@@ -54,7 +57,7 @@ public class CompiledDefinition implements Serializable {
      * A function that takes a string and the source of that string and parses it as a program into KAST.
      */
     public BiFunction<String, Source, K> getProgramParser(KExceptionManager kem) {
-        return getParser(kompiledDefinition.mainSyntaxModule(), programStartSymbol, kem);
+        return getParser(programParsingModuleFor(mainSyntaxModuleName(), kem).get(), programStartSymbol, kem);
     }
 
     /**
@@ -71,7 +74,31 @@ public class CompiledDefinition implements Serializable {
         return kompiledDefinition.mainModule();
     }
 
-    public Module syntaxModule() { return kompiledDefinition.mainSyntaxModule(); }
+    public String mainSyntaxModuleName() { return parsedDefinition.att().<String>getOptional(Att.syntaxModule()).get(); }
+
+    /**
+     * @return the module used for generating the program (i.e. ground) parser for the module named moduleName
+     * It automatically generates this module unless the user has already defined a module postfixed with
+     * {@link RuleGrammarGenerator#POSTFIX}. In latter case, it uses the user-defined module.
+     */
+    public Option<Module> programParsingModuleFor(String moduleName, KExceptionManager kem) {
+        RuleGrammarGenerator gen = new RuleGrammarGenerator(parsedDefinition, kompileOptions.strict());
+
+        Option<Module> userProgramParsingModule = parsedDefinition.getModule(moduleName + RuleGrammarGenerator.POSTFIX);
+        if (userProgramParsingModule.isDefined()) {
+            kem.registerInternalHiddenWarning("Module " + userProgramParsingModule.get().name() + " is user-defined.");
+            return userProgramParsingModule;
+        } else {
+            Option<Module> moduleOption = parsedDefinition.getModule(moduleName);
+            Option<Module> programParsingModuleOption = moduleOption.isDefined() ?
+                    Option.apply(gen.getProgramsGrammar(moduleOption.get())) :
+                    Option.empty();
+            if (programParsingModuleOption.isDefined()) {
+                kem.registerInternalHiddenWarning("Module " + programParsingModuleOption.get().name() + " has been automatically generated.");
+            }
+            return programParsingModuleOption;
+        }
+    }
 
     public Module languageParsingModule() { return languageParsingModule; }
 

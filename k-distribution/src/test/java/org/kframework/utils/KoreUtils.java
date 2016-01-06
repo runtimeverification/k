@@ -4,6 +4,10 @@ package org.kframework.utils;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.kframework.backend.java.symbolic.JavaBackend;
+import org.kframework.kore.KORE;
+import org.kframework.kore.KToken;
+import org.kframework.kore.Sort;
+import org.kframework.krun.KRunOptions;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.attributes.Source;
 import org.kframework.backend.java.symbolic.InitializeRewriter;
@@ -29,7 +33,8 @@ import org.kframework.utils.options.SMTOptions;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
 
@@ -57,14 +62,27 @@ public class KoreUtils {
     }
 
     public KoreUtils(String fileName, String mainModuleName, String mainProgramsModuleName) throws URISyntaxException {
+        this(fileName, mainModuleName, mainProgramsModuleName, false, Sorts.K(), false, false);
+    }
+
+    public KoreUtils(String fileName, String mainModuleName, String mainProgramsModuleName, boolean search, Sort sort, boolean heatCoolStrategies, boolean noPrelude) throws URISyntaxException {
         kem = new KExceptionManager(new GlobalOptions());
         File definitionFile = testResource(fileName);
         KompileOptions kompileOptions = new KompileOptions();
         GlobalOptions globalOptions = new GlobalOptions();
+        globalOptions.debug = true;
+        globalOptions.warnings = GlobalOptions.Warnings.ALL;
+
+        kompileOptions.experimental.heatCoolStrategies = heatCoolStrategies;
+        kompileOptions.outerParsing.noPrelude = noPrelude;
+
+        KRunOptions krunOptions = new KRunOptions();
+        krunOptions.search = search;
 
         Kompile kompile = new Kompile(kompileOptions, FileUtil.testFileUtil(), kem, false);
-        compiledDef = kompile.run(definitionFile, mainModuleName, mainProgramsModuleName, Sorts.K(),
+        compiledDef = kompile.run(definitionFile, mainModuleName, mainProgramsModuleName, sort,
                 new JavaBackend(kem, FileUtil.testFileUtil(), globalOptions, kompileOptions).steps(kompile));
+
         requestScope = new SimpleScope();
         injector = Guice.createInjector(new JavaSymbolicCommonModule() {
             @Override
@@ -76,6 +94,8 @@ public class KoreUtils {
                 bind(FileSystem.class).to(PortableFileSystem.class);
                 bind(FileUtil.class).toInstance(FileUtil.testFileUtil());
                 bind(KompileOptions.class).toInstance(kompileOptions);
+                bind(KRunOptions.class).toInstance(krunOptions);
+                bind(KRunOptions.ConfigurationCreationOptions.class).toInstance(krunOptions.configurationCreation);
 
                 bindScope(RequestScoped.class, requestScope);
                 bindScope(DefinitionScoped.class, requestScope);
@@ -85,17 +105,28 @@ public class KoreUtils {
     }
 
     public K getParsed(String program, Source source) throws IOException, URISyntaxException {
+        return getParsed(program, source, null);
+    }
+
+    public K getParsed(String program, Source source, String strategy) throws IOException, URISyntaxException {
         K parsed = programParser.apply(program, source);
         KRun krun = new KRun(kem, FileUtil.testFileUtil(), true);
-        return krun.plugConfigVars(compiledDef, Collections.singletonMap(KToken("$PGM", Sorts.KConfigVar()), parsed));
 
+        Map<KToken, K> map = new HashMap<>();
+        map.put(KToken("$PGM", Sorts.KConfigVar()), parsed);
+
+        BiFunction<String, Source, K> strategyParser = compiledDef.getParser(
+                compiledDef.programParsingModuleFor(compiledDef.mainSyntaxModuleName(), kem).get(), KORE.Sort("Strategy"), kem);
+
+        if (strategy != null)
+            map.put(KToken("$STRATEGY", Sorts.KConfigVar()), strategyParser.apply(strategy, Source.apply("given strategy")));
+        return krun.plugConfigVars(compiledDef, map);
     }
 
     public K stepRewrite(K parsedPgm, Optional<Integer> depth) {
         requestScope.enter();
         InitializeRewriter init = injector.getInstance(InitializeRewriter.class);
         try {
-            InitializeRewriter initRewriter = injector.getInstance(InitializeRewriter.class);
             K kResult = init.apply(compiledDef.executionModule()).execute(parsedPgm, depth).k();
             return kResult;
         } finally {

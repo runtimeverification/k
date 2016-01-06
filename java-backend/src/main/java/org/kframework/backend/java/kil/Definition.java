@@ -17,26 +17,20 @@ import org.kframework.attributes.Att;
 import org.kframework.backend.java.compile.KOREtoBackendKIL;
 import org.kframework.backend.java.indexing.IndexingTable;
 import org.kframework.backend.java.indexing.RuleIndex;
-import org.kframework.backend.java.symbolic.JavaBackend;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Subsorts;
-import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.ConfigurationInfo;
 import org.kframework.compile.ConfigurationInfoFromModule;
 import org.kframework.compile.utils.ConfigurationStructureMap;
-import org.kframework.definition.DefinitionTransformer;
 import org.kframework.definition.Module;
-import org.kframework.definition.ModuleTransformer;
-import org.kframework.definition.Sentence;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
 import org.kframework.kil.DataStructureSort;
 import org.kframework.kil.Production;
 import org.kframework.kil.loader.Context;
-import org.kframework.kore.KApply;
 import org.kframework.kore.convertors.KOREtoKIL;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -57,7 +51,6 @@ import java.util.stream.Collectors;
 
 import static org.kframework.kore.KORE.Sort;
 import static org.kframework.Collections.*;
-import static scala.compat.java8.JFunction.*;
 
 /**
  * A K definition in the format of the Java Rewrite Engine.
@@ -67,6 +60,8 @@ import static scala.compat.java8.JFunction.*;
 public class Definition extends JavaSymbolicObject {
 
     public static final String AUTOMATON = "automaton";
+
+    public final Module module;
 
     private static class DefinitionData implements Serializable {
         public final Subsorts subsorts;
@@ -140,9 +135,9 @@ public class Definition extends JavaSymbolicObject {
     /**
      * all the rules indexed with the ordinal used by {@link org.kframework.backend.java.symbolic.FastRuleMatcher}
      */
-    public Map<Integer, Rule> ruleTable = new HashMap<>();
+    public final Map<Integer, Rule> ruleTable;
 
-    public Map<Integer, Integer> reverseRuleTable = new HashMap<>();
+    public final Map<Integer, Integer> reverseRuleTable = new HashMap<>();
 
     private final Map<KItem.CacheTableColKey, KItem.CacheTableValue> sortCacheTable = new HashMap<>();
 
@@ -150,6 +145,7 @@ public class Definition extends JavaSymbolicObject {
         kLabels = new HashSet<>();
         this.kem = kem;
         this.indexingData = indexingData;
+        this.module = null;
 
         ImmutableSet.Builder<Sort> builder = ImmutableSet.builder();
         // TODO(YilongL): this is confusing; give a better name to tokenSorts
@@ -217,9 +213,11 @@ public class Definition extends JavaSymbolicObject {
                 null,
                 context.getConfigurationStructureMap());
         this.context = context;
+        this.ruleTable = new HashMap<>();
     }
 
     public Definition(org.kframework.definition.Module module, KExceptionManager kem) {
+        this.module = module;
         kLabels = new HashSet<>();
         this.kem = kem;
 
@@ -227,9 +225,7 @@ public class Definition extends JavaSymbolicObject {
         JavaConversions.mapAsJavaMap(module.signatureFor()).entrySet().stream().forEach(e -> {
             JavaConversions.setAsJavaSet(e.getValue()).stream().forEach(p -> {
                 ImmutableList.Builder<Sort> sortsBuilder = ImmutableList.builder();
-                JavaConversions.seqAsJavaList(p._1()).stream()
-                        .map(s -> Sort.of(s.name()))
-                        .forEach(sortsBuilder::add);
+                stream(p._1()).map(s -> Sort.of(s.name())).forEach(sortsBuilder::add);
                 signaturesBuilder.put(
                         e.getKey().name(),
                         new SortSignature(sortsBuilder.build(), Sort.of(p._2().name())));
@@ -266,6 +262,7 @@ public class Definition extends JavaSymbolicObject {
         context = null;
 
         this.indexingData = new IndexingTable.Data();
+        this.ruleTable = new HashMap<>();
     }
 
     private Map<org.kframework.kore.Sort, DataStructureSort> getDataStructureSorts(Module module) {
@@ -306,8 +303,8 @@ public class Definition extends JavaSymbolicObject {
     /**
      * Converts the org.kframework.Rules to backend Rules, also plugging in the automaton rule
      */
-    public void addKoreRules(Module module, TermContext termContext) {
-        KOREtoBackendKIL transformer = new KOREtoBackendKIL(module, this, termContext, false, termContext.global().krunOptions.experimental.prove != null);
+    public void addKoreRules(Module module, GlobalContext global) {
+        KOREtoBackendKIL transformer = new KOREtoBackendKIL(module, this, global, false, global.krunOptions.experimental.prove != null);
         List<org.kframework.definition.Rule> koreRules = JavaConversions.setAsJavaSet(module.sentences()).stream()
                 .filter(org.kframework.definition.Rule.class::isInstance)
                 .map(org.kframework.definition.Rule.class::cast)
@@ -346,6 +343,7 @@ public class Definition extends JavaSymbolicObject {
         this.indexingData = indexingData;
         this.ruleTable = ruleTable;
         this.automaton = automaton;
+        this.module = null;
 
         this.definitionData = definitionData;
         this.context = null;

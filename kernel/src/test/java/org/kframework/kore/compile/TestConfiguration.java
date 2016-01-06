@@ -198,7 +198,7 @@ class TestConfiguration implements ConfigurationInfo {
     }
 
     @Override
-    public scala.collection.immutable.Set<Sort> getCellBagSortsOfCell(Sort k) {
+    public scala.collection.Set<Sort> getCellBagSortsOfCell(Sort k) {
         return Set(Sort(k.name() + "Bag"));
     }
 }

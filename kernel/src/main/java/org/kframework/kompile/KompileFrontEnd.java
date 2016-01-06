@@ -60,16 +60,17 @@ public class KompileFrontEnd extends FrontEnd {
 
     @Override
     public int run() {
-        if (!options.mainDefinitionFile().exists()) {
+        if (!options.outerParsing.mainDefinitionFile(files).exists()) {
             throw KEMException.criticalError("Definition file doesn't exist: " +
-                    options.mainDefinitionFile().getAbsolutePath());
+                    options.outerParsing.mainDefinitionFile(files).getAbsolutePath());
         }
 
         Kompile kompile = new Kompile(options, files, kem, sw);
         //TODO(dwightguth): handle start symbols
-        CompiledDefinition def = kompile.run(options.mainDefinitionFile(), options.mainModule(), options.syntaxModule(), Sorts.K(), koreBackend.get().steps(kompile));
+        CompiledDefinition def = kompile.run(options.outerParsing.mainDefinitionFile(files), options.mainModule(files), options.syntaxModule(files), Sorts.K(), koreBackend.get().steps(kompile));
         loader.saveOrDie(files.resolveKompiled("compiled.bin"), def);
         koreBackend.get().accept(def);
+        loader.saveOrDie(files.resolveKompiled("timestamp"), "");
         sw.printIntermediate("Save to disk");
         sw.printTotal("Total");
         return 0;

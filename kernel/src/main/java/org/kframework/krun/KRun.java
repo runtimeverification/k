@@ -4,18 +4,16 @@ package org.kframework.krun;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.attributes.Source;
 import org.kframework.builtin.Sorts;
+import org.kframework.definition.ConfigVars;
 import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
 import org.kframework.kompile.CompiledDefinition;
+import org.kframework.kore.VisitK;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KToken;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
-import org.kframework.parser.binary.BinaryParser;
-import org.kframework.unparser.ToBinary;
-import org.kframework.unparser.ToKast;
-import org.kframework.kore.compile.VisitKORE;
 import org.kframework.krun.modes.ExecutionMode;
 import org.kframework.main.Main;
 import org.kframework.parser.ProductionReference;
@@ -45,6 +43,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import static org.kframework.Collections.*;
 import static org.kframework.kore.KORE.*;
 
 /**
@@ -110,7 +109,7 @@ public class KRun {
         if (searchResult.isEmpty()) {
             outputFile("No Search Results \n", options);
         }
-        int i = 0;
+        int i = 1;
         List<String> results = new ArrayList<>();
         for (Map<? extends KVariable, ? extends K> substitution : searchResult) {
             StringBuilder sb = new StringBuilder();
@@ -119,8 +118,9 @@ public class KRun {
         }
         Collections.sort(results);
         StringBuilder sb = new StringBuilder();
+        sb.append("Search results:\n\n");
         for (String solution : results) {
-            sb.append("Solution: ").append(i++).append("\n");
+            sb.append("Solution ").append(i++).append(":\n");
             sb.append(solution);
         }
         outputFile(sb.toString(), options);
@@ -220,7 +220,7 @@ public class KRun {
     /**
      * Given a substitution, represented by a map of KVariables to K, print the substitution. The printing follows the following format:
      * If Pattern is represented by a single variable, then entire substitution is printed without the pattern, else
-     * variable is printed, followed by --->, and then the substitution corresponding K.
+     * variable is printed, followed by -->, and then the substitution corresponding K.
      *
      * @param subst         A Map from KVariables to K representing the result of a match of a pattern on a configuration.
      * @param parsedPattern The parsed (not compiled) pattern object. The parsed pattern is used to
@@ -236,12 +236,12 @@ public class KRun {
             return;
         }
         List<String> varList = new ArrayList<>();
-        new VisitKORE() {
+        new VisitK() {
             @Override
-            public Void apply(KVariable k) {
+            public void apply(KVariable k) {
                     /* Not Observing reflexivity Rule requires comparison by name */
                 varList.add(k.name());
-                return super.apply(k);
+                super.apply(k);
             }
         }.apply(parsedPattern.body());
         for (KVariable variable : subst.keySet()) {
@@ -252,7 +252,7 @@ public class KRun {
                     return;
                 }
                 prettyPrint(compiledDefinition, outputModes, print, variable);
-                print.accept("---> \n".getBytes());
+                print.accept(" -->\n".getBytes());
                 prettyPrint(compiledDefinition, outputModes, print, value);
             }
         }
@@ -261,7 +261,7 @@ public class KRun {
     private K parseConfigVars(KRunOptions options, CompiledDefinition compiledDef) {
         HashMap<KToken, K> output = new HashMap<>();
         for (Map.Entry<String, Pair<String, String>> entry
-                : options.configurationCreation.configVars(compiledDef.languageParsingModule().name()).entrySet()) {
+                : options.configurationCreation.configVars(compiledDef.getParsedDefinition().mainModule().name()).entrySet()) {
             String name = entry.getKey();
             String value = entry.getValue().getLeft();
             String parser = entry.getValue().getRight();
@@ -278,7 +278,26 @@ public class KRun {
             output.put(KToken("$STDIN", Sorts.KConfigVar()), KToken("\"" + stdin + "\"", Sorts.String()));
             output.put(KToken("$IO", Sorts.KConfigVar()), KToken("\"off\"", Sorts.String()));
         }
+        checkConfigVars(output.keySet(), compiledDef);
         return plugConfigVars(compiledDef, output);
+    }
+
+    private void checkConfigVars(Set<KToken> inputConfigVars, CompiledDefinition compiledDef) {
+        Set<KToken> defConfigVars = mutable(new ConfigVars(compiledDef.kompiledDefinition.mainModule()).configVars());
+
+        for (KToken defConfigVar : defConfigVars) {
+            if (!inputConfigVars.contains(defConfigVar)) {
+                throw KEMException.compilerError("Configuration variable missing: " + defConfigVar.s());
+            }
+        }
+
+        for (KToken inputConfigVar : inputConfigVars) {
+            if (!defConfigVars.contains(inputConfigVar)) {
+                if (!inputConfigVar.s().equals("$STDIN") && !inputConfigVar.s().equals("$IO")) {
+                    kem.registerCompilerWarning("User specified configuration variable " + inputConfigVar.s() + " which does not exist.");
+                }
+            }
+        }
     }
 
     public static String getStdinBuffer(boolean ttyStdin) {

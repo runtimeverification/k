@@ -13,7 +13,7 @@ import org.kframework.definition.RegexTerminal;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Tag;
 import org.kframework.kil.*;
-import org.kframework.kore.AbstractKORETransformer;
+import org.kframework.kore.AbstractKTransformer;
 import org.kframework.kore.InjectedKLabel;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -23,6 +23,7 @@ import org.kframework.kore.KSequence;
 import org.kframework.kore.KToken;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import scala.Enumeration.Value;
 import scala.Tuple2;
@@ -39,9 +40,7 @@ import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static org.kframework.Collections.Seq;
-import static org.kframework.Collections.Set;
-import static org.kframework.Collections.immutable;
+import static org.kframework.Collections.*;
 import static org.kframework.definition.Constructors.*;
 import static org.kframework.kore.KORE.*;
 
@@ -49,12 +48,14 @@ public class KILtoKORE extends KILTransformation<Object> {
 
     private org.kframework.kil.loader.Context context;
     private final boolean doDropQuote;
+    private boolean autoImportDomains;
     private KILtoInnerKORE inner;
     private final boolean syntactic;
 
-    public KILtoKORE(org.kframework.kil.loader.Context context, boolean syntactic, boolean doDropQuote) {
+    public KILtoKORE(org.kframework.kil.loader.Context context, boolean syntactic, boolean doDropQuote, boolean autoImportDomains) {
         this.context = context;
         this.doDropQuote = doDropQuote;
+        this.autoImportDomains = autoImportDomains;
         inner = new KILtoInnerKORE(context, doDropQuote);
         this.syntactic = syntactic;
     }
@@ -88,12 +89,18 @@ public class KILtoKORE extends KILTransformation<Object> {
 
         return Definition(
                 koreModules.get(mainModule.getName()),
-                koreModules.get(mainModule.getName()),
-                immutable(new HashSet<>(koreModules.values())));
+                immutable(new HashSet<>(koreModules.values())), Att());
     }
 
     public org.kframework.definition.Module apply(Module mainModule, Set<Module> allKilModules,
                                                   Map<String, org.kframework.definition.Module> koreModules) {
+        return apply(mainModule, allKilModules, koreModules, Seq());
+    }
+
+    private org.kframework.definition.Module apply(Module mainModule, Set<Module> allKilModules,
+                                                  Map<String, org.kframework.definition.Module> koreModules,
+                                                  scala.collection.Seq<Module> visitedModules) {
+        checkCircularModuleImports(mainModule, visitedModules);
         Set<org.kframework.definition.Sentence> items = mainModule.getItems().stream()
                 .filter(j -> !(j instanceof org.kframework.kil.Import))
                 .flatMap(j -> apply(j).stream()).collect(Collectors.toSet());
@@ -102,6 +109,15 @@ public class KILtoKORE extends KILTransformation<Object> {
                 .filter(imp -> imp instanceof Import)
                 .map(imp -> (Import) imp)
                 .collect(Collectors.toSet());
+
+        boolean isPredefined = mainModule.getSource().source().contains("builtin");
+        if (autoImportDomains && !isPredefined) {
+            if (mainModule.getName().endsWith("-SYNTAX")) {
+                importedModuleNames.add(new Import("DOMAINS-SYNTAX"));
+            } else {
+                importedModuleNames.add(new Import("DOMAINS"));
+            }
+        }
 
         Set<org.kframework.definition.Module> importedModules = importedModuleNames.stream()
                 .map(imp -> {
@@ -112,7 +128,7 @@ public class KILtoKORE extends KILTransformation<Object> {
                         Module mod = theModule.get();
                         org.kframework.definition.Module result = koreModules.get(mod.getName());
                         if (result == null) {
-                            result = apply(mod, allKilModules, koreModules);
+                            result = apply(mod, allKilModules, koreModules, cons(mainModule, visitedModules));
                         }
                         return result;
                     } else if (koreModules.containsKey(imp.getName())) {
@@ -126,6 +142,17 @@ public class KILtoKORE extends KILTransformation<Object> {
                 inner.convertAttributes(mainModule));
         koreModules.put(newModule.name(), newModule);
         return newModule;
+    }
+
+    private static void checkCircularModuleImports(Module mainModule, scala.collection.Seq<Module> visitedModules) {
+        if (visitedModules.contains(mainModule)) {
+            String msg = "Found circularity in module imports: ";
+            for (Module m : mutable(visitedModules)) { // JavaConversions.seqAsJavaList(visitedModules)
+                msg += m.getName() + " < ";
+            }
+            msg += visitedModules.head().getName();
+            throw KEMException.compilerError(msg);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -172,7 +199,7 @@ public class KILtoKORE extends KILTransformation<Object> {
                     KToken("true", Sorts.Bool()), inner.convertAttributes(r));
         K body = inner.apply(r.getBody());
 
-        AbstractKORETransformer<Set<Tuple2<K, Sort>>> gatherSorts = new AbstractKORETransformer<Set<Tuple2<K, Sort>>>() {
+        AbstractKTransformer<Set<Tuple2<K, Sort>>> gatherSorts = new AbstractKTransformer<Set<Tuple2<K, Sort>>>() {
             @Override
             public Set<Tuple2<K, Sort>> apply(KApply k) {
                 return processChildren(k.klist());
@@ -227,7 +254,7 @@ public class KILtoKORE extends KILTransformation<Object> {
     }
 
     public org.kframework.definition.SyntaxAssociativity apply(PriorityExtendedAssoc ii) {
-        scala.collection.immutable.Set<Tag> tags = toTags(ii.getTags());
+        scala.collection.Set<Tag> tags = toTags(ii.getTags());
         String assocOrig = ii.getAssoc();
         Value assoc = applyAssoc(assocOrig);
         return SyntaxAssociativity(assoc, tags);
@@ -236,26 +263,26 @@ public class KILtoKORE extends KILTransformation<Object> {
     public Value applyAssoc(String assocOrig) {
         // "left", "right", "non-assoc"
         switch (assocOrig) {
-            case "left":
-                return Associativity.Left();
-            case "right":
-                return Associativity.Right();
-            case "non-assoc":
-                return Associativity.NonAssoc();
-            default:
-                throw new AssertionError("Incorrect assoc string: " + assocOrig);
+        case "left":
+            return Associativity.Left();
+        case "right":
+            return Associativity.Right();
+        case "non-assoc":
+            return Associativity.NonAssoc();
+        default:
+            throw new AssertionError("Incorrect assoc string: " + assocOrig);
         }
     }
 
     public Set<org.kframework.definition.Sentence> apply(PriorityExtended pe) {
-        Seq<scala.collection.immutable.Set<Tag>> seqOfSetOfTags = immutable(pe.getPriorityBlocks()
+        Seq<scala.collection.Set<Tag>> seqOfSetOfTags = immutable(pe.getPriorityBlocks()
                 .stream().map(block -> toTags(block.getProductions()))
                 .collect(Collectors.toList()));
 
         return Sets.newHashSet(SyntaxPriority(seqOfSetOfTags));
     }
 
-    public scala.collection.immutable.Set<Tag> toTags(List<KLabelConstant> labels) {
+    public scala.collection.Set<Tag> toTags(List<KLabelConstant> labels) {
         return immutable(labels.stream().flatMap(l -> context.tags.get(l.getLabel()).stream().map(p -> Tag(dropQuote(p.getKLabel())))).collect(Collectors.toSet()));
     }
 
@@ -270,7 +297,7 @@ public class KILtoKORE extends KILTransformation<Object> {
             return res;
         }
 
-        Function<PriorityBlock, scala.collection.immutable.Set<Tag>> applyToTags = (PriorityBlock b) -> immutable(b
+        Function<PriorityBlock, scala.collection.Set<Tag>> applyToTags = (PriorityBlock b) -> immutable(b
                 .getProductions().stream().filter(p -> p.getKLabel() != null).map(p -> Tag(dropQuote(p.getKLabel())))
                 .collect(Collectors.toSet()));
 
@@ -368,7 +395,7 @@ public class KILtoKORE extends KILTransformation<Object> {
         String follow = "#";
         int followIndex = regex.lastIndexOf("(?!");
         if (followIndex != -1 && regex.endsWith(")")) { // find the follow pattern at the end: (?!X)
-            if (!(followIndex > 0 && regex.charAt(followIndex-1) == '\\')) {
+            if (!(followIndex > 0 && regex.charAt(followIndex - 1) == '\\')) {
                 follow = regex.substring(followIndex + "(?!".length(), regex.length() - 1);
                 regex = regex.substring(0, followIndex);
             }
@@ -382,7 +409,7 @@ public class KILtoKORE extends KILTransformation<Object> {
         // Transform list declarations of the form Es ::= List{E, ","} into something representable in kore
         org.kframework.kore.Sort elementSort = apply(userList.getSort());
 
-        org.kframework.attributes.Att attrs = inner.convertAttributes(p).add(KOREtoKIL.USER_LIST_ATTRIBUTE, userList.getListType());
+        org.kframework.attributes.Att attrs = inner.convertAttributes(p).add(Att.userList(), userList.getListType());
         String kilProductionId = "" + System.identityHashCode(p);
         Att attrsWithKilProductionId = attrs.add(KILtoInnerKORE.PRODUCTION_ID, kilProductionId);
         org.kframework.definition.Production prod1, prod3;

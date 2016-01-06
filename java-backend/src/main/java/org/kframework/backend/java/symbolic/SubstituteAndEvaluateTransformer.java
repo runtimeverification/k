@@ -112,7 +112,7 @@ public class SubstituteAndEvaluateTransformer extends CopyOnWriteTransformer {
         Term result = kItem;
         if (proceed(kItem)) {
             result = ((KItem) super
-                    .transform(BinderSubstitutionTransformer.binderSensitiveSubstitute(kItem, context)))
+                    .transform(BinderSubstitutionTransformer.binderSensitiveSubstitute(kItem)))
                     .resolveFunctionAndAnywhere(copyOnShareSubstAndEval, context);
         }
 

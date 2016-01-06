@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2015 K Team. All Rights Reserved. -->
+<tests>
+    <test
+        definition="x.k"
+        programs="."
+        extension="x"
+        skip="pdf"
+        posixInitScript="run.sh"
+        results="." >
+    </test>
+
+    <include file     ="config-var-not-exist-or-missing/config.xml"
+             directory="config-var-not-exist-or-missing"
+             programs ="config-var-not-exist-or-missing"
+             results  ="config-var-not-exist-or-missing" />
+</tests>

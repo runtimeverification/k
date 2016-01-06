@@ -43,7 +43,7 @@ public class AbstractKMachine {
         this.subject = subject;
         this.instructions = instructions;
         this.cells = cells;
-        this.substitution = ConjunctiveFormula.of(context);
+        this.substitution = ConjunctiveFormula.of(context.global());
         this.unifier = new SymbolicUnifier(context);
         this.context = context;
     }
@@ -124,7 +124,7 @@ public class AbstractKMachine {
 
                 if (!substitutions.isEmpty()) {
                     if (substitutions.size() == 1) {
-                        substitution = substitution.addAndSimplify(substitutions.get(0));
+                        substitution = substitution.addAndSimplify(substitutions.get(0), context);
                         if (substitution.isFalse()) {
                             success = false;
                             return;
@@ -132,7 +132,7 @@ public class AbstractKMachine {
                     } else {
                         substitution = substitution.add(new DisjunctiveFormula(
                                 substitutions,
-                                context));
+                                context.global()));
                     }
                     success = true;
                     pc = successPC;

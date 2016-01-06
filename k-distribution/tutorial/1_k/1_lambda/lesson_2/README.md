@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2012-2014 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2012-2015 K Team. All Rights Reserved. -->
 ### Module Importing, Rules, Variables
 
 [MOVIE [4'03"]](http://youtu.be/NDXgYfHG6R4)
@@ -25,10 +25,17 @@ SUBSTITUTION, which is defined in the required `substitution.k` file.
 
 Now we have all the substitution machinery available for our definition.
 However, since our substitution is generic, it cannot know which language
-constructs bind variables; however, this information is critical in order to
-correctly solve the variable capture problem.  Thus, you have to tell the
-substitution that your lambda construct is meant to be a binder.  This is
-simply done using the attribute `binder`.
+constructs bind variables, and what counts as a variable; however, this
+information is critical in order to correctly solve the variable capture
+problem.  Thus, you have to tell the substitution that your lambda construct
+is meant to be a binder, and that your `Id` terms should be treated as variables
+for substitution.  The former is done using the attribute `binder`.
+By default, `binder` binds all the variables occurring anywhere in the first 
+argument of the corresponding syntactic construct within its other arguments;
+you can configure which arguments are bound where, but that will be discussed
+in subsequent lectures.  To tell K which terms are meant to act as variables
+for binding and substitution, we have to explicitly subsort the desired syntactic 
+categories to the builtin `KVariable` sort.
 
 Now we are ready to define our first K rule.  Rules are introduced with the
 keyword `rule` and make use of the rewrite symbol, `=>`.  In our case,
@@ -51,29 +58,18 @@ yet concerned with proving) that the first two variables will always have the
 claimed sorts whenever we execute any expression that parses within our
 original grammar.
 
-Let us compile the definition and then run some programs.
-
-First, you will notice that a new cell has been automatically added to the
-default configuration.  For example,
+Let us compile the definition and then run some programs.  For example,
 
     krun closed-variable-capture.lambda
 
 yields the output
 
     <k>
-      lambda _id0 . ((lambda x . (lambda y . (x  y)))  _id0) 
+      lambda y . ((lambda x . (lambda y . (x  y))) y)
     </k> 
-    <nextId>
-      1 
-    </nextId> 
 
-The new cell `<nextId> ... </nextId>` has been added by the substitution,
-to keep track of the fresh variables that it needs to generate in order to
-avoid variable capture.  In our example above, it has already used a fresh
-identifier, `_id0`, and thus the counter has been incremented (from 0 to 1).
-
-Second, you will notice that only certain programs reduce (some even yield
-non-termination, such as `omega.lambda`), while others do not.  For example,
+Notice that only certain programs reduce (some even yield non-termination,
+such as `omega.lambda`), while others do not.  For example,
 `free-variable-capture.lambda` does not reduce its second argument expression
 to `y`, as we would expect.  This is because the K rewrite rules between syntactic
 terms do not apply anywhere they match.  They only apply where they have been

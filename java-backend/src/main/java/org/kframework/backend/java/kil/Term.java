@@ -9,12 +9,10 @@ import org.kframework.backend.java.symbolic.BottomUpVisitor;
 import org.kframework.backend.java.symbolic.CopyOnShareSubstAndEvalTransformer;
 import org.kframework.backend.java.symbolic.Evaluator;
 import org.kframework.backend.java.symbolic.SubstituteAndEvaluateTransformer;
-import org.kframework.backend.java.symbolic.Transformable;
 import org.kframework.backend.java.util.Constants;
 import org.kframework.kore.convertors.KILtoInnerKORE;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -25,7 +23,7 @@ import java.util.Set;
  *
  * @author AndreiS
  */
-public abstract class Term extends JavaSymbolicObject implements Transformable, Comparable<Term>,
+public abstract class Term extends JavaSymbolicObject<Term> implements Comparable<Term>,
         org.kframework.kore.K {
 
     protected final Kind kind;
@@ -104,22 +102,6 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
     }
 
     /**
-     * Returns a new {@code Term} instance obtained from this term by applying a binder insensitive substitution.
-     */
-    @Override
-    public Term substitute(Map<Variable, ? extends Term> substitution, TermContext context) {
-        return (Term) super.substitute(substitution, context);
-    }
-
-    /**
-     * Returns a new {@code Term} instance obtained from this term by applying a binder-aware substitution.
-     */
-    @Override
-    public Term substituteWithBinders(Map<Variable, ? extends Term> substitution, TermContext context) {
-        return (Term) super.substituteWithBinders(substitution, context);
-    }
-
-    /**
      * Returns a new {@code Term} instance obtained from this term by applying
      * substitution.
      * <p>
@@ -162,16 +144,6 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
     }
 
     /**
-     * Similar to {@link Term#copyOnShareSubstAndEval(Map, Set, TermContext)}
-     * except the empty reusable variable set.
-     *
-     * @see {@link Term#copyOnShareSubstAndEval(Map, Set, TermContext)}
-     */
-    public Term copyOnShareSubstAndEval(Map<Variable, ? extends Term> substitution, TermContext context) {
-        return copyOnShareSubstAndEval(substitution, Collections.<Variable>emptySet(), context);
-    }
-
-    /**
      * Returns a list containing the contents of each occurrence of a cell with the given name.
      *
      * Warning: this is slow!
@@ -193,15 +165,6 @@ public abstract class Term extends JavaSymbolicObject implements Transformable, 
             }
         });
         return contents;
-    }
-
-     /**
-     * Returns a new {@code Term} instance obtained from this term by substituting variable with
-     * term.
-     */
-    @Override
-    public Term substituteWithBinders(Variable variable, Term term, TermContext context) {
-        return (Term) super.substituteWithBinders(variable, term, context);
     }
 
     @Override

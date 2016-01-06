@@ -5,6 +5,7 @@ package org.kframework.parser.outer;
 import com.beust.jcommander.internal.Lists;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
+import org.kframework.attributes.Att;
 import org.kframework.attributes.Source;
 import org.kframework.definition.Definition;
 import org.kframework.kore.K;
@@ -38,12 +39,12 @@ public class NewOuterParserTest {
         ParserUtils parser = new ParserUtils(FileUtil.testFileUtil(), new KExceptionManager(new GlobalOptions()));
         Definition definition = parser.loadDefinition(
                 mainModuleName,
-                mainProgramsModule, definitionString, source,
+                mainProgramsModule, definitionString, definitionFile,
                 definitionFile.getParentFile(),
                 Lists.newArrayList(BUILTIN_DIRECTORY),
-                true);
+                true, false);
 
-        K kBody = ParserUtils.parseWithModule(theTextToParse, startSymbol, source, definition.mainSyntaxModule());
+        K kBody = ParserUtils.parseWithModule(theTextToParse, startSymbol, source, definition.getModule(definition.att().<String>get(Att.syntaxModule()).get()).get());
         //System.out.println(kBody);
     }
 }

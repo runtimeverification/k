@@ -74,13 +74,13 @@ public class ConstrainedTerm extends JavaSymbolicObject {
 
     private final TermContext context;
 
-    public ConstrainedTerm(Term term, ConjunctiveFormula constraint) {
+    public ConstrainedTerm(Term term, ConjunctiveFormula constraint, TermContext context) {
         this.data = new Data(term, constraint);
-        this.context = constraint.termContext().fork();
+        this.context = context;
     }
 
     public ConstrainedTerm(Term term, TermContext context) {
-        this(term, ConjunctiveFormula.of(context));
+        this(term, ConjunctiveFormula.of(context.global()), context);
     }
 
     public TermContext termContext() {
@@ -108,7 +108,8 @@ public class ConstrainedTerm extends JavaSymbolicObject {
             }
             result = new ConstrainedTerm(
                     expandedTerm.term().substituteAndEvaluate(patternExpander.extraConstraint().substitution(), context),
-                    expandedTerm.constraint().add(patternExpander.extraConstraint()).simplify());
+                    expandedTerm.constraint().add(patternExpander.extraConstraint()).simplify(context),
+                    context);
         }
 
         return result;
@@ -120,43 +121,43 @@ public class ConstrainedTerm extends JavaSymbolicObject {
      * existentially quantified.
      */
     public ConjunctiveFormula matchImplies(ConstrainedTerm constrainedTerm, boolean expand) {
-        ConjunctiveFormula constraint = ConjunctiveFormula.of(constrainedTerm.termContext())
+        ConjunctiveFormula constraint = ConjunctiveFormula.of(constrainedTerm.termContext().global())
                 .add(data.constraint.substitution())
                 .add(data.term, constrainedTerm.data.term)
-                .simplifyBeforePatternFolding();
+                .simplifyBeforePatternFolding(context);
         if (constraint.isFalse()) {
             return null;
         }
 
         /* apply pattern folding */
-        constraint = constraint.simplifyModuloPatternFolding()
+        constraint = constraint.simplifyModuloPatternFolding(context)
                 .add(constrainedTerm.data.constraint)
-                .simplifyModuloPatternFolding();
+                .simplifyModuloPatternFolding(context);
         if (constraint.isFalse()) {
             return null;
         }
 
         if (expand) {
-            constraint = constraint.expandPatterns(false).simplifyModuloPatternFolding();
+            constraint = constraint.expandPatterns(false, context).simplifyModuloPatternFolding(context);
             if (constraint.isFalse()) {
                 return null;
             }
         }
 
-        constraint.termContext().setTopConstraint(data.constraint);
-        constraint = (ConjunctiveFormula) constraint.evaluate(constraint.termContext());
+        context.setTopConstraint(data.constraint);
+        constraint = (ConjunctiveFormula) constraint.evaluate(context);
 
         Set<Variable> rightOnlyVariables = Sets.difference(constraint.variableSet(), variableSet());
         constraint = constraint.orientSubstitution(rightOnlyVariables);
 
         ConjunctiveFormula leftHandSide = data.constraint;
         ConjunctiveFormula rightHandSide = constraint.removeBindings(rightOnlyVariables);
-        rightHandSide = (ConjunctiveFormula) rightHandSide.substitute(leftHandSide.substitution(), context);
+        rightHandSide = (ConjunctiveFormula) rightHandSide.substitute(leftHandSide.substitution());
         if (!leftHandSide.implies(rightHandSide, rightOnlyVariables)) {
             return null;
         }
 
-        return data.constraint.addAndSimplify(constraint);
+        return data.constraint.addAndSimplify(constraint, context);
     }
 
     public Term term() {
@@ -177,10 +178,10 @@ public class ConstrainedTerm extends JavaSymbolicObject {
             Set<Variable> variables) {
         assert (instructions == null) == (cells == null);
         /* unify the subject term and the pattern term without considering those associated constraints */
-        ConjunctiveFormula constraint;
+        ConjunctiveFormula unificationConstraint;
         if (instructions != null) {
-            constraint = AbstractKMachine.unify(this, instructions, cells, termContext());
-            if (constraint == null) {
+            unificationConstraint = AbstractKMachine.unify(this, instructions, cells, termContext());
+            if (unificationConstraint == null) {
                 return Collections.emptyList();
             }
         } else {
@@ -188,30 +189,43 @@ public class ConstrainedTerm extends JavaSymbolicObject {
             if (!unifier.symbolicUnify(term(), constrainedTerm.term())) {
                 return Collections.emptyList();
             }
-            constraint = unifier.constraint();
+            unificationConstraint = unifier.constraint();
         }
-        constraint = constraint.simplify();
-        if (constraint.isFalse()) {
+        unificationConstraint = unificationConstraint.simplify(context);
+        if (unificationConstraint.isFalse()) {
             return Collections.emptyList();
         }
 
+        return evaluateConstraints(
+                unificationConstraint,
+                constraint(),
+                constrainedTerm.constraint(),
+                variables == null ? constrainedTerm.variableSet() : variables,
+                context);
+    }
+
+    public static List<Pair<ConjunctiveFormula, Boolean>> evaluateConstraints(
+            ConjunctiveFormula constraint,
+            ConjunctiveFormula subjectConstraint,
+            ConjunctiveFormula patternConstraint,
+            Set<Variable> variables,
+            TermContext context) {
         List<ConjunctiveFormula> candidates = constraint.getDisjunctiveNormalForm().conjunctions().stream()
-                .map(c -> c.addAndSimplify(constrainedTerm.constraint()))
+                .map(c -> c.addAndSimplify(patternConstraint, context))
                 .filter(c -> !c.isFalse())
                 .map(ConjunctiveFormula::resolveNonDeterministicLookups)
                 .map(ConjunctiveFormula::getDisjunctiveNormalForm)
                 .map(DisjunctiveFormula::conjunctions)
                 .flatMap(List::stream)
-                .map(ConjunctiveFormula::simplify)
+                .map(c -> c.simplify(context))
                 .filter(c -> !c.isFalse())
                 .collect(Collectors.toList());
 
         List<Pair<ConjunctiveFormula, Boolean>> solutions = Lists.newArrayList();
         for (ConjunctiveFormula candidate : candidates) {
-            variables = variables == null ? constrainedTerm.variableSet() : variables;
             candidate = candidate.orientSubstitution(variables);
 
-            ConjunctiveFormula solution = candidate.addAndSimplify(constraint());
+            ConjunctiveFormula solution = candidate.addAndSimplify(subjectConstraint, context);
             if (solution.isFalse()) {
                 continue;
             }

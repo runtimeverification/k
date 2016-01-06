@@ -53,7 +53,7 @@ public abstract class FrontEnd {
                 } catch (ParameterException e) {
                     throw KEMException.criticalError(e.getMessage(), e);
                 } finally {
-                    files.deleteTempDir();
+                    files.deleteTempDir(kem);
                 }
                 kem.print();
             }

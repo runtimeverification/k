@@ -133,12 +133,6 @@ those were all borrowed from SIMPLE. */
 require "domains.k"
 
 module KOOL-UNTYPED-SYNTAX
-  imports KOOL-UNTYPED-COMMON
-  imports ID
-endmodule
-
-module KOOL-UNTYPED-COMMON
-  imports DOMAINS-COMMON
 
 /*@ \section{Syntax}
 
@@ -178,13 +172,8 @@ for the KOOL object-oriented constructs.
                | "(" Id ")" Exp          [strict(2)]    // KOOL  cast
                | "new" Id "(" Exps ")"   [strict(2)]    // KOOL
                | Exp "." Id                             // KOOL
-               // TODO(KORE): drop klabel once parsing issues #1682 are fixed
-               > Exp "[" Exps "]"        [strict,klabel("farray")]
-               > Exp "(" Exps ")"        [strict(2),klabel("fcall")]    // was strict in SIMPLE
-               /*
                > Exp "[" Exps "]"        [strict]
                > Exp "(" Exps ")"        [strict(2)]    // was strict in SIMPLE
-               */
                | "-" Exp                 [strict]
                | "sizeOf" "(" Exp ")"    [strict]
                | "read" "(" ")"
@@ -209,8 +198,8 @@ for the KOOL object-oriented constructs.
                > "spawn" Block
                > Exp "=" Exp             [strict(2), right]
 
-  // TODO(KORE): drop klabel once parsing issues #1682 are fixed
-  syntax Ids  ::= List{Id,","}           [klabel("'_,_::Ids")]
+  // TODO(KORE): drop klabel once issues #1913 are fixed
+  syntax Ids  ::= List{Id,","}           [klabel(_,_::Ids)]
   /*
   syntax Ids  ::= List{Id,","}
   */
@@ -266,8 +255,7 @@ assignment, etc.).  Finally, we discuss in detail the
 semantics of the additional KOOL constructs. */
 
 module KOOL-UNTYPED
-  imports KOOL-UNTYPED-COMMON
-  imports DOMAINS
+  imports KOOL-UNTYPED-SYNTAX
 
 /*@ \subsection{Configuration}
 
@@ -326,7 +314,15 @@ member declarations (\textsf{declarations}).
                   <nextLoc color="gray"> 0 </nextLoc>
                 //<br/> // TODO(KORE): support latex annotations #1799
                   <classes color="Fuchsia">        // KOOL
-                    .Map
+                     // TODO(KORE): hack to avoid not having AC -- see 2230bb3947c34b34b09e44eaa2ea2dfbd46b31cf
+                     .Map
+                     /*
+                     <class multiplicity="*" color="Fuchsia">
+                        <className color="Fuchsia"> Main </className>
+                        <extends color="Fuchsia"> Object </extends>
+                        <declarations color="Fuchsia"> .K </declarations>
+                     </class>
+                     */
                   </classes>
                 </T>
 
@@ -360,21 +356,16 @@ object and method closures. */
   syntax Val ::= Int | Bool | String
                | array(Int,Int)
   syntax Vals ::= List{Val,","}
-  syntax Exps ::= Vals // TODO(KORE): support implicit subsort #1705
   syntax Exp ::= Val
   syntax KResult ::= Val
-  syntax KResult ::= Vals // TODO(KORE): support implicit subsort #1705
+  syntax KResult ::= Vals
 
 /*@ The semantics below are taken verbatim from the untyped SIMPLE
 definition. */
 
   syntax KItem ::= "undefined"  [latex(\bot)]
 
-  // TODO(KORE): Change .K back to . throughout this definition #1772
-  rule <k> var X:Id; => .K ...</k>
-  /*
   rule <k> var X:Id; => . ...</k>
-  */
        <env> Env => Env[X <- L] </env>
        <store>... .Map => L |-> undefined ...</store>
        <nextLoc> L:Int => L +Int 1 </nextLoc>
@@ -382,33 +373,21 @@ definition. */
 
   context var _:Id[HOLE];
 
-  rule <k> var X:Id[N:Int]; => .K ...</k>
+  rule <k> var X:Id[N:Int]; => . ...</k>
        <env> Env => Env[X <- L] </env>
        <store>... .Map => L |-> array(L +Int 1, N)
-                          // TODO(KORE): drop labeled-form once parsing issues #1682 are fixed
-                          frange(L +Int 1, L +Int N, undefined) ...</store>
-                          /*
-                          `L +Int 1` ... `L +Int N` |-> undefined ...</store>
-                          */
+                          (L +Int 1) ... (L +Int N) |-> undefined ...</store>
        <nextLoc> L:Int => L +Int 1 +Int N </nextLoc>
     when N >=Int 0
 
 
   syntax Id ::= "$1" | "$2"
-  // TODO(KORE): drop labeled-form once parsing issues #1682 are fixed
-  rule var farray(X:Id, `_,_`(N1:Int, `_,_`(N2:Int, Vs:Vals)));
-  /*
   rule var X:Id[N1:Int, N2:Int, Vs:Vals];
-  */
     => var X[N1];
        {
          var $1=X;
          for(var $2=0; $2 <= N1 - 1; ++$2) {
-           // TODO(KORE): drop labeled-form once parsing issues #1682 are fixed
-           var farray(X, `_,_`(N2,Vs));
-           /*
            var X[N2,Vs];
-           */
            $1[$2] = X;
          }
        }
@@ -446,11 +425,7 @@ definition. */
   rule false || E => E
 
 
-  // TODO(KORE): drop labeled-form once parsing issues #1682 are fixed
-  rule farray(V:Val, `_,_`(N1:Int, `_,_`(N2:Int, Vs:Vals))) => farray(V[N1], `_,_`(N2, Vs))
-  /*
   rule V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2, Vs]
-  */
     [structural, anywhere]
 
   rule array(L,_)[N:Int] => lookup(L +Int N)
@@ -467,7 +442,7 @@ interestingly, the semantics of return stays unchanged. */
   rule <k> return(V:Val); ~> _ => V ~> K </k>
        <control>
          <fstack> ListItem((Env,K,C)) => .List ...</fstack>
-         `_ => C`
+         (_ => C)
        </control>
        <env> _ => Env </env>
 
@@ -480,17 +455,21 @@ interestingly, the semantics of return stays unchanged. */
 
   context (HOLE => lvalue(HOLE)) = _
 
+  // TODO(KORE): use parenthesis instead of backtick once #1943 is fixed
   rule <k> loc(L) = V:Val => V ...</k> <store>... L |-> `_ => V` ...</store>
+  /*
+  rule <k> loc(L) = V:Val => V ...</k> <store>... L |-> (_ => V) ...</store>
+  */
     [assignment]
 
 
-  rule {} => .K  [structural]
+  rule {} => .  [structural]
   rule <k> { S } => S ~> env(Env) ...</k>  <env> Env </env>  [structural]
 
 
   rule S1::Stmts S2::Stmts => S1 ~> S2  [structural]
 
-  rule _:Val; => .K
+  rule _:Val; => .
 
   rule if ( true) S else _ => S
   rule if (false) _ else S => S
@@ -499,31 +478,33 @@ interestingly, the semantics of return stays unchanged. */
 
   rule <k> print(V:Val, Es => Es); ...</k> <out>... .List => ListItem(V) </out>
     [print]
-  // TODO(KORE): drop labeled-form once parsing issues #1682 are fixed
-  rule `print(_);`(.Vals) => .K  [structural]
-  /*
   rule print(.Vals); => .  [structural]
-  */
 
 
   syntax KItem ::= (Id,Stmt,K,Map,ControlCellFragment)
+  // TODO(KORE): drop the additional production once parsing issue #1842 is fixed
+                 | (Id,Stmt,K,Map,K)
 
   syntax KItem ::= "popx"
 
+  // TODO(KORE): use parenthesis instead of backtick once #1943 is fixed
   rule <k> `try S1 catch(X) {S2} => S1 ~> popx` ~> K </k>
+  /*
+  rule <k> (try S1 catch(X) {S2} => S1 ~> popx) ~> K </k>
+  */
        <control>
          <xstack> .List => ListItem((X, S2, K, Env, C)) ...</xstack>
          C
        </control>
        <env> Env </env>
 
-  rule <k> popx => .K ...</k>
+  rule <k> popx => . ...</k>
        <xstack> ListItem(_) => .List ...</xstack>
 
   rule <k> throw V:Val; ~> _ => { var X = V; S2 } ~> K </k>
        <control>
          <xstack> ListItem((X, S2, K, Env, C)) => .List ...</xstack>
-         `_ => C`
+         (_ => C)
        </control>
        <env> _ => Env </env>
 
@@ -534,38 +515,46 @@ interestingly, the other concurrency constructs keep their semantics
 from SIMPLE unchanged. */
 
   // TODO(KORE): ..Bag should be . throughout this definition #1772
-  rule `<thread>... <k>.K</k> <holds>H</holds> <id>T</id> ...</thread> => .Bag`
+  rule (<thread>... <k>.</k> <holds>H</holds> <id>T</id> ...</thread> => .Bag)
   /*
-  rule `<thread>... <k>.</k> <holds>H</holds> <id>T</id> ...</thread> => .`
+  rule (<thread>... <k>.</k> <holds>H</holds> <id>T</id> ...</thread> => .)
   */
        <busy> Busy => Busy -Set keys(H) </busy>
        <terminated>... .Set => SetItem(T) ...</terminated>
 
-  rule <k> join T:Int; => .K ...</k>
+  rule <k> join T:Int; => . ...</k>
        <terminated>... SetItem(T) ...</terminated>
 
-  rule <k> acquire V:Val; => .K ...</k>
+  rule <k> acquire V:Val; => . ...</k>
        <holds>... .Map => V |-> 0 ...</holds>
+       // TODO(KORE): use parenthesis instead of backtick once #1931 is fixed
        <busy> Busy `.Set => SetItem(V)` </busy>
+       /*
+       <busy> Busy (.Set => SetItem(V)) </busy>
+       */
     when (notBool(V in Busy:Set))  [acquire]
 
-  rule <k> acquire V; => .K ...</k>
+  rule <k> acquire V; => . ...</k>
        <holds>... V:Val |-> (N:Int => N +Int 1) ...</holds>
 
-  rule <k> release V:Val; => .K ...</k>
+  rule <k> release V:Val; => . ...</k>
        <holds>... V |-> (N => N:Int -Int 1) ...</holds>
     when N >Int 0
 
-  rule <k> release V; => .K ...</k> <holds>... V:Val |-> 0 => .Map ...</holds>
+  rule <k> release V; => . ...</k> <holds>... V:Val |-> 0 => .Map ...</holds>
        <busy>... SetItem(V) => .Set ...</busy>
 
-  rule <k> rendezvous V:Val; => .K ...</k>
-       <k> rendezvous V; => .K ...</k>  [rendezvous]
+  rule <k> rendezvous V:Val; => . ...</k>
+       <k> rendezvous V; => . ...</k>  [rendezvous]
 
 //@ \subsection{Unchanged auxiliary operations from untyped SIMPLE}
 
   syntax Stmts ::= mkDecls(Ids,Vals)  [function]
+  // TODO(KORE): use parenthesis instead of backtick once #1943 is fixed
   rule mkDecls(`X:Id, Xs:Ids`, `V:Val, Vs:Vals`) => var X=V; mkDecls(Xs,Vs)
+  /*
+  rule mkDecls((X:Id, Xs:Ids), (V:Val, Vs:Vals)) => var X=V; mkDecls(Xs,Vs)
+  */
   rule mkDecls(.Ids,.Vals) => {}
 
   // TODO(KORE): clarify sort inferences #1803
@@ -576,8 +565,14 @@ from SIMPLE unchanged. */
   rule <k> lookup(L) => V ...</k> <store>... L |-> V:Val ...</store>  [lookup]
 
   syntax KItem ::= env(Map)
-  rule <k> env(Env) => .K ...</k>  <env> _ => Env </env>  [structural]
-  rule `env(_) => .K` ~> env(_)  [structural]
+  rule <k> env(Env) => . ...</k>  <env> _ => Env </env>  [structural]
+  // TODO(KORE): use parenthesis instead of backtick once #1943 is fixed
+  rule `env(_) => .` ~> env(_)  [structural]
+  /*
+  rule (env(_) => .) ~> env(_)  [structural]
+  */
+  // TODO: How can we make sure that the second rule above applies before the first one?
+  //       Probably we'll deal with this using strategies, eventually.
 
   syntax Exp ::= lvalue(K)
   syntax Val ::= loc(Int)
@@ -591,14 +586,12 @@ from SIMPLE unchanged. */
   rule lvalue(lookup(L:Int) => loc(L))  [structural]
 
 
-  // TODO(KORE): drop labeled-form once parsing issues #1682 are fixed
-  syntax Map ::= frange(Int,Int,K) [function, latex({#1}\ldots{#2}\mapsto{#3})]
-  rule frange(N,M,_) => .Map  when N >Int M
-  rule frange(N,M,K) => N |-> K frange(N +Int 1, M, K)  when N <=Int M
-  /*
   syntax Map ::= Int "..." Int "|->" K
     [function, latex({#1}\ldots{#2}\mapsto{#3})]
   rule N...M |-> _ => .Map  when N >Int M
+  // TODO(KORE): drop bracket #1935
+  rule N...M |-> K => N |-> K `(N +Int 1)...M |-> K`  when N <=Int M
+  /*
   rule N...M |-> K => N |-> K (N +Int 1)...M |-> K  when N <=Int M
   */
 
@@ -644,6 +637,8 @@ to the language, namely object and method closures: */
 
   syntax Val ::= objectClosure(CrntObjCellFragment)
                | methodClosure(Id,Int,Ids,Stmt)
+  // TODO(KORE): drop the additional production once parsing issue #1842 is fixed
+               | objectClosure(K)
 
 /*@  An object value consists of an \texttt{objectClosure}-wrapped bag
 containing the current class of the object and the environment stack
@@ -672,43 +667,20 @@ the method body.  The \texttt{mkDecls} construct is the one that came
 with the unchanged semantics of SIMPLE above.  */
 
   syntax KItem ::= (Map,K,ControlCellFragment)
+  // TODO(KORE): drop the additional production once parsing issue #1842 is fixed
+                 | (Map,K,K)
 
-  // TODO(KORE): drop labeled-form once parsing issues #1682 are fixed
-  //             fix duplicated rules once cell fragment issues #1744 #1747 #1748 are fixed
-  rule <k> fcall(methodClosure(Class,OL,Xs,S), Vs:Vals) ~> K
-           => mkDecls(Xs,Vs) S return; </k>
-       <env> Env => .Map </env>
-       <store>... OL |-> objectClosure(<crntObj>-fragment `<crntClass>_</crntClass>`:>CrntClassCell Obj1:EnvStackCell Obj2:LocationCell </crntObj>-fragment)...</store>
-       <control>
-          C
-          <fstack> .List => ListItem((Env, K, <control>-fragment noFstackCell C `<crntObj> Obj' </crntObj>`:>CrntObjCell </control>-fragment))
-          ...</fstack>
-          <crntObj> Obj' => <crntClass> Class </crntClass> Obj1 Obj2 </crntObj>
-       </control>
-  //
-  rule <k> fcall(methodClosure(Class,OL,Xs,S), Vs:Vals) ~> K
-           => mkDecls(Xs,Vs) S return; </k>
-       <env> Env => .Map </env>
-       <store>... OL |-> objectClosure(<crntObj>-fragment `<crntClass>_</crntClass>`:>CrntClassCell Obj1:EnvStackCell noLocationCell </crntObj>-fragment)...</store>
-       <control>
-          C
-          <fstack> .List => ListItem((Env, K, <control>-fragment noFstackCell C `<crntObj> Obj' </crntObj>`:>CrntObjCell </control>-fragment))
-          ...</fstack>
-          <crntObj> Obj' => <crntClass> Class </crntClass> Obj1 </crntObj>
-       </control>
-  /*
   rule <k> methodClosure(Class,OL,Xs,S)(Vs:Vals) ~> K
            => mkDecls(Xs,Vs) S return; </k>
        <env> Env => .Map </env>
        <store>... OL |-> objectClosure(<crntClass>_</crntClass> Obj)...</store>
-       <br/>
+     //<br/> // TODO(KORE): support latex annotations #1799
        <control>
           C
           <fstack> .List => ListItem((Env, K, C <crntObj> Obj' </crntObj>))
           ...</fstack>
           <crntObj> Obj' => <crntClass> Class </crntClass> Obj </crntObj>
        </control>
-  */
 
 
 /*@ \subsubsection{Spawn}
@@ -726,12 +698,12 @@ environment. */
          <env> Env </env>
          <crntObj> Obj </crntObj>
        ...</thread>
-       `.Bag => <thread>...
+       (.Bag => <thread>...
                <k> S </k>
                <env> Env </env>
                <id> !T </id>
                <crntObj> Obj </crntObj>
-             ...</thread>`
+             ...</thread>)
 
 
 //@ \subsection{Semantics of the new KOOL constructs}
@@ -742,8 +714,16 @@ Initially, the classes forming the program are moved into their
 corresponding cells: */
 
   syntax KItem ::= ClassBody(K, K)
-  rule <k> class Class1 extends Class2 { S } => .K ...</k>
+  rule <k> class Class1 extends Class2 { S } => . ...</k>
+       // TODO(KORE): classes hack to avoid not having AC -- see 2230bb3947c34b34b09e44eaa2ea2dfbd46b31cf
        <classes>... `.Map => Class1 |-> ClassBody(Class2, S)`
+       /*
+       <classes>... (.Bag => <class>
+                            <className> Class1 </className>
+                            <extends> Class2 </extends>
+                            <declarations> S </declarations>
+                        </class>)
+       */
        ...</classes>  [structural]
 
 /*@ \subsubsection{Method declaration}
@@ -763,7 +743,7 @@ This gives the KOOL programmer a lot of power; one should use this
 power wisely, though, because programs can become easily hard to
 understand and reason about if one overuses these features. */
 
-  rule <k> method F:Id(Xs:Ids) S => .K ...</k>
+  rule <k> method F:Id(Xs:Ids) S => . ...</k>
        <crntClass> Class:Id </crntClass>
        <location> OL:Int </location>
        <env> Env => Env[F <- L] </env>
@@ -793,31 +773,22 @@ refer to it (see rule above). */
 
   syntax KItem ::= (Id,EnvCell) // TODO: used to be ListItem; explain this
 
-  // TODO(KORE): drop labeled-form once parsing issues #1682 are fixed
-  rule <k> `new_(_)`(Class:Id, Vs:Vals) ~> K
-           => create(Class) ~> storeObj ~> ` fcall(Class,Vs) ; return this;` </k>
+  // TODO(KORE): drop bracket #1935
+  rule <k> `new Class:Id(Vs:Vals) ~> K`
   /*
   rule <k> new Class:Id(Vs:Vals) ~> K
-           => create(Class) ~> storeObj ~> Class(Vs); return this; </k>
   */
+           => create(Class) ~> storeObj ~> Class(Vs); return this; </k>
        <env> Env => .Map </env>
        <nextLoc> L:Int => L +Int 1 </nextLoc>
      //<br/> // TODO(KORE): support latex annotations #1799
        <control> C
          <crntObj> Obj
                    => <crntClass> Object </crntClass>
-                      // TODO(KORE): drop cell sort casting #1747
-                      <envStack> ListItem((Object, `<env>.Map</env>`:>EnvCell)) </envStack>
-                      /*
                       <envStack> ListItem((Object, <env>.Map</env>)) </envStack>
-                      */
                       <location> L </location>
          </crntObj>
-         // TODO(KORE): fix cell fragment issues #1744 #1747 #1748
-         <fstack> .List => ListItem((Env, K, <control>-fragment noFstackCell C `<crntObj> Obj </crntObj>`:>CrntObjCell </control>-fragment)) ...</fstack>
-         /*
          <fstack> .List => ListItem((Env, K, C <crntObj> Obj </crntObj>)) ...</fstack>
-         */
        </control>
 
 /*@ The creation of a new object (the memory allocation part only) is
@@ -831,10 +802,16 @@ members (both fields and methods) of that class. */
 
   rule <k> create(Class:Id)
            => create(Class1) ~> setCrntClass(Class) ~> S ~> addEnvLayer ...</k>
+       // TODO(KORE): classes hack to avoid not having AC -- see 2230bb3947c34b34b09e44eaa2ea2dfbd46b31cf
        <classes>...`Class |-> ClassBody(Class1:Id, S)`...</classes>
        [structural]
+       /*
+       <className> Class </className>
+       <extends> Class1:Id </extends>
+       <declarations> S </declarations>  [structural]
+       */
 
-  rule <k> create(Object) => .K ...</k>  [structural]
+  rule <k> create(Object) => . ...</k>  [structural]
 
 /*@ The next operation sets the current class of the current object.
 This is necessary to be done at each layer, because the current class
@@ -843,7 +820,7 @@ semantics of method declarations above). */
 
   syntax KItem ::= setCrntClass(Id)
 
-  rule <k> setCrntClass(C) => .K ...</k>
+  rule <k> setCrntClass(C) => . ...</k>
        <crntClass> _ => C </crntClass>  [structural]
 
 /*@ The next operation adds a new tagged environment layer to the
@@ -853,14 +830,10 @@ empty). */
 
   syntax KItem ::= "addEnvLayer"
 
-  rule <k> addEnvLayer => .K ...</k>
+  rule <k> addEnvLayer => . ...</k>
        <env> Env => .Map </env>
        <crntClass> Class:Id </crntClass>
-       // TODO(KORE): drop cell sort casting #1747
-       <envStack> .List => ListItem((Class, `<env>Env</env>`:>EnvCell)) ...</envStack>
-       /*
        <envStack> .List => ListItem((Class, <env>Env</env>)) ...</envStack>
-       */
     [structural]
 
 /*@ The following operation stores the created object at the location
@@ -873,8 +846,8 @@ the location is unnecessary and thus we delete it from the
 
   syntax KItem ::= "storeObj"
 
-  rule <k> storeObj => .K ...</k>
-       <crntObj> Obj `<location> L:Int </location> => .Bag` </crntObj>
+  rule <k> storeObj => . ...</k>
+       <crntObj> Obj (<location> L:Int </location> => .Bag) </crntObj>
        <store>... .Map => L |-> objectClosure(Obj) ...</store>
 
 
@@ -922,31 +895,13 @@ invocations see the entire object, as needed for dynamic method dispatch. */
     => lookupMember(<envStack> (Class,EnvC) EStack </envStack>, X)
     [structural]*/
 
-  // TODO(KORE): fix cell fragment issues #1744 #1747 #1748
-  rule objectClosure(<crntObj>-fragment
-                     `<crntClass> Class:Id </crntClass>`:>CrntClassCell
-                     `<envStack> ListItem((Class,EnvC:EnvCell)) EStack </envStack>`:>EnvStackCell
-                     _ </crntObj>-fragment)
-  /*
   rule objectClosure(<crntClass> Class:Id </crntClass>
-                     <envStack> ListItem((Class,EnvC:BagItem)) EStack </envStack>)
-  */
+                     <envStack> ListItem((Class,EnvC:EnvCell)) EStack </envStack>)
        . X:Id
-    // TODO(KORE): drop cell sort casting #1747
-    => lookupMember(`<envStack> ListItem((Class,EnvC)) EStack </envStack>`:>EnvStackCell, X)
-    /*
     => lookupMember(<envStack> ListItem((Class,EnvC)) EStack </envStack>, X)
-    */
     [structural]
-  // TODO(KORE): fix cell fragment issues #1744 #1747 #1748
-  rule objectClosure(<crntObj>-fragment
-                     `<crntClass> Class:Id </crntClass>`:>CrntClassCell
-                     `<envStack> ListItem((Class':Id,_)) => .List ...</envStack>`:>EnvStackCell
-                     _ </crntObj>-fragment)
-  /*
   rule objectClosure(<crntClass> Class:Id </crntClass>
-                     <envStack> ListItem((Class':Id,_)) => .List ...</envStack>)
-  */
+                     <envStack> ListItem((Class':Id,_::EnvCell)) => .List ...</envStack>)
        . X:Id
     when Class =/=K Class'  [structural]
 
@@ -954,17 +909,13 @@ invocations see the entire object, as needed for dynamic method dispatch. */
        <crntClass> Class </crntClass>
        <envStack>... (Class,EnvC) EStack </envStack>
     [structural]*/
-  // TODO(KORE): drop cell sort casting #1747
-  rule <k> super . X => lookupMember(`<envStack>EStack</envStack>`:>EnvStackCell, X) ...</k>
-  /*
   rule <k> super . X => lookupMember(<envStack>EStack</envStack>, X) ...</k>
-  */
        <crntClass> Class:Id </crntClass>
-       <envStack> ListItem((Class,_)) EStack </envStack>
+       <envStack> ListItem((Class,_::EnvCell)) EStack </envStack>
     [structural]
   rule <k> super . X ...</k>
        <crntClass> Class </crntClass>
-       <envStack> ListItem((Class':Id,_)) => .List ...</envStack>
+       <envStack> ListItem((Class':Id,_::EnvCell)) => .List ...</envStack>
     when Class =/=K Class'  [structural]
 
 /*@\subsubsection{Method invocation}
@@ -999,37 +950,28 @@ method call or the array access.  */
 
   context HOLE._::Id(_) when HOLE =/=K super
 
-  // TODO(KORE): fix cell fragment issues #1744 #1747 #1748
-  rule (objectClosure(<crntObj>-fragment _ `<envStack> EStack </envStack>`:>EnvStackCell _ </crntObj>-fragment) . X
-    => lookupMember(`<envStack> EStack </envStack>`:>EnvStackCell, X:Id))(_:Exps)  [structural]
-  /*
-  rule (objectClosure(Obj:Bag <envStack> EStack </envStack>) . X
+  rule (objectClosure(<envStack> EStack </envStack> _) . X
     => lookupMember(<envStack> EStack </envStack>, X:Id))(_:Exps)  [structural]
-  */
 
 /*  rule <k> (super . X
             => lookupMember(<envStack>EStack</envStack>,X))(_:Exps)...</k>
        <crntClass> Class </crntClass>
-       <envStack>... (Class,_) EStack </envStack>
+       <envStack>... (Class,_::EnvCell) EStack </envStack>
     [structural]*/
   rule <k> (super . X
-            // TODO(KORE): drop cell sort casting #1747
-            => lookupMember(`<envStack>EStack</envStack>`:>EnvStackCell,X))(_:Exps)...</k>
-            /*
             => lookupMember(<envStack>EStack</envStack>,X))(_:Exps)...</k>
-            */
        <crntClass> Class </crntClass>
-       <envStack> ListItem((Class,_)) EStack </envStack>
+       <envStack> ListItem((Class,_::EnvCell)) EStack </envStack>
     [structural]
   rule <k> (super . X)(_:Exps) ...</k>
        <crntClass> Class </crntClass>
-       <envStack> ListItem((Class':Id,_)) => .List ...</envStack>
+       <envStack> ListItem((Class':Id,_::EnvCell)) => .List ...</envStack>
     when Class =/=K Class'  [structural]
 
   // TODO(KORE): fix getKLabel #1801 and context issue #1802
-  rule fcall(fcall(A:Exp,B:Exps),C:Exps) => fcall(A,B) ~> #freezerFunCall(C)
-  rule fcall(farray(A:Exp,B:Exps),C:Exps) => farray(A,B) ~> #freezerFunCall(C)
-  rule V:Val ~> #freezerFunCall(C:Exps) => fcall(V,C)
+  rule (A:Exp(B:Exps))(C:Exps) => A(B) ~> #freezerFunCall(C)
+  rule (A:Exp[B:Exps])(C:Exps) => A[B] ~> #freezerFunCall(C)
+  rule V:Val ~> #freezerFunCall(C:Exps) => V(C)
   syntax KItem ::= "#freezerFunCall" "(" K ")"
   /*
   context HOLE(_:Exps)
@@ -1055,26 +997,14 @@ desired class.  It returns \texttt{true} iff it can find the class,
 otherwise it returns \texttt{false}; it only gets stuck when its first
 argument does not evaluate to an object.  */
 
-  // TODO(KORE): fix cell fragment issues #1744 #1747 #1748
-  rule objectClosure(<crntObj>-fragment _ `<envStack> ListItem((C,_)) ...</envStack>`:>EnvStackCell _ </crntObj>-fragment)
-  /*
-  rule objectClosure(<envStack> ListItem((C,_)) ...</envStack> _)
-  */
+  rule objectClosure(<envStack> ListItem((C,_::EnvCell)) ...</envStack> _)
        instanceOf C => true
 
-  // TODO(KORE): fix cell fragment issues #1744 #1747 #1748
-  rule objectClosure(<crntObj>-fragment _ `<envStack> ListItem((C::Id,_)) => .List ...</envStack>`:>EnvStackCell _ </crntObj>-fragment)
-  /*
-  rule objectClosure(<envStack> ListItem((C::Id,_)) => .List ...</envStack> _)
-  */
+  rule objectClosure(<envStack> ListItem((C,_::EnvCell)) => .List ...</envStack> _)
        instanceOf C'  when C =/=K C'  [structural]
 //TODO: remove the sort cast ::Id of C above, when sort inference bug fixed
 
-  // TODO(KORE): fix cell fragment issues #1744 #1747 #1748
-  rule objectClosure(<crntObj>-fragment _ `<envStack> .List </envStack>`:>EnvStackCell _ </crntObj>-fragment) instanceOf _ => false
-  /*
   rule objectClosure(<envStack> .List </envStack> _) instanceOf _ => false
-  */
 
 
 /*@ \subsubsection{Cast}
@@ -1087,13 +1017,8 @@ available.  Moreover, the execution may complete successfully even
 in the presence of invalid casts, provided that each accessed member
 during the current execution is, or happens to be, available.  */
 
-  // TODO(KORE): fix cell fragment issues #1744 #1747 #1748
-  rule (C) objectClosure(<crntObj>-fragment `<crntClass> _ </crntClass>`:>CrntClassCell Obj1 Obj2 </crntObj>-fragment)
-    => objectClosure(<crntObj>-fragment `<crntClass> C </crntClass>`:>CrntClassCell Obj1 Obj2 </crntObj>-fragment)
-  /*
   rule (C) objectClosure(<crntClass> _ </crntClass> Obj)
     => objectClosure(<crntClass> C </crntClass> Obj)
-  */
 
 
 /*@ \subsection{KOOL-specific auxiliary declarations and operations}
@@ -1123,31 +1048,13 @@ member's location based on the current class of the object. */
               . X
               => lookupMember(<envStack> (C,EnvC) EStack </envStack>,
                               X))  [structural]*/
-  // TODO(KORE): fix cell fragment issues #1744 #1747 #1748
-  rule lvalue(objectClosure(<crntObj>-fragment
-                            `<crntClass> Class </crntClass>`:>CrntClassCell
-                            `<envStack> ListItem((Class,EnvC:EnvCell)) EStack </envStack>`:>EnvStackCell
-                            _ </crntObj>-fragment)
-  /*
   rule lvalue(objectClosure(<crntClass> Class </crntClass>
-                            <envStack> ListItem((Class,EnvC:BagItem)) EStack </envStack>)
-  */
+                            <envStack> ListItem((Class,EnvC:EnvCell)) EStack </envStack>)
               . X
-              // TODO(KORE): drop cell sort casting #1747
-              => lookupMember(`<envStack> ListItem((Class,EnvC)) EStack </envStack>`:>EnvStackCell,
-              /*
               => lookupMember(<envStack> ListItem((Class,EnvC)) EStack </envStack>,
-              */
                               X))  [structural]
-  // TODO(KORE): fix cell fragment issues #1744 #1747 #1748
-  rule lvalue(objectClosure(<crntObj>-fragment
-                            `<crntClass> Class </crntClass>`:>CrntClassCell
-                            `<envStack> ListItem((Class':Id,_)) => .List ...</envStack>`:>EnvStackCell
-                            _ </crntObj>-fragment)
-  /*
   rule lvalue(objectClosure(<crntClass> Class </crntClass>
-                            <envStack> ListItem((Class':Id,_)) => .List ...</envStack>)
-  */
+                            <envStack> ListItem((Class':Id,_::EnvCell)) => .List ...</envStack>)
               . X)
     when Class =/=K Class'  [structural]
 
@@ -1165,22 +1072,13 @@ starting with the most concrete class and going up in the hierarchy. */
 
 //  rule lookupMember(<envStack> (_, <env>... X|->L ...</env>) ...</envStack>, X)
 //    => lookup(L)
-  // TODO(KORE): drop cell sort casting #1747
-  rule lookupMember(``<envStack> ListItem((_, `<env>... X|->L ...</env>`:>EnvCell)) ...</envStack>``:>EnvStackCell, X)
-  /*
   rule lookupMember(<envStack> ListItem((_, <env>... X|->L ...</env>)) ...</envStack>, X)
-  */
     => lookup(L)
 
 //  rule lookupMember(<envStack> (_, <env> Env </env>) => .List ...</envStack>, X)
 //    when notBool(X in keys(Env))
-  // TODO(KORE): drop cell sort casting #1747
-  rule lookupMember(``<envStack> ListItem((_, `<env> Env </env>`:>EnvCell)) Rest </envStack>``:>EnvStackCell, X) =>
-       lookupMember(`<envStack> Rest </envStack>`:>EnvStackCell, X)
-  /*
   rule lookupMember(<envStack> ListItem((_, <env> Env </env>)) Rest </envStack>, X) =>
        lookupMember(<envStack> Rest </envStack>, X)
-  */
     when notBool(X in keys(Env))
 //TODO: beautify the above
 

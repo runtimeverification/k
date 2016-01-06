@@ -1,18 +1,16 @@
-<!-- Copyright (c) 2012-2014 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2012-2015 K Team. All Rights Reserved. -->
 ### Adding Builtins; Side Conditions
 
 [MOVIE [4'52"]](http://youtu.be/T1aI04q3l9U)
 
 We have already added the builtin identifiers (sort `Id`) to LAMBDA expressions,
-but those had no operations on them (note that substitution is not builtin; it
-is a predefined operation, defined in K).  In this lesson we add integers and
+but those had no operations on them.  In this lesson we add integers and
 Booleans to LAMBDA, and extend the builtin operations on them into
 corresponding operations on LAMBDA expressions.  We will also learn how to add
 side conditions to rules, to limit the number of instances where they can
 apply.
 
-The K tool provides several builtins, defined in the K distribution (Maude)
-file k/bin/maude/lib/pl-builtins.maude, which are automatically included in all
+The K tool provides several builtins, which are automatically included in all
 definitions.  These can be used in the languages that we define, typically by
 including them in the desired syntactic categories.  You can also define your
 own builtins in case the provided ones are not suitable for your language
@@ -30,8 +28,9 @@ To make use of these builtins, we have to add some arithmetic operation
 constructs to our language.  We prefer to use the conventional infix notation
 for these, and the usual precedences (i.e., multiplication and division bind
 tighter than addition, which binds tighter than relational operators).
-Inspired from SDF, we use `>` instead of `|` to state that all the previous
-constructs bind tighter than all the subsequent ones.  See `lambda.k`.
+Inspired from [SDF](http://www.syntax-definition.org/), we use `>` instead of
+`|` to state that all the previous constructs bind tighter than all the
+subsequent ones.  See `lambda.k`.
 
 The only thing left is to link the LAMBDA arithmetic operations to the
 corresponding builtin operations, when their arguments are evaluated.

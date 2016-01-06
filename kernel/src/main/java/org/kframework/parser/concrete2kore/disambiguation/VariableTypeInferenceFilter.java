@@ -49,12 +49,12 @@ import static org.kframework.kore.KORE.*;
 public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFailedException, ParseFailedException> {
     public enum VarType { CONTEXT, USER }
     private final POSet<Sort> subsorts;
-    private final scala.collection.immutable.Set<Sort> sortSet;
-    private final scala.collection.immutable.Map<KLabel, scala.collection.immutable.Set<Production>> productions;
+    private final scala.collection.Set<Sort> sortSet;
+    private final scala.collection.Map<KLabel, scala.collection.Set<Production>> productions;
     private final boolean inferSortChecks;
     private Set<ParseFailedException> warnings = Sets.newHashSet();
-    public VariableTypeInferenceFilter(POSet<Sort> subsorts, scala.collection.immutable.Set<Sort> sortSet, scala.collection.immutable.Map<
-            KLabel, scala.collection.immutable.Set<Production>> productions, boolean inferSortChecks) {
+    public VariableTypeInferenceFilter(POSet<Sort> subsorts, scala.collection.Set<Sort> sortSet, scala.collection.Map<
+            KLabel, scala.collection.Set<Production>> productions, boolean inferSortChecks) {
         this.subsorts = subsorts;
         this.sortSet = sortSet;
         this.productions = productions;

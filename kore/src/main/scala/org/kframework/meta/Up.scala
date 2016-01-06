@@ -6,6 +6,7 @@ import org.kframework.definition.Associativity
 import org.kframework.kore._
 import collection.JavaConverters._
 import org.kframework.kore
+import collection._
 
 class Up[K <: kore.K](cons: Constructors[K] with ScalaSugared[K], imports: Set[String]) extends (Any => K) {
 
@@ -37,7 +38,7 @@ class Up[K <: kore.K](cons: Constructors[K] with ScalaSugared[K], imports: Set[S
         val elements = o.productIterator.toList
         val klist = cons.KList(elements map apply asJava)
         cons.KApply(cons.KLabel(processName(o.getClass().getName)), klist,
-          Att() +(ClassFromUp.toString(), o.getClass().getName()))
+          Att() +(Att.ClassFromUp.toString(), o.getClass().getName()))
     }
   }
 

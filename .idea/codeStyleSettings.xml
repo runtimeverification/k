@@ -10,6 +10,8 @@
         </XML>
         <codeStyleSettings language="JAVA">
           <option name="INDENT_CASE_FROM_SWITCH" value="false" />
+          <option name="KEEP_SIMPLE_METHODS_IN_ONE_LINE" value="true" />
+          <option name="KEEP_SIMPLE_CLASSES_IN_ONE_LINE" value="true" />
           <indentOptions>
             <option name="LABEL_INDENT_SIZE" value="-4" />
           </indentOptions>

@@ -10,19 +10,21 @@ import java.util.Set;
 /**
  * Contains helper methods for handling data structures and operations (lookup, update, ...) on data structures.
  *
+ * TODO: make these methods take GlobalContext instead of TermContext as argument
+ *
  * @author AndreiS
  */
 public interface DataStructures {
 
-    public final String MAP_CHOICE = "Map:choice";
-    public final String SET_CHOICE = "Set:choice";
-    public final String LIST_GET = "List:get";
-    public final String MAP_LOOKUP = "Map:lookup";
-    public final String SET_MEMBERSHIP = "Set:in";
-    public final String LIST_RANGE = "List:range";
-    public final String MAP_UPDATE = "'updateMap";
-    public final String MAP_REMOVE_ALL = "'removeAll";
-    public final String SET_REMOVE_ALL = "Set:difference";
+    String MAP_CHOICE = "Map:choice";
+    String SET_CHOICE = "Set:choice";
+    String LIST_GET = "List:get";
+    String MAP_LOOKUP = "Map:lookup";
+    String SET_MEMBERSHIP = "Set:in";
+    String LIST_RANGE = "List:range";
+    String MAP_UPDATE = "'updateMap";
+    String MAP_REMOVE_ALL = "'removeAll";
+    String SET_REMOVE_ALL = "Set:difference";
 
     static KItem lookup(Term base, Term key, TermContext context) {
         KLabelConstant klabel;
@@ -40,7 +42,7 @@ public interface DataStructures {
             assert false : "unimplemented missing case";
             return null;
         }
-        return KItem.of(klabel, kList, context, base.getSource(), base.getLocation());
+        return KItem.of(klabel, kList, context.global(), base.getSource(), base.getLocation());
     }
 
     static boolean isChoice(Term term) {
@@ -94,7 +96,7 @@ public interface DataStructures {
             assert false : "unimplemented missing case";
             return null;
         }
-        return KItem.of(klabel, KList.singleton(base), context, base.getSource(), base.getLocation());
+        return KItem.of(klabel, KList.singleton(base), context.global(), base.getSource(), base.getLocation());
     }
 
     static Term listRange(Term base, int removeLeft, int removeRight, TermContext context) {
@@ -105,7 +107,7 @@ public interface DataStructures {
         return KItem.of(
                 KLabelConstant.of(LIST_RANGE, context.definition()),
                 KList.concatenate(base, IntToken.of(removeLeft), IntToken.of(removeRight)),
-                context, base.getSource(), base.getLocation());
+                context.global(), base.getSource(), base.getLocation());
     }
 
     static Term mapRemoveAll(Term base, Set<Term> removeSet, TermContext context) {
@@ -113,12 +115,12 @@ public interface DataStructures {
             return base;
         }
 
-        BuiltinSet.Builder builder = BuiltinSet.builder(context);
+        BuiltinSet.Builder builder = BuiltinSet.builder(context.global());
         builder.addAll(removeSet);
         return KItem.of(
                 KLabelConstant.of(MAP_REMOVE_ALL, context.definition()),
                 KList.concatenate(base, builder.build()),
-                context, base.getSource(), base.getLocation());
+                context.global(), base.getSource(), base.getLocation());
     }
 
     static Term mapUpdateAll(Term base, Map<Term, Term> updateMap, TermContext context) {
@@ -126,12 +128,12 @@ public interface DataStructures {
             return base;
         }
 
-        BuiltinMap.Builder builder = new BuiltinMap.Builder(context);
+        BuiltinMap.Builder builder = new BuiltinMap.Builder(context.global());
         builder.putAll(updateMap);
         return KItem.of(
                 KLabelConstant.of(MAP_UPDATE, context.definition()),
                 KList.concatenate(base, builder.build()),
-                context, base.getSource(), base.getLocation());
+                context.global(), base.getSource(), base.getLocation());
     }
 
     static Term setDifference(Term base, Set<Term> removeSet, TermContext context) {
@@ -139,12 +141,12 @@ public interface DataStructures {
             return base;
         }
 
-        BuiltinSet.Builder builder = BuiltinSet.builder(context);
+        BuiltinSet.Builder builder = BuiltinSet.builder(context.global());
         builder.addAll(removeSet);
         return KItem.of(
                 KLabelConstant.of(SET_REMOVE_ALL, context.definition()),
                 KList.concatenate(base, builder.build()),
-                context, base.getSource(), base.getLocation());
+                context.global(), base.getSource(), base.getLocation());
     }
 
     static boolean isMapUpdate(Term term) {

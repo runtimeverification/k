@@ -16,7 +16,7 @@ import org.kframework.parser.ProductionReference;
 import org.kframework.parser.SetsGeneralTransformer;
 import org.kframework.parser.Term;
 import org.kframework.parser.TermCons;
-import org.kframework.parser.concrete2kore.generator.UserList;
+import org.kframework.definition.UserList;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.pcollections.ConsPStack;
@@ -37,8 +37,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.kframework.Collections.*;
 import static org.kframework.kore.KORE.*;
+import static org.kframework.Collections.*;
 
 /**
  * Transformer class adding the implicit terminator (.List{"<klabel>"}) to user defined lists.
@@ -47,7 +47,7 @@ public class AddEmptyLists extends SetsGeneralTransformer<ParseFailedException, 
 
     private final Module m;
     private final POSet<Sort> subsorts;
-    private final scala.collection.immutable.Set<Sort> listSorts;
+    private final scala.collection.Set<Sort> listSorts;
     private final Map<String, List<UserList>> lists;
 
     public AddEmptyLists(Module m) {

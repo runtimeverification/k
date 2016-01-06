@@ -18,7 +18,7 @@ public class IfThenElseFinder extends PrePostVisitor {
     final List<KItem> result;
     private final String IF_THEN_ELSE_LABEL="'#if_#then_#else_#fi";
 
-    public IfThenElseFinder(TermContext context) {
+    public IfThenElseFinder() {
         result = new ArrayList<>();
         preVisitor.addVisitor(new LocalVisitor() {
             @Override

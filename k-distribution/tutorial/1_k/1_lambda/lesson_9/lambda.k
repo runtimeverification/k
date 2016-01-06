@@ -58,16 +58,10 @@ color conventional C-like comments; or (2) Run the \K pre-processor
 We need the predefined substitution module, so we require it with the command
 below.  Then we should make sure that we import its module called SUBSTITUTION
 in our LAMBDA module below. */
-require "domains.k"
 require "substitution.k"
 
-module LAMBDA-SYNTAX
-  imports LAMBDA-COMMON
-  imports ID
-endmodule
-
-module LAMBDA-COMMON
-  imports DOMAINS-COMMON
+module LAMBDA
+  imports SUBSTITUTION
 
 /*@ \section{Basic Call-by-value $\lambda$-Calculus}
 
@@ -104,28 +98,11 @@ interleaved) orders.
   syntax Exp ::= Val
                | Exp Exp              [left, strict]
                | "(" Exp ")"          [bracket]
-  syntax Val ::= Int | Bool
-  syntax Exp ::= Exp "*" Exp          [strict, left]
-               | Exp "/" Exp          [strict]
-               > Exp "+" Exp          [strict, left]
-               > Exp "<=" Exp         [strict]
-  syntax Exp ::= "if" Exp "then" Exp "else" Exp  [strict(1)]         // Conditional
-               | "let" Id "=" Exp "in" Exp                           // Let binder
-               | "letrec" Id Id "=" Exp "in" Exp                     // Letrec
-               | "mu" Id "." Exp      [binder, latex(\mu{#1}.{#2})]  // Mu
-
-endmodule
-
-module LAMBDA
-  imports LAMBDA-COMMON
-  imports DOMAINS
-  imports SUBSTITUTION
-
+  syntax KVariable ::= Id
   syntax KResult ::= Val
 
 //@ \section{$\beta$-reduction}
 
-  syntax Variable ::= Id
   rule (lambda X:Id . E:Exp) V:Val => E[V / X]
 
 /*@ \section{Integer and Boolean Builtins}
@@ -140,6 +117,11 @@ rules will only be applied after the arguments of the arithmetic constructs
 are fully evaluated to \K results; this will happen thanks to their strictness
 attributes declared as annotations to their syntax declarations (below).  */
 
+  syntax Val ::= Int | Bool
+  syntax Exp ::= Exp "*" Exp          [strict, left]
+               | Exp "/" Exp          [strict]
+               > Exp "+" Exp          [strict, left]
+               > Exp "<=" Exp         [strict]
   rule I1:Int * I2:Int => I1 *Int I2
   rule I1:Int / I2:Int => I1 /Int I2  when I2 =/=Int 0
   rule I1:Int + I2:Int => I1 +Int I2
@@ -148,6 +130,7 @@ attributes declared as annotations to their syntax declarations (below).  */
 /*@ \section{Conditional}
 Note that the \texttt{if} construct is strict only in its first argument. */
 
+  syntax Exp ::= "if" Exp "then" Exp "else" Exp    [strict(1)]
   rule if true  then E else _ => E
   rule if false then _ else E => E
 
@@ -155,6 +138,7 @@ Note that the \texttt{if} construct is strict only in its first argument. */
 The let binder is a derived construct, because it can be defined using
 $\lambda$. */
 
+  syntax Exp ::= "let" Id "=" Exp "in" Exp
   rule let X = E in E':Exp => (lambda X . E') E                         [macro]
 
 /*@ \section{Letrec Binder}
@@ -162,9 +146,8 @@ We prefer a definition based on the $\mu$ construct.  Note that $\mu$ is not
 really necessary, but it makes the definition of letrec easier to understand
 and faster to execute. */
 
+  syntax Exp ::= "letrec" Id Id "=" Exp "in" Exp
+               | "mu" Id "." Exp                  [binder, latex(\mu{#1}.{#2})]
   rule letrec F:Id X:Id = E in E' => let F = mu F . lambda X . E in E' [macro]
   rule mu X . E => E[(mu X . E) / X]
-
-  configuration <T> <k> $PGM:K </k> </T>
-  // TODO: remove after adding an "add top cell wrapper" pass to the kompiler
 endmodule

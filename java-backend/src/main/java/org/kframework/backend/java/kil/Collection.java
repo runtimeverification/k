@@ -21,16 +21,13 @@ public abstract class Collection extends Term {
      */
     protected final Variable frame;
 
-    protected final TermContext context;
-
     /**
      * Creates an instance of class {@code Collection} given its kind and a
      * frame variable. If the given frame is non-null, the kind of the frame
      * must be equal to the kind of the instance.
      */
-    protected Collection(Variable frame, Kind kind, TermContext context) {
+    protected Collection(Variable frame, Kind kind) {
         super(kind);
-        this.context = context;
 
         assert frame == null || frame.kind() == kind
                 : "unexpected kind " + frame.kind() + " for frame variable " + frame.name()
@@ -90,9 +87,4 @@ public abstract class Collection extends Term {
     public ASTNode accept(Transformer transformer) {
         return transformer.transform(this);
     }
-
-    public TermContext context() {
-        return context;
-    }
-
 }

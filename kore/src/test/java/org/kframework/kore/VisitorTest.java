@@ -11,18 +11,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class VisitorTest {
-    class FooTransformer extends AbstractKORETransformer<K> {
-
-        @Override
-        public K apply(KApply k) {
-            List<K> newItems = k.klist().items().stream().map(this).collect(Collectors.toList());
-            return KApply(k.klabel(), KList(newItems), k.att());
-        }
-
-        @Override
-        public K apply(KRewrite k) {
-            return KRewrite(apply(k.left()), apply(k.right()), k.att());
-        }
+    class FooTransformer extends TransformK {
 
         @Override
         public K apply(KToken k) {
@@ -44,6 +33,7 @@ public class VisitorTest {
         public K apply(InjectedKLabel k) {
             return k;
         }
+
     }
 
     @Test

@@ -50,7 +50,7 @@ public class TermContext extends JavaSymbolicObject {
      * Forks an identical {@link TermContext}.
      */
     public TermContext fork() {
-        return new TermContext(global, new FreshCounter(counter.value));
+        return counter != null ? new TermContext(global, new FreshCounter(counter.value)) : this;
     }
 
     public BigInteger freshConstant() {

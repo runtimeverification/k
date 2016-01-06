@@ -35,6 +35,7 @@ public class MacroExpander extends CopyOnWriteTransformer {
     }
 
     public Definition processDefinition() {
+        Definition definition = context.definition();
         Definition processedDefinition = new Definition(
                 definition.definitionData(),
                 kem,
@@ -103,7 +104,7 @@ public class MacroExpander extends CopyOnWriteTransformer {
                 rule.cellsToCopy(),
                 rule.matchingInstructions(),
                 rule,
-                context);
+                rule.globalContext());
     }
 
     public Term processTerm(Term term) {
@@ -136,7 +137,7 @@ public class MacroExpander extends CopyOnWriteTransformer {
     }
 
     private Term applyMacroRule(Term term) {
-        for (Rule rule : definition.macros()) {
+        for (Rule rule : context.definition().macros()) {
             Map<Variable, Term> solution;
             List<Substitution<Variable, Term>> matches = PatternMatcher.match(term, rule, context);
             if (matches.isEmpty()) {

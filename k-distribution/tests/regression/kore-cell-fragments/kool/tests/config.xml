@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2015 K Team. All Rights Reserved. -->
+  <tests>
+    <test
+        definition="h.k"
+        programs="."
+        extension="h"
+        skip="pdf"
+        results="." >
+    </test>
+  </tests>

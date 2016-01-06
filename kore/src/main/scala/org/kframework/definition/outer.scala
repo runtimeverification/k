@@ -2,17 +2,21 @@
 
 package org.kframework.definition
 
+import javax.annotation.Nonnull
+
 import dk.brics.automaton.{BasicAutomata, RegExp, RunAutomaton, SpecialOperations}
 import org.kframework.POSet
 import org.kframework.attributes.Att
+import org.kframework.definition.Constructors._
 import org.kframework.kore.Unapply.{KApply, KLabel}
 import org.kframework.kore._
 import org.kframework.utils.errorsystem.KEMException
 
-import javax.annotation.Nonnull
-
 import scala.annotation.meta.param
 import scala.collection.JavaConverters._
+
+import collection._
+import scala.collection.Set
 
 trait OuterKORE
 
@@ -29,10 +33,9 @@ case class DivergingAttributesForTheSameKLabel(ps: Set[Production])
 //}
 
 case class Definition(
-  mainModule: Module,
-  mainSyntaxModule: Module,
-  entryModules: Set[Module],
-  att: Att = Att())
+                       mainModule: Module,
+                       entryModules: Set[Module],
+                       att: Att)
   extends DefinitionToString with OuterKORE {
 
   private def allModules(m: Module): Set[Module] = m.imports | (m.imports flatMap allModules) + m
@@ -40,18 +43,66 @@ case class Definition(
   val modules = entryModules flatMap allModules
 
   assert(modules.contains(mainModule))
-  assert(modules.contains(mainSyntaxModule))
 
-  def getModule(name: String): Option[Module] = modules find { case Module(`name`, _, _, _) => true; case _ => false }
+  def getModule(name: String): Option[Module] = modules find { case m: Module => m.name == name; case _ => false }
+
+  override def hashCode = mainModule.hashCode
+
+  override def equals(that: Any) = that match {
+    case Definition(`mainModule`, `entryModules`, _) => true
+    case _ => false
+  }
 }
 
-case class Module(name: String, imports: Set[Module], localSentences: Set[Sentence], @(Nonnull @param) att: Att = Att())
-  extends ModuleToString with KLabelMappings with OuterKORE {
+trait Sorting {
+  def computeSubsortPOSet(sentences: Set[Sentence]) = {
+    val subsortRelations: Set[(Sort, Sort)] = sentences collect {
+      case Production(endSort, Seq(NonTerminal(startSort)), _) => (startSort, endSort)
+    }
+
+    POSet(subsortRelations)
+  }
+}
+
+trait GeneratingListSubsortProductions extends Sorting {
+
+  def computeFromSentences(wipSentences: Set[Sentence]): Set[Sentence] = {
+    val userLists = UserList.apply(wipSentences)
+
+    val subsorts = computeSubsortPOSet(wipSentences)
+
+    val listProductions =
+      for (l1 <- userLists;
+           l2 <- userLists
+           if l1 != l2 && l1.klabel == l2.klabel &&
+             subsorts.>(ADT.Sort(l1.childSort), ADT.Sort(l2.childSort))) yield {
+        Production(ADT.Sort(l1.sort), Seq(NonTerminal(ADT.Sort(l2.sort))), Att().add(Att.generatedByListSubsorting))
+      }
+
+    listProductions.toSet
+  }
+}
+
+object Module {
+  def apply(name: String, unresolvedLocalSentences: Set[Sentence]): Module = {
+    new Module(name, Set(), unresolvedLocalSentences, Att())
+  }
+  def apply(name: String, imports: Set[Module], unresolvedLocalSentences: Set[Sentence], @(Nonnull@param) att: Att = Att()): Module = {
+    new Module(name, imports, unresolvedLocalSentences, att)
+  }
+}
+
+class Module(val name: String, val imports: Set[Module], unresolvedLocalSentences: Set[Sentence], @(Nonnull@param) val att: Att = Att())
+  extends ModuleToString with KLabelMappings with OuterKORE with Sorting with GeneratingListSubsortProductions with Serializable {
   assert(att != null)
 
-  val sentences: Set[Sentence] = localSentences | (imports flatMap {
-    _.sentences
-  })
+  private val importedSentences = imports flatMap {_.sentences}
+
+  val listProductions = computeFromSentences(unresolvedLocalSentences | importedSentences)
+
+  val localSentences = unresolvedLocalSentences | listProductions
+
+  val sentences: Set[Sentence] = localSentences | importedSentences
 
   /** All the imported modules, calculated recursively. */
   lazy val importedModules: Set[Module] = imports | (imports flatMap {
@@ -69,21 +120,17 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
   lazy val definedKLabels: Set[KLabel] =
     (productionsFor.keys.toSet | klabelsDefinedInRules.keys.toSet).filter(!_.isInstanceOf[KVariable])
 
-  private def mergeMultiset(map1: Map[KLabel, Int], map2: Map[KLabel, Int]) = map1 ++ map2.map{ case (k,v) => k -> (v + map1.getOrElse(k,0)) }
-
   lazy val klabelsDefinedInRules: Map[KLabel, Int] = {
-    val transformer = new KORETransformer[Map[KLabel, Int]] {
-      override def apply(k: KApply): Map[KLabel, Int] = mergeMultiset(k.klist.items.asScala.map(apply).fold(Map())(mergeMultiset), Map((k.klabel, 1)))
+    def mergeMultiset(map1: Map[KLabel, Int], map2: Map[KLabel, Int]) = map1 ++ map2.map { case (k, v) => k -> (v + map1.getOrElse(k, 0)) }
 
-      override def apply(k: KRewrite): Map[KLabel, Int] = mergeMultiset(apply(k.left), apply(k.right))
-
-      override def apply(k: KToken): Map[KLabel, Int] = Map()
-
-      override def apply(k: KVariable): Map[KLabel, Int] = Map()
-
-      override def apply(k: KSequence): Map[KLabel, Int] = k.items.asScala.map(apply).fold(Map())(mergeMultiset)
+    val transformer = new FoldK[Map[KLabel, Int]] {
+      override def apply(k: KApply): Map[KLabel, Int] = merge(apply(k.klist), Map((k.klabel, 1)))
 
       override def apply(k: InjectedKLabel): Map[KLabel, Int] = Map((k.klabel, 1))
+
+      def unit = Map()
+
+      def merge(map1: Map[KLabel, Int], map2: Map[KLabel, Int]) = mergeMultiset(map1, map2)
     }
     rules.map(r => {
       mergeMultiset(transformer.apply(r.body), mergeMultiset(transformer.apply(r.requires), transformer.apply(r.ensures)))
@@ -96,11 +143,11 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
       .groupBy(_.sort)
       .map { case (s, ps) => (s, ps) }
 
-  lazy val bracketProductionsFor: Map[Sort, Set[Production]] =
+  lazy val bracketProductionsFor: Map[Sort, List[Production]] =
     productions
-      .collect({ case p if p.att.contains("bracket") => p})
+      .collect({ case p if p.att.contains("bracket") => p })
       .groupBy(_.sort)
-      .map { case (s, ps) => (s, ps)}
+      .map { case (s, ps) => (s, ps.toList.sortBy(_.sort)(subsorts.asOrdering)) }
 
   @transient lazy val sortFor: Map[KLabel, Sort] = productionsFor mapValues {_.head.sort}
 
@@ -142,37 +189,37 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
     sortDeclarations
       .groupBy(_.sort)
 
-  @transient lazy val sortAttributesFor: Map[Sort, Att] =  sortDeclarationsFor mapValues {mergeAttributes(_)}
+  @transient lazy val sortAttributesFor: Map[Sort, Att] = sortDeclarationsFor mapValues {mergeAttributes(_)}
 
   private def mergeAttributes[T <: Sentence](p: Set[T]) = {
     val union = p.flatMap(_.att.att)
-    val attMap = union.collect({case t@KApply(KLabel(_), _) => t}).groupBy(_.klabel)
-    Att(union.filter { k => !k.isInstanceOf[KApply] || attMap(k.asInstanceOf[KApply].klabel).size == 1})
+    val attMap = union.collect({ case t@KApply(KLabel(_), _) => t }).groupBy(_.klabel)
+    Att(union.filter { k => !k.isInstanceOf[KApply] || attMap(k.asInstanceOf[KApply].klabel).size == 1 })
   }
 
   val definedSorts: Set[Sort] = (productions map {_.sort}) ++ (sortDeclarations map {_.sort})
-  val usedCellSorts: Set[Sort] = productions.flatMap {p => p.items.collect{case NonTerminal(s) => s}
-     .filter(s => s.name.endsWith("Cell") || s.name.endsWith("CellFragment"))}
+  val usedCellSorts: Set[Sort] = productions.flatMap { p => p.items.collect { case NonTerminal(s) => s }
+    .filter(s => s.name.endsWith("Cell") || s.name.endsWith("CellFragment"))
+  }
 
   lazy val listSorts: Set[Sort] = sentences.collect({ case Production(srt, _, att1) if att1.contains("userList") =>
-    srt })
+    srt
+  })
 
-  private lazy val subsortRelations: Set[(Sort, Sort)] = sentences collect {
-    case Production(endSort, Seq(NonTerminal(startSort)), _) => (startSort, endSort)
-  }
+  lazy val subsorts: POSet[Sort] = computeSubsortPOSet(sentences)
 
   private lazy val expressedPriorities: Set[(Tag, Tag)] =
     sentences
       .collect({ case SyntaxPriority(ps, _) => ps })
       .map { ps: Seq[Set[Tag]] =>
-      val pairSetAndPenultimateTagSet = ps.foldLeft((Set[(Tag, Tag)](), Set[Tag]())) {
-        case ((all, prev), current) =>
-          val newPairs = for (a <- prev; b <- current) yield (a, b)
+        val pairSetAndPenultimateTagSet = ps.foldLeft((Set[(Tag, Tag)](), Set[Tag]())) {
+          case ((all, prev), current) =>
+            val newPairs = for (a <- prev; b <- current) yield (a, b)
 
-          (newPairs | all, current)
-      }
-      pairSetAndPenultimateTagSet._1 // we're only interested in the pair set part of the fold
-    }.flatten
+            (newPairs | all, current)
+        }
+        pairSetAndPenultimateTagSet._1 // we're only interested in the pair set part of the fold
+      }.flatten
   lazy val priorities = POSet(expressedPriorities)
   lazy val leftAssoc = buildAssoc(Associativity.Left)
   lazy val rightAssoc = buildAssoc(Associativity.Right)
@@ -181,21 +228,20 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
     sentences
       .collect({ case SyntaxAssociativity(`side` | Associativity.NonAssoc, ps, _) => ps })
       .map { ps: Set[Tag] =>
-      for (a <- ps; b <- ps) yield (a, b)
-    }.flatten
+        for (a <- ps; b <- ps) yield (a, b)
+      }.flatten
   }
 
-  lazy val subsorts: POSet[Sort] = POSet(subsortRelations)
-
   @transient lazy val freshFunctionFor: Map[Sort, KLabel] =
-    productions.groupBy(_.sort).mapValues(_.filter(_.att.contains("freshGenerator")) )
+    productions.groupBy(_.sort).mapValues(_.filter(_.att.contains("freshGenerator")))
       .filter(_._2.nonEmpty).mapValues(_.map(p => p.klabel.get)).mapValues { set => {
       if (set.size > 1)
         throw KEMException.compilerError("Found more than one fresh generator for sort " + sortFor(set.head)
           + ". Found: " + set)
       else
         set.head
-    }}
+    }
+    }
 
   // check that non-terminals have a defined sort
   private val nonTerminalsWithUndefinedSort = sentences flatMap {
@@ -209,7 +255,11 @@ case class Module(name: String, imports: Set[Module], localSentences: Set[Senten
   if (!nonTerminalsWithUndefinedSort.isEmpty)
     throw new NonTerminalsWithUndefinedSortException(nonTerminalsWithUndefinedSort)
 
-  override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(Module.this);
+  override lazy val hashCode: Int = name.hashCode
+
+  override def equals(that: Any) = that match {
+    case m: Module => m.name == name && m.sentences == sentences
+  }
 }
 
 // hooked but different from core, Import is a sentence here
@@ -239,9 +289,9 @@ object Associativity extends Enumeration {
 }
 
 case class SyntaxAssociativity(
-  assoc: Associativity.Value,
-  tags: collection.immutable.Set[Tag],
-  att: Att = Att())
+                                assoc: Associativity.Value,
+                                tags: Set[Tag],
+                                att: Att = Att())
   extends Sentence with SyntaxAssociativityToString with OuterKORE
 
 case class Tag(name: String) extends TagToString with OuterKORE
@@ -255,7 +305,7 @@ case class Tag(name: String) extends TagToString with OuterKORE
 //}
 
 case class SyntaxSort(sort: Sort, att: Att = Att()) extends Sentence
-with SyntaxSortToString with OuterKORE {
+  with SyntaxSortToString with OuterKORE {
   def items = Seq()
 }
 
@@ -282,6 +332,7 @@ object Production {
   def apply(klabel: String, sort: Sort, items: Seq[ProductionItem], att: Att = Att()): Production = {
     Production(sort, items, att + ("klabel" -> klabel))
   }
+
   val kLabelAttribute = "klabel"
 }
 
@@ -293,15 +344,17 @@ sealed trait ProductionItem extends OuterKORE
 
 sealed trait TerminalLike extends ProductionItem {
   def pattern: RunAutomaton
+
   def followPattern: RunAutomaton
+
   def precedePattern: RunAutomaton
 }
 
 case class NonTerminal(sort: Sort) extends ProductionItem
-with NonTerminalToString
+  with NonTerminalToString
 
 case class RegexTerminal(precedeRegex: String, regex: String, followRegex: String) extends TerminalLike with
-RegexTerminalToString {
+  RegexTerminalToString {
   lazy val pattern = new RunAutomaton(new RegExp(regex).toAutomaton, false)
   lazy val followPattern = new RunAutomaton(new RegExp(followRegex).toAutomaton, false)
   lazy val precedePattern = {
@@ -311,12 +364,16 @@ RegexTerminalToString {
   }
 }
 
+object Terminal {
+  def apply(value: String): Terminal = Terminal(value, Seq())
+}
+
 case class Terminal(value: String, followRegex: Seq[String]) extends TerminalLike // hooked
-with TerminalToString {
-  def this(value: String) = this(value, Seq())
+  with TerminalToString {
+
   lazy val pattern = new RunAutomaton(BasicAutomata.makeString(value), false)
   lazy val followPattern =
-    new RunAutomaton(BasicAutomata.makeStringUnion(followRegex.toArray : _*), false)
+    new RunAutomaton(BasicAutomata.makeStringUnion(followRegex.toArray: _*), false)
   lazy val precedePattern = new RunAutomaton(BasicAutomata.makeEmpty(), false)
 }
 

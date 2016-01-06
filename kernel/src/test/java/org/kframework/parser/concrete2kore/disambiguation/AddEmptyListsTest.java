@@ -56,10 +56,10 @@ public class AddEmptyListsTest {
 
         Definition baseK =
                 parser.loadDefinition("K", "K", definitionText,
-                        Source.apply(definitionFile.getAbsolutePath()),
+                        definitionFile,
                         definitionFile.getParentFile(),
                         Lists.newArrayList(Kompile.BUILTIN_DIRECTORY),
-                        true);
+                        true, false);
 
         return new RuleGrammarGenerator(baseK, true);
     }

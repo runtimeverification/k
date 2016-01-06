@@ -6,12 +6,11 @@ import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import org.apache.commons.collections15.ListUtils;
 import org.kframework.Collections;
+import org.kframework.Strategy;
 import org.kframework.attributes.Source;
 import org.kframework.backend.Backends;
 import org.kframework.builtin.BooleanUtils;
-import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
-import org.kframework.compile.CleanKSeq;
 import org.kframework.compile.ConfigurationInfoFromModule;
 import org.kframework.compile.LabelInfo;
 import org.kframework.compile.LabelInfoFromModule;
@@ -20,19 +19,24 @@ import org.kframework.definition.Context;
 import org.kframework.definition.Definition;
 import org.kframework.definition.DefinitionTransformer;
 import org.kframework.definition.Module;
-import org.kframework.definition.ModuleTransformer;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
-import org.kframework.kore.ADT;
-import org.kframework.kore.Assoc;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
-import org.kframework.kore.KORE;
-import org.kframework.kore.KSequence;
-import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
-import org.kframework.kore.SortedADT;
-import org.kframework.kore.compile.*;
+import org.kframework.kore.compile.AddImplicitComputationCell;
+import org.kframework.kore.compile.ConcretizeCells;
+import org.kframework.kore.compile.GenerateSentencesFromConfigDecl;
+import org.kframework.kore.compile.GenerateSortPredicateSyntax;
+import org.kframework.kore.compile.ResolveAnonVar;
+import org.kframework.kore.compile.ResolveContexts;
+import org.kframework.kore.compile.ResolveFreshConstants;
+import org.kframework.kore.compile.ResolveHeatCoolAttribute;
+import org.kframework.kore.compile.ResolveIOStreams;
+import org.kframework.kore.compile.ResolveSemanticCasts;
+import org.kframework.kore.compile.ResolveStrict;
+import org.kframework.kore.compile.SortInfo;
+import org.kframework.kore.compile.checks.CheckRHSVariables;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.concrete2kore.ParseCache;
@@ -49,8 +53,7 @@ import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
 import scala.Tuple2;
-import scala.collection.immutable.Seq;
-import scala.collection.immutable.Set;
+import scala.collection.Set;
 import scala.util.Either;
 
 import java.io.File;
@@ -63,6 +66,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -80,7 +84,7 @@ import static scala.compat.java8.JFunction.*;
 public class Kompile {
 
     public static final File BUILTIN_DIRECTORY = JarInfo.getKIncludeDir().resolve("builtin").toFile();
-    private static final String REQUIRE_PRELUDE_K = "requires \"prelude.k\"\n";
+    public static final String REQUIRE_PRELUDE_K = "requires \"prelude.k\"\n";
     public static final Sort START_SYMBOL = Sort("RuleContent");
 
     public final KompileOptions kompileOptions;
@@ -140,12 +144,24 @@ public class Kompile {
         Definition parsedDef = parseDefinition(definitionFile, mainModuleName, mainProgramsModuleName, true);
         sw.printIntermediate("Parse definition [" + parsedBubbles.get() + "/" + (parsedBubbles.get() + cachedBubbles.get()) + " rules]");
 
+        checkDefinition(parsedDef);
+
         Definition kompiledDefinition = pipeline.apply(parsedDef);
         sw.printIntermediate("Apply compile pipeline");
 
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(kompiledDefinition.mainModule());
 
         return new CompiledDefinition(kompileOptions, parsedDef, kompiledDefinition, programStartSymbol, configInfo.getDefaultCell(configInfo.topCell()).klabel());
+    }
+
+    private void checkDefinition(Definition parsedDef) {
+        CheckRHSVariables checkRHSVariables = new CheckRHSVariables(errors);
+        stream(parsedDef.modules()).forEach(m -> stream(m.localSentences()).forEach(checkRHSVariables::check));
+
+        if (!errors.isEmpty()) {
+            kem.addAllKException(errors.stream().map(e -> e.exception).collect(Collectors.toList()));
+            throw KEMException.compilerError("Had " + errors.size() + " structural errors.");
+        }
     }
 
     public Function<Definition, Definition> defaultSteps() {
@@ -165,15 +181,15 @@ public class Kompile {
                 .andThen(resolveSemanticCasts)
                 .andThen(generateSortPredicateSyntax)
                 .andThen(func(this::resolveFreshConstants))
-                .andThen(func(this::addImplicitComputationCellTransformer))
-                .andThen(func(this::concretizeTransformer))
+                .andThen(func(AddImplicitComputationCell::transformDefinition))
+                .andThen(new Strategy(kompileOptions.experimental.heatCoolStrategies).addStrategyCellToRulesTransformer())
+                .andThen(func(ConcretizeCells::transformDefinition))
                 .andThen(func(this::addSemanticsModule))
-                .andThen(func(this::addProgramModule))
                 .apply(def);
     }
 
     public Definition resolveIOStreams(Definition d) {
-        return DefinitionTransformer.from(new ResolveIOStreams(d)::resolve, "resolving io streams").apply(d);
+        return DefinitionTransformer.from(new ResolveIOStreams(d, kem)::resolve, "resolving io streams").apply(d);
     }
 
     public Definition addSemanticsModule(Definition d) {
@@ -190,10 +206,10 @@ public class Kompile {
 
         Module languageParsingModule = Module("LANGUAGE-PARSING",
                 Set(d.mainModule(),
-                        d.mainSyntaxModule(),
-                        d.getModule("K-TERM").get()), Set(), Att());
+                        d.getModule("K-TERM").get(),
+                        d.getModule(RuleGrammarGenerator.ID_PROGRAM_PARSING).get()), Set(), Att());
         allModules.add(languageParsingModule);
-        return Definition(withKSeq, d.mainSyntaxModule(), immutable(allModules));
+        return Definition(withKSeq, immutable(allModules), d.att());
     }
 
     public Definition resolveFreshConstants(Definition input) {
@@ -201,47 +217,21 @@ public class Kompile {
                 .apply(input);
     }
 
-    public Definition addProgramModule(Definition d) {
-        Module programsModule = gen.getProgramsGrammar(d.mainSyntaxModule());
-        java.util.Set<Module> allModules = mutable(d.modules());
-        allModules.add(programsModule);
-        return Definition(d.mainModule(), programsModule, immutable(allModules));
-    }
-
-    private Definition addImplicitComputationCellTransformer(Definition input) {
-        ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(input.mainModule());
-        LabelInfo labelInfo = new LabelInfoFromModule(input.mainModule());
-        SortInfo sortInfo = SortInfo.fromModule(input.mainModule());
-        return DefinitionTransformer.fromSentenceTransformer(
-                new AddImplicitComputationCell(configInfo, labelInfo),
-                "concretizing configuration").apply(input);
-    }
-
-    private Definition concretizeTransformer(Definition input) {
-        ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(input.mainModule());
-        LabelInfo labelInfo = new LabelInfoFromModule(input.mainModule());
-        SortInfo sortInfo = SortInfo.fromModule(input.mainModule());
-        return DefinitionTransformer.fromSentenceTransformer(
-                new ConcretizeCells(configInfo, labelInfo, sortInfo, kem)::concretize,
-                "concretizing configuration"
-        ).apply(input);
-    }
-
     private Sentence concretizeSentence(Sentence s, Definition input) {
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(input.mainModule());
         LabelInfo labelInfo = new LabelInfoFromModule(input.mainModule());
         SortInfo sortInfo = SortInfo.fromModule(input.mainModule());
-        return new ConcretizeCells(configInfo, labelInfo, sortInfo, kem).concretize(s);
+        return new ConcretizeCells(configInfo, labelInfo, sortInfo, input.mainModule()).concretize(s);
     }
 
     public Module parseModule(CompiledDefinition definition, File definitionFile, boolean dropQuote) {
         java.util.Set<Module> modules = parser.loadModules(
                 mutable(definition.getParsedDefinition().modules()),
                 "require " + StringUtil.enquoteCString(definitionFile.getPath()),
-                Source.apply(definitionFile.getPath()),
+                Source.apply(definitionFile.getAbsolutePath()),
                 definitionFile.getParentFile(),
                 Lists.newArrayList(BUILTIN_DIRECTORY),
-                dropQuote);
+                dropQuote, !kompileOptions.outerParsing.noPrelude);
 
         if (modules.size() != 1) {
             throw KEMException.compilerError("Expected to find a file with 1 module: found " + modules.size() + " instead.");
@@ -261,17 +251,17 @@ public class Kompile {
             }
         }
 
-        gen = new RuleGrammarGenerator(definition.getParsedDefinition(), kompileOptions.strict());
-        Module modWithConfig = resolveConfig(module, definition.getParsedDefinition());
+        ResolveConfig resolveConfig = new ResolveConfig(definition.getParsedDefinition(), kompileOptions.strict());
+        Module modWithConfig = resolveConfig.apply(module);
 
         gen = new RuleGrammarGenerator(definition.getParsedDefinition(), kompileOptions.strict());
         Module parsedMod = resolveBubbles(modWithConfig);
 
-        if(cacheParses) {
+        if (cacheParses) {
             loader.saveOrDie(files.resolveKompiled("cache.bin"), caches);
         }
         if (!errors.isEmpty()) {
-            kem.addAllKException(errors.stream().map(e -> e.getKException()).collect(Collectors.toList()));
+            kem.addAllKException(errors.stream().map(e -> e.exception).collect(Collectors.toList()));
             throw KEMException.compilerError("Had " + errors.size() + " parsing errors.");
         }
         return parsedMod;
@@ -279,18 +269,18 @@ public class Kompile {
 
     public Definition parseDefinition(File definitionFile, String mainModuleName, String mainProgramsModule, boolean dropQuote) {
         String prelude = REQUIRE_PRELUDE_K;
-        if (kompileOptions.noPrelude) {
+        if (kompileOptions.outerParsing.noPrelude) {
             prelude = "";
         }
         Definition definition = parser.loadDefinition(
                 mainModuleName,
                 mainProgramsModule, prelude + FileUtil.load(definitionFile),
-                Source.apply(definitionFile.getPath()),
+                definitionFile,
                 definitionFile.getParentFile(),
-                ListUtils.union(kompileOptions.includes.stream()
+                ListUtils.union(kompileOptions.outerParsing.includes.stream()
                                 .map(files::resolveWorkingDirectory).collect(Collectors.toList()),
                         Lists.newArrayList(BUILTIN_DIRECTORY)),
-                dropQuote);
+                dropQuote, !kompileOptions.outerParsing.noPrelude);
 
         boolean hasConfigDecl = stream(definition.mainModule().sentences())
                 .filter(s -> s instanceof Bubble)
@@ -324,67 +314,90 @@ public class Kompile {
             }
         }
 
-        gen = new RuleGrammarGenerator(definitionWithConfigBubble, kompileOptions.strict());
-        Definition defWithConfig = DefinitionTransformer.from(m -> resolveConfig(m, definitionWithConfigBubble), "parsing configurations").apply(definitionWithConfigBubble);
+        ResolveConfig resolveConfig = new ResolveConfig(definitionWithConfigBubble, kompileOptions.strict());
+        Definition defWithConfig = DefinitionTransformer.from(resolveConfig, "parsing configurations").apply(definitionWithConfigBubble);
 
         gen = new RuleGrammarGenerator(defWithConfig, kompileOptions.strict());
         Definition parsedDef = DefinitionTransformer.from(this::resolveBubbles, "parsing rules").apply(defWithConfig);
 
-        if(cacheParses) {
+        if (cacheParses) {
             loader.saveOrDie(files.resolveKompiled("cache.bin"), caches);
         }
         if (!errors.isEmpty()) {
-            kem.addAllKException(errors.stream().map(e -> e.getKException()).collect(Collectors.toList()));
+            kem.addAllKException(errors.stream().map(e -> e.exception).collect(Collectors.toList()));
             throw KEMException.compilerError("Had " + errors.size() + " parsing errors.");
         }
         return parsedDef;
     }
 
     Map<String, ParseCache> caches;
-    java.util.Set<ParseFailedException> errors;
+    java.util.Set<KEMException> errors;
     RuleGrammarGenerator gen;
 
-    private Module resolveConfig(Module module, Definition def) {
-        if (stream(module.localSentences())
-                .filter(s -> s instanceof Bubble)
-                .map(b -> (Bubble) b)
-                .filter(b -> b.sentenceType().equals("config")).count() == 0)
-            return module;
-        Module configParserModule = gen.getConfigGrammar(module);
+    class ResolveConfig implements UnaryOperator<Module> {
+        private final Definition def;
+        private final RuleGrammarGenerator gen;
 
-        ParseCache cache = loadCache(configParserModule);
-        ParseInModule parser = gen.getCombinedGrammar(cache.getModule());
-
-        Set<Sentence> configDeclProductions = stream(module.localSentences())
-                .parallel()
-                .filter(s -> s instanceof Bubble)
-                .map(b -> (Bubble) b)
-                .filter(b -> b.sentenceType().equals("config"))
-                .flatMap(b -> performParse(cache.getCache(), parser, b))
-                .map(contents -> {
-                    KApply configContents = (KApply) contents;
-                    List<K> items = configContents.klist().items();
-                    switch (configContents.klabel().name()) {
-                    case "#ruleNoConditions":
-                        return Configuration(items.get(0), BooleanUtils.TRUE, configContents.att());
-                    case "#ruleEnsures":
-                        return Configuration(items.get(0), items.get(1), configContents.att());
-                    default:
-                        throw KEMException.compilerError("Illegal configuration with requires clause detected.", configContents);
-                    }
-                })
-                .flatMap(
-                        configDecl -> stream(GenerateSentencesFromConfigDecl.gen(configDecl.body(), configDecl.ensures(), configDecl.att(), parser.getExtensionModule())))
-                .collect(Collections.toSet());
-
-        Module mapModule;
-        if (def.getModule("MAP").isDefined()) {
-            mapModule = def.getModule("MAP").get();
-        } else {
-            throw KEMException.compilerError("Module Map must be visible at the configuration declaration, in module "+module.name());
+        ResolveConfig(Definition def, boolean isStrict) {
+            this.def = def;
+            this.gen = new RuleGrammarGenerator(def, isStrict);
         }
-        return Module(module.name(), (Set<Module>) module.imports().$bar(Set(mapModule)), (Set<Sentence>) module.localSentences().$bar(configDeclProductions), module.att());
+
+        public Module apply(Module inputModule) {
+            if (stream(inputModule.localSentences())
+                    .filter(s -> s instanceof Bubble)
+                    .map(b -> (Bubble) b)
+                    .filter(b -> b.sentenceType().equals("config")).count() == 0)
+                return inputModule;
+
+
+            Set<Sentence> importedConfigurationSortsSubsortedToCell = stream(inputModule.productions())
+                    .filter(p -> p.att().contains("cell"))
+                    .map(p -> Production(Sort("Cell"), Seq(NonTerminal(p.sort())))).collect(Collections.toSet());
+
+            Module module = Module(inputModule.name(), (Set<Module>) inputModule.imports(),
+                    (Set<Sentence>) inputModule.localSentences().$bar(importedConfigurationSortsSubsortedToCell),
+                    inputModule.att());
+
+            Module configParserModule = gen.getConfigGrammar(module);
+
+            ParseCache cache = loadCache(configParserModule);
+            ParseInModule parser = gen.getCombinedGrammar(cache.getModule());
+
+            Set<Sentence> configDeclProductions = stream(module.localSentences())
+                    .parallel()
+                    .filter(s -> s instanceof Bubble)
+                    .map(b -> (Bubble) b)
+                    .filter(b -> b.sentenceType().equals("config"))
+                    .flatMap(b -> performParse(cache.getCache(), parser, b))
+                    .map(contents -> {
+                        KApply configContents = (KApply) contents;
+                        List<K> items = configContents.klist().items();
+                        switch (configContents.klabel().name()) {
+                        case "#ruleNoConditions":
+                            return Configuration(items.get(0), BooleanUtils.TRUE, configContents.att());
+                        case "#ruleEnsures":
+                            return Configuration(items.get(0), items.get(1), configContents.att());
+                        default:
+                            throw KEMException.compilerError("Illegal configuration with requires clause detected.", configContents);
+                        }
+                    })
+                    .flatMap(
+                            configDecl -> stream(GenerateSentencesFromConfigDecl.gen(configDecl.body(), configDecl.ensures(), configDecl.att(), parser.getExtensionModule())))
+                    .collect(Collections.toSet());
+
+            Module mapModule;
+            if (def.getModule("MAP").isDefined()) {
+                mapModule = def.getModule("MAP").get();
+            } else {
+                throw KEMException.compilerError("Module Map must be visible at the configuration declaration, in module " + module.name());
+            }
+            return Module(module.name(), (Set<Module>) module.imports().$bar(Set(mapModule)),
+                    (Set<Sentence>) module.localSentences().$bar(configDeclProductions),
+                    module.att());
+        }
     }
+
 
     private Module resolveBubbles(Module module) {
         if (stream(module.localSentences())
@@ -505,7 +518,7 @@ public class Kompile {
             parsedBubbles.getAndIncrement();
             kem.addAllKException(result._2().stream().map(e -> e.getKException()).collect(Collectors.toList()));
             if (result._1().isRight()) {
-                KApply k = (KApply)TreeNodesToKORE.down(result._1().right().get());
+                KApply k = (KApply) TreeNodesToKORE.down(result._1().right().get());
                 k = KApply(k.klabel(), k.klist(), k.att().addAll(b.att().remove("contentStartLine").remove("contentStartColumn").remove("Source").remove("Location")));
                 cache.put(b.contents(), new ParsedSentence(k, new HashSet<>(result._2())));
                 return Stream.of(k);

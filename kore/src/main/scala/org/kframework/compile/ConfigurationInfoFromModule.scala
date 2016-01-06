@@ -11,6 +11,7 @@ import org.kframework.compile.ConfigurationInfo.Multiplicity
 import org.kframework.definition.{Module, NonTerminal, Production}
 import org.kframework.kore._
 import org.kframework.TopologicalSort._
+import collection._
 
 object ConfigurationInfoFromModule
 
@@ -55,7 +56,13 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
 
   private val edgesPoset: POSet[Sort] = POSet(edges)
 
-  private val topCells = cellSorts.filter (l => !edges.map(_._2).contains(l))
+  private val topCellsIncludingStrategyCell = cellSorts.diff(edges.map(_._2))
+
+  private val topCells =
+    if (topCellsIncludingStrategyCell.size > 1)
+      topCellsIncludingStrategyCell.filterNot(_.name == "SCell")
+    else
+      topCellsIncludingStrategyCell
 
   if (topCells.size > 1)
     throw new AssertionError("Too many top cells:" + topCells)

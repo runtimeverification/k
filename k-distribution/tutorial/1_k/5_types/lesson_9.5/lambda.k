@@ -1,11 +1,9 @@
 // Copyright (c) 2013-2015 K Team. All Rights Reserved.
-require "modules/unification.k"
-require "modules/substitution.k"
+require "domains.k"
+require "unification.k"
+require "substitution.k"
 
-module LAMBDA
-  imports UNIFICATION
-  imports SUBSTITUTION
-
+module LAMBDA-SYNTAX
   syntax Exp ::= Int | Bool | Id
                | "(" Exp ")"                      [bracket]
                | Exp Exp                          [strict, left]
@@ -24,6 +22,13 @@ module LAMBDA
                 | "(" Type ")"                    [bracket]
 
   syntax Exp ::= Type
+endmodule
+
+module LAMBDA
+  imports LAMBDA-SYNTAX
+  imports UNIFICATION
+  imports SUBSTITUTION
+
   syntax Variable ::= Id
   syntax KResult ::= Type
 
@@ -57,5 +62,5 @@ module LAMBDA
        <tenv> TEnv => TEnv[X <- ?T] </tenv>
 
   syntax KItem ::= tenv(Map)
-  rule <k> T:Type ~> (tenv(TEnv) => .) ...</k>  <tenv> _ => TEnv </tenv>
+  rule <k> T:Type ~> tenv(TEnv) => T ...</k>  <tenv> _ => TEnv </tenv>
 endmodule

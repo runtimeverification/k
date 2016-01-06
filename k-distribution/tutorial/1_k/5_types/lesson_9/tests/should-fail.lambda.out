@@ -2,5 +2,4 @@ Search results:
 
 Solution 1:
 V:K -->
-bool -> _0:Type = (int -> _1:Type) ~> _1 ~> if _0 then HOLE else f 2 ~> tenv (
-   x |-> bool -> _0 ) ~> (bool -> _0) -> HOLE ~> tenv ( .Map )
+( ( bool -> V0 ) = ( int -> V1 ) ) ~> V1 ~> #freezer8 ( V0 , f 2 ) ~> tenv ( x |-> ( bool -> V0 ) ) ~> ( bool -> V0 ) ~> tenv ( .Map )
