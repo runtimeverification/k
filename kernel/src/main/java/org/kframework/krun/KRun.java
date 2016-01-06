@@ -4,6 +4,7 @@ package org.kframework.krun;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.attributes.Source;
 import org.kframework.builtin.Sorts;
+import org.kframework.definition.ConfigVars;
 import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
 import org.kframework.kompile.CompiledDefinition;
@@ -43,6 +44,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import static org.kframework.Collections.*;
 import static org.kframework.kore.KORE.*;
 
 /**
@@ -271,7 +273,26 @@ public class KRun {
             output.put(KToken("$STDIN", Sorts.KConfigVar()), KToken("\"" + stdin + "\"", Sorts.String()));
             output.put(KToken("$IO", Sorts.KConfigVar()), KToken("\"off\"", Sorts.String()));
         }
+        checkConfigVars(output.keySet(), compiledDef);
         return plugConfigVars(compiledDef, output);
+    }
+
+    private void checkConfigVars(Set<KToken> inputConfigVars, CompiledDefinition compiledDef) {
+        Set<KToken> defConfigVars = mutable(new ConfigVars(compiledDef.kompiledDefinition.mainModule()).configVars());
+
+        for (KToken defConfigVar : defConfigVars) {
+            if (!inputConfigVars.contains(defConfigVar)) {
+                throw KEMException.compilerError("Configuration variable missing: " + defConfigVar.s());
+            }
+        }
+
+        for (KToken inputConfigVar : inputConfigVars) {
+            if (!defConfigVars.contains(inputConfigVar)) {
+                if (!inputConfigVar.s().equals("$STDIN") && !inputConfigVar.s().equals("$IO")) {
+                    kem.registerCompilerWarning("User specified configuration variable " + inputConfigVar.s() + " which does not exist.");
+                }
+            }
+        }
     }
 
     public static String getStdinBuffer(boolean ttyStdin) {
