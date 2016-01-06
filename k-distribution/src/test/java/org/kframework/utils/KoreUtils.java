@@ -74,7 +74,7 @@ public class KoreUtils {
         globalOptions.warnings = GlobalOptions.Warnings.ALL;
 
         kompileOptions.experimental.heatCoolStrategies = heatCoolStrategies;
-        kompileOptions.noPrelude = noPrelude;
+        kompileOptions.outerParsing.noPrelude = noPrelude;
 
         KRunOptions krunOptions = new KRunOptions();
         krunOptions.search = search;
