@@ -1,27 +1,22 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
 package org.kframework.kdoc;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
+import com.google.inject.Inject;
+import com.google.inject.Module;
+import com.google.inject.Provider;
 import org.kframework.backend.PosterBackend;
-import org.kframework.kil.Definition;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
-import org.kframework.utils.file.KompiledDir;
 import org.kframework.utils.inject.CommonModule;
-import org.kframework.utils.inject.DefinitionScope;
-import org.kframework.utils.inject.Concrete;
 import org.kframework.utils.inject.JCommanderModule;
 import org.kframework.utils.inject.JCommanderModule.ExperimentalUsage;
 import org.kframework.utils.inject.JCommanderModule.Usage;
 
-import com.google.inject.Inject;
-import com.google.inject.Module;
-import com.google.inject.Provider;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class KDocFrontEnd extends FrontEnd {
@@ -34,39 +29,27 @@ public class KDocFrontEnd extends FrontEnd {
         return modules;
     }
 
+    private final KDocOptions options;
     private final Provider<PosterBackend> backend;
-    private final Provider<Definition> def;
-    private final DefinitionScope scope;
-    private final Provider<File> kompiledDir;
 
     @Inject
     public KDocFrontEnd(
+            KDocOptions options,
             KExceptionManager kem,
             GlobalOptions globalOptions,
             @Usage String usage,
             @ExperimentalUsage String experimentalUsage,
             JarInfo jarInfo,
-            Provider<PosterBackend> backend,
-            @Concrete Provider<Definition> def,
             FileUtil files,
-            DefinitionScope scope,
-            @KompiledDir Provider<File> kompiledDir) {
+            Provider<PosterBackend> backend) {
         super(kem, globalOptions, usage, experimentalUsage, jarInfo, files);
+        this.options = options;
         this.backend = backend;
-        this.def = def;
-        this.scope = scope;
-        this.kompiledDir = kompiledDir;
     }
 
     @Override
     protected int run() {
-        scope.enter(kompiledDir.get());
-        try {
-            backend.get().run(def.get());
-            return 0;
-        } finally {
-            scope.exit();
-        }
+        return 0;
     }
 
 }

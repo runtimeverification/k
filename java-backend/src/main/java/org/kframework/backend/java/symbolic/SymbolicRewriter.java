@@ -235,6 +235,9 @@ public class SymbolicRewriter {
 
     private List<ConstrainedTerm> fastComputeRewriteStep(ConstrainedTerm subject, boolean computeOne) {
         List<ConstrainedTerm> results = new ArrayList<>();
+        if (definition.automaton == null) {
+            return results;
+        }
         List<Triple<ConjunctiveFormula, Boolean, Integer>> matches = theFastMatcher.mainMatch(
                 subject,
                 definition.automaton.leftHandSide(),

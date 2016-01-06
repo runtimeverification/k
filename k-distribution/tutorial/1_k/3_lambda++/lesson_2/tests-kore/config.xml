@@ -9,6 +9,8 @@
            results=".">
     <kompile-option name="--superheat"
                     value="strict" />
+    <kompile-option name="--syntax-module"
+                    value="LAMBDA" />
     <all-programs>
       <krun-option name="--search" />
       <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />

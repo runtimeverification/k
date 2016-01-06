@@ -45,6 +45,13 @@ case class Definition(
   assert(modules.contains(mainModule))
 
   def getModule(name: String): Option[Module] = modules find { case m: Module => m.name == name; case _ => false }
+
+  override def hashCode = mainModule.hashCode
+
+  override def equals(that: Any) = that match {
+    case Definition(`mainModule`, `entryModules`, _) => true
+    case _ => false
+  }
 }
 
 trait Sorting {
@@ -77,6 +84,9 @@ trait GeneratingListSubsortProductions extends Sorting {
 }
 
 object Module {
+  def apply(name: String, unresolvedLocalSentences: Set[Sentence]): Module = {
+    new Module(name, Set(), unresolvedLocalSentences, Att())
+  }
   def apply(name: String, imports: Set[Module], unresolvedLocalSentences: Set[Sentence], @(Nonnull@param) att: Att = Att()): Module = {
     new Module(name, imports, unresolvedLocalSentences, att)
   }
@@ -133,11 +143,11 @@ class Module(val name: String, val imports: Set[Module], unresolvedLocalSentence
       .groupBy(_.sort)
       .map { case (s, ps) => (s, ps) }
 
-  lazy val bracketProductionsFor: Map[Sort, Set[Production]] =
+  lazy val bracketProductionsFor: Map[Sort, List[Production]] =
     productions
       .collect({ case p if p.att.contains("bracket") => p })
       .groupBy(_.sort)
-      .map { case (s, ps) => (s, ps) }
+      .map { case (s, ps) => (s, ps.toList.sortBy(_.sort)(subsorts.asOrdering)) }
 
   @transient lazy val sortFor: Map[KLabel, Sort] = productionsFor mapValues {_.head.sort}
 
@@ -354,9 +364,12 @@ case class RegexTerminal(precedeRegex: String, regex: String, followRegex: Strin
   }
 }
 
+object Terminal {
+  def apply(value: String): Terminal = Terminal(value, Seq())
+}
+
 case class Terminal(value: String, followRegex: Seq[String]) extends TerminalLike // hooked
   with TerminalToString {
-  def this(value: String) = this(value, Seq())
 
   lazy val pattern = new RunAutomaton(BasicAutomata.makeString(value), false)
   lazy val followPattern =

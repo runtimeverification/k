@@ -6,20 +6,16 @@ import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
-import org.apache.commons.io.FilenameUtils;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
 import org.kframework.main.Tool;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
-import org.kframework.utils.file.DefinitionDir;
-import org.kframework.utils.file.KompiledDir;
-import org.kframework.utils.file.TempDir;
-import org.kframework.utils.file.WorkingDir;
 import org.kframework.utils.inject.Options;
+import org.kframework.utils.inject.OuterParsingModule;
+import org.kframework.utils.options.OuterParsingOptions;
 import org.kframework.utils.options.SMTOptions;
 
-import java.io.File;
 import java.util.Map;
 
 public class KompileModule extends AbstractModule {
@@ -31,6 +27,8 @@ public class KompileModule extends AbstractModule {
     protected void configure() {
         bind(FrontEnd.class).to(KompileFrontEnd.class);
         bind(Tool.class).toInstance(Tool.KOMPILE);
+
+        install(new OuterParsingModule());
 
         Multibinder<Object> optionsBinder = Multibinder.newSetBinder(binder(), Object.class, Options.class);
         optionsBinder.addBinding().to(KompileOptions.class);
@@ -52,20 +50,9 @@ public class KompileModule extends AbstractModule {
         return options.global;
     }
 
-    @Provides @DefinitionDir
-    File definitionDir(@WorkingDir File workingDir, KompileOptions options) {
-        if (options.directory == null) {
-            return options.mainDefinitionFile().getParentFile();
-        }
-        File f = new File(options.directory);
-        if (f.isAbsolute()) return f;
-        return new File(workingDir, options.directory);
-    }
+    @Provides
+    OuterParsingOptions outerParsingOptions(KompileOptions options) { return options.outerParsing; }
 
-    @Provides @KompiledDir
-    File kompiledDir(@DefinitionDir File defDir, KompileOptions options, @TempDir File tempDir) {
-        return new File(defDir, FilenameUtils.removeExtension(options.mainDefinitionFile().getName()) + "-kompiled");
-    }
 
     @Provides
     org.kframework.kore.compile.Backend getKoreBackend(KompileOptions options, Map<String, org.kframework.kore.compile.Backend> map, KExceptionManager kem) {

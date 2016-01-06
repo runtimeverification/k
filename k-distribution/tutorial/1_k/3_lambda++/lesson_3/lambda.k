@@ -1,32 +1,9 @@
 // Copyright (c) 2012-2015 K Team. All Rights Reserved.
-
-require "domains.k"
-
-module LAMBDA-SYNTAX
-  imports DOMAINS-SYNTAX
-
+module LAMBDA
   syntax Exp ::= Id
                | "lambda" Id "." Exp  [latex(\lambda{#1}.{#2})]
                | Exp Exp              [strict, left]
                | "(" Exp ")"          [bracket]
-
-  syntax Exp ::= Val
-  syntax Val ::= Int | Bool
-  syntax Exp ::= Exp "*" Exp          [strict, left]
-               | Exp "/" Exp          [strict]
-               > Exp "+" Exp          [strict, left]
-               > Exp "<=" Exp         [strict]
-
-  syntax Exp ::= "if" Exp "then" Exp "else" Exp  [strict(1)]
-
-  syntax Exp ::= "let" Id "=" Exp "in" Exp
-
-  syntax Exp ::= "letrec" Id Id "=" Exp "in" Exp
-endmodule
-
-module LAMBDA
-  imports LAMBDA-SYNTAX
-  imports DOMAINS
 
   configuration <T>
                   <k> $PGM:Exp </k>
@@ -35,6 +12,7 @@ module LAMBDA
                 </T>
 
   syntax Val ::= closure(Map,Id,Exp)
+  syntax Exp ::= Val
   syntax KResult ::= Val
 
   rule <k> lambda X:Id . E => closure(Rho,X,E) ...</k>
@@ -46,19 +24,27 @@ module LAMBDA
   rule <k> X => V ...</k>
        <env>... X |-> N ...</env>
        <store>... N |-> V ...</store>
-  rule <k> _:Val ~> `Rho => .K` ...</k> <env> _ => Rho </env>
+  rule <k> _:Val ~> (Rho => .) ...</k> <env> _ => Rho </env>
     [structural]
 
+  syntax Val ::= Int | Bool
+  syntax Exp ::= Exp "*" Exp          [strict, left]
+               | Exp "/" Exp          [strict]
+               > Exp "+" Exp          [strict, left]
+               > Exp "<=" Exp         [strict]
   rule I1 * I2 => I1 *Int I2
   rule I1 / I2 => I1 /Int I2
   rule I1 + I2 => I1 +Int I2
   rule I1 <= I2 => I1 <=Int I2
 
+  syntax Exp ::= "if" Exp "then" Exp "else" Exp  [strict(1)]
   rule if true  then E else _ => E
   rule if false then _ else E => E
 
+  syntax Exp ::= "let" Id "=" Exp "in" Exp
   rule let X = E in E':Exp => (lambda X . E') E                         [macro]
 
+  syntax Exp ::= "letrec" Id Id "=" Exp "in" Exp
   syntax Id ::= "$x" | "$y"
   rule letrec F:Id X:Id = E in E'
     => let F =

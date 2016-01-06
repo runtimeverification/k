@@ -1,4 +1,5 @@
-Solution: 0
-V
----> 
-V0 -> ` V1 -> ` V2 -> V2 ` `
+Search results:
+
+Solution 1:
+V:K -->
+V0 -> ( V1 -> ( V2 -> V2 ) )

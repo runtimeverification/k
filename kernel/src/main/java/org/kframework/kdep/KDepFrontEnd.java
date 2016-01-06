@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Module;
 import org.apache.commons.collections15.ListUtils;
+import org.kframework.attributes.Source;
 import org.kframework.kompile.Kompile;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
@@ -17,6 +18,7 @@ import org.kframework.utils.inject.CommonModule;
 import org.kframework.utils.inject.JCommanderModule;
 import org.kframework.utils.inject.JCommanderModule.ExperimentalUsage;
 import org.kframework.utils.inject.JCommanderModule.Usage;
+import org.kframework.utils.options.OuterParsingOptions;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -42,7 +44,7 @@ import java.util.stream.Collectors;
  */
 public class KDepFrontEnd extends FrontEnd {
 
-    private final KDepOptions options;
+    private final OuterParsingOptions options;
     private final KExceptionManager kem;
     private final Stopwatch sw;
     private final FileUtil files;
@@ -50,7 +52,7 @@ public class KDepFrontEnd extends FrontEnd {
 
     @Inject
     public KDepFrontEnd(
-            KDepOptions options,
+            OuterParsingOptions options,
             KExceptionManager kem,
             GlobalOptions globalOptions,
             @Usage String usage,
@@ -63,7 +65,7 @@ public class KDepFrontEnd extends FrontEnd {
         this.kem = kem;
         this.sw = sw;
         this.files = files;
-        this.parser = new ParserUtils(files, kem, options.global);
+        this.parser = new ParserUtils(files, kem, globalOptions);
     }
 
     public static List<Module> getModules() {
@@ -81,9 +83,9 @@ public class KDepFrontEnd extends FrontEnd {
             prelude = "";
         }
 
-        List<org.kframework.kil.Module> modules = parser.slurp(prelude + FileUtil.load(options.mainDefinitionFile()),
-                options.mainDefinitionFile(),
-                options.mainDefinitionFile().getParentFile(),
+        List<org.kframework.kil.Module> modules = parser.slurp(prelude + FileUtil.load(options.mainDefinitionFile(files)),
+                Source.apply(options.mainDefinitionFile(files).getAbsolutePath()),
+                options.mainDefinitionFile(files).getParentFile(),
                 ListUtils.union(options.includes.stream()
                         .map(files::resolveWorkingDirectory).collect(Collectors.toList()),
                 Lists.newArrayList(Kompile.BUILTIN_DIRECTORY)));

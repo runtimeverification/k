@@ -112,16 +112,12 @@ public class ParserUtils {
 
     public List<org.kframework.kil.Module> slurp(
             String definitionText,
-            File source,
+            Source source,
             File currentDirectory,
             List<File> lookupDirectories) {
-        List<DefinitionItem> items = Outer.parse(Source.apply(source.getPath()), definitionText, null);
+        List<DefinitionItem> items = Outer.parse(source, definitionText, null);
         if (options.verbose) {
-            try {
-                System.out.println("Importing: " + source.getCanonicalPath());
-            } catch (IOException e) {
-                System.out.println("Importing: " + source.getAbsolutePath());
-            }
+            System.out.println("Importing: " + source);
         }
         List<org.kframework.kil.Module> results = new ArrayList<>();
 
@@ -148,7 +144,7 @@ public class ParserUtils {
 
                 if (definitionFile.isPresent()) {
                     results.addAll(slurp(files.loadFromWorkingDirectory(definitionFile.get().getPath()),
-                            definitionFile.get(),
+                            Source.apply(definitionFile.get().getAbsolutePath()),
                             definitionFile.get().getParentFile(),
                             lookupDirectories));
                 }
@@ -163,10 +159,11 @@ public class ParserUtils {
     public Set<Module> loadModules(
             Set<Module> previousModules,
             String definitionText,
-            File source,
+            Source source,
             File currentDirectory,
             List<File> lookupDirectories,
-            boolean dropQuote) {
+            boolean dropQuote,
+            boolean autoImportDomains) {
 
         List<org.kframework.kil.Module> kilModules =
                 slurp(definitionText, source, currentDirectory, lookupDirectories);
@@ -177,7 +174,7 @@ public class ParserUtils {
         Context context = new Context();
         new CollectProductionsVisitor(context).visitNode(def);
 
-        KILtoKORE kilToKore = new KILtoKORE(context, false, dropQuote);
+        KILtoKORE kilToKore = new KILtoKORE(context, false, dropQuote, autoImportDomains);
 
         HashMap<String, Module> koreModules = new HashMap<>();
         koreModules.putAll(previousModules.stream().collect(Collectors.toMap(Module::name, m -> m)));
@@ -195,8 +192,22 @@ public class ParserUtils {
             File source,
             File currentDirectory,
             List<File> lookupDirectories,
-            boolean dropQuote) {
-        Set<Module> modules = loadModules(new HashSet<>(), definitionText, source, currentDirectory, lookupDirectories, dropQuote);
+            boolean dropQuote,
+            boolean autoImportDomains) {
+        return loadDefinition(mainModuleName, syntaxModuleName, definitionText,
+                Source.apply(source.getAbsolutePath()),
+                currentDirectory, lookupDirectories, dropQuote, autoImportDomains);
+    }
+
+    public org.kframework.definition.Definition loadDefinition(
+            String mainModuleName,
+            String syntaxModuleName,
+            String definitionText,
+            Source source,
+            File currentDirectory,
+            List<File> lookupDirectories,
+            boolean dropQuote, boolean autoImportDomains) {
+        Set<Module> modules = loadModules(new HashSet<>(), definitionText, source, currentDirectory, lookupDirectories, dropQuote, autoImportDomains);
         Optional<Module> opt = modules.stream().filter(m -> m.name().equals(mainModuleName)).findFirst();
         if (!opt.isPresent()) {
             throw KEMException.compilerError("Could not find main module with name " + mainModuleName

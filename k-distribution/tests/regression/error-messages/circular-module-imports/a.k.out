@@ -1,0 +1,1 @@
+[Error] Compiler: Found circularity in module imports: E < D < C < B < A < E
