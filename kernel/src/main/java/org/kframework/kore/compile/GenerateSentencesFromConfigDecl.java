@@ -350,7 +350,7 @@ public class GenerateSentencesFromConfigDecl {
                     .add("wrapElement", "<" + cellName + ">")
                     .add(Attribute.UNIT_KEY, "." + bagSort.name())
                     .add(Attribute.HOOK_KEY, type.toUpperCase() + ".concat")
-                    .add("avoid")
+                    .add("avoid") // needed to ensure cell collections are parsed as Bag instead of CellBag
                     .add(Attribute.FUNCTION_KEY);
             String unitHook = type.toUpperCase() + ".unit", elementHook = type.toUpperCase() + ".element";
             switch(type) {
