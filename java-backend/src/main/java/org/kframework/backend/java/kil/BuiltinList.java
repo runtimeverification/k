@@ -339,7 +339,7 @@ public class BuiltinList extends Collection implements CollectionInternalReprese
         return new SingletonBuiltinList(element, global, sort, operatorKLabel, unitKLabel);
     }
 
-    private static class SingletonBuiltinList extends BuiltinList {
+    public static class SingletonBuiltinList extends BuiltinList {
         private SingletonBuiltinList(Term child, GlobalContext global, Sort sort, KLabelConstant operatorKLabel, KLabelConstant unitKLabel) {
             super(ImmutableList.of(child), sort, operatorKLabel, unitKLabel, global);
         }

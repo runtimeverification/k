@@ -267,7 +267,7 @@ public class FastRuleMatcher {
                 elementMask = patternElementTailSplit.elementMask.clone();
                 elementMask.and(ruleMask);
                 if (!elementMask.isEmpty()) {
-                    elementMask = match(subject.get(subjectIndex), patternElementTailSplit.element, elementMask, path.$colon$colon(Pair.of(subjectIndex, subjectIndex + 1)));
+                    elementMask = match(subject.get(subjectIndex), patternElementTailSplit.element, elementMask, subject instanceof BuiltinList.SingletonBuiltinList ? path : path.$colon$colon(Pair.of(subjectIndex, subjectIndex + 1)));
                     if (!elementMask.isEmpty()) {
                         elementMask = matchAssoc(subject, subjectIndex + 1, pattern, patternIndex + 1, elementMask, path);
                     }

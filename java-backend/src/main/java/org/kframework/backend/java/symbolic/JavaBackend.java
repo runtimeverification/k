@@ -27,6 +27,7 @@ import org.kframework.kore.compile.AssocCommToAssoc;
 import org.kframework.kore.compile.Backend;
 import org.kframework.kore.compile.ConvertDataStructureToLookup;
 import org.kframework.kore.compile.MergeRules;
+import org.kframework.kore.compile.NormalizeAssoc;
 import org.kframework.kore.compile.RewriteToTop;
 import org.kframework.kore.TransformK;
 import org.kframework.main.GlobalOptions;
@@ -77,6 +78,7 @@ public class JavaBackend implements Backend {
 
         return d -> (func((Definition dd) -> kompile.defaultSteps().apply(dd)))
                 .andThen(DefinitionTransformer.fromRuleBodyTranformer(RewriteToTop::bubbleRewriteToTopInsideCells, "bubble out rewrites below cells"))
+                .andThen(new DefinitionTransformer(new NormalizeAssoc(KORE.c())))
                 .andThen(func(dd -> expandMacrosDefinitionTransformer.apply(dd)))
                 .andThen(convertDataStructureToLookup)
                 .andThen(DefinitionTransformer.fromRuleBodyTranformer(JavaBackend::ADTKVariableToSortedVariable, "ADT.KVariable to SortedVariable"))

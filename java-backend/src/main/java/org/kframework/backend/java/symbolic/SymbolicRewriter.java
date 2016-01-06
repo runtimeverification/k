@@ -75,7 +75,7 @@ public class SymbolicRewriter {
         this.counter = counter;
         this.strategy = new TransitionCompositeStrategy(kompileOptions.transition);
         this.useFastRewriting = !kompileOptions.experimental.koreProve;
-        this.theFastMatcher = new FastRuleMatcher(global, allRuleBits.length());
+        this.theFastMatcher = new FastRuleMatcher(global, definition.ruleTable.size());
     }
 
     public KRunState rewrite(ConstrainedTerm constrainedTerm, int bound) {
