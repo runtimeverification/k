@@ -231,7 +231,7 @@ public class Kompile {
                 Source.apply(definitionFile.getAbsolutePath()),
                 definitionFile.getParentFile(),
                 Lists.newArrayList(BUILTIN_DIRECTORY),
-                dropQuote, !kompileOptions.noPrelude);
+                dropQuote, !kompileOptions.outerParsing.noPrelude);
 
         if (modules.size() != 1) {
             throw KEMException.compilerError("Expected to find a file with 1 module: found " + modules.size() + " instead.");
@@ -280,7 +280,7 @@ public class Kompile {
                 ListUtils.union(kompileOptions.outerParsing.includes.stream()
                                 .map(files::resolveWorkingDirectory).collect(Collectors.toList()),
                         Lists.newArrayList(BUILTIN_DIRECTORY)),
-                dropQuote, !kompileOptions.noPrelude);
+                dropQuote, !kompileOptions.outerParsing.noPrelude);
 
         boolean hasConfigDecl = stream(definition.mainModule().sentences())
                 .filter(s -> s instanceof Bubble)
