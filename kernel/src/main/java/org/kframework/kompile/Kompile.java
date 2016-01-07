@@ -166,7 +166,6 @@ public class Kompile {
 
     public Function<Definition, Definition> defaultSteps() {
         DefinitionTransformer resolveStrict = DefinitionTransformer.from(new ResolveStrict(kompileOptions)::resolve, "resolving strict and seqstrict attributes");
-        DefinitionTransformer resolveContexts = DefinitionTransformer.from(new ResolveContexts(kompileOptions)::resolve, "resolving context sentences");
         DefinitionTransformer resolveHeatCoolAttribute = DefinitionTransformer.fromSentenceTransformer(new ResolveHeatCoolAttribute()::resolve, "resolving heat and cool attributes");
         DefinitionTransformer resolveAnonVars = DefinitionTransformer.fromSentenceTransformer(new ResolveAnonVar()::resolve, "resolving \"_\" vars");
         DefinitionTransformer resolveSemanticCasts =
@@ -176,7 +175,7 @@ public class Kompile {
         return def -> func(this::resolveIOStreams)
                 .andThen(resolveStrict)
                 .andThen(resolveAnonVars)
-                .andThen(resolveContexts)
+                .andThen(func(d -> new ResolveContexts(kompileOptions).resolve(d)))
                 .andThen(resolveHeatCoolAttribute)
                 .andThen(resolveSemanticCasts)
                 .andThen(generateSortPredicateSyntax)

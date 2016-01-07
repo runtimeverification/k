@@ -74,7 +74,7 @@ public class BuiltinList extends Collection implements CollectionInternalReprese
             BitSet emptyListMask = BitSet.apply(bitSetLength);
             emptyListMask.makeOnes(bitSetLength);
             for (int i = index + 1; i < children.size(); i++) {
-                if (children.get(index) instanceof RuleAutomatonDisjunction) {
+                if (children.get(i) instanceof RuleAutomatonDisjunction) {
                     emptyListMask.and(((RuleAutomatonDisjunction) children.get(i)).assocDisjunctionArray[sort.ordinal()].stream()
                             .filter(p -> p.getLeft().isEmpty())
                             .map(p -> p.getRight())

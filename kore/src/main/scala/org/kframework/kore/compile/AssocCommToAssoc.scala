@@ -29,11 +29,16 @@ class AssocCommToAssoc(c: Constructors[K]) extends (Module => Module) {
   }
 
   def apply(k: K)(implicit m: Module): List[K] = k match {
-    case Unapply.KApply(label: KLabel, children: List[K]) if isAssocComm(label) => convert(label, children, None)
-    case Unapply.KRewrite(Unapply.KApply(label: KLabel, children: List[K]), right: K) if isAssocComm(label) => convert(label, children, Some(right))
-    case Unapply.KApply(label: KLabel, children: List[K]) => crossProduct(children map apply) map {label(_: _*)}
-    case Unapply.KRewrite(left: K, right: K) => apply(left) map {KRewrite(_, right, Att())}
-    case _ => List(k)
+    case Unapply.KApply(label: KLabel, children: List[K]) if isAssocComm(label) =>
+      convert(label, children, None)
+    case Unapply.KRewrite(Unapply.KApply(label: KLabel, children: List[K]), right: K) if isAssocComm(label) =>
+      convert(label, children, Some(right))
+    case Unapply.KApply(label: KLabel, children: List[K]) =>
+      crossProduct(children map apply) map {label(_: _*)}
+    case Unapply.KRewrite(left: K, right: K) =>
+      apply(left) map {KRewrite(_, right, Att())}
+    case _ =>
+      List(k)
   }
 
   def isAssocComm(label: KLabel)(implicit m: Module): Boolean = {
@@ -43,8 +48,6 @@ class AssocCommToAssoc(c: Constructors[K]) extends (Module => Module) {
   }
 
   def convert(label: KLabel, children: List[K], rightOption: Option[K])(implicit m: Module): List[K] = {
-    System.err.println(label(children: _*))
-
     val opSort: Sort = m.signatureFor(label).head._2
 
     val (elements: Seq[K], nonElements: Seq[K]) = children partition {
