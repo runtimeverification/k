@@ -215,7 +215,7 @@ public class FastRuleMatcher {
             // TODO: make tokens unique?
             return subject.equals(pattern) ? ruleMask : empty;
         } else {
-            assert subject instanceof KItem || subject instanceof BuiltinList || subject instanceof Token || subject instanceof BuiltinMap: "unexpected class at matching: " + subject.getClass();
+            assert subject instanceof KItem || subject instanceof BuiltinList || subject instanceof Token || subject instanceof BuiltinMap : "unexpected class at matching: " + subject.getClass();
             assert pattern instanceof KItem || pattern instanceof BuiltinList || pattern instanceof Token : "unexpected class at matching: " + pattern.getClass();
             return empty;
         }
@@ -323,7 +323,9 @@ public class FastRuleMatcher {
             } else {
                 constraints[i] = constraints[i].add(conjunctions.iterator().next()).simplify();
             }
-            ruleMask.set(i);
+            if (!constraints[i].isFalse()) {
+                ruleMask.set(i);
+            }
         }
 
         return ruleMask;
