@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2015 K Team. All Rights Reserved.
+// Copyright (c) 2012-2016 K Team. All Rights Reserved.
 package org.kframework.backend.html;
 
 import org.apache.commons.io.FilenameUtils;
