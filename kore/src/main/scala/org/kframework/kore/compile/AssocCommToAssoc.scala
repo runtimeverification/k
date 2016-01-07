@@ -32,6 +32,7 @@ class AssocCommToAssoc(c: Constructors[K]) extends (Module => Module) {
     case Unapply.KApply(label: KLabel, children: List[K]) if isAssocComm(label) =>
       convert(label, children, None)
     case Unapply.KRewrite(Unapply.KApply(label: KLabel, children: List[K]), right: K) if isAssocComm(label) =>
+      //TODO(AndreiS): right is not always normalized, despite being normal right after NormalizeAssoc
       convert(label, children, Some(right))
     case Unapply.KApply(label: KLabel, children: List[K]) =>
       crossProduct(children map apply) map {label(_: _*)}
@@ -64,6 +65,7 @@ class AssocCommToAssoc(c: Constructors[K]) extends (Module => Module) {
         elements.permutations.toList map {
           _.foldRight(List(anonymousVariable(opSort))) { (e, l) => anonymousVariable(opSort) :: e :: l }
         }
+      //TODO(AndreiS): check the variable is free (not constrained elsewhere by the rule)
       case Some(v: KVariable) if v.name.startsWith("DotVar") =>
         elements.permutations.toList map {
           _.foldRight(List(dotVariable(opSort, 0))) { (e, l) => dotVariable(opSort, (l.size + 1) / 2) :: e :: l }
@@ -76,13 +78,8 @@ class AssocCommToAssoc(c: Constructors[K]) extends (Module => Module) {
       case Some(right) =>
         frameOption match {
           case Some(v: KVariable) if v.name.startsWith("DotVar") =>
-            val frameSubstitute = label((0 to elements.size) map {dotVariable(opSort, _)}: _*)
-            right match {
-              case Unapply.KApply(`label`, children1: List[K]) =>
-                Some(label(children1 map { case Unapply.KVariable(name) if name == v.name => frameSubstitute; case k => k }: _*))
-              case Unapply.KVariable(name) if name == v.name => Some(frameSubstitute)
-              case k: K => Some(k)
-            }
+            //TODO(AndreiS): substitute in the entire rule, not just locally
+            Some(substituteFrame(right, v.name, label((0 to elements.size) map {dotVariable(opSort, _)}: _*)))
           case _ => Some(right)
         }
       case None => None
@@ -93,6 +90,12 @@ class AssocCommToAssoc(c: Constructors[K]) extends (Module => Module) {
       case Some(convertedRight) => results map {KRewrite(_, convertedRight, Att())}
       case None => results
     }
+  }
+
+  def substituteFrame(k: K, name: String, substitute: K): K = k match {
+    case Unapply.KApply(label: KLabel, children: List[K]) => label(children map {substituteFrame(_, name, substitute)}: _*)
+    case Unapply.KVariable(`name`) => substitute
+    case _: K => k
   }
 
   def crossProduct[T](lls: List[List[T]]): List[List[T]] = {

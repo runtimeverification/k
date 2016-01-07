@@ -88,7 +88,7 @@ public class JavaBackend implements Backend {
                 .andThen(DefinitionTransformer.fromSentenceTransformer(new AddConfigurationRecoveryFlags(), "add refers_THIS_CONFIGURATION_marker"))
                 .andThen(DefinitionTransformer.fromSentenceTransformer(JavaBackend::markSingleVariables, "mark single variables"))
                 .andThen(DefinitionTransformer.from(new AssocCommToAssoc(KORE.c()), "convert assoc/comm to assoc"))
-                .andThen(new DefinitionTransformer(new MergeRules(KORE.c())))
+                .andThen(DefinitionTransformer.from(new MergeRules(KORE.c()), "generate matching automaton"))
                 .apply(d);
     }
 
