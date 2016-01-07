@@ -6,22 +6,15 @@ import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
-import org.kframework.backend.Backends;
 import org.kframework.backend.PosterBackend;
-import org.kframework.backend.html.HtmlBackend;
-import org.kframework.backend.latex.DocumentationBackend;
-import org.kframework.backend.latex.LatexBackend;
-import org.kframework.backend.latex.PdfBackend;
-import org.kframework.kil.loader.Context;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
 import org.kframework.main.Tool;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
-import org.kframework.utils.inject.DefinitionLoadingModule;
-import org.kframework.utils.inject.Main;
 import org.kframework.utils.inject.Options;
-import org.kframework.utils.options.DefinitionLoadingOptions;
+import org.kframework.utils.inject.OuterParsingModule;
+import org.kframework.utils.options.OuterParsingOptions;
 
 import java.util.Map;
 
@@ -32,9 +25,7 @@ public class KDocModule extends AbstractModule {
         bind(FrontEnd.class).to(KDocFrontEnd.class);
         bind(Tool.class).toInstance(Tool.KDOC);
 
-        install(new DefinitionLoadingModule());
-
-        bind(Context.class).annotatedWith(Main.class).to(Context.class);
+        install(new OuterParsingModule());
 
         Multibinder<Object> optionsBinder = Multibinder.newSetBinder(binder(), Object.class, Options.class);
         optionsBinder.addBinding().to(KDocOptions.class);
@@ -42,10 +33,6 @@ public class KDocModule extends AbstractModule {
 
         MapBinder<String, PosterBackend> posterBinder = MapBinder.newMapBinder(
                 binder(), String.class, PosterBackend.class);
-        posterBinder.addBinding(Backends.PDF).to(PdfBackend.class);
-        posterBinder.addBinding(Backends.LATEX).to(LatexBackend.class);
-        posterBinder.addBinding(Backends.DOC).to(DocumentationBackend.class);
-        posterBinder.addBinding(Backends.HTML).to(HtmlBackend.class);
     }
 
     @Provides
@@ -54,8 +41,8 @@ public class KDocModule extends AbstractModule {
     }
 
     @Provides
-    DefinitionLoadingOptions defLoadingOptions(KDocOptions options) {
-        return options.definitionLoading;
+    OuterParsingOptions outerParsingOptions(KDocOptions options) {
+        return options.outerParsing;
     }
 
     @Provides

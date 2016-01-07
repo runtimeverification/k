@@ -9,9 +9,4 @@
         posixInitScript="run.sh"
         results="." >
     </test>
-
-    <include file     ="config-var-not-exist-or-missing/config.xml"
-             directory="config-var-not-exist-or-missing"
-             programs ="config-var-not-exist-or-missing"
-             results  ="config-var-not-exist-or-missing" />
 </tests>

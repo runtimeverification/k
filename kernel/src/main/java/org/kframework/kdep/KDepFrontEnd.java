@@ -19,6 +19,7 @@ import org.kframework.utils.inject.CommonModule;
 import org.kframework.utils.inject.JCommanderModule;
 import org.kframework.utils.inject.JCommanderModule.ExperimentalUsage;
 import org.kframework.utils.inject.JCommanderModule.Usage;
+import org.kframework.utils.options.OuterParsingOptions;
 
 import java.io.File;
 import java.io.IOException;
@@ -45,7 +46,7 @@ import java.util.stream.Collectors;
  */
 public class KDepFrontEnd extends FrontEnd {
 
-    private final KDepOptions options;
+    private final OuterParsingOptions options;
     private final KExceptionManager kem;
     private final Stopwatch sw;
     private final FileUtil files;
@@ -53,7 +54,7 @@ public class KDepFrontEnd extends FrontEnd {
 
     @Inject
     public KDepFrontEnd(
-            KDepOptions options,
+            OuterParsingOptions options,
             KExceptionManager kem,
             GlobalOptions globalOptions,
             @Usage String usage,

@@ -50,7 +50,7 @@ public class LatexBackend extends PosterBackend {
         String preamble = lf.getPreamble().toString();
         latexified += preamble + "\\begin{document}" + endl + lf.getResult() + "\\end{document}" + endl;
 
-        File canonicalFile = options.mainDefinitionFile();
+        File canonicalFile = options.outerParsing.mainDefinitionFile(files);
         if(makeDocument) latexFilePath = FilenameUtils.removeExtension(canonicalFile.getName()) + "-doc.tex";
         else latexFilePath = FilenameUtils.removeExtension(canonicalFile.getName()) + ".tex";
         files.saveToTemp(latexFilePath, latexified);
