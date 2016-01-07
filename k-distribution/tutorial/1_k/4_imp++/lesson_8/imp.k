@@ -396,6 +396,8 @@ all behaviors.  The second rule is structural because we do not want it to
 count as a computational step. */
 
   syntax Printable ::= Int | String
+/* currently it is necessary to subsort Printable to AExp,
+but future K should be able to infer that automatically. */
   syntax AExp ::= Printable
   syntax Printables ::= List{Printable,","}
   syntax KResult ::= Printables
