@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2015 K Team. All Rights Reserved.
+// Copyright (c) 2013-2016 K Team. All Rights Reserved.
 package org.kframework.ktest.Config;
 
 import org.apache.commons.io.FilenameUtils;
