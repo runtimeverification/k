@@ -4,18 +4,15 @@ package org.kframework.parser.binary;
 import org.kframework.kore.K;
 import org.kframework.kore.KLabel;
 import org.kframework.utils.errorsystem.KEMException;
+import scala.Tuple2;
 import scala.collection.immutable.List$;
-import scala.collection.immutable.Nil$;
 
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Deque;
-import java.util.LinkedList;
 import java.util.List;
 
 import static org.kframework.kore.KORE.*;
@@ -61,10 +58,10 @@ public class BinaryParser {
     public static final int BEGIN = 0, KTOKEN = 1, KAPPLY = 2, KSEQUENCE = 3, KVARIABLE = 4, KREWRITE = 5,
             INJECTEDKLABEL = 6, END = 7;
 
-    private final DataInputStream data;
+    private final ByteBuffer data;
     private final List<String> interns = new ArrayList<>();
 
-    private BinaryParser(DataInputStream data) {
+    private BinaryParser(ByteBuffer data) {
         this.data = data;
     }
 
@@ -73,7 +70,7 @@ public class BinaryParser {
         Deque<K> stack = new ArrayDeque<>();
         int type = 0;
         while(type != END) {
-            type = data.readByte();
+            type = data.get();
             scala.collection.immutable.List<K> items;
             int arity;
             switch (type) {
@@ -82,7 +79,7 @@ public class BinaryParser {
                 break;
             case KAPPLY:
                 KLabel lbl = readKLabel();
-                arity = data.readInt();
+                arity = data.getInt();
                 items = List$.MODULE$.<K>empty();
                 for (int i = 0; i < arity; i++) {
                     items = items.$colon$colon(stack.pop());
@@ -90,7 +87,7 @@ public class BinaryParser {
                 stack.push(KApply(lbl, KList(items)));
                 break;
             case KSEQUENCE:
-                arity = data.readInt();
+                arity = data.getInt();
                 items = List$.MODULE$.<K>empty();
                 for (int i = 0; i < arity; i++) {
                     items = items.$colon$colon(stack.pop());
@@ -119,18 +116,18 @@ public class BinaryParser {
 
     private KLabel readKLabel() throws IOException {
         String lbl = readString();
-        if (data.readBoolean())
+        if (data.get() != 0)
             return KVariable(lbl);
         return KLabel(lbl);
     }
 
     private String readString() throws IOException {
-        int idx = data.readInt();
+        int idx = data.getInt();
         if (idx == 0) {
-            int len = data.readInt();
+            int len = data.getInt();
             char[] buf = new char[len];
             for (int i = 0; i < len; i++) {
-                buf[i] = data.readChar();
+                buf[i] = data.getChar();
             }
             String s = new String(buf);
             interns.add(s);
@@ -140,26 +137,24 @@ public class BinaryParser {
         }
     }
 
-    public static K parse(byte[] s) {
-        ByteArrayInputStream in = new ByteArrayInputStream(s);
-        return parse(in);
-    }
-
     public static boolean isBinaryKast(byte[] bytes) {
         return Arrays.equals(Arrays.copyOfRange(bytes, 0, 5), MAGIC);
     }
 
-    public static K parse(InputStream in) {
+    public static K parse(byte[] in) {
+        return parse(ByteBuffer.wrap(in));
+    }
+
+    public static K parse(ByteBuffer data) {
         try {
-            DataInputStream data = new DataInputStream(in);
             byte[] magic = new byte[5];
-            int read = data.read(magic);
-            if (read != 5 || !Arrays.equals(magic, MAGIC)) {
+            data.get(magic);
+            if (!Arrays.equals(magic, MAGIC)) {
                 throw KEMException.compilerError("Reading binary data from input source which is not a KAST term.");
             }
-            int major = data.readByte();
-            int minor = data.readByte();
-            int build = data.readByte();
+            int major = data.get();
+            int minor = data.get();
+            int build = data.get();
             if (major == 4 && minor == 0 && build == 0) {
                 return new BinaryParser(data).read400();
             } else {

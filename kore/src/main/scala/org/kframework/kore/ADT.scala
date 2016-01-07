@@ -45,10 +45,7 @@ object ADT {
 
   object KSequence {
     def apply(elements: List[K], att: Att = Att()): KSequence =
-      new KSequence(elements.foldLeft(List[K]()) {
-        case (sum, s: KSequence) => sum ++ s.items.asScala
-        case (sum, t) => sum :+ t
-      }, att)
+      new KSequence(elements, att)
   }
 
   case class KVariable(name: String, att: Att = Att()) extends kore.KVariable {
@@ -62,7 +59,6 @@ object ADT {
   case class KToken(s: String, sort: kore.Sort, att: Att = Att()) extends kore.KToken
 
   case class KList(elements: List[K]) extends kore.KList {
-    elements foreach { e => assert(e.isInstanceOf[K]) }
     def items: java.util.List[K] = elements.asJava
     def iterator: Iterator[K] = elements.iterator
     val size = elements.size

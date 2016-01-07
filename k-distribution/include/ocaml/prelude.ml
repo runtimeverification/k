@@ -126,7 +126,7 @@ module Subst = Map.Make(String)
 let print_subst (out: out_channel) (c: k Subst.t) : unit = 
   output_string out "1\n"; Subst.iter (fun v k -> output_string out (v ^ "\n" ^ (print_k k) ^ "\n")) c
 let print_subst_binary (out: out_channel) (c: k Subst.t) : unit =
-  output_string out "1\n"; Subst.iter (fun v k -> output_string out (v ^ "\n" ^ (print_k_binary k) ^ "\n")) c
+  output_binary_int out 1; Subst.iter (fun v k -> output_binary_int out (String.length v); output_string out v; output_string out (print_k_binary k)) c
 let emin (exp: int) (prec: int) : int = (- (1 lsl (exp - 1))) + 4 - prec
 let emin_normal (exp: int) : int = (- (1 lsl (exp - 1))) + 2
 let emax (exp: int) : int = 1 lsl (exp - 1)
