@@ -7,6 +7,7 @@ import com.google.common.collect.ListMultimap;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.compile.KOREtoBackendKIL;
 import org.kframework.backend.java.kil.BuiltinList;
+import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.kil.InnerRHSRewrite;
@@ -214,7 +215,7 @@ public class FastRuleMatcher {
             // TODO: make tokens unique?
             return subject.equals(pattern) ? ruleMask : empty;
         } else {
-            assert subject instanceof KItem || subject instanceof BuiltinList || subject instanceof Token : "unexpected class at matching: " + subject.getClass();
+            assert subject instanceof KItem || subject instanceof BuiltinList || subject instanceof Token || subject instanceof BuiltinMap: "unexpected class at matching: " + subject.getClass();
             assert pattern instanceof KItem || pattern instanceof BuiltinList || pattern instanceof Token : "unexpected class at matching: " + pattern.getClass();
             return empty;
         }

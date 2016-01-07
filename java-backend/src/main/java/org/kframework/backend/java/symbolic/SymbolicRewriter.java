@@ -351,10 +351,22 @@ public class SymbolicRewriter {
         if (path.isEmpty()) {
             return rhs.substituteAndEvaluate(substitution, context);
         } else {
-            KItem kItemSubject = (KItem) subject;
-            List<Term> newContents = new ArrayList<>(((KList) kItemSubject.kList()).getContents());
-            newContents.set(path.head().getLeft(), buildRHS(newContents.get(path.head().getLeft()), substitution, (scala.collection.immutable.List<Pair<Integer, Integer>>) path.tail(), rhs, context));
-            return KItem.of(kItemSubject.kLabel(), KList.concatenate(newContents), context.global()).applyAnywhereRules(false, context);
+            if (subject instanceof KItem) {
+                KItem kItemSubject = (KItem) subject;
+                List<Term> newContents = new ArrayList<>(((KList) kItemSubject.kList()).getContents());
+                newContents.set(path.head().getLeft(), buildRHS(newContents.get(path.head().getLeft()), substitution, (scala.collection.immutable.List<Pair<Integer, Integer>>) path.tail(), rhs, context));
+                return KItem.of(kItemSubject.kLabel(), KList.concatenate(newContents), context.global()).applyAnywhereRules(false, context);
+            } else if (subject instanceof BuiltinList) {
+                BuiltinList builtinListSubject = (BuiltinList) subject;
+                List<Term> newContents = new ArrayList<>(builtinListSubject.children);
+                newContents.set(path.head().getLeft(), buildRHS(newContents.get(path.head().getLeft()), substitution, (scala.collection.immutable.List<Pair<Integer, Integer>>) path.tail(), rhs, context));
+                return BuiltinList
+                        .builder(builtinListSubject.sort, builtinListSubject.operatorKLabel, builtinListSubject.unitKLabel, builtinListSubject.globalContext())
+                        .addAll(newContents)
+                        .build();
+            } else {
+                throw new AssertionError("unexpected rewrite in subject: " + subject);
+            }
         }
     }
 
@@ -367,11 +379,16 @@ public class SymbolicRewriter {
             return rewrites.get(0).getRight().substituteAndEvaluate(substitution, context);
         }
 
-        KItem kItemSubject = (KItem) subject;
-
         Map<Pair<Integer, Integer>, List<Pair<scala.collection.immutable.List<Pair<Integer, Integer>>, Term>>> commonPath = rewrites.stream().collect(Collectors.groupingBy(rw -> rw.getLeft().head()));
 
-        List<Term> contents = ((KList) kItemSubject.kList()).getContents();
+        List<Term> contents;
+        if (subject instanceof KItem) {
+            contents = ((KList) ((KItem) subject).kList()).getContents();
+        } else if (subject instanceof BuiltinList) {
+            contents = ((BuiltinList) subject).children;
+        } else {
+            throw new AssertionError("unexpected rewrite in subject: " + subject);
+        }
         List<Term> newContents = new ArrayList<>();
 
         for (int i = 0; i < contents.size(); i++) {
@@ -385,7 +402,16 @@ public class SymbolicRewriter {
             }
         }
 
-        return KItem.of(kItemSubject.kLabel(), KList.concatenate(newContents), context.global()).applyAnywhereRules(false, context);
+        if (subject instanceof KItem) {
+            return KItem.of(((KItem) subject).kLabel(), KList.concatenate(newContents), context.global()).applyAnywhereRules(false, context);
+        } else if (subject instanceof BuiltinList) {
+            return BuiltinList
+                    .builder(((BuiltinList) subject).sort, ((BuiltinList) subject).operatorKLabel, ((BuiltinList) subject).unitKLabel, ((BuiltinList) subject).globalContext())
+                    .addAll(newContents)
+                    .build();
+        } else {
+            throw new AssertionError("unexpected rewrite in subject: " + subject);
+        }
     }
 
     private List<ConstrainedTerm> computeRewriteStepByRule(ConstrainedTerm subject, Rule rule) {

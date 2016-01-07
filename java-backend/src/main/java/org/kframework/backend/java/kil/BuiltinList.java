@@ -2,8 +2,6 @@
 package org.kframework.backend.java.kil;
 
 import com.google.common.collect.ImmutableList;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.lang3.tuple.Triple;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Constants;
@@ -11,9 +9,7 @@ import org.kframework.builtin.KLabels;
 import org.kframework.kil.ASTNode;
 import org.kframework.utils.BitSet;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 
