@@ -22,12 +22,10 @@ class AssocCommToAssoc(c: Constructors[K]) extends (Module => Module) {
     Module(m.name, m.imports, m.localSentences flatMap {apply(_)(m)}, m.att)
   }
 
-  def apply(s: Sentence)(implicit m: Module): Seq[Sentence] = s match {
+  def apply(s: Sentence)(implicit m: Module): List[Sentence] = s match {
     //TODO(AndreiS): handle AC in requires and ensures
-    case r: Rule =>
-      val rs = apply(r.body) map {Rule(_, r.requires, r.ensures, r.att)}
-      rs
-    case _ => Seq(s)
+    case r: Rule => apply(r.body) map {Rule(_, r.requires, r.ensures, r.att)}
+    case _ => List(s)
   }
 
   def apply(k: K)(implicit m: Module): List[K] = k match {
@@ -45,6 +43,8 @@ class AssocCommToAssoc(c: Constructors[K]) extends (Module => Module) {
   }
 
   def convert(label: KLabel, children: List[K], rightOption: Option[K])(implicit m: Module): List[K] = {
+    System.err.println(label(children: _*))
+
     val opSort: Sort = m.signatureFor(label).head._2
 
     val (elements: Seq[K], nonElements: Seq[K]) = children partition {
