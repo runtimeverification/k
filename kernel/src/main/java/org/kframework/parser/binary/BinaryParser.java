@@ -105,7 +105,7 @@ public class BinaryParser {
             interns.add(s);
             return s;
         } else {
-            return interns.get(idx - 1);
+            return interns.get(interns.size() - idx);
         }
     }
 

@@ -38,6 +38,24 @@ public class BinaryKASTTest {
         assertEquals(term, result2);
     }
 
+
+    @Test
+    public void testConcatenate() throws Exception {
+        File tmp = File.createTempFile("tmp", null);
+        BinaryLoader loader = new BinaryLoader(new KExceptionManager(new GlobalOptions()));
+        loader.saveOrDie(tmp, term);
+        K result = loader.loadOrDie(K.class, tmp);
+        assertEquals(term, result);
+        byte[] str = ToBinary.apply(term);
+        byte[] krewrite = new byte[str.length * 2 - 8];
+        System.arraycopy(str, 0, krewrite, 0, str.length - 1);
+        System.arraycopy(str, 8, krewrite, str.length - 1, str.length - 9);
+        krewrite[krewrite.length - 2] = BinaryParser.KREWRITE;
+        krewrite[krewrite.length - 1] = BinaryParser.END;
+        K result2 = BinaryParser.parse(krewrite);
+        assertEquals(KRewrite(term, term), result2);
+    }
+
     @Test @Ignore
     public void testLarger() throws Exception {
         BinaryLoader loader = new BinaryLoader(new KExceptionManager(new GlobalOptions()));

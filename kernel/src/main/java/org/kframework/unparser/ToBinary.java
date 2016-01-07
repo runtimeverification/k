@@ -110,12 +110,12 @@ public class ToBinary {
         }
 
         private void writeString(String s) throws IOException {
-            int idx = interns.getOrDefault(s, 0);
-            data.writeInt(idx);
-            if (idx == 0) {
+            int idx = interns.getOrDefault(s, interns.size());
+            data.writeInt(interns.size() - idx);
+            if (idx == interns.size()) {
                 data.writeInt(s.length());
                 data.writeChars(s);
-                interns.put(s, interns.size() + 1);
+                interns.put(s, interns.size());
             }
         }
     }

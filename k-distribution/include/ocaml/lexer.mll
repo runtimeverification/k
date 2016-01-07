@@ -54,7 +54,7 @@ let parse_k_binary_string (s: char Stream.t) (interns: string list ref) : string
     interns := !interns @ [str];
     str
   else
-    List.nth !interns (idx_in_interns - 1)
+    List.nth !interns ((List.length !interns) - idx_in_interns)
 
 let rec parse_k_binary_term (s: char Stream.t) (stack: k Stack.t) (interns: string list ref) : k =
   match Char.code (Stream.next s) with

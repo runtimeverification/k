@@ -8,28 +8,32 @@ import org.kframework.definition.ConfigVars;
 import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
 import org.kframework.kompile.CompiledDefinition;
-import org.kframework.kore.VisitK;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KToken;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
+import org.kframework.kore.VisitK;
 import org.kframework.krun.modes.ExecutionMode;
 import org.kframework.main.Main;
 import org.kframework.parser.ProductionReference;
+import org.kframework.parser.binary.BinaryParser;
+import org.kframework.parser.kore.KoreParser;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.unparser.AddBrackets;
 import org.kframework.unparser.KOREToTreeNodes;
 import org.kframework.unparser.OutputModes;
+import org.kframework.unparser.ToBinary;
+import org.kframework.unparser.ToKast;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.file.FileUtil;
-import org.kframework.parser.kore.KoreParser;
 import scala.Tuple2;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -112,9 +116,10 @@ public class KRun {
         int i = 1;
         List<String> results = new ArrayList<>();
         for (Map<? extends KVariable, ? extends K> substitution : searchResult) {
-            StringBuilder sb = new StringBuilder();
-            prettyPrintSubstitution(substitution, result.getParsedRule(), compiledDef, options.output, sb::append);
-            results.add(sb.toString());
+            ByteArrayOutputStream sb = new ByteArrayOutputStream();
+            prettyPrintSubstitution(substitution, result.getParsedRule(), compiledDef, options.output, v -> sb.write(v, 0, v.length));
+            //Note that this is actually unsafe, but we are here assuming that --search is not used with --output binary
+            results.add(new String(sb.toByteArray()));
         }
         Collections.sort(results);
         StringBuilder sb = new StringBuilder();
@@ -163,7 +168,11 @@ public class KRun {
     }
     public void outputFile(byte[] output, KRunOptions options) {
         if (options.outputFile == null) {
-            System.out.print(output);
+            try {
+                System.out.write(output);
+            } catch (IOException e) {
+                throw KEMException.internalError(e.getMessage(), e);
+            }
         } else {
             files.saveToWorkingDirectory(options.outputFile, output);
         }
@@ -251,7 +260,7 @@ public class KRun {
                     prettyPrint(compiledDefinition, outputModes, print, value);
                     return;
                 }
-                prettyPrint(compiledDefinition, outputModes, print, variable);
+                print.accept(variable.toString().getBytes());
                 print.accept(" -->\n".getBytes());
                 prettyPrint(compiledDefinition, outputModes, print, value);
             }

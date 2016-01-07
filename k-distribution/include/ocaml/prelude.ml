@@ -67,15 +67,15 @@ let print_k_binary (c: k) : string =  let buf = Buffer.create 16 in
     Buffer.add_char buf (Char.chr three);
     Buffer.add_char buf (Char.chr four) in
   let print_string (s: string) : unit =
-    let idx = try Hashtbl.find intern s with Not_found -> 0 in
-    print_int idx;
-    if idx = 0 then 
+    let idx = try Hashtbl.find intern s with Not_found -> Hashtbl.length intern in
+    print_int (Hashtbl.length intern - idx);
+    if idx = Hashtbl.length intern then 
       (print_int (String.length s);
       for i = 0 to (String.length s) - 1 do
         Buffer.add_char buf '\x00';
         Buffer.add_char buf (String.get s i)
       done;
-      let new_idx = (Hashtbl.length intern) + 1 in
+      let new_idx = (Hashtbl.length intern) in
       assert (not (Hashtbl.mem intern s));
       Hashtbl.add intern s new_idx)
     else () in
