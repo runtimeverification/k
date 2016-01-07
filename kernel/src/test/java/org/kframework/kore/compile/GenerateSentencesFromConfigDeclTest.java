@@ -75,7 +75,7 @@ public class GenerateSentencesFromConfigDeclTest {
                         Seq(NonTerminal(Sort("ThreadCellBag")), NonTerminal(Sort("ThreadCellBag"))),
                         Att().add("assoc","").add("comm","").add("unit",".ThreadCellBag")
                                 .add("element","ThreadCellBagItem").add("wrapElement","<thread>")
-                                .add("function").add("avoid").add("hook","BAG.concat")),
+                                .add("function").add("avoid").add("bag").add("hook","BAG.concat")),
                 Production(".ThreadCellBag", Sort("ThreadCellBag"),
                         Seq(Terminal(".ThreadCellBag")),
                         Att().add("function").add("hook","BAG.unit")),
