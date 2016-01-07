@@ -67,7 +67,7 @@ public class KDepFrontEnd extends FrontEnd {
         this.kem = kem;
         this.sw = sw;
         this.files = files;
-        this.parser = new ParserUtils(files::resolveWorkingDirectory, kem, options.global);
+        this.parser = new ParserUtils(files::resolveWorkingDirectory, kem, globalOptions);
     }
 
     public static List<Module> getModules() {
@@ -86,9 +86,9 @@ public class KDepFrontEnd extends FrontEnd {
         }
 
         List<org.kframework.kil.Module> modules = null;
-        modules = parser.slurp(prelude + FileUtil.load(options.mainDefinitionFile()),
-                Source.apply(options.mainDefinitionFile().getAbsolutePath()),
-                options.mainDefinitionFile().getParentFile(),
+        modules = parser.slurp(prelude + FileUtil.load(options.mainDefinitionFile(files)),
+                Source.apply(options.mainDefinitionFile(files).getAbsolutePath()),
+                options.mainDefinitionFile(files).getParentFile(),
                 ListUtils.union(options.includes.stream()
                                 .map(files::resolveWorkingDirectory).collect(Collectors.toList()),
                         Lists.newArrayList(Kompile.BUILTIN_DIRECTORY)));

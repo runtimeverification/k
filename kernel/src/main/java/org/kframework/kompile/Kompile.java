@@ -88,10 +88,10 @@ public class Kompile {
         this.kem = kem;
         this.errors = new HashSet<>();
         this.parser = new ParserUtils(files::resolveWorkingDirectory, kem, global);
-        List<File> lookupDirectories = kompileOptions.includes.stream().map(files::resolveWorkingDirectory).collect(Collectors.toList());
+        List<File> lookupDirectories = kompileOptions.outerParsing.includes.stream().map(files::resolveWorkingDirectory).collect(Collectors.toList());
         this.definitionParsing = new DefinitionParsing(
-                lookupDirectories, kompileOptions.strict(), kompileOptions.noPrelude, kem,
-                parser, cacheParses, files.resolveKompiled("cache.bin"), !kompileOptions.noPrelude);
+                lookupDirectories, kompileOptions.strict(), kompileOptions.outerParsing.noPrelude, kem,
+                parser, cacheParses, files.resolveKompiled("cache.bin"), !kompileOptions.outerParsing.noPrelude);
         this.sw = sw;
     }
 
@@ -209,7 +209,7 @@ public class Kompile {
     }
 
     public Module parseModule(CompiledDefinition definition, File definitionFile, boolean dropQuote) {
-        return definitionParsing.parseModule(definition, definitionFile, dropQuote, !kompileOptions.noPrelude);
+        return definitionParsing.parseModule(definition, definitionFile, dropQuote, !kompileOptions.outerParsing.noPrelude);
     }
 
     private Sentence concretizeSentence(Sentence s, Definition input) {

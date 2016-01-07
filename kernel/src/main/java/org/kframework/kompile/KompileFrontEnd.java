@@ -67,7 +67,7 @@ public class KompileFrontEnd extends FrontEnd {
 
         Kompile kompile = new Kompile(options, files, kem, sw);
         //TODO(dwightguth): handle start symbols
-        CompiledDefinition def = kompile.run(options.mainDefinitionFile(), options.mainModule(), options.syntaxModule(), Sorts.K(), koreBackend.get().steps(kompile));
+        CompiledDefinition def = kompile.run(options.outerParsing.mainDefinitionFile(files), options.mainModule(files), options.syntaxModule(files), Sorts.K(), koreBackend.get().steps(kompile));
         loader.saveOrDie(files.resolveKompiled("compiled.bin"), def);
         koreBackend.get().accept(def);
         loader.saveOrDie(files.resolveKompiled("timestamp"), "");
