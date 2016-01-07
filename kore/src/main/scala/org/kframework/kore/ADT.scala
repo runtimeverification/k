@@ -30,7 +30,7 @@ object ADT {
     val items: java.util.List[K] = elements.asJava
     val size: Int = elements.size
     val asIterable: java.lang.Iterable[K] = new ListIterable(elements)
-    val kApply: kore.KApply = items.asScala reduceRightOption { (a, b) => KLabel(KLabels.KSEQ)(a, b) } getOrElse { KLabel(KLabels.DOTK)() } match {
+    lazy val kApply: kore.KApply = items.asScala reduceRightOption { (a, b) => KLabel(KLabels.KSEQ)(a, b) } getOrElse { KLabel(KLabels.DOTK)() } match {
       case k: kore.KApply => k
       case x => KLabel(KLabels.KSEQ)(x, KLabel(KLabels.DOTK)())
     }
