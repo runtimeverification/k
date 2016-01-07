@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2015 K Team. All Rights Reserved.
+// Copyright (c) 2014-2016 K Team. All Rights Reserved.
 
 package org.kframework.kore.convertors;
 
@@ -20,7 +20,7 @@ import static org.junit.Assert.assertEquals;
 
 public abstract class BaseTest {
 
-    private static final String COPYRIGHT_HEADER = "// Copyright (c) 2014-2015 K Team. All Rights Reserved.";
+    private static final String COPYRIGHT_HEADER = "// Copyright (c) 2014-2016 K Team. All Rights Reserved.";
 
     @Rule
     public TestName name = new TestName();
