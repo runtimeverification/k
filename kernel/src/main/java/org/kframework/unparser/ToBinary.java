@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by dwightguth on 11/16/15.
+ * Writes a KAST term to the KAST binary format. For details of that format, see {@link BinaryParser}.
  */
 public class ToBinary {
 

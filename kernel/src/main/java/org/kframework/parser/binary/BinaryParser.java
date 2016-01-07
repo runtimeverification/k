@@ -21,7 +21,38 @@ import java.util.List;
 import static org.kframework.kore.KORE.*;
 
 /**
- * Created by dwightguth on 11/16/15.
+ * Parses a KAST binary term into the KORE data structures.
+ *
+ * Format of the KAST binary term is as follows:
+ *
+ * First five bytes are the magic header "\x7fKAST".
+ * Next 3 bytes are the major, minor, and release version of the format. Currently
+ * they are set to "\x04\x00\x00".
+ *
+ * Subsequently, the format contains a post-order traversal of the term according to the following rules:
+ *
+ * * KToken:         the byte "\x01" followed by a representation of the string of the token, and then the sort of the
+ *                   token.
+ * * KApply:         Representation of each child of the KApply followed by the byte "\x02" followed by a representation
+ *                   of the klabel, followed by a 4-byte arity of the KApply.
+ * * KSequence:      Representation of each child of the KSequence followed by the byte "\x03" followed by a 4-byte
+ *                   length of the KSequence.
+ * * KVariable:      The byte "\x04" followed by a representation of the name of the variable.
+ * * KRewrite:       Representation of the LHS of the rewrite, followed by the RHS, followed by the byte "\x05".
+ * * InjectedKLabel: The byte "\x06" followed by the representation of the klabel.
+ * * KLabel:         The representation of the string of the klabel, followed by the byte "\x01" if the klabel is a
+ *                   variable, and "\x00" if it's a concrete klabel.
+ * * String:         A 4-byte offset in the string intern table. The intern table is commputed as the term is traversed.
+ *                   An offset of 0 means that the string has not appeared before in this term, and is followed by a
+ *                   4-byte length of the string followed by the String in UTF-16. An offset of 1 means the string
+ *                   refers to the most recent previous string in the intern table. An offset of 2 means the
+ *                   next-most-recent, and so forth.
+ *
+ * After the term is traversed, it terminates with the byte "\x07". Note that KAST terms are constructed to be
+ * self-contained and composable. A client can take the output of two KAST terms and combine them into a single term
+ * simply by concatenating the terms together after stripping their MAGIC prefix and suffix. This will not be as
+ * space-compact as if the term was outputted all at once, but can be done in constant time without requiring the terms
+ * to be modified internally, and will still deserialze correctly.
  */
 public class BinaryParser {
 
