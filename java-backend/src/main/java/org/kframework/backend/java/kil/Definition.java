@@ -307,31 +307,30 @@ public class Definition extends JavaSymbolicObject {
      */
     public void addKoreRules(Module module, GlobalContext global) {
         KOREtoBackendKIL transformer = new KOREtoBackendKIL(module, this, global, false, global.krunOptions.experimental.prove != null);
-        List<org.kframework.definition.Rule> koreRules = JavaConversions.setAsJavaSet(module.sentences()).stream()
-                .filter(org.kframework.definition.Rule.class::isInstance)
-                .map(org.kframework.definition.Rule.class::cast)
+        List<org.kframework.definition.Rule> koreRules = JavaConversions.setAsJavaSet(module.rules()).stream()
+                .filter(r -> !r.att().contains(AUTOMATON))
                 .collect(Collectors.toList());
         koreRules.forEach(r -> {
             if (r.att().contains(Att.topRule())) {
-//            if (r.body() instanceof KApply && ((KApply) r.body()).klabel().name().equals(KLabels.GENERATED_TOP_CELL)) {
-                if (!r.att().contains(AUTOMATON)) {
-                    reverseRuleTable.put(r.hashCode(), reverseRuleTable.size());
-                }
+                reverseRuleTable.put(r.hashCode(), reverseRuleTable.size());
             }
         });
         koreRules.forEach(r -> {
             Rule convertedRule = transformer.convert(Optional.of(module), r);
             addRule(convertedRule);
-//            if (r.body() instanceof KApply && ((KApply) r.body()).klabel().name().equals(KLabels.GENERATED_TOP_CELL)) {
             if (r.att().contains(Att.topRule())) {
-                if (!r.att().contains(AUTOMATON)) {
-                    ruleTable.put(reverseRuleTable.get(r.hashCode()), convertedRule);
-                }
-            }
-            if (r.att().contains(AUTOMATON)) {
-                automaton = convertedRule;
+                ruleTable.put(reverseRuleTable.get(r.hashCode()), convertedRule);
             }
         });
+
+
+        Optional<org.kframework.definition.Rule> koreAutomaton = JavaConversions.setAsJavaSet(module.localRules()).stream()
+                .filter(r -> r.att().contains(AUTOMATON))
+                .collect(Collectors.collectingAndThen(
+                        Collectors.toList(),
+                        list -> list.size() == 1 ? Optional.of(list.get(0)) : Optional.empty()
+                ));
+        automaton = transformer.convert(Optional.of(module), koreAutomaton.get());
     }
 
     @Inject

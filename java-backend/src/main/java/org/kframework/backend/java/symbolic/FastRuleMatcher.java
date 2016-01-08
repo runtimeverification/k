@@ -298,7 +298,7 @@ public class FastRuleMatcher {
             this can only happen when the pattern contains a rewrite with a list pattern in the LHS,
             which means there are no deep-nested rewrites,
             which in turn means the inaccurate paths will never be used */
-            ruleMask = match(subject.range(subjectIndex, i), pattern.get(patternIndex), ruleMask, path.$colon$colon(Pair.of(subjectIndex, i)));
+            ruleMask = match(subject.range(subjectIndex, i), pattern.get(patternIndex), ruleMask, subject instanceof BuiltinList.SingletonBuiltinList ? path : path.$colon$colon(Pair.of(subjectIndex, i)));
 
             if (!ruleMask.isEmpty()) {
                 ruleMask = matchAssoc(subject, i, pattern, patternIndex + 1, ruleMask, path);
