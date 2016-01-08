@@ -22,8 +22,9 @@ Below we discuss some of the high-level features of the K framework
 and of the current K tool prototype, which you may find useful to know
 about before starting to type and execute the tutorial examples.
 
-Feel free to contact us at <info@kframework.org> for any questions or
-concerns.
+Subscribe to the [K user](https://lists.cs.illinois.edu/lists/info/k-user)
+list for technical questions and news on major tool updates.  Ask general,
+non-technical questions at <info@kframework.org>.
 
 ## K Framework Overview
 
@@ -39,10 +40,11 @@ concerns.
 
 K is an executable semantic framework in which programming languages,
 calculi, as well as type systems or formal analysis tools can be
-defined by making use of configurations, computations and rules.
+defined by making use of configurations, computations and rules:
+
 - Configurations organize the system/program state in units called
   cells, which are labeled and can be nested.
-- Computations carry "computational meaning" as special nested list
+- Computations carry computational meaning as special nested list
   structures sequentializing computational tasks, such as fragments of
   program; in particular, computations extend the original language or
   calculus syntax.
@@ -63,12 +65,14 @@ such as abrupt termination, exceptions, call/cc, concurrency, etc.
 
 The K tool prototype, called the "K tool" or the "K prototype" from
 here on, is a prototype implementation of the K Framework written in
-Java and Maude.  The K prototype is developed by a joint team of
+Java and Maude.  The K prototype is implemented by a joint team of
 faculty and students from the University of Illinois at
 Urbana-Champaign, USA (the FSL group, led by professor Grigore Rosu),
 the University Alexandru Ioan Cuza, Iasi, Romania (the FMSE group, led
-by professor Dorel Lucanu), the University of Bucharest (professor
-Traian Florin Serbanuta), as well as several individual enthusiasts.
+by professor Dorel Lucanu), and the University of Bucharest, Romania
+(professor Traian Florin Serbanuta), of developers from
+[Runtime Verification, Inc.](https://runtimeverification.com),
+as well as of several individual enthusiasts.
 A current list of the people involved in the project and their
 specific roles can be accessed from <http://kframework.org>.
 
