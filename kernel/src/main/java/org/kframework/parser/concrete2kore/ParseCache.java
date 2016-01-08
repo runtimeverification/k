@@ -36,7 +36,7 @@ public class ParseCache implements Serializable {
     }
 
     public static class ParsedSentence implements Serializable {
-        private final K parse;
+        private K parse;
         private final Set<ParseFailedException> warnings;
 
         public ParsedSentence(K parse, Set<ParseFailedException> warnings) {

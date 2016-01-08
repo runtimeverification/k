@@ -1,8 +1,10 @@
-package org.kframework.kore
+package org.kframework.unparser
 
-import Unapply._
 import org.apache.commons.lang3.StringEscapeUtils
-import collection.JavaConverters._
+import org.kframework.kore.Unapply._
+import org.kframework.kore.{KLabel, InjectedKLabel, K, KApply}
+
+import scala.collection.JavaConverters._
 
 /**
  * Pretty prints inner KORE structures to labeled form.

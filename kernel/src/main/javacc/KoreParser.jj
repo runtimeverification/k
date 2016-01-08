@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2015 K Team. All Rights Reserved.
+// Copyright (c) 2015-2016 K Team. All Rights Reserved.
 // Represents the grammar of the KSEQ module in kast.k
 options {
   STATIC = false;
@@ -9,7 +9,7 @@ options {
 }
 
 PARSER_BEGIN(KoreParser)
-package org.kframework.utils.koreparser;
+package org.kframework.parser.kore;
 
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;

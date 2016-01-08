@@ -1,7 +1,8 @@
-package org.kframework.kore
+package org.kframework.unparser
 
 import org.junit.{Assert, Test}
 import org.kframework.attributes.Att
+import org.kframework.kore.ADT
 import org.kframework.kore.KORE._
 
 class UnparseTest {
