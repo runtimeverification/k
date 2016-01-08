@@ -44,8 +44,16 @@ object ADT {
   }
 
   object KSequence {
+    private val emptyAtt = Att()
+
+    def raw(elements: scala.collection.immutable.List[K]): KSequence =
+      new KSequence(elements, emptyAtt)
+
     def apply(elements: List[K], att: Att = Att()): KSequence =
-      new KSequence(elements, att)
+      new KSequence(elements.foldLeft(List[K]()) {
+        case (sum, s: KSequence) => sum ++ s.items.asScala
+        case (sum, t) => sum :+ t
+      }, att)
   }
 
   case class KVariable(name: String, att: Att = Att()) extends kore.KVariable {
@@ -61,8 +69,8 @@ object ADT {
   case class KList(elements: List[K]) extends kore.KList {
     def items: java.util.List[K] = elements.asJava
     def iterator: Iterator[K] = elements.iterator
-    val size = elements.size
-    val asIterable = new ListIterable(elements)
+    lazy val size = elements.size
+    lazy val asIterable = new ListIterable(elements)
   }
 
   case class KRewrite(left: kore.K, right: kore.K, att: Att = Att()) extends kore.KRewrite

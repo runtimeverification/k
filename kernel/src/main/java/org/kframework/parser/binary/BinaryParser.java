@@ -1,10 +1,10 @@
 // Copyright (c) 2015-2016 K Team. All Rights Reserved.
 package org.kframework.parser.binary;
 
+import org.kframework.kore.ADT;
 import org.kframework.kore.K;
 import org.kframework.kore.KLabel;
 import org.kframework.utils.errorsystem.KEMException;
-import scala.Tuple2;
 import scala.collection.immutable.List$;
 
 import java.io.IOException;
@@ -92,7 +92,7 @@ public class BinaryParser {
                 for (int i = 0; i < arity; i++) {
                     items = items.$colon$colon(stack.pop());
                 }
-                stack.push(KSequence(items));
+                stack.push(ADT.KSequence$.MODULE$.raw(items));
                 break;
             case KVARIABLE:
                 stack.push(KVariable(readString()));

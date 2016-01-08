@@ -104,6 +104,8 @@ public class KRun {
             if (((List) result).isEmpty()) {
                 System.out.println("true");
             }
+        } else if (result instanceof Integer) {
+            return (Integer)result;
         }
         return 0;
     }
