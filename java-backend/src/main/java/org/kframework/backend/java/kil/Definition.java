@@ -323,14 +323,15 @@ public class Definition extends JavaSymbolicObject {
             }
         });
 
-
         Optional<org.kframework.definition.Rule> koreAutomaton = JavaConversions.setAsJavaSet(module.localRules()).stream()
                 .filter(r -> r.att().contains(AUTOMATON))
                 .collect(Collectors.collectingAndThen(
                         Collectors.toList(),
                         list -> list.size() == 1 ? Optional.of(list.get(0)) : Optional.empty()
                 ));
-        automaton = transformer.convert(Optional.of(module), koreAutomaton.get());
+        if (koreAutomaton.isPresent()) {
+            automaton = transformer.convert(Optional.of(module), koreAutomaton.get());
+        }
     }
 
     @Inject
