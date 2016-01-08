@@ -44,7 +44,7 @@ public class ResolveContexts {
 
     public Definition resolve(Definition d) {
         Module transformedMainModule = resolve(d.mainModule());
-        return Definition.apply(transformedMainModule, minus(d.mainModule(), add(transformedMainModule, d.entryModules())), d.att());
+        return Definition.apply(transformedMainModule, add(transformedMainModule, minus(d.mainModule(), d.entryModules())), d.att());
     }
 
     public Module resolve(Module input) {
