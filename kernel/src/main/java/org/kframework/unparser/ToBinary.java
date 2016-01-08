@@ -23,9 +23,6 @@ import java.util.Map;
  */
 public class ToBinary {
 
-    private ToBinary() {
-    }
-
     public static void apply(OutputStream out, K k) {
         try {
             DataOutputStream data = new DataOutputStream(out);
@@ -36,7 +33,7 @@ public class ToBinary {
             data.writeByte(4);
             data.writeByte(0);
             data.writeByte(0);
-            new Traverse(data).apply(k);
+            new ToBinary(data).traverse(k);
             data.writeByte(BinaryParser.END);
         } catch (IOException e) {
             throw KEMException.criticalError("Could not write K term to binary", e, k);
@@ -50,73 +47,71 @@ public class ToBinary {
         return out.toByteArray();
     }
 
-    private static class Traverse {
-        DataOutputStream data;
-        Map<String, Integer> interns = new HashMap<>();
+    DataOutputStream data;
+    Map<String, Integer> interns = new HashMap<>();
 
-        public Traverse(DataOutputStream data) {
-            this.data = data;
-        }
+    private ToBinary(DataOutputStream data) {
+        this.data = data;
+    }
 
-        void apply(K k) throws IOException {
-            if (k instanceof KToken) {
-                KToken tok = (KToken) k;
+    private void traverse(K k) throws IOException {
+        if (k instanceof KToken) {
+            KToken tok = (KToken) k;
 
-                data.writeByte(BinaryParser.KTOKEN);
-                writeString(tok.s());
-                writeString(tok.sort().name());
+            data.writeByte(BinaryParser.KTOKEN);
+            writeString(tok.s());
+            writeString(tok.sort().name());
 
-            } else if (k instanceof KApply) {
-                KApply app = (KApply) k;
+        } else if (k instanceof KApply) {
+            KApply app = (KApply) k;
 
-                for (K item : app.asIterable()) {
-                    apply(item);
-                }
-                data.writeByte(BinaryParser.KAPPLY);
-                writeString(app.klabel().name());
-                data.writeBoolean(app.klabel() instanceof KVariable);
-                data.writeInt(app.size());
-
-            } else if (k instanceof KSequence) {
-                KSequence seq = (KSequence) k;
-
-                for (K item : seq.asIterable()) {
-                    apply(item);
-                }
-                data.writeByte(BinaryParser.KSEQUENCE);
-                data.writeInt(seq.size());
-
-            } else if (k instanceof KVariable) {
-                KVariable var = (KVariable) k;
-
-                data.writeByte(BinaryParser.KVARIABLE);
-                writeString(var.name());
-
-            } else if (k instanceof KRewrite) {
-                KRewrite rew = (KRewrite) k;
-
-                apply(rew.left());
-                apply(rew.right());
-                data.writeByte(BinaryParser.KREWRITE);
-
-            } else if (k instanceof InjectedKLabel) {
-                InjectedKLabel inj = (InjectedKLabel) k;
-
-                data.writeByte(BinaryParser.INJECTEDKLABEL);
-                writeString(inj.klabel().name());
-                data.writeBoolean(inj.klabel() instanceof KVariable);
-
+            for (K item : app.asIterable()) {
+                traverse(item);
             }
-        }
+            data.writeByte(BinaryParser.KAPPLY);
+            writeString(app.klabel().name());
+            data.writeBoolean(app.klabel() instanceof KVariable);
+            data.writeInt(app.size());
 
-        private void writeString(String s) throws IOException {
-            int idx = interns.getOrDefault(s, interns.size());
-            data.writeInt(interns.size() - idx);
-            if (idx == interns.size()) {
-                data.writeInt(s.length());
-                data.writeChars(s);
-                interns.put(s, interns.size());
+        } else if (k instanceof KSequence) {
+            KSequence seq = (KSequence) k;
+
+            for (K item : seq.asIterable()) {
+                traverse(item);
             }
+            data.writeByte(BinaryParser.KSEQUENCE);
+            data.writeInt(seq.size());
+
+        } else if (k instanceof KVariable) {
+            KVariable var = (KVariable) k;
+
+            data.writeByte(BinaryParser.KVARIABLE);
+            writeString(var.name());
+
+        } else if (k instanceof KRewrite) {
+            KRewrite rew = (KRewrite) k;
+
+            traverse(rew.left());
+            traverse(rew.right());
+            data.writeByte(BinaryParser.KREWRITE);
+
+        } else if (k instanceof InjectedKLabel) {
+            InjectedKLabel inj = (InjectedKLabel) k;
+
+            data.writeByte(BinaryParser.INJECTEDKLABEL);
+            writeString(inj.klabel().name());
+            data.writeBoolean(inj.klabel() instanceof KVariable);
+
+        }
+    }
+
+    private void writeString(String s) throws IOException {
+        int idx = interns.getOrDefault(s, interns.size());
+        data.writeInt(interns.size() - idx);
+        if (idx == interns.size()) {
+            data.writeInt(s.length());
+            data.writeChars(s);
+            interns.put(s, interns.size());
         }
     }
 }

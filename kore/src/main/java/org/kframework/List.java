@@ -1,18 +1,13 @@
 // Copyright (c) 2015-2016 K Team. All Rights Reserved.
-package org.kframework.kore;
-
-import scala.collection.immutable.List;
+package org.kframework;
 
 import java.io.Serializable;
 import java.util.Iterator;
 
-/**
- * Created by dwightguth on 11/19/15.
- */
-public class ListIterable<T> implements Iterable<T>, Serializable {
-    private List<T> list;
+public class List<T> implements Iterable<T>, Serializable {
+    private final scala.collection.immutable.List<T> list;
 
-    public ListIterable(List<T> l) {
+    public List(scala.collection.immutable.List<T> l) {
         this.list = l;
     }
 
@@ -20,15 +15,17 @@ public class ListIterable<T> implements Iterable<T>, Serializable {
     public Iterator<T> iterator() {
         return new Iterator<T>() {
 
+            private scala.collection.immutable.List<T> l = list;
+
             @Override
             public boolean hasNext() {
-                return !list.isEmpty();
+                return !l.isEmpty();
             }
 
             @Override
             public T next() {
-                T head = list.head();
-                list = (scala.collection.immutable.List<T>) list.tail();
+                T head = l.head();
+                l = (scala.collection.immutable.List<T>) l.tail();
                 return head;
             }
         };

@@ -17,9 +17,6 @@ import java.io.File;
 import static org.junit.Assert.*;
 import static org.kframework.kore.KORE.*;
 
-/**
- * Created by dwightguth on 11/16/15.
- */
 public class BinaryKASTTest {
 
     K term = KApply(KLabel("<T>"), KApply(KLabel("<k>"), KSequence(KToken("foo", Sort("Bar")),

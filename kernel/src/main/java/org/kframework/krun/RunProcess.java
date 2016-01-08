@@ -13,7 +13,13 @@ import java.util.function.Supplier;
 // instantiate processes
 public class RunProcess {
 
-    public static Thread getOutputStreamThread(Process p2, Supplier<InputStream> in, PrintStream out) {
+    /**
+     * Returns a thread that pipes all incoming data from {@param in} to {@param out}.
+     * @param in A function that returns the input stream to be piped to {@param out}
+     * @param out The output stream to pipe data to.
+     * @return A {@link Thread} that will pipe all data from {@param in} to {@param out} until EOF is reached.
+     */
+    public static Thread getOutputStreamThread(Supplier<InputStream> in, PrintStream out) {
         return new Thread(() -> {
                     int count;
                     byte[] buffer = new byte[8192];
@@ -65,8 +71,8 @@ public class RunProcess {
             outWriter = new PrintStream(out);
             errWriter = new PrintStream(err);
 
-            Thread outThread = getOutputStreamThread(process, process::getInputStream, outWriter);
-            Thread errThread = getOutputStreamThread(process, process::getErrorStream, errWriter);
+            Thread outThread = getOutputStreamThread(process::getInputStream, outWriter);
+            Thread errThread = getOutputStreamThread(process::getErrorStream, errWriter);
 
             outThread.start();
             errThread.start();

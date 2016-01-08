@@ -29,7 +29,7 @@ object ADT {
   class KSequence private(val elements: List[K], val att: Att = Att()) extends kore.KSequence {
     val items: java.util.List[K] = elements.asJava
     val size: Int = elements.size
-    val asIterable: java.lang.Iterable[K] = new ListIterable(elements)
+    val asIterable: java.lang.Iterable[K] = new org.kframework.List(elements)
     lazy val kApply: kore.KApply = items.asScala reduceRightOption { (a, b) => KLabel(KLabels.KSEQ)(a, b) } getOrElse { KLabel(KLabels.DOTK)() } match {
       case k: kore.KApply => k
       case x => KLabel(KLabels.KSEQ)(x, KLabel(KLabels.DOTK)())
@@ -70,7 +70,7 @@ object ADT {
     def items: java.util.List[K] = elements.asJava
     def iterator: Iterator[K] = elements.iterator
     lazy val size = elements.size
-    lazy val asIterable = new ListIterable(elements)
+    lazy val asIterable = new org.kframework.List(elements)
   }
 
   case class KRewrite(left: kore.K, right: kore.K, att: Att = Att()) extends kore.KRewrite
