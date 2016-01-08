@@ -137,7 +137,7 @@ of statements surrounded by curly brackets.  */
                  | "halt" ";"
                  > "join" AExp ";"            [strict]
 
-  syntax Ids   ::= List{Id,","}               [strict, klabel(ids)]
+  syntax Ids   ::= List{Id,","}
   syntax AExps ::= List{AExp,","}
   syntax Stmts ::= List{Stmt,""}
 endmodule
@@ -396,6 +396,8 @@ all behaviors.  The second rule is structural because we do not want it to
 count as a computational step. */
 
   syntax Printable ::= Int | String
+/* currently it is necessary to subsort Printable to AExp,
+  but future K should be able to infer that automatically. */
   syntax AExp ::= Printable
 
   context print(HOLE:AExp, AEs:AExps);
