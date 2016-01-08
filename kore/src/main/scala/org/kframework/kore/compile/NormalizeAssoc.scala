@@ -28,8 +28,8 @@ class NormalizeAssoc(c: Constructors[K]) extends (Module => Module) {
         val flattenChildren = flatten(kApply, opKLabel, unitKLabel)
         if (flattenChildren exists {_.isInstanceOf[KRewrite]}) {
           KRewrite(
-            KApply(opKLabel, KList(flattenChildren map RewriteToTop.toLeft flatMap {flatten(_, opKLabel, unitKLabel)} map apply: _*), kApply.att),
-            KApply(opKLabel, KList(flattenChildren map RewriteToTop.toRight flatMap {flatten(_, opKLabel, unitKLabel)} map apply: _*), kApply.att),
+            KApply(opKLabel, KList(flatten(RewriteToTop.toLeft(k), opKLabel, unitKLabel) map apply: _*), kApply.att),
+            RewriteToTop.toRight(k),
             Att())
         } else {
           KApply(opKLabel, KList(flattenChildren map apply: _*), kApply.att)
@@ -37,7 +37,7 @@ class NormalizeAssoc(c: Constructors[K]) extends (Module => Module) {
       } else {
         KApply(kApply.klabel, KList(immutable(kApply.klist.items) map apply: _*), kApply.att)
       }
-    case kRewrite: KRewrite => KRewrite(apply(kRewrite.left), apply(kRewrite.right), kRewrite.att)
+    case kRewrite: KRewrite => KRewrite(apply(kRewrite.left), kRewrite.right, kRewrite.att)
     case _ => k
   }
 
@@ -46,8 +46,8 @@ class NormalizeAssoc(c: Constructors[K]) extends (Module => Module) {
       children flatMap {flatten(_, op, unit)}
     case Unapply.KApply(`unit`, List()) =>
       Seq()
-    case kRewrite: KRewrite =>
-      (flatten(kRewrite.left, op, unit) map {KRewrite(_, KApply(unit), kRewrite.att)}) :+ KRewrite(KApply(unit), kRewrite.right, kRewrite.att)
+    //case kRewrite: KRewrite =>
+    //  (flatten(kRewrite.left, op, unit) map {KRewrite(_, KApply(unit), kRewrite.att)}) :+ KRewrite(KApply(unit), kRewrite.right, kRewrite.att)
     case _ =>
       Seq(k)
   }
