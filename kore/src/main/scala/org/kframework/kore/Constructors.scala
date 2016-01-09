@@ -17,11 +17,13 @@ trait Constructors[KK <: K] {
 
   val injectedKListLabel = "INJECTED-KLIST"
 
+  private val emptyAtt = Att()
+
   // default methods:
   @annotation.varargs def KList(items: KK*): KList = KList(items.asJava)
-  @annotation.varargs def KApply(klabel: KLabel, items: KK*): KK = KApply(klabel, KList(items.asJava), Att())
-  @annotation.varargs def KSequence(list: KK*): KK = KSequence(list.toList.asJava, Att())
-  def KVariable(name: String): KVariable with KK = KVariable(name, Att())
+  @annotation.varargs def KApply(klabel: KLabel, items: KK*): KK = KApply(klabel, KList(items.asJava), emptyAtt)
+  @annotation.varargs def KSequence(list: KK*): KK = KSequence(list.toList.asJava, emptyAtt)
+  def KVariable(name: String): KVariable with KK = KVariable(name, emptyAtt)
 
   def convert(l: KLabel): KLabel = l match {
     case Unapply.KLabel(name) => KLabel(name)

@@ -1,22 +1,45 @@
-// Copyright (c) 2014-2016 K Team. All Rights Reserved.
+// Copyright (c) 2012-2016 K Team. All Rights Reserved.
 package org.kframework.krun;
 
-import org.kframework.utils.ThreadedStreamCapturer;
 import org.kframework.utils.errorsystem.KEMException;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.util.Map;
+import java.util.function.Supplier;
 
 // instantiate processes
 public class RunProcess {
 
+    /**
+     * Returns a thread that pipes all incoming data from {@param in} to {@param out}.
+     * @param in A function that returns the input stream to be piped to {@param out}
+     * @param out The output stream to pipe data to.
+     * @return A {@link Thread} that will pipe all data from {@param in} to {@param out} until EOF is reached.
+     */
+    public static Thread getOutputStreamThread(Supplier<InputStream> in, PrintStream out) {
+        return new Thread(() -> {
+                    int count;
+                    byte[] buffer = new byte[8192];
+                    try {
+                        while (true) {
+                            count = in.get().read(buffer);
+                            if (count < 0)
+                                break;
+                            out.write(buffer, 0, count);
+                        }
+                    } catch (IOException e) {}
+                });
+    }
+
     public static class ProcessOutput {
-        public final String stdout;
-        public final String stderr;
+        public final byte[] stdout;
+        public final byte[] stderr;
         public final int exitCode;
 
-        public ProcessOutput(String stdout, String stderr, int exitCode) {
+        public ProcessOutput(byte[] stdout, byte[] stderr, int exitCode) {
             this.stdout = stdout;
             this.stderr = stderr;
             this.exitCode = exitCode;
@@ -27,7 +50,6 @@ public class RunProcess {
 
     public static ProcessOutput execute(Map<String, String> environment, ProcessBuilder pb, String... commands) {
 
-        ThreadedStreamCapturer inputStreamHandler, errorStreamHandler;
 
         try {
             if (commands.length <= 0) {
@@ -42,32 +64,28 @@ public class RunProcess {
             // start process
             Process process = pb.start();
 
-            InputStream inputStream = process.getInputStream();
-            InputStream errorStream = process.getErrorStream();
-            // these need to run as java threads to get the standard output and error from the command.
-            inputStreamHandler = new ThreadedStreamCapturer(inputStream);
-            errorStreamHandler = new ThreadedStreamCapturer(errorStream);
+            ByteArrayOutputStream out, err;
+            PrintStream outWriter, errWriter;
+            out = new ByteArrayOutputStream();
+            err = new ByteArrayOutputStream();
+            outWriter = new PrintStream(out);
+            errWriter = new PrintStream(err);
 
-            inputStreamHandler.start();
-            errorStreamHandler.start();
+            Thread outThread = getOutputStreamThread(process::getInputStream, outWriter);
+            Thread errThread = getOutputStreamThread(process::getErrorStream, errWriter);
+
+            outThread.start();
+            errThread.start();
 
             // wait for process to finish
             process.waitFor();
 
-            synchronized (inputStreamHandler) {
-                while (inputStreamHandler.isAlive())
-                    inputStreamHandler.wait();
-            }
-            synchronized (errorStreamHandler) {
-                while (errorStreamHandler.isAlive())
-                    errorStreamHandler.wait();
-            }
+            outThread.join();
+            errThread.join();
+            outWriter.flush();
+            errWriter.flush();
 
-            String s1 = inputStreamHandler.getContent().toString();
-
-            String s2 = errorStreamHandler.getContent().toString();
-
-            return new ProcessOutput(s1, s2, process.exitValue());
+            return new ProcessOutput(out.toByteArray(), err.toByteArray(), process.exitValue());
 
         } catch (IOException | InterruptedException e) {
             throw KEMException.criticalError("Error while running process:" + e.getMessage(), e);

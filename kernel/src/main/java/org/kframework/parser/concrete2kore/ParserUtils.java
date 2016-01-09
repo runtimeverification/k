@@ -15,6 +15,7 @@ import org.kframework.kore.convertors.KILtoKORE;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 
@@ -26,6 +27,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.kframework.Collections.*;
@@ -36,18 +38,16 @@ import static org.kframework.definition.Constructors.*;
  */
 public class ParserUtils {
 
-    private final FileUtil files;
     private final KExceptionManager kem;
     private final GlobalOptions options;
+    private Function<File, File> makeAbsolute;
 
-    public ParserUtils(FileUtil files, KExceptionManager kem) {
-        this.files = files;
-        this.kem = kem;
-        this.options = new GlobalOptions();
+    public ParserUtils(Function<File, File> makeAbsolute, KExceptionManager kem) {
+        this(makeAbsolute, kem, new GlobalOptions());
     }
 
-    public ParserUtils(FileUtil files, KExceptionManager kem, GlobalOptions options) {
-        this.files = files;
+    public ParserUtils(Function<File, File> makeAbsolute, KExceptionManager kem, GlobalOptions options) {
+        this.makeAbsolute = makeAbsolute;
         this.kem = kem;
         this.options = options;
     }
@@ -143,7 +143,7 @@ public class ParserUtils {
                         .filter(file -> file.exists()).findFirst();
 
                 if (definitionFile.isPresent()) {
-                    results.addAll(slurp(files.loadFromWorkingDirectory(definitionFile.get().getPath()),
+                    results.addAll(slurp(loadDefinitionText(definitionFile.get()),
                             Source.apply(definitionFile.get().getAbsolutePath()),
                             definitionFile.get().getParentFile(),
                             lookupDirectories));
@@ -154,6 +154,14 @@ public class ParserUtils {
             }
         }
         return results;
+    }
+
+    private String loadDefinitionText(File definitionFile) {
+        try {
+            return FileUtils.readFileToString(makeAbsolute.apply(definitionFile));
+        } catch (IOException e) {
+            throw KEMException.criticalError(e.getMessage(), e);
+        }
     }
 
     public Set<Module> loadModules(
@@ -192,8 +200,7 @@ public class ParserUtils {
             File source,
             File currentDirectory,
             List<File> lookupDirectories,
-            boolean dropQuote,
-            boolean autoImportDomains) {
+            boolean dropQuote, boolean autoImportDomains) {
         return loadDefinition(mainModuleName, syntaxModuleName, definitionText,
                 Source.apply(source.getAbsolutePath()),
                 currentDirectory, lookupDirectories, dropQuote, autoImportDomains);
