@@ -1,4 +1,5 @@
 // Copyright (c) 2014-2015 K Team. All Rights Reserved.
+
 // C/Java-like comments like this one are completely ignored by the K tool.
 /* These ones, which may spread over
 several lines, are ignored, too.  */
@@ -58,6 +59,7 @@ color conventional C-like comments; or (2) Run the \K pre-processor
 We need the predefined substitution module, so we require it with the command
 below.  Then we should make sure that we import its module called SUBSTITUTION
 in our LAMBDA module below. */
+
 require "substitution.k"
 
 module LAMBDA
@@ -73,22 +75,13 @@ a bracket. */
 /*@ \paragraph{Note:}{
 Syntax in \K is defined using the familiar BNF notation, with
 terminals enclosed in quotes and nonterminals starting with capital
-letters.  Currently, \K uses
-\href{http://releases.strategoxt.org/strategoxt-manual/unstable/manual/chunk-chapter/tutorial-sdf.html}{SDF}
-as parsing frontend.  Specifically, it extends BNF with several attributes and
-notations inspired from SDF, plus a few \K-specific attributes which will be
-described in this tutorial.  To ease reading, the parsing- or
-typesetting-specific syntactic notations and attributes that appear in the
-ASCII semantics, such as the quotes around the terminals and operator
-precedences and grouping, are not displayed in the generated documentation.
-We only display the \K-specific attributes in the generated documentation,
-such as \texttt{strict}, \texttt{binder} and \texttt{bracket}, because those
-have a semantic nature.
+letters.  \K actually extends BNF with several attributes, which will be
+described in this tutorial.
 } */
 
 /*@ \paragraph{Note:}{
 The \texttt{strict} constructs can evaluate their arguments in any (fully
-interleaved) orders.
+interleaved) order.
 } */
 
 //@ The initial syntax of our $\lambda$-calculus:
@@ -123,7 +116,7 @@ attributes declared as annotations to their syntax declarations (below).  */
                > Exp "+" Exp          [strict, left]
                > Exp "<=" Exp         [strict]
   rule I1:Int * I2:Int => I1 *Int I2
-  rule I1:Int / I2:Int => I1 /Int I2  when I2 =/=Int 0
+  rule I1:Int / I2:Int => I1 /Int I2  requires I2 =/=Int 0
   rule I1:Int + I2:Int => I1 +Int I2
   rule I1:Int <= I2:Int => I1 <=Int I2
 
