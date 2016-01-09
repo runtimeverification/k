@@ -5,7 +5,7 @@
   <include file="../../../2_imp/lesson_5/tests/config.xml"
            more-programs="."
            more-results="."
-           exclude="div" >
+           exclude="div" > <!--because of search bug-->
     <kompile-option name="--superheat" value="strict" />
     <program name="div.imp">
       <krun-option name="--search" />
