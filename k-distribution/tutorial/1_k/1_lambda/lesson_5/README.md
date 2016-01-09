@@ -87,6 +87,6 @@ expressions and/or by calling builtin functions.
 premises are unnecessary, so there is no need to provide support for them.
 
 Having builtin arithmetic is useful, but writing programs with just lambda
-and arithmetic constructs is still a pain.  In the next two lessons we will add
-let-binding and conditional constructs, which will allow us to write nicer
-programs.
+and arithmetic constructs is still a pain.  In the next two lessons we will
+add conditional (`if_then_else`) and binding (`let` and `letrec`) constructs,
+which will allow us to write nicer programs.

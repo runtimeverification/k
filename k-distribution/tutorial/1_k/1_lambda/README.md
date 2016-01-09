@@ -1,4 +1,5 @@
-<!-- Copyright (c) 2012-2014 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2012-2016 K Team. All Rights Reserved. -->
+
 ## Part 1: Defining LAMBDA
 
 Here you will learn how to define a very simple language in K and the basics
