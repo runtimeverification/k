@@ -44,7 +44,6 @@ class AssocCommToAssoc(c: Constructors[K]) extends (Module => Module) {
 
   def isAssocComm(label: KLabel)(implicit m: Module): Boolean = {
     val att: Att = m.attributesFor.getOrElse(label, Att())
-    assert(!(att.contains(Att.assoc) && att.contains(Att.comm)) || att.contains(Att.bag))
     att.contains(Att.assoc) && att.contains(Att.comm)
   }
 
