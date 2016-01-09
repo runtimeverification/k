@@ -284,5 +284,8 @@ public final class KRunOptions {
         @Parameter(names="--native-library-path", description="Directories to search for native libraries in for linking. Useful in defining rewriter plugins.",
                 listConverter=StringListConverter.class)
         public List<String> nativeLibraryPath = Collections.emptyList();
+
+        @Parameter(names="--profile", description="Run krun multiple times to gather better performance metrics.")
+        public int profile = 1;
     }
 }

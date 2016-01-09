@@ -121,6 +121,10 @@ public class FileUtil {
         save(resolveWorkingDirectory(file), content);
     }
 
+    public void saveToWorkingDirectory(String file, byte[] content) {
+        save(resolveWorkingDirectory(file), content);
+    }
+
     public String loadFromKompiled(String file) {
         return load(resolveKompiled(file));
     }
@@ -133,7 +137,15 @@ public class FileUtil {
         return load(resolveTemp(file));
     }
 
+    public byte[] loadBytesFromTemp(String file) {
+        return loadBytes(resolveTemp(file));
+    }
+
     public void saveToTemp(String file, String content) {
+        save(resolveTemp(file), content);
+    }
+
+    public void saveToTemp(String file, byte[] content) {
         save(resolveTemp(file), content);
     }
 
@@ -154,9 +166,12 @@ public class FileUtil {
     }
 
     public File resolveWorkingDirectory(String file) {
-        File f = new File(file);
-        if (f.isAbsolute()) return f;
-        return new File(workingDir, file);
+        return resolveWorkingDirectory(new File(file));
+    }
+
+    public File resolveWorkingDirectory(File file) {
+        if (file.isAbsolute()) return file;
+        return new File(workingDir, file.getPath());
     }
 
     public File resolveKBase(String file) {
@@ -203,9 +218,29 @@ public class FileUtil {
         }
     }
 
+    public static void save(File file, byte[] content) {
+        try {
+            File dir = file.getAbsoluteFile().getParentFile();
+            if (!dir.exists() && !dir.mkdirs()) {
+                throw KEMException.criticalError("Could not create directory " + dir);
+            }
+            FileUtils.writeByteArrayToFile(file, content);
+        } catch (IOException e) {
+            throw KEMException.criticalError("Could not write to file " + file.getAbsolutePath(), e);
+        }
+    }
+
     public static String load(File file) {
         try {
             return FileUtils.readFileToString(file);
+        } catch (IOException e) {
+            throw KEMException.criticalError("Could not read from file " + file.getAbsolutePath(), e);
+        }
+    }
+
+    public static byte[] loadBytes(File file) {
+        try {
+            return FileUtils.readFileToByteArray(file);
         } catch (IOException e) {
             throw KEMException.criticalError("Could not read from file " + file.getAbsolutePath(), e);
         }

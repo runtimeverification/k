@@ -120,8 +120,8 @@ public class BuiltinIOOperations {
         KLabelConstant klabel = KLabelConstant.of(klabelString, context);
         assert def.kLabels().contains(klabel) : "No KLabel in definition for " + klabelString;
         */
-        String stdout = output.stdout != null ? output.stdout : "";
-        String stderr = output.stderr != null ? output.stderr : "";
+        String stdout = output.stdout != null ? new String(output.stdout) : "";
+        String stderr = output.stderr != null ? new String(output.stderr) : "";
         return KItem.of(klabel, KList.concatenate(IntToken.of(output.exitCode),
             StringToken.of(stdout.trim()), StringToken.of(stderr.trim())), termContext.global());
     }

@@ -53,7 +53,7 @@ trait Collection[T] {
     foreach { builder += f(_) }
     builder.result()
   }
-  def map[R](f: T => R): List[R] = {
+  def map[R](f: T => R): scala.List[R] = {
     val builder = ListBuffer[R]()
     foreach { builder += f(_) }
     builder.result()

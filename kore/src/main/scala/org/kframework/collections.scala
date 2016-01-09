@@ -20,7 +20,7 @@ object Collections {
   def immutable[T](s: java.util.List[T]): Seq[T] = s.asScala
   def immutable[T](s: Array[T]): Seq[T] = s
 
-  def mutable[T](s: List[T]): java.util.List[T] = s.asJava
+  def mutable[T](s: scala.List[T]): java.util.List[T] = s.asJava
   def mutable[T](s: Seq[T]): java.util.List[T] = s.asJava
   def mutable[K, V](s: Map[K, V]): java.util.Map[K, V] = s.asJava
   def mutable[T](s: Set[T]): java.util.Set[T] = {
@@ -35,7 +35,7 @@ object Collections {
   def iterable[T](c: Collection[T]): java.lang.Iterable[T] = c.iterable.asJava
 
   def map[T](f: java.util.function.Function[T, T])(s: Set[T]): Set[T] = s.map(x => f(x))
-  def map[T](f: java.util.function.Function[T, T])(s: List[T]): List[T] = s.map(x => f(x))
+  def map[T](f: java.util.function.Function[T, T])(s: scala.List[T]): scala.List[T] = s.map(x => f(x))
   def map[T](f: java.util.function.Function[T, T])(s: Seq[T]): Seq[T] = s.map(x => f(x))
 
   def add[T](e: T)(s: Set[T]): Set[T] = s + e
@@ -48,15 +48,15 @@ object Collections {
   @annotation.varargs def Seq[T](es: T*) = scala.collection.immutable.Seq[T](es: _*)
   @annotation.varargs def Set[T](es: T*) = scala.collection.immutable.Set[T](es: _*)
 
-  def toList[T]: Collector[T, List[T]] =
+  def toList[T]: Collector[T, scala.List[T]] =
     Collector(() => new CombinerFromBuilder(ListBuffer()))
 
   def toSet[T]: Collector[T, Set[T]] =
     Collector(() => new CombinerFromBuilder(new SetBuilder(Set())))
 
-  def toAssociativeList[T]: Collector[T, List[T]] =
+  def toAssociativeList[T]: Collector[T, scala.List[T]] =
     Collector(() => new CombinerFromBuilder(
-      new AssocBuilder[T, List[T], List[T]](ListBuffer())))
+      new AssocBuilder[T, scala.List[T], scala.List[T]](ListBuffer())))
 
   def toAssociativeSet[T]: Collector[T, Set[T]] =
     Collector(() => new CombinerFromBuilder(

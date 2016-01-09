@@ -70,6 +70,8 @@ trait KApp extends {} with kore.KApply with K {
   // KApp seen as a collection Set(2, Set(3, 4)) is normalized and has size 3 and 2,3,4 as children
   def size: Int = children.size
 
+  def asIterable = new org.kframework.List[kore.K](children.toList)
+
   def items = children.toList.asJava.asInstanceOf[java.util.List[kore.K]]
 
   def children: Iterable[K]
