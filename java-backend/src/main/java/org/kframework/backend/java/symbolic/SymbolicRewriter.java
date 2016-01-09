@@ -51,6 +51,7 @@ public class SymbolicRewriter {
 
     private final JavaExecutionOptions javaOptions;
     private final TransitionCompositeStrategy strategy;
+    private final List<String> transitions;
     private final Stopwatch stopwatch = Stopwatch.createUnstarted();
     private final KOREtoBackendKIL constructor;
     private boolean transition;
@@ -74,6 +75,7 @@ public class SymbolicRewriter {
         this.ruleIndex = definition.getIndex();
         this.counter = counter;
         this.strategy = new TransitionCompositeStrategy(kompileOptions.transition);
+        this.transitions = kompileOptions.transition;
         this.useFastRewriting = !kompileOptions.experimental.koreProve;
         this.theFastMatcher = new FastRuleMatcher(global, definition.ruleTable.size());
         this.transition = useFastRewriting;
@@ -244,6 +246,7 @@ public class SymbolicRewriter {
                 definition.automaton.leftHandSide(),
                 allRuleBits,
                 computeOne,
+                transitions,
                 subject.termContext());
         for (Triple<ConjunctiveFormula, Boolean, Integer> triple : matches) {
             Rule rule = definition.ruleTable.get(triple.getRight());

@@ -17,7 +17,6 @@ import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.LocalRewriteTerm;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.RuleAutomatonDisjunction;
-import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Token;
@@ -31,12 +30,9 @@ import static org.kframework.Collections.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
@@ -76,6 +72,7 @@ public class FastRuleMatcher {
             Term pattern,
             BitSet ruleMask,
             boolean computeOne,
+            List<String> transitions,
             TermContext context) {
 
         ruleMask.stream().forEach(i -> constraints[i] = ConjunctiveFormula.of(context.global()));
@@ -99,7 +96,7 @@ public class FastRuleMatcher {
                             .collect(Collectors.toSet()),
                     context);
             for (Pair<ConjunctiveFormula, Boolean> pair : ruleResults) {
-                if (rule.containsAttribute("assignment") || rule.containsAttribute("lookup") || rule.containsAttribute("print") || rule.containsAttribute("read")) {
+                if (transitions.stream().anyMatch(rule::containsAttribute)) {
                     transitionResults.add(Triple.of(pair.getLeft(), pair.getRight(), i));
                 } else {
                     structuralResults.add(Triple.of(pair.getLeft(), pair.getRight(), i));
