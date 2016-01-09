@@ -83,8 +83,8 @@ public class FastRuleMatcher {
 
         BitSet theMatchingRules = match(subject.term(), pattern, ruleMask, List());
 
-        List<Triple<ConjunctiveFormula, Boolean, Integer>> theResult = new ArrayList<>();
-
+        List<Triple<ConjunctiveFormula, Boolean, Integer>> structuralResults = new ArrayList<>();
+        List<Triple<ConjunctiveFormula, Boolean, Integer>> transitionResults = new ArrayList<>();
         for (int i = theMatchingRules.nextSetBit(0); i >= 0; i = theMatchingRules.nextSetBit(i + 1)) {
             Rule rule = global.getDefinition().ruleTable.get(i);
             // TODO(YilongL): remove TermContext from the signature once
@@ -99,13 +99,22 @@ public class FastRuleMatcher {
                             .collect(Collectors.toSet()),
                     context);
             for (Pair<ConjunctiveFormula, Boolean> pair : ruleResults) {
-                theResult.add(Triple.of(pair.getLeft(), pair.getRight(), i));
-                if (computeOne) {
-                    return theResult;
+                if (rule.containsAttribute("assignment") || rule.containsAttribute("lookup") || rule.containsAttribute("print") || rule.containsAttribute("read")) {
+                    transitionResults.add(Triple.of(pair.getLeft(), pair.getRight(), i));
+                } else {
+                    structuralResults.add(Triple.of(pair.getLeft(), pair.getRight(), i));
                 }
             }
         }
-        return theResult;
+
+        if (!structuralResults.isEmpty()) {
+            return structuralResults.subList(0, 1);
+        } else if (computeOne && !transitionResults.isEmpty()) {
+            return transitionResults.subList(0, 1);
+        } else {
+            return transitionResults;
+        }
+
     }
 
     private BitSet match(Term subject, Term pattern, BitSet ruleMask, scala.collection.immutable.List<Pair<Integer, Integer>> path) {
