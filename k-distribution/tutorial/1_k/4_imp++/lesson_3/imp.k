@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2015 K Team. All Rights Reserved.
+// Copyright (c) 2014-2016 K Team. All Rights Reserved.
 module IMP-SYNTAX
   syntax AExp  ::= Int | String | Id
                  | "++" Id
@@ -19,13 +19,13 @@ module IMP-SYNTAX
                    Block "else" Block         [strict(1)]
                  | "while" "(" BExp ")" Block
                  | "int" Ids ";"
-                 | "print" "(" AExps ")" ";"  [strict]
+                 | "print" "(" AExps ")" ";"
                  | "halt" ";"
                  > "spawn" Stmt
                  > Stmt Stmt                  [left]
 
   syntax Ids   ::= List{Id,","}
-  syntax AExps ::= List{AExp,","}             [seqstrict]
+  syntax AExps ::= List{AExp,","}
 endmodule
 
 
