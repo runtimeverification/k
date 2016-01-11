@@ -59,7 +59,6 @@ public class DefinitionParsing {
     private final File cacheFile;
     private boolean autoImportDomains;
 
-    private boolean noPrelude;
     private final KExceptionManager kem;
     private final ParserUtils parser;
     private final boolean cacheParses;
@@ -73,14 +72,12 @@ public class DefinitionParsing {
     public DefinitionParsing(
             List<File> lookupDirectories,
             boolean isStrict,
-            boolean noPrelude,
             KExceptionManager kem,
             ParserUtils parser,
             boolean cacheParses,
             File cacheFile,
             boolean autoImportDomains) {
         this.lookupDirectories = lookupDirectories;
-        this.noPrelude = noPrelude;
         this.kem = kem;
         this.parser = parser;
         this.cacheParses = cacheParses;
@@ -134,13 +131,9 @@ public class DefinitionParsing {
     }
 
     public Definition parseDefinition(File definitionFile, String mainModuleName, String mainProgramsModule, boolean dropQuote) {
-        String prelude = Kompile.REQUIRE_PRELUDE_K;
-        if (this.noPrelude) {
-            prelude = "";
-        }
         Definition definition = parser.loadDefinition(
                 mainModuleName,
-                mainProgramsModule, prelude + FileUtil.load(definitionFile),
+                mainProgramsModule, FileUtil.load(definitionFile),
                 definitionFile,
                 definitionFile.getParentFile(),
                 ListUtils.union(lookupDirectories,
