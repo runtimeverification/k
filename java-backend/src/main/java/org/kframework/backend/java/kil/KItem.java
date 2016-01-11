@@ -417,7 +417,7 @@ public class KItem extends Term implements KItemRepresentation, HasGlobalContext
                         Term[] arguments = kList.getContents().toArray(new Term[kList.getContents().size()]);
                         Term result = builtins.get().invoke(context, kLabelConstant, arguments);
                         if (result != null) {
-                            return result;
+                            return result.evaluate(context);
                         }
                     } catch (ClassCastException e) {
                     // DISABLE EXCEPTION CHECKSTYLE
