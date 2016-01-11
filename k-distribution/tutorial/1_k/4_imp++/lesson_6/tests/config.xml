@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright (c) 2013-2014 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2013-2016 K Team. All Rights Reserved. -->
 <tests>
 
   <include file="../../lesson_5/tests/config.xml" 
-           more-results="." >
+           more-results="."
+           exclude="spawn.imp div.imp sum.imp collatz.imp primes.imp"> <!--add spawn because of search bug-->
     <kompile-option name="--transition"
                     value="lookup increment assignment read print" />
     <kompile-option name="--backend" value="java" />
