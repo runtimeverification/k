@@ -319,7 +319,7 @@ public class SymbolicRewriter {
                 @Override
                 public ASTNode transform(KItem kItem) {
                     if (kItem.kLabel() instanceof KLabelConstant && ((KLabelConstant) kItem.kLabel()).name().equals("#RESTORE_CONFIGURATION")) {
-                        return KItem.of(KLabelConstant.of(KLabels.DOTK, definition), KList.EMPTY, subject.termContext().global());
+                        return BuiltinList.kSequenceBuilder(subject.termContext().global()).build();
                     } else {
                         return super.transform(kItem);
                     }
