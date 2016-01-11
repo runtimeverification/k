@@ -1,10 +1,1 @@
-<T>
-    <k>
-        "Input two numbers: " ~> HOLE, .AExps ~> print ( HOLE ) ; ~> int x
-          , y ; ~> x = read ( ) ; ~> y = read ( ) ; ~> print ( 
-          "Their sum is: ", x + y, "\n" ) ;
-    </k>
-    <state>
-        .Map
-    </state>
-</T>
+<T> <k> print ( "Input two numbers: " , .Ids ) ; ~> int x , ( y , .Ids ) ; ~> ( x = read ( ) ; ) ~> ( y = read ( ) ; ) ~> print ( "Their sum is: " , ( ( x + y ) , ( "\n" , .Ids ) ) ) ; ~> . </k> <state> .Map </state> </T>

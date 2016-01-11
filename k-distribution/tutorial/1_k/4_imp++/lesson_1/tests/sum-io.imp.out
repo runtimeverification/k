@@ -1,15 +1,1 @@
-<T>
-    <k>
-        "Add numbers up to (<= 0 to quit)? " ~> HOLE, .AExps ~> print ( 
-          HOLE ) ; ~> n = read ( ) ; ~> if ( n <= 0 ) { halt ; } else { (s = 0
-           ; while ( ! n <= 0 ) { s = s + n ; n = n + -1 ; }) print ( "Sum = "
-          , s, "\n" ) ; } ~> while ( true ) { (print ( 
-          "Add numbers up to (<= 0 to quit)? " ) ; n = read ( ) ;) if ( n <= 0
-           ) { halt ; } else { (s = 0 ; while ( ! n <= 0 ) { s = s + n ; n = n
-           + -1 ; }) print ( "Sum = ", s, "\n" ) ; } }
-    </k>
-    <state>
-        n |-> 0
-        s |-> 0
-    </state>
-</T>
+<T> <k> print ( "Add numbers up to (<= 0 to quit)? " , .Ids ) ; ~> ( n = read ( ) ; ) ~> ( if ( n <= 0 ) { halt ; } else { s = 0 ; while ( ! ( n <= 0 ) ) { s = s + n ; n = n + -1 ; } print ( "Sum = " , ( s , ( "\n" , .Ids ) ) ) ; } ) ~> ( while ( true ) { print ( "Add numbers up to (<= 0 to quit)? " , .Ids ) ; n = read ( ) ; if ( n <= 0 ) { halt ; } else { s = 0 ; while ( ! ( n <= 0 ) ) { s = s + n ; n = n + -1 ; } print ( "Sum = " , ( s , ( "\n" , .Ids ) ) ) ; } } ) ~> . </k> <state> s |-> 0 n |-> 0 </state> </T>
