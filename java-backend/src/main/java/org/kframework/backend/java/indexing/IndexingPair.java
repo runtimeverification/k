@@ -73,23 +73,7 @@ public class IndexingPair implements Serializable {
      * @return the indexing pair
      */
     public static IndexingPair getInstreamIndexingPair(Term pattern, Definition definition) {
-        Index fstIndex;
-        Index sndIndex;
-
-        if (!(pattern instanceof BuiltinList)) {
-            return definition.indexingData.TOP_INDEXING_PAIR;
-        }
-        BuiltinList instream = (BuiltinList) pattern;
-
-        if (!instream.isConcreteCollection()) {
-            fstIndex = instream.elementsLeft().isEmpty() ? definition.indexingData.TOP_INDEX : getIndex(instream.get(0), definition);
-            sndIndex = instream.elementsRight().isEmpty() ? definition.indexingData.TOP_INDEX : getIndex(instream.get(-1), definition);
-        } else {
-            fstIndex = instream.isEmpty() ? definition.indexingData.BOTTOM_INDEX : getIndex(instream.get(0), definition);
-            sndIndex = instream.concreteSize() < 2 ? definition.indexingData.BOTTOM_INDEX : getIndex(instream.get(-1), definition);
-        }
-
-        return new IndexingPair(fstIndex, sndIndex);
+        throw new AssertionError("Should not reach this place anymore");
     }
 
     /**
@@ -103,23 +87,7 @@ public class IndexingPair implements Serializable {
      * @return the indexing pair
      */
     public static IndexingPair getOutstreamIndexingPair(Term pattern, Definition definition) {
-        Index fstIndex;
-        Index sndIndex;
-
-        if (!(pattern instanceof BuiltinList)) {
-            return definition.indexingData.TOP_INDEXING_PAIR;
-        }
-        BuiltinList outstream = (BuiltinList) pattern;
-
-        if (!outstream.isConcreteCollection()) {
-            fstIndex = outstream.elementsLeft().isEmpty() ? definition.indexingData.TOP_INDEX : getIndex(outstream.get(0), definition);
-            sndIndex = outstream.elementsLeft().size() < 2 ? definition.indexingData.TOP_INDEX : getIndex(outstream.get(1), definition);
-        } else {
-            fstIndex = outstream.isEmpty() ? definition.indexingData.BOTTOM_INDEX : getIndex(outstream.get(0), definition);
-            sndIndex = outstream.concreteSize() < 2 ? definition.indexingData.BOTTOM_INDEX : getIndex(outstream.get(1), definition);
-        }
-
-        return new IndexingPair(fstIndex, sndIndex);
+        throw new AssertionError("Should not reach this place anymore");
     }
 
     public final Index first;

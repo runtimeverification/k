@@ -279,15 +279,15 @@ public final class BuiltinBitVectorOperations {
         return term.extract(beginIndex.intValue(), endIndex.intValue());
     }
 
-    public static BuiltinList toDigits(
+    public static Term toDigits(
             BitVector term,
             IntToken bitwidth,
             IntToken count,
             TermContext context) {
         if (bitwidth.intValue() > 0 && bitwidth.intValue() * count.intValue() <= term.bitwidth) {
-            BuiltinList.Builder builder = BuiltinList.builder(context.global());
-            builder.addItems(term.toDigits(bitwidth.intValue(), count.intValue()));
-            return (BuiltinList) builder.build();
+            return BuiltinList.builder(context.global())
+                    .addAll(term.toDigits(bitwidth.intValue(), count.intValue()))
+                    .build();
         } else {
             return null;
         }
@@ -299,7 +299,7 @@ public final class BuiltinBitVectorOperations {
             try {
                 // AndreiS: double cast because Java in its infinite wisdom does not allow to cast
                 // List<Term> to List<BitVector>
-                digits = (List<BitVector>) ((List) digitList.elements());
+                digits = (List<BitVector>) ((List) digitList.children);
             } catch (ClassCastException e) {
                 throw new IllegalArgumentException(digitList + " is not a list of bitvectors");
             }

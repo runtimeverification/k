@@ -233,6 +233,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
             /* OPTIMIZATION: if no narrowing happens, the constraint remains unchanged;
              * thus, there is no need to check satisfiability or expand patterns */
             boolean isMatching = candidate.isMatching(variables);
+
             if (!isMatching && solution.checkUnsat()) {
                 continue;
             }

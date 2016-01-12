@@ -50,7 +50,7 @@ public class SMTLibTerm extends Term {
 
     @Override
     protected boolean computeMutability() {
-        throw new UnsupportedOperationException();
+        return false;
     }
 
     @Override

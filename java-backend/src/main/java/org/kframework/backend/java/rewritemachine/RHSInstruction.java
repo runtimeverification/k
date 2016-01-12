@@ -4,10 +4,11 @@ package org.kframework.backend.java.rewritemachine;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 import org.kframework.backend.java.kil.CellLabel;
+import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.Kind;
+import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Variable;
-import org.kframework.kore.Sort;
 
 import java.io.Serializable;
 import java.util.List;
@@ -31,8 +32,11 @@ public final class RHSInstruction implements Serializable {
         private final int size2;
         private final int size3;
         private final Kind kind;
-        private final Sort cellCollectionSort;
+        private final org.kframework.kore.Sort cellCollectionSort;
         private final List<CellLabel> cellLabels;
+        public final Sort assocListSort;
+        public final KLabelConstant assocListOperator;
+        public final KLabelConstant assocListUnit;
         private final Source source;
         private final Location location;
 
@@ -73,6 +77,10 @@ public final class RHSInstruction implements Serializable {
             this(type, 0);
         }
 
+        public Constructor(ConstructorType type, int size, Sort assocListSort, KLabelConstant assocListOperator, KLabelConstant assocListUnit) {
+            this(type, size, 0, 0, null, null, null, assocListSort, assocListOperator, assocListUnit, null, null);
+        }
+
         public Constructor(ConstructorType type, int size1) {
             this(type, size1, 0);
         }
@@ -89,17 +97,18 @@ public final class RHSInstruction implements Serializable {
 
         public Constructor(ConstructorType type, int size1,
                 int size2, int size3, Kind kind,
-                Sort cellCollectionSort, List<CellLabel> cellLabels) {
-            this(type, size1, size2, size3, kind, cellCollectionSort, cellLabels, null, null);
+                org.kframework.kore.Sort cellCollectionSort, List<CellLabel> cellLabels) {
+            this(type, size1, size2, size3, kind, cellCollectionSort, cellLabels, null, null, null, null, null);
         }
 
         public Constructor(ConstructorType type, Source source, Location location) {
-            this(type, 0, 0, 0, null, null, null, source, location);
+            this(type, 0, 0, 0, null, null, null, null, null, null, source, location);
         }
 
         public Constructor(ConstructorType type, int size1,
-                int size2, int size3, Kind kind, Sort cellCollectionSort, List<CellLabel> cellLabels,
-                Source source, Location location) {
+                           int size2, int size3, Kind kind, org.kframework.kore.Sort cellCollectionSort, List<CellLabel> cellLabels,
+                           Sort assocListSort, KLabelConstant assocListOperator, KLabelConstant assocListUnit,
+                           Source source, Location location) {
             this.type = type;
             this.size1 = size1;
             this.size2 = size2;
@@ -107,6 +116,9 @@ public final class RHSInstruction implements Serializable {
             this.kind = kind;
             this.cellCollectionSort = cellCollectionSort;
             this.cellLabels = cellLabels;
+            this.assocListSort = assocListSort;
+            this.assocListOperator = assocListOperator;
+            this.assocListUnit = assocListUnit;
             this.source = source;
             this.location = location;
         }
@@ -116,7 +128,7 @@ public final class RHSInstruction implements Serializable {
         }
 
         public Constructor(ConstructorType type, int size1,
-                List<CellLabel> cellLabels, Sort cellCollectionSort) {
+                List<CellLabel> cellLabels, org.kframework.kore.Sort cellCollectionSort) {
             this(type, size1, 0, 0, null, cellCollectionSort, cellLabels);
         }
 
@@ -140,7 +152,7 @@ public final class RHSInstruction implements Serializable {
             return type;
         }
 
-        public Sort cellCollectionSort() {
+        public org.kframework.kore.Sort cellCollectionSort() {
             return cellCollectionSort;
         }
 

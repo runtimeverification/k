@@ -35,9 +35,7 @@ public class PrePostVisitor implements Visitor {
         preVisitor.resetProceed();
         node.accept(preVisitor);
         if (!preVisitor.isProceed()) return;
-        for (Term t : node.elementsLeft()) t.accept(this);
-        for (Term t : node.baseTerms()) t.accept(this);
-        for (Term t : node.elementsRight()) t.accept(this);
+        for (Term t : node.children) t.accept(this);
         node.accept(postVisitor);
     }
 

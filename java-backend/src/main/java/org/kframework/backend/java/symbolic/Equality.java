@@ -114,8 +114,7 @@ public class Equality implements Serializable {
                 && !(leftHandSide instanceof BuiltinList) && !(rightHandSide instanceof BuiltinList)
                 && !(leftHandSide instanceof BuiltinSet) && !(rightHandSide instanceof BuiltinSet)
                 || BuiltinMap.isMapUnifiableByCurrentAlgorithm(leftHandSide, rightHandSide)
-                || BuiltinSet.isSetUnifiableByCurrentAlgorithm(leftHandSide, rightHandSide)
-                || BuiltinList.isListUnifiableByCurrentAlgorithm(leftHandSide, rightHandSide);
+                || BuiltinSet.isSetUnifiableByCurrentAlgorithm(leftHandSide, rightHandSide);
     }
 
     public KItem toK() {

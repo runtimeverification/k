@@ -19,29 +19,23 @@ public class BuiltinListTest {
 
     @Test
     public void testListRange() throws Exception {
-        BuiltinList.Builder builder = BuiltinList.builder(termContext.global());
-        builder.addItem(IntToken.of(0));
-        builder.concatenate(new Variable("L", Sort.LIST));
-        builder.addItems(ImmutableList.<Term>of(IntToken.of(9), IntToken.of(10)));
         BuiltinList baseBuiltinList = (BuiltinList) BuiltinListOperations.range(
-                (BuiltinList) builder.build(),
+                BuiltinList.builder(Sort.LIST, null, null, termContext.global())
+                        .addAll(IntToken.of(0), new Variable("L", Sort.LIST), IntToken.of(9), IntToken.of(10))
+                        .build(),
                 IntToken.of(1),
                 IntToken.of(1),
                 termContext);
 
-        builder = BuiltinList.builder(termContext.global());
-        builder.addItems(ImmutableList.<Term>of(IntToken.of(0), IntToken.of(1)));
-        builder.concatenate(baseBuiltinList);
-        builder.addItems(ImmutableList.<Term>of(IntToken.of(9), IntToken.of(10)));
         BuiltinList builtinList = (BuiltinList) BuiltinListOperations.range(
-                (BuiltinList) builder.build(),
+                BuiltinList.builder(Sort.LIST, null, null, termContext.global())
+                        .addAll(IntToken.of(0), IntToken.of(1))
+                        .addAll(baseBuiltinList.children)
+                        .addAll(IntToken.of(9), IntToken.of(10)).build(),
                 IntToken.of(2),
                 IntToken.of(1),
                 termContext);
 
-        Assert.assertEquals(new Variable("L", Sort.LIST), builtinList.frame());
-        Assert.assertEquals(2, builtinList.concreteSize());
-        Assert.assertEquals(IntToken.of(9), builtinList.get(-1));
-        Assert.assertEquals(IntToken.of(9), builtinList.get(-2));
+        Assert.assertEquals(builtinList.children, ImmutableList.of(new Variable("L", Sort.LIST), IntToken.of(9), IntToken.of(9)));
     }
 }

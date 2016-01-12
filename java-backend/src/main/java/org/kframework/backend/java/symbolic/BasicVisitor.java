@@ -67,6 +67,8 @@ public class BasicVisitor implements Visitor {
             visit((RuleAutomatonDisjunction) node);
         } else if (node instanceof InnerRHSRewrite) {
             visit((InnerRHSRewrite) node);
+        } else if (node instanceof LocalRewriteTerm) {
+            visit((LocalRewriteTerm) node);
         } else {
             assert false : "unexpected class " + node.getClass();
         }
@@ -93,9 +95,7 @@ public class BasicVisitor implements Visitor {
 
     @Override
     public void visit(BuiltinList node) {
-        node.elementsLeft().stream().forEach(this::visitNode);
-        node.baseTerms().stream().forEach(this::visitNode);
-        node.elementsRight().stream().forEach(this::visitNode);
+        node.children.stream().forEach(this::visitNode);
     }
 
     @Override
