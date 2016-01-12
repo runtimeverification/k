@@ -1,4 +1,4 @@
-// Copyright (c) 2015 K Team. All Rights Reserved.
+// Copyright (c) 2015-2016 K Team. All Rights Reserved.
 
 // Module defining only the sorts K and KString, useful for modularity
 module SORT-K

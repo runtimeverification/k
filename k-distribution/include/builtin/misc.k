@@ -1,4 +1,4 @@
-// Copyright (c) 2015 K Team. All Rights Reserved.
+// Copyright (c) 2015-2016 K Team. All Rights Reserved.
 
 module ID
   syntax Id ::= r"(?<![A-Za-z0-9\\_])[A-Za-z\\_][A-Za-z0-9\\_]*"     [token, autoReject]
