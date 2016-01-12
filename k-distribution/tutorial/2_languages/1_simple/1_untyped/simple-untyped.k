@@ -324,7 +324,7 @@ to the \K tool, as indicated by the \textit{\$PGM} variable, followed by the
   configuration <T color="red">
                   <threads color="orange">
                     <thread multiplicity="*" color="yellow">
-                      <k color="green"> `$PGM:Stmts ~> execute` </k>
+                      <k color="green"> $PGM:Stmts ~> execute </k>
                     //<br/> // TODO(KORE): support latex annotations #1799
                       <control color="cyan">
                         <fstack color="blue"> .List </fstack>
@@ -420,7 +420,7 @@ declarations. */
   rule <k> var X:Id[N:Int]; => .K ...</k>
        <env> Env => Env[X <- L] </env>
        <store>... .Map => L |-> array(L +Int 1, N)
-                          `L +Int 1` ... `L +Int N` |-> undefined ...</store>
+                          (L +Int 1) ... (L +Int N) |-> undefined ...</store>
        <nextLoc> L => L +Int 1 +Int N </nextLoc>
     when N >=Int 0
 
@@ -642,7 +642,7 @@ nulary \texttt{return;} statements. */
   rule <k> return(V:Val); ~> _ => V ~> K </k>
        <control>
          <fstack> ListItem((Env,K,C)) => .List ...</fstack>
-         `_ => C`
+         (_ => C)
        </control>
        <env> _ => Env </env>
 
@@ -686,7 +686,7 @@ resulting location: */
 
   context (HOLE => lvalue(HOLE)) = _
 
-  rule <k> loc(L) = V:Val => V ...</k> <store>... L |-> `_ => V` ...</store>
+  rule <k> loc(L) = V:Val => V ...</k> <store>... L |-> (_ => V) ...</store>
     [assignment]
 
 /*@ \section{Statements}
@@ -828,7 +828,7 @@ exception stack.  The three rules below modularly do precisely the above. */
 
   syntax KItem ::= "popx"
 
-  rule <k> `try S1 catch(X) {S2} => S1 ~> popx` ~> K </k>
+  rule <k> (try S1 catch(X) {S2} => S1 ~> popx) ~> K </k>
        <control>
          <xstack> .List => ListItem((X, S2, K, Env, C)) ...</xstack>
          C
@@ -841,7 +841,7 @@ exception stack.  The three rules below modularly do precisely the above. */
   rule <k> throw V:Val; ~> _ => { var X = V; S2 } ~> K </k>
        <control>
          <xstack> ListItem((X, S2, K, Env, C)) => .List ...</xstack>
-         `_ => C`
+         (_ => C)
        </control>
        <env> _ => Env </env>
 
@@ -872,11 +872,11 @@ configuration.  This is part of \K's configuration abstraction mechanism. */
          <k> spawn S => !T:Int ...</k>
          <env> Env </env>
        ...</thread>
-       `.Bag => <thread>...
+       (.Bag => <thread>...
                <k> S </k>
                <env> Env </env>
                <id> !T </id>
-             ...</thread>`
+             ...</thread>)
 
 /*@ \subsubsection{Thread termination}
 Dually to the above, when a thread terminates its assigned computation (the
@@ -894,9 +894,9 @@ into the \textsf{terminated} cell, so the \texttt{join} construct knows which
 threads have terminated. */
 
   // TODO(KORE): ..Bag should be . throughout this definition #1772
-  rule `<thread>... <k>.K</k> <holds>H</holds> <id>T</id> ...</thread> => .Bag`
+  rule (<thread>... <k>.K</k> <holds>H</holds> <id>T</id> ...</thread> => .Bag)
   /*
-  rule `<thread>... <k>.</k> <holds>H</holds> <id>T</id> ...</thread> => .`
+  rule (<thread>... <k>.</k> <holds>H</holds> <id>T</id> ...</thread> => .)
   */
        <busy> Busy => Busy -Set keys(H) </busy>
        <terminated>... .Set => SetItem(T) ...</terminated>
@@ -922,7 +922,7 @@ by the two rules below: */
 
   rule <k> acquire V:Val; => .K ...</k>
        <holds>... .Map => V |-> 0 ...</holds>
-       <busy> Busy `.Set => SetItem(V)` </busy>
+       <busy> Busy (.Set => SetItem(V)) </busy>
     when (notBool(V in Busy))  [acquire]
 
   rule <k> acquire V; => .K ...</k>
@@ -973,7 +973,7 @@ and a list of values in a sequence of corresponding variable
 declarations. */
 
   syntax Stmts ::= mkDecls(Ids,Vals)  [function]
-  rule mkDecls(`X:Id, Xs:Ids`, `V:Val, Vs:Vals`) => var X=V; mkDecls(Xs,Vs)
+  rule mkDecls((X:Id, Xs:Ids), (V:Val, Vs:Vals)) => var X=V; mkDecls(Xs,Vs)
   rule mkDecls(.Ids,.Vals) => {}
 
 /*@ \subsection{Location lookup}
@@ -1011,7 +1011,7 @@ recovery tasks, we only need to keep the last one.  The elegant rule below
 does precisely that, thus avoiding the unnecessary computation explosion
 problem: */
 
-  rule `env(_) => .K` ~> env(_)  [structural]
+  rule (env(_) => .K) ~> env(_)  [structural]
 
 /* In fact, the above follows a common convention in \K for recovery
 operations of cell contents: the meaning of a computation task of the form
@@ -1066,7 +1066,7 @@ value: */
   syntax Map ::= Int "..." Int "|->" K
     [function, latex({#1}\ldots{#2}\mapsto{#3})]
   rule N...M |-> _ => .Map  when N >Int M
-  rule N...M |-> K => N |-> K `N +Int 1`...M |-> K  when N <=Int M
+  rule N...M |-> K => N |-> K (N +Int 1)...M |-> K  when N <=Int M
 
 /*@ The semantics of SIMPLE is now complete.  Make sure you kompile the
 definition with the right options in order to generate the desired model.

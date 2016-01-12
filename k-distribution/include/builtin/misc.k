@@ -40,7 +40,7 @@ module BOOL
   rule false xorBool B:Bool => B:Bool
   rule B:Bool xorBool false => B:Bool
   rule B:Bool xorBool B:Bool => false
-  rule B1:Bool xorBool B2:Bool => notBool `B1 ==Bool B2`
+  rule B1:Bool xorBool B2:Bool => notBool (B1 ==Bool B2)
 
   rule true orBool _:Bool => true
   rule _:Bool orBool true => true
@@ -52,7 +52,7 @@ module BOOL
   rule _:Bool impliesBool true => true
   rule B:Bool impliesBool false => notBool B
 
-  rule B1:Bool =/=Bool B2:Bool => notBool `B1 ==Bool B2`*/
+  rule B1:Bool =/=Bool B2:Bool => notBool (B1 ==Bool B2)*/
 endmodule
 
 module LOGIC
