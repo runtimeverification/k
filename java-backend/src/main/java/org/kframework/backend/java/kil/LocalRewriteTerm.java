@@ -5,6 +5,10 @@ import org.apache.commons.lang3.tuple.Pair;
 import scala.collection.immutable.List;
 
 
+/**
+ * {@link Term} representation of a local rewrite (path in the subject to the rewrite, and the right-hand-side of the rewrite).
+ * It can be stored in a {@link org.kframework.backend.java.symbolic.ConjunctiveFormula}.
+ */
 public class LocalRewriteTerm extends SMTLibTerm {
 
     public final scala.collection.immutable.List<Pair<Integer, Integer>> path;

@@ -48,6 +48,14 @@ public class BuiltinList extends Collection implements CollectionInternalReprese
         elementTailSplits = new ElementTailSplit[children.size()];
     }
 
+    /**
+     * Class representation of the element and the tail components of a list child.
+     * This representation enables efficient matching of head/tail patterns.
+     * A list child can be a list element, a list variable, or a disjunction of list elements and variables.
+     * The element component consists of the element or the elements in the disjunction, combined with their respective bitsets.
+     * The tail component consists of the list variable or the list variables in the disjunction such that the list is empty on the remaining positions,
+     * combined with their respective bitsets.
+     */
     public static class ElementTailSplit {
         public final Term element;
         public final BitSet elementMask;
@@ -65,6 +73,9 @@ public class BuiltinList extends Collection implements CollectionInternalReprese
         }
     }
 
+    /**
+     * Returns the element component and the tail component of the list child on position index.
+     */
     public ElementTailSplit splitElementTail(int index, int bitSetLength) {
         if (elementTailSplits[index] == null) {
             BitSet emptyListMask = BitSet.apply(bitSetLength);
@@ -331,10 +342,19 @@ public class BuiltinList extends Collection implements CollectionInternalReprese
         }
     }
 
-    public BuiltinList upElementToList(Term element) {
+    /**
+     * Wraps this element in a {@link SingletonBuiltinList}.
+     * {@link org.kframework.backend.java.symbolic.FastRuleMatcher} is the only class allowed to call this method.
+     */
+    public SingletonBuiltinList upElementToList(Term element) {
         return new SingletonBuiltinList(element, global, sort, operatorKLabel, unitKLabel);
     }
 
+    /**
+     * Class representation of a singleton builtin list. This representation is not canonical;
+     * {@link BuiltinList#builder(Sort, KLabelConstant, KLabelConstant, GlobalContext)} returns the element directly as the canonical representation.
+     * {@link org.kframework.backend.java.symbolic.FastRuleMatcher} is the only class allowed to use this class.
+     */
     public static class SingletonBuiltinList extends BuiltinList {
         private SingletonBuiltinList(Term child, GlobalContext global, Sort sort, KLabelConstant operatorKLabel, KLabelConstant unitKLabel) {
             super(ImmutableList.of(child), sort, operatorKLabel, unitKLabel, global);

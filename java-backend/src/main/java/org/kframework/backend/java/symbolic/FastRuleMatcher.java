@@ -247,6 +247,13 @@ public class FastRuleMatcher {
         }
     }
 
+    /**
+     * Implements associative matching. The current implementation has the following limitations:
+     * * assoc operation signature only of the form "s * s -> s"
+     * * only one assoc operation per sort
+     * * klabel variables only stand for non-assoc klabels
+     * * no klist variables
+     */
     private BitSet matchAssoc(BuiltinList subject, int subjectIndex, BuiltinList pattern, int patternIndex, BitSet ruleMask, scala.collection.immutable.List<Pair<Integer, Integer>> path) {
         assert subject.sort.equals(pattern.sort);
         assert subject.isConcreteCollection();
