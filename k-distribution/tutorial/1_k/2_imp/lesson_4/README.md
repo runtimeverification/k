@@ -99,11 +99,9 @@ As seen soon when we define IMP++, configuration abstraction is not only a
 user convenience; it actually significantly increases the modularity of our
 definitions.  The k-cell-completion is only the very first step, though.
 
-If you really want certain rewrites over syntactic terms to simply apply
+If you really want certain rewrites over syntactic terms to apply
 anywhere they match, then you should tag the rule with the attribute
-`anywhere`, which tells the tool to not complete the rule and thus allows
-it to apply anywhere.  We will discuss tags, and in particular the
-`anywhere` tag, in future tutorial lessons.
+`anywhere`, which was discussed in Tutorial 1, Lesson 2.5.
 
 #### Structural vs. Computational Rules
 
