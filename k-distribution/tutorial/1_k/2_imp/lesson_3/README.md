@@ -1,8 +1,8 @@
-<!-- Copyright (c) 2010-2014 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2010-2016 K Team. All Rights Reserved. -->
 
 ### Computations, Results, Strictness; Rules Involving Cells
 
-In this lesson we will learn about the syntactic category K of computations,
+In this lesson we will learn about the syntactic category `K` of computations,
 about how strictness attributes are in fact syntactic sugar for rewrite rules
 over computations, and why it is important to tell the tool which
 computations are results.  We will also see a K rule that involves cells.
@@ -12,10 +12,10 @@ computations are results.  We will also see a K rule that involves cells.
 Computation structures, or more simply *computations*, extend the abstract
 syntax of your language with a list structure using `~>` (read  *followed
 by* or *and then*, and written $\curvearrowright$ in Latex) as a separator.
-K provides a distinguished sort, K, for computations.  The extension of the
+K provides a distinguished sort, `K`, for computations.  The extension of the
 abstract syntax of your language into computations is done automatically by
 the K tool when you declare constructs using the `syntax` keyword, so the K
-semantic rules can uniformly operate only on terms of sort K.  The intuition
+semantic rules can uniformly operate only on terms of sort `K`.  The intuition
 for computation structures of the form
 
     t1 ~> t2 ~> ... ~> tn
@@ -34,7 +34,7 @@ following two opposite rules (`X` ranges over `Id` and `A` over `AExp`):
     X=A; => A ~> X=[];
     A ~> X=[]; => X=A;
 
-The first rule pulls `A` from the syntactic context X=A; and schedules it
+The first rule pulls `A` from the syntactic context `X=A;` and schedules it
 for processing.  The second rule plugs `A` back into its context.
 Inspired from the chemical abstract machine, we call rules of the first
 type above *heating* rules and rules of the second type *cooling* rules.
@@ -44,7 +44,7 @@ top of the computation atomic tasks, such as a variable lookup, or a
 builtin operation, which then make computational progress by means of other
 rules.  Once progress is made, cooling rules can iteratively plug the result
 back into context, so that heating rules can pick another candidate for
-reduction, and so and so forth.
+reduction, and so on and so forth.
 
 When operations are strict only in some of their arguments, the corresponding
 positions of the arguments in which they are strict are explicitly enumerated
@@ -93,48 +93,52 @@ the K tool relies on users giving explicit definitions of their languages'
 results.
 
 The K tool provides a predicate `isKResult`, which is automatically defined
-as we add syntactic constructs to KResult (in fact the K tool defines such
+as we add syntactic constructs to `KResult` (in fact the K tool defines such
 predicates for all syntactic categories, which are used, for example, as
 rule side conditions to check user-declared variable memberships, such as
 `V:Val` stating that `V` belongs to `Val`).
 
-The kompile tool, depending upon what it is requested to do, changes the
+The `kompile` tool, depending upon what it is requested to do, changes the
 reversible heating/cooling rules corresponding to evaluation strategy
 definitions (e.g., those corresponding to strictness attributes) to avoid
 non-termination.  For example, when one is interested in obtaining an
 executable model of the language (which is the default compilation mode of
-kompile), then heating is performed only when the to-be-pulled syntactic
+`kompile`), then heating is performed only when the to-be-pulled syntactic
 fragment is not a result, and the corresponding cooling only when the
 to-be-plugged fragment is a result.  In this case, e.g., the heating/cooling
 rules for assignment are modified as follows:
 
-    X=A; => A ~> X=[];   when notBool isKResult(A)
-    A ~> X=[]; => X=A;   when isKResult(A)
+    X=A; => A ~> X=[];  requires notBool isKResult(A)
+    A ~> X=[]; => X=A;  requires isKResult(A)
 
 Note that non-termination of heating/cooling is avoided now.  The only thing
 lost is the number of possible behaviors that a program can manifest, but 
 this is irrelevant when all we want is one behavior.
 
 As will be discussed in the IMP++ tutorial, the heating/cooling rules are
-modified differently by kompile when we are interested in other aspects of the
-language definition, such us, for example, in a search-able model that
+modified differently by `kompile` when we are interested in other aspects
+of the language definition, such us, for example, in a search-able model that
 comprises all program behaviors.  This latter model is obviously more general
 from a theoretical perspective, but, in practice, it is also slower to execute.
-The kompile tool strives to give you the best model of the language for the
+The `kompile` tool strives to give you the best model of the language for the
 task you are interested in.
 
 ##### Can't Results be Inferred Automatically?
 
 This is a long story, but the short answer is: *No!*.  Maybe in some cases
 it is possible, but we prefer to not attempt it in the K tool.  For example,
-you may not want a stuck computation to count as a result, just because you
-forgot a semantic rule!  Besides, in our experience with defining large
-languages, it is quite useful to take your time and think of what the results
-of your language's computations are.  This fact in itself may help you
-improve your overall language design.  We typically do it at the same time
-with defining the evaluation strategies of our languages.
+you most likely do not want a stuck computation to count as a result, just
+because you forgot a semantic rule that could reduce that stuck computation
+further!  Besides, in our experience with defining large languages, it is
+quite useful to take your time and think of what the results of your
+language's computations are.  This fact in itself may help you improve your
+overall language design.  We typically do it at the same time with defining
+the evaluation strategies of our languages.
 
-So sorry: you currently do have to explicitly define your K results if you
+Although in theory K could infer the results of your language as the
+stuck computations, based on our own experience we have deliberately decided
+to not provide this feature, in spite of requests from some users.
+So you currently do have to explicitly define your K results if you
 want to effectively use the K tool.  Note, however, that theoretical
 definitions, not meant to be executed, need not worry about defining results
 (that's because in theory semantic rules apply *modulo* the reversible
@@ -144,31 +148,31 @@ heating/cooling rules, so results are not necessary).
 
 All our K rules so far in the tutorial were of the form
 
-    rule left => right when condition
+    rule left => right requires condition
 
-where left and right were syntactic, or more generally computation, terms.
+where `left` and `right` were syntactic, or more generally computation, terms.
 
 Here is our first K rule explicitly involving cells:
 
     rule <k> X:Id => I ...</k> <state>... X |-> I ...</state>
 
 Recall that the `k` cell holds computations, which are sequences of tasks
-separated by `~>`.  Also, the state cell holds a map, which is a set of
+separated by `~>`.  Also, the `state` cell holds a map, which is a set of
 bindings, each binding being a pair of computations (currently, the
 K builtin data-structures, like maps, are untyped; or, said differently,
-they are all over the type of computations, K).
+they are all over the type of computations, `K`).
 
 Therefore, the two cells mentioned in the rule above hold collections
 of things, ordered or not.  The `...`s, which we also call cell *frames*,
-stand for *more stuff there, but stuff that we do not care about*.
+stand for *more stuff there, which we do not care about*.
 
 The rewrite relation `=>` is allowed in K to appear anywhere in a term, its
 meaning being that the corresponding subterm is rewritten as indicated in the
 shown context.  We say that K's rewriting is *local*.
 
 The rule above says that if the identifier `X` is the first task in the `k`
-cell, and if `X` is bound to `I` somewhere in the state, then `X` rewrites
-to `I` locally in the `k` cell.  Therefore, variables need to be already
+cell, and if `X` is bound to `I` somewhere in the `state`, then `X` rewrites
+to `I` *locally* in the `k` cell.  Therefore, IMP variables need to be already
 declared when looked up.
 
 Of course, the K rule above can be translated into an ordinary rewrite rule
@@ -180,9 +184,10 @@ of the form
 Besides being more verbose and thus tedious to write, this ordinary rule
 is also more error-prone; for example, we may forget the `Rest` variable
 in the right-hand-side, etc.  Moreover, the concurrent semantics of K
-allows for its rules to be interpreted as concurrent transactions, where
-the context is all read-only, while the sub-terms which actually rewrite are
-read/write; thus, K rule instances can apply concurrently if they only overlap
+allows for its rules to be interpreted as *concurrent transactions*, where
+the context is the read-only component of the transaction, while the
+subterms which are rewritten are read/write component of the transaction;
+thus, K rule instances can apply concurrently if they only overlap
 on read-only parts, while they cannot if regarded as ordinary rewrite logic
 rules.  Note: our current implementation of the K tool is not concurrent,
 so K rules are in fact desugared as normal rewrite rules in the K tool.

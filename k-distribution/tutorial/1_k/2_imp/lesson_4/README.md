@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2010-2014 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2010-2016 K Team. All Rights Reserved. -->
 
 ### Configuration Abstraction, Part 1; Types of Rules
 
@@ -13,39 +13,39 @@ were defined in IMP-SYNTAX.
 
 The rules for the arithmetic and Boolean constructs are self-explanatory.
 Note, however, that K will infer the correct sorts of all the variables in
-these rules, because of they appear as arguments of the builtin operations
+these rules, because they appear as arguments of the builtin operations
 (`_+Int_`, etc.).  Moreover, the inferred sorts will be enforced dynamically.
 Indeed, we do not want to apply the rule for addition, for example, when the
 two arguments are not integers.  In the rules for `&&`, although we prefer to
 not do it here for simplicity, we could have eliminated the dynamic check by
-replacing `B` (and similarly for `_`) with `B:K`, for two reasons.  First, it
-can be shown that whenever any of these rules apply, `B` will be a `BExp`
-anyway; that's because there is no rule that can touch such a `B` (this
+replacing `B` (and similarly for `_`) with `B:K`.  Indeed, it can be shown
+that whenever any of these rules apply, `B` (or `_`) is a `BExp` anyway.
+That's because there is no rule that can touch such a `B` (or `_`); this
 will become clearer shortly, when we discuss the first step of configuration
-abstraction).  Second, since we know that `B` will be a `BExp` anyway, we can
-save the time it takes to check its sort; such times may look minor, but they
-accumulate, so some designers may prefer to avoid run-time checks whenever
-possible.
+abstraction.  Therefore, since we know that `B` will be a `BExp` anyway, we
+could save the time it takes to check its sort; such times may look minor,
+but they accumulate, so some designers may prefer to avoid run-time checks
+whenever possible.
 
-The block rules are trivial.  However, the rule for non-empty blocks works
-only because we do not have local variable declarations in IMP.  We will have
-to change this rule in IMP++.
+The block rules are trivial.  However, the rule for non-empty blocks is
+semantically correct only because we do not have local variable declarations
+in IMP.  We will have to change this rule in IMP++.
 
-The assignment rule has two `=>`: one in the k cell dissolving the assignment
-statement, and the other in the state updating the value of the assigned
-variable.  Note that the one in the state is surrounded by parentheses:
-`(_ => I)`.  That is because `=>` is greedy: it matches as much as it can to
-the left and to the right, until it reaches the cell boundaries (closed or
-open).  If you want to limit its scope, or for clarity, you can use
+The assignment rule has two `=>`: one in the `k` cell dissolving the
+assignment statement, and the other in the `state` cell updating the value of
+the assigned variable.  Note that the one in the `state` is surrounded by
+parentheses: `(_ => I)`.  That is because `=>` is greedy: it matches as much
+as it can to the left and to the right, until it reaches the cell boundaries
+(closed or open).  If you want to limit its scope, or for clarity, you can use
 parentheses like here.
 
 The rule for sequential composition simply desugars `S1 S2` into `S1 ~> S2`.
 Indeed, the two have exactly the same semantics.  Note that statements
-*evaluate* to nothing (`.`), so once S1 is processed in `S1 ~> S2`, then the
+*evaluate* to nothing (`.`), so once `S1` is processed in `S1 ~> S2`, then the
 next task is automatically `S2`, without wasting any step for the transition.
 
 The rules for the conditional and while statements are clear.  One thing to
-keep in mind now is that the while unrolling rule will not apply
+keep in mind now is that the `while` unrolling rule will not apply
 indefinitely in the positive branch of the resulting conditional, because
 of K's configuration abstraction, which will be discussed shortly.
 
@@ -80,8 +80,8 @@ In K, all semantic rules are in fact rules between configurations.  As soon
 explained in the IMP++ tutorial, the declared configuration cell structure is
 used to automatically complete the missing configuration parts in rules.
 However, many rules do not involve any cells, being rules between syntactic
-terms (of sort K); for example, we had only three rules involving cells in our
-IMP semantics.  In this case, the k cell will be added automatically and the
+terms (of sort `K`); for example, we had only three rules involving cells in our
+IMP semantics.  In this case, the `k` cell will be added automatically and the
 actual rewrite will happen on top of the enclosed computation.  For example,
 the rule for the `while` loop is automatically translated into the following:
 
@@ -100,10 +100,10 @@ user convenience; it actually significantly increases the modularity of our
 definitions.  The k-cell-completion is only the very first step, though.
 
 If you really want certain rewrites over syntactic terms to simply apply
-anywhere they match (although we beg you to reconsider!), then you should
-tag the rule with the attribute `anywhere`, which tells the tool to
-not complete the rule and thus allows it to apply anywhere.  We will discuss
-tags, and in particular the `anywhere` tag, in future tutorial lessons.
+anywhere they match, then you should tag the rule with the attribute
+`anywhere`, which tells the tool to not complete the rule and thus allows
+it to apply anywhere.  We will discuss tags, and in particular the
+`anywhere` tag, in future tutorial lessons.
 
 #### Structural vs. Computational Rules
 

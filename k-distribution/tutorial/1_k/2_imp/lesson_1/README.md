@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2010-2014 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2010-2016 K Team. All Rights Reserved. -->
 
 ### Defining a More Complex Syntax
 
@@ -26,13 +26,13 @@ In other words, there is currently nothing fancy in K tool's module system.
 
 IMP has six syntactic categories, as shown in `imp.k`: `AExp` for arithmetic
 expressions, `BExp` for Boolean expressions, `Block` for blocks, `Stmt` for
-statements, `Pgm` for programs and Ids for comma-separated lists of
+statements, `Pgm` for programs and `Ids` for comma-separated lists of
 identifiers.  Blocks are special statements, whose role is to syntactically
 constrain the conditional statement and the while loop statement to only
 take blocks as branches and body, respectively.
 
-There is nothing special about arithmetic and Boolean expressions.  
-They are given the expected strictness attributes, except for `<=` and `&&`,
+There is nothing special about arithmetic and Boolean expressions. They
+are given the expected strictness attributes, except for `<=` and `&&`,
 for demonstration purposes.
 
 The `<=` is defined to be `seqstrict`, which means that it evaluates its
@@ -48,7 +48,8 @@ short-circuited semantics (its second argument will only be evaluated when
 the first evaluates to true).  Recall the K tool also allows us to associate
 Latex attributes to constructs, telling the document generator how to display
 them.  For example, we associate `<=` the attribute `latex({#1}\leq{#2})`,
-which makes it be displayed $\leq$ everywhere in the generated documentation.
+which makes it be displayed $\leq$ everywhere in the generated Latex
+documentation.
 
 In this tutorial we take the freedom to associate the various constructs
 parsing precedences that we have already tested and we know work well, so that
@@ -68,12 +69,12 @@ An IMP program declares a comma-separated list of variables using the keyword
 Syntactically, the idea here is that we can wrap any IMP program within a
 `main(){...}` function and get a valid C program.  IMP does not allow variable
 declarations anywhere else except through this construct, at the top-level of
-the program.  Other languages provided with the \K distribution (see, e.g., the
+the program.  Other languages provided with the K distribution (see, e.g., the
 IMP++ language also discussed in this tutorial) remove this top-level program
 construct of IMP and add instead variable declaration as a statement construct,
 which can be used anywhere in the program, not only at the top level.
 
-Note how we defined the comma-separated list of identifiers, using
+Note how we defined the comma-separated list of identifiers using
 `List{Id,","}`.  The K tool provides builtin support for generic syntactic
 lists.  In general,
 
@@ -98,7 +99,7 @@ Since IMP is a fragment of C, you may want to select the C mode in your
 editor when writing these programs.  This will also give your the feel that
 you are writing programs in a real programming language.
 
-For example, here is `sum.imp`, which sums in sum all numbers up to n:
+For example, here is `sum.imp`, which sums in `sum` all numbers up to `n`:
 
     int n, sum;
     n = 100;
@@ -111,7 +112,7 @@ For example, here is `sum.imp`, which sums in sum all numbers up to n:
 Now krun it and see how it looks parsed in the default `k` cell.
 
 The program `collatz.imp` tests the Collatz conjecture for all numbers up to
-m and accumulates the total number of steps in s:
+`m` and accumulates the total number of steps in `s`:
 
     int m, n, q, r, s;
     m = 10;
