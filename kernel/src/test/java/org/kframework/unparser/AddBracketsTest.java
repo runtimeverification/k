@@ -23,7 +23,6 @@ import scala.Tuple2;
 import scala.util.Either;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Set;
 
 import static org.junit.Assert.*;
@@ -40,7 +39,7 @@ public class AddBracketsTest {
     public RuleGrammarGenerator makeRuleGrammarGenerator() {
         String definitionText;
         FileUtil files = FileUtil.testFileUtil();
-        ParserUtils parser = new ParserUtils(files::resolveWorkingDirectory, new KExceptionManager(new GlobalOptions()));
+        ParserUtils parser = new ParserUtils(files, new KExceptionManager(new GlobalOptions()));
         File definitionFile = new File(Kompile.BUILTIN_DIRECTORY.toString() + "/kast.k");
         definitionText = files.loadFromWorkingDirectory(definitionFile.getPath());
 

@@ -61,8 +61,8 @@ public class KoreUtils {
         return new File(KoreUtils.class.getResource(baseName).toURI());
     }
 
-    public KoreUtils(String fileName, String mainModuleName, String mainProgramsModuleName, boolean noPrelude) throws URISyntaxException {
-        this(fileName, mainModuleName, mainProgramsModuleName, false, Sorts.K(), false, noPrelude);
+    public KoreUtils(String fileName, String mainModuleName, String mainProgramsModuleName) throws URISyntaxException {
+        this(fileName, mainModuleName, mainProgramsModuleName, false, Sorts.K(), false, false);
     }
 
     public KoreUtils(String fileName, String mainModuleName, String mainProgramsModuleName, boolean search, Sort sort, boolean heatCoolStrategies, boolean noPrelude) throws URISyntaxException {
@@ -104,11 +104,11 @@ public class KoreUtils {
         programParser = compiledDef.getProgramParser(kem);
     }
 
-    public K getParsed(String program, Source source) throws URISyntaxException {
+    public K getParsed(String program, Source source) throws IOException, URISyntaxException {
         return getParsed(program, source, null);
     }
 
-    public K getParsed(String program, Source source, String strategy) throws URISyntaxException {
+    public K getParsed(String program, Source source, String strategy) throws IOException, URISyntaxException {
         K parsed = programParser.apply(program, source);
         KRun krun = new KRun(kem, FileUtil.testFileUtil(), true);
 
