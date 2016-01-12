@@ -65,18 +65,18 @@ To avoid requesting the back-end to perform an illegal operation, we may use a
 side condition in the rule of division, to make sure it only applies when the
 denominator is non-zero.
 
-Side conditions can only be Boolean expressions in K, which can be fully
-evaluated within the underlying mathematical domains (which can be extended by
-the user, as we will see in future lessons).  Side conditions cannot refer to
-user-defined syntactic language constructs whose semantics is defined using K
-rules, because the K rewriting machinery is not used for evaluating the side
-conditions.
-
-In other words, the K side conditions are not premises; in particular, they
-cannot contain other rewrites in them (using `=>`).  This contrasts other
-rewrite engines, for example [Maude](http://maude.cs.illinois.edu/), which
+Like in other operational formalisms, the role of the K side
+conditions is to filter the number of instances of the rule.  The notion
+of a *side condition* comes from logics, where a sharp distinction is made
+between a side condition (cheap) and a *premise* (expensive).  Premises are
+usually resolved using further (expensive) logical derivations, while side
+conditions are simple (cheap) conditions over the rule meta-variables within
+the underlying mathematical domains (which in K can be extended by the user,
+as we will see in future lessons).  Regarded as a logic, K derives rewrite
+rules from other rewrite rules; therefore, the K side conditions cannot
+contain other rewrites in them (using `=>`).  This contrasts other rewrite
+engines, for example [Maude](http://maude.cs.illinois.edu/), which
 allow conditional rules with rewrites in conditions.
-
 The rationale behind this deliberate restriction in K is twofold:
 - On the one hand, general conditional rules require a complex, and thus slower
 rewrite engine, which starts recursive (sometimes exhaustive) rewrite sessions
