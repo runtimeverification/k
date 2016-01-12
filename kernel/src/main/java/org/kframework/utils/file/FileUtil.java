@@ -166,12 +166,9 @@ public class FileUtil {
     }
 
     public File resolveWorkingDirectory(String file) {
-        return resolveWorkingDirectory(new File(file));
-    }
-
-    public File resolveWorkingDirectory(File file) {
-        if (file.isAbsolute()) return file;
-        return new File(workingDir, file.getPath());
+        File f = new File(file);
+        if (f.isAbsolute()) return f;
+        return new File(workingDir, file);
     }
 
     public File resolveKBase(String file) {

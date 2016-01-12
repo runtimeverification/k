@@ -17,7 +17,6 @@ import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
 
 import java.io.File;
-import java.io.IOException;
 
 import static org.kframework.kore.KORE.*;
 
@@ -28,7 +27,7 @@ public class NewOuterParserTest {
     public static final File BUILTIN_DIRECTORY = JarInfo.getKIncludeDir().resolve("builtin").toFile();
 
     @Test
-    public void testKOREOuter() throws IOException {
+    public void testKOREOuter() throws Exception {
         String theTextToParse = "module FOO syntax Exp ::= Exp [stag(as(d)f)] rule ab cd [rtag(.::KList)] endmodule";
         String mainModuleName = "E-KORE";
         String mainProgramsModule = "E-KORE";
@@ -37,7 +36,7 @@ public class NewOuterParserTest {
         String definitionString = FileUtils.readFileToString(definitionFile);
         Source source = Source.apply(definitionFile.getPath());
 
-        ParserUtils parser = new ParserUtils(FileUtil.testFileUtil()::resolveWorkingDirectory, new KExceptionManager(new GlobalOptions()));
+        ParserUtils parser = new ParserUtils(FileUtil.testFileUtil(), new KExceptionManager(new GlobalOptions()));
         Definition definition = parser.loadDefinition(
                 mainModuleName,
                 mainProgramsModule, definitionString, definitionFile,
