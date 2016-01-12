@@ -1,4 +1,5 @@
-<!-- Copyright (c) 2012-2014 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2012-2016 K Team. All Rights Reserved. -->
+
 ### A Complete and Documented K Definition
 
 [MOVIE [6'07"]](http://youtu.be/-pHgLqNMKac)
@@ -10,8 +11,9 @@ to send it to others, etc.
 
 The K tool allows a literate programming style, where the executable
 language definition can be documented by means of annotations.  Some
-back-ends of the K tool, such as those enabled with the --latex, --pdf and the
---html options to the kompile tool, know how to interpret such annotations.
+back-ends of the K tool, such as those enabled with the `--latex`, `--pdf` and
+the `--html` options to the `kompile` tool, know how to interpret such
+annotations.
 
 There are three types of comments, which we discuss next.
 
@@ -31,7 +33,7 @@ of the LAMBDA module, explaining how we define the syntax of this language.
 Note that we can simply use any Latex commands, including sections,
 subsections, mathematical symbols, and so on.
 
-Once we are done typing the annotations, we can kompile `lambda.k` with a
+Once we are done typing the annotations, we can `kompile lambda.k` with a
 document generation option, say `--pdf`, and take a look at the generated
 PDF document.  Other options are also possible, for example `--html` and
 `--latex`.  The latter is particularly useful when you want to incorporate

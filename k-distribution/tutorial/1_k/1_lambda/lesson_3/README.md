@@ -1,4 +1,5 @@
-<!-- Copyright (c) 2012-2014 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2012-2016 K Team. All Rights Reserved. -->
+
 ### Evaluation Strategies using Strictness
 
 [MOVIE [2'20"]](http://youtu.be/aul1x6bd1YM)

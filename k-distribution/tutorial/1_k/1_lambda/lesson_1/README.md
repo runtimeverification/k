@@ -2,7 +2,7 @@
 
 ### Syntax Modules and Basic K Commands
 
-[MOVIE]
+[MOVIE [4'07"]](http://youtu.be/y5Tf1EZVj8E)
 
 Here we define our first K module, which contains the initial syntax of the
 LAMBDA language, and learn how to use the basic K commands.
