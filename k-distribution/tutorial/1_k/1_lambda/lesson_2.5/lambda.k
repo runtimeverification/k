@@ -1,4 +1,5 @@
-// Copyright (c) 2013-2015 K Team. All Rights Reserved.
+// Copyright (c) 2013-2016 K Team. All Rights Reserved.
+
 require "substitution.k"
 
 module LAMBDA

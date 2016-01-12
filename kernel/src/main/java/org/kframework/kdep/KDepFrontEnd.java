@@ -24,19 +24,20 @@ import org.kframework.utils.options.OuterParsingOptions;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
  * Frontend for kdep tool.
- *
+ * <p>
  * kdep is designed to generate a Makefile that contains the dependencies
  * that kompile has on files when you run it. This can be used in order to ensure that if any
  * of the files required by a k definition are changed, the makefile will rerun kompile.
- *
+ * <p>
  * Example Makefile snippet:
- *
+ * <p>
  * <pre>
  *     .depend:
  *             kdep definition.k -d "directory" -I includes > .depend
@@ -80,18 +81,25 @@ public class KDepFrontEnd extends FrontEnd {
 
     @Override
     protected int run() {
-        String prelude = Kompile.REQUIRE_PRELUDE_K;
-        if (options.noPrelude) {
-            prelude = "";
+        List<org.kframework.kil.Module> modules = new ArrayList<>();
+        Source source = Source.apply(options.mainDefinitionFile(files).getAbsolutePath());
+        File currentDirectory = options.mainDefinitionFile(files).getParentFile();
+        List<File> lookupDirectories = ListUtils.union(options.includes.stream()
+                        .map(files::resolveWorkingDirectory).collect(Collectors.toList()),
+                Lists.newArrayList(Kompile.BUILTIN_DIRECTORY));
+
+        // load builtin files if needed first
+        if (!options.noPrelude) {
+            modules.addAll(parser.slurp(Kompile.REQUIRE_PRELUDE_K,
+                    source,
+                    currentDirectory,
+                    lookupDirectories));
         }
 
-        List<org.kframework.kil.Module> modules = null;
-        modules = parser.slurp(prelude + FileUtil.load(options.mainDefinitionFile(files)),
-                Source.apply(options.mainDefinitionFile(files).getAbsolutePath()),
-                options.mainDefinitionFile(files).getParentFile(),
-                ListUtils.union(options.includes.stream()
-                                .map(files::resolveWorkingDirectory).collect(Collectors.toList()),
-                        Lists.newArrayList(Kompile.BUILTIN_DIRECTORY)));
+        modules.addAll(parser.slurp(FileUtil.load(options.mainDefinitionFile(files)),
+                source,
+                currentDirectory,
+                lookupDirectories));
         Set<File> allFiles = modules.stream().map(m -> new File(m.getSource().source())).collect(Collectors.toSet());
         System.out.println(files.resolveWorkingDirectory(".").toURI().relativize(files.resolveKompiled("timestamp").toURI()).getPath() + " : \\");
         for (File file : allFiles) {

@@ -9,6 +9,7 @@ import org.kframework.kil.Definition;
 import org.kframework.kil.DefinitionItem;
 import org.kframework.kil.Require;
 import org.kframework.kil.loader.Context;
+import org.kframework.kompile.Kompile;
 import org.kframework.kore.K;
 import org.kframework.kore.Sort;
 import org.kframework.kore.convertors.KILtoKORE;
@@ -190,6 +191,8 @@ public class ParserUtils {
 
         kilModules.stream().forEach(m -> kilToKore.apply(m, kilModulesSet, koreModules));
 
+        // TODO(dwightguth): from radum: why are you removing the previous modules? Just spent 30 minutes debugging because of this
+        // please add javadoc to this function, since I don't know why you will need such a behaviour
         return koreModules.values().stream().filter(m -> !previousModules.contains(m)).collect(Collectors.toSet());
     }
 
@@ -214,7 +217,11 @@ public class ParserUtils {
             File currentDirectory,
             List<File> lookupDirectories,
             boolean dropQuote, boolean autoImportDomains) {
-        Set<Module> modules = loadModules(new HashSet<>(), definitionText, source, currentDirectory, lookupDirectories, dropQuote, autoImportDomains);
+        Set<Module> previousModules = new HashSet<>();
+        if (autoImportDomains)
+            previousModules.addAll(loadModules(new HashSet<>(), Kompile.REQUIRE_PRELUDE_K, source, currentDirectory, lookupDirectories, dropQuote, false));
+        Set<Module> modules = loadModules(previousModules, definitionText, source, currentDirectory, lookupDirectories, dropQuote, autoImportDomains);
+        modules.addAll(previousModules); // add the previous modules, since load modules is not additive
         Optional<Module> opt = modules.stream().filter(m -> m.name().equals(mainModuleName)).findFirst();
         if (!opt.isPresent()) {
             throw KEMException.compilerError("Could not find main module with name " + mainModuleName

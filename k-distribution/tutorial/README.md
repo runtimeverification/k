@@ -1,14 +1,16 @@
-<!-- Copyright (c) 2014 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2014-2016 K Team. All Rights Reserved. -->
+
 # K Tutorial
-##### [Grigore Rosu](http://fsl.cs.illinois.edu/grosu) (<grosu@illinois.edu>)
+[*Grigore Rosu*](http://fsl.cs.illinois.edu/grosu) (<grosu@illinois.edu>)
 
 In this tutorial you will learn how to use the K tool by means of a series of
-lectures illustrating several simple languages defined using K.  Almost all the
-material is presented in two forms: as ordinary text and a a short screencast movie.
-We recommend the readers to either download the K tool from its URL
-(<http://kframework.org>) and install it on their machines (K is implemented in Java,
-so it is platform-independent) or use the provided online interface to execute the
-tutorial lessons and do the proposed exercises.
+lectures illustrating several simple languages defined using K.  Almost all
+the material is presented in two forms: as ordinary text and as a short
+screencast movie.
+We recommend to either download the K tool from its URL
+(<http://kframework.org>) and install it on your machine (K is implemented
+in Java, so it is platform-independent) or use the provided online interface
+to execute the tutorial lessons and do the proposed exercises.
 The objective of this tutorial is twofold: to learn K (in folder
 [tutorial/1_k](/tutorial/1_k/)) and to learn how to define languages across
 various paradigms using K (in folder [tutorial/2_languages](/tutorial/2_languages/)).
@@ -22,8 +24,9 @@ Below we discuss some of the high-level features of the K framework
 and of the current K tool prototype, which you may find useful to know
 about before starting to type and execute the tutorial examples.
 
-Feel free to contact us at <info@kframework.org> for any questions or
-concerns.
+Subscribe to the [K user](https://lists.cs.illinois.edu/lists/info/k-user)
+list for technical questions and news on major tool updates.  Ask general,
+non-technical questions at <info@kframework.org>.
 
 ## K Framework Overview
 
@@ -39,10 +42,11 @@ concerns.
 
 K is an executable semantic framework in which programming languages,
 calculi, as well as type systems or formal analysis tools can be
-defined by making use of configurations, computations and rules.
+defined by making use of configurations, computations and rules:
+
 - Configurations organize the system/program state in units called
   cells, which are labeled and can be nested.
-- Computations carry "computational meaning" as special nested list
+- Computations carry computational meaning as special nested list
   structures sequentializing computational tasks, such as fragments of
   program; in particular, computations extend the original language or
   calculus syntax.
@@ -63,12 +67,14 @@ such as abrupt termination, exceptions, call/cc, concurrency, etc.
 
 The K tool prototype, called the "K tool" or the "K prototype" from
 here on, is a prototype implementation of the K Framework written in
-Java and Maude.  The K prototype is developed by a joint team of
+Java and Maude.  The K prototype is implemented by a joint team of
 faculty and students from the University of Illinois at
 Urbana-Champaign, USA (the FSL group, led by professor Grigore Rosu),
 the University Alexandru Ioan Cuza, Iasi, Romania (the FMSE group, led
-by professor Dorel Lucanu), the University of Bucharest (professor
-Traian Florin Serbanuta), as well as several individual enthusiasts.
+by professor Dorel Lucanu), and the University of Bucharest, Romania
+(professor Traian Florin Serbanuta), developers from
+[Runtime Verification, Inc.](https://runtimeverification.com),
+and several individual enthusiasts.
 A current list of the people involved in the project and their
 specific roles can be accessed from <http://kframework.org>.
 
@@ -87,7 +93,8 @@ contains the definition of the untyped version of the SIMPLE language, while
 contains the static semantics, i.e., the type checker.
 
 We encourage you to contribute with examples to our distribution.
-Please see the README file under [samples](/samples/) for instructions on how to do it.
+Please see the README file under [samples](/samples/) for instructions on how
+to do it.
 
 
 ### How It Works
@@ -106,7 +113,7 @@ process below, using the untyped SIMPLE language
 #### Parsing Programs
 
 You may prefer to first define the syntax and then the semantics.
-That is how most of the languages in the examples directory are
+That is how most of the languages in this directory are
 defined.  This reduces ambiguities in the parser and therefore might
 be able to parse more programs.  For example, suppose that we want to
 define a language LANGUAGE and that we have already defined its syntax
@@ -135,16 +142,16 @@ syntactic terms follows the simple abstract-syntax-tree (AST) syntax:
 
     K ::= KLabel "(" KList ")"
 
-`KList` is a non-terminal standing for lists of K terms.  We use
-`.KList` for the unit of KList.  This way, from an internal representation
-point of view, a language syntax is nothing but a finite set of `KLabel`
-constants.  The `kast` tool can be used to parse a program and see its
-KAST form.  By running
+`KList` is a non-terminal standing for lists of K terms.  This way, from
+an internal representation point of view, a language syntax is nothing but
+a finite set of `KLabel` constants.  The `kast` tool can be used to parse
+a program and see its KAST form.  By running
 
     $ kompile simple-untyped.k
     $ kast tests/diverse/factorial.simple
 
-from the [tutorial/2_languages/1_simple/1_untyped](/tutorial/2_languages/1_simple/1_untyped)
+from the
+[tutorial/2_languages/1_simple/1_untyped](/tutorial/2_languages/1_simple/1_untyped)
 directory, you get the internal representation of the factorial program.
 Typically, you should not need to execute the `kast` tool directly, as it will
 be executed by the `krun` tool (below) when necessary.  However, executing it
@@ -190,7 +197,6 @@ lectures in the tutorial.
 
 Please report issues at <https://github.com/kframework/k/issues>.
 Simply post your test case and briefly explain your problem.  If you
-have write permissions to our repository, please also add a test case
-to the repository yourself using the directions in
-[tests/issues](/tests/issues/) (do this in addition to posting an issue,
-because you need the issue number).
+want to help us the most, please also propose a test case to the
+repository using the style in [tests/issues](/tests/issues/) (do this
+in addition to posting an issue, because you need the issue number).

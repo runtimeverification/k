@@ -110,6 +110,9 @@ public class KILtoKORE extends KILTransformation<Object> {
                 .map(imp -> (Import) imp)
                 .collect(Collectors.toSet());
 
+        // TODO (@cos): This is a bug. If someone has a folder named builtin, nothing under that is going to work.
+        // the proper way to verify if a file is builtin, is to verify if the entire absolute path begins with
+        // the K builtin directory. This is a regression from K3.6
         boolean isPredefined = mainModule.getSource().source().contains("builtin");
         if (autoImportDomains && !isPredefined) {
             if (mainModule.getName().endsWith("-SYNTAX")) {

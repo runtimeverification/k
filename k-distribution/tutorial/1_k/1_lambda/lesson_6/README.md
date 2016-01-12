@@ -1,4 +1,5 @@
-<!-- Copyright (c) 2012-2014 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2012-2016 K Team. All Rights Reserved. -->
+
 ### Selective Strictness; Anonymous Variables
 
 [MOVIE [2'14"]](http://youtu.be/IreP6DFPWdk)

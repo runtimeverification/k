@@ -1,4 +1,5 @@
-<!-- Copyright (c) 2012-2015 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2012-2016 K Team. All Rights Reserved. -->
+
 ### Module Importing, Rules, Variables
 
 [MOVIE [4'03"]](http://youtu.be/NDXgYfHG6R4)
@@ -9,16 +10,17 @@ and how to make proper use of variables in rules.
 
 Let us continue our `lambda.k` definition started in the previous lesson.
 
-The `requires` keyword takes a `.k` file containing language features that are
-needed for the current definition.  The predefined features are referred to
-using their relative path from the [k/include](/include/) folder.  Thus, the command
+The `requires` keyword takes a `.k` file containing language features that
+are needed for the current definition, which can be found in the
+[k/include](/include/) folder.  Thus, the command
 
-    require "modules/substitution.k"
+    require "substitution.k"
 
 says that the subsequent definition of LAMBDA needs the generic substitution,
-which is predefined in file `modules/substitution.k` under the folder [k/include](/include/).
-Note that substitution is defined itself in K, although it uses features that
-we have not discussed yet in this tutorial, so it may not be easy to understand now.
+which is predefined in file `substitution.k` under the folder
+[k/include](/include/).  Note that substitution can be defined itself in K,
+although it uses advanced features that we have not discussed yet in this
+tutorial, so it may not be easy to understand now.
 
 Using the `imports` keyword, we can now modify LAMBDA to import the module
 SUBSTITUTION, which is defined in the required `substitution.k` file.
