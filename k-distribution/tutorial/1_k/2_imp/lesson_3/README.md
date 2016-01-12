@@ -127,22 +127,20 @@ task you are interested in.
 
 This is a long story, but the short answer is: *No!*.  Maybe in some cases
 it is possible, but we prefer to not attempt it in the K tool.  For example,
-you most likely do not want a stuck computation to count as a result, just
-because you forgot a semantic rule that could reduce that stuck computation
-further!  Besides, in our experience with defining large languages, it is
-quite useful to take your time and think of what the results of your
-language's computations are.  This fact in itself may help you improve your
-overall language design.  We typically do it at the same time with defining
-the evaluation strategies of our languages.
-
-Although in theory K could infer the results of your language as the
-stuck computations, based on our own experience we have deliberately decided
-to not provide this feature, in spite of requests from some users.
-So you currently do have to explicitly define your K results if you
-want to effectively use the K tool.  Note, however, that theoretical
-definitions, not meant to be executed, need not worry about defining results
-(that's because in theory semantic rules apply *modulo* the reversible
-heating/cooling rules, so results are not necessary).
+you most likely do not want any stuck computation to count as a result,
+since some of them can happen simply because you forgot a semantic rule that
+could have further reduce it!  Besides, in our experience with defining large
+languages, it is quite useful to take your time and think of what the results
+of your language's computations are.  This fact in itself may help you improve
+your overall language design.  We typically do it at the same time with
+defining the evaluation strategies of our languages.  Although in theory K
+could infer the results of your language as the stuck computations, based on
+the above we have deliberately decided to not provide this feature, in spite
+of requests from some users.  So you currently do have to explicitly define
+your K results if you want to effectively use the K tool.  Note, however, that
+theoretical definitions, not meant to be executed, need not worry about
+defining results (that's because in theory semantic rules apply *modulo* the
+reversible heating/cooling rules, so results are not necessary).
 
 ##### A K Rule Involving Cells
 
