@@ -59,7 +59,7 @@ rule <k> xabcde(<b> B </b> X) => "abcde" ... </k>
 rule <k> xabde(<b> B </b> X) => "abde" ... </k>
      <x>
        <c> _ </c>
-       `_ => X <b> B </b>`
+       (_ => X <b> B </b>)
      </x>
 
 syntax KItem ::= x1(XCellFragment) | x1(K)

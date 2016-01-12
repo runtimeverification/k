@@ -82,7 +82,7 @@ module TREE-PATTERN
   syntax TreeSeq ::= Tree "::TS" TreeSeq
                    | ".TreeSeq"
                    > TreeSeq "@TS" TreeSeq      [function, left]
-  rule `T ::TS TS1` @TS TS2 => T ::TS `TS1 @TS TS2`
+  rule (T ::TS TS1) @TS TS2 => T ::TS (TS1 @TS TS2)
   rule .TreeSeq @TS TS => TS
 
   syntax Map ::= "treeList" "(" Pointer ")" "(" TreeSeq ")"    [pattern(1)]
