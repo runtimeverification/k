@@ -459,7 +459,7 @@ public class ConvertDataStructureToLookup {
                         // TODO(dwightguth): choose better between lookup and choice.
                         Multiset<KVariable> vars = HashMultiset.create();
                         gatherVars(element, vars);
-                        if (vars.isEmpty() || element instanceof KVariable && varConstraints.count(element) != 1) {
+                        if (vars.isEmpty() || (element instanceof KVariable && varConstraints.count(element) != 1)) {
                             state.add(KApply(KLabel("Set:in"), element, accum));
                         } else {
                             //set choice
