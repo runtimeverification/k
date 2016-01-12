@@ -46,9 +46,9 @@ it is equivalent with `seqstrict(1 2)`.
 The `&&` is only strict in its first argument, because we will give it a
 short-circuited semantics (its second argument will only be evaluated when
 the first evaluates to true).  Recall the K tool also allows us to associate
-Latex attributes to constructs, telling the document generator how to display
+LaTex attributes to constructs, telling the document generator how to display
 them.  For example, we associate `<=` the attribute `latex({#1}\leq{#2})`,
-which makes it be displayed $\leq$ everywhere in the generated Latex
+which makes it be displayed $\leq$ everywhere in the generated LaTex
 documentation.
 
 In this tutorial we take the freedom to associate the various constructs
