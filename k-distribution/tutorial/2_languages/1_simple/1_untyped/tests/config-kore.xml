@@ -5,9 +5,10 @@
   <test definition="simple-untyped"
         programs="."
         extension="simple"
-        exclude="dekker exceptions_07 threads_07 threads_10 threads_11"
+        exclude="dekker"
         skip="pdf"
         results="." >
+        <kompile-option name="--transition" value="lookup assignment increment" />
         <all-programs>
           <krun-option name="--parser" value="kast --sort Stmts" />
           <krun-option name="--output" value="none" />

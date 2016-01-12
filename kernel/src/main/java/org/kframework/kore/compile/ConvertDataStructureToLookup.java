@@ -230,7 +230,7 @@ public class ConvertDataStructureToLookup {
                     if (att.contains(Attribute.COMMUTATIVE_KEY)) {
                         if (att.contains(Attribute.IDEMPOTENT_KEY)) {
                             // Set
-                            return convertSet(k, collectionLabel, components);
+                            return convertSet(k, collectionLabel, components, varConstraints);
                         } else {
                             //TODO(dwightguth): differentiate Map and Bag
                             if (att.get(Attribute.HOOK_KEY).get().equals("MAP.concat"))
@@ -416,7 +416,7 @@ public class ConvertDataStructureToLookup {
              * Set elements without variables become membership checks in the map, whereas Set elements
              * with variables trigger iteration over the set with matching on each element.
              */
-            private K convertSet(KApply k, KLabel collectionLabel, List<K> components) {
+            private K convertSet(KApply k, KLabel collectionLabel, List<K> components, Multiset<KVariable> varConstraints) {
                 if (rhsOf == null) {
                     //left hand side
                     KVariable frame = null;
@@ -459,7 +459,7 @@ public class ConvertDataStructureToLookup {
                         // TODO(dwightguth): choose better between lookup and choice.
                         Multiset<KVariable> vars = HashMultiset.create();
                         gatherVars(element, vars);
-                        if (vars.isEmpty()) {
+                        if (vars.isEmpty() || element instanceof KVariable && varConstraints.count(element) != 1) {
                             state.add(KApply(KLabel("Set:in"), element, accum));
                         } else {
                             //set choice
