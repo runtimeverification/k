@@ -54,7 +54,7 @@ lambda calculus, based on passing a function to itself.
 We may not like to define fixed-points following the approach above, because
 it requires global changes in the body of the function meant to be recursive,
 basically to pass it to itself (`f f` in our case above).  The approach below
-isolates the fixed-point aspect of the function in a so-called *fixed-poi1nt
+isolates the fixed-point aspect of the function in a so-called *fixed-point
 combinator*, which we call `fix` below, and then apply it to the function
 defining the body of the factorial, without any changes to it:
 
