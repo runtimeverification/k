@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2015 K Team. All Rights Reserved.
+// Copyright (c) 2014-2016 K Team. All Rights Reserved.
 
 /*!
 \setlength{\parindent}{1em}
@@ -111,7 +111,7 @@ There is nothing special about these, but recall that \K's configuration
 abstraction mechanism is at work here!  That means that the rewrites in the
 rules below all happen at the beginning of the \textsf{k} cell.  */
 
-  rule I1 / I2 => I1 /Int I2  when I2 =/=Int 0
+  rule I1 / I2 => I1 /Int I2  requires I2 =/=Int 0
   rule I1 + I2 => I1 +Int I2
 
 /*@ \subsection{Boolean expressions}
@@ -194,6 +194,6 @@ empty \texttt{int;} declaration as a structural cleanup rather than as
 a computational step. */
 
   rule <k> int (X,Xs => Xs);_ </k> <state> Rho:Map (.Map => X|->0) </state>
-    when notBool (X in keys(Rho))
+    requires notBool (X in keys(Rho))
   rule int .Ids; S => S  [structural]
 endmodule

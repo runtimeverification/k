@@ -1,4 +1,5 @@
-// Copyright (c) 2014-2015 K Team. All Rights Reserved.
+// Copyright (c) 2014-2016 K Team. All Rights Reserved.
+
 module IMP-SYNTAX
   syntax AExp  ::= Int | Id
                  | AExp "/" AExp              [left, strict]
@@ -33,7 +34,7 @@ module IMP
 
 // AExp
   rule <k> X:Id => I ...</k> <state>... X |-> I ...</state>
-  rule I1 / I2 => I1 /Int I2  when I2 =/=Int 0
+  rule I1 / I2 => I1 /Int I2  requires I2 =/=Int 0
   rule I1 + I2 => I1 +Int I2
 // BExp
   rule I1 <= I2 => I1 <=Int I2
@@ -51,6 +52,6 @@ module IMP
   rule while (B) S => if (B) {S while (B) S} else {}  [structural]
 // Pgm
   rule <k> int (X,Xs => Xs);_ </k> <state> Rho:Map (.Map => X|->0) </state>
-    when notBool (X in keys(Rho))
+    requires notBool (X in keys(Rho))
   rule int .Ids; S => S  [structural]
 endmodule

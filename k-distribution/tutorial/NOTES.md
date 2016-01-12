@@ -1,11 +1,22 @@
 <!-- Copyright (c) 2014-2016 K Team. All Rights Reserved. -->
 
+*Dear reader: these `NOTES.md` documents are mostly for myself (Grigore), to
+keep track of changes and updates that need to be made as things evolve
+in the K framework.  You can safely ignore them.  However, if you are curious
+how things will change and decide to read them, I would be grateful if you
+let me know whenever you find inconsistencies or things that I forgot to
+mention here.  Or even better, feel free to make pull requests with suggested
+changes or updates.*
+
 Global changes that need to be made:
 
 * Replace `when` in rules with `requires`
 
 Things to revise each time the structure of the tutorial changes:
 
+* `1_k\2_imp\lesson_1\README.md` refers to Tutorial 1
+* `1_k\2_imp\lesson_4\README.md` refers to Lesson 1
+* `1_k\2_imp\lesson_4\README.md` refers to Tutorial 1, Lesson 2.5
 * `1_k\3_lambda++\lesson_1\README.md` refers to Lesson 8, Tutorial 1
 * `1_k\3_lambda++\lesson_2\README.md` Lesson 1, Tutorial 1
 * `1_k\3_lambda++\lesson_3\README.md` refers to Lesson 7, Tutorial 1
@@ -30,11 +41,43 @@ Things to revise each time the structure of the tutorial changes:
 `symNat(n)` of sort `Nat`", but the representation of symbolic numbers may
 have changed
 
-Describe/explain/justify the terminology "the `<k/>` cell" as opposed to "the `k` cell".
+Describe/use/explain/justify the terminology "the `<k/>` cell" as opposed to "the `k` cell".
 
-It would be a good idea to make the README files self contained, that is,
-to include the entire lang.k code in them, spread over the entire README, as things
-are discussed.
+Would it be a good idea to make the README files self contained, that is,
+to include the entire `lang.k` code in them, spread over the entire README, as things
+are discussed?
 
 `1_k\5_types\lesson_4\README.md` refers to *polymorphism*, but some may say that is not precisely 
 polymorphism, because the types are not universally quantified.  Explain that better.
+
+Modify the entire tutorial to use `.` or, if needed, `.::Map`, etc.,
+instead of `.Map`, etc..  Check for each instance specifically, because
+the surrounding text may also need to be modified.
+
+We are still using the `--pdf` option to `kompile` at many places in the
+tutorial, although in some places at the beginning we replaced it with the
+new approach, `kdoc`.  It is actually not clear that we should switch to
+`kdoc`, because after all the Latex generation is still a backend.  So it
+makes sense to implement it as such, instead of as a different tool.
+
+We sometimes use "Kompile", or "kompile", as a verb instead of "Compile",
+or "compile", to indicate that we mean compilation with K.  Similarly for
+"Krun", or "krun", instead of "Run" or "run".
+
+Add citations to:
+
+* chemical abstract machine
+* logics, where the distinction betweem side condition and premise is explained
+
+Replace `I1 +Int I2`, `notBool B`, etc., with `(I1 + I2)@INT`, `(not B)@Bool`,
+etc., when we have module qualification in place and working.
+
+Explain `isSort(T)` for all sorts `Sort`, in one place, when it is first used.
+Explain also that `T:Sort` yields a side condition `isSort(T)`.
+
+Currently all the K collections are "untyped", that is, over the sort `K`.
+In the future we want to have parametric collections.  Make sure the tutorial
+is systematically changed when this happens.
+
+See issue #2023 and modify tutorial/1_k/2_imp/lesson_4 accordingly, if needed.
+
