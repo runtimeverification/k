@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2010-2014 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2010-2016 K Team. All Rights Reserved. -->
 
 ### Defining a Configuration
 
@@ -20,13 +20,13 @@ defined using an XML-ish notation stating clearly where the cell starts
 and where it ends.
 
 While not enforced by the tool, we typically like to put the entire
-configuration in a top-level cell, called T.  So let's define it:
+configuration in a top-level cell, called `T`.  So let's define it:
 
     configuration <T>...</T>
 
 Cells can have other cells inside.  In our case of IMP, we need a cell to
-hold the remaining program, which we typically call k, and a cell to hold
-the program state.  Let us add them:
+hold the remaining program, cell which we typically call `k`, and a cell to
+hold the program state.  Let us add them:
 
     configuration <T> <k>...</k> <state>...</state> </T>
 
@@ -36,20 +36,20 @@ the contents of the cells with some terms.  The syntactic categories of
 those terms will also indirectly define the types of the corresponding
 cells.
 
-For example, we want the k cell to initially hold the program that is passed
-to krun.  K provides a builtin configuration variable, called $PGM, which is
-specifically designed for this purpose: krun will place its program there
+For example, we want the `k` cell to initially hold the program that is passed
+to `krun`.  K provides a builtin configuration variable, called `$PGM`, which
+is specifically designed for this purpose: `krun` will place its program there
 (after it parses it, or course).  The K tool allows users to define their own
 configuration variables, too, which can be used to develop custom
-initializations of program configurations with the help of krun; this can be
+initializations of program configurations with the help of `krun`; this can be
 quite useful when defining complex languages, but we do not discuss it in
 this tutorial.
 
     configuration <T> <k> $PGM </k> <state>...</state>  </T>
 
-Moreover, we want the program to be a proper Pgm term (because we do not
-want to allow krun to take fragments of programs, for example, statements).
-Therefore, we tag $PGM with the desired syntactic category, pgm:
+Moreover, we want the program to be a proper `Pgm` term (because we do not
+want to allow `krun` to take fragments of programs, for example, statements).
+Therefore, we tag `$PGM` with the desired syntactic category, `Pgm`:
 
     configuration <T> <k> $PGM:Pgm </k> <state>...</state>  </T>
 
@@ -65,7 +65,7 @@ types of nothing, to avoid confusion we can suffix the `.` with its desired
 type.  K has several builtin data-types, including lists, sets, bags, and
 maps.  `.Map` is the empty map.
 
-Compile imp.k and run several programs to see how the configuration is
+Kompile `imp.k` and run several programs to see how the configuration is
 initialized as desired.
 
 Also, compile with the option `--pdf`, to see how configurations are displayed
