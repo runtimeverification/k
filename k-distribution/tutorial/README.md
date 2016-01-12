@@ -72,9 +72,9 @@ faculty and students from the University of Illinois at
 Urbana-Champaign, USA (the FSL group, led by professor Grigore Rosu),
 the University Alexandru Ioan Cuza, Iasi, Romania (the FMSE group, led
 by professor Dorel Lucanu), and the University of Bucharest, Romania
-(professor Traian Florin Serbanuta), of developers from
+(professor Traian Florin Serbanuta), developers from
 [Runtime Verification, Inc.](https://runtimeverification.com),
-as well as of several individual enthusiasts.
+and several individual enthusiasts.
 A current list of the people involved in the project and their
 specific roles can be accessed from <http://kframework.org>.
 
