@@ -20,29 +20,13 @@ public class GenerateRHSInstructions extends BottomUpVisitor {
 
     @Override
     public void visit(BuiltinList node) {
-        if (node.isGround() && node.isNormal() && !node.isMutable()) {
+        if (node.isGround() && node.isNormal()) {
             rhsSchedule.add(RHSInstruction.PUSH(node));
         } else {
-            int sizeRight = 0;
-            for (int i = node.elementsRight().size() - 1; i >= 0; i--) {
-                Term k = node.elementsRight().get(i);
-                k.accept(this);
-                sizeRight++;
+            for (int i = node.size() - 1; i >= 0; i--) {
+                node.get(i).accept(this);
             }
-            int sizeBase = 0;
-            for (int i = node.baseTerms().size() - 1; i >= 0; i--) {
-                Term k = node.baseTerms().get(i);
-                k.accept(this);
-                sizeBase++;
-            }
-            int sizeLeft = 0;
-            for (int i = node.elementsLeft().size() - 1; i >= 0; i--) {
-                Term k = node.elementsLeft().get(i);
-                k.accept(this);
-                sizeLeft++;
-            }
-            rhsSchedule.add(RHSInstruction.CONSTRUCT(new Constructor(
-                    ConstructorType.BUILTIN_LIST, sizeLeft, sizeBase, sizeRight)));
+            rhsSchedule.add(RHSInstruction.CONSTRUCT(new Constructor(ConstructorType.BUILTIN_LIST, node.size(), node.sort, node.operatorKLabel, node.unitKLabel)));
         }
     }
 

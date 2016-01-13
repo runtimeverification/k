@@ -305,13 +305,13 @@ public class KILtoBackendJavaKILTransformer extends CopyOnWriteTransformer {
     public ASTNode visit(org.kframework.kil.ListBuiltin node, Void _void)  {
         BuiltinList.Builder builder = BuiltinList.builder(termContext.global());
         for (org.kframework.kil.Term element : node.elementsLeft()) {
-            builder.addItem((Term) this.visitNode(element));
+            builder.add((Term) this.visitNode(element));
         }
         for (org.kframework.kil.Term term : node.baseTerms()) {
-            builder.concatenate((Term) this.visitNode(term));
+            builder.add((Term) this.visitNode(term));
         }
         for (org.kframework.kil.Term element : node.elementsRight()) {
-            builder.addItem((Term) this.visitNode(element));
+            builder.add((Term) this.visitNode(element));
         }
         return builder.build();
     }

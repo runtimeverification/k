@@ -39,6 +39,7 @@ object Collections {
   def map[T](f: java.util.function.Function[T, T])(s: Seq[T]): Seq[T] = s.map(x => f(x))
 
   def add[T](e: T)(s: Set[T]): Set[T] = s + e
+  def minus[T](e: T)(s: Set[T]): Set[T] = s - e
   def or[T](a: Set[T], b: Set[T]): Set[T] = a | b
 
   def cons[T](e: T)(s: Seq[T]): Seq[T] = e +: s

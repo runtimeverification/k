@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<!-- Copyright (c) 2012-2015 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2012-2016 K Team. All Rights Reserved. -->
 
 <tests>
   <!-- Tutorial Languages and Programs. -->
@@ -11,7 +11,9 @@
 
 <!--  <include file="../samples/tests/config.xml" directory="samples" />-->
 
+<!--
   <include file="regression/config.xml" directory="tests/regression" skip="pdf" />
+-->
 
   <include file="../samples-kore/kernelc/tests/config.xml"
            directory="samples-kore/kernelc"

@@ -9,8 +9,10 @@ import org.kframework.backend.java.kil.Kind;
 import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
+import org.kframework.backend.java.kil.Variable;
 
 import java.util.List;
+import java.util.stream.IntStream;
 
 
 /**
@@ -24,37 +26,74 @@ public class BuiltinListOperations {
         if (list1.sort() != Sort.LIST || list2.sort() != Sort.LIST) {
             throw new IllegalArgumentException();
         }
-        return BuiltinList.concatenate(context.global(), list1, list2);
+        return BuiltinList.builder(context.global()).addAll(list1, list2).build();
     }
 
     public static Term unit(TermContext context) {
         return BuiltinList.builder(context.global()).build();
     }
 
-    public static Term element(Term element, TermContext context) {
-        BuiltinList.Builder builder = BuiltinList.builder(context.global());
-        builder.addItem(element);
-        return builder.build();
-    }
-
-    public static Term get(BuiltinList list, IntToken index, TermContext context) {
-        Term value = list.get(index.intValue());
-        if (value != null) {
-            return value;
-        } else if (list.isConcreteCollection()) {
-            return Bottom.BOTTOM;
+    public static Term get(Term list, IntToken index, TermContext context) {
+        if (list instanceof BuiltinList) {
+            try {
+                BuiltinList builtinList = (BuiltinList) list;
+                if (index.intValue() >= 0) {
+                    if (IntStream.range(0, index.intValue()).allMatch(builtinList::isElement)) {
+                        return builtinList.get(index.intValue());
+                    } else {
+                        return null;
+                    }
+                } else {
+                    if (IntStream.range(builtinList.size() + index.intValue() + 1, builtinList.size()).allMatch(builtinList::isElement)) {
+                        return builtinList.get(builtinList.size() + index.intValue());
+                    } else {
+                        return null;
+                    }
+                }
+            } catch (IndexOutOfBoundsException e) {
+                return Bottom.BOTTOM;
+            }
         } else {
-            return null;
+            /* the list must consist of exactly one element */
+            if (list.sort() != Sort.LIST) {
+                throw new IllegalArgumentException();
+            }
+
+            if (list instanceof Variable) {
+                return null;
+            }
+
+            if (index.intValue() == 0) {
+                return list;
+            } else {
+                return Bottom.BOTTOM;
+            }
         }
     }
 
-    public static BoolToken in(Term element, BuiltinList list, TermContext context) {
-        if (list.contains(element)) {
-            return BoolToken.TRUE;
-        } else if (element.isGround() && list.isGround()) {
-            return BoolToken.FALSE;
+    public static BoolToken in(Term element, Term list, TermContext context) {
+        if (list instanceof BuiltinList) {
+            BuiltinList builtinList = (BuiltinList) list;
+            if (builtinList.contains(element)) {
+                return BoolToken.TRUE;
+            } else if (element.isGround() && builtinList.isGround()) {
+                return BoolToken.FALSE;
+            } else {
+                return null;
+            }
         } else {
-            return null;
+            /* the list must consist of exactly one element */
+            if (list.sort() != Sort.LIST) {
+                throw new IllegalArgumentException();
+            }
+
+            if (list.equals(element)) {
+                return BoolToken.TRUE;
+            } else if (element.isGround() && list.isGround()) {
+                return BoolToken.FALSE;
+            } else {
+                return null;
+            }
         }
     }
 
@@ -64,51 +103,44 @@ public class BuiltinListOperations {
         if (removeLeft == 0 && removeRight == 0) {
             return list;
         }
-        int pendingRemoveLeft;
-        int pendingRemoveRight;
-        if (!(list instanceof BuiltinList)) {
-            return null;
-        }
-        BuiltinList builtinList = (BuiltinList) list;
-        List<Term> elementsLeft = builtinList.elementsLeft();
-        List<Term> elementsRight = builtinList.elementsRight();
-        if (builtinList.isConcreteCollection()) {
-            if (removeLeft + removeRight > elementsLeft.size()) {
+
+        if (list instanceof BuiltinList) {
+            try {
+                BuiltinList builtinList = (BuiltinList) list;
+
+                int toRemoveFromLeft = IntStream.range(0, removeLeft)
+                        .filter(i -> !builtinList.isElement(i))
+                        .findFirst().orElse(removeLeft);
+                int toRemoveFromRight = IntStream.range(0, removeRight)
+                        .filter(i -> !builtinList.isElement(builtinList.size() - 1 - i))
+                        .findFirst().orElse(removeRight);
+
+                int pendingRemoveLeft = removeLeft - toRemoveFromLeft;
+                int pendingRemoveRight = removeRight - toRemoveFromRight;
+                Term subList = builtinList.range(toRemoveFromLeft, builtinList.size() - toRemoveFromRight);
+
+                return (pendingRemoveLeft > 0 || pendingRemoveRight > 0) ?
+                        DataStructures.listRange(subList, pendingRemoveLeft, pendingRemoveRight, context) :
+                        subList;
+            } catch (IndexOutOfBoundsException e) {
                 return Bottom.BOTTOM;
             }
-
-            pendingRemoveLeft = pendingRemoveRight = 0;
-            elementsLeft = elementsLeft.subList(removeLeft, elementsLeft.size() - removeRight);
-            elementsRight = ImmutableList.of();
         } else {
-            if (removeLeft > elementsLeft.size()) {
-                pendingRemoveLeft = removeLeft - elementsLeft.size();
-                elementsLeft = ImmutableList.of();
-            } else {
-                pendingRemoveLeft = 0;
-                elementsLeft = elementsLeft.subList(removeLeft, elementsLeft.size());
+            /* the list must consist of exactly one element */
+            if (list.sort() != Sort.LIST) {
+                throw new IllegalArgumentException();
             }
 
-            if (removeRight > elementsRight.size()) {
-                pendingRemoveRight = removeRight - elementsRight.size();
-                elementsRight = ImmutableList.of();
+            if (list instanceof Variable) {
+                return null;
+            }
+
+            if (removeLeft == 1 && removeRight == 0 || removeLeft == 0 && removeRight == 1) {
+                return unit(context);
             } else {
-                pendingRemoveRight = 0;
-                elementsRight = elementsRight.subList(0, elementsRight.size() - removeRight);
+                return Bottom.BOTTOM;
             }
         }
-
-        BuiltinList.Builder builder = BuiltinList.builder(context.global());
-        builder.addItems(elementsLeft);
-        builder.concatenate(builtinList.baseTerms());
-        builder.addItems(elementsRight);
-
-        return (pendingRemoveLeft > 0 || pendingRemoveRight > 0) ?
-                DataStructures.listRange(
-                        builder.build(),
-                        pendingRemoveLeft,
-                        pendingRemoveLeft, context) :
-                builder.build();
     }
 
 }

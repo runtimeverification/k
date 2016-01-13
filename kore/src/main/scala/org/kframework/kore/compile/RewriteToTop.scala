@@ -30,11 +30,26 @@ object RewriteToTop {
 
   def bubbleRewriteToTopInsideCells(k: K): K = k match {
     case kapp: KApply =>
-      if (kapp.klabel.name.startsWith("<") && kapp.klabel.name.endsWith(">"))
-        KApply(kapp.klabel, immutable(kapp.klist.items) map bubbleRewriteToTopInsideCells, kapp.att)
+      if (isCell(kapp) && nonCell(kapp.items.get(0)))
+        KApply(kapp.klabel, immutable(kapp.klist.items) map makeRewriteIfNeeded, kapp.att)
       else
-        makeRewriteIfNeeded(k)
-    case _ => makeRewriteIfNeeded(k)
+        KApply(kapp.klabel, immutable(kapp.klist.items) map bubbleRewriteToTopInsideCells, kapp.att)
+    case _ => k
+  }
+
+
+  def nonCell(k: K): Boolean = k match {
+    case kapp: KApply => if (!isCell(kapp)) {
+      immutable(kapp.klist.items) map nonCell forall { b => b }
+    } else {
+      false
+    }
+    case rw: KRewrite => nonCell(rw.left) && nonCell(rw.right)
+    case _ => true
+  }
+
+  private def isCell(kapp: KApply): Boolean = {
+    kapp.klabel.name.startsWith("<") && kapp.klabel.name.endsWith(">")
   }
 
   private def makeRewriteIfNeeded(k: K): K = if (toLeft(k) != toRight(k)) ADT.KRewrite(toLeft(k), toRight(k)) else k

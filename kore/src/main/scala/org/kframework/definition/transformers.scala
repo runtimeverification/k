@@ -75,6 +75,8 @@ object DefinitionTransformer {
 
   def from(f: java.util.function.UnaryOperator[Module], name: String): DefinitionTransformer = DefinitionTransformer(f(_), name)
 
+  def from(f: Module => Module, name: String): DefinitionTransformer = DefinitionTransformer(f, name)
+
   def apply(f: Module => Module): DefinitionTransformer = new DefinitionTransformer(f)
 
   def apply(f: Module => Module, name: String): DefinitionTransformer = new DefinitionTransformer(ModuleTransformer(f, name))

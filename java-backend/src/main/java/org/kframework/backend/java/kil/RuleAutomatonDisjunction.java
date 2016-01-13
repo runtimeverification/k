@@ -43,7 +43,10 @@ public class RuleAutomatonDisjunction extends Term implements HasGlobalContext {
      */
     public final Map<Token, BitSet> tokenDisjunctions;
 
+    public final List<Pair<BuiltinList, BitSet>>[] assocDisjunctionArray;
+
     private final List<Pair<Term, BitSet>> disjunctions;
+    private final Sort sort;
 
     private final GlobalContext global;
 
@@ -59,9 +62,10 @@ public class RuleAutomatonDisjunction extends Term implements HasGlobalContext {
         super(Kind.KITEM);
         this.global = global;
         disjunctions = Collections.unmodifiableList(children);
-        this.kItemDisjunctionsArray = new Pair[KLabelConstant.maxOrdinal.get()];
-        varKItemDisjunctionsMap = new HashMap<>();
+        sort = global.getDefinition().subsorts().getLUBSort(disjunctions.stream().map(p -> p.getLeft().sort()).collect(Collectors.toSet()));
 
+        kItemDisjunctionsArray = new Pair[KLabelConstant.maxOrdinal.get()];
+        varKItemDisjunctionsMap = new HashMap<>();
         children.stream()
                 .filter(p -> p.getLeft() instanceof KItem)
                 .forEach(p -> {
@@ -77,17 +81,23 @@ public class RuleAutomatonDisjunction extends Term implements HasGlobalContext {
                     }
                 });
 
-        this.variableDisjunctionsArray = new List[Sort.maxOrdinal.get()];
-
+        variableDisjunctionsArray = new List[Sort.maxOrdinal.get()];
         global.getDefinition().allSorts().forEach(s -> {
-            this.variableDisjunctionsArray[s.ordinal()] = new ArrayList<>((Set<Pair<Variable, BitSet>>) (Object) children.stream()
+            variableDisjunctionsArray[s.ordinal()] = new ArrayList<>((Set<Pair<Variable, BitSet>>) (Object) children.stream()
                     .filter(p -> p.getLeft() instanceof Variable && global.getDefinition().subsorts().isSubsortedEq(p.getLeft().sort(), s))
                     .collect(Collectors.toSet()));
         });
 
-        this.tokenDisjunctions = children.stream()
+        tokenDisjunctions = children.stream()
                 .filter(p -> p.getLeft() instanceof Token)
                 .collect(Collectors.toMap(p -> (Token) p.getLeft(), p -> p.getRight()));
+
+        assocDisjunctionArray = new List[Sort.maxOrdinal.get()];
+        global.getDefinition().allSorts().forEach(s -> {
+            assocDisjunctionArray[s.ordinal()] = (List<Pair<BuiltinList, BitSet>>) (Object) children.stream()
+                    .filter(p -> p.getLeft() instanceof BuiltinList && global.getDefinition().subsorts().isSubsortedEq(p.getLeft().sort(), s))
+                    .collect(Collectors.toList());
+        });
     }
 
 
@@ -122,7 +132,7 @@ public class RuleAutomatonDisjunction extends Term implements HasGlobalContext {
 
     @Override
     public boolean isExactSort() {
-        throw new UnsupportedOperationException();
+        return false;
     }
 
     @Override
@@ -132,7 +142,7 @@ public class RuleAutomatonDisjunction extends Term implements HasGlobalContext {
 
     @Override
     public Sort sort() {
-        throw new UnsupportedOperationException();
+        return sort;
     }
 
     @Override

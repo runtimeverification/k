@@ -23,9 +23,11 @@ import org.kframework.kore.KORE;
 import org.kframework.kore.KSequence;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.SortedADT;
+import org.kframework.kore.compile.AssocCommToAssoc;
 import org.kframework.kore.compile.Backend;
 import org.kframework.kore.compile.ConvertDataStructureToLookup;
 import org.kframework.kore.compile.MergeRules;
+import org.kframework.kore.compile.NormalizeAssoc;
 import org.kframework.kore.compile.RewriteToTop;
 import org.kframework.kore.TransformK;
 import org.kframework.main.GlobalOptions;
@@ -76,6 +78,7 @@ public class JavaBackend implements Backend {
 
         return d -> (func((Definition dd) -> kompile.defaultSteps().apply(dd)))
                 .andThen(DefinitionTransformer.fromRuleBodyTranformer(RewriteToTop::bubbleRewriteToTopInsideCells, "bubble out rewrites below cells"))
+                .andThen(DefinitionTransformer.from(new NormalizeAssoc(KORE.c()), "convert assoc/comm to assoc"))
                 .andThen(func(dd -> expandMacrosDefinitionTransformer.apply(dd)))
                 .andThen(convertDataStructureToLookup)
                 .andThen(DefinitionTransformer.fromRuleBodyTranformer(JavaBackend::ADTKVariableToSortedVariable, "ADT.KVariable to SortedVariable"))
@@ -84,7 +87,8 @@ public class JavaBackend implements Backend {
                 .andThen(func(dd -> markRegularRules(dd)))
                 .andThen(DefinitionTransformer.fromSentenceTransformer(new AddConfigurationRecoveryFlags(), "add refers_THIS_CONFIGURATION_marker"))
                 .andThen(DefinitionTransformer.fromSentenceTransformer(JavaBackend::markSingleVariables, "mark single variables"))
-                .andThen(new DefinitionTransformer(new MergeRules(KORE.c())))
+                .andThen(DefinitionTransformer.from(new AssocCommToAssoc(KORE.c()), "convert assoc/comm to assoc"))
+                .andThen(DefinitionTransformer.from(new MergeRules(KORE.c()), "generate matching automaton"))
                 .apply(d);
     }
 
