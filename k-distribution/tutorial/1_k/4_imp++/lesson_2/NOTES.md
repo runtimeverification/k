@@ -1,0 +1,1 @@
+update discussion on fresh; it has already been explained in lambda++

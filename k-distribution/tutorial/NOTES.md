@@ -18,7 +18,8 @@ Things to revise each time the structure of the tutorial changes:
 * `1_k\2_imp\lesson_4\README.md` refers to Lesson 1
 * `1_k\2_imp\lesson_4\README.md` refers to Tutorial 1, Lesson 2.5
 * `1_k\3_lambda++\lesson_1\README.md` refers to Lesson 8, Tutorial 1
-* `1_k\3_lambda++\lesson_2\README.md` Lesson 1, Tutorial 1
+* `1_k\3_lambda++\lesson_1\exercises refers to Lesson 1, tests/config.xml
+* `1_k\3_lambda++\lesson_2\README.md` Lesson 1, Tutorial 1; Tutorial 6; Part 1, 2
 * `1_k\3_lambda++\lesson_3\README.md` refers to Lesson 7, Tutorial 1
 * `1_k\3_lambda++\lesson_4\README.md` refers to Lesson 1
 * `1_k\3_lambda++\lesson_5\README.md` refers to Lesson 4, Lesson 8 and Lesson 7 of Tutorial 1
@@ -67,7 +68,8 @@ or "compile", to indicate that we mean compilation with K.  Similarly for
 Add citations to:
 
 * chemical abstract machine
-* logics, where the distinction betweem side condition and premise is explained
+* logics, where the distinction between side condition and premise is explained
+* reduction semantics with evaluation contexts
 
 Replace `I1 +Int I2`, `notBool B`, etc., with `(I1 + I2)@INT`, `(not B)@Bool`,
 etc., when we have module qualification in place and working.
