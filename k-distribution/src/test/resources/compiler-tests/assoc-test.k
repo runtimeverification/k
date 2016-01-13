@@ -9,9 +9,9 @@ module ASSOC-TEST
              | "b"
 
   syntax KItem ::= foo(S)
-  rule 0 => foo(`b * b` * `b * b`)
-  rule foo(``X * `b => a * a` `` * b)
-  rule foo(`X * a` * Y) => 1
+  rule 0 => foo((b * b) * (b * b))
+  rule foo((X * (b => a * a) ) * b)
+  rule foo((X * a) * Y) => 1
 
   configuration <k> $PGM </k>
 endmodule
