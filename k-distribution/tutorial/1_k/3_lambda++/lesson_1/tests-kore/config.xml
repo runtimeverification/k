@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright (c) 2013-2015 K Team. All Rights Reserved. -->
-<tests>
-
-  <include file="../../../1_lambda/lesson_8/tests/config.xml"
-           more-programs="."
-           more-results="." />
-
-</tests>
