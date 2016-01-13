@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2015 K Team. All Rights Reserved.
+// Copyright (c) 2014-2016 K Team. All Rights Reserved.
 require "domains.k"
 
 module IMP-SYNTAX
@@ -46,7 +46,7 @@ module IMP
   syntax KResult ::= Int | Bool
 
   configuration <T color="yellow">
-                  <k color="green"> `$PGM:Pgm`:K </k>
+                  <k color="green"> ($PGM:Pgm):K </k>
                   <state color="red"> .Map </state>
                   <in stream="stdin"> .List </in>
                   <out stream="stdout"> .List </out>
@@ -73,7 +73,7 @@ module IMP
 
 // Stmt
 
-  rule <k> X = I:Int; => .K ...</k> <state>... X |-> `_ => I` ...</state>
+  rule <k> X = I:Int; => .K ...</k> <state>... X |-> (_ => I) ...</state>
 
   rule S1:Stmt S2:Stmt => S1 ~> S2  [structural]
 
@@ -84,8 +84,8 @@ module IMP
 
 // Pgm
 
-  rule <k> int `X,Xs => Xs`;_ </k> <state> Rho:Map `.Map => X|->0` </state>
-      when notBool `X in keys(Rho)`
+  rule <k> int (X,Xs => Xs);_ </k> <state> Rho:Map (.Map => X|->0) </state>
+      when notBool (X in keys(Rho))
   rule int .Ids; S => S  [structural]
 
 // IMP+

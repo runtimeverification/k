@@ -1,4 +1,4 @@
-// Copyright (c) 2015 K Team. All Rights Reserved.
+// Copyright (c) 2015-2016 K Team. All Rights Reserved.
 
 // Module defining only the sorts K and KString, useful for modularity
 module SORT-K
@@ -49,8 +49,7 @@ module KSEQ
                  | ".::K"    [klabel(#EmptyK), hook(org.kframework.kore.EmptyK)]
                  | K "~>" K  [klabel(#KSequence), left, assoc, unit(#EmptyK), hook(org.kframework.kore.KSequence)]
   syntax left #KSequence
-  syntax KBott     ::= "`" K "`"    [bracket]
-                     | "(" K ")"    [bracket]
+  syntax KBott     ::= "(" K ")"    [bracket]
 endmodule
 
 

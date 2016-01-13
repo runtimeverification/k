@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2015 K Team. All Rights Reserved.
+// Copyright (c) 2014-2016 K Team. All Rights Reserved.
 
 module TREE-PATTERN
   imports KERNELC-SEMANTICS
@@ -82,7 +82,7 @@ module TREE-PATTERN
   syntax TreeSeq ::= Tree "::TS" TreeSeq
                    | ".TreeSeq"
                    > TreeSeq "@TS" TreeSeq      [function, left]
-  rule `T ::TS TS1` @TS TS2 => T ::TS `TS1 @TS TS2`
+  rule (T ::TS TS1) @TS TS2 => T ::TS (TS1 @TS TS2)
   rule .TreeSeq @TS TS => TS
 
   syntax Map ::= "treeList" "(" Pointer ")" "(" TreeSeq ")"    [pattern(1)]
