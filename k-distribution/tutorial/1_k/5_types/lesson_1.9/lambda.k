@@ -1,5 +1,5 @@
-// Copyright (c) 2013-2015 K Team. All Rights Reserved.
-require "modules/substitution.k"
+// Copyright (c) 2013-2016 K Team. All Rights Reserved.
+require "substitution.k"
 
 module LAMBDA
   imports SUBSTITUTION
@@ -44,5 +44,5 @@ module LAMBDA
                | "mu" Id ":" Type "." Exp      [binder]
   rule letrec F : T1  X : T2 = E in E'
     => let F : T1 = mu F : T1 . lambda X : T2 . E in E'               [macro]
-  rule mu X : T . E => (T -> T) E[T/X]         [anywhere]
+  rule mu X : T . E => (T -> T) (E[T/X]):>Exp         [anywhere]
 endmodule
