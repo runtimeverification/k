@@ -1,46 +1,8 @@
 Search results:
 
 Solution 1:
-<T>
-    <k>
-        (++ x) ~> (HOLE / ((++ x) / x)) ~> y = HOLE ;
-    </k>
-    <env>
-        x |-> 1
-        y |-> 2
-    </env>
-    <store>
-        1 |-> 1
-        2 |-> 0
-    </store>
-</T>
-
+<T> <k> ( ++ x ) ~> #freezer8 ( ++ x / x ) ~> #freezer4 ( y ) </k> <env> x |-> 1 y |-> 2 </env> <store> 1 |-> 1 2 |-> 0 </store> </T>
 Solution 2:
-<T>
-    <k>
-        (++ x) ~> (HOLE / 1) ~> ((++ x) / HOLE) ~> y = HOLE ;
-    </k>
-    <env>
-        x |-> 1
-        y |-> 2
-    </env>
-    <store>
-        1 |-> 1
-        2 |-> 0
-    </store>
-</T>
-
+<T> <k> ( ++ x ) ~> #freezer8 ( 1 ) ~> #freezer7 ( ++ x ) ~> #freezer4 ( y ) </k> <env> x |-> 1 y |-> 2 </env> <store> 1 |-> 1 2 |-> 0 </store> </T>
 Solution 3:
-<T>
-    <k>
-        (++ x) ~> (HOLE / x) ~> ((++ x) / HOLE) ~> y = HOLE ;
-    </k>
-    <env>
-        x |-> 1
-        y |-> 2
-    </env>
-    <store>
-        1 |-> 1
-        2 |-> 0
-    </store>
-</T>
+<T> <k> ( ++ x ) ~> #freezer8 ( x ) ~> #freezer7 ( ++ x ) ~> #freezer4 ( y ) </k> <env> x |-> 1 y |-> 2 </env> <store> 1 |-> 1 2 |-> 0 </store> </T>
