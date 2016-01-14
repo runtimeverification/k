@@ -146,11 +146,11 @@ public class AddEmptyListsTest {
     @Test
     public void testLabedFunConcreteArgument() {
         parseTerm("`f`(.As)", "K", KApply(F, NIL));
-        parseTerm("`f`(`a,a`)", "K", KApply(F, KApply(CONS, A, KApply(CONS, A, NIL))));
-        parseTerm("`f`(`a,.As`)", "K", KApply(F, KApply(CONS, A, NIL)));
-        parseTerm("`f`(`a,b`)", "K", KApply(F, KApply(CONS, A, KApply(CONS, B, NIL))));
-        parseTerm("`f`(`b,.Bs`)", "K", KApply(F, KApply(CONS, B, NIL)));
-        parseTerm("`f`(`b,b`)", "K", KApply(F, KApply(CONS, B, KApply(CONS, B, NIL))));
+        parseTerm("`f`((a,a))", "K", KApply(F, KApply(CONS, A, KApply(CONS, A, NIL))));
+        parseTerm("`f`((a,.As))", "K", KApply(F, KApply(CONS, A, NIL)));
+        parseTerm("`f`((a,b))", "K", KApply(F, KApply(CONS, A, KApply(CONS, B, NIL))));
+        parseTerm("`f`((b,.Bs))", "K", KApply(F, KApply(CONS, B, NIL)));
+        parseTerm("`f`((b,b))", "K", KApply(F, KApply(CONS, B, KApply(CONS, B, NIL))));
     }
 
     @Test

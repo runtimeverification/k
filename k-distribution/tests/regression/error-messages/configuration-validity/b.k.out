@@ -1,0 +1,3 @@
+[Error] Compiler: Attempting to concatenate cells not of multiplicity="*" into
+a cell collection.
+  while executing phase "concretizing configuration" on sentence at

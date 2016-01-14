@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2015 K Team. All Rights Reserved.
+// Copyright (c) 2014-2016 K Team. All Rights Reserved.
 requires "domains.k"
 
 module IMP-SYNTAX
@@ -54,14 +54,14 @@ module IMP
   rule {} => .K   [structural]
   rule {S} => S  [structural]
 // Stmt
-  rule <k> X = I:Int; => .K ...</k> <state>... X |-> `_ => I` ...</state>
+  rule <k> X = I:Int; => .K ...</k> <state>... X |-> (_ => I) ...</state>
   rule S1::Stmt S2::Stmt => S1 ~> S2  [structural]
   rule if (true)  S else _ => S
   rule if (false) _ else S => S
   rule while (B) S => if (B) {S while (B) S} else {}  [structural]
 // Pgm
-  rule <k> int `X,Xs => Xs`;_ </k> <state> Rho:Map `.Map => X|->0` </state>
-    when notBool `X in keys(Rho)`
+  rule <k> int (X,Xs => Xs);_ </k> <state> Rho:Map (.Map => X|->0) </state>
+    when notBool (X in keys(Rho))
 
   rule int .Ids; S => S  [structural]
 endmodule

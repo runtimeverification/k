@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2015 K Team. All Rights Reserved.
+// Copyright (c) 2014-2016 K Team. All Rights Reserved.
 
 module KERNELC-CONFIGURATION
   imports KERNELC-SYNTAX
@@ -161,7 +161,7 @@ module KERNELC-SEMANTICS
 
   syntax KItem ::= deleteLocals(List)
   rule
-    <k> deleteLocals(`ListItem(tv(_:Type, P:Pointer)) => .List` L:List) ...</k>
+    <k> deleteLocals((ListItem(tv(_:Type, P:Pointer)) => .List) L:List) ...</k>
     <heap>... P |-> _ => .Map...</heap>
     [structural]
   rule deleteLocals(.List) => .K    [structural]
@@ -497,15 +497,15 @@ module KERNELC-SEMANTICS
   syntax VariableDeclarations ::= declareParameters(ParameterDeclarations)
     [function]
   rule declareParameters(T:Type X:Id, PDs:ParameterDeclarations)
-    => `T X; declareParameters(PDs)`
+    => (T X; declareParameters(PDs))
   rule declareParameters(.ParameterDeclarations) => .VariableDeclarations
 
   syntax Statements ::=
     bindParameters(ParameterDeclarations, EvaluatedExpressions, Block)
     [function]
   rule bindParameters(
-          `_:Type X:Id, PDs:ParameterDeclarations`,
-          `TV:TypedValue, EEs:EvaluatedExpressions`,
+          (_:Type X:Id, PDs:ParameterDeclarations),
+          (TV:TypedValue, EEs:EvaluatedExpressions),
           B:Block)
     => X = TV; bindParameters(PDs, EEs, B)
   rule bindParameters(.ParameterDeclarations, .EvaluatedExpressions, B:Block)
