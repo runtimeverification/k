@@ -44,16 +44,16 @@ closures and identifiers to their values in the store.  In fact, the only
 values at this moment are the closures, and they are purely semantic entities,
 which cannot be used explicitly in programs.  That's why we modified the
 original syntax of the language to include no `Val` syntactic category
-anymore, and that's why we need to add closures as values now; we do it
-same like before, adding a `Val` syntactic category which is subsorted
+anymore, and that's why we need to add closures as values now; same like
+before, we add a `Val` syntactic category which is subsorted
 to `KResult`.  In general, whenever you have any strictness attributes,
 your should also define some K results.
 
 Invoking a closure is a bit more involved than the substitution-based
-beta-reduction: we need to switch to closure's environment, then create a
-new, or fresh, binding for closure's parameter to the value passed to the
-closure, then evaluate the closure's body, and then switch back to caller's 
-environment, which needs to be stored somewhere in the meanwhile.
+beta-reduction: we need to switch to the closure's environment, then create a
+new, or fresh, binding for the closure's parameter to the value passed to the
+closure, then evaluate the closure's body, and then switch back to the
+caller's environment, which needs to be stored somewhere in the meanwhile.
 We can do all these with one rule:
 
     rule <k> closure(Rho,X,E) V:Val => E ~> Rho' ...</k>
@@ -62,7 +62,7 @@ We can do all these with one rule:
 
 Therefore, we atomically do all the following:
 
-- switch the computation to closure's body, `E`, followed by a
+- switch the computation to the closure's body, `E`, followed by a
 caller-environment-recovery task `Rho'` (note that `Rho'` is the
 current environment),
 - generate a fresh location `!N` (the `!` is important, we discuss it below),
@@ -82,17 +82,17 @@ it stays unchanged.  Here we just use `...`.
 The declaration of the *fresh* variable above, `!N`, is new and needs
 some explanation.  First, note that `!N` appears only in the right-hand-side
 terms in the rule, that is, it is not matched when the rule is applied.
-Instead, a fresh natural number is generated each time the rule is applied.
+Instead, a fresh `Nat` element is generated each time the rule is applied.
 In K, we can define syntactic categories which have the capability to
 generate fresh elements like above, using unbound variables whose name starts
 with a `!`.  The details of how to do that are beyond the scope of this
 tutorial (see Tutorial 6).  All we need to know here is that an arbitrary
 fresh element of that syntactic category is generated each time the rule
-is applied.  We cannot rely on the particular name, value or structure of
-the generated element, because that can change with the next version of the
-K tool, or even from execution to execution with the same version.  All you
-can rely on is that each newly generated element is distinct from the
-previously elements for the same syntactic category.
+is applied.  We cannot rely on the particular name or value of the generated
+element, because that can change with the next version of the K tool, or
+even from execution to execution with the same version.  All you can rely
+on is that each newly generated element is distinct from the previously
+generated elements for the same syntactic category.
 
 Unlike in the substitution-based definition, we now also need a lookup rule:
 
@@ -109,7 +109,7 @@ The only thing left to define is the auxiliary environment-recovery operation:
 
 When the item preceding the environment recovery task `Rho` in the
 computation becomes a value, replace the current environment with `Rho`
-and dissolves `Rho` from the computation.
+and dissolve `Rho` from the computation.
 
 Before we kompile, let us make this rule and the lambda evaluation rule
 structural, because we do not want these to count as transitions.
