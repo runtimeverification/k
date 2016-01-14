@@ -7,13 +7,13 @@ module UNIFICATION
 
   syntax Set ::= #variables(K)    [function, hook(UNIFICATION.variables), impure]
 
-  syntax Set ::= #metaVariables(K)    [function, hook(UNIFICATION.metaVariables), impure]
+  syntax Set ::= #metaKVariables(K)    [function, hook(UNIFICATION.metaVariables), impure]
 
   syntax KItem ::= #variablesMap(K) [function, hook(UNIFICATION.variablesMap), impure]
 
-  syntax K ::= #rename(K, Set)    [function, hook(UNIFICATION.rename), impure]
+  syntax K ::= #renameMetaKVariables(K, Set)    [function, hook(UNIFICATION.rename), impure]
 
-  syntax K ::= #freezeVariables(K, K) [function, hook(UNIFICATION.freezeVariables), impure]
+  syntax K ::= #freezeKVariables(K, K) [function, hook(UNIFICATION.freezeVariables), impure]
 
   syntax Bool ::= #unifiable(K,K) [function, hook(UNIFICATION.unifiable), impure]
 
