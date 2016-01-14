@@ -6,12 +6,19 @@ import org.kframework.builtin.BooleanUtils;
 import org.kframework.definition.Context;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
+import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
 
 import static org.kframework.definition.Constructors.*;
 import static org.kframework.kore.KORE.*;
 
 public class ResolveHeatCoolAttribute {
+
+    private final KompileOptions kompileOptions;
+
+    public ResolveHeatCoolAttribute(KompileOptions kompileOptions) {
+        this.kompileOptions = kompileOptions;
+    }
 
     private Rule resolve(Rule rule) {
         return Rule(
@@ -34,7 +41,7 @@ public class ResolveHeatCoolAttribute {
         if (att.contains("heat")) {
             return BooleanUtils.and(requires, BooleanUtils.not(predicate));
         } else if (att.contains("cool")) {
-            if (att.contains("transition")) {
+            if (kompileOptions.superheat.stream().allMatch(att::contains)) {
                 // if the cooling rule is a transition, do not add the isKResult predicate
                 // because that will inhibit search
                 return requires;

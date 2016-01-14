@@ -2,6 +2,7 @@
 package org.kframework.backend.java.symbolic;
 
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -75,7 +76,10 @@ public class SymbolicRewriter {
         this.ruleIndex = definition.getIndex();
         this.counter = counter;
         this.strategy = new TransitionCompositeStrategy(kompileOptions.transition);
-        this.transitions = kompileOptions.transition;
+        this.transitions = ImmutableList.<String>builder()
+                .addAll(kompileOptions.transition)
+                .addAll(kompileOptions.superheat)
+                .build();
         this.useFastRewriting = !kompileOptions.experimental.koreProve;
         this.theFastMatcher = new FastRuleMatcher(global, definition.ruleTable.size());
         this.transition = useFastRewriting;
