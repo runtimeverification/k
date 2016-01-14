@@ -13,9 +13,7 @@
     </all-programs>
   </include>
 
-<!-- TODO: drop exclude once superheat supported -->
   <include file="../../lesson_2/tests-kore/config.xml"
-           exclude="omega free-variable-capture callcc-env1 callcc-env2 callcc-with-let"
            more-programs="../../lesson_1/tests ../tests"
            more-results="../../lesson_1/tests ../tests .">
     <kompile-option name="--superheat"

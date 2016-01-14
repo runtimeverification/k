@@ -1,4 +1,4 @@
-<T>\s*<k>\s*3 / 0 ~> \(y = HOLE ;\)\s*</k>\s*<env>\s*x \|-> 1\s+y \|-> 2\s*</env>\s*<store>\s*1 \|-> 3\s+2 \|-> 0\s*</store>\s*</T>
+<T>\s*<k>\s*3 / 0 ~> #freezer9 \( y \)\s*</k>\s*<env>\s*x \|-> 1\s+y \|-> 2\s*</env>\s*<store>\s*1 \|-> 3\s+2 \|-> 0\s*</store>\s*</T>
 <T>\s*<k>\s*.K\s*</k>\s*<env>\s*x \|-> 1\s+y \|-> 2\s*</env>\s*<store>\s*1 \|-> 3\s+2 \|-> 0\s*</store>\s*</T>
 <T>\s*<k>\s*.K\s*</k>\s*<env>\s*x \|-> 1\s+y \|-> 2\s*</env>\s*<store>\s*1 \|-> 3\s+2 \|-> 1\s*</store>\s*</T>
 <T>\s*<k>\s*.K\s*</k>\s*<env>\s*x \|-> 1\s+y \|-> 2\s*</env>\s*<store>\s*1 \|-> 3\s+2 \|-> 2\s*</store>\s*</T>

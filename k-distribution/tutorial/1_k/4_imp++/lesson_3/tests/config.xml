@@ -5,7 +5,6 @@
   <include file="../../lesson_2/tests/config.xml"
            more-results="." >
     <kompile-option name="--superheat" value="division" />
-    <kompile-option name="--supercool" value="lookup increment" />
     <kompile-option name="--backend" value="java" />
     <program name="div.imp" regex="true">
       <krun-option name="--search" />

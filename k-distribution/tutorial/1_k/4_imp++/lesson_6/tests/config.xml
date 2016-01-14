@@ -4,10 +4,9 @@
 
   <include file="../../lesson_5/tests/config.xml" 
            more-results="."
-           exclude="spawn.imp div.imp sum.imp collatz.imp primes.imp"> <!--add spawn because of search bug-->
+           exclude="div.imp sum.imp collatz.imp primes.imp">
     <kompile-option name="--transition"
                     value="lookup increment assignment read print" />
-    <kompile-option name="--backend" value="java" />
     <program name="spawn.imp" >
       <krun-option name="--search" />
     </program>
