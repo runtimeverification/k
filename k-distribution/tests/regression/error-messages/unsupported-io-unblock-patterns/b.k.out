@@ -1,12 +1,18 @@
 [Warning] Compiler: Unsupported matching pattern in stdin stream cell.
 The currently supported pattern is: <in> ListItem(V:Sort) => .List ... </in>
+	Location(20,10,20,45)
 [Warning] Compiler: Unsupported matching pattern in stdin stream cell.
 The currently supported pattern is: <in> ListItem(V:Sort) => .List ... </in>
+	Location(23,10,23,40)
 [Warning] Compiler: Unsupported matching pattern in stdin stream cell.
 The currently supported pattern is: <in> ListItem(V:Sort) => .List ... </in>
+	Location(26,10,26,36)
 [Warning] Compiler: Unsupported matching pattern in stdin stream cell.
 The currently supported pattern is: <in> ListItem(V:Sort) => .List ... </in>
+	Location(29,10,29,66)
 [Warning] Compiler: Unsupported matching pattern in stdin stream cell.
 The currently supported pattern is: <in> ListItem(V:Sort) => .List ... </in>
+	Location(32,10,32,75)
 [Warning] Compiler: Unsupported matching pattern in stdin stream cell.
 The currently supported pattern is: <in> ListItem(V:Sort) => .List ... </in>
+	Location(35,10,35,67)
