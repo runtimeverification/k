@@ -123,11 +123,15 @@ public class DefinitionParsing {
         if (cacheParses) {
             loader.saveOrDie(cacheFile, caches);
         }
+        throwExceptionIfThereAreErrors();
+        return parsedMod;
+    }
+
+    private void throwExceptionIfThereAreErrors() {
         if (!errors.isEmpty()) {
             kem.addAllKException(errors.stream().map(e -> e.exception).collect(Collectors.toList()));
             throw KEMException.compilerError("Had " + errors.size() + " parsing errors.");
         }
-        return parsedMod;
     }
 
     public Definition parseDefinition(File definitionFile, String mainModuleName, String mainProgramsModule, boolean dropQuote) {
@@ -182,20 +186,22 @@ public class DefinitionParsing {
         if (cacheParses) {
             loader.saveOrDie(cacheFile, caches);
         }
-        if (!errors.isEmpty()) {
-            kem.addAllKException(errors.stream().map(e -> e.exception).collect(Collectors.toList()));
-            throw KEMException.compilerError("Had " + errors.size() + " parsing errors.");
-        }
+        throwExceptionIfThereAreErrors();
         return defWithConfig;
     }
 
     Map<String, ParseCache> caches;
-    java.util.Set<KEMException> errors;
+    private java.util.Set<KEMException> errors;
     RuleGrammarGenerator gen;
+
+    public java.util.Set<KEMException> errors() {
+        return errors;
+    }
 
     public Definition resolveNonConfigBubbles(Definition defWithConfig) {
         RuleGrammarGenerator gen = new RuleGrammarGenerator(defWithConfig, isStrict);
         Definition parsedDef = DefinitionTransformer.from(m -> this.resolveNonConfigBubbles(m, gen), "parsing rules").apply(defWithConfig);
+        throwExceptionIfThereAreErrors();
         return parsedDef;
     }
 
