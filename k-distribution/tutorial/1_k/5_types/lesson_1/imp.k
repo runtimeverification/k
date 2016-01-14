@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2015 K Team. All Rights Reserved.
+// Copyright (c) 2014-2016 K Team. All Rights Reserved.
 module IMP-SYNTAX
   syntax AExp  ::= Int | String | Id
                  | "++" Id
@@ -20,12 +20,12 @@ module IMP-SYNTAX
                    Block "else" Block         [strict]
                  | "while" "(" BExp ")" Block [strict]
                  | "int" Ids ";"
-                 | "print" "(" AExps ")" ";"  [strict]
+                 | "print" "(" AExps ")" ";"
                  | "halt" ";"
                  > "join" AExp ";"            [strict]
 
-  syntax Ids   ::= List{Id,","}               [strict]
-  syntax AExps ::= List{AExp,","}             [strict]
+  syntax Ids   ::= List{Id,","}
+  syntax AExps ::= List{AExp,","}
   syntax Stmts ::= List{Stmt,""}              [seqstrict]
 endmodule
 
@@ -81,6 +81,7 @@ module IMP
   rule <k> int (X:Id,Xs:Ids => Xs); ...</k> <tenv> M:Map => M [ X <- int ] </tenv>
   rule int .Ids; => stmt
 
+  context print(HOLE:AExp, AEs:AExps);
   rule print(_:PrintableType,AEs => AEs);
   rule print(.AExps); => stmt
 

@@ -1,9 +1,1 @@
-<T>
-    <k>
-        stmt
-    </k>
-    <tenv>
-        n |-> int
-        sum |-> int
-    </tenv>
-</T>
+<T> <k> stmt </k> <tenv> n |-> int sum |-> int </tenv> </T>
