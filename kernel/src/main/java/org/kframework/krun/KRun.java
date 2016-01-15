@@ -249,8 +249,9 @@ public class KRun {
                                                Consumer<byte[]> print) {
         subst.entrySet().forEach(e -> {
             if (parsedPattern.body() instanceof KVariable) {
-                assert e.getKey().equals(parsedPattern.body());
+                assert e.getKey().name().equals(parsedPattern.body().toString());
                 prettyPrint(compiledDefinition, outputModes, print, e.getValue());
+                return;
             }
             print.accept(e.getKey().toString().getBytes());
             print.accept(" -->\n".getBytes());
