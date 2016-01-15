@@ -6,7 +6,7 @@
   <include file="../../../1_lambda/lesson_1/tests/config.xml"
            exclude="omega"
            results=".">
-<!-- Not sure the next line should be there -->
+<!-- The next line should not be needed ... -->
     <kompile-option name="--syntax-module" value="LAMBDA" />
     <kompile-option name="--superheat"
                     value="strict" />
