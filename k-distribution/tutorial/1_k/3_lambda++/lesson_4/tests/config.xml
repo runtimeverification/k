@@ -15,7 +15,7 @@
   <include file="../../lesson_2/tests/config.xml"
            more-programs="../../lesson_1/tests ."
            more-results="../../lesson_1/tests .">
-    <kompile-option name="--superheat"
+    <kompile-option name="--super-strict"
                     value="strict" />
     <kompile-option name="--directory"
                     value="nondet" />

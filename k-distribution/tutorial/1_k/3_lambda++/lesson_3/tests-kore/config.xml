@@ -14,7 +14,7 @@
   </include>
 
   <include file="../../lesson_2/tests-kore/config.xml" >
-    <kompile-option name="--superheat"
+    <kompile-option name="--superstrict"
                     value="strict" />
     <kompile-option name="--directory"
                     value="nondet" />

@@ -42,9 +42,9 @@ public class ResolveHeatCoolAttribute {
         if (att.contains("heat")) {
             return BooleanUtils.and(requires, BooleanUtils.not(predicate));
         } else if (att.contains("cool")) {
-            if (kompileOptions.superheat.stream().allMatch(att::contains)) {
+            if (kompileOptions.superStrict.stream().allMatch(att::contains)) {
                 // if the cooling rule is a super strict, then tag the isKResult predicate and drop it during search
-                predicate = KApply(predicate.klabel(), predicate.klist(), predicate.att().add("superstrict"));
+                predicate = KApply(predicate.klabel(), predicate.klist(), predicate.att().add("super-strict"));
             }
             return BooleanUtils.and(requires, predicate);
         }

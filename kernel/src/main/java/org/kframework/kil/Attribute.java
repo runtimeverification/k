@@ -66,8 +66,6 @@ public class Attribute<T> extends ASTNode {
     public static final Attribute<String> TRANSITION = Attribute.of("transition", "");
     public static final Attribute<String> NOT_IN_RULES = Attribute.of("notInRules", "");
     public static final Attribute<String> VARIABLE = Attribute.of("variable", "");
-    public static final Attribute<String> SUPERCOOL = Attribute.of("supercool", "");
-    public static final Attribute<String> SUPERHEAT = Attribute.of("superheat", "");
     public static final Attribute<String> HYBRID = Attribute.of("hybrid", "");
 
     private Key<T> key;

@@ -288,9 +288,9 @@ ability to search the state space of programs.
 
 In order to make use of the search functionality that \krun provides, it is
 first necessary to tune your semantics for nondeterminism by appropriately
-specifying values for the \verb^--transition^, \verb^--superheat^, and
-\verb^--supercool^ flags to \kompile. For information on how to do this, please
-refer to section \ref{sec:nondeterminism}.
+specifying values for the \verb^--transition^ and \verb^--super-strict^ flags
+to \kompile. For information on how to do this, please refer to section
+\ref{sec:nondeterminism}.
 
 Once this is done, the simplest possible entry point into the mechanisms \krun
 provides for searching the state space of programs is the \verb^--search^ flag.
