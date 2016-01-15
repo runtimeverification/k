@@ -520,7 +520,7 @@ public class SymbolicRewriter {
      * up to the bound as were found, and returns {@code true} if the bound has been reached.
      */
     private static boolean addSearchResult(
-            List<Substitution<Variable, Term>> searchResults,
+            HashSet<Substitution<Variable, Term>> searchResults,
             ConstrainedTerm initialTerm,
             Rule pattern,
             int bound) {
@@ -547,7 +547,7 @@ public class SymbolicRewriter {
      * @param searchType  defines when we will attempt to match the pattern
      * @return a list of substitution mappings for results that matched the pattern
      */
-    public List<Substitution<Variable, Term>> search(
+    public Set<Substitution<Variable, Term>> search(
             Term initialTerm,
             Rule pattern,
             int bound,
@@ -556,7 +556,7 @@ public class SymbolicRewriter {
             TermContext context) {
         stopwatch.start();
 
-        List<Substitution<Variable, Term>> searchResults = Lists.newArrayList();
+        HashSet<Substitution<Variable, Term>> searchResults = Sets.newHashSet();
         Set<ConstrainedTerm> visited = Sets.newHashSet();
 
         ConstrainedTerm initCnstrTerm = new ConstrainedTerm(initialTerm, context);
@@ -640,12 +640,12 @@ public class SymbolicRewriter {
             System.err.println("[" + visited.size() + "states, " + step + "steps, " + stopwatch + "]");
         }
 
-        List<Substitution<Variable, Term>> adaptedResults = searchResults.stream().map(r -> {
+        Set<Substitution<Variable, Term>> adaptedResults = searchResults.stream().map(r -> {
             RenameAnonymousVariables renameAnonymousVariables = new RenameAnonymousVariables();
             Substitution<Variable, Term> subs = new HashMapSubstitution();
             r.forEach((k, v) -> subs.plus(renameAnonymousVariables.getRenamedVariable(k), renameAnonymousVariables.apply(v)));
             return subs;
-        }).collect(Collectors.toList());
+        }).collect(Collectors.toSet());
 
         return adaptedResults;
     }
