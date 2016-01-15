@@ -103,10 +103,7 @@ public class KILtoInnerKORE extends KILTransformation<K> {
     }
 
     public String dropQuote(String s) {
-        if (doDropQuote && s.startsWith("'"))
-            return s.substring(1);
-        else
-            return s;
+        return s;
     }
 
     public K apply(KApp kApp) {

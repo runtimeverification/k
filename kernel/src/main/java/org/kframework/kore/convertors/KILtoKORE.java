@@ -432,14 +432,7 @@ public class KILtoKORE extends KILTransformation<Object> {
     }
 
     public String dropQuote(String s) {
-        if (doDropQuote) {
-            if (s.startsWith("'"))
-                return s.substring(1);
-            else
-                return s;
-        } else {
-            return s;
-        }
+        return s;
     }
 
     public org.kframework.kore.Sort apply(org.kframework.kil.Sort sort) {
