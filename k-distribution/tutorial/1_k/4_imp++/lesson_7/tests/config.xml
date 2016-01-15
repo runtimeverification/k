@@ -6,8 +6,13 @@
            more-programs="."
            more-results="." >
     <all-programs>
+        <krun-option name="--parser" value="kast --sort Stmts"/>
         <krun-option name="--output" value="none" />
     </all-programs>
+    <program name="spawn.imp" >
+        <krun-option name="--parser" value="kast --sort Stmts"/>
+        <krun-option name="--search" />
+    </program>
   </include>
 </tests>
 
