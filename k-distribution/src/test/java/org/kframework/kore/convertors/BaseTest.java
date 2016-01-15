@@ -14,13 +14,15 @@ import org.kframework.parser.outer.Outer;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Calendar;
 import java.util.function.Function;
 
 import static org.junit.Assert.assertEquals;
 
 public abstract class BaseTest {
 
-    private static final String COPYRIGHT_HEADER = "// Copyright (c) 2014-2015 K Team. All Rights Reserved.";
+    private static final String COPYRIGHT_HEADER = "// Copyright (c) " + Calendar.getInstance().get(Calendar.YEAR) + " K Team. All Rights Reserved.";
+    private static final String COPYRIGHT_HEADER_REGEX = "// Copyright \\(c\\) [0-9\\-]* K Team. All Rights Reserved.";
 
     @Rule
     public TestName name = new TestName();
@@ -99,7 +101,7 @@ public abstract class BaseTest {
     }
 
     private String clean(String definitionText) {
-        return definitionText.replace(COPYRIGHT_HEADER, "").replaceAll(" *\n", "\n").trim();
+        return definitionText.replaceAll(COPYRIGHT_HEADER_REGEX, "").replaceAll(" *\n", "\n").trim();
     }
 
 }
