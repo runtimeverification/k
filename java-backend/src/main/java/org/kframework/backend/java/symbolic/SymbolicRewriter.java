@@ -521,15 +521,15 @@ public class SymbolicRewriter {
      */
     private static boolean addSearchResult(
             HashSet<Substitution<Variable, Term>> searchResults,
-            ConstrainedTerm initialTerm,
+            ConstrainedTerm subject,
             Rule pattern,
             int bound) {
-        assert Sets.intersection(initialTerm.term().variableSet(),
-                initialTerm.constraint().substitution().keySet()).isEmpty();
+        assert Sets.intersection(subject.term().variableSet(),
+                subject.constraint().substitution().keySet()).isEmpty();
         List<Substitution<Variable, Term>> discoveredSearchResults = PatternMatcher.match(
-                initialTerm.term(),
+                subject.term(),
                 pattern,
-                initialTerm.termContext());
+                subject.termContext());
         for (Substitution<Variable, Term> searchResult : discoveredSearchResults) {
             searchResults.add(searchResult);
             if (searchResults.size() == bound) {
