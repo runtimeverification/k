@@ -115,10 +115,10 @@ attributes declared as annotations to their syntax declarations (below).  */
                | Exp "/" Exp          [strict]
                > Exp "+" Exp          [strict, left]
                > Exp "<=" Exp         [strict]
-  rule I1:Int * I2:Int => I1 *Int I2
-  rule I1:Int / I2:Int => I1 /Int I2  requires I2 =/=Int 0
-  rule I1:Int + I2:Int => I1 +Int I2
-  rule I1:Int <= I2:Int => I1 <=Int I2
+  rule I1 * I2 => I1 *Int I2
+  rule I1 / I2 => I1 /Int I2  requires I2 =/=Int 0
+  rule I1 + I2 => I1 +Int I2
+  rule I1 <= I2 => I1 <=Int I2
 
 /*@ \section{Conditional}
 Note that the \texttt{if} construct is strict only in its first argument. */

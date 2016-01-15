@@ -1,0 +1,3 @@
+[Error] Compiler: Had 1 parsing errors.
+[Error] Inner Parser: Parse error: unexpected end of file.
+	Location(7,19,7,20)

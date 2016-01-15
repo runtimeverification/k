@@ -20,10 +20,10 @@ module LAMBDA
                | Exp "/" Exp          [strict]
                > Exp "+" Exp          [strict, left]
                > Exp "<=" Exp         [strict]
-  rule I1:Int * I2:Int => I1 *Int I2
-  rule I1:Int / I2:Int => I1 /Int I2
-  rule I1:Int + I2:Int => I1 +Int I2
-  rule I1:Int <= I2:Int => I1 <=Int I2
+  rule I1 * I2 => I1 *Int I2
+  rule I1 / I2 => I1 /Int I2
+  rule I1 + I2 => I1 +Int I2
+  rule I1 <= I2 => I1 <=Int I2
 
   syntax Exp ::= "if" Exp "then" Exp "else" Exp    [strict(1)]
   rule if true  then E else _ => E
