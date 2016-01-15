@@ -135,6 +135,14 @@ public class DefinitionParsing {
         }
     }
 
+    public Definition parseDefinitionAndResolveBubbles(File definitionFile, String mainModuleName, String mainProgramsModule, boolean dropQuote) {
+        Definition parsedDefinition = parseDefinition(definitionFile, mainModuleName, mainProgramsModule, dropQuote);
+        Definition afterResolvingConfigBubbles = resolveConfigBubbles(parsedDefinition);
+        Definition afterResolvingAllOtherBubbles = resolveNonConfigBubbles(afterResolvingConfigBubbles);
+        saveCachesAndReportParsingErrors();
+        return afterResolvingAllOtherBubbles;
+    }
+
     private void throwExceptionIfThereAreErrors() {
         if (!errors.isEmpty()) {
             kem.addAllKException(errors.stream().map(e -> e.exception).collect(Collectors.toList()));
@@ -191,7 +199,6 @@ public class DefinitionParsing {
         gen = new RuleGrammarGenerator(definitionWithConfigBubble, isStrict);
         Definition defWithConfig = DefinitionTransformer.from(resolveConfig, "parsing configurations").apply(definitionWithConfigBubble);
 
-        saveCachesAndReportParsingErrors();
         return defWithConfig;
     }
 
@@ -206,7 +213,6 @@ public class DefinitionParsing {
     public Definition resolveNonConfigBubbles(Definition defWithConfig) {
         RuleGrammarGenerator gen = new RuleGrammarGenerator(defWithConfig, isStrict);
         Definition parsedDef = DefinitionTransformer.from(m -> this.resolveNonConfigBubbles(m, gen), "parsing rules").apply(defWithConfig);
-        saveCachesAndReportParsingErrors();
         return parsedDef;
     }
 
