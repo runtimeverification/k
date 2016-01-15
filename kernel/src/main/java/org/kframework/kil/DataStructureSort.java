@@ -64,15 +64,15 @@ public class DataStructureSort implements Serializable {
     public static final Sort DEFAULT_LIST_SORT = Sort.LIST;
     public static final Sort DEFAULT_MAP_SORT = Sort.MAP;
     public static final Sort DEFAULT_SET_SORT = Sort.SET;
-    public static final String DEFAULT_LIST_LABEL = "'_List_";
-    public static final String DEFAULT_LIST_ITEM_LABEL = "'ListItem";
-    public static final String DEFAULT_LIST_UNIT_LABEL = "'.List";
-    public static final String DEFAULT_MAP_LABEL = "'_Map_";
-    public static final String DEFAULT_MAP_ITEM_LABEL = "'_|->_";
-    public static final String DEFAULT_MAP_UNIT_LABEL = "'.Map";
-    public static final String DEFAULT_SET_LABEL = "'_Set_";
-    public static final String DEFAULT_SET_ITEM_LABEL = "'SetItem";
-    public static final String DEFAULT_SET_UNIT_LABEL = "'.Set";
+    public static final String DEFAULT_LIST_LABEL = "_List_";
+    public static final String DEFAULT_LIST_ITEM_LABEL = "ListItem";
+    public static final String DEFAULT_LIST_UNIT_LABEL = ".List";
+    public static final String DEFAULT_MAP_LABEL = "_Map_";
+    public static final String DEFAULT_MAP_ITEM_LABEL = "_|->_";
+    public static final String DEFAULT_MAP_UNIT_LABEL = ".Map";
+    public static final String DEFAULT_SET_LABEL = "_Set_";
+    public static final String DEFAULT_SET_ITEM_LABEL = "SetItem";
+    public static final String DEFAULT_SET_UNIT_LABEL = ".Set";
 
     /** Name of this data structure sort. */
     private final String name;

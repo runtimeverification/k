@@ -29,17 +29,17 @@ public class KLabelConstant extends KLabel {
     public static final KLabelConstant HEAT_KLABEL = of("heat");
     public static final KLabelConstant HEATED_KLABEL = of("heated");
     public static final KLabelConstant REDEX_KLABEL = of("redex");
-    public static final KLabelConstant KNEQ_KLABEL = of("'_=/=K_");
-    public static final KLabelConstant KEQ_KLABEL = of("'_==K_");
-    public static final KLabelConstant KEQ = of("'_=K_");
-    public static final KLabelConstant KLIST_EQUALITY = of("'_=" + Sort.KLIST + "_");
-    public static final KLabelConstant ANDBOOL_KLABEL = of("'#andBool");
-    public static final KLabelConstant BOOL_ANDBOOL_KLABEL = of("'_andBool_");
-    public static final KLabelConstant NOTBOOL_KLABEL = of("'notBool_");
-    public static final KLabelConstant BOOL_ANDTHENBOOL_KLABEL = of("'_andThenBool_");
+    public static final KLabelConstant KNEQ_KLABEL = of("_=/=K_");
+    public static final KLabelConstant KEQ_KLABEL = of("_==K_");
+    public static final KLabelConstant KEQ = of("_=K_");
+    public static final KLabelConstant KLIST_EQUALITY = of("_=" + Sort.KLIST + "_");
+    public static final KLabelConstant ANDBOOL_KLABEL = of("#andBool");
+    public static final KLabelConstant BOOL_ANDBOOL_KLABEL = of("_andBool_");
+    public static final KLabelConstant NOTBOOL_KLABEL = of("notBool_");
+    public static final KLabelConstant BOOL_ANDTHENBOOL_KLABEL = of("_andThenBool_");
     public static final KLabelConstant KRESULT_PREDICATE = of("is" + Sort.KRESULT);
     public static final KLabelConstant STREAM_PREDICATE = of("is" + Sort.of("Stream"));
-    public static final KLabelConstant STRING_PLUSSTRING_KLABEL = of("'_+String_");
+    public static final KLabelConstant STRING_PLUSSTRING_KLABEL = of("_+String_");
     public static final KLabelConstant FRESH_KLABEL = of("fresh");
 
     /**

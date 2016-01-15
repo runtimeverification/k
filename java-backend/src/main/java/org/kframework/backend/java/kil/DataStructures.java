@@ -22,8 +22,8 @@ public interface DataStructures {
     String MAP_LOOKUP = "Map:lookup";
     String SET_MEMBERSHIP = "Set:in";
     String LIST_RANGE = "List:range";
-    String MAP_UPDATE = "'updateMap";
-    String MAP_REMOVE_ALL = "'removeAll";
+    String MAP_UPDATE = "updateMap";
+    String MAP_REMOVE_ALL = "removeAll";
     String SET_REMOVE_ALL = "Set:difference";
 
     static KItem lookup(Term base, Term key, TermContext context) {

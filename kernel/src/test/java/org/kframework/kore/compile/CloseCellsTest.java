@@ -20,8 +20,8 @@ import static org.kframework.kore.KORE.*;
 public class CloseCellsTest {
 
     final SortInfo sortInfo = new SortInfo() {{
-        addOp("Map", "'_Map_");
-        addOp("List", "'_List_");
+        addOp("Map", "_Map_");
+        addOp("List", "_List_");
     }};
     final TestConfiguration cfgInfo = new TestConfiguration() {{
         addCell(null, "ThreadCell", "<thread>", Multiplicity.STAR);
@@ -36,8 +36,8 @@ public class CloseCellsTest {
         addLabel("EnvCell", "<env>");
         addLabel("ThreadCell", "<thread>");
         addLabel("ListCell", "<list>");
-        addLabel("Map", "'_Map_", true, true, true);
-        addLabel("List", "'_List_", true, false, true);
+        addLabel("Map", "_Map_", true, true, true);
+        addLabel("List", "_List_", true, false, true);
     }};
 
     @Test
@@ -51,7 +51,7 @@ public class CloseCellsTest {
     @Test
     public void testCloseMap() {
         K term = cell("<env>", true, false, KApply(KLabel("'_|=>_"), intToToken(1), intToToken(2)));
-        K expected = ccell("<env>", KApply(KLabel("'_Map_"), KApply(KLabel("'_|=>_"), intToToken(1), intToToken(2)), KVariable("DotVar0")));
+        K expected = ccell("<env>", KApply(KLabel("_Map_"), KApply(KLabel("'_|=>_"), intToToken(1), intToToken(2)), KVariable("DotVar0")));
         Assert.assertEquals(expected, new CloseCells(cfgInfo, sortInfo, labelInfo).close(term));
     }
 
@@ -62,9 +62,9 @@ public class CloseCellsTest {
                 cell("<list>", false, true, intToToken(2)),
                 cell("<list>", true, true, intToToken(3)));
         K expected = KApply(KLabel(KLabels.CELLS),
-                ccell("<list>", KApply(KLabel("'_List_"), KVariable("DotVar0"), intToToken(1))),
-                ccell("<list>", KApply(KLabel("'_List_"), intToToken(2), KVariable("DotVar1"))),
-                ccell("<list>", KApply(KLabel("'_List_"), KVariable("DotVar2"), KApply(KLabel("'_List_"), intToToken(3), KVariable("DotVar3")))));
+                ccell("<list>", KApply(KLabel("_List_"), KVariable("DotVar0"), intToToken(1))),
+                ccell("<list>", KApply(KLabel("_List_"), intToToken(2), KVariable("DotVar1"))),
+                ccell("<list>", KApply(KLabel("_List_"), KVariable("DotVar2"), KApply(KLabel("_List_"), intToToken(3), KVariable("DotVar3")))));
         Assert.assertEquals(expected, new CloseCells(cfgInfo, sortInfo, labelInfo).close(term));
     }
 

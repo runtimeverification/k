@@ -174,7 +174,7 @@ public class KILtoKORE extends KILTransformation<Object> {
 
     public Context apply(org.kframework.kil.Context c) {
         if (syntactic)
-            return Context(KApply(KLabel("'context")), KToken("true", Sorts.Bool()),
+            return Context(KApply(KLabel("context")), KToken("true", Sorts.Bool()),
                     inner.convertAttributes(c));
         return Context(inner.apply(c.getBody()), inner.applyOrTrue(c.getRequires()));
     }
@@ -186,7 +186,7 @@ public class KILtoKORE extends KILTransformation<Object> {
 
     public org.kframework.definition.Configuration apply(Configuration kilConfiguration) {
         if (syntactic)
-            return Configuration(KApply(KLabel("'configuration")), KToken("true", Sorts.Bool()),
+            return Configuration(KApply(KLabel("configuration")), KToken("true", Sorts.Bool()),
                     inner.convertAttributes(kilConfiguration));
         Cell body = (Cell) kilConfiguration.getBody();
         return Configuration(inner.apply(body), inner.applyOrTrue(kilConfiguration.getEnsures()),
@@ -195,7 +195,7 @@ public class KILtoKORE extends KILTransformation<Object> {
 
     public Rule apply(org.kframework.kil.Rule r) {
         if (syntactic)
-            return Rule(KApply(KLabel("'rule")), KToken("true", Sorts.Bool()),
+            return Rule(KApply(KLabel("rule")), KToken("true", Sorts.Bool()),
                     KToken("true", Sorts.Bool()), inner.convertAttributes(r));
         K body = inner.apply(r.getBody());
 
@@ -241,7 +241,7 @@ public class KILtoKORE extends KILTransformation<Object> {
         Set<Tuple2<K, Sort>> expSorts = gatherSorts.apply(body);
         //System.out.println("gatherSorts = " + expSorts);
 
-        BinaryOperator<K> makeAnd = (a, b) -> KApply(KLabel(dropQuote("'_andBool_")), KList(a, b));
+        BinaryOperator<K> makeAnd = (a, b) -> KApply(KLabel(dropQuote("_andBool_")), KList(a, b));
         K sortPredicates = expSorts
                 .stream()
                 .map(t -> (K) KApply(KLabel("is" + t._2().name()), KList(t._1())))

@@ -114,9 +114,9 @@ public class BuiltinIOOperations {
         //for (String c : args) { System.out.println(c); }
         ProcessOutput output = RunProcess.execute(environment, termContext.global().files.getProcessBuilder(), args);
 
-        KLabelConstant klabel = KLabelConstant.of("'#systemResult(_,_,_)", termContext.definition());
+        KLabelConstant klabel = KLabelConstant.of("#systemResult(_,_,_)", termContext.definition());
         /*
-        String klabelString = "'#systemResult(_,_,_)";
+        String klabelString = "#systemResult(_,_,_)";
         KLabelConstant klabel = KLabelConstant.of(klabelString, context);
         assert def.kLabels().contains(klabel) : "No KLabel in definition for " + klabelString;
         */
@@ -127,7 +127,7 @@ public class BuiltinIOOperations {
     }
 
     private KItem processIOException(String errno, Term klist, TermContext termContext) {
-        String klabelString = "'#" + errno;
+        String klabelString = "#" + errno;
         KLabelConstant klabel = KLabelConstant.of(klabelString, termContext.definition());
         assert termContext.definition().kLabels().contains(klabel) : "No KLabel in definition for errno '" + errno + "'";
         return KItem.of(klabel, klist, termContext.global());
