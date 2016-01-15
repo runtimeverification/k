@@ -52,7 +52,7 @@ public class RuleGrammarTest {
                         definitionFile,
                         definitionFile.getParentFile(),
                         Lists.newArrayList(Kompile.BUILTIN_DIRECTORY),
-                        true, false);
+                        false);
 
         return new RuleGrammarGenerator(baseK, true);
     }

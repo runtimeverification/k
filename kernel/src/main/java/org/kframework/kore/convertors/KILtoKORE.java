@@ -47,23 +47,20 @@ import static org.kframework.kore.KORE.*;
 public class KILtoKORE extends KILTransformation<Object> {
 
     private org.kframework.kil.loader.Context context;
-    private final boolean doDropQuote;
     private boolean autoImportDomains;
     private KILtoInnerKORE inner;
     private final boolean syntactic;
 
-    public KILtoKORE(org.kframework.kil.loader.Context context, boolean syntactic, boolean doDropQuote, boolean autoImportDomains) {
+    public KILtoKORE(org.kframework.kil.loader.Context context, boolean syntactic, boolean autoImportDomains) {
         this.context = context;
-        this.doDropQuote = doDropQuote;
         this.autoImportDomains = autoImportDomains;
-        inner = new KILtoInnerKORE(context, doDropQuote);
+        inner = new KILtoInnerKORE(context);
         this.syntactic = syntactic;
     }
 
     public KILtoKORE(org.kframework.kil.loader.Context context) {
         this.context = context;
-        this.doDropQuote = true;
-        inner = new KILtoInnerKORE(context, doDropQuote);
+        inner = new KILtoInnerKORE(context);
         this.syntactic = false;
     }
 

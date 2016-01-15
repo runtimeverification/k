@@ -109,7 +109,7 @@ public class Kompile {
      * @return
      */
     public CompiledDefinition run(File definitionFile, String mainModuleName, String mainProgramsModuleName, Sort programStartSymbol, Function<Definition, Definition> pipeline) {
-        Definition parsedDef = parseDefinition(definitionFile, mainModuleName, mainProgramsModuleName, true);
+        Definition parsedDef = parseDefinition(definitionFile, mainModuleName, mainProgramsModuleName);
         sw.printIntermediate("Parse definition [" + definitionParsing.parsedBubbles.get() + "/" + (definitionParsing.parsedBubbles.get() + definitionParsing.cachedBubbles.get()) + " rules]");
 
         checkDefinition(parsedDef);
@@ -122,8 +122,8 @@ public class Kompile {
         return new CompiledDefinition(kompileOptions, parsedDef, kompiledDefinition, programStartSymbol, configInfo.getDefaultCell(configInfo.topCell()).klabel());
     }
 
-    public Definition parseDefinition(File definitionFile, String mainModuleName, String mainProgramsModule, boolean dropQuote) {
-        Definition parsedDefinition = definitionParsing.parseDefinition(definitionFile, mainModuleName, mainProgramsModule, dropQuote);
+    public Definition parseDefinition(File definitionFile, String mainModuleName, String mainProgramsModule) {
+        Definition parsedDefinition = definitionParsing.parseDefinition(definitionFile, mainModuleName, mainProgramsModule);
         Definition afterResolvingConfigBubbles = definitionParsing.resolveConfigBubbles(parsedDefinition);
         Definition afterResolvingAllOtherBubbles = definitionParsing.resolveNonConfigBubbles(afterResolvingConfigBubbles);
         return afterResolvingAllOtherBubbles;
@@ -207,8 +207,8 @@ public class Kompile {
                 .apply(parsedRule);
     }
 
-    public Module parseModule(CompiledDefinition definition, File definitionFile, boolean dropQuote) {
-        return definitionParsing.parseModule(definition, definitionFile, dropQuote, !kompileOptions.outerParsing.noPrelude);
+    public Module parseModule(CompiledDefinition definition, File definitionFile) {
+        return definitionParsing.parseModule(definition, definitionFile, !kompileOptions.outerParsing.noPrelude);
     }
 
     private Sentence concretizeSentence(Sentence s, Definition input) {

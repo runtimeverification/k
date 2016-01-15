@@ -87,14 +87,14 @@ public class DefinitionParsing {
         this.isStrict = isStrict;
     }
 
-    public Module parseModule(CompiledDefinition definition, File definitionFile, boolean dropQuote, boolean autoImportDomains) {
+    public Module parseModule(CompiledDefinition definition, File definitionFile, boolean autoImportDomains) {
         java.util.Set<Module> modules = parser.loadModules(
                 mutable(definition.getParsedDefinition().modules()),
                 "require " + StringUtil.enquoteCString(definitionFile.getPath()),
                 Source.apply(definitionFile.getAbsolutePath()),
                 definitionFile.getParentFile(),
                 Lists.newArrayList(Kompile.BUILTIN_DIRECTORY),
-                dropQuote, autoImportDomains);
+                autoImportDomains);
 
         if (modules.size() != 1) {
             throw KEMException.compilerError("Expected to find a file with 1 module: found " + modules.size() + " instead.");
@@ -134,7 +134,7 @@ public class DefinitionParsing {
         }
     }
 
-    public Definition parseDefinition(File definitionFile, String mainModuleName, String mainProgramsModule, boolean dropQuote) {
+    public Definition parseDefinition(File definitionFile, String mainModuleName, String mainProgramsModule) {
         Definition definition = parser.loadDefinition(
                 mainModuleName,
                 mainProgramsModule, FileUtil.load(definitionFile),
@@ -142,7 +142,7 @@ public class DefinitionParsing {
                 definitionFile.getParentFile(),
                 ListUtils.union(lookupDirectories,
                         Lists.newArrayList(Kompile.BUILTIN_DIRECTORY)),
-                dropQuote, autoImportDomains);
+                autoImportDomains);
         return definition;
     }
 
