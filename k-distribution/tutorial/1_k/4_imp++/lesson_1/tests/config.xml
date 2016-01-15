@@ -5,7 +5,7 @@
   <include file="../../../2_imp/lesson_5/tests/config.xml"
            more-programs="."
            more-results="." >
-    <kompile-option name="--superheat" value="strict" />
+    <kompile-option name="--transition" value="strict" />
     <program name="div.imp">
       <krun-option name="--search" />
     </program>
