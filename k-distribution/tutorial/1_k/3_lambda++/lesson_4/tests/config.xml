@@ -6,6 +6,6 @@
   <include file="../../lesson_3/tests/config1.xml" />
   <include file="../../lesson_3/tests/config2.xml"
            more-programs = "."
-		   more-results = "." />
+           more-results = "." />
 
 </tests>
