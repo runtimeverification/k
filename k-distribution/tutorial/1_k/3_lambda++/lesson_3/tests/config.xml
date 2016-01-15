@@ -3,7 +3,7 @@
 
 <tests>
 
-  <include file="config1.xml" />
-  <include file="config2.xml" />
+  <include file="config-det.xml" />
+  <include file="config-nondet.xml" />
 
 </tests>

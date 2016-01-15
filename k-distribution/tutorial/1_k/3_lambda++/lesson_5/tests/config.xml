@@ -2,11 +2,11 @@
 <!-- Copyright (c) 2013-2014 K Team. All Rights Reserved. -->
 <tests>
 
-  <include file="../../lesson_3/tests/config1.xml"
+  <include file="../../lesson_3/tests/config-det.xml"
            more-programs="../../../1_lambda/lesson_8/tests"
            more-results="../../../1_lambda/lesson_8/tests" />
 
-  <include file="../../lesson_3/tests/config2.xml"
+  <include file="../../lesson_3/tests/config-nondet.xml"
            more-programs="../../lesson_4/tests"
            more-results="../../lesson_4/tests ." />
 
