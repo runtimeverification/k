@@ -85,7 +85,7 @@ public class AddBracketsTest {
                 "  syntax Exp ::= Exp \"*\" Exp [left]\n" +
                 "  syntax Exp ::= \"1\"\n" +
                 "  syntax Exp ::= \"(\" Exp \")\" [bracket]\n" +
-                "  syntax priority '_*_ > '_+_\n" +
+                "  syntax priority _*_ > _+_\n" +
                 "endmodule\n";
         unparserTest(def, "1 + 1 + 1 + 1");
         unparserTest(def, "1 + ( 1 + 1 ) + 1");
