@@ -8,8 +8,9 @@
            results=".">
     <kompile-option name="--superheat"
                     value="strict" />
-    <kompile-option name="--backend" value="java" />
-<!-- Grigore: explain the superheat option above -->
+<!-- Andrei: modify superheat to superstrict above -->
+<!-- Grigore: explain the superstrict option above -->
+<!-- Grigore: we may want to use this option also in lambda -->
   </include>
 
 </tests>

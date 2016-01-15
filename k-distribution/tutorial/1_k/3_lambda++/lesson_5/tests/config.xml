@@ -2,11 +2,12 @@
 <!-- Copyright (c) 2013-2014 K Team. All Rights Reserved. -->
 <tests>
 
-  <include file="../../lesson_4/tests/config.xml"
-           exclude="omega closed-variable-capture free-variable-capture"
-           more-results="../../lesson_1/tests ." />
-<!-- The above is not perfect, because closed-variable-capture and
-     free-variable-capture ended up being excluded from both sets of
-     included tests; we need to extend ktest to allow for finer
-     grain configuration of inclusions -->
+  <include file="../../lesson_3/tests/config1.xml"
+           more-programs="../../../1_lambda/lesson_8/tests"
+           more-results="../../../1_lambda/lesson_8/tests" />
+
+  <include file="../../lesson_3/tests/config2.xml"
+           more-programs="../../lesson_4/tests"
+           more-results="../../lesson_4/tests ." />
+
 </tests>

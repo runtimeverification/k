@@ -1,3 +1,5 @@
+<!-- Copyright (c) 2012-2016 K Team. All Rights Reserved. -->
+
 * Cut-and-paste is a poor-man's approach to reuse.
 
 Indeed, it is.  A better way to reuse, which requires a bit of planning ahead,
