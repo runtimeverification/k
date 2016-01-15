@@ -8,6 +8,9 @@
                     value="strict" />
     <kompile-option name="--directory"
                     value="nondet" />
+<!-- The next line should not be needed ... -->
+    <kompile-option name="--syntax-module" value="LAMBDA" />
+
 <!-- Andrei: superheat => superstrict above -->
     <all-programs>
       <krun-option name="--search" />
