@@ -93,7 +93,7 @@ public class AddEmptyListsTest {
                     "syntax K ::= f(As) | g(A) | h(Bs)" +
                     "endmodule\n";
 
-    public static final KApply NIL = KApply(KLabel(".List{\"'_,_\"}"));
+    public static final KApply NIL = KApply(KLabel(".List{\"_,_\"}"));
     public static final KLabel CONS = KLabel("_,_");
     public static final KApply A = KApply(KLabel("alabel"));
     public static final KApply B = KApply(KLabel("blabel"));
@@ -165,7 +165,7 @@ public class AddEmptyListsTest {
 
     @Test
     public void testArgumentLabeledNil() {
-        parseTerm("f(`.List{\"'_,_\"}`(.KList))", "K", KApply(F, NIL));
+        parseTerm("f(`.List{\"_,_\"}`(.KList))", "K", KApply(F, NIL));
     }
 
     @Test
@@ -181,7 +181,7 @@ public class AddEmptyListsTest {
 
     @Test
     public void testArgumentLabeledNilSub1() {
-        parseTerm("h(`.List{\"'_,_\"}`(.KList))", "K", KApply(H, NIL));
+        parseTerm("h(`.List{\"_,_\"}`(.KList))", "K", KApply(H, NIL));
     }
 
     @Test
