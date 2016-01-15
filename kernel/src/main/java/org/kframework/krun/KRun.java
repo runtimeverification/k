@@ -362,7 +362,7 @@ public class KRun {
 
         if (output.exitCode != 0) {
             throw new ParseFailedException(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, "Parser returned a non-zero exit code: "
-                    + output.exitCode + "\nStdout:\n" + output.stdout + "\nStderr:\n" + output.stderr));
+                    + output.exitCode + "\nStdout:\n" + new String(output.stdout) + "\nStderr:\n" + new String(output.stderr)));
         }
 
         byte[] kast = output.stdout != null ? output.stdout : new byte[0];
