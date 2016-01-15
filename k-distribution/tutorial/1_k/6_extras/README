@@ -7,10 +7,8 @@ Here we will learn several other features of K, such as:
 - more details about how configuration abstraction really works
 - how to define arbitrary partial orders over syntactic constructs
 etc.
-
-
-
-
+- how to add the freshness capability to sorts, which allows us to generate
+fresh elements of that sort (using `!` variables).
 
 Similar heating/cooling rules are also automatically
 associated to \K (evaluation) context declarations in more complex
