@@ -7,7 +7,7 @@ module TEST
                | "t"    [andanohter]
                | "u"    [off]
 
-  syntax priorities 'x > 'y 'z > 't > 'u
-  syntax left 'x
-  syntax right 'y
+  syntax priorities x > y z > t > u
+  syntax left x
+  syntax right y
 endmodule

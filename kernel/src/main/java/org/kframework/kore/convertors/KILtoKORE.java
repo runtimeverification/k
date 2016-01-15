@@ -24,6 +24,7 @@ import org.kframework.kore.KToken;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import scala.Enumeration.Value;
 import scala.Tuple2;
@@ -283,7 +284,12 @@ public class KILtoKORE extends KILTransformation<Object> {
     }
 
     public scala.collection.Set<Tag> toTags(List<KLabelConstant> labels) {
-        return immutable(labels.stream().flatMap(l -> context.tags.get(l.getLabel()).stream().map(p -> Tag(dropQuote(p.getKLabel())))).collect(Collectors.toSet()));
+        return immutable(labels.stream().flatMap(l -> {
+            java.util.Set<Production> productions = context.tags.get(l.getLabel());
+            if(productions.isEmpty())
+                throw KEMException.outerParserError("Could not find any productions for tag: "+l.getLabel(), l.getSource(), l.getLocation());
+            return productions.stream().map(p -> Tag(dropQuote(p.getKLabel())));
+        }).collect(Collectors.toSet()));
     }
 
     public Set<org.kframework.definition.Sentence> apply(Syntax s) {
