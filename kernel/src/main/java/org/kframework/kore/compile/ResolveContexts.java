@@ -12,6 +12,7 @@ import org.kframework.definition.ProductionItem;
 import org.kframework.definition.Sentence;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.FindK;
+import org.kframework.kore.KORE;
 import org.kframework.kore.VisitK;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -64,10 +65,10 @@ public class ResolveContexts {
         if (klabels.isEmpty()) {
             klabels.addAll(mutable(input.definedKLabels()));
         }
-        KLabel freezer = KLabel("#freezer" + nameHint);
         int counter = 0;
+        KLabel freezer;
         do {
-            freezer = KLabel(freezer.name() + counter++);
+            freezer = KLabel("#freezer" + nameHint + (counter++ == 0 ? "" : counter));
         } while (klabels.contains(freezer));
         klabels.add(freezer);
         return freezer;
