@@ -1,1 +1,1 @@
-<T> <k> print ( "Input two numbers: " , .Ids ) ; ~> int x , ( y , .Ids ) ; ~> ( x = read ( ) ; ) ~> ( y = read ( ) ; ) ~> print ( "Their sum is: " , ( ( x + y ) , ( "\n" , .Ids ) ) ) ; </k> <state> .Map </state> </T>
+<T> <k> print ( "Input two numbers: " , .AExps ) ; ~> int x , ( y , .AExps ) ; ~> ( x = read ( ) ; ) ~> ( y = read ( ) ; ) ~> print ( "Their sum is: " , ( ( x + y ) , ( "\n" , .AExps ) ) ) ; </k> <state> .Map </state> </T>
