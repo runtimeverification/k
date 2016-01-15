@@ -120,11 +120,27 @@ public class DefinitionParsing {
         gen = new RuleGrammarGenerator(definition.getParsedDefinition(), isStrict);
         Module parsedMod = resolveNonConfigBubbles(modWithConfig, gen);
 
+        saveCachesAndReportParsingErrors();
+        return parsedMod;
+    }
+
+    private void saveCachesAndReportParsingErrors() {
+        saveCaches();
+        throwExceptionIfThereAreErrors();
+    }
+
+    private void saveCaches() {
         if (cacheParses) {
             loader.saveOrDie(cacheFile, caches);
         }
-        throwExceptionIfThereAreErrors();
-        return parsedMod;
+    }
+
+    public Definition parseDefinitionAndResolveBubbles(File definitionFile, String mainModuleName, String mainProgramsModule) {
+        Definition parsedDefinition = parseDefinition(definitionFile, mainModuleName, mainProgramsModule);
+        Definition afterResolvingConfigBubbles = resolveConfigBubbles(parsedDefinition);
+        Definition afterResolvingAllOtherBubbles = resolveNonConfigBubbles(afterResolvingConfigBubbles);
+        saveCachesAndReportParsingErrors();
+        return afterResolvingAllOtherBubbles;
     }
 
     private void throwExceptionIfThereAreErrors() {
@@ -183,10 +199,6 @@ public class DefinitionParsing {
         gen = new RuleGrammarGenerator(definitionWithConfigBubble, isStrict);
         Definition defWithConfig = DefinitionTransformer.from(resolveConfig, "parsing configurations").apply(definitionWithConfigBubble);
 
-        if (cacheParses) {
-            loader.saveOrDie(cacheFile, caches);
-        }
-        throwExceptionIfThereAreErrors();
         return defWithConfig;
     }
 
@@ -201,7 +213,6 @@ public class DefinitionParsing {
     public Definition resolveNonConfigBubbles(Definition defWithConfig) {
         RuleGrammarGenerator gen = new RuleGrammarGenerator(defWithConfig, isStrict);
         Definition parsedDef = DefinitionTransformer.from(m -> this.resolveNonConfigBubbles(m, gen), "parsing rules").apply(defWithConfig);
-        throwExceptionIfThereAreErrors();
         return parsedDef;
     }
 

@@ -123,10 +123,7 @@ public class Kompile {
     }
 
     public Definition parseDefinition(File definitionFile, String mainModuleName, String mainProgramsModule) {
-        Definition parsedDefinition = definitionParsing.parseDefinition(definitionFile, mainModuleName, mainProgramsModule);
-        Definition afterResolvingConfigBubbles = definitionParsing.resolveConfigBubbles(parsedDefinition);
-        Definition afterResolvingAllOtherBubbles = definitionParsing.resolveNonConfigBubbles(afterResolvingConfigBubbles);
-        return afterResolvingAllOtherBubbles;
+        return definitionParsing.parseDefinitionAndResolveBubbles(definitionFile, mainModuleName, mainProgramsModule);
     }
 
     public Definition resolveIOStreams(Definition d) {
