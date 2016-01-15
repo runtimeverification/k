@@ -61,7 +61,7 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
      */
     public String getTerminatorKLabel() {
         assert isListDecl();
-        return "'.List{" + StringUtil.enquoteCString(getKLabel()) + "}";
+        return ".List{" + StringUtil.enquoteCString(getKLabel()) + "}";
     }
 
     /**
@@ -184,7 +184,7 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
             if (sort.equals(Sort.KLABEL) && getArity() == 0)
                 return null;
             else
-                klabel = "'" + getPrefixLabel();
+                klabel = getPrefixLabel();
         }
         return klabel.replace(" ", "");
     }
