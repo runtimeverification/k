@@ -59,15 +59,15 @@ public class ResolveContexts {
     }
 
     private Set<KLabel> klabels = new HashSet<>();
-    private int counter = 0;
 
-    private KLabel getUniqueFreezerLabel(Module input) {
+    private KLabel getUniqueFreezerLabel(Module input, String nameHint) {
         if (klabels.isEmpty()) {
             klabels.addAll(mutable(input.definedKLabels()));
         }
-        KLabel freezer;
+        KLabel freezer = KLabel("#freezer" + nameHint);
+        int counter = 0;
         do {
-            freezer = KLabel("#freezer" + counter++);
+            freezer = KLabel(freezer.name() + counter++);
         } while (klabels.contains(freezer));
         klabels.add(freezer);
         return freezer;
@@ -120,7 +120,7 @@ public class ResolveContexts {
         K cooled = RewriteToTop.toLeft(body);
         // TODO(dwightguth): generate freezers better for pretty-printing purposes
         List<ProductionItem> items = new ArrayList<>();
-        KLabel freezerLabel = getUniqueFreezerLabel(input);
+        KLabel freezerLabel = getUniqueFreezerLabel(input, ((KApply)cooled).klabel().name());
         items.add(Terminal(freezerLabel.name()));
         items.add(Terminal("("));
         for (int i = 0; i < vars.size(); i++) {
