@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2015 K Team. All Rights Reserved.
+// Copyright (c) 2013-2016 K Team. All Rights Reserved.
 /* BUGS:
 
 Due to now JavaCC handles EOF, EOF cannot terminate a single-line comment
