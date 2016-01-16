@@ -1,4 +1,5 @@
-<!-- Copyright (c) 2014 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2014-2016 K Team. All Rights Reserved. -->
+
 ### Reusing Existing Semantics
 
 [MOVIE [3'21"]](http://youtu.be/tW4KRdgBIGo)
@@ -14,9 +15,9 @@ definition from Lesson 7 in Part 1 of the tutorial.
 
 Let us `kompile` and `krun` all the remaining programs from Part 1 of the
 tutorial.  Everything should work fine, although the store contains lots of
-garbage.  Garbage collection is an interesting topic, but we do not do it here.
-Nevertheless, much of this garbage is caused by the intricate use of the
-fixed-point combinator to define recursion.  In a future lesson in this
+garbage.  Garbage collection is an interesting topic, but we do not do it
+here.  Nevertheless, much of this garbage is caused by the intricate use of
+the fixed-point combinator to define recursion.  In a future lesson in this
 tutorial we will see that a different, environment-based definition of
 fixed-points will allocate much less memory.
 

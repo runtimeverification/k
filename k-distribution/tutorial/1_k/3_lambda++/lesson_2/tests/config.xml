@@ -6,10 +6,13 @@
   <include file="../../../1_lambda/lesson_1/tests/config.xml"
            exclude="omega"
            results=".">
+<!-- The next line should not be needed ... -->
+    <kompile-option name="--syntax-module" value="LAMBDA" />
     <kompile-option name="--superheat"
                     value="strict" />
-    <kompile-option name="--backend" value="java" />
-<!-- Grigore: explain the superheat option above -->
+<!-- Andrei: modify superheat to superstrict above -->
+<!-- Grigore: explain the superstrict option above -->
+<!-- Grigore: we may want to use this option also in lambda -->
   </include>
 
 </tests>
