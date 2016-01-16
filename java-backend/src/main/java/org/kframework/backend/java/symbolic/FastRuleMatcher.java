@@ -4,6 +4,7 @@ package org.kframework.backend.java.symbolic;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
+import org.kframework.attributes.Att;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.compile.KOREtoBackendKIL;
 import org.kframework.backend.java.kil.BuiltinList;
@@ -88,7 +89,7 @@ public class FastRuleMatcher {
             // TODO(YilongL): remove TermContext from the signature once
             // ConstrainedTerm doesn't hold a TermContext anymore
             ConjunctiveFormula patternConstraint = ConjunctiveFormula.of(rule.lookups());
-            if (!computeOne && rule.containsAttribute("cool") && transitions.stream().anyMatch(rule::containsAttribute)) {
+            if (!computeOne && rule.containsAttribute(Att.cool()) && transitions.stream().anyMatch(rule::containsAttribute)) {
                 patternConstraint = patternConstraint.addAll(rule.requires().stream().filter(t -> !t.containsAttribute(Attribute.SUPER_STRICT)).collect(Collectors.toList()));
             } else {
                 patternConstraint = patternConstraint.addAll(rule.requires());

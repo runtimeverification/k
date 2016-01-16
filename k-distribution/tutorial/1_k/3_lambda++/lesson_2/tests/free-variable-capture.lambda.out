@@ -2,16 +2,19 @@ Search results:
 
 Solution 1:
 V:K -->
-a ~> (HOLE ((lambda x . (lambda y . x) y) z))
-
+a ~> #freezer__ ( ( lambda x . lambda y . x ) y z )
 Solution 2:
 V:K -->
-y ~> closure ( .Map , x , lambda y . x ) HOLE ~> HOLE z ~> (a HOLE)
-
+a ~> #freezer__ ( closure ( .Map , x , lambda y . x ) y z )
 Solution 3:
 V:K -->
-y ~> lambda x . (lambda y . x) HOLE ~> HOLE z ~> (a HOLE)
-
+y ~> #freezer__2 ( closure ( .Map , x , lambda y . x ) ) ~> #freezer__ ( z ) ~> #freezer__2 ( a )
 Solution 4:
 V:K -->
-z ~> (lambda x . (lambda y . x) y) HOLE ~> (a HOLE)
+y ~> #freezer__2 ( lambda x . lambda y . x ) ~> #freezer__ ( z ) ~> #freezer__2 ( a )
+Solution 5:
+V:K -->
+z ~> #freezer__2 ( ( lambda x . lambda y . x ) y ) ~> #freezer__2 ( a )
+Solution 6:
+V:K -->
+z ~> #freezer__2 ( closure ( .Map , x , lambda y . x ) y ) ~> #freezer__2 ( a )

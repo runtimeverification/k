@@ -54,6 +54,7 @@ public class SymbolicRewriter {
     private final Stopwatch stopwatch = Stopwatch.createUnstarted();
     private final KOREtoBackendKIL constructor;
     private boolean transition;
+    private Set<ConstrainedTerm> superheated = Sets.newHashSet();
     private final RuleIndex ruleIndex;
     private final KRunState.Counter counter;
     private final Map<ConstrainedTerm, Set<Rule>> subject2DisabledRules = new HashMap<>();
@@ -250,6 +251,7 @@ public class SymbolicRewriter {
                 computeOne,
                 transitions,
                 subject.termContext());
+        Set<ConstrainedTerm> newSuperheated = Sets.newHashSet();
         for (Triple<ConjunctiveFormula, Boolean, Integer> triple : matches) {
             Rule rule = definition.ruleTable.get(triple.getRight());
             Substitution<Variable, Term> substitution =
@@ -286,9 +288,18 @@ public class SymbolicRewriter {
 
             theNew = restoreConfigurationIfNecessary(subject, rule, theNew);
 
-            results.add(new ConstrainedTerm(theNew, subject.termContext()));
-            //results.add(buildResult(rule, triple.getLeft(), subject.term(), true, subject.termContext()));
+            ConstrainedTerm result = new ConstrainedTerm(theNew, subject.termContext());
+
+            /* TODO(AndreiS): remove this hack for super strictness after strategies work */
+            if (rule.containsAttribute(Att.heat()) && transitions.stream().anyMatch(rule::containsAttribute)) {
+                newSuperheated.add(result);
+            } else if (rule.containsAttribute(Att.cool()) && transitions.stream().anyMatch(rule::containsAttribute) && superheated.contains(subject)) {
+                continue;
+            }
+
+            results.add(result);
         }
+        superheated = newSuperheated;
 
         if (results.isEmpty()) {
             addStuckFlagIfNotThere(subject).ifPresent(results::add);
