@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Copyright (c) 2013-2016 K Team. All Rights Reserved. -->
+
 <tests>
 
   <include file="../../../2_imp/lesson_5/tests/config.xml"
            more-programs="."
-           more-results="."
-           exclude="div" > <!--because of search bug-->
+           more-results="." >
+	<!-- Andrei: superheat => superstrict below-->
     <kompile-option name="--superheat" value="strict" />
     <program name="div.imp">
       <krun-option name="--search" />
