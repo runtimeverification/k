@@ -1,27 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Copyright (c) 2013-2016 K Team. All Rights Reserved. -->
+
 <tests>
 
-  <include file="../../../1_lambda/lesson_8/tests/config.xml"
-           more-results="../../lesson_2/tests"
-           exclude="omega fibbo closed-variable-capture free-variable-capture" />
-<!-- Thew first program, omega, does not terminate.  The second, "fibbo", takes
-     way too long with this semantics, so prefer to exclude it.  The last two
-     are excluded because they yield nondeterminism unless we kompile with the
-     superheat "strict" option, which is done below.  We do not want to kompile
-     with superheat "strict" option for all programs, because it is too slow.  -->
+  <include file="config-det.xml" />
+  <include file="config-nondet.xml" />
 
-  <include file="../../lesson_2/tests/config.xml">
-    <kompile-option name="--super-strict"
-                    value="strict" />
-    <kompile-option name="--directory"
-                    value="nondet" />
-    <kompile-option name="--backend" value="java" />
-    <all-programs>
-      <krun-option name="--search" />
-      <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
-      <krun-option name="--directory"
-                   value="nondet"/>
-    </all-programs>
-  </include>
 </tests>

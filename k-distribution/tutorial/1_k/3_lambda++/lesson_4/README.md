@@ -1,4 +1,5 @@
-<!-- Copyright (c) 2014 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2014-2016 K Team. All Rights Reserved. -->
+
 ### Do Not Reuse Blindly!
 
 [MOVIE [3'37"]](http://youtu.be/OXvtklaSaSQ)

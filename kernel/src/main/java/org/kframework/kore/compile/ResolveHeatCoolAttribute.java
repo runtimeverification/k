@@ -6,6 +6,7 @@ import org.kframework.builtin.BooleanUtils;
 import org.kframework.definition.Context;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
+import org.kframework.kil.Attribute;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -42,9 +43,9 @@ public class ResolveHeatCoolAttribute {
         if (att.contains("heat")) {
             return BooleanUtils.and(requires, BooleanUtils.not(predicate));
         } else if (att.contains("cool")) {
-            if (kompileOptions.superStrict.stream().allMatch(att::contains)) {
+            if (kompileOptions.superStrict.stream().anyMatch(att::contains)) {
                 // if the cooling rule is a super strict, then tag the isKResult predicate and drop it during search
-                predicate = KApply(predicate.klabel(), predicate.klist(), predicate.att().add("super-strict"));
+                predicate = KApply(predicate.klabel(), predicate.klist(), predicate.att().add(Attribute.SUPER_STRICT));
             }
             return BooleanUtils.and(requires, predicate);
         }
