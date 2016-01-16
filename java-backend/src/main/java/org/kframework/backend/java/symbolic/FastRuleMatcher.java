@@ -22,6 +22,7 @@ import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.builtin.KLabels;
+import org.kframework.kil.Attribute;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
 import org.kframework.utils.BitSet;
@@ -88,7 +89,7 @@ public class FastRuleMatcher {
             // ConstrainedTerm doesn't hold a TermContext anymore
             ConjunctiveFormula patternConstraint = ConjunctiveFormula.of(rule.lookups());
             if (!computeOne && rule.containsAttribute("cool") && transitions.stream().anyMatch(rule::containsAttribute)) {
-                patternConstraint = patternConstraint.addAll(rule.requires().stream().filter(t -> !t.containsAttribute("super-strict")).collect(Collectors.toList()));
+                patternConstraint = patternConstraint.addAll(rule.requires().stream().filter(t -> !t.containsAttribute(Attribute.SUPER_STRICT)).collect(Collectors.toList()));
             } else {
                 patternConstraint = patternConstraint.addAll(rule.requires());
             }
