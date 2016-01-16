@@ -8,7 +8,7 @@
                     value="strict" />
     <kompile-option name="--directory"
                     value="nondet" />
-<!-- The next line should not be needed ... -->
+<!-- The next line should not be needed after fixing kast ... -->
     <kompile-option name="--syntax-module" value="LAMBDA" />
 
 <!-- Andrei: superheat => superstrict above -->

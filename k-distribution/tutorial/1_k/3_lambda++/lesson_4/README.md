@@ -16,7 +16,7 @@ Let's try (and fail) to reuse the definition of `callcc` from Lesson 1:
     rule <k> (callcc V:Val => V cc(K)) ~> K </k>
     rule <k> cc(K) V ~> _ =>  V ~> K </k>
 
-The callcc examples that we tried in Lesson 1 work, so it may look it works.
+The `callcc` examples that we tried in Lesson 1 work, so it may look it works.
 
 However, the problem is that `cc(K)` should also include an environment,
 and that environment should also be restored when `cc(K)` is invoked.
