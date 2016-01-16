@@ -81,6 +81,9 @@ public class ResolveContexts {
         K body = context.body();
         K requiresHeat = context.requires();
         K requiresCool = BooleanUtils.TRUE;
+
+        int currentHolePosition[] = new int[] { 0 };
+        int finalHolePosition[] = new int[] { 0 };
         // Find a heated hole
         // e.g., context ++(HOLE => lvalue(HOLE))
         K heated = new VisitK() {
@@ -105,8 +108,10 @@ public class ResolveContexts {
             public void apply(KVariable k) {
                 if (!k.name().equals("HOLE")) {
                     vars.put(k, k);
+                    finalHolePosition[0] = currentHolePosition[0];
                 } else {
                     holeVar = k;
+                    currentHolePosition[0]++;
                 }
                 super.apply(k);
             }
@@ -122,7 +127,7 @@ public class ResolveContexts {
         K cooled = RewriteToTop.toLeft(body);
         // TODO(dwightguth): generate freezers better for pretty-printing purposes
         List<ProductionItem> items = new ArrayList<>();
-        KLabel freezerLabel = getUniqueFreezerLabel(input, ((KApply)cooled).klabel().name());
+        KLabel freezerLabel = getUniqueFreezerLabel(input, ((KApply)cooled).klabel().name() + finalHolePosition[0]);
         items.add(Terminal(freezerLabel.name()));
         items.add(Terminal("("));
         for (int i = 0; i < vars.size(); i++) {
