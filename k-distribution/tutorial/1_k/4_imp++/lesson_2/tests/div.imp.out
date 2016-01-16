@@ -1,8 +1,8 @@
 Search results:
 
 Solution 1:
-<T> <k> ( ++ x ) ~> #freezer_/_01 ( ++ x / x ) ~> #freezer_=_;0 ( y ) </k> <env> x |-> 1 y |-> 2 </env> <store> 1 |-> 1 2 |-> 0 </store> </T>
+<T> <k> ( ++ x ) ~> #freezer_/_ ( ++ x / x ) ~> #freezer_=_; ( y ) </k> <env> x |-> 1 y |-> 2 </env> <store> 1 |-> 1 2 |-> 0 </store> </T>
 Solution 2:
-<T> <k> ( ++ x ) ~> #freezer_/_01 ( 1 ) ~> #freezer_/_0 ( ++ x ) ~> #freezer_=_;0 ( y ) </k> <env> x |-> 1 y |-> 2 </env> <store> 1 |-> 1 2 |-> 0 </store> </T>
+<T> <k> ( ++ x ) ~> #freezer_/_ ( 1 ) ~> #freezer_/_2 ( ++ x ) ~> #freezer_=_; ( y ) </k> <env> x |-> 1 y |-> 2 </env> <store> 1 |-> 1 2 |-> 0 </store> </T>
 Solution 3:
-<T> <k> ( ++ x ) ~> #freezer_/_01 ( x ) ~> #freezer_/_0 ( ++ x ) ~> #freezer_=_;0 ( y ) </k> <env> x |-> 1 y |-> 2 </env> <store> 1 |-> 1 2 |-> 0 </store> </T>
+<T> <k> ( ++ x ) ~> #freezer_/_ ( x ) ~> #freezer_/_2 ( ++ x ) ~> #freezer_=_; ( y ) </k> <env> x |-> 1 y |-> 2 </env> <store> 1 |-> 1 2 |-> 0 </store> </T>
