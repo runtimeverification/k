@@ -4,7 +4,7 @@
 
   <include file="../../lesson_2/tests/config.xml"
            more-results="." >
-    <kompile-option name="--superheat" value="division" />
+    <kompile-option name="--super-strict" value="division" />
     <program name="div.imp" regex="true">
       <krun-option name="--search" />
     </program>

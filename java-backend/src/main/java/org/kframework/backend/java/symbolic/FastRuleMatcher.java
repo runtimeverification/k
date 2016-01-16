@@ -88,7 +88,7 @@ public class FastRuleMatcher {
             // ConstrainedTerm doesn't hold a TermContext anymore
             ConjunctiveFormula patternConstraint = ConjunctiveFormula.of(rule.lookups());
             if (!computeOne && rule.containsAttribute("cool") && transitions.stream().anyMatch(rule::containsAttribute)) {
-                patternConstraint = patternConstraint.addAll(rule.requires().stream().filter(t -> !t.containsAttribute("superstrict")).collect(Collectors.toList()));
+                patternConstraint = patternConstraint.addAll(rule.requires().stream().filter(t -> !t.containsAttribute("super-strict")).collect(Collectors.toList()));
             } else {
                 patternConstraint = patternConstraint.addAll(rule.requires());
             }

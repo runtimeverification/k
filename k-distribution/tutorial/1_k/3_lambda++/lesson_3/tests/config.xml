@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright (c) 2013-2014 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2013-2016 K Team. All Rights Reserved. -->
 <tests>
 
   <include file="../../../1_lambda/lesson_8/tests/config.xml"
@@ -12,7 +12,7 @@
      with superheat "strict" option for all programs, because it is too slow.  -->
 
   <include file="../../lesson_2/tests/config.xml">
-    <kompile-option name="--superheat"
+    <kompile-option name="--super-strict"
                     value="strict" />
     <kompile-option name="--directory"
                     value="nondet" />
