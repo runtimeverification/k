@@ -44,6 +44,7 @@ public class ResolveContexts {
     }
 
     public Definition resolve(Definition d) {
+        klabels = new HashSet<>();
         Module transformedMainModule = resolve(d.mainModule());
         return Definition.apply(transformedMainModule, add(transformedMainModule, minus(d.mainModule(), d.entryModules())), d.att());
     }
@@ -59,7 +60,7 @@ public class ResolveContexts {
         return Module(input.name(), input.imports(), (scala.collection.Set<Sentence>) stream(input.localSentences()).filter(s -> !(s instanceof Context)).collect(Collections.toSet()).$bar(immutable(rulesToAdd)), input.att());
     }
 
-    private Set<KLabel> klabels = new HashSet<>();
+    private Set<KLabel> klabels;
 
     private KLabel getUniqueFreezerLabel(Module input, String nameHint) {
         if (klabels.isEmpty()) {
