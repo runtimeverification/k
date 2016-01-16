@@ -747,11 +747,7 @@ refer to it (see rule above). */
 
   syntax KItem ::= (Id,EnvCell) // TODO: used to be ListItem; explain this
 
-  // TODO(KORE): drop bracket #1935
   rule <k> new Class:Id(Vs:Vals) ~> K
-  /*
-  rule <k> new Class:Id(Vs:Vals) ~> K
-  */
            => create(Class) ~> storeObj ~> Class(Vs); return this; </k>
        <env> Env => .Map </env>
        <nextLoc> L:Int => L +Int 1 </nextLoc>
