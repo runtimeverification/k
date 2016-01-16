@@ -567,11 +567,7 @@ from SIMPLE unchanged. */
   syntax Map ::= Int "..." Int "|->" K
     [function, latex({#1}\ldots{#2}\mapsto{#3})]
   rule N...M |-> _ => .Map  when N >Int M
-  // TODO(KORE): drop bracket #1935
-  rule N...M |-> K => (N |-> K) (N +Int 1)...M |-> K  when N <=Int M
-  /*
   rule N...M |-> K => N |-> K (N +Int 1)...M |-> K  when N <=Int M
-  */
 
 
 /*@ \subsection{Changes to the existing untyped SIMPLE semantics}
@@ -752,7 +748,7 @@ refer to it (see rule above). */
   syntax KItem ::= (Id,EnvCell) // TODO: used to be ListItem; explain this
 
   // TODO(KORE): drop bracket #1935
-  rule <k> (new Class:Id(Vs:Vals) ~> K)
+  rule <k> new Class:Id(Vs:Vals) ~> K
   /*
   rule <k> new Class:Id(Vs:Vals) ~> K
   */

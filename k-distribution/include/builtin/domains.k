@@ -43,6 +43,7 @@ module MAP
   syntax Map ::= K "|->" K                      [function, hook(MAP.element), latex({#1}\mapsto{#2})]
 
   syntax priorities _|->_ > _Map_ .Map
+  syntax non-assoc _|->_
 
   /*@ Retrieve the value associated with the given key */
   syntax K ::= Map "[" K "]"                    [function, hook(MAP.lookup), klabel(Map:lookup)]
