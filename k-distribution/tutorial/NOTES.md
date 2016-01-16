@@ -46,7 +46,10 @@ Describe/use/explain/justify the terminology "the `<k/>` cell" as opposed to "th
 
 Would it be a good idea to make the README files self contained, that is,
 to include the entire `lang.k` code in them, spread over the entire README, as things
-are discussed?
+are discussed?  In case we decide not to, make sure that the code snippets mentioned
+in the READMEs are in perfect correspondence to the code in the actual .k definitions.
+Maybe add a tag before each code snippet saying what file and what lines in that
+file comes from, then we can use a script to check them to be identical.
 
 `1_k\5_types\lesson_4\README.md` refers to *polymorphism*, but some may say that is not precisely 
 polymorphism, because the types are not universally quantified.  Explain that better.
@@ -83,3 +86,6 @@ is systematically changed when this happens.
 
 See issue #2023 and modify tutorial/1_k/2_imp/lesson_4 accordingly, if needed.
 
+All definitions, and corresponding READMEs, should be changed to take advantage
+of modules and module operations.  Ideally, we'd like to have no code repetition
+in any examples, except for demonstration purposes.
