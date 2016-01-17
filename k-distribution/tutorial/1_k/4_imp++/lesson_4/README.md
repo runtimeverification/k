@@ -1,8 +1,8 @@
-<!-- Copyright (c) 2010-2014 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2010-2016 K Team. All Rights Reserved. -->
 
 ### Semantic Lists; Input/Output Streaming
 
-In this lesson we add semantics to the read and print IMP++ constructs.
+In this lesson we add semantics to the `read` and `print` IMP++ constructs.
 In doing so, we also learn how to use semantic lists and how to connect
 cells holding semantic lists to the standard input and standard output.
 This allows us to turn the K semantics into an interactive interpreter.
@@ -19,25 +19,57 @@ which we use for states, environments, stores, etc., are sets of pairs
 `t1 |-> t2`, where `t1` and `t2` are terms of sort K.  The `ListItem` wrapper
 is currently needed, to avoid parsing ambiguities.
 
-Since we want the print statement to also print strings, we need to tell
+Since we want the `print` statement to also print strings, we need to tell
 K that strings are results.  To make it more interesting, let us also overload
 the `+` symbol on arithmetic expressions to also take strings and, as a
 result, to concatenate them.  Since `+` is already strict, we only need to add
 a rule reducing the IMP addition of strings to the builtin operation `+String`
 which concatenates two strings.
 
-Let us next give semantics to read and print.  The former reads and consumes
-the first integer item from the `<in/>` cell; note that our read only reads
-integer values (it gets stuck if the first item in the `<in/>` cell is not an
-integer).  The latter takes each of print's arguments in order and places
-them at the end of the `<out/>` cell.  Since we want to print both integers and
-string values, to avoid writing two rules, one for each type of value, we
-instead add a new syntactic category, `Printable`, which is the union of
-integers and strings.  Note that there is no need to also add syntactic lists
-of `Printable` elements, because we can use a variable over syntactic lists of
-arithmetic expressions to match the remaining arguments of print (in other
-words, we can output the first argument of the print statement as soon as it
-becomes a `Printable`, even if the remaining arguments are not evaluated yet).
+The semantics of `read` is immediate: read and consumes the first integer item
+from the `<in/>` cell; note that our read only reads integer values (it gets
+stuck if the first item in the `<in/>` cell is not an integer).
+
+The semantics of `print` is a bit trickier.  Recall that `print` takes an
+arbitrary number of arithmetic expression arguments, and evaluates and outputs
+each of them in order, from left to right.  For example,
+`print("Hello", 3/0, "Bye");` outputs "Hello" and then gets stuck on the
+illegal division by zero operation.  In other words, we do not want it to
+first evaluate all its arguments and then print them, because that would miss
+outputting potentially valuable information.  So the first step is to evaluate
+the first argument of `print`.  In some sense, what we'd like to say is that
+`print` has the evaluation strategy `strict(1)`. However, strictness
+attributes only work with individual language constructs, while what we need
+is an evaluation strategy that involves *two* constructs: `print` and the list
+(comma) construct of `AExps`.  If we naively associate `print` the `strict(1)`
+evaluation strategy then its first and unique argument, an `AExps` list, will
+be scheduled for evaluation and the execution will get stuck because we have
+no rules for evaluating `AExps` terms.  If we make the list construct of
+`AExps` `strict` then we get the wrong semantics for `print` which first
+evaluates all its arguments and then outputs them.  The correct way to
+tell K that `print` should evaluate only its first argument is by using a
+context declaration:
+
+    context print(HOLE:AExp, _);
+
+Note the `HOLE` of sort `AExp` above.  Contexts allow us to define finer-grain
+evaluation strategies than the strictness attributes, involving potentially
+more than one language construct, like above.  The `HOLE` indicates the
+argument which is requested to be evaluated.  For example, the `strict`
+attribute of division corresponds to two contexts:
+
+    context HOLE / _
+    context _ / HOLE
+
+In their full generality, contexts can be any terms with precisely one
+occurrence of a `HOLE`, and with arbitrary side conditions on any variables
+occurring in the context term as well as on the `HOLE`.  See Part 6 of the
+tutorial for more examples.
+
+Once evaluated, the first argument of `print` is expected to become either an
+integer or a string.  Since we want to print both integers and string values,
+to avoid writing two rules, one for each type of value, we instead add a new
+syntactic category, `Printable`, which is the union of integers and strings.
 
 Let us `kompile` and `krun` the `io.imp` program discussed in Lesson 1.  As
 expected, it gets stuck with a read construct on top of the computation and
@@ -65,9 +97,9 @@ Let us `kompile` and `krun` `io.imp` again.  It prints the message and then
 waits for your input numbers.  Type in two numbers, then press `<Enter>`.
 A message with their sum is then printed, followed by the final configuration.
 If you do not want to see the final configuration, and thus obtain a realistic
-interpreter for our language, then call `krun` with the option `--no-config`:
+interpreter for our language, then call `krun` with the option `--output none`:
 
-    krun io.imp --no-config
+    krun io.imp --output none
 
 Let us now `krun` our interactive sum program, which continuously reads numbers
 from the console and prints the sum of numbers up to them:
