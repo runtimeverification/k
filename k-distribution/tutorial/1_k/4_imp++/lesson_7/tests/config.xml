@@ -5,11 +5,11 @@
   <include file="../../lesson_6/tests/config.xml"
            more-programs="."
            more-results="." >
+<!-- The following options should not be needed -->
+<!-- Once fixed, spawn.imp.out should be modified like in Lesson 6 -->
     <all-programs>
         <krun-option name="--parser" value="kast --sort Stmts"/>
         <krun-option name="--output" value="none" />
     </all-programs>
   </include>
 </tests>
-
-
