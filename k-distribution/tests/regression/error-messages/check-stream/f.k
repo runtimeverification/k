@@ -1,11 +1,11 @@
 // Copyright (c) 2016 K Team. All Rights Reserved.
 
-module B-SYNTAX
+module F-SYNTAX
     syntax Pgm
 endmodule
 
-module B
-    imports B-SYNTAX
+module F
+    imports F-SYNTAX
 
 configuration <T>
     <k> $PGM:Pgm </k>
