@@ -18,7 +18,8 @@ Things to revise each time the structure of the tutorial changes:
 * `1_k\2_imp\lesson_4\README.md` refers to Lesson 1
 * `1_k\2_imp\lesson_4\README.md` refers to Tutorial 1, Lesson 2.5
 * `1_k\3_lambda++\lesson_1\README.md` refers to Lesson 8, Tutorial 1
-* `1_k\3_lambda++\lesson_2\README.md` Lesson 1, Tutorial 1
+* `1_k\3_lambda++\lesson_1\exercises refers to Lesson 1, tests/config.xml
+* `1_k\3_lambda++\lesson_2\README.md` Lesson 1, Tutorial 1; Tutorial 6; Part 1, 2
 * `1_k\3_lambda++\lesson_3\README.md` refers to Lesson 7, Tutorial 1
 * `1_k\3_lambda++\lesson_4\README.md` refers to Lesson 1
 * `1_k\3_lambda++\lesson_5\README.md` refers to Lesson 4, Lesson 8 and Lesson 7 of Tutorial 1
@@ -45,7 +46,10 @@ Describe/use/explain/justify the terminology "the `<k/>` cell" as opposed to "th
 
 Would it be a good idea to make the README files self contained, that is,
 to include the entire `lang.k` code in them, spread over the entire README, as things
-are discussed?
+are discussed?  In case we decide not to, make sure that the code snippets mentioned
+in the READMEs are in perfect correspondence to the code in the actual .k definitions.
+Maybe add a tag before each code snippet saying what file and what lines in that
+file comes from, then we can use a script to check them to be identical.
 
 `1_k\5_types\lesson_4\README.md` refers to *polymorphism*, but some may say that is not precisely 
 polymorphism, because the types are not universally quantified.  Explain that better.
@@ -67,7 +71,8 @@ or "compile", to indicate that we mean compilation with K.  Similarly for
 Add citations to:
 
 * chemical abstract machine
-* logics, where the distinction betweem side condition and premise is explained
+* logics, where the distinction between side condition and premise is explained
+* reduction semantics with evaluation contexts
 
 Replace `I1 +Int I2`, `notBool B`, etc., with `(I1 + I2)@INT`, `(not B)@Bool`,
 etc., when we have module qualification in place and working.
@@ -81,3 +86,6 @@ is systematically changed when this happens.
 
 See issue #2023 and modify tutorial/1_k/2_imp/lesson_4 accordingly, if needed.
 
+All definitions, and corresponding READMEs, should be changed to take advantage
+of modules and module operations.  Ideally, we'd like to have no code repetition
+in any examples, except for demonstration purposes.

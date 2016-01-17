@@ -1,2 +1,3 @@
 [Error] Critical: Can't mix cells at different levels under a rewrite
   while executing phase "concretizing configuration" on sentence at
+	Location(26,6,26,34)

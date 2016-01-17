@@ -11,6 +11,7 @@ import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.concrete2kore.ParserUtils;
 import org.kframework.utils.Stopwatch;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
@@ -21,6 +22,7 @@ import org.kframework.utils.inject.JCommanderModule.Usage;
 import org.kframework.utils.options.OuterParsingOptions;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -66,7 +68,7 @@ public class KDepFrontEnd extends FrontEnd {
         this.kem = kem;
         this.sw = sw;
         this.files = files;
-        this.parser = new ParserUtils(files, kem, globalOptions);
+        this.parser = new ParserUtils(files::resolveWorkingDirectory, kem, globalOptions);
     }
 
     public static List<Module> getModules() {

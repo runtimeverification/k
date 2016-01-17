@@ -209,7 +209,7 @@ public abstract class Term extends JavaSymbolicObject<Term> implements Comparabl
     public abstract boolean equals(Object object);
 
     public Att att() {
-        return new KILtoInnerKORE(null, true).convertAttributes(this);
+        return new KILtoInnerKORE(null).convertAttributes(this);
     }
 
     public Location location() { return getLocation(); }

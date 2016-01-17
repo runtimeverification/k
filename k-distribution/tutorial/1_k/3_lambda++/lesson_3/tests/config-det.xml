@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2016 K Team. All Rights Reserved. -->
+
+<tests>
+
+  <include file="../../../1_lambda/lesson_7/tests/config.xml"
+           more-results="../../lesson_2/tests"
+           exclude="omega closed-variable-capture free-variable-capture" />
+<!-- The first program, omega, does not terminate.  The last two
+     are excluded because they yield nondeterminism unless we kompile with the
+     superstrict "strict" option, which is done in config2.xml.  We do not
+     want to kompile with the superstrict "strict" option for all programs, 
+     because it is too slow (we should check if it still is slow now).  -->
+
+</tests>

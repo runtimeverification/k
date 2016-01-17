@@ -1,31 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright (c) 2013-2014 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2013-2016 K Team. All Rights Reserved. -->
+
 <tests>
 
-<!-- This shows a limitation of ktest!  We would like to include the
-     config.xml of lesson_2, and say it somehow that we want to exclude
-     the callcc-env1/2.lambda programs from the first include only.
-     Since this does not seem to be possible, we copy and modify the
-     config.xml of lesson_3.  Hopefully we will find a way to fix this. -->
-
-  <include file="../../lesson_1/tests/config.xml"
-           more-results="../../lesson_2/tests"
-           exclude="omega fibbo closed-variable-capture free-variable-capture callcc-with-let" />
-
-  <include file="../../lesson_2/tests/config.xml"
-           more-programs="../../lesson_1/tests ."
-           more-results="../../lesson_1/tests .">
-    <kompile-option name="--superheat"
-                    value="strict" />
-    <kompile-option name="--directory"
-                    value="nondet" />
-    <kompile-option name="--backend" value="java" />
-    <all-programs>
-      <krun-option name="--search" />
-      <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
-      <krun-option name="--directory"
-                   value="nondet"/>
-    </all-programs>
-  </include>
+  <include file="../../lesson_3/tests/config-det.xml" />
+  <include file="../../lesson_3/tests/config-nondet.xml"
+           more-programs = "."
+           more-results = "." />
 
 </tests>

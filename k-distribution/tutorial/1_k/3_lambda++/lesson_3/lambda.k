@@ -1,4 +1,5 @@
-// Copyright (c) 2012-2015 K Team. All Rights Reserved.
+// Copyright (c) 2012-2016 K Team. All Rights Reserved.
+
 module LAMBDA
   syntax Exp ::= Id
                | "lambda" Id "." Exp  [latex(\lambda{#1}.{#2})]
@@ -42,7 +43,7 @@ module LAMBDA
   rule if false then _ else E => E
 
   syntax Exp ::= "let" Id "=" Exp "in" Exp
-  rule let X = E in E':Exp => (lambda X . E') E                         [macro]
+  rule let X = E in E':Exp => (lambda X . E') E                        [macro]
 
   syntax Exp ::= "letrec" Id Id "=" Exp "in" Exp
   syntax Id ::= "$x" | "$y"
@@ -50,5 +51,5 @@ module LAMBDA
     => let F =
          (lambda $x . ((lambda F . lambda X . E) (lambda $y . ($x $x $y))))
          (lambda $x . ((lambda F . lambda X . E) (lambda $y . ($x $x $y))))
-       in E'                                                            [macro]
+       in E'                                                           [macro]
 endmodule

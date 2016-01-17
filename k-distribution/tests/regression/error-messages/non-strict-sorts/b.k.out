@@ -1,1 +1,2 @@
 [Error] Compiler: Only productions with a KLabel can be strict.
+	Location(19,18,19,27)

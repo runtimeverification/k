@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2015 K Team. All Rights Reserved.
+// Copyright (c) 2012-2016 K Team. All Rights Reserved.
 /*@
 \title{KOOL --- Typed --- Static}
 \author{Grigore Ro\c{s}u and Traian Florin \c{S}erb\u{a}nu\c{t}\u{a}
@@ -110,7 +110,7 @@ the wrapper in the generated documentation, we associate it an
 //@ \subsection{Types}
 
   syntax Type ::= "void" | "int" | "bool" | "string"
-                | Id                     [klabel("'class")]  // see next
+                | Id                     [klabel("class")]  // see next
                 | class(Id)         // explicit KOOL class type
                 | Type "[" "]"
                 > Types "->" Type

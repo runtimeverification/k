@@ -20,7 +20,9 @@ object ModuleTransformer {
           f(m, s)
         } catch {
           case e: KEMException =>
-            e.exception.addTraceFrame("while executing phase \"" + name + "\" on sentence at " + s.att.get(classOf[Source]).map(_.toString).getOrElse("<none>") + ":" + s.att.get(classOf[Location]).map(_.toString).getOrElse("<none>"))
+            e.exception.addTraceFrame("while executing phase \"" + name + "\" on sentence at"
+              + "\n\t" + s.att.get(classOf[Source]).map(_.toString).getOrElse("<none>")
+              + "\n\t" + s.att.get(classOf[Location]).map(_.toString).getOrElse("<none>"))
             throw e
         }
       }

@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2015 K Team. All Rights Reserved.
+// Copyright (c) 2014-2016 K Team. All Rights Reserved.
 
 module TEST
   syntax Foo ::= "x"
@@ -7,7 +7,7 @@ module TEST
                | "t"    [andanohter]
                | "u"    [off]
 
-  syntax priorities 'x > 'y 'z > 't > 'u
-  syntax left 'x
-  syntax right 'y
+  syntax priorities x > y z > t > u
+  syntax left x
+  syntax right y
 endmodule

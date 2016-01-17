@@ -23,6 +23,7 @@ import scala.Tuple2;
 import scala.util.Either;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Set;
 
 import static org.junit.Assert.*;
@@ -39,7 +40,7 @@ public class AddBracketsTest {
     public RuleGrammarGenerator makeRuleGrammarGenerator() {
         String definitionText;
         FileUtil files = FileUtil.testFileUtil();
-        ParserUtils parser = new ParserUtils(files, new KExceptionManager(new GlobalOptions()));
+        ParserUtils parser = new ParserUtils(files::resolveWorkingDirectory, new KExceptionManager(new GlobalOptions()));
         File definitionFile = new File(Kompile.BUILTIN_DIRECTORY.toString() + "/kast.k");
         definitionText = files.loadFromWorkingDirectory(definitionFile.getPath());
 
@@ -48,7 +49,7 @@ public class AddBracketsTest {
                         definitionFile,
                         definitionFile.getParentFile(),
                         Lists.newArrayList(Kompile.BUILTIN_DIRECTORY),
-                        true, false);
+                        false);
 
         return new RuleGrammarGenerator(baseK, true);
     }
@@ -84,7 +85,7 @@ public class AddBracketsTest {
                 "  syntax Exp ::= Exp \"*\" Exp [left]\n" +
                 "  syntax Exp ::= \"1\"\n" +
                 "  syntax Exp ::= \"(\" Exp \")\" [bracket]\n" +
-                "  syntax priority '_*_ > '_+_\n" +
+                "  syntax priority _*_ > _+_\n" +
                 "endmodule\n";
         unparserTest(def, "1 + 1 + 1 + 1");
         unparserTest(def, "1 + ( 1 + 1 ) + 1");

@@ -12,6 +12,7 @@ import org.kframework.definition.ProductionItem;
 import org.kframework.definition.Sentence;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.FindK;
+import org.kframework.kore.KORE;
 import org.kframework.kore.VisitK;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -43,6 +44,7 @@ public class ResolveContexts {
     }
 
     public Definition resolve(Definition d) {
+        klabels = new HashSet<>();
         Module transformedMainModule = resolve(d.mainModule());
         return Definition.apply(transformedMainModule, add(transformedMainModule, minus(d.mainModule(), d.entryModules())), d.att());
     }
@@ -58,16 +60,16 @@ public class ResolveContexts {
         return Module(input.name(), input.imports(), (scala.collection.Set<Sentence>) stream(input.localSentences()).filter(s -> !(s instanceof Context)).collect(Collections.toSet()).$bar(immutable(rulesToAdd)), input.att());
     }
 
-    private Set<KLabel> klabels = new HashSet<>();
-    private int counter = 0;
+    private Set<KLabel> klabels;
 
-    private KLabel getUniqueFreezerLabel(Module input) {
+    private KLabel getUniqueFreezerLabel(Module input, String nameHint) {
         if (klabels.isEmpty()) {
             klabels.addAll(mutable(input.definedKLabels()));
         }
+        int counter = 0;
         KLabel freezer;
         do {
-            freezer = KLabel("#freezer" + counter++);
+            freezer = KLabel("#freezer" + nameHint + (counter++ == 0 ? "" : counter));
         } while (klabels.contains(freezer));
         klabels.add(freezer);
         return freezer;
@@ -79,6 +81,9 @@ public class ResolveContexts {
         K body = context.body();
         K requiresHeat = context.requires();
         K requiresCool = BooleanUtils.TRUE;
+
+        int currentHolePosition[] = new int[] { 0 };
+        int finalHolePosition[] = new int[] { 0 };
         // Find a heated hole
         // e.g., context ++(HOLE => lvalue(HOLE))
         K heated = new VisitK() {
@@ -103,8 +108,10 @@ public class ResolveContexts {
             public void apply(KVariable k) {
                 if (!k.name().equals("HOLE")) {
                     vars.put(k, k);
+                    finalHolePosition[0] = currentHolePosition[0];
                 } else {
                     holeVar = k;
+                    currentHolePosition[0]++;
                 }
                 super.apply(k);
             }
@@ -120,7 +127,7 @@ public class ResolveContexts {
         K cooled = RewriteToTop.toLeft(body);
         // TODO(dwightguth): generate freezers better for pretty-printing purposes
         List<ProductionItem> items = new ArrayList<>();
-        KLabel freezerLabel = getUniqueFreezerLabel(input);
+        KLabel freezerLabel = getUniqueFreezerLabel(input, ((KApply)cooled).klabel().name() + finalHolePosition[0]);
         items.add(Terminal(freezerLabel.name()));
         items.add(Terminal("("));
         for (int i = 0; i < vars.size(); i++) {

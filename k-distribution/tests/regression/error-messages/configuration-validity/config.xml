@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2016 K Team. All Rights Reserved. -->
+<tests>
+    <test definition="dummy.k"
+          extension="dummy"
+          programs="."
+          results="." 
+          posixInitScript="run.sh"
+          skip="pdf" >
+    </test>
+</tests>
