@@ -91,7 +91,7 @@ public class FastRuleMatcher {
             /* TODO(AndreiS): remove this hack for super strictness after strategies work */
             ConjunctiveFormula patternConstraint = ConjunctiveFormula.of(rule.lookups());
             if (!computeOne && rule.containsAttribute(Att.cool()) && transitions.stream().anyMatch(rule::containsAttribute)) {
-                patternConstraint = patternConstraint.addAll(rule.requires().stream().filter(t -> !t.containsAttribute(Attribute.SUPER_STRICT)).collect(Collectors.toList()));
+                patternConstraint = patternConstraint.addAll(rule.requires().stream().filter(t -> !t.containsAttribute(Att.transition())).collect(Collectors.toList()));
             } else {
                 patternConstraint = patternConstraint.addAll(rule.requires());
             }

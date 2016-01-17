@@ -144,8 +144,8 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
         // we've encountered a regular KApply
         BitSet[] childrenDontCareRuleMask = constructDontCareRuleMask(convertedKList);
         KItem kItem = KItem.of(convertedKLabel, convertedKList, global, childrenDontCareRuleMask == null ? null : childrenDontCareRuleMask);
-        if (att.contains(Attribute.SUPER_STRICT)) {
-            kItem.addAttribute(Attribute.SUPER_STRICT, "");
+        if (att.contains(Att.transition())) {
+            kItem.addAttribute(Att.transition(), "");
         }
         return kItem;
     }

@@ -72,10 +72,6 @@ public class KompileOptions implements Serializable {
         return syntaxModule;
     }
 
-    // Advanced options
-    @Parameter(names="--super-strict", listConverter=StringListConverter.class, description="Specifies which syntactic constructs are super strict. <string> is a whitespace-separated list of production tags.")
-    public List<String> superStrict = Collections.emptyList();
-
     @Parameter(names="--transition", listConverter=StringListConverter.class, description="<string> is a whitespace-separated list of tags designating rules to become transitions.")
     public List<String> transition = Collections.singletonList(DEFAULT_TRANSITION);
 

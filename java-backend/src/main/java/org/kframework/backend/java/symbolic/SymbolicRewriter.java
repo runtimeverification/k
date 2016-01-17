@@ -76,10 +76,7 @@ public class SymbolicRewriter {
         this.ruleIndex = definition.getIndex();
         this.counter = counter;
         this.strategy = new TransitionCompositeStrategy(kompileOptions.transition);
-        this.transitions = ImmutableList.<String>builder()
-                .addAll(kompileOptions.transition)
-                .addAll(kompileOptions.superStrict)
-                .build();
+        this.transitions = kompileOptions.transition;
         this.useFastRewriting = !kompileOptions.experimental.koreProve;
         this.theFastMatcher = new FastRuleMatcher(global, definition.ruleTable.size());
         this.transition = useFastRewriting;

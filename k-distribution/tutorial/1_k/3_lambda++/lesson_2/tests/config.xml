@@ -8,7 +8,7 @@
            results=".">
 <!-- The next line should not be needed ... -->
     <kompile-option name="--syntax-module" value="LAMBDA" />
-    <kompile-option name="--super-strict"
+    <kompile-option name="--transition"
                     value="strict" />
 <!-- Grigore: explain the superstrict option above -->
 <!-- Grigore: we may want to use this option also in lambda -->

@@ -67,7 +67,6 @@ public class Attribute<T> extends ASTNode {
     public static final Attribute<String> NOT_IN_RULES = Attribute.of("notInRules", "");
     public static final Attribute<String> VARIABLE = Attribute.of("variable", "");
     public static final Attribute<String> HYBRID = Attribute.of("hybrid", "");
-    public static final String SUPER_STRICT = "super-strict";
 
     private Key<T> key;
     private T value;
