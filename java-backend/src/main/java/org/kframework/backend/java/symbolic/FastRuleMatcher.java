@@ -32,6 +32,7 @@ import static org.kframework.Collections.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -57,6 +58,9 @@ public class FastRuleMatcher {
 
     private final GlobalContext global;
 
+    public static List<Substitution<Variable, Term>> match(Term subject, Term pattern, TermContext context) {
+        return new FastRuleMatcher(context.global(), 1).mainMatch(subject, pattern, context);
+    }
 
     public FastRuleMatcher(GlobalContext global, int ruleCount) {
         this.global = global;
@@ -120,6 +124,25 @@ public class FastRuleMatcher {
             return transitionResults;
         }
 
+    }
+
+    public List<Substitution<Variable, Term>> mainMatch(Term subject, Term pattern, TermContext context) {
+        constraints[0] = ConjunctiveFormula.of(global);
+        empty = BitSet.apply(ruleCount);
+        BitSet one = BitSet.apply(1);
+        one.makeOnes(1);
+        BitSet theMatchingRules = match(subject, pattern, one, List());
+        if (theMatchingRules.get(0)) {
+            return constraints[0].getDisjunctiveNormalForm().conjunctions().stream()
+                    .map(c -> c.simplify(context))
+                    .filter(c -> !c.isFalse())
+                    .map(c -> c.orientSubstitution(pattern.variableSet()))
+                    .filter(c -> c.isMatching(pattern.variableSet()))
+                    .map(c -> c.substitution())
+                    .collect(Collectors.toList());
+        } else {
+            return Collections.emptyList();
+        }
     }
 
     private BitSet match(Term subject, Term pattern, BitSet ruleMask, scala.collection.immutable.List<Pair<Integer, Integer>> path) {
