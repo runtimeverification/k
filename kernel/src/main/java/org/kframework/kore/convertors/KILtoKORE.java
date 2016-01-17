@@ -23,6 +23,7 @@ import org.kframework.kore.KSequence;
 import org.kframework.kore.KToken;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
+import org.kframework.kore.compile.checks.CheckListDecl;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -99,6 +100,7 @@ public class KILtoKORE extends KILTransformation<Object> {
                                                   Map<String, org.kframework.definition.Module> koreModules,
                                                   scala.collection.Seq<Module> visitedModules) {
         checkCircularModuleImports(mainModule, visitedModules);
+        CheckListDecl.check(mainModule);
         Set<org.kframework.definition.Sentence> items = mainModule.getItems().stream()
                 .filter(j -> !(j instanceof org.kframework.kil.Import))
                 .flatMap(j -> apply(j).stream()).collect(Collectors.toSet());
