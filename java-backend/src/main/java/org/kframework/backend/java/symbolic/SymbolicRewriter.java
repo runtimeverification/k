@@ -54,7 +54,8 @@ public class SymbolicRewriter {
     private final Stopwatch stopwatch = Stopwatch.createUnstarted();
     private final KOREtoBackendKIL constructor;
     private boolean transition;
-    private Set<ConstrainedTerm> superheated = Sets.newHashSet();
+    private final Set<ConstrainedTerm> superheated = Sets.newHashSet();
+    private final Set<ConstrainedTerm> newSuperheated = Sets.newHashSet();
     private final RuleIndex ruleIndex;
     private final KRunState.Counter counter;
     private final Map<ConstrainedTerm, Set<Rule>> subject2DisabledRules = new HashMap<>();
@@ -251,7 +252,6 @@ public class SymbolicRewriter {
                 computeOne,
                 transitions,
                 subject.termContext());
-        Set<ConstrainedTerm> newSuperheated = Sets.newHashSet();
         for (Triple<ConjunctiveFormula, Boolean, Integer> triple : matches) {
             Rule rule = definition.ruleTable.get(triple.getRight());
             Substitution<Variable, Term> substitution =
@@ -299,7 +299,6 @@ public class SymbolicRewriter {
 
             results.add(result);
         }
-        superheated = newSuperheated;
 
         if (results.isEmpty()) {
             addStuckFlagIfNotThere(subject).ifPresent(results::add);
@@ -603,6 +602,9 @@ public class SymbolicRewriter {
         int step;
     label:
         for (step = 0; !queue.isEmpty(); ++step) {
+            superheated.clear();
+            superheated.addAll(newSuperheated);
+            newSuperheated.clear();
             for (Map.Entry<ConstrainedTerm, Integer> entry : queue.entrySet()) {
                 ConstrainedTerm term = entry.getKey();
                 Integer currentDepth = entry.getValue();
