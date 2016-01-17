@@ -10,6 +10,11 @@
         <krun-option name="--parser" value="kast --sort Stmts"/>
         <krun-option name="--output" value="none" />
     </all-programs>
+    <program name="div.imp" >
+<!-- The following options should not be needed -->
+        <krun-option name="--parser" value="kast --sort Stmts"/>
+        <krun-option name="--search" />
+    </program>
     <program name="spawn.imp" >
 <!-- The following options should not be needed -->
         <krun-option name="--parser" value="kast --sort Stmts"/>
