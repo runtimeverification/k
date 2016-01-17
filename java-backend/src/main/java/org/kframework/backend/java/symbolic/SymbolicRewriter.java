@@ -524,16 +524,17 @@ public class SymbolicRewriter {
      * the pattern to the terms they unify with. Adds as many search results
      * up to the bound as were found, and returns {@code true} if the bound has been reached.
      */
-    private static boolean addSearchResult(
+    private boolean addSearchResult(
             HashSet<Substitution<Variable, Term>> searchResults,
             ConstrainedTerm subject,
             Rule pattern,
             int bound) {
         assert Sets.intersection(subject.term().variableSet(),
                 subject.constraint().substitution().keySet()).isEmpty();
-        List<Substitution<Variable, Term>> discoveredSearchResults = PatternMatcher.match(
+        assert pattern.requires().isEmpty() && pattern.lookups().getKComponents().isEmpty();
+        List<Substitution<Variable, Term>> discoveredSearchResults = theFastMatcher.mainMatch(
                 subject.term(),
-                pattern,
+                pattern.leftHandSide(),
                 subject.termContext());
         for (Substitution<Variable, Term> searchResult : discoveredSearchResults) {
             searchResults.add(searchResult);
