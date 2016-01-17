@@ -12,8 +12,8 @@
       <all-programs>
         <krun-option name="--symbolic-execution" />
         <krun-option name="--search" />
-        <krun-option name="--output" value="no-wrap" />
-        <krun-option name="--pattern" value="&lt;solution&gt; Solution:Map &lt;/solution&gt;" />
+        <!--<krun-option name="&#45;&#45;output" value="no-wrap" />-->
+        <!--<krun-option name="&#45;&#45;pattern" value="&lt;solution&gt; Solution:Map &lt;/solution&gt;" />-->
       </all-programs>
       <program name="append-4.logik">
         <krun-option name="--symbolic-execution" />

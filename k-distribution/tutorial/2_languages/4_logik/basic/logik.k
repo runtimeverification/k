@@ -194,10 +194,26 @@ one may devise techniques to detect non-termination in some cases,
 one cannot do it in general (same like for all Turing-complete
 languages).  */
 
-require "modules/unification.k"
+require "unification.k"
+
+module LOGIK-COMMON
+syntax Literal
+  syntax Term ::= Literal | Literal "(" Terms ")"
+  syntax Terms ::= List{Term,","}
+  syntax Clause ::= Term ":-" Terms "." | Term "."
+  syntax Query ::= "?-" Terms "."
+  syntax Pgm ::= Query | Clause Pgm
+endmodule
+
+module LOGIK-SYNTAX
+  imports LOGIK-COMMON
+    syntax Term ::= Token{[\_A-Z][a-zA-Z0-9\_]*}                   [variable, onlyLabel, autoReject, token]
+    syntax Literal ::= Token{[a-z][a-zA-Z0-9\_]*}                  [onlyLabel, autoReject, token]
+endmodule
 
 module LOGIK
   imports UNIFICATION
+  imports LOGIK-COMMON
 
 /*@ Unification is at the core of logic programming.  Here we are
 going to use the predefined unification procedure (the same one we
@@ -208,19 +224,14 @@ used in the type inferencers in Tutorial 5). */
 The syntax of LOGIK is straightforward: a program is a sequence of
 Horn clauses followed by a query: */
 
-  syntax Term ::= Literal | Literal "(" Terms ")"
-  syntax Terms ::= List{Term,","}
-  syntax Clause ::= Term ":-" Terms "." | Term "."
-  syntax Query ::= "?-" Terms "."
-  syntax Pgm ::= Query | Clause Pgm
+
 
 /*@ Variables and literals are defined as tokens following the conventions
 used in Prolog (variables start with \_ or capital letter, while literals
 start with lower case letters): */
 
 
-  syntax Term ::= Token{[\_A-Z][a-zA-Z0-9\_]*}                   [variable, onlyLabel, autoReject, token]
-  syntax Literal ::= Token{[a-z][a-zA-Z0-9\_]*}                  [onlyLabel, autoReject, token]
+
 
 /*@ \section{Configuration}
 
@@ -237,7 +248,6 @@ discard the main cell. */
   configuration <T color="yellow" multiplicity="?">
                   <k color="green"> $PGM:Pgm </k>
                   <fresh color="orange"> .K </fresh>
-                  <br/>
                   <clauses color="red">
                     <clause color="pink" multiplicity="*"> .K </clause>
                   </clauses>
@@ -265,7 +275,7 @@ can safely regard clauses as ``clause schemas'' comprising infinitely
 many instances, one for each context.  */
 
   rule <k> C:Clause Pgm => Pgm </k>
-       (. => <clause> #renameVariables(C) </clause>)
+       (.Bag => <clause> #renameVariables(C) </clause>)
 
   rule <k> ?- Ls:Terms. => Ls ...</k>
        <mgu> _ => #variablesMap(#variables(Ls)) </mgu>
