@@ -11,15 +11,17 @@ import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 
+import java.util.Set;
+
 import static org.kframework.definition.Constructors.*;
 import static org.kframework.kore.KORE.*;
 
 public class ResolveHeatCoolAttribute {
 
-    private final KompileOptions kompileOptions;
+    private Set<String> transitions;
 
-    public ResolveHeatCoolAttribute(KompileOptions kompileOptions) {
-        this.kompileOptions = kompileOptions;
+    public ResolveHeatCoolAttribute(Set<String> transitions) {
+        this.transitions = transitions;
     }
 
     private Rule resolve(Rule rule) {
@@ -43,7 +45,7 @@ public class ResolveHeatCoolAttribute {
         if (att.contains("heat")) {
             return BooleanUtils.and(requires, BooleanUtils.not(predicate));
         } else if (att.contains("cool")) {
-            if (kompileOptions.transition.stream().anyMatch(att::contains)) {
+            if (transitions.stream().anyMatch(att::contains)) {
                 // if the cooling rule is a super strict, then tag the isKResult predicate and drop it during search
                 predicate = KApply(predicate.klabel(), predicate.klist(), predicate.att().add(Att.transition()));
             }
