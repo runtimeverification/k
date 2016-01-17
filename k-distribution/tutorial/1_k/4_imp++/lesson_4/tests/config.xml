@@ -8,9 +8,6 @@
     <all-programs>
       <krun-option name="--output" value="none" />
     </all-programs>
-    <program name="div.imp">
-      <krun-option name="--output" value="none" />
-    </program>
   </include>
 
 </tests>
