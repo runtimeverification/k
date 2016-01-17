@@ -1,0 +1,2 @@
+[Error] Compiler: Inline list declarations are not allowed.
+	Location(12,26,12,37)
