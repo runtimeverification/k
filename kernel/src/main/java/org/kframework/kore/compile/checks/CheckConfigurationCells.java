@@ -1,6 +1,7 @@
 // Copyright (c) 2015-2016 K Team. All Rights Reserved.
 package org.kframework.kore.compile.checks;
 
+import org.kframework.definition.ConfigVars;
 import org.kframework.definition.Module;
 import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
@@ -43,7 +44,7 @@ public class CheckConfigurationCells {
                     Sort sort = ((NonTerminal) i).sort();
                     if (sort.name().endsWith("Cell")) {
                         if (cells.contains(sort.name())) {
-                            Production cell = module.cellProductionsFor().get(sort).get().head();
+                            Production cell = new ConfigVars(module).cellProductionsFor().get(sort).get().head();
                             errors.add(KEMException.compilerError("Cell " + cell.klabel().get() + " found twice in configuration.", p));
                         }
                         cells.add(sort.name());

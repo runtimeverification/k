@@ -2,7 +2,7 @@
 
 package org.kframework.definition
 
-import org.kframework.kore.{FoldK, KToken}
+import org.kframework.kore.{Sort, FoldK, KToken}
 
 import scala.collection.Set
 
@@ -20,4 +20,10 @@ class ConfigVars(m: Module) {
     initRules.map(r => transformer.apply(r.body))
       .fold(transformer.unit)(transformer.merge)
   }
+
+  lazy val cellProductionsFor: Map[Sort, Set[Production]] =
+    m.productions
+      .collect({ case p if p.att.contains("cell") => p })
+      .groupBy(_.sort)
+      .map { case (s, ps) => (s, ps) }
 }
