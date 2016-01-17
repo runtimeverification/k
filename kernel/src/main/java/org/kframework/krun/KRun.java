@@ -4,7 +4,7 @@ package org.kframework.krun;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.attributes.Source;
 import org.kframework.builtin.Sorts;
-import org.kframework.definition.ConfigVars;
+import org.kframework.compile.ConfigurationInfoFromModule;
 import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
 import org.kframework.kompile.CompiledDefinition;
@@ -294,7 +294,7 @@ public class KRun {
     }
 
     private void checkConfigVars(Set<KToken> inputConfigVars, CompiledDefinition compiledDef) {
-        Set<KToken> defConfigVars = mutable(new ConfigVars(compiledDef.kompiledDefinition.mainModule()).configVars());
+        Set<KToken> defConfigVars = mutable(new ConfigurationInfoFromModule(compiledDef.kompiledDefinition.mainModule()).configVars());
 
         for (KToken defConfigVar : defConfigVars) {
             if (!inputConfigVars.contains(defConfigVar)) {
