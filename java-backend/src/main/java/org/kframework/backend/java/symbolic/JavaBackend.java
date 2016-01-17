@@ -10,12 +10,14 @@ import org.kframework.compile.ConfigurationInfoFromModule;
 import org.kframework.definition.Constructors;
 import org.kframework.definition.Definition;
 import org.kframework.definition.DefinitionTransformer;
+import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.Kompile;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.ADT;
+import org.kframework.kore.KToken;
 import org.kframework.kore.VisitK;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -89,8 +91,22 @@ public class JavaBackend implements Backend {
                 .andThen(DefinitionTransformer.fromSentenceTransformer(JavaBackend::markSingleVariables, "mark single variables"))
                 .andThen(DefinitionTransformer.from(new AssocCommToAssoc(KORE.c()), "convert assoc/comm to assoc"))
                 .andThen(DefinitionTransformer.from(new MergeRules(KORE.c()), "generate matching automaton"))
+                .andThen(DefinitionTransformer.fromKTransformerWithModuleInfo(this::kTokenVariablesToTrueVariables, "generate matching automaton"))
                 .apply(d);
     }
+
+
+    private K kTokenVariablesToTrueVariables(Module m, K k) {
+        return new TransformK() {
+            public K apply(KToken k) {
+                if(m.sortAttributesFor().get(k.sort()).contains(Att.variable())) {
+                    return new SortedADT.SortedKVariable(k.s(), k.att().add(Att.sort(), k.sort().name()));
+                } else
+                    return k;
+            }
+        }.apply(k);
+    }
+
 
     /**
      * Put a marker on the "regular" (i.e. non function/macro/etc.) rules that we can use later.

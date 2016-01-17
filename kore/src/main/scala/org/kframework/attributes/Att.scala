@@ -120,6 +120,8 @@ object Att {
   val unit = "unit"
   val bag = "bag"
   val syntaxModule = "syntaxModule"
+  val variable = "variable"
+  val sort = "sort"
 }
 
 trait AttributesToString {
