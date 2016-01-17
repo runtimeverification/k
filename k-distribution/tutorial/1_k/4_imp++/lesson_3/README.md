@@ -45,7 +45,7 @@ We next explain how to tell `kompile` what kind of language model we are
 interested in for analysis purposes.  When you experiment with non-determinism
 in a language semantics, you should keep it in mind that the `--transition`
 option of `kompile` allows you to configure what counts as a transition in
-your language model.  We here only discuss transitions due to
+your language model.  We here only discuss transitions due to the
 non-deterministic evaluation strategies of language constructs, but we will
 see in future lectures (see Lesson 6 of IMP++, where we add concurrency) that
 we can also have transitions due to non-deterministic applications of rewrite
@@ -65,7 +65,7 @@ therefore allows you to finely tune the generated language models using the
 
 To state which constructs are to be considered to generate transitions in the
 generated language model, and for other reasons, too, the K tool allows you to
-tag any productions and any rules.  You can do this the same way we tagged
+tag any production and any rule.  You can do this the same way we tagged
 rules with the `structural` keyword in earlier tutorials: put the tag in
 brackets.  You can associate multiple tags to the same construct or rule, and
 more than one construct or rule can have the same tag.  As an example, let us
@@ -93,11 +93,10 @@ Now the command
 shows us all five behaviors of this program.  Interestingly, one
 of the five behaviors yields a division by zero!
 
-It will take you a little to master the use of the `--transition` option, but
-it can be quite useful when you experiment with your language designs or
-when you formally analyze programs for certain kinds of errors.  Please let
-us know if you ever need more finer-grained control over the non-determinism
-of your language models.
+The `--transition` option can be quite useful when you experiment with your
+language designs or when you formally analyze programs for certain kinds of
+errors.  Please let us know if you ever need more finer-grained control over
+the non-determinism of your language models.
 
 Before we conclude this lesson, we'd like to let you know one trick, which
 you will hopefully not overuse: you can tag elements in your K definition with
