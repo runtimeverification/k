@@ -23,6 +23,7 @@ import org.kframework.kore.KSequence;
 import org.kframework.kore.KToken;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
+import org.kframework.kore.compile.checks.CheckListDecl;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -99,7 +100,7 @@ public class KILtoKORE extends KILTransformation<Object> {
                                                   Map<String, org.kframework.definition.Module> koreModules,
                                                   scala.collection.Seq<Module> visitedModules) {
         checkCircularModuleImports(mainModule, visitedModules);
-        checkListDecl(mainModule);
+        CheckListDecl.check(mainModule);
         Set<org.kframework.definition.Sentence> items = mainModule.getItems().stream()
                 .filter(j -> !(j instanceof org.kframework.kil.Import))
                 .flatMap(j -> apply(j).stream()).collect(Collectors.toSet());
@@ -154,36 +155,6 @@ public class KILtoKORE extends KILTransformation<Object> {
             }
             msg += visitedModules.head().getName();
             throw KEMException.compilerError(msg);
-        }
-    }
-
-    private static void checkListDecl(Module m) {
-        m.getItems().stream().forEach(i -> checkListDecl(i)); // KILtoKORE::checkListDecl
-    }
-
-    private static void checkListDecl(ModuleItem i) {
-        if (i instanceof Syntax) {
-            Syntax s = (Syntax) i;
-            for (PriorityBlock b : s.getPriorityBlocks()) {
-                for (Production p : b.getProductions()) {
-                    if (p.getItems().size() == 1 && p.getItems().get(0) instanceof UserList) { // Syntax Es ::= List{E,""}
-                        org.kframework.kil.Sort listSort = s.getDeclaredSort().getSort(); // Es
-                        org.kframework.kil.Sort elemSort = ((UserList) p.getItems().get(0)).getSort(); // E
-                        if (listSort.isBaseSort()) {
-                            throw KExceptionManager.compilerError(listSort + " can not be extended to be a list sort.", p);
-                        }
-                        if (listSort.equals(elemSort)) {
-                            throw KExceptionManager.compilerError("Circular lists are not allowed.", p);
-                        }
-                    } else {
-                        for (org.kframework.kil.ProductionItem it : p.getItems()) {
-                            if (it instanceof UserList) { // Syntax Es ::= ... List{E,""} ...
-                                throw KExceptionManager.compilerError("Inline list declarations are not allowed.", it);
-                            }
-                        }
-                    }
-                }
-            }
         }
     }
 
