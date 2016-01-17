@@ -309,8 +309,13 @@ public class Commands {
                 System.out.println("No Substitutions");
                 return;
             }
-            result.getSubstitutions().stream().forEach(subst -> {
-                KRun.prettyPrintSubstitution(subst, result.getParsedRule(), compiledDefinition, OutputModes.PRETTY, s -> System.out.println(s));
+            result.getSubstitutions().forEach(subst -> {
+                KRun.prettyPrintSubstitution(
+                        KRun.filterAnonymousVariables(subst, result.getParsedRule()),
+                        result.getParsedRule(),
+                        compiledDefinition,
+                        OutputModes.PRETTY,
+                        System.out::println);
             });
         }
 

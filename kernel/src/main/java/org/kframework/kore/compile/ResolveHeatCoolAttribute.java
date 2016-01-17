@@ -6,12 +6,23 @@ import org.kframework.builtin.BooleanUtils;
 import org.kframework.definition.Context;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
+import org.kframework.kil.Attribute;
+import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
+import org.kframework.kore.KApply;
+
+import java.util.Set;
 
 import static org.kframework.definition.Constructors.*;
 import static org.kframework.kore.KORE.*;
 
 public class ResolveHeatCoolAttribute {
+
+    private Set<String> transitions;
+
+    public ResolveHeatCoolAttribute(Set<String> transitions) {
+        this.transitions = transitions;
+    }
 
     private Rule resolve(Rule rule) {
         return Rule(
@@ -30,17 +41,15 @@ public class ResolveHeatCoolAttribute {
 
     private K transform(K requires, Att att) {
         String sort = att.<String>getOptional("result").orElse("KResult");
-        K predicate = KApply(KLabel("is" + sort), KVariable("HOLE"));
+        KApply predicate = KApply(KLabel("is" + sort), KVariable("HOLE"));
         if (att.contains("heat")) {
             return BooleanUtils.and(requires, BooleanUtils.not(predicate));
         } else if (att.contains("cool")) {
-            if (att.contains("transition")) {
-                // if the cooling rule is a transition, do not add the isKResult predicate
-                // because that will inhibit search
-                return requires;
-            } else {
-                return BooleanUtils.and(requires, predicate);
+            if (transitions.stream().anyMatch(att::contains)) {
+                // if the cooling rule is a super strict, then tag the isKResult predicate and drop it during search
+                predicate = KApply(predicate.klabel(), predicate.klist(), predicate.att().add(Att.transition()));
             }
+            return BooleanUtils.and(requires, predicate);
         }
         throw new AssertionError("unreachable");
     }

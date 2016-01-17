@@ -8,9 +8,8 @@
            results=".">
 <!-- The next line should not be needed ... -->
     <kompile-option name="--syntax-module" value="LAMBDA" />
-    <kompile-option name="--superheat"
+    <kompile-option name="--transition"
                     value="strict" />
-<!-- Andrei: modify superheat to superstrict above -->
 <!-- Grigore: explain the superstrict option above -->
 <!-- Grigore: we may want to use this option also in lambda -->
   </include>

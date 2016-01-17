@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2010-2014 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2010-2016 K Team. All Rights Reserved. -->
 
 ### Configuration Refinement; Freshness
 
@@ -19,9 +19,9 @@ with two cells
     <env color="LightSkyBlue"> .Map </env>
     <store color="red"> .Map </store>
 
-`Structurally` speaking, this split of a cell into other cells is a major
+Structurally speaking, this split of a cell into other cells is a major
 semantic change, which, unfortunately, requires us to revisit the existing
-rules that used the state cell.  Once could, of course, argue that we could
+rules that used the state cell.  One could, of course, argue that we could
 have avoided this problem if we had followed from the very beginning the
 good-practice style to work with an environment and a store, instead of a
 monolithic state.  While that is a valid argument, highlighting the fact that
@@ -53,19 +53,15 @@ This is quite similar to the way we allocated space for variables in
 the environment-based definition of LAMBDA++ in Part 3 of the tutorial.
 
     rule <k> int (X,Xs => Xs); ...</k>
-         <env> Rho:Map => Rho[N/X] </env>
-         <store>... .Map => N|->0 ...</store>
-      when fresh(N:Nat)
+         <env> Rho => Rho[X <- !N:Int] </env>
+         <store>... .Map => !N |-> 0 ...</store>
 
-The side condition `fresh(N:Nat)` generates an *element* of sort `Nat` that has
-not been generated so far.  We emphasized *element*, because, like also
-explained in the LAMBDA++ tutorial, technically it is nothing but K syntactic
-sugar for a straightforward operation: it generates a term of the form
-`symNat(n)` of sort `Nat`, or something similar (because the internal
-representation of symbolic numbers may change in the K implementation), where
-`n` is a natural number, thought of as the `n`-th symbolic natural number that
-had been generated so far; the counter `n` is maintained in a cell that the K
-tool automatically adds to the configuration for this purpose.
+Note the use of the fresh (`!N`) variable notation above.  Recall from
+the LAMBDA++ tutorial that each time the rule with fresh (`!`) variables is
+applied, fresh elements of corresponding sorts are generated for the fresh
+variables, distinct from all the previously generated elements; also, we
+cannot and should not assume anything about the particular element that is
+being generated, except that it is different from the previous ones.
 
 `kompile` and `krun` `sum.imp` to see how the fresh locations have been
 generated and used.  There were two fresh locations needed, for the two

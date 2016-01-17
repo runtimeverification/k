@@ -109,6 +109,7 @@ object Att {
   val ClassFromUp = "classType"
   val Location = "location"
   val Function = "function"
+  val transition = "transition"
   val heat = "heat"
   val cool = "cool"
   val stuck = "#STUCK"

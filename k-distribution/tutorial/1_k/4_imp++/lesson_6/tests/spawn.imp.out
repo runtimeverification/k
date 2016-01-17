@@ -1,193 +1,62 @@
 Search results:
 
 Solution 1:
-<T>
-    <threads>
-        .Bag
-    </threads>
-    <store>
-        1 |-> 11
-    </store>
-    <in>
-        ListItem(#buffer ( "" ))
-    </in>
-    <out>
-        ListItem(#buffer ( "x = 11\n" ))
-    </out>
-</T>
-
+Store:Map -->
+1 |-> 11
+Out:String -->
+"x = 11\n"
 Solution 2:
-<T>
-    <threads>
-        .Bag
-    </threads>
-    <store>
-        1 |-> 11
-    </store>
-    <in>
-        ListItem(#buffer ( "" ))
-    </in>
-    <out>
-        ListItem(#buffer ( "x = 23\n" ))
-    </out>
-</T>
-
+Store:Map -->
+1 |-> 11
+Out:String -->
+"x = 23\n"
 Solution 3:
-<T>
-    <threads>
-        .Bag
-    </threads>
-    <store>
-        1 |-> 11
-    </store>
-    <in>
-        ListItem(#buffer ( "" ))
-    </in>
-    <out>
-        ListItem(#buffer ( "x = 33\n" ))
-    </out>
-</T>
-
+Store:Map -->
+1 |-> 11
+Out:String -->
+"x = 33\n"
 Solution 4:
-<T>
-    <threads>
-        .Bag
-    </threads>
-    <store>
-        1 |-> 16
-    </store>
-    <in>
-        ListItem(#buffer ( "" ))
-    </in>
-    <out>
-        ListItem(#buffer ( "x = 16\n" ))
-    </out>
-</T>
-
+Store:Map -->
+1 |-> 16
+Out:String -->
+"x = 16\n"
 Solution 5:
-<T>
-    <threads>
-        .Bag
-    </threads>
-    <store>
-        1 |-> 16
-    </store>
-    <in>
-        ListItem(#buffer ( "" ))
-    </in>
-    <out>
-        ListItem(#buffer ( "x = 23\n" ))
-    </out>
-</T>
-
+Store:Map -->
+1 |-> 16
+Out:String -->
+"x = 23\n"
 Solution 6:
-<T>
-    <threads>
-        .Bag
-    </threads>
-    <store>
-        1 |-> 16
-    </store>
-    <in>
-        ListItem(#buffer ( "" ))
-    </in>
-    <out>
-        ListItem(#buffer ( "x = 33\n" ))
-    </out>
-</T>
-
+Store:Map -->
+1 |-> 16
+Out:String -->
+"x = 33\n"
 Solution 7:
-<T>
-    <threads>
-        .Bag
-    </threads>
-    <store>
-        1 |-> 21
-    </store>
-    <in>
-        ListItem(#buffer ( "" ))
-    </in>
-    <out>
-        ListItem(#buffer ( "x = 11\n" ))
-    </out>
-</T>
-
+Store:Map -->
+1 |-> 21
+Out:String -->
+"x = 11\n"
 Solution 8:
-<T>
-    <threads>
-        .Bag
-    </threads>
-    <store>
-        1 |-> 21
-    </store>
-    <in>
-        ListItem(#buffer ( "" ))
-    </in>
-    <out>
-        ListItem(#buffer ( "x = 21\n" ))
-    </out>
-</T>
-
+Store:Map -->
+1 |-> 21
+Out:String -->
+"x = 21\n"
 Solution 9:
-<T>
-    <threads>
-        .Bag
-    </threads>
-    <store>
-        1 |-> 21
-    </store>
-    <in>
-        ListItem(#buffer ( "" ))
-    </in>
-    <out>
-        ListItem(#buffer ( "x = 23\n" ))
-    </out>
-</T>
-
+Store:Map -->
+1 |-> 21
+Out:String -->
+"x = 23\n"
 Solution 10:
-<T>
-    <threads>
-        .Bag
-    </threads>
-    <store>
-        1 |-> 33
-    </store>
-    <in>
-        ListItem(#buffer ( "" ))
-    </in>
-    <out>
-        ListItem(#buffer ( "x = 11\n" ))
-    </out>
-</T>
-
+Store:Map -->
+1 |-> 33
+Out:String -->
+"x = 11\n"
 Solution 11:
-<T>
-    <threads>
-        .Bag
-    </threads>
-    <store>
-        1 |-> 33
-    </store>
-    <in>
-        ListItem(#buffer ( "" ))
-    </in>
-    <out>
-        ListItem(#buffer ( "x = 23\n" ))
-    </out>
-</T>
-
+Store:Map -->
+1 |-> 33
+Out:String -->
+"x = 23\n"
 Solution 12:
-<T>
-    <threads>
-        .Bag
-    </threads>
-    <store>
-        1 |-> 33
-    </store>
-    <in>
-        ListItem(#buffer ( "" ))
-    </in>
-    <out>
-        ListItem(#buffer ( "x = 33\n" ))
-    </out>
-</T>
+Store:Map -->
+1 |-> 33
+Out:String -->
+"x = 33\n"
