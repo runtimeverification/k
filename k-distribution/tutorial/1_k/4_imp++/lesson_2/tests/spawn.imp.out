@@ -1,1 +1,1 @@
-<T> <k> print ( "x = " , .Ids ) ; ~> ( x = read ( ) ; ) ~> ( spawn x = x / 2 ; ) ~> ( spawn x = x + 10 ; ) ~> print ( x , ( "\n" , .Ids ) ) ; </k> <env> x |-> 1 </env> <store> 1 |-> 0 </store> </T>
+<T> <k> print ( "x = " , .AExps ) ; ~> ( x = read ( ) ; ) ~> ( spawn x = x / 2 ; ) ~> ( spawn x = x + 10 ; ) ~> print ( x , ( "\n" , .AExps ) ) ; </k> <env> x |-> 1 </env> <store> 1 |-> 0 </store> </T>

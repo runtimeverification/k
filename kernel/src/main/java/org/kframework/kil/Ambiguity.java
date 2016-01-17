@@ -34,7 +34,7 @@ public class Ambiguity extends Collection {
         if (content.length() > 1)
             content = content.substring(0, content.length() - 1);
 
-        return "'amb(" + content + ")";
+        return "amb(" + content + ")";
     }
 
     @Override

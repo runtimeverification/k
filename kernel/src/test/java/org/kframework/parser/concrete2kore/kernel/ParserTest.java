@@ -534,7 +534,7 @@ public class ParserTest {
 
         PrimitiveState minus = new RegExState("Minus-State", expNt, regex("\\-"));
         NonTerminalState expExp = new NonTerminalState("Exp-nts(Exp)", expNt, expNt);
-        Production p1 = Production(EXP_SORT, Seq(Terminal("-"), NonTerminal(EXP_SORT)), Attributes().add("klabel", "'-_"));
+        Production p1 = Production(EXP_SORT, Seq(Terminal("-"), NonTerminal(EXP_SORT)), Attributes().add("klabel", "-_"));
         RuleState rs1 = new RuleState("Exps-wrapMinus", expNt, new WrapLabelRule(p1));
         expNt.entryState.next.add(minus);
         minus.next.add(expExp);
@@ -549,7 +549,7 @@ public class ParserTest {
          */
         NonTerminal expsNt = new NonTerminal("Exps");
         NonTerminalState expExps = new NonTerminalState("Exp-nts(Exps)", expsNt, expNt);
-        Production p2 = Production(Sort("Exps"), Seq(NonTerminal(EXP_SORT)), Attributes().add("klabel", "'_,_"));
+        Production p2 = Production(Sort("Exps"), Seq(NonTerminal(EXP_SORT)), Attributes().add("klabel", "_,_"));
         PrimitiveState separator = new RegExState("Sep-State", expsNt, regex("\\,"));
         RuleState labelList = new RuleState("RuleStateExps", expsNt, new WrapLabelRule(p2));
         expsNt.entryState.next.add(expExps);

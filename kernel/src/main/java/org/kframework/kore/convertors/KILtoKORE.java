@@ -24,6 +24,7 @@ import org.kframework.kore.KToken;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import scala.Enumeration.Value;
 import scala.Tuple2;
@@ -47,23 +48,20 @@ import static org.kframework.kore.KORE.*;
 public class KILtoKORE extends KILTransformation<Object> {
 
     private org.kframework.kil.loader.Context context;
-    private final boolean doDropQuote;
     private boolean autoImportDomains;
     private KILtoInnerKORE inner;
     private final boolean syntactic;
 
-    public KILtoKORE(org.kframework.kil.loader.Context context, boolean syntactic, boolean doDropQuote, boolean autoImportDomains) {
+    public KILtoKORE(org.kframework.kil.loader.Context context, boolean syntactic, boolean autoImportDomains) {
         this.context = context;
-        this.doDropQuote = doDropQuote;
         this.autoImportDomains = autoImportDomains;
-        inner = new KILtoInnerKORE(context, doDropQuote);
+        inner = new KILtoInnerKORE(context);
         this.syntactic = syntactic;
     }
 
     public KILtoKORE(org.kframework.kil.loader.Context context) {
         this.context = context;
-        this.doDropQuote = true;
-        inner = new KILtoInnerKORE(context, doDropQuote);
+        inner = new KILtoInnerKORE(context);
         this.syntactic = false;
     }
 
@@ -177,7 +175,7 @@ public class KILtoKORE extends KILTransformation<Object> {
 
     public Context apply(org.kframework.kil.Context c) {
         if (syntactic)
-            return Context(KApply(KLabel("'context")), KToken("true", Sorts.Bool()),
+            return Context(KApply(KLabel("context")), KToken("true", Sorts.Bool()),
                     inner.convertAttributes(c));
         return Context(inner.apply(c.getBody()), inner.applyOrTrue(c.getRequires()));
     }
@@ -189,7 +187,7 @@ public class KILtoKORE extends KILTransformation<Object> {
 
     public org.kframework.definition.Configuration apply(Configuration kilConfiguration) {
         if (syntactic)
-            return Configuration(KApply(KLabel("'configuration")), KToken("true", Sorts.Bool()),
+            return Configuration(KApply(KLabel("configuration")), KToken("true", Sorts.Bool()),
                     inner.convertAttributes(kilConfiguration));
         Cell body = (Cell) kilConfiguration.getBody();
         return Configuration(inner.apply(body), inner.applyOrTrue(kilConfiguration.getEnsures()),
@@ -198,7 +196,7 @@ public class KILtoKORE extends KILTransformation<Object> {
 
     public Rule apply(org.kframework.kil.Rule r) {
         if (syntactic)
-            return Rule(KApply(KLabel("'rule")), KToken("true", Sorts.Bool()),
+            return Rule(KApply(KLabel("rule")), KToken("true", Sorts.Bool()),
                     KToken("true", Sorts.Bool()), inner.convertAttributes(r));
         K body = inner.apply(r.getBody());
 
@@ -244,7 +242,7 @@ public class KILtoKORE extends KILTransformation<Object> {
         Set<Tuple2<K, Sort>> expSorts = gatherSorts.apply(body);
         //System.out.println("gatherSorts = " + expSorts);
 
-        BinaryOperator<K> makeAnd = (a, b) -> KApply(KLabel(dropQuote("'_andBool_")), KList(a, b));
+        BinaryOperator<K> makeAnd = (a, b) -> KApply(KLabel(dropQuote("_andBool_")), KList(a, b));
         K sortPredicates = expSorts
                 .stream()
                 .map(t -> (K) KApply(KLabel("is" + t._2().name()), KList(t._1())))
@@ -286,7 +284,12 @@ public class KILtoKORE extends KILTransformation<Object> {
     }
 
     public scala.collection.Set<Tag> toTags(List<KLabelConstant> labels) {
-        return immutable(labels.stream().flatMap(l -> context.tags.get(l.getLabel()).stream().map(p -> Tag(dropQuote(p.getKLabel())))).collect(Collectors.toSet()));
+        return immutable(labels.stream().flatMap(l -> {
+            java.util.Set<Production> productions = context.tags.get(l.getLabel());
+            if(productions.isEmpty())
+                throw KEMException.outerParserError("Could not find any productions for tag: "+l.getLabel(), l.getSource(), l.getLocation());
+            return productions.stream().map(p -> Tag(dropQuote(p.getKLabel())));
+        }).collect(Collectors.toSet()));
     }
 
     public Set<org.kframework.definition.Sentence> apply(Syntax s) {
@@ -432,14 +435,7 @@ public class KILtoKORE extends KILTransformation<Object> {
     }
 
     public String dropQuote(String s) {
-        if (doDropQuote) {
-            if (s.startsWith("'"))
-                return s.substring(1);
-            else
-                return s;
-        } else {
-            return s;
-        }
+        return s;
     }
 
     public org.kframework.kore.Sort apply(org.kframework.kil.Sort sort) {

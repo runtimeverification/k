@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Copyright (c) 2013-2016 K Team. All Rights Reserved. -->
+
 <tests>
 
-  <include file="../../lesson_2/tests/config.xml" 
-           more-results="."
-           exclude="div.imp sum.imp collatz.imp primes.imp">
+  <include file="../../lesson_2/tests/config.xml"
+           more-results="." >
     <all-programs>
       <krun-option name="--output" value="none" />
     </all-programs>

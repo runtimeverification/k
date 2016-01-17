@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Copyright (c) 2013-2016 K Team. All Rights Reserved. -->
+
 <tests>
 
   <include file="../../../2_imp/lesson_5/tests/config.xml"
            more-programs="."
            more-results="." >
-    <kompile-option name="--transition" value="strict" />
+    <kompile-option name="--super-strict" value="strict" />
     <program name="div.imp">
       <krun-option name="--search" />
     </program>

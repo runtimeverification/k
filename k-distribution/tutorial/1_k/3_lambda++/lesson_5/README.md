@@ -1,4 +1,5 @@
-<!-- Copyright (c) 2014 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2014-2016 K Team. All Rights Reserved. -->
+
 ### More Semantic Computation Items
 
 [MOVIE [5'19"]](http://youtu.be/dP3FW0kZN6k)
@@ -20,7 +21,7 @@ it, and to recover it at invocation time:
     rule <k> cc(Rho,K) V:Val ~> _ =>  V ~> K </k> <env> _ => Rho </env>
 
 Let us kompile and make sure it works with the `callcc-env2.lambda` program,
-which should evaluate to `3`, not to `4`.
+which should evaluate to 3, not to 4.
 
 Note that the `cc` value, which can be used as a computation item in the `<k/>`
 cell, is now quite semantic in nature, pretty much the same as the closures.
@@ -31,8 +32,7 @@ was defined in Lesson 8 of Part 1 of the tutorial on LAMBDA:
 
     syntax Exp ::= "letrec" Id Id "=" Exp "in" Exp
                  | "mu" Id "." Exp      [latex(\mu{#1}.{#2})]
-    rule letrec F:Id X = E in E' => let F = mu F . lambda X . E in E'
-      [structural]
+    rule letrec F:Id X = E in E' => let F = mu F . lambda X . E in E'    [macro]
 
 We removed the `binder` annotation of `mu`, because it is not necessary
 anymore (since we do not work with substitutions anymore).
@@ -42,11 +42,11 @@ it with a special closure which already binds `X` to a fresh location holding
 the closure itself:
 
     syntax Exp ::= muclosure(Map,Exp)
-
-    rule <k> mu X . E => muclosure(Rho[N/X],E) ...</k>
+    
+    rule <k> mu X . E => muclosure(Rho[X <- !N], E) ...</k>
          <env> Rho </env>
-         <store>... . => (N |-> muclosure(Rho[N/X],E)) ...</store>
-      when fresh(N:Nat)  [structural]
+         <store>... .Map => (!N:Int |-> muclosure(Rho[X <- !N], E)) ...</store>
+      [structural]
 
 Since each time `mu X . E` is encountered during the evaluation it needs to
 evaluate `E`, we conclude that `muclosure` cannot be a value.  We can declare
@@ -54,10 +54,10 @@ it as either an expression or as a computation.  Let's go with the former.
 
 Finally, here is the rule unrolling the `muclosure`:
 
-    rule <k> muclosure(Rho,E) => E ~> env(Rho') ...</k>
-         <env> Rho' => Rho </env>
+  rule <k> muclosure(Rho,E) => E ~> Rho' ...</k>
+       <env> Rho' => Rho </env>
 
-Note that the current `environment Rho'` needs to be saved before and
+Note that the current environment `Rho'` needs to be saved before and
 restored after `E` is executed, because the fixed point may be invoked
 from a context with a completely different environment from the one
 in which `mu X . E` was declared.

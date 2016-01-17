@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2015 K Team. All Rights Reserved.
+// Copyright (c) 2013-2016 K Team. All Rights Reserved.
 /* BUGS:
 
 Due to now JavaCC handles EOF, EOF cannot terminate a single-line comment
@@ -884,7 +884,7 @@ void Production(List<Production> prods) :
 ) { Production prod = new Production(new NonTerminal(Sort.of("")), items); }
   (Attributes(prod))?
   { if (klabel != null && prod.getAttribute("klabel") == null) {
-      prod.addAttribute("klabel", "'"+klabel);
+      prod.addAttribute("klabel", klabel);
     }
     prods.add(markLoc(loc, prod)); }
 }

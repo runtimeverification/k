@@ -53,7 +53,7 @@ class Constructors(val module: definition.Module, implicit val theory: Theory) e
 
   override def KLabel(name: String): Label = {
 
-    val res = if (name.startsWith("'<")) {
+    val res = if (name.startsWith("<")) {
       RegularKAppLabel(name, Att())
     } else if (name.startsWith("is")) {
       SortPredicateLabel(Sort(name.replace("is", "")))

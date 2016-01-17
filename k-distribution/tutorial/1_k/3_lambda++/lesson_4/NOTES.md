@@ -18,3 +18,11 @@ applied.  If you make application seqstrict(2,1) then you get 4.
 Dec 06, 2014: Looks like we should discuss the --search and --transition
 options before this lesson, and then kompile the definition with option
 --transition = computational and krun it with --search.
+
+The README.md says "One is to make `+` `seqstrict` in the semantics, to
+enforce its evaluation from left-to-right.  Do it and then run the program
+above again;".  Then it continues and says "The problem is now the
+non-deterministic evaluation strategy of the function application construct".
+Grigore will add this as an exercise, asking reader to fix this
+non-determinism. Then ask them to propose another example where you still get
+non-determinism; can they?

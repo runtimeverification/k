@@ -171,7 +171,6 @@ public class ParserUtils {
             Source source,
             File currentDirectory,
             List<File> lookupDirectories,
-            boolean dropQuote,
             boolean autoImportDomains) {
 
         List<org.kframework.kil.Module> kilModules =
@@ -183,7 +182,7 @@ public class ParserUtils {
         Context context = new Context();
         new CollectProductionsVisitor(context).visitNode(def);
 
-        KILtoKORE kilToKore = new KILtoKORE(context, false, dropQuote, autoImportDomains);
+        KILtoKORE kilToKore = new KILtoKORE(context, false, autoImportDomains);
 
         HashMap<String, Module> koreModules = new HashMap<>();
         koreModules.putAll(previousModules.stream().collect(Collectors.toMap(Module::name, m -> m)));
@@ -203,10 +202,10 @@ public class ParserUtils {
             File source,
             File currentDirectory,
             List<File> lookupDirectories,
-            boolean dropQuote, boolean autoImportDomains) {
+            boolean autoImportDomains) {
         return loadDefinition(mainModuleName, syntaxModuleName, definitionText,
                 Source.apply(source.getAbsolutePath()),
-                currentDirectory, lookupDirectories, dropQuote, autoImportDomains);
+                currentDirectory, lookupDirectories, autoImportDomains);
     }
 
     public org.kframework.definition.Definition loadDefinition(
@@ -216,11 +215,11 @@ public class ParserUtils {
             Source source,
             File currentDirectory,
             List<File> lookupDirectories,
-            boolean dropQuote, boolean autoImportDomains) {
+            boolean autoImportDomains) {
         Set<Module> previousModules = new HashSet<>();
         if (autoImportDomains)
-            previousModules.addAll(loadModules(new HashSet<>(), Kompile.REQUIRE_PRELUDE_K, source, currentDirectory, lookupDirectories, dropQuote, false));
-        Set<Module> modules = loadModules(previousModules, definitionText, source, currentDirectory, lookupDirectories, dropQuote, autoImportDomains);
+            previousModules.addAll(loadModules(new HashSet<>(), Kompile.REQUIRE_PRELUDE_K, source, currentDirectory, lookupDirectories, false));
+        Set<Module> modules = loadModules(previousModules, definitionText, source, currentDirectory, lookupDirectories, autoImportDomains);
         modules.addAll(previousModules); // add the previous modules, since load modules is not additive
         Optional<Module> opt = modules.stream().filter(m -> m.name().equals(mainModuleName)).findFirst();
         if (!opt.isPresent()) {

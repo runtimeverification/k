@@ -48,7 +48,7 @@ public class TermCons extends ProductionReference implements Interfaces.MutableL
                 if (contents.size() == 0)
                     str += "." + sort;
                 else {
-                    str += "'_" + separator + "_(";
+                    str += "_" + separator + "_(";
                     for (Term t : contents)
                         str += t + ", ";
                     str = str.substring(0, str.length()-2) + ")";
