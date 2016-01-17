@@ -1,18 +1,42 @@
 Search results:
 
 Solution 1:
-<T> <threads> <thread> <k> . </k> <env> x |-> 1 t2 |-> 4 t1 |-> 2 </env> <id> 6 </id> </thread> <thread> <k> . </k> <env> x |-> 1 t2 |-> 4 t1 |-> 2 </env> <id> 0 </id> </thread> <thread> <k> . </k> <env> x |-> 1 t1 |-> 2 </env> <id> 3 </id> </thread> </threads> <store> 4 |-> 6 1 |-> 11 2 |-> 3 </store> <in> ListItem ( #buffer ( "" ) ) ListItem ( "off" ) ListItem ( #istream ( 0 ) ) </in> <out> ListItem ( #ostream ( 1 ) ) ListItem ( "off" ) ListItem ( #buffer ( "x = 11\n" ) ) </out> </T>
+Store:Map -->
+1 |-> 11 5 |-> 8 2 |-> 3
+Out:String -->
+"x = 11\n"
 Solution 2:
-<T> <threads> <thread> <k> . </k> <env> x |-> 1 t2 |-> 4 t1 |-> 2 </env> <id> 6 </id> </thread> <thread> <k> . </k> <env> x |-> 1 t2 |-> 4 t1 |-> 2 </env> <id> 0 </id> </thread> <thread> <k> . </k> <env> x |-> 1 t1 |-> 2 </env> <id> 3 </id> </thread> </threads> <store> 4 |-> 6 1 |-> 16 2 |-> 3 </store> <in> ListItem ( #buffer ( "" ) ) ListItem ( "off" ) ListItem ( #istream ( 0 ) ) </in> <out> ListItem ( #ostream ( 1 ) ) ListItem ( "off" ) ListItem ( #buffer ( "x = 16\n" ) ) </out> </T>
+Store:Map -->
+1 |-> 21 2 |-> 3 7 |-> 9
+Out:String -->
+"x = 21\n"
 Solution 3:
-<T> <threads> <thread> <k> . </k> <env> x |-> 1 t2 |-> 4 t1 |-> 2 </env> <id> 6 </id> </thread> <thread> <k> . </k> <env> x |-> 1 t2 |-> 4 t1 |-> 2 </env> <id> 0 </id> </thread> <thread> <k> . </k> <env> x |-> 1 t1 |-> 2 </env> <id> 3 </id> </thread> </threads> <store> 4 |-> 6 1 |-> 21 2 |-> 3 </store> <in> ListItem ( #buffer ( "" ) ) ListItem ( "off" ) ListItem ( #istream ( 0 ) ) </in> <out> ListItem ( #ostream ( 1 ) ) ListItem ( "off" ) ListItem ( #buffer ( "x = 21\n" ) ) </out> </T>
+Store:Map -->
+1 |-> 21 5 |-> 8 2 |-> 3
+Out:String -->
+"x = 21\n"
 Solution 4:
-<T> <threads> <thread> <k> . </k> <env> x |-> 1 t2 |-> 4 t1 |-> 2 </env> <id> 6 </id> </thread> <thread> <k> . </k> <env> x |-> 1 t2 |-> 4 t1 |-> 2 </env> <id> 0 </id> </thread> <thread> <k> . </k> <env> x |-> 1 t1 |-> 2 </env> <id> 3 </id> </thread> </threads> <store> 4 |-> 6 1 |-> 33 2 |-> 3 </store> <in> ListItem ( #buffer ( "" ) ) ListItem ( "off" ) ListItem ( #istream ( 0 ) ) </in> <out> ListItem ( #ostream ( 1 ) ) ListItem ( "off" ) ListItem ( #buffer ( "x = 33\n" ) ) </out> </T>
+Store:Map -->
+1 |-> 33 5 |-> 8 2 |-> 3
+Out:String -->
+"x = 33\n"
 Solution 5:
-<T> <threads> <thread> <k> . </k> <env> x |-> 1 t2 |-> 5 t1 |-> 2 </env> <id> 8 </id> </thread> <thread> <k> . </k> <env> x |-> 1 t2 |-> 5 t1 |-> 2 </env> <id> 0 </id> </thread> <thread> <k> . </k> <env> x |-> 1 t1 |-> 2 </env> <id> 3 </id> </thread> </threads> <store> 1 |-> 11 5 |-> 8 2 |-> 3 </store> <in> ListItem ( #buffer ( "" ) ) ListItem ( "off" ) ListItem ( #istream ( 0 ) ) </in> <out> ListItem ( #ostream ( 1 ) ) ListItem ( "off" ) ListItem ( #buffer ( "x = 11\n" ) ) </out> </T>
+Store:Map -->
+4 |-> 6 1 |-> 11 2 |-> 3
+Out:String -->
+"x = 11\n"
 Solution 6:
-<T> <threads> <thread> <k> . </k> <env> x |-> 1 t2 |-> 5 t1 |-> 2 </env> <id> 8 </id> </thread> <thread> <k> . </k> <env> x |-> 1 t2 |-> 5 t1 |-> 2 </env> <id> 0 </id> </thread> <thread> <k> . </k> <env> x |-> 1 t1 |-> 2 </env> <id> 3 </id> </thread> </threads> <store> 1 |-> 21 5 |-> 8 2 |-> 3 </store> <in> ListItem ( #buffer ( "" ) ) ListItem ( "off" ) ListItem ( #istream ( 0 ) ) </in> <out> ListItem ( #ostream ( 1 ) ) ListItem ( "off" ) ListItem ( #buffer ( "x = 21\n" ) ) </out> </T>
+Store:Map -->
+4 |-> 6 1 |-> 16 2 |-> 3
+Out:String -->
+"x = 16\n"
 Solution 7:
-<T> <threads> <thread> <k> . </k> <env> x |-> 1 t2 |-> 5 t1 |-> 2 </env> <id> 8 </id> </thread> <thread> <k> . </k> <env> x |-> 1 t2 |-> 5 t1 |-> 2 </env> <id> 0 </id> </thread> <thread> <k> . </k> <env> x |-> 1 t1 |-> 2 </env> <id> 3 </id> </thread> </threads> <store> 1 |-> 33 5 |-> 8 2 |-> 3 </store> <in> ListItem ( #buffer ( "" ) ) ListItem ( "off" ) ListItem ( #istream ( 0 ) ) </in> <out> ListItem ( #ostream ( 1 ) ) ListItem ( "off" ) ListItem ( #buffer ( "x = 33\n" ) ) </out> </T>
+Store:Map -->
+4 |-> 6 1 |-> 21 2 |-> 3
+Out:String -->
+"x = 21\n"
 Solution 8:
-<T> <threads> <thread> <k> . </k> <env> x |-> 1 t2 |-> 7 t1 |-> 2 </env> <id> 9 </id> </thread> <thread> <k> . </k> <env> x |-> 1 t2 |-> 7 t1 |-> 2 </env> <id> 0 </id> </thread> <thread> <k> . </k> <env> x |-> 1 t1 |-> 2 </env> <id> 3 </id> </thread> </threads> <store> 1 |-> 21 2 |-> 3 7 |-> 9 </store> <in> ListItem ( #buffer ( "" ) ) ListItem ( "off" ) ListItem ( #istream ( 0 ) ) </in> <out> ListItem ( #ostream ( 1 ) ) ListItem ( "off" ) ListItem ( #buffer ( "x = 21\n" ) ) </out> </T>
+Store:Map -->
+4 |-> 6 1 |-> 33 2 |-> 3
+Out:String -->
+"x = 33\n"
