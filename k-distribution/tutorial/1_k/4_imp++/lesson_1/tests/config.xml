@@ -6,6 +6,7 @@
   <include file="../../../2_imp/lesson_5/tests/config.xml"
            more-programs="."
            more-results="." >
+    <!-- replace division with strict when we have proper search strategies -->
     <kompile-option name="--transition" value="division" />
     <program name="div.imp">
       <krun-option name="--search" />
