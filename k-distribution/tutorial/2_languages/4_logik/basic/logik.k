@@ -197,7 +197,11 @@ languages).  */
 require "unification.k"
 
 module LOGIK-COMMON
-syntax Literal
+/*@ \section{Syntax}
+
+The syntax of LOGIK is straightforward: a program is a sequence of
+Horn clauses followed by a query: */
+  syntax Literal
   syntax Term ::= Literal | Literal "(" Terms ")"
   syntax Terms ::= List{Term,","}
   syntax Clause ::= Term ":-" Terms "." | Term "."
@@ -207,6 +211,9 @@ endmodule
 
 module LOGIK-SYNTAX
   imports LOGIK-COMMON
+  /*@ Variables and literals are defined as tokens following the conventions
+  used in Prolog (variables start with \_ or capital letter, while literals
+  start with lower case letters): */
     syntax Term ::= Token{[\_A-Z][a-zA-Z0-9\_]*}                   [variable, onlyLabel, autoReject, token]
     syntax Literal ::= Token{[a-z][a-zA-Z0-9\_]*}                  [onlyLabel, autoReject, token]
 endmodule
@@ -218,20 +225,6 @@ module LOGIK
 /*@ Unification is at the core of logic programming.  Here we are
 going to use the predefined unification procedure (the same one we
 used in the type inferencers in Tutorial 5). */
-
-/*@ \section{Syntax}
-
-The syntax of LOGIK is straightforward: a program is a sequence of
-Horn clauses followed by a query: */
-
-
-
-/*@ Variables and literals are defined as tokens following the conventions
-used in Prolog (variables start with \_ or capital letter, while literals
-start with lower case letters): */
-
-
-
 
 /*@ \section{Configuration}
 
