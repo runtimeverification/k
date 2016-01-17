@@ -117,7 +117,7 @@ of statements surrounded by curly brackets.  */
                  | "++" Id
                  | "read" "(" ")"
                  > AExp "/" AExp              [left, strict, division]
-                 > AExp "+" AExp              [left, strict, addition]
+                 > AExp "+" AExp              [left, strict]
                  > "spawn" Block
                  > Id "=" AExp                [strict(2)]
                  | "(" AExp ")"               [bracket]

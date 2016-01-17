@@ -5,7 +5,7 @@
   <include file="../../lesson_5/tests/config.xml" 
            more-results="." >
     <kompile-option name="--transition"
-                    value="addition division lookup increment assignment read print" />
+                    value="strict lookup increment assignment read print" />
     <program name="spawn.imp" >
       <krun-option name="--search" />
       <krun-option name="--pattern"
