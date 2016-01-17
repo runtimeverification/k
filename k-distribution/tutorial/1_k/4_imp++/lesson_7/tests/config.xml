@@ -13,5 +13,7 @@
     </all-programs>
     <program name="spawn.imp" >
         <krun-option name="--parser" value="kast --sort Stmts"/>
-        <krun-option name="--search" />  </include>
+        <krun-option name="--search" />
+    </program>
+  </include>
 </tests>
