@@ -137,6 +137,12 @@ class Module(val name: String, val imports: Set[Module], unresolvedLocalSentence
     }).fold(Map())(mergeMultiset)
   }
 
+  lazy val cellProductionsFor: Map[Sort, Set[Production]] =
+    productions
+      .collect({ case p if p.att.contains("cell") => p })
+      .groupBy(_.sort)
+      .map { case (s, ps) => (s, ps) }
+
   lazy val tokenProductionsFor: Map[Sort, Set[Production]] =
     productions
       .collect({ case p if p.att.contains("token") => p })
