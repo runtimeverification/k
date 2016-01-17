@@ -3,12 +3,17 @@
 <tests>
 
   <include file="../../lesson_5/tests/config.xml" 
-           more-results="."
-           exclude="spawn.imp div.imp sum.imp collatz.imp primes.imp"> <!--add spawn because of search bug-->
+           more-results="." >
+	<!-- Andrei: superheat => superstrict below-->
+    <kompile-option name="--superheat" value="strict" />
     <kompile-option name="--transition"
                     value="lookup increment assignment read print" />
-    <kompile-option name="--backend" value="java" />
     <program name="spawn.imp" >
+      <krun-option name="--search" />
+	  <krun-option name="--pattern"
+	               value="&lt;store&gt; Store &lt;/store&gt; &lt;out&gt; ListItem(_) ListItem(_) ListItem(#buffer(Out:String)) &lt;/out&gt;" />
+    </program>
+    <program name="div.imp" >
       <krun-option name="--search" />
     </program>
   </include>
