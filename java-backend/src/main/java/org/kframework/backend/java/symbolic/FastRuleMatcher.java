@@ -4,6 +4,7 @@ package org.kframework.backend.java.symbolic;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
+import org.kframework.attributes.Att;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.compile.KOREtoBackendKIL;
 import org.kframework.backend.java.kil.BuiltinList;
@@ -22,6 +23,7 @@ import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.builtin.KLabels;
+import org.kframework.kil.Attribute;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
 import org.kframework.utils.BitSet;
@@ -86,7 +88,13 @@ public class FastRuleMatcher {
             Rule rule = global.getDefinition().ruleTable.get(i);
             // TODO(YilongL): remove TermContext from the signature once
             // ConstrainedTerm doesn't hold a TermContext anymore
-            ConjunctiveFormula patternConstraint = ConjunctiveFormula.of(rule.lookups()).addAll(rule.requires());
+            /* TODO(AndreiS): remove this hack for super strictness after strategies work */
+            ConjunctiveFormula patternConstraint = ConjunctiveFormula.of(rule.lookups());
+            if (!computeOne && rule.containsAttribute(Att.cool()) && transitions.stream().anyMatch(rule::containsAttribute)) {
+                patternConstraint = patternConstraint.addAll(rule.requires().stream().filter(t -> !t.containsAttribute(Att.transition())).collect(Collectors.toList()));
+            } else {
+                patternConstraint = patternConstraint.addAll(rule.requires());
+            }
             List<Pair<ConjunctiveFormula, Boolean>> ruleResults = ConstrainedTerm.evaluateConstraints(
                     constraints[i],
                     subject.constraint(),

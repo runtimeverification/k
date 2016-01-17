@@ -2,7 +2,7 @@
 package org.kframework.backend.java.symbolic;
 
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
@@ -42,7 +42,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * @author AndreiS
@@ -55,6 +54,8 @@ public class SymbolicRewriter {
     private final Stopwatch stopwatch = Stopwatch.createUnstarted();
     private final KOREtoBackendKIL constructor;
     private boolean transition;
+    private final Set<ConstrainedTerm> superheated = Sets.newHashSet();
+    private final Set<ConstrainedTerm> newSuperheated = Sets.newHashSet();
     private final RuleIndex ruleIndex;
     private final KRunState.Counter counter;
     private final Map<ConstrainedTerm, Set<Rule>> subject2DisabledRules = new HashMap<>();
@@ -284,8 +285,16 @@ public class SymbolicRewriter {
 
             theNew = restoreConfigurationIfNecessary(subject, rule, theNew);
 
-            results.add(new ConstrainedTerm(theNew, subject.termContext()));
-            //results.add(buildResult(rule, triple.getLeft(), subject.term(), true, subject.termContext()));
+            ConstrainedTerm result = new ConstrainedTerm(theNew, subject.termContext());
+
+            /* TODO(AndreiS): remove this hack for super strictness after strategies work */
+            if (rule.containsAttribute(Att.heat()) && transitions.stream().anyMatch(rule::containsAttribute)) {
+                newSuperheated.add(result);
+            } else if (rule.containsAttribute(Att.cool()) && transitions.stream().anyMatch(rule::containsAttribute) && superheated.contains(subject)) {
+                continue;
+            }
+
+            results.add(result);
         }
 
         if (results.isEmpty()) {
@@ -516,16 +525,16 @@ public class SymbolicRewriter {
      * up to the bound as were found, and returns {@code true} if the bound has been reached.
      */
     private static boolean addSearchResult(
-            List<Substitution<Variable, Term>> searchResults,
-            ConstrainedTerm initialTerm,
+            HashSet<Substitution<Variable, Term>> searchResults,
+            ConstrainedTerm subject,
             Rule pattern,
             int bound) {
-        assert Sets.intersection(initialTerm.term().variableSet(),
-                initialTerm.constraint().substitution().keySet()).isEmpty();
+        assert Sets.intersection(subject.term().variableSet(),
+                subject.constraint().substitution().keySet()).isEmpty();
         List<Substitution<Variable, Term>> discoveredSearchResults = PatternMatcher.match(
-                initialTerm.term(),
+                subject.term(),
                 pattern,
-                initialTerm.termContext());
+                subject.termContext());
         for (Substitution<Variable, Term> searchResult : discoveredSearchResults) {
             searchResults.add(searchResult);
             if (searchResults.size() == bound) {
@@ -543,7 +552,7 @@ public class SymbolicRewriter {
      * @param searchType  defines when we will attempt to match the pattern
      * @return a list of substitution mappings for results that matched the pattern
      */
-    public List<Substitution<Variable, Term>> search(
+    public Set<Substitution<Variable, Term>> search(
             Term initialTerm,
             Rule pattern,
             int bound,
@@ -552,7 +561,7 @@ public class SymbolicRewriter {
             TermContext context) {
         stopwatch.start();
 
-        List<Substitution<Variable, Term>> searchResults = Lists.newArrayList();
+        HashSet<Substitution<Variable, Term>> searchResults = Sets.newHashSet();
         Set<ConstrainedTerm> visited = Sets.newHashSet();
 
         ConstrainedTerm initCnstrTerm = new ConstrainedTerm(initialTerm, context);
@@ -590,6 +599,9 @@ public class SymbolicRewriter {
         int step;
     label:
         for (step = 0; !queue.isEmpty(); ++step) {
+            superheated.clear();
+            superheated.addAll(newSuperheated);
+            newSuperheated.clear();
             for (Map.Entry<ConstrainedTerm, Integer> entry : queue.entrySet()) {
                 ConstrainedTerm term = entry.getKey();
                 Integer currentDepth = entry.getValue();
@@ -636,12 +648,12 @@ public class SymbolicRewriter {
             System.err.println("[" + visited.size() + "states, " + step + "steps, " + stopwatch + "]");
         }
 
-        List<Substitution<Variable, Term>> adaptedResults = searchResults.stream().map(r -> {
+        Set<Substitution<Variable, Term>> adaptedResults = searchResults.stream().map(r -> {
             RenameAnonymousVariables renameAnonymousVariables = new RenameAnonymousVariables();
             Substitution<Variable, Term> subs = new HashMapSubstitution();
             r.forEach((k, v) -> subs.plus(renameAnonymousVariables.getRenamedVariable(k), renameAnonymousVariables.apply(v)));
             return subs;
-        }).collect(Collectors.toList());
+        }).collect(Collectors.toSet());
 
         return adaptedResults;
     }
