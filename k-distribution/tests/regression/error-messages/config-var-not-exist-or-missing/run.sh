@@ -1,5 +1,6 @@
 #!/bin/bash
 
+rm -rf *-kompiled
 { kompile b.k
   krun -cXA=1               1.b 2>&1 | diff - 1.b.out
   krun -cXA=1 -cXB=2        2.b 2>&1 | diff - 2.b.out
