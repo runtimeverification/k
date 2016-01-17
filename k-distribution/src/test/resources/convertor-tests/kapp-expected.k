@@ -1,7 +1,7 @@
 // Copyright (c) 2014-2016 K Team. All Rights Reserved.
 module TEST [Location(#token("3",Int),#token("1",Int),#token("18",Int),#token("9",Int)) Source(#token("src/test/resources/convertor-tests/kapp.k",KString))]
   syntax Bools ::= Bool "," Bools [Location(#token("15",Int),#token("20",Int),#token("15",Int),#token("34",Int)) Source(#token("src/test/resources/convertor-tests/kapp.k",KString)) klabel(#token("_,_",KString)) right() userList(#token("*",KString))]
-  syntax Bools ::= ".Bools" [Location(#token("15",Int),#token("20",Int),#token("15",Int),#token("34",Int)) Source(#token("src/test/resources/convertor-tests/kapp.k",KString)) klabel(#token(".List{\"'_,_\"}",KString)) userList(#token("*",KString))]
+  syntax Bools ::= ".Bools" [Location(#token("15",Int),#token("20",Int),#token("15",Int),#token("34",Int)) Source(#token("src/test/resources/convertor-tests/kapp.k",KString)) klabel(#token(".List{\"_,_\"}",KString)) userList(#token("*",KString))]
   syntax Bool ::= #Bool [Location(#token("6",Int),#token("19",Int),#token("6",Int),#token("23",Int)) Source(#token("src/test/resources/convertor-tests/kapp.k",KString))]
   syntax Bool ::= "notBool" Bool [Location(#token("8",Int),#token("19",Int),#token("8",Int),#token("32",Int)) Source(#token("src/test/resources/convertor-tests/kapp.k",KString)) klabel(#token("notBool_",KString))]
   syntax #Bool ::= "true" [Location(#token("4",Int),#token("20",Int),#token("4",Int),#token("25",Int)) Source(#token("src/test/resources/convertor-tests/kapp.k",KString)) klabel(#token("true",KString))]
@@ -9,5 +9,5 @@ module TEST [Location(#token("3",Int),#token("1",Int),#token("18",Int),#token("9
   rule =>(notBool_(#token("true",#Bool)),#token("false",#Bool)) requires _andBool_(#token("true",Bool),#token("true",Bool)) ensures #token("true",Bool) [Location(#token("10",Int),#token("3",Int),#token("10",Int),#token("28",Int)) Source(#token("src/test/resources/convertor-tests/kapp.k",KString))]
   rule =>(notBool_(#token("false",#Bool)),#token("true",#Bool)) requires _andBool_(#token("true",Bool),#token("true",Bool)) ensures #token("true",Bool) [Location(#token("11",Int),#token("3",Int),#token("11",Int),#token("28",Int)) Source(#token("src/test/resources/convertor-tests/kapp.k",KString))]
   rule =>(notBool(#token("true",#Bool)),#token("false",#Bool)) requires _andBool_(#token("true",Bool),#token("true",Bool)) ensures #token("true",Bool) [Location(#token("13",Int),#token("3",Int),#token("13",Int),#token("30",Int)) Source(#token("src/test/resources/convertor-tests/kapp.k",KString))]
-  rule =>(_,_(#token("true",#Bool),#token("true",#Bool)),.List{"'_,_"}()) requires _andBool_(#token("true",Bool),#token("true",Bool)) ensures #token("true",Bool) [Location(#token("17",Int),#token("3",Int),#token("17",Int),#token("27",Int)) Source(#token("src/test/resources/convertor-tests/kapp.k",KString))]
+  rule =>(_,_(#token("true",#Bool),#token("true",#Bool)),.List{"_,_"}()) requires _andBool_(#token("true",Bool),#token("true",Bool)) ensures #token("true",Bool) [Location(#token("17",Int),#token("3",Int),#token("17",Int),#token("27",Int)) Source(#token("src/test/resources/convertor-tests/kapp.k",KString))]
 endmodule

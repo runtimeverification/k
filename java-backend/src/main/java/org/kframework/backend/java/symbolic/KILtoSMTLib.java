@@ -492,31 +492,31 @@ public class KILtoSMTLib extends CopyOnWriteTransformer {
 
         if (krunOptions.experimental.smt.floatsAsPO) {
             switch (kLabel.label()) {
-                case "'_<Float_":
+                case "_<Float_":
                     label = "float_lt";
                     break;
-                case "'_<=Float_":
+                case "_<=Float_":
                     label = "float_le";
                     break;
-                case "'_>Float_":
+                case "_>Float_":
                     label = "float_gt";
                     break;
-                case "'_>=Float_":
+                case "_>=Float_":
                     label = "float_ge";
                     break;
-                case "'maxFloat":
+                case "maxFloat":
                     label = "float_max";
                     break;
-                case "'minFloat":
+                case "minFloat":
                     label = "float_min";
                     break;
-                case "'_==Float_":
+                case "_==Float_":
                     label = "=";
                     break;
-                case "'_=/=Float_":
+                case "_=/=Float_":
                     label = "(not (= #1 #2))";
                     break;
-                case "'isNaN":
+                case "isNaN":
                     label = "(= #1 float_nan)";
                     break;
             }

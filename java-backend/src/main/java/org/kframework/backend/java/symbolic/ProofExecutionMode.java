@@ -63,7 +63,7 @@ public class ProofExecutionMode implements ExecutionMode<List<K>> {
     public List<K> execute(K k, Rewriter rewriter, CompiledDefinition compiledDefinition) {
         String proofFile = options.experimental.prove;
         Kompile kompile = new Kompile(compiledDefinition.kompileOptions, globalOptions, files, kem, sw, false);
-        Module mod = kompile.parseModule(compiledDefinition, files.resolveWorkingDirectory(proofFile).getAbsoluteFile(), true);
+        Module mod = kompile.parseModule(compiledDefinition, files.resolveWorkingDirectory(proofFile).getAbsoluteFile());
         RewriterResult executionResult = rewriter.execute(k, Optional.<Integer>empty());
 
         ConfigurationInfo configurationInfo = new ConfigurationInfoFromModule(compiledDefinition.executionModule());

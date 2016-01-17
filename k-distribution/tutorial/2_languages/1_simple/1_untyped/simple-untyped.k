@@ -154,7 +154,7 @@ whenever requested (e.g., when they appear as strict arguments of
 the constructs above). */
 
   // TODO(KORE): drop klabel once issues #1913 are fixed
-  syntax Ids  ::= List{Id,","}           [klabel("'_,_::Ids")]
+  syntax Ids  ::= List{Id,","}           [klabel("_,_::Ids")]
   /*
   syntax Ids  ::= List{Id,","}
   */
@@ -1066,8 +1066,7 @@ value: */
   syntax Map ::= Int "..." Int "|->" K
     [function, latex({#1}\ldots{#2}\mapsto{#3})]
   rule N...M |-> _ => .Map  when N >Int M
-  // TODO(KORE): drop bracket #1935
-  rule N...M |-> K => (N |-> K) (N +Int 1)...M |-> K  when N <=Int M
+  rule N...M |-> K => N |-> K (N +Int 1)...M |-> K  when N <=Int M
 
 /*@ The semantics of SIMPLE is now complete.  Make sure you kompile the
 definition with the right options in order to generate the desired model.
