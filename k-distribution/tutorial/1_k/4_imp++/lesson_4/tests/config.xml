@@ -3,7 +3,7 @@
 
 <tests>
 
-  <include file="../../lesson_2/tests/config.xml"
+  <include file="../../lesson_3/tests/config.xml"
            more-results="." >
     <all-programs>
       <krun-option name="--output" value="none" />

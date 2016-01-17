@@ -4,7 +4,7 @@ module IMP-SYNTAX
                  | "++" Id
                  | "read" "(" ")"
                  > AExp "/" AExp              [left, strict, division]
-                 > AExp "+" AExp              [left, strict]
+                 > AExp "+" AExp              [left, strict, addition]
                  | "(" AExp ")"               [bracket]
   syntax BExp  ::= Bool
                  | AExp "<=" AExp             [seqstrict, latex({#1}\leq{#2})]

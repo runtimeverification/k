@@ -4,7 +4,7 @@ module IMP-SYNTAX
                  | "++" Id
                  | "read" "(" ")"
                  > AExp "/" AExp              [left, strict, division]
-                 > AExp "+" AExp              [left, strict]
+                 > AExp "+" AExp              [left, strict, addition]
                  > "spawn" Block
                  > Id "=" AExp                [strict(2)]
                  | "(" AExp ")"               [bracket]
