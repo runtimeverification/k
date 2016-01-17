@@ -51,7 +51,7 @@ public class GenerateSentencesFromConfigDeclTest {
                         definitionFile,
                         definitionFile.getParentFile(),
                         Lists.newArrayList(Kompile.BUILTIN_DIRECTORY),
-                        true, false);
+                        false);
     }
 
     @Test

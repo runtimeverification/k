@@ -2,7 +2,9 @@
 package org.kframework.parser.concrete2kore.disambiguation;
 
 import com.google.common.collect.Sets;
+import org.kframework.Collections;
 import org.kframework.definition.NonTerminal;
+import org.kframework.parser.Ambiguity;
 import org.kframework.parser.SetsTransformerWithErrors;
 import org.kframework.parser.Term;
 import org.kframework.parser.TermCons;
@@ -16,6 +18,7 @@ import scala.util.Right;
 import java.util.HashSet;
 import java.util.Set;
 
+import static org.kframework.Collections.*;
 
 /**
  * Make sure that the rewrite binds greedy (has least priority).
@@ -23,6 +26,7 @@ import java.util.Set;
 public class CorrectRewritePriorityVisitor extends SetsTransformerWithErrors<ParseFailedException> {
 
     private final static Set<String> exceptions;
+
     static {
         exceptions = new HashSet<>();
         exceptions.add("#ruleRequires");
@@ -30,6 +34,20 @@ public class CorrectRewritePriorityVisitor extends SetsTransformerWithErrors<Par
         exceptions.add("#ruleRequiresEnsures");
         exceptions.add("#KRewrite");
         exceptions.add("#KList");
+    }
+
+    @Override
+    public Either<java.util.Set<ParseFailedException>, Term> apply(Ambiguity amb) {
+        // if the ambiguity has rewrites at the top, prefer them, and eliminate the rest
+        scala.collection.Set<Term> rewrites = amb.items().stream().filter(o ->
+                o instanceof TermCons &&
+                        ((TermCons) o).production().klabel().isDefined() &&
+                        ((TermCons) o).production().klabel().get().name().equals("#KRewrite")).collect(Collections.toSet());
+        if (rewrites.size() == 0 || rewrites.size() == amb.items().size())
+            return super.apply(amb);
+        if (rewrites.size() == 1)
+            return Right.apply(rewrites.head());
+        return super.apply(Ambiguity.apply(mutable(rewrites)));
     }
 
     @Override
@@ -45,7 +63,7 @@ public class CorrectRewritePriorityVisitor extends SetsTransformerWithErrors<Par
                     return rez;
                 tc = tc.with(0, rez.right().get());
             }
-            if (tc.production().items().apply(tc.production().items().size() -1) instanceof NonTerminal) {
+            if (tc.production().items().apply(tc.production().items().size() - 1) instanceof NonTerminal) {
                 int last = tc.items().size() - 1;
                 Either<java.util.Set<ParseFailedException>, Term> rez =
                         new PriorityVisitor2(tc).apply(tc.get(last));
@@ -59,6 +77,7 @@ public class CorrectRewritePriorityVisitor extends SetsTransformerWithErrors<Par
 
     private static class PriorityVisitor2 extends SetsTransformerWithErrors<ParseFailedException> {
         private final TermCons parent;
+
         public PriorityVisitor2(TermCons parent) {
             this.parent = parent;
         }

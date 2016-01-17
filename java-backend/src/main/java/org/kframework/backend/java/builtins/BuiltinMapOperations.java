@@ -166,7 +166,7 @@ public class BuiltinMapOperations {
         builder.addAll(map.getEntries().keySet());
         if (!map.isConcreteCollection()) {
             builder.add(KItem.of(
-                    KLabelConstant.of("'keys", context.definition()),
+                    KLabelConstant.of("keys", context.definition()),
                     KList.concatenate(BuiltinMap.concatenate(context.global(), map.baseTerms())),
                     context.global()));
         }

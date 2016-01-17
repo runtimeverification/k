@@ -25,15 +25,13 @@ import static org.kframework.Collections.*;
 public class KILtoInnerKORE extends KILTransformation<K> {
 
     private Context context;
-    private final boolean doDropQuote;
 
     private KLabel KLabel(String name) {
         return KORE.KLabel(dropQuote(name));
     }
 
-    public KILtoInnerKORE(org.kframework.kil.loader.Context context, boolean doDropQuote) {
+    public KILtoInnerKORE(org.kframework.kil.loader.Context context) {
         this.context = context;
-        this.doDropQuote = doDropQuote;
     }
 
     public static final String PRODUCTION_ID = "productionID";
@@ -103,10 +101,7 @@ public class KILtoInnerKORE extends KILTransformation<K> {
     }
 
     public String dropQuote(String s) {
-        if (doDropQuote && s.startsWith("'"))
-            return s.substring(1);
-        else
-            return s;
+        return s;
     }
 
     public K apply(KApp kApp) {

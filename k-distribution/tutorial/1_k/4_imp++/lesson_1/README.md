@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2010-2014 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2010-2016 K Team. All Rights Reserved. -->
 
 ### Extending/Changing an Existing Language Syntax
 
@@ -13,15 +13,14 @@ Let us first add the new syntactic constructs, with their precedences:
 - variable increment, `++`, which increments an integer variable and
 evaluates to the new value;
 - `read`, which reads and evaluates to a new integer from the input buffer;
-- `print`, which takes a comma-separated list of arithmetic expressions,
-  evaluates all of them, and then prints their values to the output buffer;
-  we therefore define a new list syntactic category, `AExps`, which we pass
-  as an argument to print; moreover, we declare print `strict`, to evaluate
-  its `AExps`-list argument, and then the `AExps` list construct `seqstrict`,
-  so lists of arithmetic expressions get evaluated from left-to-right whenever
-  they reach the top of the `<k/>` cell (replace `seqstrict` with `strict`
-  if you want expressions in a list to evaluate non-deterministically and
-  interleaved); we also go ahead and add strings as arithmetic expressions,
+- `print`, which takes a comma-separated list of arithmetic expressions and
+  evaluates and prints each of them in order, from left to right, to the
+  output buffer; we therefore define a new list syntactic category, `AExps`,
+  which we pass as an argument to `print`; note we do not want to declare
+  `print` to be `strict`, because we do not want to first evaluate the
+  arguments and then print them (for example, if the second argument performs
+  an illegal operation, say division by zero, we still want to print the first
+  argument); we also go ahead and add strings as arithmetic expressions,
   because we intend print to also take strings, in order to print nice
   messages to the user;
 - `halt`, which abruptly terminates the program; and
@@ -68,9 +67,9 @@ be able to see all the different behaviors of this program.  Challenge: can
 you identify the behavior where the program performs a division-by-zero?
 
 If we run `div.imp` now, it will get stuck with the variable increment
-construct on top of the computation cell.  Once we give it a semantics, in
-the next lesson, `div.imp` will execute completely (all the other constructs
-in `div.imp` already have their semantics defined as part of IMP).
+construct on top of the computation cell.  Once we give it a semantics,
+`div.imp` will execute completely (all the other constructs in `div.imp`
+already have their semantics defined as part of IMP).
 
 Note that some people prefer to define all their semantics in a *by need*
 style, that is, they first write and parse lots of programs, and then they

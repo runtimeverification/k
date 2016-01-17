@@ -43,7 +43,7 @@ public class NewOuterParserTest {
                 mainProgramsModule, definitionString, definitionFile,
                 definitionFile.getParentFile(),
                 Lists.newArrayList(BUILTIN_DIRECTORY),
-                true, false);
+                false);
 
         K kBody = ParserUtils.parseWithModule(theTextToParse, startSymbol, source, definition.getModule(definition.att().<String>get(Att.syntaxModule()).get()).get());
         //System.out.println(kBody);
