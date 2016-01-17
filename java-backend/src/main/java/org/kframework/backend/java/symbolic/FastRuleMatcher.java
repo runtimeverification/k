@@ -88,6 +88,7 @@ public class FastRuleMatcher {
             Rule rule = global.getDefinition().ruleTable.get(i);
             // TODO(YilongL): remove TermContext from the signature once
             // ConstrainedTerm doesn't hold a TermContext anymore
+            /* TODO(AndreiS): remove this hack for super strictness after strategies work */
             ConjunctiveFormula patternConstraint = ConjunctiveFormula.of(rule.lookups());
             if (!computeOne && rule.containsAttribute(Att.cool()) && transitions.stream().anyMatch(rule::containsAttribute)) {
                 patternConstraint = patternConstraint.addAll(rule.requires().stream().filter(t -> !t.containsAttribute(Attribute.SUPER_STRICT)).collect(Collectors.toList()));
