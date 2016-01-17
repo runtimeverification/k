@@ -1,0 +1,10 @@
+Search results:
+
+Solution 1:
+<T> <k> ( ++ x ) ~> #freezer_/_1 ( ++ x / 1 ) ~> #freezer_=_;0 ( y ) </k> <state> x |-> 1 y |-> 0 </state> </T>
+Solution 2:
+<T> <k> ( ++ x ) ~> #freezer_/_1 ( ++ x / x ) ~> #freezer_=_;0 ( y ) </k> <state> x |-> 1 y |-> 0 </state> </T>
+Solution 3:
+<T> <k> ( ++ x ) ~> #freezer_/_1 ( 1 ) ~> #freezer_/_0 ( ++ x ) ~> #freezer_=_;0 ( y ) </k> <state> x |-> 1 y |-> 0 </state> </T>
+Solution 4:
+<T> <k> ( ++ x ) ~> #freezer_/_1 ( x ) ~> #freezer_/_0 ( ++ x ) ~> #freezer_=_;0 ( y ) </k> <state> x |-> 1 y |-> 0 </state> </T>
