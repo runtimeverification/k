@@ -29,6 +29,7 @@ import org.kframework.kore.compile.ResolveStrict;
 import org.kframework.kore.compile.SortInfo;
 import org.kframework.kore.compile.checks.CheckConfigurationCells;
 import org.kframework.kore.compile.checks.CheckRHSVariables;
+import org.kframework.kore.compile.checks.CheckSortTopUniqueness;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.concrete2kore.ParserUtils;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
@@ -168,6 +169,8 @@ public class Kompile {
         stream(parsedDef.modules()).forEach(m -> stream(m.localSentences()).forEach(checkRHSVariables::check));
 
         stream(parsedDef.modules()).forEach(m -> stream(m.localSentences()).forEach(new CheckConfigurationCells(errors, m)::check));
+
+        stream(parsedDef.modules()).forEach(m -> stream(m.localSentences()).forEach(new CheckSortTopUniqueness(errors, m)::check));
 
         if (!errors.isEmpty()) {
             kem.addAllKException(errors.stream().map(e -> e.exception).collect(Collectors.toList()));
