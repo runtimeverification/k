@@ -2,7 +2,6 @@
 package org.kframework.kore.compile.checks;
 
 import org.kframework.compile.ConfigurationInfoFromModule;
-import org.kframework.definition.ConfigVars;
 import org.kframework.definition.Module;
 import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
