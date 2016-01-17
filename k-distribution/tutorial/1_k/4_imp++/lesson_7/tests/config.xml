@@ -10,12 +10,12 @@
         <krun-option name="--parser" value="kast --sort Stmts"/>
         <krun-option name="--output" value="none" />
     </all-programs>
-<!-- Remove spawn completely after parser option is no longer needed -->
     <program name="spawn.imp" >
+<!-- The following options should not be needed -->
         <krun-option name="--parser" value="kast --sort Stmts"/>
         <krun-option name="--search" />
         <krun-option name="--pattern"
-                     value="&lt;store&gt; Store &lt;/store&gt; &lt;out&gt; ListItem(_) ListItem(_) ListItem(#buffer(Out:String)) &lt;/out&gt;" />
+                     value="&lt;out&gt; ListItem(_) ListItem(_) ListItem(#buffer(Out:String)) &lt;/out&gt;" />
     </program>
   </include>
 </tests>
