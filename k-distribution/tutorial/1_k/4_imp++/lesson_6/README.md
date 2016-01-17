@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2010-2014 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2010-2016 K Team. All Rights Reserved. -->
 
 ### Adding/Deleting Cells Dynamically; Configuration Abstraction, Part 2
 
@@ -41,26 +41,25 @@ instance; and
 3. it may help you better understand and control the dynamics
 of your configuration, and thus your overall semantics.
 
-For good encapsulation, I (admittedly subjectively) also prefer to put all
-thread cells into one cell, `<threads/>`.  This is totally unnecessary here; to
-convince yourself that this is indeed true, you can remove this cell once
-we are done with the semantics and everything will work without having to
-make any changes.
+For good encapsulation, I also prefer to put all thread cells into one cell, 
+`<threads/>`.  This is technically unnecessary, though; to convince yourself
+that this is indeed the case, you can remove this cell once we are done with
+the semantics and everything will work without having to make any changes.
 
-Before we continue, let us `kompile` an `krun` some programs that used to work,
-say `sum-io.imp`.  In spite of the relatively radical configuration
+Before we continue, let us `kompile` an `krun` some programs that used to
+work, say `sum-io.imp`.  In spite of the relatively radical configuration
 reorganization, those programs execute just fine!  How is that possible?
 In particular, why do rules like the lookup and assignment still work,
-unchanged, in spite of the fact that the `<k/>` and `<env/>` cells are not at the
-same level with the `<store/>` cell in the configuration anymore?
+unchanged, in spite of the fact that the `<k/>` and `<env/>` cells are not at
+the same level with the `<store/>` cell in the configuration anymore?
 
 Welcome to configuration abstraction, part 2.  Recall that the role of
 configuration abstraction is to allow you to only write the relevant
 information in each rule, and have the compiler fill-in the obvious and boring
 details.  According to the configuration that we declared for our new
 language, there is only one reasonable way to complete rules like the lookup,
-namely to place the `<k/>` and `</env>` cells inside a `<thread/>` cell, inside a
-`<threads/>` cell:
+namely to place the `<k/>` and `</env>` cells inside a `<thread/>` cell,
+inside a `<threads/>` cell:
 
     rule <threads>...
            <thread>...
@@ -72,8 +71,9 @@ namely to place the `<k/>` and `</env>` cells inside a `<thread/>` cell, inside 
 
 This is the most direct, compact and local way to complete the configuration
 context of the lookup rule.  If for some reason you wanted here to match the
-`<k/>` cell of one thread and the `<env/>` cell of another thread, then you would
-need to explicitly tell K so, by mentioning the two thread cells, for example:
+`<k/>` cell of one thread and the `<env/>` cell of another thread, then you
+would need to explicitly tell K so, by mentioning the two thread cells,
+for example:
 
     rule <thread>...
              <k> X:Id => I ...</k>
@@ -84,8 +84,8 @@ need to explicitly tell K so, by mentioning the two thread cells, for example:
          <store>... N |-> I ...</store>  [lookup]
 
 By default, K completes rules in a greedy style.  Think this way: what is the
-minimal number of changes to my rule to make it fit the declared configuration?
-That's what the K tool will do.
+minimal number of changes to my rule to make it fit the declared
+configuration?  That's what the K tool will do.
 
 Configuration abstraction is technically unnecessary, but once you start
 using it and get a feel for how it works, it will become your best friend.
@@ -129,7 +129,8 @@ happens, we can go ahead and remove the useless `thread` cell:
 
     rule <thread>... <k> . </k> ...</thread> => .  [structural]
 
-Let's see what we've got.  `kompile` and `krun` `spawn.imp`.  Note the following:
+Let's see what we've got.  `kompile` and `krun` `spawn.imp`.
+Note the following:
 
 - The `<threads/>` cell is empty, so all threads terminated normally;
 - The value printed is different from the value in the store; the store value
@@ -154,26 +155,28 @@ For example:
 
     echo 23 | krun spawn.imp --search
 
-puts `23` in the standard input buffer, which is then transferred in the `<in/>`
-cell as a list item, and then the exhaustive search procedure is invoked.
+puts `23` in the standard input buffer, which is then transferred in the
+`<in/>` cell as a list item, and then the exhaustive search procedure is
+invoked.
 
 Second, even after piping some input, the `spawn.imp` program still manifests
 only one behavior, which does not seem right.  There should be many more.
 
-Like with the `superheat`/`supercool` options discussed in Lesson 3, by default
-`kompile` optimizes the generated model for execution.  In particular, it
-does not insert any backtracking markers where transition attempts should be
-made, so `krun` lacks the information it needs to exhaustively search the
-generated language model.  Like with the other options, we also have to
-explicitly tell `kompile` which rules should be considered as actual
+As explained in Lesson 3, by default `kompile` optimizes the generated
+language model for execution.  In particular, it does not insert any
+backtracking markers where transition attempts should be made, so `krun`
+lacks the information it needs to exhaustively search the generated language
+model.  Like we did in Lesson 3 with the language constructs, we also have
+to explicitly tell `kompile` which rules should be considered as actual
 transitions.  A theoretically correct but practically unfeasible approach
 to search all possible behaviors is to consider all rules as transitions.
-Even more than in the case of `superheating` and `supercooling`, such a naive
-solution would make the number of behaviors, and thus `krun`, explode.
-Remember that a two-thread program with 150 statements each manifests more
-behaviors than particles in the known universe!  Consequently, unless your
-multi-threaded programs are very small, you will most likely want to control
-which rules should be considered transitions and which should not.
+Even more than with the non-deterministic strictness of language constructs
+in Lesson 3, such a naive solution would make the number of behaviors, and
+thus `krun`, explode.  Remember that a two-thread program with 150 statements
+each manifests more behaviors than particles in the known universe!
+Consequently, unless your multi-threaded programs are very small, you will
+most likely want to control which rules should be considered transitions and
+which should not.
 
 A good rule of thumb is to include as transitions only those rules which
 *compete for behaviors*.  That is, those rules which may yield a different
@@ -185,22 +188,23 @@ if we delay the lookup of variable `x`, then other threads may write `x` in the
 meanwhile (with an increment or an assignment rule) and thus yield a
 different behavior.
 
-Let us tag those rules which should be transitions: lookup and increment need
-to be transitions (they may be already tagged, because they happened to also
-be `supercool` rules); the read rule needs to also be a transition, because it
-may complete with other instances of itself in other threads; assignment
-needs to also be a transition, and so should be the first rule for print.
+Let us discuss and tag those rules which should be transitions: lookup and
+increment need to be transitions and we already tagged them in Lesson 3;
+the read rule needs to also be a transition, because it may complete with
+other instances of itself in other threads; assignment needs to also be a
+transition, and so should be the first rule for `print`.
 
 Let us now `kompile` with the transition option set as desired:
 
-    kompile imp --transition="lookup increment assignment read print"
+    kompile imp --transition "lookup increment assignment read print"
 
-Now `echo 23 | krun spawn.imp --search` gives us all 10 behaviors of the
-spawn program.
-  
-It is highly non-trivial to say precisely which rules need to be transitions,
-so `krun` makes no attempt to automatically detect it.  Instead, it provides the
-functionality to let you decide it.
+Now `echo 23 | krun spawn.imp --search` gives us all 12 behaviors of the
+`spawn.imp` program.
+
+Like for non-deterministically strict operations which can be tagged as
+transitions, it is highly non-trivial to say precisely which rules need
+to be transitions.  So `krun` makes no attempt to automatically detect it.
+Instead, it provides the functionality to let you decide it.
 
 We currently have no mechanism for thread synchronization.  In the next lesson
-we add a join statement, which allows a thread to wait until another completes.
+we add a `join` statement, which allows a thread to wait until another completes.

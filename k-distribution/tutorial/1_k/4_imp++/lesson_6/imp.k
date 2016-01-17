@@ -1,4 +1,5 @@
 // Copyright (c) 2014-2016 K Team. All Rights Reserved.
+
 module IMP-SYNTAX
   syntax AExp  ::= Int | String | Id
                  | "++" Id
@@ -54,7 +55,7 @@ module IMP
        <store>... N |-> (I => I +Int 1) ...</store>  [increment]
   rule <k> read() => I ...</k>
        <in> ListItem(I:Int) => .List ...</in>  [read]
-  rule I1 / I2 => I1 /Int I2  when I2 =/=Int 0
+  rule I1 / I2 => I1 /Int I2  requires I2 =/=Int 0
   rule I1 + I2 => I1 +Int I2
   rule Str1 + Str2 => Str1 +String Str2
 // BExp
