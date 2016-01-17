@@ -72,13 +72,6 @@ public class KompileOptions implements Serializable {
         return syntaxModule;
     }
 
-    // Advanced options
-    @Parameter(names="--superheat", listConverter=StringListConverter.class, description="Specifies which syntactic constructs superheat the computation. To be used in combination with --supercool. <string> is a whitespace-separated list of production tags.")
-    public List<String> superheat = Collections.singletonList("superheat");
-
-    @Parameter(names="--supercool", listConverter=StringListConverter.class, description="Specifies which rules supercool the computation. To be used in combination with --superheat. <string> is a whitespace-separated list of rule tags.")
-    public List<String> supercool = Collections.singletonList("supercool");
-
     @Parameter(names="--transition", listConverter=StringListConverter.class, description="<string> is a whitespace-separated list of tags designating rules to become transitions.")
     public List<String> transition = Collections.singletonList(DEFAULT_TRANSITION);
 

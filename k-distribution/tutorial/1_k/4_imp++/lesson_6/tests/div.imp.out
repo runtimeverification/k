@@ -1,0 +1,12 @@
+Search results:
+
+Solution 1:
+<T> <threads> .ThreadCellBag </threads> <store> 1 |-> 3 2 |-> 0 </store> <in> ListItem ( #buffer ( "" ) ) ListItem ( "off" ) ListItem ( #istream ( 0 ) ) </in> <out> ListItem ( #ostream ( 1 ) ) ListItem ( "off" ) ListItem ( #buffer ( "" ) ) </out> </T>
+Solution 2:
+<T> <threads> .ThreadCellBag </threads> <store> 1 |-> 3 2 |-> 1 </store> <in> ListItem ( #buffer ( "" ) ) ListItem ( "off" ) ListItem ( #istream ( 0 ) ) </in> <out> ListItem ( #ostream ( 1 ) ) ListItem ( "off" ) ListItem ( #buffer ( "" ) ) </out> </T>
+Solution 3:
+<T> <threads> .ThreadCellBag </threads> <store> 1 |-> 3 2 |-> 2 </store> <in> ListItem ( #buffer ( "" ) ) ListItem ( "off" ) ListItem ( #istream ( 0 ) ) </in> <out> ListItem ( #ostream ( 1 ) ) ListItem ( "off" ) ListItem ( #buffer ( "" ) ) </out> </T>
+Solution 4:
+<T> <threads> .ThreadCellBag </threads> <store> 1 |-> 3 2 |-> 3 </store> <in> ListItem ( #buffer ( "" ) ) ListItem ( "off" ) ListItem ( #istream ( 0 ) ) </in> <out> ListItem ( #ostream ( 1 ) ) ListItem ( "off" ) ListItem ( #buffer ( "" ) ) </out> </T>
+Solution 5:
+<T> <threads> <thread> <k> ( 3 / 0 ) ~> #freezer_=_;0 ( y ) </k> <env> x |-> 1 y |-> 2 </env> </thread> </threads> <store> 1 |-> 3 2 |-> 0 </store> <in> ListItem ( #buffer ( "" ) ) ListItem ( "off" ) ListItem ( #istream ( 0 ) ) </in> <out> ListItem ( #ostream ( 1 ) ) ListItem ( "off" ) ListItem ( #buffer ( "" ) ) </out> </T>

@@ -1,42 +1,14 @@
 Search results:
 
 Solution 1:
-Store:Map -->
-1 |-> 11 5 |-> 8 2 |-> 3
 Out:String -->
 "x = 11\n"
 Solution 2:
-Store:Map -->
-1 |-> 21 2 |-> 3 7 |-> 9
 Out:String -->
-"x = 21\n"
+"x = 16\n"
 Solution 3:
-Store:Map -->
-1 |-> 21 5 |-> 8 2 |-> 3
 Out:String -->
 "x = 21\n"
 Solution 4:
-Store:Map -->
-1 |-> 33 5 |-> 8 2 |-> 3
-Out:String -->
-"x = 33\n"
-Solution 5:
-Store:Map -->
-4 |-> 6 1 |-> 11 2 |-> 3
-Out:String -->
-"x = 11\n"
-Solution 6:
-Store:Map -->
-4 |-> 6 1 |-> 16 2 |-> 3
-Out:String -->
-"x = 16\n"
-Solution 7:
-Store:Map -->
-4 |-> 6 1 |-> 21 2 |-> 3
-Out:String -->
-"x = 21\n"
-Solution 8:
-Store:Map -->
-4 |-> 6 1 |-> 33 2 |-> 3
 Out:String -->
 "x = 33\n"

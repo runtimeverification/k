@@ -1,0 +1,20 @@
+Search results:
+
+Solution 1:
+V:K -->
+a ~> #freezer__1 ( ( lambda x . lambda y . x ) y z )
+Solution 2:
+V:K -->
+a ~> #freezer__1 ( closure ( .Map , x , lambda y . x ) y z )
+Solution 3:
+V:K -->
+y ~> #freezer__0 ( closure ( .Map , x , lambda y . x ) ) ~> #freezer__1 ( z ) ~> #freezer__0 ( a )
+Solution 4:
+V:K -->
+y ~> #freezer__0 ( lambda x . lambda y . x ) ~> #freezer__1 ( z ) ~> #freezer__0 ( a )
+Solution 5:
+V:K -->
+z ~> #freezer__0 ( ( lambda x . lambda y . x ) y ) ~> #freezer__0 ( a )
+Solution 6:
+V:K -->
+z ~> #freezer__0 ( closure ( .Map , x , lambda y . x ) y ) ~> #freezer__0 ( a )

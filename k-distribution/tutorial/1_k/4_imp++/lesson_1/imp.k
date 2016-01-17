@@ -4,7 +4,8 @@ module IMP-SYNTAX
   syntax AExp  ::= Int | String | Id
                  | "++" Id
                  | "read" "(" ")"
-                 > AExp "/" AExp              [left, strict]
+                 // remove division tag when we have proper search strategies
+                 > AExp "/" AExp              [left, strict, division]
                  > AExp "+" AExp              [left, strict]
                  | "(" AExp ")"               [bracket]
   syntax BExp  ::= Bool
