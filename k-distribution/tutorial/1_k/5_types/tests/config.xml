@@ -2,7 +2,6 @@
 <!-- Copyright (c) 2013-2015 K Team. All Rights Reserved. -->
 <tests>
 
-<!-- NOTE: use temporary config.xml during KORE translation
   <include file="../lesson_1/tests/config.xml" directory="lesson_1" />
   <include file="../lesson_2/tests/config.xml" directory="lesson_2" />
   <include file="../lesson_3/tests/config.xml" directory="lesson_3" />
@@ -12,7 +11,5 @@
   <include file="../lesson_7/tests/config.xml" directory="lesson_7" />
   <include file="../lesson_8/tests/config.xml" directory="lesson_8" />
   <include file="../lesson_9/tests/config.xml" directory="lesson_9" />
--->
-  <include file="../lesson_9/tests-kore/config.xml" directory="lesson_9" />
 
 </tests>
