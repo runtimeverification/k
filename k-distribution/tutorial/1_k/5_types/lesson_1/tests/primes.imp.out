@@ -1,17 +1,1 @@
-<T>
-    <k>
-        stmt
-    </k>
-    <tenv>
-        i |-> int
-        m |-> int
-        n |-> int
-        q |-> int
-        r |-> int
-        s |-> int
-        t |-> int
-        x |-> int
-        y |-> int
-        z |-> int
-    </tenv>
-</T>
+<T> <k> stmt </k> <tenv> z |-> int i |-> int y |-> int x |-> int t |-> int s |-> int r |-> int q |-> int n |-> int m |-> int </tenv> </T>

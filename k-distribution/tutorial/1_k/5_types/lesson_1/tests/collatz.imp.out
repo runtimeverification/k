@@ -1,12 +1,1 @@
-<T>
-    <k>
-        stmt
-    </k>
-    <tenv>
-        m |-> int
-        n |-> int
-        q |-> int
-        r |-> int
-        s |-> int
-    </tenv>
-</T>
+<T> <k> stmt </k> <tenv> s |-> int r |-> int q |-> int n |-> int m |-> int </tenv> </T>
