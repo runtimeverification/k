@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright (c) 2013-2015 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2013-2016 K Team. All Rights Reserved. -->
 
 <tests>
 
@@ -8,25 +8,9 @@
       programs="../../programs/"
       results="."
       extension="simple" >
-      <kompile-option name="--backend" value="java" />
-      <all-programs>
-        <krun-option name="--pattern" value="&lt;tasks&gt;.Bag&lt;/tasks&gt;"/>
-        <krun-option name="--smt" value="none" />
-        <krun-option name="--symbolic-execution" />
-      </all-programs>
-  </test>
-
-  <test
-      definition="simple-typed-static.k"
-      programs="../../programs/"
-      results="."
-      extension="simple" >
-      <kompile-option name="--backend" value="java" />
       <all-programs>
         <krun-option name="--pattern" value="&lt;tasks&gt;.Bag&lt;/tasks&gt;"/>
       </all-programs>
   </test>
-
-
 
 </tests>
