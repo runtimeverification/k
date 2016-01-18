@@ -131,7 +131,7 @@ type, we also introduce a new syntactic category for typed variables,
 \textit{Param}, and lists over it. */
 
   syntax Param ::= Type Id
-  syntax Params ::= List{Param,","}    [klabel("_,_::Params")]  //TODO: remove klabel
+  syntax Params ::= List{Param,","}
 
   syntax Decl ::= Type Exps ";"
                 | Type Id "(" Params ")" Block

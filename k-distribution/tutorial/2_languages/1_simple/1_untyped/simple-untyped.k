@@ -152,9 +152,7 @@ Moreover, we want them to be strict, that is, to evaluate to lists of results
 whenever requested (e.g., when they appear as strict arguments of
 the constructs above). */
 
-  // TODO(KORE): drop klabel once issues #1913 are fixed
-  syntax Ids  ::= List{Id,","}           // [klabel("_,_::Ids")]
-//  syntax Ids  ::= List{Id,","}
+  syntax Ids  ::= List{Id,","}
   syntax Exps ::= List{Exp,","}          [strict]  // automatically hybrid now
 
 /*@ \subsection{Statements}
