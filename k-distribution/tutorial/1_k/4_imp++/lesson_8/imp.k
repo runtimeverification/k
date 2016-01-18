@@ -582,8 +582,8 @@ Using the \texttt{--transition} option allows you to interfere with this
 process and to obtain all possible non-deterministic behaviors as if
 the theoretical heating/cooling rules were applied.  Optimizations
 of course happen under the hood, but you need not be aware of them.
-Used carefully, this mechanism allows us to explore more non-deterministic
-behaviors of a program, even all of them like here, still efficiently.
+Used carefully, this mechanism allows us to efficiently explore more of
+the non-deterministic behaviors of a program, even all of them (like here).
 For example, with the semantics of IMP++ given above, the \texttt{krun}
 command with the \texttt{-\,\!-search} option detects all five behaviors
 of the following IMP++ program (\texttt{x} can be 0, 1, 2, 3, or undefined
