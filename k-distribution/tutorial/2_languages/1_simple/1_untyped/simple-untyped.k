@@ -153,7 +153,7 @@ whenever requested (e.g., when they appear as strict arguments of
 the constructs above). */
 
   // TODO(KORE): drop klabel once issues #1913 are fixed
-  syntax Ids  ::= List{Id,","}           [klabel("_,_::Ids")]
+  syntax Ids  ::= List{Id,","}           // [klabel("_,_::Ids")]
 //  syntax Ids  ::= List{Id,","}
   syntax Exps ::= List{Exp,","}          [strict]  // automatically hybrid now
 
