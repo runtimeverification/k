@@ -26,7 +26,7 @@ module IMP-SYNTAX
 
   syntax Ids   ::= List{Id,","}
   syntax AExps ::= List{AExp,","}
-  syntax Stmts ::= List{Stmt,""}              [seqstrict]
+  syntax Stmts ::= List{Stmt,""}              [strict(1)]
 endmodule
 
 

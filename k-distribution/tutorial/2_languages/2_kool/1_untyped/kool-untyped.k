@@ -196,13 +196,9 @@ for the KOOL object-oriented constructs.
                > "spawn" Block
                > Exp "=" Exp             [strict(2), right]
 
-  // TODO(KORE): drop klabel once issues #1913 are fixed
-  syntax Ids  ::= List{Id,","}           [klabel(_,_::Ids)]
-  /*
   syntax Ids  ::= List{Id,","}
-  */
-  syntax Exps ::= List{Exp,","}          [strict]
 
+  syntax Exps ::= List{Exp,","}          [strict]
 
   syntax Block ::= "{" "}"
                 | "{" Stmts "}"

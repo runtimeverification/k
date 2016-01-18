@@ -106,6 +106,7 @@ object Att {
   val topRule = "topRule"
   val userList = "userList"
   val generatedByListSubsorting = "generatedByListSubsorting"
+  val generatedBy = "generatedBy"
   val ClassFromUp = "classType"
   val Location = "location"
   val Function = "function"
@@ -120,6 +121,10 @@ object Att {
   val unit = "unit"
   val bag = "bag"
   val syntaxModule = "syntaxModule"
+  val variable = "variable"
+  val sort = "sort"
+
+  def generatedByAtt(c: Class[_]) = Att().add(Att.generatedBy, c.getName)
 }
 
 trait AttributesToString {

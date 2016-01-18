@@ -1,5 +1,5 @@
 Search results:
 
 Solution 1:
-V:K -->
-(_0:Type -> _1:Type) -> ((_1 -> _2:Type) -> (_0 -> _2))
+T:Type -->
+( V0 -> V1 ) -> ( ( V1 -> V2 ) -> ( V0 -> V2 ) )
