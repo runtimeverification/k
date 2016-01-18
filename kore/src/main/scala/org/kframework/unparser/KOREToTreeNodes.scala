@@ -24,12 +24,7 @@ object KOREToTreeNodes {
 
   def up(mod: Module)(t: K): K = t match {
     case v: KVariable => KToken(v.name, Sorts.KVariable, v.att)
-    case t: KToken =>
-      if (mod.tokenProductionsFor.contains(Sort(t.sort.name))) {
-        t
-      } else {
-        KApply(KLabel("#KToken"), KList(KToken(t.s, Sorts.KString, t.att), KToken(t.sort.name, Sorts.KString, t.att)), t.att)
-      }
+    case t: KToken => t
     case s: KSequence =>
       if (s.items.size() == 0)
         KApply(KLabel("#EmptyK"), KList(), s.att)
