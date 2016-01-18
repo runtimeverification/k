@@ -3,6 +3,13 @@
 <tests>
 
   <include file="../../lesson_5/tests/config.xml"
-           more-results="." />
+           more-results="." >
+    <all-programs>
+      <krun-option name="--symbolic-execution" />
+      <krun-option name="--search" />
+      <!-- the pattern T:Type matches iff the program is well-typed -->
+      <krun-option name="--pattern" value="&lt;tasks&gt; &lt;task&gt; &lt;k&gt; T:Type &lt;/k&gt; _ &lt;/task&gt; &lt;/tasks&gt;" />
+    </all-programs>
+  </include>
 
 </tests>
