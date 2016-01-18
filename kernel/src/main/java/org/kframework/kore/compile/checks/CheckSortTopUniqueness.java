@@ -13,13 +13,22 @@ import static org.kframework.kore.KORE.Sort;
 import java.util.Set;
 
 /**
- * Checks if multiple top sorts KList and Bag are found for
+ * Check that every sort has an unique top (super) sort.
+ * For example, the following is not allowed, since A has multiple top sorts, KList and Bag:
+ *   syntax A
+ *   syntax KList ::= A
+ *   syntax Bag ::= A
  */
 public class CheckSortTopUniqueness {
     private final Set<KEMException> errors;
 
     private final Module module;
 
+    /**
+     * Check that the given module has no sort that has multiple top sorts.
+     * @param errors to be updated when violations occur. Multiple violations will be accumulated in `errors`.
+     * @param module to be checked.
+     */
     public CheckSortTopUniqueness(Set<KEMException> errors, Module module) {
         this.errors = errors;
         this.module = module;
