@@ -1,5 +1,5 @@
 Search results:
 
 Solution 1:
-V:K -->
-int -> (int -> int)
+T:Type -->
+int -> ( int -> int )
