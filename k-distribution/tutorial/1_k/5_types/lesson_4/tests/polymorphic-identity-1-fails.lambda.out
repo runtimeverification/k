@@ -2,4 +2,31 @@ Search results:
 
 Solution 1:
 V:K -->
+( ( bool -> V0 ) = ( int -> V1 ) ) ~> V1 ~> #freezerif_then_else_0 ( V0 , ( bool -> V0 ) 1 ) ~> #freezer_->_0 ( bool -> V0 ) ~> #freezer__1 ( V2 -> V2 )
+Solution 2:
+V:K -->
+( ( bool -> V0 ) = ( int -> V1 ) ) ~> V1 ~> #freezerif_then_else_0 ( V0 , ( bool -> V0 ) 1 ) ~> #freezer_->_0 ( bool -> V0 ) ~> #freezer__1 ( lambda x . x )
+Solution 3:
+V:K -->
+( ( bool -> V0 ) = ( int -> V1 ) ) ~> V1 ~> #freezerif_then_else_1 ( V0 , ( bool -> V0 ) 2 ) ~> #freezer_->_0 ( bool -> V0 ) ~> #freezer__1 ( V2 -> V2 )
+Solution 4:
+V:K -->
+( ( bool -> V0 ) = ( int -> V1 ) ) ~> V1 ~> #freezerif_then_else_1 ( V0 , ( bool -> V0 ) 2 ) ~> #freezer_->_0 ( bool -> V0 ) ~> #freezer__1 ( lambda x . x )
+Solution 5:
+V:K -->
+( ( int -> V0 ) = ( bool -> V1 ) ) ~> V1 ~> #freezerif_then_else_12 ( ( int -> V0 ) 1 , V0 ) ~> #freezer_->_0 ( int -> V0 ) ~> #freezer__1 ( V2 -> V2 )
+Solution 6:
+V:K -->
+( ( int -> V0 ) = ( bool -> V1 ) ) ~> V1 ~> #freezerif_then_else_12 ( ( int -> V0 ) 1 , V0 ) ~> #freezer_->_0 ( int -> V0 ) ~> #freezer__1 ( lambda x . x )
+Solution 7:
+V:K -->
+( ( int -> V0 ) = ( bool -> V1 ) ) ~> V1 ~> #freezerif_then_else_12 ( V0 , ( int -> V0 ) 2 ) ~> #freezer_->_0 ( int -> V0 ) ~> #freezer__1 ( V2 -> V2 )
+Solution 8:
+V:K -->
+( ( int -> V0 ) = ( bool -> V1 ) ) ~> V1 ~> #freezerif_then_else_12 ( V0 , ( int -> V0 ) 2 ) ~> #freezer_->_0 ( int -> V0 ) ~> #freezer__1 ( lambda x . x )
+Solution 9:
+V:K -->
+( ( int -> V0 ) = ( bool -> V1 ) ) ~> V1 ~> #freezerif_then_else_12 ( V0 , V0 ) ~> #freezer_->_0 ( int -> V0 ) ~> #freezer__1 ( V2 -> V2 )
+Solution 10:
+V:K -->
 ( ( int -> V0 ) = ( bool -> V1 ) ) ~> V1 ~> #freezerif_then_else_12 ( V0 , V0 ) ~> #freezer_->_0 ( int -> V0 ) ~> #freezer__1 ( lambda x . x )
