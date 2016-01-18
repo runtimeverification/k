@@ -87,6 +87,7 @@ object Module {
   def apply(name: String, unresolvedLocalSentences: Set[Sentence]): Module = {
     new Module(name, Set(), unresolvedLocalSentences, Att())
   }
+
   def apply(name: String, imports: Set[Module], unresolvedLocalSentences: Set[Sentence], @(Nonnull@param) att: Att = Att()): Module = {
     new Module(name, imports, unresolvedLocalSentences, att)
   }
@@ -117,6 +118,16 @@ class Module(val name: String, val imports: Set[Module], unresolvedLocalSentence
       .groupBy(_.klabel.get)
       .map { case (l, ps) => (l, ps) }
 
+  lazy val productionsForSort: Map[Sort, Set[Production]] =
+    productions
+      .groupBy(_.sort)
+      .map { case (l, ps) => (l, ps) }
+
+  @transient
+  lazy val attForSort: Map[Sort, Att] =
+    productionsForSort mapValues {_ map {_.att} reduce {_.++(_)}}
+
+  @transient
   lazy val definedKLabels: Set[KLabel] =
     (productionsFor.keys.toSet | klabelsDefinedInRules.keys.toSet).filter(!_.isInstanceOf[KVariable])
 
