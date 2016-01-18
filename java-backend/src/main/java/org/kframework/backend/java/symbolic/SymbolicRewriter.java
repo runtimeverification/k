@@ -2,7 +2,6 @@
 package org.kframework.backend.java.symbolic;
 
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
@@ -242,7 +241,7 @@ public class SymbolicRewriter {
         if (definition.automaton == null) {
             return results;
         }
-        List<Triple<ConjunctiveFormula, Boolean, Integer>> matches = theFastMatcher.mainMatch(
+        List<Triple<ConjunctiveFormula, Boolean, Integer>> matches = theFastMatcher.matchRulePattern(
                 subject,
                 definition.automaton.leftHandSide(),
                 allRuleBits,
@@ -524,16 +523,17 @@ public class SymbolicRewriter {
      * the pattern to the terms they unify with. Adds as many search results
      * up to the bound as were found, and returns {@code true} if the bound has been reached.
      */
-    private static boolean addSearchResult(
+    private boolean addSearchResult(
             HashSet<Substitution<Variable, Term>> searchResults,
             ConstrainedTerm subject,
             Rule pattern,
             int bound) {
         assert Sets.intersection(subject.term().variableSet(),
                 subject.constraint().substitution().keySet()).isEmpty();
-        List<Substitution<Variable, Term>> discoveredSearchResults = PatternMatcher.match(
+        assert pattern.requires().stream().allMatch(BoolToken.TRUE::equals) && pattern.lookups().getKComponents().isEmpty();
+        List<Substitution<Variable, Term>> discoveredSearchResults = FastRuleMatcher.match(
                 subject.term(),
-                pattern,
+                pattern.leftHandSide(),
                 subject.termContext());
         for (Substitution<Variable, Term> searchResult : discoveredSearchResults) {
             searchResults.add(searchResult);

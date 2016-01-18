@@ -131,7 +131,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
         @Override
         public RewriterResult execute(K k, Optional<Integer> depth) {
             TermContext termContext = TermContext.builder(rewritingContext).freshCounter(initCounterValue).build();
-            KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, termContext.global(), false, false);
+            KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, termContext.global(), false);
             Term backendKil = KILtoBackendJavaKILTransformer.expandAndEvaluate(termContext, kem, converter.convert(k));
             this.rewriter = new SymbolicRewriter(rewritingContext,  kompileOptions, javaOptions, new KRunState.Counter(), converter);
             JavaKRunState result = (JavaKRunState) rewriter.rewrite(new ConstrainedTerm(backendKil, termContext), depth.orElse(-1));
@@ -147,7 +147,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
         @Override
         public List<? extends Map<? extends KVariable, ? extends K>> search(K initialConfiguration, Optional<Integer> depth, Optional<Integer> bound, Rule pattern, SearchType searchType) {
             TermContext termContext = TermContext.builder(rewritingContext).freshCounter(initCounterValue).build();
-            KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, termContext.global(), true, false);
+            KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, termContext.global(), false);
             Term javaTerm = KILtoBackendJavaKILTransformer.expandAndEvaluate(termContext, kem, converter.convert(initialConfiguration));
             org.kframework.backend.java.kil.Rule javaPattern = converter.convert(Optional.empty(), pattern);
             List<Substitution<Variable, Term>> searchResults;
@@ -167,7 +167,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
         @Override
         public List<K> prove(List<Rule> rules) {
             TermContext termContext = TermContext.builder(rewritingContext).freshCounter(initCounterValue).build();
-            KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, termContext.global(), true, false);
+            KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, termContext.global(), false);
             List<org.kframework.backend.java.kil.Rule> javaRules = rules.stream()
                     .map(r -> converter.convert(Optional.<Module>empty(), r))
                     .collect(Collectors.toList());
