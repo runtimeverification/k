@@ -28,6 +28,7 @@ import org.kframework.kore.SortedADT;
 import org.kframework.kore.compile.AssocCommToAssoc;
 import org.kframework.kore.compile.Backend;
 import org.kframework.kore.compile.ConvertDataStructureToLookup;
+import org.kframework.kore.compile.KTokenVariablesToTrueVariables;
 import org.kframework.kore.compile.MergeRules;
 import org.kframework.kore.compile.NormalizeAssoc;
 import org.kframework.kore.compile.RewriteToTop;
@@ -91,22 +92,9 @@ public class JavaBackend implements Backend {
                 .andThen(DefinitionTransformer.fromSentenceTransformer(JavaBackend::markSingleVariables, "mark single variables"))
                 .andThen(DefinitionTransformer.from(new AssocCommToAssoc(KORE.c()), "convert assoc/comm to assoc"))
                 .andThen(DefinitionTransformer.from(new MergeRules(KORE.c()), "generate matching automaton"))
-                .andThen(DefinitionTransformer.fromKTransformerWithModuleInfo(this::kTokenVariablesToTrueVariables, "generate matching automaton"))
+                .andThen(DefinitionTransformer.fromKTransformerWithModuleInfo(new KTokenVariablesToTrueVariables(), "generate matching automaton"))
                 .apply(d);
     }
-
-
-    private K kTokenVariablesToTrueVariables(Module m, K k) {
-        return new TransformK() {
-            public K apply(KToken k) {
-                if(m.sortAttributesFor().get(k.sort()).contains(Att.variable())) {
-                    return new SortedADT.SortedKVariable(k.s(), k.att().add(Att.sort(), k.sort().name()));
-                } else
-                    return k;
-            }
-        }.apply(k);
-    }
-
 
     /**
      * Put a marker on the "regular" (i.e. non function/macro/etc.) rules that we can use later.
