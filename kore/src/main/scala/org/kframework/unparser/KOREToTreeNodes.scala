@@ -28,7 +28,7 @@ object KOREToTreeNodes {
       if (mod.tokenProductionsFor.contains(Sort(t.sort.name))) {
         t
       } else {
-        KApply(KLabel("#KToken"), KList(KToken(t.s, Sorts.KString, t.att), KToken(t.sort.name, Sorts.KString, t.att)), t.att)
+        KToken(t.s, Sorts.KString, t.att)
       }
     case s: KSequence =>
       if (s.items.size() == 0)
