@@ -289,8 +289,7 @@ public class KRun {
             String name = entry.getKey();
             String value = entry.getValue().getLeft();
             String parser = entry.getValue().getRight();
-            // TODO(dwightguth): start symbols
-            Sort sort = Sorts.K();
+            Sort sort = compiledDef.programStartSymbol;
             K configVar = externalParse(parser, value, sort, Source.apply("<command line: -c" + name + ">"), compiledDef);
             output.put(KToken("$" + name, Sorts.KConfigVar()), configVar);
         }
