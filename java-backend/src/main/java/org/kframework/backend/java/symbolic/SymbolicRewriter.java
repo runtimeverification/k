@@ -531,7 +531,7 @@ public class SymbolicRewriter {
             int bound) {
         assert Sets.intersection(subject.term().variableSet(),
                 subject.constraint().substitution().keySet()).isEmpty();
-        assert pattern.requires().isEmpty() && pattern.lookups().getKComponents().isEmpty();
+        assert pattern.requires().stream().allMatch(BoolToken.TRUE::equals) && pattern.lookups().getKComponents().isEmpty();
         List<Substitution<Variable, Term>> discoveredSearchResults = theFastMatcher.mainMatch(
                 subject.term(),
                 pattern.leftHandSide(),
