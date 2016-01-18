@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright (c) 2013-2015 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2013-2016 K Team. All Rights Reserved. -->
+
 <tests>
 
   <test definition="simple-untyped"
@@ -7,18 +8,20 @@
         extension="simple"
         exclude="dekker"
         results="." >
-        <kompile-option name="--superheat" value="strict" />
-        <kompile-option name="--backend" value="java" />
+        <kompile-option name="--transition" value="strict" />
         <all-programs>
+          <krun-option name="--parser" value="kast --sort Stmts" />
           <krun-option name="--output" value="none" />
         </all-programs>
         <program name="threads_05.simple">
+          <krun-option name="--parser" value="kast --sort Stmts" />
           <krun-option name="--search" />
           <krun-option name="--bound" value="5" />
         </program>
         <program name="exceptions_07.simple">
+          <krun-option name="--parser" value="kast --sort Stmts" />
           <krun-option name="--search" />
-          <krun-option name="--pattern" value="&lt;out&gt; ListItem(#buffer(S:String)) &lt;/out&gt;" />
+          <krun-option name="--pattern" value="&lt;out&gt; ListItem(#ostream(1)) ListItem(&quot;off&quot;) ListItem(#buffer(S:String)) &lt;/out&gt;" />
         </program>
   </test>
 

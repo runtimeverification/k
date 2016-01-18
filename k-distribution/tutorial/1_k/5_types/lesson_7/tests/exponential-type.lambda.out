@@ -1,8 +1,5 @@
 Search results:
 
 Solution 1:
-V:K -->
-_0:Type -> (_1:Type -> (_2:Type -> (_3:Type -> (_4:Type -> (_5:Type -> (_6
-  :Type -> (_7:Type -> (_8:Type -> (_9:Type -> (_10:Type -> (_11:Type -> (_12
-  :Type -> (_13:Type -> (_14:Type -> (_15:Type -> (_16:Type -> _0)))))))))))))
-  )))
+T:Type -->
+V0 -> ( V1 -> ( V2 -> ( V3 -> ( V4 -> ( V5 -> ( V6 -> ( V7 -> ( V8 -> ( V9 -> ( V10 -> ( V11 -> ( V12 -> ( V13 -> ( V14 -> ( V15 -> ( V16 -> V0 ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) )

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright (c) 2013-2015 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2013-2016 K Team. All Rights Reserved. -->
 <tests>
 
   <test
@@ -7,12 +7,12 @@
     programs="."
     extension="lambda"
     results="." >
-    <kompile-option name="--backend" value="java" />
+    <kompile-option name="--syntax-module" value="LAMBDA" />
     <all-programs>
       <krun-option name="--symbolic-execution" />
       <krun-option name="--search" />
-      <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
-      <krun-option name="--z3-executable" />
+      <!-- the pattern T:Type matches iff the program is well-typed -->
+      <krun-option name="--pattern" value="&lt;k&gt; T:Type &lt;/k&gt;" />
     </all-programs>
   </test>
 

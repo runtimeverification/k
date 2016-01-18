@@ -14,6 +14,7 @@ import org.kframework.kore.KToken;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
 import org.kframework.kore.VisitK;
+import org.kframework.kore.compile.KTokenVariablesToTrueVariables;
 import org.kframework.krun.modes.ExecutionMode;
 import org.kframework.main.Main;
 import org.kframework.parser.ProductionReference;
@@ -75,6 +76,9 @@ public class KRun {
         } else {
             program = parseConfigVars(options, compiledDef);
         }
+
+        program = new KTokenVariablesToTrueVariables()
+                .apply(compiledDef.kompiledDefinition.getModule(compiledDef.mainSyntaxModuleName()).get(), program);
 
 
         Rewriter rewriter = rewriterGenerator.apply(compiledDef.executionModule());
