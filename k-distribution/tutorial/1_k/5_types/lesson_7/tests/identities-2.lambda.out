@@ -2,4 +2,4 @@ Search results:
 
 Solution 1:
 V:K -->
-_0:Type -> (_1:Type -> (_2:Type -> _2))
+V0 -> ( V1 -> ( V2 -> V2 ) )

@@ -2,12 +2,4 @@ Search results:
 
 Solution 1:
 V:K -->
-(int -> bool) -> bool = (_0:Type -> _0) -> _1:Type
-
-Solution 2:
-V:K -->
-_0:Type
-
-Solution 3:
-V:K -->
-bool = int
+int = bool

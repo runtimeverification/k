@@ -2,4 +2,4 @@ Search results:
 
 Solution 1:
 V:K -->
-( ( bool -> V0 ) = ( int -> V1 ) ) ~> V1 ~> #freezer8 ( V0 , f 2 ) ~> tenv ( x |-> ( bool -> V0 ) ) ~> ( bool -> V0 ) ~> tenv ( .Map )
+( ( bool -> V0 ) = ( int -> V1 ) ) ~> V1 ~> #freezerif_then_else_1 ( V0 , f 2 ) ~> tenv ( x |-> ( bool -> V0 ) ) ~> #freezer_->_0 ( bool -> V0 ) ~> tenv ( .Map )
