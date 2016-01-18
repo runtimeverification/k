@@ -1,0 +1,3 @@
+[Error] Compiler: Had 1 parsing errors.
+[Error] Inner Parser: Parse error: unexpected character '1'.
+	Location(12,27,12,28)
