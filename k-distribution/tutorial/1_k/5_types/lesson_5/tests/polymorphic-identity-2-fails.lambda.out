@@ -3,6 +3,3 @@ Search results:
 Solution 1:
 V:K -->
 ( V0 = ( V0 -> V1 ) ) ~> V1 ~> #freezer_->_0 ( V0 ) ~> tenv ( .Map ) ~> #freezer__1 ( V2 -> V2 )
-Solution 2:
-V:K -->
-( V0 = ( V0 -> V1 ) ) ~> V1 ~> #freezer_->_0 ( V0 ) ~> tenv ( .Map ) ~> #freezer__1 ( lambda x . x )

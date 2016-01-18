@@ -2,40 +2,4 @@ Search results:
 
 Solution 1:
 V:K -->
-( ( bool -> V0 ) = ( int -> V1 ) ) ~> V1 ~> #freezerif_then_else_0 ( V0 , ( bool -> V0 ) 1 ) ~> tenv ( x |-> ( bool -> V0 ) ) ~> #freezer_->_0 ( bool -> V0 ) ~> tenv ( .Map )
-Solution 2:
-V:K -->
-( ( bool -> V0 ) = ( int -> V1 ) ) ~> V1 ~> #freezerif_then_else_0 ( V0 , f 1 ) ~> tenv ( x |-> ( bool -> V0 ) ) ~> #freezer_->_0 ( bool -> V0 ) ~> tenv ( .Map )
-Solution 3:
-V:K -->
-( ( bool -> V0 ) = ( int -> V1 ) ) ~> V1 ~> #freezerif_then_else_0 ( V0 , f int ) ~> tenv ( x |-> ( bool -> V0 ) ) ~> #freezer_->_0 ( bool -> V0 ) ~> tenv ( .Map )
-Solution 4:
-V:K -->
-( ( bool -> V0 ) = ( int -> V1 ) ) ~> V1 ~> #freezerif_then_else_12 ( V0 , ( bool -> V0 ) 2 ) ~> tenv ( x |-> ( bool -> V0 ) ) ~> #freezer_->_0 ( bool -> V0 ) ~> tenv ( .Map )
-Solution 5:
-V:K -->
-( ( bool -> V0 ) = ( int -> V1 ) ) ~> V1 ~> #freezerif_then_else_12 ( V0 , f 2 ) ~> tenv ( x |-> ( bool -> V0 ) ) ~> #freezer_->_0 ( bool -> V0 ) ~> tenv ( .Map )
-Solution 6:
-V:K -->
-( ( bool -> V0 ) = ( int -> V1 ) ) ~> V1 ~> #freezerif_then_else_12 ( V0 , f int ) ~> tenv ( x |-> ( bool -> V0 ) ) ~> #freezer_->_0 ( bool -> V0 ) ~> tenv ( .Map )
-Solution 7:
-V:K -->
-( ( int -> V0 ) = ( bool -> V1 ) ) ~> V1 ~> #freezerif_then_else_1 ( ( int -> V0 ) 1 , V0 ) ~> tenv ( x |-> ( int -> V0 ) ) ~> #freezer_->_0 ( int -> V0 ) ~> tenv ( .Map )
-Solution 8:
-V:K -->
-( ( int -> V0 ) = ( bool -> V1 ) ) ~> V1 ~> #freezerif_then_else_1 ( V0 , ( int -> V0 ) 2 ) ~> tenv ( x |-> ( int -> V0 ) ) ~> #freezer_->_0 ( int -> V0 ) ~> tenv ( .Map )
-Solution 9:
-V:K -->
-( ( int -> V0 ) = ( bool -> V1 ) ) ~> V1 ~> #freezerif_then_else_1 ( V0 , V0 ) ~> tenv ( x |-> ( int -> V0 ) ) ~> #freezer_->_0 ( int -> V0 ) ~> tenv ( .Map )
-Solution 10:
-V:K -->
-( ( int -> V0 ) = ( bool -> V1 ) ) ~> V1 ~> #freezerif_then_else_1 ( V0 , f 2 ) ~> tenv ( x |-> ( int -> V0 ) ) ~> #freezer_->_0 ( int -> V0 ) ~> tenv ( .Map )
-Solution 11:
-V:K -->
-( ( int -> V0 ) = ( bool -> V1 ) ) ~> V1 ~> #freezerif_then_else_1 ( V0 , f int ) ~> tenv ( x |-> ( int -> V0 ) ) ~> #freezer_->_0 ( int -> V0 ) ~> tenv ( .Map )
-Solution 12:
-V:K -->
-( ( int -> V0 ) = ( bool -> V1 ) ) ~> V1 ~> #freezerif_then_else_1 ( f 1 , V0 ) ~> tenv ( x |-> ( int -> V0 ) ) ~> #freezer_->_0 ( int -> V0 ) ~> tenv ( .Map )
-Solution 13:
-V:K -->
-( ( int -> V0 ) = ( bool -> V1 ) ) ~> V1 ~> #freezerif_then_else_1 ( f int , V0 ) ~> tenv ( x |-> ( int -> V0 ) ) ~> #freezer_->_0 ( int -> V0 ) ~> tenv ( .Map )
+( ( bool -> V0 ) = ( int -> V1 ) ) ~> V1 ~> #freezerif_then_else_1 ( V0 , f 2 ) ~> tenv ( x |-> ( bool -> V0 ) ) ~> #freezer_->_0 ( bool -> V0 ) ~> tenv ( .Map )

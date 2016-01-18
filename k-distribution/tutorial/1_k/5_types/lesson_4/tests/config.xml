@@ -7,12 +7,12 @@
     programs="."
     extension="lambda"
     results="." >
-    <kompile-option name="--transition" value="strict" />
     <kompile-option name="--syntax-module" value="LAMBDA" />
     <all-programs>
       <krun-option name="--symbolic-execution" />
       <krun-option name="--search" />
       <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
+      <krun-option name="--z3-executable" />
     </all-programs>
   </test>
 
