@@ -7,6 +7,7 @@
     programs="."
     extension="lambda"
     results="." >
+    <kompile-option name="--syntax-module" value="LAMBDA" />
     <all-programs>
       <krun-option name="--symbolic-execution" />
       <krun-option name="--search" />
