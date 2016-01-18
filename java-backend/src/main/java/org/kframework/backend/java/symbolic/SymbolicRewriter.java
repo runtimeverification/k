@@ -2,7 +2,6 @@
 package org.kframework.backend.java.symbolic;
 
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
@@ -242,7 +241,7 @@ public class SymbolicRewriter {
         if (definition.automaton == null) {
             return results;
         }
-        List<Triple<ConjunctiveFormula, Boolean, Integer>> matches = theFastMatcher.mainMatch(
+        List<Triple<ConjunctiveFormula, Boolean, Integer>> matches = theFastMatcher.matchRulePattern(
                 subject,
                 definition.automaton.leftHandSide(),
                 allRuleBits,

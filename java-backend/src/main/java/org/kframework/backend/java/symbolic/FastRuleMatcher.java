@@ -23,7 +23,6 @@ import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.builtin.KLabels;
-import org.kframework.kil.Attribute;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
 import org.kframework.utils.BitSet;
@@ -59,7 +58,7 @@ public class FastRuleMatcher {
     private final GlobalContext global;
 
     public static List<Substitution<Variable, Term>> match(Term subject, Term pattern, TermContext context) {
-        return new FastRuleMatcher(context.global(), 1).mainMatch(subject, pattern, context);
+        return new FastRuleMatcher(context.global(), 1).matchSinglePattern(subject, pattern, context);
     }
 
     public FastRuleMatcher(GlobalContext global, int ruleCount) {
@@ -69,11 +68,12 @@ public class FastRuleMatcher {
     }
 
     /**
-     * Match the subject against the possibly-merged pattern.
+     * Unifies the subject against the possibly-merged pattern.
      *
-     * @return a list of constraints tagged with the Integer identifier of the rule they belong to.
+     * @return a list of constraints tagged with the Integer identifier of the rule they belong to and
+     * with a Boolean which is true if the rule matched.
      */
-    public List<Triple<ConjunctiveFormula, Boolean, Integer>> mainMatch(
+    public List<Triple<ConjunctiveFormula, Boolean, Integer>> matchRulePattern(
             ConstrainedTerm subject,
             Term pattern,
             BitSet ruleMask,
@@ -126,7 +126,10 @@ public class FastRuleMatcher {
 
     }
 
-    public List<Substitution<Variable, Term>> mainMatch(Term subject, Term pattern, TermContext context) {
+    /**
+     * Matches the subject against the pattern. The pattern does not contain any disjunctions.
+     */
+    public List<Substitution<Variable, Term>> matchSinglePattern(Term subject, Term pattern, TermContext context) {
         constraints[0] = ConjunctiveFormula.of(global);
         empty = BitSet.apply(ruleCount);
         BitSet one = BitSet.apply(1);
