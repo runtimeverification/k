@@ -81,7 +81,7 @@ module IMP
   rule <k> int (X:Id,Xs:Ids => Xs); ...</k> <tenv> M:Map => M [ X <- int ] </tenv>
   rule int .Ids; => stmt
 
-  context print(HOLE:AExp, AEs:AExps);
+  context print(HOLE:AExp, _);
   rule print(_:PrintableType,AEs => AEs);
   rule print(.AExps); => stmt
 
