@@ -9,7 +9,6 @@
         skip="pdf"
         results="." >
     <all-programs>
-      <krun-option name="--parser" value="kast --sort Stmts" />
       <krun-option name="--output" value="none" />
     </all-programs>
   </test>
