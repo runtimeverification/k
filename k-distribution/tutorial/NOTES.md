@@ -25,7 +25,10 @@ Things to revise each time the structure of the tutorial changes:
 * `1_k\3_lambda++\lesson_5\README.md` refers to Lesson 4, Lesson 8 and Lesson 7 of Tutorial 1
 * `1_k\3_lambda++\lesson_6\README.md` refers to Parts 3 and 4 of the tutorial
 * `1_k\4_imp++\lesson_1\README.md` refers to Lesson 4, Tutorial 2; also Tutorial 3 (at the end)
-* `1_k\4_imp++\lesson_5\README.md` refers to Lesson 4
+* `1_k\4_imp++\lesson_2\README.md` refers to Tutorial 3; Tutorial 2
+* `1_k\4_imp++\lesson_3\README.md` refers to Lesson 1, Lesson 6
+* `1_k\4_imp++\lesson_4\README.md` refers to Tutorial 6
+* `1_k\4_imp++\lesson_5\README.md` refers to Lesson 4; Tutorial 3
 * `1_k\4_imp++\lesson_6\README.md` refers to Lesson 3
 * `1_k\4_imp++\lesson_7\README.md` refers to Lesson 1, 6
 * `1_k\5_types\lesson_1\README.md` refers to Part 4
@@ -89,3 +92,8 @@ See issue #2023 and modify tutorial/1_k/2_imp/lesson_4 accordingly, if needed.
 All definitions, and corresponding READMEs, should be changed to take advantage
 of modules and module operations.  Ideally, we'd like to have no code repetition
 in any examples, except for demonstration purposes.
+
+In the PL semantics book, define print(AExps) to have the same semantics as in
+IMP++: evaluates and prints each of its arguments in order (as opposed to
+first evaluate all of them and then print them---for example, if the second
+argument performs a division by zero, I still want to print the first argument.)

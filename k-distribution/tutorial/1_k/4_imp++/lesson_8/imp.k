@@ -523,14 +523,13 @@ To tell the \K tool to exhaustively explore all the behaviors due to the
 non-determinism of addition, division, and threads, we have to kompile
 with the command:
 \begin{verbatim}
-kompile imp.k --superheat="addition division" --supercool="lookup increment"
-              --transition="lookup assignment increment read print"
+kompile imp.k --transition="addition division lookup assignment increment read print"
 \end{verbatim}
 As already mentioned, the syntax and rule tags play no theoretical or
 foundational role in \K.  They are only a means to allow \texttt{kompile} to
 refer to them in its options, like we did above.  By default, \texttt{kompile}'s
-options are all empty, because this yields the fastest language model when
-executed.  Nonempty options may slow down the execution, but they instrument
+transition option is empty, because this yields the fastest language model when
+executed.  Transitions may slow down the execution, but they instrument
 the language model to allow for formal analysis of program behaviors, even for
 exhaustive analysis.
 
@@ -555,11 +554,11 @@ non-deterministically pick another redex, and so on and so forth
 without losing any opportunities to apply semantic rules.
 Nevertheless, these unrestricted heating/cooling rules may create an
 immense, often unfeasibly large space of possibilities to analyze.
-Super-heating/cooling implement an optimization which works well with
-other implementation choices made in the current \K tool.  Recall from
-the detailed description of the IMP language semantics that
-(theoretical) reversible rules like above are restricted to complementary
-conditional rules of the form
+The \texttt{--transition} option implements an optimization which works
+well with other implementation choices made in the current \K tool.
+Recall from the detailed description of the IMP language semantics that
+(theoretical) reversible rules like above are restricted by default
+to complementary conditional rules of the form
 $$
 \begin{array}{l}
 E_1 \texttt{/} E_2 \ \ \Rightarrow \ \ E_1 \kra \square \texttt{/} E_2
@@ -579,21 +578,15 @@ that into a result, then a cooling rule is applied to plug the
 obtained result back into its context, then another argument may be
 chosen and completely heated, and so on.  This leads to efficient
 execution, but it may and typically does hide program behaviors.
-Super-heating/cooling allows you to interfere with this process.
-More precisely, whenever a rule tag is included in the \texttt{supercool}
-category, the \K tool will continue to apply (unrestricted) cooling rules
-on the resulting computation disregarding the membership to $\KResult$
-side condition, thus plugging everything back into its context, until no
-construct tagged \texttt{superheat} is left uncooled.  This way, the
-heating rules now have the possibility to pick another evaluation order
-for the cooled fragment of computation.  This way, we can think of
-super-heating/cooling as marking fragments of computation in which
-exhaustive analysis of the evaluation order is performed.  Used carefully,
-this mechanism allows us to explore more non-deterministic behaviors of a
-program, even all of them like here, still efficiently.  For example, with
-the semantics of IMP++ given below, the \texttt{krun} command with the
-\texttt{-\,\!-search} option detects all five behaviors of the
-following IMP++ program (\texttt{x} can be 0, 1, 2, 3, or undefined
+Using the \texttt{--transition} option allows you to interfere with this
+process and to obtain all possible non-deterministic behaviors as if
+the theoretical heating/cooling rules were applied.  Optimizations
+of course happen under the hood, but you need not be aware of them.
+Used carefully, this mechanism allows us to efficiently explore more of
+the non-deterministic behaviors of a program, even all of them (like here).
+For example, with the semantics of IMP++ given above, the \texttt{krun}
+command with the \texttt{-\,\!-search} option detects all five behaviors
+of the following IMP++ program (\texttt{x} can be 0, 1, 2, 3, or undefined
 due to division-by-zero):
 \begin{verbatim}
   int x,y;
@@ -602,12 +595,11 @@ due to division-by-zero):
 \end{verbatim}
 
 Besides non-determinism due to underspecified argument evaluation
-orders, which the current \K tool addresses by means of superheating
-and supercooling as explained above, there is another important source
-of non-determinism in programming languages: non-determinism due to
-concurrency/parallelism.  For example, when two or more threads are
-about to access the same location in the store and at least one of
-these accesses is a write (i.e., an instance of the variable
+orders, which the current \K tool addresses as explained above, there
+is another important source of non-determinism in programming languages:
+non-determinism due to concurrency/parallelism.  For example, when two
+or more threads are about to access the same location in the store and at
+least one of these accesses is a write (i.e., an instance of the variable
 assignment rule), there is a high chance that different choices for
 the next transition lead to different program behaviors.  While in the
 theory of \K all the non-structural rules count as computational steps

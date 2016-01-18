@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2010-2014 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2010-2016 K Team. All Rights Reserved. -->
 
 ### Everything Changes: Syntax, Configuration, Semantics
 
@@ -17,7 +17,7 @@ unique ids to the two spawned threads, and then to modify the main thread to
 join the two child threads before printing.  To avoid adding a new type to
 the language, let's assume that thread ids are integer numbers.  So we declare
 two integers, `t1` and `t2`, and assign them the two spawn commands.  In order
-for this to parse, we will have to change the syntax of spawn to be an
+for this to parse, we will have to change the syntax of `spawn` to be an
 arithmetic expression construct instead of a statement.  Once we do that,
 we have a slight syntactic annoyance: we need to put two consecutive `;`
 after the spawn assignment, one for the assignment statement inside the spawn,

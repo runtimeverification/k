@@ -1,11 +1,12 @@
-<!-- Copyright (c) 2010-2014 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2010-2016 K Team. All Rights Reserved. -->
 
 ### Deleting, Saving and Restoring Cell Contents
 
 In this lesson we will see how easily we can delete, save and/or restore
 contents of cells in order to achieve the desired semantics of language
 constructs that involve abrupt changes of control or environments.  We have
-seen similar or related K features in the LAMBDA++ language in Part 3 of the tutorial.
+seen similar or related K features in the LAMBDA++ language in Part 3 of the
+tutorial.
 
 Let us start by adding semantics to the `halt` statement.  As its name says,
 what we want is to abruptly terminate the execution of the program.  Moreover,
@@ -31,7 +32,7 @@ ways to do this, which you can explore on your own: for example you can add
 a new list cell for this task where to push/pop the environment snapshots in
 a stack style; or you can use the existing environment cell for this purpose,
 but then you need to change the variable access rules to search through the
-stacked environments for their variable.
+stacked environments for the variable.
 
 My preferred solution is to follow a style similar to how we saved/restored
 LAMBDA++ environments in Part 3 of the Tutorial, namely to use the already
