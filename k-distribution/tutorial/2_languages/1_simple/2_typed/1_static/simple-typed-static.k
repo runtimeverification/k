@@ -595,7 +595,7 @@ list of variable declarations. */
 //  syntax LValue ::= Id | Exp "[" Exps "]"
 // but unfortunately that currently generates some ambiguous parsings.
   syntax LValue ::= Id
-////  rule isLValue(_:Exp[_:Exps]) => true
+  rule isLValue(_:Exp[_:Exps]) => true
 
   syntax Exp ::= ltype(Exp)
 // We would like to say:
@@ -603,9 +603,8 @@ list of variable declarations. */
 // but we currently cannot type the HOLE
 //  context ltype(HOLE) requires isLValue(HOLE)
 
-  context ltype(HOLE:LValue)
+  context ltype(HOLE) requires isLValue(HOLE)
   syntax Exp ::= LValue
-
 
 //@ The function \texttt{getTypes} is the same as in SIMPLE typed dynamic.
 

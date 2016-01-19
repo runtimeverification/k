@@ -137,7 +137,7 @@ public class RuleAutomatonDisjunction extends Term implements HasGlobalContext {
 
     @Override
     public boolean isSymbolic() {
-        throw new UnsupportedOperationException();
+        return true;
     }
 
     @Override
