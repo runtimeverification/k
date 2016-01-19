@@ -601,9 +601,9 @@ list of variable declarations. */
 // We would like to say:
 //  context ltype(HOLE:LValue)
 // but we currently cannot type the HOLE
-  context ltype(HOLE) requires isLValue(HOLE)
+//  context ltype(HOLE) requires isLValue(HOLE)
 
-//  context ltype(HOLE:LValue)
+  context ltype(HOLE:LValue)
   syntax Exp ::= LValue
 
 
