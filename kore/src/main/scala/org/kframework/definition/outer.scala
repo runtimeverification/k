@@ -87,13 +87,9 @@ object Module {
   def apply(name: String, unresolvedLocalSentences: Set[Sentence]): Module = {
     new Module(name, Set(), unresolvedLocalSentences, Att())
   }
-
-  def apply(name: String, imports: Set[Module], unresolvedLocalSentences: Set[Sentence], @(Nonnull@param) att: Att = Att()): Module = {
-    new Module(name, imports, unresolvedLocalSentences, att)
-  }
 }
 
-class Module(val name: String, val imports: Set[Module], unresolvedLocalSentences: Set[Sentence], @(Nonnull@param) val att: Att = Att())
+case class Module(val name: String, val imports: Set[Module], unresolvedLocalSentences: Set[Sentence], @(Nonnull@param) val att: Att = Att())
   extends ModuleToString with KLabelMappings with OuterKORE with Sorting with GeneratingListSubsortProductions with Serializable {
   assert(att != null)
 

@@ -1,4 +1,5 @@
 // Copyright (c) 2012-2016 K Team. All Rights Reserved.
+
 /*!
 \title{SIMPLE --- Typed --- Dynamic}
 \author{Grigore Ro\c{s}u and Traian Florin \c{S}erb\u{a}nu\c{t}\u{a}
@@ -137,6 +138,7 @@ the end of this module). */
   syntax Vals ::= List{Val,","}
   syntax Exp ::= Val
   syntax KResult ::= Val
+                   | Vals  // TODO: should not need this
 
 /*@ \subsection{Configuration}
 The configuration is almost identical to that of untyped SIMPLE,
@@ -151,19 +153,19 @@ function body encounters an explicit \texttt{return} statement. */
                   <threads color="orange">
                     <thread multiplicity="*" color="yellow">
                       <k color="green"> ($PGM:Stmts ~> execute) </k>
-                      <br/>
+//                      <br/>
                       <control color="cyan">
                         <fstack color="blue"> .List </fstack>
                         <xstack color="purple"> .List </xstack>
                         <return color="LimeGreen"> void </return> //return type
                        </control>
-                      <br/>
+//                      <br/>
                       <env color="violet"> .Map </env>
                       <holds color="black"> .Map </holds>
                       <id color="pink"> 0 </id>
                     </thread>
                   </threads>
-                  <br/>
+//                  <br/>
                   <genv color="pink"> .Map </genv>
                   <store color="white"> .Map </store>
                   <busy color="cyan">.Set</busy>
@@ -416,7 +418,7 @@ values, in which case our semantics below works fine: */
           <k> spawn S => !T:Int ...</k>
           <env> Env </env>
         ...</thread>
-        (. => <thread>...
+        (.Bag => <thread>...
                 <k> S </k>
                 <env> Env </env>
                 <id> !T </id>
@@ -424,7 +426,7 @@ values, in which case our semantics below works fine: */
 
 //@ {Thread termination}
 
-   rule (<thread>... <k>.</k> <holds>H</holds> <id>T</id> ...</thread> => .)
+   rule (<thread>... <k>.</k> <holds>H</holds> <id>T</id> ...</thread> => .Bag)
         <busy> Busy => Busy -Set keys(H) </busy>
         <terminated>... .Set => SetItem(T) ...</terminated>
 
@@ -468,7 +470,7 @@ into a list of variable declarations. */
 
 //@ Location lookup.
 
-  syntax KItem ::= lookup(Int)
+  syntax Exp ::= lookup(Int)  // see NOTES.md for why Exp instead of KItem
   rule <k> lookup(L) => V ...</k> <store>... L |-> V:Val ...</store>  [lookup]
 
 //@ Environment recovery.

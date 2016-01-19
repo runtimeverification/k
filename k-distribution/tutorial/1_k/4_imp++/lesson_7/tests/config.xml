@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Copyright (c) 2013-2016 K Team. All Rights Reserved. -->
+
 <tests>
 
   <include file="../../lesson_6/tests/config.xml"
@@ -7,17 +8,12 @@
            more-results="." >
 <!-- The following options should not be needed -->
     <all-programs>
-        <krun-option name="--parser" value="kast --sort Stmts"/>
         <krun-option name="--output" value="none" />
     </all-programs>
     <program name="div.imp" >
-<!-- The following options should not be needed -->
-        <krun-option name="--parser" value="kast --sort Stmts"/>
         <krun-option name="--search" />
     </program>
     <program name="spawn.imp" >
-<!-- The following options should not be needed -->
-        <krun-option name="--parser" value="kast --sort Stmts"/>
         <krun-option name="--search" />
         <krun-option name="--pattern"
                      value="&lt;out&gt; ListItem(_) ListItem(_) ListItem(#buffer(Out:String)) &lt;/out&gt;" />

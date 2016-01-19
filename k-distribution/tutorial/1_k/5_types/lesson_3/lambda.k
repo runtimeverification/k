@@ -11,8 +11,6 @@ module LAMBDA
 
   syntax Exp ::= Type
 
-  syntax Variable ::= Id
-
   syntax KResult ::= Type
 
   configuration <T color="yellow">
@@ -21,10 +19,9 @@ module LAMBDA
                 </T>
 
   syntax Exp ::= Exp "->" Exp                  [strict]
-  rule <k> lambda X : T . E:Exp => (T -> E) ~> Rho ...</k>
+  rule <k> lambda X : T . E => (T -> E) ~> Rho ...</k>
        <tenv> Rho:Map => Rho[X <- T] </tenv>
-  // Remove the sorting of E above when the bug is fixed.  Currently, the
-  // inferred sort is Type, due to a bug.
+
   rule <k> X:Id => T ...</k> <tenv>... X |-> T ...</tenv>
   rule (T1 -> T2) T1 => T2
 

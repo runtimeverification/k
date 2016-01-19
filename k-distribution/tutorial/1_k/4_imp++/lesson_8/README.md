@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2010-2014 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2010-2016 K Team. All Rights Reserved. -->
 
 ### Wrapping up Larger Languages
 
@@ -17,8 +17,8 @@ and out cells on the next line.  The html-ish tag `<br/>` inserts a line break
 in the configuration layout, as you can see in the generated document.
 
 There is a detailed discussion at the end of the document about the
-`--superheat`, `--supercool` and `--transition` options of `kompile`.
-You may want to check it out.
+`--transition` option of `kompile`, because that is important and we want
+the poster to include everything we learned in this part of the tutorial.
 
 You can go even further and manually edit the generated Latex document.
 You typically want to do that when you want to publish your language

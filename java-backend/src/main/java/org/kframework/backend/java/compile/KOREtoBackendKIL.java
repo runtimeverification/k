@@ -48,7 +48,6 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
     private final Module module;
     private final Definition definition;
     private final GlobalContext global;
-    private final boolean useCellCollections;
     /**
      * Flag that controls whether the translator substitutes the variables in a {@code Rule} with fresh variables
      */
@@ -59,11 +58,10 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
 
     private final HashMap<String, Variable> variableTable = new HashMap<>();
 
-    public KOREtoBackendKIL(Module module, Definition definition, GlobalContext global, boolean useCellCollections, boolean freshRules) {
+    public KOREtoBackendKIL(Module module, Definition definition, GlobalContext global, boolean freshRules) {
         this.module = module;
         this.definition = definition;
         this.global = global;
-        this.useCellCollections = useCellCollections;
         this.freshRules = freshRules;
 
         kSeqLabel = KLabelConstant.of(KLabels.KSEQ, global.getDefinition());
@@ -296,20 +294,7 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
         else if (k instanceof org.kframework.kore.KToken)
             return KToken(((org.kframework.kore.KToken) k).s(), ((org.kframework.kore.KToken) k).sort(), k.att());
         else if (k instanceof org.kframework.kore.KApply) {
-            KLabel klabel = ((KApply) k).klabel();
-            org.kframework.kore.KList klist = ((KApply) k).klist();
-            if (useCellCollections && definition.configurationInfo().getCellForConcat(klabel).isDefined())
-                return KLabelInjection.injectionOf(CellCollection(klabel, klist), global);
-            if (useCellCollections && definition.configurationInfo().getCellForUnit(klabel).isDefined() && klist.size() == 0)
-                return KLabelInjection.injectionOf(
-                        CellCollection.empty(definition.configurationInfo().getCellForUnit(klabel).get(), definition),
-                        global);
-            else if (useCellCollections && definition.cellMultiplicity(CellLabel.of(klabel.name())) == ConfigurationInfo.Multiplicity.STAR)
-                return KLabelInjection.injectionOf(
-                        CellCollection.singleton(CellLabel.of(klabel.name()), KList(klist.items()), definition.configurationInfo().getCellSort(klabel), definition),
-                        global);
-            else
-                return KApply1(klabel, klist, k.att());
+            return KApply1(((KApply) k).klabel(), ((KApply) k).klist(), k.att());
         } else if (k instanceof org.kframework.kore.KSequence)
             return KSequence(((org.kframework.kore.KSequence) k).items(), k.att());
         else if (k instanceof org.kframework.kore.KVariable)

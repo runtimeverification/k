@@ -1,8 +1,9 @@
 // Copyright (c) 2012-2016 K Team. All Rights Reserved.
-require "domains.k"
 require "unification.k"
 
-module LAMBDA-SYNTAX
+module LAMBDA
+  imports UNIFICATION
+
   syntax Exp ::= Int | Bool | Id
                | "(" Exp ")"                      [bracket]
                | Exp Exp                          [strict, left]
@@ -21,13 +22,6 @@ module LAMBDA-SYNTAX
                 | "(" Type ")"                    [bracket]
 
   syntax Exp ::= Type
-endmodule
-
-module LAMBDA
-  imports LAMBDA-SYNTAX
-  imports UNIFICATION
-
-  syntax Variable ::= Id
   syntax KResult ::= Type
 
   configuration <k color="green"> $PGM:Exp </k>
@@ -41,9 +35,10 @@ module LAMBDA
   rule T1:Type  + T2:Type => T1 = int ~> T2 = int ~> int
   rule T1:Type <= T2:Type => T1 = int ~> T2 = int ~> bool
 
-  rule <k> lambda X:Id . E:Exp => E ~> ?T:Type ~> tenv(TEnv) ...</k>
+  syntax Exp ::= Exp "->" Exp                  [strict]
+  rule <k> lambda X:Id . E => ?T:Type -> E ~> tenv(TEnv) ...</k>
        <tenv> TEnv => TEnv[X <- ?T] </tenv>
-  rule T2:Type ~> T1:Type => T1 -> T2
+
   rule T1:Type T2:Type => T1 = (T2 -> ?T:Type) ~> ?T
   rule if T:Type then T1:Type else T2:Type => T = bool ~> T1 = T2 ~> T1
 
@@ -51,18 +46,18 @@ module LAMBDA
   syntax Type ::= MetaVariable
   rule <k> let X = T:Type in E => E ~> tenv(TEnv) ...</k>
        <tenv> TEnv
-        => TEnv[X <- (forall #metaVariables(T) -Set #metaVariables(tenv(TEnv))) #freezeVariables(T, tenv(TEnv)):>Type]
+        => TEnv[X <- (forall #metaKVariables(T) -Set #metaKVariables(tenv(TEnv))) #freezeKVariables(T, tenv(TEnv)):>Type]
        </tenv>
-  rule <k> X:Id => #rename(T, Tvs) ...</k>
-       <tenv>... X |-> (forall Tvs) T:>Type ...</tenv>
+  rule <k> X:Id => #renameMetaKVariables(T, Tvs) ...</k>
+       <tenv>... X |-> (forall Tvs) T ...</tenv>
 
   rule letrec F X = E in E' => let F = mu F . lambda X . E in E'        [macro]
   rule <k> mu X:Id . E:Exp => (?T:Type -> ?T) E ~> tenv(TEnv) ...</k>
        <tenv> TEnv => TEnv[X <- ?T] </tenv>
 
   syntax KItem ::= Type "=" Type
-  rule T = T => .K
+  rule T = T => .
 
   syntax KItem ::= tenv(Map)
-  rule <k> T:Type ~> tenv(TEnv) => T ...</k> <tenv> _ => TEnv </tenv>
+  rule <k> T:Type ~> (tenv(TEnv) => .) ...</k>  <tenv> _ => TEnv </tenv>
 endmodule

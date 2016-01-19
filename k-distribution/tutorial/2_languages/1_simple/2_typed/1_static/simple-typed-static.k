@@ -1,4 +1,5 @@
 // Copyright (c) 2012-2016 K Team. All Rights Reserved.
+
 /*!
 \title{SIMPLE --- Typed --- Static}
 \author{Grigore Ro\c{s}u and
@@ -296,6 +297,7 @@ types are results (same like we did in the IMP++ tutorial). */
   syntax Type ::= BlockOrStmtType
   syntax Block ::= BlockOrStmtType
   syntax KResult ::= Type
+                   | Types    //TODO: remove this, eventually
 
 /*@ \subsection{Configuration}
 
@@ -319,7 +321,7 @@ subcells. */
                       <return multiplicity="?" color="black"> void </return>
                     </task>
                   </tasks>
-                  <br/>
+//                  <br/>
                   <gtenv color="blue"> .Map </gtenv>
                 </T>
 
@@ -344,7 +346,7 @@ variable. */
 
   rule <task> <k> T:Type X:Id; => stmt ...</k> </task>
        <gtenv> Rho (.Map => X |-> T) </gtenv>
-    when notBool(X in keys(Rho))
+    requires notBool(X in keys(Rho))
   rule <k> T:Type X:Id; => stmt ...</k> <tenv> Rho => Rho[X <- T] </tenv>
 
   context _:Type _:>Exp[HOLE:>Exps];
@@ -376,8 +378,8 @@ include such a similar \texttt{return} statement here.  That's because
 the \texttt{return} statements type to \texttt{stmt} anyway, and the
 entire code of the function body needs to type anyway. */
 
-  rule <task> <k> T:Type F:Id(Ps:Params) S => getTypes(Ps)->T F;...</k> </task>
-       (. => <task>
+  rule <task> <k> T:Type F:Id(Ps:Params) S => getTypes(Ps)->T F; ...</k> </task>
+       (.Bag => <task>
                <k> mkDecls(Ps) S </k> <tenv> .Map </tenv> <return> T </return>
              </task>)
     [structural]
@@ -392,7 +394,7 @@ generate a function task executing \texttt{main()} to ensure that it
 types (remove this task creation if you do not want your type system
 to reject programs without a \texttt{main} function). */
 
-  rule <task> <k> stmt => main(.Exps); </k> (. => <tenv> .Map </tenv>) </task>
+  rule <task> <k> stmt => main(.Exps); </k> (.Bag => <tenv> .Map </tenv>) </task>
     [structural]
 
 /*@ \subsection{Collecting the terminated tasks}
@@ -407,7 +409,7 @@ important to ensure that we only dissolve tasks containing a
 In the end, there should be no task cell left in the configuration
 when the program correctly type checks. */
 
-  rule <task>... <k> _:BlockOrStmtType </k> <tenv> _ </tenv> ...</task> => .
+  rule <task>... <k> _:BlockOrStmtType </k> <tenv> _ </tenv> ...</task> => .Bag
 
 /*@ \subsection{Basic values}
 
@@ -431,7 +433,7 @@ environment, too. */
   rule <k> X:Id => T ...</k> <tenv>... X |-> T ...</tenv>
 
   rule <k> X:Id => T ...</k> <tenv> Rho </tenv> <gtenv>... X |-> T ...</gtenv>
-    when notBool(X in keys(Rho))
+    requires notBool(X in keys(Rho))
 
   rule <task> <k> X:Id => T ...</k> </task> <gtenv>... X |-> T ...</gtenv>
 
@@ -495,7 +497,7 @@ strings. */
 
   rule read() => int
 
-  rule print(T:Type, Ts => Ts); when T ==K int orBool T ==K string
+  rule print(T:Type, Ts => Ts); requires T ==K int orBool T ==K string
   rule print(.Types); => stmt
 
 /*@ \subsection{Assignment}
@@ -514,7 +516,7 @@ Function application requires the type of the function and the
 types of the passed values to be compatible.  Note that a special case
 is needed to handle the no-argument case: */
 
-  rule (Ts:Types -> T)(Ts) => T when Ts =/=K .Types
+  rule (Ts:Types -> T)(Ts) => T requires Ts =/=K .Types
   rule (void -> T)(.Types) => T
 
 /*@ The returned value must have the same type as the declared
@@ -539,7 +541,7 @@ exceptions can only have integer type. */
   rule {} => block
 
   rule <task> <k> {S} => block ...</k> <tenv> Rho </tenv> R </task>
-       (. => <task> <k> S </k> <tenv> Rho </tenv> R </task>)
+       (.Bag => <task> <k> S </k> <tenv> Rho </tenv> R </task>)
 
 //@ \subsection{Expression statement}
 
@@ -569,7 +571,7 @@ Same like with the functions above, we do not check for thrown
 exceptions which are not caught. */
 
   rule <k> spawn S => int ...</k> <tenv> Rho </tenv>
-       (. => <task> <k> S </k> <tenv> Rho </tenv> </task>)
+       (.Bag => <task> <k> S </k> <tenv> Rho </tenv> </task>)
   rule join int; => stmt
   rule acquire _:Type; => stmt
   rule release _:Type; => stmt
@@ -589,18 +591,18 @@ list of variable declarations. */
 /*@ The \texttt{ltype} context allows only expressions which have an
  lvalue to evaluate. */
 
-// We would like to say the following instead of the predicate rule below:
-//  syntax LValue ::= Id | Exp "[" Exps "]"
-// but unfortunately that currently generates some ambiguous parsings.
   syntax LValue ::= Id
-  rule isLValue(_:Exp[_:Exps]) => true
+                  | Exp "[" Exps "]"
+  syntax Exp ::= LValue  // K should be able to infer this
+                         // if not added, then it gets stuck with an Id on k cell
+
+// Instead of the second LValue production above you can use a rule:
+//  rule isLValue(_:Exp[_:Exps]) => true
 
   syntax Exp ::= ltype(Exp)
-// We would like to say:
 //  context ltype(HOLE:LValue)
-// but we currently cannot type the HOLE
-  context ltype(HOLE) when isLValue(HOLE)
-
+// The above context does not work due to some error, so we write instead
+  context ltype(HOLE) requires isLValue(HOLE)
 
 //@ The function \texttt{getTypes} is the same as in SIMPLE typed dynamic.
 
@@ -608,4 +610,5 @@ list of variable declarations. */
   rule getTypes(T:Type _:Id) => T, .Types   // I would like to not use .Types
   rule getTypes(T:Type _:Id, P, Ps) => T, getTypes(P,Ps)
   rule getTypes(.Params) => void, .Types
+
 endmodule

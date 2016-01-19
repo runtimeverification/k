@@ -1,14 +1,24 @@
 // Copyright (c) 2015-2016 K Team. All Rights Reserved.
 package org.kframework.kompile;
 
+import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.attributes.Source;
+import org.kframework.builtin.KLabels;
+import org.kframework.builtin.Sorts;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
+import org.kframework.kore.ADT;
+import org.kframework.kore.FoldK;
+import org.kframework.kore.FoldKIntoSet;
 import org.kframework.kore.K;
+import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
+import org.kframework.kore.KORE;
+import org.kframework.kore.KToken;
 import org.kframework.kore.Sort;
+import org.kframework.kore.VisitK;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.concrete2kore.ParseInModule;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
@@ -22,12 +32,15 @@ import scala.util.Either;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * A class representing a compiled definition. It has everything needed for executing and parsing programs.
@@ -38,19 +51,46 @@ public class CompiledDefinition implements Serializable {
     private final Definition parsedDefinition;
     public final Definition kompiledDefinition;
     public final Sort programStartSymbol;
+    public final HashMap<String, Sort> configurationVariableDefaultSorts = new HashMap<>();
     public final KLabel topCellInitializer;
     private final Module languageParsingModule;
     private transient Map<String, Rule> cachedcompiledPatterns;
     private transient Map<String, Rule> cachedParsedPatterns;
 
 
-    public CompiledDefinition(KompileOptions kompileOptions, Definition parsedDefinition, Definition kompiledDefinition, Sort programStartSymbol, KLabel topCellInitializer) {
+    public CompiledDefinition(KompileOptions kompileOptions, Definition parsedDefinition, Definition kompiledDefinition, KLabel topCellInitializer) {
         this.kompileOptions = kompileOptions;
         this.parsedDefinition = parsedDefinition;
         this.kompiledDefinition = kompiledDefinition;
-        this.programStartSymbol = programStartSymbol;
+        initializeConfigurationVariableDefaultSorts();
+        this.programStartSymbol = configurationVariableDefaultSorts.getOrDefault("$PGM", Sorts.K());
         this.topCellInitializer = topCellInitializer;
         this.languageParsingModule = kompiledDefinition.getModule("LANGUAGE-PARSING").get();
+    }
+
+    private void initializeConfigurationVariableDefaultSorts() {
+        // searching for #SemanticCastTo<Sort>(Map:lookup(_, #token(<VarName>, KConfigVar)))
+        Collections.stream(parsedDefinition.mainModule().rules())
+                .forEach(r -> {
+                    new VisitK() {
+                        @Override
+                        public void apply(KApply k) {
+                            if (k.klabel().name().contains("#SemanticCastTo")
+                                    && k.items().size() == 1 && k.items().get(0) instanceof KApply) {
+                                KApply theMapLookup = (KApply) k.items().get(0);
+                                if (theMapLookup.klabel().name().equals(KLabels.MAP_LOOKUP)
+                                        && theMapLookup.size() == 2 && theMapLookup.items().get(1) instanceof KToken) {
+                                    KToken t = (KToken) theMapLookup.items().get(1);
+                                    if (t.sort().equals(Sorts.KConfigVar())) {
+                                        Sort sort = KORE.Sort(k.klabel().name().replace("#SemanticCastTo", ""));
+                                        configurationVariableDefaultSorts.put(t.s(), sort);
+                                    }
+                                }
+                            }
+                            super.apply(k);
+                        }
+                    }.apply(r.body());
+                });
     }
 
     /**
@@ -136,7 +176,7 @@ public class CompiledDefinition implements Serializable {
     }
 
     private void readObject(java.io.ObjectInputStream stream)
-         throws IOException, ClassNotFoundException {
+            throws IOException, ClassNotFoundException {
         stream.defaultReadObject();
         cachedcompiledPatterns = new ConcurrentHashMap<>();
         cachedParsedPatterns = new ConcurrentHashMap<>();

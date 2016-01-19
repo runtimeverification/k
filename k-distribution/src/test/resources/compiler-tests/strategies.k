@@ -16,5 +16,5 @@ module A
 
     rule z => zz                [tag(zzz)]
 
-    configuration <t> <k> $PGM </k> initSCell(Init) </t>
+    configuration <t> <k> $PGM:Exp </k> initSCell(Init) </t>
 endmodule

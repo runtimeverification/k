@@ -86,6 +86,14 @@ heated.  Previous versions of K allowed you to also specify which rules could
 trigger non-deterministic behaviors of operator evaluation strategies,
 but that option was rarely used and is not available anymore.
 
+Note that it is highly non-trivial to say precisely whether a strict language
+construct may yield non-deterministic behaviors.  For example, division's
+strictness would yield no non-determinism if the language had no side effects.
+It is even harder to say so for a particular program.  Consequently, our K
+implementation makes no attempt to automatically detect which operations
+should be tagged as transitions.  Instead, it provides the functionality to
+let you decide it.
+
 Now the command
 
     krun div.imp --search

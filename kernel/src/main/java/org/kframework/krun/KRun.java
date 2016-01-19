@@ -251,16 +251,20 @@ public class KRun {
                                                Rule parsedPattern, CompiledDefinition compiledDefinition,
                                                OutputModes outputModes,
                                                Consumer<byte[]> print) {
-        subst.entrySet().forEach(e -> {
-            if (parsedPattern.body() instanceof KVariable) {
-                assert e.getKey().name().equals(parsedPattern.body().toString());
+        if(subst.isEmpty()) {
+            print.accept("Empty substitution\n".getBytes());
+        } else {
+            subst.entrySet().forEach(e -> {
+                if (parsedPattern.body() instanceof KVariable) {
+                    assert e.getKey().name().equals(parsedPattern.body().toString());
+                    prettyPrint(compiledDefinition, outputModes, print, e.getValue());
+                    return;
+                }
+                print.accept(e.getKey().toString().getBytes());
+                print.accept(" -->\n".getBytes());
                 prettyPrint(compiledDefinition, outputModes, print, e.getValue());
-                return;
-            }
-            print.accept(e.getKey().toString().getBytes());
-            print.accept(" -->\n".getBytes());
-            prettyPrint(compiledDefinition, outputModes, print, e.getValue());
-        });
+            });
+        }
     }
 
     /**
@@ -289,8 +293,7 @@ public class KRun {
             String name = entry.getKey();
             String value = entry.getValue().getLeft();
             String parser = entry.getValue().getRight();
-            // TODO(dwightguth): start symbols
-            Sort sort = Sorts.K();
+            Sort sort = compiledDef.programStartSymbol;
             K configVar = externalParse(parser, value, sort, Source.apply("<command line: -c" + name + ">"), compiledDef);
             output.put(KToken("$" + name, Sorts.KConfigVar()), configVar);
         }

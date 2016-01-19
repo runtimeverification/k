@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright (c) 2013-2014 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2013-2016 K Team. All Rights Reserved. -->
 <tests>
 
   <test
@@ -9,7 +9,6 @@
                 ../../../4_imp++/lesson_7/tests"
       extension="imp"
       results="." >
-    <kompile-option name="--backend" value="java" />
   </test>
 
 

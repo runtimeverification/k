@@ -306,7 +306,7 @@ public class Definition extends JavaSymbolicObject {
      * Converts the org.kframework.Rules to backend Rules, also plugging in the automaton rule
      */
     public void addKoreRules(Module module, GlobalContext global) {
-        KOREtoBackendKIL transformer = new KOREtoBackendKIL(module, this, global, false, global.krunOptions.experimental.prove != null);
+        KOREtoBackendKIL transformer = new KOREtoBackendKIL(module, this, global, global.krunOptions.experimental.prove != null);
         List<org.kframework.definition.Rule> koreRules = JavaConversions.setAsJavaSet(module.rules()).stream()
                 .filter(r -> !r.att().contains(AUTOMATON))
                 .collect(Collectors.toList());

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright (c) 2013-2014 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2013-2016 K Team. All Rights Reserved. -->
 <tests>
 
   <test
@@ -7,7 +7,7 @@
     programs="."
     extension="lambda"
     results="." >
-    <kompile-option name="--backend" value="java" />
+    <kompile-option name="--syntax-module" value="LAMBDA" />
     <all-programs>
       <krun-option name="--search" />
       <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />

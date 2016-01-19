@@ -1,5 +1,4 @@
 // Copyright (c) 2013-2016 K Team. All Rights Reserved.
-require "domains.k"
 require "unification.k"
 require "substitution.k"
 
@@ -29,7 +28,7 @@ module LAMBDA
   imports UNIFICATION
   imports SUBSTITUTION
 
-  syntax Variable ::= Id
+  syntax KVariable ::= Id
   syntax KResult ::= Type
 
   configuration <k color="green"> $PGM:Exp </k>
@@ -43,18 +42,19 @@ module LAMBDA
   rule int + int => int
   rule int <= int => bool
 
-  rule <k> lambda X:Id . E:Exp => E ~> ?T:Type -> HOLE ~> tenv(TEnv) ...</k>
+  syntax Exp ::= Exp "->" Exp                  [strict]
+  rule <k> lambda X:Id . E => ?T:Type -> E ~> tenv(TEnv) ...</k>
        <tenv> TEnv => TEnv[X <- ?T] </tenv>
-  rule T2:Type ~> T1:Type -> HOLE => T1 -> T2
+
   rule (T1:Type -> T2:Type) T1 => T2
   rule if bool then T:Type else T => T
 
   syntax TypeSchema ::= "(" "forall" Set ")" Type
   rule <k> let X = T:Type in E => E ~> tenv(TEnv) ...</k>
        <tenv> TEnv
-        => TEnv[X <- (forall #metaVariables(T) -Set #metaVariables(tenv(TEnv))) T]
+        => TEnv[X <- (forall #metaKVariables(T) -Set #metaKVariables(tenv(TEnv))) T]
        </tenv>
-  rule <k> X:Id => #rename(T, Tvs) ...</k>
+  rule <k> X:Id => #renameMetaKVariables(T, Tvs) ...</k>
        <tenv>... X |-> (forall Tvs) T ...</tenv>
 
   rule letrec F X = E in E' => let F = mu F . lambda X . E in E'        [macro]
