@@ -46,7 +46,7 @@ untyped KOOL.  */
                 | Type "[" "]"
                 > Types "->" Type
                 | "(" Type ")"           [bracket]
-  syntax Types ::= List{Type,","}
+  syntax Types ::= List{Type,","}   [klabel(_,_::Types)]
 
 //@ \subsection{Declarations}
 
