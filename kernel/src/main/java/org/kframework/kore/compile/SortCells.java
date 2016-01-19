@@ -57,13 +57,16 @@ import static org.kframework.kore.KORE.*;
  */
 public class SortCells {
     private final ConcretizationInfo cfg;
+    private final LabelInfo labelInfo;
     private final Module module;
     public SortCells(ConfigurationInfo cfgInfo, LabelInfo labelInfo, Module module) {
         this.cfg = new ConcretizationInfo(cfgInfo, labelInfo);
+        this.labelInfo = labelInfo;
         this.module = module;
     }
     public SortCells(ConfigurationInfo cfgInfo, LabelInfo labelInfo) {
         this.cfg = new ConcretizationInfo(cfgInfo, labelInfo);
+        this.labelInfo = labelInfo;
         this.module = null;
     }
 
@@ -754,27 +757,29 @@ public class SortCells {
             return term;
         }
 
-        // find cell fragment variables only appear in <k> cell
-        new VisitK() {
-            private boolean inKCell = false;
-            @Override
-            public void apply(KApply k) {
-                if (k.klabel().name().equals("<k>")) {
-                    assert !inKCell;
-                    inKCell = true;
-                    super.apply(k);
-                    inKCell = false;
-                } else {
-                    super.apply(k);
+        // drop cell fragment variables that appear outside <k> cell, in non-function rules
+        if (!labelInfo.isFunction(term)) {
+            new VisitK() {
+                private boolean inKCell = false;
+                @Override
+                public void apply(KApply k) {
+                    if (k.klabel().name().equals("<k>")) {
+                        assert !inKCell;
+                        inKCell = true;
+                        super.apply(k);
+                        inKCell = false;
+                    } else {
+                        super.apply(k);
+                    }
                 }
-            }
-            @Override
-            public void apply(KVariable var) {
-                if (!inKCell && cellFragmentVars.containsKey(var)) {
-                    cellFragmentVars.remove(var);
+                @Override
+                public void apply(KVariable var) {
+                    if (!inKCell && cellFragmentVars.containsKey(var)) {
+                        cellFragmentVars.remove(var);
+                    }
                 }
-            }
-        }.apply(term);
+            }.apply(term);
+        }
 
         if (cellFragmentVars.isEmpty()) {
             return term;
