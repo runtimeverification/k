@@ -1,10 +1,12 @@
-<!-- Copyright (c) 2014 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2014-2016 K Team. All Rights Reserved. -->
+
 ### Substitution-Based Higher-Order Type Systems
 
 [MOVIE [6'52"]](http://youtu.be/7P2QtR9jM2o)
 
 In this lesson you learn how to define a substitution-based type system for
-a higher-order language, namely the LAMBDA language defined in Part 1 of the tutorial.
+a higher-order language, namely the LAMBDA language defined in Part 1 of the
+tutorial.
 
 Let us copy the definition of LAMBDA from Part 1 of the tutorial, Lesson 8.
 We are going to modify it into a type systems for LAMBDA.
@@ -55,18 +57,18 @@ the latter arguments are actually typed, so we write `T:Type`.
 
 There is nothing special about `let`, except that we have to make sure we
 change its syntax to account for the type of the variable that it binds.
-This rule is a macro, so the let is desugared statically.
+This rule is a macro, so the `let` is desugared statically.
 
 Similarly, the syntax of `letrec` and `mu` needs to change to account for the
 type of the variable that they bind.  The typing of `letrec` remains based on
 its desugaring to `mu`; we have to make sure the types are also included now.
 
-The typing policy of `mu` is that its body should type to the same type `T` of its
-variable, which is also the type of the entire mu expression.  This can be 
-elegantly achieved by rewriting it to `(T -> T) E[T/X]`.  Recall that 
+The typing policy of `mu` is that its body should type to the same type `T` of
+its variable, which is also the type of the entire `mu` expression.  This can
+be elegantly achieved by rewriting it to `(T -> T) E[T/X]`.  Recall that 
 application is strict, so `E[T/X]` will be eventually reduced to its type.
-Then the application types correctly only if that type is also `T`, and in that
-case the result type will also be `T`.
+Then the application types correctly only if that type is also `T`, and in
+that case the result type will also be `T`.
 
 `kompile` and `krun` some programs.  You can, for example, take the LAMBDA
 programs from the first tutorial, modify them by adding types to their

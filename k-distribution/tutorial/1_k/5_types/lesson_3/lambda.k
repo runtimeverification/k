@@ -1,4 +1,5 @@
 // Copyright (c) 2012-2016 K Team. All Rights Reserved.
+
 module LAMBDA
   syntax Type ::= "int" | "bool"
                 | Type "->" Type
@@ -20,7 +21,7 @@ module LAMBDA
 
   syntax Exp ::= Exp "->" Exp                  [strict]
   rule <k> lambda X : T . E => (T -> E) ~> Rho ...</k>
-       <tenv> Rho:Map => Rho[X <- T] </tenv>
+       <tenv> Rho => Rho[X <- T] </tenv>
 
   rule <k> X:Id => T ...</k> <tenv>... X |-> T ...</tenv>
   rule (T1 -> T2) T1 => T2
