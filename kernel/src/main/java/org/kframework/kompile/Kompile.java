@@ -98,8 +98,8 @@ public class Kompile {
         this.sw = sw;
     }
 
-    public CompiledDefinition run(File definitionFile, String mainModuleName, String mainProgramsModuleName, Sort programStartSymbol) {
-        return run(definitionFile, mainModuleName, mainProgramsModuleName, programStartSymbol, defaultSteps());
+    public CompiledDefinition run(File definitionFile, String mainModuleName, String mainProgramsModuleName) {
+        return run(definitionFile, mainModuleName, mainProgramsModuleName, defaultSteps());
     }
 
     /**
@@ -111,7 +111,7 @@ public class Kompile {
      * @param programStartSymbol
      * @return
      */
-    public CompiledDefinition run(File definitionFile, String mainModuleName, String mainProgramsModuleName, Sort programStartSymbol, Function<Definition, Definition> pipeline) {
+    public CompiledDefinition run(File definitionFile, String mainModuleName, String mainProgramsModuleName, Function<Definition, Definition> pipeline) {
         Definition parsedDef = parseDefinition(definitionFile, mainModuleName, mainProgramsModuleName);
         sw.printIntermediate("Parse definition [" + definitionParsing.parsedBubbles.get() + "/" + (definitionParsing.parsedBubbles.get() + definitionParsing.cachedBubbles.get()) + " rules]");
 
@@ -122,7 +122,7 @@ public class Kompile {
 
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(kompiledDefinition.mainModule());
 
-        return new CompiledDefinition(kompileOptions, parsedDef, kompiledDefinition, programStartSymbol, configInfo.getDefaultCell(configInfo.topCell()).klabel());
+        return new CompiledDefinition(kompileOptions, parsedDef, kompiledDefinition, configInfo.getDefaultCell(configInfo.topCell()).klabel());
     }
 
     public Definition parseDefinition(File definitionFile, String mainModuleName, String mainProgramsModule) {

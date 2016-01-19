@@ -9,9 +9,6 @@
                 ../../../4_imp++/lesson_7/tests"
       extension="imp"
       results="." >
-    <all-programs>
-      <krun-option name="--parser" value="kast --sort Stmts"/>
-    </all-programs>
   </test>
 
 

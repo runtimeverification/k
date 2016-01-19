@@ -62,10 +62,10 @@ public class KoreUtils {
     }
 
     public KoreUtils(String fileName, String mainModuleName, String mainProgramsModuleName, boolean noPrelude) throws URISyntaxException {
-        this(fileName, mainModuleName, mainProgramsModuleName, false, Sorts.K(), false, noPrelude);
+        this(fileName, mainModuleName, mainProgramsModuleName, false, false, noPrelude);
     }
 
-    public KoreUtils(String fileName, String mainModuleName, String mainProgramsModuleName, boolean search, Sort sort, boolean heatCoolStrategies, boolean noPrelude) throws URISyntaxException {
+    public KoreUtils(String fileName, String mainModuleName, String mainProgramsModuleName, boolean search, boolean heatCoolStrategies, boolean noPrelude) throws URISyntaxException {
         kem = new KExceptionManager(new GlobalOptions());
         File definitionFile = testResource(fileName);
         KompileOptions kompileOptions = new KompileOptions();
@@ -80,7 +80,7 @@ public class KoreUtils {
         krunOptions.search = search;
 
         Kompile kompile = new Kompile(kompileOptions, FileUtil.testFileUtil(), kem, false);
-        compiledDef = kompile.run(definitionFile, mainModuleName, mainProgramsModuleName, sort,
+        compiledDef = kompile.run(definitionFile, mainModuleName, mainProgramsModuleName,
                 new JavaBackend(kem, FileUtil.testFileUtil(), globalOptions, kompileOptions).steps(kompile));
 
         requestScope = new SimpleScope();
