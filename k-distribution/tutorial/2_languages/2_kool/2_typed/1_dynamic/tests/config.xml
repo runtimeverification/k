@@ -10,19 +10,6 @@
         results="." >
         <all-programs>
           <krun-option name="--output" value="none" />
-          <krun-option name="--smt" value="none" />
-          <krun-option name="--symbolic-execution" />
-        </all-programs>
-  </test>
-
-  <test definition="kool-typed-dynamic.k"
-        programs="../../programs/"
-        extension="kool"
-        exclude="cycle"
-        skip="pdf"
-        results="." >
-        <all-programs>
-          <krun-option name="--output" value="none" />
         </all-programs>
   </test>
 
