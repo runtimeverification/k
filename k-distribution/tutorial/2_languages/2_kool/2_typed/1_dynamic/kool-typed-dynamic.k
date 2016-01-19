@@ -493,7 +493,6 @@ Exceptions are propagated now until a catch that can handle them is
 encountered. */
 
   syntax KItem ::= (Param,Stmt,K,Map,ControlCellFragment)
-                 | (Param,Stmt,K,Map,K)
   syntax KItem ::= "popx"
 
   rule <k> (try S1 catch(P) S2 => S1 ~> popx) ~> K </k>
