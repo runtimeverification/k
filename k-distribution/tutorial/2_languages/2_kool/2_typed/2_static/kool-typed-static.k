@@ -544,6 +544,7 @@ instance of this rule). */
 // as the rule below does not work when rewriting . to both the task
 // and the class cells; I had to include two separate . rewrites
 
+// TODO: the following fails krun; see #2117
   rule <task> <k> class C:Id extends C':Id { S:Stmts } => stmt ...</k> </task>
        (.Bag => <class>...
                <className> C </className>
@@ -554,7 +555,30 @@ instance of this rule). */
                 <k> checkType(class(C')) ~> S </k>
                 <inClass> C </inClass>
                 <ctenvT> .Map </ctenvT>
-             </task>)  [structural]
+             </task>)
+    [structural]
+
+// You may want to try the thing below, but that failed, too
+/*
+syntax Type ::= "stmtStop"
+
+  rule <tasks>...
+       <task> <k> class C:Id extends C':Id { S:Stmts } => stmtStop ...</k> </task>
+       (.Bag => <task>
+                <k> checkType(class(C')) ~> S </k>
+                <inClass> C </inClass>
+                <ctenvT> .Map </ctenvT>
+             </task>)
+       ...</tasks>
+       <classes>...
+       .Bag => <class>...
+               <className> C </className>
+               <extends> C' </extends>
+             ...</class>
+       ...</classes>
+//       <br/>
+  [structural]
+*/
 
 //@ \paragraph{Check for unique class names}
 
