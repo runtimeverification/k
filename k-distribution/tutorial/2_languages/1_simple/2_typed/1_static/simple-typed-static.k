@@ -591,20 +591,18 @@ list of variable declarations. */
 /*@ The \texttt{ltype} context allows only expressions which have an
  lvalue to evaluate. */
 
-// We would like to say the following instead of the predicate rule below:
-//  syntax LValue ::= Id | Exp "[" Exps "]"
-// but unfortunately that currently generates some ambiguous parsings.
   syntax LValue ::= Id
-  rule isLValue(_:Exp[_:Exps]) => true
+                  | Exp "[" Exps "]"
+  syntax Exp ::= LValue  // K should be able to infer this
+                         // if not added, then it gets stuck with an Id on k cell
+
+// Instead of the second LValue production above you can use a rule:
+//  rule isLValue(_:Exp[_:Exps]) => true
 
   syntax Exp ::= ltype(Exp)
-// We would like to say:
 //  context ltype(HOLE:LValue)
-// but we currently cannot type the HOLE
-//  context ltype(HOLE) requires isLValue(HOLE)
-
+// The above context does not work due to some error, so we write instead
   context ltype(HOLE) requires isLValue(HOLE)
-  syntax Exp ::= LValue
 
 //@ The function \texttt{getTypes} is the same as in SIMPLE typed dynamic.
 
