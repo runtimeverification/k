@@ -271,7 +271,8 @@ languages, we finally tell the tool that values are \K results. */
                | lambda(Ids,Stmt)
   syntax Vals ::= List{Val,","}
   syntax Exp ::= Val
-  syntax KResult ::= Val | Vals
+  syntax KResult ::= Val
+                   | Vals  // TODO: should not need this
 
 /*@ The inclusion of values in expressions follows the methodology of
 syntactic definitions (like, e.g., in SOS): extend the syntax of the language
