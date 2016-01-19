@@ -119,6 +119,7 @@ public class KRun {
         Set<Map<? extends KVariable, ? extends K>> searchResult = ((SearchResult) result).getSearchList().stream()
                 .map(subst -> filterAnonymousVariables(subst, result.getParsedRule()))
                 .collect(Collectors.toSet());
+        outputFile("Search results:\n\n", options);
         if (searchResult.isEmpty()) {
             outputFile("No Search Results \n", options);
         }
@@ -132,7 +133,6 @@ public class KRun {
         }
         Collections.sort(results);
         StringBuilder sb = new StringBuilder();
-        sb.append("Search results:\n\n");
         for (String solution : results) {
             sb.append("Solution ").append(i++).append(":\n");
             sb.append(solution);
