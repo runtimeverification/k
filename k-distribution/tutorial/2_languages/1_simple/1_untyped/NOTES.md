@@ -18,7 +18,3 @@ this a bit in the Latex discussion (related to #1803):
 We currently add Vals to KResult, but we should have a better pattern for
 List{Sort} and in general for any collections, where we make them hybrid
 (they become KResults when their elements become KResults)
-
-We currently have to do this, which is also a problem of the list patterns:
-+  syntax Ids  ::= List{Id,","}           [klabel("_,_::Ids")]
--  syntax Ids  ::= List{Id,","}
