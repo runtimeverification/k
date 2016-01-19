@@ -596,7 +596,6 @@ those in untyped KOOL. */
 
   syntax KItem ::= create(Id)
 
-  syntax KItem ::= ClassBody(K, K)
   rule <k> create(Class:Id)
            => create(Class1) ~> setCrntClass(Class) ~> S ~> addEnvLayer ...</k>
        <className> Class </className>
