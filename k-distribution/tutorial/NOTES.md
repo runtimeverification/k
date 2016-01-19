@@ -31,11 +31,12 @@ Things to revise each time the structure of the tutorial changes:
 * `1_k\4_imp++\lesson_5\README.md` refers to Lesson 4; Tutorial 3
 * `1_k\4_imp++\lesson_6\README.md` refers to Lesson 3
 * `1_k\4_imp++\lesson_7\README.md` refers to Lesson 1, 6
-* `1_k\5_types\lesson_1\README.md` refers to Part 4
-* `1_k\5_types\lesson_3\README.md` refers to Part 1
+* `1_k\5_types\lesson_1\README.md` refers to Part 4; SIMPLE
+* `1_k\5_types\lesson_2\NOTES/README.md` refer to Tutorial 1
+* `1_k\5_types\lesson_3\README.md` refers to Part 1; Lesson 1,2
 * `1_k\5_types\lesson_4\README.md` refers to Part 1, and to Lessons 2 and 3
 * `1_k\5_types\lesson_5\README.md` refers to Lessons 4, 3, 2
-* `1_k\5_types\lesson_6\README.md` refers to Lesson 5
+* `1_k\5_types\lesson_6\README.md` refers to Lesson 5; SIMPLE, KOOL, IMP++
 * `1_k\5_types\lesson_7\README.md` refers to Lesson 4, 8, 9
 * `1_k\5_types\lesson_8\README.md` refers to Lessons 5, 7
 * `1_k\5_types\lesson_9\README.md` refers to Lessons 8, 5, 7, 4
