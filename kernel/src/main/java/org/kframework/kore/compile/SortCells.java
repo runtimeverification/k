@@ -592,8 +592,7 @@ public class SortCells {
                             // fill individual cells first, starting with empty
                             KApply cellFragment = null;
                             ArrayList<K> klist = new ArrayList<K>(Collections.nCopies(subcellSorts.size(), null));
-                            for (int i = 0; i < k.klist().size(); i++) {
-                                K item = k.klist().items().get(i);
+                            for (K item : IncompleteCellUtils.flattenCells(k)) { // #cells(#cells(x,y),z) => [x,y,z]
                                 if (item instanceof KApply) {
                                     KApply kapp = (KApply) item;
                                     if (cfg.cfg.isCellLabel(kapp.klabel())) {
