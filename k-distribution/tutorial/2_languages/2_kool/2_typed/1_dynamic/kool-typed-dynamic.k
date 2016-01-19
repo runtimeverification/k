@@ -413,7 +413,6 @@ Like in untyped KOOL. */
 The only change to untyped KOOL's values is that method closures are
 now typed (their first argument holds their type): */
 
-
  syntax Val ::= objectClosure(CrntObjCellFragment)
               | methodClosure(Type,Id,Int,Params,Stmt)
  // TODO(KORE): drop the additional production once parsing issue #1842 is fixed
