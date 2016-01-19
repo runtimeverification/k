@@ -110,7 +110,8 @@ the wrapper in the generated documentation, we associate it an
 //@ \subsection{Types}
 
   syntax Type ::= "void" | "int" | "bool" | "string"
-                | Id                     [klabel("class")]  // see next
+                | Id      // TODO: switch to next once #2112 fixed
+//                | Id                     [klabel("class")]  // see next
                 | class(Id)         // explicit KOOL class type
                 | Type "[" "]"
                 > Types "->" Type
@@ -285,6 +286,7 @@ typed SIMPLE, so we do not discuss them much here. */
   syntax Type ::= BlockOrStmtType
   syntax Block ::= BlockOrStmtType
   syntax KResult ::= Type
+                   | Types  // TODO: should not be needed
 
 
   context _:Type _:>Exp[HOLE:>Exps];
