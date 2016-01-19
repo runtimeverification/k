@@ -1,4 +1,5 @@
-<!-- Copyright (c) 2014 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2014-2016 K Team. All Rights Reserved. -->
+
 ### A Naive Substitution-Based Type Inferencer
 
 [MOVIE []]()
@@ -25,9 +26,9 @@ Similarly, the program `if.lambda`
 can only make sense when `x` has type `bool` and `y` and `z` have the same
 type, say `t`, in which case the type of the entire expression is
 `bool -> t -> t -> t`.  Since the type `t` can be anything, we say that
-the type of this expression is *polymorphic*.  Ad-litteram, that means
-that the code above can be used in different contexts, where `t` can be
-an `int`, a `bool`, a function type `int -> int`, and so on.
+the type of this expression is *polymorphic*.  That means that the code
+above can be used in different contexts, where `t` can be an `int`, a
+`bool`, a function type `int -> int`, and so on.
 
 In the `identity.lambda` program
 
@@ -62,6 +63,8 @@ Let us start with the syntax, which is essentially identical to that
 of the type checker in Lesson 2, except that bound variables are not
 declared a type anymore.  Also, to keep things more compact, we put
 all the `Exp` syntax declarations in one syntax declaration this time.
+
+<!-- This part needs to change -->
 
 Before we modify the rules, let us first define our machinery for
 adding and solving constraints.  First, we require and import the

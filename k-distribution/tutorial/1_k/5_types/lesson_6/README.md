@@ -1,4 +1,5 @@
 <!-- Copyright (c) 2012-2014 K Team. All Rights Reserved. -->
+
 ### Parallel Type Checkers/Inferencers
 
 [MOVIE []]()
@@ -65,6 +66,8 @@ expressions and declaring it `strict`:
 
     syntax KItem ::= Exp "=" Exp  [strict]
 
+<!-- This will need to be changed, as unification is now builtin -->
+
 Unlike before, where we only passed types to the equality construct,
 we now need a runtime check that its arguments are indeed types before
 we can generate the `updateMgu` command:
@@ -72,7 +75,7 @@ we can generate the `updateMgu` command:
     rule <k> T:Type = T':Type => . ...</k>
          <mgu> Theta:Mgu => updateMgu(Theta,T,T') </mgu>
 
-Like before, an equality will therefore update the `<mgu/>` dell and then
+Like before, an equality will therefore update the `<mgu/>` cell and then
 it dissolves itself, letting the `<k/>` cell in the corresponding task
 empty.  Such empty tasks are unnecessary, so they can be erased:
 
@@ -113,6 +116,6 @@ We can now `kompile` and `krun` all the programs that we typed in Lesson 5.
 Everything should work.
 
 In this lesson we only aimed at parallelizing the type inferencer in
-Lesson 5, not to improve its expressivity; it still has the same
+Lesson 5, not to improve its expressiveness; it still has the same
 limitations in terms of polymorphism.  The next lessons are dedicated
 to polymorphic type inferencers.

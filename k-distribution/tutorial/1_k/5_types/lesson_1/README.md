@@ -1,4 +1,5 @@
-<!-- Copyright (c) 2014 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2014-2016 K Team. All Rights Reserved. -->
+
 ### Imperative, Environment-Based Type Systems
 
 [MOVIE [10'11"]](http://youtu.be/WyUxdo7GhtE)
@@ -18,7 +19,8 @@ We also clean up the semantics by removing the unnecessary tags, and also
 use `strict` instead of `seqstrict` wherever possible, because `strict` gives
 implementations more freedom.  Interestingly, note that `spawn` is strict now,
 because the code of the child thread should type in the current parent's type
-environment.
+environment.  Note that this is not always the case for threads, see for example
+SIMPLE in the languages tutorial, but it works here for our simpler IMP++.
 
 From a typing perspective, the `&&` construct is strict in both its arguments;
 its short-circuit (concrete) semantics is irrelevant for its (static) type

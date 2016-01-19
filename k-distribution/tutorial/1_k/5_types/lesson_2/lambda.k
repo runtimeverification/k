@@ -1,4 +1,5 @@
 // Copyright (c) 2012-2016 K Team. All Rights Reserved.
+
 require "substitution.k"
 
 module LAMBDA
@@ -47,5 +48,5 @@ module LAMBDA
                | "mu" Id ":" Type "." Exp                             [binder]
   rule letrec F : T1  X : T2 = E in E'
     => let F : T1 = mu F : T1 . lambda X : T2 . E in E'               [macro]
-  rule mu X : T . E => (T -> T) (E[T/X]):>Exp
+  rule mu X : T . E => (T -> T) (E[T/X]):>Exp  // TODO: casting should not be needed
 endmodule

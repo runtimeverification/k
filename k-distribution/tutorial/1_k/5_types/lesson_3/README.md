@@ -1,10 +1,12 @@
-<!-- Copyright (c) 2012-2014 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2012-2016 K Team. All Rights Reserved. -->
+
 ### Environment-Based Higher-Order Type Systems
 
 [MOVIE []]()
 
 In this lesson you learn how to define an environment-based type system for
-a higher-order language, namely the LAMBDA language defined in Part 1 of the tutorial.
+a higher-order language, namely the LAMBDA language defined in Part 1 of the
+tutorial.
 
 The simplest and fastest way to proceed is to copy the substitution-based
 type system of LAMBDA from the previous lesson and modify it into an
@@ -14,7 +16,7 @@ substitution.
 
 We do not need the substitution anymore, so we can remove the require and
 import statements.  The syntax of types and expressions stays unchanged, but
-we can now remove the binder tag of lambda.
+we can now remove the `binder` tag of lambda.
 
 Like in the type system of IMP++ in Lesson 1, we need a configuration that
 contains, besides the `<k/>` cell, a `<tenv/>` cell that will hold the type
@@ -28,8 +30,8 @@ type lookup rule:
 
 The type environment is populated by the semantic rule of `lambda`:
 
-    rule <k> lambda X : T . E => (T -> E) ~> tenv(Rho) ...</k>
-         <tenv> Rho => Rho[T/X] </tenv>
+    rule <k> lambda X : T . E => (T -> E) ~> Rho ...</k>
+         <tenv> Rho => Rho[X <- T] </tenv>
 
 So `X` is bound to its type `T` in the type environment, and then `T -> E`
 is scheduled for processing.  Recall that the arrow type construct has been
@@ -55,7 +57,7 @@ Finally, we give the semantics of environment recovery, making sure
 the environment is recovered only after the preceding computation is
 reduced to a type:
 
-    rule <k> _:Type ~> (tenv(Rho) => .) ...</k> <tenv> _ => Rho </tenv>
+  rule <k> _:Type ~> (Rho => .) ...</k> <tenv> _ => Rho </tenv>
 
 The changes that we applied to the substitution-based definition were
 therefore quite systematic: each substitution invocation was replaced with
