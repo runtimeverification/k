@@ -46,7 +46,11 @@ untyped KOOL.  */
                 | Type "[" "]"
                 > Types "->" Type
                 | "(" Type ")"           [bracket]
+  // TODO(KORE): drop klabel once issues #1913 are fixed
   syntax Types ::= List{Type,","}   [klabel(_,_::Types)]
+  /*
+  syntax Types ::= List{Type,","}
+  */
 
 //@ \subsection{Declarations}
 
@@ -409,8 +413,10 @@ Like in untyped KOOL. */
 The only change to untyped KOOL's values is that method closures are
 now typed (their first argument holds their type): */
 
+
  syntax Val ::= objectClosure(CrntObjCellFragment)
               | methodClosure(Type,Id,Int,Params,Stmt)
+ // TODO(KORE): drop the additional production once parsing issue #1842 is fixed
               | objectClosure(K)
 
 /*@ The type held by a method clossure will be the entire type of the
@@ -433,6 +439,7 @@ method returns.  We have to do the same with the current object
 environment, so we group them together in the stack frame.  */
 
   syntax KItem ::= (Map,K,ControlCellFragment)
+ // TODO(KORE): drop the additional production once parsing issue #1842 is fixed
                  | (Map,K,K)
 
   rule <k> methodClosure(_->T,Class,OL,Ps,S)(Vs:Vals) ~> K
