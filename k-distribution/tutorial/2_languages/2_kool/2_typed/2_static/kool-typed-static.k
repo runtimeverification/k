@@ -263,7 +263,7 @@ in the class extends relation. */
                       <inClass multiplicity="?" color="Fuchsia"> .K </inClass>
                     </task>
                   </tasks>
-                  <br/>
+//                  <br/>
                   <classes color="Fuchsia">
                     <class multiplicity="*">
                       <className color="Fuchsia"> Object </className>
@@ -293,7 +293,7 @@ typed SIMPLE, so we do not discuss them much here. */
   rule T:Type E:Exp[.Types]; => T E;          [structural]
 
 
-  rule <task>... <k> _:BlockOrStmtType </k> <tenv> _ </tenv> ...</task> => .
+  rule <task>... <k> _:BlockOrStmtType </k> <tenv> _ </tenv> ...</task> => .Bag
 
 
   rule _:Int => int
@@ -344,8 +344,8 @@ typed SIMPLE, so we do not discuss them much here. */
 
   rule {} => block
 
-  rule <task> <k> {S} => block ...</k> <tenv> Rho </tenv> R </task>
-       (. => <task> <k> S </k> <tenv> Rho </tenv> R </task>)
+  rule <task> <k> {S:Stmts} => block ...</k> <tenv> Rho </tenv> R </task>
+       (.Bag => <task> <k> S </k> <tenv> Rho </tenv> R </task>)
 
   rule _:Type; => stmt
   rule if (bool) block else block => stmt
@@ -434,7 +434,7 @@ at the end of this module). */
   rule <k> T:Type X:Id; => stuck(T X;) ...</k>
        <ctenvT>... X |-> _ ...</ctenvT>
        <inClass> C:Id </inClass>
-       <br/>
+//       <br/>
        <out>... .List => ListItem("Member \"" +String Id2String(X)
                               +String "\" declared twice in class \""
                               +String Id2String(C) +String "\"!\n") </out>
@@ -460,13 +460,13 @@ for example, inside other methods). */
   rule <k> T:Type F:Id(Ps:Params) S
         => checkMethod(F, getTypes(Ps)->T, C')
            ~> getTypes(Ps)->T F; ...</k>
-       <br/>
+//       <br/>
        <inClass> C </inClass>
        <ctenvT> _ </ctenvT> // to ensure we are in a class pass
        <className> C </className>
        <extends> C' </extends>
-       <br/>
-       (. => <task>
+//       <br/>
+       (.Bag => <task>
                <k> mkDecls(Ps) S </k>
                <inClass> C </inClass>
                <tenv> .Map </tenv>
@@ -514,10 +514,10 @@ type correctly. */
 The spawned cell needs to also be passed the parent's class. */
 // explain why
 
-  rule <k> spawn S => int ...</k>
+  rule <k> spawn S:Block => int ...</k>
        <tenv> Rho </tenv>
        <inClass> C </inClass>
-       (. => <task>
+       (.Bag => <task>
                <k> S </k>
                <tenv> Rho </tenv>
                <inClass> C </inClass>
@@ -542,13 +542,13 @@ instance of this rule). */
 // as the rule below does not work when rewriting . to both the task
 // and the class cells; I had to include two separate . rewrites
 
-  rule <task> <k> class C:Id extends C':Id { S } => stmt ...</k> </task>
-       (. => <class>...
+  rule <task> <k> class C:Id extends C':Id { S:Stmts } => stmt ...</k> </task>
+       (.Bag => <class>...
                <className> C </className>
                <extends> C' </extends>
              ...</class>)
-       <br/>
-       (. => <task>
+//       <br/>
+       (.Bag => <task>
                 <k> checkType(class(C')) ~> S </k>
                 <inClass> C </inClass>
                 <ctenvT> .Map </ctenvT>
@@ -559,7 +559,7 @@ instance of this rule). */
   rule (<T>...
           <className> C </className>
           <className> C </className>
-        ...</T> => .)
+        ...</T> => .Bag)
        <out>... .List => ListItem("Class \"" +String Id2String(C)
                                   +String "\" declared twice!\n") </out>
     [structural]
@@ -584,7 +584,7 @@ checks for cycles. */
   rule (<T>...
           <className> C </className>
           <extendsAll>... SetItem(C) ...</extendsAll>
-        ...</T> => .)
+        ...</T> => .Bag)
        <out>... .List => ListItem("Class \"" +String Id2String(C)
                                   +String "\" is in a cycle!\n") </out>
     [inheritance-cycle]
@@ -681,7 +681,7 @@ wait.  Finally, the sixth rule below reports an error when the
 
   rule <k> class(Object) . X:Id => stuck(class(Object) . X) ...</k>
        <inClass> C:Id </inClass>
-       <br/>
+//      <br/>
        <out>... .List => ListItem("Member \"" +String Id2String(X)
                               +String "\" not declared! (see class \""
                               +String Id2String(C) +String "\")\n") </out>
@@ -742,7 +742,7 @@ the \textsf{tasks} cell has been removed. */
 // make sure that the class main and the method main() are declared.
 
   rule <task> <k> stmt => new Main(.Exps); </k>
-              (. => <tenv> .Map </tenv>
+              (.Bag => <tenv> .Map </tenv>
                     <return> void </return>
                     <inClass> Main </inClass>)
        </task>
@@ -754,9 +754,9 @@ the \textsf{tasks} cell has been removed. */
           <k> stmt </k>
           <ctenvT> Rho </ctenvT>
           <inClass> C:Id </inClass>
-        </task> => .)
+        </task> => .Bag)
         <className> C </className>
-        (. => <ctenv> Rho </ctenv>)
+        (.Bag => <ctenv> Rho </ctenv>)
     [structural]
 
 // discard method task when done
@@ -764,12 +764,12 @@ the \textsf{tasks} cell has been removed. */
   rule <task>...
          <k> stmt </k>
          <tenv> _ </tenv>  // only to ensure that this is a method task
-       ...</task> => .
+       ...</task> => .Bag
     [structural]
 
 // cleanup tasks and output a success message when done
 
-  rule (<T>... <tasks> .Bag </tasks> ...</T> => .)
+  rule (<T>... <tasks> .Bag </tasks> ...</T> => .Bag)
        <out>... .List => ListItem("Type checked!\n") </out>
     [structural]
 
