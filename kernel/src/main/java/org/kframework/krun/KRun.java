@@ -67,6 +67,14 @@ public class KRun {
         this.ttyStdin = ttyStdin;
     }
 
+    public static class InitialConfiguration {
+        public K theConfig;
+
+        public InitialConfiguration(K theConfig) {
+            this.theConfig = theConfig;
+        }
+    }
+
     public int run(CompiledDefinition compiledDef, KRunOptions options, Function<Module, Rewriter> rewriterGenerator, ExecutionMode executionMode) {
         String pgmFileName = options.configurationCreation.pgm();
         K program;
@@ -77,13 +85,15 @@ public class KRun {
             program = parseConfigVars(options, compiledDef);
         }
 
-        program = new KTokenVariablesToTrueVariables()
-                .apply(compiledDef.kompiledDefinition.getModule(compiledDef.mainSyntaxModuleName()).get(), program);
+        // store initial configuration in single mutable reference so that we can make sure it can be garbage collected
+        // down the stack.
+        InitialConfiguration config = new InitialConfiguration(program);
+        program = null;
 
 
         Rewriter rewriter = rewriterGenerator.apply(compiledDef.executionModule());
 
-        Object result = executionMode.execute(program, rewriter, compiledDef);
+        Object result = executionMode.execute(config, rewriter, compiledDef);
 
         if (result instanceof K) {
             prettyPrint(compiledDef, options.output, s -> outputFile(s, options), (K) result);

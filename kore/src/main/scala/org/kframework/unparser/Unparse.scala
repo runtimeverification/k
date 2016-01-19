@@ -1,5 +1,7 @@
 package org.kframework.unparser
 
+import java.io.PrintStream
+
 import org.apache.commons.lang3.StringEscapeUtils
 import org.kframework.kore.Unapply._
 import org.kframework.kore.{KLabel, InjectedKLabel, K, KApply}
@@ -34,9 +36,13 @@ object Unparse extends {
 object ToKast {
   def apply(k: K): String = {
     val b = StringBuilder.newBuilder
-    unparse(b, false, 0, k)
+    unparse(s => b ++= s, false, 0, k)
     b.toString()
   }
+  def apply(k: K, out: PrintStream): Unit = {
+    unparse(out.print, false, 0, k)
+  }
+
   def apply(l: KLabel): String = unparse(false, l)
 
   def escape(s: String): String = StringEscapeUtils.escapeJava(s)
@@ -74,37 +80,37 @@ object ToKast {
    * @param prec The current precedence level
    * @param k The term to print
    */
-  def unparse(b:StringBuilder, inParen: Boolean, prec: Int, k: K): Unit = k match {
-    case KToken(s, sort) => b ++= "#token(\"" + escape(s) + "\",\"" + escape(sort.name) + "\")"
-    case InjectedKLabel(l) => b ++= "#klabel("+apply(l)+")"
-    case KVariable(v) => b ++= v.toString
-    case KApply(l, List()) => b ++= unparse(inParen,l)+"(.KList)"
+  def unparse(b:String=>Unit, inParen: Boolean, prec: Int, k: K): Unit = k match {
+    case KToken(s, sort) => b("#token(\"" + escape(s) + "\",\"" + escape(sort.name) + "\")")
+    case InjectedKLabel(l) => b("#klabel("+apply(l)+")")
+    case KVariable(v) => b(v.toString)
+    case KApply(l, List()) => b(unparse(inParen,l)+"(.KList)")
     case KApply(l, args) =>
-      b ++= unparse(inParen,l)
-      b ++= "("
+      b(unparse(inParen,l))
+      b("(")
       var first = true
       for (a <- args) {
         if (!first) {
-          b ++= ","
+          b(",")
         } else {
           first = false
         }
         unparse(b, false, 0, a)
       }
-      b ++= ")"
-    case KSequence(Seq()) => b ++= ".K"
+      b(")")
+    case KSequence(Seq()) => b(".K")
     case KSequence(a +: items) =>
       unparse(b, inParen, 2, a)
       for (i <- items) {
-        b ++= "~>"
+        b("~>")
         unparse(b, false, 2, i)
       }
     case KRewrite(l,r) =>
       val needParen = prec > 1
-      if (needParen) b ++= "``"
+      if (needParen) b("``")
       unparse(b,needParen || inParen,1,l)
-      b ++= "=>"
+      b("=>")
       unparse(b,false,1,r)
-      if (needParen) b ++= "``"
+      if (needParen) b("``")
   }
 }

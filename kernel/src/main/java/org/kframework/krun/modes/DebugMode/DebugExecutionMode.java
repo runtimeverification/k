@@ -11,14 +11,14 @@ import jline.console.completer.Completer;
 import jline.console.completer.FileNameCompleter;
 import jline.console.completer.NullCompleter;
 import jline.console.completer.StringsCompleter;
-import org.kframework.rewriter.Rewriter;
 import org.kframework.debugger.KDebug;
 import org.kframework.debugger.KoreKDebug;
 import org.kframework.kompile.CompiledDefinition;
-import org.kframework.kore.K;
+import org.kframework.krun.KRun;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.api.io.FileSystem;
 import org.kframework.krun.modes.ExecutionMode;
+import org.kframework.rewriter.Rewriter;
 import org.kframework.utils.debugparser.ParseException;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -84,8 +84,8 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
 
 
     @Override
-    public Void execute(K k, Rewriter rewriter, CompiledDefinition compiledDefinition) {
-        KDebug debugger = new KoreKDebug(k, rewriter, checkpointInterval, files, kem, kRunOptions, compiledDefinition);
+    public Void execute(KRun.InitialConfiguration k, Rewriter rewriter, CompiledDefinition compiledDefinition) {
+        KDebug debugger = new KoreKDebug(k.theConfig, rewriter, checkpointInterval, files, kem, kRunOptions, compiledDefinition);
         ConsoleReader reader = getConsoleReader();
         while (true) {
             try {

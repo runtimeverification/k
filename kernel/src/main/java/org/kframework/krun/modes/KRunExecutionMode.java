@@ -40,7 +40,8 @@ public class KRunExecutionMode implements ExecutionMode {
     }
 
     @Override
-    public Object execute(K k, Rewriter rewriter, CompiledDefinition compiledDefinition) {
+    public Object execute(KRun.InitialConfiguration config, Rewriter rewriter, CompiledDefinition compiledDefinition) {
+        K k = config.theConfig;
         Rule pattern = null, parsedPattern = null;
         if (kRunOptions.pattern != null) {
             parsedPattern = KRun.parsePattern(files, kem, kRunOptions.pattern, compiledDefinition, Source.apply("<command line>"));

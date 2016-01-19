@@ -16,6 +16,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Map;
 
 /**
@@ -32,7 +33,7 @@ public class ToBinary {
             //version
             data.writeByte(4);
             data.writeByte(0);
-            data.writeByte(0);
+            data.writeByte(1);
             new ToBinary(data).traverse(k);
             data.writeByte(BinaryParser.END);
         } catch (IOException e) {
@@ -47,18 +48,27 @@ public class ToBinary {
         return out.toByteArray();
     }
 
-    DataOutputStream data;
-    Map<String, Integer> interns = new HashMap<>();
+    private DataOutputStream data;
+    private Map<String, Integer> interns = new HashMap<>();
+    private Map<K, Integer> kInterns = new IdentityHashMap<>();
+    private int numTermsWritten;
 
     private ToBinary(DataOutputStream data) {
         this.data = data;
     }
 
     private void traverse(K k) throws IOException {
+        if (kInterns.containsKey(k)) {
+            data.writeByte(BinaryParser.BACK_REFERENCE);
+            data.writeInt(numTermsWritten - kInterns.get(k));
+            add_intern(k);
+            return;
+        }
         if (k instanceof KToken) {
             KToken tok = (KToken) k;
 
             data.writeByte(BinaryParser.KTOKEN);
+            add_intern(k);
             writeString(tok.s());
             writeString(tok.sort().name());
 
@@ -69,6 +79,7 @@ public class ToBinary {
                 traverse(item);
             }
             data.writeByte(BinaryParser.KAPPLY);
+            add_intern(k);
             writeString(app.klabel().name());
             data.writeBoolean(app.klabel() instanceof KVariable);
             data.writeInt(app.size());
@@ -80,12 +91,14 @@ public class ToBinary {
                 traverse(item);
             }
             data.writeByte(BinaryParser.KSEQUENCE);
+            add_intern(k);
             data.writeInt(seq.size());
 
         } else if (k instanceof KVariable) {
             KVariable var = (KVariable) k;
 
             data.writeByte(BinaryParser.KVARIABLE);
+            add_intern(k);
             writeString(var.name());
 
         } else if (k instanceof KRewrite) {
@@ -94,15 +107,22 @@ public class ToBinary {
             traverse(rew.left());
             traverse(rew.right());
             data.writeByte(BinaryParser.KREWRITE);
+            add_intern(k);
 
         } else if (k instanceof InjectedKLabel) {
             InjectedKLabel inj = (InjectedKLabel) k;
 
             data.writeByte(BinaryParser.INJECTEDKLABEL);
+            add_intern(k);
             writeString(inj.klabel().name());
             data.writeBoolean(inj.klabel() instanceof KVariable);
 
         }
+    }
+
+    private void add_intern(K k) {
+        kInterns.put(k, numTermsWritten);
+        numTermsWritten++;
     }
 
     private void writeString(String s) throws IOException {
