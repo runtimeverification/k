@@ -308,15 +308,11 @@ member declarations (\textsf{declarations}).
                   <nextLoc color="gray"> 0 </nextLoc>
                 //<br/> // TODO(KORE): support latex annotations #1799
                   <classes color="Fuchsia">        // KOOL
-                     // TODO(KORE): hack to avoid not having AC -- see 2230bb3947c34b34b09e44eaa2ea2dfbd46b31cf
-                     .Map
-                     /*
                      <class multiplicity="*" color="Fuchsia">
                         <className color="Fuchsia"> Main </className>
                         <extends color="Fuchsia"> Object </extends>
                         <declarations color="Fuchsia"> .K </declarations>
                      </class>
-                     */
                   </classes>
                 </T>
 
@@ -683,17 +679,12 @@ environment. */
 Initially, the classes forming the program are moved into their
 corresponding cells: */
 
-  syntax KItem ::= ClassBody(K, K)
   rule <k> class Class1 extends Class2 { S } => . ...</k>
-       // TODO(KORE): classes hack to avoid not having AC -- see 2230bb3947c34b34b09e44eaa2ea2dfbd46b31cf
-       <classes>... (.Map => Class1 |-> ClassBody(Class2, S))
-       /*
        <classes>... (.Bag => <class>
                             <className> Class1 </className>
                             <extends> Class2 </extends>
                             <declarations> S </declarations>
                         </class>)
-       */
        ...</classes>  [structural]
 
 /*@ \subsubsection{Method declaration}
@@ -768,14 +759,9 @@ members (both fields and methods) of that class. */
 
   rule <k> create(Class:Id)
            => create(Class1) ~> setCrntClass(Class) ~> S ~> addEnvLayer ...</k>
-       // TODO(KORE): classes hack to avoid not having AC -- see 2230bb3947c34b34b09e44eaa2ea2dfbd46b31cf
-       <classes>...(Class |-> ClassBody(Class1:Id, S))...</classes>
-       [structural]
-       /*
        <className> Class </className>
        <extends> Class1:Id </extends>
        <declarations> S </declarations>  [structural]
-       */
 
   rule <k> create(Object) => . ...</k>  [structural]
 
@@ -934,7 +920,7 @@ method call or the array access.  */
        <envStack> ListItem((Class':Id,_::EnvCell)) => .List ...</envStack>
     when Class =/=K Class'  [structural]
 
-  // TODO(KORE): fix getKLabel #1801 and context issue #1802
+  // TODO(KORE): fix getKLabel #1801
   rule (A:Exp(B:Exps))(C:Exps) => A(B) ~> #freezerFunCall(C)
   rule (A:Exp[B:Exps])(C:Exps) => A[B] ~> #freezerFunCall(C)
   rule V:Val ~> #freezerFunCall(C:Exps) => V(C)
