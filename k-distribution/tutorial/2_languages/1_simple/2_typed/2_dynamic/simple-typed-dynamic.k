@@ -470,7 +470,7 @@ into a list of variable declarations. */
 
 //@ Location lookup.
 
-  syntax KItem ::= lookup(Int)
+  syntax Exp ::= lookup(Int)  // see NOTES.md for why Exp instead of KItem
   rule <k> lookup(L) => V ...</k> <store>... L |-> V:Val ...</store>  [lookup]
 
 //@ Environment recovery.
