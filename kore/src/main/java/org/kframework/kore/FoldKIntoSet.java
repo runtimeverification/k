@@ -18,4 +18,8 @@ public class FoldKIntoSet<E> extends AbstractFoldK<Set<E>> {
     public Set<E> merge(Set<E> a, Set<E> b) {
         return Collections.or(a, b);
     }
+
+    public Set<E> apply(K k) {
+        return super.apply(k);
+    }
 }
