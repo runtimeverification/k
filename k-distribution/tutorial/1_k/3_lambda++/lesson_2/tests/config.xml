@@ -4,7 +4,7 @@
 <tests>
 
   <include file="../../../1_lambda/lesson_1/tests/config.xml"
-           exclude="omega"
+           exclude="omega callcc-env2"
            results=".">
 <!-- The next line should not be needed ... -->
     <kompile-option name="--syntax-module" value="LAMBDA" />
