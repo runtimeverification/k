@@ -49,6 +49,11 @@ import java.util.Map;
  *                   refers to the most recent previous string in the intern table. An offset of 2 means the
  *                   next-most-recent, and so forth.
  *
+ * Note one exception to this rule in binary format 4.0.1: if a term is encountered that has already been serialized,
+ * instead of serializing it again we serialize the byte '\x08' followed by a 4-byte offset in the term intern table.
+ * The term intern table behaves the same as the string intern table except that it contains every term that has been
+ * traversed to date.
+ *
  * After the term is traversed, it terminates with the byte "\x07". Note that KAST terms are constructed to be
  * self-contained and composable. A client can take the output of two KAST terms and combine them into a single term
  * simply by concatenating the terms together after stripping their MAGIC prefix and suffix. This will not be as
