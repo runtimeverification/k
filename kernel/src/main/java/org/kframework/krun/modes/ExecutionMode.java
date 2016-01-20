@@ -1,9 +1,9 @@
 // Copyright (c) 2015-2016 K Team. All Rights Reserved.
 package org.kframework.krun.modes;
 
-import org.kframework.rewriter.Rewriter;
 import org.kframework.kompile.CompiledDefinition;
-import org.kframework.kore.K;
+import org.kframework.krun.KRun;
+import org.kframework.rewriter.Rewriter;
 
 /**
  * Created by Manasvi on 6/16/15.
@@ -12,5 +12,5 @@ import org.kframework.kore.K;
  */
 public interface ExecutionMode<T> {
 
-    public T execute(K k, Rewriter rewriter, CompiledDefinition compiledDefinition);
+    public T execute(KRun.InitialConfiguration k, Rewriter rewriter, CompiledDefinition compiledDefinition);
 }

@@ -16,9 +16,7 @@ import org.kframework.kore.convertors.KILtoKORE;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KEMException;
-import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
-import org.kframework.utils.file.FileUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -238,5 +236,18 @@ public class ParserUtils {
         }
 
         return org.kframework.definition.Definition.apply(mainModule, immutable(modules), Att().add(Att.syntaxModule(), syntaxModule.name()));
+    }
+
+    public org.kframework.definition.Definition loadDefinition(
+            String mainModuleName,
+            String syntaxModuleName,
+            String definitionText,
+            File source,
+            File currentDirectory,
+            List<File> lookupDirectories,
+            boolean dropQuote, boolean autoImportDomains) {
+        return loadDefinition(mainModuleName, syntaxModuleName, definitionText,
+                source,
+                currentDirectory, lookupDirectories, dropQuote, autoImportDomains);
     }
 }
