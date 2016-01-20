@@ -3,9 +3,11 @@
 
 <tests>
 
-  <include file="../../lesson_3/tests/config-det.xml" />
+  <include file="../../lesson_3/tests/config-det.xml"
+           exclude="omega callcc-env1 callcc-env2 factorial-let" />
   <include file="../../lesson_3/tests/config-nondet.xml"
            more-programs = "."
+           exclude="omega callcc-env1 callcc-env2 factorial-let"
            more-results = "." />
 
 </tests>
