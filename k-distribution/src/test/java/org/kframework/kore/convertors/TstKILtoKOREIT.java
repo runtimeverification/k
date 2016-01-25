@@ -3,6 +3,7 @@
 package org.kframework.kore.convertors;
 
 import org.junit.FixMethodOrder;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
@@ -26,7 +27,7 @@ public class TstKILtoKOREIT extends BaseTest {
         outerOnlyTest();
     }
 
-    @Test
+    @Test @Ignore
     public void syntaxWithRhs() throws IOException {
         outerOnlyTest();
     }
@@ -36,17 +37,17 @@ public class TstKILtoKOREIT extends BaseTest {
         outerOnlyTest();
     }
 
-    @Test
+    @Test @Ignore
     public void syntaxPriorities() throws IOException {
         outerOnlyTest();
     }
 
-    @Test
+    @Test @Ignore
     public void syntaxWithPriorities() throws IOException {
         outerOnlyTest();
     }
 
-    @Test
+    @Test @Ignore
     public void syntaxWithOR() throws IOException {
         outerOnlyTest();
     }
