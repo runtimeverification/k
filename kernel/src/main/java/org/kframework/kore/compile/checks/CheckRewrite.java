@@ -1,3 +1,4 @@
+// Copyright (c) 2016 K Team. All Rights Reserved.
 package org.kframework.kore.compile.checks;
 
 import org.kframework.definition.Module;
