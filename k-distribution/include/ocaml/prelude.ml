@@ -230,6 +230,7 @@ struct
     | _ -> raise Not_implemented
   let hook_lookup c lbl sort config ff = match c with 
       [Map (_,_,k1)], k2 -> (try KMap.find k2 k1 with Not_found -> interned_bottom)
+    | [Bottom], k2 -> interned_bottom
     | _ -> raise Not_implemented
   let hook_update c lbl sort config ff = match c with 
       [Map (s,l,k1)], k, v -> [Map (s,l,(KMap.add k v k1))]
@@ -246,6 +247,7 @@ struct
     | _ -> raise Not_implemented
   let hook_in_keys c lbl sort config ff = match c with
       (k1, [Map (_,_,k2)]) -> [Bool (KMap.mem k1 k2)]
+    | (k1, [Bottom]) -> [Bool false] (* case is useful for double map lookup *)
     | _ -> raise Not_implemented
   let hook_values c lbl sort config ff = match c with 
       [Map (_,_,k1)] -> [List (SortList, Lbl_List_,(match List.split (KMap.bindings k1) with (_,vs) -> vs))]
