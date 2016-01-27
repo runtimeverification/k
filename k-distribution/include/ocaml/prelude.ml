@@ -217,6 +217,8 @@ let get_exit_code(subst: k Subst.t) : int = match (Subst.fold (fun k v res -> ma
   | [Int i], Some _ -> failwith "Bad exit code pattern"
   | _ -> res) subst None) with Some i -> i | _ -> failwith "Bad exit code pattern"
 
+let () = Random.self_init ()
+
 module MAP =
 struct
 
@@ -496,6 +498,9 @@ struct
   let hook_float2string c lbl sort config ff = match c with
       [Float (f,_,_)] -> [String (Gmp.FR.to_string_base_digits Gmp.GMP_RNDN 10 0 f)]
     | _ -> raise Not_implemented
+  let hook_uuid c lbl sort config ff = match c with
+      () -> let uuid = Uuidm.create `V4 in
+      [String (Uuidm.to_string uuid)]
   let hook_floatFormat c lbl sort config ff = raise Not_implemented
   let hook_string2float c lbl sort config ff = raise Not_implemented
   let hook_replace c lbl sort config ff = raise Not_implemented

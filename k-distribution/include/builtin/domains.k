@@ -448,6 +448,8 @@ module STRING
   syntax String ::= categoryChar(String)       [function, hook(STRING.category)]
                   | directionalityChar(String) [function, hook(STRING.directionality)]
 
+  syntax String ::= "newUUID" [function, hook(STRING.uuid), impure]
+
   rule S1:String <=String S2:String => notBool (S2 <String S1)
   rule S1:String >String S2:String => S2 <String S1
   rule S1:String >=String S2:String => notBool (S1 <String S2)
