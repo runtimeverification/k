@@ -216,8 +216,6 @@ let get_exit_code(subst: k Subst.t) : int = match (Subst.fold (fun k v res -> ma
   | [Int i], Some _ -> failwith "Bad exit code pattern"
   | _ -> res) subst None) with Some i -> i | _ -> failwith "Bad exit code pattern"
 
-let () = Random.self_init ()
-
 module MAP =
 struct
 
