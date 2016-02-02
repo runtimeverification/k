@@ -54,7 +54,6 @@ let k_char_escape (buf: Buffer.t) (c: char) : unit = match c with
 | '\n' -> Buffer.add_string buf "\\n"
 | '\t' -> Buffer.add_string buf "\\t"
 | '\r' -> Buffer.add_string buf "\\r"
-| '\x0c' -> Buffer.add_string buf "\\f"
 | _ when let code = Char.code c in code >= 32 && code < 127 -> Buffer.add_char buf c
 | _ -> Buffer.add_string buf (Printf.sprintf "\\x%02x" (Char.code c))
 let k_string_escape str = 
