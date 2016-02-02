@@ -54,7 +54,6 @@ let k_char_escape (buf: Buffer.t) (c: char) : unit = match c with
 | '\n' -> Buffer.add_string buf "\\n"
 | '\t' -> Buffer.add_string buf "\\t"
 | '\r' -> Buffer.add_string buf "\\r"
-| '\x0c' -> Buffer.add_string buf "\\f"
 | _ when let code = Char.code c in code >= 32 && code < 127 -> Buffer.add_char buf c
 | _ -> Buffer.add_string buf (Printf.sprintf "\\x%02x" (Char.code c))
 let k_string_escape str = 
@@ -496,6 +495,9 @@ struct
   let hook_float2string c lbl sort config ff = match c with
       [Float (f,_,_)] -> [String (Gmp.FR.to_string_base_digits Gmp.GMP_RNDN 10 0 f)]
     | _ -> raise Not_implemented
+  let hook_uuid c lbl sort config ff = match c with
+      () -> let uuid = Uuidm.create `V4 in
+      [String (Uuidm.to_string uuid)]
   let hook_floatFormat c lbl sort config ff = raise Not_implemented
   let hook_string2float c lbl sort config ff = raise Not_implemented
   let hook_replace c lbl sort config ff = raise Not_implemented
