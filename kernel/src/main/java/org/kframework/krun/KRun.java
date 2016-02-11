@@ -14,7 +14,6 @@ import org.kframework.kore.KToken;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
 import org.kframework.kore.VisitK;
-import org.kframework.kore.compile.KTokenVariablesToTrueVariables;
 import org.kframework.krun.modes.ExecutionMode;
 import org.kframework.main.Main;
 import org.kframework.parser.ProductionReference;
@@ -315,7 +314,10 @@ public class KRun {
             output.put(KToken("$STDIN", Sorts.KConfigVar()), KToken("\"" + stdin + "\"", Sorts.String()));
             output.put(KToken("$IO", Sorts.KConfigVar()), KToken("\"off\"", Sorts.String()));
         }
-        checkConfigVars(output.keySet(), compiledDef);
+        if (options.global.debug) {
+            // on the critical path, so don't perform this check because it's slow unless we're debugging.
+            checkConfigVars(output.keySet(), compiledDef);
+        }
         return plugConfigVars(compiledDef, output);
     }
 
