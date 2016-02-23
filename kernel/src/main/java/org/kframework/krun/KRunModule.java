@@ -87,9 +87,6 @@ public class KRunModule extends AbstractModule {
                     binder(), TypeLiteral.get(String.class), new TypeLiteral<Function<org.kframework.definition.Module, Rewriter>>() {
                     });
 
-            //TODO(cos): move to tiny module
-            rewriterBinder.addBinding("tiny").toInstance(m -> new org.kframework.tiny.FullTinyRewriter(m));
-
             bind(FileUtil.class);
 
             bind(FileSystem.class).to(PortableFileSystem.class);
