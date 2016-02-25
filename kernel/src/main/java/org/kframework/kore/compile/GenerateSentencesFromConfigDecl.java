@@ -47,7 +47,7 @@ public class GenerateSentencesFromConfigDecl {
      * Cells of multiplicity ? desugar into an initializer production, an initializer rule, a cell production, and an
      * empty production indicating the absence of that cell.
      * Cells with children additionally generate a *CellFragment sort with the same arity as the cell production,
-     *  but the arguments mad   e optional by generating additional sorts.
+     *  but the arguments made optional by generating additional sorts.
      * Cells which have parents and are not multiplicity * generate a CellOpt sort which is a supersort of the cell sort
      *  and has an additional production name like {@code <cell>-absent}. (For a cell with multiplicitly ? this is
      *  necessary to distinguish a fragment that did capture the state of the cell when it wasn't present, from
