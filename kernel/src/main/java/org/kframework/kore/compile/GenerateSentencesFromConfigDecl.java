@@ -47,7 +47,7 @@ public class GenerateSentencesFromConfigDecl {
      * Cells of multiplicity ? desugar into an initializer production, an initializer rule, a cell production, and an
      * empty production indicating the absence of that cell.
      * Cells with children additionally generate a *CellFragment sort with the same arity as the cell production,
-     *  but the arguments made optional by generating additional sorts.
+     *  but the arguments mad   e optional by generating additional sorts.
      * Cells which have parents and are not multiplicity * generate a CellOpt sort which is a supersort of the cell sort
      *  and has an additional production name like {@code <cell>-absent}. (For a cell with multiplicitly ? this is
      *  necessary to distinguish a fragment that did capture the state of the cell when it wasn't present, from
@@ -356,8 +356,13 @@ public class GenerateSentencesFromConfigDecl {
             switch(type) {
             case "Set":
                 bagAtt = bagAtt.add(Attribute.IDEMPOTENT_KEY, "");
+                // fall through
+            case "Map":
+                bagAtt = bagAtt.add(Attribute.COMMUTATIVE_KEY, "");
+                break;
             case "Bag":
                 bagAtt = bagAtt.add(Attribute.COMMUTATIVE_KEY, "").add(Att.bag() + "");
+                break;
             case "List":
                 break;
             default:
@@ -365,7 +370,12 @@ public class GenerateSentencesFromConfigDecl {
             }
             SyntaxSort sortDecl = SyntaxSort(bagSort, Att().add("hook", type.toUpperCase() + '.' + type));
             Sentence bagSubsort = Production(bagSort, Seq(NonTerminal(sort)));
-            Sentence bagElement = Production(bagSort.name() + "Item", bagSort, Seq(Terminal(bagSort.name() + "Item"), Terminal("("), NonTerminal(sort), Terminal(")")), Att().add(Attribute.HOOK_KEY, elementHook).add(Attribute.FUNCTION_KEY));
+            Sentence bagElement;
+            if (type.equals("Map")) {
+                bagElement = Production(bagSort.name() + "Item", bagSort, Seq(Terminal(bagSort.name() + "Item"), Terminal("("), NonTerminal(childSorts.get(0)), Terminal(","), NonTerminal(sort), Terminal(")")), Att().add(Attribute.HOOK_KEY, elementHook).add(Attribute.FUNCTION_KEY));
+            } else {
+                bagElement = Production(bagSort.name() + "Item", bagSort, Seq(Terminal(bagSort.name() + "Item"), Terminal("("), NonTerminal(sort), Terminal(")")), Att().add(Attribute.HOOK_KEY, elementHook).add(Attribute.FUNCTION_KEY));
+            }
             Sentence bagUnit = Production("." + bagSort.name(), bagSort, Seq(Terminal("." + bagSort.name())), Att().add(Attribute.HOOK_KEY, unitHook).add(Attribute.FUNCTION_KEY));
             Sentence bag = Production("_" + bagSort + "_", bagSort, Seq(NonTerminal(bagSort), NonTerminal(bagSort)),
                     bagAtt);
