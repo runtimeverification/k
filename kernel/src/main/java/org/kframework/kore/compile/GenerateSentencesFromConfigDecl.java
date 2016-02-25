@@ -372,9 +372,19 @@ public class GenerateSentencesFromConfigDecl {
             Sentence bagSubsort = Production(bagSort, Seq(NonTerminal(sort)));
             Sentence bagElement;
             if (type.equals("Map")) {
-                bagElement = Production(bagSort.name() + "Item", bagSort, Seq(Terminal(bagSort.name() + "Item"), Terminal("("), NonTerminal(childSorts.get(0)), Terminal(","), NonTerminal(sort), Terminal(")")), Att().add(Attribute.HOOK_KEY, elementHook).add(Attribute.FUNCTION_KEY));
+                bagElement = Production(bagSort.name() + "Item", bagSort, Seq(
+                        Terminal(bagSort.name() + "Item"),
+                        Terminal("("),
+                        NonTerminal(childSorts.get(0)),
+                        Terminal(","),
+                        NonTerminal(sort),
+                        Terminal(")")), Att().add(Attribute.HOOK_KEY, elementHook).add(Attribute.FUNCTION_KEY));
             } else {
-                bagElement = Production(bagSort.name() + "Item", bagSort, Seq(Terminal(bagSort.name() + "Item"), Terminal("("), NonTerminal(sort), Terminal(")")), Att().add(Attribute.HOOK_KEY, elementHook).add(Attribute.FUNCTION_KEY));
+                bagElement = Production(bagSort.name() + "Item", bagSort, Seq(
+                        Terminal(bagSort.name() + "Item"),
+                        Terminal("("),
+                        NonTerminal(sort),
+                        Terminal(")")), Att().add(Attribute.HOOK_KEY, elementHook).add(Attribute.FUNCTION_KEY));
             }
             Sentence bagUnit = Production("." + bagSort.name(), bagSort, Seq(Terminal("." + bagSort.name())), Att().add(Attribute.HOOK_KEY, unitHook).add(Attribute.FUNCTION_KEY));
             Sentence bag = Production("_" + bagSort + "_", bagSort, Seq(NonTerminal(bagSort), NonTerminal(bagSort)),
