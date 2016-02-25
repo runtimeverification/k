@@ -366,7 +366,8 @@ public class GenerateSentencesFromConfigDecl {
             case "List":
                 break;
             default:
-                throw KEMException.compilerError("Unexpected type for multiplicity * cell: " + cellName + ". Should be one of: Set, Bag, List");
+                throw KEMException.compilerError("Unexpected type for multiplicity * cell: " + cellName
+                        + ". Should be one of: Set, Bag, List, Map");
             }
             SyntaxSort sortDecl = SyntaxSort(bagSort, Att().add("hook", type.toUpperCase() + '.' + type));
             Sentence bagSubsort = Production(bagSort, Seq(NonTerminal(sort)));
