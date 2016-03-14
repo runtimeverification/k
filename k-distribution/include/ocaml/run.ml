@@ -24,6 +24,8 @@ let context_switch (config: k) (thread_id: k) : k = match config with
   if (K.compare old_thread_id thread_id) = 0 then config else
   [Thread(global,thread_id,(KMap.find thread_id other_threads),[Map(sort,lbl,(KMap.remove thread_id (KMap.add old_thread_id old_thread other_threads)))])]
 
+type step = Step of k * step_function | NoStep of k
+
 let rec take_steps (module Def: Plugin.Definition) (step_function: k -> (k * step_function)) (active_threads: k list) (config: k) (depth: int) (n: int) (last_resort: bool) : k * int =
   if n = depth then (
     config,n
@@ -31,15 +33,15 @@ let rec take_steps (module Def: Plugin.Definition) (step_function: k -> (k * ste
     match active_threads with
     | thread :: other_active_threads ->
     let active_config = context_switch config thread in
-      match (try Some (step_function active_config) with Stuck _ -> None) with
-      | Some (([Thread(_,thread_id,_,[Map(_,_,other_threads)])] as config),(StepFunc step_function)) -> (
+      match (try let res,func = (step_function active_config) in Step(res,func) with Stuck c -> NoStep c) with
+      | Step (([Thread(_,thread_id,_,[Map(_,_,other_threads)])] as config),(StepFunc step_function)) -> (
         take_steps (module Def) step_function (thread_id :: other_active_threads) config depth (n+1) false
       )
-      | None -> (
+      | NoStep config -> (
         match active_config with [Thread(_,thread_id,_,[Map(_,_,other_threads)])] ->
         if other_active_threads = [] then (
           if last_resort || KMap.cardinal other_threads = 0 then (
-            active_config,n
+            config,n
           ) else (
             let (other_thread_ids,_) = List.split(KMap.bindings other_threads) in
             take_steps (module Def) Def.step (thread_id :: other_thread_ids) active_config depth n true

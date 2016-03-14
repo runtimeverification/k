@@ -12,8 +12,7 @@ import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.KRewrite;
 
-import java.util.List;
-import java.util.stream.Stream;
+import static org.kframework.kore.KORE.*;
 
 /**
  * This pass adds the implicit top and k cells to
@@ -45,6 +44,14 @@ public class AddTopCellToRules {
 
         if (term instanceof KApply && ((KApply) term).klabel().equals(root)) {
             return term;
+        } else if (term instanceof KRewrite) {
+            KRewrite rew = (KRewrite) term;
+            K left = addRootCell(rew.left());
+            if (left == rew.left()) {
+                return KRewrite(rew.left(), rew.right());
+            } else {
+                return IncompleteCellUtils.make(root, true, term, true);
+            }
         } else {
             return IncompleteCellUtils.make(root, true, term, true);
         }
