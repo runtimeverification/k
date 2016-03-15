@@ -4,9 +4,9 @@
 
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.kframework.k</groupId>
+    <groupId>com.runtimeverification.k</groupId>
     <artifactId>parent</artifactId>
-    <version>4.0-beta4-SNAPSHOT</version>
+    <version>1.0-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <artifactId>kore</artifactId>

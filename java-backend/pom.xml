@@ -4,9 +4,9 @@
 
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.kframework.k</groupId>
+    <groupId>com.runtimeverification.k</groupId>
     <artifactId>parent</artifactId>
-    <version>4.0-beta4-SNAPSHOT</version>
+    <version>1.0-SNAPSHOT</version>
   </parent>
   <artifactId>java-backend</artifactId>
   <packaging>jar</packaging>
@@ -21,12 +21,12 @@
     </dependency>
 
     <dependency>
-      <groupId>org.kframework.k</groupId>
+      <groupId>com.runtimeverification.k</groupId>
       <artifactId>kernel</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.kframework.k</groupId>
+      <groupId>com.runtimeverification.k</groupId>
       <artifactId>kernel</artifactId>
       <version>${project.version}</version>
       <type>test-jar</type>

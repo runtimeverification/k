@@ -4,9 +4,9 @@
 
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.kframework.k</groupId>
+    <groupId>com.runtimeverification.k</groupId>
     <artifactId>parent</artifactId>
-    <version>4.0-beta4-SNAPSHOT</version>
+    <version>1.0-SNAPSHOT</version>
   </parent>
   <artifactId>k-distribution</artifactId>
   <packaging>jar</packaging>
@@ -20,26 +20,32 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.kframework.k</groupId>
+      <groupId>com.runtimeverification.k</groupId>
       <artifactId>kernel</artifactId>
       <version>${project.version}</version>
     </dependency>
 	<dependency>
-      <groupId>org.kframework.k</groupId>
+      <groupId>com.runtimeverification.k</groupId>
       <artifactId>kernel</artifactId>
       <version>${project.version}</version>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.kframework.k</groupId>
+      <groupId>com.runtimeverification.k</groupId>
       <artifactId>java-backend</artifactId>
       <version>${project.version}</version>
       <scope>runtime</scope>
     </dependency>
     <dependency>
-      <groupId>org.kframework.k</groupId>
+      <groupId>com.runtimeverification.k</groupId>
       <artifactId>coq-backend</artifactId>
+      <version>${project.version}</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.runtimeverification.rv_match</groupId>
+      <artifactId>ocaml-backend</artifactId>
       <version>${project.version}</version>
       <scope>runtime</scope>
     </dependency>
@@ -102,6 +108,25 @@
             <goals>
               <goal>run</goal>
             </goals>
+          </execution>
+          <execution>
+            <id>install-k</id>
+            <phase>install</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target name="install-k">
+                <delete dir="/opt/rv-match/k"/>
+                <copy todir="/opt/rv-match/k">
+                   <fileset dir="${project.basedir}/../k/k-distribution/target/release/k"/>
+                </copy>
+		<!-- Set executable permissions -->
+                <exec executable="chmod" failonerror="true" dir="${project.basedir}/..">
+                  <arg line="-R +x /opt/rv-match/k/bin/ /opt/rv-match/k/lib/" />
+                </exec>
+              </target>
+            </configuration>
           </execution>
         </executions>
       </plugin>
