@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<!-- Copyright (c) 2014-2015 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2014-2016 K Team. All Rights Reserved. -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
@@ -56,7 +56,8 @@
             <phase>pre-integration-test</phase>
             <configuration>
               <target>
-                <exec executable="${project.build.directory}/release/k/bin/kserver${native.script.extension}" spawn="true">
+                <exec executable="${project.build.directory}/release/k/bin/spawn-kserver">
+                  <arg value="${project.build.directory}/kserver.log"/>
                 </exec>
                 <sleep seconds="5" />
               </target>
@@ -77,6 +78,8 @@
                   <arg value="--report" />
                   <arg value="--debug" />
                   <arg value="--warnings-to-errors" />
+                  <arg value="--timeout" />
+                  <arg value="400000" />
                 </exec>
               </target>
               <skip>${skipKTest}</skip>
