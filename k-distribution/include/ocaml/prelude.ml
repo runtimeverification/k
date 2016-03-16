@@ -9,12 +9,22 @@ type k = K.t
 exception Stuck of k
 exception Not_implemented
 
+let interned_bottom = [Bottom]
+
 module MemoKey = struct
   type t = k list
   let compare c1 c2 = compare_klist c1 c2
 end
 
 module Memo = Map.Make(MemoKey)
+
+module KIdentityHash = struct
+  type t = k
+  let equal = equal_k
+  let hash = Hashtbl.hash_param 1000 1000
+end
+
+module KIdentityHashtbl = Hashtbl.Make(KIdentityHash)
 
 module GuardElt = struct
   type t = Guard of int
@@ -44,7 +54,6 @@ let k_char_escape (buf: Buffer.t) (c: char) : unit = match c with
 | '\n' -> Buffer.add_string buf "\\n"
 | '\t' -> Buffer.add_string buf "\\t"
 | '\r' -> Buffer.add_string buf "\\r"
-| '\x0c' -> Buffer.add_string buf "\\f"
 | _ when let code = Char.code c in code >= 32 && code < 127 -> Buffer.add_char buf c
 | _ -> Buffer.add_string buf (Printf.sprintf "\\x%02x" (Char.code c))
 let k_string_escape str = 
@@ -56,7 +65,11 @@ let print_k_binary (c: k) : string =  let buf = Buffer.create 16 in
   let ksequence_code = "\x03" in
   let injectedklabel_code = "\x06" in
   let end_code = "\x07" in
+  let backreference_code = "\x08" in
+  let table_size = (1 lsl 18) in
   let intern = Hashtbl.create 16 in
+  let k_intern = KIdentityHashtbl.create table_size in
+  let terms_visited = ref 0 in
   let print_int (i: int) : unit =
     let one = (i lsr 24) land 0xff in
     let two = (i lsr 16) land 0xff in
@@ -79,25 +92,33 @@ let print_k_binary (c: k) : string =  let buf = Buffer.create 16 in
       assert (not (Hashtbl.mem intern s));
       Hashtbl.add intern s new_idx)
     else () in
+  let add_intern (c: k) : unit =
+    KIdentityHashtbl.replace k_intern c !terms_visited;
+    terms_visited := !terms_visited + 1;
+    if !terms_visited land (table_size - 1) = 0 then KIdentityHashtbl.clear k_intern else () in
   let rec print_klist(c: k list) : unit = match c with
   | [] -> ()
   | e::l  -> print_k e 0; print_klist l
   and print_k(c: k) (size: int) : unit = match c with
-  | [] -> if size <> 1 then (Buffer.add_string buf ksequence_code; print_int size) else ()
-  | e::l -> print_kitem(normalize e); print_k l (size + 1)
-  and print_kitem(c: normal_kitem) : unit = match c with
-  | KApply(klabel, klist) -> print_klist klist; Buffer.add_string buf kapply_code; print_string (print_klabel_string klabel); Buffer.add_char buf '\x00'; print_int (List.length klist)
-  | KItem (KToken(sort, s)) -> Buffer.add_string buf ktoken_code; print_string s; print_string (print_sort sort)
-  | KItem (InjectedKLabel(klabel)) -> Buffer.add_string buf injectedklabel_code; print_string (print_klabel_string klabel); Buffer.add_char buf '\x00'
-  | KItem (Bool(b)) -> print_kitem(KItem (KToken(SortBool, string_of_bool(b))))
-  | KItem (String(s)) -> print_kitem(KItem (KToken(SortString, "\"" ^ (k_string_escape s) ^ "\"")))
-  | KItem (Int(i)) -> print_kitem(KItem (KToken(SortInt, Z.to_string(i))))
-  | KItem (Float(f,_,_)) -> print_kitem(KItem (KToken(SortFloat, float_to_string(f))))
-  | KItem (Bottom) -> print_kitem(KApply(Lbl'0023'Bottom, []))
-  | KItem (List(_,lbl,l)) -> print_kitem(normalize (k_of_list lbl l))
-  | KItem (Set(_,lbl,s)) -> print_kitem(normalize (k_of_set lbl s))
-  | KItem (Map(_,lbl,m)) -> print_kitem(normalize (k_of_map lbl m))
-  in Buffer.add_string buf "\x7fKAST\x04\x00\x00"; print_k c 0; Buffer.add_string buf end_code; Buffer.contents buf
+  | [] -> if size <> 1 then (Buffer.add_string buf ksequence_code; add_intern c; print_int size) else ()
+  | e::l -> print_kitem(normalize e, [e]); print_k l (size + 1)
+  and print_kitem = function (c, as_k) ->
+  if KIdentityHashtbl.mem k_intern as_k then
+    (Buffer.add_string buf backreference_code; print_int (!terms_visited - (KIdentityHashtbl.find k_intern as_k)); add_intern as_k)
+  else match c with
+  | KApply(klabel, klist) -> print_klist klist; Buffer.add_string buf kapply_code; add_intern as_k; print_string (print_klabel_string klabel); Buffer.add_char buf '\x00'; print_int (List.length klist)
+  | KItem (KToken(sort, s)) -> Buffer.add_string buf ktoken_code; add_intern as_k; print_string s; print_string (print_sort sort)
+  | KItem (InjectedKLabel(klabel)) -> Buffer.add_string buf injectedklabel_code; add_intern as_k; print_string (print_klabel_string klabel); Buffer.add_char buf '\x00'
+  | KItem (Bool(b)) -> print_kitem(KItem (KToken(SortBool, string_of_bool(b))), [Bool b])
+  | KItem (String(s)) -> print_kitem(KItem (KToken(SortString, "\"" ^ (k_string_escape s) ^ "\"")), [String s])
+  | KItem (Int(i)) -> print_kitem(KItem (KToken(SortInt, Z.to_string(i))), [Int i])
+  | KItem (Float(f,e,p)) -> print_kitem(KItem (KToken(SortFloat, float_to_string(f))), [Float(f,e,p)])
+  | KItem (Bottom) -> print_kitem(KApply(Lbl'0023'Bottom, []), [Bottom])
+  | KItem (List(sort,lbl,l)) -> print_kitem(normalize (k_of_list lbl l), [List(sort,lbl,l)])
+  | KItem (Set(sort,lbl,s)) -> print_kitem(normalize (k_of_set lbl s), [Set(sort,lbl,s)])
+  | KItem (Map(sort,lbl,m)) -> print_kitem(normalize (k_of_map lbl m), [Map(sort,lbl,m)])
+  in Buffer.add_string buf "\x7fKAST\x04\x00\x01"; print_k c 0; Buffer.add_string buf end_code; 
+  Buffer.contents buf
 
 let print_k (c: k) : string = let buf = Buffer.create 16 in
   let rec print_klist(c: k list) : unit = match c with
@@ -204,14 +225,11 @@ struct
       () -> [Map (sort,(collection_for lbl),KMap.empty)]
   let hook_concat c lbl sort config ff = match c with 
       ([Map (s,l1,k1)]), ([Map (_,l2,k2)]) 
-        when (l1 = l2) -> [Map (s,l1,(KMap.merge (fun k a b -> match a, b with 
-                          None, None -> None 
-                        | None, Some v 
-                        | Some v, None -> Some v 
-                        | Some v1, Some v2 when v1 = v2 -> Some v1) k1 k2))]
+        when (l1 = l2) -> [Map (s,l1,(KMap.union (fun k a b -> if a = b then Some a else raise Not_implemented) k1 k2))]
     | _ -> raise Not_implemented
   let hook_lookup c lbl sort config ff = match c with 
-      [Map (_,_,k1)], k2 -> (try KMap.find k2 k1 with Not_found -> [Bottom])
+      [Map (_,_,k1)], k2 -> (try KMap.find k2 k1 with Not_found -> interned_bottom)
+    | [Bottom], k2 -> interned_bottom
     | _ -> raise Not_implemented
   let hook_update c lbl sort config ff = match c with 
       [Map (s,l,k1)], k, v -> [Map (s,l,(KMap.add k v k1))]
@@ -228,6 +246,7 @@ struct
     | _ -> raise Not_implemented
   let hook_in_keys c lbl sort config ff = match c with
       (k1, [Map (_,_,k2)]) -> [Bool (KMap.mem k1 k2)]
+    | (k1, [Bottom]) -> [Bool false] (* case is useful for double map lookup *)
     | _ -> raise Not_implemented
   let hook_values c lbl sort config ff = match c with 
       [Map (_,_,k1)] -> [List (SortList, Lbl_List_,(match List.split (KMap.bindings k1) with (_,vs) -> vs))]
@@ -244,11 +263,8 @@ struct
     | _ -> raise Not_implemented
   let hook_updateAll c lbl sort config ff = match c with 
       ([Map (s,l1,k1)]), ([Map (_,l2,k2)]) 
-        when (l1 = l2) -> [Map (s,l1,(KMap.merge (fun k a b -> match a, b with 
-                          None, None -> None 
-                        | None, Some v 
-                        | Some v, None 
-                        | Some _, Some v -> Some v) k1 k2))]
+        when (l1 = l2) -> [Map (s,l1,(KMap.union (fun k a b -> match a, b with 
+                          _, v -> Some v) k1 k2))]
     | _ -> raise Not_implemented
   let hook_removeAll c lbl sort config ff = match c with
       [Map (s,l,k1)], [Set (_,_,k2)] -> [Map (s,l,KMap.filter (fun k v -> not (KSet.mem k k2)) k1)]
@@ -299,12 +315,12 @@ struct
   let hook_get c lbl sort config ff = match c with
       [List (_,_,l1)], [Int i] -> 
         let i = Z.to_int i in (try if i >= 0 then List.nth l1 i else List.nth l1 ((List.length l1) + i) 
-                               with Failure _ -> [Bottom] | Invalid_argument _ -> [Bottom])
+                               with Failure _ -> interned_bottom | Invalid_argument _ -> interned_bottom)
     | _ -> raise Not_implemented
   let hook_range c lbl sort config ff = match c with
       [List (s,lbl,l1)], [Int i1], [Int i2] -> 
         (try [List (s,lbl,(list_range (l1, (Z.to_int i1), (List.length(l1) - (Z.to_int i2) - (Z.to_int i1)))))] 
-         with Failure _ -> [Bottom])
+         with Failure _ -> interned_bottom)
     | _ -> raise Not_implemented
   let hook_size c lbl sort config ff = match c with
       [List (_,_,l)] -> [Int (Z.of_int (List.length l))]
@@ -324,8 +340,8 @@ struct
     | [Set (s,_,_)] -> [String (print_sort s)]
     | _ -> raise Not_implemented
   let hook_getKLabel c lbl sort config ff = match c with
-      [k] -> (match (normalize k) with KApply (lbl, _) -> [InjectedKLabel lbl] | _ -> [Bottom])
-    | _ -> [Bottom]
+      [k] -> (match (normalize k) with KApply (lbl, _) -> [InjectedKLabel lbl] | _ -> interned_bottom)
+    | _ -> interned_bottom
   let hook_configuration c lbl sort config ff = match c with
       () -> config
   let hook_fresh c lbl sort config ff = match c with
@@ -479,6 +495,9 @@ struct
   let hook_float2string c lbl sort config ff = match c with
       [Float (f,_,_)] -> [String (Gmp.FR.to_string_base_digits Gmp.GMP_RNDN 10 0 f)]
     | _ -> raise Not_implemented
+  let hook_uuid c lbl sort config ff = match c with
+      () -> let uuid = Uuidm.create `V4 in
+      [String (Uuidm.to_string uuid)]
   let hook_floatFormat c lbl sort config ff = raise Not_implemented
   let hook_string2float c lbl sort config ff = raise Not_implemented
   let hook_replace c lbl sort config ff = raise Not_implemented

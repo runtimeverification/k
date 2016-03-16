@@ -1,20 +1,101 @@
---- a/bytecomp/matching.ml  2015-10-19 10:50:12.000000000 -0500
-+++ b/bytecomp/matching.ml  2015-10-19 14:50:56.560932567 -0500
-@@ -79,7 +79,7 @@
+diff --git a/bytecomp/matching.ml b/bytecomp/matching.ml
+index 40169c4..5b2caa5 100644
+--- a/bytecomp/matching.ml
++++ b/bytecomp/matching.ml
+@@ -79,7 +79,7 @@ let rec small_enough n = function
        else small_enough (n-1) rem
-
+ 
  let ctx_lshift ctx =
 -  if small_enough 31 ctx then
-+  if small_enough (*3*)1 ctx then
++  if small_enough 1 ctx then
      List.map lshift ctx
    else (* Context pruning *) begin
      get_mins le_ctx (List.map lforget ctx)
-@@ -2169,7 +2169,7 @@
+@@ -2189,7 +2189,7 @@ let mk_failaction_pos partial seen ctx defs  =
        | _  -> scan_def ((List.map fst now,idef)::env) later rem in
-
+ 
    let fail_pats = complete_pats_constrs seen in
 -  if List.length fail_pats < 32 then begin
-+  if List.length fail_pats < (*3*)2 then begin
++  if List.length fail_pats < 2 then begin
      let fail,jmps =
        scan_def
-         []  
+         []
+diff --git a/typing/parmatch.ml b/typing/parmatch.ml
+index 6cffd5a..7f5e0fd 100644
+--- a/typing/parmatch.ml
++++ b/typing/parmatch.ml
+@@ -89,7 +89,7 @@ let rec compat p q =
+   | Tpat_tuple ps, Tpat_tuple qs -> compats ps qs
+   | Tpat_lazy p, Tpat_lazy q -> compat p q
+   | Tpat_construct (_, c1,ps1), Tpat_construct (_, c2,ps2) ->
+-      c1.cstr_tag = c2.cstr_tag && compats ps1 ps2
++      Types.equal_tag c1.cstr_tag c2.cstr_tag && compats ps1 ps2
+   | Tpat_variant(l1,Some p1, r1), Tpat_variant(l2,Some p2,_) ->
+       l1=l2 && compat p1 p2
+   | Tpat_variant (l1,None,r1), Tpat_variant(l2,None,_) ->
+@@ -270,7 +270,7 @@ let pretty_matrix (pss : matrix) =
+ let simple_match p1 p2 =
+   match p1.pat_desc, p2.pat_desc with
+   | Tpat_construct(_, c1, _), Tpat_construct(_, c2, _) ->
+-      c1.cstr_tag = c2.cstr_tag
++      Types.equal_tag c1.cstr_tag c2.cstr_tag
+   | Tpat_variant(l1, _, _), Tpat_variant(l2, _, _) ->
+       l1 = l2
+   | Tpat_constant(c1), Tpat_constant(c2) -> const_compare c1 c2 = 0
+@@ -760,7 +760,7 @@ let complete_constrs p all_tags =
+   let not_tags = complete_tags c.cstr_consts c.cstr_nonconsts all_tags in
+   let constrs = get_variant_constructors p.pat_env c.cstr_res in
+   let others =
+-    List.filter (fun cnstr -> List.mem cnstr.cstr_tag not_tags) constrs in
++    List.filter (fun cnstr -> List.exists (fun tag -> Types.equal_tag tag cnstr.cstr_tag) not_tags) constrs in
+   let const, nonconst =
+     List.partition (fun cnstr -> cnstr.cstr_arity = 0) others in
+   const @ nonconst
+@@ -1494,7 +1494,7 @@ let rec le_pat p q =
+   | _, Tpat_alias(q,_,_) -> le_pat p q
+   | Tpat_constant(c1), Tpat_constant(c2) -> const_compare c1 c2 = 0
+   | Tpat_construct(_,c1,ps), Tpat_construct(_,c2,qs) ->
+-      c1.cstr_tag = c2.cstr_tag && le_pats ps qs
++      Types.equal_tag c1.cstr_tag c2.cstr_tag && le_pats ps qs
+   | Tpat_variant(l1,Some p1,_), Tpat_variant(l2,Some p2,_) ->
+       (l1 = l2 && le_pat p1 p2)
+   | Tpat_variant(l1,None,r1), Tpat_variant(l2,None,_) ->
+@@ -1544,7 +1544,7 @@ let rec lub p q = match p.pat_desc,q.pat_desc with
+     let r = lub p q in
+     make_pat (Tpat_lazy r) p.pat_type p.pat_env
+ | Tpat_construct (lid, c1,ps1), Tpat_construct (_,c2,ps2)
+-      when  c1.cstr_tag = c2.cstr_tag  ->
++      when  Types.equal_tag c1.cstr_tag c2.cstr_tag  ->
+         let rs = lubs ps1 ps2 in
+         make_pat (Tpat_construct (lid, c1,rs))
+           p.pat_type p.pat_env
+diff --git a/typing/types.ml b/typing/types.ml
+index f30d6ca..1922f60 100644
+--- a/typing/types.ml
++++ b/typing/types.ml
+@@ -300,6 +300,12 @@ and constructor_tag =
+   | Cstr_extension of Path.t * bool     (* Extension constructor
+                                            true if a constant false if a block*)
+ 
++let equal_tag t1 t2 = match (t1, t2) with
++  | Cstr_constant i1, Cstr_constant i2 -> i2 = i1
++  | Cstr_block i1, Cstr_block i2 -> i2 = i1
++  | Cstr_extension (path1, b1), Cstr_extension (path2, b2) -> path1 = path2 && b1 = b2
++  | (Cstr_constant _|Cstr_block _|Cstr_extension _), _ -> false
++
+ type label_description =
+   { lbl_name: string;                   (* Short name *)
+     lbl_res: type_expr;                 (* Type of the result *)
+diff --git a/typing/types.mli b/typing/types.mli
+index f83e60a..0979050 100644
+--- a/typing/types.mli
++++ b/typing/types.mli
+@@ -447,6 +447,8 @@ and constructor_tag =
+   | Cstr_extension of Path.t * bool     (* Extension constructor
+                                            true if a constant false if a block*)
+ 
++val equal_tag :  constructor_tag -> constructor_tag -> bool
++
+ type label_description =
+   { lbl_name: string;                   (* Short name *)
+     lbl_res: type_expr;                 (* Type of the result *)

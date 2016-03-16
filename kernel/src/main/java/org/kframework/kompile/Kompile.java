@@ -29,6 +29,7 @@ import org.kframework.kore.compile.ResolveStrict;
 import org.kframework.kore.compile.SortInfo;
 import org.kframework.kore.compile.checks.CheckConfigurationCells;
 import org.kframework.kore.compile.checks.CheckRHSVariables;
+import org.kframework.kore.compile.checks.CheckRewrite;
 import org.kframework.kore.compile.checks.CheckSortTopUniqueness;
 import org.kframework.kore.compile.checks.CheckStreams;
 import org.kframework.main.GlobalOptions;
@@ -41,7 +42,6 @@ import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -50,7 +50,7 @@ import java.util.stream.Collectors;
 
 import static org.kframework.Collections.*;
 import static org.kframework.definition.Constructors.*;
-import static scala.compat.java8.JFunction.func;
+import static scala.compat.java8.JFunction.*;
 
 /**
  * The new compilation pipeline. Everything is just wired together and will need clean-up once we deside on design.
@@ -174,6 +174,8 @@ public class Kompile {
         stream(parsedDef.modules()).forEach(m -> stream(m.localSentences()).forEach(new CheckSortTopUniqueness(errors, m)::check));
 
         stream(parsedDef.modules()).forEach(m -> stream(m.localSentences()).forEach(new CheckStreams(errors, m)::check));
+
+        stream(parsedDef.modules()).forEach(m -> stream(m.localSentences()).forEach(new CheckRewrite(errors, m)::check));
 
         if (!errors.isEmpty()) {
             kem.addAllKException(errors.stream().map(e -> e.exception).collect(Collectors.toList()));

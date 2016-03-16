@@ -6,7 +6,7 @@ import java.util.function.BiFunction
 
 import org.kframework.attributes.{Source, Location}
 import org.kframework.definition
-import org.kframework.kore.K
+import org.kframework.kore.{AttCompare, K}
 import org.kframework.utils.errorsystem.KEMException
 
 object ModuleTransformer {
@@ -28,6 +28,7 @@ object ModuleTransformer {
             throw e
         }
       }
+      //TODO(compare attributes)
       if (newSentences != m.localSentences)
         Module(m.name, m.imports, newSentences, m.att)
       else

@@ -171,7 +171,7 @@ module LIST
   syntax List ::= ".List"                 [function, hook(LIST.unit), smtlib(smt_seq_nil), latex(\dotCt{List})]
                 //| "."
   /*@ Construct a singleton List (a list with only  one element) */
-  syntax List ::= ListItem(K)             [smtlib(smt_seq_elem)]
+  syntax List ::= ListItem(K)             [function, hook(LIST.element), smtlib(smt_seq_elem)]
 
   /*@ Get an element form the List by index. Positive indices mean from the
    beginning (0 is the first element), and negative indices mean from the end
@@ -447,6 +447,8 @@ module STRING
 
   syntax String ::= categoryChar(String)       [function, hook(STRING.category)]
                   | directionalityChar(String) [function, hook(STRING.directionality)]
+
+  syntax String ::= "newUUID" [function, hook(STRING.uuid), impure]
 
   rule S1:String <=String S2:String => notBool (S2 <String S1)
   rule S1:String >String S2:String => S2 <String S1

@@ -3,15 +3,20 @@ package org.kframework.backend.java.symbolic;
 
 import com.google.inject.Inject;
 import org.kframework.AddConfigurationRecoveryFlags;
+import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.backend.java.kore.compile.ExpandMacrosDefinitionTransformer;
 import org.kframework.compile.AddBottomSortForListsWithIdenticalLabels;
 import org.kframework.compile.NormalizeKSeq;
 import org.kframework.compile.ConfigurationInfoFromModule;
 import org.kframework.definition.Constructors;
+import org.kframework.definition.Constructors$;
 import org.kframework.definition.Definition;
 import org.kframework.definition.DefinitionTransformer;
 import org.kframework.definition.Module;
+import org.kframework.definition.ModuleComment;
+import org.kframework.definition.ModuleTransformer;
+import org.kframework.definition.Production;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kompile.CompiledDefinition;
@@ -42,9 +47,10 @@ import static scala.compat.java8.JFunction.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 import java.util.function.Function;
 
-import static org.kframework.definition.Constructors.Att;
+import static org.kframework.definition.Constructors.*;
 
 public class JavaBackend implements Backend {
 
@@ -65,6 +71,22 @@ public class JavaBackend implements Backend {
         this.kompileOptions = kompileOptions;
     }
 
+    private Module transformListItemProduction(Module m) {
+        //GIANT UGLY HACK because Andrei implemented lists really weirdly.
+        if (!m.name().equals("LIST")) {
+            return m;
+        }
+        return Module(m.name(), m.imports(), org.kframework.Collections.stream(m.localSentences()).flatMap(s -> {
+            if (s instanceof Production) {
+                Production p = (Production) s;
+                if (p.att().<String>getOptional("hook").orElse("").equals("LIST.element")) {
+                    return Stream.of(new ModuleComment("dummy", Att()), Production(p.sort(), p.items(), p.att().remove("hook").remove("function")));
+                }
+            }
+            return Stream.of(s);
+        }).collect(Collections.toSet()), m.att());
+    }
+
     /**
      * @param the generic {@link Kompile}
      * @return the special steps for the Java backend
@@ -80,7 +102,8 @@ public class JavaBackend implements Backend {
                     .andThen(convertDataStructureToLookup::apply);
         }
 
-        return d -> (func((Definition dd) -> kompile.defaultSteps().apply(dd)))
+        return d -> DefinitionTransformer.from(m -> transformListItemProduction(m), "fix weirdness with ListItem")
+                .andThen(func((Definition dd) -> kompile.defaultSteps().apply(dd)))
                 .andThen(DefinitionTransformer.fromRuleBodyTranformer(RewriteToTop::bubbleRewriteToTopInsideCells, "bubble out rewrites below cells"))
                 .andThen(DefinitionTransformer.from(new NormalizeAssoc(KORE.c()), "convert assoc/comm to assoc"))
                 .andThen(DefinitionTransformer.from(AddBottomSortForListsWithIdenticalLabels.singleton(), "AddBottomSortForListsWithIdenticalLabels"))

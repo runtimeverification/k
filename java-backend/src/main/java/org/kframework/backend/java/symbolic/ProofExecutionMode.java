@@ -2,7 +2,6 @@
 package org.kframework.backend.java.symbolic;
 
 import com.google.inject.Inject;
-import org.kframework.rewriter.Rewriter;
 import org.kframework.RewriterResult;
 import org.kframework.compile.ConfigurationInfo;
 import org.kframework.compile.ConfigurationInfoFromModule;
@@ -21,9 +20,11 @@ import org.kframework.kore.KSequence;
 import org.kframework.kore.KToken;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.TransformK;
+import org.kframework.krun.KRun;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.modes.ExecutionMode;
 import org.kframework.main.GlobalOptions;
+import org.kframework.rewriter.Rewriter;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
@@ -60,11 +61,11 @@ public class ProofExecutionMode implements ExecutionMode<List<K>> {
     }
 
     @Override
-    public List<K> execute(K k, Rewriter rewriter, CompiledDefinition compiledDefinition) {
+    public List<K> execute(KRun.InitialConfiguration k, Rewriter rewriter, CompiledDefinition compiledDefinition) {
         String proofFile = options.experimental.prove;
         Kompile kompile = new Kompile(compiledDefinition.kompileOptions, globalOptions, files, kem, sw, false);
         Module mod = kompile.parseModule(compiledDefinition, files.resolveWorkingDirectory(proofFile).getAbsoluteFile());
-        RewriterResult executionResult = rewriter.execute(k, Optional.<Integer>empty());
+        RewriterResult executionResult = rewriter.execute(k.theConfig, Optional.<Integer>empty());
 
         ConfigurationInfo configurationInfo = new ConfigurationInfoFromModule(compiledDefinition.executionModule());
         AbstractKTransformer<Map<String, K>> cellPlaceholderSubstitutionCollector = new AbstractKTransformer<Map<String, K>>() {

@@ -14,7 +14,6 @@ import org.kframework.kore.KToken;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
 import org.kframework.kore.VisitK;
-import org.kframework.kore.compile.KTokenVariablesToTrueVariables;
 import org.kframework.krun.modes.ExecutionMode;
 import org.kframework.main.Main;
 import org.kframework.parser.ProductionReference;
@@ -67,6 +66,14 @@ public class KRun {
         this.ttyStdin = ttyStdin;
     }
 
+    public static class InitialConfiguration {
+        public K theConfig;
+
+        public InitialConfiguration(K theConfig) {
+            this.theConfig = theConfig;
+        }
+    }
+
     public int run(CompiledDefinition compiledDef, KRunOptions options, Function<Module, Rewriter> rewriterGenerator, ExecutionMode executionMode) {
         String pgmFileName = options.configurationCreation.pgm();
         K program;
@@ -77,13 +84,15 @@ public class KRun {
             program = parseConfigVars(options, compiledDef);
         }
 
-        program = new KTokenVariablesToTrueVariables()
-                .apply(compiledDef.kompiledDefinition.getModule(compiledDef.mainSyntaxModuleName()).get(), program);
+        // store initial configuration in single mutable reference so that we can make sure it can be garbage collected
+        // down the stack.
+        InitialConfiguration config = new InitialConfiguration(program);
+        program = null;
 
 
         Rewriter rewriter = rewriterGenerator.apply(compiledDef.executionModule());
 
-        Object result = executionMode.execute(program, rewriter, compiledDef);
+        Object result = executionMode.execute(config, rewriter, compiledDef);
 
         if (result instanceof K) {
             prettyPrint(compiledDef, options.output, s -> outputFile(s, options), (K) result);
@@ -305,7 +314,10 @@ public class KRun {
             output.put(KToken("$STDIN", Sorts.KConfigVar()), KToken("\"" + stdin + "\"", Sorts.String()));
             output.put(KToken("$IO", Sorts.KConfigVar()), KToken("\"off\"", Sorts.String()));
         }
-        checkConfigVars(output.keySet(), compiledDef);
+        if (options.global.debug) {
+            // on the critical path, so don't perform this check because it's slow unless we're debugging.
+            checkConfigVars(output.keySet(), compiledDef);
+        }
         return plugConfigVars(compiledDef, output);
     }
 
