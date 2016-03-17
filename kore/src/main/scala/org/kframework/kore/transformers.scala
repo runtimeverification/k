@@ -32,7 +32,7 @@ trait KTransformer[T] extends ((K) => T) with java.util.function.Function[K, T] 
 /**
   * Folds a K term into a T. T must be a monoid with the identity defined by unit and the operation by merge.
   */
-trait FoldK[T] extends KTransformer[T] {
+abstract class FoldK[T] extends KTransformer[T] {
 
   def apply(k: KApply): T = merge(
     k.klabel match { case v: KVariable => apply(v); case _ => unit },

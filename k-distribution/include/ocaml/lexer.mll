@@ -77,14 +77,14 @@ let parse_k_binary_string (s: char Stream.t) (interns: string dynarray) : string
   else
     Dynarray.get interns ((Dynarray.length interns) - idx_in_interns)
 
-let rec parse_k_binary_term (s: char Stream.t) (stack: k Stack.t) (interns: string dynarray) (k_interns: k dynarray) : k =
+let rec parse_k_binary_term (module Def: Plugin.Definition) (s: char Stream.t) (stack: k Stack.t) (interns: string dynarray) (k_interns: k dynarray) : k =
   match Char.code (Stream.next s) with
 | 1 -> (* ktoken *)
   let str = parse_k_binary_string s interns in
   let sort = parse_k_binary_string s interns in
   Stack.push [ktoken(parse_sort sort)(str)] stack;
   Dynarray.add k_interns (Stack.top stack);
-  parse_k_binary_term s stack interns k_interns
+  parse_k_binary_term (module Def) s stack interns k_interns
 | 2 -> (* kapply *)
   let lbl = parse_k_binary_string s interns in
   ignore(Stream.next s);
@@ -92,13 +92,13 @@ let rec parse_k_binary_term (s: char Stream.t) (stack: k Stack.t) (interns: stri
   let items = parse_k_binary_stack stack arity [] in
   Stack.push (Def.eval (KApply((parse_klabel lbl), items)) []) stack;
   Dynarray.add k_interns (Stack.top stack);
-  parse_k_binary_term s stack interns k_interns
+  parse_k_binary_term (module Def) s stack interns k_interns
 | 3 -> (* ksequence *)
   let arity = parse_k_binary_int s in
   let items = parse_k_binary_stack stack arity [] in
   Stack.push (List.flatten items) stack;
   Dynarray.add k_interns (Stack.top stack);
-  parse_k_binary_term s stack interns k_interns
+  parse_k_binary_term (module Def) s stack interns k_interns
 | 4 -> (* kvariable *)
   failwith "Unsupported: Variables in subject"
 | 5 -> (* krewrite *)
@@ -108,14 +108,14 @@ let rec parse_k_binary_term (s: char Stream.t) (stack: k Stack.t) (interns: stri
   ignore(Stream.next s);
   Stack.push [InjectedKLabel (parse_klabel lbl)] stack;
   Dynarray.add k_interns (Stack.top stack);
-  parse_k_binary_term s stack interns k_interns
+  parse_k_binary_term (module Def) s stack interns k_interns
 | 7 -> (* end *)
   Stack.pop stack
 | 8 -> (* back reference *)
   let idx = parse_k_binary_int s in
   Stack.push (Dynarray.get k_interns ((Dynarray.length k_interns) - idx)) stack;
   Dynarray.add k_interns (Stack.top stack);
-  parse_k_binary_term s stack interns k_interns
+  parse_k_binary_term (module Def) s stack interns k_interns
 | _ -> failwith "Unexpected term code in binary KAST"
  
 let parse_k_binary (s: char Stream.t) : k = 
@@ -123,7 +123,7 @@ let parse_k_binary (s: char Stream.t) : k =
   for i = 1 to 5 do Stream.junk s done;
   if Stream.npeek 3 s <> ['\x04'; '\x00'; '\x01'] && Stream.npeek 3 s <> ['\x04'; '\x00'; '\x00'] then failwith "Unsupported KAST version" else
   for i = 1 to 3 do Stream.junk s done;
-  parse_k_binary_term s (Stack.create ()) (Dynarray.empty "") (Dynarray.empty [Bottom])
+  parse_k_binary_term (Plugin.get ()) s (Stack.create ()) (Dynarray.empty "") (Dynarray.empty [Bottom])
 
 let parse_k_binary_string (s: string) : k =
   parse_k_binary (Stream.of_string s)

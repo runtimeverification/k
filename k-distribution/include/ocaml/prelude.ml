@@ -6,6 +6,9 @@ module KSet = Set.Make(K)
 open Constants.K
 type k = K.t
 
+(* this is needed so that statically linked binary will contain this module that is needed by dynamically linked realdef *)
+let _ = Gc.stat
+
 exception Stuck of k
 exception Not_implemented
 
@@ -23,6 +26,8 @@ module KIdentityHash = struct
   let equal = equal_k
   let hash = Hashtbl.hash_param 1000 1000
 end
+
+type step_function = StepFunc of (k -> (k * step_function))
 
 module KIdentityHashtbl = Hashtbl.Make(KIdentityHash)
 
@@ -343,7 +348,7 @@ struct
       [k] -> (match (normalize k) with KApply (lbl, _) -> [InjectedKLabel lbl] | _ -> interned_bottom)
     | _ -> interned_bottom
   let hook_configuration c lbl sort config ff = match c with
-      () -> config
+      () -> match config with [Thread(global, _, _, _)] -> global
   let hook_fresh c lbl sort config ff = match c with
       [String sort] -> let res = ff sort config !freshCounter in freshCounter := Z.add !freshCounter Z.one; res
     | _ -> raise Not_implemented
