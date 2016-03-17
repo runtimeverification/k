@@ -118,7 +118,7 @@
               <target name="install-k">
                 <delete dir="/opt/rv-match/k"/>
                 <copy todir="/opt/rv-match/k">
-                   <fileset dir="${project.basedir}/../k/k-distribution/target/release/k"/>
+                   <fileset dir="${project.build.directory}/release/k"/>
                 </copy>
 		<!-- Set executable permissions -->
                 <exec executable="chmod" failonerror="true" dir="${project.basedir}/..">
