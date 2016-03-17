@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-"$(dirname "$0")/kserver" &> "$1" &
+"$(dirname "$0")/kserver" &>> "$1" &
