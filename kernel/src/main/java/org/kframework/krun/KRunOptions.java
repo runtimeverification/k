@@ -277,13 +277,9 @@ public final class KRunOptions {
         @Parameter(names="--coverage-file", description="Record a trace of locations of all rules and terms applied.")
         public File coverage = null;
 
-        @Parameter(names="--native-libraries", description="Native libraries to link the rewrite engine against. Useful in defining rewriter plugins.",
+        @Parameter(names="--native-libraries", description="Flags to pass to linker. Useful in defining rewriter plugins.",
                 listConverter=StringListConverter.class)
         public List<String> nativeLibraries = Collections.emptyList();
-
-        @Parameter(names="--native-library-path", description="Directories to search for native libraries in for linking. Useful in defining rewriter plugins.",
-                listConverter=StringListConverter.class)
-        public List<String> nativeLibraryPath = Collections.emptyList();
 
         @Parameter(names="--profile", description="Run krun multiple times to gather better performance metrics.")
         public int profile = 1;
