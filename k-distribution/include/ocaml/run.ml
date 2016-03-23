@@ -18,6 +18,7 @@ let plug_config (config: k) : k =
   match config with [Thread(global,thread_id,thread,[Map(sort,lbl,threads)])] ->
   let thread_set = [Map(sort,lbl,(KMap.remove [Bottom] (KMap.add thread_id thread threads)))] in
   Def.set_thread_set global thread_set
+  | _ -> config
 
 let context_switch (config: k) (thread_id: k) : k = match config with
   [Thread(global,old_thread_id,old_thread,[Map(sort,lbl,other_threads)])] ->
