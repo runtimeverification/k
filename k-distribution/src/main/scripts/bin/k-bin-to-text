@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+if [[ `uname` == *MINGW* || `uname` == *MSYS* || `uname` == *CYGWIN* ]]; then
+  "$(dirname "$0")/k-bin-to-text.bat" "$@"
+else
+  source "$(dirname "$0")/../lib/setenv"
+  ulimit -s `ulimit -H -s`
+  eval $JAVA org.kframework.main.BinaryToText '"$@"'
+fi
