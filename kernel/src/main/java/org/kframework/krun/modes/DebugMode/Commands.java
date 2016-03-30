@@ -9,6 +9,7 @@ import org.kframework.kompile.CompiledDefinition;
 import org.kframework.krun.KRun;
 import org.kframework.utils.errorsystem.KEMException;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -39,13 +40,12 @@ public class Commands {
             DebuggerState steppedState = session.step(activeStateId, stepCount);
             int effectiveStepCount = steppedState.getStepNum() - prevState.getStepNum();
             if (effectiveStepCount < stepCount) {
-                utils.print("Attempted " + stepCount + " step(s). " + "Took " + effectiveStepCount + " steps(s).",
-                        s -> System.out.println(s));
-                utils.print("Final State Reached", s -> System.out.println(s));
+                utils.print("Attempted " + stepCount + " step(s). " + "Took " + effectiveStepCount + " steps(s).");
+                utils.print("Final State Reached");
                 utils.displayWatches(steppedState.getWatchList(), compiledDefinition);
                 return;
             }
-            utils.print(stepCount + " Step(s) Taken.", s -> System.out.println(s));
+            utils.print(stepCount + " Step(s) Taken.");
             utils.displayWatches(steppedState.getWatchList(), compiledDefinition);
         }
     }
@@ -81,7 +81,7 @@ public class Commands {
             CommandUtils utils = new CommandUtils(isSource);
             DebuggerState requestedState = session.getActiveState();
             if (requestedState != null) {
-                prettyPrint(compiledDefinition, OutputModes.PRETTY, s -> utils.print(s, y -> System.out.println(y)), requestedState.getCurrentK());
+                prettyPrint(compiledDefinition, OutputModes.PRETTY, s -> utils.print(s), requestedState.getCurrentK());
             } else {
                 throw KEMException.debuggerError("\"Requested State/Configuration Unreachable\",");
             }
@@ -108,7 +108,7 @@ public class Commands {
             if (backSteppedState == null) {
                 throw KEMException.debuggerError("\"Already at Start State, Cannot take steps.\",");
             }
-            utils.print("Took -" + backStepCount + " step(s)", s -> System.out.println(s));
+            utils.print("Took -" + backStepCount + " step(s)");
             utils.displayWatches(backSteppedState.getWatchList(), compiledDefinition);
         }
     }
@@ -127,7 +127,7 @@ public class Commands {
                 throw KEMException.debuggerError("Requested State not Present in List of states");
             }
             CommandUtils utils = new CommandUtils(isSource);
-            utils.print("Selected State " + stateNum, s -> System.out.println(s));
+            utils.print("Selected State " + stateNum);
         }
     }
 
@@ -150,17 +150,16 @@ public class Commands {
             if (nextState == null) {
                 throw KEMException.debuggerError("State Number specified does not exist");
             } else if (!configurationNum.isPresent()) {
-                utils.print("Selected State " + requestedState, s -> System.out.println(s));
+                utils.print("Selected State " + requestedState);
             } else {
                 int requestedConfig = configurationNum.get();
                 DebuggerState finalState = session.jumpTo(requestedState, requestedConfig);
                 if (finalState == null) {
                     throw KEMException.debuggerError("Requested Step Number couldn't be selected.");
                 } else if (!stateNum.isPresent()) {
-                    utils.print("Jumped to Step Number " + requestedConfig, s -> System.out.println(s));
+                    utils.print("Jumped to Step Number " + requestedConfig);
                 } else {
-                    utils.print("Jumped to State Number " + requestedState + " and Step Number " + requestedConfig,
-                            x -> System.out.println(x));
+                    utils.print("Jumped to State Number " + requestedState + " and Step Number " + requestedConfig);
                 }
                 utils.displayWatches(finalState.getWatchList(), compiledDefinition);
                 return;
@@ -184,7 +183,7 @@ public class Commands {
             DebuggerState currentState = session.getStates().get(session.getActiveStateId());
             DebuggerState finalState = session.resume();
             CommandUtils utils = new CommandUtils(isSource);
-            utils.print(finalState.getStepNum() - currentState.getStepNum() + "Step(s) Taken", s -> System.out.println(s));
+            utils.print("Took " + (finalState.getStepNum() - currentState.getStepNum()) + " step(s)");
             utils.displayWatches(finalState.getWatchList(), compiledDefinition);
         }
     }
@@ -203,7 +202,7 @@ public class Commands {
                 KEMException.debuggerError("Checkpoint Value must be >= 1");
             }
             session.setCheckpointInterval(checkpointInterval);
-            utils.print("Checkpointing Interval set to " + checkpointInterval, s -> System.out.println(s));
+            utils.print("Checkpointing Interval set to " + checkpointInterval);
             return;
         }
     }
@@ -255,7 +254,7 @@ public class Commands {
                 throw KEMException.debuggerError("Watch Doesn't Exists");
             }
             CommandUtils utils = new CommandUtils(isSource);
-            utils.print("Watch " + (watchNum) + " removed", x -> System.out.println(x));
+            utils.print("Watch " + (watchNum) + " removed");
         }
     }
 
@@ -272,7 +271,7 @@ public class Commands {
                 throw KEMException.debuggerError("StateNumber Speicified doesn't exist");
             }
             CommandUtils utils = new CommandUtils(isSource);
-            utils.print("Copied State " + stateNum, s -> System.out.println(s));
+            utils.print("Copied State " + stateNum);
         }
     }
 
@@ -285,11 +284,11 @@ public class Commands {
             CommandUtils utils = new CommandUtils(isSource);
             for (DebuggerState state : stateList) {
                 if (i == activeStateIndex) {
-                    utils.print("State " + (i++) + "*", s -> System.out.println(s));
+                    utils.print("State " + (i++) + "*");
                 } else {
-                    utils.print("State " + (i++), s -> System.out.println(s));
+                    utils.print("State " + (i++));
                 }
-                utils.print("Step Count " + state.getStepNum(), s -> System.out.println(s));
+                utils.print("Step Count " + state.getStepNum());
             }
         }
     }
@@ -315,29 +314,35 @@ public class Commands {
                         result.getParsedRule(),
                         compiledDefinition,
                         OutputModes.PRETTY,
-                        System.out::println);
+                        new CommandUtils(false)::print);
             });
         }
 
-        private void print(byte[] printString, Consumer<byte[]> printer) {
+        private void print(byte[] bytes){
             if (!disableOutput) {
-                printer.accept(printString);
+                try {
+                    System.out.write(bytes);
+                } catch (IOException e) {
+                    KEMException.debuggerError("IOError :" + e.getMessage());
+                }
             }
         }
 
-        private void print(String printString, Consumer<byte[]> printer) {
-            print(printString.getBytes(), printer);
+        private void print(String printString) {
+            if (!disableOutput) {
+                System.out.println(printString);
+            }
         }
 
         private void displayWatches(List<DebuggerMatchResult> watches, CompiledDefinition compiledDefinition) {
             if (watches.isEmpty()) {
                 return;
             }
-            print("Watches:", x -> System.out.println(x));
+            print("Watches:");
             int i = 0;
             for (DebuggerMatchResult watch : watches) {
-                print("Watch " + (i), num -> System.out.println(num));
-                print("Pattern : " + watch.getPattern(), y -> System.out.println(y));
+                print("Watch " + (i));
+                print("Pattern : " + watch.getPattern());
                 prettyPrintSubstitution(watch, compiledDefinition);
                 i++;
             }
