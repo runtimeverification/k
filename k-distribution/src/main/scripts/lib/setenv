@@ -1,21 +1,26 @@
 #!/usr/bin/env bash
-if java -version 2>&1 | grep "64-Bit" >& /dev/null; then
-  ARCH=64;
-else
-  ARCH=32;
-fi
-
-K_LIB_DIR="$(cd $(dirname "$0")/../lib; pwd)"
 if [ `uname` = 'Darwin' ]; then
-  export PATH="$K_LIB_DIR/native/osx":$PATH
-  export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:"$K_LIB_DIR/native/osx"
+  OS=osx
 elif [[ `uname` == *MINGW* || `uname` == *MSYS* || `uname` == *CYGWIN* ]]; then
-  export PATH="$K_LIB_DIR/native/windows":"$K_LIB_DIR/native/windows$ARCH":"$K_LIB_DIR/native/$ARCH":$PATH
+  OS=windows
 else
   if [ `uname` != 'Linux' ]; then
     echo "Warning: unsupported OS detected. Defaulting to Linux mode, but errors may occur." 1>&2
   fi
-  export PATH="$K_LIB_DIR/native/linux":"$K_LIB_DIR/native/linux$ARCH":$PATH
+  OS=linux
+fi
+K_LIB_DIR="$(cd $(dirname "$0")/../lib; pwd)"
+
+export PATH="$K_LIB_DIR/native/$OS":$PATH
+
+source "$K_LIB_DIR/checkJava" # sets ARCH and JAVA
+
+if [ `uname` = 'Darwin' ]; then
+  export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:"$K_LIB_DIR/native/osx"
+elif [[ `uname` == *MINGW* || `uname` == *MSYS* || `uname` == *CYGWIN* ]]; then
+  export PATH="$K_LIB_DIR/native/windows$ARCH":"$K_LIB_DIR/native/$ARCH":$PATH
+else
+  export PATH="$K_LIB_DIR/native/linux$ARCH":$PATH
   export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"$K_LIB_DIR/native/linux$ARCH"
 fi
 

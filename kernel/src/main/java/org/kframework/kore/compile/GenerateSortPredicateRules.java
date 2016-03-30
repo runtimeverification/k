@@ -125,11 +125,15 @@ public class GenerateSortPredicateRules {
                     BooleanUtils.TRUE,
                     BooleanUtils.TRUE));
             if (nonProtectingSubsorts.contains(s)) {
-                res.addAll(predicateRules.stream().filter(r -> isPredicateFor(r, s)).map(r -> promotePredicate(r, sort)).collect(Collectors.toList()));
+                res.addAll(predicateRules.stream().filter(r -> isPredicateFor(r, s)).filter(this::isTruePredicate).map(r -> promotePredicate(r, sort)).collect(Collectors.toList()));
             }
         });
         res.add(Rule(KRewrite(KApply(KLabel("is" + sort.name()), KVariable("K")), BooleanUtils.FALSE), BooleanUtils.TRUE, BooleanUtils.TRUE, Att().add("owise")));
         return res.stream();
+    }
+
+    private boolean isTruePredicate(Rule r) {
+        return RewriteToTop.toRight(r.body()).equals(BooleanUtils.TRUE);
     }
 
     private boolean isPredicateFor(Rule r, Sort s) {

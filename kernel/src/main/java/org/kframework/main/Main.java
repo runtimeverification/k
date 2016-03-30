@@ -64,10 +64,13 @@ public class Main {
     }
 
     public static void nailMain(NGContext context) {
+        KServerFrontEnd kserver = KServerFrontEnd.instance();
+        if (!kserver.isLocal()) {
+            context.assertLoopbackClient();
+        }
         isNailgun = true;
         if (context.getArgs().length >= 1) {
             String[] args2 = Arrays.copyOfRange(context.getArgs(), 1, context.getArgs().length);
-            KServerFrontEnd kserver = KServerFrontEnd.instance();
             int result = kserver.run(context.getArgs()[0], args2, new File(context.getWorkingDirectory()), (Map) context.getEnv());
             System.exit(result);
             return;

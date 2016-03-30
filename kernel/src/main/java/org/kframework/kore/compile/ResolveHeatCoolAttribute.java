@@ -7,9 +7,10 @@ import org.kframework.definition.Context;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kil.Attribute;
-import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
+import org.kframework.kore.KVariable;
+import org.kframework.kore.TransformK;
 
 import java.util.Set;
 
@@ -26,7 +27,7 @@ public class ResolveHeatCoolAttribute {
 
     private Rule resolve(Rule rule) {
         return Rule(
-                rule.body(),
+                transformBody(rule.body(), rule.att()),
                 transform(rule.requires(), rule.att()),
                 rule.ensures(),
                 rule.att());
@@ -34,10 +35,24 @@ public class ResolveHeatCoolAttribute {
 
     private Context resolve(Context context) {
         return new Context(
-                context.body(),
+                transformBody(context.body(), context.att()),
                 transform(context.requires(), context.att()),
                 context.att());
     }
+
+            private K transformBody(K body, Att att) {
+                if (att.contains("cool")) {
+                    return new TransformK() {
+                        public K apply(KVariable var) {
+                            if (var.name(). equals("HOLE")) {
+                                return KVariable(var.name(), var.att().add(Attribute.SORT_KEY, "KResult"));
+                            }
+                            return super.apply(var);
+                        }
+                    }.apply(body);
+                }
+                return body;
+            }
 
     private K transform(K requires, Att att) {
         String sort = att.<String>getOptional("result").orElse("KResult");

@@ -2,10 +2,14 @@
 <!-- Copyright (c) 2014-2016 K Team. All Rights Reserved. -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.kframework.k</groupId>
+  <parent>
+    <groupId>com.runtimeverification.rv_match</groupId>
+    <artifactId>parent</artifactId>
+    <version>1.0-SNAPSHOT</version>
+  </parent>
+  <groupId>com.runtimeverification.k</groupId>
   <artifactId>parent</artifactId>
   <packaging>pom</packaging>
-  <version>4.0-beta4-SNAPSHOT</version>
   <name>K Framework Tool Parent</name>
 
   <modules>

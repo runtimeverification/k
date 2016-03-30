@@ -14,8 +14,38 @@ else
     exit 1
 fi
 
+function setarch {
+  echo $version | grep '64-Bit' >& /dev/null
+  if [ $? -eq 0 ]; then
+    ARCH=64
+  else
+    ARCH=32
+  fi
+}
+
+version=$(ng --nailgun-server local:$HOME/.kserver/socket org.kframework.main.JavaVersion 2>&1)
+if [ $? -eq 0 ]; then
+  setarch
+  JAVA="ng --nailgun-server local:$HOME/.kserver/socket"
+else
+  version=$(ng org.kframework.main.JavaVersion 2>&1)
+  if [ $? -eq 0 ]; then
+    setarch
+    JAVA=ng
+  else
+    version=$("$_java" -version 2>&1)
+    setarch
+    if [ $ARCH -eq 64 ]; then
+      TIERED=-XX:+TieredCompilation
+    fi
+    export K_OPTS="-Xms64m -Xmx1024m -Xss32m $TIERED $K_OPTS"
+    JAVA="java -Djava.awt.headless=true $K_OPTS -ea -cp \"$(dirname "$0")/java/*\""
+  fi
+fi
+
+
 if [[ "$_java" ]]; then
-    version=$("$_java" -version 2>&1 | awk -F '"' '/version/ {print $2}')
+    version=$(echo $version | awk -F '"' '/version/ {print $2}')
 #    echo version "$version"
     if ! [[ "$version" > "$MIN_VERSION" ]]; then
         echoerr -e "\033[1;31mError:\033[0m K requires Java $MIN_VERSION to run but the detected version is $version."

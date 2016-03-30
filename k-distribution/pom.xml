@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<!-- Copyright (c) 2014-2015 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2014-2016 K Team. All Rights Reserved. -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.kframework.k</groupId>
+    <groupId>com.runtimeverification.k</groupId>
     <artifactId>parent</artifactId>
-    <version>4.0-beta4-SNAPSHOT</version>
+    <version>1.0-SNAPSHOT</version>
   </parent>
   <artifactId>k-distribution</artifactId>
   <packaging>jar</packaging>
@@ -20,26 +20,32 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.kframework.k</groupId>
+      <groupId>com.runtimeverification.k</groupId>
       <artifactId>kernel</artifactId>
       <version>${project.version}</version>
     </dependency>
 	<dependency>
-      <groupId>org.kframework.k</groupId>
+      <groupId>com.runtimeverification.k</groupId>
       <artifactId>kernel</artifactId>
       <version>${project.version}</version>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.kframework.k</groupId>
+      <groupId>com.runtimeverification.k</groupId>
       <artifactId>java-backend</artifactId>
       <version>${project.version}</version>
       <scope>runtime</scope>
     </dependency>
     <dependency>
-      <groupId>org.kframework.k</groupId>
+      <groupId>com.runtimeverification.k</groupId>
       <artifactId>coq-backend</artifactId>
+      <version>${project.version}</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.runtimeverification.rv_match</groupId>
+      <artifactId>ocaml-backend</artifactId>
       <version>${project.version}</version>
       <scope>runtime</scope>
     </dependency>
@@ -56,7 +62,8 @@
             <phase>pre-integration-test</phase>
             <configuration>
               <target>
-                <exec executable="${project.build.directory}/release/k/bin/kserver${native.script.extension}" spawn="true">
+                <exec executable="${project.build.directory}/release/k/bin/spawn-kserver">
+                  <arg value="${project.build.directory}/kserver.log"/>
                 </exec>
                 <sleep seconds="5" />
               </target>
@@ -77,6 +84,8 @@
                   <arg value="--report" />
                   <arg value="--debug" />
                   <arg value="--warnings-to-errors" />
+                  <arg value="--timeout" />
+                  <arg value="400000" />
                 </exec>
               </target>
               <skip>${skipKTest}</skip>
@@ -91,14 +100,32 @@
             <configuration>
               <target>
                 <move file="${ktestDir}/junit-reports" tofile="target/ktest-reports" failonerror="false" />
-                <exec executable="${project.build.directory}/release/k/lib/native/${native.os.classifier}/ng${native.exe.extension}">
-                  <arg value="ng-stop" />
+                <exec executable="${project.build.directory}/release/k/bin/stop-kserver">
                 </exec>
               </target>
             </configuration>
             <goals>
               <goal>run</goal>
             </goals>
+          </execution>
+          <execution>
+            <id>install-k</id>
+            <phase>install</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target name="install-k">
+                <delete dir="/opt/rv-match/k"/>
+                <copy todir="/opt/rv-match/k">
+                   <fileset dir="${project.build.directory}/release/k"/>
+                </copy>
+		<!-- Set executable permissions -->
+                <exec executable="chmod" failonerror="true" dir="${project.basedir}/..">
+                  <arg line="-R +x /opt/rv-match/k/bin/ /opt/rv-match/k/lib/" />
+                </exec>
+              </target>
+            </configuration>
           </execution>
         </executions>
       </plugin>

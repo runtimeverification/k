@@ -20,7 +20,7 @@ k:
 | DOTK { [] }
 
 kitem: 
-  klabel LPAREN klist RPAREN { Def.eval (Constants.KApply($1, $3)) [] }
+  klabel LPAREN klist RPAREN { let module Def = (val Plugin.get () : Plugin.Definition) in Def.eval (Constants.KApply($1, $3)) [] }
 | KLABELLABEL LPAREN klabel RPAREN { [InjectedKLabel $3] }
 | TOKENLABEL LPAREN STRING COMMA sort RPAREN { [Prelude.ktoken $5 $3] }
 
