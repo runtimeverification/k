@@ -97,7 +97,7 @@ public class KRun {
         if (result instanceof K) {
             prettyPrint(compiledDef, options.output, s -> outputFile(s, options), (K) result);
             if (options.exitCodePattern != null) {
-                Rule exitCodePattern = compilePattern(files, kem, options.exitCodePattern, options, compiledDef, Source.apply("<command line: --exit-code>"));
+                Rule exitCodePattern = compilePattern(files, kem, options.exitCodePattern, compiledDef, Source.apply("<command line: --exit-code>"));
                 List<? extends Map<? extends KVariable, ? extends K>> res = rewriter.match((K) result, exitCodePattern);
                 return getExitCode(kem, res);
             }
@@ -206,10 +206,7 @@ public class KRun {
      * @param source  Source of the pattern, usually either command line or file path.
      * @return The pattern (represented by a Rule object) obtained from the compilation process.
      */
-    public static Rule compilePattern(FileUtil files, KExceptionManager kem, String pattern, KRunOptions options, CompiledDefinition compiledDef, Source source) {
-        if (pattern != null && (options.experimental.prove != null || options.experimental.ltlmc())) {
-            throw KEMException.criticalError("Pattern matching is not supported by model checking or proving");
-        }
+    public static Rule compilePattern(FileUtil files, KExceptionManager kem, String pattern, CompiledDefinition compiledDef, Source source) {
         return compiledDef.compilePatternIfAbsent(files, kem, pattern, source);
     }
 

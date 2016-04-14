@@ -9,9 +9,6 @@ import org.kframework.builtin.Sorts;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
-import org.kframework.kore.ADT;
-import org.kframework.kore.FoldK;
-import org.kframework.kore.FoldKIntoSet;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
@@ -22,7 +19,6 @@ import org.kframework.kore.VisitK;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.concrete2kore.ParseInModule;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
-import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.file.FileUtil;
@@ -30,17 +26,14 @@ import scala.Option;
 import scala.Tuple2;
 import scala.util.Either;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * A class representing a compiled definition. It has everything needed for executing and parsing programs.
@@ -54,8 +47,8 @@ public class CompiledDefinition implements Serializable {
     public final HashMap<String, Sort> configurationVariableDefaultSorts = new HashMap<>();
     public final KLabel topCellInitializer;
     private final Module languageParsingModule;
-    private transient Map<String, Rule> cachedcompiledPatterns;
-    private transient Map<String, Rule> cachedParsedPatterns;
+    private Map<String, Rule> cachedcompiledPatterns = new ConcurrentHashMap<>();
+    private Map<String, Rule> cachedParsedPatterns = new ConcurrentHashMap<>();
 
 
     public CompiledDefinition(KompileOptions kompileOptions, Definition parsedDefinition, Definition kompiledDefinition, KLabel topCellInitializer) {
@@ -173,12 +166,5 @@ public class CompiledDefinition implements Serializable {
 
     public Rule parsePatternIfAbsent(FileUtil files, KExceptionManager kem, String pattern, Source source) {
         return cachedParsedPatterns.computeIfAbsent(pattern, p -> new Kompile(kompileOptions, files, kem).parseRule(this, p, source));
-    }
-
-    private void readObject(java.io.ObjectInputStream stream)
-            throws IOException, ClassNotFoundException {
-        stream.defaultReadObject();
-        cachedcompiledPatterns = new ConcurrentHashMap<>();
-        cachedParsedPatterns = new ConcurrentHashMap<>();
     }
 }
