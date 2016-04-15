@@ -249,6 +249,9 @@ struct
   let hook_keys c lbl sort config ff = match c with 
       [Map (_,_,k1)] -> [Set (SortSet, Lbl_Set_,(KMap.fold (fun k v -> KSet.add k) k1 KSet.empty))]
     | _ -> raise Not_implemented
+  let hook_keys_list c lbl sort config ff = match c with 
+      [Map (_,_,k1)] -> [List (SortList, Lbl_List_,(match List.split (KMap.bindings k1) with l, _ -> l))]
+    | _ -> raise Not_implemented
   let hook_in_keys c lbl sort config ff = match c with
       (k1, [Map (_,_,k2)]) -> [Bool (KMap.mem k1 k2)]
     | (k1, [Bottom]) -> [Bool false] (* case is useful for double map lookup *)
@@ -302,6 +305,9 @@ struct
     | _ -> raise Not_implemented
   let hook_size c lbl sort config ff = match c with
       [Set (_,_,s)] -> [Int (Z.of_int (KSet.cardinal s))]
+    | _ -> raise Not_implemented
+  let hook_set2list c lbl sort config ff = match c with
+      [Set (_,_,s)] -> [List (SortList,Lbl_List_, (KSet.elements s))]
     | _ -> raise Not_implemented
 end
 

@@ -19,4 +19,5 @@ let get () : (module Definition) =
 let load (path: string) : unit =
   let () = Dynlink.allow_unsafe_modules true in
   let filename = Dynlink.adapt_filename (path) in
-  Dynlink.loadfile filename
+  try Dynlink.loadfile filename
+  with Dynlink.Error e -> prerr_string (Dynlink.error_message e); failwith "could not load semantics"

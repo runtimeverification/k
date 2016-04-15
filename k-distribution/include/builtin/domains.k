@@ -68,6 +68,7 @@ module MAP
 
   /*@ Get a Set consisting of all keys in the Map:*/
   syntax Set ::= keys(Map)                      [function, hook(MAP.keys)]
+  syntax List ::= "keys_list" "(" Map ")"       [function, hook(MAP.keys_list)]
 
   syntax Bool ::= K "in_keys" "(" Map ")"       [function, hook(MAP.in_keys)]
 
@@ -186,6 +187,15 @@ module LIST
 
   /*@ Get the list length */
   syntax Int ::= size(List)               [function, hook(LIST.size), klabel (sizeList), smtlib(smt_seq_len)]
+endmodule
+
+module COLLECTIONS
+  imports LIST
+  imports SET
+  imports MAP
+
+  syntax List ::= Set2List(Set) [function, hook(SET.set2list)]
+
 endmodule
 
 module BOOL-SYNTAX
