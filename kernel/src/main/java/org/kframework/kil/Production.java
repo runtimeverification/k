@@ -178,7 +178,7 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
      */
     public String getKLabel() {
         String klabel = getAttribute("klabel");
-        if (klabel == null && isSyntacticSubsort()) {
+        if (klabel == null && (isSyntacticSubsort() || containsAttribute("token") || containsAttribute("bracket"))) {
             return null;
         } else if (klabel == null) {
             if (sort.equals(Sort.KLABEL) && getArity() == 0)
@@ -200,7 +200,7 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
                 label += "_" + ((UserList) pi).separator + "_";
             }
         }
-        return label;
+        return label + "_" + ownerModuleName;
     }
 
     public java.util.List<ProductionItem> getItems() {

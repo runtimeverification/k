@@ -309,6 +309,9 @@ struct
   let hook_set2list c lbl sort config ff = match c with
       [Set (_,_,s)] -> [List (SortList,Lbl_List_, (KSet.elements s))]
     | _ -> raise Not_implemented
+  let hook_list2set c lbl sort config ff = match c with
+      [List (_,_,l)] -> [Set (SortSet,Lbl_Set_, (KSet.of_list l))]
+    | _ -> raise Not_implemented
 end
 
 module LIST =

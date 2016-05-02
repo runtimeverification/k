@@ -15,6 +15,8 @@ class POSet[T](directRelations: Set[(T, T)]) extends Serializable {
   // convert the input set of relations to Map form for performance
   private val directRelationsMap: Map[T, Set[T]] = directRelations groupBy { _._1 } mapValues { _ map { _._2 } toSet } map identity
 
+  lazy val elements: Set[T] = directRelations.flatMap(a => Set(a._1, a._2))
+
   /**
    * Internal private method. Computes the transitive closer of the initial relations.
    * It also checks for cycles during construction and throws an exception if it finds any.

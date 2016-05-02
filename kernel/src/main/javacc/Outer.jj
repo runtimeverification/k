@@ -869,10 +869,10 @@ void Production(List<Production> prods) :
   (UpperId() | <LOWER_ID>)
   { items.add(tokenLoc(new Terminal(image()))); klabel = image(); }
   "("              { items.add(tokenLoc(new Terminal(image()))); }
-  nonTerminal = SortID()  { items.add(nonTerminal); }
+  (nonTerminal = SortID()  { items.add(nonTerminal); }
   (","             { items.add(tokenLoc(new Terminal(image()))); }
    nonTerminal = SortID() { items.add(nonTerminal); }
-  )*
+  )*)?
   ")"              { items.add(tokenLoc(new Terminal(image()))); }
 | "("              { items.add(tokenLoc(new Terminal(image()))); }
   nonTerminal = SortID()  { items.add(nonTerminal); }

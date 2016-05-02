@@ -23,7 +23,6 @@ import scala.Tuple2;
 import scala.util.Either;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Set;
 
 import static org.junit.Assert.*;
@@ -85,7 +84,7 @@ public class AddBracketsTest {
                 "  syntax Exp ::= Exp \"*\" Exp [left]\n" +
                 "  syntax Exp ::= \"1\"\n" +
                 "  syntax Exp ::= \"(\" Exp \")\" [bracket]\n" +
-                "  syntax priority _*_ > _+_\n" +
+                "  syntax priority _*__TEST > _+__TEST\n" +
                 "endmodule\n";
         unparserTest(def, "1 + 1 + 1 + 1");
         unparserTest(def, "1 + ( 1 + 1 ) + 1");

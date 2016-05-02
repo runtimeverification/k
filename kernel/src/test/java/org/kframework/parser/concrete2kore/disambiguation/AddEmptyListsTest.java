@@ -93,8 +93,8 @@ public class AddEmptyListsTest {
                     "syntax K ::= f(As) | g(A) | h(Bs)" +
                     "endmodule\n";
 
-    public static final KApply NIL = KApply(KLabel(".List{\"_,_\"}"));
-    public static final KLabel CONS = KLabel("_,_");
+    public static final KApply NIL = KApply(KLabel(".List{\"_,__TEST\"}"));
+    public static final KLabel CONS = KLabel("_,__TEST");
     public static final KApply A = KApply(KLabel("alabel"));
     public static final KApply B = KApply(KLabel("blabel"));
     public static final KLabel F = KLabel("f");
@@ -160,28 +160,28 @@ public class AddEmptyListsTest {
 
     @Test
     public void testArgumentLabeledCons() {
-        parseTerm("f(`_,_`(a,.As))", "K", KApply(F, KApply(CONS, A, NIL)));
+        parseTerm("f(`_,__TEST`(a,.As))", "K", KApply(F, KApply(CONS, A, NIL)));
     }
 
     @Test
     public void testArgumentLabeledNil() {
-        parseTerm("f(`.List{\"_,_\"}`(.KList))", "K", KApply(F, NIL));
+        parseTerm("f(`.List{\"_,__TEST\"}`(.KList))", "K", KApply(F, NIL));
     }
 
     @Test
     public void testArgumentLabeledConsSub1() {
-        parseTerm("h(`_,_`(b,.Bs))", "K", KApply(H, KApply(CONS, B, NIL)));
+        parseTerm("h(`_,__TEST`(b,.Bs))", "K", KApply(H, KApply(CONS, B, NIL)));
     }
 
     @Test
     public void testArgumentLabeledConsSub2() {
         // gets a warning because the argument of sort As does not fit.n
-        parseTerm("h(`_,_`(a,.As))", "K", KApply(H, KApply(CONS, A, NIL)), 1);
+        parseTerm("h(`_,__TEST`(a,.As))", "K", KApply(H, KApply(CONS, A, NIL)), 1);
     }
 
     @Test
     public void testArgumentLabeledNilSub1() {
-        parseTerm("h(`.List{\"_,_\"}`(.KList))", "K", KApply(H, NIL));
+        parseTerm("h(`.List{\"_,__TEST\"}`(.KList))", "K", KApply(H, NIL));
     }
 
     @Test

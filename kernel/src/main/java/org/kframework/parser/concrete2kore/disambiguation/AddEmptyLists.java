@@ -68,12 +68,14 @@ public class AddEmptyLists extends SetsGeneralTransformer<ParseFailedException, 
         List<Term> newItems = new LinkedList<>();
         boolean changed = false;
 
-        final String tcLabelName = tc.production().klabel().get().name();
-        // Never add a list wrapper between a sort annotation and the annotated term
-        if (tcLabelName.equals("#SyntacticCast")
-                || tcLabelName.startsWith("#SemanticCastTo")
-                || tcLabelName.equals("#InnerCast")) {
-            return super.apply(tc);
+        if (tc.production().klabel().isDefined()) {
+            final String tcLabelName = tc.production().klabel().get().name();
+            // Never add a list wrapper between a sort annotation and the annotated term
+            if (tcLabelName.equals("#SyntacticCast")
+                    || tcLabelName.startsWith("#SemanticCastTo")
+                    || tcLabelName.equals("#InnerCast")) {
+                return super.apply(tc);
+            }
         }
 
         for (ProductionItem pi : mutable(p.items())) {

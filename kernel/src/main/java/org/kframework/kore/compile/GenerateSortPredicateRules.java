@@ -60,6 +60,9 @@ public class GenerateSortPredicateRules {
     }
 
     private Stream<? extends Sentence> gen(Sort sort) {
+        if (sort.equals(Sorts.K()) || sort.equals(Sorts.KItem())) {
+            return Stream.empty();
+        }
         List<Sentence> res = new ArrayList<>();
         Production prod = Production("is" + sort.name(), Sorts.Bool(),
                 Seq(Terminal("is" + sort.name()), Terminal("("), NonTerminal(Sorts.K()), Terminal(")")),

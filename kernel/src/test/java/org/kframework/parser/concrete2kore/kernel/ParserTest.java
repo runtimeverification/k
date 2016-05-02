@@ -87,7 +87,7 @@ public class ParserTest {
         Parser parser = new Parser("asdfAAA1");
 
         Term result = parser.parse(nt1, 0);
-        Term expected = amb(klist(amb(klist(Constant.apply("asdfAAA1", constant("seq"))))));
+        Term expected = amb(klist(amb(Constant.apply("asdfAAA1", constant("seq")))));
         Assert.assertEquals("Single Token check: ", expected, result);
         Nullability nc = new Nullability(grammar) ;
         Assert.assertEquals("Expected Nullable NTs", true, nc.isNullable(nt1.entryState) && nc.isNullable(nt1.exitState));
@@ -115,13 +115,13 @@ public class ParserTest {
 
         {
             Term result = new Parser("abc").parse(nt1, 0);
-            Term expected = amb(klist(amb(klist(Constant.apply("abc", prd)))));
+            Term expected = amb(klist(amb(Constant.apply("abc", prd))));
             Assert.assertEquals("Single Token check: ", expected, result);
         }
 
         {
             Term result = new Parser("").parse(nt1, 0);
-            Term expected = amb(klist(amb(klist(Constant.apply("", prd)))));
+            Term expected = amb(klist(amb(Constant.apply("", prd))));
             Assert.assertEquals("Single Token check: ", expected, result);
         }
 
@@ -178,16 +178,16 @@ public class ParserTest {
 
         {
             Term result = new Parser("").parse(nt1, 0);
-            Term expected = amb(klist(amb(klist(kapp("epsilon")))));
+            Term expected = amb(klist(amb(kapp("epsilon"))));
             Assert.assertEquals("EmtpyString check: ", expected, result);
         }
 
         {
             Term result = new Parser("xxyy").parse(nt1, 0);
             Term expected =
-                amb(klist(amb(klist(kapp("xAy",
-                    amb(klist(kapp("xAy",
-                            amb(klist(kapp("epsilon")))))))))));
+                amb(klist(amb(kapp("xAy",
+                    kapp("xAy",
+                            kapp("epsilon"))))));
             Assert.assertEquals("x^ny^n check: ", expected, result);
         }
         Nullability nc = new Nullability(grammar) ;
@@ -219,16 +219,16 @@ public class ParserTest {
 
         {
             Term result = new Parser("").parse(nt1, 0);
-            Term expected = amb(klist(amb(klist(kapp("epsilon")))));
+            Term expected = amb(klist(amb(kapp("epsilon"))));
             Assert.assertEquals("EmtpyString check: ", expected, result);
         }
 
         {
             Term result = new Parser("yy").parse(nt1, 0);
             Term expected =
-                amb(klist(amb(klist(kapp("Ay",
-                    amb(klist(kapp("Ay",
-                            amb(klist(kapp("epsilon")))))))))));
+                amb(klist(amb(kapp("Ay",
+                    kapp("Ay",
+                            kapp("epsilon"))))));
             Assert.assertEquals("y^n check: ", expected, result);
         }
         Nullability nc = new Nullability(grammar) ;
@@ -261,16 +261,16 @@ public class ParserTest {
 
         {
             Term result = new Parser("").parse(nt1, 0);
-            Term expected = amb(klist(amb(klist(kapp("epsilon")))));
+            Term expected = amb(klist(amb(kapp("epsilon"))));
             Assert.assertEquals("EmtpyString check: ", expected, result);
         }
 
         {
             Term result = new Parser("xx").parse(nt1, 0);
             Term expected =
-                amb(klist(amb(klist(kapp("xA",
-                        amb(klist(kapp("xA",
-                                amb(klist(kapp("epsilon")))))))))));
+                amb(klist(amb(kapp("xA",
+                        kapp("xA",
+                                kapp("epsilon"))))));
             Assert.assertEquals("x^n check: ", expected, result);
         }
         Nullability nc = new Nullability(grammar) ;
@@ -309,28 +309,28 @@ public class ParserTest {
 
         {
             Term result = new Parser("x").parse(nt1, 0);
-            Term expected = amb(klist(amb(klist(kapp("x")))));
+            Term expected = amb(klist(amb(kapp("x"))));
             Assert.assertEquals("Single char check: ", expected, result);
         }
 
         {
             Term result = new Parser("xx").parse(nt1, 0);
-            Term expected = amb(klist(amb(klist(kapp("AA", amb(klist(kapp("x"))), amb(klist(kapp("x"))))))));
+            Term expected = amb(klist(amb(kapp("AA", kapp("x"), kapp("x")))));
             Assert.assertEquals("AA check: ", expected, result);
         }
         Term X = kapp("x");
         {
             Term result = new Parser("xxx").parse(nt1, 0);
-            Term expected = amb(klist(amb(klist(kapp("AA", amb(klist(kapp("AA", amb(klist(X)), amb(klist(X))))), amb(klist(X)))),
-                                          klist(kapp("AA", amb(klist(X)), amb(klist(kapp("AA", amb(klist(X)), amb(klist(X))))))))));
+            Term expected = amb(klist(amb(kapp("AA", kapp("AA", X, X), X),
+                                          kapp("AA", X, kapp("AA", X, X)))));
             Assert.assertEquals("AAA check: ", expected, result);
         }
         {
             Term result = new Parser("xxxx").parse(nt1, 0);
-            Term t1 = amb(klist(X));
-            Term t2 = amb(klist(kapp("AA", t1, t1)));
-            Term t3 = amb(klist(kapp("AA", t2, t1)), klist(kapp("AA", t1, t2)));
-            Term t4 = amb(klist(kapp("AA", t3, t1)), klist(kapp("AA", t2, t2)), klist(kapp("AA", t1, t3)));
+            Term t1 = X;
+            Term t2 = kapp("AA", t1, t1);
+            Term t3 = amb(kapp("AA", t2, t1), kapp("AA", t1, t2));
+            Term t4 = amb(kapp("AA", t3, t1), kapp("AA", t2, t2), kapp("AA", t1, t3));
             Term expected = amb(klist(t4));
             Assert.assertEquals("AAA check: ", expected, result);
         }
@@ -354,7 +354,7 @@ public class ParserTest {
         resx.next.add(rs1);
         rs1.next.add(baseCase.exitState);
 
-        Term expected = amb(klist(kapp("x")));
+        Term expected = kapp("x");
 
         for (int i = 2; i < 10; i++) {
             NonTerminal nt = new NonTerminal("NT"+i);
@@ -364,7 +364,7 @@ public class ParserTest {
             state.next.add(rs2);
             rs2.next.add(nt.exitState);
             baseCase = nt;
-            expected = amb(klist(kapp("n" + i, expected)));
+            expected = kapp("n" + i, expected);
         }
         Grammar grammar = new Grammar();
         grammar.add(baseCase);
@@ -372,7 +372,7 @@ public class ParserTest {
 
         {
             Term result = new Parser("x").parse(baseCase, 0);
-            expected = amb(klist(expected));
+            expected = amb(klist(amb(expected)));
             Assert.assertEquals("Single char check: ", expected, result);
         }
         Nullability nc = new Nullability(grammar) ;
@@ -396,7 +396,7 @@ public class ParserTest {
         resx.next.add(rs1);
         rs1.next.add(baseCase.exitState);
 
-        Term expected = amb(klist(kapp("x")));
+        Term expected = kapp("x");
 
         for (int i = 2; i < 10; i++) {
             NonTerminal nt = new NonTerminal("NT"+i);
@@ -406,7 +406,7 @@ public class ParserTest {
             state.next.add(rs2);
             rs2.next.add(nt.exitState);
             baseCase = nt;
-            expected = amb(klist(kapp("n" + i, expected)));
+            expected = kapp("n" + i, expected);
         }
         Grammar grammar = new Grammar();
         grammar.add(baseCase);
@@ -414,7 +414,7 @@ public class ParserTest {
 
         {
             Term result = new Parser("").parse(baseCase, 0);
-            expected = amb(klist(expected));
+            expected = amb(klist(amb(expected)));
             Assert.assertEquals("Single char check: ", expected, result);
         }
         Nullability nc = new Nullability(grammar) ;
@@ -494,9 +494,9 @@ public class ParserTest {
         grammar.compile();
         {
             Term result = new Parser("1+2*3").parse(exp, 0);
-            Term expected = amb(klist(amb(klist(kapp("plus", amb(klist(amb(klist(amb(klist(Constant.apply("1", litPrd))))))),
-                                                amb(klist(kapp("mul", amb(klist(amb(klist(Constant.apply("2", litPrd))))),
-                                                          amb(klist(Constant.apply("3", litPrd)))))))))));
+            Term expected = amb(klist(amb(kapp("plus", Constant.apply("1", litPrd),
+                                                kapp("mul", Constant.apply("2", litPrd),
+                                                          Constant.apply("3", litPrd))))));
             Assert.assertEquals("1+2*3: ", expected, result);
         }
         Nullability nc = new Nullability(grammar) ;

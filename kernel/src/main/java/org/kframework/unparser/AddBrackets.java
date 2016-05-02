@@ -15,15 +15,12 @@ import org.kframework.parser.TermCons;
 import org.kframework.utils.errorsystem.KEMException;
 import org.pcollections.ConsPStack;
 import scala.Tuple2;
-import scala.collection.Seq;
-import scala.collection.Set;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 
 import static org.kframework.Collections.*;
-import static scala.compat.java8.JFunction.*;
 
 /**
  * Implements the naive algorithm to add brackets in order to disambiguate an unparsed AST. This algorithm executes
@@ -141,6 +138,9 @@ public class AddBrackets {
     }
 
     private boolean isPriorityWrong(ProductionReference outer, ProductionReference inner, int position) {
+        if (outer.production().klabel().isEmpty()  || inner.production().klabel().isEmpty()) {
+            return false;
+        }
         Tag parentLabel = new Tag(outer.production().klabel().get().name());
         Tag localLabel = new Tag(inner.production().klabel().get().name());
         if (m.priorities().lessThan(parentLabel, localLabel)) {

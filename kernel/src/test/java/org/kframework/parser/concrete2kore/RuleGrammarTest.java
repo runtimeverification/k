@@ -445,23 +445,23 @@ public class RuleGrammarTest {
         parseRule("A:Exp(I:Int, Is:Ints)", def, 0, false);
         parseRule("A:Exp, .Exps", def, 0,
                 KApply(KLabel("#ruleNoConditions"),
-                        KApply(KLabel("_,_"),
+                        KApply(KLabel("_,__TEST"),
                                 KApply(KLabel("#SemanticCastToExp"), KToken("A", Sort("#KVariable"))),
-                                KApply(KLabel(".List{\"_,_\"}"))
+                                KApply(KLabel(".List{\"_,__TEST\"}"))
                         )));
-        parseProgram("1(1, 1)", def, "Exp", 0, KApply(KLabel("_(_)"),
-                KApply(KLabel("1")),
-                KApply(KLabel("_,_"), KApply(KLabel("1")), // Ne#Es ::= E "," Ne#Es [klabel('_,_)]
-                        KApply(KLabel("_,_"), KApply(KLabel("1")), // Ne#Es ::= E Es#Terminator [klabel('_,_)]
-                                KApply(KLabel(".List{\"_,_\"}")))) // Es#Terminator ::= "" [klabel('.Es)]
+        parseProgram("1(1, 1)", def, "Exp", 0, KApply(KLabel("_(_)_TEST"),
+                KApply(KLabel("1_TEST")),
+                KApply(KLabel("_,__TEST"), KApply(KLabel("1_TEST")), // Ne#Es ::= E "," Ne#Es [klabel('_,_)]
+                        KApply(KLabel("_,__TEST"), KApply(KLabel("1_TEST")), // Ne#Es ::= E Es#Terminator [klabel('_,_)]
+                                KApply(KLabel(".List{\"_,__TEST\"}")))) // Es#Terminator ::= "" [klabel('.Es)]
         ));
-        parseProgram("1()", def, "Exp", 0, KApply(KLabel("_(_)"),
-                KApply(KLabel("1")),
-                KApply(KLabel(".List{\"_,_\"}")) // Es#Terminator ::= "" [klabel('.Es)]
+        parseProgram("1()", def, "Exp", 0, KApply(KLabel("_(_)_TEST"),
+                KApply(KLabel("1_TEST")),
+                KApply(KLabel(".List{\"_,__TEST\"}")) // Es#Terminator ::= "" [klabel('.Es)]
         ));
         parseProgram("", def, "NeInts", 0, true);
-        parseProgram("1", def, "NeInts", 0, KApply(KLabel("_,_"),
-                KApply(KLabel("1")), // Ne#Es ::= E Es#Terminator [klabel('_,_)]
-                KApply(KLabel(".List{\"_,_\"}"))));
+        parseProgram("1", def, "NeInts", 0, KApply(KLabel("_,__TEST"),
+                KApply(KLabel("1_TEST")), // Ne#Es ::= E Es#Terminator [klabel('_,_)]
+                KApply(KLabel(".List{\"_,__TEST\"}"))));
     }
 }

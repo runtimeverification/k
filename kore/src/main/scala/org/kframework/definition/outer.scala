@@ -125,7 +125,7 @@ case class Module(val name: String, val imports: Set[Module], unresolvedLocalSen
 
   @transient
   lazy val definedKLabels: Set[KLabel] =
-    (productionsFor.keys.toSet | klabelsDefinedInRules.keys.toSet).filter(!_.isInstanceOf[KVariable])
+    (productionsFor.keys.toSet).filter(!_.isInstanceOf[KVariable])
 
   lazy val klabelsDefinedInRules: Map[KLabel, Int] = {
     def mergeMultiset(map1: Map[KLabel, Int], map2: Map[KLabel, Int]) = map1 ++ map2.map { case (k, v) => k -> (v + map1.getOrElse(k, 0)) }

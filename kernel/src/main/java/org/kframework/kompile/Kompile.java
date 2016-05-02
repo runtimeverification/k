@@ -28,6 +28,7 @@ import org.kframework.kore.compile.ResolveSemanticCasts;
 import org.kframework.kore.compile.ResolveStrict;
 import org.kframework.kore.compile.SortInfo;
 import org.kframework.kore.compile.checks.CheckConfigurationCells;
+import org.kframework.kore.compile.checks.CheckKLabels;
 import org.kframework.kore.compile.checks.CheckRHSVariables;
 import org.kframework.kore.compile.checks.CheckRewrite;
 import org.kframework.kore.compile.checks.CheckSortTopUniqueness;
@@ -45,6 +46,7 @@ import java.io.File;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -176,6 +178,12 @@ public class Kompile {
         stream(parsedDef.modules()).forEach(m -> stream(m.localSentences()).forEach(new CheckStreams(errors, m)::check));
 
         stream(parsedDef.modules()).forEach(m -> stream(m.localSentences()).forEach(new CheckRewrite(errors, m)::check));
+
+        CheckKLabels checkKLabels = new CheckKLabels(errors);
+        // only check imported modules because otherwise we might have false positives
+        Consumer<Module> checkModuleKLabels = m -> stream(m.localSentences()).forEach(s -> checkKLabels.check(s, m));
+        stream(parsedDef.mainModule().importedModules()).forEach(checkModuleKLabels);
+        checkModuleKLabels.accept(parsedDef.mainModule());
 
         if (!errors.isEmpty()) {
             kem.addAllKException(errors.stream().map(e -> e.exception).collect(Collectors.toList()));

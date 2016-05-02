@@ -28,6 +28,7 @@ trait HasChildren {
 
 case class Constant private(value: String, production: Production) extends ProductionReference {
   override def toString = "#token(" + production.sort + ",\"" + StringEscapeUtils.escapeJava(value) + "\")"
+  override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(Constant.this);
 }
 
 // note that items is reversed because it is more efficient to generate it this way during parsing
@@ -49,11 +50,17 @@ case class Ambiguity(items: Set[Term])
     this
   }
   override def toString() = "amb(" + (items.asScala mkString ",") + ")"
+  override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(Ambiguity.this);
 }
 
 case class KList(items: PStack[Term])
   extends Term with HasChildren {
-  def add(t: Term) = KList(items.plus(t), location, source)
+  def add(t: Term) = {
+    if (items.size() == 0 && t.isInstanceOf[KList])
+      t
+    else
+      KList(items.plus(t), location, source)
+  }
   def remove(n: Int) = {
     var newItems = items;
     for (_ <- 1 to n) {

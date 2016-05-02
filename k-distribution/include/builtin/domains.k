@@ -34,13 +34,13 @@ module MAP
    the two Maps are assumed disjoint) */
   syntax Map ::= Map Map                        [left, function, hook(MAP.concat), klabel(_Map_), assoc, comm, unit(.Map), element(_|->_)]
   /*@  Construct an empty Map */
-  syntax Map ::= ".Map"                         [function, hook(MAP.unit), latex(\dotCt{Map})]
+  syntax Map ::= ".Map"                         [function, hook(MAP.unit), klabel(.Map), latex(\dotCt{Map})]
                // breaks klabel uniqueness
                //| "."                            [function, hook(MAP.unit)]
   syntax Map ::= "(" Map ")" [bracket]
   /*@ Construct a singleton Map (a Map with only one key/value pair). The key
    is on the left and the value is on the right */
-  syntax Map ::= K "|->" K                      [function, hook(MAP.element), latex({#1}\mapsto{#2})]
+  syntax Map ::= K "|->" K                      [function, hook(MAP.element), klabel(_|->_), latex({#1}\mapsto{#2})]
 
   syntax priorities _|->_ > _Map_ .Map
   syntax non-assoc _|->_
@@ -52,7 +52,7 @@ module MAP
   syntax Map ::= Map "[" K "<-" K "]"           [function, hook(MAP.update), prefer]
 
   /*@ Remove key/value pair associated with the key from map? */
-  syntax Map ::= Map "[" K "<-" "undef" "]"     [function, hook(MAP.remove)]
+  syntax Map ::= Map "[" K "<-" "undef" "]"     [function, hook(MAP.remove), klabel(_[_<-undef])]
 
   /*@ Get the difference of two maps interpreted as sets of entries
    ($M_1 \setminus M2$) */
@@ -97,13 +97,13 @@ module SET
   /*@ Construct a new Set as the union of two different sets ($A \cup B$) */
   syntax Set ::= Set Set                  [left, function, hook(SET.concat), klabel(_Set_), assoc, comm, unit(.Set), idem, element(SetItem)]
   /*@ Construct an empty Set */
-  syntax Set ::= ".Set"                   [function, hook(SET.unit), latex(\dotCt{Set})]
+  syntax Set ::= ".Set"                   [function, hook(SET.unit), klabel(.Set), latex(\dotCt{Set})]
                //| "."
   syntax Set ::= "(" Set ")" [bracket]
   /*@ Construct a singleton Set (a Set with only one element $\{ a \}$). To add
    an element $a$ to a set $A$, construct the union of the singleton set
    $\{ a \}$ and $A$ ($\{ a \} \cup A$). */
-  syntax Set ::= SetItem(K)               [function, hook(SET.element)]
+  syntax Set ::= SetItem(K)               [function, hook(SET.element), klabel(SetItem)]
 
   /*@ Get the intersection of two sets ($A \cap B$) */
   syntax Set ::= intersectSet(Set, Set)   [function, hook(SET.intersection)]
@@ -169,10 +169,10 @@ module LIST
    the append "@" operation in many functional programming languages. */
   syntax List ::= List List               [left, function, hook(LIST.concat), klabel(_List_), smtlib(smt_seq_concat), assoc, unit(.List), element(ListItem)]
   /*@ Construct an empty List: */
-  syntax List ::= ".List"                 [function, hook(LIST.unit), smtlib(smt_seq_nil), latex(\dotCt{List})]
+  syntax List ::= ".List"                 [function, hook(LIST.unit), klabel(.List), smtlib(smt_seq_nil), latex(\dotCt{List})]
                 //| "."
   /*@ Construct a singleton List (a list with only  one element) */
-  syntax List ::= ListItem(K)             [function, hook(LIST.element), smtlib(smt_seq_elem)]
+  syntax List ::= ListItem(K)             [function, hook(LIST.element), klabel(ListItem), smtlib(smt_seq_elem)]
 
   /*@ Get an element form the List by index. Positive indices mean from the
    beginning (0 is the first element), and negative indices mean from the end
@@ -195,6 +195,7 @@ module COLLECTIONS
   imports MAP
 
   syntax List ::= Set2List(Set) [function, hook(SET.set2list)]
+  syntax Set ::= List2Set(List) [function, hook(SET.list2set)]
 
 endmodule
 
@@ -207,8 +208,8 @@ endmodule
 module BOOL
   imports BASIC-K
   imports BOOL-SYNTAX
-  syntax Bool ::= "notBool" Bool          [function, smtlib(not), boolOperation, latex(\neg_{\scriptstyle\it Bool}{#1}), hook(BOOL.not)]
-                > Bool "andBool" Bool     [function, left, smtlib(and), boolOperation, latex({#1}\wedge_{\scriptstyle\it Bool}{#2}), hook(BOOL.and)]
+  syntax Bool ::= "notBool" Bool          [function, klabel(notBool_), smtlib(not), boolOperation, latex(\neg_{\scriptstyle\it Bool}{#1}), hook(BOOL.not)]
+                > Bool "andBool" Bool     [function, klabel(_andBool_), left, smtlib(and), boolOperation, latex({#1}\wedge_{\scriptstyle\it Bool}{#2}), hook(BOOL.and)]
                 | K "andThenBool" K       [function, left, smtlib(and), boolOperation, hook(BOOL.andThen)]
                 > Bool "xorBool" Bool     [function, left, smtlib(xor), boolOperation, hook(BOOL.xor)]
                 > Bool "orBool" Bool      [function, left, smtlib(or), boolOperation, latex({#1}\vee_{\scriptstyle\it Bool}{#2}), hook(BOOL.or)]
@@ -307,7 +308,7 @@ module INT
                 | Int "<Int" Int          [function, left, smtlib(<), latex({#1}\mathrel{<_{\scriptstyle\it Int}}{#2}), hook(INT.lt)]
                 | Int ">=Int" Int         [function, left, smtlib(>=), latex({#1}\mathrel{\geq_{\scriptstyle\it Int}}{#2}), hook(INT.ge)]
                 | Int ">Int" Int          [function, left, smtlib(>), latex({#1}\mathrel{>_{\scriptstyle\it Int}}{#2}), hook(INT.gt)]
-                | Int "==Int" Int         [function, left, smtlib(=), latex({#1}\mathrel{{=}{=}_{\scriptstyle\it Int}}{#2}), hook(INT.eq)]
+                | Int "==Int" Int         [function, left, smtlib(=), latex({#1}\mathrel{{=}{=}_{\scriptstyle\it Int}}{#2}), hook(INT.eq), klabel(_==Int_)]
                 | Int "=/=Int" Int        [function, left, smtlib(distinct), latex({#1}\mathrel{{=}{/}{=}_{\scriptstyle\it Int}}{#2}), hook(INT.ne)]
                 | Int "dividesInt" Int    [function]
 
@@ -381,7 +382,7 @@ module FLOAT
                 | Float "<Float" Float        [function, left, smtlib(<), latex({#1}\mathrel{<_{\scriptstyle\it Float}}{#2}), hook(FLOAT.lt)]
                 | Float ">=Float" Float       [function, left, smtlib(>=), latex({#1}\mathrel{\geq_{\scriptstyle\it Float}}{#2}), hook(FLOAT.ge)]
                 | Float ">Float" Float        [function, left, smtlib(>), latex({#1}\mathrel{>_{\scriptstyle\it Float}}{#2}), hook(FLOAT.gt)]
-                | Float "==Float" Float       [function, left, smtlib(==), latex({#1}\mathrel{==_{\scriptstyle\it Float}}{#2}), hook(FLOAT.eq)]
+                | Float "==Float" Float       [function, left, smtlib(==), latex({#1}\mathrel{==_{\scriptstyle\it Float}}{#2}), hook(FLOAT.eq), klabel(_==Float_)]
                 | Float "=/=Float" Float      [function, left, smtlib((not (== #1 #2))), latex({#1}\mathrel{\neq_{\scriptstyle\it Float}}{#2})]
 
 
@@ -512,7 +513,7 @@ module K-EQUAL
   imports BASIC-K
 
   syntax Bool ::= left:
-                    K "==K" K           [function, smtlib(=), hook(KEQUAL.eq), latex({#1}\mathrel{=_K}{#2}), equalEqualK]
+                    K "==K" K           [function, smtlib(=), hook(KEQUAL.eq), klabel(_==K_), latex({#1}\mathrel{=_K}{#2}), equalEqualK]
                 | K "=/=K" K          [function, smtlib(distinct), hook(KEQUAL.ne), latex({#1}\mathrel{\neq_K}{#2}), notEqualEqualK]
 
   syntax priorities equalEqualK notEqualEqualK > boolOperation
@@ -537,7 +538,7 @@ module K-REFLECTION
 
   // meaningful only for the purposes of compilation to a binary, otherwise
   // undefined
-  syntax List ::= "#argv" [function, hook(KREFLECTION.argv)]
+  syntax List ::= #argv() [function, hook(KREFLECTION.argv)]
 
 endmodule
 
@@ -962,7 +963,7 @@ module STRATEGY
 
     syntax #RuleTag ::= r"[a-zA-Z0-9]*"                    [token]
 
-    syntax Strategy ::= "#STUCK"
+    syntax Strategy ::= #STUCK()
 
     syntax StrategyApply ::= "^" #RuleTag                      [klabel(#applyRule)]
 
@@ -1020,6 +1021,7 @@ module BASIC-STRATEGY
     rule <s> false ; B:Strategy => false ...</s>
 
 // the second rule is stupid -- just made to sidestep what is likely a KSEQ normalization bug
-    rule <s> #STUCK ~> A:StrategyApply => false ...</s>
-    rule <s> #STUCK ~> false => false ...</s>
+    rule <s> #STUCK() ~> A:StrategyApply => false ...</s>
+    rule <s> #STUCK() ~> false => false ...</s>
+
 endmodule

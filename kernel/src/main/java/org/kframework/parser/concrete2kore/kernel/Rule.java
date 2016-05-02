@@ -9,7 +9,6 @@ import org.kframework.parser.Constant;
 import org.kframework.parser.KList;
 import org.kframework.parser.Term;
 import org.kframework.parser.TermCons;
-import org.pcollections.ConsPStack;
 
 import java.io.Serializable;
 import java.util.HashSet;
@@ -64,14 +63,15 @@ public abstract class Rule implements Serializable {
             }
             return result;
         }
-        protected abstract KList apply(KList set, MetaData metaData);
+        protected abstract Term apply(KList set, MetaData metaData);
     }
 
     /**
      * Wraps the current KList with the given KLabel
      */
     public static class WrapLabelRule extends KListRule {
-        private final Production label;
+        public final Production label;
+        private final boolean isToken, needsLabel;
         public final Automaton rejectPattern;
         private final Set<String> rejects;
         public WrapLabelRule(Production label, Automaton rejectPattern, Set<String> rejects) {
@@ -79,15 +79,17 @@ public abstract class Rule implements Serializable {
             this.label = label;
             this.rejectPattern = rejectPattern;
             this.rejects = rejects;
+            this.isToken = label.att().contains("token");
+            this.needsLabel = label.klabel().isDefined() || !label.isSyntacticSubsort();
         }
         public WrapLabelRule(Production label) {
             this(label, null, new HashSet<>());
         }
-        protected KList apply(KList klist, MetaData metaData) {
+        protected Term apply(KList klist, MetaData metaData) {
             Term term;
             Location loc = new Location(metaData.start.line, metaData.start.column, metaData.end.line, metaData.end.column);
             Source source = metaData.source;
-            if (label.att().contains("token")) {
+            if (isToken) {
                 String value = metaData.input.subSequence(metaData.start.position, metaData.end.position).toString();
                 if (rejectPattern != null && rejectPattern.run(value)) {
                     return null;
@@ -96,10 +98,12 @@ public abstract class Rule implements Serializable {
                     return null;
                 }
                 term = Constant.apply(value, label, Optional.of(loc), Optional.of(source));
-            } else {
+            } else if (needsLabel) {
                 term = TermCons.apply(klist.items(), label, loc, source);
+            } else {
+                return klist;
             }
-            return new KList(ConsPStack.singleton(term));
+            return term;
         }
     }
 
