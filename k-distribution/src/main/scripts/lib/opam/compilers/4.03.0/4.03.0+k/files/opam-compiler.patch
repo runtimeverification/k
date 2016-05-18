@@ -4,7 +4,7 @@ index 40169c4..5b2caa5 100644
 +++ b/bytecomp/matching.ml
 @@ -79,7 +79,7 @@ let rec small_enough n = function
        else small_enough (n-1) rem
- 
+
  let ctx_lshift ctx =
 -  if small_enough 31 ctx then
 +  if small_enough 1 ctx then
@@ -13,7 +13,7 @@ index 40169c4..5b2caa5 100644
      get_mins le_ctx (List.map lforget ctx)
 @@ -2189,7 +2189,7 @@ let mk_failaction_pos partial seen ctx defs  =
        | _  -> scan_def ((List.map fst now,idef)::env) later rem in
- 
+
    let fail_pats = complete_pats_constrs seen in
 -  if List.length fail_pats < 32 then begin
 +  if List.length fail_pats < 2 then begin
@@ -30,7 +30,7 @@ index 6cffd5a..7f5e0fd 100644
    | Tpat_construct (_, c1,ps1), Tpat_construct (_, c2,ps2) ->
 -      c1.cstr_tag = c2.cstr_tag && compats ps1 ps2
 +      Types.equal_tag c1.cstr_tag c2.cstr_tag && compats ps1 ps2
-   | Tpat_variant(l1,Some p1, _r1), Tpat_variant(l2,Some p2,_) ->
+   | Tpat_variant(l1,Some p1, r1), Tpat_variant(l2,Some p2,_) ->
        l1=l2 && compat p1 p2
    | Tpat_variant (l1,None,r1), Tpat_variant(l2,None,_) ->
 @@ -270,7 +270,7 @@ let pretty_matrix (pss : matrix) =
@@ -76,7 +76,7 @@ index f30d6ca..1922f60 100644
 @@ -300,6 +300,12 @@ and constructor_tag =
    | Cstr_extension of Path.t * bool     (* Extension constructor
                                             true if a constant false if a block*)
- 
+
 +let equal_tag t1 t2 = match (t1, t2) with
 +  | Cstr_constant i1, Cstr_constant i2 -> i2 = i1
 +  | Cstr_block i1, Cstr_block i2 -> i2 = i1
@@ -93,7 +93,7 @@ index f83e60a..0979050 100644
 @@ -447,6 +447,8 @@ and constructor_tag =
    | Cstr_extension of Path.t * bool     (* Extension constructor
                                             true if a constant false if a block*)
- 
+
 +val equal_tag :  constructor_tag -> constructor_tag -> bool
 +
  type label_description =

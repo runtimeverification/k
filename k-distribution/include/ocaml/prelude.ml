@@ -46,12 +46,12 @@ let rec list_range (c: k list * int * int) : k list = match c with
 | (_ :: tail, n, len) -> list_range(tail, n - 1, len)
 | ([], _, _) -> raise(Failure "list_range")
 let float_to_string (f: Gmp.FR.t) : string = if Gmp.FR.is_nan f then "NaN" else if Gmp.FR.is_inf f then if Gmp.FR.sgn f > 0 then "Infinity" else "-Infinity" else Gmp.FR.to_string_base_digits Gmp.GMP_RNDN 10 0 f
-let k_of_list lbl l = match l with 
+let k_of_list lbl l = match l with
   [] -> denormalize (KApply((unit_for lbl),[]))
 | hd :: tl -> List.fold_left (fun list el -> denormalize (KApply(lbl, [list] :: [denormalize (KApply((el_for lbl),[el]))] :: []))) (denormalize (KApply((el_for lbl),[hd]))) tl
-let k_of_set lbl s = if (KSet.cardinal s) = 0 then denormalize (KApply((unit_for lbl),[])) else 
+let k_of_set lbl s = if (KSet.cardinal s) = 0 then denormalize (KApply((unit_for lbl),[])) else
   let hd = KSet.choose s in KSet.fold (fun el set -> denormalize (KApply(lbl, [set] :: [denormalize (KApply((el_for lbl),[el]))] :: []))) (KSet.remove hd s) (denormalize (KApply((el_for lbl),[hd])))
-let k_of_map lbl m = if (KMap.cardinal m) = 0 then denormalize (KApply((unit_for lbl),[])) else 
+let k_of_map lbl m = if (KMap.cardinal m) = 0 then denormalize (KApply((unit_for lbl),[])) else
   let (k,v) = KMap.choose m in KMap.fold (fun k v map -> denormalize (KApply(lbl, [map] :: [denormalize (KApply((el_for lbl),[k;v]))] :: []))) (KMap.remove k m) (denormalize (KApply((el_for lbl),[k;v])))
 let k_char_escape (buf: Buffer.t) (c: char) : unit = match c with
 | '"' -> Buffer.add_string buf "\\\""
@@ -61,7 +61,7 @@ let k_char_escape (buf: Buffer.t) (c: char) : unit = match c with
 | '\r' -> Buffer.add_string buf "\\r"
 | _ when let code = Char.code c in code >= 32 && code < 127 -> Buffer.add_char buf c
 | _ -> Buffer.add_string buf (Printf.sprintf "\\x%02x" (Char.code c))
-let k_string_escape str = 
+let k_string_escape str =
   let buf = Buffer.create (String.length str) in
   String.iter (k_char_escape buf) str; Buffer.contents buf
 let print_k_binary (c: k) : string =  let buf = Buffer.create 16 in
@@ -87,7 +87,7 @@ let print_k_binary (c: k) : string =  let buf = Buffer.create 16 in
   let print_string (s: string) : unit =
     let idx = try Hashtbl.find intern s with Not_found -> Hashtbl.length intern in
     print_int (Hashtbl.length intern - idx);
-    if idx = Hashtbl.length intern then 
+    if idx = Hashtbl.length intern then
       (print_int (String.length s);
       for i = 0 to (String.length s) - 1 do
         Buffer.add_char buf '\x00';
@@ -122,7 +122,7 @@ let print_k_binary (c: k) : string =  let buf = Buffer.create 16 in
   | KItem (List(sort,lbl,l)) -> print_kitem(normalize (k_of_list lbl l), [List(sort,lbl,l)])
   | KItem (Set(sort,lbl,s)) -> print_kitem(normalize (k_of_set lbl s), [Set(sort,lbl,s)])
   | KItem (Map(sort,lbl,m)) -> print_kitem(normalize (k_of_map lbl m), [Map(sort,lbl,m)])
-  in Buffer.add_string buf "\x7fKAST\x04\x00\x01"; print_k c 0; Buffer.add_string buf end_code; 
+  in Buffer.add_string buf "\x7fKAST\x04\x00\x01"; print_k c 0; Buffer.add_string buf end_code;
   Buffer.contents buf
 
 let print_k (c: k) : string = let buf = Buffer.create 16 in
@@ -136,7 +136,7 @@ let print_k (c: k) : string = let buf = Buffer.create 16 in
   | e1::e2::l -> print_kitem(normalize e1); Buffer.add_string buf " ~> "; print_k(e2::l)
   and print_kitem(c: normal_kitem) : unit = match c with
   | KApply(klabel, klist) -> Buffer.add_string buf (print_klabel klabel); Buffer.add_char buf '('; print_klist(klist); Buffer.add_char buf ')'
-  | KItem (KToken(sort, s)) -> Buffer.add_string buf "#token(\""; Buffer.add_string buf (k_string_escape s); 
+  | KItem (KToken(sort, s)) -> Buffer.add_string buf "#token(\""; Buffer.add_string buf (k_string_escape s);
         Buffer.add_string buf "\", \""; Buffer.add_string buf (print_sort sort); Buffer.add_string buf "\")"
   | KItem (InjectedKLabel(klabel)) -> Buffer.add_string buf "#klabel("; Buffer.add_string buf (print_klabel klabel); Buffer.add_char buf ')'
   | KItem (Bool(b)) -> print_kitem(KItem (KToken(SortBool, string_of_bool(b))))
@@ -149,23 +149,23 @@ let print_k (c: k) : string = let buf = Buffer.create 16 in
   | KItem (Map(_,lbl,m)) -> print_kitem(normalize (k_of_map lbl m))
   in print_k c; Buffer.contents buf
 module Subst = Map.Make(String)
-let print_subst (out: out_channel) (c: k Subst.t) : unit = 
+let print_subst (out: out_channel) (c: k Subst.t) : unit =
   output_string out "1\n"; Subst.iter (fun v k -> output_string out (v ^ "\n" ^ (print_k k) ^ "\n")) c
 let print_subst_binary (out: out_channel) (c: k Subst.t) : unit =
   output_binary_int out 1; Subst.iter (fun v k -> output_binary_int out (String.length v); output_string out v; output_string out (print_k_binary k)) c
 let emin (exp: int) (prec: int) : int = (- (1 lsl (exp - 1))) + 4 - prec
 let emin_normal (exp: int) : int = (- (1 lsl (exp - 1))) + 2
 let emax (exp: int) : int = 1 lsl (exp - 1)
-let round_to_range (c: kitem) : kitem = match c with 
+let round_to_range (c: kitem) : kitem = match c with
     Float(f,e,p) -> let (cr, t) = (Gmp.FR.check_range p Gmp.GMP_RNDN (emin e p) (emax e) f) in Float((Gmp.FR.subnormalize cr t Gmp.GMP_RNDN),e,p)
   | _ -> raise (Invalid_argument "round_to_range")
 let curr_fd : Z.t ref = ref (Z.of_int 3)
 let file_descriptors = let m = Hashtbl.create 5 in Hashtbl.add m (Z.of_int 0) Unix.stdin; Hashtbl.add m (Z.of_int 1) Unix.stdout; Hashtbl.add m (Z.of_int 2) Unix.stderr; m
 let default_file_perm = 0o777
-let convert_open_flags (s: string) : Unix.open_flag list = 
-  match s with 
-      "r" -> [Unix.O_RDONLY] 
-    | "w" -> [Unix.O_WRONLY] 
+let convert_open_flags (s: string) : Unix.open_flag list =
+  match s with
+      "r" -> [Unix.O_RDONLY]
+    | "w" -> [Unix.O_WRONLY]
     | "rw" -> [Unix.O_RDWR]
     | "wac" -> [Unix.O_WRONLY; Unix.O_APPEND; Unix.O_CREAT]
     | _ -> raise (Invalid_argument "convert_open_flags")
@@ -179,15 +179,15 @@ let to_zarith (i: Gmp.Z.t) : Z.t = Z.of_string (Gmp.Z.to_string i)
 let from_zarith (i: Z.t) : Gmp.Z.t = Gmp.Z.from_string (Z.to_string i)
 
 let deconstruct_float (f: Gmp.FR.t) (prec: int) (e: int) : bool * int * Z.t option =
- let (digits, exp) = Gmp.FR.to_string_exp_base_digits Gmp.GMP_RNDN 2 prec f in match digits with 
+ let (digits, exp) = Gmp.FR.to_string_exp_base_digits Gmp.GMP_RNDN 2 prec f in match digits with
  | "@Inf@" -> false, (emax e), Some Z.zero
  | "-@Inf@" -> true, (emax e), Some Z.zero
  | "@NaN@" -> false, (emax e), None
  | "-@NaN@" -> true, (emax e), None
  | _ -> let min_exp = emin_normal e in
  let significand = Z.abs (Z.of_string_base 2 digits) in
- let scaled_significand = if exp < min_exp then 
-   (Z.shift_right significand (min_exp - (exp - 1))) else 
+ let scaled_significand = if exp < min_exp then
+   (Z.shift_right significand (min_exp - (exp - 1))) else
    significand in
  let true_exp = if exp < min_exp then min_exp else if exp > (emax e) then emax e else (exp - 1) in
  (String.get digits 0 = '-'), true_exp, Some scaled_significand
@@ -198,7 +198,7 @@ let unescape_k_string (str: string) =
   let str = String.sub str 1 (String.length str - 2) in
   Scanf.unescaped str
 
-let parse_float (str: string) : int * int * string = 
+let parse_float (str: string) : int * int * string =
   if Str.string_match float_regexp str 0 then
     let prec = int_of_string (Str.matched_group 2 str) in
     let exp = int_of_string (Str.matched_group 3 str) in
@@ -224,54 +224,54 @@ let get_exit_code(subst: k Subst.t) : int = match (Subst.fold (fun k v res -> ma
 module MAP =
 struct
 
-  let hook_element c lbl sort config ff = match c with 
+  let hook_element c lbl sort config ff = match c with
       k1, k2 -> [Map (sort,(collection_for lbl),(KMap.singleton k1 k2))]
-  let hook_unit c lbl sort config ff = match c with 
+  let hook_unit c lbl sort config ff = match c with
       () -> [Map (sort,(collection_for lbl),KMap.empty)]
-  let hook_concat c lbl sort config ff = match c with 
-      ([Map (s,l1,k1)]), ([Map (_,l2,k2)]) 
+  let hook_concat c lbl sort config ff = match c with
+      ([Map (s,l1,k1)]), ([Map (_,l2,k2)])
         when (l1 = l2) -> [Map (s,l1,(KMap.union (fun k a b -> if a = b then Some a else raise Not_implemented) k1 k2))]
     | _ -> raise Not_implemented
-  let hook_lookup c lbl sort config ff = match c with 
+  let hook_lookup c lbl sort config ff = match c with
       [Map (_,_,k1)], k2 -> (try KMap.find k2 k1 with Not_found -> interned_bottom)
     | [Bottom], k2 -> interned_bottom
     | _ -> raise Not_implemented
-  let hook_update c lbl sort config ff = match c with 
+  let hook_update c lbl sort config ff = match c with
       [Map (s,l,k1)], k, v -> [Map (s,l,(KMap.add k v k1))]
     | _ -> raise Not_implemented
-  let hook_remove c lbl sort config ff = match c with 
+  let hook_remove c lbl sort config ff = match c with
       [Map (s,l,k1)], k2 -> [Map (s,l,(KMap.remove k2 k1))]
     | _ -> raise Not_implemented
   let hook_difference c lbl sort config ff = match c with
       [Map (s,l1,k1)], [Map (_,l2,k2)]
         when (l1 = l2) -> [Map (s,l1,(KMap.filter (fun k v -> try (compare (KMap.find k k2) v) <> 0 with Not_found -> true) k1))]
     | _ -> raise Not_implemented
-  let hook_keys c lbl sort config ff = match c with 
+  let hook_keys c lbl sort config ff = match c with
       [Map (_,_,k1)] -> [Set (SortSet, Lbl_Set_,(KMap.fold (fun k v -> KSet.add k) k1 KSet.empty))]
     | _ -> raise Not_implemented
-  let hook_keys_list c lbl sort config ff = match c with 
+  let hook_keys_list c lbl sort config ff = match c with
       [Map (_,_,k1)] -> [List (SortList, Lbl_List_,(match List.split (KMap.bindings k1) with l, _ -> l))]
     | _ -> raise Not_implemented
   let hook_in_keys c lbl sort config ff = match c with
       (k1, [Map (_,_,k2)]) -> [Bool (KMap.mem k1 k2)]
     | (k1, [Bottom]) -> [Bool false] (* case is useful for double map lookup *)
     | _ -> raise Not_implemented
-  let hook_values c lbl sort config ff = match c with 
+  let hook_values c lbl sort config ff = match c with
       [Map (_,_,k1)] -> [List (SortList, Lbl_List_,(match List.split (KMap.bindings k1) with (_,vs) -> vs))]
     | _ -> raise Not_implemented
-  let hook_choice c lbl sort config ff = match c with 
+  let hook_choice c lbl sort config ff = match c with
       [Map (_,_,k1)] -> (match KMap.choose k1 with (k, _) -> k)
     | _ -> raise Not_implemented
-  let hook_size c lbl sort config ff = match c with 
+  let hook_size c lbl sort config ff = match c with
       [Map (_,_,m)] -> [Int (Z.of_int (KMap.cardinal m))]
     | _ -> raise Not_implemented
   let hook_inclusion c lbl sort config ff = match c with
-      [Map (s,l1,k1)], [Map (_,l2,k2)] 
+      [Map (s,l1,k1)], [Map (_,l2,k2)]
         when (l1 = l2) -> [Bool (KMap.for_all (fun k v -> try (compare (KMap.find k k2) v) = 0 with Not_found -> false) k1)]
     | _ -> raise Not_implemented
-  let hook_updateAll c lbl sort config ff = match c with 
-      ([Map (s,l1,k1)]), ([Map (_,l2,k2)]) 
-        when (l1 = l2) -> [Map (s,l1,(KMap.union (fun k a b -> match a, b with 
+  let hook_updateAll c lbl sort config ff = match c with
+      ([Map (s,l1,k1)]), ([Map (_,l2,k2)])
+        when (l1 = l2) -> [Map (s,l1,(KMap.union (fun k a b -> match a, b with
                           _, v -> Some v) k1 k2))]
     | _ -> raise Not_implemented
   let hook_removeAll c lbl sort config ff = match c with
@@ -327,13 +327,13 @@ struct
       k1, [List (_,_,k2)] -> [Bool (List.mem k1 k2)]
     | _ -> raise Not_implemented
   let hook_get c lbl sort config ff = match c with
-      [List (_,_,l1)], [Int i] -> 
-        let i = Z.to_int i in (try if i >= 0 then List.nth l1 i else List.nth l1 ((List.length l1) + i) 
+      [List (_,_,l1)], [Int i] ->
+        let i = Z.to_int i in (try if i >= 0 then List.nth l1 i else List.nth l1 ((List.length l1) + i)
                                with Failure _ -> interned_bottom | Invalid_argument _ -> interned_bottom)
     | _ -> raise Not_implemented
   let hook_range c lbl sort config ff = match c with
-      [List (s,lbl,l1)], [Int i1], [Int i2] -> 
-        (try [List (s,lbl,(list_range (l1, (Z.to_int i1), (List.length(l1) - (Z.to_int i2) - (Z.to_int i1)))))] 
+      [List (s,lbl,l1)], [Int i1], [Int i2] ->
+        (try [List (s,lbl,(list_range (l1, (Z.to_int i1), (List.length(l1) - (Z.to_int i2) - (Z.to_int i1)))))]
          with Failure _ -> interned_bottom)
     | _ -> raise Not_implemented
   let hook_size c lbl sort config ff = match c with
@@ -341,10 +341,10 @@ struct
     | _ -> raise Not_implemented
 end
 
-module KREFLECTION = 
+module KREFLECTION =
 struct
   let hook_sort c lbl sort config ff = match c with
-      
+
       [KToken (sort, s)] -> [String (print_sort(sort))]
     | [Int _] -> [String "Int"]
     | [String _] -> [String "String"]
@@ -358,6 +358,7 @@ struct
     | _ -> interned_bottom
   let hook_configuration c lbl sort config ff = match c with
       () -> match config with [Thread(global, _, _, _)] -> global
+    | _ -> config
   let hook_fresh c lbl sort config ff = match c with
       [String sort] -> let res = ff sort config !freshCounter in freshCounter := Z.add !freshCounter Z.one; res
     | _ -> raise Not_implemented
@@ -385,7 +386,7 @@ struct
       [Int i] -> let b = Bytes.create 1 in let _ = Unix.read (Hashtbl.find file_descriptors i) b 0 1 in [Int (Z.of_int (Char.code (Bytes.get b 0)))]
     | _ -> raise Not_implemented
   let hook_open c lbl sort config ff = match c with
-      [String path], [String flags] -> 
+      [String path], [String flags] ->
         let fd = Unix.openfile path (convert_open_flags flags) default_file_perm in
           let fd_int = !curr_fd in Hashtbl.add file_descriptors fd_int fd; curr_fd := (Z.add fd_int Z.one); [Int fd_int]
     | _ -> raise Not_implemented
@@ -393,7 +394,7 @@ struct
       [Int fd], [Int c] -> let _ = Unix.write (Hashtbl.find file_descriptors fd) (Bytes.make 1 (Char.chr (Z.to_int c))) 0 1 in []
     | _ -> raise Not_implemented
   let hook_read c lbl sort config ff = match c with
-      [Int fd], [Int len] -> let l = (Z.to_int len) in 
+      [Int fd], [Int len] -> let l = (Z.to_int len) in
         let b = Bytes.create l in let _ = Unix.read (Hashtbl.find file_descriptors fd) b 0 l in [String (Bytes.to_string b)]
     | _ -> raise Not_implemented
   let hook_seek c lbl sort config ff = match c with
@@ -414,7 +415,7 @@ struct
   let hook_system c lbl sort config ff = raise Not_implemented
 end
 
-module BOOL = 
+module BOOL =
 struct
   let hook_and c lbl sort config ff = match c with
       [Bool b1], [Bool b2] -> [Bool (b1 && b2)]
@@ -466,13 +467,13 @@ struct
       [Int i] -> [String (String.make 1 (Char.chr (Z.to_int i)))]
     | _ -> raise Not_implemented
   let hook_find c lbl sort config ff = match c with
-      [String s1], [String s2], [Int i] -> 
-        (try [Int (Z.of_int (Str.search_forward (Str.regexp_string s2) s1 (Z.to_int i)))] 
+      [String s1], [String s2], [Int i] ->
+        (try [Int (Z.of_int (Str.search_forward (Str.regexp_string s2) s1 (Z.to_int i)))]
         with Not_found -> [Int (Z.of_int (-1))])
     | _ -> raise Not_implemented
   let hook_rfind c lbl sort config ff = match c with
-      [String s1], [String s2], [Int i] -> 
-        (try [Int (Z.of_int (Str.search_backward (Str.regexp_string s2) s1 (Z.to_int i)))] 
+      [String s1], [String s2], [Int i] ->
+        (try [Int (Z.of_int (Str.search_backward (Str.regexp_string s2) s1 (Z.to_int i)))]
         with Not_found -> [Int (Z.of_int (-1))])
     | _ -> raise Not_implemented
   let hook_length c lbl sort config ff = match c with
@@ -656,19 +657,19 @@ struct
       [Float (f,e,p)] -> [round_to_range(Float ((Gmp.FR.neg_prec p Gmp.GMP_RNDN f),e,p))]
     | _ -> raise Not_implemented
   let hook_add c lbl sort config ff = match c with
-      [Float (f1,e1,p1)], [Float (f2,e2,p2)] 
+      [Float (f1,e1,p1)], [Float (f2,e2,p2)]
         when e1 = e2 && p1 = p2 -> [round_to_range(Float ((Gmp.FR.add_prec p1 Gmp.GMP_RNDN f1 f2),e1,p1))]
     | _ -> raise Not_implemented
   let hook_sub c lbl sort config ff = match c with
-      [Float (f1,e1,p1)], [Float (f2,e2,p2)] 
+      [Float (f1,e1,p1)], [Float (f2,e2,p2)]
         when e1 = e2 && p1 = p2 -> [round_to_range(Float ((Gmp.FR.sub_prec p1 Gmp.GMP_RNDN f1 f2),e1,p1))]
     | _ -> raise Not_implemented
   let hook_mul c lbl sort config ff = match c with
-      [Float (f1,e1,p1)], [Float (f2,e2,p2)] 
+      [Float (f1,e1,p1)], [Float (f2,e2,p2)]
         when e1 = e2 && p1 = p2 -> [round_to_range(Float ((Gmp.FR.mul_prec p1 Gmp.GMP_RNDN f1 f2),e1,p1))]
     | _ -> raise Not_implemented
   let hook_div c lbl sort config ff = match c with
-      [Float (f1,e1,p1)], [Float (f2,e2,p2)] 
+      [Float (f1,e1,p1)], [Float (f2,e2,p2)]
         when e1 = e2 && p1 = p2 -> [round_to_range(Float ((Gmp.FR.div_prec p1 Gmp.GMP_RNDN f1 f2),e1,p1))]
     | _ -> raise Not_implemented
   let hook_pow c lbl sort config ff = match c with
@@ -700,7 +701,7 @@ struct
       [Float (f,_,_)] -> [Int (to_zarith (Gmp.FR.to_z_f f))]
     | _ -> raise Not_implemented
   let hook_int2float c lbl sort config ff = match c with
-      [Int i], [Int prec], [Int exp] -> 
+      [Int i], [Int prec], [Int exp] ->
         [round_to_range(Float ((Gmp.FR.from_z_prec (Z.to_int prec) Gmp.GMP_RNDN (from_zarith i)),(Z.to_int exp),(Z.to_int prec)))]
     | _ -> raise Not_implemented
   let hook_min c lbl sort config ff = raise Not_implemented
@@ -711,7 +712,7 @@ struct
       [Float (f,e,p)] -> (match deconstruct_float f e p with (s,_,_) -> [Bool s])
     | _ -> raise Not_implemented
   let hook_significand c lbl sort config ff = match c with
-      [Float (f,e,p)] -> (match deconstruct_float f e p with (_, _, Some s) -> [Int s] 
+      [Float (f,e,p)] -> (match deconstruct_float f e p with (_, _, Some s) -> [Int s]
         | _ -> raise Not_implemented)
     | _ -> raise Not_implemented
   let hook_atan2 c lbl sort config ff = raise Not_implemented

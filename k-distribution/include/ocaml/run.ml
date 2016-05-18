@@ -52,10 +52,22 @@ let rec take_steps (module Def: Plugin.Definition) (step_function: k -> (k * ste
         )
       )
   )
-          
+
+let rec take_steps_no_thread (module Def: Plugin.Definition) (step_function: k -> (k * step_function)) (config: k) (depth: int) (n: int) : k * int =
+  if n = depth then (
+    (config, n)
+  ) else (
+    match (try let (res, func) = (step_function config) in Step(res, func) with Stuck c -> NoStep c) with
+    | Step(config, StepFunc step_function) -> take_steps_no_thread (module Def) step_function config depth (n+1)
+    | NoStep config -> (config, n)
+  )
 
 let run (config: k) (depth: int) : k * int =
   let module Def = (val Plugin.get () : Plugin.Definition) in
   let first_config, first_thread_ids = split_config config in
   let last_config,n = take_steps (module Def) Def.step first_thread_ids first_config depth 0 false in
   (plug_config last_config, n)
+
+let run_no_thread_opt (config: k) (depth: int) : k * int =
+  let module Def = (val Plugin.get () : Plugin.Definition) in
+  take_steps_no_thread (module Def) Def.step config depth 0
