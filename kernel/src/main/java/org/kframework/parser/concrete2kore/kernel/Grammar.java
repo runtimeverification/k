@@ -488,6 +488,8 @@ public class Grammar implements Serializable {
          */
         abstract Set<MatchResult> matches(String text, String reverseText, int startPosition);
 
+        abstract int errorAt(String text, String reverseText, int startPosition);
+
         public PrimitiveState(String name, NonTerminal nt) {
             super(name, nt, true);
         }
@@ -535,6 +537,26 @@ public class Grammar implements Serializable {
                 return Collections.emptySet();
 
             return Collections.singleton(new MatchResult(startPosition + matchedLength));
+        }
+
+        int errorAt(String text, String reverseText, int startPosition) {
+            int matchedLength = pattern.run(text, startPosition);
+            if (matchedLength == -1) {
+                return errorAt(text, startPosition);
+            }
+            return startPosition;
+        }
+
+        private int errorAt(String text, int startPosition) {
+            int current = pattern.getInitialState();
+            int length = text.length();
+            for (int i = startPosition; i < length; i++) {
+                current = pattern.step(current, text.charAt(i));
+                if (current == -1) {
+                    return i;
+                }
+            }
+            return startPosition;
         }
     }
 }

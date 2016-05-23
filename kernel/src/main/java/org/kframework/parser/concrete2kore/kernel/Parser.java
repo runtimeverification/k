@@ -605,7 +605,7 @@ public class Parser {
         int current = 0;
         for (StateCall.Key key : s.stateCalls.keySet()) {
             if (key.state instanceof PrimitiveState)
-                current = Math.max(current, key.stateBegin);
+                current = Math.max(current, ((PrimitiveState) key.state).errorAt(s.input, s.reverseInput, key.stateBegin));
         }
         Set<Pair<Production, RegExState>> tokens = new HashSet<>();
         for (StateCall.Key key : s.stateCalls.keySet()) {
