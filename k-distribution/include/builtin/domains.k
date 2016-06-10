@@ -20,6 +20,25 @@ module DOMAINS
   imports SET
 endmodule
 
+module ARRAY
+  imports LIST
+  imports STRING-SYNTAX
+
+  syntax Array [hook(ARRAY.Array), unit(arrayCtor), element(_[_<-_])]
+
+  syntax Array ::= makeArray(Int, K) [function, hook(ARRAY.make)]
+                 | makeEmptyArray(Int) [function, hook(ARRAY.makeEmpty)]
+                 | arrayCtor(String, Int) [function, hook(ARRAY.ctor)]
+
+  syntax K ::= Array "[" Int "]" [function, hook(ARRAY.lookup)]
+  syntax Array ::= Array "[" Int "<-" K "]" [function, hook(ARRAY.update), klabel(_[_<-_])]
+  syntax Array ::= Array "[" Int "<-" "undef" "]" [function, hook(ARRAY.remove)]
+  syntax Array ::= updateArray(Array, Int, List) [function, hook(ARRAY.updateAll)]
+
+  syntax Bool ::= Int "in_keys" "(" Array ")" [function, hook(ARRAY.in_keys)]
+
+endmodule
+
 module MAP
   imports LIST
   imports SET

@@ -53,6 +53,8 @@ let k_of_set lbl s = if (KSet.cardinal s) = 0 then denormalize (KApply((unit_for
   let hd = KSet.choose s in KSet.fold (fun el set -> denormalize (KApply(lbl, [set] :: [denormalize (KApply((el_for lbl),[el]))] :: []))) (KSet.remove hd s) (denormalize (KApply((el_for lbl),[hd])))
 let k_of_map lbl m = if (KMap.cardinal m) = 0 then denormalize (KApply((unit_for lbl),[])) else
   let (k,v) = KMap.choose m in KMap.fold (fun k v map -> denormalize (KApply(lbl, [map] :: [denormalize (KApply((el_for lbl),[k;v]))] :: []))) (KMap.remove k m) (denormalize (KApply((el_for lbl),[k;v])))
+let k_of_array sort a = let uuid = Uuidm.create `V4 in
+  fst (Dynarray.fold_left (fun (res,i) elt -> match elt with [Bottom] -> res,(Z.add i Z.one) | _ -> (denormalize(KApply((el_for_array sort),[[res]; [Int i]; elt]))),(Z.add i Z.one)) ((denormalize(KApply((unit_for_array sort), [[String (Uuidm.to_string uuid)]; [Int (Z.of_int (Dynarray.length a))]]))),Z.zero) a)
 let k_char_escape (buf: Buffer.t) (c: char) : unit = match c with
 | '"' -> Buffer.add_string buf "\\\""
 | '\\' -> Buffer.add_string buf "\\\\"
@@ -118,10 +120,11 @@ let print_k_binary (c: k) : string =  let buf = Buffer.create 16 in
   | KItem (String(s)) -> print_kitem(KItem (KToken(SortString, "\"" ^ (k_string_escape s) ^ "\"")), [String s])
   | KItem (Int(i)) -> print_kitem(KItem (KToken(SortInt, Z.to_string(i))), [Int i])
   | KItem (Float(f,e,p)) -> print_kitem(KItem (KToken(SortFloat, float_to_string(f))), [Float(f,e,p)])
-  | KItem (Bottom) -> print_kitem(KApply(Lbl'0023'Bottom, []), [Bottom])
+  | KItem (Bottom) -> print_kitem(KApply(Lbl'0023'Bottom, []), interned_bottom)
   | KItem (List(sort,lbl,l)) -> print_kitem(normalize (k_of_list lbl l), [List(sort,lbl,l)])
   | KItem (Set(sort,lbl,s)) -> print_kitem(normalize (k_of_set lbl s), [Set(sort,lbl,s)])
   | KItem (Map(sort,lbl,m)) -> print_kitem(normalize (k_of_map lbl m), [Map(sort,lbl,m)])
+  | KItem (Array(sort,a)) -> print_kitem(normalize (k_of_array sort a), [Array(sort,a)])
   in Buffer.add_string buf "\x7fKAST\x04\x00\x01"; print_k c 0; Buffer.add_string buf end_code;
   Buffer.contents buf
 
@@ -147,6 +150,7 @@ let print_k (c: k) : string = let buf = Buffer.create 16 in
   | KItem (List(_,lbl,l)) -> print_kitem(normalize (k_of_list lbl l))
   | KItem (Set(_,lbl,s)) -> print_kitem(normalize (k_of_set lbl s))
   | KItem (Map(_,lbl,m)) -> print_kitem(normalize (k_of_map lbl m))
+  | KItem (Array(sort,a)) -> print_kitem(normalize (k_of_array sort a))
   in print_k c; Buffer.contents buf
 module Subst = Map.Make(String)
 let print_subst (out: out_channel) (c: k Subst.t) : unit =
@@ -338,6 +342,35 @@ struct
     | _ -> raise Not_implemented
   let hook_size c lbl sort config ff = match c with
       [List (_,_,l)] -> [Int (Z.of_int (List.length l))]
+    | _ -> raise Not_implemented
+end
+
+module ARRAY =
+struct
+  let hook_make c lbl sort config ff = match c with
+      [Int len], k -> [Array (sort,(Dynarray.make (Z.to_int len) k))]
+    | _ -> raise Not_implemented
+  let hook_makeEmpty c lbl sort config ff = match c with
+      [Int len] -> [Array (sort,(Dynarray.make (Z.to_int len) interned_bottom))]
+    | _ -> raise Not_implemented
+  let hook_lookup c lbl sort config ff = match c with
+      [Array (_,a)], [Int idx] -> (try Dynarray.get a (Z.to_int idx) with Invalid_argument _ | Z.Overflow -> interned_bottom)
+    | _ -> raise Not_implemented
+  let hook_update c lbl sort config ff = match c with
+      [Array (_,a)] as value, [Int i], k -> (try Dynarray.set a (Z.to_int i) k with Invalid_argument _ | Z.Overflow -> ()); value
+    | _ -> raise Not_implemented
+  let hook_remove c lbl sort config ff = match c with
+      [Array (_,a)] as value, [Int i] -> (try Dynarray.set a (Z.to_int i) interned_bottom with Invalid_argument _ | Z.Overflow -> ()); value
+    | _ -> raise Not_implemented
+  let hook_updateAll c lbl sort config ff = match c with
+      [Array (s,a)] as value, [Int i], [List (_,_,l)] -> List.iteri (fun j elt -> try Dynarray.set a (j + (Z.to_int i)) elt with Invalid_argument _ | Z.Overflow -> ()) l; value
+    | _ -> raise Not_implemented
+  let hook_in_keys c lbl sort config ff = match c with
+      [Int i], [Array (_,a)] -> [Bool (try (match Dynarray.get a (Z.to_int i) with [Bottom] -> false | _ -> true) with Invalid_argument _ | Z.Overflow -> false)]
+    | _ -> raise Not_implemented
+
+  let hook_ctor c lbl sort config ff = match c with
+      _, [Int len] -> [Array (sort,(Dynarray.make (Z.to_int len) interned_bottom))]
     | _ -> raise Not_implemented
 end
 
