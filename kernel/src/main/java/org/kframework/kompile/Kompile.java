@@ -46,6 +46,7 @@ import java.io.File;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -178,6 +179,14 @@ public class Kompile {
         stream(parsedDef.modules()).forEach(m -> stream(m.localSentences()).forEach(new CheckStreams(errors, m)::check));
 
         stream(parsedDef.modules()).forEach(m -> stream(m.localSentences()).forEach(new CheckRewrite(errors, m)::check));
+
+        Set<String> moduleNames = new HashSet<>();
+        stream(parsedDef.modules()).forEach(m -> {
+            if (moduleNames.contains(m.name())) {
+                errors.add(KEMException.compilerError("Found multiple modules with name: " + m.name()));
+            }
+            moduleNames.add(m.name());
+        });
 
         CheckKLabels checkKLabels = new CheckKLabels(errors);
         // only check imported modules because otherwise we might have false positives

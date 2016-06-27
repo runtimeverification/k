@@ -1,7 +1,6 @@
 // Copyright (c) 2015-2016 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore;
 
-import com.google.common.collect.SetMultimap;
 import org.apache.commons.io.FileUtils;
 import org.kframework.attributes.Att;
 import org.kframework.attributes.Source;
@@ -114,7 +113,8 @@ public class ParserUtils {
             String definitionText,
             Source source,
             File currentDirectory,
-            List<File> lookupDirectories) {
+            List<File> lookupDirectories,
+            Set<File> requiredFiles) {
         List<DefinitionItem> items = Outer.parse(source, definitionText, null);
         if (options.verbose) {
             System.out.println("Importing: " + source);
@@ -143,10 +143,17 @@ public class ParserUtils {
                         .filter(file -> file.exists()).findFirst();
 
                 if (definitionFile.isPresent()) {
-                    results.addAll(slurp(loadDefinitionText(definitionFile.get()),
-                            Source.apply(definitionFile.get().getAbsolutePath()),
-                            definitionFile.get().getParentFile(),
-                            lookupDirectories));
+                    File canonical = definitionFile.get().getAbsoluteFile();
+                    try {
+                        canonical = canonical.getCanonicalFile();
+                    } catch (IOException e) {}
+                    if (!requiredFiles.contains(canonical)) {
+                        requiredFiles.add(canonical);
+                        results.addAll(slurp(loadDefinitionText(canonical),
+                                Source.apply(canonical.getAbsolutePath()),
+                                canonical.getParentFile(),
+                                lookupDirectories, requiredFiles));
+                    }
                 }
                 else
                     throw KExceptionManager.criticalError("Could not find file: " +
@@ -170,10 +177,11 @@ public class ParserUtils {
             Source source,
             File currentDirectory,
             List<File> lookupDirectories,
-            boolean autoImportDomains) {
+            boolean autoImportDomains,
+            Set<File> requiredFiles) {
 
         List<org.kframework.kil.Module> kilModules =
-                slurp(definitionText, source, currentDirectory, lookupDirectories);
+                slurp(definitionText, source, currentDirectory, lookupDirectories, requiredFiles);
 
         Definition def = new Definition();
         def.setItems((List<DefinitionItem>) (Object) kilModules);
@@ -216,9 +224,10 @@ public class ParserUtils {
             List<File> lookupDirectories,
             boolean autoImportDomains) {
         Set<Module> previousModules = new HashSet<>();
+        Set<File> requiredFiles = new HashSet<>();
         if (autoImportDomains)
-            previousModules.addAll(loadModules(new HashSet<>(), Kompile.REQUIRE_PRELUDE_K, source, currentDirectory, lookupDirectories, false));
-        Set<Module> modules = loadModules(previousModules, definitionText, source, currentDirectory, lookupDirectories, autoImportDomains);
+            previousModules.addAll(loadModules(new HashSet<>(), Kompile.REQUIRE_PRELUDE_K, source, currentDirectory, lookupDirectories, false, requiredFiles));
+        Set<Module> modules = loadModules(previousModules, definitionText, source, currentDirectory, lookupDirectories, autoImportDomains, requiredFiles);
         modules.addAll(previousModules); // add the previous modules, since load modules is not additive
         Optional<Module> opt = modules.stream().filter(m -> m.name().equals(mainModuleName)).findFirst();
         if (!opt.isPresent()) {

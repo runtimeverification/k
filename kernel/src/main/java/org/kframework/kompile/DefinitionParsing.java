@@ -94,7 +94,8 @@ public class DefinitionParsing {
                 Source.apply(definitionFile.getAbsolutePath()),
                 definitionFile.getParentFile(),
                 Lists.newArrayList(Kompile.BUILTIN_DIRECTORY),
-                autoImportDomains);
+                autoImportDomains,
+                new HashSet<>());
 
         if (modules.size() != 1) {
             throw KEMException.compilerError("Expected to find a file with 1 module: found " + modules.size() + " instead.");
