@@ -82,7 +82,7 @@ public class JarInfo {
             String revision = mf.getMainAttributes().getValue("Implementation-Revision");
             String branch = mf.getMainAttributes().getValue("Implementation-Branch");
             Date date = new Date(Long.parseLong(mf.getMainAttributes().getValue("Implementation-Date")));
-            System.out.println("K framework version " + JarInfo.class.getPackage().getImplementationVersion());
+            System.out.println("RV-K version " + JarInfo.class.getPackage().getImplementationVersion());
             System.out.println("Git revision: " + revision);
             System.out.println("Git branch: " + branch);
             System.out.println("Build date: " + date.toString());
