@@ -1,7 +1,6 @@
 // Copyright (c) 2014-2016 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore.kernel;
 
-import dk.brics.automaton.Automaton;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 import org.kframework.definition.Production;
@@ -72,18 +71,11 @@ public abstract class Rule implements Serializable {
     public static class WrapLabelRule extends KListRule {
         public final Production label;
         private final boolean isToken, needsLabel;
-        public final Automaton rejectPattern;
-        private final Set<String> rejects;
-        public WrapLabelRule(Production label, Automaton rejectPattern, Set<String> rejects) {
+        public WrapLabelRule(Production label) {
             assert label != null;
             this.label = label;
-            this.rejectPattern = rejectPattern;
-            this.rejects = rejects;
             this.isToken = label.att().contains("token");
             this.needsLabel = label.klabel().isDefined() || !label.isSyntacticSubsort();
-        }
-        public WrapLabelRule(Production label) {
-            this(label, null, new HashSet<>());
         }
         protected Term apply(KList klist, MetaData metaData) {
             Term term;
@@ -91,12 +83,6 @@ public abstract class Rule implements Serializable {
             Source source = metaData.source;
             if (isToken) {
                 String value = metaData.input.subSequence(metaData.start.position, metaData.end.position).toString();
-                if (rejectPattern != null && rejectPattern.run(value)) {
-                    return null;
-                }
-                if (rejects.contains(value)) {
-                    return null;
-                }
                 term = Constant.apply(value, label, Optional.of(loc), Optional.of(source));
             } else if (needsLabel) {
                 term = TermCons.apply(klist.items(), label, loc, source);

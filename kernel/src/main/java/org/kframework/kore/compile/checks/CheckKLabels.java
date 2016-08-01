@@ -1,6 +1,7 @@
 package org.kframework.kore.compile.checks;
 
 import com.google.common.collect.ImmutableSet;
+import org.kframework.definition.Context;
 import org.kframework.definition.Module;
 import org.kframework.definition.Production;
 import org.kframework.definition.Rule;
@@ -35,32 +36,36 @@ public class CheckKLabels {
     private final Map<KLabel, Module> klabels = new HashMap<>();
 
     public void check(Sentence sentence, Module m) {
+        VisitK checkKLabels = new VisitK() {
+            @Override
+            public void apply(InjectedKLabel k) {
+                apply(k.klabel(), k);
+                super.apply(k);
+            }
+
+            @Override
+            public void apply(KApply k) {
+                apply(k.klabel(), k);
+                super.apply(k);
+            }
+
+            private void apply(KLabel klabel, K k) {
+                if (klabel instanceof KVariable)
+                    return;
+                if (!m.definedKLabels().apply(klabel) && !isInternalKLabel(klabel.name(), m)) {
+                    errors.add(KEMException.compilerError("Found klabel " + klabel.name() + " not defined in any production.", k));
+                }
+            }
+        };
         if (sentence instanceof Rule) {
-            Rule rl = (Rule)sentence;
-            VisitK checkKLabels = new VisitK() {
-                @Override
-                public void apply(InjectedKLabel k) {
-                    apply(k.klabel(), k);
-                    super.apply(k);
-                }
-
-                @Override
-                public void apply(KApply k) {
-                    apply(k.klabel(), k);
-                    super.apply(k);
-                }
-
-                private void apply(KLabel klabel, K k) {
-                    if (klabel instanceof KVariable)
-                        return;
-                    if (!m.definedKLabels().apply(klabel) && !isInternalKLabel(klabel.name(), m)) {
-                        errors.add(KEMException.compilerError("Found klabel " + klabel.name() + " not defined in any production.", k));
-                    }
-                }
-            };
+            Rule rl = (Rule) sentence;
             checkKLabels.apply(rl.body());
             checkKLabels.apply(rl.requires());
             checkKLabels.apply(rl.ensures());
+        } else if (sentence instanceof Context) {
+            Context ctx = (Context) sentence;
+            checkKLabels.apply(ctx.body());
+            checkKLabels.apply(ctx.requires());
         } else if (sentence instanceof Production) {
             Production prod = (Production) sentence;
             if (prod.klabel().isDefined()) {

@@ -278,7 +278,7 @@ endmodule
 
 module INT-SYNTAX
   syntax Int [hook(INT.Int)]
-  syntax Int ::= r"[\\+-]?[0-9]+" [prefer, token]
+  syntax Int ::= r"[\\+-]?[0-9]+" [prefer, token, prec(2)]
 endmodule
 
 module INT
@@ -344,7 +344,7 @@ endmodule
 
 module FLOAT-SYNTAX
   syntax Float [hook(FLOAT.Float)]
-  syntax Float ::= r"([\\+-]?[0-9]+(\\.[0-9]*)?|\\.[0-9]+)([eE][\\+-]?([0-9]+(\\.[0-9]*)?|\\.[0-9]d+))?([fFdD]|([pP][0-9]+[xX][0-9]+))?" [token]
+  syntax Float ::= r"([\\+-]?[0-9]+(\\.[0-9]*)?|\\.[0-9]+)([eE][\\+-]?([0-9]+(\\.[0-9]*)?|\\.[0-9]d+))?([fFdD]|([pP][0-9]+[xX][0-9]+))?" [token, prec(1)]
   syntax Float ::= r"[\\+-]?Infinity([fFdD]|([pP][0-9]+[xX][0-9]+))?" [token]
   syntax Float ::= r"NaN([fFdD]|([pP][0-9]+[xX][0-9]+))?" [token]
 endmodule
@@ -428,7 +428,7 @@ module STRING-SYNTAX
   //              | [\\][U] 8*Hex // "\UFFffFFff" Backslash 'U' followed by eight hexadecimal characters
   //                              // the code must not be in the range [0xdfff, 0xd800] or exceed 0x10ffff
   syntax String [hook(STRING.String)]
-  syntax String ::= r"[\\\"](([^\\\"\n\r\\\\])|([\\\\][nrtf\\\"\\\\])|([\\\\][x][0-9a-fA-F]{2})|([\\\\][u][0-9a-fA-F]{4})|([\\\\][U][0-9a-fA-F]{8}))*[\\\"]"      [token]
+  syntax String ::= r"[\\\"](([^\\\"\\n\\r\\\\])|([\\\\][nrtf\\\"\\\\])|([\\\\][x][0-9a-fA-F]{2})|([\\\\][u][0-9a-fA-F]{4})|([\\\\][U][0-9a-fA-F]{8}))*[\\\"]"      [token]
 endmodule
 
 module STRING
@@ -511,7 +511,10 @@ module STRING
 endmodule
 
 module ID-PROGRAM-PARSING
-  syntax Id ::= r"(?<![A-Za-z0-9\\_])[A-Za-z\\_][A-Za-z0-9\\_]*"     [notInRules, token, autoReject]
+  imports BUILTIN-ID-TOKENS
+  syntax Id ::= r"(?<![A-Za-z0-9\\_])[A-Za-z\\_][A-Za-z0-9\\_]*"     [prec(1), notInRules, token, autoReject]
+              | #LowerId                                             [notInRules, token, autoReject]
+              | #UpperId                                             [notInRules, token, autoReject]
 endmodule
 
 module ID
@@ -752,7 +755,7 @@ module STDOUT-STREAM
   // Send first char from the buffer to the server
   rule [stdoutWrite]:
        <stdout>
-       ListItem(#ostream((.K => #write(N, S)) ~> N:Int))
+       ListItem(#ostream({(.K => #write(N, S)) ~> N:Int}:>Int))
        ListItem("on")
        ListItem(#buffer(S:String => ""))
        _:List
@@ -979,8 +982,10 @@ module CONFIGURATION-PRIMITIVES
 endmodule
 
 module STRATEGY
+    imports BUILTIN-ID-TOKENS
 
-    syntax #RuleTag ::= r"[a-zA-Z0-9]*"                    [token]
+    syntax #RuleTag ::= #LowerId                           [token]
+                      | #UpperId                           [token]
 
     syntax Strategy ::= #STUCK()
 

@@ -376,7 +376,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
         case "#OuterCast":
             return tc.production().sort();
         case "#InnerCast":
-            return ((NonTerminal)tc.production().items().apply(0)).sort();
+            return ((NonTerminal)tc.production().items().apply(1)).sort();
         default:
             if (tc.production().klabel().get().name().startsWith("#SemanticCastTo")) {
                 return tc.production().sort();

@@ -126,7 +126,7 @@ public class RuleGrammarTest {
                 "| r\"[0-9]+\" [token] " +
                 "syntax left 'Plus " +
                 "endmodule";
-        parseRule("1+2=>A:Exp~>B:>Exp", def, 1, false);
+        parseRule("1+2=>A:Exp~>{B}:>Exp", def, 1, false);
     }
 
     // test variable disambiguation when a variable is declared by the user
@@ -426,42 +426,5 @@ public class RuleGrammarTest {
                             KToken("l",Sort("KLabel")), KToken("_",Sort("#KVariable"))),
                 KApply(KLabel("#EmptyK"))
                 )));
-    }
-
-    // automatic subsort overloaded lists, al sorts of program lists tests
-    // regression test for issue #1705
-    @Test
-    public void test25() {
-        String def = "" +
-                "module TEST " +
-                "syntax Int ::= \"1\" " +
-                "syntax Exp ::= Int " +
-                "            | Exp \"(\" Exps \")\" " +
-                "" +
-                "syntax Ints ::= List{Int,\",\"} " +
-                "syntax Exps ::= List{Exp,\",\"} " +
-                "syntax NeInts ::= NeList{Int,\",\"} " +
-                "endmodule";
-        parseRule("A:Exp(I:Int, Is:Ints)", def, 0, false);
-        parseRule("A:Exp, .Exps", def, 0,
-                KApply(KLabel("#ruleNoConditions"),
-                        KApply(KLabel("_,__TEST"),
-                                KApply(KLabel("#SemanticCastToExp"), KToken("A", Sort("#KVariable"))),
-                                KApply(KLabel(".List{\"_,__TEST\"}"))
-                        )));
-        parseProgram("1(1, 1)", def, "Exp", 0, KApply(KLabel("_(_)_TEST"),
-                KApply(KLabel("1_TEST")),
-                KApply(KLabel("_,__TEST"), KApply(KLabel("1_TEST")), // Ne#Es ::= E "," Ne#Es [klabel('_,_)]
-                        KApply(KLabel("_,__TEST"), KApply(KLabel("1_TEST")), // Ne#Es ::= E Es#Terminator [klabel('_,_)]
-                                KApply(KLabel(".List{\"_,__TEST\"}")))) // Es#Terminator ::= "" [klabel('.Es)]
-        ));
-        parseProgram("1()", def, "Exp", 0, KApply(KLabel("_(_)_TEST"),
-                KApply(KLabel("1_TEST")),
-                KApply(KLabel(".List{\"_,__TEST\"}")) // Es#Terminator ::= "" [klabel('.Es)]
-        ));
-        parseProgram("", def, "NeInts", 0, true);
-        parseProgram("1", def, "NeInts", 0, KApply(KLabel("_,__TEST"),
-                KApply(KLabel("1_TEST")), // Ne#Es ::= E Es#Terminator [klabel('_,_)]
-                KApply(KLabel(".List{\"_,__TEST\"}"))));
     }
 }

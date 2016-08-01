@@ -14,20 +14,28 @@ module BASIC-K
 endmodule
 
 module KSTRING
-  syntax KString ::= r"[\\\"](([^\\\"\n\r\\\\])|([\\\\][nrtf\\\"\\\\])|([\\\\][x][0-9a-fA-F]{2})|([\\\\][u][0-9a-fA-F]{4})|([\\\\][U][0-9a-fA-F]{8}))*[\\\"]"      [token, hook(org.kframework.kore.KString)]
+  syntax KString ::= r"[\\\"](([^\\\"\\n\\r\\\\])|([\\\\][nrtf\\\"\\\\])|([\\\\][x][0-9a-fA-F]{2})|([\\\\][u][0-9a-fA-F]{4})|([\\\\][U][0-9a-fA-F]{8}))*[\\\"]"      [token, hook(org.kframework.kore.KString)]
   // optionally qualified strings, like in Scala "abc", i"abc", r"a*bc", etc.
+endmodule
+
+module BUILTIN-ID-TOKENS
+  syntax #LowerId ::= r"[a-z][a-zA-Z0-9]*"                    [prec(2)]
+  syntax #UpperId ::= r"[A-Z][a-zA-Z0-9]*"                    [prec(2)]
 endmodule
 
 module KAST
   imports BASIC-K
   imports KSTRING
+  imports BUILTIN-ID-TOKENS
+
   syntax KBott ::= "#token" "(" KString "," KString ")"  [klabel(#KToken), hook(org.kframework.kore.KToken)]
                  | "#klabel" "(" KLabel ")"              [klabel(#WrappedKLabel), hook(org.kframework.kore.meta.WrappedKLabel)]
                  | KLabel "(" KList ")"                  [klabel(#KApply), hook(org.kframework.kore.KApply)]
   syntax KItem ::= KBott
 
-  syntax KLabel ::= r"`(\\\\`|\\\\\\\\|[^`\\\\\n\r])+`" [token, hook(org.kframework.kore.KLabel)]
-                  | r"(?<![a-zA-Z0-9])[#a-z][a-zA-Z0-9]*"               [token, hook(org.kframework.kore.KLabel), autoReject]
+  syntax KLabel ::= r"`(\\\\`|\\\\\\\\|[^`\\\\\\n\\r])+`" [token, hook(org.kframework.kore.KLabel)]
+                  | #LowerId                                   [token, autoReject]
+                  | r"(?<![a-zA-Z0-9])[#a-z][a-zA-Z0-9]*"               [token, hook(org.kframework.kore.KLabel), autoReject, prec(1)]
                        // something that doesn't collide with meta-variables
 
   syntax KList ::= K
@@ -47,7 +55,7 @@ module KSEQ
   syntax KBott ::= ".K"      [klabel(#EmptyK), hook(org.kframework.kore.EmptyK)]
                  | "."       [klabel(#EmptyK), hook(org.kframework.kore.EmptyK)]
                  | ".::K"    [klabel(#EmptyK), hook(org.kframework.kore.EmptyK)]
-                 | K "~>" K  [klabel(#KSequence), left, assoc, unit(#EmptyK), hook(org.kframework.kore.KSequence)]
+  syntax K ::= K "~>" K  [klabel(#KSequence), left, assoc, unit(#EmptyK), hook(org.kframework.kore.KSequence)]
   syntax left #KSequence
   syntax KBott     ::= "(" K ")"    [bracket]
 endmodule
@@ -56,7 +64,8 @@ endmodule
 // To be used when parsing/pretty-printing symbolic configurations
 module KSEQ-SYMBOLIC
   imports KSEQ
-  syntax #KVariable ::= r"(?<![A-Za-z0-9_\\$!\\?])(\\!|\\?)?([A-Z][A-Za-z0-9'_]*|_)"   [token, autoReject, hook(org.kframework.kore.KVariable)]
+  syntax #KVariable ::= r"(?<![A-Za-z0-9_\\$!\\?])(\\!|\\?)?([A-Z][A-Za-z0-9'_]*|_)"   [token, prec(1), autoReject, hook(org.kframework.kore.KVariable)]
+                      | #UpperId                                                       [token, autoReject]
   syntax KConfigVar ::= r"(?<![A-Za-z0-9_\\$!\\?])(\\$)([A-Z][A-Za-z0-9'_]*)"          [token, autoReject]
   syntax KBott      ::= #KVariable
   syntax KBott      ::= KConfigVar
@@ -91,7 +100,9 @@ endmodule
 module CONFIG-CELLS
   imports KCELLS
   imports RULE-LISTS
-  syntax #CellName ::= r"[a-zA-Z0-9\\-]+"  [token]
+  syntax #CellName ::= r"[a-zA-Z][a-zA-Z0-9\\-]*"  [token, prec(1)]
+                     | #LowerId            [token]
+                     | #UpperId            [token]
 
   syntax Cell ::= "<" #CellName #CellProperties ">" K "</" #CellName ">" [klabel(#configCell)]
   syntax Cell ::= "<" #CellName "/>" [klabel(#externalCell)]
@@ -190,7 +201,8 @@ module K
   imports K-SORT-LATTICE
   imports AUTO-CASTS
   imports AUTO-FOLLOW
-  syntax KBott     ::= K "=>" K     [klabel(#KRewrite), hook(org.kframework.kore.KRewrite), non-assoc]
+   syntax K ::= K "=>" K [klabel(#KRewrite)]
+  // syntax KBott ::= K "=>" K [klabel(#KRewrite)]
   syntax non-assoc #KRewrite
 
 endmodule

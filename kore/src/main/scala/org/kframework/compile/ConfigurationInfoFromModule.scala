@@ -20,7 +20,7 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
   private val cellProductions: Map[Sort,Production] =
     m.productions.filter(_.att.contains("cell")).map(p => (p.sort, p)).toMap
   private val cellBagProductions: Map[Sort,Production] =
-    m.productions.filter(_.att.contains("assoc")).map(p => (p.sort, p)).toMap
+    m.productions.filter(_.att.contains("cellCollection")).map(p => (p.sort, p)).toMap
   private val cellBagSubsorts: Map[Sort, Set[Sort]] = cellBagProductions.values.map(p => (p.sort, getCellSortsOfCellBag(p.sort))).toMap
   private val cellSorts: Set[Sort] = cellProductions.keySet
   private val cellBagSorts: Set[Sort] = cellBagProductions.keySet

@@ -82,6 +82,9 @@ public class KompileOptions implements Serializable {
 
     public boolean strict() { return !nonStrict; }
 
+    @Parameter(names="--exit-code", description="Specify a matching pattern containing an integer variable which will be used as the exit status of krun.")
+    public String exitCodePattern;
+
     @ParametersDelegate
     public Experimental experimental = new Experimental();
 

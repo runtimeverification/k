@@ -54,11 +54,7 @@ case class Att(att: Set[K]) extends AttributesToString {
       case None => java.util.Optional.empty[T]()
     }
 
-  def contains(label: String): Boolean =
-    att exists {
-      case KApply(KLabel(`label`), _) => true
-      case z => false
-    }
+  def contains(label: String): Boolean = attMap.contains(label)
 
   def +(o: Any) = new Att(att + Att.up(o))
 

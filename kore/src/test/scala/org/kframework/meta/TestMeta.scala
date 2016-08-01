@@ -31,7 +31,7 @@ class TestMeta {
     if (x != y) Assert.assertEquals(x.toString, y.toString)
   }
 
-  val m = Module("TEST", Set(), Set(Production("Foo", Sort("Foo"), Seq(Terminal("Bar", Seq())))))
+  val m = Module("TEST", Set(), Set(Production("Foo", Sort("Foo"), Seq(Terminal("Bar")))))
   val d = Definition(m, Set(m), Att())
 
   val metamodule = 'Module("TEST", 'Set(),
@@ -102,7 +102,7 @@ class TestMeta {
       assertEquals(prod, actual)
     }
     {
-      val prod = Production(Sort("Exp"), Seq(NonTerminal(Sort("Int")), Terminal("+", Seq()), RegexTerminal("#", "[a-z]", "#")), Att())
+      val prod = Production(Sort("Exp"), Seq(NonTerminal(Sort("Int")), Terminal("+"), RegexTerminal("#", "[a-z]", "#")), Att())
       val prod2 = Production(Sort("Exp"), Seq(), Att().add("originalProd", prod))
       assertEquals(prod, prod2.att.get("originalProd").get)
     }

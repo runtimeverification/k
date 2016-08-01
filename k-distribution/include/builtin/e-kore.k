@@ -5,7 +5,7 @@ module BUBBLE
 
   syntax Bubble ::= Bubble BubbleItem [token]
                   | BubbleItem        [token]
-  syntax BubbleItem ::= r"[^ \t\n\r]" [token, reject2("rule|syntax|endmodule|configuration|context")]
+  syntax BubbleItem ::= r"[^ \\t\\n\\r]" [prec(0), token, reject2("rule|syntax|endmodule|configuration|context")]
 
 endmodule
 

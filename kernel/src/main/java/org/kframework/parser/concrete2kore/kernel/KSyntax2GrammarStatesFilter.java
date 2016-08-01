@@ -15,6 +15,8 @@ import org.kframework.parser.concrete2kore.kernel.Grammar.NextableState;
 import org.kframework.parser.concrete2kore.kernel.Grammar.NonTerminal;
 import org.kframework.parser.concrete2kore.kernel.Grammar.RuleState;
 import org.kframework.parser.concrete2kore.kernel.Rule.WrapLabelRule;
+import org.kframework.utils.errorsystem.KEMException;
+import scala.Tuple2;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -22,6 +24,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -35,24 +38,62 @@ import static org.kframework.Collections.*;
  */
 public class KSyntax2GrammarStatesFilter {
 
-    public static Grammar getGrammar(Module module) {
+    public static Grammar getGrammar(Module module, Scanner scanner) {
         Automaton.setMinimization(Automaton.MINIMIZE_BRZOZOWSKI);
         Grammar grammar = new Grammar();
         Set<String> rejects = new HashSet<>();
         // create a NonTerminal for every declared sort
         for (Sort sort : iterable(module.definedSorts())) {
-            grammar.add(new NonTerminal(sort.name()));
+            grammar.add(grammar.new NonTerminal(sort.name()));
         }
         for (Sort sort : iterable(module.usedCellSorts())) {
-            grammar.add(new NonTerminal(sort.name()));
+            grammar.add(grammar.new NonTerminal(sort.name()));
         }
 
         stream(module.productions()).forEach(p -> collectRejects(p, rejects));
-        stream(module.productions()).collect(Collectors.groupingBy(p -> p.sort())).forEach((sort, prods) -> processProductions(sort, prods, grammar, rejects));
-
-        grammar.addWhiteSpace();
-        grammar.compile();
+        stream(module.productions()).collect(Collectors.groupingBy(p -> p.sort())).entrySet().stream().sorted((e1, e2) -> e1.getKey().name().compareTo(e2.getKey().name())).forEach(e -> processProductions(e.getKey(), e.getValue(), grammar, rejects, scanner));
+        grammar.compile(scanner);
         return grammar;
+    }
+
+    public static Map<TerminalLike, Tuple2<Integer, Integer>> getTokens(Module module) {
+        Map<TerminalLike, Tuple2<Integer, Integer>> tokens = new HashMap<>();
+        Map<String, Integer> terminals = new HashMap<>();
+        int idx = 0;
+        for (Production p : iterable(module.productions())) {
+            for (ProductionItem pi : iterable(p.items())) {
+                if (pi instanceof TerminalLike) {
+                    TerminalLike lx = (TerminalLike) pi;
+                    int current;
+                    if (tokens.containsKey(lx)) {
+                        if (p.att().contains("prec")) {
+                            int prec = Integer.valueOf(p.att().<String>getOptional("prec").get());
+                            if (prec != tokens.get(lx)._2()) {
+                                throw KEMException.compilerError("Inconsistent token precedence detected.", p);
+                            }
+                        }
+                    } else if (lx instanceof Terminal && terminals.containsKey(((Terminal) lx).value())) {
+                        current = terminals.get(((Terminal) lx).value());
+                        tokens.put(lx, Tuple2.apply(current, Integer.MAX_VALUE));
+                    } else {
+                        current = idx++;
+                        if (lx instanceof Terminal) {
+                            terminals.put(((Terminal) lx).value(), current);
+                            tokens.put(lx, Tuple2.apply(current, Integer.MAX_VALUE));
+                        } else {
+                            int prec;
+                            if (p.att().contains("prec")) {
+                                prec = Integer.valueOf(p.att().<String>getOptional("prec").get());
+                            } else {
+                                prec = 0;
+                            }
+                            tokens.put(lx, Tuple2.apply(current, prec));
+                        }
+                    }
+                }
+            }
+        }
+        return tokens;
     }
 
     static public <E> String mkString(Iterable<E> list, Function<E,String> stringify, String delimiter) {
@@ -77,7 +118,12 @@ public class KSyntax2GrammarStatesFilter {
         }
     }
 
-    public static void processProductions(Sort sort, List<Production> prods, Grammar grammar, Set<String> autoRejects) {
+    public static void processProductions(
+            Sort sort,
+            List<Production> prods,
+            Grammar grammar,
+            Set<String> autoRejects,
+            Scanner scanner) {
         NonTerminal nt = grammar.get(sort.name());
         assert nt != null : "Could not find in the grammar the required sort: " + sort;
         // all types of production follow pretty much the same pattern
@@ -101,20 +147,23 @@ public class KSyntax2GrammarStatesFilter {
                 NextableState previous = pair.getValue();
                 if (prdItem instanceof org.kframework.definition.NonTerminal) {
                     org.kframework.definition.NonTerminal srt = (org.kframework.definition.NonTerminal) prdItem;
-                    Grammar.NonTerminalState nts = new Grammar.NonTerminalState(sort + " ::= " + srt.sort(), nt,
+                    Grammar.NonTerminalState nts = grammar.new NonTerminalState(sort + " ::= " + srt.sort(), nt,
                             grammar.get(srt.sort().name()));
                     previous.next.add(nts);
                     previous = nts;
                 } else if (prdItem instanceof TerminalLike) {
                     TerminalLike lx = (TerminalLike) prdItem;
-                    Grammar.PrimitiveState pstate = new Grammar.RegExState(
-                            sort.name() + ":" + lx.toString(),
-                            nt,
-                            lx.precedePattern(),
-                            lx.pattern(),
-                            lx.followPattern());
-                    previous.next.add(pstate);
-                    previous = pstate;
+//                    int current;
+                    // empty terminal is essentially a signifier to indicate an empty production
+                    if (!(lx instanceof Terminal) || !((Terminal) lx).value().isEmpty()) {
+                        int token = scanner.resolve(lx);
+                        Grammar.PrimitiveState pstate = grammar.new RegExState(
+                                sort.name() + ":" + token,
+                                nt,
+                                token);
+                        previous.next.add(pstate);
+                        previous = pstate;
+                    }
                 } else {
                     assert false : "Didn't expect this ProductionItem type: "
                             + prdItem.getClass().getName();
@@ -125,22 +174,14 @@ public class KSyntax2GrammarStatesFilter {
             }
             h.i++;
             Iterator<Production> iter = productionsRemaining.keySet().iterator();
-            while(iter.hasNext()) {
+            while (iter.hasNext()) {
                 Production prd = iter.next();
                 NextableState previous = productionsRemaining.get(prd);
                 if (prd.items().size() == h.i) {
-                    Automaton pattern = null;
-                    Set<String> rejects = new HashSet<>();
-                    if (prd.att().contains("token")) {
-                        // TODO: calculate reject list
-                        if (prd.att().contains(Constants.AUTOREJECT))
-                            rejects = autoRejects;
-                        if (prd.att().contains(Constants.REJECT2))
-                            pattern = getAutomaton(prd.att().get(Constants.REJECT2).get().toString());
-                    }
-                    if (prd.att().contains(Constants.ORIGINAL_PRD))
-                        prd = (Production) prd.att().get(Constants.ORIGINAL_PRD).get();
-                    RuleState labelRule = new RuleState("AddLabelRS", nt, new WrapLabelRule(prd, pattern, rejects));
+                    Optional<Production> original = prd.att().<Production>getOptional(Constants.ORIGINAL_PRD);
+                    if (original.isPresent())
+                        prd = original.get();
+                    RuleState labelRule = grammar.new RuleState("AddLabelRS", nt, new WrapLabelRule(prd));
                     previous.next.add(labelRule);
                     previous = labelRule;
 

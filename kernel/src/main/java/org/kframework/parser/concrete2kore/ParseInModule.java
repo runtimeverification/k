@@ -8,10 +8,21 @@ import org.kframework.kore.K;
 import org.kframework.kore.Sort;
 import org.kframework.parser.Term;
 import org.kframework.parser.TreeNodesToKORE;
-import org.kframework.parser.concrete2kore.disambiguation.*;
+import org.kframework.parser.concrete2kore.disambiguation.AddEmptyLists;
+import org.kframework.parser.concrete2kore.disambiguation.AmbFilter;
+import org.kframework.parser.concrete2kore.disambiguation.ApplyTypeCheckVisitor;
+import org.kframework.parser.concrete2kore.disambiguation.CorrectCastPriorityVisitor;
+import org.kframework.parser.concrete2kore.disambiguation.CorrectKSeqPriorityVisitor;
+import org.kframework.parser.concrete2kore.disambiguation.CorrectRewritePriorityVisitor;
+import org.kframework.parser.concrete2kore.disambiguation.PreferAvoidVisitor;
+import org.kframework.parser.concrete2kore.disambiguation.PriorityVisitor;
+import org.kframework.parser.concrete2kore.disambiguation.RemoveBracketVisitor;
+import org.kframework.parser.concrete2kore.disambiguation.TreeCleanerVisitor;
+import org.kframework.parser.concrete2kore.disambiguation.VariableTypeInferenceFilter;
 import org.kframework.parser.concrete2kore.kernel.Grammar;
 import org.kframework.parser.concrete2kore.kernel.KSyntax2GrammarStatesFilter;
 import org.kframework.parser.concrete2kore.kernel.Parser;
+import org.kframework.parser.concrete2kore.kernel.Scanner;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import scala.Tuple2;
@@ -84,21 +95,29 @@ public class ParseInModule implements Serializable {
      */
     public Tuple2<Either<Set<ParseFailedException>, K>, Set<ParseFailedException>>
             parseString(String input, Sort startSymbol, Source source) {
-        return parseString(input, startSymbol, source, 1, 1);
+        return parseString(input, startSymbol, null, source, 1, 1);
     }
 
-    private void getGrammar() {
+    private Scanner getGrammar(Scanner scanner) {
+        if(scanner == null) {
+            scanner = getScanner();
+        }
         Grammar g = grammar;
         if (g == null) {
-            g = KSyntax2GrammarStatesFilter.getGrammar(this.parsingModule);
+            g = KSyntax2GrammarStatesFilter.getGrammar(this.parsingModule, scanner);
             grammar = g;
         }
+        return scanner;
+    }
+
+    public Scanner getScanner() {
+        return new Scanner(parsingModule);
     }
 
     public Tuple2<Either<Set<ParseFailedException>, K>, Set<ParseFailedException>>
-        parseString(String input, Sort startSymbol, Source source, int startLine, int startColumn) {
+        parseString(String input, Sort startSymbol, Scanner scanner, Source source, int startLine, int startColumn) {
         final Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> result
-                = parseStringTerm(input, startSymbol, source, startLine, startColumn);
+                = parseStringTerm(input, startSymbol, scanner, source, startLine, startColumn);
         Either<Set<ParseFailedException>, K> parseInfo;
         if (result._1().isLeft()) {
             parseInfo = Left.apply(result._1().left().get());
@@ -123,8 +142,8 @@ public class ParseInModule implements Serializable {
      * @return
      */
     private Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>>
-            parseStringTerm(String input, Sort startSymbol, Source source, int startLine, int startColumn) {
-        getGrammar();
+            parseStringTerm(String input, Sort startSymbol, Scanner scanner, Source source, int startLine, int startColumn) {
+        scanner = getGrammar(scanner);
 
         Grammar.NonTerminal startSymbolNT = grammar.get(startSymbol.name());
         Set<ParseFailedException> warn = Sets.newHashSet();
@@ -134,9 +153,9 @@ public class ParseInModule implements Serializable {
             return new Tuple2<>(Left.apply(Sets.newHashSet(new ParseFailedException(kex))), warn);
         }
 
-        Parser parser = new Parser(input, source, startLine, startColumn);
         Term parsed;
         try {
+            Parser parser = new Parser(input, scanner, source, startLine, startColumn);
             parsed = parser.parse(startSymbolNT, 0);
         } catch (ParseFailedException e) {
             return Tuple2.apply(Left.apply(Collections.singleton(e)), Collections.emptySet());

@@ -346,6 +346,7 @@ public class GenerateSentencesFromConfigDecl {
             Sort bagSort = Sort(sortName + type);
             Att bagAtt = Att()
                     .add(Attribute.ASSOCIATIVE_KEY, "")
+                    .add("cellCollection")
                     .add("element", bagSort.name() + "Item")
                     .add("wrapElement", "<" + cellName + ">")
                     .add(Attribute.UNIT_KEY, "." + bagSort.name())

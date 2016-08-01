@@ -54,14 +54,13 @@ public class KRunExecutionMode implements ExecutionMode {
             }
             return new SearchResult(rewriter.search(k, Optional.ofNullable(kRunOptions.depth), Optional.ofNullable(kRunOptions.bound), pattern, kRunOptions.searchType()), parsedPattern);
         }
-        if (kRunOptions.exitCodePattern != null) {
-            Rule exitCodePattern = KRun.compilePattern(files, kem, kRunOptions.exitCodePattern, compiledDefinition, Source.apply("<command line: --exit-code>"));
+        if (compiledDefinition.exitCodePattern != null) {
             Tuple2<RewriterResult, List<? extends Map<? extends KVariable, ? extends K>>> res;
             if (pattern != null) {
                 res = rewriter.executeAndMatch(k, Optional.ofNullable(kRunOptions.depth), pattern);
-                return new Tuple2<>(new SearchResult(res._2(), parsedPattern), KRun.getExitCode(kem, rewriter.match(res._1().k(), exitCodePattern)));
+                return new Tuple2<>(new SearchResult(res._2(), parsedPattern), KRun.getExitCode(kem, rewriter.match(res._1().k(), compiledDefinition.exitCodePattern)));
             }
-            res = rewriter.executeAndMatch(k, Optional.ofNullable(kRunOptions.depth), exitCodePattern);
+            res = rewriter.executeAndMatch(k, Optional.ofNullable(kRunOptions.depth), compiledDefinition.exitCodePattern);
             return Tuple2.apply(res._1().k(), KRun.getExitCode(kem, res._2()));
         }
         if (pattern != null) {

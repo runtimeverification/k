@@ -1,6 +1,7 @@
 // Copyright (c) 2014-2016 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore.kernel;
 
+import org.apache.commons.codec.binary.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.attributes.Location;
@@ -26,8 +27,6 @@ import org.pcollections.ConsPStack;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -393,9 +392,8 @@ public class Parser {
      */
     private static class ParseState {
         // the input string which needs parsing
-        final String input;
-        // the reverse input used for precede restrictions
-        final String reverseInput;
+        final Scanner.Token[] input;
+        final String originalInput;
         // a priority queue containing the return states to be processed
         final StateReturnWorkList stateReturnWorkList = new StateReturnWorkList();
         // a preprocessed correspondence from index to line and column in the input string
@@ -403,11 +401,13 @@ public class Parser {
         // TODO: extract Location class into it's own file
         final int[] lines;
         final int[] columns;
+        private int maxPosition = 0;
+        private final Source source;
         Map<NonTerminalCall.Key, NonTerminalCall> ntCalls = new HashMap<>();
         Map<StateCall.Key, StateCall> stateCalls = new HashMap<>();
         Map<StateReturn.Key, StateReturn> stateReturns = new HashMap<>();
 
-        public ParseState(String input, int startLine, int startColumn) {
+        public ParseState(String input, Scanner scanner, Source source, int startLine, int startColumn) {
             /**
              * Create arrays corresponding to the index in the input CharSequence and the line and
              * column in the text. Tab counts as one.
@@ -416,22 +416,31 @@ public class Parser {
              * http://www.unicode.org/standard/reports/tr13/tr13-5.html
              * http://www.unicode.org/reports/tr18/#Line_Boundaries
              */
-            this.input = input;
-            this.reverseInput = new StringBuilder(input).reverse().toString();
-            lines = new int[input.length()+1];
-            columns = new int[input.length()+1];
+            this.originalInput = input;
+            this.source = source;
+            byte[] utf8 = StringUtils.getBytesUtf8(input);
+            lines = new int[utf8.length+1];
+            columns = new int[utf8.length+1];
             int l = startLine;
             int c = startColumn;
-            for (int i = 0; i < input.length(); i++) {
-                lines[i] = l;
-                columns[i] = c;
-                switch (input.charAt(i)) {
+            int length = input.codePointCount(0, input.length());
+            for (int offset = 0, utf8offset = 0, codepoint, numBytes; offset < length; offset += Character.charCount(codepoint),
+                    utf8offset += numBytes) {
+                codepoint = input.codePointAt(offset);
+                numBytes = StringUtils.getBytesUtf8(new String(Character.toChars(codepoint))).length;
+                for (int i = 0; i < numBytes; i++) {
+                    lines[utf8offset + i] = l;
+                    columns[utf8offset + i] = c;
+                }
+
+                switch (input.codePointAt(offset)) {
                     case '\r' :
-                        if (i+1 < input.length()) {
-                            if (input.charAt(i+1) == '\n') {
-                                lines[i+1] = l;
-                                columns[i+1] = c + 1;
-                                i++;
+                        if (offset+1 < input.length()) {
+                            if (input.charAt(offset+1) == '\n') {
+                                lines[offset+1] = l;
+                                columns[offset+1] = c + 1;
+                                offset++;
+                                utf8offset++;
                             }
                         }
                     case '\n'      :
@@ -445,8 +454,9 @@ public class Parser {
                         c++;
                 }
             }
-            lines[input.length()] = l;
-            columns[input.length()] = c;
+            lines[utf8.length] = l;
+            columns[utf8.length] = c;
+            this.input = scanner.tokenize(input, source, lines, columns);
         }
     }
 
@@ -541,16 +551,13 @@ public class Parser {
     ////////////////
 
     private final ParseState s;
-    private final Source source;
 
-    public Parser(String input) {
-        s = new ParseState(input, 1, 1);
-        this.source = Source.apply("<unknown>");
+    public Parser(String input, Scanner scanner) {
+        s = new ParseState(input, scanner, Source.apply("<unknown>"), 1, 1);
     }
 
-    public Parser(String input, Source source, int startLine, int startColumn) {
-        s = new ParseState(input, startLine, startColumn);
-        this.source = source;
+    public Parser(String input, Scanner scanner, Source source, int startLine, int startColumn) {
+        s = new ParseState(input, scanner, source, startLine, startColumn);
     }
 
     /**
@@ -572,21 +579,20 @@ public class Parser {
 
         Set<Term> resultSet = new HashSet<>();
         for(StateReturn stateReturn : s.ntCalls.computeIfAbsent(new NonTerminalCall.Key(nt, position), NonTerminalCall.Key::create).exitStateReturns) {
-            if (stateReturn.key.stateEnd == s.input.length()) {
+            if (stateReturn.key.stateEnd == s.input.length) {
                 resultSet.add(KList.apply(ConsPStack.singleton(Ambiguity.apply(stateReturn.function.values))));
             }
         }
         Ambiguity result = Ambiguity.apply(resultSet);
 
         if(result.items().size() == 0) {
-            CharSequence content = s.input;
             ParseError perror = getErrors();
 
-            String msg = content.length() == perror.position ?
+            String msg = s.input.length == perror.position ?
                     "Parse error: unexpected end of file." :
-                    "Parse error: unexpected character '" + content.charAt(perror.position) + "'.";
-            Location loc = new Location(perror.line, perror.column,
-                    perror.line, perror.column + 1);
+                    "Parse error: unexpected token '" + s.input[perror.position].value + "'.";
+            Location loc = new Location(perror.startLine, perror.startColumn,
+                    perror.endLine, perror.endColumn);
             Source source = perror.source;
             throw new ParseFailedException(new KException(
                     ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, msg, source, loc));
@@ -605,16 +611,24 @@ public class Parser {
         int current = 0;
         for (StateCall.Key key : s.stateCalls.keySet()) {
             if (key.state instanceof PrimitiveState)
-                current = Math.max(current, ((PrimitiveState) key.state).errorAt(s.input, s.reverseInput, key.stateBegin));
+                current = Math.max(current, key.stateBegin);
         }
+        current = Math.max(current, s.maxPosition);
         Set<Pair<Production, RegExState>> tokens = new HashSet<>();
         for (StateCall.Key key : s.stateCalls.keySet()) {
-            if (key.state instanceof RegExState && key.stateBegin == current) {
+            if (key.state instanceof RegExState && key.stateBegin == s.maxPosition) {
                 tokens.add(new ImmutablePair<>(
                     null, ((RegExState) key.state)));
             }
         }
-        return new ParseError(source, current, s.lines[current], s.columns[current], tokens);
+        if (current == s.input.length) {
+            Scanner.Token t = s.input[current - 1];
+            return new ParseError(s.source, current, s.lines[t.endLoc], s.columns[t.endLoc],
+                    s.lines[t.endLoc], s.columns[t.endLoc] + 1, tokens);
+        } else {
+            return new ParseError(s.source, current, s.lines[s.input[current].startLoc], s.columns[s.input[current].startLoc],
+                    s.lines[s.input[current].endLoc], s.columns[s.input[current].endLoc], tokens);
+        }
     }
 
     /**
@@ -624,20 +638,22 @@ public class Parser {
         /// The character offset of the error
         public final Source source;
         public final int position;
-        /// The column of the error
-        public final int column;
-        /// The line of the error
-        public final int line;
+        public final int startColumn;
+        public final int startLine;
+        public final int endColumn;
+        public final int endLine;
         /// Pairs of Sorts and RegEx patterns that the parsed expected to occur next
         public final Set<Pair<Production, RegExState>> tokens;
 
-        public ParseError(Source source, int position, int line, int column, Set<Pair<Production, RegExState>> tokens) {
+        public ParseError(Source source, int position, int startLine, int startColumn, int endLine, int endColumn, Set<Pair<Production, RegExState>> tokens) {
+            this.startColumn = startColumn;
+            this.endColumn = endColumn;
+            this.startLine = startLine;
+            this.endLine = endLine;
             assert tokens != null;
             this.source = source;
             this.position = position;
             this.tokens = tokens;
-            this.column = column;
-            this.line = line;
         }
     }
 
@@ -673,14 +689,23 @@ public class Parser {
         } else if (stateReturn.key.stateCall.key.state instanceof PrimitiveState) {
             return stateReturn.function.add(stateReturn.key.stateCall.function);
         } else if (stateReturn.key.stateCall.key.state instanceof RuleState) {
-            int startPosition = stateReturn.key.stateCall.key.ntCall.key.ntBegin;
-            int endPosition = stateReturn.key.stateEnd;
+            int startPosition, endPosition;
+            if (stateReturn.key.stateCall.key.ntCall.key.ntBegin == s.input.length) {
+                startPosition = s.input[s.input.length - 1].endLoc;
+            } else {
+                startPosition = s.input[stateReturn.key.stateCall.key.ntCall.key.ntBegin].startLoc;
+            }
+            if (stateReturn.key.stateEnd == 0) {
+                endPosition = s.input[0].startLoc;
+            } else {
+                endPosition = s.input[stateReturn.key.stateEnd - 1].endLoc;
+            }
             return stateReturn.function.addRule(stateReturn.key.stateCall.function,
                 ((RuleState) stateReturn.key.stateCall.key.state).rule, stateReturn,
-                new Rule.MetaData(source,
+                new Rule.MetaData(s.source,
                     new Rule.MetaData.Location(startPosition, s.lines[startPosition], s.columns[startPosition]),
                     new Rule.MetaData.Location(endPosition, s.lines[endPosition], s.columns[endPosition]),
-                    s.input));
+                    s.originalInput));
         } else if (stateReturn.key.stateCall.key.state instanceof NonTerminalState) {
             return stateReturn.function.addNTCall(
                 stateReturn.key.stateCall.function,
@@ -708,27 +733,32 @@ public class Parser {
                 s.stateReturns.computeIfAbsent(
                     new StateReturn.Key(stateCall, stateCall.key.stateBegin), StateReturn.Key::create));
         } else if (nextState instanceof PrimitiveState) {
-            for (PrimitiveState.MatchResult matchResult :
-                    ((PrimitiveState)nextState).matches(s.input, s.reverseInput, stateCall.key.stateBegin)) {
+            if (((PrimitiveState)nextState).matches(s.input, stateCall.key.stateBegin)) {
                 s.stateReturnWorkList.enqueue(
                     s.stateReturns.computeIfAbsent(
-                            new StateReturn.Key(stateCall, matchResult.matchEnd), StateReturn.Key::create));
+                            new StateReturn.Key(stateCall, stateCall.key.stateBegin + 1), StateReturn.Key::create));
             }
         // not instanceof SimpleState
         } else if (nextState instanceof NonTerminalState) {
             // add to the ntCall
-            NonTerminalCall ntCall = s.ntCalls.computeIfAbsent(new NonTerminalCall.Key(
-                    ((NonTerminalState) nextState).child, stateCall.key.stateBegin), NonTerminalCall.Key::create);
-            ntCall.callers.add(stateCall);
-            // activate the entry state call (almost like activateStateCall but we have no stateReturn)
-            StateCall entryStateCall = s.stateCalls.computeIfAbsent(new StateCall.Key(
-                    ntCall, stateCall.key.stateBegin, ntCall.key.nt.entryState), StateCall.Key::create);
-            activateStateCall(entryStateCall, Function.IDENTITY);
-            // process existStateReturns already done in the ntCall
-            for (StateReturn exitStateReturn : ntCall.exitStateReturns) {
-                s.stateReturnWorkList.enqueue(
-                    s.stateReturns.computeIfAbsent(
-                        new StateReturn.Key(stateCall, exitStateReturn.key.stateEnd), StateReturn.Key::create));
+            NonTerminal nt = ((NonTerminalState)nextState).child;
+            if (nt.nullable() || (stateCall.key.stateBegin < s.input.length && nt.lookahead(s.input[stateCall.key.stateBegin].kind))) {
+                NonTerminalCall ntCall = s.ntCalls.computeIfAbsent(new NonTerminalCall.Key(
+                        nt, stateCall.key.stateBegin), NonTerminalCall.Key::create);
+                ntCall.callers.add(stateCall);
+                // activate the entry state call (almost like activateStateCall but we have no stateReturn)
+                StateCall entryStateCall = s.stateCalls.computeIfAbsent(new StateCall.Key(
+                        ntCall, stateCall.key.stateBegin, ntCall.key.nt.entryState), StateCall.Key::create);
+                activateStateCall(entryStateCall, Function.IDENTITY);
+                // process existStateReturns already done in the ntCall
+                for (StateReturn exitStateReturn : ntCall.exitStateReturns) {
+                    s.stateReturnWorkList.enqueue(
+                            s.stateReturns.computeIfAbsent(
+                                    new StateReturn.Key(stateCall, exitStateReturn.key.stateEnd), StateReturn.Key::create));
+                }
+            } else {
+                // we don't create an entry in the map for this statecall, so we need to track its location another way.
+                s.maxPosition = Math.max(s.maxPosition, stateCall.key.stateBegin);
             }
         } else { throw unknownStateType(); }
     }

@@ -47,11 +47,12 @@ public class CompiledDefinition implements Serializable {
     public final HashMap<String, Sort> configurationVariableDefaultSorts = new HashMap<>();
     public final KLabel topCellInitializer;
     private final Module languageParsingModule;
+    public final Rule exitCodePattern;
     private Map<String, Rule> cachedcompiledPatterns = new ConcurrentHashMap<>();
     private Map<String, Rule> cachedParsedPatterns = new ConcurrentHashMap<>();
 
 
-    public CompiledDefinition(KompileOptions kompileOptions, Definition parsedDefinition, Definition kompiledDefinition, KLabel topCellInitializer) {
+    public CompiledDefinition(KompileOptions kompileOptions, Definition parsedDefinition, Definition kompiledDefinition, FileUtil files, KExceptionManager kem, KLabel topCellInitializer) {
         this.kompileOptions = kompileOptions;
         this.parsedDefinition = parsedDefinition;
         this.kompiledDefinition = kompiledDefinition;
@@ -59,6 +60,11 @@ public class CompiledDefinition implements Serializable {
         this.programStartSymbol = configurationVariableDefaultSorts.getOrDefault("$PGM", Sorts.K());
         this.topCellInitializer = topCellInitializer;
         this.languageParsingModule = kompiledDefinition.getModule("LANGUAGE-PARSING").get();
+        if (kompileOptions.exitCodePattern != null) {
+            this.exitCodePattern = compilePatternIfAbsent(files, kem, kompileOptions.exitCodePattern, Source.apply("<command line: --exit-code>"));
+        } else {
+            this.exitCodePattern = null;
+        }
     }
 
     private void initializeConfigurationVariableDefaultSorts() {

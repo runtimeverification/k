@@ -67,7 +67,7 @@ object ADT {
   case class KToken(s: String, sort: kore.Sort, att: Att = Att()) extends kore.KToken
 
   case class KList(elements: List[K]) extends kore.KList {
-    def items: java.util.List[K] = elements.asJava
+    lazy val items: java.util.List[K] = elements.asJava
     def iterator: Iterator[K] = elements.iterator
     lazy val size = elements.size
     lazy val asIterable = new org.kframework.List(elements)

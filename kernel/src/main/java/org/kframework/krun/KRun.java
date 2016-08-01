@@ -96,9 +96,8 @@ public class KRun {
 
         if (result instanceof K) {
             prettyPrint(compiledDef, options.output, s -> outputFile(s, options), (K) result);
-            if (options.exitCodePattern != null) {
-                Rule exitCodePattern = compilePattern(files, kem, options.exitCodePattern, compiledDef, Source.apply("<command line: --exit-code>"));
-                List<? extends Map<? extends KVariable, ? extends K>> res = rewriter.match((K) result, exitCodePattern);
+            if (compiledDef.exitCodePattern != null) {
+                List<? extends Map<? extends KVariable, ? extends K>> res = rewriter.match((K) result, compiledDef.exitCodePattern);
                 return getExitCode(kem, res);
             }
         } else if (result instanceof Tuple2) {

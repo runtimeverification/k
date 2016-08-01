@@ -6,7 +6,7 @@ import org.kframework.definition.Associativity
 import org.kframework.kore._
 import collection.JavaConverters._
 import org.kframework.kore
-import collection._
+import scala.collection._
 
 class Up[K <: kore.K](cons: Constructors[K] with ScalaSugared[K], imports: Set[String]) extends (Any => K) {
 
@@ -22,6 +22,7 @@ class Up[K <: kore.K](cons: Constructors[K] with ScalaSugared[K], imports: Set[S
   def apply(o: Any): K = {
     o match {
       case o: List[_] => 'List(o map apply: _*)
+      case o: mutable.Buffer[_] => 'List(o map apply: _*)
       case o: Set[_] => 'Set(o map apply toList: _*)
       case att: Att => 'Att(att.att.toSeq.asInstanceOf[Seq[K]] :_*)
 

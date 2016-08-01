@@ -58,7 +58,7 @@ public class StrategiesTest {
         String syntaxModule = "IMP-SYNTAX";
 
         String pgm = "int s, n; n = 10; while(0<=n) { s = s + n; n = n + -1; }";
-        String expected = "<generatedTop> <k> . </k> <state> s |-> 55 n |-> -1 </state> <s> true </s> </generatedTop>";
+        String expected = "<generatedTop> <k> .::K </k> <state> s |-> 55 n |-> -1 </state> <s> true </s> </generatedTop>";
 
         assertSearch(filename, mainModule, syntaxModule, pgm, expected, "(^heat* ; ^regular ; (^cool || true))*"); //
     }
