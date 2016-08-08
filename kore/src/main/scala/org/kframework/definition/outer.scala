@@ -145,6 +145,7 @@ case class Module(val name: String, val imports: Set[Module], unresolvedLocalSen
   def isSort(klabel: KLabel, s: Sort) = subsorts.<(sortFor(klabel), s)
 
   lazy val rules: Set[Rule] = sentences collect { case r: Rule => r }
+  lazy val contexts: Set[Context] = sentences collect { case r: Context => r }
 
   lazy val localRules: Set[Rule] = localSentences collect { case r: Rule => r }
 

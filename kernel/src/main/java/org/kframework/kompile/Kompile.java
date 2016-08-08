@@ -28,6 +28,7 @@ import org.kframework.kore.compile.ResolveSemanticCasts;
 import org.kframework.kore.compile.ResolveStrict;
 import org.kframework.kore.compile.SortInfo;
 import org.kframework.kore.compile.checks.CheckConfigurationCells;
+import org.kframework.kore.compile.checks.CheckImports;
 import org.kframework.kore.compile.checks.CheckKLabels;
 import org.kframework.kore.compile.checks.CheckRHSVariables;
 import org.kframework.kore.compile.checks.CheckRewrite;
@@ -179,6 +180,8 @@ public class Kompile {
         stream(parsedDef.modules()).forEach(m -> stream(m.localSentences()).forEach(new CheckStreams(errors, m)::check));
 
         stream(parsedDef.modules()).forEach(m -> stream(m.localSentences()).forEach(new CheckRewrite(errors, m)::check));
+
+        stream(parsedDef.modules()).forEach(new CheckImports(parsedDef.mainModule(), kem)::check);
 
         Set<String> moduleNames = new HashSet<>();
         stream(parsedDef.modules()).forEach(m -> {

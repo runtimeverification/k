@@ -417,8 +417,6 @@ module FLOAT
 endmodule
 
 module STRING-SYNTAX
-  imports BASIC-K
-
   // Double Quoted Strings are of the form:
   // DoubleQuote StringChar* DoubleQuote
   // StringChar ::= ~[\"\n\r\\] // anything except for Newline, DoubleQuote and Backslash
