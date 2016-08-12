@@ -28,6 +28,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.kframework.Collections.*;
 
@@ -42,11 +43,9 @@ public class KSyntax2GrammarStatesFilter {
         Automaton.setMinimization(Automaton.MINIMIZE_BRZOZOWSKI);
         Grammar grammar = new Grammar();
         Set<String> rejects = new HashSet<>();
+        Set<Sort> sorts = Stream.concat(stream(module.definedSorts()), stream(module.usedCellSorts())).collect(Collectors.toSet());
         // create a NonTerminal for every declared sort
-        for (Sort sort : iterable(module.definedSorts())) {
-            grammar.add(grammar.new NonTerminal(sort.name()));
-        }
-        for (Sort sort : iterable(module.usedCellSorts())) {
+        for (Sort sort : sorts) {
             grammar.add(grammar.new NonTerminal(sort.name()));
         }
 

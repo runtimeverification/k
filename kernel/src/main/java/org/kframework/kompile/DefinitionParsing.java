@@ -116,8 +116,16 @@ public class DefinitionParsing {
             }
         }
 
+        Module modWithConfig;
         ResolveConfig resolveConfig = new ResolveConfig(definition.getParsedDefinition(), isStrict, this::parseBubble, this::getParser);
-        Module modWithConfig = resolveConfig.apply(module);
+
+        try {
+            modWithConfig = resolveConfig.apply(module);
+        } catch (KEMException e) {
+            errors.add(e);
+            throwExceptionIfThereAreErrors();
+            throw new AssertionError("should not reach this statement");
+        }
 
         gen = new RuleGrammarGenerator(definition.getParsedDefinition(), isStrict);
         Module parsedMod = resolveNonConfigBubbles(modWithConfig, null, gen);
@@ -204,9 +212,15 @@ public class DefinitionParsing {
 
         ResolveConfig resolveConfig = new ResolveConfig(definitionWithConfigBubble, isStrict, this::parseBubble, this::getParser);
         gen = new RuleGrammarGenerator(definitionWithConfigBubble, isStrict);
-        Definition defWithConfig = DefinitionTransformer.from(resolveConfig, "parsing configurations").apply(definitionWithConfigBubble);
 
-        return defWithConfig;
+        try {
+            Definition defWithConfig = DefinitionTransformer.from(resolveConfig, "parsing configurations").apply(definitionWithConfigBubble);
+            return defWithConfig;
+        } catch (KEMException e) {
+            errors.add(e);
+            throwExceptionIfThereAreErrors();
+            throw new AssertionError("should not reach this statement");
+        }
     }
 
     Map<String, ParseCache> caches;
