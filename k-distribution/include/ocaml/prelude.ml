@@ -31,6 +31,14 @@ type step_function = StepFunc of (k -> (k * step_function))
 
 module KIdentityHashtbl = Hashtbl.Make(KIdentityHash)
 
+module KMemoIdentityHash = struct
+  type t = k
+  let equal = equal_k
+  let hash = hash_k_param 900
+end
+
+module KMemoIdentityHashtbl = Hashtbl.Make(KMemoIdentityHash)
+
 module GuardElt = struct
   type t = Guard of int
   let compare c1 c2 = match c1 with Guard(i1) -> match c2 with Guard(i2) -> i2 - i1
