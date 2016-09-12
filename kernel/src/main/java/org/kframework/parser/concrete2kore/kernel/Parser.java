@@ -621,6 +621,10 @@ public class Parser {
                     null, ((RegExState) key.state)));
             }
         }
+        if (s.input.length == 0) {
+            return new ParseError(s.source, current, s.lines[0], s.columns[0],
+                    s.lines[0], s.columns[0] + 1, tokens);
+        }
         if (current == s.input.length) {
             Scanner.Token t = s.input[current - 1];
             return new ParseError(s.source, current, s.lines[t.endLoc], s.columns[t.endLoc],
