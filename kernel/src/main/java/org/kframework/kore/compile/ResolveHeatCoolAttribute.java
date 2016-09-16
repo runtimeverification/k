@@ -45,7 +45,7 @@ public class ResolveHeatCoolAttribute {
                     return new TransformK() {
                         public K apply(KVariable var) {
                             if (var.name(). equals("HOLE")) {
-                                return KVariable(var.name(), var.att().add(Attribute.SORT_KEY, "KResult"));
+                                return KVariable(var.name(), var.att().add(Attribute.SORT_KEY, att.getOptional("result").orElse("KResult")));
                             }
                             return super.apply(var);
                         }
