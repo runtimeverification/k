@@ -147,6 +147,10 @@ public class FloatBuiltin extends Token {
         return exponent;
     }
 
+    public int precision() {
+        return value.precision();
+    }
+
     /**
      * Returns a {@link String} representing the sort name of a float token.
      */
@@ -188,14 +192,6 @@ public class FloatBuiltin extends Token {
     }
 
     public static String printKFloatSuffix(BigFloat value, int exponent) {
-        if (value.precision() == BinaryMathContext.BINARY64.precision
-                && exponent == BinaryMathContext.BINARY64_EXPONENT_BITS) {
-            return "";
-        }
-        if (value.precision() == BinaryMathContext.BINARY32.precision
-                && exponent == BinaryMathContext.BINARY32_EXPONENT_BITS) {
-            return "f";
-        }
         return "p" + value.precision() + "x" + exponent;
     }
 

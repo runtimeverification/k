@@ -54,6 +54,7 @@ let rec list_range (c: k list * int * int) : k list = match c with
 | (_ :: tail, n, len) -> list_range(tail, n - 1, len)
 | ([], _, _) -> raise(Failure "list_range")
 let float_to_string (f: Gmp.FR.t) : string = if Gmp.FR.is_nan f then "NaN" else if Gmp.FR.is_inf f then if Gmp.FR.sgn f > 0 then "Infinity" else "-Infinity" else Gmp.FR.to_string_base_digits Gmp.GMP_RNDN 10 0 f
+let precise_float_to_string (f,p,e) = float_to_string(f) ^ "p" ^ string_of_int p ^ "x" ^ string_of_int e
 let k_of_list lbl l = match l with
   [] -> denormalize (KApply((unit_for lbl),[]))
 | hd :: tl -> List.fold_left (fun list el -> denormalize (KApply(lbl, [list] :: [denormalize (KApply((el_for lbl),[el]))] :: []))) (denormalize (KApply((el_for lbl),[hd]))) tl
@@ -127,7 +128,7 @@ let print_k_binary (c: k) : string =  let buf = Buffer.create 16 in
   | KItem (Bool(b)) -> print_kitem(KItem (KToken(SortBool, string_of_bool(b))), [Bool b])
   | KItem (String(s)) -> print_kitem(KItem (KToken(SortString, "\"" ^ (k_string_escape s) ^ "\"")), [String s])
   | KItem (Int(i)) -> print_kitem(KItem (KToken(SortInt, Z.to_string(i))), [Int i])
-  | KItem (Float(f,e,p)) -> print_kitem(KItem (KToken(SortFloat, float_to_string(f))), [Float(f,e,p)])
+  | KItem (Float(f,e,p)) -> print_kitem(KItem (KToken(SortFloat, precise_float_to_string(f,p,e))), [Float(f,e,p)])
   | KItem (Bottom) -> print_kitem(KApply(Lbl'0023'Bottom, []), interned_bottom)
   | KItem (List(sort,lbl,l)) -> print_kitem(normalize (k_of_list lbl l), [List(sort,lbl,l)])
   | KItem (Set(sort,lbl,s)) -> print_kitem(normalize (k_of_set lbl s), [Set(sort,lbl,s)])
@@ -153,7 +154,7 @@ let print_k (c: k) : string = let buf = Buffer.create 16 in
   | KItem (Bool(b)) -> print_kitem(KItem (KToken(SortBool, string_of_bool(b))))
   | KItem (String(s)) -> print_kitem(KItem (KToken(SortString, "\"" ^ (k_string_escape s) ^ "\"")))
   | KItem (Int(i)) -> print_kitem(KItem (KToken(SortInt, Z.to_string(i))))
-  | KItem (Float(f,_,_)) -> print_kitem(KItem (KToken(SortFloat, float_to_string(f))))
+  | KItem (Float(f,e,p)) -> print_kitem(KItem (KToken(SortFloat, precise_float_to_string(f,p,e))))
   | KItem (Bottom) -> print_kitem(KApply(Lbl'0023'Bottom, []))
   | KItem (List(_,lbl,l)) -> print_kitem(normalize (k_of_list lbl l))
   | KItem (Set(_,lbl,s)) -> print_kitem(normalize (k_of_set lbl s))
@@ -204,22 +205,19 @@ let deconstruct_float (f: Gmp.FR.t) (prec: int) (e: int) : bool * int * Z.t opti
  let true_exp = if exp < min_exp then min_exp else if exp > (emax e) then emax e else (exp - 1) in
  (String.get digits 0 = '-'), true_exp, Some scaled_significand
 
-let float_regexp = Str.regexp "(.*)[pP]([0-9]+)[xX]([0-9]+)"
+let float_regexp = Str.regexp "\\(.*\\)[pP]\\([0-9]+\\)[xX]\\([0-9]+\\)"
 
 let unescape_k_string (str: string) =
   let str = String.sub str 1 (String.length str - 2) in
   Scanf.unescaped str
 
-let parse_float (str: string) : int * int * string =
+ let parse_float (str: string) : int * int * string =
+   let (cMAX_FLOAT_PREC, cMAX_FLOAT_EXP) = (237, 19) in
   if Str.string_match float_regexp str 0 then
     let prec = int_of_string (Str.matched_group 2 str) in
     let exp = int_of_string (Str.matched_group 3 str) in
     (prec, exp, (Str.matched_group 1 str))
-  else let last_idx = String.length str - 1 in
-  let last = String.get str last_idx in match last with
-  | 'f' | 'F' -> (24, 8, String.sub str 0 last_idx)
-  | 'd' | 'D' -> (53, 11, String.sub str 0 last_idx)
-  | _ -> (53, 11, str)
+  else (cMAX_FLOAT_PREC, cMAX_FLOAT_EXP, str)
 
 let ktoken (s: sort) (str: string) : kitem = match s with
 | SortInt -> Int (Z.of_string str)
@@ -546,7 +544,7 @@ struct
     | [Bool b] -> [String (string_of_bool b)]
     | [String s] -> [String ("\"" ^ (k_string_escape s) ^ "\"")]
     | [Int i] -> [String (Z.to_string i)]
-    | [Float(f,_,_)] -> [String (float_to_string f)]
+    | [Float(f,p,e)] -> [String (precise_float_to_string (f,e,p))]
     | _ -> raise Not_implemented
   let hook_float2string c lbl sort config ff = match c with
       [Float (f,_,_)] -> [String (Gmp.FR.to_string_base_digits Gmp.GMP_RNDN 10 0 f)]
