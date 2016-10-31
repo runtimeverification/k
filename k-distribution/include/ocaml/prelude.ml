@@ -401,6 +401,9 @@ struct
   let hook_fresh c lbl sort config ff = match c with
       [String sort] -> let res = ff sort config !freshCounter in freshCounter := Z.add !freshCounter Z.one; res
     | _ -> raise Not_implemented
+  let hook_getenv c lbl sort config ff = match c with
+      [String key] -> [String (Sys.getenv key)]
+    | _ -> raise Not_implemented
   let hook_argv c lbl sort config ff = match c with
       () -> [List (SortList, Lbl_List_,(Array.fold_right (fun arg res -> [String arg] :: res) Sys.argv []))]
 end
