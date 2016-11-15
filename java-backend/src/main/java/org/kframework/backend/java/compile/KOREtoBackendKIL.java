@@ -258,6 +258,11 @@ public class KOREtoBackendKIL extends org.kframework.kore.AbstractConstructors<o
     }
 
     @Override
+    public org.kframework.kore.KAs KAs(org.kframework.kore.K left, org.kframework.kore.K right, Att att) {
+        throw new AssertionError("Should not encounter a KRewrite");
+    }
+
+    @Override
     public InjectedKLabel InjectedKLabel(org.kframework.kore.KLabel klabel, Att att) {
         return new InjectedKLabel(convert1(klabel));
     }

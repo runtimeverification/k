@@ -58,6 +58,16 @@ public class LiftToKSequence {
                 }
                 return KApply(k.klabel(), KList(children), k.att());
             }
+
+            @Override
+            public K apply(KAs k) {
+                K res = apply(k.pattern());
+                KVariable var = (KVariable) k.alias();
+                if (!(res instanceof KSequence) && var.att().<String>getOptional("sort").orElse("K").equals("K")) {
+                    res = KSequence(res);
+                }
+                return KAs(res, k.alias(), k.att());
+            }
         }.apply(term);
         if (result instanceof KSequence) {
             return result;

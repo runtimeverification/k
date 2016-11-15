@@ -43,6 +43,12 @@ object TreeNodesToKORE {
       KApply(downKLabel(items(0)),
         KList(downList(Assoc.flatten(KLabel("#KList"), items.tail, KLabel("#EmptyKList")))), t.att)
 
+    case t@KApply(KLabel("#KAs"), items) =>
+      val it = items.iterator
+      val res = KAs(down(it.next()), down(it.next()), t.att)
+      assert(!it.hasNext)
+      res
+
     case t@KApply(KLabel("#WrappedKLabel"), items) =>
       InjectedKLabel(downKLabel(items(0)), t.att)
 

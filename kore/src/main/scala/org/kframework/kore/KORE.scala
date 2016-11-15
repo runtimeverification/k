@@ -38,6 +38,8 @@ object KORE extends Constructors[K] with ScalaSugared[K] {
 
   def KRewrite(left: K, right: K): KRewrite = KRewrite(left, right, emptyAtt)
 
+  def KAs(pattern: K, alias: K): KAs = KAs(pattern, alias, emptyAtt)
+
   def InjectedKLabel(label: KLabel): InjectedKLabel = InjectedKLabel(label, emptyAtt)
 
   //  def toKList: Collector[K, KList] =
@@ -60,6 +62,8 @@ object KORE extends Constructors[K] with ScalaSugared[K] {
   override def KToken(s: String, sort: Sort, att: Att): KToken = ADT.KToken(s, sort, att)
 
   override def KRewrite(left: K, right: K, att: Att): KRewrite = ADT.KRewrite(left, right, att)
+
+  override def KAs(pattern: K, alias: K, att: Att): KAs = ADT.KAs(pattern, alias, att)
 
   override def KList[KK <: K](items: java.util.List[KK]): KList = ADT.KList(items.asScala.toList)
 

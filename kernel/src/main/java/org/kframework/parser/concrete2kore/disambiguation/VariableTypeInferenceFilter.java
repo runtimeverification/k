@@ -418,9 +418,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
             }
 
             public Tuple2<Either<java.util.Set<ParseFailedException>, Term>, java.util.Set<VarInfo>> apply(TermCons tc) {
-                if (tc.production().att().contains("bracket")
-                        || (tc.production().klabel().isDefined()
-                            && tc.production().klabel().get().equals(KLabel("#KRewrite")))) {
+                if (hasInferredSort(tc)) {
                    return super.apply(tc);
                 }
                 return simpleResult(tc);
@@ -485,9 +483,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
             }
 
             public Either<java.util.Set<ParseFailedException>, Term> apply(TermCons tc) {
-                if (tc.production().att().contains("bracket")
-                        || (tc.production().klabel().isDefined()
-                        && tc.production().klabel().get().equals(KLabel("#KRewrite")))) {
+                if (hasInferredSort(tc)) {
                     return super.apply(tc);
                 }
                 return Right.apply(tc);
@@ -525,6 +521,13 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
             }
 
         }
+    }
+
+    static boolean hasInferredSort(TermCons tc) {
+        return tc.production().att().contains("bracket")
+                || (tc.production().klabel().isDefined()
+                && (tc.production().klabel().get().equals(KLabel("#KRewrite"))
+                || tc.production().klabel().get().equals(KLabel("#KAs"))));
     }
 
     public class CollectExpectedVariablesVisitor extends SafeTransformer {
@@ -588,9 +591,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
             }
 
             public Term apply(TermCons tc) {
-                if (tc.production().att().contains("bracket")
-                        || (tc.production().klabel().isDefined()
-                        && tc.production().klabel().get().equals(KLabel("#KRewrite")))) {
+                if (hasInferredSort(tc)) {
                     return super.apply(tc);
                 }
                 return tc;

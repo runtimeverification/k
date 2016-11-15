@@ -65,6 +65,7 @@ public class RuleGrammarGenerator {
     public static final String CONFIG_CELLS = "CONFIG-CELLS";
     public static final String K = "K";
     public static final String AUTO_CASTS = "AUTO-CASTS";
+    public static final String KSEQ_SYMBOLIC = "KSEQ-SYMBOLIC";
     public static final String K_TOP_SORT = "K-TOP-SORT";
     public static final String K_BOTTOM_SORT = "K-BOTTOM-SORT";
     public static final String AUTO_FOLLOW = "AUTO-FOLLOW";
@@ -194,6 +195,17 @@ public class RuleGrammarGenerator {
             for (Sort srt : iterable(mod.definedSorts())) {
                 if (!isParserSort(srt)) {
                     prods.add(Production(srt, Seq(NonTerminal(srt), Terminal("=>"), NonTerminal(srt)), Att().add(Constants.ORIGINAL_PRD, rewrite)));
+                }
+            }
+        }
+
+
+
+        if (baseK.getModule(KSEQ_SYMBOLIC).isDefined() && mod.importedModules().contains(baseK.getModule(KSEQ_SYMBOLIC).get())) {
+            Production as = stream(baseK.getModule(KSEQ_SYMBOLIC).get().productionsFor().apply(KLabel("#KAs"))).findAny().get();
+            for (Sort srt : iterable(mod.definedSorts())) {
+                if (!isParserSort(srt)) {
+                    prods.add(Production(srt, Seq(NonTerminal(srt), Terminal("#as"), NonTerminal(srt)), Att().add(Constants.ORIGINAL_PRD, as)));
                 }
             }
         }

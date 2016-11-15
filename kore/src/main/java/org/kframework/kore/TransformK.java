@@ -1,11 +1,13 @@
 // Copyright (c) 2015-2016 K Team. All Rights Reserved.
 package org.kframework.kore;
 
-import org.kframework.kore.*;
-
 import java.util.ArrayList;
 
-import static org.kframework.kore.KORE.*;
+import static org.kframework.kore.KORE.KApply;
+import static org.kframework.kore.KORE.KAs;
+import static org.kframework.kore.KORE.KList;
+import static org.kframework.kore.KORE.KRewrite;
+import static org.kframework.kore.KORE.KSequence;
 
 /**
  * Abstract K to K transformer.
@@ -39,6 +41,17 @@ public class TransformK extends AbstractKTransformer<K> {
         K r = apply(k.right());
         if (l != k.left() || r != k.right()) {
             return KRewrite(l, r, k.att());
+        } else {
+            return k;
+        }
+    }
+
+    @Override
+    public K apply(KAs k) {
+        K l = apply(k.pattern());
+        K r = apply(k.alias());
+        if (l != k.pattern() || r != k.alias()) {
+            return KAs(l, r, k.att());
         } else {
             return k;
         }

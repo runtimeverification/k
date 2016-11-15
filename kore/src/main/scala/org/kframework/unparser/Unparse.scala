@@ -113,5 +113,12 @@ object ToKast {
       accumulator("=>")
       unparse(accumulator,false,1,r)
       if (needParen) accumulator("``")
+    case KAs(l,r) =>
+      val needParen = prec > 1
+      if (needParen) accumulator("``")
+      unparse(accumulator,needParen || inParen,1,l)
+      accumulator(" #as ")
+      unparse(accumulator,false,1,r)
+      if (needParen) accumulator("``")
   }
 }

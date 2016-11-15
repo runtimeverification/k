@@ -13,6 +13,7 @@ trait Constructors[KK <: K] {
   def KSequence[KKK <: KK](items: java.util.List[KKK], att: Att): KK
   def KVariable(name: String, att: Att): KVariable with KK
   def KRewrite(left: K, right: K, att: Att): KRewrite with KK
+  def KAs(pattern: K, alias: K, att: Att): KAs with KK
   def InjectedKLabel(klabel: KLabel, att: Att): InjectedKLabel
 
   val injectedKListLabel = "INJECTED-KLIST"

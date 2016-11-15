@@ -92,6 +92,20 @@ trait KVariable extends KItem with KLabel {
   def computeHashCode = name.hashCode
 }
 
+trait KAs extends K {
+  def pattern: K
+  def alias: K
+
+  override def equals(that: Any): Boolean =
+    hashCode == that.hashCode && (that match {
+      case that: AnyRef if that.asInstanceOf[AnyRef] eq this => true
+      case that: KAs => this.pattern == that.pattern && this.alias == that.alias
+      case _ => false
+    })
+
+  def computeHashCode = pattern.hashCode * 19 + alias.hashCode
+}
+
 trait KRewrite extends K {
   def left: K
   def right: K

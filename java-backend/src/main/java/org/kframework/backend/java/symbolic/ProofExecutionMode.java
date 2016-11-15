@@ -14,6 +14,7 @@ import org.kframework.kore.AbstractKTransformer;
 import org.kframework.kore.InjectedKLabel;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
+import org.kframework.kore.KAs;
 import org.kframework.kore.KCollection;
 import org.kframework.kore.KRewrite;
 import org.kframework.kore.KSequence;
@@ -82,6 +83,11 @@ public class ProofExecutionMode implements ExecutionMode<List<K>> {
 
             @Override
             public Map<String, K> apply(KRewrite k) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public Map<String, K> apply(KAs k) {
                 throw new UnsupportedOperationException();
             }
 

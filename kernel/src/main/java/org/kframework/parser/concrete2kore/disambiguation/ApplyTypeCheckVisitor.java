@@ -20,8 +20,6 @@ import scala.util.Right;
 
 import java.util.Set;
 
-import static org.kframework.kore.KORE.*;
-
 
 public class ApplyTypeCheckVisitor extends SetsTransformerWithErrors<ParseFailedException> {
     private final POSet<Sort> subsorts;
@@ -76,9 +74,7 @@ public class ApplyTypeCheckVisitor extends SetsTransformerWithErrors<ParseFailed
         public Either<java.util.Set<ParseFailedException>, Term> apply(ProductionReference pr) {
             if (pr instanceof TermCons) {
                 TermCons tc = (TermCons) pr;
-                if (tc.production().att().contains("bracket")
-                        || (tc.production().klabel().isDefined()
-                        && tc.production().klabel().get().equals(KLabel("#KRewrite")))) {
+                if (VariableTypeInferenceFilter.hasInferredSort(tc)) {
                     return super.apply(tc);
                 }
             }

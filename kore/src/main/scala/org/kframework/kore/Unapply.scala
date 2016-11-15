@@ -39,6 +39,10 @@ object Unapply {
     def unapply(krw: KRewrite): Option[(K, K)] = Some(krw.left, krw.right)
   }
 
+  object KAs {
+    def unapply(krw: KAs): Option[(K, K)] = Some(krw.pattern, krw.alias)
+  }
+
   object KVariable {
     def unapply(v: KVariable): Option[String] = Some(v.name)
   }

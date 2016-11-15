@@ -1,12 +1,6 @@
 // Copyright (c) 2015-2016 K Team. All Rights Reserved.
 package org.kframework.backend.java.kore.compile;
 
-import org.kframework.backend.java.compile.KOREtoBackendKIL;
-import org.kframework.backend.java.kil.Term;
-import org.kframework.backend.java.kil.TermContext;
-import org.kframework.backend.java.symbolic.InitializeRewriter;
-import org.kframework.backend.java.symbolic.JavaExecutionOptions;
-import org.kframework.backend.java.symbolic.MacroExpander;
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.definition.Context;
 import org.kframework.definition.Module;
@@ -17,24 +11,24 @@ import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
-import org.kframework.kore.compile.KtoKORE;
-import org.kframework.krun.KRunOptions;
-import org.kframework.krun.ioserver.filesystem.portable.PortableFileSystem;
+import org.kframework.kore.KList;
+import org.kframework.kore.KVariable;
+import org.kframework.kore.TransformK;
+import org.kframework.kore.compile.RewriteToTop;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static scala.compat.java8.JFunction.func;
 import static org.kframework.Collections.*;
 import static org.kframework.definition.Constructors.*;
 import static org.kframework.kore.KORE.*;
+import static scala.compat.java8.JFunction.*;
 
 /**
  * Uses the Java backend to expand all the macros in a particular module. A macro is a rule (without a side condition)
@@ -46,30 +40,17 @@ import static org.kframework.kore.KORE.*;
  */
 public class ExpandMacros {
 
-    private final InitializeRewriter.SymbolicRewriterGlue rewriter;
     private final KExceptionManager kem;
-    private final boolean noMacros;
+
+    private final Map<KLabel, Rule> macros;
 
     public ExpandMacros(Module mod, KExceptionManager kem, FileUtil files, GlobalOptions globalOptions, KompileOptions kompileOptions) {
         this.kem = kem;
-        Optional<Module> macroModule = getMacroModule(mod);
-        if (macroModule.isPresent()) {
-            rewriter = (InitializeRewriter.SymbolicRewriterGlue) new InitializeRewriter(
-                    new PortableFileSystem(kem, files),
-                    new JavaExecutionOptions(),
-                    globalOptions,
-                    kem,
-                    kompileOptions.experimental.smt,
-                    new HashMap<>(),
-                    kompileOptions,
-                    new KRunOptions(),
-                    files,
-                    new InitializeRewriter.InitializeDefinition()).apply(macroModule.get());
-            noMacros = false;
-        } else {
-            noMacros = true;
-            rewriter = null;
-        }
+        macros = stream(mod.rules()).filter(r -> r.att().contains("macro")).collect(Collectors.toMap(r -> ((KApply)RewriteToTop.toLeft(r.body())).klabel(), Function.identity()));
+    }
+
+    private boolean isFunction(KLabel klabel, Module mod) {
+        return mod.attributesFor().apply(klabel).contains("function");
     }
 
     private static boolean isSortPredicates(K term, Module mod) {
@@ -94,30 +75,6 @@ public class ExpandMacros {
                 atts.get(Attribute.PREDICATE_KEY).exists(func(s -> !s.equals("")))));
     }
 
-    private static Optional<Module> getMacroModule(Module mod) {
-        Set<Sentence> sentences = new HashSet<>();
-        sentences.addAll(mutable(mod.productions()));
-        sentences.addAll(mutable(mod.sortDeclarations()));
-        Set<Rule> macroRules = stream(mod.rules())
-                .filter(r -> r.att().contains(Attribute.MACRO_KEY))
-                .map(r -> {
-                    if (!r.ensures().equals(BooleanUtils.TRUE) || !isSortPredicates(r.requires(),mod)) {
-                        throw KEMException.compilerError("Side conditions are not allowed in macro rules. If you are typing a variable, use ::.", r);
-                    }
-                    if (!r.requires().equals(BooleanUtils.TRUE)) {
-                        return Rule(r.body(), BooleanUtils.TRUE, r.ensures(), r.att());
-                    } else {
-                        return r;
-                    }
-                })
-                .collect(Collectors.toSet());
-        sentences.addAll(macroRules);
-        if (macroRules.isEmpty()) {
-            return Optional.empty();
-        }
-        return Optional.of(Module(mod.name(), Set(), immutable(sentences), mod.att()));
-    }
-
     private Rule expand(Rule rule) {
         return Rule(expand(rule.body()),
                 expand(rule.requires()),
@@ -133,13 +90,40 @@ public class ExpandMacros {
     }
 
     public K expand(K term) {
-        if (noMacros) {
+        if (macros.size() == 0)
             return term;
-        }
-        TermContext tc = TermContext.builder(rewriter.rewritingContext).build();
-        //Term t = new KOREtoBackendKIL(tc).convert(term).evaluate(tc);
-        Term t = new MacroExpander(tc, kem).processTerm(new KOREtoBackendKIL(rewriter.module, rewriter.definition, tc.global(), false).convert(term));
-        return new KtoKORE().apply(t);
+        return new TransformK() {
+            @Override
+            public K apply(KApply k) {
+                Rule r = macros.get(k.klabel());
+                if (r == null)
+                    return super.apply(k);
+                if (!r.requires().equals(BooleanUtils.TRUE)) {
+                    throw KEMException.compilerError("Cannot compute macros with side conditions.", r);
+                }
+                K left = RewriteToTop.toLeft(r.body());
+                KList list;
+                if (left instanceof KApply) {
+                    list = ((KApply) left).klist();
+                } else {
+                    throw KEMException.compilerError("Cannot compute macros that are not function-like.", r);
+                }
+                final Map<KVariable, K> subst = new HashMap<>();
+                for (int i = 0; i < k.items().size(); i++) {
+                    K param = list.items().get(i);
+                    if (!(param instanceof KVariable)) {
+                        throw KEMException.compilerError("Cannot compute macros that are not function-like.", r);
+                    }
+                    subst.put(((KVariable)param), apply(k.items().get(i)));
+                }
+                return apply(new TransformK() {
+                    @Override
+                    public K apply(KVariable k) {
+                        return subst.get(k);
+                    }
+                }.apply(RewriteToTop.toRight(r.body())));
+            }
+        }.apply(term);
     }
 
     public Sentence expand(Sentence s) {

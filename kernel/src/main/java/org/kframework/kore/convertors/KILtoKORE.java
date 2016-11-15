@@ -17,6 +17,7 @@ import org.kframework.kore.AbstractKTransformer;
 import org.kframework.kore.InjectedKLabel;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
+import org.kframework.kore.KAs;
 import org.kframework.kore.KCollection;
 import org.kframework.kore.KRewrite;
 import org.kframework.kore.KSequence;
@@ -25,7 +26,6 @@ import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
 import org.kframework.kore.compile.checks.CheckListDecl;
 import org.kframework.utils.errorsystem.KEMException;
-import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import scala.Enumeration.Value;
 import scala.Tuple2;
@@ -43,6 +43,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.kframework.Collections.*;
+import static org.kframework.definition.Constructors.Att;
 import static org.kframework.definition.Constructors.*;
 import static org.kframework.kore.KORE.*;
 
@@ -211,6 +212,11 @@ public class KILtoKORE extends KILTransformation<Object> {
             @Override
             public Set<Tuple2<K, Sort>> apply(KRewrite k) {
                 return Sets.union(apply(k.left()), apply(k.right()));
+            }
+
+            @Override
+            public Set<Tuple2<K, Sort>> apply(KAs k) {
+                return Sets.union(apply(k.pattern()), apply(k.alias()));
             }
 
             @Override

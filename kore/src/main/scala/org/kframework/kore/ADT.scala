@@ -75,6 +75,8 @@ object ADT {
 
   case class KRewrite(left: kore.K, right: kore.K, att: Att = Att()) extends kore.KRewrite
 
+  case class KAs(pattern: kore.K, alias: kore.K, att: Att = Att()) extends kore.KAs
+
   case class InjectedKLabel(klabel: kore.KLabel, att: Att) extends kore.InjectedKLabel
 
 }

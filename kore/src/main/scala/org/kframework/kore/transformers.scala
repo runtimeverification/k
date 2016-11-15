@@ -14,6 +14,7 @@ trait KTransformer[T] extends ((K) => T) with java.util.function.Function[K, T] 
     case k: KVariable => apply(k)
     case k: KSequence => apply(k: KSequence)
     case k: InjectedKLabel => apply(k)
+    case k: KAs => apply(k)
   }
 
   def apply(k: KApply): T
@@ -27,6 +28,8 @@ trait KTransformer[T] extends ((K) => T) with java.util.function.Function[K, T] 
   def apply(k: KSequence): T
 
   def apply(k: InjectedKLabel): T
+
+  def apply(k: KAs): T
 }
 
 /**
@@ -42,6 +45,8 @@ abstract class FoldK[T] extends KTransformer[T] {
   def apply(klist: KList): T = klist.items.asScala.map(apply).fold(unit)(merge)
 
   def apply(k: KRewrite): T = merge(apply(k.left), apply(k.right))
+
+  def apply(k: KAs): T = merge(apply(k.pattern), apply(k.alias))
 
   def apply(k: KToken): T = unit
 
@@ -75,6 +80,7 @@ class KVisitor extends java.util.function.Consumer[K] {
       case k: KVariable => apply(k)
       case k: KSequence => apply(k: KSequence)
       case k: InjectedKLabel => apply(k)
+      case k: KAs => apply(k)
     }
   }
 
@@ -89,6 +95,11 @@ class KVisitor extends java.util.function.Consumer[K] {
   def apply(k: KRewrite): Unit = {
     apply(k.left);
     apply(k.right)
+  }
+
+  def apply(k: KAs): Unit = {
+    apply(k.pattern);
+    apply(k.alias)
   }
 
   def apply(k: KToken): Unit = {}

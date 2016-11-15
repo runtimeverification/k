@@ -70,6 +70,8 @@ module KSEQ-SYMBOLIC
   syntax KBott      ::= #KVariable
   syntax KBott      ::= KConfigVar
   syntax KLabel     ::= #KVariable
+
+  syntax K      ::= K "#as" K                                                      [klabel(#KAs)]
 endmodule
 
 module KCELLS
