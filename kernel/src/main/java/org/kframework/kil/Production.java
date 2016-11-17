@@ -2,11 +2,10 @@
 package org.kframework.kil;
 
 import com.google.common.collect.Multimap;
-
 import org.kframework.kil.visitors.Visitor;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KExceptionManager;
-import java.util.ArrayList;
+
 import java.util.List;
 
 /**
@@ -22,22 +21,6 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
     protected Sort sort;
     protected String ownerModuleName;
     private Multimap<Integer, Integer> binderMap;
-
-    public static Production makeFunction(Sort funSort, String funName, Sort argSort, org.kframework.kil.loader.Context context) {
-        List<ProductionItem> prodItems = new ArrayList<ProductionItem>();
-        prodItems.add(new Terminal(funName));
-        prodItems.add(new Terminal("("));
-        prodItems.add(new NonTerminal(argSort));
-        prodItems.add(new Terminal(")"));
-
-        Production funProd = new Production(new NonTerminal(funSort), prodItems);
-        if (funSort.isComputationSort()) {
-            funProd.putAttribute("klabel", funName);
-            context.addProduction(funProd);
-        }
-
-        return funProd;
-    }
 
     public boolean isListDecl() {
         return items.size() == 1 && items.get(0) instanceof UserList;

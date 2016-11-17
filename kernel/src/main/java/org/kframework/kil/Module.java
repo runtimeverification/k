@@ -1,7 +1,6 @@
 // Copyright (c) 2012-2016 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import org.kframework.kil.loader.Context;
 import org.kframework.kil.loader.ModuleContext;
 import org.kframework.kil.visitors.Visitor;
 
@@ -137,39 +136,6 @@ public class Module extends DefinitionItem implements Interfaces.MutableList<Mod
     @Override
     public Module shallowCopy() {
         return new Module(this);
-    }
-
-    public void addSubsort(Sort sort, Sort subsort, Context context) {
-        this.addProduction(sort, new NonTerminal(subsort));
-        context.addSubsort(sort, subsort);
-    }
-
-    public void addConstant(Sort ctSort, String ctName) {
-        this.addProduction(ctSort, new Terminal(ctName));
-    }
-
-    public void addConstant(KLabelConstant kLabelConstant) {
-        this.addProduction(kLabelConstant.getSort(), new Terminal(kLabelConstant.getLabel()));
-    }
-
-    public void addProduction(Sort sort, ProductionItem prodItem) {
-        List<ProductionItem> prodItems = new LinkedList<>();
-        prodItems.add(prodItem);
-        this.addProduction(sort, new Production(new NonTerminal(sort), prodItems));
-    }
-
-    public void addProduction(Sort sort, Production prod) {
-        List<PriorityBlock> pbs = new LinkedList<>();
-        PriorityBlock pb = new PriorityBlock();
-        pbs.add(pb);
-
-        List<Production> prods = new LinkedList<>();
-        pb.setProductions(prods);
-
-        prods.add(prod);
-
-        this.items.add(new Syntax(new NonTerminal(sort), pbs));
-        this.sorts = null;
     }
 
     public List<Rule> getRules() {
