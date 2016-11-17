@@ -32,7 +32,7 @@ public class ConcretizationInfo {
         if (k instanceof KApply) {
             return labels.getCodomain(((KApply) k).klabel());
         } else if (k instanceof KVariable) {
-            return Sort(k.att().<String>get(Attribute.SORT_KEY).get());
+            return Sort(k.att().get(Attribute.SORT_KEY));
         } else {
             throw new AssertionError("expected KApply or KVariable, found " + k.getClass().getSimpleName());
         }

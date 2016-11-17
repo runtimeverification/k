@@ -53,6 +53,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.kframework.Collections.*;
+import static org.kframework.kore.KORE.*;
 import static org.kframework.definition.Constructors.*;
 import static scala.compat.java8.JFunction.*;
 

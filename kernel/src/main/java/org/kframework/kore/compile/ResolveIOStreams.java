@@ -69,7 +69,7 @@ public class ResolveIOStreams {
             }
             // Step 2.
             for (Production p : streamProductions) {
-                if (p.att().<String>get("stream").get().equals("stdin")) {
+                if (p.att().get("stream").equals("stdin")) {
                     sentences.addAll(getStdinStreamUnblockingRules(p, sentences));
                 }
             }
@@ -87,8 +87,8 @@ public class ResolveIOStreams {
         for (Sentence s : mutable(m.localSentences())) {
             if (s instanceof Production) {
                 Production p = (Production) s;
-                if (p.att().<String>get("stream").isDefined()) {
-                    checkStreamName(p.att().<String>get("stream").get());
+                if (p.att().getOption("stream").isDefined()) {
+                    checkStreamName(p.att().get("stream"));
                     productions.add(p);
                 }
             }
@@ -149,7 +149,7 @@ public class ResolveIOStreams {
 
     // Get an initializer rule from the built-in *-STREAM module
     private KList getContentsOfInitRule(Production streamProduction) {
-        String streamName = streamProduction.att().<String>get("stream").get(); // stdin, stdout
+        String streamName = streamProduction.att().get("stream"); // stdin, stdout
         String initLabel = GenerateSentencesFromConfigDecl.getInitLabel(
                 Sort(GenerateSentencesFromConfigDecl.getSortOfCell(streamName))); // initStdinCell, initStdoutCell
         String cellLabel = "<" + streamName + ">"; // <stdin>, <stdout>
@@ -172,7 +172,7 @@ public class ResolveIOStreams {
     // - productions whose sort is `Stream`
     // - rules that have `stream` attribute, but changing cell names according to user-defined one.
     private java.util.Set<Sentence> getStreamModuleSentences(Production streamProduction) {
-        String streamName = streamProduction.att().<String>get("stream").get(); // stdin, stdout
+        String streamName = streamProduction.att().get("stream"); // stdin, stdout
         String builtinCellLabel = "<" + streamName + ">"; // <stdin>, <stdout>
         KLabel userCellLabel = streamProduction.klabel().get(); // <in>, <out>
 
@@ -309,7 +309,7 @@ public class ResolveIOStreams {
                     if (!sort.isEmpty()) {
                         sorts.add(sort);
                     } else {
-                        if (k.att().get(Location.class).isDefined()) { // warning only for user-provided rules
+                        if (k.att().getOption(Location.class).isDefined()) { // warning only for user-provided rules
                             kem.registerCompilerWarning("Unsupported matching pattern in stdin stream cell." +
                                     "\nThe currently supported pattern is: <in> ListItem(V:Sort) => .List ... </in>", k);
                         }
@@ -375,7 +375,7 @@ public class ResolveIOStreams {
      *      </in>
      */
     private K getUnblockRuleBody(Production streamProduction, String sort) {
-        String streamName = streamProduction.att().<String>get("stream").get();
+        String streamName = streamProduction.att().get("stream");
         assert streamName.equals("stdin"); // stdin
         String builtinCellLabel = "<" + streamName + ">"; // <stdin>
         KLabel userCellLabel = streamProduction.klabel().get(); // <in>

@@ -18,6 +18,7 @@ object Collections {
   def immutable[T](s: java.lang.Iterable[T]): Iterable[T] = s.asScala
   def immutable[T](s: java.util.Set[T]): Set[T] = s.asScala.toSet
   def immutable[T](s: java.util.List[T]): Seq[T] = s.asScala
+  def immutable[K, V](s: java.util.Map[K, V]): Map[K, V] = s.asScala
   def immutable[T](s: Array[T]): Seq[T] = s
 
   def mutable[T](s: scala.List[T]): java.util.List[T] = s.asJava

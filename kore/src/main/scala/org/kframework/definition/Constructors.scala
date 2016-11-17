@@ -2,6 +2,8 @@
 
 package org.kframework.definition
 
+import java.util.Optional
+
 import org.kframework.attributes.Att
 import org.kframework.{attributes, definition}
 import org.kframework.kore._
@@ -53,8 +55,6 @@ object Constructors {
     definition.Bubble(sentenceType, content, att)
 
   def Associativity = definition.Associativity;
-
-  def Att() = attributes.Att();
 
   // EXTRA
 

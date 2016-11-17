@@ -1,8 +1,8 @@
-// Copyright (c) 2014-2016 K Team. All Rights Reserved.
-module ANOTHER [Location(#token("3",Int),#token("1",Int),#token("4",Int),#token("9",Int)) Source(#token("src/test/resources/convertor-tests/imports.k",KString))]
+// Copyright (c) 2016 K Team. All Rights Reserved.
+module ANOTHER [org.kframework.attributes.Location(Location(3,1,4,9)) org.kframework.attributes.Source(Source(src/test/resources/convertor-tests/imports.k))]
 endmodule
 
 
-module TEST [Location(#token("6",Int),#token("1",Int),#token("8",Int),#token("9",Int)) Source(#token("src/test/resources/convertor-tests/imports.k",KString))]
+module TEST [org.kframework.attributes.Location(Location(6,1,8,9)) org.kframework.attributes.Source(Source(src/test/resources/convertor-tests/imports.k))]
   imports ANOTHER
 endmodule

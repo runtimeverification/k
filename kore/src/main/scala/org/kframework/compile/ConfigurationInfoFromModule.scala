@@ -29,10 +29,10 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
 
   private val cellFragmentLabel: Map[String,KLabel] =
     m.productions.filter(_.att.contains("cellFragment"))
-      .map(p => (p.att.get("cellFragment",classOf[String]).get,p.klabel.get)).toMap
+      .map(p => (p.att.get("cellFragment"),p.klabel.get)).toMap
   private val cellAbsentLabel: Map[String,KLabel] =
     m.productions.filter(_.att.contains("cellOptAbsent"))
-      .map (p => (p.att.get("cellOptAbsent",classOf[String]).get,p.klabel.get)).toMap
+      .map (p => (p.att.get("cellOptAbsent"),p.klabel.get)).toMap
 
 
   private val cellInitializer: Map[Sort, KApply] =
@@ -127,11 +127,11 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
 
   override def getUnit(k: Sort): KApply = {
     if (getMultiplicity(k) == Multiplicity.OPTIONAL)
-      KApply(KLabel(cellProductions(k).att.get[String]("unit").get))
+      KApply(KLabel(cellProductions(k).att.get("unit")))
     else {
       val sorts = getCellBagSortsOfCell(k)
       assert(sorts.size == 1, "Too many cell bags found for cell sort: " + k + ", " + sorts)
-      KApply(KLabel(cellBagProductions(sorts.head).att.get[String]("unit").get))
+      KApply(KLabel(cellBagProductions(sorts.head).att.get("unit")))
     }
   }
 
@@ -153,7 +153,7 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
     cellSorts
       .map(s => (s, getCellBagSortsOfCell(s)))
       .filter(_._2.size == 1)
-      .filter(p => KApply(KLabel(cellBagProductions(p._2.head).att.get[String]("unit").get)).equals(unit))
+      .filter(p => KApply(KLabel(cellBagProductions(p._2.head).att.get("unit"))).equals(unit))
       .map(_._1)
       .headOption
   }

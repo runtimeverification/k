@@ -1,16 +1,15 @@
 // Copyright (c) 2015-2016 K Team. All Rights Reserved.
 package org.kframework.definition;
 
-import org.kframework.attributes.Att;
-import org.kframework.definition.NonTerminal;
-import org.kframework.definition.Production;
-import org.kframework.definition.Sentence;
-import org.kframework.definition.Terminal;
-
-import java.util.*;
-import java.util.stream.Collectors;
-
 import org.kframework.Collections;
+import org.kframework.attributes.Att;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Class to hold easy to access information about user defined lists.
@@ -52,7 +51,7 @@ public class UserList {
                     ul.klabel = p.klabel().get().name();
                     ul.attrs = p.att().remove("klabel");
                     // should work without the Att.userList() att, i.e. for any list -- see #1892
-                    ul.nonEmpty = ul.attrs.get(Att.userList()).get().equals("+");
+                    ul.nonEmpty = ul.attrs.get(Att.userList()).equals("+");
                     ul.childSort = ((NonTerminal) p.items().head()).sort().name();
                     ul.pList = p;
                 } else if (p.items().size() == 1 && p.items().head() instanceof Terminal) {

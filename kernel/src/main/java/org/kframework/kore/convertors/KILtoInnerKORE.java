@@ -2,24 +2,28 @@
 
 package org.kframework.kore.convertors;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.kframework.attributes.*;
+import org.kframework.attributes.Att;
+import org.kframework.attributes.Location;
+import org.kframework.attributes.Source;
 import org.kframework.builtin.Labels;
 import org.kframework.builtin.Sorts;
 import org.kframework.kil.*;
-import org.kframework.kil.KSequence;
 import org.kframework.kil.loader.Context;
-import org.kframework.kore.*;
+import org.kframework.kore.K;
+import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.KList;
-import org.kframework.meta.Up;
+import org.kframework.kore.KORE;
+import org.kframework.kore.KRewrite;
+import org.kframework.kore.KVariable;
+import scala.Tuple2;
+
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static org.kframework.kore.KORE.*;
-import static org.kframework.Collections.*;
 
 @SuppressWarnings("unused")
 public class KILtoInnerKORE extends KILTransformation<K> {
@@ -48,8 +52,6 @@ public class KILtoInnerKORE extends KILTransformation<K> {
     // return KList();
     // }
 
-    private K cellMarker = org.kframework.definition.Configuration.cellMarker();
-
     @SuppressWarnings("unchecked")
     public KApply apply(Cell body) {
         // K x = ;
@@ -57,7 +59,7 @@ public class KILtoInnerKORE extends KILTransformation<K> {
         // && ((KApply) x).size() == 0) {
 
         return KApply(KLabel(body.getLabel()), KList(apply(body.getContents())),
-                Attributes(cellMarker).addAll(convertCellAttributes(body)));
+                Att().add("cell").addAll(convertCellAttributes(body)));
         // } else {
         // return KApply(KLabel(body.getLabel()), KList(x),
         // Att(cellMarker));
@@ -65,7 +67,7 @@ public class KILtoInnerKORE extends KILTransformation<K> {
     }
 
     public K apply(org.kframework.kil.KLabelConstant c) {
-        return InjectedKLabel(KLabel(c.getLabel()), Attributes());
+        return InjectedKLabel(KLabel(c.getLabel()), Att());
     }
 
     public org.kframework.kore.KSequence apply(KSequence seq) {
@@ -97,7 +99,7 @@ public class KILtoInnerKORE extends KILTransformation<K> {
         // NOTE: we don't covert it back to ListTerminator because Radu thinks
         // it is not necessary
 
-        return KApply(KLabel(terminatorKLabel), KList(), Attributes().add(LIST_TERMINATOR));
+        return KApply(KLabel(terminatorKLabel), KList(), Att().add(LIST_TERMINATOR));
     }
 
     public String dropQuote(String s) {
@@ -146,9 +148,7 @@ public class KILtoInnerKORE extends KILTransformation<K> {
 
     private org.kframework.attributes.Att sortAttributes(Term cons) {
 
-        return convertAttributes(cons).addAll(
-                Attributes(KApply(KLabel("sort"),
-                        KList(KToken(cons.getSort().toString(), Sorts.KString())))));
+        return convertAttributes(cons).add("sort", cons.getSort().toString());
     }
 
     public KApply apply(Hole hole) {
@@ -186,55 +186,47 @@ public class KILtoInnerKORE extends KILTransformation<K> {
     public org.kframework.attributes.Att convertAttributes(ASTNode t) {
         Attributes attributes = t.getAttributes();
 
-        Set<K> attributesSet = attributes
+        Map<String, String> attributesSet = attributes
                 .keySet()
                 .stream()
                 .map(key -> {
                     String keyString = key.toString();
                     String valueString = attributes.get(key).getValue().toString();
                     if (keyString.equals("klabel")) {
-                        return (K) KApply(KLabel("klabel"),
-                                KList(KToken(dropQuote(valueString), Sort("AttributeValue"))));
+                        return Tuple2.apply("klabel", dropQuote(valueString));
                     } else {
-                        return (K) KApply(KLabel(keyString),
-                                KList(KToken(valueString, Sort("AttributeValue"))));
+                        return Tuple2.apply(keyString, valueString);
                     }
 
-                }).collect(Collectors.toSet());
+                }).collect(Collectors.toMap(Tuple2::_1, Tuple2::_2));
 
-        return Attributes(immutable(attributesSet))
+        return Att().addAll(attributesSet)
                 .addAll(attributesFromLocation(t.getLocation()))
                 .addAll(attributesFromSource(t.getSource()));
     }
 
     private Att attributesFromSource(Source source) {
-        Up up = new Up(KORE.self(), Set("org.kframework.attributes"));
         if (source != null) {
-            return Att.apply(Set(up.apply(source)));
+            return Att().add(Source.class, source);
         }
-        return Attributes();
+        return Att();
     }
 
     public org.kframework.attributes.Att convertCellAttributes(Cell c) {
         Map<String, String> attributes = c.getCellAttributes();
 
-        Set<K> attributesSet = attributes
+        Map<String, String> attributesSet = attributes
                 .keySet()
                 .stream()
-                .map(key -> {
-                    String value = attributes.get(key);
-                    return (K)KApply(KLabel(key), KList(KToken(value, Sort("AttributeValue"))));
-                }).collect(Collectors.toSet());
+                .collect(Collectors.toMap(Function.identity(), attributes::get));
 
-        return Attributes(immutable(attributesSet));
+        return Att().addAll(attributesSet);
     }
 
     private org.kframework.attributes.Att attributesFromLocation(Location location) {
-        Up up = new Up(KORE.self(), Set("org.kframework.attributes"));
-
         if (location != null) {
-            return org.kframework.attributes.Att.apply(Set(up.apply(location)));
+            return Att().add(Location.class, location);
         } else
-            return Attributes();
+            return Att();
     }
 }

@@ -24,7 +24,7 @@ class NormalizeAssoc(c: Constructors[K]) extends (Module => Module) {
     case kApply: KApply =>
       if (m.attributesFor.getOrElse(kApply.klabel, Att()).contains(Att.assoc)) {
         val opKLabel: KLabel = kApply.klabel
-        val unitKLabel: KLabel = KLabel(m.attributesFor(opKLabel).get(Att.unit).get)
+        val unitKLabel: KLabel = KLabel(m.attributesFor(opKLabel).get(Att.unit))
         val flattenChildren = flatten(kApply, opKLabel, unitKLabel)
         if (flattenChildren exists {_.isInstanceOf[KRewrite]}) {
           KRewrite(

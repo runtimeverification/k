@@ -40,7 +40,7 @@ class Strategy(heatCool: Boolean) {
 
                     val strategy =
                       if (r.att.contains("tag")) {
-                        makeRewrite(r.att.get[String]("tag").get)
+                        makeRewrite(r.att.get("tag"))
                       } else if (heatCool && r.att.contains(Att.heat)) {
                         makeRewrite("heat")
                       } else if (heatCool && r.att.contains(Att.cool)) {

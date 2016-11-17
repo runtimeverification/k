@@ -135,7 +135,7 @@ public class SortCells {
                 remainingCells = new LinkedHashSet<>(cfg.getChildren(cell));
             }
             if (var.att().contains(Attribute.SORT_KEY)) {
-                Sort sort = Sort(var.att().<String>get(Attribute.SORT_KEY).get());
+                Sort sort = Sort(var.att().get(Attribute.SORT_KEY));
                 if (cfg.cfg.isCell(sort)) {
                     remainingCells.removeIf(s -> !s.equals(sort));
                 }
@@ -149,7 +149,7 @@ public class SortCells {
                     }
                 } else if (item instanceof KVariable && !item.equals(var)) {
                     if (item.att().contains(Attribute.SORT_KEY)) {
-                        Sort sort = Sort(item.att().<String>get(Attribute.SORT_KEY).get());
+                        Sort sort = Sort(item.att().get(Attribute.SORT_KEY));
                         remainingCells.remove(sort);
                     }
                 }
@@ -267,7 +267,7 @@ public class SortCells {
                     if (item instanceof KVariable) {
                         KVariable var = (KVariable) item;
                         if (var.att().contains(Attribute.SORT_KEY)) {
-                            Sort sort = Sort(var.att().<String>get(Attribute.SORT_KEY).get());
+                            Sort sort = Sort(var.att().get(Attribute.SORT_KEY));
                             if (cfg.cfg.isCell(sort)) {
                                 if (!cellVariables.getOrDefault(var, sort).equals(sort)) {
                                     Sort prevSort = cellVariables.get(var);
@@ -619,7 +619,7 @@ public class SortCells {
                                             var = varinfo.var;
                                     }
                                     if (var.att().contains(Attribute.SORT_KEY)) {
-                                        Sort sort = Sort(var.att().<String>get(Attribute.SORT_KEY).get());
+                                        Sort sort = Sort(var.att().get(Attribute.SORT_KEY));
                                         if (cfg.cfg.isCell(sort)) {
                                             if (!subcellSorts.contains(sort)) {
                                                 throw new IllegalArgumentException("No such sub-cell " + sort + " in the cell " + cellLabel);
@@ -731,7 +731,7 @@ public class SortCells {
                         if (item instanceof KVariable) {
                             KVariable var = (KVariable) item;
                             if (var.att().contains(Attribute.SORT_KEY)) {
-                                Sort sort = Sort(var.att().<String>get(Attribute.SORT_KEY).get());
+                                Sort sort = Sort(var.att().get(Attribute.SORT_KEY));
                                 if (!cfg.cfg.isCell(sort)) {
                                     if (!cellFragmentVars.containsKey(var)) {
                                         cellFragmentVars.put(var, new HashSet<>());
@@ -809,7 +809,7 @@ public class SortCells {
                                     if (cellFragmentSort.name().endsWith("Fragment")) {
                                         Sort cellSort = Sort(cellFragmentSort.name().substring(0,cellFragmentSort.name().indexOf("Fragment")));
                                         KLabel cellLabel = cfg.cfg.getCellLabel(cellSort);
-                                        klist0.set(idx, KApply(cellLabel, KList(item0), Att(KApply(KLabel("dummy_cell")))));
+                                        klist0.set(idx, KApply(cellLabel, KList(item0), Att().add("dummy_cell")));
                                     }
                                 }
                             }

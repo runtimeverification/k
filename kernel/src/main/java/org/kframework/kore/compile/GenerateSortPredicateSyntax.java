@@ -11,6 +11,7 @@ import org.kframework.kore.Sort;
 import java.util.HashSet;
 import java.util.Set;
 
+import static org.kframework.kore.KORE.*;
 import static org.kframework.Collections.*;
 import static org.kframework.definition.Constructors.*;
 

@@ -2,6 +2,7 @@
 
 package org.kframework.definition
 
+import java.util.Optional
 import javax.annotation.Nonnull
 
 import dk.brics.automaton.{BasicAutomata, RegExp, RunAutomaton, SpecialOperations}
@@ -98,7 +99,7 @@ case class Module(val name: String, val imports: Set[Module], unresolvedLocalSen
 
   @transient
   lazy val attForSort: Map[Sort, Att] =
-    productionsForSort mapValues {_ map {_.att} reduce {_.++(_)}}
+    productionsForSort mapValues {_ map {_.att} reduce {_.addAll(_)}}
 
   @transient
   lazy val definedKLabels: Set[KLabel] =
@@ -179,7 +180,7 @@ case class Module(val name: String, val imports: Set[Module], unresolvedLocalSen
   private def mergeAttributes[T <: Sentence](p: Set[T]) = {
     val union = p.flatMap(_.att.att)
     val attMap = union.collect({ case t@KApply(KLabel(_), _) => t }).groupBy(_.klabel)
-    Att(union.filter { k => !k.isInstanceOf[KApply] || attMap(k.asInstanceOf[KApply].klabel).size == 1 })
+    Att(union.filter { k => !k.isInstanceOf[KApply] || attMap(k.asInstanceOf[KApply].klabel).size == 1 }.toMap)
   }
 
   val definedSorts: Set[Sort] = (productions map {_.sort}) ++ (sortDeclarations map {_.sort})
@@ -296,7 +297,7 @@ case class SyntaxSort(sort: Sort, att: Att = Att()) extends Sentence
 
 case class Production(sort: Sort, items: Seq[ProductionItem], att: Att)
   extends Sentence with ProductionToString {
-  lazy val klabel: Option[KLabel] = att.get[String]("klabel") map {org.kframework.kore.KORE.KLabel(_)}
+  lazy val klabel: Option[KLabel] = att.getOption("klabel") map {org.kframework.kore.KORE.KLabel(_)}
 
   override def equals(that: Any) = that match {
     case p@Production(`sort`, `items`, _) => this.klabel == p.klabel
@@ -321,7 +322,7 @@ case class Production(sort: Sort, items: Seq[ProductionItem], att: Att)
 
 object Production {
   def apply(klabel: String, sort: Sort, items: Seq[ProductionItem], att: Att = Att()): Production = {
-    Production(sort, items, att + ("klabel" -> klabel))
+    Production(sort, items, att.add("klabel", klabel))
   }
 
   val kLabelAttribute = "klabel"

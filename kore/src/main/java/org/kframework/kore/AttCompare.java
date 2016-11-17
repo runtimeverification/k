@@ -2,6 +2,7 @@
 package org.kframework.kore;
 
 import org.kframework.attributes.Att;
+import scala.Tuple2;
 import scala.collection.Map;
 
 import java.util.Arrays;
@@ -67,8 +68,8 @@ public class AttCompare {
         return true;
     }
 
-    private Map<String, KApply> filterAtt(Att att) {
-        return att.attMap().filterKeys(func(attNames::contains));
+    private Map<Tuple2<String, Class<?>>, Object> filterAtt(Att att) {
+        return att.att().filterKeys(func(tuple -> attNames.contains(tuple._1())));
     }
 
     @Override

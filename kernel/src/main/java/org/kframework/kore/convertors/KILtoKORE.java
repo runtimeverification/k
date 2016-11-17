@@ -43,7 +43,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.kframework.Collections.*;
-import static org.kframework.definition.Constructors.Att;
 import static org.kframework.definition.Constructors.*;
 import static org.kframework.kore.KORE.*;
 
@@ -172,8 +171,8 @@ public class KILtoKORE extends KILTransformation<Object> {
 
     public org.kframework.definition.Bubble apply(StringSentence sentence) {
         return Bubble(sentence.getType(), sentence.getContent(), inner.convertAttributes(sentence)
-                .add("contentStartLine", sentence.getContentStartLine())
-                .add("contentStartColumn", sentence.getContentStartColumn()));
+                .add("contentStartLine", Integer.class, sentence.getContentStartLine())
+                .add("contentStartColumn", Integer.class, sentence.getContentStartColumn()));
     }
 
     public Context apply(org.kframework.kil.Context c) {

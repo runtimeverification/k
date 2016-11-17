@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.kframework.Collections.*;
-import static org.kframework.definition.Constructors.Att;
 import static org.kframework.definition.Constructors.*;
 import static org.kframework.kore.KORE.*;
 import static scala.compat.java8.JFunction.*;
@@ -194,7 +193,7 @@ public class RuleGrammarGenerator {
             Production rewrite = stream(baseK.getModule(K).get().productionsFor().apply(KLabel("#KRewrite"))).findAny().get();
             for (Sort srt : iterable(mod.definedSorts())) {
                 if (!isParserSort(srt)) {
-                    prods.add(Production(srt, Seq(NonTerminal(srt), Terminal("=>"), NonTerminal(srt)), Att().add(Constants.ORIGINAL_PRD, rewrite)));
+                    prods.add(Production(srt, Seq(NonTerminal(srt), Terminal("=>"), NonTerminal(srt)), Att().add(Constants.ORIGINAL_PRD, Production.class, rewrite)));
                 }
             }
         }
@@ -205,7 +204,7 @@ public class RuleGrammarGenerator {
             Production as = stream(baseK.getModule(KSEQ_SYMBOLIC).get().productionsFor().apply(KLabel("#KAs"))).findAny().get();
             for (Sort srt : iterable(mod.definedSorts())) {
                 if (!isParserSort(srt)) {
-                    prods.add(Production(srt, Seq(NonTerminal(srt), Terminal("#as"), NonTerminal(srt)), Att().add(Constants.ORIGINAL_PRD, as)));
+                    prods.add(Production(srt, Seq(NonTerminal(srt), Terminal("#as"), NonTerminal(srt)), Att().add(Constants.ORIGINAL_PRD, Production.class, as)));
                 }
             }
         }
@@ -295,15 +294,15 @@ public class RuleGrammarGenerator {
                 Att newAtts = ul.attrs.remove("userList");
                 // Es#Terminator ::= "" [klabel('.Es)]
                 prod1 = Production(ul.terminatorKLabel, Sort(ul.sort + "#Terminator"), Seq(Terminal("")),
-                        newAtts.add("klabel", ul.terminatorKLabel).add(Constants.ORIGINAL_PRD, ul.pTerminator));
+                        newAtts.add("klabel", ul.terminatorKLabel).add(Constants.ORIGINAL_PRD, Production.class, ul.pTerminator));
                 // Ne#Es ::= E "," Ne#Es [klabel('_,_)]
                 prod2 = Production(ul.klabel, Sort("Ne#" + ul.sort),
                         Seq(NonTerminal(Sort(ul.childSort)), Terminal(ul.separator), NonTerminal(Sort("Ne#" + ul.sort))),
-                        newAtts.add("klabel", ul.klabel).add(Constants.ORIGINAL_PRD, ul.pList));
+                        newAtts.add("klabel", ul.klabel).add(Constants.ORIGINAL_PRD, Production.class, ul.pList));
                 // Ne#Es ::= E Es#Terminator [klabel('_,_)]
                 prod3 = Production(ul.klabel, Sort("Ne#" + ul.sort),
                         Seq(NonTerminal(Sort(ul.childSort)), NonTerminal(Sort(ul.sort + "#Terminator"))),
-                        newAtts.add("klabel", ul.klabel).add(Constants.ORIGINAL_PRD, ul.pList));
+                        newAtts.add("klabel", ul.klabel).add(Constants.ORIGINAL_PRD, Production.class, ul.pList));
                 // Es ::= Ne#Es
                 prod4 = Production(Sort(ul.sort), Seq(NonTerminal(Sort("Ne#" + ul.sort))));
                 // Es ::= Es#Terminator // if the list is *

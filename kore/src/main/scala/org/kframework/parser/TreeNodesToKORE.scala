@@ -6,8 +6,7 @@ import org.kframework.attributes._
 import org.kframework.builtin.Sorts
 import org.kframework.kore
 import org.kframework.kore.Unapply._
-import org.kframework.kore.{Constructors => con, _}
-import org.kframework.meta.Up
+import org.kframework.kore.{KORE, _}
 
 import scala.collection.JavaConverters._
 
@@ -18,7 +17,7 @@ object TreeNodesToKORE {
   def apply(t: Term): K = t match {
     case c@Constant(s, p) => KToken(s, p.sort, locationToAtt(c.location.get(), c.source.get()))
     case t@TermCons(items, p) => KApply(p.klabel.get, KList(new util.ArrayList(items).asScala.reverse map apply asJava), locationToAtt(t.location.get(), t.source.get()))
-    case Ambiguity(items) => KApply(KLabel("AMB"), KList(items.asScala.toList map apply asJava), Att())
+    case Ambiguity(items) => KApply(KLabel("AMB"), KList(items.asScala.toList map apply asJava), Att)
   }
 
   def down(t: K): K = t match {
@@ -80,8 +79,6 @@ object TreeNodesToKORE {
       downKLabel(items.head)
   }
 
-  val up = new Up(KORE, Set())
-
   def locationToAtt(l: Location, s: Source): Att =
-    Att(up(Location(l.startLine, l.startColumn, l.endLine, l.endColumn)), up(Source(s.source)))
+    Att.add(classOf[Location], l).add(classOf[Source], s)
 }

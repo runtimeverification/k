@@ -11,7 +11,6 @@ import org.kframework.kil.Attribute;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
-import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
 import org.kframework.utils.errorsystem.KEMException;
 
@@ -24,7 +23,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.kframework.Collections.*;
-import static org.kframework.definition.Constructors.Att;
 import static org.kframework.definition.Constructors.*;
 import static org.kframework.kore.KORE.*;
 
@@ -61,9 +59,9 @@ public class ResolveStrict {
         List<Integer> strictnessPositions = new ArrayList<>();
         String attribute;
         if (sequential) {
-            attribute = production.att().<String>get(Attribute.SEQSTRICT_KEY).get();
+            attribute = production.att().get(Attribute.SEQSTRICT_KEY);
         } else {
-            attribute = production.att().<String>get(Attribute.STRICT_KEY).get();
+            attribute = production.att().get(Attribute.STRICT_KEY);
         }
         if (attribute.isEmpty()) {
             for (int i = 1; i <= arity; i++) {

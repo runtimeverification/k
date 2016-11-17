@@ -1,104 +1,46 @@
 package org.kframework.attributes
 
-import org.kframework.builtin.Sorts
-import org.kframework.kore.Unapply._
-import org.kframework.kore.{KApply, K, KORE}
-import org.kframework.meta.{Up, Down}
+import java.util.Optional
 
-import scala.collection.JavaConverters._
-import collection._
+import org.kframework.Collections._
 
+case class Att(att: Map[(String, Class[_]), Any]) extends AttributesToString {
 
-case class Att(att: Set[K]) extends AttributesToString {
+  override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(Att.this)
 
-  val attMap: Map[String, KApply] = att map {
-    case t@KApply(KLabel(key), _) => (key, t)
-  } toMap
+  def contains(key: String): Boolean = att.contains((key, classOf[String]))
 
-  def getKValue(key: String): Option[K] = attMap.get(key) collect { case t@KApply(KLabel(`key`), List(v)) => v }
+  def get(key: String): String = getOption(key).get
+  def get[T](key: Class[T]): T = getOption(key).get
+  def get[T](key: String, cls: Class[T]): T = getOption(key, cls).get
+  def getOption(key: String): Option[String] = att.get((key, classOf[String])).asInstanceOf[Option[String]]
+  def getOption[T](key: Class[T]): Option[T] = att.get((key.getName, key)).asInstanceOf[Option[T]]
+  def getOption[T](key: String, cls: Class[T]): Option[T] = att.get((key, cls)).asInstanceOf[Option[T]]
+  def getOptional(key: String): Optional[String] = optionToOptional(getOption(key))
+  def getOptional[T](key: Class[T]): Optional[T] = optionToOptional(getOption(key))
+  def getOptional[T](key: String, cls: Class[T]): Optional[T] = optionToOptional(getOption(key, cls))
 
-  def getK(key: String): Option[K] = attMap.get(key) map { case t@KApply(KLabel(`key`), _) => t }
+  private def optionToOptional[T](option: Option[T]): Optional[T] = option match { case None => Optional.empty(); case Some(x) => Optional.of(x); }
 
-  def get[T](key: String): Option[T] =
-    getKValue(key).orElse(getK(key))
-      .map(Att.down)
-      .map {_.asInstanceOf[T]}
+  def add(key: String): Att = add(key, "")
+  def add(key: String, value: String): Att = add(key, classOf[String], value)
+  def add[T](key: String, cls: Class[T], value: T): Att = Att(att + ((key, cls) -> value))
+  def add[T](key: Class[T], value: T): Att = add(key.getName, key, value)
+  def addAll(thatAtt: Att) = Att(att ++ thatAtt.att)
+  def addAll(thatAtt: java.util.Map[String, String]): Att = Att(immutable(thatAtt).map { case (k, v) => ((k, classOf[String]), v)}.toMap)
 
-  def get[T](key: String, cls: Class[T]): Option[T] =
-    getKValue(key).orElse(getK(key))
-      .map(Att.down)
-      .map { x =>
-        if (cls.isInstance(x))
-          x.asInstanceOf[T]
-        else
-          getK(key).map(Att.down).map {_.asInstanceOf[T]}.get
-      }
-
-  def get[T](cls: Class[T]): Option[T] = get(cls.getName, cls)
-
-  def getOptional[T](label: String): java.util.Optional[T] =
-    get[T](label) match {
-      case Some(s) => java.util.Optional.of(s);
-      case None => java.util.Optional.empty[T]()
-    }
-
-  def getOptional[T](label: String, cls: Class[T]): java.util.Optional[T] =
-    get[T](label, cls) match {
-      case Some(s) => java.util.Optional.of(s);
-      case None => java.util.Optional.empty[T]()
-    }
-
-  def getOptional[T](cls: Class[T]): java.util.Optional[T] =
-    get[T](cls) match {
-      case Some(s) => java.util.Optional.of(s);
-      case None => java.util.Optional.empty[T]()
-    }
-
-  def contains(label: String): Boolean = attMap.contains(label)
-
-  def +(o: Any) = new Att(att + Att.up(o))
-
-  def +(k: K): Att = new Att(att + k)
-
-  def +(k: String): Att = add(KORE.KApply(KORE.KLabel(k), KORE.KList(), Att()))
-
-  def +(kv: (String, Any)): Att = add(KORE.KApply(KORE.KLabel(kv._1), KORE.KList(Att.up(kv._2)), Att()))
-
-  def ++(that: Att) = new Att(att ++ that.att)
-
-  // nice methods for Java
-  def add(o: Any): Att = this + o
-
-  def add(k: K): Att = this + k
-
-  def add(k: String): Att = this + k
-
-  def add(key: String, value: Any): Att = this + (key -> value)
-
-  def stream = att.asJava.stream
-
-  def addAll(that: Att) = this ++ that
-
-  def remove(k: String): Att = new Att(att filter { case KApply(KLabel(`k`), _) => false; case _ => true })
-
-  override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(Att.this);
+  def remove(key: String): Att = remove(key, classOf[String])
+  def remove(key: Class[_]): Att = remove(key.getName, key)
+  def remove(key: String, cls: Class[_]): Att = Att(att - ((key, cls)))
 }
 
-trait KeyWithType
-
 object Att {
-  @annotation.varargs def apply(atts: K*): Att = Att(atts.toSet)
 
-  val includes = Set("scala.collection.immutable", "org.kframework.attributes")
-  val down = Down(includes)
-  val up = new Up(KORE, includes)
-
-  implicit def asK(key: String, value: String) =
-    KORE.KApply(KORE.KLabel(key), KORE.KList(List(KORE.KToken(value, Sorts.KString, Att())).asJava), Att())
+  def apply(): Att = Att(Map.empty)
 
   /**
-    * attribute marking the top rule label
-    */
+   * attribute marking the top rule label
+   */
   val topRule = "topRule"
   val userList = "userList"
   val generatedByListSubsorting = "generatedByListSubsorting"
@@ -119,26 +61,21 @@ object Att {
   val syntaxModule = "syntaxModule"
   val variable = "variable"
   val sort = "sort"
-
-  def generatedByAtt(c: Class[_]) = Att().add(Att.generatedBy, c.getName)
 }
 
 trait AttributesToString {
   self: Att =>
 
-  override def toString() =
+  override def toString =
     "[" +
-      (this.filteredAtt map {
-        case KApply(KLabel(keyName), KList(KToken(value, _))) => keyName + "(" + value + ")"
-        case x => x.toString
-      }).toList.sorted.mkString(" ") +
-      "]"
+      toStrings.sorted.mkString(" ") +
+    "]"
 
   def postfixString = {
-    if (filteredAtt.isEmpty) "" else (" " + toString())
+    if (toStrings.isEmpty) "" else " " + toString()
   }
 
-  lazy val filteredAtt: List[K] =
-    (att filter { case KApply(KLabel("productionID"), _) => false; case _ => true }).toList sortBy {_.toString}
-  // TODO: remove along with KIL to KORE to KIL convertors
+  lazy val toStrings: List[String] =
+    att filter { case (("productionId", _), _) => false; case _ => true } map
+      { case ((key, _), value) => key + "(" + value + ")" } toList
 }

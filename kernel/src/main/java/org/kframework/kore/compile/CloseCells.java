@@ -279,7 +279,7 @@ public class CloseCells {
             required.remove(labelInfo.getCodomain(((KApply) item).klabel()));
         } else if (item instanceof KVariable) {
             if (item.att().contains(Attribute.SORT_KEY)) {
-                Sort sort = Sort(item.att().<String>get(Attribute.SORT_KEY).get());
+                Sort sort = Sort(item.att().get(Attribute.SORT_KEY));
                 if (cfg.cfg.isCell(sort)) {
                     required.remove(sort);
                 } else {

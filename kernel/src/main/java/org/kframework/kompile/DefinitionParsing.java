@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.commons.collections15.ListUtils;
 import org.kframework.Collections;
+import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.definition.Bubble;
@@ -46,7 +47,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.kframework.Collections.*;
-import static org.kframework.definition.Constructors.Att;
 import static org.kframework.definition.Constructors.*;
 import static org.kframework.kore.KORE.*;
 
@@ -280,7 +280,7 @@ public class DefinitionParsing {
         errors = java.util.Collections.synchronizedSet(Sets.newHashSet());
         gen = new RuleGrammarGenerator(compiledDef.kompiledDefinition, isStrict);
         java.util.Set<K> res = performParse(new HashMap<>(), gen.getCombinedGrammar(gen.getRuleGrammar(compiledDef.executionModule())),
-                null, new Bubble("rule", contents, Att().add("contentStartLine", 1).add("contentStartColumn", 1).add("Source", source.source())))
+                null, new Bubble("rule", contents, Att().add("contentStartLine", Integer.class, 1).add("contentStartColumn", Integer.class, 1).add(Source.class, source)))
                 .collect(Collectors.toSet());
         if (!errors.isEmpty()) {
             throw errors.iterator().next();
@@ -347,9 +347,9 @@ public class DefinitionParsing {
     }
 
     private Stream<? extends K> performParse(Map<String, ParsedSentence> cache, ParseInModule parser, Scanner scanner, Bubble b) {
-        int startLine = b.att().<Integer>get("contentStartLine").get();
-        int startColumn = b.att().<Integer>get("contentStartColumn").get();
-        String source = b.att().<String>get("Source").get();
+        int startLine = b.att().get("contentStartLine", Integer.class);
+        int startColumn = b.att().get("contentStartColumn", Integer.class);
+        Source source = b.att().get(Source.class);
         Tuple2<Either<java.util.Set<ParseFailedException>, K>, java.util.Set<ParseFailedException>> result;
         if (cache.containsKey(b.contents())) {
             ParsedSentence parse = cache.get(b.contents());
@@ -357,12 +357,12 @@ public class DefinitionParsing {
             kem.addAllKException(parse.getWarnings().stream().map(e -> e.getKException()).collect(Collectors.toList()));
             return Stream.of(parse.getParse());
         } else {
-            result = parser.parseString(b.contents(), START_SYMBOL, scanner, Source.apply(source), startLine, startColumn);
+            result = parser.parseString(b.contents(), START_SYMBOL, scanner, source, startLine, startColumn);
             parsedBubbles.getAndIncrement();
             kem.addAllKException(result._2().stream().map(e -> e.getKException()).collect(Collectors.toList()));
             if (result._1().isRight()) {
                 KApply k = (KApply) TreeNodesToKORE.down(result._1().right().get());
-                k = KApply(k.klabel(), k.klist(), k.att().addAll(b.att().remove("contentStartLine").remove("contentStartColumn").remove("Source").remove("Location")));
+                k = KApply(k.klabel(), k.klist(), k.att().addAll(b.att().remove("contentStartLine").remove("contentStartColumn").remove(Source.class).remove(Location.class)));
                 cache.put(b.contents(), new ParsedSentence(k, new HashSet<>(result._2())));
                 return Stream.of(k);
             } else {

@@ -177,7 +177,7 @@ public class KSyntax2GrammarStatesFilter {
                 Production prd = iter.next();
                 NextableState previous = productionsRemaining.get(prd);
                 if (prd.items().size() == h.i) {
-                    Optional<Production> original = prd.att().<Production>getOptional(Constants.ORIGINAL_PRD);
+                    Optional<Production> original = prd.att().getOptional(Constants.ORIGINAL_PRD, Production.class);
                     if (original.isPresent())
                         prd = original.get();
                     RuleState labelRule = grammar.new RuleState("AddLabelRS", nt, new WrapLabelRule(prd));

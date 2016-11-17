@@ -30,7 +30,7 @@ case class Rich(theModule: Module) {
   implicit class RichKLabel(klabel: KLabel) {
     def productions = module.productionsFor(klabel)
 
-    def att: Att = Att(productions.flatMap(_.att.att))
+    def att: Att = Att(productions.flatMap(_.att.att).toMap)
   }
 
 }

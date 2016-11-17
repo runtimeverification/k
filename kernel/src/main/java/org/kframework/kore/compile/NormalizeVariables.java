@@ -65,7 +65,7 @@ public class NormalizeVariables {
                 @Override
                 public void apply(KVariable k) {
                     if (k.att().contains("denormal")) {
-                        normalization.put(KVariable(k.att().<String>get("denormal").get()), k.name());
+                        normalization.put(KVariable(k.att().get("denormal")), k.name());
                     }
                 }
             }.apply(normal);

@@ -92,8 +92,8 @@ public class GenerateSentencesFromConfigDecl {
                                 String cellName = label.s();
                                 Att cellProperties = getCellPropertiesAsAtt(kapp.klist().items().get(1), cellName, ensures);
                                 Multiplicity multiplicity = convertStringMultiplicity(
-                                        cellProperties.<String>get("multiplicity"), term);
-                                boolean isStream = cellProperties.<String>get("stream").isDefined();
+                                        cellProperties.getOption("multiplicity"), term);
+                                boolean isStream = cellProperties.getOption("stream").isDefined();
 
                                 K cellContents = kapp.klist().items().get(2);
                                 Tuple3<Set<Sentence>, List<Sort>, K> childResult = genInternal(
