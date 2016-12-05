@@ -9,6 +9,7 @@ case class Att(att: Map[(String, Class[_]), Any]) extends AttributesToString {
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(Att.this)
 
   def contains(key: String): Boolean = att.contains((key, classOf[String]))
+  def contains(key: String, cls: Class[_]): Boolean = att.contains((key, cls))
 
   def get(key: String): String = getOption(key).get
   def get[T](key: Class[T]): T = getOption(key).get

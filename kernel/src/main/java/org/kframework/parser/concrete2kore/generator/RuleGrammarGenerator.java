@@ -198,14 +198,18 @@ public class RuleGrammarGenerator {
             }
         }
 
-
-
         if (baseK.getModule(KSEQ_SYMBOLIC).isDefined() && mod.importedModules().contains(baseK.getModule(KSEQ_SYMBOLIC).get())) {
             Production as = stream(baseK.getModule(KSEQ_SYMBOLIC).get().productionsFor().apply(KLabel("#KAs"))).findAny().get();
             for (Sort srt : iterable(mod.definedSorts())) {
                 if (!isParserSort(srt)) {
                     prods.add(Production(srt, Seq(NonTerminal(srt), Terminal("#as"), NonTerminal(srt)), Att().add(Constants.ORIGINAL_PRD, Production.class, as)));
                 }
+            }
+        }
+
+        for (Production p : iterable(mod.productions())) {
+            if (p.isPrefixProduction()) {
+                prods.addAll(mutable(p.recordProductions()));
             }
         }
         extensionProds.addAll(prods);

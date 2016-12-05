@@ -119,7 +119,7 @@ public class HTMLFilter extends BackendFilter {
 
     @Override
     public Void visit(NonTerminal sort, Void _void) {
-        result.append("<span class =\"italic\"> " + makeGreek(sort.getName()) + " </span>");
+        result.append("<span class =\"italic\"> " + makeGreek(sort.getSort().getName()) + " </span>");
         return _void;
     }
 

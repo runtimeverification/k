@@ -206,7 +206,7 @@ public class CoqLabelUnparser extends NonCachingVisitor {
         builder.append('(');
         boolean listOp = false;
         for (ProductionItem i : c.getProduction().getItems()) {
-            if (i instanceof NonTerminal && ((NonTerminal)i).getName().equals("KList")) {
+            if (i instanceof NonTerminal && ((NonTerminal)i).getSort().getName().equals("KList")) {
                 listOp = true;
                 break;
             }

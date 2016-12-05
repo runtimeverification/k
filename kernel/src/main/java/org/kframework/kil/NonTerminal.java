@@ -2,24 +2,33 @@
 package org.kframework.kil;
 
 import org.kframework.kil.visitors.Visitor;
+import scala.Option;
+
+import java.util.Optional;
 
 /** A nonterminal in a {@link Production}. Also abused in some places as a sort identifier */
 public class NonTerminal extends ProductionItem {
 
     private Sort sort;
+    private Optional<String> name;
 
-    public NonTerminal(Sort sort) {
+    public NonTerminal(Sort sort, Optional<String> name) {
         super();
         this.sort = sort;
+        this.name = name;
     }
 
     public NonTerminal(NonTerminal nonTerminal) {
         super(nonTerminal);
         this.sort = nonTerminal.sort;
+        this.name = nonTerminal.name;
     }
 
-    public String getName() {
-        return getSort().getName();
+    public Option<String> getName() {
+        if (name.isPresent()) {
+            return Option.apply(name.get());
+        }
+        return Option.empty();
     }
 
     public void setSort(Sort sort) {

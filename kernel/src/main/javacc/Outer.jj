@@ -189,6 +189,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -524,21 +525,18 @@ String StringRegex() : {}
 }
 
 /** Parses and returns a NonTerminal but not a List, NeList, Lexer, or Token */
-NonTerminal SimpleSortID() : { Location loc = startLoc(); String str; }
+NonTerminal SimpleSortID() : { Location loc = startLoc(); String str; Optional<String> name = Optional.empty(); }
 {
-  <UPPER_ID> { str = image(); }
-  ("{"  { str = str + specialAndImage(); }
-   UpperId() { str = str + specialAndImage(); }
-   "}"  { str = str + specialAndImage(); })?
-  { return markLoc(loc, new NonTerminal(Sort.of(str))); }
+  (LOOKAHEAD((<UPPER_ID> | <LOWER_ID>) ":")
+  (<UPPER_ID> | <LOWER_ID>) { name = Optional.of(image()); } ":")?
+  UpperId() { str = image(); }
+  { return markLoc(loc, new NonTerminal(Sort.of(str), name)); }
 }
 
 /** Parses and returns a NonTerminal */
 NonTerminal SortID() : { NonTerminal nonTerminal; }
 {
   nonTerminal = SimpleSortID() { return nonTerminal; }
-  | ("List" | "NeList" | "Lexer" | "Token")
-    { return tokenLoc(new NonTerminal(Sort.of(image()))); }
 }
 
 ///////
@@ -881,7 +879,7 @@ void Production(List<Production> prods) :
   )*
   ")"              { items.add(tokenLoc(new Terminal(image()))); }
 | (ProductionItem(items))+
-) { Production prod = new Production(new NonTerminal(Sort.of("")), items); }
+) { Production prod = new Production(new NonTerminal(Sort.of(""), Optional.empty()), items); }
   (Attributes(prod))?
   { if (klabel != null && prod.getAttribute("klabel") == null) {
       prod.addAttribute("klabel", klabel);
@@ -897,23 +895,11 @@ void ProductionItem(List<ProductionItem> items) :
   str = String()                { items.add(tokenLoc(new Terminal(str))); }
 | str = StringCaseInsensitive() { items.add(tokenLoc(new Terminal(str, true))); }
 | str = StringRegex()           { items.add(tokenLoc(new Lexical(str, ""))); }
+| LOOKAHEAD("List" "{") "List"
+  ( "{" UpperId() { str = image(); } "," sep = String() "}"
+    { items.add(markLoc(loc, new UserList(Sort.of(str), sep, "*"))); })
+| LOOKAHEAD("NeList" "{") "NeList"
+  ( "{" UpperId() { str = image(); } "," sep = String() "}"
+    { items.add(markLoc(loc, new UserList(Sort.of(str), sep, "+"))); })
 | nonTerminal = SimpleSortID()  { items.add(nonTerminal); }
-| "List"
-  ( "{" UpperId() { str = image(); } "," sep = String() "}"
-    { items.add(markLoc(loc, new UserList(Sort.of(str), sep, "*"))); return; })?
-  { items.add(tokenLoc(new NonTerminal(Sort.of(image())))); }
-| "NeList"
-  ( "{" UpperId() { str = image(); } "," sep = String() "}"
-    { items.add(markLoc(loc, new UserList(Sort.of(str), sep, "+"))); return; })?
-  { items.add(tokenLoc(new NonTerminal(Sort.of(image())))); }
-| ("Lexer" | "Token" { isToken = true; })
-  ( "{" { SwitchTo(REGEX_STATE); }
-    str = RegEx(follow)
-    "}" { SwitchTo(DEFAULT);
-          items.add(markLoc(loc, new Lexical(
-            str+special(),
-            isToken && follow.length() != 0 ?
-               follow.toString() : null)));
-          return; })?
-  { items.add(tokenLoc(new NonTerminal(Sort.of(image())))); }
 }

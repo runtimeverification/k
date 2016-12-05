@@ -56,7 +56,7 @@ case class Definition(
 trait Sorting {
   def computeSubsortPOSet(sentences: Set[Sentence]) = {
     val subsortRelations: Set[(Sort, Sort)] = sentences collect {
-      case Production(endSort, Seq(NonTerminal(startSort)), _) => (startSort, endSort)
+      case Production(endSort, Seq(NonTerminal(startSort, _)), _) => (startSort, endSort)
     }
 
     POSet(subsortRelations)
@@ -164,7 +164,7 @@ case class Module(val name: String, val imports: Set[Module], unresolvedLocalSen
       ps: Set[Production] =>
         ps.map {
           p: Production =>
-            val params: Seq[Sort] = p.items collect { case NonTerminal(sort) => sort }
+            val params: Seq[Sort] = p.items collect { case NonTerminal(sort, _) => sort }
             (params, p.sort)
         }
     }
@@ -184,7 +184,7 @@ case class Module(val name: String, val imports: Set[Module], unresolvedLocalSen
   }
 
   val definedSorts: Set[Sort] = (productions map {_.sort}) ++ (sortDeclarations map {_.sort})
-  val usedCellSorts: Set[Sort] = productions.flatMap { p => p.items.collect { case NonTerminal(s) => s }
+  val usedCellSorts: Set[Sort] = productions.flatMap { p => p.items.collect { case NonTerminal(s, _) => s }
     .filter(s => s.name.endsWith("Cell") || s.name.endsWith("CellFragment"))
   }
 
@@ -306,18 +306,77 @@ case class Production(sort: Sort, items: Seq[ProductionItem], att: Att)
 
   override lazy val hashCode: Int = (sort.hashCode() * 31 + items.hashCode()) * 31 + klabel.hashCode()
 
-  def isSyntacticSubsort: Boolean =
+  lazy val isSyntacticSubsort: Boolean =
     items.size == 1 && items.head.isInstanceOf[NonTerminal]
 
-  def isSubsort: Boolean =
+  lazy val isSubsort: Boolean =
     isSyntacticSubsort && klabel.isEmpty
 
-  def getSubsortSort: Sort =
+  lazy val getSubsortSort: Sort =
     items.head.asInstanceOf[NonTerminal].sort
 
-  def arity: Int = items.count(_.isInstanceOf[NonTerminal])
+  lazy val nonterminals = items.filter(_.isInstanceOf[NonTerminal]).map(_.asInstanceOf[NonTerminal])
 
-  def nonterminal(i: Int): NonTerminal = items.filter(_.isInstanceOf[NonTerminal])(i).asInstanceOf[NonTerminal]
+  lazy val arity: Int = nonterminals.size
+
+  def nonterminal(i: Int): NonTerminal = nonterminals(i)
+
+  private def computePrefixProduction: Boolean = {
+    var state = 0
+    for (item <- items) {
+      if (state == 0) {
+        // some sequence of terminals ending in an open parens
+        item match {
+          case terminal: Terminal if terminal.value == "(" => state = 1
+          case _: Terminal =>
+          case _ => return false
+        }
+      } else if (state == 1) {
+        // a nonterminal or a close paren
+        item match {
+          case _: NonTerminal => state = 2
+          case terminal: Terminal if terminal.value == ")" => state = 4
+          case _ => return false
+        }
+      } else if (state == 2) {
+        // a close paren or a comma
+        item match {
+          case terminal: Terminal if terminal.value == "," => state = 3
+          case terminal: Terminal if terminal.value == ")" => state = 4
+        }
+      } else if (state == 3) {
+        // a nonterminal
+        item match {
+          case _: NonTerminal => state = 2
+          case _ => return false
+        }
+      } else {
+        return false
+      }
+    }
+    state == 4
+  }
+
+  lazy val isPrefixProduction: Boolean = computePrefixProduction
+
+  private def makeRecordProduction(terminals: List[NonTerminal]): Production = {
+    val prefix = items.takeWhile(_.isInstanceOf[Terminal]) :+ Terminal("...")
+    val suffix = items.last
+    val newAtt = att.add("recordPrd", classOf[Production], this)
+    if (terminals.isEmpty)
+      Production(sort, prefix :+ suffix, newAtt)
+    else {
+      val middle = terminals.tail.foldLeft(Seq(Terminal(terminals.head.name.get), Terminal(":"), terminals.head)){ (l, nt) => l ++ Seq(Terminal(","), Terminal(nt.name.get), Terminal(":"), nt) }
+      Production(sort, prefix ++ middle :+ suffix, newAtt)
+    }
+  }
+
+  lazy val recordProductions: Set[Production] = {
+    assert(isPrefixProduction)
+    val namedNts = items.filter(_.isInstanceOf[NonTerminal]).map(_.asInstanceOf[NonTerminal]).filter(_.name.isDefined).toSet
+    val permutations = namedNts.subsets().flatMap(subset => subset.toList.permutations)
+    permutations.map(makeRecordProduction).toSet
+  }
 }
 
 object Production {
@@ -337,7 +396,7 @@ sealed trait ProductionItem extends OuterKORE
 sealed trait TerminalLike extends ProductionItem {
 }
 
-case class NonTerminal(sort: Sort) extends ProductionItem
+case class NonTerminal(sort: Sort, name: Option[String]) extends ProductionItem
   with NonTerminalToString
 
 case class RegexTerminal(precedeRegex: String, regex: String, followRegex: String) extends TerminalLike with
@@ -357,5 +416,5 @@ case class Terminal(value: String) extends TerminalLike // hooked
 
 /* Helper constructors */
 object NonTerminal {
-  def apply(sort: String): NonTerminal = NonTerminal(ADT.Sort(sort))
+  def apply(sort: String, name: Option[String]): NonTerminal = NonTerminal(ADT.Sort(sort), name)
 }

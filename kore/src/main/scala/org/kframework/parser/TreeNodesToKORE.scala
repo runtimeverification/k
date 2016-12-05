@@ -4,9 +4,11 @@ import java.util
 
 import org.kframework.attributes._
 import org.kframework.builtin.Sorts
+import org.kframework.definition.{NonTerminal, Production}
 import org.kframework.kore
 import org.kframework.kore.Unapply._
 import org.kframework.kore.{KORE, _}
+import org.pcollections.PStack
 
 import scala.collection.JavaConverters._
 
@@ -16,8 +18,21 @@ object TreeNodesToKORE {
 
   def apply(t: Term): K = t match {
     case c@Constant(s, p) => KToken(s, p.sort, locationToAtt(c.location.get(), c.source.get()))
-    case t@TermCons(items, p) => KApply(p.klabel.get, KList(new util.ArrayList(items).asScala.reverse map apply asJava), locationToAtt(t.location.get(), t.source.get()))
+    case t@TermCons(items, p) => termConsToKApply(t, items, p)
     case Ambiguity(items) => KApply(KLabel("AMB"), KList(items.asScala.toList map apply asJava), Att)
+  }
+
+  def termConsToKApply(t: TermCons, items: PStack[Term], p: Production): KApply = {
+    if (p.att.contains("recordPrd", classOf[Production])) {
+      val realProd = p.att.get("recordPrd", classOf[Production])
+      val map = new util.ArrayList(items).asScala.reverse.zipWithIndex.map { case (item, idx) => (p.nonterminal(idx).name.get, apply(item))} toMap
+      val realItems = realProd.nonterminals.map {
+        case NonTerminal(_, None) => KToken("_", Sorts.KVariable)
+        case NonTerminal(_, Some(x)) => map.getOrElse(x, KToken("_", Sorts.KVariable))
+      }
+      KApply(p.klabel.get, KList(realItems.asJava), locationToAtt(t.location.get(), t.source.get()))
+    } else
+      KApply(p.klabel.get, KList(new util.ArrayList(items).asScala.reverse map apply asJava), locationToAtt(t.location.get(), t.source.get()))
   }
 
   def down(t: K): K = t match {

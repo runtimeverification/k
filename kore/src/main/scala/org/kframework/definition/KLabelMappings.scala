@@ -14,7 +14,7 @@ trait KLabelMappings {
 
   def makeKLabel(items: Seq[ProductionItem]): kore.KLabel = ADT.KLabel(
     items map {
-      case NonTerminal(sort) => "_"
+      case NonTerminal(sort, _) => "_"
       case Terminal(string) => string
       //TODO(cos): remove this
       case RegexTerminal(_, regex, _) => "regexp"

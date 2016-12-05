@@ -33,7 +33,8 @@ object Constructors {
   def Production(klabel: String, sort: Sort, items: Seq[ProductionItem], att: attributes.Att) = definition.Production(klabel, sort, items, att)
 
   def Terminal(s: String) = definition.Terminal(s)
-  def NonTerminal(sort: Sort) = definition.NonTerminal(sort)
+  def NonTerminal(sort: Sort) = definition.NonTerminal(sort, None)
+  def NonTerminal(sort: Sort, name: Option[String]) = definition.NonTerminal(sort, name)
   def RegexTerminal(regexString: String) = definition.RegexTerminal("#", regexString, "#")
   def RegexTerminal(precedeRegexString: String, regexString: String, followRegexString: String) = definition.RegexTerminal(precedeRegexString, regexString, followRegexString)
 

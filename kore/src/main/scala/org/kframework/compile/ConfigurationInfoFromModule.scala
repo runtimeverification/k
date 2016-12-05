@@ -41,8 +41,8 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
 
   private val edges: Set[(Sort, Sort)] = cellProductions.toList.flatMap { case (s,p) =>
     p.items.flatMap{
-      case NonTerminal(n) if cellSorts.contains(n) => List((s, n))
-      case NonTerminal(n) if cellBagSorts.contains(n) => getCellSortsOfCellBag(n).map(subsort => (s, subsort))
+      case NonTerminal(n, _) if cellSorts.contains(n) => List((s, n))
+      case NonTerminal(n, _) if cellBagSorts.contains(n) => getCellSortsOfCellBag(n).map(subsort => (s, subsort))
       case _ => List()
     }}.toSet
 
@@ -107,7 +107,7 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
       Seq(s)
   }}.asJava
 
-  override def leafCellType(k: Sort): Sort = cellProductions(k).items.collectFirst{ case NonTerminal(n) => n} get
+  override def leafCellType(k: Sort): Sort = cellProductions(k).items.collectFirst{ case NonTerminal(n, _) => n} get
 
   override def getDefaultCell(k: Sort): KApply = cellInitializer(k)
 
