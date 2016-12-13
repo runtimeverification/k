@@ -300,11 +300,11 @@ case class Production(sort: Sort, items: Seq[ProductionItem], att: Att)
   lazy val klabel: Option[KLabel] = att.getOption("klabel") map {org.kframework.kore.KORE.KLabel(_)}
 
   override def equals(that: Any) = that match {
-    case p@Production(`sort`, `items`, _) => this.klabel == p.klabel
+    case p@Production(`sort`, `items`, _) => this.klabel == p.klabel && this.att.getOption("poly") == p.att.getOption("poly")
     case _ => false
   }
 
-  override lazy val hashCode: Int = (sort.hashCode() * 31 + items.hashCode()) * 31 + klabel.hashCode()
+  override lazy val hashCode: Int = ((sort.hashCode() * 31 + items.hashCode()) * 31 + klabel.hashCode()) * 31 + att.getOption("poly").hashCode()
 
   lazy val isSyntacticSubsort: Boolean =
     items.size == 1 && items.head.isInstanceOf[NonTerminal]

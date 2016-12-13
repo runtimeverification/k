@@ -23,8 +23,14 @@ module BUILTIN-ID-TOKENS
   syntax #UpperId ::= r"[A-Z][a-zA-Z0-9]*"                    [prec(2)]
 endmodule
 
+module SORT-KBOTT
+  imports SORT-K
+  syntax KBott
+endmodule
+
 module KAST
   imports BASIC-K
+  imports SORT-KBOTT
   imports KSTRING
   imports BUILTIN-ID-TOKENS
 
@@ -57,7 +63,7 @@ module KSEQ
                  | ".::K"    [klabel(#EmptyK), hook(org.kframework.kore.EmptyK)]
   syntax K ::= K "~>" K  [klabel(#KSequence), left, assoc, unit(#EmptyK), hook(org.kframework.kore.KSequence)]
   syntax left #KSequence
-  syntax KBott     ::= "(" K ")"    [bracket]
+  syntax K     ::= "(" K ")"    [bracket, poly(0, 1)]
 endmodule
 
 
@@ -71,7 +77,7 @@ module KSEQ-SYMBOLIC
   syntax KBott      ::= KConfigVar
   syntax KLabel     ::= #KVariable
 
-  syntax K      ::= K "#as" K                                                      [klabel(#KAs)]
+  syntax K      ::= K "#as" K                                                      [klabel(#KAs), poly(0, 1, 2)]
 endmodule
 
 module KCELLS
@@ -128,17 +134,13 @@ module REQUIRES-ENSURES
 endmodule
 
 module K-TOP-SORT
-  // if this module is imported, the parser automatically
-  // generates, for all sorts, productions of the form:
-  // K     ::= Sort
-  // this is part of the mechanism that allows concrete user syntax in K
+  imports SORT-KBOTT
+  syntax KItem ::= KBott [poly(1)]
 endmodule
 
 module K-BOTTOM-SORT
-  // if this module is imported, the parser automatically
-  // generates, for all sorts, productions of the form:
-  // Sort  ::= KBott
-  // this is part of the mechanism that allows concrete user syntax in K
+  imports SORT-KBOTT
+  syntax KItem ::= KBott [poly(0)]
 endmodule
 
 module K-SORT-LATTICE
@@ -203,8 +205,7 @@ module K
   imports K-SORT-LATTICE
   imports AUTO-CASTS
   imports AUTO-FOLLOW
-   syntax K ::= K "=>" K [klabel(#KRewrite)]
-  // syntax KBott ::= K "=>" K [klabel(#KRewrite)]
+  syntax K ::= K "=>" K [klabel(#KRewrite), poly(0, 1, 2)]
   syntax non-assoc #KRewrite
 
 endmodule

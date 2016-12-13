@@ -56,7 +56,6 @@ module MAP
   syntax Map ::= ".Map"                         [function, hook(MAP.unit), klabel(.Map), latex(\dotCt{Map})]
                // breaks klabel uniqueness
                //| "."                            [function, hook(MAP.unit)]
-  syntax Map ::= "(" Map ")" [bracket]
   /*@ Construct a singleton Map (a Map with only one key/value pair). The key
    is on the left and the value is on the right */
   syntax Map ::= K "|->" K                      [function, hook(MAP.element), klabel(_|->_), latex({#1}\mapsto{#2})]
@@ -118,7 +117,6 @@ module SET
   /*@ Construct an empty Set */
   syntax Set ::= ".Set"                   [function, hook(SET.unit), klabel(.Set), latex(\dotCt{Set})]
                //| "."
-  syntax Set ::= "(" Set ")" [bracket]
   /*@ Construct a singleton Set (a Set with only one element $\{ a \}$). To add
    an element $a$ to a set $A$, construct the union of the singleton set
    $\{ a \}$ and $A$ ($\{ a \} \cup A$). */
@@ -237,7 +235,6 @@ module BOOL
                 > left:
                   Bool "==Bool" Bool      [function, left, smtlib(=), hook(BOOL.eq)]
                 | Bool "=/=Bool" Bool     [function, left, smtlib(distinct), hook(BOOL.ne)]
-  syntax Bool ::= "(" Bool ")" [bracket]
 
   rule notBool true => false
   rule notBool false => true
@@ -313,7 +310,6 @@ module INT
   syntax Int ::= "minInt" "(" Int "," Int ")"   [function, smtlib(int_min), hook(INT.min)]
                | "maxInt" "(" Int "," Int ")"   [function, smtlib(int_max), hook(INT.max)]
                | absInt ( Int )                 [function, smtlib(int_abs), hook(INT.abs)]
-  syntax Int ::= "(" Int ")" [bracket]
 
   rule I1:Int divInt I2:Int => (I1 -Int (I1 modInt I2)) /Int I2
   requires I2 =/=Int 0
@@ -541,7 +537,7 @@ module K-EQUAL
 
   rule K1:Bool ==Bool K2:Bool => K1 ==K K2
 
-  syntax K ::= "#if" Bool "#then" K "#else" K "#fi"   [function, hook(KEQUAL.ite)]
+  syntax K ::= "#if" Bool "#then" K "#else" K "#fi"   [function, hook(KEQUAL.ite), poly(0, 2, 3)]
   rule #if true #then K:K #else _:K #fi => K
   rule #if false #then _:K #else K:K #fi => K
 
@@ -1009,8 +1005,7 @@ module BASIC-STRATEGY
 
     syntax Strategy ::= Hole
 
-    syntax Strategy ::= "(" Strategy ")"                                    [bracket]
-                        > "if" Strategy "then" Strategy "else" Strategy
+    syntax Strategy ::= "if" Strategy "then" Strategy "else" Strategy
                         > Strategy "*"
                         > Strategy ";" Strategy                             [right]
                         > Strategy "||" Strategy                            [right]

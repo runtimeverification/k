@@ -31,6 +31,7 @@ import scala.util.Left;
 import scala.util.Right;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -39,6 +40,8 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static org.kframework.Collections.*;
 import static org.kframework.kore.KORE.*;
@@ -47,6 +50,7 @@ import static org.kframework.kore.KORE.*;
  * Apply the priority and associativity filters.
  */
 public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFailedException, ParseFailedException> {
+
     public enum VarType { CONTEXT, USER }
     private final POSet<Sort> subsorts;
     private final scala.collection.Set<Sort> sortSet;
@@ -418,8 +422,8 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
             }
 
             public Tuple2<Either<java.util.Set<ParseFailedException>, Term>, java.util.Set<VarInfo>> apply(TermCons tc) {
-                if (hasInferredSort(tc)) {
-                   return super.apply(tc);
+                if (hasPolySort(tc)) {
+                   return visitPolyChildrenSets(tc, this::apply);
                 }
                 return simpleResult(tc);
             }
@@ -483,8 +487,8 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
             }
 
             public Either<java.util.Set<ParseFailedException>, Term> apply(TermCons tc) {
-                if (hasInferredSort(tc)) {
-                    return super.apply(tc);
+                if (hasPolySort(tc)) {
+                    return visitPolyChildren(tc, this::apply);
                 }
                 return Right.apply(tc);
             }
@@ -523,11 +527,45 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
         }
     }
 
-    static boolean hasInferredSort(TermCons tc) {
-        return tc.production().att().contains("bracket")
-                || (tc.production().klabel().isDefined()
-                && (tc.production().klabel().get().equals(KLabel("#KRewrite"))
-                || tc.production().klabel().get().equals(KLabel("#KAs"))));
+    static boolean hasPolySort(TermCons tc) {
+        return tc.production().att().contains("poly") && Arrays.asList(tc.production().att().get("poly").split(",")).stream().anyMatch(s -> s.trim().equals("0"));
+    }
+
+    static Tuple2<Either<Set<ParseFailedException>, Term>, Set<VarInfo>> visitPolyChildrenSets(TermCons tc, Function<Term, Tuple2<Either<Set<ParseFailedException>, Term>, Set<VarInfo>>> apply) {
+        Set<ParseFailedException> errors = new HashSet<>();
+        Set<VarInfo> info = new HashSet<>();
+        for (int i : Arrays.asList(tc.production().att().get("poly").split(",")).stream().map(s -> Integer.valueOf(s.trim())).filter(j -> j != 0).collect(Collectors.toList())) {
+            Tuple2<Either<Set<ParseFailedException>, Term>, Set<VarInfo>> res = apply.apply(tc.get(i - 1));
+            info.addAll(res._2());
+            if (res._1().isLeft())
+                errors.addAll(res._1().left().get());
+        }
+        if (errors.isEmpty())
+            return Tuple2.apply(Right.apply(tc), info);
+        else
+            return Tuple2.apply(Left.apply(errors), info);
+    }
+
+    static Term visitPolyChildrenSafe(TermCons tc, Function<Term, Term> apply) {
+        for (int i : Arrays.asList(tc.production().att().get("poly").split(",")).stream().map(s -> Integer.valueOf(s.trim())).filter(j -> j != 0).collect(Collectors.toList())) {
+            apply.apply(tc.get(i - 1));
+
+        }
+        return tc;
+    }
+
+    static Either<Set<ParseFailedException>,Term> visitPolyChildren(TermCons tc, Function<Term, Either<Set<ParseFailedException>, Term>> apply) {
+        Set<ParseFailedException> errors = new HashSet<>();
+        for (int i : Arrays.asList(tc.production().att().get("poly").split(",")).stream().map(s -> Integer.valueOf(s.trim())).filter(j -> j != 0).collect(Collectors.toList())) {
+            Either<Set<ParseFailedException>, Term> res = apply.apply(tc.get(i - 1));
+            if (res.isLeft()) {
+                errors.addAll(res.left().get());
+            }
+        }
+        if (errors.isEmpty())
+            return Right.apply(tc);
+        else
+            return Left.apply(errors);
     }
 
     public class CollectExpectedVariablesVisitor extends SafeTransformer {
@@ -591,8 +629,8 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
             }
 
             public Term apply(TermCons tc) {
-                if (hasInferredSort(tc)) {
-                    return super.apply(tc);
+                if (hasPolySort(tc)) {
+                    return visitPolyChildrenSafe(tc, this::apply);
                 }
                 return tc;
             }

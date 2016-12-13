@@ -74,8 +74,8 @@ public class ApplyTypeCheckVisitor extends SetsTransformerWithErrors<ParseFailed
         public Either<java.util.Set<ParseFailedException>, Term> apply(ProductionReference pr) {
             if (pr instanceof TermCons) {
                 TermCons tc = (TermCons) pr;
-                if (VariableTypeInferenceFilter.hasInferredSort(tc)) {
-                    return super.apply(tc);
+                if (VariableTypeInferenceFilter.hasPolySort(tc)) {
+                    return VariableTypeInferenceFilter.visitPolyChildren(tc, this::apply);
                 }
             }
             if (pr instanceof Constant && pr.production().sort().equals(Sorts.KVariable())) {

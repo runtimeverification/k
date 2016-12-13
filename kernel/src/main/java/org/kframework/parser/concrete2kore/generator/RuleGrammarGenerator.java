@@ -8,6 +8,7 @@ import org.kframework.compile.ConfigurationInfo;
 import org.kframework.compile.ConfigurationInfoFromModule;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
+import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
 import org.kframework.definition.ProductionItem;
 import org.kframework.definition.RegexTerminal;
@@ -20,7 +21,10 @@ import org.kframework.kore.Sort;
 import org.kframework.parser.concrete2kore.ParseInModule;
 import scala.collection.Seq;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -171,45 +175,38 @@ public class RuleGrammarGenerator {
             prods.addAll(makeCasts(Sorts.KBott(), Sorts.K(), Sorts.KItem()));
             prods.addAll(makeCasts(Sorts.KBott(), Sorts.K(), Sorts.K()));
         }
-        if (baseK.getModule(K_TOP_SORT).isDefined() && mod.importedModules().contains(baseK.getModule(K_TOP_SORT).get())) { // create the diamond
-            for (Sort srt : iterable(mod.definedSorts())) {
-                if (!isParserSort(srt)) {
-                    // K ::= Sort
-                    prods.add(Production(Sorts.K(), Seq(NonTerminal(srt)), Att()));
-                }
-            }
-        }
-
-        if (baseK.getModule(K_BOTTOM_SORT).isDefined() && mod.importedModules().contains(baseK.getModule(K_BOTTOM_SORT).get())) { // create the diamond
-            for (Sort srt : iterable(mod.definedSorts())) {
-                if (!isParserSort(srt)) {
-                    // Sort ::= KBott
-                    prods.add(Production(srt, Seq(NonTerminal(Sorts.KBott())), Att()));
-                }
-            }
-        }
-
-        if (baseK.getModule(K).isDefined() && mod.importedModules().contains(baseK.getModule(K).get())) {
-            Production rewrite = stream(baseK.getModule(K).get().productionsFor().apply(KLabel("#KRewrite"))).findAny().get();
-            for (Sort srt : iterable(mod.definedSorts())) {
-                if (!isParserSort(srt)) {
-                    prods.add(Production(srt, Seq(NonTerminal(srt), Terminal("=>"), NonTerminal(srt)), Att().add(Constants.ORIGINAL_PRD, Production.class, rewrite)));
-                }
-            }
-        }
-
-        if (baseK.getModule(KSEQ_SYMBOLIC).isDefined() && mod.importedModules().contains(baseK.getModule(KSEQ_SYMBOLIC).get())) {
-            Production as = stream(baseK.getModule(KSEQ_SYMBOLIC).get().productionsFor().apply(KLabel("#KAs"))).findAny().get();
-            for (Sort srt : iterable(mod.definedSorts())) {
-                if (!isParserSort(srt)) {
-                    prods.add(Production(srt, Seq(NonTerminal(srt), Terminal("#as"), NonTerminal(srt)), Att().add(Constants.ORIGINAL_PRD, Production.class, as)));
-                }
-            }
-        }
 
         for (Production p : iterable(mod.productions())) {
             if (p.isPrefixProduction()) {
                 prods.addAll(mutable(p.recordProductions()));
+            }
+        }
+
+        for (Production p : iterable(mod.productions())) {
+            if (p.att().contains("poly")) {
+                Set<Integer> positions = Arrays.asList(p.att().get("poly").split(",")).stream().map(s -> Integer.valueOf(s.trim())).collect(Collectors.toSet());
+                for (Sort srt : iterable(mod.definedSorts())) {
+                    if (!isParserSort(srt)) {
+                        Sort returnSort = p.sort();
+                        if (positions.contains(0))
+                            returnSort = srt;
+                        List<ProductionItem> pis = new ArrayList<>();
+                        int idx = 1;
+                        for (ProductionItem pi : iterable(p.items())) {
+                            if (pi instanceof NonTerminal) {
+                                if (positions.contains(idx)) {
+                                    pis.add(NonTerminal(srt, ((NonTerminal) pi).name()));
+                                } else {
+                                    pis.add(pi);
+                                }
+                                idx++;
+                            } else {
+                                pis.add(pi);
+                            }
+                        }
+                        prods.add(Production(returnSort, immutable(pis), p.att().add(Constants.ORIGINAL_PRD, Production.class, p)));
+                    }
+                }
             }
         }
         extensionProds.addAll(prods);
