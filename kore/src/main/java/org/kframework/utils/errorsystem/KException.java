@@ -99,6 +99,7 @@ public class KException implements Serializable {
 
     public String toString(boolean verbose) {
         return "[" + types.get(type) + "] " + labels.get(exceptionGroup) + ": " + message
+                + (exception == null ? "" : " (" + exception.getMessage() + ")")
                 + trace.toString() + traceTail()
                 + (source == null ? "" : "\n\t" + source)
                 + (location == null ? "" : "\n\t" + location)
