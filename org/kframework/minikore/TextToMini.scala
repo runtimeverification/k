@@ -197,7 +197,7 @@ class TextToMini {
   // Sort = Name
   def parseSentences(sentences: Seq[Sentence]): Seq[Sentence] = {
     next() match {
-      case 'i' => expect("mports")
+      case 'i' => expect("mport")  // Grigore: "import" instead of "imports"?
         val sen = parseImport()
         parseSentences(sentences :+ sen)
       case 's' => expect("yntax")
@@ -509,7 +509,8 @@ object TextToMini {
   // SymbolChar = [a-zA-Z0-9@#$%^_-]+
   def isSymbolChar(c: Char): Boolean = {
     ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || ('0' <= c && c <= '9') ||
-      c == '@' || c == '#' || c == '$' || c == '%' || c == '^' || c == '_' || c == '-'
+      c == '@' || c == '#' || c == '$' || c == '%' || c == '^' || c == '_' || c == '-' ||
+      c == '.'  // Grigore: I think we should allow '.', too.
   }
 //  // SymbolChar = [^[]():]
 //  def isSymbolChar(c: Char): Boolean = {
