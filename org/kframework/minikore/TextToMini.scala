@@ -102,9 +102,10 @@ class TextToMini {
     }
   }
   //
+  // TODO(Daejun): should consider word separation by whitespaces
   def expect(str: String): Unit = {
     for (c <- str) {
-      val n = next()
+      val n = nextWithSpaces()
       if (n == c) ()
       else throw ParseError(c, n)
     }
@@ -221,6 +222,7 @@ class TextToMini {
         parseSentences(sentences :+ sen)
       case 'e' => putback('e') // endmodule
         sentences
+      case err => throw ParseError.apply("imports, syntax, rule, axiom, or endmodule", err)
     }
   }
 
@@ -273,8 +275,8 @@ class TextToMini {
   def parsePattern(): Pattern = {
     next() match {
       case '\\' =>
-        val c1 = next()
-        val c2 = next()
+        val c1 = nextWithSpaces()
+        val c2 = nextWithSpaces()
         (c1, c2) match {
           case ('t', 'r') => expect("ue()")
             True()
@@ -355,7 +357,7 @@ class TextToMini {
         case '"' =>
           s.toString()
         case '\\' =>
-          val c = next()
+          val c = nextWithSpaces()
           val s1 = StringEscapeUtils.unescapeJava("\\" + c)
           s ++= s1; loop(s)
         case c =>
@@ -371,7 +373,7 @@ class TextToMini {
   // ModuleName = [A-Z][A-Z-]*
   def parseModuleName(): String = {
     def loop(s: StringBuilder): String = {
-      next() match {
+      nextWithSpaces() match {
         case c if ('A' <= c && c <= 'Z') || c == '-'  =>
           s += c; loop(s)
         case c => putback(c)
@@ -399,7 +401,7 @@ class TextToMini {
 //  //      | EscapedSymbol
 //  def parseName(): String = {
 //    def loop(s: StringBuilder): String = {
-//      next() match {
+//      nextWithSpaces() match {
 //        case c if ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || c == '@' || c == '-' =>
 //          s += c; loop(s)
 //        case c => putback(c)
@@ -422,7 +424,7 @@ class TextToMini {
   //        | EscapedSymbol
   def parseSymbol(): String = {
     def loop(s: StringBuilder): String = {
-      next() match {
+      nextWithSpaces() match {
         case c if isSymbolChar(c) =>
           s += c; loop(s)
         case c => putback(c)
@@ -442,7 +444,7 @@ class TextToMini {
   // EscapedSymbol = ` [^`] `
   def parseEscapedSymbol(): String = {
     def loop(s: StringBuilder): String = {
-      next() match {
+      nextWithSpaces() match {
         case '`' =>
           s.toString()
         case c =>
