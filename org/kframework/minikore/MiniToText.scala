@@ -8,7 +8,7 @@ object MiniToText {
 
   def apply(d: Definition): String = {
     apply(d.att) + "\n\n" +
-    d.modules.map(apply).mkString("\n\n")
+    d.modules.map(apply).mkString("\n\n") + "\n"
   }
 
   def apply(m: Module): String = {
@@ -19,7 +19,7 @@ object MiniToText {
 
   def apply(s: Sentence): String = s match {
     case Import(name, att) =>
-      "imports " + name + " " + apply(att)
+      "import " + name + " " + apply(att)
     case SortDeclaration(sort, att) =>
       "syntax " + apply(sort) + " " + apply(att)
     case SymbolDeclaration(sort, label, args, att) =>

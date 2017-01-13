@@ -13,7 +13,10 @@ class ScannerJava {
   var columnNum: Int = _
   //
   def init(file: java.io.File): Unit = {
-    bufferedReader = new java.io.BufferedReader(new java.io.FileReader(file))
+    init(new java.io.BufferedReader(new java.io.FileReader(file)))
+  }
+  def init(br: java.io.BufferedReader): Unit = {
+    bufferedReader = br
     line = ""
     lineNum = 0
     columnNum = 0
@@ -42,7 +45,10 @@ class ScannerScala {
   var columnNum: Int = _
   //
   def init(file: java.io.File): Unit = {
-    stream = io.Source.fromFile(file)
+    init(io.Source.fromFile(file))
+  }
+  def init(src: io.Source): Unit = {
+    stream = src
     lines = stream.getLines()
     line = ""
     lineNum = 0
@@ -104,6 +110,7 @@ class TextToMini {
   //
   // TODO(Daejun): should consider word separation by whitespaces
   def expect(str: String): Unit = {
+    putback(next()) // skip starting white spaces
     for (c <- str) {
       val n = nextWithSpaces()
       if (n == c) ()
@@ -136,8 +143,13 @@ class TextToMini {
   //////////////////////////////////////////////////////////
 
   def parse(file: java.io.File): Definition = {
+    parse(io.Source.fromFile(file))
+    // parse(new java.io.BufferedReader(new java.io.FileReader(file)))
+  }
+
+  def parse(src: io.Source): Definition = {
     try {
-      Scanner.init(file)
+      Scanner.init(src)
       parseDefinition()
     } finally {
       Scanner.close()
@@ -189,7 +201,7 @@ class TextToMini {
 
   // Sentences = <lookahead>(e) // <empty>
   //           | Sentence Sentences
-  // Sentence = imports Import
+  // Sentence = import Import
   //          | syntax Sort SortOrSymbolDeclaration
   //          | rule Rule
   //          | axiom Axiom
@@ -198,7 +210,7 @@ class TextToMini {
   // Sort = Name
   def parseSentences(sentences: Seq[Sentence]): Seq[Sentence] = {
     next() match {
-      case 'i' => expect("mport")  // Grigore: "import" instead of "imports"?
+      case 'i' => expect("mport")
         val sen = parseImport()
         parseSentences(sentences :+ sen)
       case 's' => expect("yntax")
@@ -222,7 +234,7 @@ class TextToMini {
         parseSentences(sentences :+ sen)
       case 'e' => putback('e') // endmodule
         sentences
-      case err => throw ParseError.apply("imports, syntax, rule, axiom, or endmodule", err)
+      case err => throw ParseError.apply("import, syntax, rule, axiom, or endmodule", err)
     }
   }
 
@@ -300,7 +312,7 @@ class TextToMini {
           case ('e', 'x') => expect("ists(")
             val v = parseVariable(); expect(",")
             val p = parsePattern(); expect(")")
-            Implies(v, p)
+            Exists(v, p)
           case ('f', 'o') => expect("rall(")
             val v = parseVariable(); expect(",")
             val p = parsePattern(); expect(")")
@@ -485,34 +497,13 @@ class TextToMini {
     }
   }
 
-  def test(file: java.io.File): Unit = {
-    Scanner.init(file)
-    println("-------------------------")
-    val now = java.lang.System.nanoTime()
-    try {
-      println(next())
-      println(next())
-      println(next())
-      println(next())
-      println(next())
-      println(next())
-      println(next())
-    } catch {
-      case _: java.io.EOFException => println("end of file")
-      case _: Throwable => ???
-    }
-    println(java.lang.System.nanoTime() - now)
-    println("-------------------------")
-  }
-
 }
 
 object TextToMini {
-  // SymbolChar = [a-zA-Z0-9@#$%^_-]+
+  // SymbolChar = [a-zA-Z0-9.@#$%^_-]+
   def isSymbolChar(c: Char): Boolean = {
     ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || ('0' <= c && c <= '9') ||
-      c == '@' || c == '#' || c == '$' || c == '%' || c == '^' || c == '_' || c == '-' ||
-      c == '.'  // Grigore: I think we should allow '.', too.
+      c == '.' || c == '@' || c == '#' || c == '$' || c == '%' || c == '^' || c == '_' || c == '-'
   }
 //  // SymbolChar = [^[]():]
 //  def isSymbolChar(c: Char): Boolean = {
