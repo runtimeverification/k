@@ -109,7 +109,10 @@ class TextToMini {
   }
   //
   def expect(str: String): Unit = {
-    putback(next()) // skip starting white spaces
+    putback(next()) // skip leading white spaces
+    expectNoLeadingSpaces(str)
+  }
+  def expectNoLeadingSpaces(str: String): Unit = {
     for (c <- str) {
       val n = nextWithSpaces()
       if (n == c) ()
@@ -129,13 +132,13 @@ class TextToMini {
       ParseError()
     }
     def apply(expected: String, actual: Char): ParseError = {
-      apply(expected, actual.toString)
+      apply(expected, "'" + actual + "'")
     }
     def apply(expected: Char, actual: String): ParseError = {
-      apply(expected.toString, actual)
+      apply("'" + expected + "'", actual)
     }
     def apply(expected: Char, actual: Char): ParseError = {
-      apply(expected.toString, actual.toString)
+      apply("'" + expected + "'", "'" + actual + "'")
     }
   }
 
@@ -209,26 +212,26 @@ class TextToMini {
   // Sort = Name
   def parseSentences(sentences: Seq[Sentence]): Seq[Sentence] = {
     next() match {
-      case 'i' => expect("mport")
+      case 'i' => expectNoLeadingSpaces("mport")
         val sen = parseImport()
         parseSentences(sentences :+ sen)
-      case 's' => expect("yntax")
+      case 's' => expectNoLeadingSpaces("yntax")
         val sort = parseSort()
         next() match {
           case '[' => putback('[')
             val att = parseAttributes()
             val sen = SortDeclaration(sort, att)
             parseSentences(sentences :+ sen)
-          case ':' => expect(":=")
+          case ':' => expectNoLeadingSpaces(":=")
             val (symbol, args, att) = parseSymbolDeclaration()
             val sen = SymbolDeclaration(sort, symbol, args, att)
             parseSentences(sentences :+ sen)
-          case err => throw ParseError("[ or :", err)
+          case err => throw ParseError("'[' or ':'", err)
         }
-      case 'r' => expect("ule")
+      case 'r' => expectNoLeadingSpaces("ule")
         val sen = parseRule()
         parseSentences(sentences :+ sen)
-      case 'a' => expect("xiom")
+      case 'a' => expectNoLeadingSpaces("xiom")
         val sen = parseAxiom()
         parseSentences(sentences :+ sen)
       case 'e' => putback('e') // endmodule
@@ -289,11 +292,11 @@ class TextToMini {
         val c1 = nextWithSpaces()
         val c2 = nextWithSpaces()
         (c1, c2) match {
-          case ('t', 'r') => expect("ue"); expect("("); expect(")")
+          case ('t', 'r') => expectNoLeadingSpaces("ue"); expect("("); expect(")")
             True()
-          case ('f', 'a') => expect("lse"); expect("("); expect(")")
+          case ('f', 'a') => expectNoLeadingSpaces("lse"); expect("("); expect(")")
             False()
-          case ('a', 'n') => expect("d"); expect("(")
+          case ('a', 'n') => expectNoLeadingSpaces("d"); expect("(")
             val p1 = parsePattern(); expect(",")
             val p2 = parsePattern(); expect(")")
             And(p1, p2)
@@ -301,33 +304,33 @@ class TextToMini {
             val p1 = parsePattern(); expect(",")
             val p2 = parsePattern(); expect(")")
             Or(p1, p2)
-          case ('n', 'o') => expect("t"); expect("(")
+          case ('n', 'o') => expectNoLeadingSpaces("t"); expect("(")
             val p = parsePattern(); expect(")")
             Not(p)
-          case ('i', 'm') => expect("plies"); expect("(")
+          case ('i', 'm') => expectNoLeadingSpaces("plies"); expect("(")
             val p1 = parsePattern(); expect(",")
             val p2 = parsePattern(); expect(")")
             Implies(p1, p2)
-          case ('e', 'x') => expect("ists"); expect("(")
+          case ('e', 'x') => expectNoLeadingSpaces("ists"); expect("(")
             val v = parseVariable(); expect(",")
             val p = parsePattern(); expect(")")
             Exists(v, p)
-          case ('f', 'o') => expect("rall"); expect("(")
+          case ('f', 'o') => expectNoLeadingSpaces("rall"); expect("(")
             val v = parseVariable(); expect(",")
             val p = parsePattern(); expect(")")
             ForAll(v, p)
-          case ('n', 'e') => expect("xt"); expect("(")
+          case ('n', 'e') => expectNoLeadingSpaces("xt"); expect("(")
             val p = parsePattern(); expect(")")
             Next(p)
-          case ('r', 'e') => expect("write"); expect("(")
+          case ('r', 'e') => expectNoLeadingSpaces("write"); expect("(")
             val p1 = parsePattern(); expect(",")
             val p2 = parsePattern(); expect(")")
             Rewrite(p1, p2)
-          case ('e', 'q') => expect("ual"); expect("(")
+          case ('e', 'q') => expectNoLeadingSpaces("ual"); expect("(")
             val p1 = parsePattern(); expect(",")
             val p2 = parsePattern(); expect(")")
             Equal(p1, p2)
-          case err => throw ParseError("matching logic connectives", err.toString())
+          case err => throw ParseError("\\true, \\false, \\and, \\or, \\not, \\implies, \\exists, \\forall, \\next, \\rewrite, or \\equal", err.toString())
         }
       case c => putback(c)
         val symbol = parseSymbol() // or parseName()
@@ -346,7 +349,7 @@ class TextToMini {
                 expect(")")
                 Application(symbol, args)
             }
-          case err => throw ParseError(": or (", err)
+          case err => throw ParseError("':' or '('", err)
         }
     }
   }
@@ -393,7 +396,7 @@ class TextToMini {
     }
     next() match {
       case c if isModuleNameStart(c) => loop(new StringBuilder(c.toString))
-      case err => throw ParseError("ModuleName", err)
+      case err => throw ParseError("<ModuleName>", err)
     }
   }
   def isModuleNameStart(c: Char): Boolean = {
@@ -424,7 +427,7 @@ class TextToMini {
 //        parseEscapedSymbol()
 //      case c if isNameStart(c) =>
 //        loop(new StringBuilder(c.toString))
-//      case err => throw ParseError("Name", err)
+//      case err => throw ParseError("<Name>", err)
 //    }
 //  }
 //  def isNameStart(c: Char): Boolean = {
@@ -447,7 +450,7 @@ class TextToMini {
         parseEscapedSymbol()
       case c if isSymbolChar(c) =>
         loop(new StringBuilder(c.toString))
-      case err => throw ParseError("Symbol", err)
+      case err => throw ParseError("<Symbol>", err)
     }
   }
   def isSymbolChar(c: Char): Boolean = TextToMini.isSymbolChar(c) // TODO(Daejun): more efficient way?
@@ -484,7 +487,7 @@ class TextToMini {
         case c if c == sep =>
           val elem = parseElem()
           parseList2(lst :+ elem)
-        case err => throw ParseError(endsWith.toString + " or " + sep, err)
+        case err => throw ParseError("'" + endsWith + "' or '" + sep + "'", err)
       }
     }
     next() match {
