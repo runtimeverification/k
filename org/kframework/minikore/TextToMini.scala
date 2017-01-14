@@ -254,6 +254,7 @@ class TextToMini {
       case err => throw error("<ModuleName>", err)
     }
   }
+
   def isModuleNameStart(c: Char): Boolean = {
     'A' <= c && c <= 'Z'
   }
@@ -308,6 +309,7 @@ class TextToMini {
       case err => throw error("<Symbol>", err)
     }
   }
+
   def isSymbolChar(c: Char): Boolean = TextToMini.isSymbolChar(c) // TODO(Daejun): more efficient way?
 
   // EscapedSymbol = ` [^`] `
@@ -377,12 +379,15 @@ class TextToMini {
         List.fill(scanner.columnNum - 1)(' ').mkString + "^"
     )
   }
+
   def error(expected: String, actual: Char): ParseError = {
     error(expected, "'" + actual + "'")
   }
+
   def error(expected: Char, actual: String): ParseError = {
     error("'" + expected + "'", actual)
   }
+
   def error(expected: Char, actual: Char): ParseError = {
     error("'" + expected + "'", "'" + actual + "'")
   }

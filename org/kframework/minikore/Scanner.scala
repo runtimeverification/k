@@ -13,6 +13,7 @@ class Scanner {
   def init(file: java.io.File): Unit = {
     init(io.Source.fromFile(file))
   }
+
   def init(src: io.Source): Unit = {
     stream = src
     lines = stream.getLines()
@@ -40,7 +41,7 @@ class Scanner {
   // abstract stream: next(), putback()
   var lookahead: Option[Char] = None
   var yieldEOL: Boolean = false
-  //
+
   def next(): Char = {
     columnNum += 1
     lookahead match {
@@ -60,6 +61,7 @@ class Scanner {
         }
     }
   }
+
   def putback(c: Char): Unit = {
     columnNum -= 1
     lookahead match {
