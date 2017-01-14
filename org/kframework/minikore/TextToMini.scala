@@ -3,143 +3,43 @@ package org.kframework.minikore
 import org.apache.commons.lang3.StringEscapeUtils
 import org.kframework.minikore.MiniKore._
 
-// directly using BufferedReader without the wrapper of Scala's BufferedSource
-class ScannerJava {
-  // should be used after `init()`
-  private var bufferedReader: java.io.BufferedReader = _
-  var input: Iterator[Char] = _
-  var line: String = _
-  var lineNum: Int = _
-  var columnNum: Int = _
-  //
-  def init(file: java.io.File): Unit = {
-    init(new java.io.BufferedReader(new java.io.FileReader(file)))
-  }
-  def init(br: java.io.BufferedReader): Unit = {
-    bufferedReader = br
-    line = ""
-    lineNum = 0
-    columnNum = 0
-    readLine()
-  }
-  def close(): Unit = {
-    bufferedReader.close() // will also close FileReader
-  }
-  //
-  def readLine(): Unit = {
-    line = bufferedReader.readLine()
-    if (line == null) throw new java.io.EOFException()
-    input = line.iterator // TODO(Daejun): how efficient is it to generate iterator view of Java string?
-    lineNum += 1
-    columnNum = 0
-  }
-}
 
-class ScannerScala {
-  // should be used after `init()`
-  private var stream: io.Source = _
-  private var lines: Iterator[String] = _
-  var input: Iterator[Char] = _
-  var line: String = _
-  var lineNum: Int = _
-  var columnNum: Int = _
-  //
-  def init(file: java.io.File): Unit = {
-    init(io.Source.fromFile(file))
-  }
-  def init(src: io.Source): Unit = {
-    stream = src
-    lines = stream.getLines()
-    line = ""
-    lineNum = 0
-    columnNum = 0
-    readLine()
-  }
-  def close(): Unit = {
-    stream.close()
-  }
-  //
-  def readLine(): Unit = {
-    if (lines.hasNext) {
-      line = lines.next()
-      input = line.iterator
-      lineNum += 1
-      columnNum = 0
-    } else { // end of file
-      throw new java.io.EOFException()
-    }
-  }
-}
+case class ParseError(msg: String) extends Exception
+
+
 
 class TextToMini {
-  val Scanner = new ScannerScala() // new ScannerJava() // TODO(Daejun): compare performance against ScannerJava
+  val Scanner = new Scanner()
 
-  // abstract unreadable stream: next(), putback()
-  var lookahead: Option[Char] = None
-  //
-  def nextWithSpaces(): Char = {
-    lookahead match {
-      case Some(c) =>
-        lookahead = None
-        c
-      case None =>
-        if (Scanner.input.hasNext) {
-          Scanner.columnNum += 1
-          Scanner.input.next()
-        } else { // end of line
-          Scanner.readLine()
-          nextWithSpaces()
-        }
-    }
+
+  def consume(str: String): Unit = {
+    Scanner.consumeWhiteSpaces()
+    consumeNoLeadingSpaces(str)
   }
-  def next(): Char = {
-    nextWithSpaces() match {
-      case ' '  => next() // skip white spaces
-      case '\t' => Scanner.columnNum += 3; next() // skip white spaces
-      case '\n' | '\r' => ??? // next() // stream.getLines implicitly drops newline characters
-      case c => c
-    }
-  }
-  def putback(c: Char): Unit = {
-    lookahead match {
-      case Some(_) => ???
-      case None =>
-        lookahead = Some(c)
-    }
-  }
-  //
-  def expect(str: String): Unit = {
-    putback(next()) // skip leading white spaces
-    expectNoLeadingSpaces(str)
-  }
-  def expectNoLeadingSpaces(str: String): Unit = {
+  def consumeNoLeadingSpaces(str: String): Unit = {
     for (c <- str) {
-      val n = nextWithSpaces()
+      val n = Scanner.nextWithSpaces()
       if (n == c) ()
-      else throw ParseError(c, n)
+      else throw error(c, n)
     }
   }
 
-  case class ParseError() extends Exception
-  object ParseError {
-    def apply(expected: String, actual: String): ParseError = {
-      Console.err.println(
-        "ERROR: " + "Line " + Scanner.lineNum + ": Column " + Scanner.columnNum + ": " +
-          "Expected " + expected + ", but " + actual + "\n" +
-          Scanner.line + "\n" +
-          List.fill(Scanner.columnNum - 1)(' ').mkString + "^"
-      )
-      ParseError()
-    }
-    def apply(expected: String, actual: Char): ParseError = {
-      apply(expected, "'" + actual + "'")
-    }
-    def apply(expected: Char, actual: String): ParseError = {
-      apply("'" + expected + "'", actual)
-    }
-    def apply(expected: Char, actual: Char): ParseError = {
-      apply("'" + expected + "'", "'" + actual + "'")
-    }
+  def error(expected: String, actual: String): ParseError = {
+    ParseError(
+      "ERROR: " + "Line " + Scanner.lineNum + ": Column " + Scanner.columnNum + ": " +
+        "Expected " + expected + ", but " + actual + "\n" +
+        Scanner.line + "\n" +
+        List.fill(Scanner.columnNum - 1)(' ').mkString + "^"
+    )
+  }
+  def error(expected: String, actual: Char): ParseError = {
+    error(expected, "'" + actual + "'")
+  }
+  def error(expected: Char, actual: String): ParseError = {
+    error("'" + expected + "'", actual)
+  }
+  def error(expected: Char, actual: Char): ParseError = {
+    error("'" + expected + "'", "'" + actual + "'")
   }
 
   //////////////////////////////////////////////////////////
@@ -167,9 +67,9 @@ class TextToMini {
 
   // Attributes = [ List{Pattern, ',', ']'} ]
   def parseAttributes(): Attributes = {
-    expect("[")
+    consume("[")
     val att = parseList(parsePattern, ',', ']')
-    expect("]")
+    consume("]")
     att
   }
 
@@ -178,7 +78,7 @@ class TextToMini {
   def parseModules(modules: Seq[Module]): Seq[Module] = {
     val isEOF =
       try {
-        putback(next()) // check if EOF
+        Scanner.putback(Scanner.next()) // check if EOF
         false
       } catch {
         case _: java.io.EOFException => true
@@ -193,10 +93,10 @@ class TextToMini {
 
   // Module = module ModuleName Sentences endmodule Attributes
   def parseModule(): Module = {
-    expect("module")
+    consume("module")
     val name = parseModuleName()
     val sentences = parseSentences(Seq())
-    expect("endmodule")
+    consume("endmodule")
     val att = parseAttributes()
     Module(name, sentences, att)
   }
@@ -211,32 +111,32 @@ class TextToMini {
   //                         | ::= SymbolDeclaration
   // Sort = Name
   def parseSentences(sentences: Seq[Sentence]): Seq[Sentence] = {
-    next() match {
-      case 'i' => expectNoLeadingSpaces("mport")
+    Scanner.next() match {
+      case 'i' => consumeNoLeadingSpaces("mport")
         val sen = parseImport()
         parseSentences(sentences :+ sen)
-      case 's' => expectNoLeadingSpaces("yntax")
+      case 's' => consumeNoLeadingSpaces("yntax")
         val sort = parseSort()
-        next() match {
-          case '[' => putback('[')
+        Scanner.next() match {
+          case '[' => Scanner.putback('[')
             val att = parseAttributes()
             val sen = SortDeclaration(sort, att)
             parseSentences(sentences :+ sen)
-          case ':' => expectNoLeadingSpaces(":=")
+          case ':' => consumeNoLeadingSpaces(":=")
             val (symbol, args, att) = parseSymbolDeclaration()
             val sen = SymbolDeclaration(sort, symbol, args, att)
             parseSentences(sentences :+ sen)
-          case err => throw ParseError("'[' or ':'", err)
+          case err => throw error("'[' or ':'", err)
         }
-      case 'r' => expectNoLeadingSpaces("ule")
+      case 'r' => consumeNoLeadingSpaces("ule")
         val sen = parseRule()
         parseSentences(sentences :+ sen)
-      case 'a' => expectNoLeadingSpaces("xiom")
+      case 'a' => consumeNoLeadingSpaces("xiom")
         val sen = parseAxiom()
         parseSentences(sentences :+ sen)
-      case 'e' => putback('e') // endmodule
+      case 'e' => Scanner.putback('e') // endmodule
         sentences
-      case err => throw ParseError.apply("import, syntax, rule, axiom, or endmodule", err)
+      case err => throw error("import, syntax, rule, axiom, or endmodule", err)
     }
   }
 
@@ -244,9 +144,9 @@ class TextToMini {
   // Sort = Name
   def parseSymbolDeclaration(): Tuple3[String, Seq[String], Attributes] = {
     val symbol = parseSymbol()
-    expect("(")
+    consume("(")
     val args = parseList(parseSort, ',', ')')
-    expect(")")
+    consume(")")
     val att = parseAttributes()
     (symbol, args, att)
   }
@@ -283,73 +183,73 @@ class TextToMini {
   //         | \implies ( Pattern , Pattern )
   //         | \exists ( Variable , Pattern )
   //         | \forall ( Variable , Pattern )
-  //         | \next ( Pattern )
+  //         | \Scanner.next ( Pattern )
   //         | \rewrite ( Pattern , Pattern )
   //         | \equal ( Pattern , Pattern )
   def parsePattern(): Pattern = {
-    next() match {
+    Scanner.next() match {
       case '\\' =>
-        val c1 = nextWithSpaces()
-        val c2 = nextWithSpaces()
+        val c1 = Scanner.nextWithSpaces()
+        val c2 = Scanner.nextWithSpaces()
         (c1, c2) match {
-          case ('t', 'r') => expectNoLeadingSpaces("ue"); expect("("); expect(")")
+          case ('t', 'r') => consumeNoLeadingSpaces("ue"); consume("("); consume(")")
             True()
-          case ('f', 'a') => expectNoLeadingSpaces("lse"); expect("("); expect(")")
+          case ('f', 'a') => consumeNoLeadingSpaces("lse"); consume("("); consume(")")
             False()
-          case ('a', 'n') => expectNoLeadingSpaces("d"); expect("(")
-            val p1 = parsePattern(); expect(",")
-            val p2 = parsePattern(); expect(")")
+          case ('a', 'n') => consumeNoLeadingSpaces("d"); consume("(")
+            val p1 = parsePattern(); consume(",")
+            val p2 = parsePattern(); consume(")")
             And(p1, p2)
-          case ('o', 'r') => expect("(")
-            val p1 = parsePattern(); expect(",")
-            val p2 = parsePattern(); expect(")")
+          case ('o', 'r') => consume("(")
+            val p1 = parsePattern(); consume(",")
+            val p2 = parsePattern(); consume(")")
             Or(p1, p2)
-          case ('n', 'o') => expectNoLeadingSpaces("t"); expect("(")
-            val p = parsePattern(); expect(")")
+          case ('n', 'o') => consumeNoLeadingSpaces("t"); consume("(")
+            val p = parsePattern(); consume(")")
             Not(p)
-          case ('i', 'm') => expectNoLeadingSpaces("plies"); expect("(")
-            val p1 = parsePattern(); expect(",")
-            val p2 = parsePattern(); expect(")")
+          case ('i', 'm') => consumeNoLeadingSpaces("plies"); consume("(")
+            val p1 = parsePattern(); consume(",")
+            val p2 = parsePattern(); consume(")")
             Implies(p1, p2)
-          case ('e', 'x') => expectNoLeadingSpaces("ists"); expect("(")
-            val v = parseVariable(); expect(",")
-            val p = parsePattern(); expect(")")
+          case ('e', 'x') => consumeNoLeadingSpaces("ists"); consume("(")
+            val v = parseVariable(); consume(",")
+            val p = parsePattern(); consume(")")
             Exists(v, p)
-          case ('f', 'o') => expectNoLeadingSpaces("rall"); expect("(")
-            val v = parseVariable(); expect(",")
-            val p = parsePattern(); expect(")")
+          case ('f', 'o') => consumeNoLeadingSpaces("rall"); consume("(")
+            val v = parseVariable(); consume(",")
+            val p = parsePattern(); consume(")")
             ForAll(v, p)
-          case ('n', 'e') => expectNoLeadingSpaces("xt"); expect("(")
-            val p = parsePattern(); expect(")")
+          case ('n', 'e') => consumeNoLeadingSpaces("xt"); consume("(")
+            val p = parsePattern(); consume(")")
             Next(p)
-          case ('r', 'e') => expectNoLeadingSpaces("write"); expect("(")
-            val p1 = parsePattern(); expect(",")
-            val p2 = parsePattern(); expect(")")
+          case ('r', 'e') => consumeNoLeadingSpaces("write"); consume("(")
+            val p1 = parsePattern(); consume(",")
+            val p2 = parsePattern(); consume(")")
             Rewrite(p1, p2)
-          case ('e', 'q') => expectNoLeadingSpaces("ual"); expect("(")
-            val p1 = parsePattern(); expect(",")
-            val p2 = parsePattern(); expect(")")
+          case ('e', 'q') => consumeNoLeadingSpaces("ual"); consume("(")
+            val p1 = parsePattern(); consume(",")
+            val p2 = parsePattern(); consume(")")
             Equal(p1, p2)
-          case err => throw ParseError("\\true, \\false, \\and, \\or, \\not, \\implies, \\exists, \\forall, \\next, \\rewrite, or \\equal", err.toString())
+          case err => throw error("\\true, \\false, \\and, \\or, \\not, \\implies, \\exists, \\forall, \\Scanner.next, \\rewrite, or \\equal", err.toString())
         }
-      case c => putback(c)
+      case c => Scanner.putback(c)
         val symbol = parseSymbol() // or parseName()
-        next() match {
+        Scanner.next() match {
           case ':' => // TODO(Daejun): check if symbol is Name
             val sort = parseSort()
             Variable(symbol, sort)
           case '(' =>
-            next() match {
-              case '"' => putback('"')
+            Scanner.next() match {
+              case '"' => Scanner.putback('"')
                 val value = parseString()
-                expect(")")
+                consume(")")
                 DomainValue(symbol, value)
-              case c => putback(c)
+              case c => Scanner.putback(c)
                 val args = parseList(parsePattern, ',', ')')
-                expect(")")
+                consume(")")
                 Application(symbol, args)
             }
-          case err => throw ParseError("':' or '('", err)
+          case err => throw error("':' or '('", err)
         }
     }
   }
@@ -357,7 +257,7 @@ class TextToMini {
   // Variable = Name : Sort
   def parseVariable(): Variable = {
     val name = parseName()
-    expect(":")
+    consume(":")
     val sort = parseSort()
     Variable(name, sort)
   }
@@ -367,36 +267,36 @@ class TextToMini {
   // String = " <char> "
   def parseString(): String = {
     def loop(s: StringBuilder): String = {
-      nextWithSpaces() match {
+      Scanner.nextWithSpaces() match {
         case '"' =>
           s.toString()
         case '\\' =>
-          val c = nextWithSpaces()
+          val c = Scanner.nextWithSpaces()
           val s1 = StringEscapeUtils.unescapeJava("\\" + c)
           s ++= s1; loop(s)
         case c =>
           s += c; loop(s)
       }
     }
-    next() match {
+    Scanner.next() match {
       case '"' => loop(new StringBuilder())
-      case err => throw ParseError('"', err)
+      case err => throw error('"', err)
     }
   }
 
   // ModuleName = [A-Z][A-Z-]*
   def parseModuleName(): String = {
     def loop(s: StringBuilder): String = {
-      nextWithSpaces() match {
+      Scanner.nextWithSpaces() match {
         case c if ('A' <= c && c <= 'Z') || c == '-'  =>
           s += c; loop(s)
-        case c => putback(c)
+        case c => Scanner.putback(c)
           s.toString()
       }
     }
-    next() match {
+    Scanner.next() match {
       case c if isModuleNameStart(c) => loop(new StringBuilder(c.toString))
-      case err => throw ParseError("<ModuleName>", err)
+      case err => throw error("<ModuleName>", err)
     }
   }
   def isModuleNameStart(c: Char): Boolean = {
@@ -415,19 +315,19 @@ class TextToMini {
 //  //      | EscapedSymbol
 //  def parseName(): String = {
 //    def loop(s: StringBuilder): String = {
-//      nextWithSpaces() match {
+//      Scanner.nextWithSpaces() match {
 //        case c if ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || c == '@' || c == '-' =>
 //          s += c; loop(s)
-//        case c => putback(c)
+//        case c => Scanner.putback(c)
 //          s.toString()
 //      }
 //    }
-//    next() match {
-//      case '`' => putback('`')
+//    Scanner.next() match {
+//      case '`' => Scanner.putback('`')
 //        parseEscapedSymbol()
 //      case c if isNameStart(c) =>
 //        loop(new StringBuilder(c.toString))
-//      case err => throw ParseError("<Name>", err)
+//      case err => throw error("<Name>", err)
 //    }
 //  }
 //  def isNameStart(c: Char): Boolean = {
@@ -438,19 +338,19 @@ class TextToMini {
   //        | EscapedSymbol
   def parseSymbol(): String = {
     def loop(s: StringBuilder): String = {
-      nextWithSpaces() match {
+      Scanner.nextWithSpaces() match {
         case c if isSymbolChar(c) =>
           s += c; loop(s)
-        case c => putback(c)
+        case c => Scanner.putback(c)
           s.toString()
       }
     }
-    next() match {
-      case '`' => putback('`')
+    Scanner.next() match {
+      case '`' => Scanner.putback('`')
         parseEscapedSymbol()
       case c if isSymbolChar(c) =>
         loop(new StringBuilder(c.toString))
-      case err => throw ParseError("<Symbol>", err)
+      case err => throw error("<Symbol>", err)
     }
   }
   def isSymbolChar(c: Char): Boolean = TextToMini.isSymbolChar(c) // TODO(Daejun): more efficient way?
@@ -458,17 +358,17 @@ class TextToMini {
   // EscapedSymbol = ` [^`] `
   def parseEscapedSymbol(): String = {
     def loop(s: StringBuilder): String = {
-      nextWithSpaces() match {
+      Scanner.nextWithSpaces() match {
         case '`' =>
           s.toString()
         case c =>
           s += c; loop(s)
       }
     }
-    next() match {
+    Scanner.next() match {
       case '`' =>
         loop(new StringBuilder())
-      case err => throw ParseError('`', err)
+      case err => throw error('`', err)
     }
   }
 
@@ -481,19 +381,19 @@ class TextToMini {
   def parseList[T](parseElem: () => T, sep: Char, endsWith: Char): Seq[T] = {
     assert(sep != endsWith)
     def parseList2(lst: Seq[T]): Seq[T] = {
-      next() match {
-        case c if c == endsWith => putback(c)
+      Scanner.next() match {
+        case c if c == endsWith => Scanner.putback(c)
           lst
         case c if c == sep =>
           val elem = parseElem()
           parseList2(lst :+ elem)
-        case err => throw ParseError("'" + endsWith + "' or '" + sep + "'", err)
+        case err => throw error("'" + endsWith + "' or '" + sep + "'", err)
       }
     }
-    next() match {
-      case c if c == endsWith => putback(c)
+    Scanner.next() match {
+      case c if c == endsWith => Scanner.putback(c)
         Seq()
-      case c => putback(c)
+      case c => Scanner.putback(c)
         val elem = parseElem()
         parseList2(Seq(elem))
     }
