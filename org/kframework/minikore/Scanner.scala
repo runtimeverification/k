@@ -1,8 +1,8 @@
 package org.kframework.minikore
 
 class Scanner {
-
   // should be used after `init()`
+
   private var stream: io.Source = _
   private var lines: Iterator[String] = _
   var input: Iterator[Char] = _
@@ -31,34 +31,32 @@ class Scanner {
       line = lines.next()
       input = line.iterator
       lineNum += 1
+      columnNum = 0
     } else { // end of file
       throw new java.io.EOFException()
     }
   }
 
-  // abstract unreadable stream: next(), putback()
+  // abstract stream: next(), putback()
   var lookahead: Option[Char] = None
   //
-  def nextWithSpaces(): Char = {
+  def next(): Char = {
+    columnNum += 1
     lookahead match {
       case Some(c) =>
         lookahead = None
         c
       case None =>
         if (input.hasNext) {
-          columnNum += 1
           input.next()
         } else { // end of line
           readLine()
-          nextWithSpaces()
+          '\n'
         }
     }
   }
-  def next(): Char = {
-    consumeWhiteSpaces()
-    nextWithSpaces()
-  }
   def putback(c: Char): Unit = {
+    columnNum -= 1
     lookahead match {
       case Some(_) => ???
       case None =>
@@ -66,12 +64,27 @@ class Scanner {
     }
   }
 
-  def consumeWhiteSpaces(): Unit = {
-    nextWithSpaces() match {
-      case ' '  => consumeWhiteSpaces() // skip white spaces
-      case '\t' => columnNum += 3; consumeWhiteSpaces() // skip white spaces
-      case '\n' | '\r' => ??? // next() // stream.getLines implicitly drops newline characters
+  def skipWhitespaces(): Unit = {
+    next() match {
+      case ' '  => skipWhitespaces()
+      case '\t' => columnNum += 3; skipWhitespaces()
+      case '\n' | '\r' => skipWhitespaces()
       case c => putback(c)
+    }
+  }
+
+  def nextWithSkippingWhitespaces(): Char = {
+    skipWhitespaces()
+    next()
+  }
+
+  def isEOF(): Boolean = {
+    try {
+      putback(nextWithSkippingWhitespaces())
+      false
+    } catch {
+      case _: java.io.EOFException => true
+      case _: Throwable => ???
     }
   }
 
