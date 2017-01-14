@@ -39,6 +39,7 @@ class Scanner {
 
   // abstract stream: next(), putback()
   var lookahead: Option[Char] = None
+  var yieldEOL: Boolean = false
   //
   def next(): Char = {
     columnNum += 1
@@ -49,9 +50,13 @@ class Scanner {
       case None =>
         if (input.hasNext) {
           input.next()
-        } else { // end of line
-          readLine()
+        } else if (!yieldEOL) { // end of line
+          yieldEOL = true
           '\n'
+        } else {
+          yieldEOL = false
+          readLine()
+          next()
         }
     }
   }

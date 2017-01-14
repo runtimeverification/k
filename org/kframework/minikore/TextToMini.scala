@@ -138,7 +138,7 @@ class TextToMini {
   //         | \implies ( Pattern , Pattern )
   //         | \exists ( Variable , Pattern )
   //         | \forall ( Variable , Pattern )
-  //         | \Scanner.next ( Pattern )
+  //         | \next ( Pattern )
   //         | \rewrite ( Pattern , Pattern )
   //         | \equal ( Pattern , Pattern )
   def parsePattern(): Pattern = {
@@ -185,7 +185,7 @@ class TextToMini {
             val p1 = parsePattern(); consumeWithLeadingWhitespaces(",")
             val p2 = parsePattern(); consumeWithLeadingWhitespaces(")")
             Equal(p1, p2)
-          case err => throw error("\\true, \\false, \\and, \\or, \\not, \\implies, \\exists, \\forall, \\Scanner.next, \\rewrite, or \\equal", err.toString())
+          case (err1, err2) => throw error("\\true, \\false, \\and, \\or, \\not, \\implies, \\exists, \\forall, \\next, \\rewrite, or \\equal", "'" + err1 + err2 + "'")
         }
       case c => scanner.putback(c)
         val symbol = parseSymbol() // or parseName()
@@ -270,15 +270,15 @@ class TextToMini {
 //  //      | EscapedSymbol
 //  def parseName(): String = {
 //    def loop(s: StringBuilder): String = {
-//      Scanner.nextWithSpaces() match {
+//      scanner.next() match {
 //        case c if ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || c == '@' || c == '-' =>
 //          s += c; loop(s)
-//        case c => Scanner.putback(c)
+//        case c => scanner.putback(c)
 //          s.toString()
 //      }
 //    }
-//    Scanner.next() match {
-//      case '`' => Scanner.putback('`')
+//    scanner.nextWithSkippingWhitespaces() match {
+//      case '`' => scanner.putback('`')
 //        parseEscapedSymbol()
 //      case c if isNameStart(c) =>
 //        loop(new StringBuilder(c.toString))
@@ -372,7 +372,7 @@ class TextToMini {
   def error(expected: String, actual: String): ParseError = {
     ParseError(
       "ERROR: " + "Line " + scanner.lineNum + ": Column " + scanner.columnNum + ": " +
-        "Expected " + expected + ", but " + actual + "\n" +
+        "Expected " + expected + ", but " + StringEscapeUtils.escapeJava(actual) + "\n" +
         scanner.line + "\n" +
         List.fill(scanner.columnNum - 1)(' ').mkString + "^"
     )
