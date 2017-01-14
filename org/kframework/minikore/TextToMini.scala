@@ -372,8 +372,8 @@ class TextToMini {
   def error(expected: String, actual: String): ParseError = {
     ParseError(
       "ERROR: " + "Line " + scanner.lineNum + ": Column " + scanner.columnNum + ": " +
-        "Expected " + expected + ", but " + StringEscapeUtils.escapeJava(actual) + "\n" +
-        scanner.line + "\n" +
+        "Expected " + expected + ", but " + StringEscapeUtils.escapeJava(actual) + System.lineSeparator() +
+        scanner.line + System.lineSeparator() +
         List.fill(scanner.columnNum - 1)(' ').mkString + "^"
     )
   }

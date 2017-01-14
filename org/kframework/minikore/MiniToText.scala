@@ -7,13 +7,13 @@ object MiniToText {
   // TODO(Daejun): more efficient implementation using StringBuilder instead of string concatenation
 
   def apply(d: Definition): String = {
-    apply(d.att) + "\n\n" +
-    d.modules.map(apply).mkString("\n\n") + "\n"
+    apply(d.att) + System.lineSeparator() + System.lineSeparator() +
+    d.modules.map(apply).mkString(System.lineSeparator() + System.lineSeparator()) + System.lineSeparator()
   }
 
   def apply(m: Module): String = {
-    "module " + m.name + "\n" +
-      m.sentences.map(s => "  " + apply(s)).mkString("\n") + "\n" +
+    "module " + m.name + System.lineSeparator() +
+      m.sentences.map(s => "  " + apply(s)).mkString(System.lineSeparator()) + System.lineSeparator() +
     "endmodule " + apply(m.att)
   }
 
