@@ -3,4 +3,4 @@ opam init
 opam repository add k "$(dirname "$0")/../lib/opam"
 opam update
 opam switch 4.03.0+trunk
-opam install mlgmp zarith uuidm camomile
+opam install mlgmp zarith uuidm camomile atdgen atdj

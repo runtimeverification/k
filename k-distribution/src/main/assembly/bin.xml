@@ -7,29 +7,12 @@
   <baseDirectory>k</baseDirectory>
     <dependencySets>
       <dependencySet>
-        <outputDirectory>/lib/native</outputDirectory>
+        <outputDirectory>/bin</outputDirectory>
         <includes>
-          <include>*:exe:*</include>
+          <include>*:uexe:${native.os.classifier}:*</include>
         </includes>
-        <outputFileNameMapping>${artifact.classifier}/${artifact.artifactId}.${artifact.type}</outputFileNameMapping>
+        <outputFileNameMapping>${artifact.artifactId}</outputFileNameMapping>
         <fileMode>775</fileMode>
-      </dependencySet>
-      <dependencySet>
-        <outputDirectory>/lib/native</outputDirectory>
-        <includes>
-          <include>*:uexe:*</include>
-        </includes>
-        <outputFileNameMapping>${artifact.classifier}/${artifact.artifactId}</outputFileNameMapping>
-        <fileMode>775</fileMode>
-      </dependencySet>
-      <dependencySet>
-        <outputDirectory>/lib/native</outputDirectory>
-        <includes>
-          <include>*:dll:*</include>
-          <include>*:so:*</include>
-          <include>*:dylib:*</include>
-        </includes>
-        <outputFileNameMapping>${artifact.classifier}/${artifact.artifactId}.${artifact.type}</outputFileNameMapping>
       </dependencySet>
     </dependencySets>
   <fileSets>
