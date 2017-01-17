@@ -16,6 +16,10 @@ class TextToMini {
     try {
       scanner.init(src)
       parseDefinition()
+    } catch {
+      case _: java.io.EOFException => throw ParseError("ERROR: Unexpected end of file while parsing")
+      case exc: ParseError => throw exc
+      case exc: Throwable => throw ParseError("ERROR: Unexpected error while parsing: " + exc.toString) // shouldn't be reachable
     } finally {
       scanner.close()
     }
