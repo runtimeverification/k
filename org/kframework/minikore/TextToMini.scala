@@ -189,7 +189,8 @@ class TextToMini {
             val p1 = parsePattern(); consumeWithLeadingWhitespaces(",")
             val p2 = parsePattern(); consumeWithLeadingWhitespaces(")")
             Equal(p1, p2)
-          case (err1, err2) => throw error("\\true, \\false, \\and, \\or, \\not, \\implies, \\exists, \\forall, \\next, \\rewrite, or \\equal", "'" + err1 + err2 + "'")
+          case (err1, err2) => throw error("\\true, \\false, \\and, \\or, \\not, \\implies, \\exists, \\forall, \\next, \\rewrite, or \\equal",
+                                           "'\\" + err1 + err2 + "'")
         }
       case c => scanner.putback(c)
         val symbol = parseSymbol() // or parseName()
@@ -378,8 +379,8 @@ class TextToMini {
   def error(expected: String, actual: String): ParseError = {
     ParseError(
       "ERROR: " + "Line " + scanner.lineNum + ": Column " + scanner.columnNum + ": " +
-        "Expected " + expected + ", but " + StringEscapeUtils.escapeJava(actual) + System.lineSeparator() +
-        scanner.line + System.lineSeparator() +
+        "Expected " + expected + ", but " + actual // StringEscapeUtils.escapeJava(actual)
+        + System.lineSeparator() + scanner.line + System.lineSeparator() +
         List.fill(scanner.columnNum - 1)(' ').mkString + "^"
     )
   }

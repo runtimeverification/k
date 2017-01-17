@@ -49,7 +49,7 @@ class Scanner {
           input.next()
         } else if (!yieldEOL) { // end of line
           yieldEOL = true
-          '\n'
+          System.lineSeparator()
         } else {
           yieldEOL = false
           readLine()
