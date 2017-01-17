@@ -235,7 +235,7 @@ class TextToMini {
     }
     scanner.nextWithSkippingWhitespaces() match {
       case '"' => loop(new StringBuilder())
-      case err => throw error('"', err)
+      case err => throw error('"', err) // shouldn't be reachable
     }
   }
 
@@ -325,7 +325,7 @@ class TextToMini {
     scanner.nextWithSkippingWhitespaces() match {
       case '`' =>
         loop(new StringBuilder())
-      case err => throw error('`', err)
+      case err => throw error('`', err) // shouldn't be reachable
     }
   }
 

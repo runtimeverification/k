@@ -10,10 +10,6 @@ class Scanner {
   var lineNum: Int = _
   var columnNum: Int = _
 
-  def init(file: java.io.File): Unit = {
-    init(io.Source.fromFile(file))
-  }
-
   def init(src: io.Source): Unit = {
     stream = src
     lines = stream.getLines()
@@ -91,7 +87,7 @@ class Scanner {
       false
     } catch {
       case _: java.io.EOFException => true
-      case _: Throwable => ???
+      case _: Throwable => ??? // shouldn't be reachable
     }
   }
 
