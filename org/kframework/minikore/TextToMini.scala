@@ -19,7 +19,7 @@ class TextToMini {
     parse(io.Source.fromFile(file))
   }
 
-  /** Parses the string from the stream and returns [[MiniKore.Definition]]. */
+  /** Parses from the stream and returns [[MiniKore.Definition]]. */
   @throws(classOf[ParseError])
   def parse(src: io.Source): Definition = {
     try {
