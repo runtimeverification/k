@@ -5,7 +5,7 @@ package org.kframework.minikore
   * Should be initialized by [[init]] before use,
   * and closed by [[close]] after use.
   *
-  * @constructor creates a new scanner.
+  * @constructor Creates a new scanner.
   */
 class Scanner {
 
