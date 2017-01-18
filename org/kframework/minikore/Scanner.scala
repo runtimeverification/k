@@ -96,7 +96,7 @@ class Scanner {
     next() match {
       case ' '  => skipWhitespaces()
       case '\t' => columnNum += 3; skipWhitespaces()
-      case '\n' | '\r' => skipWhitespaces()
+      case '\n' | '\r' => ??? // skipWhitespaces() // shouldn't be reachable.
       case c => putback(c)
     }
   }

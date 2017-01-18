@@ -398,9 +398,9 @@ class TextToMini {
     error(expected, "'" + actual + "'")
   }
 
-  private def error(expected: Char, actual: String): ParseError = {
-    error("'" + expected + "'", actual)
-  }
+//  private def error(expected: Char, actual: String): ParseError = {
+//    error("'" + expected + "'", actual)
+//  }
 
   private def error(expected: Char, actual: Char): ParseError = {
     error("'" + expected + "'", "'" + actual + "'")
