@@ -1,6 +1,6 @@
 package org.kframework.minikore
 
-/** A scanner of an input stream [[io.Source]].
+/** A scanner of an input stream.
   *
   * Should be initialized by [[init]] before use,
   * and closed by [[close]] after use.
