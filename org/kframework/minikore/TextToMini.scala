@@ -8,7 +8,7 @@ case class ParseError(msg: String) extends Exception(msg) // ParseError.msg eq E
 
 /** A parser for [[MiniKore]].
   *
-  * @constructor creates a new parser.
+  * @constructor Creates a new parser.
   */
 class TextToMini {
   private val scanner = new Scanner()

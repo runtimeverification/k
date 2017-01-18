@@ -5,7 +5,7 @@ package org.kframework.minikore
   * Should be initialized by [[init]] before use,
   * and closed by [[close]] after use.
   *
-  * @constructor creates a new scanner.
+  * @constructor Creates a new scanner.
   */
 class Scanner {
 
@@ -21,7 +21,7 @@ class Scanner {
 
   /** Initializes this scanner.
     *
-    * @param src the stream to associate with this scanner.
+    * @param src The stream to associate with this scanner.
     */
   def init(src: io.Source): Unit = {
     stream = src
