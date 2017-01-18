@@ -1,15 +1,28 @@
 package org.kframework.minikore
 
+/** A scanner of an input stream [[io.Source]].
+  *
+  * Should be initialized by [[init]] before use,
+  * and closed by [[close]] after use.
+  *
+  * @constructor creates a new scanner.
+  */
 class Scanner {
-  // should be used after `init()`
 
   private var stream: io.Source = _
   private var lines: Iterator[String] = _
-  var input: Iterator[Char] = _
+  private var input: Iterator[Char] = _
+  /** The string of the line that this scanner currently reads. */
   var line: String = _
+  /** The line number of the current line. */
   var lineNum: Int = _
+  /** The column position of this scanner in the line. */
   var columnNum: Int = _
 
+  /** Initializes this scanner.
+    *
+    * @param src the stream to associate with this scanner.
+    */
   def init(src: io.Source): Unit = {
     stream = src
     lines = stream.getLines()
@@ -19,11 +32,13 @@ class Scanner {
     readLine()
   }
 
+  /** Closes the stream associated with this scanner. */
   def close(): Unit = {
     stream.close()
   }
 
-  def readLine(): Unit = {
+  @throws(classOf[java.io.EOFException])
+  private def readLine(): Unit = {
     if (lines.hasNext) {
       line = lines.next()
       input = line.iterator
@@ -34,10 +49,14 @@ class Scanner {
     }
   }
 
-  // abstract stream: next(), putback()
-  var lookahead: Option[Char] = None
-  var yieldEOL: Boolean = false
+  private var lookahead: Option[Char] = None
+  private var yieldEOL: Boolean = false
 
+  /** Returns the next character from the stream.
+    *
+    * Returns a blank space ' ' when a newline is encountered.
+    */
+  @throws(classOf[java.io.EOFException])
   def next(): Char = {
     columnNum += 1
     lookahead match {
@@ -58,6 +77,10 @@ class Scanner {
     }
   }
 
+  /** Puts back the character into the stream.
+    *
+    * Cannot put other characters until the inserted character has been read by [[next]].
+    */
   def putback(c: Char): Unit = {
     columnNum -= 1
     lookahead match {
@@ -67,6 +90,8 @@ class Scanner {
     }
   }
 
+  /** Consumes the whitespace characters until a non-whitespace character is met. */
+  @throws(classOf[java.io.EOFException])
   def skipWhitespaces(): Unit = {
     next() match {
       case ' '  => skipWhitespaces()
@@ -76,11 +101,17 @@ class Scanner {
     }
   }
 
+  /** Returns the next non-whitespace character. */
   def nextWithSkippingWhitespaces(): Char = {
     skipWhitespaces()
     next()
   }
 
+  /** Checks if EOF is reached.
+    *
+    * Side effect:
+    * Consumes the whitespace characters until either a non-whitespace character or EOF is met.
+    */
   def isEOF(): Boolean = {
     try {
       putback(nextWithSkippingWhitespaces())

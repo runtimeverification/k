@@ -2,6 +2,7 @@ package org.kframework.minikore
 
 import scala.collection._
 
+/** Algebraic data type of MiniKore. */
 object MiniKore {
 
   type Attributes = Seq[Pattern]

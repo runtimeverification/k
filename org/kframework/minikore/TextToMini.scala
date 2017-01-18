@@ -3,15 +3,24 @@ package org.kframework.minikore
 import org.apache.commons.lang3.StringEscapeUtils
 import org.kframework.minikore.MiniKore._
 
+/** Parsing error exception. */
 case class ParseError(msg: String) extends Exception
 
+/** A parser for [[MiniKore]].
+  *
+  * @constructor creates a new parser.
+  */
 class TextToMini {
-  val scanner = new Scanner()
+  private val scanner = new Scanner()
 
+  /** Parses the file and returns [[MiniKore.Definition]]. */
+  @throws(classOf[ParseError])
   def parse(file: java.io.File): Definition = {
     parse(io.Source.fromFile(file))
   }
 
+  /** Parses the string from the stream and returns [[MiniKore.Definition]]. */
+  @throws(classOf[ParseError])
   def parse(src: io.Source): Definition = {
     try {
       scanner.init(src)
@@ -26,14 +35,14 @@ class TextToMini {
   }
 
   // Definition = Attributes Modules
-  def parseDefinition(): Definition = {
+  private def parseDefinition(): Definition = {
     val att = parseAttributes()
     val modules = parseModules(Seq())
     Definition(modules, att)
   }
 
   // Attributes = [ List{Pattern, ',', ']'} ]
-  def parseAttributes(): Attributes = {
+  private def parseAttributes(): Attributes = {
     consumeWithLeadingWhitespaces("[")
     val att = parseList(parsePattern, ',', ']')
     consumeWithLeadingWhitespaces("]")
@@ -42,7 +51,7 @@ class TextToMini {
 
   // Modules = <EOF> // <empty>
   //         | Module Modules
-  def parseModules(modules: Seq[Module]): Seq[Module] = {
+  private def parseModules(modules: Seq[Module]): Seq[Module] = {
     if (scanner.isEOF()) modules
     else {
       val mod = parseModule()
@@ -51,7 +60,7 @@ class TextToMini {
   }
 
   // Module = module ModuleName Sentences endmodule Attributes
-  def parseModule(): Module = {
+  private def parseModule(): Module = {
     consumeWithLeadingWhitespaces("module")
     val name = parseModuleName()
     val sentences = parseSentences(Seq())
@@ -69,7 +78,7 @@ class TextToMini {
   // SortOrSymbolDeclaration = Attributes
   //                         | ::= SymbolDeclaration
   // Sort = Name
-  def parseSentences(sentences: Seq[Sentence]): Seq[Sentence] = {
+  private def parseSentences(sentences: Seq[Sentence]): Seq[Sentence] = {
     scanner.nextWithSkippingWhitespaces() match {
       case 'i' => consume("mport")
         val sen = parseImport()
@@ -101,7 +110,7 @@ class TextToMini {
 
   // SymbolDeclaration = Symbol ( List{Sort, ',', ')'} ) Attributes
   // Sort = Name
-  def parseSymbolDeclaration(): Tuple3[String, Seq[String], Attributes] = {
+  private def parseSymbolDeclaration(): Tuple3[String, Seq[String], Attributes] = {
     val symbol = parseSymbol()
     consumeWithLeadingWhitespaces("(")
     val args = parseList(parseSort, ',', ')')
@@ -111,21 +120,21 @@ class TextToMini {
   }
 
   // Import = ModuleName Attributes
-  def parseImport(): Import = {
+  private def parseImport(): Import = {
     val name = parseModuleName()
     val att = parseAttributes()
     Import(name, att)
   }
 
   // Rule = Pattern Attributes
-  def parseRule(): Rule = {
+  private def parseRule(): Rule = {
     val pattern = parsePattern()
     val att = parseAttributes()
     Rule(pattern, att)
   }
 
   // Axiom = Pattern Attributes
-  def parseAxiom(): Axiom = {
+  private def parseAxiom(): Axiom = {
     val pattern = parsePattern()
     val att = parseAttributes()
     Axiom(pattern, att)
@@ -145,7 +154,7 @@ class TextToMini {
   //         | \next ( Pattern )
   //         | \rewrite ( Pattern , Pattern )
   //         | \equal ( Pattern , Pattern )
-  def parsePattern(): Pattern = {
+  private def parsePattern(): Pattern = {
     scanner.nextWithSkippingWhitespaces() match {
       case '\\' =>
         val c1 = scanner.next()
@@ -215,7 +224,7 @@ class TextToMini {
   }
 
   // Variable = Name : Sort
-  def parseVariable(): Variable = {
+  private def parseVariable(): Variable = {
     val name = parseName()
     consumeWithLeadingWhitespaces(":")
     val sort = parseSort()
@@ -225,7 +234,7 @@ class TextToMini {
   //////////////////////////////////////////////////////////
 
   // String = " <char> "
-  def parseString(): String = {
+  private def parseString(): String = {
     def loop(s: StringBuilder): String = {
       scanner.next() match {
         case '"' =>
@@ -245,7 +254,7 @@ class TextToMini {
   }
 
   // ModuleName = [A-Z][A-Z-]*
-  def parseModuleName(): String = {
+  private def parseModuleName(): String = {
     def loop(s: StringBuilder): String = {
       scanner.next() match {
         case c if ('A' <= c && c <= 'Z') || c == '-'  =>
@@ -260,17 +269,17 @@ class TextToMini {
     }
   }
 
-  def isModuleNameStart(c: Char): Boolean = {
+  private def isModuleNameStart(c: Char): Boolean = {
     'A' <= c && c <= 'Z'
   }
 
   // TODO(Daejun): double check Sort, Name, Symbol
 
   // Sort = Name
-  def parseSort(): String = parseName() // TODO(Daejun): directly alias function name instead of delegation?
+  private def parseSort(): String = parseName() // TODO(Daejun): directly alias function name instead of delegation?
 
   // Name = Symbol
-  def parseName(): String = parseSymbol()
+  private def parseName(): String = parseSymbol()
 
 //  // Name = [A-Z][a-zA-Z@-]*  // for Sort or VariableName
 //  //      | EscapedSymbol
@@ -297,7 +306,7 @@ class TextToMini {
 
   // Symbol = SymbolChar+
   //        | EscapedSymbol
-  def parseSymbol(): String = {
+  private def parseSymbol(): String = {
     def loop(s: StringBuilder): String = {
       scanner.next() match {
         case c if isSymbolChar(c) =>
@@ -315,10 +324,10 @@ class TextToMini {
     }
   }
 
-  def isSymbolChar(c: Char): Boolean = TextToMini.isSymbolChar(c) // TODO(Daejun): more efficient way?
+  private def isSymbolChar(c: Char): Boolean = TextToMini.isSymbolChar(c) // TODO(Daejun): more efficient way?
 
   // EscapedSymbol = ` [^`] `
-  def parseEscapedSymbol(): String = {
+  private def parseEscapedSymbol(): String = {
     def loop(s: StringBuilder): String = {
       scanner.next() match {
         case '`' =>
@@ -340,7 +349,7 @@ class TextToMini {
   //      | Elem List2
   // List2 = <endsWith> // <empty>
   //       | <sep> Elem List2
-  def parseList[T](parseElem: () => T, sep: Char, endsWith: Char): Seq[T] = {
+  private def parseList[T](parseElem: () => T, sep: Char, endsWith: Char): Seq[T] = {
     assert(sep != endsWith)
     def parseList2(lst: Seq[T]): Seq[T] = {
       scanner.nextWithSkippingWhitespaces() match {
@@ -361,12 +370,12 @@ class TextToMini {
     }
   }
 
-  def consumeWithLeadingWhitespaces(str: String): Unit = {
+  private def consumeWithLeadingWhitespaces(str: String): Unit = {
     scanner.skipWhitespaces()
     consume(str)
   }
 
-  def consume(str: String): Unit = {
+  private def consume(str: String): Unit = {
     for (c <- str) {
       val n = scanner.next()
       if (n == c) ()
@@ -376,7 +385,7 @@ class TextToMini {
 
   //////////////////////////////////////////////////////////
 
-  def error(expected: String, actual: String): ParseError = {
+  private def error(expected: String, actual: String): ParseError = {
     ParseError(
       "ERROR: " + "Line " + scanner.lineNum + ": Column " + scanner.columnNum + ": " +
         "Expected " + expected + ", but " + actual // StringEscapeUtils.escapeJava(actual)
@@ -385,22 +394,26 @@ class TextToMini {
     )
   }
 
-  def error(expected: String, actual: Char): ParseError = {
+  private def error(expected: String, actual: Char): ParseError = {
     error(expected, "'" + actual + "'")
   }
 
-  def error(expected: Char, actual: String): ParseError = {
+  private def error(expected: Char, actual: String): ParseError = {
     error("'" + expected + "'", actual)
   }
 
-  def error(expected: Char, actual: Char): ParseError = {
+  private def error(expected: Char, actual: Char): ParseError = {
     error("'" + expected + "'", "'" + actual + "'")
   }
 
 }
 
+/** Collection of static methods. */
 object TextToMini {
-  // SymbolChar = [a-zA-Z0-9.@#$%^_-]+
+  /** Check if the character is among symbol characters.
+    *
+    * {{{ SymbolChar = [a-zA-Z0-9.@#$%^_-]+ }}}
+    */
   def isSymbolChar(c: Char): Boolean = {
     ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || ('0' <= c && c <= '9') ||
       c == '.' || c == '@' || c == '#' || c == '$' || c == '%' || c == '^' || c == '_' || c == '-'
