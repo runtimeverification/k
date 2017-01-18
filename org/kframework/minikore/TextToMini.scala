@@ -253,11 +253,11 @@ class TextToMini {
     }
   }
 
-  // ModuleName = [A-Z][A-Z-]*
+  // ModuleName = [A-Z][A-Z0-9-]*
   private def parseModuleName(): String = {
     def loop(s: StringBuilder): String = {
       scanner.next() match {
-        case c if ('A' <= c && c <= 'Z') || c == '-'  =>
+        case c if ('A' <= c && c <= 'Z') || ('0' <= c && c <= '9') || c == '-'  =>
           s += c; loop(s)
         case c => scanner.putback(c)
           s.toString()
