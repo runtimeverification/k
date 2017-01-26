@@ -23,6 +23,7 @@ function setarch {
   fi
 }
 
+export HOME=~
 version=$(ng --nailgun-server local:$HOME/.kserver/socket org.kframework.main.JavaVersion 2>&1)
 if [ $? -eq 0 ]; then
   setarch
