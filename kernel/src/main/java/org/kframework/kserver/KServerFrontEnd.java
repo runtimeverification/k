@@ -73,7 +73,9 @@ public class KServerFrontEnd extends FrontEnd {
         File dir = null;
         if (isLocal()) {
             // can use more secure unix domain sockets
-            dir = new File(System.getProperty("user.home"), ".kserver");
+            // we use HOME variable to get home on linux because user.home does not match HOME variable when run with sudo
+            // unless run with sudo -H, and we want to ensure that the installer works correctly.
+            dir = new File(OS.current() == OS.LINUX ? System.getenv("HOME") : System.getProperty("user.home"), ".kserver");
             dir.mkdirs();
             dir.setReadable(false, false);
             dir.setReadable(true, true);
