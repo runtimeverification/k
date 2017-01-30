@@ -1,5 +1,7 @@
 package org.kframework.minikore
 
+import org.kframework.minikore.{MiniKoreInterface => i}
+
 import scala.collection._
 
 /** Algebraic data type of MiniKore. */
@@ -17,7 +19,7 @@ object MiniKore {
   case class Rule(pattern: Pattern, att: Attributes) extends Sentence
   case class Axiom(pattern: Pattern, att: Attributes) extends Sentence
 
-  sealed trait Pattern
+  sealed trait Pattern extends i.Pattern
   case class Variable(name: String, sort: String) extends Pattern
   case class Application(label: String, args: Seq[Pattern]) extends Pattern
   case class DomainValue(label: String, value: String) extends Pattern
@@ -25,7 +27,7 @@ object MiniKore {
   case class True() extends Pattern
   case class False() extends Pattern
   //
-  case class And(p: Pattern, q: Pattern) extends Pattern
+  case class And(p: Pattern, q: Pattern) extends Pattern with i.And
   case class Or(p: Pattern, q: Pattern) extends Pattern
   case class Not(p: Pattern) extends Pattern
   case class Implies(p: Pattern, q: Pattern) extends Pattern
@@ -36,4 +38,8 @@ object MiniKore {
   case class Rewrite(p: Pattern, q: Pattern) extends Pattern
   case class Equal(p: Pattern, q: Pattern) extends Pattern
 
+
+  object And extends i.AndConstructor {
+    def apply(p: i.Pattern, q: i.Pattern): i.Pattern = new And(p.asInstanceOf[Pattern], q.asInstanceOf[Pattern])
+  }
 }
