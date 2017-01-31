@@ -33,9 +33,37 @@ object MiniKoreInterface {
     def q: Pattern
   }
 
+  trait Not extends Pattern {
+    def p: Pattern
+  }
+
+  trait Implies extends Pattern {
+    def p: Pattern
+    def q: Pattern
+  }
+
   trait Exists extends Pattern {
     def v: Variable
     def p: Pattern
+  }
+
+  trait ForAll extends Pattern {
+    def v: Variable
+    def p: Pattern
+  }
+
+  trait Next extends Pattern {
+    def p: Pattern
+  }
+
+  trait Rewrite extends Pattern {
+    def p: Pattern
+    def q: Pattern
+  }
+
+  trait Equal extends Pattern {
+    def p: Pattern
+    def q: Pattern
   }
 
   trait Constructor[P <: Pattern, V <: Variable] {
@@ -46,7 +74,13 @@ object MiniKoreInterface {
     def False(): P
     def And(p: P, q: P): P
     def Or(p: P, q: P): P
+    def Not(p: P): P
+    def Implies(p: P, q: P): P
     def Exists(v: V, p: P): P
+    def ForAll(v: V, p: P): P
+    def Next(p: P): P
+    def Rewrite(p: P, q: P): P
+    def Equal(p: P, q: P): P
   }
 
 }
