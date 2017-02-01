@@ -1,15 +1,16 @@
 package org.kframework.minikore
 
+import org.kframework.minikore.MiniKoreInterface.{Pattern, Variable}
 import org.kframework.minikore.{MiniKoreInterface => i}
 
 /**
   * Created by daejunpark on 1/31/17.
   */
-abstract class MiniKoreTraverse {
+abstract class MiniKoreTraverse[P <: i.Pattern, V <: i.Variable] {
 
-  def c[P <: i.Pattern, V <: i.Variable]: i.Constructor[P,V]
+  def c: i.Of[P,V] // i.Constructor[P,V]
 
-  def map(f: i.Pattern => i.Pattern)(p: i.Pattern): i.Pattern = p match {
+  def map(f: i.Pattern => P)(p: i.Pattern): P = p match {
     case p:i.Variable    => f(c.Variable(p.name, p.sort))
     case p:i.Application => f(c.Application(p.label, p.args.map(map(f))))
     case p:i.DomainValue => f(c.DomainValue(p.label, p.value))
@@ -26,7 +27,7 @@ abstract class MiniKoreTraverse {
     case p:i.Equal       => f(c.Equal   (map(f)(p.p), map(f)(p.q)))
   }
 
-  def iter(f: i.Pattern => i.Pattern)(p: i.Pattern): Unit = p match {
+  def iter(f: i.Pattern => Unit)(p: i.Pattern): Unit = p match {
     case p:i.Variable    => f(p)
     case p:i.Application => f(p); p.args.foreach(iter(f))
     case p:i.DomainValue => f(p)
@@ -63,4 +64,9 @@ abstract class MiniKoreTraverse {
     c.Variable(x.name + "!new!", x.sort) // TODO: make it really fresh
   }
 
+}
+
+class X extends MiniKoreTraverse {
+  override def c: i.Constructor[MiniKore.Pattern,MiniKore.Variable] = MiniKore.Constructor
+  override def c[P <: i.Pattern, V <: i.Variable]: i.Constructor[P,V] = MiniKore.Constructor
 }

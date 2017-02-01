@@ -1,5 +1,6 @@
 package org.kframework.minikore
 
+import org.kframework.minikore.MiniKoreInterface.Ast
 import org.kframework.minikore.{MiniKoreInterface => i}
 
 import scala.collection._
@@ -27,7 +28,7 @@ object MiniKore {
   case class True() extends Pattern with i.True
   case class False() extends Pattern with i.False
   //
-  case class And(p: Pattern, q: Pattern) extends Pattern with i.And
+  case class And(p: Pattern, q: Pattern) extends Pattern with i.And[Pattern] { override def constructor(p: Pattern, q: Pattern) = And(p,q) }
   case class Or(p: Pattern, q: Pattern) extends Pattern with i.Or
   case class Not(p: Pattern) extends Pattern with i.Not
   case class Implies(p: Pattern, q: Pattern) extends Pattern with i.Implies
