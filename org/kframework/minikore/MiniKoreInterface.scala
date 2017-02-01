@@ -2,131 +2,82 @@ package org.kframework.minikore
 
 object MiniKoreInterface {
 
-  // View
+  // View & Constructor
 
   trait Ast
 
-  trait Leaf extends Ast
-
-  trait Node[T <: Ast] extends Ast {
-    def args: Seq[T]
+  trait LeafConstructor[T <: Ast, V] extends Ast {
+    def constructor: V => T
   }
 
-  trait Node1[T <: Ast] extends Ast {
-    def p: T
-    def constructor: T => T
+  trait Leaf[T <: Ast, V] extends Ast with LeafConstructor[T, V]
+
+  trait Node0Constructor[T <: Ast] extends Ast {
+    def constructor: () => T
   }
 
-  trait Node2[T <: Ast] extends Ast {
-    def p: T
-    def q: T
-    def constructor(p: T, q: T): T
+  trait Node0[T <: Ast] extends Ast with Node0Constructor[T]
+
+  trait Node1Constructor[T <: Ast, T1 <: Ast] extends Ast {
+    def constructor: T1 => T
   }
 
-  trait NodeV[T <: Ast, V <: Leaf] extends Ast {
-    def v: V
-    def p: T
-    def constructor(v: V, p: T): T
-//    def translator(v: Leaf, p: Ast): T
+  trait Node1[T <: Ast, T1 <: Ast] extends Ast with Node1Constructor[T, T1] {
+    def p: T1
+  }
+
+  trait Node2Constructor[T <: Ast, T1 <: Ast, T2 <: Ast] extends Ast {
+    def constructor: (T1, T2) => T
+  }
+
+  trait Node2[T <: Ast, T1 <: Ast, T2 <: Ast] extends Ast with Node2Constructor[T, T1, T2] {
+    def p: T1
+    def q: T2
+  }
+
+  trait NodeSeqConstructor[T <: Ast, V, T1 <: Ast] extends Ast {
+    def constructor: (V, Seq[T1]) => T
+  }
+
+  trait NodeSeq[T <: Ast, V, T1 <: Ast] extends Ast with NodeSeqConstructor[T, V, T1] {
+    def args: Seq[T1]
   }
 
   // Interface
 
   trait Pattern extends Ast
 
-  trait Variable extends Pattern with Leaf {
+  trait Variable[P <: Pattern] extends Pattern with Leaf[P, (String, String)] {
     def name: String
     def sort: String
   }
 
-  trait Application extends Pattern with Node[Pattern] {
+  trait Application[P <: Pattern] extends Pattern with NodeSeq[P, String, P] {
     def label: String
-    def args: Seq[Pattern]
   }
 
-  trait DomainValue extends Pattern with Leaf {
+  trait DomainValue[P <: Pattern] extends Pattern with Leaf[P, (String, String)] {
     def label: String
     def value: String
   }
 
-  trait True extends Pattern with Leaf
+  trait True[P <: Pattern] extends Pattern with Node0[P]
+  trait False[P <: Pattern] extends Pattern with Node0[P]
 
-  trait False extends Pattern with Leaf
+  trait And[P <: Pattern] extends Pattern with Node2[P, P, P]
+  trait Or[P <: Pattern] extends Pattern with Node2[P, P, P]
+  trait Not[P <: Pattern] extends Pattern with Node1[P, P]
+  trait Implies[P <: Pattern] extends Pattern with Node2[P, P, P]
 
-  trait And[T <: Pattern] extends Pattern with Node2[T]
-
-  trait Or extends Pattern with Node2[Pattern] {
-//    def p: Pattern
-//    def q: Pattern
+  trait Binder[V <: Variable[P], P <: Pattern] extends Pattern with Node2Constructor[P, V, P]{
+    def v: V
+    def p: P
   }
+  trait Exists[V <: Variable[P], P <: Pattern] extends Pattern with Binder[V, P]
+  trait ForAll[V <: Variable[P], P <: Pattern] extends Pattern with Binder[V, P]
 
-  trait Not extends Pattern with Node1[Pattern] {
-//    def p: Pattern
-  }
-
-  trait Implies extends Pattern with Node2[Pattern] {
-//    def p: Pattern
-//    def q: Pattern
-  }
-
-  trait Exists extends Pattern with NodeV[Pattern, Variable] {
-//    def v: Variable
-//    def p: Pattern
-  }
-
-  trait ForAll extends Pattern with NodeV[Pattern, Variable] {
-//    def v: Variable
-//    def p: Pattern
-  }
-
-  trait Next extends Pattern with Node1[Pattern] {
-//    def p: Pattern
-  }
-
-  trait Rewrite extends Pattern with Node2[Pattern] {
-//    def p: Pattern
-//    def q: Pattern
-  }
-
-  trait Equal extends Pattern with Node2[Pattern] {
-//    def p: Pattern
-//    def q: Pattern
-  }
-
-  // Constructor
-
-//  trait Constructor[P <: Pattern, V <: Variable] {
-//    def Variable(name: String, sort: String): P
-//    def Application(label: String, args: Seq[P]): P
-//    def DomainValue(label: String, value: String): P
-//    def True(): P
-//    def False(): P
-//    def And(p: P, q: P): P
-//    def Or(p: P, q: P): P
-//    def Not(p: P): P
-//    def Implies(p: P, q: P): P
-//    def Exists(v: V, p: P): P
-//    def ForAll(v: V, p: P): P
-//    def Next(p: P): P
-//    def Rewrite(p: P, q: P): P
-//    def Equal(p: P, q: P): P
-//  }
-//
-//  trait Of[P <: Pattern, V <: Variable] {
-//    def Variable(name: String, sort: String): P
-//    def Application(label: String, args: Seq[Pattern]): P
-//    def DomainValue(label: String, value: String): P
-//    def True(): P
-//    def False(): P
-//    def And(p: Pattern, q: Pattern): P
-//    def Or(p: Pattern, q: Pattern): P
-//    def Not(p: Pattern): P
-//    def Implies(p: Pattern, q: Pattern): P
-//    def Exists(v: Variable, p: Pattern): P
-//    def ForAll(v: Variable, p: Pattern): P
-//    def Next(p: Pattern): P
-//    def Rewrite(p: Pattern, q: Pattern): P
-//    def Equal(p: Pattern, q: Pattern): P
-//  }
+  trait Next[P <: Pattern] extends Pattern with Node1[P, P]
+  trait Rewrite[P <: Pattern] extends Pattern with Node2[P, P, P]
+  trait Equal[P <: Pattern] extends Pattern with Node2[P, P, P]
 
 }

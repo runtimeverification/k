@@ -1,72 +1,61 @@
 package org.kframework.minikore
 
-import org.kframework.minikore.MiniKoreInterface.{Pattern, Variable}
 import org.kframework.minikore.{MiniKoreInterface => i}
 
 /**
   * Created by daejunpark on 1/31/17.
   */
-abstract class MiniKoreTraverse[P <: i.Pattern, V <: i.Variable] {
+object MiniKoreTraverse {
 
-  def c: i.Of[P,V] // i.Constructor[P,V]
+//  def fold[P1 <: i.Pattern, P2 <: i.Pattern, V1 <: i.Variable[P1], V2 <: i.Variable[P2]](f: P1 => P2, v: V1 => V2)(p: P1): P2 = p match {
 
-  def map(f: i.Pattern => P)(p: i.Pattern): P = p match {
-    case p:i.Variable    => f(c.Variable(p.name, p.sort))
-    case p:i.Application => f(c.Application(p.label, p.args.map(map(f))))
-    case p:i.DomainValue => f(c.DomainValue(p.label, p.value))
-    case p:i.True        => f(c.True())
-    case p:i.False       => f(c.False())
-    case p:i.And         => f(c.And     (map(f)(p.p), map(f)(p.q)))
-    case p:i.Or          => f(c.Or      (map(f)(p.p), map(f)(p.q)))
-    case p:i.Not         => f(c.Not     (map(f)(p.p))             )
-    case p:i.Implies     => f(c.Implies (map(f)(p.p), map(f)(p.q)))
-    case p:i.Exists      => f(c.Exists  (       p.v , map(f)(p.p)))
-    case p:i.ForAll      => f(c.ForAll  (       p.v , map(f)(p.p)))
-    case p:i.Next        => f(c.Next    (map(f)(p.p))             )
-    case p:i.Rewrite     => f(c.Rewrite (map(f)(p.p), map(f)(p.q)))
-    case p:i.Equal       => f(c.Equal   (map(f)(p.p), map(f)(p.q)))
+//  def map[P <: i.Pattern, V <: i.Variable[P]](f: P => P, v: V => V)(p: P): P = p match {
+//    case p:i.Variable[P]    => f(p.constructor((p.name, p.sort)))
+//    case p:i.Application[P] => f(p.constructor(p.label, p.args.map(map(f,v))))
+//    case p:i.DomainValue[P] => f(p.constructor((p.label, p.value)))
+//    case p:i.Node0[P]       => f(p.constructor())
+//    case p:i.Node1[P,P]     => f(p.constructor(p.p))
+//    case p:i.Node2[P,P,P]   => f(p.constructor(p.p, p.q))
+//    case p:i.Binder[V,P]    => f(p.constructor(p.v, p.p))
+//  }
+
+  def map[P <: i.Pattern, V <: i.Variable[P]](f: P => P)(p: P): P = p match {
+    case p:i.Variable[P]    => f(p.constructor((p.name, p.sort)))
+    case p:i.Application[P] => f(p.constructor(p.label, p.args.map(map(f))))
+    case p:i.DomainValue[P] => f(p.constructor((p.label, p.value)))
+    case p:i.Node0[P]       => f(p.constructor())
+    case p:i.Node1[P,P]     => f(p.constructor(p.p))
+    case p:i.Node2[P,P,P]   => f(p.constructor(p.p, p.q))
+    case p:i.Binder[V,P]    => f(p.constructor(p.v, p.p))
   }
 
-  def iter(f: i.Pattern => Unit)(p: i.Pattern): Unit = p match {
-    case p:i.Variable    => f(p)
-    case p:i.Application => f(p); p.args.foreach(iter(f))
-    case p:i.DomainValue => f(p)
-    case p:i.True        => f(p)
-    case p:i.False       => f(p)
-    case p:i.And         => f(p); iter(f)(p.p); iter(f)(p.q)
-    case p:i.Or          => f(p); iter(f)(p.p); iter(f)(p.q)
-    case p:i.Not         => f(p); iter(f)(p.p)
-    case p:i.Implies     => f(p); iter(f)(p.p); iter(f)(p.q)
-    case p:i.Exists      => f(p); iter(f)(p.v); iter(f)(p.p)
-    case p:i.ForAll      => f(p); iter(f)(p.v); iter(f)(p.p)
-    case p:i.Next        => f(p); iter(f)(p.p)
-    case p:i.Rewrite     => f(p); iter(f)(p.p); iter(f)(p.q)
-    case p:i.Equal       => f(p); iter(f)(p.p); iter(f)(p.q)
+//  def iter[P <: i.Pattern](f: P => Unit)(p: P): Unit = p match {
+//    case p:i.Leaf[P,_]      => f(p)
+//    case p:i.Node0[P]       => f(p)
+//    case p:i.Node1[P,P]     => f(p); iter(f)(p.p)
+//    case p:i.Node2[P,P,P]   => f(p); iter(f)(p.p); iter(f)(p.q)
+//    case p:i.NodeSeq[P,_,P] => f(p); p.args.foreach(iter(f))
+//    case p:i.Binder[_,P]    => f(p); f(p.v); iter(f)(p.p)
+//  }
+
+  def size[P <: i.Pattern](p: P): Int = p match {
+    case p:i.Leaf[P,_]      => 1
+    case p:i.Node0[P]       => 1
+    case p:i.Node1[P,P]     => size(p.p)
+    case p:i.Node2[P,P,P]   => size(p.p) + size(p.q)
+    case p:i.NodeSeq[P,_,P] => p.args.map(size).sum
+    case p:i.Binder[_,P]    => size(p.p)
   }
 
-  def size(p: i.Pattern): Int = p match {
-    case p:i.Leaf => 1
-    case p:i.Node[i.Pattern] => p.args.map(size).sum
-    case p:i.Node1[i.Pattern] => size(p.p)
-    case p:i.Node2[i.Pattern] => size(p.p) + size(p.q)
-    case p:i.NodeV[i.Pattern, i.Variable] => size(p.p)
-  }
-
-  def subst(m: Map[i.Variable, i.Pattern])(p: i.Pattern): i.Pattern = {
+  def subst[P <: i.Pattern, V <: i.Variable[P], Vp >: i.Variable[P]](m: Map[Vp, P])(p: P): P = {
+    def fresh(x: V): P = {
+      x.constructor((x.name + "!new!", x.sort)) // TODO: make it really fresh
+    }
     p match {
-      case p:i.Variable => if (m.contains(p)) m(p) else p
-      case p:i.Exists => val x = fresh(p.v); c.Exists(x, subst(m + (p.v -> x))(p.p))
-      case p:i.ForAll => val x = fresh(p.v); c.ForAll(x, subst(m + (p.v -> x))(p.p))
+      case v:i.Variable[P] => if (m.contains(v)) m(v) else p
+      case p:i.Binder[V, P] => val x = fresh(p.v); p.constructor(x.asInstanceOf[V], subst(m + (p.v -> x))(p.p))
       case _ => map(subst(m))(p)
     }
   }
-  def fresh(x: i.Variable): i.Variable = {
-    c.Variable(x.name + "!new!", x.sort) // TODO: make it really fresh
-  }
 
-}
-
-class X extends MiniKoreTraverse {
-  override def c: i.Constructor[MiniKore.Pattern,MiniKore.Variable] = MiniKore.Constructor
-  override def c[P <: i.Pattern, V <: i.Variable]: i.Constructor[P,V] = MiniKore.Constructor
 }
