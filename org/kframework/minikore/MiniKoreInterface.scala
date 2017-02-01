@@ -2,69 +2,97 @@ package org.kframework.minikore
 
 object MiniKoreInterface {
 
-  trait Pattern
+  // View
 
-  trait Variable extends Pattern {
+  trait Ast
+
+  trait Leaf extends Ast
+
+  trait Node[T <: Ast] extends Ast {
+    def args: Seq[T]
+  }
+
+  trait Node1[T <: Ast] extends Ast {
+    def p: T
+  }
+
+  trait Node2[T <: Ast] extends Ast {
+    def p: T
+    def q: T
+  }
+
+  trait NodeV[T <: Ast, V <: Leaf] extends Ast {
+    def v: V
+    def p: T
+  }
+
+  // Interface
+
+  trait Pattern extends Ast
+
+  trait Variable extends Pattern with Leaf {
     def name: String
     def sort: String
   }
 
-  trait Application extends Pattern {
+  trait Application extends Pattern with Node[Pattern] {
     def label: String
     def args: Seq[Pattern]
   }
 
-  trait DomainValue extends Pattern {
+  trait DomainValue extends Pattern with Leaf {
     def label: String
     def value: String
   }
 
-  trait True extends Pattern
+  trait True extends Pattern with Leaf
 
-  trait False extends Pattern
+  trait False extends Pattern with Leaf
 
-  trait And extends Pattern {
+  trait And extends Pattern with Node2[Pattern] {
     def p: Pattern
     def q: Pattern
   }
 
-  trait Or extends Pattern {
+  trait Or extends Pattern with Node2[Pattern] {
     def p: Pattern
     def q: Pattern
   }
 
-  trait Not extends Pattern {
+  trait Not extends Pattern with Node1[Pattern] {
     def p: Pattern
   }
 
-  trait Implies extends Pattern {
+  trait Implies extends Pattern with Node2[Pattern] {
     def p: Pattern
     def q: Pattern
   }
 
-  trait Exists extends Pattern {
+  trait Exists extends Pattern with NodeV[Pattern, Variable] {
     def v: Variable
     def p: Pattern
   }
 
-  trait ForAll extends Pattern {
+  trait ForAll extends Pattern with NodeV[Pattern, Variable] {
     def v: Variable
     def p: Pattern
   }
 
-  trait Next extends Pattern {
+  trait Next extends Pattern with Node1[Pattern] {
     def p: Pattern
   }
 
-  trait Rewrite extends Pattern {
+  trait Rewrite extends Pattern with Node2[Pattern] {
     def p: Pattern
     def q: Pattern
   }
 
-  trait Equal extends Pattern {
+  trait Equal extends Pattern with Node2[Pattern] {
     def p: Pattern
     def q: Pattern
   }
+
+  // Constructor
 
   trait Constructor[P <: Pattern, V <: Variable] {
     def Variable(name: String, sort: String): P
