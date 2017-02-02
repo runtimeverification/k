@@ -37,33 +37,35 @@ object MiniKore extends i.Constructor {
     override def constructor = False
   }
   //
-  case class And(p: Pattern, q: Pattern) extends Pattern with i.And {
+  case class And    (p: Pattern , q: Pattern) extends Pattern with i.And {
     override def constructor = And
   }
-  case class Or(p: Pattern, q: Pattern) extends Pattern with i.Or {
+  case class Or     (p: Pattern , q: Pattern) extends Pattern with i.Or {
     override def constructor = Or
   }
-  case class Not(p: Pattern) extends Pattern with i.Not {
+  case class Not    (p: Pattern             ) extends Pattern with i.Not {
     override def constructor = Not
   }
-  case class Implies(p: Pattern, q: Pattern) extends Pattern with i.Implies {
+  case class Implies(p: Pattern , q: Pattern) extends Pattern with i.Implies {
     override def constructor = Implies
   }
-  case class Exists(v: Variable, p: Pattern) extends Pattern with i.Exists {
+  case class Exists (v: Variable, p: Pattern) extends Pattern with i.Exists {
     override def constructor = Exists
   }
-  case class ForAll(v: Variable, p: Pattern) extends Pattern with i.ForAll {
+  case class ForAll (v: Variable, p: Pattern) extends Pattern with i.ForAll {
     override def constructor = ForAll
   }
-  case class Next(p: Pattern) extends Pattern with i.Next {
+  case class Next   (p: Pattern             ) extends Pattern with i.Next {
     override def constructor = Next
   }
-  case class Rewrite(p: Pattern, q: Pattern) extends Pattern with i.Rewrite {
+  case class Rewrite(p: Pattern , q: Pattern) extends Pattern with i.Rewrite {
     override def constructor = Rewrite
   }
-  case class Equal(p: Pattern, q: Pattern) extends Pattern with i.Equal {
+  case class Equal  (p: Pattern , q: Pattern) extends Pattern with i.Equal {
     override def constructor = Equal
   }
+
+  // implementation of i.Constructor
 
   object Variable    extends i.VariableConstructor {
   //override def apply(name: String, sort: String): i.Variable
