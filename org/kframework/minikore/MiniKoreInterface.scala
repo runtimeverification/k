@@ -90,4 +90,24 @@ object MiniKoreInterface {
   trait Rewrite extends Pattern with Node2[Rewrite]
   trait Equal   extends Pattern with Node2[Equal]
 
+
+  // factory of constructors
+
+  trait Constructor {
+    def Variable    : VariableConstructor
+    def Application : ApplicationConstructor
+    def DomainValue : DomainValueConstructor
+    def True        : Node0Constructor[True]
+    def False       : Node0Constructor[False]
+    def And         : Node2Constructor[And]
+    def Or          : Node2Constructor[Or]
+    def Not         : Node1Constructor[Not]
+    def Implies     : Node2Constructor[Implies]
+    def Exists      : NodeVConstructor[Exists]
+    def ForAll      : NodeVConstructor[ForAll]
+    def Next        : Node1Constructor[Next]
+    def Rewrite     : Node2Constructor[Rewrite]
+    def Equal       : Node2Constructor[Equal]
+  }
+
 }
