@@ -49,7 +49,7 @@ object MiniToText {
     case ForAll(v, p) => "\\forall(" + apply(v) + "," + apply(p) + ")"
     case Next(p) => "\\next(" + apply(p) + ")"
     case Rewrite(p, q) => "\\rewrite(" + apply(p) + "," + apply(q) + ")"
-    case Equal(p, q) => "\\equal(" + apply(p) + "," + apply(q) + ")"
+    case Equals(p, q) => "\\equal(" + apply(p) + "," + apply(q) + ")"
   }
 
   /** Returns a string from [[MiniKore.Attributes]]. */

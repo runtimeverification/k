@@ -197,7 +197,7 @@ class TextToMini {
           case ('e', 'q') => consume("ual"); consumeWithLeadingWhitespaces("(")
             val p1 = parsePattern(); consumeWithLeadingWhitespaces(",")
             val p2 = parsePattern(); consumeWithLeadingWhitespaces(")")
-            Equal(p1, p2)
+            Equals(p1, p2)
           case (err1, err2) => throw error("\\true, \\false, \\and, \\or, \\not, \\implies, \\exists, \\forall, \\next, \\rewrite, or \\equal",
                                            "'\\" + err1 + err2 + "'")
         }

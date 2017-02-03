@@ -9,7 +9,7 @@ object MiniKore {
 
   //Default Implementation
 
-  type Attributes = Seq[Pattern]
+  type Attributes = Seq[i.Pattern]
 
   case class Definition(modules: Seq[Module], att: Attributes)
 
@@ -23,79 +23,79 @@ object MiniKore {
 
   case class SymbolDeclaration(sort: String, label: String, args: Seq[String], att: Attributes) extends Sentence
 
-  case class Rule(pattern: Pattern, att: Attributes) extends Sentence
+  case class Rule(pattern: i.Pattern, att: Attributes) extends Sentence
 
-  case class Axiom(pattern: Pattern, att: Attributes) extends Sentence
+  case class Axiom(pattern: i.Pattern, att: Attributes) extends Sentence
 
-  sealed trait Pattern extends i.Pattern
 
-  case class Variable(name: String, sort: String) extends Pattern with i.Variable
+  case class Variable(name: String, sort: String) extends i.Pattern with i.Variable
 
-  case class Application(label: String, args: Seq[Pattern]) extends Pattern with i.Application {
-    override def children: Seq[Pattern] = args
+  case class Application(label: String, args: Seq[i.Pattern]) extends i.Pattern with i.Application {
+    override def childrenAsSeq = args
 
-    override def childrenAsSeq: Seq[Pattern] = children
+    override def children = args
   }
 
-  case class DomainValue(label: String, value: String) extends Pattern with i.DomainValue
 
-  case class True() extends Pattern with i.True
+  case class DomainValue(label: String, value: String) extends i.Pattern with i.DomainValue
 
-  case class False() extends Pattern with i.False
+  case class True() extends i.Pattern with i.True
 
-  case class And(p: Pattern, q: Pattern) extends Pattern with i.And {
-    override def children: (Pattern, Pattern) = (p, q)
+  case class False() extends i.Pattern with i.False
 
-    override def childrenAsSeq: Seq[Pattern] = Seq(p, q)
+  case class And(p: i.Pattern, q: i.Pattern) extends i.Pattern with i.And {
+    override def children: (i.Pattern, i.Pattern) = (p, q)
+
+    override def childrenAsSeq: Seq[i.Pattern] = Seq(p, q)
   }
 
-  case class Or(p: Pattern, q: Pattern) extends Pattern with i.Or {
-    override def children: (Pattern, Pattern) = (p, q)
+  case class Or(p: i.Pattern, q: i.Pattern) extends i.Pattern with i.Or {
+    override def children: (i.Pattern, i.Pattern) = (p, q)
 
-    override def childrenAsSeq: Seq[Pattern] = Seq(p, q)
+    override def childrenAsSeq: Seq[i.Pattern] = Seq(p, q)
   }
 
-  case class Not(p: Pattern) extends Pattern with i.Not {
-    override def children: Pattern = p
+  case class Not(p: i.Pattern) extends i.Pattern with i.Not {
+    override def children: i.Pattern = p
 
-    override def childrenAsSeq: Seq[Pattern] = Seq(p)
+    override def childrenAsSeq: Seq[i.Pattern] = Seq(p)
   }
 
-  case class Implies(p: Pattern, q: Pattern) extends Pattern with i.Implies {
-    override def children: (Pattern, Pattern) = (p, q)
+  case class Implies(p: i.Pattern, q: i.Pattern) extends i.Pattern with i.Implies {
+    override def children: (i.Pattern, i.Pattern) = (p, q)
 
-    override def childrenAsSeq: Seq[Pattern] = Seq(p, q)
+    override def childrenAsSeq: Seq[i.Pattern] = Seq(p, q)
   }
 
-  case class Exists(v: Variable, p: Pattern) extends Pattern with i.Exists {
-    override def children: (Variable, Pattern) = (v, p)
+  case class Exists(v: Variable, p: i.Pattern) extends i.Pattern with i.Exists {
+    override def children: (Variable, i.Pattern) = (v, p)
 
-    override def childrenAsSeq: Seq[Pattern] = Seq(v, p)
+    override def childrenAsSeq: Seq[i.Pattern] = Seq(v, p)
 
   }
 
-  case class ForAll(v: Variable, p: Pattern) extends Pattern with i.ForAll {
-    override def children: (Variable, Pattern) = (v, p)
+  case class ForAll(v: Variable, p: i.Pattern) extends i.Pattern with i.ForAll {
+    override def children: (Variable, i.Pattern) = (v, p)
 
-    override def childrenAsSeq: Seq[Pattern] = Seq(v, p)
+    override def childrenAsSeq: Seq[i.Pattern] = Seq(v, p)
   }
 
-  case class Next(p: Pattern) extends Pattern with i.Next {
-    override def children: Pattern = p
+  case class Next(p: i.Pattern) extends i.Pattern with i.Next {
+    override def children: i.Pattern = p
 
-    override def childrenAsSeq: Seq[Pattern] = Seq(p)
+    override def childrenAsSeq: Seq[i.Pattern] = Seq(p)
   }
 
-  case class Rewrite(p: Pattern, q: Pattern) extends Pattern with i.Rewrite {
-    override def children: (Pattern, Pattern) = (p, q)
+  case class Rewrite(p: i.Pattern, q: i.Pattern) extends i.Pattern with i.Rewrite {
+    override def children: (i.Pattern, i.Pattern) = (p, q)
 
-    override def childrenAsSeq: Seq[Pattern] = Seq(p, q)
+    override def childrenAsSeq: Seq[i.Pattern] = Seq(p, q)
   }
 
-  case class Equals(p: Pattern, q: Pattern) extends Pattern with i.Equals {
-    override def children: (Pattern, Pattern) = (p, q)
+  case class Equals(p: i.Pattern, q: i.Pattern) extends i.Pattern with i.Equals {
+    override def children: (i.Pattern, i.Pattern) = (p, q)
 
-    override def childrenAsSeq: Seq[Pattern] = Seq(p, q)
+    override def childrenAsSeq: Seq[i.Pattern] = Seq(p, q)
   }
 
 }

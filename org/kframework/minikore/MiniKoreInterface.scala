@@ -7,8 +7,8 @@ object MiniKoreInterface {
   trait AST
 
   // T - Type of Pattern, C - Type of Children, A - Constructor's Arguments
-  sealed trait Node[T <: Pattern, C, A] extends AST {
-    def apply: A => T
+  sealed trait Node[T <: Pattern, C, Construct] extends AST {
+    def construct: Construct
 
     def children: C
 
@@ -23,22 +23,22 @@ object MiniKoreInterface {
   }
 
   // A Pattern such as Not, takes 1 argument, and the type of the children is the same.
-  sealed trait Node1[T, C <: Pattern] extends Node[T, C, C]
+  sealed trait Node1[T, C <: Pattern] extends Node[T, C, C => T]
 
 
-  sealed trait Node2[T, C1 <: Pattern, C2 <: Pattern] extends Node[T, (C1, C2), (C1, C2)]
+  sealed trait Node2[T, C1 <: Pattern, C2 <: Pattern] extends Node[T, (C1, C2), (C1, C2) => T]
 
 
   // An Application Node takes a Label Type, and a Children type. The type of the constructor is a composite type.
-  sealed trait NodeApply[T, Label, Children] extends Node[T, Children, (Label, Children)]
+  sealed trait NodeApply[T, Label, Children] extends Node[T, Children, (Label, Children) => T]
 
-  sealed trait Leaf[T <: Pattern, A] extends AST {
-    def apply: A => T
+  sealed trait Leaf[T <: Pattern, Construct] extends AST {
+    def apply: Construct
   }
 
-  trait Variable extends Pattern with Leaf[Variable, (String, String)]
+  trait Variable extends Pattern with Leaf[Variable, (String, String) => Variable]
 
-  trait DomainValue extends Pattern with Leaf[DomainValue, (String, String)]
+  trait DomainValue extends Pattern with Leaf[DomainValue, (String, String) => DomainValue]
 
   trait True extends Pattern with Node0[True]
 

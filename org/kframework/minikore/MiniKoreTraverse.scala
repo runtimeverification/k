@@ -3,11 +3,11 @@ package org.kframework.minikore
 import org.kframework.minikore.{MiniKoreInterface => i}
 
 object MiniKoreTraverse {
-
-  def size(p: i.Pattern): Int = p match {
-    case p: i.Leaf[_, _] => 1
-    case p: i.Node[_, _, _] => p.asInstanceOf[i.Node].childrenAsSeq map {size} sum
-  }
+//
+//  def size(p: i.Pattern): Int = p match {
+//    case p: i.Leaf[_, _] => 1
+//    case p: i.Node[_, _, _] => p.asInstanceOf[i.Node].childrenAsSeq map {size} sum
+//  }
 
 //  def iter(f: i.Pattern => Unit)(p: i.Pattern): Unit = p match {
 //    case p:i.Leaf        => f(p)
@@ -73,8 +73,8 @@ object MiniKoreTraverse {
 //    }
 //  }
 
-}
-object Main {
-  val tree1 = MiniKore.And(MiniKore.DomainValue("String", "abc"), MiniKore.DomainValue("String", "X"))
-  print(MiniKoreTraverse.size(tree1))
+//}
+//object Main {
+//  val tree1 = MiniKore.And(MiniKore.DomainValue("String", "abc"), MiniKore.DomainValue("String", "X"))
+//  print(MiniKoreTraverse.size(tree1))
 }
