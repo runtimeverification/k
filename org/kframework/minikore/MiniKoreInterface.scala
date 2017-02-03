@@ -2,112 +2,58 @@ package org.kframework.minikore
 
 object MiniKoreInterface {
 
-  // abstract types
+  trait Pattern
 
-  sealed trait Ast
+  trait AST
 
-  // type for Variable and DomainValue
-  trait Leaf extends Ast
+  // T - Type of Pattern, C - Type of Children, A - Constructor's Arguments
+  sealed trait Node[T <: Pattern, C, A] extends AST {
+    def apply: A => T
 
-  // type for Application and DomainValue
-  trait Node extends Ast {
-    def label: String
+    def children: C
   }
 
-  // types for matching logic connectives
+  // A Pattern Such as True/False takes no arguments, hence types of Children is None, Constructor's arguments is None.
+  sealed trait Node0[T] extends Node[T, None.type, None.type]
 
-  trait Node0[T <: Pattern] extends Ast {
-    def constructor: Node0Constructor[T]
-  }
-  trait Node0Constructor[T <: Pattern] {
-    def apply(): T
-  }
+  // A Pattern such as Not, takes 1 argument, and the type of the children is the same.
+  sealed trait Node1[T, C <: Pattern] extends Node[T, C, C]
 
-  trait Node1[T <: Pattern] extends Ast {
-    def p: Pattern
-    def constructor: Node1Constructor[T]
-  }
-  trait Node1Constructor[T <: Pattern] {
-    def apply(p: Pattern): T
+  sealed trait Node2[T, C1 <: Pattern, C2 <: Pattern] extends Node[T, (C1, C2), (C1, C2)]
+
+  // An Application Node takes a Label Type, and a Children type. The type of the constructor is a composite type.
+  sealed trait NodeApply[T, Label, Children] extends Node[T, Children, (Label, Children)]
+
+  sealed trait Leaf[T <: Pattern, A] extends AST {
+    def apply: A => T
   }
 
-  trait Node2[T <: Pattern] extends Ast {
-    def p: Pattern
-    def q: Pattern
-    def constructor: Node2Constructor[T]
-  }
-  trait Node2Constructor[T <: Pattern] {
-    def apply(p: Pattern, q: Pattern): T
-  }
+  trait Variable extends Pattern with Leaf[Variable, (String, String)]
 
-  trait NodeV[T <: Pattern] extends Ast {
-    def v: Variable
-    def p: Pattern
-    def constructor: NodeVConstructor[T]
-  }
-  trait NodeVConstructor[T <: Pattern] {
-    def apply(v: Variable, p: Pattern): T
-  }
+  trait DomainValue extends Pattern with Leaf[DomainValue, (String, String)]
 
-  // ground types
+  trait True extends Pattern with Node0[True]
 
-  trait Pattern extends Ast
+  trait False extends Pattern with Node0[False]
 
-  trait Variable extends Pattern with Leaf {
-    def name: String
-    def sort: String
-    def constructor: VariableConstructor
-  }
-  trait VariableConstructor {
-    def apply(name: String, sort: String): Variable
-  }
+  trait And extends Pattern with Node2[And, Pattern, Pattern]
 
-  trait Application extends Pattern with Node {
-    def args: Seq[Pattern]
-    def constructor: ApplicationConstructor
-  }
-  trait ApplicationConstructor {
-    def apply(label: String, args: Seq[Pattern]): Application
-  }
+  trait Or extends Pattern with Node2[Or, Pattern, Pattern]
 
-  trait DomainValue extends Pattern with Node with Leaf {
-    def value: String
-    def constructor: DomainValueConstructor
-  }
-  trait DomainValueConstructor {
-    def apply(label: String, value: String): DomainValue
-  }
+  trait Not extends Pattern with Node1[Not, Pattern]
 
-  trait True    extends Pattern with Node0[True]
-  trait False   extends Pattern with Node0[False]
-  trait And     extends Pattern with Node2[And]
-  trait Or      extends Pattern with Node2[Or]
-  trait Not     extends Pattern with Node1[Not]
-  trait Implies extends Pattern with Node2[Implies]
-  trait Exists  extends Pattern with NodeV[Exists]
-  trait ForAll  extends Pattern with NodeV[ForAll]
-  trait Next    extends Pattern with Node1[Next]
-  trait Rewrite extends Pattern with Node2[Rewrite]
-  trait Equal   extends Pattern with Node2[Equal]
+  trait Application extends Pattern with NodeApply[Application, String, Seq[Pattern]]
 
+  trait Implies extends Pattern with Node2[Implies, Pattern, Pattern]
 
-  // factory of constructors
+  trait Exists extends Pattern with Node2[Exists, Variable, Pattern]
 
-  trait Constructor {
-    def Variable    : VariableConstructor
-    def Application : ApplicationConstructor
-    def DomainValue : DomainValueConstructor
-    def True        : Node0Constructor[True]
-    def False       : Node0Constructor[False]
-    def And         : Node2Constructor[And]
-    def Or          : Node2Constructor[Or]
-    def Not         : Node1Constructor[Not]
-    def Implies     : Node2Constructor[Implies]
-    def Exists      : NodeVConstructor[Exists]
-    def ForAll      : NodeVConstructor[ForAll]
-    def Next        : Node1Constructor[Next]
-    def Rewrite     : Node2Constructor[Rewrite]
-    def Equal       : Node2Constructor[Equal]
-  }
+  trait ForAll extends Pattern with Node2[ForAll, Variable, Pattern]
+
+  trait Next extends Pattern with Node1[Next, Pattern]
+
+  trait Rewrite extends Pattern with Node2[Rewrite, Pattern, Pattern]
+
+  trait Equals extends Pattern with Node2[Equals, Pattern, Pattern]
 
 }
