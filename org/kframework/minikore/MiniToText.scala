@@ -2,6 +2,7 @@ package org.kframework.minikore
 
 import org.apache.commons.lang3.StringEscapeUtils
 import org.kframework.minikore.MiniKore._
+import org.kframework.minikore.MiniKoreInterface.Pattern
 
 /** Function (i.e., unparser) from MiniKore to String. */
 object MiniToText {
@@ -34,7 +35,7 @@ object MiniToText {
       "axiom " + apply(pattern) + " " + apply(att)
   }
 
-  /** Returns a string from [[MiniKore.Pattern]]. */
+  /** Returns a string from [[MiniKoreInterface.Pattern]]. */
   def apply(pat: Pattern): String = pat match {
     case Variable(name, sort) => apply(name) + ":" + apply(sort)
     case Application(label, args) => apply(label) + "(" + args.map(apply).mkString(",") + ")"
