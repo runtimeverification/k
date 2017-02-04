@@ -1,8 +1,9 @@
 package org.kframework.minikore
 
-object MiniKoreInterface {
 
-  trait Pattern
+object TreeInterface {
+
+  import org.kframework.minikore.PatternInterface.Pattern
 
   trait AST
 
@@ -56,6 +57,14 @@ object MiniKoreInterface {
   sealed trait Leaf[T <: Pattern, Construct] extends AST {
     def construct: Construct
   }
+
+}
+
+object PatternInterface {
+
+  import org.kframework.minikore.TreeInterface._
+
+  trait Pattern
 
   trait Variable extends Pattern with Leaf[Variable, (String, String) => Variable] {
     def name: String
@@ -231,4 +240,38 @@ object MiniKoreInterface {
     def unapply(arg: And): Option[(Pattern, Pattern)] = Some(arg.p, arg.q)
   }
 
+
+}
+
+trait FactoryInterface {
+
+  import org.kframework.minikore.PatternInterface._
+
+  def Application(label: String, args: Seq[Pattern]): Application
+
+  def Variable(name: String, sort: String): Variable
+
+  def DomainValue(label: String, value: String): DomainValue
+
+  def True(): True
+
+  def False(): False
+
+  def And(p: Pattern, q: Pattern): And
+
+  def Or(p: Pattern, q: Pattern): Or
+
+  def Not(p: Pattern): Not
+
+  def Implies(p: Pattern, q: Pattern): Implies
+
+  def Exists(v: Variable, p: Pattern): Exists
+
+  def ForAll(v: Variable, p: Pattern): ForAll
+
+  def Next(p: Pattern): Next
+
+  def Rewrite(p: Pattern, q: Pattern): Rewrite
+
+  def Equals(p: Pattern, q: Pattern): Equals
 }

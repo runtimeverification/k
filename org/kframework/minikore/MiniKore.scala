@@ -1,7 +1,7 @@
 package org.kframework.minikore
 
 
-import org.kframework.minikore.{MiniKoreInterface => i}
+import org.kframework.minikore.{PatternInterface => i}
 
 import scala.collection._
 
@@ -86,7 +86,7 @@ object MiniKore {
 
 }
 
-object Constructors {
+object Constructors extends FactoryInterface {
   def Application(label: String, args: Seq[i.Pattern]): MiniKore.Application = MiniKore.Application(label, args)
 
   def Variable(name: String, sort: String): MiniKore.Variable = MiniKore.Variable(name, sort)
