@@ -86,7 +86,7 @@ object MiniKore {
 
 }
 
-object Constructors extends {
+object Constructors extends FactoryInterface{
   def Application(label: String, args: Seq[i.Pattern]): MiniKore.Application = MiniKore.Application(label, args)
 
   def Variable(name: String, sort: String): MiniKore.Variable = MiniKore.Variable(name, sort)
