@@ -9,7 +9,7 @@ object TreeInterface {
 
   // T - Type of Pattern, C - Type of Children, A - Constructor's Arguments
   sealed trait Node[T, C, CT] extends AST {
-    def construct: CT
+    def construct: Any => T
 
     def children: C
 

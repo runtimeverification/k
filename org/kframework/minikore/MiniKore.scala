@@ -29,64 +29,64 @@ object MiniKore {
   case class Axiom(pattern: i.Pattern, att: Attributes) extends Sentence
 
   case class Variable(name: String, sort: String) extends i.Variable {
-    override def construct = Constructors.Variable
+    override def construct: (String, String) => Variable = Constructors.Variable
   }
 
   case class Application(label: String, args: Seq[i.Pattern]) extends i.Application {
-    override def construct = Constructors.Application
+    override def construct: (String, Seq[i.Pattern]) => Application = Constructors.Application
   }
 
   case class DomainValue(label: String, value: String) extends i.DomainValue {
-    override def construct = Constructors.DomainValue
+    override def construct: (String, String) => DomainValue = Constructors.DomainValue
   }
 
   case class True() extends i.True {
-    override def construct = Constructors.True
+    override def construct: () => True = Constructors.True
   }
 
   case class False() extends i.False {
-    override def construct = Constructors.False
+    override def construct: () => False = Constructors.False
   }
 
   case class And(p: i.Pattern, q: i.Pattern) extends i.And {
-    override def construct = Constructors.And
+    override def construct: (i.Pattern, i.Pattern) => And = Constructors.And
   }
 
   case class Or(p: i.Pattern, q: i.Pattern) extends i.Or {
-    override def construct = Constructors.Or
+    override def construct: (i.Pattern, i.Pattern) => Or = Constructors.Or
   }
 
   case class Not(p: i.Pattern) extends i.Not {
-    override def construct = Constructors.Not
+    override def construct: i.Pattern => Not = Constructors.Not
   }
 
   case class Implies(p: i.Pattern, q: i.Pattern) extends i.Implies {
-    override def construct = Constructors.Implies
+    override def construct: (i.Pattern, i.Pattern) => Implies = Constructors.Implies
   }
 
   case class Exists(v: i.Variable, p: i.Pattern) extends i.Exists {
-    override def construct = Constructors.Exists
+    override def construct: (i.Variable, i.Pattern) => Exists = Constructors.Exists
   }
 
   case class ForAll(v: i.Variable, p: i.Pattern) extends i.ForAll {
-    override def construct = Constructors.ForAll
+    override def construct: (i.Variable, i.Pattern) => ForAll = Constructors.ForAll
   }
 
   case class Next(p: i.Pattern) extends i.Next {
-    override def construct = Constructors.Next
+    override def construct: i.Pattern => Next = Constructors.Next
   }
 
   case class Rewrite(p: i.Pattern, q: i.Pattern) extends i.Rewrite {
-    override def construct = Constructors.Rewrite
+    override def construct: (i.Variable, i.Pattern) => Rewrite = Constructors.Rewrite
   }
 
   case class Equals(p: i.Pattern, q: i.Pattern) extends i.Equals {
-    override def construct = Constructors.Equals
+    override def construct: (i.Variable, i.Pattern) => Equals = Constructors.Equals
   }
 
 }
 
-object Constructors extends FactoryInterface {
+object Constructors extends {
   def Application(label: String, args: Seq[i.Pattern]): MiniKore.Application = MiniKore.Application(label, args)
 
   def Variable(name: String, sort: String): MiniKore.Variable = MiniKore.Variable(name, sort)
