@@ -7,21 +7,24 @@ import org.kframework.minikore.PatternInterface._
 object MiniKoreTraverse {
 
   def size(p: Pattern): Int = p match {
-    case p: Leaf[_] => 1
-    case p: Node[_] => p.children map size sum
-    case p: NodeApply[_] => if (p.children.isEmpty) 1 else p.children map size sum
+    case Leaf(_) => 1
+    case Node(children: Seq[Pattern]) => children.map(size) sum
+    case NodeApply(_, children: Seq[Pattern]) => if (children.isEmpty) 1 else children map size sum
+  }
+
+
+  def map(f: Pattern => Pattern)(p: Pattern): Pattern = p match {
+    case p: Leaf[Pattern] => f(p)
+    case p: Node[Pattern] => p.construct(p.children.map(x => f(x)))
+    case p: NodeApply[Pattern] => p.construct(p.label, p.children.map(x => f(x)))
+  }
+
+  def iter(f: Pattern => Unit)(p: Pattern): Unit = p match {
+    case p: Leaf[_] => f(p)
+    case p: Node[_] => p.children map(x => f(x))
   }
 
   //
-  //    def iter(f: Pattern => Unit)(p: Pattern): Unit = p match {
-  //      case p:Leaf[_, _]        => f(p)
-  //      case p: Node[_, _, _]    => p.childrenAsSeq map(f)
-  //    }
-  //
-  //    def map(f: Pattern => Pattern)(p: Pattern): Pattern = p match {
-  //      case p: Leaf[_, _]        => f(p)
-  //      case p: Node[_, _, _]     => p.construct
-  //    }
   //
   //    def mapShallow(f: Pattern => Pattern)(p: Pattern): Pattern = p match {
   //      case p:Leaf        => p

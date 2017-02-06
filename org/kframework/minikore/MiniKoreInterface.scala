@@ -5,7 +5,7 @@ object TreeInterface {
 
   import org.kframework.minikore.PatternInterface.Pattern
 
-  trait AST
+  sealed trait AST extends Pattern
 
 
   // T - Type of Pattern, C - Type of Children, A - Constructor's Arguments
@@ -60,6 +60,10 @@ object TreeInterface {
     def construct: (String, String) => T
 
     def contents: (String, String)
+  }
+
+  object Leaf {
+    def unapply(arg: Leaf[_]): Option[(String, String)] = Some(arg.contents)
   }
 
 }
@@ -176,7 +180,7 @@ object PatternInterface {
 
     def p: Pattern
 
-    override def children: Seq[Pattern] = Seq(p)
+    override def children: Seq[Pattern] = Seq(v, p)
 
   }
 
@@ -189,7 +193,7 @@ object PatternInterface {
 
     def p: Pattern
 
-    override def children: Seq[Pattern] = Seq(p)
+    override def children: Seq[Pattern] = Seq(v, p)
 
   }
 
