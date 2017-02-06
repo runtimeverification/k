@@ -7,40 +7,35 @@ object TreeInterface {
 
   trait AST
 
+
   // T - Type of Pattern, C - Type of Children, A - Constructor's Arguments
-  sealed trait Node[T, C, CT] extends AST {
-    def construct: Any => T
+  sealed trait Node[T] extends AST {
+    def construct: Seq[Pattern] => T
 
-    def children: C
-
-    def childrenAsSeq: Seq[Pattern]
+    def children: Seq[Pattern]
   }
 
   object Node {
-    def unapply(arg: Node[_, _, _]): Option[_] = {
-      arg.children match {
-        case None => None
-        case x@_ => Some(x)
-      }
-    }
+    def unapply(arg: Node[_]): Option[Seq[Pattern]] = Some(arg.children)
   }
 
   // A Pattern Such as True/False takes no arguments, hence types of Children is None, Constructor's arguments is None.
-  sealed trait Node0[T] extends Node[T, None.type, () => T] {
-    override def children = None
-
-    override def childrenAsSeq = Seq.empty[Pattern]
+  sealed trait Node0[T] extends Node[T] {
+    override def children = Seq.empty[Pattern]
   }
 
   // A Pattern such as Not, takes 1 argument, and the type of the children is the same.
-  sealed trait Node1[T, C <: Pattern] extends Node[T, C, C => T]
-
-  object Node1 {
-    def unapply(arg: Node1[_, _]): Option[_] = Some(arg.children)
+  sealed trait Node1[T] extends Node[T] {
+    def construct(p: Pattern): T = {
+      construct(Seq(p))
+    }
   }
 
-
-  sealed trait Node2[T, C1 <: Pattern, C2 <: Pattern] extends Node[T, (C1, C2), (C1, C2) => T]
+  sealed trait Node2[T, C1 <: Pattern, C2 <: Pattern] extends Node[T] {
+    def construct(p: Pattern, q: Pattern): T = {
+      construct(Seq(p, q))
+    }
+  }
 
   object Node2 {
     def unapply(arg: Node2[_, _, _]): Option[_] = Some(arg.children)
@@ -48,14 +43,23 @@ object TreeInterface {
 
 
   // An Application Node takes a Label Type, and a Children type. The type of the constructor is a composite type.
-  sealed trait NodeApply[T, Label, Children] extends Node[T, Children, (Label, Children) => T]
+  sealed trait NodeApply[T] extends AST {
+    def children: Seq[Pattern]
 
-  object NodeApply {
-    def unapply(arg: NodeApply[_, _, _]): Option[_] = Some(arg.children)
+    def construct: (String, Seq[Pattern]) => T
+
+    def label: String
+
   }
 
-  sealed trait Leaf[T <: Pattern, Construct] extends AST {
-    def construct: Construct
+  object NodeApply {
+    def unapply(arg: NodeApply[_]): Option[(String, Seq[Pattern])] = Some(arg.label, arg.children)
+  }
+
+  sealed trait Leaf[T <: Pattern] extends AST {
+    def construct: (String, String) => T
+
+    def contents: (String, String)
   }
 
 }
@@ -66,20 +70,24 @@ object PatternInterface {
 
   trait Pattern
 
-  trait Variable extends Pattern with Leaf[Variable, (String, String) => Variable] {
+  trait Variable extends Pattern with Leaf[Variable] {
     def name: String
 
     def sort: String
+
+    override def contents = (name, sort)
   }
 
   object Variable {
     def unapply(arg: Variable): Option[(String, String)] = Some(arg.name, arg.sort)
   }
 
-  trait DomainValue extends Pattern with Leaf[DomainValue, (String, String) => DomainValue] {
+  trait DomainValue extends Pattern with Leaf[DomainValue] {
     def label: String
 
     def value: String
+
+    override def contents = ((label, value))
   }
 
   object DomainValue {
@@ -104,9 +112,7 @@ object PatternInterface {
 
     def q: Pattern
 
-    override def children: (Pattern, Pattern) = (p, q)
-
-    override def childrenAsSeq: Seq[Pattern] = Seq(p, q)
+    override def children: Seq[Pattern] = Seq(p, q)
 
   }
 
@@ -120,21 +126,17 @@ object PatternInterface {
 
     def q: Pattern
 
-    override def children: (Pattern, Pattern) = (p, q)
-
-    override def childrenAsSeq: Seq[Pattern] = Seq(p, q)
+    override def children: Seq[Pattern] = Seq(p, q)
   }
 
   object Or {
     def unapply(arg: And): Option[(Pattern, Pattern)] = Some(arg.p, arg.q)
   }
 
-  trait Not extends Pattern with Node1[Not, Pattern] {
+  trait Not extends Pattern with Node1[Not] {
     def p: Pattern
 
-    override def children: Pattern = p
-
-    override def childrenAsSeq: Seq[Pattern] = Seq(p)
+    override def children: Seq[Pattern] = Seq(p)
 
   }
 
@@ -142,14 +144,13 @@ object PatternInterface {
     def unapply(arg: Not): Option[Pattern] = Some(arg.p)
   }
 
-  trait Application extends Pattern with NodeApply[Application, String, Seq[Pattern]] {
+  trait Application extends Pattern with NodeApply[Application] {
     def label: String
 
     def args: Seq[Pattern]
 
     override def children: Seq[Pattern] = args
 
-    override def childrenAsSeq: Seq[Pattern] = args
   }
 
   object Application {
@@ -162,9 +163,8 @@ object PatternInterface {
 
     def q: Pattern
 
-    override def children: (Pattern, Pattern) = (p, q)
+    override def children: Seq[Pattern] = Seq(p, q)
 
-    override def childrenAsSeq: Seq[Pattern] = Seq(p, q)
   }
 
   object Implies {
@@ -176,9 +176,8 @@ object PatternInterface {
 
     def p: Pattern
 
-    override def children: (Variable, Pattern) = (v, p)
+    override def children: Seq[Pattern] = Seq(p)
 
-    override def childrenAsSeq: Seq[Pattern] = Seq(v, p)
   }
 
   object Exists {
@@ -190,22 +189,20 @@ object PatternInterface {
 
     def p: Pattern
 
-    override def children: (Variable, Pattern) = (v, p)
+    override def children: Seq[Pattern] = Seq(p)
 
-    override def childrenAsSeq: Seq[Pattern] = Seq(v, p)
   }
 
   object ForAll {
     def unapply(arg: Exists): Option[(Variable, Pattern)] = Some(arg.v, arg.p)
   }
 
-  trait Next extends Pattern with Node1[Next, Pattern] {
+  trait Next extends Pattern with Node1[Next] {
 
     def p: Pattern
 
-    override def children: Pattern = p
+    override def children: Seq[Pattern] = Seq(p)
 
-    override def childrenAsSeq: Seq[Pattern] = Seq(p)
   }
 
   object Next {
@@ -217,9 +214,8 @@ object PatternInterface {
 
     def q: Pattern
 
-    override def children: (Pattern, Pattern) = (p, q)
+    override def children: Seq[Pattern] = Seq(p, q)
 
-    override def childrenAsSeq: Seq[Pattern] = Seq(p, q)
   }
 
   object Rewrite {
@@ -231,9 +227,8 @@ object PatternInterface {
 
     def q: Pattern
 
-    override def children: (Pattern, Pattern) = (p, q)
+    override def children: Seq[Pattern] = Seq(p, q)
 
-    override def childrenAsSeq: Seq[Pattern] = Seq(p, q)
   }
 
   object Equals {
