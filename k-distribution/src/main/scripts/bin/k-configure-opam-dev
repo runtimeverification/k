@@ -4,4 +4,4 @@ opam repository add k "$(dirname "$0")/../lib/opam" \
  || opam repository set-url k "$(dirname "$0")/../lib/opam"
 opam update
 opam switch 4.03.0+k
-opam install mlgmp zarith uuidm camomile atdgen atdj
+opam install mlgmp zarith uuidm camomile atdgen atdj ctypes ctypes-foreign
