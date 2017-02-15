@@ -11,21 +11,17 @@ object TreeInterface {
     def build: NodeBuilder[T]
   }
 
-  trait NodeBuilder[T] extends (Seq[_ <: AST] => Node[T]) {
-    def apply(children: Seq[_ <: AST]): Node[T]
-  }
+  trait NodeBuilder[T] extends (Seq[_ <: AST] => Node[T])
 
   trait Node0Builder[T] extends NodeBuilder[T] with (() => Node[T]) {
-
-    def apply(): Node0[T]
-
     override def apply(children: Seq[_ <: AST]) = {
       assert(children.isEmpty)
       apply()
     }
   }
 
-  trait Node1Builder[P <: AST, T] extends NodeBuilder[T] with (P => Node1[P, T]) {
+  trait Node1Builder[P <: AST, T] extends NodeBuilder[T] with ((P) => Node1[P, T]) {
+
     def apply(p: P): Node1[P, T]
 
     override def apply(children: Seq[_ <: AST]) = {
@@ -44,7 +40,17 @@ object TreeInterface {
     }
   }
 
-  trait LabelledNodeBuilder[L, T] extends NodeBuilder[T] with ((L, Seq[_ <: AST]) => LabelledNode[L, T]) {
+  trait Node2BinderBuilder[P1 <: AST, P2 <: AST, T] extends NodeBuilder[T] with ((P1, P2) => Node2Binder[P1, P2, T]) {
+    def apply(p: P1, q: P2): Node2Binder[P1, P2, T]
+
+
+    override def apply(children: Seq[_ <: AST]) = {
+      assert(children.size == 2)
+      apply(children.head.asInstanceOf[P1], children(1).asInstanceOf[P2])
+    }
+  }
+
+  trait LabelledNodeBuilder[L, T] extends NodeBuilder[T] with ((L, Seq[_ <:AST]) => LabelledNode[L, T]) {
     def apply(label: L, args: Seq[_ <: AST]): LabelledNode[L, T]
 
     def wrappedApply(args: Seq[_ <: AST]): LabelledNode[L, T]
@@ -55,11 +61,11 @@ object TreeInterface {
   sealed trait Leaf[C] extends AST {
     def contents: C
 
-    def builder: LeafBuilder[C]
+    def build: LeafBuilder[C]
   }
 
   trait LeafBuilder[C] extends (C => Leaf[C]) {
-    def apply(content: C): Leaf[C]
+    def apply(contents: C) : Leaf[C]
   }
 
   sealed trait LabelledNode[L, T] extends Node[T] {
@@ -93,7 +99,18 @@ object TreeInterface {
 
     override def children = Seq(p, q)
 
-    def build: Node2Builder[P1, P2, T]
+    def build: Node2BinderBuilder[P1, P2, T]
+
+  }
+
+  sealed trait Node2Binder[P1 <: AST, P2 <: AST, T] extends Node[T] {
+    def v: P1
+
+    def p: P2
+
+    override def children = Seq(v, p)
+
+    def build: Node2BinderBuilder[P1, P2, T]
 
   }
 
@@ -110,6 +127,8 @@ object PatternInterface {
 
     def sort: String
 
+    override def contents = (name, sort)
+
   }
 
   object Variable {
@@ -120,6 +139,8 @@ object PatternInterface {
     def label: String
 
     def value: String
+
+    override def contents = (label, value)
   }
 
   object DomainValue {
@@ -177,16 +198,16 @@ object PatternInterface {
     def unapply(arg: And): Option[(Pattern, Pattern)] = Some(arg.p, arg.q)
   }
 
-  trait Exists extends Pattern with Node2[Variable, Pattern, Exists]
+  trait Exists extends Pattern with Node2Binder[Variable, Pattern, Exists]
 
   object Exists {
-    def unapply(arg: Exists): Option[(Variable, Pattern)] = Some(arg.p, arg.q)
+    def unapply(arg: Exists): Option[(Variable, Pattern)] = Some(arg.v, arg.p)
   }
 
-  trait ForAll extends Pattern with Node2[Variable, Pattern, ForAll]
+  trait ForAll extends Pattern with Node2Binder[Variable, Pattern, ForAll]
 
   object ForAll {
-    def unapply(arg: Exists): Option[(Variable, Pattern)] = Some(arg.p, arg.q)
+    def unapply(arg: Exists): Option[(Variable, Pattern)] = Some(arg.v, arg.p)
   }
 
   trait Next extends Pattern with Node1[Pattern, Next]
@@ -202,7 +223,7 @@ object PatternInterface {
     def unapply(arg: Rewrite): Option[(Pattern, Pattern)] = Some(arg.p, arg.q)
   }
 
-  trait Equals extends Pattern with Node2[Equals, Pattern, Pattern]
+  trait Equals extends Pattern with Node2[Pattern, Pattern, Equals]
 
   object Equals {
     def unapply(arg: And): Option[(Pattern, Pattern)] = Some(arg.p, arg.q)
