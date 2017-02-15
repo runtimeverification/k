@@ -31,7 +31,6 @@ object TreeInterface {
   }
 
   trait Node2Builder[P1 <: AST, P2 <: AST, T] extends NodeBuilder[T] with ((P1, P2) => Node2[P1, P2, T]) {
-    def apply(p: P1, q: P2): Node2[P1, P2, T]
 
 
     override def apply(children: Seq[_ <: AST]) = {
@@ -41,7 +40,6 @@ object TreeInterface {
   }
 
   trait Node2BinderBuilder[P1 <: AST, P2 <: AST, T] extends NodeBuilder[T] with ((P1, P2) => Node2Binder[P1, P2, T]) {
-    def apply(p: P1, q: P2): Node2Binder[P1, P2, T]
 
 
     override def apply(children: Seq[_ <: AST]) = {
@@ -50,13 +48,9 @@ object TreeInterface {
     }
   }
 
-  trait LabelledNodeBuilder[L, T] extends NodeBuilder[T] with ((L, Seq[_ <:AST]) => LabelledNode[L, T]) {
-    def apply(label: L, args: Seq[_ <: AST]): LabelledNode[L, T]
 
-    def wrappedApply(args: Seq[_ <: AST]): LabelledNode[L, T]
+  trait LabelledNodeBuilder[L, T] extends NodeBuilder[T] with ((Seq[_ <: AST]) => LabelledNode[L, T])
 
-    override def apply(children: Seq[_ <: AST]) = wrappedApply(children)
-  }
 
   sealed trait Leaf[C] extends AST {
     def contents: C
@@ -65,7 +59,7 @@ object TreeInterface {
   }
 
   trait LeafBuilder[C] extends (C => Leaf[C]) {
-    def apply(contents: C) : Leaf[C]
+    def apply(contents: C): Leaf[C]
   }
 
   sealed trait LabelledNode[L, T] extends Node[T] {

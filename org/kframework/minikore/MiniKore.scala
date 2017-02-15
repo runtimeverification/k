@@ -5,6 +5,7 @@ import org.kframework.minikore.PatternInterface.{Not, Variable, _}
 import org.kframework.minikore.TreeInterface._
 import org.kframework.minikore.{PatternInterface => i}
 
+import scala.Seq
 import scala.collection._
 
 /** Algebraic data type of MiniKore. */
@@ -36,7 +37,10 @@ object MiniKore {
 
 
   case class Application(label: String, args: Seq[i.Pattern]) extends i.Application {
-    override def build: LabelledNodeBuilder[String, i.Application] = Constructors.ApplicationBuilder
+    override def build: (Seq[_ <: AST]) => LabelledNode[String, i.Application] = { (nArgs: Seq[_ <: AST]) =>
+      val cArgs: Seq[i.Pattern] = nArgs.map(_.asInstanceOf[i.Pattern])
+      Constructors.Application(label, cArgs)
+    }
   }
 
   case class DomainValue(label: String, value: String) extends i.DomainValue {
@@ -99,14 +103,6 @@ object Constructors extends FactoryInterface {
   }
 
   def Variable(name: String, sort: String): MiniKore.Variable = MiniKore.Variable(name, sort)
-
-  object ApplicationBuilder extends LabelledNodeBuilder[String, i.Application] {
-    override def apply(label: String, args: Seq[_ <: t.AST]): LabelledNode[String, i.Application] =
-      MiniKore.Application(label, args.asInstanceOf[Seq[i.Pattern]])
-
-
-    override def wrappedApply(args: Seq[AST]): LabelledNode[String, Application] = ???
-  }
 
   def Application(label: String, args: Seq[i.Pattern]): MiniKore.Application = MiniKore.Application(label, args)
 
