@@ -3,67 +3,98 @@ package org.kframework.minikore
 
 object TreeInterface {
 
-  import org.kframework.minikore.PatternInterface.Pattern
+  sealed trait AST
 
-  sealed trait AST extends Pattern
-
-
-  // T - Type of Pattern, C - Type of Children, A - Constructor's Arguments
   sealed trait Node[T] extends AST {
-    def construct: Seq[Pattern] => T
+    def children: Seq[AST]
 
-    def children: Seq[Pattern]
+    def build: NodeBuilder[T]
   }
 
-  object Node {
-    def unapply(arg: Node[_]): Option[Seq[Pattern]] = Some(arg.children)
+  trait NodeBuilder[T] extends (Seq[_ <: AST] => Node[T]) {
+    def apply(children: Seq[_ <: AST]): Node[T]
   }
 
-  // A Pattern Such as True/False takes no arguments, hence types of Children is None, Constructor's arguments is None.
+  trait Node0Builder[T] extends NodeBuilder[T] with (() => Node[T]) {
+
+    def apply(): Node0[T]
+
+    override def apply(children: Seq[_ <: AST]) = {
+      assert(children.isEmpty)
+      apply()
+    }
+  }
+
+  trait Node1Builder[P <: AST, T] extends NodeBuilder[T] with (P => Node1[P, T]) {
+    def apply(p: P): Node1[P, T]
+
+    override def apply(children: Seq[_ <: AST]) = {
+      assert(children.size == 1)
+      apply(children.head.asInstanceOf[P])
+    }
+  }
+
+  trait Node2Builder[P1 <: AST, P2 <: AST, T] extends NodeBuilder[T] with ((P1, P2) => Node2[P1, P2, T]) {
+    def apply(p: P1, q: P2): Node2[P1, P2, T]
+
+
+    override def apply(children: Seq[_ <: AST]) = {
+      assert(children.size == 2)
+      apply(children.head.asInstanceOf[P1], children(1).asInstanceOf[P2])
+    }
+  }
+
+  trait LabelledNodeBuilder[L, T] extends NodeBuilder[T] with ((L, Seq[_ <: AST]) => LabelledNode[L, T]) {
+    def apply(label: L, args: Seq[_ <: AST]): LabelledNode[L, T]
+
+    def wrappedApply(args: Seq[_ <: AST]): LabelledNode[L, T]
+
+    override def apply(children: Seq[_ <: AST]) = wrappedApply(children)
+  }
+
+  sealed trait Leaf[C] extends AST {
+    def contents: C
+
+    def builder: LeafBuilder[C]
+  }
+
+  trait LeafBuilder[C] extends (C => Leaf[C]) {
+    def apply(content: C): Leaf[C]
+  }
+
+  sealed trait LabelledNode[L, T] extends Node[T] {
+    def label: L
+
+    def args: Seq[_ <: AST]
+
+    def build: LabelledNodeBuilder[L, T]
+  }
+
   sealed trait Node0[T] extends Node[T] {
-    override def children = Seq.empty[Pattern]
-  }
+    override def children = Seq.empty
 
-  // A Pattern such as Not, takes 1 argument, and the type of the children is the same.
-  sealed trait Node1[T] extends Node[T] {
-    def construct(p: Pattern): T = {
-      construct(Seq(p))
-    }
-  }
-
-  sealed trait Node2[T, C1 <: Pattern, C2 <: Pattern] extends Node[T] {
-    def construct(p: Pattern, q: Pattern): T = {
-      construct(Seq(p, q))
-    }
-  }
-
-  object Node2 {
-    def unapply(arg: Node2[_, _, _]): Option[_] = Some(arg.children)
-  }
-
-
-  // An Application Node takes a Label Type, and a Children type. The type of the constructor is a composite type.
-  sealed trait NodeApply[T] extends AST {
-    def children: Seq[Pattern]
-
-    def construct: (String, Seq[Pattern]) => T
-
-    def label: String
+    def build: Node0Builder[T]
 
   }
 
-  object NodeApply {
-    def unapply(arg: NodeApply[_]): Option[(String, Seq[Pattern])] = Some(arg.label, arg.children)
+  sealed trait Node1[P <: AST, T] extends Node[T] {
+    def p: P
+
+    def build: Node1Builder[P, T]
+
+    override def children = Seq(p)
   }
 
-  sealed trait Leaf[T <: Pattern] extends AST {
-    def construct: (String, String) => T
 
-    def contents: (String, String)
-  }
+  sealed trait Node2[P1 <: AST, P2 <: AST, T] extends Node[T] {
+    def p: P1
 
-  object Leaf {
-    def unapply(arg: Leaf[_]): Option[(String, String)] = Some(arg.contents)
+    def q: P2
+
+    override def children = Seq(p, q)
+
+    def build: Node2Builder[P1, P2, T]
+
   }
 
 }
@@ -72,26 +103,23 @@ object PatternInterface {
 
   import org.kframework.minikore.TreeInterface._
 
-  trait Pattern
+  sealed trait Pattern extends AST
 
-  trait Variable extends Pattern with Leaf[Variable] {
+  trait Variable extends Pattern with Leaf[(String, String)] {
     def name: String
 
     def sort: String
 
-    override def contents = (name, sort)
   }
 
   object Variable {
     def unapply(arg: Variable): Option[(String, String)] = Some(arg.name, arg.sort)
   }
 
-  trait DomainValue extends Pattern with Leaf[DomainValue] {
+  trait DomainValue extends Pattern with Leaf[(String, String)] {
     def label: String
 
     def value: String
-
-    override def contents = ((label, value))
   }
 
   object DomainValue {
@@ -107,48 +135,29 @@ object PatternInterface {
 
   trait False extends Pattern with Node0[False]
 
-  object False {
-    def unapply(arg: False): Boolean = false
-  }
+  object False
 
-  trait And extends Pattern with Node2[And, Pattern, Pattern] {
-    def p: Pattern
+  trait And extends Pattern with Node2[Pattern, Pattern, And]
 
-    def q: Pattern
-
-    override def children: Seq[Pattern] = Seq(p, q)
-
-  }
 
   object And {
     def unapply(arg: And): Option[(Pattern, Pattern)] = Some(arg.p, arg.q)
   }
 
 
-  trait Or extends Pattern with Node2[Or, Pattern, Pattern] {
-    def p: Pattern
-
-    def q: Pattern
-
-    override def children: Seq[Pattern] = Seq(p, q)
-  }
+  trait Or extends Pattern with Node2[Pattern, Pattern, Or]
 
   object Or {
     def unapply(arg: And): Option[(Pattern, Pattern)] = Some(arg.p, arg.q)
   }
 
-  trait Not extends Pattern with Node1[Not] {
-    def p: Pattern
-
-    override def children: Seq[Pattern] = Seq(p)
-
-  }
+  trait Not extends Pattern with Node1[Pattern, Not]
 
   object Not {
     def unapply(arg: Not): Option[Pattern] = Some(arg.p)
   }
 
-  trait Application extends Pattern with NodeApply[Application] {
+  trait Application extends Pattern with LabelledNode[String, Application] {
     def label: String
 
     def args: Seq[Pattern]
@@ -161,79 +170,39 @@ object PatternInterface {
     def unapply(arg: Application): Option[(String, Seq[Pattern])] = Some(arg.label, arg.args)
   }
 
-  trait Implies extends Pattern with Node2[Implies, Pattern, Pattern] {
+  trait Implies extends Pattern with Node2[Pattern, Pattern, Implies]
 
-    def p: Pattern
-
-    def q: Pattern
-
-    override def children: Seq[Pattern] = Seq(p, q)
-
-  }
 
   object Implies {
     def unapply(arg: And): Option[(Pattern, Pattern)] = Some(arg.p, arg.q)
   }
 
-  trait Exists extends Pattern with Node2[Exists, Variable, Pattern] {
-    def v: Variable
-
-    def p: Pattern
-
-    override def children: Seq[Pattern] = Seq(v, p)
-
-  }
+  trait Exists extends Pattern with Node2[Variable, Pattern, Exists]
 
   object Exists {
-    def unapply(arg: Exists): Option[(Variable, Pattern)] = Some(arg.v, arg.p)
+    def unapply(arg: Exists): Option[(Variable, Pattern)] = Some(arg.p, arg.q)
   }
 
-  trait ForAll extends Pattern with Node2[ForAll, Variable, Pattern] {
-    def v: Variable
-
-    def p: Pattern
-
-    override def children: Seq[Pattern] = Seq(v, p)
-
-  }
+  trait ForAll extends Pattern with Node2[Variable, Pattern, ForAll]
 
   object ForAll {
-    def unapply(arg: Exists): Option[(Variable, Pattern)] = Some(arg.v, arg.p)
+    def unapply(arg: Exists): Option[(Variable, Pattern)] = Some(arg.p, arg.q)
   }
 
-  trait Next extends Pattern with Node1[Next] {
+  trait Next extends Pattern with Node1[Pattern, Next]
 
-    def p: Pattern
-
-    override def children: Seq[Pattern] = Seq(p)
-
-  }
 
   object Next {
     def unapply(arg: Not): Option[Pattern] = Some(arg.p)
   }
 
-  trait Rewrite extends Pattern with Node2[Rewrite, Pattern, Pattern] {
-    def p: Pattern
-
-    def q: Pattern
-
-    override def children: Seq[Pattern] = Seq(p, q)
-
-  }
+  trait Rewrite extends Pattern with Node2[Pattern, Pattern, Rewrite]
 
   object Rewrite {
-    def unapply(arg: And): Option[(Pattern, Pattern)] = Some(arg.p, arg.q)
+    def unapply(arg: Rewrite): Option[(Pattern, Pattern)] = Some(arg.p, arg.q)
   }
 
-  trait Equals extends Pattern with Node2[Equals, Pattern, Pattern] {
-    def p: Pattern
-
-    def q: Pattern
-
-    override def children: Seq[Pattern] = Seq(p, q)
-
-  }
+  trait Equals extends Pattern with Node2[Equals, Pattern, Pattern]
 
   object Equals {
     def unapply(arg: And): Option[(Pattern, Pattern)] = Some(arg.p, arg.q)
