@@ -178,9 +178,21 @@ let default_file_perm = 0o777
 let convert_open_flags (s: string) : Unix.open_flag list =
   match s with
       "r" -> [Unix.O_RDONLY]
-    | "w" -> [Unix.O_WRONLY]
-    | "rw" -> [Unix.O_RDWR]
-    | "wac" -> [Unix.O_WRONLY; Unix.O_APPEND; Unix.O_CREAT]
+    | "w" -> [Unix.O_WRONLY; Unix.O_TRUNC; Unix.O_CREAT]
+    | "wx" -> [Unix.O_WRONLY; Unix.O_EXCL; Unix.O_CREAT]
+    | "a" -> [Unix.O_WRONLY; Unix.O_APPEND; Unix.O_CREAT]
+    | "rb" -> [Unix.O_RDONLY]
+    | "wb" -> [Unix.O_WRONLY; Unix.O_TRUNC; Unix.O_CREAT]
+    | "wbx" -> [Unix.O_WRONLY; Unix.O_EXCL; Unix.O_CREAT]
+    | "ab" -> [Unix.O_WRONLY; Unix.O_APPEND; Unix.O_CREAT]
+    | "r+" -> [Unix.O_RDWR]
+    | "w+" -> [Unix.O_RDWR; Unix.O_TRUNC; Unix.O_CREAT]
+    | "w+x" -> [Unix.O_RDWR; Unix.O_EXCL; Unix.O_CREAT]
+    | "a+" -> [Unix.O_RDWR; Unix.O_APPEND; Unix.O_CREAT]
+    | "r+b" | "rb+" -> [Unix.O_RDWR]
+    | "w+b" | "wb+" -> [Unix.O_RDWR; Unix.O_TRUNC; Unix.O_CREAT]
+    | "w+bx" | "wb+x" -> [Unix.O_RDWR; Unix.O_EXCL; Unix.O_CREAT]
+    | "a+b" | "ab+" -> [Unix.O_RDWR; Unix.O_APPEND; Unix.O_CREAT]
     | _ -> raise (Invalid_argument "convert_open_flags")
 let to_string_base (base: int) (i: Z.t) : string = match base with
   10 -> Z.format "%d" i
@@ -425,7 +437,9 @@ struct
       [Int i] -> Unix.close (Hashtbl.find file_descriptors i); []
     | _ -> raise Not_implemented
   let hook_getc c lbl sort config ff = match c with
-      [Int i] -> let b = Bytes.create 1 in let _ = Unix.read (Hashtbl.find file_descriptors i) b 0 1 in [Int (Z.of_int (Char.code (Bytes.get b 0)))]
+      [Int i] -> let b = Bytes.create 1 in match Unix.read (Hashtbl.find file_descriptors i) b 0 1 with
+          0 -> [Int (Z.of_int (-1))]
+        | _ -> [Int (Z.of_int (Char.code (Bytes.get b 0)))]
     | _ -> raise Not_implemented
   let hook_open c lbl sort config ff = match c with
       [String path], [String flags] ->
