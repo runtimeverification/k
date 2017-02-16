@@ -1,7 +1,7 @@
 package org.kframework.minikore
 
 
-import org.kframework.minikore.PatternInterface.{Not, Variable, _}
+import org.kframework.minikore.PatternInterface.{Next, Not}
 import org.kframework.minikore.TreeInterface._
 import org.kframework.minikore.{PatternInterface => i}
 
@@ -37,7 +37,7 @@ object MiniKore {
 
 
   case class Application(label: String, args: Seq[i.Pattern]) extends i.Application {
-    override def build: (Seq[_ <: AST]) => LabelledNode[String, i.Application] = { (nArgs: Seq[_ <: AST]) =>
+    override def build = { (nArgs: Seq[_ <: AST]) =>
       val cArgs: Seq[i.Pattern] = nArgs.map(_.asInstanceOf[i.Pattern])
       Constructors.Application(label, cArgs)
     }
@@ -64,7 +64,7 @@ object MiniKore {
   }
 
   case class Not(p: i.Pattern) extends i.Not {
-    override def build: Node1Builder[i.Pattern, i.Not] = Constructors.NotBuilder
+    override def build: NodeBuilder[i.Not] = Constructors.NotBuilder
   }
 
 
@@ -81,7 +81,7 @@ object MiniKore {
   }
 
   case class Next(p: i.Pattern) extends i.Next {
-    override def build: Node1Builder[i.Pattern, i.Next] = Constructors.NextBuilder
+    override def build: NodeBuilder[i.Next] = Constructors.NextBuilder
   }
 
   case class Rewrite(p: i.Pattern, q: i.Pattern) extends i.Rewrite {
@@ -125,55 +125,61 @@ object Constructors extends FactoryInterface {
   def False(): MiniKore.False = MiniKore.False()
 
   object AndBuilder extends t.Node2Builder[i.Pattern, i.Pattern, i.And] {
-    override def apply(p: Pattern, q: Pattern): Node2[Pattern, Pattern, i.And] = MiniKore.And(p, q)
+    override def apply(p: i.Pattern, q: i.Pattern): Node2[i.Pattern, i.Pattern, i.And] = MiniKore.And(p, q)
   }
 
   def And(p: i.Pattern, q: i.Pattern): MiniKore.And = MiniKore.And(p, q)
 
   object OrBuilder extends t.Node2Builder[i.Pattern, i.Pattern, i.Or] {
-    override def apply(p: Pattern, q: Pattern): Node2[Pattern, Pattern, i.Or] = MiniKore.Or(p, q)
+    override def apply(p: i.Pattern, q: i.Pattern): Node2[i.Pattern, i.Pattern, i.Or] = MiniKore.Or(p, q)
   }
 
   def Or(p: i.Pattern, q: i.Pattern): MiniKore.Or = MiniKore.Or(p, q)
 
-  object NotBuilder extends t.Node1Builder[i.Pattern, i.Not] {
-    override def apply(p: Pattern): Node1[Pattern, Not] = MiniKore.Not(p)
+  object NotBuilder extends t.NodeBuilder[i.Not] {
+    override def apply(v1: Seq[_ <: AST]): Node[Not] = {
+      assert(v1.size == 1)
+      MiniKore.Not(v1.head.asInstanceOf[i.Pattern])
+    }
   }
 
   def Not(p: i.Pattern): MiniKore.Not = MiniKore.Not(p)
 
   object ImpliesBuilder extends t.Node2Builder[i.Pattern, i.Pattern, i.Implies] {
-    override def apply(p: Pattern, q: Pattern): Node2[i.Pattern, i.Pattern, i.Implies] = MiniKore.Implies(p, q)
+    override def apply(p: i.Pattern, q: i.Pattern): Node2[i.Pattern, i.Pattern, i.Implies] = MiniKore.Implies(p, q)
   }
 
   def Implies(p: i.Pattern, q: i.Pattern): MiniKore.Implies = MiniKore.Implies(p, q)
 
   object ExistsBuilder extends Node2BinderBuilder[i.Variable, i.Pattern, i.Exists] {
-    override def apply(v: Variable, p: Pattern): Node2Binder[i.Variable, i.Pattern, i.Exists] = MiniKore.Exists(v, p)
+    override def apply(v: i.Variable, p: i.Pattern): Node2Binder[i.Variable, i.Pattern, i.Exists] = MiniKore.Exists(v, p)
   }
 
   def Exists(v: i.Variable, p: i.Pattern): MiniKore.Exists = MiniKore.Exists(v, p)
 
   object ForAllBuilder extends Node2BinderBuilder[i.Variable, i.Pattern, i.ForAll] {
-    override def apply(v: Variable, p: Pattern): Node2Binder[Variable, Pattern, ForAll] = MiniKore.ForAll(v, p)
+    override def apply(v: i.Variable, p: i.Pattern): Node2Binder[i.Variable, i.Pattern, i.ForAll] = MiniKore.ForAll(v, p)
   }
 
   def ForAll(v: i.Variable, p: i.Pattern): MiniKore.ForAll = MiniKore.ForAll(v, p)
 
-  object NextBuilder extends t.Node1Builder[i.Pattern, i.Next] {
-    override def apply(p: Pattern): Node1[i.Pattern, i.Next] = MiniKore.Next(p)
+  object NextBuilder extends t.NodeBuilder[i.Next] {
+    override def apply(v1: Seq[_ <: AST]): Node[Next] = {
+      assert(v1.size == 1)
+      MiniKore.Next(v1.head.asInstanceOf[i.Pattern])
+    }
   }
 
   def Next(p: i.Pattern): MiniKore.Next = MiniKore.Next(p)
 
   object RewriteBuilder extends t.Node2Builder[i.Pattern, i.Pattern, i.Rewrite] {
-    override def apply(p: Pattern, q: Pattern): Node2[Pattern, Pattern, i.Rewrite] = MiniKore.Rewrite(p, q)
+    override def apply(p: i.Pattern, q: i.Pattern): Node2[i.Pattern, i.Pattern, i.Rewrite] = MiniKore.Rewrite(p, q)
   }
 
   def Rewrite(p: i.Pattern, q: i.Pattern): MiniKore.Rewrite = MiniKore.Rewrite(p, q)
 
   object EqualsBuilder extends t.Node2Builder[i.Pattern, i.Pattern, i.Equals] {
-    override def apply(p: Pattern, q: Pattern): Node2[i.Pattern, i.Pattern, i.Equals] = MiniKore.Equals(p, q)
+    override def apply(p: i.Pattern, q: i.Pattern): Node2[i.Pattern, i.Pattern, i.Equals] = MiniKore.Equals(p, q)
   }
 
   def Equals(p: i.Pattern, q: i.Pattern): MiniKore.Equals = MiniKore.Equals(p, q)

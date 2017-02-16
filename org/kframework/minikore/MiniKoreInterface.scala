@@ -11,6 +11,10 @@ object TreeInterface {
     def build: NodeBuilder[T]
   }
 
+  object Node {
+    def unapply[T](arg: Node[T]): Option[Seq[_ <: AST]] = Some(arg.children)
+  }
+
   trait NodeBuilder[T] extends (Seq[_ <: AST] => Node[T])
 
   trait Node0Builder[T] extends NodeBuilder[T] with (() => Node[T]) {
@@ -20,15 +24,7 @@ object TreeInterface {
     }
   }
 
-  trait Node1Builder[P <: AST, T] extends NodeBuilder[T] with ((P) => Node1[P, T]) {
 
-    def apply(p: P): Node1[P, T]
-
-    override def apply(children: Seq[_ <: AST]) = {
-      assert(children.size == 1)
-      apply(children.head.asInstanceOf[P])
-    }
-  }
 
   trait Node2Builder[P1 <: AST, P2 <: AST, T] extends NodeBuilder[T] with ((P1, P2) => Node2[P1, P2, T]) {
 
@@ -80,7 +76,7 @@ object TreeInterface {
   sealed trait Node1[P <: AST, T] extends Node[T] {
     def p: P
 
-    def build: Node1Builder[P, T]
+    def build: NodeBuilder[T]
 
     override def children = Seq(p)
   }
@@ -93,7 +89,7 @@ object TreeInterface {
 
     override def children = Seq(p, q)
 
-    def build: Node2BinderBuilder[P1, P2, T]
+    def build: Node2Builder[P1, P2, T]
 
   }
 
@@ -150,7 +146,9 @@ object PatternInterface {
 
   trait False extends Pattern with Node0[False]
 
-  object False
+  object False {
+    def unapply(arg: False): Boolean = true
+  }
 
   trait And extends Pattern with Node2[Pattern, Pattern, And]
 

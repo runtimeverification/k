@@ -1,28 +1,27 @@
 package org.kframework.minikore
 
-import org.kframework.minikore.TreeInterface._
-
+import org.kframework.minikore.{TreeInterface => t}
 import org.kframework.minikore.PatternInterface._
+import org.kframework.minikore.TreeInterface.AST
 
 object MiniKoreTraverse {
 
-  def size(p: Pattern): Int = p match {
-    case Leaf(_) => 1
-    case Node(children: Seq[Pattern]) => children.map(size) sum
-    case NodeApply(_, children: Seq[Pattern]) => if (children.isEmpty) 1 else children map size sum
-  }
-
-
-  def map(f: Pattern => Pattern)(p: Pattern): Pattern = p match {
-    case p: Leaf[Pattern] => f(p)
-    case p: Node[Pattern] => p.construct(p.children.map(x => f(x)))
-    case p: NodeApply[Pattern] => p.construct(p.label, p.children.map(x => f(x)))
-  }
-
-  def iter(f: Pattern => Unit)(p: Pattern): Unit = p match {
-    case p: Leaf[_] => f(p)
-    case p: Node[_] => p.children map(x => f(x))
-  }
+//  def size(p: Pattern): Int = p match {
+////    case p: t.Node[_] => p.children map(size())
+//
+//  }
+//
+//
+//  def map(f: Pattern => Pattern)(p: Pattern): Pattern = p match {
+//    case p: Leaf[Pattern] => f(p)
+//    case p: Node[Pattern] => p.construct(p.children.map(x => f(x)))
+//    case p: NodeApply[Pattern] => p.construct(p.label, p.children.map(x => f(x)))
+//  }
+//
+//  def iter(f: Pattern => Unit)(p: Pattern): Unit = p match {
+//    case p: Leaf[_] => f(p)
+//    case p: Node[_] => p.children map(x => f(x))
+//  }
 
   //
   //
