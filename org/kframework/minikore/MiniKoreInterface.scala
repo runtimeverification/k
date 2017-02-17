@@ -3,7 +3,9 @@ package org.kframework.minikore
 
 object TreeInterface {
 
+
   sealed trait AST[T <: AST[T]]
+
 
   sealed trait Node[T <: AST[T]] extends AST[T] with Product {
     def children: Seq[_ <: T]
@@ -12,17 +14,17 @@ object TreeInterface {
   }
 
   object Node {
-    def unapply[T](arg: AST[T]): Option[Seq[_ <: T]] = arg match {
+    def unapply[T <: AST[T]](arg: AST[T]): Option[Seq[_ <: T]] = arg match {
       case n: Node[T] => Some(n.children)
       case _ => None
     }
   }
 
-  trait NodeBuilder[T] {
+  trait NodeBuilder[T <: AST[T]] {
     def apply(children: Seq[_ <: T]): Node[T]
   }
 
-  trait Node0Builder[T] extends NodeBuilder[T] with (() => Node[T]) {
+  trait Node0Builder[T <: AST[T]] extends NodeBuilder[T] with (() => Node[T]) {
     override def apply(children: Seq[_ <: T]) = {
       assert(children.isEmpty)
       apply()
@@ -30,7 +32,7 @@ object TreeInterface {
     }
   }
 
-  trait Node1Builder[T] extends NodeBuilder[T] with ((T) => Node[T]) {
+  trait Node1Builder[T <: AST[T]] extends NodeBuilder[T] with ((T) => Node[T]) {
     override def apply(children: Seq[_ <: T]) = {
       assert(children.size == 1)
       apply(children.head)
@@ -38,7 +40,7 @@ object TreeInterface {
   }
 
 
-  trait Node2Builder[T] extends NodeBuilder[T] with ((T, T) => Node2[T]) {
+  trait Node2Builder[T <: AST[T]] extends NodeBuilder[T] with ((T, T) => Node2[T]) {
 
     override def apply(children: Seq[_ <: T]) = {
       assert(children.size == 2)
@@ -47,27 +49,27 @@ object TreeInterface {
   }
 
 
-  sealed trait Leaf[T, C] extends AST[T] {
+  sealed trait Leaf[T <: AST[T], C] extends AST[T] {
     def contents: C
 
     def build: LeafBuilder[T, C]
   }
 
   object Leaf {
-    def unapply[T, C](arg: AST[T]): Option[C] = arg match {
+    def unapply[T <: AST[T], C](arg: AST[T]): Option[C] = arg match {
       case l: Leaf[T, C] => Some(l.contents)
       case _ => None
     }
   }
 
-  trait LeafBuilder[T, C] extends (C => Leaf[T, C]) {
+  trait LeafBuilder[T <: AST[T], C] extends (C => Leaf[T, C]) {
     def apply(contents: C): Leaf[T, C]
   }
 
-  trait LabelledNodeBuilder[L, T] extends NodeBuilder[T] with (Seq[_ <: T] => LabelledNode[L, T])
+  trait LabelledNodeBuilder[L, T <: AST[T]] extends NodeBuilder[T] with (Seq[_ <: T] => LabelledNode[L, T])
 
 
-  sealed trait LabelledNode[L, T] extends Node[T] {
+  sealed trait LabelledNode[L, T <: AST[T]] extends Node[T] {
 
     def label: L
 
@@ -76,14 +78,14 @@ object TreeInterface {
     def build: LabelledNodeBuilder[L, T]
   }
 
-  sealed trait Node0[T] extends Node[T] {
+  sealed trait Node0[T <: AST[T]] extends Node[T] {
     override def children = Seq.empty
 
     def build: Node0Builder[T]
 
   }
 
-  sealed trait Node1[T] extends Node[T] with Product1[T] {
+  sealed trait Node1[T <: AST[T]] extends Node[T] with Product1[T] {
 
     def build: NodeBuilder[T]
 
@@ -91,7 +93,7 @@ object TreeInterface {
   }
 
 
-  sealed trait Node2[T] extends Node[T] with Product2[T, T] {
+  sealed trait Node2[T <: AST[T]] extends Node[T] with Product2[T, T] {
 
     override def children = Seq(_1, _2)
 
