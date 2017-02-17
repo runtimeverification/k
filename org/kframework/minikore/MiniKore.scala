@@ -1,11 +1,10 @@
 package org.kframework.minikore
 
 
-import org.kframework.minikore.PatternInterface.{Next, Not}
+import org.kframework.minikore.PatternInterface.Pattern
 import org.kframework.minikore.TreeInterface._
 import org.kframework.minikore.{PatternInterface => i}
 
-import scala.Seq
 import scala.collection._
 
 /** Algebraic data type of MiniKore. */
@@ -32,155 +31,122 @@ object MiniKore {
   case class Axiom(pattern: i.Pattern, att: Attributes) extends Sentence
 
   case class Variable(name: String, sort: String) extends i.Variable {
-    override def build = Constructors.VariableBuilder
+    override def build = Builders.VariableBuilder
   }
 
 
   case class Application(label: String, args: Seq[i.Pattern]) extends i.Application {
-    override def build = { (nArgs: Seq[_ <: AST]) =>
-      val cArgs: Seq[i.Pattern] = nArgs.map(_.asInstanceOf[i.Pattern])
-      Constructors.Application(label, cArgs)
+    override def build: Seq[i.Pattern] => i.Application = { (nArgs: Seq[i.Pattern]) =>
+      new Application(label, nArgs)
     }
   }
 
+
   case class DomainValue(label: String, value: String) extends i.DomainValue {
-    override def build: LeafBuilder[(String, String)] = Constructors.DomainValueBuilder
+    override def build = Builders.DomainValueBuilder
   }
 
   case class True() extends i.True {
-    override def build: Node0Builder[i.True] = Constructors.TrueBuilder
+    override def build = Builders.TrueBuilder
   }
 
   case class False() extends i.False {
-    override def build: Node0Builder[i.False] = Constructors.FalseBuilder
+    override def build: Node0Builder[i.Pattern] = Builders.FalseBuilder
   }
 
-  case class And(p: i.Pattern, q: i.Pattern) extends i.And {
-    override def build: Node2Builder[i.Pattern, i.Pattern, i.And] = Constructors.AndBuilder
+  case class And(override val p: i.Pattern, override val q: i.Pattern) extends i.And {
+    override def build: Node2Builder[i.Pattern] = Builders.AndBuilder
   }
 
   case class Or(p: i.Pattern, q: i.Pattern) extends i.Or {
-    override def build: Node2Builder[i.Pattern, i.Pattern, i.Or] = Constructors.OrBuilder
+    override def build: Node2Builder[i.Pattern] = Builders.OrBuilder
   }
 
   case class Not(p: i.Pattern) extends i.Not {
-    override def build: NodeBuilder[i.Not] = Constructors.NotBuilder
+    override def build: NodeBuilder[i.Pattern] = Builders.NotBuilder
   }
 
 
   case class Implies(p: i.Pattern, q: i.Pattern) extends i.Implies {
-    override def build: Node2Builder[i.Pattern, i.Pattern, i.Implies] = Constructors.ImpliesBuilder
+    override def build: Node2Builder[i.Pattern] = Builders.ImpliesBuilder
   }
 
   case class Exists(v: i.Variable, p: i.Pattern) extends i.Exists {
-    override def build: Node2BinderBuilder[i.Variable, i.Pattern, i.Exists] = Constructors.ExistsBuilder
+    override def build: Node2Builder[i.Pattern] = Builders.ExistsBuilder
   }
 
   case class ForAll(v: i.Variable, p: i.Pattern) extends i.ForAll {
-    override def build: Node2BinderBuilder[i.Variable, i.Pattern, i.ForAll] = Constructors.ForAllBuilder
+    override def build: Node2Builder[i.Pattern] = Builders.ForAllBuilder
   }
 
   case class Next(p: i.Pattern) extends i.Next {
-    override def build: NodeBuilder[i.Next] = Constructors.NextBuilder
+    override def build: NodeBuilder[i.Pattern] = Builders.NextBuilder
   }
 
   case class Rewrite(p: i.Pattern, q: i.Pattern) extends i.Rewrite {
-    override def build: Node2Builder[i.Pattern, i.Pattern, i.Rewrite] = Constructors.RewriteBuilder
+    override def build: Node2Builder[i.Pattern] = Builders.RewriteBuilder
   }
 
   case class Equals(p: i.Pattern, q: i.Pattern) extends i.Equals {
-    override def build: Node2Builder[i.Pattern, i.Pattern, i.Equals] = Constructors.EqualsBuilder
+    override def build: Node2Builder[i.Pattern] = Builders.EqualsBuilder
   }
 
 }
 
-object Constructors extends FactoryInterface {
+object Builders {
 
-  import org.kframework.minikore.{TreeInterface => t}
+  import org.kframework.minikore.{MiniKore => m}
 
-  object VariableBuilder extends t.LeafBuilder[(String, String)] {
-    override def apply(contents: (String, String)) = MiniKore.Variable(contents._1, contents._2)
+  object VariableBuilder extends i.VariableBuilder {
+    override def apply(contents: (String, String)) = m.Variable(contents._1, contents._2)
   }
 
-  def Variable(name: String, sort: String): MiniKore.Variable = MiniKore.Variable(name, sort)
-
-  def Application(label: String, args: Seq[i.Pattern]): MiniKore.Application = MiniKore.Application(label, args)
-
-  object DomainValueBuilder extends t.LeafBuilder[(String, String)] {
-    override def apply(contents: (String, String)): Leaf[(String, String)] = MiniKore.DomainValue(contents._1, contents._2)
+  object DomainValueBuilder extends i.DomainValueBuilder {
+    override def apply(contents: (String, String)) = m.DomainValue(contents._1, contents._2)
   }
 
-  def DomainValue(label: String, value: String): MiniKore.DomainValue = MiniKore.DomainValue(label, value)
-
-  object TrueBuilder extends t.Node0Builder[i.True] {
-    override def apply(): Node[i.True] = MiniKore.True()
+  object AndBuilder extends i.AndBuilder {
+    override def apply(v1: Pattern, v2: Pattern) = m.And(v1, v2)
   }
 
-  def True(): MiniKore.True = MiniKore.True()
-
-  object FalseBuilder extends t.Node0Builder[i.False] {
-    override def apply(): Node[i.False] = MiniKore.False()
+  object OrBuilder extends i.OrBuilder {
+    override def apply(v1: Pattern, v2: Pattern) = m.Or(v1, v2)
   }
 
-  def False(): MiniKore.False = MiniKore.False()
-
-  object AndBuilder extends t.Node2Builder[i.Pattern, i.Pattern, i.And] {
-    override def apply(p: i.Pattern, q: i.Pattern): Node2[i.Pattern, i.Pattern, i.And] = MiniKore.And(p, q)
+  object ImpliesBuilder extends i.ImpliesBuilder {
+    override def apply(v1: Pattern, v2: Pattern) = m.Implies(v1, v2)
   }
 
-  def And(p: i.Pattern, q: i.Pattern): MiniKore.And = MiniKore.And(p, q)
-
-  object OrBuilder extends t.Node2Builder[i.Pattern, i.Pattern, i.Or] {
-    override def apply(p: i.Pattern, q: i.Pattern): Node2[i.Pattern, i.Pattern, i.Or] = MiniKore.Or(p, q)
+  object RewriteBuilder extends i.RewriteBuilder {
+    override def apply(v1: Pattern, v2: Pattern) = m.Rewrite(v1, v2)
   }
 
-  def Or(p: i.Pattern, q: i.Pattern): MiniKore.Or = MiniKore.Or(p, q)
-
-  object NotBuilder extends t.NodeBuilder[i.Not] {
-    override def apply(v1: Seq[_ <: AST]): Node[Not] = {
-      assert(v1.size == 1)
-      MiniKore.Not(v1.head.asInstanceOf[i.Pattern])
-    }
+  object EqualsBuilder extends i.EqualsBuilder {
+    override def apply(v1: Pattern, v2: Pattern) = m.Equals(v1, v2)
   }
 
-  def Not(p: i.Pattern): MiniKore.Not = MiniKore.Not(p)
-
-  object ImpliesBuilder extends t.Node2Builder[i.Pattern, i.Pattern, i.Implies] {
-    override def apply(p: i.Pattern, q: i.Pattern): Node2[i.Pattern, i.Pattern, i.Implies] = MiniKore.Implies(p, q)
+  object NotBuilder extends i.NotBuilder {
+    override def apply(v1: Pattern) = m.Not(v1)
   }
 
-  def Implies(p: i.Pattern, q: i.Pattern): MiniKore.Implies = MiniKore.Implies(p, q)
-
-  object ExistsBuilder extends Node2BinderBuilder[i.Variable, i.Pattern, i.Exists] {
-    override def apply(v: i.Variable, p: i.Pattern): Node2Binder[i.Variable, i.Pattern, i.Exists] = MiniKore.Exists(v, p)
+  object NextBuilder extends i.NextBuilder {
+    override def apply(v1: Pattern) = m.Next(v1)
   }
 
-  def Exists(v: i.Variable, p: i.Pattern): MiniKore.Exists = MiniKore.Exists(v, p)
-
-  object ForAllBuilder extends Node2BinderBuilder[i.Variable, i.Pattern, i.ForAll] {
-    override def apply(v: i.Variable, p: i.Pattern): Node2Binder[i.Variable, i.Pattern, i.ForAll] = MiniKore.ForAll(v, p)
+  object TrueBuilder extends i.TrueBuilder {
+    override def apply() = m.True()
   }
 
-  def ForAll(v: i.Variable, p: i.Pattern): MiniKore.ForAll = MiniKore.ForAll(v, p)
-
-  object NextBuilder extends t.NodeBuilder[i.Next] {
-    override def apply(v1: Seq[_ <: AST]): Node[Next] = {
-      assert(v1.size == 1)
-      MiniKore.Next(v1.head.asInstanceOf[i.Pattern])
-    }
+  object FalseBuilder extends i.FalseBuilder {
+    override def apply() = m.False()
   }
 
-  def Next(p: i.Pattern): MiniKore.Next = MiniKore.Next(p)
-
-  object RewriteBuilder extends t.Node2Builder[i.Pattern, i.Pattern, i.Rewrite] {
-    override def apply(p: i.Pattern, q: i.Pattern): Node2[i.Pattern, i.Pattern, i.Rewrite] = MiniKore.Rewrite(p, q)
+  object ExistsBuilder extends i.ExistsBuilder {
+    override def apply(v1: Pattern, v2: Pattern) = m.Exists(v1.asInstanceOf[i.Variable], v2)
   }
 
-  def Rewrite(p: i.Pattern, q: i.Pattern): MiniKore.Rewrite = MiniKore.Rewrite(p, q)
-
-  object EqualsBuilder extends t.Node2Builder[i.Pattern, i.Pattern, i.Equals] {
-    override def apply(p: i.Pattern, q: i.Pattern): Node2[i.Pattern, i.Pattern, i.Equals] = MiniKore.Equals(p, q)
+  object ForAllBuilder extends i.ForAllBuilder {
+    override def apply(v1: Pattern, v2: Pattern) = m.ForAll(v1.asInstanceOf[i.Variable], v2)
   }
 
-  def Equals(p: i.Pattern, q: i.Pattern): MiniKore.Equals = MiniKore.Equals(p, q)
 }
