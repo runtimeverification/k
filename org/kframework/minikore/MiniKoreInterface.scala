@@ -12,7 +12,7 @@ object TreeInterface {
   }
 
   object Node {
-    def unapply[T](arg: AST[T]): Option[Seq[_ <: T]] = {
+    def unapply[T](arg: AST[T]): Option[Seq[_ <: T]] = arg match {
       case n: Node[T] => Some(n.children)
       case _ => None
     }
@@ -56,6 +56,7 @@ object TreeInterface {
   object Leaf {
     def unapply[T, C](arg: AST[T]): Option[C] = arg match {
       case l: Leaf[T, C] => Some(l.contents)
+      case _ => None
     }
   }
 
@@ -106,7 +107,7 @@ object PatternInterface {
 
   sealed trait Pattern extends AST[Pattern]
 
-  trait Variable extends Pattern with Leaf[Variable, (String, String)] {
+  trait Variable extends Pattern with Leaf[Pattern, (String, String)] {
     def name: String
 
     def sort: String
@@ -116,7 +117,7 @@ object PatternInterface {
   }
 
 
-  trait VariableBuilder extends LeafBuilder[Variable, (String, String)] {
+  trait VariableBuilder extends LeafBuilder[Pattern, (String, String)] {
 
     object Variable {
       def unapply(arg: Variable): Option[(String, String)] = Some(arg.name, arg.sort)
@@ -125,7 +126,7 @@ object PatternInterface {
   }
 
 
-  trait DomainValue extends Pattern with Leaf[DomainValue, (String, String)] {
+  trait DomainValue extends Pattern with Leaf[Pattern, (String, String)] {
     def label: String
 
     def value: String
@@ -133,7 +134,7 @@ object PatternInterface {
     override def contents = (label, value)
   }
 
-  trait DomainValueBuilder extends LeafBuilder[DomainValue, (String, String)] {
+  trait DomainValueBuilder extends LeafBuilder[Pattern, (String, String)] {
 
     object DomainValue {
       def unapply(arg: Pattern): Option[(String, String)] = arg match {
@@ -227,6 +228,7 @@ object PatternInterface {
     object Not {
       def unapply(arg: Pattern): Option[Pattern] = arg match {
         case n: Not => Some(n.p)
+        case _ => None
       }
     }
 
@@ -320,6 +322,7 @@ object PatternInterface {
     object Next {
       def unapply(arg: Pattern): Option[Pattern] = arg match {
         case n: Next => Some(n.p)
+        case _ => None
       }
     }
 

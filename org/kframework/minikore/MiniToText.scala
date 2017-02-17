@@ -2,7 +2,6 @@ package org.kframework.minikore
 
 import org.apache.commons.lang3.StringEscapeUtils
 import org.kframework.minikore.MiniKore._
-//import org.kframework.minikore.MiniKore.{Definition, Module, Sentence, Import, SymbolDeclaration, Attributes, SortDeclaration, Rule, Axiom}
 import org.kframework.minikore.PatternInterface.Pattern
 
 /** Function (i.e., unparser) from MiniKore to String. */

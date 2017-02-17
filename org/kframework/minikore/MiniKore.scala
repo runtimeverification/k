@@ -36,7 +36,7 @@ object MiniKore {
 
 
   case class Application(label: String, args: Seq[i.Pattern]) extends i.Application {
-    override def build: Seq[i.Pattern] => i.Application = { (nArgs: Seq[i.Pattern]) =>
+    override def build: LabelledNodeBuilder[String, Pattern] = { (nArgs: Seq[i.Pattern]) =>
       new Application(label, nArgs)
     }
   }
