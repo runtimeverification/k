@@ -1,5 +1,7 @@
 package org.kframework.minikore
 
+import org.kframework.minikore.PatternInterface._
+
 
 object TreeInterface {
 
@@ -111,20 +113,22 @@ object PatternInterface {
 
   sealed trait Pattern extends AST[Pattern]
 
-  trait Variable extends Pattern with Leaf[Pattern, (String, String)] {
+  type Sort = String
+
+  trait Variable extends Pattern with Leaf[Pattern, (String, Sort)] {
     def name: String
 
-    def sort: String
+    def sort: Sort
 
     override def contents = (name, sort)
 
   }
 
 
-  trait VariableBuilder extends LeafBuilder[Pattern, (String, String)] {
+  trait VariableBuilder extends LeafBuilder[Pattern, (String, Sort)] {
 
     object Variable {
-      def unapply(arg: Variable): Option[(String, String)] = Some(arg.name, arg.sort)
+      def unapply(arg: Variable): Option[(String, Sort)] = Some(arg.name, arg.sort)
     }
 
   }
@@ -388,5 +392,20 @@ object PatternInterface {
 
 
 }
+
+case class Builders(Variable: VariableBuilder,
+                    DomainValue: DomainValueBuilder,
+                    True: TrueBuilder,
+                    False: FalseBuilder,
+                    Not: NotBuilder,
+                    Next: NextBuilder,
+                    Exists: ExistsBuilder,
+                    ForAll: ForAllBuilder,
+                    And: AndBuilder,
+                    Or: OrBuilder,
+                    Implies: ImpliesBuilder,
+                    Equals: EqualsBuilder,
+                    Rewrite: RewriteBuilder,
+                    Application: ApplicationBuilder)
 
 

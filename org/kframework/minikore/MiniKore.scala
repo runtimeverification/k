@@ -30,72 +30,72 @@ object MiniKore {
 
   case class Axiom(pattern: i.Pattern, att: Attributes) extends Sentence
 
-  case class Variable(name: String, sort: String) extends i.Variable {
-    override def build = Builders.VariableBuilder
+  case class Variable(name: String, sort: i.Sort) extends i.Variable {
+    override def build = DefaultBuilders.VariableBuilder
   }
 
   case class Application(label: String, args: Seq[i.Pattern]) extends i.Application {
-    override def build = Builders.ApplicationBuilder.curried.apply(label).asInstanceOf[LabelBuild[String, i.Pattern]]
+    override def build = DefaultBuilders.ApplicationBuilder.curried.apply(label).asInstanceOf[LabelBuild[String, i.Pattern]]
   }
 
 
   case class DomainValue(label: String, value: String) extends i.DomainValue {
-    override def build = Builders.DomainValueBuilder
+    override def build = DefaultBuilders.DomainValueBuilder
   }
 
   case class True() extends i.True {
-    override def build = Builders.TrueBuilder
+    override def build = DefaultBuilders.TrueBuilder
   }
 
   case class False() extends i.False {
-    override def build: Node0Builder[i.Pattern] = Builders.FalseBuilder
+    override def build: Node0Builder[i.Pattern] = DefaultBuilders.FalseBuilder
   }
 
   case class And(override val p: i.Pattern, override val q: i.Pattern) extends i.And {
-    override def build: Node2Builder[i.Pattern] = Builders.AndBuilder
+    override def build: Node2Builder[i.Pattern] = DefaultBuilders.AndBuilder
   }
 
   case class Or(p: i.Pattern, q: i.Pattern) extends i.Or {
-    override def build: Node2Builder[i.Pattern] = Builders.OrBuilder
+    override def build: Node2Builder[i.Pattern] = DefaultBuilders.OrBuilder
   }
 
   case class Not(p: i.Pattern) extends i.Not {
-    override def build: NodeBuilder[i.Pattern] = Builders.NotBuilder
+    override def build: NodeBuilder[i.Pattern] = DefaultBuilders.NotBuilder
   }
 
 
   case class Implies(p: i.Pattern, q: i.Pattern) extends i.Implies {
-    override def build: Node2Builder[i.Pattern] = Builders.ImpliesBuilder
+    override def build: Node2Builder[i.Pattern] = DefaultBuilders.ImpliesBuilder
   }
 
   case class Exists(v: i.Variable, p: i.Pattern) extends i.Exists {
-    override def build: Node2Builder[i.Pattern] = Builders.ExistsBuilder
+    override def build: Node2Builder[i.Pattern] = DefaultBuilders.ExistsBuilder
   }
 
   case class ForAll(v: i.Variable, p: i.Pattern) extends i.ForAll {
-    override def build: Node2Builder[i.Pattern] = Builders.ForAllBuilder
+    override def build: Node2Builder[i.Pattern] = DefaultBuilders.ForAllBuilder
   }
 
   case class Next(p: i.Pattern) extends i.Next {
-    override def build: NodeBuilder[i.Pattern] = Builders.NextBuilder
+    override def build: NodeBuilder[i.Pattern] = DefaultBuilders.NextBuilder
   }
 
   case class Rewrite(p: i.Pattern, q: i.Pattern) extends i.Rewrite {
-    override def build: Node2Builder[i.Pattern] = Builders.RewriteBuilder
+    override def build: Node2Builder[i.Pattern] = DefaultBuilders.RewriteBuilder
   }
 
   case class Equals(p: i.Pattern, q: i.Pattern) extends i.Equals {
-    override def build: Node2Builder[i.Pattern] = Builders.EqualsBuilder
+    override def build: Node2Builder[i.Pattern] = DefaultBuilders.EqualsBuilder
   }
 
 }
 
-object Builders {
+object DefaultBuilders {
 
   import org.kframework.minikore.{MiniKore => m}
 
   object VariableBuilder extends i.VariableBuilder {
-    override def apply(contents: (String, String)) = m.Variable(contents._1, contents._2)
+    override def apply(contents: (String, i.Sort)) = m.Variable(contents._1, contents._2)
   }
 
   object DomainValueBuilder extends i.DomainValueBuilder {
@@ -152,6 +152,11 @@ object Builders {
     }
   }
 
+  def build: Builders = Builders(VariableBuilder, DomainValueBuilder, TrueBuilder, FalseBuilder,
+    NotBuilder, NextBuilder, ExistsBuilder, ForAllBuilder, AndBuilder, OrBuilder, ImpliesBuilder, EqualsBuilder,
+    RewriteBuilder, ApplicationBuilder)
 
 }
+
+
 
