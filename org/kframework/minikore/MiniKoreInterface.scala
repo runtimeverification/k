@@ -125,7 +125,7 @@ object PatternInterface {
   }
 
 
-  trait VariableBuilder extends LeafBuilder[Pattern, (String, Sort)] {
+  trait VariableBuilder extends LeafBuilder[Pattern, (String, Sort)] with ((Tuple2[String, Sort]) => Variable) {
 
     object Variable {
       def unapply(arg: Variable): Option[(String, Sort)] = Some(arg.name, arg.sort)
@@ -142,7 +142,7 @@ object PatternInterface {
     override def contents = (label, value)
   }
 
-  trait DomainValueBuilder extends LeafBuilder[Pattern, (String, String)] {
+  trait DomainValueBuilder extends LeafBuilder[Pattern, (String, String)] with ((Tuple2[String, String]) => DomainValue) {
 
     object DomainValue {
       def unapply(arg: Pattern): Option[(String, String)] = arg match {
@@ -155,11 +155,11 @@ object PatternInterface {
 
   trait True extends Pattern with Node0[Pattern]
 
-  trait TrueBuilder extends Node0Builder[Pattern] {
+  trait TrueBuilder extends Node0Builder[Pattern] with (() => True) {
 
     object True {
       def unapply(arg: Pattern): Boolean = arg match {
-        case t: True => true
+        case _: True => true
         case _ => false
       }
     }
@@ -169,11 +169,11 @@ object PatternInterface {
 
   trait False extends Pattern with Node0[Pattern]
 
-  trait FalseBuilder extends Node0Builder[Pattern] {
+  trait FalseBuilder extends Node0Builder[Pattern] with (() => False) {
 
     object False {
       def unapply(arg: Pattern): Boolean = arg match {
-        case t: False => true
+        case _: False => true
         case _ => false
       }
     }
@@ -191,7 +191,7 @@ object PatternInterface {
   }
 
 
-  trait AndBuilder extends Node2Builder[Pattern] {
+  trait AndBuilder extends Node2Builder[Pattern] with ((Pattern, Pattern) => And) {
 
     object And {
       def unapply(arg: Pattern): Option[(Pattern, Pattern)] = arg match {
@@ -213,7 +213,7 @@ object PatternInterface {
 
   }
 
-  trait OrBuilder extends Node2Builder[Pattern] {
+  trait OrBuilder extends Node2Builder[Pattern] with ((Pattern, Pattern) => Or) {
 
     object Or {
       def unapply(arg: Pattern): Option[(Pattern, Pattern)] = arg match {
@@ -231,7 +231,7 @@ object PatternInterface {
 
   }
 
-  trait NotBuilder extends Node1Builder[Pattern] {
+  trait NotBuilder extends Node1Builder[Pattern] with ((Pattern) => Not) {
 
     object Not {
       def unapply(arg: Pattern): Option[Pattern] = arg match {
@@ -251,7 +251,7 @@ object PatternInterface {
 
   }
 
-  trait ApplicationBuilder extends LabelledNodeBuilder[String, Pattern] {
+  trait ApplicationBuilder extends LabelledNodeBuilder[String, Pattern] with ((String, Seq[Pattern]) => Application) {
 
     object Application {
       def unapply(arg: Pattern): Option[(String, Seq[Pattern])] = arg match {
@@ -263,7 +263,7 @@ object PatternInterface {
   }
 
 
-  trait Implies extends Pattern with Node2[Pattern] {
+  trait Implies extends Pattern with Node2[Pattern] with ((Pattern, Pattern) => Implies) {
     def p: Pattern
 
     def q: Pattern
@@ -295,7 +295,7 @@ object PatternInterface {
     override val _2 = p
   }
 
-  trait ExistsBuilder extends Node2Builder[Pattern] {
+  trait ExistsBuilder extends Node2Builder[Pattern] with ((Variable, Pattern) => Exists) {
 
     object Exists {
       def unapply(arg: Pattern): Option[(Variable, Pattern)] = arg match {
@@ -316,7 +316,7 @@ object PatternInterface {
     override val _2 = p
   }
 
-  trait ForAllBuilder extends Node2Builder[Pattern] {
+  trait ForAllBuilder extends Node2Builder[Pattern] with ((Variable, Pattern) => ForAll) {
 
     object ForAll {
       def unapply(arg: Pattern): Option[(Variable, Pattern)] = arg match {
@@ -333,7 +333,7 @@ object PatternInterface {
     override val _1 = p
   }
 
-  trait NextBuilder extends Node1Builder[Pattern] {
+  trait NextBuilder extends Node1Builder[Pattern] with ((Pattern) => Next) {
 
     object Next {
       def unapply(arg: Pattern): Option[Pattern] = arg match {
@@ -356,7 +356,7 @@ object PatternInterface {
 
   }
 
-  trait RewriteBuilder extends Node2Builder[Pattern] {
+  trait RewriteBuilder extends Node2Builder[Pattern] with ((Pattern, Pattern) => Rewrite) {
 
     object Rewrite {
       def unapply(arg: Pattern): Option[(Pattern, Pattern)] = arg match {
@@ -379,7 +379,7 @@ object PatternInterface {
 
   }
 
-  trait EqualsBuilder extends Node2Builder[Pattern] {
+  trait EqualsBuilder extends Node2Builder[Pattern] with ((Pattern, Pattern) => Equals) {
 
     object Equals {
       def unapply(arg: Pattern): Option[(Pattern, Pattern)] = arg match {

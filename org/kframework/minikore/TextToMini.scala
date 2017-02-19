@@ -1,7 +1,7 @@
 package org.kframework.minikore
 
 import org.apache.commons.lang3.StringEscapeUtils
-import org.kframework.minikore.MiniKore._
+import org.kframework.minikore.MiniKore.{Attributes, Definition, Module, Sentence, Rule, Axiom, SymbolDeclaration, SortDeclaration, Import}
 import org.kframework.minikore.PatternInterface.Pattern
 
 /** Parsing error exception. */
@@ -11,7 +11,7 @@ case class ParseError(msg: String) extends Exception(msg) // ParseError.msg eq E
   *
   * @constructor Creates a new parser.
   */
-class TextToMini {
+class TextToMini(b: Builders) {
   private val scanner = new Scanner()
 
   /** Parses the file and returns [[MiniKore.Definition]]. */
@@ -162,13 +162,13 @@ class TextToMini {
         val c2 = scanner.next()
         (c1, c2) match {
           case ('t', 'r') => consume("ue"); consumeWithLeadingWhitespaces("("); consumeWithLeadingWhitespaces(")")
-            True()
+            b.True()
           case ('f', 'a') => consume("lse"); consumeWithLeadingWhitespaces("("); consumeWithLeadingWhitespaces(")")
-            False()
+            b.False()
           case ('a', 'n') => consume("d"); consumeWithLeadingWhitespaces("(")
             val p1 = parsePattern(); consumeWithLeadingWhitespaces(",")
             val p2 = parsePattern(); consumeWithLeadingWhitespaces(")")
-            And(p1, p2)
+            b.And(p1, p2)
           case ('o', 'r') => consumeWithLeadingWhitespaces("(")
             val p1 = parsePattern(); consumeWithLeadingWhitespaces(",")
             val p2 = parsePattern(); consumeWithLeadingWhitespaces(")")
