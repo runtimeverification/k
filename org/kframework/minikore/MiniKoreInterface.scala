@@ -93,12 +93,26 @@ object TreeInterface {
     def apply(x: L, c: Seq[_ <: T]): LabelledNode[L, T]
   }
 
+  object LabelledNode {
+    def unapply[L, T <: AST[T]](arg: AST[T]): Option[(L, Seq[_ <: T])] = arg match {
+      case p: LabelledNode[L, T] => Some(p.label, p.children)
+      case _ => None
+    }
+  }
+
 
   sealed trait Node0[T <: AST[T]] extends Node[T] {
     override def children = Seq.empty
 
     def build: Node0Builder[T]
 
+  }
+
+  object Node0 {
+    def unapply[T <: AST[T]](arg: AST[T]): Boolean = arg match {
+      case p: Node0[T] => true
+      case _ => false
+    }
   }
 
   sealed trait Node1[T <: AST[T]] extends Node[T] with Product1[T] {
@@ -108,6 +122,13 @@ object TreeInterface {
     override def children = Seq(_1)
   }
 
+  object Node1 {
+    def unapply[T <: AST[T]](arg: AST[T]): Option[T] = arg match {
+      case n: Node1[T] => Some(n._1)
+      case _ => None
+    }
+  }
+
 
   sealed trait Node2[T <: AST[T]] extends Node[T] with Product2[T, T] {
 
@@ -115,6 +136,13 @@ object TreeInterface {
 
     def build: Node2Builder[T]
 
+  }
+
+  object Node2 {
+    def unapply[T <: AST[T]](arg: AST[T]): Option[(T, T)] = arg match {
+      case n: Node2[T] => Some((n._1, n._2))
+      case _ => None
+    }
   }
 
 }
@@ -132,14 +160,16 @@ object PatternInterface {
 
     def sort: Sort
 
-    override def contents = (name, sort)
+    override def contents: (String, Sort) = (name, sort)
 
   }
 
 
   trait VariableBuilder extends LeafBuilder[Pattern, (String, Sort)] {
 
-    override def apply(contents: (String, Sort)): Variable
+    def apply(name: String, sort: Sort): Variable
+
+    override def apply(contents: (String, Sort)) = apply(contents._1, contents._2)
 
     object Variable {
       def unapply(arg: Variable): Option[(String, Sort)] = Some(arg.name, arg.sort)
@@ -153,12 +183,15 @@ object PatternInterface {
 
     def value: String
 
+
     override def contents = (label, value)
   }
 
   trait DomainValueBuilder extends LeafBuilder[Pattern, (String, String)] {
 
-    override def apply(contents: (String, String)): DomainValue
+    def apply(label: String, value: String): DomainValue
+
+    override def apply(contents: (String, String)): DomainValue = apply(contents._1, contents._2)
 
     object DomainValue {
       def unapply(arg: Pattern): Option[(String, String)] = arg match {
@@ -352,7 +385,7 @@ object PatternInterface {
 
   trait ForAllBuilder extends Node2Builder[Pattern] {
 
-    override def apply(v: Pattern, p:  Pattern): ForAll
+    override def apply(v: Pattern, p: Pattern): ForAll
 
     object ForAll {
       def unapply(arg: Pattern): Option[(Variable, Pattern)] = arg match {
@@ -396,7 +429,7 @@ object PatternInterface {
 
   trait RewriteBuilder extends Node2Builder[Pattern] {
 
-    def apply(p: Pattern, q:  Pattern): Rewrite
+    def apply(p: Pattern, q: Pattern): Rewrite
 
     object Rewrite {
       def unapply(arg: Pattern): Option[(Pattern, Pattern)] = arg match {

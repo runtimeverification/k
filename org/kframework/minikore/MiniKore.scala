@@ -1,7 +1,7 @@
 package org.kframework.minikore
 
 
-import org.kframework.minikore.PatternInterface.Pattern
+import org.kframework.minikore.PatternInterface.{Pattern, Sort}
 import org.kframework.minikore.TreeInterface._
 import org.kframework.minikore.{PatternInterface => i}
 
@@ -95,11 +95,12 @@ object DefaultBuilders {
   import org.kframework.minikore.{MiniKore => m}
 
   object VariableBuilder extends i.VariableBuilder {
-    override def apply(contents: (String, i.Sort)): i.Variable = m.Variable(contents._1, contents._2)
+
+    override def apply(name: String, sort: Sort): i.Variable = m.Variable(name, sort)
   }
 
   object DomainValueBuilder extends i.DomainValueBuilder {
-    override def apply(contents: (String, String)) : i.DomainValue = m.DomainValue(contents._1, contents._2)
+    override def apply(label: String, value: String) : i.DomainValue = m.DomainValue(label, value)
   }
 
   object AndBuilder extends i.AndBuilder {
