@@ -32,7 +32,7 @@ object TreeInterface {
     }
   }
 
-  trait Node1Builder[T <: AST[T]] extends NodeBuilder[T] with ((T) => Node[T]) {
+  trait Node1Builder[T <: AST[T]] extends NodeBuilder[T] with ((T) => Node1[T]) {
     override def apply(children: Seq[_ <: T]) = {
       assert(children.size == 1)
       apply(children.head)
@@ -66,17 +66,19 @@ object TreeInterface {
     def apply(contents: C): Leaf[T, C]
   }
 
-  trait LabelledNodeBuilder[L, T <: AST[T]] extends NodeBuilder[T] with (Seq[_ <: T] => LabelledNode[L, T])
 
+  trait LabelBuild[L, T <: AST[T]] extends NodeBuilder[T] with ((Seq[_ <: AST[T]]) => LabelledNode[L, T])
 
-  sealed trait LabelledNode[L, T <: AST[T]] extends Node[T] {
+  trait LabelledNode[L, T <: AST[T]] extends Node[T] {
 
     def label: L
 
-    def args: Seq[_ <: T]
+    def build: LabelBuild[L, T]
 
-    def build: LabelledNodeBuilder[L, T]
   }
+
+  trait LabelledNodeBuilder[L, T <: AST[T]] extends ((L, Seq[_ <: AST[T]]) => LabelledNode[L, T])
+
 
   sealed trait Node0[T <: AST[T]] extends Node[T] {
     override def children = Seq.empty
@@ -237,13 +239,21 @@ object PatternInterface {
   }
 
   trait Application extends Pattern with LabelledNode[String, Pattern] {
+
+    def args: Seq[Pattern]
+
     override def children: Seq[Pattern] = args
+
+
   }
 
   trait ApplicationBuilder extends LabelledNodeBuilder[String, Pattern] {
 
     object Application {
-      def unapply(arg: Application): Option[(String, Seq[Pattern])] = Some(arg.label, arg.args)
+      def unapply(arg: Pattern): Option[(String, Seq[Pattern])] = arg match {
+        case a: Application => Some(a.label, a.args)
+        case _ => None
+      }
     }
 
   }

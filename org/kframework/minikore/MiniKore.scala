@@ -34,11 +34,8 @@ object MiniKore {
     override def build = Builders.VariableBuilder
   }
 
-
   case class Application(label: String, args: Seq[i.Pattern]) extends i.Application {
-    override def build: LabelledNodeBuilder[String, Pattern] = { (nArgs: Seq[i.Pattern]) =>
-      new Application(label, nArgs)
-    }
+    override def build = Builders.ApplicationBuilder.curried.apply(label).asInstanceOf[LabelBuild[String, i.Pattern]]
   }
 
 
@@ -149,4 +146,12 @@ object Builders {
     override def apply(v1: Pattern, v2: Pattern) = m.ForAll(v1.asInstanceOf[i.Variable], v2)
   }
 
+  object ApplicationBuilder extends i.ApplicationBuilder {
+    override def apply(v1: String, v2: Seq[_ <: AST[Pattern]]) = {
+      m.Application(v1, v2.map(_.asInstanceOf[i.Pattern]))
+    }
+  }
+
+
 }
+
