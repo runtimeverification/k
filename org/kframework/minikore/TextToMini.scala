@@ -413,8 +413,12 @@ class TextToMini(b: Builders) {
 object TextToMini {
   /** Check if the character is among symbol characters.
     *
+    * Requires Link To Builder Class.
     * {{{ SymbolChar = [a-zA-Z0-9.@#$%^_-]+ }}}
     */
+
+  def apply(b: Builders): TextToMini = new TextToMini(b)
+
   def isSymbolChar(c: Char): Boolean = {
     ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || ('0' <= c && c <= '9') ||
       c == '.' || c == '@' || c == '#' || c == '$' || c == '%' || c == '^' || c == '_' || c == '-'

@@ -1,10 +1,7 @@
 package org.kframework.minikore
 
 import org.apache.commons.io.FileUtils
-
 import org.kframework.minikore.MiniKore.Definition
-
-import org.kframework.minikore.Builders
 
 // TODO(Daejun): drop this file
 
