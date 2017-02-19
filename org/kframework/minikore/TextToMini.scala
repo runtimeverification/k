@@ -1,8 +1,8 @@
 package org.kframework.minikore
 
 import org.apache.commons.lang3.StringEscapeUtils
-import org.kframework.minikore.MiniKore.{Attributes, Definition, Module, Sentence, Rule, Axiom, SymbolDeclaration, SortDeclaration, Import}
-import org.kframework.minikore.PatternInterface.Pattern
+import org.kframework.minikore.MiniKore.{Definition, DomainValue, Rule, Axiom, SortDeclaration, SymbolDeclaration, Import, Module, Attributes, Sentence}
+import org.kframework.minikore.PatternInterface._
 
 /** Parsing error exception. */
 case class ParseError(msg: String) extends Exception(msg) // ParseError.msg eq Exception.detailMessage, i.e., msg() == getMessage()
@@ -172,33 +172,33 @@ class TextToMini(b: Builders) {
           case ('o', 'r') => consumeWithLeadingWhitespaces("(")
             val p1 = parsePattern(); consumeWithLeadingWhitespaces(",")
             val p2 = parsePattern(); consumeWithLeadingWhitespaces(")")
-            Or(p1, p2)
+            b.Or(p1, p2)
           case ('n', 'o') => consume("t"); consumeWithLeadingWhitespaces("(")
             val p = parsePattern(); consumeWithLeadingWhitespaces(")")
-            Not(p)
+            b.Not(p)
           case ('i', 'm') => consume("plies"); consumeWithLeadingWhitespaces("(")
             val p1 = parsePattern(); consumeWithLeadingWhitespaces(",")
             val p2 = parsePattern(); consumeWithLeadingWhitespaces(")")
-            Implies(p1, p2)
+            b.Implies(p1, p2)
           case ('e', 'x') => consume("ists"); consumeWithLeadingWhitespaces("(")
             val v = parseVariable(); consumeWithLeadingWhitespaces(",")
             val p = parsePattern(); consumeWithLeadingWhitespaces(")")
-            Exists(v, p)
+            b.Exists(v, p)
           case ('f', 'o') => consume("rall"); consumeWithLeadingWhitespaces("(")
             val v = parseVariable(); consumeWithLeadingWhitespaces(",")
             val p = parsePattern(); consumeWithLeadingWhitespaces(")")
-            ForAll(v, p)
+            b.ForAll(v, p)
           case ('n', 'e') => consume("xt"); consumeWithLeadingWhitespaces("(")
             val p = parsePattern(); consumeWithLeadingWhitespaces(")")
-            Next(p)
+            b.Next(p)
           case ('r', 'e') => consume("write"); consumeWithLeadingWhitespaces("(")
             val p1 = parsePattern(); consumeWithLeadingWhitespaces(",")
             val p2 = parsePattern(); consumeWithLeadingWhitespaces(")")
-            Rewrite(p1, p2)
+            b.Rewrite(p1, p2)
           case ('e', 'q') => consume("ual"); consumeWithLeadingWhitespaces("(")
             val p1 = parsePattern(); consumeWithLeadingWhitespaces(",")
             val p2 = parsePattern(); consumeWithLeadingWhitespaces(")")
-            Equals(p1, p2)
+            b.Equals(p1, p2)
           case (err1, err2) => throw error("\\true, \\false, \\and, \\or, \\not, \\implies, \\exists, \\forall, \\next, \\rewrite, or \\equal",
                                            "'\\" + err1 + err2 + "'")
         }
@@ -207,7 +207,7 @@ class TextToMini(b: Builders) {
         scanner.nextWithSkippingWhitespaces() match {
           case ':' => // TODO(Daejun): check if symbol is Name
             val sort = parseSort()
-            Variable(symbol, sort)
+            b.Variable(symbol, sort).asInstanceOf[Variable]
           case '(' =>
             scanner.nextWithSkippingWhitespaces() match {
               case '"' => scanner.putback('"')
@@ -217,7 +217,7 @@ class TextToMini(b: Builders) {
               case c => scanner.putback(c)
                 val args = parseList(parsePattern, ',', ')')
                 consumeWithLeadingWhitespaces(")")
-                Application(symbol, args)
+                b.Application(symbol, args)
             }
           case err => throw error("':' or '('", err)
         }
@@ -229,7 +229,7 @@ class TextToMini(b: Builders) {
     val name = parseName()
     consumeWithLeadingWhitespaces(":")
     val sort = parseSort()
-    Variable(name, sort)
+    b.Variable(name, sort).asInstanceOf[Variable]
   }
 
   //////////////////////////////////////////////////////////
