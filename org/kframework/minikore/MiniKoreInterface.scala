@@ -28,7 +28,7 @@ object TreeInterface {
 
   trait Node0Builder[T <: AST[T]] extends NodeBuilder[T] {
 
-    def apply(): Node[T]
+    def apply(): Node0[T]
 
     override def apply(children: Seq[_ <: T]) = {
       assert(children.isEmpty)
@@ -39,7 +39,7 @@ object TreeInterface {
 
   trait Node1Builder[T <: AST[T]] extends NodeBuilder[T] {
 
-    def apply(p: T): Node[T]
+    def apply(p: T): Node1[T]
 
     override def apply(children: Seq[_ <: T]) = {
       assert(children.size == 1)
@@ -50,7 +50,7 @@ object TreeInterface {
 
   trait Node2Builder[T <: AST[T]] extends NodeBuilder[T] {
 
-    def apply(p: T, q: T): Node[T]
+    def apply(p: T, q: T): Node2[T]
 
     override def apply(children: Seq[_ <: T]) = {
       assert(children.size == 2)
@@ -77,16 +77,8 @@ object TreeInterface {
   }
 
 
-  trait LabelBuild[L, T <: AST[T]] extends NodeBuilder[T] {
-    override def apply(children: Seq[_ <: T]): LabelledNode[L, T]
-  }
-
   trait LabelledNode[L, T <: AST[T]] extends Node[T] {
-
     def label: L
-
-    def build: LabelBuild[L, T]
-
   }
 
   trait LabelledNodeBuilder[L, T <: AST[T]] {

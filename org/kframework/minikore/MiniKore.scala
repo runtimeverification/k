@@ -35,7 +35,11 @@ object MiniKore {
   }
 
   case class Application(label: String, args: Seq[i.Pattern]) extends i.Application {
-    override def build = {(args: Seq[i.Pattern]) => DefaultBuilders.ApplicationBuilder(label, args)}
+
+    override def build = (c: Seq[i.Pattern]) => {
+      assert(c.size == args.size)
+      DefaultBuilders.ApplicationBuilder(label, c)
+    }
   }
 
 
@@ -100,7 +104,7 @@ object DefaultBuilders {
   }
 
   object DomainValueBuilder extends i.DomainValueBuilder {
-    override def apply(label: String, value: String) : i.DomainValue = m.DomainValue(label, value)
+    override def apply(label: String, value: String): i.DomainValue = m.DomainValue(label, value)
   }
 
   object AndBuilder extends i.AndBuilder {
@@ -108,15 +112,15 @@ object DefaultBuilders {
   }
 
   object OrBuilder extends i.OrBuilder {
-    override def apply(v1: Pattern, v2: Pattern) : i.Or = m.Or(v1, v2)
+    override def apply(v1: Pattern, v2: Pattern): i.Or = m.Or(v1, v2)
   }
 
   object ImpliesBuilder extends i.ImpliesBuilder {
-    override def apply(v1: Pattern, v2: Pattern) : i.Implies = m.Implies(v1, v2)
+    override def apply(v1: Pattern, v2: Pattern): i.Implies = m.Implies(v1, v2)
   }
 
   object RewriteBuilder extends i.RewriteBuilder {
-    override def apply(v1: Pattern, v2: Pattern) : i.Rewrite = m.Rewrite(v1, v2)
+    override def apply(v1: Pattern, v2: Pattern): i.Rewrite = m.Rewrite(v1, v2)
   }
 
   object EqualsBuilder extends i.EqualsBuilder {
@@ -124,11 +128,11 @@ object DefaultBuilders {
   }
 
   object NotBuilder extends i.NotBuilder {
-    override def apply(v1: Pattern) : i.Not = m.Not(v1)
+    override def apply(v1: Pattern): i.Not = m.Not(v1)
   }
 
   object NextBuilder extends i.NextBuilder {
-    override def apply(v1: Pattern) : i.Next = m.Next(v1)
+    override def apply(v1: Pattern): i.Next = m.Next(v1)
   }
 
   object TrueBuilder extends i.TrueBuilder {
@@ -148,7 +152,7 @@ object DefaultBuilders {
   }
 
   object ApplicationBuilder extends i.ApplicationBuilder {
-    override def apply(v1: String, v2: Seq[_ <: Pattern]) : i.Application = {
+    override def apply(v1: String, v2: Seq[_ <: Pattern]): i.Application = {
       m.Application(v1, v2)
     }
   }
