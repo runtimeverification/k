@@ -229,7 +229,7 @@ class TextToMini(b: Builders) {
     val name = parseName()
     consumeWithLeadingWhitespaces(":")
     val sort = parseSort()
-    b.Variable(name, sort).asInstanceOf[Variable]
+    b.Variable(name, sort)
   }
 
   //////////////////////////////////////////////////////////

@@ -35,7 +35,7 @@ object MiniKore {
   }
 
   case class Application(label: String, args: Seq[i.Pattern]) extends i.Application {
-    override def build = DefaultBuilders.ApplicationBuilder.curried.apply(label).asInstanceOf[LabelBuild[String, i.Pattern]]
+    override def build = {(args: Seq[i.Pattern]) => DefaultBuilders.ApplicationBuilder(label, args)}
   }
 
 
@@ -147,8 +147,8 @@ object DefaultBuilders {
   }
 
   object ApplicationBuilder extends i.ApplicationBuilder {
-    override def apply(v1: String, v2: Seq[_ <: AST[Pattern]]) : i.Application = {
-      m.Application(v1, v2.map(_.asInstanceOf[i.Pattern]))
+    override def apply(v1: String, v2: Seq[_ <: Pattern]) : i.Application = {
+      m.Application(v1, v2)
     }
   }
 

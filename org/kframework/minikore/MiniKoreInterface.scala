@@ -39,7 +39,7 @@ object TreeInterface {
 
   trait Node1Builder[T <: AST[T]] extends NodeBuilder[T] {
 
-    def apply(p: _ <: T): Node[T]
+    def apply(p: T): Node[T]
 
     override def apply(children: Seq[_ <: T]) = {
       assert(children.size == 1)
@@ -50,7 +50,7 @@ object TreeInterface {
 
   trait Node2Builder[T <: AST[T]] extends NodeBuilder[T] {
 
-    def apply(p: _ <: T, q: _ <: T): Node[T]
+    def apply(p: T, q: T): Node[T]
 
     override def apply(children: Seq[_ <: T]) = {
       assert(children.size == 2)
@@ -213,7 +213,7 @@ object PatternInterface {
 
   trait AndBuilder extends Node2Builder[Pattern] {
 
-    override def apply(x: _ <: Pattern, y: _ <: Pattern): And
+    override def apply(x: Pattern, y: Pattern): And
 
     object And {
       def unapply(arg: Pattern): Option[(Pattern, Pattern)] = arg match {
@@ -237,7 +237,7 @@ object PatternInterface {
 
   trait OrBuilder extends Node2Builder[Pattern] {
 
-    override def apply(x: _ <: Pattern, y: _ <: Pattern): Or
+    override def apply(x: Pattern, y: Pattern): Or
 
     object Or {
       def unapply(arg: Pattern): Option[(Pattern, Pattern)] = arg match {
@@ -257,7 +257,7 @@ object PatternInterface {
 
   trait NotBuilder extends Node1Builder[Pattern] {
 
-    override def apply(p: _ <: Pattern): Not
+    override def apply(p: Pattern): Not
 
     object Not {
       def unapply(arg: Pattern): Option[Pattern] = arg match {
@@ -270,7 +270,7 @@ object PatternInterface {
 
   trait Application extends Pattern with LabelledNode[String, Pattern] {
 
-    def args: Seq[Pattern]
+    def args: Seq[_ <: Pattern]
 
     override def children: Seq[Pattern] = args
 
@@ -284,7 +284,7 @@ object PatternInterface {
 
 
     object Application {
-      def unapply(arg: Pattern): Option[(String, Seq[Pattern])] = arg match {
+      def unapply(arg: Pattern): Option[(String, Seq[_ <: Pattern])] = arg match {
         case a: Application => Some(a.label, a.args)
         case _ => None
       }
@@ -305,7 +305,7 @@ object PatternInterface {
 
   trait ImpliesBuilder extends Node2Builder[Pattern] {
 
-    override def apply(p: _ <: Pattern, q: _ <: Pattern): Implies
+    override def apply(p: Pattern, q: Pattern): Implies
 
     object Implies {
       def unapply(arg: Pattern): Option[(Pattern, Pattern)] = arg match {
@@ -329,7 +329,7 @@ object PatternInterface {
 
   trait ExistsBuilder extends Node2Builder[Pattern] {
 
-    override def apply(p: _ <: Pattern, q: _ <: Pattern): Exists
+    override def apply(p: Pattern, q: Pattern): Exists
 
     object Exists {
       def unapply(arg: Pattern): Option[(Variable, Pattern)] = arg match {
@@ -352,7 +352,7 @@ object PatternInterface {
 
   trait ForAllBuilder extends Node2Builder[Pattern] {
 
-    override def apply(v: _ <: Pattern, p: _ <: Pattern): ForAll
+    override def apply(v: Pattern, p:  Pattern): ForAll
 
     object ForAll {
       def unapply(arg: Pattern): Option[(Variable, Pattern)] = arg match {
@@ -371,7 +371,7 @@ object PatternInterface {
 
   trait NextBuilder extends Node1Builder[Pattern] {
 
-    override def apply(p: _ <: Pattern): Next
+    override def apply(p: Pattern): Next
 
     object Next {
       def unapply(arg: Pattern): Option[Pattern] = arg match {
@@ -396,7 +396,7 @@ object PatternInterface {
 
   trait RewriteBuilder extends Node2Builder[Pattern] {
 
-    def apply(p: _ <: Pattern, q: _ <: Pattern): Rewrite
+    def apply(p: Pattern, q:  Pattern): Rewrite
 
     object Rewrite {
       def unapply(arg: Pattern): Option[(Pattern, Pattern)] = arg match {
@@ -421,8 +421,8 @@ object PatternInterface {
 
   trait EqualsBuilder extends Node2Builder[Pattern] {
 
-    def apply(p: _ <: Pattern, q: _ <: Pattern): Equals
-    
+    def apply(p: Pattern, q: Pattern): Equals
+
 
     object Equals {
       def unapply(arg: Pattern): Option[(Pattern, Pattern)] = arg match {
