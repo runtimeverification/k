@@ -1,8 +1,8 @@
 package org.kframework.minikore
 
 import org.apache.commons.lang3.StringEscapeUtils
-import org.kframework.minikore.MiniKore._
-import org.kframework.minikore.PatternInterface.Pattern
+import org.kframework.minikore.MiniKore.{Definition, Module, Sentence, SortDeclaration, SymbolDeclaration, Axiom, Rule, Import, Attributes}
+import org.kframework.minikore.PatternInterface._
 
 /** Function (i.e., unparser) from MiniKore to String. */
 object MiniToText {
@@ -11,14 +11,14 @@ object MiniToText {
   /** Returns a string from [[MiniKore.Definition]]. */
   def apply(d: Definition): String = {
     apply(d.att) + System.lineSeparator() + System.lineSeparator() +
-    d.modules.map(apply).mkString(System.lineSeparator() + System.lineSeparator()) + System.lineSeparator()
+      d.modules.map(apply).mkString(System.lineSeparator() + System.lineSeparator()) + System.lineSeparator()
   }
 
   /** Returns a string from [[MiniKore.Module]]. */
   def apply(m: Module): String = {
     "module " + m.name + System.lineSeparator() +
       m.sentences.map(s => "  " + apply(s)).mkString(System.lineSeparator()) + System.lineSeparator() +
-    "endmodule " + apply(m.att)
+      "endmodule " + apply(m.att)
   }
 
   /** Returns a string from [[MiniKore.Sentence]]. */

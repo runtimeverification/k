@@ -36,10 +36,7 @@ object MiniKore {
 
   case class Application(label: String, args: Seq[i.Pattern]) extends i.Application {
 
-    override def build = (c: Seq[i.Pattern]) => {
-      assert(c.size == args.size)
-      DefaultBuilders.ApplicationBuilder(label, c)
-    }
+    override def build = DefaultBuilders.ApplicationBuilder.apply(label, _)
   }
 
 
