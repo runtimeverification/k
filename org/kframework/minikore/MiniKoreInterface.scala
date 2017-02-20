@@ -143,7 +143,7 @@ object PatternInterface {
 
   import TreeInterface._
 
-  trait Pattern extends AST[Pattern]
+  sealed trait Pattern extends AST[Pattern]
 
   type Sort = String
 
