@@ -11,6 +11,8 @@ import scala.collection._
 object MiniKore {
 
   //Default Implementation
+  
+  trait Pattern extends i.Pattern
 
   type Attributes = Seq[i.Pattern]
 
