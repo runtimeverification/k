@@ -1,7 +1,6 @@
 package org.kframework.minikore
 
 
-import org.kframework.minikore.PatternInterface.{Pattern, Sort}
 import org.kframework.minikore.TreeInterface._
 import org.kframework.minikore.{PatternInterface => i}
 
@@ -35,8 +34,7 @@ object MiniKore {
   }
 
   case class Application(label: String, args: Seq[i.Pattern]) extends i.Application {
-
-    override def build = DefaultBuilders.ApplicationBuilder.apply(label, _)
+    override def build = DefaultBuilders.ApplicationBuilder(label, _)
   }
 
 
@@ -97,7 +95,7 @@ object DefaultBuilders {
 
   object VariableBuilder extends i.VariableBuilder {
 
-    override def apply(name: String, sort: Sort): i.Variable = m.Variable(name, sort)
+    override def apply(name: String, sort: i.Sort): i.Variable = m.Variable(name, sort)
   }
 
   object DomainValueBuilder extends i.DomainValueBuilder {
@@ -105,31 +103,31 @@ object DefaultBuilders {
   }
 
   object AndBuilder extends i.AndBuilder {
-    override def apply(v1: Pattern, v2: Pattern): i.And = m.And(v1, v2)
+    override def apply(v1: i.Pattern, v2: i.Pattern): i.And = m.And(v1, v2)
   }
 
   object OrBuilder extends i.OrBuilder {
-    override def apply(v1: Pattern, v2: Pattern): i.Or = m.Or(v1, v2)
+    override def apply(v1: i.Pattern, v2: i.Pattern): i.Or = m.Or(v1, v2)
   }
 
   object ImpliesBuilder extends i.ImpliesBuilder {
-    override def apply(v1: Pattern, v2: Pattern): i.Implies = m.Implies(v1, v2)
+    override def apply(v1: i.Pattern, v2: i.Pattern): i.Implies = m.Implies(v1, v2)
   }
 
   object RewriteBuilder extends i.RewriteBuilder {
-    override def apply(v1: Pattern, v2: Pattern): i.Rewrite = m.Rewrite(v1, v2)
+    override def apply(v1: i.Pattern, v2: i.Pattern): i.Rewrite = m.Rewrite(v1, v2)
   }
 
   object EqualsBuilder extends i.EqualsBuilder {
-    override def apply(v1: Pattern, v2: Pattern) = m.Equals(v1, v2)
+    override def apply(v1: i.Pattern, v2: i.Pattern) = m.Equals(v1, v2)
   }
 
   object NotBuilder extends i.NotBuilder {
-    override def apply(v1: Pattern): i.Not = m.Not(v1)
+    override def apply(v1: i.Pattern): i.Not = m.Not(v1)
   }
 
   object NextBuilder extends i.NextBuilder {
-    override def apply(v1: Pattern): i.Next = m.Next(v1)
+    override def apply(v1: i.Pattern): i.Next = m.Next(v1)
   }
 
   object TrueBuilder extends i.TrueBuilder {
@@ -141,15 +139,15 @@ object DefaultBuilders {
   }
 
   object ExistsBuilder extends i.ExistsBuilder {
-    override def apply(v1: Pattern, v2: Pattern): i.Exists = m.Exists(v1.asInstanceOf[i.Variable], v2)
+    override def apply(v1: i.Pattern, v2: i.Pattern): i.Exists = m.Exists(v1.asInstanceOf[i.Variable], v2)
   }
 
   object ForAllBuilder extends i.ForAllBuilder {
-    override def apply(v1: Pattern, v2: Pattern): i.ForAll = m.ForAll(v1.asInstanceOf[i.Variable], v2)
+    override def apply(v1: i.Pattern, v2: i.Pattern): i.ForAll = m.ForAll(v1.asInstanceOf[i.Variable], v2)
   }
 
   object ApplicationBuilder extends i.ApplicationBuilder {
-    override def apply(v1: String, v2: Seq[_ <: Pattern]): i.Application = {
+    override def apply(v1: String, v2: Seq[_ <: i.Pattern]): i.Application = {
       m.Application(v1, v2)
     }
   }
