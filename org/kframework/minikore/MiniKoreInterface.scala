@@ -5,13 +5,10 @@ import org.kframework.minikore.PatternInterface._
 
 object TreeInterface {
 
-
   sealed trait AST[T <: AST[T]]
-
 
   sealed trait Node[T <: AST[T]] extends AST[T] with Product {
     def children: Seq[_ <: T]
-
     def build: NodeBuilder[T]
   }
 
@@ -27,18 +24,15 @@ object TreeInterface {
   }
 
   trait Node0Builder[T <: AST[T]] extends NodeBuilder[T] {
-
     def apply(): T
 
     override def apply(children: Seq[_ <: T]) = {
       assert(children.isEmpty)
       apply()
-
     }
   }
 
   trait Node1Builder[T <: AST[T]] extends NodeBuilder[T] {
-
     def apply(p: T): T
 
     override def apply(children: Seq[_ <: T]) = {
@@ -47,9 +41,7 @@ object TreeInterface {
     }
   }
 
-
   trait Node2Builder[T <: AST[T]] extends NodeBuilder[T] {
-
     def apply(p: T, q: T): T
 
     override def apply(children: Seq[_ <: T]) = {
@@ -58,10 +50,8 @@ object TreeInterface {
     }
   }
 
-
   sealed trait Leaf[T <: AST[T], C] extends AST[T] {
     def contents: C
-
     def build: LeafBuilder[T, C]
   }
 
@@ -75,7 +65,6 @@ object TreeInterface {
   trait LeafBuilder[T <: AST[T], C] {
     def apply(contents: C): T
   }
-
 
   trait LabelledNode[L, T <: AST[T]] extends Node[T] {
     def label: L
@@ -92,12 +81,9 @@ object TreeInterface {
     }
   }
 
-
   sealed trait Node0[T <: AST[T]] extends Node[T] {
     override def children = Seq.empty
-
     def build: Node0Builder[T]
-
   }
 
   object Node0 {
@@ -108,9 +94,7 @@ object TreeInterface {
   }
 
   sealed trait Node1[T <: AST[T]] extends Node[T] with Product1[T] {
-
     def build: NodeBuilder[T]
-
     override def children = Seq(_1)
   }
 
@@ -121,13 +105,9 @@ object TreeInterface {
     }
   }
 
-
   sealed trait Node2[T <: AST[T]] extends Node[T] with Product2[T, T] {
-
     override def children = Seq(_1, _2)
-
     def build: Node2Builder[T]
-
   }
 
   object Node2 {
@@ -171,10 +151,7 @@ object PatternInterface {
 
   trait DomainValue extends Pattern with Leaf[Pattern, (String, String)] {
     def label: String
-
     def value: String
-
-
     override def contents = (label, value)
   }
 
