@@ -1,7 +1,8 @@
 package org.kframework.minikore
 
 import org.apache.commons.lang3.StringEscapeUtils
-import org.kframework.minikore.MiniKore.{Definition, DomainValue, Rule, Axiom, SortDeclaration, SymbolDeclaration, Import, Module, Attributes, Sentence}
+import org.kframework.minikore.Build.Builders
+import org.kframework.minikore.MiniKore.{Attributes, Axiom, Definition, DomainValue, Import, Module, Rule, Sentence, SortDeclaration, SymbolDeclaration}
 import org.kframework.minikore.PatternInterface._
 
 /** Parsing error exception. */

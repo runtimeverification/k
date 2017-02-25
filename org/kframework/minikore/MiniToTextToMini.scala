@@ -7,7 +7,7 @@ import org.kframework.minikore.MiniKore.Definition
 
 object MiniToTextToMini {
 
-  def defaultImplemntation: Builders = DefaultBuilders.build
+  def defaultImplemntation: Build.Builders = DefaultBuilders
 
   def apply(d: Definition): Definition = {
     val text = MiniToText.apply(d)
