@@ -5,7 +5,6 @@ import org.kframework.minikore.PatternInterface._
 
 object TreeInterface {
 
-
   sealed trait AST
 
 
@@ -111,9 +110,12 @@ object PatternInterface {
 
   import TreeInterface._
 
+
   sealed trait Pattern extends AST
 
+
   type Sort = String
+
 
   trait Variable extends Pattern with Leaf[(String, Sort)] {
     def name: String
@@ -132,6 +134,7 @@ object PatternInterface {
     def unapply(arg: Variable): Option[(String, Sort)] = Some(arg.name, arg.sort)
   }
 
+
   trait DomainValue extends Pattern with Leaf[(String, String)] {
     def label: String
 
@@ -149,6 +152,7 @@ object PatternInterface {
     def unapply(arg: DomainValue): Option[(String, String)] = Some(arg.label, arg.value)
   }
 
+
   trait True extends Pattern with Node0 {
     override def apply(): True
   }
@@ -157,6 +161,7 @@ object PatternInterface {
   object True {
     def unapply(arg: True): Boolean = true
   }
+
 
   trait False extends Pattern with Node0
 
