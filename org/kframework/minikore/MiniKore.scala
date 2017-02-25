@@ -32,11 +32,9 @@ object MiniKore {
     override def build: i.VariableBuilder = Variable.apply
   }
 
-
   case class Application(label: String, args: Seq[i.Pattern]) extends i.Application {
     override def build = Application(label, _: Seq[i.Pattern])
   }
-
 
   case class DomainValue(label: String, value: String) extends i.DomainValue {
     override def build: i.DomainValueBuilder = DomainValue.apply
@@ -88,6 +86,10 @@ object MiniKore {
     override def build: i.EqualsBuilder = Equals.apply
   }
 
+  object ApplicationBuilder extends i.ApplicationBuilder {
+    def apply(label: String, children: Seq[i.Pattern]) = Application(label, children)
+  }
+
 }
 
 object DefaultBuilders {
@@ -96,7 +98,7 @@ object DefaultBuilders {
 
   def build: Builders = Builders(m.Variable.apply, m.DomainValue.apply, m.True().build, m.False().build,
     m.Not.apply, m.Next.apply, m.Exists.apply, m.ForAll.apply, m.And.apply, m.Or.apply, m.Implies.apply,
-    m.Equals.apply, m.Rewrite.apply, m.Application.apply)
+    m.Equals.apply, m.Rewrite.apply, m.ApplicationBuilder)
 
 }
 
