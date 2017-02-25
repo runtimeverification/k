@@ -27,6 +27,7 @@ object TreeInterface {
     def build(contents: C): Pattern
   }
 
+
   object Leaf {
     def unapply[C](arg: AST): Option[C] = arg match {
       case l: Leaf[C] => Some(l.contents)
@@ -42,6 +43,7 @@ object TreeInterface {
 
     override def build(children: Seq[Pattern]) = apply(label, children)
   }
+
 
   object LabeledNode {
     def unapply[L](arg: AST): Option[(L, Seq[Pattern])] = arg match {
@@ -62,12 +64,14 @@ object TreeInterface {
     }
   }
 
+
   object Node0 {
     def unapply(arg: AST): Boolean = arg match {
       case _: Node0 => true
       case _ => false
     }
   }
+
 
   sealed trait Node1 extends Node with Product1[Pattern] {
     override def children = Seq(_1)
@@ -94,8 +98,8 @@ object TreeInterface {
       assert(children.size == 2)
       apply(children.head, children(1))
     }
-
   }
+
 
   object Node2 {
     def unapply(arg: Node2): Option[(Pattern, Pattern)] = Some(arg._1, arg._2)
@@ -171,8 +175,8 @@ object PatternInterface {
     override val _2 = q
 
     override def apply(p: Pattern, q: Pattern): And
-
   }
+
 
   object And {
     def unapply(arg: And): Option[(Pattern, Pattern)] = Some(arg.p, arg.q)
@@ -196,14 +200,15 @@ object PatternInterface {
     def unapply(arg: Or): Option[(Pattern, Pattern)] = Some(arg.p, arg.q)
   }
 
+
   trait Not extends Pattern with Node1 {
     def p: Pattern
 
     override val _1 = p
 
     override def apply(p: Pattern): Not
-
   }
+
 
   object Not {
     def unapply(arg: Not): Option[Pattern] = Some(arg.p)
@@ -216,7 +221,6 @@ object PatternInterface {
     override def children: Seq[Pattern] = args
 
     override def apply(label: String, children: Seq[Pattern]): Application
-
   }
 
 
@@ -226,6 +230,7 @@ object PatternInterface {
       case _ => None
     }
   }
+
 
   trait Implies extends Pattern with Node2 {
     def p: Pattern
@@ -244,6 +249,7 @@ object PatternInterface {
     def unapply(arg: Implies): Option[(Pattern, Pattern)] = Some(arg.p, arg.q)
   }
 
+
   trait Exists extends Pattern with Node2 {
     def v: Variable
 
@@ -257,6 +263,7 @@ object PatternInterface {
 
     override def apply(p: Pattern, q: Pattern): Exists = apply(v, q)
   }
+
 
   object Exists {
     def unapply(arg: Exists): Option[(Variable, Pattern)] = Some(arg.v, arg.p)
@@ -275,12 +282,13 @@ object PatternInterface {
     def apply(v: Variable, p: Pattern): ForAll
 
     override def apply(p: Pattern, q: Pattern): ForAll = apply(p, q)
-
   }
+
 
   object ForAll {
     def unapply(arg: ForAll): Option[(Variable, Pattern)] = Some(arg.v, arg.p)
   }
+
 
   trait Next extends Pattern with Node1 {
     def p: Pattern
@@ -288,13 +296,13 @@ object PatternInterface {
     override val _1 = p
 
     override def apply(p: Pattern): Next
-
   }
 
 
   object Next {
     def unapply(arg: Next): Option[Pattern] = Some(arg.p)
   }
+
 
   trait Rewrite extends Pattern with Node2 {
     def p: Pattern
@@ -313,6 +321,7 @@ object PatternInterface {
     def unapply(arg: Rewrite): Option[(Pattern, Pattern)] = Some(arg.p, arg.q)
   }
 
+
   trait Equals extends Pattern with Node2 {
     def p: Pattern
 
@@ -323,7 +332,6 @@ object PatternInterface {
     override val _2 = q
 
     override def apply(p: Pattern, q: Pattern): Equals
-
   }
 
 
