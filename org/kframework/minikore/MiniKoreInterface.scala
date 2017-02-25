@@ -266,7 +266,7 @@ object PatternInterface {
 
     def apply(v: Variable, p: Pattern): Exists
 
-    override def apply(p: Pattern, q: Pattern): Exists = apply(v, q)
+    override def apply(p: Pattern, q: Pattern): Exists = apply(p, q)
   }
 
 
