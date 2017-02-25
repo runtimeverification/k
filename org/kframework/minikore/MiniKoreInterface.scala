@@ -28,8 +28,8 @@ object TreeInterface {
 
 
   object Leaf {
-    def unapply[C](arg: AST): Option[C] = arg match {
-      case l: Leaf[C] => Some(l.contents)
+    def unapply(arg: AST): Option[_] = arg match {
+      case l: Leaf[_] => Some(l.contents)
       case _ => None
     }
   }
@@ -45,8 +45,8 @@ object TreeInterface {
 
 
   object LabeledNode {
-    def unapply[L](arg: AST): Option[(L, Seq[Pattern])] = arg match {
-      case l: LabeledNode[L] => Some(l.label, l.children)
+    def unapply[_](arg: AST) : Option[(_, Seq[Pattern])] = arg match {
+      case l: LabeledNode[_] =>  Some(l.label, l.children)
       case _ => None
     }
   }
