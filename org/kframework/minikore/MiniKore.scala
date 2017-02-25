@@ -1,7 +1,6 @@
 package org.kframework.minikore
 
 
-import org.kframework.minikore.PatternInterface.{Equals, Pattern}
 import org.kframework.minikore.{PatternInterface => i}
 
 import scala.collection._
@@ -34,14 +33,15 @@ object MiniKore {
   }
 
   case class Application(label: String, args: Seq[i.Pattern]) extends i.Application {
-    override def apply(label: String, children: Seq[i.Pattern]): Application = Application(label, children)
+    override def apply(label: String, children: Seq[i.Pattern]): Application =
+      Application(label, children)
   }
 
   case class DomainValue(label: String, value: String) extends i.DomainValue {
     override def apply(label: String, value: String): DomainValue = DomainValue(label, value)
   }
 
-  case class True() extends i.True{
+  case class True() extends i.True {
     override def apply(): True = True()
   }
 

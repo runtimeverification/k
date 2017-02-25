@@ -70,7 +70,6 @@ object TreeInterface {
   }
 
   sealed trait Node1 extends Node with Product1[Pattern] {
-
     override def children = Seq(_1)
 
     def apply(p: Pattern): Pattern
@@ -87,7 +86,6 @@ object TreeInterface {
 
 
   sealed trait Node2 extends Node with Product2[Pattern, Pattern] {
-
     override def children = Seq(_1, _2)
 
     def apply(p: Pattern, q: Pattern): Pattern
@@ -213,7 +211,6 @@ object PatternInterface {
 
 
   trait Application extends Pattern with LabeledNode[String] {
-
     def args: Seq[Pattern]
 
     override def children: Seq[Pattern] = args
@@ -231,7 +228,6 @@ object PatternInterface {
   }
 
   trait Implies extends Pattern with Node2 {
-
     def p: Pattern
 
     def q: Pattern
