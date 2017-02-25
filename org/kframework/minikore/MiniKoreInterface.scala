@@ -153,21 +153,21 @@ object PatternInterface {
   }
 
 
-  trait True extends Pattern with Node0 {
-    override def apply(): True
+  trait Top extends Pattern with Node0 {
+    override def apply(): Top
   }
 
 
-  object True {
-    def unapply(arg: True): Boolean = true
+  object Top {
+    def unapply(arg: Top): Boolean = true
   }
 
 
-  trait False extends Pattern with Node0
+  trait Bottom extends Pattern with Node0
 
 
-  object False {
-    def unapply(arg: False): Boolean = true
+  object Bottom {
+    def unapply(arg: Bottom): Boolean = true
   }
 
   trait And extends Pattern with Node2 {
@@ -266,7 +266,7 @@ object PatternInterface {
 
     def apply(v: Variable, p: Pattern): Exists
 
-    override def apply(p: Pattern, q: Pattern): Exists = apply(p, q)
+    override def apply(p: Pattern, q: Pattern): Exists = apply(p.asInstanceOf[Variable], q)
   }
 
 
@@ -286,7 +286,7 @@ object PatternInterface {
 
     def apply(v: Variable, p: Pattern): ForAll
 
-    override def apply(p: Pattern, q: Pattern): ForAll = apply(p, q)
+    override def apply(p: Pattern, q: Pattern): ForAll = apply(p.asInstanceOf[Variable], q)
   }
 
 
@@ -354,9 +354,9 @@ object Build {
 
     def DomainValue(label: String, value: String): DomainValue
 
-    def True(): True
+    def Top(): Top
 
-    def False(): False
+    def Bottom(): Bottom
 
     def Not(p: Pattern): Not
 

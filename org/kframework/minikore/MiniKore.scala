@@ -41,12 +41,12 @@ object MiniKore {
     override def apply(label: String, value: String): DomainValue = DomainValue(label, value)
   }
 
-  case class True() extends i.True {
-    override def apply(): True = True()
+  case class Top() extends i.Top {
+    override def apply(): Top = Top()
   }
 
-  case class False() extends i.False {
-    override def apply(): i.Pattern = False()
+  case class Bottom() extends i.Bottom {
+    override def apply(): i.Pattern = Bottom()
   }
 
   case class And(p: i.Pattern, q: i.Pattern) extends i.And {
@@ -95,9 +95,9 @@ object DefaultBuilders extends Build.Builders {
 
   override def DomainValue(label: String, value: String): i.DomainValue = m.DomainValue(label, value)
 
-  override def True(): i.True = m.True()
+  override def Top(): i.Top = m.Top()
 
-  override def False(): i.False = m.False()
+  override def Bottom(): i.Bottom = m.Bottom()
 
   override def Not(p: i.Pattern): i.Not = m.Not(p)
 

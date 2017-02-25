@@ -40,8 +40,8 @@ object MiniToText {
     case Variable(name, sort) => apply(name) + ":" + apply(sort)
     case Application(label, args) => apply(label) + "(" + args.map(apply).mkString(",") + ")"
     case DomainValue(label, value) => apply(label) + "(\"" + StringEscapeUtils.escapeJava(value) + "\")"
-    case True() => "\\true()"
-    case False() => "\\false()"
+    case Top() => "\\true()"
+    case Bottom() => "\\false()"
     case And(p, q) => "\\and(" + apply(p) + "," + apply(q) + ")"
     case Or(p, q) => "\\or(" + apply(p) + "," + apply(q) + ")"
     case Not(p) => "\\not(" + apply(p) + ")"
