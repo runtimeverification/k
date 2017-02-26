@@ -1,7 +1,6 @@
 package org.kframework.minikore
 
 
-import org.kframework.minikore.PatternInterface.Top
 import org.kframework.minikore.{PatternInterface => i}
 
 import scala.collection._
