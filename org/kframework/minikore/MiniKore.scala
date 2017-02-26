@@ -28,15 +28,11 @@ object MiniKore {
 
   case class Axiom(pattern: i.Pattern, att: Attributes) extends Sentence
 
-  case class Variable(name: String, sort: i.Sort) extends i.Variable {
-    override def apply(name: String, sort: String): Variable = Variable(name, sort)
-  }
+  case class Variable(_1: i.Name, _2: i.Sort) extends i.Variable
 
-  case class DomainValue(label: String, value: String) extends i.DomainValue {
-    override def apply(label: String, value: String): DomainValue = DomainValue(label, value)
-  }
+  case class DomainValue(_1: i.Label, _2: i.Value) extends i.DomainValue
 
-  case class Application(_1: String, args: Seq[i.Pattern]) extends i.Application
+  case class Application(_1: i.Label, args: Seq[i.Pattern]) extends i.Application
 
   case class Top() extends i.Top
 
@@ -66,9 +62,9 @@ object DefaultBuilders extends Build.Builders {
 
   import org.kframework.minikore.{MiniKore => m}
 
-  override def Variable(name: String, sort: i.Sort): i.Variable = m.Variable(name, sort)
+  override def Variable(_1: i.Name, _2: i.Sort): i.Variable = m.Variable(_1, _2)
 
-  override def DomainValue(label: String, value: String): i.DomainValue = m.DomainValue(label, value)
+  override def DomainValue(_1: i.Label, _2: i.Value): i.DomainValue = m.DomainValue(_1, _2)
 
   override def Top(): i.Top = m.Top()
 
@@ -92,7 +88,7 @@ object DefaultBuilders extends Build.Builders {
 
   override def Rewrite(_1: i.Pattern, _2: i.Pattern): i.Rewrite = m.Rewrite(_1, _2)
 
-  override def Application(_1: String, args: Seq[i.Pattern]): m.Application = m.Application(_1, args)
+  override def Application(_1: i.Label, args: Seq[i.Pattern]): m.Application = m.Application(_1, args)
 }
 
 

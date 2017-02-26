@@ -20,16 +20,26 @@ object TreeInterface {
   }
 
 
-  sealed trait Leaf[C] extends AST with Product1[C] {
-    def build(_1: C): Pattern
+  sealed trait Leaf[C] extends AST with Product {
+    def contents: C
+
+    def build(contents: C): Pattern
   }
 
 
   object Leaf {
     def unapply(arg: AST): Option[_] = arg match {
-      case l: Leaf[_] => Some(l._1)
+      case l: Leaf[_] => Some(l.contents)
       case _ => None
     }
+  }
+
+  sealed trait Leaf2[CC] extends Leaf[Product2[CC, CC]] with Product2[CC, CC] {
+    override def contents: Product2[CC, CC] = (_1, _2)
+
+    def apply(_1: CC, _2: CC): Pattern
+
+    override def build(contents: Product2[CC, CC]): Pattern = apply(contents._1, contents._2)
   }
 
 
@@ -113,43 +123,32 @@ object PatternInterface {
 
   sealed trait Pattern extends AST
 
+  type Name = String
 
   type Sort = String
 
 
-  trait Variable extends Pattern with Leaf[(String, Sort)] {
-    def name: String
-
-    def sort: Sort
-
-    override val _1: (String, Sort) = (name, sort)
-
-    def apply(name: String, sort: String): Variable
-
-    override def build(contents: (String, Sort)) = apply(contents._1, contents._2)
+  trait Variable extends Pattern with Leaf2[String] {
+    def apply(_1: Name, _2: Sort): Variable
   }
 
 
   object Variable {
-    def unapply(arg: Variable): Option[(String, Sort)] = Some(arg.name, arg.sort)
+    def unapply(arg: Variable): Option[(Name, Sort)] = Some(arg._1, arg._2)
   }
 
+  type Label = String
 
-  trait DomainValue extends Pattern with Leaf[(String, String)] {
-    def label: String
+  type Value = String
 
-    def value: String
 
-    def apply(label: String, value: String): DomainValue
-
-    override val _1: (String, String) = (label, value)
-
-    override def build(contents: (String, String)) = apply(contents._1, contents._2)
+  trait DomainValue extends Pattern with Leaf2[String] {
+    def apply(_1: Label, _2: Value): DomainValue
   }
 
 
   object DomainValue {
-    def unapply(arg: DomainValue): Option[(String, String)] = Some(arg.label, arg.value)
+    def unapply(arg: DomainValue): Option[(Label, Value)] = Some(arg._1, arg._2)
   }
 
 
@@ -200,13 +199,13 @@ object PatternInterface {
   }
 
 
-  trait Application extends Pattern with LabeledNode[String] {
-    override def apply(_1: String, args: Seq[Pattern]): Application
+  trait Application extends Pattern with LabeledNode[Label] {
+    override def apply(_1: Label, args: Seq[Pattern]): Application
   }
 
 
   object Application {
-    def unapply(arg: Pattern): Option[(String, Seq[Pattern])] = arg match {
+    def unapply(arg: Pattern): Option[(Label, Seq[Pattern])] = arg match {
       case a: Application => Some(a._1, a.args)
       case _ => None
     }
@@ -286,9 +285,9 @@ object Build {
 
   trait Builders {
 
-    def Variable(name: String, sort: Sort): Variable
+    def Variable(_1: Name, _2: Sort): Variable
 
-    def DomainValue(label: String, value: String): DomainValue
+    def DomainValue(_1: Label, _2: Sort): DomainValue
 
     def Top(): Top
 
@@ -312,7 +311,7 @@ object Build {
 
     def Rewrite(_1: Pattern, _2: Pattern): Rewrite
 
-    def Application(s: String, args: Seq[Pattern]): Application
+    def Application(_1: Label, args: Seq[Pattern]): Application
   }
 
 }
