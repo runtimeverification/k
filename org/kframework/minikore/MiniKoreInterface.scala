@@ -8,7 +8,7 @@ object TreeInterface {
   sealed trait AST
 
 
-  sealed trait Node extends AST with Product {
+  sealed trait Node extends AST {
     def children: Seq[Pattern]
 
     def build(children: Seq[Pattern]): Pattern
@@ -72,8 +72,7 @@ object TreeInterface {
   }
 
 
-  sealed trait Node1 extends Node with Product1[Pattern] {
-    override def children = Seq(_1)
+  sealed trait Node1 extends Node {
 
     def apply(p: Pattern): Pattern
 
@@ -84,12 +83,11 @@ object TreeInterface {
   }
 
   object Node1 {
-    def unapply(arg: Node1): Option[Pattern] = Some(arg._1)
+    def unapply(arg: Node1): Option[Pattern] = Some(arg.children.head)
   }
 
 
-  sealed trait Node2 extends Node with Product2[Pattern, Pattern] {
-    override def children = Seq(_1, _2)
+  sealed trait Node2 extends Node {
 
     def apply(p: Pattern, q: Pattern): Pattern
 
@@ -101,7 +99,7 @@ object TreeInterface {
 
 
   object Node2 {
-    def unapply(arg: Node2): Option[(Pattern, Pattern)] = Some(arg._1, arg._2)
+    def unapply(arg: Node2): Option[(Pattern, Pattern)] = Some(arg.children.head, arg.children(1))
   }
 
 }
@@ -175,9 +173,7 @@ object PatternInterface {
 
     def q: Pattern
 
-    override val _1 = p
-
-    override val _2 = q
+    override def children = Seq(p, q)
 
     override def apply(p: Pattern, q: Pattern): And
   }
@@ -193,9 +189,7 @@ object PatternInterface {
 
     def q: Pattern
 
-    override val _1 = p
-
-    override val _2 = q
+    override def children = Seq(p, q)
 
     override def apply(p: Pattern, q: Pattern): Or
   }
@@ -209,7 +203,7 @@ object PatternInterface {
   trait Not extends Pattern with Node1 {
     def p: Pattern
 
-    override val _1 = p
+    override def children = Seq(p)
 
     override def apply(p: Pattern): Not
   }
@@ -242,9 +236,7 @@ object PatternInterface {
 
     def q: Pattern
 
-    override val _1 = p
-
-    override val _2 = q
+    override def children = Seq(p, q)
 
     override def apply(p: Pattern, q: Pattern): Implies
   }
@@ -260,9 +252,7 @@ object PatternInterface {
 
     def p: Pattern
 
-    override val _1 = v
-
-    override val _2 = p
+    override def children = Seq(v, p)
 
     def apply(v: Variable, p: Pattern): Exists
 
@@ -280,9 +270,7 @@ object PatternInterface {
 
     def p: Pattern
 
-    override val _1 = v
-
-    override val _2 = p
+    override def children = Seq(v, p)
 
     def apply(v: Variable, p: Pattern): ForAll
 
@@ -298,7 +286,7 @@ object PatternInterface {
   trait Next extends Pattern with Node1 {
     def p: Pattern
 
-    override val _1 = p
+    override def children = Seq(p)
 
     override def apply(p: Pattern): Next
   }
@@ -314,9 +302,7 @@ object PatternInterface {
 
     def q: Pattern
 
-    override val _1 = p
-
-    override val _2 = q
+    override def children = Seq(p, q)
 
     override def apply(p: Pattern, q: Pattern): Rewrite
   }
@@ -332,9 +318,7 @@ object PatternInterface {
 
     def q: Pattern
 
-    override val _1 = p
-
-    override val _2 = q
+    override def children = Seq(p, q)
 
     override def apply(p: Pattern, q: Pattern): Equals
   }
