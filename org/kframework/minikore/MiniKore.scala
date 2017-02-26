@@ -32,58 +32,33 @@ object MiniKore {
     override def apply(name: String, sort: String): Variable = Variable(name, sort)
   }
 
-  case class Application(label: String, args: Seq[i.Pattern]) extends i.Application {
-    override def apply(label: String, children: Seq[i.Pattern]): Application =
-      Application(label, children)
-  }
+  case class Application(label: String, args: Seq[i.Pattern]) extends i.Application
 
   case class DomainValue(label: String, value: String) extends i.DomainValue {
     override def apply(label: String, value: String): DomainValue = DomainValue(label, value)
   }
 
-  case class Top() extends i.Top {
-    override def apply(): Top = Top()
-  }
+  case class Top() extends i.Top
 
-  case class Bottom() extends i.Bottom {
-    override def apply(): i.Pattern = Bottom()
-  }
+  case class Bottom() extends i.Bottom
 
-  case class And(p: i.Pattern, q: i.Pattern) extends i.And {
-    override def apply(p: i.Pattern, q: i.Pattern): And = And(p, q)
-  }
+  case class And(_1: i.Pattern, _2: i.Pattern) extends i.And
 
-  case class Or(p: i.Pattern, q: i.Pattern) extends i.Or {
-    override def apply(p: i.Pattern, q: i.Pattern): Or = Or(p, q)
-  }
+  case class Or(_1: i.Pattern, _2: i.Pattern) extends i.Or
 
-  case class Not(p: i.Pattern) extends i.Not {
-    override def apply(p: i.Pattern): Not = Not(p)
-  }
+  case class Not(_1: i.Pattern) extends i.Not
 
-  case class Implies(p: i.Pattern, q: i.Pattern) extends i.Implies {
-    override def apply(p: i.Pattern, q: i.Pattern): Implies = Implies(p, q)
-  }
+  case class Implies(_1: i.Pattern, _2: i.Pattern) extends i.Implies
 
-  case class Exists(v: i.Variable, p: i.Pattern) extends i.Exists {
-    override def apply(v: i.Variable, p: i.Pattern): Exists = Exists(v, p)
-  }
+  case class Exists(_1: i.Variable, _2: i.Pattern) extends i.Exists
 
-  case class ForAll(v: i.Variable, p: i.Pattern) extends i.ForAll {
-    override def apply(v: i.Variable, p: i.Pattern): ForAll = ForAll(v, p)
-  }
+  case class ForAll(_1: i.Variable, _2: i.Pattern) extends i.ForAll
 
-  case class Next(p: i.Pattern) extends i.Next {
-    override def apply(p: i.Pattern): Next = Next(p)
-  }
+  case class Next(_1: i.Pattern) extends i.Next
 
-  case class Rewrite(p: i.Pattern, q: i.Pattern) extends i.Rewrite {
-    override def apply(p: i.Pattern, q: i.Pattern): Rewrite = Rewrite(p, q)
-  }
+  case class Rewrite(_1: i.Pattern, _2: i.Pattern) extends i.Rewrite
 
-  case class Equals(p: i.Pattern, q: i.Pattern) extends i.Equals {
-    override def apply(p: i.Pattern, q: i.Pattern): Equals = Equals(p, q)
-  }
+  case class Equals(_1: i.Pattern, _2: i.Pattern) extends i.Equals
 
 }
 
@@ -99,23 +74,23 @@ object DefaultBuilders extends Build.Builders {
 
   override def Bottom(): i.Bottom = m.Bottom()
 
-  override def Not(p: i.Pattern): i.Not = m.Not(p)
+  override def Not(_1: i.Pattern): i.Not = m.Not(_1)
 
-  override def Next(p: i.Pattern): i.Next = m.Next(p)
+  override def Next(_1: i.Pattern): i.Next = m.Next(_1)
 
-  override def And(p: i.Pattern, q: i.Pattern): i.And = m.And(p, q)
+  override def And(_1: i.Pattern, _2: i.Pattern): i.And = m.And(_1, _2)
 
-  override def Or(p: i.Pattern, q: i.Pattern): i.Or = m.Or(p, q)
+  override def Or(_1: i.Pattern, _2: i.Pattern): i.Or = m.Or(_1, _2)
 
-  override def Implies(p: i.Pattern, q: i.Pattern): i.Implies = m.Implies(p, q)
+  override def Implies(_1: i.Pattern, _2: i.Pattern): i.Implies = m.Implies(_1, _2)
 
-  override def Equals(p: i.Pattern, q: i.Pattern): i.Equals = m.Equals(p, q)
+  override def Equals(_1: i.Pattern, _2: i.Pattern): i.Equals = m.Equals(_1, _2)
 
-  override def Exists(v: i.Variable, p: i.Pattern): i.Exists = m.Exists(v, p)
+  override def Exists(_1: i.Variable, _2: i.Pattern): i.Exists = m.Exists(_1, _2)
 
-  override def ForAll(v: i.Variable, p: i.Pattern): i.ForAll = m.ForAll(v, p)
+  override def ForAll(_1: i.Variable, _2: i.Pattern): i.ForAll = m.ForAll(_1, _2)
 
-  override def Rewrite(p: i.Pattern, q: i.Pattern): i.Rewrite = m.Rewrite(p, q)
+  override def Rewrite(_1: i.Pattern, _2: i.Pattern): i.Rewrite = m.Rewrite(_1, _2)
 
   override def Application(s: String, args: Seq[i.Pattern]): m.Application = m.Application(s, args)
 }

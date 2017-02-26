@@ -8,28 +8,26 @@ object TreeInterface {
   sealed trait AST
 
 
-  sealed trait Node extends AST {
-    def children: Seq[Pattern]
+  sealed trait Node extends AST with Product {
+    def args: Seq[Pattern]
 
     def build(children: Seq[Pattern]): Pattern
   }
 
 
   object Node {
-    def unapply(arg: Node): Option[Seq[Pattern]] = Some(arg.children)
+    def unapply(arg: Node): Option[Seq[Pattern]] = Some(arg.args)
   }
 
 
-  sealed trait Leaf[C] extends AST {
-    def contents: C
-
-    def build(contents: C): Pattern
+  sealed trait Leaf[C] extends AST with Product1[C] {
+    def build(_1: C): Pattern
   }
 
 
   object Leaf {
     def unapply(arg: AST): Option[_] = arg match {
-      case l: Leaf[_] => Some(l.contents)
+      case l: Leaf[_] => Some(l._1)
       case _ => None
     }
   }
@@ -45,15 +43,15 @@ object TreeInterface {
 
 
   object LabeledNode {
-    def unapply[_](arg: AST) : Option[(_, Seq[Pattern])] = arg match {
-      case l: LabeledNode[_] =>  Some(l.label, l.children)
+    def unapply[_](arg: AST): Option[(_, Seq[Pattern])] = arg match {
+      case l: LabeledNode[_] => Some(l.label, l.args)
       case _ => None
     }
   }
 
 
   sealed trait Node0 extends Node {
-    override def children = Seq.empty[Pattern]
+    override def args = Seq.empty[Pattern]
 
     def apply(): Pattern
 
@@ -72,9 +70,11 @@ object TreeInterface {
   }
 
 
-  sealed trait Node1 extends Node {
+  sealed trait Node1 extends Node with Product1[Pattern] {
 
-    def apply(p: Pattern): Pattern
+    override def args = Seq(_1)
+
+    def apply(_1: Pattern): Pattern
 
     override def build(children: Seq[Pattern]) = {
       assert(children.size == 1)
@@ -83,13 +83,15 @@ object TreeInterface {
   }
 
   object Node1 {
-    def unapply(arg: Node1): Option[Pattern] = Some(arg.children.head)
+    def unapply(arg: Node1): Option[Pattern] = Some(arg._1)
   }
 
 
-  sealed trait Node2 extends Node {
+  sealed trait Node2 extends Node with Product2[Pattern, Pattern] {
 
-    def apply(p: Pattern, q: Pattern): Pattern
+    def apply(_1: Pattern, _2: Pattern): Pattern
+
+    override def args = Seq(_1, _2)
 
     override def build(children: Seq[Pattern]) = {
       assert(children.size == 2)
@@ -99,7 +101,7 @@ object TreeInterface {
 
 
   object Node2 {
-    def unapply(arg: Node2): Option[(Pattern, Pattern)] = Some(arg.children.head, arg.children(1))
+    def unapply(arg: Node2): Option[(Pattern, Pattern)] = Some(arg._1, arg._2)
   }
 
 }
@@ -120,11 +122,11 @@ object PatternInterface {
 
     def sort: Sort
 
-    override def contents: (String, Sort) = (name, sort)
+    override val _1: (String, Sort) = (name, sort)
 
     def apply(name: String, sort: String): Variable
 
-    override def build(contents: (String, Sort)) = apply(name, sort)
+    override def build(contents: (String, Sort)) = apply(contents._1, contents._2)
   }
 
 
@@ -140,7 +142,7 @@ object PatternInterface {
 
     def apply(label: String, value: String): DomainValue
 
-    override def contents: (String, String) = (label, value)
+    override val _1: (String, String) = (label, value)
 
     override def build(contents: (String, String)) = apply(contents._1, contents._2)
   }
@@ -169,57 +171,37 @@ object PatternInterface {
   }
 
   trait And extends Pattern with Node2 {
-    def p: Pattern
-
-    def q: Pattern
-
-    override def children = Seq(p, q)
-
-    override def apply(p: Pattern, q: Pattern): And
+    override def apply(_1: Pattern, _2: Pattern): And
   }
 
 
   object And {
-    def unapply(arg: And): Option[(Pattern, Pattern)] = Some(arg.p, arg.q)
+    def unapply(arg: And): Option[(Pattern, Pattern)] = Some(arg._1, arg._2)
   }
 
 
   trait Or extends Pattern with Node2 {
-    def p: Pattern
-
-    def q: Pattern
-
-    override def children = Seq(p, q)
-
-    override def apply(p: Pattern, q: Pattern): Or
+    override def apply(_1: Pattern, _2: Pattern): Or
   }
 
 
   object Or {
-    def unapply(arg: Or): Option[(Pattern, Pattern)] = Some(arg.p, arg.q)
+    def unapply(arg: Or): Option[(Pattern, Pattern)] = Some(arg._1, arg._2)
   }
 
 
   trait Not extends Pattern with Node1 {
-    def p: Pattern
-
-    override def children = Seq(p)
-
-    override def apply(p: Pattern): Not
+    override def apply(_1: Pattern): Not
   }
 
 
   object Not {
-    def unapply(arg: Not): Option[Pattern] = Some(arg.p)
+    def unapply(arg: Not): Option[Pattern] = Some(arg._1)
   }
 
 
   trait Application extends Pattern with LabeledNode[String] {
-    def args: Seq[Pattern]
-
-    override def children: Seq[Pattern] = args
-
-    override def apply(label: String, children: Seq[Pattern]): Application
+    override def apply(label: String, args: Seq[Pattern]): Application
   }
 
 
@@ -232,100 +214,70 @@ object PatternInterface {
 
 
   trait Implies extends Pattern with Node2 {
-    def p: Pattern
-
-    def q: Pattern
-
-    override def children = Seq(p, q)
-
-    override def apply(p: Pattern, q: Pattern): Implies
+    override def apply(_1: Pattern, _2: Pattern): Implies
   }
 
 
   object Implies {
-    def unapply(arg: Implies): Option[(Pattern, Pattern)] = Some(arg.p, arg.q)
+    def unapply(arg: Implies): Option[(Pattern, Pattern)] = Some(arg._1, arg._2)
   }
 
 
   trait Exists extends Pattern with Node2 {
-    def v: Variable
+    override val _1: Variable
 
-    def p: Pattern
+    def apply(_1: Variable, _2: Pattern): Exists
 
-    override def children = Seq(v, p)
-
-    def apply(v: Variable, p: Pattern): Exists
-
-    override def apply(p: Pattern, q: Pattern): Exists = apply(p.asInstanceOf[Variable], q)
+    override def apply(_1: Pattern, _2: Pattern): Exists = apply(_1.asInstanceOf[Variable], _2)
   }
 
 
   object Exists {
-    def unapply(arg: Exists): Option[(Variable, Pattern)] = Some(arg.v, arg.p)
+    def unapply(arg: Exists): Option[(Variable, Pattern)] = Some(arg._1, arg._2)
   }
 
 
   trait ForAll extends Pattern with Node2 {
-    def v: Variable
+    override val _1: Variable
 
-    def p: Pattern
+    def apply(_1: Variable, _2: Pattern): ForAll
 
-    override def children = Seq(v, p)
-
-    def apply(v: Variable, p: Pattern): ForAll
-
-    override def apply(p: Pattern, q: Pattern): ForAll = apply(p.asInstanceOf[Variable], q)
+    override def apply(_1: Pattern, _2: Pattern): ForAll = apply(_1.asInstanceOf[Variable], _2)
   }
 
 
   object ForAll {
-    def unapply(arg: ForAll): Option[(Variable, Pattern)] = Some(arg.v, arg.p)
+    def unapply(arg: ForAll): Option[(Variable, Pattern)] = Some(arg._1, arg._2)
   }
 
 
   trait Next extends Pattern with Node1 {
-    def p: Pattern
-
-    override def children = Seq(p)
-
-    override def apply(p: Pattern): Next
+    override def apply(_1: Pattern): Next
   }
 
 
   object Next {
-    def unapply(arg: Next): Option[Pattern] = Some(arg.p)
+    def unapply(arg: Next): Option[Pattern] = Some(arg._1)
   }
 
 
   trait Rewrite extends Pattern with Node2 {
-    def p: Pattern
-
-    def q: Pattern
-
-    override def children = Seq(p, q)
-
-    override def apply(p: Pattern, q: Pattern): Rewrite
+    override def apply(_1: Pattern, _2: Pattern): Rewrite
   }
 
 
   object Rewrite {
-    def unapply(arg: Rewrite): Option[(Pattern, Pattern)] = Some(arg.p, arg.q)
+    def unapply(arg: Rewrite): Option[(Pattern, Pattern)] = Some(arg._1, arg._2)
   }
 
 
   trait Equals extends Pattern with Node2 {
-    def p: Pattern
-
-    def q: Pattern
-
-    override def children = Seq(p, q)
-
-    override def apply(p: Pattern, q: Pattern): Equals
+    override def apply(_1: Pattern, _2: Pattern): Equals
   }
 
 
   object Equals {
-    def unapply(arg: Equals): Option[(Pattern, Pattern)] = Some(arg.p, arg.q)
+    def unapply(arg: Equals): Option[(Pattern, Pattern)] = Some(arg._1, arg._2)
   }
 
 }
@@ -342,23 +294,23 @@ object Build {
 
     def Bottom(): Bottom
 
-    def Not(p: Pattern): Not
+    def Not(_1: Pattern): Not
 
-    def Next(p: Pattern): Next
+    def Next(_1: Pattern): Next
 
-    def And(p: Pattern, q: Pattern): And
+    def And(_1: Pattern, _2: Pattern): And
 
-    def Or(p: Pattern, q: Pattern): Or
+    def Or(_1: Pattern, _2: Pattern): Or
 
-    def Implies(p: Pattern, q: Pattern): Implies
+    def Implies(_1: Pattern, _2: Pattern): Implies
 
-    def Equals(p: Pattern, q: Pattern): Equals
+    def Equals(_1: Pattern, _2: Pattern): Equals
 
-    def Exists(v: Variable, p: Pattern): Exists
+    def Exists(_1: Variable, _2: Pattern): Exists
 
-    def ForAll(v: Variable, p: Pattern): ForAll
+    def ForAll(_1: Variable, _2: Pattern): ForAll
 
-    def Rewrite(p: Pattern, q: Pattern): Rewrite
+    def Rewrite(_1: Pattern, _2: Pattern): Rewrite
 
     def Application(s: String, args: Seq[Pattern]): Application
   }
