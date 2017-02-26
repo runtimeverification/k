@@ -33,18 +33,18 @@ object TreeInterface {
   }
 
 
-  trait LabeledNode[L] extends Node {
-    def label: L
+  trait LabeledNode[L] extends Node with Product1[L] {
+    override val _1: L
 
-    def apply(label: L, children: Seq[Pattern]): Pattern
+    def apply(_1: L, args: Seq[Pattern]): Pattern
 
-    override def build(children: Seq[Pattern]) = apply(label, children)
+    override def build(args: Seq[Pattern]): Pattern = apply(_1, args)
   }
 
 
   object LabeledNode {
     def unapply[_](arg: AST): Option[(_, Seq[Pattern])] = arg match {
-      case l: LabeledNode[_] => Some(l.label, l.args)
+      case l: LabeledNode[_] => Some(l._1, l.args)
       case _ => None
     }
   }
@@ -201,13 +201,13 @@ object PatternInterface {
 
 
   trait Application extends Pattern with LabeledNode[String] {
-    override def apply(label: String, args: Seq[Pattern]): Application
+    override def apply(_1: String, args: Seq[Pattern]): Application
   }
 
 
   object Application {
     def unapply(arg: Pattern): Option[(String, Seq[Pattern])] = arg match {
-      case a: Application => Some(a.label, a.args)
+      case a: Application => Some(a._1, a.args)
       case _ => None
     }
   }

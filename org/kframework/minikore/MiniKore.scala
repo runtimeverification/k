@@ -32,11 +32,11 @@ object MiniKore {
     override def apply(name: String, sort: String): Variable = Variable(name, sort)
   }
 
-  case class Application(label: String, args: Seq[i.Pattern]) extends i.Application
-
   case class DomainValue(label: String, value: String) extends i.DomainValue {
     override def apply(label: String, value: String): DomainValue = DomainValue(label, value)
   }
+
+  case class Application(_1: String, args: Seq[i.Pattern]) extends i.Application
 
   case class Top() extends i.Top
 
@@ -92,7 +92,7 @@ object DefaultBuilders extends Build.Builders {
 
   override def Rewrite(_1: i.Pattern, _2: i.Pattern): i.Rewrite = m.Rewrite(_1, _2)
 
-  override def Application(s: String, args: Seq[i.Pattern]): m.Application = m.Application(s, args)
+  override def Application(_1: String, args: Seq[i.Pattern]): m.Application = m.Application(_1, args)
 }
 
 
