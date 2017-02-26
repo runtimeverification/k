@@ -42,6 +42,12 @@ object TreeInterface {
     override def build(contents: Product2[CC, CC]): Pattern = apply(contents._1, contents._2)
   }
 
+  object Leaf2 {
+    def unapply[_](args: AST): Option[(_, _)] = args match {
+      case l: Leaf2[_] => Some(l._1, l._2)
+      case _ => None
+    }
+  }
 
   trait LabeledNode[L] extends Node with Product1[L] {
     override val _1: L
