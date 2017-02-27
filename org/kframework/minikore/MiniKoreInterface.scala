@@ -26,27 +26,20 @@ object TreeInterface {
     def build(contents: C): Pattern
   }
 
-
   object Leaf {
-    def unapply(arg: AST): Option[_] = arg match {
-      case l: Leaf[_] => Some(l.contents)
-      case _ => None
-    }
+    def unapply(arg: Leaf[_]): Option[_] = Some(arg.contents)
   }
 
-  sealed trait Leaf2[CC] extends Leaf[Product2[CC, CC]] with Product2[CC, CC] {
-    override def contents: Product2[CC, CC] = (_1, _2)
+  sealed trait Leaf2[CC1, CC2] extends Leaf[Product2[CC1, CC2]] with Product2[CC1, CC2] {
+    override def contents: Product2[CC1, CC2] = (_1, _2)
 
-    def apply(_1: CC, _2: CC): Pattern
+    def apply(_1: CC1, _2: CC2): Pattern
 
-    override def build(contents: Product2[CC, CC]): Pattern = apply(contents._1, contents._2)
+    override def build(contents: Product2[CC1, CC2]): Pattern = apply(contents._1, contents._2)
   }
 
   object Leaf2 {
-    def unapply[_](args: AST): Option[(_, _)] = args match {
-      case l: Leaf2[_] => Some(l._1, l._2)
-      case _ => None
-    }
+    def unapply(arg: Leaf2[_, _]): Option[(_, _)] = Some(arg._1, arg._2)
   }
 
   trait LabeledNode[L] extends Node with Product1[L] {
@@ -57,14 +50,9 @@ object TreeInterface {
     override def build(args: Seq[Pattern]): Pattern = apply(_1, args)
   }
 
-
   object LabeledNode {
-    def unapply[_](arg: AST): Option[(_, Seq[Pattern])] = arg match {
-      case l: LabeledNode[_] => Some(l._1, l.args)
-      case _ => None
-    }
+    def unapply(arg: LabeledNode[_]): Option[(_, Seq[Pattern])] = Some(arg._1, arg.args)
   }
-
 
   sealed trait Node0 extends Node {
     override def args = Seq.empty[Pattern]
@@ -79,10 +67,7 @@ object TreeInterface {
 
 
   object Node0 {
-    def unapply(arg: AST): Boolean = arg match {
-      case _: Node0 => true
-      case _ => false
-    }
+    def unapply(arg: Node0): Boolean = true
   }
 
 
@@ -100,6 +85,21 @@ object TreeInterface {
 
   object Node1 {
     def unapply(arg: Node1): Option[Pattern] = Some(arg._1)
+  }
+
+  sealed trait BinderNode extends Node with Product2[Variable, Pattern] {
+    def apply(_1: Variable, _2: Pattern): Pattern
+
+    override def args = Seq(_1, _2)
+
+    override def build(children: Seq[Pattern]): Pattern = {
+      assert(children.size == 2)
+      apply(children.head.asInstanceOf[Variable], children(1))
+    }
+  }
+
+  object BinderNode {
+    def unapply(arg: BinderNode): Option[(Variable, Pattern)] = Some(arg._1, arg._2)
   }
 
 
@@ -134,8 +134,9 @@ object PatternInterface {
   type Sort = String
 
 
-  trait Variable extends Pattern with Leaf2[String] {
+  trait Variable extends Pattern with Leaf2[Name, Sort] {
     def apply(_1: Name, _2: Sort): Variable
+
   }
 
 
@@ -148,7 +149,7 @@ object PatternInterface {
   type Value = String
 
 
-  trait DomainValue extends Pattern with Leaf2[String] {
+  trait DomainValue extends Pattern with Leaf2[Label, Value] {
     def apply(_1: Label, _2: Value): DomainValue
   }
 
@@ -168,7 +169,9 @@ object PatternInterface {
   }
 
 
-  trait Bottom extends Pattern with Node0
+  trait Bottom extends Pattern with Node0 {
+    override def apply(): Bottom
+  }
 
 
   object Bottom {
@@ -211,10 +214,7 @@ object PatternInterface {
 
 
   object Application {
-    def unapply(arg: Pattern): Option[(Label, Seq[Pattern])] = arg match {
-      case a: Application => Some(a._1, a.args)
-      case _ => None
-    }
+    def unapply(arg: Application): Option[(Label, Seq[Pattern])] = Some(arg._1, arg.args)
   }
 
 
@@ -228,12 +228,8 @@ object PatternInterface {
   }
 
 
-  trait Exists extends Pattern with Node2 {
-    override val _1: Variable
-
+  trait Exists extends Pattern with BinderNode {
     def apply(_1: Variable, _2: Pattern): Exists
-
-    override def apply(_1: Pattern, _2: Pattern): Exists = apply(_1.asInstanceOf[Variable], _2)
   }
 
 
@@ -242,12 +238,8 @@ object PatternInterface {
   }
 
 
-  trait ForAll extends Pattern with Node2 {
-    override val _1: Variable
-
+  trait ForAll extends Pattern with BinderNode {
     def apply(_1: Variable, _2: Pattern): ForAll
-
-    override def apply(_1: Pattern, _2: Pattern): ForAll = apply(_1.asInstanceOf[Variable], _2)
   }
 
 

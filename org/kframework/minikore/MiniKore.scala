@@ -29,11 +29,11 @@ object MiniKore {
   case class Axiom(pattern: i.Pattern, att: Attributes) extends Sentence
 
   case class Variable(_1: i.Name, _2: i.Sort) extends i.Variable {
-    override def apply(_1: i.Name, _2: i.Sort): Variable = Variable(_1, _2)
+    def apply(_1: i.Name, _2: i.Sort): Variable = Variable(_1, _2)
   }
 
   case class DomainValue(_1: i.Label, _2: i.Value) extends i.DomainValue {
-    override def apply(_1: i.Label, _2: i.Value): DomainValue = DomainValue(_1, _2)
+    def apply(_1: i.Label, _2: i.Value): DomainValue = DomainValue(_1, _2)
   }
 
   case class Application(_1: i.Label, args: Seq[i.Pattern]) extends i.Application {
