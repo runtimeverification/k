@@ -1,6 +1,6 @@
 package org.kframework.kore.compile
 
-import org.kframework.kore.KORE.{KApply, KList, KSequence}
+import org.kframework.kore.KORE.{KApply, KList, KAs, KSequence}
 import org.kframework.kore.KRewrite
 import org.kframework.kore._
 import org.kframework.Collections._
@@ -11,6 +11,7 @@ object RewriteToTop {
     case t: KRewrite => t.left
     case t: KApply => KApply(t.klabel, immutable(t.klist.items) map toLeft, t.att)
     case t: KSequence => KSequence(mutable(immutable(t.items) map toLeft toList), t.att)
+    case t: KAs => KAs(toLeft(t.pattern), t.alias)
     case other => other
   }
 
@@ -18,23 +19,8 @@ object RewriteToTop {
     case t: KRewrite => t.right
     case t: KApply => KApply(t.klabel, immutable(t.klist.items) map toRight, t.att)
     case t: KSequence => KSequence(mutable(immutable(t.items) map toRight toList), t.att)
+    case t: KAs => t.alias
     case other => other
-  }
-
-  def bubbleRewriteOutOfKSeq(k: K): K = k match {
-    case kseq: KSequence => ADT.KRewrite(toLeft(kseq), toRight(kseq))
-    case t: KRewrite => ADT.KRewrite(t.left, t.right)
-    case t: KApply => KApply(t.klabel, immutable(t.klist.items) map bubbleRewriteOutOfKSeq, t.att)
-    case other => other
-  }
-
-  def bubbleRewriteToTopInsideCells(k: K): K = k match {
-    case kapp: KApply =>
-      if (isCell(kapp) && nonCell(kapp.items.get(0)))
-        KApply(kapp.klabel, immutable(kapp.klist.items) map makeRewriteIfNeeded, kapp.att)
-      else
-        KApply(kapp.klabel, immutable(kapp.klist.items) map bubbleRewriteToTopInsideCells, kapp.att)
-    case _ => k
   }
 
 
