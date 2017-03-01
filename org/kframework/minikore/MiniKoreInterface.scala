@@ -1,9 +1,9 @@
 package org.kframework.minikore
 
-import org.kframework.minikore.PatternInterface._
-
 
 object TreeInterface {
+
+  import PatternInterface._
 
   sealed trait AST
 
@@ -26,21 +26,25 @@ object TreeInterface {
     def build(contents: C): Pattern
   }
 
+
   object Leaf {
-    def unapply(arg: Leaf[_]): Option[_] = Some(arg.contents)
+    def unapply[C](arg: Leaf[C]): Option[C] = Some(arg.contents)
   }
+
 
   sealed trait Leaf2[CC1, CC2] extends Leaf[Product2[CC1, CC2]] with Product2[CC1, CC2] {
     override def contents: Product2[CC1, CC2] = (_1, _2)
 
     def apply(_1: CC1, _2: CC2): Pattern
 
-    override def build(contents: Product2[CC1, CC2]): Pattern = apply(contents._1, contents._2)
+    def build(contents: Product2[CC1, CC2]): Pattern = apply(contents._1, contents._2)
   }
 
+
   object Leaf2 {
-    def unapply(arg: Leaf2[_, _]): Option[(_, _)] = Some(arg._1, arg._2)
+    def unapply[CC1, CC2](arg: Leaf2[CC1, CC2]): Option[(CC1, CC2)] = Some(arg._1, arg._2)
   }
+
 
   trait LabeledNode[L] extends Node with Product1[L] {
     override val _1: L
@@ -50,9 +54,11 @@ object TreeInterface {
     override def build(args: Seq[Pattern]): Pattern = apply(_1, args)
   }
 
+
   object LabeledNode {
-    def unapply(arg: LabeledNode[_]): Option[(_, Seq[Pattern])] = Some(arg._1, arg.args)
+    def unapply[L](arg: LabeledNode[L]): Option[(L, Seq[Pattern])] = Some(arg._1, arg.args)
   }
+
 
   sealed trait Node0 extends Node {
     override def args = Seq.empty[Pattern]
@@ -65,14 +71,12 @@ object TreeInterface {
     }
   }
 
-
   object Node0 {
     def unapply(arg: Node0): Boolean = true
   }
 
 
   sealed trait Node1 extends Node with Product1[Pattern] {
-
     override def args = Seq(_1)
 
     def apply(_1: Pattern): Pattern
@@ -83,14 +87,20 @@ object TreeInterface {
     }
   }
 
+
   object Node1 {
     def unapply(arg: Node1): Option[Pattern] = Some(arg._1)
   }
 
-  sealed trait BinderNode extends Node with Product2[Variable, Pattern] {
+
+  sealed trait BinderNode extends Node2 {
     def apply(_1: Variable, _2: Pattern): Pattern
 
+    override val _1: Variable
+
     override def args = Seq(_1, _2)
+
+    override def apply(_1: Pattern, _2: Pattern) = apply(_1.asInstanceOf[Variable], _2)
 
     override def build(children: Seq[Pattern]): Pattern = {
       assert(children.size == 2)
@@ -104,7 +114,6 @@ object TreeInterface {
 
 
   sealed trait Node2 extends Node with Product2[Pattern, Pattern] {
-
     def apply(_1: Pattern, _2: Pattern): Pattern
 
     override def args = Seq(_1, _2)
@@ -136,9 +145,7 @@ object PatternInterface {
 
   trait Variable extends Pattern with Leaf2[Name, Sort] {
     def apply(_1: Name, _2: Sort): Variable
-
   }
-
 
   object Variable {
     def unapply(arg: Variable): Option[(Name, Sort)] = Some(arg._1, arg._2)
@@ -148,11 +155,9 @@ object PatternInterface {
 
   type Value = String
 
-
   trait DomainValue extends Pattern with Leaf2[Label, Value] {
     def apply(_1: Label, _2: Value): DomainValue
   }
-
 
   object DomainValue {
     def unapply(arg: DomainValue): Option[(Label, Value)] = Some(arg._1, arg._2)
@@ -280,6 +285,7 @@ object PatternInterface {
 }
 
 object Build {
+  import PatternInterface._
 
   trait Builders {
 
