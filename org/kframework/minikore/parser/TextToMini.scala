@@ -13,6 +13,7 @@ case class ParseError(msg: String) extends Exception(msg) // ParseError.msg eq E
   * @constructor Creates a new parser.
   */
 class TextToMini(b: Builders) {
+  import b._
   private val scanner = new Scanner()
 
   /** Parses the file and returns [[org.kframework.minikore.implementation.MiniKore.Definition]]. */
@@ -163,43 +164,43 @@ class TextToMini(b: Builders) {
         val c2 = scanner.next()
         (c1, c2) match {
           case ('t', 'o') => consume("p"); consumeWithLeadingWhitespaces("("); consumeWithLeadingWhitespaces(")")
-            b.Top()
+            Top()
           case ('b', 'o') => consume("ttom"); consumeWithLeadingWhitespaces("("); consumeWithLeadingWhitespaces(")")
-            b.Bottom()
+            Bottom()
           case ('a', 'n') => consume("d"); consumeWithLeadingWhitespaces("(")
             val p1 = parsePattern(); consumeWithLeadingWhitespaces(",")
             val p2 = parsePattern(); consumeWithLeadingWhitespaces(")")
-            b.And(p1, p2)
+            And(p1, p2)
           case ('o', 'r') => consumeWithLeadingWhitespaces("(")
             val p1 = parsePattern(); consumeWithLeadingWhitespaces(",")
             val p2 = parsePattern(); consumeWithLeadingWhitespaces(")")
-            b.Or(p1, p2)
+            Or(p1, p2)
           case ('n', 'o') => consume("t"); consumeWithLeadingWhitespaces("(")
             val p = parsePattern(); consumeWithLeadingWhitespaces(")")
-            b.Not(p)
+            Not(p)
           case ('i', 'm') => consume("plies"); consumeWithLeadingWhitespaces("(")
             val p1 = parsePattern(); consumeWithLeadingWhitespaces(",")
             val p2 = parsePattern(); consumeWithLeadingWhitespaces(")")
-            b.Implies(p1, p2)
+            Implies(p1, p2)
           case ('e', 'x') => consume("ists"); consumeWithLeadingWhitespaces("(")
             val v = parseVariable(); consumeWithLeadingWhitespaces(",")
             val p = parsePattern(); consumeWithLeadingWhitespaces(")")
-            b.Exists(v, p)
+            Exists(v, p)
           case ('f', 'o') => consume("rall"); consumeWithLeadingWhitespaces("(")
             val v = parseVariable(); consumeWithLeadingWhitespaces(",")
             val p = parsePattern(); consumeWithLeadingWhitespaces(")")
-            b.ForAll(v, p)
+            ForAll(v, p)
           case ('n', 'e') => consume("xt"); consumeWithLeadingWhitespaces("(")
             val p = parsePattern(); consumeWithLeadingWhitespaces(")")
-            b.Next(p)
+            Next(p)
           case ('r', 'e') => consume("write"); consumeWithLeadingWhitespaces("(")
             val p1 = parsePattern(); consumeWithLeadingWhitespaces(",")
             val p2 = parsePattern(); consumeWithLeadingWhitespaces(")")
-            b.Rewrite(p1, p2)
+            Rewrite(p1, p2)
           case ('e', 'q') => consume("uals"); consumeWithLeadingWhitespaces("(")
             val p1 = parsePattern(); consumeWithLeadingWhitespaces(",")
             val p2 = parsePattern(); consumeWithLeadingWhitespaces(")")
-            b.Equals(p1, p2)
+            Equals(p1, p2)
           case (err1, err2) => throw error("\\top, \\bottom, \\and, \\or, \\not, \\implies, \\exists, \\forall, \\next, \\rewrite, or \\equals",
                                            "'\\" + err1 + err2 + "'")
         }
@@ -208,17 +209,17 @@ class TextToMini(b: Builders) {
         scanner.nextWithSkippingWhitespaces() match {
           case ':' => // TODO(Daejun): check if symbol is Name
             val sort = parseSort()
-            b.Variable(symbol, sort).asInstanceOf[Variable]
+            Variable(symbol, sort).asInstanceOf[Variable]
           case '(' =>
             scanner.nextWithSkippingWhitespaces() match {
               case '"' => scanner.putback('"')
                 val value = parseString()
                 consumeWithLeadingWhitespaces(")")
-                b.DomainValue(symbol, value)
+                DomainValue(symbol, value)
               case c => scanner.putback(c)
                 val args = parseList(parsePattern, ',', ')')
                 consumeWithLeadingWhitespaces(")")
-                b.Application(symbol, args)
+                Application(symbol, args)
             }
           case err => throw error("':' or '('", err)
         }
@@ -230,7 +231,7 @@ class TextToMini(b: Builders) {
     val name = parseName()
     consumeWithLeadingWhitespaces(":")
     val sort = parseSort()
-    b.Variable(name, sort)
+    Variable(name, sort)
   }
 
   //////////////////////////////////////////////////////////
