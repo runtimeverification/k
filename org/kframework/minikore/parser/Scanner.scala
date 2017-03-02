@@ -1,4 +1,4 @@
-package org.kframework.minikore
+package org.kframework.minikore.parser
 
 /** A scanner of an input stream.
   *

@@ -1,7 +1,6 @@
-package org.kframework.minikore
+package org.kframework.minikore.implementation
 
-
-import org.kframework.minikore.{PatternInterface => i}
+import org.kframework.minikore.interfaces.{BuilderInterface, PatternInterface => i}
 
 import scala.collection._
 
@@ -86,9 +85,9 @@ object MiniKore {
 
 }
 
-object DefaultBuilders extends Build.Builders {
+object DefaultBuilders extends BuilderInterface.Builders {
 
-  import org.kframework.minikore.{MiniKore => m}
+  import org.kframework.minikore.implementation.{MiniKore => m}
 
   def Variable(_1: i.Name, _2: i.Sort): i.Variable = m.Variable(_1, _2)
 
@@ -116,7 +115,7 @@ object DefaultBuilders extends Build.Builders {
 
   def Rewrite(_1: i.Pattern, _2: i.Pattern): i.Rewrite = m.Rewrite(_1, _2)
 
-  def Application(_1: i.Label, args: Seq[i.Pattern]): m.Application = m.Application(_1, args)
+  def Application(_1: i.Label, args: Seq[i.Pattern]): MiniKore.Application = m.Application(_1, args)
 }
 
 

@@ -1,13 +1,15 @@
-package org.kframework.minikore
+package org.kframework.minikore.parser
 
 import org.apache.commons.io.FileUtils
-import org.kframework.minikore.MiniKore.Definition
+import org.kframework.minikore.implementation.DefaultBuilders
+import org.kframework.minikore.implementation.MiniKore.Definition
+import org.kframework.minikore.interfaces.BuilderInterface.Builders
 
 // TODO(Daejun): drop this file
 
 object MiniToTextToMini {
 
-  def defaultImplemntation: Build.Builders = DefaultBuilders
+  def defaultImplemntation: Builders = DefaultBuilders
 
   def apply(d: Definition): Definition = {
     val text = MiniToText.apply(d)

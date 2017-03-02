@@ -1,27 +1,27 @@
-package org.kframework.minikore
+package org.kframework.minikore.parser
 
 import org.apache.commons.lang3.StringEscapeUtils
-import org.kframework.minikore.Build.Builders
-import org.kframework.minikore.MiniKore.{Attributes, Axiom, Definition, DomainValue, Import, Module, Rule, Sentence, SortDeclaration, SymbolDeclaration}
-import org.kframework.minikore.PatternInterface._
+import org.kframework.minikore.implementation.MiniKore.{Definition, Module, Sentence, SortDeclaration, SymbolDeclaration, Rule, Axiom, Attributes, Import}
+import org.kframework.minikore.interfaces.PatternInterface._
+import org.kframework.minikore.interfaces.BuilderInterface.Builders
 
 /** Parsing error exception. */
 case class ParseError(msg: String) extends Exception(msg) // ParseError.msg eq Exception.detailMessage, i.e., msg() == getMessage()
 
-/** A parser for [[MiniKore]].
+/** A parser for [[org.kframework.minikore.interfaces.PatternInterface]].
   *
   * @constructor Creates a new parser.
   */
 class TextToMini(b: Builders) {
   private val scanner = new Scanner()
 
-  /** Parses the file and returns [[MiniKore.Definition]]. */
+  /** Parses the file and returns [[org.kframework.minikore.implementation.MiniKore.Definition]]. */
   @throws(classOf[ParseError])
   def parse(file: java.io.File): Definition = {
     parse(io.Source.fromFile(file))
   }
 
-  /** Parses from the stream and returns [[MiniKore.Definition]]. */
+  /** Parses from the stream and returns [[org.kframework.minikore.implementation.MiniKore.Definition]]. */
   @throws(classOf[ParseError])
   def parse(src: io.Source): Definition = {
     try {
@@ -162,9 +162,9 @@ class TextToMini(b: Builders) {
         val c1 = scanner.next()
         val c2 = scanner.next()
         (c1, c2) match {
-          case ('t', 'r') => consume("ue"); consumeWithLeadingWhitespaces("("); consumeWithLeadingWhitespaces(")")
+          case ('t', 'o') => consume("p"); consumeWithLeadingWhitespaces("("); consumeWithLeadingWhitespaces(")")
             b.Top()
-          case ('f', 'a') => consume("lse"); consumeWithLeadingWhitespaces("("); consumeWithLeadingWhitespaces(")")
+          case ('b', 'o') => consume("ttom"); consumeWithLeadingWhitespaces("("); consumeWithLeadingWhitespaces(")")
             b.Bottom()
           case ('a', 'n') => consume("d"); consumeWithLeadingWhitespaces("(")
             val p1 = parsePattern(); consumeWithLeadingWhitespaces(",")
@@ -196,11 +196,11 @@ class TextToMini(b: Builders) {
             val p1 = parsePattern(); consumeWithLeadingWhitespaces(",")
             val p2 = parsePattern(); consumeWithLeadingWhitespaces(")")
             b.Rewrite(p1, p2)
-          case ('e', 'q') => consume("ual"); consumeWithLeadingWhitespaces("(")
+          case ('e', 'q') => consume("uals"); consumeWithLeadingWhitespaces("(")
             val p1 = parsePattern(); consumeWithLeadingWhitespaces(",")
             val p2 = parsePattern(); consumeWithLeadingWhitespaces(")")
             b.Equals(p1, p2)
-          case (err1, err2) => throw error("\\true, \\false, \\and, \\or, \\not, \\implies, \\exists, \\forall, \\next, \\rewrite, or \\equal",
+          case (err1, err2) => throw error("\\top, \\bottom, \\and, \\or, \\not, \\implies, \\exists, \\forall, \\next, \\rewrite, or \\equals",
                                            "'\\" + err1 + err2 + "'")
         }
       case c => scanner.putback(c)
@@ -214,7 +214,7 @@ class TextToMini(b: Builders) {
               case '"' => scanner.putback('"')
                 val value = parseString()
                 consumeWithLeadingWhitespaces(")")
-                DomainValue(symbol, value)
+                b.DomainValue(symbol, value)
               case c => scanner.putback(c)
                 val args = parseList(parsePattern, ',', ')')
                 consumeWithLeadingWhitespaces(")")
