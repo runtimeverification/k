@@ -47,9 +47,10 @@ object MiniKore {
     def apply(): Bottom = Bottom()
   }
 
-  case class And(_1: i.Pattern, _2: i.Pattern) extends i.And {
-    def apply(_1: i.Pattern, _2: i.Pattern): And = And(_1, _2)
+  case class And(override val _1: i.Pattern, override val _2: i.Pattern) extends i.And {
+    def apply(_1: i.Pattern, _2: i.Pattern): And = new And(_1, _2)
   }
+
 
   case class Or(_1: i.Pattern, _2: i.Pattern) extends i.Or {
     def apply(_1: i.Pattern, _2: i.Pattern): Or = Or(_1, _2)
@@ -102,7 +103,7 @@ object DefaultBuilders extends build.Builders {
 
   def Next(_1: i.Pattern): i.Next = m.Next(_1)
 
-  def And(_1: i.Pattern, _2: i.Pattern): i.And = m.And(_1, _2)
+  def And(_1: i.Pattern, _2: i.Pattern): i.And = new m.And(_1, _2)
 
   def Or(_1: i.Pattern, _2: i.Pattern): i.Or = m.Or(_1, _2)
 

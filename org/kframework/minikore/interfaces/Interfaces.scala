@@ -5,12 +5,12 @@ object tree {
   import pattern._
 
   /**
-    * Base type of the Tree interface. [[Pattern]] extends AST.
+    * Base type of the Tree interface. [[pattern.Pattern]] extends AST.
     */
   sealed trait AST
 
   /**
-    * Specifies Node behavior of [[Pattern]].
+    * Specifies Node behavior of [[pattern.Pattern]].
     *
     * Allows matching a Pattern against as a Node,
     * and building a Pattern from a list of Patterns.
@@ -19,7 +19,7 @@ object tree {
     def args: Seq[Pattern]
 
     /* Allows building Nodes using a list of Patterns */
-    def build(children: Seq[Pattern]): Pattern
+    def apply(children: Seq[Pattern]): Pattern
   }
 
   object Node {
@@ -28,13 +28,14 @@ object tree {
 
   /**
     * Specifies Leaf Behavior of Patterns.
+    *
     * @tparam C The Contents of the Leaf.
     */
   sealed trait Leaf[C] extends AST with Product {
     def contents: C
 
     /* Allows building a leaf using its contents */
-    def build(contents: C): Pattern
+    def apply(contents: C): Pattern
   }
 
   object Leaf {
@@ -42,7 +43,8 @@ object tree {
   }
 
   /**
-    * A Leaf with only two fields as its contents. [[DomainValue]], [[Variable]] extend this trait.
+    * A Leaf with Product2[CC1, CC2] as its contents. [[pattern.DomainValue]], [[pattern.Variable]] extend this trait.
+    *
     * @tparam CC1 Type of First Field.
     * @tparam CC2 Type of Second Field.
     */
@@ -51,7 +53,7 @@ object tree {
 
     def apply(_1: CC1, _2: CC2): Pattern
 
-    override def build(contents: Product2[CC1, CC2]): Pattern = apply(contents._1, contents._2)
+    override def apply(contents: Product2[CC1, CC2]): Pattern = apply(contents._1, contents._2)
   }
 
   object Leaf2 {
@@ -60,13 +62,14 @@ object tree {
 
 
   /**
-    * Node that has a Label. [[Application]] that extends this trait.
+    * Node with extra member label, respresenting a node's Label. [[pattern.Application]] that extends this trait.
+    *
     * @tparam L Type of Label.
     */
   sealed trait LabeledNode[L] extends Node with Product1[L] {
     def apply(_1: L, args: Seq[Pattern]): Pattern
 
-    override def build(children: Seq[Pattern]): Pattern = apply(_1, children)
+    override def apply(children: Seq[Pattern]): Pattern = apply(_1, children)
   }
 
   object LabeledNode {
@@ -75,14 +78,14 @@ object tree {
 
 
   /**
-    * A Node with empty list of Patterns as its args list. [[Top]], [[Bottom]] extend this trait.
+    * A Node with empty list of Patterns as its args list. [[pattern.Top]], [[pattern.Bottom]] extend this trait.
     */
   sealed trait Node0 extends Node {
     override def args = Seq.empty[Pattern]
 
     def apply(): Pattern
 
-    override def build(children: Seq[Pattern]) = {
+    override def apply(children: Seq[Pattern]) = {
       assert(children.isEmpty)
       apply()
     }
@@ -93,14 +96,14 @@ object tree {
   }
 
   /**
-    * A Node with a single pattern in its args list. Extended by [[Next]], [[Not]].
+    * A Node with a single pattern in its args list. Extended by [[pattern.Next]], [[pattern.Not]].
     */
   sealed trait Node1 extends Node with Product1[Pattern] {
     override def args = Seq(_1)
 
     def apply(_1: Pattern): Pattern
 
-    override def build(children: Seq[Pattern]) = {
+    override def apply(children: Seq[Pattern]) = {
       assert(children.size == 1)
       apply(children.head)
     }
@@ -112,14 +115,14 @@ object tree {
   }
 
   /**
-    * A Node with 2 Patterns in its args list. Extended by [[Or]], [[And]], [[Implies]], [[Equals]], [[Rewrite]].
+    * A Node with two Patterns in its args list. Extended by [[pattern.Or]], [[pattern.And]], [[pattern.Implies]], [[pattern.Equals]], [[pattern.Rewrite]].
     */
   sealed trait Node2 extends Node with Product2[Pattern, Pattern] {
     def apply(_1: Pattern, _2: Pattern): Pattern
 
     override def args = Seq(_1, _2)
 
-    override def build(children: Seq[Pattern]) = {
+    override def apply(children: Seq[Pattern]) = {
       assert(children.size == 2)
       apply(children.head, children(1))
     }
@@ -131,7 +134,7 @@ object tree {
 
 
   /**
-    * Extends [[Node2]], and only allows [[Variable]] as the first element in its args list. Extended bu [[Exists]], [[ForAll]].
+    * Extends [[Node2]], and only allows [[pattern.Variable]] as the first element, and [[pattern.Pattern]] in its args list. Extended by [[pattern.Exists]], [[pattern.ForAll]].
     */
   sealed trait BinderNode extends Node2 {
     def apply(_1: Variable, _2: Pattern): Pattern
@@ -140,7 +143,7 @@ object tree {
 
     override def apply(_1: Pattern, _2: Pattern) = apply(_1.asInstanceOf[Variable], _2)
 
-    override def build(children: Seq[Pattern]): Pattern = {
+    override def apply(children: Seq[Pattern]): Pattern = {
       assert(children.size == 2)
       apply(children.head.asInstanceOf[Variable], children(1))
     }
@@ -166,7 +169,14 @@ object pattern {
 
   /**
     * Matching Logic Variable.
-    * Needs 2 strings - representing name and sort respectively to construct.
+    *
+    * Provides (Implementations for members)
+    *    - contents of type Product2[Name, Sort].
+    *
+    * Requires (Implementation for members)
+    *    - _1 of type [[Name]].
+    *    - _2 of type [[Sort]].
+    *    - apply method taking arguments ([[Name]], [[Sort]]) and returning [[Variable]].
     */
   trait Variable extends Pattern with Leaf2[Name, Sort] {
     def apply(_1: Name, _2: Sort): Variable
@@ -182,8 +192,15 @@ object pattern {
   type Value = String
 
   /**
-    * Matching Logic Domain Value.
-    * Needs 2 strings - representing the label, and the value to construct.
+    * Matching Logic DomainValue.
+    *
+    * Provides (Implementations for members)
+    *    - contents of type Product2[Label, Value].
+    *
+    * Requires (Implementation for members)
+    *    - _1 of type [[Label]].
+    *    - _2 of type [[Value]].
+    *    - apply method taking arguments ([[Label]], [[Value]]) and returning [[DomainValue]].
     */
   trait DomainValue extends Pattern with Leaf2[Label, Value] {
     def apply(_1: Label, _2: Value): DomainValue
@@ -194,7 +211,13 @@ object pattern {
   }
 
   /**
-    * Matching Logic Top. Requires no parameters.
+    * Matching Logic Top.
+    *
+    * Provides (Implementation for members)
+    *    - args, an empty list.
+    *
+    * Requires (Implementation for members)
+    *    - apply method taking arguments () and returning [[Top]].
     */
   trait Top extends Pattern with Node0 {
     override def apply(): Top
@@ -205,7 +228,13 @@ object pattern {
   }
 
   /**
-    * Matching Logic Bottom. Requires no parameters.
+    * Matching Logic Bottom.
+    *
+    * Provides (Implementation for members)
+    *    - args, an empty list.
+    *
+    * Requires (Implementation for members)
+    *    - apply method taking arguments () and returning [[Bottom]].
     */
   trait Bottom extends Pattern with Node0 {
     override def apply(): Bottom
@@ -215,9 +244,16 @@ object pattern {
     def unapply(arg: Bottom): Boolean = true
   }
 
-
   /**
-    * Matching Logic And. Requires two [[Pattern]], represented as _1, and _2.
+    * Matching Logic And.
+    *
+    * Provides (Implementation for members)
+    *    - args, a list containing two [[Pattern]]s.
+    *
+    * Requires (Implementation for members)
+    *    - _1 of type [[Pattern]].
+    *    - _2 of type [[Pattern]].
+    *    - apply method taking arguments ([[Pattern]], [[Pattern]]) and returning [[And]].
     */
   trait And extends Pattern with Node2 {
     override def apply(_1: Pattern, _2: Pattern): And
@@ -229,7 +265,15 @@ object pattern {
 
 
   /**
-    * Matching Logic Or. Requires two [[Pattern]], represented as _1, and _2.
+    * Matching Logic Or.
+    *
+    * Provides (Implementation for members)
+    *    - args, a list containing two [[Pattern]]s.
+    *
+    * Requires (Implementation for members)
+    *    - _1 of type [[Pattern]].
+    *    - _2 of type [[Pattern]].
+    *    - apply method taking arguments ([[Pattern]], [[Pattern]]) and returning [[Or]].
     */
   trait Or extends Pattern with Node2 {
     override def apply(_1: Pattern, _2: Pattern): Or
@@ -241,7 +285,14 @@ object pattern {
 
 
   /**
-    * Matching Logic Not. Requies one [[Pattern]], represented as _1.
+    * Matching Logic Not.
+    *
+    * Provides (Implementation for members)
+    *    - args, a list containing one [[Pattern]].
+    *
+    * Requires (Implementation for members)
+    *    - _1 of type [[Pattern]].
+    *    - apply method taking argument ([[Pattern]]) and returning [[Not]].
     */
   trait Not extends Pattern with Node1 {
     override def apply(_1: Pattern): Not
@@ -253,8 +304,12 @@ object pattern {
 
 
   /**
-    * Symbol from the algebra in Matching Logic. Requires a List of [[Pattern]], specified by
-    * in the algebra as the number of arguments required to construct the symbol.
+    * Matching Logic Symbol Application.
+    *
+    * Requires (Implementation for members)
+    *    - _1 of type [[Label]], representing symbol from Matching Logic Algebra.
+    *    - args of type Seq[Pattern].
+    *    - apply method taking arguments ([[Label]], Seq[Pattern]) and returning [[Application]].
     */
   trait Application extends Pattern with LabeledNode[Label] {
     override def apply(_1: Label, args: Seq[Pattern]): Application
@@ -266,7 +321,15 @@ object pattern {
 
 
   /**
-    * Matching Logic Implies. Requires two [[Pattern]], represented as _1, and _2.
+    * Matching Logic Implies.
+    *
+    * Provides (Implementation for members)
+    *    - args, a list containing two [[Pattern]]s.
+    *
+    * Requires (Implementation for members)
+    *    - _1 of type [[Pattern]].
+    *    - _2 of type [[Pattern]].
+    *    - apply method taking arguments ([[Pattern]], [[Pattern]]) and returning [[Implies]].
     */
   trait Implies extends Pattern with Node2 {
     override def apply(_1: Pattern, _2: Pattern): Implies
@@ -278,7 +341,15 @@ object pattern {
 
 
   /**
-    * Matching Logic Existential Quantifier. Requires a [[Variable]] and a [[Pattern]], represented as _1, and _2.
+    * Matching Logic Existential Quantifier.
+    *
+    * Provides (Implementation for members)
+    *    - args, a list containing a [[Variable]] and a [[Pattern]].
+    *
+    * Requires (Implementation for members)
+    *    - _1 of type [[Variable]].
+    *    - _2 of type [[Pattern]].
+    *    - apply method taking arguments ([[Variable]], [[Pattern]]) and returning [[Exists]].
     */
   trait Exists extends Pattern with BinderNode {
     def apply(_1: Variable, _2: Pattern): Exists
@@ -290,7 +361,15 @@ object pattern {
 
 
   /**
-    * Matching Logic ForAll Quantifier. Requires a [[Variable]] and a [[Pattern]], represented as _1, and _2.
+    * Matching Logic ForAll Quantifier.
+    *
+    * Provides (Implementation for members)
+    *    - args, a list containing a [[Variable]] and a [[Pattern]].
+    *
+    * Requires (Implementation for members)
+    *    - _1 of type [[Variable]].
+    *    - _2 of type [[Pattern]].
+    *    - apply method taking arguments ([[Variable]], [[Pattern]]) and returning [[ForAll]].
     */
   trait ForAll extends Pattern with BinderNode {
     def apply(_1: Variable, _2: Pattern): ForAll
@@ -302,7 +381,14 @@ object pattern {
 
 
   /**
-    * Matching Logic Next. Requires a [[Pattern]], represented as _1.
+    * Matching Logic Next.
+    *
+    * Provides (Implementation for members)
+    *    - args, a list containing one [[Pattern]].
+    *
+    * Requires (Implementation for members)
+    *    - _1 of type [[Pattern]].
+    *    - apply method taking argument ([[Pattern]]) and returning [[Next]].
     */
   trait Next extends Pattern with Node1 {
     override def apply(_1: Pattern): Next
@@ -314,7 +400,15 @@ object pattern {
 
 
   /**
-    * Matching Logic Rewrite. Requires two [[Pattern]], represented as _1, and _2.
+    * Matching Logic Rewrite.
+    *
+    * Provides (Implementation for members)
+    *    - args, a list containing two [[Pattern]]s.
+    *
+    * Requires (Implementation for members)
+    *    - _1 of type [[Pattern]].
+    *    - _2 of type [[Pattern]].
+    *    - apply method taking arguments ([[Pattern]], [[Pattern]]) and returning [[Rewrite]].
     */
   trait Rewrite extends Pattern with Node2 {
     override def apply(_1: Pattern, _2: Pattern): Rewrite
@@ -326,7 +420,15 @@ object pattern {
 
 
   /**
-    * Matching Logic Equals. Requires two [[Pattern]], represented as _1, and _2.
+    * Matching Logic Equals.
+    *
+    * Provides (Implementation for members)
+    *   - args, a list containing two [[Pattern]]s.
+    *
+    * Requires (Implementation for members)
+    *   - _1 of type [[Pattern]].
+    *   - _2 of type [[Pattern]].
+    *   - apply method taking arguments ([[Pattern]], [[Pattern]]) and returning [[Equals]].
     */
   trait Equals extends Pattern with Node2 {
     override def apply(_1: Pattern, _2: Pattern): Equals
@@ -343,7 +445,7 @@ object build {
   import pattern._
 
   /**
-    * The Builders trait has one method for every [[Pattern]], with the same name.
+    * The Builders trait has one method for every [[pattern.Pattern]], with the same name.
     * Implementations are expected to implement the methods, allowing tools to
     * build patterns in an implementation independent manner.
     */
