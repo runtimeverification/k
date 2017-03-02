@@ -2,13 +2,13 @@ package org.kframework.minikore.parser
 
 import org.apache.commons.lang3.StringEscapeUtils
 import org.kframework.minikore.implementation.MiniKore.{Definition, Module, Sentence, SortDeclaration, SymbolDeclaration, Rule, Axiom, Attributes, Import}
-import org.kframework.minikore.interfaces.PatternInterface._
-import org.kframework.minikore.interfaces.BuilderInterface.Builders
+import org.kframework.minikore.interfaces.pattern._
+import org.kframework.minikore.interfaces.build.Builders
 
 /** Parsing error exception. */
 case class ParseError(msg: String) extends Exception(msg) // ParseError.msg eq Exception.detailMessage, i.e., msg() == getMessage()
 
-/** A parser for [[org.kframework.minikore.interfaces.PatternInterface]].
+/** A parser for [[org.kframework.minikore.interfaces.pattern]].
   *
   * @constructor Creates a new parser.
   */

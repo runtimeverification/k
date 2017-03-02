@@ -1,13 +1,13 @@
 package org.kframework.minikore.implementation
 
-import org.kframework.minikore.interfaces.{BuilderInterface, PatternInterface => i}
+import org.kframework.minikore.interfaces.{build, pattern => i}
 
 import scala.collection._
 
 /** Algebraic data type of MiniKore. */
 object MiniKore {
 
-  //Default Implementation
+  /** A collection of classes that serve as the default implementation of the [[org.kframework.minikore.interfaces.pattern]] **/
 
   type Attributes = Seq[i.Pattern]
 
@@ -85,7 +85,8 @@ object MiniKore {
 
 }
 
-object DefaultBuilders extends BuilderInterface.Builders {
+/** Implementation of the [[org.kframework.minikore.interfaces.build.Builders]] **/
+object DefaultBuilders extends build.Builders {
 
   import org.kframework.minikore.implementation.{MiniKore => m}
 

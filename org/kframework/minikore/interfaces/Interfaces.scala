@@ -1,15 +1,24 @@
 package org.kframework.minikore.interfaces
 
-object TreeInterface {
+object tree {
 
-  import PatternInterface._
+  import pattern._
 
+  /**
+    * Base type of the Tree interface. [[Pattern]] extends AST.
+    */
   sealed trait AST
 
-
+  /**
+    * Specifies Node behavior of [[Pattern]].
+    *
+    * Allows matching a Pattern against as a Node,
+    * and building a Pattern from a list of Patterns.
+    */
   sealed trait Node extends AST with Product {
     def args: Seq[Pattern]
 
+    /* Allows building Nodes using a list of Patterns */
     def build(children: Seq[Pattern]): Pattern
   }
 
@@ -17,10 +26,14 @@ object TreeInterface {
     def unapply(arg: Node): Option[Seq[Pattern]] = Some(arg.args)
   }
 
-
+  /**
+    * Specifies Leaf Behavior of Patterns.
+    * @tparam C The Contents of the Leaf.
+    */
   sealed trait Leaf[C] extends AST with Product {
     def contents: C
 
+    /* Allows building a leaf using its contents */
     def build(contents: C): Pattern
   }
 
@@ -28,7 +41,11 @@ object TreeInterface {
     def unapply[C](arg: Leaf[C]): Option[C] = Some(arg.contents)
   }
 
-
+  /**
+    * A Leaf with only two fields as its contents. [[DomainValue]], [[Variable]] extend this trait.
+    * @tparam CC1 Type of First Field.
+    * @tparam CC2 Type of Second Field.
+    */
   sealed trait Leaf2[CC1, CC2] extends Leaf[Product2[CC1, CC2]] with Product2[CC1, CC2] {
     override def contents: Product2[CC1, CC2] = (_1, _2)
 
@@ -42,6 +59,10 @@ object TreeInterface {
   }
 
 
+  /**
+    * Node that has a Label. [[Application]] that extends this trait.
+    * @tparam L Type of Label.
+    */
   sealed trait LabeledNode[L] extends Node with Product1[L] {
     def apply(_1: L, args: Seq[Pattern]): Pattern
 
@@ -53,6 +74,9 @@ object TreeInterface {
   }
 
 
+  /**
+    * A Node with empty list of Patterns as its args list. [[Top]], [[Bottom]] extend this trait.
+    */
   sealed trait Node0 extends Node {
     override def args = Seq.empty[Pattern]
 
@@ -68,7 +92,9 @@ object TreeInterface {
     def unapply(arg: Node0): Boolean = true
   }
 
-
+  /**
+    * A Node with a single pattern in its args list. Extended by [[Next]], [[Not]].
+    */
   sealed trait Node1 extends Node with Product1[Pattern] {
     override def args = Seq(_1)
 
@@ -85,6 +111,9 @@ object TreeInterface {
     def unapply(arg: Node1): Option[Pattern] = Some(arg._1)
   }
 
+  /**
+    * A Node with 2 Patterns in its args list. Extended by [[Or]], [[And]], [[Implies]], [[Equals]], [[Rewrite]].
+    */
   sealed trait Node2 extends Node with Product2[Pattern, Pattern] {
     def apply(_1: Pattern, _2: Pattern): Pattern
 
@@ -101,6 +130,9 @@ object TreeInterface {
   }
 
 
+  /**
+    * Extends [[Node2]], and only allows [[Variable]] as the first element in its args list. Extended bu [[Exists]], [[ForAll]].
+    */
   sealed trait BinderNode extends Node2 {
     def apply(_1: Variable, _2: Pattern): Pattern
 
@@ -121,18 +153,21 @@ object TreeInterface {
 }
 
 
-object PatternInterface {
+object pattern {
 
-  import TreeInterface._
+  import tree._
 
-
+  /* ML Pattern Type */
   sealed trait Pattern extends AST
 
   type Name = String
 
   type Sort = String
 
-
+  /**
+    * Matching Logic Variable.
+    * Needs 2 strings - representing name and sort respectively to construct.
+    */
   trait Variable extends Pattern with Leaf2[Name, Sort] {
     def apply(_1: Name, _2: Sort): Variable
   }
@@ -146,6 +181,10 @@ object PatternInterface {
 
   type Value = String
 
+  /**
+    * Matching Logic Domain Value.
+    * Needs 2 strings - representing the label, and the value to construct.
+    */
   trait DomainValue extends Pattern with Leaf2[Label, Value] {
     def apply(_1: Label, _2: Value): DomainValue
   }
@@ -154,7 +193,9 @@ object PatternInterface {
     def unapply(arg: DomainValue): Option[(Label, Value)] = Some(arg._1, arg._2)
   }
 
-
+  /**
+    * Matching Logic Top. Requires no parameters.
+    */
   trait Top extends Pattern with Node0 {
     override def apply(): Top
   }
@@ -163,7 +204,9 @@ object PatternInterface {
     def unapply(arg: Top): Boolean = true
   }
 
-
+  /**
+    * Matching Logic Bottom. Requires no parameters.
+    */
   trait Bottom extends Pattern with Node0 {
     override def apply(): Bottom
   }
@@ -173,6 +216,9 @@ object PatternInterface {
   }
 
 
+  /**
+    * Matching Logic And. Requires two [[Pattern]], represented as _1, and _2.
+    */
   trait And extends Pattern with Node2 {
     override def apply(_1: Pattern, _2: Pattern): And
   }
@@ -182,6 +228,9 @@ object PatternInterface {
   }
 
 
+  /**
+    * Matching Logic Or. Requires two [[Pattern]], represented as _1, and _2.
+    */
   trait Or extends Pattern with Node2 {
     override def apply(_1: Pattern, _2: Pattern): Or
   }
@@ -191,6 +240,9 @@ object PatternInterface {
   }
 
 
+  /**
+    * Matching Logic Not. Requies one [[Pattern]], represented as _1.
+    */
   trait Not extends Pattern with Node1 {
     override def apply(_1: Pattern): Not
   }
@@ -200,6 +252,10 @@ object PatternInterface {
   }
 
 
+  /**
+    * Symbol from the algebra in Matching Logic. Requires a List of [[Pattern]], specified by
+    * in the algebra as the number of arguments required to construct the symbol.
+    */
   trait Application extends Pattern with LabeledNode[Label] {
     override def apply(_1: Label, args: Seq[Pattern]): Application
   }
@@ -209,6 +265,9 @@ object PatternInterface {
   }
 
 
+  /**
+    * Matching Logic Implies. Requires two [[Pattern]], represented as _1, and _2.
+    */
   trait Implies extends Pattern with Node2 {
     override def apply(_1: Pattern, _2: Pattern): Implies
   }
@@ -218,6 +277,9 @@ object PatternInterface {
   }
 
 
+  /**
+    * Matching Logic Existential Quantifier. Requires a [[Variable]] and a [[Pattern]], represented as _1, and _2.
+    */
   trait Exists extends Pattern with BinderNode {
     def apply(_1: Variable, _2: Pattern): Exists
   }
@@ -227,6 +289,9 @@ object PatternInterface {
   }
 
 
+  /**
+    * Matching Logic ForAll Quantifier. Requires a [[Variable]] and a [[Pattern]], represented as _1, and _2.
+    */
   trait ForAll extends Pattern with BinderNode {
     def apply(_1: Variable, _2: Pattern): ForAll
   }
@@ -236,6 +301,9 @@ object PatternInterface {
   }
 
 
+  /**
+    * Matching Logic Next. Requires a [[Pattern]], represented as _1.
+    */
   trait Next extends Pattern with Node1 {
     override def apply(_1: Pattern): Next
   }
@@ -245,6 +313,9 @@ object PatternInterface {
   }
 
 
+  /**
+    * Matching Logic Rewrite. Requires two [[Pattern]], represented as _1, and _2.
+    */
   trait Rewrite extends Pattern with Node2 {
     override def apply(_1: Pattern, _2: Pattern): Rewrite
   }
@@ -254,6 +325,9 @@ object PatternInterface {
   }
 
 
+  /**
+    * Matching Logic Equals. Requires two [[Pattern]], represented as _1, and _2.
+    */
   trait Equals extends Pattern with Node2 {
     override def apply(_1: Pattern, _2: Pattern): Equals
   }
@@ -264,10 +338,15 @@ object PatternInterface {
 
 }
 
-object BuilderInterface {
+object build {
 
-  import PatternInterface._
+  import pattern._
 
+  /**
+    * The Builders trait has one method for every [[Pattern]], with the same name.
+    * Implementations are expected to implement the methods, allowing tools to
+    * build patterns in an implementation independent manner.
+    */
   trait Builders {
 
     def Variable(_1: Name, _2: Sort): Variable
