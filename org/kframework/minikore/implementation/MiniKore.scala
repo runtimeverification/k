@@ -28,60 +28,59 @@ object MiniKore {
   case class Axiom(pattern: i.Pattern, att: Attributes) extends Sentence
 
   case class Variable(_1: i.Name, _2: i.Sort) extends i.Variable {
-    def apply(_1: i.Name, _2: i.Sort): Variable = new Variable(_1, _2)
+    def build(_1: i.Name, _2: i.Sort): Variable = new Variable(_1, _2)
   }
 
   case class DomainValue(_1: i.Label, _2: i.Value) extends i.DomainValue {
-    def apply(_1: i.Label, _2: i.Value): DomainValue = DomainValue(_1, _2)
+    def build(_1: i.Label, _2: i.Value): DomainValue = DomainValue(_1, _2)
   }
 
   case class Application(_1: i.Label, args: Seq[i.Pattern]) extends i.Application {
-    def apply(_1: i.Label, args: Seq[i.Pattern]): Application = Application(_1, args)
+    def build(_1: i.Label, args: Seq[i.Pattern]): Application = Application(_1, args)
   }
 
   case class Top() extends i.Top {
-    def apply(): Top = Top()
+    def build(): Top = Top()
   }
 
   case class Bottom() extends i.Bottom {
-    def apply(): Bottom = Bottom()
+    def build(): Bottom = Bottom()
   }
 
-  case class And(override val _1: i.Pattern, override val _2: i.Pattern) extends i.And {
-    def apply(_1: i.Pattern, _2: i.Pattern): And = new And(_1, _2)
+  case class And(_1: i.Pattern, _2: i.Pattern) extends i.And {
+    def build(_1: i.Pattern, _2: i.Pattern): And = new And(_1, _2)
   }
-
 
   case class Or(_1: i.Pattern, _2: i.Pattern) extends i.Or {
-    def apply(_1: i.Pattern, _2: i.Pattern): Or = Or(_1, _2)
+    def build(_1: i.Pattern, _2: i.Pattern): Or = Or(_1, _2)
   }
 
   case class Not(_1: i.Pattern) extends i.Not {
-    def apply(_1: i.Pattern): Not = Not(_1)
+    def build(_1: i.Pattern): Not = Not(_1)
   }
 
   case class Implies(_1: i.Pattern, _2: i.Pattern) extends i.Implies {
-    def apply(_1: i.Pattern, _2: i.Pattern): Implies = Implies(_1, _2)
+    def build(_1: i.Pattern, _2: i.Pattern): Implies = Implies(_1, _2)
   }
 
   case class Exists(_1: i.Variable, _2: i.Pattern) extends i.Exists {
-    def apply(_1: i.Variable, _2: i.Pattern): Exists = Exists(_1, _2)
+    def build(_1: i.Variable, _2: i.Pattern): Exists = Exists(_1, _2)
   }
 
   case class ForAll(_1: i.Variable, _2: i.Pattern) extends i.ForAll {
-    def apply(_1: i.Variable, _2: i.Pattern): ForAll = ForAll(_1, _2)
+    def build(_1: i.Variable, _2: i.Pattern): ForAll = ForAll(_1, _2)
   }
 
   case class Next(_1: i.Pattern) extends i.Next {
-    def apply(_1: i.Pattern): Next = Next(_1)
+    def build(_1: i.Pattern): Next = Next(_1)
   }
 
   case class Rewrite(_1: i.Pattern, _2: i.Pattern) extends i.Rewrite {
-    def apply(_1: i.Pattern, _2: i.Pattern): Rewrite = Rewrite(_1, _2)
+    def build(_1: i.Pattern, _2: i.Pattern): Rewrite = Rewrite(_1, _2)
   }
 
   case class Equals(_1: i.Pattern, _2: i.Pattern) extends i.Equals {
-    def apply(_1: i.Pattern, _2: i.Pattern): Equals = Equals(_1, _2)
+    def build(_1: i.Pattern, _2: i.Pattern): Equals = Equals(_1, _2)
   }
 
 }

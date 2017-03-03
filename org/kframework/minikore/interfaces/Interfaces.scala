@@ -19,7 +19,7 @@ object tree {
     def args: Seq[Pattern]
 
     /* Allows building Nodes using a list of Patterns */
-    def apply(children: Seq[Pattern]): Pattern
+    def build(children: Seq[Pattern]): Pattern
   }
 
   object Node {
@@ -35,7 +35,7 @@ object tree {
     def contents: C
 
     /* Allows building a leaf using its contents */
-    def apply(contents: C): Pattern
+    def build(contents: C): Pattern
   }
 
   object Leaf {
@@ -51,9 +51,9 @@ object tree {
   sealed trait Leaf2[CC1, CC2] extends Leaf[Product2[CC1, CC2]] with Product2[CC1, CC2] {
     override def contents: Product2[CC1, CC2] = (_1, _2)
 
-    def apply(_1: CC1, _2: CC2): Pattern
+    def build(_1: CC1, _2: CC2): Pattern
 
-    override def apply(contents: Product2[CC1, CC2]): Pattern = apply(contents._1, contents._2)
+    override def build(contents: Product2[CC1, CC2]): Pattern = build(contents._1, contents._2)
   }
 
   object Leaf2 {
@@ -67,9 +67,9 @@ object tree {
     * @tparam L Type of Label.
     */
   sealed trait LabeledNode[L] extends Node with Product1[L] {
-    def apply(_1: L, args: Seq[Pattern]): Pattern
+    def build(_1: L, args: Seq[Pattern]): Pattern
 
-    override def apply(children: Seq[Pattern]): Pattern = apply(_1, children)
+    override def build(children: Seq[Pattern]): Pattern = build(_1, children)
   }
 
   object LabeledNode {
@@ -83,11 +83,11 @@ object tree {
   sealed trait Node0 extends Node {
     override def args = Seq.empty[Pattern]
 
-    def apply(): Pattern
+    def build(): Pattern
 
-    override def apply(children: Seq[Pattern]) = {
+    override def build(children: Seq[Pattern]): Pattern = {
       assert(children.isEmpty)
-      apply()
+      build()
     }
   }
 
@@ -101,11 +101,11 @@ object tree {
   sealed trait Node1 extends Node with Product1[Pattern] {
     override def args = Seq(_1)
 
-    def apply(_1: Pattern): Pattern
+    def build(_1: Pattern): Pattern
 
-    override def apply(children: Seq[Pattern]) = {
+    override def build(children: Seq[Pattern]): Pattern = {
       assert(children.size == 1)
-      apply(children.head)
+      build(children.head)
     }
   }
 
@@ -118,13 +118,13 @@ object tree {
     * A Node with two Patterns in its args list. Extended by [[pattern.Or]], [[pattern.And]], [[pattern.Implies]], [[pattern.Equals]], [[pattern.Rewrite]].
     */
   sealed trait Node2 extends Node with Product2[Pattern, Pattern] {
-    def apply(_1: Pattern, _2: Pattern): Pattern
+    def build(_1: Pattern, _2: Pattern): Pattern
 
     override def args = Seq(_1, _2)
 
-    override def apply(children: Seq[Pattern]) = {
+    override def build(children: Seq[Pattern]): Pattern = {
       assert(children.size == 2)
-      apply(children.head, children(1))
+      build(children.head, children(1))
     }
   }
 
@@ -137,15 +137,15 @@ object tree {
     * Extends [[Node2]], and only allows [[pattern.Variable]] as the first element, and [[pattern.Pattern]] in its args list. Extended by [[pattern.Exists]], [[pattern.ForAll]].
     */
   sealed trait BinderNode extends Node2 {
-    def apply(_1: Variable, _2: Pattern): Pattern
+    def build(_1: Variable, _2: Pattern): Pattern
 
     override val _1: Variable
 
-    override def apply(_1: Pattern, _2: Pattern) = apply(_1.asInstanceOf[Variable], _2)
+    override def build(_1: Pattern, _2: Pattern): Pattern = build(_1.asInstanceOf[Variable], _2)
 
-    override def apply(children: Seq[Pattern]): Pattern = {
+    override def build(children: Seq[Pattern]): Pattern = {
       assert(children.size == 2)
-      apply(children.head.asInstanceOf[Variable], children(1))
+      build(children.head.asInstanceOf[Variable], children(1))
     }
   }
 
@@ -176,10 +176,10 @@ object pattern {
     * Requires (Implementation for members)
     *    - _1 of type [[Name]].
     *    - _2 of type [[Sort]].
-    *    - apply method taking arguments ([[Name]], [[Sort]]) and returning [[Variable]].
+    *    - build method taking arguments ([[Name]], [[Sort]]) and returning [[Variable]].
     */
   trait Variable extends Pattern with Leaf2[Name, Sort] {
-    def apply(_1: Name, _2: Sort): Variable
+    def build(_1: Name, _2: Sort): Variable
   }
 
   object Variable {
@@ -200,10 +200,10 @@ object pattern {
     * Requires (Implementation for members)
     *    - _1 of type [[Label]].
     *    - _2 of type [[Value]].
-    *    - apply method taking arguments ([[Label]], [[Value]]) and returning [[DomainValue]].
+    *    - build method taking arguments ([[Label]], [[Value]]) and returning [[DomainValue]].
     */
   trait DomainValue extends Pattern with Leaf2[Label, Value] {
-    def apply(_1: Label, _2: Value): DomainValue
+    def build(_1: Label, _2: Value): DomainValue
   }
 
   object DomainValue {
@@ -217,10 +217,10 @@ object pattern {
     *    - args, an empty list.
     *
     * Requires (Implementation for members)
-    *    - apply method taking arguments () and returning [[Top]].
+    *    - build method taking arguments () and returning [[Top]].
     */
   trait Top extends Pattern with Node0 {
-    override def apply(): Top
+    override def build(): Top
   }
 
   object Top {
@@ -234,10 +234,10 @@ object pattern {
     *    - args, an empty list.
     *
     * Requires (Implementation for members)
-    *    - apply method taking arguments () and returning [[Bottom]].
+    *    - build method taking arguments () and returning [[Bottom]].
     */
   trait Bottom extends Pattern with Node0 {
-    override def apply(): Bottom
+    override def build(): Bottom
   }
 
   object Bottom {
@@ -253,10 +253,10 @@ object pattern {
     * Requires (Implementation for members)
     *    - _1 of type [[Pattern]].
     *    - _2 of type [[Pattern]].
-    *    - apply method taking arguments ([[Pattern]], [[Pattern]]) and returning [[And]].
+    *    - build method taking arguments ([[Pattern]], [[Pattern]]) and returning [[And]].
     */
   trait And extends Pattern with Node2 {
-    override def apply(_1: Pattern, _2: Pattern): And
+    override def build(_1: Pattern, _2: Pattern): And
   }
 
   object And {
@@ -273,10 +273,10 @@ object pattern {
     * Requires (Implementation for members)
     *    - _1 of type [[Pattern]].
     *    - _2 of type [[Pattern]].
-    *    - apply method taking arguments ([[Pattern]], [[Pattern]]) and returning [[Or]].
+    *    - build method taking arguments ([[Pattern]], [[Pattern]]) and returning [[Or]].
     */
   trait Or extends Pattern with Node2 {
-    override def apply(_1: Pattern, _2: Pattern): Or
+    override def build(_1: Pattern, _2: Pattern): Or
   }
 
   object Or {
@@ -292,10 +292,10 @@ object pattern {
     *
     * Requires (Implementation for members)
     *    - _1 of type [[Pattern]].
-    *    - apply method taking argument ([[Pattern]]) and returning [[Not]].
+    *    - build method taking argument ([[Pattern]]) and returning [[Not]].
     */
   trait Not extends Pattern with Node1 {
-    override def apply(_1: Pattern): Not
+    override def build(_1: Pattern): Not
   }
 
   object Not {
@@ -309,10 +309,10 @@ object pattern {
     * Requires (Implementation for members)
     *    - _1 of type [[Label]], representing symbol from Matching Logic Algebra.
     *    - args of type Seq[Pattern].
-    *    - apply method taking arguments ([[Label]], Seq[Pattern]) and returning [[Application]].
+    *    - build method taking arguments ([[Label]], Seq[Pattern]) and returning [[Application]].
     */
   trait Application extends Pattern with LabeledNode[Label] {
-    override def apply(_1: Label, args: Seq[Pattern]): Application
+    override def build(_1: Label, args: Seq[Pattern]): Application
   }
 
   object Application {
@@ -329,10 +329,10 @@ object pattern {
     * Requires (Implementation for members)
     *    - _1 of type [[Pattern]].
     *    - _2 of type [[Pattern]].
-    *    - apply method taking arguments ([[Pattern]], [[Pattern]]) and returning [[Implies]].
+    *    - build method taking arguments ([[Pattern]], [[Pattern]]) and returning [[Implies]].
     */
   trait Implies extends Pattern with Node2 {
-    override def apply(_1: Pattern, _2: Pattern): Implies
+    override def build(_1: Pattern, _2: Pattern): Implies
   }
 
   object Implies {
@@ -349,10 +349,10 @@ object pattern {
     * Requires (Implementation for members)
     *    - _1 of type [[Variable]].
     *    - _2 of type [[Pattern]].
-    *    - apply method taking arguments ([[Variable]], [[Pattern]]) and returning [[Exists]].
+    *    - build method taking arguments ([[Variable]], [[Pattern]]) and returning [[Exists]].
     */
   trait Exists extends Pattern with BinderNode {
-    def apply(_1: Variable, _2: Pattern): Exists
+    def build(_1: Variable, _2: Pattern): Exists
   }
 
   object Exists {
@@ -369,10 +369,10 @@ object pattern {
     * Requires (Implementation for members)
     *    - _1 of type [[Variable]].
     *    - _2 of type [[Pattern]].
-    *    - apply method taking arguments ([[Variable]], [[Pattern]]) and returning [[ForAll]].
+    *    - build method taking arguments ([[Variable]], [[Pattern]]) and returning [[ForAll]].
     */
   trait ForAll extends Pattern with BinderNode {
-    def apply(_1: Variable, _2: Pattern): ForAll
+    def build(_1: Variable, _2: Pattern): ForAll
   }
 
   object ForAll {
@@ -388,10 +388,10 @@ object pattern {
     *
     * Requires (Implementation for members)
     *    - _1 of type [[Pattern]].
-    *    - apply method taking argument ([[Pattern]]) and returning [[Next]].
+    *    - build method taking argument ([[Pattern]]) and returning [[Next]].
     */
   trait Next extends Pattern with Node1 {
-    override def apply(_1: Pattern): Next
+    override def build(_1: Pattern): Next
   }
 
   object Next {
@@ -408,10 +408,10 @@ object pattern {
     * Requires (Implementation for members)
     *    - _1 of type [[Pattern]].
     *    - _2 of type [[Pattern]].
-    *    - apply method taking arguments ([[Pattern]], [[Pattern]]) and returning [[Rewrite]].
+    *    - build method taking arguments ([[Pattern]], [[Pattern]]) and returning [[Rewrite]].
     */
   trait Rewrite extends Pattern with Node2 {
-    override def apply(_1: Pattern, _2: Pattern): Rewrite
+    override def build(_1: Pattern, _2: Pattern): Rewrite
   }
 
   object Rewrite {
@@ -428,10 +428,10 @@ object pattern {
     * Requires (Implementation for members)
     *   - _1 of type [[Pattern]].
     *   - _2 of type [[Pattern]].
-    *   - apply method taking arguments ([[Pattern]], [[Pattern]]) and returning [[Equals]].
+    *   - build method taking arguments ([[Pattern]], [[Pattern]]) and returning [[Equals]].
     */
   trait Equals extends Pattern with Node2 {
-    override def apply(_1: Pattern, _2: Pattern): Equals
+    override def build(_1: Pattern, _2: Pattern): Equals
   }
 
   object Equals {
