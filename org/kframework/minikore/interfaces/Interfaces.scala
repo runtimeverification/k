@@ -163,9 +163,6 @@ object pattern {
   /* ML Pattern Type */
   sealed trait Pattern extends AST
 
-  type Name = String
-
-  type Sort = String
 
   /**
     * Matching Logic Variable.
@@ -187,9 +184,13 @@ object pattern {
   }
 
 
-  type Label = String
+  case class Label(label: String)
 
-  type Value = String
+  case class Sort(sort: String)
+
+  case class Value(value: String)
+
+  case class Name(name: String)
 
   /**
     * Matching Logic DomainValue.
@@ -453,7 +454,7 @@ object build {
 
     def Variable(_1: Name, _2: Sort): Variable
 
-    def DomainValue(_1: Label, _2: Sort): DomainValue
+    def DomainValue(_1: Label, _2: Value): DomainValue
 
     def Top(): Top
 

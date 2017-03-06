@@ -209,17 +209,17 @@ class TextToMini(b: Builders) {
         scanner.nextWithSkippingWhitespaces() match {
           case ':' => // TODO(Daejun): check if symbol is Name
             val sort = parseSort()
-            Variable(symbol, sort).asInstanceOf[Variable]
+            Variable(Name(symbol), Sort(sort))
           case '(' =>
             scanner.nextWithSkippingWhitespaces() match {
               case '"' => scanner.putback('"')
                 val value = parseString()
                 consumeWithLeadingWhitespaces(")")
-                DomainValue(symbol, value)
+                DomainValue(Label(symbol), Value(value))
               case c => scanner.putback(c)
                 val args = parseList(parsePattern, ',', ')')
                 consumeWithLeadingWhitespaces(")")
-                Application(symbol, args)
+                Application(Label(symbol), args)
             }
           case err => throw error("':' or '('", err)
         }
@@ -231,7 +231,7 @@ class TextToMini(b: Builders) {
     val name = parseName()
     consumeWithLeadingWhitespaces(":")
     val sort = parseSort()
-    Variable(name, sort)
+    Variable(Name(name), Sort(sort))
   }
 
   //////////////////////////////////////////////////////////

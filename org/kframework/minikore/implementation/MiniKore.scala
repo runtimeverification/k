@@ -102,7 +102,7 @@ object DefaultBuilders extends build.Builders {
 
   def Next(_1: i.Pattern): i.Next = m.Next(_1)
 
-  def And(_1: i.Pattern, _2: i.Pattern): i.And = new m.And(_1, _2)
+  def And(_1: i.Pattern, _2: i.Pattern): i.And = m.And(_1, _2)
 
   def Or(_1: i.Pattern, _2: i.Pattern): i.Or = m.Or(_1, _2)
 

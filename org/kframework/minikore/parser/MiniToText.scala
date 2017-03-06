@@ -37,9 +37,9 @@ object MiniToText {
 
   /** Returns a string from [[org.kframework.minikore.interfaces.pattern.Pattern]]. */
   def apply(pat: Pattern): String = pat match {
-    case Variable(name, sort) => apply(name) + ":" + apply(sort)
-    case Application(label, args) => apply(label) + "(" + args.map(apply).mkString(",") + ")"
-    case DomainValue(label, value) => apply(label) + "(\"" + StringEscapeUtils.escapeJava(value) + "\")"
+    case Variable(Name(name), Sort(sort)) => apply(name) + ":" + apply(sort)
+    case Application(Label(label), args) => apply(label) + "(" + args.map(apply).mkString(",") + ")"
+    case DomainValue(Label(label), Value(value)) => apply(label) + "(\"" + StringEscapeUtils.escapeJava(value) + "\")"
     case Top() => "\\top()"
     case Bottom() => "\\bottom()"
     case And(p, q) => "\\and(" + apply(p) + "," + apply(q) + ")"
