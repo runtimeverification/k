@@ -9,6 +9,7 @@ object tree {
     */
   sealed trait AST
 
+
   /**
     * Specifies Node behavior of [[pattern.Pattern]].
     *
@@ -26,6 +27,7 @@ object tree {
     def unapply(arg: Node): Option[Seq[Pattern]] = Some(arg.args)
   }
 
+
   /**
     * Specifies Leaf Behavior of Patterns.
     *
@@ -41,6 +43,7 @@ object tree {
   object Leaf {
     def unapply[C](arg: Leaf[C]): Option[C] = Some(arg.contents)
   }
+
 
   /**
     * A Leaf with Product2[CC1, CC2] as its contents. [[pattern.DomainValue]], [[pattern.Variable]] extend this trait.
@@ -95,6 +98,7 @@ object tree {
     def unapply(arg: Node0): Boolean = true
   }
 
+
   /**
     * A Node with a single pattern in its args list. Extended by [[pattern.Next]], [[pattern.Not]].
     */
@@ -109,10 +113,10 @@ object tree {
     }
   }
 
-
   object Node1 {
     def unapply(arg: Node1): Option[Pattern] = Some(arg._1)
   }
+
 
   /**
     * A Node with two Patterns in its args list. Extended by [[pattern.Or]], [[pattern.And]], [[pattern.Implies]], [[pattern.Equals]], [[pattern.Rewrite]].
@@ -192,6 +196,7 @@ object pattern {
 
   type Name = String
 
+
   /**
     * Matching Logic DomainValue.
     *
@@ -211,6 +216,7 @@ object pattern {
     def unapply(arg: DomainValue): Option[(Symbol, Value)] = Some(arg._1, arg._2)
   }
 
+
   /**
     * Matching Logic Top.
     *
@@ -228,6 +234,7 @@ object pattern {
     def unapply(arg: Top): Boolean = true
   }
 
+
   /**
     * Matching Logic Bottom.
     *
@@ -244,6 +251,7 @@ object pattern {
   object Bottom {
     def unapply(arg: Bottom): Boolean = true
   }
+
 
   /**
     * Matching Logic And.
