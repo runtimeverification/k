@@ -13,30 +13,30 @@ object MiniKore {
 
   case class Definition(modules: Seq[Module], att: Attributes)
 
-  case class Module(name: String, sentences: Seq[Sentence], att: Attributes)
+  case class Module(name: i.Name, sentences: Seq[Sentence], att: Attributes)
 
   sealed trait Sentence
 
-  case class Import(name: String, att: Attributes) extends Sentence
+  case class Import(name: i.Name, att: Attributes) extends Sentence
 
-  case class SortDeclaration(sort: String, att: Attributes) extends Sentence
+  case class SortDeclaration(sort: i.Sort, att: Attributes) extends Sentence
 
-  case class SymbolDeclaration(sort: String, label: String, args: Seq[String], att: Attributes) extends Sentence
+  case class SymbolDeclaration(sort: i.Sort, symbol: i.Symbol, args: Seq[String], att: Attributes) extends Sentence
 
   case class Rule(pattern: i.Pattern, att: Attributes) extends Sentence
 
   case class Axiom(pattern: i.Pattern, att: Attributes) extends Sentence
 
   case class Variable(_1: i.Name, _2: i.Sort) extends i.Variable {
-    def build(_1: i.Name, _2: i.Sort): Variable = new Variable(_1, _2)
+    def build(_1: i.Name, _2: i.Sort): Variable = Variable(_1, _2)
   }
 
-  case class DomainValue(_1: i.Label, _2: i.Value) extends i.DomainValue {
-    def build(_1: i.Label, _2: i.Value): DomainValue = DomainValue(_1, _2)
+  case class DomainValue(_1: i.Symbol, _2: i.Value) extends i.DomainValue {
+    def build(_1: i.Symbol, _2: i.Value): DomainValue = DomainValue(_1, _2)
   }
 
-  case class Application(_1: i.Label, args: Seq[i.Pattern]) extends i.Application {
-    def build(_1: i.Label, args: Seq[i.Pattern]): Application = Application(_1, args)
+  case class Application(_1: i.Symbol, args: Seq[i.Pattern]) extends i.Application {
+    def build(_1: i.Symbol, args: Seq[i.Pattern]): Application = Application(_1, args)
   }
 
   case class Top() extends i.Top {
@@ -92,7 +92,7 @@ object DefaultBuilders extends build.Builders {
 
   def Variable(_1: i.Name, _2: i.Sort): i.Variable = m.Variable(_1, _2)
 
-  def DomainValue(_1: i.Label, _2: i.Value): i.DomainValue = m.DomainValue(_1, _2)
+  def DomainValue(_1: i.Symbol, _2: i.Value): i.DomainValue = m.DomainValue(_1, _2)
 
   def Top(): i.Top = m.Top()
 
@@ -116,7 +116,7 @@ object DefaultBuilders extends build.Builders {
 
   def Rewrite(_1: i.Pattern, _2: i.Pattern): i.Rewrite = m.Rewrite(_1, _2)
 
-  def Application(_1: i.Label, args: Seq[i.Pattern]): MiniKore.Application = m.Application(_1, args)
+  def Application(_1: i.Symbol, args: Seq[i.Pattern]): MiniKore.Application = m.Application(_1, args)
 }
 
 

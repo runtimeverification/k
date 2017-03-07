@@ -25,9 +25,9 @@ object MiniToText {
   def apply(s: Sentence): String = s match {
     case Import(name, att) =>
       "import " + name + " " + apply(att)
-    case SortDeclaration(sort, att) =>
+    case SortDeclaration(Sort(sort), att) =>
       "syntax " + apply(sort) + " " + apply(att)
-    case SymbolDeclaration(sort, label, args, att) =>
+    case SymbolDeclaration(Sort(sort), Symbol(label), args, att) =>
       "syntax " + apply(sort) + " ::= " + apply(label) + "(" + args.map(apply).mkString(",") + ") " + apply(att)
     case Rule(pattern, att) =>
       "rule " + apply(pattern) + " " + apply(att)
@@ -37,9 +37,9 @@ object MiniToText {
 
   /** Returns a string from [[org.kframework.minikore.interfaces.pattern.Pattern]]. */
   def apply(pat: Pattern): String = pat match {
-    case Variable(Name(name), Sort(sort)) => apply(name) + ":" + apply(sort)
-    case Application(Label(label), args) => apply(label) + "(" + args.map(apply).mkString(",") + ")"
-    case DomainValue(Label(label), Value(value)) => apply(label) + "(\"" + StringEscapeUtils.escapeJava(value) + "\")"
+    case Variable(name, Sort(sort)) => apply(name) + ":" + apply(sort)
+    case Application(Symbol(label), args) => apply(label) + "(" + args.map(apply).mkString(",") + ")"
+    case DomainValue(Symbol(label), value) => apply(label) + "(\"" + StringEscapeUtils.escapeJava(value) + "\")"
     case Top() => "\\top()"
     case Bottom() => "\\bottom()"
     case And(p, q) => "\\and(" + apply(p) + "," + apply(q) + ")"

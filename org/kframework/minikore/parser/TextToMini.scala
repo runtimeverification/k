@@ -91,11 +91,11 @@ class TextToMini(b: Builders) {
         scanner.nextWithSkippingWhitespaces() match {
           case '[' => scanner.putback('[')
             val att = parseAttributes()
-            val sen = SortDeclaration(sort, att)
+            val sen = SortDeclaration(Sort(sort), att)
             parseSentences(sentences :+ sen)
           case ':' => consume(":=")
             val (symbol, args, att) = parseSymbolDeclaration()
-            val sen = SymbolDeclaration(sort, symbol, args, att)
+            val sen = SymbolDeclaration(Sort(sort), Symbol(symbol), args, att)
             parseSentences(sentences :+ sen)
           case err => throw error("'[' or ':'", err)
         }
@@ -209,17 +209,17 @@ class TextToMini(b: Builders) {
         scanner.nextWithSkippingWhitespaces() match {
           case ':' => // TODO(Daejun): check if symbol is Name
             val sort = parseSort()
-            Variable(Name(symbol), Sort(sort))
+            Variable(symbol, Sort(sort))
           case '(' =>
             scanner.nextWithSkippingWhitespaces() match {
               case '"' => scanner.putback('"')
                 val value = parseString()
                 consumeWithLeadingWhitespaces(")")
-                DomainValue(Label(symbol), Value(value))
+                DomainValue(Symbol(symbol), value)
               case c => scanner.putback(c)
                 val args = parseList(parsePattern, ',', ')')
                 consumeWithLeadingWhitespaces(")")
-                Application(Label(symbol), args)
+                Application(Symbol(symbol), args)
             }
           case err => throw error("':' or '('", err)
         }
@@ -231,7 +231,7 @@ class TextToMini(b: Builders) {
     val name = parseName()
     consumeWithLeadingWhitespaces(":")
     val sort = parseSort()
-    Variable(Name(name), Sort(sort))
+    Variable(name, Sort(sort))
   }
 
   //////////////////////////////////////////////////////////
