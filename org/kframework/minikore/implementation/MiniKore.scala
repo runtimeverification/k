@@ -116,7 +116,7 @@ object DefaultBuilders extends build.Builders {
 
   def Rewrite(_1: i.Pattern, _2: i.Pattern): i.Rewrite = m.Rewrite(_1, _2)
 
-  def Application(_1: i.Symbol, args: Seq[i.Pattern]): MiniKore.Application = m.Application(_1, args)
+  def Application(_1: i.Symbol, args: Seq[i.Pattern]): i.Application = m.Application(_1, args)
 }
 
 
