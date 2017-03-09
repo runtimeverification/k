@@ -19,6 +19,7 @@ import org.kframework.parser.SetsGeneralTransformer;
 import org.kframework.parser.SetsTransformerWithErrors;
 import org.kframework.parser.Term;
 import org.kframework.parser.TermCons;
+import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -31,8 +32,8 @@ import scala.util.Left;
 import scala.util.Right;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -528,13 +529,16 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
     }
 
     static boolean hasPolySort(TermCons tc) {
-        return tc.production().att().contains("poly") && Arrays.asList(tc.production().att().get("poly").split(",")).stream().anyMatch(s -> s.trim().equals("0"));
+        if (!tc.production().att().contains("poly"))
+            return false;
+        List<Set<Integer>> positions = RuleGrammarGenerator.computePositions(tc.production());
+        return positions.stream().anyMatch(s -> s.contains(0));
     }
 
     static Tuple2<Either<Set<ParseFailedException>, Term>, Set<VarInfo>> visitPolyChildrenSets(TermCons tc, Function<Term, Tuple2<Either<Set<ParseFailedException>, Term>, Set<VarInfo>>> apply) {
         Set<ParseFailedException> errors = new HashSet<>();
         Set<VarInfo> info = new HashSet<>();
-        for (int i : Arrays.asList(tc.production().att().get("poly").split(",")).stream().map(s -> Integer.valueOf(s.trim())).filter(j -> j != 0).collect(Collectors.toList())) {
+        for (int i : getPolyChildren(tc)) {
             Tuple2<Either<Set<ParseFailedException>, Term>, Set<VarInfo>> res = apply.apply(tc.get(i - 1));
             info.addAll(res._2());
             if (res._1().isLeft())
@@ -547,7 +551,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
     }
 
     static Term visitPolyChildrenSafe(TermCons tc, Function<Term, Term> apply) {
-        for (int i : Arrays.asList(tc.production().att().get("poly").split(",")).stream().map(s -> Integer.valueOf(s.trim())).filter(j -> j != 0).collect(Collectors.toList())) {
+        for (int i : getPolyChildren(tc)) {
             apply.apply(tc.get(i - 1));
 
         }
@@ -556,7 +560,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
 
     static Either<Set<ParseFailedException>,Term> visitPolyChildren(TermCons tc, Function<Term, Either<Set<ParseFailedException>, Term>> apply) {
         Set<ParseFailedException> errors = new HashSet<>();
-        for (int i : Arrays.asList(tc.production().att().get("poly").split(",")).stream().map(s -> Integer.valueOf(s.trim())).filter(j -> j != 0).collect(Collectors.toList())) {
+        for (int i : getPolyChildren(tc)) {
             Either<Set<ParseFailedException>, Term> res = apply.apply(tc.get(i - 1));
             if (res.isLeft()) {
                 errors.addAll(res.left().get());
@@ -566,6 +570,11 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
             return Right.apply(tc);
         else
             return Left.apply(errors);
+    }
+
+    private static List<Integer> getPolyChildren(TermCons tc) {
+        return RuleGrammarGenerator.computePositions(tc.production()).stream().filter(s -> s.contains(0)).findAny()
+                .orElse(Collections.emptySet()).stream().filter(j -> j != 0).collect(Collectors.toList());
     }
 
     public class CollectExpectedVariablesVisitor extends SafeTransformer {

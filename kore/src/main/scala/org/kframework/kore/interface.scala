@@ -1,7 +1,7 @@
 package org.kframework.kore
 
 import org.kframework.attributes._
-import org.kframework.unparser.Unparse
+import org.kframework.unparser.{ToKast}
 
 /**
  * This file contains all inner KORE interfaces.
@@ -11,7 +11,7 @@ import org.kframework.unparser.Unparse
 
 trait K extends Serializable {
   def att: Att
-  override def toString = Unparse.apply(this)
+  override def toString = ToKast.apply(this)
 
   lazy val cachedHashCode = computeHashCode
 

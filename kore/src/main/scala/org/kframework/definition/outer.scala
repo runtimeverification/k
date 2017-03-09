@@ -343,6 +343,7 @@ case class Production(sort: Sort, items: Seq[ProductionItem], att: Att)
         item match {
           case terminal: Terminal if terminal.value == "," => state = 3
           case terminal: Terminal if terminal.value == ")" => state = 4
+          case _ => return false
         }
       } else if (state == 3) {
         // a nonterminal

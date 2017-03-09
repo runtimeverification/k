@@ -2,23 +2,22 @@
 package org.kframework.kore.compile;
 
 import org.kframework.Collections;
-import org.kframework.definition.Definition;
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Context;
+import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.definition.Production;
 import org.kframework.definition.ProductionItem;
 import org.kframework.definition.Sentence;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.FindK;
-import org.kframework.kore.KORE;
-import org.kframework.kore.VisitK;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.KRewrite;
 import org.kframework.kore.KVariable;
+import org.kframework.kore.VisitK;
 import org.kframework.utils.errorsystem.KEMException;
 
 import java.util.ArrayList;
@@ -68,7 +67,7 @@ public class ResolveContexts {
         int counter = 0;
         KLabel freezer;
         do {
-            freezer = KLabel("#freezer" + nameHint + (counter++ == 0 ? "" : counter));
+            freezer = KLabel("#freezer" + nameHint + "_" + (counter++ == 0 ? "" : counter));
         } while (klabels.contains(freezer));
         klabels.add(freezer);
         return freezer;

@@ -9,28 +9,6 @@ import org.kframework.kore.{KLabel, InjectedKLabel, K, KApply}
 import scala.collection.JavaConverters._
 
 /**
- * Pretty prints inner KORE structures to labeled form.
- */
-
-object Unparse extends {
-  def apply(k: K): String = k match {
-    case KToken(s, sort) => "#token(\"" + StringEscapeUtils.escapeJava(s) + "\"," + sort + ")"
-    // TODO: Radu: fix string escaping above; see issue #1359
-    case KSequence(l) =>
-      if (l.isEmpty)
-        ".K"
-      else
-        "~>(" + l.map(apply).mkString(",") + ")"
-    //        l.map("(" + apply(_) + ")").mkString("~>")
-    case KRewrite(left, right) => "=>(" + apply(left) + "," + apply(right) + ")"
-    // apply(left) + "=>" + apply(right)
-    case kapp: KApply => kapp.klabel.name + "(" + kapp.klist.items.asScala.map(apply).mkString(",") + ")"
-    case KVariable(name) => name
-    case inj: InjectedKLabel => "#klabel(" + inj.klabel.name + ")"
-  }
-}
-
-/**
  * Print terms according to the official KAST syntax.
  */
 object ToKast {

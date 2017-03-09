@@ -184,28 +184,36 @@ public class RuleGrammarGenerator {
 
         for (Production p : iterable(mod.productions())) {
             if (p.att().contains("poly")) {
-                Set<Integer> positions = Arrays.asList(p.att().get("poly").split(",")).stream().map(s -> Integer.valueOf(s.trim())).collect(Collectors.toSet());
-                for (Sort srt : iterable(mod.definedSorts())) {
-                    if (!isParserSort(srt)) {
-                        Sort returnSort = p.sort();
-                        if (positions.contains(0))
+                List<Set<Integer>> positions = computePositions(p);
+                if (!p.isSyntacticSubsort()) {
+                    // we don't actually need to do anything except in this case because the type checker will never
+                    // actually reject a parse because the sorts in the arguments don't match; it will simply infer
+                    // sort K for those arguments.
+                    positions = positions.stream().filter(s -> s.contains(0)).collect(Collectors.toList());
+                }
+                List<List<Sort>> sortTuples = makeAllSortTuples(positions.size(), mod);
+                for (List<Sort> tuple : sortTuples) {
+                    Sort returnSort = p.sort();
+                    List<ProductionItem> pis = new ArrayList<>();
+                    pis.addAll(mutable(p.items()));
+                    for (int i = 0; i < positions.size(); i++) {
+                        Set<Integer> parameter = positions.get(i);
+                        Sort srt = tuple.get(i);
+                        if (parameter.contains(0)) {
                             returnSort = srt;
-                        List<ProductionItem> pis = new ArrayList<>();
+                        }
                         int idx = 1;
-                        for (ProductionItem pi : iterable(p.items())) {
+                        for (int j = 0; j < pis.size(); j++) {
+                            ProductionItem pi = pis.get(j);
                             if (pi instanceof NonTerminal) {
-                                if (positions.contains(idx)) {
-                                    pis.add(NonTerminal(srt, ((NonTerminal) pi).name()));
-                                } else {
-                                    pis.add(pi);
+                                if (parameter.contains(idx)) {
+                                    pis.set(j, NonTerminal(srt, ((NonTerminal) pi).name()));
                                 }
                                 idx++;
-                            } else {
-                                pis.add(pi);
                             }
                         }
-                        prods.add(Production(returnSort, immutable(pis), p.att().add(Constants.ORIGINAL_PRD, Production.class, p)));
                     }
+                    prods.add(Production(returnSort, immutable(pis), p.att().add(Constants.ORIGINAL_PRD, Production.class, p)));
                 }
             }
         }
@@ -339,6 +347,34 @@ public class RuleGrammarGenerator {
         Module disambM = new Module(mod.name() + "-DISAMB", Set(), immutable(disambProds), mod.att());
         Module parseM = new Module(mod.name() + "-PARSER", Set(), immutable(parseProds), mod.att());
         return new ParseInModule(mod, extensionM, disambM, parseM, this.strict);
+    }
+
+    public static List<Set<Integer>> computePositions(Production p) {
+        return (List<Set<Integer>>) Arrays.asList(p.att().get("poly").split(";"))
+                            .stream().map(l -> Arrays.asList(l.split(",")).stream()
+                                    .map(s -> Integer.valueOf(s.trim())).collect(Collectors.toSet())).collect(Collectors.toList());
+    }
+
+    private List<List<Sort>> makeAllSortTuples(int size, Module mod) {
+        List<List<Sort>> res = new ArrayList<>();
+        List<Sort> allSorts = stream(mod.definedSorts()).filter(s -> !isParserSort(s)).collect(Collectors.toList());
+        makeAllSortTuples(size, size, allSorts, res, new int[size]);
+        return res;
+    }
+
+    private void makeAllSortTuples(int level, int size, List<Sort> sorts, List<List<Sort>> res, int[] indices) {
+        if (level == 0) {
+            List<Sort> tuple = new ArrayList<>();
+            for (int i = 0; i < indices.length; i++) {
+                tuple.add(sorts.get(indices[i]));
+            }
+            res.add(tuple);
+        } else {
+            for (int i = 0; i < sorts.size(); i++) {
+                indices[level-1] = i;
+                makeAllSortTuples(level-1, size, sorts, res, indices);
+            }
+        }
     }
 
     private boolean isExceptionSort(Sort srt) {

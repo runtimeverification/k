@@ -78,7 +78,7 @@ public class CheckKLabels {
         }
     }
 
-    private final ImmutableSet<String> internalNames = ImmutableSet.of("#cells", "#dots", "#noDots");
+    private final ImmutableSet<String> internalNames = ImmutableSet.of("#cells", "#dots", "#noDots", "#fun2", "#fun3");
 
     private boolean isInternalKLabel(String name, Module m) {
         return name.startsWith("#SemanticCastTo") || internalNames.contains(name) || (name.startsWith("is") && m.definedSorts().apply(Sort(name.substring(2))));

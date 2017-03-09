@@ -43,6 +43,12 @@ public class ResolveAnonVar {
                 context.att());
     }
 
+    public K resolveK(K k) {
+        resetVars();;
+        gatherVars(k);
+        return transform(k);
+    }
+
     public synchronized Sentence resolve(Sentence s) {
         if (s instanceof Rule) {
             return resolve((Rule) s);

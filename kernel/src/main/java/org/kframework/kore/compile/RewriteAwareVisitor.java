@@ -1,8 +1,13 @@
 // Copyright (c) 2015-2016 K Team. All Rights Reserved.
 package org.kframework.kore.compile;
 
+import org.kframework.kore.KApply;
 import org.kframework.kore.KRewrite;
+import org.kframework.kore.KVariable;
 import org.kframework.kore.VisitK;
+import org.kframework.utils.errorsystem.KEMException;
+
+import java.util.Set;
 
 /**
  * A visitor designed to track whether we are currently in the left hand side or right hand side of a term.
@@ -13,7 +18,9 @@ import org.kframework.kore.VisitK;
  */
 public class RewriteAwareVisitor extends VisitK {
 
-    public RewriteAwareVisitor(boolean isBody) {
+    private final Set<KEMException> errors;
+    public RewriteAwareVisitor(boolean isBody, Set<KEMException> errors) {
+        this.errors = errors;
         if (isBody) {
             isRHS = true;
             isLHS = true;
@@ -43,5 +50,45 @@ public class RewriteAwareVisitor extends VisitK {
         isLHS = false;
         apply(k.right());
         isLHS = true;
+    }
+
+    @Override
+    public void apply(KApply k) {
+        if (!(k.klabel() instanceof KVariable) && k.klabel().name().equals("#fun2") || k.klabel().name().equals("#fun3")) {
+            if (k.klabel().name().equals("#fun2")) {
+                boolean wasRHS = isRHS;
+                boolean wasLHS = isLHS;
+                if (!isRHS || isLHS) {
+                    errors.add(KEMException.compilerError("Found #fun expression not on right-hand side of rule.", k));
+                }
+                isRHS = false;
+                isLHS = false;
+                apply(k.items().get(0));
+                // in well formed programs this should always reset to true and false, but we want to make sure we don't
+                // create spurious reports if this constraint was violated by the user.
+                isRHS = wasRHS;
+                isLHS = wasLHS;
+                apply(k.items().get(1));
+            } else {
+                boolean wasRHS = isRHS;
+                boolean wasLHS = isLHS;
+                if (!isRHS || isLHS) {
+                    errors.add(KEMException.compilerError("Found #fun expression not on right-hand side of rule.", k));
+                }
+                isRHS = false;
+                isLHS = true;
+                apply(k.items().get(0));
+                isRHS = true;
+                isLHS = false;
+                apply(k.items().get(1));
+                // in well formed programs this should always reset to true and false, but we want to make sure we don't
+                // create spurious reports if this constraint was violated by the user.
+                isRHS = wasRHS;
+                isLHS = wasLHS;
+                apply(k.items().get(2));
+            }
+        } else {
+            super.apply(k);
+        }
     }
 }

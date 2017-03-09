@@ -76,8 +76,6 @@ module KSEQ-SYMBOLIC
   syntax KBott      ::= #KVariable
   syntax KBott      ::= KConfigVar
   syntax KLabel     ::= #KVariable
-
-  syntax K      ::= K "#as" K                                                      [klabel(#KAs), poly(0, 1, 2)]
 endmodule
 
 module KCELLS
@@ -205,9 +203,15 @@ module K
   imports K-SORT-LATTICE
   imports AUTO-CASTS
   imports AUTO-FOLLOW
+
   syntax K ::= K "=>" K [klabel(#KRewrite), poly(0, 1, 2)]
   syntax non-assoc #KRewrite
 
+  syntax K ::= K "#as" K [klabel(#KAs), poly(0, 1, 2)]
+  // functions that preserve sorts and can therefore have inner rewrites
+  syntax K ::= "#fun" "(" K ")" "(" K ")" [klabel(#fun2), poly(0, 1, 2), prefer]
+  // functions that do not preserve sort and therefore cannot have inner rewrites
+  syntax K ::= "#fun" "(" K "=>" K ")" "(" K ")" [klabel(#fun3), poly(0, 2; 1, 3)]
 endmodule
 
 // To be used to parse terms in full K

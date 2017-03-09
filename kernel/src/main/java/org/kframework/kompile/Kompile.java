@@ -22,6 +22,7 @@ import org.kframework.kore.compile.GenerateSortPredicateSyntax;
 import org.kframework.kore.compile.ResolveAnonVar;
 import org.kframework.kore.compile.ResolveContexts;
 import org.kframework.kore.compile.ResolveFreshConstants;
+import org.kframework.kore.compile.ResolveFun;
 import org.kframework.kore.compile.ResolveHeatCoolAttribute;
 import org.kframework.kore.compile.ResolveIOStreams;
 import org.kframework.kore.compile.ResolveSemanticCasts;
@@ -53,8 +54,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.kframework.Collections.*;
-import static org.kframework.kore.KORE.*;
 import static org.kframework.definition.Constructors.*;
+import static org.kframework.kore.KORE.*;
 import static scala.compat.java8.JFunction.*;
 
 /**
@@ -144,9 +145,11 @@ public class Kompile {
         DefinitionTransformer resolveAnonVars = DefinitionTransformer.fromSentenceTransformer(new ResolveAnonVar()::resolve, "resolving \"_\" vars");
         DefinitionTransformer resolveSemanticCasts =
                 DefinitionTransformer.fromSentenceTransformer(new ResolveSemanticCasts(kompileOptions.backend.equals(Backends.JAVA))::resolve, "resolving semantic casts");
+        DefinitionTransformer resolveFun = DefinitionTransformer.from(new ResolveFun()::resolve, "resolving #fun");
         DefinitionTransformer generateSortPredicateSyntax = DefinitionTransformer.from(new GenerateSortPredicateSyntax()::gen, "adding sort predicate productions");
 
         return def -> func(this::resolveIOStreams)
+                .andThen(resolveFun)
                 .andThen(resolveStrict)
                 .andThen(resolveAnonVars)
                 .andThen(func(d -> new ResolveContexts(kompileOptions).resolve(d)))
