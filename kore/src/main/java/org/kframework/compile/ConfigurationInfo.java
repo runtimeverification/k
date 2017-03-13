@@ -1,7 +1,6 @@
 // Copyright (c) 2015-2016 K Team. All Rights Reserved.
 package org.kframework.compile;
 
-import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.Sort;
@@ -73,7 +72,7 @@ public interface ConfigurationInfo {
 
     /** Returns a term which is the default cell of sort k,
      * probably an initializer macro */
-    K getDefaultCell(Sort k);
+    KApply getDefaultCell(Sort k);
 
     boolean isConstantInitializer(Sort k);
 

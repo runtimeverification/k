@@ -16,7 +16,7 @@ object RewriteToTop {
   }
 
   def toRight(rewrite: K): K = rewrite match {
-    case t: KRewrite => t.right
+    case t: KRewrite => toRight(t.right) // recurse here because of KAs
     case t: KApply => KApply(t.klabel, immutable(t.klist.items) map toRight, t.att)
     case t: KSequence => KSequence(mutable(immutable(t.items) map toRight toList), t.att)
     case t: KAs => t.alias
