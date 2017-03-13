@@ -281,10 +281,10 @@ public class GenerateSentencesFromConfigDecl {
         Sentence initializer;
         Rule initializerRule;
         if (hasConfigurationOrRegularVariable || isStream) {
-            initializer = Production(initLabel, sort, Seq(Terminal(initLabel), Terminal("("), NonTerminal(Sort("Map")), Terminal(")")), Att().add("initializer").add("function"));
+            initializer = Production(initLabel, sort, Seq(Terminal(initLabel), Terminal("("), NonTerminal(Sort("Map")), Terminal(")")), Att().add("initializer").add("function").add("noThread"));
             initializerRule = Rule(KRewrite(KApply(KLabel(initLabel), KVariable("Init")), IncompleteCellUtils.make(KLabel("<" + cellName + ">"), false, childInitializer, false)), BooleanUtils.TRUE, ensures == null ? BooleanUtils.TRUE : ensures, Att().add("initializer"));
         } else {
-            initializer = Production(initLabel, sort, Seq(Terminal(initLabel)), Att().add("initializer").add("function"));
+            initializer = Production(initLabel, sort, Seq(Terminal(initLabel)), Att().add("initializer").add("function").add("noThread"));
             initializerRule = Rule(KRewrite(KApply(KLabel(initLabel)), IncompleteCellUtils.make(KLabel("<" + cellName + ">"), false, childInitializer, false)), BooleanUtils.TRUE, ensures == null ? BooleanUtils.TRUE : ensures, Att().add("initializer"));
         }
         sentences.add(initializer);

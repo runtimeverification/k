@@ -160,6 +160,8 @@ let print_k (c: k) : string = let buf = Buffer.create 16 in
   | KItem (Set(_,lbl,s)) -> print_kitem(normalize (k_of_set lbl s))
   | KItem (Map(_,lbl,m)) -> print_kitem(normalize (k_of_map lbl m))
   | KItem (Array(sort,a)) -> print_kitem(normalize (k_of_array sort a))
+  | KItem (ThreadLocal) -> print_kitem(KApply(Lbl'0023'ThreadLocal, []))
+  | KItem (Thread(k1, k2, k3, k4)) -> print_kitem(KApply(Lbl'0023'Thread, [k1; k2; k3; k4]))
   in print_k c; Buffer.contents buf
 module Subst = Map.Make(String)
 let print_subst (out: out_channel) (c: k Subst.t) : unit =
@@ -408,8 +410,7 @@ struct
       [k] -> (match (normalize k) with KApply (lbl, _) -> [InjectedKLabel lbl] | _ -> interned_bottom)
     | _ -> interned_bottom
   let hook_configuration c lbl sort config ff = match c with
-      () -> match config with [Thread(global, _, _, _)] -> global
-    | _ -> config
+      () -> config
   let hook_fresh c lbl sort config ff = match c with
       [String sort] -> let res = ff sort config !freshCounter in freshCounter := Z.add !freshCounter Z.one; res
     | _ -> raise Not_implemented
