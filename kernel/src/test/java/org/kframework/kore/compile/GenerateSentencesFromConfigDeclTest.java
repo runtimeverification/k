@@ -65,7 +65,7 @@ public class GenerateSentencesFromConfigDeclTest {
         Module m = parserGen.getCombinedGrammar(parserGen.getConfigGrammar(m1)).getExtensionModule();
         Set<Sentence> gen = GenerateSentencesFromConfigDecl.gen(configuration, BooleanUtils.FALSE, Att(), m);
         Att initializerAtts = Att().add("initializer");
-        Att productionAtts = initializerAtts.add("function").add("noThread");
+        Att productionAtts = initializerAtts.add("function");
         Set<Sentence> reference = Set(Production("<threads>", Sort("ThreadsCell"),
                         Seq(Terminal("<threads>"), NonTerminal(Sort("ThreadCellBag")), Terminal("</threads>")),
                         Att().add("cell").add("topcell")),

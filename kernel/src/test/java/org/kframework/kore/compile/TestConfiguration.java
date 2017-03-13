@@ -7,6 +7,7 @@ import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Maps;
 import org.kframework.compile.ConfigurationInfo;
+import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.Sort;
@@ -32,7 +33,7 @@ class TestConfiguration implements ConfigurationInfo {
     Sort computationCell = null;
 
     Map<Sort, Multiplicity> multiplicities = Maps.newHashMap();
-    Map<Sort, KApply> defaultCells = Maps.newHashMap();
+    Map<Sort, K> defaultCells = Maps.newHashMap();
     BiMap<Sort, KLabel> units = HashBiMap.create();
     BiMap<Sort, KLabel> concats = HashBiMap.create();
     Map<Sort, KLabel> cellLabels = Maps.newHashMap();
@@ -74,7 +75,7 @@ class TestConfiguration implements ConfigurationInfo {
         cellLabels.put(Sort(child), KLabel(label));
     }
 
-    public void addDefault(String cell, KApply term) {
+    public void addDefault(String cell, K term) {
         defaultCells.put(Sort(cell), term);
     }
 
@@ -156,7 +157,7 @@ class TestConfiguration implements ConfigurationInfo {
     public KLabel getCellAbsentLabel(Sort k) { return cellAbsentLabels.get(k); }
 
     @Override
-    public KApply getDefaultCell(Sort k) {
+    public K getDefaultCell(Sort k) {
         return defaultCells.get(k);
     }
 
