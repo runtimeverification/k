@@ -113,13 +113,13 @@ class TextToMini(b: Builders) {
 
   // SymbolDeclaration = Symbol ( List{Sort, ',', ')'} ) Attributes
   // Sort = Name
-  private def parseSymbolDeclaration(): Tuple3[String, Seq[String], Attributes] = {
+  private def parseSymbolDeclaration(): Tuple3[String, Seq[Sort], Attributes] = {
     val symbol = parseSymbol()
     consumeWithLeadingWhitespaces("(")
     val args = parseList(parseSort, ',', ')')
     consumeWithLeadingWhitespaces(")")
     val att = parseAttributes()
-    (symbol, args, att)
+    (symbol, args.map(Sort.apply), att)
   }
 
   // Import = ModuleName Attributes

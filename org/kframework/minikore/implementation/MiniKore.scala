@@ -21,7 +21,7 @@ object MiniKore {
 
   case class SortDeclaration(sort: i.Sort, att: Attributes) extends Sentence
 
-  case class SymbolDeclaration(sort: i.Sort, symbol: i.Symbol, args: Seq[String], att: Attributes) extends Sentence
+  case class SymbolDeclaration(sort: i.Sort, symbol: i.Symbol, args: Seq[i.Sort], att: Attributes) extends Sentence
 
   case class Rule(pattern: i.Pattern, att: Attributes) extends Sentence
 
@@ -48,7 +48,7 @@ object MiniKore {
   }
 
   case class And(_1: i.Pattern, _2: i.Pattern) extends i.And {
-    def build(_1: i.Pattern, _2: i.Pattern): And = new And(_1, _2)
+    def build(_1: i.Pattern, _2: i.Pattern): And = And(_1, _2)
   }
 
   case class Or(_1: i.Pattern, _2: i.Pattern) extends i.Or {

@@ -28,7 +28,7 @@ object MiniToText {
     case SortDeclaration(Sort(sort), att) =>
       "syntax " + apply(sort) + " " + apply(att)
     case SymbolDeclaration(Sort(sort), Symbol(label), args, att) =>
-      "syntax " + apply(sort) + " ::= " + apply(label) + "(" + args.map(apply).mkString(",") + ") " + apply(att)
+      "syntax " + apply(sort) + " ::= " + apply(label) + "(" + args.map(x => apply(x.sort)).mkString(",") + ") " + apply(att)
     case Rule(pattern, att) =>
       "rule " + apply(pattern) + " " + apply(att)
     case Axiom(pattern, att) =>
@@ -57,6 +57,7 @@ object MiniToText {
   def apply(att: Attributes): String = {
     "[" + att.map(apply).mkString(",") + "]"
   }
+
 
   /** Normalizes the string of Sort, Name, or Symbol.
     *
