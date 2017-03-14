@@ -40,13 +40,12 @@ class OuterTest {
     val prod = Production(sort1, Seq(Terminal("foo"), Terminal("("), nt1, Terminal(","), nt2, Terminal(")")), Att)
     val newAtt = Att.add("recordPrd", classOf[Production], prod)
     val records = prod.recordProductions
-    Assert.assertEquals(5, records.size)
+    Assert.assertEquals(4, records.size)
     Assert.assertEquals(Set(
       Production(sort1, Seq(Terminal("foo"), Terminal("("), Terminal("..."), Terminal(")")), newAtt),
       Production(sort1, Seq(Terminal("foo"), Terminal("("), Terminal("..."), Terminal("baz"), Terminal(":"), nt2, Terminal(")")), newAtt),
       Production(sort1, Seq(Terminal("foo"), Terminal("("), Terminal("..."), Terminal("bar"), Terminal(":"), nt1, Terminal(")")), newAtt),
-      Production(sort1, Seq(Terminal("foo"), Terminal("("), Terminal("..."), Terminal("bar"), Terminal(":"), nt1, Terminal(","), Terminal("baz"), Terminal(":"), nt2,Terminal(")")), newAtt),
-      Production(sort1, Seq(Terminal("foo"), Terminal("("), Terminal("..."), Terminal("baz"), Terminal(":"), nt2, Terminal(","), Terminal("bar"), Terminal(":"), nt1,Terminal(")")), newAtt)
+      Production(sort1, Seq(Terminal("foo"), Terminal("("), Terminal("..."), Terminal("bar"), Terminal(":"), nt1, Terminal(","), Terminal("baz"), Terminal(":"), nt2,Terminal(")")), newAtt)
     ), records)
   }
 }

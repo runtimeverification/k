@@ -360,7 +360,7 @@ case class Production(sort: Sort, items: Seq[ProductionItem], att: Att)
 
   lazy val isPrefixProduction: Boolean = computePrefixProduction
 
-  private def makeRecordProduction(terminals: List[NonTerminal]): Production = {
+  private def makeRecordProduction(terminals: Seq[NonTerminal]): Production = {
     val prefix = items.takeWhile(_.isInstanceOf[Terminal]) :+ Terminal("...")
     val suffix = items.last
     val newAtt = att.add("recordPrd", classOf[Production], this)
@@ -374,9 +374,9 @@ case class Production(sort: Sort, items: Seq[ProductionItem], att: Att)
 
   lazy val recordProductions: Set[Production] = {
     assert(isPrefixProduction)
-    val namedNts = items.filter(_.isInstanceOf[NonTerminal]).map(_.asInstanceOf[NonTerminal]).filter(_.name.isDefined).toSet
-    val permutations = namedNts.subsets().flatMap(subset => subset.toList.permutations)
-    permutations.map(makeRecordProduction).toSet
+    val namedNts = items.filter(_.isInstanceOf[NonTerminal]).map(_.asInstanceOf[NonTerminal]).filter(_.name.isDefined).toSeq
+    val powerSet = 0 to namedNts.size flatMap namedNts.combinations
+    powerSet.map(makeRecordProduction).toSet
   }
 }
 
