@@ -1,6 +1,21 @@
 package org.kframework.minikore.interfaces
 
-
+/**
+  * Provides a collection of [[tree.AST]] types, allowing for viewing [[pattern.Pattern]]s as ASTs.
+  *
+  * Sample Usage -
+  * {{{def printVariableNames(pattern: Pattern): Unit = p match {
+  *     case BinderNode(Variable(str: Name, Sort(sortName)), p: Pattern) => {
+  *       println(Name +"@" + sortName)
+  *       printVariableName(p)
+  *     }
+  *     case Node(args: Seq[Pattern]) => args.map(printVariableNames)
+  *     case Variable(str: Name, Sort(sortName)) => println(str + "@" sortName)
+  *   }
+  * }}}
+  *
+  *
+  */
 object tree {
 
   import pattern._
@@ -164,7 +179,17 @@ object tree {
 
 }
 
-
+/**
+  * Provides all Pattern types, and destructors for matching on [[pattern.Pattern]]s.
+  *
+  * Sample Usage -
+  * {{{
+  *   def filterAndConstructs(patterns: Seq[Pattern]): Seq[Pattern] = patterns collect {
+  *     case a@And(x: Pattern, y: Pattern) => a
+  *   }
+  * }}}
+  *
+  */
 object pattern {
 
   import tree._
@@ -454,6 +479,20 @@ object pattern {
 
 }
 
+/**
+  * Provides a Builder type that allows building Pattern types in [[pattern]].
+  *
+  * Sample Usage -
+  *
+  * Given a concrete implementation of [[build.Builders]], one can create new patters -
+  * {{{
+  *   /* Given Concrete Implementation */
+  *   val builder: Builders = ConcreteBuilders
+  *   /* A Pattern Or(X:Int, Y:Int) can be constructed in the following way */
+  *   val or: Or = builder.Or(builder.Variable("X", Sort("Int)), builder."Y", Sort("Int"))
+  * }}}
+  *
+  */
 object build {
 
   import pattern._
