@@ -493,7 +493,7 @@ object pattern {
   *   /* Given Concrete Implementation */
   *   val builder: Builders = ConcreteBuilders
   *   /* A Pattern Or(X:Int, Y:Int) can be constructed in the following way */
-  *   val or: Or = builder.Or(builder.Variable("X", Sort("Int)), builder."Y", Sort("Int"))
+  *   val or: Or = builder.Or(builder.Variable("X", Sort("Int")), builder."Y", Sort("Int"))
   * }}}
   *
   */
