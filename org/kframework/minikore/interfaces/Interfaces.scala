@@ -1,5 +1,6 @@
 package org.kframework.minikore.interfaces
 
+
 object tree {
 
   import pattern._
@@ -47,6 +48,10 @@ object tree {
 
   /**
     * A Leaf with Product2[CC1, CC2] as its contents. [[pattern.DomainValue]], [[pattern.Variable]] extend this trait.
+    *
+    * [[Leaf2]] extends [[Leaf]], with Product[CC1, CC2] as its type parameter.
+    * This allows for creating a Leaf[Product[CC1, CC2]], directly using the build method, of
+    * type (CC1, CC2) => Pattern.
     *
     * @tparam CC1 Type of First Field.
     * @tparam CC2 Type of Second Field.
@@ -188,9 +193,9 @@ object pattern {
   }
 
 
-  case class Symbol(symbol: String)
+  case class Symbol(str: String)
 
-  case class Sort(sort: String)
+  case class Sort(str: String)
 
   type Value = String
 
@@ -201,7 +206,7 @@ object pattern {
     * Matching Logic DomainValue.
     *
     * Provides (Implementations for members)
-    *    - contents of type Product2[Label, Value].
+    *    - contents of type Product2[Symbol, Value].
     *
     * Requires (Implementation for members)
     *    - _1 of type [[Symbol]].
