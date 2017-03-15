@@ -159,6 +159,9 @@ object tree {
 
   /**
     * Extends [[Node2]], and only allows [[pattern.Variable]] as the first element, and [[pattern.Pattern]] in its args list. Extended by [[pattern.Exists]], [[pattern.ForAll]].
+    *
+    * TODO: An extension of Binder Node may be provided in the future, to allow user defined symbols to have binder-like behavior.
+    *       These symbols may allow multiple arguments, with the variable bound in some, but not all of them.
     */
   sealed trait BinderNode extends Node2 {
     def build(_1: Variable, _2: Pattern): Pattern
