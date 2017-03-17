@@ -764,7 +764,10 @@ struct
   let hook_min c lbl sort config ff = raise Not_implemented
   let hook_max c lbl sort config ff = raise Not_implemented
   let hook_rem c lbl sort config ff = raise Not_implemented
-  let hook_root c lbl sort config ff = raise Not_implemented
+  let hook_root c lbl sort config ff = match c with
+    | [Float (f,e,p)], [Int i] when Z.to_int i = 2 -> 
+        [round_to_range(Float ((Gmp.FR.sqrt_prec p Gmp.GMP_RNDN f),e,p))]
+    | _ -> raise Not_implemented
   let hook_sign c lbl sort config ff = match c with
       [Float (f,e,p)] -> (match deconstruct_float f e p with (s,_,_) -> [Bool s])
     | _ -> raise Not_implemented
