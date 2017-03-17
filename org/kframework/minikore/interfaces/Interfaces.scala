@@ -24,7 +24,7 @@ object tree {
     * Base type of the Tree interface. [[pattern.Pattern]] extends AST.
     * Represents a Pattern in Matching Logic.
     */
-  trait AST
+  sealed trait AST
 
 
   /**

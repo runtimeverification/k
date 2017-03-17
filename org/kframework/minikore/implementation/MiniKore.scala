@@ -27,7 +27,7 @@ object MiniKore {
 
   case class Axiom(pattern: i.Pattern, att: Attributes) extends Sentence
 
-  case class SymbolImplementation(str: String) extends i.Symbol
+  case class Symbol(str: String) extends i.Symbol
 
   case class Variable(_1: i.Name, _2: i.Sort) extends i.Variable {
     def build(_1: i.Name, _2: i.Sort): Variable = Variable(_1, _2)
@@ -92,7 +92,7 @@ object DefaultBuilders extends build.Builders {
 
   import org.kframework.minikore.implementation.{MiniKore => m}
 
-  def Symbol(str: String): i.Symbol = m.SymbolImplementation(str)
+  def Symbol(str: String): i.Symbol = m.Symbol(str)
 
   def Variable(_1: i.Name, _2: i.Sort): i.Variable = m.Variable(_1, _2)
 
