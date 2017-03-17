@@ -24,7 +24,7 @@ object tree {
     * Base type of the Tree interface. [[pattern.Pattern]] extends AST.
     * Represents a Pattern in Matching Logic.
     */
-  sealed trait AST
+  trait AST
 
 
   /**
@@ -33,7 +33,7 @@ object tree {
     * Allows matching a Pattern against as a Node,
     * and building a Pattern from a list of Patterns.
     */
-  sealed trait Node extends AST with Product {
+  trait Node extends AST with Product {
     def args: Seq[Pattern]
 
     /* Allows building Nodes using a list of Patterns */
@@ -50,7 +50,7 @@ object tree {
     *
     * @tparam C The Contents of the Leaf.
     */
-  sealed trait Leaf[C] extends AST with Product {
+  trait Leaf[C] extends AST with Product {
     def contents: C
 
     /* Allows building a leaf using its contents */
@@ -199,7 +199,7 @@ object pattern {
   import tree._
 
   /* ML Pattern Type */
-  sealed trait Pattern extends AST
+  trait Pattern extends AST
 
 
   /**
@@ -221,8 +221,13 @@ object pattern {
     def unapply(arg: Variable): Option[(Name, Sort)] = Some(arg._1, arg._2)
   }
 
+  trait Symbol {
+    def str: String
+  }
 
-  case class Symbol(str: String)
+  object Symbol {
+    def unapply(s: Symbol) = Some(s.str)
+  }
 
   case class Sort(str: String)
 
@@ -298,9 +303,7 @@ object pattern {
     *    - _2 of type [[Pattern]].
     *    - build method taking arguments ([[Pattern]], [[Pattern]]) and returning [[And]].
     */
-  trait And extends Pattern with Node2 {
-    override def build(_1: Pattern, _2: Pattern): And
-  }
+  trait And extends Pattern with Node2
 
   object And {
     def unapply(arg: And): Option[(Pattern, Pattern)] = Some(arg._1, arg._2)
@@ -318,9 +321,7 @@ object pattern {
     *    - _2 of type [[Pattern]].
     *    - build method taking arguments ([[Pattern]], [[Pattern]]) and returning [[Or]].
     */
-  trait Or extends Pattern with Node2 {
-    override def build(_1: Pattern, _2: Pattern): Or
-  }
+  trait Or extends Pattern with Node2
 
   object Or {
     def unapply(arg: Or): Option[(Pattern, Pattern)] = Some(arg._1, arg._2)
@@ -337,9 +338,7 @@ object pattern {
     *    - _1 of type [[Pattern]].
     *    - build method taking argument ([[Pattern]]) and returning [[Not]].
     */
-  trait Not extends Pattern with Node1 {
-    override def build(_1: Pattern): Not
-  }
+  trait Not extends Pattern with Node1
 
   object Not {
     def unapply(arg: Not): Option[Pattern] = Some(arg._1)
@@ -354,9 +353,7 @@ object pattern {
     *    - args of type Seq[Pattern].
     *    - build method taking arguments ([[Symbol]], Seq[Pattern]) and returning [[Application]].
     */
-  trait Application extends Pattern with LabeledNode[Symbol] {
-    override def build(_1: Symbol, args: Seq[Pattern]): Application
-  }
+  trait Application extends Pattern with LabeledNode[Symbol]
 
   object Application {
     def unapply(arg: Application): Option[(Symbol, Seq[Pattern])] = Some(arg._1, arg.args)
@@ -374,9 +371,7 @@ object pattern {
     *    - _2 of type [[Pattern]].
     *    - build method taking arguments ([[Pattern]], [[Pattern]]) and returning [[Implies]].
     */
-  trait Implies extends Pattern with Node2 {
-    override def build(_1: Pattern, _2: Pattern): Implies
-  }
+  trait Implies extends Pattern with Node2
 
   object Implies {
     def unapply(arg: Implies): Option[(Pattern, Pattern)] = Some(arg._1, arg._2)
@@ -394,9 +389,7 @@ object pattern {
     *    - _2 of type [[Pattern]].
     *    - build method taking arguments ([[Variable]], [[Pattern]]) and returning [[Exists]].
     */
-  trait Exists extends Pattern with BinderNode {
-    def build(_1: Variable, _2: Pattern): Exists
-  }
+  trait Exists extends Pattern with BinderNode
 
   object Exists {
     def unapply(arg: Exists): Option[(Variable, Pattern)] = Some(arg._1, arg._2)
@@ -414,9 +407,7 @@ object pattern {
     *    - _2 of type [[Pattern]].
     *    - build method taking arguments ([[Variable]], [[Pattern]]) and returning [[ForAll]].
     */
-  trait ForAll extends Pattern with BinderNode {
-    def build(_1: Variable, _2: Pattern): ForAll
-  }
+  trait ForAll extends Pattern with BinderNode
 
   object ForAll {
     def unapply(arg: ForAll): Option[(Variable, Pattern)] = Some(arg._1, arg._2)
@@ -433,9 +424,7 @@ object pattern {
     *    - _1 of type [[Pattern]].
     *    - build method taking argument ([[Pattern]]) and returning [[Next]].
     */
-  trait Next extends Pattern with Node1 {
-    override def build(_1: Pattern): Next
-  }
+  trait Next extends Pattern with Node1
 
   object Next {
     def unapply(arg: Next): Option[Pattern] = Some(arg._1)
@@ -453,9 +442,7 @@ object pattern {
     *    - _2 of type [[Pattern]].
     *    - build method taking arguments ([[Pattern]], [[Pattern]]) and returning [[Rewrite]].
     */
-  trait Rewrite extends Pattern with Node2 {
-    override def build(_1: Pattern, _2: Pattern): Rewrite
-  }
+  trait Rewrite extends Pattern with Node2
 
   object Rewrite {
     def unapply(arg: Rewrite): Option[(Pattern, Pattern)] = Some(arg._1, arg._2)
@@ -473,9 +460,7 @@ object pattern {
     *   - _2 of type [[Pattern]].
     *   - build method taking arguments ([[Pattern]], [[Pattern]]) and returning [[Equals]].
     */
-  trait Equals extends Pattern with Node2 {
-    override def build(_1: Pattern, _2: Pattern): Equals
-  }
+  trait Equals extends Pattern with Node2
 
   object Equals {
     def unapply(arg: Equals): Option[(Pattern, Pattern)] = Some(arg._1, arg._2)
@@ -508,6 +493,8 @@ object build {
     */
   trait Builders {
 
+    def Symbol(str: String): Symbol
+
     def Variable(_1: Name, _2: Sort): Variable
 
     def DomainValue(_1: Symbol, _2: Value): DomainValue
@@ -516,25 +503,25 @@ object build {
 
     def Bottom(): Bottom
 
-    def Not(_1: Pattern): Not
+    def Not(_1: Pattern): Pattern
 
-    def Next(_1: Pattern): Next
+    def Next(_1: Pattern): Pattern
 
-    def And(_1: Pattern, _2: Pattern): And
+    def And(_1: Pattern, _2: Pattern): Pattern
 
-    def Or(_1: Pattern, _2: Pattern): Or
+    def Or(_1: Pattern, _2: Pattern): Pattern
 
-    def Implies(_1: Pattern, _2: Pattern): Implies
+    def Implies(_1: Pattern, _2: Pattern): Pattern
 
-    def Equals(_1: Pattern, _2: Pattern): Equals
+    def Equals(_1: Pattern, _2: Pattern): Pattern
 
-    def Exists(_1: Variable, _2: Pattern): Exists
+    def Exists(_1: Variable, _2: Pattern): Pattern
 
-    def ForAll(_1: Variable, _2: Pattern): ForAll
+    def ForAll(_1: Variable, _2: Pattern): Pattern
 
-    def Rewrite(_1: Pattern, _2: Pattern): Rewrite
+    def Rewrite(_1: Pattern, _2: Pattern): Pattern
 
-    def Application(_1: Symbol, args: Seq[Pattern]): Application
+    def Application(_1: Symbol, args: Seq[Pattern]): Pattern
   }
 
 }
