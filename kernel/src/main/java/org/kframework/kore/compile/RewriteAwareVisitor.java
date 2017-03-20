@@ -55,14 +55,14 @@ public class RewriteAwareVisitor extends VisitK {
     @Override
     public void apply(KApply k) {
         if (!(k.klabel() instanceof KVariable) && k.klabel().name().equals("#fun2") || k.klabel().name().equals("#fun3")) {
+            boolean wasRHS = isRHS;
+            boolean wasLHS = isLHS;
+            if (!isRHS || isLHS) {
+                errors.add(KEMException.compilerError("Found #fun expression not on right-hand side of rule.", k));
+            }
             if (k.klabel().name().equals("#fun2")) {
-                boolean wasRHS = isRHS;
-                boolean wasLHS = isLHS;
-                if (!isRHS || isLHS) {
-                    errors.add(KEMException.compilerError("Found #fun expression not on right-hand side of rule.", k));
-                }
-                isRHS = false;
-                isLHS = false;
+                isRHS = true;
+                isLHS = true;
                 apply(k.items().get(0));
                 // in well formed programs this should always reset to true and false, but we want to make sure we don't
                 // create spurious reports if this constraint was violated by the user.
@@ -70,11 +70,6 @@ public class RewriteAwareVisitor extends VisitK {
                 isLHS = wasLHS;
                 apply(k.items().get(1));
             } else {
-                boolean wasRHS = isRHS;
-                boolean wasLHS = isLHS;
-                if (!isRHS || isLHS) {
-                    errors.add(KEMException.compilerError("Found #fun expression not on right-hand side of rule.", k));
-                }
                 isRHS = false;
                 isLHS = true;
                 apply(k.items().get(0));
