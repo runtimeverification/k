@@ -166,7 +166,7 @@ public class Kompile {
 
     public Rule parseAndCompileRule(CompiledDefinition compiledDef, String contents, Source source, Optional<Rule> parsedRule) {
         Rule parsed = parsedRule.orElse(parseRule(compiledDef, contents, source));
-        return compileRule(compiledDef, parsed);
+        return compileRule(compiledDef.kompiledDefinition, parsed);
     }
 
     public Rule parseRule(CompiledDefinition compiledDef, String contents, Source source) {
@@ -232,10 +232,10 @@ public class Kompile {
                 .apply(input);
     }
 
-    public Rule compileRule(CompiledDefinition compiledDef, Rule parsedRule) {
+    public Rule compileRule(Definition compiledDef, Rule parsedRule) {
         return (Rule) func(new ResolveAnonVar()::resolve)
                 .andThen(func(new ResolveSemanticCasts(kompileOptions.backend.equals(Backends.JAVA))::resolve))
-                .andThen(func(s -> concretizeSentence(s, compiledDef.kompiledDefinition)))
+                .andThen(func(s -> concretizeSentence(s, compiledDef)))
                 .apply(parsedRule);
     }
 

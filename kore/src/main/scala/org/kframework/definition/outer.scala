@@ -69,22 +69,20 @@ object Module {
   }
 }
 
-case class Module(val name: String, val imports: Set[Module], unresolvedLocalSentences: Set[Sentence], @(Nonnull@param) val att: Att = Att())
+case class Module(val name: String, val imports: Set[Module], localSentences: Set[Sentence], @(Nonnull@param) val att: Att = Att())
   extends ModuleToString with KLabelMappings with OuterKORE with Sorting with Serializable {
   assert(att != null)
 
-  private val importedSentences = imports flatMap {_.sentences}
+  private lazy val importedSentences = imports flatMap {_.sentences}
 
-  val localSentences = unresolvedLocalSentences
-
-  val sentences: Set[Sentence] = localSentences | importedSentences
+  lazy val sentences: Set[Sentence] = localSentences | importedSentences
 
   /** All the imported modules, calculated recursively. */
   lazy val importedModules: Set[Module] = imports | (imports flatMap {
     _.importedModules
   })
 
-  val productions: Set[Production] = sentences collect { case p: Production => p }
+  lazy val productions: Set[Production] = sentences collect { case p: Production => p }
 
   lazy val productionsFor: Map[KLabel, Set[Production]] =
     productions
@@ -169,7 +167,7 @@ case class Module(val name: String, val imports: Set[Module], unresolvedLocalSen
         }
     }
 
-  val sortDeclarations: Set[SyntaxSort] = sentences.collect({ case s: SyntaxSort => s })
+  lazy val sortDeclarations: Set[SyntaxSort] = sentences.collect({ case s: SyntaxSort => s })
 
   lazy val sortDeclarationsFor: Map[Sort, Set[SyntaxSort]] =
     sortDeclarations
@@ -183,8 +181,8 @@ case class Module(val name: String, val imports: Set[Module], unresolvedLocalSen
     Att(union.filter { k => !k.isInstanceOf[KApply] || attMap(k.asInstanceOf[KApply].klabel).size == 1 }.toMap)
   }
 
-  val definedSorts: Set[Sort] = (productions map {_.sort}) ++ (sortDeclarations map {_.sort})
-  val usedCellSorts: Set[Sort] = productions.flatMap { p => p.items.collect { case NonTerminal(s, _) => s }
+  lazy val definedSorts: Set[Sort] = (productions map {_.sort}) ++ (sortDeclarations map {_.sort})
+  lazy val usedCellSorts: Set[Sort] = productions.flatMap { p => p.items.collect { case NonTerminal(s, _) => s }
     .filter(s => s.name.endsWith("Cell") || s.name.endsWith("CellFragment"))
   }
 
@@ -230,16 +228,13 @@ case class Module(val name: String, val imports: Set[Module], unresolvedLocalSen
     }
 
   // check that non-terminals have a defined sort
-  private val nonTerminalsWithUndefinedSort = sentences flatMap {
+  def checkSorts () = sentences foreach {
     case p@Production(_, items, _) =>
       val res = items collect { case nt: NonTerminal if !definedSorts.contains(nt.sort) && !usedCellSorts.contains(nt.sort) => nt }
-      if (!res.isEmpty)
+      if (res.nonEmpty)
         throw KEMException.compilerError("Could not find sorts: " + res.asJava, p)
-      res
-    case _ => Set()
+    case _ =>
   }
-  if (!nonTerminalsWithUndefinedSort.isEmpty)
-    throw new NonTerminalsWithUndefinedSortException(nonTerminalsWithUndefinedSort)
 
   override lazy val hashCode: Int = name.hashCode
 

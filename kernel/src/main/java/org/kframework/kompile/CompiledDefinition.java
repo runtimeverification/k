@@ -4,10 +4,12 @@ package org.kframework.kompile;
 import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.attributes.Source;
+import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
+import org.kframework.definition.Production;
 import org.kframework.definition.Rule;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -16,9 +18,11 @@ import org.kframework.kore.KORE;
 import org.kframework.kore.KToken;
 import org.kframework.kore.Sort;
 import org.kframework.kore.VisitK;
+import org.kframework.kore.compile.IncompleteCellUtils;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.concrete2kore.ParseInModule;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.file.FileUtil;
@@ -34,6 +38,10 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
+
+import static org.kframework.Collections.*;
+import static org.kframework.definition.Constructors.*;
+import static org.kframework.kore.KORE.*;
 
 /**
  * A class representing a compiled definition. It has everything needed for executing and parsing programs.
@@ -60,11 +68,17 @@ public class CompiledDefinition implements Serializable {
         this.programStartSymbol = configurationVariableDefaultSorts.getOrDefault("$PGM", Sorts.K());
         this.topCellInitializer = topCellInitializer;
         this.languageParsingModule = kompiledDefinition.getModule("LANGUAGE-PARSING").get();
-        if (kompileOptions.exitCodePattern != null) {
-            this.exitCodePattern = compilePatternIfAbsent(files, kem, kompileOptions.exitCodePattern, Source.apply("<command line: --exit-code>"));
-        } else {
-            this.exitCodePattern = null;
+        this.exitCodePattern = new Kompile(kompileOptions, files, kem).compileRule(kompiledDefinition, getExitCodeRule(parsedDefinition));
+    }
+
+    private Rule getExitCodeRule(Definition parsedDefinition) {
+        Module mainMod = parsedDefinition.mainModule();
+        Set<Production> exitProds = stream(mainMod.productions()).filter(p -> p.att().contains("exit")).collect(Collectors.toSet());
+        if (exitProds.size() != 1) {
+            throw KEMException.compilerError("Found more than one or zero productions with 'exit' attribute. Exactly one production, a cell, must have this attribute, designating the exit code of krun. Found:\n" + exitProds);
         }
+        Production exitProd = exitProds.iterator().next();
+        return Rule(IncompleteCellUtils.make(exitProd.klabel().get(), false, KApply(KLabel("#SemanticCastToInt"), KVariable("_")), false), BooleanUtils.TRUE, BooleanUtils.TRUE);
     }
 
     private void initializeConfigurationVariableDefaultSorts() {

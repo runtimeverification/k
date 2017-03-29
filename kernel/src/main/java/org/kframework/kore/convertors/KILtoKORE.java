@@ -143,6 +143,7 @@ public class KILtoKORE extends KILTransformation<Object> {
 
         org.kframework.definition.Module newModule = Module(mainModule.getName(), immutable(importedModules), immutable(items),
                 inner.convertAttributes(mainModule));
+        newModule.checkSorts();
         koreModules.put(newModule.name(), newModule);
         return newModule;
     }
