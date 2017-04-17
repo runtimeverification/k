@@ -6,12 +6,25 @@ object kore {
 
   trait Name
 
+  object Name {
+    def unapply(arg: Name): Boolean = true
+  }
+
   trait Sort
 
+  object Sort {
+    def unapply(arg: Sort): Boolean = true
+  }
   trait Symbol
 
+  object Symbol {
+    def unapply(arg: Symbol): Boolean = true
+  }
   trait Value
 
+  object Value {
+    def unapply(arg: Value): Boolean = true
+  }
   trait DomainValue extends Pattern {
     val symbol: Symbol
     val value: Value
