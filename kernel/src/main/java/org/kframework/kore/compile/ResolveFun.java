@@ -101,7 +101,7 @@ public class ResolveFun {
                     funRules.add(funRule(fun, body));
                     List<K> klist = new ArrayList<>();
                     klist.add(apply(arg));
-                    klist.addAll(closure(k));
+                    klist.addAll(closure(body));
                     return KApply(fun, KList(klist));
                 }
                 return super.apply(k);
