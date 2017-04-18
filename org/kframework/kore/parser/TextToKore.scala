@@ -47,7 +47,7 @@ class TextToKore(b: Builders) {
     consumeWithLeadingWhitespaces("[")
     val att = parseList(parsePattern, ',', ']')
     consumeWithLeadingWhitespaces("]")
-    att
+    b.Attributes(att)
   }
 
   // Modules = <EOF> // <empty>
@@ -67,7 +67,7 @@ class TextToKore(b: Builders) {
     val sentences = parseSentences(Seq())
     consumeWithLeadingWhitespaces("endmodule")
     val att = parseAttributes()
-    b.Module(b.Name(nameStr), sentences, att)
+    b.Module(b.ModuleName(nameStr), sentences, att)
   }
 
   // Sentences = <lookahead>(e) // <empty>
@@ -124,7 +124,7 @@ class TextToKore(b: Builders) {
   private def parseImport(): Import = {
     val name = parseModuleName()
     val att = parseAttributes()
-    b.Import(b.Name(name), att)
+    b.Import(b.ModuleName(name), att)
   }
 
   // Rule = Pattern Attributes

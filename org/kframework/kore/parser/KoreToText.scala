@@ -22,7 +22,7 @@ object KoreToText {
 
   /** Returns a string from [[org.kframework.kore.interfaces.Kore.Sentence]]. */
   def apply(s: Sentence): String = s match {
-    case Import(Name(name), att) =>
+    case Import(ModuleName(name), att) =>
       "import " + apply(name) + " " + apply(att)
     case SortDeclaration(Sort(sort), att) =>
       "syntax " + apply(sort) + " " + apply(att)
@@ -54,7 +54,7 @@ object KoreToText {
 
   /** Returns a string from [[org.kframework.kore.interfaces.Kore.Attributes]]. */
   def apply(att: Attributes): String = {
-    "[" + att.map(apply).mkString(",") + "]"
+    "[" + att.att.map(apply).mkString(",") + "]"
   }
 
 

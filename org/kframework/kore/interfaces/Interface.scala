@@ -154,19 +154,24 @@ object Kore {
     def unapply(arg: Application): Option[(Symbol, Seq[Pattern])] = Some(arg.symbol, arg.args)
   }
 
-  type Attributes = Seq[Pattern]
+  trait Attributes {
+    def att: Seq[Pattern]
+  }
 
+  object Attributes {
+    def unapply(arg: Attributes): Option[Seq[Pattern]] = Some(arg.att)
+  }
 
   trait Sentence {
     val att: Attributes
   }
 
   trait Import extends Sentence {
-    val name: Name
+    val name: ModuleName
   }
 
   object Import {
-    def unapply(arg: Import): Option[(Name, Attributes)] = Some(arg.name, arg.att)
+    def unapply(arg: Import): Option[(ModuleName, Attributes)] = Some(arg.name, arg.att)
   }
 
   trait Rule extends Sentence {
@@ -193,7 +198,8 @@ object Kore {
     def unapply(arg: SortDeclaration): Option[(Sort, Attributes)] = Some(arg.sort, arg.att)
   }
 
-  trait SymbolDeclaration extends SortDeclaration {
+  trait SymbolDeclaration extends Sentence{
+    val sort: Sort
     val symbol: Symbol
     val args: Seq[Sort]
   }
@@ -202,14 +208,22 @@ object Kore {
     def unapply(arg: SymbolDeclaration): Option[(Sort, Symbol, Seq[Sort], Attributes)] = Some(arg.sort, arg.symbol, arg.args, arg.att)
   }
 
+  trait ModuleName {
+    def str: String
+  }
+
+  object ModuleName {
+    def unapply(arg: ModuleName): Option[String] = Some(arg.str)
+  }
+
   trait Module {
-    val name: Name
+    val name: ModuleName
     val sentences: Seq[Sentence]
     val att: Attributes
   }
 
   object Module {
-    def unapply(arg: Module): Option[(Name, Seq[Sentence], Attributes)] = Some(arg.name, arg.sentences, arg.att)
+    def unapply(arg: Module): Option[(ModuleName, Seq[Sentence], Attributes)] = Some(arg.name, arg.sentences, arg.att)
   }
 
   trait Definition {
@@ -227,6 +241,8 @@ object Kore {
 trait Builders {
 
   import Kore._
+
+  def ModuleName(str: String): ModuleName
 
   def Name(str: String): Name
 
@@ -264,18 +280,20 @@ trait Builders {
 
   def Application(p: Symbol, args: Seq[Pattern]): Application
 
-  def Import(name: Name, att: Attributes = Seq.empty): Import
+  def Attributes(att: Seq[Pattern]): Attributes
 
-  def SortDeclaration(sort: Sort, att: Attributes = Seq.empty): SortDeclaration
+  def Import(name: ModuleName, att: Attributes): Import
 
-  def SymbolDeclaration(sort: Sort, symbol: Symbol, args: Seq[Sort], att: Attributes = Seq.empty): SymbolDeclaration
+  def SortDeclaration(sort: Sort, att: Attributes): SortDeclaration
 
-  def Rule(p: Pattern, att: Attributes = Seq.empty): Rule
+  def SymbolDeclaration(sort: Sort, symbol: Symbol, args: Seq[Sort], att: Attributes): SymbolDeclaration
 
-  def Axiom(p: Pattern, att: Attributes = Seq.empty): Axiom
+  def Rule(p: Pattern, att: Attributes): Rule
 
-  def Module(name: Name, sentences: Seq[Sentence], att: Attributes = Seq.empty): Module
+  def Axiom(p: Pattern, att: Attributes): Axiom
 
-  def Definition(modules: Seq[Module], att: Attributes = Seq.empty): Definition
+  def Module(name: ModuleName, sentences: Seq[Sentence], att: Attributes): Module
+
+  def Definition(modules: Seq[Module], att: Attributes): Definition
 }
 

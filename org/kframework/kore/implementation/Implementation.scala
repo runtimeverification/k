@@ -1,5 +1,6 @@
 package org.kframework.kore.implementation
 
+import org.kframework.kore.interfaces.Kore.Pattern
 import org.kframework.kore.interfaces.{Builders, Kore => i}
 
 object DefaultKore {
@@ -11,6 +12,10 @@ object DefaultKore {
   case class Value(str: String) extends i.Value
 
   case class Sort(str: String) extends i.Sort
+
+  case class ModuleName(str: String) extends i.ModuleName
+
+  case class Attributes(att: Seq[i.Pattern]) extends i.Attributes
 
   case class Top() extends i.Top
 
@@ -40,28 +45,30 @@ object DefaultKore {
 
   case class Application(symbol: i.Symbol, args: Seq[i.Pattern]) extends i.Application
 
-  case class Import(name: i.Name, att: i.Attributes = Seq.empty) extends i.Import
+  case class Import(name: i.ModuleName, att: i.Attributes) extends i.Import
 
-  case class SortDeclaration(sort: i.Sort, att: i.Attributes = Seq.empty) extends i.SortDeclaration
+  case class SortDeclaration(sort: i.Sort, att: i.Attributes) extends i.SortDeclaration
 
-  case class SymbolDeclaration(sort: i.Sort, symbol: i.Symbol, args: Seq[i.Sort], att: i.Attributes = Seq.empty) extends i.SymbolDeclaration
+  case class SymbolDeclaration(sort: i.Sort, symbol: i.Symbol, args: Seq[i.Sort], att: i.Attributes) extends i.SymbolDeclaration
 
-  case class Rule(p: i.Pattern, att: i.Attributes = Seq.empty) extends i.Rule
+  case class Rule(p: i.Pattern, att: i.Attributes) extends i.Rule
 
-  case class Axiom(p: i.Pattern, att: i.Attributes = Seq.empty) extends i.Axiom
+  case class Axiom(p: i.Pattern, att: i.Attributes) extends i.Axiom
 
-  case class Module(name: i.Name, sentences: Seq[i.Sentence], att: i.Attributes = Seq.empty) extends i.Module
+  case class Module(name: i.ModuleName, sentences: Seq[i.Sentence], att: i.Attributes) extends i.Module
 
-  case class Definition(modules: Seq[i.Module], att: i.Attributes = Seq.empty) extends i.Definition
+  case class Definition(modules: Seq[i.Module], att: i.Attributes) extends i.Definition
 
 }
 
 case class DefaultBuilders() extends Builders {
 
-  import org.kframework.kore.interfaces.{Kore => i}
   import org.kframework.kore.implementation.{DefaultKore => k}
+  import org.kframework.kore.interfaces.{Kore => i}
 
   def Name(str: String): i.Name = k.Name(str)
+
+  def ModuleName(str: String): i.ModuleName = k.ModuleName(str)
 
   def Sort(str: String): i.Sort = k.Sort(str)
 
@@ -97,7 +104,9 @@ case class DefaultBuilders() extends Builders {
 
   def Application(symbol: i.Symbol, args: Seq[i.Pattern]): i.Application = k.Application(symbol, args)
 
-  def Import(name: i.Name, att: i.Attributes): i.Import = k.Import(name, att)
+  def Attributes(att: Seq[Pattern]): i.Attributes = k.Attributes(att)
+
+  def Import(name: i.ModuleName, att: i.Attributes): i.Import = k.Import(name, att)
 
   def SortDeclaration(sort: i.Sort, att: i.Attributes): i.SortDeclaration = k.SortDeclaration(sort, att)
 
@@ -107,7 +116,7 @@ case class DefaultBuilders() extends Builders {
 
   def Axiom(p: i.Pattern, att: i.Attributes): i.Axiom = k.Axiom(p, att)
 
-  def Module(name: i.Name, sentences: Seq[i.Sentence], att: i.Attributes): i.Module = k.Module(name, sentences, att)
+  def Module(name: i.ModuleName, sentences: Seq[i.Sentence], att: i.Attributes): i.Module = k.Module(name, sentences, att)
 
   def Definition(modules: Seq[i.Module], att: i.Attributes): i.Definition = k.Definition(modules, att)
 }
