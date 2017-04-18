@@ -1,4 +1,4 @@
-package org.kframework.minikore.interfaces
+package org.kframework.kore.interfaces
 
 object Kore {
 
@@ -203,12 +203,13 @@ object Kore {
   }
 
   trait Module {
+    val name: Name
     val sentences: Seq[Sentence]
     val att: Attributes
   }
 
   object Module {
-    def unapply(arg: Module): Option[(Seq[Sentence], Attributes)] = Some(arg.sentences, arg.att)
+    def unapply(arg: Module): Option[(Name, Seq[Sentence], Attributes)] = Some(arg.name, arg.sentences, arg.att)
   }
 
   trait Definition {
@@ -273,7 +274,7 @@ trait Builders {
 
   def Axiom(p: Pattern, att: Attributes = Seq.empty): Axiom
 
-  def Module(sentences: Seq[Sentence], att: Attributes = Seq.empty): Module
+  def Module(name: Name, sentences: Seq[Sentence], att: Attributes = Seq.empty): Module
 
   def Definition(modules: Seq[Module], att: Attributes = Seq.empty): Definition
 }

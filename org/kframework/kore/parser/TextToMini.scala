@@ -1,14 +1,14 @@
-package org.kframework.minikore.parser
+package org.kframework.kore.parser
 
 import org.apache.commons.lang3.StringEscapeUtils
-import org.kframework.minikore.implementation.MiniKore.{Definition, Module, Sentence, SortDeclaration, SymbolDeclaration, Rule, Axiom, Attributes, Import}
-import org.kframework.minikore.interfaces.pattern._
-import org.kframework.minikore.interfaces.build.Builders
+import org.kframework.kore.implementation.MiniKore.{Definition, Module, Sentence, SortDeclaration, SymbolDeclaration, Rule, Axiom, Attributes, Import}
+import org.kframework.kore.interfaces.pattern._
+import org.kframework.kore.interfaces.build.Builders
 
 /** Parsing error exception. */
 case class ParseError(msg: String) extends Exception(msg) // ParseError.msg eq Exception.detailMessage, i.e., msg() == getMessage()
 
-/** A parser for [[org.kframework.minikore.interfaces.pattern]].
+/** A parser for [[org.kframework.kore.interfaces.pattern]].
   *
   * @constructor Creates a new parser.
   */
@@ -16,13 +16,13 @@ class TextToMini(b: Builders) {
   import b._
   private val scanner = new Scanner()
 
-  /** Parses the file and returns [[org.kframework.minikore.implementation.MiniKore.Definition]]. */
+  /** Parses the file and returns [[org.kframework.kore.implementation.MiniKore.Definition]]. */
   @throws(classOf[ParseError])
   def parse(file: java.io.File): Definition = {
     parse(io.Source.fromFile(file))
   }
 
-  /** Parses from the stream and returns [[org.kframework.minikore.implementation.MiniKore.Definition]]. */
+  /** Parses from the stream and returns [[org.kframework.kore.implementation.MiniKore.Definition]]. */
   @throws(classOf[ParseError])
   def parse(src: io.Source): Definition = {
     try {

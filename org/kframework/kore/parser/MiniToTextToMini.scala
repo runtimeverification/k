@@ -1,9 +1,9 @@
-package org.kframework.minikore.parser
+package org.kframework.kore.parser
 
 import org.apache.commons.io.FileUtils
-import org.kframework.minikore.implementation.DefaultBuilders
-import org.kframework.minikore.implementation.MiniKore.Definition
-import org.kframework.minikore.interfaces.build.Builders
+import org.kframework.kore.implementation.DefaultBuilders
+import org.kframework.kore.implementation.MiniKore.Definition
+import org.kframework.kore.interfaces.build.Builders
 
 // TODO(Daejun): drop this file
 

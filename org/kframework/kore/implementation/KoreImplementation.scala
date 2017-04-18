@@ -1,6 +1,6 @@
-package org.kframework.minikore.implementation
+package org.kframework.kore.implementation
 
-import org.kframework.minikore.interfaces.{Builders, Kore => i}
+import org.kframework.kore.interfaces.{Builders, Kore => i}
 
 object DefaultKore {
 
@@ -50,7 +50,7 @@ object DefaultKore {
 
   case class Axiom(p: i.Pattern, att: i.Attributes = Seq.empty) extends i.Axiom
 
-  case class Module(sentences: Seq[i.Sentence], att: i.Attributes = Seq.empty) extends i.Module
+  case class Module(name: i.Name, sentences: Seq[i.Sentence], att: i.Attributes = Seq.empty) extends i.Module
 
   case class Definition(modules: Seq[i.Module], att: i.Attributes = Seq.empty) extends i.Definition
 
@@ -58,8 +58,8 @@ object DefaultKore {
 
 class DefaultBuilders extends Builders {
 
-  import org.kframework.minikore.interfaces.{Kore => i}
-  import org.kframework.minikore.implementation.{DefaultKore => k}
+  import org.kframework.kore.interfaces.{Kore => i}
+  import org.kframework.kore.implementation.{DefaultKore => k}
 
   def Name(str: String): i.Name = k.Name(str)
 
@@ -107,7 +107,7 @@ class DefaultBuilders extends Builders {
 
   def Axiom(p: i.Pattern, att: i.Attributes): i.Axiom = k.Axiom(p, att)
 
-  def Module(sentences: Seq[i.Sentence], att: i.Attributes): i.Module = k.Module(sentences, att)
+  def Module(name: i.Name, sentences: Seq[i.Sentence], att: i.Attributes): i.Module = k.Module(name, sentences, att)
 
   def Definition(modules: Seq[i.Module], att: i.Attributes): i.Definition = k.Definition(modules, att)
 }
