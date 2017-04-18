@@ -15,15 +15,15 @@ object KoreToText {
 
   /** Returns a string from [[org.kframework.kore.interfaces.Kore.Module]]. */
   def apply(m: Module): String = {
-    "module " + m.name.str + System.lineSeparator() +
+    "module " + apply(m.name.str) + System.lineSeparator() +
       m.sentences.map(s => "  " + apply(s)).mkString(System.lineSeparator()) + System.lineSeparator() +
       "endmodule " + apply(m.att)
   }
 
   /** Returns a string from [[org.kframework.kore.interfaces.Kore.Sentence]]. */
   def apply(s: Sentence): String = s match {
-    case Import(name, att) =>
-      "import " + name + " " + apply(att)
+    case Import(Name(name), att) =>
+      "import " + apply(name) + " " + apply(att)
     case SortDeclaration(Sort(sort), att) =>
       "syntax " + apply(sort) + " " + apply(att)
     case SymbolDeclaration(Sort(sort), Symbol(label), args, att) =>
@@ -36,7 +36,7 @@ object KoreToText {
 
   /** Returns a string from [[org.kframework.kore.interfaces.Kore.Pattern]]. */
   def apply(pat: Pattern): String = pat match {
-    case Variable(name, Sort(sort)) => apply(name.str) + ":" + apply(sort)
+    case Variable(Name(name), Sort(sort)) => apply(name) + ":" + apply(sort)
     case Application(Symbol(label), args) => apply(label) + "(" + args.map(apply).mkString(",") + ")"
     case DomainValue(Symbol(label), value) => apply(label) + "(\"" + StringEscapeUtils.escapeJava(value.str) + "\")"
     case Top() => "\\top()"
@@ -65,7 +65,7 @@ object KoreToText {
     *         otherwise, the input string as it is.
     */
   def apply(s: String): String = {
-    if (s == "" || s.exists(c => !TextToMini.isSymbolChar(c))) {
+    if (s == "" || s.exists(c => !TextToKore.isSymbolChar(c))) {
       "`" + s + "`"
     } else s
   }

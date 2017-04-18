@@ -56,7 +56,7 @@ object DefaultKore {
 
 }
 
-class DefaultBuilders extends Builders {
+case class DefaultBuilders() extends Builders {
 
   import org.kframework.kore.interfaces.{Kore => i}
   import org.kframework.kore.implementation.{DefaultKore => k}
