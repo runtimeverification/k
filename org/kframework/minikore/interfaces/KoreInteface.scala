@@ -1,41 +1,39 @@
-package org.kframework.minikore.main.interfaces
+package org.kframework.minikore.interfaces
 
-object kore {
+object Kore {
 
   sealed trait Pattern
 
-  trait Data
-
   trait Name {
-    val name: Data
+    val str: String
   }
 
   object Name {
-    def unapply(arg: Name): Option[Data] = Some(arg.name)
+    def unapply(arg: Name): Option[String] = Some(arg.str)
   }
 
   trait Sort {
-    val sort: Data
+    val str: String
   }
 
   object Sort {
-    def unapply(arg: Sort): Option[Data] = Some(arg.sort)
+    def unapply(arg: Sort): Option[String] = Some(arg.str)
   }
 
   trait Symbol {
-    val symbol: Data
+    val str: String
   }
 
   object Symbol {
-    def unapply(arg: Symbol): Option[Data] = Some(arg.symbol)
+    def unapply(arg: Symbol): Option[String] = Some(arg.str)
   }
 
   trait Value {
-    val value: Data
+    val str: String
   }
 
   object Value {
-    def unapply(arg: Value): Option[Data] = Some(arg.value)
+    def unapply(arg: Value): Option[String] = Some(arg.str)
   }
 
   trait DomainValue extends Pattern {
@@ -131,20 +129,20 @@ object kore {
 
   trait Exists extends Pattern {
     val v: Variable
-    val q: Pattern
+    val p: Pattern
   }
 
   object Exists {
-    def unapply(arg: Exists): Option[(Variable, Pattern)] = Some(arg.v, arg.q)
+    def unapply(arg: Exists): Option[(Variable, Pattern)] = Some(arg.v, arg.p)
   }
 
   trait ForAll extends Pattern {
     val v: Variable
-    val q: Pattern
+    val p: Pattern
   }
 
   object ForAll {
-    def unapply(arg: ForAll): Option[(Variable, Pattern)] = Some(arg.v, arg.q)
+    def unapply(arg: ForAll): Option[(Variable, Pattern)] = Some(arg.v, arg.p)
   }
 
   trait Application extends Pattern {
@@ -158,15 +156,10 @@ object kore {
 
   type Attributes = Seq[Pattern]
 
-  trait HasAttributes {
+
+  trait Sentence {
     val att: Attributes
   }
-
-  object HasAttributes {
-    def unapply(arg: HasAttributes): Option[Attributes] = Some(arg.att)
-  }
-
-  trait Sentence extends HasAttributes
 
   trait Import extends Sentence {
     val name: Name
@@ -209,16 +202,18 @@ object kore {
     def unapply(arg: SymbolDeclaration): Option[(Sort, Symbol, Seq[Sort], Attributes)] = Some(arg.sort, arg.symbol, arg.args, arg.att)
   }
 
-  trait Module extends HasAttributes {
+  trait Module {
     val sentences: Seq[Sentence]
+    val att: Attributes
   }
 
   object Module {
     def unapply(arg: Module): Option[(Seq[Sentence], Attributes)] = Some(arg.sentences, arg.att)
   }
 
-  trait Definition extends HasAttributes {
+  trait Definition {
     val modules: Seq[Module]
+    val att: Attributes
   }
 
   object Definition {
@@ -227,61 +222,59 @@ object kore {
 
 }
 
-object builders {
 
-  import kore._
+trait Builders {
 
-  trait Builders {
+  import Kore._
 
-    def Name(name: Data): Name
+  def Name(str: String): Name
 
-    def Sort(sort: Data): Sort
+  def Sort(str: String): Sort
 
-    def Symbol(symbol: Data): Symbol
+  def Symbol(str: String): Symbol
 
-    def Value(value: Data): Value
+  def Value(str: String): Value
 
-    def Variable(name: Name, sort: Sort): Variable
+  def Variable(name: Name, sort: Sort): Variable
 
-    def DomainValue(symbol: Symbol, value: Value): DomainValue
+  def DomainValue(symbol: Symbol, value: Value): DomainValue
 
-    def Top(): Top
+  def Top(): Top
 
-    def Bottom(): Bottom
+  def Bottom(): Bottom
 
-    def Not(p: Pattern): Not
+  def Not(p: Pattern): Not
 
-    def Next(p: Pattern): Next
+  def Next(p: Pattern): Next
 
-    def And(p: Pattern, q: Pattern): And
+  def And(p: Pattern, q: Pattern): And
 
-    def Or(p: Pattern, q: Pattern): Or
+  def Or(p: Pattern, q: Pattern): Or
 
-    def Implies(p: Pattern, q: Pattern): Implies
+  def Implies(p: Pattern, q: Pattern): Implies
 
-    def Equals(p: Pattern, q: Pattern): Equals
+  def Equals(p: Pattern, q: Pattern): Equals
 
-    def Exists(v: Variable, q: Pattern): Exists
+  def Exists(v: Variable, p: Pattern): Exists
 
-    def ForAll(v: Variable, q: Pattern): ForAll
+  def ForAll(v: Variable, p: Pattern): ForAll
 
-    def Rewrite(p: Pattern, q: Pattern): Rewrite
+  def Rewrite(p: Pattern, q: Pattern): Rewrite
 
-    def Application(p: Symbol, args: Seq[Pattern]): Application
+  def Application(p: Symbol, args: Seq[Pattern]): Application
 
-    def Import(name: Name, att: Attributes = Seq.empty): Import
+  def Import(name: Name, att: Attributes = Seq.empty): Import
 
-    def SortDeclaration(sort: Sort, att: Attributes = Seq.empty): SortDeclaration
+  def SortDeclaration(sort: Sort, att: Attributes = Seq.empty): SortDeclaration
 
-    def SymbolDeclaration(sort: Sort, symbol: Symbol, args: Seq[Sort], att: Attributes = Seq.empty): SymbolDeclaration
+  def SymbolDeclaration(sort: Sort, symbol: Symbol, args: Seq[Sort], att: Attributes = Seq.empty): SymbolDeclaration
 
-    def Rule(p: Pattern, att: Attributes = Seq.empty): Rule
+  def Rule(p: Pattern, att: Attributes = Seq.empty): Rule
 
-    def Axiom(p: Pattern, att: Attributes = Seq.empty): Axiom
+  def Axiom(p: Pattern, att: Attributes = Seq.empty): Axiom
 
-    def Module(sentences: Seq[Sentence], att: Attributes = Seq.empty): Module
+  def Module(sentences: Seq[Sentence], att: Attributes = Seq.empty): Module
 
-    def Definition(modules: Seq[Module], att: Attributes = Seq.empty): Definition
-  }
-
+  def Definition(modules: Seq[Module], att: Attributes = Seq.empty): Definition
 }
+
