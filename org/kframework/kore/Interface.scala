@@ -1,8 +1,8 @@
 package org.kframework.kore
 
 trait Definition {
-  val modules: Seq[Module]
-  val att: Attributes
+  def modules: Seq[Module]
+  def att: Attributes
 }
 
 object Definition {
@@ -10,9 +10,9 @@ object Definition {
 }
 
 trait Module {
-  val name: ModuleName
-  val sentences: Seq[Sentence]
-  val att: Attributes
+  def name: ModuleName
+  def sentences: Seq[Sentence]
+  def att: Attributes
 }
 
 object Module {
@@ -20,11 +20,11 @@ object Module {
 }
 
 trait Sentence {
-  val att: Attributes
+  def att: Attributes
 }
 
 trait Import extends Sentence {
-  val name: ModuleName
+  def name: ModuleName
 }
 
 object Import {
@@ -32,7 +32,7 @@ object Import {
 }
 
 trait SortDeclaration extends Sentence {
-  val sort: Sort
+  def sort: Sort
 }
 
 object SortDeclaration {
@@ -40,9 +40,9 @@ object SortDeclaration {
 }
 
 trait SymbolDeclaration extends Sentence {
-  val sort: Sort
-  val symbol: Symbol
-  val args: Seq[Sort]
+  def sort: Sort
+  def symbol: Symbol
+  def args: Seq[Sort]
 }
 
 object SymbolDeclaration {
@@ -51,7 +51,7 @@ object SymbolDeclaration {
 
 
 trait Rule extends Sentence {
-  val _1: Pattern
+  def _1: Pattern
 }
 
 object Rule {
@@ -59,7 +59,7 @@ object Rule {
 }
 
 trait Axiom extends Sentence {
-  val _1: Pattern
+  def _1: Pattern
 }
 
 object Axiom {
@@ -78,8 +78,8 @@ object Attributes {
 trait Pattern
 
 trait Variable extends Pattern {
-  val name: Name
-  val sort: Sort
+  def name: Name
+  def sort: Sort
 }
 
 object Variable {
@@ -87,8 +87,8 @@ object Variable {
 }
 
 trait Application extends Pattern {
-  val symbol: Symbol
-  val args: Seq[Pattern]
+  def symbol: Symbol
+  def args: Seq[Pattern]
 }
 
 object Application {
@@ -96,8 +96,8 @@ object Application {
 }
 
 trait DomainValue extends Pattern {
-  val symbol: Symbol
-  val value: Value
+  def symbol: Symbol
+  def value: Value
 }
 
 object DomainValue {
@@ -117,8 +117,8 @@ object Bottom {
 }
 
 trait And extends Pattern {
-  val _1: Pattern
-  val _2: Pattern
+  def _1: Pattern
+  def _2: Pattern
 }
 
 object And {
@@ -126,8 +126,8 @@ object And {
 }
 
 trait Or extends Pattern {
-  val _1: Pattern
-  val _2: Pattern
+  def _1: Pattern
+  def _2: Pattern
 }
 
 object Or {
@@ -143,8 +143,8 @@ object Not {
 }
 
 trait Implies extends Pattern {
-  val _1: Pattern
-  val _2: Pattern
+  def _1: Pattern
+  def _2: Pattern
 }
 
 object Implies {
@@ -152,8 +152,8 @@ object Implies {
 }
 
 trait Exists extends Pattern {
-  val v: Variable
-  val p: Pattern
+  def v: Variable
+  def p: Pattern
 }
 
 object Exists {
@@ -161,8 +161,8 @@ object Exists {
 }
 
 trait ForAll extends Pattern {
-  val v: Variable
-  val p: Pattern
+  def v: Variable
+  def p: Pattern
 }
 
 object ForAll {
@@ -179,8 +179,8 @@ object Next {
 
 
 trait Rewrite extends Pattern {
-  val _1: Pattern
-  val _2: Pattern
+  def _1: Pattern
+  def _2: Pattern
 }
 
 object Rewrite {
@@ -188,8 +188,8 @@ object Rewrite {
 }
 
 trait Equals extends Pattern {
-  val _1: Pattern
-  val _2: Pattern
+  def _1: Pattern
+  def _2: Pattern
 }
 
 object Equals {
@@ -205,7 +205,7 @@ object ModuleName {
 }
 
 trait Name {
-  val str: String
+  def str: String
 }
 
 object Name {
@@ -213,7 +213,7 @@ object Name {
 }
 
 trait Sort {
-  val str: String
+  def str: String
 }
 
 object Sort {
@@ -221,7 +221,7 @@ object Sort {
 }
 
 trait Symbol {
-  val str: String
+  def str: String
 }
 
 object Symbol {
@@ -229,7 +229,7 @@ object Symbol {
 }
 
 trait Value {
-  val str: String
+  def str: String
 }
 
 object Value {
