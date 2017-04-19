@@ -1,30 +1,29 @@
-package org.kframework.minikore.parser
+package org.kframework.kore.parser
 
 import org.apache.commons.lang3.StringEscapeUtils
-import org.kframework.minikore.implementation.MiniKore.{Definition, Import, Rule, Axiom, Module, Attributes, Sentence, SymbolDeclaration, SortDeclaration}
-import org.kframework.minikore.interfaces.pattern._
+import org.kframework.kore.interfaces.Kore._
 
-/** Function (i.e., unparser) from MiniKore to String. */
-object MiniToText {
+/** Function (i.e., unparser) from Kore to String. */
+object KoreToText {
   // TODO(Daejun): more efficient implementation using StringBuilder instead of string concatenation
 
-  /** Returns a string from [[org.kframework.minikore.implementation.MiniKore.Definition]]. */
+  /** Returns a string from [[org.kframework.kore.interfaces.Kore.Definition]]. */
   def apply(d: Definition): String = {
     apply(d.att) + System.lineSeparator() + System.lineSeparator() +
       d.modules.map(apply).mkString(System.lineSeparator() + System.lineSeparator()) + System.lineSeparator()
   }
 
-  /** Returns a string from [[org.kframework.minikore.implementation.MiniKore.Module]]. */
+  /** Returns a string from [[org.kframework.kore.interfaces.Kore.Module]]. */
   def apply(m: Module): String = {
-    "module " + m.name + System.lineSeparator() +
+    "module " + apply(m.name.str) + System.lineSeparator() +
       m.sentences.map(s => "  " + apply(s)).mkString(System.lineSeparator()) + System.lineSeparator() +
       "endmodule " + apply(m.att)
   }
 
-  /** Returns a string from [[org.kframework.minikore.implementation.MiniKore.Sentence]]. */
+  /** Returns a string from [[org.kframework.kore.interfaces.Kore.Sentence]]. */
   def apply(s: Sentence): String = s match {
-    case Import(name, att) =>
-      "import " + name + " " + apply(att)
+    case Import(ModuleName(name), att) =>
+      "import " + apply(name) + " " + apply(att)
     case SortDeclaration(Sort(sort), att) =>
       "syntax " + apply(sort) + " " + apply(att)
     case SymbolDeclaration(Sort(sort), Symbol(label), args, att) =>
@@ -35,11 +34,11 @@ object MiniToText {
       "axiom " + apply(pattern) + " " + apply(att)
   }
 
-  /** Returns a string from [[org.kframework.minikore.interfaces.pattern.Pattern]]. */
+  /** Returns a string from [[org.kframework.kore.interfaces.Kore.Pattern]]. */
   def apply(pat: Pattern): String = pat match {
-    case Variable(name, Sort(sort)) => apply(name) + ":" + apply(sort)
+    case Variable(Name(name), Sort(sort)) => apply(name) + ":" + apply(sort)
     case Application(Symbol(label), args) => apply(label) + "(" + args.map(apply).mkString(",") + ")"
-    case DomainValue(Symbol(label), value) => apply(label) + "(\"" + StringEscapeUtils.escapeJava(value) + "\")"
+    case DomainValue(Symbol(label), value) => apply(label) + "(\"" + StringEscapeUtils.escapeJava(value.str) + "\")"
     case Top() => "\\top()"
     case Bottom() => "\\bottom()"
     case And(p, q) => "\\and(" + apply(p) + "," + apply(q) + ")"
@@ -53,9 +52,9 @@ object MiniToText {
     case Equals(p, q) => "\\equals(" + apply(p) + "," + apply(q) + ")"
   }
 
-  /** Returns a string from [[org.kframework.minikore.implementation.MiniKore.Attributes]]. */
+  /** Returns a string from [[org.kframework.kore.interfaces.Kore.Attributes]]. */
   def apply(att: Attributes): String = {
-    "[" + att.map(apply).mkString(",") + "]"
+    "[" + att.att.map(apply).mkString(",") + "]"
   }
 
 
@@ -66,7 +65,7 @@ object MiniToText {
     *         otherwise, the input string as it is.
     */
   def apply(s: String): String = {
-    if (s == "" || s.exists(c => !TextToMini.isSymbolChar(c))) {
+    if (s == "" || s.exists(c => !TextToKore.isSymbolChar(c))) {
       "`" + s + "`"
     } else s
   }
