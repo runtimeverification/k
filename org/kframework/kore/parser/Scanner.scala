@@ -44,7 +44,8 @@ class Scanner {
       input = line.iterator
       lineNum += 1
       columnNum = 0
-    } else { // end of file
+    } else {
+      // end of file
       throw new java.io.EOFException()
     }
   }
@@ -66,9 +67,10 @@ class Scanner {
       case None =>
         if (input.hasNext) {
           input.next()
-        } else if (!yieldEOL) { // end of line
+        } else if (!yieldEOL) {
+          // end of line
           yieldEOL = true
-          ' '   // safer than '\n' (platform independent)
+          ' ' // safer than '\n' (platform independent)
         } else {
           yieldEOL = false
           readLine()
@@ -94,7 +96,7 @@ class Scanner {
   @throws(classOf[java.io.EOFException])
   def skipWhitespaces(): Unit = {
     next() match {
-      case ' '  => skipWhitespaces()
+      case ' ' => skipWhitespaces()
       case '\t' => columnNum += 3; skipWhitespaces()
       case '\n' | '\r' => ??? // skipWhitespaces() // shouldn't be reachable.
       case c => putback(c)
@@ -123,3 +125,4 @@ class Scanner {
   }
 
 }
+
