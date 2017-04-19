@@ -1,26 +1,27 @@
 package org.kframework.kore.parser
 
 import org.apache.commons.lang3.StringEscapeUtils
-import org.kframework.kore.interfaces.Kore._
+import org.kframework.kore._
+import org.kframework.kore
 
 /** Function (i.e., unparser) from Kore to String. */
 object KoreToText {
   // TODO(Daejun): more efficient implementation using StringBuilder instead of string concatenation
 
-  /** Returns a string from [[org.kframework.kore.interfaces.Kore.Definition]]. */
+  /** Returns a string from [[kore.Definition]]. */
   def apply(d: Definition): String = {
     apply(d.att) + System.lineSeparator() + System.lineSeparator() +
       d.modules.map(apply).mkString(System.lineSeparator() + System.lineSeparator()) + System.lineSeparator()
   }
 
-  /** Returns a string from [[org.kframework.kore.interfaces.Kore.Module]]. */
+  /** Returns a string from [[kore.Module]]. */
   def apply(m: Module): String = {
     "module " + apply(m.name.str) + System.lineSeparator() +
       m.sentences.map(s => "  " + apply(s)).mkString(System.lineSeparator()) + System.lineSeparator() +
       "endmodule " + apply(m.att)
   }
 
-  /** Returns a string from [[org.kframework.kore.interfaces.Kore.Sentence]]. */
+  /** Returns a string from [[kore.Sentence]]. */
   def apply(s: Sentence): String = s match {
     case Import(ModuleName(name), att) =>
       "import " + apply(name) + " " + apply(att)
@@ -34,7 +35,7 @@ object KoreToText {
       "axiom " + apply(pattern) + " " + apply(att)
   }
 
-  /** Returns a string from [[org.kframework.kore.interfaces.Kore.Pattern]]. */
+  /** Returns a string from [[kore.Pattern]]. */
   def apply(pat: Pattern): String = pat match {
     case Variable(Name(name), Sort(sort)) => apply(name) + ":" + apply(sort)
     case Application(Symbol(label), args) => apply(label) + "(" + args.map(apply).mkString(",") + ")"
@@ -52,7 +53,7 @@ object KoreToText {
     case Equals(p, q) => "\\equals(" + apply(p) + "," + apply(q) + ")"
   }
 
-  /** Returns a string from [[org.kframework.kore.interfaces.Kore.Attributes]]. */
+  /** Returns a string from [[kore.Attributes]]. */
   def apply(att: Attributes): String = {
     "[" + att.att.map(apply).mkString(",") + "]"
   }

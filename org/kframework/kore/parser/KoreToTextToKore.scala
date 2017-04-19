@@ -1,15 +1,15 @@
 package org.kframework.kore.parser
 
 import org.apache.commons.io.FileUtils
-import org.kframework.kore.implementation.DefaultBuilders
-import org.kframework.kore.interfaces.Builders
-import org.kframework.kore.interfaces.Kore.Definition
+import org.kframework.kore._
+import org.kframework.kore.default.DefaultBuilders
+
 
 // TODO(Daejun): drop this file
 
 object MiniToTextToMini {
 
-  def defaultImplemntation: Builders = DefaultBuilders()
+  def defaultImplemntation: Builders = DefaultBuilders
 
   def apply(d: Definition): Definition = {
     val text = KoreToText.apply(d)
