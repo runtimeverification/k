@@ -78,12 +78,12 @@ object Attributes {
 trait Pattern
 
 trait Variable extends Pattern {
-  def name1: Name
+  def name: Name
   def sort: Sort
 }
 
 object Variable {
-  def unapply(arg: Variable): Option[(Name, Sort)] = Some(arg.name1, arg.sort)
+  def unapply(arg: Variable): Option[(Name, Sort)] = Some(arg.name, arg.sort)
 }
 
 trait Application extends Pattern {

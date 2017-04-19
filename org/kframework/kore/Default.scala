@@ -20,7 +20,7 @@ object default {
 
   case class Attributes(att: Seq[i.Pattern]) extends i.Attributes
 
-  case class Variable(name1: i.Name, sort: i.Sort) extends i.Variable
+  case class Variable(name: i.Name, sort: i.Sort) extends i.Variable
 
   case class Application(symbol: i.Symbol, args: Seq[i.Pattern]) extends i.Application
 
