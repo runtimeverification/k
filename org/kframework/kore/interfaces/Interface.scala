@@ -53,19 +53,19 @@ object Kore {
 
 
   trait Rule extends Sentence {
-    val p: Pattern
+    val _1: Pattern
   }
 
   object Rule {
-    def unapply(arg: Rule): Option[(Pattern, Attributes)] = Some(arg.p, arg.att)
+    def unapply(arg: Rule): Option[(Pattern, Attributes)] = Some(arg._1, arg.att)
   }
 
   trait Axiom extends Sentence {
-    val p: Pattern
+    val _1: Pattern
   }
 
   object Axiom {
-    def unapply(arg: Axiom): Option[(Pattern, Attributes)] = Some(arg.p, arg.att)
+    def unapply(arg: Axiom): Option[(Pattern, Attributes)] = Some(arg._1, arg.att)
   }
 
   trait Attributes {
@@ -77,15 +77,15 @@ object Kore {
   }
 
 
-  sealed trait Pattern
+  trait Pattern
 
   trait Variable extends Pattern {
-    val name: Name
+    val name: String
     val sort: Sort
   }
 
   object Variable {
-    def unapply(arg: Variable): Option[(Name, Sort)] = Some(arg.name, arg.sort)
+    def unapply(arg: Variable): Option[(String, Sort)] = Some(arg.name, arg.sort)
   }
 
   trait Application extends Pattern {
@@ -98,12 +98,12 @@ object Kore {
   }
 
   trait DomainValue extends Pattern {
-    val symbol: Symbol
-    val value: Value
+    def symbol: Symbol
+    def theValue: Value
   }
 
   object DomainValue {
-    def unapply(arg: DomainValue): Option[(Symbol, Value)] = Some(arg.symbol, arg.value)
+    def unapply(arg: DomainValue): Option[(Symbol, Value)] = Some(arg.symbol, arg.theValue)
   }
 
   trait Top extends Pattern
@@ -119,83 +119,83 @@ object Kore {
   }
 
   trait And extends Pattern {
-    val p: Pattern
-    val q: Pattern
+    def _1: Pattern
+    def _2: Pattern
   }
 
   object And {
-    def unapply(arg: And): Option[(Pattern, Pattern)] = Some(arg.p, arg.q)
+    def unapply(arg: And): Option[(Pattern, Pattern)] = Some(arg._1, arg._2)
   }
 
   trait Or extends Pattern {
-    val p: Pattern
-    val q: Pattern
+    def _1: Pattern
+    def _2: Pattern
   }
 
   object Or {
-    def unapply(arg: Or): Option[(Pattern, Pattern)] = Some(arg.p, arg.q)
+    def unapply(arg: Or): Option[(Pattern, Pattern)] = Some(arg._1, arg._2)
   }
 
   trait Not extends Pattern {
-    def p: Pattern
+    def _1: Pattern
   }
 
   object Not {
-    def unapply(arg: Not): Option[Pattern] = Some(arg.p)
+    def unapply(arg: Not): Option[Pattern] = Some(arg._1)
   }
 
   trait Implies extends Pattern {
-    val p: Pattern
-    val q: Pattern
+    def _1: Pattern
+    def _2: Pattern
   }
 
   object Implies {
-    def unapply(arg: Implies): Option[(Pattern, Pattern)] = Some(arg.p, arg.q)
+    def unapply(arg: Implies): Option[(Pattern, Pattern)] = Some(arg._1, arg._2)
   }
 
   trait Exists extends Pattern {
-    val v: Variable
-    val p: Pattern
+    def v: Variable
+    def _1: Pattern
   }
 
   object Exists {
-    def unapply(arg: Exists): Option[(Variable, Pattern)] = Some(arg.v, arg.p)
+    def unapply(arg: Exists): Option[(Variable, Pattern)] = Some(arg.v, arg._1)
   }
 
   trait ForAll extends Pattern {
-    val v: Variable
-    val p: Pattern
+    def v: Variable
+    def _1: Pattern
   }
 
   object ForAll {
-    def unapply(arg: ForAll): Option[(Variable, Pattern)] = Some(arg.v, arg.p)
+    def unapply(arg: ForAll): Option[(Variable, Pattern)] = Some(arg.v, arg._1)
   }
 
   trait Next extends Pattern {
-    def p: Pattern
+    def _1: Pattern
   }
 
   object Next {
-    def unapply(arg: Next): Option[Pattern] = Some(arg.p)
+    def unapply(arg: Next): Option[Pattern] = Some(arg._1)
   }
 
 
   trait Rewrite extends Pattern {
-    val p: Pattern
-    val q: Pattern
+    def _1: Pattern
+    def _2: Pattern
   }
 
   object Rewrite {
-    def unapply(arg: Rewrite): Option[(Pattern, Pattern)] = Some(arg.p, arg.q)
+    def unapply(arg: Rewrite): Option[(Pattern, Pattern)] = Some(arg._1, arg._2)
   }
 
   trait Equals extends Pattern {
-    val p: Pattern
-    val q: Pattern
+    def _1: Pattern
+    def _2: Pattern
   }
 
   object Equals {
-    def unapply(arg: Equals): Option[(Pattern, Pattern)] = Some(arg.p, arg.q)
+    def unapply(arg: Equals): Option[(Pattern, Pattern)] = Some(arg._1, arg._2)
   }
 
   trait ModuleName {
@@ -207,7 +207,7 @@ object Kore {
   }
 
   trait Name {
-    val str: String
+    def str: String
   }
 
   object Name {
@@ -215,7 +215,7 @@ object Kore {
   }
 
   trait Sort {
-    val str: String
+    def str: String
   }
 
   object Sort {
@@ -223,7 +223,7 @@ object Kore {
   }
 
   trait Symbol {
-    val str: String
+    def str: String
   }
 
   object Symbol {
@@ -231,7 +231,7 @@ object Kore {
   }
 
   trait Value {
-    val str: String
+    def str: String
   }
 
   object Value {
@@ -261,39 +261,37 @@ trait Builders {
 
   def Attributes(att: Seq[Pattern]): Attributes
 
-  def Variable(name: Name, sort: Sort): Variable
+  def Variable(name: String, sort: Sort): Variable
 
-  def Application(p: Symbol, args: Seq[Pattern]): Application
+  def Application(p: Symbol, args: Seq[Pattern]): Pattern
 
-  def DomainValue(symbol: Symbol, value: Value): DomainValue
+  def DomainValue(symbol: Symbol, value: Value): Pattern
 
   def Top(): Top
 
   def Bottom(): Bottom
 
-  def And(p: Pattern, q: Pattern): And
+  def And(p: Pattern, q: Pattern): Pattern
 
-  def Or(p: Pattern, q: Pattern): Or
+  def Or(p: Pattern, q: Pattern): Pattern
 
-  def Not(p: Pattern): Not
+  def Not(p: Pattern): Pattern
 
-  def Implies(p: Pattern, q: Pattern): Implies
+  def Implies(p: Pattern, q: Pattern): Pattern
 
-  def Exists(v: Variable, p: Pattern): Exists
+  def Exists(v: Variable, p: Pattern): Pattern
 
-  def ForAll(v: Variable, p: Pattern): ForAll
+  def ForAll(v: Variable, p: Pattern): Pattern
 
-  def Next(p: Pattern): Next
+  def Next(p: Pattern): Pattern
 
-  def Equals(p: Pattern, q: Pattern): Equals
+  def Equals(p: Pattern, q: Pattern): Pattern
 
-  def Rewrite(p: Pattern, q: Pattern): Rewrite
+  def Rewrite(p: Pattern, q: Pattern): Pattern
 
   def ModuleName(str: String): ModuleName
 
   def Sort(str: String): Sort
-
-  def Name(str: String): Name
 
   def Symbol(str: String): Symbol
 

@@ -15,39 +15,39 @@ object DefaultKore {
 
   case class SymbolDeclaration(sort: i.Sort, symbol: i.Symbol, args: Seq[i.Sort], att: i.Attributes) extends i.SymbolDeclaration
 
-  case class Rule(p: i.Pattern, att: i.Attributes) extends i.Rule
+  case class Rule(_1: i.Pattern, att: i.Attributes) extends i.Rule
 
-  case class Axiom(p: i.Pattern, att: i.Attributes) extends i.Axiom
+  case class Axiom(_1: i.Pattern, att: i.Attributes) extends i.Axiom
 
   case class Attributes(att: Seq[i.Pattern]) extends i.Attributes
 
-  case class Variable(name: i.Name, sort: i.Sort) extends i.Variable
+  case class Variable(name: String, sort: i.Sort) extends i.Variable
 
   case class Application(symbol: i.Symbol, args: Seq[i.Pattern]) extends i.Application
 
-  case class DomainValue(symbol: i.Symbol, value: i.Value) extends i.DomainValue
+  case class DomainValue(symbol: i.Symbol, theValue: i.Value) extends i.DomainValue
 
   case class Top() extends i.Top
 
   case class Bottom() extends i.Bottom
 
-  case class And(p: i.Pattern, q: i.Pattern) extends i.And
+  case class And(_1: i.Pattern, _2: i.Pattern) extends i.And
 
-  case class Or(p: i.Pattern, q: i.Pattern) extends i.Or
+  case class Or(_1: i.Pattern, _2: i.Pattern) extends i.Or
 
-  case class Not(p: i.Pattern) extends i.Not
+  case class Not(_1: i.Pattern) extends i.Not
 
-  case class Implies(p: i.Pattern, q: i.Pattern) extends i.Implies
+  case class Implies(_1: i.Pattern, _2: i.Pattern) extends i.Implies
 
-  case class Exists(v: i.Variable, p: i.Pattern) extends i.Exists
+  case class Exists(v: i.Variable, _1: i.Pattern) extends i.Exists
 
-  case class ForAll(v: i.Variable, p: i.Pattern) extends i.ForAll
+  case class ForAll(v: i.Variable, _1: i.Pattern) extends i.ForAll
 
-  case class Next(p: i.Pattern) extends i.Next
+  case class Next(_1: i.Pattern) extends i.Next
 
-  case class Rewrite(p: i.Pattern, q: i.Pattern) extends i.Rewrite
+  case class Rewrite(_1: i.Pattern, _2: i.Pattern) extends i.Rewrite
 
-  case class Equals(p: i.Pattern, q: i.Pattern) extends i.Equals
+  case class Equals(_1: i.Pattern, _2: i.Pattern) extends i.Equals
 
   case class ModuleName(str: String) extends i.ModuleName
 
@@ -75,9 +75,9 @@ case class DefaultBuilders() extends Builders {
 
   def SymbolDeclaration(sort: i.Sort, symbol: i.Symbol, args: Seq[i.Sort], att: i.Attributes): i.SymbolDeclaration = k.SymbolDeclaration(sort, symbol, args, att)
 
-  def Rule(p: i.Pattern, att: i.Attributes): i.Rule = k.Rule(p, att)
+  def Rule(_1: i.Pattern, att: i.Attributes): i.Rule = k.Rule(_1, att)
 
-  def Axiom(p: i.Pattern, att: i.Attributes): i.Axiom = k.Axiom(p, att)
+  def Axiom(_1: i.Pattern, att: i.Attributes): i.Axiom = k.Axiom(_1, att)
 
   def Module(name: i.ModuleName, sentences: Seq[i.Sentence], att: i.Attributes): i.Module = k.Module(name, sentences, att)
 
@@ -85,7 +85,7 @@ case class DefaultBuilders() extends Builders {
 
   def Attributes(att: Seq[Pattern]): i.Attributes = k.Attributes(att)
 
-  def Variable(name: i.Name, sort: i.Sort): i.Variable = k.Variable(name, sort)
+  def Variable(name: String, sort: i.Sort): i.Variable = k.Variable(name, sort)
 
   def DomainValue(symbol: i.Symbol, value: i.Value): i.DomainValue = k.DomainValue(symbol, value)
 
@@ -95,23 +95,23 @@ case class DefaultBuilders() extends Builders {
 
   def Bottom(): i.Bottom = k.Bottom()
 
-  def And(p: i.Pattern, q: i.Pattern): i.And = k.And(p, q)
+  def And(_1: i.Pattern, _2: i.Pattern): i.And = k.And(_1, _2)
 
-  def Or(p: i.Pattern, q: i.Pattern): i.Or = k.Or(p, q)
+  def Or(_1: i.Pattern, _2: i.Pattern): i.Or = k.Or(_1, _2)
 
-  def Not(p: i.Pattern): i.Not = k.Not(p)
+  def Not(_1: i.Pattern): i.Not = k.Not(_1)
 
-  def Implies(p: i.Pattern, q: i.Pattern): i.Implies = k.Implies(p, q)
+  def Implies(_1: i.Pattern, _2: i.Pattern): i.Implies = k.Implies(_1, _2)
 
-  def Exists(v: i.Variable, p: i.Pattern): i.Exists = k.Exists(v, p)
+  def Exists(v: i.Variable, _1: i.Pattern): i.Exists = k.Exists(v, _1)
 
-  def ForAll(v: i.Variable, p: i.Pattern): i.ForAll = k.ForAll(v, p)
+  def ForAll(v: i.Variable, _1: i.Pattern): i.ForAll = k.ForAll(v, _1)
 
-  def Next(p: i.Pattern): i.Next = k.Next(p)
+  def Next(_1: i.Pattern): i.Next = k.Next(_1)
 
-  def Equals(p: i.Pattern, q: i.Pattern): i.Equals = k.Equals(p, q)
+  def Equals(_1: i.Pattern, _2: i.Pattern): i.Equals = k.Equals(_1, _2)
 
-  def Rewrite(p: i.Pattern, q: i.Pattern): i.Rewrite = k.Rewrite(p, q)
+  def Rewrite(_1: i.Pattern, _2: i.Pattern): i.Rewrite = k.Rewrite(_1, _2)
 
   def Sort(str: String): i.Sort = k.Sort(str)
 

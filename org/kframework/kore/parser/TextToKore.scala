@@ -207,7 +207,7 @@ class TextToKore(b: Builders) {
         scanner.nextWithSkippingWhitespaces() match {
           case ':' => // TODO(Daejun): check if symbol is Name
             val sort = parseSort()
-            b.Variable(b.Name(symbol), b.Sort(sort))
+            b.Variable(symbol, b.Sort(sort))
           case '(' =>
             scanner.nextWithSkippingWhitespaces() match {
               case '"' => scanner.putback('"')
@@ -229,7 +229,7 @@ class TextToKore(b: Builders) {
     val nameStr = parseName()
     consumeWithLeadingWhitespaces(":")
     val sort = parseSort()
-    b.Variable(b.Name(nameStr), b.Sort(sort))
+    b.Variable(nameStr, b.Sort(sort))
   }
 
   //////////////////////////////////////////////////////////
