@@ -2,7 +2,7 @@ package org.kframework.kore.parser
 
 import org.apache.commons.io.FileUtils
 import org.kframework.kore._
-import org.kframework.kore.default.DefaultBuilders
+import org.kframework.kore.implementation.DefaultBuilders
 
 
 // TODO(Daejun): drop this file

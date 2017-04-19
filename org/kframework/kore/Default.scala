@@ -1,6 +1,6 @@
 package org.kframework.kore
 
-object default {
+object implementation {
 
   import org.kframework.{kore => i}
 
@@ -61,7 +61,7 @@ object default {
 
   object DefaultBuilders extends i.Builders {
 
-    import org.kframework.kore.{default => d}
+    import org.kframework.kore.{implementation => d}
 
     def Definition(modules: Seq[i.Module], att: i.Attributes): i.Definition = d.Definition(modules, att)
 
