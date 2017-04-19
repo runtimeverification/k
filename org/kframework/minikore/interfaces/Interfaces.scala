@@ -229,7 +229,17 @@ object pattern {
     def unapply(s: Symbol) = Some(s.str)
   }
 
-  case class Sort(str: String)
+  trait Sort {
+    val str: String
+  }
+
+  case class SortImplementation(str: String) extends Sort
+
+  object Sort {
+    def apply(name: String) = SortImplementation(name)
+
+    def unapply(arg: Sort): Option[String] = Some(arg.str)
+  }
 
   type Value = String
 
