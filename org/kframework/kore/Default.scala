@@ -1,6 +1,6 @@
 package org.kframework.kore
 
-object implementation {
+private object implementation {
 
   import org.kframework.{kore => i}
 
@@ -20,7 +20,7 @@ object implementation {
 
   case class Attributes(att: Seq[i.Pattern]) extends i.Attributes
 
-  case class Variable(name: i.Name, sort: i.Sort) extends i.Variable
+  case class SortedVariable(name: i.Name, sort: i.Sort) extends i.SortedVariable
 
   case class Application(symbol: i.Symbol, args: Seq[i.Pattern]) extends i.Application
 
@@ -65,15 +65,15 @@ object implementation {
 
     def Definition(modules: Seq[i.Module], att: i.Attributes): i.Definition = d.Definition(modules, att)
 
-    def Import(name: i.ModuleName, att: i.Attributes): i.Import = d.Import(name, att)
+    def Import(name: i.ModuleName, att: i.Attributes): i.Sentence = d.Import(name, att)
 
-    def SortDeclaration(sort: i.Sort, att: i.Attributes): i.SortDeclaration = d.SortDeclaration(sort, att)
+    def SortDeclaration(sort: i.Sort, att: i.Attributes): i.Sentence = d.SortDeclaration(sort, att)
 
-    def SymbolDeclaration(sort: i.Sort, symbol: i.Symbol, args: Seq[i.Sort], att: i.Attributes): i.SymbolDeclaration = d.SymbolDeclaration(sort, symbol, args, att)
+    def SymbolDeclaration(sort: i.Sort, symbol: i.Symbol, args: Seq[i.Sort], att: i.Attributes): i.Sentence = d.SymbolDeclaration(sort, symbol, args, att)
 
-    def Rule(_1: i.Pattern, att: i.Attributes): i.Rule = d.Rule(_1, att)
+    def Rule(_1: i.Pattern, att: i.Attributes): i.Sentence = d.Rule(_1, att)
 
-    def Axiom(_1: i.Pattern, att: i.Attributes): i.Axiom = d.Axiom(_1, att)
+    def Axiom(_1: i.Pattern, att: i.Attributes): i.Sentence = d.Axiom(_1, att)
 
     def Module(name: i.ModuleName, sentences: Seq[i.Sentence], att: i.Attributes): i.Module = d.Module(name, sentences, att)
 
@@ -81,33 +81,33 @@ object implementation {
 
     def Attributes(att: Seq[Pattern]): i.Attributes = d.Attributes(att)
 
-    def Variable(name: i.Name, sort: i.Sort): i.Variable = d.Variable(name, sort)
+    def SortedVariable(name: i.Name, sort: i.Sort): i.Variable= d.SortedVariable(name, sort)
 
-    def DomainValue(symbol: i.Symbol, value: i.Value): i.DomainValue = d.DomainValue(symbol, value)
+    def DomainValue(symbol: i.Symbol, value: i.Value): i.Pattern = d.DomainValue(symbol, value)
 
-    def Application(symbol: i.Symbol, args: Seq[i.Pattern]): i.Application = d.Application(symbol, args)
+    def Application(symbol: i.Symbol, args: Seq[i.Pattern]): i.Pattern = d.Application(symbol, args)
 
-    def Top(): i.Top = d.Top()
+    def Top(): i.Pattern = d.Top()
 
-    def Bottom(): i.Bottom = d.Bottom()
+    def Bottom(): i.Pattern = d.Bottom()
 
-    def And(_1: i.Pattern, _2: i.Pattern): i.And = d.And(_1, _2)
+    def And(_1: i.Pattern, _2: i.Pattern): i.Pattern = d.And(_1, _2)
 
-    def Or(_1: i.Pattern, _2: i.Pattern): i.Or = d.Or(_1, _2)
+    def Or(_1: i.Pattern, _2: i.Pattern): i.Pattern = d.Or(_1, _2)
 
-    def Not(_1: i.Pattern): i.Not = d.Not(_1)
+    def Not(_1: i.Pattern): i.Pattern = d.Not(_1)
 
-    def Implies(_1: i.Pattern, _2: i.Pattern): i.Implies = d.Implies(_1, _2)
+    def Implies(_1: i.Pattern, _2: i.Pattern): i.Pattern = d.Implies(_1, _2)
 
-    def Exists(v: i.Variable, p: i.Pattern): i.Exists = d.Exists(v, p)
+    def Exists(v: Variable, p: Pattern): i.Pattern = d.Exists(v, p)
 
-    def ForAll(v: i.Variable, p: i.Pattern): i.ForAll = d.ForAll(v, p)
+    def ForAll(v: Variable, p: Pattern): i.Pattern = d.ForAll(v, p)
 
-    def Next(_1: i.Pattern): i.Next = d.Next(_1)
+    def Next(_1: i.Pattern): i.Pattern = d.Next(_1)
 
-    def Equals(_1: i.Pattern, _2: i.Pattern): i.Equals = d.Equals(_1, _2)
+    def Equals(_1: i.Pattern, _2: i.Pattern): i.Pattern = d.Equals(_1, _2)
 
-    def Rewrite(_1: i.Pattern, _2: i.Pattern): i.Rewrite = d.Rewrite(_1, _2)
+    def Rewrite(_1: i.Pattern, _2: i.Pattern): i.Pattern = d.Rewrite(_1, _2)
 
     def Sort(str: String): i.Sort = d.Sort(str)
 

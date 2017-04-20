@@ -77,13 +77,15 @@ object Attributes {
 
 trait Pattern
 
-trait Variable extends Pattern {
+trait Variable extends Pattern
+
+trait SortedVariable extends Variable {
   def name: Name
   def sort: Sort
 }
 
-object Variable {
-  def unapply(arg: Variable): Option[(Name, Sort)] = Some(arg.name, arg.sort)
+object SortedVariable {
+  def unapply(arg: SortedVariable): Option[(Name, Sort)] = Some(arg.name, arg.sort)
 }
 
 trait Application extends Pattern {
@@ -242,45 +244,45 @@ trait Builders {
 
   def Module(name: ModuleName, sentences: Seq[Sentence], att: Attributes): Module
 
-  def Import(name: ModuleName, att: Attributes): Import
+  def Import(name: ModuleName, att: Attributes): Sentence
 
-  def SortDeclaration(sort: Sort, att: Attributes): SortDeclaration
+  def SortDeclaration(sort: Sort, att: Attributes): Sentence
 
-  def SymbolDeclaration(sort: Sort, symbol: Symbol, args: Seq[Sort], att: Attributes): SymbolDeclaration
+  def SymbolDeclaration(sort: Sort, symbol: Symbol, args: Seq[Sort], att: Attributes): Sentence
 
-  def Rule(_1: Pattern, att: Attributes): Rule
+  def Rule(_1: Pattern, att: Attributes): Sentence
 
-  def Axiom(_1: Pattern, att: Attributes): Axiom
+  def Axiom(_1: Pattern, att: Attributes): Sentence
 
   def Attributes(att: Seq[Pattern]): Attributes
 
-  def Variable(name: Name, sort: Sort): Variable
+  def SortedVariable(name: Name, sort: Sort): Variable
 
-  def Application(_1: Symbol, args: Seq[Pattern]): Application
+  def Application(_1: Symbol, args: Seq[Pattern]): Pattern
 
-  def DomainValue(symbol: Symbol, value: Value): DomainValue
+  def DomainValue(symbol: Symbol, value: Value): Pattern
 
-  def Top(): Top
+  def Top(): Pattern
 
-  def Bottom(): Bottom
+  def Bottom(): Pattern
 
-  def And(_1: Pattern, _2: Pattern): And
+  def And(_1: Pattern, _2: Pattern): Pattern
 
-  def Or(_1: Pattern, _2: Pattern): Or
+  def Or(_1: Pattern, _2: Pattern): Pattern
 
-  def Not(_1: Pattern): Not
+  def Not(_1: Pattern): Pattern
 
-  def Implies(_1: Pattern, _2: Pattern): Implies
+  def Implies(_1: Pattern, _2: Pattern): Pattern
 
-  def Exists(v: Variable, p: Pattern): Exists
+  def Exists(v: Variable, p: Pattern): Pattern
 
-  def ForAll(v: Variable, p: Pattern): ForAll
+  def ForAll(v: Variable, p: Pattern): Pattern
 
-  def Next(_1: Pattern): Next
+  def Next(_1: Pattern): Pattern
 
-  def Equals(_1: Pattern, _2: Pattern): Equals
+  def Equals(_1: Pattern, _2: Pattern): Pattern
 
-  def Rewrite(_1: Pattern, _2: Pattern): Rewrite
+  def Rewrite(_1: Pattern, _2: Pattern): Pattern
 
   def ModuleName(str: String): ModuleName
 

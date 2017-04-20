@@ -37,7 +37,7 @@ object KoreToText {
 
   /** Returns a string from [[kore.Pattern]]. */
   def apply(pat: Pattern): String = pat match {
-    case Variable(Name(name), Sort(sort)) => apply(name) + ":" + apply(sort)
+    case SortedVariable(Name(name), Sort(sort)) => apply(name) + ":" + apply(sort)
     case Application(Symbol(label), args) => apply(label) + "(" + args.map(apply).mkString(",") + ")"
     case DomainValue(Symbol(label), value) => apply(label) + "(\"" + StringEscapeUtils.escapeJava(value.str) + "\")"
     case Top() => "\\top()"
