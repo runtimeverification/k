@@ -1,67 +1,71 @@
 package org.kframework.kore
+import org.kframework.{kore => i}
 
-private object implementation {
+object implementation {
 
-  import org.kframework.{kore => i}
+  private object ConcreteClasses {
 
-  case class Definition(modules: Seq[i.Module], att: i.Attributes) extends i.Definition
+    import org.kframework.{kore => i}
 
-  case class Module(name: i.ModuleName, sentences: Seq[i.Sentence], att: i.Attributes) extends i.Module
+    case class Definition(modules: Seq[i.Module], att: i.Attributes) extends i.Definition
 
-  case class Import(name: i.ModuleName, att: i.Attributes) extends i.Import
+    case class Module(name: i.ModuleName, sentences: Seq[i.Sentence], att: i.Attributes) extends i.Module
 
-  case class SortDeclaration(sort: i.Sort, att: i.Attributes) extends i.SortDeclaration
+    case class Import(name: i.ModuleName, att: i.Attributes) extends i.Import
 
-  case class SymbolDeclaration(sort: i.Sort, symbol: i.Symbol, args: Seq[i.Sort], att: i.Attributes) extends i.SymbolDeclaration
+    case class SortDeclaration(sort: i.Sort, att: i.Attributes) extends i.SortDeclaration
 
-  case class Rule(_1: i.Pattern, att: i.Attributes) extends i.Rule
+    case class SymbolDeclaration(sort: i.Sort, symbol: i.Symbol, args: Seq[i.Sort], att: i.Attributes) extends i.SymbolDeclaration
 
-  case class Axiom(_1: i.Pattern, att: i.Attributes) extends i.Axiom
+    case class Rule(_1: i.Pattern, att: i.Attributes) extends i.Rule
 
-  case class Attributes(att: Seq[i.Pattern]) extends i.Attributes
+    case class Axiom(_1: i.Pattern, att: i.Attributes) extends i.Axiom
 
-  case class SortedVariable(name: i.Name, sort: i.Sort) extends i.SortedVariable
+    case class Attributes(att: Seq[i.Pattern]) extends i.Attributes
 
-  case class Application(symbol: i.Symbol, args: Seq[i.Pattern]) extends i.Application
+    case class SortedVariable(name: i.Name, sort: i.Sort) extends i.SortedVariable
 
-  case class DomainValue(symbol: i.Symbol, value: i.Value) extends i.DomainValue
+    case class Application(symbol: i.Symbol, args: Seq[i.Pattern]) extends i.Application
 
-  case class Top() extends i.Top
+    case class DomainValue(symbol: i.Symbol, value: i.Value) extends i.DomainValue
 
-  case class Bottom() extends i.Bottom
+    case class Top() extends i.Top
 
-  case class And(_1: i.Pattern, _2: i.Pattern) extends i.And
+    case class Bottom() extends i.Bottom
 
-  case class Or(_1: i.Pattern, _2: i.Pattern) extends i.Or
+    case class And(_1: i.Pattern, _2: i.Pattern) extends i.And
 
-  case class Not(_1: i.Pattern) extends i.Not
+    case class Or(_1: i.Pattern, _2: i.Pattern) extends i.Or
 
-  case class Implies(_1: i.Pattern, _2: i.Pattern) extends i.Implies
+    case class Not(_1: i.Pattern) extends i.Not
 
-  case class Exists(v: i.Variable, p: i.Pattern) extends i.Exists
+    case class Implies(_1: i.Pattern, _2: i.Pattern) extends i.Implies
 
-  case class ForAll(v: i.Variable, p: i.Pattern) extends i.ForAll
+    case class Exists(v: i.Variable, p: i.Pattern) extends i.Exists
 
-  case class Next(_1: i.Pattern) extends i.Next
+    case class ForAll(v: i.Variable, p: i.Pattern) extends i.ForAll
 
-  case class Rewrite(_1: i.Pattern, _2: i.Pattern) extends i.Rewrite
+    case class Next(_1: i.Pattern) extends i.Next
 
-  case class Equals(_1: i.Pattern, _2: i.Pattern) extends i.Equals
+    case class Rewrite(_1: i.Pattern, _2: i.Pattern) extends i.Rewrite
 
-  case class ModuleName(str: String) extends i.ModuleName
+    case class Equals(_1: i.Pattern, _2: i.Pattern) extends i.Equals
 
-  case class Sort(str: String) extends i.Sort
+    case class ModuleName(str: String) extends i.ModuleName
 
-  case class Name(str: String) extends i.Name
+    case class Sort(str: String) extends i.Sort
 
-  case class Symbol(str: String) extends i.Symbol
+    case class Name(str: String) extends i.Name
 
-  case class Value(str: String) extends i.Value
+    case class Symbol(str: String) extends i.Symbol
 
+    case class Value(str: String) extends i.Value
+
+  }
 
   object DefaultBuilders extends i.Builders {
 
-    import org.kframework.kore.{implementation => d}
+    import org.kframework.kore.implementation.{ConcreteClasses => d}
 
     def Definition(modules: Seq[i.Module], att: i.Attributes): i.Definition = d.Definition(modules, att)
 
