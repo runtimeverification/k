@@ -121,21 +121,21 @@ class TextToKore(b: Builders) {
   }
 
   // Import = ModuleName Attributes
-  private def parseImport(): Import = {
+  private def parseImport(): Sentence = {
     val name = parseModuleName()
     val att = parseAttributes()
     b.Import(b.ModuleName(name), att)
   }
 
   // Rule = Pattern Attributes
-  private def parseRule(): Rule = {
+  private def parseRule(): Sentence = {
     val pattern = parsePattern()
     val att = parseAttributes()
     b.Rule(pattern, att)
   }
 
   // Axiom = Pattern Attributes
-  private def parseAxiom(): Axiom = {
+  private def parseAxiom(): Sentence = {
     val pattern = parsePattern()
     val att = parseAttributes()
     b.Axiom(pattern, att)
@@ -207,7 +207,7 @@ class TextToKore(b: Builders) {
         scanner.nextWithSkippingWhitespaces() match {
           case ':' => // TODO(Daejun): check if symbol is Name
             val sort = parseSort()
-            b.Variable(b.Name(symbol), b.Sort(sort))
+            b.SortedVariable(b.Name(symbol), b.Sort(sort))
           case '(' =>
             scanner.nextWithSkippingWhitespaces() match {
               case '"' => scanner.putback('"')
@@ -229,7 +229,7 @@ class TextToKore(b: Builders) {
     val nameStr = parseName()
     consumeWithLeadingWhitespaces(":")
     val sort = parseSort()
-    b.Variable(b.Name(nameStr), b.Sort(sort))
+    b.SortedVariable(b.Name(nameStr), b.Sort(sort))
   }
 
   //////////////////////////////////////////////////////////

@@ -77,13 +77,15 @@ object Attributes {
 
 trait Pattern
 
-trait Variable extends Pattern {
+trait Variable extends Pattern
+
+trait SortedVariable extends Variable {
   def name: Name
   def sort: Sort
 }
 
-object Variable {
-  def unapply(arg: Variable): Option[(Name, Sort)] = Some(arg.name, arg.sort)
+object SortedVariable {
+  def unapply(arg: SortedVariable): Option[(Name, Sort)] = Some(arg.name, arg.sort)
 }
 
 trait Application extends Pattern {
@@ -242,19 +244,19 @@ trait Builders {
 
   def Module(name: ModuleName, sentences: Seq[Sentence], att: Attributes): Module
 
-  def Import(name: ModuleName, att: Attributes): Import
+  def Import(name: ModuleName, att: Attributes): Sentence
 
-  def SortDeclaration(sort: Sort, att: Attributes): SortDeclaration
+  def SortDeclaration(sort: Sort, att: Attributes): Sentence
 
-  def SymbolDeclaration(sort: Sort, symbol: Symbol, args: Seq[Sort], att: Attributes): SymbolDeclaration
+  def SymbolDeclaration(sort: Sort, symbol: Symbol, args: Seq[Sort], att: Attributes): Sentence
 
-  def Rule(_1: Pattern, att: Attributes): Rule
+  def Rule(_1: Pattern, att: Attributes): Sentence
 
-  def Axiom(_1: Pattern, att: Attributes): Axiom
+  def Axiom(_1: Pattern, att: Attributes): Sentence
 
   def Attributes(att: Seq[Pattern]): Attributes
 
-  def Variable(name: Name, sort: Sort): Variable
+  def SortedVariable(name: Name, sort: Sort): Variable
 
   def Application(_1: Symbol, args: Seq[Pattern]): Pattern
 
