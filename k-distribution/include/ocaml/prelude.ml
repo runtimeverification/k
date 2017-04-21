@@ -260,6 +260,10 @@ struct
       [Map (_,_,k1)], k2 -> (try KMap.find k2 k1 with Not_found -> interned_bottom)
     | [Bottom], k2 -> interned_bottom
     | _ -> raise Not_implemented
+  let hook_lookupOrDefault c lbl sort config ff = match c with
+      [Map (_,_,k1)], k2, k3 -> (try KMap.find k2 k1 with Not_found -> k3)
+    | [Bottom], k2, k3 -> k3
+    | _ -> raise Not_implemented
   let hook_update c lbl sort config ff = match c with
       [Map (s,l,k1)], k, v -> [Map (s,l,(KMap.add k v k1))]
     | _ -> raise Not_implemented
