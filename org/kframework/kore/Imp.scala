@@ -1,7 +1,7 @@
 package org.kframework.kore
 
 import org.kframework.kore
-import org.kframework.kore.default.DefaultBuilders
+import org.kframework.kore.implementation.DefaultBuilders
 
 import scala.collection.Iterable
 
@@ -71,21 +71,21 @@ object Imp {
 
   // rules
 
-  val X = Variable(Name("X"), Sort("Id"))
-  val Xs = Variable(Name("X"), Sort("List{Id}"))
-  val M = Variable(Name("M"), Sort("Map{Id,Int}"))
-  val I = Variable(Name("I"), Sort("Int"))
-  val I1 = Variable(Name("I1"), Sort("Int"))
-  val I2 = Variable(Name("I2"), Sort("Int"))
-  val B = Variable(Name("B"), Sort("Bool"))
-  val S = Variable(Name("S"), Sort("Stmt"))
-  val S1 = Variable(Name("S1"), Sort("Stmt"))
-  val S2 = Variable(Name("S2"), Sort("Stmt"))
-  val Ks = Variable(Name("Ks"), Sort("List{K}"))
-  val Be = Variable(Name("Be"), Sort("BExp"))
-  val Blk = Variable(Name("Blk"), Sort("Block"))
-  val Blk1 = Variable(Name("Blk1"), Sort("Block"))
-  val Blk2 = Variable(Name("Blk2"), Sort("Block"))
+  val X = SortedVariable(Name("X"), Sort("Id"))
+  val Xs = SortedVariable(Name("X"), Sort("List{Id}"))
+  val M = SortedVariable(Name("M"), Sort("Map{Id,Int}"))
+  val I = SortedVariable(Name("I"), Sort("Int"))
+  val I1 = SortedVariable(Name("I1"), Sort("Int"))
+  val I2 = SortedVariable(Name("I2"), Sort("Int"))
+  val B = SortedVariable(Name("B"), Sort("Bool"))
+  val S = SortedVariable(Name("S"), Sort("Stmt"))
+  val S1 = SortedVariable(Name("S1"), Sort("Stmt"))
+  val S2 = SortedVariable(Name("S2"), Sort("Stmt"))
+  val Ks = SortedVariable(Name("Ks"), Sort("List{K}"))
+  val Be = SortedVariable(Name("Be"), Sort("BExp"))
+  val Blk = SortedVariable(Name("Blk"), Sort("Block"))
+  val Blk1 = SortedVariable(Name("Blk1"), Sort("Block"))
+  val Blk2 = SortedVariable(Name("Blk2"), Sort("Block"))
 
   val IntDiv = Symbol("_/Int_:Int*Int->Int")
   val IntPlus = Symbol("_+Int_:Int*Int->Int")
