@@ -38,25 +38,25 @@ class TextToKore(b: Builders) {
   // Definition = Attributes Modules
   private def parseDefinition(): Definition = {
     val att = parseAttributes()
-    val modules = parseModules(Seq())
-    b.Definition(modules, att)
+    val modules = parseModules(Set())
+    b.Definition(att, modules)
   }
 
   // Attributes = [ List{Pattern, ',', ']'} ]
   private def parseAttributes(): Attributes = {
     consumeWithLeadingWhitespaces("[")
-    val att = parseList(parsePattern, ',', ']')
+    val att = parseList(() => parsePattern(), ',', ']').toSet
     consumeWithLeadingWhitespaces("]")
     b.Attributes(att)
   }
 
   // Modules = <EOF> // <empty>
   //         | Module Modules
-  private def parseModules(modules: Seq[Module]): Seq[Module] = {
+  private def parseModules(modules: Set[Module]): Set[Module] = {
     if (scanner.isEOF()) modules
     else {
       val mod = parseModule()
-      parseModules(modules :+ mod)
+      parseModules(modules + mod)
     }
   }
 
@@ -64,7 +64,7 @@ class TextToKore(b: Builders) {
   private def parseModule(): Module = {
     consumeWithLeadingWhitespaces("module")
     val nameStr = parseModuleName()
-    val sentences = parseSentences(Seq())
+    val sentences = parseSentences(Set())
     consumeWithLeadingWhitespaces("endmodule")
     val att = parseAttributes()
     b.Module(b.ModuleName(nameStr), sentences, att)
@@ -79,30 +79,30 @@ class TextToKore(b: Builders) {
   // SortOrSymbolDeclaration = Attributes
   //                         | ::= SymbolDeclaration
   // Sort = Name
-  private def parseSentences(sentences: Seq[Sentence]): Seq[Sentence] = {
+  private def parseSentences(sentences: Set[Sentence]): Set[Sentence] = {
     scanner.nextWithSkippingWhitespaces() match {
       case 'i' => consume("mport")
         val sen = parseImport()
-        parseSentences(sentences :+ sen)
+        parseSentences(sentences + sen)
       case 's' => consume("yntax")
         val sort = parseSort()
         scanner.nextWithSkippingWhitespaces() match {
           case '[' => scanner.putback('[')
             val att = parseAttributes()
             val sen = b.SortDeclaration(b.Sort(sort), att)
-            parseSentences(sentences :+ sen)
+            parseSentences(sentences + sen)
           case ':' => consume(":=")
             val (symbol, args, att) = parseSymbolDeclaration()
             val sen = b.SymbolDeclaration(b.Sort(sort), b.Symbol(symbol), args, att)
-            parseSentences(sentences :+ sen)
+            parseSentences(sentences + sen)
           case err => throw error("'[' or ':'", err)
         }
       case 'r' => consume("ule")
         val sen = parseRule()
-        parseSentences(sentences :+ sen)
+        parseSentences(sentences + sen)
       case 'a' => consume("xiom")
         val sen = parseAxiom()
-        parseSentences(sentences :+ sen)
+        parseSentences(sentences + sen)
       case 'e' => scanner.putback('e') // endmodule
         sentences
       case err => throw error("import, syntax, rule, axiom, or endmodule", err)
@@ -114,7 +114,7 @@ class TextToKore(b: Builders) {
   private def parseSymbolDeclaration(): Tuple3[String, Seq[Sort], Attributes] = {
     val symbol = parseSymbol()
     consumeWithLeadingWhitespaces("(")
-    val args = parseList(parseSort, ',', ')')
+    val args = parseList(() => parseSort(), ',', ')')
     consumeWithLeadingWhitespaces(")")
     val att = parseAttributes()
     (symbol, args.map(b.Sort), att)
@@ -215,7 +215,7 @@ class TextToKore(b: Builders) {
                 consumeWithLeadingWhitespaces(")")
                 b.DomainValue(b.Symbol(symbol), b.Value(value))
               case c => scanner.putback(c)
-                val args = parseList(parsePattern, ',', ')')
+                val args = parseList(() => parsePattern(), ',', ')')
                 consumeWithLeadingWhitespaces(")")
                 b.Application(b.Symbol(symbol), args)
             }

@@ -1,22 +1,23 @@
 package org.kframework.kore
+import scala.collection._
 
 trait Definition {
-  def modules: Seq[Module]
   def att: Attributes
+  def modules(): Set[Module]
 }
 
 object Definition {
-  def unapply(arg: Definition): Option[(Seq[Module], Attributes)] = Some(arg.modules, arg.att)
+  def unapply(arg: Definition): Option[(Set[Module], Attributes)] = Some(arg.modules, arg.att)
 }
 
 trait Module {
   def name: ModuleName
-  def sentences: Seq[Sentence]
+  def sentences(): Set[Sentence]
   def att: Attributes
 }
 
 object Module {
-  def unapply(arg: Module): Option[(ModuleName, Seq[Sentence], Attributes)] = Some(arg.name, arg.sentences, arg.att)
+  def unapply(arg: Module): Option[(ModuleName, Set[Sentence], Attributes)] = Some(arg.name, arg.sentences, arg.att)
 }
 
 trait Sentence {
@@ -67,26 +68,17 @@ object Axiom {
 }
 
 trait Attributes {
-  def att: Seq[Pattern]
+  def att: Set[Pattern]
 }
 
 object Attributes {
-  def unapply(arg: Attributes): Option[Seq[Pattern]] = Some(arg.att)
+  def unapply(arg: Attributes): Option[Set[Pattern]] = Some(arg.att)
 }
 
 
 trait Pattern
 
 trait Variable extends Pattern
-
-trait SortedVariable extends Variable {
-  def name: Name
-  def sort: Sort
-}
-
-object SortedVariable {
-  def unapply(arg: SortedVariable): Option[(Name, Sort)] = Some(arg.name, arg.sort)
-}
 
 trait Application extends Pattern {
   def symbol: Symbol
@@ -198,6 +190,15 @@ object Equals {
   def unapply(arg: Equals): Option[(Pattern, Pattern)] = Some(arg._1, arg._2)
 }
 
+trait SortedVariable extends Variable {
+  def name: Name
+  def sort: Sort
+}
+
+object SortedVariable {
+  def unapply(arg: SortedVariable): Option[(Name, Sort)] = Some(arg.name, arg.sort)
+}
+
 trait ModuleName {
   def str: String
 }
@@ -240,9 +241,9 @@ object Value {
 
 trait Builders {
 
-  def Definition(modules: Seq[Module], att: Attributes): Definition
+  def Definition(att: Attributes, modules: Set[Module]): Definition
 
-  def Module(name: ModuleName, sentences: Seq[Sentence], att: Attributes): Module
+  def Module(name: ModuleName, sentences: Set[Sentence], att: Attributes): Module
 
   def Import(name: ModuleName, att: Attributes): Sentence
 
@@ -254,7 +255,7 @@ trait Builders {
 
   def Axiom(_1: Pattern, att: Attributes): Sentence
 
-  def Attributes(att: Seq[Pattern]): Attributes
+  def Attributes(att: Set[Pattern]): Attributes
 
   def SortedVariable(name: Name, sort: Sort): Variable
 
