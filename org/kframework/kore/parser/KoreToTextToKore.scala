@@ -15,7 +15,7 @@ object MiniToTextToMini {
     val text = KoreToText.apply(d)
     val file = new java.io.File("/tmp/x")
     FileUtils.writeStringToFile(file, text)
-    val d2 = TextToKore(defaultImplemntation).parse(file)
+    val d2 = new TextToKore(defaultImplemntation).parse(file)
     val text2 = KoreToText.apply(d2)
     assert(d == d2)
     d2
