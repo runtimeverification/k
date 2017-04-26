@@ -39,13 +39,13 @@ class TextToKore(b: Builders) {
   private def parseDefinition(): Definition = {
     val att = parseAttributes()
     val modules = parseModules(Seq())
-    b.Definition(modules, att)
+    b.Definition(att, modules)
   }
 
   // Attributes = [ List{Pattern, ',', ']'} ]
   private def parseAttributes(): Attributes = {
     consumeWithLeadingWhitespaces("[")
-    val att = parseList(parsePattern, ',', ']')
+    val att = parseList(() => parsePattern(), ',', ']')
     consumeWithLeadingWhitespaces("]")
     b.Attributes(att)
   }
@@ -114,7 +114,7 @@ class TextToKore(b: Builders) {
   private def parseSymbolDeclaration(): Tuple3[String, Seq[Sort], Attributes] = {
     val symbol = parseSymbol()
     consumeWithLeadingWhitespaces("(")
-    val args = parseList(parseSort, ',', ')')
+    val args = parseList(() => parseSort(), ',', ')')
     consumeWithLeadingWhitespaces(")")
     val att = parseAttributes()
     (symbol, args.map(b.Sort), att)
@@ -215,7 +215,7 @@ class TextToKore(b: Builders) {
                 consumeWithLeadingWhitespaces(")")
                 b.DomainValue(b.Symbol(symbol), b.Value(value))
               case c => scanner.putback(c)
-                val args = parseList(parsePattern, ',', ')')
+                val args = parseList(() => parsePattern(), ',', ')')
                 consumeWithLeadingWhitespaces(")")
                 b.Application(b.Symbol(symbol), args)
             }

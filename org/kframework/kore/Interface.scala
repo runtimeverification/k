@@ -1,8 +1,9 @@
 package org.kframework.kore
 
 trait Definition {
-  def modules: Seq[Module]
   def att: Attributes
+
+  def modules: Seq[Module]
 }
 
 object Definition {
@@ -11,7 +12,9 @@ object Definition {
 
 trait Module {
   def name: ModuleName
+
   def sentences: Seq[Sentence]
+
   def att: Attributes
 }
 
@@ -19,12 +22,12 @@ object Module {
   def unapply(arg: Module): Option[(ModuleName, Seq[Sentence], Attributes)] = Some(arg.name, arg.sentences, arg.att)
 }
 
-trait Sentence {
-  def att: Attributes
-}
+trait Sentence
 
 trait Import extends Sentence {
   def name: ModuleName
+
+  def att: Attributes
 }
 
 object Import {
@@ -33,6 +36,8 @@ object Import {
 
 trait SortDeclaration extends Sentence {
   def sort: Sort
+
+  def att: Attributes
 }
 
 object SortDeclaration {
@@ -41,8 +46,12 @@ object SortDeclaration {
 
 trait SymbolDeclaration extends Sentence {
   def sort: Sort
+
   def symbol: Symbol
+
   def args: Seq[Sort]
+
+  def att: Attributes
 }
 
 object SymbolDeclaration {
@@ -51,45 +60,40 @@ object SymbolDeclaration {
 
 
 trait Rule extends Sentence {
-  def _1: Pattern
+  def pattern: Pattern
+
+  def att: Attributes
 }
 
 object Rule {
-  def unapply(arg: Rule): Option[(Pattern, Attributes)] = Some(arg._1, arg.att)
+  def unapply(arg: Rule): Option[(Pattern, Attributes)] = Some(arg.pattern, arg.att)
 }
 
 trait Axiom extends Sentence {
-  def _1: Pattern
+  def pattern: Pattern
+
+  def att: Attributes
 }
 
 object Axiom {
-  def unapply(arg: Axiom): Option[(Pattern, Attributes)] = Some(arg._1, arg.att)
+  def unapply(arg: Axiom): Option[(Pattern, Attributes)] = Some(arg.pattern, arg.att)
 }
 
 trait Attributes {
-  def att: Seq[Pattern]
+  def patterns: Seq[Pattern]
 }
 
 object Attributes {
-  def unapply(arg: Attributes): Option[Seq[Pattern]] = Some(arg.att)
+  def unapply(arg: Attributes): Option[Seq[Pattern]] = Some(arg.patterns)
 }
-
 
 trait Pattern
 
 trait Variable extends Pattern
 
-trait SortedVariable extends Variable {
-  def name: Name
-  def sort: Sort
-}
-
-object SortedVariable {
-  def unapply(arg: SortedVariable): Option[(Name, Sort)] = Some(arg.name, arg.sort)
-}
-
 trait Application extends Pattern {
   def symbol: Symbol
+
   def args: Seq[Pattern]
 }
 
@@ -99,6 +103,7 @@ object Application {
 
 trait DomainValue extends Pattern {
   def symbol: Symbol
+
   def value: Value
 }
 
@@ -120,6 +125,7 @@ object Bottom {
 
 trait And extends Pattern {
   def _1: Pattern
+
   def _2: Pattern
 }
 
@@ -129,6 +135,7 @@ object And {
 
 trait Or extends Pattern {
   def _1: Pattern
+
   def _2: Pattern
 }
 
@@ -146,6 +153,7 @@ object Not {
 
 trait Implies extends Pattern {
   def _1: Pattern
+
   def _2: Pattern
 }
 
@@ -155,6 +163,7 @@ object Implies {
 
 trait Exists extends Pattern {
   def v: Variable
+
   def p: Pattern
 }
 
@@ -164,6 +173,7 @@ object Exists {
 
 trait ForAll extends Pattern {
   def v: Variable
+
   def p: Pattern
 }
 
@@ -179,9 +189,9 @@ object Next {
   def unapply(arg: Next): Option[Pattern] = Some(arg._1)
 }
 
-
 trait Rewrite extends Pattern {
   def _1: Pattern
+
   def _2: Pattern
 }
 
@@ -191,11 +201,22 @@ object Rewrite {
 
 trait Equals extends Pattern {
   def _1: Pattern
+
   def _2: Pattern
 }
 
 object Equals {
   def unapply(arg: Equals): Option[(Pattern, Pattern)] = Some(arg._1, arg._2)
+}
+
+trait SortedVariable extends Variable {
+  def name: Name
+
+  def sort: Sort
+}
+
+object SortedVariable {
+  def unapply(arg: SortedVariable): Option[(Name, Sort)] = Some(arg.name, arg.sort)
 }
 
 trait ModuleName {
@@ -206,20 +227,20 @@ object ModuleName {
   def unapply(arg: ModuleName): Option[String] = Some(arg.str)
 }
 
-trait Name {
-  def str: String
-}
-
-object Name {
-  def unapply(arg: Name): Option[String] = Some(arg.str)
-}
-
 trait Sort {
   def str: String
 }
 
 object Sort {
   def unapply(arg: Sort): Option[String] = Some(arg.str)
+}
+
+trait Name {
+  def str: String
+}
+
+object Name {
+  def unapply(arg: Name): Option[String] = Some(arg.str)
 }
 
 trait Symbol {
@@ -240,7 +261,7 @@ object Value {
 
 trait Builders {
 
-  def Definition(modules: Seq[Module], att: Attributes): Definition
+  def Definition(att: Attributes, modules: Seq[Module]): Definition
 
   def Module(name: ModuleName, sentences: Seq[Sentence], att: Attributes): Module
 
@@ -250,13 +271,11 @@ trait Builders {
 
   def SymbolDeclaration(sort: Sort, symbol: Symbol, args: Seq[Sort], att: Attributes): Sentence
 
-  def Rule(_1: Pattern, att: Attributes): Sentence
+  def Rule(pattern: Pattern, att: Attributes): Sentence
 
-  def Axiom(_1: Pattern, att: Attributes): Sentence
+  def Axiom(pattern: Pattern, att: Attributes): Sentence
 
   def Attributes(att: Seq[Pattern]): Attributes
-
-  def SortedVariable(name: Name, sort: Sort): Variable
 
   def Application(_1: Symbol, args: Seq[Pattern]): Pattern
 
@@ -283,6 +302,8 @@ trait Builders {
   def Equals(_1: Pattern, _2: Pattern): Pattern
 
   def Rewrite(_1: Pattern, _2: Pattern): Pattern
+
+  def SortedVariable(name: Name, sort: Sort): Variable
 
   def ModuleName(str: String): ModuleName
 

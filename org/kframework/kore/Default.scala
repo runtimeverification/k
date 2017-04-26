@@ -1,13 +1,12 @@
 package org.kframework.kore
+
 import org.kframework.{kore => i}
 
 object implementation {
 
   private object ConcreteClasses {
 
-    import org.kframework.{kore => i}
-
-    case class Definition(modules: Seq[i.Module], att: i.Attributes) extends i.Definition
+    case class Definition(att: i.Attributes, modules: Seq[i.Module]) extends i.Definition
 
     case class Module(name: i.ModuleName, sentences: Seq[i.Sentence], att: i.Attributes) extends i.Module
 
@@ -17,13 +16,11 @@ object implementation {
 
     case class SymbolDeclaration(sort: i.Sort, symbol: i.Symbol, args: Seq[i.Sort], att: i.Attributes) extends i.SymbolDeclaration
 
-    case class Rule(_1: i.Pattern, att: i.Attributes) extends i.Rule
+    case class Rule(pattern: i.Pattern, att: i.Attributes) extends i.Rule
 
-    case class Axiom(_1: i.Pattern, att: i.Attributes) extends i.Axiom
+    case class Axiom(pattern: i.Pattern, att: i.Attributes) extends i.Axiom
 
-    case class Attributes(att: Seq[i.Pattern]) extends i.Attributes
-
-    case class SortedVariable(name: i.Name, sort: i.Sort) extends i.SortedVariable
+    case class Attributes(patterns: Seq[i.Pattern]) extends i.Attributes
 
     case class Application(symbol: i.Symbol, args: Seq[i.Pattern]) extends i.Application
 
@@ -51,6 +48,8 @@ object implementation {
 
     case class Equals(_1: i.Pattern, _2: i.Pattern) extends i.Equals
 
+    case class SortedVariable(name: i.Name, sort: i.Sort) extends i.SortedVariable
+
     case class ModuleName(str: String) extends i.ModuleName
 
     case class Sort(str: String) extends i.Sort
@@ -67,7 +66,9 @@ object implementation {
 
     import org.kframework.kore.implementation.{ConcreteClasses => d}
 
-    def Definition(modules: Seq[i.Module], att: i.Attributes): i.Definition = d.Definition(modules, att)
+    def Definition(att: i.Attributes, modules: Seq[i.Module]): i.Definition = d.Definition(att, modules)
+
+    def Module(name: i.ModuleName, sentences: Seq[i.Sentence], att: i.Attributes): i.Module = d.Module(name, sentences, att)
 
     def Import(name: i.ModuleName, att: i.Attributes): i.Sentence = d.Import(name, att)
 
@@ -79,13 +80,7 @@ object implementation {
 
     def Axiom(_1: i.Pattern, att: i.Attributes): i.Sentence = d.Axiom(_1, att)
 
-    def Module(name: i.ModuleName, sentences: Seq[i.Sentence], att: i.Attributes): i.Module = d.Module(name, sentences, att)
-
-    def ModuleName(str: String): i.ModuleName = d.ModuleName(str)
-
-    def Attributes(att: Seq[Pattern]): i.Attributes = d.Attributes(att)
-
-    def SortedVariable(name: i.Name, sort: i.Sort): i.Variable= d.SortedVariable(name, sort)
+    def Attributes(patterns: Seq[Pattern]): i.Attributes = d.Attributes(patterns)
 
     def DomainValue(symbol: i.Symbol, value: i.Value): i.Pattern = d.DomainValue(symbol, value)
 
@@ -109,9 +104,13 @@ object implementation {
 
     def Next(_1: i.Pattern): i.Pattern = d.Next(_1)
 
+    def Rewrite(_1: i.Pattern, _2: i.Pattern): i.Pattern = d.Rewrite(_1, _2)
+
     def Equals(_1: i.Pattern, _2: i.Pattern): i.Pattern = d.Equals(_1, _2)
 
-    def Rewrite(_1: i.Pattern, _2: i.Pattern): i.Pattern = d.Rewrite(_1, _2)
+    def SortedVariable(name: i.Name, sort: i.Sort): i.Variable = d.SortedVariable(name, sort)
+
+    def ModuleName(str: String): i.ModuleName = d.ModuleName(str)
 
     def Sort(str: String): i.Sort = d.Sort(str)
 

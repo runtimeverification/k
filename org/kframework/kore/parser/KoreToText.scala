@@ -55,7 +55,7 @@ object KoreToText {
 
   /** Returns a string from [[kore.Attributes]]. */
   def apply(att: Attributes): String = {
-    "[" + att.att.map(apply).mkString(",") + "]"
+    "[" + att.patterns.map(apply).mkString(",") + "]"
   }
 
 
