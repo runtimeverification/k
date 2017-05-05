@@ -198,7 +198,7 @@ public class FileUtil {
         }
     }
 
-    private void copyFileToDirectory(File from, File toDir) {
+    public void copyFileToDirectory(File from, File toDir) {
         try {
             FileUtils.copyFileToDirectory(from, toDir);
         } catch (IOException e) {
