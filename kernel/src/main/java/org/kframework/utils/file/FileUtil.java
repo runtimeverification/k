@@ -91,7 +91,7 @@ public class FileUtil {
 
     // generate an unique name for a folder with the name dirName
     public static String generateUniqueFolderName(String dirName) {
-        DateFormat df = new SimpleDateFormat("-yyyy-MM-dd-HH-mm-ss-");
+        DateFormat df = new SimpleDateFormat("-yyyy-MM-dd-HH-mm-ss-SSS-");
         Date today = Calendar.getInstance().getTime();
         String reportDate = df.format(today);
         return dirName + reportDate + UUID.randomUUID().toString();
