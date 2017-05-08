@@ -1,8 +1,6 @@
 // Copyright (c) 2012-2016 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import org.kframework.kil.visitors.Visitor;
-
 import com.beust.jcommander.internal.Lists;
 
 import java.util.ArrayList;
@@ -14,8 +12,7 @@ import java.util.List;
  * Contains {@link Production}s, grouped into a list {@link PriorityBlock}
  * according to precedence marked by {@code >} in the declaration.
  */
-public class Syntax extends ModuleItem implements Interfaces.MutableParent<NonTerminal, Enum<?>>,
-        Interfaces.MutableList<PriorityBlock, Enum<?>> {
+public class Syntax extends ModuleItem {
     /** The sort being declared. */
     NonTerminal sort;
     java.util.List<PriorityBlock> priorityBlocks;
@@ -106,11 +103,6 @@ public class Syntax extends ModuleItem implements Interfaces.MutableParent<NonTe
     }
 
     @Override
-    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
-        return visitor.complete(this, visitor.visit(this, p));
-    }
-
-    @Override
     public boolean equals(Object obj) {
         if (obj == null)
             return false;
@@ -146,25 +138,5 @@ public class Syntax extends ModuleItem implements Interfaces.MutableParent<NonTe
     @Override
     public Syntax shallowCopy() {
         return new Syntax(this);
-    }
-
-    @Override
-    public NonTerminal getChild(Enum<?> type) {
-        return sort;
-    }
-
-    @Override
-    public List<PriorityBlock> getChildren(Enum<?> type) {
-        return priorityBlocks;
-    }
-
-    @Override
-    public void setChildren(List<PriorityBlock> children, Enum<?> cls) {
-        this.priorityBlocks = children;
-    }
-
-    @Override
-    public void setChild(NonTerminal child, Enum<?> type) {
-        this.sort = child;
     }
 }

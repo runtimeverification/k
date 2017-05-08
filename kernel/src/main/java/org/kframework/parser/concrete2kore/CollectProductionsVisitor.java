@@ -1,37 +1,40 @@
 // Copyright (c) 2014-2016 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore;
 
+import org.kframework.kil.Definition;
 import org.kframework.kil.Module;
 import org.kframework.kil.Production;
 import org.kframework.kil.Sort;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.BasicVisitor;
 
-public class CollectProductionsVisitor extends BasicVisitor {
+public class CollectProductionsVisitor {
+    private final Context context;
+
     public CollectProductionsVisitor(Context context) {
-        super(context);
+        this.context = context;
     }
 
     private String moduleName;
     private Sort sort;
 
-    public Void visit(Module mod, Void _void) {
+    public void visit(Module mod) {
         this.moduleName = mod.getName();
-        return super.visit(mod, _void);
+        mod.getItems().forEach(mi -> { if (mi instanceof Syntax) visit((Syntax)mi); });
     }
 
-    public Void visit(Syntax syntax, Void _void) {
+    public void visit(Syntax syntax) {
         this.sort = syntax.getDeclaredSort().getRealSort();
-        return super.visit(syntax, _void);
+        syntax.getPriorityBlocks().forEach(pb -> pb.getProductions().forEach(this::visit));
     }
 
-    @Override
-    public Void visit(Production node, Void _void) {
+    public void visit(Production node) {
         node.setSort(sort);
         node.setOwnerModuleName(moduleName);
         context.addProduction(node);
-        this.getCurrentModule().getModuleContext().addProduction(node);
-        return null;
+    }
+
+    public void visit(Definition def) {
+        def.getItems().forEach(di -> { if (di instanceof Module) visit((Module)di); });
     }
 }

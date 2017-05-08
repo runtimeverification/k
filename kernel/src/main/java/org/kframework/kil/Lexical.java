@@ -1,8 +1,6 @@
 // Copyright (c) 2013-2016 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import org.kframework.kil.visitors.Visitor;
-
 /** A terminal in a {@link Production}. */
 public class Lexical extends ProductionItem {
 
@@ -64,12 +62,4 @@ public class Lexical extends ProductionItem {
         return lexicalRule;
     }
 
-    public void setLexicalRule(String lexicalRule) {
-        this.lexicalRule = lexicalRule;
-    }
-
-    @Override
-    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
-        return visitor.complete(this, visitor.visit(this, p));
-    }
 }

@@ -1,19 +1,17 @@
 // Copyright (c) 2014-2016 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import java.io.Serializable;
-import java.lang.annotation.Annotation;
-import java.util.Scanner;
-
+import com.google.common.reflect.TypeToken;
+import com.google.inject.name.Names;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 import org.kframework.kil.Attribute.Key;
 import org.kframework.kil.loader.Constants;
-import org.kframework.kil.visitors.Visitor;
 import org.w3c.dom.Element;
 
-import com.google.common.reflect.TypeToken;
-import com.google.inject.name.Names;
+import java.io.Serializable;
+import java.lang.annotation.Annotation;
+import java.util.Scanner;
 
 /**
  * Base class for K AST. Useful for Visitors and Transformers.
@@ -311,8 +309,6 @@ public abstract class ASTNode implements Serializable {
      * @return a copy of the ASTNode containing the same fields.
      */
     public abstract ASTNode shallowCopy();
-
-    protected abstract <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E;
 
     public int computeHashCode() {
         throw new AssertionError("Subclasses should implement their own hashCode so this code should not be reachable");

@@ -5,7 +5,6 @@ import com.google.common.reflect.TypeToken;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import org.kframework.kil.loader.Constants;
-import org.kframework.kil.visitors.Visitor;
 
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
@@ -203,11 +202,6 @@ public class Attribute<T> extends ASTNode {
     @Override
     public Attribute<T> shallowCopy() {
         return new Attribute<T>(this);
-    }
-
-    @Override
-    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
-        return visitor.complete(this, visitor.visit(this, p));
     }
 
     @Override

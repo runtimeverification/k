@@ -9,7 +9,7 @@ import org.kframework.definition.Module;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
-import org.kframework.kore.compile.GenerateSentencesFromConfigDecl;
+import org.kframework.compile.GenerateSentencesFromConfigDecl;
 import org.kframework.parser.concrete2kore.ParseInModule;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.utils.errorsystem.KEMException;

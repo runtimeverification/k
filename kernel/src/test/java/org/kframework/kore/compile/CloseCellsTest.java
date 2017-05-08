@@ -1,10 +1,9 @@
 // Copyright (c) 2015-2016 K Team. All Rights Reserved.
-package org.kframework.kore.compile;
+package org.kframework.compile;
 
 import org.junit.Rule;
 import org.junit.rules.ExpectedException;
 import org.kframework.builtin.KLabels;
-import org.kframework.builtin.Labels;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.LabelInfo;
 import org.kframework.kore.*;

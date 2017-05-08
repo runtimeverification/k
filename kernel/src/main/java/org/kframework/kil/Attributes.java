@@ -5,7 +5,6 @@ import com.google.inject.name.Names;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 import org.kframework.kil.Attribute.Key;
-import org.kframework.kil.visitors.Visitor;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -28,7 +27,7 @@ import java.util.Set;
  *
  * @see ASTNode
  */
-public class Attributes extends ASTNode implements Interfaces.MutableList<Attribute<?>, Enum<?>>, Map<Key<?>, Attribute<?>> {
+public class Attributes extends ASTNode implements Map<Key<?>, Attribute<?>> {
 
     protected transient LinkedHashMap<Key<?>, Attribute<?>> contents;
 
@@ -88,24 +87,6 @@ public class Attributes extends ASTNode implements Interfaces.MutableList<Attrib
         } else if (!contents.equals(other.contents))
             return false;
         return true;
-    }
-
-    @Override
-    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
-        return visitor.complete(this, visitor.visit(this, p));
-    }
-
-    @Override
-    public List<Attribute<?>> getChildren(Enum<?> _void) {
-        return new ArrayList<Attribute<?>>(contents.values());
-    }
-
-    @Override
-    public void setChildren(List<Attribute<?>> children, Enum<?> _void) {
-        contents.clear();
-        for (Attribute<?> attr : children) {
-            add(attr);
-        }
     }
 
     public void add(Attribute<?> e) {

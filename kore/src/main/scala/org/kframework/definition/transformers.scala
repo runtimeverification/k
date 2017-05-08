@@ -118,14 +118,4 @@ class DefinitionTransformer(moduleTransformer: Module => Module) extends (Defini
   }
 }
 
-/**
-  * Only transforms modules which are reachable from mainModule or mainSyntaxModule
-  */
-class SelectiveDefinitionTransformer(moduleTransformer: ModuleTransformer) extends (Definition => Definition) {
-  override def apply(d: Definition): Definition = {
-    definition.Definition(
-      moduleTransformer(d.mainModule),
-      d.entryModules map { m => moduleTransformer.memoization.getOrElse(m, m) },
-      d.att)
-  }
-}
+

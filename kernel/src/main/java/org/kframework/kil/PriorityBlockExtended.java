@@ -1,14 +1,12 @@
 // Copyright (c) 2012-2016 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import org.kframework.kil.visitors.Visitor;
-
 import java.util.ArrayList;
 import java.util.List;
 
 /** A group within a {@code syntax priorities} declaration.
  * @see PriorityExtended */
-public class PriorityBlockExtended extends ASTNode implements Interfaces.MutableList<KLabelConstant, Enum<?>> {
+public class PriorityBlockExtended extends ASTNode {
 
     java.util.List<KLabelConstant> productions = new ArrayList<KLabelConstant>();
 
@@ -37,18 +35,13 @@ public class PriorityBlockExtended extends ASTNode implements Interfaces.Mutable
     @Override
     public String toString() {
         String content = "";
-        for (Term production : productions)
+        for (KLabelConstant production : productions)
             content += production + " ";
 
         if (content.length() > 2)
             content = content.substring(0, content.length() - 1);
 
         return content;
-    }
-
-    @Override
-    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
-        return visitor.complete(this, visitor.visit(this, p));
     }
 
     @Override
@@ -76,7 +69,7 @@ public class PriorityBlockExtended extends ASTNode implements Interfaces.Mutable
     public int hashCode() {
         int hash = 0;
 
-        for (Term prd : productions)
+        for (KLabelConstant prd : productions)
             hash += prd.hashCode();
         return hash;
     }
@@ -86,14 +79,7 @@ public class PriorityBlockExtended extends ASTNode implements Interfaces.Mutable
         return new PriorityBlockExtended(this);
     }
 
-    @Override
     public List<KLabelConstant> getChildren(Enum<?> _void) {
         return productions;
     }
-
-    @Override
-    public void setChildren(List<KLabelConstant> children, Enum<?> _void) {
-        this.productions = children;
-    }
-
 }

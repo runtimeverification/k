@@ -1,6 +1,6 @@
 package org.kframework.kore
 
-import org.kframework.{AssocBuilder, CombinerFromBuilder, Collector, attributes}
+import org.kframework.{CombinerFromBuilder, Collector, attributes}
 import org.kframework.attributes.Att
 
 import scala.collection.mutable.ListBuffer
@@ -67,16 +67,6 @@ object KORE extends Constructors[K] with ScalaSugared[K] {
   def KList[KK <: K](items: List[KK]): KList = ADT.KList(items)
 
   override def InjectedKLabel(klabel: KLabel, att: Att): InjectedKLabel = ADT.InjectedKLabel(klabel, att)
-
-  def toKList: Collector[K, KList] =
-    Collector(() => new CombinerFromBuilder(
-      new AssocBuilder[K, ADT.KList, ADT.KList](
-        ListBuffer[K]().mapResult[ADT.KList](l => ADT.KList(l))))).asInstanceOf[Collector[K, KList]]
-
-  def toKSequence: Collector[K, KSequence] =
-    Collector(() => new CombinerFromBuilder(
-      new AssocBuilder[K, ADT.KSequence, ADT.KSequence](
-        ListBuffer[K]().mapResult[ADT.KSequence](l => ADT.KSequence(l))))).asInstanceOf[Collector[K, KSequence]]
 
   def self = this
 

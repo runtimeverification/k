@@ -1,8 +1,6 @@
 // Copyright (c) 2013-2016 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import org.kframework.kil.visitors.Visitor;
-
 /**
  *
  */
@@ -80,10 +78,5 @@ public class Restrictions extends ModuleItem {
 
     public void setPattern(String pattern) {
         this.pattern = pattern;
-    }
-
-    @Override
-    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
-        return visitor.complete(this, visitor.visit(this, p));
     }
 }

@@ -6,8 +6,6 @@ import org.kframework.kore
 
 import scala.collection.JavaConverters._
 
-class ScalaSugar[KK <: K](val c: Constructors[KK]) extends ScalaSugared[KK]
-
 trait ScalaSugared[K <: kore.K] {
   val c: Constructors[K]
 

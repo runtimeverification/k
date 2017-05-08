@@ -70,7 +70,7 @@ object Module {
 }
 
 case class Module(val name: String, val imports: Set[Module], localSentences: Set[Sentence], @(Nonnull@param) val att: Att = Att())
-  extends ModuleToString with KLabelMappings with OuterKORE with Sorting with Serializable {
+  extends ModuleToString with OuterKORE with Sorting with Serializable {
   assert(att != null)
 
   private lazy val importedSentences = imports flatMap {_.sentences}

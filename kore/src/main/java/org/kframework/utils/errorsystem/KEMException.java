@@ -110,6 +110,6 @@ public class KEMException extends RuntimeException {
 
     private static KEMException create(ExceptionType type, KExceptionGroup group, String message,
                                        Throwable e, Location location, Source source) {
-        return new KEMException(new KException(type, group, message, null, source, location, e));
+        return new KEMException(new KException(type, group, message, source, location, e));
     }
 }

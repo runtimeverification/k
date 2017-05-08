@@ -18,7 +18,7 @@ import org.kframework.kore.KORE;
 import org.kframework.kore.KToken;
 import org.kframework.kore.Sort;
 import org.kframework.kore.VisitK;
-import org.kframework.kore.compile.IncompleteCellUtils;
+import org.kframework.compile.IncompleteCellUtils;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.concrete2kore.ParseInModule;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;

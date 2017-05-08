@@ -42,7 +42,7 @@ public abstract class BaseTest {
         public DefinitionWithContext(Definition d, Context c) {
             this.definition = d;
             this.context = c;
-            new CollectProductionsVisitor(c).visitNode(d);
+            new CollectProductionsVisitor(c).visit(d);
         }
     }
 

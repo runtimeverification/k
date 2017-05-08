@@ -1,8 +1,6 @@
 // Copyright (c) 2012-2016 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import org.kframework.kil.visitors.Visitor;
-
 public class LiterateDefinitionComment extends DefinitionItem implements LiterateComment {
     private String value;
     private LiterateCommentType lcType = LiterateCommentType.COMMON;
@@ -16,11 +14,6 @@ public class LiterateDefinitionComment extends DefinitionItem implements Literat
         super(literateDefinitionComment);
         value = literateDefinitionComment.value;
         lcType = literateDefinitionComment.lcType;
-    }
-
-    @Override
-    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
-        return visitor.complete(this, visitor.visit(this, p));
     }
 
     public void setValue(String value) {

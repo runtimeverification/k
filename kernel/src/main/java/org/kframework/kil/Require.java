@@ -1,8 +1,6 @@
 // Copyright (c) 2012-2016 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import org.kframework.kil.visitors.Visitor;
-
 /** A require directive */
 public class Require extends DefinitionItem {
     /** The string argument to {@code require}, as written in the input file. */
@@ -16,11 +14,6 @@ public class Require extends DefinitionItem {
     public Require(String value) {
         super();
         this.value = value;
-    }
-
-    @Override
-    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
-        return visitor.complete(this, visitor.visit(this, p));
     }
 
     public void setValue(String value) {

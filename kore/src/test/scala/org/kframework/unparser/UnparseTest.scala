@@ -10,9 +10,6 @@ class UnparseTest {
     Assert.assertEquals("""#token("12","Int")""",ToKast(KToken("12", Sort("Int"))))
   }
 
-  @Test def SimpleLabel() {
-    Assert.assertEquals("foo",ToKast('foo))
-  }
   @Test def EscapeLabel() {
     Assert.assertEquals("`_+_`",ToKast(KLabel("_+_")))
   }

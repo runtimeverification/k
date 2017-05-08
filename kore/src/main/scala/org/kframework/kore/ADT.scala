@@ -81,18 +81,3 @@ object ADT {
 
 }
 
-object SortedADT {
-
-  case class SortedKVariable(name: String, att: Att = Att()) extends kore.KVariable {
-    def apply(ks: K*) = ADT.KApply(this, ADT.KList(ks.toList))
-
-    val sort: Sort = ADT.Sort(att.getOption("sort").getOrElse("K"))
-
-    override def equals(other: Any) = other match {
-      case v: SortedKVariable => name == v.name && sort == v.sort
-//      case v: KVariable => throw new UnsupportedOperationException(s"should not mix SortedKVariables with KVariables for variable $this and $v")
-      case _ => false
-    }
-  }
-
-}

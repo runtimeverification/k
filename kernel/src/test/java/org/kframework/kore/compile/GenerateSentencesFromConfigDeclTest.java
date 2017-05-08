@@ -1,5 +1,5 @@
 // Copyright (c) 2015-2016 K Team. All Rights Reserved.
-package org.kframework.kore.compile;
+package org.kframework.compile;
 
 import com.google.common.collect.Lists;
 import org.junit.Before;

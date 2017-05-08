@@ -32,7 +32,7 @@ public class KompileFrontEnd extends FrontEnd {
 
 
     private final KompileOptions options;
-    private final Provider<org.kframework.kore.compile.Backend> koreBackend;
+    private final Provider<org.kframework.compile.Backend> koreBackend;
     private final Stopwatch sw;
     private final KExceptionManager kem;
     private final BinaryLoader loader;
@@ -43,7 +43,7 @@ public class KompileFrontEnd extends FrontEnd {
             KompileOptions options,
             @Usage String usage,
             @ExperimentalUsage String experimentalUsage,
-            Provider<org.kframework.kore.compile.Backend> koreBackend,
+            Provider<org.kframework.compile.Backend> koreBackend,
             Stopwatch sw,
             KExceptionManager kem,
             BinaryLoader loader,

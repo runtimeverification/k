@@ -11,9 +11,6 @@ import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Named;
 import com.google.inject.throwingproviders.ThrowingProviderBinder;
-import org.kframework.unparser.OutputModes;
-import org.kframework.kil.Configuration;
-import org.kframework.kil.loader.Context;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.krun.KRunOptions.ConfigurationCreationOptions;
 import org.kframework.krun.api.io.FileSystem;
@@ -26,13 +23,11 @@ import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
 import org.kframework.main.Tool;
 import org.kframework.rewriter.Rewriter;
-import org.kframework.utils.BinaryLoader;
-import org.kframework.utils.Stopwatch;
+import org.kframework.unparser.OutputModes;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.Annotations;
-import org.kframework.utils.inject.DefinitionScoped;
 import org.kframework.utils.inject.Main;
 import org.kframework.utils.inject.Options;
 import org.kframework.utils.options.DefinitionLoadingOptions;
@@ -129,14 +124,6 @@ public class KRunModule extends AbstractModule {
             if (res == null)
                 res = new KRunExecutionMode(kRunOptions, kem, files);
             return res;
-        }
-
-        @Provides @DefinitionScoped
-        Configuration configuration(BinaryLoader loader, Context context, Stopwatch sw, FileUtil files) {
-            Configuration cfg = loader.loadOrDie(Configuration.class,
-                    files.resolveKompiled("configuration.bin"));
-            sw.printIntermediate("Reading configuration from binary");
-            return cfg;
         }
 
 

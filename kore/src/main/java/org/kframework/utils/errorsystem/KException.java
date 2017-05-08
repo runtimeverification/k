@@ -15,7 +15,6 @@ public class KException implements Serializable {
     private final Location location;
     private final String message;
     private final Throwable exception;
-    private String compilationPhase = null;
     private StringBuilder trace = new StringBuilder();
 
     private static final Map<ExceptionType, String> types;
@@ -41,36 +40,21 @@ public class KException implements Serializable {
     }
 
     public KException(ExceptionType type, KExceptionGroup label, String message) {
-        this(type, label, message, null, null, (Location) null, null);
+        this(type, label, message, null, (Location) null, null);
     }
 
     public KException(ExceptionType type, KExceptionGroup label, String message, Throwable e) {
-        this(type, label, message, null, null, (Location) null, e);
+        this(type, label, message, null, (Location) null, e);
     }
 
     public KException(ExceptionType type, KExceptionGroup label, String message, Source source, Location location) {
-        this(type, label, message, null, source, location, null);
-    }
-
-    public KException(ExceptionType type, KExceptionGroup label, String message, String compilationPhase, Source source, Location location) {
-        this(type, label, message, compilationPhase, source, location, null);
+        this(type, label, message, source, location, null);
     }
 
     public KException(
             ExceptionType type,
             KExceptionGroup label,
             String message,
-            Source source,
-            Location location,
-            Throwable e) {
-        this(type, label, message, null, source, location, e);
-    }
-
-    public KException(
-            ExceptionType type,
-            KExceptionGroup label,
-            String message,
-            String compilationPhase,
             Source source,
             Location location,
             Throwable exception) {
@@ -78,7 +62,6 @@ public class KException implements Serializable {
         this.type = type;
         this.exceptionGroup = label;
         this.message = message;
-        this.compilationPhase = compilationPhase;
         this.source = source;
         this.location = location;
         this.exception = exception;
@@ -102,8 +85,7 @@ public class KException implements Serializable {
                 + (exception == null ? "" : " (" + exception.getMessage() + ")")
                 + trace.toString() + traceTail()
                 + (source == null ? "" : "\n\t" + source)
-                + (location == null ? "" : "\n\t" + location)
-                + (compilationPhase == null || !verbose ? "" : "\n\tCompilation Phase: " + compilationPhase);
+                + (location == null ? "" : "\n\t" + location);
     }
 
     public String getMessage() {

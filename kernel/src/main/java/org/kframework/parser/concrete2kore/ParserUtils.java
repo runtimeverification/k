@@ -29,9 +29,8 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static org.kframework.kore.KORE.*;
 import static org.kframework.Collections.*;
-import static org.kframework.definition.Constructors.*;
+import static org.kframework.kore.KORE.*;
 
 /**
  * A few functions that are a common pattern when calling the new parser.
@@ -104,7 +103,7 @@ public class ParserUtils {
         def.setMainSyntaxModule(mainModule);
 
         Context context = new Context();
-        new CollectProductionsVisitor(context).visitNode(def);
+        new CollectProductionsVisitor(context).visit(def);
 
         KILtoKORE kilToKore = new KILtoKORE(context);
         return kilToKore.apply(def).getModule(mainModule).get();
@@ -188,7 +187,7 @@ public class ParserUtils {
         def.setItems((List<DefinitionItem>) (Object) kilModules);
 
         Context context = new Context();
-        new CollectProductionsVisitor(context).visitNode(def);
+        new CollectProductionsVisitor(context).visit(def);
 
         KILtoKORE kilToKore = new KILtoKORE(context, false, autoImportDomains);
 

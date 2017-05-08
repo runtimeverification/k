@@ -30,12 +30,6 @@ public class InterfaceTest {
     }
 
     @Test
-    public void manipulatingKList() {
-        KList l = KList(Seq(KToken("1", Sorts.Int()), KToken("2", Sorts.Int()))).stream().map(x -> KToken("3", Sorts.Int())).collect(toKList());
-        assertEquals(KList(Seq(KToken("3", Sorts.Int()), KToken("3", Sorts.Int()))), l);
-    }
-
-    @Test
     public void kSeqIsAssociative() {
         assertEquals(KSequence(Seq(KToken("1", Sorts.Int()), KToken("2", Sorts.Int()))), KSequence(Seq(KToken("1", Sorts.Int()), KSequence(Seq(KToken("2", Sorts.Int()))))));
     }

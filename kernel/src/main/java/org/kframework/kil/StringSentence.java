@@ -1,8 +1,6 @@
 // Copyright (c) 2012-2016 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import org.kframework.kil.visitors.Visitor;
-
 /**
  * Used as a container for unparsed sentences like rule, context and configuration.
  *
@@ -31,11 +29,6 @@ public class StringSentence extends ModuleItem {
 
     public String toString() {
         return type+"["+label+"]:"+content;
-    }
-
-    @Override
-    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
-        return visitor.complete(this, visitor.visit(this, p));
     }
 
     public String getContent() {

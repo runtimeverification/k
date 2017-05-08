@@ -1,8 +1,6 @@
 // Copyright (c) 2012-2016 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import org.kframework.kil.visitors.Visitor;
-
 public class LiterateModuleComment extends ModuleItem implements LiterateComment {
 
     private String value;
@@ -24,11 +22,6 @@ public class LiterateModuleComment extends ModuleItem implements LiterateComment
         setLocation(ldc.getLocation());
         value = ldc.getValue();
         lcType = ldc.getType();
-    }
-
-    @Override
-    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
-        return visitor.complete(this, visitor.visit(this, p));
     }
 
     @Override

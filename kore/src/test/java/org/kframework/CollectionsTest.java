@@ -2,14 +2,15 @@
 
 package org.kframework;
 
+import org.junit.Test;
+import scala.collection.Set;
+import scala.collection.immutable.List;
+
 import java.util.stream.Stream;
 
-import org.junit.Test;
-
-import scala.collection.immutable.List;
-import scala.collection.Set;
-import static org.kframework.Collections.*;
 import static org.junit.Assert.*;
+import static org.kframework.Collections.List;
+import static org.kframework.Collections.*;
 
 public class CollectionsTest {
     @Test
@@ -48,53 +49,4 @@ public class CollectionsTest {
         assertEquals(Set(0, 1), collectedList);
     }
 
-    @Test
-    public void testAssociativeList() {
-
-        Stream<Integer> s = stream(List(1, 2, 3));
-
-        // splitting 3 into a list
-        Stream<Object> l = s.map(x -> {
-            if (x == 3)
-                return List(1, 2);
-            else
-                return x;
-        });
-
-        // and now... converting it to an Sssociative List
-        List<Object> collectedList = l.collect(toAssociativeList());
-
-        // check out the result
-        assertEquals(List(1, 2, 1, 2), collectedList);
-
-        // yes, the types are not perfect, some casting is needed,
-        // but you cannot really ask too much from Java
-    }
-
-    @Test
-    public void moreNestingJustToBeSure() {
-
-        Stream<Object> s = stream(List(1, List(2, List(3, 4)), List(5)));
-
-        // and now... converting it to an assoc List
-        List<Object> collectedList = s.collect(toAssociativeList());
-
-        // check out the result
-        assertEquals(List(1, 2, 3, 4, 5), collectedList);
-    }
-
-    @Test
-    public void testAssociativeSet() {
-
-        Stream<Integer> s = stream(Set(1, 2, 3));
-
-        // usual Java 8 manipulation
-        Stream<Object> l = s.map(x -> Set(x / 2));
-
-        // and back to an *assoc* Set
-        Set<Object> collectedList = l.collect(toAssociativeSet());
-
-        // which has the expected value
-        assertEquals(Set(0, 1), collectedList);
-    }
 }

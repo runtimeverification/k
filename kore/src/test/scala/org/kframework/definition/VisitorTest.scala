@@ -30,52 +30,8 @@ class FooDoubleDispatchVisitor extends DoubleDispatchVisitor {
   def visitBuz(x: Buz.type) {}
 }
 
-case class FooReflectionVisitor() extends AbstractVisitor {
-  var sumX = 0
-  def visit(foo: Bar) {
-    sumX += foo.x
-  }
-}
+
 
 class VisitorTest {
 
-  @Test def testSimple {
-    val visitor = FooReflectionVisitor()
-    visitor(Bar(1, Bar(2, Buz)))
-    Assert.assertEquals(3, visitor.sumX)
-  }
-
-  @Test def testPerformance {
-    val manyBars = (1 to 1000).foldLeft(Buz: Foo) { case (x, i) => Bar(i, x) }
-
-    // by double dispatch
-    var startTime = System.nanoTime()
-    val ddvisitor = new FooDoubleDispatchVisitor()
-    (1 to 100) foreach { i => manyBars.accept(ddvisitor) }
-    Assert.assertEquals(50050000, ddvisitor.sumX)
-    println((System.nanoTime() - startTime) / 1000)
-
-    // by pattern matching
-    startTime = System.nanoTime()
-    class PM {
-      var sumX = 0
-      def apply(x: Foo): Unit = x match {
-        case Bar(x, rest) =>
-          sumX += x; apply(rest)
-        case Buz =>
-      }
-    }
-    val visitorPM = new PM()
-    (1 to 100) foreach { i => visitorPM(manyBars) }
-    Assert.assertEquals(50050000, visitorPM.sumX)
-    println((System.nanoTime() - startTime) / 1000)
-
-    // by reflection
-    startTime = System.nanoTime()
-    val visitor = FooReflectionVisitor()
-    (1 to 100) foreach { i => visitor(manyBars) }
-    Assert.assertEquals(50050000, visitor.sumX)
-    println((System.nanoTime() - startTime) / 1000)
-
-  }
 }

@@ -16,7 +16,7 @@ import static org.mockito.Mockito.*;
 public class KompileFrontEndTest extends IOTestCase {
 
     @Mock
-    org.kframework.kore.compile.Backend koreBackend;
+    org.kframework.compile.Backend koreBackend;
 
     @Mock
     JarInfo jarInfo;

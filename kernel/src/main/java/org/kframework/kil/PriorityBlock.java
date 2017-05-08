@@ -1,18 +1,15 @@
 // Copyright (c) 2012-2016 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import org.kframework.kil.visitors.Visitor;
-
 import com.google.common.collect.Lists;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * A block of productions at the same priority within a syntax declaration.
  * @see Syntax
  */
-public class PriorityBlock extends ASTNode implements Interfaces.MutableList<Production, Enum<?>> {
+public class PriorityBlock extends ASTNode {
 
     java.util.List<Production> productions = new ArrayList<Production>();
     /** "left", "right", or "non-assoc" if this group of productions had
@@ -71,11 +68,6 @@ public class PriorityBlock extends ASTNode implements Interfaces.MutableList<Pro
     }
 
     @Override
-    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
-        return visitor.complete(this, visitor.visit(this, p));
-    }
-
-    @Override
     public boolean equals(Object obj) {
         if (obj == null)
             return false;
@@ -111,16 +103,6 @@ public class PriorityBlock extends ASTNode implements Interfaces.MutableList<Pro
     @Override
     public PriorityBlock shallowCopy() {
         return new PriorityBlock(this);
-    }
-
-    @Override
-    public List<Production> getChildren(Enum<?> _void) {
-        return productions;
-    }
-
-    @Override
-    public void setChildren(List<Production> children, Enum<?> _void) {
-        this.productions = children;
     }
 
 }

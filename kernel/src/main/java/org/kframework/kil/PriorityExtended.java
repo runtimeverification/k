@@ -1,14 +1,10 @@
 // Copyright (c) 2012-2016 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import java.util.List;
-
-import org.kframework.kil.visitors.Visitor;
-
 /** A priority declaration, {@code syntax priorities} <em>labels</em> {@code >} ... {@code >} <em>labels</em>.
  * @see PriorityBlockExtended
  */
-public class PriorityExtended extends ModuleItem  implements Interfaces.MutableList<PriorityBlockExtended, Enum<?>>{
+public class PriorityExtended extends ModuleItem {
     /** Highest priority block comes first */
     java.util.List<PriorityBlockExtended> priorityBlocks;
 
@@ -19,10 +15,6 @@ public class PriorityExtended extends ModuleItem  implements Interfaces.MutableL
 
     public java.util.List<PriorityBlockExtended> getPriorityBlocks() {
         return priorityBlocks;
-    }
-
-    public void setPriorityBlocks(java.util.List<PriorityBlockExtended> priorityBlocks) {
-        this.priorityBlocks = priorityBlocks;
     }
 
     public PriorityExtended(PriorityExtended node) {
@@ -41,11 +33,6 @@ public class PriorityExtended extends ModuleItem  implements Interfaces.MutableL
             blocks = blocks.substring(0, blocks.length() - 3);
 
         return "  syntax priorities" + blocks + "\n";
-    }
-
-    @Override
-    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
-        return visitor.complete(this, visitor.visit(this, p));
     }
 
     @Override
@@ -81,15 +68,5 @@ public class PriorityExtended extends ModuleItem  implements Interfaces.MutableL
     @Override
     public PriorityExtended shallowCopy() {
         return new PriorityExtended(this);
-    }
-
-    @Override
-    public List<PriorityBlockExtended> getChildren(Enum<?> _void) {
-        return priorityBlocks;
-    }
-
-    @Override
-    public void setChildren(List<PriorityBlockExtended> children, Enum<?> _void) {
-        this.priorityBlocks = children;
     }
 }

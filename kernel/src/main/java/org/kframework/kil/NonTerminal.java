@@ -1,7 +1,6 @@
 // Copyright (c) 2014-2016 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import org.kframework.kil.visitors.Visitor;
 import scala.Option;
 
 import java.util.Optional;
@@ -46,11 +45,6 @@ public class NonTerminal extends ProductionItem {
     @Override
     public String toString() {
         return sort.getName();
-    }
-
-    @Override
-    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
-        return visitor.complete(this, visitor.visit(this, p));
     }
 
     @Override

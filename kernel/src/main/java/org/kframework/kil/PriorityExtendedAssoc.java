@@ -1,14 +1,10 @@
 // Copyright (c) 2012-2016 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import java.util.List;
-
-import org.kframework.kil.visitors.Visitor;
-
 /**
  * An associativity declaration, one of {@code syntax left}, {@code syntax right}, or {@ code syntax non-assoc}.
  */
-public class PriorityExtendedAssoc extends ModuleItem implements Interfaces.MutableList<KLabelConstant, Enum<?>>{
+public class PriorityExtendedAssoc extends ModuleItem {
     /** "left", "right", "non-assoc" */
     String assoc = null;
     /** The labels getting an associativity. */
@@ -56,11 +52,6 @@ public class PriorityExtendedAssoc extends ModuleItem implements Interfaces.Muta
     }
 
     @Override
-    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
-        return visitor.complete(this, visitor.visit(this, p));
-    }
-
-    @Override
     public boolean equals(Object obj) {
         if (obj == null)
             return false;
@@ -93,15 +84,5 @@ public class PriorityExtendedAssoc extends ModuleItem implements Interfaces.Muta
     @Override
     public PriorityExtendedAssoc shallowCopy() {
         return new PriorityExtendedAssoc(this);
-    }
-
-    @Override
-    public List<KLabelConstant> getChildren(Enum<?> _void) {
-        return tags;
-    }
-
-    @Override
-    public void setChildren(List<KLabelConstant> children, Enum<?> _void) {
-        this.tags = children;
     }
 }

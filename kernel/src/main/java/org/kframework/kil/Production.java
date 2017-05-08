@@ -2,7 +2,6 @@
 package org.kframework.kil;
 
 import com.google.common.collect.Multimap;
-import org.kframework.kil.visitors.Visitor;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
@@ -11,7 +10,7 @@ import java.util.List;
 /**
  * A production. Any explicit attributes on the production are stored in {@link ASTNode#attributes}.
  */
-public class Production extends ASTNode implements Interfaces.MutableList<ProductionItem, Enum<?>> {
+public class Production extends ASTNode {
 
     /*
      * Andrei S: It appears that the cons attribute is mandatory for all new production added during compilation, otherwise a null pointer exception can be thrown in one of the later compilation
@@ -24,16 +23,6 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
 
     public boolean isListDecl() {
         return items.size() == 1 && items.get(0) instanceof UserList;
-    }
-
-    /**
-     * Retrieves the {@link UserList} object of the production if this is a list declaration.
-     * Should not be called on other types of productions.
-     * @return the list object
-     */
-    public UserList getListDecl() {
-        assert isListDecl();
-        return (UserList) items.get(0);
     }
 
     /**
@@ -94,12 +83,6 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
     public boolean isConstant() {
         // TODO(Radu): properly determine if a production is a constant or not, just like below
         return isTerminal() && (sort.getName().startsWith("#") || sort.equals(Sort.KLABEL));
-    }
-
-    public boolean isConstant(org.kframework.kil.loader.Context context) {
-        return isTerminal() && (sort.getName().startsWith("#") ||
-                                sort.equals(Sort.KLABEL) ||
-                                context.getTokenSorts().contains(getSort()));
     }
 
     public boolean isBracket() {
@@ -211,33 +194,6 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
         return arity;
     }
 
-    /**
-     * Gets the arity of KItems using the KLabel declared by this production.
-     * A KItem has the arity of its production, if that production is not
-     * a KLabel declaration. KLabel declarations declare KItems with an
-     * arity equal to the value of the required integer attribute "arity".
-     * @return
-     */
-    public int getArityOfKItem() {
-        if (sort.equals(Sort.KLABEL) && isConstant()) {
-            try {
-                String attr = getAttribute(Attribute.ARITY_KEY);
-                if (attr == null) {
-                    throw KExceptionManager.criticalError("Strict KLabels must declare an 'arity' attribute.", this);
-                }
-                return Integer.parseInt(attr);
-            } catch (NumberFormatException e) {
-                throw KExceptionManager.criticalError("Could not parse 'arity' attribute as an integer.", e, this);
-            }
-        }
-        return getArity();
-    }
-
-    @Override
-    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
-        return visitor.complete(this, visitor.visit(this, p));
-    }
-
     public Sort getSort() {
         return sort;
     }
@@ -334,80 +290,8 @@ public class Production extends ASTNode implements Interfaces.MutableList<Produc
         return new Production(this);
     }
 
-    public String getOwnerModuleName() {
-        return ownerModuleName;
-    }
-
     public void setOwnerModuleName(String ownerModuleName) {
         this.ownerModuleName = ownerModuleName;
-    }
-
-    public boolean hasTerminalToRight(int idx) {
-        int arity = 0;
-        for (int i = 0; i < items.size(); i++) {
-            ProductionItem item = items.get(i);
-            if (item instanceof UserList) {
-                if (idx == arity)
-                    return !((UserList) item).getSeparator().equals("");
-                if (idx == arity + 1)
-                    return false;
-                arity += 2;
-            } else if (item instanceof NonTerminal) {
-                if (idx == arity)
-                    return i != items.size() - 1 && items.get(i + 1) instanceof Terminal;
-                arity++;
-            }
-        }
-        throw new IllegalArgumentException("Index not found in production");
-    }
-
-    public boolean hasTerminalToLeft(int idx) {
-        int arity = 0;
-        for (int i = 0; i < items.size(); i++) {
-            ProductionItem item = items.get(i);
-            if (item instanceof UserList) {
-                if (idx == arity)
-                    return false;
-                if (idx == arity + 1)
-                    return !((UserList) item).getSeparator().equals("");
-                arity += 2;
-            } else if (item instanceof NonTerminal) {
-                if (idx == arity)
-                    return i != 0 && items.get(i - 1) instanceof Terminal;
-                arity++;
-            }
-        }
-        throw new IllegalArgumentException("Index not found in production");
-    }
-
-    /**
-     * Getter for the {@code binderMap} structure.
-     * The binder map is a MultiMap consisting of key -> value pairs
-     * representing the position of a bounded variable and the position
-     * of an expression in which it is bound.
-     *
-     * Important note:  Unlike the positions specified by user (which start at 1),
-     * the positions in binderMap are rebased to start at 0 as it
-     * is customary for Java collections.
-     *
-     * @return the binder map associated to this production
-     */
-    public Multimap<Integer, Integer> getBinderMap() {
-        return binderMap;
-    }
-
-    public void setBinderMap(Multimap<Integer, Integer> binderMap) {
-        this.binderMap = binderMap;
-    }
-
-    @Override
-    public List<ProductionItem> getChildren(Enum<?> _void) {
-        return items;
-    }
-
-    @Override
-    public void setChildren(List<ProductionItem> children, Enum<?> _void) {
-        this.items = children;
     }
 
     /**

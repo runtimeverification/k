@@ -32,8 +32,6 @@ object Collections {
 
   def iterable[T](c: Iterable[T]): java.lang.Iterable[T] = c.asJava
   def stream[T](c: Iterable[T]): java.util.stream.Stream[T] = StreamSupport.stream(c.asJava.spliterator(), false);
-  //  def stream[T](c: Collection[T]): java.util.stream.Stream[T] = c.stream
-  def iterable[T](c: Collection[T]): java.lang.Iterable[T] = c.iterable.asJava
 
   def map[T](f: java.util.function.Function[T, T])(s: Set[T]): Set[T] = s.map(x => f(x))
   def map[T](f: java.util.function.Function[T, T])(s: scala.List[T]): scala.List[T] = s.map(x => f(x))
@@ -55,13 +53,6 @@ object Collections {
   def toSet[T]: Collector[T, Set[T]] =
     Collector(() => new CombinerFromBuilder(new SetBuilder(Set())))
 
-  def toAssociativeList[T]: Collector[T, scala.List[T]] =
-    Collector(() => new CombinerFromBuilder(
-      new AssocBuilder[T, scala.List[T], scala.List[T]](ListBuffer())))
-
-  def toAssociativeSet[T]: Collector[T, Set[T]] =
-    Collector(() => new CombinerFromBuilder(
-      new AssocBuilder[T, Set[T], Set[T]](new SetBuilder(Set()))))
 }
 
 class CombinerFromBuilder[T, R <: {def iterator : Iterator[T]}](protected[this] val b: Builder[T, R]) extends

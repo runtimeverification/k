@@ -1,8 +1,6 @@
 // Copyright (c) 2012-2016 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import org.kframework.kil.visitors.Visitor;
-
 /** An import directive */
 public class Import extends ModuleItem {
 
@@ -34,10 +32,5 @@ public class Import extends ModuleItem {
     @Override
     public Import shallowCopy() {
         return new Import(this);
-    }
-
-    @Override
-    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
-        return visitor.complete(this, visitor.visit(this, p));
     }
 }

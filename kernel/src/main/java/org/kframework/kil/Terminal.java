@@ -1,7 +1,6 @@
 // Copyright (c) 2012-2016 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import org.kframework.kil.visitors.Visitor;
 import org.kframework.utils.StringUtil;
 
 /** A terminal in a {@link Production}. */
@@ -39,11 +38,6 @@ public class Terminal extends ProductionItem {
     @Override
     public String toString() {
         return StringUtil.enquoteCString(terminal, caseInsensitive ? '\'' : '"');
-    }
-
-    @Override
-    protected <P, R, E extends Throwable> R accept(Visitor<P, R, E> visitor, P p) throws E {
-        return visitor.complete(this, visitor.visit(this, p));
     }
 
     @Override

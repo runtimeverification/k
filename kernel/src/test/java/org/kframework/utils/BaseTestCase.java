@@ -9,7 +9,6 @@ import com.google.inject.name.Names;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.kframework.kdoc.KDocOptions;
-import org.kframework.kil.Configuration;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
 import org.kframework.kompile.KompileOptions;
@@ -35,9 +34,6 @@ public abstract class BaseTestCase {
 
     @Mock
     protected Definition definition;
-
-    @Mock
-    protected Configuration configuration;
 
     @Mock
     protected KExceptionManager kem;
@@ -78,7 +74,6 @@ public abstract class BaseTestCase {
         protected void configure() {
             bind(KompileOptions.class).toInstance(context.kompileOptions);
             bind(Definition.class).toInstance(definition);
-            bind(Configuration.class).toInstance(configuration);
             bind(File.class).annotatedWith(KompiledDir.class).toInstance(kompiledDir);
             bind(Definition.class).annotatedWith(Concrete.class).toInstance(definition);
         }

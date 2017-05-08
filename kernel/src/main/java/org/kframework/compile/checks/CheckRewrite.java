@@ -1,111 +1,92 @@
-// Copyright (c) 2012-2016 K Team. All Rights Reserved.
+// Copyright (c) 2016 K Team. All Rights Reserved.
 package org.kframework.compile.checks;
 
-import org.kframework.kil.Configuration;
-import org.kframework.kil.Rewrite;
-import org.kframework.kil.Rule;
-import org.kframework.kil.Syntax;
-import org.kframework.kil.TermCons;
-import org.kframework.kil.loader.Context;
-import org.kframework.kil.visitors.BasicVisitor;
-import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.definition.Module;
+import org.kframework.definition.Rule;
+import org.kframework.definition.Sentence;
+import org.kframework.kore.K;
+import org.kframework.kore.KApply;
+import org.kframework.kore.KRewrite;
+import org.kframework.kore.KVariable;
+import org.kframework.kore.VisitK;
+import org.kframework.utils.errorsystem.KEMException;
 
-public class CheckRewrite extends BasicVisitor {
+import java.util.Set;
 
-    public CheckRewrite(Context context) {
-        super(context);
+/**
+ * Created by dwightguth on 1/25/16.
+ */
+public class CheckRewrite {
+    private final Set<KEMException> errors;
+    private final Module m;
+
+    public CheckRewrite(Set<KEMException> errors, Module m) {
+        this.errors = errors;
+        this.m = m;
     }
 
-    private boolean inConfig = false;
-    private boolean inRewrite = false;
-    private boolean inSideCondition = false;
-    private boolean inFunction = false;
-    private int rewritesNo = 0;
-
-    @Override
-    public Void visit(Syntax node, Void _void) {
-        return null;
+    public void check(Sentence sentence) {
+        if (sentence instanceof Rule) {
+            check(((Rule) sentence).body());
+        }
     }
 
-    @Override
-    public Void visit(Configuration node, Void _void) {
-        inConfig = true;
-        super.visit(node, _void);
-        inConfig = false;
-        return null;
-    }
+    private void check(K body) {
+        class Holder {
+            boolean hasRewrite = false;
+            boolean inRewrite = false;
+        }
+        Holder h = new Holder();
+        new VisitK() {
+            @Override
+            public void apply(KRewrite k) {
+                boolean inRewrite = h.inRewrite;
+                if (h.inRewrite) {
+                    errors.add(KEMException.compilerError("Rewrites are not allowed to be nested.", k));
+                }
+                h.hasRewrite = true;
+                h.inRewrite = true;
+                super.apply(k);
+                h.inRewrite = inRewrite;
+            }
 
-    @Override
-    public Void visit(Rule node, Void _void) {
-        rewritesNo = 0;
-        this.visitNode(node.getBody());
-        if (rewritesNo == 0) {
-            String msg = "Rules must have at least one rewrite.";
-            throw KExceptionManager.compilerError(msg, this, node);
+            @Override
+            public void apply(KApply k) {
+                if (!(k.klabel() instanceof KVariable) && k.klabel().name().equals("#fun2") || k.klabel().name().equals("#fun3")) {
+                    if (k.klabel().name().equals("#fun2")) {
+                        boolean wasInRewrite = h.inRewrite;
+                        boolean hadRewrite = h.hasRewrite;
+                        h.inRewrite = false;
+                        h.hasRewrite = false;
+                        apply(k.items().get(0));
+                        if (!h.hasRewrite) {
+                            errors.add(KEMException.compilerError("#fun expressions must have at least one rewrite.", k));
+                        }
+                        // in well formed programs this should always reset to true and true, but we want to make sure we
+                        // don't create spurious reports if this constraint was violated by the user.
+                        h.inRewrite = wasInRewrite;
+                        h.hasRewrite = hadRewrite;
+                        apply(k.items().get(1));
+                    } else {
+                        boolean wasInRewrite = h.inRewrite;
+                        boolean hadRewrite = h.hasRewrite;
+                        h.inRewrite = true;
+                        h.hasRewrite = true;
+                        apply(k.items().get(0));
+                        apply(k.items().get(1));
+                        // in well formed programs this should always reset to true and true, but we want to make sure we
+                        // don't create spurious reports if this constraint was violated by the user.
+                        h.inRewrite = wasInRewrite;
+                        h.hasRewrite = hadRewrite;
+                        apply(k.items().get(2));
+                    }
+                } else {
+                    super.apply(k);
+                }
+            }
+        }.accept(body);
+        if (!h.hasRewrite) {
+            errors.add(KEMException.compilerError("Rules must have at least one rewrite.", body));
         }
-
-        if (node.getRequires() != null) {
-            inSideCondition = true;
-            this.visitNode(node.getRequires());
-            inSideCondition = false;
-        }
-        if (node.getEnsures() != null) {
-            inSideCondition = true;
-            this.visitNode(node.getEnsures());
-            inSideCondition = false;
-        }
-        return null;
-    }
-
-    @Override
-    public Void visit(org.kframework.kil.Context node, Void _void) {
-        this.visitNode(node.getBody());
-        if (node.getRequires() != null) {
-            inSideCondition = true;
-            this.visitNode(node.getRequires());
-            inSideCondition = false;
-        }
-        if (node.getEnsures() != null) {
-            inSideCondition = true;
-            this.visitNode(node.getEnsures());
-            inSideCondition = false;
-        }
-        return null;
-    }
-
-    @Override
-    public Void visit(TermCons node, Void _void) {
-        boolean temp = inFunction;
-        if (node.getProduction().containsAttribute("function")) {
-            //inFunction = true;
-        }
-        super.visit(node, _void);
-        inFunction = temp;
-        return null;
-    }
-
-    @Override
-    public Void visit(Rewrite node, Void _void) {
-        if (inConfig) {
-            String msg = "Rewrites are not allowed in configurations.";
-            throw KExceptionManager.compilerError(msg, this, node);
-        }
-        if (inRewrite) {
-            String msg = "Rewrites are not allowed to be nested.";
-            throw KExceptionManager.compilerError(msg, this, node);
-        }
-        if (inSideCondition) {
-            String msg = "Rewrites are not allowed in side conditions.";
-            throw KExceptionManager.compilerError(msg, this, node);
-        }
-        if (inFunction) {
-            String msg = "Rewrites are not allowed under functions.";
-            throw KExceptionManager.compilerError(msg, this, node);
-        }
-        rewritesNo++;
-        inRewrite = true;
-        super.visit(node, _void);
-        inRewrite = false;
-        return null;
     }
 }
