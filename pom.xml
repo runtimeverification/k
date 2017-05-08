@@ -17,7 +17,6 @@
     <module>kernel</module>
     <module>ktree</module>
     <module>k-distribution</module>
-    <module>coq-backend</module>
     <module>API</module>
   </modules>
 
