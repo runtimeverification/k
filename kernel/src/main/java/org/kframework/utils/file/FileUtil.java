@@ -154,6 +154,9 @@ public class FileUtil {
     }
 
     public File resolveTemp(String file) {
+        if (!tempDir.exists() && !tempDir.mkdirs()) {
+            throw KEMException.criticalError("Could not create temporary directory " + tempDir);
+        }
         return new File(tempDir, file);
     }
 
