@@ -10,17 +10,14 @@ value load_symbol(char* start, char* end) {
   memcpy(String_val(s), start, len);
   CAMLreturn(s);
 }
-
-extern char _binary_kore_term_start[];
-extern char _binary_kore_term_end[];
-value load_kore_term(value unit) {
-    CAMLparam1(unit);
-    CAMLreturn(load_symbol(_binary_kore_term_start, _binary_kore_term_end));
-}
-extern char _binary_marshal_term_start[];
-extern char _binary_marshal_term_end[];
-value load_marshal_term(value unit) {
-    CAMLparam1(unit);
-    CAMLreturn(load_symbol(_binary_marshal_term_start, _binary_marshal_term_end));
+#define RESOURCE(name) \
+extern char _binary_##name##_start[];\
+extern char _binary_##name##_end[];\
+value load_##name(value unit) {\
+    CAMLparam1(unit);\
+    CAMLreturn(load_symbol(_binary_##name##_start, _binary_##name##_end));\
 }
 
+RESOURCE(kore_term)
+RESOURCE(marshal_term)
+RESOURCE(plugin_path)
