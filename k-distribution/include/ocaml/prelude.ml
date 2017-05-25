@@ -61,7 +61,7 @@ let k_of_list lbl l = match l with
 let k_of_set lbl s = if (KSet.cardinal s) = 0 then denormalize (KApply((unit_for lbl),[])) else
   let hd = KSet.choose s in KSet.fold (fun el set -> denormalize (KApply(lbl, [set] :: [denormalize (KApply((el_for lbl),[el]))] :: []))) (KSet.remove hd s) (denormalize (KApply((el_for lbl),[hd])))
 let k_of_map lbl m = if (KMap.cardinal m) = 0 then denormalize (KApply((unit_for lbl),[])) else
-  let (k,v) = KMap.choose m in KMap.fold (fun k v map -> denormalize (KApply(lbl, [map] :: [denormalize (KApply((el_for lbl),[k;v]))] :: []))) (KMap.remove k m) (denormalize (KApply((el_for lbl),[k;v])))
+  let (k,v) = KMap.choose m in KMap.fold (fun k v map -> denormalize (KApply(lbl, [map] :: [denormalize (val_for lbl k v)] :: []))) (KMap.remove k m) (denormalize (val_for lbl k v))
 let k_of_array sort a = let uuid = Uuidm.create `V4 in
   fst (Dynarray.fold_left (fun (res,i) elt -> match elt with [Bottom] -> res,(Z.add i Z.one) | _ -> (denormalize(KApply((el_for_array sort),[[res]; [Int i]; elt]))),(Z.add i Z.one)) ((denormalize(KApply((unit_for_array sort), [[String (Uuidm.to_string uuid)]; [Int (Z.of_int (Dynarray.length a))]]))),Z.zero) a)
 let k_char_escape (buf: Buffer.t) (c: char) : unit = match c with
