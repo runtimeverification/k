@@ -245,6 +245,37 @@ let get_exit_code(subst: k Subst.t) : int = match (Subst.fold (fun k v res -> ma
   | [Int i], Some _ -> failwith "Bad exit code pattern"
   | _ -> res) subst None) with Some i -> i | _ -> failwith "Bad exit code pattern"
 
+
+module CONFIG =
+struct
+  let depth = ref (-1)
+  let sys_argv = ref Sys.argv
+
+  let set_sys_argv () =
+    let has_rv_args () =
+      try let _ = Sys.getenv "RV_MATCH_BINARY_FLAGS" in true
+      with Not_found -> false
+    in if has_rv_args () then
+      let cmd = ref [Sys.argv.(0)] in
+      let set_depth d = depth := d in
+      let add_sys_argv arg = cmd := arg::!cmd in
+      let anon_arg a = print_endline ("Invalid argument: " ^ a ^". Will be ignored") in
+      let string_of_list l = "[" ^ String.concat "; " l ^ "]" in
+    begin
+      print_endline "RV_MATCH_BINARY_FLAGS is set. parsing RV_Match specific args.";
+      let speclist = [
+        ("--depth", Arg.Int (set_depth), "The maximum number of computational steps to execute the definition for.");
+        ("--", Arg.Rest (add_sys_argv), "Command line for the program");
+      ]
+      in let usage_msg = "Invalid RV options. Usage:\n  " ^ Sys.argv.(0) ^ " <rv-options> -- <pgm-options>\nRV options available:"
+      in Arg.parse speclist anon_arg usage_msg;
+      sys_argv := Array.of_list (List.rev !cmd);
+      print_endline ("Max depth: " ^ string_of_int !depth);
+      print_endline ("Command line: " ^ string_of_list (List.rev !cmd));
+    end
+  else ()
+end
+
 module MAP =
 struct
 
@@ -422,7 +453,7 @@ struct
       [String key] -> [String (Sys.getenv key)]
     | _ -> raise Not_implemented
   let hook_argv c lbl sort config ff = match c with
-      () -> [List (SortList, Lbl_List_,(Array.fold_right (fun arg res -> [String arg] :: res) Sys.argv []))]
+      () -> [List (SortList, Lbl_List_,(Array.fold_right (fun arg res -> [String arg] :: res) !CONFIG.sys_argv []))]
 end
 
 module KEQUAL =
@@ -784,3 +815,4 @@ struct
       [Float (f,e,p)] -> (match deconstruct_float f e p with (_, exp, _) -> [Int (Z.of_int exp)])
     | _ -> raise Not_implemented
 end
+
