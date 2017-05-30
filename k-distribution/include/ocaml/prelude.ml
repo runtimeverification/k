@@ -250,6 +250,7 @@ module CONFIG =
 struct
   let depth = ref (-1)
   let sys_argv = ref Sys.argv
+  let output_file = ref "config"
 
   let set_sys_argv () =
     let has_rv_args () =
@@ -258,6 +259,7 @@ struct
     in if has_rv_args () then
       let cmd = ref [Sys.argv.(0)] in
       let set_depth d = depth := d in
+      let set_output_file outf = output_file := outf in
       let add_sys_argv arg = cmd := arg::!cmd in
       let anon_arg a = print_endline ("Invalid argument: " ^ a ^". Will be ignored") in
       let string_of_list l = "[" ^ String.concat "; " l ^ "]" in
@@ -265,6 +267,7 @@ struct
       print_endline "RV_MATCH_BINARY_FLAGS is set. parsing RV_Match specific args.";
       let speclist = [
         ("--depth", Arg.Int (set_depth), "The maximum number of computational steps to execute the definition for.");
+        ("--output-file", Arg.String (set_output_file), "The file to store (failing) configuration into.");
         ("--", Arg.Rest (add_sys_argv), "Command line for the program");
       ]
       in let usage_msg = "Invalid RV options. Usage:\n  " ^ Sys.argv.(0) ^ " <rv-options> -- <pgm-options>\nRV options available:"
