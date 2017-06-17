@@ -576,6 +576,7 @@ module K-IO
 
   syntax K ::= "#close" "(" Int ")" [function, hook(IO.close), impure]
              | "#seek" "(" Int "," Int ")" [function, hook(IO.seek), impure]
+             | "#seekEnd" "(" Int "," Int ")" [function, hook(IO.seekEnd), impure]
              | "#putc" "(" Int "," Int ")"      [function, hook(IO.putc), impure]
              | "#write" "(" Int "," String ")" [function, hook(IO.write), impure]
 

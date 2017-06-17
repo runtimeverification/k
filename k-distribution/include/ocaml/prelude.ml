@@ -495,6 +495,9 @@ struct
   let hook_seek c lbl sort config ff = match c with
       [Int fd], [Int off] -> let o = (Z.to_int off) in let _ = Unix.lseek (Hashtbl.find file_descriptors fd) o Unix.SEEK_SET in []
     | _ -> raise Not_implemented
+  let hook_seekEnd c lbl sort config ff = match c with
+      [Int fd], [Int off] -> let o = (Z.to_int off) in let _ = Unix.lseek (Hashtbl.find file_descriptors fd) o Unix.SEEK_END in []
+    | _ -> raise Not_implemented
   let hook_tell c lbl sort config ff = match c with
       [Int fd] -> [Int (Z.of_int (Unix.lseek (Hashtbl.find file_descriptors fd) 0 Unix.SEEK_CUR))]
     | _ -> raise Not_implemented
