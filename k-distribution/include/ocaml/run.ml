@@ -71,3 +71,48 @@ let run (config: k) (depth: int) : k * int =
 let run_no_thread_opt (config: k) (depth: int) : k * int =
   let module Def = (val Plugin.get () : Plugin.Definition) in
   take_steps_no_thread (module Def) Def.step config depth 0
+
+module Makeconfig =
+struct
+  let depth = ref (-1)
+  let output_file = ref "run.out"
+  let name = ref ""
+  let value = ref ""
+  let init = ref "initGeneratedTopCell"
+  let vars = ref KMap.empty
+  let serialize = ref false
+  let is_marshal = ref false
+
+  let add_arg category =
+    if !is_marshal && not !serialize then Prelude.no_parse_eval := true;
+    let parsed_val = match category with
+    | "text" -> Lexer.parse_k !value
+    | "textfile" -> Lexer.parse_k_file !value
+    | "binary" -> Lexer.parse_k_binary_string !value
+    | "binaryfile" -> Lexer.parse_k_binary_file !value
+    in let key = [KToken(SortKConfigVar, "$" ^ !name)]
+    in vars := KMap.add key parsed_val !vars
+
+  let speclist = [
+    ("--depth", Arg.Set_int depth, "The maximum number of computational steps to execute the definition for.");
+    ("--output-file", Arg.Set_string output_file, "The file to write the resulting configuration into.");
+    ("-c", Arg.Tuple([Arg.Set_string name; Arg.Set_string value; Arg.Symbol(["text"; "textfile"; "binary"; "binaryfile"], add_arg)]), "A krun configuration variable.");
+    ("--initializer", Arg.Set_string init, "Initializer for top cell.");
+    ("-s", Arg.Set serialize, "Output term marshaled.")
+  ]
+
+  let usage_msg = "K interpreter"
+
+  let parse () : (k * int * out_channel) =
+    Arg.parse speclist (fun _ -> ()) usage_msg;
+    let module Def = (val Plugin.get () : Plugin.Definition) in
+    let input = Def.eval (Constants.KApply(Constants.parse_klabel(!init), [[Map(SortMap,Lbl_Map_,!vars)]])) [] in
+    vars := KMap.empty; (* for gc *)
+    input, !depth, open_out_bin !output_file
+
+  let marshal () =
+    is_marshal := true;
+    Arg.parse speclist (fun _ -> ()) usage_msg;
+    let input = [Map(SortMap,Lbl_Map_,!vars)] in
+    !serialize, input, open_out_bin !output_file
+end

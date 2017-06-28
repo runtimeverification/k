@@ -4,6 +4,7 @@ import com.martiansoftware.nailgun.NGContext;
 import org.kframework.kore.K;
 import org.kframework.parser.binary.BinaryParser;
 import org.kframework.unparser.ToKast;
+import org.kframework.utils.file.FileUtil;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -21,11 +22,12 @@ public class BinaryToText {
 
 
     public static void nailMain(NGContext context) throws IOException {
-        File f = new File(context.getWorkingDirectory(), context.getArgs()[0]);
+        FileUtil files = new FileUtil(null,null,new File(context.getWorkingDirectory()),null,null,null);
+        File f = files.resolveWorkingDirectory(context.getArgs()[0]);
         FileChannel channel = FileChannel.open(f.toPath());
         ByteBuffer buf = channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size());
         K result = BinaryParser.parse(buf);
-        ToKast.apply(result, new PrintStream(new FileOutputStream(new File(context.getWorkingDirectory(), context.getArgs()[1]))));
+        ToKast.apply(result, new PrintStream(new FileOutputStream(files.resolveWorkingDirectory(context.getArgs()[1]))));
     }
 
     public static void main(String[] args) throws IOException {

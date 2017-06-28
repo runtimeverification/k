@@ -90,7 +90,7 @@ let rec parse_k_binary_term (module Def: Plugin.Definition) (s: char Stream.t) (
   ignore(Stream.next s);
   let arity = parse_k_binary_int s in
   let items = parse_k_binary_stack stack arity [] in
-  Stack.push (Def.eval (KApply((parse_klabel lbl), items)) []) stack;
+  Stack.push (if !Prelude.no_parse_eval then [Constants.denormalize (KApply((parse_klabel lbl), items))] else Def.eval (KApply((parse_klabel lbl), items)) []) stack;
   Dynarray.add k_interns (Stack.top stack);
   parse_k_binary_term (module Def) s stack interns k_interns
 | 3 -> (* ksequence *)
