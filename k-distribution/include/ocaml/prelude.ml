@@ -673,6 +673,9 @@ struct
   let hook_pow c lbl sort config ff = match c with
       [Int a], [Int b] -> [Int (Z.pow a (Z.to_int b))]
     | _ -> raise Not_implemented
+  let hook_powmod c lbl sort config ff = match c with
+      [Int a], [Int b], [Int c]-> [Int (Z.powm a b c)]
+    | _ -> raise Not_implemented
   let hook_xor c lbl sort config ff = match c with
       [Int a], [Int b] -> [Int (Z.logxor a b)]
     | _ -> raise Not_implemented
