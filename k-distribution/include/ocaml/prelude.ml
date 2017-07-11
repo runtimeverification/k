@@ -245,6 +245,9 @@ let get_exit_code(subst: k Subst.t) : int = match (Subst.fold (fun k v res -> ma
   | [Int i], Some _ -> failwith "Bad exit code pattern"
   | _ -> res) subst None) with Some i -> i | _ -> failwith "Bad exit code pattern"
 
+(* set to true if you don't want the k parser to evaluate functions.
+   this is used by --ocaml-compile in order to prevent us from evaluating
+   argv while marshalling data. *)
 let no_parse_eval = ref false
 
 module CONFIG =
