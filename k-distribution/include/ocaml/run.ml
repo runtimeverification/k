@@ -40,15 +40,17 @@ let rec take_steps (module Def: Plugin.Definition) (step_function: k -> (k * ste
       )
       | NoStep config -> (
         match active_config with [Thread(_,thread_id,_,[Map(_,_,other_threads)])] ->
-        if other_active_threads = [] then (
+        let (other_thread_ids,_) = List.split(KMap.bindings other_threads) in
+        let still_active (thd: k) : bool = List.mem thd other_thread_ids in
+        let still_active_threads = List.filter still_active other_active_threads in
+        if still_active_threads = [] then (
           if last_resort || KMap.cardinal other_threads = 0 then (
             config,n
           ) else (
-            let (other_thread_ids,_) = List.split(KMap.bindings other_threads) in
             take_steps (module Def) Def.step (thread_id :: other_thread_ids) active_config depth n true
           )
         ) else (
-          take_steps (module Def) Def.step other_active_threads active_config depth n last_resort
+          take_steps (module Def) Def.step still_active_threads active_config depth n last_resort
         )
       )
   )
