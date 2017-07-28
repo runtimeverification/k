@@ -1,11 +1,6 @@
 open Constants
 
-module KBasicMap = Map.Make(K)
-module KMap = struct
-  include KBasicMap
-  let compose k1 k2 = (KBasicMap.fold (fun k v m -> try KBasicMap.add k (v, KBasicMap.find v k2) m with Not_found -> m) k1 KBasicMap.empty)
-  let reverse map = let flip f x y = f y x in (KBasicMap.fold (flip KBasicMap.add) map KBasicMap.empty)
-end
+module KMap = Map.Make(K)
 module KSet = Set.Make(K)
 
 open Constants.K
