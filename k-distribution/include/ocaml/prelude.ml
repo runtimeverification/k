@@ -196,6 +196,80 @@ let convert_open_flags (s: string) : Unix.open_flag list =
     | "w+bx" | "wb+x" -> [Unix.O_RDWR; Unix.O_EXCL; Unix.O_CREAT]
     | "a+b" | "ab+" -> [Unix.O_RDWR; Unix.O_APPEND; Unix.O_CREAT]
     | _ -> raise (Invalid_argument "convert_open_flags")
+let unix_error (f: unit -> k) = try f () with Unix.Unix_error(err,_,_) as ex -> match err with
+| EUNKNOWNERR(i) -> [KApply1((parse_klabel "#unknownIOError"), [Int (Z.of_int i)])]
+| _ -> [KApply0(parse_klabel(match err with
+| E2BIG -> "#E2BIG_K-IO"
+| EACCES -> "#EACCES_K-IO"
+| EAGAIN -> "#EAGAIN_K-IO"
+| EBADF -> "#EBADF_K-IO"
+| EBUSY -> "#EBUSY_K-IO"
+| ECHILD -> "#ECHILD_K-IO"
+| EDEADLK -> "#EDEADLK_K-IO"
+| EDOM -> "#EDOM_K-IO"
+| EEXIST -> "#EEXIST_K-IO"
+| EFAULT -> "#EFAULT_K-IO"
+| EFBIG -> "#EFBIG_K-IO"
+| EINTR -> "#EINTR_K-IO"
+| EINVAL -> "#EINVAL_K-IO"
+| EIO -> "#EIO_K-IO"
+| EISDIR -> "#EISDIR_K-IO"
+| EMFILE -> "#EMFILE_K-IO"
+| EMLINK -> "#EMLINK_K-IO"
+| ENAMETOOLONG -> "#ENAMETOOLONG_K-IO"
+| ENFILE -> "#ENFILE_K-IO"
+| ENODEV -> "#ENODEV_K-IO"
+| ENOENT -> "#ENOENT_K-IO"
+| ENOEXEC -> "#ENOEXEC_K-IO"
+| ENOLCK -> "#ENOLCK_K-IO"
+| ENOMEM -> "#ENOMEM_K-IO"
+| ENOSPC -> "#ENOSPC_K-IO"
+| ENOSYS -> "#ENOSYS_K-IO"
+| ENOTDIR -> "#ENOTDIR_K-IO"
+| ENOTEMPTY -> "#ENOTEMPTY_K-IO"
+| ENOTTY -> "#ENOTTY_K-IO"
+| ENXIO -> "#ENXIO_K-IO"
+| EPERM -> "#EPERM_K-IO"
+| EPIPE -> "#EPIPE_K-IO"
+| ERANGE -> "#ERANGE_K-IO"
+| EROFS -> "#EROFS_K-IO"
+| ESPIPE -> "#ESPIPE_K-IO"
+| ESRCH -> "#ESRCH_K-IO"
+| EXDEV -> "#EXDEV_K-IO"
+| EWOULDBLOCK -> "#EWOULDBLOCK_K-IO"
+| EINPROGRESS -> "#EINPROGRESS_K-IO"
+| EALREADY -> "#EALREADY_K-IO"
+| ENOTSOCK -> "#ENOTSOCK_K-IO"
+| EDESTADDRREQ -> "#EDESTADDRREQ_K-IO"
+| EMSGSIZE -> "#EMSGSIZE_K-IO"
+| EPROTOTYPE -> "#EPROTOTYPE_K-IO"
+| ENOPROTOOPT -> "#ENOPROTOOPT_K-IO"
+| EPROTONOSUPPORT -> "#EPROTONOSUPPORT_K-IO"
+| ESOCKTNOSUPPORT -> "#ESOCKTNOSUPPORT_K-IO"
+| EOPNOTSUPP -> "#EOPNOTSUPP_K-IO"
+| EPFNOSUPPORT -> "#EPFNOSUPPORT_K-IO"
+| EAFNOSUPPORT -> "#EAFNOSUPPORT_K-IO"
+| EADDRINUSE -> "#EADDRINUSE_K-IO"
+| EADDRNOTAVAIL -> "#EADDRNOTAVAIL_K-IO"
+| ENETDOWN -> "#ENETDOWN_K-IO"
+| ENETUNREACH -> "#ENETUNREACH_K-IO"
+| ENETRESET -> "#ENETRESET_K-IO"
+| ECONNABORTED -> "#ECONNABORTED_K-IO"
+| ECONNRESET -> "#ECONNRESET_K-IO"
+| ENOBUFS -> "#ENOBUFS_K-IO"
+| EISCONN -> "#EISCONN_K-IO"
+| ENOTCONN -> "#ENOTCONN_K-IO"
+| ESHUTDOWN -> "#ESHUTDOWN_K-IO"
+| ETOOMANYREFS -> "#ETOOMANYREFS_K-IO"
+| ETIMEDOUT -> "#ETIMEDOUT_K-IO"
+| ECONNREFUSED -> "#ECONNREFUSED_K-IO"
+| EHOSTDOWN -> "#EHOSTDOWN_K-IO"
+| EHOSTUNREACH -> "#EHOSTUNREACH_K-IO"
+| ELOOP -> "#ELOOP_K-IO"
+| EOVERFLOW -> "#EOVERFLOW_K-IO"
+| EUNKNOWNERR(i) -> failwith "unreachable"
+))]
+
 let to_string_base (base: int) (i: Z.t) : string = match base with
   10 -> Z.format "%d" i
 | 2 -> Z.format "%b" i
@@ -477,36 +551,36 @@ end
 module IO =
 struct
   let hook_close c lbl sort config ff = match c with
-      [Int i] -> Unix.close (Hashtbl.find file_descriptors i); []
+      [Int i] -> unix_error (fun () -> Unix.close (Hashtbl.find file_descriptors i); [])
     | _ -> raise Not_implemented
   let hook_getc c lbl sort config ff = match c with
-      [Int i] -> let b = Bytes.create 1 in match Unix.read (Hashtbl.find file_descriptors i) b 0 1 with
+      [Int i] -> unix_error (fun () -> let b = Bytes.create 1 in match Unix.read (Hashtbl.find file_descriptors i) b 0 1 with
           0 -> [Int (Z.of_int (-1))]
-        | _ -> [Int (Z.of_int (Char.code (Bytes.get b 0)))]
+        | _ -> [Int (Z.of_int (Char.code (Bytes.get b 0)))])
     | _ -> raise Not_implemented
   let hook_open c lbl sort config ff = match c with
       [String path], [String flags] ->
-        let fd = Unix.openfile path (convert_open_flags flags) default_file_perm in
-          let fd_int = !curr_fd in Hashtbl.add file_descriptors fd_int fd; curr_fd := (Z.add fd_int Z.one); [Int fd_int]
+        unix_error (fun () -> let fd = Unix.openfile path (convert_open_flags flags) default_file_perm in
+          let fd_int = !curr_fd in Hashtbl.add file_descriptors fd_int fd; curr_fd := (Z.add fd_int Z.one); [Int fd_int])
     | _ -> raise Not_implemented
   let hook_putc c lbl sort config ff = match c with
-      [Int fd], [Int c] -> let _ = Unix.write (Hashtbl.find file_descriptors fd) (Bytes.make 1 (Char.chr (Z.to_int c))) 0 1 in []
+      [Int fd], [Int c] -> unix_error (fun () -> let _ = Unix.write (Hashtbl.find file_descriptors fd) (Bytes.make 1 (Char.chr (Z.to_int c))) 0 1 in [])
     | _ -> raise Not_implemented
   let hook_read c lbl sort config ff = match c with
-      [Int fd], [Int len] -> let l = (Z.to_int len) in
-        let b = Bytes.create l in let _ = Unix.read (Hashtbl.find file_descriptors fd) b 0 l in [String (Bytes.to_string b)]
+      [Int fd], [Int len] -> unix_error (fun () -> let l = (Z.to_int len) in
+        let b = Bytes.create l in let _ = Unix.read (Hashtbl.find file_descriptors fd) b 0 l in [String (Bytes.to_string b)])
     | _ -> raise Not_implemented
   let hook_seek c lbl sort config ff = match c with
-      [Int fd], [Int off] -> let o = (Z.to_int off) in let _ = Unix.lseek (Hashtbl.find file_descriptors fd) o Unix.SEEK_SET in []
+      [Int fd], [Int off] -> unix_error (fun () -> let o = (Z.to_int off) in let _ = Unix.lseek (Hashtbl.find file_descriptors fd) o Unix.SEEK_SET in [])
     | _ -> raise Not_implemented
   let hook_seekEnd c lbl sort config ff = match c with
-      [Int fd], [Int off] -> let o = (Z.to_int off) in let _ = Unix.lseek (Hashtbl.find file_descriptors fd) o Unix.SEEK_END in []
+      [Int fd], [Int off] -> unix_error (fun () -> let o = (Z.to_int off) in let _ = Unix.lseek (Hashtbl.find file_descriptors fd) o Unix.SEEK_END in [])
     | _ -> raise Not_implemented
   let hook_tell c lbl sort config ff = match c with
-      [Int fd] -> [Int (Z.of_int (Unix.lseek (Hashtbl.find file_descriptors fd) 0 Unix.SEEK_CUR))]
+      [Int fd] -> unix_error (fun () -> [Int (Z.of_int (Unix.lseek (Hashtbl.find file_descriptors fd) 0 Unix.SEEK_CUR))])
     | _ -> raise Not_implemented
   let hook_write c lbl sort config ff = match c with
-      [Int fd], [String s] -> let b = Bytes.of_string s in let _ = Unix.write (Hashtbl.find file_descriptors fd) b 0 (Bytes.length b) in []
+      [Int fd], [String s] -> unix_error (fun () -> let b = Bytes.of_string s in let _ = Unix.write (Hashtbl.find file_descriptors fd) b 0 (Bytes.length b) in [])
     | _ -> raise Not_implemented
 
   let hook_stat c lbl sort config ff = raise Not_implemented
