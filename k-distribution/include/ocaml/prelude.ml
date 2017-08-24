@@ -903,3 +903,28 @@ struct
     | _ -> raise Not_implemented
 end
 
+module RACE =
+struct
+  type rule_type =
+    | Owise
+    | Heat
+    | Cool
+    | Nondet
+    | NoType
+  let rec valid_continuations = function
+    | [] -> []
+    | h::t -> valid_continuation h t :: valid_continuations t
+  and valid_continuation c = function
+    | [] -> c
+    | h::t -> valid_cont c h ; valid_continuation c t
+  and valid_cont (_, (_,t1 ,l1), _) (_, (_, t2, l2), _) = match (t1,t2) with
+    | (Heat, Heat)
+    | (Nondet, Nondet) -> ()
+    | _ -> Printf.printf "Warning: Race detected between rules at %s and %s.\n" l1 l2
+  let all_steps (one_step : k -> int -> (k * (int * rule_type * string) * step_function)) (c: k) (start_after: int) : (k * (int * rule_type * string) * step_function) list =
+    let rec steps start l =
+      try let (_, (s, _, loc), _) as r = one_step c start
+          in steps s (r :: l)
+      with (Stuck _) -> l
+    in steps start_after []
+end
