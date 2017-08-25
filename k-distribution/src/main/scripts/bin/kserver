@@ -6,7 +6,7 @@ else
   ulimit -s `ulimit -H -s`
   if "$(dirname "$0")/../lib/checkJava"; then
     trap 'kill -TERM $PID' TERM INT
-    java -Djava.awt.headless=true -Djansi.force=true $K_OPTS -ea -cp "$(dirname "$0")/../lib/java/*" org.kframework.main.Main -kserver "$@"&
+    java -Dfile.encoding=UTF-8 -Djava.awt.headless=true -Djansi.force=true $K_OPTS -ea -cp "$(dirname "$0")/../lib/java/*" org.kframework.main.Main -kserver "$@"&
     PID=$!
     wait $PID
     trap - TERM INT

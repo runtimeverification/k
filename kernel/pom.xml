@@ -208,6 +208,7 @@
           <systemPropertyVariables>
             <java.awt.headless>true</java.awt.headless>
           </systemPropertyVariables>
+          <argLine>-Dfile.encoding=UTF-8</argLine>
         </configuration>
       </plugin>
       <plugin>
