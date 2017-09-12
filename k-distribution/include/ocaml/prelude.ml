@@ -133,7 +133,7 @@ let print_k_binary (c: k) : string =  let buf = Buffer.create 16 in
   | KItem (List(sort,lbl,l)) -> print_kitem(normalize (k_of_list lbl l), [List(sort,lbl,l)])
   | KItem (Set(sort,lbl,s)) -> print_kitem(normalize (k_of_set lbl s), [Set(sort,lbl,s)])
   | KItem (Map(sort,lbl,m)) -> print_kitem(normalize (k_of_map lbl m), [Map(sort,lbl,m)])
-  | KItem (Array(sort,a)) -> print_kitem(normalize (k_of_array sort a), [Array(sort,a)])
+  | KItem (Array(sort,d,a)) -> print_kitem(normalize (k_of_array sort a), [Array(sort,d,a)])
   in Buffer.add_string buf "\x7fKAST\x04\x00\x01"; print_k c 0; Buffer.add_string buf end_code;
   Buffer.contents buf
 
@@ -159,7 +159,7 @@ let print_k (c: k) : string = let buf = Buffer.create 16 in
   | KItem (List(_,lbl,l)) -> print_kitem(normalize (k_of_list lbl l))
   | KItem (Set(_,lbl,s)) -> print_kitem(normalize (k_of_set lbl s))
   | KItem (Map(_,lbl,m)) -> print_kitem(normalize (k_of_map lbl m))
-  | KItem (Array(sort,a)) -> print_kitem(normalize (k_of_array sort a))
+  | KItem (Array(sort,d,a)) -> print_kitem(normalize (k_of_array sort a))
   | KItem (ThreadLocal) -> print_kitem(KApply(Lbl'Hash'ThreadLocal, []))
   | KItem (Thread(k1, k2, k3, k4)) -> print_kitem(KApply(Lbl'Hash'Thread, [k1; k2; k3; k4]))
   in print_k c; Buffer.contents buf
@@ -484,29 +484,29 @@ end
 module ARRAY =
 struct
   let hook_make c lbl sort config ff = match c with
-      [Int len], k -> [Array (sort,(Dynarray.make (Z.to_int len) k))]
+      [Int len], k -> [Array (sort,k,(Dynarray.make (Z.to_int len) k))]
     | _ -> raise Not_implemented
   let hook_makeEmpty c lbl sort config ff = match c with
-      [Int len] -> [Array (sort,(Dynarray.make (Z.to_int len) interned_bottom))]
+      [Int len] -> [Array (sort,interned_bottom,(Dynarray.make (Z.to_int len) interned_bottom))]
     | _ -> raise Not_implemented
   let hook_lookup c lbl sort config ff = match c with
-      [Array (_,a)], [Int idx] -> (try Dynarray.get a (Z.to_int idx) with Invalid_argument _ | Z.Overflow -> interned_bottom)
+      [Array (_,k,a)], [Int idx] -> (try Dynarray.get a (Z.to_int idx) with Invalid_argument _ | Z.Overflow -> k)
     | _ -> raise Not_implemented
   let hook_update c lbl sort config ff = match c with
-      [Array (_,a)] as value, [Int i], k -> (try Dynarray.set a (Z.to_int i) k with Invalid_argument _ | Z.Overflow -> ()); value
+      [Array (_,_,a)] as value, [Int i], k -> (try Dynarray.set a (Z.to_int i) k with Invalid_argument _ | Z.Overflow -> ()); value
     | _ -> raise Not_implemented
   let hook_remove c lbl sort config ff = match c with
-      [Array (_,a)] as value, [Int i] -> (try Dynarray.set a (Z.to_int i) interned_bottom with Invalid_argument _ | Z.Overflow -> ()); value
+      [Array (_,k,a)] as value, [Int i] -> (try Dynarray.set a (Z.to_int i) k with Invalid_argument _ | Z.Overflow -> ()); value
     | _ -> raise Not_implemented
   let hook_updateAll c lbl sort config ff = match c with
-      [Array (s,a)] as value, [Int i], [List (_,_,l)] -> List.iteri (fun j elt -> try Dynarray.set a (j + (Z.to_int i)) elt with Invalid_argument _ | Z.Overflow -> ()) l; value
+      [Array (_,_,a)] as value, [Int i], [List (_,_,l)] -> List.iteri (fun j elt -> try Dynarray.set a (j + (Z.to_int i)) elt with Invalid_argument _ | Z.Overflow -> ()) l; value
     | _ -> raise Not_implemented
   let hook_in_keys c lbl sort config ff = match c with
-      [Int i], [Array (_,a)] -> [Bool (try (match Dynarray.get a (Z.to_int i) with [Bottom] -> false | _ -> true) with Invalid_argument _ | Z.Overflow -> false)]
+      [Int i], [Array (_,k,a)] -> [Bool (try (if compare (Dynarray.get a (Z.to_int i)) k = 0 then false else true) with Invalid_argument _ | Z.Overflow -> false)]
     | _ -> raise Not_implemented
 
   let hook_ctor c lbl sort config ff = match c with
-      _, [Int len] -> [Array (sort,(Dynarray.make (Z.to_int len) interned_bottom))]
+      _, [Int len] -> [Array (sort,interned_bottom,(Dynarray.make (Z.to_int len) interned_bottom))]
     | _ -> raise Not_implemented
 end
 

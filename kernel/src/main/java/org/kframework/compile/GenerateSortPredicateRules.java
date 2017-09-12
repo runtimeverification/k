@@ -109,9 +109,10 @@ public class GenerateSortPredicateRules {
                 for (NonTerminal nt : nts) {
                     KVariable v = KVariable("K" + i++, Att().add(Attribute.SORT_KEY, nt.sort().name()));
                     klist.add(v);
-                    side.add(KApply(KLabel("is" + nt.sort().name()), v));
+                    if (!mutable(mod.sortAttributesFor()).getOrDefault(sort, Att()).contains("flatPredicate")) {
+                        side.add(KApply(KLabel("is" + nt.sort().name()), v));
+                    }
                 }
-                ;
                 Optional<K> sideCondition = side.stream().reduce(BooleanUtils::and);
                 K requires;
                 if (!sideCondition.isPresent()) {
