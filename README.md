@@ -133,7 +133,7 @@ Common error messages:
 - `[WARNING] Cannot get the branch information from the git repository:
    Detecting the current branch failed: 'git' is not recognized as an internal or external command,
    operable program or batch file.`
-   + ``git` might not be installed on your system. Make sure that you can execute
+   +  `git` might not be installed on your system. Make sure that you can execute
       `git` from the command line.
 
 - `1) Error injecting constructor, java.lang.Error: Unresolved compilation problems:
@@ -152,7 +152,7 @@ rebuild the entire project. Generally speaking, however, the project should buil
 without needing to be cleaned first.
 
 If you are doing work with snapshot dependencies, you can update them to the latest version by
-running maven with the -U flag.
+running maven with the `-U` flag.
 
 If you are configuring artifacts in a repository and need to purge the local repository's cache
 of artifacts, you can run `mvn dependency:purge-local-repository`.
