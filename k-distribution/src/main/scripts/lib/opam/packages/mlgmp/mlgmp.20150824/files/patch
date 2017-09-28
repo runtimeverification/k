@@ -315,8 +315,8 @@ diff -ruN mlgmp_ref/mlgmp/mlgmp_fr.c mlgmp/mlgmp_fr.c
 +  CAMLlocal2(r, tuple);
 +  r=alloc_init_mpfr(prec);
 +  int t = mpfr_set(*mpfr_val(r), *mpfr_val(a), Mode_val(mode));
-+  mpfr_exp_t last_emin = mpfr_get_emin();
-+  mpfr_exp_t last_emax = mpfr_get_emax();
++  mp_exp_t last_emin = mpfr_get_emin();
++  mp_exp_t last_emax = mpfr_get_emax();
 +  mpfr_set_emin(Long_val(emin));
 +  mpfr_set_emax(Long_val(emax));
 +  t = mpfr_check_range(*mpfr_val(r), t, Mode_val(mode));
@@ -357,8 +357,8 @@ diff -ruN mlgmp_ref/mlgmp/mlgmp_fr.c mlgmp/mlgmp_fr.c
 +  CAMLlocal1(r);
 +  r = alloc_mpfr();
 +  mpfr_init2(*mpfr_val(r), mpfr_get_prec(*mpfr_val(a)));
-+  mpfr_exp_t last_emin = mpfr_get_emin();
-+  mpfr_exp_t last_emax = mpfr_get_emax();
++  mp_exp_t last_emin = mpfr_get_emin();
++  mp_exp_t last_emax = mpfr_get_emax();
 +  mpfr_set_emin(Long_val(emin));
 +  mpfr_set_emax(Long_val(emax));
 +  mpfr_set(*mpfr_val(r), *mpfr_val(a), GMP_RNDN);

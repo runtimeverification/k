@@ -24,34 +24,38 @@ let context_switch (config: k) (thread_id: k) : k = match config with
   [Thread(global,old_thread_id,old_thread,[Map(sort,lbl,other_threads)])] ->
   if (K.compare old_thread_id thread_id) = 0 then config else
   [Thread(global,thread_id,(KMap.find thread_id other_threads),[Map(sort,lbl,(KMap.remove thread_id (KMap.add old_thread_id old_thread other_threads)))])]
+| _ -> invalid_arg "context switch"
 
 type step = Step of k * step_function | NoStep of k
 
-let rec take_steps (module Def: Plugin.Definition) (step_function: k -> (k * step_function)) (active_threads: k list) (config: k) (depth: int) (n: int) (last_resort: bool) : k * int =
+let rec take_steps (module Def: Plugin.Definition) (step_function: k -> (k * step_function)) (thread: k) (other_active_threads: k list) (config: k) (depth: int) (n: int) (last_resort: bool) : k * int =
   if n = depth then (
     config,n
   ) else (
-    match active_threads with
-    | thread :: other_active_threads ->
     let active_config = context_switch config thread in
       match (try let res,func = (step_function active_config) in Step(res,func) with Stuck c -> NoStep c) with
-      | Step (([Thread(_,thread_id,_,[Map(_,_,other_threads)])] as config),(StepFunc step_function)) -> (
-        take_steps (module Def) step_function (thread_id :: other_active_threads) config depth (n+1) false
+      | Step (([Thread(_,thread_id,_,_)] as config),(StepFunc step_function)) -> (
+        take_steps (module Def) step_function thread_id other_active_threads config depth (n+1) false
       )
+      | Step _ -> invalid_arg "mismatched constructor at top of split configuration"
       | NoStep config -> (
-        match active_config with [Thread(_,thread_id,_,[Map(_,_,other_threads)])] ->
-        let (other_thread_ids,_) = List.split(KMap.bindings other_threads) in
-        let still_active (thd: k) : bool = List.mem thd other_thread_ids in
-        let still_active_threads = List.filter still_active other_active_threads in
-        if still_active_threads = [] then (
-          if last_resort || KMap.cardinal other_threads = 0 then (
-            config,n
-          ) else (
-            take_steps (module Def) Def.step (thread_id :: other_thread_ids) active_config depth n true
+        match active_config with [Thread(_,thread_id,_,[Map(_,_,other_threads)])] -> (
+          let (other_thread_ids,_) = List.split(KMap.bindings other_threads) in
+          let still_active (thd: k) : bool = List.mem thd other_thread_ids in
+          let still_active_threads = List.filter still_active other_active_threads in
+          match still_active_threads with
+          | [] -> (
+            if last_resort || KMap.cardinal other_threads = 0 then (
+              config,n
+            ) else (
+              take_steps (module Def) Def.step thread_id other_thread_ids active_config depth n true
+            )
           )
-        ) else (
-          take_steps (module Def) Def.step still_active_threads active_config depth n last_resort
+          | thread_id :: other_still_active_threads -> (
+            take_steps (module Def) Def.step thread_id other_still_active_threads active_config depth n last_resort
+          )
         )
+        | _ -> invalid_arg "mismatched constructor at top of split configuration"
       )
   )
 
@@ -67,7 +71,7 @@ let rec take_steps_no_thread (module Def: Plugin.Definition) (step_function: k -
 let run (config: k) (depth: int) : k * int =
   let module Def = (val Plugin.get () : Plugin.Definition) in
   let first_config, first_thread_ids = split_config config in
-  let last_config,n = take_steps (module Def) Def.step first_thread_ids first_config depth 0 false in
+  let last_config,n = take_steps (module Def) Def.step (List.hd first_thread_ids) (List.tl first_thread_ids)  first_config depth 0 false in
   (plug_config last_config, n)
 
 let run_no_thread_opt (config: k) (depth: int) : k * int =
@@ -92,6 +96,7 @@ struct
     | "textfile" -> Lexer.parse_k_file !value
     | "binary" -> Lexer.parse_k_binary_string !value
     | "binaryfile" -> Lexer.parse_k_binary_file !value
+    | _ -> raise (Arg.Bad "invalid kast format. Choose one of text|textfile|binary|binaryfile")
     in let key = [KToken(SortKConfigVar, "$" ^ !name)]
     in vars := KMap.add key parsed_val !vars
 

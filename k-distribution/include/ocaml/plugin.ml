@@ -1,5 +1,4 @@
 open Constants
-open Constants.K
 open Prelude
 
 module type Definition =

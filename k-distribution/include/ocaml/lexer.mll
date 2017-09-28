@@ -120,9 +120,9 @@ let rec parse_k_binary_term (module Def: Plugin.Definition) (s: char Stream.t) (
  
 let parse_k_binary (s: char Stream.t) : k = 
   if Stream.npeek 5 s <> ['\x7f'; 'K'; 'A'; 'S'; 'T'] then failwith "Invalid binary KAST" else
-  for i = 1 to 5 do Stream.junk s done;
+  for _ = 1 to 5 do Stream.junk s done;
   if Stream.npeek 3 s <> ['\x04'; '\x00'; '\x01'] && Stream.npeek 3 s <> ['\x04'; '\x00'; '\x00'] then failwith "Unsupported KAST version" else
-  for i = 1 to 3 do Stream.junk s done;
+  for _ = 1 to 3 do Stream.junk s done;
   parse_k_binary_term (Plugin.get ()) s (Stack.create ()) (Dynarray.empty "") (Dynarray.empty [Bottom])
 
 let parse_k_binary_string (s: string) : k =
