@@ -507,6 +507,23 @@ module STRING
 
 endmodule
 
+module STRING-BUFFER-SYNTAX
+  imports BASIC-K
+
+  syntax StringBuffer [hook(BUFFER.StringBuffer)]
+  syntax StringBuffer ::= ".StringBuffer" [function, hook(BUFFER.empty), impure]
+endmodule
+
+module STRING-BUFFER
+  imports STRING-BUFFER-SYNTAX
+  imports STRING-SYNTAX
+
+  syntax StringBuffer ::= StringBuffer "+String" String [function, left, hook(BUFFER.concat)]
+
+  syntax String ::= StringBuffer2String ( StringBuffer ) [function, hook(BUFFER.toString)]
+
+endmodule
+
 module ID-PROGRAM-PARSING
   imports BUILTIN-ID-TOKENS
   syntax Id ::= r"(?<![A-Za-z0-9\\_])[A-Za-z\\_][A-Za-z0-9\\_]*"     [prec(1), notInRules, token, autoReject]

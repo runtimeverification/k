@@ -127,6 +127,7 @@ let print_k_binary (c: k) : string =  let buf = Buffer.create 16 in
   | KItem (InjectedKLabel(klabel)) -> Buffer.add_string buf injectedklabel_code; add_intern as_k; print_string (print_klabel_string klabel); Buffer.add_char buf '\x00'
   | KItem (Bool(b)) -> print_kitem(KItem (KToken(SortBool, string_of_bool(b))), [Bool b])
   | KItem (String(s)) -> print_kitem(KItem (KToken(SortString, "\"" ^ (k_string_escape s) ^ "\"")), [String s])
+  | KItem (StringBuffer(s)) -> print_kitem(KItem (KToken(SortStringBuffer, "\"" ^ (k_string_escape (Buffer.contents s)) ^ "\"")), [StringBuffer s])
   | KItem (Int(i)) -> print_kitem(KItem (KToken(SortInt, Z.to_string(i))), [Int i])
   | KItem (Float(f,e,p)) -> print_kitem(KItem (KToken(SortFloat, precise_float_to_string(f,p,e))), [Float(f,e,p)])
   | KItem (Bottom) -> print_kitem(KApply(Lbl'Hash'Bottom, []), interned_bottom)
@@ -156,6 +157,7 @@ let print_k (c: k) : string = let buf = Buffer.create 16 in
   | KItem (InjectedKLabel(klabel)) -> Buffer.add_string buf "#klabel("; Buffer.add_string buf (print_klabel klabel); Buffer.add_char buf ')'
   | KItem (Bool(b)) -> print_kitem(KItem (KToken(SortBool, string_of_bool(b))))
   | KItem (String(s)) -> print_kitem(KItem (KToken(SortString, "\"" ^ (k_string_escape s) ^ "\"")))
+  | KItem (StringBuffer(s)) -> print_kitem(KItem (KToken(SortStringBuffer, "\"" ^ (k_string_escape (Buffer.contents s)) ^ "\"")))
   | KItem (Int(i)) -> print_kitem(KItem (KToken(SortInt, Z.to_string(i))))
   | KItem (Float(f,e,p)) -> print_kitem(KItem (KToken(SortFloat, precise_float_to_string(f,p,e))))
   | KItem (Bottom) -> print_kitem(KApply(Lbl'Hash'Bottom, []))
@@ -618,6 +620,18 @@ struct
       [Bool b1], [Bool b2] -> [Bool (b1 = b2)]
     | _ -> raise Not_implemented
   let hook_xor = hook_ne
+end
+
+module BUFFER =
+struct
+  let hook_empty c _ _ _ _ = match c with
+      () -> [StringBuffer (Buffer.create 32)]
+  let hook_concat c _ _ _ _ = match c with
+      [StringBuffer buf], [String s] -> Buffer.add_string buf s; [StringBuffer buf]
+    | _ -> raise Not_implemented
+  let hook_toString c _ _ _ _ = match c with
+      [StringBuffer buf] -> [String (Buffer.contents buf)]
+    | _ -> raise Not_implemented
 end
 
 module STRING =
