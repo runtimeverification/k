@@ -724,6 +724,9 @@ struct
   let hook_tmod c _ _ _ _ = match c with
       [Int a], [Int b] -> [Int (Z.rem a b)]
     | _ -> raise Not_implemented
+  let hook_emod c _ _ _ _ = match c with
+      [Int a], [Int b] -> [Int (Z.erem a b)]
+    | _ -> raise Not_implemented
   let hook_add c _ _ _ _ = match c with
       [Int a], [Int b] -> [Int (Z.add a b)]
     | _ -> raise Not_implemented
@@ -747,6 +750,9 @@ struct
     | _ -> raise Not_implemented
   let hook_tdiv c _ _ _ _ = match c with
       [Int a], [Int b] -> [Int (Z.div a b)]
+    | _ -> raise Not_implemented
+  let hook_ediv c _ _ _ _ = match c with
+      [Int a], [Int b] -> [Int (Z.ediv a b)]
     | _ -> raise Not_implemented
   let hook_shl c _ _ _ _ = match c with
       [Int a], [Int b] -> [Int (Z.shift_left a (Z.to_int b))]
@@ -794,8 +800,6 @@ struct
   let hook_srand c _ _ _ _ = match c with
       [Int seed] -> let () = Gmp.Z.randseed Gmp.RNG.default (from_zarith seed) in []
     | _ -> raise Not_implemented
-  let hook_ediv _ _ _ _ _ = raise Not_implemented
-  let hook_emod _ _ _ _ _ = raise Not_implemented
 end
 
 module FLOAT =
