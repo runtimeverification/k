@@ -764,7 +764,7 @@ struct
       [Int a], [Int b] -> [Bool (Z.geq a b)]
     | _ -> raise Not_implemented
   let hook_shr c _ _ _ _ = match c with
-      [Int a], [Int b] -> [Int (Z.shift_right a (Z.to_int b))]
+      [Int a], [Int b] -> [Int (try (Z.shift_right a (Z.to_int b)) with Z.Overflow -> if Z.geq a Z.zero then Z.zero else Z.of_int (-1))]
     | _ -> raise Not_implemented
   let hook_gt c _ _ _ _ = match c with
       [Int a], [Int b] -> [Bool (Z.gt a b)]
