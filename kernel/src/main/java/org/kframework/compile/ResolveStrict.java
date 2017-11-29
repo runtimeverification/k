@@ -6,6 +6,7 @@ import org.kframework.definition.Context;
 import org.kframework.definition.Module;
 import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
+import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kil.Attribute;
 import org.kframework.kompile.KompileOptions;
@@ -84,7 +85,7 @@ public class ResolveStrict {
             }
         }
 
-        Set<Sentence> contexts = new HashSet<>();
+        Set<Sentence> sentences = new HashSet<>();
         for (int i = 0; i < strictnessPositions.size(); i++) {
             List<K> items = new ArrayList<>();
             for (int j = 0; j < arity; j++) {
@@ -112,9 +113,30 @@ public class ResolveStrict {
                 requires = sideCondition.get();
             }
             Context ctx = Context(KApply(production.klabel().get(), KList(items)), requires, production.att());
-            contexts.add(ctx);
+            sentences.add(ctx);
         }
-        return contexts;
+        if (production.att().contains("hybrid")) {
+            List<K> items = new ArrayList<>();
+            for (int j = 0; j < arity; j++) {
+                if (kompileOptions.strict()) {
+                    // Preserve sort information of the production
+                    items.add(cast(production.nonterminal(j).sort(), KVariable("K" + j)));
+                } else {
+                    items.add(KVariable("K" + j));
+                }
+            }
+            K term = KApply(production.klabel().get(), KList(items));
+            Optional<KApply> sideCondition = strictnessPositions.stream().map(j -> KApply(KLabel("isKResult"), KVariable("K" + (j - 1)))).reduce(BooleanUtils::and);
+            K requires;
+            if (!sideCondition.isPresent()) {
+                requires = BooleanUtils.TRUE;
+            } else {
+                requires = sideCondition.get();
+            }
+            Rule hybrid = Rule(KRewrite(KApply(KLabel("isKResult"), term), BooleanUtils.TRUE), requires, BooleanUtils.TRUE);
+            sentences.add(hybrid);
+        }
+        return sentences;
     }
 
     public Module resolve(Module input) {
