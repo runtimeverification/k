@@ -52,7 +52,7 @@ object implementation {
 
     case class ModuleName(str: String) extends i.ModuleName
 
-    case class Sort(str: String) extends i.Sort
+    case class Sort(str: String, params: Seq[i.Sort]) extends i.Sort
 
     case class Name(str: String) extends i.Name
 
@@ -112,7 +112,7 @@ object implementation {
 
     def ModuleName(str: String): i.ModuleName = d.ModuleName(str)
 
-    def Sort(str: String): i.Sort = d.Sort(str)
+    def Sort(str: String, params: Seq[i.Sort]): i.Sort = d.Sort(str, params)
 
     def Name(str: String): i.Name = d.Name(str)
 

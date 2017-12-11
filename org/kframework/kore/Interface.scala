@@ -227,12 +227,27 @@ object ModuleName {
   def unapply(arg: ModuleName): Option[String] = Some(arg.str)
 }
 
+trait Sort
+
+trait SortVariable extends Sort {
+  def name: String
+}
+
+// CompoundSort ::= SortConstructor { SortList }
+trait CompoundSort extends Sort {
+  def constructor: String
+  def params: Seq[Sort]
+}
+
+
 trait Sort {
   def str: String
+
+  def params: Seq[Sort]
 }
 
 object Sort {
-  def unapply(arg: Sort): Option[String] = Some(arg.str)
+  def unapply(arg: Sort): Option[(String, Seq[Sort])] = Some(arg.str, arg.params)
 }
 
 trait Name {
@@ -307,7 +322,7 @@ trait Builders {
 
   def ModuleName(str: String): ModuleName
 
-  def Sort(str: String): Sort
+  def Sort(str: String, params:Seq[Sort]): Sort
 
   def Name(str: String): Name
 
