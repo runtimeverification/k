@@ -29,7 +29,7 @@ class TextToKore(b: Builders) {
     } catch {
       case _: java.io.EOFException => throw ParseError("ERROR: Unexpected end of file while parsing")
       case exc: ParseError => throw exc
-      case exc: Throwable => throw ParseError("ERROR: Unexpected error while parsing: " + exc.toString) // shouldn't be reachable
+      case exc: Throwable => throw ParseError("ERROR: Unexpected error while parsing: " + exc.getMessage) // shouldn't be reachable
     } finally {
       scanner.close()
     }
@@ -73,40 +73,46 @@ class TextToKore(b: Builders) {
   // Sentences = <lookahead>(e) // <empty>
   //           | Sentence Sentences
   // Sentence = import Import
-  //          | syntax Sort SortOrSymbolDeclaration
+  //          | sort Sort Attributes
+  //          | symbol Name ( SortList ) : Sort Attributes
   //          | rule Rule
-  //          | axiom Axiom
-  // SortOrSymbolDeclaration = Attributes
-  //                         | ::= SymbolDeclaration
-  // Sort = Name
+  //          | axiom { SortList } Axiom
   private def parseSentences(sentences: Seq[Sentence]): Seq[Sentence] = {
-    scanner.nextWithSkippingWhitespaces() match {
+    val c1 = scanner.nextWithSkippingWhitespaces()
+    c1 match {
       case 'i' => consume("mport")
         val sen = parseImport()
         parseSentences(sentences :+ sen)
-      case 's' => consume("yntax")
-        val sort = parseSort()
-        scanner.nextWithSkippingWhitespaces() match {
-          case '[' => scanner.putback('[')
+      case 's' =>
+        val c2 = scanner.next()
+        c2 match {
+          case 'o' => consume("rt")
+            val sort = parseSort()
             val att = parseAttributes()
-            val sen = b.SortDeclaration(b.Sort(sort), att)
+            val sen = b.SortDeclaration(sort, att)
             parseSentences(sentences :+ sen)
-          case ':' => consume(":=")
-            val (symbol, args, att) = parseSymbolDeclaration()
-            val sen = b.SymbolDeclaration(b.Sort(sort), b.Symbol(symbol), args, att)
-            parseSentences(sentences :+ sen)
-          case err => throw error("'[' or ':'", err)
         }
-      case 'r' => consume("ule")
-        val sen = parseRule()
-        parseSentences(sentences :+ sen)
       case 'a' => consume("xiom")
         val sen = parseAxiom()
         parseSentences(sentences :+ sen)
       case 'e' => scanner.putback('e') // endmodule
         sentences
-      case err => throw error("import, syntax, rule, axiom, or endmodule", err)
+      case err => throw error("import, sort, symbol, axiom, endmodule", err)
     }
+
+/*      case ('s', 'o') => consume("rt")
+        val sort = parseSort()
+        scanner.nextWithSkippingWhitespaces() match {
+          case '[' => scanner.putback('[')
+            val att = parseAttributes()
+            val sen = b.SortDeclaration(sort, att)
+            parseSentences(sentences :+ sen)
+          case ':' => consume(":=")
+            val (symbol, args, att) = parseSymbolDeclaration()
+            val sen = b.SymbolDeclaration(sort, b.Symbol(symbol), args, att)
+            parseSentences(sentences :+ sen)
+          case err => throw error("'[' or ':'", err)
+        }*/
   }
 
   // SymbolDeclaration = Symbol ( List{Sort, ',', ')'} ) Attributes
@@ -117,7 +123,7 @@ class TextToKore(b: Builders) {
     val args = parseList(() => parseSort(), ',', ')')
     consumeWithLeadingWhitespaces(")")
     val att = parseAttributes()
-    (symbol, args.map(b.Sort), att)
+    (symbol, args, att)
   }
 
   // Import = ModuleName Attributes
@@ -207,7 +213,7 @@ class TextToKore(b: Builders) {
         scanner.nextWithSkippingWhitespaces() match {
           case ':' => // TODO(Daejun): check if symbol is Name
             val sort = parseSort()
-            b.SortedVariable(b.Name(symbol), b.Sort(sort))
+            b.SortedVariable(b.Name(symbol), sort)
           case '(' =>
             scanner.nextWithSkippingWhitespaces() match {
               case '"' => scanner.putback('"')
@@ -229,7 +235,7 @@ class TextToKore(b: Builders) {
     val nameStr = parseName()
     consumeWithLeadingWhitespaces(":")
     val sort = parseSort()
-    b.SortedVariable(b.Name(nameStr), b.Sort(sort))
+    b.SortedVariable(b.Name(nameStr), sort)
   }
 
   //////////////////////////////////////////////////////////
@@ -276,8 +282,14 @@ class TextToKore(b: Builders) {
 
   // TODO(Daejun): double check Sort, Name, Symbol
 
-  // Sort = Name
-  private def parseSort(): String = parseName() // TODO(Daejun): directly alias function name instead of delegation?
+  // Sort = Name { List{Sort, ",", ")"} }
+  private def parseSort(): Sort = {
+    val name = parseName()
+    consumeWithLeadingWhitespaces("{")
+    val params = parseList(() => parseSort(), ',', '}')
+    consumeWithLeadingWhitespaces("}")
+    b.Sort(name, params)
+  }
 
   // Name = Symbol
   private def parseName(): String = parseSymbol()
