@@ -18,7 +18,7 @@ object implementation {
 
     case class Rule(pattern: i.Pattern, att: i.Attributes) extends i.Rule
 
-    case class Axiom(pattern: i.Pattern, att: i.Attributes) extends i.Axiom
+    case class Axiom(params: Seq[i.Sort], pattern: i.Pattern, att: i.Attributes) extends i.Axiom
 
     case class Attributes(patterns: Seq[i.Pattern]) extends i.Attributes
 
@@ -26,7 +26,7 @@ object implementation {
 
     case class DomainValue(symbol: i.Symbol, value: i.Value) extends i.DomainValue
 
-    case class Top() extends i.Top
+    case class Top(sort: i.Sort) extends i.Top
 
     case class Bottom() extends i.Bottom
 
@@ -52,7 +52,9 @@ object implementation {
 
     case class ModuleName(str: String) extends i.ModuleName
 
-    case class Sort(str: String, params: Seq[i.Sort]) extends i.Sort
+    case class SortVariable(name: String) extends i.SortVariable
+
+    case class CompoundSort(ctr: String, params: Seq[i.Sort]) extends i.CompoundSort
 
     case class Name(str: String) extends i.Name
 
@@ -78,7 +80,7 @@ object implementation {
 
     def Rule(_1: i.Pattern, att: i.Attributes): i.Sentence = d.Rule(_1, att)
 
-    def Axiom(_1: i.Pattern, att: i.Attributes): i.Sentence = d.Axiom(_1, att)
+    def Axiom(params: Seq[i.Sort], _1: i.Pattern, att: i.Attributes): i.Sentence = d.Axiom(params, _1, att)
 
     def Attributes(patterns: Seq[Pattern]): i.Attributes = d.Attributes(patterns)
 
@@ -86,7 +88,7 @@ object implementation {
 
     def Application(symbol: i.Symbol, args: Seq[i.Pattern]): i.Pattern = d.Application(symbol, args)
 
-    def Top(): i.Pattern = d.Top()
+    def Top(sort: i.Sort): i.Pattern = d.Top(sort)
 
     def Bottom(): i.Pattern = d.Bottom()
 
@@ -112,7 +114,9 @@ object implementation {
 
     def ModuleName(str: String): i.ModuleName = d.ModuleName(str)
 
-    def Sort(str: String, params: Seq[i.Sort]): i.Sort = d.Sort(str, params)
+    def SortVariable(name: String): i.SortVariable = d.SortVariable(name)
+
+    def CompoundSort(ctr: String, params: Seq[i.Sort]): i.CompoundSort = d.CompoundSort(ctr, params)
 
     def Name(str: String): i.Name = d.Name(str)
 
