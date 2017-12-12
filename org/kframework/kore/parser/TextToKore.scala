@@ -142,9 +142,12 @@ class TextToKore(b: Builders) {
 
   // Axiom = Pattern Attributes
   private def parseAxiom(): Sentence = {
+    consumeWithLeadingWhitespaces("{")
+    val params = parseList(() => parseSort(), ',', '}')
+    consumeWithLeadingWhitespaces("}")
     val pattern = parsePattern()
     val att = parseAttributes()
-    b.Axiom(pattern, att)
+    b.Axiom(params, pattern, att)
   }
 
   // Pattern = Variable
@@ -167,8 +170,14 @@ class TextToKore(b: Builders) {
         val c1 = scanner.next()
         val c2 = scanner.next()
         (c1, c2) match {
-          case ('t', 'o') => consume("p"); consumeWithLeadingWhitespaces("("); consumeWithLeadingWhitespaces(")")
-            b.Top()
+          case ('t', 'o') =>
+            consume("p")
+            consumeWithLeadingWhitespaces("{")
+            val sort = parseSort()
+            consumeWithLeadingWhitespaces("}")
+            consumeWithLeadingWhitespaces("(")
+            consumeWithLeadingWhitespaces(")")
+            b.Top(sort)
           case ('b', 'o') => consume("ttom"); consumeWithLeadingWhitespaces("("); consumeWithLeadingWhitespaces(")")
             b.Bottom()
           case ('a', 'n') => consume("d"); consumeWithLeadingWhitespaces("(")
@@ -280,15 +289,18 @@ class TextToKore(b: Builders) {
     'A' <= c && c <= 'Z'
   }
 
-  // TODO(Daejun): double check Sort, Name, Symbol
-
-  // Sort = Name { List{Sort, ",", ")"} }
+  // Sort = SortVariable | Name { List{Sort, ",", ")"} }
   private def parseSort(): Sort = {
     val name = parseName()
-    consumeWithLeadingWhitespaces("{")
-    val params = parseList(() => parseSort(), ',', '}')
-    consumeWithLeadingWhitespaces("}")
-    b.Sort(name, params)
+    scanner.next() match {
+      case '{' =>
+        val params = parseList(() => parseSort(), ',', '}')
+        consumeWithLeadingWhitespaces("}")
+        b.CompoundSort(name, params)
+      case c =>
+        scanner.putback(c)
+        b.SortVariable(name)
+    }
   }
 
   // Name = Symbol

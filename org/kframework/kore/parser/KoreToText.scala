@@ -27,17 +27,20 @@ object KoreToText {
       "import " + apply(name) + " " + apply(att)
     case SortDeclaration(sort, att) =>
       "sort" + apply(sort) + " " + apply(att)
-    case SymbolDeclaration(sort, Symbol(label), args, att) =>
-      "syntax " + apply(sort) + " ::= " + apply(label) + "(" + args.map(x => apply(x.str)).mkString(",") + ") " + apply(att)
+    // case SymbolDeclaration(sort, Symbol(label), args, att) =>
+    //   "syntax " + apply(sort) + " ::= " + apply(label) + "(" + args.map(x => apply(x.str)).mkString(",") + ") " + apply(att)
     case Rule(pattern, att) =>
       "rule " + apply(pattern) + " " + apply(att)
-    case Axiom(pattern, att) =>
-      "axiom " + apply(pattern) + " " + apply(att)
+    case Axiom(params, pattern, att) =>
+      "axiom " + "{" + params.map(s => apply(s)).mkString(",") + "}" + apply(pattern) + " " + apply(att)
   }
 
   /** Returns a string from [[kore.Sort]]. */
   def apply(sort: Sort): String = {
-    apply(sort.str) + "{" + sort.params.map(s => apply(s)).mkString(",") + "}"
+    sort match {
+      case SortVariable(name) => apply(name)
+      case CompoundSort(ctr, params) => apply(ctr) + "{" + params.map(s => apply(s)).mkString(",") + "}"
+    }
   }
 
   /** Returns a string from [[kore.Pattern]]. */
@@ -45,7 +48,7 @@ object KoreToText {
     case SortedVariable(Name(name), sort) => apply(name) + ":" + apply(sort)
     case Application(Symbol(label), args) => apply(label) + "(" + args.map(apply).mkString(",") + ")"
     case DomainValue(Symbol(label), value) => apply(label) + "(\"" + StringEscapeUtils.escapeJava(value.str) + "\")"
-    case Top() => "\\top()"
+    case Top(s) => "\\top" + "{" + apply(s) + "}" + "()"
     case Bottom() => "\\bottom()"
     case And(p, q) => "\\and(" + apply(p) + "," + apply(q) + ")"
     case Or(p, q) => "\\or(" + apply(p) + "," + apply(q) + ")"

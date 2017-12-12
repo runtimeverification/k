@@ -70,13 +70,15 @@ object Rule {
 }
 
 trait Axiom extends Sentence {
+  def params: Seq[Sort]
+
   def pattern: Pattern
 
   def att: Attributes
 }
 
 object Axiom {
-  def unapply(arg: Axiom): Option[(Pattern, Attributes)] = Some(arg.pattern, arg.att)
+  def unapply(arg: Axiom): Option[(Seq[Sort], Pattern, Attributes)] = Some(arg.params, arg.pattern, arg.att)
 }
 
 trait Attributes {
@@ -111,10 +113,12 @@ object DomainValue {
   def unapply(arg: DomainValue): Option[(Symbol, Value)] = Some(arg.symbol, arg.value)
 }
 
-trait Top extends Pattern
+trait Top extends Pattern {
+  def sort: Sort
+}
 
 object Top {
-  def unapply(arg: Top): Boolean = true
+  def unapply(arg: Top): Option[Sort] = Some(arg.sort)
 }
 
 trait Bottom extends Pattern
@@ -233,21 +237,18 @@ trait SortVariable extends Sort {
   def name: String
 }
 
+object SortVariable {
+  def unapply(arg: SortVariable): Option[String] = Some(arg.name)
+}
+
 // CompoundSort ::= SortConstructor { SortList }
 trait CompoundSort extends Sort {
-  def constructor: String
+  def ctr: String
   def params: Seq[Sort]
 }
 
-
-trait Sort {
-  def str: String
-
-  def params: Seq[Sort]
-}
-
-object Sort {
-  def unapply(arg: Sort): Option[(String, Seq[Sort])] = Some(arg.str, arg.params)
+object CompoundSort {
+  def unapply(arg: CompoundSort): Option[(String, Seq[Sort])] = Some(arg.ctr, arg.params)
 }
 
 trait Name {
@@ -288,7 +289,7 @@ trait Builders {
 
   def Rule(pattern: Pattern, att: Attributes): Sentence
 
-  def Axiom(pattern: Pattern, att: Attributes): Sentence
+  def Axiom(params: Seq[Sort], pattern: Pattern, att: Attributes): Sentence
 
   def Attributes(att: Seq[Pattern]): Attributes
 
@@ -296,7 +297,7 @@ trait Builders {
 
   def DomainValue(symbol: Symbol, value: Value): Pattern
 
-  def Top(): Pattern
+  def Top(sort: Sort): Pattern
 
   def Bottom(): Pattern
 
@@ -322,7 +323,9 @@ trait Builders {
 
   def ModuleName(str: String): ModuleName
 
-  def Sort(str: String, params:Seq[Sort]): Sort
+  def SortVariable(name: String): SortVariable
+
+  def CompoundSort(ctr: String, params: Seq[Sort]): CompoundSort
 
   def Name(str: String): Name
 
