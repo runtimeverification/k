@@ -37,7 +37,7 @@ object Import {
 */
 
 trait SortDeclaration extends Sentence {
-  def params: Seq[Sort]
+  def params: Seq[SortVariable]
 
   def sort: Sort
 
@@ -45,12 +45,26 @@ trait SortDeclaration extends Sentence {
 }
 
 object SortDeclaration {
-  def unapply(arg: SortDeclaration): Option[(Seq[Sort], Sort, Attributes)]
+  def unapply(arg: SortDeclaration): Option[(Seq[SortVariable], Sort, Attributes)]
   = Some(arg.params, arg.sort, arg.att)
 }
 
 trait SymbolDeclaration extends Sentence {
   def symbol: Symbol
+
+  def argSorts: Seq[Sort]
+
+  def returnSort: Sort
+
+  def att: Attributes
+}
+
+object AliasDeclaration {
+  def unapply(arg: AliasDeclaration): Option[(Alias, Seq[Sort], Sort, Attributes)]
+  = Some(arg.alias, arg.argSorts, arg.returnSort, arg.att)
+}
+trait AliasDeclaration extends Sentence {
+  def alias: Alias
 
   def argSorts: Seq[Sort]
 
@@ -77,7 +91,7 @@ object Rule {
 */
 
 trait AxiomDeclaration extends Sentence {
-  def params: Seq[Sort]
+  def params(): Seq[SortVariable]
 
   def pattern: Pattern
 
@@ -85,7 +99,7 @@ trait AxiomDeclaration extends Sentence {
 }
 
 object AxiomDeclaration {
-  def unapply(arg: AxiomDeclaration): Option[(Seq[Sort], Pattern, Attributes)]
+  def unapply(arg: AxiomDeclaration): Option[(Seq[SortVariable], Pattern, Attributes)]
   = Some(arg.params, arg.pattern, arg.att)
 }
 
@@ -205,6 +219,7 @@ object Exists {
   def unapply(arg: Exists): Option[(Sort, Variable, Pattern)] = Some(arg.s, arg.v, arg.p)
 }
 
+// TODO(xiaohong): change to Forall
 trait ForAll extends Pattern {
   def s: Sort
 
@@ -250,6 +265,15 @@ trait Equals extends Pattern {
 object Equals {
   def unapply(arg: Equals): Option[(Sort, Sort, Pattern, Pattern)]
   = Some(arg.s1, arg.s2, arg._1, arg._2)
+}
+
+// String literals <string> are considered as meta-level patterns of sort #String
+trait StringLiteral extends Pattern {
+  def str: String
+}
+
+object StringLiteral {
+  def unapply(arg: StringLiteral): Option[String] = Some(arg.str)
 }
 
 /* for now all variables are sorted variables.
@@ -309,6 +333,17 @@ trait Symbol {
   def params: Seq[Sort]
 }
 
+/* An alias is something that "syntactically" behaves as symbols but "semantically" not symbols. */
+object Alias {
+  def unapply(arg: Alias): Option[(String, Seq[Sort])]
+  = Some(arg.ctr, (arg.params))
+}
+trait Alias {
+  def ctr: String
+
+  def params: Seq[Sort]
+}
+
 object Symbol {
   def unapply(arg: Symbol): Option[(String, Seq[Sort])]
   = Some(arg.ctr, (arg.params))
@@ -343,7 +378,7 @@ trait Builders {
 
   // def Import(name: ModuleName, att: Attributes): Sentence
 
-  def SortDeclaration(params: Seq[Sort],
+  def SortDeclaration(params: Seq[SortVariable],
                       sort: Sort,
                       att: Attributes): Sentence
 
@@ -352,15 +387,19 @@ trait Builders {
                         returnSort: Sort,
                         att: Attributes): Sentence
 
+  def AliasDeclaration(alias: Alias,
+                       argSorts: Seq[Sort],
+                       returnSort: Sort,
+                       att: Attributes): Sentence
   // def Rule(pattern: Pattern, att: Attributes): Sentence
 
-  def AxiomDeclaration(params: Seq[Sort],
+  def AxiomDeclaration(params: Seq[SortVariable],
                        pattern: Pattern,
                        att: Attributes): Sentence
 
   def Attributes(att: Seq[Pattern]): Attributes
 
-  def Variable(name: String, sort: Sort): Pattern
+  def Variable(name: String, sort: Sort): Variable
 
   def Application(symbol: Symbol, args: Seq[Pattern]): Pattern
 
@@ -388,6 +427,8 @@ trait Builders {
 
   // def Rewrite(_1: Pattern, _2: Pattern): Pattern
 
+  def StringLiteral(str: String): Pattern
+
   def ModuleName(str: String): ModuleName
 
   def SortVariable(name: String): SortVariable
@@ -397,6 +438,8 @@ trait Builders {
   // def Name(str: String): Name
 
   def Symbol(str: String, params: Seq[Sort]): Symbol
+
+  def Alias(str: String, params: Seq[Sort]): Alias
 
   // def Value(str: String): Value
 

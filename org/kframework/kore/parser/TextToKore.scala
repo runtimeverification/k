@@ -72,179 +72,230 @@ class TextToKore(b: Builders) {
 
   // Sentences = <lookahead>(e) // <empty>
   //           | Sentence Sentences
-  // Sentence = import Import
-  //          | sort Sort Attributes
-  //          | symbol Name ( SortList ) : Sort Attributes
-  //          | rule Rule
-  //          | axiom { SortList } Axiom
+  // Sentence = sort { SortVariableList } Sort Attributes
+  //          | symbol Symbol ( SortList ) : Sort Attributes
+  //          | axiom { SortVariableList } Axiom
   private def parseSentences(sentences: Seq[Sentence]): Seq[Sentence] = {
     val c1 = scanner.nextWithSkippingWhitespaces()
     c1 match {
-      case 'i' => consume("mport")
-        val sen = parseImport()
-        parseSentences(sentences :+ sen)
-      case 's' =>
+      // case 'i' => consume("mport")
+      //   val sen = parseImport()
+      //   parseSentences(sentences :+ sen)
+      case 's' => // sort or symbol declaration
         val c2 = scanner.next()
         c2 match {
-          case 'o' => consume("rt")
+          case 'o' => // sort declaration
+            consume("rt")
+            consumeWithLeadingWhitespaces("{")
+            val params = parseList(() => parseSortVariable(), ',', '}')
+            consumeWithLeadingWhitespaces("}")
             val sort = parseSort()
             val att = parseAttributes()
-            val sen = b.SortDeclaration(sort, att)
+            val sen = b.SortDeclaration(params, sort, att)
+            parseSentences(sentences :+ sen)
+          case 'y' => // symbol declaration
+            consume("mbol")
+            val symbol = parseSymbol()
+            consumeWithLeadingWhitespaces("(")
+            val argSorts = parseList(() => parseSort(), ',', ')')
+            consumeWithLeadingWhitespaces(")")
+            consumeWithLeadingWhitespaces(":")
+            val returnSort = parseSort()
+            val att = parseAttributes()
+            val sen = b.SymbolDeclaration(symbol, argSorts, returnSort, att)
             parseSentences(sentences :+ sen)
         }
-      case 'a' => consume("xiom")
-        val sen = parseAxiom()
-        parseSentences(sentences :+ sen)
-      case 'e' => scanner.putback('e') // endmodule
-        sentences
-      case err => throw error("import, sort, symbol, axiom, endmodule", err)
-    }
-
-/*      case ('s', 'o') => consume("rt")
-        val sort = parseSort()
-        scanner.nextWithSkippingWhitespaces() match {
-          case '[' => scanner.putback('[')
+      case 'a' => // axiom or alias declaration, for now just consider axioms
+        val c2 = scanner.next()
+        c2 match {
+          case 'x' => // axiom
+            consume("iom")
+            consumeWithLeadingWhitespaces("{")
+            val params = parseList(() => parseSortVariable(), ',', '}')
+            consumeWithLeadingWhitespaces("}")
+            val pattern = parsePattern()
             val att = parseAttributes()
-            val sen = b.SortDeclaration(sort, att)
+            val sen = b.AxiomDeclaration(params, pattern, att)
             parseSentences(sentences :+ sen)
-          case ':' => consume(":=")
-            val (symbol, args, att) = parseSymbolDeclaration()
-            val sen = b.SymbolDeclaration(sort, b.Symbol(symbol), args, att)
+          case 'l' => // alias
+            consume("ias")
+            val alias = parseAlias()
+            consumeWithLeadingWhitespaces("(")
+            val argSorts = parseList(() => parseSort(), ',', ')')
+            consumeWithLeadingWhitespaces(")")
+            consumeWithLeadingWhitespaces(":")
+            val returnSort = parseSort()
+            val att = parseAttributes()
+            val sen = b.AliasDeclaration(alias, argSorts, returnSort, att)
             parseSentences(sentences :+ sen)
-          case err => throw error("'[' or ':'", err)
-        }*/
+        }
+      case 'e' => // endmodule
+        scanner.putback('e')
+        sentences
+      case err =>
+        throw error("sort, symbol, axiom, endmodule", err)
+    }
   }
 
-  // SymbolDeclaration = Symbol ( List{Sort, ',', ')'} ) Attributes
-  // Sort = Name
-  private def parseSymbolDeclaration(): Tuple3[String, Seq[Sort], Attributes] = {
-    val symbol = parseSymbol()
-    consumeWithLeadingWhitespaces("(")
-    val args = parseList(() => parseSort(), ',', ')')
-    consumeWithLeadingWhitespaces(")")
-    val att = parseAttributes()
-    (symbol, args, att)
-  }
 
   // Import = ModuleName Attributes
-  private def parseImport(): Sentence = {
-    val name = parseModuleName()
-    val att = parseAttributes()
-    b.Import(b.ModuleName(name), att)
-  }
+  // private def parseImport(): Sentence = {
+  //   val name = parseModuleName()
+  //   val att = parseAttributes()
+  //   b.Import(b.ModuleName(name), att)
+  // }
 
   // Rule = Pattern Attributes
-  private def parseRule(): Sentence = {
-    val pattern = parsePattern()
-    val att = parseAttributes()
-    b.Rule(pattern, att)
-  }
+  // private def parseRule(): Sentence = {
+  //   val pattern = parsePattern()
+  //   val att = parseAttributes()
+  //   b.Rule(pattern, att)
+  // }
 
-  // Axiom = Pattern Attributes
-  private def parseAxiom(): Sentence = {
-    consumeWithLeadingWhitespaces("{")
-    val params = parseList(() => parseSort(), ',', '}')
-    consumeWithLeadingWhitespaces("}")
-    val pattern = parsePattern()
-    val att = parseAttributes()
-    b.Axiom(params, pattern, att)
-  }
 
   // Pattern = Variable
   //         | Symbol ( List{Pattern, ',', ')'} )
-  //         | Symbol ( String )
-  //         | \true ( )
-  //         | \false ( )
-  //         | \and ( Pattern , Pattern )
-  //         | \or ( Pattern , Pattern )
-  //         | \not ( Pattern )
-  //         | \implies ( Pattern , Pattern )
-  //         | \exists ( Variable , Pattern )
-  //         | \forall ( Variable , Pattern )
-  //         | \next ( Pattern )
-  //         | \rewrite ( Pattern , Pattern )
-  //         | \equal ( Pattern , Pattern )
+  //         | \top { Sort } ( )
+  //         | \bottom { Sort } ( )
+  //         | \and  { Sort } ( Pattern , Pattern )
+  //         | \or  { Sort } ( Pattern , Pattern )
+  //         | \not  { Sort } ( Pattern )
+  //         | \implies  { Sort } ( Pattern , Pattern )
+  //         | \exists  { Sort } ( Variable , Pattern )
+  //         | \forall  { Sort } ( Variable , Pattern )
+  //         | \equal  { Sort , Sort } ( Pattern , Pattern )
   private def parsePattern(): Pattern = {
     scanner.nextWithSkippingWhitespaces() match {
-      case '\\' =>
+      case '\\' => // logic connectives
         val c1 = scanner.next()
         val c2 = scanner.next()
         (c1, c2) match {
           case ('t', 'o') =>
             consume("p")
             consumeWithLeadingWhitespaces("{")
-            val sort = parseSort()
+            val s = parseSort()
             consumeWithLeadingWhitespaces("}")
             consumeWithLeadingWhitespaces("(")
             consumeWithLeadingWhitespaces(")")
-            b.Top(sort)
-          case ('b', 'o') => consume("ttom"); consumeWithLeadingWhitespaces("("); consumeWithLeadingWhitespaces(")")
-            b.Bottom()
-          case ('a', 'n') => consume("d"); consumeWithLeadingWhitespaces("(")
-            val p1 = parsePattern(); consumeWithLeadingWhitespaces(",")
-            val p2 = parsePattern(); consumeWithLeadingWhitespaces(")")
-            b.And(p1, p2)
-          case ('o', 'r') => consumeWithLeadingWhitespaces("(")
-            val p1 = parsePattern(); consumeWithLeadingWhitespaces(",")
-            val p2 = parsePattern(); consumeWithLeadingWhitespaces(")")
-            b.Or(p1, p2)
-          case ('n', 'o') => consume("t"); consumeWithLeadingWhitespaces("(")
-            val p = parsePattern(); consumeWithLeadingWhitespaces(")")
-            b.Not(p)
-          case ('i', 'm') => consume("plies"); consumeWithLeadingWhitespaces("(")
-            val p1 = parsePattern(); consumeWithLeadingWhitespaces(",")
-            val p2 = parsePattern(); consumeWithLeadingWhitespaces(")")
-            b.Implies(p1, p2)
-          case ('e', 'x') => consume("ists"); consumeWithLeadingWhitespaces("(")
-            val v = parseVariable(); consumeWithLeadingWhitespaces(",")
-            val p = parsePattern(); consumeWithLeadingWhitespaces(")")
-            b.Exists(v, p)
-          case ('f', 'o') => consume("rall"); consumeWithLeadingWhitespaces("(")
-            val v = parseVariable(); consumeWithLeadingWhitespaces(",")
-            val p = parsePattern(); consumeWithLeadingWhitespaces(")")
-            b.ForAll(v, p)
-          case ('n', 'e') => consume("xt"); consumeWithLeadingWhitespaces("(")
-            val p = parsePattern(); consumeWithLeadingWhitespaces(")")
-            b.Next(p)
-          case ('r', 'e') => consume("write"); consumeWithLeadingWhitespaces("(")
-            val p1 = parsePattern(); consumeWithLeadingWhitespaces(",")
-            val p2 = parsePattern(); consumeWithLeadingWhitespaces(")")
-            b.Rewrite(p1, p2)
-          case ('e', 'q') => consume("uals"); consumeWithLeadingWhitespaces("(")
-            val p1 = parsePattern(); consumeWithLeadingWhitespaces(",")
-            val p2 = parsePattern(); consumeWithLeadingWhitespaces(")")
-            b.Equals(p1, p2)
-          case (err1, err2) => throw error("\\top, \\bottom, \\and, \\or, \\not, \\implies, \\exists, \\forall, \\next, \\rewrite, or \\equals",
-                                           "'\\" + err1 + err2 + "'")
+            b.Top(s)
+          case ('b', 'o') =>
+            consume("ttom")
+            consumeWithLeadingWhitespaces("{")
+            val s = parseSort()
+            consumeWithLeadingWhitespaces("}")
+            consumeWithLeadingWhitespaces("(")
+            consumeWithLeadingWhitespaces(")")
+            b.Bottom(s)
+          case ('a', 'n') =>
+            consume("d")
+            consumeWithLeadingWhitespaces("{")
+            val s = parseSort()
+            consumeWithLeadingWhitespaces("}")
+            consumeWithLeadingWhitespaces("(")
+            val p1 = parsePattern()
+            consumeWithLeadingWhitespaces(",")
+            val p2 = parsePattern()
+            consumeWithLeadingWhitespaces(")")
+            b.And(s, p1, p2)
+           case ('o', 'r') =>
+            consumeWithLeadingWhitespaces("{")
+            val s = parseSort()
+            consumeWithLeadingWhitespaces("}")
+            consumeWithLeadingWhitespaces("(")
+            val p1 = parsePattern()
+            consumeWithLeadingWhitespaces(",")
+            val p2 = parsePattern()
+            consumeWithLeadingWhitespaces(")")
+            b.Or(s, p1, p2)
+           case ('n', 'o') =>
+            consume("t")
+            consumeWithLeadingWhitespaces("{")
+            val s = parseSort()
+            consumeWithLeadingWhitespaces("}")
+            consumeWithLeadingWhitespaces("(")
+            val p = parsePattern()
+            consumeWithLeadingWhitespaces(")")
+            b.Not(s, p)
+          case ('i', 'm') =>
+            consume("plies")
+            consumeWithLeadingWhitespaces("{")
+            val s = parseSort()
+            consumeWithLeadingWhitespaces("}")
+            consumeWithLeadingWhitespaces("(")
+            val p1 = parsePattern()
+            consumeWithLeadingWhitespaces(",")
+            val p2 = parsePattern()
+            consumeWithLeadingWhitespaces(")")
+            b.Implies(s, p1, p2)
+          case ('e', 'x') =>
+            consume("ists")
+            consumeWithLeadingWhitespaces("{")
+            val s = parseSort()
+            consumeWithLeadingWhitespaces("}")
+            consumeWithLeadingWhitespaces("(")
+            val v = parseVariable()
+            consumeWithLeadingWhitespaces(",")
+            val p = parsePattern()
+            consumeWithLeadingWhitespaces(")")
+            b.Exists(s, v, p)
+          case ('f', 'o') =>
+            consume("rall")
+            consumeWithLeadingWhitespaces("{")
+            val s = parseSort()
+            consumeWithLeadingWhitespaces("}")
+            consumeWithLeadingWhitespaces("(")
+            val v = parseVariable()
+            consumeWithLeadingWhitespaces(",")
+            val p = parsePattern()
+            consumeWithLeadingWhitespaces(")")
+            b.ForAll(s, v, p)
+          case ('e', 'q') =>
+            consume("uals")
+            consumeWithLeadingWhitespaces("{")
+            val s1 = parseSort()
+            consumeWithLeadingWhitespaces(",")
+            val s2 = parseSort()
+            consumeWithLeadingWhitespaces("}")
+            consumeWithLeadingWhitespaces("(")
+            val p1 = parsePattern()
+            consumeWithLeadingWhitespaces(",")
+            val p2 = parsePattern()
+            consumeWithLeadingWhitespaces(")")
+            b.Equals(s1, s2, p1, p2)
+          case (err1, err2) =>
+            throw error("\\top, \\bottom, \\and, \\or, \\not, \\implies, \\exists, \\forall, \\equals",
+              "'\\" + err1 + err2 + "'")
         }
-      case c => scanner.putback(c)
-        val symbol = parseSymbol() // or parseName()
+      case '"' =>
+        scanner.putback('"')
+        val str = parseString()
+        b.StringLiteral(str)
+      case c => scanner.putback(c) // either a variable or a symbol application or alias application
+        val id = parseId()
         scanner.nextWithSkippingWhitespaces() match {
-          case ':' => // TODO(Daejun): check if symbol is Name
+          case ':' => // variable
+            // TODO(Daejun): check if symbol is Name
             val sort = parseSort()
-            b.SortedVariable(b.Name(symbol), sort)
-          case '(' =>
-            scanner.nextWithSkippingWhitespaces() match {
-              case '"' => scanner.putback('"')
-                val value = parseString()
-                consumeWithLeadingWhitespaces(")")
-                b.DomainValue(b.Symbol(symbol), b.Value(value))
-              case c => scanner.putback(c)
-                val args = parseList(() => parsePattern(), ',', ')')
-                consumeWithLeadingWhitespaces(")")
-                b.Application(b.Symbol(symbol), args)
-            }
-          case err => throw error("':' or '('", err)
+            b.Variable(id, sort)
+          case '{' => // application: symbol or alias
+            val params = parseList(() => parseSort(), ',', '}')
+            consumeWithLeadingWhitespaces("}")
+            consumeWithLeadingWhitespaces("(")
+            val args = parseList(() => parsePattern(), ',', ')')
+            consumeWithLeadingWhitespaces(")")
+            b.Application(b.Symbol(id, params), args)
+          case err =>
+            throw error("':' or '('", err)
         }
     }
   }
 
   // Variable = Name : Sort
   private def parseVariable(): Variable = {
-    val nameStr = parseName()
+    val name = parseId()
     consumeWithLeadingWhitespaces(":")
     val sort = parseSort()
-    b.SortedVariable(b.Name(nameStr), sort)
+    b.Variable(name, sort)
   }
 
   //////////////////////////////////////////////////////////
@@ -291,7 +342,7 @@ class TextToKore(b: Builders) {
 
   // Sort = SortVariable | Name { List{Sort, ",", ")"} }
   private def parseSort(): Sort = {
-    val name = parseName()
+    val name = parseId()
     scanner.next() match {
       case '{' =>
         val params = parseList(() => parseSort(), ',', '}')
@@ -303,35 +354,28 @@ class TextToKore(b: Builders) {
     }
   }
 
-  // Name = Symbol
-  private def parseName(): String = parseSymbol()
+  private def parseSortVariable() : SortVariable = {
+    val name = parseId()
+    b.SortVariable(name)
+  }
 
-//  // Name = [A-Z][a-zA-Z@-]*  // for Sort or VariableName
-//  //      | EscapedSymbol
-//  def parseName(): String = {
-//    def loop(s: StringBuilder): String = {
-//      scanner.next() match {
-//        case c if ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || c == '@' || c == '-' =>
-//          s += c; loop(s)
-//        case c => scanner.putback(c)
-//          s.toString()
-//      }
-//    }
-//    scanner.nextWithSkippingWhitespaces() match {
-//      case '`' => scanner.putback('`')
-//        parseEscapedSymbol()
-//      case c if isNameStart(c) =>
-//        loop(new StringBuilder(c.toString))
-//      case err => throw error("<Name>", err)
-//    }
-//  }
-//  def isNameStart(c: Char): Boolean = {
-//    'A' <= c && c <= 'Z'
-//  }
+  private def parseSymbol(): Symbol = {
+    val ctr= parseId()
+    consumeWithLeadingWhitespaces("{")
+    val params = parseList(() => parseSort(), ',', '}')
+    consumeWithLeadingWhitespaces("}")
+    b.Symbol(ctr, params)
+  }
 
-  // Symbol = SymbolChar+
-  //        | EscapedSymbol
-  private def parseSymbol(): String = {
+  private def parseAlias(): Alias = {
+    val ctr= parseId()
+    consumeWithLeadingWhitespaces("{")
+    val params = parseList(() => parseSort(), ',', '}')
+    consumeWithLeadingWhitespaces("}")
+    b.Alias(ctr, params)
+  }
+
+  private def parseId(): String = {
     def loop(s: StringBuilder): String = {
       scanner.next() match {
         case c if isSymbolChar(c) =>

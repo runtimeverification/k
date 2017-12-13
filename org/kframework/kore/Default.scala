@@ -12,7 +12,7 @@ object implementation {
 
     // case class Import(name: i.ModuleName, att: i.Attributes) extends i.Import
 
-    case class SortDeclaration(params: Seq[i.Sort],
+    case class SortDeclaration(params: Seq[i.SortVariable],
                                sort: i.Sort,
                                att: i.Attributes) extends i.SortDeclaration
 
@@ -21,9 +21,14 @@ object implementation {
                                  returnSort: i.Sort,
                                  att: i.Attributes) extends i.SymbolDeclaration
 
+    case class AliasDeclaration(alias: i.Alias,
+                                argSorts: Seq[i.Sort],
+                                returnSort: i.Sort,
+                                att: i.Attributes) extends i.AliasDeclaration
+
     // case class Rule(pattern: i.Pattern, att: i.Attributes) extends i.Rule
 
-    case class AxiomDeclaration(params: Seq[i.Sort],
+    case class AxiomDeclaration(params: Seq[i.SortVariable],
                                 pattern: i.Pattern,
                                 att: i.Attributes) extends i.AxiomDeclaration
 
@@ -60,6 +65,8 @@ object implementation {
                       _1: i.Pattern,
                       _2: i.Pattern) extends i.Equals
 
+    case class StringLiteral(str: String) extends i.StringLiteral
+
     case class ModuleName(str: String) extends i.ModuleName
 
     case class SortVariable(name: String) extends i.SortVariable
@@ -69,6 +76,9 @@ object implementation {
 
     case class Symbol(ctr: String,
                       params: Seq[i.Sort]) extends i.Symbol
+
+    case class Alias(ctr: String,
+                     params: Seq[i.Sort]) extends i.Alias
 
     // case class Value(str: String) extends i.Value
 
@@ -84,7 +94,7 @@ object implementation {
 
     // def Import(name: i.ModuleName, att: i.Attributes): i.Sentence = d.Import(name, att)
 
-    def SortDeclaration(params: Seq[i.Sort], sort: i.Sort, att: i.Attributes): i.Sentence
+    def SortDeclaration(params: Seq[i.SortVariable], sort: i.Sort, att: i.Attributes): i.Sentence
     = d.SortDeclaration(params, sort, att)
 
     def SymbolDeclaration(symbol: i.Symbol,
@@ -93,9 +103,15 @@ object implementation {
                           att: i.Attributes): i.Sentence
     = d.SymbolDeclaration(symbol, argSorts, returnSort, att)
 
+    def AliasDeclaration(alias: i.Alias,
+                         argSorts: Seq[i.Sort],
+                         returnSort: i.Sort,
+                         att: i.Attributes): i.Sentence
+    = d.AliasDeclaration(alias, argSorts, returnSort, att)
+
     // def Rule(_1: i.Pattern, att: i.Attributes): i.Sentence = d.Rule(_1, att)
 
-    def AxiomDeclaration(params: Seq[i.Sort],
+    def AxiomDeclaration(params: Seq[i.SortVariable],
                          _1: i.Pattern,
                          att: i.Attributes): i.Sentence
     = d.AxiomDeclaration(params, _1, att)
@@ -131,6 +147,8 @@ object implementation {
     def Equals(s1: i.Sort, s2: i.Sort, _1: i.Pattern, _2: i.Pattern): i.Pattern
     = d.Equals(s1, s2, _1, _2)
 
+    def StringLiteral(str: String): i.Pattern = d.StringLiteral(str)
+
     def ModuleName(str: String): i.ModuleName = d.ModuleName(str)
 
     def SortVariable(name: String): i.SortVariable = d.SortVariable(name)
@@ -138,6 +156,8 @@ object implementation {
     def CompoundSort(ctr: String, params: Seq[i.Sort]): i.CompoundSort = d.CompoundSort(ctr, params)
 
     def Symbol(ctr: String, params: Seq[i.Sort]): i.Symbol = d.Symbol(ctr, params)
+
+    def Alias(ctr: String, params: Seq[i.Sort]): i.Alias = d.Alias(ctr, params)
 
     // def Value(str: String): i.Value = d.Value(str)
   }
