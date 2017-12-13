@@ -298,6 +298,22 @@ object CompoundSort {
   def unapply(arg: CompoundSort): Option[(String, Seq[Sort])] = Some(arg.ctr, arg.params)
 }
 
+/* A symbol is of the form C{s1,...,sn} where C is called a symbol constructor and
+ * s1,...,sn are sort parameters.
+ * For example:
+ * zero{}, nil{S}, nil{Nat{}}, plus{}, cons{S}, cons{Nat{}} are symbols
+ */
+trait Symbol {
+  def ctr: String
+
+  def params: Seq[Sort]
+}
+
+object Symbol {
+  def unapply(arg: Symbol): Option[(String, Seq[Sort])]
+  = Some(arg.ctr, (arg.params))
+}
+
 /*
 trait Name {
   def str: String
@@ -307,13 +323,6 @@ object Name {
   def unapply(arg: Name): Option[String] = Some(arg.str)
 }
 
-trait Symbol {
-  def str: String
-}
-
-object Symbol {
-  def unapply(arg: Symbol): Option[String] = Some(arg.str)
-}
 */
 
 /*
@@ -332,45 +341,52 @@ trait Builders {
 
   def Module(name: ModuleName, sentences: Seq[Sentence], att: Attributes): Module
 
-  def Import(name: ModuleName, att: Attributes): Sentence
+  // def Import(name: ModuleName, att: Attributes): Sentence
 
-  def SortDeclaration(sort: Sort, att: Attributes): Sentence
+  def SortDeclaration(params: Seq[Sort],
+                      sort: Sort,
+                      att: Attributes): Sentence
 
-  def SymbolDeclaration(sort: Sort, symbol: Symbol, args: Seq[Sort], att: Attributes): Sentence
+  def SymbolDeclaration(symbol: Symbol,
+                        argSorts: Seq[Sort],
+                        returnSort: Sort,
+                        att: Attributes): Sentence
 
-  def Rule(pattern: Pattern, att: Attributes): Sentence
+  // def Rule(pattern: Pattern, att: Attributes): Sentence
 
-  def Axiom(params: Seq[Sort], pattern: Pattern, att: Attributes): Sentence
+  def AxiomDeclaration(params: Seq[Sort],
+                       pattern: Pattern,
+                       att: Attributes): Sentence
 
   def Attributes(att: Seq[Pattern]): Attributes
 
-  def Application(_1: Symbol, args: Seq[Pattern]): Pattern
+  def Variable(name: String, sort: Sort): Pattern
 
-  def DomainValue(symbol: Symbol, value: Value): Pattern
+  def Application(symbol: Symbol, args: Seq[Pattern]): Pattern
 
-  def Top(sort: Sort): Pattern
+  // def DomainValue(symbol: Symbol, value: Value): Pattern
 
-  def Bottom(): Pattern
+  def Top(s: Sort): Pattern
 
-  def And(_1: Pattern, _2: Pattern): Pattern
+  def Bottom(s: Sort): Pattern
 
-  def Or(_1: Pattern, _2: Pattern): Pattern
+  def And(s: Sort, _1: Pattern, _2: Pattern): Pattern
 
-  def Not(_1: Pattern): Pattern
+  def Or(s: Sort, _1: Pattern, _2: Pattern): Pattern
 
-  def Implies(_1: Pattern, _2: Pattern): Pattern
+  def Not(s: Sort, _1: Pattern): Pattern
 
-  def Exists(v: Variable, p: Pattern): Pattern
+  def Implies(s: Sort, _1: Pattern, _2: Pattern): Pattern
 
-  def ForAll(v: Variable, p: Pattern): Pattern
+  def Exists(s:Sort, v: Variable, p: Pattern): Pattern
 
-  def Next(_1: Pattern): Pattern
+  def ForAll(s: Sort, v: Variable, p: Pattern): Pattern
 
-  def Equals(_1: Pattern, _2: Pattern): Pattern
+  // def Next(_1: Pattern): Pattern
 
-  def Rewrite(_1: Pattern, _2: Pattern): Pattern
+  def Equals(s1: Sort, s2:Sort, _1: Pattern, _2: Pattern): Pattern
 
-  def SortedVariable(name: Name, sort: Sort): Variable
+  // def Rewrite(_1: Pattern, _2: Pattern): Pattern
 
   def ModuleName(str: String): ModuleName
 
@@ -378,10 +394,10 @@ trait Builders {
 
   def CompoundSort(ctr: String, params: Seq[Sort]): CompoundSort
 
-  def Name(str: String): Name
+  // def Name(str: String): Name
 
-  def Symbol(str: String): Symbol
+  def Symbol(str: String, params: Seq[Sort]): Symbol
 
-  def Value(str: String): Value
+  // def Value(str: String): Value
 
 }

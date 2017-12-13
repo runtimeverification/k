@@ -23,14 +23,14 @@ object KoreToText {
 
   /** Returns a string from [[kore.Sentence]]. */
   def apply(s: Sentence): String = s match {
-    case Import(ModuleName(name), att) =>
-      "import " + apply(name) + " " + apply(att)
+    //case Import(ModuleName(name), att) =>
+    //  "import " + apply(name) + " " + apply(att)
     case SortDeclaration(sort, att) =>
       "sort" + apply(sort) + " " + apply(att)
     // case SymbolDeclaration(sort, Symbol(label), args, att) =>
     //   "syntax " + apply(sort) + " ::= " + apply(label) + "(" + args.map(x => apply(x.str)).mkString(",") + ") " + apply(att)
-    case Rule(pattern, att) =>
-      "rule " + apply(pattern) + " " + apply(att)
+    // case Rule(pattern, att) =>
+    //   "rule " + apply(pattern) + " " + apply(att)
     case Axiom(params, pattern, att) =>
       "axiom " + "{" + params.map(s => apply(s)).mkString(",") + "}" + apply(pattern) + " " + apply(att)
   }
