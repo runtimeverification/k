@@ -24,6 +24,7 @@ object Module {
 
 trait Sentence
 
+/*
 trait Import extends Sentence {
   def name: ModuleName
 
@@ -33,32 +34,37 @@ trait Import extends Sentence {
 object Import {
   def unapply(arg: Import): Option[(ModuleName, Attributes)] = Some(arg.name, arg.att)
 }
+*/
 
 trait SortDeclaration extends Sentence {
+  def params: Seq[Sort]
+
   def sort: Sort
 
   def att: Attributes
 }
 
 object SortDeclaration {
-  def unapply(arg: SortDeclaration): Option[(Sort, Attributes)] = Some(arg.sort, arg.att)
+  def unapply(arg: SortDeclaration): Option[(Seq[Sort], Sort, Attributes)]
+  = Some(arg.params, arg.sort, arg.att)
 }
 
 trait SymbolDeclaration extends Sentence {
-  def sort: Sort
-
   def symbol: Symbol
 
-  def args: Seq[Sort]
+  def argSorts: Seq[Sort]
+
+  def returnSort: Sort
 
   def att: Attributes
 }
 
 object SymbolDeclaration {
-  def unapply(arg: SymbolDeclaration): Option[(Sort, Symbol, Seq[Sort], Attributes)] = Some(arg.sort, arg.symbol, arg.args, arg.att)
+  def unapply(arg: SymbolDeclaration): Option[(Symbol, Seq[Sort], Sort, Attributes)]
+  = Some(arg.symbol, arg.argSorts, arg.returnSort, arg.att)
 }
 
-
+/*
 trait Rule extends Sentence {
   def pattern: Pattern
 
@@ -68,8 +74,9 @@ trait Rule extends Sentence {
 object Rule {
   def unapply(arg: Rule): Option[(Pattern, Attributes)] = Some(arg.pattern, arg.att)
 }
+*/
 
-trait Axiom extends Sentence {
+trait AxiomDeclaration extends Sentence {
   def params: Seq[Sort]
 
   def pattern: Pattern
@@ -77,8 +84,9 @@ trait Axiom extends Sentence {
   def att: Attributes
 }
 
-object Axiom {
-  def unapply(arg: Axiom): Option[(Seq[Sort], Pattern, Attributes)] = Some(arg.params, arg.pattern, arg.att)
+object AxiomDeclaration {
+  def unapply(arg: AxiomDeclaration): Option[(Seq[Sort], Pattern, Attributes)]
+  = Some(arg.params, arg.pattern, arg.att)
 }
 
 trait Attributes {
@@ -91,7 +99,15 @@ object Attributes {
 
 trait Pattern
 
-trait Variable extends Pattern
+trait Variable extends Pattern {
+  def name: String
+
+  def sort: Sort
+}
+
+object Variable {
+  def unapply(arg: Variable): Option[(String, Sort)] = Some(arg.name, arg.sort)
+}
 
 trait Application extends Pattern {
   def symbol: Symbol
@@ -103,6 +119,7 @@ object Application {
   def unapply(arg: Application): Option[(Symbol, Seq[Pattern])] = Some(arg.symbol, arg.args)
 }
 
+/*
 trait DomainValue extends Pattern {
   def symbol: Symbol
 
@@ -112,79 +129,95 @@ trait DomainValue extends Pattern {
 object DomainValue {
   def unapply(arg: DomainValue): Option[(Symbol, Value)] = Some(arg.symbol, arg.value)
 }
+*/
 
 trait Top extends Pattern {
-  def sort: Sort
+  def s: Sort
 }
 
 object Top {
-  def unapply(arg: Top): Option[Sort] = Some(arg.sort)
+  def unapply(arg: Top): Option[Sort] = Some(arg.s)
 }
 
-trait Bottom extends Pattern
+trait Bottom extends Pattern {
+  def s: Sort
+}
 
 object Bottom {
-  def unapply(arg: Bottom): Boolean = true
+  def unapply(arg: Bottom): Option[Sort] = Some(arg.s)
 }
 
 trait And extends Pattern {
+  def s: Sort
+
   def _1: Pattern
 
   def _2: Pattern
 }
 
 object And {
-  def unapply(arg: And): Option[(Pattern, Pattern)] = Some(arg._1, arg._2)
+  def unapply(arg: And): Option[(Sort, Pattern, Pattern)] = Some(arg.s, arg._1, arg._2)
 }
 
 trait Or extends Pattern {
+  def s: Sort
+
   def _1: Pattern
 
   def _2: Pattern
 }
 
 object Or {
-  def unapply(arg: Or): Option[(Pattern, Pattern)] = Some(arg._1, arg._2)
+  def unapply(arg: Or): Option[(Sort, Pattern, Pattern)] = Some(arg.s, arg._1, arg._2)
 }
 
 trait Not extends Pattern {
+  def s: Sort
+
   def _1: Pattern
 }
 
 object Not {
-  def unapply(arg: Not): Option[Pattern] = Some(arg._1)
+  def unapply(arg: Not): Option[(Sort, Pattern)] = Some(arg.s, arg._1)
 }
 
 trait Implies extends Pattern {
+  def s: Sort
+
   def _1: Pattern
 
   def _2: Pattern
 }
 
 object Implies {
-  def unapply(arg: Implies): Option[(Pattern, Pattern)] = Some(arg._1, arg._2)
+  def unapply(arg: Implies): Option[(Sort, Pattern, Pattern)] = Some(arg.s, arg._1, arg._2)
 }
 
 trait Exists extends Pattern {
+  def s: Sort // this is the sort of the whole exists pattern, not the sort of the binding variable v
+
   def v: Variable
 
   def p: Pattern
 }
 
 object Exists {
-  def unapply(arg: Exists): Option[(Variable, Pattern)] = Some(arg.v, arg.p)
+  def unapply(arg: Exists): Option[(Sort, Variable, Pattern)] = Some(arg.s, arg.v, arg.p)
 }
 
 trait ForAll extends Pattern {
+  def s: Sort
+
   def v: Variable
 
   def p: Pattern
 }
 
 object ForAll {
-  def unapply(arg: ForAll): Option[(Variable, Pattern)] = Some(arg.v, arg.p)
+  def unapply(arg: ForAll): Option[(Sort, Variable, Pattern)] = Some(arg.s, arg.v, arg.p)
 }
 
+/*
 trait Next extends Pattern {
   def _1: Pattern
 }
@@ -202,17 +235,24 @@ trait Rewrite extends Pattern {
 object Rewrite {
   def unapply(arg: Rewrite): Option[(Pattern, Pattern)] = Some(arg._1, arg._2)
 }
+*/
 
 trait Equals extends Pattern {
+  def s1: Sort // the sort of the two patterns that are being compared
+
+  def s2: Sort // the sort of the context where the equality pattern is being placed
+
   def _1: Pattern
 
   def _2: Pattern
 }
 
 object Equals {
-  def unapply(arg: Equals): Option[(Pattern, Pattern)] = Some(arg._1, arg._2)
+  def unapply(arg: Equals): Option[(Sort, Sort, Pattern, Pattern)]
+  = Some(arg.s1, arg.s2, arg._1, arg._2)
 }
 
+/* for now all variables are sorted variables.
 trait SortedVariable extends Variable {
   def name: Name
 
@@ -222,6 +262,7 @@ trait SortedVariable extends Variable {
 object SortedVariable {
   def unapply(arg: SortedVariable): Option[(Name, Sort)] = Some(arg.name, arg.sort)
 }
+*/
 
 trait ModuleName {
   def str: String
@@ -231,6 +272,10 @@ object ModuleName {
   def unapply(arg: ModuleName): Option[String] = Some(arg.str)
 }
 
+// A sort can be either a sort variable or of the form C{s1,...,sn}
+// where C is called the sort constructor and s1,...,sn are sort parameters.
+// We call sorts that are of the form C{s1,...,sn} compound sorts because
+// I don't know a better name.
 trait Sort
 
 trait SortVariable extends Sort {
@@ -241,16 +286,19 @@ object SortVariable {
   def unapply(arg: SortVariable): Option[String] = Some(arg.name)
 }
 
-// CompoundSort ::= SortConstructor { SortList }
+// A compound sort is of the form C{s1,...,sn}
+// For example:
+// Nat{} List{Nat{}} List{S} Map{S,List{S}} Map{Map{Nat{},Nat{}},Nat{}}
 trait CompoundSort extends Sort {
-  def ctr: String
-  def params: Seq[Sort]
+  def ctr: String        // sort constructor
+  def params: Seq[Sort]  // sort parameters
 }
 
 object CompoundSort {
   def unapply(arg: CompoundSort): Option[(String, Seq[Sort])] = Some(arg.ctr, arg.params)
 }
 
+/*
 trait Name {
   def str: String
 }
@@ -266,7 +314,9 @@ trait Symbol {
 object Symbol {
   def unapply(arg: Symbol): Option[String] = Some(arg.str)
 }
+*/
 
+/*
 trait Value {
   def str: String
 }
@@ -274,6 +324,7 @@ trait Value {
 object Value {
   def unapply(arg: Value): Option[String] = Some(arg.str)
 }
+*/
 
 trait Builders {
 
