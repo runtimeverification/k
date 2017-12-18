@@ -117,6 +117,7 @@ class TextToKore(b: Builders) {
             val att = parseAttributes()
             val sen = b.AxiomDeclaration(params, pattern, att)
             parseSentences(sentences :+ sen)
+            /*
           case 'l' => // alias
             consume("ias")
             val alias = parseAlias()
@@ -128,6 +129,7 @@ class TextToKore(b: Builders) {
             val att = parseAttributes()
             val sen = b.AliasDeclaration(alias, argSorts, returnSort, att)
             parseSentences(sentences :+ sen)
+            */
         }
       case 'e' => // endmodule
         scanner.putback('e')
@@ -367,6 +369,7 @@ class TextToKore(b: Builders) {
     b.Symbol(ctr, params)
   }
 
+  /*
   private def parseAlias(): Alias = {
     val ctr= parseId()
     consumeWithLeadingWhitespaces("{")
@@ -374,6 +377,7 @@ class TextToKore(b: Builders) {
     consumeWithLeadingWhitespaces("}")
     b.Alias(ctr, params)
   }
+  */
 
   private def parseId(): String = {
     def loop(s: StringBuilder): String = {

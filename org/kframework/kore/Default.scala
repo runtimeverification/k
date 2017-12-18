@@ -21,10 +21,12 @@ object implementation {
                                  returnSort: i.Sort,
                                  att: i.Attributes) extends i.SymbolDeclaration
 
+    /*
     case class AliasDeclaration(alias: i.Alias,
                                 argSorts: Seq[i.Sort],
                                 returnSort: i.Sort,
                                 att: i.Attributes) extends i.AliasDeclaration
+    */
 
     // case class Rule(pattern: i.Pattern, att: i.Attributes) extends i.Rule
 
@@ -71,14 +73,15 @@ object implementation {
 
     case class SortVariable(name: String) extends i.SortVariable
 
-    case class CompoundSort(ctr: String,
-                            params: Seq[i.Sort]) extends i.CompoundSort
+    case class CompoundSort(ctr: String, params: Seq[i.Sort]) extends i.CompoundSort
 
     case class Symbol(ctr: String,
                       params: Seq[i.Sort]) extends i.Symbol
 
+    /*
     case class Alias(ctr: String,
                      params: Seq[i.Sort]) extends i.Alias
+    */
 
     // case class Value(str: String) extends i.Value
 
@@ -103,11 +106,13 @@ object implementation {
                           att: i.Attributes): i.Sentence
     = d.SymbolDeclaration(symbol, argSorts, returnSort, att)
 
+    /*
     def AliasDeclaration(alias: i.Alias,
                          argSorts: Seq[i.Sort],
                          returnSort: i.Sort,
                          att: i.Attributes): i.Sentence
     = d.AliasDeclaration(alias, argSorts, returnSort, att)
+    */
 
     // def Rule(_1: i.Pattern, att: i.Attributes): i.Sentence = d.Rule(_1, att)
 
@@ -157,7 +162,9 @@ object implementation {
 
     def Symbol(ctr: String, params: Seq[i.Sort]): i.Symbol = d.Symbol(ctr, params)
 
+    /*
     def Alias(ctr: String, params: Seq[i.Sort]): i.Alias = d.Alias(ctr, params)
+    */
 
     // def Value(str: String): i.Value = d.Value(str)
   }

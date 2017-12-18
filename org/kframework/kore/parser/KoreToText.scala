@@ -54,6 +54,7 @@ object KoreToText {
       " " +
       apply(att)
 
+      /*
     case AliasDeclaration(alias, argSorts, returnSort, att) =>
       "alias " +
       apply(alias) +
@@ -63,6 +64,7 @@ object KoreToText {
       apply(returnSort) +
       " " +
       apply(att)
+      */
 
     // case Rule(pattern, att) =>
     //   "rule " + apply(pattern) + " " + apply(att)
@@ -91,9 +93,11 @@ object KoreToText {
   }
 
   /** Returns a string from [[kore.Alias]] */
+  /*
   def apply(alias: Alias): String = {
     apply(alias.ctr) + "{" + alias.params.map(s => apply(s)).mkString(",") + "}"
   }
+  */
 
   /** Returns a string from [[kore.Pattern]]. */
   def apply(pat: Pattern): String = pat match {
@@ -122,7 +126,7 @@ object KoreToText {
       "\\exists" + "{" + apply(s) + "}" +
         "(" + apply(v) + "," + apply(p) + ")"
     case ForAll(s, v, p) =>
-      "\\exists" + "{" + apply(s) + "}" +
+      "\\forall" + "{" + apply(s) + "}" +
         "(" + apply(v) + "," + apply(p) + ")"
     // case Next(p) => "\\next(" + apply(p) + ")"
     // case Rewrite(p, q) => "\\rewrite(" + apply(p) + "," + apply(q) + ")"

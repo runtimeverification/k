@@ -59,6 +59,7 @@ trait SymbolDeclaration extends Sentence {
   def att: Attributes
 }
 
+/*
 object AliasDeclaration {
   def unapply(arg: AliasDeclaration): Option[(Alias, Seq[Sort], Sort, Attributes)]
   = Some(arg.alias, arg.argSorts, arg.returnSort, arg.att)
@@ -72,6 +73,7 @@ trait AliasDeclaration extends Sentence {
 
   def att: Attributes
 }
+*/
 
 object SymbolDeclaration {
   def unapply(arg: SymbolDeclaration): Option[(Symbol, Seq[Sort], Sort, Attributes)]
@@ -334,6 +336,7 @@ trait Symbol {
 }
 
 /* An alias is something that "syntactically" behaves as symbols but "semantically" not symbols. */
+/*
 object Alias {
   def unapply(arg: Alias): Option[(String, Seq[Sort])]
   = Some(arg.ctr, (arg.params))
@@ -343,6 +346,7 @@ trait Alias {
 
   def params: Seq[Sort]
 }
+*/
 
 object Symbol {
   def unapply(arg: Symbol): Option[(String, Seq[Sort])]
@@ -387,10 +391,12 @@ trait Builders {
                         returnSort: Sort,
                         att: Attributes): Sentence
 
+  /*
   def AliasDeclaration(alias: Alias,
                        argSorts: Seq[Sort],
                        returnSort: Sort,
                        att: Attributes): Sentence
+  */
   // def Rule(pattern: Pattern, att: Attributes): Sentence
 
   def AxiomDeclaration(params: Seq[SortVariable],
@@ -439,7 +445,9 @@ trait Builders {
 
   def Symbol(str: String, params: Seq[Sort]): Symbol
 
+  /*
   def Alias(str: String, params: Seq[Sort]): Alias
+  */
 
   // def Value(str: String): Value
 
