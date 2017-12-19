@@ -6,9 +6,12 @@ object implementation {
 
   private object ConcreteClasses {
 
-    case class Definition(att: i.Attributes, modules: Seq[i.Module]) extends i.Definition
+    case class Definition(att: i.Attributes,
+                          modules: Seq[i.Module]) extends i.Definition
 
-    case class Module(name: i.ModuleName, sentences: Seq[i.Sentence], att: i.Attributes) extends i.Module
+    case class Module(name: i.ModuleName,
+                      decls: Seq[i.Declaration],
+                      att: i.Attributes) extends i.Module
 
     // case class Import(name: i.ModuleName, att: i.Attributes) extends i.Import
 
@@ -21,14 +24,10 @@ object implementation {
                                  returnSort: i.Sort,
                                  att: i.Attributes) extends i.SymbolDeclaration
 
-    /*
     case class AliasDeclaration(alias: i.Alias,
                                 argSorts: Seq[i.Sort],
                                 returnSort: i.Sort,
                                 att: i.Attributes) extends i.AliasDeclaration
-    */
-
-    // case class Rule(pattern: i.Pattern, att: i.Attributes) extends i.Rule
 
     case class AxiomDeclaration(params: Seq[i.SortVariable],
                                 pattern: i.Pattern,
@@ -38,9 +37,7 @@ object implementation {
 
     case class Variable(name: String, sort: i.Sort) extends i.Variable
 
-    case class Application(symbol: i.Symbol, args: Seq[i.Pattern]) extends i.Application
-
-    // case class DomainValue(symbol: i.Symbol, value: i.Value) extends i.DomainValue
+    case class Application(head: i.SymbolOrAlias, args: Seq[i.Pattern]) extends i.Application
 
     case class Top(s: i.Sort) extends i.Top
 
@@ -54,18 +51,33 @@ object implementation {
 
     case class Implies(s: i.Sort, _1: i.Pattern, _2: i.Pattern) extends i.Implies
 
+    case class Iff(s: i.Sort, _1: i.Pattern, _2: i.Pattern) extends i.Iff
+
     case class Exists(s: i.Sort, v: i.Variable, p: i.Pattern) extends i.Exists
 
-    case class ForAll(s: i.Sort, v: i.Variable, p: i.Pattern) extends i.ForAll
+    case class Forall(s: i.Sort, v: i.Variable, p: i.Pattern) extends i.Forall
 
-    // case class Next(_1: i.Pattern) extends i.Next
+    case class Next(s: i.Sort, _1: i.Pattern) extends i.Next
 
-    // case class Rewrite(_1: i.Pattern, _2: i.Pattern) extends i.Rewrite
+    case class Rewrites(s: Sort,
+                        rs: Sort,
+                        _1: i.Pattern,
+                        _2: i.Pattern) extends i.Rewrites
 
-    case class Equals(s1: i.Sort,
-                      s2: i.Sort,
+    case class Equals(s: i.Sort,
+                      rs: i.Sort,
                       _1: i.Pattern,
                       _2: i.Pattern) extends i.Equals
+
+    case class Mem(s: i.Sort,
+                   rs: i.Sort,
+                   x: i.Variable,
+                   p: i.Pattern) extends i.Mem
+
+    case class Subset(s: i.Sort,
+                   rs: i.Sort,
+                   _1: i.Pattern,
+                   _2: i.Pattern) extends i.Subset
 
     case class StringLiteral(str: String) extends i.StringLiteral
 
@@ -75,59 +87,50 @@ object implementation {
 
     case class CompoundSort(ctr: String, params: Seq[i.Sort]) extends i.CompoundSort
 
-    case class Symbol(ctr: String,
-                      params: Seq[i.Sort]) extends i.Symbol
+    case class SymbolOrAlias(ctr: String, params: Seq[i.Sort]) extends i.SymbolOrAlias
 
-    /*
-    case class Alias(ctr: String,
-                     params: Seq[i.Sort]) extends i.Alias
-    */
+    case class Symbol(ctr: String, params: Seq[i.Sort]) extends i.Symbol
 
-    // case class Value(str: String) extends i.Value
-
+    case class Alias(ctr: String, params: Seq[i.Sort]) extends i.Alias
   }
 
   object DefaultBuilders extends i.Builders {
 
     import org.kframework.kore.implementation.{ConcreteClasses => d}
 
-    def Definition(att: i.Attributes, modules: Seq[i.Module]): i.Definition = d.Definition(att, modules)
+    def Definition(att: i.Attributes, modules: Seq[i.Module]): i.Definition =
+      d.Definition(att, modules)
 
-    def Module(name: i.ModuleName, sentences: Seq[i.Sentence], att: i.Attributes): i.Module = d.Module(name, sentences, att)
+    def Module(name: i.ModuleName, decls: Seq[i.Declaration], att: i.Attributes): i.Module =
+      d.Module(name, decls, att)
 
     // def Import(name: i.ModuleName, att: i.Attributes): i.Sentence = d.Import(name, att)
 
-    def SortDeclaration(params: Seq[i.SortVariable], sort: i.Sort, att: i.Attributes): i.Sentence
+    def SortDeclaration(params: Seq[i.SortVariable], sort: i.Sort, att: i.Attributes): i.Declaration
     = d.SortDeclaration(params, sort, att)
 
     def SymbolDeclaration(symbol: i.Symbol,
                           argSorts: Seq[i.Sort],
                           returnSort: i.Sort,
-                          att: i.Attributes): i.Sentence
+                          att: i.Attributes): i.Declaration
     = d.SymbolDeclaration(symbol, argSorts, returnSort, att)
 
-    /*
     def AliasDeclaration(alias: i.Alias,
                          argSorts: Seq[i.Sort],
                          returnSort: i.Sort,
-                         att: i.Attributes): i.Sentence
+                         att: i.Attributes): i.Declaration
     = d.AliasDeclaration(alias, argSorts, returnSort, att)
-    */
-
-    // def Rule(_1: i.Pattern, att: i.Attributes): i.Sentence = d.Rule(_1, att)
 
     def AxiomDeclaration(params: Seq[i.SortVariable],
                          _1: i.Pattern,
-                         att: i.Attributes): i.Sentence
+                         att: i.Attributes): i.Declaration
     = d.AxiomDeclaration(params, _1, att)
 
     def Attributes(patterns: Seq[Pattern]): i.Attributes = d.Attributes(patterns)
 
-    // def DomainValue(symbol: i.Symbol, value: i.Value): i.Pattern = d.DomainValue(symbol, value)
-
     def Variable(name: String, sort: i.Sort): i.Variable = d.Variable(name, sort)
 
-    def Application(symbol: i.Symbol, args: Seq[i.Pattern]): i.Pattern = d.Application(symbol, args)
+    def Application(head: i.SymbolOrAlias, args: Seq[i.Pattern]): i.Pattern = d.Application(head, args)
 
     def Top(s: i.Sort): i.Pattern = d.Top(s)
 
@@ -141,16 +144,21 @@ object implementation {
 
     def Implies(s: i.Sort, _1: i.Pattern, _2: i.Pattern): i.Pattern = d.Implies(s, _1, _2)
 
+    def Iff(s: i.Sort, _1: i.Pattern, _2: i.Pattern): i.Pattern = d.Iff(s, _1, _2)
+
     def Exists(s: i.Sort, v: Variable, p: Pattern): i.Pattern = d.Exists(s, v, p)
 
-    def ForAll(s: i.Sort, v: Variable, p: Pattern): i.Pattern = d.ForAll(s, v, p)
+    def Forall(s: i.Sort, v: Variable, p: Pattern): i.Pattern = d.Forall(s, v, p)
 
-    // def Next(_1: i.Pattern): i.Pattern = d.Next(_1)
+    def Next(s: i.Sort, _1: i.Pattern): i.Pattern = d.Next(s, _1)
 
-    // def Rewrite(_1: i.Pattern, _2: i.Pattern): i.Pattern = d.Rewrite(_1, _2)
+    def Rewrites(s: i.Sort, rs: i.Sort, _1: i.Pattern, _2: i.Pattern): i.Pattern = d.Rewrites(s, rs, _1, _2)
 
-    def Equals(s1: i.Sort, s2: i.Sort, _1: i.Pattern, _2: i.Pattern): i.Pattern
-    = d.Equals(s1, s2, _1, _2)
+    def Equals(s: i.Sort, rs: i.Sort, _1: i.Pattern, _2: i.Pattern): i.Pattern = d.Equals(s, rs, _1, _2)
+
+    def Mem(s: i.Sort, rs: i.Sort, x: i.Variable, p: i.Pattern): i.Pattern = d.Mem(s, rs, x, p)
+
+    def Subset(s: i.Sort, rs: i.Sort, _1: Pattern, _2: Pattern): i.Pattern = d.Subset(s, rs, _1, _2)
 
     def StringLiteral(str: String): i.Pattern = d.StringLiteral(str)
 
@@ -160,14 +168,11 @@ object implementation {
 
     def CompoundSort(ctr: String, params: Seq[i.Sort]): i.CompoundSort = d.CompoundSort(ctr, params)
 
+    def SymbolOrAlias(ctr: String, params: Seq[i.Sort]): i.SymbolOrAlias = d.SymbolOrAlias(ctr, params)
+
     def Symbol(ctr: String, params: Seq[i.Sort]): i.Symbol = d.Symbol(ctr, params)
 
-    /*
     def Alias(ctr: String, params: Seq[i.Sort]): i.Alias = d.Alias(ctr, params)
-    */
-
-    // def Value(str: String): i.Value = d.Value(str)
   }
-
 }
 

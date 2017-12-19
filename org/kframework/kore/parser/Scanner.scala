@@ -92,7 +92,8 @@ class Scanner {
     }
   }
 
-  /** Consumes the whitespace characters until a non-whitespace character is met. */
+  /** Consumes the whitespace characters until a non-whitespace character is met.
+    */
   @throws(classOf[java.io.EOFException])
   def skipWhitespaces(): Unit = {
     next() match {

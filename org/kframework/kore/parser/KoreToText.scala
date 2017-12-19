@@ -1,11 +1,9 @@
 package org.kframework.kore.parser
 
-import org.apache.commons.lang3.StringEscapeUtils
 import org.kframework.kore._
 import org.kframework.kore
 
 /** Function (i.e., unparser) from Kore to String. */
-/** TODO(xiaohong): add tests or reuse old ones. */
 
 object KoreToText {
   // TODO(Daejun): more efficient implementation using StringBuilder instead of string concatenation
@@ -24,14 +22,14 @@ object KoreToText {
     "module " +
     apply(m.name.str) +
     System.lineSeparator() +
-    m.sentences.map(s => "  " + apply(s)).mkString(System.lineSeparator()) +
+    m.decls.map(s => "  " + apply(s)).mkString(System.lineSeparator()) +
     System.lineSeparator() +
     "endmodule " +
     apply(m.att)
   }
 
-  /** Returns a string from [[kore.Sentence]]. */
-  def apply(s: Sentence): String = s match {
+  /** Returns a string from [[kore.Declaration]]. */
+  def apply(d: Declaration): String = d match {
 
     //case Import(ModuleName(name), att) =>
     //  "import " + apply(name) + " " + apply(att)
@@ -54,7 +52,6 @@ object KoreToText {
       " " +
       apply(att)
 
-      /*
     case AliasDeclaration(alias, argSorts, returnSort, att) =>
       "alias " +
       apply(alias) +
@@ -64,27 +61,27 @@ object KoreToText {
       apply(returnSort) +
       " " +
       apply(att)
-      */
 
-    // case Rule(pattern, att) =>
-    //   "rule " + apply(pattern) + " " + apply(att)
     case AxiomDeclaration(params, pattern, att) =>
       "axiom{" +
-       params.map(s => apply(s)).mkString(",") +
-       "} " +
-       apply(pattern) +
-       " " +
-       apply(att)
+      params.map(s => apply(s)).mkString(",") +
+      "} " +
+      apply(pattern) +
+      " " +
+      apply(att)
   }
 
   /** Returns a string from [[kore.Sort]]. */
-  def apply(sort: Sort): String = {
-    sort match {
+  def apply(s: Sort): String = s match {
       case SortVariable(name) =>
         apply(name)
       case CompoundSort(ctr, params) =>
         apply(ctr) + "{" + params.map(s => apply(s)).mkString(",") + "}"
-    }
+  }
+
+  /** Returns a string from [[kore.SymbolOrAlias]] */
+  def apply(head: SymbolOrAlias): String = {
+    apply(head.ctr) + "{" + head.params.map(s => apply(s)).mkString(",") + "}"
   }
 
   /** Returns a string from [[kore.Symbol]] */
@@ -93,19 +90,16 @@ object KoreToText {
   }
 
   /** Returns a string from [[kore.Alias]] */
-  /*
   def apply(alias: Alias): String = {
     apply(alias.ctr) + "{" + alias.params.map(s => apply(s)).mkString(",") + "}"
   }
-  */
 
   /** Returns a string from [[kore.Pattern]]. */
   def apply(pat: Pattern): String = pat match {
     case Variable(name, sort) =>
       apply(name) + ":" + apply(sort)
-    case Application(symbol, args) =>
-      apply(symbol) + "(" + args.map(apply).mkString(",") + ")"
-    // case DomainValue(Symbol(label), value) => apply(label) + "(\"" + StringEscapeUtils.escapeJava(value.str) + "\")"
+    case Application(head, args) =>
+      apply(head) + "(" + args.map(apply).mkString(",") + ")"
     case Top(s) =>
       "\\top" + "{" + apply(s) + "}" + "()"
     case Bottom(s) =>
@@ -122,25 +116,38 @@ object KoreToText {
     case Implies(s, p, q) =>
       "\\implies" + "{" + apply(s) + "}" +
         "(" + apply(p) + "," + apply(q) + ")"
+    case Iff(s, p, q) =>
+      "\\iff" + "{" + apply(s) + "}" +
+        "(" + apply(p) + "," + apply(q) + ")"
     case Exists(s, v, p) =>
       "\\exists" + "{" + apply(s) + "}" +
         "(" + apply(v) + "," + apply(p) + ")"
-    case ForAll(s, v, p) =>
+    case Forall(s, v, p) =>
       "\\forall" + "{" + apply(s) + "}" +
         "(" + apply(v) + "," + apply(p) + ")"
-    // case Next(p) => "\\next(" + apply(p) + ")"
-    // case Rewrite(p, q) => "\\rewrite(" + apply(p) + "," + apply(q) + ")"
+    case Next(s, p) =>
+      "\\next" + "{" + apply(s) + "}" +
+        "(" + apply(p) + ")"
+    case Rewrites(s, rs, p, q) =>
+      "\\rewrites" + "{" + apply(s) + "," + apply(rs) + "}" +
+        "(" + apply(p) + "," + apply(q) + ")"
     case Equals(s1, s2, p, q) =>
       "\\equals" + "{" + apply(s1) + "," + apply(s2) + "}" +
         "(" + apply(p) + "," + apply(q) + ")"
-    case StringLiteral(str) => "\"" + str + "\""
+    case Mem(s, rs, x, p) =>
+      "\\mem" + "{" + apply(s) + "," + apply(rs) + "}" +
+        "(" + apply(x) + "," + apply(p) + ")"
+    case Subset(s, rs, p, q) =>
+      "\\subset" + "{" + apply(s) + "," + apply(rs) + "}" +
+        "(" + apply(p) + "," + apply(q) + ")"
+    case StringLiteral(str) =>
+      "\"" + str + "\""
   }
 
   /** Returns a string from [[kore.Attributes]]. */
   def apply(att: Attributes): String = {
     "[" + att.patterns.map(apply).mkString(",") + "]"
   }
-
 
   /** Normalizes the string of Sort, Name, or Symbol.
     *
