@@ -1,17 +1,30 @@
-#!/usr/bin/env bash
-if [[ `uname` == *MINGW* || `uname` == *MSYS* || `uname` == *CYGWIN* ]]; then
-  "$(dirname "$0")/kserver.bat" "$@"
-else
-  source "$(dirname "$0")/../lib/setenv"
-  ulimit -s `ulimit -H -s`
-  if "$(dirname "$0")/../lib/checkJava"; then
-    trap 'kill -TERM $PID' TERM INT
-    java -Dfile.encoding=UTF-8 -Djava.awt.headless=true -Djansi.force=true $K_OPTS -ea -cp "$(dirname "$0")/../lib/java/*" org.kframework.main.Main -kserver "$@"&
-    PID=$!
-    wait $PID
-    trap - TERM INT
-    wait $PID
-  else
-    exit 1
-  fi
+#!/bin/sh
+
+# the directory where this script resides
+script_dir=$(dirname $0)
+# the script will cleanup and quit when it receives any of these signals
+trap_signals="ALRM HUP INT PIPE QUIT TERM"
+
+case $(uname) in
+*MINGW*|*MSYS*|*CYGWIN*)
+	"${script_dir}/kserver.bat" "$@"
+	exit $?
+	;;
+*)
+	;;
+esac
+
+. "${script_dir}/../lib/setenv"
+ulimit -s $(ulimit -H -s)
+if ! "${script_dir}/../lib/checkJava"; then
+	exit 1
 fi
+
+trap 'kill -TERM $pid' $trap_signals
+java -Dfile.encoding=UTF-8 -Djava.awt.headless=true -Djansi.force=true \
+    $K_OPTS -ea -cp "${script_dir}/../lib/java/*" org.kframework.main.Main \
+   -kserver "$@" &
+pid=$!
+wait $pid
+trap - $trap_signals
+wait $pid
