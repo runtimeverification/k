@@ -31,6 +31,7 @@ import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.file.FileUtil;
+import scala.Option;
 import scala.Tuple2;
 import scala.collection.Set;
 import scala.util.Either;
@@ -147,10 +148,16 @@ public class DefinitionParsing {
 
     public Definition parseDefinitionAndResolveBubbles(File definitionFile, String mainModuleName, String mainProgramsModule) {
         Definition parsedDefinition = parseDefinition(definitionFile, mainModuleName, mainProgramsModule);
-        Definition trimmed = Definition(parsedDefinition.mainModule(), Stream.concat(Stream.concat(
-                        Stream.of(parsedDefinition.mainModule()),
-                        stream(parsedDefinition.mainModule().importedModules())),
-                stream(parsedDefinition.entryModules()).filter(m -> !stream(m.sentences()).anyMatch(s -> s instanceof Bubble))).collect(Collections.toSet()),
+        Stream<Module> modules = Stream.of(parsedDefinition.mainModule());
+        modules = Stream.concat(modules, stream(parsedDefinition.mainModule().importedModules()));
+        Option<Module> syntaxModule = parsedDefinition.getModule(mainProgramsModule);
+        if (syntaxModule.isDefined()) {
+            modules = Stream.concat(modules, Stream.of(syntaxModule.get()));
+            modules = Stream.concat(modules, stream(syntaxModule.get().importedModules()));
+        }
+        modules = Stream.concat(modules,
+                stream(parsedDefinition.entryModules()).filter(m -> !stream(m.sentences()).anyMatch(s -> s instanceof Bubble)));
+        Definition trimmed = Definition(parsedDefinition.mainModule(), modules.collect(Collections.toSet()),
                 parsedDefinition.att());
         Definition afterResolvingConfigBubbles = resolveConfigBubbles(trimmed);
         Definition afterResolvingAllOtherBubbles = resolveNonConfigBubbles(afterResolvingConfigBubbles);
