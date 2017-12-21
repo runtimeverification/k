@@ -298,9 +298,10 @@ public class KRun {
             String name = entry.getKey();
             String value = entry.getValue().getLeft();
             String parser = entry.getValue().getRight();
-            Sort sort = compiledDef.programStartSymbol;
+            String configVarName = "$" + name;
+            Sort sort = compiledDef.configurationVariableDefaultSorts.getOrDefault(configVarName, compiledDef.programStartSymbol);
             K configVar = externalParse(parser, value, sort, Source.apply("<command line: -c" + name + ">"), compiledDef);
-            output.put(KToken("$" + name, Sorts.KConfigVar()), configVar);
+            output.put(KToken(configVarName, Sorts.KConfigVar()), configVar);
         }
         if (options.io()) {
             output.put(KToken("$STDIN", Sorts.KConfigVar()), KToken("\"\"", Sorts.String()));
