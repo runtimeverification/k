@@ -1,9 +1,4 @@
-Search results:
-
-Solution 1:
-L:List -->
-ListItem ( #buffer ( "Class \"C1\" is in a cycle!\n" ) )
-
-Solution 2:
-L:List -->
-ListItem ( #buffer ( "Class \"C2\" is in a cycle!\n" ) )
+Solution 1
+L ==K ( ListItem ( #ostream ( 1 ) ) ListItem ( "off" ) ListItem ( #buffer ( "Class \"C1\" is in a cycle!\n" ) ) )
+Solution 2
+L ==K ( ListItem ( #ostream ( 1 ) ) ListItem ( "off" ) ListItem ( #buffer ( "Class \"C2\" is in a cycle!\n" ) ) )

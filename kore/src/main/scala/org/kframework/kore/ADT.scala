@@ -1,8 +1,10 @@
 package org.kframework.kore
 
-import org.kframework.builtin.KLabels
+import org.kframework.builtin.{KLabels, Sorts}
 import org.kframework.kore
 import org.kframework.attributes._
+import org.kframework.kore.ADT.Sort
+
 import collection.JavaConverters._
 
 /**
@@ -20,13 +22,13 @@ object ADT {
     def apply(ks: K*) = KApply(this, KList(ks.toList))
   }
 
-  case class KApply[KK <: K](klabel: kore.KLabel, klist: kore.KList, att: Att = Att()) extends kore.KApply {
+  case class KApply[KK <: K](klabel: kore.KLabel, klist: kore.KList, att: Att = Att.empty) extends kore.KApply {
     def items = klist.items
     def size = klist.size
     def asIterable = klist.asIterable
   }
 
-  class KSequence private(val elements: List[K], val att: Att = Att()) extends kore.KSequence {
+  class KSequence private(val elements: List[K], val att: Att = Att.empty) extends kore.KSequence {
     val items: java.util.List[K] = elements.asJava
     val size: Int = elements.size
     val asIterable: java.lang.Iterable[K] = new org.kframework.List(elements)
@@ -44,19 +46,19 @@ object ADT {
   }
 
   object KSequence {
-    private val emptyAtt = Att()
+    private val emptyAtt = Att.empty
 
     def raw(elements: scala.collection.immutable.List[K]): KSequence =
       new KSequence(elements, emptyAtt)
 
-    def apply(elements: List[K], att: Att = Att()): KSequence =
+    def apply(elements: List[K], att: Att = Att.empty): KSequence =
       new KSequence(elements.foldLeft(List[K]()) {
         case (sum, s: KSequence) => sum ++ s.items.asScala
         case (sum, t) => sum :+ t
       }, att)
   }
 
-  case class KVariable(name: String, att: Att = Att()) extends kore.KVariable {
+  case class KVariable(name: String, att: Att = Att.empty) extends kore.KVariable {
     def apply(ks: K*) = KApply(this, KList(ks.toList))
   }
 
@@ -64,7 +66,7 @@ object ADT {
     override def toString = name
   }
 
-  case class KToken(s: String, sort: kore.Sort, att: Att = Att()) extends kore.KToken
+  case class KToken(s: String, sort: kore.Sort, att: Att = Att.empty) extends kore.KToken
 
   case class KList(elements: List[K]) extends kore.KList {
     lazy val items: java.util.List[K] = elements.asJava
@@ -73,11 +75,27 @@ object ADT {
     lazy val asIterable = new org.kframework.List(elements)
   }
 
-  case class KRewrite(left: kore.K, right: kore.K, att: Att = Att()) extends kore.KRewrite
+  case class KRewrite(left: kore.K, right: kore.K, att: Att = Att.empty) extends kore.KRewrite
 
-  case class KAs(pattern: kore.K, alias: kore.K, att: Att = Att()) extends kore.KAs
+  case class KAs(pattern: kore.K, alias: kore.K, att: Att = Att.empty) extends kore.KAs
 
   case class InjectedKLabel(klabel: kore.KLabel, att: Att) extends kore.InjectedKLabel
+
+}
+
+object SortedADT {
+
+  case class SortedKVariable(name: String, att: Att = Att.empty) extends kore.KVariable {
+    def apply(ks: K*) = ADT.KApply(this, ADT.KList(ks.toList))
+
+    val sort: Sort = Sort(att.getOptional(Att.sort).orElse(Sorts.K.name))
+
+    override def equals(other: Any) = other match {
+      case v: SortedKVariable => name == v.name && sort == v.sort
+      //      case v: KVariable => throw new UnsupportedOperationException(s"should not mix SortedKVariables with KVariables for variable $this and $v")
+      case _ => false
+    }
+  }
 
 }
 

@@ -5,6 +5,7 @@ import org.kframework.definition.Definition;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.Kompile;
 
+import java.util.Set;
 import java.util.function.Function;
 
 /**
@@ -15,4 +16,6 @@ public interface Backend {
     void accept(CompiledDefinition def);
 
     Function<Definition, Definition> steps(Kompile kompile);
+
+    Set<String> excludedModuleTags();
 }

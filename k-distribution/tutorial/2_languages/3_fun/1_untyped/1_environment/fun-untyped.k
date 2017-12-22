@@ -1,5 +1,5 @@
 // Copyright (c) 2012-2016 K Team. All Rights Reserved.
-require "modules/pattern-matching.k"
+//require "modules/pattern-matching.k"
 
 /*!
 \title{FUN --- Untyped --- Environment}
@@ -113,7 +113,7 @@ functional or \K features that have already been explained in there.}  */
 
 //@ \section{Syntax}
 
-module FUN-UNTYPED-SYNTAX
+module FUN-UNTYPED-COMMON
 
 /*@ FUN is an expression language.  The constructs below fall into
 several categories: names, arithmetic constructs, conventional
@@ -135,7 +135,7 @@ with the former category.  We prefer the names of variables and functions
 to start with lower case letters.  We take the freedom to tacitly introduce
 syntactic lists/sequences for each nonterminal for which we need them: */
 
-  syntax Name ::= Token{[a-z][\_a-zA-Z0-9]*}       [notInRules, autoReject, token, regex("[a-z][\\_a-zA-Z0-9]*")]
+  syntax Name
   syntax Names ::= List{Name,","}
 
 /*@ Expression constructs will be defined throughtout the syntax module.
@@ -209,7 +209,7 @@ to the expression {\tt a}.  Also, note that the constructor is strict
 in its second argument, because we want to evaluate its arguments but
 not the constuctor name itsef. */
 
-  syntax ConstructorName ::= Token{[A-Z][a-zA-Z0-9]*}   [notInRules, token, autoReject]
+  syntax ConstructorName
   syntax Exp ::= ConstructorName
                | ConstructorName "(" Exps ")"    [prefer, strict(2)]
 
@@ -313,7 +313,7 @@ in datatype declarations.
 Like in many functional languages, type parameters/variables in
 user-defined types are quoted identifiers. */
 
-  syntax TypeVar  ::= Token{[\'][a-z][\_a-zA-Z0-9]*}    [notInRules, autoReject, token, regex("[\\'][a-z][\\_a-zA-Z0-9]*")]
+  syntax TypeVar
   syntax TypeVars ::= List{TypeVar,","}
 
 /*@ Types can be basic types, function types, or user-defined
@@ -323,35 +323,35 @@ for generating the desired parser.  To avoid syntactic ambiguities with
 the arrow construct for function cases, we use the symbol \verb|-->| as
 a constructor for function types:  */
 
-  syntax TypeName ::= Token{[a-z][\_a-zA-Z0-9]*}        [notInRules, autoReject, token, regex("[a-z][\\_a-zA-Z0-9]*")]
+  syntax TypeName
   syntax Type ::= "int" | "bool" | "string"
                 | Type "-->" Type                            [right]
                 | "(" Type ")"                             [bracket]
                 | TypeVar
-                | TypeName            [klabel('TypeName), onlyLabel]
-                | Type TypeName  [klabel('Type-TypeName), onlyLabel]
+                | TypeName             [klabel(TypeName), onlyLabel]
+                | Type TypeName   [klabel(Type-TypeName), onlyLabel]
                 | "(" Types ")" TypeName                    [prefer]
   syntax Types ::= List{Type,","}
 
   syntax TypeCase ::= ConstructorName
                     | ConstructorName "(" Types ")"
-  syntax TypeCases ::= List{TypeCase,"|"}
+  syntax TypeCases ::= List{TypeCase,"|"}     [klabel(_|TypeCase_)]
 
 
 //@ \subsection{Additional Priorities}
 
-  syntax priorities '@_
-                  > '__
+  syntax priorities @_
+                  > __
                   > arith
-                  > '_:=_
-                  > 'let_in_ 'letrec_in_ 'if_then_else_
-                  > '_;_
-                  > 'fun_
-                  > 'datatype_=__
+                  > _:=_
+                  > let_in_ letrec_in_ if_then_else_
+                  > _;_
+                  > fun_
+                  > datatype_=__
 endmodule
 
 module FUN-UNTYPED-MACROS
-  imports FUN-UNTYPED-SYNTAX
+  imports FUN-UNTYPED-COMMON
 
 //@ \subsection{Desugaring macros}
 
@@ -368,7 +368,7 @@ so we can easily recognize them when we debug or trace the semantics. */
 
 //@ Multiple-head list patterns desugar into successive one-head patterns:
 
-  rule [E:Exp,Es|T] => [E|[Es|T]]  when Es =/=K .Exps        [macro]
+  rule [E1,E2,Es:Exps|T] => [E1|[E2,Es|T]]                   [macro]
 
 //@ Uncurrying of multiple arguments in functions and binders:
 
@@ -382,8 +382,8 @@ so we can easily recognize them when we debug or trace the semantics. */
     => callcc (fun $k -> (fun throw -> E)(fun X -> $k E'))   [macro]
 
 //@ For uniformity, we reduce all types to their general form:
-  rule 'TypeName(Tn:TypeName) => (.TypeVars) Tn              [macro]
-  rule 'Type-TypeName(T:Type,,Tn:TypeName) => (T) Tn         [macro]
+//  rule TypeName(Tn:TypeName) => (.TypeVars) Tn               [macro]
+  rule Type-TypeName(T:Type, Tn:TypeName) => (T) Tn          [macro]
 
 //@ The dynamic semantics ignores all the type declarations:
 
@@ -391,6 +391,15 @@ so we can easily recognize them when we debug or trace the semantics. */
 
 endmodule
 
+
+module FUN-UNTYPED-SYNTAX
+  imports FUN-UNTYPED-COMMON
+
+  syntax Name ::= Token{[a-z][\_a-zA-Z0-9]*}            [onlyLabel, autoReject, token]
+  syntax ConstructorName ::= Token{[A-Z][a-zA-Z0-9]*}   [onlyLabel, autoReject, token]
+  syntax TypeVar  ::= Token{[\'][a-z][\_a-zA-Z0-9]*}    [onlyLabel, autoReject, token]
+  syntax TypeName ::= Token{[a-z][\_a-zA-Z0-9]*}        [onlyLabel, autoReject, token]
+endmodule
 
 
 /*@ \section{Semantics}
@@ -400,9 +409,9 @@ definition of FUN is also available, but that drops the \texttt{\&}
 construct as explained above. */
 
 module FUN-UNTYPED
-  imports FUN-UNTYPED-SYNTAX
+  imports FUN-UNTYPED-COMMON
   imports FUN-UNTYPED-MACROS
-  imports PATTERN-MATCHING
+  //imports PATTERN-MATCHING
 
 
 /*@ \subsection{Configuration}
@@ -479,7 +488,7 @@ value, but we do not need that level of detail here), and also that
 a function/closure value that expects the second, list argument): */
 
   syntax Val ::= "cons" | "[" Vals "]"
-  rule isVal(cons V:Val) => true
+  rule isVal@FUN-UNTYPED(cons V:Val) => true
   rule cons V:Val [Vs:Vals] => [V,Vs]
 
 
@@ -506,15 +515,15 @@ how the pre-defined pattern matching works before proceeding.
 The best way to do that is to consult
 \texttt{k/include/modules/pattern-matching.k}. */
 
-/*@ To set up the pattern matching mechanism we need to specify what K
-terms act as variables (for pattern matching, substitution, etc.).
-This is currently done my subsorting those terms to the builtin
-\texttt{Variable} sort.  In our case, we only want to allow the
-\texttt{Name} identifiers to act as variables for pattern matching;
-note that the \texttt{ConstructorName} identifiers are {\em not}
-variables (they construct data values): */
-
-  syntax Variable ::= Name
+///*@ To set up the pattern matching mechanism we need to specify what K
+//terms act as variables (for pattern matching, substitution, etc.).
+//This is currently done my subsorting those terms to the builtin
+//\texttt{Variable} sort.  In our case, we only want to allow the
+//\texttt{Name} identifiers to act as variables for pattern matching;
+//note that the \texttt{ConstructorName} identifiers are {\em not}
+//variables (they construct data values): */
+//
+//  syntax KVariable ::= Name
 
 /*@ We distinguish two cases when the closure is applied.
 If the first pattern matches, then we pick the first case: switch to
@@ -524,17 +533,15 @@ making sure that the environment is properly recovered afterwards.
 If the first pattern does not match, then we drop it and thus move on
 to the next one. */
 
-  rule <k> closure(Rho, P->E | _) V:Val
-           => bindTo(getMatching(P,V)) ~> E ~> env(Rho') ...</k>
-       <env> Rho' => Rho </env>  when isMatching(P,V)
-  rule closure(_, (P->_ | Cs:Cases => Cs)) V:Val  when notBool isMatching(P,V)
-
-/*@ Besides the generic decomposition rules for patterns and values,
-we also want to allow \texttt{[head|tail]} matching for lists, so we add
-the following custom pattern decomposition rule: */
-
-  rule decomposeMatching(([H:Exp|T:Exp] => H,T),
-                         ([V:Val,Vs:Vals] => V,[Vs]))
+  rule (. => getMatching(P, V)) ~> closure(_, P->_ | _) V:Val
+  rule <k> matchResult(M:Map) ~> closure(Rho, _->E | _) _
+           => bindMap(M) ~> E ~> env(Rho') ...</k>
+       <env> Rho' => Rho </env>
+  rule (matchFailure => .) ~> closure(_, (_->_ | Cs:Cases => Cs)) _
+//  rule <k> closure(Rho, P->E | _) V:Val
+//           => bindMap(getMatching(P,V)) ~> E ~> env(Rho') ...</k>
+//       <env> Rho' => Rho </env>  when isMatching(P,V)
+//  rule closure(_, (P->_ | Cs:Cases => Cs)) V:Val  when notBool isMatching(P,V)
 
 
 /*@ \subsection{Let and Letrec}
@@ -667,13 +674,14 @@ discussed the \texttt{let} and \texttt{letrec} language constructs
 above. */
 
   syntax KItem ::= bindTo(Names,Exps)         [strict(2)]
-                 | bindTo(Map)
+                 | bindMap(Map)
                  | bind(Names)
 
-  rule bindTo(Xs:Names,Vs:Vals) => bindTo(getMatching(Xs,Vs))
+  rule (. => getMatchingAux(Xs,Vs)) ~> bindTo(Xs:Names,Vs:Vals)
+  rule matchResult(M:Map) ~> bindTo(_:Names, _:Vals) => bindMap(M)
 
-  rule bindTo(.Map) => .  [structural]
-  rule <k> bindTo((X:Name |-> V:Val => .Map) _:Map) ...</k>
+  rule bindMap(.Map) => .  [structural]
+  rule <k> bindMap((X:Name |-> V:Val => .Map) _:Map) ...</k>
        <env> Rho => Rho[X <- !L:Int] </env>
        <store>... .Map => !L |-> V ...</store>
     [structural]
@@ -703,4 +711,41 @@ and of expressions in a binding, respectively. */
   rule exps(.Bindings) => .Exps
   rule exps(_:Name=E and Bs) => E,exps(Bs)
 
+  /* Extra kore stuff */
+  syntax KResult ::= Vals
+  syntax Exps ::= Names
+
+  /* Matching */
+  syntax MatchResult ::= getMatching(Exp, Val)                      [function]
+                       | getMatchingAux(Exps, Vals)                 [function]
+                       | mergeMatching(MatchResult, MatchResult)    [function]
+                       | matchResult(Map)
+                       | "matchFailure"
+
+  rule getMatching(C:ConstructorName(Es:Exps), C(Vs:Vals)) => getMatchingAux(Es, Vs)
+  rule getMatching([Es:Exps], [Vs:Vals])                   => getMatchingAux(Es, Vs)
+  rule getMatching(C:ConstructorName, C) => matchResult(.Map)
+  rule getMatching(B:Bool, B)            => matchResult(.Map)
+  rule getMatching(I:Int, I)             => matchResult(.Map)
+  rule getMatching(S:String, S)          => matchResult(.Map)
+  rule getMatching(N:Name, V:Val) => matchResult(N |-> V)
+  rule getMatching(_, _) => matchFailure        [owise]
+
+  rule getMatchingAux((E:Exp, Es:Exps), (V:Val, Vs:Vals)) => mergeMatching(getMatching(E, V), getMatchingAux(Es, Vs))
+  rule getMatchingAux(.Exps, .Vals)                       => matchResult(.Map)
+  rule getMatchingAux(_, _) => matchFailure     [owise]
+
+  rule mergeMatching(matchResult(M1:Map), matchResult(M2:Map)) => matchResult(M1 M2)
+    requires intersectSet(keys(M1), keys(M2)) ==K .Set
+  //rule mergeMatching(_, _) => matchFailure      [owsie]
+  rule mergeMatching(matchResult(_:Map), matchFailure) => matchFailure
+  rule mergeMatching(matchFailure, matchResult(_:Map)) => matchFailure
+  rule mergeMatching(matchFailure, matchFailure)       => matchFailure
+
+/*@ Besides the generic decomposition rules for patterns and values,
+we also want to allow \texttt{[head|tail]} matching for lists, so we add
+the following custom pattern decomposition rule: */
+
+  rule getMatching([H:Exp | T:Exp], [V:Val, Vs:Vals])
+    => getMatchingAux((H, T), (V, [Vs]))
 endmodule

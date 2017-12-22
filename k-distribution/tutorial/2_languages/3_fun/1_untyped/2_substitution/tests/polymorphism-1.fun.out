@@ -1,5 +1,2 @@
-Search results:
-
-Solution 1:
-V:K -->
-fun (x -> x)
+Solution 1
+V ==K fun ( ( x -> x ) | .Cases )

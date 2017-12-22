@@ -1,6 +1,2 @@
-Search results:
-
-Solution 1:
-V:K -->
-x ~> HOLE, .Names ~> 2, HOLE ~> assignTo ( x, y , HOLE ) ~> y ~> env ( x |->
-   1 ) ~> env ( .Map )
+Solution 1
+V ==K ( x ~> #freezer_,_1 ( .Exps ) ~> #freezer_,_0 ( 2 ) ~> #freezerassignTo0 ( x , ( y , .Exps ) ) ~> y ~> env ( x |-> 1 ) ~> env ( .Map ) )

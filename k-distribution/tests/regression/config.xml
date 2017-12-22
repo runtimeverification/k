@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright (c) 2014-2015 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2014-2016 K Team. All Rights Reserved. -->
 
 <tests>
 
@@ -16,8 +16,8 @@
       extension="issue"
       >
     <all-programs>
-      <krun-option name="-output" value="sound" />
-	    <krun-option name="-parser" value="kast -parser ground" />
+      <krun-option name="-outpjavaBackendValuealue="sound" />
+	    <krun-option name="-parsjavaBackendValuealue="kast -parser ground" />
     </all-programs>
   </test>
 
@@ -28,10 +28,10 @@
       extension="test"
       skip="pdf"
       >
-    <kompile-option name="-w" value="all" />
+    <kompile-option name="javaBackendValuealue="all" />
       <all-programs>
-        <krun-option name="-output" value="none" />
-        <krun-option name="-color" value="off" />
+        <krun-option name="-outpjavaBackendValuealue="none" />
+        <krun-option name="-coljavaBackendValuealue="off" />
       </all-programs>
   </test>
 
@@ -78,6 +78,14 @@
 
   <include file="issue1724/config.xml"
            directory="issue1724"
+           skip="pdf" />
+
+  <include file="issue2182/config.xml"
+           directory="issue2182"
+           skip="pdf" />
+
+  <include file="issue2194/config.xml"
+           directory="issue2194"
            skip="pdf" />
 
 <!--  <include file="smt-sort-flattening/config.xml"

@@ -1,6 +1,4 @@
 // Copyright (c) 2014-2016 K Team. All Rights Reserved.
-require "../../kernelc.k"
-
 module TAIL-SPEC
   imports KERNELC
 
@@ -19,5 +17,4 @@ rule
     )
     list(Tail)(L:List)
   ...</heap>
-
 endmodule

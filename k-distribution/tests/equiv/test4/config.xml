@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2016 K Team. All Rights Reserved. -->
+<tests>
+    <test definition="imp.k"
+          extension="keq"
+          programs="."
+          results="."
+          customKrunCmd="keq"
+          posixInitScript="kompile.sh"
+          skip="pdf" >
+      <program name="1.keq">
+        <krun-option name="--def0" value="common-kompiled" />
+        <krun-option name="--def1" value="imp-kompiled" />
+        <krun-option name="--def2" value="lambda-kompiled" />
+        <krun-option name="--prove1" value="1-imp-spec.k" />
+        <krun-option name="--prove2" value="1-lambda-spec.k" />
+        <krun-option name="--smt_prelude" value="../../../../k-distribution/include/z3/basic.smt2" />
+      </program>
+    </test>
+</tests>

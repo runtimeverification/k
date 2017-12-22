@@ -60,7 +60,7 @@ module KERNELC-SYNTAX
     //| Expression "[" Expression "]"
     > "-" Expression                                    [seqstrict]
     | "+" Expression                                    [seqstrict]
-    | "!" Expression                                    [seqstrict]
+    | "!" Expression
     | "~" Expression                                    [seqstrict]
     | "*" Expression                                    [seqstrict]
     | "&" Expression
@@ -87,13 +87,14 @@ module KERNELC-SYNTAX
     > left: Expression "&" Expression                   [seqstrict]
     > left: Expression "^" Expression                   [seqstrict]
     > left: Expression "|" Expression                   [seqstrict]
-    > left: Expression "&&" Expression                  [prefer, seqstrict(1)]
-    > left: Expression "||" Expression                  [seqstrict(1)]
+    > left: Expression "&&" Expression                  [prefer]
+    > left: Expression "||" Expression
     > right: Expression "?" Expression ":" Expression
-  syntax Constant ::= Int
-                    | Float
+  syntax Constant ::= Primitive
                     | "NULL"
                     | String
+  syntax Primitive ::= Int
+                     | Float
   syntax Expressions ::= List{Expression, ","}          [seqstrict]
 
   syntax Id ::= "main"   [token]

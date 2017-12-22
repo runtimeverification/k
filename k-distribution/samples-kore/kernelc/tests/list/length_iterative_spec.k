@@ -1,6 +1,4 @@
 // Copyright (c) 2014-2016 K Team. All Rights Reserved.
-require "../../kernelc.k"
-
 module LENGTH-ITERATIVE-SPEC
   imports KERNELC
 
@@ -14,10 +12,10 @@ rule [loop-inv]:
   =>
     .K
   ...</k>
-  <env>...
+  <env>
     x |-> tv (struct listNode * * , object(LX:Int))
     y |-> tv (int *, object(LY:Int))
-  ...</env>
+  </env>
   <heap>...
     object(LX) |-> tv (struct listNode *, LP:Pointer => null)
     object(LY) |-> tv (int, L:Int => L +Int size(A))
@@ -35,5 +33,4 @@ rule [func-spec]:
   <heap>...
     list(LP)(A:List)
   ...</heap>
-
 endmodule

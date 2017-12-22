@@ -1,6 +1,4 @@
 // Copyright (c) 2014-2016 K Team. All Rights Reserved.
-require "../../kernelc.k"
-
 module TREE-TO-LIST-ITERATIVE-SPEC
   imports KERNELC
 
@@ -73,5 +71,4 @@ rule [func-spec]:
     list(?LP:Pointer)(tree2inorder(T))
   ...</heap>
   <out>... .List => rev(tree2inorder(T)) </out>
-
 endmodule

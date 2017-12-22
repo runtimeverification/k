@@ -23,4 +23,38 @@ object RewriteToTop {
   }
 
 
+  def bubbleRewriteToTopInsideCells(k: K): K = k match {
+    case kapp: KApply =>
+      if (isCell(kapp) && nonCell(kapp.items.get(0)))
+        KApply(kapp.klabel, immutable(kapp.klist.items) map makeRewriteIfNeeded, kapp.att)
+      else
+        KApply(kapp.klabel, immutable(kapp.klist.items) map bubbleRewriteToTopInsideCells, kapp.att)
+    case _ => k
+  }
+
+
+  def nonCell(k: K): Boolean = k match {
+    case kapp: KApply => if (!isCell(kapp)) {
+      immutable(kapp.klist.items) map nonCell forall { b => b }
+    } else {
+      false
+    }
+    case rw: KRewrite => nonCell(rw.left) && nonCell(rw.right)
+    case _ => true
+  }
+
+  def hasRewrite(k: K): Boolean = k match {
+    case t: KRewrite => true
+    case t: KApply => immutable(t.klist.items).foldLeft(false)((b,k) => b || hasRewrite(k))
+    case t: KSequence => immutable(t.items).foldLeft(false)((b,k) => b || hasRewrite(k))
+    case other => false
+  }
+
+  private def isCell(kapp: KApply): Boolean = {
+    kapp.klabel.name.startsWith("<") && kapp.klabel.name.endsWith(">")
+  }
+
+  private def makeRewriteIfNeeded(k: K): K = if (toLeft(k) != toRight(k)) ADT.KRewrite(toLeft(k), toRight(k)) else k
+
+
 }

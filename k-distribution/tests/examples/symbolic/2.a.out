@@ -1,0 +1,6 @@
+Solution 1
+<T> <k> false </k> </T>
+ AND V0 ==K false
+Solution 2
+<T> <k> true </k> </T>
+ AND V0 ==K true

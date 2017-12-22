@@ -101,4 +101,8 @@ module IMP
 // Stmts
   rule .Stmts => .                 [structural]
   rule S:Stmt Ss:Stmts => S ~> Ss  [structural]
+
+// verification ids
+  syntax Id ::= "n"     [token]
+              | "sum"   [token]
 endmodule

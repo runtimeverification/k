@@ -27,7 +27,7 @@ object Constructors {
   def SyntaxSort(sort: Sort) = definition.SyntaxSort(sort)
   def SyntaxSort(sort: Sort, att: attributes.Att) = definition.SyntaxSort(sort, att)
 
-  def Production(sort: Sort, items: Seq[ProductionItem]) = definition.Production(sort, items, Att())
+  def Production(sort: Sort, items: Seq[ProductionItem]) = definition.Production(sort, items, Att.empty)
   def Production(sort: Sort, items: Seq[ProductionItem], att: attributes.Att) = definition.Production(sort, items, att)
   def Production(klabel: String, sort: Sort, items: Seq[ProductionItem]) = definition.Production(klabel, sort, items)
   def Production(klabel: String, sort: Sort, items: Seq[ProductionItem], att: attributes.Att) = definition.Production(klabel, sort, items, att)
@@ -50,7 +50,7 @@ object Constructors {
   def Context(content: K, requires: K, att: attributes.Att) = definition.Context(content, requires, att)
 
   def Rule(body: K, requires: K, ensures: K, att: attributes.Att) = definition.Rule(body, requires, ensures, att)
-  def Rule(body: K, requires: K, ensures: K) = definition.Rule(body, requires, ensures, Att())
+  def Rule(body: K, requires: K, ensures: K) = definition.Rule(body, requires, ensures, Att.empty)
 
   def Bubble(sentenceType: String, content: String, att: attributes.Att) =
     definition.Bubble(sentenceType, content, att)

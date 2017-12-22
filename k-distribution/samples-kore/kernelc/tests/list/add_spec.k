@@ -1,6 +1,4 @@
 // Copyright (c) 2014-2016 K Team. All Rights Reserved.
-require "../../kernelc.k"
-
 module ADD-SPEC
   imports KERNELC
 
@@ -13,5 +11,4 @@ rule
     tv(struct listNode *, ?LP:Pointer)
   ...</k>
   <heap>... list(LP)(A:List) => list(?LP)(ListItem(V) A) ...</heap>
-
 endmodule

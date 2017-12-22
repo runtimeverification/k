@@ -1,0 +1,1 @@
+keq -v --debug --def0 common-kompiled --def1 imp-kompiled --def2 lambda-kompiled --prove1 1-imp-spec.k --prove2 1-lambda-spec.k --smt_prelude /Users/daejunpark/work/k/k-distribution/include/z3/basic.smt2

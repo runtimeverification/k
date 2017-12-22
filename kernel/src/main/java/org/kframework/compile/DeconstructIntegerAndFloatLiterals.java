@@ -134,9 +134,13 @@ public class DeconstructIntegerAndFloatLiterals {
             this.lhs = lhs;
         }
 
+        public boolean isLookupKLabel(KLabel k) {
+            return k.name().equals("#match") || k.name().equals("#mapChoice") || k.name().equals("#filterMapChoice") || k.name().equals("#setChoice");
+        }
+
         @Override
         public K apply(KApply k) {
-            if (ConvertDataStructureToLookup.isLookupKLabel(k)) {
+            if (isLookupKLabel(k.klabel())) {
                 assert k.klist().size() == 2;
                 K r = apply(k.klist().items().get(1));
                 lhs = true;

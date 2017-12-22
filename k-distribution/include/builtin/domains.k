@@ -20,15 +20,11 @@ module DOMAINS
   imports SET
 endmodule
 
-module ARRAY
+module ARRAY-SYNTAX
   imports LIST
-  imports STRING-SYNTAX
 
   syntax Array [hook(ARRAY.Array), unit(arrayCtor), element(_[_<-_])]
-
   syntax Array ::= makeArray(Int, K) [function, hook(ARRAY.make)]
-                 | makeEmptyArray(Int) [function, hook(ARRAY.makeEmpty)]
-                 | arrayCtor(String, Int) [function, hook(ARRAY.ctor)]
 
   syntax K ::= Array "[" Int "]" [function, hook(ARRAY.lookup)]
   syntax Array ::= Array "[" Int "<-" K "]" [function, hook(ARRAY.update), klabel(_[_<-_])]
@@ -36,7 +32,44 @@ module ARRAY
   syntax Array ::= updateArray(Array, Int, List) [function, hook(ARRAY.updateAll)]
 
   syntax Bool ::= Int "in_keys" "(" Array ")" [function, hook(ARRAY.in_keys)]
+endmodule
 
+module ARRAY-CONCRETE [concrete]
+  imports ARRAY-SYNTAX
+  imports LIST
+  imports STRING-SYNTAX
+
+  syntax Array ::= makeEmptyArray(Int) [function, hook(ARRAY.makeEmpty)]
+                 | arrayCtor(String, Int) [function, hook(ARRAY.ctor)]
+endmodule
+
+module ARRAY-SYMBOLIC [symbolic]
+  imports ARRAY-SYNTAX
+  imports MAP
+  imports INT
+
+  syntax Array ::= array(Map, Int, K)
+
+  rule makeArray(Len:Int, K:K) => array(.Map, Len, K)
+
+  rule array(_ I |-> K:K, _, _) [ I:Int ] => K
+  rule array(M:Map, _, K:K) [ I:Int ] => K requires notBool I in_keys(M)
+
+  rule array(M:Map, Len:Int, K:K) [ I:Int <- K2:K ] => array(M [ I <- K2 ], Len, K)
+       requires I >=Int 0 andBool I <Int Len
+  rule array(M:Map, Len:Int, K:K) [ I:Int <- _ ] => array(M, Len, K)
+       requires I<Int 0 orBool I >=Int Len
+  rule array(M:Map, Len:Int, K:K) [ I:Int <- undef ] => array(M [ I <- undef ], Len, K)
+
+  rule updateArray(array(M:Map, Len:Int, K:K), _, .List) => array(M, Len, K)
+  rule updateArray(array(M:Map, Len:Int, K:K), I:Int, ListItem(K2:K) L:List) => updateArray(array(M, Len, K) [ I <- K2 ], I +Int 1, L)
+
+  rule I:Int in_keys(array(M:Map, _, _)) => I in_keys(M)
+endmodule
+
+module ARRAY
+  imports ARRAY-CONCRETE
+  imports ARRAY-SYMBOLIC
 endmodule
 
 module MAP
@@ -51,7 +84,7 @@ module MAP
 
   /*@ Construct a new Map consisting of key/value pairs of two Maps (the keys of
    the two Maps are assumed disjoint) */
-  syntax Map ::= Map Map                        [left, function, hook(MAP.concat), klabel(_Map_), assoc, comm, unit(.Map), element(_|->_)]
+  syntax Map ::= Map Map                        [left, function, hook(MAP.concat), klabel(_Map_), assoc, comm, unit(.Map), element(_|->_), index(0)]
   /*@  Construct an empty Map */
   syntax Map ::= ".Map"                         [function, hook(MAP.unit), klabel(.Map), latex(\dotCt{Map})]
                // breaks klabel uniqueness
@@ -509,19 +542,29 @@ endmodule
 
 module STRING-BUFFER-SYNTAX
   imports BASIC-K
+  imports STRING
 
   syntax StringBuffer [hook(BUFFER.StringBuffer)]
   syntax StringBuffer ::= ".StringBuffer" [function, hook(BUFFER.empty), impure]
+  syntax StringBuffer ::= StringBuffer "+String" String [function, left, hook(BUFFER.concat), avoid]
+  syntax String ::= StringBuffer2String ( StringBuffer ) [function, hook(BUFFER.toString)]
+endmodule
+
+module STRING-BUFFER-SYMBOLIC [symbolic]
+  imports STRING-BUFFER-SYNTAX
+  imports STRING-SYNTAX
+  imports BOOL-SYNTAX
+
+  syntax StringBuffer ::= String
+
+  rule .StringBuffer => ""
+
+  rule StringBuffer2String(S:String) => S
 endmodule
 
 module STRING-BUFFER
   imports STRING-BUFFER-SYNTAX
-  imports STRING-SYNTAX
-
-  syntax StringBuffer ::= StringBuffer "+String" String [function, left, hook(BUFFER.concat)]
-
-  syntax String ::= StringBuffer2String ( StringBuffer ) [function, hook(BUFFER.toString)]
-
+  imports STRING-BUFFER-SYMBOLIC
 endmodule
 
 module ID-PROGRAM-PARSING
@@ -993,7 +1036,7 @@ module MINT
                 | xorMInt(MInt, MInt)   [function, hook(MINT.xor), smtlib(bvxor)]
 
   syntax MInt ::= negMInt(MInt)   [function]
-  rule negMInt(MI:MInt) => xorMInt(MI, mi(bitwidthMInt(MI), 0))
+  rule negMInt(MI:MInt) => xorMInt(MI, mi(bitwidthMInt(MI), -1))
 
   /*@ Comparison operations */
   syntax Bool ::= sltMInt(MInt, MInt)   [function, hook(MINT.slt), smtlib(bvslt)]

@@ -1,18 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright (c) 2013-2015 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2013-2016 K Team. All Rights Reserved. -->
 <tests>
 
   <test
       definition="fun-untyped.k"
       programs="../../../programs"
       extension="fun"
-      exclude="callcc-looping references-5
-               constructor-bst-sorting constructor-expr-distributivity factorial-and-list-max nth pattern references-1 stuck-letrec"
-      results="../../1_environment/tests ." >
-      <kompile-option name="--backend" value="java" />
-      <all-programs>
-        <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
-       </all-programs>
+      results="../../1_environment/tests ."
+      exclude="callcc-looping references-5 constructor-bst-sorting constructor-expr-distributivity factorial-and-list-max nth pattern references-1 stuck-letrec" >
+    <all-programs>
+      <krun-option name="--pattern" value="&lt;k&gt; V:K &lt;/k&gt;" />
+    </all-programs>
   </test>
 
 </tests>

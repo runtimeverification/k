@@ -65,11 +65,11 @@ trait Sorting {
 
 object Module {
   def apply(name: String, unresolvedLocalSentences: Set[Sentence]): Module = {
-    new Module(name, Set(), unresolvedLocalSentences, Att())
+    new Module(name, Set(), unresolvedLocalSentences, Att.empty)
   }
 }
 
-case class Module(val name: String, val imports: Set[Module], localSentences: Set[Sentence], @(Nonnull@param) val att: Att = Att())
+case class Module(val name: String, val imports: Set[Module], localSentences: Set[Sentence], @(Nonnull@param) val att: Att = Att.empty)
   extends ModuleToString with OuterKORE with Sorting with Serializable {
   assert(att != null)
 
@@ -177,8 +177,8 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
 
   private def mergeAttributes[T <: Sentence](p: Set[T]) = {
     val union = p.flatMap(_.att.att)
-    val attMap = union.collect({ case t@KApply(KLabel(_), _) => t }).groupBy(_.klabel)
-    Att(union.filter { k => !k.isInstanceOf[KApply] || attMap(k.asInstanceOf[KApply].klabel).size == 1 }.toMap)
+    val attMap = union.groupBy({ case ((name, _), _) => name})
+    Att(union.filter { key => attMap(key._1._1).size == 1 }.toMap)
   }
 
   lazy val definedSorts: Set[Sort] = (productions map {_.sort}) ++ (sortDeclarations map {_.sort})
@@ -251,17 +251,17 @@ trait Sentence {
 }
 
 // deprecated
-case class Context(body: K, requires: K, att: Att = Att()) extends Sentence with OuterKORE with ContextToString
+case class Context(body: K, requires: K, att: Att = Att.empty) extends Sentence with OuterKORE with ContextToString
 
-case class Rule(body: K, requires: K, ensures: K, att: Att = Att()) extends Sentence with RuleToString with OuterKORE
+case class Rule(body: K, requires: K, ensures: K, att: Att = Att.empty) extends Sentence with RuleToString with OuterKORE
 
-case class ModuleComment(comment: String, att: Att = Att()) extends Sentence with OuterKORE
+case class ModuleComment(comment: String, att: Att = Att.empty) extends Sentence with OuterKORE
 
 // hooked
 
 // syntax declarations
 
-case class SyntaxPriority(priorities: Seq[Set[Tag]], att: Att = Att())
+case class SyntaxPriority(priorities: Seq[Set[Tag]], att: Att = Att.empty)
   extends Sentence with SyntaxPriorityToString with OuterKORE
 
 object Associativity extends Enumeration {
@@ -272,7 +272,7 @@ object Associativity extends Enumeration {
 case class SyntaxAssociativity(
                                 assoc: Associativity.Value,
                                 tags: Set[Tag],
-                                att: Att = Att())
+                                att: Att = Att.empty)
   extends Sentence with SyntaxAssociativityToString with OuterKORE
 
 case class Tag(name: String) extends TagToString with OuterKORE
@@ -285,7 +285,7 @@ case class Tag(name: String) extends TagToString with OuterKORE
 //    att.get(Production.kLabelAttribute).headOption map { case KList(KToken(s, _, _)) => s } map { KLabel(_) }
 //}
 
-case class SyntaxSort(sort: Sort, att: Att = Att()) extends Sentence
+case class SyntaxSort(sort: Sort, att: Att = Att.empty) extends Sentence
   with SyntaxSortToString with OuterKORE {
   def items = Seq()
 }
@@ -295,7 +295,7 @@ case class Production(sort: Sort, items: Seq[ProductionItem], att: Att)
   lazy val klabel: Option[KLabel] = att.getOption("klabel") map {org.kframework.kore.KORE.KLabel(_)}
 
   override def equals(that: Any) = that match {
-    case p@Production(`sort`, `items`, _) => this.klabel == p.klabel && this.att.getOption("poly") == p.att.getOption("poly")
+    case p@Production(`sort`, `items`, _) => this.klabel == p.klabel && this.att.getOption("poly") == p.att.getOption("poly") && this.att.getOption("function") == p.att.getOption("function")
     case _ => false
   }
 
@@ -376,7 +376,7 @@ case class Production(sort: Sort, items: Seq[ProductionItem], att: Att)
 }
 
 object Production {
-  def apply(klabel: String, sort: Sort, items: Seq[ProductionItem], att: Att = Att()): Production = {
+  def apply(klabel: String, sort: Sort, items: Seq[ProductionItem], att: Att = Att.empty): Production = {
     Production(sort, items, att.add("klabel", klabel))
   }
 

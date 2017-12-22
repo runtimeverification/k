@@ -11,8 +11,8 @@ case class Att(att: Map[(String, Class[_]), Any]) extends AttributesToString {
   def contains(key: String): Boolean = att.contains((key, classOf[String]))
   def contains(key: String, cls: Class[_]): Boolean = att.contains((key, cls))
 
-  def get(key: String): String = getOption(key).get
   def get[T](key: Class[T]): T = getOption(key).get
+  def get(key: String): String = getOption(key).get
   def get[T](key: String, cls: Class[T]): T = getOption(key, cls).get
   def getOption(key: String): Option[String] = att.get((key, classOf[String])).asInstanceOf[Option[String]]
   def getOption[T](key: Class[T]): Option[T] = att.get((key.getName, key)).asInstanceOf[Option[T]]
@@ -37,7 +37,7 @@ case class Att(att: Map[(String, Class[_]), Any]) extends AttributesToString {
 
 object Att {
 
-  def apply(): Att = Att(Map.empty)
+  val empty: Att = Att(Map.empty)
 
   /**
    * attribute marking the top rule label

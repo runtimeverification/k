@@ -1,5 +1,2 @@
-Search results:
-
-Solution 1:
-V:K -->
-closure ( .Map , x -> let y = x in y )
+Solution 1
+V ==K closure ( .Map , ( x -> let ( y = x ) and .Bindings in y ) | .Cases )

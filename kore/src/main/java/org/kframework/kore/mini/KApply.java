@@ -83,7 +83,7 @@ public abstract class KApply extends AbstractList implements org.kframework.kore
 
     @Override
     public Att att() {
-        return Att.apply();
+        return Att.empty();
     }
 
     @Override

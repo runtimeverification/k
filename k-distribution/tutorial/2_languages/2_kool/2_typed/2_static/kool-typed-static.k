@@ -110,8 +110,7 @@ the wrapper in the generated documentation, we associate it an
 //@ \subsection{Types}
 
   syntax Type ::= "void" | "int" | "bool" | "string"
-                | Id      // TODO: switch to next once #2112 fixed
-//                | Id                     [klabel("class")]  // see next
+                | Id                     [klabel("class"), avoid]  // see next
                 | class(Id)         // explicit KOOL class type
                 | Type "[" "]"
                 > Types "->" Type
@@ -131,6 +130,9 @@ the wrapper in the generated documentation, we associate it an
 
 //@ \subsection{Expressions}
 
+  syntax FieldReference ::= Exp "." Id          [strict(1)]
+  syntax ArrayReference ::= Exp "[" Exps "]"    [strict]
+
   syntax Exp ::= Int | Bool | String | Id
                | "this"
                | "super"
@@ -139,8 +141,6 @@ the wrapper in the generated documentation, we associate it an
                | Exp "instanceOf" Id     [strict(1)]
                | "(" Id ")" Exp          [strict(2)]
                | "new" Id "(" Exps ")"   [strict(2)]
-               | Exp "." Id              [strict(1)]
-               > Exp "[" Exps "]"        [strict]
                > Exp "(" Exps ")"        [strict]
                | "-" Exp                 [strict]
                | "sizeOf" "(" Exp ")"    [strict]
@@ -165,6 +165,9 @@ the wrapper in the generated documentation, we associate it an
                | Exp "||" Exp            [strict, left]
                > "spawn" Block  // not strict: to check return and exceptions
                > Exp "=" Exp             [strict(2), right]
+
+  syntax Exp ::= FieldReference | ArrayReference
+  syntax priority _._ > _[_] > _(_)
 
   syntax Exps ::= List{Exp,","}          [strict]
 
@@ -368,11 +371,9 @@ typed SIMPLE, so we do not discuss them much here. */
   rule mkDecls(T:Type X:Id, Ps:Params) => T X; mkDecls(Ps)
   rule mkDecls(.Params) => {}
 
-// We would like to say the following instead of the predicate rule below:
-//  syntax LValue ::= Id | Exp "[" Exps "]"
-// but unfortunately that currently generates some ambiguous parsings.
   syntax LValue ::= Id
-  rule isLValue(_:Exp[_:Exps]) => true
+                  | FieldReference
+                  | ArrayReference
 
   syntax Exp ::= ltype(Exp)
 // We would like to say:
@@ -605,7 +606,7 @@ checks for cycles. */
          <extendsAll> SetItem(C) Cs:Set (.Set => SetItem(C')) </extendsAll>
        ...</class>
        <class>... <className>C</className> <extends>C'</extends> ...</class>
-    when notBool(C' in SetItem(C) Cs)  [structural]
+    when notBool(C' in (SetItem(C) Cs))  [structural]
 
   rule (<T>...
           <className> C </className>
@@ -686,11 +687,6 @@ wait.  Finally, the sixth rule below reports an error when the
   rule <k> X:Id => this . X ...</k>
        <tenv> Rho </tenv>
     when notBool(X in keys(Rho))
-
-// We would like to say the following instead of the predicate rule below:
-//  syntax LValue ::= Exp "." Id
-// but unfortunately that currently generates some ambiguous parsings.
-  rule isLValue(_:Exp . _:Id) => true
 
 // OLD approach:
 //  rule ltype(E:Exp . X:Id) => E . X  [structural]

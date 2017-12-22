@@ -1,11 +1,4 @@
-Search results:
-
-Solution 1:
-Solution:Map -->
-L1:Term |-> cons ( a (  ), cons ( b (  ), nil (  ) ) )
-L2:Term |-> nil (  )
-
-Solution 2:
-Solution:Map -->
-L1:Term |-> nil (  )
-L2:Term |-> cons ( b (  ), cons ( a (  ), nil (  ) ) )
+Solution 1
+Solution ==K ( L1:Term@LOGIK-COMMON |-> nil L2:Term@LOGIK-COMMON |-> ( cons ( b , ( cons ( a , ( nil , .Terms ) ) , .Terms ) ) ) )
+Solution 2
+Solution ==K ( L1:Term@LOGIK-COMMON |-> ( cons ( a , ( cons ( b , ( nil , .Terms ) ) , .Terms ) ) ) L2:Term@LOGIK-COMMON |-> nil )

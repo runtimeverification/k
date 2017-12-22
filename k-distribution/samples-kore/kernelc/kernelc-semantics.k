@@ -73,8 +73,7 @@ module KERNELC-SEMANTICS
   syntax EvaluatedExpressions ::= List{EvaluatedExpression, ","}
 
   syntax TypedValue ::= "tv" "(" Type "," Value ")"
-  syntax Value ::= Int
-                 | Float
+  syntax Value ::= Primitive
                  | Pointer
                  | "undef"
   syntax Pointer ::= "object" "(" Int ")"           [smtlib(smt_pointer_object)]

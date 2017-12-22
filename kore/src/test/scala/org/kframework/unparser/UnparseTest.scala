@@ -15,7 +15,7 @@ class UnparseTest {
   }
 
   @Test def WrappedKLabel() {
-    Assert.assertEquals("#klabel(foo)",ToKast(InjectedKLabel('foo, Att())))
+    Assert.assertEquals("#klabel(foo)",ToKast(InjectedKLabel('foo, Att.empty)))
   }
 
   @Test def EmptyApp() {
@@ -27,7 +27,7 @@ class UnparseTest {
   }
 
   @Test def SequenceEmpty() {
-    Assert.assertEquals(".K",ToKast(ADT.KSequence(List(),Att())))
+    Assert.assertEquals(".K",ToKast(ADT.KSequence(List(),Att.empty)))
   }
 
   @Test def Sequence() {
@@ -61,7 +61,7 @@ class UnparseTest {
   @Test def testKeywords(): Unit = {
     Assert.assertEquals("#a(.KList)~>`#klabel`(.KList)~>#klabel(test)~>`#token`(.KList)~>#token(\"1\",\"Int\")",
       ToKast(KSequence(KLabel("#a")(),
-        KLabel("#klabel")(), InjectedKLabel(KLabel("test"),Att()),
+        KLabel("#klabel")(), InjectedKLabel(KLabel("test"),Att.empty),
         KLabel("#token")(),  KToken("1", Sort("Int")))))
   }
 }

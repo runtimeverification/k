@@ -68,13 +68,20 @@ public class CompiledDefinition implements Serializable {
         this.programStartSymbol = configurationVariableDefaultSorts.getOrDefault("$PGM", Sorts.K());
         this.topCellInitializer = topCellInitializer;
         this.languageParsingModule = kompiledDefinition.getModule("LANGUAGE-PARSING").get();
-        this.exitCodePattern = new Kompile(kompileOptions, files, kem).compileRule(kompiledDefinition, getExitCodeRule(parsedDefinition));
+        Rule exitCodeRule = getExitCodeRule(parsedDefinition);
+        if (exitCodeRule == null) {
+            this.exitCodePattern = null;
+        } else {
+            this.exitCodePattern = new Kompile(kompileOptions, files, kem).compileRule(kompiledDefinition, exitCodeRule);
+        }
     }
 
     private Rule getExitCodeRule(Definition parsedDefinition) {
         Module mainMod = parsedDefinition.mainModule();
         Set<Production> exitProds = stream(mainMod.productions()).filter(p -> p.att().contains("exit")).collect(Collectors.toSet());
-        if (exitProds.size() != 1) {
+        if (exitProds.size() == 0) {
+            return null;
+        } else if (exitProds.size() > 1) {
             throw KEMException.compilerError("Found more than one or zero productions with 'exit' attribute. Exactly one production, a cell, must have this attribute, designating the exit code of krun. Found:\n" + exitProds);
         }
         Production exitProd = exitProds.iterator().next();

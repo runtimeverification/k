@@ -285,15 +285,6 @@ public abstract class ASTNode implements Serializable {
     }
 
     /**
-     * Sets the attributes object associated to this ASTNode.
-     *
-     * @param attrs
-     */
-    public void setAttributes(Attributes attrs) {
-        attributes = attrs;
-    }
-
-    /**
      * Copies attributes from another node into this node.
      * Use this in preference to {@link ASTNode#getAttributes} where appropriate because
      * the latter will create a new object if no attributes exist.
@@ -306,15 +297,17 @@ public abstract class ASTNode implements Serializable {
     }
 
     /**
+     * Sets the attributes object associated to this ASTNode.
+     *
+     * @param attrs
+     */
+    public void setAttributes(Attributes attrs) {
+        attributes = attrs;
+    }
+
+    /**
      * @return a copy of the ASTNode containing the same fields.
      */
     public abstract ASTNode shallowCopy();
 
-    public int computeHashCode() {
-        throw new AssertionError("Subclasses should implement their own hashCode so this code should not be reachable");
-    }
-
-    public int cachedHashCode() {
-        throw new AssertionError("Subclasses should implement their own hashCode so this code should not be reachable");
-    }
 }

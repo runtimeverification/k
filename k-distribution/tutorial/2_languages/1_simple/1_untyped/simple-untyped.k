@@ -317,6 +317,15 @@ sort.  The \textsf{k} cell is initialized with the program that will be passed
 to the \K tool, as indicated by the \textit{\$PGM} variable, followed by the
 \texttt{execute} task (defined shortly). */
 
+  // the syntax declarations below are required because the sorts are
+  // referenced directly by a production and, because of the way KIL to KORE
+  // is implemented, the configuration syntax is not available yet
+  // should simply work once KIL is removed completely
+  // check other definitions for this hack as well
+
+  syntax ControlCell
+  syntax ControlCellFragment
+
   configuration <T color="red">
                   <threads color="orange">
                     <thread multiplicity="*" color="yellow">

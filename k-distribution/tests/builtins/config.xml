@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2016 K Team. All Rights Reserved. -->
+<tests>
+    <test definition="crypto/crypto.k"
+          extension="crypto"
+          programs="crypto"
+          results="crypto"
+          skip="pdf" >
+    </test>
+    <test definition="array/array-test.k"
+          extension="array"
+          programs="array"
+          results="array"
+          skip="pdf" >
+    </test>
+    <include file="mint/config.xml" directory="mint" skip="pdf" />
+</tests>

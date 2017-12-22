@@ -1,34 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright (c) 2013-2015 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2013-2016 K Team. All Rights Reserved. -->
 <tests>
 
   <test
       definition="kool-typed-static.k"
       programs="../../programs"
       extension="kool"
+      exclude="return-object"
       results="." >
       <kompile-option name="--transition" value="inheritance-cycle" />
-      <kompile-option name="--backend" value="java" />
-      <all-programs>
-        <krun-option name="--output" value="none"/>
-        <krun-option name="--smt" value="none" />
-        <krun-option name="--symbolic-execution" />
-      </all-programs>
-      <program name="cycle.kool">
-        <krun-option name="--search" />
-        <krun-option name="--pattern" value="&lt;out&gt; L:List &lt;/out&gt;" />
-        <krun-option name="--smt" value="none" />
-        <krun-option name="--symbolic-execution" />
-      </program>
-  </test>
-
-  <test
-      definition="kool-typed-static.k"
-      programs="../../programs"
-      extension="kool"
-      results="." >
-      <kompile-option name="--transition" value="inheritance-cycle" />
-      <kompile-option name="--backend" value="java" />
       <all-programs>
         <krun-option name="--output" value="none"/>
       </all-programs>

@@ -26,7 +26,7 @@ public class KVariable implements org.kframework.kore.KVariable {
 
     @Override
     public Att att() {
-        return Att.apply();
+        return Att.empty();
     }
 
     @Override

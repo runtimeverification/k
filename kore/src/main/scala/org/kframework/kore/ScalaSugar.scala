@@ -11,10 +11,10 @@ trait ScalaSugared[K <: kore.K] {
 
   import c._
 
-  implicit def stringToToken(s: String) = KToken(s, Sorts.String, Att())
-  def stringToId(s: String): K = KToken(s, Sorts.Id, Att())
+  implicit def stringToToken(s: String) = KToken(s, Sorts.String, Att.empty)
+  def stringToId(s: String): K = KToken(s, Sorts.Id, Att.empty)
   implicit def symbolToLabel(l: Symbol) = KLabel(l.name)
-  implicit def intToToken(n: Int): K = KToken(n.toString, Sorts.Int, Att())
+  implicit def intToToken(n: Int): K = KToken(n.toString, Sorts.Int, Att.empty)
 
   implicit class ApplicableKLabel(klabel: KLabel) {
     def apply(l: K*): K = c.KApply(klabel, l: _*)
@@ -25,8 +25,8 @@ trait ScalaSugared[K <: kore.K] {
   }
 
   implicit class EnhancedK(k: K) {
-    def ~>(other: K) = KSequence(Seq(k, other).asJava, Att())
-    def ==>(other: K) = KRewrite(k, other, Att())
+    def ~>(other: K) = KSequence(Seq(k, other).asJava, Att.empty)
+    def ==>(other: K) = KRewrite(k, other, Att.empty)
     def +(other: K) = KLabel("+")(k, other)
     def -(other: K) = KLabel("-")(k, other)
     def *(other: K) = KLabel("*")(k, other)
@@ -39,5 +39,5 @@ trait ScalaSugared[K <: kore.K] {
 
   def KList[KK <: K](ks: Seq[KK]): KList = c.KList(ks.asJava)
 
-  def KApply[KK <: K](klabel: KLabel, ks: Seq[KK], att: Att = Att()): K = c.KApply(klabel, c.KList(ks.asJava), att)
+  def KApply[KK <: K](klabel: KLabel, ks: Seq[KK], att: Att = Att.empty): K = c.KApply(klabel, c.KList(ks.asJava), att)
 }

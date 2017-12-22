@@ -1,5 +1,2 @@
-Search results:
-
-Solution 1:
-V:K -->
-closure ( .Map , Nothing -> 7 )
+Solution 1
+V ==K closure ( .Map , ( Nothing -> 7 ) | .Cases )

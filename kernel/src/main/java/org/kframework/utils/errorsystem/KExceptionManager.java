@@ -99,8 +99,16 @@ public class KExceptionManager {
         register(ExceptionType.WARNING, KExceptionGroup.CRITICAL, message, null, null, null);
     }
 
+    public void registerCriticalHiddenWarning(String message) {
+        register(ExceptionType.HIDDENWARNING, KExceptionGroup.CRITICAL, message, null, null, null);
+    }
+
     public void registerCriticalWarning(String message, Throwable e) {
         register(ExceptionType.WARNING, KExceptionGroup.CRITICAL, message, e, null, null);
+    }
+
+    public void registerCriticalWarning(String message, K node) {
+        register(ExceptionType.WARNING, KExceptionGroup.CRITICAL, message, null, node.att().getOptional(Location.class).orElse(null), node.att().getOptional(Source.class).orElse(null));
     }
 
     public void registerInternalWarning(String message) {
@@ -117,6 +125,10 @@ public class KExceptionManager {
 
     public void registerInternalHiddenWarning(String message) {
         register(ExceptionType.HIDDENWARNING, KExceptionGroup.INTERNAL, message, null, null, null);
+    }
+
+    public void registerInternalHiddenWarning(String message, K node) {
+        register(ExceptionType.HIDDENWARNING, KExceptionGroup.INTERNAL, message, null, node.att().getOptional(Location.class).orElse(null), node.att().getOptional(Source.class).orElse(null));
     }
 
     private static KEMException create(ExceptionType type, KExceptionGroup group, String message,

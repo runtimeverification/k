@@ -32,12 +32,9 @@
 (declare-fun smt_seq2set (IntSeq) IntSet)
 (declare-fun smt_seq_sorted (IntSeq) Bool)
 
-(assert (forall ((s1 IntSeq) (s2 IntSeq)) (! (= (smt_seq_sorted (smt_seq_concat s1 s2)) (and (smt_set_le (smt_seq2set s1) (smt_seq2set s2)) (smt_seq_sorted s1) (smt_seq_sorted s2)))
-	:pattern ((smt_seq_sorted (smt_seq_concat s1 s2)))
-	:pattern ((smt_seq_sorted s1) (smt_seq_sorted s2))
-)))
+(assert (forall ((s1 IntSeq) (s2 IntSeq) (s3 IntSeq)) (= (smt_seq_concat s1 (smt_seq_concat s2 s3)) (smt_seq_concat (smt_seq_concat s1 s2) s3))))
 
 (assert (forall ((e1 Int) (e2 Int) (s1 IntSeq) (s2 IntSeq)) (= (= (smt_seq_concat (smt_seq_elem e1) s1) (smt_seq_concat (smt_seq_elem e2) s2)) (and (= e1 e2) (= s1 s2)))))
 
 (declare-fun smt_seq_filter (Int IntSeq) IntSeq)
-(assert (forall ((v Int) (e Int)) (= (smt_seq_filter v (smt_seq_elem e)) (ite (= v e) smt_seq_nil (smt_seq_elem e)))))
+;(assert (forall ((v Int) (e Int)) (= (smt_seq_filter v (smt_seq_elem e)) (ite (= v e) smt_seq_nil (smt_seq_elem e)))))

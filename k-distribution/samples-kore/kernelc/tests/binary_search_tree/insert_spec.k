@@ -11,8 +11,6 @@ rule
     tv(struct treeNode *, ?TP2:Pointer)
   ...</k>
   <heap>... tree(TP1)(T1:Tree) => tree(?TP2)(?T2:Tree) ...</heap>
-  <in> IN:List </in>
-  <out> OUT:List </out>
 requires bst(T1)
 ensures bst(?T2) andBool tree_keys(?T2) ==K { V } U tree_keys(T1)
 endmodule

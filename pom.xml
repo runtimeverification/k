@@ -18,6 +18,7 @@
     <module>ktree</module>
     <module>k-distribution</module>
     <module>API</module>
+    <module>java-backend</module>
   </modules>
 
   <scm>

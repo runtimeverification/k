@@ -1,5 +1,2 @@
-Search results:
-
-Solution 1:
-T:Type -->
-( int -> V0 ) -> ( int -> V0 )
+Solution 1
+T ==K ( ( int -> V0 ) -> ( int -> V0 ) )

@@ -1,6 +1,4 @@
 // Copyright (c) 2014-2016 K Team. All Rights Reserved.
-require "../../kernelc.k"
-
 module INORDER-SPEC
   imports KERNELC
 
@@ -16,5 +14,4 @@ rule
     tree(TP)(T:Tree)
   ...</heap>
   <out>... .List => tree2inorder(T) </out>
-
 endmodule

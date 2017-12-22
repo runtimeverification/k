@@ -1,5 +1,2 @@
-Search results:
-
-Solution 1:
-V:K -->
-fun (x -> (fun ([ y ] -> y)) [ x ])
+Solution 1
+V ==K fun ( ( x -> ( ( fun ( ( [ y , .Exps ] -> y ) | .Cases ) ) [ x , .Exps ] ) ) | .Cases )

@@ -1,10 +1,10 @@
 // Copyright (c) 2014-2016 K Team. All Rights Reserved.
 package org.kframework.utils.options;
 
-import java.io.Serializable;
-
 import com.beust.jcommander.Parameter;
 import com.google.inject.Inject;
+
+import java.io.Serializable;
 
 public class SMTOptions implements Serializable {
 
@@ -29,8 +29,14 @@ public class SMTOptions implements Serializable {
         }
     }
 
+    @Parameter(names="--ignore-missing-smtlib-warning", description="Suppress warning when SMTLib translation fails.")
+    public boolean ignoreMissingSMTLibWarning = false;
+
     @Parameter(names="--floats-as-po", description="Abstracts floating-point values as a partial order relation.")
     public boolean floatsAsPO = false;
+
+    @Parameter(names="--maps-as-int-array", description="Abstracts map values as an array of ints.")
+    public boolean mapAsIntArray = false;
 
     @Parameter(names="--smt_prelude", description="Path to the SMT prelude file.")
     public String smtPrelude;

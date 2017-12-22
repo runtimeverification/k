@@ -1,32 +1,10 @@
-Search results:
-
-Solution 1:
-Solution:Map -->
-L1:Term |-> cons ( _0:Term, cons ( _1:Term, cons ( _2:Term, cons ( _3:Term, 
-  nil ) ) ) )
-L2:Term |-> L2:Term
-L3:Term |-> cons ( _0, cons ( _1, cons ( _2, cons ( _3, cons ( a, L2 ) ) ) ) )
-
-Solution 2:
-Solution:Map -->
-L1:Term |-> cons ( _0:Term, cons ( _1:Term, cons ( _2:Term, nil ) ) )
-L2:Term |-> L2:Term
-L3:Term |-> cons ( _0, cons ( _1, cons ( _2, cons ( a, L2 ) ) ) )
-
-Solution 3:
-Solution:Map -->
-L1:Term |-> cons ( _0:Term, cons ( _1:Term, nil ) )
-L2:Term |-> L2:Term
-L3:Term |-> cons ( _0, cons ( _1, cons ( a, L2 ) ) )
-
-Solution 4:
-Solution:Map -->
-L1:Term |-> cons ( _0:Term, nil )
-L2:Term |-> L2:Term
-L3:Term |-> cons ( _0, cons ( a, L2 ) )
-
-Solution 5:
-Solution:Map -->
-L1:Term |-> nil
-L2:Term |-> L2:Term
-L3:Term |-> cons ( a, L2 )
+Solution 1
+Solution ==K ( L1:Term@LOGIK-COMMON |-> nil L2:Term@LOGIK-COMMON |-> L2 L3:Term@LOGIK-COMMON |-> ( cons ( a , ( L2 , .Terms ) ) ) )
+Solution 2
+Solution ==K ( L1:Term@LOGIK-COMMON |-> ( cons ( V0 , ( nil , .Terms ) ) ) L2:Term@LOGIK-COMMON |-> L2 L3:Term@LOGIK-COMMON |-> ( cons ( V0 , ( cons ( a , ( L2 , .Terms ) ) , .Terms ) ) ) )
+Solution 3
+Solution ==K ( L1:Term@LOGIK-COMMON |-> ( cons ( V0 , ( cons ( V1 , ( nil , .Terms ) ) , .Terms ) ) ) L2:Term@LOGIK-COMMON |-> L2 L3:Term@LOGIK-COMMON |-> ( cons ( V0 , ( cons ( V1 , ( cons ( a , ( L2 , .Terms ) ) , .Terms ) ) , .Terms ) ) ) )
+Solution 4
+Solution ==K ( L1:Term@LOGIK-COMMON |-> ( cons ( V0 , ( cons ( V1 , ( cons ( V2 , ( nil , .Terms ) ) , .Terms ) ) , .Terms ) ) ) L2:Term@LOGIK-COMMON |-> L2 L3:Term@LOGIK-COMMON |-> ( cons ( V0 , ( cons ( V1 , ( cons ( V2 , ( cons ( a , ( L2 , .Terms ) ) , .Terms ) ) , .Terms ) ) , .Terms ) ) ) )
+Solution 5
+Solution ==K ( L1:Term@LOGIK-COMMON |-> ( cons ( V0 , ( cons ( V1 , ( cons ( V2 , ( cons ( V3 , ( nil , .Terms ) ) , .Terms ) ) , .Terms ) ) , .Terms ) ) ) L2:Term@LOGIK-COMMON |-> L2 L3:Term@LOGIK-COMMON |-> ( cons ( V0 , ( cons ( V1 , ( cons ( V2 , ( cons ( V3 , ( cons ( a , ( L2 , .Terms ) ) , .Terms ) ) , .Terms ) ) , .Terms ) ) , .Terms ) ) ) )

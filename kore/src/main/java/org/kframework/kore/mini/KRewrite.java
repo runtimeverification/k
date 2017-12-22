@@ -33,7 +33,7 @@ public class KRewrite implements org.kframework.kore.KRewrite {
 
     @Override
     public Att att() {
-        return Att.apply();
+        return Att.empty();
     }
 
     @Override

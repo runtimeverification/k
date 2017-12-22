@@ -1,7 +1,7 @@
 Search results:
 
 Solution 1:
-Solution:Map -->
+Solution:Map@MAP -->
 "L1" |-> '_`(_`)(cons,, #symVariable(1), (cons ( (#symVariable(6), (cons ( (
   #symVariable(11), (cons ( (#symVariable(16), (nil ( .Vals ))) ))) ))) )))
 "L2" |-> L2
@@ -10,7 +10,7 @@ Solution:Map -->
    ))) ))) )))
 
 Solution 2:
-Solution:Map -->
+Solution:Map@MAP -->
 "L1" |-> '_`(_`)(cons,, #symVariable(1), (cons ( (#symVariable(6), (cons ( (
   #symVariable(11), (nil ( .Vals ))) ))) )))
 "L2" |-> L2
@@ -18,7 +18,7 @@ Solution:Map -->
   #symVariable(11), (cons ( ((a ( .Vals )), L2) ))) ))) )))
 
 Solution 3:
-Solution:Map -->
+Solution:Map@MAP -->
 "L1" |-> '_`(_`)(cons,, #symVariable(1), (cons ( (#symVariable(6), (nil ( 
   .Vals ))) )))
 "L2" |-> L2
@@ -26,13 +26,13 @@ Solution:Map -->
    ( .Vals )), L2) ))) )))
 
 Solution 4:
-Solution:Map -->
+Solution:Map@MAP -->
 "L1" |-> '_`(_`)(cons,, #symVariable(1), (nil ( .Vals )))
 "L2" |-> L2
 "L3" |-> '_`(_`)(cons,, #symVariable(1), (cons ( ((a ( .Vals )), L2) )))
 
 Solution 5:
-Solution:Map -->
+Solution:Map@MAP -->
 "L1" |-> '_`(_`)(nil,, .List{","})
 "L2" |-> L2
 "L3" |-> '_`(_`)(cons,, (a ( .List{","} )), L2)

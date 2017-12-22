@@ -1,0 +1,9 @@
+Solution 1
+<T> <k> "default" </k> </T>
+ AND V0 ==K ""
+Solution 2
+<T> <k> "f" </k> </T>
+ AND V0 ==K "f"
+Solution 3
+<T> <k> "t" </k> </T>
+ AND V0 ==K "t"

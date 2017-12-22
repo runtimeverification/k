@@ -22,7 +22,7 @@ object KORE extends Constructors[K] with ScalaSugared[K] {
 
   val constructor = this
 
-  lazy val Att = attributes.Att()
+  lazy val Att = attributes.Att.empty
 
   def Location(startLine: Int, startColumn: Int, endLine: Int, endColumn: Int) = attributes.Location(startLine,
     startColumn, endLine, endColumn)

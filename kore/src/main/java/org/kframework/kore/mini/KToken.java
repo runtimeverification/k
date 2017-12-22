@@ -33,7 +33,7 @@ public class KToken implements org.kframework.kore.KToken {
 
     @Override
     public Att att() {
-        return Att.apply();
+        return Att.empty();
     }
 
     @Override

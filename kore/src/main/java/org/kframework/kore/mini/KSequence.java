@@ -46,7 +46,7 @@ public class KSequence implements org.kframework.kore.KSequence {
 
     @Override
     public Att att() {
-        return Att.apply();
+        return Att.empty();
     }
 
     @Override

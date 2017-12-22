@@ -27,7 +27,7 @@ public class InjectedKLabel implements org.kframework.kore.InjectedKLabel {
 
     @Override
     public Att att() {
-        return Att.apply();
+        return Att.empty();
     }
 
     @Override

@@ -1,6 +1,4 @@
 // Copyright (c) 2014-2016 K Team. All Rights Reserved.
-require "../../kernelc.k"
-
 module SWAP-SPEC
   imports KERNELC
 
@@ -17,5 +15,4 @@ rule
   =>
     lseg(?LP, null)(ListItem(V2) ListItem(V1) L)
   ...</heap>
-
 endmodule

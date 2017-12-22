@@ -1,6 +1,4 @@
 // Copyright (c) 2014-2016 K Team. All Rights Reserved.
-require "../../kernelc.k"
-
 module TREE-TO-LIST-RECURSIVE-SPEC
   imports KERNELC
 
@@ -18,5 +16,4 @@ rule
     list(?LP:Pointer)(tree2inorder(T) A)
   ...</heap>
   <out>... .List => rev(tree2inorder(T)) </out>
-
 endmodule

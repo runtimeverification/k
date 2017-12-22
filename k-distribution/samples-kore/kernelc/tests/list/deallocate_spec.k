@@ -1,6 +1,4 @@
 // Copyright (c) 2014-2016 K Team. All Rights Reserved.
-require "../../kernelc.k"
-
 module DEALLOCATE-SPEC
   imports KERNELC
 
@@ -17,9 +15,9 @@ rule [loop-inv]:
   =>
     .K
   ...</k>
-  <env>...
+  <env>
     x |-> tv(struct listNode * *, object(LX:Int))
-  ...</env>
+  </env>
   <heap>...
     object(LX) |-> tv (struct listNode *, LP:Pointer => null)
     (list(LP)(_:List) => .Map)
@@ -36,5 +34,4 @@ rule [func-spec]:
   <heap>...
     list(LP)(_:List) => .Map
   ...</heap>
-
 endmodule

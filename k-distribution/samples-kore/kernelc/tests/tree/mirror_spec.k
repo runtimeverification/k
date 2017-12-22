@@ -1,6 +1,4 @@
 // Copyright (c) 2014-2016 K Team. All Rights Reserved.
-require "../../kernelc.k"
-
 module MIRROR-SPEC
   imports KERNELC
 
@@ -15,5 +13,4 @@ rule
   <heap>...
     tree(TP)(T:Tree => tree_mirror(T))
   ...</heap>
-
 endmodule

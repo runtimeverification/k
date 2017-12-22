@@ -1,0 +1,10 @@
+/* From:
+
+    http://csrc.nist.gov/groups/STM/cavp/documents/shs/shabytetestvectors.zip
+    http://csrc.nist.gov/groups/STM/cavp/secure-hashing.html#shavs
+
+   in file SHA256ShortMsg.rsp
+*/
+
+sha256DigestTest("")
+sha256DigestTest("\xd3")

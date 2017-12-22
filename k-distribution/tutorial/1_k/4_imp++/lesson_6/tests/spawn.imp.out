@@ -1,62 +1,36 @@
-Search results:
-
-Solution 1:
-Store:Map -->
-1 |-> 11
-Out:String -->
-"x = 11\n"
-Solution 2:
-Store:Map -->
-1 |-> 11
-Out:String -->
-"x = 23\n"
-Solution 3:
-Store:Map -->
-1 |-> 11
-Out:String -->
-"x = 33\n"
-Solution 4:
-Store:Map -->
-1 |-> 16
-Out:String -->
-"x = 16\n"
-Solution 5:
-Store:Map -->
-1 |-> 16
-Out:String -->
-"x = 23\n"
-Solution 6:
-Store:Map -->
-1 |-> 16
-Out:String -->
-"x = 33\n"
-Solution 7:
-Store:Map -->
-1 |-> 21
-Out:String -->
-"x = 11\n"
-Solution 8:
-Store:Map -->
-1 |-> 21
-Out:String -->
-"x = 21\n"
-Solution 9:
-Store:Map -->
-1 |-> 21
-Out:String -->
-"x = 23\n"
-Solution 10:
-Store:Map -->
-1 |-> 33
-Out:String -->
-"x = 11\n"
-Solution 11:
-Store:Map -->
-1 |-> 33
-Out:String -->
-"x = 23\n"
-Solution 12:
-Store:Map -->
-1 |-> 33
-Out:String -->
-"x = 33\n"
+Solution 1
+Out ==K "x = 11\n"
+ AND Store ==K ( 1 |-> 11 )
+Solution 2
+Out ==K "x = 11\n"
+ AND Store ==K ( 1 |-> 21 )
+Solution 3
+Out ==K "x = 11\n"
+ AND Store ==K ( 1 |-> 33 )
+Solution 4
+Out ==K "x = 16\n"
+ AND Store ==K ( 1 |-> 16 )
+Solution 5
+Out ==K "x = 21\n"
+ AND Store ==K ( 1 |-> 21 )
+Solution 6
+Out ==K "x = 23\n"
+ AND Store ==K ( 1 |-> 11 )
+Solution 7
+Out ==K "x = 23\n"
+ AND Store ==K ( 1 |-> 16 )
+Solution 8
+Out ==K "x = 23\n"
+ AND Store ==K ( 1 |-> 21 )
+Solution 9
+Out ==K "x = 23\n"
+ AND Store ==K ( 1 |-> 33 )
+Solution 10
+Out ==K "x = 33\n"
+ AND Store ==K ( 1 |-> 11 )
+Solution 11
+Out ==K "x = 33\n"
+ AND Store ==K ( 1 |-> 16 )
+Solution 12
+Out ==K "x = 33\n"
+ AND Store ==K ( 1 |-> 33 )

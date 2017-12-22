@@ -100,7 +100,7 @@ public class KLabel implements org.kframework.kore.KLabel, org.kframework.kore.K
 
     @Override
     public Att att() {
-        return Att.apply();
+        return Att.empty();
     }
 
     @Override

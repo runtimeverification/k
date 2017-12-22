@@ -149,6 +149,15 @@ being executed.  The contents of this cell will be set whenever a
 function is invoked and will be checked whenever the evaluation of the
 function body encounters an explicit \texttt{return} statement. */
 
+  // the syntax declarations below are required because the sorts are
+  // referenced directly by a production and, because of the way KIL to KORE
+  // is implemented, the configuration syntax is not available yet
+  // should simply work once KIL is removed completely
+  // check other definitions for this hack as well
+
+  syntax ControlCell
+  syntax ControlCellFragment
+
   configuration <T color="red">
                   <threads color="orange">
                     <thread multiplicity="*" color="yellow">

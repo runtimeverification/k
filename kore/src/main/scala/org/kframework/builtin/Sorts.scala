@@ -21,6 +21,7 @@ object Sorts {
   val KVariable = Sort("#KVariable")
   val KItem = Sort("KItem")
   val KLabel = Sort("KLabel")
+  val KResult = Sort("KResult")
   val KList = Sort("KList")
   val KConfigVar = Sort("KConfigVar")
 

@@ -4,7 +4,7 @@ package org.kframework.kompile;
 import com.google.inject.Inject;
 import com.google.inject.Module;
 import com.google.inject.Provider;
-import org.kframework.builtin.Sorts;
+import org.kframework.compile.Backend;
 import org.kframework.main.FrontEnd;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
@@ -32,7 +32,7 @@ public class KompileFrontEnd extends FrontEnd {
 
 
     private final KompileOptions options;
-    private final Provider<org.kframework.compile.Backend> koreBackend;
+    private final Provider<Backend> koreBackend;
     private final Stopwatch sw;
     private final KExceptionManager kem;
     private final BinaryLoader loader;
@@ -43,7 +43,7 @@ public class KompileFrontEnd extends FrontEnd {
             KompileOptions options,
             @Usage String usage,
             @ExperimentalUsage String experimentalUsage,
-            Provider<org.kframework.compile.Backend> koreBackend,
+            Provider<Backend> koreBackend,
             Stopwatch sw,
             KExceptionManager kem,
             BinaryLoader loader,
@@ -66,9 +66,10 @@ public class KompileFrontEnd extends FrontEnd {
         }
 
         Kompile kompile = new Kompile(options, files, kem, sw);
-        CompiledDefinition def = kompile.run(options.outerParsing.mainDefinitionFile(files), options.mainModule(files), options.syntaxModule(files), koreBackend.get().steps(kompile));
+        Backend backend = koreBackend.get();
+        CompiledDefinition def = kompile.run(options.outerParsing.mainDefinitionFile(files), options.mainModule(files), options.syntaxModule(files), backend.steps(kompile));
         loader.saveOrDie(files.resolveKompiled("compiled.bin"), def);
-        koreBackend.get().accept(def);
+        backend.accept(def);
         loader.saveOrDie(files.resolveKompiled("timestamp"), "");
         sw.printIntermediate("Save to disk");
         sw.printTotal("Total");

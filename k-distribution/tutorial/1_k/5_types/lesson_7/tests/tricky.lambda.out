@@ -1,5 +1,2 @@
-Search results:
-
-Solution 1:
-T:Type -->
-bool -> bool
+Solution 1
+T ==K ( bool -> bool )

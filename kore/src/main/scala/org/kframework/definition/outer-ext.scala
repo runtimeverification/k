@@ -6,7 +6,7 @@ import org.kframework.kore._
 import org.kframework.attributes._
 import org.kframework.kore.{KORE => con}
 
-case class Configuration(body: K, ensures: K, att: Att = Att()) extends Sentence with OuterKORE {
+case class Configuration(body: K, ensures: K, att: Att = Att.empty) extends Sentence with OuterKORE {
 
   //  override def toString = "configuration " + xmlify(body) + " ensures " + ensures
 
@@ -40,4 +40,4 @@ case class Configuration(body: K, ensures: K, att: Att = Att()) extends Sentence
   //  }
 }
 
-case class Bubble(sentenceType: String, contents: String, att: Att = Att()) extends Sentence
+case class Bubble(sentenceType: String, contents: String, att: Att = Att.empty) extends Sentence

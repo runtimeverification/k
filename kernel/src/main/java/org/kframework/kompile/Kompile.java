@@ -6,28 +6,7 @@ import org.kframework.Strategy;
 import org.kframework.attributes.Source;
 import org.kframework.backend.Backends;
 import org.kframework.builtin.Sorts;
-import org.kframework.compile.ConfigurationInfoFromModule;
-import org.kframework.compile.LabelInfo;
-import org.kframework.compile.LabelInfoFromModule;
-import org.kframework.definition.Constructors;
-import org.kframework.definition.Definition;
-import org.kframework.definition.DefinitionTransformer;
-import org.kframework.definition.Module;
-import org.kframework.definition.Rule;
-import org.kframework.definition.Sentence;
-import org.kframework.kore.Sort;
-import org.kframework.compile.AddImplicitComputationCell;
-import org.kframework.compile.ConcretizeCells;
-import org.kframework.compile.GenerateSortPredicateSyntax;
-import org.kframework.compile.ResolveAnonVar;
-import org.kframework.compile.ResolveContexts;
-import org.kframework.compile.ResolveFreshConstants;
-import org.kframework.compile.ResolveFun;
-import org.kframework.compile.ResolveHeatCoolAttribute;
-import org.kframework.compile.ResolveIOStreams;
-import org.kframework.compile.ResolveSemanticCasts;
-import org.kframework.compile.ResolveStrict;
-import org.kframework.compile.SortInfo;
+import org.kframework.compile.*;
 import org.kframework.compile.checks.CheckConfigurationCells;
 import org.kframework.compile.checks.CheckImports;
 import org.kframework.compile.checks.CheckKLabels;
@@ -35,6 +14,13 @@ import org.kframework.compile.checks.CheckRHSVariables;
 import org.kframework.compile.checks.CheckRewrite;
 import org.kframework.compile.checks.CheckSortTopUniqueness;
 import org.kframework.compile.checks.CheckStreams;
+import org.kframework.definition.Constructors;
+import org.kframework.definition.Definition;
+import org.kframework.definition.DefinitionTransformer;
+import org.kframework.definition.Module;
+import org.kframework.definition.Rule;
+import org.kframework.definition.Sentence;
+import org.kframework.kore.Sort;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.concrete2kore.ParserUtils;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
@@ -45,6 +31,7 @@ import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -105,7 +92,7 @@ public class Kompile {
     }
 
     public CompiledDefinition run(File definitionFile, String mainModuleName, String mainProgramsModuleName) {
-        return run(definitionFile, mainModuleName, mainProgramsModuleName, defaultSteps());
+        return run(definitionFile, mainModuleName, mainProgramsModuleName, defaultSteps(Collections.emptySet()));
     }
 
     /**
@@ -139,7 +126,16 @@ public class Kompile {
         return DefinitionTransformer.from(new ResolveIOStreams(d, kem)::resolve, "resolving io streams").apply(d);
     }
 
-    public Function<Definition, Definition> defaultSteps() {
+    private Module excludeModulesByTag(Set<String> excludedModuleTags, Module mod) {
+        Set<Module> newImports = stream(mod.imports()).filter(_import -> excludedModuleTags.stream().noneMatch(tag -> _import.att().contains(tag))).collect(Collectors.toSet());
+        return Module(mod.name(), immutable(newImports), mod.localSentences(), mod.att());
+    }
+
+    private DefinitionTransformer excludeModulesByTag(Set<String> excludedModuleTags, Definition d) {
+        return DefinitionTransformer.from(mod -> excludeModulesByTag(excludedModuleTags, mod), "remove modules based on attributes");
+    }
+
+    public Function<Definition, Definition> defaultSteps(Set<String> excludedModuleTags) {
         DefinitionTransformer resolveStrict = DefinitionTransformer.from(new ResolveStrict(kompileOptions)::resolve, "resolving strict and seqstrict attributes");
         DefinitionTransformer resolveHeatCoolAttribute = DefinitionTransformer.fromSentenceTransformer(new ResolveHeatCoolAttribute(new HashSet<>(kompileOptions.transition))::resolve, "resolving heat and cool attributes");
         DefinitionTransformer resolveAnonVars = DefinitionTransformer.fromSentenceTransformer(new ResolveAnonVar()::resolve, "resolving \"_\" vars");
@@ -148,7 +144,8 @@ public class Kompile {
         DefinitionTransformer resolveFun = DefinitionTransformer.from(new ResolveFun()::resolve, "resolving #fun");
         DefinitionTransformer generateSortPredicateSyntax = DefinitionTransformer.from(new GenerateSortPredicateSyntax()::gen, "adding sort predicate productions");
 
-        return def -> func(this::resolveIOStreams)
+        return def -> excludeModulesByTag(excludedModuleTags, def)
+                .andThen(func(this::resolveIOStreams))
                 .andThen(resolveFun)
                 .andThen(resolveStrict)
                 .andThen(resolveAnonVars)

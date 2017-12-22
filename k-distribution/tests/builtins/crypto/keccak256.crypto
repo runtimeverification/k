@@ -1,0 +1,2 @@
+/* From: https://github.com/ethereum/EIPs/issues/59#issuecomment-174271784 */
+keccakDigestTest("testing")

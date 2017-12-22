@@ -1,0 +1,5 @@
+/* From: http://homes.esat.kuleuven.be/~bosselae/ripemd160.html */
+ripemd160DigestTest("")
+ripemd160DigestTest("a")
+ripemd160DigestTest("abc")
+ripemd160DigestTest("message digest")

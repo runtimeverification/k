@@ -1,6 +1,4 @@
 // Copyright (c) 2014-2016 K Team. All Rights Reserved.
-require "../../kernelc.k"
-
 module SUM-ITERATIVE-SPEC
   imports KERNELC
 
@@ -31,5 +29,4 @@ rule
     tv(int, (N +Int 1) *Int N /Int 2)
   ...</k>
 requires N >=Int 0
-
 endmodule
