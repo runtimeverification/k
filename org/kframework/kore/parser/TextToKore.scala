@@ -444,8 +444,8 @@ class TextToKore(b: Builders) {
     }
 
     scanner.nextWithSkippingWhitespaces() match {
-      case '`' => scanner.putback('`')
-        parseEscapedSymbol()
+      // case '`' => scanner.putback('`')
+      //   parseEscapedSymbol()
       case c if isSymbolChar(c) =>
         loop(new StringBuilder(c.toString))
       case err => throw error("<Symbol>", err)
@@ -455,22 +455,22 @@ class TextToKore(b: Builders) {
   private def isSymbolChar(c: Char): Boolean = TextToKore.isSymbolChar(c) // TODO(Daejun): more efficient way?
 
   // EscapedSymbol = ` [^`] `
-  private def parseEscapedSymbol(): String = {
-    def loop(s: StringBuilder): String = {
-      scanner.next() match {
-        case '`' =>
-          s.toString()
-        case c =>
-          s += c; loop(s)
-      }
-    }
+  // private def parseEscapedSymbol(): String = {
+  //   def loop(s: StringBuilder): String = {
+  //     scanner.next() match {
+  //       case '`' =>
+  //         s.toString()
+  //       case c =>
+  //         s += c; loop(s)
+  //     }
+  //   }
 
-    scanner.nextWithSkippingWhitespaces() match {
-      case '`' =>
-        loop(new StringBuilder())
-      case err => throw error('`', err) // shouldn't be reachable
-    }
-  }
+  //   scanner.nextWithSkippingWhitespaces() match {
+  //     case '`' =>
+  //       loop(new StringBuilder())
+  //     case err => throw error('`', err) // shouldn't be reachable
+  //   }
+  // }
 
   // List{Elem, <sep>, <endsWith>}
   //
@@ -551,7 +551,8 @@ object TextToKore {
 
   def isSymbolChar(c: Char): Boolean = {
     ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || ('0' <= c && c <= '9') ||
-      c == '.' || c == '@' || c == '#' || c == '$' || c == '%' || c == '^' || c == '_' || c == '-' || c == '\\'
+      c == '.' || c == '@' || c == '#' || c == '$' || c == '%' || c == '^' || c == '_' || c == '-' || c == '\\' ||
+      c == '`'
   }
 
   //  // SymbolChar = [^[]():]

@@ -149,16 +149,18 @@ object KoreToText {
     "[" + att.patterns.map(apply).mkString(",") + "]"
   }
 
+  def apply(s: String): String = s
+
   /** Normalizes the string of Sort, Name, or Symbol.
     *
-    * @param s the string value of Sort, Name, or Symbol.
-    * @return the string enclosed in back-quotes if it contains non-symbol characters,
+    * param s the string value of Sort, Name, or Symbol.
+    * return the string enclosed in back-quotes if it contains non-symbol characters,
     *         otherwise, the input string as it is.
-    */
   def apply(s: String): String = {
     if (s == "" || s.exists(c => !TextToKore.isSymbolChar(c))) {
       "`" + s + "`"
     } else s
   }
+  */
 
 }

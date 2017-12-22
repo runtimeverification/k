@@ -192,7 +192,7 @@ trait Iff extends Pattern {
 }
 
 object Iff {
-  def unapply(arg: Implies): Option[(Sort, Pattern, Pattern)] = Some(arg.s, arg._1, arg._2)
+  def unapply(arg: Iff): Option[(Sort, Pattern, Pattern)] = Some(arg.s, arg._1, arg._2)
 }
 
 trait Exists extends Pattern {
@@ -351,6 +351,7 @@ object CompoundSort {
 
 /** A symbol-or-alias is of the form C{s1,...,sn}
   * where C is called a constructor and s1,...,sn are sort parameters.
+  * In the Semantics of K document, SymbolOrAlias is called the nonterminal <head>
   */
 trait SymbolOrAlias {
   def ctr: String
