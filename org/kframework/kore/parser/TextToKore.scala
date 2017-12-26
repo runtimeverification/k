@@ -552,7 +552,7 @@ object TextToKore {
   def isSymbolChar(c: Char): Boolean = {
     ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || ('0' <= c && c <= '9') ||
       c == '.' || c == '@' || c == '#' || c == '$' || c == '%' || c == '^' || c == '_' || c == '-' || c == '\\' ||
-      c == '`'
+      c == '`' || c == '''
   }
 
   //  // SymbolChar = [^[]():]
