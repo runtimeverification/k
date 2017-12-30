@@ -10,10 +10,10 @@ object implementation {
                           modules: Seq[i.Module]) extends i.Definition
 
     case class Module(name: i.ModuleName,
-                      decls: Seq[i.Declaration],
+                      sens: Seq[i.Sentence],
                       att: i.Attributes) extends i.Module
 
-    // case class Import(name: i.ModuleName, att: i.Attributes) extends i.Import
+    case class Import(name: i.ModuleName, att: i.Attributes) extends i.Import
 
     case class SortDeclaration(params: Seq[i.SortVariable],
                                sort: i.Sort,
@@ -101,29 +101,29 @@ object implementation {
     def Definition(att: i.Attributes, modules: Seq[i.Module]): i.Definition =
       d.Definition(att, modules)
 
-    def Module(name: i.ModuleName, decls: Seq[i.Declaration], att: i.Attributes): i.Module =
-      d.Module(name, decls, att)
+    def Module(name: i.ModuleName, sens: Seq[i.Sentence], att: i.Attributes): i.Module =
+      d.Module(name, sens, att)
 
-    // def Import(name: i.ModuleName, att: i.Attributes): i.Sentence = d.Import(name, att)
+    def Import(name: i.ModuleName, att: i.Attributes): i.Sentence = d.Import(name, att)
 
-    def SortDeclaration(params: Seq[i.SortVariable], sort: i.Sort, att: i.Attributes): i.Declaration
+    def SortDeclaration(params: Seq[i.SortVariable], sort: i.Sort, att: i.Attributes): i.Sentence
     = d.SortDeclaration(params, sort, att)
 
     def SymbolDeclaration(symbol: i.Symbol,
                           argSorts: Seq[i.Sort],
                           returnSort: i.Sort,
-                          att: i.Attributes): i.Declaration
+                          att: i.Attributes): i.Sentence
     = d.SymbolDeclaration(symbol, argSorts, returnSort, att)
 
     def AliasDeclaration(alias: i.Alias,
                          argSorts: Seq[i.Sort],
                          returnSort: i.Sort,
-                         att: i.Attributes): i.Declaration
+                         att: i.Attributes): i.Sentence
     = d.AliasDeclaration(alias, argSorts, returnSort, att)
 
     def AxiomDeclaration(params: Seq[i.SortVariable],
                          _1: i.Pattern,
-                         att: i.Attributes): i.Declaration
+                         att: i.Attributes): i.Sentence
     = d.AxiomDeclaration(params, _1, att)
 
     def Attributes(patterns: Seq[Pattern]): i.Attributes = d.Attributes(patterns)

@@ -22,17 +22,17 @@ object KoreToText {
     "module " +
     apply(m.name.str) +
     System.lineSeparator() +
-    m.decls.map(s => "  " + apply(s)).mkString(System.lineSeparator()) +
+    m.sens.map(s => "  " + apply(s)).mkString(System.lineSeparator()) +
     System.lineSeparator() +
     "endmodule " +
     apply(m.att)
   }
 
-  /** Returns a string from [[kore.Declaration]]. */
-  def apply(d: Declaration): String = d match {
+  /** Returns a string from [[kore.Sentence]]. */
+  def apply(d: Sentence): String = d match {
 
-    //case Import(ModuleName(name), att) =>
-    //  "import " + apply(name) + " " + apply(att)
+    case Import(ModuleName(name), att) =>
+      "import " + apply(name) + " " + apply(att)
 
     case SortDeclaration(params, sort, att) =>
       "sort{" +

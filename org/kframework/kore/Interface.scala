@@ -13,18 +13,17 @@ object Definition {
 trait Module {
   def name: ModuleName
 
-  def decls: Seq[Declaration]
+  def sens: Seq[Sentence]
 
   def att: Attributes
 }
 
 object Module {
-  def unapply(arg: Module): Option[(ModuleName, Seq[Declaration], Attributes)] = Some(arg.name, arg.decls, arg.att)
+  def unapply(arg: Module): Option[(ModuleName, Seq[Sentence], Attributes)] = Some(arg.name, arg.sens, arg.att)
 }
 
-trait Declaration
+trait Sentence
 
-/*
 trait Import extends Sentence {
   def name: ModuleName
 
@@ -34,9 +33,8 @@ trait Import extends Sentence {
 object Import {
   def unapply(arg: Import): Option[(ModuleName, Attributes)] = Some(arg.name, arg.att)
 }
-*/
 
-trait SortDeclaration extends Declaration {
+trait SortDeclaration extends Sentence {
   def params: Seq[SortVariable]
 
   def sort: Sort
@@ -49,7 +47,7 @@ object SortDeclaration {
   = Some(arg.params, arg.sort, arg.att)
 }
 
-trait SymbolDeclaration extends Declaration {
+trait SymbolDeclaration extends Sentence {
   def symbol: Symbol
 
   def argSorts: Seq[Sort]
@@ -63,7 +61,7 @@ object AliasDeclaration {
   def unapply(arg: AliasDeclaration): Option[(Alias, Seq[Sort], Sort, Attributes)]
   = Some(arg.alias, arg.argSorts, arg.returnSort, arg.att)
 }
-trait AliasDeclaration extends Declaration {
+trait AliasDeclaration extends Sentence {
   def alias: Alias
 
   def argSorts: Seq[Sort]
@@ -78,7 +76,7 @@ object SymbolDeclaration {
   = Some(arg.symbol, arg.argSorts, arg.returnSort, arg.att)
 }
 
-trait AxiomDeclaration extends Declaration {
+trait AxiomDeclaration extends Sentence {
   def params: Seq[SortVariable]
 
   def pattern: Pattern
@@ -372,27 +370,27 @@ trait Builders {
 
   def Definition(att: Attributes, modules: Seq[Module]): Definition
 
-  def Module(name: ModuleName, decls: Seq[Declaration], att: Attributes): Module
+  def Module(name: ModuleName, sens: Seq[Sentence], att: Attributes): Module
 
-  // def Import(name: ModuleName, att: Attributes): Sentence
+  def Import(name: ModuleName, att: Attributes): Sentence
 
   def SortDeclaration(params: Seq[SortVariable],
                       sort: Sort,
-                      att: Attributes): Declaration
+                      att: Attributes): Sentence
 
   def SymbolDeclaration(symbol: Symbol,
                         argSorts: Seq[Sort],
                         returnSort: Sort,
-                        att: Attributes): Declaration
+                        att: Attributes): Sentence
 
   def AliasDeclaration(alias: Alias,
                        argSorts: Seq[Sort],
                        returnSort: Sort,
-                       att: Attributes): Declaration
+                       att: Attributes): Sentence
 
   def AxiomDeclaration(params: Seq[SortVariable],
                        pattern: Pattern,
-                       att: Attributes): Declaration
+                       att: Attributes): Sentence
 
   def Attributes(att: Seq[Pattern]): Attributes
 
