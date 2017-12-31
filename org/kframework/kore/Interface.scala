@@ -378,7 +378,15 @@ object SymbolOrAlias {
 
 trait Symbol extends SymbolOrAlias
 
+object Symbol {
+  def unapply(arg: Symbol): Option[(String, Seq[Sort])] = Some(arg.ctr, arg.params)
+}
+
 trait Alias extends SymbolOrAlias
+
+object Alias {
+  def unapply(arg: Alias): Option[(String, Seq[Sort])] = Some(arg.ctr, arg.params)
+}
 
 trait Builders {
 
