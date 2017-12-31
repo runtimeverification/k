@@ -22,7 +22,7 @@ object KoreToText {
     "module " +
     apply(m.name.str) +
     System.lineSeparator() +
-    m.sens.map(s => "  " + apply(s)).mkString(System.lineSeparator()) +
+    m.sentences.map(s => "  " + apply(s)).mkString(System.lineSeparator()) +
     System.lineSeparator() +
     "endmodule " +
     apply(m.att)

@@ -10,7 +10,7 @@ object implementation {
                           modules: Seq[i.Module]) extends i.Definition
 
     case class Module(name: i.ModuleName,
-                      sens: Seq[i.Sentence],
+                      sentences: Seq[i.Sentence],
                       att: i.Attributes) extends i.Module
 
     case class Import(name: i.ModuleName, att: i.Attributes) extends i.Import

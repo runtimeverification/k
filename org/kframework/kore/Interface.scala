@@ -13,13 +13,13 @@ object Definition {
 trait Module {
   def name: ModuleName
 
-  def sens: Seq[Sentence]
+  def sentences: Seq[Sentence]
 
   def att: Attributes
 }
 
 object Module {
-  def unapply(arg: Module): Option[(ModuleName, Seq[Sentence], Attributes)] = Some(arg.name, arg.sens, arg.att)
+  def unapply(arg: Module): Option[(ModuleName, Seq[Sentence], Attributes)] = Some(arg.name, arg.sentences, arg.att)
 }
 
 trait Sentence
