@@ -161,6 +161,7 @@ class TextToKore(b: Builders) {
   //         | \equal  { Sort , Sort } ( Pattern , Pattern )
   //         | \mem { Sort , Sort } ( Variable , Pattern )
   //         | \subset { Sort , Sort } ( Pattern , Pattern )
+  //         | \domainvalue ( StringLiteral , StringLiteral )  // this syntax is temporary.
   //         | StringLiteral
   private def parsePattern(): Pattern = {
     scanner.nextWithSkippingWhitespaces() match {
@@ -323,6 +324,14 @@ class TextToKore(b: Builders) {
             val p2 = parsePattern()
             consumeWithLeadingWhitespaces(")")
             b.Subset(s, rs, p1, p2)
+          case ('d', 'o') => // domainvalue
+            consume("mainvalue")
+            consumeWithLeadingWhitespaces("(")
+            val sortStr = parseString()
+            consumeWithLeadingWhitespaces(",")
+            val valueStr = parseString()
+            consumeWithLeadingWhitespaces(")")
+            b.DomainValue(sortStr, valueStr)
           case (err1, err2) =>
             val known = Seq(
               "\\top", "\\bottom", "\\and", "\\or", "\\implies",

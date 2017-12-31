@@ -310,6 +310,20 @@ object StringLiteral {
   def unapply(arg: StringLiteral): Option[String] = Some(arg.str)
 }
 
+// Domain Values are needed to merge Kore to K.
+// The data structure for DomainValue is temporary.
+// It is designed and implemented just to make sure that we can
+// merge Kore to K.
+trait DomainValue extends Pattern {
+  def sortStr: String   // a string that represents the sort of the value, e.g., "Bool", "Int", etc
+
+  def valueStr: String  // a string that represents the value, e.g., "12345", "0x12345", etc
+}
+
+object DomainValue extends Pattern {
+  def unapply(arg: DomainValue): Option[(String, String)] = Some(arg.sortStr, arg.valueStr)
+}
+
 trait ModuleName {
   def str: String
 }
@@ -427,6 +441,8 @@ trait Builders {
   def Subset(s: Sort, rs:Sort, _1: Pattern, _2: Pattern): Pattern
 
   def StringLiteral(str: String): Pattern
+
+  def DomainValue(sortStr: String, valueStr: String): Pattern
 
   def ModuleName(str: String): ModuleName
 

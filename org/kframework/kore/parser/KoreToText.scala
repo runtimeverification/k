@@ -140,6 +140,8 @@ object KoreToText {
     case Subset(s, rs, p, q) =>
       "\\subset" + "{" + apply(s) + "," + apply(rs) + "}" +
         "(" + apply(p) + "," + apply(q) + ")"
+    case DomainValue(sortStr, valueStr) =>
+      "\\domainvalue" + apply(sortStr) + "," + apply(valueStr) + ")"
     case StringLiteral(str) =>
       "\"" + str + "\""
   }

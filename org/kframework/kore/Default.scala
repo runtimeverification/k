@@ -81,6 +81,8 @@ object implementation {
 
     case class StringLiteral(str: String) extends i.StringLiteral
 
+    case class DomainValue(sortStr: String, valueStr: String) extends i.DomainValue
+
     case class ModuleName(str: String) extends i.ModuleName
 
     case class SortVariable(name: String) extends i.SortVariable
@@ -161,6 +163,8 @@ object implementation {
     def Subset(s: i.Sort, rs: i.Sort, _1: Pattern, _2: Pattern): i.Pattern = d.Subset(s, rs, _1, _2)
 
     def StringLiteral(str: String): i.Pattern = d.StringLiteral(str)
+
+    def DomainValue(sortStr: String, valueStr: String): Pattern = d.DomainValue(sortStr, valueStr)
 
     def ModuleName(str: String): i.ModuleName = d.ModuleName(str)
 
