@@ -21,7 +21,6 @@ import org.kframework.utils.inject.DefinitionScope;
 import org.kframework.utils.inject.JCommanderModule;
 import org.kframework.utils.inject.JCommanderModule.ExperimentalUsage;
 import org.kframework.utils.inject.JCommanderModule.Usage;
-import org.kframework.utils.inject.Main;
 
 import java.io.File;
 import java.util.List;
@@ -29,19 +28,13 @@ import java.util.function.Function;
 
 public class KRunFrontEnd extends FrontEnd {
 
-    public static List<Module> getDefinitionSpecificModules() {
-        return ImmutableList.<Module>of(
-                new KRunModule.CommonModule(),
-                new DefinitionLoadingModule()
-        );
-    }
-
-    public static List<Module> getModules(List<Module> definitionSpecificModules) {
+    public static List<Module> getModules() {
         return ImmutableList.<Module>of(
                 new KRunModule(),
                 new CommonModule(),
                 new JCommanderModule(),
-                new KRunModule.MainExecutionContextModule(definitionSpecificModules));
+                new KRunModule.CommonModule(),
+                new DefinitionLoadingModule());
     }
 
 
@@ -62,13 +55,13 @@ public class KRunFrontEnd extends FrontEnd {
             @ExperimentalUsage String experimentalUsage,
             JarInfo jarInfo,
             DefinitionScope scope,
-            @Main(KompiledDir.class) Provider<File> kompiledDir,
+            @KompiledDir Provider<File> kompiledDir,
             KExceptionManager kem,
             KRunOptions krunOptions,
-            @Main FileUtil files,
-            @Main Provider<CompiledDefinition> compiledDef,
-            @Main Provider<Function<org.kframework.definition.Module, Rewriter>> initializeRewriter,
-            @Main Provider<ExecutionMode> executionMode,
+            FileUtil files,
+            Provider<CompiledDefinition> compiledDef,
+            Provider<Function<org.kframework.definition.Module, Rewriter>> initializeRewriter,
+            Provider<ExecutionMode> executionMode,
             TTYInfo tty) {
         super(kem, options, usage, experimentalUsage, jarInfo, files);
         this.scope = scope;

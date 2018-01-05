@@ -17,4 +17,8 @@ public class DefinitionLoadingOptions {
             "in the current directory. A definition may also be specified with the 'KRUN_COMPILED_DEF' " +
             "environment variable, in which case it is used if the option is not specified on the command line.")
     public String directory;
+
+    public DefinitionLoadingOptions(String dir) {
+        this.directory = dir;
+    }
 }

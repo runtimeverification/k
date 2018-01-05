@@ -234,10 +234,6 @@ public final class KRunOptions {
 
     public final class Experimental {
 
-        @Parameter(names="--simulation", description="Simulation property of two programs in two semantics.",
-                listConverter=StringListConverter.class)
-        public List<String> simulation;
-
         @Parameter(names="--statistics", description="Print rewrite engine statistics.", arity=1,
                 converter=OnOffConverter.class)
         public boolean statistics = false;

@@ -11,7 +11,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
-import org.kframework.utils.inject.RequestScoped;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -30,7 +29,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
 
-@RequestScoped
 public class FileUtil {
 
     private final File tempDir;

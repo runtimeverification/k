@@ -3,7 +3,6 @@ package org.kframework.krun;
 
 import com.beust.jcommander.JCommander;
 import com.google.inject.AbstractModule;
-import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
@@ -18,7 +17,6 @@ import org.kframework.krun.ioserver.filesystem.portable.PortableFileSystem;
 import org.kframework.krun.modes.DebugMode.DebugExecutionMode;
 import org.kframework.krun.modes.ExecutionMode;
 import org.kframework.krun.modes.KRunExecutionMode;
-import org.kframework.main.AnnotatedByDefinitionModule;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
 import org.kframework.main.Tool;
@@ -27,13 +25,10 @@ import org.kframework.unparser.OutputModes;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
-import org.kframework.utils.inject.Annotations;
-import org.kframework.utils.inject.Main;
 import org.kframework.utils.inject.Options;
 import org.kframework.utils.options.DefinitionLoadingOptions;
 import org.kframework.utils.options.SMTOptions;
 
-import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -99,6 +94,11 @@ public class KRunModule extends AbstractModule {
         }
 
         @Provides
+        ConfigurationCreationOptions ccOptions(KRunOptions options) {
+            return options.configurationCreation;
+        }
+
+        @Provides
         Function<org.kframework.definition.Module, Rewriter> getRewriter(KompileOptions options, Map<String, Provider<Function<org.kframework.definition.Module, Rewriter>>> map, KExceptionManager kem) {
             Provider<Function<org.kframework.definition.Module, Rewriter>> provider = map.get(options.backend);
             if (provider == null) {
@@ -135,25 +135,6 @@ public class KRunModule extends AbstractModule {
                 return new Integer(50);
             }
             return checkpointInterval;
-        }
-    }
-
-    public static class MainExecutionContextModule extends AnnotatedByDefinitionModule {
-
-        private final List<Module> definitionSpecificModules;
-
-        public MainExecutionContextModule(List<Module> definitionSpecificModules) {
-            this.definitionSpecificModules = definitionSpecificModules;
-        }
-
-        @Override
-        protected void configure() {
-            exposeBindings(definitionSpecificModules, Main.class, Annotations::main);
-        }
-
-        @Provides
-        ConfigurationCreationOptions ccOptions(KRunOptions options) {
-            return options.configurationCreation;
         }
     }
 }

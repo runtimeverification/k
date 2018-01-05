@@ -58,7 +58,7 @@ public class KServerFrontEnd extends FrontEnd {
 
     private static KServerFrontEnd instance;
     private static Thread threadInstance;
-    private static final ImmutableList<String> tools = ImmutableList.of("-kompile", "-krun", "-kast", "-kdoc", "-ktest", "-kdep");
+    private static final ImmutableList<String> tools = ImmutableList.of("-kompile", "-krun", "-kast", "-kdoc", "-ktest", "-kdep", "-keq");
 
     private final KServerOptions options;
     private final Map<String, Injector> injectors = new HashMap<>();

@@ -7,11 +7,11 @@ import java.util.List;
 
 public interface KModule {
 
-    public List<Module> getKDocModules();
-    public List<Module> getKompileModules();
-    public List<Module> getKastModules();
-    public List<Module> getKRunModules(List<Module> definitionSpecificModules);
-    public List<Module> getDefinitionSpecificKRunModules();
-    public List<Module> getKTestModules();
-
+    List<Module> getKDocModules();
+    List<Module> getKompileModules();
+    List<Module> getKastModules();
+    List<Module> getKRunModules();
+    List<Module> getKEqModules(List<Module> definitionSpecificModules);
+    List<Module> getDefinitionSpecificKEqModules();
+    List<Module> getKTestModules();
 }

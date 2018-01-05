@@ -34,12 +34,12 @@ public class Annotations {
         };
     }
 
-    public static Spec spec(Class<? extends Annotation> annotation) {
-        return new Spec() {
+    public static Spec1 spec1(Class<? extends Annotation> annotation) {
+        return new Spec1() {
 
             @Override
             public Class<? extends Annotation> annotationType() {
-                return Spec.class;
+                return Spec1.class;
             }
 
             @Override
@@ -53,10 +53,39 @@ public class Annotations {
             }
 
             public boolean equals(Object o) {
-                if (!(o instanceof Spec)) {
+                if (!(o instanceof Spec1)) {
                     return false;
                 }
-                Spec other = (Spec) o;
+                Spec1 other = (Spec1) o;
+                return annotation.equals(other.value());
+            }
+
+        };
+    }
+
+    public static Spec2 spec2(Class<? extends Annotation> annotation) {
+        return new Spec2() {
+
+            @Override
+            public Class<? extends Annotation> annotationType() {
+                return Spec2.class;
+            }
+
+            @Override
+            public Class<? extends Annotation> value() {
+                return annotation;
+            }
+
+            public int hashCode() {
+                // This is specified in java.lang.Annotation.
+                return (127 * "value".hashCode()) ^ annotation.hashCode();
+            }
+
+            public boolean equals(Object o) {
+                if (!(o instanceof Spec2)) {
+                    return false;
+                }
+                Spec2 other = (Spec2) o;
                 return annotation.equals(other.value());
             }
 

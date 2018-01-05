@@ -39,7 +39,7 @@ public class JavaBackendKModule extends AbstractKModule {
     }
 
     @Override
-    public List<Module> getDefinitionSpecificKRunModules() {
+    public List<Module> getKRunModules() {
         return Collections.singletonList(new AbstractModule() {
             @Override
             protected void configure() {
@@ -57,6 +57,21 @@ public class JavaBackendKModule extends AbstractKModule {
                         ToolActivation.class, ExecutionMode.class);
 
                 executionBinder.addBinding(new ToolActivation.OptionActivation("--prove")).to(ProofExecutionMode.class);
+            }
+        });
+    }
+
+    @Override
+    public List<Module> getDefinitionSpecificKEqModules() {
+        return Collections.singletonList(new AbstractModule() {
+            @Override
+            protected void configure() {
+
+                MapBinder<String, Function<org.kframework.definition.Module, Rewriter>> rewriterBinder = MapBinder.newMapBinder(
+                        binder(), TypeLiteral.get(String.class), new TypeLiteral<Function<org.kframework.definition.Module, Rewriter>>() {
+                        });
+                rewriterBinder.addBinding("java").to(InitializeRewriter.class);
+
             }
         });
     }

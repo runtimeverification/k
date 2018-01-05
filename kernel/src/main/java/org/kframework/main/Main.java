@@ -16,6 +16,7 @@ import org.fusesource.jansi.AnsiConsole;
 import org.kframework.kast.KastFrontEnd;
 import org.kframework.kdep.KDepFrontEnd;
 import org.kframework.kdoc.KDocFrontEnd;
+import org.kframework.keq.KEqFrontEnd;
 import org.kframework.kompile.KompileFrontEnd;
 import org.kframework.krun.KRunFrontEnd;
 import org.kframework.kserver.KServerFrontEnd;
@@ -186,24 +187,33 @@ public class Main {
                     modules = KDepFrontEnd.getModules();
                     break;
                 case "-krun":
-                    List<Module> definitionSpecificModules = new ArrayList<>();
-                    definitionSpecificModules.addAll(KRunFrontEnd.getDefinitionSpecificModules());
+                    modules.addAll(KRunFrontEnd.getModules());
                     for (KModule kModule : kModules) {
-                        List<Module> ms = kModule.getDefinitionSpecificKRunModules();
-                        if (ms != null) {
-                            definitionSpecificModules.addAll(ms);
-                        }
-                    }
-
-                    modules.addAll(KRunFrontEnd.getModules(definitionSpecificModules));
-                    for (KModule kModule : kModules) {
-                        List<Module> ms = kModule.getKRunModules(definitionSpecificModules);
+                        List<Module> ms = kModule.getKRunModules();
                         if (ms != null) {
                             modules.addAll(ms);
                         }
                     }
                     break;
-                case "-kpp":
+                case "-keq":
+                    List<Module> definitionSpecificModules = new ArrayList<>();
+                    definitionSpecificModules.addAll(KEqFrontEnd.getDefinitionSpecificModules());
+                    for (KModule kModule : kModules) {
+                        List<Module> ms = kModule.getDefinitionSpecificKEqModules();
+                        if (ms != null) {
+                            definitionSpecificModules.addAll(ms);
+                        }
+                    }
+
+                    modules.addAll(KEqFrontEnd.getModules(definitionSpecificModules));
+                    for (KModule kModule : kModules) {
+                        List<Module> ms = kModule.getKEqModules(definitionSpecificModules);
+                        if (ms != null) {
+                            modules.addAll(ms);
+                        }
+                    }
+                    break;
+            case "-kpp":
                     modules = KppFrontEnd.getModules();
                     break;
                 default:

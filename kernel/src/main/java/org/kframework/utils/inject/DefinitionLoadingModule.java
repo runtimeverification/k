@@ -4,14 +4,9 @@ package org.kframework.utils.inject;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provider;
 import com.google.inject.Provides;
-import org.kframework.kil.Definition;
-import org.kframework.kil.loader.Context;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.KompileOptions;
-import org.kframework.krun.KRunOptions;
-import org.kframework.main.GlobalOptions;
 import org.kframework.utils.BinaryLoader;
-import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.DefinitionDir;
@@ -32,51 +27,16 @@ public class DefinitionLoadingModule extends AbstractModule {
     }
 
     @Provides @DefinitionScoped
-    Context context(
-            BinaryLoader loader,
-            DefinitionLoadingOptions options,
-            GlobalOptions global,
-            Stopwatch sw,
-            KExceptionManager kem,
-            FileUtil files,
-            KRunOptions krunOptions) {
-        Context context = loader.loadOrDie(Context.class, files.resolveKompiled("context.bin"));
-        context.globalOptions = global;
-        context.krunOptions = krunOptions;
-
-        sw.printIntermediate("Loading serialized context");
-
-        sw.printIntermediate("Initializing definition paths");
-        return context;
-    }
-
-    @Provides @DefinitionScoped @Concrete
-    Definition concreteDefinition(BinaryLoader loader, FileUtil files) {
-        return loader.loadOrDie(Definition.class, files.resolveKompiled("definition-concrete.bin"));
-    }
-
-    @Provides @DefinitionScoped
-    Definition definition(BinaryLoader loader, FileUtil files) {
-        return loader.loadOrDie(Definition.class, files.resolveKompiled("definition.bin"));
-    }
-
-
-    @Provides @DefinitionScoped
     CompiledDefinition koreDefinition(BinaryLoader loader, FileUtil files) {
         return loader.loadOrDie(CompiledDefinition.class, files.resolveKompiled("compiled.bin"));
     }
 
 
     @Provides
-    KompileOptions kompileOptions(Provider<Context> context, Provider<CompiledDefinition> compiledDef, Provider<FileUtil> files) {
+    KompileOptions kompileOptions(Provider<CompiledDefinition> compiledDef) {
         // a hack, but it's good enough for what we need from it, which is a temporary solution
-        if (files.get().resolveKompiled("compiled.bin").exists()) {
-            KompileOptions res = compiledDef.get().kompileOptions;
-            return res;
-        } else {
-            Context res = context.get();
-            return res.kompileOptions;
-        }
+        KompileOptions res = compiledDef.get().kompileOptions;
+        return res;
     }
 
     @Provides @KompiledDir

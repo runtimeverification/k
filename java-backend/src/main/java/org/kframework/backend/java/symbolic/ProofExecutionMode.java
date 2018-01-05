@@ -72,17 +72,7 @@ public class ProofExecutionMode implements ExecutionMode<List<K>> {
     @Override
     public List<K> execute(KRun.InitialConfiguration config, Rewriter rewriter, CompiledDefinition compiledDefinition) {
         String proofFile = options.experimental.prove;
-        Kompile kompile = new Kompile(compiledDefinition.kompileOptions, globalOptions, files, kem, sw, false);
-        Module mod = kompile.parseModule(compiledDefinition, files.resolveWorkingDirectory(proofFile).getAbsoluteFile());
-
-        Set<Module> alsoIncluded = Stream.of("K-TERM", "K-REFLECTION", RuleGrammarGenerator.ID_PROGRAM_PARSING)
-                .map(module -> compiledDefinition.getParsedDefinition().getModule(module).get())
-                .collect(org.kframework.Collections.toSet());
-
-        mod = new JavaBackend(kem, files, globalOptions, compiledDefinition.kompileOptions)
-                .stepsForProverRules()
-                .apply(Definition.apply(mod, org.kframework.Collections.add(mod, alsoIncluded), Att.empty()))
-                .getModule(mod.name()).get();
+        Module mod = getProofModule(compiledDefinition, proofFile, globalOptions, files, kem, sw);
         K k = config.theConfig;
         config.theConfig = null;
         RewriterResult executionResult = rewriter.execute(k, Optional.<Integer>empty());
@@ -169,6 +159,21 @@ public class ProofExecutionMode implements ExecutionMode<List<K>> {
                 //.map(r -> kompile.compileRule(compiledDefinition, r))
                 .collect(Collectors.toList());
         return rewriter.prove(rules);
+    }
+
+    static Module getProofModule(CompiledDefinition compiledDefinition, String proofFile, GlobalOptions globalOptions, FileUtil files, KExceptionManager kem, Stopwatch sw) {
+        Kompile kompile = new Kompile(compiledDefinition.kompileOptions, globalOptions, files, kem, sw, false);
+        Module mod = kompile.parseModule(compiledDefinition, files.resolveWorkingDirectory(proofFile).getAbsoluteFile());
+
+        Set<Module> alsoIncluded = Stream.of("K-TERM", "K-REFLECTION", RuleGrammarGenerator.ID_PROGRAM_PARSING)
+                .map(module -> compiledDefinition.getParsedDefinition().getModule(module).get())
+                .collect(org.kframework.Collections.toSet());
+
+        mod = new JavaBackend(kem, files, globalOptions, compiledDefinition.kompileOptions)
+                .stepsForProverRules()
+                .apply(Definition.apply(mod, org.kframework.Collections.add(mod, alsoIncluded), Att.empty()))
+                .getModule(mod.name()).get();
+        return mod;
     }
 
     public static Rule transformFunction(Function<K, K> f, Rule r) {
