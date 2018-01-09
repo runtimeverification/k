@@ -146,6 +146,10 @@ public abstract class JavaSymbolicObject<T extends JavaSymbolicObject<T>>
         return isNormal;
     }
 
+    public boolean isConcrete() {
+        return isGround() && isNormal();
+    }
+
     /**
      * Returns a {@code Set} view of the user variables (ie terms of sort Variable) in this
      * {@code JavaSymbolicObject}.

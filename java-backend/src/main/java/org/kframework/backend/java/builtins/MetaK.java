@@ -202,4 +202,8 @@ public class MetaK {
         //return KLabelInjection.injectionOf(context.getTopTerm(), context.global());
         return context.getTopTerm();
     }
+
+    public static BoolToken isConcrete(Term term, TermContext context) {
+        return BoolToken.of(term.isConcrete());
+    }
 }
