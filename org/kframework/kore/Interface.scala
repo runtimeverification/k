@@ -3,28 +3,30 @@ package org.kframework.kore
 trait Definition {
   def att: Attributes
 
-  def modules: Seq[Module]
+  def module: Module
+
+  // def modules: Seq[Module]
 }
 
 object Definition {
-  def unapply(arg: Definition): Option[(Seq[Module], Attributes)] = Some(arg.modules, arg.att)
+  def unapply(arg: Definition): Option[(Module, Attributes)] = Some(arg.module, arg.att)
 }
 
 trait Module {
   def name: ModuleName
 
-  def sentences: Seq[Sentence]
+  def decls: Seq[Declaration]
 
   def att: Attributes
 }
 
 object Module {
-  def unapply(arg: Module): Option[(ModuleName, Seq[Sentence], Attributes)] = Some(arg.name, arg.sentences, arg.att)
+  def unapply(arg: Module): Option[(ModuleName, Seq[Declaration], Attributes)] = Some(arg.name, arg.decls, arg.att)
 }
 
-trait Sentence
+trait Declaration
 
-trait Import extends Sentence {
+trait Import extends Declaration {
   def name: ModuleName
 
   def att: Attributes
@@ -34,7 +36,7 @@ object Import {
   def unapply(arg: Import): Option[(ModuleName, Attributes)] = Some(arg.name, arg.att)
 }
 
-trait SortDeclaration extends Sentence {
+trait SortDeclaration extends Declaration {
   def params: Seq[SortVariable]
 
   def sort: Sort
@@ -47,7 +49,7 @@ object SortDeclaration {
   = Some(arg.params, arg.sort, arg.att)
 }
 
-trait SymbolDeclaration extends Sentence {
+trait SymbolDeclaration extends Declaration {
   def symbol: Symbol
 
   def argSorts: Seq[Sort]
@@ -61,7 +63,7 @@ object AliasDeclaration {
   def unapply(arg: AliasDeclaration): Option[(Alias, Seq[Sort], Sort, Attributes)]
   = Some(arg.alias, arg.argSorts, arg.returnSort, arg.att)
 }
-trait AliasDeclaration extends Sentence {
+trait AliasDeclaration extends Declaration {
   def alias: Alias
 
   def argSorts: Seq[Sort]
@@ -76,7 +78,7 @@ object SymbolDeclaration {
   = Some(arg.symbol, arg.argSorts, arg.returnSort, arg.att)
 }
 
-trait AxiomDeclaration extends Sentence {
+trait AxiomDeclaration extends Declaration {
   def params: Seq[SortVariable]
 
   def pattern: Pattern
@@ -392,27 +394,27 @@ trait Builders {
 
   def Definition(att: Attributes, modules: Seq[Module]): Definition
 
-  def Module(name: ModuleName, sens: Seq[Sentence], att: Attributes): Module
+  def Module(name: ModuleName, sens: Seq[Declaration], att: Attributes): Module
 
-  def Import(name: ModuleName, att: Attributes): Sentence
+  def Import(name: ModuleName, att: Attributes): Declaration
 
   def SortDeclaration(params: Seq[SortVariable],
                       sort: Sort,
-                      att: Attributes): Sentence
+                      att: Attributes): Declaration
 
   def SymbolDeclaration(symbol: Symbol,
                         argSorts: Seq[Sort],
                         returnSort: Sort,
-                        att: Attributes): Sentence
+                        att: Attributes): Declaration
 
   def AliasDeclaration(alias: Alias,
                        argSorts: Seq[Sort],
                        returnSort: Sort,
-                       att: Attributes): Sentence
+                       att: Attributes): Declaration
 
   def AxiomDeclaration(params: Seq[SortVariable],
                        pattern: Pattern,
-                       att: Attributes): Sentence
+                       att: Attributes): Declaration
 
   def Attributes(att: Seq[Pattern]): Attributes
 
