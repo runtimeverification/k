@@ -13,7 +13,8 @@ object KoreToText {
     apply(d.att) +
     System.lineSeparator() +
     System.lineSeparator() +
-    d.modules.map(apply).mkString(System.lineSeparator() + System.lineSeparator()) +
+    apply(d.module) +
+    System.lineSeparator() +
     System.lineSeparator()
   }
 
@@ -22,17 +23,17 @@ object KoreToText {
     "module " +
     apply(m.name.str) +
     System.lineSeparator() +
-    m.sentences.map(s => "  " + apply(s)).mkString(System.lineSeparator()) +
+    m.decls.map(s => "  " + apply(s)).mkString(System.lineSeparator()) +
     System.lineSeparator() +
     "endmodule " +
     apply(m.att)
   }
 
-  /** Returns a string from [[kore.Sentence]]. */
-  def apply(d: Sentence): String = d match {
+  /** Returns a string from [[kore.Declaration]]. */
+  def apply(d: Declaration): String = d match {
 
-    case Import(ModuleName(name), att) =>
-      "import " + apply(name) + " " + apply(att)
+    // case Import(ModuleName(name), att) =>
+    //   "import " + apply(name) + " " + apply(att)
 
     case SortDeclaration(params, sort, att) =>
       "sort{" +
@@ -125,23 +126,29 @@ object KoreToText {
     case Forall(s, v, p) =>
       "\\forall" + "{" + apply(s) + "}" +
         "(" + apply(v) + "," + apply(p) + ")"
-    case Next(s, p) =>
-      "\\next" + "{" + apply(s) + "}" +
+    // case Next(s, p) =>
+    //   "\\next" + "{" + apply(s) + "}" +
+    //     "(" + apply(p) + ")"
+    // case Rewrites(s, rs, p, q) =>
+    //   "\\rewrites" + "{" + apply(s) + "," + apply(rs) + "}" +
+    //     "(" + apply(p) + "," + apply(q) + ")"
+    case Ceil(s, rs, p) =>
+      "\\ceil" + "{" + apply(s) + "," + apply(rs) + "}" +
         "(" + apply(p) + ")"
-    case Rewrites(s, rs, p, q) =>
-      "\\rewrites" + "{" + apply(s) + "," + apply(rs) + "}" +
-        "(" + apply(p) + "," + apply(q) + ")"
+    case Floor(s, rs, p) =>
+      "\\floor" + "{" + apply(s) + "," + apply(rs) + "}" +
+        "(" + apply(p) + ")"
     case Equals(s1, s2, p, q) =>
       "\\equals" + "{" + apply(s1) + "," + apply(s2) + "}" +
         "(" + apply(p) + "," + apply(q) + ")"
     case Mem(s, rs, x, p) =>
       "\\mem" + "{" + apply(s) + "," + apply(rs) + "}" +
         "(" + apply(x) + "," + apply(p) + ")"
-    case Subset(s, rs, p, q) =>
-      "\\subset" + "{" + apply(s) + "," + apply(rs) + "}" +
-        "(" + apply(p) + "," + apply(q) + ")"
-    case DomainValue(sortStr, valueStr) =>
-      "\\domainvalue" + apply(sortStr) + "," + apply(valueStr) + ")"
+    // case Subset(s, rs, p, q) =>
+    //   "\\subset" + "{" + apply(s) + "," + apply(rs) + "}" +
+    //     "(" + apply(p) + "," + apply(q) + ")"
+    // case DomainValue(sortStr, valueStr) =>
+    //   "\\domainvalue" + apply(sortStr) + "," + apply(valueStr) + ")"
     case StringLiteral(str) =>
       "\"" + str + "\""
   }

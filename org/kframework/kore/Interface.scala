@@ -231,7 +231,7 @@ object Ceil {
   def unapply(arg: Ceil): Option[(Sort, Sort, Pattern)] = Some(arg.s, arg.rs, arg.p)
 }
 
-trait Ceil extends Pattern {
+trait Floor extends Pattern {
   def s: Sort
 
   def rs: Sort
@@ -239,8 +239,8 @@ trait Ceil extends Pattern {
   def p: Pattern
 }
 
-object Ceil {
-  def unapply(arg: Ceil): Option[(Sort, Sort, Pattern)] = Some(arg.s, arg.rs, arg.p)
+object Floor {
+  def unapply(arg: Floor): Option[(Sort, Sort, Pattern)] = Some(arg.s, arg.rs, arg.p)
 }
 // trait Next extends Pattern {
 //   def s: Sort
@@ -284,8 +284,7 @@ trait Equals extends Pattern {
 }
 
 object Equals {
-  def unapply(arg: Equals): Option[(Sort, Sort, Pattern, Pattern)]
-  = Some(arg.s, arg.rs, arg._1, arg._2)
+  def unapply(arg: Equals): Option[(Sort, Sort, Pattern, Pattern)] = Some(arg.s, arg.rs, arg._1, arg._2)
 }
 
 /**
@@ -304,8 +303,7 @@ trait Mem extends Pattern {
 }
 
 object Mem {
-  def unapply(arg: Mem): Option[(Sort, Sort, Variable, Pattern)] =
-    Some(arg.s, arg.rs, arg.x, arg.p)
+  def unapply(arg: Mem): Option[(Sort, Sort, Variable, Pattern)] = Some(arg.s, arg.rs, arg.x, arg.p)
 }
 
 /**
@@ -415,11 +413,11 @@ object Alias {
 
 trait Builders {
 
-  def Definition(att: Attributes, modules: Seq[Module]): Definition
+  def Definition(att: Attributes, module: Module): Definition
 
   def Module(name: ModuleName, sens: Seq[Declaration], att: Attributes): Module
 
-  def Import(name: ModuleName, att: Attributes): Declaration
+  // def Import(name: ModuleName, att: Attributes): Declaration
 
   def SortDeclaration(params: Seq[SortVariable],
                       sort: Sort,
@@ -463,19 +461,23 @@ trait Builders {
 
   def Forall(s: Sort, v: Variable, p: Pattern): Pattern
 
-  def Next(s: Sort, _1: Pattern): Pattern
+  def Ceil(s: Sort, rs: Sort, p: Pattern): Pattern
 
-  def Rewrites(s: Sort, rs: Sort, _1: Pattern, _2: Pattern): Pattern
+  def Floor(s: Sort, rs: Sort, p: Pattern): Pattern
+
+  // def Next(s: Sort, _1: Pattern): Pattern
+
+  // def Rewrites(s: Sort, rs: Sort, _1: Pattern, _2: Pattern): Pattern
 
   def Equals(s: Sort, rs:Sort, _1: Pattern, _2: Pattern): Pattern
 
   def Mem(s: Sort, rs:Sort, x: Variable, p: Pattern): Pattern
 
-  def Subset(s: Sort, rs:Sort, _1: Pattern, _2: Pattern): Pattern
+  // def Subset(s: Sort, rs:Sort, _1: Pattern, _2: Pattern): Pattern
 
   def StringLiteral(str: String): Pattern
 
-  def DomainValue(sortStr: String, valueStr: String): Pattern
+  // def DomainValue(sortStr: String, valueStr: String): Pattern
 
   def ModuleName(str: String): ModuleName
 
