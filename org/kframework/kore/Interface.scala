@@ -26,15 +26,15 @@ object Module {
 
 trait Declaration
 
-trait Import extends Declaration {
-  def name: ModuleName
-
-  def att: Attributes
-}
-
-object Import {
-  def unapply(arg: Import): Option[(ModuleName, Attributes)] = Some(arg.name, arg.att)
-}
+// trait Import extends Declaration {
+//   def name: ModuleName
+//
+//   def att: Attributes
+// }
+//
+// object Import {
+//   def unapply(arg: Import): Option[(ModuleName, Attributes)] = Some(arg.name, arg.att)
+// }
 
 trait SortDeclaration extends Declaration {
   def params: Seq[SortVariable]
@@ -219,15 +219,38 @@ object Forall {
   def unapply(arg: Forall): Option[(Sort, Variable, Pattern)] = Some(arg.s, arg.v, arg.p)
 }
 
-trait Next extends Pattern {
+trait Ceil extends Pattern {
   def s: Sort
 
-  def _1: Pattern
+  def rs: Sort
+
+  def p: Pattern
 }
 
-object Next {
-  def unapply(arg: Next): Option[(Sort, Pattern)] = Some(arg.s, arg._1)
+object Ceil {
+  def unapply(arg: Ceil): Option[(Sort, Sort, Pattern)] = Some(arg.s, arg.rs, arg.p)
 }
+
+trait Ceil extends Pattern {
+  def s: Sort
+
+  def rs: Sort
+
+  def p: Pattern
+}
+
+object Ceil {
+  def unapply(arg: Ceil): Option[(Sort, Sort, Pattern)] = Some(arg.s, arg.rs, arg.p)
+}
+// trait Next extends Pattern {
+//   def s: Sort
+//
+//   def _1: Pattern
+// }
+
+// object Next {
+//   def unapply(arg: Next): Option[(Sort, Pattern)] = Some(arg.s, arg._1)
+// }
 
 /**
   * \rewrites(P, Q) is defined as a predicate pattern floor(P implies Q)
@@ -235,20 +258,20 @@ object Next {
   * One is the sort of patterns P and Q;
   * The other is the sort of the context.
   */
-trait Rewrites extends Pattern {
-  def s: Sort // the sort of the two patterns P and Q
-
-  def rs: Sort // the sort of the context where the rewrites-to pattern is being placed.
-
-  def _1: Pattern
-
-  def _2: Pattern
-}
-
-object Rewrites {
-  def unapply(arg: Rewrites): Option[(Sort, Sort, Pattern, Pattern)] =
-    Some(arg.s, arg.rs, arg._1, arg._2)
-}
+// trait Rewrites extends Pattern {
+//   def s: Sort // the sort of the two patterns P and Q
+//
+//   def rs: Sort // the sort of the context where the rewrites-to pattern is being placed.
+//
+//   def _1: Pattern
+//
+//   def _2: Pattern
+// }
+//
+// object Rewrites {
+//   def unapply(arg: Rewrites): Option[(Sort, Sort, Pattern, Pattern)] =
+//     Some(arg.s, arg.rs, arg._1, arg._2)
+// }
 
 trait Equals extends Pattern {
   def s: Sort // the sort of the two patterns that are being compared
@@ -288,20 +311,20 @@ object Mem {
 /**
   * \subset(P,Q) is a predicate pattern that checks whether P is a subset of Q.
   */
-trait Subset extends Pattern {
-  def s: Sort // the sort of P and Q
-
-  def rs: Sort // the context sort
-
-  def _1: Pattern
-
-  def _2: Pattern
-}
-
-object Subset {
-  def unapply(arg: Subset): Option[(Sort, Sort, Pattern, Pattern)] =
-    Some(arg.s, arg.rs, arg._1, arg._2)
-}
+// trait Subset extends Pattern {
+//   def s: Sort // the sort of P and Q
+//
+//   def rs: Sort // the context sort
+//
+//   def _1: Pattern
+//
+//   def _2: Pattern
+// }
+//
+// object Subset {
+//   def unapply(arg: Subset): Option[(Sort, Sort, Pattern, Pattern)] =
+//     Some(arg.s, arg.rs, arg._1, arg._2)
+// }
 
 // String literals <string> are considered as meta-level patterns of sort #String
 trait StringLiteral extends Pattern {
@@ -316,15 +339,15 @@ object StringLiteral {
 // The data structure for DomainValue is temporary.
 // It is designed and implemented just to make sure that we can
 // merge Kore to K.
-trait DomainValue extends Pattern {
-  def sortStr: String   // a string that represents the sort of the value, e.g., "Bool", "Int", etc
-
-  def valueStr: String  // a string that represents the value, e.g., "12345", "0x12345", etc
-}
-
-object DomainValue extends Pattern {
-  def unapply(arg: DomainValue): Option[(String, String)] = Some(arg.sortStr, arg.valueStr)
-}
+// trait DomainValue extends Pattern {
+//   def sortStr: String   // a string that represents the sort of the value, e.g., "Bool", "Int", etc
+//
+//   def valueStr: String  // a string that represents the value, e.g., "12345", "0x12345", etc
+// }
+//
+// object DomainValue extends Pattern {
+//   def unapply(arg: DomainValue): Option[(String, String)] = Some(arg.sortStr, arg.valueStr)
+// }
 
 trait ModuleName {
   def str: String
