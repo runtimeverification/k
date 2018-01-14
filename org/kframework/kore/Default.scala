@@ -8,7 +8,7 @@ object implementation {
 
     case class Definition(att: i.Attributes, module: i.Module) extends i.Definition
 
-    case class Module(name: i.ModuleName, decls: Seq[i.Declaration], att: i.Attributes) extends i.Module
+    case class Module(name: String, decls: Seq[i.Declaration], att: i.Attributes) extends i.Module
 
     // case class Import(name: i.ModuleName, att: i.Attributes) extends i.Import
 
@@ -62,8 +62,6 @@ object implementation {
 
     // case class DomainValue(sortStr: String, valueStr: String) extends i.DomainValue
 
-    case class ModuleName(str: String) extends i.ModuleName
-
     case class SortVariable(name: String) extends i.SortVariable
 
     case class CompoundSort(ctr: String, params: Seq[i.Sort]) extends i.CompoundSort
@@ -81,7 +79,7 @@ object implementation {
 
     def Definition(att: i.Attributes, module: i.Module): i.Definition = d.Definition(att, module)
 
-    def Module(name: i.ModuleName, decls: Seq[i.Declaration], att: i.Attributes): i.Module = d.Module(name, decls, att)
+    def Module(name: String, decls: Seq[i.Declaration], att: i.Attributes): i.Module = d.Module(name, decls, att)
 
     // def Import(name: i.ModuleName, att: i.Attributes): i.Declaration = d.Import(name, att)
 
@@ -134,8 +132,6 @@ object implementation {
     def StringLiteral(str: String): i.Pattern = d.StringLiteral(str)
 
     // def DomainValue(sortStr: String, valueStr: String): Pattern = d.DomainValue(sortStr, valueStr)
-
-    def ModuleName(str: String): i.ModuleName = d.ModuleName(str)
 
     def SortVariable(name: String): i.SortVariable = d.SortVariable(name)
 

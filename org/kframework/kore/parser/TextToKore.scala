@@ -63,11 +63,11 @@ class TextToKore(b: Builders) {
   // Module = module ModuleName Declarations endmodule Attributes
   private def parseModule(): Module = {
     consumeWithLeadingWhitespaces("module")
-    val nameStr = parseModuleName()
+    val name = parseId()
     val decls = parseDeclarations(Seq())
     consumeWithLeadingWhitespaces("endmodule")
     val att = parseAttributes()
-    b.Module(b.ModuleName(nameStr), decls, att)
+    b.Module(name, decls, att)
   }
 
   // Declarations = <lookahead>(e) // <empty>
@@ -431,22 +431,6 @@ class TextToKore(b: Builders) {
     }
   }
 
-  // ModuleName = Identifier
-  private def parseModuleName(): String = {
-    def loop(s: StringBuilder): String = {
-      scanner.next() match {
-        case c if isIdChar(c) =>
-          s += c; loop(s)
-        case c => scanner.putback(c)
-          s.toString()
-      }
-    }
-
-    scanner.nextWithSkippingWhitespaces() match {
-      case c if isIdChar(c) => loop(new StringBuilder(c.toString))
-      case err => throw error("<ModuleName>", err)
-    }
-  }
 
   // Sort = SortVariable | Name { List{Sort, ",", ")"} }
   private def parseSort(): Sort = {

@@ -11,7 +11,7 @@ object Definition {
 }
 
 trait Module {
-  def name: ModuleName
+  def name: String
 
   def decls: Seq[Declaration]
 
@@ -19,7 +19,7 @@ trait Module {
 }
 
 object Module {
-  def unapply(arg: Module): Option[(ModuleName, Seq[Declaration], Attributes)] = Some(arg.name, arg.decls, arg.att)
+  def unapply(arg: Module): Option[(String, Seq[Declaration], Attributes)] = Some(arg.name, arg.decls, arg.att)
 }
 
 trait Declaration
@@ -345,13 +345,6 @@ object StringLiteral {
 //   def unapply(arg: DomainValue): Option[(String, String)] = Some(arg.sortStr, arg.valueStr)
 // }
 
-trait ModuleName {
-  def str: String
-}
-
-object ModuleName {
-  def unapply(arg: ModuleName): Option[String] = Some(arg.str)
-}
 
 /** A sort can be either a sort variable or of the form C{s1,...,sn}
   * where C is called the sort constructor and s1,...,sn are sort parameters.
@@ -413,7 +406,7 @@ trait Builders {
 
   def Definition(att: Attributes, module: Module): Definition
 
-  def Module(name: ModuleName, sens: Seq[Declaration], att: Attributes): Module
+  def Module(name: String, sens: Seq[Declaration], att: Attributes): Module
 
   // def Import(name: ModuleName, att: Attributes): Declaration
 
@@ -476,8 +469,6 @@ trait Builders {
   def StringLiteral(str: String): Pattern
 
   // def DomainValue(sortStr: String, valueStr: String): Pattern
-
-  def ModuleName(str: String): ModuleName
 
   def SortVariable(name: String): SortVariable
 

@@ -21,7 +21,7 @@ object KoreToText {
   /** Returns a string from [[kore.Module]]. */
   def apply(m: Module): String = {
     "module " +
-    apply(m.name.str) +
+    apply(m.name) +
     System.lineSeparator() +
     m.decls.map(s => "  " + apply(s)).mkString(System.lineSeparator()) +
     System.lineSeparator() +
