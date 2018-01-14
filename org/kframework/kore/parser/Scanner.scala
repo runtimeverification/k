@@ -40,7 +40,9 @@ class Scanner {
   @throws(classOf[java.io.EOFException])
   private def readLine(): Unit = {
     if (lines.hasNext) {
-      line = lines.next()
+      line = lines.next() // line doesn't contain newline characters '\n' or '\r',
+                          // which is against the scala specification.
+                          // As a consequence, newline characters are skipped as expected.
       input = line.iterator
       lineNum += 1
       columnNum = 0
@@ -55,7 +57,7 @@ class Scanner {
 
   /** Returns the next character from the stream.
     *
-    * Returns a blank space ' ' when a newline is encountered.
+    * Returns '\n' when a newline is encountered.
     */
   @throws(classOf[java.io.EOFException])
   def next(): Char = {
@@ -70,7 +72,7 @@ class Scanner {
         } else if (!yieldEOL) {
           // end of line
           yieldEOL = true
-          ' ' // safer than '\n' (platform independent)
+          '\n'     // the newline character '\n' is used to decide when to terminate line comments
         } else {
           yieldEOL = false
           readLine()
@@ -97,10 +99,43 @@ class Scanner {
   @throws(classOf[java.io.EOFException])
   def skipWhitespaces(): Unit = {
     next() match {
-      case ' ' => skipWhitespaces()
+      case ' ' | '\n' => skipWhitespaces()
       case '\t' => columnNum += 3; skipWhitespaces()
-      case '\n' | '\r' => ??? // skipWhitespaces() // shouldn't be reachable.
+      case '\r' => ??? // skipWhitespaces() // shouldn't be reachable.
+      case '/' => skipComments(); skipWhitespaces()
       case c => putback(c)
+    }
+  }
+
+  /**
+    * Consumes a comment
+    */
+  @throws(classOf[java.io.IOException])
+  def skipComments(): Unit = {
+    next() match {
+      case '/' => // line comment
+        skipLineComment()
+      case '*' => // block comment
+        skipBlockComment()
+      case c => throw new java.io.IOException("Invalid comments. Expect '/' or '*'")
+    }
+
+    def skipLineComment(): Unit = {
+      next() match {
+        case '\n' => ;
+        case c => skipLineComment()
+      }
+    }
+
+    def skipBlockComment(): Unit = {
+      next() match {
+        case '*' =>
+          next() match {
+            case '/' => ;
+            case c => skipBlockComment()
+          }
+        case c => skipBlockComment()
+      }
     }
   }
 

@@ -4,8 +4,6 @@ trait Definition {
   def att: Attributes
 
   def module: Module
-
-  // def modules: Seq[Module]
 }
 
 object Definition {
