@@ -117,7 +117,7 @@ class Scanner {
         skipLineComment()
       case '*' => // block comment
         skipBlockComment()
-      case c => throw new java.io.IOException("Invalid comments. Expect '/' or '*'")
+      case c => throw new ParseError("Invalid comments. Expect '/' or '*'")
     }
 
     def skipLineComment(): Unit = {
