@@ -41,8 +41,8 @@ class Scanner {
   private def readLine(): Unit = {
     if (lines.hasNext) {
       line = lines.next() // line doesn't contain newline characters '\n' or '\r',
-                          // which is against the scala specification.
-                          // As a consequence, newline characters are skipped as expected.
+      // which is against the scala specification.
+      // As a consequence, newline characters are skipped as expected.
       input = line.iterator
       lineNum += 1
       columnNum = 0
@@ -72,7 +72,7 @@ class Scanner {
         } else if (!yieldEOL) {
           // end of line
           yieldEOL = true
-          '\n'     // the newline character '\n' is used to decide when to terminate line comments
+          '\n' // the newline character '\n' is used to decide when to terminate line comments
         } else {
           yieldEOL = false
           readLine()
@@ -127,13 +127,24 @@ class Scanner {
       }
     }
 
+    /**
+      * Skip all until seeing STAR(*) SLASH(/)
+      */
     def skipBlockComment(): Unit = {
       next() match {
         case '*' =>
-          next() match {
-            case '/' => ;
-            case c => skipBlockComment()
-          }
+          skipBlockCommentAfterStar()
+        case c => skipBlockComment()
+      }
+    }
+
+    /**
+      * Have seen a STAR(*)
+      */
+    def skipBlockCommentAfterStar(): Unit = {
+      next() match {
+        case '/' => ;
+        case '*' => skipBlockCommentAfterStar()
         case c => skipBlockComment()
       }
     }
