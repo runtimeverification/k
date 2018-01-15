@@ -48,9 +48,9 @@ object implementation {
 
     // case class Rewrites(s: Sort, rs: Sort, _1: i.Pattern, _2: i.Pattern) extends i.Rewrites
 
-    case class Ceil(s: i.Sort, rs: i.Sort, p: i.Pattern) extends i.Pattern
+    case class Ceil(s: i.Sort, rs: i.Sort, p: i.Pattern) extends i.Ceil
 
-    case class Floor(s: i.Sort, rs: i.Sort, p: i.Pattern) extends i.Pattern
+    case class Floor(s: i.Sort, rs: i.Sort, p: i.Pattern) extends i.Floor
 
     case class Equals(s: i.Sort, rs: i.Sort, _1: i.Pattern, _2: i.Pattern) extends i.Equals
 

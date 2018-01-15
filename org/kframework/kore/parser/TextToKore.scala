@@ -16,8 +16,8 @@ class TextToKore(b: Builders) {
 
   /**
     * ParsingLevel ::= None        // both meta-level and object-level are allowed
-    * | Some(true)  // only accept meta-level
-    * | Some(false) // only accept object-level
+    *                | Some(true)  // only accept meta-level
+    *                | Some(false) // only accept object-level
     */
 
   private type ParsingLevel = Option[Boolean]
@@ -30,9 +30,9 @@ class TextToKore(b: Builders) {
 
   // Whenever a syntactic category is parsed, its parsing level (either object or meta) is
   // stored in previousParsingLevel.
-  // Recall that identifiers is the lexicon syntactic category that decides if a syntactic category
+  // Recall that Identifier is the only lexicon syntactic category that decides if a syntactic category
   // (such as Sort or Variable) is object-level or meta-level.
-  // Therefore, [[parseId]] is the only method that modifies previousParsingLevel.
+  // Therefore, [[parseId]] is the only method that directly modifies previousParsingLevel.
   private var previousParsingLevel: ParsingLevel = both
 
   /** Parses the file and returns [[kore.Definition]]. */
