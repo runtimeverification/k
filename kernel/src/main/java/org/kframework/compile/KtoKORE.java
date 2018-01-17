@@ -37,7 +37,7 @@ public class KtoKORE extends TransformK {
 
     @Override
     public K apply(KToken k) {
-        return KToken(k.s(), Sort(k.sort().name()), k.att());
+        return KToken(k.s(), Sort(k.sort().name(), k.sort().params()), k.att());
     }
 
     @Override

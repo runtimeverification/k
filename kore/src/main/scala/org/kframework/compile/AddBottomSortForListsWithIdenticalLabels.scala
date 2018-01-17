@@ -2,7 +2,7 @@ package org.kframework.compile
 
 import org.kframework.attributes.Att
 import org.kframework.definition._
-import org.kframework.kore.ADT.Sort
+import org.kframework.kore.KORE.Sort
 
 import collection._
 import scala.collection.immutable.Iterable
@@ -15,7 +15,7 @@ object AddBottomSortForListsWithIdenticalLabels extends Function[Module, Module]
       .groupBy(l => l.klabel)
       .map {
         case (klabel, userListInfo) =>
-          val minimalSorts = m.subsorts.minimal(userListInfo map { li => Sort(li.sort) })
+          val minimalSorts = m.subsorts.minimal(userListInfo map { li => li.sort })
           if (minimalSorts.size > 1) {
             val newBottomSort = Sort("GeneratedListBottom{" + klabel + "}")
 

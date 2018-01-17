@@ -15,6 +15,7 @@ import org.kframework.kil.Attribute;
 import org.kframework.kompile.Kompile;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
+import org.kframework.kore.Sort;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.concrete2kore.ParserUtils;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
@@ -125,14 +126,14 @@ public class GenerateSentencesFromConfigDeclTest {
                         BooleanUtils.TRUE, BooleanUtils.TRUE, initializerAtts),
                 Production("<threads>-fragment", Sort("ThreadsCellFragment"),
                         Seq(Terminal("<threads>-fragment"),NonTerminal(Sort("ThreadCellBag")),Terminal("</threads>-fragment")),
-                        Att().add(Attribute.CELL_FRAGMENT_KEY,"ThreadsCell")),
+                        Att().add(Attribute.CELL_FRAGMENT_KEY,Sort.class,Sort("ThreadsCell"))),
                 Production("<thread>-fragment", Sort("ThreadCellFragment"),
                         Seq(Terminal("<thread>-fragment"),NonTerminal(Sort("KCellOpt")),NonTerminal(Sort("OptCellOpt")),Terminal("</thread>-fragment")),
-                        Att().add(Attribute.CELL_FRAGMENT_KEY,"ThreadCell")),
+                        Att().add(Attribute.CELL_FRAGMENT_KEY,Sort.class,Sort("ThreadCell"))),
                 Production(Sort("OptCellOpt"), Seq(NonTerminal(Sort("OptCell")))),
-                Production("noOptCell", Sort("OptCellOpt"), Seq(Terminal("noOptCell")),Att().add(Attribute.CELL_OPT_ABSENT_KEY, "OptCell")),
+                Production("noOptCell", Sort("OptCellOpt"), Seq(Terminal("noOptCell")),Att().add(Attribute.CELL_OPT_ABSENT_KEY, Sort.class, Sort("OptCell"))),
                 Production(Sort("KCellOpt"), Seq(NonTerminal(Sort("KCell")))),
-                Production("noKCell", Sort("KCellOpt"), Seq(Terminal("noKCell")),Att().add(Attribute.CELL_OPT_ABSENT_KEY, "KCell"))
+                Production("noKCell", Sort("KCellOpt"), Seq(Terminal("noKCell")),Att().add(Attribute.CELL_OPT_ABSENT_KEY, Sort.class, Sort("KCell")))
             );
 
         assertEquals("Produced unexpected productions", Set(), gen.$amp$tilde(reference));

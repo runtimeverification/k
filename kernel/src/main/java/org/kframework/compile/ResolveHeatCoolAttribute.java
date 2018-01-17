@@ -6,11 +6,12 @@ import org.kframework.builtin.BooleanUtils;
 import org.kframework.definition.Context;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
-import org.kframework.kil.Attribute;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KVariable;
+import org.kframework.kore.Sort;
 import org.kframework.kore.TransformK;
+import org.kframework.parser.outer.Outer;
 
 import java.util.Set;
 
@@ -45,7 +46,7 @@ public class ResolveHeatCoolAttribute {
                     return new TransformK() {
                         public K apply(KVariable var) {
                             if (var.name(). equals("HOLE") && transitions.stream().noneMatch(att::contains)) {
-                                return KVariable(var.name(), var.att().add(Attribute.SORT_KEY, att.getOptional("result").orElse("KResult")));
+                                return KVariable(var.name(), var.att().add(Sort.class, Outer.parseSort(att.getOptional("result").orElse("KResult"))));
                             }
                             return super.apply(var);
                         }

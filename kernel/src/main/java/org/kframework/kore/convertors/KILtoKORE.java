@@ -226,7 +226,7 @@ public class KILtoKORE extends KILTransformation<Object> {
     public Set<org.kframework.definition.Sentence> apply(Syntax s) {
         Set<org.kframework.definition.Sentence> res = new HashSet<>();
 
-        org.kframework.kore.Sort sort = apply(s.getDeclaredSort().getRealSort());
+        org.kframework.kore.Sort sort = s.getDeclaredSort().getSort();
 
         // just a sort declaration
         if (s.getPriorityBlocks().size() == 0) {
@@ -262,7 +262,7 @@ public class KILtoKORE extends KILTransformation<Object> {
                     for (org.kframework.kil.ProductionItem it : p.getItems()) {
                         if (it instanceof NonTerminal) {
                             NonTerminal nt = (NonTerminal)it;
-                            items.add(NonTerminal(apply(nt.getRealSort()), nt.getName()));
+                            items.add(NonTerminal(nt.getSort(), nt.getName()));
                         } else if (it instanceof UserList) {
                             throw new AssertionError("Lists should have applied before.");
                         } else if (it instanceof Lexical) {
@@ -345,7 +345,7 @@ public class KILtoKORE extends KILTransformation<Object> {
                               org.kframework.kore.Sort sort, Production p, UserList userList) {
 
         // Transform list declarations of the form Es ::= List{E, ","} into something representable in kore
-        org.kframework.kore.Sort elementSort = apply(userList.getSort());
+        org.kframework.kore.Sort elementSort = userList.getSort();
 
         org.kframework.attributes.Att attrs = convertAttributes(p).add(Att.userList(), userList.getListType());
         String kilProductionId = "" + System.identityHashCode(p);
@@ -368,10 +368,6 @@ public class KILtoKORE extends KILTransformation<Object> {
 
     public String dropQuote(String s) {
         return s;
-    }
-
-    public org.kframework.kore.Sort apply(org.kframework.kil.Sort sort) {
-        return Sort(sort.getName());
     }
 
     public static org.kframework.attributes.Att convertAttributes(ASTNode t) {

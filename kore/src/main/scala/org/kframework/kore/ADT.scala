@@ -2,8 +2,8 @@ package org.kframework.kore
 
 import org.kframework.builtin.{KLabels, Sorts}
 import org.kframework.kore
+import org.kframework.kore.KORE.Sort
 import org.kframework.attributes._
-import org.kframework.kore.ADT.Sort
 
 import collection.JavaConverters._
 
@@ -62,8 +62,14 @@ object ADT {
     def apply(ks: K*) = KApply(this, KList(ks.toList))
   }
 
-  case class Sort(name: String) extends kore.Sort {
-    override def toString = name
+  case class Sort(name: String, params: kore.Sort*) extends kore.Sort {
+    override def toString = {
+      if (params.isEmpty) {
+        name
+      } else {
+        name + "{" + params.map(_.toString).reduce((s1, s2) => s1 + "," + s2) + "}"
+      }
+    }
   }
 
   case class KToken(s: String, sort: kore.Sort, att: Att = Att.empty) extends kore.KToken
@@ -88,7 +94,7 @@ object SortedADT {
   case class SortedKVariable(name: String, att: Att = Att.empty) extends kore.KVariable {
     def apply(ks: K*) = ADT.KApply(this, ADT.KList(ks.toList))
 
-    val sort: Sort = Sort(att.getOptional(Att.sort).orElse(Sorts.K.name))
+    val sort: Sort = att.getOptional(classOf[Sort]).orElse(Sorts.K)
 
     override def equals(other: Any) = other match {
       case v: SortedKVariable => name == v.name && sort == v.sort

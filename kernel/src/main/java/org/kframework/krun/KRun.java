@@ -313,7 +313,7 @@ public class KRun {
         List<String> tokens = new ArrayList<>(Arrays.asList(parser.split(" ")));
         tokens.add(value);
         Map<String, String> environment = new HashMap<>();
-        environment.put("KRUN_SORT", startSymbol.name());
+        environment.put("KRUN_SORT", startSymbol.toString());
         environment.put("KRUN_COMPILED_DEF", files.resolveDefinitionDirectory(".").getAbsolutePath());
         RunProcess.ProcessOutput output = RunProcess.execute(environment, files.getProcessBuilder(), tokens.toArray(new String[tokens.size()]));
 

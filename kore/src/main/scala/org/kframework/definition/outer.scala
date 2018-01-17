@@ -10,6 +10,7 @@ import org.kframework.POSet
 import org.kframework.attributes.Att
 import org.kframework.definition.Constructors._
 import org.kframework.kore.Unapply.{KApply, KLabel}
+import org.kframework.kore.KORE.Sort
 import org.kframework.kore._
 import org.kframework.utils.errorsystem.KEMException
 import org.kframework.builtin.Sorts
@@ -452,9 +453,4 @@ case class RegexTerminal(precedeRegex: String, regex: String, followRegex: Strin
 
 case class Terminal(value: String) extends TerminalLike // hooked
   with TerminalToString {
-}
-
-/* Helper constructors */
-object NonTerminal {
-  def apply(sort: String, name: Option[String]): NonTerminal = NonTerminal(ADT.Sort(sort), name)
 }

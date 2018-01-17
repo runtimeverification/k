@@ -23,9 +23,9 @@ public class GenerateSortPredicateSyntax {
     public Module gen(Module mod) {
         Set<Sentence> res = new HashSet<>();
         for (Sort sort : iterable(mod.definedSorts())) {
-            Production prod = Production("is" + sort.name(), Sorts.Bool(),
-                    Seq(Terminal("is" + sort.name()), Terminal("("), NonTerminal(Sorts.K()), Terminal(")")),
-                    Att().add(Attribute.FUNCTION_KEY).add(Attribute.PREDICATE_KEY, sort.name()));
+            Production prod = Production("is" + sort.toString(), Sorts.Bool(),
+                    Seq(Terminal("is" + sort.toString()), Terminal("("), NonTerminal(Sorts.K()), Terminal(")")),
+                    Att().add(Attribute.FUNCTION_KEY).add(Attribute.PREDICATE_KEY, Sort.class, sort));
             if (!mod.productions().contains(prod))
                 res.add(prod);
         }

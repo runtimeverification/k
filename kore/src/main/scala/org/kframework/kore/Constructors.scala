@@ -6,7 +6,7 @@ import scala.collection.JavaConverters._
 
 trait Constructors {
   def KLabel(name: String): KLabel
-  def Sort(name: String): Sort
+  def Sort(name: String, params: Sort*): Sort
   def KList(items: java.util.List[K]): KList
   def KToken(s: String, sort: Sort, att: Att): KToken
   def KApply(klabel: KLabel, klist: KList, att: Att): KApply

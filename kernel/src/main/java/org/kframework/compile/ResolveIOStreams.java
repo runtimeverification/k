@@ -3,6 +3,7 @@ package org.kframework.compile;
 
 import org.kframework.attributes.Location;
 import org.kframework.builtin.KLabels;
+import org.kframework.builtin.Sorts;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.definition.Production;
@@ -209,7 +210,7 @@ public class ResolveIOStreams {
         for (Sentence s : mutable(getStreamSyntaxModule(streamName).localSentences())) {
             if (s instanceof Production) {
                 Production production = (Production) s;
-                if (production.sort().name().equals("Stream")) {
+                if (production.sort().toString().equals("Stream")) {
                     sentences.add(production);
                 }
             }
@@ -412,10 +413,10 @@ public class ResolveIOStreams {
                         KVariable x = (KVariable) i;
                         switch (x.name()) {
                         case "?Sort":
-                            return KToken("\"" + sort + "\"", Sort("String"));
+                            return KToken("\"" + sort + "\"", Sorts.String());
                         case "?Delimiters":
                             // TODO(Daejun): support `delimiter` attribute in stream cell
-                            return KToken("\" \\n\\t\\r\"", Sort("String"));
+                            return KToken("\" \\n\\t\\r\"", Sorts.String());
                         default:
                             // fall through
                         }

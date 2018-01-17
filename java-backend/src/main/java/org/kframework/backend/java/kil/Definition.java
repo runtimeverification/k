@@ -16,12 +16,9 @@ import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Subsorts;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Module;
-import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
-import org.kframework.kil.Attributes;
 import org.kframework.kil.loader.Context;
 import org.kframework.kompile.CompiledDefinition;
-import org.kframework.kore.convertors.KILtoKORE;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -115,10 +112,10 @@ public class Definition extends JavaSymbolicObject {
         JavaConversions.mapAsJavaMap(moduleWithPolyProds.signatureFor()).entrySet().stream().forEach(e -> {
             JavaConversions.setAsJavaSet(e.getValue()).stream().forEach(p -> {
                 ImmutableList.Builder<Sort> sortsBuilder = ImmutableList.builder();
-                stream(p._1()).map(s -> Sort.of(s.name())).forEach(sortsBuilder::add);
+                stream(p._1()).map(s -> Sort.of(s)).forEach(sortsBuilder::add);
                 signaturesBuilder.put(
                         e.getKey().name(),
-                        new SortSignature(sortsBuilder.build(), Sort.of(p._2().name())));
+                        new SortSignature(sortsBuilder.build(), Sort.of(p._2())));
             });
         });
 
@@ -133,7 +130,7 @@ public class Definition extends JavaSymbolicObject {
                 signaturesBuilder.build(),
                 attributesBuilder.build(),
                 JavaConverters.mapAsJavaMapConverter(module.freshFunctionFor()).asJava().entrySet().stream().collect(Collectors.toMap(
-                        e -> Sort.of(e.getKey().name()),
+                        e -> Sort.of(e.getKey()),
                         e -> e.getValue().name())),
                 Collections.emptyMap()
         );
@@ -149,32 +146,28 @@ public class Definition extends JavaSymbolicObject {
             Optional<?> comm = prod.att().getOptional(Attribute.COMMUTATIVE_KEY);
             Optional<?> idem = prod.att().getOptional(Attribute.IDEMPOTENT_KEY);
 
-            org.kframework.kil.Sort type;
             if (prod.sort().equals(Sorts.KList()) || prod.sort().equals(Sorts.KBott()))
                 continue;
             if (assoc.isPresent() && !comm.isPresent() && !idem.isPresent()) {
                 if (!prod.att().contains(Attribute.HOOK_KEY))
                     continue;
-                type = org.kframework.kil.Sort.LIST;
             } else if (assoc.isPresent() && comm.isPresent() && idem.isPresent()) {
-                type = org.kframework.kil.Sort.SET;
             } else if (assoc.isPresent() && comm.isPresent() && !idem.isPresent()) {
                 //TODO(dwightguth): distinguish between Bag and Map
                 if (!prod.att().contains(Attribute.HOOK_KEY))
                     continue;
-                type = org.kframework.kil.Sort.MAP;
             } else if (!assoc.isPresent() && !comm.isPresent() && !idem.isPresent()) {
                 continue;
             } else {
                 throw KEMException.criticalError("Unexpected combination of assoc, comm, idem attributes found. Currently "
                         + "only sets, maps, and lists are supported: " + prod, prod);
             }
-            DataStructureSort sort = new DataStructureSort(prod.sort().name(), type,
+            DataStructureSort sort = new DataStructureSort(
                     prod.klabel().get().name(),
                     prod.att().<String>get("element"),
                     prod.att().<String>get(Attribute.UNIT_KEY),
                     new HashMap<>());
-            builder.put(prod.sort().name(), sort);
+            builder.put(prod.sort().toString(), sort);
         }
         return builder.build();
     }
@@ -362,7 +355,7 @@ public class Definition extends JavaSymbolicObject {
     }
 
     public DataStructureSort dataStructureSortOf(Sort sort) {
-        return definitionData.dataStructureSorts.get(sort.name());
+        return definitionData.dataStructureSorts.get(sort.toString());
     }
 
     public Map<Sort, String> freshFunctionNames() {

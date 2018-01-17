@@ -169,7 +169,7 @@ import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.Require;
 import org.kframework.kil.NonTerminal;
-import org.kframework.kil.Sort;
+import org.kframework.kore.Sort;
 import org.kframework.attributes.Source;
 import org.kframework.kil.StringSentence;
 import org.kframework.kil.Syntax;
@@ -195,6 +195,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static org.kframework.kore.KORE.Sort;
 
 // Comments get processed in an odd order that may cause them to be
 // out of order.  Thus we sort module items by their *end* position so
@@ -244,6 +246,17 @@ public class Outer {
     } catch (TokenMgrError e) {
       // TODO: report location
       throw KEMException.outerParserError(e.getMessage(), e, source, null);
+    }
+  }
+
+  public static Sort parseSort(String string) {
+    Outer parser = new Outer(new StringReader(string));
+    try {
+      return parser.SimpleSort();
+    } catch (ParseException e) {
+      throw KEMException.compilerError("Could not parse " + string + " as a sort.", e);
+    } catch (TokenMgrError e) {
+      throw KEMException.compilerError("Could not parse " + string + " as a sort.", e);
     }
   }
 
@@ -524,13 +537,24 @@ String StringRegex() : {}
   }
 }
 
+Sort SimpleSort() : { String str; Sort sort; List<Sort> params = new ArrayList<Sort>(); }
+{
+  UpperId() { str = image(); }
+  (
+    "{" sort = SimpleSort() { params.add(sort); }
+    ("," sort = SimpleSort() { params.add(sort); })*
+    "}"
+  )?
+  { return Sort(str, params); }
+}
+
 /** Parses and returns a NonTerminal but not a List, NeList, Lexer, or Token */
-NonTerminal SimpleSortID() : { Location loc = startLoc(); String str; Optional<String> name = Optional.empty(); }
+NonTerminal SimpleSortID() : { Location loc = startLoc(); Sort sort; Optional<String> name = Optional.empty(); }
 {
   (LOOKAHEAD((<UPPER_ID> | <LOWER_ID>) ":")
   (<UPPER_ID> | <LOWER_ID>) { name = Optional.of(image()); } ":")?
-  UpperId() { str = image(); }
-  { return markLoc(loc, new NonTerminal(Sort.of(str), name)); }
+  sort = SimpleSort()
+  { return markLoc(loc, new NonTerminal(sort, name)); }
 }
 
 /** Parses and returns a NonTerminal */
@@ -885,7 +909,7 @@ void Production(List<Production> prods) :
   )*
   ")"              { items.add(tokenLoc(new Terminal(image()))); }
 | (ProductionItem(items))+
-) { Production prod = new Production(new NonTerminal(Sort.of(""), Optional.empty()), items); }
+) { Production prod = new Production(new NonTerminal(Sort(""), Optional.empty()), items); }
   (Attributes(prod))?
   { if (klabel != null && prod.getAttribute("klabel") == null) {
       prod.addAttribute("klabel", klabel);
@@ -903,9 +927,9 @@ void ProductionItem(List<ProductionItem> items) :
 | str = StringRegex()           { items.add(tokenLoc(new Lexical(str, ""))); }
 | LOOKAHEAD("List" "{") "List"
   ( "{" UpperId() { str = image(); } "," sep = String() "}"
-    { items.add(markLoc(loc, new UserList(Sort.of(str), sep, "*"))); })
+    { items.add(markLoc(loc, new UserList(Sort(str), sep, "*"))); })
 | LOOKAHEAD("NeList" "{") "NeList"
   ( "{" UpperId() { str = image(); } "," sep = String() "}"
-    { items.add(markLoc(loc, new UserList(Sort.of(str), sep, "+"))); })
+    { items.add(markLoc(loc, new UserList(Sort(str), sep, "+"))); })
 | nonTerminal = SimpleSortID()  { items.add(nonTerminal); }
 }

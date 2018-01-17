@@ -43,11 +43,12 @@ trait KToken extends KItem {
 
 trait Sort {
   def name: String
+  def params: Seq[Sort]
   override def equals(other: Any) = other match {
-    case other: Sort => name == other.name
+    case other: Sort => name == other.name && params == other.params
     case _ => false
   }
-  override def hashCode = name.hashCode
+  override def hashCode = name.hashCode * 23 + params.hashCode
 }
 
 trait KCollection {

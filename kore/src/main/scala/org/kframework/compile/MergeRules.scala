@@ -22,7 +22,7 @@ class MergeRules extends Function[Module, Module] {
     val or = KLabel(KLabels.ML_OR)
     val True = KApply(KLabel(KLabels.ML_TRUE))
     val False = KApply(KLabel(KLabels.ML_FALSE))
-    val TrueToken: K = KToken("true", Sort("Bool"), Att.empty)
+    val TrueToken: K = KToken("true", Sorts.Bool, Att.empty)
   }
 
   import ML._

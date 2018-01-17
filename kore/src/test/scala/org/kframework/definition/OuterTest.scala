@@ -4,7 +4,7 @@ package org.kframework.definition
 
 import org.junit.{Assert, Test}
 import org.kframework.kore.KORE.Att
-import org.kframework.kore.ADT.Sort
+import org.kframework.kore.KORE.Sort
 
 class OuterTest {
   @Test def isPrefixTest: Unit = {

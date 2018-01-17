@@ -77,9 +77,9 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
             // sorts from kast.k representing meta-syntax that is not a real sort.
             // This is done to prevent variables from being inferred as KBott or
             // as KList.
-            if (subsorts.lessThanEq(sort, Sort("KBott")))
+            if (subsorts.lessThanEq(sort, Sorts.KBott()))
                 continue;
-            if (subsorts.greaterThan(sort, Sort("K")))
+            if (subsorts.greaterThan(sort, Sorts.K()))
                 continue;
             for (Sort bound : bounds)
                 if (!subsorts.greaterThanEq(bound, sort))
@@ -512,7 +512,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
             private Either<Set<ParseFailedException>, Term> wrapTermWithCast(Constant c, Sort declared) {
                 Production cast;
                 if (addCast) {
-                    cast = productions.apply(KLabel("#SemanticCastTo" + declared.name())).head();
+                    cast = productions.apply(KLabel("#SemanticCastTo" + declared.toString())).head();
                 } else if (!hasCastAlready && productions.contains(KLabel("#SyntacticCast"))) {
                     cast = stream(productions.apply(KLabel("#SyntacticCast"))).filter(p -> p.sort().equals(declared)).findAny().get();
                 } else {

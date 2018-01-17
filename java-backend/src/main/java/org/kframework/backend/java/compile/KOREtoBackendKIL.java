@@ -2,13 +2,15 @@
 
 package org.kframework.backend.java.compile;
 
+import com.google.common.collect.Lists;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.attributes.Att;
 import org.kframework.backend.java.kil.*;
-import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.symbolic.ConjunctiveFormula;
+import org.kframework.backend.java.utils.BitSet;
 import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
+import org.kframework.compile.RewriteToTop;
 import org.kframework.definition.Module;
 import org.kframework.definition.Production;
 import org.kframework.kil.Attribute;
@@ -16,13 +18,10 @@ import org.kframework.kore.Assoc;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
+import org.kframework.kore.KORE;
 import org.kframework.kore.KRewrite;
 import org.kframework.kore.KToken;
 import org.kframework.kore.KVariable;
-import org.kframework.compile.RewriteToTop;
-import org.kframework.backend.java.utils.BitSet;
-
-import static org.kframework.Collections.*;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -31,7 +30,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.google.common.collect.Lists;
+import static org.kframework.Collections.*;
 
 
 /**
@@ -68,8 +67,8 @@ public class KOREtoBackendKIL {
         return KLabelConstant.of(name, global.getDefinition());
     }
 
-    public Sort Sort(String name) {
-        return Sort.of(name);
+    public Sort Sort(org.kframework.kore.Sort sort) {
+        return Sort.of(sort);
     }
 
     public <KK extends org.kframework.kore.K> KList KList(List<KK> items) {
@@ -79,7 +78,7 @@ public class KOREtoBackendKIL {
     }
 
     public Token KToken(String s, org.kframework.kore.Sort sort, Att att) {
-        return !sort.name().equals("KBoolean") ? Token.of(Sort(sort.name()), s) : Token.of(Sort("Bool"), s);
+        return !sort.equals(KORE.Sort("KBoolean")) ? Token.of(Sort(sort), s) : Token.of(Sort(Sorts.Bool()), s);
     }
 
     public KApply KApply(KLabel klabel, org.kframework.kore.KList klist, Att att) {
@@ -107,7 +106,7 @@ public class KOREtoBackendKIL {
         if (effectivelyAssocAttributes(definition.kLabelAttributesOf(klabel.name()))) {
             // this assumes there are no KLabel variables
             BuiltinList.Builder builder = BuiltinList.builder(
-                    Sort.of(module.productionsFor().get(klabel).get().head().sort().name()),
+                    Sort.of(module.productionsFor().get(klabel).get().head().sort()),
                     (KLabelConstant) convertedKLabel,
                     KLabelConstant.of(module.attributesFor().get(klabel).get().<String>get(Att.unit()), global.getDefinition()),
                     global);
@@ -119,7 +118,7 @@ public class KOREtoBackendKIL {
         if (assocKLabelForUnit.isPresent()) {
             BuiltinList.Builder builder = BuiltinList.builder(
                     //Sort.of(module.productionsFor().get(klabel).get().head().sort().name()),
-                    Sort.of(stream(module.productionsFor().toStream()).filter(t -> t._1.name().equals(assocKLabelForUnit.get())).findAny().get()._2.head().sort().name()),
+                    Sort.of(stream(module.productionsFor().toStream()).filter(t -> t._1.name().equals(assocKLabelForUnit.get())).findAny().get()._2.head().sort()),
                     KLabelConstant.of(assocKLabelForUnit.get(), global.getDefinition()),
                     (KLabelConstant) convertedKLabel,
                     global);
@@ -232,11 +231,11 @@ public class KOREtoBackendKIL {
     }
 
     public Variable KVariable(String name, Att att) {
-        String sortName = att.getOptional(Att.sort()).orElse(Sorts.K().toString());
+        Sort sortAtt = Sort.of(att.getOptional(org.kframework.kore.Sort.class).orElse(Sorts.K()));
         Optional<Production> collectionProduction = stream(module.productions())
-                .filter(p -> p.att().contains("cellCollection") && p.sort().name().equals(sortName))
+                .filter(p -> p.att().contains("cellCollection") && p.sort().equals(sortAtt))
                 .findAny();
-        Sort sort;
+        Sort sort = sortAtt;
         if (collectionProduction.isPresent()) {
             switch (collectionProduction.get().att().get(Attribute.HOOK_KEY)) {
                 case "LIST.concat":
@@ -249,10 +248,7 @@ public class KOREtoBackendKIL {
                     sort = Sort.SET;
                     break;
                 default:
-                    sort = Sort.of(sortName);
             }
-        } else {
-            sort = Sort.of(sortName);
         }
 
         String key = name + sort;
@@ -280,7 +276,7 @@ public class KOREtoBackendKIL {
 
     private Term convert1(KLabel klabel) {
         if (klabel instanceof KVariable) {
-            return KVariable(klabel.name(), ((KVariable) klabel).att().add(Att.sort(), Sorts.KLabel().toString()));
+            return KVariable(klabel.name(), ((KVariable) klabel).att().add(org.kframework.kore.Sort.class, Sorts.KLabel()));
         } else {
             return KLabel(klabel.name());
         }

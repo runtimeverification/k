@@ -12,7 +12,7 @@ import org.pcollections.PStack
 
 import scala.collection.JavaConverters._
 
-object TreeNodesToKORE {
+class TreeNodesToKORE(parseSort: java.util.function.Function[String, Sort]) {
 
   import org.kframework.kore.KORE._
 
@@ -69,7 +69,7 @@ object TreeNodesToKORE {
     case t@KApply(KLabel("#KToken"), items) =>
       def removeQuotes(s: String) = s.drop(1).dropRight(1).replace("\\\"", "\"")
 
-      KToken(removeQuotes(items.head.asInstanceOf[KToken].s), Sort(removeQuotes(items.tail.head.asInstanceOf[KToken].s)))
+      KToken(removeQuotes(items.head.asInstanceOf[KToken].s), parseSort(removeQuotes(items.tail.head.asInstanceOf[KToken].s)))
 
     case t@KApply(l, items) =>
       KApply(l, KList((items map down _).asJava), t.att)

@@ -85,16 +85,15 @@ public class KLabelConstant extends KLabel implements org.kframework.kore.KLabel
         boolean isPattern = false;
         String smtlib = null;
         // there are labels which are just predicates, but are not obligated to be sort membership predicates
-        if (!label.startsWith("is") || !allSorts.contains(Sort.of(label.substring("is".length())))) {
+        if (!productionAttributes.contains(Attribute.PREDICATE_KEY, org.kframework.kore.Sort.class)) {
             predicateSort = null;
-            isFunction = productionAttributes.contains(Attribute.FUNCTION_KEY)
-                    || productionAttributes.contains(Attribute.PREDICATE_KEY);
+            isFunction = productionAttributes.contains(Attribute.FUNCTION_KEY);
             isPattern = productionAttributes.contains(Attribute.PATTERN_KEY);
             smtlib = productionAttributes.getOptional(Attribute.SMTLIB_KEY).orElse(null);
         } else {
             /* a KLabel beginning with "is" represents a sort membership predicate */
             isFunction = true;
-            predicateSort = Sort.of(label.substring("is".length()));
+            predicateSort = Sort.of(productionAttributes.get(Attribute.PREDICATE_KEY, org.kframework.kore.Sort.class));
         }
         this.isSortPredicate = predicateSort != null;
         this.isFunction = isFunction;

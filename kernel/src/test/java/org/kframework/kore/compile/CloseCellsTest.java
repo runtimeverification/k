@@ -19,8 +19,8 @@ import static org.kframework.kore.KORE.*;
 public class CloseCellsTest {
 
     final SortInfo sortInfo = new SortInfo() {{
-        addOp("Map", "_Map_");
-        addOp("List", "_List_");
+        addOp(Sort("Map"), "_Map_");
+        addOp(Sort("List"), "_List_");
     }};
     final TestConfiguration cfgInfo = new TestConfiguration() {{
         addCell(null, "ThreadCell", "<thread>", Multiplicity.STAR);
@@ -31,12 +31,12 @@ public class CloseCellsTest {
         addDefault("KCell", cell("<k>", stringToToken("defaultK")));
     }};
     final LabelInfo labelInfo = new LabelInfo() {{
-        addLabel("KCell", "<k>");
-        addLabel("EnvCell", "<env>");
-        addLabel("ThreadCell", "<thread>");
-        addLabel("ListCell", "<list>");
-        addLabel("Map", "_Map_", true, true, true);
-        addLabel("List", "_List_", true, false, true);
+        addLabel(Sort("KCell"), "<k>");
+        addLabel(Sort("EnvCell"), "<env>");
+        addLabel(Sort("ThreadCell"), "<thread>");
+        addLabel(Sort("ListCell"), "<list>");
+        addLabel(Sort("Map"), "_Map_", true, true, true);
+        addLabel(Sort("List"), "_List_", true, false, true);
     }};
 
     @Test
