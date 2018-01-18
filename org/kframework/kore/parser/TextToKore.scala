@@ -56,6 +56,39 @@ class TextToKore(b: Builders) {
     }
   }
 
+  /** Read from the stream and return a canonical form [[String]],
+    * in which all consecutive whitespaces are deleted.
+    * FIXME:: should return a canonical form [[String]] in which all
+    *         consecutive whitespaces are replaced by ' '
+    * Mainly used for testing. */
+  @throws(classOf[java.io.IOException])
+  def canonicalString(file: java.io.File): String = {
+    canonicalString(io.Source.fromFile(file))
+  }
+
+  @throws(classOf[java.io.IOException])
+  def canonicalString(s: String): String = {
+    canonicalString(io.Source.fromString(s))
+  }
+
+  @throws(classOf[java.io.IOException])
+  def canonicalString(src: io.Source): String = {
+    def loop(s: StringBuilder): String = {
+      while (!scanner.isEOF()) { // skipWhitespaces is called
+        s += scanner.next() // must be a nonwhitespace character
+        loop(s)
+      }
+      return s.toString()
+    }
+    try {
+      scanner.init(src)
+      loop(new StringBuilder(""))
+    }
+    catch {
+      case e: java.io.EOFException => throw e
+    }
+  }
+
   // Definition = Attributes Module
   private def parseDefinition(): Definition = {
     val att = parseAttributes()
@@ -420,39 +453,38 @@ class TextToKore(b: Builders) {
 
   //////////////////////////////////////////////////////////
 
-  // String = " <char> "
   private def parseString(): String = {
     def loop(s: StringBuilder): String = {
       scanner.next() match {
         case '"' =>
           s.toString()
-        case '\\' =>
-          val c = scanner.next()
-          var s1 = ""
-          c match {
-            case 'u' => // Unicode: 4 hex digits
-              val c1 = scanner.next()
-              val c2 = scanner.next()
-              val c3 = scanner.next()
-              val c4 = scanner.next()
-              s1 = StringEscapeUtils.unescapeJava("\\u" + c1 + c2 + c3 + c4)
-            case 'U' => // Unicode: 8 hex digits
-              val c1 = scanner.next()
-              val c2 = scanner.next()
-              val c3 = scanner.next()
-              val c4 = scanner.next()
-              val c5 = scanner.next()
-              val c6 = scanner.next()
-              val c7 = scanner.next()
-              val c8 = scanner.next()
-              s1 = StringEscapeUtils.unescapeJava("\\U" + c1 + c2 + c3 + c4 + c5 + c6 + c7 + c8)
-            case _ =>
-              s1 = StringEscapeUtils.unescapeJava("\\" + c)
-          }
-          s ++= s1;
-          loop(s)
         case c =>
           s += c; loop(s)
+        // case '\\' =>
+        //   val c = scanner.next()
+        //   var s1 = ""
+        //   c match {
+        //     case 'u' => // Unicode: 4 hex digits
+        //       val c1 = scanner.next()
+        //       val c2 = scanner.next()
+        //       val c3 = scanner.next()
+        //       val c4 = scanner.next()
+        //       s1 = StringEscapeUtils.unescapeJava("\\u" + c1 + c2 + c3 + c4)
+        //     case 'U' => // Unicode: 8 hex digits
+        //       val c1 = scanner.next()
+        //       val c2 = scanner.next()
+        //       val c3 = scanner.next()
+        //       val c4 = scanner.next()
+        //       val c5 = scanner.next()
+        //       val c6 = scanner.next()
+        //       val c7 = scanner.next()
+        //       val c8 = scanner.next()
+        //       s1 = StringEscapeUtils.unescapeJava("\\U" + c1 + c2 + c3 + c4 + c5 + c6 + c7 + c8)
+        //     case _ =>
+        //       s1 = StringEscapeUtils.unescapeJava("\\" + c)
+        //   }
+        //   s ++= s1;
+        //   loop(s)
       }
     }
 
@@ -647,6 +679,8 @@ class TextToKore(b: Builders) {
   private def error(expected: Char, actual: Char): ParseError = {
     error("'" + expected + "'", "'" + actual + "'")
   }
+
+
 
 }
 

@@ -40,9 +40,7 @@ class Scanner {
   @throws(classOf[java.io.EOFException])
   private def readLine(): Unit = {
     if (lines.hasNext) {
-      line = lines.next() // line doesn't contain newline characters '\n' or '\r',
-      // which is against the scala specification.
-      // As a consequence, newline characters are skipped as expected.
+      line = lines.next() // each line doesn't contain newline characters
       input = line.iterator
       lineNum += 1
       columnNum = 0
@@ -56,7 +54,6 @@ class Scanner {
   private var yieldEOL: Boolean = false
 
   /** Returns the next character from the stream.
-    *
     * Returns '\n' when a newline is encountered.
     */
   @throws(classOf[java.io.EOFException])
@@ -158,7 +155,7 @@ class Scanner {
 
   /** Checks if EOF is reached.
     *
-    * Side effect:
+    * Side effect
     * Consumes the whitespace characters until either a non-whitespace character or EOF is met.
     */
   def isEOF(): Boolean = {

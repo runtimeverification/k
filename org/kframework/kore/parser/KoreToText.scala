@@ -160,6 +160,11 @@ object KoreToText {
 
   def apply(s: String): String = s
 
+  def escape(s: String): String = {
+      import scala.reflect.runtime.universe._
+      Literal(Constant(s)).toString
+  }
+
   /** Normalizes the string of Sort, Name, or Symbol.
     *
     * param s the string value of Sort, Name, or Symbol.
