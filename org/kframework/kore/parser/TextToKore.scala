@@ -112,6 +112,7 @@ class TextToKore(b: Builders) {
         //   val att = parseAttributes()
         //   val decl = b.Import(b.ModuleName(nameStr), att)
         //   parseDeclarations(decls :+ decl)
+        // TODO:: Read two chars only if needed.
         case ('s', 'o') => // sort declaration
           consume("rt")
           consumeWithLeadingWhitespaces("{")
@@ -192,6 +193,7 @@ class TextToKore(b: Builders) {
         val c1 = scanner.next()
         val c2 = scanner.next()
         (c1, c2) match {
+          // TODO:: Read two chars only if needed.
           case ('t', 'o') => // top
             consume("p")
             consumeWithLeadingWhitespaces("{")
