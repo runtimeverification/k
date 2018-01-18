@@ -1,2 +1,1 @@
-Solution 1
-V ==K fun ( ( Triple ( x , ( y , ( z , .Exps ) ) ) -> y ) | .Cases )
+V ==K fun ( ( Triple ( x , ( y , ( z , .GeneratedListBottom ) ) ) -> y ) | .Cases )

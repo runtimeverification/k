@@ -35,6 +35,12 @@ public class ResolveSemanticCasts {
         varToTypedVar.clear();
     }
 
+    public K resolve(K k) {
+        resetCasts();
+        gatherCasts(k);
+        return transform(k);
+    }
+
     private Rule resolve(Rule rule) {
         resetCasts();
         gatherCasts(rule.body());

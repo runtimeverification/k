@@ -4,7 +4,7 @@ import org.kframework.attributes.{Location, Source}
 import org.kframework.builtin.Sorts
 import org.kframework.definition._
 import org.kframework.kore.{KApply, KToken, KVariable, _}
-import org.kframework.parser.{Constant, Term, TermCons}
+import org.kframework.parser.{Constant, ProductionReference, Term, TermCons}
 import org.pcollections.ConsPStack
 
 import collection._
@@ -14,11 +14,11 @@ object KOREToTreeNodes {
 
   import org.kframework.kore.KORE._
 
-  def apply(t: K, mod: Module): Term = t match {
+  def apply(t: K, mod: Module): ProductionReference = t match {
     case t: KToken => Constant(t.s, mod.tokenProductionsFor(Sort(t.sort.name)).head, t.att.getOptional(classOf[Location]), t.att.getOptional(classOf[Source]))
     case a: KApply =>
       val production: Production = mod.productionsFor(KLabel(a.klabel.name)).find(p => p.items.count(_.isInstanceOf[NonTerminal]) == a.klist.size).get
-      TermCons(ConsPStack.from((a.klist.items.asScala map { i: K => apply(i, mod) }).reverse asJava),
+      TermCons(ConsPStack.from((a.klist.items.asScala map { i: K => apply(i, mod).asInstanceOf[Term] }).reverse asJava),
         production, t.att.getOptional(classOf[Location]), t.att.getOptional(classOf[Source]))
   }
 
@@ -41,25 +41,5 @@ object KOREToTreeNodes {
 
   def upList(mod: Module)(items: Seq[K]): Seq[K] = {
     items map up(mod) _
-  }
-
-  def toString(t: Term): String = t match {
-    case Constant(s, _) => s
-    case t@TermCons(items, p) => {
-      var i = 0
-      val unparsedItems = p.items map {
-        case Terminal(s) => s
-        case NonTerminal(sort, _) => {
-          i = i + 1
-          toString(t.get(i - 1))
-        }
-        case RegexTerminal(_, _, _) => throw new AssertionError("Unimplemented yet")
-      }
-      if (p.att.contains("format")) {
-        p.att.get("format").format(unparsedItems: _*)
-      } else {
-        unparsedItems.mkString(" ")
-      }
-    }
   }
 }

@@ -199,6 +199,8 @@ for the KOOL object-oriented constructs.
   syntax Ids  ::= List{Id,","}
 
   syntax Exps ::= List{Exp,","}          [strict]
+  syntax Val
+  syntax Vals ::= List{Val,","}
 
   syntax Block ::= "{" "}"
                 | "{" Stmts "}"
@@ -228,8 +230,8 @@ for the KOOL object-oriented constructs.
 
   rule if (E) S => if (E) S else {}                                 [macro]
   rule for(Start Cond; Step) {S} => {Start while (Cond) {S Step;}}  [macro]
-  rule var E1:Exp, E2:Exp, Es:Exps; => var E1; var E2, Es;          [macro]
-  rule var X:Id = E; => var X; X = E;                               [macro]
+  rule var E1::Exp, E2::Exp, Es::Exps; => var E1; var E2, Es;       [macro]
+  rule var X::Id = E; => var X; X = E;                              [macro]
 
 //@ New desugaring rule
 
@@ -290,7 +292,7 @@ member declarations (\textsf{declarations}).
 
   configuration <T color="red">
                   <threads color="orange">
-                    <thread multiplicity="*" color="yellow">
+                    <thread multiplicity="*" type="Set" color="yellow">
                       <k color="green"> $PGM:Stmts ~> execute </k>
                     //<br/> // TODO(KORE): support latex annotations #1799
                       <control color="cyan">
@@ -313,16 +315,18 @@ member declarations (\textsf{declarations}).
                   <store color="white"> .Map </store>
                   <busy color="cyan">.Set </busy>
                   <terminated color="red"> .Set </terminated>
-                  <in color="magenta" stream="stdin"> .List </in>
-                  <out color="brown" stream="stdout"> .List </out>
+                  <input color="magenta" stream="stdin"> .List </input>
+                  <output color="brown" stream="stdout"> .List </output>
                   <nextLoc color="gray"> 0 </nextLoc>
                 //<br/> // TODO(KORE): support latex annotations #1799
                   <classes color="Fuchsia">        // KOOL
-                     <class multiplicity="*" color="Fuchsia">
+                     <classData multiplicity="*" type="Map" color="Fuchsia">
+                        // the Map has as its key the first child of the cell,
+                        // in this case the className cell.
                         <className color="Fuchsia"> Main </className>
-                        <extends color="Fuchsia"> Object </extends>
+                        <baseClass color="Fuchsia"> Object </baseClass>
                         <declarations color="Fuchsia"> .K </declarations>
-                     </class>
+                     </classData>
                   </classes>
                 </T>
 
@@ -355,8 +359,8 @@ object and method closures. */
 
   syntax Val ::= Int | Bool | String
                | array(Int,Int)
-  syntax Vals ::= List{Val,","}
   syntax Exp ::= Val
+  syntax Exps ::= Vals
   syntax KResult ::= Val
   syntax KResult ::= Vals
 
@@ -451,7 +455,7 @@ interestingly, the semantics of return stays unchanged. */
   rule return; => return nothing;   [macro]
 
 
-  rule <k> read() => I ...</k> <in> ListItem(I:Int) => .List ...</in>  [read]
+  rule <k> read() => I ...</k> <input> ListItem(I:Int) => .List ...</input>  [read]
 
 
   context (HOLE => lvalue(HOLE)) = _
@@ -461,7 +465,7 @@ interestingly, the semantics of return stays unchanged. */
 
 
   rule {} => .  [structural]
-  rule <k> { S } => S ~> env(Env) ...</k>  <env> Env </env>  [structural]
+  rule <k> { S } => S ~> setEnv(Env) ...</k>  <env> Env </env>  [structural]
 
 
   rule S1::Stmts S2::Stmts => S1 ~> S2  [structural]
@@ -473,7 +477,7 @@ interestingly, the semantics of return stays unchanged. */
 
   rule while (E) S => if (E) {S while(E)S}  [structural]
 
-  rule <k> print(V:Val, Es => Es); ...</k> <out>... .List => ListItem(V) </out>
+  rule <k> print(V:Val, Es => Es); ...</k> <output>... .List => ListItem(V) </output>
     [print]
   rule print(.Vals); => .  [structural]
 
@@ -549,9 +553,9 @@ from SIMPLE unchanged. */
   */
   rule <k> lookup(L) => V ...</k> <store>... L |-> V:Val ...</store>  [lookup]
 
-  syntax KItem ::= env(Map)
-  rule <k> env(Env) => . ...</k>  <env> _ => Env </env>  [structural]
-  rule (env(_) => .) ~> env(_)  [structural]
+  syntax KItem ::= setEnv(Map)
+  rule <k> setEnv(Env) => . ...</k>  <env> _ => Env </env>  [structural]
+  rule (setEnv(_) => .) ~> setEnv(_)  [structural]
   // TODO: How can we make sure that the second rule above applies before the first one?
   //       Probably we'll deal with this using strategies, eventually.
 
@@ -561,8 +565,8 @@ from SIMPLE unchanged. */
   rule <k> lvalue(X:Id => loc(L)) ...</k> <env>... X |-> L:Int ...</env>
     [structural]
 
-  context lvalue(_:>Exp[HOLE:>Exps])
-  context lvalue(HOLE:>Exp[_:>Exps])
+  context lvalue(_::Exp[HOLE::Exps])
+  context lvalue(HOLE::Exp[_::Exps])
 
   rule lvalue(lookup(L:Int) => loc(L))  [structural]
 
@@ -689,11 +693,11 @@ Initially, the classes forming the program are moved into their
 corresponding cells: */
 
   rule <k> class Class1 extends Class2 { S } => . ...</k>
-       <classes>... (.Bag => <class>
+       <classes>... (.Bag => <classData>
                             <className> Class1 </className>
-                            <extends> Class2 </extends>
+                            <baseClass> Class2 </baseClass>
                             <declarations> S </declarations>
-                        </class>)
+                        </classData>)
        ...</classes>  [structural]
 
 /*@ \subsubsection{Method declaration}
@@ -769,7 +773,7 @@ members (both fields and methods) of that class. */
   rule <k> create(Class:Id)
            => create(Class1) ~> setCrntClass(Class) ~> S ~> addEnvLayer ...</k>
        <className> Class </className>
-       <extends> Class1:Id </extends>
+       <baseClass> Class1:Id </baseClass>
        <declarations> S </declarations>  [structural]
 
   rule <k> create(Object) => . ...</k>  [structural]
@@ -999,7 +1003,7 @@ member's location based on the current class of the object. */
   rule <k> lvalue(X:Id => this . X) ...</k>  <env> Env </env>
     when notBool(X in keys(Env))  [structural]
 
-  context lvalue((HOLE . _)<:Exp)
+  context lvalue((HOLE . _)::Exp)
 
 /*  rule lvalue(objectClosure(<crntClass> C </crntClass>
                             <envStack>... envStackFrame(C,EnvC) EStack </envStack>)

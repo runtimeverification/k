@@ -4,10 +4,8 @@ package org.kframework.debugger;
 
 import org.kframework.definition.Rule;
 import org.kframework.kore.K;
-import org.kframework.kore.KVariable;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -60,7 +58,7 @@ public interface KDebug {
      * @param bounds        Max number of solutions to report. Empty parameter means unbounded.
      * @return
      */
-    public List<? extends Map<? extends K, ? extends K>> search(Rule searchPattern, Optional<Integer> depth, Optional<Integer> bounds);
+    public K search(Rule searchPattern, Optional<Integer> depth, Optional<Integer> bounds);
 
     /**
      * Resume the execution of the program until a final Configuration is reached.

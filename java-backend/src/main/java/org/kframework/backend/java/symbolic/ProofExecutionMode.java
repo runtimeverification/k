@@ -52,7 +52,7 @@ import static org.kframework.Collections.*;
 /**
  * Class that implements the "--prove" option.
  */
-public class ProofExecutionMode implements ExecutionMode<List<K>> {
+public class ProofExecutionMode implements ExecutionMode<K> {
 
     private final KExceptionManager kem;
     private final KRunOptions options;
@@ -70,7 +70,7 @@ public class ProofExecutionMode implements ExecutionMode<List<K>> {
     }
 
     @Override
-    public List<K> execute(KRun.InitialConfiguration config, Rewriter rewriter, CompiledDefinition compiledDefinition) {
+    public K execute(KRun.InitialConfiguration config, Rewriter rewriter, CompiledDefinition compiledDefinition) {
         String proofFile = options.experimental.prove;
         Module mod = getProofModule(compiledDefinition, proofFile, globalOptions, files, kem, sw);
         K k = config.theConfig;

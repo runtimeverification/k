@@ -109,7 +109,7 @@ public class Scanner implements AutoCloseable {
             FileUtils.write(scannerSource, flex);
             File scannerCSource = File.createTempFile("tmp-kompile-", ".c");
             scannerCSource.deleteOnExit();
-            ProcessBuilder pb = new ProcessBuilder("flex", "-Ca", "-o", scannerCSource.getAbsolutePath(), scannerSource.getAbsolutePath()).inheritIO();
+            ProcessBuilder pb = new ProcessBuilder("flex", "--nowarn", "-Ca", "-o", scannerCSource.getAbsolutePath(), scannerSource.getAbsolutePath()).inheritIO();
             int exit = pb.start().waitFor();
             if (exit != 0) {
                 throw KEMException.internalError("Flex returned nonzero exit code. See output for details.");

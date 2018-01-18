@@ -20,10 +20,10 @@ public class KLabels {
     public static final String GENERATED_TOP_CELL = "generatedTop";
     public static final String THIS_CONFIGURATION = "THIS_CONFIGURATION";
     public static final String MAP_LOOKUP = "Map:lookup";
-    public static final String ML_FALSE = "#MLFalse";
-    public static final String ML_TRUE = "#MLTrue";
-    public static final String ML_OR = "#MLOr";
-    public static final String ML_AND = "#MLAnd";
+    public static final String ML_FALSE = "#False";
+    public static final String ML_TRUE = "#True";
+    public static final String ML_OR = "#Or";
+    public static final String ML_AND = "#And";
 
     public static String ListItem = "ListItem";
     public static String DotMap = ".Map";

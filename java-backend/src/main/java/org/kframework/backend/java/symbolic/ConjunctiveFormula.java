@@ -806,12 +806,12 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
 
     @Override
     public KLabel constructorLabel() {
-        return KLabelConstant.of("_andBool_", global.getDefinition());
+        return KLabelConstant.of("#And", global.getDefinition());
     }
 
     @Override
-    public Token unit() {
-        return BoolToken.TRUE;
+    public KItem unit() {
+        return KItem.of(KLabelConstant.of("#True", global.getDefinition()), KList.EMPTY, global);
     }
 
     @Override

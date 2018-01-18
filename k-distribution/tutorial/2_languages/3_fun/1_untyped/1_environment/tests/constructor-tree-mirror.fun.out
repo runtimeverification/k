@@ -1,2 +1,1 @@
-Solution 1
-V ==K ( Tree ( Tree ( Tree ( Leaf ( 5 , .Exps ) , ( Leaf ( 4 , .Exps ) , .Exps ) ) , ( Leaf ( 3 , .Exps ) , .Exps ) ) , ( Tree ( Leaf ( 2 , .Exps ) , ( Leaf ( 1 , .Exps ) , .Exps ) ) , .Exps ) ) )
+V ==K ( Tree ( Tree ( Tree ( Leaf ( 5 , .GeneratedListBottom ) , ( Leaf ( 4 , .GeneratedListBottom ) , .GeneratedListBottom ) ) , ( Leaf ( 3 , .GeneratedListBottom ) , .GeneratedListBottom ) ) , ( Tree ( Leaf ( 2 , .GeneratedListBottom ) , ( Leaf ( 1 , .GeneratedListBottom ) , .GeneratedListBottom ) ) , .GeneratedListBottom ) ) )

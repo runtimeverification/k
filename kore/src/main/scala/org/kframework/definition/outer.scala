@@ -56,7 +56,7 @@ case class Definition(
 trait Sorting {
   def computeSubsortPOSet(sentences: Set[Sentence]) = {
     val subsortRelations: Set[(Sort, Sort)] = sentences collect {
-      case Production(endSort, Seq(NonTerminal(startSort, _)), _) => (startSort, endSort)
+      case Production(endSort, Seq(NonTerminal(startSort, _)), att) if !att.contains("klabel") => (startSort, endSort)
     }
 
     POSet(subsortRelations)

@@ -85,7 +85,7 @@ public class ResolveAnonVar {
     KVariable newDotVariable() {
         KVariable newLabel;
         do {
-            newLabel = KVariable("_" + (counter++));
+            newLabel = KVariable("_" + (counter++), Att().add("anonymous"));
         } while (vars.contains(newLabel));
         vars.add(newLabel);
         return newLabel;

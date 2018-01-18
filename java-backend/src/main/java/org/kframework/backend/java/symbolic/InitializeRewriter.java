@@ -15,15 +15,17 @@ import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.util.HookProvider;
+import org.kframework.builtin.KLabels;
 import org.kframework.compile.ExpandMacros;
 import org.kframework.compile.NormalizeKSeq;
+import org.kframework.compile.ResolveSemanticCasts;
 import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
 import org.kframework.kil.Attribute;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
-import org.kframework.kore.KVariable;
+import org.kframework.kore.KApply;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.api.io.FileSystem;
 import org.kframework.main.GlobalOptions;
@@ -49,6 +51,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.kframework.Collections.*;
+import static org.kframework.kore.KORE.*;
 
 /**
  * Created by dwightguth on 5/6/15.
@@ -146,41 +149,40 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
         public RewriterResult execute(K k, Optional<Integer> depth) {
             TermContext termContext = TermContext.builder(rewritingContext).freshCounter(initCounterValue).build();
             KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, termContext.global(), false);
+            ResolveSemanticCasts resolveCasts = new ResolveSemanticCasts(true);
             termContext.setKOREtoBackendKILConverter(converter);
-            Term backendKil = MacroExpander.expandAndEvaluate(termContext, kem, converter.convert(k));
+            Term backendKil = MacroExpander.expandAndEvaluate(termContext, kem, converter.convert(resolveCasts.resolve(k)));
             SymbolicRewriter rewriter = new SymbolicRewriter(rewritingContext, transitions, converter);
             RewriterResult result = rewriter.rewrite(new ConstrainedTerm(backendKil, termContext), depth.orElse(-1));
             return result;
         }
 
         @Override
-        public List<? extends Map<? extends KVariable, ? extends K>> match(K k, Rule rule) {
-            throw KEMException.criticalError("--search and --pattern are not implemented in --backend java");
-            //return search(k, Optional.of(0), Optional.empty(), rule, SearchType.STAR, true);
+        public K match(K k, Rule rule) {
+            return search(k, Optional.of(0), Optional.empty(), rule, SearchType.STAR);
         }
 
 
         @Override
-        public List<? extends Map<? extends KVariable, ? extends K>> search(K initialConfiguration, Optional<Integer> depth, Optional<Integer> bound, Rule pattern, SearchType searchType) {
-            throw KEMException.criticalError("--search and --pattern are not implemented in --backend java");
-            //TermContext termContext = TermContext.builder(rewritingContext).freshCounter(initCounterValue).build();
-            //KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, termContext.global(), false);
-            //termContext.setKOREtoBackendKILConverter(converter);
-            //Term javaTerm = MacroExpander.expandAndEvaluate(termContext, kem, converter.convert(initialConfiguration));
-            //org.kframework.backend.java.kil.Rule javaPattern = converter.convert(Optional.empty(), pattern);
-            //this.rewriter = new SymbolicRewriter(rewritingContext, transitions, converter);
-            //return rewriter.search(javaTerm, javaPattern, bound.orElse(NEGATIVE_VALUE), depth.orElse(NEGATIVE_VALUE), searchType, termContext, resultsAsSubstitution);
+        public K search(K initialConfiguration, Optional<Integer> depth, Optional<Integer> bound, Rule pattern, SearchType searchType) {
+            TermContext termContext = TermContext.builder(rewritingContext).freshCounter(initCounterValue).build();
+            KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, termContext.global(), false);
+            ResolveSemanticCasts resolveCasts = new ResolveSemanticCasts(true);
+            termContext.setKOREtoBackendKILConverter(converter);
+            Term javaTerm = MacroExpander.expandAndEvaluate(termContext, kem, converter.convert(resolveCasts.resolve(initialConfiguration)));
+            org.kframework.backend.java.kil.Rule javaPattern = converter.convert(Optional.empty(), pattern);
+            SymbolicRewriter rewriter = new SymbolicRewriter(rewritingContext, transitions, converter);
+            return rewriter.search(javaTerm, javaPattern, bound.orElse(NEGATIVE_VALUE), depth.orElse(NEGATIVE_VALUE), searchType, termContext);
         }
 
 
-        public Tuple2<RewriterResult, List<? extends Map<? extends KVariable, ? extends K>>> executeAndMatch(K k, Optional<Integer> depth, Rule rule) {
-            throw KEMException.criticalError("--search and --pattern are not implemented in --backend java");
-            //RewriterResult res = execute(k, depth);
-            //return Tuple2.apply(res, match(res.k(), rule));
+        public Tuple2<RewriterResult, K> executeAndMatch(K k, Optional<Integer> depth, Rule rule) {
+            RewriterResult res = execute(k, depth);
+            return Tuple2.apply(res, match(res.k(), rule));
         }
 
         @Override
-        public List<K> prove(List<Rule> rules) {
+        public K prove(List<Rule> rules) {
             ProcessProofRules processProofRules = new ProcessProofRules(rules).invoke(rewritingContext, initCounterValue, module, definition);
             List<org.kframework.backend.java.kil.Rule> javaRules = processProofRules.getJavaRules();
             KOREtoBackendKIL converter = processProofRules.getConverter();
@@ -209,8 +211,8 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
 
             return proofResults.stream()
                     .map(ConstrainedTerm::term)
-                    .map(t -> (KItem) t)
-                    .collect(Collectors.toList());
+                    .map(t -> (KApply) t)
+                    .reduce(((k1, k2) -> KApply(KLabel(KLabels.ML_AND), k1, k2))).orElse(KApply(KLabel(KLabels.ML_TRUE)));
         }
 
         @Override

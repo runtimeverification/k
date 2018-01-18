@@ -513,7 +513,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                 Production cast;
                 if (addCast) {
                     cast = productions.apply(KLabel("#SemanticCastTo" + declared.name())).head();
-                } else if (!hasCastAlready) {
+                } else if (!hasCastAlready && productions.contains(KLabel("#SyntacticCast"))) {
                     cast = stream(productions.apply(KLabel("#SyntacticCast"))).filter(p -> p.sort().equals(declared)).findAny().get();
                 } else {
                     cast = null;
@@ -603,6 +603,8 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                         clone.putAll(elem2);
                         newVars.add(clone);
                     }
+                    if (viz.vars.size() == 0)
+                        newVars.addAll(vars);
                 }
                 if (vars.size() == 0)
                     newVars.addAll(viz.vars);

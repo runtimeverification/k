@@ -20,7 +20,6 @@ import org.kframework.keq.KEqFrontEnd;
 import org.kframework.kompile.KompileFrontEnd;
 import org.kframework.krun.KRunFrontEnd;
 import org.kframework.kserver.KServerFrontEnd;
-import org.kframework.ktest.KTestFrontEnd;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.Environment;
@@ -156,15 +155,6 @@ public class Main {
                         }
                     }
                     break;
-                case "-ktest":
-                    modules.addAll(KTestFrontEnd.getModules());
-                    for (KModule kModule : kModules) {
-                        List<Module> ms = kModule.getKTestModules();
-                        if (ms != null) {
-                            modules.addAll(ms);
-                        }
-                    }
-                    break;
                 case "-kdoc":
                     modules.addAll(KDocFrontEnd.getModules());
                     for (KModule kModule : kModules) {
@@ -229,7 +219,7 @@ public class Main {
     }
 
     private static void invalidJarArguments() {
-        System.err.println("The first argument of K3 not recognized. Try -kompile, -kast, -krun, -ktest, -kserver, or -kpp.");
+        System.err.println("The first argument of K3 not recognized. Try -kompile, -kast, -kdep, -krun, -keq, -kserver, or -kpp.");
         System.exit(1);
     }
 }

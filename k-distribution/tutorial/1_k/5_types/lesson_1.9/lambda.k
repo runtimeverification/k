@@ -13,16 +13,18 @@ module LAMBDA
                | "lambda" Id ":" Type "." Exp  [binder]
                | Exp Exp                       [left]
                | "(" Exp ")"                   [bracket]
+  syntax KVariable ::= Id
 
   syntax Exp ::= Type
 
   syntax KResult ::= Type
 
   syntax Exp ::= Exp "->" Exp
-  rule lambda X : T . E => T -> E[T/X]         [anywhere]
+  rule lambda X : T . E => T -> (E[T/X])       [anywhere]
   rule (T1 -> T2) T1 => T2                     [anywhere]
 
-  syntax Exp ::= Int | Bool
+  syntax Exp ::= Int                           [klabel(intConst), prefer]
+               | Bool                          [klabel(boolConst), prefer]
                | Exp "*" Exp                   [left]
                | Exp "/" Exp
                > Exp "+" Exp                   [left]
@@ -45,5 +47,5 @@ module LAMBDA
                | "mu" Id ":" Type "." Exp      [binder]
   rule letrec F : T1  X : T2 = E in E'
     => let F : T1 = mu F : T1 . lambda X : T2 . E in E'               [macro]
-  rule mu X : T . E => (T -> T) (E[T/X]):>Exp         [anywhere]
+  rule mu X : T . E => (T -> T) (E[T/X])         [anywhere]
 endmodule

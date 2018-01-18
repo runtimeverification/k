@@ -157,6 +157,8 @@ public class DefinitionParsing {
         }
         modules = Stream.concat(modules, Stream.of(parsedDefinition.getModule("DEFAULT-CONFIGURATION").get()));
         modules = Stream.concat(modules, Stream.of(parsedDefinition.getModule("K-REFLECTION").get()));
+        modules = Stream.concat(modules, Stream.of(parsedDefinition.getModule("STDIN-STREAM").get()));
+        modules = Stream.concat(modules, Stream.of(parsedDefinition.getModule("STDOUT-STREAM").get()));
         modules = Stream.concat(modules,
                 stream(parsedDefinition.entryModules()).filter(m -> !stream(m.sentences()).anyMatch(s -> s instanceof Bubble)));
         Definition trimmed = Definition(parsedDefinition.mainModule(), modules.collect(Collections.toSet()),
@@ -259,6 +261,14 @@ public class DefinitionParsing {
                 .filter(b -> !b.sentenceType().equals("config")).count() == 0)
             return module;
         Module ruleParserModule = gen.getRuleGrammar(module);
+        final Scanner realScanner;
+        if (module.name().equals("STDOUT-STREAM") || module.name().equals("STDIN-STREAM")) {
+            // these modules are weird in that they don't get imported but they still need to be parsed. an unfortunate
+            // side effect of this is that the rule parser needs its own scanner when parsing these modules
+            realScanner = null;
+        } else {
+            realScanner = scanner;
+        }
 
         ParseCache cache = loadCache(ruleParserModule);
         ParseInModule parser = gen.getCombinedGrammar(cache.getModule());
@@ -268,7 +278,7 @@ public class DefinitionParsing {
                 .filter(s -> s instanceof Bubble)
                 .map(b -> (Bubble) b)
                 .filter(b -> b.sentenceType().equals("rule"))
-                .flatMap(b -> performParse(cache.getCache(), parser, scanner, b))
+                .flatMap(b -> performParse(cache.getCache(), parser, realScanner, b))
                 .map(this::upRule)
                 .collect(Collections.toSet());
 
@@ -277,7 +287,7 @@ public class DefinitionParsing {
                 .filter(s -> s instanceof Bubble)
                 .map(b -> (Bubble) b)
                 .filter(b -> b.sentenceType().equals("context"))
-                .flatMap(b -> performParse(cache.getCache(), parser, scanner, b))
+                .flatMap(b -> performParse(cache.getCache(), parser, realScanner, b))
                 .map(this::upContext)
                 .collect(Collections.toSet());
 
@@ -366,7 +376,7 @@ public class DefinitionParsing {
             kem.addAllKException(parse.getWarnings().stream().map(e -> e.getKException()).collect(Collectors.toList()));
             return Stream.of(parse.getParse());
         } else {
-            result = parser.parseString(b.contents(), START_SYMBOL, scanner, source, startLine, startColumn);
+            result = parser.parseString(b.contents(), START_SYMBOL, scanner, source, startLine, startColumn, !b.att().contains("macro"));
             parsedBubbles.getAndIncrement();
             kem.addAllKException(result._2().stream().map(e -> e.getKException()).collect(Collectors.toList()));
             if (result._1().isRight()) {

@@ -1,2 +1,1 @@
-Solution 1
-V ==K [ Pair ( 10 , ( 9 , .Exps ) ) , ( Pair ( 0 , ( 1 , .Exps ) ) , ( Pair ( 0 , ( 0 , .Exps ) ) , .Exps ) ) ]
+V ==K [ Pair ( 10 , ( 9 , .GeneratedListBottom ) ) , ( Pair ( 0 , ( 1 , .GeneratedListBottom ) ) , ( Pair ( 0 , ( 0 , .GeneratedListBottom ) ) , .GeneratedListBottom ) ) ]

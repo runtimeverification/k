@@ -10,7 +10,7 @@ import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
-import org.kframework.kore.KList;
+import org.kframework.kore.KToken;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.TransformK;
 import org.kframework.main.GlobalOptions;
@@ -19,8 +19,8 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.kframework.Collections.*;
@@ -35,11 +35,11 @@ public class ExpandMacros {
 
     private final KExceptionManager kem;
 
-    private final Map<KLabel, Rule> macros;
+    private final Map<KLabel, List<Rule>> macros;
 
     public ExpandMacros(Module mod, KExceptionManager kem, FileUtil files, GlobalOptions globalOptions, KompileOptions kompileOptions) {
         this.kem = kem;
-        macros = stream(mod.rules()).filter(r -> r.att().contains("macro")).collect(Collectors.toMap(r -> ((KApply)RewriteToTop.toLeft(r.body())).klabel(), Function.identity()));
+        macros = stream(mod.rules()).filter(r -> r.att().contains("macro")).collect(Collectors.groupingBy(r -> ((KApply)RewriteToTop.toLeft(r.body())).klabel()));
     }
 
     private Rule expand(Rule rule) {
@@ -62,38 +62,66 @@ public class ExpandMacros {
         return new TransformK() {
             @Override
             public K apply(KApply k) {
-                Rule r = macros.get(k.klabel());
-                if (r == null)
+                List<Rule> rules = macros.get(k.klabel());
+                if (rules == null)
                     return super.apply(k);
-                if (!r.requires().equals(BooleanUtils.TRUE)) {
-                    throw KEMException.compilerError("Cannot compute macros with side conditions.", r);
-                }
-                K left = RewriteToTop.toLeft(r.body());
-                KList list;
-                if (left instanceof KApply) {
-                    list = ((KApply) left).klist();
-                } else {
-                    throw KEMException.compilerError("Cannot compute macros that are not function-like.", r);
-                }
-                final Map<KVariable, K> subst = new HashMap<>();
-                for (int i = 0; i < k.items().size(); i++) {
-                    K param = list.items().get(i);
-                    if (!(param instanceof KVariable)) {
-                        throw KEMException.compilerError("Cannot compute macros that are not function-like.", r);
+                for (Rule r : rules) {
+                    if (!r.requires().equals(BooleanUtils.TRUE)) {
+                        throw KEMException.compilerError("Cannot compute macros with side conditions.", r);
                     }
-                    if (subst.containsKey(param)) {
-                        throw KEMException.compilerError("Cannot compute macros with non-linear variables.", r);
+                    K left = RewriteToTop.toLeft(r.body());
+                    final Map<KVariable, K> subst = new HashMap<>();
+                    if (match(subst, left, k, r)) {
+                        return apply(new TransformK() {
+                            @Override
+                            public K apply(KVariable k) {
+                                return subst.get(k);
+                            }
+                        }.apply(RewriteToTop.toRight(r.body())));
                     }
-                    subst.put(((KVariable)param), apply(k.items().get(i)));
                 }
-                return apply(new TransformK() {
-                    @Override
-                    public K apply(KVariable k) {
-                        return subst.get(k);
-                    }
-                }.apply(RewriteToTop.toRight(r.body())));
+                return super.apply(k);
             }
         }.apply(term);
+    }
+
+    private boolean match(Map<KVariable, K> subst, K pattern, K subject, Rule r) {
+        if (pattern instanceof KVariable) {
+            if (subst.containsKey(pattern)) {
+                return subst.get(pattern).equals(subject);
+            } else {
+                subst.put((KVariable)pattern, subject);
+                return true;
+            }
+        }
+        if (pattern instanceof KApply && subject instanceof KApply) {
+           KApply p = (KApply)pattern;
+           KApply s = (KApply)subject;
+           if (p.klabel() instanceof KVariable || s.klabel() instanceof KVariable) {
+               throw KEMException.compilerError("Cannot compute macros with klabel variables.", r);
+           }
+           if (!p.klabel().name().equals(s.klabel().name())) {
+               return false;
+           }
+           if (p.klist().size() != s.klist().size()) {
+               return false;
+           }
+           boolean match = true;
+           for (int i = 0; i < p.klist().size(); i++) {
+              match = match && match(subst, p.klist().items().get(i), s.klist().items().get(i), r);
+           }
+           return match;
+        }
+        if (subject instanceof KToken && pattern instanceof KToken) {
+            return subject.equals(pattern);
+        }
+        if (subject instanceof KVariable) {
+            return false;
+        }
+        if (subject instanceof KToken || pattern instanceof KToken) {
+            return false;
+        }
+        throw KEMException.compilerError("Cannot compute macros with terms that are not KApply or KVariable.", r);
     }
 
     public Sentence expand(Sentence s) {

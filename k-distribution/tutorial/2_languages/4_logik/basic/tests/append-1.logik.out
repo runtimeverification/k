@@ -1,2 +1,1 @@
-Solution 1
-Solution ==K ( V:Term@LOGIK-COMMON |-> ( cons ( a , ( cons ( b , ( nil , .Terms ) ) , .Terms ) ) ) )
+Solution ==K ( V:Term |-> ( cons ( a , ( cons ( b , ( nil , .Terms ) ) , .Terms ) ) ) )

@@ -84,6 +84,8 @@ constructs. */
 (because we now have lists of parameters). */
 
   syntax Exps ::= List{Exp,","}          [strict]
+  syntax Val
+  syntax Vals ::= List{Val,","}
 
 //@ \subsection{Statements}
 
@@ -135,8 +137,8 @@ the end of this module). */
   syntax Val ::= Int | Bool | String
                | array(Type,Int,Int)
                | lambda(Type,Params,Stmts)
-  syntax Vals ::= List{Val,","}
   syntax Exp ::= Val
+  syntax Exps ::= Vals
   syntax KResult ::= Val
                    | Vals  // TODO: should not need this
 
@@ -166,7 +168,7 @@ function body encounters an explicit \texttt{return} statement. */
                       <control color="cyan">
                         <fstack color="blue"> .List </fstack>
                         <xstack color="purple"> .List </xstack>
-                        <return color="LimeGreen"> void </return> //return type
+                        <returnType color="LimeGreen"> void </returnType>
                        </control>
 //                      <br/>
                       <env color="violet"> .Map </env>
@@ -179,8 +181,8 @@ function body encounters an explicit \texttt{return} statement. */
                   <store color="white"> .Map </store>
                   <busy color="cyan">.Set</busy>
                   <terminated color="red"> .Set </terminated>
-                  <in color="magenta" stream="stdin"> .List </in>
-                  <out color="brown" stream="stdout"> .List </out>
+                  <input color="magenta" stream="stdin"> .List </input>
+                  <output color="brown" stream="stdout"> .List </output>
                   <nextLoc color="gray"> 0 </nextLoc>
                 </T>
 
@@ -219,7 +221,7 @@ right type to the allocated locations. */
        <nextLoc> L:Int => L +Int 1 +Int N </nextLoc>
     when N >=Int 0
 
-  context _:Type _:>Exp[HOLE:>Exps];
+  context _:Type _::Exp[HOLE::Exps];
 
 /*@ The desugaring of multi-dimensional arrays into unidimensional
 ones is also similar to that in untyped SIMPLE, although we have to
@@ -322,7 +324,7 @@ checks that that type of the returned value is expected one. */
   rule <k> lambda(T,Ps,S)(Vs:Vals) ~> K => mkDecls(Ps,Vs) S return; </k>
        <control>
          <fstack> .List => ListItem((T',Env,K,C)) ...</fstack>
-         <return> T' => T </return>
+         <returnType> T' => T </returnType>
          C
        </control>
        <env> Env => GEnv </env>
@@ -331,7 +333,7 @@ checks that that type of the returned value is expected one. */
   rule <k> return V:Val; ~> _ => V ~> K </k>
        <control>
          <fstack> ListItem((T',Env,K,C)) => .List ...</fstack>
-         <return> T => T' </return>
+         <returnType> T => T' </returnType>
          (_ => C)
        </control>
        <env> _ => Env </env>
@@ -342,12 +344,12 @@ tagged with a type now.  The empty \texttt{return} statement is
 completed to return the \texttt{nothing} value tagged as expected. */
 
   syntax Val ::= nothing(Type)
-  rule <k> return; => return nothing(T); ...</k> <return> T </return>
+  rule <k> return; => return nothing(T); ...</k> <returnType> T </returnType>
     [structural]
 
 //@ \subsubsection{Read}
 
-  rule <k> read() => I ...</k> <in> ListItem(I:Int) => .List ...</in>  [read]
+  rule <k> read() => I ...</k> <input> ListItem(I:Int) => .List ...</input>  [read]
 
 /*@ \subsubsection{Assignment}
 The assignment now checks that the type of the assigned location is
@@ -363,7 +365,7 @@ preserved: */
 //@ \subsubsection{Blocks}
 
   rule {} => .  [structural]
-  rule <k> { S } => S ~> env(Env) ...</k>  <env> Env </env>  [structural]
+  rule <k> { S } => S ~> setEnv(Env) ...</k>  <env> Env </env>  [structural]
 
 //@ \subsubsection{Sequential composition}
 
@@ -386,7 +388,7 @@ preserved: */
 
 We only allow printing integers and strings: */
 
-  rule <k> print(V:Val, Es => Es); ...</k> <out>... .List => ListItem(V) </out>
+  rule <k> print(V:Val, Es => Es); ...</k> <output>... .List => ListItem(V) </output>
     when typeOf(V) ==K int orBool typeOf(V) ==K string  [print]
   rule print(.Vals); => .  [structural]
 
@@ -483,11 +485,11 @@ into a list of variable declarations. */
   rule <k> lookup(L) => V ...</k> <store>... L |-> V:Val ...</store>  [lookup]
 
 //@ Environment recovery.
-// TOD: same comment regarding env(...) as for simple untyped
+// TOD: same comment regarding setEnv(...) as for simple untyped
 
-  syntax KItem ::= env(Map)
-  rule <k> env(Env) => . ...</k>  <env> _ => Env </env>  [structural]
-  rule (env(_) => .) ~> env(_)  [structural]
+  syntax KItem ::= setEnv(Map)
+  rule <k> setEnv(Env) => . ...</k>  <env> _ => Env </env>  [structural]
+  rule (setEnv(_) => .) ~> setEnv(_)  [structural]
 
 //@ lvalue and loc
 
@@ -499,8 +501,8 @@ into a list of variable declarations. */
 
   //context lvalue(_[HOLE])
   //context lvalue(HOLE[_])
-  context lvalue(_:>Exp[HOLE:>Exps])
-  context lvalue(HOLE:>Exp[_:>Exps])
+  context lvalue(_::Exp[HOLE::Exps])
+  context lvalue(HOLE::Exp[_::Exps])
 
   rule lvalue(lookup(L:Int) => loc(L))  [structural]
 

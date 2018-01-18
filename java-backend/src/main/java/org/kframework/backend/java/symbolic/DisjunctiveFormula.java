@@ -1,17 +1,17 @@
 // Copyright (c) 2015-2016 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
-import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.kil.CollectionInternalRepresentation;
 import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.kil.HasGlobalContext;
 import org.kframework.backend.java.kil.JavaSymbolicObject;
+import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabel;
 import org.kframework.backend.java.kil.KLabelConstant;
+import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.Kind;
 import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
-import org.kframework.backend.java.kil.Token;
 
 import java.util.Collection;
 import java.util.List;
@@ -66,14 +66,13 @@ public class DisjunctiveFormula extends Term implements CollectionInternalRepres
 
     @Override
     public KLabel constructorLabel() {
-        return KLabelConstant.of("_orBool_", global.getDefinition());
+        return KLabelConstant.of("#Or", global.getDefinition());
     }
 
     @Override
-    public Token unit() {
-        return BoolToken.FALSE;
+    public KItem unit() {
+        return KItem.of(KLabelConstant.of("#False", global.getDefinition()), KList.EMPTY, global);
     }
-
     @Override
     protected int computeHash() {
         return conjunctions.hashCode();

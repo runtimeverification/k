@@ -6,6 +6,6 @@ module SUBSTITUTION
   // used for user-defined substitution only
   syntax KVariable
 
-  syntax K ::= K "[" K "/" K "]"  [function, hook(SUBSTITUTION.userSingletonSubstitutionKore), impure]
-  syntax K ::= K "[" Map "]"      [function, hook(SUBSTITUTION.userSubstitutionKore), impure]
+  syntax K ::= K "[" K "/" K "]"  [function, hook(SUBSTITUTION.substOne), impure, poly(0, 1)]
+  syntax K ::= K "[" Map "]"      [function, hook(SUBSTITUTION.substMany), impure, poly(0, 1)]
 endmodule

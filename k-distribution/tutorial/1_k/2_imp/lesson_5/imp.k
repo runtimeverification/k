@@ -25,6 +25,7 @@ making it display as $\leq$, and that \texttt{\&\&} is strict only in its first
 argument, because we want to give it a short-circuit semantics. */
 
   syntax AExp  ::= Int | Id
+                 | "-" Int
                  | AExp "/" AExp              [left, strict]
                  > AExp "+" AExp              [left, strict]
                  | "(" AExp ")"               [bracket]
@@ -113,6 +114,7 @@ rules below all happen at the beginning of the \textsf{k} cell.  */
 
   rule I1 / I2 => I1 /Int I2  requires I2 =/=Int 0
   rule I1 + I2 => I1 +Int I2
+  rule - I1 => 0 -Int I1
 
 /*@ \subsection{Boolean expressions}
 The rules below are straightforward.  Note the short-circuited semantics

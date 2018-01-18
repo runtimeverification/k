@@ -1,26 +1,32 @@
 // Copyright (c) 2015-2016 K Team. All Rights Reserved.
 package org.kframework.krun;
 
+import com.davekoelle.AlphanumComparator;
 import org.apache.commons.lang3.tuple.Pair;
+import org.kframework.attributes.Att;
 import org.kframework.attributes.Source;
+import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.ConfigurationInfoFromModule;
 import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
 import org.kframework.kompile.CompiledDefinition;
+import org.kframework.kore.Assoc;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
+import org.kframework.kore.KORE;
 import org.kframework.kore.KToken;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
+import org.kframework.kore.TransformK;
 import org.kframework.kore.VisitK;
 import org.kframework.krun.modes.ExecutionMode;
 import org.kframework.main.Main;
-import org.kframework.parser.ProductionReference;
 import org.kframework.parser.binary.BinaryParser;
 import org.kframework.parser.kore.KoreParser;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.unparser.AddBrackets;
+import org.kframework.unparser.Formatter;
 import org.kframework.unparser.KOREToTreeNodes;
 import org.kframework.unparser.OutputModes;
 import org.kframework.unparser.ToBinary;
@@ -33,12 +39,11 @@ import org.kframework.utils.file.FileUtil;
 import scala.Tuple2;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -78,7 +83,7 @@ public class KRun {
         String pgmFileName = options.configurationCreation.pgm();
         K program;
         if (options.configurationCreation.term()) {
-            program = externalParse(options.configurationCreation.parser(compiledDef.executionModule().name()),
+            program = externalParse(options.configurationCreation.parser(compiledDef.executionModule().name(), files),
                     pgmFileName, compiledDef.programStartSymbol, Source.apply("<parameters>"), compiledDef);
         } else {
             program = parseConfigVars(options, compiledDef);
@@ -97,7 +102,7 @@ public class KRun {
         if (result instanceof K) {
             prettyPrint(compiledDef, options.output, s -> outputFile(s, options), (K) result);
             if (compiledDef.exitCodePattern != null) {
-                List<? extends Map<? extends KVariable, ? extends K>> res = rewriter.match((K) result, compiledDef.exitCodePattern);
+                K res = rewriter.match((K) result, compiledDef.exitCodePattern);
                 return getExitCode(kem, res);
             }
         } else if (result instanceof Tuple2) {
@@ -113,10 +118,6 @@ public class KRun {
         } else if (result instanceof SearchResult) {
             printSearchResult((SearchResult) result, options, compiledDef);
             return 0;
-        } else if (options.experimental.prove != null) {
-            if (((List) result).isEmpty()) {
-                System.out.println("true");
-            }
         } else if (result instanceof Integer) {
             return (Integer) result;
         }
@@ -124,28 +125,7 @@ public class KRun {
     }
 
     private void printSearchResult(SearchResult result, KRunOptions options, CompiledDefinition compiledDef) {
-        Set<Map<? extends KVariable, ? extends K>> searchResult = ((SearchResult) result).getSearchList().stream()
-                .map(subst -> filterAnonymousVariables(subst, result.getParsedRule()))
-                .collect(Collectors.toSet());
-        outputFile("Search results:\n\n", options);
-        if (searchResult.isEmpty()) {
-            outputFile("No Search Results \n", options);
-        }
-        int i = 1;
-        List<String> results = new ArrayList<>();
-        for (Map<? extends KVariable, ? extends K> substitution : searchResult) {
-            ByteArrayOutputStream sb = new ByteArrayOutputStream();
-            prettyPrintSubstitution(substitution, result.getParsedRule(), compiledDef, options.output, v -> sb.write(v, 0, v.length));
-            //Note that this is actually unsafe, but we are here assuming that --search is not used with --output binary
-            results.add(new String(sb.toByteArray()));
-        }
-        Collections.sort(results);
-        StringBuilder sb = new StringBuilder();
-        for (String solution : results) {
-            sb.append("Solution ").append(i++).append(":\n");
-            sb.append(solution);
-        }
-        outputFile(sb.toString(), options);
+        prettyPrint(compiledDef, options.output, s -> outputFile(s, options), result.getSearchList());
     }
 
     /**
@@ -155,23 +135,24 @@ public class KRun {
      * @param res The substitution from the match of the user specified pattern on the Final Configuration.
      * @return An int representing the error code.
      */
-    public static int getExitCode(KExceptionManager kem, List<? extends Map<? extends KVariable, ? extends K>> res) {
-        if (res.size() != 1) {
-            kem.registerCriticalWarning("Found " + res.size() + " solutions to exit code pattern. Returning 112.");
-            return 112;
-        }
-        Map<? extends KVariable, ? extends K> solution = res.get(0);
+    public static int getExitCode(KExceptionManager kem, K res) {
+        KApply app = (KApply) res;
+        List<K> solution = Assoc.flatten(KORE.KLabel(KLabels.ML_AND), app.klist().items(), KLabel(KLabels.ML_TRUE));
         Set<Integer> vars = new HashSet<>();
-        for (K t : solution.values()) {
-            // TODO(andreistefanescu): fix Token.sort() to return a kore.Sort that obeys kore.Sort's equality contract.
-            if (t instanceof KToken && Sorts.Int().equals(((KToken) t).sort())) {
-                try {
-                    vars.add(Integer.valueOf(((KToken) t).s()));
-                } catch (NumberFormatException e) {
-                    throw KEMException.criticalError("Exit code found was not in the range of an integer. Found: " + ((KToken) t).s(), e);
+        for (K conjunct : solution) {
+            if (conjunct instanceof KApply) {
+                KApply kapp = (KApply)conjunct;
+                if (kapp.klabel().equals(KLabel("_==K_"))) {
+                    if (kapp.items().get(0) instanceof KVariable && kapp.items().get(1) instanceof KToken) {
+                        KToken rhs = (KToken) kapp.items().get(1);
+                        if (Sorts.Int().equals(rhs.sort())) {
+                            vars.add(Integer.valueOf(rhs.s()));
+                        }
+                    }
                 }
             }
         }
+
         if (vars.size() != 1) {
             kem.registerCriticalWarning("Found " + vars.size() + " integer variables in exit code pattern. Returning 111.");
             return 111;
@@ -294,7 +275,7 @@ public class KRun {
     private K parseConfigVars(KRunOptions options, CompiledDefinition compiledDef) {
         HashMap<KToken, K> output = new HashMap<>();
         for (Map.Entry<String, Pair<String, String>> entry
-                : options.configurationCreation.configVars(compiledDef.getParsedDefinition().mainModule().name()).entrySet()) {
+                : options.configurationCreation.configVars(compiledDef.getParsedDefinition().mainModule().name(), files).entrySet()) {
             String name = entry.getKey();
             String value = entry.getValue().getLeft();
             String parser = entry.getValue().getRight();
@@ -363,9 +344,41 @@ public class KRun {
     }
 
     private static String unparseTerm(K input, Module test) {
-        return KOREToTreeNodes.toString(
-                new AddBrackets(test).addBrackets((ProductionReference)
-                        KOREToTreeNodes.apply(KOREToTreeNodes.up(test, input), test)));
+        K sortedComm = new TransformK() {
+            @Override
+            public K apply(KApply k) {
+                if (k.klabel() instanceof KVariable) {
+                    return super.apply(k);
+                }
+                Att att = test.attributesFor().apply(KLabel(k.klabel().name()));
+                if (att.contains("comm") && att.contains("assoc") && att.contains("unit")) {
+                    List<K> items = new ArrayList<>(Assoc.flatten(k.klabel(), k.klist().items(), KLabel(att.get("unit"))));
+                    List<Tuple2<String, K>> printed = new ArrayList<>();
+                    for (K item : items) {
+                        String s = Formatter.format(new AddBrackets(test).addBrackets(KOREToTreeNodes.apply(KOREToTreeNodes.up(test, apply(item)), test)));
+                        printed.add(Tuple2.apply(s, item));
+                    }
+                    printed.sort(Comparator.comparing(Tuple2::_1, new AlphanumComparator()));
+                    items = printed.stream().map(Tuple2::_2).map(this::apply).collect(Collectors.toList());
+                    return items.stream().reduce((k1, k2) -> KApply(k.klabel(), k1, k2)).orElse(KApply(KLabel(att.get("unit"))));
+                }
+                return super.apply(k);
+            }
+        }.apply(input);
+        K alphaRenamed = new TransformK() {
+            Map<KVariable, KVariable> renames = new HashMap<>();
+            int newCount = 0;
+
+            @Override
+            public K apply(KVariable k) {
+                if (k.att().contains("anonymous")) {
+                    return renames.computeIfAbsent(k, k2 -> KVariable("V" + newCount++, k.att()));
+                }
+                return k;
+            }
+        }.apply(sortedComm);
+        return Formatter.format(
+                new AddBrackets(test).addBrackets(KOREToTreeNodes.apply(KOREToTreeNodes.up(test, alphaRenamed), test)));
     }
 
     public K externalParse(String parser, String value, Sort startSymbol, Source source, CompiledDefinition compiledDef) {

@@ -29,9 +29,15 @@ Here are instructions for installing K from the release zip/tgz archive.
     manager OPAM. Instructions on installing OPAM are available here:
     https://opam.ocaml.org/doc/Install.html
   * Once opam is installed, you can prepare the installation to run
-    the OCAML backend by running the "k-configure-opam" script found
+    the OCAML backend by running the "k-configure-opam-dev" script found
     in the lib directory. You will also need to run ``eval `opam config env` ``
     afterwards to update your environment.
+
+--------------------------------------------------------------------------
+
+Note: We do not currently support running K on native Windows. To use K on
+Windows, you are encouraged to install
+[Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
 
 --------------------------------------------------------------------------
 

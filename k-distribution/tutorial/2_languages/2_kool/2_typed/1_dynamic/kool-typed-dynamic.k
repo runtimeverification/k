@@ -100,6 +100,8 @@ untyped KOOL.  */
                > Exp "=" Exp             [strict(2), right]
 
   syntax Exps ::= List{Exp,","}          [strict]
+  syntax Val
+  syntax Vals ::= List{Val,","}
 
 //@ \subsection{Statements}
 
@@ -128,9 +130,9 @@ untyped KOOL.  */
 //@ \subsection{Desugaring macros}
 
   rule if (E) S => if (E) S else {}                                     [macro]
-  rule for(Start Cond; Step) {S:Stmts} => {Start while(Cond){S Step;}}  [macro]
-  rule T:Type E1:Exp, E2:Exp, Es:Exps; => T E1; T E2, Es;               [macro]
-  rule T:Type X:Id = E; => T X; X = E;                                  [macro]
+  rule for(Start Cond; Step) {S::Stmts} => {Start while(Cond){S Step;}} [macro]
+  rule T::Type E1::Exp, E2::Exp, Es::Exps; => T E1; T E2, Es;           [macro]
+  rule T::Type X::Id = E; => T X; X = E;                                [macro]
 
   rule class C:Id S => class C extends Object S                     // KOOL
 
@@ -145,7 +147,6 @@ KOOL-specific constructs.  */
 
 module KOOL-TYPED-DYNAMIC
   imports KOOL-TYPED-DYNAMIC-SYNTAX
-  imports KCELLS
 
 /*@ \subsection{Configuration}
 The configuration of dynamically typed KOOL is almost identical to
@@ -167,13 +168,13 @@ the expected type. */
 
   configuration <T color="red">
                   <threads color="orange">
-                    <thread multiplicity="*" color="yellow">
+                    <thread multiplicity="*" type="Set" color="yellow">
                       <k color="green"> ($PGM:Stmts ~> execute) </k>
                     //<br/> // TODO(KORE): support latex annotations #1799
                       <control color="cyan">
                         <fstack color="blue"> .List </fstack>
                         <xstack color="purple"> .List </xstack>
-                        <return color="LimeGreen"> void </return>  // KOOL
+                        <returnType color="LimeGreen"> void </returnType>  // KOOL
                       //<br/> // TODO(KORE): support latex annotations #1799
                         <crntObj color="Fuchsia">  // KOOL
                            <crntClass> Object </crntClass>
@@ -191,16 +192,16 @@ the expected type. */
                   <store color="white"> .Map </store>
                   <busy color="cyan">.Set </busy>
                   <terminated color="red"> .Set </terminated>
-                  <in color="magenta" stream="stdin"> .List </in>
-                  <out color="brown" stream="stdout"> .List </out>
+                  <input color="magenta" stream="stdin"> .List </input>
+                  <output color="brown" stream="stdout"> .List </output>
                   <nextLoc color="gray"> 0 </nextLoc>
                 //<br/> // TODO(KORE): support latex annotations #1799
                   <classes color="Fuchsia">        // KOOL
-                     <class multiplicity="*" color="Fuchsia">
+                     <classData multiplicity="*" type="Map" color="Fuchsia">
                         <className color="Fuchsia"> Main </className>
-                        <extends color="Fuchsia"> Object </extends>
+                        <baseClass color="Fuchsia"> Object </baseClass>
                         <declarations color="Fuchsia"> .K </declarations>
-                     </class>
+                     </classData>
                   </classes>
                 </T>
 
@@ -219,8 +220,8 @@ KOOL).  */
 
   syntax Val ::= Int | Bool | String
                | array(Type,Int,Int)
-  syntax Vals ::= List{Val,","}
   syntax Exp ::= Val
+  syntax Exps ::= Vals
   syntax KResult ::= Val
   syntax KResult ::= Vals
 
@@ -240,7 +241,7 @@ KOOL).  */
        <nextLoc> L:Int => L +Int 1 +Int N </nextLoc>
     requires N >=Int 0
 
-  context _:Type _:>Exp[HOLE:>Exps];
+  context _:Type _::Exp[HOLE::Exps];
 
 
   syntax Id ::= "$1" | "$2"
@@ -296,18 +297,18 @@ KOOL).  */
 
 
   syntax Val ::= nothing(Type)
-  rule <k> return; => return nothing(T); ...</k> <return> T </return>
+  rule <k> return; => return nothing(T); ...</k> <returnType> T </returnType>
     [structural]
 
 
-  rule <k> read() => I ...</k> <in> ListItem(I:Int) => .List ...</in>  [read]
+  rule <k> read() => I ...</k> <input> ListItem(I:Int) => .List ...</input>  [read]
 
 
   context (HOLE => lvalue(HOLE)) = _
 
 
   rule {} => .  [structural]
-  rule <k> { S } => S ~> env(Env) ...</k>  <env> Env </env>  [structural]
+  rule <k> { S } => S ~> setEnv(Env) ...</k>  <env> Env </env>  [structural]
 
 
   rule S1:Stmts S2:Stmts => S1 ~> S2  [structural]
@@ -323,7 +324,7 @@ KOOL).  */
   rule while (E) S => if (E) {S while(E)S}  [structural]
 
 
-  rule <k> print(V:Val, Es => Es); ...</k> <out>... .List => ListItem(V) </out>
+  rule <k> print(V:Val, Es => Es); ...</k> <output>... .List => ListItem(V) </output>
     requires typeOf(V) ==K int orBool typeOf(V) ==K string  [print]
   rule print(.Vals); => .  [structural]
 
@@ -363,17 +364,17 @@ KOOL).  */
   syntax Exp ::= lookup(Int)
   rule <k> lookup(L) => V ...</k> <store>... L |-> V:Val ...</store>  [lookup]
 
-  syntax KItem ::= env(Map)
-  rule <k> env(Env) => . ...</k>  <env> _ => Env </env>  [structural]
-  rule (env(_) => .) ~> env(_)  [structural]
+  syntax KItem ::= setEnv(Map)
+  rule <k> setEnv(Env) => . ...</k>  <env> _ => Env </env>  [structural]
+  rule (setEnv(_) => .) ~> setEnv(_)  [structural]
 
   syntax Exp ::= lvalue(K)
   syntax Val ::= loc(Int)
   rule <k> lvalue(X:Id => loc(L)) ...</k>  <env>... X |-> L:Int ...</env>
     [structural]
 
-  context lvalue(_:>Exp[HOLE:>Exps])
-  context lvalue(HOLE:>Exp[_:>Exps])
+  context lvalue(_::Exp[HOLE::Exps])
+  context lvalue(HOLE::Exp[_::Exps])
 
   rule lvalue(lookup(L:Int) => loc(L))  [structural]
 
@@ -452,7 +453,7 @@ environment, so we group them together in the stack frame.  */
        <control>
           <fstack> .List => ListItem(fstackFrame(Env, K, XS, T', <crntObj> Obj' </crntObj>)) ...</fstack>
           <xstack> XS </xstack>
-          <return> T' => T </return>
+          <returnType> T' => T </returnType>
           <crntObj> Obj' => <crntClass> Class </crntClass> <envStack> EStack </envStack> </crntObj>
        </control>
 
@@ -470,7 +471,7 @@ unchanged.  */
        <control>
          <fstack> ListItem(fstackFrame(Env, K, XS, RT, <crntObj> CO </crntObj>)) => .List ...</fstack>
          <xstack> _ => XS </xstack>
-         <return> T:Type => RT </return>
+         <returnType> T:Type => RT </returnType>
          <crntObj> _ => CO </crntObj>
        </control>
        <env> _ => Env </env>
@@ -549,11 +550,11 @@ Like in untyped KOOL. */
 Like in untyped KOOL. */
 
   rule <k> class Class1 extends Class2 { S } => . ...</k>
-       <classes>... (.Bag => <class>
+       <classes>... (.Bag => <classData>
                             <className> Class1 </className>
-                            <extends> Class2 </extends>
+                            <baseClass> Class2 </baseClass>
                             <declarations> S </declarations>
-                        </class>)
+                        </classData>)
        ...</classes>  [structural]
 
 
@@ -596,7 +597,7 @@ those in untyped KOOL. */
                       <envStack> ListItem(envStackFrame(Object, .Map)) </envStack>
                       <location> L </location>
          </crntObj>
-         <return> T => Class </return>
+         <returnType> T => Class </returnType>
          <fstack> .List => ListItem(fstackFrame(Env, K, XS, T, <crntObj>Obj</crntObj>)) ...</fstack>
        </control>
 
@@ -605,7 +606,7 @@ those in untyped KOOL. */
   rule <k> create(Class:Id)
            => create(Class1) ~> setCrntClass(Class) ~> S ~> addEnvLayer ...</k>
        <className> Class </className>
-       <extends> Class1:Id </extends>
+       <baseClass> Class1:Id </baseClass>
        <declarations> S </declarations>  [structural]
 
   rule <k> create(Object) => . ...</k>  [structural]
@@ -761,7 +762,7 @@ Like in untyped KOOL. */
   rule <k> lvalue(X:Id => this . X) ...</k>  <env> Env </env>
     requires notBool(X in keys(Env))  [structural]
 
-  context lvalue((HOLE . _)<:Exp)
+  context lvalue((HOLE . _)::Exp)
 
 /*  rule lvalue(objectClosure(<crntObj> <crntClass> C </crntClass>
                             <envStack>... ListItem((C,EnvC:EnvCell)) EStack </envStack> </crntObj>)
@@ -812,10 +813,10 @@ The subclass relation induces a subtyping relation. */
 
   rule <k> subtype(C1:Id, C:Id) => subtype(C2, C) ...</k>
        <className> C1 </className>
-       <extends> C2:Id </extends>
+       <baseClass> C2:Id </baseClass>
     requires C1 =/=K C  [structural]
 
-  rule subtype(Object,Class) => false
+  rule subtype(Object,Class:Id) => false
     requires Class =/=K Object  [structural]
 
   rule subtype(Ts1->T2,Ts1'->T2') => subtype(((T2)::Type,Ts1'),((T2')::Type,Ts1))  [structural]

@@ -19,7 +19,7 @@ class RenameAnonymousVariables {
 
     public Variable getRenamedVariable(Variable v) {
         if (v.isAnonymous()) {
-            return renames.computeIfAbsent(v, v2 -> new Variable("V" + newCount++, v.sort()));
+            return renames.computeIfAbsent(v, v2 -> new Variable("V" + newCount++, v.sort(), true));
         } else {
             return v;
         }

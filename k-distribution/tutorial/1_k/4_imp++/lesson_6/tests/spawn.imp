@@ -1,0 +1,6 @@
+int x;
+print("x = ");
+x=read();
+spawn x=x/2;
+spawn x=x+10;
+print(x,"\n");

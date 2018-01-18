@@ -1,8 +1,7 @@
-Solution 1
-<T> <k> ( ++ x ) ~> #freezer_/_1 ( x ) ~> #freezer_/_0 ( ++ x ) ~> #freezer_=_;0 ( y ) </k> <env> x |-> 1 y |-> 2 </env> <store> 1 |-> 1 2 |-> 0 </store> </T>
-Solution 2
-<T> <k> ( ++ x ) ~> #freezer_/_1 ( 1 ) ~> #freezer_/_0 ( ++ x ) ~> #freezer_=_;0 ( y ) </k> <env> x |-> 1 y |-> 2 </env> <store> 1 |-> 1 2 |-> 0 </store> </T>
-Solution 3
-<T> <k> ( ++ x ) ~> #freezer_/_1 ( ++ x / x ) ~> #freezer_=_;0 ( y ) </k> <env> x |-> 1 y |-> 2 </env> <store> 1 |-> 1 2 |-> 0 </store> </T>
-Solution 4
-<T> <k> ( ++ x ) ~> #freezer_/_1 ( ++ x / 1 ) ~> #freezer_=_;0 ( y ) </k> <env> x |-> 1 y |-> 2 </env> <store> 1 |-> 1 2 |-> 0 </store> </T>
+  Result ==K <T> <k> ( ++ x ) ~> #freezer_/__IMP-SYNTAX1_ ( 1 ) ~> #freezer_/__IMP-SYNTAX0_ ( ++ x ) ~> #freezer_=_;_IMP-SYNTAX0_ ( y ) </k> <env> x |-> 1 y |-> 2 </env> <store> 1 |-> 1 2 |-> 0 </store> </T>
+#Or
+  Result ==K <T> <k> ( ++ x ) ~> #freezer_/__IMP-SYNTAX1_ ( ++ x / 1 ) ~> #freezer_=_;_IMP-SYNTAX0_ ( y ) </k> <env> x |-> 1 y |-> 2 </env> <store> 1 |-> 1 2 |-> 0 </store> </T>
+#Or
+  Result ==K <T> <k> ( ++ x ) ~> #freezer_/__IMP-SYNTAX1_ ( ++ x / x ) ~> #freezer_=_;_IMP-SYNTAX0_ ( y ) </k> <env> x |-> 1 y |-> 2 </env> <store> 1 |-> 1 2 |-> 0 </store> </T>
+#Or
+  Result ==K <T> <k> ( ++ x ) ~> #freezer_/__IMP-SYNTAX1_ ( x ) ~> #freezer_/__IMP-SYNTAX0_ ( ++ x ) ~> #freezer_=_;_IMP-SYNTAX0_ ( y ) </k> <env> x |-> 1 y |-> 2 </env> <store> 1 |-> 1 2 |-> 0 </store> </T>

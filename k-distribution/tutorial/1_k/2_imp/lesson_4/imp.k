@@ -2,6 +2,7 @@
 
 module IMP-SYNTAX
   syntax AExp  ::= Int | Id
+                 | "-" Int
                  | AExp "/" AExp              [left, strict]
                  > AExp "+" AExp              [left, strict]
                  | "(" AExp ")"               [bracket]
@@ -36,6 +37,7 @@ module IMP
   rule <k> X:Id => I ...</k> <state>... X |-> I ...</state>
   rule I1 / I2 => I1 /Int I2  requires I2 =/=Int 0
   rule I1 + I2 => I1 +Int I2
+  rule - I1 => 0 -Int I1
 // BExp
   rule I1 <= I2 => I1 <=Int I2
   rule ! T => notBool T

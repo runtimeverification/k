@@ -1,2 +1,1 @@
-Solution 1
-V ==K fun ( ( x -> ( ( fun ( ( [ y , .Exps ] -> y ) | .Cases ) ) [ x , .Exps ] ) ) | .Cases )
+V ==K fun ( ( x -> ( ( fun ( ( [ y , .GeneratedListBottom ] -> y ) | .Cases ) ) [ x , .GeneratedListBottom ] ) ) | .Cases )

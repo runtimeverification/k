@@ -8,6 +8,7 @@ import org.kframework.compile.ConfigurationInfo;
 import org.kframework.compile.ConfigurationInfoFromModule;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
+import org.kframework.definition.ModuleTransformer;
 import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
 import org.kframework.definition.ProductionItem;
@@ -132,13 +133,19 @@ public class RuleGrammarGenerator {
         if(mod.name().endsWith(POSTFIX)) {
             return mod;
         } else {
-            // import PROGRAM-LISTS so user lists are modified to parse programs
-            scala.collection.Set<Module> modules = Set(mod, baseK.getModule(PROGRAM_LISTS).get());
+            Module newMod = ModuleTransformer.from(oldMod -> {
+                Set<Module> imports = stream(oldMod.imports()).map(_import -> {
+                    if (_import.name().equals(ID)) {
+                        return baseK.getModule(ID_PROGRAM_PARSING).get();
+                    } else {
+                        return _import;
+                    }
+                }).collect(Collectors.toSet());
+                return Module.apply(oldMod.name(), immutable(imports), oldMod.localSentences(), oldMod.att());
+            }, "apply program parsing modules").apply(mod);
 
-            if (stream(mod.importedModules()).anyMatch(m -> m.name().equals(ID))) {
-                Module idProgramParsingModule = baseK.getModule(ID_PROGRAM_PARSING).get();
-                modules = add(idProgramParsingModule, modules);
-            }
+            // import PROGRAM-LISTS so user lists are modified to parse programs
+            scala.collection.Set<Module> modules = Set(newMod, baseK.getModule(PROGRAM_LISTS).get());
 
             return Module.apply(mod.name() + POSTFIX, modules, Set(), Att());
         }

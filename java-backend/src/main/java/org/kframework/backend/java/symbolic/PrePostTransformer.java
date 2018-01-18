@@ -285,7 +285,7 @@ public abstract class PrePostTransformer extends CopyOnWriteTransformer {
 
         @Override
         public JavaSymbolicObject accept(Transformer transformer) {
-            throw new UnsupportedOperationException();
+            return this;
         }
 
         @Override

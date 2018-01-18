@@ -27,6 +27,8 @@ module FUN-UNTYPED-COMMON
   syntax Exp ::= Int | Bool | String | Name
                | "(" Exp ")"                       [bracket]
   syntax Exps  ::= List{Exp,","}                   [strict]
+  syntax Val
+  syntax Vals ::= List{Val,","}
 
   syntax Exp ::= left:
                  Exp "*" Exp                       [strict, arith]
@@ -52,10 +54,12 @@ module FUN-UNTYPED-COMMON
   syntax Exp ::= "[" Exps "]"                      [strict]
                | "cons" |  "head" | "tail" | "null?"
                | "[" Exps "|" Exp "]"
+  syntax Val ::= "[" Vals "]"
 
   syntax ConstructorName
   syntax Exp ::= ConstructorName
                | ConstructorName "(" Exps ")"      [prefer, strict(2)]
+  syntax Val ::= ConstructorName "(" Vals ")"
 
   syntax Exp ::= "fun" Cases
                | Exp Exp                           [strict, left]
@@ -91,10 +95,11 @@ module FUN-UNTYPED-COMMON
                 | Type "-->" Type                            [right]
                 | "(" Type ")"                             [bracket]
                 | TypeVar
-                | TypeName             [klabel(TypeName), onlyLabel]
+                | TypeName             [klabel(TypeName), avoid]
                 | Type TypeName   [klabel(Type-TypeName), onlyLabel]
                 | "(" Types ")" TypeName                    [prefer]
   syntax Types ::= List{Type,","}
+  syntax Types ::= TypeVars
 
   syntax TypeCase ::= ConstructorName
                     | ConstructorName "(" Types ")"
@@ -103,14 +108,16 @@ module FUN-UNTYPED-COMMON
 
 //@ \subsection{Additional Priorities}
 
-  syntax priorities @_
-                  > __
+  syntax priorities @__FUN-UNTYPED-COMMON
+                  > ___FUN-UNTYPED-COMMON
                   > arith
-                  > _:=_
-                  > let_in_ letrec_in_ if_then_else_
-                  > _;_
-                  > fun_
-                  > datatype_=__
+                  > _:=__FUN-UNTYPED-COMMON
+                  > let_in__FUN-UNTYPED-COMMON
+                    letrec_in__FUN-UNTYPED-COMMON
+                    if_then_else__FUN-UNTYPED-COMMON
+                  > _;__FUN-UNTYPED-COMMON
+                  > fun__FUN-UNTYPED-COMMON
+                  > datatype_=___FUN-UNTYPED-COMMON
 endmodule
 
 module FUN-UNTYPED-MACROS
@@ -147,11 +154,13 @@ endmodule
 
 module FUN-UNTYPED-SYNTAX
   imports FUN-UNTYPED-COMMON
+  imports BUILTIN-ID-TOKENS
 
-  syntax Name ::= Token{[a-z][\_a-zA-Z0-9]*}            [onlyLabel, autoReject, token]
-  syntax ConstructorName ::= Token{[A-Z][a-zA-Z0-9]*}   [onlyLabel, autoReject, token]
-  syntax TypeVar  ::= Token{[\'][a-z][\_a-zA-Z0-9]*}    [onlyLabel, autoReject, token]
-  syntax TypeName ::= Token{[a-z][\_a-zA-Z0-9]*}        [onlyLabel, autoReject, token]
+  syntax Name ::= r"[a-z][_a-zA-Z0-9]*"            [autoReject, token, prec(2)]
+                | #LowerId                         [autoReject, token]
+  syntax ConstructorName ::= #UpperId              [autoReject, token]
+  syntax TypeVar  ::= r"['][a-z][_a-zA-Z0-9]*"     [autoReject, token]
+  syntax TypeName ::= Name                         [autoReject, token]
 endmodule
 
 
@@ -171,9 +180,11 @@ module FUN-UNTYPED
 //@ Both Name and functions are values now:
 
   syntax Val ::= Int | Bool | String | Name
-  syntax Vals ::= List{Val,","}
   syntax Exp ::= Val
+  syntax Exps ::= Vals
   syntax KResult ::= Val
+  syntax Exps ::= Names
+  syntax Vals ::= Names
 
   rule I1:Int * I2:Int => I1 *Int I2
   rule I1:Int / I2:Int => I1 /Int I2 when I2 =/=K 0
@@ -196,17 +207,16 @@ module FUN-UNTYPED
   rule if  true then E else _ => E
   rule if false then _ else E => E
 
-  syntax Val ::= "cons" | "[" Vals "]"
-  rule isVal@FUN-UNTYPED(cons V:Val) => true
+  rule isVal(cons) => true
+  rule isVal(cons V:Val) => true
   rule cons V:Val [Vs:Vals] => [V,Vs]
 
   syntax Val ::= ConstructorName
-               | ConstructorName "(" Vals ")"
 
-  syntax Val ::= "fun" Cases
+  rule isVal(fun _) => true
   syntax KVariable ::= Name
   syntax Name ::= freshName(Int)    [freshGenerator, function]
-  rule freshName(I:Int) => #parseToken("Name@FUN-UNTYPED-COMMON", "#" +String Int2String(I))
+  rule freshName(I:Int) => #parseToken("Name", "#" +String Int2String(I))
 
   rule (. => getMatching(P, V)) ~> (fun P->_ | _) V:Val
   rule matchResult(M:Map) ~> (fun _->E | _) _ => E[M]
@@ -234,13 +244,14 @@ semantics to \texttt{ref}.  We also have to declare \texttt{ref} to
 be a value, so that we will never heat on it. */
 
 //  rule <k> & X => L ...</k>  <env>... X |-> L </env>
-  syntax Val ::= "ref"
+  rule isVal(ref) => true
   rule <k> ref V:Val => !L:Int ...</k> <store>... .Map => !L |-> V ...</store>
   rule <k> @ L:Int => V:Val ...</k>  <store>... L |-> V ...</store>
   rule <k> L:Int := V:Val => V ...</k>  <store>... L |-> (_=>V) ...</store>
   rule V:Val; E => E
 
-  syntax Val ::= "callcc" | cc(K)
+  syntax Val ::= cc(K)
+  rule isVal(callcc) => true
   rule <k> (callcc V:Val => V cc(K)) ~> K </k>
   rule <k> cc(K) V:Val ~> _ => V ~> K </k>
 

@@ -37,7 +37,7 @@ module LAMBDA
   rule T1:Type <= T2:Type => T1 = int ~> T2 = int ~> bool
 
   syntax Exp ::= Exp "->" Exp                  [strict]
-  rule <k> lambda X:Id . E => ?T:Type -> E ~> tenv(TEnv) ...</k>
+  rule <k> lambda X:Id . E => ?T:Type -> E ~> setTenv(TEnv) ...</k>
        <tenv> TEnv => TEnv[X <- ?T] </tenv>
 
   rule T1:Type T2:Type => T1 = (T2 -> ?T:Type) ~> ?T
@@ -45,20 +45,20 @@ module LAMBDA
 
   syntax TypeSchema ::= "(" "forall" Set ")" Type
   syntax Type ::= MetaVariable
-  rule <k> let X = T:Type in E => E ~> tenv(TEnv) ...</k>
+  rule <k> let X = T:Type in E => E ~> setTenv(TEnv) ...</k>
        <tenv> TEnv
-        => TEnv[X <- (forall #metaKVariables(T) -Set #metaKVariables(tenv(TEnv))) #freezeKVariables(T, tenv(TEnv)):>Type]
+        => TEnv[X <- (forall #metaKVariables(T) -Set #metaKVariables(setTenv(TEnv))) #freezeKVariables(T, setTenv(TEnv))]
        </tenv>
   rule <k> X:Id => #renameMetaKVariables(T, Tvs) ...</k>
        <tenv>... X |-> (forall Tvs) T ...</tenv>
 
   rule letrec F X = E in E' => let F = mu F . lambda X . E in E'        [macro]
-  rule <k> mu X:Id . E:Exp => (?T:Type -> ?T) E ~> tenv(TEnv) ...</k>
+  rule <k> mu X:Id . E:Exp => (?T:Type -> ?T) E ~> setTenv(TEnv) ...</k>
        <tenv> TEnv => TEnv[X <- ?T] </tenv>
 
   syntax KItem ::= Type "=" Type
   rule T = T => .
 
-  syntax KItem ::= tenv(Map)
-  rule <k> T:Type ~> (tenv(TEnv) => .) ...</k>  <tenv> _ => TEnv </tenv>
+  syntax KItem ::= setTenv(Map)
+  rule <k> T:Type ~> (setTenv(TEnv) => .) ...</k>  <tenv> _ => TEnv </tenv>
 endmodule

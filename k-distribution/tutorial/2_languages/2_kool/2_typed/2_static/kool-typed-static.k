@@ -167,7 +167,7 @@ the wrapper in the generated documentation, we associate it an
                > Exp "=" Exp             [strict(2), right]
 
   syntax Exp ::= FieldReference | ArrayReference
-  syntax priority _._ > _[_] > _(_)
+  syntax priority _.__KOOL-TYPED-STATIC-SYNTAX > _[_]_KOOL-TYPED-STATIC-SYNTAX > _(_)_KOOL-TYPED-STATIC-SYNTAX
 
   syntax Exps ::= List{Exp,","}          [strict]
 
@@ -263,21 +263,21 @@ in the class extends relation. */
                       <k color="green"> $PGM:Stmts </k>
                       <tenv multiplicity="?" color="cyan"> .Map </tenv>
                       <ctenvT multiplicity="?" color="blue"> .Map </ctenvT>
-                      <return multiplicity="?" color="black"> void </return>
+                      <returnType multiplicity="?" color="black"> void </returnType>
                       <inClass multiplicity="?" color="Fuchsia"> .K </inClass>
                     </task>
                   </tasks>
 //                  <br/>
                   <classes color="Fuchsia">
-                    <class multiplicity="*">
+                    <classData multiplicity="*">
                       <className color="Fuchsia"> Object </className>
-                      <extends color="Fuchsia"> .K </extends>
-                      <extendsAll color="Fuchsia"> .Set </extendsAll>
+                      <baseClass color="Fuchsia"> .K </baseClass>
+                      <baseClasses color="Fuchsia"> .Set </baseClasses>
                       <ctenv multiplicity="?" color="blue"> .Map </ctenv>
-                    </class>
+                    </classData>
                   </classes>
                 </T>
-                <out color="brown" stream="stdout"> .List </out>
+                <output color="brown" stream="stdout"> .List </output>
 
 /*@ \subsection{Unchanged semantics from statically typed SIMPLE}
 
@@ -285,6 +285,7 @@ The syntax and rules below are borrowed unchanged from statically
 typed SIMPLE, so we do not discuss them much here. */
 
   syntax Exp ::= Type
+  syntax Exps ::= Types
   syntax BlockOrStmtType ::= "block" | "stmt"
   syntax Type ::= BlockOrStmtType
   syntax Block ::= BlockOrStmtType
@@ -292,7 +293,7 @@ typed SIMPLE, so we do not discuss them much here. */
                    | Types  // TODO: should not be needed
 
 
-  context _:Type _:>Exp[HOLE:>Exps];
+  context _:Type _::Exp[HOLE::Exps];
 
   rule T:Type E:Exp[int,Ts:Types]; => T[] E[Ts];  [structural]
   rule T:Type E:Exp[.Types]; => T E;          [structural]
@@ -344,7 +345,7 @@ typed SIMPLE, so we do not discuss them much here. */
   context (HOLE => ltype(HOLE)) = _
 
 
-  rule <k> return; => stmt ...</k> <return> _ </return>
+  rule <k> return; => stmt ...</k> <returnType> _ </returnType>
 
 
   rule {} => block
@@ -438,9 +439,9 @@ at the end of this module). */
        <ctenvT>... X |-> _ ...</ctenvT>
        <inClass> C:Id </inClass>
 //       <br/>
-       <out>... .List => ListItem("Member \"" +String Id2String(X)
+       <output>... .List => ListItem("Member \"" +String Id2String(X)
                               +String "\" declared twice in class \""
-                              +String Id2String(C) +String "\"!\n") </out>
+                              +String Id2String(C) +String "\"!\n") </output>
     [structural]
 
 
@@ -467,13 +468,13 @@ for example, inside other methods). */
        <inClass> C </inClass>
        <ctenvT> _ </ctenvT> // to ensure we are in a class pass
        <className> C </className>
-       <extends> C' </extends>
+       <baseClass> C' </baseClass>
 //       <br/>
        (.Bag => <task>
                <k> mkDecls(Ps) S </k>
                <inClass> C </inClass>
                <tenv> .Map </tenv>
-               <return> T </return>
+               <returnType> T </returnType>
              </task>)
     [structural]
 
@@ -498,7 +499,7 @@ arguments:  */
 methods: */
 
   rule <k> return T:Type; => checkSubtype(T,T') ~> stmt ...</k>
-       <return> T':Type </return>
+       <returnType> T':Type </returnType>
 
 
 /*@ \subsubsection{Exceptions}
@@ -547,10 +548,10 @@ instance of this rule). */
 
 // TODO: the following fails krun; see #2117
   rule <task> <k> class C:Id extends C':Id { S:Stmts } => stmt ...</k> </task>
-       (.Bag => <class>...
+       (.Bag => <classData>...
                <className> C </className>
-               <extends> C' </extends>
-             ...</class>)
+               <baseClass> C' </baseClass>
+             ...</classData>)
 //       <br/>
        (.Bag => <task>
                 <k> checkType(class(C')) ~> S </k>
@@ -572,10 +573,10 @@ syntax Type ::= "stmtStop"
              </task>)
        ...</tasks>
        <classes>...
-       .Bag => <class>...
+       .Bag => <classData>...
                <className> C </className>
-               <extends> C' </extends>
-             ...</class>
+               <baseClass> C' </baseClass>
+             ...</classData>
        ...</classes>
 //       <br/>
   [structural]
@@ -587,8 +588,8 @@ syntax Type ::= "stmtStop"
           <className> C </className>
           <className> C </className>
         ...</T> => .Bag)
-       <out>... .List => ListItem("Class \"" +String Id2String(C)
-                                  +String "\" declared twice!\n") </out>
+       <output>... .List => ListItem("Class \"" +String Id2String(C)
+                                  +String "\" declared twice!\n") </output>
     [structural]
 
 /*@ \paragraph{Check for cycles in class hierarchy}
@@ -599,21 +600,21 @@ cell.  The first rule below initiates the transitive closure of the
 superclass relation, the second transitively closes it, and the third
 checks for cycles. */
 
-  rule <extends> C </extends>
-       <extendsAll> .Set => SetItem(C) </extendsAll>  [structural]
+  rule <baseClass> C </baseClass>
+       <baseClasses> .Set => SetItem(C) </baseClasses>  [structural]
 
-  rule <class>...
-         <extendsAll> SetItem(C) Cs:Set (.Set => SetItem(C')) </extendsAll>
-       ...</class>
-       <class>... <className>C</className> <extends>C'</extends> ...</class>
+  rule <classData>...
+         <baseClasses> SetItem(C) Cs:Set (.Set => SetItem(C')) </baseClasses>
+       ...</classData>
+       <classData>... <className>C</className> <baseClass>C'</baseClass> ...</classData>
     when notBool(C' in (SetItem(C) Cs))  [structural]
 
   rule (<T>...
           <className> C </className>
-          <extendsAll>... SetItem(C) ...</extendsAll>
+          <baseClasses>... SetItem(C) ...</baseClasses>
         ...</T> => .Bag)
-       <out>... .List => ListItem("Class \"" +String Id2String(C)
-                                  +String "\" is in a cycle!\n") </out>
+       <output>... .List => ListItem("Class \"" +String Id2String(C)
+                                  +String "\" is in a cycle!\n") </output>
     [inheritance-cycle]
 
 
@@ -648,7 +649,7 @@ Note that for typing concerns, super can be considered as an object
    rule <k> super => class(C') ...</k>
         <inClass> C:Id </inClass>
         <className> C </className>
-        <extends> C':Id </extends>
+        <baseClass> C':Id </baseClass>
 
 
 /*@ \subsubsection{Object member access}
@@ -697,16 +698,16 @@ wait.  Finally, the sixth rule below reports an error when the
 
   rule <k> class(C1:Id => C2) . X:Id ...</k>
        <className> C1 </className>
-       <extends> C2:Id </extends>
+       <baseClass> C2:Id </baseClass>
        <ctenv> Rho </ctenv>
     when notBool(X in keys(Rho))  [structural]
 
   rule <k> class(Object) . X:Id => stuck(class(Object) . X) ...</k>
        <inClass> C:Id </inClass>
 //      <br/>
-       <out>... .List => ListItem("Member \"" +String Id2String(X)
+       <output>... .List => ListItem("Member \"" +String Id2String(X)
                               +String "\" not declared! (see class \""
-                              +String Id2String(C) +String "\")\n") </out>
+                              +String Id2String(C) +String "\")\n") </output>
     [structural]
 
 
@@ -722,22 +723,22 @@ of the language need to insert runtime checks for downcasting to be safe. */
   rule (C:Id) class(C) => class(C)
   rule <k> (C2:Id) class(C1:Id) => class(C2) ...</k>
        <className> C1 </className>
-       <extendsAll>...SetItem(C2)...</extendsAll>    // upcast
+       <baseClasses>...SetItem(C2)...</baseClasses>    // upcast
   rule <k> (C2:Id) class(C1:Id) => class(C2) ...</k>
        <className> C2 </className>
-       <extendsAll>...SetItem(C1)...</extendsAll>    // downcast
+       <baseClasses>...SetItem(C1)...</baseClasses>    // downcast
   rule <k> (C2) class(C1:Id) => stuck((C2) class(C1)) ...</k>
-       <class>...
+       <classData>...
          <className> C1 </className>
-         <extendsAll> S1 </extendsAll>
-       ...</class>
-       <class>...
+         <baseClasses> S1 </baseClasses>
+       ...</classData>
+       <classData>...
          <className> C2 </className>
-         <extendsAll> S2 </extendsAll>
-       ...</class>
-       <out>... .List => ListItem("Classes \"" +String Id2String(C1)
+         <baseClasses> S2 </baseClasses>
+       ...</classData>
+       <output>... .List => ListItem("Classes \"" +String Id2String(C1)
                               +String "\" and \"" +String Id2String(C2)
-                              +String "\" are incompatible!\n") </out>
+                              +String "\" are incompatible!\n") </output>
     when notBool(C1 in S2) andBool notBool(C2 in S1)
     [transition]
     // ugly solution to avoid non-confluence (rule may apply before
@@ -765,7 +766,7 @@ the \textsf{tasks} cell has been removed. */
 
   rule <task> <k> stmt => new Main(.Exps); </k>
               (.Bag => <tenv> .Map </tenv>
-                    <return> void </return>
+                    <returnType> void </returnType>
                     <inClass> Main </inClass>)
        </task>
     [structural]
@@ -792,7 +793,7 @@ the \textsf{tasks} cell has been removed. */
 // cleanup tasks and output a success message when done
 
   rule (<T>... <tasks> .Bag </tasks> ...</T> => .Bag)
-       <out>... .List => ListItem("Type checked!\n") </out>
+       <output>... .List => ListItem("Type checked!\n") </output>
     [structural]
 
 
@@ -808,7 +809,7 @@ The subclass relation introduces a subtyping relation.  */
 
   rule <k> checkSubtype(class(C:Id), class(C':Id)) => . ...</k>
        <className> C </className>
-       <extendsAll>... SetItem(C') ...</extendsAll>  [structural]
+       <baseClasses>... SetItem(C') ...</baseClasses>  [structural]
 
   rule checkSubtype(Ts1->T2,Ts1'->T2')
     => checkSubtype(((T2)::Type,Ts1'),((T2')::Type,Ts1))  [structural]
@@ -864,7 +865,7 @@ is co-variant in the codomain and contra-variant in the domain). */
 
   rule <k> checkMethod(F:Id, T:Type, (C:Id => C')) ...</k>
        <className> C </className>
-       <extends> C':Id </extends>
+       <baseClass> C':Id </baseClass>
        <ctenv> Rho </ctenv>
     when notBool(F in keys(Rho))  [structural]
 

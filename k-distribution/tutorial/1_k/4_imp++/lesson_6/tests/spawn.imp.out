@@ -1,36 +1,35 @@
-Solution 1
-Out ==K "x = 11\n"
- AND Store ==K ( 1 |-> 11 )
-Solution 2
-Out ==K "x = 11\n"
- AND Store ==K ( 1 |-> 21 )
-Solution 3
-Out ==K "x = 11\n"
- AND Store ==K ( 1 |-> 33 )
-Solution 4
-Out ==K "x = 16\n"
- AND Store ==K ( 1 |-> 16 )
-Solution 5
-Out ==K "x = 21\n"
- AND Store ==K ( 1 |-> 21 )
-Solution 6
-Out ==K "x = 23\n"
- AND Store ==K ( 1 |-> 11 )
-Solution 7
-Out ==K "x = 23\n"
- AND Store ==K ( 1 |-> 16 )
-Solution 8
-Out ==K "x = 23\n"
- AND Store ==K ( 1 |-> 21 )
-Solution 9
-Out ==K "x = 23\n"
- AND Store ==K ( 1 |-> 33 )
-Solution 10
-Out ==K "x = 33\n"
- AND Store ==K ( 1 |-> 11 )
-Solution 11
-Out ==K "x = 33\n"
- AND Store ==K ( 1 |-> 16 )
-Solution 12
-Out ==K "x = 33\n"
- AND Store ==K ( 1 |-> 33 )
+  Out ==K "x = 11\n" #And
+  Store ==K ( 1 |-> 11 )
+#Or
+  Out ==K "x = 11\n" #And
+  Store ==K ( 1 |-> 21 )
+#Or
+  Out ==K "x = 11\n" #And
+  Store ==K ( 1 |-> 33 )
+#Or
+  Out ==K "x = 16\n" #And
+  Store ==K ( 1 |-> 16 )
+#Or
+  Out ==K "x = 21\n" #And
+  Store ==K ( 1 |-> 21 )
+#Or
+  Out ==K "x = 23\n" #And
+  Store ==K ( 1 |-> 11 )
+#Or
+  Out ==K "x = 23\n" #And
+  Store ==K ( 1 |-> 16 )
+#Or
+  Out ==K "x = 23\n" #And
+  Store ==K ( 1 |-> 21 )
+#Or
+  Out ==K "x = 23\n" #And
+  Store ==K ( 1 |-> 33 )
+#Or
+  Out ==K "x = 33\n" #And
+  Store ==K ( 1 |-> 11 )
+#Or
+  Out ==K "x = 33\n" #And
+  Store ==K ( 1 |-> 16 )
+#Or
+  Out ==K "x = 33\n" #And
+  Store ==K ( 1 |-> 33 )

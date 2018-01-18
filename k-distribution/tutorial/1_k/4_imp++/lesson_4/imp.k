@@ -4,6 +4,7 @@ module IMP-SYNTAX
   syntax AExp  ::= Int | String | Id
                  | "++" Id
                  | "read" "(" ")"
+                 | "-" Int
                  > AExp "/" AExp              [left, strict, division]
                  > AExp "+" AExp              [left, strict]
                  | "(" AExp ")"               [bracket]
@@ -27,6 +28,7 @@ module IMP-SYNTAX
 
   syntax Ids   ::= List{Id,","}
   syntax AExps ::= List{AExp,","}
+  syntax AExps ::= Ids
 endmodule
 
 
@@ -38,8 +40,8 @@ module IMP
                   <k color="green"> $PGM:Stmt </k>
                   <env color="LightSkyBlue"> .Map </env>
                   <store color="red"> .Map </store>
-                  <in color="magenta" stream="stdin"> .List </in>
-                  <out color="Orchid" stream="stdout"> .List </out>
+                  <input color="magenta" stream="stdin"> .List </input>
+                  <output color="Orchid" stream="stdout"> .List </output>
                 </T>
 
 // AExp
@@ -50,9 +52,10 @@ module IMP
        <env>... X |-> N ...</env>
        <store>... N |-> (I => I +Int 1) ...</store>  [increment]
   rule <k> read() => I ...</k>
-       <in> ListItem(I:Int) => .List ...</in>
+       <input> ListItem(I:Int) => .List ...</input>
   rule I1 / I2 => I1 /Int I2  when I2 =/=Int 0
   rule I1 + I2 => I1 +Int I2
+  rule - I => 0 -Int I
   rule Str1 + Str2 => Str1 +String Str2
 // BExp
   rule I1 <= I2 => I1 <=Int I2
@@ -82,6 +85,6 @@ module IMP
   syntax AExp ::= Printable
   context print(HOLE:AExp, _);
   rule <k> print(P:Printable,AEs => AEs); ...</k>
-       <out>... .List => ListItem(P) </out>
+       <output>... .List => ListItem(P) </output>
   rule print(.AExps); => .  [structural]
 endmodule

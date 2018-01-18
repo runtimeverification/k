@@ -3,7 +3,7 @@ require "kast.k"
 
 module DOMAINS-SYNTAX
   imports ID
-  imports INT-SYNTAX
+  imports UNSIGNED-INT-SYNTAX
   imports BOOL-SYNTAX
   imports STRING-SYNTAX
 endmodule
@@ -308,8 +308,13 @@ module BOOL
 
 endmodule
 
-module INT-SYNTAX
+module UNSIGNED-INT-SYNTAX
   syntax Int [hook(INT.Int)]
+  syntax Int ::= r"[0-9]+" [prefer, token, prec(2)]
+endmodule
+
+module INT-SYNTAX
+  imports UNSIGNED-INT-SYNTAX
   syntax Int ::= r"[\\+-]?[0-9]+" [prefer, token, prec(2)]
 endmodule
 
@@ -595,7 +600,7 @@ module K-EQUAL
                     K "==K" K           [function, smtlib(=), hook(KEQUAL.eq), klabel(_==K_), latex({#1}\mathrel{=_K}{#2}), equalEqualK]
                 | K "=/=K" K          [function, smtlib(distinct), hook(KEQUAL.ne), latex({#1}\mathrel{\neq_K}{#2}), notEqualEqualK]
 
-  syntax priorities equalEqualK notEqualEqualK > boolOperation
+  syntax priorities equalEqualK notEqualEqualK > boolOperation mlOp
   rule K1:K =/=K K2:K => notBool (K1 ==K K2)
 
   rule K1:Bool ==Bool K2:Bool => K1 ==K K2

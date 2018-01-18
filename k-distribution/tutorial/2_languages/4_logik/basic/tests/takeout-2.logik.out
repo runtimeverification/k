@@ -1,8 +1,7 @@
-Solution 1
-Solution ==K ( L:Term@LOGIK-COMMON |-> ( cons ( a , ( cons ( b , ( cons ( c , ( cons ( d , ( nil , .Terms ) ) , .Terms ) ) , .Terms ) ) , .Terms ) ) ) )
-Solution 2
-Solution ==K ( L:Term@LOGIK-COMMON |-> ( cons ( b , ( cons ( a , ( cons ( c , ( cons ( d , ( nil , .Terms ) ) , .Terms ) ) , .Terms ) ) , .Terms ) ) ) )
-Solution 3
-Solution ==K ( L:Term@LOGIK-COMMON |-> ( cons ( b , ( cons ( c , ( cons ( a , ( cons ( d , ( nil , .Terms ) ) , .Terms ) ) , .Terms ) ) , .Terms ) ) ) )
-Solution 4
-Solution ==K ( L:Term@LOGIK-COMMON |-> ( cons ( b , ( cons ( c , ( cons ( d , ( cons ( a , ( nil , .Terms ) ) , .Terms ) ) , .Terms ) ) , .Terms ) ) ) )
+  Solution ==K ( L:Term |-> ( cons ( a , ( cons ( b , ( cons ( c , ( cons ( d , ( nil , .Terms ) ) , .Terms ) ) , .Terms ) ) , .Terms ) ) ) )
+#Or
+  Solution ==K ( L:Term |-> ( cons ( b , ( cons ( a , ( cons ( c , ( cons ( d , ( nil , .Terms ) ) , .Terms ) ) , .Terms ) ) , .Terms ) ) ) )
+#Or
+  Solution ==K ( L:Term |-> ( cons ( b , ( cons ( c , ( cons ( a , ( cons ( d , ( nil , .Terms ) ) , .Terms ) ) , .Terms ) ) , .Terms ) ) ) )
+#Or
+  Solution ==K ( L:Term |-> ( cons ( b , ( cons ( c , ( cons ( d , ( cons ( a , ( nil , .Terms ) ) , .Terms ) ) , .Terms ) ) , .Terms ) ) ) )

@@ -211,11 +211,15 @@ endmodule
 
 module LOGIK-SYNTAX
   imports LOGIK-COMMON
+  imports BUILTIN-ID-TOKENS
   /*@ Variables and literals are defined as tokens following the conventions
   used in Prolog (variables start with \_ or capital letter, while literals
   start with lower case letters): */
-    syntax Term ::= Token{[\_A-Z][a-zA-Z0-9\_]*}                   [variable, onlyLabel, autoReject, token]
-    syntax Literal ::= Token{[a-z][a-zA-Z0-9\_]*}                  [onlyLabel, autoReject, token]
+  syntax #KVariable ::= r"[A-Z_][A-Za-z0-9_]*"   [token, prec(1), autoReject]
+                      | #UpperId                 [token, autoReject]
+    syntax Term ::= #KVariable [klabel(#SemanticCastToTerm)]
+    syntax Literal ::= r"[a-z][a-zA-Z0-9_]*"                 [autoReject, token]
+                     | #LowerId                              [autoReject, token]
 endmodule
 
 module LOGIK

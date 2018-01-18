@@ -4,6 +4,7 @@ module IMP-SYNTAX
   syntax AExp  ::= Int | String | Id
                  | "++" Id
                  | "read" "(" ")"
+                 | "-" Int
                  > AExp "/" AExp              [left, strict, division]
                  > AExp "+" AExp              [left, strict]
                  | "(" AExp ")"               [bracket]
@@ -27,6 +28,7 @@ module IMP-SYNTAX
 
   syntax Ids   ::= List{Id,","}
   syntax AExps ::= List{AExp,","}
+  syntax AExps ::= Ids
 endmodule
 
 
@@ -49,6 +51,7 @@ module IMP
        <store>... N |-> (I => I +Int 1) ...</store>  [increment]
   rule I1 / I2 => I1 /Int I2  when I2 =/=Int 0
   rule I1 + I2 => I1 +Int I2
+  rule - I => 0 -Int I
 // BExp
   rule I1 <= I2 => I1 <=Int I2
   rule ! T => notBool T

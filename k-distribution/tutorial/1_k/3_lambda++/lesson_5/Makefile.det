@@ -1,0 +1,7 @@
+TESTDIR=tests/deterministic
+DEFDIR=det
+include ../../1_lambda/lesson_1/Makefile
+# Some of these programs yield nondeterminism unless we kompile with the
+# superstrict "strict" option, which is done in Makefile.nondet.  We do not
+# want to kompile with the superstrict "strict" option for all programs, 
+# because it is too slow (we should check if it still is slow now).

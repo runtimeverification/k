@@ -1,2 +1,1 @@
-Solution 1
-V ==K closure ( .Map , ( Triple ( x , ( y , ( z , .Exps ) ) ) -> y ) | .Cases )
+V ==K closure ( .Map , ( Triple ( x , ( y , ( z , .GeneratedListBottom ) ) ) -> y ) | .Cases )

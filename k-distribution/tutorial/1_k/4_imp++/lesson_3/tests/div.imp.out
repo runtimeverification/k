@@ -1,10 +1,9 @@
-Solution 1
-<T> <k> . </k> <env> x |-> 1 y |-> 2 </env> <store> 1 |-> 3 2 |-> 0 </store> </T>
-Solution 2
-<T> <k> . </k> <env> x |-> 1 y |-> 2 </env> <store> 1 |-> 3 2 |-> 1 </store> </T>
-Solution 3
-<T> <k> . </k> <env> x |-> 1 y |-> 2 </env> <store> 1 |-> 3 2 |-> 2 </store> </T>
-Solution 4
-<T> <k> . </k> <env> x |-> 1 y |-> 2 </env> <store> 1 |-> 3 2 |-> 3 </store> </T>
-Solution 5
-<T> <k> ( 3 / 0 ) ~> #freezer_=_;0 ( y ) </k> <env> x |-> 1 y |-> 2 </env> <store> 1 |-> 3 2 |-> 0 </store> </T>
+  Result ==K <T> <k> ( 3 / 0 ) ~> #freezer_=_;_IMP-SYNTAX0_ ( y ) </k> <env> x |-> 1 y |-> 2 </env> <store> 1 |-> 3 2 |-> 0 </store> </T>
+#Or
+  Result ==K <T> <k> . </k> <env> x |-> 1 y |-> 2 </env> <store> 1 |-> 3 2 |-> 0 </store> </T>
+#Or
+  Result ==K <T> <k> . </k> <env> x |-> 1 y |-> 2 </env> <store> 1 |-> 3 2 |-> 1 </store> </T>
+#Or
+  Result ==K <T> <k> . </k> <env> x |-> 1 y |-> 2 </env> <store> 1 |-> 3 2 |-> 2 </store> </T>
+#Or
+  Result ==K <T> <k> . </k> <env> x |-> 1 y |-> 2 </env> <store> 1 |-> 3 2 |-> 3 </store> </T>

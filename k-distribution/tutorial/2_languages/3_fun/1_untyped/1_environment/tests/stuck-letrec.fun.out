@@ -1,2 +1,1 @@
-Solution 1
-V ==K ( x ~> #freezer_,_1 ( .Exps ) ~> #freezer_,_0 ( 2 ) ~> #freezerassignTo0 ( x , ( y , .Exps ) ) ~> y ~> env ( x |-> 1 ) ~> env ( .Map ) )
+V ==K ( x ~> #freezer_,__FUN-UNTYPED-COMMON1_ ( .GeneratedListBottom ) ~> #freezer_,__FUN-UNTYPED-COMMON0_ ( 2 ) ~> #freezerassignTo0_ ( x , ( y , .GeneratedListBottom ) ) ~> y ~> setEnv ( x |-> 1 ) ~> setEnv ( .Map ) )

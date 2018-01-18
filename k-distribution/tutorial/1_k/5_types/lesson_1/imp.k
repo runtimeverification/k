@@ -4,6 +4,7 @@ module IMP-SYNTAX
   syntax AExp  ::= Int | String | Id
                  | "++" Id
                  | "read" "(" ")"
+                 | "-" Int
                  > AExp "/" AExp              [left, strict]
                  > AExp "+" AExp              [left, strict]
                  > "spawn" Block              [strict]
@@ -28,6 +29,7 @@ module IMP-SYNTAX
   syntax Ids   ::= List{Id,","}
   syntax AExps ::= List{AExp,","}
   syntax Stmts ::= List{Stmt,""}              [strict(1)]
+  syntax AExps ::= Ids
 endmodule
 
 
@@ -55,6 +57,7 @@ module IMP
   syntax AExp ::= Type
   rule int / int => int
   rule int + int => int
+  rule - _ => int
   rule string + string => string
 
   rule spawn block => int

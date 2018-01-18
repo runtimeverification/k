@@ -7,11 +7,12 @@ import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.ParametersDelegate;
 import com.google.inject.Inject;
 import org.apache.commons.lang3.tuple.Pair;
-import org.kframework.ktest.ExecNames;
 import org.kframework.main.GlobalOptions;
 import org.kframework.rewriter.SearchType;
 import org.kframework.unparser.OutputModes;
+import org.kframework.utils.OS;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.BaseEnumConverter;
 import org.kframework.utils.options.DefinitionLoadingOptions;
@@ -61,9 +62,8 @@ public final class KRunOptions {
         @Parameter(names={"--parser"}, description="Command used to parse programs. Default is \"kast\"")
         public String parser;
 
-        private static String kastBinary = ExecNames.getExecutable("kast");
-
-        public String parser(String mainModuleName) {
+        public String parser(String mainModuleName, FileUtil files) {
+            String kastBinary = getKast(files);
             if (parser == null) {
                 if (term()) {
                     return kastBinary + " -m " + mainModuleName;
@@ -84,7 +84,8 @@ public final class KRunOptions {
         @DynamicParameter(names={"--config-var", "-c"}, description="Specify values for variables in the configuration.")
         private Map<String, String> configVars = new HashMap<>();
 
-        public Map<String, Pair<String, String>> configVars(String mainModuleName) {
+        public Map<String, Pair<String, String>> configVars(String mainModuleName, FileUtil files) {
+            String kastBinary = getKast(files);
             Map<String, Pair<String, String>> result = new HashMap<>();
             for (Map.Entry<String, String> entry : configVars.entrySet()) {
                 String cfgParser = kastBinary + " -m " + mainModuleName + " -e";
@@ -97,7 +98,7 @@ public final class KRunOptions {
                 if (configVars.containsKey("PGM")) {
                     throw KEMException.criticalError("Cannot specify both -cPGM and a program to parse.");
                 }
-                result.put("PGM", Pair.of(pgm(), parser(mainModuleName)));
+                result.put("PGM", Pair.of(pgm(), parser(mainModuleName, files)));
             }
             if (configVars.containsKey("STDIN") || configVars.containsKey("IO")) {
                 throw KEMException.criticalError("Cannot specify -cSTDIN or -cIO which are reserved for the builtin K-IO module.");
@@ -117,6 +118,14 @@ public final class KRunOptions {
             }
             return term;
         }
+    }
+
+    private static String getKast(FileUtil files) {
+        String binary = "kast";
+        if (OS.current() == OS.WINDOWS) {
+            binary = "kast.bat";
+        }
+        return files.resolveKBase("bin/" + binary).getAbsolutePath();
     }
 
     @Parameter(names="--io", description="Use real IO when running the definition. Defaults to true.", arity=1,

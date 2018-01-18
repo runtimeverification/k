@@ -1,2 +1,1 @@
-Solution 1
-V ==K ( Pair ( Pair ( 1 , ( Wrapper ( 2 , .Exps ) , .Exps ) ) , ( Pair ( 3 , ( 4 , .Exps ) ) , .Exps ) ) )
+V ==K ( Pair ( Pair ( 1 , ( Wrapper ( 2 , .GeneratedListBottom ) , .GeneratedListBottom ) ) , ( Pair ( 3 , ( 4 , .GeneratedListBottom ) ) , .GeneratedListBottom ) ) )

@@ -1,2 +1,1 @@
-Solution 1
-Solution ==K ( A:Term@LOGIK-COMMON |-> V0 B:Term@LOGIK-COMMON |-> V1 C:Term@LOGIK-COMMON |-> V0 )
+Solution ==K ( A:Term |-> V0 B:Term |-> V1 C:Term |-> V0 )

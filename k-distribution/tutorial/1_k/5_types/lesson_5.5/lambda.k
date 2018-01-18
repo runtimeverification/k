@@ -15,7 +15,7 @@ module LAMBDA
                | "let" Id "=" Exp "in" Exp          [strict(2)]
                | "letrec" Id Id "=" Exp "in" Exp
   syntax Type ::= "int" | "bool"
-                | Type "->" Type                    [strict(2)]
+                | Type "->" Type
                 | "(" Type ")"                      [bracket]
 
   syntax Exp ::= Type
@@ -41,7 +41,8 @@ module LAMBDA
   rule int <= int => bool
   rule if bool then T:Type else T => T
   syntax KItem ::= env(Map)
-  rule <k> lambda X:Id . E:Exp => ?T:Type -> (E)::K ~> env(TEnv) ...</k>
+  syntax Exp ::= Exp "->" Exp                  [strict]
+  rule <k> lambda X:Id . E:Exp => ?T:Type -> E ~> env(TEnv) ...</k>
        <tenv> TEnv:Map => TEnv[X <- ?T] </tenv>
   rule <k> mu X:Id . E:Exp => (?T:Type -> ?T) E ~> env(TEnv) ...</k>
        <tenv> TEnv:Map => TEnv[X <- ?T] </tenv>

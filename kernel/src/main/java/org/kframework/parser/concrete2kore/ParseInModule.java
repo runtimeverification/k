@@ -14,9 +14,8 @@ import org.kframework.parser.concrete2kore.disambiguation.ApplyTypeCheckVisitor;
 import org.kframework.parser.concrete2kore.disambiguation.CorrectCastPriorityVisitor;
 import org.kframework.parser.concrete2kore.disambiguation.CorrectKSeqPriorityVisitor;
 import org.kframework.parser.concrete2kore.disambiguation.CorrectRewritePriorityVisitor;
-import org.kframework.parser.concrete2kore.disambiguation.PreferAvoidVisitor;
 import org.kframework.parser.concrete2kore.disambiguation.PriorityVisitor;
-import org.kframework.parser.concrete2kore.disambiguation.PushAmbiguitiesDown;
+import org.kframework.parser.concrete2kore.disambiguation.PushAmbiguitiesDownAndPreferAvoid;
 import org.kframework.parser.concrete2kore.disambiguation.RemoveBracketVisitor;
 import org.kframework.parser.concrete2kore.disambiguation.TreeCleanerVisitor;
 import org.kframework.parser.concrete2kore.disambiguation.VariableTypeInferenceFilter;
@@ -96,7 +95,7 @@ public class ParseInModule implements Serializable {
      */
     public Tuple2<Either<Set<ParseFailedException>, K>, Set<ParseFailedException>>
             parseString(String input, Sort startSymbol, Source source) {
-        return parseString(input, startSymbol, null, source, 1, 1);
+        return parseString(input, startSymbol, null, source, 1, 1, true);
     }
 
     private Scanner getGrammar(Scanner scanner) {
@@ -116,9 +115,9 @@ public class ParseInModule implements Serializable {
     }
 
     public Tuple2<Either<Set<ParseFailedException>, K>, Set<ParseFailedException>>
-        parseString(String input, Sort startSymbol, Scanner scanner, Source source, int startLine, int startColumn) {
+        parseString(String input, Sort startSymbol, Scanner scanner, Source source, int startLine, int startColumn, boolean inferSortChecks) {
         final Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> result
-                = parseStringTerm(input, startSymbol, scanner, source, startLine, startColumn);
+                = parseStringTerm(input, startSymbol, scanner, source, startLine, startColumn, inferSortChecks);
         Either<Set<ParseFailedException>, K> parseInfo;
         if (result._1().isLeft()) {
             parseInfo = Left.apply(result._1().left().get());
@@ -143,7 +142,7 @@ public class ParseInModule implements Serializable {
      * @return
      */
     private Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>>
-            parseStringTerm(String input, Sort startSymbol, Scanner scanner, Source source, int startLine, int startColumn) {
+            parseStringTerm(String input, Sort startSymbol, Scanner scanner, Source source, int startLine, int startColumn, boolean inferSortChecks) {
         scanner = getGrammar(scanner);
 
         Grammar.NonTerminal startSymbolNT = grammar.get(startSymbol.name());
@@ -180,13 +179,12 @@ public class ParseInModule implements Serializable {
         rez = new PriorityVisitor(disambModule.priorities(), disambModule.leftAssoc(), disambModule.rightAssoc()).apply(rez.right().get());
         if (rez.isLeft())
             return new Tuple2<>(rez, warn);
-        Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rez2 = new VariableTypeInferenceFilter(disambModule.subsorts(), disambModule.definedSorts(), disambModule.productionsFor(), strict).apply(rez.right().get());
+        Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rez2 = new VariableTypeInferenceFilter(disambModule.subsorts(), disambModule.definedSorts(), disambModule.productionsFor(), strict && inferSortChecks).apply(rez.right().get());
         if (rez2._1().isLeft())
             return rez2;
         warn = rez2._2();
 
-        Term rez3 = new PushAmbiguitiesDown().apply(rez2._1().right().get());
-        rez3 = new PreferAvoidVisitor().apply(rez3);
+        Term rez3 = new PushAmbiguitiesDownAndPreferAvoid().apply(rez2._1().right().get());
         rez2 = new AmbFilter().apply(rez3);
         warn = Sets.union(rez2._2(), warn);
         rez2 = new AddEmptyLists(disambModule).apply(rez2._1().right().get());

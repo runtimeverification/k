@@ -1,0 +1,4 @@
+lambda x . (
+  let y = lambda z . x
+  in if (y true) then (y 1) else (y (lambda x . x))
+)

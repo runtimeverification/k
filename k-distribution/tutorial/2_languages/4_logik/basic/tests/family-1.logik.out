@@ -1,20 +1,19 @@
-Solution 1
-Solution ==K ( X:Term@LOGIK-COMMON |-> david A:Term@LOGIK-COMMON |-> jim B:Term@LOGIK-COMMON |-> john )
-Solution 2
-Solution ==K ( X:Term@LOGIK-COMMON |-> david A:Term@LOGIK-COMMON |-> nathan B:Term@LOGIK-COMMON |-> john )
-Solution 3
-Solution ==K ( X:Term@LOGIK-COMMON |-> david A:Term@LOGIK-COMMON |-> steve B:Term@LOGIK-COMMON |-> john )
-Solution 4
-Solution ==K ( X:Term@LOGIK-COMMON |-> jim A:Term@LOGIK-COMMON |-> nathan B:Term@LOGIK-COMMON |-> david )
-Solution 5
-Solution ==K ( X:Term@LOGIK-COMMON |-> jim A:Term@LOGIK-COMMON |-> nathan B:Term@LOGIK-COMMON |-> john )
-Solution 6
-Solution ==K ( X:Term@LOGIK-COMMON |-> jim A:Term@LOGIK-COMMON |-> steve B:Term@LOGIK-COMMON |-> david )
-Solution 7
-Solution ==K ( X:Term@LOGIK-COMMON |-> jim A:Term@LOGIK-COMMON |-> steve B:Term@LOGIK-COMMON |-> john )
-Solution 8
-Solution ==K ( X:Term@LOGIK-COMMON |-> steve A:Term@LOGIK-COMMON |-> nathan B:Term@LOGIK-COMMON |-> david )
-Solution 9
-Solution ==K ( X:Term@LOGIK-COMMON |-> steve A:Term@LOGIK-COMMON |-> nathan B:Term@LOGIK-COMMON |-> jim )
-Solution 10
-Solution ==K ( X:Term@LOGIK-COMMON |-> steve A:Term@LOGIK-COMMON |-> nathan B:Term@LOGIK-COMMON |-> john )
+  Solution ==K ( A:Term |-> jim B:Term |-> john X:Term |-> david )
+#Or
+  Solution ==K ( A:Term |-> nathan B:Term |-> david X:Term |-> jim )
+#Or
+  Solution ==K ( A:Term |-> nathan B:Term |-> david X:Term |-> steve )
+#Or
+  Solution ==K ( A:Term |-> nathan B:Term |-> jim X:Term |-> steve )
+#Or
+  Solution ==K ( A:Term |-> nathan B:Term |-> john X:Term |-> david )
+#Or
+  Solution ==K ( A:Term |-> nathan B:Term |-> john X:Term |-> jim )
+#Or
+  Solution ==K ( A:Term |-> nathan B:Term |-> john X:Term |-> steve )
+#Or
+  Solution ==K ( A:Term |-> steve B:Term |-> david X:Term |-> jim )
+#Or
+  Solution ==K ( A:Term |-> steve B:Term |-> john X:Term |-> david )
+#Or
+  Solution ==K ( A:Term |-> steve B:Term |-> john X:Term |-> jim )

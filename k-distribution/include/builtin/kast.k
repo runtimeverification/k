@@ -76,6 +76,12 @@ module KSEQ-SYMBOLIC
   syntax KBott      ::= #KVariable
   syntax KBott      ::= KConfigVar
   syntax KLabel     ::= #KVariable
+
+  syntax #Pattern ::= "#True" [klabel(#True)]
+  syntax #Pattern ::= "#False" [klabel(#False)]
+  syntax #Pattern ::= K
+                    | #Pattern "#And" #Pattern [klabel(#And), assoc, comm, unit(#True), mlOp, format(%1 %2%n%3)]
+                    > #Pattern "#Or" #Pattern [klabel(#Or), assoc, comm, unit(#False), mlOp, format(%i%1%d%n%2%n%i%3%d)]
 endmodule
 
 module KCELLS

@@ -1,2 +1,1 @@
-Solution 1
-V ==K closure ( f02 |-> 3 f01 |-> 2 f00 |-> 1 f03 |-> 4 , ( x -> ( f03 ( f03 x ) ) ) | .Cases )
+V ==K closure ( f00 |-> 1 f01 |-> 2 f02 |-> 3 f03 |-> 4 , ( x -> ( f03 ( f03 x ) ) ) | .Cases )

@@ -4,6 +4,7 @@ package org.kframework.backend.java.kil;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import org.apache.commons.lang3.tuple.Pair;
+import org.kframework.attributes.Att;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Constants;
@@ -73,8 +74,8 @@ public class Variable extends Term implements org.kframework.kore.KVariable {
      * @param anonymous
      * @param ordinal   a unique index identifying the variable
      */
-    public Variable(String name, Sort sort, boolean anonymous, int ordinal) {
-        super(Kind.of(sort));
+    public Variable(String name, Sort sort, boolean anonymous, int ordinal, Att att) {
+        super(Kind.of(sort), anonymous ? att.add("anonymous") : att);
 
         assert name != null && sort != null;
 
@@ -85,7 +86,15 @@ public class Variable extends Term implements org.kframework.kore.KVariable {
     }
 
     public Variable(String name, Sort sort) {
-        this(name, sort, false, -1);
+        this(name, sort, false);
+    }
+
+    public Variable(String name, Sort sort, boolean anonymous) {
+        this(name, sort, anonymous, -1);
+    }
+
+    public Variable(String name, Sort sort, boolean anonymous, int ordinal) {
+        this(name, sort, anonymous, ordinal, Att.empty());
     }
 
     public Variable(String name, Sort sort, int ordinal) {

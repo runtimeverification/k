@@ -147,6 +147,8 @@ the list is on a position which can be evaluated: */
   syntax Exp ::= Int | Bool | String | Name
                | "(" Exp ")"                       [bracket]
   syntax Exps  ::= List{Exp,","}                   [strict]
+  syntax Val
+  syntax Vals ::= List{Val,","}
 
 /*@ We next define the syntax of arithmetic constructs, together with
 their relative priorities and left-/non-associativities.  We also
@@ -199,6 +201,7 @@ function case pattern. */
   syntax Exp ::= "[" Exps "]"                             [strict]
                | "cons" |  "head" | "tail" | "null?"
                | "[" Exps "|" Exp "]"
+  syntax Val ::= "[" Vals "]"
 
 /*@ Data constructors start with capital letters and they may or may
 not have arguments.  We need to use the attribute ``prefer'' to make
@@ -212,6 +215,7 @@ not the constuctor name itsef. */
   syntax ConstructorName
   syntax Exp ::= ConstructorName
                | ConstructorName "(" Exps ")"    [prefer, strict(2)]
+  syntax Val ::= ConstructorName "(" Vals ")"
 
 /*@ A function is essentially a ``\texttt{|}''-separated ordered
 sequence of cases, each case of the form ``\verb|pattern -> expression|'',
@@ -328,10 +332,11 @@ a constructor for function types:  */
                 | Type "-->" Type                            [right]
                 | "(" Type ")"                             [bracket]
                 | TypeVar
-                | TypeName             [klabel(TypeName), onlyLabel]
-                | Type TypeName   [klabel(Type-TypeName), onlyLabel]
+                | TypeName             [klabel(TypeName), avoid]
+                | Type TypeName   [klabel(Type-TypeName)]
                 | "(" Types ")" TypeName                    [prefer]
   syntax Types ::= List{Type,","}
+  syntax Types ::= TypeVars
 
   syntax TypeCase ::= ConstructorName
                     | ConstructorName "(" Types ")"
@@ -340,14 +345,16 @@ a constructor for function types:  */
 
 //@ \subsection{Additional Priorities}
 
-  syntax priorities @_
-                  > __
+  syntax priorities @__FUN-UNTYPED-COMMON
+                  > ___FUN-UNTYPED-COMMON
                   > arith
-                  > _:=_
-                  > let_in_ letrec_in_ if_then_else_
-                  > _;_
-                  > fun_
-                  > datatype_=__
+                  > _:=__FUN-UNTYPED-COMMON
+                  > let_in__FUN-UNTYPED-COMMON
+                    letrec_in__FUN-UNTYPED-COMMON
+                    if_then_else__FUN-UNTYPED-COMMON
+                  > _;__FUN-UNTYPED-COMMON
+                  > fun__FUN-UNTYPED-COMMON
+                  > datatype_=___FUN-UNTYPED-COMMON
 endmodule
 
 module FUN-UNTYPED-MACROS
@@ -394,11 +401,13 @@ endmodule
 
 module FUN-UNTYPED-SYNTAX
   imports FUN-UNTYPED-COMMON
+  imports BUILTIN-ID-TOKENS
 
-  syntax Name ::= Token{[a-z][\_a-zA-Z0-9]*}            [onlyLabel, autoReject, token]
-  syntax ConstructorName ::= Token{[A-Z][a-zA-Z0-9]*}   [onlyLabel, autoReject, token]
-  syntax TypeVar  ::= Token{[\'][a-z][\_a-zA-Z0-9]*}    [onlyLabel, autoReject, token]
-  syntax TypeName ::= Token{[a-z][\_a-zA-Z0-9]*}        [onlyLabel, autoReject, token]
+  syntax Name ::= r"[a-z][_a-zA-Z0-9]*"           [autoReject, token, prec(2)]
+                | #LowerId                        [autoReject, token]
+  syntax ConstructorName ::= #UpperId             [autoReject, token]
+  syntax TypeVar  ::= r"['][a-z][_a-zA-Z0-9]*"    [autoReject, token]
+  syntax TypeName ::= Name                        [autoReject, token]
 endmodule
 
 
@@ -433,8 +442,8 @@ We only define integers, Booleans and strings as values here, but will
 add more values later.  */
 
   syntax Val ::= Int | Bool | String
-  syntax Vals ::= List{Val,","}
   syntax Exp ::= Val
+  syntax Exps ::= Vals
   syntax KResult ::= Val
 
 
@@ -487,8 +496,8 @@ value, but we do not need that level of detail here), and also that
 \texttt{cons} applied to a value is a value (specifically, it would be
 a function/closure value that expects the second, list argument): */
 
-  syntax Val ::= "cons" | "[" Vals "]"
-  rule isVal@FUN-UNTYPED(cons V:Val) => true
+  rule isVal(cons) => true
+  rule isVal(cons V:Val) => true
   rule cons V:Val [Vs:Vals] => [V,Vs]
 
 
@@ -497,7 +506,6 @@ a function/closure value that expects the second, list argument): */
 Constructors take values as arguments and produce other values: */
 
   syntax Val ::= ConstructorName
-               | ConstructorName "(" Vals ")"
 
 /*@ \subsection{Functions and Closures}
 
@@ -535,11 +543,11 @@ to the next one. */
 
   rule (. => getMatching(P, V)) ~> closure(_, P->_ | _) V:Val
   rule <k> matchResult(M:Map) ~> closure(Rho, _->E | _) _
-           => bindMap(M) ~> E ~> env(Rho') ...</k>
+           => bindMap(M) ~> E ~> setEnv(Rho') ...</k>
        <env> Rho' => Rho </env>
   rule (matchFailure => .) ~> closure(_, (_->_ | Cs:Cases => Cs)) _
 //  rule <k> closure(Rho, P->E | _) V:Val
-//           => bindMap(getMatching(P,V)) ~> E ~> env(Rho') ...</k>
+//           => bindMap(getMatching(P,V)) ~> E ~> setEnv(Rho') ...</k>
 //       <env> Rho' => Rho </env>  when isMatching(P,V)
 //  rule closure(_, (P->_ | Cs:Cases => Cs)) V:Val  when notBool isMatching(P,V)
 
@@ -585,11 +593,11 @@ $\textit{F} \mapsto \textit{L}$; this way, the closure can invoke
 itself). */
 
   rule <k> let Bs in E
-        => bindTo(names(Bs),exps(Bs)) ~> E ~> env(Rho) ...</k>
+        => bindTo(names(Bs),exps(Bs)) ~> E ~> setEnv(Rho) ...</k>
        <env> Rho </env>
 
   rule <k> letrec Bs in E
-        => bind(names(Bs))~>assignTo(names(Bs),exps(Bs))~>E~>env(Rho)...</k>
+        => bind(names(Bs))~>assignTo(names(Bs),exps(Bs))~>E~>setEnv(Rho)...</k>
        <env> Rho </env>
 
 /*@ Recall that our syntax allows \texttt{let} and \texttt{letrec} to
@@ -648,7 +656,8 @@ its argument function.  When/If invoked, the special value replaces
 the current execution context with its own and continues the execution
 normally. */
 
-  syntax Val ::= "callcc" | cc(Map,K)
+  syntax Val ::= cc(Map,K)
+  rule isVal(callcc) => true
   rule <k> (callcc V:Val => V cc(Rho,K)) ~> K </k>  <env> Rho </env>
   rule <k> cc(Rho,K) V:Val ~> _ => V ~> K </k>  <env> _ => Rho </env>
 
@@ -662,9 +671,9 @@ language in the \K tutorial and many other languages provided with the
 \K distribution.  The first ``anywhere'' rule below shows an elegant
 way to achieve the benefits of tail recursion in \K.  */
 
-  syntax KItem ::= env(Map)  // TODO: get rid of env
-  //rule (env(_) => .) ~> env(_)  [anywhere]
-  rule <k> _:Val ~> (env(Rho) => .) ...</k> <env> _ => Rho </env>
+  syntax KItem ::= setEnv(Map)  // TODO: get rid of env
+  //rule (setEnv(_) => .) ~> setEnv(_)  [anywhere]
+  rule <k> _:Val ~> (setEnv(Rho) => .) ...</k> <env> _ => Rho </env>
     [structural]
 
 /*@ \subsubsection{\texttt{bindTo}, \texttt{bind} and \texttt{assignTo}}

@@ -14,9 +14,9 @@ import java.util.stream.StreamSupport;
 public interface BitSet<T extends BitSet<?>> extends Cloneable {
 
     static BitSet apply(int length) {
-        if (length <= Long.SIZE) {
+        if (length <= Long.SIZE - 1) {
             return new OneWordBitSet();
-        } else if (length <= 4 * Long.SIZE) {
+        } else if (length <= 4 * Long.SIZE - 1) {
             return new FourWordBitSet();
         } else {
             //return new OneIntegerGenericBitSet();

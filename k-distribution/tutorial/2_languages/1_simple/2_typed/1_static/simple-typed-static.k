@@ -293,6 +293,7 @@ for the strictness and context declarations to be executable we state that
 types are results (same like we did in the IMP++ tutorial). */
 
   syntax Exp ::= Type
+  syntax Exps ::= Types
   syntax BlockOrStmtType ::= "block" | "stmt"
   syntax Type ::= BlockOrStmtType
   syntax Block ::= BlockOrStmtType
@@ -318,7 +319,7 @@ subcells. */
                     <task multiplicity="*" color="yellow">
                       <k color="green"> $PGM:Stmts </k>
                       <tenv multiplicity="?" color="cyan"> .Map </tenv>
-                      <return multiplicity="?" color="black"> void </return>
+                      <returnType multiplicity="?" color="black"> void </returnType>
                     </task>
                   </tasks>
 //                  <br/>
@@ -349,7 +350,7 @@ variable. */
     requires notBool(X in keys(Rho))
   rule <k> T:Type X:Id; => stmt ...</k> <tenv> Rho => Rho[X <- T] </tenv>
 
-  context _:Type _:>Exp[HOLE:>Exps];
+  context _:Type _::Exp[HOLE::Exps];
 // The rule below may need to sort E to Exp in the future, if the
 // parser gets stricter; without that information, it may not be able
 // to complete the LHS into T E[int,Ts],.Exps; (and similarly for the RHS)
@@ -380,7 +381,7 @@ entire code of the function body needs to type anyway. */
 
   rule <task> <k> T:Type F:Id(Ps:Params) S => getTypes(Ps)->T F; ...</k> </task>
        (.Bag => <task>
-               <k> mkDecls(Ps) S </k> <tenv> .Map </tenv> <return> T </return>
+               <k> mkDecls(Ps) S </k> <tenv> .Map </tenv> <returnType> T </returnType>
              </task>)
     [structural]
 
@@ -524,8 +525,8 @@ function return type.  If an empty return is encountered, than
 we should check that we are in a function (and not a thread)
 context, that is, a \textsf{return} cell must be available: */
 
-  rule <k> return T:Type; => stmt ...</k> <return> T </return>
-  rule <k> return; => stmt ...</k> <return> _ </return>
+  rule <k> return T:Type; => stmt ...</k> <returnType> T </returnType>
+  rule <k> return; => stmt ...</k> <returnType> _ </returnType>
 
 
 /*@ \subsection{Blocks}
@@ -592,7 +593,7 @@ list of variable declarations. */
  lvalue to evaluate. */
 
   syntax LValue ::= Id
-                  | Exp "[" Exps "]"
+  rule isLValue(_:Exp[_:Exps]) => true
   syntax Exp ::= LValue  // K should be able to infer this
                          // if not added, then it gets stuck with an Id on k cell
 

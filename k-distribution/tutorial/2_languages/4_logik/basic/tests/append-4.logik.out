@@ -1,10 +1,9 @@
-Solution 1
-Solution ==K ( L1:Term@LOGIK-COMMON |-> nil L2:Term@LOGIK-COMMON |-> L2 L3:Term@LOGIK-COMMON |-> ( cons ( a , ( L2 , .Terms ) ) ) )
-Solution 2
-Solution ==K ( L1:Term@LOGIK-COMMON |-> ( cons ( V0 , ( nil , .Terms ) ) ) L2:Term@LOGIK-COMMON |-> L2 L3:Term@LOGIK-COMMON |-> ( cons ( V0 , ( cons ( a , ( L2 , .Terms ) ) , .Terms ) ) ) )
-Solution 3
-Solution ==K ( L1:Term@LOGIK-COMMON |-> ( cons ( V0 , ( cons ( V1 , ( nil , .Terms ) ) , .Terms ) ) ) L2:Term@LOGIK-COMMON |-> L2 L3:Term@LOGIK-COMMON |-> ( cons ( V0 , ( cons ( V1 , ( cons ( a , ( L2 , .Terms ) ) , .Terms ) ) , .Terms ) ) ) )
-Solution 4
-Solution ==K ( L1:Term@LOGIK-COMMON |-> ( cons ( V0 , ( cons ( V1 , ( cons ( V2 , ( nil , .Terms ) ) , .Terms ) ) , .Terms ) ) ) L2:Term@LOGIK-COMMON |-> L2 L3:Term@LOGIK-COMMON |-> ( cons ( V0 , ( cons ( V1 , ( cons ( V2 , ( cons ( a , ( L2 , .Terms ) ) , .Terms ) ) , .Terms ) ) , .Terms ) ) ) )
-Solution 5
-Solution ==K ( L1:Term@LOGIK-COMMON |-> ( cons ( V0 , ( cons ( V1 , ( cons ( V2 , ( cons ( V3 , ( nil , .Terms ) ) , .Terms ) ) , .Terms ) ) , .Terms ) ) ) L2:Term@LOGIK-COMMON |-> L2 L3:Term@LOGIK-COMMON |-> ( cons ( V0 , ( cons ( V1 , ( cons ( V2 , ( cons ( V3 , ( cons ( a , ( L2 , .Terms ) ) , .Terms ) ) , .Terms ) ) , .Terms ) ) , .Terms ) ) ) )
+  Solution ==K ( L1:Term |-> ( cons ( V0 , ( cons ( V1 , ( cons ( V2 , ( cons ( V3 , ( nil , .Terms ) ) , .Terms ) ) , .Terms ) ) , .Terms ) ) ) L2:Term |-> L2 L3:Term |-> ( cons ( V0 , ( cons ( V1 , ( cons ( V2 , ( cons ( V3 , ( cons ( a , ( L2 , .Terms ) ) , .Terms ) ) , .Terms ) ) , .Terms ) ) , .Terms ) ) ) )
+#Or
+  Solution ==K ( L1:Term |-> ( cons ( V0 , ( cons ( V1 , ( cons ( V2 , ( nil , .Terms ) ) , .Terms ) ) , .Terms ) ) ) L2:Term |-> L2 L3:Term |-> ( cons ( V0 , ( cons ( V1 , ( cons ( V2 , ( cons ( a , ( L2 , .Terms ) ) , .Terms ) ) , .Terms ) ) , .Terms ) ) ) )
+#Or
+  Solution ==K ( L1:Term |-> ( cons ( V0 , ( cons ( V1 , ( nil , .Terms ) ) , .Terms ) ) ) L2:Term |-> L2 L3:Term |-> ( cons ( V0 , ( cons ( V1 , ( cons ( a , ( L2 , .Terms ) ) , .Terms ) ) , .Terms ) ) ) )
+#Or
+  Solution ==K ( L1:Term |-> ( cons ( V0 , ( nil , .Terms ) ) ) L2:Term |-> L2 L3:Term |-> ( cons ( V0 , ( cons ( a , ( L2 , .Terms ) ) , .Terms ) ) ) )
+#Or
+  Solution ==K ( L1:Term |-> nil L2:Term |-> L2 L3:Term |-> ( cons ( a , ( L2 , .Terms ) ) ) )

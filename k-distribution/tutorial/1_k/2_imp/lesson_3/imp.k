@@ -2,6 +2,7 @@
 
 module IMP-SYNTAX
   syntax AExp  ::= Int | Id
+                 | "-" Int
                  | AExp "/" AExp              [left, strict]
                  > AExp "+" AExp              [left, strict]
                  | "(" AExp ")"               [bracket]

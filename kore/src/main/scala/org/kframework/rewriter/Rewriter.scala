@@ -23,7 +23,7 @@ trait Rewriter {
   def execute(k: kore.K, depth: Optional[Integer]): RewriterResult
 
 
-  def `match`(k: kore.K, rule: Rule): java.util.List[_ <: java.util.Map[_ <: kore.KVariable, _ <: kore.K]]
+  def `match`(k: kore.K, rule: Rule): kore.K
 
 
   /**
@@ -34,11 +34,11 @@ trait Rewriter {
    * @param pattern The rule (pattern + side condition) that we're trying to find a substitution for.
    * @return A list of substitutions, denoting all the configurations matching the given rule.
    */
-  def search(initialConfiguration: kore.K, depth: Optional[Integer], bound: Optional[Integer], pattern: Rule, searchType: SearchType): java.util.List[_ <: java.util.Map[_ <: kore.KVariable, _ <: kore.K]]
+  def search(initialConfiguration: kore.K, depth: Optional[Integer], bound: Optional[Integer], pattern: Rule, searchType: SearchType): kore.K
 
-  def executeAndMatch(k: kore.K, depth: Optional[Integer], rule: Rule): Tuple2[RewriterResult, java.util.List[_ <: java.util.Map[_ <: kore.KVariable, _ <: kore.K]]]
+  def executeAndMatch(k: kore.K, depth: Optional[Integer], rule: Rule): Tuple2[RewriterResult, kore.K]
 
-  def prove(rules: java.util.List[Rule]): java.util.List[kore.K]
+  def prove(rules: java.util.List[Rule]): kore.K
 
   def equivalence(firstDef: Rewriter, secondDef: Rewriter, firstSpec: String, secondSpec: String): Boolean
 }

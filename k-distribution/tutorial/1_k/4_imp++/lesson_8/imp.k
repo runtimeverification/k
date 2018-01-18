@@ -116,6 +116,7 @@ of statements surrounded by curly brackets.  */
   syntax AExp  ::= Int | String | Id
                  | "++" Id
                  | "read" "(" ")"
+                 | "-" Int
                  > AExp "/" AExp              [left, strict, division]
                  > AExp "+" AExp              [left, strict]
                  > "spawn" Block
@@ -140,6 +141,7 @@ of statements surrounded by curly brackets.  */
   syntax Ids   ::= List{Id,","}
   syntax AExps ::= List{AExp,","}
   syntax Stmts ::= List{Stmt,""}
+  syntax AExps ::= Ids
 endmodule
 
 
@@ -184,23 +186,23 @@ buffers as lists of items. */
                   </threads>
 //                <br/>
                   <store color="red"> .Map </store>
-//                  <in color="magenta"> .List </in>
-//                  <out color="Orchid"> .List </out>
-                  <in color="magenta" stream="stdin"> .List </in>
-                  <out color="Orchid" stream="stdout"> .List </out>
+//                  <input color="magenta"> .List </input>
+//                  <output color="Orchid"> .List </output>
+                  <input color="magenta" stream="stdin"> .List </input>
+                  <output color="Orchid" stream="stdout"> .List </output>
                 </T>
-// Replace the <in/> and <out/> cells with the next two in order to
+// Replace the <input/> and <output/> cells with the next two in order to
 // initialize the input buffer through krun
-//     <in color="magenta"> $IN:List </in>
-//     <out color="Orchid"> .List </out>
-// Replace the <in/> and <out/> cells with the next two to connect the
+//     <input color="magenta"> $IN:List </input>
+//     <output color="Orchid"> .List </output>
+// Replace the <input/> and <output/> cells with the next two to connect the
 // input/output buffers to stdin/stdout through krun
-//     <in color="magenta" stream="stdin"> .List </in>
-//     <out color="Orchid" stream="stdout"> .List </out>
-// Replace the <in/> and <out/> cells with the next two to connect the
+//     <input color="magenta" stream="stdin"> .List </input>
+//     <output color="Orchid" stream="stdout"> .List </output>
+// Replace the <input/> and <output/> cells with the next two to connect the
 // input/output buffers to stdin/stdout and also allow input through krun
-//     <in color="magenta" stream="stdin"> $IN:List </in>
-//     <out color="Orchid" stream="stdout"> .List </out>
+//     <input color="magenta" stream="stdin"> $IN:List </input>
+//     <output color="Orchid" stream="stdout"> .List </output>
 
 /*@ We can also use configuration variables to initialize
 the configuration through \texttt{krun}.  For example, we may want to
@@ -299,6 +301,7 @@ them is chosen first. */
 
   rule I1 / I2 => I1 /Int I2  when I2 =/=Int 0
   rule I1 + I2 => I1 +Int I2
+  rule - I => 0 -Int I
 
 //@ \subsubsection{Boolean constructs}
 
@@ -376,7 +379,7 @@ reading the next integer from the input buffer, and different choices
 for the next transition can lead to different behaviors. */
 
   rule <k> read() => I ...</k>
-       <in> ListItem(I:Int) => .List ...</in>  [read]
+       <input> ListItem(I:Int) => .List ...</input>  [read]
 
 /*@ \subsubsection{Print}
 The \texttt{print} statement is strict, so all its arguments are
@@ -403,7 +406,7 @@ count as a computational step. */
   context print(HOLE:AExp, AEs:AExps);
 
   rule <k> print(P:Printable,AEs => AEs); ...</k>
-       <out>... .List => ListItem(P) </out>  [print]
+       <output>... .List => ListItem(P) </output>  [print]
   rule print(.AExps); => .  [structural]
 
 /*@ \subsubsection{Halt}

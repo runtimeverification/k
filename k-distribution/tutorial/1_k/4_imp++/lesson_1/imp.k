@@ -5,6 +5,7 @@ module IMP-SYNTAX
                  | "++" Id
                  | "read" "(" ")"
                  // remove division tag when we have proper search strategies
+                 | "-" Int
                  > AExp "/" AExp              [left, strict, division]
                  > AExp "+" AExp              [left, strict]
                  | "(" AExp ")"               [bracket]
@@ -28,6 +29,9 @@ module IMP-SYNTAX
 
   syntax Ids   ::= List{Id,","}
   syntax AExps ::= List{AExp,","}
+  // K does not yet handle automatically subsorting one user defined list to
+  // another when the elements are subsorted, so we must do it manually.
+  syntax AExps ::= Ids
 endmodule
 
 
@@ -44,6 +48,7 @@ module IMP
   rule <k> X:Id => I ...</k> <state>... X |-> I ...</state>
   rule I1 / I2 => I1 /Int I2  requires I2 =/=Int 0
   rule I1 + I2 => I1 +Int I2
+  rule - I => 0 -Int I
 // BExp
   rule I1 <= I2 => I1 <=Int I2
   rule ! T => notBool T

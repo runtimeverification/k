@@ -1,0 +1,3 @@
+TESTDIR=tests/nondeterministic
+DEFDIR=nondet
+include ../lesson_2/Makefile

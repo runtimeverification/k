@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # the directory where this script resides
 script_dir=$(dirname $0)

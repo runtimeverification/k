@@ -1,6 +1,7 @@
 // Copyright (c) 2013-2016 K Team. All Rights Reserved.
 package org.kframework.unparser;
 
+import org.kframework.builtin.Sorts;
 import org.kframework.definition.Module;
 import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
@@ -12,7 +13,6 @@ import org.kframework.parser.Constant;
 import org.kframework.parser.ProductionReference;
 import org.kframework.parser.Term;
 import org.kframework.parser.TermCons;
-import org.kframework.utils.errorsystem.KEMException;
 import org.pcollections.ConsPStack;
 import scala.Tuple2;
 
@@ -21,6 +21,7 @@ import java.util.EnumSet;
 import java.util.List;
 
 import static org.kframework.Collections.*;
+import static org.kframework.definition.Constructors.*;
 
 /**
  * Implements the naive algorithm to add brackets in order to disambiguate an unparsed AST. This algorithm executes
@@ -79,7 +80,7 @@ public class AddBrackets {
                     }
                 }
             }
-            throw KEMException.criticalError("Bracket required for unparsing, but no brackets in module exist matching inner sort " + innerSort + " and outer sort " + outerSort, inner);
+            return TermCons.apply(ConsPStack.singleton(inner), Production(Sorts.KBott(), Seq(NonTerminal(Sorts.K()))));
         }
         return inner;
     }

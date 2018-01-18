@@ -4,16 +4,22 @@ package org.kframework.compile;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
+import org.kframework.attributes.Att;
 import org.kframework.builtin.BooleanUtils;
-import org.kframework.compile.ConfigurationInfo;
 import org.kframework.compile.ConfigurationInfo.Multiplicity;
-import org.kframework.compile.LabelInfo;
 import org.kframework.definition.Context;
 import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kil.Attribute;
-import org.kframework.kore.*;
+import org.kframework.kore.K;
+import org.kframework.kore.KApply;
+import org.kframework.kore.KLabel;
+import org.kframework.kore.KRewrite;
+import org.kframework.kore.KVariable;
+import org.kframework.kore.Sort;
+import org.kframework.kore.TransformK;
+import org.kframework.kore.VisitK;
 import org.kframework.utils.errorsystem.KEMException;
 import scala.Tuple2;
 import scala.collection.JavaConversions;
@@ -191,7 +197,7 @@ public class SortCells {
             } else {
                 split = new HashMap<>();
                 for (Sort cell : remainingCells) {
-                    split.put(cell, newDotVariable());
+                    split.put(cell, newDotVariable(var.att()));
                 }
             }
             return split;
@@ -200,10 +206,10 @@ public class SortCells {
 
 
     private int counter = 0;
-    KVariable newDotVariable() {
+    KVariable newDotVariable(Att att) {
         KVariable newLabel;
         do {
-            newLabel = KVariable("_" + (counter++));
+            newLabel = KVariable("_" + (counter++), att.remove("sort"));
         } while (variables.containsKey(newLabel) || previousVars.contains(newLabel));
         variables.put(newLabel, null);
         return newLabel;

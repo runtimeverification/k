@@ -154,6 +154,9 @@ the constructs above). */
 
   syntax Ids  ::= List{Id,","}
   syntax Exps ::= List{Exp,","}          [strict]  // automatically hybrid now
+  syntax Exps ::= Ids
+  syntax Val
+  syntax Vals ::= List{Val,","}
 
 /*@ \subsection{Statements}
 Most of the statement constructs are standard for imperative languages.
@@ -269,8 +272,8 @@ languages, we finally tell the tool that values are \K results. */
   syntax Val ::= Int | Bool | String
                | array(Int,Int)
                | lambda(Ids,Stmt)
-  syntax Vals ::= List{Val,","}
   syntax Exp ::= Val
+  syntax Exps ::= Vals
   syntax KResult ::= Val
                    | Vals  // TODO: should not need this
 
@@ -347,8 +350,8 @@ to the \K tool, as indicated by the \textit{\$PGM} variable, followed by the
                   <busy color="cyan"> .Set </busy>
                   <terminated color="red"> .Set </terminated>
                 //<br/> // TODO(KORE): support latex annotations #1799
-                  <in color="magenta" stream="stdin"> .List </in>
-                  <out color="brown" stream="stdout"> .List </out>
+                  <input color="magenta" stream="stdin"> .List </input>
+                  <output color="brown" stream="stdout"> .List </output>
                   <nextLoc color="gray"> 0 </nextLoc>
                 </T>
 
@@ -670,7 +673,7 @@ The \texttt{read()} expression construct simply evaluates to the next
 input value, at the same time discarding the input value from the
 \textsf{in} cell. */
 
-  rule <k> read() => I ...</k> <in> ListItem(I:Int) => .List ...</in>  [read]
+  rule <k> read() => I ...</k> <input> ListItem(I:Int) => .List ...</input>  [read]
 
 /*@ \subsection{Assignment}
 In SIMPLE, like in C, assignments are expression constructs and not statement
@@ -702,7 +705,7 @@ for variable declarations, as we did above.  One can make the two rules below
 computational if one wants them to count as computational steps. */
 
   rule {} => .  [structural]
-  rule <k> { S } => S ~> env(Env) ...</k>  <env> Env </env>  [structural]
+  rule <k> { S } => S ~> setEnv(Env) ...</k>  <env> Env </env>  [structural]
 
 /*@ The basic definition of environment recovery is straightforward and
 given in the section on auxiliary constructs at the end of the file. */
@@ -791,7 +794,7 @@ evaluated (recall that \texttt{print} is variadic).  We append each of
 its evaluated arguments to the output buffer, and discard the residual
 \texttt{print} statement with an empty list of arguments. */
 
-  rule <k> print(V:Val, Es => Es); ...</k> <out>... .List => ListItem(V) </out>
+  rule <k> print(V:Val, Es => Es); ...</k> <output>... .List => ListItem(V) </output>
     [print]
   rule print(.Vals); => .  [structural]
 
@@ -984,8 +987,8 @@ IMP++ tutorial: */
 
 // TODO: eliminate the env wrapper, like we did in IMP++
 
-  syntax KItem ::= env(Map)
-  rule <k> env(Env) => . ...</k> <env> _ => Env </env>  [structural]
+  syntax KItem ::= setEnv(Map)
+  rule <k> setEnv(Env) => . ...</k> <env> _ => Env </env>  [structural]
 
 /*@  While theoretically sufficient, the basic definition for environment
 recovery alone is suboptimal.  Consider a loop \texttt{while (E)S},
@@ -1000,7 +1003,7 @@ recovery tasks, we only need to keep the last one.  The elegant rule below
 does precisely that, thus avoiding the unnecessary computation explosion
 problem: */
 
-  rule (env(_) => .) ~> env(_)  [structural]
+  rule (setEnv(_) => .) ~> setEnv(_)  [structural]
 
 /* In fact, the above follows a common convention in \K for recovery
 operations of cell contents: the meaning of a computation task of the form
@@ -1041,8 +1044,8 @@ corresponding store lookup operation. */
 // Array element: evaluate the array and its index;
 // then the array lookup rule above applies.
 
-  context lvalue(_:>Exp[HOLE:>Exps])
-  context lvalue(HOLE:>Exp[_:>Exps])
+  context lvalue(_::Exp[HOLE::Exps])
+  context lvalue(HOLE::Exp[_::Exps])
 
 // Finally, return the address of the desired object member
 
