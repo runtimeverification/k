@@ -124,7 +124,11 @@ class TextToKore(b: Builders) {
           parseDeclarations(decls :+ decl)
         case ('s', 'y') => // symbol declaration
           consume("mbol")
-          val symbol = parseSymbol() // previousParsingLevel is set here
+          val ctr = parseId() // previousParsingLevel is set here
+          consumeWithLeadingWhitespaces("{")
+          val params = parseList(() => parseSortVariable(parsingLevel = previousParsingLevel), ',', '}')
+          consumeWithLeadingWhitespaces("}")
+          val symbol = b.Symbol(ctr, params)
           consumeWithLeadingWhitespaces("(")
           val argSorts = parseList(() => parseSort(parsingLevel = previousParsingLevel), ',', ')')
           consumeWithLeadingWhitespaces(")")
@@ -135,7 +139,11 @@ class TextToKore(b: Builders) {
           parseDeclarations(decls :+ decl)
         case ('a', 'l') => // alias declaration
           consume("ias")
-          val alias = parseAlias() // previousParsingLevel is set here
+          val ctr = parseId() // previousParsingLevel is set here
+          consumeWithLeadingWhitespaces("{")
+          val params = parseList(() => parseSortVariable(parsingLevel = previousParsingLevel), ',', '}')
+          consumeWithLeadingWhitespaces("}")
+          val alias = b.Alias(ctr, params)
           consumeWithLeadingWhitespaces("(")
           val argSorts = parseList(() => parseSort(parsingLevel = previousParsingLevel), ',', ')')
           consumeWithLeadingWhitespaces(")")
