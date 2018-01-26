@@ -36,9 +36,8 @@ object KoreToText {
     //   "import " + apply(name) + " " + apply(att)
 
     case SortDeclaration(params, sort, att) =>
-      "sort{" +
-      params.map(s => apply(s)).mkString(",") +
-      "} " +
+      "sort" +
+      " " +
       apply(sort) +
       " " +
       apply(att)

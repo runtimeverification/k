@@ -148,12 +148,12 @@ class TextToKore(b: Builders) {
         // TODO:: Read two chars only if needed.
         case ('s', 'o') => // sort declaration
           consume("rt")
+          val ctr = parseId(parsingLevel = objt)
           consumeWithLeadingWhitespaces("{")
           val params = parseList(() => parseSortVariable(parsingLevel = objt), ',', '}')
           consumeWithLeadingWhitespaces("}")
-          val sort = parseSort(parsingLevel = objt)
           val att = parseAttributes()
-          val decl = b.SortDeclaration(params, sort, att)
+          val decl = b.SortDeclaration(params, b.CompoundSort(ctr, params), att)
           parseDeclarations(decls :+ decl)
         case ('s', 'y') => // symbol declaration
           consume("mbol")
