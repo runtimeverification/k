@@ -6,8 +6,20 @@ This is a readme file for the developers.
 
 # Prerequisites
 
+In short:
+```
+sudo apt-get install build-essential m4 openjdk-8-jdk libgmp-dev libmpfr-dev pkg-config flex z3 maven opam
+```
+
+If you install this list of dependencies, continue directly to the Install section.
+
 ## Java Development Kit (required JDK8 version 8u45 or higher)
-You can download the JDK at http://www.oracle.com/technetwork/java/javase/downloads/index.html
+
+Linux:
+*   Download from package manager (e.g. `sudo apt-get install openjdk-8-jdk`)
+
+Mac/Windows:
+*   Download the JDK [here](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
 
 To make sure that everything works you should be able to call `java -version` and
 `javac -version` from a Terminal.
@@ -18,8 +30,7 @@ Linux:
 *   Download from package manager (e.g. `sudo apt-get install maven`)
 
 Mac:
-*   If your version is prior to Mavericks, Maven comes pre-installed with XCode.
-    Otherwise, download it from a package manager or from
+*   Download it from a package manager or from
     http://maven.apache.org/download.cgi and follow the instructions on the webpage.
 
 Windows:
@@ -34,17 +45,30 @@ You can test if it works by calling `mvn -version` in a Terminal.
 This will provide the information about the JDK Maven is using, in case
 it is the wrong one.
 	
-## Git - command line
-Having a GUI client is not enough. Most distributions have an installation
-option to make git accessible in the command line too.
+## Miscellaneous
+
+Also required:
+
+*   [gcc](https://gcc.gnu.org/)
+*   [flex](https://github.com/westes/flex)
+*   [make](https://www.gnu.org/software/make/)
+*   [gmp](https://gmplib.org/)
+*   [mpfr](http://www.mpfr.org/)
+*   [pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config/)
+*   [z3](https://github.com/Z3Prover/z3)
+*   [opam](https://opam.ocaml.org/doc/Install.html)
+
+These can all be installed from your package manager.
 
 # Install
-Checkout this directory in your desired location and call `mvn package` from the main
+Checkout the directory of this README in your desired location and call `mvn package` from the main
 directory to build the distribution. For convenient usage, you can update
 your $PATH with <checkout-dir>k-distribution/target/release/k/bin (strongly recommended, but optional).
 
 You are also encouraged to set the environment variable `MAVEN_OPTS` to `-XX:+TieredCompilation`,
 which will significantly speed up the incremental build process.
+
+After running `mvn package` for the first time, you should run ``k-distribution/target/release/k/bin/k-configure-opam; eval `opam config env` ``. This performs first-time setup of the OCAML backend.
 
 # IDE Setup
 
@@ -52,33 +76,6 @@ which will significantly speed up the incremental build process.
 
 You should run K from the k-distribution project, because it is the only project to have the complete
 classpath and therefore all backends.
-
-## Environment
-
-In order for K to run correctly in an IDE, it is necessary that the correct environment variables be set.
-
-### Mac OS X
-
-`PATH=$PATH:<release>/lib/native/osx
-DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:<release>/lib/native/osx`
-
-### Windows x86
-
-`PATH=$PATH;<release>\lib\native\windows;<release>\lib\native\windows32;<release>\lib\native\32`
-
-### Windows x64
-
-`PATH=$PATH;<release>\lib\native\windows;<release>\lib\native\windows64;<release>\lib\native\64`
-
-### Linux i386
-
-`PATH=$PATH:<release>/lib/native/linux:<release>/lib/native/linux32
-LD_LIBRARY_PATH=$LD_LIBRARY_PATH:<release>/lib/native/linux32`
-
-### Linux amd64
-
-`PATH=$PATH:<release>/lib/native/linux:<release>/lib/native/linux64
-LD_LIBRARY_PATH=$LD_LIBRARY_PATH:<release>/lib/native/linux64`
 
 ## Eclipse
 _N.B. the Eclipse internal compiler may generate false compilation errors (there are bugs in its support of Scala mixed compilation). We recommend using IntelliJ IDEA if at all possible._
@@ -114,13 +111,6 @@ Assuming k-distribution/target/release/k/bin is in your path, you can compile de
 the `kompile` command.  To execute a program you can use `krun`.
 
 For running either program in the debugger, use the main class `org.kframework.main.Main` with an additional argument `-kompile` or `-krun` added before other command line arguments, and use the classpath from the `k-distribution` module.
-
-# Cross platform compilation
-To build a version of the K framework for a platform other than the current version,
-you can specify the OS and architecture using profiles. For example, to build a 32-bit
-windows release of the K framework, run `mvn install -P windows -P x86 -DskipTests -DskipKTest`.
-
-To view the platform being used by a particular build, run the `mvn help:active-profiles` target.
 
 # Troubleshooting
 Common error messages:
