@@ -1,0 +1,5 @@
+append(nil,L,L).
+append(cons(H,T),L,cons(H,Z)) :- append(T,L,Z).
+
+// Next query has an infinite number of solutions; use --bound 5, e.g.
+?- append(L1, cons(a,L2), L3).  

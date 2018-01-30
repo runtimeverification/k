@@ -1,0 +1,3 @@
+       Initially: x = 7 and y[1] = 10
+After swapRefPtr: x = 10 and y[1] = 7
+After swapPtrRef: x = 7 and y[1] = 10

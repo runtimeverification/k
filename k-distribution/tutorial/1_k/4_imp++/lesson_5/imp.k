@@ -1,5 +1,6 @@
 // Copyright (c) 2014-2016 K Team. All Rights Reserved.
 module IMP-SYNTAX
+  imports DOMAINS-SYNTAX
   syntax AExp  ::= Int | String | Id
                  | "++" Id
                  | "read" "(" ")"
@@ -33,6 +34,7 @@ endmodule
 
 module IMP
   imports IMP-SYNTAX
+  imports DOMAINS
   syntax KResult ::= Int | Bool | String
 
   configuration <T color="yellow">

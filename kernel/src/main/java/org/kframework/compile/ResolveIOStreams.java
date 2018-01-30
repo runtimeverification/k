@@ -84,7 +84,7 @@ public class ResolveIOStreams {
     // Collect productions that have 'stream' attribute
     private java.util.Set<Production> getStreamProductions(Module m) {
         java.util.Set<Production> productions = new HashSet<>();
-        for (Sentence s : mutable(m.localSentences())) {
+        for (Sentence s : mutable(m.sentences())) {
             if (s instanceof Production) {
                 Production p = (Production) s;
                 if (p.att().getOption("stream").isDefined()) {
@@ -201,7 +201,10 @@ public class ResolveIOStreams {
                     rule = Rule(body, rule.requires(), rule.ensures(), rule.att());
                     sentences.add(rule);
                 }
-            } else if (s instanceof Production) {
+            }
+        }
+        for (Sentence s : mutable(getStreamSyntaxModule(streamName).localSentences())) {
+            if (s instanceof Production) {
                 Production production = (Production) s;
                 if (production.sort().name().equals("Stream")) {
                     sentences.add(production);
@@ -214,6 +217,17 @@ public class ResolveIOStreams {
     private Module getStreamModule(String streamName) {
         // TODO(Daejun): fix hard-coded stream module naming convention
         String moduleName = streamName.toUpperCase() + "-STREAM";
+        Option<Module> module = definition.getModule(moduleName);
+        if (module.isDefined()) {
+            return module.get();
+        } else {
+            throw KEMException.compilerError("no such module: " + moduleName);
+        }
+    }
+
+    private Module getStreamSyntaxModule(String streamName) {
+        // TODO(Daejun): fix hard-coded stream module naming convention
+        String moduleName = streamName.toUpperCase() + "-STREAM$SYNTAX";
         Option<Module> module = definition.getModule(moduleName);
         if (module.isDefined()) {
             return module.get();

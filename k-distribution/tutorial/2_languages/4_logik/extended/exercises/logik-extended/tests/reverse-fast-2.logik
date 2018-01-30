@@ -1,0 +1,11 @@
+reverseFast(nil,L,L).
+reverseFast(cons(H,T),L1,L2) :-
+  reverseFast(T,cons(H,L1),L2).
+
+reverse(L1,L2) :-
+  reverseFast(L1,nil,L2).
+
+// Next has only one solution, but LOGIK is not able to infer that there is
+// only one.  So use --search --pattern ... --bound 1 (with pattern), or
+// --search --bound 2 (without pattern)  when you krun it.
+?- reverse(L, cons(a,cons(b,cons(c,nil)))).

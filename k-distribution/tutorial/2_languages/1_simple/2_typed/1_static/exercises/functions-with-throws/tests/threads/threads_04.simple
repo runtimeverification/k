@@ -1,0 +1,15 @@
+// Normally, one would think that the program below has only two behaviors.
+// However, it has four, due to the race on the output buffer.
+
+void main() {
+  spawn {
+    int x = 2;
+    print(x," ");
+  };
+  spawn {
+    int x = 3;
+    print(x," ");
+  };
+}
+
+// 4 solutions, namely all interleavings of "2_" and "3_", where "_" is space

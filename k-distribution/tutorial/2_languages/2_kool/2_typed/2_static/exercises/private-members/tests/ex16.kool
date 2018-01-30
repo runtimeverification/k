@@ -1,0 +1,41 @@
+// This works in dynamically typed KOOL, but it is rejected by the static
+// semantics: the method get() called in f() is not is private at that time.
+
+class C {
+    private int x = 1;
+    void C() {
+	x = 2;
+    }
+    private int get() {
+	return x;
+    }
+}
+
+class B extends C {
+    private int x = 3;
+    void B() {
+        super.C();
+	x = 5;
+    }
+    int f() {
+      return get();
+    }
+}
+
+class A extends B {
+    private int x = 7;
+    void A() {
+        super.B();
+	x = 10;
+    }
+    int get(){
+	return x;
+    }
+}
+
+class Main {
+  void Main() {
+    print("The next should be printed:\n");
+    print((new A()).f());
+  }
+}

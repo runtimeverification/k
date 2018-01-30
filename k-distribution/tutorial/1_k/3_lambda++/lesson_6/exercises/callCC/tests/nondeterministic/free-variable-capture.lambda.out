@@ -1,0 +1,11 @@
+  V ==K ( a ~> #freezer___LAMBDA1_ ( ( lambda x . lambda y . x ) y z ) )
+#Or
+  V ==K ( a ~> #freezer___LAMBDA1_ ( closure ( .Map , x , lambda y . x ) y z ) )
+#Or
+  V ==K ( y ~> #freezer___LAMBDA0_ ( closure ( .Map , x , lambda y . x ) ) ~> #freezer___LAMBDA1_ ( z ) ~> #freezer___LAMBDA0_ ( a ) )
+#Or
+  V ==K ( y ~> #freezer___LAMBDA0_ ( lambda x . lambda y . x ) ~> #freezer___LAMBDA1_ ( z ) ~> #freezer___LAMBDA0_ ( a ) )
+#Or
+  V ==K ( z ~> #freezer___LAMBDA0_ ( ( lambda x . lambda y . x ) y ) ~> #freezer___LAMBDA0_ ( a ) )
+#Or
+  V ==K ( z ~> #freezer___LAMBDA0_ ( closure ( .Map , x , lambda y . x ) y ) ~> #freezer___LAMBDA0_ ( a ) )

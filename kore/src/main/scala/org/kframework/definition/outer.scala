@@ -247,22 +247,36 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
 
 trait Sentence {
   // marker
+  val isSyntax: Boolean
+  val isNonSyntax: Boolean
   val att: Att
 }
 
 // deprecated
-case class Context(body: K, requires: K, att: Att = Att.empty) extends Sentence with OuterKORE with ContextToString
+case class Context(body: K, requires: K, att: Att = Att.empty) extends Sentence with OuterKORE with ContextToString {
+  override val isSyntax = false
+  override val isNonSyntax = true
+}
 
-case class Rule(body: K, requires: K, ensures: K, att: Att = Att.empty) extends Sentence with RuleToString with OuterKORE
+case class Rule(body: K, requires: K, ensures: K, att: Att = Att.empty) extends Sentence with RuleToString with OuterKORE {
+  override val isSyntax = false
+  override val isNonSyntax = true
+}
 
-case class ModuleComment(comment: String, att: Att = Att.empty) extends Sentence with OuterKORE
+case class ModuleComment(comment: String, att: Att = Att.empty) extends Sentence with OuterKORE {
+  override val isSyntax = false
+  override val isNonSyntax = true
+}
 
 // hooked
 
 // syntax declarations
 
 case class SyntaxPriority(priorities: Seq[Set[Tag]], att: Att = Att.empty)
-  extends Sentence with SyntaxPriorityToString with OuterKORE
+  extends Sentence with SyntaxPriorityToString with OuterKORE {
+  override val isSyntax = true
+  override val isNonSyntax = false
+}
 
 object Associativity extends Enumeration {
   type Value1 = Value
@@ -273,7 +287,10 @@ case class SyntaxAssociativity(
                                 assoc: Associativity.Value,
                                 tags: Set[Tag],
                                 att: Att = Att.empty)
-  extends Sentence with SyntaxAssociativityToString with OuterKORE
+  extends Sentence with SyntaxAssociativityToString with OuterKORE {
+  override val isSyntax = true
+  override val isNonSyntax = false
+}
 
 case class Tag(name: String) extends TagToString with OuterKORE
 
@@ -288,6 +305,9 @@ case class Tag(name: String) extends TagToString with OuterKORE
 case class SyntaxSort(sort: Sort, att: Att = Att.empty) extends Sentence
   with SyntaxSortToString with OuterKORE {
   def items = Seq()
+
+  override val isSyntax = true
+  override val isNonSyntax = false
 }
 
 case class Production(sort: Sort, items: Seq[ProductionItem], att: Att)
@@ -373,6 +393,8 @@ case class Production(sort: Sort, items: Seq[ProductionItem], att: Att)
     val powerSet = 0 to namedNts.size flatMap namedNts.combinations
     powerSet.map(makeRecordProduction).toSet
   }
+  override val isSyntax = true
+  override val isNonSyntax = false
 }
 
 object Production {

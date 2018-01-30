@@ -1,4 +1,5 @@
-include ../../2_imp/lesson_1/Makefile
+MAKEFILE_PATH := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
+include $(MAKEFILE_PATH)/../../2_imp/lesson_1/Makefile
 KOMPILE_FLAGS+=--transition division --backend java
 
 tests/div.imp: kompile

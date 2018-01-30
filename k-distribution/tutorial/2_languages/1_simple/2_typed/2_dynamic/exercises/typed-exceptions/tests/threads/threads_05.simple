@@ -1,0 +1,13 @@
+// Program which has infinitely many bahaviors.
+
+int x, y;
+
+void main() {
+  x=1;
+  y=0;
+  spawn { x=0; };
+  while (1<=x) {
+    y = y+1;
+  }
+  print(y,"\n");
+}

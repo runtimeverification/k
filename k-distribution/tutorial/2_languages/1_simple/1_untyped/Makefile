@@ -1,10 +1,11 @@
+MAKEFILE_PATH := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 DEF=simple-untyped
 EXT=simple
 TESTDIR=tests/*
 KOMPILE_FLAGS=--transition strict --backend java
 KRUN_FLAGS=--output none
 
-include ../../../../include/ktest.mak
+include $(MAKEFILE_PATH)/../../../../include/ktest.mak
 
 tests/threads/threads_05.simple: kompile
 	cat $@.in 2>/dev/null | $(KRUN) $@ -d $(DEFDIR) --search --bound 5 $(CHECK) $@.out

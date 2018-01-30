@@ -18,6 +18,7 @@ conditional, while loop and sequential composition constructs for statements.
 */
 
 module IMP-SYNTAX
+  imports DOMAINS-SYNTAX
 /*@ \section{Syntax}
 This module defines the syntax of IMP\@.
 Note that \texttt{<=} is sequentially strict and has a \LaTeX\ attribute
@@ -59,6 +60,7 @@ semantics.  */
 
 module IMP
   imports IMP-SYNTAX
+  imports DOMAINS
 /*@ \section{Semantics}
 This module defines the semantics of IMP\@.
 Before you start adding semantic rules to a \K definition, you need to

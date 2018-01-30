@@ -1,0 +1,33 @@
+// Note that, like in Java, the get() method called by f() is not dynamically
+// dispatched here.
+
+class B {
+    private int x = 3;
+    void B() {
+	x = 5;
+    }
+    private int get() {
+	return x;
+    }
+    int f() {
+      return get();
+    }
+}
+
+class A extends B {
+    private int x = 7;
+    void A() {
+        super.B();
+	x = 10;
+    }
+    int get(){
+	return x;
+    }
+}
+
+class Main {
+  void Main() {
+    print("The next should be printed:\n");
+    print((new A()).f());
+  }
+}

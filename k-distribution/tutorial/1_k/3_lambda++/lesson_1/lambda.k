@@ -2,8 +2,11 @@
 
 require "substitution.k"
 
-module LAMBDA
+module LAMBDA-SEMANTICS
+  imports DOMAINS
   imports SUBSTITUTION
+  imports syntax DEFAULT-CONFIGURATION
+
   syntax Val ::= Id
                | "lambda" Id "." Exp  [binder, latex(\lambda{#1}.{#2})]
   syntax Exp ::= Val
@@ -40,4 +43,9 @@ module LAMBDA
   syntax Val ::= cc(K)
   rule <k> (callcc V:Val => V cc(K)) ~> K </k>
   rule <k> cc(K) V ~> _ =>  V ~> K </k>
+endmodule
+
+module LAMBDA
+  imports LAMBDA-SEMANTICS
+  imports DEFAULT-CONFIGURATION
 endmodule

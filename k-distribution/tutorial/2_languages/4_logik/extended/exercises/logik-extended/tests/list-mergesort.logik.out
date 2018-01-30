@@ -1,5 +1,1 @@
-Search results:
-
-Solution 1:
-Solution:Map@MAP -->
-"S" |-> [ 3 | ([ 5 | ([ .List{","} ]) ]) ]
+Solution ==K ( S:Term |-> [ 3 , .Vals | [ 5 , .Vals | [ .Vals ] ] ] )

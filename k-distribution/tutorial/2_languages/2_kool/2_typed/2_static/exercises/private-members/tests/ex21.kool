@@ -1,0 +1,25 @@
+// This example shows that a subclass does not have access to superclass'
+// private fields.  Java does not allow this, either.
+
+class B {
+  private int x = 3;
+  void B() {
+  }
+  int get() {
+    return x;
+  }
+}
+
+class A extends B {
+  void A() {
+  }
+  int get(){
+    return x;
+  }
+}
+
+class Main {
+  void Main() {
+    print((new A()).get());
+  }
+}

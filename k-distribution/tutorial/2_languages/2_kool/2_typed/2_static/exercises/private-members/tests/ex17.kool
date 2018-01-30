@@ -1,0 +1,21 @@
+class A {
+    private int x = 7;
+    void A(int v) {
+	x = v;
+    }
+    void init(A a){
+	x=a.x;
+    }
+    int get() {
+	return x;
+    }
+}
+
+class Main {
+    void Main(){
+	A a = new A(10);
+	A b = new A(20);
+	a.init(b);
+	print(a.get());
+    }
+}

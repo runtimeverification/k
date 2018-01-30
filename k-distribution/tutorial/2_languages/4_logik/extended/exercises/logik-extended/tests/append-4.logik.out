@@ -1,38 +1,9 @@
-Search results:
-
-Solution 1:
-Solution:Map@MAP -->
-"L1" |-> '_`(_`)(cons,, #symVariable(1), (cons ( (#symVariable(6), (cons ( (
-  #symVariable(11), (cons ( (#symVariable(16), (nil ( .Vals ))) ))) ))) )))
-"L2" |-> L2
-"L3" |-> '_`(_`)(cons,, #symVariable(1), (cons ( (#symVariable(6), (cons ( (
-  #symVariable(11), (cons ( (#symVariable(16), (cons ( ((a ( .Vals )), L2) )))
-   ))) ))) )))
-
-Solution 2:
-Solution:Map@MAP -->
-"L1" |-> '_`(_`)(cons,, #symVariable(1), (cons ( (#symVariable(6), (cons ( (
-  #symVariable(11), (nil ( .Vals ))) ))) )))
-"L2" |-> L2
-"L3" |-> '_`(_`)(cons,, #symVariable(1), (cons ( (#symVariable(6), (cons ( (
-  #symVariable(11), (cons ( ((a ( .Vals )), L2) ))) ))) )))
-
-Solution 3:
-Solution:Map@MAP -->
-"L1" |-> '_`(_`)(cons,, #symVariable(1), (cons ( (#symVariable(6), (nil ( 
-  .Vals ))) )))
-"L2" |-> L2
-"L3" |-> '_`(_`)(cons,, #symVariable(1), (cons ( (#symVariable(6), (cons ( ((a
-   ( .Vals )), L2) ))) )))
-
-Solution 4:
-Solution:Map@MAP -->
-"L1" |-> '_`(_`)(cons,, #symVariable(1), (nil ( .Vals )))
-"L2" |-> L2
-"L3" |-> '_`(_`)(cons,, #symVariable(1), (cons ( ((a ( .Vals )), L2) )))
-
-Solution 5:
-Solution:Map@MAP -->
-"L1" |-> '_`(_`)(nil,, .List{","})
-"L2" |-> L2
-"L3" |-> '_`(_`)(cons,, (a ( .List{","} )), L2)
+  Solution ==K ( L1:Term |-> ( cons ( V0 , ( cons ( V1 , ( cons ( V2 , ( cons ( V3 , ( nil , .Vals ) ) , .Vals ) ) , .Vals ) ) , .Vals ) ) ) L2:Term |-> L2 L3:Term |-> ( cons ( V0 , ( cons ( V1 , ( cons ( V2 , ( cons ( V3 , ( cons ( a , ( L2 , .Vals ) ) , .Vals ) ) , .Vals ) ) , .Vals ) ) , .Vals ) ) ) )
+#Or
+  Solution ==K ( L1:Term |-> ( cons ( V0 , ( cons ( V1 , ( cons ( V2 , ( nil , .Vals ) ) , .Vals ) ) , .Vals ) ) ) L2:Term |-> L2 L3:Term |-> ( cons ( V0 , ( cons ( V1 , ( cons ( V2 , ( cons ( a , ( L2 , .Vals ) ) , .Vals ) ) , .Vals ) ) , .Vals ) ) ) )
+#Or
+  Solution ==K ( L1:Term |-> ( cons ( V0 , ( cons ( V1 , ( nil , .Vals ) ) , .Vals ) ) ) L2:Term |-> L2 L3:Term |-> ( cons ( V0 , ( cons ( V1 , ( cons ( a , ( L2 , .Vals ) ) , .Vals ) ) , .Vals ) ) ) )
+#Or
+  Solution ==K ( L1:Term |-> ( cons ( V0 , ( nil , .Vals ) ) ) L2:Term |-> L2 L3:Term |-> ( cons ( V0 , ( cons ( a , ( L2 , .Vals ) ) , .Vals ) ) ) )
+#Or
+  Solution ==K ( L1:Term |-> nil L2:Term |-> L2 L3:Term |-> ( cons ( a , ( L2 , .Vals ) ) ) )

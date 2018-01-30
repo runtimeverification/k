@@ -1,0 +1,27 @@
+class B {
+    private int x = 3;
+    void B() {
+	x = 5;
+    }
+    private int get() {
+	return x;
+    }
+}
+
+class A extends B {
+    private int x = 7;
+    void A() {
+        super.B();
+	x = 10;
+    }
+    private int get(){
+	return x;
+    }
+}
+
+class Main {
+  void Main() {
+    print("The next should not be printed.\n");
+    print((new A()).get());
+  }
+}

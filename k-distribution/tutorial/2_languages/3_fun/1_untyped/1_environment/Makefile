@@ -1,11 +1,12 @@
+MAKEFILE_PATH := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 DEF=fun-untyped
 EXT=fun
-TESTDIR=../../programs
+TESTDIR?=../../programs
 RESULTDIR=tests
-KOMPILE_FLAGS=--transition strict --backend java
-KRUN_FLAGS=--pattern "<k> V:K </k>"
+KOMPILE_FLAGS?=--transition strict --backend java
+KRUN_FLAGS?=--pattern "<k> V:K </k>"
 
-include ../../../../../include/ktest.mak
-
-../../programs/references-5.fun: kompile
+%/references-5.fun: kompile
 	cat tests/references-5.fun.in 2>/dev/null | $(KRUN) $@ -d $(DEFDIR) --search --pattern "<k> V:K </k>" $(CHECK) tests/references-5.fun.out
+
+include $(MAKEFILE_PATH)/../../../../../include/ktest.mak

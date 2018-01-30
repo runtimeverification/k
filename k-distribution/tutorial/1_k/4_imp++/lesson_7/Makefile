@@ -1,9 +1,10 @@
+MAKEFILE_PATH := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 DEF=imp
 EXT=imp
 KOMPILE_FLAGS=--backend java --transition "division lookup increment assignment read print"
 KRUN_FLAGS=--output none
 
-include ../../../../include/ktest.mak
+include $(MAKEFILE_PATH)/../../../../include/ktest.mak
 
 
 tests/div.imp: kompile

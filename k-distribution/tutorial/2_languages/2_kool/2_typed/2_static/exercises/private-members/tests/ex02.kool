@@ -1,0 +1,15 @@
+class A {
+    int x = 7;
+    private void A() {
+	x = 10;
+    }
+}
+
+class Main {
+  void Main() {
+    A a = new A();
+    print("This is reached: the constructor is called after the current class is set\n");
+    a.A();
+    print("But this should not be reachaed, because method A() is private.\n");
+  }
+}

@@ -1,0 +1,12 @@
+class A {
+    private int x = 7;
+    void A() {}
+}
+
+class Main {
+  void Main() {
+    A a = new A();
+    print("Accessing a private field: a.x = ");
+    print(a.x);
+  }
+}

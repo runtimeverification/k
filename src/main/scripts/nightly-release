@@ -1,0 +1,6 @@
+#!/bin/sh -ex
+COMMIT=$(git rev-parse --short k/master)
+RESPONSE=`curl --data '{"tag_name": "nightly-'$COMMIT'","name": "Nightly build of K framework at commit '$COMMIT'","draft": true,"prerelease": true}' https://api.github.com/repos/runtimeverification/k/releases?access_token=$GITHUB_TOKEN`
+ID=`echo $RESPONSE | grep '"id": [0-9]*,' -o | head -1 | grep '[0-9]*' -o`
+curl --data-binary @k/k-distribution/target/k-nightly.tar.gz -H "Authorization: token $GITHUB_TOKEN" -H "Content-Type: application/gzip" https://uploads.github.com/repos/runtimeverification/k/releases/$ID/assets?'name=nightly.tar.gz&label=Prebuilt+K+binary'
+curl -X PATCH --data '{"draft": false}' https://api.github.com/repos/runtimeverification/k/releases/$ID?access_token=$GITHUB_TOKEN

@@ -1,0 +1,15 @@
+function main() {
+  try {
+    1;
+    try {
+      2;
+    } catch(a) {
+      print(2);     // should not print this
+    }
+    throw 1;
+  } catch(b) {
+    print(1,"\n");  // should print this
+  }
+}
+
+// 1

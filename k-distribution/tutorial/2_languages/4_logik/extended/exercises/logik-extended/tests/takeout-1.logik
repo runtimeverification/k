@@ -1,0 +1,4 @@
+takeout(X,cons(X,R),R).
+takeout(X,cons(F,R),cons(F,S)) :- takeout(X,R,S).
+
+?- takeout(a,cons(a,cons(b,cons(a,nil))),L).

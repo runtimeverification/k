@@ -12,7 +12,8 @@ public class DefinitionTest {
     @Test
     public void testFrom() throws Exception {
         org.kframework.definition.Definition actual = Definition.from("module X endmodule");
-        Module mod = Module.apply("X", Set());
-        assertEquals(org.kframework.definition.Definition.apply(mod, Set(mod), Att()), actual);
+        Module modSyntax = Module.apply("X$SYNTAX", Set());
+        Module mod = new Module("X", Set(modSyntax), Set(), Att());
+        assertEquals(org.kframework.definition.Definition.apply(mod, Set(mod, modSyntax), Att()), actual);
     }
 }

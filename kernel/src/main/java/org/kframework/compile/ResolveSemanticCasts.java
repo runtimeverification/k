@@ -48,7 +48,7 @@ public class ResolveSemanticCasts {
         gatherCasts(rule.ensures());
         return new Rule(
                 transform(rule.body()),
-                addSideCondition(transform(rule.requires())),
+                addSideCondition(transform(rule.requires()), rule.att().contains("macro")),
                 transform(rule.ensures()),
                 rule.att());
     }
@@ -59,12 +59,12 @@ public class ResolveSemanticCasts {
         gatherCasts(context.requires());
         return new Context(
                 transform(context.body()),
-                addSideCondition(transform(context.requires())),
+                addSideCondition(transform(context.requires()), false),
                 context.att());
     }
 
-    K addSideCondition(K requires) {
-        if (skipSortPredicates)
+    K addSideCondition(K requires, boolean macro) {
+        if (skipSortPredicates || macro)
             return requires;
         else {
             Optional<KApply> sideCondition = casts.stream().map(k -> {

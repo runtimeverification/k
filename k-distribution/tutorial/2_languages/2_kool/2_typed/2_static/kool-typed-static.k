@@ -63,6 +63,7 @@ and contra-variant in the domain.
 
 
 module KOOL-TYPED-STATIC-SYNTAX
+  imports DOMAINS-SYNTAX
 
 /*@ \section{Syntax}
 
@@ -218,6 +219,7 @@ related to the KOOL proper syntax. */
 
 module KOOL-TYPED-STATIC
   imports KOOL-TYPED-STATIC-SYNTAX
+  imports DOMAINS
 
 /*@ \subsection{Configuration}
 

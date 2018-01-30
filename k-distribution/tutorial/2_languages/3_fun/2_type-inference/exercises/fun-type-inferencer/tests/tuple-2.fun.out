@@ -1,6 +1,1 @@
-Search results:
-
-Solution 1:
-V:K@SORT-K -->
-( (( int, (( int, .List{","} ) wrapper), .List{","} ) pair), (( int, int, 
-  .List{","} ) pair), .List{","} ) pair
+V ==K ( ( ( int , ( ( ( int , .Exps ) wrapper ) , .Exps ) ) pair ) , ( ( ( int , ( int , .Exps ) ) pair ) , .Exps ) ) pair

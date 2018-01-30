@@ -1,0 +1,8 @@
+reverseFast(nil,L,L).
+reverseFast(cons(H,T),L1,L2) :-
+  reverseFast(T,cons(H,L1),L2).
+
+reverse(L1,L2) :-
+  reverseFast(L1,nil,L2).
+
+?- reverse(cons(a,cons(X,cons(c,nil))),L), reverse(L, T).

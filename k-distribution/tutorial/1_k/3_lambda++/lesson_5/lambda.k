@@ -1,16 +1,21 @@
 // Copyright (c) 2012-2016 K Team. All Rights Reserved.
 
-module LAMBDA
-  syntax Exp ::= Id
-               | "lambda" Id "." Exp  [latex(\lambda{#1}.{#2})]
-               | Exp Exp              [strict, left]
-               | "(" Exp ")"          [bracket]
-
+module LAMBDA-CONFIG
+  imports DOMAINS
+  syntax Exp
   configuration <T>
                   <k> $PGM:Exp </k>
                   <env> .Map </env>
                   <store> .Map </store>
                 </T>
+endmodule
+
+module LAMBDA-SEMANTICS
+  imports syntax LAMBDA-CONFIG
+  syntax Exp ::= Id
+               | "lambda" Id "." Exp  [latex(\lambda{#1}.{#2})]
+               | Exp Exp              [strict, left]
+               | "(" Exp ")"          [bracket]
 
   syntax Val ::= closure(Map,Id,Exp)
   syntax Exp ::= Val
@@ -61,4 +66,9 @@ module LAMBDA
   syntax Val ::= cc(Map,K)
   rule <k> (callcc V:Val => V cc(Rho,K)) ~> K </k> <env> Rho </env>
   rule <k> cc(Rho,K) V:Val ~> _ =>  V ~> K </k> <env> _ => Rho </env>
+endmodule
+
+module LAMBDA
+  imports LAMBDA-SEMANTICS
+  imports LAMBDA-CONFIG
 endmodule

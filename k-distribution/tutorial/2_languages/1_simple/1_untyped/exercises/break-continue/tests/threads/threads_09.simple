@@ -1,0 +1,15 @@
+// Poorly synchronized program which has two behaviors.
+
+function main() {
+  var x = 1;
+  spawn {
+    x=x+1;
+    rendezvous 1;
+  };
+  x=x+1;
+  rendezvous 1;
+  print(x,"\n");
+}
+
+// 2
+// 3

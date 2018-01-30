@@ -104,6 +104,7 @@ its stuck configuration. */
 
 
 module SIMPLE-TYPED-STATIC-SYNTAX
+  imports DOMAINS-SYNTAX
 
 /*@ \section{Syntax}
 The syntax of typed SIMPLE extends that of untyped SIMPLE with support
@@ -240,6 +241,7 @@ endmodule
 
 module SIMPLE-TYPED-STATIC
   imports SIMPLE-TYPED-STATIC-SYNTAX
+  imports DOMAINS
 
 /*@ \section{Static semantics}
 

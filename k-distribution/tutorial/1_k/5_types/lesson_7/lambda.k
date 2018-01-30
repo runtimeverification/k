@@ -3,6 +3,7 @@
 require "substitution.k"
 
 module LAMBDA
+  imports DOMAINS
   imports SUBSTITUTION
 
   syntax Exp ::= Int | Bool | Id

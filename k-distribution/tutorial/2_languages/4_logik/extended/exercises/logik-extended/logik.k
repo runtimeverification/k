@@ -1,9 +1,10 @@
-// Copyright (c) 2013-2016 K Team. All Rights Reserved.
-require "modules/unification.k"
+require "unification.k"
 
-module LOGIK-SYNTAX
-  syntax Term ::= Variable
-                | Int
+module LOGIK-COMMON
+  imports DOMAINS-SYNTAX
+
+  syntax OperationName
+  syntax Term ::= Int
                 | String
                 | "(" Term ")"                                   [bracket]
                 | OperationName
@@ -16,6 +17,10 @@ module LOGIK-SYNTAX
                 | "[" Terms "|" Term "]"
   syntax Terms ::= List{Term,","}
 
+  syntax Val ::= OperationName "(" Vals ")"
+  syntax Vals ::= List{Val,","}
+
+  syntax PredicateName
   syntax Predicate ::= Bool
                      | PredicateName
                      | PredicateName "(" Terms ")"
@@ -31,29 +36,29 @@ module LOGIK-SYNTAX
   syntax Query ::= "?-" Predicates "."
   syntax Pgm ::= Query | Clause Pgm
 
-  syntax Variable      ::= Token{[\_A-Z][a-zA-Z0-9\_]*}          [notInRules, autoReject, token]
-  syntax OperationName ::= Token{[a-z][a-zA-Z0-9\_]*}            [notInRules, autoReject, token]
-  syntax PredicateName ::= Token{[a-z][a-zA-Z0-9\_]*}            [notInRules, autoReject, token]
+  rule [T1:Term,T2:Term,Ts:Terms|T':Term] => [T1|[T2,Ts|T']]      [macro]
+  rule [T:Term,Ts:Terms] => [T,Ts|[.Terms]]                      [macro]
 
-  rule P. => P :- .Predicates .                                  [macro]
+endmodule
 
-  rule (On:OperationName => On(.Terms)) , _                      [macro]
-  rule (Pn:PredicateName => Pn(.Terms)) :- _ .                   [macro]
-  rule (Pn:PredicateName => Pn(.Terms)) , _                      [macro]
+module LOGIK-SYNTAX
+  imports LOGIK-COMMON
+  imports BUILTIN-ID-TOKENS
 
-  rule [T:Term,Ts:Terms|T':Term] => [T|[Ts|T']] when Ts =/=K .Terms   [macro]
-  rule [Ts:Terms] => [Ts|[.Terms]] when Ts =/=K .Terms           [macro]
-
-// dirty trick to avoid semantic conflics with predicates (which are not strict)
-// the next term construct is not meant to be used in programs, although it can.
-  syntax Predicate ::= PredicateName "of" Terms
-  rule Pn:PredicateName(Ts:Terms) => Pn of Ts                    [macro]
+  syntax #KVariable ::= r"[A-Z_][A-Za-z0-9_]*"   [token, prec(2), autoReject]
+                      | #UpperId                 [token, autoReject]
+  syntax Term ::= #KVariable [klabel(#SemanticCastToTerm)]
+  syntax OperationName ::= r"[a-z][a-zA-Z0-9_]*"                 [autoReject, token]
+                         | #LowerId                              [autoReject, token]
+  syntax PredicateName ::= r"[a-z][a-zA-Z0-9_]*"                 [autoReject, token]
+                         | #LowerId                              [autoReject, token]
 
 endmodule
 
 
 module LOGIK
-  imports LOGIK-SYNTAX
+  imports LOGIK-COMMON
+  imports DOMAINS
   imports UNIFICATION
 
 // HW: You should complete this module

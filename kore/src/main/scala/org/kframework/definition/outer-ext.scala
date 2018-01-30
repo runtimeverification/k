@@ -7,6 +7,8 @@ import org.kframework.attributes._
 import org.kframework.kore.{KORE => con}
 
 case class Configuration(body: K, ensures: K, att: Att = Att.empty) extends Sentence with OuterKORE {
+  override val isSyntax = true
+  override val isNonSyntax = true
 
   //  override def toString = "configuration " + xmlify(body) + " ensures " + ensures
 
@@ -40,4 +42,7 @@ case class Configuration(body: K, ensures: K, att: Att = Att.empty) extends Sent
   //  }
 }
 
-case class Bubble(sentenceType: String, contents: String, att: Att = Att.empty) extends Sentence
+case class Bubble(sentenceType: String, contents: String, att: Att = Att.empty) extends Sentence {
+  override val isSyntax = sentenceType == "config"
+  override val isNonSyntax = true
+}

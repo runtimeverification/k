@@ -1,19 +1,20 @@
+MAKEFILE_PATH := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 DEF=fun-untyped
 EXT=fun
-TESTDIR=../../programs
+TESTDIR?=../../programs
 RESULTDIR=tests
 KOMPILE_FLAGS=--backend java
 KRUN_FLAGS=--pattern "<k> V:K </k>"
 
-include ../../../../../include/ktest.mak
-
-../../programs/calcc-looping.fun \
-../../programs/references-5.fun \
-../../programs/constructor-bst-sorting.fun \
-../../programs/constructor-expr-distributivity.fun \
-../../programs/factorial-and-list-max.fun \
-../../programs/nth.fun \
-../../programs/pattern.fun \
-../../programs/references-1.fun \
-../../programs/stuck-letrec.fun: kompile
+%/calcc-looping.fun \
+%/references-5.fun \
+%/constructor-bst-sorting.fun \
+%/constructor-expr-distributivity.fun \
+%/factorial-and-list-max.fun \
+%/nth.fun \
+%/pattern.fun \
+%/references-1.fun \
+%/stuck-letrec.fun: kompile
 	true
+
+include $(MAKEFILE_PATH)/../../../../../include/ktest.mak

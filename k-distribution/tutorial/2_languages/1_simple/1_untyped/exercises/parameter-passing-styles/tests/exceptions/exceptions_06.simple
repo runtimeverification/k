@@ -1,0 +1,22 @@
+var x;
+
+function f(y) {
+  var t = 1;
+  try {
+    print(t," ");
+    print(8," ");
+  } catch(p) {
+    print(p+10);  // not reachable
+  }
+  for (var i = 1; i <= y; ++i) {
+    t = t*i;
+  }
+  return t;
+}
+
+function main() {
+  x = 5;
+  print(f(x),"\n");
+}
+
+// 1 8 120

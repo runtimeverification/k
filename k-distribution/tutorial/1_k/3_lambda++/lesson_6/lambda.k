@@ -28,6 +28,7 @@ module.  Type kompile --help to see how to tell the parser which syntax to use.
 */
 
 module LAMBDA-SYNTAX
+  imports DOMAINS-SYNTAX
 /*@ \section{Syntax}
 We move all the LAMBDA++ syntax here. */
 
@@ -59,6 +60,7 @@ endmodule
 
 module LAMBDA
   imports LAMBDA-SYNTAX
+  imports DOMAINS
 
 /*@ \section{Semantics}
 The next module contains the semantics of all the LAMBDA++ constructs,

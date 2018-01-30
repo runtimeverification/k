@@ -1,61 +1,19 @@
-Search results:
-
-Solution 1:
-Solution:Map@MAP -->
-"A" |-> '_`(_`)(jim,, .List{","})
-"B" |-> '_`(_`)(john,, .List{","})
-"X" |-> '_`(_`)(david,, .List{","})
-
-Solution 2:
-Solution:Map@MAP -->
-"A" |-> '_`(_`)(nathan,, .List{","})
-"B" |-> '_`(_`)(david,, .List{","})
-"X" |-> '_`(_`)(jim,, .List{","})
-
-Solution 3:
-Solution:Map@MAP -->
-"A" |-> '_`(_`)(nathan,, .List{","})
-"B" |-> '_`(_`)(david,, .List{","})
-"X" |-> '_`(_`)(steve,, .List{","})
-
-Solution 4:
-Solution:Map@MAP -->
-"A" |-> '_`(_`)(nathan,, .List{","})
-"B" |-> '_`(_`)(jim,, .List{","})
-"X" |-> '_`(_`)(steve,, .List{","})
-
-Solution 5:
-Solution:Map@MAP -->
-"A" |-> '_`(_`)(nathan,, .List{","})
-"B" |-> '_`(_`)(john,, .List{","})
-"X" |-> '_`(_`)(david,, .List{","})
-
-Solution 6:
-Solution:Map@MAP -->
-"A" |-> '_`(_`)(nathan,, .List{","})
-"B" |-> '_`(_`)(john,, .List{","})
-"X" |-> '_`(_`)(jim,, .List{","})
-
-Solution 7:
-Solution:Map@MAP -->
-"A" |-> '_`(_`)(nathan,, .List{","})
-"B" |-> '_`(_`)(john,, .List{","})
-"X" |-> '_`(_`)(steve,, .List{","})
-
-Solution 8:
-Solution:Map@MAP -->
-"A" |-> '_`(_`)(steve,, .List{","})
-"B" |-> '_`(_`)(david,, .List{","})
-"X" |-> '_`(_`)(jim,, .List{","})
-
-Solution 9:
-Solution:Map@MAP -->
-"A" |-> '_`(_`)(steve,, .List{","})
-"B" |-> '_`(_`)(john,, .List{","})
-"X" |-> '_`(_`)(david,, .List{","})
-
-Solution 10:
-Solution:Map@MAP -->
-"A" |-> '_`(_`)(steve,, .List{","})
-"B" |-> '_`(_`)(john,, .List{","})
-"X" |-> '_`(_`)(jim,, .List{","})
+  Solution ==K ( A:Term |-> jim B:Term |-> john X:Term |-> david )
+#Or
+  Solution ==K ( A:Term |-> nathan B:Term |-> david X:Term |-> jim )
+#Or
+  Solution ==K ( A:Term |-> nathan B:Term |-> david X:Term |-> steve )
+#Or
+  Solution ==K ( A:Term |-> nathan B:Term |-> jim X:Term |-> steve )
+#Or
+  Solution ==K ( A:Term |-> nathan B:Term |-> john X:Term |-> david )
+#Or
+  Solution ==K ( A:Term |-> nathan B:Term |-> john X:Term |-> jim )
+#Or
+  Solution ==K ( A:Term |-> nathan B:Term |-> john X:Term |-> steve )
+#Or
+  Solution ==K ( A:Term |-> steve B:Term |-> david X:Term |-> jim )
+#Or
+  Solution ==K ( A:Term |-> steve B:Term |-> john X:Term |-> david )
+#Or
+  Solution ==K ( A:Term |-> steve B:Term |-> john X:Term |-> jim )

@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -181,20 +183,39 @@ public class Scanner implements AutoCloseable {
     }
     @Override
     public void close() {
-        for (Process p : pool) {
-            p.destroy();
+        synchronized(pool) {
+            if (pool.containsKey(scanner)) {
+                for (Process p : pool.get(scanner)._2()) {
+                    p.destroy();
+                }
+            }
         }
     }
 
-    AtomicInteger sizeofPool = new AtomicInteger(0);
+    private static final int N_CPUS = Runtime.getRuntime().availableProcessors();
+    private static final int N_DEFINITIONS = 10;
 
-    static int N_CPUS = Runtime.getRuntime().availableProcessors();
-
-    private ArrayBlockingQueue<Process> pool = new ArrayBlockingQueue<>(N_CPUS);
+    private static Map<File, Tuple2<AtomicInteger, ArrayBlockingQueue<Process>>> pool = Collections.synchronizedMap(new LinkedHashMap<File, Tuple2<AtomicInteger, ArrayBlockingQueue<Process>>>() {
+        @Override
+        protected synchronized boolean removeEldestEntry(final Map.Entry<File, Tuple2<AtomicInteger, ArrayBlockingQueue<Process>>> eldest) {
+            if (size() > N_DEFINITIONS) {
+                ArrayBlockingQueue<Process> pool = eldest.getValue()._2();
+                for (Process p : pool) {
+                    p.destroy();
+                }
+                return true;
+            }
+            return false;
+        }
+    });
 
     public Token[] tokenize(String input, Source source, int[] lines, int[] columns) {
         try {
             Process process;
+            Tuple2<AtomicInteger, ArrayBlockingQueue<Process>> entry = this.pool.computeIfAbsent(scanner, s -> Tuple2.apply(new AtomicInteger(0), new ArrayBlockingQueue<>(N_CPUS)));
+            AtomicInteger sizeofPool = entry._1();
+            ArrayBlockingQueue<Process> pool = entry._2();
+
             if (sizeofPool.getAndUpdate(i -> i < N_CPUS ? i + 1 : i) < N_CPUS) {
                 process = new ProcessBuilder(scanner.getAbsolutePath()).start();
             } else {
@@ -208,13 +229,13 @@ public class Scanner implements AutoCloseable {
             process.getOutputStream().write(buf);
             process.getOutputStream().write('\n');
             process.getOutputStream().flush();
-            return readTokenizedOutput(process, source, lines, columns);
+            return readTokenizedOutput(process, source, lines, columns, sizeofPool, pool);
         } catch (IOException | InterruptedException e) {
             throw KEMException.internalError("Failed to invoke scanner", e);
         }
     }
 
-    private Token[] readTokenizedOutput(Process process, Source source, int[] lines, int[] columns) throws IOException {
+    private Token[] readTokenizedOutput(Process process, Source source, int[] lines, int[] columns, AtomicInteger sizeofPool, ArrayBlockingQueue<Process> pool) throws IOException {
         List<Token> result = new ArrayList<>();
         while (true) {
             byte[] buf = new byte[24];

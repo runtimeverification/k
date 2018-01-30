@@ -3,15 +3,15 @@ package org.kframework.kompile;
 
 import org.kframework.Collections;
 import org.kframework.builtin.BooleanUtils;
+import org.kframework.compile.GenerateSentencesFromConfigDecl;
 import org.kframework.definition.Bubble;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.definition.Sentence;
+import org.kframework.kil.Import;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
-import org.kframework.compile.GenerateSentencesFromConfigDecl;
 import org.kframework.parser.concrete2kore.ParseInModule;
-import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.utils.errorsystem.KEMException;
 import scala.collection.Set;
 
@@ -23,7 +23,7 @@ import java.util.stream.Stream;
 
 import static org.kframework.Collections.*;
 import static org.kframework.definition.Constructors.*;
-import static org.kframework.kore.KORE.Sort;
+import static org.kframework.kore.KORE.*;
 
 /**
  * Expands configuration declaration to KORE productions and rules.
@@ -81,14 +81,29 @@ class ResolveConfig implements UnaryOperator<Module> {
                         configDecl -> stream(GenerateSentencesFromConfigDecl.gen(configDecl.body(), configDecl.ensures(), configDecl.att(), parser.getExtensionModule())))
                 .collect(Collections.toSet());
 
-        Module mapModule;
-        if (def.getModule("MAP").isDefined()) {
-            mapModule = def.getModule("MAP").get();
+        Set<Sentence> configDeclSyntax = stream(configDeclProductions).filter(Sentence::isSyntax).collect(Collections.toSet());
+        Set<Sentence> configDeclRules = stream(configDeclProductions).filter(Sentence::isNonSyntax).collect(Collections.toSet());
+
+        if (module.name().endsWith(Import.IMPORTS_SYNTAX_SUFFIX)) {
+            Module mapModule;
+            if (def.getModule("MAP$SYNTAX").isDefined()) {
+                mapModule = def.getModule("MAP$SYNTAX").get();
+            } else {
+                throw KEMException.compilerError("Module Map must be visible at the configuration declaration, in module " + module.name());
+            }
+            return Module(module.name(), (Set<Module>) module.imports().$bar(Set(mapModule)),
+                    (Set<Sentence>) module.localSentences().$bar(configDeclSyntax),
+                    module.att());
         } else {
-            throw KEMException.compilerError("Module Map must be visible at the configuration declaration, in module " + module.name());
+            Module mapModule;
+            if (def.getModule("MAP").isDefined()) {
+                mapModule = def.getModule("MAP").get();
+            } else {
+                throw KEMException.compilerError("Module Map must be visible at the configuration declaration, in module " + module.name());
+            }
+            return Module(module.name(), (Set<Module>) module.imports().$bar(Set(mapModule)),
+                    (Set<Sentence>) module.localSentences().$bar(configDeclRules),
+                    module.att());
         }
-        return Module(module.name(), (Set<Module>) module.imports().$bar(Set(mapModule)),
-                (Set<Sentence>) module.localSentences().$bar(configDeclProductions),
-                module.att());
     }
 }

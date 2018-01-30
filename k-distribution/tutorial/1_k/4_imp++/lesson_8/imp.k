@@ -77,7 +77,8 @@ of a program using the \texttt{search} option of \texttt{krun}.
 */
 
 module IMP-SYNTAX
-/*@ \section{Syntax}
+  imports DOMAINS-SYNTAX
+/*@ \section{Syntax}[
 IMP++ adds several syntactic constructs to IMP\@.  Also, since the
 variable declaration construct is generalized to be used anywhere a
 statement can be used, not only at the beginning of the program, we
@@ -147,6 +148,7 @@ endmodule
 
 module IMP
   imports IMP-SYNTAX
+  imports DOMAINS
 /*@ \section{Semantics}
 We next give the semantics of IMP++\@.  We start by first defining its
 configuration. */

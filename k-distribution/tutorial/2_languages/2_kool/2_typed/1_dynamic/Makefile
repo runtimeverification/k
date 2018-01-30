@@ -1,11 +1,12 @@
+MAKEFILE_PATH := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 DEF=kool-typed-dynamic
 EXT=kool
 KOMPILE_FLAGS=-O2
 KRUN_FLAGS=--output none
-TESTDIR=../programs
+TESTDIR?=../programs
 RESULTDIR=tests
 
-include ../../../../../include/ktest.mak
-
-../programs/cycle.kool: kompile
+%/cycle.kool: kompile
 	true
+
+include $(MAKEFILE_PATH)/../../../../../include/ktest.mak

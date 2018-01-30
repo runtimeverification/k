@@ -1,5 +1,1 @@
-Search results:
-
-Solution 1:
-V:K@SORT-K -->
-3 /Int 0 ~> (cond false) HOLE ~> HOLE 10
+V ==K ( ( div 3 0 ) ~> #freezer___LAMBDA-SYNTAX0_ ( cond false ) ~> #freezer___LAMBDA-SYNTAX1_ ( 10 ) )

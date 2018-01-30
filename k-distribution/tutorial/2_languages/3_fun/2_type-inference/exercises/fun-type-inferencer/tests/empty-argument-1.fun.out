@@ -1,5 +1,1 @@
-Search results:
-
-Solution 1:
-V:K@SORT-K -->
-( .List{","} ) nothing --> int
+V ==K ( ( ( .Exps ) nothing ) --> int )

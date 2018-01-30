@@ -1,0 +1,39 @@
+// Testing field shadowing and super.
+
+class C1 {
+  var x, y;
+  method C1() {
+    x=1;
+    y=2;
+  }
+}
+
+class C2 extends C1 {
+  var y, z;
+  method C2() {
+    C1();
+    y=20;
+    z=super.y;
+  }
+}
+
+class C3 extends C2 {
+  var x, y, z, u, w;
+  method C3() {
+    C2();
+    x=100;
+    y=200;
+    z=super.x;
+    u=super.y;
+    w=super.z;
+  }
+}
+
+class Main {
+  method Main() {
+    var o = new C3();
+    print(o.x, " ", o.y, " ", o.z, " ", o.u, " ", o.w, "\n");
+  }
+}
+
+// 100 200 1 20 2

@@ -10,10 +10,10 @@ clean: $(SUBCLEAN)
 update-results: $(SUBUPDATE)
 
 $(SUBMAKES):
-	$(MAKE) -f $@
+	$(MAKE) -e -f $@
 
 $(SUBCLEAN): %.clean:
-	$(MAKE) -f $* clean
+	$(MAKE) -e -f $* clean
 
 $(SUBUPDATE): %.update:
-	$(MAKE) -f $* update-results
+	$(MAKE) -e -f $* update-results

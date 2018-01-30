@@ -1,21 +1,7 @@
-Search results:
-
-Solution 1:
-Solution:Map@MAP -->
-"L" |-> '_`(_`)(cons,, (a ( .List{","} )), (cons ( ((b ( .Vals )), (cons ( ((c
-   ( .Vals )), (cons ( ((d ( .Vals )), (nil ( .Vals ))) ))) ))) )))
-
-Solution 2:
-Solution:Map@MAP -->
-"L" |-> '_`(_`)(cons,, (b ( .List{","} )), (cons ( ((a ( .Vals )), (cons ( ((c
-   ( .Vals )), (cons ( ((d ( .Vals )), (nil ( .Vals ))) ))) ))) )))
-
-Solution 3:
-Solution:Map@MAP -->
-"L" |-> '_`(_`)(cons,, (b ( .List{","} )), (cons ( ((c ( .Vals )), (cons ( ((a
-   ( .Vals )), (cons ( ((d ( .Vals )), (nil ( .Vals ))) ))) ))) )))
-
-Solution 4:
-Solution:Map@MAP -->
-"L" |-> '_`(_`)(cons,, (b ( .List{","} )), (cons ( ((c ( .Vals )), (cons ( ((d
-   ( .Vals )), (cons ( ((a ( .Vals )), (nil ( .Vals ))) ))) ))) )))
+  Solution ==K ( L:Term |-> ( cons ( a , ( cons ( b , ( cons ( c , ( cons ( d , ( nil , .Vals ) ) , .Vals ) ) , .Vals ) ) , .Vals ) ) ) )
+#Or
+  Solution ==K ( L:Term |-> ( cons ( b , ( cons ( a , ( cons ( c , ( cons ( d , ( nil , .Vals ) ) , .Vals ) ) , .Vals ) ) , .Vals ) ) ) )
+#Or
+  Solution ==K ( L:Term |-> ( cons ( b , ( cons ( c , ( cons ( a , ( cons ( d , ( nil , .Vals ) ) , .Vals ) ) , .Vals ) ) , .Vals ) ) ) )
+#Or
+  Solution ==K ( L:Term |-> ( cons ( b , ( cons ( c , ( cons ( d , ( cons ( a , ( nil , .Vals ) ) , .Vals ) ) , .Vals ) ) , .Vals ) ) ) )

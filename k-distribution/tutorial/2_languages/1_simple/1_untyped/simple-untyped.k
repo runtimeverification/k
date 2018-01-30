@@ -58,6 +58,7 @@ user of \K sees.  We recommend the beginner user to first check the
 language definitions discussed in the \K tutorial.} */
 
 module SIMPLE-UNTYPED-SYNTAX
+  imports DOMAINS-SYNTAX
 
 /*@ \section{Syntax}
 We start by defining the SIMPLE syntax.  The language constructs discussed
@@ -242,6 +243,7 @@ endmodule
 
 module SIMPLE-UNTYPED
   imports SIMPLE-UNTYPED-SYNTAX
+  imports DOMAINS
 
 /*@ \section{Basic Semantic Infrastructure}
 Before one starts adding semantic rules to a \K definition, one needs to

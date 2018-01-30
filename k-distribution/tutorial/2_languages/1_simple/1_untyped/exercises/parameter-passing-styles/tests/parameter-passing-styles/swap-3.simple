@@ -1,0 +1,15 @@
+function swap(& x,t, & y) {
+  t = x;
+  x = y;
+  y = t;
+}
+
+function main() {
+  var a[3];
+  a[0] = 7; a[1] = 8; a[2] = 9;
+  print("Before swap: a = (", a[0],", ",a[1],", ",a[2],")\n");
+  swap(a[0],a[1],a[2]);
+  print("After swap: a = (", a[0],", ",a[1],", ",a[2],")\n");
+  swap(a[0],a[0],a[0]);
+  print("After swap: a = (", a[0],", ",a[1],", ",a[2],")\n");
+}

@@ -1,9 +1,1 @@
-Search results:
-
-Solution 1:
-V:K@SORT-K -->
-#symType(53) --> (#symType(54)) --> ((#symType(55)) --> ((#symType(56)) --> ((
-  #symType(57)) --> ((#symType(58)) --> ((#symType(59)) --> (((#symType(60))) 
-  --> (#symType(61)) --> (#symType(62)) --> (#symType(63)) --> ((#symType(64))
-   --> ((#symType(65)) --> ((#symType(66)) --> (((#symType(67)) --> (#symType(
-  68)) --> (#symType(69)) --> (#symType(53)))))))))))))
+V ==K ( V0 --> V1 --> V2 --> V3 --> V4 --> V5 --> V6 --> V7 --> V8 --> V9 --> V10 --> V11 --> V12 --> V13 --> V14 --> V15 --> V16 --> V0 )

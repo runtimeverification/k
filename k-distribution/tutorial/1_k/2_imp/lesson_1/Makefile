@@ -1,4 +1,5 @@
+MAKEFILE_PATH := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 DEF=imp
 EXT=imp
 
-include ../../../../include/ktest.mak
+include $(MAKEFILE_PATH)/../../../../include/ktest.mak

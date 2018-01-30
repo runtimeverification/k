@@ -150,8 +150,9 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
             TermContext termContext = TermContext.builder(rewritingContext).freshCounter(initCounterValue).build();
             KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, termContext.global(), false);
             ResolveSemanticCasts resolveCasts = new ResolveSemanticCasts(true);
+            ExpandMacros macroExpander = new ExpandMacros(koreDef.executionModule(), kem, files, rewritingContext.globalOptions, koreDef.kompileOptions);
             termContext.setKOREtoBackendKILConverter(converter);
-            Term backendKil = MacroExpander.expandAndEvaluate(termContext, kem, converter.convert(resolveCasts.resolve(k)));
+            Term backendKil = converter.convert(macroExpander.expand(resolveCasts.resolve(k))).evaluate(termContext);
             SymbolicRewriter rewriter = new SymbolicRewriter(rewritingContext, transitions, converter);
             RewriterResult result = rewriter.rewrite(new ConstrainedTerm(backendKil, termContext), depth.orElse(-1));
             return result;
@@ -168,9 +169,10 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
             TermContext termContext = TermContext.builder(rewritingContext).freshCounter(initCounterValue).build();
             KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, termContext.global(), false);
             ResolveSemanticCasts resolveCasts = new ResolveSemanticCasts(true);
+            ExpandMacros macroExpander = new ExpandMacros(koreDef.executionModule(), kem, files, rewritingContext.globalOptions, koreDef.kompileOptions);
             termContext.setKOREtoBackendKILConverter(converter);
-            Term javaTerm = MacroExpander.expandAndEvaluate(termContext, kem, converter.convert(resolveCasts.resolve(initialConfiguration)));
-            org.kframework.backend.java.kil.Rule javaPattern = converter.convert(Optional.empty(), pattern);
+            Term javaTerm = converter.convert(macroExpander.expand(resolveCasts.resolve(initialConfiguration))).evaluate(termContext);
+            org.kframework.backend.java.kil.Rule javaPattern = converter.convert(Optional.empty(), ProofExecutionMode.transformFunction(JavaBackend::convertKSeqToKApply, pattern));
             SymbolicRewriter rewriter = new SymbolicRewriter(rewritingContext, transitions, converter);
             return rewriter.search(javaTerm, javaPattern, bound.orElse(NEGATIVE_VALUE), depth.orElse(NEGATIVE_VALUE), searchType, termContext);
         }

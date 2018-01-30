@@ -1,25 +1,11 @@
-Search results:
-
-Solution 1:
-Solution:Map@MAP -->
-"P" |-> [ 1 | ([ 2 | ([ 3 | ([ .List{","} ]) ]) ]) ]
-
-Solution 2:
-Solution:Map@MAP -->
-"P" |-> [ 1 | ([ 3 | ([ 2 | ([ .List{","} ]) ]) ]) ]
-
-Solution 3:
-Solution:Map@MAP -->
-"P" |-> [ 2 | ([ 1 | ([ 3 | ([ .List{","} ]) ]) ]) ]
-
-Solution 4:
-Solution:Map@MAP -->
-"P" |-> [ 2 | ([ 3 | ([ 1 | ([ .List{","} ]) ]) ]) ]
-
-Solution 5:
-Solution:Map@MAP -->
-"P" |-> [ 3 | ([ 1 | ([ 2 | ([ .List{","} ]) ]) ]) ]
-
-Solution 6:
-Solution:Map@MAP -->
-"P" |-> [ 3 | ([ 2 | ([ 1 | ([ .List{","} ]) ]) ]) ]
+  Solution ==K ( P:Term |-> [ 1 , .Vals | [ 2 , .Vals | [ 3 , .Vals | [ .Vals ] ] ] ] )
+#Or
+  Solution ==K ( P:Term |-> [ 1 , .Vals | [ 3 , .Vals | [ 2 , .Vals | [ .Vals ] ] ] ] )
+#Or
+  Solution ==K ( P:Term |-> [ 2 , .Vals | [ 1 , .Vals | [ 3 , .Vals | [ .Vals ] ] ] ] )
+#Or
+  Solution ==K ( P:Term |-> [ 2 , .Vals | [ 3 , .Vals | [ 1 , .Vals | [ .Vals ] ] ] ] )
+#Or
+  Solution ==K ( P:Term |-> [ 3 , .Vals | [ 1 , .Vals | [ 2 , .Vals | [ .Vals ] ] ] ] )
+#Or
+  Solution ==K ( P:Term |-> [ 3 , .Vals | [ 2 , .Vals | [ 1 , .Vals | [ .Vals ] ] ] ] )

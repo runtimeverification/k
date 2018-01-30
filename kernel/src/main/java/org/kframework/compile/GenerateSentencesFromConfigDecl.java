@@ -269,10 +269,14 @@ public class GenerateSentencesFromConfigDecl {
 
         java.util.Set<Sentence> sentences = new HashSet<Sentence>();
 
+        String klabel = "<" + cellName + ">";
+        Att att = cellProperties.addAll(configAtt);
         // syntax Cell ::= "<cell>" Children... "</cell>" [cell, cellProperties, configDeclAttributes]
-        Production cellProduction = Production("<" + cellName + ">", sort, immutable(items),
-                cellProperties.addAll(configAtt));
-        sentences.add(cellProduction);
+        if(!m.definedKLabels().contains(KLabel(klabel)) && multiplicity != Multiplicity.OPTIONAL) {
+            Production cellProduction = Production(klabel, sort, immutable(items),
+                    att);
+            sentences.add(cellProduction);
+        }
 
         // syntax Cell ::= "initCell" [initializer, function]
         // -or-
@@ -287,7 +291,9 @@ public class GenerateSentencesFromConfigDecl {
             initializer = Production(initLabel, sort, Seq(Terminal(initLabel)), Att().add("initializer").add("function").add("noThread"));
             initializerRule = Rule(KRewrite(KApply(KLabel(initLabel)), IncompleteCellUtils.make(KLabel("<" + cellName + ">"), false, childInitializer, false)), BooleanUtils.TRUE, ensures == null ? BooleanUtils.TRUE : ensures, Att().add("initializer"));
         }
-        sentences.add(initializer);
+        if (!m.definedKLabels().contains(KLabel(initLabel))) {
+            sentences.add(initializer);
+        }
         sentences.add(initializerRule);
 
         if (!isLeaf) {
@@ -313,13 +319,17 @@ public class GenerateSentencesFromConfigDecl {
                     fragmentItems.add(NonTerminal(childOptSort));
 
                     sentences.add(Production(childOptSort, List(NonTerminal(childSort))));
-                    sentences.add(Production("no"+childSort.name(), childOptSort, List(Terminal("no"+childSort.name())),
-                            Att().add(Attribute.CELL_OPT_ABSENT_KEY,childSort.name())));
+                    if (!m.definedKLabels().contains(KLabel("no"+childSort.name()))) {
+                        sentences.add(Production("no"+childSort.name(), childOptSort, List(Terminal("no"+childSort.name())),
+                                Att().add(Attribute.CELL_OPT_ABSENT_KEY,childSort.name())));
+                    }
                 }
             }
             fragmentItems.add(Terminal("</"+cellName+">-fragment"));
-            sentences.add(Production("<" + cellName + ">-fragment", fragmentSort, immutable(fragmentItems),
-                    Att().add(Attribute.CELL_FRAGMENT_KEY, sortName)));
+            if (!m.definedKLabels().contains(KLabel("<" + cellName + ">-fragment"))) {
+                sentences.add(Production("<" + cellName + ">-fragment", fragmentSort, immutable(fragmentItems),
+                        Att().add(Attribute.CELL_FRAGMENT_KEY, sortName)));
+            }
         }
 
         Sort cellsSort;
@@ -406,9 +416,10 @@ public class GenerateSentencesFromConfigDecl {
             Production cellUnit = Production("." + sortName, sort, Seq(Terminal("." + sortName)));
             sentences.add(cellUnit);
             // add UNIT_KEY attribute to cell production.
-            sentences.remove(cellProduction);
-            cellProduction = Production(cellProduction.sort(), cellProduction.items(), cellProduction.att().add(Attribute.UNIT_KEY, cellUnit.klabel().get().name()));
-            sentences.add(cellProduction);
+            if(!m.definedKLabels().contains(KLabel(klabel))) {
+                Production cellProduction = Production(sort, immutable(items), att.add(Attribute.UNIT_KEY, cellUnit.klabel().get().name()));
+                sentences.add(cellProduction);
+            }
             // rule initCell => .CellBag
             // -or-
             // rule initCell(Init) => <cell> Context[$var] </cell>

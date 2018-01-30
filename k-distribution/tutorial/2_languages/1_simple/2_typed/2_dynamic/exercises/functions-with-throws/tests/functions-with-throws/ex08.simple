@@ -1,0 +1,22 @@
+void f(int x) {        // throws clause needed for type checking
+  try {
+    print(x, "\n");
+    if(x >=3) {
+      throw -1;        // static semantics should reject this
+    } else {
+      f(x+1);
+    }
+  } catch(bool b) {
+    print("Wrong\n");  // never reaches this
+  }
+  print("Wrong\n");    // never reaches this
+}
+
+void main() {
+  try {
+    f(1);
+  } catch(int x) {
+    print("OK\n");
+  }
+  print("Done\n");
+}

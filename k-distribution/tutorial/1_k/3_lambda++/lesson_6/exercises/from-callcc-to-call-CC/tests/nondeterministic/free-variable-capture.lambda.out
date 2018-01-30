@@ -1,0 +1,11 @@
+  V ==K ( a ~> #freezer___LAMBDA-SEMANTICS1_ ( ( lambda x . lambda y . x ) y z ) ~> .Map )
+#Or
+  V ==K ( a ~> #freezer___LAMBDA-SEMANTICS1_ ( closure ( $exit |-> 1 , x , lambda y . x ) y z ) ~> .Map )
+#Or
+  V ==K ( y ~> #freezer___LAMBDA-SEMANTICS0_ ( closure ( $exit |-> 1 , x , lambda y . x ) ) ~> #freezer___LAMBDA-SEMANTICS1_ ( z ) ~> #freezer___LAMBDA-SEMANTICS0_ ( a ) ~> .Map )
+#Or
+  V ==K ( y ~> #freezer___LAMBDA-SEMANTICS0_ ( lambda x . lambda y . x ) ~> #freezer___LAMBDA-SEMANTICS1_ ( z ) ~> #freezer___LAMBDA-SEMANTICS0_ ( a ) ~> .Map )
+#Or
+  V ==K ( z ~> #freezer___LAMBDA-SEMANTICS0_ ( ( lambda x . lambda y . x ) y ) ~> #freezer___LAMBDA-SEMANTICS0_ ( a ) ~> .Map )
+#Or
+  V ==K ( z ~> #freezer___LAMBDA-SEMANTICS0_ ( closure ( $exit |-> 1 , x , lambda y . x ) y ) ~> #freezer___LAMBDA-SEMANTICS0_ ( a ) ~> .Map )

@@ -1,0 +1,10 @@
+void main() {
+  int x;
+  print("x = ");
+  x=read();
+  int t1 = spawn {x=x/2;};
+  int t2 = spawn {x=x+10;};
+  join(t1);       // comment out for more behaviors
+  join(t2);       // comment out for more behaviors
+  print(x,"\n");
+}

@@ -1,0 +1,71 @@
+  V ==K [ 7 , ( 8 , ( 9 , .GeneratedListBottom ) ) ] #And
+  _0 ==K <env> .Map </env> #And
+  _1 ==K <store> 1 |-> closure ( .Map , ( x -> ( x := @ x + 1 ) ) | .Cases ) 2 |-> 9 5 |-> 2 17 |-> 2 </store>
+#Or
+  V ==K [ 7 , ( 8 , ( 9 , .GeneratedListBottom ) ) ] #And
+  _0 ==K <env> .Map </env> #And
+  _1 ==K <store> 1 |-> closure ( .Map , ( x -> ( x := @ x + 1 ) ) | .Cases ) 2 |-> 9 13 |-> 2 27 |-> 2 </store>
+#Or
+  V ==K [ 7 , ( 8 , ( 9 , .GeneratedListBottom ) ) ] #And
+  _0 ==K <env> .Map </env> #And
+  _1 ==K <store> 1 |-> closure ( .Map , ( x -> ( x := @ x + 1 ) ) | .Cases ) 2 |-> 9 14 |-> 2 28 |-> 2 </store>
+#Or
+  V ==K [ 7 , ( 9 , ( 8 , .GeneratedListBottom ) ) ] #And
+  _0 ==K <env> .Map </env> #And
+  _1 ==K <store> 1 |-> closure ( .Map , ( x -> ( x := @ x + 1 ) ) | .Cases ) 2 |-> 9 6 |-> 2 18 |-> 2 </store>
+#Or
+  V ==K [ 7 , ( 9 , ( 8 , .GeneratedListBottom ) ) ] #And
+  _0 ==K <env> .Map </env> #And
+  _1 ==K <store> 1 |-> closure ( .Map , ( x -> ( x := @ x + 1 ) ) | .Cases ) 2 |-> 9 11 |-> 2 25 |-> 2 </store>
+#Or
+  V ==K [ 7 , ( 9 , ( 8 , .GeneratedListBottom ) ) ] #And
+  _0 ==K <env> .Map </env> #And
+  _1 ==K <store> 1 |-> closure ( .Map , ( x -> ( x := @ x + 1 ) ) | .Cases ) 2 |-> 9 12 |-> 2 26 |-> 2 </store>
+#Or
+  V ==K [ 8 , ( 8 , ( 9 , .GeneratedListBottom ) ) ] #And
+  _0 ==K <env> .Map </env> #And
+  _1 ==K <store> 1 |-> closure ( .Map , ( x -> ( x := @ x + 1 ) ) | .Cases ) 2 |-> 9 3 |-> 2 20 |-> 2 </store>
+#Or
+  V ==K [ 8 , ( 8 , ( 9 , .GeneratedListBottom ) ) ] #And
+  _0 ==K <env> .Map </env> #And
+  _1 ==K <store> 1 |-> closure ( .Map , ( x -> ( x := @ x + 1 ) ) | .Cases ) 2 |-> 9 9 |-> 2 31 |-> 2 </store>
+#Or
+  V ==K [ 8 , ( 8 , ( 9 , .GeneratedListBottom ) ) ] #And
+  _0 ==K <env> .Map </env> #And
+  _1 ==K <store> 1 |-> closure ( .Map , ( x -> ( x := @ x + 1 ) ) | .Cases ) 2 |-> 9 10 |-> 2 32 |-> 2 </store>
+#Or
+  V ==K [ 8 , ( 9 , ( 8 , .GeneratedListBottom ) ) ] #And
+  _0 ==K <env> .Map </env> #And
+  _1 ==K <store> 1 |-> closure ( .Map , ( x -> ( x := @ x + 1 ) ) | .Cases ) 2 |-> 9 4 |-> 2 23 |-> 2 </store>
+#Or
+  V ==K [ 8 , ( 9 , ( 8 , .GeneratedListBottom ) ) ] #And
+  _0 ==K <env> .Map </env> #And
+  _1 ==K <store> 1 |-> closure ( .Map , ( x -> ( x := @ x + 1 ) ) | .Cases ) 2 |-> 9 7 |-> 2 29 |-> 2 </store>
+#Or
+  V ==K [ 8 , ( 9 , ( 8 , .GeneratedListBottom ) ) ] #And
+  _0 ==K <env> .Map </env> #And
+  _1 ==K <store> 1 |-> closure ( .Map , ( x -> ( x := @ x + 1 ) ) | .Cases ) 2 |-> 9 8 |-> 2 30 |-> 2 </store>
+#Or
+  V ==K [ 9 , ( 8 , ( 9 , .GeneratedListBottom ) ) ] #And
+  _0 ==K <env> .Map </env> #And
+  _1 ==K <store> 1 |-> closure ( .Map , ( x -> ( x := @ x + 1 ) ) | .Cases ) 2 |-> 9 3 |-> 2 15 |-> 2 </store>
+#Or
+  V ==K [ 9 , ( 8 , ( 9 , .GeneratedListBottom ) ) ] #And
+  _0 ==K <env> .Map </env> #And
+  _1 ==K <store> 1 |-> closure ( .Map , ( x -> ( x := @ x + 1 ) ) | .Cases ) 2 |-> 9 9 |-> 2 22 |-> 2 </store>
+#Or
+  V ==K [ 9 , ( 8 , ( 9 , .GeneratedListBottom ) ) ] #And
+  _0 ==K <env> .Map </env> #And
+  _1 ==K <store> 1 |-> closure ( .Map , ( x -> ( x := @ x + 1 ) ) | .Cases ) 2 |-> 9 10 |-> 2 24 |-> 2 </store>
+#Or
+  V ==K [ 9 , ( 9 , ( 8 , .GeneratedListBottom ) ) ] #And
+  _0 ==K <env> .Map </env> #And
+  _1 ==K <store> 1 |-> closure ( .Map , ( x -> ( x := @ x + 1 ) ) | .Cases ) 2 |-> 9 4 |-> 2 16 |-> 2 </store>
+#Or
+  V ==K [ 9 , ( 9 , ( 8 , .GeneratedListBottom ) ) ] #And
+  _0 ==K <env> .Map </env> #And
+  _1 ==K <store> 1 |-> closure ( .Map , ( x -> ( x := @ x + 1 ) ) | .Cases ) 2 |-> 9 7 |-> 2 19 |-> 2 </store>
+#Or
+  V ==K [ 9 , ( 9 , ( 8 , .GeneratedListBottom ) ) ] #And
+  _0 ==K <env> .Map </env> #And
+  _1 ==K <store> 1 |-> closure ( .Map , ( x -> ( x := @ x + 1 ) ) | .Cases ) 2 |-> 9 8 |-> 2 21 |-> 2 </store>

@@ -1,0 +1,9 @@
+function increment(x) {
+  return x + 1;
+}
+
+function main() {
+  var x = 0;
+  x = increment(x);
+  print("x = ", x, "\n");
+}

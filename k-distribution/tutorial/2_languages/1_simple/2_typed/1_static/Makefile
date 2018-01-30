@@ -1,8 +1,9 @@
+MAKEFILE_PATH := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 DEF=simple-typed-static
 EXT=simple
-TESTDIR=../programs/*
+TESTDIR?=../programs/*
 RESULTDIR=tests
 KOMPILE_FLAGS=--backend java
 KRUN_FLAGS=--pattern "<tasks> .Bag </tasks>"
 
-include ../../../../../include/ktest.mak
+include $(MAKEFILE_PATH)/../../../../../include/ktest.mak

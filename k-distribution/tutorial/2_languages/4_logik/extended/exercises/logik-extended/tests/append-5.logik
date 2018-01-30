@@ -1,0 +1,5 @@
+append(nil,L,L).
+append(cons(H,T),L,cons(H,Z)) :- append(T,L,Z).
+
+// Next query has no solution; LOGIK detects that quickly
+?- append(cons(a,L1), L2, cons(b,L3)).

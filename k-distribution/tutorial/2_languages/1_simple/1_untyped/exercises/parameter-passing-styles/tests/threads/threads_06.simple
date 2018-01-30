@@ -1,0 +1,10 @@
+function main() {
+  var x;
+  print("x = ");
+  x=read();
+  var t1 = spawn {x=x/2;};
+  var t2 = spawn {x=x+10;};
+  join(t1);       // comment out for more behaviors
+  join(t2);       // comment out for more behaviors
+  print(x,"\n");
+}

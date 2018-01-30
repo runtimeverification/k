@@ -1,7 +1,1 @@
-Search results:
-
-Solution 1:
-Solution:Map@MAP -->
-"A" |-> A
-"B" |-> B
-"C" |-> A
+Solution ==K ( A:Term |-> V0 B:Term |-> V1 C:Term |-> V0 )

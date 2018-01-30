@@ -1,0 +1,21 @@
+class B {
+    int x = 3;
+    void B() {
+	x = 5;
+    }
+}
+
+class A extends B {
+    private int y = 7;
+    void A() {
+        super.B();  // KOOL doesn't automatically call superclass constructors
+	y = 10;
+    }
+}
+
+class Main {
+  void Main() {
+    print("The next should be printed now: ");
+    print((new A()).x);
+  }
+}

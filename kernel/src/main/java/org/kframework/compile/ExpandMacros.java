@@ -4,26 +4,35 @@ package org.kframework.compile;
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.definition.Context;
 import org.kframework.definition.Module;
+import org.kframework.definition.Production;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
+import org.kframework.kil.Attribute;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.KToken;
 import org.kframework.kore.KVariable;
+import org.kframework.kore.Sort;
 import org.kframework.kore.TransformK;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.kframework.Collections.*;
+import static org.kframework.kore.KORE.*;
 import static org.kframework.definition.Constructors.*;
 
 /**
@@ -36,10 +45,12 @@ public class ExpandMacros {
     private final KExceptionManager kem;
 
     private final Map<KLabel, List<Rule>> macros;
+    private final Module mod;
 
     public ExpandMacros(Module mod, KExceptionManager kem, FileUtil files, GlobalOptions globalOptions, KompileOptions kompileOptions) {
         this.kem = kem;
-        macros = stream(mod.rules()).filter(r -> r.att().contains("macro")).collect(Collectors.groupingBy(r -> ((KApply)RewriteToTop.toLeft(r.body())).klabel()));
+        this.mod = mod;
+        macros = stream(mod.rules()).filter(r -> r.att().contains("macro")).sorted(Comparator.comparing(r -> r.att().contains("owise"))).collect(Collectors.groupingBy(r -> ((KApply)RewriteToTop.toLeft(r.body())).klabel()));
     }
 
     private Rule expand(Rule rule) {
@@ -65,13 +76,14 @@ public class ExpandMacros {
                 List<Rule> rules = macros.get(k.klabel());
                 if (rules == null)
                     return super.apply(k);
+                K applied = super.apply(k);
                 for (Rule r : rules) {
                     if (!r.requires().equals(BooleanUtils.TRUE)) {
                         throw KEMException.compilerError("Cannot compute macros with side conditions.", r);
                     }
                     K left = RewriteToTop.toLeft(r.body());
                     final Map<KVariable, K> subst = new HashMap<>();
-                    if (match(subst, left, k, r)) {
+                    if (match(subst, left, applied, r)) {
                         return apply(new TransformK() {
                             @Override
                             public K apply(KVariable k) {
@@ -80,9 +92,33 @@ public class ExpandMacros {
                         }.apply(RewriteToTop.toRight(r.body())));
                     }
                 }
-                return super.apply(k);
+                return applied;
             }
         }.apply(term);
+    }
+
+    private Set<Sort> sort(K k, Rule r) {
+        if (k instanceof KVariable) {
+            return Collections.singleton(Sort(k.att().get(Attribute.SORT_KEY)));
+        } else if (k instanceof KToken) {
+            return Collections.singleton(((KToken)k).sort());
+        } else if (k instanceof KApply) {
+           KApply kapp = (KApply)k;
+           if (kapp.klabel() instanceof KVariable) {
+               throw KEMException.compilerError("Cannot compute macros with klabel variables.", r);
+           }
+           Set<Production> prods = new HashSet<>(mutable(mod.productionsFor().apply(kapp.klabel())));
+           prods.removeIf(p -> p.arity() != kapp.items().size());
+           for (int i = 0; i < kapp.items().size(); i++) {
+              final int idx = i;
+              Set<Sort> sorts = sort(kapp.items().get(idx), r);
+              prods.removeIf(p -> sorts.stream().noneMatch(s -> mod.subsorts().lessThanEq(s, p.nonterminal(idx).sort())));
+           }
+           Set<Sort> candidates = prods.stream().map(Production::sort).collect(Collectors.toSet());
+           return candidates;
+        } else {
+            throw KEMException.compilerError("Cannot compute macros with sort check on terms that are not KApply, KToken, or KVariable.", r);
+        }
     }
 
     private boolean match(Map<KVariable, K> subst, K pattern, K subject, Rule r) {
@@ -90,8 +126,18 @@ public class ExpandMacros {
             if (subst.containsKey(pattern)) {
                 return subst.get(pattern).equals(subject);
             } else {
-                subst.put((KVariable)pattern, subject);
-                return true;
+                if (pattern.att().contains(Attribute.SORT_KEY)) {
+                    Sort patternSort = Sort(pattern.att().get(Attribute.SORT_KEY));
+                    if (sort(subject, r).stream().anyMatch(s -> mod.subsorts().lessThanEq(s, patternSort))) {
+                        subst.put((KVariable)pattern, subject);
+                        return true;
+                    } else {
+                        return false;
+                    }
+                } else {
+                    subst.put((KVariable)pattern, subject);
+                    return true;
+                }
             }
         }
         if (pattern instanceof KApply && subject instanceof KApply) {
@@ -121,7 +167,7 @@ public class ExpandMacros {
         if (subject instanceof KToken || pattern instanceof KToken) {
             return false;
         }
-        throw KEMException.compilerError("Cannot compute macros with terms that are not KApply or KVariable.", r);
+        throw KEMException.compilerError("Cannot compute macros with terms that are not KApply, KToken, or KVariable.", r);
     }
 
     public Sentence expand(Sentence s) {

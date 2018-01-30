@@ -1,13 +1,3 @@
-Search results:
-
-Solution 1:
-Solution:Map@MAP -->
-"L1" |-> '_`(_`)(cons,, (a ( .List{","} )), (cons ( ((b ( .Vals )), (nil ( 
-  .Vals ))) )))
-"L2" |-> '_`(_`)(nil,, .List{","})
-
-Solution 2:
-Solution:Map@MAP -->
-"L1" |-> '_`(_`)(nil,, .List{","})
-"L2" |-> '_`(_`)(cons,, (b ( .List{","} )), (cons ( ((a ( .Vals )), (nil ( 
-  .Vals ))) )))
+  Solution ==K ( L1:Term |-> ( cons ( a , ( cons ( b , ( nil , .Vals ) ) , .Vals ) ) ) L2:Term |-> nil )
+#Or
+  Solution ==K ( L1:Term |-> nil L2:Term |-> ( cons ( b , ( cons ( a , ( nil , .Vals ) ) , .Vals ) ) ) )

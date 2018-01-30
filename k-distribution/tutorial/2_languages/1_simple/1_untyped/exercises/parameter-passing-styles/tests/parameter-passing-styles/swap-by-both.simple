@@ -1,0 +1,27 @@
+function swapRef(& x, t, & y) {
+  t = x; x = y; y = t;
+}
+
+function swapPtr(x,y) {
+  *x = *x + *y;
+  *y = *x - *y;
+  *x = *x - *y;
+}
+
+function swapPtrRef(x,y) {
+  swapRef(*x,0,*y);
+}
+
+function swapRefPtr(& x, & y) {
+  swapPtr(&x, &y);
+}
+
+function main() {
+  var x = 7;
+  var y[2]; y[1] = 10;
+  print("       Initially: x = ", x, " and y[1] = ", y[1], "\n");
+  swapRefPtr(x,y[1]);
+  print("After swapRefPtr: x = ", x, " and y[1] = ", y[1], "\n");
+  swapPtrRef(&x,&(y[1]));
+  print("After swapPtrRef: x = ", x, " and y[1] = ", y[1], "\n");
+}

@@ -21,6 +21,7 @@ reader to consult the typing policy and the syntax of types discussed
 in the static semantics of the typed SIMPLE language. */
 
 module SIMPLE-TYPED-DYNAMIC-SYNTAX
+  imports DOMAINS-SYNTAX
 
 /*@ \section{Syntax}
 The syntax of typed SIMPLE extends that of untyped SIMPLE with support
@@ -124,6 +125,7 @@ endmodule
 
 module SIMPLE-TYPED-DYNAMIC
   imports SIMPLE-TYPED-DYNAMIC-SYNTAX
+  imports DOMAINS
 
 //@ \section{Semantics}
 

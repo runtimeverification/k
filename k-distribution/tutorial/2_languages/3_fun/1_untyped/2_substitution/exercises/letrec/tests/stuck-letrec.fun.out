@@ -1,0 +1,3 @@
+V ==K ( x ~> #freezer_,__FUN-UNTYPED-COMMON1_ ( .GeneratedListBottom ) ~> #freezer_,__FUN-UNTYPED-COMMON0_ ( 2 ) ~> #freezerassignTo0_ ( x , ( y , .GeneratedListBottom ) ) ~> y ~> setEnv ( x |-> 1 ) ~> setEnv ( .Map ) ) #And
+_0 ==K <env> x |-> 2 y |-> 3 </env> #And
+_1 ==K <store> 1 |-> 1 </store>

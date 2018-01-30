@@ -12,17 +12,17 @@ import java.io.IOException;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TstKILtoKOREIT extends BaseTest {
 
-    @Test
+    @Test @Ignore
     public void emptyModule() throws IOException {
         outerOnlyTest();
     }
 
-    @Test
+    @Test @Ignore
     public void simpleSyntax() throws IOException {
         outerOnlyTest();
     }
 
-    @Test
+    @Test @Ignore
     public void syntaxWithAttributes() throws IOException {
         outerOnlyTest();
     }
@@ -32,7 +32,7 @@ public class TstKILtoKOREIT extends BaseTest {
         outerOnlyTest();
     }
 
-    @Test
+    @Test @Ignore
     public void imports() throws IOException {
         outerOnlyTest();
     }

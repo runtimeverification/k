@@ -1,3 +1,4 @@
+MAKEFILE_PATH := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 TESTDIR=tests/nondeterministic
 DEFDIR=nondet
-include ../lesson_2/Makefile
+include $(MAKEFILE_PATH)/../lesson_2/Makefile

@@ -1,0 +1,7 @@
+  Out ==K "x = 11\n"
+#Or
+  Out ==K "x = 16\n"
+#Or
+  Out ==K "x = 21\n"
+#Or
+  Out ==K "x = 33\n"

@@ -1,0 +1,10 @@
+reverseFast(nil,L,L).
+reverseFast(cons(H,T),L1,L2) :-
+  reverseFast(T,cons(H,L1),L2).
+
+reverse(L1,L2) :-
+  reverseFast(L1,nil,L2).
+
+// Next should generate all palindromes.  However, since there are infinitely
+// many of them, use a bound, say 5, to only see a few.
+?- reverse(L,L).

@@ -23,6 +23,7 @@ the discussion in the preamble of the static semantics of typed KOOL
 before proceeding. */
 
 module KOOL-TYPED-DYNAMIC-SYNTAX
+  imports DOMAINS-SYNTAX
 
 /*@ \section{Syntax}
 
@@ -147,6 +148,7 @@ KOOL-specific constructs.  */
 
 module KOOL-TYPED-DYNAMIC
   imports KOOL-TYPED-DYNAMIC-SYNTAX
+  imports DOMAINS
 
 /*@ \subsection{Configuration}
 The configuration of dynamically typed KOOL is almost identical to

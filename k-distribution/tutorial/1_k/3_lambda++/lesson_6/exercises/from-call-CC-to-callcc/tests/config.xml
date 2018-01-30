@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright (c) 2013-2014 K Team. All Rights Reserved. -->
-<tests>
-
-  <include file="../../../tests/config.xml" >
-    <kompile-option name="--main-module" value="CALLCC"/>
-  </include>
-
-</tests>

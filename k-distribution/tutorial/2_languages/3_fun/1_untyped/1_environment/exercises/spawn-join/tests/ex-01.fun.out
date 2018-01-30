@@ -1,17 +1,7 @@
-Search results:
-
-Solution 1:
-S:String -->
-"22"
-
-Solution 2:
-S:String -->
-"23"
-
-Solution 3:
-S:String -->
-"32"
-
-Solution 4:
-S:String -->
-"33"
+  S ==K "22"
+#Or
+  S ==K "23"
+#Or
+  S ==K "32"
+#Or
+  S ==K "33"

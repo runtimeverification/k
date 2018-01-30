@@ -18,6 +18,7 @@ the reader should consult the emvironment-based definition of FUN. */
 //@ \section{Syntax}
 
 module FUN-UNTYPED-COMMON
+  imports DOMAINS-SYNTAX
 
 //@ \subsection{The Syntactic Constructs}
 
@@ -38,6 +39,7 @@ module FUN-UNTYPED-COMMON
                  Exp "+" Exp                       [strict, left, arith]
                | Exp "^" Exp                       [strict, left, arith]
                | Exp "-" Exp                       [strict, prefer, arith]
+               | "-" Exp                           [strict, arith]
                > non-assoc:
                  Exp "<" Exp                       [strict, arith]
                | Exp "<=" Exp                      [strict, arith]
@@ -169,6 +171,7 @@ endmodule
 module FUN-UNTYPED
   imports FUN-UNTYPED-COMMON
   imports FUN-UNTYPED-MACROS
+  imports DOMAINS
   imports SUBSTITUTION
   //imports PATTERN-MATCHING
 
@@ -186,19 +189,20 @@ module FUN-UNTYPED
   syntax Exps ::= Names
   syntax Vals ::= Names
 
-  rule I1:Int * I2:Int => I1 *Int I2
-  rule I1:Int / I2:Int => I1 /Int I2 when I2 =/=K 0
-  rule I1:Int % I2:Int => I1 %Int I2 when I2 =/=K 0
-  rule I1:Int + I2:Int => I1 +Int I2
-  rule S1:String ^ S2:String => S1 +String S2
-  rule I1:Int - I2:Int => I1 -Int I2
-  rule I1:Int < I2:Int => I1 <Int I2
-  rule I1:Int <= I2:Int => I1 <=Int I2
-  rule I1:Int > I2:Int => I1 >Int I2
-  rule I1:Int >= I2:Int => I1 >=Int I2
+  rule I1 * I2 => I1 *Int I2
+  rule I1 / I2 => I1 /Int I2 when I2 =/=K 0
+  rule I1 % I2 => I1 %Int I2 when I2 =/=K 0
+  rule I1 + I2 => I1 +Int I2
+  rule S1 ^ S2 => S1 +String S2
+  rule I1 - I2 => I1 -Int I2
+  rule - I => 0 -Int I
+  rule I1 < I2 => I1 <Int I2
+  rule I1 <= I2 => I1 <=Int I2
+  rule I1 > I2 => I1 >Int I2
+  rule I1 >= I2 => I1 >=Int I2
   rule V1:Val == V2:Val => V1 ==K V2
   rule V1:Val != V2:Val => V1 =/=K V2
-  rule ! T:Bool => notBool(T)
+  rule ! T => notBool(T)
   rule true  && E => E
   rule false && _ => false
   rule true  || _ => true

@@ -6,13 +6,18 @@ import com.google.common.collect.Sets;
 import org.kframework.attributes.Att;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
+import org.kframework.compile.checks.CheckListDecl;
 import org.kframework.definition.Associativity;
 import org.kframework.definition.ModuleComment;
 import org.kframework.definition.ProductionItem;
 import org.kframework.definition.RegexTerminal;
 import org.kframework.definition.Tag;
 import org.kframework.kil.*;
-import org.kframework.compile.checks.CheckListDecl;
+import org.kframework.kil.Definition;
+import org.kframework.kil.Module;
+import org.kframework.kil.NonTerminal;
+import org.kframework.kil.Production;
+import org.kframework.kil.Terminal;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import scala.Enumeration.Value;
@@ -28,6 +33,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.kframework.Collections.*;
 import static org.kframework.definition.Constructors.*;
@@ -94,41 +100,54 @@ public class KILtoKORE extends KILTransformation<Object> {
                 .map(imp -> (Import) imp)
                 .collect(Collectors.toSet());
 
-        // TODO (@cos): This is a bug. If someone has a folder named builtin, nothing under that is going to work.
-        // the proper way to verify if a file is builtin, is to verify if the entire absolute path begins with
-        // the K builtin directory. This is a regression from K3.6
-        boolean isPredefined = mainModule.getSource().source().contains("builtin");
-        if (autoImportDomains && !isPredefined) {
-            if (mainModule.getName().endsWith("-SYNTAX")) {
-                importedModuleNames.add(new Import("DOMAINS-SYNTAX"));
-            } else {
-                importedModuleNames.add(new Import("DOMAINS"));
-            }
-        }
+        Set<Import> importedSyntax = importedModuleNames.stream()
+                .map(Import::getImportSyntax)
+                .collect(Collectors.toSet());
 
-        Set<org.kframework.definition.Module> importedModules = importedModuleNames.stream()
-                .map(imp -> {
-                    Optional<Module> theModule = allKilModules.stream()
-                            .filter(m -> m.getName().equals(imp.getName()))
-                            .findFirst();
-                    if (theModule.isPresent()) {
-                        Module mod = theModule.get();
-                        org.kframework.definition.Module result = koreModules.get(mod.getName());
-                        if (result == null) {
-                            result = apply(mod, allKilModules, koreModules, cons(mainModule, visitedModules));
-                        }
-                        return result;
-                    } else if (koreModules.containsKey(imp.getName())) {
+        Function<Import, org.kframework.definition.Module> resolveImport =
+            imp -> {
+                String name;
+                if (imp.isImportSyntax()) {
+                    name = imp.getMainModuleName();
+                } else {
+                    name = imp.getName();
+                }
+                Optional<Module> theModule = allKilModules.stream()
+                        .filter(m -> m.getName().equals(name))
+                        .findFirst();
+                if (theModule.isPresent()) {
+                    Module mod = theModule.get();
+                    org.kframework.definition.Module result = koreModules.get(mod.getName());
+                    if (result == null) {
+                        result = apply(mod, allKilModules, koreModules, cons(mainModule, visitedModules));
+                    }
+                    if (imp.isImportSyntax()) {
                         return koreModules.get(imp.getName());
-                    } else
-                        throw KExceptionManager.compilerError("Could not find module: " + imp.getName(), imp);
-                }).collect(Collectors.toSet());
+                    }
+                    return result;
+                } else if (koreModules.containsKey(imp.getName())) {
+                    return koreModules.get(imp.getName());
+                } else {
+                    throw KExceptionManager.compilerError("Could not find module: " + imp.getName(), imp);
+                }
+            };
 
+        Set<org.kframework.definition.Module> importedSyntaxModules = importedSyntax.stream()
+                .map(resolveImport).collect(Collectors.toSet());
+        Set<org.kframework.definition.Sentence> syntaxItems = items.stream().filter(org.kframework.definition.Sentence::isSyntax).collect(Collectors.toSet());
+        org.kframework.definition.Module newSyntaxModule = Module(new Import(mainModule.getName()).getImportSyntax().getName(), immutable(importedSyntaxModules), immutable(syntaxItems), convertAttributes(mainModule));
 
-        org.kframework.definition.Module newModule = Module(mainModule.getName(), immutable(importedModules), immutable(items),
+        Set<org.kframework.definition.Module> importedModules = Stream.concat(importedModuleNames.stream()
+                .map(resolveImport), Stream.of(newSyntaxModule)).collect(Collectors.toSet());
+        Set<org.kframework.definition.Sentence> nonSyntaxItems = items.stream().filter(org.kframework.definition.Sentence::isNonSyntax).collect(Collectors.toSet());
+        org.kframework.definition.Module newModule = Module(mainModule.getName(), immutable(importedModules), immutable(nonSyntaxItems),
                 convertAttributes(mainModule));
+
+        newSyntaxModule.checkSorts();
         newModule.checkSorts();
+
         koreModules.put(newModule.name(), newModule);
+        koreModules.put(newSyntaxModule.name(), newSyntaxModule);
         return newModule;
     }
 

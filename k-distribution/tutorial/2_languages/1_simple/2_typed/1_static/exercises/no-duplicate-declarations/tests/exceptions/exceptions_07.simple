@@ -1,0 +1,12 @@
+void main() {
+  try {
+    int x = 2;
+    print(x," ");
+    throw ++x + x;
+  }
+  catch(int e) {
+    print(e,"\n");
+  }
+}
+
+// 2 6 or 2 5

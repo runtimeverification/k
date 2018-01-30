@@ -1,6 +1,7 @@
 // Copyright (c) 2013-2016 K Team. All Rights Reserved.
 
 module LAMBDA
+  imports DOMAINS
   syntax Exp ::= Int | Bool | Id
                | "(" Exp ")"                        [bracket]
                | Exp Exp                            [left, seqstrict]

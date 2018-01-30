@@ -80,6 +80,8 @@ public class RuleGrammarGenerator {
 
     public static final String ID = "ID";
     public static final String ID_PROGRAM_PARSING = ID + POSTFIX;
+    private static final String ID_SYNTAX = "ID$SYNTAX";
+    private static final String ID_PROGRAM_PARSING_SYNTAX = "ID-PROGRAM-PARSING$SYNTAX";
 
     /**
      * Initialize a grammar generator.
@@ -137,6 +139,8 @@ public class RuleGrammarGenerator {
                 Set<Module> imports = stream(oldMod.imports()).map(_import -> {
                     if (_import.name().equals(ID)) {
                         return baseK.getModule(ID_PROGRAM_PARSING).get();
+                    } else if (_import.name().equals(ID_SYNTAX)) {
+                        return baseK.getModule(ID_PROGRAM_PARSING_SYNTAX).get();
                     } else {
                         return _import;
                     }
@@ -233,6 +237,7 @@ public class RuleGrammarGenerator {
         } else {
             addRuleCells = false;
         }
+        boolean addConfigCells = baseK.getModule(CONFIG_CELLS).isDefined() && mod.importedModules().contains(baseK.getModule(CONFIG_CELLS).get());
         Set<Sentence> parseProds;
         if (addRuleCells) {
             ConfigurationInfo cfgInfo = new ConfigurationInfoFromModule(mod);
@@ -264,6 +269,9 @@ public class RuleGrammarGenerator {
                 }
                 return Stream.of(s);
             }).collect(Collectors.toSet());
+        } else if (addConfigCells) {
+            // remove cells from parsing config cells so they don't conflict with the production in kast.k
+            parseProds = Stream.concat(prods.stream(), stream(mod.sentences()).filter(s -> !s.att().contains("cell"))).collect(Collectors.toSet());
         } else
             parseProds = Stream.concat(prods.stream(), stream(mod.sentences())).collect(Collectors.toSet());
 

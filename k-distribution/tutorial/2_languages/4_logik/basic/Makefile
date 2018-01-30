@@ -1,9 +1,10 @@
+MAKEFILE_PATH := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 DEF=logik
 EXT=logik	
 KOMPILE_FLAGS=--backend java
 KRUN_FLAGS=--search --pattern "<solution> Solution:Map </solution>"
 
-include ../../../../include/ktest.mak
+include $(MAKEFILE_PATH)/../../../../include/ktest.mak
 
 tests/reverse-slow-2.logik: kompile
 	cat $@.in 2>/dev/null | $(KRUN) $@ -d $(DEFDIR) $(KRUN_FLAGS) --bound 1 $(CHECK) $@.out

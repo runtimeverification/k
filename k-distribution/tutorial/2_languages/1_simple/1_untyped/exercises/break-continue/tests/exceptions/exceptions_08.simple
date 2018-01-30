@@ -1,0 +1,27 @@
+function main() {
+  var e;
+  try {
+    try {
+      try {
+        try {
+          var x = 1;
+          print(x," ");
+          throw ++x;
+        } catch(e) {
+          print(e," ");
+          throw ++e;
+        }
+      } catch(e) {
+        print(e," ");
+        throw ++e;
+      }
+    } catch(e) {
+      print(e," ");
+      throw ++e;
+    }
+  } catch(e) {
+    print(e,"\n");
+  }
+}
+
+// 1 2 3 4 5

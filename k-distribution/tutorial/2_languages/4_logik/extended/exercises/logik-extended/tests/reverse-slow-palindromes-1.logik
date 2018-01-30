@@ -1,0 +1,11 @@
+append(nil,L,L).
+append(cons(H,T),L,cons(H,Z)) :- append(T,L,Z).
+
+reverse(nil,nil).
+reverse(cons(H,T),L) :-
+  reverse(T,T1),
+  append(T1,cons(H,nil),L).
+
+// Next should generate all palindromes.  However, since there are infinitely
+// many of them, use a bound, say 5, to only see a few.
+?- reverse(L,L).

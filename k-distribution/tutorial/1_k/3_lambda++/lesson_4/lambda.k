@@ -1,6 +1,7 @@
 // Copyright (c) 2012-2016 K Team. All Rights Reserved.
 
 module LAMBDA
+  imports DOMAINS
   syntax Exp ::= Id
                | "lambda" Id "." Exp  [latex(\lambda{#1}.{#2})]
                | Exp Exp              [strict, left]

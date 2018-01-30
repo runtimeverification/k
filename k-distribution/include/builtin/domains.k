@@ -18,6 +18,7 @@ module DOMAINS
   imports K-IO
   imports MAP
   imports SET
+  imports K-REFLECTION
 endmodule
 
 module ARRAY-SYNTAX

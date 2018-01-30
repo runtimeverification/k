@@ -131,6 +131,7 @@ language for documentation on the the remaining features, because
 those were all borrowed from SIMPLE. */
 
 module KOOL-UNTYPED-SYNTAX
+  imports DOMAINS-SYNTAX
 
 /*@ \section{Syntax}
 
@@ -252,6 +253,7 @@ semantics of the additional KOOL constructs. */
 
 module KOOL-UNTYPED
   imports KOOL-UNTYPED-SYNTAX
+  imports DOMAINS
 
 /*@ \subsection{Configuration}
 

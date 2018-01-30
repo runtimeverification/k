@@ -15,7 +15,7 @@
 
   <properties>
     <config>tests/config.xml</config>
-    <ktestDir>${project.basedir}</ktestDir>
+    <ktestDir>${project.basedir}/../../k-exercises</ktestDir>
   </properties>
 
   <dependencies>
@@ -78,14 +78,8 @@
             <phase>integration-test</phase>
             <configuration>
               <target>
-                <exec dir="${ktestDir}" executable="${project.build.directory}/release/k/bin/ktest${native.script.extension}">
-                  <arg value="${config}" />
-                  <arg value="-v" />
-                  <arg value="--report" />
-                  <arg value="--debug" />
-                  <arg value="--warnings-to-errors" />
-                  <arg value="--timeout" />
-                  <arg value="400000" />
+                <exec dir="${ktestDir}" executable="make">
+                  <arg value="-j12" />
                 </exec>
               </target>
               <skip>${skipKTest}</skip>
@@ -99,7 +93,6 @@
             <phase>post-integration-test</phase>
             <configuration>
               <target>
-                <move file="${ktestDir}/junit-reports" tofile="target/ktest-reports" failonerror="false" />
                 <exec executable="${project.build.directory}/release/k/bin/stop-kserver">
                 </exec>
               </target>
@@ -152,8 +145,6 @@
             <configuration>
               <skipITs>${skipKTest}</skipITs>
               <testClassesDirectory>${project.build.directory}</testClassesDirectory>
-              <reportsDirectory>${project.build.directory}/ktest-reports</reportsDirectory>
-              <summaryFile>${project.build.directory}/ktest-reports/summary.xml</summaryFile>
             </configuration>
           </execution>
         </executions>

@@ -1,0 +1,10 @@
+function main() {
+  try {
+    throw 4;
+  } catch (e) {
+    print(e," ");
+  }
+  print(42,"\n");
+}
+
+// 4 42

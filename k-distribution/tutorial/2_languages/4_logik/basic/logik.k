@@ -197,6 +197,7 @@ languages).  */
 require "unification.k"
 
 module LOGIK-COMMON
+  imports DOMAINS-SYNTAX
 /*@ \section{Syntax}
 
 The syntax of LOGIK is straightforward: a program is a sequence of
@@ -215,16 +216,17 @@ module LOGIK-SYNTAX
   /*@ Variables and literals are defined as tokens following the conventions
   used in Prolog (variables start with \_ or capital letter, while literals
   start with lower case letters): */
-  syntax #KVariable ::= r"[A-Z_][A-Za-z0-9_]*"   [token, prec(1), autoReject]
+  syntax #KVariable ::= r"[A-Z_][A-Za-z0-9_]*"   [token, prec(2), autoReject]
                       | #UpperId                 [token, autoReject]
-    syntax Term ::= #KVariable [klabel(#SemanticCastToTerm)]
-    syntax Literal ::= r"[a-z][a-zA-Z0-9_]*"                 [autoReject, token]
-                     | #LowerId                              [autoReject, token]
+  syntax Term ::= #KVariable [klabel(#SemanticCastToTerm)]
+  syntax Literal ::= r"[a-z][a-zA-Z0-9_]*"                 [autoReject, token]
+                   | #LowerId                              [autoReject, token]
 endmodule
 
 module LOGIK
-  imports UNIFICATION
   imports LOGIK-COMMON
+  imports DOMAINS
+  imports UNIFICATION
 
 /*@ Unification is at the core of logic programming.  Here we are
 going to use the predefined unification procedure (the same one we

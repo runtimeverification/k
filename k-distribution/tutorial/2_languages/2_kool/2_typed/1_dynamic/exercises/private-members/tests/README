@@ -1,0 +1,33 @@
+Like in the untyped KOOL language, we recommend to check out the
+examples in this directory in the following order:
+
+hello-world.kool
+field.kool
+factorial.kool
+new.kool
+constructor.kool
+odd-even.kool
+field-shadowing-1.kool
+field-shadowing-2.kool
+dynamic-dispatch-1.kool
+dynamic-dispatch-2.kool
+dynamic-dispatch-3.kool
+point.kool
+tree-sum.kool
+sorting.kool
+matrix.kool
+return-object.kool
+this-explicit.kool
+this-implicit.kool
+method-sharing.kool
+super-1.kool
+super-2.kool
+super-3.kool
+exceptions-1.kool
+exceptions-2.kool
+threads.kool
+cast-1.kool
+cast-2.kool
+cycle.kool
+instanceOf.kool
+function-types.kool

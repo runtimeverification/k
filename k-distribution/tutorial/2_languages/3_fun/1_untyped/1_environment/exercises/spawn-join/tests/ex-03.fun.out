@@ -1,17 +1,7 @@
-Search results:
-
-Solution 1:
-S:String -->
-"10"
-
-Solution 2:
-S:String -->
-"15"
-
-Solution 3:
-S:String -->
-"20"
-
-Solution 4:
-S:String -->
-"5"
+  S ==K "5"
+#Or
+  S ==K "10"
+#Or
+  S ==K "15"
+#Or
+  S ==K "20"

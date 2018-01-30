@@ -1,0 +1,6 @@
+letrec f1 x = x in
+letrec f2 x = f1 f1 x in
+letrec f3 x = f2 f2 x in
+letrec f4 x = f3 f3 x in
+letrec f5 x = f4 f4 x in
+(f5 0)

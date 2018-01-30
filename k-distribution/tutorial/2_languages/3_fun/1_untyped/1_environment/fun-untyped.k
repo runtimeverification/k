@@ -114,6 +114,7 @@ functional or \K features that have already been explained in there.}  */
 //@ \section{Syntax}
 
 module FUN-UNTYPED-COMMON
+  imports DOMAINS-SYNTAX
 
 /*@ FUN is an expression language.  The constructs below fall into
 several categories: names, arithmetic constructs, conventional
@@ -166,7 +167,7 @@ define global syntax priirities later (at the end of the syntax module). */
                | Exp "-" Exp                       [strict, prefer, arith]
 // the "prefer" attribute above is to not parse x-1 as x(-1)
 // Due to some parsing problems, we currently cannot add unary minus:
-//               | "-" Exp                           [strict, arith]
+               | "-" Exp                           [strict, arith]
                > non-assoc:
                  Exp "<" Exp                       [strict, arith]
                | Exp "<=" Exp                      [strict, arith]
@@ -420,6 +421,7 @@ construct as explained above. */
 module FUN-UNTYPED
   imports FUN-UNTYPED-COMMON
   imports FUN-UNTYPED-MACROS
+  imports DOMAINS
   //imports PATTERN-MATCHING
 
 
@@ -462,7 +464,7 @@ add more values later.  */
   rule I1 + I2 => I1 +Int I2
   rule S1 ^ S2 => S1 +String S2
   rule I1 - I2 => I1 -Int I2
-//  rule - I => 0 -Int I
+  rule - I => 0 -Int I
   rule I1 < I2 => I1 <Int I2
   rule I1 <= I2 => I1 <=Int I2
   rule I1 > I2 => I1 >Int I2

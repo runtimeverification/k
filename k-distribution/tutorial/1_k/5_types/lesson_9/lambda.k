@@ -3,6 +3,7 @@
 require "unification.k"
 
 module LAMBDA
+  imports DOMAINS
   imports UNIFICATION
 
   syntax Exp ::= Int | Bool | Id

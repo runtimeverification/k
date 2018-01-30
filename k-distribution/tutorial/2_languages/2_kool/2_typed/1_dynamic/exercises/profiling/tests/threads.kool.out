@@ -1,0 +1,18 @@
+9
+
+==========
+Statistics
+==========
+
+Objects created:
+   Cell |-> 1
+   Main |-> 1
+   MyThread |-> 2
+
+Methods invoked:
+   Cell.Cell |-> 1
+   Cell.inc |-> 2
+   Main.Main |-> 1
+   MyThread.MyThread |-> 2
+   MyThread.run |-> 2
+   Thread.start |-> 2

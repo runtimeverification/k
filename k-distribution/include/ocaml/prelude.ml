@@ -749,10 +749,10 @@ struct
       [Int a], [Int b] -> [Int (Z.sub a b)]
     | _ -> raise Not_implemented
   let hook_tdiv c _ _ _ _ = match c with
-      [Int a], [Int b] -> [Int (Z.div a b)]
+      [Int a], [Int b] when b <> Z.zero -> [Int (Z.div a b)]
     | _ -> raise Not_implemented
   let hook_ediv c _ _ _ _ = match c with
-      [Int a], [Int b] -> [Int (Z.ediv a b)]
+      [Int a], [Int b] when b <> Z.zero -> [Int (Z.ediv a b)]
     | _ -> raise Not_implemented
   let hook_shl c _ _ _ _ = match c with
       [Int a], [Int b] -> [Int (Z.shift_left a (Z.to_int b))]

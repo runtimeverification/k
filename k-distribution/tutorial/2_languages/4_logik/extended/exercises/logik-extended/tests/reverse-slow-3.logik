@@ -1,0 +1,9 @@
+append(nil,L,L).
+append(cons(H,T),L,cons(H,Z)) :- append(T,L,Z).
+
+reverse(nil,nil).
+reverse(cons(H,T),L) :-
+  reverse(T,T1),
+  append(T1,cons(H,nil),L).
+
+?- reverse(cons(a,cons(X,cons(c,nil))),L), reverse(L, T).

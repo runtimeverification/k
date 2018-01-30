@@ -1,0 +1,38 @@
+// This example works, like in Java.  The fact that the private get() method
+// of B is "overridden" with a private method in A is irrelevant.
+
+class B {
+  private int x = 3;
+  void B() {
+    x = 5;
+  }
+  private int get() {
+    return x;
+  }
+  int f() {
+    return get();
+  }
+}
+
+class A extends B {
+  private int x = 7;
+  void A() {
+    super.B();
+    x = 10;
+  }
+  private int get(){
+    return x;
+  }
+  int g() {
+    return get();
+  }
+}
+
+class Main {
+  void Main() {
+    print("The following should work: ");
+    print((new A()).g());
+    print("\nAnd so should the following: "); 
+    print((new A()).f());
+  }
+}

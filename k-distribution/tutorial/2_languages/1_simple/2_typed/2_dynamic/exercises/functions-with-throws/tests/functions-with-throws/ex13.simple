@@ -1,0 +1,46 @@
+int inc(int x) {
+  return x+1;
+}
+
+void f(int x) throws int, string, (int->int) {
+  try {
+    if(x==0) {
+      throw -1;
+    } else {
+      if(x==1) {
+        throw false;
+      } else {
+        if(x==2) {
+          throw "error";
+        } else {
+          throw inc;
+        }
+      }
+    }
+  } catch(bool b) {
+    throw "false";
+  }
+}
+
+void main() {
+  try {
+    f(0);                   // rejected by type checker
+  } catch(int x) {
+    print(x,"\n");
+  }
+  try {
+    f(1);                   // rejected by type checker
+  } catch(string x) {
+    print(x,"\n");
+  }
+  try {
+    f(2);                   // rejected by type checker
+  } catch(string x) {
+    print(x,"\n");
+  }
+  try {
+    f(3);                   // rejected by type checker
+  } catch(int->int x) {
+    print(x(7),"\n");
+  }
+}

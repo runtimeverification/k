@@ -1,0 +1,13 @@
+// Fully synchronized
+
+function main() {
+  var x;
+  print("x = ");
+  x=read();
+  var t1 = spawn {x=x/2;};
+  var t2 = spawn {join(t1); x=x+10;};
+  join(t2);
+  print(x,"\n");
+}
+
+// 5

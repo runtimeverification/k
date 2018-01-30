@@ -1,0 +1,19 @@
+void main() {
+  int e = 100;
+  try {
+    try {
+      try {
+        throw "error";
+      } catch(int e) {
+        print(e," as an int\n");            // unreachable
+      }
+    } catch(bool e) {
+      print(e, " as a bool\n");             // unreachable, although the type
+                                            // checker will reject it because
+                                            // print cannot take booleans
+    }
+  } catch(string e) {
+    print(e, " as a string\n");             // should print error
+  }
+  print(e," as in the top declaration\n");  // should print 100
+}
