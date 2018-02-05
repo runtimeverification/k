@@ -140,9 +140,9 @@ object KoreToText {
     case Equals(s1, s2, p, q) =>
       "\\equals" + "{" + apply(s1) + "," + apply(s2) + "}" +
         "(" + apply(p) + "," + apply(q) + ")"
-    case Mem(s, rs, x, p) =>
-      "\\mem" + "{" + apply(s) + "," + apply(rs) + "}" +
-        "(" + apply(x) + "," + apply(p) + ")"
+    case Mem(s, rs, p, q) =>
+      "\\in" + "{" + apply(s) + "," + apply(rs) + "}" +
+        "(" + apply(p) + "," + apply(q) + ")"
     // case Subset(s, rs, p, q) =>
     //   "\\subset" + "{" + apply(s) + "," + apply(rs) + "}" +
     //     "(" + apply(p) + "," + apply(q) + ")"

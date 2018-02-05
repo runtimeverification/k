@@ -382,19 +382,18 @@ class TextToKore(b: Builders) {
             val p2 = parsePattern()
             consumeWithLeadingWhitespaces(")")
             b.Equals(s, rs, p1, p2)
-          case ('m', 'e') => // mem
-            consume("m")
+          case ('i', 'n') => // in
             consumeWithLeadingWhitespaces("{")
             val s = parseSort() // previousParsingLevel is set here
             consumeWithLeadingWhitespaces(",")
             val rs = parseSort(parsingLevel = previousParsingLevel)
             consumeWithLeadingWhitespaces("}")
             consumeWithLeadingWhitespaces("(")
-            val x = parseVariable()
-            consumeWithLeadingWhitespaces(",")
             val p = parsePattern()
+            consumeWithLeadingWhitespaces(",")
+            val q = parsePattern()
             consumeWithLeadingWhitespaces(")")
-            b.Mem(s, rs, x, p)
+            b.Mem(s, rs, p, q)
           // case ('s', 'u') => // subset
           //   consume("bset")
           //   consumeWithLeadingWhitespaces("{")

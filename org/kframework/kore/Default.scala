@@ -54,7 +54,7 @@ object implementation {
 
     case class Equals(s: i.Sort, rs: i.Sort, _1: i.Pattern, _2: i.Pattern) extends i.Equals
 
-    case class Mem(s: i.Sort, rs: i.Sort, x: i.Variable, p: i.Pattern) extends i.Mem
+    case class Mem(s: i.Sort, rs: i.Sort, p: i.Pattern, q: i.Pattern) extends i.Mem
 
     // case class Subset(s: i.Sort, rs: i.Sort,_1: i.Pattern,_2: i.Pattern) extends i.Subset
 
@@ -125,7 +125,7 @@ object implementation {
 
     def Equals(s: i.Sort, rs: i.Sort, _1: i.Pattern, _2: i.Pattern): i.Pattern = d.Equals(s, rs, _1, _2)
 
-    def Mem(s: i.Sort, rs: i.Sort, x: i.Variable, p: i.Pattern): i.Pattern = d.Mem(s, rs, x, p)
+    def Mem(s: i.Sort, rs: i.Sort, p: i.Pattern, q: i.Pattern): i.Pattern = d.Mem(s, rs, p, q)
 
     // def Subset(s: i.Sort, rs: i.Sort, _1: Pattern, _2: Pattern): i.Pattern = d.Subset(s, rs, _1, _2)
 

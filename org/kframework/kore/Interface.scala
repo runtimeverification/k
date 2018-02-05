@@ -286,22 +286,20 @@ object Equals {
 }
 
 /**
-  * \mem(X, P) is a predicate pattern that checks whether a variable x
-  * is a member of the pattern P.
-  * It is mathematically defined as ceil(X and P)
+  * Membership, denoted as \in(P, Q) === \ceil(P and Q)
   */
 trait Mem extends Pattern {
   def s: Sort // the sort of X and P
 
   def rs: Sort // the context sort
 
-  def x: Variable
+  def p: Pattern // the l.h.s.
 
-  def p: Pattern
+  def q: Pattern // the r.h.s.
 }
 
 object Mem {
-  def unapply(arg: Mem): Option[(Sort, Sort, Variable, Pattern)] = Some(arg.s, arg.rs, arg.x, arg.p)
+  def unapply(arg: Mem): Option[(Sort, Sort, Pattern, Pattern)] = Some(arg.s, arg.rs, arg.p, arg.q)
 }
 
 /**
@@ -462,7 +460,7 @@ trait Builders {
 
   def Equals(s: Sort, rs:Sort, _1: Pattern, _2: Pattern): Pattern
 
-  def Mem(s: Sort, rs:Sort, x: Variable, p: Pattern): Pattern
+  def Mem(s: Sort, rs:Sort, p: Pattern, q: Pattern): Pattern
 
   // def Subset(s: Sort, rs:Sort, _1: Pattern, _2: Pattern): Pattern
 
