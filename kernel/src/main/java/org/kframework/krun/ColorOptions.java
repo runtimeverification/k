@@ -17,9 +17,6 @@ public class ColorOptions {
     private ColorSetting color;
 
     public ColorSetting color() {
-        if (color == null) {
-            return ColorSetting.ON;
-        }
         return color;
     }
 

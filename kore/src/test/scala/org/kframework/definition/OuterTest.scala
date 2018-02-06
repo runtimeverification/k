@@ -38,7 +38,7 @@ class OuterTest {
     val nt1 = NonTerminal(sort1, Some("bar"))
     val nt2 = NonTerminal(sort2, Some("baz"))
     val prod = Production(sort1, Seq(Terminal("foo"), Terminal("("), nt1, Terminal(","), nt2, Terminal(")")), Att)
-    val newAtt = Att.add("recordPrd", classOf[Production], prod)
+    val newAtt = Att.add("recordPrd", classOf[Production], prod).add("unparseAvoid")
     val records = prod.recordProductions
     Assert.assertEquals(4, records.size)
     Assert.assertEquals(Set(

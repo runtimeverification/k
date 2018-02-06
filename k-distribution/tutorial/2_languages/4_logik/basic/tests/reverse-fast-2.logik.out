@@ -1,1 +1,1 @@
-Solution ==K ( L:Term |-> ( cons ( c , ( cons ( b , ( cons ( a , ( nil , .Terms ) ) , .Terms ) ) , .Terms ) ) ) )
+Solution ==K ( L:Term |-> cons ( c , cons ( b , cons ( a , nil , .Terms ) , .Terms ) , .Terms ) )

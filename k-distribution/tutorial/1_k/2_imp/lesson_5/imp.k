@@ -26,23 +26,23 @@ making it display as $\leq$, and that \texttt{\&\&} is strict only in its first
 argument, because we want to give it a short-circuit semantics. */
 
   syntax AExp  ::= Int | Id
-                 | "-" Int
-                 | AExp "/" AExp              [left, strict]
-                 > AExp "+" AExp              [left, strict]
+                 | "-" Int                    [format(%1%2)]
+                 | AExp "/" AExp              [left, strict, color(pink)]
+                 > AExp "+" AExp              [left, strict, color(pink)]
                  | "(" AExp ")"               [bracket]
   syntax BExp  ::= Bool
-                 | AExp "<=" AExp             [seqstrict, latex({#1}\leq{#2})]
-                 | "!" BExp                   [strict]
-                 > BExp "&&" BExp             [left, strict(1)]
+                 | AExp "<=" AExp             [seqstrict, latex({#1}\leq{#2}), color(pink)]
+                 | "!" BExp                   [strict, color(pink)]
+                 > BExp "&&" BExp             [left, strict(1), color(pink)]
                  | "(" BExp ")"               [bracket]
   syntax Block ::= "{" "}"
-                 | "{" Stmt "}"
+                 | "{" Stmt "}"               [format(%1%i%n%2%d%n%3)]
   syntax Stmt  ::= Block
-                 | Id "=" AExp ";"            [strict(2)]
+                 | Id "=" AExp ";"            [strict(2), color(pink), format(%1 %2 %3%4)]
                  | "if" "(" BExp ")"
-                   Block "else" Block         [strict(1)]
-                 | "while" "(" BExp ")" Block
-                 > Stmt Stmt                  [left]
+                   Block "else" Block         [strict(1), colors(yellow, white, white, yellow), format(%1 %2%3%4 %5 %6 %7)]
+                 | "while" "(" BExp ")" Block [colors(yellow,white,white), format(%1 %2%3%4 %5)]
+                 > Stmt Stmt                  [left, format(%1%n%2)]
 
 /*@ An IMP program declares a set of variables and then executes a
 statement in the state obtained after initializing all those variables
@@ -50,8 +50,8 @@ to 0.  \K provides builtin support for generic syntactic lists:
 $\textit{List}\{\textit{Nonterminal},\textit{terminal}\}$ stands for
 \textit{terminal}-separated lists of \textit{Nonterminal} elements. */
 
-  syntax Pgm ::= "int" Ids ";" Stmt
-  syntax Ids ::= List{Id,","}
+  syntax Pgm ::= "int" Ids ";" Stmt           [format(%1 %2%3%n%4), colors(yellow,pink)]
+  syntax Ids ::= List{Id,","} [format(%1%2 %3)]
 endmodule
 
 /*@ We are done with the definition of IMP's syntax.  Make sure

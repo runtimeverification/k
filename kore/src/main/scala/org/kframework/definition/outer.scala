@@ -378,7 +378,7 @@ case class Production(sort: Sort, items: Seq[ProductionItem], att: Att)
   private def makeRecordProduction(terminals: Seq[NonTerminal]): Production = {
     val prefix = items.takeWhile(_.isInstanceOf[Terminal]) :+ Terminal("...")
     val suffix = items.last
-    val newAtt = att.add("recordPrd", classOf[Production], this)
+    val newAtt = att.add("recordPrd", classOf[Production], this).add("unparseAvoid")
     if (terminals.isEmpty)
       Production(sort, prefix :+ suffix, newAtt)
     else {

@@ -36,6 +36,7 @@ import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.file.FileUtil;
+import org.kframework.utils.file.TTYInfo;
 import scala.Tuple2;
 
 import java.io.BufferedReader;
@@ -63,12 +64,12 @@ public class KRun {
 
     private final KExceptionManager kem;
     private final FileUtil files;
-    private final boolean ttyStdin;
+    private final TTYInfo tty;
 
-    public KRun(KExceptionManager kem, FileUtil files, boolean ttyStdin) {
+    public KRun(KExceptionManager kem, FileUtil files, TTYInfo tty) {
         this.kem = kem;
         this.files = files;
-        this.ttyStdin = ttyStdin;
+        this.tty = tty;
     }
 
     public static class InitialConfiguration {
@@ -99,8 +100,24 @@ public class KRun {
 
         Object result = executionMode.execute(config, rewriter, compiledDef);
 
+        boolean colorize = options.outputFile == null && tty.stdout;
+        ColorSetting colors = options.color.color();
+        if (colors == null) {
+            try {
+                if (!colorize) {
+                    colors = ColorSetting.OFF;
+                } else if (Integer.parseInt(files.getEnv().get("K_COLOR_SUPPORT")) >= 256) {
+                    colors = ColorSetting.EXTENDED;
+                } else {
+                    colors = ColorSetting.ON;
+                }
+            } catch (NumberFormatException e) {
+                colors = ColorSetting.ON;
+            }
+        }
+
         if (result instanceof K) {
-            prettyPrint(compiledDef, options.output, s -> outputFile(s, options), (K) result);
+            prettyPrint(compiledDef, options.output, s -> outputFile(s, options), (K) result, colors);
             if (compiledDef.exitCodePattern != null) {
                 K res = rewriter.match((K) result, compiledDef.exitCodePattern);
                 return getExitCode(kem, res);
@@ -108,15 +125,15 @@ public class KRun {
         } else if (result instanceof Tuple2) {
             Tuple2<?, ?> tuple = (Tuple2<?, ?>) result;
             if (tuple._1() instanceof K && tuple._2() instanceof Integer) {
-                prettyPrint(compiledDef, options.output, s -> outputFile(s, options), (K) tuple._1());
+                prettyPrint(compiledDef, options.output, s -> outputFile(s, options), (K) tuple._1(), colors);
                 return (Integer) tuple._2();
             }
             if (tuple._1() instanceof SearchResult && tuple._2() instanceof Integer) {
-                printSearchResult((SearchResult) tuple._1(), options, compiledDef);
+                printSearchResult((SearchResult) tuple._1(), options, compiledDef, colors);
                 return (Integer) tuple._2();
             }
         } else if (result instanceof SearchResult) {
-            printSearchResult((SearchResult) result, options, compiledDef);
+            printSearchResult((SearchResult) result, options, compiledDef, colors);
             return 0;
         } else if (result instanceof Integer) {
             return (Integer) result;
@@ -124,8 +141,8 @@ public class KRun {
         return 0;
     }
 
-    private void printSearchResult(SearchResult result, KRunOptions options, CompiledDefinition compiledDef) {
-        prettyPrint(compiledDef, options.output, s -> outputFile(s, options), result.getSearchList());
+    private void printSearchResult(SearchResult result, KRunOptions options, CompiledDefinition compiledDef, ColorSetting colorize) {
+        prettyPrint(compiledDef, options.output, s -> outputFile(s, options), result.getSearchList(), colorize);
     }
 
     /**
@@ -202,7 +219,7 @@ public class KRun {
         return compiledDef.parsePatternIfAbsent(files, kem, pattern, source);
     }
 
-    public static void prettyPrint(CompiledDefinition compiledDef, OutputModes output, Consumer<byte[]> print, K result) {
+    public static void prettyPrint(CompiledDefinition compiledDef, OutputModes output, Consumer<byte[]> print, K result, ColorSetting colorize) {
         switch (output) {
         case KAST:
             print.accept((ToKast.apply(result) + "\n").getBytes());
@@ -212,7 +229,7 @@ public class KRun {
             break;
         case PRETTY:
             Module unparsingModule = compiledDef.getExtensionModule(compiledDef.languageParsingModule());
-            print.accept((unparseTerm(result, unparsingModule) + "\n").getBytes());
+            print.accept((unparseTerm(result, unparsingModule, colorize) + "\n").getBytes());
             break;
         case BINARY:
             print.accept(ToBinary.apply(result));
@@ -243,12 +260,12 @@ public class KRun {
             subst.entrySet().forEach(e -> {
                 if (parsedPattern.body() instanceof KVariable) {
                     assert e.getKey().name().equals(parsedPattern.body().toString());
-                    prettyPrint(compiledDefinition, outputModes, print, e.getValue());
+                    prettyPrint(compiledDefinition, outputModes, print, e.getValue(), ColorSetting.OFF);
                     return;
                 }
                 print.accept(e.getKey().toString().getBytes());
                 print.accept(" -->\n".getBytes());
-                prettyPrint(compiledDefinition, outputModes, print, e.getValue());
+                prettyPrint(compiledDefinition, outputModes, print, e.getValue(), ColorSetting.OFF);
             });
         }
     }
@@ -288,7 +305,7 @@ public class KRun {
             output.put(KToken("$STDIN", Sorts.KConfigVar()), KToken("\"\"", Sorts.String()));
             output.put(KToken("$IO", Sorts.KConfigVar()), KToken("\"on\"", Sorts.String()));
         } else {
-            String stdin = getStdinBuffer(ttyStdin);
+            String stdin = getStdinBuffer(tty.stdin);
             output.put(KToken("$STDIN", Sorts.KConfigVar()), KToken("\"" + stdin + "\"", Sorts.String()));
             output.put(KToken("$IO", Sorts.KConfigVar()), KToken("\"off\"", Sorts.String()));
         }
@@ -343,7 +360,7 @@ public class KRun {
         return KApply(compiledDef.topCellInitializer, output.entrySet().stream().map(e -> KApply(KLabel("_|->_"), e.getKey(), e.getValue())).reduce(KApply(KLabel(".Map")), (a, b) -> KApply(KLabel("_Map_"), a, b)));
     }
 
-    private static String unparseTerm(K input, Module test) {
+    private static String unparseTerm(K input, Module test, ColorSetting colorize) {
         K sortedComm = new TransformK() {
             @Override
             public K apply(KApply k) {
@@ -355,7 +372,7 @@ public class KRun {
                     List<K> items = new ArrayList<>(Assoc.flatten(k.klabel(), k.klist().items(), KLabel(att.get("unit"))));
                     List<Tuple2<String, K>> printed = new ArrayList<>();
                     for (K item : items) {
-                        String s = Formatter.format(new AddBrackets(test).addBrackets(KOREToTreeNodes.apply(KOREToTreeNodes.up(test, apply(item)), test)));
+                        String s = Formatter.format(new AddBrackets(test).addBrackets(KOREToTreeNodes.apply(KOREToTreeNodes.up(test, apply(item)), test)), ColorSetting.OFF);
                         printed.add(Tuple2.apply(s, item));
                     }
                     printed.sort(Comparator.comparing(Tuple2::_1, new AlphanumComparator()));
@@ -378,7 +395,7 @@ public class KRun {
             }
         }.apply(sortedComm);
         return Formatter.format(
-                new AddBrackets(test).addBrackets(KOREToTreeNodes.apply(KOREToTreeNodes.up(test, alphaRenamed), test)));
+                new AddBrackets(test).addBrackets(KOREToTreeNodes.apply(KOREToTreeNodes.up(test, alphaRenamed), test)), colorize);
     }
 
     public K externalParse(String parser, String value, Sort startSymbol, Source source, CompiledDefinition compiledDef) {

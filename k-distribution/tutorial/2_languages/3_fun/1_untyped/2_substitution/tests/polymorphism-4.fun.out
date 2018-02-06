@@ -1,1 +1,1 @@
-V ==K fun ( ( x -> ( ( fun ( ( [ y , .GeneratedListBottom ] -> y ) | .Cases ) ) [ x , .GeneratedListBottom ] ) ) | .Cases )
+V ==K fun ( x -> ( fun ( [ y , .Names ] -> y ) | .Cases ) [ x , .Names ] ) | .Cases

@@ -1,27 +1,40 @@
 package org.kframework.unparser;
 
 import org.kframework.definition.NonTerminal;
+import org.kframework.definition.Production;
 import org.kframework.definition.ProductionItem;
 import org.kframework.definition.Terminal;
+import org.kframework.krun.ColorSetting;
 import org.kframework.parser.Constant;
 import org.kframework.parser.Term;
 import org.kframework.parser.TermCons;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.ColorUtil;
 
 import static org.kframework.Collections.*;
+import static org.fusesource.jansi.Ansi.*;
 
 public class Formatter {
 
     public static String format(Term term) {
         Indenter indenter = new Indenter(2);
-        format(term, indenter);
+        format(term, indenter, ColorSetting.OFF);
         return indenter.toString();
     }
 
-    public static void format(Term term, Indenter indenter) {
+    public static String format(Term term, ColorSetting colorize) {
+        Indenter indenter = new Indenter(2);
+        format(term, indenter, colorize);
+        return indenter.toString();
+    }
+
+    public static void format(Term term, Indenter indenter, ColorSetting colorize) {
         int indent = 0;
         if (term instanceof Constant) {
-            indenter.append(((Constant) term).value());
+            Constant c = (Constant) term;
+            color(indenter, c.production(), 0, colorize);
+            indenter.append(c.value());
+            resetColor(indenter, c.production(), colorize);
         } else if (term instanceof TermCons) {
             TermCons tc = (TermCons) term;
             String format = tc.production().att().getOptional("format").orElse(defaultFormat(tc.production().items().size()));
@@ -63,7 +76,14 @@ public class Formatter {
                         }
                         ProductionItem item = tc.production().items().apply(idx - 1);
                         if (item instanceof Terminal) {
+                            int terminal = 0;
+                            for (ProductionItem pi : iterable(tc.production().items())) {
+                                if (pi == item) break;
+                                if (pi instanceof Terminal) terminal++;
+                            }
+                            color(indenter, tc.production(), terminal, colorize);
                             indenter.append(((Terminal) item).value());
+                            resetColor(indenter, tc.production(), colorize);
                         } else if (item instanceof NonTerminal) {
                             int nt = 0;
                             for (ProductionItem pi : iterable(tc.production().items())) {
@@ -88,7 +108,7 @@ public class Formatter {
                                     indenter.dedent();
                                 }
                             }
-                            format(tc.get(nt), indenter);
+                            format(tc.get(nt), indenter, colorize);
                             if (assoc) {
                                 for (int j = 0; j < indent; j++) {
                                     indenter.indent();
@@ -115,5 +135,25 @@ public class Formatter {
         }
         sb.deleteCharAt(sb.length() - 1);
         return sb.toString();
+    }
+
+    private static void color(Indenter indenter, Production p, int offset, ColorSetting colorize) {
+        if (p.att().contains("color")) {
+            indenter.append(ColorUtil.RgbToAnsi(p.att().get("color"), colorize));
+        }
+        if (p.att().contains("colors")) {
+            try {
+                String color = p.att().get("colors").split(",")[offset].trim();
+                indenter.append(ColorUtil.RgbToAnsi(color, colorize));
+            } catch (ArrayIndexOutOfBoundsException e) {
+                throw KEMException.compilerError("Invalid colors attribute. Must be a comma separated list with exactly one element per terminal.", e, p);
+            }
+        }
+    }
+
+    private static void resetColor(Indenter indenter, Production p, ColorSetting colorize) {
+        if ((p.att().contains("color") || p.att().contains("colors"))  && colorize != ColorSetting.OFF) {
+            indenter.append(ColorUtil.ANSI_NORMAL);
+        }
     }
 }

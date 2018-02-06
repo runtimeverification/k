@@ -1,1 +1,10 @@
-<T> <k> stmt </k> <tenv> t1 |-> int t2 |-> int x |-> int </tenv> </T>
+<T>
+  <k>
+    stmt
+  </k>
+  <tenv>
+    t1 |-> int
+    t2 |-> int
+    x |-> int
+  </tenv>
+</T>

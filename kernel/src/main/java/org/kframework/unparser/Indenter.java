@@ -1,6 +1,6 @@
 package org.kframework.unparser;
 
-public class Indenter {
+public class Indenter implements Appendable {
     private final int indentSize;
     private int indentationLevel = 0;
     private boolean atNewLine = true;
@@ -10,9 +10,15 @@ public class Indenter {
         this.indentSize = indentSize;
     }
 
-    public Indenter append(String str) {
+    public Indenter append(CharSequence str) {
         printIndent();
         sb.append(str);
+        return this;
+    }
+
+    public Indenter append(CharSequence str, int start, int end) {
+        printIndent();
+        sb.append(str, start, end);
         return this;
     }
 

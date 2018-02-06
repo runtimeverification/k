@@ -85,7 +85,7 @@ module MAP
 
   /*@ Construct a new Map consisting of key/value pairs of two Maps (the keys of
    the two Maps are assumed disjoint) */
-  syntax Map ::= Map Map                        [left, function, hook(MAP.concat), klabel(_Map_), assoc, comm, unit(.Map), element(_|->_), index(0)]
+  syntax Map ::= Map Map                        [left, function, hook(MAP.concat), klabel(_Map_), assoc, comm, unit(.Map), element(_|->_), index(0), format(%1%n%2)]
   /*@  Construct an empty Map */
   syntax Map ::= ".Map"                         [function, hook(MAP.unit), klabel(.Map), latex(\dotCt{Map})]
                // breaks klabel uniqueness
@@ -149,7 +149,7 @@ module SET
    of unique items). */
 
   /*@ Construct a new Set as the union of two different sets ($A \cup B$) */
-  syntax Set ::= Set Set                  [left, function, hook(SET.concat), klabel(_Set_), assoc, comm, unit(.Set), idem, element(SetItem)]
+  syntax Set ::= Set Set                  [left, function, hook(SET.concat), klabel(_Set_), assoc, comm, unit(.Set), idem, element(SetItem), format(%1%n%2)]
   /*@ Construct an empty Set */
   syntax Set ::= ".Set"                   [function, hook(SET.unit), klabel(.Set), latex(\dotCt{Set})]
                //| "."
@@ -220,7 +220,7 @@ module LIST
 
   /*@ Construct a new List as the concatenation of two Lists. This is similar to
    the append "@" operation in many functional programming languages. */
-  syntax List ::= List List               [left, function, hook(LIST.concat), klabel(_List_), smtlib(smt_seq_concat), assoc, unit(.List), element(ListItem)]
+  syntax List ::= List List               [left, function, hook(LIST.concat), klabel(_List_), smtlib(smt_seq_concat), assoc, unit(.List), element(ListItem), format(%1%n%2)]
   /*@ Construct an empty List: */
   syntax List ::= ".List"                 [function, hook(LIST.unit), klabel(.List), smtlib(smt_seq_nil), latex(\dotCt{List})]
                 //| "."

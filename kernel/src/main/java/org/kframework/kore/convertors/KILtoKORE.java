@@ -362,7 +362,7 @@ public class KILtoKORE extends KILTransformation<Object> {
 
         // Es ::= ".Es"
         prod3 = Production(sort, Seq(Terminal("." + sort.toString())),
-                attrsWithKilProductionId.remove("strict").remove("klabel").add("klabel", dropQuote(p.getTerminatorKLabel())));
+                attrsWithKilProductionId.remove("format").remove("strict").remove("klabel").add("klabel", dropQuote(p.getTerminatorKLabel())));
 
         res.add(prod1);
         res.add(prod3);

@@ -24,7 +24,7 @@ object AddBottomSortForListsWithIdenticalLabels extends Function[Module, Module]
               .+(SyntaxSort(newBottomSort, Att.empty))
               .+(Production(newBottomSort,
                 Seq(Terminal(".GeneratedListBottom")),
-                Att.empty.add(Production.kLabelAttribute, userListInfo.head.pTerminator.klabel.get.name)))
+                Att.empty.add(Production.kLabelAttribute, userListInfo.head.pTerminator.klabel.get.name).add("unparseAvoid")))
           } else {
             Set[Sentence]()
           }

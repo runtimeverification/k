@@ -1,5 +1,8 @@
-  Solution ==K ( L:Term |-> [ 1 , .Vals | [ 2 , .Vals | [ .Vals ] ] ] X:Term |-> 3 )
+  Solution ==K ( L:Term |-> [ 1 , .Vals | [ 2 , .Vals | [ .Vals ] ] ] )
+  X:Term |-> 3
 #Or
-  Solution ==K ( L:Term |-> [ 1 , .Vals | [ 3 , .Vals | [ .Vals ] ] ] X:Term |-> 2 )
+  Solution ==K ( L:Term |-> [ 1 , .Vals | [ 3 , .Vals | [ .Vals ] ] ] )
+  X:Term |-> 2
 #Or
-  Solution ==K ( L:Term |-> [ 2 , .Vals | [ 3 , .Vals | [ .Vals ] ] ] X:Term |-> 1 )
+  Solution ==K ( L:Term |-> [ 2 , .Vals | [ 3 , .Vals | [ .Vals ] ] ] )
+  X:Term |-> 1

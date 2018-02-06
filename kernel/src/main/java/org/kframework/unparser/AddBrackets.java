@@ -144,6 +144,9 @@ public class AddBrackets {
         }
         Tag parentLabel = new Tag(outer.production().klabel().get().name());
         Tag localLabel = new Tag(inner.production().klabel().get().name());
+        if (!m.subsorts().lessThanEq(inner.production().sort(), ((NonTerminal)outer.production().items().apply(position)).sort())) {
+            return true;
+        }
         if (m.priorities().lessThan(parentLabel, localLabel)) {
             return true;
         }

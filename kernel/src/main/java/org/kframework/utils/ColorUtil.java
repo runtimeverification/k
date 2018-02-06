@@ -4,6 +4,7 @@ package org.kframework.utils;
 import org.kframework.krun.ColorSetting;
 
 import java.awt.Color;
+import java.awt.color.ColorSpace;
 import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.Map;
@@ -33,14 +34,14 @@ public final class ColorUtil {
     private static Map<Map<Color, String>, Map<Color, String>> colorToCodeConvertCache;
 
     public static Map<String, Color> colors() {
-        colors = initColors();
+        colors = doInitColors();
         return Collections.unmodifiableMap(colors);
     }
 
-    private static void initColors(String terminalColor) {
-        colors = initColors();
-        ansiColorsToTerminalCodes = initAnsiColors(colors.get(terminalColor));
-        eightBitColorsToTerminalCodes = initEightBitColors(colors.get(terminalColor));
+    static {
+        colors = doInitColors();
+        ansiColorsToTerminalCodes = initAnsiColors();
+        eightBitColorsToTerminalCodes = initEightBitColors();
         colorToCodeConvertCache = initColorToCodeConvertCache();
     }
 
@@ -51,7 +52,7 @@ public final class ColorUtil {
         return map;
     }
 
-    private static Map<String, Color> initColors() {
+    private static Map<String, Color> doInitColors() {
         Map<String, Color> colors = new HashMap<String, Color>();
         colors.put("black", Color.black);
         colors.put("blue", Color.blue);
@@ -316,7 +317,7 @@ public final class ColorUtil {
         return new Color(r, g, b);
     }
 
-    private static Map<Color, String> initAnsiColors(Color terminalColor) {
+    private static Map<Color, String> initAnsiColors() {
         Map<Color, String> map = new HashMap<Color, String>(8);
         map.put(Color.black, getBasicTerminalCode(30));
         map.put(Color.red, getBasicTerminalCode(31));
@@ -326,10 +327,6 @@ public final class ColorUtil {
         map.put(Color.magenta, getBasicTerminalCode(35));
         map.put(Color.cyan, getBasicTerminalCode(36));
         map.put(Color.white, getBasicTerminalCode(37));
-
-        //We remove the background terminal color, so that K cells would never be colored in this,
-        //but rather in the next closest color
-        map.remove(terminalColor);
 
         return Collections.unmodifiableMap(map);
     }
@@ -342,7 +339,7 @@ public final class ColorUtil {
         return "\u001b[" + code + "m";
     }
 
-    private static Map<Color, String> initEightBitColors(Color terminalColor) {
+    private static Map<Color, String> initEightBitColors() {
         Map<Integer, Integer> coordMap = new HashMap<Integer, Integer>();
         coordMap.put(0,0);
         coordMap.put(1,95);
@@ -362,13 +359,6 @@ public final class ColorUtil {
             }
         }
 
-        //Ansi colors will have priority over 8-bit ones, including all the hacks.
-        map.putAll(ansiColorsToTerminalCodes);
-
-        //We remove the background terminal color, so that K cells would never be colored in this,
-        //but rather in the next closest color
-        map.remove(terminalColor);
-
         return Collections.unmodifiableMap(map);
     }
 
@@ -379,35 +369,33 @@ public final class ColorUtil {
         return "\u001b[38;5;" + code + "m";
     }
 
-    public synchronized static String RgbToAnsi(String rgb, ColorSetting colorSetting, String terminalColor) {
-        initColors(terminalColor); //init static maps if needed
+    public synchronized static String RgbToAnsi(String rgb, ColorSetting colorSetting) {
         switch(colorSetting) {
             case OFF:
                 return "";
             case ON:
-                return getClosestTerminalCode(colors.get(rgb), ansiColorsToTerminalCodes, colors.get(terminalColor));
+                return getClosestTerminalCode(colors.get(rgb), ansiColorsToTerminalCodes);
             case EXTENDED:
-                return getClosestTerminalCode(colors.get(rgb), eightBitColorsToTerminalCodes, colors.get(terminalColor));
+                return getClosestTerminalCode(colors.get(rgb), eightBitColorsToTerminalCodes);
             default:
                 throw new UnsupportedOperationException("colorSettung: " + colorSetting);
         }
     }
 
-    private static String getClosestTerminalCode(Color rgb, Map<Color, String> codesMap, Color terminalColor) {
+    private static String getClosestTerminalCode(Color rgb, Map<Color, String> codesMap) {
         if (rgb == null)
             return "";
         if (colorToCodeConvertCache.get(codesMap).get(rgb) == null) {
-            colorToCodeConvertCache.get(codesMap).put(rgb, getClosestTerminalCodeImpl(rgb, codesMap, terminalColor));
+            colorToCodeConvertCache.get(codesMap).put(rgb, getClosestTerminalCodeImpl(rgb, codesMap));
         }
         return colorToCodeConvertCache.get(codesMap).get(rgb);
     }
 
-    private static String getClosestTerminalCodeImpl(Color rgb, Map<Color, String> codesMap, Color forbiddenColor) {
-        int minColorError = Integer.MAX_VALUE;
+    private static String getClosestTerminalCodeImpl(Color rgb, Map<Color, String> codesMap) {
+        double minColorError = Double.MAX_VALUE;
         Color minColor = null;
         for (Color ansi : codesMap.keySet()) {
-            if (ansi.equals(forbiddenColor)) continue;
-            int colorError = getColorError(rgb, ansi);
+            double colorError = getColorError(rgb, ansi);
             if (colorError < minColorError) {
                 minColorError = colorError;
                 minColor = ansi;
@@ -418,12 +406,105 @@ public final class ColorUtil {
 
     public static final String ANSI_NORMAL = "\u001b[0m";
 
-    private static int getColorError(Color c1, Color c2) {
-        int r = c1.getRed() - c2.getRed();
-        int g = c1.getGreen() - c2.getGreen();
-        int b = c1.getBlue() - c2.getBlue();
+    private static final double sl = 1.0;
+    private static final double kc = 1.0;
+    private static final double kh = 1.0;
+    // graphic args
+    private static final double kl = 1.0;
+    private static final double k1 = 0.045;
+    private static final double k2 = 0.015;
 
-        return r*r + g*g + b*b;
+    public static final class CIELab extends ColorSpace {
+        private static final ColorSpace CIEXYZ = ColorSpace.getInstance(ColorSpace.CS_CIEXYZ);
+
+        private final double xn, yn, zn;
+
+        CIELab() {
+            super(ColorSpace.TYPE_Lab, 3);
+            float[] ref = Color.white.getColorComponents(CIEXYZ, null);
+            xn = ref[0];
+            yn = ref[1];
+            zn = ref[2];
+        }
+
+        @Override
+        public float[] toRGB(float[] floats) {
+            return CIEXYZ.toRGB(toCIEXYZ(floats));
+        }
+
+        @Override
+        public float[] fromRGB(float[] floats) {
+            return fromCIEXYZ(CIEXYZ.fromRGB(floats));
+        }
+
+        @Override
+        public float[] toCIEXYZ(float[] floats) {
+            double l = floats[0];
+            double a = floats[1];
+            double b = floats[2];
+            double x = xn * finv((l + 16.0)/116.0 + a/500.0);
+            double y = yn * finv((l + 16.0)/116.0);
+            double z = zn * finv((l + 16.0)/116.0 - b/200.0);
+            return new float[]{ (float)x, (float)y, (float)z };
+        }
+
+        @Override
+        public float[] fromCIEXYZ(float[] floats) {
+            double x = floats[0];
+            double y = floats[1];
+            double z = floats[2];
+            double l = 116.0 * f(y/yn) - 16.0;
+            double a = 500.0 * (f(x/xn) - f(y/yn));
+            double b = 200.0 * (f(y/yn) - f(z/zn));
+            return new float[]{ (float)l, (float)a, (float)b };
+        }
+
+        private static final double delta = 6.0/29.0;
+        private static final double f0 = 4.0/29.0;
+
+        private double f(double t) {
+           if (t > delta*delta*delta) {
+               return Math.cbrt(t);
+           }
+           return t/(3*delta*delta) + f0;
+        }
+
+        private double finv(double t) {
+            if (t > delta) {
+                return t*t*t;
+            }
+            return 3*delta*delta*(t - f0);
+        }
+    }
+
+    // Computes the CIE94 color difference of two colors
+    private static double getColorError(Color color1, Color color2) {
+        float[] rgb1 = color1.getRGBColorComponents(null);
+        float[] rgb2 = color2.getRGBColorComponents(null);
+
+        ColorSpace labSpace = new CIELab();
+        float[] lab1 = labSpace.fromRGB(rgb1);
+        float[] lab2 = labSpace.fromRGB(rgb2);
+
+        double deltaL = lab1[0] - lab2[0];
+        double deltaA = lab1[1] - lab2[1];
+        double deltaB = lab1[2] - lab2[2];
+
+        double c1 = Math.sqrt(lab1[1]*lab1[1] + lab1[2]*lab1[2]);
+        double c2 = Math.sqrt(lab2[1]*lab2[1] + lab2[2]*lab2[2]);
+        double deltaC = c1 - c2;
+
+        double deltaH = deltaA*deltaA + deltaB*deltaB - deltaC*deltaC;
+        deltaH = deltaH < 0 ? 0 : Math.sqrt(deltaH);
+
+        double sc = 1.0 + k1*c1;
+        double sh = 1.0 + k2*c1;
+
+        double l = deltaL/(kl*sl);
+        double c = deltaC/(kc*sc);
+        double h = deltaH/(kh*sh);
+        double i = l*l + c*c + h*h;
+        return i < 0 ? 0 : Math.sqrt(i);
     }
 
     public static Color getColorByName(String colorName) {

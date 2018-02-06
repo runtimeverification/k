@@ -26,3 +26,4 @@ fi
 
 export CYGWIN=nodosfilewarning
 export LC_ALL=C  # sets locale to C to avoid issues with numeric formats
+export K_COLOR_SUPPORT=`tput colors`

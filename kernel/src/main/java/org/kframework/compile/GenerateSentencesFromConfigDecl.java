@@ -271,6 +271,14 @@ public class GenerateSentencesFromConfigDecl {
 
         String klabel = "<" + cellName + ">";
         Att att = cellProperties.addAll(configAtt);
+        StringBuilder format = new StringBuilder();
+        format.append("%1%i");
+        int i;
+        for (i = 2; i < 2 + childSorts.size(); i++) {
+            format.append("%n%").append(i);
+        }
+        format.append("%d%n%").append(i);
+        att = att.add("format", format.toString());
         // syntax Cell ::= "<cell>" Children... "</cell>" [cell, cellProperties, configDeclAttributes]
         if(!m.definedKLabels().contains(KLabel(klabel)) && multiplicity != Multiplicity.OPTIONAL) {
             Production cellProduction = Production(klabel, sort, immutable(items),

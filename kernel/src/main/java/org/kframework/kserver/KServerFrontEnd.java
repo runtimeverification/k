@@ -144,14 +144,10 @@ public class KServerFrontEnd extends FrontEnd {
             requestScope.enter();
             Main.seedInjector(requestScope, tool, args, workingDir, env);
             TTYInfo tty = injector.getInstance(TTYInfo.class);
-            if (tty.stdout) {
-                system_out.init(new PrintStream(AnsiConsole.wrapOutputStream(system_out.getPrintStream())));
-            } else {
+            if (!tty.stdout) {
                 system_out.init(new PrintStream(new AnsiOutputStream(system_out.getPrintStream())));
             }
-            if (tty.stderr) {
-                system_err.init(new PrintStream(AnsiConsole.wrapOutputStream(system_err.getPrintStream())));
-            } else {
+            if (!tty.stderr) {
                 system_err.init(new PrintStream(new AnsiOutputStream(system_err.getPrintStream())));
             }
 

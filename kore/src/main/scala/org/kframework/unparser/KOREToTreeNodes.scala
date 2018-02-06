@@ -17,7 +17,7 @@ object KOREToTreeNodes {
   def apply(t: K, mod: Module): ProductionReference = t match {
     case t: KToken => Constant(t.s, mod.tokenProductionsFor(Sort(t.sort.name)).head, t.att.getOptional(classOf[Location]), t.att.getOptional(classOf[Source]))
     case a: KApply =>
-      val production: Production = mod.productionsFor(KLabel(a.klabel.name)).find(p => p.items.count(_.isInstanceOf[NonTerminal]) == a.klist.size).get
+      val production: Production = mod.productionsFor(KLabel(a.klabel.name)).find(p => p.items.count(_.isInstanceOf[NonTerminal]) == a.klist.size && !p.att.contains("unparseAvoid")).get
       TermCons(ConsPStack.from((a.klist.items.asScala map { i: K => apply(i, mod).asInstanceOf[Term] }).reverse asJava),
         production, t.att.getOptional(classOf[Location]), t.att.getOptional(classOf[Source]))
   }
