@@ -271,11 +271,15 @@ public class KItem extends Term implements KItemRepresentation, HasGlobalContext
     }
 
     public Term evaluateFunction(TermContext context) {
-        return global.kItemOps.evaluateFunction(this, context);
+        Term result = global.kItemOps.evaluateFunction(this, context);
+        result.isEvaluated.add(context.getTopConstraint());
+        return result;
     }
 
     public Term resolveFunctionAndAnywhere(TermContext context) {
-        return global.kItemOps.resolveFunctionAndAnywhere(this, context);
+        Term result = global.kItemOps.resolveFunctionAndAnywhere(this, context);
+        result.isEvaluated.add(context.getTopConstraint());
+        return result;
     }
 
     @Override

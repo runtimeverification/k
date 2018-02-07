@@ -62,6 +62,7 @@ public class Variable extends Term implements org.kframework.kore.KVariable {
     }
 
     /* TODO(AndreiS): cache the variables */
+    private String originalName = "";
     private final String name;
     private final Sort sort;
     private final boolean anonymous;
@@ -109,6 +110,7 @@ public class Variable extends Term implements org.kframework.kore.KVariable {
     public Variable getFreshCopy() {
         Variable var = Variable.getAnonVariable(sort);
         var.copyAttributesFrom(this);
+        var.originalName = this.name;
         return var;
     }
 
@@ -172,7 +174,7 @@ public class Variable extends Term implements org.kframework.kore.KVariable {
 
     @Override
     public String toString() {
-        return name + ":" + sort;
+        return originalName + name + ":" + sort;
     }
 
     @Override

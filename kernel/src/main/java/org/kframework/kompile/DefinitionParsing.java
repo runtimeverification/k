@@ -99,6 +99,8 @@ public class DefinitionParsing {
                 autoImportDomains,
                 new HashSet<>());
 
+        modules = modules.stream().filter(m -> !m.name().endsWith("$SYNTAX")).collect(Collectors.toSet());
+
         if (modules.size() != 1) {
             throw KEMException.compilerError("Expected to find a file with 1 module: found " + modules.size() + " instead.");
         }
