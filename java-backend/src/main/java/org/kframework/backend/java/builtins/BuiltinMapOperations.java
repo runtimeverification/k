@@ -174,7 +174,17 @@ public class BuiltinMapOperations {
     }
 
     public static BoolToken in_keys(Term key, BuiltinMap map, TermContext context) {
-        return BoolToken.of(map.getEntries().containsKey(key));
+        boolean in = map.getEntries().containsKey(key);
+        BoolToken r = BoolToken.of(in);
+        if (in) {
+            return r;
+        } else if (key.isGround() && map.isConcreteCollection() && map.hasOnlyGroundKeys()) {
+            return r;
+        } else if (map.isEmpty()) {
+            return r;
+        } else {
+            return null;
+        }
     }
 
     public static Term values(BuiltinMap map, TermContext context) {
