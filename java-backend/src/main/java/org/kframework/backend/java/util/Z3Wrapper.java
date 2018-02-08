@@ -2,10 +2,8 @@
 package org.kframework.backend.java.util;
 
 import com.google.common.collect.ImmutableSet;
-import com.microsoft.z3.Params;
-import com.microsoft.z3.Solver;
-import com.microsoft.z3.Status;
-import com.microsoft.z3.Z3Exception;
+import com.sun.jna.Pointer;
+import org.kframework.backend.java.z3.*;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.OS;
 import org.kframework.utils.errorsystem.KEMException;
@@ -58,18 +56,16 @@ public class Z3Wrapper {
 
     private boolean checkQueryWithLibrary(String query, int timeout) {
         boolean result = false;
-        try {
-            com.microsoft.z3.Context context = new com.microsoft.z3.Context();
-            Solver solver = context.mkSolver();
-            Params params = context.mkParams();
+        try (Z3Context context = new Z3Context()) {
+            Z3Solver solver = new Z3Solver(context);
+            Z3Params params = new Z3Params(context);
             params.add("timeout", timeout);
-            solver.setParameters(params);
-            solver.add(context.parseSMTLIB2String(SMT_PRELUDE + query, null, null, null, null));
-            result = solver.check() == Status.UNSATISFIABLE;
-            context.dispose();
+            solver.setParams(params);
+            solver._assert(context.parseSmtlib2(SMT_PRELUDE + query));
+            result = solver.check() == Z3Status.UNSAT;
         } catch (Z3Exception e) {
             kem.registerCriticalWarning(
-                    "failed to translate smtlib expression:\n" + SMT_PRELUDE + query);
+                    "failed to translate smtlib expression:\n" + SMT_PRELUDE + query, e);
         } catch (UnsatisfiedLinkError e) {
             System.err.println(System.getProperty("java.library.path"));
             throw e;

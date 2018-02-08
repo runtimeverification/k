@@ -14,13 +14,14 @@ DEFDIR?=.
 RESULTDIR?=$(TESTDIR)
 # all tests in test directory with matching file extension
 TESTS=$(wildcard $(TESTDIR)/*.$(EXT))
+PROOF_TESTS=$(wildcard $(TESTDIR)/*_spec.k)
 
 CHECK=| diff -
 
 .PHONY: kompile krun all clean update-results
 
 # run all tests
-all: kompile krun
+all: kompile krun proofs
 
 # run only kompile
 kompile: $(DEFDIR)/$(DEF)-kompiled/timestamp
@@ -29,8 +30,10 @@ $(DEFDIR)/%-kompiled/timestamp: %.k
 	$(KOMPILE) $(KOMPILE_FLAGS) $< -d $(DEFDIR)
 krun: $(TESTS)
 
+proofs: $(PROOF_TESTS)
+
 # run all tests and regenerate output files
-update-results: krun
+update-results: krun proofs
 update-results: CHECK=>
 
 # run a single test. older versions of make run pattern rules in order, so
@@ -42,6 +45,9 @@ ifeq ($(TESTDIR),$(RESULTDIR))
 else
 	cat $(RESULTDIR)/$(notdir $@).in 2>/dev/null | $(KRUN) $@ $(KRUN_FLAGS) -d $(DEFDIR) $(CHECK) $(RESULTDIR)/$(notdir $@).out
 endif
+
+%_spec.k: kompile
+	krun $*.$(EXT) -d $(DEFDIR) --prove $@ $(CHECK) $@.out
 
 clean:
 	rm -rf $(DEFDIR)/$(DEF)-kompiled
