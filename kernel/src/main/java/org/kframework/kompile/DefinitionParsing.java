@@ -227,7 +227,7 @@ public class DefinitionParsing {
         gen = new RuleGrammarGenerator(definitionWithConfigBubble, isStrict);
 
         try {
-            Definition defWithConfig = DefinitionTransformer.from(resolveConfig, "parsing configurations").apply(definitionWithConfigBubble);
+            Definition defWithConfig = DefinitionTransformer.from(resolveConfig::apply, "parsing configurations").apply(definitionWithConfigBubble);
             return defWithConfig;
         } catch (KEMException e) {
             errors.add(e);

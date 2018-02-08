@@ -59,7 +59,6 @@
     <base>master</base>
     <skipCheckstyleOnWindows>true</skipCheckstyleOnWindows>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <scala.version>2.11.7</scala.version>
   </properties>
 
   <dependencies>
@@ -67,11 +66,6 @@
       <groupId>org.scala-lang</groupId>
       <artifactId>scala-library</artifactId>
       <version>${scala.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.scala-lang.modules</groupId>
-      <artifactId>scala-java8-compat_2.11</artifactId>
-      <version>0.7.0</version>
     </dependency>
     <dependency>
         <groupId>org.scala-lang</groupId>
@@ -115,14 +109,6 @@
     </extensions>
     <pluginManagement>
       <plugins>
-        <plugin>
-          <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.1</version>
-          <configuration>
-            <source>1.8</source>
-            <target>1.8</target>
-          </configuration>
-        </plugin>
         <plugin>
           <artifactId>maven-resources-plugin</artifactId>
           <version>2.6</version>
@@ -186,15 +172,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>2.13</version>
-        <!-- TODO(dwightguth): remove the following dependency override with Maven Checkstyle Plugin 2.14 -->
-        <dependencies>
-            <dependency>
-                <groupId>com.puppycrawl.tools</groupId>
-                <artifactId>checkstyle</artifactId>
-                <version>5.9</version>
-            </dependency>
-        </dependencies>
+        <version>3.0.0</version>
         <executions>
           <execution>
             <id>checkstyle-copyright</id>
@@ -203,7 +181,9 @@
             </goals>
             <inherited>false</inherited>
             <configuration>
-              <sourceDirectory>${project.basedir}</sourceDirectory>
+              <sourceDirectories>
+                <sourceDirectory>${project.basedir}</sourceDirectory>
+              </sourceDirectories>
               <includes>${git.modified.files}</includes>
               <configLocation>src/main/config/checkstyle-copyright.xml</configLocation>
               <failsOnError>true</failsOnError>
@@ -218,7 +198,9 @@
             </goals>
             <inherited>false</inherited>
             <configuration>
-              <sourceDirectory>${project.basedir}</sourceDirectory>
+              <sourceDirectories>
+                <sourceDirectory>${project.basedir}</sourceDirectory>
+              </sourceDirectories>
               <includes>**/*.k</includes>
               <configLocation>src/main/config/checkstyle-k.xml</configLocation>
               <failsOnError>true</failsOnError>
@@ -231,7 +213,9 @@
               <goal>check</goal>
             </goals>
             <configuration>
-              <sourceDirectory>src</sourceDirectory>
+              <sourceDirectories>
+                <sourceDirectory>src</sourceDirectory>
+              </sourceDirectories>
               <includes>**/*.java</includes>
               <configLocation>src/main/config/checkstyle-java.xml</configLocation>
               <suppressionsLocation>src/main/config/checkstyle-suppress.xml</suppressionsLocation>

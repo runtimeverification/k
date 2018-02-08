@@ -28,7 +28,7 @@ import static org.kframework.kore.KORE.*;
 /**
  * Expands configuration declaration to KORE productions and rules.
  */
-class ResolveConfig implements UnaryOperator<Module> {
+class ResolveConfig {
     private final Definition def;
     private final boolean isStrict;
     private final BiFunction<Module, Bubble, Stream<? extends K>> parseBubble;

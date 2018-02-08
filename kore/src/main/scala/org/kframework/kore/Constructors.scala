@@ -4,29 +4,29 @@ import org.kframework.attributes._
 
 import scala.collection.JavaConverters._
 
-trait Constructors[KK <: K] {
+trait Constructors {
   def KLabel(name: String): KLabel
   def Sort(name: String): Sort
-  def KList[KKK <: KK](items: java.util.List[KKK]): KList
-  def KToken(s: String, sort: Sort, att: Att): KK
-  def KApply(klabel: KLabel, klist: KList, att: Att): KK
-  def KSequence[KKK <: KK](items: java.util.List[KKK], att: Att): KK
-  def KVariable(name: String, att: Att): KVariable with KK
-  def KRewrite(left: K, right: K, att: Att): KRewrite with KK
-  def KAs(pattern: K, alias: K, att: Att): KAs with KK
+  def KList(items: java.util.List[K]): KList
+  def KToken(s: String, sort: Sort, att: Att): KToken
+  def KApply(klabel: KLabel, klist: KList, att: Att): KApply
+  def KSequence(items: java.util.List[K], att: Att): KSequence
+  def KVariable(name: String, att: Att): KVariable
+  def KRewrite(left: K, right: K, att: Att): KRewrite
+  def KAs(pattern: K, alias: K, att: Att): KAs
   def InjectedKLabel(klabel: KLabel, att: Att): InjectedKLabel
 
   // default methods:
-  @annotation.varargs def KList(items: KK*): KList = KList(items.asJava)
-  @annotation.varargs def KApply(klabel: KLabel, items: KK*): KK = KApply(klabel, KList(items.asJava), Att.empty)
-  @annotation.varargs def KSequence(list: KK*): KK = KSequence(list.toList.asJava, Att.empty)
-  def KVariable(name: String): KVariable with KK = KVariable(name, Att.empty)
+  @annotation.varargs def KList(items: K*): KList = KList(items.asJava)
+  @annotation.varargs def KApply(klabel: KLabel, items: K*): KApply = KApply(klabel, KList(items.asJava), Att.empty)
+  @annotation.varargs def KSequence(list: K*): KSequence = KSequence(list.toList.asJava, Att.empty)
+  def KVariable(name: String): KVariable = KVariable(name, Att.empty)
 
   def convert(l: KLabel): KLabel = l match {
     case Unapply.KLabel(name) => KLabel(name)
   }
 
-  def convert(k: K): KK = k match {
+  def convert(k: K): K  = k match {
     case t@Unapply.KVariable(name) => KVariable(name, t.att)
     case t@Unapply.KToken(v, s) => KToken(v, s, t.att)
     case t@Unapply.KRewrite(left, right) => KRewrite(convert(left), convert(right), t.att)
@@ -35,5 +35,5 @@ trait Constructors[KK <: K] {
   }
 }
 
-abstract class AbstractConstructors[KK <: K] extends Constructors[KK]
+abstract class AbstractConstructors extends Constructors
 

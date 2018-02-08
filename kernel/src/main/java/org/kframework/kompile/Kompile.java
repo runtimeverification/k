@@ -38,12 +38,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 import static org.kframework.Collections.*;
 import static org.kframework.definition.Constructors.*;
 import static org.kframework.kore.KORE.*;
-import static scala.compat.java8.JFunction.*;
 
 /**
  * The new compilation pipeline. Everything is just wired together and will need clean-up once we deside on design.
@@ -145,19 +145,19 @@ public class Kompile {
         DefinitionTransformer generateSortPredicateSyntax = DefinitionTransformer.from(new GenerateSortPredicateSyntax()::gen, "adding sort predicate productions");
 
         return def -> excludeModulesByTag(excludedModuleTags, def)
-                .andThen(func(this::resolveIOStreams))
+                .andThen(this::resolveIOStreams)
                 .andThen(resolveFun)
                 .andThen(resolveStrict)
                 .andThen(resolveAnonVars)
-                .andThen(func(d -> new ResolveContexts(kompileOptions).resolve(d)))
+                .andThen(d -> new ResolveContexts(kompileOptions).resolve(d))
                 .andThen(resolveHeatCoolAttribute)
                 .andThen(resolveSemanticCasts)
                 .andThen(generateSortPredicateSyntax)
-                .andThen(func(this::resolveFreshConstants))
-                .andThen(func(AddImplicitComputationCell::transformDefinition))
+                .andThen(this::resolveFreshConstants)
+                .andThen(AddImplicitComputationCell::transformDefinition)
                 .andThen(new Strategy(kompileOptions.experimental.heatCoolStrategies).addStrategyCellToRulesTransformer())
-                .andThen(func(ConcretizeCells::transformDefinition))
-                .andThen(func(this::addSemanticsModule))
+                .andThen(ConcretizeCells::transformDefinition)
+                .andThen(this::addSemanticsModule)
                 .apply(def);
     }
 
@@ -230,9 +230,10 @@ public class Kompile {
     }
 
     public Rule compileRule(Definition compiledDef, Rule parsedRule) {
-        return (Rule) func(new ResolveAnonVar()::resolve)
-                .andThen(func(new ResolveSemanticCasts(kompileOptions.backend.equals(Backends.JAVA))::resolve))
-                .andThen(func(s -> concretizeSentence(s, compiledDef)))
+        return (Rule) UnaryOperator.<Sentence>identity()
+                .andThen(new ResolveAnonVar()::resolve)
+                .andThen(new ResolveSemanticCasts(kompileOptions.backend.equals(Backends.JAVA))::resolve)
+                .andThen(s -> concretizeSentence(s, compiledDef))
                 .apply(parsedRule);
     }
 

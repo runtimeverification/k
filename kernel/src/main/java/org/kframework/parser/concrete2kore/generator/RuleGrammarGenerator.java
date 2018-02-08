@@ -33,7 +33,6 @@ import java.util.stream.Stream;
 import static org.kframework.Collections.*;
 import static org.kframework.definition.Constructors.*;
 import static org.kframework.kore.KORE.*;
-import static scala.compat.java8.JFunction.*;
 
 /**
  * Generator for rule and ground parsers.
@@ -233,7 +232,7 @@ public class RuleGrammarGenerator {
         boolean addRuleCells;
         if (baseK.getModule(RULE_CELLS).isDefined() && mod.importedModules().contains(baseK.getModule(RULE_CELLS).get())) { // prepare cell productions for rule parsing
             // make sure a configuration actually exists, otherwise ConfigurationInfoFromModule explodes.
-            addRuleCells = mod.sentences().exists(func(p -> p instanceof Production && ((Production) p).att().contains("cell")));
+            addRuleCells = mod.sentences().exists(p -> p instanceof Production && ((Production) p).att().contains("cell"));
         } else {
             addRuleCells = false;
         }

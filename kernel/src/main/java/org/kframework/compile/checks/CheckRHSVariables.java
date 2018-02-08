@@ -10,6 +10,7 @@ import org.kframework.kore.KVariable;
 import org.kframework.compile.GatherVarsVisitor;
 import org.kframework.utils.errorsystem.KEMException;
 
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -63,9 +64,13 @@ public class CheckRHSVariables {
     }
 
     private void check(K body, boolean isBody) {
-        new ComputeUnboundVariables(isBody, errors, vars, (k -> errors.add(KEMException.compilerError("Found variable " + k.name()
+        Set<KVariable> unbound = new HashSet<>();
+        new ComputeUnboundVariables(isBody, errors, vars, unbound::add).apply(body);
+        for (KVariable k : unbound) {
+            errors.add(KEMException.compilerError("Found variable " + k.name()
                 + " on right hand side of rule, not bound on left hand side."
-                + " Did you mean \"?" + k.name() + "\"?", k)))).apply(body);
+                + " Did you mean \"?" + k.name() + "\"?", k));
+        }
     }
 
 }

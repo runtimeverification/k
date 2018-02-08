@@ -65,7 +65,7 @@ public class IncompleteCellUtils {
     private static KApply makeDots(boolean isOpen) {
         return isOpen ? dots : noDots;
     }
-    private static K makeBody(List<? extends K> children) {
+    private static K makeBody(List<K> children) {
         if (children.size() == 1) {
             return children.get(0);
         } else {
@@ -76,7 +76,7 @@ public class IncompleteCellUtils {
     public static KApply make(KLabel label, boolean openLeft, K child, boolean openRight) {
         return KApply(label, KList(makeDots(openLeft), child, makeDots(openRight)));
     }
-    public static KApply make(KLabel label, boolean openLeft, List<? extends K> children, boolean openRight) {
+    public static KApply make(KLabel label, boolean openLeft, List<K> children, boolean openRight) {
         return KApply(label, KList(makeDots(openLeft), makeBody(children), makeDots(openRight)));
     }
 }

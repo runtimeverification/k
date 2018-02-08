@@ -17,7 +17,7 @@ import collection._
  * https://github.com/kframework/k/wiki/KORE-data-structures-guide
  *
  */
-object KORE extends Constructors[K] with ScalaSugared[K] {
+object KORE extends Constructors with ScalaSugared {
   val c = KORE
 
   val constructor = this
@@ -49,7 +49,7 @@ object KORE extends Constructors[K] with ScalaSugared[K] {
 
   override def KApply(klabel: KLabel, klist: KList, att: Att): KApply = ADT.KApply(klabel, klist, att)
 
-  override def KSequence[KK <: K](items: java.util.List[KK], att: Att): KSequence = ADT.KSequence(items.asScala
+  override def KSequence(items: java.util.List[K], att: Att): KSequence = ADT.KSequence(items.asScala
     .toList, att)
 
   override def KVariable(name: String, att: Att): KVariable = ADT.KVariable(name, att)
@@ -62,9 +62,9 @@ object KORE extends Constructors[K] with ScalaSugared[K] {
 
   override def KAs(pattern: K, alias: K, att: Att): KAs = ADT.KAs(pattern, alias, att)
 
-  override def KList[KK <: K](items: java.util.List[KK]): KList = ADT.KList(items.asScala.toList)
+  override def KList(items: java.util.List[K]): KList = ADT.KList(items.asScala.toList)
 
-  def KList[KK <: K](items: List[KK]): KList = ADT.KList(items)
+  def KList(items: List[K]): KList = ADT.KList(items)
 
   override def InjectedKLabel(klabel: KLabel, att: Att): InjectedKLabel = ADT.InjectedKLabel(klabel, att)
 

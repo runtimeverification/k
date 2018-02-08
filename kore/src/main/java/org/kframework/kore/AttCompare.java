@@ -8,8 +8,6 @@ import scala.collection.Map;
 import java.util.Arrays;
 import java.util.List;
 
-import static scala.compat.java8.JFunction.*;
-
 /**
  * Created by dwightguth on 6/17/15.
  */
@@ -69,7 +67,7 @@ public class AttCompare {
     }
 
     private Map<Tuple2<String, Class<?>>, Object> filterAtt(Att att) {
-        return att.att().filterKeys(func(tuple -> attNames.contains(tuple._1())));
+        return att.att().filterKeys(tuple -> attNames.contains(tuple._1()));
     }
 
     @Override

@@ -6,8 +6,8 @@ import org.kframework.kore
 
 import scala.collection.JavaConverters._
 
-trait ScalaSugared[K <: kore.K] {
-  val c: Constructors[K]
+trait ScalaSugared {
+  val c: Constructors
 
   import c._
 
@@ -37,7 +37,7 @@ trait ScalaSugared[K <: kore.K] {
     def ||(other: K) = KLabel(KLabels.OR)(k, other)
   }
 
-  def KList[KK <: K](ks: Seq[KK]): KList = c.KList(ks.asJava)
+  def KList(ks: Seq[K]): KList = c.KList(ks.asJava)
 
-  def KApply[KK <: K](klabel: KLabel, ks: Seq[KK], att: Att = Att.empty): K = c.KApply(klabel, c.KList(ks.asJava), att)
+  def KApply(klabel: KLabel, ks: Seq[K], att: Att = Att.empty): KApply = c.KApply(klabel, c.KList(ks.asJava), att)
 }

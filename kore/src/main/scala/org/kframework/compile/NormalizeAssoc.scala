@@ -10,7 +10,7 @@ import org.kframework.kore._
 /**
  * Compiler pass flattening associative collections
  */
-class NormalizeAssoc(c: Constructors[K]) extends ((Module, Sentence )=> Sentence) {
+class NormalizeAssoc(c: Constructors) extends ((Module, Sentence )=> Sentence) {
 
   import c._
 
