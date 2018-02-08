@@ -9,6 +9,7 @@ import org.kframework.definition.RegexTerminal;
 import org.kframework.definition.Terminal;
 import org.kframework.definition.TerminalLike;
 import org.kframework.utils.StringUtil;
+import org.kframework.utils.OS;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.ParseFailedException;
@@ -34,6 +35,8 @@ public class Scanner implements AutoCloseable {
 
     private final Map<TerminalLike, Tuple2<Integer, Integer>> tokens;
     private final File scanner;
+
+    private static final String FLEX_LIB = OS.current().equals(OS.OSX) ? "-ll" : "-lfl";
 
     public Scanner(Module parsingModule) {
         tokens = KSyntax2GrammarStatesFilter.getTokens(parsingModule);
@@ -118,7 +121,7 @@ public class Scanner implements AutoCloseable {
             }
             scanner = File.createTempFile("tmp-kompile-", "");
             scanner.deleteOnExit();
-            pb = new ProcessBuilder("gcc", scannerCSource.getAbsolutePath(), "-o", scanner.getAbsolutePath(), "-lfl");
+            pb = new ProcessBuilder("gcc", scannerCSource.getAbsolutePath(), "-o", scanner.getAbsolutePath(), FLEX_LIB);
             exit = pb.start().waitFor();
             scanner.setExecutable(true);
             if (exit != 0) {
