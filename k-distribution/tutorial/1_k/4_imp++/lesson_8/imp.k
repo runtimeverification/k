@@ -514,6 +514,10 @@ of the computation structure smaller, then you can also add the rule
  rule (_:Map => .) ~> _:Map  [structural]
 \end{verbatim}
 This rule acts like a ``tail recursion'' optimization, but for blocks. */
+
+// verification ids
+  syntax Id ::= "n"     [token]
+              | "sum"   [token]
 endmodule
 
 /*@ \section{On Kompilation Options}

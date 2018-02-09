@@ -47,7 +47,7 @@ else
 endif
 
 %_spec.k: kompile
-	krun $*.$(EXT) -d $(DEFDIR) --prove $@ $(CHECK) $@.out
+	$(KRUN) $*.$(EXT) -d $(DEFDIR) --prove $@ $(CHECK) $@.out
 
 clean:
 	rm -rf $(DEFDIR)/$(DEF)-kompiled
