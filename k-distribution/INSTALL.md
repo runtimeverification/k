@@ -12,7 +12,7 @@ Appropriate installation instructions and bug reports are welcome from contribut
   * Move this directory, once extracted, to your preferred location.  For convenient usage,
     update your $PATH with <preferred-location>/k/bin.
 
-3. OCAML:
+3. OCAML (not required by K tutorial):
   * To use the OCAML backend requires an installation of the OCAML package
     manager OPAM. Instructions on installing OPAM are available here:
     https://opam.ocaml.org/doc/Install.html
