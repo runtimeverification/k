@@ -2,7 +2,7 @@
 git fetch k '+refs/heads/*:refs/remotes/k/*'
 test `git rev-parse HEAD:k` = `git rev-parse refs/remotes/k/master^{tree}`
 COMMIT=$(git rev-parse --short k/master)
-DESCRIPTION='This is the nightly release of the K framework. To install, download and extract the "Prebuilt K binary", and follow the instructions in INSTALL.md within the target directory. On Windows, start by installing [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10) with Ubuntu, after which you can download and extract the archive by running:
+DESCRIPTION='This is the nightly release of the K framework. To install, download and extract the \"Prebuilt K binary\", and follow the instructions in INSTALL.md within the target directory. On Windows, start by installing [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10) with Ubuntu, after which you can download and extract the archive by running:
 ```
 sudo apt-get install wget
 wget https://github.com/runtimeverification/k/releases/download/nightly-'$COMMIT'/nightly.tar.gz
