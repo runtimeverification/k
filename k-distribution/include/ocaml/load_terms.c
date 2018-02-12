@@ -21,4 +21,3 @@ value load_##name(value unit) {\
 RESOURCE(kore_term)
 RESOURCE(marshal_term)
 RESOURCE(plugin_path)
-RESOURCE(native_binary)
