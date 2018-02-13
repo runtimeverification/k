@@ -562,6 +562,10 @@ public class ConvertDataStructureToLookup {
         }
     }
 
+    public K convert(K k) {
+        return infer(k);
+    }
+
     public static boolean isLookupKLabel(KLabel k) {
         return k.name().equals("#match") || k.name().equals("#mapChoice") || k.name().equals("#setChoice");
     }

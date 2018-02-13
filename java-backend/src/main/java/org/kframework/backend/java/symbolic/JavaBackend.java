@@ -50,6 +50,7 @@ import static org.kframework.definition.Constructors.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class JavaBackend implements Backend {
@@ -121,6 +122,7 @@ public class JavaBackend implements Backend {
     }
 
     public Function<Definition, Definition> stepsForProverRules() {
+        BiFunction<Module, K, K> convertCellCollections = (Module m, K k) -> new ConvertDataStructureToLookup(m, false).convert(k);
         return d -> DefinitionTransformer.fromSentenceTransformer(new ResolveAnonVar()::resolve, "resolve anonymous varaibles")
                 .andThen(DefinitionTransformer.fromSentenceTransformer((m, s) -> new ResolveSemanticCasts(kompileOptions.backend.equals(Backends.JAVA)).resolve(s), "resolve semantic casts"))
                 .andThen(AddImplicitComputationCell::transformDefinition)
@@ -128,6 +130,7 @@ public class JavaBackend implements Backend {
                 .andThen(DefinitionTransformer.fromRuleBodyTranformer(RewriteToTop::bubbleRewriteToTopInsideCells, "bubble out rewrites below cells"))
                 .andThen(DefinitionTransformer.from(AddBottomSortForListsWithIdenticalLabels.singleton(), "add bottom sorts for lists"))
                 .andThen(DefinitionTransformer.fromSentenceTransformer((m, s) -> new ExpandMacros(m, kem, files, globalOptions, kompileOptions).expand(s), "expand macros"))
+                .andThen(DefinitionTransformer.fromKTransformerWithModuleInfo(convertCellCollections, "convert cell to the underlying collections"))
                 .andThen(DefinitionTransformer.fromRuleBodyTranformer(JavaBackend::ADTKVariableToSortedVariable, "ADT.KVariable to SortedVariable"))
                 .andThen(DefinitionTransformer.fromRuleBodyTranformer(JavaBackend::convertKSeqToKApply, "kseq to kapply"))
                 .andThen(DefinitionTransformer.fromRuleBodyTranformer(NormalizeKSeq.self(), "normalize kseq"))
