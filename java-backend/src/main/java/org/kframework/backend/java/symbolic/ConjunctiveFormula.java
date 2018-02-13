@@ -14,6 +14,7 @@ import org.kframework.backend.java.util.RewriteEngineUtils;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -756,7 +757,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
         return simplifiedConstraint;
     }
 
-    private static final Map<Triple<ConjunctiveFormula, ConjunctiveFormula, Set<Variable>>, Boolean> impliesSMTCache = Maps.newHashMap();
+    private static final Map<Triple<ConjunctiveFormula, ConjunctiveFormula, Set<Variable>>, Boolean> impliesSMTCache = Collections.synchronizedMap(new HashMap<>());
 
     private static boolean impliesSMT(
             ConjunctiveFormula left,
