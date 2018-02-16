@@ -35,6 +35,7 @@ import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import scala.Function1;
+import scala.Tuple2;
 import scala.collection.Set;
 
 import java.util.Collection;
@@ -52,7 +53,7 @@ import static org.kframework.Collections.*;
 /**
  * Class that implements the "--prove" option.
  */
-public class ProofExecutionMode implements ExecutionMode<K> {
+public class ProofExecutionMode implements ExecutionMode<Tuple2<K, Integer>> {
 
     private final KExceptionManager kem;
     private final KRunOptions options;
@@ -70,7 +71,7 @@ public class ProofExecutionMode implements ExecutionMode<K> {
     }
 
     @Override
-    public K execute(KRun.InitialConfiguration config, Rewriter rewriter, CompiledDefinition compiledDefinition) {
+    public Tuple2<K, Integer> execute(KRun.InitialConfiguration config, Rewriter rewriter, CompiledDefinition compiledDefinition) {
         String proofFile = options.experimental.prove;
         Module mod = getProofModule(compiledDefinition, proofFile, globalOptions, files, kem, sw);
         K k = config.theConfig;
@@ -158,7 +159,15 @@ public class ProofExecutionMode implements ExecutionMode<K> {
                 .map(r -> transform(NormalizeKSeq.self(), r))
                 //.map(r -> kompile.compileRule(compiledDefinition, r))
                 .collect(Collectors.toList());
-        return rewriter.prove(rules);
+        K results = rewriter.prove(rules);
+        int exit;
+        if (results instanceof KApply) {
+            KApply kapp = (KApply) results;
+            exit = kapp.klabel().name().equals("#True") ? 0 : 1;
+        } else {
+            exit = 1;
+        }
+        return Tuple2.apply(results, exit);
     }
 
     static Module getProofModule(CompiledDefinition compiledDefinition, String proofFile, GlobalOptions globalOptions, FileUtil files, KExceptionManager kem, Stopwatch sw) {
