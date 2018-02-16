@@ -15,7 +15,7 @@
 
   <properties>
     <config>tests/config.xml</config>
-    <ktestDir>${project.basedir}/../../k-exercises</ktestDir>
+    <ktestDir>${project.basedir}/tutorial</ktestDir>
   </properties>
 
   <dependencies>
