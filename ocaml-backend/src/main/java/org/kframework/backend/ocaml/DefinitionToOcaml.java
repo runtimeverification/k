@@ -24,8 +24,7 @@ import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.Sorts;
-import org.kframework.compile.ExpandMacros;
-import org.kframework.compile.FloatBuiltin;
+import org.kframework.compile.*;
 import org.kframework.definition.Module;
 import org.kframework.definition.ModuleTransformer;
 import org.kframework.definition.NonTerminal;
@@ -49,12 +48,6 @@ import org.kframework.kore.KToken;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
 import org.kframework.kore.VisitK;
-import org.kframework.compile.DeconstructIntegerAndFloatLiterals;
-import org.kframework.compile.GenerateSortPredicateRules;
-import org.kframework.compile.IncompleteCellUtils;
-import org.kframework.compile.LiftToKSequence;
-import org.kframework.compile.NormalizeVariables;
-import org.kframework.compile.RewriteToTop;
 import org.kframework.krun.KRun;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.concrete2kore.ParserUtils;
@@ -145,6 +138,10 @@ public class DefinitionToOcaml implements Serializable {
     static {
         ImmutableMap.Builder<String, Function<String, String>> builder = ImmutableMap.builder();
         builder.put("BOOL.Bool", s -> "(Bool " + s + ")");
+        builder.put("MINT.MInt", s -> {
+            MIntBuiltin m = MIntBuiltin.of(s);
+            return "(MInt (" + m.precision() + ", Z.of_string \"" + m.value() + "))";
+        });
         builder.put("INT.Int", s -> "(Int (Z.of_string \"" +  s + "\"))");
         builder.put("FLOAT.Float", s -> {
             FloatBuiltin f = FloatBuiltin.of(s);
@@ -156,6 +153,10 @@ public class DefinitionToOcaml implements Serializable {
 
         builder = ImmutableMap.builder();
         builder.put("BOOL.Bool", s -> "(Bool " + s + ")");
+        builder.put("MINT.MInt", s -> {
+            MIntBuiltin m = MIntBuiltin.of(s);
+            return "(MInt (" + m.precision() + ", Z.of_string \"" + m.value() + "))";
+        });
         builder.put("INT.Int", s -> "(Lazy.force " + encodeStringToIntConst(s) + ")");
         builder.put("FLOAT.Float", s -> {
             FloatBuiltin f = FloatBuiltin.of(s);
@@ -169,6 +170,7 @@ public class DefinitionToOcaml implements Serializable {
     static {
         ImmutableMap.Builder<String, Function<Sort, String>> builder = ImmutableMap.builder();
         builder.put("BOOL.Bool", s -> "Bool _");
+        builder.put("MINT.MInt", s -> "MInt _");
         builder.put("INT.Int", s -> "Int _");
         builder.put("FLOAT.Float", s -> "Float _");
         builder.put("STRING.String", s -> "String _");
@@ -189,6 +191,7 @@ public class DefinitionToOcaml implements Serializable {
         builder.put("STRING.String", s -> "[String _] -> [Bool true]");
         builder.put("BUFFER.StringBuffer", s -> "[StringBuffer _] -> [Bool true]");
         builder.put("BOOL.Bool", s -> "[Bool _] -> [Bool true]");
+        builder.put("MINT.MInt", s -> "[MInt _] -> [Bool true]");
         builder.put("MAP.Map", s -> "[Map (s,_,_)] when (s = " + encodeStringToIdentifier(s) + ") -> [Bool true]");
         builder.put("SET.Set", s -> "[Set (s,_,_)] when (s = " + encodeStringToIdentifier(s) + ") -> [Bool true]");
         builder.put("LIST.List", s -> "[List (s,_,_)] when (s = " + encodeStringToIdentifier(s) + ") -> [Bool true]");
@@ -574,6 +577,7 @@ public class DefinitionToOcaml implements Serializable {
         sb.append("type sort = \n");
         Set<Sort> sorts = mutable(mainModule.definedSorts());
         sorts.add(Sorts.Bool());
+        sorts.add(Sorts.MInt());
         sorts.add(Sorts.Int());
         sorts.add(Sorts.String());
         sorts.add(Sorts.Float());
@@ -766,6 +770,7 @@ public class DefinitionToOcaml implements Serializable {
                 "    | String s -> Hashtbl.hash s\n" +
                 "    | StringBuffer s -> Hashtbl.hash (Buffer.contents s)\n" +
                 "    | Bool b -> Hashtbl.hash b\n" +
+                "    | MInt (w,i) -> Hashtbl.hash w * 67 + Z.hash i\n" +
                 "    | Bottom -> 1\n" +
                 "    | ThreadLocal -> 2\n" +
                 "    | Thread(k1,k2,k3,k4) -> ((((Hashtbl.hash Lbl'Hash'Thread) * 37 + hash_k k1) * 37 + hash_k k2) * 37 + hash_k k3) * 36 + hash_k k4\n" +
@@ -827,6 +832,8 @@ public class DefinitionToOcaml implements Serializable {
                 "        max)\n" +
                 "    | Bool b -> qfld kq (31*h + Hashtbl.hash b) (\n" +
                 "        max)\n" +
+                "    | MInt (w,i) -> qfld kq ((31*h + (Hashtbl.hash w))*67 + Z.hash i) (\n" +
+                "        max)\n" +
                 "    | Bottom -> qfld kq (31*h + 1) (\n" +
                 "        max)\n" +
                 "    | ThreadLocal -> qfld kq (31*h + 2) (\n" +
@@ -869,6 +876,7 @@ public class DefinitionToOcaml implements Serializable {
                 "    | (String s1), (String s2) -> s1 = s2\n" +
                 "    | (StringBuffer s1), (StringBuffer s2) -> s1 == s2\n" +
                 "    | (Bool b1), (Bool b2) -> b1 = b2\n" +
+                "    | (MInt (w1,i1)), (MInt (w2,i2)) -> w1 = w2 && Z.equal i1 i2\n" +
                 "    | Bottom, Bottom -> true\n" +
                 "    | _ -> false\n" +
                 "  and equal_klist c1 c2 = if c1 == c2 then true else match (c1, c2) with\n" +
@@ -915,6 +923,7 @@ public class DefinitionToOcaml implements Serializable {
                 "    | (String s1), (String s2) -> Pervasives.compare s1 s2\n" +
                 "    | (StringBuffer s1), (StringBuffer s2) -> Pervasives.compare (Buffer.contents s1) (Buffer.contents s2)\n" +
                 "    | (Bool b1), (Bool b2) -> if b1 = b2 then 0 else if b1 then -1 else 1\n" +
+                "    | (MInt (w1,i1)), (MInt (w2,i2)) -> let v = Pervasives.compare w1 w2 in if v = 0 then Z.compare i1 i2 else v\n" +
                 "    | Bottom, Bottom -> 0\n" +
                 "    | ThreadLocal, ThreadLocal -> 0\n" +
                 "    | Thread (k11, k12, k13, k14), Thread (k21, k22, k23, k24) -> let v = compare k11 k21 in if v = 0 then let v = compare k12 k22 in if v = 0 then let v = compare k13 k23 in if v = 0 then compare k14 k24 else v else v else v\n");
@@ -945,6 +954,8 @@ public class DefinitionToOcaml implements Serializable {
                 "    | _, StringBuffer(_) -> 1\n" +
                 "    | Bool(_), _ -> -1\n" +
                 "    | _, Bool(_) -> 1\n" +
+                "    | MInt _, _ -> -1\n" +
+                "    | _, MInt _ -> 1\n" +
                 "    | Bottom, _ -> -1\n" +
                 "    | _, Bottom -> 1\n" +
                 "    | ThreadLocal, _ -> -1\n" +
@@ -1097,6 +1108,7 @@ public class DefinitionToOcaml implements Serializable {
         sb.append("            | String of string\n");
         sb.append("            | StringBuffer of Buffer.t\n");
         sb.append("            | Bool of bool\n");
+        sb.append("            | MInt of int * Z.t\n");
         sb.append("            | ThreadLocal\n");
         sb.append("            | Thread of t * t * t * t\n");
         sb.append("            | Bottom\n");
