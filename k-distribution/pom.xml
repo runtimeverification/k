@@ -32,7 +32,7 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>com.runtimeverification.rv_match</groupId>
+      <groupId>com.runtimeverification.k</groupId>
       <artifactId>ocaml-backend</artifactId>
       <version>${project.version}</version>
       <scope>runtime</scope>

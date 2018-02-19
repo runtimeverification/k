@@ -74,6 +74,7 @@ public class RuleGrammarGenerator {
     public static final String AUTO_FOLLOW = "AUTO-FOLLOW";
     public static final String PROGRAM_LISTS = "PROGRAM-LISTS";
     public static final String RULE_LISTS = "RULE-LISTS";
+    public static final String RECORD_PRODS = "RECORD-PRODUCTIONS";
 
     public static final String POSTFIX = "-PROGRAM-PARSING";
 
@@ -186,9 +187,11 @@ public class RuleGrammarGenerator {
             prods.addAll(makeCasts(Sorts.KBott(), Sorts.K(), Sorts.K()));
         }
 
-        for (Production p : iterable(mod.productions())) {
-            if (p.isPrefixProduction()) {
-                prods.addAll(mutable(p.recordProductions()));
+        if (baseK.getModule(RECORD_PRODS).isDefined() && mod.importedModules().contains(baseK.getModule(RECORD_PRODS).get())) {
+            for (Production p : iterable(mod.productions())) {
+                if (p.isPrefixProduction()) {
+                    prods.addAll(mutable(p.recordProductions()));
+                }
             }
         }
 

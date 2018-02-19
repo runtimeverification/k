@@ -22,6 +22,7 @@ import org.kframework.kore.KLabel;
 import org.kframework.kore.KORE;
 import org.kframework.kore.KRewrite;
 import org.kframework.kore.KVariable;
+import org.kframework.kore.SortedADT;
 import org.kframework.kore.Sort;
 import org.kframework.kore.TransformK;
 import org.kframework.kore.VisitK;
@@ -197,7 +198,7 @@ public class ConvertDataStructureToLookup {
     KVariable newDotVariable(Sort sort) {
         KVariable newLabel;
         do {
-            newLabel = KVariable("_" + (counter++), Att().add("sort", sort.name()));
+            newLabel = KVariable("_" + (counter++), Att.empty().add("sort", sort.name()));
         } while (vars.contains(newLabel));
         vars.add(newLabel);
         return newLabel;
@@ -206,23 +207,46 @@ public class ConvertDataStructureToLookup {
     /**
      * For the cell bag sorts with multiplicity *, add the single-element wrapper around individual cells.
      */
-    private K infer(K term, KLabel collectionLabel) {
-        Optional<String> wrapElement = m.attributesFor().apply(collectionLabel).<String>getOptional("wrapElement");
-        if (wrapElement.isPresent()) {
-            KLabel wrappedLabel = KLabel(wrapElement.get());
-            return new TransformK() {
-                @Override
-                public K apply(KApply k) {
-                    if (k.klabel().equals(wrappedLabel)) {
-                        KLabel elementLabel = KLabel(m.attributesFor().apply(collectionLabel).<String>get("element"));
-                        return KORE.KApply(elementLabel, super.apply(k));
+    private K infer(K term) {
+        return new TransformK() {
+            @Override
+            public K apply(KApply k) {
+                for (KLabel collectionLabel : collectionFor.keySet()) {
+                    Optional<String> wrapElement = m.attributesFor().apply(collectionLabel).getOptional("wrapElement");
+                    if (wrapElement.isPresent()) {
+                        KLabel wrappedLabel = KLabel(wrapElement.get());
+                        KLabel elementLabel = KLabel(m.attributesFor().apply(collectionLabel).get("element"));
+                        if (k.klabel().equals(elementLabel)) {
+                            return k;
+                        }
+                        if (k.klabel().equals(wrappedLabel)) {
+                            if (collectionIsMap(collectionLabel)) {
+                                // Map
+                                return KApply(elementLabel, super.apply(k.klist().items().get(0)), super.apply(k));
+                            } else if (collectionIsBag(collectionLabel)) {
+                                // bags are handled differently in the java backend, so we don't want to infer here
+                                return super.apply(k);
+                            } else {
+                                return KApply(elementLabel, super.apply(k));
+                            }
+                        }
                     }
-                    return super.apply(k);
                 }
-            }.apply(term);
-        } else {
-            return term;
-        }
+                return super.apply(k);
+            }
+        }.apply(term);
+    }
+
+    public boolean collectionIsMap(KLabel collectionLabel) {
+        return m.attributesFor().apply(collectionLabel).contains(Attribute.COMMUTATIVE_KEY)
+                && !m.attributesFor().apply(collectionLabel).contains(Attribute.IDEMPOTENT_KEY)
+                && !m.attributesFor().apply(collectionLabel).contains(Att.bag());
+    }
+
+    public boolean collectionIsBag(KLabel collectionLabel) {
+        return m.attributesFor().apply(collectionLabel).contains(Attribute.COMMUTATIVE_KEY)
+                && !m.attributesFor().apply(collectionLabel).contains(Attribute.IDEMPOTENT_KEY)
+                && m.attributesFor().apply(collectionLabel).contains(Att.bag());
     }
 
     private K transform(K body) {
@@ -291,7 +315,7 @@ public class ConvertDataStructureToLookup {
                             KApply kapp = (KApply) component;
                             boolean needsWrapper = false;
                             if (kapp.klabel().equals(elementLabel)
-                                    || (needsWrapper = kapp.klabel().equals(KLabel(m.attributesFor().apply(collectionLabel).<String>get("wrapElement"))))) {
+                                    || (needsWrapper = kapp.klabel().equals(getWrapElement(collectionLabel)))) {
                                 if (kapp.klist().size() != 1 && !needsWrapper) {
                                     throw KEMException.internalError("Unexpected arity of list element: " + kapp.klist().size(), kapp);
                                 }
@@ -356,12 +380,12 @@ public class ConvertDataStructureToLookup {
                     if (lhsOf == null && RewriteToTop.hasRewrite(k)) {
                         // An outermost list may contain nested rewrites, so the term
                         // is translated into a rewrite from compiled match into the original right-hand side.
-                        return KRewrite(list, infer(RewriteToTop.toRight(k), collectionLabel));
+                        return KRewrite(list, infer(RewriteToTop.toRight(k)));
                     } else {
                         return list;
                     }
                 } else {
-                    return infer(super.apply(k), collectionLabel);
+                    return infer(super.apply(k));
                 }
             }
 
@@ -384,16 +408,20 @@ public class ConvertDataStructureToLookup {
                             }
                             frame = (KVariable) component;
                         } else if (component instanceof KApply) {
+
+                            boolean needsWrapper = false;
                             KApply kapp = (KApply) component;
-                            if (kapp.klabel().equals(KLabel(m.attributesFor().apply(collectionLabel).<String>get("element")))) {
-                                if (kapp.klist().size() != 2) {
+                            if (kapp.klabel().equals(KLabel(m.attributesFor().apply(collectionLabel).get("element")))
+                                    || (needsWrapper = kapp.klabel().equals(getWrapElement(collectionLabel)))) {
+                                if (kapp.klist().size() != 2 && !needsWrapper) {
                                     throw KEMException.internalError("Unexpected arity of map element: " + kapp.klist().size(), kapp);
                                 }
                                 K stack = lhsOf;
                                 // setting lhsOf prevents inner lists from being translated to rewrites,
                                 lhsOf = kapp;
 
-                                elements.put(super.apply(kapp.klist().items().get(0)), super.apply(kapp.klist().items().get(1)));
+                                elements.put(super.apply(kapp.klist().items().get(0)),
+                                        needsWrapper ? super.apply(kapp) : super.apply(kapp.klist().items().get(1)));
 
                                 lhsOf = stack;
                             } else {
@@ -401,7 +429,7 @@ public class ConvertDataStructureToLookup {
                             }
                         }
                     }
-                    KVariable map = newDotVariable(m.productionsFor().get(collectionLabel).get().head().sort());
+                    KVariable map = newDotVariable(Sort("Map"));
                     // K1,Ctx[K1 |-> K2 K3] => K1,Ctx[M] requires K3 := M[K1<-undef] andBool K1 := choice(M) andBool K2 := M[K1]
                     if (frame != null) {
                         state.add(KORE.KApply(KLabel("#match"), frame, elements.keySet().stream().reduce(map, (a1, a2) -> KORE.KApply(KLabel("_[_<-undef]"), a1, a2))));
@@ -419,13 +447,17 @@ public class ConvertDataStructureToLookup {
                     if (lhsOf == null && RewriteToTop.hasRewrite(k)) {
                         // An outermost map may contain nested rewrites, so the term
                         // is translated into a rewrite from compiled match into the original right-hand side.
-                        return KRewrite(map, infer(RewriteToTop.toRight(k), collectionLabel));
+                        return KRewrite(map, infer(RewriteToTop.toRight(k)));
                     } else {
                         return map;
                     }
                 } else {
-                    return infer(super.apply(k), collectionLabel);
+                    return infer(super.apply(k));
                 }
+            }
+
+            private KLabel getWrapElement(KLabel collectionLabel) {
+                return KLabel(m.attributesFor().apply(collectionLabel).get("wrapElement"));
             }
 
 
@@ -452,7 +484,7 @@ public class ConvertDataStructureToLookup {
 
                             boolean needsWrapper = false;
                             if (kapp.klabel().equals(elementLabel)
-                                    || (needsWrapper = kapp.klabel().equals(KLabel(m.attributesFor().apply(collectionLabel).<String>get("wrapElement"))))) {
+                                    || (needsWrapper = kapp.klabel().equals(getWrapElement(collectionLabel)))) {
                                 if (kapp.klist().size() != 1 && !needsWrapper) {
                                     throw KEMException.internalError("Unexpected arity of set element: " + kapp.klist().size(), kapp);
                                 }
@@ -469,7 +501,7 @@ public class ConvertDataStructureToLookup {
                             }
                         }
                     }
-                    KVariable set = newDotVariable(m.productionsFor().get(collectionLabel).get().head().sort());
+                    KVariable set = newDotVariable(Sort("Set"));
                     K accum = set;
                     // Ctx[SetItem(K1) K2] => Ctx[S] requires K1 := choice(S) andBool K2 := S -Set SetItem(K1)
                     // Ctx[SetItem(5) SetItem(6) K] => Ctx[S] requires 5 in S andBool 6 in S andBool K := S -Set SetItem(5) SetItem(6)
@@ -494,12 +526,12 @@ public class ConvertDataStructureToLookup {
                     if (lhsOf == null && RewriteToTop.hasRewrite(k)) {
                         // An outermost set may contain nested rewrites, so the term
                         // is translated into a rewrite from compiled match into the original right-hand side.
-                        return KRewrite(set, infer(RewriteToTop.toRight(k), collectionLabel));
+                        return KRewrite(set, infer(RewriteToTop.toRight(k)));
                     } else {
                         return set;
                     }
                 } else {
-                    return infer(super.apply(k), collectionLabel);
+                    return infer(super.apply(k));
                 }
             }
 
@@ -537,6 +569,10 @@ public class ConvertDataStructureToLookup {
         } else {
             return s;
         }
+    }
+
+    public K convert(K k) {
+        return infer(k);
     }
 
     public static boolean isLookupKLabel(KLabel k) {

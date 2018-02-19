@@ -202,10 +202,18 @@ module DEFAULT-CONFIGURATION
   configuration <k> $PGM:K </k>
 endmodule
 
+module RECORD-PRODUCTIONS
+  // if this module is imported, prefix productions of the form
+  // syntax Sort ::= name(Args)
+  // will be able to be parsed with don't-care variables according
+  // to their nonterminal's names
+endmodule
+
 // To be used to parse semantic rules
 module K
   imports KSEQ-SYMBOLIC
   imports REQUIRES-ENSURES
+  imports RECORD-PRODUCTIONS
   imports K-SORT-LATTICE
   imports AUTO-CASTS
   imports AUTO-FOLLOW
@@ -223,6 +231,7 @@ endmodule
 // To be used to parse terms in full K
 module K-TERM
   imports KSEQ-SYMBOLIC
+  imports RECORD-PRODUCTIONS
   imports K-SORT-LATTICE
   imports AUTO-CASTS
   imports AUTO-FOLLOW

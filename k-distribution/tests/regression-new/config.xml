@@ -18,5 +18,10 @@
            programs="concrete-function"
            results="concrete-function" />
 
+  <include file="cell_map/config.xml"
+           directory="cell_map"
+           programs="cell_map"
+           results="cell_map" />
+
 </tests>
 

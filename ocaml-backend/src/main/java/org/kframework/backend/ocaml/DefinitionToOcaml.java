@@ -2641,10 +2641,13 @@ public class DefinitionToOcaml implements Serializable {
     }
 
     private void applyVarRhs(KVariable v, StringBuilder sb, VarInfo vars) {
-        if (vars.vars.get(v).isEmpty()) {
-            throw KEMException.internalError("Failed to compile rule due to unmatched variable on right-hand-side. This is likely due to an unsupported collection pattern.", v);
+        if (vars.vars.get(v).isEmpty() && !getVarName(v).startsWith("?")) {
+            throw KEMException.internalError("Failed to compile rule due to unmatched variable on right-hand-side. This is likely due to an unsupported collection pattern: " + getVarName(v), v);
+        } else if (vars.vars.get(v).isEmpty()) {
+            sb.append("(raise (Stuck config))");
+        } else {
+            applyVarRhs(vars.vars.get(v).iterator().next(), sb, vars.listVars.get(vars.vars.get(v).iterator().next()));
         }
-        applyVarRhs(vars.vars.get(v).iterator().next(), sb, vars.listVars.get(vars.vars.get(v).iterator().next()));
     }
 
     private void applyVarRhs(String varOccurrance, StringBuilder sb, KLabel listVar) {

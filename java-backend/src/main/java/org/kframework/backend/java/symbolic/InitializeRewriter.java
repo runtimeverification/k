@@ -103,7 +103,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
         TermContext initializingContext = TermContext.builder(new GlobalContext(fs, deterministicFunctions, globalOptions, krunOptions, kem, smtOptions, hookProvider, files, Stage.INITIALIZING))
                 .freshCounter(0).build();
         Definition definition;
-        definition = initializeDefinition.invoke(mainModule, kem, initializingContext.global());
+        definition = initializeDefinition.invoke(mainModule, kem, koreDef, initializingContext.global());
         GlobalContext rewritingContext = new GlobalContext(fs, deterministicFunctions, globalOptions, krunOptions, kem, smtOptions, hookProvider, files, Stage.REWRITING);
         rewritingContext.setDefinition(definition);
 
@@ -411,11 +411,11 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
             }
         };
 
-        public Definition invoke(Module module, KExceptionManager kem, GlobalContext global) {
+        public Definition invoke(Module module, KExceptionManager kem, CompiledDefinition compiledDef, GlobalContext global) {
             if (cache.containsKey(module)) {
                 return cache.get(module);
             }
-            Definition definition = new Definition(module, kem);
+            Definition definition = new Definition(module, compiledDef, kem);
 
             global.setDefinition(definition);
 

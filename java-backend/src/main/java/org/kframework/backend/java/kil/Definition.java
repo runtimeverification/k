@@ -20,7 +20,9 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
 import org.kframework.kil.loader.Context;
+import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kore.convertors.KILtoKORE;
+import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import scala.collection.JavaConversions;
@@ -103,12 +105,14 @@ public class Definition extends JavaSymbolicObject {
 
     private final Map<KItem.CacheTableColKey, KItem.CacheTableValue> sortCacheTable = new HashMap<>();
 
-    public Definition(org.kframework.definition.Module module, KExceptionManager kem) {
+    public Definition(org.kframework.definition.Module module, CompiledDefinition def, KExceptionManager kem) {
         kLabels = new HashSet<>();
         this.kem = kem;
 
+        Module moduleWithPolyProds = new RuleGrammarGenerator(def.getParsedDefinition(), false).getCombinedGrammar(module).getExtensionModule();
+
         ImmutableSetMultimap.Builder<String, SortSignature> signaturesBuilder = ImmutableSetMultimap.builder();
-        JavaConversions.mapAsJavaMap(module.signatureFor()).entrySet().stream().forEach(e -> {
+        JavaConversions.mapAsJavaMap(moduleWithPolyProds.signatureFor()).entrySet().stream().forEach(e -> {
             JavaConversions.setAsJavaSet(e.getValue()).stream().forEach(p -> {
                 ImmutableList.Builder<Sort> sortsBuilder = ImmutableList.builder();
                 stream(p._1()).map(s -> Sort.of(s.name())).forEach(sortsBuilder::add);
@@ -124,7 +128,7 @@ public class Definition extends JavaSymbolicObject {
         });
 
         definitionData = new DefinitionData(
-                new Subsorts(module),
+                new Subsorts(moduleWithPolyProds),
                 getDataStructureSorts(module),
                 signaturesBuilder.build(),
                 attributesBuilder.build(),
