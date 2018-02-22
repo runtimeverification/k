@@ -35,12 +35,12 @@ import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
+import org.kframework.utils.inject.DefinitionScoped;
 import org.kframework.utils.options.SMTOptions;
 import scala.Tuple2;
 import scala.collection.JavaConversions;
 
 import java.lang.invoke.MethodHandle;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -115,7 +115,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
         public final Definition definition;
         public Definition miniKoreDefinition;
         public final Module module;
-        private final BigInteger initCounterValue;
+        private final long initCounterValue;
         public final GlobalContext rewritingContext;
         private final KExceptionManager kem;
         private final FileUtil files;
@@ -128,7 +128,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
                 Definition definition,
                 Definition miniKoreDefinition,
                 List<String> transitions,
-                BigInteger initCounterValue,
+                long initCounterValue,
                 GlobalContext rewritingContext,
                 KExceptionManager kem,
                 FileUtil files, CompiledDefinition koreDef,
@@ -302,7 +302,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
                 return javaRules;
             }
 
-            public ProcessProofRules invoke(GlobalContext rewritingContext, BigInteger initCounterValue, Module module, Definition definition) {
+            public ProcessProofRules invoke(GlobalContext rewritingContext, long initCounterValue, Module module, Definition definition) {
                 termContext = TermContext.builder(rewritingContext).freshCounter(initCounterValue).build();
                 converter = new KOREtoBackendKIL(module, definition, termContext.global(), false);
                 termContext.setKOREtoBackendKILConverter(converter);
@@ -402,6 +402,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
     }
 
 
+    @DefinitionScoped
     public static class InitializeDefinition {
 
         private final Map<Module, Definition> cache = new LinkedHashMap<Module, Definition>() {

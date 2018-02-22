@@ -12,34 +12,18 @@ import org.kframework.utils.errorsystem.KEMException;
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * An object containing context specific to a particular configuration.
  */
 public class TermContext extends JavaSymbolicObject {
 
-    private final FreshCounter counter;
+    private final AtomicLong counter;
 
     private final GlobalContext global;
 
     private Set<Variable> initialVariables;
-
-    /**
-     * This class shall not be accessed by more than one thread,
-     * so it is made non-thread-safe intentionally.
-     */
-    private static class FreshCounter implements Serializable {
-        private BigInteger value;
-
-        private FreshCounter(BigInteger value) {
-            this.value = value;
-        }
-
-        private BigInteger incrementAndGet() {
-            value = value.add(BigInteger.ONE);
-            return value;
-        }
-    }
 
     private Term topTerm;
 
@@ -47,7 +31,7 @@ public class TermContext extends JavaSymbolicObject {
 
     private KOREtoBackendKIL converter;
 
-    private TermContext(GlobalContext global, FreshCounter counter) {
+    private TermContext(GlobalContext global, AtomicLong counter) {
         this.global = global;
         this.counter = counter;
         this.initialVariables = Sets.newHashSet();
@@ -70,18 +54,18 @@ public class TermContext extends JavaSymbolicObject {
      * Forks an identical {@link TermContext}.
      */
     public TermContext fork() {
-        return counter != null ? new TermContext(global, new FreshCounter(counter.value)) : this;
+        return counter != null ? new TermContext(global, new AtomicLong(counter.get())) : this;
     }
 
     public BigInteger freshConstant() {
         if (counter == null) {
             throw KEMException.criticalError("No fresh counter available in this TermContext.");
         }
-        return counter.incrementAndGet();
+        return BigInteger.valueOf(counter.incrementAndGet());
     }
 
-    public BigInteger getCounterValue() {
-        return counter.value;
+    public long getCounterValue() {
+        return counter.get();
     }
 
     public Definition definition() {
@@ -134,18 +118,14 @@ public class TermContext extends JavaSymbolicObject {
 
         private final GlobalContext globalContext;
 
-        private FreshCounter counter;
+        private AtomicLong counter;
 
         public Builder(GlobalContext globalContext) {
             this.globalContext = globalContext;
         }
 
         public Builder freshCounter(long initialValue) {
-            return freshCounter(BigInteger.valueOf(initialValue));
-        }
-
-        public Builder freshCounter(BigInteger initialValue) {
-            this.counter = new FreshCounter(initialValue);
+            this.counter = new AtomicLong(initialValue);
             return this;
         }
 

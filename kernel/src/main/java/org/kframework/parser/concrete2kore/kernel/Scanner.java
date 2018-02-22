@@ -198,7 +198,7 @@ public class Scanner implements AutoCloseable {
     private static final int N_CPUS = Runtime.getRuntime().availableProcessors();
     private static final int N_DEFINITIONS = 10;
 
-    private static Map<File, Tuple2<AtomicInteger, ArrayBlockingQueue<Process>>> pool = Collections.synchronizedMap(new LinkedHashMap<File, Tuple2<AtomicInteger, ArrayBlockingQueue<Process>>>() {
+    private static Map<File, Tuple2<AtomicInteger, ArrayBlockingQueue<Process>>> pool = new LinkedHashMap<File, Tuple2<AtomicInteger, ArrayBlockingQueue<Process>>>() {
         @Override
         protected synchronized boolean removeEldestEntry(final Map.Entry<File, Tuple2<AtomicInteger, ArrayBlockingQueue<Process>>> eldest) {
             if (size() > N_DEFINITIONS) {
@@ -210,12 +210,15 @@ public class Scanner implements AutoCloseable {
             }
             return false;
         }
-    });
+    };
 
     public Token[] tokenize(String input, Source source, int[] lines, int[] columns) {
         try {
             Process process;
-            Tuple2<AtomicInteger, ArrayBlockingQueue<Process>> entry = this.pool.computeIfAbsent(scanner, s -> Tuple2.apply(new AtomicInteger(0), new ArrayBlockingQueue<>(N_CPUS)));
+            Tuple2<AtomicInteger, ArrayBlockingQueue<Process>> entry;
+            synchronized(pool) {
+                entry = this.pool.computeIfAbsent(scanner, s -> Tuple2.apply(new AtomicInteger(0), new ArrayBlockingQueue<>(N_CPUS)));
+            }
             AtomicInteger sizeofPool = entry._1();
             ArrayBlockingQueue<Process> pool = entry._2();
 
