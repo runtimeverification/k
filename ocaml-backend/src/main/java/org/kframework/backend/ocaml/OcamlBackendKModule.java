@@ -52,6 +52,8 @@ public class OcamlBackendKModule extends AbstractKModule {
             @Override
             protected void configure() {
 
+                bindOptions(OcamlBackendKModule.this::krunOptions, binder());
+
                 MapBinder<String, Function<org.kframework.definition.Module, Rewriter>> rewriterBinder = MapBinder.newMapBinder(
                         binder(), TypeLiteral.get(String.class), new TypeLiteral<Function<org.kframework.definition.Module, Rewriter>>() {
                         });
@@ -65,6 +67,7 @@ public class OcamlBackendKModule extends AbstractKModule {
                         ToolActivation.class, ExecutionMode.class);
 
                 executionBinder.addBinding(new ToolActivation.OptionActivation("--ocaml-compile")).to(OcamlCompileExecutionMode.class);
+                executionBinder.addBinding(new ToolActivation.OptionActivation("--interpret")).to(InterpreterExecutionMode.class);
             }
         });
     }

@@ -86,8 +86,10 @@ struct
   let value = ref ""
   let init = ref "initGeneratedTopCell"
   let vars = ref KMap.empty
+  let term = ref []
   let serialize = ref false
   let is_marshal = ref false
+  let is_term = ref false
 
   let add_arg category =
     if !is_marshal && not !serialize then Prelude.no_parse_eval := true;
@@ -97,13 +99,20 @@ struct
     | "binary" -> Lexer.parse_k_binary_string !value
     | "binaryfile" -> Lexer.parse_k_binary_file !value
     | _ -> raise (Arg.Bad "invalid kast format. Choose one of text|textfile|binary|binaryfile")
-    in let key = [KToken(SortKConfigVar, "$" ^ !name)]
-    in vars := KMap.add key parsed_val !vars
+    in if !name = "" then begin
+      term := parsed_val;
+      is_term := true
+    end else
+      let key = [KToken(SortKConfigVar, "$" ^ !name)] in
+      vars := KMap.add key parsed_val !vars
+
+  let types = ["text"; "textfile"; "binary"; "binaryfile"]
 
   let speclist = [
     ("--depth", Arg.Set_int depth, "The maximum number of computational steps to execute the definition for.");
     ("--output-file", Arg.Set_string output_file, "The file to write the resulting configuration into.");
-    ("-c", Arg.Tuple([Arg.Set_string name; Arg.Set_string value; Arg.Symbol(["text"; "textfile"; "binary"; "binaryfile"], add_arg)]), "A krun configuration variable.");
+    ("-c", Arg.Tuple([Arg.Set_string name; Arg.Set_string value; Arg.Symbol(types, add_arg)]), "A krun configuration variable.");
+    ("-t", Arg.Tuple([Arg.Set_string value; Arg.Symbol(types, add_arg)]), "The entire term to interpret.");
     ("--initializer", Arg.Set_string init, "Initializer for top cell.");
     ("-s", Arg.Set serialize, "Output term marshaled.")
   ]
@@ -113,7 +122,7 @@ struct
   let parse () : (k * int * out_channel) =
     Arg.parse speclist (fun _ -> ()) usage_msg;
     let module Def = (val Plugin.get () : Plugin.Definition) in
-    let input = Def.eval (Constants.KApply(Constants.parse_klabel(!init), [[Map(SortMap,Lbl_Map_,!vars)]])) [] in
+    let input = if !is_term then !term else Def.eval (Constants.KApply(Constants.parse_klabel(!init), [[Map(SortMap,Lbl_Map_,!vars)]])) [] in
     vars := KMap.empty; (* for gc *)
     input, !depth, open_out_bin !output_file
 

@@ -51,7 +51,7 @@ public abstract class AbstractKModule implements KModule {
         });
     }
 
-    private void bindOptions(Supplier<List<Pair<Class<?>, Boolean>>> action, Binder binder) {
+    protected void bindOptions(Supplier<List<Pair<Class<?>, Boolean>>> action, Binder binder) {
         Multibinder<Object> optionsBinder = Multibinder.newSetBinder(binder, Object.class, Options.class);
         Multibinder<Class<?>> experimentalOptionsBinder = Multibinder.newSetBinder(binder, new TypeLiteral<Class<?>>() {}, Options.class);
         for (Pair<Class<?>, Boolean> option : action.get()) {

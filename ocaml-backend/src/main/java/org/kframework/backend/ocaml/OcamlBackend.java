@@ -8,6 +8,7 @@ import org.kframework.definition.Definition;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.Kompile;
 import org.kframework.kompile.KompileOptions;
+import org.kframework.krun.KRunOptions;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.errorsystem.KEMException;
@@ -128,6 +129,13 @@ public class OcamlBackend implements Backend {
                 if (exit != 0) {
                     throw KEMException.criticalError("ocamlopt returned nonzero exit code: " + exit + "\nExamine output to see errors.");
                 }
+
+                OcamlRewriter rewriter = new OcamlRewriter(files, def, new KRunOptions());
+                ocaml = def.interpreter();
+                files.saveToTemp("interpreter.ml", ocaml);
+                rewriter.compileOcaml("interpreter.ml");
+                files.resolveTemp("a.out").renameTo(files.resolveKompiled("interpreter"));
+                files.resolveKompiled("interpreter").setExecutable(true);
             } else {
                 // write out the interpreter program
                 ocaml = def.interpreter();
