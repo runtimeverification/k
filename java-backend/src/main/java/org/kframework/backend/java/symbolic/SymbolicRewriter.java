@@ -586,6 +586,7 @@ public class SymbolicRewriter {
         List<ConstrainedTerm> nextQueue = new ArrayList<>();
 
         initialTerm = initialTerm.expandPatterns(true);
+        initialTerm = initialTerm.evaluateUnderCurrentConstraint();
 
         visited.add(initialTerm);
         queue.add(initialTerm);
