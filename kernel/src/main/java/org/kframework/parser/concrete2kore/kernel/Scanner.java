@@ -1,5 +1,7 @@
 package org.kframework.parser.concrete2kore.kernel;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.kframework.attributes.Location;
@@ -19,12 +21,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -184,28 +183,31 @@ public class Scanner implements AutoCloseable {
             return kind + ":" + value;
         }
     }
+
     @Override
     public void close() {
-        synchronized(pool) {
-            if (pool.containsKey(scanner)) {
-                for (Process p : pool.get(scanner)._2()) {
-                    p.destroy();
-                }
+        synchronized(idleProcesses) {
+            for (Process p : idleProcesses.get(this)) {
+                p.destroy();
+                cache.remove(p);
+                activeProcceses--;
             }
+            idleProcesses.removeAll(this);
         }
     }
 
     private static final int N_CPUS = Runtime.getRuntime().availableProcessors();
-    private static final int N_DEFINITIONS = 10;
-
-    private static Map<File, Tuple2<AtomicInteger, ArrayBlockingQueue<Process>>> pool = new LinkedHashMap<File, Tuple2<AtomicInteger, ArrayBlockingQueue<Process>>>() {
+    private static final int N_PROCS = 512;
+    private static int activeProcceses = 0;
+    private static final Semaphore runningScanners = new Semaphore(N_PROCS);
+    private static final ListMultimap<Scanner, Process> idleProcesses = ArrayListMultimap.create();
+    private static final Map<Process, Scanner> cache = new LinkedHashMap<Process, Scanner>() {
         @Override
-        protected synchronized boolean removeEldestEntry(final Map.Entry<File, Tuple2<AtomicInteger, ArrayBlockingQueue<Process>>> eldest) {
-            if (size() > N_DEFINITIONS) {
-                ArrayBlockingQueue<Process> pool = eldest.getValue()._2();
-                for (Process p : pool) {
-                    p.destroy();
-                }
+        protected boolean removeEldestEntry(Map.Entry<Process, Scanner> entry) {
+            if (activeProcceses > N_PROCS) {
+                entry.getKey().destroy();
+                idleProcesses.get(entry.getValue()).remove(entry.getKey());
+                activeProcceses--;
                 return true;
             }
             return false;
@@ -214,19 +216,23 @@ public class Scanner implements AutoCloseable {
 
     public Token[] tokenize(String input, Source source, int[] lines, int[] columns) {
         try {
-            Process process;
-            Tuple2<AtomicInteger, ArrayBlockingQueue<Process>> entry;
-            synchronized(pool) {
-                entry = this.pool.computeIfAbsent(scanner, s -> Tuple2.apply(new AtomicInteger(0), new ArrayBlockingQueue<>(N_CPUS)));
-            }
-            AtomicInteger sizeofPool = entry._1();
-            ArrayBlockingQueue<Process> pool = entry._2();
+            runningScanners.acquire();
 
-            if (sizeofPool.getAndUpdate(i -> i < N_CPUS ? i + 1 : i) < N_CPUS) {
-                process = new ProcessBuilder(scanner.getAbsolutePath()).start();
-            } else {
-                process = pool.take();
+            Process process;
+            synchronized (idleProcesses) {
+                if (idleProcesses.get(this).size() > 0) {
+                    List<Process> idleForThisScanner = idleProcesses.get(this);
+                    process = idleForThisScanner.remove(idleForThisScanner.size() - 1);
+                    cache.remove(process);
+                } else {
+                    process = new ProcessBuilder(scanner.getAbsolutePath()).start();
+                    activeProcceses++;
+                    // temporarily add it so that LinkedHashMap evicts the old entry
+                    cache.put(process, this);
+                    cache.remove(process);
+                }
             }
+
             byte[] buf = input.getBytes("UTF-8");
             ByteBuffer size = ByteBuffer.allocate(4);
             size.order(ByteOrder.nativeOrder());
@@ -235,45 +241,60 @@ public class Scanner implements AutoCloseable {
             process.getOutputStream().write(buf);
             process.getOutputStream().write('\n');
             process.getOutputStream().flush();
-            return readTokenizedOutput(process, source, lines, columns, sizeofPool, pool);
+            return readTokenizedOutput(process, source, lines, columns);
         } catch (IOException | InterruptedException e) {
             throw KEMException.internalError("Failed to invoke scanner", e);
+        } finally {
+            runningScanners.release();
         }
     }
 
-    private Token[] readTokenizedOutput(Process process, Source source, int[] lines, int[] columns, AtomicInteger sizeofPool, ArrayBlockingQueue<Process> pool) throws IOException {
+    private Token[] readTokenizedOutput(Process process, Source source, int[] lines, int[] columns) throws IOException {
         List<Token> result = new ArrayList<>();
-        while (true) {
-            byte[] buf = new byte[24];
-            IOUtils.readFully(process.getInputStream(), buf);
-            ByteBuffer byteBuf = ByteBuffer.wrap(buf);
-            byteBuf.order(ByteOrder.nativeOrder());
-            long startLoc = byteBuf.getLong();
-            if (startLoc < 0) {
-                break;
+        boolean success = false;
+        try {
+            while (true) {
+                byte[] buf = new byte[24];
+                IOUtils.readFully(process.getInputStream(), buf);
+                ByteBuffer byteBuf = ByteBuffer.wrap(buf);
+                byteBuf.order(ByteOrder.nativeOrder());
+                long startLoc = byteBuf.getLong();
+                if (startLoc < 0) {
+                    break;
+                }
+                long endLoc = byteBuf.getLong();
+                int kind = byteBuf.getInt();
+                int len = byteBuf.getInt();
+                byte[] bytes = new byte[len];
+                IOUtils.readFully(process.getInputStream(), bytes);
+                String value = new String(bytes, "UTF-8");
+                Token t = new Token(kind, value, startLoc, endLoc);
+                if (kind == -1) {
+                    String msg = "Scanner error: unexpected character sequence '" + value + "'.";
+                    Location loc = new Location(lines[t.startLoc], columns[t.startLoc],
+                            lines[t.endLoc], columns[t.endLoc]);
+                    throw new ParseFailedException(new KException(
+                            KException.ExceptionType.ERROR, KException.KExceptionGroup.INNER_PARSER, msg, source, loc));
+                }
+                result.add(t);
             }
-            long endLoc = byteBuf.getLong();
-            int kind = byteBuf.getInt();
-            int len = byteBuf.getInt();
-            byte[] bytes = new byte[len];
-            IOUtils.readFully(process.getInputStream(), bytes);
-            String value = new String(bytes, "UTF-8");
-            Token t = new Token(kind, value, startLoc, endLoc);
-            if (kind == -1) {
-                String msg = "Scanner error: unexpected character sequence '" + value + "'.";
-                Location loc = new Location(lines[t.startLoc], columns[t.startLoc],
-                        lines[t.endLoc], columns[t.endLoc]);
-                // we aren't returning this process to the pool since it still has some input tokens in it left,
+            success = true;
+            return result.toArray(new Token[result.size()]);
+        } finally {
+            if (success) {
+                synchronized (idleProcesses) {
+                    cache.put(process, this);
+                    idleProcesses.put(this, process);
+                }
+            } else {
+                // we aren't returning this process to the pool since something went wrong with it,
                 // so we have to clean up here and then make sure that the pool knows it can allocate a new process.
-                process.destroy();
-                sizeofPool.decrementAndGet();
-                throw new ParseFailedException(new KException(
-                        KException.ExceptionType.ERROR, KException.KExceptionGroup.INNER_PARSER, msg, source, loc));
+                synchronized (idleProcesses) {
+                    process.destroy();
+                    activeProcceses--;
+                }
             }
-            result.add(t);
         }
-        pool.add(process);
-        return result.toArray(new Token[result.size()]);
     }
 
 }
