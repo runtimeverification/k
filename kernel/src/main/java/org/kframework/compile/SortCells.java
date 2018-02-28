@@ -193,7 +193,13 @@ public class SortCells {
                 split = Collections.emptyMap();
             } else if (remainingCells.size() == 1) {
                 Sort s = Iterables.getOnlyElement(remainingCells);
-                split = ImmutableMap.of(s, KVariable(var.name(), var.att().remove(Attribute.SORT_KEY)));
+                if (cfg.getMultiplicity(s) == Multiplicity.STAR) {
+                    split = ImmutableMap.of(s, KVariable(
+                            var.name(),
+                            var.att().add(Attribute.SORT_KEY, getPredicateSort(s).name())));
+                } else {
+                    split = ImmutableMap.of(s, KVariable(var.name(), var.att().remove(Attribute.SORT_KEY)));
+                }
             } else {
                 split = new HashMap<>();
                 for (Sort cell : remainingCells) {

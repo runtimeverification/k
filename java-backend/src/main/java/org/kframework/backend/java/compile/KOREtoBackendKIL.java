@@ -10,6 +10,7 @@ import org.kframework.backend.java.symbolic.ConjunctiveFormula;
 import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Module;
+import org.kframework.definition.Production;
 import org.kframework.kil.Attribute;
 import org.kframework.kore.Assoc;
 import org.kframework.kore.K;
@@ -231,7 +232,29 @@ public class KOREtoBackendKIL {
     }
 
     public Variable KVariable(String name, Att att) {
-        Sort sort = Sort.of(att.getOptional(Att.sort()).orElse(Sorts.K().toString()));
+        String sortName = att.getOptional(Att.sort()).orElse(Sorts.K().toString());
+        Optional<Production> collectionProduction = stream(module.productions())
+                .filter(p -> p.att().contains("cellCollection") && p.sort().name().equals(sortName))
+                .findAny();
+        Sort sort;
+        if (collectionProduction.isPresent()) {
+            switch (collectionProduction.get().att().get(Attribute.HOOK_KEY)) {
+                case "LIST.concat":
+                    sort = Sort.LIST;
+                    break;
+                case "MAP.concat":
+                    sort = Sort.MAP;
+                    break;
+                case "SET.concat":
+                    sort = Sort.SET;
+                    break;
+                default:
+                    sort = Sort.BAG;
+            }
+        } else {
+            sort = Sort.of(sortName);
+        }
+
         String key = name + sort;
         if (variableTable.containsKey(key)) {
             return variableTable.get(key);
