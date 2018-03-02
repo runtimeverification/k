@@ -564,6 +564,12 @@ class TextToKore(b: Builders) {
                   "#`" + loop(new StringBuilder(c.toString()))
                 case c => throw error("Meta-Identifier>", c)
               }
+            case '\\' => // #\ID
+              scanner.next() match {
+                case c if isLetter(c) =>
+                  "#\\" + loop(new StringBuilder(c.toString()))
+                case c => throw error("Meta-Identifier>", c)
+              }
             case c if isLetter(c) => // #ID
               "#" + loop(new StringBuilder(c.toString()))
             case err => throw error("<Meta-Identifier>", err)
