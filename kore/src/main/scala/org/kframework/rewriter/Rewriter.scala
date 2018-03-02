@@ -38,7 +38,7 @@ trait Rewriter {
 
   def executeAndMatch(k: kore.K, depth: Optional[Integer], rule: Rule): Tuple2[RewriterResult, kore.K]
 
-  def prove(rules: java.util.List[Rule]): kore.K
+  def prove(rules: Module): kore.K
 
-  def equivalence(firstDef: Rewriter, secondDef: Rewriter, firstSpec: String, secondSpec: String): Boolean
+  def equivalence(firstDef: Rewriter, secondDef: Rewriter, firstSpec: Module, secondSpec: Module): Boolean
 }

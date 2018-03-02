@@ -46,7 +46,7 @@ import static org.kframework.kore.KORE.*;
 public class RuleGrammarGenerator {
 
     private final Definition baseK;
-    private final boolean strict;
+    public final boolean strict;
     private static final Set<Sort> kSorts = new HashSet<>();
 
     static {
@@ -168,12 +168,12 @@ public class RuleGrammarGenerator {
      * @param mod module for which to create the parser.
      * @return parser which applies disambiguation filters by default.
      */
-    public ParseInModule getCombinedGrammar(Module mod) {
+    public static ParseInModule getCombinedGrammar(Module mod, boolean strict) {
         Set<Sentence> prods = new HashSet<>();
         Set<Sentence> extensionProds = new HashSet<>();
         Set<Sentence> disambProds;
 
-        if (baseK.getModule(AUTO_CASTS).isDefined() && mod.importedModules().contains(baseK.getModule(AUTO_CASTS).get())) { // create the diamond
+        if (mod.importedModuleNames().contains(AUTO_CASTS)) { // create the diamond
             Set<Sentence> temp;
             for (Sort srt : iterable(mod.definedSorts())) {
                 if (!isParserSort(srt)) {
@@ -187,7 +187,7 @@ public class RuleGrammarGenerator {
             prods.addAll(makeCasts(Sorts.KBott(), Sorts.K(), Sorts.K()));
         }
 
-        if (baseK.getModule(RECORD_PRODS).isDefined() && mod.importedModules().contains(baseK.getModule(RECORD_PRODS).get())) {
+        if (mod.importedModuleNames().contains(RECORD_PRODS)) {
             for (Production p : iterable(mod.productions())) {
                 if (p.isPrefixProduction()) {
                     prods.addAll(mutable(p.recordProductions()));
@@ -233,13 +233,13 @@ public class RuleGrammarGenerator {
         extensionProds.addAll(prods);
 
         boolean addRuleCells;
-        if (baseK.getModule(RULE_CELLS).isDefined() && mod.importedModules().contains(baseK.getModule(RULE_CELLS).get())) { // prepare cell productions for rule parsing
+        if (mod.importedModuleNames().contains(RULE_CELLS)) { // prepare cell productions for rule parsing
             // make sure a configuration actually exists, otherwise ConfigurationInfoFromModule explodes.
             addRuleCells = mod.sentences().exists(p -> p instanceof Production && ((Production) p).att().contains("cell"));
         } else {
             addRuleCells = false;
         }
-        boolean addConfigCells = baseK.getModule(CONFIG_CELLS).isDefined() && mod.importedModules().contains(baseK.getModule(CONFIG_CELLS).get());
+        boolean addConfigCells = mod.importedModuleNames().contains(CONFIG_CELLS);
         Set<Sentence> parseProds;
         if (addRuleCells) {
             ConfigurationInfo cfgInfo = new ConfigurationInfoFromModule(mod);
@@ -277,7 +277,7 @@ public class RuleGrammarGenerator {
         } else
             parseProds = Stream.concat(prods.stream(), stream(mod.sentences())).collect(Collectors.toSet());
 
-        if (baseK.getModule(AUTO_FOLLOW).isDefined() && mod.importedModules().contains(baseK.getModule(AUTO_FOLLOW).get())) {
+        if (mod.importedModuleNames().contains(AUTO_FOLLOW)) {
             Object PRESENT = new Object();
             PatriciaTrie<Object> terminals = new PatriciaTrie<>(); // collect all terminals so we can do automatic follow restriction for prefix terminals
             parseProds.stream().filter(sent -> sent instanceof Production).forEach(p -> stream(((Production) p).items()).forEach(i -> {
@@ -302,7 +302,7 @@ public class RuleGrammarGenerator {
         }
 
         disambProds = parseProds.stream().collect(Collectors.toSet());
-        if (baseK.getModule(PROGRAM_LISTS).isDefined() && mod.importedModules().contains(baseK.getModule(PROGRAM_LISTS).get())) {
+        if (mod.importedModuleNames().contains(PROGRAM_LISTS)) {
             Set<Sentence> prods3 = new HashSet<>();
             // if no start symbol has been defined in the configuration, then use K
             for (Sort srt : iterable(mod.definedSorts())) {
@@ -348,7 +348,7 @@ public class RuleGrammarGenerator {
             parseProds = res;
         }
 
-        if (baseK.getModule(RULE_LISTS).isDefined() && mod.importedModules().contains(baseK.getModule(RULE_LISTS).get())) {
+        if (mod.importedModuleNames().contains(RULE_LISTS)) {
             java.util.Set<Sentence> res = new HashSet<>();
             for (UserList ul : UserList.getLists(parseProds)) {
                 org.kframework.definition.Production prod1;
@@ -363,7 +363,7 @@ public class RuleGrammarGenerator {
         Module extensionM = new Module(mod.name() + "-EXTENSION", Set(mod), immutable(extensionProds), mod.att());
         Module disambM = new Module(mod.name() + "-DISAMB", Set(), immutable(disambProds), mod.att());
         Module parseM = new Module(mod.name() + "-PARSER", Set(), immutable(parseProds), mod.att());
-        return new ParseInModule(mod, extensionM, disambM, parseM, this.strict);
+        return new ParseInModule(mod, extensionM, disambM, parseM, strict);
     }
 
     public static List<Set<Integer>> computePositions(Production p) {
@@ -372,14 +372,14 @@ public class RuleGrammarGenerator {
                                     .map(s -> Integer.valueOf(s.trim())).collect(Collectors.toSet())).collect(Collectors.toList());
     }
 
-    private List<List<Sort>> makeAllSortTuples(int size, Module mod) {
+    private static List<List<Sort>> makeAllSortTuples(int size, Module mod) {
         List<List<Sort>> res = new ArrayList<>();
         List<Sort> allSorts = stream(mod.definedSorts()).filter(s -> !isParserSort(s)).collect(Collectors.toList());
         makeAllSortTuples(size, size, allSorts, res, new int[size]);
         return res;
     }
 
-    private void makeAllSortTuples(int level, int size, List<Sort> sorts, List<List<Sort>> res, int[] indices) {
+    private static void makeAllSortTuples(int level, int size, List<Sort> sorts, List<List<Sort>> res, int[] indices) {
         if (level == 0) {
             List<Sort> tuple = new ArrayList<>();
             for (int i = 0; i < indices.length; i++) {
@@ -398,7 +398,7 @@ public class RuleGrammarGenerator {
         return kSorts.contains(srt) || srt.name().startsWith("#");
     }
 
-    private Set<Sentence> makeCasts(Sort outerSort, Sort innerSort, Sort castSort) {
+    private static Set<Sentence> makeCasts(Sort outerSort, Sort innerSort, Sort castSort) {
         Set<Sentence> prods = new HashSet<>();
         Att attrs1 = Att().add(Attribute.SORT_KEY, castSort.name());
         prods.add(Production("#SyntacticCast", castSort, Seq(NonTerminal(castSort), Terminal("::" + castSort.name())), attrs1));

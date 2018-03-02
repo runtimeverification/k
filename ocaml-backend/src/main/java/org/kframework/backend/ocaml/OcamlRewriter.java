@@ -117,12 +117,12 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
             }
 
             @Override
-            public K prove(List<Rule> rules) {
+            public K prove(Module rules) {
                 throw new UnsupportedOperationException();
             }
 
             @Override
-            public boolean equivalence(Rewriter firstDef, Rewriter secondDef, String firstSpec, String secondSpec) {
+            public boolean equivalence(Rewriter firstDef, Rewriter secondDef, Module firstSpec, Module secondSpec) {
                 throw new UnsupportedOperationException();
             }
         };

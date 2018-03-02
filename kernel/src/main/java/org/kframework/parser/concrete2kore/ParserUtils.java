@@ -28,6 +28,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.kframework.Collections.*;
 import static org.kframework.kore.KORE.*;
@@ -177,7 +178,6 @@ public class ParserUtils {
             Source source,
             File currentDirectory,
             List<File> lookupDirectories,
-            boolean autoImportDomains,
             Set<File> requiredFiles) {
 
         List<org.kframework.kil.Module> kilModules =
@@ -189,17 +189,27 @@ public class ParserUtils {
         Context context = new Context();
         new CollectProductionsVisitor(context).visit(def);
 
-        KILtoKORE kilToKore = new KILtoKORE(context, false, autoImportDomains);
+        KILtoKORE kilToKore = new KILtoKORE(context, false);
 
         HashMap<String, Module> koreModules = new HashMap<>();
         koreModules.putAll(previousModules.stream().collect(Collectors.toMap(Module::name, m -> m)));
         HashSet<org.kframework.kil.Module> kilModulesSet = new HashSet<>(kilModules);
 
-        kilModules.stream().forEach(m -> kilToKore.apply(m, kilModulesSet, koreModules));
+        return kilModules.stream().map(m -> kilToKore.apply(m, kilModulesSet, koreModules)).flatMap(m -> Stream.concat(Stream.of(m), Stream.of(koreModules.get(m.name() + "$SYNTAX")))).collect(Collectors.toSet());
+    }
 
-        // TODO(dwightguth): from radum: why are you removing the previous modules? Just spent 30 minutes debugging because of this
-        // please add javadoc to this function, since I don't know why you will need such a behaviour
-        return koreModules.values().stream().filter(m -> !previousModules.contains(m)).collect(Collectors.toSet());
+    public org.kframework.definition.Definition loadDefinition(
+            String mainModuleName,
+            Set<Module> previousModules,
+            String definitionText,
+            Source source,
+            File currentDirectory,
+            List<File> lookupDirectories) {
+        Set<Module> modules = loadModules(previousModules, definitionText, source, currentDirectory, lookupDirectories, new HashSet<>());
+        Set<Module> allModules = new HashSet<>(modules);
+        allModules.addAll(previousModules);
+        Module mainModule = getMainModule(mainModuleName, allModules);
+        return org.kframework.definition.Definition.apply(mainModule, immutable(modules), Att.empty());
     }
 
     public org.kframework.definition.Definition loadDefinition(
@@ -226,15 +236,11 @@ public class ParserUtils {
         Set<Module> previousModules = new HashSet<>();
         Set<File> requiredFiles = new HashSet<>();
         if (autoImportDomains)
-            previousModules.addAll(loadModules(new HashSet<>(), Kompile.REQUIRE_PRELUDE_K, source, currentDirectory, lookupDirectories, false, requiredFiles));
-        Set<Module> modules = loadModules(previousModules, definitionText, source, currentDirectory, lookupDirectories, autoImportDomains, requiredFiles);
+            previousModules.addAll(loadModules(new HashSet<>(), Kompile.REQUIRE_PRELUDE_K, source, currentDirectory, lookupDirectories, requiredFiles));
+        Set<Module> modules = loadModules(previousModules, definitionText, source, currentDirectory, lookupDirectories, requiredFiles);
         modules.addAll(previousModules); // add the previous modules, since load modules is not additive
-        Optional<Module> opt = modules.stream().filter(m -> m.name().equals(mainModuleName)).findFirst();
-        if (!opt.isPresent()) {
-            throw KEMException.compilerError("Could not find main module with name " + mainModuleName
-                    + " in definition. Use --main-module to specify one.");
-        }
-        Module mainModule = opt.get();
+        Module mainModule = getMainModule(mainModuleName, modules);
+        Optional<Module> opt;
         opt = modules.stream().filter(m -> m.name().equals(syntaxModuleName)).findFirst();
         Module syntaxModule;
         if (!opt.isPresent()) {
@@ -246,6 +252,15 @@ public class ParserUtils {
         }
 
         return org.kframework.definition.Definition.apply(mainModule, immutable(modules), Att().add(Att.syntaxModule(), syntaxModule.name()));
+    }
+
+    private Module getMainModule(String mainModuleName, Set<Module> modules) {
+        Optional<Module> opt = modules.stream().filter(m -> m.name().equals(mainModuleName)).findFirst();
+        if (!opt.isPresent()) {
+            throw KEMException.compilerError("Could not find main module with name " + mainModuleName
+                    + " in definition. Use --main-module to specify one.");
+        }
+        return opt.get();
     }
 
     public org.kframework.definition.Definition loadDefinition(

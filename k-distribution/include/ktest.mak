@@ -6,6 +6,8 @@ KOMPILE=$(abspath $(MAKEFILE_PATH)/../bin/kompile)
 KRUN=$(abspath $(MAKEFILE_PATH)/../bin/krun)
 # and kdep
 KDEP=$(abspath $(MAKEFILE_PATH)/../bin/kdep)
+# and kprove
+KPROVE=$(abspath $(MAKEFILE_PATH)/../bin/kprove)
 # path relative to current definition of test programs
 TESTDIR?=tests
 # path to put -kompiled directory in
@@ -14,11 +16,11 @@ DEFDIR?=.
 RESULTDIR?=$(TESTDIR)
 # all tests in test directory with matching file extension
 TESTS=$(wildcard $(TESTDIR)/*.$(EXT))
-PROOF_TESTS=$(wildcard $(TESTDIR)/*_spec.k)
+PROOF_TESTS=$(wildcard $(TESTDIR)/*-spec.k)
 
 CHECK=| diff -
 
-.PHONY: kompile krun all clean update-results
+.PHONY: kompile krun all clean update-results proofs
 
 # run all tests
 all: kompile krun proofs
@@ -46,8 +48,8 @@ else
 	cat $(RESULTDIR)/$(notdir $@).in 2>/dev/null | $(KRUN) $@ $(KRUN_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $(RESULTDIR)/$(notdir $@).out
 endif
 
-%_spec.k: kompile
-	$(KRUN) $*.$(EXT) -d $(DEFDIR) --z3-executable --prove $@ $(CHECK) $@.out
+%-spec.k: kompile
+	$(KPROVE) -d $(DEFDIR) --z3-executable $@ $(CHECK) $@.out
 
 clean:
 	rm -rf $(DEFDIR)/$(DEF)-kompiled

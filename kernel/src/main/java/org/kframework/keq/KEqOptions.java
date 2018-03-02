@@ -35,4 +35,16 @@ public final class KEqOptions {
 
     @Parameter(names={"--spec2", "-s2"}, description="Path to specification for second program.")
     public String spec2;
+
+    @Parameter(names={"--spec-module1", "-sm1"}, description="Name of module containing first specification to prove.")
+    public String specModule1;
+
+    @Parameter(names={"--spec-module2", "-sm2"}, description="Name of module containing second specification to prove.")
+    public String specModule2;
+
+    @Parameter(names={"--def-module1", "-m1"}, description="Name of module in first definition to use as definition.")
+    public String defModule1;
+
+    @Parameter(names={"--def-module2", "-m2"}, description="Name of module in second definition to use as definition.")
+    public String defModule2;
 }

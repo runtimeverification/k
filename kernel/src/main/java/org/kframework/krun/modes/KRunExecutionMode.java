@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import org.kframework.RewriterResult;
 import org.kframework.attributes.Source;
 import org.kframework.builtin.BooleanUtils;
+import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kore.K;
@@ -18,6 +19,7 @@ import org.kframework.utils.file.FileUtil;
 import scala.Tuple2;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 
 /**
@@ -37,7 +39,8 @@ public class KRunExecutionMode implements ExecutionMode {
     }
 
     @Override
-    public Object execute(KRun.InitialConfiguration config, Rewriter rewriter, CompiledDefinition compiledDefinition) {
+    public Tuple2<K, Integer> execute(KRun.InitialConfiguration config, Function<Module, Rewriter> rewriterGenerator, CompiledDefinition compiledDefinition) {
+        Rewriter rewriter = rewriterGenerator.apply(compiledDefinition.executionModule());
         K k = config.theConfig;
         Rule pattern = null, parsedPattern = null;
         if (kRunOptions.pattern != null) {
@@ -49,21 +52,21 @@ public class KRunExecutionMode implements ExecutionMode {
                 pattern = new Rule(KORE.KVariable("Result"), BooleanUtils.TRUE, BooleanUtils.TRUE, KORE.Att());
                 parsedPattern = pattern;
             }
-            return new SearchResult(rewriter.search(k, Optional.ofNullable(kRunOptions.depth), Optional.ofNullable(kRunOptions.bound), pattern, kRunOptions.searchType()), parsedPattern);
+            return Tuple2.apply(rewriter.search(k, Optional.ofNullable(kRunOptions.depth), Optional.ofNullable(kRunOptions.bound), pattern, kRunOptions.searchType()), 0);
         }
         if (compiledDefinition.exitCodePattern != null) {
             Tuple2<RewriterResult, K> res;
             if (pattern != null) {
                 res = rewriter.executeAndMatch(k, Optional.ofNullable(kRunOptions.depth), pattern);
-                return new Tuple2<>(new SearchResult(res._2(), parsedPattern), KRun.getExitCode(kem, rewriter.match(res._1().k(), compiledDefinition.exitCodePattern)));
+                return new Tuple2<>(res._2(), KRun.getExitCode(kem, rewriter.match(res._1().k(), compiledDefinition.exitCodePattern)));
             }
             res = rewriter.executeAndMatch(k, Optional.ofNullable(kRunOptions.depth), compiledDefinition.exitCodePattern);
             return Tuple2.apply(res._1().k(), KRun.getExitCode(kem, res._2()));
         }
         if (pattern != null) {
             Tuple2<RewriterResult, K> res = rewriter.executeAndMatch(k, Optional.ofNullable(kRunOptions.depth), pattern);
-            return new SearchResult(res._2(), parsedPattern);
+            return Tuple2.apply(res._2(), 0);
         }
-        return rewriter.execute(k, Optional.ofNullable(kRunOptions.depth)).k();
+        return Tuple2.apply(rewriter.execute(k, Optional.ofNullable(kRunOptions.depth)).k(), 0);
     }
 }

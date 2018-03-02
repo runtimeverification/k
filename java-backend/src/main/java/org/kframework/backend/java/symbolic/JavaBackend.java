@@ -7,17 +7,8 @@ import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.backend.Backends;
 import org.kframework.builtin.KLabels;
-import org.kframework.compile.AddBottomSortForListsWithIdenticalLabels;
-import org.kframework.compile.ExpandMacros;
-import org.kframework.compile.NormalizeKSeq;
-import org.kframework.compile.ConfigurationInfoFromModule;
-import org.kframework.definition.Constructors;
-import org.kframework.definition.Definition;
-import org.kframework.definition.DefinitionTransformer;
-import org.kframework.definition.Module;
-import org.kframework.definition.Production;
-import org.kframework.definition.Rule;
-import org.kframework.definition.Sentence;
+import org.kframework.compile.*;
+import org.kframework.definition.*;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.Kompile;
 import org.kframework.kompile.KompileOptions;
@@ -30,16 +21,7 @@ import org.kframework.kore.KApply;
 import org.kframework.kore.KORE;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.SortedADT;
-import org.kframework.compile.AddImplicitComputationCell;
-import org.kframework.compile.AssocCommToAssoc;
-import org.kframework.compile.Backend;
-import org.kframework.compile.ConcretizeCells;
 import org.kframework.backend.java.compile.ConvertDataStructureToLookup;
-import org.kframework.compile.MergeRules;
-import org.kframework.compile.NormalizeAssoc;
-import org.kframework.compile.ResolveAnonVar;
-import org.kframework.compile.ResolveSemanticCasts;
-import org.kframework.compile.RewriteToTop;
 import org.kframework.kore.TransformK;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -99,7 +81,7 @@ public class JavaBackend implements Backend {
      * @return the special steps for the Java backend
      */
     @Override
-    public Function<Definition, Definition> steps(Kompile kompile) {
+    public Function<Definition, Definition> steps() {
         DefinitionTransformer convertDataStructureToLookup = DefinitionTransformer.fromSentenceTransformer((m, s) -> new ConvertDataStructureToLookup(m, false).convert(s), "convert data structures to lookups");
 
         return d -> DefinitionTransformer.fromRuleBodyTranformer(RewriteToTop::bubbleRewriteToTopInsideCells, "bubble out rewrites below cells")
@@ -111,49 +93,57 @@ public class JavaBackend implements Backend {
                 .andThen(convertDataStructureToLookup)
                 .andThen(DefinitionTransformer.fromRuleBodyTranformer(JavaBackend::ADTKVariableToSortedVariable, "ADT.KVariable to SortedVariable"))
                 .andThen(DefinitionTransformer.fromRuleBodyTranformer(JavaBackend::convertKSeqToKApply, "kseq to kapply"))
-                .andThen(DefinitionTransformer.fromRuleBodyTranformer(NormalizeKSeq.self(), "normalize kseq"))
+                .andThen(DefinitionTransformer.fromRuleBodyTranformer(NormalizeKSeq.self()::apply, "normalize kseq"))
                 .andThen(JavaBackend::markRegularRules)
                 .andThen(DefinitionTransformer.fromSentenceTransformer(new AddConfigurationRecoveryFlags(), "add refers_THIS_CONFIGURATION_marker"))
                 .andThen(DefinitionTransformer.fromSentenceTransformer(JavaBackend::markSingleVariables, "mark single variables"))
                 .andThen(DefinitionTransformer.from(new AssocCommToAssoc(), "convert AC matching to A matching"))
                 .andThen(DefinitionTransformer.from(new MergeRules(), "merge rules into one rule with or clauses"))
-                .apply(kompile.defaultSteps(excludedModuleTags()).apply(d));
+                .apply(Kompile.defaultSteps(kompileOptions, kem, excludedModuleTags()).apply(d));
              // .andThen(KoreToMiniToKore::apply) // for serialization/deserialization test
     }
 
-    public Function<Definition, Definition> stepsForProverRules() {
+    @Override
+    public Function<Module, Module> specificationSteps(Definition def) {
         BiFunction<Module, K, K> convertCellCollections = (Module m, K k) -> new ConvertDataStructureToLookup(m, false).convert(k);
-        return d -> DefinitionTransformer.fromSentenceTransformer(new ResolveAnonVar()::resolve, "resolve anonymous varaibles")
-                .andThen(DefinitionTransformer.fromSentenceTransformer((m, s) -> new ResolveSemanticCasts(kompileOptions.backend.equals(Backends.JAVA)).resolve(s), "resolve semantic casts"))
-                .andThen(AddImplicitComputationCell::transformDefinition)
-                .andThen(ConcretizeCells::transformDefinition)
-                .andThen(DefinitionTransformer.fromRuleBodyTranformer(RewriteToTop::bubbleRewriteToTopInsideCells, "bubble out rewrites below cells"))
-                .andThen(DefinitionTransformer.from(AddBottomSortForListsWithIdenticalLabels.singleton(), "add bottom sorts for lists"))
-                .andThen(DefinitionTransformer.fromSentenceTransformer((m, s) -> new ExpandMacros(m, kem, files, globalOptions, kompileOptions).expand(s), "expand macros"))
-                .andThen(DefinitionTransformer.fromKTransformerWithModuleInfo(convertCellCollections, "convert cell to the underlying collections"))
-                .andThen(DefinitionTransformer.fromRuleBodyTranformer(JavaBackend::ADTKVariableToSortedVariable, "ADT.KVariable to SortedVariable"))
-                .andThen(DefinitionTransformer.fromRuleBodyTranformer(JavaBackend::convertKSeqToKApply, "kseq to kapply"))
-                .andThen(DefinitionTransformer.fromRuleBodyTranformer(NormalizeKSeq.self(), "normalize kseq"))
-                .andThen(JavaBackend::markRegularRules)
-                .andThen(DefinitionTransformer.fromSentenceTransformer(new AddConfigurationRecoveryFlags()::apply, "add refers_THIS_CONFIGURATION_marker"))
-                .apply(d);
+        return m -> ModuleTransformer.fromSentenceTransformer(new ResolveAnonVar()::resolve, "resolve anonymous varaibles")
+                .andThen(ModuleTransformer.fromSentenceTransformer(s -> new ResolveSemanticCasts(kompileOptions.backend.equals(Backends.JAVA)).resolve(s), "resolve semantic casts"))
+                .andThen(AddImplicitComputationCell::transformModule)
+                .andThen(ConcretizeCells::transformModule)
+                .andThen(ModuleTransformer.fromRuleBodyTranformer(RewriteToTop::bubbleRewriteToTopInsideCells, "bubble out rewrites below cells"))
+                .andThen(AddBottomSortForListsWithIdenticalLabels.singleton())
+                .andThen(ModuleTransformer.fromSentenceTransformer((mod, s) -> new ExpandMacros(mod, kem, files, globalOptions, kompileOptions).expand(s), "expand macros"))
+                .andThen(ModuleTransformer.fromKTransformerWithModuleInfo(convertCellCollections::apply, "convert cell to the underlying collections"))
+                .andThen(ModuleTransformer.fromRuleBodyTranformer(JavaBackend::ADTKVariableToSortedVariable, "ADT.KVariable to SortedVariable"))
+                .andThen(ModuleTransformer.fromRuleBodyTranformer(JavaBackend::convertKSeqToKApply, "kseq to kapply"))
+                .andThen(ModuleTransformer.fromRuleBodyTranformer(NormalizeKSeq.self(), "normalize kseq"))
+                .andThen(mod -> JavaBackend.markRegularRules(def, mod))
+                .andThen(ModuleTransformer.fromSentenceTransformer(new AddConfigurationRecoveryFlags()::apply, "add refers_THIS_CONFIGURATION_marker"))
+                .apply(m);
     }
 
-    /**
-     * Put a marker on the "regular" (i.e. non function/macro/etc.) rules that we can use later.
-     */
+    private static Sentence markRegularRules(Definition d, ConfigurationInfoFromModule configInfo, Sentence s, String att) {
+        if (s instanceof org.kframework.definition.Rule) {
+            org.kframework.definition.Rule r = (org.kframework.definition.Rule) s;
+            if (r.body() instanceof KApply && d.mainModule().sortFor().apply(((KApply) r.body()).klabel()).equals(configInfo.topCell())) {
+                return org.kframework.definition.Rule.apply(r.body(), r.requires(), r.ensures(), r.att().add(att));
+            } else
+                return r;
+        } else
+            return s;
+    }
+
+    private static Module markRegularRules(Definition d, Module mod) {
+        ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(d.mainModule());
+        return ModuleTransformer.fromSentenceTransformer(s -> markRegularRules(d, configInfo, s, "specification"), "mark regular rules").apply(mod);
+    }
+
+        /**
+         * Put a marker on the "regular" (i.e. non function/macro/etc.) rules that we can use later.
+         */
     private static Definition markRegularRules(Definition d) {
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(d.mainModule());
-        return DefinitionTransformer.fromSentenceTransformer((Sentence s) -> {
-            if (s instanceof org.kframework.definition.Rule) {
-                org.kframework.definition.Rule r = (org.kframework.definition.Rule) s;
-                if (r.body() instanceof KApply && d.mainModule().sortFor().apply(((KApply) r.body()).klabel()).equals(configInfo.topCell())) {
-                    return org.kframework.definition.Rule.apply(r.body(), r.requires(), r.ensures(), r.att().add(Att.topRule()));
-                } else
-                    return r;
-            } else
-                return s;
-        }, "mark regular rules").apply(d);
+        return DefinitionTransformer.fromSentenceTransformer((mod, s) -> markRegularRules(d, configInfo, s, Att.topRule()), "mark regular rules").apply(d);
     }
 
     /**

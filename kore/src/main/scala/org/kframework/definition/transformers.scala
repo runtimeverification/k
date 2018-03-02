@@ -35,24 +35,20 @@ object ModuleTransformer {
         m
     }, name)
 
-  def fromRuleBodyTranformer(f: java.util.function.UnaryOperator[K], name: String): ModuleTransformer =
-    fromSentenceTransformer(_ match { case r: Rule => r.copy(body = f(r.body)); case s => s }, name)
-
   def fromRuleBodyTranformer(f: K => K, name: String): ModuleTransformer =
     fromSentenceTransformer(_ match { case r: Rule => r.copy(body = f(r.body)); case s => s }, name)
 
-  def fromKTransformerWithModuleInfo(ff: Module => K => K, name: String): ModuleTransformer =
+  def fromKTransformerWithModuleInfo(ff: (Module, K) => K, name: String): ModuleTransformer =
     fromSentenceTransformer((module, sentence) => {
-      val f: K => K = ff(module)
       sentence match {
-        case r: Rule => Rule.apply(f(r.body), f(r.requires), f(r.ensures), r.att)
-        case c: Context => Context.apply(f(c.body), f(c.requires), c.att)
+        case r: Rule => Rule.apply(ff(module, r.body), ff(module, r.requires), ff(module, r.ensures), r.att)
+        case c: Context => Context.apply(ff(module, c.body), ff(module, c.requires), c.att)
         case o => o
       }
     }, name)
 
   def fromKTransformer(f: K => K, name: String): ModuleTransformer =
-    fromKTransformerWithModuleInfo((m: Module) => f, name)
+    fromKTransformerWithModuleInfo((mod, k) => f(k), name)
 
   def apply(f: Module => Module, name: String): ModuleTransformer = f match {
     case f: ModuleTransformer => f
@@ -92,7 +88,7 @@ object DefinitionTransformer {
     DefinitionTransformer(ModuleTransformer.fromKTransformer(f, name))
 
   def fromKTransformerWithModuleInfo(f: (Module, K) => K, name: String): DefinitionTransformer =
-    DefinitionTransformer(ModuleTransformer.fromKTransformerWithModuleInfo(f.curried, name))
+    DefinitionTransformer(ModuleTransformer.fromKTransformerWithModuleInfo(f, name))
 
   def fromKTransformerWithModuleInfo(f: BiFunction[Module, K, K], name: String): DefinitionTransformer =
     fromKTransformerWithModuleInfo((m, k) => f(m, k), name)

@@ -118,8 +118,5 @@ public abstract class AbstractKModule implements KModule {
     }
 
     @Override
-    public List<Module> getKTestModules() {
-        return Lists.newArrayList();
-    }
-
+    public List<Module> getKProveModules() { return Lists.newArrayList(); }
 }

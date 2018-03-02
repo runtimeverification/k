@@ -21,6 +21,7 @@ import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import scala.Option;
 import scala.Tuple2;
+import scala.collection.Set;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -54,7 +55,7 @@ public class ResolveIOStreams {
      * 3. Import rules from *-STREAM modules (with modification of cell names).
      */
     public Module resolve(Module m) {
-        java.util.Set<Production> streamProductions = getStreamProductions(m);
+        java.util.Set<Production> streamProductions = getStreamProductions(m.sentences());
         if (streamProductions.isEmpty()) {
             return m;
         } else {
@@ -74,17 +75,19 @@ public class ResolveIOStreams {
                 }
             }
             // Step 3.
-            for (Production p : streamProductions) {
-                sentences.addAll(getStreamModuleSentences(p));
+            if (!getStreamProductions(m.localSentences()).isEmpty()) {
+                for (Production p : streamProductions) {
+                    sentences.addAll(getStreamModuleSentences(p));
+                }
             }
             return Module(m.name(), m.imports(), immutable(sentences), m.att());
         }
     }
 
     // Collect productions that have 'stream' attribute
-    private java.util.Set<Production> getStreamProductions(Module m) {
+    private java.util.Set<Production> getStreamProductions(Set<Sentence> sentences) {
         java.util.Set<Production> productions = new HashSet<>();
-        for (Sentence s : mutable(m.sentences())) {
+        for (Sentence s : mutable(sentences)) {
             if (s instanceof Production) {
                 Production p = (Production) s;
                 if (p.att().getOption("stream").isDefined()) {

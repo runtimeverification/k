@@ -13,5 +13,5 @@ public interface KModule {
     List<Module> getKRunModules();
     List<Module> getKEqModules(List<Module> definitionSpecificModules);
     List<Module> getDefinitionSpecificKEqModules();
-    List<Module> getKTestModules();
+    List<Module> getKProveModules();
 }

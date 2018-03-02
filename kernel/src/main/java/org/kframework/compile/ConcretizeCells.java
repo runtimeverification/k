@@ -5,10 +5,7 @@ import org.kframework.compile.ConfigurationInfo;
 import org.kframework.compile.ConfigurationInfoFromModule;
 import org.kframework.compile.LabelInfo;
 import org.kframework.compile.LabelInfoFromModule;
-import org.kframework.definition.Definition;
-import org.kframework.definition.DefinitionTransformer;
-import org.kframework.definition.Module;
-import org.kframework.definition.Sentence;
+import org.kframework.definition.*;
 
 /**
  * Apply the configuration concretization process.
@@ -45,6 +42,17 @@ public class ConcretizeCells {
                 "concretizing configuration"
         ).apply(input);
     }
+
+
+    public static Module transformModule(Module mod) {
+        ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(mod);
+        LabelInfo labelInfo = new LabelInfoFromModule(mod);
+        SortInfo sortInfo = SortInfo.fromModule(mod);
+        return ModuleTransformer.fromSentenceTransformer(
+                new ConcretizeCells(configInfo, labelInfo, sortInfo, mod)::concretize,
+                "concretizing configuration").apply(mod);
+    }
+
 
     public ConcretizeCells(ConfigurationInfo configurationInfo, LabelInfo labelInfo, SortInfo sortInfo, Module module) {
         this.configurationInfo = configurationInfo;
