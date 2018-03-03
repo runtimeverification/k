@@ -402,7 +402,6 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
     }
 
 
-    @DefinitionScoped
     public static class InitializeDefinition {
 
         private final Map<Module, Definition> cache = new LinkedHashMap<Module, Definition>() {

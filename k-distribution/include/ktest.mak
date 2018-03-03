@@ -27,7 +27,7 @@ all: kompile krun proofs
 kompile: $(DEFDIR)/$(DEF)-kompiled/timestamp
 
 $(DEFDIR)/%-kompiled/timestamp: %.k
-	$(KOMPILE) $(KOMPILE_FLAGS) $< -d $(DEFDIR)
+	$(KOMPILE) $(KOMPILE_FLAGS) $(DEBUG) $< -d $(DEFDIR)
 krun: $(TESTS)
 
 proofs: $(PROOF_TESTS)
@@ -41,13 +41,13 @@ update-results: CHECK=>
 # specified in the makefile prior to including ktest.mak.
 %.$(EXT): kompile
 ifeq ($(TESTDIR),$(RESULTDIR))
-	cat $@.in 2>/dev/null | $(KRUN) $@ $(KRUN_FLAGS) -d $(DEFDIR) $(CHECK) $@.out
+	cat $@.in 2>/dev/null | $(KRUN) $@ $(KRUN_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $@.out
 else
-	cat $(RESULTDIR)/$(notdir $@).in 2>/dev/null | $(KRUN) $@ $(KRUN_FLAGS) -d $(DEFDIR) $(CHECK) $(RESULTDIR)/$(notdir $@).out
+	cat $(RESULTDIR)/$(notdir $@).in 2>/dev/null | $(KRUN) $@ $(KRUN_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $(RESULTDIR)/$(notdir $@).out
 endif
 
 %_spec.k: kompile
-	$(KRUN) $*.$(EXT) -d $(DEFDIR) --prove $@ $(CHECK) $@.out
+	$(KRUN) $*.$(EXT) -d $(DEFDIR) --z3-executable --prove $@ $(CHECK) $@.out
 
 clean:
 	rm -rf $(DEFDIR)/$(DEF)-kompiled

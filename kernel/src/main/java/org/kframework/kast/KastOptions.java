@@ -89,6 +89,9 @@ public final class KastOptions {
     @Parameter(names={"--module", "-m"}, description="Parse text in the specified module. Defaults to the syntax module of the definition.")
     public String module;
 
+    @Parameter(names="--expand-macros", description="Also expand macros in the parsed string.")
+    public boolean expandMacros = false;
+
     @ParametersDelegate
     public Experimental experimental = new Experimental();
 

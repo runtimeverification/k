@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import com.google.inject.Module;
 import com.google.inject.Provider;
 import org.kframework.attributes.Source;
+import org.kframework.compile.ExpandMacros;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kore.K;
 import org.kframework.unparser.ToKast;
@@ -44,6 +45,7 @@ public class KastFrontEnd extends FrontEnd {
     private final KastOptions options;
     private final Stopwatch sw;
     private final KExceptionManager kem;
+    private final FileUtil files;
     private final Map<String, String> env;
     private final Provider<File> kompiledDir;
     private final Provider<CompiledDefinition> compiledDef;
@@ -66,6 +68,7 @@ public class KastFrontEnd extends FrontEnd {
         this.options = options;
         this.sw = sw;
         this.kem = kem;
+        this.files = files;
         this.env = env;
         this.kompiledDir = kompiledDir;
         this.compiledDef = compiledDef;
@@ -103,6 +106,9 @@ public class KastFrontEnd extends FrontEnd {
                 mod = mod2.get();
             }
             K parsed = def.getParser(mod, sort, kem).apply(FileUtil.read(stringToParse), source);
+            if (options.expandMacros) {
+                parsed = new ExpandMacros(mod, kem, files, options.global, def.kompileOptions).expand(parsed);
+            }
             System.out.println(ToKast.apply(parsed));
             sw.printTotal("Total");
             return 0;
