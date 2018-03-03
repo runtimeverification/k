@@ -249,7 +249,7 @@ public class KOREtoBackendKIL {
                     sort = Sort.SET;
                     break;
                 default:
-                    sort = Sort.BAG;
+                    sort = Sort.of(sortName);
             }
         } else {
             sort = Sort.of(sortName);
