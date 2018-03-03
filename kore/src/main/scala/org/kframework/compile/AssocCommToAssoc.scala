@@ -70,7 +70,7 @@ class AssocCommToAssoc extends Function[Module, Module] {
     val opSort: Sort = m.signatureFor(label).head._2
 
     val (elements: Seq[K], nonElements: Seq[K]) = children partition {
-      case v: SortedKVariable => m.subsorts.lessThanEq(v.sort, opSort);
+      case v: SortedKVariable => m.subsorts.lessThan(v.sort, opSort);
       case _ => true
     }
 
@@ -99,7 +99,7 @@ class AssocCommToAssoc extends Function[Module, Module] {
     val opSort: Sort = m.signatureFor(label).head._2
 
     val (elements: Seq[K], nonElements: Seq[K]) = children partition {
-      case v: SortedKVariable => m.subsorts.lessThanEq(v.sort, opSort);
+      case v: SortedKVariable => m.subsorts.lessThan(v.sort, opSort);
       case _ => true
     }
 
