@@ -66,7 +66,8 @@ public class InterpreterExecutionMode implements ExecutionMode {
                 files.resolveKompiled("interpreter").getAbsolutePath(),
                 files.resolveKompiled("realdef.cma").getAbsolutePath(),
                 "-t", input.getAbsolutePath(), "binaryfile", "--output-file",
-                output.getAbsolutePath()
+                output.getAbsolutePath(),
+                "--depth", options.depth == null ? "-1" : options.depth.toString()
                 );
 
         try (FileChannel channel = FileChannel.open(output.toPath())) {

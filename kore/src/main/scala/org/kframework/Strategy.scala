@@ -22,7 +22,7 @@ class Strategy(heatCool: Boolean) {
 
           import rich._
           
-          if (!module.importedModules.exists(_.name == "STRATEGY")) {
+          if (!module.importedModuleNames.contains("STRATEGY$SYNTAX")) {
             r
           } else
             r match {
@@ -32,7 +32,7 @@ class Strategy(heatCool: Boolean) {
                     // todo: "!module.attributesFor.contains(klabel) ||" when #1723 is fixed
 
                     def makeRewrite(tag: String) =
-                      KORE.KApply(KORE.KLabel(KLabels.KSEQ),
+                      KORE.KSequence(
                         KORE.KRewrite(
                           KORE.KApply(KORE.KLabel("#applyRule"), KORE.KToken(tag, KORE.Sort("#RuleTag"))),
                           KORE.KApply(KORE.KLabel("#appliedRule"), KORE.KToken(tag, KORE.Sort("#RuleTag")))),

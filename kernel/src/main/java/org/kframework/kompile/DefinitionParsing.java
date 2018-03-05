@@ -148,7 +148,6 @@ public class DefinitionParsing {
             modules = Stream.concat(modules, Stream.of(syntaxModule.get()));
             modules = Stream.concat(modules, stream(syntaxModule.get().importedModules()));
         }
-        modules = Stream.concat(modules, Stream.of(parsedDefinition.getModule("DEFAULT-CONFIGURATION").get()));
         modules = Stream.concat(modules, Stream.of(parsedDefinition.getModule("K-REFLECTION").get()));
         modules = Stream.concat(modules, Stream.of(parsedDefinition.getModule("STDIN-STREAM").get()));
         modules = Stream.concat(modules, Stream.of(parsedDefinition.getModule("STDOUT-STREAM").get()));
@@ -156,7 +155,7 @@ public class DefinitionParsing {
                 stream(parsedDefinition.entryModules()).filter(m -> !stream(m.sentences()).anyMatch(s -> s instanceof Bubble)));
         Definition trimmed = Definition(parsedDefinition.mainModule(), modules.collect(Collections.toSet()),
                 parsedDefinition.att());
-        Definition afterResolvingConfigBubbles = resolveConfigBubbles(trimmed);
+        Definition afterResolvingConfigBubbles = resolveConfigBubbles(trimmed, parsedDefinition.getModule("DEFAULT-CONFIGURATION").get());
         RuleGrammarGenerator gen = new RuleGrammarGenerator(afterResolvingConfigBubbles, isStrict);
         Definition afterResolvingAllOtherBubbles = resolveNonConfigBubbles(afterResolvingConfigBubbles, gen);
         saveCachesAndReportParsingErrors();
@@ -182,7 +181,7 @@ public class DefinitionParsing {
         return definition;
     }
 
-    protected Definition resolveConfigBubbles(Definition definition) {
+    protected Definition resolveConfigBubbles(Definition definition, Module defaultConfiguration) {
         boolean hasConfigDecl = stream(definition.mainModule().sentences())
                 .filter(s -> s instanceof Bubble)
                 .map(b -> (Bubble) b)
@@ -194,7 +193,7 @@ public class DefinitionParsing {
             definitionWithConfigBubble = DefinitionTransformer.from(mod -> {
                 if (mod == definition.mainModule()) {
                     java.util.Set<Module> imports = mutable(mod.imports());
-                    imports.add(definition.getModule("DEFAULT-CONFIGURATION").get());
+                    imports.add(defaultConfiguration);
                     return Module(mod.name(), (Set<Module>) immutable(imports), mod.localSentences(), mod.att());
                 }
                 return mod;

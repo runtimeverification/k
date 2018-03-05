@@ -3,14 +3,15 @@ package org.kframework.compile
 import java.util
 
 import org.kframework.POSet
-import org.kframework.kore.KORE.{KLabel, KApply}
+import org.kframework.kore.KORE.{KApply, KLabel}
 
 import scala.collection.JavaConverters._
-
 import org.kframework.compile.ConfigurationInfo.Multiplicity
-import org.kframework.definition.{Rule, Module, NonTerminal, Production}
+import org.kframework.definition.{Module, NonTerminal, Production, Rule}
 import org.kframework.kore._
 import org.kframework.TopologicalSort._
+import org.kframework.utils.errorsystem.KEMException
+
 import collection._
 
 object ConfigurationInfoFromModule
@@ -58,14 +59,14 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
 
   private val topCellsIncludingStrategyCell = cellSorts.diff(edges.map(_._2))
 
-  private val topCells =
+  private lazy val topCells =
     if (topCellsIncludingStrategyCell.size > 1)
-      topCellsIncludingStrategyCell.filterNot(_.name == "SCell")
+      topCellsIncludingStrategyCell.filterNot(s => s.name == "SCell" || s.name == "KCell")
     else
       topCellsIncludingStrategyCell
 
   if (topCells.size > 1)
-    throw new AssertionError("Too many top cells:" + topCells)
+    throw KEMException.compilerError("Too many top cells:" + topCells)
 
   val topCell: Sort = topCells.head
   private val sortedSorts: Seq[Sort] = tsort(edges).toSeq
@@ -77,9 +78,9 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
   private lazy val mainCell = {
     val mainCells = cellProductions.filter(x => x._2.att.contains("maincell")).map(_._1)
     if (mainCells.size > 1)
-      throw new AssertionError("Too many main cells:" + mainCells)
+      throw KEMException.compilerError("Too many main cells:" + mainCells)
     if (mainCells.isEmpty)
-      throw new AssertionError("No main cell found")
+      throw KEMException.compilerError("No main cell found")
     mainCells.head
   }
 

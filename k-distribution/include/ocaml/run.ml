@@ -28,12 +28,18 @@ let context_switch (config: k) (thread_id: k) : k = match config with
 
 type step = Step of k * step_function | NoStep of k
 
+let strat_step (module Def: Plugin.Definition) (step_function: k -> (k * step_function)) (config: k) : k * step_function =
+  try
+    step_function config
+  with Stuck _ ->
+    step_function (Def.make_stuck config)
+
 let rec take_steps (module Def: Plugin.Definition) (step_function: k -> (k * step_function)) (thread: k) (other_active_threads: k list) (config: k) (depth: int) (n: int) (last_resort: bool) : k * int =
   if n = depth then (
     config,n
   ) else (
     let active_config = context_switch config thread in
-      match (try let res,func = (step_function active_config) in Step(res,func) with Stuck c -> NoStep c) with
+      match (try let res,func = (strat_step (module Def) step_function active_config) in Step(res,func) with Stuck c -> NoStep c) with
       | Step (([Thread(_,thread_id,_,_)] as config),(StepFunc step_function)) -> (
         take_steps (module Def) step_function thread_id other_active_threads config depth (n+1) false
       )
@@ -63,7 +69,7 @@ let rec take_steps_no_thread (module Def: Plugin.Definition) (step_function: k -
   if n = depth then (
     (config, n)
   ) else (
-    match (try let (res, func) = (step_function config) in Step(res, func) with Stuck c -> NoStep c) with
+    match (try let (res, func) = (strat_step (module Def) step_function config) in Step(res, func) with Stuck c -> NoStep c) with
     | Step(config, StepFunc step_function) -> take_steps_no_thread (module Def) step_function config depth (n+1)
     | NoStep config -> (config, n)
   )

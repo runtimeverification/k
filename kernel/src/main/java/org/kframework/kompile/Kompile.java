@@ -120,8 +120,17 @@ public class Kompile {
         return definitionParsing.parseDefinitionAndResolveBubbles(definitionFile, mainModuleName, mainProgramsModule);
     }
 
+    private static Module filterStreamModules(Module input) {
+        if (input.name().equals("STDIN-STREAM") || input.name().equals("STDOUT-STREAM")) {
+            return Module(input.name(), Set(), Set(), input.att());
+        }
+        return input;
+    }
+
     private static Definition resolveIOStreams(KExceptionManager kem,Definition d) {
-        return DefinitionTransformer.from(new ResolveIOStreams(d, kem)::resolve, "resolving io streams").apply(d);
+        return DefinitionTransformer.from(new ResolveIOStreams(d, kem)::resolve, "resolving io streams")
+                .andThen(DefinitionTransformer.from(Kompile::filterStreamModules, "resolving io streams"))
+                .apply(d);
     }
 
     private static Module excludeModulesByTag(Set<String> excludedModuleTags, Module mod) {
