@@ -1414,7 +1414,7 @@ public class DefinitionToOcaml implements Serializable {
             } else {
                 sb.append("let ");
             }
-            sb.append("rewrite_thread_set (c: k) (config: k) (guard: int) (new_threads: k) : k = match c with \n");
+            sb.append("rewrite_thread_set (c: k) (config: k) (guard: int) (new_threads: kitem) : k = match c with \n");
             {
                 Rule r = rewriteThreadSet;
                 convertComment(r, sb);
@@ -1433,8 +1433,9 @@ public class DefinitionToOcaml implements Serializable {
                 convertRHS(sb, RuleType.REGULAR, r, vars, suffix, ruleNum, "", false);
             }
             sb.append("| _ -> failwith \"rewrite_thread_set\"\n");
-            sb.append("let set_thread_set (config: k) (set: k) : k =\n");
-            sb.append("  rewrite_thread_set config config (-1) set\n");
+            sb.append("let set_thread_set (config: k) (set: k) : k = match set with\n");
+            sb.append("| hd :: [] ->  rewrite_thread_set config config (-1) hd\n");
+            sb.append("| _ -> failwith \"set_thread_set\"\n");
         }
         sb.append("end\nlet () = Plugin.the_definition := Some (module Def)\n");
         return sb.toString();
@@ -3080,7 +3081,7 @@ public class DefinitionToOcaml implements Serializable {
                 return vars.listVars.get(varName).name();
             }
         }
-        return k.att().<String>getOptional(Attribute.SORT_KEY).orElse("K");
+        return k.att().getOptional(Attribute.SORT_KEY).orElse("K");
     }
 
     private boolean isList(K item, boolean klist, boolean rhs, VarInfo vars, boolean anywhereRule) {
