@@ -507,6 +507,11 @@ struct
   let hook_updateAll c _ _ _ _ = match c with
       [Array (_,_,a)] as value, [Int i], [List (_,_,l)] -> List.iteri (fun j elt -> try Dynarray.set a (j + (Z.to_int i)) elt with Invalid_argument _ | Z.Overflow -> ()) l; value
     | _ -> raise Not_implemented
+  let hook_fill c _ _ _ _ = match c with
+      [Array (_,_,a)] as value, [Int i], [Int n], elt -> (try (for j = (Z.to_int i) to (Z.to_int i) + (Z.to_int n) - 1 do
+        try Dynarray.set a j elt with Invalid_argument _ -> ()
+      done) with Z.Overflow -> ()); value
+    | _ -> raise Not_implemented
   let hook_in_keys c _ _ _ _ = match c with
       [Int i], [Array (_,k,a)] -> [Bool (try (if compare (Dynarray.get a (Z.to_int i)) k = 0 then false else true) with Invalid_argument _ | Z.Overflow -> false)]
     | _ -> raise Not_implemented

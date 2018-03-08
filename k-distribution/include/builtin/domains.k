@@ -31,6 +31,9 @@ module ARRAY-SYNTAX
   syntax Array ::= Array "[" Int "<-" K "]" [function, hook(ARRAY.update), klabel(_[_<-_])]
   syntax Array ::= Array "[" Int "<-" "undef" "]" [function, hook(ARRAY.remove)]
   syntax Array ::= updateArray(Array, Int, List) [function, hook(ARRAY.updateAll)]
+  /*@ Sets a range of indices (given by an index into the array and the number
+   of indices to set) to the same value. */
+  syntax Array ::= fillArray(Array, Int, Int, K) [function, hook(ARRAY.fill)]
 
   syntax Bool ::= Int "in_keys" "(" Array ")" [function, hook(ARRAY.in_keys)]
 endmodule
@@ -64,6 +67,10 @@ module ARRAY-SYMBOLIC [symbolic]
 
   rule updateArray(array(M:Map, Len:Int, K:K), _, .List) => array(M, Len, K)
   rule updateArray(array(M:Map, Len:Int, K:K), I:Int, ListItem(K2:K) L:List) => updateArray(array(M, Len, K) [ I <- K2 ], I +Int 1, L)
+
+  rule fillArray(array(M:Map, Len:Int, K:K), _, 0, _) => array(M, Len, K)
+  rule fillArray(array(M:Map, Len:Int, K:K), I:Int, N:Int, K2:K) => fillArray(array(M, Len, K) [ I <- K2 ], I +Int 1, N -Int 1, K2)
+       requires N >Int 0
 
   rule I:Int in_keys(array(M:Map, _, _)) => I in_keys(M)
 endmodule
