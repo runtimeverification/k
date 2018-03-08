@@ -82,6 +82,8 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
     _.importedModules
   })
 
+  lazy val importedModuleNames: Set[String] = importedModules.map(_.name)
+
   lazy val productions: Set[Production] = sentences collect { case p: Production => p }
 
   lazy val productionsFor: Map[KLabel, Set[Production]] =

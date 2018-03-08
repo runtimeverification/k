@@ -205,6 +205,7 @@ public class DefinitionToOcaml implements Serializable {
     private Map<KLabel, KLabel> collectionFor;
     private Set<KLabel> filteredMapConstructors;
     private Rule matchThreadSet, rewriteThreadSet;
+    private Rule makeStuck;
 
     public void initialize(DefinitionToOcaml serialized, CompiledDefinition def) {
         mainModule = serialized.mainModule;
@@ -212,6 +213,7 @@ public class DefinitionToOcaml implements Serializable {
         filteredMapConstructors = serialized.filteredMapConstructors;
         matchThreadSet = serialized.matchThreadSet;
         rewriteThreadSet = serialized.rewriteThreadSet;
+        makeStuck = serialized.makeStuck;
         functions = serialized.functions;
         anywhereKLabels = serialized.anywhereKLabels;
         options = serialized.options;
@@ -288,6 +290,13 @@ public class DefinitionToOcaml implements Serializable {
             this.rewriteThreadSet = convert(new Kompile(kompileOptions, files, kem).compileRule(def.kompiledDefinition, rewriteThreadSet));
             this.rewriteThreadSet = Rule(new TransformK() { public K apply(KVariable var) { return KVariable(var.name(), var.att().remove("sort")); } }.apply(this.rewriteThreadSet.body()),
                     this.rewriteThreadSet.requires(), this.rewriteThreadSet.ensures());
+        }
+        KLabel stratCell = KLabel("<s>");
+        if (mainModule.definedKLabels().contains(stratCell)) {
+            Rule makeStuck = Rule(IncompleteCellUtils.make(stratCell, false, KRewrite(KSequence(), KApply(KLabel("#STUCK"))), true), BooleanUtils.TRUE, BooleanUtils.TRUE);
+            this.makeStuck = convert(new Kompile(kompileOptions, files, kem).compileRule(def.kompiledDefinition, makeStuck));
+        } else {
+            this.makeStuck = null;
         }
     }
 
@@ -1083,7 +1092,6 @@ public class DefinitionToOcaml implements Serializable {
                 Source.apply(definitionFile.getAbsolutePath()),
                 definitionFile.getParentFile(),
                 lookupDirectories,
-                !kompileOptions.outerParsing.noPrelude,
                 new HashSet<>());
         mods.stream().forEach(m -> klabels.addAll(mutable(m.definedKLabels())));
     }
@@ -1394,6 +1402,16 @@ public class DefinitionToOcaml implements Serializable {
         }
         if (options.optimizeStep()) {
             ruleNum = writeStepFunction(sb, groupedByStepFunction.getOrDefault(Optional.<KLabel>empty(), Collections.emptyList()), "stepNone", ruleNum);
+        }
+
+        if (makeStuck != null) {
+            sb.append("let set_stuck (c: k) (config: k) (guard: int) : k * step_function = match c with \n");
+            convertFunction(Collections.singletonList(makeStuck), sb, "step", RuleType.REGULAR);
+            sb.append("| _ -> failwith \"set_stuck\"\n");
+            sb.append("let make_stuck (config: k) : k =\n");
+            sb.append("  fst (set_stuck config config (-1))\n");
+        } else {
+            sb.append("let make_stuck (config: k) : k = config\n");
         }
 
         if (matchThreadSet == null) {

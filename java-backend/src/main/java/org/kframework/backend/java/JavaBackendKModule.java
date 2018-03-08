@@ -2,13 +2,15 @@
 package org.kframework.backend.java;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.name.Names;
 import org.kframework.backend.java.symbolic.InitializeRewriter;
 import org.kframework.backend.java.symbolic.JavaBackend;
-import org.kframework.backend.java.symbolic.ProofExecutionMode;
+import org.kframework.compile.Backend;
+import org.kframework.kprove.KProve;
 import org.kframework.krun.ToolActivation;
 import org.kframework.krun.modes.ExecutionMode;
 import org.kframework.main.AbstractKModule;
@@ -29,13 +31,16 @@ public class JavaBackendKModule extends AbstractKModule {
         mods.add(new AbstractModule() {
             @Override
             protected void configure() {
-
-                MapBinder<String, org.kframework.compile.Backend> mapBinder = MapBinder.newMapBinder(
-                        binder(), String.class, org.kframework.compile.Backend.class);
-                mapBinder.addBinding("java").to(JavaBackend.class);
+                installJavaBackend(binder());
             }
-        });
+            });
         return mods;
+    }
+
+    private void installJavaBackend(Binder binder) {
+        MapBinder<String, Backend> mapBinder = MapBinder.newMapBinder(
+                binder, String.class, Backend.class);
+        mapBinder.addBinding("java").to(JavaBackend.class);
     }
 
     @Override
@@ -43,22 +48,31 @@ public class JavaBackendKModule extends AbstractKModule {
         return Collections.singletonList(new AbstractModule() {
             @Override
             protected void configure() {
-
-                MapBinder<String, Function<org.kframework.definition.Module, Rewriter>> rewriterBinder = MapBinder.newMapBinder(
-                        binder(), TypeLiteral.get(String.class), new TypeLiteral<Function<org.kframework.definition.Module, Rewriter>>() {
-                        });
-                rewriterBinder.addBinding("java").to(InitializeRewriter.class);
+                installJavaRewriter(binder());
 
                 MapBinder<String, Integer> checkPointBinder = MapBinder.newMapBinder(
                         binder(), String.class, Integer.class, Names.named("checkpointIntervalMap"));
                 checkPointBinder.addBinding("java").toInstance(50); //TODO(dwightguth): finesse this number
-
-                MapBinder<ToolActivation, ExecutionMode> executionBinder = MapBinder.newMapBinder(binder(),
-                        ToolActivation.class, ExecutionMode.class);
-
-                executionBinder.addBinding(new ToolActivation.OptionActivation("--prove")).to(ProofExecutionMode.class);
             }
         });
+    }
+
+    @Override
+    public List<Module> getKProveModules() {
+        return Collections.singletonList(new AbstractModule() {
+            @Override
+            protected void configure() {
+                installJavaBackend(binder());
+                installJavaRewriter(binder());
+            }
+        });
+    }
+
+    private void installJavaRewriter(Binder binder) {
+        MapBinder<String, Function<org.kframework.definition.Module, Rewriter>> rewriterBinder = MapBinder.newMapBinder(
+                binder, TypeLiteral.get(String.class), new TypeLiteral<Function<org.kframework.definition.Module, Rewriter>>() {
+                });
+        rewriterBinder.addBinding("java").to(InitializeRewriter.class);
     }
 
     @Override
@@ -66,12 +80,8 @@ public class JavaBackendKModule extends AbstractKModule {
         return Collections.singletonList(new AbstractModule() {
             @Override
             protected void configure() {
-
-                MapBinder<String, Function<org.kframework.definition.Module, Rewriter>> rewriterBinder = MapBinder.newMapBinder(
-                        binder(), TypeLiteral.get(String.class), new TypeLiteral<Function<org.kframework.definition.Module, Rewriter>>() {
-                        });
-                rewriterBinder.addBinding("java").to(InitializeRewriter.class);
-
+                installJavaBackend(binder());
+                installJavaRewriter(binder());
             }
         });
     }

@@ -10,6 +10,7 @@ import org.kframework.definition.Module;
 import org.kframework.definition.RegexTerminal;
 import org.kframework.definition.Terminal;
 import org.kframework.definition.TerminalLike;
+import org.kframework.parser.concrete2kore.ParseInModule;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.OS;
 import org.kframework.utils.errorsystem.KEMException;
@@ -34,12 +35,18 @@ public class Scanner implements AutoCloseable {
 
     private final Map<TerminalLike, Tuple2<Integer, Integer>> tokens;
     private final File scanner;
+    private final Module module;
 
     private static final String FLEX_LIB = OS.current().equals(OS.OSX) ? "-ll" : "-lfl";
 
-    public Scanner(Module parsingModule) {
-        tokens = KSyntax2GrammarStatesFilter.getTokens(parsingModule);
+    public Scanner(ParseInModule module) {
+        tokens = KSyntax2GrammarStatesFilter.getTokens(module.getParsingModule());
         scanner = getScanner();
+        this.module = module.seedModule();
+    }
+
+    public Module getModule() {
+        return module;
     }
 
     // debugging method

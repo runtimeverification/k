@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.kframework.builtin.Sorts;
+import org.kframework.definition.Module;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.Assoc;
@@ -20,17 +21,19 @@ import org.kframework.unparser.ToBinary;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
+import scala.Tuple2;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 import static org.kframework.kore.KORE.*;
 
 /**
  * Created by dwightguth on 8/25/15.
  */
-public class OcamlCompileExecutionMode implements ExecutionMode<Void> {
+public class OcamlCompileExecutionMode implements ExecutionMode {
 
     private final KExceptionManager kem;
     private final FileUtil files;
@@ -57,7 +60,7 @@ public class OcamlCompileExecutionMode implements ExecutionMode<Void> {
     }
 
     @Override
-    public Void execute(KRun.InitialConfiguration k, Rewriter ignored, CompiledDefinition compiledDefinition) {
+    public Tuple2<K, Integer> execute(KRun.InitialConfiguration k, Function<Module, Rewriter> ignored, CompiledDefinition compiledDefinition) {
         if (compiledDefinition.exitCodePattern != null) {
             // serializedVars will not be evaluated at program load.
             // This is faster, but their definition may not include impure functions
@@ -108,7 +111,7 @@ public class OcamlCompileExecutionMode implements ExecutionMode<Void> {
                 rewriter.createResourceObject("kore_term");
                 rewriter.createResourceObject("marshal_term");
                 rewriter.createResourceObject("plugin_path");
-                String outputFile = options.outputFile;
+                String outputFile = options.prettyPrint.outputFile;
                 if (outputFile == null) {
                     outputFile = "a.out";
                 }

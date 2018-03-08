@@ -105,11 +105,11 @@ public class Definition extends JavaSymbolicObject {
 
     private final Map<KItem.CacheTableColKey, KItem.CacheTableValue> sortCacheTable = new HashMap<>();
 
-    public Definition(org.kframework.definition.Module module, CompiledDefinition def, KExceptionManager kem) {
+    public Definition(org.kframework.definition.Module module, KExceptionManager kem) {
         kLabels = new HashSet<>();
         this.kem = kem;
 
-        Module moduleWithPolyProds = new RuleGrammarGenerator(def.getParsedDefinition(), false).getCombinedGrammar(module).getExtensionModule();
+        Module moduleWithPolyProds = RuleGrammarGenerator.getCombinedGrammar(module, false).getExtensionModule();
 
         ImmutableSetMultimap.Builder<String, SortSignature> signaturesBuilder = ImmutableSetMultimap.builder();
         JavaConversions.mapAsJavaMap(moduleWithPolyProds.signatureFor()).entrySet().stream().forEach(e -> {

@@ -59,12 +59,12 @@ public class KRunModule extends AbstractModule {
     }
 
     @Provides
-    ColorOptions colorOptions(KRunOptions options) {
-        return options.color;
+    PrettyPrintOptions prettyPrintOptions(KRunOptions options) {
+        return options.prettyPrint;
     }
 
     @Provides
-    OutputModes outputModes(KRunOptions options) {
+    OutputModes outputModes(PrettyPrintOptions options) {
         return options.output;
     }
 
@@ -72,15 +72,9 @@ public class KRunModule extends AbstractModule {
 
         @Override
         protected void configure() {
+            install(new RewriterModule());
+
             //bind backend implementations of tools to their interfaces
-            MapBinder<String, Function<org.kframework.definition.Module, Rewriter>> rewriterBinder = MapBinder.newMapBinder(
-                    binder(), TypeLiteral.get(String.class), new TypeLiteral<Function<org.kframework.definition.Module, Rewriter>>() {
-                    });
-
-            bind(FileUtil.class);
-
-            bind(FileSystem.class).to(PortableFileSystem.class);
-
             MapBinder<ToolActivation, ExecutionMode> executionBinder = MapBinder.newMapBinder(binder(),
                     ToolActivation.class, ExecutionMode.class);
 
@@ -96,16 +90,6 @@ public class KRunModule extends AbstractModule {
         @Provides
         ConfigurationCreationOptions ccOptions(KRunOptions options) {
             return options.configurationCreation;
-        }
-
-        @Provides
-        Function<org.kframework.definition.Module, Rewriter> getRewriter(KompileOptions options, Map<String, Provider<Function<org.kframework.definition.Module, Rewriter>>> map, KExceptionManager kem) {
-            Provider<Function<org.kframework.definition.Module, Rewriter>> provider = map.get(options.backend);
-            if (provider == null) {
-                throw KEMException.criticalError("Backend " + options.backend + " does not support execution. Supported backends are: "
-                        + map.keySet());
-            }
-            return provider.get();
         }
 
         @Provides

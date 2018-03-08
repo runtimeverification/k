@@ -87,6 +87,8 @@ public class ParseInModule implements Serializable {
         return extensionModule;
     }
 
+    public Module getParsingModule() { return parsingModule; }
+
     /**
      * Parse as input the given string and start symbol using the module stored in the object.
      * @param input          the string to parse.
@@ -111,7 +113,7 @@ public class ParseInModule implements Serializable {
     }
 
     public Scanner getScanner() {
-        return new Scanner(parsingModule);
+        return new Scanner(this);
     }
 
     public Tuple2<Either<Set<ParseFailedException>, K>, Set<ParseFailedException>>

@@ -29,15 +29,13 @@ public class KompileModule extends AbstractModule {
         bind(Tool.class).toInstance(Tool.KOMPILE);
 
         install(new OuterParsingModule());
+        install(new BackendModule());
 
         Multibinder<Object> optionsBinder = Multibinder.newSetBinder(binder(), Object.class, Options.class);
         optionsBinder.addBinding().to(KompileOptions.class);
         Multibinder<Class<?>> experimentalOptionsBinder = Multibinder.newSetBinder(binder(), new TypeLiteral<Class<?>>() {}, Options.class);
         experimentalOptionsBinder.addBinding().toInstance(KompileOptions.Experimental.class);
         experimentalOptionsBinder.addBinding().toInstance(SMTOptions.class);
-
-        MapBinder.newMapBinder(
-                binder(), String.class, org.kframework.compile.Backend.class);
     }
 
     @Provides
@@ -53,14 +51,4 @@ public class KompileModule extends AbstractModule {
     @Provides
     OuterParsingOptions outerParsingOptions(KompileOptions options) { return options.outerParsing; }
 
-
-    @Provides
-    org.kframework.compile.Backend getKoreBackend(KompileOptions options, Map<String, org.kframework.compile.Backend> map, KExceptionManager kem) {
-        org.kframework.compile.Backend backend = map.get(options.backend);
-        if (backend == null) {
-            throw KEMException.criticalError("Invalid backend: " + options.backend
-                    + ". It should be one of " + map.keySet());
-        }
-        return backend;
-    }
 }

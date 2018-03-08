@@ -18,6 +18,7 @@ import org.kframework.kdep.KDepFrontEnd;
 import org.kframework.kdoc.KDocFrontEnd;
 import org.kframework.keq.KEqFrontEnd;
 import org.kframework.kompile.KompileFrontEnd;
+import org.kframework.kprove.KProveFrontEnd;
 import org.kframework.krun.KRunFrontEnd;
 import org.kframework.kserver.KServerFrontEnd;
 import org.kframework.utils.errorsystem.KEMException;
@@ -180,6 +181,15 @@ public class Main {
                     modules.addAll(KRunFrontEnd.getModules());
                     for (KModule kModule : kModules) {
                         List<Module> ms = kModule.getKRunModules();
+                        if (ms != null) {
+                            modules.addAll(ms);
+                        }
+                    }
+                    break;
+                case "-kprove":
+                    modules.addAll(KProveFrontEnd.getModules());
+                    for (KModule kModule : kModules) {
+                        List<Module> ms = kModule.getKProveModules();
                         if (ms != null) {
                             modules.addAll(ms);
                         }

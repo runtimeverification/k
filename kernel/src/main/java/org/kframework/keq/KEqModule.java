@@ -7,6 +7,7 @@ import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
+import org.kframework.kompile.BackendModule;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.krun.api.io.FileSystem;
 import org.kframework.krun.ioserver.filesystem.portable.PortableFileSystem;
@@ -38,6 +39,8 @@ public class KEqModule extends AbstractModule {
             MapBinder<String, Function<org.kframework.definition.Module, Rewriter>> rewriterBinder = MapBinder.newMapBinder(
                     binder(), TypeLiteral.get(String.class), new TypeLiteral<Function<org.kframework.definition.Module, Rewriter>>() {
                     });
+
+            install(new BackendModule());
 
             bind(FileUtil.class);
             bind(FileSystem.class).to(PortableFileSystem.class);

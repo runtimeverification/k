@@ -42,12 +42,10 @@ import static org.kframework.kore.KORE.*;
 public class KILtoKORE extends KILTransformation<Object> {
 
     private org.kframework.kil.loader.Context context;
-    private boolean autoImportDomains;
     private final boolean syntactic;
 
-    public KILtoKORE(org.kframework.kil.loader.Context context, boolean syntactic, boolean autoImportDomains) {
+    public KILtoKORE(org.kframework.kil.loader.Context context, boolean syntactic) {
         this.context = context;
-        this.autoImportDomains = autoImportDomains;
         this.syntactic = syntactic;
     }
 

@@ -1131,6 +1131,14 @@ module STRATEGY
     configuration <s> $STRATEGY:K  </s>
 endmodule
 
+module DEFAULT-STRATEGY
+    imports syntax STRATEGY
+
+    rule ~ regular => ^ regular [anywhere]
+
+    rule initSCell(_) => <s> ^ regular </s>
+endmodule
+
 module BASIC-STRATEGY
     imports STRATEGY
     imports BOOL

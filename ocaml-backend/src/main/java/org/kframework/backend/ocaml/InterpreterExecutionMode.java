@@ -2,6 +2,7 @@
 package org.kframework.backend.ocaml;
 
 import com.google.inject.Inject;
+import org.kframework.definition.Module;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
@@ -20,9 +21,10 @@ import scala.Tuple2;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.function.Function;
 
 
-public class InterpreterExecutionMode implements ExecutionMode<Tuple2<K, Integer>> {
+public class InterpreterExecutionMode implements ExecutionMode {
 
     private final KExceptionManager kem;
     private final FileUtil files;
@@ -46,7 +48,7 @@ public class InterpreterExecutionMode implements ExecutionMode<Tuple2<K, Integer
     }
 
     @Override
-    public Tuple2<K, Integer> execute(KRun.InitialConfiguration k, Rewriter unused, CompiledDefinition compiledDefinition) {
+    public Tuple2<K, Integer> execute(KRun.InitialConfiguration k, Function<Module, Rewriter> unused, CompiledDefinition compiledDefinition) {
         OcamlRewriter rewriter = new OcamlRewriter(files, converter, options);
         K config = k.theConfig;
         k.theConfig = null;
@@ -64,7 +66,8 @@ public class InterpreterExecutionMode implements ExecutionMode<Tuple2<K, Integer
                 files.resolveKompiled("interpreter").getAbsolutePath(),
                 files.resolveKompiled("realdef.cma").getAbsolutePath(),
                 "-t", input.getAbsolutePath(), "binaryfile", "--output-file",
-                output.getAbsolutePath()
+                output.getAbsolutePath(),
+                "--depth", options.depth == null ? "-1" : options.depth.toString()
                 );
 
         try (FileChannel channel = FileChannel.open(output.toPath())) {

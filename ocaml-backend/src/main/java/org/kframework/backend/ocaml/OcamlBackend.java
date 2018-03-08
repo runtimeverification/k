@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import org.apache.commons.io.FileUtils;
 import org.kframework.compile.Backend;
 import org.kframework.definition.Definition;
+import org.kframework.definition.Module;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.Kompile;
 import org.kframework.kompile.KompileOptions;
@@ -159,8 +160,13 @@ public class OcamlBackend implements Backend {
     }
 
     @Override
-    public Function<Definition, Definition> steps(Kompile kompile) {
-        return kompile.defaultSteps(excludedModuleTags());
+    public Function<Definition, Definition> steps() {
+        return Kompile.defaultSteps(kompileOptions, kem, excludedModuleTags());
+    }
+
+    @Override
+    public Function<Module, Module> specificationSteps(Definition ignored) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

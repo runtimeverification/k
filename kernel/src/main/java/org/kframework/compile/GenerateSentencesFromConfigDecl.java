@@ -2,6 +2,7 @@
 package org.kframework.compile;
 
 import com.google.common.collect.Lists;
+import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.KLabels;
@@ -118,11 +119,12 @@ public class GenerateSentencesFromConfigDecl {
                             Sort sort = Sort(getSortOfCell(cellName));
                             Option<Set<Production>> initializerProduction = m.productionsFor().get(KLabel(getInitLabel(sort)));
                             if (initializerProduction.isDefined()) {
-                                if (initializerProduction.get().size() == 1) { // should be only a single initializer
-                                    if (initializerProduction.get().head().items().size() == 1) {
+                                Set<Production> realProds = stream(initializerProduction.get()).filter(p -> !p.att().contains("recordPrd", Production.class)).collect(Collections.toSet());
+                                if (realProds.size() == 1) { // should be only a single initializer
+                                    if (realProds.head().items().size() == 1) {
                                         // XCell ::= "initXCell"
                                         return Tuple3.apply(Set(), Lists.newArrayList(sort), KApply(KLabel(getInitLabel(sort))));
-                                    } else if (initializerProduction.get().head().items().size() == 4) {
+                                    } else if (realProds.head().items().size() == 4) {
                                         // XCell ::= "initXCell" "(" Map ")"
                                         return Tuple3.apply(Set(), Lists.newArrayList(sort), KApply(KLabel(getInitLabel(sort)), KVariable("Init")));
                                     }
@@ -192,6 +194,14 @@ public class GenerateSentencesFromConfigDecl {
             if (k.sort().equals(Sorts.KConfigVar())) {
                 hasConfigVar = true;
             }
+        }
+
+        @Override
+        public void apply(KApply k) {
+            if (k.klabel().name().equals("#externalCell")) {
+                hasConfigVar = true;
+            }
+            super.apply(k);
         }
 
         @Override

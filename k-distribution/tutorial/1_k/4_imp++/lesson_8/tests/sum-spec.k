@@ -1,7 +1,8 @@
 // Copyright (c) 2016 K Team. All Rights Reserved.
 
-module SUM-SPEC
+module SUM-INVARIANT
   imports IMP
+
 rule
   <threads><thread>...
     <k>
@@ -22,6 +23,11 @@ rule
     LSUM |-> (S:Int => S +Int ((N +Int 1) *Int N /Int 2))
   ...</store>
 requires N >=Int 0
+
+endmodule
+
+module SUM-SPEC
+  imports SUM-INVARIANT
 
 rule
   <threads><thread>...

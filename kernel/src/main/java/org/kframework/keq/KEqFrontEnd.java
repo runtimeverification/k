@@ -4,10 +4,12 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Module;
 import com.google.inject.Provider;
+import org.kframework.compile.Backend;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
 import org.kframework.rewriter.Rewriter;
+import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
@@ -32,6 +34,8 @@ public class KEqFrontEnd extends FrontEnd {
     private final KExceptionManager kem;
     private final KEqOptions keqOptions;
     private final FileUtil files;
+    private final Stopwatch sw;
+    private final Provider<Backend> backend;
     private final Provider<CompiledDefinition> compiledDef;
     private final Provider<CompiledDefinition> compiledDef1;
     private final Provider<CompiledDefinition> compiledDef2;
@@ -52,6 +56,8 @@ public class KEqFrontEnd extends FrontEnd {
             KExceptionManager kem,
             KEqOptions keqOptions,
             @Main FileUtil files,
+            Stopwatch sw,
+            @Main Provider<Backend> backend,
             @Main Provider<CompiledDefinition> compiledDef,
             @Spec1 Provider<CompiledDefinition> compiledDef1,
             @Spec2 Provider<CompiledDefinition> compiledDef2,
@@ -66,6 +72,8 @@ public class KEqFrontEnd extends FrontEnd {
         this.kem = kem;
         this.keqOptions = keqOptions;
         this.files = files;
+        this.sw = sw;
+        this.backend = backend;
         this.compiledDef = compiledDef;
         this.compiledDef1 = compiledDef1;
         this.compiledDef2 = compiledDef2;
@@ -78,10 +86,12 @@ public class KEqFrontEnd extends FrontEnd {
     protected int run() {
         CompiledDefinition commonDef, def1, def2;
         Function<org.kframework.definition.Module, Rewriter> commonRewriter, rewriter1, rewriter2;
+        Backend backend;
         scope.enter(kompiledDir.get());
         try {
             commonDef = compiledDef.get();
             commonRewriter = initializeRewriter.get();
+            backend = this.backend.get();
         } finally {
             scope.exit();
         }
@@ -99,8 +109,9 @@ public class KEqFrontEnd extends FrontEnd {
         } finally {
             scope.exit();
         }
-        return new KEq(kem, files).run(commonDef, def1, def2,
+        return new KEq(kem, files, sw).run(commonDef, def1, def2,
                 keqOptions,
+                backend,
                 commonRewriter, rewriter1, rewriter2);
     }
 

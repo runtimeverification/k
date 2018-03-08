@@ -5,11 +5,7 @@ import org.kframework.compile.ConfigurationInfo;
 import org.kframework.compile.ConfigurationInfoFromModule;
 import org.kframework.compile.LabelInfo;
 import org.kframework.compile.LabelInfoFromModule;
-import org.kframework.definition.Context;
-import org.kframework.definition.Definition;
-import org.kframework.definition.DefinitionTransformer;
-import org.kframework.definition.Rule;
-import org.kframework.definition.Sentence;
+import org.kframework.definition.*;
 import org.kframework.kil.Attribute;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -32,6 +28,14 @@ public class AddImplicitComputationCell implements UnaryOperator<Sentence> {
         return DefinitionTransformer.fromSentenceTransformer(
                 new AddImplicitComputationCell(configInfo, labelInfo),
                 "concretizing configuration").apply(input);
+    }
+
+    public static Module transformModule(Module mod) {
+        ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(mod);
+        LabelInfo labelInfo = new LabelInfoFromModule(mod);
+        return ModuleTransformer.fromSentenceTransformer(
+                new AddImplicitComputationCell(configInfo, labelInfo),
+                "concretizing configuration").apply(mod);
     }
 
     private final ConfigurationInfo cfg;

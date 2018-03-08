@@ -1,1 +1,2 @@
-krun --backend java --prove "$@"
+#!/usr/bin/env sh
+"$(dirname "$0")/../lib/k" -kprove "$@"

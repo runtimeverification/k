@@ -16,16 +16,18 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.util.HookProvider;
 import org.kframework.builtin.KLabels;
-import org.kframework.compile.ExpandMacros;
-import org.kframework.compile.NormalizeKSeq;
-import org.kframework.compile.ResolveSemanticCasts;
+import org.kframework.compile.*;
+import org.kframework.definition.DefinitionTransformer;
 import org.kframework.definition.Module;
+import org.kframework.definition.ModuleTransformer;
 import org.kframework.definition.Rule;
 import org.kframework.kil.Attribute;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
+import org.kframework.kore.KORE;
+import org.kframework.kprove.KProve;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.api.io.FileSystem;
 import org.kframework.main.GlobalOptions;
@@ -37,6 +39,7 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.DefinitionScoped;
 import org.kframework.utils.options.SMTOptions;
+import scala.Function1;
 import scala.Tuple2;
 import scala.collection.JavaConversions;
 
@@ -59,7 +62,6 @@ import static org.kframework.kore.KORE.*;
 public class InitializeRewriter implements Function<Module, Rewriter> {
 
     private final FileSystem fs;
-    private final CompiledDefinition koreDef;
     private final Stopwatch sw;
     private final boolean deterministicFunctions;
     private final GlobalOptions globalOptions;
@@ -71,6 +73,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
     private final FileUtil files;
     private final InitializeDefinition initializeDefinition;
     private static final int NEGATIVE_VALUE = -1;
+    private final KompileOptions kompileOptions;
 
     @Inject
     public InitializeRewriter(
@@ -82,10 +85,8 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
             KompileOptions kompileOptions,
             FileUtil files,
             InitializeDefinition initializeDefinition,
-            CompiledDefinition koreDef,
             Stopwatch sw) {
         this.fs = fs;
-        this.koreDef = koreDef;
         this.sw = sw;
         this.deterministicFunctions = false;
         this.globalOptions = globalOptions;
@@ -93,6 +94,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
         this.smtOptions = smtOptions;
         this.hookProvider = HookProvider.get(kem);
         this.transitions = kompileOptions.transition;
+        this.kompileOptions = kompileOptions;
         this.krunOptions = krunOptions;
         this.files = files;
         this.initializeDefinition = initializeDefinition;
@@ -103,12 +105,21 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
         TermContext initializingContext = TermContext.builder(new GlobalContext(fs, deterministicFunctions, globalOptions, krunOptions, kem, smtOptions, hookProvider, files, Stage.INITIALIZING))
                 .freshCounter(0).build();
         Definition definition;
-        definition = initializeDefinition.invoke(mainModule, kem, koreDef, initializingContext.global());
+        definition = initializeDefinition.invoke(mainModule, kem, initializingContext.global());
         GlobalContext rewritingContext = new GlobalContext(fs, deterministicFunctions, globalOptions, krunOptions, kem, smtOptions, hookProvider, files, Stage.REWRITING);
         rewritingContext.setDefinition(definition);
 
-        return new SymbolicRewriterGlue(mainModule, definition, definition, transitions, initializingContext.getCounterValue(), rewritingContext, kem, files, koreDef, sw);
+        return new SymbolicRewriterGlue(mainModule, definition, definition, transitions, initializingContext.getCounterValue(), rewritingContext, kem, files, kompileOptions, sw);
     }
+
+    public static Rule transformFunction(Function<K, K> f, Rule r) {
+        return Rule.apply(f.apply(r.body()), f.apply(r.requires()), f.apply(r.ensures()), r.att());
+    }
+
+    public static Rule transform(Function1<K, K> f, Rule r) {
+        return Rule.apply(f.apply(r.body()), f.apply(r.requires()), f.apply(r.ensures()), r.att());
+    }
+
 
     public static class SymbolicRewriterGlue implements Rewriter {
 
@@ -120,7 +131,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
         private final KExceptionManager kem;
         private final FileUtil files;
         private final List<String> transitions;
-        private final CompiledDefinition koreDef;
+        private KompileOptions kompileOptions;
         private final Stopwatch sw;
 
         public SymbolicRewriterGlue(
@@ -131,11 +142,11 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
                 long initCounterValue,
                 GlobalContext rewritingContext,
                 KExceptionManager kem,
-                FileUtil files, CompiledDefinition koreDef,
+                FileUtil files, KompileOptions kompileOptions,
                 Stopwatch sw) {
             this.transitions = transitions;
             this.files = files;
-            this.koreDef = koreDef;
+            this.kompileOptions = kompileOptions;
             this.sw = sw;
             this.definition = definition;
             this.miniKoreDefinition = miniKoreDefinition;
@@ -150,7 +161,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
             TermContext termContext = TermContext.builder(rewritingContext).freshCounter(initCounterValue).build();
             KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, termContext.global(), false);
             ResolveSemanticCasts resolveCasts = new ResolveSemanticCasts(true);
-            ExpandMacros macroExpander = new ExpandMacros(koreDef.executionModule(), kem, files, rewritingContext.globalOptions, koreDef.kompileOptions);
+            ExpandMacros macroExpander = new ExpandMacros(module, kem, files, rewritingContext.globalOptions, kompileOptions);
             termContext.setKOREtoBackendKILConverter(converter);
             Term backendKil = converter.convert(macroExpander.expand(resolveCasts.resolve(k))).evaluate(termContext);
             SymbolicRewriter rewriter = new SymbolicRewriter(rewritingContext, transitions, converter);
@@ -169,10 +180,10 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
             TermContext termContext = TermContext.builder(rewritingContext).freshCounter(initCounterValue).build();
             KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, termContext.global(), false);
             ResolveSemanticCasts resolveCasts = new ResolveSemanticCasts(true);
-            ExpandMacros macroExpander = new ExpandMacros(koreDef.executionModule(), kem, files, rewritingContext.globalOptions, koreDef.kompileOptions);
+            ExpandMacros macroExpander = new ExpandMacros(module, kem, files, rewritingContext.globalOptions, kompileOptions);
             termContext.setKOREtoBackendKILConverter(converter);
             Term javaTerm = converter.convert(macroExpander.expand(resolveCasts.resolve(initialConfiguration))).evaluate(termContext);
-            org.kframework.backend.java.kil.Rule javaPattern = converter.convert(Optional.empty(), ProofExecutionMode.transformFunction(JavaBackend::convertKSeqToKApply, pattern));
+            org.kframework.backend.java.kil.Rule javaPattern = converter.convert(Optional.empty(), transformFunction(JavaBackend::convertKSeqToKApply, pattern));
             SymbolicRewriter rewriter = new SymbolicRewriter(rewritingContext, transitions, converter);
             return rewriter.search(javaTerm, javaPattern, bound.orElse(NEGATIVE_VALUE), depth.orElse(NEGATIVE_VALUE), searchType, termContext);
         }
@@ -184,7 +195,8 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
         }
 
         @Override
-        public K prove(List<Rule> rules) {
+        public K prove(Module mod) {
+            List<Rule> rules = stream(mod.rules()).filter(r -> r.att().contains("specification")).collect(Collectors.toList());
             ProcessProofRules processProofRules = new ProcessProofRules(rules).invoke(rewritingContext, initCounterValue, module, definition);
             List<org.kframework.backend.java.kil.Rule> javaRules = processProofRules.getJavaRules();
             KOREtoBackendKIL converter = processProofRules.getConverter();
@@ -218,7 +230,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
         }
 
         @Override
-        public boolean equivalence(Rewriter firstDef, Rewriter secondDef, String firstSpec, String secondSpec) {
+        public boolean equivalence(Rewriter firstDef, Rewriter secondDef, Module firstSpec, Module secondSpec) {
             if (!(firstDef instanceof SymbolicRewriterGlue) || !(secondDef instanceof SymbolicRewriterGlue)) {
                 throw KEMException.criticalError("All three definitions must be compiled with --backend java in order" +
                         "to check program equivalence.");
@@ -333,24 +345,14 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
         final List<Boolean> trusted;
         final SymbolicRewriter rewriter;
 
-        EquivalenceState(SymbolicRewriterGlue glue, String spec) {
-            CompiledDefinition def = glue.koreDef;
+        EquivalenceState(SymbolicRewriterGlue glue, Module spec) {
             GlobalOptions globalOptions = glue.rewritingContext.globalOptions;
             FileUtil files = glue.files;
             KExceptionManager kem = glue.kem;
             Stopwatch sw = glue.sw;
-            KompileOptions options = glue.koreDef.kompileOptions;
-            Module parsedModule = ProofExecutionMode.getProofModule(def, spec, globalOptions, files, kem, sw);
-            ExpandMacros macroExpander = new ExpandMacros(def.executionModule(), kem, files, globalOptions, options);
+            KompileOptions options = glue.kompileOptions;
 
-            List<Rule> rules = stream(parsedModule.localRules())
-                    .filter(r -> r.toString().contains("spec.k"))
-                    .map(r -> (Rule) macroExpander.expand(r))
-                    .map(r -> ProofExecutionMode.transformFunction(JavaBackend::ADTKVariableToSortedVariable, r))
-                    .map(r -> ProofExecutionMode.transformFunction(JavaBackend::convertKSeqToKApply, r))
-                    .map(r -> ProofExecutionMode.transform(NormalizeKSeq.self(), r))
-                    //.map(r -> kompile.compileRule(compiledDefinition, r))
-                    .collect(Collectors.toList());
+            List<Rule> rules = stream(spec.rules()).filter(r -> r.att().contains("specification")).collect(Collectors.toList());
 
             SymbolicRewriterGlue.ProcessProofRules processProofRules = new SymbolicRewriterGlue.ProcessProofRules(rules);
             processProofRules.invoke(glue.rewritingContext, glue.initCounterValue, glue.module, glue.definition);
@@ -411,11 +413,11 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
             }
         };
 
-        public Definition invoke(Module module, KExceptionManager kem, CompiledDefinition compiledDef, GlobalContext global) {
+        public Definition invoke(Module module, KExceptionManager kem, GlobalContext global) {
             if (cache.containsKey(module)) {
                 return cache.get(module);
             }
-            Definition definition = new Definition(module, compiledDef, kem);
+            Definition definition = new Definition(module, kem);
 
             global.setDefinition(definition);
 

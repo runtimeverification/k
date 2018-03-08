@@ -13,7 +13,9 @@ import jline.console.completer.NullCompleter;
 import jline.console.completer.StringsCompleter;
 import org.kframework.debugger.KDebug;
 import org.kframework.debugger.KoreKDebug;
+import org.kframework.definition.Module;
 import org.kframework.kompile.CompiledDefinition;
+import org.kframework.kore.K;
 import org.kframework.krun.KRun;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.api.io.FileSystem;
@@ -23,12 +25,14 @@ import org.kframework.utils.debugparser.ParseException;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
+import scala.Tuple2;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.kframework.utils.debugparser.DebuggerCommandParser.*;
@@ -39,7 +43,7 @@ import static org.kframework.utils.file.FileUtil.*;
  * <p>
  * Execution mode class for the Kore based Debugger
  */
-public class DebugExecutionMode implements ExecutionMode<Void> {
+public class DebugExecutionMode implements ExecutionMode {
 
     private final KRunOptions kRunOptions;
     private final KExceptionManager kem;
@@ -84,8 +88,8 @@ public class DebugExecutionMode implements ExecutionMode<Void> {
 
 
     @Override
-    public Void execute(KRun.InitialConfiguration k, Rewriter rewriter, CompiledDefinition compiledDefinition) {
-        KDebug debugger = new KoreKDebug(k.theConfig, rewriter, checkpointInterval, files, kem, kRunOptions, compiledDefinition);
+    public Tuple2<K, Integer> execute(KRun.InitialConfiguration k, Function<Module, Rewriter> rewriter, CompiledDefinition compiledDefinition) {
+        KDebug debugger = new KoreKDebug(k.theConfig, rewriter.apply(compiledDefinition.executionModule()), checkpointInterval, files, kem, kRunOptions, compiledDefinition);
         ConsoleReader reader = getConsoleReader();
         while (true) {
             try {

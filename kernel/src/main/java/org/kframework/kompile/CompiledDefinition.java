@@ -170,7 +170,7 @@ public class CompiledDefinition implements Serializable {
      */
 
     public BiFunction<String, Source, K> getParser(Module module, Sort programStartSymbol, KExceptionManager kem) {
-        ParseInModule parseInModule = new RuleGrammarGenerator(parsedDefinition, kompileOptions.strict()).getCombinedGrammar(module);
+        ParseInModule parseInModule = RuleGrammarGenerator.getCombinedGrammar(module, kompileOptions.strict());
 
         return (BiFunction<String, Source, K> & Serializable) (s, source) -> {
             Tuple2<Either<Set<ParseFailedException>, K>, Set<ParseFailedException>> res = parseInModule.parseString(s, programStartSymbol, source);
@@ -183,7 +183,7 @@ public class CompiledDefinition implements Serializable {
     }
 
     public Module getExtensionModule(Module module) {
-        return new RuleGrammarGenerator(kompiledDefinition, kompileOptions.strict()).getCombinedGrammar(module).getExtensionModule();
+        return RuleGrammarGenerator.getCombinedGrammar(module, kompileOptions.strict()).getExtensionModule();
     }
 
     public Rule compilePatternIfAbsent(FileUtil files, KExceptionManager kem, String pattern, Source source) {

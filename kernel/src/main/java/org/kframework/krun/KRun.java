@@ -23,6 +23,7 @@ import org.kframework.kore.VisitK;
 import org.kframework.krun.modes.ExecutionMode;
 import org.kframework.main.Main;
 import org.kframework.parser.binary.BinaryParser;
+import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.parser.kore.KoreParser;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.unparser.AddBrackets;
@@ -95,54 +96,14 @@ public class KRun {
         InitialConfiguration config = new InitialConfiguration(program);
         program = null;
 
+        Tuple2<K, Integer> result = executionMode.execute(config, rewriterGenerator, compiledDef);
 
-        Rewriter rewriter = rewriterGenerator.apply(compiledDef.executionModule());
 
-        Object result = executionMode.execute(config, rewriter, compiledDef);
-
-        boolean colorize = options.outputFile == null && tty.stdout;
-        ColorSetting colors = options.color.color();
-        if (colors == null) {
-            try {
-                if (!colorize) {
-                    colors = ColorSetting.OFF;
-                } else if (Integer.parseInt(files.getEnv().get("K_COLOR_SUPPORT")) >= 256) {
-                    colors = ColorSetting.EXTENDED;
-                } else {
-                    colors = ColorSetting.ON;
-                }
-            } catch (NumberFormatException e) {
-                colors = ColorSetting.ON;
-            }
-        }
-
-        if (result instanceof K) {
-            prettyPrint(compiledDef, options.output, s -> outputFile(s, options), (K) result, colors);
-            if (compiledDef.exitCodePattern != null) {
-                K res = rewriter.match((K) result, compiledDef.exitCodePattern);
-                return getExitCode(kem, res);
-            }
-        } else if (result instanceof Tuple2) {
-            Tuple2<?, ?> tuple = (Tuple2<?, ?>) result;
-            if (tuple._1() instanceof K && tuple._2() instanceof Integer) {
-                prettyPrint(compiledDef, options.output, s -> outputFile(s, options), (K) tuple._1(), colors);
-                return (Integer) tuple._2();
-            }
-            if (tuple._1() instanceof SearchResult && tuple._2() instanceof Integer) {
-                printSearchResult((SearchResult) tuple._1(), options, compiledDef, colors);
-                return (Integer) tuple._2();
-            }
-        } else if (result instanceof SearchResult) {
-            printSearchResult((SearchResult) result, options, compiledDef, colors);
-            return 0;
-        } else if (result instanceof Integer) {
-            return (Integer) result;
+        if (result != null) {
+            prettyPrint(compiledDef.languageParsingModule(), options.prettyPrint.output, s -> outputFile(s, options.prettyPrint, files), result._1(), options.prettyPrint.color(tty.stdout, files.getEnv()));
+            return result._2();
         }
         return 0;
-    }
-
-    private void printSearchResult(SearchResult result, KRunOptions options, CompiledDefinition compiledDef, ColorSetting colorize) {
-        prettyPrint(compiledDef, options.output, s -> outputFile(s, options), result.getSearchList(), colorize);
     }
 
     /**
@@ -178,11 +139,11 @@ public class KRun {
     }
 
     //TODO(dwightguth): use Writer
-    public void outputFile(String output, KRunOptions options) {
-        outputFile(output.getBytes(), options);
+    public static void outputFile(String output, PrettyPrintOptions options, FileUtil files) {
+        outputFile(output.getBytes(), options, files);
     }
 
-    public void outputFile(byte[] output, KRunOptions options) {
+    public static void outputFile(byte[] output, PrettyPrintOptions options, FileUtil files) {
         if (options.outputFile == null) {
             try {
                 System.out.write(output);
@@ -219,7 +180,7 @@ public class KRun {
         return compiledDef.parsePatternIfAbsent(files, kem, pattern, source);
     }
 
-    public static void prettyPrint(CompiledDefinition compiledDef, OutputModes output, Consumer<byte[]> print, K result, ColorSetting colorize) {
+    public static void prettyPrint(Module module, OutputModes output, Consumer<byte[]> print, K result, ColorSetting colorize) {
         switch (output) {
         case KAST:
             print.accept((ToKast.apply(result) + "\n").getBytes());
@@ -228,7 +189,7 @@ public class KRun {
             print.accept("".getBytes());
             break;
         case PRETTY:
-            Module unparsingModule = compiledDef.getExtensionModule(compiledDef.languageParsingModule());
+            Module unparsingModule = RuleGrammarGenerator.getCombinedGrammar(module, false).getExtensionModule();
             print.accept((unparseTerm(result, unparsingModule, colorize) + "\n").getBytes());
             break;
         case BINARY:
@@ -237,56 +198,6 @@ public class KRun {
         default:
             throw KEMException.criticalError("Unsupported output mode: " + output);
         }
-    }
-
-    /**
-     * Given a substitution, represented by a map of KVariables to K, print the substitution. The printing follows the following format:
-     * If Pattern is represented by a single variable, then entire substitution is printed without the pattern, else
-     * variable is printed, followed by -->, and then the substitution corresponding K.
-     *
-     * @param subst         A Map from KVariables to K representing the result of a match of a pattern on a configuration.
-     * @param parsedPattern The parsed (not compiled) pattern object. The parsed pattern is used to
-     *                      weed out variables not defined in the original string pattern by the user.
-     * @param outputModes   The output mode represented by the user.
-     * @param print         A consumer function that is called with the result of the unparsing process. The consumer must accept a String.
-     */
-    public static void prettyPrintSubstitution(Map<? extends KVariable, ? extends K> subst,
-                                               Rule parsedPattern, CompiledDefinition compiledDefinition,
-                                               OutputModes outputModes,
-                                               Consumer<byte[]> print) {
-        if(subst.isEmpty()) {
-            print.accept("Empty substitution\n".getBytes());
-        } else {
-            subst.entrySet().forEach(e -> {
-                if (parsedPattern.body() instanceof KVariable) {
-                    assert e.getKey().name().equals(parsedPattern.body().toString());
-                    prettyPrint(compiledDefinition, outputModes, print, e.getValue(), ColorSetting.OFF);
-                    return;
-                }
-                print.accept(e.getKey().toString().getBytes());
-                print.accept(" -->\n".getBytes());
-                prettyPrint(compiledDefinition, outputModes, print, e.getValue(), ColorSetting.OFF);
-            });
-        }
-    }
-
-    /**
-     * Returns a new substitution containing only the keys occurring in the pattern.
-     */
-    public static Map<KVariable, K> filterAnonymousVariables(Map<? extends KVariable, ? extends K> substitution, Rule parsedPattern) {
-        List<String> varList = new ArrayList<>();
-        new VisitK() {
-            @Override
-            public void apply(KVariable k) {
-                /* Not Observing reflexivity Rule requires comparison by name */
-                varList.add(k.name());
-                super.apply(k);
-            }
-        }.apply(parsedPattern.body());
-
-        return substitution.entrySet().stream()
-                .filter(e -> varList.contains(e.getKey().name()))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     private K parseConfigVars(KRunOptions options, CompiledDefinition compiledDef) {

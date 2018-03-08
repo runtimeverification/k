@@ -14,12 +14,7 @@ import org.kframework.compile.checks.CheckRHSVariables;
 import org.kframework.compile.checks.CheckRewrite;
 import org.kframework.compile.checks.CheckSortTopUniqueness;
 import org.kframework.compile.checks.CheckStreams;
-import org.kframework.definition.Constructors;
-import org.kframework.definition.Definition;
-import org.kframework.definition.DefinitionTransformer;
-import org.kframework.definition.Module;
-import org.kframework.definition.Rule;
-import org.kframework.definition.Sentence;
+import org.kframework.definition.*;
 import org.kframework.kore.Sort;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.concrete2kore.ParserUtils;
@@ -40,6 +35,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.kframework.Collections.*;
 import static org.kframework.definition.Constructors.*;
@@ -85,6 +81,8 @@ public class Kompile {
         this.errors = new HashSet<>();
         this.parser = new ParserUtils(files::resolveWorkingDirectory, kem, global);
         List<File> lookupDirectories = kompileOptions.outerParsing.includes.stream().map(files::resolveWorkingDirectory).collect(Collectors.toList());
+        // these directories should be relative to the current working directory if we refer to them later after the WD has changed.
+        kompileOptions.outerParsing.includes = lookupDirectories.stream().map(File::getAbsolutePath).collect(Collectors.toList());
         this.definitionParsing = new DefinitionParsing(
                 lookupDirectories, kompileOptions.strict(), kem,
                 parser, cacheParses, files.resolveKompiled("cache.bin"), !kompileOptions.outerParsing.noPrelude);
@@ -92,7 +90,7 @@ public class Kompile {
     }
 
     public CompiledDefinition run(File definitionFile, String mainModuleName, String mainProgramsModuleName) {
-        return run(definitionFile, mainModuleName, mainProgramsModuleName, defaultSteps(Collections.emptySet()));
+        return run(definitionFile, mainModuleName, mainProgramsModuleName, defaultSteps(kompileOptions, kem, Collections.emptySet()));
     }
 
     /**
@@ -122,20 +120,29 @@ public class Kompile {
         return definitionParsing.parseDefinitionAndResolveBubbles(definitionFile, mainModuleName, mainProgramsModule);
     }
 
-    public Definition resolveIOStreams(Definition d) {
-        return DefinitionTransformer.from(new ResolveIOStreams(d, kem)::resolve, "resolving io streams").apply(d);
+    private static Module filterStreamModules(Module input) {
+        if (input.name().equals("STDIN-STREAM") || input.name().equals("STDOUT-STREAM")) {
+            return Module(input.name(), Set(), Set(), input.att());
+        }
+        return input;
     }
 
-    private Module excludeModulesByTag(Set<String> excludedModuleTags, Module mod) {
+    private static Definition resolveIOStreams(KExceptionManager kem,Definition d) {
+        return DefinitionTransformer.from(new ResolveIOStreams(d, kem)::resolve, "resolving io streams")
+                .andThen(DefinitionTransformer.from(Kompile::filterStreamModules, "resolving io streams"))
+                .apply(d);
+    }
+
+    private static Module excludeModulesByTag(Set<String> excludedModuleTags, Module mod) {
         Set<Module> newImports = stream(mod.imports()).filter(_import -> excludedModuleTags.stream().noneMatch(tag -> _import.att().contains(tag))).collect(Collectors.toSet());
         return Module(mod.name(), immutable(newImports), mod.localSentences(), mod.att());
     }
 
-    private DefinitionTransformer excludeModulesByTag(Set<String> excludedModuleTags, Definition d) {
+    private static DefinitionTransformer excludeModulesByTag(Set<String> excludedModuleTags, Definition d) {
         return DefinitionTransformer.from(mod -> excludeModulesByTag(excludedModuleTags, mod), "remove modules based on attributes");
     }
 
-    public Function<Definition, Definition> defaultSteps(Set<String> excludedModuleTags) {
+    public static Function<Definition, Definition> defaultSteps(KompileOptions kompileOptions, KExceptionManager kem, Set<String> excludedModuleTags) {
         DefinitionTransformer resolveStrict = DefinitionTransformer.from(new ResolveStrict(kompileOptions)::resolve, "resolving strict and seqstrict attributes");
         DefinitionTransformer resolveHeatCoolAttribute = DefinitionTransformer.fromSentenceTransformer(new ResolveHeatCoolAttribute(new HashSet<>(kompileOptions.transition))::resolve, "resolving heat and cool attributes");
         DefinitionTransformer resolveAnonVars = DefinitionTransformer.fromSentenceTransformer(new ResolveAnonVar()::resolve, "resolving \"_\" vars");
@@ -143,9 +150,10 @@ public class Kompile {
                 DefinitionTransformer.fromSentenceTransformer(new ResolveSemanticCasts(kompileOptions.backend.equals(Backends.JAVA))::resolve, "resolving semantic casts");
         DefinitionTransformer resolveFun = DefinitionTransformer.from(new ResolveFun()::resolve, "resolving #fun");
         DefinitionTransformer generateSortPredicateSyntax = DefinitionTransformer.from(new GenerateSortPredicateSyntax()::gen, "adding sort predicate productions");
+        DefinitionTransformer subsortKItem = DefinitionTransformer.from(Kompile::subsortKItem, "subsort all sorts to KItem");
 
         return def -> excludeModulesByTag(excludedModuleTags, def)
-                .andThen(this::resolveIOStreams)
+                .andThen(d -> Kompile.resolveIOStreams(kem, d))
                 .andThen(resolveFun)
                 .andThen(resolveStrict)
                 .andThen(resolveAnonVars)
@@ -153,12 +161,32 @@ public class Kompile {
                 .andThen(resolveHeatCoolAttribute)
                 .andThen(resolveSemanticCasts)
                 .andThen(generateSortPredicateSyntax)
-                .andThen(this::resolveFreshConstants)
+                .andThen(Kompile::resolveFreshConstants)
                 .andThen(AddImplicitComputationCell::transformDefinition)
                 .andThen(new Strategy(kompileOptions.experimental.heatCoolStrategies).addStrategyCellToRulesTransformer())
                 .andThen(ConcretizeCells::transformDefinition)
-                .andThen(this::addSemanticsModule)
+                .andThen(subsortKItem)
+                .andThen(Kompile::addSemanticsModule)
                 .apply(def);
+    }
+
+    private static Module subsortKItem(Module module) {
+        java.util.Set<Sentence> prods = new HashSet<>();
+        for (Sort srt : iterable(module.definedSorts())) {
+            if (!RuleGrammarGenerator.isParserSort(srt)) {
+                // KItem ::= Sort
+                Production prod = Production(Sorts.KItem(), Seq(NonTerminal(srt)), Att());
+                if (!module.sentences().contains(prod)) {
+                    prods.add(prod);
+                }
+            }
+        }
+        if (prods.isEmpty()) {
+            return module;
+        } else {
+            return Module(module.name(), module.imports(), Stream.concat(stream(module.localSentences()), prods.stream())
+                    .collect(org.kframework.Collections.toSet()), module.att());
+        }
     }
 
     public Rule parseAndCompileRule(CompiledDefinition compiledDef, String contents, Source source, Optional<Rule> parsedRule) {
@@ -204,27 +232,18 @@ public class Kompile {
         }
     }
 
-    public Definition addSemanticsModule(Definition d) {
-        java.util.Set<Sentence> prods = new HashSet<>();
-        for (Sort srt : iterable(d.mainModule().definedSorts())) {
-            if (!RuleGrammarGenerator.isParserSort(srt)) {
-                // KItem ::= Sort
-                prods.add(Production(Sorts.KItem(), Seq(NonTerminal(srt)), Att()));
-            }
-        }
-        Module withKSeq = Constructors.Module("SEMANTICS", Set(d.mainModule()), immutable(prods), Att());
+    private static Definition addSemanticsModule(Definition d) {
         java.util.Set<Module> allModules = mutable(d.modules());
-        allModules.add(withKSeq);
 
         Module languageParsingModule = Constructors.Module("LANGUAGE-PARSING",
                 Set(d.mainModule(),
                         d.getModule("K-TERM").get(),
                         d.getModule(RuleGrammarGenerator.ID_PROGRAM_PARSING).get()), Set(), Att());
         allModules.add(languageParsingModule);
-        return Constructors.Definition(withKSeq, immutable(allModules), d.att());
+        return Constructors.Definition(d.mainModule(), immutable(allModules), d.att());
     }
 
-    public Definition resolveFreshConstants(Definition input) {
+    private static Definition resolveFreshConstants(Definition input) {
         return DefinitionTransformer.from(new ResolveFreshConstants(input)::resolve, "resolving !Var variables")
                 .apply(input);
     }
@@ -237,8 +256,8 @@ public class Kompile {
                 .apply(parsedRule);
     }
 
-    public Module parseModule(CompiledDefinition definition, File definitionFile) {
-        return definitionParsing.parseModule(definition, definitionFile, !kompileOptions.outerParsing.noPrelude);
+    public Set<Module> parseModules(CompiledDefinition definition, String mainModule, File definitionFile) {
+        return definitionParsing.parseModules(definition, mainModule, definitionFile);
     }
 
     private Sentence concretizeSentence(Sentence s, Definition input) {

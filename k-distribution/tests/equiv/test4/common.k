@@ -1,10 +1,8 @@
 // Copyright (c) 2016 K Team. All Rights Reserved.
 
-require "domains.k"
-
 module COMMON
-
 imports ID
+imports DOMAINS
 
 syntax Bool ::= vars(List)
 

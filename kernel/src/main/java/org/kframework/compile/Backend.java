@@ -2,6 +2,9 @@
 package org.kframework.compile;
 
 import org.kframework.definition.Definition;
+import org.kframework.definition.Module;
+import org.kframework.definition.Rule;
+import org.kframework.definition.Sentence;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.Kompile;
 
@@ -15,7 +18,9 @@ public interface Backend {
 
     void accept(CompiledDefinition def);
 
-    Function<Definition, Definition> steps(Kompile kompile);
+    Function<Definition, Definition> steps();
+
+    Function<Module, Module> specificationSteps(Definition def);
 
     Set<String> excludedModuleTags();
 }
