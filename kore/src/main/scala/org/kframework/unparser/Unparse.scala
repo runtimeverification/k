@@ -30,11 +30,14 @@ object ToKast {
         && l.name != "#token" && l.name != "#klabel") {
       l.name
     } else if (inParen) {
-      " `"+l.name+'`'
+      " `"+ escapeBackTicksAndSlashes(l.name) +'`'
     } else {
-      '`'+l.name+'`'
+      '`'+ escapeBackTicksAndSlashes(l.name) +'`'
     }
   }
+
+  def escapeBackTicksAndSlashes(str: String) : String =
+    str.foldRight[List[Char]] (Nil) { (c, r) => if (c == '`' || c == '\\') '\\' :: c :: r else c :: r }.mkString
 
   /**
    * Recursive worker function for printing KAST terms.
