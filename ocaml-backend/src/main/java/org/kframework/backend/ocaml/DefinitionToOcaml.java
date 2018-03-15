@@ -48,6 +48,7 @@ import org.kframework.kore.KToken;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
 import org.kframework.kore.VisitK;
+import org.kframework.kore.TransformK;
 import org.kframework.krun.KRun;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.concrete2kore.ParserUtils;
@@ -287,6 +288,8 @@ public class DefinitionToOcaml implements Serializable {
             this.matchThreadSet = convert(new Kompile(kompileOptions, files, kem).compileRule(def.kompiledDefinition, matchThreadSet));
             Rule rewriteThreadSet = Rule(IncompleteCellUtils.make(threadKLabels.iterator().next(), false, KRewrite(KVariable("Threads"), KVariable("NewThreads")), false), BooleanUtils.TRUE, BooleanUtils.TRUE);
             this.rewriteThreadSet = convert(new Kompile(kompileOptions, files, kem).compileRule(def.kompiledDefinition, rewriteThreadSet));
+            this.rewriteThreadSet = Rule(new TransformK() { public K apply(KVariable var) { return KVariable(var.name(), var.att().remove("sort")); } }.apply(this.rewriteThreadSet.body()),
+                    this.rewriteThreadSet.requires(), this.rewriteThreadSet.ensures());
         }
         KLabel stratCell = KLabel("<s>");
         if (mainModule.definedKLabels().contains(stratCell)) {

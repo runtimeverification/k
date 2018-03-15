@@ -315,7 +315,7 @@ public class FastRuleMatcher {
                 return empty;
             }
         } else if (subject instanceof BuiltinSet && pattern instanceof BuiltinSet) {
-            return subject.equals(pattern) ? ruleMask : empty;
+            return unifySet((BuiltinSet) subject, (BuiltinSet) pattern, ruleMask, path);
         } else {
             assert subject instanceof KItem || subject instanceof BuiltinList || subject instanceof Token || subject instanceof BuiltinMap : "unexpected class at matching: " + subject.getClass();
             assert pattern instanceof KItem || pattern instanceof BuiltinList || pattern instanceof Token : "unexpected class at matching: " + pattern.getClass();
@@ -714,6 +714,52 @@ public class FastRuleMatcher {
                  * preserve the original map terms for pattern folding */
                 return addUnification(map, otherMap, ruleMask, path);
             }
+        }
+
+        return ruleMask;
+    }
+
+    private BitSet unifySet(BuiltinSet set, BuiltinSet otherSet, BitSet ruleMask, scala.collection.immutable.List<Pair<Integer, Integer>> path) {
+        assert set.collectionFunctions().isEmpty() && set.collectionPatterns().isEmpty()
+                && otherSet.collectionFunctions().isEmpty() && otherSet.collectionPatterns().isEmpty();
+
+        Set<Term> commonElements = Sets.intersection(set.elements(), otherSet.elements());
+        Set<Term> remainingElements = Sets.difference(set.elements(), commonElements);
+        Set<Term> otherRemainingElements =  Sets.difference(otherSet.elements(), commonElements);
+        Multiset<Variable> commonVariables = Multisets.intersection(
+                set.collectionVariables(),
+                otherSet.collectionVariables());
+        Multiset<Variable> remainingVariables = Multisets.difference(
+                set.collectionVariables(),
+                commonVariables);
+        Multiset<Variable> otherRemainingVariables = Multisets.difference(
+                otherSet.collectionVariables(),
+                commonVariables);
+
+        if (remainingElements.isEmpty()
+                && remainingVariables.isEmpty()
+                && !otherRemainingElements.isEmpty()) {
+            return empty;
+        }
+        if (otherRemainingElements.isEmpty()
+                && otherRemainingVariables.isEmpty()
+                && !remainingElements.isEmpty()) {
+            return empty;
+        }
+
+        BuiltinSet.Builder builder = BuiltinSet.builder(global);
+        builder.addAll(remainingElements);
+        builder.concatenate(remainingVariables.toArray(new Term[remainingVariables.size()]));
+        Term remainingSet = builder.build();
+
+        BuiltinSet.Builder otherBuilder = BuiltinSet.builder(global);
+        otherBuilder.addAll(otherRemainingElements);
+        otherBuilder.concatenate(otherRemainingVariables.toArray(new Term[otherRemainingVariables.size()]));
+        Term otherRemainingSet = otherBuilder.build();
+
+        if (!(remainingSet instanceof BuiltinSet && ((BuiltinSet) remainingSet).isEmpty())
+                || !(otherRemainingSet instanceof BuiltinSet && ((BuiltinSet) otherRemainingSet).isEmpty())) {
+            return addUnification(remainingSet, otherRemainingSet, ruleMask, path);
         }
 
         return ruleMask;
