@@ -37,7 +37,7 @@ object ToKast {
   }
 
   def escapeBackTicksAndSlashes(str: String) : String =
-    str.replaceAll("\\", "\\\\").replaceAll("`", "\\`");
+    str.replaceAll("\\\\", "\\\\\\\\").replaceAll("`", "\\\\`");
 
   /**
    * Recursive worker function for printing KAST terms.
