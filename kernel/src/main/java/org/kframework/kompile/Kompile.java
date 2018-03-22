@@ -109,6 +109,8 @@ public class Kompile {
         checkDefinition(parsedDef);
 
         Definition kompiledDefinition = pipeline.apply(parsedDef);
+
+        files.saveToKompiled("compiled.txt", kompiledDefinition.toString());
         sw.printIntermediate("Apply compile pipeline");
 
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(kompiledDefinition.mainModule());
