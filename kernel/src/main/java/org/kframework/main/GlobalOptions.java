@@ -89,4 +89,7 @@ public final class GlobalOptions {
 
     @Parameter(names={"--warnings-to-errors", "-w2e"}, description="Convert warnings to errors.")
     public boolean warnings2errors = false;
+
+    @Parameter(names="--ac-unification", description="Use AC unification for maps.")
+    public boolean acUnification = false;
 }

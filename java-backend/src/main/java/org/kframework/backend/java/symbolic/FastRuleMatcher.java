@@ -3,6 +3,8 @@
 package org.kframework.backend.java.symbolic;
 
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.Multisets;
@@ -28,6 +30,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.kframework.Collections.*;
 
@@ -306,7 +309,14 @@ public class FastRuleMatcher {
         } else if (subject instanceof BuiltinList && pattern instanceof BuiltinList) {
             return matchAssoc((BuiltinList) subject, 0, (BuiltinList) pattern, 0, ruleMask, path);
         } else if (subject instanceof BuiltinMap && pattern instanceof BuiltinMap) {
-            return unifyMapModuloPatternFolding((BuiltinMap) subject, (BuiltinMap) pattern, ruleMask, path);
+            if (global.globalOptions.acUnification) {
+                assert ruleMask.cardinality() == 1;
+                constraints[ruleMask.nextSetBit(0)] = constraints[ruleMask.nextSetBit(0)].add(
+                        unifyMapComplete((BuiltinMap) subject, (BuiltinMap) pattern));
+                return ruleMask;
+            } else {
+                return unifyMapModuloPatternFolding((BuiltinMap) subject, (BuiltinMap) pattern, ruleMask, path);
+            }
         } else if (subject instanceof Token && pattern instanceof Token) {
             // TODO: make tokens unique?
             if (subject.equals(pattern)) {
@@ -717,6 +727,122 @@ public class FastRuleMatcher {
         }
 
         return ruleMask;
+    }
+
+    private DisjunctiveFormula unifyMapComplete(BuiltinMap map, BuiltinMap otherMap) {
+        assert map.collectionFunctions().isEmpty()
+                && otherMap.collectionFunctions().isEmpty()
+                && map.collectionPatterns().isEmpty()
+                && otherMap.collectionPatterns().isEmpty()
+                && map.collectionVariables().size() <= 1
+                && otherMap.collectionVariables().size() <= 1;
+
+        Set<Term> commonKeys = Sets.intersection(map.getEntries().keySet(), otherMap.getEntries().keySet());
+        List<Map.Entry<Term, Term>> remainingEntries = map.getEntries().entrySet().stream()
+                .filter(entry -> !commonKeys.contains(entry.getKey()))
+                .collect(Collectors.toList());
+        List<Map.Entry<Term, Term>> otherRemainingEntries = otherMap.getEntries().entrySet().stream()
+                .filter(entry -> !commonKeys.contains(entry.getKey()))
+                .collect(Collectors.toList());
+
+        ConjunctiveFormula commonValuesConstraint = ConjunctiveFormula.of(global).addAll(
+                commonKeys.stream()
+                        .map(key -> new Equality(map.get(key), otherMap.get(key), global))
+                        .collect(Collectors.toList()));
+
+        List<List<Pair<Integer, Integer>>> combinations = generateCombinations(
+                IntStream.range(0, remainingEntries.size()).boxed().collect(Collectors.toList()),
+                IntStream.range(0, otherRemainingEntries.size()).boxed().collect(Collectors.toList()));
+        return new DisjunctiveFormula(
+                combinations.stream()
+                        .filter(combination -> map.hasFrame() || combination.size() == otherRemainingEntries.size())
+                        .filter(combination -> otherMap.hasFrame() || combination.size() == remainingEntries.size())
+                        .map(combination -> {
+                            ConjunctiveFormula constraint = commonValuesConstraint;
+                            for (Pair<Integer, Integer> pair : combination) {
+                                constraint = constraint.add(
+                                        remainingEntries.get(pair.getLeft()).getKey(),
+                                        otherRemainingEntries.get(pair.getRight()).getKey());
+                                constraint = constraint.add(
+                                        remainingEntries.get(pair.getLeft()).getValue(),
+                                        otherRemainingEntries.get(pair.getRight()).getValue());
+                            }
+
+                            Set<Integer> unusedIndices = ImmutableSet.copyOf(Sets.difference(
+                                    IntStream.range(0, remainingEntries.size()).boxed().collect(Collectors.toSet()),
+                                    combination.stream().map(Pair::getLeft).collect(Collectors.toSet())));
+                            Map<Term, Term> unusedEntries = unusedIndices.stream()
+                                    .map(remainingEntries::get)
+                                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                            Set<Integer> otherUnusedIndices = ImmutableSet.copyOf(Sets.difference(
+                                    IntStream.range(0, otherRemainingEntries.size()).boxed().collect(Collectors.toSet()),
+                                    combination.stream().map(Pair::getRight).collect(Collectors.toSet())));
+                            Map<Term, Term> otherUnusedEntries = otherUnusedIndices.stream()
+                                    .map(otherRemainingEntries::get)
+                                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+                            if (!unusedEntries.isEmpty() && !otherUnusedEntries.isEmpty()) {
+                                Variable commonVariable = Variable.getAnonVariable(Sort.MAP);
+
+                                BuiltinMap.Builder otherBuilder =  BuiltinMap.builder(global);
+                                otherBuilder.putAll(otherUnusedEntries);
+                                otherBuilder.concatenate(commonVariable);
+                                constraint = constraint.add(map.frame(), otherBuilder.build());
+
+                                BuiltinMap.Builder builder =  BuiltinMap.builder(global);
+                                builder.putAll(unusedEntries);
+                                builder.concatenate(commonVariable);
+                                constraint = constraint.add(otherMap.frame(), builder.build());
+                            } else {
+                                BuiltinMap.Builder builder =  BuiltinMap.builder(global);
+                                builder.putAll(unusedEntries);
+                                if (map.hasFrame()) {
+                                    builder.concatenate(map.frame());
+                                }
+
+                                BuiltinMap.Builder otherBuilder =  BuiltinMap.builder(global);
+                                otherBuilder.putAll(otherUnusedEntries);
+                                if (otherMap.hasFrame()) {
+                                    otherBuilder.concatenate(otherMap.frame());
+                                }
+
+                                constraint = constraint.add(builder.build(), otherBuilder.build());
+                            }
+
+                            return constraint;
+                        })
+                        .collect(Collectors.toList()),
+                global);
+    }
+
+    private static List<List<Pair<Integer, Integer>>> generateCombinations(
+            List<Integer> indices,
+            List<Integer> otherIndices) {
+        List<Pair<List<Pair<Integer, Integer>>, Set<Integer>>> partialStates = ImmutableList.of(
+                Pair.of(ImmutableList.of(),ImmutableSet.copyOf(otherIndices)));
+        for (int index : indices) {
+            partialStates = partialStates.stream()
+                    .map(partialState -> {
+                        List<Pair<Integer, Integer>> partialCombination = partialState.getLeft();
+                        Set<Integer> remainingOtherIndices = partialState.getRight();
+                        return ImmutableList.<Pair<List<Pair<Integer, Integer>>, Set<Integer>>>builder()
+                                .addAll(remainingOtherIndices.stream()
+                                        .map(otherIndex -> Pair.<List<Pair<Integer, Integer>>, Set<Integer>>of(
+                                                ImmutableList.<Pair<Integer, Integer>>builder()
+                                                        .addAll(partialCombination)
+                                                        .add(Pair.of(index, otherIndex))
+                                                        .build(),
+                                                ImmutableSet.copyOf(Sets.difference(
+                                                        remainingOtherIndices,
+                                                        ImmutableSet.of(otherIndex)))))
+                                        .collect(Collectors.toList()))
+                                .add(partialState)
+                                .build();
+                    })
+                    .flatMap(List::stream)
+                    .collect(Collectors.toList());
+        }
+        return partialStates.stream().map(Pair::getLeft).collect(Collectors.toList());
     }
 
     private BitSet unifySet(BuiltinSet set, BuiltinSet otherSet, BitSet ruleMask, scala.collection.immutable.List<Pair<Integer, Integer>> path) {

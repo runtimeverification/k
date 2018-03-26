@@ -72,11 +72,13 @@ public class ConvertDataStructureToLookup {
     private final Module m;
     private final Map<KLabel, KLabel> collectionFor;
     private final boolean matchOnConsList;
+    private final boolean acUnification;
 
-    public ConvertDataStructureToLookup(Module m, boolean matchOnConsList) {
+    public ConvertDataStructureToLookup(Module m, boolean matchOnConsList, boolean acUnification) {
         this.m = m;
         collectionFor = collectionFor(m);
         this.matchOnConsList = matchOnConsList;
+        this.acUnification = acUnification;
     }
 
     public static Map<KLabel, KLabel> collectionFor(Module m) {
@@ -253,6 +255,7 @@ public class ConvertDataStructureToLookup {
         //maintain the list of variables in the term so that we can deduce that a particular variable is unconstrained
         Multiset<KVariable> varConstraints = HashMultiset.create();
         gatherVars(RewriteToTop.toLeft(body), varConstraints);
+        final boolean acUnification = this.acUnification;
         return new TransformK() {
             @Override
             public K apply(KApply k) {
@@ -430,19 +433,23 @@ public class ConvertDataStructureToLookup {
                         }
                     }
                     KVariable map = newDotVariable(Sort("Map"));
-                    // K1,Ctx[K1 |-> K2 K3] => K1,Ctx[M] requires K3 := M[K1<-undef] andBool K1 := choice(M) andBool K2 := M[K1]
-                    if (frame != null) {
-                        state.add(KORE.KApply(KLabel("#match"), frame, elements.keySet().stream().reduce(map, (a1, a2) -> KORE.KApply(KLabel("_[_<-undef]"), a1, a2))));
-                    } else {
-                        KLabel unit = KLabel(m.attributesFor().apply(collectionLabel).<String>get("unit"));
-                        state.add(KORE.KApply(KLabel("_==K_"), KORE.KApply(unit), elements.keySet().stream().reduce(map, (a1, a2) -> KORE.KApply(KLabel("_[_<-undef]"), a1, a2))));
-                    }
-                    for (Map.Entry<K, K> element : elements.entrySet()) {
-                        // TODO(dwightguth): choose better between lookup and choice.
-                        if (element.getKey() instanceof KVariable && varConstraints.count(element.getKey()) == 1) {
-                            state.add(KORE.KApply(KLabel("#mapChoice"), element.getKey(), map));
+                    if (!acUnification) {
+                        // K1,Ctx[K1 |-> K2 K3] => K1,Ctx[M] requires K3 := M[K1<-undef] andBool K1 := choice(M) andBool K2 := M[K1]
+                        if (frame != null) {
+                            state.add(KORE.KApply(KLabel("#match"), frame, elements.keySet().stream().reduce(map, (a1, a2) -> KORE.KApply(KLabel("_[_<-undef]"), a1, a2))));
+                        } else {
+                            KLabel unit = KLabel(m.attributesFor().apply(collectionLabel).<String>get("unit"));
+                            state.add(KORE.KApply(KLabel("_==K_"), KORE.KApply(unit), elements.keySet().stream().reduce(map, (a1, a2) -> KORE.KApply(KLabel("_[_<-undef]"), a1, a2))));
                         }
-                        state.add(KORE.KApply(KLabel("#match"), element.getValue(), KORE.KApply(KLabel(KLabels.MAP_LOOKUP), map, element.getKey())));
+                        for (Map.Entry<K, K> element : elements.entrySet()) {
+                            // TODO(dwightguth): choose better between lookup and choice.
+                            if (element.getKey() instanceof KVariable && varConstraints.count(element.getKey()) == 1) {
+                                state.add(KORE.KApply(KLabel("#mapChoice"), element.getKey(), map));
+                            }
+                            state.add(KORE.KApply(KLabel("#match"), element.getValue(), KORE.KApply(KLabel(KLabels.MAP_LOOKUP), map, element.getKey())));
+                        }
+                    } else {
+                        state.add(KORE.KApply(KLabel("_==K_"), map, RewriteToTop.toLeft(k)));
                     }
                     if (lhsOf == null && RewriteToTop.hasRewrite(k)) {
                         // An outermost map may contain nested rewrites, so the term
