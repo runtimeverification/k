@@ -7,6 +7,7 @@ sig
   val get_thread_set : k -> k
   val set_thread_set : k -> k -> k
   val make_stuck : k -> k
+  val make_unstuck : k -> k
   val step : k -> (k * step_function)
 end
 

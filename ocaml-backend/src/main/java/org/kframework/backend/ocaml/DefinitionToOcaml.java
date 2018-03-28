@@ -205,7 +205,7 @@ public class DefinitionToOcaml implements Serializable {
     private Map<KLabel, KLabel> collectionFor;
     private Set<KLabel> filteredMapConstructors;
     private Rule matchThreadSet, rewriteThreadSet;
-    private Rule makeStuck;
+    private Rule makeStuck, makeUnstuck;
 
     public void initialize(DefinitionToOcaml serialized, CompiledDefinition def) {
         mainModule = serialized.mainModule;
@@ -214,6 +214,7 @@ public class DefinitionToOcaml implements Serializable {
         matchThreadSet = serialized.matchThreadSet;
         rewriteThreadSet = serialized.rewriteThreadSet;
         makeStuck = serialized.makeStuck;
+        makeUnstuck = serialized.makeUnstuck;
         functions = serialized.functions;
         anywhereKLabels = serialized.anywhereKLabels;
         options = serialized.options;
@@ -294,9 +295,12 @@ public class DefinitionToOcaml implements Serializable {
         KLabel stratCell = KLabel("<s>");
         if (mainModule.definedKLabels().contains(stratCell)) {
             Rule makeStuck = Rule(IncompleteCellUtils.make(stratCell, false, KRewrite(KSequence(), KApply(KLabel("#STUCK"))), true), BooleanUtils.TRUE, BooleanUtils.TRUE);
+            Rule makeUnstuck = Rule(IncompleteCellUtils.make(stratCell, false, KRewrite(KApply(KLabel("#STUCK")), KSequence()), true), BooleanUtils.TRUE, BooleanUtils.TRUE);
             this.makeStuck = convert(new Kompile(kompileOptions, files, kem).compileRule(def.kompiledDefinition, makeStuck));
+            this.makeUnstuck = convert(new Kompile(kompileOptions, files, kem).compileRule(def.kompiledDefinition, makeUnstuck));
         } else {
             this.makeStuck = null;
+            this.makeUnstuck = null;
         }
     }
 
@@ -1407,11 +1411,21 @@ public class DefinitionToOcaml implements Serializable {
         if (makeStuck != null) {
             sb.append("let set_stuck (c: k) (config: k) (guard: int) : k * step_function = match c with \n");
             convertFunction(Collections.singletonList(makeStuck), sb, "step", RuleType.REGULAR);
-            sb.append("| _ -> failwith \"set_stuck\"\n");
+            sb.append("| _ -> (c, (StepFunc step))\n");
             sb.append("let make_stuck (config: k) : k =\n");
             sb.append("  fst (set_stuck config config (-1))\n");
         } else {
             sb.append("let make_stuck (config: k) : k = config\n");
+        }
+
+        if (makeUnstuck != null) {
+            sb.append("let set_unstuck (c: k) (config: k) (guard: int) : k * step_function = match c with \n");
+            convertFunction(Collections.singletonList(makeUnstuck), sb, "step", RuleType.REGULAR);
+            sb.append("| _ -> (c, (StepFunc step))\n");
+            sb.append("let make_unstuck (config: k) : k =\n");
+            sb.append("  fst (set_unstuck config config (-1))\n");
+        } else {
+            sb.append("let make_unstuck (config: k) : k = config\n");
         }
 
         if (matchThreadSet == null) {
