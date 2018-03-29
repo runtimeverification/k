@@ -27,6 +27,52 @@ import java.util.Set;
 public class MetaK {
 
     /**
+     * Unifies two {@link Term}s, returning the set of unifiers.
+     *
+     * @param term1
+     *            the first term
+     * @param term2
+     *            the second term
+     * @param context
+     *            the term context
+     * @return {@link BuiltinSet}, the set of {@link BuiltinMap} unifiers (if provably unifiable)
+     *         {@code null}, if not provably unifiable/non-unifiable
+     */
+    public static Term unify(Term term1, Term term2, TermContext context) {
+        ConjunctiveFormula constraint = ConjunctiveFormula.of(context.global());
+        if (term1 instanceof KList && term2 instanceof KList) {
+            if (((KList) term1).size() != ((KList) term2).size()) {
+                return null; // TODO: Return empty map, "no unifiers"? Or is that incorrect because we don't do fully general AC unification?
+            }
+            for (int i = 0; i < ((KList) term1).size(); i++) {
+                constraint = constraint.add(((KList) term1).get(i), ((KList) term2).get(i));
+            }
+        } else {
+            constraint = constraint.add(term1, term2);
+        }
+
+        BuiltinSet.Builder substsBuilder = BuiltinSet.builder(context.global());
+        constraint = constraint.simplify(context);
+        if (constraint.isFalse()) {
+            return substsBuilder.build(); // TODO: Is this correct? no unifiers?
+        }
+
+        for (ConjunctiveFormula solution : constraint.getDisjunctiveNormalForm().conjunctions()) {
+            solution = solution.simplify(context);
+            if (solution.isSubstitution()) {
+                BuiltinMap.Builder substBuilder = BuiltinMap.builder(context.global());
+                substBuilder.putAll(solution.substitution());
+                substsBuilder.add(substBuilder.build());
+            } else if (!solution.isFalse()) {
+                /* when none of the solutions is true and at least one of the
+                 * them is not certainly false, the result is unknown */
+                return null; // TODO: Return partial list of unifiers?
+            }
+        }
+        return substsBuilder.build();
+    }
+
+    /**
      * Checks if two given {@link Term}s can be unified.
      *
      * @param term1

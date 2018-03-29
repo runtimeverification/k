@@ -17,6 +17,8 @@ module UNIFICATION
 
   syntax Bool ::= #unifiable(K,K) [function, hook(UNIFICATION.unifiable), impure]
 
+  syntax K ::= #unify(K, K) [function, hook(UNIFICATION.unify), impure]
+
   syntax MetaVariable
 
 endmodule
