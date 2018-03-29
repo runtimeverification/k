@@ -1,0 +1,6 @@
+unify 3               and 3
+unify 3               and 5
+unify 3               and symbolicExp
+unify 3 + 5           and 3 + symbolicExp
+unify symbolicExp     and symbolicExp
+unify symbolicExp + 5 and 3 + symbolicExp

@@ -1,0 +1,14 @@
+<generatedTop>
+  <k>
+    .
+  </k>
+  <results>
+    ListItem ( unify ( 3 , 3 ) is SetItem ( .Map ) )
+    ListItem ( unify ( 3 , 5 ) is .Set )
+    ListItem ( unify ( 3 , V0 ) is SetItem ( V0 |-> 3 ) )
+    ListItem ( unify ( 3 + 5 , 3 + V1 ) is SetItem ( V1 |-> 5 ) )
+    ListItem ( unify ( V2 , V3 ) is SetItem ( V2 |-> V3 ) )
+    ListItem ( unify ( V4 + 5 , 3 + V5 ) is SetItem ( V4 |-> 3
+    V5 |-> 5 ) )
+  </results>
+</generatedTop>
