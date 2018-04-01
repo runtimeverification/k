@@ -230,6 +230,14 @@ public class MetaK {
     }
 
     /**
+     * Returns the {@link ConjunctiveFormula} constraint of a given {@link Term}.
+     *
+     */
+    public static ConjunctiveFormula getConstraint(Term term, TermContext context) {
+        return ConjunctiveFormula.of(context.global());
+    }
+
+    /**
      * Returns the K label of a specified {@link KItem}.
      *
      * @param kItem
