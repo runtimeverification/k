@@ -12,6 +12,8 @@ import org.kframework.backend.java.util.Constants;
 import com.google.inject.Provider;
 import org.kframework.builtin.KLabels;
 
+import org.pcollections.PSet;
+
 /**
  * An equality between two canonicalized terms.
  */
@@ -60,6 +62,12 @@ public class Equality implements Serializable {
 
     public Term rightHandSide() {
         return rightHandSide;
+    }
+
+    public PSet<Variable> variableSet() {
+        PSet<Variable> vSet = leftHandSide.variableSet();
+        vSet.plusAll(rightHandSide.variableSet());
+        return vSet;
     }
 
     private boolean isTermEquality(Term term) {
