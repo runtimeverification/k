@@ -1,0 +1,5 @@
+symbolicExp     matches 3               ?
+3               matches symbolicExp     ?
+3 + symbolicExp matches symbolicExp     ?
+symbolicExp     matches 3 + symbolicExp ?
+3 + symbolicExp matches 3 + 5           ?
