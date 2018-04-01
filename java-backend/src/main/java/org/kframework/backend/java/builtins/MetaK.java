@@ -11,12 +11,17 @@ import org.kframework.backend.java.kil.MetaVariable;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
+import org.kframework.backend.java.symbolic.Equality;
 import org.kframework.backend.java.symbolic.ConjunctiveFormula;
+import org.kframework.backend.java.symbolic.DisjunctiveFormula;
 import org.kframework.backend.java.symbolic.CopyOnWriteTransformer;
 import org.kframework.backend.java.symbolic.PatternMatcher;
+import org.kframework.backend.java.symbolic.PersistentUniqueList;
+import org.kframework.backend.java.symbolic.ImmutableMapSubstitution;
 
 import java.util.HashSet;
 import java.util.Set;
+import org.pcollections.PSet;
 
 
 /**
@@ -231,10 +236,52 @@ public class MetaK {
 
     /**
      * Returns the {@link ConjunctiveFormula} constraint of a given {@link Term}.
+     * The resulting constraint will be restricted to the parts relevant given the variables in the term.
      *
      */
     public static ConjunctiveFormula getConstraint(Term term, TermContext context) {
-        return ConjunctiveFormula.of(context.global());
+        ConjunctiveFormula currentConstraint = context.getTopConstraint();
+        if (! currentConstraint.isUnknown()) {
+            return currentConstraint;   // current constraint is either true or false
+        } else {
+            PSet<Variable> termVariables = term.variableSet();
+            if (! MetaK.varsIntersect(currentConstraint.variableSet(), termVariables)) {
+                return ConjunctiveFormula.of(context.global());    // current constraint does not restrict term, so use true
+            } else {
+                Set<DisjunctiveFormula> disjuncts = new HashSet<DisjunctiveFormula>();
+                for (ConjunctiveFormula conjunct: currentConstraint.getDisjunctiveNormalForm().conjunctions()) {
+                    if (MetaK.varsIntersect(conjunct.variableSet(), termVariables)) {
+                        Set<Equality> conjuncts = new HashSet<Equality>();
+                        for (Equality equality: conjunct.equalities()) {
+                            if (MetaK.varsIntersect(equality.variableSet(), termVariables)) {
+                                conjuncts.add(equality);
+                            }
+                        }
+                        ConjunctiveFormula newConjunct = ConjunctiveFormula.of( ImmutableMapSubstitution.empty()
+                                                                              , PersistentUniqueList.from(conjuncts)
+                                                                              , PersistentUniqueList.empty()
+                                                                              , context.global()
+                                                                              );
+                        disjuncts.add(newConjunct.getDisjunctiveNormalForm());
+                    }
+                }
+                ConjunctiveFormula finalConjunct = ConjunctiveFormula.of( ImmutableMapSubstitution.empty()
+                                                                        , PersistentUniqueList.empty()
+                                                                        , PersistentUniqueList.from(disjuncts)
+                                                                        , context.global()
+                                                                        );
+                return finalConjunct;
+            }
+        }
+    }
+
+    public static boolean varsIntersect(PSet<Variable> vs1, PSet<Variable> vs2) {
+        for (Variable v : vs1) {
+            if (vs2.contains(v)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
