@@ -1,5 +1,12 @@
 // Copyright (c) 2012-2018 K Team. All Rights Reserved.
 require "domains.k"
+
+module MATCHING
+  imports BOOL
+
+  syntax Bool ::= #matches(K, K) [function, hook(MATCHING.matchable), impure]
+endmodule
+
 module UNIFICATION
   imports SET
 
