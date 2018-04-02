@@ -658,7 +658,7 @@ public class SymbolicRewriter {
                             cterm.constraint().removeBindings(
                                     Sets.difference(
                                             cterm.constraint().substitution().keySet(),
-                                            initialTerm.variableSet())),
+                                            Sets.union(initialTerm.variableSet(), cterm.term().variableSet()))),
                             cterm.termContext());
                     if (visited.add(result)) {
                         nextQueue.add(result);
