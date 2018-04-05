@@ -793,6 +793,7 @@ module K-REFLECTION
   syntax String ::= #sort(K) [function, hook(KREFLECTION.sort)]
   syntax KItem ::= #fresh(String)   [function, hook(KREFLECTION.fresh), impure]
   syntax K ::= #getConstraint(K) [function, hook(KREFLECTION.getConstraint), impure]
+  syntax Bool ::= #setConstraint(K) [function, hook(KREFLECTION.setConstraint), impure]
   syntax KItem ::= getKLabel(K)  [function, hook(KREFLECTION.getKLabel)]
 
   syntax String ::= #getenv(String) [function, impure, hook(KREFLECTION.getenv)]
@@ -800,7 +801,6 @@ module K-REFLECTION
   // meaningful only for the purposes of compilation to a binary, otherwise
   // undefined
   syntax List ::= #argv() [function, hook(KREFLECTION.argv)]
-
 endmodule
 
 module K-REFLECTION-SYMBOLIC [symbolic]
