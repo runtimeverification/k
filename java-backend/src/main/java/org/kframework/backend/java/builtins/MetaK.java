@@ -285,6 +285,14 @@ public class MetaK {
     }
 
     /**
+     * Set's the top-level constraint to the given {@link Term}.
+     */
+    public static BoolToken setConstraint(Term constraint, TermContext context) {
+        context.setTopConstraint((ConjunctiveFormula) constraint);
+        return BoolToken.TRUE;
+    }
+
+    /**
      * Returns the K label of a specified {@link KItem}.
      *
      * @param kItem
