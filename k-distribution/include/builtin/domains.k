@@ -795,6 +795,7 @@ module K-REFLECTION
   syntax K ::= "#getFullConstraint" [function, hook(KREFLECTION.getFullConstraint), impure]
   syntax K ::= #getConstraint(K) [function, hook(KREFLECTION.getConstraint), impure]
   syntax Bool ::= #setConstraint(K) [function, hook(KREFLECTION.setConstraint), impure]
+  syntax Bool ::= "#printConstraint" [function, hook(KREFLECTION.printConstraint), impure]
   syntax KItem ::= getKLabel(K)  [function, hook(KREFLECTION.getKLabel)]
 
   syntax String ::= #getenv(String) [function, impure, hook(KREFLECTION.getenv)]
