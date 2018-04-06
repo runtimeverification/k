@@ -152,8 +152,7 @@ public class SymbolicRewriter {
         Term entireConf = constructor.KApply1(((KApply) subject.term()).klabel(),
                 constructor.KList(((KApply) subject.term()).klist().stream().map(k ->
                         k instanceof KApply && ((KApply) k).klabel().name().contains(Strategy.strategyCellName()) ? s : k).collect(Collectors.toList())), emptyAtt);
-        return Optional.of(new ConstrainedTerm(entireConf, subject.termContext()));
-
+        return Optional.of(new ConstrainedTerm(entireConf, subject.constraint(), subject.termContext()));
     }
 
     /**
