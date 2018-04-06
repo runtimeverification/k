@@ -235,6 +235,13 @@ public class MetaK {
     }
 
     /**
+     * Returns the {@link ConjunctiveFormula} top-level constraint.
+     */
+    public static ConjunctiveFormula getFullConstraint(TermContext context) {
+        return context.getTopConstraint();
+    }
+
+    /**
      * Returns the {@link ConjunctiveFormula} constraint of a given {@link Term}.
      * The resulting constraint will be restricted to the parts relevant given the variables in the term.
      *

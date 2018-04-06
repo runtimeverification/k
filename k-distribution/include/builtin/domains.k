@@ -742,6 +742,7 @@ module K-REFLECTION
   syntax K ::= "#configuration" [function, impure, hook(KREFLECTION.configuration)]
   syntax String ::= #sort(K) [function, hook(KREFLECTION.sort)]
   syntax KItem ::= #fresh(String)   [function, hook(KREFLECTION.fresh), impure]
+  syntax K ::= "#getFullConstraint" [function, hook(KREFLECTION.getFullConstraint), impure]
   syntax K ::= #getConstraint(K) [function, hook(KREFLECTION.getConstraint), impure]
   syntax Bool ::= #setConstraint(K) [function, hook(KREFLECTION.setConstraint), impure]
   syntax KItem ::= getKLabel(K)  [function, hook(KREFLECTION.getKLabel)]
