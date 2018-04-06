@@ -299,6 +299,11 @@ public class MetaK {
         return BoolToken.TRUE;
     }
 
+    public static BoolToken printConstraint(TermContext context) {
+        System.out.println(context.getTopConstraint().toString());
+        return BoolToken.TRUE;
+    }
+
     /**
      * Returns the K label of a specified {@link KItem}.
      *
