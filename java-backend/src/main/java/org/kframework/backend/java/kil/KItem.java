@@ -17,6 +17,7 @@ import org.kframework.backend.java.util.Subsorts;
 import org.kframework.backend.java.util.Constants;
 import org.kframework.builtin.KLabels;
 import org.kframework.kil.Attribute;
+import org.kframework.kore.mini.KVariable;
 import org.kframework.main.GlobalOptions;
 import org.kframework.backend.java.utils.BitSet;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -730,7 +731,21 @@ public class KItem extends Term implements KItemRepresentation {
 
     @Override
     public String toString() {
-        return kLabel + "(" + kList.toString() + ")";
+        String label = kLabel.toString();
+        if(label.equals("<programBytes>") || label.equals("<code>")) {
+            return kLabel + "(" + ((KList)kList).getContents().size() + ")";
+        } else if (label.equals("#mkCall__________EVM")) {
+            return kLabel + "()";
+        } else if(label.equals("{_|_|_|_|_|_|_|_|_|_|_|_|_}_EVM")) {
+            return kLabel + "()";
+        } else if(label.equals("{_|_}_EVM")) {
+            return kLabel + "()";
+        } else if(label.equals("<callState>-fragment")){
+            return kLabel + "()";
+        }
+        else {
+            return kLabel + "(" + kList.toString() + ")";
+        }
     }
 
     @Override
