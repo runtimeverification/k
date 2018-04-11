@@ -856,7 +856,21 @@ public class KItem extends Term implements KItemRepresentation {
     }
 
     public String toStringImpl() {
-        return kLabel + "(" + kList.toString() + ")";
+        String label = kLabel.toString();
+        if(label.equals("<programBytes>") || label.equals("<code>")) {
+            return kLabel + "(" + ((KList)kList).getContents().size() + ")";
+        } else if (label.equals("#mkCall__________EVM")) {
+            return kLabel + "()";
+        } else if(label.equals("{_|_|_|_|_|_|_|_|_|_|_|_|_}_EVM")) {
+            return kLabel + "()";
+        } else if(label.equals("{_|_}_EVM")) {
+            return kLabel + "()";
+        } else if(label.equals("<callState>-fragment")){
+            return kLabel + "()";
+        }
+        else {
+            return kLabel + "(" + kList.toString() + ")";
+        }
     }
 
     @Override

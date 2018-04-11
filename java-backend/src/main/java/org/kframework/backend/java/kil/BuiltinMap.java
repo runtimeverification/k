@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableMultiset;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections4.map.UnmodifiableMap;
 import org.apache.commons.lang3.tuple.Triple;
+import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Constants;
@@ -120,6 +121,12 @@ public class BuiltinMap extends AssociativeCommutativeCollection {
 
     private String toString(String operator, String mapsTo, String identity) {
         if (!isEmpty()) {
+            IntToken key1 = IntToken.of(0);
+            IntToken key2 = IntToken.of(2);
+            if(entries.containsKey(key1) && entries.get(key1).toString().equals("PUSH(Int(#\"1\"),, Int(#\"0\"))") &&
+               entries.containsKey(key2) && entries.get(key2).toString().equals("CALLDATALOAD_EVM(.KList)")) {
+                return "CodeMap(" + entries.size() + ")";
+            }
             return Joiner.on(operator).join(
                     Joiner.on(operator).withKeyValueSeparator(mapsTo).join(entries),
                     Joiner.on(operator).join(collectionPatterns),
