@@ -254,7 +254,9 @@ public class ConstrainedTerm extends JavaSymbolicObject {
                     && subjectConstraint.implies(ConjunctiveFormula.of(context.global()).addAll(candidateConstraint.equalities()), Sets.newHashSet())) {
                 context.setTopConstraint(null);
                 solutions.add(Triple.of(
-                        subjectConstraint.addAndSimplify(candidateConstraint.substitution(), context),
+                        subjectConstraint
+                                .addAndSimplify(candidateConstraint.substitution(), context)
+                                .orientSubstitution(variables),
                         true,
                         pair.getLeft()));
                 context.setTopConstraint(subjectConstraint);
