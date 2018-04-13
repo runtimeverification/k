@@ -148,7 +148,7 @@ public class DefinitionToOcaml implements Serializable {
             FloatBuiltin f = FloatBuiltin.of(s);
             return "(round_to_range(Float ((Gmp.FR.from_string_prec_base " + f.precision() + " Gmp.GMP_RNDN 10 \"" + f.value() + "\"), " + f.exponent() + ", " + f.precision() + ")))";
         });
-        builder.put("STRING.String", s -> "(String " + enquoteString(StringUtil.unquoteKString(StringUtil.unquoteKString("\"" + s + "\""))) + ")");
+        builder.put("STRING.String", s -> "(String " + enquoteString(StringUtil.unquoteKString(s)) + ")");
         builder.put("BUFFER.StringBuffer", DefinitionToOcaml::stringBufferConstant);
         userSortHooks = builder.build();
 
@@ -163,7 +163,7 @@ public class DefinitionToOcaml implements Serializable {
             FloatBuiltin f = FloatBuiltin.of(s);
             return "(round_to_range(Float ((Gmp.FR.from_string_prec_base " + f.precision() + " Gmp.GMP_RNDN 10 \"" + f.value() + "\"), " + f.exponent() + ", " + f.precision() + ")))";
         });
-        builder.put("STRING.String", s -> "(String " + enquoteString(StringUtil.unquoteKString(StringUtil.unquoteKString("\"" + s + "\""))) + ")");
+        builder.put("STRING.String", s -> "(String " + enquoteString(StringUtil.unquoteKString(s)) + ")");
         builder.put("BUFFER.StringBuffer", DefinitionToOcaml::stringBufferConstant);
         defSortHooks = builder.build();
     }

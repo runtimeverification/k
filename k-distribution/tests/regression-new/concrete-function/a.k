@@ -1,7 +1,9 @@
 module A-SYNTAX
+imports DOMAINS-SYNTAX
 syntax Pgm ::= run(Int)
 endmodule
 module A
+imports DOMAINS
 imports A-SYNTAX
 configuration <k> $PGM:Pgm </k>
 
