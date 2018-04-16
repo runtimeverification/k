@@ -128,9 +128,9 @@ object KoreToText {
     // case Next(s, p) =>
     //   "\\next" + "{" + apply(s) + "}" +
     //     "(" + apply(p) + ")"
-    // case Rewrites(s, rs, p, q) =>
-    //   "\\rewrites" + "{" + apply(s) + "," + apply(rs) + "}" +
-    //     "(" + apply(p) + "," + apply(q) + ")"
+    case Rewrites(s, p, q) =>
+      "\\rewrites" + "{" + apply(s) + "}" +
+        "(" + apply(p) + "," + apply(q) + ")"
     case Ceil(s, rs, p) =>
       "\\ceil" + "{" + apply(s) + "," + apply(rs) + "}" +
         "(" + apply(p) + ")"

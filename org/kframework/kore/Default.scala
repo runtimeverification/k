@@ -46,7 +46,7 @@ object implementation {
 
     // case class Next(s: i.Sort, _1: i.Pattern) extends i.Next
 
-    // case class Rewrites(s: Sort, rs: Sort, _1: i.Pattern, _2: i.Pattern) extends i.Rewrites
+    case class Rewrites(s: Sort, _1: i.Pattern, _2: i.Pattern) extends i.Rewrites
 
     case class Ceil(s: i.Sort, rs: i.Sort, p: i.Pattern) extends i.Ceil
 
@@ -117,7 +117,7 @@ object implementation {
 
     // def Next(s: i.Sort, _1: i.Pattern): i.Pattern = d.Next(s, _1)
 
-    // def Rewrites(s: i.Sort, rs: i.Sort, _1: i.Pattern, _2: i.Pattern): i.Pattern = d.Rewrites(s, rs, _1, _2)
+    def Rewrites(s: i.Sort, _1: i.Pattern, _2: i.Pattern): i.Pattern = d.Rewrites(s, _1, _2)
 
     def Ceil(s: i.Sort, rs: i.Sort, p: Pattern): i.Pattern = d.Ceil(s, rs, p)
 

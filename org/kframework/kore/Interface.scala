@@ -256,20 +256,18 @@ object Floor {
   * One is the sort of patterns P and Q;
   * The other is the sort of the context.
   */
-// trait Rewrites extends Pattern {
-//   def s: Sort // the sort of the two patterns P and Q
-//
-//   def rs: Sort // the sort of the context where the rewrites-to pattern is being placed.
-//
-//   def _1: Pattern
-//
-//   def _2: Pattern
-// }
-//
-// object Rewrites {
-//   def unapply(arg: Rewrites): Option[(Sort, Sort, Pattern, Pattern)] =
-//     Some(arg.s, arg.rs, arg._1, arg._2)
-// }
+trait Rewrites extends Pattern {
+  def s: Sort // the sort of the two patterns P and Q
+
+  def _1: Pattern
+
+  def _2: Pattern
+}
+
+object Rewrites {
+  def unapply(arg: Rewrites): Option[(Sort, Pattern, Pattern)] =
+    Some(arg.s, arg._1, arg._2)
+}
 
 trait Equals extends Pattern {
   def s: Sort // the sort of the two patterns that are being compared
@@ -456,7 +454,7 @@ trait Builders {
 
   // def Next(s: Sort, _1: Pattern): Pattern
 
-  // def Rewrites(s: Sort, rs: Sort, _1: Pattern, _2: Pattern): Pattern
+  def Rewrites(s: Sort, _1: Pattern, _2: Pattern): Pattern
 
   def Equals(s: Sort, rs:Sort, _1: Pattern, _2: Pattern): Pattern
 
