@@ -30,10 +30,10 @@ type step = Step of k * step_function | NoStep of k
 
 let init_thread_pool (threads: k list) : k list * int * bool = (threads, 0, false)
 
-let schedule_next_thread (stuck: bool) (config: k) (thread_pool: k list * int * bool) : (k * (k list * int * bool)) option =
+let schedule_next_thread (module Def: Plugin.Definition) (step_function: k -> (k * step_function)) (stuck: bool) (config: k) (thread_pool: k list * int * bool) : (k * (k -> (k * step_function)) * (k list * int * bool)) option =
   let slice = 5000 in
   let (pool_threads, slice_used, last_resort) = thread_pool in
-  if not stuck && slice_used < slice then Some (config, (pool_threads, slice_used + 1, false))
+  if not stuck && slice_used < slice then Some (config, step_function, (pool_threads, slice_used + 1, false))
   else (
     match config with
       | [Thread(_,curr_thread,_,[Map(_,_,other_threads)])] -> (
@@ -47,12 +47,12 @@ let schedule_next_thread (stuck: bool) (config: k) (thread_pool: k list * int * 
             ) else (
               let all_threads = other_thread_ids@[curr_thread] in
               let config = context_switch config (List.hd all_threads) in
-              Some (config, (List.tl all_threads, 0, true))
+              Some (config, Def.step, (List.tl all_threads, 0, true))
             )
           )
           | (thread :: threads) -> (
             let config = context_switch config thread in
-            Some (config, (threads, 0, last_resort))
+            Some (config, Def.step, (threads, 0, last_resort))
           )
         )
       | _ -> invalid_arg "mismatched constructor at top of split configuration"
@@ -63,14 +63,14 @@ let rec take_steps (module Def: Plugin.Definition) (step_function: k -> (k * ste
   else (
     match (try let res,func = (step_function config) in Step(res,func) with Stuck c -> NoStep c) with
     | Step (config,(StepFunc step_function)) -> (
-        match schedule_next_thread false config thread_pool with
+        match schedule_next_thread (module Def) step_function false config thread_pool with
           | None -> (config, n)
-          | Some (config, thread_pool) -> take_steps (module Def) step_function thread_pool config depth (n+1)
+          | Some (config, step_function, thread_pool) -> take_steps (module Def) step_function thread_pool config depth (n+1)
     )
     | NoStep config -> (
-      match schedule_next_thread true config thread_pool with
+      match schedule_next_thread (module Def) step_function true config thread_pool with
         | None -> (config, n)
-        | Some (config, thread_pool) -> take_steps (module Def) Def.step thread_pool config depth n
+        | Some (config, step_function, thread_pool) -> take_steps (module Def) step_function thread_pool config depth n
     )
   )
 
