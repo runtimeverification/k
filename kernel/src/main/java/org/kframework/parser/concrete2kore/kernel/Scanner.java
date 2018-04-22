@@ -6,6 +6,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
+import org.kframework.builtin.Sorts;
 import org.kframework.definition.Module;
 import org.kframework.definition.RegexTerminal;
 import org.kframework.definition.Terminal;
@@ -54,10 +55,6 @@ public class Scanner implements AutoCloseable {
         return tokens.entrySet().stream().filter(e -> e.getValue()._1() == kind).findAny().get().getKey();
     }
 
-    static final String multiLine = "(\\/\\*([^\\*]|(\\*+([^\\*\\/])))*\\*+\\/)";
-    static final String singleLine = "(\\/\\/[^\\n\\r]*)";
-    static final String whites = "([\\ \\n\\r\\t])";
-
     public File getScanner() {
         File scanner;
         // tokenization
@@ -81,9 +78,11 @@ public class Scanner implements AutoCloseable {
                     "   fwrite(yytext, 1, len, stdout);" +
                     " } while (0) \n" +
                     "char *buffer;\n" +
-                    "%}\n" +
-                    "%%\n" +
-                    "("+ multiLine +"|"+ singleLine +"|"+ whites +")" + " ;\n");
+                    "%}\n\n" +
+                    "%%\n\n");
+            if (this.module.definedSorts().contains(Sorts.Layout())) {
+                flex.append(this.module.layout() + " ;\n");
+            }
             List<TerminalLike> ordered = tokens.keySet().stream().sorted((t1, t2) -> tokens.get(t2)._2() - tokens.get(t1)._2()).collect(Collectors.toList());
             for (TerminalLike key : ordered) {
                 if (key instanceof Terminal) {
@@ -95,7 +94,7 @@ public class Scanner implements AutoCloseable {
                 }
                 writeAction(flex, key);
             }
-            flex.append("%%\n" +
+            flex.append("\n\n%%\n\n" +
                     "int main(int argc, char **argv) {\n" +
                     "  freopen(NULL, \"rb\", stdin);\n" +
                     "  freopen(NULL, \"wb\", stdout);\n" +
