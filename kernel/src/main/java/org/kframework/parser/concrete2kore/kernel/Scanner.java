@@ -54,10 +54,6 @@ public class Scanner implements AutoCloseable {
         return tokens.entrySet().stream().filter(e -> e.getValue()._1() == kind).findAny().get().getKey();
     }
 
-    static final String multiLine = "(\\/\\*([^\\*]|(\\*+([^\\*\\/])))*\\*+\\/)";
-    static final String singleLine = "(\\/\\/[^\\n\\r]*)";
-    static final String whites = "([\\ \\n\\r\\t])";
-
     public File getScanner() {
         File scanner;
         // tokenization
@@ -82,8 +78,10 @@ public class Scanner implements AutoCloseable {
                     " } while (0) \n" +
                     "char *buffer;\n" +
                     "%}\n" +
-                    "%%\n" +
-                    "("+ multiLine +"|"+ singleLine +"|"+ whites +")" + " ;\n");
+                    "%%\n");
+            if (this.module.layout().length() > 0) {
+                flex.append("(" + this.module.layout() + ")" + " ;\n");
+            }
             List<TerminalLike> ordered = tokens.keySet().stream().sorted((t1, t2) -> tokens.get(t2)._2() - tokens.get(t1)._2()).collect(Collectors.toList());
             for (TerminalLike key : ordered) {
                 if (key instanceof Terminal) {
