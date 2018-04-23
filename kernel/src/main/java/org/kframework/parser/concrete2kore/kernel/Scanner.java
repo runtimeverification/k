@@ -40,9 +40,9 @@ public class Scanner implements AutoCloseable {
     private static final String FLEX_LIB = OS.current().equals(OS.OSX) ? "-ll" : "-lfl";
 
     public Scanner(ParseInModule module) {
-        tokens = KSyntax2GrammarStatesFilter.getTokens(module.getParsingModule());
-        scanner = getScanner();
-        this.module = module.seedModule();
+        this.tokens  = KSyntax2GrammarStatesFilter.getTokens(module.getParsingModule());
+        this.module  = module.seedModule();
+        this.scanner = getScanner();
     }
 
     public Module getModule() {
