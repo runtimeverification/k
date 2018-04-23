@@ -6,6 +6,8 @@ import org.kframework.kore.ADT
 import org.kframework.kore.KORE.Sort
 
 object Sorts {
+  val Layout = Sort("#Layout")
+
   val KString = Sort("KString")
   val String = Sort("String")
 
