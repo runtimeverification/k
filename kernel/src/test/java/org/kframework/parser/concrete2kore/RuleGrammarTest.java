@@ -444,4 +444,32 @@ public class RuleGrammarTest {
         parseProgram("1+2+3", def, "Exp", 0, false);
         //System.out.println("out3 = " + out3);
     }
+
+    // test default/custom layout
+    @Test
+    public void testLayout() {
+        String defaultLayout = "" +
+                "module TEST " +
+                "syntax Int ::= Int \"+\" Int " +
+                "syntax Int ::= r\"[0-9]+\" [token] " +
+                "endmodule";
+        parseProgram("0 + 3 // some text"   , defaultLayout, "Int", 0, false);
+        parseProgram("0 + 3 /* some text */", defaultLayout, "Int", 0, false);
+        parseProgram("0 /* some text */ + 3", defaultLayout, "Int", 0, false);
+        parseProgram("0 + 3 ;; some text"   , defaultLayout, "Int", 0, true);
+
+        String customLayout = "" +
+                "module TEST " +
+                "syntax #Layout ::= r\"(\\\\(;([^;]|(;+([^;\\\\)])))*;\\\\))\"" +
+                                 "| r\"(;;[^\\\\n\\\\r]*)\"" +
+                                 "| r\"([\\\\ \\\\n\\\\r\\\\t])\"" +
+                "// -------------------------------------\n" +      // make sure standard layout still works in K defn
+                "syntax Int ::= Int \"+\" Int " +
+                "syntax Int ::= r\"[0-9]+\" [token] " +
+                "endmodule";
+        parseProgram("0 + 3 ;; some text"   , customLayout, "Int", 0, false);
+        parseProgram("0 + 3 (; some text ;)", customLayout, "Int", 0, false);
+        parseProgram("0 (; some text ;) + 3", customLayout, "Int", 0, false);
+        parseProgram("0 + 3 // some text"   , customLayout, "Int", 0, true);
+    }
 }
