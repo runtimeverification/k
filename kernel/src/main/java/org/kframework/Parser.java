@@ -28,7 +28,6 @@ public class Parser {
     private Parser(Module module) {
         // TODO: remove hack once the frontend is cleaner; also remove the IOException once the hack is cleared
         if (module.name().endsWith(RuleGrammarGenerator.RULE_CELLS)) {
-            org.kframework.definition.Definition definitionWithBuiltins = Definition.from("require \"domians.k\"", "K");
             this.parseInModule = RuleGrammarGenerator.getCombinedGrammar(module, true);
         } else {
             this.parseInModule = new ParseInModule(module);
