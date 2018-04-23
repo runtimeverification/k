@@ -427,4 +427,21 @@ public class RuleGrammarTest {
                 KApply(KLabel("#EmptyK"))
                 )));
     }
+
+    @Test
+    public void testPriorityAssoc() throws Exception {
+        String def = "module TEST " +
+                "syntax Exp ::= Exp \"*\" Exp [left, klabel('Mul)] " +
+                "> Exp \"+\" Exp [left, klabel('Plus)] " +
+                "| r\"[0-9]+\" [token] " +
+                "syntax left 'Plus " +
+                "syntax left 'Mul " +
+                "endmodule";
+        parseProgram("1+2",   def, "Exp", 0, false);
+        //System.out.println("out1 = " + out1);
+        parseProgram("1+2*3", def, "Exp", 0, false);
+        //System.out.println("out2 = " + out2);
+        parseProgram("1+2+3", def, "Exp", 0, false);
+        //System.out.println("out3 = " + out3);
+    }
 }
