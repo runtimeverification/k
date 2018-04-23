@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Module;
 import com.google.inject.Provider;
+import org.kframework.Debugg;
 import org.kframework.compile.Backend;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.krun.KRun;
@@ -92,7 +93,12 @@ public class KProveFrontEnd extends FrontEnd {
                         kproveOptions.specFile(files).getAbsolutePath());
             }
             return new KProve(kem, sw, files, tty).run(kproveOptions, compiledDef.get(), backend.get(), initializeRewriter.get());
+        } catch(Exception e) {
+            Debugg.saveCrashTerm(e);
+            throw e;
         } finally {
+            Debugg.endProveRule();
+            Debugg.close();
             scope.exit();
         }
     }

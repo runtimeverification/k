@@ -1,6 +1,7 @@
 // Copyright (c) 2014-2018 K Team. All Rights Reserved.
 package org.kframework.main;
 
+import org.kframework.Debugg;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KException;

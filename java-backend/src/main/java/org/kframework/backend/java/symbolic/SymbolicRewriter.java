@@ -6,6 +6,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.RewriterResult;
+import org.kframework.Debugg;
 import org.kframework.Strategy;
 import org.kframework.attributes.Att;
 import org.kframework.backend.java.builtins.BoolToken;
@@ -162,6 +163,7 @@ public class SymbolicRewriter {
                 subject.termContext());
         for (FastRuleMatcher.RuleMatchResult matchResult : matches) {
             Rule rule = definition.ruleTable.get(matchResult.ruleIndex);
+            Debugg.setCurrentRule(rule);
             Substitution<Variable, Term> substitution =
                     rule.att().contains(Att.refers_THIS_CONFIGURATION()) ?
                             matchResult.constraint.substitution().plus(new Variable(KLabels.THIS_CONFIGURATION, Sort.KSEQUENCE), filterOurStrategyCell(subject.term())) :
@@ -217,6 +219,8 @@ public class SymbolicRewriter {
                 continue;
             }
 
+
+            Debugg.addStepRule(subject.term(), result.term(), rule.toString());
             results.add(result);
         }
 
@@ -587,14 +591,28 @@ public class SymbolicRewriter {
 
         initialTerm = initialTerm.expandPatterns(true);
 
+        Debugg.setUpProveRule();
+        Debugg.setInitialTerm(initialTerm.term());
+        Debugg.setTargetTerm(targetTerm.term());
+       // Debugg.setSpecRules(specRules);
+
         visited.add(initialTerm);
         queue.add(initialTerm);
         boolean guarded = false;
         int step = 0;
+
+        // XXX - each term in the queue has to imply the target term
         while (!queue.isEmpty()) {
             step++;
+            Debugg.step(Integer.toString(step));
+            if(step % 100 == 0) {
+                System.out.println(step);
+            }
             for (ConstrainedTerm term : queue) {
+                Debugg.setCurrentTerm(term.term());
                 if (term.implies(targetTerm)) {
+                    String cconst = KILtoSMTLib.translateConstraint(term.constraint());
+                    Debugg.addStep(term.term(), targetTerm.term(), cconst);
                     continue;
                 }
 
@@ -621,6 +639,8 @@ public class SymbolicRewriter {
                 if (guarded) {
                     ConstrainedTerm result = applySpecRules(term, specRules);
                     if (result != null) {
+                        String cconst = KILtoSMTLib.translateConstraint(term.constraint());
+                        Debugg.addStep(term.term(), result.term(), cconst);
                         if (visited.add(result))
                             nextQueue.add(result);
                         continue;
@@ -653,6 +673,8 @@ public class SymbolicRewriter {
                 }
 
                 for (ConstrainedTerm cterm : results) {
+                    String cconst = KILtoSMTLib.translateConstraint(term.constraint());
+                    //Debugg.addStep(term.term(), cterm.term(), cconst);
                     ConstrainedTerm result = new ConstrainedTerm(
                             cterm.term(),
                             cterm.constraint().removeBindings(
@@ -664,6 +686,7 @@ public class SymbolicRewriter {
                         nextQueue.add(result);
                     }
                 }
+
             }
 
             /* swap the queues */
@@ -674,6 +697,8 @@ public class SymbolicRewriter {
             nextQueue.clear();
             guarded = true;
         }
+
+        Debugg.endProveRule();
 
         return proofResults;
     }
