@@ -39,9 +39,17 @@ public class Scanner implements AutoCloseable {
 
     private static final String FLEX_LIB = OS.current().equals(OS.OSX) ? "-ll" : "-lfl";
 
+    private String layout;
+
     public Scanner(ParseInModule module) {
         this.tokens  = KSyntax2GrammarStatesFilter.getTokens(module.getParsingModule());
         this.module  = module.seedModule();
+        String whites = "[\\ \\n\\r\\t]";
+        if (this.module.layout().length() == 0) {
+            this.layout = whites;
+        } else {
+            this.layout = this.module.layout() + "|(" + whites + ")";
+        }
         this.scanner = getScanner();
     }
 
@@ -78,10 +86,8 @@ public class Scanner implements AutoCloseable {
                     " } while (0) \n" +
                     "char *buffer;\n" +
                     "%}\n" +
-                    "%%\n");
-            if (this.module.layout().length() > 0) {
-                flex.append("(" + this.module.layout() + ")" + " ;\n");
-            }
+                    "%%\n" +
+                    "(" + this.layout + ")" + " ;\n");
             List<TerminalLike> ordered = tokens.keySet().stream().sorted((t1, t2) -> tokens.get(t2)._2() - tokens.get(t1)._2()).collect(Collectors.toList());
             for (TerminalLike key : ordered) {
                 if (key instanceof Terminal) {
