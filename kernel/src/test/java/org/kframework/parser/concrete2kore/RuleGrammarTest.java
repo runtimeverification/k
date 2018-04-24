@@ -462,7 +462,6 @@ public class RuleGrammarTest {
                 "module TEST " +
                 "syntax #Layout ::= r\"(\\\\(;([^;]|(;+([^;\\\\)])))*;\\\\))\"" +
                                  "| r\"(;;[^\\\\n\\\\r]*)\"" +
-                                 "| r\"([\\\\ \\\\n\\\\r\\\\t])\"" +
                 "// -------------------------------------\n" +      // make sure standard layout still works in K defn
                 "syntax Int ::= Int \"+\" Int " +
                 "syntax Int ::= r\"[0-9]+\" [token] " +
