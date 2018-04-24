@@ -322,8 +322,8 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
                         .map(r -> converter.convert(Optional.<Module>empty(), r))
                         .map(r -> new org.kframework.backend.java.kil.Rule(
                                 r.label(),
-                                r.leftHandSide().evaluate(termContext),
-                                r.rightHandSide().evaluate(termContext),
+                                evaluate(r.leftHandSide(), r.getRequires(), termContext),
+                                evaluate(r.rightHandSide(), r.getRequires(), termContext),
                                 r.requires(),
                                 r.ensures(),
                                 r.freshConstants(),
@@ -333,6 +333,13 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
                                 termContext.global()))
                         .collect(Collectors.toList());
                 return this;
+            }
+
+            private Term evaluate(Term term, ConjunctiveFormula constraint, TermContext context) {
+                context.setTopConstraint(constraint);
+                Term newTerm = term.evaluate(context);
+                context.setTopConstraint(null);
+                return newTerm;
             }
         }
     }
