@@ -219,8 +219,9 @@ public class SymbolicRewriter {
                 continue;
             }
 
-
-            Debugg.addStepRule(subject.term(), result.term(), rule.toString());
+            String rule_key = matchResult.ruleIndex + "";
+            Debugg.addRule(rule_key, rule.att().toString());
+            Debugg.addStepRule(subject.term(), result.term(), subject.constraint(), result.constraint(), rule_key);
             results.add(result);
         }
 
@@ -592,8 +593,8 @@ public class SymbolicRewriter {
         initialTerm = initialTerm.expandPatterns(true);
 
         Debugg.setUpProveRule();
-        Debugg.setInitialTerm(initialTerm.term());
-        Debugg.setTargetTerm(targetTerm.term());
+        Debugg.setInitialTerm(initialTerm.term(), initialTerm.constraint());
+        Debugg.setTargetTerm(targetTerm.term(), targetTerm.constraint());
        // Debugg.setSpecRules(specRules);
 
         visited.add(initialTerm);
@@ -609,10 +610,10 @@ public class SymbolicRewriter {
                 System.out.println(step);
             }
             for (ConstrainedTerm term : queue) {
-                Debugg.setCurrentTerm(term.term());
+                Debugg.setCurrentTerm(term.term(), term.constraint());
                 if (term.implies(targetTerm)) {
-                    String cconst = KILtoSMTLib.translateConstraint(term.constraint());
-                    Debugg.addStep(term.term(), targetTerm.term(), cconst);
+                    //String cconst = KILtoSMTLib.translateConstraint(term.constraint());
+                    Debugg.addStep(term.term(), targetTerm.term(), term.constraint(), targetTerm.constraint());
                     continue;
                 }
 
@@ -639,8 +640,6 @@ public class SymbolicRewriter {
                 if (guarded) {
                     ConstrainedTerm result = applySpecRules(term, specRules);
                     if (result != null) {
-                        String cconst = KILtoSMTLib.translateConstraint(term.constraint());
-                        Debugg.addStep(term.term(), result.term(), cconst);
                         if (visited.add(result))
                             nextQueue.add(result);
                         continue;
@@ -711,7 +710,11 @@ public class SymbolicRewriter {
             ConstrainedTerm pattern = specRule.createLhsPattern(constrainedTerm.termContext());
             ConjunctiveFormula constraint = constrainedTerm.matchImplies(pattern, true);
             if (constraint != null) {
-                return buildResult(specRule, constraint, null, true, constrainedTerm.termContext());
+                ConstrainedTerm result = buildResult(specRule, constraint, null, true, constrainedTerm.termContext());
+                String rule_key = specRule.att().toString().hashCode() + "";
+                Debugg.addRule(rule_key, specRule.att().toString());
+                Debugg.addStepRule(constrainedTerm.term(), result.term(), constrainedTerm.constraint(), result.constraint(), rule_key);
+                return result;
             }
         }
         return null;

@@ -1,3 +1,4 @@
+// TODO - rewrite this with JsonWriter - https://javabeginners.de/Frameworks/Json/Json_schreiben.php
 package org.kframework;
 
 import org.kframework.definition.Module;
@@ -9,6 +10,7 @@ import org.kframework.unparser.OutputModes;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.function.Consumer;
 
 public class Debugg {
@@ -24,10 +26,13 @@ public class Debugg {
     static String cstep;
     private static String targetTerm;
     private static String initialTerm;
-    private static K currentTerm; // saved to catch crashing terms
+    private static String currentTerm; // saved to catch crashing terms
     private static K currentRule; // saved to catch crashing terms
     private static boolean crash;
     private static String exception;
+
+    private static HashMap<String, String> ruleMap;
+    private static HashMap<String, String> nodeMap;
 
     public static void init(Module module, OutputModes output, Consumer<byte[]> print, ColorSetting colorize) {
         Debugg.module = module;
@@ -35,7 +40,9 @@ public class Debugg {
         Debugg.print = print;
         Debugg.colorize = colorize;
         Debugg.crash = false;
+        Debugg.ruleMap = new HashMap<>();
         ruleProfs = new ArrayList<>();
+        Debugg.nodeMap = new HashMap<>();
     }
 
     public static void step(String s) {
@@ -54,17 +61,17 @@ public class Debugg {
 //      Debugg.writer.println(s);
     }*/
 
-    public static void setInitialTerm(K term) {
-        initialTerm = KRun.getString(Debugg.module, Debugg.output, Debugg.print, term, Debugg.colorize);
+    public static void setInitialTerm(K term, K constraint) {
+        initialTerm = addNode(term, constraint);
     }
 
-    public static void setTargetTerm(K term) {
-        targetTerm = KRun.getString(Debugg.module, Debugg.output, Debugg.print, term, Debugg.colorize);
+    public static void setTargetTerm(K term, K constraint) {
+        targetTerm = addNode(term, constraint);
     }
 
-    public static void setCurrentTerm(K term) {
+    public static void setCurrentTerm(K term, K constraint) {
         // currentTerm = KRun.getString(Debugg.module, Debugg.output, Debugg.print, term, Debugg.colorize);
-        currentTerm = term;
+        currentTerm = addNode(term, constraint);
     }
     public static void setCurrentRule(K rule) {
         // currentTerm = KRun.getString(Debugg.module, Debugg.output, Debugg.print, term, Debugg.colorize);
@@ -76,7 +83,28 @@ public class Debugg {
     }
 
     public static void close() {
-        String json = "[" + String.join(",\n", ruleProfs) + "]";
+        StringBuilder rules = new StringBuilder();
+        for (String key : Debugg.ruleMap.keySet()) {
+            if(!rules.toString().equals("")) rules.append(",\n");
+            rules.append("\"")
+                    .append(key)
+                    .append("\": \"")
+                    .append(Debugg.ruleMap.get(key))
+                    .append("\"");
+        }
+        StringBuilder nodes = new StringBuilder();
+        for (String key : Debugg.nodeMap.keySet()) {
+            if(!nodes.toString().equals("")) nodes.append(",\n");
+            nodes.append("\"")
+                    .append(key)
+                    .append("\": ")
+                    .append(Debugg.nodeMap.get(key));
+        }
+        String json = "{\n"
+            + "\"rules\": "  + "{\n" + rules + "\n},\n"
+            + "\"nodes\": "  + "{\n" + nodes + "\n},\n"
+            + "\"proofs\": [\n" + String.join(",\n", ruleProfs) + "\n]\n"
+            + "}\n";
         try {
             Debugg.writer = new PrintWriter("debug.json");
             Debugg.writer.println(json);
@@ -86,33 +114,42 @@ public class Debugg {
         }
     }
 
-    public static void addStep(K term, K term1, String cconst) {
-        String from = KRun.getString(Debugg.module, Debugg.output, Debugg.print, term, Debugg.colorize);
-        String to   = KRun.getString(Debugg.module, Debugg.output, Debugg.print, term1, Debugg.colorize);
+    public static String addNode(K term, K constraint) {
+        String t = KRun.getString(Debugg.module, Debugg.output, Debugg.print, term, Debugg.colorize);
+        String c = KRun.getString(Debugg.module, Debugg.output, Debugg.print, constraint, Debugg.colorize);
+        String node = "{\n"
+                + "\"term\": \"" + t + "\",\n"
+                + "\"constraint\": \"" + c + "\"\n"
+                + "}\n";
+        nodeMap.put(node.hashCode() + "", node);
+        return node.hashCode() + "";
+    }
 
+    public static void addStep(K from, K to, K from_c, K to_c) {
+        //.replaceAll("\n","\\\\n")
         String jsonStep = "{\n" +
                     "\"step\": \"" + cstep +"\",\n" +
-                    "\"from\": \"" + from  +"\",\n" +
-                    "\"from_constraint\": \"" + cconst.replaceAll("\n","\\\\n") + "\",\n" +
-                    "\"to\": \""   + to    +"\"\n" +
-                "}";
+                    "\"from\": \"" + addNode(from, from_c) +"\",\n" +
+                    "\"to\": \""   + addNode(to, to_c) +"\"\n" +
+                "}\n";
 
         steps.add(jsonStep);
 
     }
 
-    public static void addStepRule(K term, K term1, String rule) {
-        String from = KRun.getString(Debugg.module, Debugg.output, Debugg.print, term, Debugg.colorize);
-        String to   = KRun.getString(Debugg.module, Debugg.output, Debugg.print, term1, Debugg.colorize);
-
+    public static void addStepRule(K from, K to, K from_c, K to_c, String rule_key) {
         String jsonStep = "{\n" +
                 "\"step\": \"" + cstep +"\",\n" +
-                "\"from\": \"" + from  +"\",\n" +
-                "\"rule\": \"" + rule.replaceAll("\"","'").replaceAll("/\\\\","AND") + "\",\n" +
-                "\"to\": \""   + to    +"\"\n" +
+                "\"from\": \"" + addNode(from, from_c) +"\",\n" +
+                "\"to\": \""   + addNode(to, to_c) +"\",\n" +
+                "\"rule\": \"" + rule_key + "\"\n" + //.replaceAll("\"","'").replaceAll("/\\\\","AND")
                 "}";
 
         steps.add(jsonStep);
+    }
+
+    public static void addRule(String rule_key, String rule) {
+        Debugg.ruleMap.put(rule_key, rule);
     }
 
     public static void setUpProveRule() {
@@ -123,10 +160,10 @@ public class Debugg {
         String steps = String.join(",\n", Debugg.steps);
         String crash = "";
         if(Debugg.crash) {
-            String crashTermString = KRun.getString(Debugg.module, Debugg.output, Debugg.print, Debugg.currentTerm, Debugg.colorize);
-            crash = ",\"crash\": \"" + crashTermString +"\"\n" +
+            //String crashTermString = KRun.getString(Debugg.module, Debugg.output, Debugg.print, Debugg.currentTerm, Debugg.colorize);
+            crash = ",\"crash\": \"" + currentTerm +"\"\n" +
                     ",\"crash_rule\": \"" + currentRule.toString().replaceAll("\"","'").replaceAll("/\\\\","AND") + "\"\n" +
-                    ",\"exception\": \"" + Debugg.exception + "\"";
+                    ",\"exception\": \"" + Debugg.exception + "\"\n";
         }
 
         String jsonRuleProve = "{\n" +
