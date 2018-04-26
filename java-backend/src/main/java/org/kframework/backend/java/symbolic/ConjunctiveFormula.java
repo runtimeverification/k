@@ -8,6 +8,7 @@ import com.google.common.collect.Sets;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.kframework.backend.java.builtins.BoolToken;
+import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.util.Constants;
 import org.kframework.backend.java.util.RewriteEngineUtils;
@@ -15,6 +16,7 @@ import org.kframework.backend.java.util.RewriteEngineUtils;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -487,6 +489,66 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 TruthValue.FALSE,
                 equality,
                 global);
+    }
+
+    /**
+     * Apply projection lemmas over equalities:
+     *     proj(X,0,N) == proj(Y,0,N) /\ ... /\ proj(X,N-1,N) == proj(Y,N-1,N)
+     *   iff
+     *     X == Y
+     */
+    public ConjunctiveFormula applyProjectionLemma() {
+        // Map: (X,Y) ==> N ==> {0,1,...,N-1}
+        Map<Equality, Map<Integer, Set<Integer>>> projEqualitiesMap = new HashMap<>();
+        for (Equality equality : this.equalities) {
+            if (equality.leftHandSide() instanceof KItem && equality.rightHandSide() instanceof KItem) {
+                KLabelConstant lKLabel = (KLabelConstant) ((KItem) equality.leftHandSide()).kLabel(); // proj
+                KLabelConstant rKLabel = (KLabelConstant) ((KItem) equality.rightHandSide()).klabel(); // proj
+
+                KList lKList = (KList) ((KItem) equality.leftHandSide()).kList(); // X, I, N
+                KList rKList = (KList) ((KItem) equality.rightHandSide()).kList(); // Y, I, N
+
+                if (lKLabel.isProjection() && lKLabel.equals(rKLabel)) {
+                    // TODO: extract from [proj] attribute
+                    int sizeKList = 3;
+                    int idxVector = 0; // X
+                    int idxElem = 1; // I
+                    int idxSize = 2; // N
+                    if (lKList.size() == sizeKList && rKList.size() == sizeKList) {
+                        if (lKList.get(idxElem) instanceof IntToken && rKList.get(idxElem) instanceof IntToken
+                                && lKList.get(idxSize) instanceof IntToken && rKList.get(idxSize) instanceof IntToken) {
+                            int lElem = ((IntToken) lKList.get(idxElem)).intValue(); // I
+                            int rElem = ((IntToken) rKList.get(idxElem)).intValue(); // I
+                            int lSize = ((IntToken) lKList.get(idxSize)).intValue(); // N
+                            int rSize = ((IntToken) rKList.get(idxSize)).intValue(); // N
+                            if (lElem == rElem && lSize == rSize) {
+                                Equality newEquality = new Equality(lKList.get(idxVector), rKList.get(idxVector), global); // X == Y
+                                Map<Integer, Set<Integer>> projEqualities = projEqualitiesMap.get(newEquality); // N ==> {...,I,...}
+                                if (projEqualities == null) {
+                                    projEqualities = new HashMap<>();
+                                    Set<Integer> elemSet = new HashSet<>(); // {0,1,...,N-1}
+                                    for (int i = 0; i < lSize; i++) { elemSet.add(i); }
+                                    projEqualities.put(lSize, elemSet);
+                                    projEqualitiesMap.put(newEquality, projEqualities);
+                                }
+                                projEqualities.get(lSize).remove(lElem); // N ==> {...}
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        PersistentUniqueList<Equality> equalities = this.equalities;
+        for (Equality equality : projEqualitiesMap.keySet()) {
+            for (int size :projEqualitiesMap.get(equality).keySet()) {
+                if (projEqualitiesMap.get(equality).get(size).isEmpty()) {
+                    equalities = equalities.plus(equality);
+                }
+            }
+        }
+
+        return new ConjunctiveFormula(substitution, equalities, disjunctions, truthValue, falsifyingEquality, global);
     }
 
     public ImmutableMapSubstitution<Variable, Term> getSubstitution(Variable variable, Term term) {

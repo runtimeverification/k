@@ -135,6 +135,11 @@ public class ConstrainedTerm extends JavaSymbolicObject {
             return null;
         }
 
+        constraint = constraint.applyProjectionLemma();
+        if (constraint.isFalse()) {
+            return null;
+        }
+
         /* apply pattern folding */
         constraint = constraint.simplifyModuloPatternFolding(context)
                 .add(constrainedTerm.data.constraint)
