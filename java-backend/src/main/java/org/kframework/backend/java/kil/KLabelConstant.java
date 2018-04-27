@@ -56,6 +56,8 @@ public class KLabelConstant extends KLabel implements org.kframework.kore.KLabel
      */
     private final boolean isFunction;
 
+    private final boolean isProjection;
+
     /*
      * boolean flag set iff a production tagged with "pattern" generates
      * this {@code KLabelConstant}
@@ -82,6 +84,7 @@ public class KLabelConstant extends KLabel implements org.kframework.kore.KLabel
         // TODO(YilongL): urgent; how to detect KLabel clash?
 
         boolean isFunction;
+        boolean isProjection = false;
         boolean isPattern = false;
         String smtlib = null;
         // there are labels which are just predicates, but are not obligated to be sort membership predicates
@@ -89,6 +92,7 @@ public class KLabelConstant extends KLabel implements org.kframework.kore.KLabel
             predicateSort = null;
             isFunction = productionAttributes.contains(Attribute.FUNCTION_KEY)
                     || productionAttributes.contains(Attribute.PREDICATE_KEY);
+            isProjection = productionAttributes.contains(Attribute.PROJECTION_KEY);
             isPattern = productionAttributes.contains(Attribute.PATTERN_KEY);
             smtlib = productionAttributes.getOptional(Attribute.SMTLIB_KEY).orElse(null);
         } else {
@@ -98,6 +102,7 @@ public class KLabelConstant extends KLabel implements org.kframework.kore.KLabel
         }
         this.isSortPredicate = predicateSort != null;
         this.isFunction = isFunction;
+        this.isProjection = isProjection;
         this.isPattern = isPattern;
         this.smtlib = smtlib;
     }
@@ -136,6 +141,11 @@ public class KLabelConstant extends KLabel implements org.kframework.kore.KLabel
     @Override
     public boolean isFunction() {
         return isFunction;
+    }
+
+    @Override
+    public boolean isProjection() {
+        return isProjection;
     }
 
     /**

@@ -50,6 +50,7 @@ public abstract class KLabel extends Term {
      */
     public abstract boolean isFunction();
 
+    public abstract boolean isProjection();
 
     /**
      * Checks if this {@code KLabel} represents a pattern. A {@code KLabel}
