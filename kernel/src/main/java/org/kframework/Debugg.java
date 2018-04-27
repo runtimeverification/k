@@ -11,6 +11,8 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.function.Consumer;
 
 public class Debugg {
@@ -33,6 +35,8 @@ public class Debugg {
 
     private static HashMap<String, String> ruleMap;
     private static HashMap<String, String> nodeMap;
+
+    private static Queue<String> tmpRules;
 
     public static void init(Module module, OutputModes output, Consumer<byte[]> print, ColorSetting colorize) {
         Debugg.module = module;
@@ -135,6 +139,16 @@ public class Debugg {
 
         steps.add(jsonStep);
 
+    }
+
+    public static void resetTmpRules() {
+        tmpRules = new LinkedList<String>();
+    }
+    public static void pushTmpRule(String rule_key) {
+        tmpRules.add(rule_key);
+    }
+    public static String getTmpRule() {
+        return tmpRules.remove();
     }
 
     public static void addStepRule(K from, K to, K from_c, K to_c, String rule_key) {

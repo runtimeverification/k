@@ -220,8 +220,9 @@ public class SymbolicRewriter {
             }
 
             String rule_key = matchResult.ruleIndex + "";
+            Debugg.pushTmpRule(rule_key);
             Debugg.addRule(rule_key, rule.att().toString());
-            Debugg.addStepRule(subject.term(), result.term(), subject.constraint(), result.constraint(), rule_key);
+            //Debugg.addStepRule(subject.term(), result.term(), subject.constraint(), result.constraint(), rule_key);
             results.add(result);
         }
 
@@ -646,6 +647,7 @@ public class SymbolicRewriter {
                     }
                 }
 
+                Debugg.resetTmpRules();
                 List<ConstrainedTerm> results = fastComputeRewriteStep(term, false, true, true);
                 if (results.isEmpty()) {
                     /* final term */
@@ -681,6 +683,8 @@ public class SymbolicRewriter {
                                             cterm.constraint().substitution().keySet(),
                                             initialTerm.variableSet())),
                             cterm.termContext());
+                    String rule_key = Debugg.getTmpRule();
+                    Debugg.addStepRule(term.term(), result.term(), term.constraint(), result.constraint(), rule_key);
                     if (visited.add(result)) {
                         nextQueue.add(result);
                     }
