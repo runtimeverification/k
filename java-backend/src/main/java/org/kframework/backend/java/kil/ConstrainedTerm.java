@@ -155,6 +155,24 @@ public class ConstrainedTerm extends JavaSymbolicObject {
             }
         }
 
+        // evaluate/simplify equalities
+        context.setTopConstraint(data.constraint);
+        for (Equality equality : constraint.equalities()) {
+            Term equalityTerm = equality.toK();
+            Term evaluatedTerm = equalityTerm.evaluate(context);
+            if (!evaluatedTerm.equals(equalityTerm)) {
+                constraint = constraint.addAll(Collections.singletonList(evaluatedTerm));
+                if (constraint == null || constraint.isFalse()) {
+                    return null;
+                }
+            }
+        }
+        context.setTopConstraint(null);
+        constraint = constraint.simplifyModuloPatternFolding(context);
+        if (constraint.isFalse()) {
+            return null;
+        }
+
         context.setTopConstraint(data.constraint);
         constraint = (ConjunctiveFormula) constraint.evaluate(context);
 
