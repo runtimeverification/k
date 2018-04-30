@@ -368,6 +368,9 @@ module INT
     ((I1 %Int absInt(I2)) +Int absInt(I2)) %Int absInt(I2)
   requires I2 =/=Int 0    [concrete]
 
+  rule minInt(I1:Int, I2:Int) => I1 requires I1 <=Int I2
+  rule minInt(I1:Int, I2:Int) => I2 requires I1 >=Int I2
+
   syntax Bool ::= Int "<=Int" Int         [function, left, smtlib(<=), latex({#1}\mathrel{\leq_{\scriptstyle\it Int}}{#2}), hook(INT.le)]
                 | Int "<Int" Int          [function, left, smtlib(<), latex({#1}\mathrel{<_{\scriptstyle\it Int}}{#2}), hook(INT.lt)]
                 | Int ">=Int" Int         [function, left, smtlib(>=), latex({#1}\mathrel{\geq_{\scriptstyle\it Int}}{#2}), hook(INT.ge)]
