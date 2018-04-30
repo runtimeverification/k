@@ -615,6 +615,9 @@ module K-EQUAL
 
   syntax K ::= "#if" Bool "#then" K "#else" K "#fi"   [function, smtlib(ite), hook(KEQUAL.ite), poly(0, 2, 3)]
 
+  rule #if C:Bool #then B1 #else _ #fi => B1 requires C
+  rule #if C:Bool #then _ #else B2 #fi => B2 requires notBool C
+
 endmodule
 
 module K-REFLECTION
