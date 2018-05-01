@@ -12,6 +12,7 @@ import org.kframework.definition.Constructors._
 import org.kframework.kore.Unapply.{KApply, KLabel}
 import org.kframework.kore._
 import org.kframework.utils.errorsystem.KEMException
+import org.kframework.builtin.Sorts
 
 import scala.annotation.meta.param
 import scala.collection.JavaConverters._
@@ -96,6 +97,17 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
     productions
       .groupBy(_.sort)
       .map { case (l, ps) => (l, ps) }
+
+  lazy val layouts: Set[String] =
+    productionsForSort
+      .get(Sorts.Layout)
+      .getOrElse(Set[Production]())
+      .collect({
+          case Production(_, Seq(RegexTerminal(_, terminalRegex, _)), _) => terminalRegex
+          case p => throw KEMException.compilerError("Productions of sort `Layout` must be exactly one `RegexTerminal`.\nProduction: " + p.toString())
+      })
+
+  lazy val layout: String = layouts.mkString("|")
 
   @transient
   lazy val attForSort: Map[Sort, Att] =

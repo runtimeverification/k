@@ -39,10 +39,18 @@ public class Scanner implements AutoCloseable {
 
     private static final String FLEX_LIB = OS.current().equals(OS.OSX) ? "-ll" : "-lfl";
 
+    private String layout;
+
     public Scanner(ParseInModule module) {
-        tokens = KSyntax2GrammarStatesFilter.getTokens(module.getParsingModule());
-        scanner = getScanner();
-        this.module = module.seedModule();
+        this.tokens  = KSyntax2GrammarStatesFilter.getTokens(module.getParsingModule());
+        this.module  = module.seedModule();
+        String whites = "[\\ \\n\\r\\t]";
+        if (this.module.layout().length() == 0) {
+            this.layout = whites;
+        } else {
+            this.layout = this.module.layout() + "|(" + whites + ")";
+        }
+        this.scanner = getScanner();
     }
 
     public Module getModule() {
@@ -53,10 +61,6 @@ public class Scanner implements AutoCloseable {
     private TerminalLike getTokenByKind(int kind) {
         return tokens.entrySet().stream().filter(e -> e.getValue()._1() == kind).findAny().get().getKey();
     }
-
-    static final String multiLine = "(\\/\\*([^\\*]|(\\*+([^\\*\\/])))*\\*+\\/)";
-    static final String singleLine = "(\\/\\/[^\\n\\r]*)";
-    static final String whites = "([\\ \\n\\r\\t])";
 
     public File getScanner() {
         File scanner;
@@ -83,7 +87,7 @@ public class Scanner implements AutoCloseable {
                     "char *buffer;\n" +
                     "%}\n" +
                     "%%\n" +
-                    "("+ multiLine +"|"+ singleLine +"|"+ whites +")" + " ;\n");
+                    "(" + this.layout + ")" + " ;\n");
             List<TerminalLike> ordered = tokens.keySet().stream().sorted((t1, t2) -> tokens.get(t2)._2() - tokens.get(t1)._2()).collect(Collectors.toList());
             for (TerminalLike key : ordered) {
                 if (key instanceof Terminal) {

@@ -196,6 +196,11 @@ module RULE-LISTS
 
 endmodule
 
+module DEFAULT-LAYOUT
+    syntax #Layout ::= r"(\\/\\*([^\\*]|(\\*+([^\\*\\/])))*\\*+\\/)"
+                     | r"(\\/\\/[^\\n\\r]*)"
+endmodule
+
 module DEFAULT-CONFIGURATION
   imports BASIC-K
 
