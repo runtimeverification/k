@@ -72,6 +72,10 @@ public class Variable extends Term implements org.kframework.kore.KVariable {
     private final Sort sort;
     private final boolean anonymous;
 
+    public String getOriginalName() {
+        return this.originalName;
+    }
+
     private final int ordinal;
 
     /**
@@ -184,7 +188,7 @@ public class Variable extends Term implements org.kframework.kore.KVariable {
 
     @Override
     public String toString() {
-        return originalName + name + ":" + sort;
+        return originalName ;
     }
 
     @Override

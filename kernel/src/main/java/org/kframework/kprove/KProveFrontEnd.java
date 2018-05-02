@@ -94,11 +94,12 @@ public class KProveFrontEnd extends FrontEnd {
             }
             return new KProve(kem, sw, files, tty).run(kproveOptions, compiledDef.get(), backend.get(), initializeRewriter.get());
         } catch(Exception e) {
+            System.out.println(e.toString());
             Debugg.saveCrashTerm(e);
             throw e;
         } finally {
             Debugg.endProveRule();
-            Debugg.close();
+            Debugg.save();
             scope.exit();
         }
     }

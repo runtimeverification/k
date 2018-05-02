@@ -341,6 +341,9 @@ public class KRun {
 
             @Override
             public K apply(KVariable k) {
+                if(!k.toString().equals("")) {
+                    return renames.computeIfAbsent(k, k2 -> KVariable(k.toString(), k.att()));
+                }
                 if (k.att().contains("anonymous")) {
                     return renames.computeIfAbsent(k, k2 -> KVariable("V" + newCount++, k.att()));
                 }

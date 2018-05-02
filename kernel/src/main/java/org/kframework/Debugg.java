@@ -29,7 +29,7 @@ public class Debugg {
     private static String targetTerm;
     private static String initialTerm;
     private static String currentTerm; // saved to catch crashing terms
-    private static K currentRule; // saved to catch crashing terms
+    private static String currentRule; // saved to catch crashing terms
     private static boolean crash;
     private static String exception;
 
@@ -77,7 +77,7 @@ public class Debugg {
         // currentTerm = KRun.getString(Debugg.module, Debugg.output, Debugg.print, term, Debugg.colorize);
         currentTerm = addNode(term, constraint);
     }
-    public static void setCurrentRule(K rule) {
+    public static void setCurrentRule(String rule) {
         // currentTerm = KRun.getString(Debugg.module, Debugg.output, Debugg.print, term, Debugg.colorize);
         currentRule = rule;
     }
@@ -86,7 +86,7 @@ public class Debugg {
         System.out.println(KRun.getString(Debugg.module, Debugg.output, Debugg.print, term, Debugg.colorize));
     }
 
-    public static void close() {
+    public static void save() {
         StringBuilder rules = new StringBuilder();
         for (String key : Debugg.ruleMap.keySet()) {
             if(!rules.toString().equals("")) rules.append(",\n");
@@ -170,13 +170,27 @@ public class Debugg {
         Debugg.steps = new ArrayList<String>();
     }
 
+
+    public static void saveIntermediate() {
+        String steps = String.join(",\n", Debugg.steps);
+
+        String jsonRuleProve = "{\n" +
+                "\"initialTerm\": \"" + initialTerm + "\",\n" +
+                "\"targetTerm\": \""  + targetTerm  + "\",\n" +
+                "\"steps\": [" + steps + "]\n" +
+                "}\n";
+        ruleProfs.add(jsonRuleProve);
+        Debugg.save();
+        ruleProfs.remove(ruleProfs.size() - 1);
+    }
+
     public static void endProveRule() {
         String steps = String.join(",\n", Debugg.steps);
         String crash = "";
         if(Debugg.crash) {
             //String crashTermString = KRun.getString(Debugg.module, Debugg.output, Debugg.print, Debugg.currentTerm, Debugg.colorize);
             crash = ",\"crash\": \"" + currentTerm +"\"\n" +
-                    ",\"crash_rule\": \"" + currentRule.toString().replaceAll("\"","'").replaceAll("/\\\\","AND") + "\"\n" +
+                    ",\"crash_rule\": \"" + currentRule.replaceAll("\"","'").replaceAll("/\\\\","AND") + "\"\n" +
                     ",\"exception\": \"" + Debugg.exception + "\"\n";
         }
 

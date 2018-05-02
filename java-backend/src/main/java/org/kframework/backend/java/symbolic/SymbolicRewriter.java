@@ -163,7 +163,7 @@ public class SymbolicRewriter {
                 subject.termContext());
         for (FastRuleMatcher.RuleMatchResult matchResult : matches) {
             Rule rule = definition.ruleTable.get(matchResult.ruleIndex);
-            Debugg.setCurrentRule(rule);
+            Debugg.setCurrentRule(rule.att().toString());
             Substitution<Variable, Term> substitution =
                     rule.att().contains(Att.refers_THIS_CONFIGURATION()) ?
                             matchResult.constraint.substitution().plus(new Variable(KLabels.THIS_CONFIGURATION, Sort.KSEQUENCE), filterOurStrategyCell(subject.term())) :
@@ -609,6 +609,7 @@ public class SymbolicRewriter {
             Debugg.step(Integer.toString(step));
             if(step % 100 == 0) {
                 System.out.println(step);
+                Debugg.saveIntermediate();
             }
             for (ConstrainedTerm term : queue) {
                 Debugg.setCurrentTerm(term.term(), term.constraint());
