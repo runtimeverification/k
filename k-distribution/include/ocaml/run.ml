@@ -2,6 +2,7 @@ open Constants
 open Constants.K
 open Prelude
 
+(*
 let split_config (config: k) : k * k list =
   let module Def = (val Plugin.get () : Plugin.Definition) in
   match Def.get_thread_set config with
@@ -12,7 +13,7 @@ let split_config (config: k) : k * k list =
   let first_other_thread_ids, _ = List.split(KMap.bindings first_other_threads) in
   [Thread(first_global,first_thread_id,first_thread,[Map(sort,lbl,first_other_threads)])], first_thread_id :: first_other_thread_ids)
   | _ -> failwith "split_config"
-
+*)
 let plug_config (config: k) : k =
   let module Def = (val Plugin.get () : Plugin.Definition) in
   match config with [Thread(global,thread_id,thread,[Map(sort,lbl,threads)])] ->
