@@ -1392,7 +1392,7 @@ public class DefinitionToOcaml implements Serializable {
                 }
                 sb.append("\n");
             }
-            sb.append("| _ -> step) | _ -> step) | _ -> step\n");
+            sb.append("| _ -> stepNone) | _ -> stepNone) | _ -> stepNone\n");
         } else {
             sb.append("step\n");
         }
