@@ -28,35 +28,50 @@ let context_switch (config: k) (thread_id: k) : k = match config with
 
 type step = Step of k * step_function | NoStep of k
 
-let rec take_steps (module Def: Plugin.Definition) (step_function: k -> (k * step_function)) (thread: k) (other_active_threads: k list) (config: k) (depth: int) (n: int) (last_resort: bool) : k * int =
-  if n = depth then (
-    config,n
-  ) else (
-    let active_config = context_switch config thread in
-      match (try let res,func = (step_function active_config) in Step(res,func) with Stuck c -> NoStep c) with
-      | Step (([Thread(_,thread_id,_,_)] as config),(StepFunc step_function)) -> (
-        take_steps (module Def) step_function thread_id other_active_threads config depth (n+1) false
-      )
-      | Step _ -> invalid_arg "mismatched constructor at top of split configuration"
-      | NoStep config -> (
-        match active_config with [Thread(_,thread_id,_,[Map(_,_,other_threads)])] -> (
-          let (other_thread_ids,_) = List.split(KMap.bindings other_threads) in
-          let still_active (thd: k) : bool = List.mem thd other_thread_ids in
-          let still_active_threads = List.filter still_active other_active_threads in
-          match still_active_threads with
+let init_thread_pool (threads: k list) : k list * int * bool = (threads, 0, false)
+
+let schedule_next_thread (module Def: Plugin.Definition) (step_function: k -> (k * step_function)) (stuck: bool) (config: k) (thread_pool: k list * int * bool) : (k * (k -> (k * step_function)) * (k list * int * bool)) option =
+  let slice = 5000 in
+  let (pool_threads, slice_used, last_resort) = thread_pool in
+  if not stuck && slice_used < slice then Some (config, step_function, (pool_threads, slice_used + 1, false))
+  else (
+    match config with
+      | [Thread(_,curr_thread,_,[Map(_,_,other_threads)])] -> (
+        let (other_thread_ids,_) = List.split(KMap.bindings other_threads) in
+        let is_active (thd: k) : bool = List.mem thd other_thread_ids in
+        let new_pool_threads = List.filter is_active (if stuck then pool_threads else pool_threads@[curr_thread]) in
+        match new_pool_threads with
           | [] -> (
-            if last_resort || KMap.cardinal other_threads = 0 then (
-              config,n
+            if last_resort then (
+              None
             ) else (
-              take_steps (module Def) Def.step thread_id other_thread_ids active_config depth n true
+              let all_threads = other_thread_ids@[curr_thread] in
+              let config = context_switch config (List.hd all_threads) in
+              Some (config, Def.step, (List.tl all_threads, 0, true))
             )
           )
-          | thread_id :: other_still_active_threads -> (
-            take_steps (module Def) Def.step thread_id other_still_active_threads active_config depth n last_resort
+          | (thread :: threads) -> (
+            let config = context_switch config thread in
+            Some (config, Def.step, (threads, 0, last_resort))
           )
         )
-        | _ -> invalid_arg "mismatched constructor at top of split configuration"
-      )
+      | _ -> invalid_arg "mismatched constructor at top of split configuration"
+  )
+
+let rec take_steps (module Def: Plugin.Definition) (step_function: k -> (k * step_function)) (thread_pool: (k list * int * bool)) (config: k) (depth: int) (n: int) : k * int =
+  if n = depth then (config, n)
+  else (
+    match (try let res,func = (step_function config) in Step(res,func) with Stuck c -> NoStep c) with
+    | Step (config,(StepFunc step_function)) -> (
+        match schedule_next_thread (module Def) step_function false config thread_pool with
+          | None -> (config, n)
+          | Some (config, step_function, thread_pool) -> take_steps (module Def) step_function thread_pool config depth (n+1)
+    )
+    | NoStep config -> (
+      match schedule_next_thread (module Def) step_function true config thread_pool with
+        | None -> (config, n)
+        | Some (config, step_function, thread_pool) -> take_steps (module Def) step_function thread_pool config depth n
+    )
   )
 
 let rec take_steps_no_thread (module Def: Plugin.Definition) (step_function: k -> (k * step_function)) (config: k) (depth: int) (n: int) : k * int =
@@ -69,10 +84,14 @@ let rec take_steps_no_thread (module Def: Plugin.Definition) (step_function: k -
   )
 
 let rec strat_run (module Def: Plugin.Definition) (config: k) (depth: int) (n: int) : k * int =
-  let first_config, first_thread_ids = split_config config in
-  let c1,n1 = take_steps (module Def) Def.step (List.hd first_thread_ids) (List.tl first_thread_ids) first_config depth n false in
-  let c1,thread_ids = split_config (Def.make_stuck (plug_config c1)) in
-  let c2,n2 = take_steps (module Def) Def.step (List.hd thread_ids) (List.tl thread_ids) c1 depth n1 false in
+  let c0,threads = split_config config in
+  let c0 = context_switch c0 (List.hd threads) in
+  let c1,n1 = take_steps (module Def) Def.step (init_thread_pool (List.tl threads)) c0 depth n in
+
+  let c1,threads = split_config (Def.make_stuck (plug_config c1)) in
+  let c1 = context_switch c1 (List.hd threads) in
+  let c2,n2 = take_steps (module Def) Def.step (init_thread_pool (List.tl threads)) c1 depth n1 in
+
   if (n1 = n2) then (plug_config c2, n2) else (strat_run (module Def) (plug_config c2) depth n2)
 
 let run (config: k) (depth: int) : k * int =

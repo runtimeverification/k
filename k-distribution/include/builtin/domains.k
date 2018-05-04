@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2016 K Team. All Rights Reserved.
+// Copyright (c) 2015-2018 K Team. All Rights Reserved.
 require "kast.k"
 
 module DOMAINS-SYNTAX
@@ -368,6 +368,9 @@ module INT
     ((I1 %Int absInt(I2)) +Int absInt(I2)) %Int absInt(I2)
   requires I2 =/=Int 0    [concrete]
 
+  rule minInt(I1:Int, I2:Int) => I1 requires I1 <=Int I2
+  rule minInt(I1:Int, I2:Int) => I2 requires I1 >=Int I2
+
   syntax Bool ::= Int "<=Int" Int         [function, left, smtlib(<=), latex({#1}\mathrel{\leq_{\scriptstyle\it Int}}{#2}), hook(INT.le)]
                 | Int "<Int" Int          [function, left, smtlib(<), latex({#1}\mathrel{<_{\scriptstyle\it Int}}{#2}), hook(INT.lt)]
                 | Int ">=Int" Int         [function, left, smtlib(>=), latex({#1}\mathrel{\geq_{\scriptstyle\it Int}}{#2}), hook(INT.ge)]
@@ -614,6 +617,9 @@ module K-EQUAL
   rule K1:Bool ==Bool K2:Bool => K1 ==K K2
 
   syntax K ::= "#if" Bool "#then" K "#else" K "#fi"   [function, smtlib(ite), hook(KEQUAL.ite), poly(0, 2, 3)]
+
+  rule #if C:Bool #then B1 #else _ #fi => B1 requires C
+  rule #if C:Bool #then _ #else B2 #fi => B2 requires notBool C
 
 endmodule
 
