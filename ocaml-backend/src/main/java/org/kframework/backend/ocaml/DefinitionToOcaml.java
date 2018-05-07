@@ -68,6 +68,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -424,7 +425,7 @@ public class DefinitionToOcaml implements Serializable {
         }
         sb.append("try_match (c: k) (config: k) (guard: int) : k Subst.t = match c with \n");
         convertFunction(Collections.singletonList(convert(r)), sb, "try_match", RuleType.PATTERN);
-        sb.append("| _ -> raise(Stuck c)\n");
+        sb.append("| _ -> raise(Stuck [c])\n");
     }
 
     public String executeAndMatch(K k, int depth, Rule r, String file, String substFile) {
@@ -453,18 +454,15 @@ public class DefinitionToOcaml implements Serializable {
         ocamlProgramHeader(sb, true);
         ocamlMatchPattern(exitCodePattern, sb);  //declares try_match
         sb.append("let input, depth, out = Makeconfig.parse ()\n");
-        sb.append("let res, _ = ");
-        if (this.threadCellExists) {
-            sb.append("run");
-        } else {
-            sb.append("run_no_thread_opt");
-        }
-        sb.append("(input) (depth)\n");
+        sb.append("let stack, _ = ");
+        constructRun(sb, "depth");
+        ocamlPrintKStacktrace(sb);
+        sb.append("let res = hd (rev stack)\n");
         sb.append("let () = output_string out (print_k_binary(res))\n");
         sb.append("let () = try let subst = try_match res res (-1) in\n");
         sb.append("let code = get_exit_code subst in\n");
         sb.append("exit code\n");
-        sb.append("with Stuck(res) -> output_string out (print_k_binary res); exit 112\n");
+        sb.append("with Stuck(stack2) -> output_string out (print_k_binary (hd (rev stack2))); exit 112\n");
         return sb.toString();
     }
 
@@ -472,10 +470,16 @@ public class DefinitionToOcaml implements Serializable {
         sb.append("let _ = (try print_subst_binary subst (try_match res res (-1)) with Stuck c -> output_string subst \"\\x00\\x00\\x00\\x00\")\n");
     }
 
+    private void ocamlPrintKStacktrace(StringBuilder sb) {
+		sb.append("let () = if (length stack) <> 1 then print_string (print_stacktrace stack) \n");
+    }
+
     private void runAndPrint(int depth, StringBuilder sb) {
-        sb.append("let res, steps = ");
+        sb.append("let stack, steps = ");
         constructRun(sb, String.valueOf(depth));
         sb.append("\n");
+        ocamlPrintKStacktrace(sb);
+        sb.append("let res = hd (rev stack)\n");
         sb.append("let () = output_string out ((string_of_int steps) ^ \"\\n\" ^ print_k_binary(res))\n");
     }
 
@@ -507,19 +511,21 @@ public class DefinitionToOcaml implements Serializable {
 
     private String ocamlFinishCompile(Rule exitCode, Integer dumpExitCode, StringBuilder sb) {
         ocamlMatchPattern(exitCode, sb);
-        sb.append("let _ = try let res, _ = ");
+        sb.append("let _ = try let stack, _ = ");
         constructRun(sb, "!CONFIG.depth");
-        sb.append("in let subst = try_match res res (-1) in\n");
+        sb.append("in\n");
+        sb.append("let res = hd (rev stack) in\n");
+        sb.append("let subst = try_match res res (-1) in\n");
         sb.append("let code = get_exit_code subst in\n");
         if (dumpExitCode != null) {
             sb.append("(if code = ").append(dumpExitCode).append(" then\n");
             sb.append("(prerr_endline \"Execution failed (configuration dumped)\";\n");
-            sb.append("let out = open_out !CONFIG.output_file in output_string out (print_k res))\n");
+            sb.append("let out = open_out !CONFIG.output_file in output_string out (print_stacktrace stack))\n");
             sb.append("else ());\n");
         }
         sb.append("exit code\n");
-        sb.append("with Stuck(res) -> (prerr_endline \"Execution failed (configuration dumped)\";\n");
-        sb.append("let out = open_out !CONFIG.output_file in output_string out (print_k res);\n");
+        sb.append("with Stuck(stack) -> (prerr_endline \"Execution failed (configuration dumped)\";\n");
+        sb.append("let out = open_out !CONFIG.output_file in output_string out (print_stacktrace stack);\n");
         sb.append("exit 139)\n");
         return sb.toString();
     }
@@ -531,7 +537,8 @@ public class DefinitionToOcaml implements Serializable {
             sb.append("external load_plugin_path : unit -> string = \"load_plugin_path\"\n");
             sb.append("let () = Plugin.load (load_plugin_path ())");
         }
-        sb.append("\nopen Prelude\nopen Constants\nopen Constants.K\nopen Run\nlet () = Sys.catch_break true\n");
+        sb.append("\nopen Prelude\nopen Constants\nopen Constants.K\nopen Run\nopen List\n");
+        sb.append("let () = Sys.catch_break true\n");
         sb.append("let () = Gc.set { (Gc.get()) with Gc.minor_heap_size = 33554432 }");
     }
 
@@ -1260,7 +1267,7 @@ public class DefinitionToOcaml implements Serializable {
                         sb.append("| \"").append(sort.name()).append("\" -> (");
                         KLabel freshFunction = mainModule.freshFunctionFor().apply(sort);
                         encodeStringToFunction(sb, freshFunction);
-                        sb.append(" ([Int counter]) config (-1))\n");
+                        sb.append(" ([Int counter]) config [config] (-1))\n");
                     }
                     sb.append("| _ -> invalid_arg (\"Cannot find fresh function for sort \" ^ sort)");
                     if (isLetRec) {
@@ -1277,11 +1284,12 @@ public class DefinitionToOcaml implements Serializable {
                     }
                     int arity = getArity(functionLabel);
                     printFunctionParams(sb, arity);
-                    sb.append(" (config: k) (guard: int) : k = let lbl = \n");
+                    sb.append(" (config: k) (stack: k list) (guard: int) : k = let lbl = \n");
                     encodeStringToIdentifier(sb, functionLabel);
                     sb.append(" and sort = \n");
                     encodeStringToIdentifier(sb, mainModule.sortFor().apply(functionLabel));
                     sb.append(" in ");
+                    sb.append("let here = [denormalize (KApply(lbl, (denormalize").append(arity).append(" c)))] in\n");
                     sb.append("match c with \n");
                     String namespace = hook.substring(0, hook.indexOf('.'));
                     String function = hook.substring(namespace.length() + 1);
@@ -1310,14 +1318,15 @@ public class DefinitionToOcaml implements Serializable {
 
                     convertFunction(functionRules.get(functionLabel).stream().sorted(this::sortFunctionRules).collect(Collectors.toList()),
                             sb, functionName, RuleType.FUNCTION);
-                    sb.append("| _ -> raise (Stuck [denormalize (KApply(lbl, (denormalize").append(arity).append(" c)))])\n");
+                    sb.append("| _ -> raise (Stuck (here :: stack) )\n");
+
                     if (constants.contains(functionLabel)) {
                         sb.append(conn.equals("let rec ") ? "and " : conn);
                         sb.append("const");
                         encodeStringToAlphanumeric(sb, functionLabel.name());
                         sb.append(" : k Lazy.t = lazy (");
                         encodeStringToFunction(sb, functionLabel);
-                        sb.append(" () interned_bottom (-1))\n");
+                        sb.append(" () interned_bottom [] (-1))\n");
                     } else if (mainModule.attributesFor().apply(functionLabel).contains("memo")) {
                         encodeMemoizationOfFunction(sb, conn, functionLabel, functionName, arity);
                     }
@@ -1327,9 +1336,11 @@ public class DefinitionToOcaml implements Serializable {
                     String functionName = encodeStringToFunction(sb, functionLabel);
                     int arity = getArity(functionLabel);
                     printFunctionParams(sb, arity);
-                    sb.append(" (config: k) (guard: int) : k = let lbl = \n");
+                    sb.append(" (config: k) (stack: k list) (guard: int) : k = let lbl = \n");
                     encodeStringToIdentifier(sb, functionLabel);
-                    sb.append(" in match c with \n");
+                    sb.append(" in\n");
+                    sb.append("let here = [denormalize (KApply(lbl, (denormalize").append(arity).append(" c)))] in\n");
+                    sb.append("match c with \n");
                     convertFunction(anywhereRules.get(functionLabel), sb, functionName, RuleType.ANYWHERE);
                     sb.append("| ");
                     for (int i = 0; i < arity; i++) {
@@ -1356,7 +1367,7 @@ public class DefinitionToOcaml implements Serializable {
                         sb.append(" -> ");
                         encodeStringToFunction(sb, label);
                         int arity = getArity(label);
-                        sb.append(" (normalize").append(arity).append(" kl) config (-1)\n");
+                        sb.append(" (normalize").append(arity).append(" kl) config [] (-1)\n");
                     }
                     sb.append("| _ -> [denormalize c])\n");
                     sb.append("| _ -> [denormalize c]\n");
@@ -1609,6 +1620,8 @@ public class DefinitionToOcaml implements Serializable {
         Map<Boolean, List<Rule>> groupedByLookup = sortedRules.stream()
                 .collect(Collectors.groupingBy(this::hasLookups));
         sb.append("and ").append(funcName).append(" (c:k) : k * step_function =\n");
+		sb.append("let stack = [] in\n");
+		sb.append("let here = c in\n");
         if (options.checkRaces) {
             sb.append(" let (k, (i,_ ,_), s) as kis = one_").append(funcName).append(" c (-1) in ");
             sb.append("\n    let (k,i,s) = List.hd (RACE.valid_continuations (kis :: RACE.all_steps one_").append(funcName).append(" c i)) in (k,s)\n");
@@ -1620,12 +1633,14 @@ public class DefinitionToOcaml implements Serializable {
                 ruleNum = convert(r, sb, RuleType.REGULAR, ruleNum, funcName);
             }
         }
-        sb.append("| _ -> lookups_").append(funcName).append(" c c ").append(options.checkRaces ? "start_after" : "(-1)").append('\n');
-        sb.append("with Sys.Break -> raise (Stuck c)\n");
-        sb.append("and lookups_").append(funcName).append(" (c: k) (config: k) (guard: int) : k ")
-                .append(options.checkRaces ? "* (int * RACE.rule_type * string) " : "").append("* step_function = match c with \n");
+        sb.append("| _ -> lookups_").append(funcName).append(" c c stack ").append(options.checkRaces ? "start_after" : "(-1)").append('\n');
+        sb.append("with Sys.Break -> raise (Stuck [c])\n");
+        sb.append("and lookups_").append(funcName).append(" (c: k) (config: k) (stack: k list) (guard: int) : k ")
+                .append(options.checkRaces ? "* (int * RACE.rule_type * string) " : "").append("* step_function = \n")
+                .append("let here = c in\n")
+                .append("match c with \n");
         ruleNum = convert(groupedByLookup.getOrDefault(true, Collections.emptyList()), sb, funcName, "lookups_" + funcName, RuleType.REGULAR, ruleNum);
-        sb.append("| _ -> raise (Stuck c)\n");
+        sb.append("| _ -> raise (Stuck (here :: stack))\n");
         return ruleNum;
     }
 
@@ -1657,7 +1672,7 @@ public class DefinitionToOcaml implements Serializable {
         sb.append(conn.equals("let rec ") ? "and " : conn);
         encodeStringToFunction(sb, functionLabel);
         printFunctionParams(sb, arity);
-        sb.append(" (config: k) (guard: int) : k = let key = ");
+        sb.append(" (config: k) (stack: k list) (guard: int) : k = let key = ");
         sb.append("[denormalize (KApply(");
         encodeStringToIdentifier(sb, functionLabel);
         sb.append(", (denormalize").append(arity).append(" c)))]in\n ");
@@ -1665,7 +1680,7 @@ public class DefinitionToOcaml implements Serializable {
         encodeStringToAlphanumeric(sb, functionLabel.name());
         sb.append(" key with Not_found -> let res = ")
                 .append(functionName)
-                .append(" c config guard in (if KMemoIdentityHashtbl.length memo_table");
+                .append(" c config stack guard in (if KMemoIdentityHashtbl.length memo_table");
         encodeStringToAlphanumeric(sb, functionLabel.name());
         sb.append(" > (1 lsl 18) then KMemoIdentityHashtbl.clear memo_table");
         encodeStringToAlphanumeric(sb, functionLabel.name());
@@ -2492,7 +2507,7 @@ public class DefinitionToOcaml implements Serializable {
         List<Lookup> results = new ArrayList<>();
         Holder h = new Holder();
         h.first = hasMultipleRules;
-        h.reapply = "(" + functionName + " c config " + ruleNum + ")";
+        h.reapply = "(" + functionName + " c config stack " + ruleNum + ")";
         new VisitK() {
             @Override
             public void apply(KApply k) {
@@ -2679,7 +2694,7 @@ public class DefinitionToOcaml implements Serializable {
         if (vars.vars.get(v).isEmpty() && !getVarName(v).startsWith("?")) {
             throw KEMException.internalError("Failed to compile rule due to unmatched variable on right-hand-side. This is likely due to an unsupported collection pattern: " + getVarName(v), v);
         } else if (vars.vars.get(v).isEmpty()) {
-            sb.append("(raise (Stuck config))");
+            sb.append("(raise (Stuck [config]))");
         } else {
             applyVarRhs(vars.vars.get(v).iterator().next(), sb, vars.listVars.get(vars.vars.get(v).iterator().next()));
         }
@@ -2975,7 +2990,7 @@ public class DefinitionToOcaml implements Serializable {
                     encodeStringToFunction(sb, k.klabel());
                     sb.append("(");
                     applyTuple(k.klist().items());
-                    sb.append(") config (-1)");
+                    sb.append(") config (here :: stack) (-1)");
                 } else {
                     sb.append("Lazy.force const");
                     encodeStringToAlphanumeric(sb, k.klabel().name());

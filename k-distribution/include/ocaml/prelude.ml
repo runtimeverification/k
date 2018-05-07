@@ -9,7 +9,7 @@ type k = K.t
 (* this is needed so that statically linked binary will contain this module that is needed by dynamically linked realdef *)
 let _ = Gc.stat
 
-exception Stuck of k
+exception Stuck of (k list)
 exception Not_implemented
 
 let interned_bottom = [Bottom]
