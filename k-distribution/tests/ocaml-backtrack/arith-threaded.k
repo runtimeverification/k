@@ -1,4 +1,4 @@
-module ARITH-SYNTAX
+module ARITH-THREADED-SYNTAX
   imports DOMAINS-SYNTAX
   syntax AExp  ::= Int
                  | "-" AExp                   [strict]
@@ -9,13 +9,17 @@ module ARITH-SYNTAX
 endmodule
 
 
-module ARITH
-  imports ARITH-SYNTAX
+module ARITH-THREADED
+  imports ARITH-THREADED-SYNTAX
   imports DOMAINS
   syntax KResult ::= Int
 
   configuration <T color="yellow">
-                  <k color="green"> $PGM:Pgm </k>
+                  <threads color="yellow" thread="">
+                    <thread multiplicity="*" color="yellow" type="Map">
+                      <k color="green"> $PGM:Pgm </k>
+                    </thread>
+                  </threads>
                 </T>
 
 // AExp
