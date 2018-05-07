@@ -25,7 +25,7 @@ module ARITH
 
   rule isBeautiful(I::Int) => I =/=Int 2 requires isPretty(I)
   rule isPretty(I::Int) => I =/=Int 1 requires isNice(I)
-  rule isNice(I::Int) => I >=Int 0
+  rule isNice(I::Int) => true requires I >Int 0
 
   // Normal rule
   rule I1 + I2 => I1 +Int I2
