@@ -1,3 +1,4 @@
+// Copyright (c) 2016-2018 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore.kernel;
 
 import com.google.common.collect.ArrayListMultimap;
@@ -242,10 +243,9 @@ public class Scanner implements AutoCloseable {
             byte[] buf = input.getBytes("UTF-8");
             ByteBuffer size = ByteBuffer.allocate(4);
             size.order(ByteOrder.nativeOrder());
-            size.putInt(buf.length + 1);
+            size.putInt(buf.length);
             process.getOutputStream().write(size.array());
             process.getOutputStream().write(buf);
-            process.getOutputStream().write('\n');
             process.getOutputStream().flush();
             return readTokenizedOutput(process, source, lines, columns);
         } catch (IOException | InterruptedException e) {
