@@ -86,27 +86,29 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
                     " the definition's main module.");
         }
         return new Rewriter() {
+            private byte[] saveAndRun(String filename, String ocaml) {
+                files.saveToTemp(filename, ocaml);
+                return compileAndExecOcaml(filename);
+            }
+
             @Override
             public RewriterResult execute(K k, Optional<Integer> depth) {
                 String ocaml = converter.execute(k, depth.orElse(-1), files.resolveTemp("run.out").getAbsolutePath());
-                files.saveToTemp("pgm.ml", ocaml);
-                byte[] output = compileAndExecOcaml("pgm.ml");
+                byte[] output = saveAndRun("pgm.ml", ocaml);
                 return parseOcamlRewriterOutput(output);
             }
 
             @Override
             public K match(K k, Rule rule) {
                 String ocaml = converter.match(k, rule, files.resolveTemp("run.out").getAbsolutePath());
-                files.saveToTemp("match.ml", ocaml);
-                byte[] output = compileAndExecOcaml("match.ml");
+                byte[] output = saveAndRun("match.ml", ocaml);
                 return parseOcamlSearchOutput(output);
             }
 
             @Override
             public Tuple2<RewriterResult, K> executeAndMatch(K k, Optional<Integer> depth, Rule rule) {
                 String ocaml = converter.executeAndMatch(k, depth.orElse(-1), rule, files.resolveTemp("run.out").getAbsolutePath(), files.resolveTemp("run.subst").getAbsolutePath());
-                files.saveToTemp("pgm.ml", ocaml);
-                byte[] output = compileAndExecOcaml("pgm.ml");
+                byte[] output = saveAndRun("pgm.ml", ocaml);
                 byte[] subst = files.loadBytesFromTemp("run.subst");
                 return Tuple2.apply(parseOcamlRewriterOutput(output), parseOcamlSearchOutput(subst));
             }
