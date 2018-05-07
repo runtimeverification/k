@@ -167,6 +167,13 @@ public class ConstrainedTerm extends JavaSymbolicObject {
         return data.constraint.addAndSimplify(constraint, context);
     }
 
+    public ConstrainedTerm evaluateUnderCurrentConstraint() {
+        context.setTopConstraint(data.constraint);
+        Term term = data.term.evaluate(context);
+        context.setTopConstraint(null);
+        return new ConstrainedTerm(term, data.constraint, context);
+    }
+
     public Term term() {
         return data.term;
     }
