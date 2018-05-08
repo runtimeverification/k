@@ -143,6 +143,9 @@ object KoreToText {
     case Mem(s, rs, p, q) =>
       "\\in" + "{" + apply(s) + "," + apply(rs) + "}" +
         "(" + apply(p) + "," + apply(q) + ")"
+    case DomainValue(s, str) =>
+      "\\dv" + "{" + apply(s) + "}" +
+        "(\"" + str + "\")"
     // case Subset(s, rs, p, q) =>
     //   "\\subset" + "{" + apply(s) + "," + apply(rs) + "}" +
     //     "(" + apply(p) + "," + apply(q) + ")"

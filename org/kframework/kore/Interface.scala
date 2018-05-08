@@ -301,6 +301,19 @@ object Mem {
 }
 
 /**
+  * Membership, denoted as \in(P, Q) === \ceil(P and Q)
+  */
+trait DomainValue extends Pattern {
+  def s: Sort // the sort of X and P
+
+  def str: String // the value
+}
+
+object DomainValue {
+  def unapply(arg: DomainValue): Option[(Sort, String)] = Some(arg.s, arg.str)
+}
+
+/**
   * \subset(P,Q) is a predicate pattern that checks whether P is a subset of Q.
   */
 // trait Subset extends Pattern {
@@ -460,11 +473,11 @@ trait Builders {
 
   def Mem(s: Sort, rs:Sort, p: Pattern, q: Pattern): Pattern
 
+  def DomainValue(s: Sort, str:String): Pattern
+
   // def Subset(s: Sort, rs:Sort, _1: Pattern, _2: Pattern): Pattern
 
   def StringLiteral(str: String): Pattern
-
-  // def DomainValue(sortStr: String, valueStr: String): Pattern
 
   def SortVariable(name: String): SortVariable
 
