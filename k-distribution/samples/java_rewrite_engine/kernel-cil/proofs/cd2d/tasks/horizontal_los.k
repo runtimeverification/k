@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2016 K Team. All Rights Reserved.
+// Copyright (c) 2013-2018 K Team. All Rights Reserved.
 /*@
   requires DISTANCE(Sx) && DISTANCE(Sy) ;
   ensures horizontal_losR(s_x,s_y,D) ==> TRUE(\result);

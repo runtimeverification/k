@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2016 K Team. All Rights Reserved.
+// Copyright (c) 2013-2018 K Team. All Rights Reserved.
 /*!
 \title{A quine program written in K-framwork}
 \author{Radu Mereu\c{t}\u{a}
@@ -12,7 +12,7 @@ module QUINE-EXPLICIT
     <k> "" ~> "" </k>
     <out stream="stdout"> .List </out>
     <prefix>
-        "// Copyright (c) 2013-2014 K Team. All Rights Reserved." ~>
+        "// Copyright (c) 2013-2018 K Team. All Rights Reserved." ~>
         "/*!" ~>
         "\\title{A quine program written in K-framwork}" ~>
         "\\author{Radu Mereu\\c{t}\\u{a}" ~>

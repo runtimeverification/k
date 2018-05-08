@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2016 K Team. All Rights Reserved.
+// Copyright (c) 2015-2018 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore;
 
 import com.google.common.collect.Lists;
@@ -426,5 +426,50 @@ public class RuleGrammarTest {
                             KToken("l",Sort("KLabel")), KToken("_",Sort("#KVariable"))),
                 KApply(KLabel("#EmptyK"))
                 )));
+    }
+
+    @Test
+    public void testPriorityAssoc() throws Exception {
+        String def = "module TEST " +
+                "syntax Exp ::= Exp \"*\" Exp [left, klabel('Mul)] " +
+                "> Exp \"+\" Exp [left, klabel('Plus)] " +
+                "| r\"[0-9]+\" [token] " +
+                "syntax left 'Plus " +
+                "syntax left 'Mul " +
+                "endmodule";
+        parseProgram("1+2",   def, "Exp", 0, false);
+        //System.out.println("out1 = " + out1);
+        parseProgram("1+2*3", def, "Exp", 0, false);
+        //System.out.println("out2 = " + out2);
+        parseProgram("1+2+3", def, "Exp", 0, false);
+        //System.out.println("out3 = " + out3);
+    }
+
+    // test default/custom layout
+    @Test
+    public void testLayout() {
+        String defaultLayout = "" +
+                "module TEST " +
+                "syntax Int ::= Int \"+\" Int " +
+                "syntax Int ::= r\"[0-9]+\" [token] " +
+                "endmodule";
+        parseProgram("0 + 3 // some text"   , defaultLayout, "Int", 0, false);
+        parseProgram("0 + 3 /* some text */", defaultLayout, "Int", 0, false);
+        parseProgram("0 /* some text */ + 3", defaultLayout, "Int", 0, false);
+        parseProgram("0 + 3 ;; some text"   , defaultLayout, "Int", 0, true);
+
+        String customLayout = "" +
+                "module TEST " +
+                "syntax #Layout ::= r\"(\\\\(;([^;]|(;+([^;\\\\)])))*;\\\\))\"" +
+                                 "| r\"(;;[^\\\\n\\\\r]*)\"" +
+                                 "| r\"([\\\\ \\\\n\\\\r\\\\t])\"" +
+                "// -------------------------------------\n" +      // make sure standard layout still works in K defn
+                "syntax Int ::= Int \"+\" Int " +
+                "syntax Int ::= r\"[0-9]+\" [token] " +
+                "endmodule";
+        parseProgram("0 + 3 ;; some text"   , customLayout, "Int", 0, false);
+        parseProgram("0 + 3 (; some text ;)", customLayout, "Int", 0, false);
+        parseProgram("0 (; some text ;) + 3", customLayout, "Int", 0, false);
+        parseProgram("0 + 3 // some text"   , customLayout, "Int", 0, true);
     }
 }

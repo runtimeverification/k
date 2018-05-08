@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2012-2016 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2012-2018 K Team. All Rights Reserved. -->
 
 * Cut-and-paste is a poor-man's approach to reuse.
 

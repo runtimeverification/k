@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2016 K Team. All Rights Reserved.
+// Copyright (c) 2015-2018 K Team. All Rights Reserved.
 package org.kframework.utils.inject;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;

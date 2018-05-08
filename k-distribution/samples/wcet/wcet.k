@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2016 K Team. All Rights Reserved.
+// Copyright (c) 2013-2018 K Team. All Rights Reserved.
 /*!
 \title{Low-Level Program Verification using Matching Logic Reachability}
 \author{Dwight Guth, Andrei \c{S}tef\u{a}nescu, and Grigore Ro\c{s}u}

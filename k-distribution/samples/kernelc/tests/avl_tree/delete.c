@@ -1,4 +1,4 @@
-// Copyright (c) 2014 K Team. All Rights Reserved.
+// Copyright (c) 2014-2018 K Team. All Rights Reserved.
 /*
  * Function that deletes the node of the tree having a certain value and
  * rebalances the tree to be an avl tree. Note that many functions below do not

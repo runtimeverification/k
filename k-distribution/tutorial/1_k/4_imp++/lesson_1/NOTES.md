@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2016 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2016-2018 K Team. All Rights Reserved. -->
 
 Add an exercise somewhere with a print which first evaluates all its arguments
 and THEN prints them.  The idea is to define `print` to be `strict` and to

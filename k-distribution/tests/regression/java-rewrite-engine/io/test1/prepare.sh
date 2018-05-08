@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright (c) 2013-2014 K Team. All Rights Reserved.
+# Copyright (c) 2013-2018 K Team. All Rights Reserved.
 
 DIR=$(dirname $0)
 

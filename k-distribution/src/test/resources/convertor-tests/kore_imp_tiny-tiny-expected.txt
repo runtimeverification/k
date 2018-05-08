@@ -1,2 +1,2 @@
-// Copyright (c) 2014-2015 K Team. All Rights Reserved.
+// Copyright (c) 2014-2018 K Team. All Rights Reserved.
 <top>(<k>(~>()),<state>(_Map_(Tuple2(n:Id,-1),Tuple2(s:Id,55))))

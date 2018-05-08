@@ -1,2 +1,2 @@
-// Copyright (c) 2014-2015 K Team. All Rights Reserved.
+// Copyright (c) 2014-2018 K Team. All Rights Reserved.
 '<top>('<k>('_/_(Int(#"1"),, Int(#"0"))),, '<state>(Id(#"x2") |-> Int(#"0") Id(#"x1") |-> Int(#"1")   ))

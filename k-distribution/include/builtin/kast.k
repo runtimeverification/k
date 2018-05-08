@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2016 K Team. All Rights Reserved.
+// Copyright (c) 2015-2018 K Team. All Rights Reserved.
 
 // Module defining only the sorts K and KString, useful for modularity
 module SORT-K
@@ -194,6 +194,12 @@ module RULE-LISTS
   // adds the subsort production to the parsing module only:
   // Es ::= E        [userList("*")]
 
+endmodule
+
+module DEFAULT-LAYOUT
+    syntax #Layout ::= r"(\\/\\*([^\\*]|(\\*+([^\\*\\/])))*\\*+\\/)"
+                     | r"(\\/\\/[^\\n\\r]*)"
+                     | r"([\\ \\n\\r\\t])"
 endmodule
 
 module DEFAULT-CONFIGURATION

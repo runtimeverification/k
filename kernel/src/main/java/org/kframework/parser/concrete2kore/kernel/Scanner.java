@@ -1,3 +1,4 @@
+// Copyright (c) 2016-2018 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore.kernel;
 
 import com.google.common.collect.ArrayListMultimap;
@@ -6,6 +7,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
+import org.kframework.builtin.Sorts;
 import org.kframework.definition.Module;
 import org.kframework.definition.RegexTerminal;
 import org.kframework.definition.Terminal;
@@ -40,9 +42,9 @@ public class Scanner implements AutoCloseable {
     private static final String FLEX_LIB = OS.current().equals(OS.OSX) ? "-ll" : "-lfl";
 
     public Scanner(ParseInModule module) {
-        tokens = KSyntax2GrammarStatesFilter.getTokens(module.getParsingModule());
-        scanner = getScanner();
-        this.module = module.seedModule();
+        this.tokens  = KSyntax2GrammarStatesFilter.getTokens(module.getParsingModule());
+        this.module  = module.seedModule();
+        this.scanner = getScanner();
     }
 
     public Module getModule() {
@@ -53,10 +55,6 @@ public class Scanner implements AutoCloseable {
     private TerminalLike getTokenByKind(int kind) {
         return tokens.entrySet().stream().filter(e -> e.getValue()._1() == kind).findAny().get().getKey();
     }
-
-    static final String multiLine = "(\\/\\*([^\\*]|(\\*+([^\\*\\/])))*\\*+\\/)";
-    static final String singleLine = "(\\/\\/[^\\n\\r]*)";
-    static final String whites = "([\\ \\n\\r\\t])";
 
     public File getScanner() {
         File scanner;
@@ -81,9 +79,11 @@ public class Scanner implements AutoCloseable {
                     "   fwrite(yytext, 1, len, stdout);" +
                     " } while (0) \n" +
                     "char *buffer;\n" +
-                    "%}\n" +
-                    "%%\n" +
-                    "("+ multiLine +"|"+ singleLine +"|"+ whites +")" + " ;\n");
+                    "%}\n\n" +
+                    "%%\n\n");
+            if (this.module.definedSorts().contains(Sorts.Layout())) {
+                flex.append(this.module.layout() + " ;\n");
+            }
             List<TerminalLike> ordered = tokens.keySet().stream().sorted((t1, t2) -> tokens.get(t2)._2() - tokens.get(t1)._2()).collect(Collectors.toList());
             for (TerminalLike key : ordered) {
                 if (key instanceof Terminal) {
@@ -95,7 +95,7 @@ public class Scanner implements AutoCloseable {
                 }
                 writeAction(flex, key);
             }
-            flex.append("%%\n" +
+            flex.append("\n\n%%\n\n" +
                     "int main(int argc, char **argv) {\n" +
                     "  freopen(NULL, \"rb\", stdin);\n" +
                     "  freopen(NULL, \"wb\", stdout);\n" +
@@ -243,10 +243,9 @@ public class Scanner implements AutoCloseable {
             byte[] buf = input.getBytes("UTF-8");
             ByteBuffer size = ByteBuffer.allocate(4);
             size.order(ByteOrder.nativeOrder());
-            size.putInt(buf.length + 1);
+            size.putInt(buf.length);
             process.getOutputStream().write(size.array());
             process.getOutputStream().write(buf);
-            process.getOutputStream().write('\n');
             process.getOutputStream().flush();
             return readTokenizedOutput(process, source, lines, columns);
         } catch (IOException | InterruptedException e) {

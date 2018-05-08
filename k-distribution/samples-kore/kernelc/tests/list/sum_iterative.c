@@ -1,4 +1,4 @@
-// Copyright (c) 2014 K Team. All Rights Reserved.
+// Copyright (c) 2014-2018 K Team. All Rights Reserved.
 /*
  * Function sum_iterative  returns the sum of the elements of a
  * singly linked list. The sum is iteratively computed.

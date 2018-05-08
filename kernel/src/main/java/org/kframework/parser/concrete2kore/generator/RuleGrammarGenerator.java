@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2016 K Team. All Rights Reserved.
+// Copyright (c) 2015-2018 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore.generator;
 
 import org.apache.commons.collections4.trie.PatriciaTrie;
@@ -64,6 +64,7 @@ public class RuleGrammarGenerator {
         return java.util.Collections.unmodifiableSet(kSorts);
     }
     /// modules that have a meaning:
+    public static final String DEFAULT_LAYOUT = "DEFAULT-LAYOUT";
     public static final String RULE_CELLS = "RULE-CELLS";
     public static final String CONFIG_CELLS = "CONFIG-CELLS";
     public static final String K = "K";
@@ -108,7 +109,11 @@ public class RuleGrammarGenerator {
      */
     public Module getRuleGrammar(Module mod) {
         // import RULE-CELLS in order to parse cells specific to rules
-        Module newM = new Module(mod.name() + "-" + RULE_CELLS, Set(mod, baseK.getModule(K).get(), baseK.getModule(RULE_CELLS).get()), Set(), Att());
+        Module newM = new Module( mod.name() + "-" + RULE_CELLS
+                                , Set(mod, baseK.getModule(K).get(), baseK.getModule(RULE_CELLS).get(), baseK.getModule(DEFAULT_LAYOUT).get())
+                                , Set()
+                                , Att()
+                                );
         return newM;
     }
 
@@ -120,7 +125,11 @@ public class RuleGrammarGenerator {
      */
     public Module getConfigGrammar(Module mod) {
         // import CONFIG-CELLS in order to parse cells specific to configurations
-        Module newM = new Module(mod.name() + "-" + CONFIG_CELLS, Set(mod, baseK.getModule(K).get(), baseK.getModule(CONFIG_CELLS).get()), Set(), Att());
+        Module newM = new Module( mod.name() + "-" + CONFIG_CELLS
+                                , Set(mod, baseK.getModule(K).get(), baseK.getModule(CONFIG_CELLS).get(), baseK.getModule(DEFAULT_LAYOUT).get())
+                                , Set()
+                                , Att()
+                                );
         return newM;
     }
 
@@ -148,10 +157,18 @@ public class RuleGrammarGenerator {
                 return Module.apply(oldMod.name(), immutable(imports), oldMod.localSentences(), oldMod.att());
             }, "apply program parsing modules").apply(mod);
 
-            // import PROGRAM-LISTS so user lists are modified to parse programs
-            scala.collection.Set<Module> modules = Set(newMod, baseK.getModule(PROGRAM_LISTS).get());
+            Set<Module> modules = new HashSet<Module>();
+            modules.add(newMod);
 
-            return Module.apply(mod.name() + POSTFIX, modules, Set(), Att());
+            // import PROGRAM-LISTS so user lists are modified to parse programs
+            modules.add(baseK.getModule(PROGRAM_LISTS).get());
+
+            // check if `#Layout` has been declared, import `DEFAULT-LAYOUT` if not
+            if (! mod.definedSorts().contains(Sorts.Layout())) {
+                modules.add(baseK.getModule(DEFAULT_LAYOUT).get());
+            }
+
+            return Module.apply(mod.name() + POSTFIX, immutable(modules), Set(), Att());
         }
     }
 

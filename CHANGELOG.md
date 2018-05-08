@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2014-2015 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2014-2018 K Team. All Rights Reserved. -->
 
 # K Framework 3.6 #
 
