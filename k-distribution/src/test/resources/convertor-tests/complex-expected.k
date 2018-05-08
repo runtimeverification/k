@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2016 K Team. All Rights Reserved.
+// Copyright (c) 2014-2018 K Team. All Rights Reserved.
 module TEST [Location(#token("3",Int),#token("1",Int),#token("10",Int),#token("9",Int)) Source(#token("src/test/resources/convertor-tests/complex.k",KString))]
   syntax Bool ::= #Bool [Location(#token("6",Int),#token("19",Int),#token("6",Int),#token("23",Int)) Source(#token("src/test/resources/convertor-tests/complex.k",KString))]
   syntax #Bool ::= "true" [Location(#token("4",Int),#token("20",Int),#token("4",Int),#token("25",Int)) Source(#token("src/test/resources/convertor-tests/complex.k",KString)) klabel(#token("true",KString))]

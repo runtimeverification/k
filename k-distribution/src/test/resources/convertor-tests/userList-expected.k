@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2016 K Team. All Rights Reserved.
+// Copyright (c) 2014-2018 K Team. All Rights Reserved.
 module TEST [Location(#token("3",Int),#token("1",Int),#token("6",Int),#token("9",Int)) Source(#token("src/test/resources/convertor-tests/userList.k",KString))]
   syntax Stxs ::= Stx "," Stxs [Location(#token("5",Int),#token("21",Int),#token("5",Int),#token("42",Int)) Source(#token("src/test/resources/convertor-tests/userList.k",KString)) foo(#token("",AttributeValue)) klabel(#token("_,_",KString)) right() userList(#token("*",KString))]
   syntax Stxs ::= ".Stxs" [Location(#token("5",Int),#token("21",Int),#token("5",Int),#token("42",Int)) Source(#token("src/test/resources/convertor-tests/userList.k",KString)) foo(#token("",AttributeValue)) klabel(#token(".List{\"_,_\"}",KString)) userList(#token("*",KString))]

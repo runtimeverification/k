@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2016 K Team. All Rights Reserved.
+// Copyright (c) 2014-2018 K Team. All Rights Reserved.
 module TEST [Location(#token("3",Int),#token("1",Int),#token("13",Int),#token("9",Int)) Source(#token("src/test/resources/convertor-tests/syntaxWithPriorities.k",KString))]
   syntax priority x > y z > t > u
   syntax associativity right y

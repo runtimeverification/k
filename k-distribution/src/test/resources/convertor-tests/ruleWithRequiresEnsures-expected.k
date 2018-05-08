@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2016 K Team. All Rights Reserved.
+// Copyright (c) 2014-2018 K Team. All Rights Reserved.
 module TEST [Location(#token("3",Int),#token("1",Int),#token("9",Int),#token("9",Int)) Source(#token("src/test/resources/convertor-tests/ruleWithRequiresEnsures.k",KString))]
   syntax Exp [Location(#token("4",Int),#token("3",Int),#token("4",Int),#token("12",Int)) Source(#token("src/test/resources/convertor-tests/ruleWithRequiresEnsures.k",KString))]
   rule =>(A,A) requires _andBool_(A,isExp(A)) ensures A [Location(#token("8",Int),#token("3",Int),#token("8",Int),#token("38",Int)) Source(#token("src/test/resources/convertor-tests/ruleWithRequiresEnsures.k",KString))]

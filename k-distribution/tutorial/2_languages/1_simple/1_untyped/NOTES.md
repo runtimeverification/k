@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2016 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2016-2018 K Team. All Rights Reserved. -->
 
 This is not well tested now, and it was not well tested in v3.6 either.
 We should add some rules as transitions, too, and then use search on all

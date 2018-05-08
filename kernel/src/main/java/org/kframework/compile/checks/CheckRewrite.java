@@ -1,4 +1,4 @@
-// Copyright (c) 2016 K Team. All Rights Reserved.
+// Copyright (c) 2016-2018 K Team. All Rights Reserved.
 package org.kframework.compile.checks;
 
 import org.kframework.definition.Module;

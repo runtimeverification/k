@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (c) 2014-2016 K Team. All Rights Reserved.
+# Copyright (c) 2014-2018 K Team. All Rights Reserved.
 # Usage: ./add_copyright <file>
 # TODO(dwightguth): currently this script will add a duplicate xml declaration
 # to files containing an xml declaration but no copyright, and will not
@@ -41,17 +41,17 @@ then
 fi
 if [ $EXTENSION = "xml" -o $EXTENSION = "xsd" ]
 then
-  sed -i '1s/^/<?xml version="1.0" encoding="UTF-8"?>\n<!-- Copyright (c) '$YEAR'2016 K Team. All Rights Reserved. -->\n/' "$1"
+  sed -i '1s/^/<?xml version="1.0" encoding="UTF-8"?>\n<!-- Copyright (c) '$YEAR'2018 K Team. All Rights Reserved. -->\n/' "$1"
 fi
 if [ $EXTENSION = "md" ]
 then
-  sed -i '1s/^/<!-- Copyright (c) '$YEAR'2016 K Team. All Rights Reserved. -->\n/' "$1"
+  sed -i '1s/^/<!-- Copyright (c) '$YEAR'2018 K Team. All Rights Reserved. -->\n/' "$1"
 fi
 if [ $EXTENSION = "k" -o $EXTENSION = "java" -o $EXTENSION = "jj" ]
 then
-  sed -i '1s/^/\/\/ Copyright (c) '$YEAR'2016 K Team. All Rights Reserved.\n/' "$1"
+  sed -i '1s/^/\/\/ Copyright (c) '$YEAR'2018 K Team. All Rights Reserved.\n/' "$1"
 fi
 if [ $EXTENSION = "css" ]
 then
-  sed -i '1s/^/\/\* Copyright (c) '$YEAR'2016 K Team. All Rights Reserved. \*\/\n/' "$1"
+  sed -i '1s/^/\/\* Copyright (c) '$YEAR'2018 K Team. All Rights Reserved. \*\/\n/' "$1"
 fi

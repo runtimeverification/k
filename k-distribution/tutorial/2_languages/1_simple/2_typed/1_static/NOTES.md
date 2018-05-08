@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2014-2016 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2014-2018 K Team. All Rights Reserved. -->
 
 While we disallow global variables with the same name, and that includes
 vector variables, we currently do not check that function names are distinct

@@ -1,4 +1,4 @@
-// Copyright (c) 2014 K Team. All Rights Reserved.
+// Copyright (c) 2014-2018 K Team. All Rights Reserved.
 /*
  * Function that searches an avl tree for a node with a certain value. It is
  * almost identical to the find function of binary search trees. The fact that

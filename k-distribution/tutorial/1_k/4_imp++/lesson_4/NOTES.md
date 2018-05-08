@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2010-2016 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2010-2018 K Team. All Rights Reserved. -->
 
 Make sure cells have the same indentation, which should use normal
 spaces, not tabs.  Tabs look differently in different editors.

@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2010-2016 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2010-2018 K Team. All Rights Reserved. -->
 
 ### Completing and Documenting IMP
 

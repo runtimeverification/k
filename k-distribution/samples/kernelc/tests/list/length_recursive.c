@@ -1,4 +1,4 @@
-// Copyright (c) 2014 K Team. All Rights Reserved.
+// Copyright (c) 2014-2018 K Team. All Rights Reserved.
 /*
  * Function length_recursive returns the length of a singly linked list.
  * The length is recursively computed.

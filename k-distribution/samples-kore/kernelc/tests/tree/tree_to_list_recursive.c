@@ -1,4 +1,4 @@
-// Copyright (c) 2014 K Team. All Rights Reserved.
+// Copyright (c) 2014-2018 K Team. All Rights Reserved.
 /*
  * Function that recursively transforms a binary tree into a singly linked list.
  * When freeing each tree node, it also prints its value.

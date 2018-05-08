@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<!-- Copyright (c) 2012-2016 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2012-2018 K Team. All Rights Reserved. -->
 <tests>
     <test definition="lang.k"
           results="."

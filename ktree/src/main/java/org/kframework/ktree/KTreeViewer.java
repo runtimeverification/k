@@ -1,4 +1,4 @@
-// Copyright (c) 2015 K Team. All Rights Reserved.
+// Copyright (c) 2015-2018 K Team. All Rights Reserved.
 package org.kframework.ktree;
 
 import org.apache.commons.io.FileUtils;
