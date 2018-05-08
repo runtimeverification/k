@@ -12,7 +12,8 @@
        be effectively automated. -->
   <!-- TODO: add modules as needed to support comments in other programming languages -->
   <module name="RegexpHeader">
-    <property name="header" value="^&lt;\?xml.*\?&gt;$\n^&lt;!-- Copyright \(c\) (\d\d\d\d-)?2018 (?:Runtime Verification, Inc. \(RV-Match team\)|K Team). All Rights Reserved. --&gt;$" />
+    <property name="multiLines" value="1,2" />
+    <property name="header" value="^&lt;\?xml.*\?&gt;$\n^&lt;!-- Copyright \(c\) (\d\d\d\d-)?2018 (Runtime Verification, Inc.( \(RV-Match team\))?|2018 K Team). All Rights Reserved. --&gt;$" />
     <property name="fileExtensions" value="xml,xsd" />
   </module>
   <module name="RegexpHeader">
@@ -20,7 +21,7 @@
     <property name="fileExtensions" value="md" />
   </module>
   <module name="RegexpHeader">
-    <property name="header" value="^// Copyright \(c\) (\d\d\d\d-)?2018 (?:Runtime Verification, Inc. \(RV-Match team\)|K Team). All Rights Reserved.$" />
+    <property name="header" value="^// Copyright \(c\) (\d\d\d\d-)?2018 (Runtime Verification, Inc.( \(RV-Match team\))?|K Team). All Rights Reserved.$" />
     <property name="fileExtensions" value="k,kore,java,jj,str" />
   </module>
   <module name="RegexpHeader">
