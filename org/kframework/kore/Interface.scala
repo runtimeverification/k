@@ -301,7 +301,7 @@ object Mem {
 }
 
 /**
-  * Membership, denoted as \in(P, Q) === \ceil(P and Q)
+  * Any domain-specific value represented as a string.
   */
 trait DomainValue extends Pattern {
   def s: Sort // the sort of X and P
