@@ -97,7 +97,7 @@ public class KProve {
         Module specModule = getModule(specModuleName, modulesMap, compiledDefinition.getParsedDefinition());
         specModule = backend.specificationSteps(compiledDefinition.kompiledDefinition).apply(specModule);
         specModule = spliceModule(specModule, compiledDefinition.kompiledDefinition);
-        Definition combinedDef = Definition.apply(defModule, (Set<Module>) immutable(modules).$bar(compiledDefinition.getParsedDefinition().entryModules()), Att.empty());
+        Definition combinedDef = Definition.apply(defModule, compiledDefinition.getParsedDefinition().entryModules(), Att.empty());
         Definition compiled = compileDefinition(backend, combinedDef);
         return Tuple2.apply(compiled, specModule);
     }
