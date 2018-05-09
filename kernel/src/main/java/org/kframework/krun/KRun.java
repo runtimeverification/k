@@ -238,8 +238,7 @@ public class KRun {
     }
 
     public static String getString(Module module, OutputModes output, Consumer<byte[]> print, K result, ColorSetting colorize) {
-        Module unparsingModule = RuleGrammarGenerator.getCombinedGrammar(module, false).getExtensionModule();
-        return (unparseTerm(result, unparsingModule, colorize) + "\n").replaceAll("\n", "\\\\n");
+        return (unparseTerm(result, module, colorize) + "\n").replaceAll("\n", "\\\\n");
     }
 
     private K parseConfigVars(KRunOptions options, CompiledDefinition compiledDef) {

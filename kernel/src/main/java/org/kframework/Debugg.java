@@ -5,14 +5,14 @@ import org.kframework.definition.Module;
 import org.kframework.kore.K;
 import org.kframework.krun.ColorSetting;
 import org.kframework.krun.KRun;
+import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.unparser.OutputModes;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Queue;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.function.Consumer;
 
 public class Debugg {
@@ -32,9 +32,11 @@ public class Debugg {
     private static String currentRule; // saved to catch crashing terms
     private static boolean crash;
     private static String exception;
+    private static Module unparsingModule;
 
-    private static HashMap<String, String> ruleMap;
-    private static HashMap<String, String> nodeMap;
+
+    private static HashMap<String, Boolean> ruleMap;
+    private static HashMap<String, Boolean> nodeMap;
 
     private static Queue<String> tmpRules;
 
@@ -47,6 +49,8 @@ public class Debugg {
         Debugg.ruleMap = new HashMap<>();
         ruleProfs = new ArrayList<>();
         Debugg.nodeMap = new HashMap<>();
+        Debugg.currentRule = "";
+        Debugg.unparsingModule = RuleGrammarGenerator.getCombinedGrammar(module, false).getExtensionModule();
     }
 
     public static void step(String s) {
@@ -88,29 +92,34 @@ public class Debugg {
 
     public static void save() {
         StringBuilder rules = new StringBuilder();
-        for (String key : Debugg.ruleMap.keySet()) {
+        /*for (String key : Debugg.ruleMap.keySet()) {
             if(!rules.toString().equals("")) rules.append(",\n");
             rules.append("\"")
                     .append(key)
                     .append("\": \"")
                     .append(Debugg.ruleMap.get(key))
                     .append("\"");
-        }
-        StringBuilder nodes = new StringBuilder();
+        }*/
+        /*StringBuilder nodes = new StringBuilder();
         for (String key : Debugg.nodeMap.keySet()) {
             if(!nodes.toString().equals("")) nodes.append(",\n");
             nodes.append("\"")
                     .append(key)
                     .append("\": ")
                     .append(Debugg.nodeMap.get(key));
-        }
+        }*/
         String json = "{\n"
-            + "\"rules\": "  + "{\n" + rules + "\n},\n"
-            + "\"nodes\": "  + "{\n" + nodes + "\n},\n"
+           // + "\"rules\": "  + "{\n" + rules + "\n},\n"
+            //+ "\"nodes\": "  + "{\n" + nodes + "\n},\n"
             + "\"proofs\": [\n" + String.join(",\n", ruleProfs) + "\n]\n"
             + "}\n";
         try {
-            Debugg.writer = new PrintWriter("debug.json");
+
+
+            DateFormat df = new SimpleDateFormat("yyyy_MM_dd_HH_mm");
+            Date today = Calendar.getInstance().getTime();
+            String reportDate = df.format(today);
+            Debugg.writer = new PrintWriter("steps/debug_" + reportDate + ".json");
             Debugg.writer.println(json);
             Debugg.writer.close();
         } catch (FileNotFoundException e) {
@@ -119,14 +128,25 @@ public class Debugg {
     }
 
     public static String addNode(K term, K constraint) {
-        String t = KRun.getString(Debugg.module, Debugg.output, Debugg.print, term, Debugg.colorize);
-        String c = KRun.getString(Debugg.module, Debugg.output, Debugg.print, constraint, Debugg.colorize);
+
+        String t = KRun.getString(Debugg.unparsingModule, Debugg.output, Debugg.print, term, Debugg.colorize);
+        String c = KRun.getString(Debugg.unparsingModule, Debugg.output, Debugg.print, constraint, Debugg.colorize);
         String node = "{\n"
                 + "\"term\": \"" + t + "\",\n"
                 + "\"constraint\": \"" + c + "\"\n"
                 + "}\n";
-        nodeMap.put(node.hashCode() + "", node);
-        return node.hashCode() + "";
+        String node_key = Integer.toHexString(node.hashCode());
+        if(!Debugg.nodeMap.containsKey(node_key)) {
+            try {
+                Debugg.writer = new PrintWriter("nodes/" + node_key + ".json");
+                Debugg.writer.println(node);
+                Debugg.writer.close();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+        nodeMap.put(node.hashCode() + "", true);
+        return node_key;
     }
 
     public static void addStep(K from, K to, K from_c, K to_c) {
@@ -163,7 +183,16 @@ public class Debugg {
     }
 
     public static void addRule(String rule_key, String rule) {
-        Debugg.ruleMap.put(rule_key, rule);
+        if(!Debugg.ruleMap.containsKey(rule_key)) {
+            try {
+                Debugg.writer = new PrintWriter("rules/" + rule_key + ".json");
+                Debugg.writer.println(rule);
+                Debugg.writer.close();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+        Debugg.ruleMap.put(rule_key, true);
     }
 
     public static void setUpProveRule() {

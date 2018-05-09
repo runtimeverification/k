@@ -219,7 +219,7 @@ public class SymbolicRewriter {
                 continue;
             }
 
-            String rule_key = matchResult.ruleIndex + "";
+            String rule_key = Integer.toHexString(matchResult.ruleIndex);
             Debugg.pushTmpRule(rule_key);
             Debugg.addRule(rule_key, rule.att().toString());
             //Debugg.addStepRule(subject.term(), result.term(), subject.constraint(), result.constraint(), rule_key);
@@ -611,6 +611,12 @@ public class SymbolicRewriter {
                 System.out.println(step);
                 Debugg.saveIntermediate();
             }
+            if(step == 1246) {
+                System.out.println("jaja");
+            }
+            if(step == 1250) {
+             //   throw new Error("ein Zonk hinter dieser Tür.");
+            }
             for (ConstrainedTerm term : queue) {
                 Debugg.setCurrentTerm(term.term(), term.constraint());
                 if (term.implies(targetTerm)) {
@@ -716,7 +722,7 @@ public class SymbolicRewriter {
             ConjunctiveFormula constraint = constrainedTerm.matchImplies(pattern, true);
             if (constraint != null) {
                 ConstrainedTerm result = buildResult(specRule, constraint, null, true, constrainedTerm.termContext());
-                String rule_key = specRule.att().toString().hashCode() + "";
+                String rule_key = Integer.toHexString(specRule.att().toString().hashCode());
                 Debugg.addRule(rule_key, specRule.att().toString());
                 Debugg.addStepRule(constrainedTerm.term(), result.term(), constrainedTerm.constraint(), result.constraint(), rule_key);
                 return result;
