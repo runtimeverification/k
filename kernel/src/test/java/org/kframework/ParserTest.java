@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 import org.kframework.definition.*;
+import org.kframework.definition.Module;
 import org.kframework.kore.K;
 import org.kframework.kore.Sort;
 import scala.Option;

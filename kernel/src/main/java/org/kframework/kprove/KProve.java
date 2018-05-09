@@ -6,6 +6,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.kframework.attributes.Att;
 import org.kframework.compile.*;
 import org.kframework.definition.*;
+import org.kframework.definition.Module;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.Kompile;
 import org.kframework.kore.K;
