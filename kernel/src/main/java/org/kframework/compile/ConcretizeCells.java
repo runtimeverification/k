@@ -6,6 +6,7 @@ import org.kframework.compile.ConfigurationInfoFromModule;
 import org.kframework.compile.LabelInfo;
 import org.kframework.compile.LabelInfoFromModule;
 import org.kframework.definition.*;
+import org.kframework.definition.Module;
 
 /**
  * Apply the configuration concretization process.
