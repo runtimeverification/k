@@ -3,6 +3,7 @@ package org.kframework;
 
 import org.kframework.attributes.Source;
 import org.kframework.definition.*;
+import org.kframework.definition.Module;
 import org.kframework.kore.K;
 import org.kframework.kore.Sort;
 import org.kframework.parser.concrete2kore.ParseInModule;
