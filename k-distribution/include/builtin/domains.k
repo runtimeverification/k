@@ -739,7 +739,7 @@ module K-IO
                                   String) // module name
                                   [function, hook(IO.parseInModule), impure]
 
-  rule #open(S:String) => #open(S:String, "rw")
+  rule #open(S:String) => #open(S:String, "r+")
 
   syntax Int ::= "#stdin"   [function]
                 | "#stdout" [function]
