@@ -82,6 +82,9 @@ public class KompileOptions implements Serializable {
 
     public boolean strict() { return !nonStrict; }
 
+    @Parameter(names="--coverage", description="Generate coverage data when executing semantics.")
+    public boolean coverage;
+
     @ParametersDelegate
     public Experimental experimental = new Experimental();
 

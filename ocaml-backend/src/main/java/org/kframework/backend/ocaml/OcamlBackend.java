@@ -162,7 +162,7 @@ public class OcamlBackend implements Backend {
 
     @Override
     public Function<Definition, Definition> steps() {
-        return Kompile.defaultSteps(kompileOptions, kem, excludedModuleTags());
+        return Kompile.defaultSteps(kompileOptions, kem, files, excludedModuleTags());
     }
 
     @Override
