@@ -726,6 +726,8 @@ module K-IO
              | "#seekEnd" "(" Int "," Int ")" [function, hook(IO.seekEnd), impure]
              | "#putc" "(" Int "," Int ")"      [function, hook(IO.putc), impure]
              | "#write" "(" Int "," String ")" [function, hook(IO.write), impure]
+             | "#lock" "(" Int "," Int ")" [function, hook(IO.lock), impure]
+             | "#unlock" "(" Int "," Int ")" [function, hook(IO.unlock), impure]
 
   syntax KItem ::= "#stat" "(" String ")" [function, hook(IO.stat), impure]
                  | "#lstat" "(" String ")" [function, hook(IO.lstat), impure]
