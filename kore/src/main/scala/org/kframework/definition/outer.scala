@@ -264,22 +264,26 @@ trait Sentence {
   val isSyntax: Boolean
   val isNonSyntax: Boolean
   val att: Att
+  def withAtt(att: Att): Sentence
 }
 
 // deprecated
 case class Context(body: K, requires: K, att: Att = Att.empty) extends Sentence with OuterKORE with ContextToString {
   override val isSyntax = false
   override val isNonSyntax = true
+  override def withAtt(att: Att) = Context(body, requires, att)
 }
 
 case class Rule(body: K, requires: K, ensures: K, att: Att = Att.empty) extends Sentence with RuleToString with OuterKORE {
   override val isSyntax = false
   override val isNonSyntax = true
+  override def withAtt(att: Att) = Rule(body, requires, ensures, att)
 }
 
 case class ModuleComment(comment: String, att: Att = Att.empty) extends Sentence with OuterKORE {
   override val isSyntax = false
   override val isNonSyntax = true
+  override def withAtt(att: Att) = ModuleComment(comment, att)
 }
 
 // hooked
@@ -290,6 +294,7 @@ case class SyntaxPriority(priorities: Seq[Set[Tag]], att: Att = Att.empty)
   extends Sentence with SyntaxPriorityToString with OuterKORE {
   override val isSyntax = true
   override val isNonSyntax = false
+  override def withAtt(att: Att) = SyntaxPriority(priorities, att)
 }
 
 object Associativity extends Enumeration {
@@ -304,6 +309,7 @@ case class SyntaxAssociativity(
   extends Sentence with SyntaxAssociativityToString with OuterKORE {
   override val isSyntax = true
   override val isNonSyntax = false
+  override def withAtt(att: Att) = SyntaxAssociativity(assoc, tags, att)
 }
 
 case class Tag(name: String) extends TagToString with OuterKORE
@@ -322,6 +328,7 @@ case class SyntaxSort(sort: Sort, att: Att = Att.empty) extends Sentence
 
   override val isSyntax = true
   override val isNonSyntax = false
+  override def withAtt(att: Att) = SyntaxSort(sort, att)
 }
 
 case class Production(sort: Sort, items: Seq[ProductionItem], att: Att)
@@ -409,6 +416,7 @@ case class Production(sort: Sort, items: Seq[ProductionItem], att: Att)
   }
   override val isSyntax = true
   override val isNonSyntax = false
+  override def withAtt(att: Att) = Production(sort, items, att)
 }
 
 object Production {
