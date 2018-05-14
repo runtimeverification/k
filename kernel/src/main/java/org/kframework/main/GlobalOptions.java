@@ -1,7 +1,9 @@
 // Copyright (c) 2014-2019 K Team. All Rights Reserved.
 package org.kframework.main;
 
+import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Set;
 
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -84,9 +86,24 @@ public final class GlobalOptions {
     @Parameter(names="--debug", description="Print debugging output messages")
     public boolean debug = false;
 
+    @Parameter(names = "--debug-steps", variableArity = true, description = "Specify exact steps for which --debug option should be enabled")
+    public List<String> debugSteps = new ArrayList<>();
+
     @Parameter(names={"--warnings", "-w"}, converter=WarningsConverter.class, description="Warning level. Values: [all|normal|none]")
     public Warnings warnings = Warnings.NORMAL;
 
     @Parameter(names={"--warnings-to-errors", "-w2e"}, description="Convert warnings to errors.")
     public boolean warnings2errors = false;
+
+    @Parameter(names="--fast", description="Print final configs with toString() rather than pretty print.")
+    public boolean fast = false;
+
+    @Parameter(names="--branching-allowed", arity=1, description="Number of branching events allowed before a forcible stop.")
+    public int branchingAllowed = Integer.MAX_VALUE;
+
+    @Parameter(names="--log", description="Log every step.")
+    public boolean log = false;
+
+    @Parameter(names = "--no-debug-last-step", description = "By default option --debug activated for last step. Useful to debug final implication. Use this option to disable debug entirely.")
+    public boolean noDebugLastStep = false;
 }

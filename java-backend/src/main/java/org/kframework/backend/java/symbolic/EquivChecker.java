@@ -131,7 +131,7 @@ public class EquivChecker {
             ++steps;
             for (ConstrainedTerm curr : queue) {
 
-                java.util.List<ConstrainedTerm> nexts = rewriter.fastComputeRewriteStep(curr, false, true, true);
+                java.util.List<ConstrainedTerm> nexts = rewriter.fastComputeRewriteStep(curr, false, true, true, steps);
 
                 if (nexts.isEmpty()) {
                     /* final term */
