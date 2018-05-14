@@ -89,4 +89,10 @@ public final class GlobalOptions {
 
     @Parameter(names={"--warnings-to-errors", "-w2e"}, description="Convert warnings to errors.")
     public boolean warnings2errors = false;
+
+    @Parameter(names="--fast", description="Print final configs with toString() rather than pretty print.")
+    public boolean fast = false;
+
+    @Parameter(names="--halt-on-branching", description="Halt execution if there is branching.")
+    public boolean haltOnBranching = false;
 }

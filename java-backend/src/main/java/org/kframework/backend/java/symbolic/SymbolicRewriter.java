@@ -11,7 +11,20 @@ import org.kframework.attributes.Att;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.FreshOperations;
 import org.kframework.backend.java.compile.KOREtoBackendKIL;
-import org.kframework.backend.java.kil.*;
+import org.kframework.backend.java.kil.BuiltinList;
+import org.kframework.backend.java.kil.BuiltinMap;
+import org.kframework.backend.java.kil.ConstrainedTerm;
+import org.kframework.backend.java.kil.Definition;
+import org.kframework.backend.java.kil.GlobalContext;
+import org.kframework.backend.java.kil.JavaSymbolicObject;
+import org.kframework.backend.java.kil.KItem;
+import org.kframework.backend.java.kil.KLabelConstant;
+import org.kframework.backend.java.kil.KList;
+import org.kframework.backend.java.kil.Rule;
+import org.kframework.backend.java.kil.Sort;
+import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermContext;
+import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.strategies.TransitionCompositeStrategy;
 import org.kframework.builtin.KLabels;
 import org.kframework.kore.FindK;
@@ -24,7 +37,14 @@ import org.kframework.rewriter.SearchType;
 import org.kframework.backend.java.utils.BitSet;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.io.File;
 
@@ -622,6 +642,21 @@ public class SymbolicRewriter {
                 System.out.println(output);
                 System.out.println(statusCode);
                 System.out.println(localMem);
+                System.out.println("<localMem>");
+                K theMap = ((KItem) localMem).klist().items().get(0);
+                if (theMap instanceof BuiltinMap) {
+                    List<Term> entries = ((BuiltinMap) theMap).getKComponents();
+                    for (int i = 0; i < entries.size(); i += 10) {
+                        System.out.println("\t" + entries.get(i));
+                        System.out.println("\t...");
+                    }
+                } else {
+                    System.out.println("\tNon-map format:");
+                    System.out.print("\t");
+                    System.out.println(theMap);
+                }
+                System.out.println("</localMem>");
+
                 System.out.println(pc);
                 System.out.println(wordStack);
                 String callDataStr = callData.toString();
@@ -713,7 +748,13 @@ public class SymbolicRewriter {
                 }
 
                 if (results.size() > 1) {
-                    System.out.println("\nBranching!\n=====================\n");
+                    if (KProve.options.global.haltOnBranching) {
+                        System.out.println("\nHalt on branching!\n=====================\n");
+                        proofResults.addAll(results);
+                        continue;
+                    } else {
+                        System.out.println("\nBranching!\n=====================\n");
+                    }
                 }
                 for (ConstrainedTerm cterm : results) {
                     ConstrainedTerm result = new ConstrainedTerm(
@@ -743,7 +784,11 @@ public class SymbolicRewriter {
         }
         //fixme rebase: check if not printed elsewhere
         for (ConstrainedTerm term : proofResults) {
-            KProve.prettyPrint(term.term());
+            if (KProve.options.global.fast) {
+                System.out.println(term);
+            } else {
+                KProve.prettyPrint(term.term());
+            }
             System.out.println("/\\");
             KProve.prettyPrint(term.constraint());
             System.out.println();
