@@ -12,7 +12,7 @@ public class NumberSentences {
     }
 
     private String ruleHash(Sentence s) {
-      String text = s.toString();
+      String text = new NormalizeVariables().normalize(s).toString();
       SHA3.Digest256 sha3engine = new SHA3.Digest256();
       byte[] digest = sha3engine.digest(text.getBytes());
       String digestString = Hex.toHexString(digest);
