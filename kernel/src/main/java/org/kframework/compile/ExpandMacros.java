@@ -117,6 +117,7 @@ public class ExpandMacros {
                         final Map<KVariable, K> subst = new HashMap<>();
                         if (match(subst, left, applied, r)) {
                             if (cover) {
+                                if (!r.att().contains("UNIQUE_ID")) System.out.println(r.toString());
                                 coverage.println(r.att().get("UNIQUE_ID"));
                             }
                             return apply(new TransformK() {
