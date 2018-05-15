@@ -67,12 +67,17 @@ public class ExpandMacros {
         this.cover = kompileOptions.coverage;
         files.resolveKompiled(".").mkdirs();
         macros = stream(mod.rules()).filter(r -> r.att().contains("macro")).sorted(Comparator.comparing(r -> r.att().contains("owise"))).collect(Collectors.groupingBy(r -> ((KApply)RewriteToTop.toLeft(r.body())).klabel()));
-        try {
-            FileOutputStream os = new FileOutputStream(files.resolveKompiled("coverage.txt"), true);
-            channel = os.getChannel();
-            coverage = new PrintWriter(new BufferedWriter(new OutputStreamWriter(os)));
-        } catch (IOException e) {
-            throw KEMException.internalError("Could not write list of rules to coverage document.", e);
+        if (cover) {
+            try {
+                FileOutputStream os = new FileOutputStream(files.resolveKompiled("coverage.txt"), true);
+                channel = os.getChannel();
+                coverage = new PrintWriter(new BufferedWriter(new OutputStreamWriter(os)));
+            } catch (IOException e) {
+                throw KEMException.internalError("Could not write list of rules to coverage document.", e);
+            }
+        } else {
+            channel = null;
+            coverage = null;
         }
     }
 
