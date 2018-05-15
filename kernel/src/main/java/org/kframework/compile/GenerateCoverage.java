@@ -22,14 +22,14 @@ import static org.kframework.kore.KORE.*;
 public class GenerateCoverage implements AutoCloseable {
     private final boolean cover;
     private final FileUtil files;
-    private final PrintWriter allFiles;
+    private final PrintWriter allRulesFile;
 
     public GenerateCoverage(boolean cover, FileUtil files) {
         this.cover = cover;
         this.files = files;
         files.resolveKompiled(".").mkdirs();
         try {
-            allFiles = new PrintWriter(new BufferedWriter(new FileWriter(files.resolveKompiled("allRules.txt").getAbsolutePath())));
+            allRulesFile = new PrintWriter(new BufferedWriter(new FileWriter(files.resolveKompiled("allRules.txt").getAbsolutePath())));
         } catch (IOException e) {
             throw KEMException.internalError("Could not write list of rules to coverage document.", e);
         }
@@ -49,9 +49,9 @@ public class GenerateCoverage implements AutoCloseable {
         int col = r.att().get(Location.class).startColumn();
         String loc = file + ":" + line + ":" + col;
         String id = r.att().get("UNIQUE_ID");
-        allFiles.print(id);
-        allFiles.print(" ");
-        allFiles.println(loc);
+        allRulesFile.print(id);
+        allRulesFile.print(" ");
+        allRulesFile.println(loc);
         if (r.att().contains("macro")) {
             //handled by macro expander
             return body;
@@ -63,6 +63,6 @@ public class GenerateCoverage implements AutoCloseable {
 
     @Override
     public void close() {
-      allFiles.close();
+      allRulesFile.close();
     }
 }
