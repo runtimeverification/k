@@ -594,6 +594,12 @@ struct
   let hook_write c _ _ _ _ = match c with
       [Int fd], [String s] -> unix_error (fun () -> let b = Bytes.of_string s in let _ = Unix.write (Hashtbl.find file_descriptors fd) b 0 (Bytes.length b) in [])
     | _ -> raise Not_implemented
+  let hook_lock c _ _ _ _ = match c with
+      [Int fd], [Int len] -> unix_error (fun () -> Unix.lockf (Hashtbl.find file_descriptors fd) Unix.F_LOCK (Z.to_int len); [])
+    | _ -> raise Not_implemented
+  let hook_unlock c _ _ _ _ = match c with
+      [Int fd], [Int len] -> unix_error (fun () -> Unix.lockf (Hashtbl.find file_descriptors fd) Unix.F_ULOCK (Z.to_int len); [])
+    | _ -> raise Not_implemented
 
   let hook_stat _ _ _ _ _ = raise Not_implemented
   let hook_lstat _ _ _ _ _ = raise Not_implemented

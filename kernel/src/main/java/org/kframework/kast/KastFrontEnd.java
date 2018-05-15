@@ -96,18 +96,21 @@ public class KastFrontEnd extends FrontEnd {
                 }
             }
             org.kframework.definition.Module mod;
+            org.kframework.definition.Module compiledMod;
             if (options.module == null) {
                 mod = def.programParsingModuleFor(def.mainSyntaxModuleName(), kem).get();
+                compiledMod = def.kompiledDefinition.getModule(def.mainSyntaxModuleName()).get();
             } else {
                 Option<org.kframework.definition.Module> mod2 = def.programParsingModuleFor(options.module, kem);
                 if (mod2.isEmpty()) {
                     throw KEMException.innerParserError("Module " + options.module + " not found. Specify a module with -m.");
                 }
                 mod = mod2.get();
+                compiledMod = def.kompiledDefinition.getModule(options.module).get();
             }
             K parsed = def.getParser(mod, sort, kem).apply(FileUtil.read(stringToParse), source);
             if (options.expandMacros) {
-                parsed = new ExpandMacros(mod, kem, files, options.global, def.kompileOptions).expand(parsed);
+                parsed = new ExpandMacros(compiledMod, kem, files, options.global, def.kompileOptions).expand(parsed);
             }
             System.out.println(ToKast.apply(parsed));
             sw.printTotal("Total");

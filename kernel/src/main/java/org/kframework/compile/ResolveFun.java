@@ -1,5 +1,7 @@
+// Copyright (c) 2017-2018 K Team. All Rights Reserved.
 package org.kframework.compile;
 
+import org.kframework.attributes.Att;
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Context;
@@ -98,7 +100,7 @@ public class ResolveFun {
                     }
                     KLabel fun = getUniqueLambdaLabel(nameHint1, nameHint2);
                     funProds.add(funProd(fun, body));
-                    funRules.add(funRule(fun, body));
+                    funRules.add(funRule(fun, body, k.att()));
                     List<K> klist = new ArrayList<>();
                     klist.add(apply(arg));
                     klist.addAll(closure(body));
@@ -109,14 +111,14 @@ public class ResolveFun {
         }.apply(body);
     }
 
-    private Rule funRule(KLabel fun, K k) {
+    private Rule funRule(KLabel fun, K k, Att att) {
         K resolved = transform(k);
         K withAnonVars = new ResolveAnonVar().resolveK(resolved);
         List<K> klist = new ArrayList<>();
         klist.add(RewriteToTop.toLeft(withAnonVars));
         klist.addAll(closure(k));
         return Rule(KRewrite(KApply(fun, KList(klist)), RewriteToTop.toRight(withAnonVars)),
-                BooleanUtils.TRUE, BooleanUtils.TRUE);
+                BooleanUtils.TRUE, BooleanUtils.TRUE, att);
     }
 
     private List<K> closure(K k) {

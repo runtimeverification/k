@@ -35,8 +35,11 @@ object ModuleTransformer {
         m
     }, name)
 
-  def fromRuleBodyTranformer(f: K => K, name: String): ModuleTransformer =
-    fromSentenceTransformer(_ match { case r: Rule => r.copy(body = f(r.body)); case s => s }, name)
+  def fromRuleBodyTransformer(f: K => K, name: String): ModuleTransformer =
+    fromRuleBodyTransformerWithRule((rule, k) => f(k), name)
+
+  def fromRuleBodyTransformerWithRule(f: (Rule, K) => K, name: String) : ModuleTransformer =
+    fromSentenceTransformer(_ match { case r: Rule => r.copy(body = f(r, r.body)); case s => s }, name)
 
   def fromKTransformerWithModuleInfo(ff: (Module, K) => K, name: String): ModuleTransformer =
     fromSentenceTransformer((module, sentence) => {
@@ -81,8 +84,11 @@ object DefinitionTransformer {
   def fromSentenceTransformer(f: (Module, Sentence) => Sentence, name: String): DefinitionTransformer =
     DefinitionTransformer(ModuleTransformer.fromSentenceTransformer(f, name))
 
-  def fromRuleBodyTranformer(f: K => K, name: String): DefinitionTransformer =
-    DefinitionTransformer(ModuleTransformer.fromRuleBodyTranformer(f, name))
+  def fromRuleBodyTransformer(f: K => K, name: String): DefinitionTransformer =
+    DefinitionTransformer(ModuleTransformer.fromRuleBodyTransformer(f, name))
+
+  def fromRuleBodyTransformerWithRule(f: (Rule, K) => K, name: String): DefinitionTransformer =
+    DefinitionTransformer(ModuleTransformer.fromRuleBodyTransformerWithRule(f, name))
 
   def fromKTransformer(f: K => K, name: String): DefinitionTransformer =
     DefinitionTransformer(ModuleTransformer.fromKTransformer(f, name))

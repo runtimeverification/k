@@ -726,6 +726,8 @@ module K-IO
              | "#seekEnd" "(" Int "," Int ")" [function, hook(IO.seekEnd), impure]
              | "#putc" "(" Int "," Int ")"      [function, hook(IO.putc), impure]
              | "#write" "(" Int "," String ")" [function, hook(IO.write), impure]
+             | "#lock" "(" Int "," Int ")" [function, hook(IO.lock), impure]
+             | "#unlock" "(" Int "," Int ")" [function, hook(IO.unlock), impure]
 
   syntax KItem ::= "#stat" "(" String ")" [function, hook(IO.stat), impure]
                  | "#lstat" "(" String ")" [function, hook(IO.lstat), impure]
@@ -737,7 +739,7 @@ module K-IO
                                   String) // module name
                                   [function, hook(IO.parseInModule), impure]
 
-  rule #open(S:String) => #open(S:String, "rw")
+  rule #open(S:String) => #open(S:String, "r+")
 
   syntax Int ::= "#stdin"   [function]
                 | "#stdout" [function]
@@ -754,6 +756,17 @@ module K-IO
 
   syntax KItem ::= #system ( String ) [function, hook(IO.system), impure]
                  | "#systemResult" "(" Int /* exit code */ "," String /* stdout */ "," String /* stderr */ ")"
+
+  syntax K ::= #appendToFile(String, String) [function]
+             | #lockOpenFileThenAppendAndClose(Int, String) [function]
+             | #appendToOpenFileThenClose(K, Int, String) [function]
+             | #thenUnlockAndClose(K, Int, String) [function]
+             | #thenClose(K, Int) [function]
+  rule #appendToFile(Path:String, Text:String) => #lockOpenFileThenAppendAndClose(#open(Path, "a"), Text)
+  rule #lockOpenFileThenAppendAndClose(FD:Int, Text:String) => #appendToOpenFileThenClose(#lock(FD, 0), FD, Text)
+  rule #appendToOpenFileThenClose(.K, FD:Int, Text:String) => #thenUnlockAndClose(#write(FD, Text), FD, Text)
+  rule #thenUnlockAndClose(.K, FD:Int, Text:String) => #thenClose(#unlock(FD, 0 -Int lengthString(Text)), FD)
+  rule #thenClose(.K, FD) => #close(FD)
 
 endmodule
 
