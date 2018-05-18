@@ -1,6 +1,6 @@
-diff -ruN mlgmp_ref/mlgmp/config.h mlgmp/config.h
---- mlgmp_ref/mlgmp/config.h	2002-07-29 20:31:12.000000000 -0500
-+++ mlgmp/config.h	2016-03-10 08:50:24.938515505 -0600
+diff -ruN mlgmp_ref/config.h mlgmp/config.h
+--- mlgmp_ref/config.h	2002-07-29 20:31:12.000000000 -0500
++++ mlgmp/config.h	2018-05-18 16:35:43.518092957 -0500
 @@ -3,6 +3,7 @@
  #define NDEBUG
  #undef TRACE
@@ -30,9 +30,9 @@ diff -ruN mlgmp_ref/mlgmp/config.h mlgmp/config.h
  extern void deserialize_block_1(void * data, long len);
  
  #endif /* SERIALIZE */
-diff -ruN mlgmp_ref/mlgmp/gmp.ml mlgmp/gmp.ml
---- mlgmp_ref/mlgmp/gmp.ml	2012-02-24 01:48:47.000000000 -0600
-+++ mlgmp/gmp.ml	2016-03-10 08:50:24.938515505 -0600
+diff -ruN mlgmp_ref/gmp.ml mlgmp/gmp.ml
+--- mlgmp_ref/gmp.ml	2012-02-24 01:48:47.000000000 -0600
++++ mlgmp/gmp.ml	2018-05-18 16:35:43.530093046 -0500
 @@ -1,7 +1,8 @@
  (*
   * ML GMP - Interface between Objective Caml and GNU MP
@@ -52,6 +52,23 @@ diff -ruN mlgmp_ref/mlgmp/gmp.ml mlgmp/gmp.ml
    external urandomb: state: RNG.randstate_t->nbits: int->t =
      "_mlgmp_z_urandomb";;
    external urandomm: state: RNG.randstate_t->n: t->t =
+@@ -415,11 +418,11 @@
+        ((if sign < 0 then "-" else "")
+        ^ (let lm=String.length mantissa
+         in if lm > 1
+-           then let tmp = String.create (succ lm)
+-                in String.blit mantissa 0 tmp 0 1;
+-                   String.blit mantissa 1 tmp 2 (pred lm);
+-                   String.set tmp 1 '.';
+-                   tmp
++           then let tmp = Bytes.create (succ lm)
++                in Bytes.blit_string mantissa 0 tmp 0 1;
++                   Bytes.blit_string mantissa 1 tmp 2 (pred lm);
++                   Bytes.set tmp 1 '.';
++                   Bytes.to_string tmp
+            else mantissa)
+        ^ (if base <= 10 then "E" else "@")
+        ^ (string_of_int (pred exponent)));;
 @@ -512,6 +515,14 @@
        = "_mlgmp_fr_exp";;
    external exp2_prec : prec: int -> mode: rounding_mode -> t->t
@@ -114,6 +131,23 @@ diff -ruN mlgmp_ref/mlgmp/gmp.ml mlgmp/gmp.ml
    let to_string_base_digits ~mode: mode
       ~base: base ~digits: digits x =
     let mantissa, exponent =
+@@ -608,11 +636,11 @@
+           then "Inf"
+           else (let lm=String.length mantissa
+         in if lm > 1
+-           then let tmp = String.create (succ lm)
+-                in String.blit mantissa 0 tmp 0 (1+i);
+-                   String.blit mantissa (1+i) tmp (2+i) ((pred lm)-i);
+-                   String.set tmp (1+i) '.';
+-                   tmp
++           then let tmp = Bytes.create (succ lm)
++                in Bytes.blit_string mantissa 0 tmp 0 (1+i);
++                   Bytes.blit_string mantissa (1+i) tmp (2+i) ((pred lm)-i);
++                   Bytes.set tmp (1+i) '.';
++                   Bytes.to_string tmp
+            else mantissa)
+        ^ (if base <= 10 then "E" else "@")
+        ^ (string_of_int (pred exponent)));;
 @@ -626,10 +654,7 @@
     if sign = 0
     then Z.zero
@@ -126,9 +160,9 @@ diff -ruN mlgmp_ref/mlgmp/gmp.ml mlgmp/gmp.ml
       if exponent < 0
       then division mantissa (- exponent)
       else Z.mul_2exp mantissa exponent;;
-diff -ruN mlgmp_ref/mlgmp/gmp.mli mlgmp/gmp.mli
---- mlgmp_ref/mlgmp/gmp.mli	2012-02-24 01:48:02.000000000 -0600
-+++ mlgmp/gmp.mli	2016-03-10 08:50:24.938515505 -0600
+diff -ruN mlgmp_ref/gmp.mli mlgmp/gmp.mli
+--- mlgmp_ref/gmp.mli	2012-02-24 01:48:02.000000000 -0600
++++ mlgmp/gmp.mli	2018-05-18 16:35:43.518092957 -0500
 @@ -128,6 +128,8 @@
      external hamdist : t -> t -> int = "_mlgmp_z_hamdist"
      external scan0 : t -> int -> int = "_mlgmp_z_scan0"
@@ -194,9 +228,9 @@ diff -ruN mlgmp_ref/mlgmp/gmp.mli mlgmp/gmp.mli
      val to_string_base_digits :
        mode:rounding_mode -> base:int -> digits:int -> t -> string
      val to_string : t -> string
-diff -ruN mlgmp_ref/mlgmp/Makefile mlgmp/Makefile
---- mlgmp_ref/mlgmp/Makefile	2012-02-24 02:17:29.000000000 -0600
-+++ mlgmp/Makefile	2016-03-10 08:50:24.938515505 -0600
+diff -ruN mlgmp_ref/Makefile mlgmp/Makefile
+--- mlgmp_ref/Makefile	2012-02-24 02:17:29.000000000 -0600
++++ mlgmp/Makefile	2018-05-18 16:35:43.518092957 -0500
 @@ -15,7 +15,7 @@
  	-cclib -lmpfr -cclib -lgmp -cclib -L$(DESTDIR)
  
@@ -235,9 +269,9 @@ diff -ruN mlgmp_ref/mlgmp/Makefile mlgmp/Makefile
  
  test_suite.opt:	gmp.cmxa test_suite.cmx
  	$(OCAMLOPT) $+ -o $@
-diff -ruN mlgmp_ref/mlgmp/META mlgmp/META
---- mlgmp_ref/mlgmp/META	1969-12-31 18:00:00.000000000 -0600
-+++ mlgmp/META	2016-03-10 08:53:26.330509447 -0600
+diff -ruN mlgmp_ref/META mlgmp/META
+--- mlgmp_ref/META	1969-12-31 18:00:00.000000000 -0600
++++ mlgmp/META	2018-05-18 16:35:43.518092957 -0500
 @@ -0,0 +1,11 @@
 +version = "20150824"
 +description = "GMP"
@@ -250,9 +284,9 @@ diff -ruN mlgmp_ref/mlgmp/META mlgmp/META
 +
 +
 +
-diff -ruN mlgmp_ref/mlgmp/mlgmp_f.c mlgmp/mlgmp_f.c
---- mlgmp_ref/mlgmp/mlgmp_f.c	2012-02-24 02:10:11.000000000 -0600
-+++ mlgmp/mlgmp_f.c	2016-03-10 08:50:24.938515505 -0600
+diff -ruN mlgmp_ref/mlgmp_f.c mlgmp/mlgmp_f.c
+--- mlgmp_ref/mlgmp_f.c	2012-02-24 02:10:11.000000000 -0600
++++ mlgmp/mlgmp_f.c	2018-05-18 16:35:43.518092957 -0500
 @@ -228,8 +228,7 @@
  
  int _mlgmp_f_custom_compare(value a, value b)
@@ -280,9 +314,9 @@ diff -ruN mlgmp_ref/mlgmp/mlgmp_f.c mlgmp/mlgmp_f.c
  }
  
  unsigned long _mlgmp_f_deserialize(void * dst)
-diff -ruN mlgmp_ref/mlgmp/mlgmp_fr.c mlgmp/mlgmp_fr.c
---- mlgmp_ref/mlgmp/mlgmp_fr.c	2012-02-24 02:13:11.000000000 -0600
-+++ mlgmp/mlgmp_fr.c	2016-03-10 08:50:24.938515505 -0600
+diff -ruN mlgmp_ref/mlgmp_fr.c mlgmp/mlgmp_fr.c
+--- mlgmp_ref/mlgmp_fr.c	2012-02-24 02:13:11.000000000 -0600
++++ mlgmp/mlgmp_fr.c	2018-05-18 16:35:43.518092957 -0500
 @@ -35,7 +35,7 @@
  
  struct custom_operations _mlgmp_custom_fr =
@@ -527,9 +561,9 @@ diff -ruN mlgmp_ref/mlgmp/mlgmp_fr.c mlgmp/mlgmp_fr.c
  }
  
  unsigned long _mlgmp_fr_deserialize(void * dst)
-diff -ruN mlgmp_ref/mlgmp/mlgmp_q.c mlgmp/mlgmp_q.c
---- mlgmp_ref/mlgmp/mlgmp_q.c	2012-02-24 02:16:14.000000000 -0600
-+++ mlgmp/mlgmp_q.c	2016-03-10 08:50:24.938515505 -0600
+diff -ruN mlgmp_ref/mlgmp_q.c mlgmp/mlgmp_q.c
+--- mlgmp_ref/mlgmp_q.c	2012-02-24 02:16:14.000000000 -0600
++++ mlgmp/mlgmp_q.c	2018-05-18 16:35:43.518092957 -0500
 @@ -156,8 +156,7 @@
  
  int _mlgmp_q_custom_compare(value a, value b)
@@ -572,9 +606,9 @@ diff -ruN mlgmp_ref/mlgmp/mlgmp_q.c mlgmp/mlgmp_q.c
 -  CAMLreturn(r);
 +  return r;
  }
-diff -ruN mlgmp_ref/mlgmp/mlgmp_z.c mlgmp/mlgmp_z.c
---- mlgmp_ref/mlgmp/mlgmp_z.c	2012-02-24 02:15:29.000000000 -0600
-+++ mlgmp/mlgmp_z.c	2016-03-10 08:50:24.938515505 -0600
+diff -ruN mlgmp_ref/mlgmp_z.c mlgmp/mlgmp_z.c
+--- mlgmp_ref/mlgmp_z.c	2012-02-24 02:15:29.000000000 -0600
++++ mlgmp/mlgmp_z.c	2018-05-18 16:35:43.518092957 -0500
 @@ -571,8 +571,7 @@
  
  int _mlgmp_z_custom_compare(value a, value b)
@@ -630,9 +664,9 @@ diff -ruN mlgmp_ref/mlgmp/mlgmp_z.c mlgmp/mlgmp_z.c
 -  CAMLreturn(r);
 +  return r;
  }
-diff -ruN mlgmp_ref/mlgmp/test_suite.ml mlgmp/test_suite.ml
---- mlgmp_ref/mlgmp/test_suite.ml	2012-02-24 02:32:36.000000000 -0600
-+++ mlgmp/test_suite.ml	2016-03-10 08:50:24.938515505 -0600
+diff -ruN mlgmp_ref/test_suite.ml mlgmp/test_suite.ml
+--- mlgmp_ref/test_suite.ml	2012-02-24 02:32:36.000000000 -0600
++++ mlgmp/test_suite.ml	2018-05-18 16:35:43.522092987 -0500
 @@ -82,6 +82,7 @@
  
  begin
