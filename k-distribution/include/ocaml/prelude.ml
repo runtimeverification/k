@@ -617,8 +617,12 @@ struct
     | _ -> raise Not_implemented
   
   let flush_log path txt =
+    let dir = Filename.dirname path in
+    let base = Filename.basename path in
+    let pid = string_of_int (Unix.getpid ()) in
+    let new_path = Filename.concat dir (pid ^ "_" ^ base) in
     let flags = [Open_wronly; Open_append; Open_creat; Open_text] in
-    let out_chan = open_out_gen flags 0o666 path in
+    let out_chan = open_out_gen flags 0o666 new_path in
     let fd = Unix.descr_of_out_channel out_chan in
     Unix.lockf fd Unix.F_LOCK 0;
     output_string out_chan (Buffer.contents txt);
