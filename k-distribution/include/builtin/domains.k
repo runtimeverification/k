@@ -757,16 +757,7 @@ module K-IO
   syntax KItem ::= #system ( String ) [function, hook(IO.system), impure]
                  | "#systemResult" "(" Int /* exit code */ "," String /* stdout */ "," String /* stderr */ ")"
 
-  syntax K ::= #appendToFile(String, String) [function]
-             | #lockOpenFileThenAppendAndClose(Int, String) [function]
-             | #appendToOpenFileThenClose(K, Int, String) [function]
-             | #thenUnlockAndClose(K, Int, String) [function]
-             | #thenClose(K, Int) [function]
-  rule #appendToFile(Path:String, Text:String) => #lockOpenFileThenAppendAndClose(#open(Path, "a"), Text)
-  rule #lockOpenFileThenAppendAndClose(FD:Int, Text:String) => #appendToOpenFileThenClose(#lock(FD, 0), FD, Text)
-  rule #appendToOpenFileThenClose(.K, FD:Int, Text:String) => #thenUnlockAndClose(#write(FD, Text), FD, Text)
-  rule #thenUnlockAndClose(.K, FD:Int, Text:String) => #thenClose(#unlock(FD, 0 -Int lengthString(Text)), FD)
-  rule #thenClose(.K, FD) => #close(FD)
+  syntax K ::= #logToFile(String, String) [function, hook(IO.log), impure]
 
 endmodule
 
