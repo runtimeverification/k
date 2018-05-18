@@ -3071,15 +3071,22 @@ public class DefinitionToOcaml implements Serializable {
             for (int i = 0; i < items.size(); i++) {
                 K item = items.get(i);
                 boolean stack = topAnywherePre;
+                if (isUnit(item, klist, rhs, vars, stack)) {
+                    sb.append("let _ = ");
+                }
                 apply(item);
                 if (i != items.size() - 1) {
-                    if (isList(item, klist, rhs, vars, stack)) {
+                    if (isUnit(item, klist, rhs, vars, stack)) {
+                        sb.append(" in ");
+                    } else if (isList(item, klist, rhs, vars, stack)) {
                         sb.append(" @ ");
                     } else {
                         sb.append(" :: ");
                     }
                 } else {
-                    if (!isList(item, klist, rhs, vars, stack)) {
+                    if (isUnit(item, klist, rhs, vars, stack)) {
+                        sb.append(" in []");
+                    } else if (!isList(item, klist, rhs, vars, stack)) {
                         sb.append(" :: []");
                     }
                 }
@@ -3116,6 +3123,10 @@ public class DefinitionToOcaml implements Serializable {
             }
         }
         return k.att().<String>getOptional(Attribute.SORT_KEY).orElse("K");
+    }
+
+    private boolean isUnit(K item, boolean klist, boolean rhs, VarInfo vars, boolean anywhereRule) {
+        return isList(item, klist, rhs, vars, anywhereRule) && item instanceof KApply && mainModule.attributesFor().apply(((KApply)item).klabel()).contains("returnsUnit");
     }
 
     private boolean isList(K item, boolean klist, boolean rhs, VarInfo vars, boolean anywhereRule) {

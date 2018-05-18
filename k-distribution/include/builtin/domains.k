@@ -757,7 +757,7 @@ module K-IO
   syntax KItem ::= #system ( String ) [function, hook(IO.system), impure]
                  | "#systemResult" "(" Int /* exit code */ "," String /* stdout */ "," String /* stderr */ ")"
 
-  syntax K ::= #logToFile(String, String) [function, hook(IO.log), impure]
+  syntax K ::= #logToFile(String, String) [function, hook(IO.log), impure, returnsUnit]
 
 endmodule
 
