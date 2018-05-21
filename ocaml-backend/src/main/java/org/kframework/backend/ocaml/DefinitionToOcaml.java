@@ -3126,7 +3126,7 @@ public class DefinitionToOcaml implements Serializable {
     }
 
     private boolean isUnit(K item, boolean klist, boolean rhs, VarInfo vars, boolean anywhereRule) {
-        return isList(item, klist, rhs, vars, anywhereRule) && item instanceof KApply && mainModule.attributesFor().apply(((KApply)item).klabel()).contains("returnsUnit");
+        return isList(item, klist, rhs, vars, anywhereRule) && item instanceof KApply && !(((KApply)item).klabel() instanceof KVariable) && mainModule.attributesFor().apply(((KApply)item).klabel()).contains("returnsUnit");
     }
 
     private boolean isList(K item, boolean klist, boolean rhs, VarInfo vars, boolean anywhereRule) {
