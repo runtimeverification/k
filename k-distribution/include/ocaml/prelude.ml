@@ -601,6 +601,36 @@ struct
       [Int fd], [Int len] -> unix_error (fun () -> Unix.lockf (Hashtbl.find file_descriptors fd) Unix.F_ULOCK (Z.to_int len); [])
     | _ -> raise Not_implemented
 
+  let log_files = Hashtbl.create 2
+
+  let hook_log c _ _ _ _ = match c with
+      [String path], [String txt] -> 
+      let log = try
+        Hashtbl.find log_files path
+      with Not_found -> 
+        let empty = Buffer.create 16 in
+        Hashtbl.add log_files path empty;
+        empty
+      in
+      Buffer.add_string log txt;
+      []
+    | _ -> raise Not_implemented
+  
+  let flush_log path txt =
+    let dir = Filename.dirname path in
+    let base = Filename.basename path in
+    let pid = string_of_int (Unix.getpid ()) in
+    let new_path = Filename.concat dir (pid ^ "_" ^ base) in
+    let flags = [Open_wronly; Open_append; Open_creat; Open_text] in
+    let out_chan = open_out_gen flags 0o666 new_path in
+    let fd = Unix.descr_of_out_channel out_chan in
+    Unix.lockf fd Unix.F_LOCK 0;
+    output_string out_chan (Buffer.contents txt);
+    close_out out_chan
+
+  let flush_logs () =
+    Hashtbl.iter flush_log log_files 
+
   let hook_stat _ _ _ _ _ = raise Not_implemented
   let hook_lstat _ _ _ _ _ = raise Not_implemented
   let hook_opendir _ _ _ _ _ = raise Not_implemented

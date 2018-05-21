@@ -56,9 +56,9 @@ public class GenerateCoverage implements AutoCloseable {
             //handled by macro expander
             return body;
         }
-        return KRewrite(left, KSequence(right, KApply(KLabel("#appendToFile"),
+        return KRewrite(left, KSequence(KApply(KLabel("#logToFile"),
             KToken(StringUtil.enquoteKString(files.resolveKompiled("coverage.txt").getAbsolutePath()), Sorts.String()),
-            KToken(StringUtil.enquoteKString(id + '\n'), Sorts.String()))));
+            KToken(StringUtil.enquoteKString(id + '\n'), Sorts.String())), right));
     }
 
     @Override
