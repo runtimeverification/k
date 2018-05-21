@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+import glob
 import os
 import sys
 import time
@@ -7,7 +8,14 @@ if len(sys.argv) < 4:
   print("usage: " + sys.argv[0] + " <kompiled-dir>... -- <files>...")
   exit(1)
 allRules = set()
-coverage = []
+coverMap = {}
+
+def addCover(rule):
+  rule = rule.strip()
+  if not rule in coverMap:
+    coverMap[rule] = 0
+  coverMap[rule] += 1
+
 for idx, dir in enumerate(sys.argv[1:], start=1):
   if dir == "--":
     fileIdx = idx + 1
@@ -17,9 +25,12 @@ for idx, dir in enumerate(sys.argv[1:], start=1):
     allRules.update(f.readlines())
   filename = dir + "/coverage.txt"
   with open(filename) as f:
-    coverage.extend(f.readlines())
-  
-coverage = [rule.strip() for rule in coverage]
+    for line in f:
+      addCover(line)
+  for filename in glob.glob(dir + "/*_coverage.txt"):
+    with open(filename) as f:
+      for line in f:
+        addCover(line)
 
 sources = [os.path.abspath(path) for path in  sys.argv[fileIdx:]]
 
@@ -45,14 +56,12 @@ def linesCovered(coverageOfComponent):
   return len(coveredLines)
 
 def rulesCovered(coverageOfComponent):
-  coveredRules = set()
-  coveredRules.update(coverageOfComponent)
-  return len(coveredRules)
+  return len(coverageOfComponent)
 
 numRulesGlobal = len(allRules)
 numLines = len(allLines)
-lineRateGlobal = float(linesCovered(coverage)) / numLines
-ruleRateGlobal = float(rulesCovered(coverage)) / numRulesGlobal
+lineRateGlobal = float(linesCovered(coverMap)) / numLines
+ruleRateGlobal = float(rulesCovered(coverMap)) / numRulesGlobal
 timestamp = int(time.time())
 
 template = """
@@ -115,7 +124,7 @@ for filename in sources:
     else:
       ruleMapByLine[value[0]].append(key)
 
-  fileCoverage = [rule for rule in coverage if rule in allRules]
+  fileCoverage = {rule: num for rule, num in coverMap.items() if rule in allRules}
 
   numRulesFile = len(allRules)
   numLines = len(allLines)
@@ -125,9 +134,9 @@ for filename in sources:
   lines = []
 
   for lineNum,rules in ruleMapByLine.items():
-    lineCoverage = [rule for rule in fileCoverage if rule in rules]
-    hits = len(lineCoverage)
-    numCovered = len(set(lineCoverage))
+    lineCoverage = {rule: num for rule, num in fileCoverage.items() if rule in rules}
+    hits = sum(lineCoverage.values())
+    numCovered = len(lineCoverage)
     numRulesLine = len(rules)
     ruleRateLine = float(numCovered) / numRulesLine
     if numRulesLine == 1:
