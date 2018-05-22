@@ -156,7 +156,7 @@ public class BinaryParser {
         String lbl = readString();
         if (data.get() != 0)
             return new KVariable(lbl);
-        return klabelCache.computeIfAbsent(lbl, org.kframework.kore.mini.KLabel::new);
+        return klabelCache.computeIfAbsent(lbl, org.kframework.kore.KORE::KLabel);
     }
 
     private String readString() throws IOException {

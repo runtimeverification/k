@@ -354,8 +354,8 @@ public class ResolveIOStreams {
                     if (klist.size() == 3) {
                         KApply k1 = (KApply) klist.items().get(0);
                         KApply k3 = (KApply) klist.items().get(2);
-                        if (k1.klabel().name().equals(KLabels.NO_DOTS) && k1.klist().size() == 0 &&
-                                k3.klabel().name().equals(KLabels.DOTS) && k3.klist().size() == 0) {
+                        if (KLabels.NO_DOTS.equals(k1.klabel()) && k1.klist().size() == 0 &&
+                                KLabels.DOTS.equals(k3.klabel()) && k3.klist().size() == 0) {
 
                             KRewrite k2 = (KRewrite) klist.items().get(1);
                             KApply k2l = (KApply) k2.left();

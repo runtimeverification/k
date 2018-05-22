@@ -204,7 +204,7 @@ public class AddParentCells {
     Optional<KLabel> getParent(K k) {
         if (k instanceof KApply) {
             final KApply app = (KApply) k;
-            if (app.klabel().equals(KLabel(KLabels.CELLS))) {
+            if (KLabels.CELLS.equals(app.klabel())) {
                 List<K> items = app.klist().items();
                 if (items.isEmpty()) {
                     return Optional.empty();

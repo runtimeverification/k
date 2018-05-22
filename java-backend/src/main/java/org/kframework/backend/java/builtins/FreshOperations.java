@@ -8,6 +8,7 @@ import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 
+import org.kframework.kore.KLabel;
 import org.kframework.utils.errorsystem.KEMException;
 
 
@@ -23,7 +24,7 @@ public class FreshOperations {
     }
 
     public static Term fresh(StringToken term, TermContext context) {
-        String name = context.definition().freshFunctionNames().get(Sort.parse(term.stringValue()));
+        KLabel name = context.definition().freshFunctionNames().get(Sort.parse(term.stringValue()));
         if (name == null) {
             throw KEMException.criticalError("Attempting to generate a fresh symbol of sort " + term.stringValue()
                     + " but no fresh function can be found.");

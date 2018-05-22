@@ -115,7 +115,7 @@ public class BuiltinMap extends AssociativeCommutativeCollection {
 
     @Override
     public String toString() {
-        return toString(" ", " |-> ", KLabels.DotMap);
+        return toString(" ", " |-> ", KLabels.DotMap.name());
     }
 
     private String toString(String operator, String mapsTo, String identity) {

@@ -60,7 +60,7 @@ public class JavaBackend implements Backend {
             return sentence;
         }
         Production prod = (Production)sentence;
-        if (prod.klabel().isDefined() && prod.klabel().get().name().equals(KLabels.ListItem)) {
+        if (prod.klabel().isDefined() && KLabels.ListItem.equals(prod.klabel().get())) {
             return Production(prod.sort(), prod.items(), prod.att().remove("function"));
         }
         return prod;

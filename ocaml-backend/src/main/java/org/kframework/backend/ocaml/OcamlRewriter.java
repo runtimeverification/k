@@ -160,8 +160,8 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
         }
         return list.stream().map(m -> m.entrySet().stream()
                     .map(e -> KApply(KLabel("_==K_"), e.getKey(), e.getValue()))
-                    .reduce((k1, k2) -> KApply(KLabel(KLabels.ML_AND), k1, k2)).orElse(KApply(KLabel(KLabels.ML_TRUE))))
-                .reduce((k1, k2) -> KApply(KLabel(KLabels.ML_OR), k1, k2)).orElse(KApply(KLabel(KLabels.ML_FALSE)));
+                    .reduce((k1, k2) -> KApply(KLabels.ML_AND, k1, k2)).orElse(KApply(KLabels.ML_TRUE)))
+                .reduce((k1, k2) -> KApply(KLabels.ML_OR, k1, k2)).orElse(KApply(KLabels.ML_FALSE));
     }
 
     private static String readLine(ByteArrayInputStream inputStream) {

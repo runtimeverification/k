@@ -12,6 +12,7 @@ import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
 import org.kframework.utils.errorsystem.KEMException;
+import scala.collection.Seq;
 
 import java.util.Map;
 import java.util.Set;
@@ -37,6 +38,7 @@ public class KLabelConstant extends KLabel implements org.kframework.kore.KLabel
 
     /* un-escaped label */
     private final String label;
+    private final Seq<org.kframework.kore.Sort> params;
 
     /**
      * see {@link #ordinal()}
@@ -70,11 +72,13 @@ public class KLabelConstant extends KLabel implements org.kframework.kore.KLabel
 
     private KLabelConstant(
             String label,
+            Seq<org.kframework.kore.Sort> params,
             int ordinal,
             Set<SortSignature> signatures,
             Set<Sort> allSorts,
             Att productionAttributes) {
         this.label = label;
+        this.params = params;
         this.ordinal = ordinal;
         this.signatures = signatures;
         this.productionAttributes = productionAttributes;
@@ -109,14 +113,15 @@ public class KLabelConstant extends KLabel implements org.kframework.kore.KLabel
      * @param label string representation of the KLabel; must not be '`' escaped;
      * @return AST term representation the the KLabel;
      */
-    public static KLabelConstant of(String label, Definition definition) {
-        return cache.computeIfAbsent(Pair.of(definition.signaturesOf(label), definition.kLabelAttributesOf(label)), p -> new ConcurrentHashMap<>())
-                .computeIfAbsent(label, l -> new KLabelConstant(
-                        l,
+    public static KLabelConstant of(org.kframework.kore.KLabel label, Definition definition) {
+        return cache.computeIfAbsent(Pair.of(definition.signaturesOf(label.name()), definition.kLabelAttributesOf(label)), p -> new ConcurrentHashMap<>())
+                .computeIfAbsent(label.toString(), l -> new KLabelConstant(
+                        label.name(),
+                        label.params(),
                         maxOrdinal.getAndIncrement(),
-                        definition.signaturesOf(l),
+                        definition.signaturesOf(label.name()),
                         definition.allSorts(),
-                        definition.kLabelAttributesOf(l)));
+                        definition.kLabelAttributesOf(label)));
     }
 
     /**
@@ -194,6 +199,9 @@ public class KLabelConstant extends KLabel implements org.kframework.kore.KLabel
     }
 
     @Override
+    public Seq<org.kframework.kore.Sort> params() { return params; }
+
+    @Override
     public boolean equals(Object object) {
         /* {@code KLabelConstant} objects are cached to ensure uniqueness */
         return this == object;
@@ -228,7 +236,7 @@ public class KLabelConstant extends KLabel implements org.kframework.kore.KLabel
                 Pair.of(signatures, productionAttributes),
                 p -> new ConcurrentHashMap<>());
         if (localCache.containsKey(label) && localCache.get(label).ordinal != this.ordinal) {
-            KEMException.criticalError("The ordinal for klabel: " + label + " is " + localCache.get(label).ordinal +
+            throw KEMException.criticalError("The ordinal for klabel: " + label + " is " + localCache.get(label).ordinal +
                     " in the cache and " + this.ordinal + " serialized.");
         }
         // TODO: fix bug: ordinals from deserialized objects may overlap with those of newly created objects

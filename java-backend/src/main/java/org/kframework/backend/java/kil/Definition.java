@@ -53,16 +53,16 @@ public class Definition extends JavaSymbolicObject {
         public final Subsorts subsorts;
         public Map<String, DataStructureSort> dataStructureSorts;
         public final SetMultimap<String, SortSignature> signatures;
-        public final ImmutableMap<String, Att> kLabelAttributes;
-        public final Map<Sort, String> freshFunctionNames;
+        public final ImmutableMap<org.kframework.kore.KLabel, Att> kLabelAttributes;
+        public final Map<Sort, org.kframework.kore.KLabel> freshFunctionNames;
         public final Map<Sort, Sort> smtSortFlattening;
 
         private DefinitionData(
                 Subsorts subsorts,
                 Map<String, DataStructureSort> dataStructureSorts,
                 SetMultimap<String, SortSignature> signatures,
-                ImmutableMap<String, Att> kLabelAttributes,
-                Map<Sort, String> freshFunctionNames,
+                ImmutableMap<org.kframework.kore.KLabel, Att> kLabelAttributes,
+                Map<Sort, org.kframework.kore.KLabel> freshFunctionNames,
                 Map<Sort, Sort> smtSortFlattening) {
             this.subsorts = subsorts;
             this.dataStructureSorts = dataStructureSorts;
@@ -119,9 +119,9 @@ public class Definition extends JavaSymbolicObject {
             });
         });
 
-        ImmutableMap.Builder<String, Att> attributesBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<org.kframework.kore.KLabel, Att> attributesBuilder = ImmutableMap.builder();
         JavaConversions.mapAsJavaMap(module.attributesFor()).entrySet().stream().forEach(e -> {
-            attributesBuilder.put(e.getKey().name(), e.getValue());
+            attributesBuilder.put(e.getKey(), e.getValue());
         });
 
         definitionData = new DefinitionData(
@@ -131,7 +131,7 @@ public class Definition extends JavaSymbolicObject {
                 attributesBuilder.build(),
                 JavaConverters.mapAsJavaMapConverter(module.freshFunctionFor()).asJava().entrySet().stream().collect(Collectors.toMap(
                         e -> Sort.of(e.getKey()),
-                        e -> e.getValue().name())),
+                        e -> e.getValue())),
                 Collections.emptyMap()
         );
         context = null;
@@ -163,9 +163,9 @@ public class Definition extends JavaSymbolicObject {
                         + "only sets, maps, and lists are supported: " + prod, prod);
             }
             DataStructureSort sort = new DataStructureSort(
-                    prod.klabel().get().name(),
-                    prod.att().<String>get("element"),
-                    prod.att().<String>get(Attribute.UNIT_KEY),
+                    prod.klabel().get(),
+                    KLabel.parse(prod.att().<String>get("element")),
+                    KLabel.parse(prod.att().<String>get(Attribute.UNIT_KEY)),
                     new HashMap<>());
             builder.put(prod.sort().toString(), sort);
         }
@@ -346,11 +346,11 @@ public class Definition extends JavaSymbolicObject {
         return definitionData.signatures.get(label);
     }
 
-    public Map<String, Att> kLabelAttributes() {
+    public Map<org.kframework.kore.KLabel, Att> kLabelAttributes() {
         return definitionData.kLabelAttributes;
     }
 
-    public Att kLabelAttributesOf(String label) {
+    public Att kLabelAttributesOf(org.kframework.kore.KLabel label) {
         return Optional.ofNullable(definitionData.kLabelAttributes.get(label)).orElse(Att.empty());
     }
 
@@ -358,7 +358,7 @@ public class Definition extends JavaSymbolicObject {
         return definitionData.dataStructureSorts.get(sort.toString());
     }
 
-    public Map<Sort, String> freshFunctionNames() {
+    public Map<Sort, org.kframework.kore.KLabel> freshFunctionNames() {
         return definitionData.freshFunctionNames;
     }
 

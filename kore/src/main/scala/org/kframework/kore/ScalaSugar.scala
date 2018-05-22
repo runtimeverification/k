@@ -20,10 +20,6 @@ trait ScalaSugared {
     def apply(l: K*): K = c.KApply(klabel, l: _*)
   }
 
-  implicit class ApplicableSymbol(klabel: Symbol) {
-    def apply(l: K*): K = c.KApply(klabel, l: _*)
-  }
-
   implicit class EnhancedK(k: K) {
     def ~>(other: K) = KSequence(Seq(k, other).asJava, Att.empty)
     def ==>(other: K) = KRewrite(k, other, Att.empty)
@@ -33,8 +29,8 @@ trait ScalaSugared {
     def /(other: K) = KLabel("/")(k, other)
     def &(other: K) = KLabel("&")(k, other)
     def ~(other: K) = KLabel("~")(k, other)
-    def &&(other: K) = KLabel(KLabels.AND)(k, other)
-    def ||(other: K) = KLabel(KLabels.OR)(k, other)
+    def &&(other: K) = KLabels.AND.apply(k, other)
+    def ||(other: K) = KLabels.OR.apply(k, other)
   }
 
   def KList(ks: Seq[K]): KList = c.KList(ks.asJava)

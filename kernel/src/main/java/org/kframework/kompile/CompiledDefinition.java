@@ -98,7 +98,7 @@ public class CompiledDefinition implements Serializable {
                             if (k.klabel().name().contains("#SemanticCastTo")
                                     && k.items().size() == 1 && k.items().get(0) instanceof KApply) {
                                 KApply theMapLookup = (KApply) k.items().get(0);
-                                if (theMapLookup.klabel().name().equals(KLabels.MAP_LOOKUP)
+                                if (KLabels.MAP_LOOKUP.equals(theMapLookup.klabel())
                                         && theMapLookup.size() == 2 && theMapLookup.items().get(1) instanceof KToken) {
                                     KToken t = (KToken) theMapLookup.items().get(1);
                                     if (t.sort().equals(Sorts.KConfigVar())) {

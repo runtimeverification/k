@@ -320,6 +320,6 @@ public class SortCellsTest {
     }
 
     KApply cells(K... ks) {
-        return KApply(KLabel(KLabels.CELLS), ks);
+        return KApply(KLabels.CELLS, ks);
     }
 }

@@ -134,7 +134,7 @@ public class GenerateSentencesFromConfigDecl {
                     }
                 }
                 throw KEMException.compilerError("Malformed io cell in configuration declaration.", term);
-            } else if (kapp.klabel().name().equals(KLabels.CELLS)) {
+            } else if (KLabels.CELLS.equals(kapp.klabel())) {
                 //is a cell bag, and thus represents the multiple children of its parent cell
                 if (ensures != null) {
                     //top level cell, therefore, should be the children of the generatedTop cell
@@ -153,7 +153,7 @@ public class GenerateSentencesFromConfigDecl {
                     sorts.addAll(childResult._2());
                     initializers.add(childResult._3());
                 }
-                return Tuple3.apply(accumSentences, sorts, KApply(KLabel(KLabels.CELLS), immutable(initializers)));
+                return Tuple3.apply(accumSentences, sorts, KApply(KLabels.CELLS, immutable(initializers)));
             }
             //TODO: call generic getSort method of some kind
             // child of a leaf cell. Generate no productions, but inform parent that it has a child of a particular sort.
@@ -467,7 +467,7 @@ public class GenerateSentencesFromConfigDecl {
         } else if (cellProperties.contains("initial")) {
             return KApply(KLabel(initLabel));
         } else {
-            return KApply(KLabel(KLabels.CELLS));
+            return KApply(KLabels.CELLS);
         }
     }
 
