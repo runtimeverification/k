@@ -184,7 +184,7 @@ public class KILtoKORE extends KILTransformation<Object> {
     }
 
     public org.kframework.definition.SyntaxAssociativity apply(PriorityExtendedAssoc ii) {
-        scala.collection.Set<Tag> tags = toTags(ii.getTags());
+        scala.collection.Set<Tag> tags = toTags(ii.getTags(), ii);
         String assocOrig = ii.getAssoc();
         Value assoc = applyAssoc(assocOrig);
         return SyntaxAssociativity(assoc, tags);
@@ -206,17 +206,17 @@ public class KILtoKORE extends KILTransformation<Object> {
 
     public Set<org.kframework.definition.Sentence> apply(PriorityExtended pe) {
         Seq<scala.collection.Set<Tag>> seqOfSetOfTags = immutable(pe.getPriorityBlocks()
-                .stream().map(block -> toTags(block.getProductions()))
+                .stream().map(block -> toTags(block.getProductions(), pe))
                 .collect(Collectors.toList()));
 
         return Sets.newHashSet(SyntaxPriority(seqOfSetOfTags));
     }
 
-    public scala.collection.Set<Tag> toTags(List<KLabelConstant> labels) {
+    public scala.collection.Set<Tag> toTags(List<Tag> labels, ASTNode loc) {
         return immutable(labels.stream().flatMap(l -> {
-            java.util.Set<Production> productions = context.tags.get(l.getLabel());
+            java.util.Set<Production> productions = context.tags.get(l.name());
             if (productions.isEmpty())
-                throw KEMException.outerParserError("Could not find any productions for tag: " + l.getLabel(), l.getSource(), l.getLocation());
+                throw KEMException.outerParserError("Could not find any productions for tag: " + l.name(), loc.getSource(), loc.getLocation());
             return productions.stream().map(p -> Tag(dropQuote(p.getKLabel())));
         }).collect(Collectors.toSet()));
     }
