@@ -109,7 +109,7 @@ public final class Sort implements org.kframework.kore.Sort, Serializable {
      */
     Object readResolve() throws ObjectStreamException {
         if (cache.containsKey(name) && cache.get(name).ordinal != this.ordinal) {
-            KEMException.criticalError("The ordinal for sort: " + name + " is " + cache.get(name).ordinal +
+            throw KEMException.criticalError("The ordinal for sort: " + name + " is " + cache.get(name).ordinal +
                     " in the cache and " + this.ordinal + " serialized.");
         }
         // TODO: fix bug: ordinals from deserialized objects may overlap with those of newly created objects
