@@ -30,9 +30,9 @@ class TreeNodesToKORE(parseSort: java.util.function.Function[String, Sort]) {
         case NonTerminal(_, None) => KToken("_", Sorts.KVariable)
         case NonTerminal(_, Some(x)) => map.getOrElse(x, KToken("_", Sorts.KVariable))
       }
-      KApply(p.klabel.get, KList(realItems.asJava), locationToAtt(t.location.get(), t.source.get()))
+      KApply(p.klabel.get, KList(realItems.asJava), locationToAtt(t.location.get(), t.source.get()).add(classOf[Production], realProd))
     } else
-      KApply(p.klabel.get, KList(new util.ArrayList(items).asScala.reverse map apply asJava), locationToAtt(t.location.get(), t.source.get()))
+      KApply(p.klabel.get, KList(new util.ArrayList(items).asScala.reverse map apply asJava), locationToAtt(t.location.get(), t.source.get()).add(classOf[Production], p))
   }
 
   def down(t: K): K = t match {
