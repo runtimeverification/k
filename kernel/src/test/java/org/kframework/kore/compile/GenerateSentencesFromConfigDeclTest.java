@@ -10,6 +10,7 @@ import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
+import org.kframework.definition.Production;
 import org.kframework.definition.Sentence;
 import org.kframework.kil.Attribute;
 import org.kframework.kompile.Kompile;
@@ -56,12 +57,14 @@ public class GenerateSentencesFromConfigDeclTest {
 
     @Test
     public void testSingleTop() {
+        Production prod = Production(".Opt", Sort("OptCellContent"), Seq(Terminal("")));
+        Production prod2 = Production("#SemanticCastToKItem", Sort("KItem"), Seq(NonTerminal(Sort("KItem"))));
         K configuration = cell("threads", Collections.emptyMap(),
                 cell("thread", Collections.singletonMap("multiplicity", "*"),
-                        cells(cell("k", Collections.emptyMap(), KApply(KLabel("#SemanticCastToKItem"), KToken("$PGM", Sorts.KConfigVar()))),
+                        cells(cell("k", Collections.emptyMap(), KApply(KLabel("#SemanticCastToKItem"), KList(KToken("$PGM", Sorts.KConfigVar())), Att.empty().add(Production.class, prod2))),
                                 cell("opt", Collections.singletonMap("multiplicity", "?"),
-                                        KApply(KLabel(".Opt"))))));
-        Module m1 = Module("CONFIG", Set(def.getModule("KSEQ").get()), Set(Production(".Opt", Sort("OptCellContent"), Seq(Terminal("")))), Att());
+                                        KApply(KLabel(".Opt"), KList(), Att.empty().add(Production.class, prod))))));
+        Module m1 = Module("CONFIG", Set(def.getModule("KSEQ").get()), Set(prod), Att());
         RuleGrammarGenerator parserGen = new RuleGrammarGenerator(def, true);
         Module m = RuleGrammarGenerator.getCombinedGrammar(parserGen.getConfigGrammar(m1), true).getExtensionModule();
         Set<Sentence> gen = GenerateSentencesFromConfigDecl.gen(configuration, BooleanUtils.FALSE, Att(), m);
