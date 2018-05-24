@@ -188,7 +188,7 @@ class TextToKore(b: Builders) {
           val decl = b.SymbolDeclaration(symbol, argSorts, returnSort, att)
           parseDeclarations(decls :+ decl)
         case ('h', 'o') => // hook-sort or hook-symbol declaration
-          consume("ok-")
+          consume("oked-")
           val c1 = scanner.next()
           val c2 = scanner.next()
           (c1, c2) match {
