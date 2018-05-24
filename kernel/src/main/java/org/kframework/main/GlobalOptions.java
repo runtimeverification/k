@@ -93,6 +93,9 @@ public final class GlobalOptions {
     @Parameter(names="--fast", description="Print final configs with toString() rather than pretty print.")
     public boolean fast = false;
 
-    @Parameter(names="--halt-on-branching", description="Halt execution if there is branching.")
-    public boolean haltOnBranching = false;
+    @Parameter(names="--branching-allowed", arity=1, description="Number of branching events allowed before a forcible stop.")
+    public int branchingAllowed = Integer.MAX_VALUE;
+
+    @Parameter(names="--log", description="Log every step.")
+    public boolean log = false;
 }

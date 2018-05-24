@@ -99,7 +99,7 @@ public class SymbolicRewriter {
     }
 
     private List<ConstrainedTerm> computeRewriteStep(ConstrainedTerm constrainedTerm, int step, boolean computeOne) {
-        return fastComputeRewriteStep(constrainedTerm, computeOne, false, false);
+        return fastComputeRewriteStep(constrainedTerm, computeOne, false, false, step);
     }
 
     /**
@@ -153,7 +153,7 @@ public class SymbolicRewriter {
         throw new UnsupportedOperationException();
     }
 
-    public List<ConstrainedTerm> fastComputeRewriteStep(ConstrainedTerm subject, boolean computeOne, boolean narrowing, boolean proofFlag) {
+    public List<ConstrainedTerm> fastComputeRewriteStep(ConstrainedTerm subject, boolean computeOne, boolean narrowing, boolean proofFlag, int step) {
         List<ConstrainedTerm> results = new ArrayList<>();
         if (definition.automaton == null) {
             return results;
@@ -166,7 +166,7 @@ public class SymbolicRewriter {
                 computeOne,
                 transitions,
                 proofFlag,
-                subject.termContext());
+                subject.termContext(), step);
         for (FastRuleMatcher.RuleMatchResult matchResult : matches) {
             Rule rule = definition.ruleTable.get(matchResult.ruleIndex);
             Substitution<Variable, Term> substitution =
@@ -597,77 +597,24 @@ public class SymbolicRewriter {
         boolean guarded = false;
         int step = 0;
 
-        System.out.println("\nTarget term\n=====================\n");
-        System.out.println(targetTerm);
+        if (KProve.options.global.log) {
+            System.out.println("\nTarget term\n=====================\n");
+            System.out.println(targetTerm);
+        }
         String targetCallDataStr =
                 ((KList) ((KItem) ((KList) ((KItem) ((KList) ((KItem) ((KList) ((KItem) targetTerm.term()).kList())
                         .get(5)).kList()).get(0)).klist()).get(5)).klist()).get(4).toString();
+        int branchingRemaining = KProve.options.global.branchingAllowed;
         while (!queue.isEmpty()) {
             step++;
             for (ConstrainedTerm term : queue) {
-                Term generatedTop = term.term();
-                Term k = ((KList) ((KItem) generatedTop).kList()).get(0);
-                Term ethereum = ((KList) ((KItem) generatedTop).kList()).get(5);
-                Term evm = ((KList) ((KItem) ethereum).klist()).get(0);
-                Term output = ((KList) ((KItem) evm).kList()).get(0);
-                Term statusCode = ((KList) ((KItem) evm).kList()).get(1);
-                Term callState = ((KList) ((KItem) evm).kList()).get(5);
-                Term callData = ((KList) ((KItem) callState).kList()).get(4);
+                BuiltinList kSequence = logStep(step, targetCallDataStr, term, false);
+
                 if (term.implies(targetTerm)) {
                     successPaths++;
-                    System.out.println("\nSTEP " + step + ": " + (System.currentTimeMillis() - Main.startTime) / 1000. +
-                            " s \n===================\nEliminated:");
-                    System.out.println(k + "\n");
-                    System.out.println(output + "\n");
-                    System.out.println(statusCode + "\n");
+                    System.out.println("\n============\nStep " + step + ": eliminated!\n============\n");
                     continue;
                 }
-
-                System.out.println("\nSTEP " + step + ": " + (System.currentTimeMillis() - Main.startTime) / 1000. +
-                        " s \n===================");
-                Term wordStack = ((KList) ((KItem) callState).kList()).get(6);
-                Term localMem = ((KList) ((KItem) callState).kList()).get(7);
-                Term pc = ((KList) ((KItem) callState).kList()).get(8);
-
-                Term network = ((KList) ((KItem) ethereum).klist()).get(1);
-                BuiltinMap accounts = (BuiltinMap) ((KList) ((KItem) ((KList) ((KItem) network).kList())
-                        .get(1)).klist()).get(0);
-                Term acctID = ((KList) ((KItem) accounts.getKComponents().get(0)).klist()).get(0);
-                Term storage = ((KList) ((KItem) ((KList) ((KItem) accounts.getKComponents().get(0)).klist())
-                        .get(1)).klist()).get(3);
-
-                BuiltinList kSequence =  ((BuiltinList)((KList)((KItem) k).klist()).get(0));
-
-                KProve.prettyPrint(k);
-                System.out.println(output);
-                System.out.println(statusCode);
-                System.out.println(localMem);
-                System.out.println("<localMem>");
-                K theMap = ((KItem) localMem).klist().items().get(0);
-                if (theMap instanceof BuiltinMap) {
-                    List<Term> entries = ((BuiltinMap) theMap).getKComponents();
-                    for (int i = 0; i < entries.size(); i += 10) {
-                        System.out.println("\t" + entries.get(i));
-                        System.out.println("\t...");
-                    }
-                } else {
-                    System.out.println("\tNon-map format:");
-                    System.out.print("\t");
-                    System.out.println(theMap);
-                }
-                System.out.println("</localMem>");
-
-                System.out.println(pc);
-                System.out.println(wordStack);
-                String callDataStr = callData.toString();
-                if (!targetCallDataStr.equals(callData.toString())) {
-                    System.out.println(callDataStr.substring(0, Math.min(callDataStr.length(), 300)));
-                }
-                System.out.println("accounts: " + accounts.getKComponents().size());
-                System.out.println(acctID);
-                System.out.println(storage);
-                System.out.println("/\\");
-                KProve.prettyPrint(term.constraint());
 
                 //stopping at halt
                 if (kSequence.size() == 2 && kSequence.get(0) instanceof KItem
@@ -714,7 +661,7 @@ public class SymbolicRewriter {
 
                 List<ConstrainedTerm> results;
                 try {
-                    results = fastComputeRewriteStep(term, false, true, true);
+                    results = fastComputeRewriteStep(term, false, true, true, step);
                 } catch (Throwable e) {
                     System.out.println("\n\nTerm throwing exception\n============================\n\n");
                     KProve.prettyPrint(term.term());
@@ -748,11 +695,16 @@ public class SymbolicRewriter {
                 }
 
                 if (results.size() > 1) {
-                    if (KProve.options.global.haltOnBranching) {
+                    if (!KProve.options.global.log) {
+                        logStep(step, targetCallDataStr, term, true);
+                    }
+                    if (branchingRemaining == 0) {
                         System.out.println("\nHalt on branching!\n=====================\n");
+
                         proofResults.addAll(results);
                         continue;
                     } else {
+                        branchingRemaining--;
                         System.out.println("\nBranching!\n=====================\n");
                     }
                 }
@@ -807,6 +759,67 @@ public class SymbolicRewriter {
         }
         System.err.format("Longest path: %d steps\n", step);
         global.profiler.printResult();
+    }
+
+    private BuiltinList logStep(int step, String targetCallDataStr, ConstrainedTerm term, boolean forced) {
+        Term generatedTop = term.term();
+        Term k = ((KList) ((KItem) generatedTop).kList()).get(0);
+        Term ethereum = ((KList) ((KItem) generatedTop).kList()).get(5);
+        Term evm = ((KList) ((KItem) ethereum).klist()).get(0);
+        Term output = ((KList) ((KItem) evm).kList()).get(0);
+        Term statusCode = ((KList) ((KItem) evm).kList()).get(1);
+        Term callState = ((KList) ((KItem) evm).kList()).get(5);
+        Term callData = ((KList) ((KItem) callState).kList()).get(4);
+
+        if (KProve.options.global.log || forced) {
+            System.out.println("\nSTEP " + step + ": " + (System.currentTimeMillis() - Main.startTime) / 1000. +
+                    " s \n===================");
+        }
+        Term wordStack = ((KList) ((KItem) callState).kList()).get(6);
+        Term localMem = ((KList) ((KItem) callState).kList()).get(7);
+        Term pc = ((KList) ((KItem) callState).kList()).get(8);
+
+        Term network = ((KList) ((KItem) ethereum).klist()).get(1);
+        BuiltinMap accounts = (BuiltinMap) ((KList) ((KItem) ((KList) ((KItem) network).kList())
+                .get(1)).klist()).get(0);
+        Term acctID = ((KList) ((KItem) accounts.getKComponents().get(0)).klist()).get(0);
+        Term storage = ((KList) ((KItem) ((KList) ((KItem) accounts.getKComponents().get(0)).klist())
+                .get(1)).klist()).get(3);
+
+        BuiltinList kSequence =  ((BuiltinList)((KList)((KItem) k).klist()).get(0));
+
+        if (KProve.options.global.log || forced) {
+            KProve.prettyPrint(k);
+            System.out.println(output);
+            System.out.println(statusCode);
+            System.out.println("<localMem>");
+            K theMap = ((KItem) localMem).klist().items().get(0);
+            if (theMap instanceof BuiltinMap) {
+                List<Term> entries = ((BuiltinMap) theMap).getKComponents();
+                for (int i = 0; i < entries.size(); i += 10) {
+                    System.out.println("\t" + entries.get(i));
+                    System.out.println("\t...");
+                }
+            } else {
+                System.out.println("\tNon-map format:");
+                System.out.print("\t");
+                System.out.println(theMap);
+            }
+            System.out.println("</localMem>");
+
+            System.out.println(pc);
+            System.out.println(wordStack);
+            String callDataStr = callData.toString();
+            if (!targetCallDataStr.equals(callData.toString())) {
+                System.out.println(callDataStr.substring(0, Math.min(callDataStr.length(), 300)));
+            }
+            System.out.println("accounts: " + accounts.getKComponents().size());
+            System.out.println(acctID);
+            System.out.println(storage);
+            System.out.println("/\\");
+            KProve.prettyPrint(term.constraint());
+        }
+        return kSequence;
     }
 
     /**

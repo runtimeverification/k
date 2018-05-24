@@ -71,7 +71,7 @@ public class FastRuleMatcher {
             boolean computeOne,
             List<String> transitions,
             boolean proveFlag,
-            TermContext context) {
+            TermContext context, int step) {
 
         ruleMask.stream().forEach(i -> constraints[i] = ConjunctiveFormula.of(context.global()));
         empty = BitSet.apply(ruleCount);
