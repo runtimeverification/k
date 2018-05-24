@@ -47,22 +47,21 @@ object SortDeclaration {
   = Some(arg.params, arg.sort, arg.att)
 }
 
-trait SymbolDeclaration extends Declaration {
-  def symbol: Symbol
+trait HookSortDeclaration extends Declaration {
+  def params: Seq[SortVariable]
 
-  def argSorts: Seq[Sort]
-
-  def returnSort: Sort
+  def sort: Sort
 
   def att: Attributes
 }
 
-object AliasDeclaration {
-  def unapply(arg: AliasDeclaration): Option[(Alias, Seq[Sort], Sort, Attributes)]
-  = Some(arg.alias, arg.argSorts, arg.returnSort, arg.att)
+object HookSortDeclaration {
+  def unapply(arg: HookSortDeclaration): Option[(Seq[SortVariable], Sort, Attributes)]
+  = Some(arg.params, arg.sort, arg.att)
 }
-trait AliasDeclaration extends Declaration {
-  def alias: Alias
+
+trait SymbolDeclaration extends Declaration {
+  def symbol: Symbol
 
   def argSorts: Seq[Sort]
 
@@ -75,6 +74,40 @@ object SymbolDeclaration {
   def unapply(arg: SymbolDeclaration): Option[(Symbol, Seq[Sort], Sort, Attributes)]
   = Some(arg.symbol, arg.argSorts, arg.returnSort, arg.att)
 }
+
+trait HookSymbolDeclaration extends Declaration {
+  def symbol: Symbol
+
+  def argSorts: Seq[Sort]
+
+  def returnSort: Sort
+
+  def att: Attributes
+}
+
+object HookSymbolDeclaration {
+  def unapply(arg: HookSymbolDeclaration): Option[(Symbol, Seq[Sort], Sort, Attributes)]
+  = Some(arg.symbol, arg.argSorts, arg.returnSort, arg.att)
+}
+
+trait AliasDeclaration extends Declaration {
+  def alias: Alias
+
+  def argSorts: Seq[Sort]
+
+  def returnSort: Sort
+
+  def att: Attributes
+}
+
+object AliasDeclaration {
+  def unapply(arg: AliasDeclaration): Option[(Alias, Seq[Sort], Sort, Attributes)]
+  = Some(arg.alias, arg.argSorts, arg.returnSort, arg.att)
+}
+
+
+
+
 
 trait AxiomDeclaration extends Declaration {
   def params: Seq[SortVariable]
@@ -423,7 +456,16 @@ trait Builders {
                       sort: Sort,
                       att: Attributes): Declaration
 
+  def HookSortDeclaration(params: Seq[SortVariable],
+                      sort: Sort,
+                      att: Attributes): Declaration
+
   def SymbolDeclaration(symbol: Symbol,
+                        argSorts: Seq[Sort],
+                        returnSort: Sort,
+                        att: Attributes): Declaration
+
+  def HookSymbolDeclaration(symbol: Symbol,
                         argSorts: Seq[Sort],
                         returnSort: Sort,
                         att: Attributes): Declaration

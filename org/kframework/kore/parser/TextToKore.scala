@@ -187,6 +187,38 @@ class TextToKore(b: Builders) {
           val att = parseAttributes()
           val decl = b.SymbolDeclaration(symbol, argSorts, returnSort, att)
           parseDeclarations(decls :+ decl)
+        case ('h', 'o') => // hook-sort or hook-symbol declaration
+          consume("ok-")
+          val c1 = scanner.next()
+          val c2 = scanner.next()
+          (c1, c2) match {
+            case ('s', 'o') => // hook-sort
+              consume("rt")
+              val ctr = parseId(parsingLevel = objt)
+              consumeWithLeadingWhitespaces("{")
+              val params = parseList(() => parseSortVariable(parsingLevel = objt), ',', '}')
+              consumeWithLeadingWhitespaces("}")
+              val att = parseAttributes()
+              val decl = b.HookSortDeclaration(params, b.CompoundSort(ctr, params), att)
+              parseDeclarations(decls :+ decl)
+            case ('s', 'y') => // hook-symbol
+              consume("mbol")
+              val ctr = parseId() // previousParsingLevel is set here
+              consumeWithLeadingWhitespaces("{")
+              val params = parseList(() => parseSortVariable(parsingLevel = previousParsingLevel), ',', '}')
+              consumeWithLeadingWhitespaces("}")
+              val symbol = b.Symbol(ctr, params)
+              consumeWithLeadingWhitespaces("(")
+              val argSorts = parseList(() => parseSort(parsingLevel = previousParsingLevel), ',', ')')
+              consumeWithLeadingWhitespaces(")")
+              consumeWithLeadingWhitespaces(":")
+              val returnSort = parseSort(parsingLevel = previousParsingLevel)
+              val att = parseAttributes()
+              val decl = b.HookSymbolDeclaration(symbol, argSorts, returnSort, att)
+              parseDeclarations(decls :+ decl)
+            case (e1, e2) => // error
+              throw error("sort, symbol", e1)
+          }
         case ('a', 'l') => // alias declaration
           consume("ias")
           val ctr = parseId() // previousParsingLevel is set here

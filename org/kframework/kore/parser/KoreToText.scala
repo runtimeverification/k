@@ -42,8 +42,25 @@ object KoreToText {
       " " +
       apply(att)
 
+    case HookSortDeclaration(params, sort, att) =>
+      "hook-sort" +
+        " " +
+        apply(sort) +
+        " " +
+        apply(att)
+
     case SymbolDeclaration(symbol, argSorts, returnSort, att) =>
       "symbol " +
+        apply(symbol) +
+        "(" +
+        argSorts.map(s => apply(s)).mkString(",") +
+        ") : " +
+        apply(returnSort) +
+        " " +
+        apply(att)
+
+    case HookSymbolDeclaration(symbol, argSorts, returnSort, att) =>
+      "hook-symbol " +
       apply(symbol) +
       "(" +
       argSorts.map(s => apply(s)).mkString(",") +
