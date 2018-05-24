@@ -13,7 +13,7 @@ object KoreToText {
     apply(d.att) +
     System.lineSeparator() +
     System.lineSeparator() +
-    apply(d.module) +
+    d.modules.map(m => apply(m)).mkString(System.lineSeparator()) +
     System.lineSeparator() +
     System.lineSeparator()
   }
@@ -32,8 +32,8 @@ object KoreToText {
   /** Returns a string from [[kore.Declaration]]. */
   def apply(d: Declaration): String = d match {
 
-    // case Import(ModuleName(name), att) =>
-    //   "import " + apply(name) + " " + apply(att)
+    case Import(name, att) =>
+      "import " + " " + apply(name) + " " + apply(att)
 
     case SortDeclaration(params, sort, att) =>
       "sort" +

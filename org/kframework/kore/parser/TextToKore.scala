@@ -74,11 +74,13 @@ class TextToKore(b: Builders) {
   @throws(classOf[java.io.IOException])
   def canonicalString(src: io.Source): String = {
     def loop(s: StringBuilder): String = {
-      while (!scanner.isEOF()) { // skipWhitespaces is called
-        s += scanner.next() // must be a nonwhitespace character
-        loop(s)
+      if (scanner.isEOF()) {
+        return s.toString()
       }
-      return s.toString()
+      else {
+        s += scanner.next() // s must be a nonwhitespace character
+        loop(s)             // tail recursive
+      }
     }
     try {
       scanner.init(src)
@@ -92,8 +94,8 @@ class TextToKore(b: Builders) {
   // Definition = Attributes Module
   private def parseDefinition(): Definition = {
     val att = parseAttributes()
-    val module = parseModule()
-    b.Definition(att, module)
+    val modules = parseModules()
+    b.Definition(att, modules)
   }
 
   // Attributes = [ List{Pattern, ',', ']'} ]
@@ -124,12 +126,28 @@ class TextToKore(b: Builders) {
     b.Module(name, decls, att)
   }
 
+  private def parseModules() : Seq[Module] = {
+    var ms = Seq.empty[Module]
+    while(!scanner.isEOF()) {
+      val leading_char = scanner.nextWithSkippingWhitespaces()
+      if (leading_char == 'm') { // a module starts
+        scanner.putback('m')
+        val m = parseModule()
+        ms = ms :+ m
+      }
+      else
+        throw error('m', leading_char)
+    }
+    ms
+  }
+
   // Declarations = <lookahead>(e) // <empty>
   //              | Declaration Declarations
   // Declaration = sort { SortVariableList } Sort Attributes
   //             | symbol Symbol ( SortList ) : Sort Attributes
   //             | alias Alias ( SortList ) : Sort Attributes
   //             | axiom { SortVariableList } Axiom
+  //             | import Id Attributes
   private def parseDeclarations(decls: Seq[Declaration]): Seq[Declaration] = {
     val c1 = scanner.nextWithSkippingWhitespaces()
     if (c1 == 'e') { // endmodule
@@ -139,13 +157,12 @@ class TextToKore(b: Builders) {
     else {
       val c2 = scanner.nextWithSkippingWhitespaces()
       (c1, c2) match {
-        // case ('i', 'm') => // import
-        //   consume("port")
-        //   val nameStr = parseModuleName()
-        //   val att = parseAttributes()
-        //   val decl = b.Import(b.ModuleName(nameStr), att)
-        //   parseDeclarations(decls :+ decl)
-        // TODO:: Read two chars only if needed.
+         case ('i', 'm') => // import
+           consume("port")
+           val nameStr = parseId()
+           val att = parseAttributes()
+           val decl = b.Import(nameStr, att)
+           parseDeclarations(decls :+ decl)
         case ('s', 'o') => // sort declaration
           consume("rt")
           val ctr = parseId(parsingLevel = objt)

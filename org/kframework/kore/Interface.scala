@@ -3,11 +3,11 @@ package org.kframework.kore
 trait Definition {
   def att: Attributes
 
-  def module: Module
+  def modules: Seq[Module]
 }
 
 object Definition {
-  def unapply(arg: Definition): Option[(Module, Attributes)] = Some(arg.module, arg.att)
+  def unapply(arg: Definition): Option[(Seq[Module], Attributes)] = Some(arg.modules, arg.att)
 }
 
 trait Module {
@@ -24,15 +24,15 @@ object Module {
 
 trait Declaration
 
-// trait Import extends Declaration {
-//   def name: ModuleName
-//
-//   def att: Attributes
-// }
-//
-// object Import {
-//   def unapply(arg: Import): Option[(ModuleName, Attributes)] = Some(arg.name, arg.att)
-// }
+trait Import extends Declaration {
+  def name: String
+
+  def att: Attributes
+}
+
+object Import {
+  def unapply(arg: Import): Option[(String, Attributes)] = Some(arg.name, arg.att)
+}
 
 trait SortDeclaration extends Declaration {
   def params: Seq[SortVariable]
@@ -413,11 +413,11 @@ object Alias {
 
 trait Builders {
 
-  def Definition(att: Attributes, module: Module): Definition
+  def Definition(att: Attributes, modules: Seq[Module]): Definition
 
   def Module(name: String, sens: Seq[Declaration], att: Attributes): Module
 
-  // def Import(name: ModuleName, att: Attributes): Declaration
+  def Import(name: String, att: Attributes): Declaration
 
   def SortDeclaration(params: Seq[SortVariable],
                       sort: Sort,
