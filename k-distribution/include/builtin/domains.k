@@ -504,7 +504,6 @@ module STRING
   syntax String ::= Int2String   ( Int )                [function, hook(STRING.int2string)]
   syntax String ::= Base2String  ( Int , Int )          [function, hook(STRING.base2string)]
   syntax Int    ::= String2Base  ( String , Int )       [function, hook(STRING.string2base)]
-  syntax KItem  ::= "#parseToken"  "(" String "," String ")"  [function, hook(STRING.string2token)]
 
 
   syntax String ::= "replaceAll" "(" String "," String "," String ")"      [function, hook(STRING.replaceAll)]
@@ -590,17 +589,29 @@ module ID-PROGRAM-PARSING
               | #UpperId                                             [notInRules, token, autoReject]
 endmodule
 
-module ID
-  imports STRING
+module ID-SYNTAX
+  imports INT-SYNTAX
+  imports STRING-SYNTAX
 
   syntax Id
 
   syntax String ::= Id2String ( Id )    [function, hook(STRING.token2string)]
-  syntax Id ::= String2Id ( String )    [function]
-  rule String2Id(S:String) => #parseToken("Id", S)
-
+  syntax Id ::= String2Id (String) [function, hook(STRING.string2token)]
   syntax Id ::= freshId(Int)    [freshGenerator, function]
+endmodule
+
+module ID
+  imports ID-SYNTAX
+  imports ID-SYMBOLIC
+  imports STRING
+
   rule freshId(I:Int) => String2Id("_" +String Int2String(I))
+endmodule
+
+module ID-SYMBOLIC [symbolic]
+  imports ID-SYNTAX
+  syntax KItem  ::= "#parseToken"  "(" String "," String ")"  [function, hook(STRING.parseToken)]
+  rule String2Id(S:String) => #parseToken("Id", S)
 endmodule
 
 module K-EQUAL

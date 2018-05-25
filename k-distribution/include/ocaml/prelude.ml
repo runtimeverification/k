@@ -733,8 +733,8 @@ struct
   let hook_base2string c _ _ _ _ = match c with
       [Int i], [Int base] -> [String (to_string_base (Z.to_int base) i)]
     | _ -> raise Not_implemented
-  let hook_string2token c _ _ _ _ = match c with
-      [String sort], [String value] -> [ktoken (parse_sort sort) value]
+  let hook_string2token c _ sort _ _ = match c with
+      [String value] -> [ktoken sort value]
     | _ -> raise Not_implemented
   let hook_token2string c _ _ _ _ = match c with
       [KToken(_,s)] -> [String s]
