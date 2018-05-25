@@ -1,0 +1,41 @@
+module BASIC-K
+  sort K{} []
+  sort KItem{} []
+endmodule []
+
+module KSEQ
+  import BASIC-K []
+
+  symbol kseq{}(KItem{}, K{}) : K{} []
+  symbol append{}(K{}, K{}) : K{} []
+  symbol dotk{}() : K{} []
+
+  axiom{R}
+    \equals{K{},R}(
+      append{}(dotk{}(),K2:K{}),
+      K2:K{})
+  []
+
+  axiom{R}
+    \equals{K{},R}(
+      append{}(kseq{}(K1:KItem{},K2:K{}),K3:K{}),
+      kseq{}(K1:KItem{},append{}(K2:K{},K3:K{})))
+  []
+
+endmodule []
+
+module INJ
+  symbol inj{From,To}(From) : To []
+ 
+  axiom{S1,S2,S3,R} 
+    \equals{S3,R}(
+      inj{S2,S3}(inj{S1,S2}(T:S1)),
+      inj{S1,S3}(T:S1))
+  []
+
+endmodule []
+
+module K
+  import KSEQ []
+  import INJ []
+endmodule []

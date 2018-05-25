@@ -1,3 +1,4 @@
+// Copyright (c) 2018 K Team. All Rights Reserved.
 package org.kframework.attributes;
 
 import java.util.Optional;
