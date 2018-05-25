@@ -157,7 +157,7 @@ public class ParserUtils {
                     }
                 }
                 else
-                    throw KExceptionManager.criticalError("Could not find file: " +
+                    throw KEMException.criticalError("Could not find file: " +
                             definitionFileName + "\nLookup directories:" + allLookupDirectoris, di);
             }
         }

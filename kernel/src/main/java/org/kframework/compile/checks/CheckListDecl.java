@@ -11,6 +11,7 @@ import org.kframework.kil.ProductionItem;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.UserList;
 import org.kframework.kore.Sort;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
 import java.util.Set;
@@ -44,15 +45,15 @@ public class CheckListDecl {
                         Sort listSort = s.getDeclaredSort().getSort(); // Es
                         Sort elemSort = ((UserList) p.getItems().get(0)).getSort(); // E
                         if (isBaseSort(listSort)) {
-                            throw KExceptionManager.compilerError(listSort + " can not be extended to be a list sort.", p);
+                            throw KEMException.compilerError(listSort + " can not be extended to be a list sort.", p);
                         }
                         if (listSort.equals(elemSort)) {
-                            throw KExceptionManager.compilerError("Circular lists are not allowed.", p);
+                            throw KEMException.compilerError("Circular lists are not allowed.", p);
                         }
                     } else {
                         for (ProductionItem it : p.getItems()) {
                             if (it instanceof UserList) { // Syntax Es ::= ... List{E,""} ...
-                                throw KExceptionManager.compilerError("Inline list declarations are not allowed.", it);
+                                throw KEMException.compilerError("Inline list declarations are not allowed.", it);
                             }
                         }
                     }

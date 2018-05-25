@@ -7,7 +7,7 @@ import javax.annotation.Nonnull
 
 import dk.brics.automaton.{BasicAutomata, RegExp, RunAutomaton, SpecialOperations}
 import org.kframework.POSet
-import org.kframework.attributes.Att
+import org.kframework.attributes.{Att, HasLocation, Location, Source}
 import org.kframework.definition.Constructors._
 import org.kframework.kore.Unapply.{KApply, KLabel}
 import org.kframework.kore
@@ -18,7 +18,6 @@ import org.kframework.builtin.Sorts
 
 import scala.annotation.meta.param
 import scala.collection.JavaConverters._
-
 import collection._
 import scala.collection.Set
 
@@ -261,12 +260,14 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
 
 // hooked but different from core, Import is a sentence here
 
-trait Sentence {
+trait Sentence extends HasLocation {
   // marker
   val isSyntax: Boolean
   val isNonSyntax: Boolean
   val att: Att
   def withAtt(att: Att): Sentence
+  def location: Optional[Location] = att.getOptional(classOf[Location])
+  def source: Optional[Source] = att.getOptional(classOf[Source])
 }
 
 // deprecated

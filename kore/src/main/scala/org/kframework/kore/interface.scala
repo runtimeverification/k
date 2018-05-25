@@ -1,5 +1,7 @@
 package org.kframework.kore
 
+import java.util.Optional
+
 import org.kframework.attributes._
 import org.kframework.kore.ADT.{KApply, KList}
 import org.kframework.unparser.ToKast
@@ -10,7 +12,7 @@ import org.kframework.unparser.ToKast
  * https://github.com/kframework/k/wiki/KORE-data-structures-guide
  */
 
-trait K extends Serializable {
+trait K extends Serializable with HasLocation {
   def att: Att
   override def toString = ToKast.apply(this)
 
@@ -19,6 +21,9 @@ trait K extends Serializable {
   override def hashCode = cachedHashCode
 
   def computeHashCode: Int
+
+  def location: Optional[Location] = att.getOptional(classOf[Location])
+  def source: Optional[Source] = att.getOptional(classOf[Source])
 }
 
 trait KItem extends K

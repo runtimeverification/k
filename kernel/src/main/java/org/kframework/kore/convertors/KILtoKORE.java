@@ -127,7 +127,7 @@ public class KILtoKORE extends KILTransformation<Object> {
                 } else if (koreModules.containsKey(imp.getName())) {
                     return koreModules.get(imp.getName());
                 } else {
-                    throw KExceptionManager.compilerError("Could not find module: " + imp.getName(), imp);
+                    throw KEMException.compilerError("Could not find module: " + imp.getName(), imp);
                 }
             };
 
