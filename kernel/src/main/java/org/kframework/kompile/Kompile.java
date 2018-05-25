@@ -86,7 +86,7 @@ public class Kompile {
         kompileOptions.outerParsing.includes = lookupDirectories.stream().map(File::getAbsolutePath).collect(Collectors.toList());
         this.definitionParsing = new DefinitionParsing(
                 lookupDirectories, kompileOptions.strict(), kem,
-                parser, cacheParses, files.resolveKompiled("cache.bin"), !kompileOptions.outerParsing.noPrelude);
+                parser, cacheParses, files.resolveKompiled("cache.bin"), !kompileOptions.outerParsing.noPrelude, kompileOptions.isKore());
         this.sw = sw;
     }
 

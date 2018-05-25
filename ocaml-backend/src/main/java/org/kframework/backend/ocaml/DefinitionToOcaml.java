@@ -1097,7 +1097,7 @@ public class DefinitionToOcaml implements Serializable {
                 Source.apply(definitionFile.getAbsolutePath()),
                 definitionFile.getParentFile(),
                 lookupDirectories,
-                new HashSet<>());
+                new HashSet<>(), false);
         mods.stream().forEach(m -> klabels.addAll(mutable(m.definedKLabels())));
     }
 

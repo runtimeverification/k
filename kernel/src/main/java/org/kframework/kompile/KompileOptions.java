@@ -35,6 +35,7 @@ public class KompileOptions implements Serializable {
     private String docStyle;
 
     private static final String DEFAULT_DOC_STYLE = "poster,style=bubble";
+    private boolean kore;
 
     public String docStyle() {
         if (backend.equals(Backends.HTML)) {
@@ -87,6 +88,10 @@ public class KompileOptions implements Serializable {
 
     @ParametersDelegate
     public Experimental experimental = new Experimental();
+
+    public boolean isKore() {
+        return backend.equals("kore") || backend.equals("haskell") || backend.equals("llvm");
+    }
 
     public static final class Experimental implements Serializable {
 
