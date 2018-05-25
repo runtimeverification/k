@@ -607,18 +607,22 @@ public class SymbolicRewriter {
         while (!queue.isEmpty()) {
             step++;
             Debugg.step(Integer.toString(step));
-            if(step % 100 == 0) {
-                System.out.println(step);
-                Debugg.saveIntermediate();
-            }
-            if(step == 1246) {
-                System.out.println("jaja");
-            }
-            if(step == 1250) {
+            if(step == 1653) {
+                System.out.println(2);
              //   throw new Error("ein Zonk hinter dieser Tür.");
             }
             for (ConstrainedTerm term : queue) {
-                Debugg.setCurrentTerm(term.term(), term.constraint());
+                String kcontent = term.term().getCellContentsByName("<k>").get(0).toString();
+                if(kcontent.equals("#execute_EVM(.KList)")) {
+                    Debugg.setCurrentTerm(term.term(), term.constraint(), true);
+                    String currpc = term.term().getCellContentsByName("<pc>").get(0).toString();
+                    String initpc = initialTerm.term().getCellContentsByName("<pc>").get(0).toString();
+                    boolean circ = currpc.equals(initpc) && guarded;
+                    Debugg.setCircWatcher(circ);
+                } else {
+                    Debugg.setCurrentTerm(term.term(), term.constraint(), false);
+                    Debugg.setCircWatcher(false);
+                }
                 if (term.implies(targetTerm)) {
                     //String cconst = KILtoSMTLib.translateConstraint(term.constraint());
                     Debugg.addStep(term.term(), targetTerm.term(), term.constraint(), targetTerm.constraint());
@@ -719,6 +723,7 @@ public class SymbolicRewriter {
     private ConstrainedTerm applySpecRules(ConstrainedTerm constrainedTerm, List<Rule> specRules) {
         for (Rule specRule : specRules) {
             ConstrainedTerm pattern = specRule.createLhsPattern(constrainedTerm.termContext());
+            Debugg.setSpecRule(!specRule.att().contains("trusted"));
             ConjunctiveFormula constraint = constrainedTerm.matchImplies(pattern, true);
             if (constraint != null) {
                 ConstrainedTerm result = buildResult(specRule, constraint, null, true, constrainedTerm.termContext());

@@ -96,7 +96,6 @@ public class KProveFrontEnd extends FrontEnd {
                     compiledDef.get(),
                     backend.get(), initializeRewriter.get());
         } catch(Exception e) {
-            System.out.println(e.toString());
             Debugg.saveCrashTerm(e);
             throw e;
         } finally {
