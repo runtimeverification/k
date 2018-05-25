@@ -270,10 +270,10 @@ module BOOL
   imports BOOL-SYNTAX
   syntax Bool ::= "notBool" Bool          [function, klabel(notBool_), smtlib(not), boolOperation, latex(\neg_{\scriptstyle\it Bool}{#1}), hook(BOOL.not)]
                 > Bool "andBool" Bool     [function, klabel(_andBool_), left, smtlib(and), boolOperation, latex({#1}\wedge_{\scriptstyle\it Bool}{#2}), hook(BOOL.and)]
-                | K "andThenBool" K       [function, left, smtlib(and), boolOperation, hook(BOOL.andThen)]
+                | Bool "andThenBool" Bool [function, left, smtlib(and), boolOperation, hook(BOOL.andThen)]
                 | Bool "xorBool" Bool     [function, left, smtlib(xor), boolOperation, hook(BOOL.xor)]
                 | Bool "orBool" Bool      [function, left, smtlib(or), boolOperation, latex({#1}\vee_{\scriptstyle\it Bool}{#2}), hook(BOOL.or)]
-                | K "orElseBool" K        [function, left, smtlib(or), boolOperation, hook(BOOL.orElse)]
+                | Bool "orElseBool" Bool  [function, left, smtlib(or), boolOperation, hook(BOOL.orElse)]
                 | Bool "impliesBool" Bool [function, left, smtlib(=>), boolOperation, hook(BOOL.implies)]
                 > left:
                   Bool "==Bool" Bool      [function, left, smtlib(=), hook(BOOL.eq)]
@@ -287,8 +287,8 @@ module BOOL
   rule false andBool _:Bool => false
   rule _:Bool andBool false => false
 
-  rule true andThenBool K:K => K
-  rule K:K andThenBool true => K
+  rule true andThenBool K::Bool => K
+  rule K::Bool andThenBool true => K
   rule false andThenBool _ => false
   rule _ andThenBool false => false
 
@@ -304,8 +304,8 @@ module BOOL
 
   rule true orElseBool _ => true
   rule _ orElseBool true => true
-  rule false orElseBool K:K => K
-  rule K:K orElseBool false => K
+  rule false orElseBool K::Bool => K
+  rule K::Bool orElseBool false => K
 
   rule true impliesBool B:Bool => B
   rule false impliesBool _:Bool => true
