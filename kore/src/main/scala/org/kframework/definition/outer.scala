@@ -111,10 +111,6 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
   lazy val layout: String = "(" + layouts.mkString(")|(") + ")"
 
   @transient
-  lazy val attForSort: Map[Sort, Att] =
-    productionsForSort mapValues {_ map {_.att} reduce {_.addAll(_)}}
-
-  @transient
   lazy val definedKLabels: Set[KLabel] =
     (productionsFor.keys.toSet).filter(!_.isInstanceOf[KVariable])
 
