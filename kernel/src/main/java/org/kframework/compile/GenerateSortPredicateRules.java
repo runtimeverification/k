@@ -4,6 +4,7 @@ package org.kframework.compile;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.kframework.Collections;
 import org.kframework.builtin.BooleanUtils;
+import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
@@ -43,12 +44,12 @@ import static org.kframework.kore.KORE.*;
  */
 public class GenerateSortPredicateRules {
 
-    private final Definition def;
     private Module mod;
     private java.util.Set<Rule> predicateRules;
+    private boolean kore;
 
-    public GenerateSortPredicateRules(Definition def) {
-        this.def = def;
+    public GenerateSortPredicateRules(boolean kore) {
+        this.kore = kore;
     }
 
     public Module gen(Module mod) {
@@ -59,6 +60,9 @@ public class GenerateSortPredicateRules {
     }
 
     private Stream<? extends Sentence> gen(Sort sort) {
+        if (kore) {
+            return genKore(sort);
+        }
         if (sort.equals(Sorts.K()) || sort.equals(Sorts.KItem())) {
             return Stream.empty();
         }
@@ -133,6 +137,21 @@ public class GenerateSortPredicateRules {
         });
         res.add(Rule(KRewrite(KApply(KLabel("is" + sort.toString()), KVariable("K")), BooleanUtils.FALSE), BooleanUtils.TRUE, BooleanUtils.TRUE, Att().add("owise")));
         return res.stream();
+    }
+
+    private Stream<? extends Sentence> genKore(Sort sort) {
+        if (sort.equals(Sorts.K())) {
+            return Stream.of(Rule(KRewrite(KApply(KLabel("is" + sort.toString()), KVariable("K")), BooleanUtils.TRUE), BooleanUtils.TRUE, BooleanUtils.TRUE));
+        } else {
+            List<Sentence> res = new ArrayList<>();
+            for (Sort s : iterable(mod.definedSorts())) {
+                if (mod.subsorts().lessThanEq(s, sort)) {
+                    res.add(Rule(KRewrite(KApply(KLabel("is" + sort.toString()), KVariable(s.name(), Att().add(Sort.class, s))), BooleanUtils.TRUE), BooleanUtils.TRUE, BooleanUtils.TRUE));
+                }
+            }
+            res.add(Rule(KRewrite(KApply(KLabel("is" + sort.toString()), KVariable("K")), BooleanUtils.FALSE), BooleanUtils.TRUE, BooleanUtils.TRUE, Att().add("owise")));
+            return res.stream();
+        }
     }
 
     private boolean isTruePredicate(Rule r) {
