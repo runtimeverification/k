@@ -19,7 +19,7 @@ import static org.kframework.Collections.*;
 public class ParserTest {
     private static final Sort xSort = Sort("X");
     Module m = Module.apply("TEST", Set(
-            Production.apply(xSort, Seq(Terminal.apply("x")), Att().add("klabel", "x"))
+            Production.apply(KLabel("x"), xSort, Seq(Terminal.apply("x")), Att())
     ));
 
     @Test

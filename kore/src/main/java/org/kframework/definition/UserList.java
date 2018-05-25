@@ -3,6 +3,7 @@ package org.kframework.definition;
 
 import org.kframework.Collections;
 import org.kframework.attributes.Att;
+import org.kframework.kore.KLabel;
 import org.kframework.kore.Sort;
 
 import java.util.ArrayList;
@@ -19,8 +20,8 @@ public class UserList {
     public Sort sort = null;
     public Sort childSort = null;
     public String separator = null;
-    public String terminatorKLabel = null;
-    public String klabel = null;
+    public KLabel terminatorKLabel = null;
+    public KLabel klabel = null;
     public boolean nonEmpty = false;
     public Production pList = null, pTerminator = null;
     public org.kframework.attributes.Att attrs = null;
@@ -49,14 +50,14 @@ public class UserList {
                 if (p.items().size() == 3) {
                     Terminal t = (Terminal) p.items().tail().head();
                     ul.separator = t.value();
-                    ul.klabel = p.klabel().get().name();
+                    ul.klabel = p.klabel().get();
                     ul.attrs = p.att().remove("klabel");
                     // should work without the Att.userList() att, i.e. for any list -- see #1892
                     ul.nonEmpty = ul.attrs.get(Att.userList()).equals("+");
                     ul.childSort = ((NonTerminal) p.items().head()).sort();
                     ul.pList = p;
                 } else if (p.items().size() == 1 && p.items().head() instanceof Terminal) {
-                    ul.terminatorKLabel = p.klabel().get().name();
+                    ul.terminatorKLabel = p.klabel().get();
                     ul.pTerminator = p;
                 } else
                     throw new AssertionError("Didn't expect this type of production when recognizing userList patterns!");

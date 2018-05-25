@@ -63,7 +63,7 @@ public class GenerateSortPredicateRules {
             return Stream.empty();
         }
         List<Sentence> res = new ArrayList<>();
-        Production prod = Production("is" + sort.toString(), Sorts.Bool(),
+        Production prod = Production(KLabel("is" + sort.toString()), Sorts.Bool(),
                 Seq(Terminal("is" + sort.toString()), Terminal("("), NonTerminal(Sorts.K()), Terminal(")")),
                 Att().add(Attribute.FUNCTION_KEY).add(Attribute.PREDICATE_KEY, Sort.class, sort));
         res.add(prod);

@@ -140,7 +140,7 @@ public class ResolveFun {
             pis.add(NonTerminal(Sorts.K()));
         }
         pis.add(Terminal(")"));
-        return Production(fun.name(), Sorts.K(),
+        return Production(fun, Sorts.K(),
                 immutable(pis),
                 Att().add("function"));
     }

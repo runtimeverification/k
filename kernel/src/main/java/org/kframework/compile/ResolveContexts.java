@@ -141,7 +141,7 @@ public class ResolveContexts {
             items.remove(items.size() - 1);
         }
         items.add(Terminal(")"));
-        Production freezer = Production(freezerLabel.name(), Sorts.KItem(), immutable(items), Att());
+        Production freezer = Production(freezerLabel, Sorts.KItem(), immutable(items), Att());
         K frozen = KApply(freezerLabel, vars.values().stream().collect(Collections.toList()));
         return Stream.of(freezer,
                 Rule(KRewrite(cooled, KSequence(heated, frozen)), requiresHeat, BooleanUtils.TRUE, context.att().add("heat")),

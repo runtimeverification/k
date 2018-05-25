@@ -18,6 +18,7 @@ import org.kframework.kil.Module;
 import org.kframework.kil.NonTerminal;
 import org.kframework.kil.Production;
 import org.kframework.kil.Terminal;
+import org.kframework.kore.KLabel;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import scala.Enumeration.Value;
@@ -292,7 +293,7 @@ public class KILtoKORE extends KILTransformation<Object> {
                                         "" + System.identityHashCode(p)));
                     else
                         prod = Production(
-                                dropQuote(p.getKLabel()),
+                                KLabel(dropQuote(p.getKLabel())),
                                 sort,
                                 immutable(items),
                                 attrs.add(PRODUCTION_ID,
@@ -353,14 +354,14 @@ public class KILtoKORE extends KILTransformation<Object> {
         org.kframework.definition.Production prod1, prod3;
 
         // Es ::= E "," Es
-        prod1 = Production(sort,
+        prod1 = Production(KLabel(dropQuote(p.getKLabel())), sort,
                 Seq(NonTerminal(elementSort), Terminal(userList.getSeparator()), NonTerminal(sort)),
-                attrsWithKilProductionId.remove("klabel").add("klabel", dropQuote(p.getKLabel())).add("right"));
+                attrsWithKilProductionId.add("right"));
 
 
         // Es ::= ".Es"
-        prod3 = Production(sort, Seq(Terminal("." + sort.toString())),
-                attrsWithKilProductionId.remove("format").remove("strict").remove("klabel").add("klabel", dropQuote(p.getTerminatorKLabel())));
+        prod3 = Production(KLabel(dropQuote(p.getTerminatorKLabel())), sort, Seq(Terminal("." + sort.toString())),
+                attrsWithKilProductionId.remove("format").remove("strict"));
 
         res.add(prod1);
         res.add(prod3);

@@ -256,14 +256,14 @@ public class DefinitionToOcaml implements Serializable {
                                             ModuleTransformer.fromSentenceTransformer(new SplitThreadsCell(def.executionModule())::convert, "split threads cell into thread local and global") :
                                             ModuleTransformer.fromSentenceTransformer(s -> s, "identity function -- no transformation");
         ModuleTransformer preprocessKLabelPredicates = ModuleTransformer.fromSentenceTransformer(new PreprocessKLabelPredicates(def.executionModule())::convert, "preprocess klabel predicates");
-        Sentence thread = Production("#Thread", Sorts.KItem(), Seq(
+        Sentence thread = Production(KLabel("#Thread"), Sorts.KItem(), Seq(
                 Terminal("#Thread"), Terminal("("),
                 NonTerminal(Sorts.K()), Terminal(","),
                 NonTerminal(Sorts.K()), Terminal(","),
                 NonTerminal(Sorts.K()), Terminal(","),
                 NonTerminal(Sorts.K()), Terminal(")")));
-        Sentence bottom = Production("#Bottom", Sorts.KItem(), Seq(Terminal("#Bottom")));
-        Sentence threadLocal = Production("#ThreadLocal", Sorts.KItem(), Seq(Terminal("#ThreadLocal")));
+        Sentence bottom = Production(KLabel("#Bottom"), Sorts.KItem(), Seq(Terminal("#Bottom")));
+        Sentence threadLocal = Production(KLabel("#ThreadLocal"), Sorts.KItem(), Seq(Terminal("#ThreadLocal")));
         Function1<Module, Module> pipeline = preprocessKLabelPredicates
                 .andThen(splitThreadCell)
                 .andThen(mod -> Module(mod.name(), mod.imports(),
