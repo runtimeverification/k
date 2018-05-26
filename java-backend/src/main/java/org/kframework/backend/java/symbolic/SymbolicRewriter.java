@@ -601,14 +601,19 @@ public class SymbolicRewriter {
             System.out.println("\nTarget term\n=====================\n");
             System.out.println(targetTerm);
         }
-        String targetCallDataStr =
-                ((KList) ((KItem) ((KList) ((KItem) ((KList) ((KItem) ((KList) ((KItem) targetTerm.term()).kList())
-                        .get(5)).kList()).get(0)).klist()).get(5)).klist()).get(4).toString();
+        String targetCallDataStr;
+        try {
+            targetCallDataStr = ((KList) ((KItem) ((KList) ((KItem) ((KList) ((KItem) ((KList) ((KItem) targetTerm.term()).kList())
+                    .get(5)).kList()).get(0)).klist()).get(5)).klist()).get(4).toString();
+        } catch (Exception e) {
+            System.err.println("Specification rule does not match expected spec form: " + targetTerm);
+            throw e;
+        }
         int branchingRemaining = KProve.options.global.branchingAllowed;
         while (!queue.isEmpty()) {
             step++;
             for (ConstrainedTerm term : queue) {
-                BuiltinList kSequence = logStep(step, targetCallDataStr, term, false);
+                BuiltinList kSequence = logStep(step, targetCallDataStr, term, step == 1);
 
                 if (term.implies(targetTerm)) {
                     successPaths++;
