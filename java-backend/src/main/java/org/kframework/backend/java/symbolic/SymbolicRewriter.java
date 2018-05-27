@@ -621,8 +621,14 @@ public class SymbolicRewriter {
                 if (guarded) {
                     ConstrainedTerm result = applySpecRules(term, specRules);
                     if (result != null) {
-                        if (visited.add(result))
+                        if (visited.add(result)) {
                             nextQueue.add(result);
+                        } else {
+                            if (term.equals(result)) {
+                                System.err.println("Step " + step + ": infinite loop after applying a spec rule.");
+                                proofResults.add(result);
+                            }
+                        }
                         continue;
                     }
                 }
