@@ -613,12 +613,15 @@ public class SymbolicRewriter {
         while (!queue.isEmpty()) {
             step++;
             for (ConstrainedTerm term : queue) {
-                BuiltinList kSequence = logStep(step, targetCallDataStr, term, step == 1);
+                BuiltinList kSequence;
 
                 if (term.implies(targetTerm)) {
                     successPaths++;
                     System.out.println("\n============\nStep " + step + ": eliminated!\n============\n");
+                    logStep(step, targetCallDataStr, term, true);
                     continue;
+                } else {
+                    kSequence = logStep(step, targetCallDataStr, term, step == 1);
                 }
 
                 //stopping at halt
@@ -656,6 +659,9 @@ public class SymbolicRewriter {
                         if (visited.add(result)) {
                             nextQueue.add(result);
                         } else {
+                            if (!KProve.options.global.log) {
+                                logStep(step, targetCallDataStr, term, true);
+                            }
                             if (term.equals(result)) {
                                 kem.registerCriticalWarning("Step " + step + ": infinite loop after applying a spec rule.");
                             }
@@ -676,6 +682,10 @@ public class SymbolicRewriter {
                     throw e;
                 }
                 if (results.isEmpty()) {
+                    if (!KProve.options.global.log) {
+                        logStep(step, targetCallDataStr, term, true);
+                    }
+                    System.out.println("Step above: " + step + ", evaluation ended with no successors.");
                     /* final term */
                     proofResults.add(term);
                 } else {
@@ -783,6 +793,7 @@ public class SymbolicRewriter {
         Term wordStack = ((KList) ((KItem) callState).kList()).get(6);
         Term localMem = ((KList) ((KItem) callState).kList()).get(7);
         Term pc = ((KList) ((KItem) callState).kList()).get(8);
+        Term gas = ((KList) ((KItem) callState).kList()).get(9);
 
         Term network = ((KList) ((KItem) ethereum).klist()).get(1);
         BuiltinMap accounts = (BuiltinMap) ((KList) ((KItem) ((KList) ((KItem) network).kList())
@@ -813,6 +824,7 @@ public class SymbolicRewriter {
             System.out.println("</localMem>");
 
             System.out.println(pc);
+            System.out.println(gas);
             System.out.println(wordStack);
             String callDataStr = callData.toString();
             if (!targetCallDataStr.equals(callData.toString())) {
