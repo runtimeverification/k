@@ -289,4 +289,24 @@ public class Debugg {
     public static void setSpecRule(boolean main) {
         Debugg.specRule = main;
     }
+
+    public static void specialTerm(String kcontent) {
+        if(kcontent.equals("#halt_EVM(.KList)")) {
+            System.out.println("specialnode halt" + currentTerm);
+        }
+        if(kcontent.equals("#exception_EVM(.KList)")) {
+            System.out.println("specialnode exception" + currentTerm);
+        }
+        if(kcontent.equals("#revert_EVM(.KList)")) {
+            System.out.println("specialnode revert " + currentTerm);
+        }
+        if(kcontent.equals("#end_EVM(.KList)")) {
+            System.out.println("specialnode end " + currentTerm);
+        }
+    }
+
+    public static void branchingNode(K term, K constraint) {
+        String node_key = addNode(term, constraint);
+        System.out.println("specialnode branch " + node_key);
+    }
 }

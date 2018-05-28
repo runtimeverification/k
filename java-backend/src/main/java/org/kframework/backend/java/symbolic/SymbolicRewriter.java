@@ -607,7 +607,7 @@ public class SymbolicRewriter {
         while (!queue.isEmpty()) {
             step++;
             Debugg.step(Integer.toString(step));
-            if(step == 1653) {
+            if(step == 874) {
                 System.out.println(2);
              //   throw new Error("ein Zonk hinter dieser Tür.");
             }
@@ -617,12 +617,14 @@ public class SymbolicRewriter {
                     Debugg.setCurrentTerm(term.term(), term.constraint(), true);
                     String currpc = term.term().getCellContentsByName("<pc>").get(0).toString();
                     String initpc = initialTerm.term().getCellContentsByName("<pc>").get(0).toString();
-                    boolean circ = currpc.equals(initpc) && guarded;
+                    String targetpc = targetTerm.term().getCellContentsByName("<pc>").get(0).toString();
+                    boolean circ = (currpc.equals(initpc) || currpc.equals(targetpc)) && guarded;
                     Debugg.setCircWatcher(circ);
                 } else {
                     Debugg.setCurrentTerm(term.term(), term.constraint(), false);
                     Debugg.setCircWatcher(false);
                 }
+                Debugg.specialTerm(kcontent);
                 if (term.implies(targetTerm)) {
                     //String cconst = KILtoSMTLib.translateConstraint(term.constraint());
                     Debugg.addStep(term.term(), targetTerm.term(), term.constraint(), targetTerm.constraint());
@@ -696,6 +698,9 @@ public class SymbolicRewriter {
                             cterm.termContext());
                     String rule_key = Debugg.getTmpRule();
                     Debugg.addStepRule(term.term(), result.term(), term.constraint(), result.constraint(), rule_key);
+                    if(results.size() > 1) {
+                        Debugg.branchingNode(result.term(), result.constraint());
+                    }
                     if (visited.add(result)) {
                         nextQueue.add(result);
                     }
