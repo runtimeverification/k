@@ -9,6 +9,7 @@ import com.google.inject.Provider;
 import org.kframework.attributes.Source;
 import org.kframework.kore.Sort;
 import org.kframework.main.GlobalOptions;
+import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.RequestScoped;
@@ -17,8 +18,6 @@ import org.kframework.utils.options.DefinitionLoadingOptions;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.List;
-
-import static org.kframework.kore.KORE.*;
 
 @RequestScoped
 public final class KastOptions {
@@ -82,7 +81,7 @@ public final class KastOptions {
         // converts the command line argument into a Sort
         @Override
         public Sort convert(String arg) {
-            return Sort(arg);
+            return Outer.parseSort(arg);
         }
     }
 

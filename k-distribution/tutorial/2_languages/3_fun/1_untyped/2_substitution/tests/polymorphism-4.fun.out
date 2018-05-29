@@ -1,1 +1,1 @@
-V ==K fun ( x -> ( fun ( [ y , .Names ] -> y ) | .Cases ) [ x , .Names ] ) | .Cases
+V ==K fun ( x -> ( fun ( [ y , .Types ] -> y ) | .Cases ) [ x , .Types ] ) | .Cases

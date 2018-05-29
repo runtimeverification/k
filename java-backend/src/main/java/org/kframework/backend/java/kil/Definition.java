@@ -16,12 +16,9 @@ import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Subsorts;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Module;
-import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
-import org.kframework.kil.Attributes;
 import org.kframework.kil.loader.Context;
 import org.kframework.kompile.CompiledDefinition;
-import org.kframework.kore.convertors.KILtoKORE;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -56,16 +53,16 @@ public class Definition extends JavaSymbolicObject {
         public final Subsorts subsorts;
         public Map<String, DataStructureSort> dataStructureSorts;
         public final SetMultimap<String, SortSignature> signatures;
-        public final ImmutableMap<String, Att> kLabelAttributes;
-        public final Map<Sort, String> freshFunctionNames;
+        public final ImmutableMap<org.kframework.kore.KLabel, Att> kLabelAttributes;
+        public final Map<Sort, org.kframework.kore.KLabel> freshFunctionNames;
         public final Map<Sort, Sort> smtSortFlattening;
 
         private DefinitionData(
                 Subsorts subsorts,
                 Map<String, DataStructureSort> dataStructureSorts,
                 SetMultimap<String, SortSignature> signatures,
-                ImmutableMap<String, Att> kLabelAttributes,
-                Map<Sort, String> freshFunctionNames,
+                ImmutableMap<org.kframework.kore.KLabel, Att> kLabelAttributes,
+                Map<Sort, org.kframework.kore.KLabel> freshFunctionNames,
                 Map<Sort, Sort> smtSortFlattening) {
             this.subsorts = subsorts;
             this.dataStructureSorts = dataStructureSorts;
@@ -115,16 +112,16 @@ public class Definition extends JavaSymbolicObject {
         JavaConversions.mapAsJavaMap(moduleWithPolyProds.signatureFor()).entrySet().stream().forEach(e -> {
             JavaConversions.setAsJavaSet(e.getValue()).stream().forEach(p -> {
                 ImmutableList.Builder<Sort> sortsBuilder = ImmutableList.builder();
-                stream(p._1()).map(s -> Sort.of(s.name())).forEach(sortsBuilder::add);
+                stream(p._1()).map(s -> Sort.of(s)).forEach(sortsBuilder::add);
                 signaturesBuilder.put(
                         e.getKey().name(),
-                        new SortSignature(sortsBuilder.build(), Sort.of(p._2().name())));
+                        new SortSignature(sortsBuilder.build(), Sort.of(p._2())));
             });
         });
 
-        ImmutableMap.Builder<String, Att> attributesBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<org.kframework.kore.KLabel, Att> attributesBuilder = ImmutableMap.builder();
         JavaConversions.mapAsJavaMap(module.attributesFor()).entrySet().stream().forEach(e -> {
-            attributesBuilder.put(e.getKey().name(), e.getValue());
+            attributesBuilder.put(e.getKey(), e.getValue());
         });
 
         definitionData = new DefinitionData(
@@ -133,8 +130,8 @@ public class Definition extends JavaSymbolicObject {
                 signaturesBuilder.build(),
                 attributesBuilder.build(),
                 JavaConverters.mapAsJavaMapConverter(module.freshFunctionFor()).asJava().entrySet().stream().collect(Collectors.toMap(
-                        e -> Sort.of(e.getKey().name()),
-                        e -> e.getValue().name())),
+                        e -> Sort.of(e.getKey()),
+                        e -> e.getValue())),
                 Collections.emptyMap()
         );
         context = null;
@@ -149,32 +146,28 @@ public class Definition extends JavaSymbolicObject {
             Optional<?> comm = prod.att().getOptional(Attribute.COMMUTATIVE_KEY);
             Optional<?> idem = prod.att().getOptional(Attribute.IDEMPOTENT_KEY);
 
-            org.kframework.kil.Sort type;
             if (prod.sort().equals(Sorts.KList()) || prod.sort().equals(Sorts.KBott()))
                 continue;
             if (assoc.isPresent() && !comm.isPresent() && !idem.isPresent()) {
                 if (!prod.att().contains(Attribute.HOOK_KEY))
                     continue;
-                type = org.kframework.kil.Sort.LIST;
             } else if (assoc.isPresent() && comm.isPresent() && idem.isPresent()) {
-                type = org.kframework.kil.Sort.SET;
             } else if (assoc.isPresent() && comm.isPresent() && !idem.isPresent()) {
                 //TODO(dwightguth): distinguish between Bag and Map
                 if (!prod.att().contains(Attribute.HOOK_KEY))
                     continue;
-                type = org.kframework.kil.Sort.MAP;
             } else if (!assoc.isPresent() && !comm.isPresent() && !idem.isPresent()) {
                 continue;
             } else {
                 throw KEMException.criticalError("Unexpected combination of assoc, comm, idem attributes found. Currently "
                         + "only sets, maps, and lists are supported: " + prod, prod);
             }
-            DataStructureSort sort = new DataStructureSort(prod.sort().name(), type,
-                    prod.klabel().get().name(),
-                    prod.att().<String>get("element"),
-                    prod.att().<String>get(Attribute.UNIT_KEY),
+            DataStructureSort sort = new DataStructureSort(
+                    prod.klabel().get(),
+                    KLabel.parse(prod.att().<String>get("element")),
+                    KLabel.parse(prod.att().<String>get(Attribute.UNIT_KEY)),
                     new HashMap<>());
-            builder.put(prod.sort().name(), sort);
+            builder.put(prod.sort().toString(), sort);
         }
         return builder.build();
     }
@@ -353,19 +346,19 @@ public class Definition extends JavaSymbolicObject {
         return definitionData.signatures.get(label);
     }
 
-    public Map<String, Att> kLabelAttributes() {
+    public Map<org.kframework.kore.KLabel, Att> kLabelAttributes() {
         return definitionData.kLabelAttributes;
     }
 
-    public Att kLabelAttributesOf(String label) {
+    public Att kLabelAttributesOf(org.kframework.kore.KLabel label) {
         return Optional.ofNullable(definitionData.kLabelAttributes.get(label)).orElse(Att.empty());
     }
 
     public DataStructureSort dataStructureSortOf(Sort sort) {
-        return definitionData.dataStructureSorts.get(sort.name());
+        return definitionData.dataStructureSorts.get(sort.toString());
     }
 
-    public Map<Sort, String> freshFunctionNames() {
+    public Map<Sort, org.kframework.kore.KLabel> freshFunctionNames() {
         return definitionData.freshFunctionNames;
     }
 

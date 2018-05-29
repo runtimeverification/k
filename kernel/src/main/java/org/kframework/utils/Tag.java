@@ -11,7 +11,6 @@ public class Tag {
     public final static String tokens = "tokens";
     public final static String terminal = "terminal";
     public final static String separator = "separator";
-    public final static String sort = "sort";
     public final static String userlist = "userlist";
     public final static String syntax = "syntax";
     public final static String comment = "comment";

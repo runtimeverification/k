@@ -37,7 +37,7 @@ public class KompileOptions implements Serializable {
     private static final String DEFAULT_DOC_STYLE = "poster,style=bubble";
 
     public String docStyle() {
-        if (backend == Backends.HTML) {
+        if (backend.equals(Backends.HTML)) {
             if (docStyle == null) {
                 return "k-definition.css";
             }

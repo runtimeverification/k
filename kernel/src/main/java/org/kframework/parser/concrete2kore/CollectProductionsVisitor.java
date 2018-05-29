@@ -4,7 +4,7 @@ package org.kframework.parser.concrete2kore;
 import org.kframework.kil.Definition;
 import org.kframework.kil.Module;
 import org.kframework.kil.Production;
-import org.kframework.kil.Sort;
+import org.kframework.kore.Sort;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.loader.Context;
 

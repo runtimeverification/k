@@ -1,3 +1,4 @@
+// Copyright (c) 2016-2018 K Team. All Rights Reserved.
 package org.kframework.compile.checks;
 
 import com.google.common.collect.ImmutableSet;
@@ -8,10 +9,12 @@ import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.InjectedKLabel;
 import org.kframework.kore.K;
+import org.kframework.kore.Sort;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.VisitK;
+import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KEMException;
 
 import java.util.HashMap;
@@ -81,6 +84,6 @@ public class CheckKLabels {
     private final ImmutableSet<String> internalNames = ImmutableSet.of("#cells", "#dots", "#noDots", "#fun2", "#fun3");
 
     private boolean isInternalKLabel(String name, Module m) {
-        return name.startsWith("#SemanticCastTo") || internalNames.contains(name) || (name.startsWith("is") && m.definedSorts().apply(Sort(name.substring(2))));
+        return name.startsWith("#SemanticCastTo") || internalNames.contains(name) || (name.startsWith("is") && m.definedSorts().apply(Outer.parseSort(name.substring(2))));
     }
 }

@@ -23,6 +23,7 @@ import org.kframework.parser.concrete2kore.kernel.Grammar;
 import org.kframework.parser.concrete2kore.kernel.KSyntax2GrammarStatesFilter;
 import org.kframework.parser.concrete2kore.kernel.Parser;
 import org.kframework.parser.concrete2kore.kernel.Scanner;
+import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import scala.Tuple2;
@@ -124,7 +125,7 @@ public class ParseInModule implements Serializable {
         if (result._1().isLeft()) {
             parseInfo = Left.apply(result._1().left().get());
         } else {
-            parseInfo = Right.apply(TreeNodesToKORE.apply(result._1().right().get()));
+            parseInfo = Right.apply(new TreeNodesToKORE(Outer::parseSort).apply(result._1().right().get()));
         }
         return new Tuple2<>(parseInfo, result._2());
     }
@@ -147,7 +148,7 @@ public class ParseInModule implements Serializable {
             parseStringTerm(String input, Sort startSymbol, Scanner scanner, Source source, int startLine, int startColumn, boolean inferSortChecks) {
         scanner = getGrammar(scanner);
 
-        Grammar.NonTerminal startSymbolNT = grammar.get(startSymbol.name());
+        Grammar.NonTerminal startSymbolNT = grammar.get(startSymbol.toString());
         Set<ParseFailedException> warn = Sets.newHashSet();
         if (startSymbolNT == null) {
             String msg = "Could not find start symbol: " + startSymbol;

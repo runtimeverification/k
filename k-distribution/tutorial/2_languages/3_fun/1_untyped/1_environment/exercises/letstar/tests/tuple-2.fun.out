@@ -1,1 +1,1 @@
-V ==K Pair ( Pair ( 1 , Wrapper ( 2 , .Names ) , .Names ) , Pair ( 3 , 4 , .Names ) , .Names )
+V ==K Pair ( Pair ( 1 , Wrapper ( 2 , .Types ) , .Types ) , Pair ( 3 , 4 , .Types ) , .Types )

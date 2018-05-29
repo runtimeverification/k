@@ -93,7 +93,7 @@ public class DeconstructIntegerAndFloatLiterals {
     KVariable newDotVariable(Sort sort) {
         KVariable newLabel;
         do {
-            newLabel = KVariable("_" + (counter++), Att().add("sort", sort.name()));
+            newLabel = KVariable("_" + (counter++), Att().add(Sort.class, sort));
         } while (vars.contains(newLabel));
         vars.add(newLabel);
         return newLabel;

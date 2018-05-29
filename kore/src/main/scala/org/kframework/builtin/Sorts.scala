@@ -9,15 +9,18 @@ object Sorts {
   val Layout = Sort("#Layout")
 
   val KString = Sort("KString")
-  val String = Sort("String")
-
   val KBool = Sort("KBool")
-  val Bool = Sort("Bool")
 
+  val Bool = Sort("Bool")
   val Int = Sort("Int")
-  val File = Sort("File")
-  val Float = Sort("Float")
   val MInt = Sort("MInt")
+  val String = Sort("String")
+  val Float = Sort("Float")
+  val StringBuffer = Sort("StringBuffer")
+
+  val List = Sort("List")
+  val Set = Sort("Set")
+  val Map = Sort("Map")
 
   val K = Sort("K")
   val KBott = Sort("KBott")
@@ -28,5 +31,8 @@ object Sorts {
   val KList = Sort("KList")
   val KConfigVar = Sort("KConfigVar")
 
-  val Id = ADT.Sort("Id")
+  val Bag = Sort("Bag")
+  val Cell = Sort("Cell")
+
+  val Id = Sort("Id")
 }

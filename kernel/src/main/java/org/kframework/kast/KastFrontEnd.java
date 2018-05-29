@@ -8,8 +8,9 @@ import org.kframework.attributes.Source;
 import org.kframework.compile.ExpandMacros;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kore.K;
-import org.kframework.unparser.ToKast;
 import org.kframework.main.FrontEnd;
+import org.kframework.parser.outer.Outer;
+import org.kframework.unparser.ToKast;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -29,8 +30,6 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import static org.kframework.kore.KORE.*;
 
 public class KastFrontEnd extends FrontEnd {
 
@@ -90,7 +89,7 @@ public class KastFrontEnd extends FrontEnd {
             org.kframework.kore.Sort sort = options.sort;
             if (sort == null) {
                 if (env.get("KRUN_SORT") != null) {
-                    sort = Sort(env.get("KRUN_SORT"));
+                    sort = Outer.parseSort(env.get("KRUN_SORT"));
                 } else {
                     sort = def.programStartSymbol;
                 }
