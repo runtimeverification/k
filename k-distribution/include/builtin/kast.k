@@ -7,7 +7,6 @@ endmodule
 
 module BASIC-K
   imports SORT-K
-  syntax KLabel
   syntax KItem [hook(K.KItem)]
   syntax K     ::= KItem
   syntax KConfigVar
