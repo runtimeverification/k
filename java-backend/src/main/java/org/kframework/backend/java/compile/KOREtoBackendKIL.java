@@ -236,8 +236,12 @@ public class KOREtoBackendKIL {
 
     public Variable KVariable(String name, Att att) {
         Sort sortAtt = Sort.of(att.getOptional(org.kframework.kore.Sort.class).orElse(Sorts.K()));
+        if (att.contains("cellSort")) {
+            sortAtt = Sort.of(Sorts.K());
+        }
+        Sort realSort = sortAtt;
         Optional<Production> collectionProduction = stream(module.productions())
-                .filter(p -> p.att().contains("cellCollection") && p.sort().equals(sortAtt))
+                .filter(p -> p.att().contains("cellCollection") && p.sort().equals(realSort))
                 .findAny();
         Sort sort = sortAtt;
         if (collectionProduction.isPresent()) {

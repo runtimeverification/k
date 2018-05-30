@@ -199,12 +199,12 @@ public class SortCells {
                             var.name(),
                             var.att().add(Sort.class, getPredicateSort(s))));
                 } else {
-                    split = ImmutableMap.of(s, KVariable(var.name(), var.att().add(Sort.class, s)));
+                    split = ImmutableMap.of(s, KVariable(var.name(), var.att().add(Sort.class, s).add("cellSort")));
                 }
             } else {
                 split = new HashMap<>();
                 for (Sort cell : remainingCells) {
-                    split.put(cell, newDotVariable(var.att().add(Sort.class, cell)));
+                    split.put(cell, newDotVariable(var.att().add(Sort.class, cell).add("cellSort")));
                 }
             }
             return split;
