@@ -27,7 +27,7 @@ public class Z3Wrapper {
 
     private static final Set<String> Z3_QUERY_RESULTS = ImmutableSet.of("unknown", "sat", "unsat");
 
-    public final String SMT_PRELUDE;
+    public final String SMT_PRELUDE, CHECK_SAT;
     private final SMTOptions options;
     private final GlobalOptions globalOptions;
     private final KExceptionManager kem;
@@ -44,6 +44,7 @@ public class Z3Wrapper {
         this.files = files;
 
         SMT_PRELUDE = options.smtPrelude == null ? "" : files.loadFromWorkingDirectory(options.smtPrelude);
+        CHECK_SAT = options.z3Tactic == null ? "(check-sat)" : "(check-sat-using " + options.z3Tactic + ")";
     }
 
     public synchronized boolean isUnsat(String query, int timeout) {
@@ -89,7 +90,7 @@ public class Z3Wrapper {
                     z3Process.getOutputStream()));
                 BufferedReader output = new BufferedReader(new InputStreamReader(
                     z3Process.getInputStream()));
-                input.write(SMT_PRELUDE + query + "(check-sat)\n");
+                input.write(SMT_PRELUDE + query + CHECK_SAT + "\n");
                 input.flush();
                 result = output.readLine();
                 z3Process.destroy();

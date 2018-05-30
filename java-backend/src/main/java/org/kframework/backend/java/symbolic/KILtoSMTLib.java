@@ -78,6 +78,7 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
             "<",
             ">=",
             ">",
+            "^",
             /* extra int theory */
             "int_max",
             "int_min",

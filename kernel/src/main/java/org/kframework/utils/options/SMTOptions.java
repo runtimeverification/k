@@ -49,4 +49,7 @@ public class SMTOptions implements Serializable {
 
     @Parameter(names="--z3-impl-timeout", description="The default soft timeout (in milli seconds) of Z3 for checking implication.")
     public int z3ImplTimeout = 5000;
+
+    @Parameter(names="--z3-tactic", description="The solver tactic to use to check satisfiability in Z3.")
+    public String z3Tactic;
 }
