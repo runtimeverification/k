@@ -32,6 +32,7 @@ import org.kframework.kore.KApply;
 import org.kframework.kore.KORE;
 import org.kframework.rewriter.SearchType;
 import org.kframework.backend.java.utils.BitSet;
+import org.kframework.utils.errorsystem.KExceptionManager;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -579,7 +580,7 @@ public class SymbolicRewriter {
     public List<ConstrainedTerm> proveRule(
             ConstrainedTerm initialTerm,
             ConstrainedTerm targetTerm,
-            List<Rule> specRules) {
+            List<Rule> specRules, KExceptionManager kem) {
         List<ConstrainedTerm> proofResults = new ArrayList<>();
         Set<ConstrainedTerm> visited = new HashSet<>();
         List<ConstrainedTerm> queue = new ArrayList<>();
@@ -625,7 +626,7 @@ public class SymbolicRewriter {
                             nextQueue.add(result);
                         } else {
                             if (term.equals(result)) {
-                                System.err.println("Step " + step + ": infinite loop after applying a spec rule.");
+                                kem.registerCriticalWarning("Step " + step + ": infinite loop after applying a spec rule.");
                                 proofResults.add(result);
                             }
                         }
