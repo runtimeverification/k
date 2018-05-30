@@ -134,7 +134,7 @@ public class GenerateSentencesFromConfigDecl {
                     }
                 }
                 throw KEMException.compilerError("Malformed io cell in configuration declaration.", term);
-            } else if (kapp.klabel().name().equals(KLabels.CELLS)) {
+            } else if (KLabels.CELLS.equals(kapp.klabel())) {
                 //is a cell bag, and thus represents the multiple children of its parent cell
                 if (ensures != null) {
                     //top level cell, therefore, should be the children of the generatedTop cell
@@ -153,12 +153,12 @@ public class GenerateSentencesFromConfigDecl {
                     sorts.addAll(childResult._2());
                     initializers.add(childResult._3());
                 }
-                return Tuple3.apply(accumSentences, sorts, KApply(KLabel(KLabels.CELLS), immutable(initializers)));
+                return Tuple3.apply(accumSentences, sorts, KApply(KLabels.CELLS, immutable(initializers)));
             }
             //TODO: call generic getSort method of some kind
             // child of a leaf cell. Generate no productions, but inform parent that it has a child of a particular sort.
             // A leaf cell initializes to the value specified in the configuration declaration.
-            return Tuple3.apply(Set(), Lists.newArrayList(m.sortFor().get(kapp.klabel()).get()), getLeafInitializer(term));
+            return Tuple3.apply(Set(), Lists.newArrayList(kapp.att().get(Production.class).sort()), getLeafInitializer(term));
         } else if (term instanceof KToken) {
             // child of a leaf cell. Generate no productions, but inform parent that it has a child of a particular sort.
             // A leaf cell initializes to the value specified in the configuration declaration.
@@ -174,7 +174,7 @@ public class GenerateSentencesFromConfigDecl {
     }
 
     public static String getInitLabel(Sort sort) {
-        return "init" + sort.name();
+        return "init" + sort.toString();
     }
 
     /**
@@ -269,7 +269,7 @@ public class GenerateSentencesFromConfigDecl {
         if (cellProperties.contains("maincell")) {
             assert isLeaf;
             assert childSorts.size() == 1;
-            childSorts = Lists.newArrayList(Sort("K"));
+            childSorts = Lists.newArrayList(Sorts.K());
         }
 
         List<ProductionItem> items = Stream.concat(Stream.concat(Stream.of(
@@ -291,7 +291,7 @@ public class GenerateSentencesFromConfigDecl {
         att = att.add("format", format.toString());
         // syntax Cell ::= "<cell>" Children... "</cell>" [cell, cellProperties, configDeclAttributes]
         if(!m.definedKLabels().contains(KLabel(klabel)) && multiplicity != Multiplicity.OPTIONAL) {
-            Production cellProduction = Production(klabel, sort, immutable(items),
+            Production cellProduction = Production(KLabel(klabel), sort, immutable(items),
                     att);
             sentences.add(cellProduction);
         }
@@ -303,10 +303,10 @@ public class GenerateSentencesFromConfigDecl {
         Sentence initializer;
         Rule initializerRule;
         if (hasConfigurationOrRegularVariable || isStream) {
-            initializer = Production(initLabel, sort, Seq(Terminal(initLabel), Terminal("("), NonTerminal(Sort("Map")), Terminal(")")), Att().add("initializer").add("function").add("noThread"));
+            initializer = Production(KLabel(initLabel), sort, Seq(Terminal(initLabel), Terminal("("), NonTerminal(Sorts.Map()), Terminal(")")), Att().add("initializer").add("function").add("noThread"));
             initializerRule = Rule(KRewrite(KApply(KLabel(initLabel), KVariable("Init")), IncompleteCellUtils.make(KLabel("<" + cellName + ">"), false, childInitializer, false)), BooleanUtils.TRUE, ensures == null ? BooleanUtils.TRUE : ensures, Att().add("initializer"));
         } else {
-            initializer = Production(initLabel, sort, Seq(Terminal(initLabel)), Att().add("initializer").add("function").add("noThread"));
+            initializer = Production(KLabel(initLabel), sort, Seq(Terminal(initLabel)), Att().add("initializer").add("function").add("noThread"));
             initializerRule = Rule(KRewrite(KApply(KLabel(initLabel)), IncompleteCellUtils.make(KLabel("<" + cellName + ">"), false, childInitializer, false)), BooleanUtils.TRUE, ensures == null ? BooleanUtils.TRUE : ensures, Att().add("initializer"));
         }
         if (!m.definedKLabels().contains(KLabel(initLabel))) {
@@ -333,20 +333,20 @@ public class GenerateSentencesFromConfigDecl {
                     // child was a multiplicity * List/Bag/Set
                     fragmentItems.add(NonTerminal(childSort));
                 } else {
-                    Sort childOptSort = Sort(childSort.name()+"Opt");
+                    Sort childOptSort = Sort(childSort.name()+"Opt", childSort.params());
                     fragmentItems.add(NonTerminal(childOptSort));
 
                     sentences.add(Production(childOptSort, List(NonTerminal(childSort))));
-                    if (!m.definedKLabels().contains(KLabel("no"+childSort.name()))) {
-                        sentences.add(Production("no"+childSort.name(), childOptSort, List(Terminal("no"+childSort.name())),
-                                Att().add(Attribute.CELL_OPT_ABSENT_KEY,childSort.name())));
+                    if (!m.definedKLabels().contains(KLabel("no"+childSort.toString()))) {
+                        sentences.add(Production(KLabel("no"+childSort.toString()), childOptSort, List(Terminal("no"+childSort.toString())),
+                                Att().add(Attribute.CELL_OPT_ABSENT_KEY,Sort.class,childSort)));
                     }
                 }
             }
             fragmentItems.add(Terminal("</"+cellName+">-fragment"));
             if (!m.definedKLabels().contains(KLabel("<" + cellName + ">-fragment"))) {
-                sentences.add(Production("<" + cellName + ">-fragment", fragmentSort, immutable(fragmentItems),
-                        Att().add(Attribute.CELL_FRAGMENT_KEY, sortName)));
+                sentences.add(Production(KLabel("<" + cellName + ">-fragment"), fragmentSort, immutable(fragmentItems),
+                        Att().add(Attribute.CELL_FRAGMENT_KEY, Sort.class, Sort(sortName))));
             }
         }
 
@@ -402,7 +402,7 @@ public class GenerateSentencesFromConfigDecl {
             Sentence bagSubsort = Production(bagSort, Seq(NonTerminal(sort)));
             Sentence bagElement;
             if (type.equals("Map")) {
-                bagElement = Production(bagSort.name() + "Item", bagSort, Seq(
+                bagElement = Production(KLabel(bagSort.name() + "Item"), bagSort, Seq(
                         Terminal(bagSort.name() + "Item"),
                         Terminal("("),
                         NonTerminal(childSorts.get(0)),
@@ -410,14 +410,14 @@ public class GenerateSentencesFromConfigDecl {
                         NonTerminal(sort),
                         Terminal(")")), Att().add(Attribute.HOOK_KEY, elementHook).add(Attribute.FUNCTION_KEY));
             } else {
-                bagElement = Production(bagSort.name() + "Item", bagSort, Seq(
+                bagElement = Production(KLabel(bagSort.name() + "Item"), bagSort, Seq(
                         Terminal(bagSort.name() + "Item"),
                         Terminal("("),
                         NonTerminal(sort),
                         Terminal(")")), Att().add(Attribute.HOOK_KEY, elementHook).add(Attribute.FUNCTION_KEY));
             }
-            Sentence bagUnit = Production("." + bagSort.name(), bagSort, Seq(Terminal("." + bagSort.name())), Att().add(Attribute.HOOK_KEY, unitHook).add(Attribute.FUNCTION_KEY));
-            Sentence bag = Production("_" + bagSort + "_", bagSort, Seq(NonTerminal(bagSort), NonTerminal(bagSort)),
+            Sentence bagUnit = Production(KLabel("." + bagSort.name()), bagSort, Seq(Terminal("." + bagSort.name())), Att().add(Attribute.HOOK_KEY, unitHook).add(Attribute.FUNCTION_KEY));
+            Sentence bag = Production(KLabel("_" + bagSort + "_"), bagSort, Seq(NonTerminal(bagSort), NonTerminal(bagSort)),
                     bagAtt);
             sentences.add(sortDecl);
             sentences.add(bagSubsort);
@@ -431,11 +431,11 @@ public class GenerateSentencesFromConfigDecl {
             rhs = optionalCellInitializer(hasConfigurationOrRegularVariable, cellProperties, initLabel);
         } else if (multiplicity == Multiplicity.OPTIONAL) {
             // syntax Cell ::= ".Cell"
-            Production cellUnit = Production("." + sortName, sort, Seq(Terminal("." + sortName)));
+            Production cellUnit = Production(KLabel("." + sortName), sort, Seq(Terminal("." + sortName)));
             sentences.add(cellUnit);
             // add UNIT_KEY attribute to cell production.
             if(!m.definedKLabels().contains(KLabel(klabel))) {
-                Production cellProduction = Production(sort, immutable(items), att.add(Attribute.UNIT_KEY, cellUnit.klabel().get().name()));
+                Production cellProduction = Production(KLabel(klabel), sort, immutable(items), att.add(Attribute.UNIT_KEY, cellUnit.klabel().get().name()));
                 sentences.add(cellProduction);
             }
             // rule initCell => .CellBag
@@ -467,7 +467,7 @@ public class GenerateSentencesFromConfigDecl {
         } else if (cellProperties.contains("initial")) {
             return KApply(KLabel(initLabel));
         } else {
-            return KApply(KLabel(KLabels.CELLS));
+            return KApply(KLabels.CELLS);
         }
     }
 
@@ -479,7 +479,7 @@ public class GenerateSentencesFromConfigDecl {
         if (ensures != null) {
             att = att.add("topcell");
         }
-        att = att.add("cell").add("klabel", "<" + cellName + ">");
+        att = att.add("cell");
         return att.addAll(getCellPropertiesAsAtt(k));
     }
 
@@ -509,7 +509,7 @@ public class GenerateSentencesFromConfigDecl {
                             String key = keyToken.s();
                             if (kapp.klist().items().get(0) instanceof KToken) {
                                 KToken valueToken = (KToken) kapp.klist().items().get(1);
-                                if (valueToken.sort().equals(Sort("KString"))) {
+                                if (valueToken.sort().equals(Sorts.KString())) {
                                     String value = StringUtil.unquoteKString(valueToken.s());
                                     return Tuple2.apply(key, value);
                                 }

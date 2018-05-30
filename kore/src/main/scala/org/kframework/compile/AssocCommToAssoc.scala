@@ -128,8 +128,8 @@ class AssocCommToAssoc extends Function[Module, Module] {
     }
   }
 
-  private def anonymousVariable(s: Sort): K = SortedADT.SortedKVariable("THE_VARIABLE", Att.empty.add(Att.sort, s.name))
+  private def anonymousVariable(s: Sort): K = SortedADT.SortedKVariable("THE_VARIABLE", Att.empty.add(classOf[Sort], s))
 
-  private def dotVariable(s: Sort, n: Int): K = SortedADT.SortedKVariable(s.name + "_DotVar" + n, Att.empty.add(Att.sort, s.name))
+  private def dotVariable(s: Sort, n: Int): K = SortedADT.SortedKVariable(s.toString + "_DotVar" + n, Att.empty.add(classOf[Sort], s))
 
 }

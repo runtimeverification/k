@@ -199,7 +199,7 @@ public class Commands {
         public void runCommand(KDebug session, CompiledDefinition compiledDefinition, boolean isSource) {
             CommandUtils utils = new CommandUtils(isSource);
             if (checkpointInterval <= 0) {
-                KEMException.debuggerError("Checkpoint Value must be >= 1");
+                throw KEMException.debuggerError("Checkpoint Value must be >= 1");
             }
             session.setCheckpointInterval(checkpointInterval);
             utils.print("Checkpointing Interval set to " + checkpointInterval);
@@ -312,7 +312,7 @@ public class Commands {
                 try {
                     System.out.write(bytes);
                 } catch (IOException e) {
-                    KEMException.debuggerError("IOError :" + e.getMessage());
+                    throw KEMException.debuggerError("IOError :" + e.getMessage());
                 }
             }
         }

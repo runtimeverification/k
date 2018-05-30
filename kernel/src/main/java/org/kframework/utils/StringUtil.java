@@ -5,9 +5,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.beust.jcommander.JCommander;
 
-import org.kframework.kil.NonTerminal;
-import org.kframework.kil.Sort;
-
 public class StringUtil {
     /**
      * Unescape the textual representation of a string specific to SDF and Maude.
@@ -370,24 +367,6 @@ public class StringUtil {
                 assert false: "should be exhaustive list of directionalities";
                 return null; //unreachable
         }
-    }
-
-    /**
-     * Creates an SDF safe representation of a Sort name.
-     * @param nonTerminal String representation of the sort.
-     * @return textual representation of the Sort name.
-     */
-    public static String escapeSort(NonTerminal nonTerminal) {
-        return escapeSort(nonTerminal.getSort());
-    }
-
-    /**
-     * Creates an SDF safe representation of a Sort name.
-     * @param sort String representation of the sort.
-     * @return textual representation of the Sort name.
-     */
-    public static String escapeSort(Sort sort) {
-        return escapeSort(sort.toString());
     }
 
     /**

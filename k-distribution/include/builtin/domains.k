@@ -333,8 +333,8 @@ module INT
 
   syntax Int ::= "~Int" Int                     [function, latex(\mathop{\sim_{\scriptstyle\it Int}}{#1}), hook(INT.not)]
                > left:
-                 Int "^Int" Int                 [function, left, latex({#1}\mathrel{{\char`\^}_{\!\scriptstyle\it Int}}{#2}), hook(INT.pow)]
-               | Int "^%Int" Int Int            [function, left, hook(INT.powmod)]
+                 Int "^Int" Int                 [function, left, smtlib(^), latex({#1}\mathrel{{\char`\^}_{\!\scriptstyle\it Int}}{#2}), hook(INT.pow)]
+               | Int "^%Int" Int Int            [function, left, smtlib((mod (^ #1 #2) #3)), hook(INT.powmod)]
                > left:
                  Int "*Int" Int                 [function, left, smtlib(*), latex({#1}\mathrel{\ast_{\scriptstyle\it Int}}{#2}), hook(INT.mul)]
                /* FIXME: translate /Int and %Int into smtlib */

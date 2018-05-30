@@ -106,8 +106,8 @@ public class KItem extends Term implements KItemRepresentation, HasGlobalContext
 
     private static Kind computeKind(Term kLabel) {
         if (kLabel instanceof KLabelConstant) {
-            String name = ((KLabelConstant) kLabel).name();
-            if (name.equals(KLabels.DOTK) || name.equals(KLabels.KSEQ)) {
+            org.kframework.kore.KLabel name = ((KLabelConstant) kLabel);
+            if (KLabels.DOTK.equals(name) || KLabels.KSEQ.equals(name)) {
                 return Kind.K;
             }
         }
@@ -586,9 +586,9 @@ public class KItem extends Term implements KItemRepresentation, HasGlobalContext
      */
     public Term applyAnywhereRules(TermContext context) {
         // apply a .K ~> K => K normalization
-        if ((kLabel instanceof KLabelConstant) && ((KLabelConstant) kLabel).name().equals(KLabels.KSEQ)
+        if ((kLabel instanceof KLabelConstant) && KLabels.KSEQ.equals((KLabelConstant) kLabel)
                 && kList instanceof KList
-                && (((KList) kList).get(0) instanceof KItem && ((KItem) ((KList) kList).get(0)).kLabel.toString().equals(KLabels.DOTK) || ((KList) kList).get(0).equals(KSequence.EMPTY))) {
+                && (((KList) kList).get(0) instanceof KItem && KLabels.DOTK.equals(((KItem) ((KList) kList).get(0)).kLabel) || ((KList) kList).get(0).equals(KSequence.EMPTY))) {
             return ((KList) kList).get(1);
         }
 

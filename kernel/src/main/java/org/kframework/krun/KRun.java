@@ -115,7 +115,7 @@ public class KRun {
      */
     public static int getExitCode(KExceptionManager kem, K res) {
         KApply app = (KApply) res;
-        List<K> solution = Assoc.flatten(KORE.KLabel(KLabels.ML_AND), app.klist().items(), KLabel(KLabels.ML_TRUE));
+        List<K> solution = Assoc.flatten(KLabels.ML_AND, app.klist().items(), KLabels.ML_TRUE);
         Set<Integer> vars = new HashSet<>();
         for (K conjunct : solution) {
             if (conjunct instanceof KApply) {
@@ -313,7 +313,7 @@ public class KRun {
         List<String> tokens = new ArrayList<>(Arrays.asList(parser.split(" ")));
         tokens.add(value);
         Map<String, String> environment = new HashMap<>();
-        environment.put("KRUN_SORT", startSymbol.name());
+        environment.put("KRUN_SORT", startSymbol.toString());
         environment.put("KRUN_COMPILED_DEF", files.resolveDefinitionDirectory(".").getAbsolutePath());
         RunProcess.ProcessOutput output = RunProcess.execute(environment, files.getProcessBuilder(), tokens.toArray(new String[tokens.size()]));
 

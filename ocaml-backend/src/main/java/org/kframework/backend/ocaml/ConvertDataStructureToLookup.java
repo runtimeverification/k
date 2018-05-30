@@ -285,7 +285,7 @@ public class ConvertDataStructureToLookup {
         gatherVars(RewriteToTop.toLeft(body), varConstraints);
         return new TransformK() {
             public K apply(KApply k) {
-                if (k.klabel().name().equals(KLabels.KSEQ))
+                if (KLabels.KSEQ.equals(k.klabel()))
                     return super.apply(k);
                 if (k.klabel().name().equals("#Thread")) {
                     K global = apply(k.klist().items().get(0));

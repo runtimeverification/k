@@ -71,7 +71,7 @@ public enum Kind {
 
     @Override
     public String toString() {
-        return sorts.get(this).name();
+        return sorts.get(this).toString();
     }
 
 }

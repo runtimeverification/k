@@ -7,6 +7,7 @@ import org.kframework.attributes.Source;
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
+import org.kframework.compile.IncompleteCellUtils;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.definition.Production;
@@ -14,14 +15,13 @@ import org.kframework.definition.Rule;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
-import org.kframework.kore.KORE;
 import org.kframework.kore.KToken;
 import org.kframework.kore.Sort;
 import org.kframework.kore.VisitK;
-import org.kframework.compile.IncompleteCellUtils;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.concrete2kore.ParseInModule;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
+import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.ParseFailedException;
@@ -98,11 +98,11 @@ public class CompiledDefinition implements Serializable {
                             if (k.klabel().name().contains("#SemanticCastTo")
                                     && k.items().size() == 1 && k.items().get(0) instanceof KApply) {
                                 KApply theMapLookup = (KApply) k.items().get(0);
-                                if (theMapLookup.klabel().name().equals(KLabels.MAP_LOOKUP)
+                                if (KLabels.MAP_LOOKUP.equals(theMapLookup.klabel())
                                         && theMapLookup.size() == 2 && theMapLookup.items().get(1) instanceof KToken) {
                                     KToken t = (KToken) theMapLookup.items().get(1);
                                     if (t.sort().equals(Sorts.KConfigVar())) {
-                                        Sort sort = KORE.Sort(k.klabel().name().replace("#SemanticCastTo", ""));
+                                        Sort sort = Outer.parseSort(k.klabel().name().replace("#SemanticCastTo", ""));
                                         configurationVariableDefaultSorts.put(t.s(), sort);
                                     }
                                 }
@@ -178,7 +178,7 @@ public class CompiledDefinition implements Serializable {
             if (res._1().isLeft()) {
                 throw res._1().left().get().iterator().next();
             }
-            return TreeNodesToKORE.down(res._1().right().get());
+            return new TreeNodesToKORE(Outer::parseSort).down(res._1().right().get());
         };
     }
 

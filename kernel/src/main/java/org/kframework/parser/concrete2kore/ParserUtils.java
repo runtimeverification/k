@@ -262,17 +262,4 @@ public class ParserUtils {
         }
         return opt.get();
     }
-
-    public org.kframework.definition.Definition loadDefinition(
-            String mainModuleName,
-            String syntaxModuleName,
-            String definitionText,
-            File source,
-            File currentDirectory,
-            List<File> lookupDirectories,
-            boolean dropQuote, boolean autoImportDomains) {
-        return loadDefinition(mainModuleName, syntaxModuleName, definitionText,
-                source,
-                currentDirectory, lookupDirectories, dropQuote, autoImportDomains);
-    }
 }

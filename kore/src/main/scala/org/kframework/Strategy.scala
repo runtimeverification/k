@@ -49,11 +49,11 @@ class Strategy(heatCool: Boolean) {
                         makeRewrite("regular")
                       }
 
-                    KORE.KApply(KORE.KLabel(KLabels.CELLS), r.body,
+                    KORE.KApply(KLabels.CELLS, r.body,
                       KORE.KApply(strategyCellLabel,
-                        KORE.KApply(KORE.KLabel(KLabels.NO_DOTS)),
+                        KORE.KApply(KLabels.NO_DOTS),
                         strategy,
-                        KORE.KApply(KORE.KLabel(KLabels.NO_DOTS))
+                        KORE.KApply(KLabels.NO_DOTS)
                       ))
                   case _ => r.body
                 }

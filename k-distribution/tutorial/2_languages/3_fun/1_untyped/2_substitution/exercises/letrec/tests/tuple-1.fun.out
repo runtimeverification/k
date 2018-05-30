@@ -1,1 +1,1 @@
-V ==K fun ( Triple ( x , y , z , .Names ) -> y ) | .Cases
+V ==K fun ( Triple ( x , y , z , .Types ) -> y ) | .Cases
