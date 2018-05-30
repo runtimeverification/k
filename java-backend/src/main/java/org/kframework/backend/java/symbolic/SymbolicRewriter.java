@@ -685,7 +685,7 @@ public class SymbolicRewriter {
                     if (!KProve.options.global.log) {
                         logStep(step, targetCallDataStr, term, true);
                     }
-                    System.out.println("Step above: " + step + ", evaluation ended with no successors.");
+                    System.out.println("\nStep above: " + step + ", evaluation ended with no successors.");
                     /* final term */
                     proofResults.add(term);
                 } else {
