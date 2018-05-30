@@ -10,7 +10,7 @@
     <store>
       0 |-> 0
       1 |-> 0
-      2 |-> lambda ( void , .Params , { x = 1 ; y = 0 ; spawn { x = 0 ; } ; while ( 1 <= x ) { y = y + 1 ; } print ( y , "\n" , .Params ) ; } )
+      2 |-> lambda ( void , .Vals , { x = 1 ; y = 0 ; spawn { x = 0 ; } ; while ( 1 <= x ) { y = y + 1 ; } print ( y , "\n" , .Vals ) ; } )
     </store>
     <busy>
       .Set
@@ -46,7 +46,7 @@
     <store>
       0 |-> 0
       1 |-> 1
-      2 |-> lambda ( void , .Params , { x = 1 ; y = 0 ; spawn { x = 0 ; } ; while ( 1 <= x ) { y = y + 1 ; } print ( y , "\n" , .Params ) ; } )
+      2 |-> lambda ( void , .Vals , { x = 1 ; y = 0 ; spawn { x = 0 ; } ; while ( 1 <= x ) { y = y + 1 ; } print ( y , "\n" , .Vals ) ; } )
     </store>
     <busy>
       .Set
@@ -82,7 +82,7 @@
     <store>
       0 |-> 0
       1 |-> 2
-      2 |-> lambda ( void , .Params , { x = 1 ; y = 0 ; spawn { x = 0 ; } ; while ( 1 <= x ) { y = y + 1 ; } print ( y , "\n" , .Params ) ; } )
+      2 |-> lambda ( void , .Vals , { x = 1 ; y = 0 ; spawn { x = 0 ; } ; while ( 1 <= x ) { y = y + 1 ; } print ( y , "\n" , .Vals ) ; } )
     </store>
     <busy>
       .Set
@@ -118,7 +118,7 @@
     <store>
       0 |-> 0
       1 |-> 3
-      2 |-> lambda ( void , .Params , { x = 1 ; y = 0 ; spawn { x = 0 ; } ; while ( 1 <= x ) { y = y + 1 ; } print ( y , "\n" , .Params ) ; } )
+      2 |-> lambda ( void , .Vals , { x = 1 ; y = 0 ; spawn { x = 0 ; } ; while ( 1 <= x ) { y = y + 1 ; } print ( y , "\n" , .Vals ) ; } )
     </store>
     <busy>
       .Set
@@ -154,7 +154,7 @@
     <store>
       0 |-> 0
       1 |-> 4
-      2 |-> lambda ( void , .Params , { x = 1 ; y = 0 ; spawn { x = 0 ; } ; while ( 1 <= x ) { y = y + 1 ; } print ( y , "\n" , .Params ) ; } )
+      2 |-> lambda ( void , .Vals , { x = 1 ; y = 0 ; spawn { x = 0 ; } ; while ( 1 <= x ) { y = y + 1 ; } print ( y , "\n" , .Vals ) ; } )
     </store>
     <busy>
       .Set

@@ -1,1 +1,1 @@
-V ==K closure ( .Map , Triple ( x , y , z , .Names ) -> y | .Cases )
+V ==K closure ( .Map , Triple ( x , y , z , .Types ) -> y | .Cases )

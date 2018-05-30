@@ -3,6 +3,7 @@ package org.kframework.kompile;
 
 import org.kframework.Collections;
 import org.kframework.builtin.BooleanUtils;
+import org.kframework.builtin.Sorts;
 import org.kframework.compile.GenerateSentencesFromConfigDecl;
 import org.kframework.definition.Bubble;
 import org.kframework.definition.Definition;
@@ -23,7 +24,6 @@ import java.util.stream.Stream;
 
 import static org.kframework.Collections.*;
 import static org.kframework.definition.Constructors.*;
-import static org.kframework.kore.KORE.*;
 
 /**
  * Expands configuration declaration to KORE productions and rules.
@@ -51,7 +51,7 @@ class ResolveConfig {
 
         Set<Sentence> importedConfigurationSortsSubsortedToCell = stream(inputModule.productions())
                 .filter(p -> p.att().contains("cell"))
-                .map(p -> Production(Sort("Cell"), Seq(NonTerminal(p.sort())))).collect(Collections.toSet());
+                .map(p -> Production(Sorts.Cell(), Seq(NonTerminal(p.sort())))).collect(Collections.toSet());
 
         Module module = Module(inputModule.name(), (Set<Module>) inputModule.imports(),
                 (Set<Sentence>) inputModule.localSentences().$bar(importedConfigurationSortsSubsortedToCell),

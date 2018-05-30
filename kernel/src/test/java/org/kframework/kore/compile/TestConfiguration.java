@@ -198,6 +198,6 @@ class TestConfiguration implements ConfigurationInfo {
 
     @Override
     public scala.collection.Set<Sort> getCellBagSortsOfCell(Sort k) {
-        return Set(Sort(k.name() + "Bag"));
+        return Set(Sort(k.name() + "Bag", k.params()));
     }
 }

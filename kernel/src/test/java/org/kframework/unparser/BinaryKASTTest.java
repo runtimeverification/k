@@ -6,7 +6,6 @@ import org.junit.Test;
 import org.kframework.kore.K;
 import org.kframework.kore.mini.InjectedKLabel;
 import org.kframework.kore.mini.KApply;
-import org.kframework.kore.mini.KLabel;
 import org.kframework.kore.mini.KRewrite;
 import org.kframework.kore.mini.KSequence;
 import org.kframework.kore.mini.KToken;
@@ -17,14 +16,15 @@ import org.kframework.utils.file.FileUtil;
 import java.io.File;
 
 import static org.junit.Assert.*;
+import static org.kframework.kore.KORE.*;
 
 public class BinaryKASTTest {
 
-    K sharedTerm = KApply.of(new KLabel("_|->_"), new KToken("x", "Id"), new KToken("1", "Int"));
-    K sharedTerm2 = new KToken("foo", "Bar");
+    K sharedTerm = KApply.of(KLabel("_|->_"), new KToken("x", Sort("Id")), new KToken("1", Sort("Int")));
+    K sharedTerm2 = new KToken("foo", Sort("Bar"));
 
-    K term = KApply.of(new KLabel("<T>"), KApply.of(new KLabel("<k>"), new KSequence(sharedTerm2,
-                    new KRewrite(new KVariable("Baz"), new KVariable("Baz2")), new InjectedKLabel(new KLabel("_+_")), KApply.of(new KLabel("foo")))),
+    K term = KApply.of(KLabel("<T>"), KApply.of(KLabel("<k>"), new KSequence(sharedTerm2,
+                    new KRewrite(new KVariable("Baz"), new KVariable("Baz2")), new InjectedKLabel(KLabel("_+_")), KApply.of(KLabel("foo")))),
             KApply.of(new KVariable("Lbl"), sharedTerm, sharedTerm, sharedTerm2, sharedTerm));
 
     @Test

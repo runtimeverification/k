@@ -2,8 +2,8 @@ package org.kframework.kore
 
 import org.kframework.builtin.{KLabels, Sorts}
 import org.kframework.kore
+import org.kframework.kore.KORE.Sort
 import org.kframework.attributes._
-import org.kframework.kore.ADT.Sort
 
 import collection.JavaConverters._
 
@@ -16,10 +16,14 @@ import collection.JavaConverters._
 
 object ADT {
 
-  case class KLabel(name: String) extends kore.KLabel {
-    override def toString = name
-
-    def apply(ks: K*) = KApply(this, KList(ks.toList))
+  case class KLabel(name: String, params: kore.Sort*) extends kore.KLabel {
+    override def toString = {
+      if (params.isEmpty) {
+        name
+      } else {
+        name + "{" + params.map(_.toString).reduce((s1, s2) => s1 + "," + s2) + "}"
+      }
+    }
   }
 
   case class KApply[KK <: K](klabel: kore.KLabel, klist: kore.KList, att: Att = Att.empty) extends kore.KApply {
@@ -32,9 +36,9 @@ object ADT {
     val items: java.util.List[K] = elements.asJava
     val size: Int = elements.size
     val asIterable: java.lang.Iterable[K] = new org.kframework.List(elements)
-    lazy val kApply: kore.KApply = items.asScala reduceRightOption { (a, b) => KLabel(KLabels.KSEQ)(a, b) } getOrElse { KLabel(KLabels.DOTK)() } match {
+    lazy val kApply: kore.KApply = items.asScala reduceRightOption { (a, b) => KLabels.KSEQ.apply(a, b) } getOrElse { KLabels.DOTK.apply() } match {
       case k: kore.KApply => k
-      case x => KLabel(KLabels.KSEQ)(x, KLabel(KLabels.DOTK)())
+      case x => KLabels.KSEQ(x, KLabels.DOTK())
     }
 
     def iterator: Iterator[K] = elements.iterator
@@ -59,11 +63,17 @@ object ADT {
   }
 
   case class KVariable(name: String, att: Att = Att.empty) extends kore.KVariable {
-    def apply(ks: K*) = KApply(this, KList(ks.toList))
+    def params = Seq()
   }
 
-  case class Sort(name: String) extends kore.Sort {
-    override def toString = name
+  case class Sort(name: String, params: kore.Sort*) extends kore.Sort {
+    override def toString = {
+      if (params.isEmpty) {
+        name
+      } else {
+        name + "{" + params.map(_.toString).reduce((s1, s2) => s1 + "," + s2) + "}"
+      }
+    }
   }
 
   case class KToken(s: String, sort: kore.Sort, att: Att = Att.empty) extends kore.KToken
@@ -86,9 +96,9 @@ object ADT {
 object SortedADT {
 
   case class SortedKVariable(name: String, att: Att = Att.empty) extends kore.KVariable {
-    def apply(ks: K*) = ADT.KApply(this, ADT.KList(ks.toList))
+    val sort: Sort = att.getOptional(classOf[Sort]).orElse(Sorts.K)
 
-    val sort: Sort = Sort(att.getOptional(Att.sort).orElse(Sorts.K.name))
+    def params = Seq()
 
     override def equals(other: Any) = other match {
       case v: SortedKVariable => name == v.name && sort == v.sort

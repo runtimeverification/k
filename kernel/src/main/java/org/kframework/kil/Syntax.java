@@ -81,28 +81,6 @@ public class Syntax extends ModuleItem {
     }
 
     @Override
-    public List<String> getKLabels() {
-        List<String> lbls = new LinkedList<String>();
-        if (priorityBlocks == null)
-            return lbls;
-        for (PriorityBlock pb : priorityBlocks) {
-            for (Production prod : pb.getProductions()) {
-                if (prod.getSort().isComputationSort() || prod.getSort().equals(Sort.KLABEL) && prod.isConstant()) {
-                    lbls.add(prod.getKLabelOfKItem());
-                }
-            }
-        }
-        return lbls;
-    }
-
-    @Override
-    public List<Sort> getAllSorts() {
-        List<Sort> sorts = new ArrayList<>();
-        sorts.add(sort.getSort());
-        return sorts;
-    }
-
-    @Override
     public boolean equals(Object obj) {
         if (obj == null)
             return false;

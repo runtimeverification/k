@@ -35,15 +35,15 @@ public class Subsorts implements Serializable {
 
     public Subsorts(Module module) {
         sorts = JavaConversions.asJavaCollection(module.definedSorts()).stream()
-                .map(s -> Sort.of(s.name()))
+                .map(Sort::of)
                 .collect(Collectors.toSet());
 
         this.subsort = ArrayTable.create(sorts, sorts);
         for (org.kframework.kore.Sort sort1 : Collections.iterable(module.definedSorts())) {
             for (org.kframework.kore.Sort sort2 : Collections.iterable(module.definedSorts())) {
                 subsort.put(
-                        Sort.of(sort1.name()),
-                        Sort.of(sort2.name()),
+                        Sort.of(sort1),
+                        Sort.of(sort2),
                         module.subsorts().$greater(sort1, sort2));
             }
         }

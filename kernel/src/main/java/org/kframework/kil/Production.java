@@ -1,9 +1,10 @@
 // Copyright (c) 2012-2018 K Team. All Rights Reserved.
 package org.kframework.kil;
 
+import org.kframework.kore.Sort;
+
 import com.google.common.collect.Multimap;
 import org.kframework.utils.StringUtil;
-import org.kframework.utils.errorsystem.KExceptionManager;
 
 import java.util.List;
 
@@ -56,16 +57,6 @@ public class Production extends ASTNode {
         return isSyntacticSubsort() && getKLabel() == null;
     }
 
-    /**
-     * Retrieves the {@link NonTerminal} object of the production if this is a subsorting.
-     * Should not be called on other types of productions.
-     * @return the Sort object
-     */
-    public Sort getSubsort() {
-        assert isSyntacticSubsort();
-        return getChildSort(0);
-    }
-
     public boolean isLexical() {
         return items.size() == 1 && items.get(0) instanceof Lexical;
     }
@@ -78,15 +69,6 @@ public class Production extends ASTNode {
     public Lexical getLexical() {
         assert isLexical();
         return (Lexical) items.get(0);
-    }
-
-    public boolean isConstant() {
-        // TODO(Radu): properly determine if a production is a constant or not, just like below
-        return isTerminal() && (sort.getName().startsWith("#") || sort.equals(Sort.KLABEL));
-    }
-
-    public boolean isBracket() {
-        return getArity() == 1 && getAttribute(Attribute.BRACKET.getKey()) != null;
     }
 
     /**
@@ -104,11 +86,6 @@ public class Production extends ASTNode {
      */
     public boolean isTerminal() {
         return items.size() == 1 && items.get(0) instanceof Terminal;
-    }
-
-    public Sort getBracketSort() {
-        assert isBracket();
-        return getChildSort(0);
     }
 
     public Production(Production node) {
@@ -147,10 +124,7 @@ public class Production extends ASTNode {
         if (klabel == null && (isSyntacticSubsort() || containsAttribute("token") || containsAttribute("bracket"))) {
             return null;
         } else if (klabel == null) {
-            if (sort.equals(Sort.KLABEL) && getArity() == 0)
-                return null;
-            else
-                klabel = getPrefixLabel();
+            klabel = getPrefixLabel();
         }
         return klabel.replace(" ", "");
     }
@@ -221,18 +195,6 @@ public class Production extends ASTNode {
         return null;
     }
 
-    public Sort getChildSort(int idx) {
-        ASTNode node = getChildNode(idx);
-        if (node instanceof UserList) {
-            return ((UserList) node).getSort();
-        } else if (node instanceof Production) {
-            return ((Production) node).getSort();
-        } else if (node instanceof NonTerminal) {
-            return ((NonTerminal) node).getSort();
-        }
-        throw new AssertionError("unreachable");
-    }
-
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -292,22 +254,5 @@ public class Production extends ASTNode {
 
     public void setOwnerModuleName(String ownerModuleName) {
         this.ownerModuleName = ownerModuleName;
-    }
-
-    /**
-     * Gets the KLabel which is declared in the definition by this production.
-     * A production declares a KLabel if it has a corresponding KLabel (ie,
-     * produces a term of sort KItem), or if it is a constant constructor
-     * of sort KLabel.
-     * @return
-     */
-    public String getKLabelOfKItem() {
-        if (sort.equals(Sort.KLABEL) && isConstant()) {
-            return getConstant().getTerminal();
-        }
-        if (getKLabel() == null) {
-            throw KExceptionManager.internalError("Attempted to get null KLabel of production.", this);
-        }
-        return getKLabel();
     }
 }

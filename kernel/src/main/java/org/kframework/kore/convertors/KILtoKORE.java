@@ -18,6 +18,7 @@ import org.kframework.kil.Module;
 import org.kframework.kil.NonTerminal;
 import org.kframework.kil.Production;
 import org.kframework.kil.Terminal;
+import org.kframework.kore.KLabel;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import scala.Enumeration.Value;
@@ -184,7 +185,7 @@ public class KILtoKORE extends KILTransformation<Object> {
     }
 
     public org.kframework.definition.SyntaxAssociativity apply(PriorityExtendedAssoc ii) {
-        scala.collection.Set<Tag> tags = toTags(ii.getTags());
+        scala.collection.Set<Tag> tags = toTags(ii.getTags(), ii);
         String assocOrig = ii.getAssoc();
         Value assoc = applyAssoc(assocOrig);
         return SyntaxAssociativity(assoc, tags);
@@ -206,17 +207,17 @@ public class KILtoKORE extends KILTransformation<Object> {
 
     public Set<org.kframework.definition.Sentence> apply(PriorityExtended pe) {
         Seq<scala.collection.Set<Tag>> seqOfSetOfTags = immutable(pe.getPriorityBlocks()
-                .stream().map(block -> toTags(block.getProductions()))
+                .stream().map(block -> toTags(block.getProductions(), pe))
                 .collect(Collectors.toList()));
 
         return Sets.newHashSet(SyntaxPriority(seqOfSetOfTags));
     }
 
-    public scala.collection.Set<Tag> toTags(List<KLabelConstant> labels) {
+    public scala.collection.Set<Tag> toTags(List<Tag> labels, ASTNode loc) {
         return immutable(labels.stream().flatMap(l -> {
-            java.util.Set<Production> productions = context.tags.get(l.getLabel());
+            java.util.Set<Production> productions = context.tags.get(l.name());
             if (productions.isEmpty())
-                throw KEMException.outerParserError("Could not find any productions for tag: " + l.getLabel(), l.getSource(), l.getLocation());
+                throw KEMException.outerParserError("Could not find any productions for tag: " + l.name(), loc.getSource(), loc.getLocation());
             return productions.stream().map(p -> Tag(dropQuote(p.getKLabel())));
         }).collect(Collectors.toSet()));
     }
@@ -226,7 +227,7 @@ public class KILtoKORE extends KILTransformation<Object> {
     public Set<org.kframework.definition.Sentence> apply(Syntax s) {
         Set<org.kframework.definition.Sentence> res = new HashSet<>();
 
-        org.kframework.kore.Sort sort = apply(s.getDeclaredSort().getRealSort());
+        org.kframework.kore.Sort sort = s.getDeclaredSort().getSort();
 
         // just a sort declaration
         if (s.getPriorityBlocks().size() == 0) {
@@ -262,7 +263,7 @@ public class KILtoKORE extends KILTransformation<Object> {
                     for (org.kframework.kil.ProductionItem it : p.getItems()) {
                         if (it instanceof NonTerminal) {
                             NonTerminal nt = (NonTerminal)it;
-                            items.add(NonTerminal(apply(nt.getRealSort()), nt.getName()));
+                            items.add(NonTerminal(nt.getSort(), nt.getName()));
                         } else if (it instanceof UserList) {
                             throw new AssertionError("Lists should have applied before.");
                         } else if (it instanceof Lexical) {
@@ -292,7 +293,7 @@ public class KILtoKORE extends KILTransformation<Object> {
                                         "" + System.identityHashCode(p)));
                     else
                         prod = Production(
-                                dropQuote(p.getKLabel()),
+                                KLabel(dropQuote(p.getKLabel())),
                                 sort,
                                 immutable(items),
                                 attrs.add(PRODUCTION_ID,
@@ -345,7 +346,7 @@ public class KILtoKORE extends KILTransformation<Object> {
                               org.kframework.kore.Sort sort, Production p, UserList userList) {
 
         // Transform list declarations of the form Es ::= List{E, ","} into something representable in kore
-        org.kframework.kore.Sort elementSort = apply(userList.getSort());
+        org.kframework.kore.Sort elementSort = userList.getSort();
 
         org.kframework.attributes.Att attrs = convertAttributes(p).add(Att.userList(), userList.getListType());
         String kilProductionId = "" + System.identityHashCode(p);
@@ -353,14 +354,14 @@ public class KILtoKORE extends KILTransformation<Object> {
         org.kframework.definition.Production prod1, prod3;
 
         // Es ::= E "," Es
-        prod1 = Production(sort,
+        prod1 = Production(KLabel(dropQuote(p.getKLabel())), sort,
                 Seq(NonTerminal(elementSort), Terminal(userList.getSeparator()), NonTerminal(sort)),
-                attrsWithKilProductionId.remove("klabel").add("klabel", dropQuote(p.getKLabel())).add("right"));
+                attrsWithKilProductionId.add("right"));
 
 
         // Es ::= ".Es"
-        prod3 = Production(sort, Seq(Terminal("." + sort.toString())),
-                attrsWithKilProductionId.remove("format").remove("strict").remove("klabel").add("klabel", dropQuote(p.getTerminatorKLabel())));
+        prod3 = Production(KLabel(dropQuote(p.getTerminatorKLabel())), sort, Seq(Terminal("." + sort.toString())),
+                attrsWithKilProductionId.remove("format").remove("strict"));
 
         res.add(prod1);
         res.add(prod3);
@@ -368,10 +369,6 @@ public class KILtoKORE extends KILTransformation<Object> {
 
     public String dropQuote(String s) {
         return s;
-    }
-
-    public org.kframework.kore.Sort apply(org.kframework.kil.Sort sort) {
-        return Sort(sort.getName());
     }
 
     public static org.kframework.attributes.Att convertAttributes(ASTNode t) {

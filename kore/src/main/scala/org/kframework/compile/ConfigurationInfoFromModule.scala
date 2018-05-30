@@ -12,6 +12,8 @@ import org.kframework.kore._
 import org.kframework.TopologicalSort._
 import org.kframework.utils.errorsystem.KEMException
 
+import org.kframework.builtin.Sorts
+
 import collection._
 
 object ConfigurationInfoFromModule
@@ -28,12 +30,12 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
   private val cellLabels: Map[Sort, KLabel] = cellProductions.mapValues(_.klabel.get)
   private val cellLabelsToSorts: Map[KLabel, Sort] = cellLabels.map(_.swap)
 
-  private val cellFragmentLabel: Map[String,KLabel] =
-    m.productions.filter(_.att.contains("cellFragment"))
-      .map(p => (p.att.get("cellFragment"),p.klabel.get)).toMap
-  private val cellAbsentLabel: Map[String,KLabel] =
-    m.productions.filter(_.att.contains("cellOptAbsent"))
-      .map (p => (p.att.get("cellOptAbsent"),p.klabel.get)).toMap
+  private val cellFragmentLabel: Map[Sort,KLabel] =
+    m.productions.filter(_.att.contains("cellFragment", classOf[Sort]))
+      .map(p => (p.att.get("cellFragment", classOf[Sort]),p.klabel.get)).toMap
+  private val cellAbsentLabel: Map[Sort,KLabel] =
+    m.productions.filter(_.att.contains("cellOptAbsent", classOf[Sort]))
+      .map (p => (p.att.get("cellOptAbsent", classOf[Sort]),p.klabel.get)).toMap
 
 
   private val cellInitializer: Map[Sort, KApply] =
@@ -61,7 +63,7 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
 
   private lazy val topCells =
     if (topCellsIncludingStrategyCell.size > 1)
-      topCellsIncludingStrategyCell.filterNot(s => s.name == "SCell" || s.name == "KCell")
+      topCellsIncludingStrategyCell.filterNot(s => s == KORE.Sort("SCell") || s == KORE.Sort("KCell"))
     else
       topCellsIncludingStrategyCell
 
@@ -119,8 +121,8 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
   override def getCellLabel(k: Sort): KLabel = cellLabels(k)
   override def getCellSort(kLabel: KLabel): Sort = cellLabelsToSorts(kLabel)
 
-  override def getCellFragmentLabel(k : Sort): KLabel = cellFragmentLabel(k.name)
-  override def getCellAbsentLabel(k: Sort): KLabel = cellAbsentLabel(k.name)
+  override def getCellFragmentLabel(k : Sort): KLabel = cellFragmentLabel(k)
+  override def getCellAbsentLabel(k: Sort): KLabel = cellAbsentLabel(k)
 
   override def getRootCell: Sort = topCell
   override def getComputationCell: Sort = mainCell
@@ -165,7 +167,7 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
   lazy val configVars: Set[KToken] = {
     val transformer = new FoldK[Set[KToken]] {
       override def apply(k: KToken): Set[KToken] = {
-        if (k.sort.name == "KConfigVar") Set(k) else unit
+        if (k.sort == Sorts.KConfigVar) Set(k) else unit
       }
       def unit = Set()
       def merge(set1: Set[KToken], set2: Set[KToken]) = set1 | set2

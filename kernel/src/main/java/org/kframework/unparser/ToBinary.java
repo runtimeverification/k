@@ -70,7 +70,7 @@ public class ToBinary {
             data.writeByte(BinaryParser.KTOKEN);
             add_intern(k);
             writeString(tok.s());
-            writeString(tok.sort().name());
+            writeString(tok.sort().toString());
 
         } else if (k instanceof KApply) {
             KApply app = (KApply) k;

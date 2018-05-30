@@ -1,7 +1,8 @@
 package org.kframework.kore
 
 import org.kframework.attributes._
-import org.kframework.unparser.{ToKast}
+import org.kframework.kore.ADT.{KApply, KList}
+import org.kframework.unparser.ToKast
 
 /**
  * This file contains all inner KORE interfaces.
@@ -24,11 +25,14 @@ trait KItem extends K
 
 trait KLabel {
   def name: String
+  def params: Seq[Sort]
   override def equals(other: Any) = other match {
-    case l: KLabel => name == l.name
+    case l: KLabel => name == l.name && params == l.params
     case _ => false
   }
-  override def hashCode = name.hashCode
+  override def hashCode = name.hashCode * 29 + params.hashCode
+
+  def apply(ks: K*) = KApply(this, KList(ks.toList))
 }
 
 trait KToken extends KItem {
@@ -43,11 +47,12 @@ trait KToken extends KItem {
 
 trait Sort {
   def name: String
+  def params: Seq[Sort]
   override def equals(other: Any) = other match {
-    case other: Sort => name == other.name
+    case other: Sort => name == other.name && params == other.params
     case _ => false
   }
-  override def hashCode = name.hashCode
+  override def hashCode = name.hashCode * 23 + params.hashCode
 }
 
 trait KCollection {

@@ -154,7 +154,7 @@ public class BuiltinList extends Collection implements CollectionInternalReprese
         return !(isListVariable(term)
                 || term instanceof BuiltinList && ((BuiltinList) term).sort.equals(sort)
                 || term instanceof RuleAutomatonDisjunction && ((RuleAutomatonDisjunction) term).disjunctions().stream().anyMatch(p -> !isElement(p.getLeft()))
-                || term instanceof KItem && ((KItem) term).kLabel().toString().equals(KLabels.KREWRITE) && !isElement(((KList) ((KItem) term).kList()).get(0)));
+                || term instanceof KItem && KLabels.KREWRITE.equals(((KItem) term).kLabel()) && !isElement(((KList) ((KItem) term).kList()).get(0)));
     }
 
     private boolean isListVariable(Term term) {
@@ -273,8 +273,8 @@ public class BuiltinList extends Collection implements CollectionInternalReprese
     public static Builder builder(GlobalContext global) {
         return builder(
                 Sort.LIST,
-                KLabelConstant.of("_List_", global.getDefinition()),
-                KLabelConstant.of(".List", global.getDefinition()),
+                KLabelConstant.of(KLabels.List, global.getDefinition()),
+                KLabelConstant.of(KLabels.DotList, global.getDefinition()),
                 global);
     }
 

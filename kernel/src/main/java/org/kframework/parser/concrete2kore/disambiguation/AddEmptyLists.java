@@ -48,7 +48,7 @@ public class AddEmptyLists extends SetsGeneralTransformer<ParseFailedException, 
     private final Module m;
     private final POSet<Sort> subsorts;
     private final scala.collection.Set<Sort> listSorts;
-    private final Map<String, List<UserList>> lists;
+    private final Map<Sort, List<UserList>> lists;
 
     public AddEmptyLists(Module m) {
         this.m = m;
@@ -98,7 +98,7 @@ public class AddEmptyLists extends SetsGeneralTransformer<ParseFailedException, 
                             new KException(KException.ExceptionType.HIDDENWARNING, KException.KExceptionGroup.LISTS, msg, child.source().get(), child.location().get())));
                     newItems.add(child);
                 } else {
-                    UserList ul = lists.get(expectedSort.name()).get(0);
+                    UserList ul = lists.get(expectedSort).get(0);
                     TermCons terminator = TermCons.apply(ConsPStack.empty(), ul.pTerminator, child.location(), child.source());
                     // TermCons with PStack requires the elements to be in the reverse order
                     TermCons newTc = TermCons.apply(ConsPStack.from(Arrays.asList(terminator, child)), ul.pList, child.location(), child.source());
@@ -135,7 +135,7 @@ public class AddEmptyLists extends SetsGeneralTransformer<ParseFailedException, 
                     assert rawArgs.stream().allMatch(ProductionReference.class::isInstance);
                     @SuppressWarnings("unchecked") List<ProductionReference> args = (List<ProductionReference>) (List) rawArgs;
                     List<Sort> childSorts = args.stream().map(this::getSort).collect(Collectors.toList());
-                    if (!childSorts.contains(Sort("KList"))) { // try to exclude non-concrete lists
+                    if (!childSorts.contains(Sorts.KList())) { // try to exclude non-concrete lists
                         List<Production> validProductions = new ArrayList<>();
                     nextprod:
                         for (Production prod : productions) {
@@ -231,7 +231,7 @@ public class AddEmptyLists extends SetsGeneralTransformer<ParseFailedException, 
     private Optional<KLabel> klabelFromTerm(Term labelTerm) {
         if (labelTerm instanceof Constant) {
             Constant labelCon = (Constant) labelTerm;
-            if (labelCon.production().sort().name().equals("KLabel")) {
+            if (labelCon.production().sort().equals(Sorts.KLabel())) {
                 String labelVal = labelCon.value();
                 if (labelVal.charAt(0) == '`') {
                     return Optional.of(KLabel(labelVal.substring(1, labelVal.length() - 1)));
