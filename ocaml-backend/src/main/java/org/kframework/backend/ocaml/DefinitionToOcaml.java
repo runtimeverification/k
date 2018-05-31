@@ -3123,6 +3123,9 @@ public class DefinitionToOcaml implements Serializable {
                 return vars.listVars.get(varName).name();
             }
         }
+        if (k.att().contains("cellSort")) {
+            return Sorts.K().toString();
+        }
         return k.att().getOptional(Sort.class).orElse(Sorts.K()).toString();
     }
 
