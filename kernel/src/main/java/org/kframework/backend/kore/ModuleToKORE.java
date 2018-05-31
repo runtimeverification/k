@@ -478,6 +478,7 @@ public class ModuleToKORE {
                 sb.append("} (");
                 convertTokenProd(sort);
                 sb.append(", ");
+                hasToken = true;
             }
             sb.append("\\bottom{");
             convert(sort, false);
@@ -485,7 +486,11 @@ public class ModuleToKORE {
             for (int i = 0; i < numTerms; i++) {
                 sb.append(")");
             }
-            sb.append(" [] // no junk\n");
+            sb.append(" [] // no junk");
+            if (hasToken && !METAVAR) {
+                sb.append(" (TODO: fix bug with \\dv)");
+            }
+            sb.append("\n");
         }
         sb.append("\n// rules\n");
         for (Rule rule : iterable(module.rules())) {
@@ -604,7 +609,7 @@ public class ModuleToKORE {
             convert(sort, false);
             sb.append("}(#Str:#String{}))");
         } else {
-            sb.append("\\bottom{");
+            sb.append("\\top{");
             convert(sort, false);
             sb.append("}()");
         }
