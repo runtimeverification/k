@@ -9,7 +9,7 @@ module BASIC-K
   imports SORT-K
   syntax KItem [hook(K.KItem)]
   syntax K     ::= KItem
-  syntax KConfigVar
+  syntax KConfigVar [token]
 endmodule
 
 module KSTRING

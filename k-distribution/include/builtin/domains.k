@@ -593,7 +593,7 @@ module ID-SYNTAX
   imports INT-SYNTAX
   imports STRING-SYNTAX
 
-  syntax Id
+  syntax Id [token]
 
   syntax String ::= Id2String ( Id )    [function, hook(STRING.token2string)]
   syntax Id ::= String2Id (String) [function, hook(STRING.string2token)]

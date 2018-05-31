@@ -433,17 +433,7 @@ public class ModuleToKORE {
                 convert(sort, false);
                 sb.append("} (");
                 if (prod.att().contains("token") && !hasToken) {
-                    if (METAVAR) {
-                        sb.append("\\exists{");
-                        convert(sort, false);
-                        sb.append("} (#Str:#String{}, \\dv{");
-                        convert(sort, false);
-                        sb.append("}(#Str:#String{}))");
-                    } else {
-                        sb.append("\\bottom{");
-                        convert(sort, false);
-                        sb.append("}()");
-                    }
+                    convertTokenProd(sort);
                     hasToken = true;
                 } else if (prod.isSubsort()) {
                     sb.append("\\exists{");
@@ -478,6 +468,15 @@ public class ModuleToKORE {
                         sb.append(")");
                     }
                 }
+                sb.append(", ");
+            }
+            Att sortAtt = module.sortAttributesFor().get(sort).getOrElse(() -> KORE.Att());
+            if (!hasToken && sortAtt.contains("token")) {
+                numTerms++;
+                sb.append("\\or{");
+                convert(sort, false);
+                sb.append("} (");
+                convertTokenProd(sort);
                 sb.append(", ");
             }
             sb.append("\\bottom{");
@@ -595,6 +594,20 @@ public class ModuleToKORE {
         convert(attributes, module.att());
         sb.append("\n");
         return sb.toString();
+    }
+
+    private void convertTokenProd(Sort sort) {
+        if (METAVAR) {
+            sb.append("\\exists{");
+            convert(sort, false);
+            sb.append("} (#Str:#String{}, \\dv{");
+            convert(sort, false);
+            sb.append("}(#Str:#String{}))");
+        } else {
+            sb.append("\\bottom{");
+            convert(sort, false);
+            sb.append("}()");
+        }
     }
 
     private void convertParams(KLabel kLabel, boolean hasR) {
