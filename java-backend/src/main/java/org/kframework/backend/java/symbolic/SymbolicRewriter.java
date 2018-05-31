@@ -798,9 +798,6 @@ public class SymbolicRewriter {
         Term network = ((KList) ((KItem) ethereum).klist()).get(1);
         BuiltinMap accounts = (BuiltinMap) ((KList) ((KItem) ((KList) ((KItem) network).kList())
                 .get(1)).klist()).get(0);
-        Term acctID = ((KList) ((KItem) accounts.getKComponents().get(0)).klist()).get(0);
-        Term storage = ((KList) ((KItem) ((KList) ((KItem) accounts.getKComponents().get(0)).klist())
-                .get(1)).klist()).get(3);
 
         BuiltinList kSequence =  ((BuiltinList)((KList)((KItem) k).klist()).get(0));
 
@@ -830,9 +827,13 @@ public class SymbolicRewriter {
             if (!targetCallDataStr.equals(callData.toString())) {
                 System.out.println(callDataStr.substring(0, Math.min(callDataStr.length(), 300)));
             }
-            System.out.println("accounts: " + accounts.getKComponents().size());
-            System.out.println(acctID);
-            System.out.println(storage);
+            System.out.println("accounts: " + accounts.getEntries().size());
+            for (Map.Entry<Term, Term> acct : accounts.getEntries().entrySet()) {
+                Term acctID = acct.getKey();
+                K storage = ((KItem) acct.getValue()).klist().items().get(3);
+                System.out.println(acctID);
+                System.out.println(storage);
+            }
             System.out.println("/\\");
             KProve.prettyPrint(term.constraint());
         }
