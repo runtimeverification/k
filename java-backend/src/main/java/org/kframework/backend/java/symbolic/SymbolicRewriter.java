@@ -627,7 +627,6 @@ public class SymbolicRewriter {
                         } else {
                             if (term.equals(result)) {
                                 kem.registerCriticalWarning("Step " + step + ": infinite loop after applying a spec rule.");
-                                proofResults.add(result);
                             }
                         }
                         continue;
