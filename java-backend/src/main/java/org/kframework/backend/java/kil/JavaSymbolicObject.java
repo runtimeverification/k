@@ -180,7 +180,7 @@ public abstract class JavaSymbolicObject<T extends JavaSymbolicObject<T>>
                     new LocalVisitor() {
                         @Override
                         public void visit(Term term) {
-                            if (!(term instanceof KList) && global.getDefinition().subsorts().isSubsortedEq(Sort.KVARIABLE, term.sort())) {
+                            if (!(term instanceof KList) && !(term instanceof KLabel) && global.getDefinition().subsorts().isSubsortedEq(Sort.KVARIABLE, term.sort())) {
                                 intermediate.get(term).add(term);
                             }
                         }
