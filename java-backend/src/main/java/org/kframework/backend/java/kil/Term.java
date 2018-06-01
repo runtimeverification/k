@@ -143,7 +143,4 @@ public abstract class Term extends JavaSymbolicObject<Term> implements Comparabl
 
     @Override
     public abstract boolean equals(Object object);
-
-    public Location location() { return getLocation(); }
-    public Source source() { return getSource(); }
 }

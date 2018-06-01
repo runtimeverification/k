@@ -52,7 +52,7 @@ public class UnboundedVariablesCollector extends PrePostVisitor {
         preVisitor.addVisitor(new LocalVisitor(){
             @Override
             public void visit(Term node) {
-                if (!(node instanceof KList) && global.getDefinition().subsorts().isSubsortedEq(Sort.KVARIABLE, node.sort())) {
+                if (!(node instanceof KList) && !(node instanceof KLabel) && global.getDefinition().subsorts().isSubsortedEq(Sort.KVARIABLE, node.sort())) {
                     if (!boundVariables.contains(node)) {
                         unboundedVariables.add(node);
                     }

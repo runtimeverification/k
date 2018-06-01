@@ -347,7 +347,7 @@ public class Rule extends JavaSymbolicObject<Rule> {
         if (ensures != null) {
             string += " ensures " + ensures;
         }
-        string += " [" + "Location: " + getLocation() + ", " + getSource() + "]";
+        string += " [" + "Location: " + location() + ", " + source() + "]";
         return string;
     }
 

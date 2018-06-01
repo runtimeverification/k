@@ -70,17 +70,6 @@ public class Syntax extends ModuleItem {
     }
 
     @Override
-    public List<String> getLabels() {
-        List<String> lbls = new LinkedList<String>();
-        for (PriorityBlock pb : priorityBlocks) {
-            for (Production prod : pb.getProductions()) {
-                lbls.add(prod.getLabel());
-            }
-        }
-        return lbls;
-    }
-
-    @Override
     public boolean equals(Object obj) {
         if (obj == null)
             return false;

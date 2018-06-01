@@ -126,7 +126,7 @@ public class GenerateSentencesFromConfigDecl {
                                         return Tuple3.apply(Set(), Lists.newArrayList(sort), KApply(KLabel(getInitLabel(sort))));
                                     } else if (realProds.head().items().size() == 4) {
                                         // XCell ::= "initXCell" "(" Map ")"
-                                        return Tuple3.apply(Set(), Lists.newArrayList(sort), KApply(KLabel(getInitLabel(sort)), KVariable("Init")));
+                                        return Tuple3.apply(Set(), Lists.newArrayList(sort), KApply(KLabel(getInitLabel(sort)), INIT));
                                     }
                                 }
                             }
@@ -221,12 +221,14 @@ public class GenerateSentencesFromConfigDecl {
             @Override
             public K apply(KToken k) {
                 if (k.sort().equals(Sorts.KConfigVar())) {
-                    return KApply(KLabel("Map:lookup"), KVariable("Init"), k);
+                    return KApply(KLabel("Map:lookup"), INIT, k);
                 }
                 return k;
             }
         }.apply(leafContents);
     }
+
+    private static KVariable INIT = KVariable("Init", Att.empty().add(Sort.class, Sorts.Map()));
 
     /**
      * Generates the sentences associated with a particular cell.
@@ -304,7 +306,7 @@ public class GenerateSentencesFromConfigDecl {
         Rule initializerRule;
         if (hasConfigurationOrRegularVariable || isStream) {
             initializer = Production(KLabel(initLabel), sort, Seq(Terminal(initLabel), Terminal("("), NonTerminal(Sorts.Map()), Terminal(")")), Att().add("initializer").add("function").add("noThread"));
-            initializerRule = Rule(KRewrite(KApply(KLabel(initLabel), KVariable("Init")), IncompleteCellUtils.make(KLabel("<" + cellName + ">"), false, childInitializer, false)), BooleanUtils.TRUE, ensures == null ? BooleanUtils.TRUE : ensures, Att().add("initializer"));
+            initializerRule = Rule(KRewrite(KApply(KLabel(initLabel), INIT), IncompleteCellUtils.make(KLabel("<" + cellName + ">"), false, childInitializer, false)), BooleanUtils.TRUE, ensures == null ? BooleanUtils.TRUE : ensures, Att().add("initializer"));
         } else {
             initializer = Production(KLabel(initLabel), sort, Seq(Terminal(initLabel)), Att().add("initializer").add("function").add("noThread"));
             initializerRule = Rule(KRewrite(KApply(KLabel(initLabel)), IncompleteCellUtils.make(KLabel("<" + cellName + ">"), false, childInitializer, false)), BooleanUtils.TRUE, ensures == null ? BooleanUtils.TRUE : ensures, Att().add("initializer"));
@@ -449,7 +451,7 @@ public class GenerateSentencesFromConfigDecl {
             // rule initCell(Init) => <cell> initChildren(Init)... </cell>
             cellsSort = sort;
             if (hasConfigurationOrRegularVariable || isStream) {
-                rhs = KApply(KLabel(initLabel), KVariable("Init"));
+                rhs = KApply(KLabel(initLabel), INIT);
             } else {
                 rhs = KApply(KLabel(initLabel));
             }
@@ -463,7 +465,7 @@ public class GenerateSentencesFromConfigDecl {
      */
     private static KApply optionalCellInitializer(boolean initializeOptionalCell, Att cellProperties, String initLabel) {
         if (initializeOptionalCell) {
-            return KApply(KLabel(initLabel), KVariable("Init"));
+            return KApply(KLabel(initLabel), INIT);
         } else if (cellProperties.contains("initial")) {
             return KApply(KLabel(initLabel));
         } else {

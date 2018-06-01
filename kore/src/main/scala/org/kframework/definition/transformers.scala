@@ -96,9 +96,6 @@ object DefinitionTransformer {
   def fromKTransformerWithModuleInfo(f: (Module, K) => K, name: String): DefinitionTransformer =
     DefinitionTransformer(ModuleTransformer.fromKTransformerWithModuleInfo(f, name))
 
-  def fromKTransformerWithModuleInfo(f: BiFunction[Module, K, K], name: String): DefinitionTransformer =
-    fromKTransformerWithModuleInfo((m, k) => f(m, k), name)
-
   def from(f: Module => Module, name: String): DefinitionTransformer = DefinitionTransformer(f, name)
 
   def apply(f: Module => Module): DefinitionTransformer = new DefinitionTransformer(f)

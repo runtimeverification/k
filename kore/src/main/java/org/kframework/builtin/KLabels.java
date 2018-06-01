@@ -43,4 +43,6 @@ public class KLabels {
     public static final KLabel MAP_REMOVE_ALL = KLabel("removeAll");
     public static final KLabel SET_REMOVE_ALL = KLabel("Set:difference");
     public static final KLabel MAP_KEYS = KLabel("keys");
+
+    public static final String INJ = "inj";
 }

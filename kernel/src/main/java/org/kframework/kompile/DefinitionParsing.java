@@ -61,6 +61,7 @@ public class DefinitionParsing {
     public static final Sort START_SYMBOL = Sort("RuleContent");
     private final File cacheFile;
     private boolean autoImportDomains;
+    private boolean kore;
 
     private final KExceptionManager kem;
     private final ParserUtils parser;
@@ -79,13 +80,15 @@ public class DefinitionParsing {
             ParserUtils parser,
             boolean cacheParses,
             File cacheFile,
-            boolean autoImportDomains) {
+            boolean autoImportDomains,
+            boolean kore) {
         this.lookupDirectories = lookupDirectories;
         this.kem = kem;
         this.parser = parser;
         this.cacheParses = cacheParses;
         this.cacheFile = cacheFile;
         this.autoImportDomains = autoImportDomains;
+        this.kore = kore;
         this.loader = new BinaryLoader(this.kem);
         this.isStrict = isStrict;
     }
@@ -98,7 +101,8 @@ public class DefinitionParsing {
                 Source.apply(definitionFile.getAbsolutePath()),
                 definitionFile.getParentFile(),
                 ListUtils.union(lookupDirectories,
-                        Lists.newArrayList(Kompile.BUILTIN_DIRECTORY)));
+                        Lists.newArrayList(Kompile.BUILTIN_DIRECTORY)),
+                kore);
 
         errors = java.util.Collections.synchronizedSet(Sets.newHashSet());
         caches = new HashMap<>();
@@ -178,7 +182,8 @@ public class DefinitionParsing {
                 definitionFile.getParentFile(),
                 ListUtils.union(lookupDirectories,
                         Lists.newArrayList(Kompile.BUILTIN_DIRECTORY)),
-                autoImportDomains);
+                autoImportDomains,
+                kore);
         return definition;
     }
 

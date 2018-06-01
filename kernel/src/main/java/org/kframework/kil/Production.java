@@ -6,6 +6,7 @@ import org.kframework.kore.Sort;
 import com.google.common.collect.Multimap;
 import org.kframework.utils.StringUtil;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -32,9 +33,9 @@ public class Production extends ASTNode {
      * Should be called only if isListDecl is true.
      * @return String representation of the separator KLabel.
      */
-    public String getTerminatorKLabel() {
+    public String getTerminatorKLabel(boolean kore) {
         assert isListDecl();
-        return ".List{" + StringUtil.enquoteCString(getKLabel()) + "}";
+        return ".List{" + StringUtil.enquoteCString(getKLabel(kore)) + "}" + (kore ? "_" + getSort().name() : "");
     }
 
     /**
@@ -45,16 +46,6 @@ public class Production extends ASTNode {
      */
     public boolean isSyntacticSubsort() {
         return items.size() == 1 && items.get(0) instanceof NonTerminal;
-    }
-
-    /**
-     * True if this production consists is a subsort declaration.
-     * It must consist of a single nonterminal, and not have an
-     * explicitly assigned label.
-     * @return
-     */
-    public boolean isSubsort() {
-        return isSyntacticSubsort() && getKLabel() == null;
     }
 
     public boolean isLexical() {
@@ -108,39 +99,36 @@ public class Production extends ASTNode {
         this.ownerModuleName = ownerModule;
     }
 
-    @Deprecated
-    public String getLabel() {
-        return getPrefixLabel();
-    }
-
     /**
      * Gets the KLabel corresponding to this production. A production has a
      * KLabel if and only if the production flattens in KORE to a term which is of sort
      * KItem (ie, is a function or a constructor).
      * @return
      */
-    public String getKLabel() {
+    public String getKLabel(boolean kore) {
         String klabel = getAttribute("klabel");
         if (klabel == null && (isSyntacticSubsort() || containsAttribute("token") || containsAttribute("bracket"))) {
             return null;
         } else if (klabel == null) {
-            klabel = getPrefixLabel();
+            klabel = getPrefixLabel(kore);
         }
         return klabel.replace(" ", "");
     }
 
-    private String getPrefixLabel() {
+    private String getPrefixLabel(boolean kore) {
         String label = "";
+        List<String> sorts = new ArrayList<>();
         for (ProductionItem pi : items) {
             if (pi instanceof NonTerminal) {
                 label += "_";
+                sorts.add(((NonTerminal) pi).getSort().name());
             } else if (pi instanceof Terminal) {
                 label += ((Terminal) pi).getTerminal();
             } else if (pi instanceof UserList) {
                 label += "_" + ((UserList) pi).separator + "_";
             }
         }
-        return label + "_" + ownerModuleName;
+        return label + "_" + ownerModuleName + (kore ? "_" + sorts.stream().reduce("", (s1, s2) -> s1 + "_" + s2) : "");
     }
 
     public java.util.List<ProductionItem> getItems() {
@@ -209,10 +197,10 @@ public class Production extends ASTNode {
                 return false;
         } else if (!items.equals(other.items))
             return false;
-        if (getKLabel() == null) {
-            if (other.getKLabel() != null)
+        if (getAttribute("klabel") == null) {
+            if (other.getAttribute("klabel") != null)
                 return false;
-        } else if (!getKLabel().equals(other.getKLabel()))
+        } else if (!getAttribute("klabel").equals(other.getAttribute("klabel")))
             return false;
         if (sort == null) {
             if (other.sort != null)
@@ -233,7 +221,7 @@ public class Production extends ASTNode {
         int result = 1;
         result = prime * result + ((items == null) ? 0 : items.hashCode());
         result = prime * result
-                + ((getKLabel() == null) ? 0 : getKLabel().hashCode());
+                + ((getAttribute("klabel") == null) ? 0 : getAttribute("klabel").hashCode());
         result = prime * result + ((sort == null) ? 0 : sort.hashCode());
         result = prime * result + ((binderMap == null) ? 0 : binderMap.hashCode());
         return result;
