@@ -785,13 +785,9 @@ public class SymbolicRewriter {
         Term statusCode = ((KList) ((KItem) evm).kList()).get(1);
         Term callState = ((KList) ((KItem) evm).kList()).get(5);
         Term callData = ((KList) ((KItem) callState).kList()).get(4);
-
-        if (KProve.options.global.log || forced) {
-            System.out.println("\nSTEP " + step + ": " + (System.currentTimeMillis() - Main.startTime) / 1000. +
-                    " s \n===================");
-        }
         Term wordStack = ((KList) ((KItem) callState).kList()).get(6);
         Term localMem = ((KList) ((KItem) callState).kList()).get(7);
+        K theMap = ((KItem) localMem).klist().items().get(0);
         Term pc = ((KList) ((KItem) callState).kList()).get(8);
         Term gas = ((KList) ((KItem) callState).kList()).get(9);
 
@@ -801,12 +797,21 @@ public class SymbolicRewriter {
 
         BuiltinList kSequence =  ((BuiltinList)((KList)((KItem) k).klist()).get(0));
 
+        if (!(theMap instanceof BuiltinMap || theMap instanceof Variable)) {
+            forced = true;
+        }
+
+        if (KProve.options.global.log || forced) {
+            System.out.println("\nSTEP " + step + ": " + (System.currentTimeMillis() - Main.startTime) / 1000. +
+                    " s \n===================");
+        }
+
         if (KProve.options.global.log || forced) {
             KProve.prettyPrint(k);
             System.out.println(output);
             System.out.println(statusCode);
             System.out.println("<localMem>");
-            K theMap = ((KItem) localMem).klist().items().get(0);
+
             if (theMap instanceof BuiltinMap) {
                 List<Term> entries = ((BuiltinMap) theMap).getKComponents();
                 for (int i = 0; i < entries.size(); i += 10) {
@@ -824,7 +829,7 @@ public class SymbolicRewriter {
             System.out.println(gas);
             System.out.println(wordStack);
             String callDataStr = callData.toString();
-            if (!targetCallDataStr.equals(callData.toString())) {
+            if (!targetCallDataStr.equals(callDataStr)) {
                 System.out.println(callDataStr.substring(0, Math.min(callDataStr.length(), 300)));
             }
             System.out.println("accounts: " + accounts.getEntries().size());
@@ -836,6 +841,9 @@ public class SymbolicRewriter {
             }
             System.out.println("/\\");
             KProve.prettyPrint(term.constraint());
+        }
+        if (!(theMap instanceof BuiltinMap || theMap instanceof Variable)) {
+            throw new RuntimeException("Non-map format, aborting.");
         }
         return kSequence;
     }
