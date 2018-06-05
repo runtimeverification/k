@@ -33,13 +33,11 @@ public class KExceptionManager {
 
             @Override
             public void uncaughtException(Thread t, Throwable e) {
-                if (options.debug) {
-                    e.printStackTrace();
-                }
-                exceptions.add(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL,
+                e.printStackTrace();
+                /*exceptions.add(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL,
                         "Uncaught exception thrown of type " + e.getClass().getSimpleName()
                         + ".\nPlease rerun your program with the --debug flag to generate a stack trace, "
-                        + "and file a bug report at https://github.com/kframework/k/issues", e));
+                        + "and file a bug report at https://github.com/kframework/k/issues", e));*/
                 print();
             }
         });
