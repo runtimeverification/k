@@ -613,20 +613,27 @@ public class SymbolicRewriter {
         while (!queue.isEmpty()) {
             step++;
             for (ConstrainedTerm term : queue) {
-                BuiltinList kSequence;
+                Term generatedTop = term.term();
+                Term k = ((KList) ((KItem) generatedTop).kList()).get(0);
+                BuiltinList kSequence = ((BuiltinList) ((KList) ((KItem) k).klist()).get(0));
+                boolean isHalt = kSequence.size() == 2 && kSequence.get(0) instanceof KItem
+                        && kSequence.get(0).toString().equals("#halt_EVM(.KList)");
+                boolean oldDebug =  KProve.options.global.debug;
 
+                if (isHalt && !KProve.options.global.noDebugLastStep) {
+                    KProve.options.global.debug = true;
+                }
                 if (term.implies(targetTerm)) {
                     successPaths++;
                     System.out.println("\n============\nStep " + step + ": eliminated!\n============\n");
                     logStep(step, targetCallDataStr, term, true);
                     continue;
                 } else {
-                    kSequence = logStep(step, targetCallDataStr, term, step == 1);
+                    logStep(step, targetCallDataStr, term, step == 1);
                 }
 
                 //stopping at halt
-                if (kSequence.size() == 2 && kSequence.get(0) instanceof KItem
-                        && kSequence.get(0).toString().equals("#halt_EVM(.KList)")) {
+                if (isHalt) {
                     System.out.println("Halt! Terminating branch.");
                     proofResults.add(term);
                     continue;
@@ -735,6 +742,7 @@ public class SymbolicRewriter {
                         nextQueue.add(result);
                     }
                 }
+                KProve.options.global.debug = oldDebug;
             }
 
             /* swap the queues */
