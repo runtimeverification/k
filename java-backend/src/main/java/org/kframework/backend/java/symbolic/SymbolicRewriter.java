@@ -607,10 +607,6 @@ public class SymbolicRewriter {
         while (!queue.isEmpty()) {
             step++;
             Debugg.step(Integer.toString(step));
-            if(step == 874) {
-                System.out.println(2);
-             //   throw new Error("ein Zonk hinter dieser Tür.");
-            }
             for (ConstrainedTerm term : queue) {
                 String kcontent = term.term().getCellContentsByName("<k>").get(0).toString();
                 if(kcontent.equals("#execute_EVM(.KList)")) {
