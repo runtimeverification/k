@@ -68,6 +68,10 @@ public class TermContext extends JavaSymbolicObject {
         return counter.get();
     }
 
+    public void setCounterValue(long value) {
+        counter.set(value);
+    }
+
     public Definition definition() {
         return global.getDefinition();
     }

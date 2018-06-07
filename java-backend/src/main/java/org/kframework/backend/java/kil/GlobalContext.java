@@ -55,6 +55,19 @@ public class GlobalContext implements Serializable {
         this.stage = stage;
     }
 
+    public GlobalContext(GlobalContext context) {
+        this.fs = context.fs;
+        this.globalOptions = context.globalOptions;
+        this.krunOptions = context.krunOptions;
+        this.kem = context.kem;
+        this.hookProvider = context.hookProvider;
+        this.files = context.files;
+        this.equalityOps = context.equalityOps;
+        this.constraintOps = context.constraintOps;
+        this.kItemOps =  context.kItemOps;
+        this.stage = context.stage;
+    }
+
     @Inject
     public GlobalContext(
             GlobalOptions globalOptions,

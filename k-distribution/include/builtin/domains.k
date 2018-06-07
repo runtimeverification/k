@@ -633,6 +633,16 @@ module K-REFLECTION
   // undefined
   syntax List ::= #argv() [function, hook(KREFLECTION.argv)]
 
+  syntax List ::= #rewrite(K) [function, hook(KREFLECTION.rewrite), impure]
+                | #narrow(K)  [function, hook(KREFLECTION.narrow), impure]
+
+  syntax K ::= K "/\\" K  [function, impure, hook(KREFLECTION.and)]
+             | "T"        [function, impure, hook(KREFLECTION.top)]
+             | K "===" K  [function, impure, hook(KREFLECTION.equal)]
+  syntax K ::= #getTerm(K)        [function, impure, hook(KREFLECTION.getTerm)]
+             | #getConstraint(K)  [function, impure, hook(KREFLECTION.getConstraint)]
+  syntax Map ::= #getSubstitution(K)  [function, impure, hook(KREFLECTION.getSubstitution)]
+  syntax Bool ::= #isSubstitution(K)  [function, impure, hook(KREFLECTION.isSubstitution)]
 endmodule
 
 module K-IO

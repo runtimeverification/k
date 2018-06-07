@@ -3,6 +3,7 @@ package org.kframework.backend.java.builtins;
 
 import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.BuiltinSet;
+import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.kil.JavaSymbolicObject;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabelInjection;
@@ -14,9 +15,17 @@ import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.symbolic.ConjunctiveFormula;
 import org.kframework.backend.java.symbolic.CopyOnWriteTransformer;
 import org.kframework.backend.java.symbolic.PatternMatcher;
+import org.kframework.backend.java.symbolic.SymbolicRewriter;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.tuple.Triple;
 
 
 /**
@@ -205,5 +214,103 @@ public class MetaK {
 
     public static BoolToken isConcrete(Term term, TermContext context) {
         return BoolToken.of(term.isConcrete());
+    }
+
+    public static BuiltinSet unify(ConstrainedTerm term1, ConstrainedTerm term2, TermContext context) {
+        List<ConjunctiveFormula> results = term1.unify(term2, Collections.emptySet()).stream()
+                .map(Triple::getLeft)
+                .collect(Collectors.toList());
+        BuiltinSet.Builder builder = BuiltinSet.builder(context.global());
+        builder.addAll(results);
+        return (BuiltinSet) builder.build();
+    }
+
+    public static BuiltinSet match(ConstrainedTerm subject, ConstrainedTerm pattern, TermContext context) {
+        List<BuiltinMap> results = subject.unify(pattern, null).stream()
+                .filter(Triple::getMiddle)
+                .map(Triple::getLeft)
+                .map(c -> {
+                    assert c.isSubstitution();
+                    return c.substitution().asBuiltinMap(context.global());
+                })
+                .collect(Collectors.toList());
+        BuiltinSet.Builder builder = BuiltinSet.builder(context.global());
+        builder.addAll(results);
+        return (BuiltinSet) builder.build();
+    }
+
+    public static BuiltinSet rewrite(ConstrainedTerm term, TermContext context) {
+        return step(term, false, context);
+    }
+
+    public static BuiltinSet narrow(ConstrainedTerm term, TermContext context) {
+        return step(term, true, context);
+    }
+
+    private static BuiltinSet step(
+            ConstrainedTerm term,
+            boolean narrowing,
+            TermContext context) {
+        term.termContext().setCounterValue(context.getCounterValue());
+
+        SymbolicRewriter symbolicRewriter = new SymbolicRewriter(context.global(), Collections.emptyList(), null);
+        List<ConstrainedTerm> results = symbolicRewriter.fastComputeRewriteStep(
+                term,
+                false,
+                narrowing,
+                false);
+
+        Optional<Long> updatedCounterValue = results.stream()
+                .map(ConstrainedTerm::termContext)
+                .map(TermContext::getCounterValue)
+                .max(Comparator.comparing(Long::valueOf));
+        updatedCounterValue.ifPresent(context::setCounterValue);
+
+        BuiltinSet.Builder builder = BuiltinSet.builder(context.global());
+        builder.addAll(results);
+        return (BuiltinSet) builder.build();
+    }
+
+
+    public static Term and(Term term, ConjunctiveFormula constraint, TermContext context) {
+        if (term instanceof ConstrainedTerm) {
+            ConstrainedTerm constrainedTerm = (ConstrainedTerm) term;
+            ConjunctiveFormula resultConstraint = constrainedTerm.constraint().add(constraint).simplify();
+            Term resultTerm = constrainedTerm.term()
+                    .substituteAndEvaluate(resultConstraint.substitution(), constrainedTerm.termContext());
+            return new ConstrainedTerm(resultTerm, resultConstraint, constrainedTerm.termContext());
+        } else if (term instanceof ConjunctiveFormula) {
+            ConjunctiveFormula conjunctiveFormula = (ConjunctiveFormula) term;
+            return conjunctiveFormula.add(constraint).simplify();
+        } else {
+            return new ConstrainedTerm(
+                    term.substituteAndEvaluate(constraint.substitution(), context),
+                    constraint,
+                    context.fork());
+        }
+    }
+
+    public static ConjunctiveFormula top(TermContext context) {
+        return ConjunctiveFormula.of(context.global());
+    }
+
+    public static ConjunctiveFormula equal(Term leftHandSide, Term rightHandSide, TermContext context) {
+        return ConjunctiveFormula.of(context.global()).add(leftHandSide, rightHandSide).simplify();
+    }
+
+    public static Term getTerm(ConstrainedTerm constrainedTerm, TermContext context) {
+        return constrainedTerm.term();
+    }
+
+    public static ConjunctiveFormula getConstraint(ConstrainedTerm constrainedTerm, TermContext context) {
+        return constrainedTerm.constraint();
+    }
+
+    public static BuiltinMap getSubstitution(ConjunctiveFormula constraint, TermContext context) {
+        return constraint.substitution().asBuiltinMap(context.global());
+    }
+
+    public static BoolToken isSubstitution(ConjunctiveFormula constraint, TermContext context) {
+        return BoolToken.of(constraint.isSubstitution());
     }
 }

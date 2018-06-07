@@ -29,7 +29,7 @@ import org.apache.commons.lang3.tuple.Triple;
  *
  * @author AndreiS
  */
-public class ConstrainedTerm extends JavaSymbolicObject {
+public class ConstrainedTerm extends Term {
 
     public static class Data {
         public final Term term;
@@ -79,6 +79,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
     private final TermContext context;
 
     public ConstrainedTerm(Term term, ConjunctiveFormula constraint, TermContext context) {
+        super(Kind.K);
         this.data = new Data(term, constraint);
         this.context = context;
         this.context.setTopTerm(term);
@@ -303,7 +304,22 @@ public class ConstrainedTerm extends JavaSymbolicObject {
     }
 
     @Override
-    public int hashCode() {
+    public boolean isExactSort() {
+        return false;
+    }
+
+    @Override
+    public boolean isSymbolic() {
+        return true;
+    }
+
+    @Override
+    public Sort sort() {
+        return Sort.KITEM;
+    }
+
+    @Override
+    protected int computeHash() {
         int h = hashCode;
         if (h == Constants.NO_HASHCODE) {
             h = 1;

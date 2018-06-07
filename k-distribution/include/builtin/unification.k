@@ -1,5 +1,12 @@
 // Copyright (c) 2012-2016 K Team. All Rights Reserved.
 require "domains.k"
+
+module MATCHING
+  imports SET
+
+  syntax Set ::= #match(K, K) [function, hook(MATCHING.match), impure]
+endmodule
+
 module UNIFICATION
   imports SET
 
@@ -19,4 +26,5 @@ module UNIFICATION
 
   syntax MetaVariable
 
+  syntax Set ::= #unify(K, K) [function, hook(UNIFICATION.unify), impure]
 endmodule

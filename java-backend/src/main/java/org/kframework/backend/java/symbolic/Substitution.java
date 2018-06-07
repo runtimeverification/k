@@ -2,6 +2,7 @@
 
 package org.kframework.backend.java.symbolic;
 
+import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
@@ -35,4 +36,10 @@ public interface Substitution<K extends Term, V extends Term> extends Map<K, V> 
     List<Equality> equalities(GlobalContext global);
 
     boolean isFalse(GlobalContext global);
+
+    default BuiltinMap asBuiltinMap(GlobalContext global) {
+        BuiltinMap.Builder builder = BuiltinMap.builder(global);
+        builder.putAll(this);
+        return (BuiltinMap) builder.build();
+    }
 }
