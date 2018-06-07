@@ -242,7 +242,7 @@ public class RuleGrammarGenerator {
                             }
                         }
                     }
-                    prods.add(Production(returnSort, immutable(pis), p.att().add(Constants.ORIGINAL_PRD, Production.class, p)));
+                    prods.add(Production(p.klabel(), returnSort, immutable(pis), p.att().add(Constants.ORIGINAL_PRD, Production.class, p)));
                 }
             }
         }
