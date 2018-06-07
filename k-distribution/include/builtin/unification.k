@@ -27,5 +27,9 @@ module UNIFICATION
   syntax K ::= #unify(K, K) [function, hook(UNIFICATION.unify), impure]
 
   syntax MetaVariable
+  syntax K ::= "#getFullConstraint" [function, hook(KREFLECTION.getFullConstraint), impure]
+  syntax K ::= #getConstraint(K) [function, hook(KREFLECTION.getConstraint), impure]
+  syntax Bool ::= #setConstraint(K) [function, hook(KREFLECTION.setConstraint), impure]
+  syntax Bool ::= "#printConstraint" [function, hook(KREFLECTION.printConstraint), impure]
 
 endmodule
