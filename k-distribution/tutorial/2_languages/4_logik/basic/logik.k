@@ -194,7 +194,7 @@ one may devise techniques to detect non-termination in some cases,
 one cannot do it in general (same like for all Turing-complete
 languages).  */
 
-require "unification.k"
+require "symbolic.k"
 
 module LOGIK-COMMON
   imports DOMAINS-SYNTAX

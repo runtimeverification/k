@@ -1,6 +1,6 @@
 // Copyright (c) 2013-2019 K Team. All Rights Reserved.
 
-require "unification.k"
+require "symbolic.k"
 require "substitution.k"
 
 module LAMBDA-SYNTAX

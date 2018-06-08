@@ -69,7 +69,7 @@ all the `Exp` syntax declarations in one syntax declaration this time.
 Before we modify the rules, let us first define our machinery for
 adding and solving constraints.  First, we require and import the
 unification procedure.  We do not discuss unification here, but if you
-are interested you can consult the `unification.k` files under
+are interested you can consult the `symbolic.k` files under
 [k/include/modules](/include/modules), which contains our current generic
 definition of unification, which is written also in K.  The generic unification
 provides a sort, `Mgu`, for *most-general-unifier*, an operation
