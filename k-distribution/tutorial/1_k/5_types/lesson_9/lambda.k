@@ -1,6 +1,6 @@
 // Copyright (c) 2012-2018 K Team. All Rights Reserved.
 
-require "unification.k"
+require "symbolic.k"
 
 module LAMBDA
   imports DOMAINS

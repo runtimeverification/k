@@ -1,4 +1,4 @@
-require "unification.k"
+require "symbolic.k"
 
 module LOGIK-COMMON
   imports DOMAINS-SYNTAX
