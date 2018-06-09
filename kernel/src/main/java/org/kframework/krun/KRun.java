@@ -31,6 +31,7 @@ import org.kframework.unparser.Formatter;
 import org.kframework.unparser.KOREToTreeNodes;
 import org.kframework.unparser.OutputModes;
 import org.kframework.unparser.ToBinary;
+import org.kframework.unparser.ToJson;
 import org.kframework.unparser.ToKast;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KException;
@@ -194,6 +195,9 @@ public class KRun {
             break;
         case BINARY:
             print.accept(ToBinary.apply(result));
+            break;
+        case JSON:
+            print.accept(ToJson.apply(result));
             break;
         default:
             throw KEMException.criticalError("Unsupported output mode: " + output);
