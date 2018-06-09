@@ -1,3 +1,4 @@
+// Copyright (c) 2015-2018 K Team. All Rights Reserved.
 package org.kframework.kprove;
 
 import com.google.common.collect.ImmutableList;
