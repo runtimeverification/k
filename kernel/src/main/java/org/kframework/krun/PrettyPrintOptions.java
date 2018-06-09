@@ -56,7 +56,7 @@ public class PrettyPrintOptions {
     public String outputFile;
 
     @Parameter(names={"--output", "-o"}, converter=OutputModeConverter.class,
-            description="How to display krun results. <mode> is either [pretty|sound|kast|binary|none|no-wrap].")
+            description="How to display krun results. <mode> is either [pretty|sound|kast|binary|json|none|no-wrap].")
     public OutputModes output = OutputModes.PRETTY;
 
     public static class OutputModeConverter extends BaseEnumConverter<OutputModes> {
