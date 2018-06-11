@@ -122,6 +122,8 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
             "string_le",
             "string_gt",
             "string_ge",
+            /* rpow */
+            "smt_rpow",
             /* set theory */
             "smt_set_mem", "smt_miset_mem",
             "smt_set_add", "smt_miset_add",

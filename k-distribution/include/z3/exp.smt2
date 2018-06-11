@@ -11,6 +11,16 @@
 ;(assert (> pow256 1000000000000))
 
 (declare-fun expFunc (Int Int) Int)
+(declare-fun smt_rpow (Int Int Int Int) Int)
+
+(assert (forall ((x1 Int) (y1 Int) (x2 Int) (y2 Int) (z1 Int) (z2 Int) (b1 Int) (b2 Int))
+ (!
+  (=> (and (<= x1 x2) (<= y1 y2))
+    (<= (smt_rpow z1 x1 y1 b1) (expFunc z2 x2 y2 b2))
+  )
+  :pattern ((expFunc z1 x1 y1 b1) (expFunc z2 x2 y2 b2))
+ )
+))
 
 (assert (forall ((x1 Int) (y1 Int) (x2 Int) (y2 Int))
  (!
@@ -25,6 +35,13 @@
   (!
     (=> (>= y 1) (>= (expFunc x y) x))
     :pattern ((expFunc x y))
+  )
+))
+
+(assert (forall ((x Int) (y Int) (z Int) (b Int))
+  (!
+    (=> (>= y 2) (>= (smt_rpow z x y b) (* x x)))
+    :pattern ((smt_rpow z x y b))
   )
 ))
 
