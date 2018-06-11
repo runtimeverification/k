@@ -835,6 +835,9 @@ struct
   let hook_min c _ _ _ _ = match c with
       [Int a], [Int b] -> [Int (Z.min a b)]
     | _ -> raise Not_implemented
+  let hook_log2 c _ _ _ _ = match c with
+      [Int a] -> [Int (Z.of_int (Z.log2 a))]
+    | _ -> raise Not_implemented
   let hook_rand c _ _ _ _ = match c with
       [Int max] -> let mpz = Gmp.Z.urandomm Gmp.RNG.default (from_zarith max) in
           [Int (to_zarith mpz)]
