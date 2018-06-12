@@ -143,6 +143,7 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
       .groupBy(_.sort)
       .map { case (s, ps) => (s, ps.toList.sortBy(_.sort)(subsorts.asOrdering)) }
 
+  // TODO: should this use computeSubsortPOSet to get an actual GLB of the given sort?
   @transient lazy val sortFor: Map[KLabel, Sort] = productionsFor mapValues {_.head.sort}
 
   def optionSortFor(k: K): Option[Sort] = k match {
