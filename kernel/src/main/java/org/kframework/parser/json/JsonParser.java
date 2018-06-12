@@ -32,6 +32,23 @@ public class JsonParser {
                              , INJECTEDKLABEL = "InjectedKLabel"
                              ;
 
+    public static K parseJson(JsonObject data) {
+        try {
+            if (! (data.containsKey("format") && data.containsKey("version") && data.containsKey("term"))) {
+                throw KEMException.criticalError("Must have `format`, `version`, and `term` fields in serialized Json!");
+            }
+            if (data.getString("format") != "KAST") {
+                throw KEMException.criticalError("Only can deserialize 'KAST' format Json! Found: " + data.getString("format"));
+            }
+            if (data.getInt("version") != 1) {
+                throw KEMException.criticalError("Only can deserialize KAST version '1'! Found: " + data.getInt("version"));
+            }
+            return toK(data.getJsonObject("term"));
+        } catch (IOException e) {
+            throw KEMException.criticalError("Could not read K term from json", e);
+        }
+    }
+
     private static K toK(JsonObject data) throws IOException {
         switch (data.getString("node")) {
 
