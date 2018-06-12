@@ -15,10 +15,10 @@
 
 (assert (forall ((x1 Int) (y1 Int) (x2 Int) (y2 Int) (z1 Int) (z2 Int) (b1 Int) (b2 Int))
  (!
-  (=> (and (<= x1 x2) (<= y1 y2))
-    (<= (smt_rpow z1 x1 y1 b1) (expFunc z2 x2 y2 b2))
+  (=> (and (<= x1 x2) (<= y1 y2) (<= z1 z2) (<= b1 b2))
+    (<= (smt_rpow z1 x1 y1 b1) (smt_rpow z2 x2 y2 b2))
   )
-  :pattern ((expFunc z1 x1 y1 b1) (expFunc z2 x2 y2 b2))
+  :pattern ((smt_rpow z1 x1 y1 b1) (smt_rpow z2 x2 y2 b2))
  )
 ))
 
@@ -40,7 +40,28 @@
 
 (assert (forall ((x Int) (y Int) (z Int) (b Int))
   (!
-    (=> (>= y 2) (>= (smt_rpow z x y b) (* x x)))
+    (=> (>= y 1) (>= (* (smt_rpow z x y b) b) (* z x) ))
+    :pattern ((smt_rpow z x y b))
+  )
+))
+
+(assert (forall ((x Int) (y Int) (z Int) (b Int))
+  (!
+    (=> (>= y 2) (>= (* (smt_rpow z x y b) b) (* x x)))
+    :pattern ((smt_rpow z x y b))
+  )
+))
+
+(assert (forall ((x Int) (y Int) (z Int) (b Int))
+  (!
+    (=> (>= y 1) (>= (* (smt_rpow z x y b) b) (+ (* z x) (div b 2))))
+    :pattern ((smt_rpow z x y b))
+  )
+))
+
+(assert (forall ((x Int) (y Int) (z Int) (b Int))
+  (!
+    (=> (>= y 2) (>= (* (smt_rpow z x y b) b) (+ (* x x) (div b 2))))
     :pattern ((smt_rpow z x y b))
   )
 ))
