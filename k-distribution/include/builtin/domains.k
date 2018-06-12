@@ -359,6 +359,7 @@ module INT
   syntax Int ::= "minInt" "(" Int "," Int ")"   [function, smtlib(int_min), hook(INT.min)]
                | "maxInt" "(" Int "," Int ")"   [function, smtlib(int_max), hook(INT.max)]
                | absInt ( Int )                 [function, smtlib(int_abs), hook(INT.abs)]
+               | log2Int ( Int )                [function, hook(INT.log2)]
 
   rule I1:Int divInt I2:Int => (I1 -Int (I1 modInt I2)) /Int I2
   requires I2 =/=Int 0
