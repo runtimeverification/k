@@ -215,6 +215,7 @@ public class KRun {
         prettyPrint(module, output, print, abstractKLabels(module, result, lossyKLabels), colorize);
     }
 
+    // TODO: find a better place for this
     public static K abstractKLabels(Module module, K result, Set<String> lossyKLabels) {
         K abstracted = new TransformK() {
             @Override
