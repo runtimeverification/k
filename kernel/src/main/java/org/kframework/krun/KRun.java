@@ -56,6 +56,9 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import scala.Some;
+import scala.Option;
+
 import static org.kframework.Collections.*;
 import static org.kframework.kore.KORE.*;
 
@@ -202,6 +205,82 @@ public class KRun {
         default:
             throw KEMException.criticalError("Unsupported output mode: " + output);
         }
+    }
+
+    /**
+     * Methods `{omit,tokenize,flatten}KLabels` allows the user to specify some KLabels below which they do not care for accurate term representation.
+     * For example, a user-interface level tool (eg. state explorer) may not need accurate term representation to work, but handling huge Json terms may be a hindrance.
+     */
+    public static K omitTerm(Module module, K k) {
+        if (! (k instanceof KApply)) return k;
+        KApply kapp           = (KApply) k;
+        Sort   finalSort      = Sorts.K();
+        Option<Sort> termSort = module.sortFor().get(kapp.klabel());
+        if (! termSort.isEmpty()) {
+            finalSort = termSort.get();
+        }
+        return KToken(kapp.klabel().name(), finalSort);
+    }
+
+    public static K omitKLabels(Module module, K result, Set<String> omittedKLabels) {
+        return new TransformK() {
+            @Override
+            public K apply(KApply k) {
+                if (omittedKLabels.contains(k.klabel().name())) {
+                    List<K> newArgs = k.klist().items().stream().map(arg -> omitTerm(module, arg)).collect(Collectors.toList());
+                    return KApply(k.klabel(), KList(newArgs), k.att());
+                } else {
+                    return super.apply(k);
+                }
+            }
+        }.apply(result);
+    }
+
+    public static K tokenizeTerm(Module module, K k) {
+        if (! (k instanceof KApply)) return k;
+        KApply kapp            = (KApply) k;
+        Module unparsingModule = RuleGrammarGenerator.getCombinedGrammar(module, false).getExtensionModule();
+        String tokenizedTerm   = unparseTerm(kapp, unparsingModule, ColorSetting.OFF);
+        Sort   finalSort       = Sorts.K();
+        Option<Sort> termSort  = module.sortFor().get(kapp.klabel());
+        if (! termSort.isEmpty()) {
+            finalSort = termSort.get();
+        }
+        return KToken(tokenizedTerm, finalSort);
+    }
+
+    public static K tokenizeKLabels(Module module, K result, Set<String> tokenizedKLabels) {
+        return new TransformK() {
+            @Override
+            public K apply(KApply k) {
+                if (tokenizedKLabels.contains(k.klabel().name())) {
+                    List<K> newArgs = k.klist().items().stream().map(arg -> KRun.tokenizeTerm(module, arg)).collect(Collectors.toList());
+                    return KApply(k.klabel(), KList(newArgs), k.att());
+                } else {
+                    return super.apply(k);
+                }
+            }
+        }.apply(result);
+    }
+
+    public static K flattenKLabels(Module module, K result, Set<String> flattenedKLabels) {
+        return new TransformK() {
+            @Override
+            public K apply(KApply k) {
+                if (flattenedKLabels.contains(k.klabel().name())) {
+                    List<K> items = new ArrayList<>();
+                    Att att = module.attributesFor().apply(KLabel(k.klabel().name()));
+                    if (att.contains("assoc") && att.contains("unit")) {
+                        items = Assoc.flatten(k.klabel(), k.klist().items(), KLabel(att.get("unit")));
+                    } else {
+                        items = k.klist().items();
+                    }
+                    return KApply(k.klabel(), KList(items), k.att());
+                } else {
+                    return super.apply(k);
+                }
+            }
+        }.apply(result);
     }
 
     private K parseConfigVars(KRunOptions options, CompiledDefinition compiledDef) {
