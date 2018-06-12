@@ -10,8 +10,16 @@
 ;(assert (< pow256 200000000000000000000000000000000000000000000000000000000000000000000000000000))
 ;(assert (> pow256 1000000000000))
 
+(declare-fun smt_div_word (Int Int) Int)
 (declare-fun expFunc (Int Int) Int)
 (declare-fun smt_rpow (Int Int Int Int) Int)
+
+(assert (forall ((x Int) (y Int))
+(=>
+  (not (= y 0))
+  (= (smt_div_word x y)
+     (div x y))
+)))
 
 (assert (forall ((x1 Int) (y1 Int) (x2 Int) (y2 Int) (z1 Int) (z2 Int) (b1 Int) (b2 Int))
  (!
