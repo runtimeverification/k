@@ -79,6 +79,8 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
             ">=",
             ">",
             "^",
+            "expFunc",
+            "pow256",
             /* extra int theory */
             "int_max",
             "int_min",
@@ -120,6 +122,9 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
             "string_le",
             "string_gt",
             "string_ge",
+            /* rpow */
+            "smt_rpow",
+            "smt_div_word",
             /* set theory */
             "smt_set_mem", "smt_miset_mem",
             "smt_set_add", "smt_miset_add",
@@ -559,6 +564,11 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
 
     @Override
     public JavaSymbolicObject transform(IntToken intToken) {
+        BigInteger v = intToken.bigIntegerValue();
+        BigInteger pow256 = new BigInteger("115792089237316195423570985008687907853269984665640564039457584007913129639936");
+        if (v.equals(pow256)) {
+            return new SMTLibTerm("pow256");
+        }
         return new SMTLibTerm(intToken.javaBackendValue());
     }
 

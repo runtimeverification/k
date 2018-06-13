@@ -31,6 +31,7 @@ import org.kframework.unparser.Formatter;
 import org.kframework.unparser.KOREToTreeNodes;
 import org.kframework.unparser.OutputModes;
 import org.kframework.unparser.ToBinary;
+import org.kframework.unparser.ToJson;
 import org.kframework.unparser.ToKast;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KException;
@@ -54,6 +55,9 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import scala.Some;
+import scala.Option;
 
 import static org.kframework.Collections.*;
 import static org.kframework.kore.KORE.*;
@@ -195,9 +199,46 @@ public class KRun {
         case BINARY:
             print.accept(ToBinary.apply(result));
             break;
+        case JSON:
+            print.accept(ToJson.apply(result));
+            break;
         default:
             throw KEMException.criticalError("Unsupported output mode: " + output);
         }
+    }
+
+    /**
+     * Methods `abstractPrettyPrint` and `abstractKLabels` allow the user to specify some KLabels below which they do not care for accurate term representation.
+     * For example, a user-interface level tool (eg. state explorer) may not need accurate term representation to work, but handling huge Json terms may be a hindrance.
+     */
+    public static void abstractPrettyPrint(Module module, OutputModes output, Consumer<byte[]> print, K result, ColorSetting colorize, Set<String> lossyKLabels) {
+        prettyPrint(module, output, print, abstractKLabels(module, result, lossyKLabels), colorize);
+    }
+
+    // TODO: find a better place for this
+    public static K abstractKLabels(Module module, K result, Set<String> lossyKLabels) {
+        K abstracted = new TransformK() {
+            @Override
+            public K apply(KApply k) {
+                if (lossyKLabels.contains(k.klabel().name())) {
+                    Module       unparsingModule = RuleGrammarGenerator.getCombinedGrammar(module, false).getExtensionModule();
+                    String       abstractTerm    = unparseTerm(result, unparsingModule, ColorSetting.OFF);
+                    Option<Sort> termSort        = module.sortFor().get(k.klabel());
+                    Sort         finalSort       = Sorts.K();
+                    if (! termSort.isEmpty()) {
+                        finalSort = termSort.get();
+                    }
+                    return KToken(abstractTerm, finalSort);
+                } else {
+                    return k;
+                }
+            }
+        }.apply(result);
+        return abstracted;
+    }
+
+    public static String getString(Module module, OutputModes output, Consumer<byte[]> print, K result, ColorSetting colorize) {
+        return (unparseTerm(result, module, colorize) + "\n").replaceAll("\n", "\\\\n");
     }
 
     private K parseConfigVars(KRunOptions options, CompiledDefinition compiledDef) {
@@ -299,6 +340,9 @@ public class KRun {
 
             @Override
             public K apply(KVariable k) {
+                if(!k.toString().equals("")) {
+                    return renames.computeIfAbsent(k, k2 -> KVariable(k.toString(), k.att()));
+                }
                 if (k.att().contains("anonymous")) {
                     return renames.computeIfAbsent(k, k2 -> KVariable("V" + newCount++, k.att()));
                 }

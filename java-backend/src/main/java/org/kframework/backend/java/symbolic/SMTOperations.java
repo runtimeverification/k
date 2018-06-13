@@ -67,6 +67,7 @@ public class SMTOperations {
                         KILtoSMTLib.translateImplication(left, right, rightOnlyVariables),
                         smtOptions.z3ImplTimeout);
             } catch (UnsupportedOperationException | SMTTranslationFailure e) {
+                System.err.println(e.getMessage());
                 if (!smtOptions.ignoreMissingSMTLibWarning) {
                     kem.registerCriticalWarning(e.getMessage(), e);
                 }

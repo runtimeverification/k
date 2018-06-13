@@ -11,6 +11,8 @@ public class List<T> implements Iterable<T>, Serializable {
         this.list = l;
     }
 
+
+
     @Override
     public Iterator<T> iterator() {
         return new Iterator<T>() {

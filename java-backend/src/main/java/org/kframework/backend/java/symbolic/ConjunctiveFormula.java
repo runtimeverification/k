@@ -7,6 +7,8 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
+import org.kframework.Debugg;
+import org.kframework.Warning;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.util.Constants;
@@ -706,7 +708,9 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 continue;
             }
 
+
             if (!impliesSMT(left, right, rightOnlyVariables)) {
+                Debugg.circProve(left, right);
                 if (global.globalOptions.debug) {
                     System.err.println("Failure!");
                 }
