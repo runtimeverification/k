@@ -361,6 +361,13 @@ module INT
                | absInt ( Int )                 [function, smtlib(int_abs), hook(INT.abs)]
                | log2Int ( Int )                [function, hook(INT.log2)]
 
+  syntax Int ::= bitRangeInt           ( Int, indexInt: Int, lengthInt: Int ) [function, hook(INT.bitRange)]
+  syntax Int ::= signExtendBitRangeInt ( Int, indexInt: Int, lengthInt: Int ) [function, hook(INT.signExtendBitRange)]
+
+  rule bitRangeInt(I, IDX, LEN) => (I >>Int IDX) modInt (1 <<Int LEN)
+
+  rule signExtendBitRangeInt(I, IDX, LEN) => (bitRangeInt(I, IDX, LEN) +Int (1 <<Int (LEN -Int 1))) modInt (1 <<Int LEN) -Int (1 <<Int (LEN -Int 1))
+
   rule I1:Int divInt I2:Int => (I1 -Int (I1 modInt I2)) /Int I2
   requires I2 =/=Int 0
   rule
