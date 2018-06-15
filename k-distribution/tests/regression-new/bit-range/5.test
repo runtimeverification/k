@@ -1,0 +1,1 @@
+signExtendBitRangeInt(255, 0, 8)
