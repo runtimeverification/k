@@ -35,4 +35,7 @@ object Sorts {
   val Cell = Sort("Cell")
 
   val Id = Sort("Id")
+
+  val Z3Query  = Sort("Z3Query")
+  val Z3Result = Sort("Z3Result")
 }
