@@ -300,6 +300,15 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
         return truthValue == TruthValue.FALSE;
     }
 
+    /**
+     * @return true if formula contains both some element "T" and "T ==K false".
+     */
+    public boolean isFalseFromContradictions() {
+        Set<Term> elements = new HashSet<>(getKComponents());
+        return equalities.parallelStream()
+                .anyMatch(eq -> eq.rightHandSide().equals(BoolToken.FALSE) && elements.contains(eq.leftHandSide()));
+    }
+
     public boolean isUnknown() {
         return truthValue == TruthValue.UNKNOWN;
     }
