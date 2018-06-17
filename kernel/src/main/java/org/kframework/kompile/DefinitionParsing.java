@@ -25,6 +25,7 @@ import org.kframework.parser.concrete2kore.ParseInModule;
 import org.kframework.parser.concrete2kore.ParserUtils;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.parser.concrete2kore.kernel.Scanner;
+import org.kframework.parser.outer.Outer;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
@@ -60,6 +61,7 @@ public class DefinitionParsing {
     public static final Sort START_SYMBOL = Sort("RuleContent");
     private final File cacheFile;
     private boolean autoImportDomains;
+    private boolean kore;
 
     private final KExceptionManager kem;
     private final ParserUtils parser;
@@ -78,13 +80,15 @@ public class DefinitionParsing {
             ParserUtils parser,
             boolean cacheParses,
             File cacheFile,
-            boolean autoImportDomains) {
+            boolean autoImportDomains,
+            boolean kore) {
         this.lookupDirectories = lookupDirectories;
         this.kem = kem;
         this.parser = parser;
         this.cacheParses = cacheParses;
         this.cacheFile = cacheFile;
         this.autoImportDomains = autoImportDomains;
+        this.kore = kore;
         this.loader = new BinaryLoader(this.kem);
         this.isStrict = isStrict;
     }
@@ -97,7 +101,8 @@ public class DefinitionParsing {
                 Source.apply(definitionFile.getAbsolutePath()),
                 definitionFile.getParentFile(),
                 ListUtils.union(lookupDirectories,
-                        Lists.newArrayList(Kompile.BUILTIN_DIRECTORY)));
+                        Lists.newArrayList(Kompile.BUILTIN_DIRECTORY)),
+                kore);
 
         errors = java.util.Collections.synchronizedSet(Sets.newHashSet());
         caches = new HashMap<>();
@@ -177,7 +182,8 @@ public class DefinitionParsing {
                 definitionFile.getParentFile(),
                 ListUtils.union(lookupDirectories,
                         Lists.newArrayList(Kompile.BUILTIN_DIRECTORY)),
-                autoImportDomains);
+                autoImportDomains,
+                kore);
         return definition;
     }
 
@@ -367,7 +373,7 @@ public class DefinitionParsing {
             parsedBubbles.getAndIncrement();
             kem.addAllKException(result._2().stream().map(e -> e.getKException()).collect(Collectors.toList()));
             if (result._1().isRight()) {
-                KApply k = (KApply) TreeNodesToKORE.down(result._1().right().get());
+                KApply k = (KApply) new TreeNodesToKORE(Outer::parseSort).down(result._1().right().get());
                 k = KApply(k.klabel(), k.klist(), k.att().addAll(b.att().remove("contentStartLine").remove("contentStartColumn").remove(Source.class).remove(Location.class)));
                 cache.put(b.contents(), new ParsedSentence(k, new HashSet<>(result._2())));
                 return Stream.of(k);

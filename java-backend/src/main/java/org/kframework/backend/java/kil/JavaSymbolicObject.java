@@ -21,6 +21,7 @@ import org.pcollections.PSet;
 import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 
@@ -179,7 +180,7 @@ public abstract class JavaSymbolicObject<T extends JavaSymbolicObject<T>>
                     new LocalVisitor() {
                         @Override
                         public void visit(Term term) {
-                            if (!(term instanceof KList) && global.getDefinition().subsorts().isSubsortedEq(Sort.KVARIABLE, term.sort())) {
+                            if (!(term instanceof KList) && !(term instanceof KLabel) && global.getDefinition().subsorts().isSubsortedEq(Sort.KVARIABLE, term.sort())) {
                                 intermediate.get(term).add(term);
                             }
                         }
@@ -194,12 +195,20 @@ public abstract class JavaSymbolicObject<T extends JavaSymbolicObject<T>>
         return att;
     }
 
+    public Optional<Source> source() {
+        return this.att().getOptional(Source.class);
+    }
+
+    public Optional<Location> location() {
+        return this.att().getOptional(Location.class);
+    }
+
     public Source getSource() {
-        return this.att().get(Source.class);
+        return source().orElse(null);
     }
 
     public Location getLocation() {
-        return this.att().get(Location.class);
+        return location().orElse(null);
     }
 
     public void copyAttributesFrom(JavaSymbolicObject variable) {

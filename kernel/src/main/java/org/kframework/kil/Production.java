@@ -1,10 +1,12 @@
 // Copyright (c) 2012-2018 K Team. All Rights Reserved.
 package org.kframework.kil;
 
+import org.kframework.kore.Sort;
+
 import com.google.common.collect.Multimap;
 import org.kframework.utils.StringUtil;
-import org.kframework.utils.errorsystem.KExceptionManager;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -31,9 +33,9 @@ public class Production extends ASTNode {
      * Should be called only if isListDecl is true.
      * @return String representation of the separator KLabel.
      */
-    public String getTerminatorKLabel() {
+    public String getTerminatorKLabel(boolean kore) {
         assert isListDecl();
-        return ".List{" + StringUtil.enquoteCString(getKLabel()) + "}";
+        return ".List{" + StringUtil.enquoteCString(getKLabel(kore)) + "}" + (kore ? "_" + getSort().name() : "");
     }
 
     /**
@@ -44,26 +46,6 @@ public class Production extends ASTNode {
      */
     public boolean isSyntacticSubsort() {
         return items.size() == 1 && items.get(0) instanceof NonTerminal;
-    }
-
-    /**
-     * True if this production consists is a subsort declaration.
-     * It must consist of a single nonterminal, and not have an
-     * explicitly assigned label.
-     * @return
-     */
-    public boolean isSubsort() {
-        return isSyntacticSubsort() && getKLabel() == null;
-    }
-
-    /**
-     * Retrieves the {@link NonTerminal} object of the production if this is a subsorting.
-     * Should not be called on other types of productions.
-     * @return the Sort object
-     */
-    public Sort getSubsort() {
-        assert isSyntacticSubsort();
-        return getChildSort(0);
     }
 
     public boolean isLexical() {
@@ -78,15 +60,6 @@ public class Production extends ASTNode {
     public Lexical getLexical() {
         assert isLexical();
         return (Lexical) items.get(0);
-    }
-
-    public boolean isConstant() {
-        // TODO(Radu): properly determine if a production is a constant or not, just like below
-        return isTerminal() && (sort.getName().startsWith("#") || sort.equals(Sort.KLABEL));
-    }
-
-    public boolean isBracket() {
-        return getArity() == 1 && getAttribute(Attribute.BRACKET.getKey()) != null;
     }
 
     /**
@@ -104,11 +77,6 @@ public class Production extends ASTNode {
      */
     public boolean isTerminal() {
         return items.size() == 1 && items.get(0) instanceof Terminal;
-    }
-
-    public Sort getBracketSort() {
-        assert isBracket();
-        return getChildSort(0);
     }
 
     public Production(Production node) {
@@ -131,42 +99,36 @@ public class Production extends ASTNode {
         this.ownerModuleName = ownerModule;
     }
 
-    @Deprecated
-    public String getLabel() {
-        return getPrefixLabel();
-    }
-
     /**
      * Gets the KLabel corresponding to this production. A production has a
      * KLabel if and only if the production flattens in KORE to a term which is of sort
      * KItem (ie, is a function or a constructor).
      * @return
      */
-    public String getKLabel() {
+    public String getKLabel(boolean kore) {
         String klabel = getAttribute("klabel");
         if (klabel == null && (isSyntacticSubsort() || containsAttribute("token") || containsAttribute("bracket"))) {
             return null;
         } else if (klabel == null) {
-            if (sort.equals(Sort.KLABEL) && getArity() == 0)
-                return null;
-            else
-                klabel = getPrefixLabel();
+            klabel = getPrefixLabel(kore);
         }
         return klabel.replace(" ", "");
     }
 
-    private String getPrefixLabel() {
+    private String getPrefixLabel(boolean kore) {
         String label = "";
+        List<String> sorts = new ArrayList<>();
         for (ProductionItem pi : items) {
             if (pi instanceof NonTerminal) {
                 label += "_";
+                sorts.add(((NonTerminal) pi).getSort().name());
             } else if (pi instanceof Terminal) {
                 label += ((Terminal) pi).getTerminal();
             } else if (pi instanceof UserList) {
                 label += "_" + ((UserList) pi).separator + "_";
             }
         }
-        return label + "_" + ownerModuleName;
+        return label + "_" + ownerModuleName + (kore ? "_" + sorts.stream().reduce("", (s1, s2) -> s1 + "_" + s2) : "");
     }
 
     public java.util.List<ProductionItem> getItems() {
@@ -221,18 +183,6 @@ public class Production extends ASTNode {
         return null;
     }
 
-    public Sort getChildSort(int idx) {
-        ASTNode node = getChildNode(idx);
-        if (node instanceof UserList) {
-            return ((UserList) node).getSort();
-        } else if (node instanceof Production) {
-            return ((Production) node).getSort();
-        } else if (node instanceof NonTerminal) {
-            return ((NonTerminal) node).getSort();
-        }
-        throw new AssertionError("unreachable");
-    }
-
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -247,10 +197,10 @@ public class Production extends ASTNode {
                 return false;
         } else if (!items.equals(other.items))
             return false;
-        if (getKLabel() == null) {
-            if (other.getKLabel() != null)
+        if (getAttribute("klabel") == null) {
+            if (other.getAttribute("klabel") != null)
                 return false;
-        } else if (!getKLabel().equals(other.getKLabel()))
+        } else if (!getAttribute("klabel").equals(other.getAttribute("klabel")))
             return false;
         if (sort == null) {
             if (other.sort != null)
@@ -271,7 +221,7 @@ public class Production extends ASTNode {
         int result = 1;
         result = prime * result + ((items == null) ? 0 : items.hashCode());
         result = prime * result
-                + ((getKLabel() == null) ? 0 : getKLabel().hashCode());
+                + ((getAttribute("klabel") == null) ? 0 : getAttribute("klabel").hashCode());
         result = prime * result + ((sort == null) ? 0 : sort.hashCode());
         result = prime * result + ((binderMap == null) ? 0 : binderMap.hashCode());
         return result;
@@ -292,22 +242,5 @@ public class Production extends ASTNode {
 
     public void setOwnerModuleName(String ownerModuleName) {
         this.ownerModuleName = ownerModuleName;
-    }
-
-    /**
-     * Gets the KLabel which is declared in the definition by this production.
-     * A production declares a KLabel if it has a corresponding KLabel (ie,
-     * produces a term of sort KItem), or if it is a constant constructor
-     * of sort KLabel.
-     * @return
-     */
-    public String getKLabelOfKItem() {
-        if (sort.equals(Sort.KLABEL) && isConstant()) {
-            return getConstant().getTerminal();
-        }
-        if (getKLabel() == null) {
-            throw KExceptionManager.internalError("Attempted to get null KLabel of production.", this);
-        }
-        return getKLabel();
     }
 }

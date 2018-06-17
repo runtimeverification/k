@@ -12,7 +12,7 @@ import org.pcollections.PStack
 
 import scala.collection.JavaConverters._
 
-object TreeNodesToKORE {
+class TreeNodesToKORE(parseSort: java.util.function.Function[String, Sort]) {
 
   import org.kframework.kore.KORE._
 
@@ -30,9 +30,9 @@ object TreeNodesToKORE {
         case NonTerminal(_, None) => KToken("_", Sorts.KVariable)
         case NonTerminal(_, Some(x)) => map.getOrElse(x, KToken("_", Sorts.KVariable))
       }
-      KApply(p.klabel.get, KList(realItems.asJava), locationToAtt(t.location.get(), t.source.get()))
+      KApply(p.klabel.get, KList(realItems.asJava), locationToAtt(t.location.get(), t.source.get()).add(classOf[Production], realProd))
     } else
-      KApply(p.klabel.get, KList(new util.ArrayList(items).asScala.reverse map apply asJava), locationToAtt(t.location.get(), t.source.get()))
+      KApply(p.klabel.get, KList(new util.ArrayList(items).asScala.reverse map apply asJava), locationToAtt(t.location.get(), t.source.get()).add(classOf[Production], p))
   }
 
   def down(t: K): K = t match {
@@ -69,7 +69,7 @@ object TreeNodesToKORE {
     case t@KApply(KLabel("#KToken"), items) =>
       def removeQuotes(s: String) = s.drop(1).dropRight(1).replace("\\\"", "\"")
 
-      KToken(removeQuotes(items.head.asInstanceOf[KToken].s), Sort(removeQuotes(items.tail.head.asInstanceOf[KToken].s)))
+      KToken(removeQuotes(items.head.asInstanceOf[KToken].s), parseSort(removeQuotes(items.tail.head.asInstanceOf[KToken].s)))
 
     case t@KApply(l, items) =>
       KApply(l, KList((items map down _).asJava), t.att)

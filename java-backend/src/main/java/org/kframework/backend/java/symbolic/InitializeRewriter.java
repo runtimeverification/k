@@ -226,7 +226,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
             return proofResults.stream()
                     .map(ConstrainedTerm::term)
                     .map(t -> (KApply) t)
-                    .reduce(((k1, k2) -> KApply(KLabel(KLabels.ML_AND), k1, k2))).orElse(KApply(KLabel(KLabels.ML_TRUE)));
+                    .reduce(((k1, k2) -> KApply(KLabels.ML_AND, k1, k2))).orElse(KApply(KLabels.ML_TRUE));
         }
 
         @Override
@@ -429,7 +429,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
             global.setDefinition(definition);
 
             JavaConversions.setAsJavaSet(module.attributesFor().keySet()).stream()
-                    .map(l -> KLabelConstant.of(l.name(), definition))
+                    .map(l -> KLabelConstant.of(l, definition))
                     .forEach(definition::addKLabel);
             definition.addKoreRules(module, global);
             cache.put(module, definition);

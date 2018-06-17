@@ -24,7 +24,7 @@ object Unapply {
   }
 
   object Sort {
-    def unapply(sort: Sort) = Some(sort.name)
+    def unapply(sort: Sort) = Some(sort.name, sort.params)
   }
 
   object KApply {

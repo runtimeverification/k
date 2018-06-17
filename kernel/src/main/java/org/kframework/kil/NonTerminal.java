@@ -1,6 +1,8 @@
 // Copyright (c) 2014-2018 K Team. All Rights Reserved.
 package org.kframework.kil;
 
+import org.kframework.kore.Sort;
+
 import scala.Option;
 
 import java.util.Optional;
@@ -35,7 +37,7 @@ public class NonTerminal extends ProductionItem {
     }
 
     public Sort getSort() {
-        return sort.isCellSort() ? Sort.BAG : sort;
+        return sort;
     }
 
     public Sort getRealSort() {
@@ -44,7 +46,7 @@ public class NonTerminal extends ProductionItem {
 
     @Override
     public String toString() {
-        return sort.getName();
+        return sort.toString();
     }
 
     @Override

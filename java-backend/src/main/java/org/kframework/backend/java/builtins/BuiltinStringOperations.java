@@ -173,7 +173,7 @@ public class BuiltinStringOperations {
     }
 
     public static Token string2token(StringToken sort, StringToken value, TermContext context) {
-        return Token.of(Sort.of(sort.stringValue()), value.stringValue());
+        return Token.of(Sort.parse(sort.stringValue()), value.stringValue());
     }
 
     /**

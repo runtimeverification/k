@@ -216,7 +216,7 @@ public abstract class AbstractUnifier implements Unifier {
     }
 
     public static boolean isKSeq(Term term) {
-        return term instanceof KItem && ((KItem) term).kLabel().toString().equals(KLabels.KSEQ);
+        return term instanceof KItem && KLabels.KSEQ.equals(((KItem) term).kLabel());
     }
 
     public static boolean isKSeqVar(Term term) {

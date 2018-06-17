@@ -99,6 +99,18 @@ public class BuiltinIntOperations {
         return IntToken.of(term.bigIntegerValue().abs());
     }
 
+    public static IntToken log2(IntToken term, TermContext context) {
+        BigInteger val = term.bigIntegerValue();
+        if (val.compareTo(BigInteger.ZERO) <= 0)
+            return null;
+        int log2 = 0;
+        while (val.compareTo(BigInteger.ONE) > 0) {
+            val = val.shiftRight(1);
+            log2++;
+        }
+        return IntToken.of(log2);
+    }
+
     public static BoolToken eq(IntToken term1, IntToken term2, TermContext context) {
         return BoolToken.of(term1.bigIntegerValue().compareTo(term2.bigIntegerValue()) == 0);
     }

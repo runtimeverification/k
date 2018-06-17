@@ -27,12 +27,8 @@ import org.kframework.backend.java.kil.SortSignature;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.builtin.Sorts;
-import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
-import org.kframework.kil.NonTerminal;
-import org.kframework.kil.Production;
-import org.kframework.kil.UserList;
-import org.kframework.kore.convertors.KILtoKORE;
+import org.kframework.kore.KORE;
 import org.kframework.krun.KRunOptions;
 
 import java.math.BigInteger;
@@ -49,16 +45,16 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
             Sort.BOOL,
             Sort.INT,
             Sort.BIT_VECTOR,
-            Sort.of(Sorts.Float().name()),
-            Sort.of(Sorts.String().name()),
-            Sort.of("IntSet"),
-            Sort.of("MIntSet"),
-            Sort.of("FloatSet"),
-            Sort.of("StringSet"),
-            Sort.of("IntSeq"),
-            Sort.of("MIntSeq"),
-            Sort.of("FloatSeq"),
-            Sort.of("StringSeq"));
+            Sort.of(Sorts.Float()),
+            Sort.of(Sorts.String()),
+            Sort.of(KORE.Sort("IntSet")),
+            Sort.of(KORE.Sort("MIntSet")),
+            Sort.of(KORE.Sort("FloatSet")),
+            Sort.of(KORE.Sort("StringSet")),
+            Sort.of(KORE.Sort("IntSeq")),
+            Sort.of(KORE.Sort("MIntSeq")),
+            Sort.of(KORE.Sort("FloatSeq")),
+            Sort.of(KORE.Sort("StringSeq")));
     public static final ImmutableSet<String> SMTLIB_BUILTIN_FUNCTIONS = ImmutableSet.of(
             "forall",
             "exists",
@@ -82,6 +78,7 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
             "<",
             ">=",
             ">",
+            "^",
             /* extra int theory */
             "int_max",
             "int_min",
@@ -269,7 +266,7 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
         StringBuilder sb = new StringBuilder();
 
         for (Sort sort : Sets.difference(sorts, SMTLIB_BUILTIN_SORTS)) {
-            if (sort.name().equals("Map") && krunOptions.experimental.smt.mapAsIntArray) {
+            if (sort.equals(Sort.MAP) && krunOptions.experimental.smt.mapAsIntArray) {
                 sb.append("(define-sort Map () (Array Int Int))");
             } else {
                 sb.append("(declare-sort ");
@@ -360,22 +357,6 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
         return getParametricSortName(variable.att(), variable.sort());
     }
 
-    private String getSortName(ASTNode node) {
-        Sort s;
-        if (node instanceof NonTerminal) {
-            s = Sort.of(((NonTerminal) node).getSort());
-        } else if (node instanceof UserList) {
-            s = Sort.of(((UserList) node).getSort());
-        } else if (node instanceof Production) {
-            s = Sort.of(((Production) node).getSort());
-        } else {
-            assert false : "getSortName should be called with a sorted node";
-            return null;
-        }
-
-        return getParametricSortName(KILtoKORE.convertAttributes(node), s);
-    }
-
     private String getParametricSortName(Att att, Sort s) {
         s = renameSort(s);
         if (s == Sort.BIT_VECTOR) {
@@ -391,8 +372,8 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
     private Sort renameSort(Sort sort) {
         sort = definition.smtSortFlattening().getOrDefault(sort, sort);
         if (sort == Sort.LIST) {
-            return Sort.of("IntSeq");
-        } else if (sort == Sort.of(Sorts.Id().name())) {
+            return Sort.of(KORE.Sort("IntSeq"));
+        } else if (sort == Sort.of(Sorts.Id())) {
             return Sort.INT;
         } else {
             return sort;

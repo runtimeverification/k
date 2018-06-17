@@ -270,10 +270,10 @@ module BOOL
   imports BOOL-SYNTAX
   syntax Bool ::= "notBool" Bool          [function, klabel(notBool_), smtlib(not), boolOperation, latex(\neg_{\scriptstyle\it Bool}{#1}), hook(BOOL.not)]
                 > Bool "andBool" Bool     [function, klabel(_andBool_), left, smtlib(and), boolOperation, latex({#1}\wedge_{\scriptstyle\it Bool}{#2}), hook(BOOL.and)]
-                | K "andThenBool" K       [function, left, smtlib(and), boolOperation, hook(BOOL.andThen)]
+                | Bool "andThenBool" Bool [function, left, smtlib(and), boolOperation, hook(BOOL.andThen)]
                 | Bool "xorBool" Bool     [function, left, smtlib(xor), boolOperation, hook(BOOL.xor)]
                 | Bool "orBool" Bool      [function, left, smtlib(or), boolOperation, latex({#1}\vee_{\scriptstyle\it Bool}{#2}), hook(BOOL.or)]
-                | K "orElseBool" K        [function, left, smtlib(or), boolOperation, hook(BOOL.orElse)]
+                | Bool "orElseBool" Bool  [function, left, smtlib(or), boolOperation, hook(BOOL.orElse)]
                 | Bool "impliesBool" Bool [function, left, smtlib(=>), boolOperation, hook(BOOL.implies)]
                 > left:
                   Bool "==Bool" Bool      [function, left, smtlib(=), hook(BOOL.eq)]
@@ -287,8 +287,8 @@ module BOOL
   rule false andBool _:Bool => false
   rule _:Bool andBool false => false
 
-  rule true andThenBool K:K => K
-  rule K:K andThenBool true => K
+  rule true andThenBool K::Bool => K
+  rule K::Bool andThenBool true => K
   rule false andThenBool _ => false
   rule _ andThenBool false => false
 
@@ -304,8 +304,8 @@ module BOOL
 
   rule true orElseBool _ => true
   rule _ orElseBool true => true
-  rule false orElseBool K:K => K
-  rule K:K orElseBool false => K
+  rule false orElseBool K::Bool => K
+  rule K::Bool orElseBool false => K
 
   rule true impliesBool B:Bool => B
   rule false impliesBool _:Bool => true
@@ -333,8 +333,8 @@ module INT
 
   syntax Int ::= "~Int" Int                     [function, latex(\mathop{\sim_{\scriptstyle\it Int}}{#1}), hook(INT.not)]
                > left:
-                 Int "^Int" Int                 [function, left, latex({#1}\mathrel{{\char`\^}_{\!\scriptstyle\it Int}}{#2}), hook(INT.pow)]
-               | Int "^%Int" Int Int            [function, left, hook(INT.powmod)]
+                 Int "^Int" Int                 [function, left, smtlib(^), latex({#1}\mathrel{{\char`\^}_{\!\scriptstyle\it Int}}{#2}), hook(INT.pow)]
+               | Int "^%Int" Int Int            [function, left, smtlib((mod (^ #1 #2) #3)), hook(INT.powmod)]
                > left:
                  Int "*Int" Int                 [function, left, smtlib(*), latex({#1}\mathrel{\ast_{\scriptstyle\it Int}}{#2}), hook(INT.mul)]
                /* FIXME: translate /Int and %Int into smtlib */
@@ -359,6 +359,7 @@ module INT
   syntax Int ::= "minInt" "(" Int "," Int ")"   [function, smtlib(int_min), hook(INT.min)]
                | "maxInt" "(" Int "," Int ")"   [function, smtlib(int_max), hook(INT.max)]
                | absInt ( Int )                 [function, smtlib(int_abs), hook(INT.abs)]
+               | log2Int ( Int )                [function, hook(INT.log2)]
 
   rule I1:Int divInt I2:Int => (I1 -Int (I1 modInt I2)) /Int I2
   requires I2 =/=Int 0
@@ -504,7 +505,6 @@ module STRING
   syntax String ::= Int2String   ( Int )                [function, hook(STRING.int2string)]
   syntax String ::= Base2String  ( Int , Int )          [function, hook(STRING.base2string)]
   syntax Int    ::= String2Base  ( String , Int )       [function, hook(STRING.string2base)]
-  syntax KItem  ::= "#parseToken"  "(" String "," String ")"  [function, hook(STRING.string2token)]
 
 
   syntax String ::= "replaceAll" "(" String "," String "," String ")"      [function, hook(STRING.replaceAll)]
@@ -590,17 +590,29 @@ module ID-PROGRAM-PARSING
               | #UpperId                                             [notInRules, token, autoReject]
 endmodule
 
-module ID
-  imports STRING
+module ID-SYNTAX
+  imports INT-SYNTAX
+  imports STRING-SYNTAX
 
-  syntax Id
+  syntax Id [token]
 
   syntax String ::= Id2String ( Id )    [function, hook(STRING.token2string)]
-  syntax Id ::= String2Id ( String )    [function]
-  rule String2Id(S:String) => #parseToken("Id", S)
-
+  syntax Id ::= String2Id (String) [function, hook(STRING.string2token)]
   syntax Id ::= freshId(Int)    [freshGenerator, function]
+endmodule
+
+module ID
+  imports ID-SYNTAX
+  imports ID-SYMBOLIC
+  imports STRING
+
   rule freshId(I:Int) => String2Id("_" +String Int2String(I))
+endmodule
+
+module ID-SYMBOLIC [symbolic]
+  imports ID-SYNTAX
+  syntax KItem  ::= "#parseToken"  "(" String "," String ")"  [function, hook(STRING.parseToken)]
+  rule String2Id(S:String) => #parseToken("Id", S)
 endmodule
 
 module K-EQUAL

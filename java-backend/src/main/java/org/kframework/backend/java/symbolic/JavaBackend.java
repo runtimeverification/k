@@ -7,6 +7,7 @@ import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.backend.Backends;
 import org.kframework.builtin.KLabels;
+import org.kframework.builtin.Sorts;
 import org.kframework.compile.*;
 import org.kframework.definition.*;
 import org.kframework.definition.Module;
@@ -59,7 +60,7 @@ public class JavaBackend implements Backend {
             return sentence;
         }
         Production prod = (Production)sentence;
-        if (prod.klabel().isDefined() && prod.klabel().get().name().equals(KLabels.ListItem)) {
+        if (prod.klabel().isDefined() && KLabels.ListItem.equals(prod.klabel().get())) {
             return Production(prod.sort(), prod.items(), prod.att().remove("function"));
         }
         return prod;
@@ -181,7 +182,7 @@ public class JavaBackend implements Backend {
 
             TransformK markerAdder = new TransformK() {
                 public K apply(KVariable kvar) {
-                    if (kvar instanceof SortedADT.SortedKVariable && ((SortedADT.SortedKVariable) kvar).sort().equals(KORE.Sort("K")) && varCount.get(kvar) == 1
+                    if (kvar instanceof SortedADT.SortedKVariable && ((SortedADT.SortedKVariable) kvar).sort().equals(Sorts.K()) && varCount.get(kvar) == 1
                             && !kvar.name().equals(KLabels.THIS_CONFIGURATION)) {
                         return new SortedADT.SortedKVariable("THE_VARIABLE", Att.empty());
                     } else {

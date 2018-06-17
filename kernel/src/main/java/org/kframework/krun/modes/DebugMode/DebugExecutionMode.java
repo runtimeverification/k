@@ -120,7 +120,7 @@ public class DebugExecutionMode implements ExecutionMode {
             } catch (FileNotFoundException fileNotFound) {
                 System.out.println(fileNotFound.getMessage());
             } catch (IOException inputException) {
-                KEMException.criticalError("Failed to read input from console");
+                throw KEMException.criticalError("Failed to read input from console");
             } catch (UserInterruptException interrupt) {
                 return null;
             }

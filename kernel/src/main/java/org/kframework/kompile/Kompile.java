@@ -86,7 +86,7 @@ public class Kompile {
         kompileOptions.outerParsing.includes = lookupDirectories.stream().map(File::getAbsolutePath).collect(Collectors.toList());
         this.definitionParsing = new DefinitionParsing(
                 lookupDirectories, kompileOptions.strict(), kem,
-                parser, cacheParses, files.resolveKompiled("cache.bin"), !kompileOptions.outerParsing.noPrelude);
+                parser, cacheParses, files.resolveKompiled("cache.bin"), !kompileOptions.outerParsing.noPrelude, kompileOptions.isKore());
         this.sw = sw;
     }
 
@@ -130,7 +130,7 @@ public class Kompile {
         return input;
     }
 
-    private static Definition resolveIOStreams(KExceptionManager kem,Definition d) {
+    public static Definition resolveIOStreams(KExceptionManager kem,Definition d) {
         return DefinitionTransformer.from(new ResolveIOStreams(d, kem)::resolve, "resolving io streams")
                 .andThen(DefinitionTransformer.from(Kompile::filterStreamModules, "resolving io streams"))
                 .apply(d);
@@ -141,7 +141,7 @@ public class Kompile {
         return Module(mod.name(), immutable(newImports), mod.localSentences(), mod.att());
     }
 
-    private static DefinitionTransformer excludeModulesByTag(Set<String> excludedModuleTags, Definition d) {
+    public static DefinitionTransformer excludeModulesByTag(Set<String> excludedModuleTags, Definition d) {
         return DefinitionTransformer.from(mod -> excludeModulesByTag(excludedModuleTags, mod), "remove modules based on attributes");
     }
 
@@ -179,7 +179,7 @@ public class Kompile {
                 .apply(def);
     }
 
-    private static Module subsortKItem(Module module) {
+    public static Module subsortKItem(Module module) {
         java.util.Set<Sentence> prods = new HashSet<>();
         for (Sort srt : iterable(module.definedSorts())) {
             if (!RuleGrammarGenerator.isParserSort(srt)) {
@@ -241,7 +241,7 @@ public class Kompile {
         }
     }
 
-    private static Definition addSemanticsModule(Definition d) {
+    public static Definition addSemanticsModule(Definition d) {
         java.util.Set<Module> allModules = mutable(d.modules());
 
         Module languageParsingModule = Constructors.Module("LANGUAGE-PARSING",
@@ -252,7 +252,7 @@ public class Kompile {
         return Constructors.Definition(d.mainModule(), immutable(allModules), d.att());
     }
 
-    private static Definition resolveFreshConstants(Definition input) {
+    public static Definition resolveFreshConstants(Definition input) {
         return DefinitionTransformer.from(new ResolveFreshConstants(input)::resolve, "resolving !Var variables")
                 .apply(input);
     }

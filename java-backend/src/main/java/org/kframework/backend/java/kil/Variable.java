@@ -8,11 +8,16 @@ import org.kframework.attributes.Att;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Constants;
+import org.kframework.kore.ADT;
+import org.kframework.kore.K;
+import scala.collection.Seq;
 
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.kframework.Collections.Seq;
 
 
 /**
@@ -119,6 +124,11 @@ public class Variable extends Term implements org.kframework.kore.KVariable {
      */
     public String name() {
         return name;
+    }
+
+    @Override
+    public Seq<org.kframework.kore.Sort> params() {
+        return Seq();
     }
 
     public boolean isAnonymous() {

@@ -70,4 +70,7 @@ public abstract class KLabel extends Term {
         return transformer.transform(this);
     }
 
+    public static org.kframework.kore.KLabel parse(String s) {
+        return org.kframework.kore.KORE.KLabel(s);
+    }
 }
