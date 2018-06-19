@@ -296,6 +296,10 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
         return truthValue == TruthValue.TRUE;
     }
 
+    public boolean isFalseExtended() {
+        return isFalse() || isFalseFromContradictions();
+    }
+
     public boolean isFalse() {
         return truthValue == TruthValue.FALSE;
     }
@@ -674,7 +678,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
 
     public boolean implies(ConjunctiveFormula constraint, Set<Variable> rightOnlyVariables) {
         // TODO(AndreiS): this can prove "stuff -> false", it needs fixing
-        assert !constraint.isFalse();
+        assert !constraint.isFalseExtended();
 
         LinkedList<Pair<ConjunctiveFormula, ConjunctiveFormula>> implications = new LinkedList<>();
         implications.add(Pair.of(this, constraint));
@@ -682,7 +686,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
             Pair<ConjunctiveFormula, ConjunctiveFormula> implication = implications.remove();
             ConjunctiveFormula left = implication.getLeft();
             ConjunctiveFormula right = implication.getRight();
-            if (left.isFalse()) {
+            if (left.isFalseExtended()) {
                 continue;
             }
 
