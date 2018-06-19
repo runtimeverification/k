@@ -634,6 +634,9 @@ public class SymbolicRewriter {
 
                 //stopping at halt
                 if (isHalt) {
+                    if (!KProve.options.global.log) {
+                        logStep(step, targetCallDataStr, term, true);
+                    }
                     System.out.println("Halt! Terminating branch.");
                     proofResults.add(term);
                     continue;
@@ -681,6 +684,9 @@ public class SymbolicRewriter {
                 try {
                     results = fastComputeRewriteStep(term, false, true, true, step);
                 } catch (Throwable e) {
+                    if (!KProve.options.global.log) {
+                        logStep(step, targetCallDataStr, term, true);
+                    }
                     System.out.println("\n\nTerm throwing exception\n============================\n\n");
                     KProve.prettyPrint(term.term());
                     System.out.println("/\\");
