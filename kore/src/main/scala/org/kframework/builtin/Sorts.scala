@@ -17,6 +17,7 @@ object Sorts {
   val String = Sort("String")
   val Float = Sort("Float")
   val StringBuffer = Sort("StringBuffer")
+  val Bytes = Sort("Bytes")
 
   val List = Sort("List")
   val Set = Sort("Set")

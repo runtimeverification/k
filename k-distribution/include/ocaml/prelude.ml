@@ -127,6 +127,7 @@ let print_k_binary (c: k) : string =  let buf = Buffer.create 16 in
   | KItem (InjectedKLabel(klabel)) -> Buffer.add_string buf injectedklabel_code; add_intern as_k; print_string (print_klabel_string klabel); Buffer.add_char buf '\x00'
   | KItem (Bool(b)) -> print_kitem(KItem (KToken(SortBool, string_of_bool(b))), [Bool b])
   | KItem (String(s)) -> print_kitem(KItem (KToken(SortString, "\"" ^ (k_string_escape s) ^ "\"")), [String s])
+  | KItem (Bytes(b)) -> print_kitem(KItem (KToken(SortBytes, "b\"" ^ (k_string_escape (Bytes.to_string b)) ^ "\"")), [Bytes b])
   | KItem (StringBuffer(s)) -> print_kitem(KItem (KToken(SortStringBuffer, "\"" ^ (k_string_escape (Buffer.contents s)) ^ "\"")), [StringBuffer s])
   | KItem (Int(i)) -> print_kitem(KItem (KToken(SortInt, Z.to_string(i))), [Int i])
   | KItem (Float(f,e,p)) -> print_kitem(KItem (KToken(SortFloat, precise_float_to_string(f,p,e))), [Float(f,e,p)])
@@ -137,7 +138,7 @@ let print_k_binary (c: k) : string =  let buf = Buffer.create 16 in
   | KItem (Array(sort,d,a)) -> print_kitem(normalize (k_of_array sort a), [Array(sort,d,a)])
   | KItem (ThreadLocal) -> print_kitem(KApply(Lbl'Hash'ThreadLocal, []), [ThreadLocal])
   | KItem (Thread(k1,k2,k3,k4)) -> print_kitem(KApply(Lbl'Hash'Thread, [k1; k2; k3; k4]), [Thread(k1,k2,k3,k4)])
-  | KItem _ -> invalid_arg "priot_kitem"
+  | KItem _ -> invalid_arg "print_kitem"
   in Buffer.add_string buf "\x7fKAST\x04\x00\x01"; print_k c 0; Buffer.add_string buf end_code;
   Buffer.contents buf
 
@@ -157,6 +158,7 @@ let print_k (c: k) : string = let buf = Buffer.create 16 in
   | KItem (InjectedKLabel(klabel)) -> Buffer.add_string buf "#klabel("; Buffer.add_string buf (print_klabel klabel); Buffer.add_char buf ')'
   | KItem (Bool(b)) -> print_kitem(KItem (KToken(SortBool, string_of_bool(b))))
   | KItem (String(s)) -> print_kitem(KItem (KToken(SortString, "\"" ^ (k_string_escape s) ^ "\"")))
+  | KItem (Bytes(b)) -> print_kitem(KItem (KToken(SortBytes, "b\"" ^ (k_string_escape (Bytes.to_string b)) ^ "\"")))
   | KItem (StringBuffer(s)) -> print_kitem(KItem (KToken(SortStringBuffer, "\"" ^ (k_string_escape (Buffer.contents s)) ^ "\"")))
   | KItem (Int(i)) -> print_kitem(KItem (KToken(SortInt, Z.to_string(i))))
   | KItem (Float(f,e,p)) -> print_kitem(KItem (KToken(SortFloat, precise_float_to_string(f,p,e))))
@@ -314,10 +316,19 @@ let unescape_k_string (str: string) =
   else (cMAX_FLOAT_PREC, cMAX_FLOAT_EXP, str)
 
 let signed_extract i idx len =
+  if len = 0 then Z.zero else
   if Z.testbit i (idx + len - 1)
   then let max = Z.shift_left Z.one (len-1) in
     Z.sub (Z.extract (Z.add (Z.extract i idx len) max) 0 len) max
   else Z.extract i idx len
+
+let reverse b =
+  let len = Bytes.length b in
+  let res = Bytes.create len in
+  for i = 0 to len - 1 do
+    Bytes.set res (len - i - 1) (Bytes.get b i)
+  done;
+  res
 
 let ktoken (s: sort) (str: string) : kitem = match s with
 | SortInt -> Int (Z.of_string str)
@@ -534,6 +545,7 @@ struct
       [KToken (sort, _)] -> [String (print_sort(sort))]
     | [Int _] -> [String "Int"]
     | [String _] -> [String "String"]
+    | [Bytes _] -> [String "Bytes"]
     | [Bool _] -> [String "Bool"]
     | [Map (s,_,_)] -> [String (print_sort s)]
     | [List (s,_,_)] -> [String (print_sort s)]
@@ -679,6 +691,70 @@ struct
     | _ -> raise Not_implemented
   let hook_toString c _ _ _ _ = match c with
       [StringBuffer buf] -> [String (Buffer.contents buf)]
+    | _ -> raise Not_implemented
+end
+
+module BYTES =
+struct
+  let hook_empty c _ _ _ _ = match c with
+      () -> [Bytes (Bytes.empty)]
+  let hook_bytes2int c _ _ _ _ = match c with
+      [Bytes b], [KApply0(LbllittleEndianBytes)], [KApply0(LblunsignedBytes)] ->
+      [Int (Z.of_bits (Bytes.to_string b))]
+    | [Bytes b], [KApply0(LblbigEndianBytes)], [KApply0(LblunsignedBytes)] ->
+      [Int (Z.of_bits (Bytes.to_string (reverse b)))]
+    | [Bytes b], [KApply0(LbllittleEndianBytes)], [KApply0(LblsignedBytes)] ->
+      [Int (signed_extract (Z.of_bits (Bytes.to_string b)) 0 ((Bytes.length b) * 8))]
+    | [Bytes b], [KApply0(LblbigEndianBytes)], [KApply0(LblsignedBytes)] ->
+      [Int (signed_extract (Z.of_bits (Bytes.to_string (reverse b))) 0 ((Bytes.length b) * 8))]
+    | _ -> raise Not_implemented
+  let hook_int2bytes c _ _ _ _ = match c with
+      [Int len], [Int i], [KApply0(endian)] ->
+      let len = Z.to_int len in
+      if len = 0 then [Bytes Bytes.empty] else
+      let compl = Z.lt i Z.zero in
+      let b = Bytes.make len (if compl then '\255' else '\000') in
+      let twos = Z.extract i 0 (len * 8) in
+      let s = Z.to_bits twos in
+      Bytes.blit_string s 0 b 0 (min len (String.length s));
+      [Bytes (if endian = LbllittleEndianBytes then b else reverse b)]
+    | _ -> raise Not_implemented
+  let hook_bytes2string c _ _ _ _ = match c with
+      [Bytes b] -> [String (Bytes.to_string b)]
+    | _ -> raise Not_implemented
+  let hook_string2bytes c _ _ _ _ = match c with
+      [String s] -> [Bytes (Bytes.of_string s)]
+    | _ -> raise Not_implemented
+  let hook_substr c _ _ _ _ = match c with
+      [Bytes b], [Int off1], [Int off2] ->
+      [Bytes (Bytes.sub b (Z.to_int off1) (Z.to_int (Z.sub off2 off1)))]
+    | _ -> raise Not_implemented
+  let hook_replaceAt c _ _ _ _ = match c with
+      [Bytes b], [Int off], [Bytes b2] ->
+      Bytes.blit b2 0 b (Z.to_int off) (Bytes.length b2);
+      [Bytes b]
+    | _ -> raise Not_implemented
+  let hook_length c _ _ _ _ = match c with
+      [Bytes b] -> [Int (Z.of_int (Bytes.length b))]
+    | _ -> raise Not_implemented
+  let hook_padRight c _ _ _ _ = match c with
+      [Bytes b], [Int len], [Int v] ->
+      let len = Z.to_int len in
+      if len <= Bytes.length b then [Bytes b] else
+      let res = Bytes.make (max (Bytes.length b) len) (Char.chr (Z.to_int v)) in
+      Bytes.blit b 0 res 0 (Bytes.length b);
+      [Bytes res]
+    | _ -> raise Not_implemented
+  let hook_padLeft c _ _ _ _ = match c with
+      [Bytes b], [Int len], [Int v] ->
+      let len = Z.to_int len in
+      if len <= Bytes.length b then [Bytes b] else
+      let res = Bytes.make (max (Bytes.length b) len) (Char.chr (Z.to_int v)) in
+      Bytes.blit b 0 res (len - Bytes.length b) (Bytes.length b);
+      [Bytes res]
+    | _ -> raise Not_implemented
+  let hook_reverse c _ _ _ _ = match c with
+      [Bytes b] -> [Bytes (reverse b)]
     | _ -> raise Not_implemented
 end
 
@@ -845,7 +921,7 @@ struct
       [Int a] -> [Int (Z.of_int (Z.log2 a))]
     | _ -> raise Not_implemented
   let hook_bitRange c _ _ _ _ = match c with
-      [Int i], [Int off], [Int len] -> [Int (try (Z.extract i (Z.to_int off) (Z.to_int len)) with Z.Overflow -> if not (Z.fits_int off) then if Z.geq i Z.zero then Z.zero else Z.of_int (-1) else raise Not_implemented)]
+      [Int i], [Int off], [Int len] -> if Z.equal len Z.zero then [Int Z.zero] else [Int (try (Z.extract i (Z.to_int off) (Z.to_int len)) with Z.Overflow -> if not (Z.fits_int off) then if Z.geq i Z.zero then Z.zero else Z.of_int (-1) else raise Not_implemented)]
     | _ -> raise Not_implemented
   let hook_signExtendBitRange c _ _ _ _ = match c with
       [Int i], [Int off], [Int len] -> [Int (try (signed_extract i (Z.to_int off) (Z.to_int len)) with Z.Overflow -> if not (Z.fits_int off) then if Z.geq i Z.zero then Z.zero else Z.of_int (-1) else raise Not_implemented)]
