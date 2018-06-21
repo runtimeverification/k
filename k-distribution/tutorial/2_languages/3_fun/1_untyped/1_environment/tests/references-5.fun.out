@@ -1,11 +1,11 @@
-  V ==K [ 7 , 8 , 9 , .Types ]
+  V ==K [ 7 , 8 , 9 , .Vals ]
 #Or
-  V ==K [ 7 , 9 , 8 , .Types ]
+  V ==K [ 7 , 9 , 8 , .Vals ]
 #Or
-  V ==K [ 8 , 8 , 9 , .Types ]
+  V ==K [ 8 , 8 , 9 , .Vals ]
 #Or
-  V ==K [ 8 , 9 , 8 , .Types ]
+  V ==K [ 8 , 9 , 8 , .Vals ]
 #Or
-  V ==K [ 9 , 8 , 9 , .Types ]
+  V ==K [ 9 , 8 , 9 , .Vals ]
 #Or
-  V ==K [ 9 , 9 , 8 , .Types ]
+  V ==K [ 9 , 9 , 8 , .Vals ]

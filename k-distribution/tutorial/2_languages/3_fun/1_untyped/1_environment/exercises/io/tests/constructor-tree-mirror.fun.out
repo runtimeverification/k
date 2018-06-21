@@ -1,1 +1,1 @@
-V ==K Tree ( Tree ( Tree ( Leaf ( 5 , .Types ) , Leaf ( 4 , .Types ) , .Types ) , Leaf ( 3 , .Types ) , .Types ) , Tree ( Leaf ( 2 , .Types ) , Leaf ( 1 , .Types ) , .Types ) , .Types )
+V ==K Tree ( Tree ( Tree ( Leaf ( 5 , .Vals ) , Leaf ( 4 , .Vals ) , .Vals ) , Leaf ( 3 , .Vals ) , .Vals ) , Tree ( Leaf ( 2 , .Vals ) , Leaf ( 1 , .Vals ) , .Vals ) , .Vals )
