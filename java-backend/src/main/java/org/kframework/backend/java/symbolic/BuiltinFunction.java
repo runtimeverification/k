@@ -9,6 +9,7 @@ import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.util.ImpureFunctionException;
 import org.kframework.kil.Attribute;
 import org.kframework.kore.KLabel;
+import org.kframework.kore.KORE;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
@@ -53,7 +54,7 @@ public class BuiltinFunction {
         } catch (NoSuchMethodException | IllegalAccessException e) {
             throw KEMException.internalError("Failed to load partial evaluation hook implementation", e);
         }
-        for (Map.Entry<KLabel, Att> entry : definition.kLabelAttributes().entrySet()) {
+        for (Map.Entry<String, Att> entry : definition.kLabelAttributes().entrySet()) {
             String hookAttribute = entry.getValue().getOptional(Attribute.HOOK_KEY).orElse(null);
             if (hookAttribute != null) {
                 /*
@@ -72,7 +73,7 @@ public class BuiltinFunction {
                     continue;
                 }
 
-                table.put(KLabelConstant.of(entry.getKey(), definition), hookProvider.get(hookAttribute));
+                table.put(KLabelConstant.of(KORE.KLabel(entry.getKey()), definition), hookProvider.get(hookAttribute));
             }
         }
     }
