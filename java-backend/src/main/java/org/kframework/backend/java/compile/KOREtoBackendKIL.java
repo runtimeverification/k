@@ -152,7 +152,7 @@ public class KOREtoBackendKIL {
     private Optional<KLabel> getAssocKLabelForUnit(KLabel klabel) {
         return definition.kLabelAttributes().entrySet().stream()
                 .filter(e -> effectivelyAssocAttributes(e.getValue()) && e.getValue().get(Att.unit()).equals(klabel.name()))
-                .map(e -> e.getKey())
+                .map(e -> KORE.KLabel(e.getKey()))
                 .findAny();
     }
 
