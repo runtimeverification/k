@@ -179,6 +179,11 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
                 + "(assert " + expression + ")";
     }
 
+    /**
+     * Generates the z3 query for "left /\ !right".
+     * left -> right <==> !(left /\ !right)
+     * => this query should be unsat for implication to be proven.
+     */
     public static String translateImplication(
             ConjunctiveFormula leftHandSide,
             ConjunctiveFormula rightHandSide,
