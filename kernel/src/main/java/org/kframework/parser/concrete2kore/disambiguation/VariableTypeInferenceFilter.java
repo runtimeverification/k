@@ -31,16 +31,7 @@ import scala.util.Either;
 import scala.util.Left;
 import scala.util.Right;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -336,32 +327,25 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
         public VarInfo(Constant varOcc, Sort sort, VarType varType) {
             this.varKey = getVarKey(varOcc);
             this.sort = sort;
-            this.loc = varOcc.location().get();
+            this.loc = varOcc.location().orElse(null);
             this.varType = varType;
         }
 
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
-            if (!(o instanceof VarInfo)) return false;
-
+            if (o == null || getClass() != o.getClass()) return false;
             VarInfo varInfo = (VarInfo) o;
-
-            if (!loc.equals(varInfo.loc)) return false;
-            if (!sort.equals(varInfo.sort)) return false;
-            if (!varKey.equals(varInfo.varKey)) return false;
-            if (varType != varInfo.varType) return false;
-
-            return true;
+            return Objects.equals(varKey, varInfo.varKey) &&
+                    Objects.equals(sort, varInfo.sort) &&
+                    Objects.equals(loc, varInfo.loc) &&
+                    varType == varInfo.varType;
         }
 
         @Override
         public int hashCode() {
-            int result = varKey.hashCode();
-            result = 31 * result + sort.hashCode();
-            result = 31 * result + loc.hashCode();
-            result = 31 * result + varType.hashCode();
-            return result;
+
+            return Objects.hash(varKey, sort, loc, varType);
         }
 
         @Override
