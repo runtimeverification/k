@@ -48,13 +48,15 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
     private final scala.collection.Set<Sort> sortSet;
     private final scala.collection.Map<KLabel, scala.collection.Set<Production>> productions;
     private final boolean inferSortChecks;
+    private final boolean inferCasts;
     private Set<ParseFailedException> warnings = Sets.newHashSet();
     public VariableTypeInferenceFilter(POSet<Sort> subsorts, scala.collection.Set<Sort> sortSet, scala.collection.Map<
-            KLabel, scala.collection.Set<Production>> productions, boolean inferSortChecks) {
+            KLabel, scala.collection.Set<Production>> productions, boolean inferSortChecks, boolean inferCasts) {
         this.subsorts = subsorts;
         this.sortSet = sortSet;
         this.productions = productions;
         this.inferSortChecks = inferSortChecks;
+        this.inferCasts = inferCasts;
     }
 
     /** Return the set of all known sorts which are a lower bound on
@@ -497,7 +499,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                 Production cast;
                 if (addCast) {
                     cast = productions.apply(KLabel("#SemanticCastTo" + declared.toString())).head();
-                } else if (!hasCastAlready && productions.contains(KLabel("#SyntacticCast"))) {
+                } else if (inferCasts && !hasCastAlready && productions.contains(KLabel("#SyntacticCast"))) {
                     cast = stream(productions.apply(KLabel("#SyntacticCast"))).filter(p -> p.sort().equals(declared)).findAny().get();
                 } else {
                     cast = null;

@@ -22,7 +22,9 @@ import org.kframework.kore.TransformK;
 import org.kframework.kore.VisitK;
 import org.kframework.krun.modes.ExecutionMode;
 import org.kframework.main.Main;
+import org.kframework.parser.ProductionReference;
 import org.kframework.parser.binary.BinaryParser;
+import org.kframework.parser.concrete2kore.ParseInModule;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.parser.kore.KoreParser;
 import org.kframework.rewriter.Rewriter;
@@ -271,7 +273,7 @@ public class KRun {
         return KApply(compiledDef.topCellInitializer, output.entrySet().stream().map(e -> KApply(KLabel("_|->_"), e.getKey(), e.getValue())).reduce(KApply(KLabel(".Map")), (a, b) -> KApply(KLabel("_Map_"), a, b)));
     }
 
-    private static String unparseTerm(K input, Module test, ColorSetting colorize) {
+    public static String unparseTerm(K input, Module test, ColorSetting colorize) {
         K sortedComm = new TransformK() {
             @Override
             public K apply(KApply k) {
@@ -283,7 +285,7 @@ public class KRun {
                     List<K> items = new ArrayList<>(Assoc.flatten(k.klabel(), k.klist().items(), KLabel(att.get("unit"))));
                     List<Tuple2<String, K>> printed = new ArrayList<>();
                     for (K item : items) {
-                        String s = Formatter.format(new AddBrackets(test).addBrackets(KOREToTreeNodes.apply(KOREToTreeNodes.up(test, apply(item)), test)), ColorSetting.OFF);
+                        String s = unparseInternal(test, ColorSetting.OFF, apply(item));
                         printed.add(Tuple2.apply(s, item));
                     }
                     printed.sort(Comparator.comparing(Tuple2::_1, new AlphanumComparator()));
@@ -305,8 +307,12 @@ public class KRun {
                 return k;
             }
         }.apply(sortedComm);
+        return unparseInternal(test, colorize, alphaRenamed);
+    }
+
+    private static String unparseInternal(Module mod, ColorSetting colorize, K input) {
         return Formatter.format(
-                new AddBrackets(test).addBrackets(KOREToTreeNodes.apply(KOREToTreeNodes.up(test, alphaRenamed), test)), colorize);
+                new AddBrackets(mod).addBrackets((ProductionReference) ParseInModule.disambiguateForUnparse(mod, KOREToTreeNodes.apply(KOREToTreeNodes.up(mod, input), mod))), colorize);
     }
 
     public K externalParse(String parser, String value, Sort startSymbol, Source source, CompiledDefinition compiledDef) {

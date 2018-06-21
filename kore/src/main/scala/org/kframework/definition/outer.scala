@@ -155,6 +155,14 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
       .groupBy(_.sort)
       .map { case (s, ps) => (s, ps) }
 
+  def tokenProductionFor(s: Sort): Production = {
+    if (tokenProductionsFor.contains(s))
+      tokenProductionsFor.apply(s).head
+    else
+      Production(None, s, Seq(), Att.empty.add("token"))
+  }
+
+
   lazy val bracketProductionsFor: Map[Sort, List[Production]] =
     productions
       .collect({ case p if p.att.contains("bracket") => p })
