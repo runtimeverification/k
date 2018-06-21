@@ -1,7 +1,9 @@
 // Copyright (c) 2014-2018 K Team. All Rights Reserved.
 package org.kframework.main;
 
+import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Set;
 
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -83,6 +85,9 @@ public final class GlobalOptions {
 
     @Parameter(names="--debug", description="Print debugging output messages")
     public boolean debug = false;
+
+    @Parameter(names = "--debug-steps", variableArity = true, description = "Specify exact steps for which --debug option should be enabled")
+    public List<String> debugSteps = new ArrayList<>();
 
     @Parameter(names={"--warnings", "-w"}, converter=WarningsConverter.class, description="Warning level. Values: [all|normal|none]")
     public Warnings warnings = Warnings.NORMAL;
