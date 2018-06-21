@@ -63,6 +63,23 @@ trait Sorting {
 
     POSet(subsortRelations)
   }
+
+  def computeOverloadPOSet(subsorts: POSet[Sort], prods: Set[Production]) = {
+    def isLessThan(p1: Production, p2: Production): Boolean = {
+      p1 != p2 &&
+        p1.klabel.isDefined &&
+        p1.klabel == p2.klabel &&
+        subsorts.lessThanEq(p1.sort, p2.sort) &&
+        p1.nonterminals.size == p2.nonterminals.size &&
+        p1.nonterminals.zip(p2.nonterminals).forall(pair => subsorts.lessThanEq(pair._1.sort, pair._2.sort)) &&
+        p1.items.map { case NonTerminal(_, name) => NonTerminal(Sorts.K, name) case pi => pi }.equals(p2.items.map { case NonTerminal(_, name) => NonTerminal(Sorts.K, name) case pi => pi })
+    }
+    val pairs = for (x <- prods; y <- prods) yield (x, y)
+    val overloadRelations: Set[(Production, Production)] = pairs collect {
+      case (p1, p2) if isLessThan(p1, p2) => (p1, p2)
+    }
+    POSet(overloadRelations)
+  }
 }
 
 object Module {
@@ -73,6 +90,7 @@ object Module {
 
 case class Module(val name: String, val imports: Set[Module], localSentences: Set[Sentence], @(Nonnull@param) val att: Att = Att.empty)
   extends ModuleToString with OuterKORE with Sorting with Serializable {
+
   assert(att != null)
 
   private lazy val importedSentences = imports flatMap {_.sentences}
@@ -202,6 +220,7 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
   })
 
   lazy val subsorts: POSet[Sort] = computeSubsortPOSet(sentences)
+  lazy val overloads: POSet[Production] = computeOverloadPOSet(subsorts, productions)
 
   private lazy val expressedPriorities: Set[(Tag, Tag)] =
     sentences
