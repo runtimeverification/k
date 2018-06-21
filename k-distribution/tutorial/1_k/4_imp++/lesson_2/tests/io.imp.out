@@ -1,6 +1,6 @@
 <T>
   <k>
-    print ( "Input two numbers: " , .Ids ) ; ~> int x , y , .Ids ; ~> x = read ( ) ; ~> y = read ( ) ; ~> print ( "Their sum is: " , x + y , "\n" , .Ids ) ;
+    print ( "Input two numbers: " , .AExps ) ; ~> int x , y , .Ids ; ~> x = read ( ) ; ~> y = read ( ) ; ~> print ( "Their sum is: " , x + y , "\n" , .AExps ) ;
   </k>
   <env>
     .Map
