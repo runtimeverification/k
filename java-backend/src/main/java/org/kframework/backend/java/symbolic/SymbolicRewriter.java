@@ -674,8 +674,8 @@ public class SymbolicRewriter {
                             logStep(step, v, targetCallDataStr, term, true);
                         }
                         // re-running constraint generation again for debug purposes
-                        if (!global.globalOptions.debug) {
-                            System.err.println("\nApplying specification rule:\n=========================\n");
+                        System.err.println("\nApplying specification rule\n=========================\n");
+                        if (global.globalOptions.debugSpecRules && !global.globalOptions.debug) {
                             boolean oldDebug2 = global.globalOptions.debug;
                             global.globalOptions.debug = true;
                             applySpecRules(term, specRules);
