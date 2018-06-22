@@ -683,8 +683,8 @@ public class SymbolicRewriter {
                             logStep(step, v, targetCallDataStr, term, true);
                         }
                         // re-running constraint generation again for debug purposes
-                        if (!KProve.options.global.debug) {
-                            System.err.println("\nApplying specification rule:\n=========================\n");
+                        System.err.println("\nApplying specification rule\n=========================\n");
+                        if (KProve.options.global.debugSpecRules && !KProve.options.global.debug) {
                             boolean oldDebug2 = KProve.options.global.debug;
                             KProve.options.global.debug = true;
                             applySpecRules(term, specRules);
