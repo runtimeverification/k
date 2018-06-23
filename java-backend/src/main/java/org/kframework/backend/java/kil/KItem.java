@@ -18,6 +18,7 @@ import org.kframework.backend.java.util.Constants;
 import org.kframework.builtin.KLabels;
 import org.kframework.kil.Attribute;
 import org.kframework.kore.mini.KVariable;
+import org.kframework.kprove.KProve;
 import org.kframework.main.GlobalOptions;
 import org.kframework.backend.java.utils.BitSet;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -531,6 +532,10 @@ public class KItem extends Term implements KItemRepresentation {
                                 appliedRule = rule;
                             }
 
+                            if (KProve.options.global.logRulesPublic && result != null) {
+                                System.err.println("\n" + rule);
+                            }
+
                             /*
                              * If the function definitions do not need to be deterministic, try them in order
                              * and apply the first one that matches.
@@ -647,6 +652,10 @@ public class KItem extends Term implements KItemRepresentation {
                 RuleAuditing.succeed(rule);
                 Term rightHandSide = rule.rightHandSide();
                 rightHandSide = rightHandSide.substituteAndEvaluate(solution, context);
+
+                if (global.globalOptions.logRulesPublic) {
+                    System.err.println("\n" + rule);
+                }
                 return rightHandSide;
             } finally {
                 if (RuleAuditing.isAuditBegun()) {
