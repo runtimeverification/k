@@ -2,13 +2,18 @@
 package org.kframework.backend.java.util;
 
 import com.google.common.collect.ImmutableSet;
+
 import org.kframework.backend.java.z3.*;
+import org.kframework.builtin.Sorts;
+import org.kframework.Debugg;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.OS;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.options.SMTOptions;
+
+import static org.kframework.kore.KORE.KToken;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -46,6 +51,9 @@ public class Z3Wrapper {
     }
 
     public synchronized boolean isUnsat(CharSequence query, int timeout, Z3Profiler timer) {
+        StringBuilder queryStr = new StringBuilder(query.length());
+        queryStr.append(query);
+        Debugg.log(Debugg.LogEvent.Z3QUERY, KToken(queryStr.toString(), Sorts.Z3Query()));
         if (options.z3Executable) {
             return checkQueryWithExternalProcess(query, timeout, timer);
         } else {
@@ -116,6 +124,7 @@ public class Z3Wrapper {
                 System.err.println("\nz3 likely timeout\n");
             }
         }
+        Debugg.log(Debugg.LogEvent.Z3RESULT, KToken(result, Sorts.Z3Result()));
         if (!Z3_QUERY_RESULTS.contains(result)) {
             throw KEMException.criticalError("Z3 crashed on input query:\n" + query + "\nresult:\n" + result);
         }
