@@ -3,13 +3,17 @@ package org.kframework.backend.java.util;
 
 import com.google.common.collect.ImmutableSet;
 import com.sun.jna.Pointer;
+import org.kframework.Debugg;
 import org.kframework.backend.java.z3.*;
+import org.kframework.builtin.Sorts;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.OS;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.options.SMTOptions;
+
+import static org.kframework.kore.KORE.KToken;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -48,6 +52,7 @@ public class Z3Wrapper {
     }
 
     public synchronized boolean isUnsat(String query, int timeout) {
+        Debugg.log(Debugg.LogEvent.Z3QUERY, KToken(query, Sorts.Z3Query()));
         if (options.z3Executable) {
             return checkQueryWithExternalProcess(query, timeout);
         } else {
@@ -101,6 +106,7 @@ public class Z3Wrapper {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        Debugg.log(Debugg.LogEvent.Z3RESULT, KToken(result, Sorts.Z3Result()));
         if (!Z3_QUERY_RESULTS.contains(result)) {
             throw KEMException.criticalError("Z3 crashed on input query:\n" + query + "\nresult:\n" + result);
         }
