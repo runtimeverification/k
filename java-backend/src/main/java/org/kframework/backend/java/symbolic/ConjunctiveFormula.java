@@ -7,6 +7,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
+import org.kframework.Debugg;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.kil.*;
@@ -798,6 +799,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
             if (global.globalOptions.debug) {
                 System.err.println("Attempting to prove: \n\t" + left + "\n  implies \n\t" + right);
             }
+            Debugg.log(Debugg.LogEvent.IMPLICATION, left, right);
 
             right = right.orientSubstitution(rightOnlyVariables);
             right = left.simplifyConstraint(right);
@@ -823,6 +825,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 implications.add(Pair.of(left.add(condition, BoolToken.FALSE).simplify(context), right));
                 continue;
             }
+
 
             if (!impliesSMT(left, right, rightOnlyVariables)) {
                 if (global.globalOptions.debug) {
