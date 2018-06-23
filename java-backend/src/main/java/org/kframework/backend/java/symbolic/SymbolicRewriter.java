@@ -6,6 +6,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.RewriterResult;
+import org.kframework.Debugg;
 import org.kframework.Strategy;
 import org.kframework.attributes.Att;
 import org.kframework.backend.java.builtins.BoolToken;
@@ -26,12 +27,16 @@ import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.strategies.TransitionCompositeStrategy;
 import org.kframework.builtin.KLabels;
+import org.kframework.builtin.Sorts;
 import org.kframework.kore.FindK;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
+import org.kframework.kore.KRewrite;
 import org.kframework.kore.KORE;
 import org.kframework.rewriter.SearchType;
 import org.kframework.backend.java.utils.BitSet;
+
+import static org.kframework.kore.KORE.KRewrite;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -146,6 +151,10 @@ public class SymbolicRewriter {
         throw new UnsupportedOperationException();
     }
 
+    private static K ruleToKRewrite(Rule rule) {
+        return KRewrite(rule.leftHandSide(), rule.rightHandSide(), rule.att());
+    }
+
     public List<ConstrainedTerm> fastComputeRewriteStep(ConstrainedTerm subject, boolean computeOne, boolean narrowing, boolean proofFlag) {
         List<ConstrainedTerm> results = new ArrayList<>();
         if (definition.automaton == null) {
@@ -162,6 +171,7 @@ public class SymbolicRewriter {
                 subject.termContext());
         for (FastRuleMatcher.RuleMatchResult matchResult : matches) {
             Rule rule = definition.ruleTable.get(matchResult.ruleIndex);
+            Debugg.log(Debugg.LogEvent.RULE, ruleToKRewrite(rule));
             Substitution<Variable, Term> substitution =
                     rule.att().contains(Att.refers_THIS_CONFIGURATION()) ?
                             matchResult.constraint.substitution().plus(new Variable(KLabels.THIS_CONFIGURATION, Sort.KSEQUENCE), filterOurStrategyCell(subject.term())) :
@@ -587,14 +597,20 @@ public class SymbolicRewriter {
 
         initialTerm = initialTerm.expandPatterns(true);
 
+        Debugg.log(Debugg.LogEvent.INIT,   initialTerm.term(), initialTerm.constraint());
+        Debugg.log(Debugg.LogEvent.TARGET, targetTerm.term(),  targetTerm.constraint());
+
         visited.add(initialTerm);
         queue.add(initialTerm);
         boolean guarded = false;
         int step = 0;
+
         while (!queue.isEmpty()) {
             step++;
             for (ConstrainedTerm term : queue) {
+                Debugg.log(Debugg.LogEvent.NODE, term.term(), term.constraint());
                 if (term.implies(targetTerm)) {
+                    Debugg.log(Debugg.LogEvent.IMPLIESTARGET, term.term(), term.constraint());
                     continue;
                 }
 
@@ -660,6 +676,10 @@ public class SymbolicRewriter {
                                             cterm.constraint().substitution().keySet(),
                                             initialTerm.variableSet())),
                             cterm.termContext());
+                    Debugg.log(Debugg.LogEvent.RSTEP, term.term(), term.constraint(), result.term(), result.constraint());
+                    if(results.size() > 1) {
+                        Debugg.log(Debugg.LogEvent.BRANCH, result.term(), result.constraint());
+                    }
                     if (visited.add(result)) {
                         nextQueue.add(result);
                     }
@@ -686,7 +706,10 @@ public class SymbolicRewriter {
             ConstrainedTerm pattern = specRule.createLhsPattern(constrainedTerm.termContext());
             ConjunctiveFormula constraint = constrainedTerm.matchImplies(pattern, true);
             if (constraint != null) {
-                return buildResult(specRule, constraint, null, true, constrainedTerm.termContext());
+                ConstrainedTerm result = buildResult(specRule, constraint, null, true, constrainedTerm.termContext());
+                Debugg.log(Debugg.LogEvent.RULE, ruleToKRewrite(specRule));
+                Debugg.log(Debugg.LogEvent.SRSTEP, constrainedTerm.term(), constrainedTerm.constraint(), result.term(), result.constraint());
+                return result;
             }
         }
         return null;
