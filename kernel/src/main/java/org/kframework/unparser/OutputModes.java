@@ -7,5 +7,19 @@ package org.kframework.unparser;
  *
  */
 public enum OutputModes {
-    PRETTY, SOUND, KAST, BINARY, JSON , NONE
+    PRETTY, SOUND, KAST, BINARY, JSON , NONE;
+
+    private String extension;
+    static {
+        PRETTY.extension = "kpretty";
+        SOUND.extension  = "ksound";
+        KAST.extension   = "kast";
+        BINARY.extension = "kbin";
+        JSON.extension   = "json";
+        NONE.extension   = "";
+    }
+
+    public String ext() {
+        return extension;
+    }
 }
