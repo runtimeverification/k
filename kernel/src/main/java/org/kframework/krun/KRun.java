@@ -185,23 +185,22 @@ public class KRun {
     }
 
     public static void prettyPrint(Module module, OutputModes output, Consumer<byte[]> print, K result, ColorSetting colorize) {
+        print.accept(prettyPrint(module, output, result, colorize));
+    }
+
+    public static byte[] prettyPrint(Module module, OutputModes output, K result, ColorSetting colorize) {
         switch (output) {
         case KAST:
-            print.accept((ToKast.apply(result) + "\n").getBytes());
-            break;
+            return (ToKast.apply(result) + "\n").getBytes();
         case NONE:
-            print.accept("".getBytes());
-            break;
+            return "".getBytes();
         case PRETTY:
             Module unparsingModule = RuleGrammarGenerator.getCombinedGrammar(module, false).getExtensionModule();
-            print.accept((unparseTerm(result, unparsingModule, colorize) + "\n").getBytes());
-            break;
+            return (unparseTerm(result, unparsingModule, colorize) + "\n").getBytes();
         case BINARY:
-            print.accept(ToBinary.apply(result));
-            break;
+            return ToBinary.apply(result);
         case JSON:
-            print.accept(ToJson.apply(result));
-            break;
+            return ToJson.apply(result);
         default:
             throw KEMException.criticalError("Unsupported output mode: " + output);
         }
