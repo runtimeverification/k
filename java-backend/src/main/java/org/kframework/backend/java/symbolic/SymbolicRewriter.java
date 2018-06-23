@@ -32,6 +32,7 @@ import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KORE;
 import org.kframework.kprove.KProve;
+import org.kframework.main.GlobalOptions;
 import org.kframework.main.Main;
 import org.kframework.rewriter.SearchType;
 import org.kframework.backend.java.utils.BitSet;
@@ -55,8 +56,9 @@ public class SymbolicRewriter {
 
     private final List<String> transitions;
     private final Stopwatch stopwatch = Stopwatch.createUnstarted();
-    private final GlobalContext global;
     private final KOREtoBackendKIL constructor;
+    private final GlobalOptions globalOptions;
+    private final GlobalContext global;
     private boolean transition;
     private final Set<ConstrainedTerm> superheated = Sets.newHashSet();
     private final Set<ConstrainedTerm> newSuperheated = Sets.newHashSet();
@@ -74,6 +76,7 @@ public class SymbolicRewriter {
         this.theFastMatcher = new FastRuleMatcher(global, definition.ruleTable.size());
         this.transition = true;
         this.global = global;
+        this.globalOptions = global.globalOptions;
     }
 
     public KOREtoBackendKIL getConstructor() {
@@ -161,6 +164,10 @@ public class SymbolicRewriter {
         for (FastRuleMatcher.RuleMatchResult matchResult : matches) {
             Rule rule = definition.ruleTable.get(matchResult.ruleIndex);
             global.stateLog.log(StateLog.LogEvent.RULEATTEMPT, rule.toKRewrite());
+            if (globalOptions.logRulesPublic) {
+                System.err.println("\n" + rule);
+            }
+
             Substitution<Variable, Term> substitution =
                     rule.att().contains(Att.refers_THIS_CONFIGURATION()) ?
                             matchResult.constraint.substitution().plus(new Variable(KLabels.THIS_CONFIGURATION, Sort.KSEQUENCE), filterOurStrategyCell(subject.term())) :
@@ -203,6 +210,9 @@ public class SymbolicRewriter {
                 // TODO(AndreiS): move these some other place
                 result = result.expandPatterns(true);
                 if (result.constraint().isFalseExtended() || result.constraint().checkUnsat()) {
+                    if (globalOptions.logRulesPublic) {
+                        System.err.println("Execution path aborted");
+                    }
                     continue;
                 }
             }
@@ -211,6 +221,9 @@ public class SymbolicRewriter {
             if (rule.att().contains(Att.heat()) && transitions.stream().anyMatch(rule.att()::contains)) {
                 newSuperheated.add(result);
             } else if (rule.att().contains(Att.cool()) && transitions.stream().anyMatch(rule.att()::contains) && superheated.contains(subject)) {
+                if (globalOptions.logRulesPublic) {
+                    System.err.println("Execution path aborted");
+                }
                 continue;
             }
 
@@ -586,8 +599,9 @@ public class SymbolicRewriter {
         queue.add(initialTerm);
         boolean guarded = false;
         int step = 0;
+        globalOptions.logRulesPublic = globalOptions.logRules;
 
-        if (global.globalOptions.log) {
+        if (globalOptions.log) {
             System.out.println("\nTarget term\n=====================\n");
             System.out.println(targetTerm);
         }
@@ -599,14 +613,14 @@ public class SymbolicRewriter {
             System.err.println("Specification rule does not match expected spec form: " + targetTerm);
             throw e;
         }
-        int branchingRemaining = global.globalOptions.branchingAllowed;
+        int branchingRemaining = globalOptions.branchingAllowed;
         boolean nextStepLogEnabled = false;
         while (!queue.isEmpty()) {
             step++;
             int v = 0;
-            boolean oldLogEnabled = global.globalOptions.log;
+            boolean oldLogEnabled = globalOptions.log;
             if (nextStepLogEnabled) {
-                global.globalOptions.log = true;
+                globalOptions.log = true;
             }
             nextStepLogEnabled = false;
 
@@ -617,13 +631,13 @@ public class SymbolicRewriter {
                 BuiltinList kSequence = ((BuiltinList) ((KList) ((KItem) k).klist()).get(0));
                 boolean isHalt = kSequence.size() == 2 && kSequence.get(0) instanceof KItem
                         && kSequence.get(0).toString().equals("#halt_EVM(.KList)");
-                boolean oldDebug =  global.globalOptions.debug;
-                boolean oldLog = global.globalOptions.log;
+                boolean oldDebug =  globalOptions.debug;
+                boolean oldLog = globalOptions.log;
 
-                if (isHalt && !global.globalOptions.noDebugLastStep
-                        || global.globalOptions.debugSteps.contains(String.valueOf(step))) {
-                    global.globalOptions.debug = true;
-                    global.globalOptions.log = true;
+                if (isHalt && !globalOptions.noDebugLastStep
+                        || globalOptions.debugSteps.contains(String.valueOf(step))) {
+                    globalOptions.debug = true;
+                    globalOptions.log = true;
                 }
                 if (term.implies(targetTerm)) {
                     global.stateLog.log(StateLog.LogEvent.REACHPROVED, term.term(), term.constraint());
@@ -637,7 +651,7 @@ public class SymbolicRewriter {
 
                 //stopping at halt
                 if (isHalt) {
-                    if (!global.globalOptions.log) {
+                    if (!globalOptions.log) {
                         logStep(step, v, targetCallDataStr, term, true);
                     }
                     System.out.println("Halt! Terminating branch.");
@@ -670,16 +684,16 @@ public class SymbolicRewriter {
                     ConstrainedTerm result = applySpecRules(term, specRules);
                     if (result != null) {
                         nextStepLogEnabled = true;
-                        if (!global.globalOptions.log) {
+                        if (!globalOptions.log) {
                             logStep(step, v, targetCallDataStr, term, true);
                         }
                         // re-running constraint generation again for debug purposes
                         System.err.println("\nApplying specification rule\n=========================\n");
-                        if (global.globalOptions.debugSpecRules && !global.globalOptions.debug) {
-                            boolean oldDebug2 = global.globalOptions.debug;
-                            global.globalOptions.debug = true;
+                        if (globalOptions.debugSpecRules && !globalOptions.debug) {
+                            boolean oldDebug2 = globalOptions.debug;
+                            globalOptions.debug = true;
                             applySpecRules(term, specRules);
-                            global.globalOptions.debug = oldDebug2;
+                            globalOptions.debug = oldDebug2;
                         }
                         if (visited.add(result)) {
                             nextQueue.add(result);
@@ -696,7 +710,7 @@ public class SymbolicRewriter {
                 try {
                     results = fastComputeRewriteStep(term, false, true, true, step);
                 } catch (Throwable e) {
-                    if (!global.globalOptions.log) {
+                    if (!globalOptions.log) {
                         logStep(step, v, targetCallDataStr, term, true);
                     }
                     System.out.println("\n\nTerm throwing exception\n============================\n\n");
@@ -707,7 +721,7 @@ public class SymbolicRewriter {
                     throw e;
                 }
                 if (results.isEmpty()) {
-                    if (!global.globalOptions.log) {
+                    if (!globalOptions.log) {
                         logStep(step, v, targetCallDataStr, term, true);
                     }
                     System.out.println("\nStep above: " + step + ", evaluation ended with no successors.");
@@ -717,7 +731,7 @@ public class SymbolicRewriter {
 
                 if (results.size() > 1) {
                     nextStepLogEnabled = true;
-                    if (!global.globalOptions.log) {
+                    if (!globalOptions.log) {
                         logStep(step, v, targetCallDataStr, term, true);
                     }
                     if (branchingRemaining == 0) {
@@ -742,8 +756,8 @@ public class SymbolicRewriter {
                         nextQueue.add(result);
                     }
                 }
-                global.globalOptions.debug = oldDebug;
-                global.globalOptions.log = oldLog;
+                globalOptions.debug = oldDebug;
+                globalOptions.log = oldLog;
             }
 
             /* swap the queues */
@@ -754,15 +768,15 @@ public class SymbolicRewriter {
             nextQueue.clear();
             guarded = true;
 
-            global.globalOptions.log = oldLogEnabled;
+            globalOptions.log = oldLogEnabled;
         }
 
-        if (global.globalOptions.verbose) {
+        if (globalOptions.verbose) {
             printSummaryBox(rule, proofResults, successPaths, step);
         }
         //fixme rebase: check if not printed elsewhere
         for (ConstrainedTerm term : proofResults) {
-            if (global.globalOptions.fast) {
+            if (globalOptions.fast) {
                 System.out.println(term);
             } else {
                 KProve.prettyPrint(term.term());
@@ -812,12 +826,12 @@ public class SymbolicRewriter {
             forced = true;
         }
 
-        if (global.globalOptions.log || forced) {
+        if (globalOptions.log || forced || globalOptions.logRulesPublic) {
             System.out.println("\nSTEP " + step + " v" + v + " : "
                     + (System.currentTimeMillis() - Main.startTime) / 1000. + " s \n===================");
         }
 
-        if (global.globalOptions.log || forced) {
+        if (globalOptions.log || forced) {
             KProve.prettyPrint(k);
             System.out.println(output);
             System.out.println(statusCode);
@@ -870,6 +884,9 @@ public class SymbolicRewriter {
             if (constraint != null) {
                 ConstrainedTerm result = buildResult(specRule, constraint, null, true, constrainedTerm.termContext());
                 global.stateLog.log(StateLog.LogEvent.SRULE, specRule.toKRewrite());
+                if (globalOptions.logRulesPublic) {
+                    System.err.println("\n" + specRule);
+                }
                 return result;
             }
         }
