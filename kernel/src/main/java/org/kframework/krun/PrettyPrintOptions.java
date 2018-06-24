@@ -3,10 +3,13 @@ package org.kframework.krun;
 
 import com.beust.jcommander.Parameter;
 import com.google.inject.Inject;
+
 import org.kframework.unparser.OutputModes;
 import org.kframework.utils.options.BaseEnumConverter;
 
 import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
 
 public class PrettyPrintOptions {
 
@@ -71,4 +74,12 @@ public class PrettyPrintOptions {
         }
     }
 
+    @Parameter(names={"--output-omit"}, description="KLabels to omit from the output.")
+    public List<String> omittedKLabels = new ArrayList<String>();
+
+    @Parameter(names={"--output-flatten"}, description="Assoc KLabels to flatten arguments for (reducing output size).")
+    public List<String> flattenedKLabels = new ArrayList<String>();
+
+    @Parameter(names={"--output-tokenize"}, description="KLabels to tokenize underneath (reducing output size).")
+    public List<String> tokenizedKLabels = new ArrayList<String>();
 }
