@@ -47,6 +47,10 @@ public class KProveOptions {
     @ParametersDelegate
     public PrintOptions print = new PrintOptions();
 
+    // TODO: Should eventually allow this option in non-proof mode
+    @Parameter(names={"--debugg"}, description="Output proof debugging information")
+    public boolean debugg = false;
+
     @Parameter(names={"--spec-module", "-sm"}, description="Name of module containing specification to prove")
     public String specModule;
 
