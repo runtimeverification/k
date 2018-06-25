@@ -83,7 +83,7 @@ public class Commands {
             CommandUtils utils = new CommandUtils(isSource);
             DebuggerState requestedState = session.getActiveState();
             if (requestedState != null) {
-                KPrint.prettyPrint(compiledDefinition.languageParsingModule(), OutputModes.PRETTY, s -> utils.print(s), requestedState.getCurrentK(), ColorSetting.ON);
+                KPrint.prettyPrint(compiledDefinition.languageParsingModule(), s -> utils.print(s), requestedState.getCurrentK());
             } else {
                 throw KEMException.debuggerError("\"Requested State/Configuration Unreachable\",");
             }
@@ -306,7 +306,7 @@ public class Commands {
             if (disableOutput) {
                 return;
             }
-            KPrint.prettyPrint(compiledDefinition.languageParsingModule(), OutputModes.PRETTY, s -> System.out.println(s), result.getSubstitutions(), ColorSetting.ON);
+            KPrint.prettyPrint(compiledDefinition.languageParsingModule(), s -> System.out.println(s), result.getSubstitutions());
         }
 
         private void print(byte[] bytes){

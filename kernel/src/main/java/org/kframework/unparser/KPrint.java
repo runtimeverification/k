@@ -42,22 +42,25 @@ import static org.kframework.kore.KORE.*;
  */
 public class KPrint {
 
-    private final KExceptionManager kem;
-    private final FileUtil          files;
-    private final TTYInfo           tty;
+    private static KExceptionManager kem;
+    private static FileUtil          files;
+    private static TTYInfo           tty;
 
-    public KPrint(KExceptionManager kem, FileUtil files, TTYInfo tty) {
-        this.kem   = kem;
-        this.files = files;
-        this.tty   = tty;
+    public static PrintOptions options;
+
+    public KPrint(KExceptionManager kem, FileUtil files, TTYInfo tty, PrintOptions options) {
+        this.kem     = kem;
+        this.files   = files;
+        this.tty     = tty;
+        this.options = options;
     }
 
     //TODO(dwightguth): use Writer
-    public static void outputFile(String output, PrintOptions options, FileUtil files) {
-        outputFile(output.getBytes(), options, files);
+    public static void outputFile(String output) {
+        outputFile(output.getBytes());
     }
 
-    public static void outputFile(byte[] output, PrintOptions options, FileUtil files) {
+    public static void outputFile(byte[] output) {
         if (options.outputFile == null) {
             try {
                 System.out.write(output);
@@ -69,26 +72,25 @@ public class KPrint {
         }
     }
 
-    // TODO: prettyPrint should take advantage of the `PrintOptions`
-    public static void prettyPrint(Module module, OutputModes output, Consumer<byte[]> print, K result, ColorSetting colorize) {
-        print.accept(prettyPrint(module, output, result, colorize));
+    public static void prettyPrint(Module module, Consumer<byte[]> print, K result) {
+        print.accept(prettyPrint(module, result));
     }
 
-    public static byte[] prettyPrint(Module module, OutputModes output, K result, ColorSetting colorize) {
-        switch (output) {
+    public static byte[] prettyPrint(Module module, K result) {
+        switch (options.output) {
         case KAST:
             return (ToKast.apply(result) + "\n").getBytes();
         case NONE:
             return "".getBytes();
         case PRETTY:
             Module unparsingModule = RuleGrammarGenerator.getCombinedGrammar(module, false).getExtensionModule();
-            return (unparseTerm(result, unparsingModule, colorize) + "\n").getBytes();
+            return (unparseTerm(result, unparsingModule) + "\n").getBytes();
         case BINARY:
             return ToBinary.apply(result);
         case JSON:
             return ToJson.apply(result);
         default:
-            throw KEMException.criticalError("Unsupported output mode: " + output);
+            throw KEMException.criticalError("Unsupported output mode: " + options.output);
         }
     }
 
@@ -96,7 +98,6 @@ public class KPrint {
      * Methods `{omit,tokenize,flatten}KLabels` allows the user to specify some KLabels below which they do not care for accurate term representation.
      * For example, a user-interface level tool (eg. state explorer) may not need accurate term representation to work, but handling huge Json terms may be a hindrance.
      */
-    // TODO: find a better place for this
     public static K omitTerm(Module module, K k) {
         if (! (k instanceof KApply)) return k;
         KApply kapp           = (KApply) k;
@@ -108,11 +109,11 @@ public class KPrint {
         return KToken(kapp.klabel().name(), finalSort);
     }
 
-    public static K omitKLabels(Module module, K result, Set<String> omittedKLabels) {
+    public static K omitKLabels(Module module, K result) {
         return new TransformK() {
             @Override
             public K apply(KApply k) {
-                if (omittedKLabels.contains(k.klabel().name())) {
+                if (options.omittedKLabels.contains(k.klabel().name())) {
                     List<K> newArgs = k.klist().items().stream().map(arg -> omitTerm(module, arg)).collect(Collectors.toList());
                     return KApply(k.klabel(), KList(newArgs), k.att());
                 } else {
@@ -126,7 +127,7 @@ public class KPrint {
         if (! (k instanceof KApply)) return k;
         KApply kapp            = (KApply) k;
         Module unparsingModule = RuleGrammarGenerator.getCombinedGrammar(module, false).getExtensionModule();
-        String tokenizedTerm   = unparseTerm(kapp, unparsingModule, ColorSetting.OFF);
+        String tokenizedTerm   = unparseTerm(kapp, unparsingModule);
         Sort   finalSort       = Sorts.K();
         Option<Sort> termSort  = module.sortFor().get(kapp.klabel());
         if (! termSort.isEmpty()) {
@@ -135,11 +136,11 @@ public class KPrint {
         return KToken(tokenizedTerm, finalSort);
     }
 
-    public static K tokenizeKLabels(Module module, K result, Set<String> tokenizedKLabels) {
+    public static K tokenizeKLabels(Module module, K result) {
         return new TransformK() {
             @Override
             public K apply(KApply k) {
-                if (tokenizedKLabels.contains(k.klabel().name())) {
+                if (options.tokenizedKLabels.contains(k.klabel().name())) {
                     List<K> newArgs = k.klist().items().stream().map(arg -> tokenizeTerm(module, arg)).collect(Collectors.toList());
                     return KApply(k.klabel(), KList(newArgs), k.att());
                 } else {
@@ -149,11 +150,11 @@ public class KPrint {
         }.apply(result);
     }
 
-    public static K flattenKLabels(Module module, K result, Set<String> flattenedKLabels) {
+    public static K flattenKLabels(Module module, K result) {
         return new TransformK() {
             @Override
             public K apply(KApply k) {
-                if (flattenedKLabels.contains(k.klabel().name())) {
+                if (options.flattenedKLabels.contains(k.klabel().name())) {
                     List<K> items = new ArrayList<>();
                     Att att = module.attributesFor().apply(KLabel(k.klabel().name()));
                     if (att.contains("assoc") && att.contains("unit")) {
@@ -169,7 +170,7 @@ public class KPrint {
         }.apply(result);
     }
 
-    private static String unparseTerm(K input, Module test, ColorSetting colorize) {
+    private static String unparseTerm(K input, Module test) {
         K sortedComm = new TransformK() {
             @Override
             public K apply(KApply k) {
@@ -204,6 +205,6 @@ public class KPrint {
             }
         }.apply(sortedComm);
         return Formatter.format(
-                new AddBrackets(test).addBrackets(KOREToTreeNodes.apply(KOREToTreeNodes.up(test, alphaRenamed), test)), colorize);
+                new AddBrackets(test).addBrackets(KOREToTreeNodes.apply(KOREToTreeNodes.up(test, alphaRenamed), test)), KPrint.options.color(KPrint.tty.stdout, KPrint.files.getEnv()));
     }
 }
