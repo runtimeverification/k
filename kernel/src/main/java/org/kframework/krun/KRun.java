@@ -101,7 +101,7 @@ public class KRun {
 
 
         if (result != null) {
-            kprint.prettyPrint(compiledDef.languageParsingModule(), options.print.output, s -> kprint.outputFile(s, options.print, files), result._1(), options.print.color(tty.stdout, files.getEnv()));
+            kprint.prettyPrint(compiledDef.languageParsingModule(), s -> kprint.outputFile(s), result._1());
             return result._2();
         }
         return 0;
