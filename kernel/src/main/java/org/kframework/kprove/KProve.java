@@ -19,6 +19,7 @@ import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.TTYInfo;
+import org.kframework.unparser.KPrint;
 import scala.Option;
 import scala.Tuple2;
 import scala.collection.Set;
@@ -62,7 +63,7 @@ public class KProve {
         } else {
             exit = 1;
         }
-        KRun.prettyPrint(compiled._1().getModule("LANGUAGE-PARSING").get(), options.prettyPrint.output, s -> KRun.outputFile(s, options.prettyPrint, files), results, options.prettyPrint.color(tty.stdout, files.getEnv()));
+        KPrint.prettyPrint(compiled._1().getModule("LANGUAGE-PARSING").get(), options.print.output, s -> KPrint.outputFile(s, options.print, files), results, options.print.color(tty.stdout, files.getEnv()));
         return exit;
     }
 
