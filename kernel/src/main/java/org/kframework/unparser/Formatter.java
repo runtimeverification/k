@@ -6,7 +6,6 @@ import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
 import org.kframework.definition.ProductionItem;
 import org.kframework.definition.Terminal;
-import org.kframework.krun.ColorSetting;
 import org.kframework.parser.Constant;
 import org.kframework.parser.Term;
 import org.kframework.parser.TermCons;
