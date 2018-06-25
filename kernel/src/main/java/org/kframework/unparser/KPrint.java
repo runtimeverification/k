@@ -77,21 +77,29 @@ public class KPrint {
     }
 
     public static byte[] prettyPrint(Module module, K result) {
+        K abstracted = abstractionPass(module, result);
         switch (options.output) {
         case KAST:
-            return (ToKast.apply(result) + "\n").getBytes();
+            return (ToKast.apply(abstracted) + "\n").getBytes();
         case NONE:
             return "".getBytes();
         case PRETTY:
             Module unparsingModule = RuleGrammarGenerator.getCombinedGrammar(module, false).getExtensionModule();
-            return (unparseTerm(result, unparsingModule) + "\n").getBytes();
+            return (unparseTerm(abstracted, unparsingModule) + "\n").getBytes();
         case BINARY:
-            return ToBinary.apply(result);
+            return ToBinary.apply(abstracted);
         case JSON:
-            return ToJson.apply(result);
+            return ToJson.apply(abstracted);
         default:
             throw KEMException.criticalError("Unsupported output mode: " + options.output);
         }
+    }
+
+    private static K abstractionPass(Module unparsingModule, K contents) {
+        K omitted   = KPrint.omitKLabels    (unparsingModule, contents);
+        K flattened = KPrint.flattenKLabels (unparsingModule, omitted);
+        K tokenized = KPrint.tokenizeKLabels(unparsingModule, flattened);
+        return tokenized;
     }
 
     /**
