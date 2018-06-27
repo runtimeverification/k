@@ -231,8 +231,12 @@ class TextToKore(b: Builders) {
           consumeWithLeadingWhitespaces(")")
           consumeWithLeadingWhitespaces(":")
           val returnSort = parseSort(parsingLevel = previousParsingLevel)
+          consumeWithLeadingWhitespaces("where")
+          val leftPattern = parsePattern()
+          consumeWithLeadingWhitespaces(":=")
+          val rightPattern = parsePattern()
           val att = parseAttributes()
-          val decl = b.AliasDeclaration(alias, argSorts, returnSort, att)
+          val decl = b.AliasDeclaration(alias, argSorts, returnSort, leftPattern, rightPattern, att)
           parseDeclarations(decls :+ decl)
         case ('a', 'x') => // axiom declaration
           consume("iom")

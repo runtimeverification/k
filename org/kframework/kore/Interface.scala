@@ -97,12 +97,16 @@ trait AliasDeclaration extends Declaration {
 
   def returnSort: Sort
 
+  def leftPattern: Pattern
+
+  def rightPattern: Pattern
+
   def att: Attributes
 }
 
 object AliasDeclaration {
-  def unapply(arg: AliasDeclaration): Option[(Alias, Seq[Sort], Sort, Attributes)]
-  = Some(arg.alias, arg.argSorts, arg.returnSort, arg.att)
+  def unapply(arg: AliasDeclaration): Option[(Alias, Seq[Sort], Sort, Pattern, Pattern, Attributes)]
+  = Some(arg.alias, arg.argSorts, arg.returnSort, arg.leftPattern, arg.rightPattern, arg.att)
 }
 
 
@@ -473,6 +477,8 @@ trait Builders {
   def AliasDeclaration(alias: Alias,
                        argSorts: Seq[Sort],
                        returnSort: Sort,
+                       leftPattern: Pattern,
+                       rightPattern: Pattern,
                        att: Attributes): Declaration
 
   def AxiomDeclaration(params: Seq[SortVariable],

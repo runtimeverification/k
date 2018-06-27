@@ -20,7 +20,7 @@ object implementation {
 
     case class HookSymbolDeclaration(symbol: i.Symbol, argSorts: Seq[i.Sort], returnSort: i.Sort, att: i.Attributes) extends i.HookSymbolDeclaration
 
-    case class AliasDeclaration(alias: i.Alias, argSorts: Seq[i.Sort], returnSort: i.Sort, att: i.Attributes) extends i.AliasDeclaration
+    case class AliasDeclaration(alias: i.Alias, argSorts: Seq[i.Sort], returnSort: i.Sort, leftPattern: i.Pattern, rightPattern: i.Pattern, att: i.Attributes) extends i.AliasDeclaration
 
     case class AxiomDeclaration(params: Seq[i.SortVariable], pattern: i.Pattern, att: i.Attributes) extends i.AxiomDeclaration
 
@@ -95,7 +95,7 @@ object implementation {
 
     def HookSymbolDeclaration(symbol: i.Symbol, argSorts: Seq[i.Sort], returnSort: i.Sort, att: i.Attributes): i.Declaration = d.HookSymbolDeclaration(symbol, argSorts, returnSort, att)
 
-    def AliasDeclaration(alias: i.Alias, argSorts: Seq[i.Sort], returnSort: i.Sort, att: i.Attributes): i.Declaration = d.AliasDeclaration(alias, argSorts, returnSort, att)
+    def AliasDeclaration(alias: i.Alias, argSorts: Seq[i.Sort], returnSort: i.Sort, leftPattern: i.Pattern, rightPattern: i.Pattern, att: i.Attributes): i.Declaration = d.AliasDeclaration(alias, argSorts, returnSort, leftPattern, rightPattern, att)
 
     def AxiomDeclaration(params: Seq[i.SortVariable], _1: i.Pattern, att: i.Attributes): i.Declaration = d.AxiomDeclaration(params, _1, att)
 

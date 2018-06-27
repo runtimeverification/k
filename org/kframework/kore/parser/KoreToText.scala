@@ -69,7 +69,7 @@ object KoreToText {
       " " +
       apply(att)
 
-    case AliasDeclaration(alias, argSorts, returnSort, att) =>
+    case AliasDeclaration(alias, argSorts, returnSort, leftPattern, rightPattern, att) =>
       "alias " +
       apply(alias) +
       "(" +
@@ -77,6 +77,12 @@ object KoreToText {
       ") : " +
       apply(returnSort) +
       " " +
+      "where" + 
+      apply(leftPattern) +
+      " " +
+      ":=" +
+      " " +
+      apply(rightPattern) +
       apply(att)
 
     case AxiomDeclaration(params, pattern, att) =>
