@@ -58,7 +58,7 @@ public class KProve {
         Tuple2<Definition, Module> compiled = getProofDefinition(options.specFile(files), options.defModule, options.specModule, compiledDefinition, backend, options.global, files, kem, sw);
         Rewriter rewriter = rewriterGenerator.apply(compiled._1().mainModule());
         Module specModule = compiled._2();
-        Debugg.init(files, specModule, compiled._1().getModule("LANGUAGE-PARSING").get(), kprint, options.debugg);
+        Debugg.init(options, files, specModule, compiled._1().getModule("LANGUAGE-PARSING").get(), kprint, options.debugg);
         Debugg.log("spec " + options.specFile(files).getAbsolutePath());
         K results;
         try {

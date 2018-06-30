@@ -5,6 +5,7 @@ import com.beust.jcommander.Parameter;
 import com.google.inject.Inject;
 
 import org.kframework.utils.options.BaseEnumConverter;
+import org.kframework.utils.options.StringListConverter;
 
 import java.util.Map;
 import java.util.List;
@@ -73,12 +74,12 @@ public class PrintOptions {
         }
     }
 
-    @Parameter(names={"--output-omit"}, description="KLabels to omit from the output.")
+    @Parameter(names={"--output-omit"}, listConverter=StringListConverter.class, description="KLabels to omit from the output.")
     public List<String> omittedKLabels = new ArrayList<String>();
 
-    @Parameter(names={"--output-flatten"}, description="Assoc KLabels to flatten arguments for (reducing output size).")
+    @Parameter(names={"--output-flatten"}, listConverter=StringListConverter.class, description="Assoc KLabels to flatten arguments for (reducing output size).")
     public List<String> flattenedKLabels = new ArrayList<String>();
 
-    @Parameter(names={"--output-tokenize"}, description="KLabels to tokenize underneath (reducing output size).")
+    @Parameter(names={"--output-tokenize"}, listConverter=StringListConverter.class, description="KLabels to tokenize underneath (reducing output size).")
     public List<String> tokenizedKLabels = new ArrayList<String>();
 }
