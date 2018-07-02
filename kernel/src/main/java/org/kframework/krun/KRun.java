@@ -194,11 +194,16 @@ public class KRun {
         case NONE:
             print.accept("".getBytes());
             break;
-        case PRETTY:
+        case PRETTY: {
             Module unparsingModule = RuleGrammarGenerator.getCombinedGrammar(module, false).getExtensionModule();
             print.accept((unparseTerm(result, unparsingModule, colorize, files, kompile) + "\n").getBytes());
             break;
-        case BINARY:
+        } case PROGRAM: {
+            RuleGrammarGenerator gen = new RuleGrammarGenerator(def);
+            Module unparsingModule = RuleGrammarGenerator.getCombinedGrammar(gen.getProgramsGrammar(module), false).getParsingModule();
+            print.accept((unparseTerm(result, unparsingModule, colorize, files, kompile) + "\n").getBytes());
+            break;
+        } case BINARY:
             print.accept(ToBinary.apply(result));
             break;
         default:
