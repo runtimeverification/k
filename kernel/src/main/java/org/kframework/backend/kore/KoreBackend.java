@@ -75,7 +75,7 @@ public class KoreBackend implements Backend {
         DefinitionTransformer resolveFun = DefinitionTransformer.from(new ResolveFun()::resolve, "resolving #fun");
         DefinitionTransformer generateSortPredicateSyntax = DefinitionTransformer.from(new GenerateSortPredicateSyntax()::gen, "adding sort predicate productions");
         DefinitionTransformer subsortKItem = DefinitionTransformer.from(Kompile::subsortKItem, "subsort all sorts to KItem");
-        DefinitionTransformer expandMacros = DefinitionTransformer.fromSentenceTransformer((m, s) -> new ExpandMacros(m, kem, files, kompileOptions.global, kompileOptions).expand(s), "expand macros");
+        DefinitionTransformer expandMacros = DefinitionTransformer.fromSentenceTransformer((m, s) -> new ExpandMacros(m, files, kompileOptions, false).expand(s), "expand macros");
 
         return def -> Kompile.excludeModulesByTag(excludedModuleTags(), def)
                 .andThen(d -> Kompile.resolveIOStreams(kem, d))

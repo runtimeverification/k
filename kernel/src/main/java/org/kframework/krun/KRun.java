@@ -8,9 +8,12 @@ import org.kframework.attributes.Source;
 import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.ConfigurationInfoFromModule;
+import org.kframework.compile.ExpandMacros;
+import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
 import org.kframework.kompile.CompiledDefinition;
+import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.Assoc;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -21,6 +24,7 @@ import org.kframework.kore.Sort;
 import org.kframework.kore.TransformK;
 import org.kframework.kore.VisitK;
 import org.kframework.krun.modes.ExecutionMode;
+import org.kframework.main.GlobalOptions;
 import org.kframework.main.Main;
 import org.kframework.parser.ProductionReference;
 import org.kframework.parser.binary.BinaryParser;
@@ -102,7 +106,7 @@ public class KRun {
 
 
         if (result != null) {
-            prettyPrint(compiledDef.languageParsingModule(), options.prettyPrint.output, s -> outputFile(s, options.prettyPrint, files), result._1(), options.prettyPrint.color(tty.stdout, files.getEnv()));
+            prettyPrint(compiledDef.getParsedDefinition(), compiledDef.languageParsingModule(), files, compiledDef.kompileOptions, options.prettyPrint.output, s -> outputFile(s, options.prettyPrint, files), result._1(), options.prettyPrint.color(tty.stdout, files.getEnv()));
             return result._2();
         }
         return 0;
@@ -182,7 +186,7 @@ public class KRun {
         return compiledDef.parsePatternIfAbsent(files, kem, pattern, source);
     }
 
-    public static void prettyPrint(Module module, OutputModes output, Consumer<byte[]> print, K result, ColorSetting colorize) {
+    public static void prettyPrint(Definition def, Module module, FileUtil files, KompileOptions kompile, OutputModes output, Consumer<byte[]> print, K result, ColorSetting colorize) {
         switch (output) {
         case KAST:
             print.accept((ToKast.apply(result) + "\n").getBytes());
@@ -192,7 +196,7 @@ public class KRun {
             break;
         case PRETTY:
             Module unparsingModule = RuleGrammarGenerator.getCombinedGrammar(module, false).getExtensionModule();
-            print.accept((unparseTerm(result, unparsingModule, colorize) + "\n").getBytes());
+            print.accept((unparseTerm(result, unparsingModule, colorize, files, kompile) + "\n").getBytes());
             break;
         case BINARY:
             print.accept(ToBinary.apply(result));
@@ -273,7 +277,7 @@ public class KRun {
         return KApply(compiledDef.topCellInitializer, output.entrySet().stream().map(e -> KApply(KLabel("_|->_"), e.getKey(), e.getValue())).reduce(KApply(KLabel(".Map")), (a, b) -> KApply(KLabel("_Map_"), a, b)));
     }
 
-    public static String unparseTerm(K input, Module test, ColorSetting colorize) {
+    public static String unparseTerm(K input, Module test, ColorSetting colorize, FileUtil files, KompileOptions kompile) {
         K sortedComm = new TransformK() {
             @Override
             public K apply(KApply k) {
@@ -285,7 +289,7 @@ public class KRun {
                     List<K> items = new ArrayList<>(Assoc.flatten(k.klabel(), k.klist().items(), KLabel(att.get("unit"))));
                     List<Tuple2<String, K>> printed = new ArrayList<>();
                     for (K item : items) {
-                        String s = unparseInternal(test, ColorSetting.OFF, apply(item));
+                        String s = unparseInternal(test, ColorSetting.OFF, apply(item), files, kompile);
                         printed.add(Tuple2.apply(s, item));
                     }
                     printed.sort(Comparator.comparing(Tuple2::_1, new AlphanumComparator()));
@@ -307,12 +311,13 @@ public class KRun {
                 return k;
             }
         }.apply(sortedComm);
-        return unparseInternal(test, colorize, alphaRenamed);
+        return unparseInternal(test, colorize, alphaRenamed, files, kompile);
     }
 
-    private static String unparseInternal(Module mod, ColorSetting colorize, K input) {
+    private static String unparseInternal(Module mod, ColorSetting colorize, K input, FileUtil files, KompileOptions kompile) {
+        ExpandMacros expandMacros = new ExpandMacros(mod, files, kompile, true);
         return Formatter.format(
-                new AddBrackets(mod).addBrackets((ProductionReference) ParseInModule.disambiguateForUnparse(mod, KOREToTreeNodes.apply(KOREToTreeNodes.up(mod, input), mod))), colorize);
+                new AddBrackets(mod).addBrackets((ProductionReference) ParseInModule.disambiguateForUnparse(mod, KOREToTreeNodes.apply(KOREToTreeNodes.up(mod, expandMacros.expand(input)), mod))), colorize);
     }
 
     public K externalParse(String parser, String value, Sort startSymbol, Source source, CompiledDefinition compiledDef) {

@@ -9,6 +9,7 @@ import org.kframework.builtin.Sorts;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.kompile.Kompile;
+import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
 import org.kframework.krun.ColorSetting;
 import org.kframework.krun.KRun;
@@ -94,7 +95,7 @@ public class AddBracketsTest {
         Module test = parseModule(def);
         ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(gen.getProgramsGrammar(test), true);
         K parsed = parseTerm(pgm, parser);
-        String unparsed = KRun.unparseTerm(parsed, test, ColorSetting.OFF);
+        String unparsed = KRun.unparseTerm(parsed, test, ColorSetting.OFF, FileUtil.testFileUtil(), new KompileOptions());
         assertEquals(pgm, unparsed);
     }
 

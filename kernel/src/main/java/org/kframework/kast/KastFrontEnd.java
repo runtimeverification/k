@@ -109,7 +109,7 @@ public class KastFrontEnd extends FrontEnd {
             }
             K parsed = def.getParser(mod, sort, kem).apply(FileUtil.read(stringToParse), source);
             if (options.expandMacros) {
-                parsed = new ExpandMacros(compiledMod, kem, files, options.global, def.kompileOptions).expand(parsed);
+                parsed = new ExpandMacros(compiledMod, files, def.kompileOptions, false).expand(parsed);
             }
             System.out.println(ToKast.apply(parsed));
             sw.printTotal("Total");

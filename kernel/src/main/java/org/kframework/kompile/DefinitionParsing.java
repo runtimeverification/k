@@ -369,7 +369,7 @@ public class DefinitionParsing {
             kem.addAllKException(parse.getWarnings().stream().map(e -> e.getKException()).collect(Collectors.toList()));
             return Stream.of(parse.getParse());
         } else {
-            result = parser.parseString(b.contents(), START_SYMBOL, scanner, source, startLine, startColumn, !b.att().contains("macro"));
+            result = parser.parseString(b.contents(), START_SYMBOL, scanner, source, startLine, startColumn, !b.att().contains("macro") && !b.att().contains("alias"));
             parsedBubbles.getAndIncrement();
             kem.addAllKException(result._2().stream().map(e -> e.getKException()).collect(Collectors.toList()));
             if (result._1().isRight()) {

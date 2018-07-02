@@ -226,7 +226,7 @@ public class DefinitionToOcaml implements Serializable {
         constants = serialized.constants;
         realStepFunctions = serialized.realStepFunctions;
         if (serialized.expandMacros == null) {
-            serialized.expandMacros = new ExpandMacros(def.executionModule(), kem, files, globalOptions, kompileOptions);
+            serialized.expandMacros = new ExpandMacros(def.executionModule(), files, kompileOptions, false);
         }
         if (serialized.convertDataStructure == null) {
             serialized.convertDataStructure = new ConvertDataStructureToLookup(def.executionModule(), true);
@@ -251,7 +251,7 @@ public class DefinitionToOcaml implements Serializable {
         this.convertDataStructure = new ConvertDataStructureToLookup(def.executionModule(), true);
         ModuleTransformer convertLookups = ModuleTransformer.fromSentenceTransformer(convertDataStructure::convert, "convert data structures to lookups");
         ModuleTransformer liftToKSequence = ModuleTransformer.fromSentenceTransformer(new LiftToKSequence()::lift, "lift K into KSequence");
-        this.expandMacros = new ExpandMacros(def.executionModule(), kem, files, globalOptions, kompileOptions);
+        this.expandMacros = new ExpandMacros(def.executionModule(), files, kompileOptions, false);
         ModuleTransformer expandMacros = ModuleTransformer.fromSentenceTransformer(this.expandMacros::expand, "expand macro rules");
         ModuleTransformer deconstructInts = ModuleTransformer.fromSentenceTransformer(new DeconstructIntegerAndFloatLiterals()::convert, "remove matches on integer literals in left hand side");
         this.threadCellExists = containsThreadCell(def);
@@ -1197,7 +1197,7 @@ public class DefinitionToOcaml implements Serializable {
         SetMultimap<KLabel, Rule> functionRules = HashMultimap.create();
         ListMultimap<KLabel, Rule> anywhereRules = ArrayListMultimap.create();
         anywhereKLabels = new HashSet<>();
-        stream(mainModule.rules()).filter(r -> !r.att().contains(Attribute.MACRO_KEY)).forEach(r -> {
+        stream(mainModule.rules()).filter(r -> !r.att().contains(Attribute.MACRO_KEY) && !r.att().contains(Attribute.ALIAS_KEY)).forEach(r -> {
             K left = RewriteToTop.toLeft(r.body());
             if (left instanceof KSequence) {
                 KSequence kseq = (KSequence) left;
@@ -1387,7 +1387,7 @@ public class DefinitionToOcaml implements Serializable {
         }
         List<Rule> sortedRules = unsortedRules.stream()
                 .sorted(this::sortRules)
-                .filter(r -> !functionRules.values().contains(r) && !r.att().contains(Attribute.MACRO_KEY) && !r.att().contains(Attribute.ANYWHERE_KEY))
+                .filter(r -> !functionRules.values().contains(r) && !r.att().contains(Attribute.MACRO_KEY) && !r.att().contains(Attribute.ALIAS_KEY) && !r.att().contains(Attribute.ANYWHERE_KEY))
                 .collect(Collectors.toList());
         sb.append("let rec get_next_op_from_exp(c: kitem) : (k -> k * (step_function)) = ");
         Set<KLabel> allStepFunctions = Sets.difference(mutable(mainModule.definedKLabels()), functions);
