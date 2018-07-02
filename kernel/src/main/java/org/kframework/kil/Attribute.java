@@ -17,14 +17,12 @@ import java.lang.annotation.Annotation;
  */
 public class Attribute<T> extends ASTNode {
 
-    public static final String BUILTIN_KEY = "builtin";
     public static final String FUNCTION_KEY = "function";
     public static final String ASSOCIATIVE_KEY = "assoc";
     public static final String COMMUTATIVE_KEY = "comm";
     public static final String IDEMPOTENT_KEY = "idem";
     public static final String UNIT_KEY = "unit";
     public static final String PREDICATE_KEY = "predicate";
-    public static final String STREAM_KEY = "stream";
     public static final String ANYWHERE_KEY = Constants.ANYWHERE;
     public static final String PATTERN_KEY = "pattern";
     public static final String PATTERN_FOLDING_KEY = "pattern-folding";
@@ -33,40 +31,24 @@ public class Attribute<T> extends ASTNode {
     public static final String ALIAS_KEY = "alias";
     public static final String LEMMA_KEY = "lemma";
     public static final String TRUSTED_KEY = "trusted";
-    public static final String SIMPLIFICATION_KEY = "simplification";
 
-    public static final String FRESH_GENERATOR = "freshGenerator";
     public static final String BITWIDTH_KEY = "bitwidth";
     public static final String EXPONENT_KEY = "exponent";
     public static final String SIGNIFICAND_KEY = "significand";
     public static final String SMTLIB_KEY = "smtlib";
     public static final String SMT_LEMMA_KEY = "smt-lemma";
-    public static final String SMT_SORT_FLATTEN = "smt-sort-flatten";
     // Used to direct configuration abstraction,
     // generated when translating configuration declaration to productions.
     public static final String CELL_KEY = "cell";
     public static final String CELL_FRAGMENT_KEY = "cellFragment";
     public static final String CELL_OPT_ABSENT_KEY = "cellOptAbsent";
 
-    public static final String EQUALITY_KEY = "equality";
-    public static final String ARITY_KEY = "arity";
     public static final String IMPURE_KEY = "impure";
     public static final String STRICT_KEY = "strict";
     public static final String SEQSTRICT_KEY = "seqstrict";
     public static final String CONCRETE_FUNCTION_KEY = "concrete";
 
-    public static final Attribute<String> BRACKET = Attribute.of("bracket", "");
-    public static final Attribute<String> FUNCTION = Attribute.of(FUNCTION_KEY, "");
-    public static final Attribute<String> PREDICATE = Attribute.of(PREDICATE_KEY, "");
     public static final Attribute<String> PATTERN = Attribute.of(PATTERN_KEY, "");
-    public static final Attribute<String> PATTERN_FOLDING = Attribute.of(PATTERN_FOLDING_KEY, "");
-    public static final Attribute<String> TRUSTED = Attribute.of(TRUSTED_KEY, "");
-    public static final Attribute<String> MACRO = Attribute.of(MACRO_KEY, "");
-    public static final Attribute<String> ANYWHERE = Attribute.of("anywhere", "");
-    public static final Attribute<String> TRANSITION = Attribute.of("transition", "");
-    public static final Attribute<String> NOT_IN_RULES = Attribute.of("notInRules", "");
-    public static final Attribute<String> VARIABLE = Attribute.of("variable", "");
-    public static final Attribute<String> HYBRID = Attribute.of("hybrid", "");
 
     private Key<T> key;
     private T value;
