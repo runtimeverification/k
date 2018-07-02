@@ -53,7 +53,7 @@ public class AddBracketsTest {
                         Lists.newArrayList(Kompile.BUILTIN_DIRECTORY),
                         false, false);
 
-        return new RuleGrammarGenerator(baseK, true);
+        return new RuleGrammarGenerator(baseK);
     }
 
     private Module parseModule(String def) {

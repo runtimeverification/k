@@ -45,7 +45,6 @@ import static org.kframework.kore.KORE.*;
 public class RuleGrammarGenerator {
 
     private final Definition baseK;
-    public final boolean strict;
     private static final Set<Sort> kSorts = new HashSet<>();
 
     static {
@@ -87,12 +86,9 @@ public class RuleGrammarGenerator {
      * Initialize a grammar generator.
      * @param baseK A Definition containing a K module giving the syntax of K itself.
      *              The default K syntax is defined in include/kast.k.
-     * @param strict true if the generated parsers should retain inferred variable
-     *               sorts as sort predicate in the requires clause.
      */
-    public RuleGrammarGenerator(Definition baseK, boolean strict) {
+    public RuleGrammarGenerator(Definition baseK) {
         this.baseK = baseK;
-        this.strict = strict;
     }
 
     private Set<Module> renameKItem2Bottom(Set<Module> def) {

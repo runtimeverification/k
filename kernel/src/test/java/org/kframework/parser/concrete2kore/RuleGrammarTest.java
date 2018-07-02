@@ -54,7 +54,7 @@ public class RuleGrammarTest {
                         Lists.newArrayList(Kompile.BUILTIN_DIRECTORY),
                         false, false);
 
-        return new RuleGrammarGenerator(baseK, true);
+        return new RuleGrammarGenerator(baseK);
     }
 
     private void parseRule(String input, String def, int warnings, boolean expectedError) {
