@@ -318,7 +318,7 @@ public class RuleGrammarGenerator {
             Set<Sentence> prods3 = new HashSet<>();
             // if no start symbol has been defined in the configuration, then use K
             for (Sort srt : iterable(mod.definedSorts())) {
-                if (!kSorts.contains(srt) && !mod.listSorts().contains(srt)) {
+                if (!isParserSort(srt) && !mod.listSorts().contains(srt)) {
                     // K ::= Sort
                     prods3.add(Production(Sorts.K(), Seq(NonTerminal(srt)), Att()));
                 }
