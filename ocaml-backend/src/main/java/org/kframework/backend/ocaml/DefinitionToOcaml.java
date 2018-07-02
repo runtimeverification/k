@@ -128,7 +128,7 @@ public class DefinitionToOcaml implements Serializable {
     static {
         ImmutableSet.Builder<String> builder = ImmutableSet.builder();
         builder.add("BOOL").add("FLOAT").add("INT").add("IO").add("K").add("KEQUAL").add("KREFLECTION").add("LIST");
-        builder.add("MAP").add("MINT").add("SET").add("STRING").add("ARRAY").add("BUFFER");
+        builder.add("MAP").add("MINT").add("SET").add("STRING").add("ARRAY").add("BUFFER").add("BYTES");
         hookNamespaces = builder.build();
     }
 
@@ -150,6 +150,7 @@ public class DefinitionToOcaml implements Serializable {
             return "(round_to_range(Float ((Gmp.FR.from_string_prec_base " + f.precision() + " Gmp.GMP_RNDN 10 \"" + f.value() + "\"), " + f.exponent() + ", " + f.precision() + ")))";
         });
         builder.put("STRING.String", s -> "(String " + enquoteString(StringUtil.unquoteKString(s)) + ")");
+        builder.put("BYTES.Bytes", s -> "(Bytes (Bytes.of_string " + enquoteString(StringUtil.unquoteKString(s)) + "))");
         builder.put("BUFFER.StringBuffer", DefinitionToOcaml::stringBufferConstant);
         userSortHooks = builder.build();
 
@@ -165,6 +166,7 @@ public class DefinitionToOcaml implements Serializable {
             return "(round_to_range(Float ((Gmp.FR.from_string_prec_base " + f.precision() + " Gmp.GMP_RNDN 10 \"" + f.value() + "\"), " + f.exponent() + ", " + f.precision() + ")))";
         });
         builder.put("STRING.String", s -> "(String " + enquoteString(StringUtil.unquoteKString(s)) + ")");
+        builder.put("BYTES.Bytes", s -> "(Bytes (Bytes.of_string " + enquoteString(StringUtil.unquoteKString(s)) + "))");
         builder.put("BUFFER.StringBuffer", DefinitionToOcaml::stringBufferConstant);
         defSortHooks = builder.build();
     }
@@ -176,6 +178,7 @@ public class DefinitionToOcaml implements Serializable {
         builder.put("INT.Int", s -> "Int _");
         builder.put("FLOAT.Float", s -> "Float _");
         builder.put("STRING.String", s -> "String _");
+        builder.put("BYTES.Bytes", s -> "Bytes _");
         builder.put("BUFFER.StringBuffer", s -> "StringBuffer _");
         builder.put("LIST.List", s -> "List (" + encodeStringToIdentifier(s) + ",_,_)");
         builder.put("ARRAY.Array", s -> "Array (" + encodeStringToIdentifier(s) + ",_,_)");
@@ -191,6 +194,7 @@ public class DefinitionToOcaml implements Serializable {
         builder.put("INT.Int", s -> "[Int _] -> [Bool true]");
         builder.put("FLOAT.Float", s -> "[Float _] -> [Bool true]");
         builder.put("STRING.String", s -> "[String _] -> [Bool true]");
+        builder.put("BYTES.Bytes", s -> "[Bytes _] -> [Bool true]");
         builder.put("BUFFER.StringBuffer", s -> "[StringBuffer _] -> [Bool true]");
         builder.put("BOOL.Bool", s -> "[Bool _] -> [Bool true]");
         builder.put("MINT.MInt", s -> "[MInt _] -> [Bool true]");
@@ -599,6 +603,7 @@ public class DefinitionToOcaml implements Serializable {
         sorts.add(Sorts.String());
         sorts.add(Sorts.Float());
         sorts.add(Sorts.StringBuffer());
+        sorts.add(Sorts.Bytes());
         for (Sort s : sorts) {
             sb.append("|");
             encodeStringToIdentifier(sb, s);
@@ -606,6 +611,10 @@ public class DefinitionToOcaml implements Serializable {
         }
         Set<KLabel> klabels = mutable(mainModule.definedKLabels());
         klabels.add(KLabel("#Bottom"));
+        klabels.add(KLabel("littleEndianBytes"));
+        klabels.add(KLabel("bigEndianBytes"));
+        klabels.add(KLabel("signedBytes"));
+        klabels.add(KLabel("unsignedBytes"));
         addOpaqueKLabels(klabels);
         sb.append("type klabel = \n");
         for (KLabel label : klabels) {
@@ -786,6 +795,7 @@ public class DefinitionToOcaml implements Serializable {
                 "    | Float (f,_,_) -> Hashtbl.hash (Gmp.FR.to_float f)\n" +
                 "    | String s -> Hashtbl.hash s\n" +
                 "    | StringBuffer s -> Hashtbl.hash (Buffer.contents s)\n" +
+                "    | Bytes b -> Hashtbl.hash b\n" +
                 "    | Bool b -> Hashtbl.hash b\n" +
                 "    | MInt (w,i) -> Hashtbl.hash w * 67 + Z.hash i\n" +
                 "    | Bottom -> 1\n" +
@@ -845,6 +855,8 @@ public class DefinitionToOcaml implements Serializable {
                 "        max)\n" +
                 "    | String s -> qfld kq (31*h + Hashtbl.hash s) (\n" +
                 "        max)\n" +
+                "    | Bytes b -> qfld kq (31*h + Hashtbl.hash b) (\n" +
+                "        max)\n" +
                 "    | StringBuffer s -> qfld kq (31*h + Hashtbl.hash (Buffer.contents s)) (\n" +
                 "        max)\n" +
                 "    | Bool b -> qfld kq (31*h + Hashtbl.hash b) (\n" +
@@ -891,6 +903,7 @@ public class DefinitionToOcaml implements Serializable {
                 "    | (Int i1), (Int i2) -> Z.equal i1 i2\n" +
                 "    | (Float (f1,e1,p1)), (Float (f2,e2,p2)) -> e1 = e2 && p1 = p2 && Gmp.FR.compare f1 f2 = 0\n" +
                 "    | (String s1), (String s2) -> s1 = s2\n" +
+                "    | (Bytes b1), (Bytes b2) -> b1 == b2\n" +
                 "    | (StringBuffer s1), (StringBuffer s2) -> s1 == s2\n" +
                 "    | (Bool b1), (Bool b2) -> b1 = b2\n" +
                 "    | (MInt (w1,i1)), (MInt (w2,i2)) -> w1 = w2 && Z.equal i1 i2\n" +
@@ -938,6 +951,7 @@ public class DefinitionToOcaml implements Serializable {
                 "    | (Int i1), (Int i2) -> Z.compare i1 i2\n" +
                 "    | (Float (f1,e1,p1)), (Float (f2,e2,p2)) -> let v = e2 - e1 in if v = 0 then let v2 = p2 - p1 in if v2 = 0 then Gmp.FR.compare f1 f2 else v2 else v\n" +
                 "    | (String s1), (String s2) -> Pervasives.compare s1 s2\n" +
+                "    | (Bytes b1), (Bytes b2) -> Pervasives.compare b1 b2\n" +
                 "    | (StringBuffer s1), (StringBuffer s2) -> Pervasives.compare (Buffer.contents s1) (Buffer.contents s2)\n" +
                 "    | (Bool b1), (Bool b2) -> if b1 = b2 then 0 else if b1 then -1 else 1\n" +
                 "    | (MInt (w1,i1)), (MInt (w2,i2)) -> let v = Pervasives.compare w1 w2 in if v = 0 then Z.compare i1 i2 else v\n" +
@@ -967,6 +981,8 @@ public class DefinitionToOcaml implements Serializable {
                 "    | _, Float(_) -> 1\n" +
                 "    | String(_), _ -> -1\n" +
                 "    | _, String(_) -> 1\n" +
+                "    | Bytes(_), _ -> -1\n" +
+                "    | _, Bytes(_) -> 1\n" +
                 "    | StringBuffer(_), _ -> -1\n" +
                 "    | _, StringBuffer(_) -> 1\n" +
                 "    | Bool(_), _ -> -1\n" +
@@ -1122,6 +1138,7 @@ public class DefinitionToOcaml implements Serializable {
         sb.append("            | Int of Z.t\n");
         sb.append("            | Float of Gmp.FR.t * int * int\n");
         sb.append("            | String of string\n");
+        sb.append("            | Bytes of bytes\n");
         sb.append("            | StringBuffer of Buffer.t\n");
         sb.append("            | Bool of bool\n");
         sb.append("            | MInt of int * Z.t\n");
