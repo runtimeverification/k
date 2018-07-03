@@ -1,1 +1,1 @@
-V ==K ( V0 , V1 , V2 , .Types ) triple --> V1
+V ==K ( V0 , V1 , V2 , .TypeVars ) triple --> V1

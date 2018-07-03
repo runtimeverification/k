@@ -1,1 +1,1 @@
-V ==K ( ( int , int , .Types ) pair , .Types ) list
+V ==K ( ( int , int , .TypeVars ) pair , .TypeVars ) list
