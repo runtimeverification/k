@@ -3,6 +3,7 @@ package org.kframework;
 
 import org.kframework.definition.Module;
 import org.kframework.kore.K;
+import org.kframework.kprove.KProveOptions;
 import org.kframework.krun.KRun;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.unparser.KPrint;
@@ -39,7 +40,7 @@ public class Debugg {
     private static String      currentRule;
     private static long        startTime;
 
-    public static void init(FileUtil files, Module specModule, Module parsingModule, KPrint kprint, boolean loggingOn) {
+    public static void init(KProveOptions options, FileUtil files, Module specModule, Module parsingModule, KPrint kprint, boolean loggingOn) {
         Debugg.loggingOn = loggingOn;
         if (! Debugg.loggingOn) return;
 
@@ -51,12 +52,19 @@ public class Debugg {
         try {
             Debugg.sessionId  = Integer.toString(Math.abs(Debugg.specModule.hashCode()));
             Debugg.sessionDir = files.resolveKompiled(sessionId + ".debugg");
-            Debugg.nodesDir   = new File(Debugg.sessionDir, "nodes/");
+            String path          = sessionDir.getAbsolutePath();
+            if(options.debuggPath != null) {
+                path = options.debuggPath;
+            }
+            Debugg.nodesDir   = new File(path, "nodes/");
             Debugg.nodesDir.mkdirs();
-            Debugg.sessionLog = new PrintWriter(sessionDir.getAbsolutePath() + "/debugg.log");
-            System.out.println("Debugg logging to path: " + sessionDir.getAbsolutePath());
+            Debugg.sessionLog = new PrintWriter(path + "/debugg.log");
+            if(options.debuggPath != null) {
+                System.out.println("run");
+            } else {
+                System.out.println(path);
+            }
         } catch (FileNotFoundException e) {
-            System.err.println("Could not open up Debugg log in directory: " + sessionDir.getAbsolutePath());
             e.printStackTrace();
         }
 
