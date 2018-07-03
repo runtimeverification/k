@@ -72,7 +72,7 @@ trait Sorting {
         subsorts.lessThanEq(p1.sort, p2.sort) &&
         p1.nonterminals.size == p2.nonterminals.size &&
         p1.nonterminals.zip(p2.nonterminals).forall(pair => subsorts.lessThanEq(pair._1.sort, pair._2.sort)) &&
-        p1.items.map { case NonTerminal(_, name) => NonTerminal(Sorts.K, name) case pi => pi }.equals(p2.items.map { case NonTerminal(_, name) => NonTerminal(Sorts.K, name) case pi => pi })
+        (p1.sort != p2.sort || p1.nonterminals.map(_.sort) != p2.nonterminals.map(_.sort))
     }
     val pairs = for (x <- prods; y <- prods) yield (x, y)
     val overloadRelations: Set[(Production, Production)] = pairs collect {

@@ -45,10 +45,7 @@ case class TermCons private(items: PStack[Term], production: Production)
 
 case class Ambiguity(items: Set[Term])
   extends Term with HasChildren {
-  def replaceChildren(newChildren: Collection[Term]) = {
-    items.clear(); items.addAll(newChildren);
-    this
-  }
+  def replaceChildren(newChildren: Collection[Term]) = Ambiguity(new HashSet[Term](newChildren), location, source)
   override def toString() = "amb(" + (items.asScala mkString ",") + ")"
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(Ambiguity.this);
 }
@@ -105,10 +102,10 @@ object KList {
 
 object Ambiguity {
   @annotation.varargs def apply(items: Term*): Ambiguity = Ambiguity(items.to[mutable.Set].asJava)
-  def apply(items: Set[Term], location: Location, source: Source):Ambiguity = {
+  def apply(items: Set[Term], location: Optional[Location], source: Optional[Source]):Ambiguity = {
     val res = Ambiguity(items)
-    res.location = Optional.of(location)
-    res.source = Optional.of(source)
+    res.location = location
+    res.source = source
     res
   }
 }
