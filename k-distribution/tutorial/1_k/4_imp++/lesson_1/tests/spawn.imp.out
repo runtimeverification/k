@@ -1,6 +1,6 @@
 <T>
   <k>
-    print ( "x = " , .AExps ) ; ~> x = read ( ) ; ~> spawn x = x / 2 ; ~> spawn x = x + 10 ; ~> print ( x , "\n" , .AExps ) ;
+    print ( "x = " , .Ids ) ; ~> x = read ( ) ; ~> spawn x = x / 2 ; ~> spawn x = x + 10 ; ~> print ( x , "\n" , .Ids ) ;
   </k>
   <state>
     x |-> 0
