@@ -81,4 +81,7 @@ public class PrintOptions {
 
     @Parameter(names={"--output-tokenize"}, description="KLabels to tokenize underneath (reducing output size).")
     public List<String> tokenizedKLabels = new ArrayList<String>();
+
+    @Parameter(names={"--output-tostring"}, description="KLabels to be printed in toString() format.")
+    public List<String> tostringKLabels = new ArrayList<>();
 }

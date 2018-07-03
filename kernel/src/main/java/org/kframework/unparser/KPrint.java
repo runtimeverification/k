@@ -96,10 +96,11 @@ public class KPrint {
     }
 
     private static K abstractionPass(Module unparsingModule, K contents) {
-        K omitted   = KPrint.omitKLabels    (unparsingModule, contents);
-        K flattened = KPrint.flattenKLabels (unparsingModule, omitted);
-        K tokenized = KPrint.tokenizeKLabels(unparsingModule, flattened);
-        return tokenized;
+        K omitted    = KPrint.omitKLabels    (unparsingModule, contents);
+        K flattened  = KPrint.flattenKLabels (unparsingModule, omitted);
+        K tokenized  = KPrint.tokenizeKLabels(unparsingModule, flattened);
+        K tostringed = KPrint.tostringKLabels(unparsingModule, tokenized);
+        return tostringed;
     }
 
     /**
@@ -150,6 +151,32 @@ public class KPrint {
             public K apply(KApply k) {
                 if (options.tokenizedKLabels.contains(k.klabel().name())) {
                     List<K> newArgs = k.klist().items().stream().map(arg -> tokenizeTerm(module, arg)).collect(Collectors.toList());
+                    return KApply(k.klabel(), KList(newArgs), k.att());
+                } else {
+                    return super.apply(k);
+                }
+            }
+        }.apply(result);
+    }
+
+    public static K tostringTerm(Module module, K k) {
+        if (! (k instanceof KApply)) return k;
+        KApply       kapp         = (KApply) k;
+        String       tostringTerm = kapp.toString();
+        Sort         finalSort    = Sorts.K();
+        Option<Sort> termSort     = module.sortFor().get(kapp.klabel());
+        if (! termSort.isEmpty()) {
+            finalSort = termSort.get();
+        }
+        return KToken(tostringTerm, finalSort);
+    }
+
+    public static K tostringKLabels(Module module, K result) {
+        return new TransformK() {
+            @Override
+            public K apply(KApply k) {
+                if (options.tostringKLabels.contains(k.klabel().name())) {
+                    List<K> newArgs = k.klist().items().stream().map(arg -> tostringTerm(module, arg)).collect(Collectors.toList());
                     return KApply(k.klabel(), KList(newArgs), k.att());
                 } else {
                     return super.apply(k);
