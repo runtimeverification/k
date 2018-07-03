@@ -23,7 +23,7 @@ object KOREToTreeNodes {
   }
 
   def up(mod: Module)(t: K): K = t match {
-    case v: KVariable => KToken(v.name, Sorts.KVariable, v.att)
+    case v: KVariable => KToken(v.toString, Sorts.KVariable, v.att)
     case t: KToken =>
       if (mod.tokenProductionsFor.contains(t.sort)) {
         t
