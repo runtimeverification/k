@@ -103,7 +103,7 @@ public class ToJson {
             KVariable var = (KVariable) k;
 
             knode.add("node", JsonParser.KVARIABLE);
-            knode.add("name", var.name());
+            knode.add("name", var.toString());
 
         } else if (k instanceof KRewrite) {
             KRewrite rew = (KRewrite) k;
@@ -111,6 +111,7 @@ public class ToJson {
             knode.add("node", JsonParser.KREWRITE);
             knode.add("lhs", toJson(rew.left()));
             knode.add("rhs", toJson(rew.right()));
+            knode.add("att", rew.att().toString());
 
         } else if (k instanceof InjectedKLabel) {
             InjectedKLabel inj = (InjectedKLabel) k;
