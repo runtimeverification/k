@@ -1,21 +1,24 @@
 // Copyright (c) 2014-2018 K Team. All Rights Reserved.
-package org.kframework.krun;
+package org.kframework.unparser;
 
 import com.beust.jcommander.Parameter;
 import com.google.inject.Inject;
-import org.kframework.unparser.OutputModes;
+
 import org.kframework.utils.options.BaseEnumConverter;
+import org.kframework.utils.options.StringListConverter;
 
 import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
 
-public class PrettyPrintOptions {
+public class PrintOptions {
 
-    public PrettyPrintOptions() {
+    public PrintOptions() {
     }
 
     //TODO(dwightguth): remove in Guice 4.0
     @Inject
-    public PrettyPrintOptions(Void v) {
+    public PrintOptions(Void v) {
     }
 
     @Parameter(names = "--color", description = "Use colors in output. Default is on.", converter=ColorModeConverter.class)
@@ -56,7 +59,7 @@ public class PrettyPrintOptions {
     public String outputFile;
 
     @Parameter(names={"--output", "-o"}, converter=OutputModeConverter.class,
-            description="How to display krun results. <mode> is either [pretty|sound|kast|binary|none|no-wrap].")
+            description="How to display krun results. <mode> is either [pretty|sound|kast|binary|json|none|no-wrap].")
     public OutputModes output = OutputModes.PRETTY;
 
     public static class OutputModeConverter extends BaseEnumConverter<OutputModes> {
@@ -71,4 +74,15 @@ public class PrettyPrintOptions {
         }
     }
 
+    @Parameter(names={"--output-omit"}, listConverter=StringListConverter.class, description="KLabels to omit from the output.")
+    public List<String> omittedKLabels = new ArrayList<String>();
+
+    @Parameter(names={"--output-flatten"}, listConverter=StringListConverter.class, description="Assoc KLabels to flatten arguments for (reducing output size).")
+    public List<String> flattenedKLabels = new ArrayList<String>();
+
+    @Parameter(names={"--output-tokenize"}, listConverter=StringListConverter.class, description="KLabels to tokenize underneath (reducing output size).")
+    public List<String> tokenizedKLabels = new ArrayList<String>();
+
+    @Parameter(names={"--output-tostring"}, listConverter=StringListConverter.class, description="KLabels to be printed in toString() format.")
+    public List<String> tostringKLabels = new ArrayList<>();
 }

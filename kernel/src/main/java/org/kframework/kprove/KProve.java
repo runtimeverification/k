@@ -19,6 +19,7 @@ import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.TTYInfo;
+import org.kframework.unparser.KPrint;
 import scala.Option;
 import scala.Tuple2;
 import scala.collection.Set;
@@ -41,13 +42,15 @@ public class KProve {
     private final Stopwatch sw;
     private final FileUtil files;
     private TTYInfo tty;
+    private KPrint kprint;
 
     @Inject
-    public KProve(KExceptionManager kem, Stopwatch sw, FileUtil files, TTYInfo tty) {
+    public KProve(KExceptionManager kem, Stopwatch sw, FileUtil files, TTYInfo tty, KPrint kprint) {
         this.kem = kem;
         this.sw = sw;
         this.files = files;
         this.tty = tty;
+        this.kprint = kprint;
     }
 
     public int run(KProveOptions options, CompiledDefinition compiledDefinition, Backend backend, Function<Module, Rewriter> rewriterGenerator) {
@@ -62,7 +65,7 @@ public class KProve {
         } else {
             exit = 1;
         }
-        KRun.prettyPrint(compiled._1().getModule("LANGUAGE-PARSING").get(), options.prettyPrint.output, s -> KRun.outputFile(s, options.prettyPrint, files), results, options.prettyPrint.color(tty.stdout, files.getEnv()));
+        kprint.prettyPrint(compiled._1().getModule("LANGUAGE-PARSING").get(), s -> kprint.outputFile(s), results);
         return exit;
     }
 

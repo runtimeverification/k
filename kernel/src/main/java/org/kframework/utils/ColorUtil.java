@@ -1,7 +1,7 @@
 // Copyright (c) 2012-2018 K Team. All Rights Reserved.
 package org.kframework.utils;
 
-import org.kframework.krun.ColorSetting;
+import org.kframework.unparser.ColorSetting;
 
 import java.awt.Color;
 import java.awt.color.ColorSpace;

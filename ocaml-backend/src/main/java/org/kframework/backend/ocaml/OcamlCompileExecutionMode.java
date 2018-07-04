@@ -18,6 +18,7 @@ import org.kframework.krun.modes.ExecutionMode;
 import org.kframework.main.GlobalOptions;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.unparser.ToBinary;
+import org.kframework.unparser.KPrint;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
@@ -40,6 +41,7 @@ public class OcamlCompileExecutionMode implements ExecutionMode {
     private final OcamlKRunOptions ocamlKRunOptions;
     private final DefinitionToOcaml converter;
     private final KRunOptions options;
+    private final KPrint kprint;
 
     @Inject
     public OcamlCompileExecutionMode(
@@ -50,6 +52,7 @@ public class OcamlCompileExecutionMode implements ExecutionMode {
             CompiledDefinition def,
             OcamlRewriter.InitializeDefinition init,
             KRunOptions options,
+            KPrint kprint,
             OcamlKRunOptions ocamlKRunOptions) {
         this.kem = kem;
         this.files = files;
@@ -57,6 +60,7 @@ public class OcamlCompileExecutionMode implements ExecutionMode {
         this.converter = new DefinitionToOcaml(kem, files, globalOptions, kompileOptions, null);
         converter.initialize(init.serialized, def);
         this.options = options;
+        this.kprint = kprint;
     }
 
     @Override
@@ -111,7 +115,7 @@ public class OcamlCompileExecutionMode implements ExecutionMode {
                 rewriter.createResourceObject("kore_term");
                 rewriter.createResourceObject("marshal_term");
                 rewriter.createResourceObject("plugin_path");
-                String outputFile = options.prettyPrint.outputFile;
+                String outputFile = kprint.options.outputFile;
                 if (outputFile == null) {
                     outputFile = "a.out";
                 }

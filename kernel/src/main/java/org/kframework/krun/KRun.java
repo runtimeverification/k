@@ -26,12 +26,8 @@ import org.kframework.parser.binary.BinaryParser;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.parser.kore.KoreParser;
 import org.kframework.rewriter.Rewriter;
-import org.kframework.unparser.AddBrackets;
-import org.kframework.unparser.Formatter;
-import org.kframework.unparser.KOREToTreeNodes;
-import org.kframework.unparser.OutputModes;
-import org.kframework.unparser.ToBinary;
-import org.kframework.unparser.ToKast;
+import org.kframework.unparser.KPrint;
+import org.kframework.unparser.PrintOptions;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -55,6 +51,9 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import scala.Some;
+import scala.Option;
+
 import static org.kframework.Collections.*;
 import static org.kframework.kore.KORE.*;
 
@@ -64,11 +63,13 @@ import static org.kframework.kore.KORE.*;
 public class KRun {
 
     private final KExceptionManager kem;
+    private final KPrint kprint;
     private final FileUtil files;
     private final TTYInfo tty;
 
-    public KRun(KExceptionManager kem, FileUtil files, TTYInfo tty) {
+    public KRun(KExceptionManager kem, KPrint kprint, FileUtil files, TTYInfo tty) {
         this.kem = kem;
+        this.kprint = kprint;
         this.files = files;
         this.tty = tty;
     }
@@ -100,7 +101,7 @@ public class KRun {
 
 
         if (result != null) {
-            prettyPrint(compiledDef.languageParsingModule(), options.prettyPrint.output, s -> outputFile(s, options.prettyPrint, files), result._1(), options.prettyPrint.color(tty.stdout, files.getEnv()));
+            kprint.prettyPrint(compiledDef.languageParsingModule(), s -> kprint.outputFile(s), result._1());
             return result._2();
         }
         return 0;
@@ -138,23 +139,6 @@ public class KRun {
         return vars.iterator().next();
     }
 
-    //TODO(dwightguth): use Writer
-    public static void outputFile(String output, PrettyPrintOptions options, FileUtil files) {
-        outputFile(output.getBytes(), options, files);
-    }
-
-    public static void outputFile(byte[] output, PrettyPrintOptions options, FileUtil files) {
-        if (options.outputFile == null) {
-            try {
-                System.out.write(output);
-            } catch (IOException e) {
-                throw KEMException.internalError(e.getMessage(), e);
-            }
-        } else {
-            files.saveToWorkingDirectory(options.outputFile, output);
-        }
-    }
-
     /**
      * Function to compile the String Pattern, if the pattern is not present in the cache. Note the difference between
      * compilation and parsing. Compilation is the result of resolving anonymous variables, semantic casts, and concretizing
@@ -178,26 +162,6 @@ public class KRun {
      */
     public static Rule parsePattern(FileUtil files, KExceptionManager kem, String pattern, CompiledDefinition compiledDef, Source source) {
         return compiledDef.parsePatternIfAbsent(files, kem, pattern, source);
-    }
-
-    public static void prettyPrint(Module module, OutputModes output, Consumer<byte[]> print, K result, ColorSetting colorize) {
-        switch (output) {
-        case KAST:
-            print.accept((ToKast.apply(result) + "\n").getBytes());
-            break;
-        case NONE:
-            print.accept("".getBytes());
-            break;
-        case PRETTY:
-            Module unparsingModule = RuleGrammarGenerator.getCombinedGrammar(module, false).getExtensionModule();
-            print.accept((unparseTerm(result, unparsingModule, colorize) + "\n").getBytes());
-            break;
-        case BINARY:
-            print.accept(ToBinary.apply(result));
-            break;
-        default:
-            throw KEMException.criticalError("Unsupported output mode: " + output);
-        }
     }
 
     private K parseConfigVars(KRunOptions options, CompiledDefinition compiledDef) {
@@ -269,44 +233,6 @@ public class KRun {
 
     public KApply plugConfigVars(CompiledDefinition compiledDef, Map<KToken, K> output) {
         return KApply(compiledDef.topCellInitializer, output.entrySet().stream().map(e -> KApply(KLabel("_|->_"), e.getKey(), e.getValue())).reduce(KApply(KLabel(".Map")), (a, b) -> KApply(KLabel("_Map_"), a, b)));
-    }
-
-    private static String unparseTerm(K input, Module test, ColorSetting colorize) {
-        K sortedComm = new TransformK() {
-            @Override
-            public K apply(KApply k) {
-                if (k.klabel() instanceof KVariable) {
-                    return super.apply(k);
-                }
-                Att att = test.attributesFor().apply(KLabel(k.klabel().name()));
-                if (att.contains("comm") && att.contains("assoc") && att.contains("unit")) {
-                    List<K> items = new ArrayList<>(Assoc.flatten(k.klabel(), k.klist().items(), KLabel(att.get("unit"))));
-                    List<Tuple2<String, K>> printed = new ArrayList<>();
-                    for (K item : items) {
-                        String s = Formatter.format(new AddBrackets(test).addBrackets(KOREToTreeNodes.apply(KOREToTreeNodes.up(test, apply(item)), test)), ColorSetting.OFF);
-                        printed.add(Tuple2.apply(s, item));
-                    }
-                    printed.sort(Comparator.comparing(Tuple2::_1, new AlphanumComparator()));
-                    items = printed.stream().map(Tuple2::_2).map(this::apply).collect(Collectors.toList());
-                    return items.stream().reduce((k1, k2) -> KApply(k.klabel(), k1, k2)).orElse(KApply(KLabel(att.get("unit"))));
-                }
-                return super.apply(k);
-            }
-        }.apply(input);
-        K alphaRenamed = new TransformK() {
-            Map<KVariable, KVariable> renames = new HashMap<>();
-            int newCount = 0;
-
-            @Override
-            public K apply(KVariable k) {
-                if (k.att().contains("anonymous")) {
-                    return renames.computeIfAbsent(k, k2 -> KVariable("V" + newCount++, k.att()));
-                }
-                return k;
-            }
-        }.apply(sortedComm);
-        return Formatter.format(
-                new AddBrackets(test).addBrackets(KOREToTreeNodes.apply(KOREToTreeNodes.up(test, alphaRenamed), test)), colorize);
     }
 
     public K externalParse(String parser, String value, Sort startSymbol, Source source, CompiledDefinition compiledDef) {
