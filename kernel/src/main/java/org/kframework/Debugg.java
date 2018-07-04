@@ -32,6 +32,7 @@ public class Debugg {
     private static KPrint   kprint;
     private static boolean  loggingOn;
 
+    private static String      loggingPath;
     private static String      sessionId;
     private static File        sessionDir;
     private static File        nodesDir;
@@ -40,8 +41,8 @@ public class Debugg {
     private static String      currentRule;
     private static long        startTime;
 
-    public static void init(KProveOptions options, FileUtil files, Module specModule, Module parsingModule, KPrint kprint, boolean loggingOn) {
-        Debugg.loggingOn = loggingOn;
+    public static void init(KProveOptions kproveOptions, FileUtil files, Module specModule, Module parsingModule, KPrint kprint) {
+        Debugg.loggingOn = kproveOptions.debugg;
         if (! Debugg.loggingOn) return;
 
         Debugg.files         = files;
@@ -49,21 +50,15 @@ public class Debugg {
         Debugg.parsingModule = parsingModule;
         Debugg.kprint        = kprint;
 
+        Debugg.loggingPath = kproveOptions.debuggPath;
         try {
             Debugg.sessionId  = Integer.toString(Math.abs(Debugg.specModule.hashCode()));
-            Debugg.sessionDir = files.resolveKompiled(sessionId + ".debugg");
-            String path          = sessionDir.getAbsolutePath();
-            if(options.debuggPath != null) {
-                path = options.debuggPath;
-            }
-            Debugg.nodesDir   = new File(path, "nodes/");
+            Debugg.sessionDir = kproveOptions.debuggPath == null ? files.resolveKompiled(sessionId + ".debugg") : new File(kproveOptions.debuggPath);
+            String path       = sessionDir.getAbsolutePath();
+            Debugg.nodesDir   = new File(Debugg.sessionDir, "nodes/");
             Debugg.nodesDir.mkdirs();
-            Debugg.sessionLog = new PrintWriter(path + "/debugg.log");
-            if(options.debuggPath != null) {
-                System.out.println("run");
-            } else {
-                System.out.println(path);
-            }
+            Debugg.sessionLog = new PrintWriter(Debugg.sessionDir.getAbsolutePath() + "/debugg.log");
+            System.out.println("Debugg: " + Debugg.sessionDir.getAbsolutePath());
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
