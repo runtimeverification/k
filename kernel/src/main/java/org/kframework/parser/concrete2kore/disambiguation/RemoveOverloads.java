@@ -23,31 +23,20 @@ public class RemoveOverloads extends SafeTransformer {
 
     @Override
     public Term apply(Ambiguity a) {
-        Term applied = super.apply(a);
-        if (!(applied instanceof Ambiguity)) {
-            return applied;
-        }
-        Ambiguity ambApplied = (Ambiguity) applied;
-        PStack<Term> children = null;
         Set<Production> productions = new HashSet<>();
-        for (Term t : ambApplied.items()) {
+        for (Term t : a.items()) {
             if (t instanceof TermCons) {
                 TermCons tc = (TermCons)t;
                 productions.add(tc.production());
-                if (children == null) {
-                    children = tc.items();
-                } else if (!children.equals(tc.items())) {
-                    return applied;
-                }
             } else {
-                return applied;
+                return super.apply(a);
             }
         }
         Set<Production> candidates = overloads.minimal(productions);
-        Ambiguity result = Ambiguity.apply(ambApplied.items().stream().filter(t -> candidates.contains(((ProductionReference)t).production())).collect(Collectors.toSet()));
+        Ambiguity result = Ambiguity.apply(a.items().stream().filter(t -> candidates.contains(((ProductionReference)t).production())).collect(Collectors.toSet()));
         if (result.items().size() == 1) {
-            return result.items().iterator().next();
+            return apply(result.items().iterator().next());
         }
-        return result;
+        return super.apply(result);
     }
 }
