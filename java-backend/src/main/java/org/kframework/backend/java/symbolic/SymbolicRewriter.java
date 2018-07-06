@@ -826,12 +826,14 @@ public class SymbolicRewriter {
             forced = true;
         }
 
-        if (globalOptions.log || forced || globalOptions.logRulesPublic) {
+        boolean inNewStmt = globalOptions.logStmtsOnly && inNewStmt(kSequence);
+
+        if (globalOptions.log || forced || inNewStmt || globalOptions.logRulesPublic) {
             System.out.println("\nSTEP " + step + " v" + v + " : "
                     + (System.currentTimeMillis() - Main.startTime) / 1000. + " s \n===================");
         }
 
-        if (globalOptions.log || forced) {
+        if (globalOptions.log || forced || inNewStmt) {
             KProve.prettyPrint(k);
             System.out.println(output);
             System.out.println(statusCode);
@@ -872,6 +874,11 @@ public class SymbolicRewriter {
             throw new RuntimeException("<localMem> non-map format, aborting.");
         }
         return kSequence;
+    }
+
+    private boolean inNewStmt(BuiltinList kSequence) {
+        return kSequence.size() >= 2 && !kSequence.get(0).toString().startsWith("#")
+                && kSequence.get(1).toString().startsWith("#pc");
     }
 
     /**
