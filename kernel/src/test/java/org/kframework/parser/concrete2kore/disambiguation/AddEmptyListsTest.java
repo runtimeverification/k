@@ -62,7 +62,7 @@ public class AddEmptyListsTest {
                         Lists.newArrayList(Kompile.BUILTIN_DIRECTORY),
                         false, false);
 
-        return new RuleGrammarGenerator(baseK, true);
+        return new RuleGrammarGenerator(baseK);
     }
 
     private void parseTerm(String term, String sort, K expected) {

@@ -579,7 +579,7 @@ public class ModuleToKORE {
                     convert(attributes, rule.att());
                     sb.append("\n\n");
                 }
-            } else if (!rule.att().contains(Attribute.MACRO_KEY) && !rule.att().contains(Attribute.ANYWHERE_KEY)) {
+            } else if (!rule.att().contains(Attribute.MACRO_KEY) && !rule.att().contains(Attribute.ALIAS_KEY) && !rule.att().contains(Attribute.ANYWHERE_KEY)) {
                 sb.append("  axiom{} \\and{");
                 convert(topCell, false);
                 sb.append("} (\n    ");
@@ -656,7 +656,7 @@ public class ModuleToKORE {
         dependencies = new DirectedSparseGraph<>();
 
         Set<KLabel> anywhereKLabels = new HashSet<>();
-        stream(module.rules()).filter(r -> !r.att().contains(Attribute.MACRO_KEY)).forEach(r -> {
+        stream(module.rules()).filter(r -> !r.att().contains(Attribute.MACRO_KEY) && !r.att().contains(Attribute.ALIAS_KEY)).forEach(r -> {
             K left = RewriteToTop.toLeft(r.body());
             if (left instanceof KApply) {
                 KApply kapp = (KApply) left;

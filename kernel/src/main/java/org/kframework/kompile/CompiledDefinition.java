@@ -142,7 +142,7 @@ public class CompiledDefinition implements Serializable {
      * {@link RuleGrammarGenerator#POSTFIX}. In latter case, it uses the user-defined module.
      */
     public Option<Module> programParsingModuleFor(String moduleName, KExceptionManager kem) {
-        RuleGrammarGenerator gen = new RuleGrammarGenerator(parsedDefinition, kompileOptions.strict());
+        RuleGrammarGenerator gen = new RuleGrammarGenerator(parsedDefinition);
 
         Option<Module> userProgramParsingModule = parsedDefinition.getModule(moduleName + RuleGrammarGenerator.POSTFIX);
         if (userProgramParsingModule.isDefined()) {

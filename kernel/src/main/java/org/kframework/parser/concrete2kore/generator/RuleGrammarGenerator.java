@@ -45,7 +45,6 @@ import static org.kframework.kore.KORE.*;
 public class RuleGrammarGenerator {
 
     private final Definition baseK;
-    public final boolean strict;
     private static final Set<Sort> kSorts = new HashSet<>();
 
     static {
@@ -87,12 +86,9 @@ public class RuleGrammarGenerator {
      * Initialize a grammar generator.
      * @param baseK A Definition containing a K module giving the syntax of K itself.
      *              The default K syntax is defined in include/kast.k.
-     * @param strict true if the generated parsers should retain inferred variable
-     *               sorts as sort predicate in the requires clause.
      */
-    public RuleGrammarGenerator(Definition baseK, boolean strict) {
+    public RuleGrammarGenerator(Definition baseK) {
         this.baseK = baseK;
-        this.strict = strict;
     }
 
     private Set<Module> renameKItem2Bottom(Set<Module> def) {
@@ -322,7 +318,7 @@ public class RuleGrammarGenerator {
             Set<Sentence> prods3 = new HashSet<>();
             // if no start symbol has been defined in the configuration, then use K
             for (Sort srt : iterable(mod.definedSorts())) {
-                if (!kSorts.contains(srt) && !mod.listSorts().contains(srt)) {
+                if (!isParserSort(srt) && !mod.listSorts().contains(srt)) {
                     // K ::= Sort
                     prods3.add(Production(Sorts.K(), Seq(NonTerminal(srt)), Att()));
                 }
@@ -336,14 +332,14 @@ public class RuleGrammarGenerator {
                 Att newAtts = ul.attrs.remove("userList");
                 // Es#Terminator ::= "" [klabel('.Es)]
                 prod1 = Production(ul.terminatorKLabel, Sort(ul.sort.name() + "#Terminator", ul.sort.params()), Seq(Terminal("")),
-                        newAtts.add(Constants.ORIGINAL_PRD, Production.class, ul.pTerminator));
+                        newAtts.remove("format").add(Constants.ORIGINAL_PRD, Production.class, ul.pTerminator));
                 // Ne#Es ::= E "," Ne#Es [klabel('_,_)]
                 prod2 = Production(ul.klabel, Sort("Ne#" + ul.sort.name(), ul.sort.params()),
                         Seq(NonTerminal(ul.childSort), Terminal(ul.separator), NonTerminal(Sort("Ne#" + ul.sort.name(), ul.sort.params()))),
                         newAtts.add(Constants.ORIGINAL_PRD, Production.class, ul.pList));
-                // Ne#Es ::= E Es#Terminator [klabel('_,_)]
+                // Ne#Es ::= E "" Es#Terminator [klabel('_,_)]
                 prod3 = Production(ul.klabel, Sort("Ne#" + ul.sort.name(), ul.sort.params()),
-                        Seq(NonTerminal(ul.childSort), NonTerminal(Sort(ul.sort.name() + "#Terminator", ul.sort.params()))),
+                        Seq(NonTerminal(ul.childSort), Terminal(""), NonTerminal(Sort(ul.sort.name() + "#Terminator", ul.sort.params()))),
                         newAtts.add(Constants.ORIGINAL_PRD, Production.class, ul.pList));
                 // Es ::= Ne#Es
                 prod4 = Production(ul.sort, Seq(NonTerminal(Sort("Ne#" + ul.sort.name(), ul.sort.params()))));

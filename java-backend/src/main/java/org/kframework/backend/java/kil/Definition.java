@@ -238,7 +238,7 @@ public class Definition extends JavaSymbolicObject {
             patternRules.put(rule.definedKLabel(), rule);
         } else if (rule.att().contains(Attribute.PATTERN_FOLDING_KEY)) {
             patternFoldingRules.add(rule);
-        } else if (rule.att().contains(Attribute.MACRO_KEY)) {
+        } else if (rule.att().contains(Attribute.MACRO_KEY) || rule.att().contains(Attribute.ALIAS_KEY)) {
             macros.add(rule);
         } else if (rule.att().contains(Attribute.ANYWHERE_KEY)) {
             if (!(rule.leftHandSide() instanceof KItem)) {

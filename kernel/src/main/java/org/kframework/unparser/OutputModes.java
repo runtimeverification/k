@@ -7,5 +7,5 @@ package org.kframework.unparser;
  *
  */
 public enum OutputModes {
-    PRETTY, SOUND, KAST, BINARY, NONE
+    PRETTY, PROGRAM, KAST, BINARY, NONE
 }

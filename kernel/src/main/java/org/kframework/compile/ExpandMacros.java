@@ -1,6 +1,7 @@
 // Copyright (c) 2015-2018 K Team. All Rights Reserved.
 package org.kframework.compile;
 
+import org.kframework.attributes.Att;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 import org.kframework.builtin.BooleanUtils;
@@ -53,20 +54,19 @@ import static org.kframework.definition.Constructors.*;
  */
 public class ExpandMacros {
 
-    private final KExceptionManager kem;
-
     private final Map<KLabel, List<Rule>> macros;
     private final Module mod;
     private final boolean cover;
     private final PrintWriter coverage;
     private final FileChannel channel;
+    private final boolean reverse;
 
-    public ExpandMacros(Module mod, KExceptionManager kem, FileUtil files, GlobalOptions globalOptions, KompileOptions kompileOptions) {
-        this.kem = kem;
+    public ExpandMacros(Module mod, FileUtil files, KompileOptions kompileOptions, boolean reverse) {
         this.mod = mod;
+        this.reverse = reverse;
         this.cover = kompileOptions.coverage;
         files.resolveKompiled(".").mkdirs();
-        macros = stream(mod.rules()).filter(r -> r.att().contains("macro")).sorted(Comparator.comparing(r -> r.att().contains("owise"))).collect(Collectors.groupingBy(r -> ((KApply)RewriteToTop.toLeft(r.body())).klabel()));
+        macros = stream(mod.rules()).filter(r -> isMacro(r.att(), reverse)).sorted(Comparator.comparing(r -> r.att().contains("owise"))).collect(Collectors.groupingBy(r -> ((KApply)getLeft(r, reverse)).klabel()));
         if (cover) {
             try {
                 FileOutputStream os = new FileOutputStream(files.resolveKompiled("coverage.txt"), true);
@@ -79,6 +79,17 @@ public class ExpandMacros {
             channel = null;
             coverage = null;
         }
+    }
+
+    private K getLeft(Rule r, boolean reverse) {
+        if (reverse) {
+            return RewriteToTop.toRight(r.body());
+        }
+        return RewriteToTop.toLeft(r.body());
+    }
+
+    private boolean isMacro(Att att, boolean reverse) {
+        return att.contains("alias") || (!reverse && att.contains("macro"));
     }
 
     private Rule expand(Rule rule) {
@@ -119,6 +130,12 @@ public class ExpandMacros {
                             throw KEMException.compilerError("Cannot compute macros with side conditions.", r);
                         }
                         K left = RewriteToTop.toLeft(r.body());
+                        K right = RewriteToTop.toRight(r.body());
+                        if (reverse) {
+                            K tmp = left;
+                            left = right;
+                            right = tmp;
+                        }
                         final Map<KVariable, K> subst = new HashMap<>();
                         if (match(subst, left, applied, r)) {
                             if (cover) {
@@ -130,7 +147,7 @@ public class ExpandMacros {
                                 public K apply(KVariable k) {
                                     return subst.get(k);
                                 }
-                            }.apply(RewriteToTop.toRight(r.body())));
+                            }.apply(right));
                         }
                     }
                     return applied;
@@ -223,7 +240,7 @@ public class ExpandMacros {
     }
 
     public Sentence expand(Sentence s) {
-        if (s instanceof Rule && !s.att().contains("macro")) {
+        if (s instanceof Rule && !s.att().contains("macro") && !s.att().contains("alias")) {
             return expand((Rule) s);
         } else if (s instanceof Context) {
             return expand((Context) s);

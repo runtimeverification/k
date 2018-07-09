@@ -118,7 +118,7 @@ public class DefinitionParsing {
 
         Module modWithConfig;
         ResolveConfig resolveConfig = new ResolveConfig(definition.getParsedDefinition(), isStrict, this::parseBubble, this::getParser);
-        gen = new RuleGrammarGenerator(definition.getParsedDefinition(), isStrict);
+        gen = new RuleGrammarGenerator(definition.getParsedDefinition());
 
         try {
             def = DefinitionTransformer.from(resolveConfig::apply, "parse config bubbles").apply(def);
@@ -161,7 +161,7 @@ public class DefinitionParsing {
         Definition trimmed = Definition(parsedDefinition.mainModule(), modules.collect(Collections.toSet()),
                 parsedDefinition.att());
         Definition afterResolvingConfigBubbles = resolveConfigBubbles(trimmed, parsedDefinition.getModule("DEFAULT-CONFIGURATION").get());
-        RuleGrammarGenerator gen = new RuleGrammarGenerator(afterResolvingConfigBubbles, isStrict);
+        RuleGrammarGenerator gen = new RuleGrammarGenerator(afterResolvingConfigBubbles);
         Definition afterResolvingAllOtherBubbles = resolveNonConfigBubbles(afterResolvingConfigBubbles, gen);
         saveCachesAndReportParsingErrors();
         return afterResolvingAllOtherBubbles;
@@ -221,7 +221,7 @@ public class DefinitionParsing {
         }
 
         ResolveConfig resolveConfig = new ResolveConfig(definitionWithConfigBubble, isStrict, this::parseBubble, this::getParser);
-        gen = new RuleGrammarGenerator(definitionWithConfigBubble, isStrict);
+        gen = new RuleGrammarGenerator(definitionWithConfigBubble);
 
         try {
             Definition defWithConfig = DefinitionTransformer.from(resolveConfig::apply, "parsing configurations").apply(definitionWithConfigBubble);
@@ -264,7 +264,7 @@ public class DefinitionParsing {
         Module ruleParserModule = gen.getRuleGrammar(module);
 
         ParseCache cache = loadCache(ruleParserModule);
-        ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), gen.strict);
+        ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), isStrict);
 
         Set<Sentence> ruleSet = stream(module.localSentences())
                 .parallel()
@@ -290,7 +290,7 @@ public class DefinitionParsing {
 
     public Rule parseRule(CompiledDefinition compiledDef, String contents, Source source) {
         errors = java.util.Collections.synchronizedSet(Sets.newHashSet());
-        gen = new RuleGrammarGenerator(compiledDef.kompiledDefinition, isStrict);
+        gen = new RuleGrammarGenerator(compiledDef.kompiledDefinition);
         java.util.Set<K> res = performParse(new HashMap<>(), RuleGrammarGenerator.getCombinedGrammar(gen.getRuleGrammar(compiledDef.executionModule()), isStrict),
                 null, new Bubble("rule", contents, Att().add("contentStartLine", Integer.class, 1).add("contentStartColumn", Integer.class, 1).add(Source.class, source)))
                 .collect(Collectors.toSet());
@@ -369,7 +369,7 @@ public class DefinitionParsing {
             kem.addAllKException(parse.getWarnings().stream().map(e -> e.getKException()).collect(Collectors.toList()));
             return Stream.of(parse.getParse());
         } else {
-            result = parser.parseString(b.contents(), START_SYMBOL, scanner, source, startLine, startColumn, !b.att().contains("macro"));
+            result = parser.parseString(b.contents(), START_SYMBOL, scanner, source, startLine, startColumn, !b.att().contains("macro") && !b.att().contains("alias"));
             parsedBubbles.getAndIncrement();
             kem.addAllKException(result._2().stream().map(e -> e.getKException()).collect(Collectors.toList()));
             if (result._1().isRight()) {

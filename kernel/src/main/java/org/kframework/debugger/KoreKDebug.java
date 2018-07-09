@@ -282,4 +282,9 @@ public class KoreKDebug implements KDebug {
         );
         return watchNum;
     }
+
+    @Override
+    public FileUtil files() {
+        return files;
+    }
 }

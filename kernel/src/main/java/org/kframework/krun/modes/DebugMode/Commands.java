@@ -9,6 +9,7 @@ import org.kframework.krun.KRun;
 import org.kframework.krun.ColorSetting;
 import org.kframework.unparser.OutputModes;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.file.FileUtil;
 
 import java.io.IOException;
 import java.util.List;
@@ -42,11 +43,11 @@ public class Commands {
             if (effectiveStepCount < stepCount) {
                 utils.print("Attempted " + stepCount + " step(s). " + "Took " + effectiveStepCount + " steps(s).");
                 utils.print("Final State Reached");
-                utils.displayWatches(steppedState.getWatchList(), compiledDefinition);
+                utils.displayWatches(session.files(), steppedState.getWatchList(), compiledDefinition);
                 return;
             }
             utils.print(stepCount + " Step(s) Taken.");
-            utils.displayWatches(steppedState.getWatchList(), compiledDefinition);
+            utils.displayWatches(session.files(), steppedState.getWatchList(), compiledDefinition);
         }
     }
 
@@ -68,6 +69,7 @@ public class Commands {
                 }
             });
             utils.displayWatches(
+                    session.files(),
                     session.getActiveState().getWatchList(),
                     compiledDefinition
             );
@@ -81,7 +83,7 @@ public class Commands {
             CommandUtils utils = new CommandUtils(isSource);
             DebuggerState requestedState = session.getActiveState();
             if (requestedState != null) {
-                prettyPrint(compiledDefinition.languageParsingModule(), OutputModes.PRETTY, s -> utils.print(s), requestedState.getCurrentK(), ColorSetting.ON);
+                prettyPrint(compiledDefinition.getParsedDefinition(), compiledDefinition.languageParsingModule(), session.files(), compiledDefinition.kompileOptions, OutputModes.PRETTY, s -> utils.print(s), requestedState.getCurrentK(), ColorSetting.ON);
             } else {
                 throw KEMException.debuggerError("\"Requested State/Configuration Unreachable\",");
             }
@@ -109,7 +111,7 @@ public class Commands {
                 throw KEMException.debuggerError("\"Already at Start State, Cannot take steps.\",");
             }
             utils.print("Took -" + backStepCount + " step(s)");
-            utils.displayWatches(backSteppedState.getWatchList(), compiledDefinition);
+            utils.displayWatches(session.files(), backSteppedState.getWatchList(), compiledDefinition);
         }
     }
 
@@ -161,10 +163,10 @@ public class Commands {
                 } else {
                     utils.print("Jumped to State Number " + requestedState + " and Step Number " + requestedConfig);
                 }
-                utils.displayWatches(finalState.getWatchList(), compiledDefinition);
+                utils.displayWatches(session.files(), finalState.getWatchList(), compiledDefinition);
                 return;
             }
-            utils.displayWatches(nextState.getWatchList(), compiledDefinition);
+            utils.displayWatches(session.files(), nextState.getWatchList(), compiledDefinition);
         }
 
     }
@@ -184,7 +186,7 @@ public class Commands {
             DebuggerState finalState = session.resume();
             CommandUtils utils = new CommandUtils(isSource);
             utils.print("Took " + (finalState.getStepNum() - currentState.getStepNum()) + " step(s)");
-            utils.displayWatches(finalState.getWatchList(), compiledDefinition);
+            utils.displayWatches(session.files(), finalState.getWatchList(), compiledDefinition);
         }
     }
 
@@ -219,7 +221,7 @@ public class Commands {
         public void runCommand(KDebug session, CompiledDefinition compiledDefinition, boolean isSource) {
             DebuggerMatchResult result = session.match(pattern, "<Command Line>");
             CommandUtils utils = new CommandUtils(isSource);
-            utils.prettyPrintSubstitution(result, compiledDefinition);
+            utils.prettyPrintSubstitution(session.files(), result, compiledDefinition);
         }
 
     }
@@ -300,11 +302,11 @@ public class Commands {
             this.disableOutput = isSource;
         }
 
-        private void prettyPrintSubstitution(DebuggerMatchResult result, CompiledDefinition compiledDefinition) {
+        private void prettyPrintSubstitution(FileUtil files, DebuggerMatchResult result, CompiledDefinition compiledDefinition) {
             if (disableOutput) {
                 return;
             }
-            KRun.prettyPrint(compiledDefinition.languageParsingModule(), OutputModes.PRETTY, s -> System.out.println(s), result.getSubstitutions(), ColorSetting.ON);
+            KRun.prettyPrint(compiledDefinition.getParsedDefinition(), compiledDefinition.languageParsingModule(), files, compiledDefinition.kompileOptions, OutputModes.PRETTY, s -> System.out.println(s), result.getSubstitutions(), ColorSetting.ON);
         }
 
         private void print(byte[] bytes){
@@ -323,7 +325,7 @@ public class Commands {
             }
         }
 
-        private void displayWatches(List<DebuggerMatchResult> watches, CompiledDefinition compiledDefinition) {
+        private void displayWatches(FileUtil files, List<DebuggerMatchResult> watches, CompiledDefinition compiledDefinition) {
             if (watches.isEmpty()) {
                 return;
             }
@@ -332,7 +334,7 @@ public class Commands {
             for (DebuggerMatchResult watch : watches) {
                 print("Watch " + (i));
                 print("Pattern : " + watch.getPattern());
-                prettyPrintSubstitution(watch, compiledDefinition);
+                prettyPrintSubstitution(files, watch, compiledDefinition);
                 i++;
             }
         }
