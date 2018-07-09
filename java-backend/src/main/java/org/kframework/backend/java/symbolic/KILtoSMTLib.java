@@ -197,18 +197,18 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
                 rightHandSideOnlyVariables)));
         sb.append("(assert (and ");
         sb.append(leftExpression);
-        sb.append(" (not ");
+        sb.append(" \n(not ");
         rightHandSideOnlyVariables = Sets.intersection(
                 rightTransformer.variables(),
                 rightHandSideOnlyVariables);
         if (!rightHandSideOnlyVariables.isEmpty()) {
-            sb.append("(exists (");
+            sb.append("\n  (exists (");
             sb.append(leftTransformer.getQuantifiedVariables(rightHandSideOnlyVariables));
-            sb.append(") ");
+            sb.append("\n  )\n");
         }
         sb.append(rightExpression);
         if (!rightHandSideOnlyVariables.isEmpty()) {
-            sb.append(")");
+            sb.append("\n)");
         }
         sb.append(")))");
         return sb.toString();
@@ -416,7 +416,7 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
             try {
                 String left = translateTerm(equality.leftHandSide());
                 String right = translateTerm(equality.rightHandSide());
-                sb.append(" (= ");
+                sb.append("\n (= ");
                 sb.append(left);
                 sb.append(" ");
                 sb.append(right);
