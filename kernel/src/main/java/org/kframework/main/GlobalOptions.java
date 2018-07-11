@@ -119,7 +119,8 @@ public final class GlobalOptions {
     public boolean logStmtsOnly = false;
 
     @Parameter(names="--log-basic",
-            description="Log most basic information: summary of initial step, final steps and final implications.")
+            description="Log most basic information: summary of initial step, final steps and final implications." +
+                    " All custom logging only works for KEVM-based specs.")
     public boolean logBasic = false;
 
     public boolean logRulesPublic = false;
