@@ -610,6 +610,7 @@ public class SymbolicRewriter {
         boolean guarded = false;
         int step = 0;
         globalOptions.logRulesPublic = globalOptions.logRules;
+        globalOptions.logBasic |= globalOptions.logStmtsOnly | globalOptions.log;
 
         if (globalOptions.log) {
             System.out.println("\nTarget term\n=====================\n");
@@ -638,9 +639,13 @@ public class SymbolicRewriter {
                 v++;
                 Term generatedTop = term.term();
                 Term k = ((KList) ((KItem) generatedTop).kList()).get(0);
-                BuiltinList kSequence = ((BuiltinList) ((KList) ((KItem) k).klist()).get(0));
-                boolean isHalt = kSequence.size() == 2 && kSequence.get(0) instanceof KItem
-                        && kSequence.get(0).toString().equals("#halt_EVM(.KList)");
+                Term kContent = ((KList) ((KItem) k).klist()).get(0);
+                BuiltinList kSequence = kContent instanceof BuiltinList ? (BuiltinList) kContent : null;
+                boolean isHalt = kSequence != null
+                        ? kSequence.size() == 2 && kSequence.get(0) instanceof KItem
+                        && kSequence.get(0).toString().equals("#halt_EVM(.KList)")
+                        && !kSequence.get(1).toString().equals("#execute_EVM(.KList)")
+                        : kContent.toString().equals("#halt_EVM(.KList)");
                 boolean oldDebug =  globalOptions.debug;
                 boolean oldLog = globalOptions.log;
 
@@ -699,7 +704,9 @@ public class SymbolicRewriter {
                             logStep(step, v, targetCallDataStr, term, true);
                         }
                         // re-running constraint generation again for debug purposes
-                        System.err.println("\nApplying specification rule\n=========================\n");
+                        if (globalOptions.logBasic) {
+                            System.err.println("\nApplying specification rule\n=========================\n");
+                        }
                         if (globalOptions.debugSpecRules && !globalOptions.debug) {
                             boolean oldDebug2 = globalOptions.debug;
                             globalOptions.debug = true;
@@ -771,7 +778,9 @@ public class SymbolicRewriter {
                         continue;
                     } else {
                         branchingRemaining--;
-                        System.out.println("\nBranching!\n=====================\n");
+                        if (globalOptions.logBasic) {
+                            System.out.println("\nBranching!\n=====================\n");
+                        }
                     }
                 }
                 for (ConstrainedTerm cterm : results) {
@@ -831,7 +840,10 @@ public class SymbolicRewriter {
         globalContext.profiler.printResult();
     }
 
-    private BuiltinList logStep(int step, int v, String targetCallDataStr, ConstrainedTerm term, boolean forced) {
+    private void logStep(int step, int v, String targetCallDataStr, ConstrainedTerm term, boolean forced) {
+        if (!globalOptions.logBasic) {
+            return;
+        }
         Term generatedTop = term.term();
         Term k = ((KList) ((KItem) generatedTop).kList()).get(0);
         Term ethereum = ((KList) ((KItem) generatedTop).kList()).get(5);
@@ -850,13 +862,13 @@ public class SymbolicRewriter {
         BuiltinMap accounts = (BuiltinMap) ((KList) ((KItem) ((KList) ((KItem) network).kList())
                 .get(1)).klist()).get(0);
 
-        BuiltinList kSequence =  ((BuiltinList)((KList)((KItem) k).klist()).get(0));
-
         if (!(theMap instanceof BuiltinMap || theMap instanceof Variable)) {
             forced = true;
         }
 
-        boolean inNewStmt = globalOptions.logStmtsOnly && inNewStmt(kSequence);
+        Term kContent = ((KList) ((KItem) k).klist()).get(0);
+        BuiltinList kSequence = kContent instanceof BuiltinList ? (BuiltinList) kContent : null;
+        boolean inNewStmt = globalOptions.logStmtsOnly && kSequence != null && inNewStmt(kSequence);
 
         if (globalOptions.log || forced || inNewStmt || globalOptions.logRulesPublic) {
             System.out.println("\nSTEP " + step + " v" + v + " : "
@@ -903,7 +915,6 @@ public class SymbolicRewriter {
         if (!(theMap instanceof BuiltinMap || theMap instanceof Variable)) {
             throw new RuntimeException("<localMem> non-map format, aborting.");
         }
-        return kSequence;
     }
 
     private boolean inNewStmt(BuiltinList kSequence) {
