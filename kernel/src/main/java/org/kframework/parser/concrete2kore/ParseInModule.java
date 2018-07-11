@@ -8,17 +8,7 @@ import org.kframework.kore.K;
 import org.kframework.kore.Sort;
 import org.kframework.parser.Term;
 import org.kframework.parser.TreeNodesToKORE;
-import org.kframework.parser.concrete2kore.disambiguation.AddEmptyLists;
-import org.kframework.parser.concrete2kore.disambiguation.AmbFilter;
-import org.kframework.parser.concrete2kore.disambiguation.ApplyTypeCheckVisitor;
-import org.kframework.parser.concrete2kore.disambiguation.CorrectCastPriorityVisitor;
-import org.kframework.parser.concrete2kore.disambiguation.CorrectKSeqPriorityVisitor;
-import org.kframework.parser.concrete2kore.disambiguation.CorrectRewritePriorityVisitor;
-import org.kframework.parser.concrete2kore.disambiguation.PriorityVisitor;
-import org.kframework.parser.concrete2kore.disambiguation.PushAmbiguitiesDownAndPreferAvoid;
-import org.kframework.parser.concrete2kore.disambiguation.RemoveBracketVisitor;
-import org.kframework.parser.concrete2kore.disambiguation.TreeCleanerVisitor;
-import org.kframework.parser.concrete2kore.disambiguation.VariableTypeInferenceFilter;
+import org.kframework.parser.concrete2kore.disambiguation.*;
 import org.kframework.parser.concrete2kore.kernel.Grammar;
 import org.kframework.parser.concrete2kore.kernel.KSyntax2GrammarStatesFilter;
 import org.kframework.parser.concrete2kore.kernel.Parser;
@@ -182,7 +172,7 @@ public class ParseInModule implements Serializable {
         rez = new PriorityVisitor(disambModule.priorities(), disambModule.leftAssoc(), disambModule.rightAssoc()).apply(rez.right().get());
         if (rez.isLeft())
             return new Tuple2<>(rez, warn);
-        Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rez2 = new VariableTypeInferenceFilter(disambModule.subsorts(), disambModule.definedSorts(), disambModule.productionsFor(), strict && inferSortChecks).apply(rez.right().get());
+        Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rez2 = new VariableTypeInferenceFilter(disambModule.subsorts(), disambModule.definedSorts(), disambModule.productionsFor(), strict && inferSortChecks, true).apply(rez.right().get());
         if (rez2._1().isLeft())
             return rez2;
         warn = rez2._2();
@@ -195,5 +185,23 @@ public class ParseInModule implements Serializable {
         rez3 = new RemoveBracketVisitor().apply(rez2._1().right().get());
 
         return new Tuple2<>(Right.apply(rez3), warn);
+    }
+
+    public static Term disambiguateForUnparse(Module mod, Term ambiguity) {
+        Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheckVisitor(mod.subsorts()).apply(ambiguity);
+        Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rez2;
+        if (rez.isLeft()) {
+            rez2 = new AmbFilter().apply(ambiguity);
+            return rez2._1().right().get();
+        }
+        rez2 = new VariableTypeInferenceFilter(mod.subsorts(), mod.definedSorts(), mod.productionsFor(), false, false).apply(rez.right().get());
+        if (rez2._1().isLeft()) {
+            rez2 = new AmbFilter().apply(rez.right().get());
+            return rez2._1().right().get();
+        }
+        Term rez3 = new RemoveOverloads(mod.overloads()).apply(rez2._1().right().get());
+        rez3 = new PushAmbiguitiesDownAndPreferAvoid().apply(rez3);
+        rez2 = new AmbFilter().apply(rez3);
+        return rez2._1().right().get();
     }
 }

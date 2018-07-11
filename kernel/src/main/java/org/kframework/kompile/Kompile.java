@@ -3,6 +3,7 @@ package org.kframework.kompile;
 
 import com.google.inject.Inject;
 import org.kframework.Strategy;
+import org.kframework.attributes.Att;
 import org.kframework.attributes.Source;
 import org.kframework.backend.Backends;
 import org.kframework.builtin.Sorts;
@@ -246,6 +247,7 @@ public class Kompile {
 
         Module languageParsingModule = Constructors.Module("LANGUAGE-PARSING",
                 Set(d.mainModule(),
+                        d.getModule(d.att().get(Att.syntaxModule())).get(),
                         d.getModule("K-TERM").get(),
                         d.getModule(RuleGrammarGenerator.ID_PROGRAM_PARSING).get()), Set(), Att());
         allModules.add(languageParsingModule);

@@ -62,7 +62,7 @@ public class KProve {
         } else {
             exit = 1;
         }
-        KRun.prettyPrint(compiled._1().getModule("LANGUAGE-PARSING").get(), options.prettyPrint.output, s -> KRun.outputFile(s, options.prettyPrint, files), results, options.prettyPrint.color(tty.stdout, files.getEnv()));
+        KRun.prettyPrint(compiled._1(), compiled._1().getModule("LANGUAGE-PARSING").get(), files, compiledDefinition.kompileOptions, options.prettyPrint.output, s -> KRun.outputFile(s, options.prettyPrint, files), results, options.prettyPrint.color(tty.stdout, files.getEnv()));
         return exit;
     }
 
@@ -98,7 +98,7 @@ public class KProve {
         Module specModule = getModule(specModuleName, modulesMap, compiledDefinition.getParsedDefinition());
         specModule = backend.specificationSteps(compiledDefinition.kompiledDefinition).apply(specModule);
         specModule = spliceModule(specModule, compiledDefinition.kompiledDefinition);
-        Definition combinedDef = Definition.apply(defModule, compiledDefinition.getParsedDefinition().entryModules(), Att.empty());
+        Definition combinedDef = Definition.apply(defModule, compiledDefinition.getParsedDefinition().entryModules(), compiledDefinition.getParsedDefinition().att());
         Definition compiled = compileDefinition(backend, combinedDef);
         return Tuple2.apply(compiled, specModule);
     }

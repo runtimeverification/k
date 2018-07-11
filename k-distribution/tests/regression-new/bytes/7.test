@@ -1,0 +1,1 @@
+Bytes2Int(String2Bytes("\xff\x00"), LE, Signed)

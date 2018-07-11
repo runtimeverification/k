@@ -26,7 +26,7 @@ public class Compiler {
      * Generates the definition containing the modules appropriate for generating rule parsers.
      */
     public static Definition toRuleParser(Definition d) {
-        RuleGrammarGenerator rgg = new RuleGrammarGenerator(d, true);
+        RuleGrammarGenerator rgg = new RuleGrammarGenerator(d);
         return DefinitionTransformer.from(rgg::getRuleGrammar, "toRuleParser").apply(d);
     }
 
@@ -35,7 +35,7 @@ public class Compiler {
      * with the exact cell labels not known apriori.
      */
     public static Definition toGenericAbstractConfigurationParser(Definition d) {
-        RuleGrammarGenerator rgg = new RuleGrammarGenerator(d, true);
+        RuleGrammarGenerator rgg = new RuleGrammarGenerator(d);
         return DefinitionTransformer.from(rgg::getConfigGrammar, "toGenericAbstractConfigurationParser").apply(d);
     }
 

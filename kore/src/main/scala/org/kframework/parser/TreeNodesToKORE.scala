@@ -1,6 +1,7 @@
 package org.kframework.parser
 
 import java.util
+import java.util.Optional
 
 import org.kframework.attributes._
 import org.kframework.builtin.Sorts
@@ -17,7 +18,7 @@ class TreeNodesToKORE(parseSort: java.util.function.Function[String, Sort]) {
   import org.kframework.kore.KORE._
 
   def apply(t: Term): K = t match {
-    case c@Constant(s, p) => KToken(s, p.sort, locationToAtt(c.location.get(), c.source.get()))
+    case c@Constant(s, p) => KToken(s, p.sort, locationToAtt(c.location, c.source))
     case t@TermCons(items, p) => termConsToKApply(t, items, p)
     case Ambiguity(items) => KApply(KLabel("AMB"), KList(items.asScala.toList map apply asJava), Att)
   }
@@ -30,9 +31,9 @@ class TreeNodesToKORE(parseSort: java.util.function.Function[String, Sort]) {
         case NonTerminal(_, None) => KToken("_", Sorts.KVariable)
         case NonTerminal(_, Some(x)) => map.getOrElse(x, KToken("_", Sorts.KVariable))
       }
-      KApply(p.klabel.get, KList(realItems.asJava), locationToAtt(t.location.get(), t.source.get()).add(classOf[Production], realProd))
+      KApply(p.klabel.get, KList(realItems.asJava), locationToAtt(t.location, t.source).add(classOf[Production], realProd))
     } else
-      KApply(p.klabel.get, KList(new util.ArrayList(items).asScala.reverse map apply asJava), locationToAtt(t.location.get(), t.source.get()).add(classOf[Production], p))
+      KApply(p.klabel.get, KList(new util.ArrayList(items).asScala.reverse map apply asJava), locationToAtt(t.location, t.source).add(classOf[Production], p))
   }
 
   def down(t: K): K = t match {
@@ -94,6 +95,10 @@ class TreeNodesToKORE(parseSort: java.util.function.Function[String, Sort]) {
       downKLabel(items.head)
   }
 
-  def locationToAtt(l: Location, s: Source): Att =
-    Att.add(classOf[Location], l).add(classOf[Source], s)
+  def locationToAtt(l: Optional[Location], s: Optional[Source]): Att = {
+    var a = Att
+    if (l.isPresent) a = a.add(classOf[Location], l.get)
+    if (s.isPresent) a = a.add(classOf[Source], s.get)
+    a
+  }
 }

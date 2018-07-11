@@ -1,1 +1,1 @@
-T ==K ( bool -> bool )
+T ==K bool -> bool

@@ -53,7 +53,7 @@ public class Definition extends JavaSymbolicObject {
         public final Subsorts subsorts;
         public Map<String, DataStructureSort> dataStructureSorts;
         public final SetMultimap<String, SortSignature> signatures;
-        public final ImmutableMap<org.kframework.kore.KLabel, Att> kLabelAttributes;
+        public final ImmutableMap<String, Att> kLabelAttributes;
         public final Map<Sort, org.kframework.kore.KLabel> freshFunctionNames;
         public final Map<Sort, Sort> smtSortFlattening;
 
@@ -61,7 +61,7 @@ public class Definition extends JavaSymbolicObject {
                 Subsorts subsorts,
                 Map<String, DataStructureSort> dataStructureSorts,
                 SetMultimap<String, SortSignature> signatures,
-                ImmutableMap<org.kframework.kore.KLabel, Att> kLabelAttributes,
+                ImmutableMap<String, Att> kLabelAttributes,
                 Map<Sort, org.kframework.kore.KLabel> freshFunctionNames,
                 Map<Sort, Sort> smtSortFlattening) {
             this.subsorts = subsorts;
@@ -119,9 +119,9 @@ public class Definition extends JavaSymbolicObject {
             });
         });
 
-        ImmutableMap.Builder<org.kframework.kore.KLabel, Att> attributesBuilder = ImmutableMap.builder();
+        ImmutableMap.Builder<String, Att> attributesBuilder = ImmutableMap.builder();
         JavaConversions.mapAsJavaMap(module.attributesFor()).entrySet().stream().forEach(e -> {
-            attributesBuilder.put(e.getKey(), e.getValue());
+            attributesBuilder.put(e.getKey().name(), e.getValue());
         });
 
         definitionData = new DefinitionData(
@@ -238,7 +238,7 @@ public class Definition extends JavaSymbolicObject {
             patternRules.put(rule.definedKLabel(), rule);
         } else if (rule.att().contains(Attribute.PATTERN_FOLDING_KEY)) {
             patternFoldingRules.add(rule);
-        } else if (rule.att().contains(Attribute.MACRO_KEY)) {
+        } else if (rule.att().contains(Attribute.MACRO_KEY) || rule.att().contains(Attribute.ALIAS_KEY)) {
             macros.add(rule);
         } else if (rule.att().contains(Attribute.ANYWHERE_KEY)) {
             if (!(rule.leftHandSide() instanceof KItem)) {
@@ -346,12 +346,12 @@ public class Definition extends JavaSymbolicObject {
         return definitionData.signatures.get(label);
     }
 
-    public Map<org.kframework.kore.KLabel, Att> kLabelAttributes() {
+    public Map<String, Att> kLabelAttributes() {
         return definitionData.kLabelAttributes;
     }
 
     public Att kLabelAttributesOf(org.kframework.kore.KLabel label) {
-        return Optional.ofNullable(definitionData.kLabelAttributes.get(label)).orElse(Att.empty());
+        return Optional.ofNullable(definitionData.kLabelAttributes.get(label.name())).orElse(Att.empty());
     }
 
     public DataStructureSort dataStructureSortOf(Sort sort) {
