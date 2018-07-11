@@ -642,17 +642,19 @@ public class SymbolicRewriter {
                 if (term.implies(targetTerm)) {
                     global.stateLog.log(StateLog.LogEvent.REACHPROVED, term.term(), term.constraint());
                     successPaths++;
-                    System.out.println("\n============\nStep " + step + ": eliminated!\n============\n");
-                    logStep(step, v, targetCallDataStr, term, true);
+                    if (globalOptions.logBasic) {
+                        System.out.println("\n============\nStep " + step + ": eliminated!\n============\n");
+                        logStep(step, v, targetCallDataStr, term, true);
+                    }
                     continue;
                 } else {
-                    logStep(step, v, targetCallDataStr, term, step == 1);
+                    logStep(step, v, targetCallDataStr, term, step == 1 && globalOptions.logBasic);
                 }
 
                 //stopping at halt
                 if (isHalt) {
                     if (!globalOptions.log) {
-                        logStep(step, v, targetCallDataStr, term, true);
+                        logStep(step, v, targetCallDataStr, term, globalOptions.logBasic);
                     }
                     System.out.println("Halt! Terminating branch.");
                     proofResults.add(term);
