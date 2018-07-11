@@ -118,5 +118,9 @@ public final class GlobalOptions {
             "Except when intermediary steps are important for other reason, like branching.")
     public boolean logStmtsOnly = false;
 
+    @Parameter(names="--log-basic",
+            description="Log most basic information: summary of initial step, final steps and final implications.")
+    public boolean logBasic = false;
+
     public boolean logRulesPublic = false;
 }

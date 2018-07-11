@@ -532,7 +532,7 @@ public class KItem extends Term implements KItemRepresentation {
                                 appliedRule = rule;
                             }
 
-                            if (KProve.options.global.logRulesPublic && result != null) {
+                            if (kItem.global.globalOptions.logRulesPublic && result != null) {
                                 System.err.println("\n" + rule);
                             }
 
