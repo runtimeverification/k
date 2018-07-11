@@ -104,8 +104,8 @@ public final class GlobalOptions {
     @Parameter(names="--log", description="Log every step.")
     public boolean log = false;
 
-    @Parameter(names = "--no-debug-last-step", description = "By default option --debug activated for last step. Useful to debug final implication. Use this option to disable debug entirely.")
-    public boolean noDebugLastStep = false;
+    @Parameter(names = "--debug-last-step", description = "Activate option --debug for last step. Useful to debug final implication.")
+    public boolean debugLastStep = false;
 
     @Parameter(names="--debug-spec-rules", description="Enable --debug for steps where a specification rule is applied. " +
             "This may be useful because during spec rules new constraints are sometimes added to the path condition.")

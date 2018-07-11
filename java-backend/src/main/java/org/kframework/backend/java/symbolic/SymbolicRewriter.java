@@ -644,7 +644,7 @@ public class SymbolicRewriter {
                 boolean oldDebug =  globalOptions.debug;
                 boolean oldLog = globalOptions.log;
 
-                if (isHalt && !globalOptions.noDebugLastStep
+                if (isHalt && globalOptions.debugLastStep
                         || globalOptions.debugSteps.contains(String.valueOf(step))) {
                     globalOptions.debug = true;
                     globalOptions.log = true;
