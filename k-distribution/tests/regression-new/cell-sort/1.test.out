@@ -1,0 +1,35 @@
+<T>
+  <k>
+    "done"
+  </k>
+  <functions>
+    <nextFunction>
+      3
+    </nextFunction>
+    <function>
+      <fId>
+        0
+      </fId>
+    </function> <function>
+      <fId>
+        1
+      </fId>
+    </function> <function>
+      <fId>
+        2
+      </fId>
+    </function>
+  </functions>
+  <contracts>
+    <contract>
+      <cName>
+        foo
+      </cName>
+      <cFunctions>
+        f1 |-> 0
+        f2 |-> 1
+        f3 |-> 2
+      </cFunctions>
+    </contract>
+  </contracts>
+</T>
