@@ -5,7 +5,7 @@ package org.kframework.kprove;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate;
 import com.google.inject.Inject;
-import org.kframework.krun.PrettyPrintOptions;
+import org.kframework.unparser.PrintOptions;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
@@ -45,7 +45,7 @@ public class KProveOptions {
     public SMTOptions smt = new SMTOptions();
 
     @ParametersDelegate
-    public PrettyPrintOptions prettyPrint = new PrettyPrintOptions();
+    public PrintOptions print = new PrintOptions();
 
     @Parameter(names={"--spec-module", "-sm"}, description="Name of module containing specification to prove")
     public String specModule;

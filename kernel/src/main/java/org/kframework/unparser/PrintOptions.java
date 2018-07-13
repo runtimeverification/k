@@ -1,22 +1,22 @@
 // Copyright (c) 2014-2018 K Team. All Rights Reserved.
-package org.kframework.krun;
+package org.kframework.unparser;
 
 import com.beust.jcommander.Parameter;
 import com.google.inject.Inject;
 import org.kframework.unparser.OutputModes;
-import org.kframework.krun.ColorSetting;
+import org.kframework.unparser.ColorSetting;
 import org.kframework.utils.options.BaseEnumConverter;
 
 import java.util.Map;
 
-public class PrettyPrintOptions {
+public class PrintOptions {
 
-    public PrettyPrintOptions() {
+    public PrintOptions() {
     }
 
     //TODO(dwightguth): remove in Guice 4.0
     @Inject
-    public PrettyPrintOptions(Void v) {
+    public PrintOptions(Void v) {
     }
 
     @Parameter(names = "--color", description = "Use colors in output. Default is on.", converter=ColorModeConverter.class)

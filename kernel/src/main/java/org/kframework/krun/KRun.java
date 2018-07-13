@@ -33,9 +33,11 @@ import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.parser.kore.KoreParser;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.unparser.AddBrackets;
+import org.kframework.unparser.ColorSetting;
 import org.kframework.unparser.Formatter;
 import org.kframework.unparser.KOREToTreeNodes;
 import org.kframework.unparser.OutputModes;
+import org.kframework.unparser.PrintOptions;
 import org.kframework.unparser.ToBinary;
 import org.kframework.unparser.ToKast;
 import org.kframework.utils.errorsystem.KEMException;
@@ -106,7 +108,7 @@ public class KRun {
 
 
         if (result != null) {
-            prettyPrint(compiledDef.getParsedDefinition(), compiledDef.languageParsingModule(), files, compiledDef.kompileOptions, options.prettyPrint.output, s -> outputFile(s, options.prettyPrint, files), result._1(), options.prettyPrint.color(tty.stdout, files.getEnv()));
+            prettyPrint(compiledDef.getParsedDefinition(), compiledDef.languageParsingModule(), files, compiledDef.kompileOptions, options.print.output, s -> outputFile(s, options.print, files), result._1(), options.print.color(tty.stdout, files.getEnv()));
             return result._2();
         }
         return 0;
@@ -145,11 +147,11 @@ public class KRun {
     }
 
     //TODO(dwightguth): use Writer
-    public static void outputFile(String output, PrettyPrintOptions options, FileUtil files) {
+    public static void outputFile(String output, PrintOptions options, FileUtil files) {
         outputFile(output.getBytes(), options, files);
     }
 
-    public static void outputFile(byte[] output, PrettyPrintOptions options, FileUtil files) {
+    public static void outputFile(byte[] output, PrintOptions options, FileUtil files) {
         if (options.outputFile == null) {
             try {
                 System.out.write(output);

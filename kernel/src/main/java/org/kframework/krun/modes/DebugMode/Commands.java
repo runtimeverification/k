@@ -6,7 +6,7 @@ import org.kframework.debugger.DebuggerState;
 import org.kframework.debugger.KDebug;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.krun.KRun;
-import org.kframework.krun.ColorSetting;
+import org.kframework.unparser.ColorSetting;
 import org.kframework.unparser.OutputModes;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;

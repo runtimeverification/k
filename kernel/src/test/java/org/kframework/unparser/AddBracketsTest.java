@@ -11,7 +11,6 @@ import org.kframework.definition.Module;
 import org.kframework.kompile.Kompile;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
-import org.kframework.krun.ColorSetting;
 import org.kframework.krun.KRun;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.ProductionReference;
