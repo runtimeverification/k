@@ -53,25 +53,24 @@ public class KPrint {
     }
 
     public static void prettyPrint(Definition def, Module module, FileUtil files, KompileOptions kompile, OutputModes output, Consumer<byte[]> print, K result, ColorSetting colorize) {
+        print.accept(prettyPrint(def, module, files, kompile, output, result, colorize));
+    }
+
+    public static byte[] prettyPrint(Definition def, Module module, FileUtil files, KompileOptions kompile, OutputModes output, K result, ColorSetting colorize) {
         switch (output) {
         case KAST:
-            print.accept((ToKast.apply(result) + "\n").getBytes());
-            break;
+            return (ToKast.apply(result) + "\n").getBytes();
         case NONE:
-            print.accept("".getBytes());
-            break;
+            return "".getBytes();
         case PRETTY: {
             Module unparsingModule = RuleGrammarGenerator.getCombinedGrammar(module, false).getExtensionModule();
-            print.accept((unparseTerm(result, unparsingModule, colorize, files, kompile) + "\n").getBytes());
-            break;
+            return (unparseTerm(result, unparsingModule, colorize, files, kompile) + "\n").getBytes();
         } case PROGRAM: {
             RuleGrammarGenerator gen = new RuleGrammarGenerator(def);
             Module unparsingModule = RuleGrammarGenerator.getCombinedGrammar(gen.getProgramsGrammar(module), false).getParsingModule();
-            print.accept((unparseTerm(result, unparsingModule, colorize, files, kompile) + "\n").getBytes());
-            break;
+            return (unparseTerm(result, unparsingModule, colorize, files, kompile) + "\n").getBytes();
         } case BINARY:
-            print.accept(ToBinary.apply(result));
-            break;
+            return ToBinary.apply(result);
         default:
             throw KEMException.criticalError("Unsupported output mode: " + output);
         }
