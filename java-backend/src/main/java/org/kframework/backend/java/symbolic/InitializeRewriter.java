@@ -218,7 +218,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
                         ConstrainedTerm lhs = r.createLhsPattern(termContext);
                         ConstrainedTerm rhs = r.createRhsPattern();
                         termContext.setInitialVariables(lhs.variableSet());
-                        return rewriter.proveRule(lhs, rhs, allRules);
+                        return rewriter.proveRule(lhs, rhs, allRules, kem);
                     })
                     .flatMap(List::stream)
                     .collect(Collectors.toList());
