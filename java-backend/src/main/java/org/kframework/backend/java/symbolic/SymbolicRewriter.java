@@ -206,7 +206,8 @@ public class SymbolicRewriter {
             if (!matchResult.isMatching) {
                 // TODO(AndreiS): move these some other place
                 result = result.expandPatterns(true);
-                if (result.constraint().isFalseExtended() || result.constraint().checkUnsat()) {
+                if (result.constraint().isFalseExtended() || result.constraint().checkUnsat(
+                        new FormulaContext(FormulaContext.Kind.RegularConstr, rule))) {
                     if (global.globalOptions.logRulesPublic) {
                         System.err.println("Execution path aborted");
                     }
@@ -376,7 +377,7 @@ public class SymbolicRewriter {
             ConjunctiveFormula constraint,
             @SuppressWarnings("unused") Term subject,
             boolean expandPattern,
-            TermContext context) {
+            TermContext context, FormulaContext formulaContext) {
         for (Variable variable : rule.freshConstants()) {
             constraint = constraint.add(
                     variable,
@@ -405,7 +406,7 @@ public class SymbolicRewriter {
         if (expandPattern) {
             // TODO(AndreiS): move these some other place
             result = result.expandPatterns(true);
-            if (result.constraint().isFalseExtended() || result.constraint().checkUnsat()) {
+            if (result.constraint().isFalseExtended() || result.constraint().checkUnsat(formulaContext)) {
                 result = null;
             }
         }
@@ -922,7 +923,8 @@ public class SymbolicRewriter {
             ConjunctiveFormula constraint = constrainedTerm.matchImplies(pattern, true, specRule.matchingSymbols(),
                     new FormulaContext(FormulaContext.Kind.SpecRule, specRule));
             if (constraint != null) {
-                ConstrainedTerm result = buildResult(specRule, constraint, null, true, constrainedTerm.termContext());
+                ConstrainedTerm result = buildResult(specRule, constraint, null, true, constrainedTerm.termContext(),
+                        new FormulaContext(FormulaContext.Kind.SpecConstr, specRule));
                 global.stateLog.log(StateLog.LogEvent.SRULE, specRule.toKRewrite());
                 if (global.globalOptions.logRulesPublic) {
                     System.err.println("\n" + specRule);

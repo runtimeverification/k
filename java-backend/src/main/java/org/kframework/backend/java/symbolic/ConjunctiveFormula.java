@@ -799,8 +799,13 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 .collect(Collectors.toList()), global);
     }
 
-    public boolean checkUnsat() {
-        return global.constraintOps.checkUnsat(this);
+    public boolean checkUnsat(FormulaContext formulaContext) {
+        formulaContext.z3Profiler.newRequest();
+        boolean unsat = global.constraintOps.checkUnsat(this, formulaContext);
+        if (global.globalOptions.debugZ3) {
+            formulaContext.printUnsat(this, unsat, false);
+        }
+        return unsat;
     }
 
     public boolean smartImplies(ConjunctiveFormula constraint) {
@@ -821,7 +826,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
          */
 
         constraint = (ConjunctiveFormula) constraint.substitute(this.substitution());
-        return implies(constraint, Collections.emptySet(), new FormulaContext(FormulaContext.Kind.EquivChecker, null));
+        return implies(constraint, Collections.emptySet(), new FormulaContext(FormulaContext.Kind.EquivImplication, null));
     }
 
     /**

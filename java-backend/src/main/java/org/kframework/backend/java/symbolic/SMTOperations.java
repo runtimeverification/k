@@ -33,7 +33,7 @@ public class SMTOperations {
         this.global     = global;
     }
 
-    public boolean checkUnsat(ConjunctiveFormula constraint) {
+    public boolean checkUnsat(ConjunctiveFormula constraint, FormulaContext formulaContext) {
         if (smtOptions.smt != SMTSolver.Z3) {
             return false;
         }
@@ -51,14 +51,20 @@ public class SMTOperations {
             } finally {
                 constraint.globalContext().profiler.queryBuildTimer.stop();
             }
-            result = z3.isUnsat(query, smtOptions.z3CnstrTimeout, constraint.globalContext().profiler.z3Constraint);
+            if (global.debugZ3Queries) {
+                System.err.format("\nZ3 constraint query:\n%s\n", query);
+            }
+            result = z3.isUnsat(query, smtOptions.z3CnstrTimeout, formulaContext.z3Profiler);
             if (result && RuleAuditing.isAuditBegun()) {
                 System.err.format("SMT query returned unsat: %s\n", query);
             }
         } catch (UnsupportedOperationException e) {
             e.printStackTrace();
             kem.registerCriticalWarning("z3 constraint query: " + e.getMessage(), e);
-            constraint.globalContext().profiler.z3Constraint.newQueryBuildFailure();
+            if (global.debugZ3) {
+                System.err.format("\nZ3 constraint warning: %s\n", e.getMessage());
+            }
+            formulaContext.z3Profiler.newQueryBuildFailure();
         }
         return result;
     }
