@@ -843,8 +843,8 @@ public class SymbolicRewriter {
         boolean inNewStmt = globalOptions.logStmtsOnly && kSequence != null && inNewStmt(kSequence);
 
         if (globalOptions.log || forced || inNewStmt || globalOptions.logRulesPublic) {
-            System.out.println("\nSTEP " + step + " v" + v + " : "
-                    + (System.currentTimeMillis() - Main.startTime) / 1000. + " s \n===================");
+            System.out.format("\nSTEP %d v%d : %f s \n===================\n",
+                    step, v, (System.currentTimeMillis() - Main.startTime) / 1000.);
         }
 
         if (globalOptions.log || forced || inNewStmt) {
