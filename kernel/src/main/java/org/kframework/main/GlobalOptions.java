@@ -86,6 +86,9 @@ public final class GlobalOptions {
     @Parameter(names="--debug", description="Print debugging output messages")
     public boolean debug = false;
 
+    @Parameter(names="--debug-full", description="Print all SMT queries")
+    public boolean debugFull = false;
+
     @Parameter(names = "--debug-steps", variableArity = true, description = "Specify exact steps for which --debug option should be enabled")
     public List<String> debugSteps = new ArrayList<>();
 
