@@ -7,6 +7,7 @@ import org.kframework.debugger.KDebug;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.krun.KRun;
 import org.kframework.unparser.ColorSetting;
+import org.kframework.unparser.KPrint;
 import org.kframework.unparser.OutputModes;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
@@ -83,7 +84,7 @@ public class Commands {
             CommandUtils utils = new CommandUtils(isSource);
             DebuggerState requestedState = session.getActiveState();
             if (requestedState != null) {
-                prettyPrint(compiledDefinition.getParsedDefinition(), compiledDefinition.languageParsingModule(), session.files(), compiledDefinition.kompileOptions, OutputModes.PRETTY, s -> utils.print(s), requestedState.getCurrentK(), ColorSetting.ON);
+                KPrint.prettyPrint(compiledDefinition.getParsedDefinition(), compiledDefinition.languageParsingModule(), session.files(), compiledDefinition.kompileOptions, OutputModes.PRETTY, s -> utils.print(s), requestedState.getCurrentK(), ColorSetting.ON);
             } else {
                 throw KEMException.debuggerError("\"Requested State/Configuration Unreachable\",");
             }
@@ -306,7 +307,7 @@ public class Commands {
             if (disableOutput) {
                 return;
             }
-            KRun.prettyPrint(compiledDefinition.getParsedDefinition(), compiledDefinition.languageParsingModule(), files, compiledDefinition.kompileOptions, OutputModes.PRETTY, s -> System.out.println(s), result.getSubstitutions(), ColorSetting.ON);
+            KPrint.prettyPrint(compiledDefinition.getParsedDefinition(), compiledDefinition.languageParsingModule(), files, compiledDefinition.kompileOptions, OutputModes.PRETTY, s -> System.out.println(s), result.getSubstitutions(), ColorSetting.ON);
         }
 
         private void print(byte[] bytes){

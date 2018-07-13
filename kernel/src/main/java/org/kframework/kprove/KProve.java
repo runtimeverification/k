@@ -15,6 +15,7 @@ import org.kframework.krun.KRun;
 import org.kframework.main.GlobalOptions;
 import org.kframework.main.Main;
 import org.kframework.rewriter.Rewriter;
+import org.kframework.unparser.KPrint;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -64,7 +65,7 @@ public class KProve {
         } else {
             exit = 1;
         }
-        KRun.prettyPrint(compiled._1(), compiled._1().getModule("LANGUAGE-PARSING").get(), files, compiledDefinition.kompileOptions, options.print.output, s -> KRun.outputFile(s, options.print, files), results, options.print.color(tty.stdout, files.getEnv()));
+        KPrint.prettyPrint(compiled._1(), compiled._1().getModule("LANGUAGE-PARSING").get(), files, compiledDefinition.kompileOptions, options.print.output, s -> KPrint.outputFile(s, options.print, files), results, options.print.color(tty.stdout, files.getEnv()));
         return exit;
     }
 

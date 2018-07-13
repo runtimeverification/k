@@ -19,6 +19,7 @@ import org.kframework.parser.concrete2kore.ParseInModule;
 import org.kframework.parser.concrete2kore.ParserUtils;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.parser.outer.Outer;
+import org.kframework.unparser.KPrint;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.file.FileUtil;
@@ -94,7 +95,7 @@ public class AddBracketsTest {
         Module test = parseModule(def);
         ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(gen.getProgramsGrammar(test), true);
         K parsed = parseTerm(pgm, parser);
-        String unparsed = KRun.unparseTerm(parsed, test, ColorSetting.OFF, FileUtil.testFileUtil(), new KompileOptions());
+        String unparsed = KPrint.unparseTerm(parsed, test, ColorSetting.OFF, FileUtil.testFileUtil(), new KompileOptions());
         assertEquals(pgm, unparsed);
     }
 
