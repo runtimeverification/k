@@ -78,7 +78,7 @@ public class SMTOperations {
                     left.globalContext().profiler.queryBuildTimer.stop();
                 }
                 if (global.debug) {
-                    System.err.println("\nz3 query: " + query);
+                    System.err.format("\nz3 query: %s\n", query);
                 }
                 return z3.isUnsat(query, smtOptions.z3ImplTimeout, left.globalContext().profiler.z3Implication);
             } catch (UnsupportedOperationException | SMTTranslationFailure e) {
