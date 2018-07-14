@@ -9,7 +9,26 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.IntToken;
-import org.kframework.backend.java.kil.*;
+import org.kframework.backend.java.kil.Bottom;
+import org.kframework.backend.java.kil.BuiltinList;
+import org.kframework.backend.java.kil.BuiltinMap;
+import org.kframework.backend.java.kil.CollectionInternalRepresentation;
+import org.kframework.backend.java.kil.ConstrainedTerm;
+import org.kframework.backend.java.kil.DataStructures;
+import org.kframework.backend.java.kil.GlobalContext;
+import org.kframework.backend.java.kil.HasGlobalContext;
+import org.kframework.backend.java.kil.JavaSymbolicObject;
+import org.kframework.backend.java.kil.KItem;
+import org.kframework.backend.java.kil.KLabel;
+import org.kframework.backend.java.kil.KLabelConstant;
+import org.kframework.backend.java.kil.KList;
+import org.kframework.backend.java.kil.Kind;
+import org.kframework.backend.java.kil.LocalRewriteTerm;
+import org.kframework.backend.java.kil.Sort;
+import org.kframework.backend.java.kil.SortSignature;
+import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermContext;
+import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.util.Constants;
 import org.kframework.backend.java.util.RewriteEngineUtils;
 import org.kframework.builtin.KLabels;
@@ -821,7 +840,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
             }
 
             if (global.globalOptions.debug) {
-                System.err.println("\nAttempting to prove:\n================= \n\t" + left + "\n  implies \n\t" + right);
+                System.err.format("\nAttempting to prove:\n================= \n\t%s\n  implies \n\t%s\n", left, right);
             }
 
             right = right.orientSubstitution(existentialQuantVars);
@@ -841,7 +860,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 // TODO (AndreiS): handle KList variables
                 Term condition = ((KList) ite.kList()).get(0);
                 if (global.globalOptions.debug) {
-                    System.err.println("Split on " + condition);
+                    System.err.format("Split on %s\n", condition);
                 }
                 TermContext context = TermContext.builder(global).build();
                 implications.add(Pair.of(left.add(condition, BoolToken.TRUE).simplify(context), right));
