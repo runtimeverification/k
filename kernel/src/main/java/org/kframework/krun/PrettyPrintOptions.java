@@ -4,6 +4,7 @@ package org.kframework.krun;
 import com.beust.jcommander.Parameter;
 import com.google.inject.Inject;
 import org.kframework.unparser.OutputModes;
+import org.kframework.krun.ColorSetting;
 import org.kframework.utils.options.BaseEnumConverter;
 
 import java.util.Map;
