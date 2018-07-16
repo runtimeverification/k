@@ -19,37 +19,37 @@ module TEST
                   <k color="green"> $PGM:Pgm </k>
                   <functions color="blue">
                     <nextFunction> 0:Int </nextFunction> // It works again if we move this outside of <functions>
-                    <function multiplicity = "*"> 
+                    <function multiplicity = "*">
                       <fId> 0:Int </fId>
                     </function>
                   </functions>
                   <contracts color="orange">
-                    <contract multiplicity = "*"> 
+                    <contract multiplicity = "*">
                       <cName> . </cName>
                       <cFunctions> .Map </cFunctions>
                     </contract>
                   </contracts>
                 </T>
-  
-  rule 
+
+  rule
     <k> addContract(ContractName:Id); => . ... </k>
     <contracts>
       ...
       (.Bag =>
-        <contract> 
+        <contract>
           <cName> ContractName </cName>
-          <cFunctions> .Map </cFunctions> 
+          <cFunctions> .Map </cFunctions>
         </contract>)
       ...
     </contracts>
 
-rule 
+rule
   <k> addFunction(ContractName:Id, FunctionName:Id); => . ... </k>
     <contracts>
       ...
-      <contract> 
+      <contract>
         <cName> ContractName </cName>
-        <cFunctions> ... .Map => FunctionName |-> N ... </cFunctions> 
+        <cFunctions> ... .Map => FunctionName |-> N ... </cFunctions>
       </contract>
       ...
     </contracts>
@@ -59,15 +59,15 @@ rule
       ...
     </functions>
 
-rule 
+rule
   <k> testFunction(ContractName:Id, FunctionName:Id); => "done" ... </k>
-      <contract> 
+      <contract>
         <cName> ContractName </cName>
-        <cFunctions> ... FunctionName |-> N:Int ... </cFunctions> 
+        <cFunctions> ... FunctionName |-> N:Int ... </cFunctions>
       </contract>
       <function> <fId> N </fId> </function>
 
-rule 
+rule
   S1:Stmt S2:Stmt => S1 ~> S2  [structural]
 
 endmodule
