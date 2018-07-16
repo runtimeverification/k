@@ -97,6 +97,8 @@ public class KPrint {
             return (unparseTerm(result, unparsingModule, kompile, colorize) + "\n").getBytes();
         } case BINARY:
             return ToBinary.apply(result);
+        case JSON:
+            return ToJson.apply(result);
         default:
             throw KEMException.criticalError("Unsupported output mode: " + options.output);
         }
