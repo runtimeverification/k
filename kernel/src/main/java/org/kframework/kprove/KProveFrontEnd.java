@@ -15,6 +15,7 @@ import org.kframework.krun.modes.ExecutionMode;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
 import org.kframework.rewriter.Rewriter;
+import org.kframework.unparser.KPrint;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -91,7 +92,8 @@ public class KProveFrontEnd extends FrontEnd {
                 throw KEMException.criticalError("Definition file doesn't exist: " +
                         kproveOptions.specFile(files).getAbsolutePath());
             }
-            return new KProve(kem, sw, files, tty).run(kproveOptions, compiledDef.get(), backend.get(), initializeRewriter.get());
+            KPrint kprint = new KPrint(kem, files, tty, kproveOptions.print);
+            return new KProve(kem, sw, files, kprint).run(kproveOptions, compiledDef.get(), backend.get(), initializeRewriter.get());
         } finally {
             scope.exit();
         }

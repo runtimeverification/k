@@ -52,11 +52,13 @@ public class KRun {
     private final KExceptionManager kem;
     private final FileUtil files;
     private final TTYInfo tty;
+    private final KPrint kprint;
 
-    public KRun(KExceptionManager kem, FileUtil files, TTYInfo tty) {
-        this.kem = kem;
-        this.files = files;
-        this.tty = tty;
+    public KRun(KExceptionManager kem, FileUtil files, TTYInfo tty, KPrint kprint) {
+        this.kem    = kem;
+        this.files  = files;
+        this.tty    = tty;
+        this.kprint = kprint;
     }
 
     public static class InitialConfiguration {
@@ -86,7 +88,7 @@ public class KRun {
 
 
         if (result != null) {
-            KPrint.prettyPrint(compiledDef.getParsedDefinition(), compiledDef.languageParsingModule(), files, compiledDef.kompileOptions, options.print.output, s -> KPrint.outputFile(s, options.print, files), result._1(), options.print.color(tty.stdout, files.getEnv()));
+            kprint.prettyPrint(compiledDef.getParsedDefinition(), compiledDef.languageParsingModule(), compiledDef.kompileOptions, s -> kprint.outputFile(s), result._1());
             return result._2();
         }
         return 0;

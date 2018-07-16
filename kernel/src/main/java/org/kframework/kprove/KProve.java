@@ -20,7 +20,6 @@ import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
-import org.kframework.utils.file.TTYInfo;
 import scala.Option;
 import scala.Tuple2;
 import scala.collection.Set;
@@ -42,14 +41,14 @@ public class KProve {
     private final KExceptionManager kem;
     private final Stopwatch sw;
     private final FileUtil files;
-    private TTYInfo tty;
+    private final KPrint kprint;
 
     @Inject
-    public KProve(KExceptionManager kem, Stopwatch sw, FileUtil files, TTYInfo tty) {
-        this.kem = kem;
-        this.sw = sw;
-        this.files = files;
-        this.tty = tty;
+    public KProve(KExceptionManager kem, Stopwatch sw, FileUtil files, KPrint kprint) {
+        this.kem    = kem;
+        this.sw     = sw;
+        this.files  = files;
+        this.kprint = kprint;
     }
 
     public int run(KProveOptions options, CompiledDefinition compiledDefinition, Backend backend, Function<Module, Rewriter> rewriterGenerator) {
@@ -65,7 +64,7 @@ public class KProve {
         } else {
             exit = 1;
         }
-        KPrint.prettyPrint(compiled._1(), compiled._1().getModule("LANGUAGE-PARSING").get(), files, compiledDefinition.kompileOptions, options.print.output, s -> KPrint.outputFile(s, options.print, files), results, options.print.color(tty.stdout, files.getEnv()));
+        kprint.prettyPrint(compiled._1(), compiled._1().getModule("LANGUAGE-PARSING").get(), compiledDefinition.kompileOptions, s -> kprint.outputFile(s), results);
         return exit;
     }
 

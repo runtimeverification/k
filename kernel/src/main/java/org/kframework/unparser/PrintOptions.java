@@ -14,6 +14,10 @@ public class PrintOptions {
     public PrintOptions() {
     }
 
+    public PrintOptions(ColorSetting color) {
+        this.color = color;
+    }
+
     //TODO(dwightguth): remove in Guice 4.0
     @Inject
     public PrintOptions(Void v) {

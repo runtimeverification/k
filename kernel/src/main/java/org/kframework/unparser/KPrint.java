@@ -12,11 +12,14 @@ import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.TransformK;
+import org.kframework.main.GlobalOptions;
 import org.kframework.parser.ProductionReference;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.parser.concrete2kore.ParseInModule;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
+import org.kframework.utils.file.TTYInfo;
 import scala.Tuple2;
 
 import java.io.IOException;
@@ -35,12 +38,29 @@ import static org.kframework.kore.KORE.*;
  */
 public class KPrint {
 
-    //TODO(dwightguth): use Writer
-    public static void outputFile(String output, PrintOptions options, FileUtil files) {
-        outputFile(output.getBytes(), options, files);
+    private static KExceptionManager kem;
+    private static FileUtil          files;
+    private static TTYInfo           tty;
+
+    public static PrintOptions options;
+
+    public KPrint() {
+        this(new KExceptionManager(new GlobalOptions()), FileUtil.testFileUtil(), new TTYInfo(false, false, false), new PrintOptions());
     }
 
-    public static void outputFile(byte[] output, PrintOptions options, FileUtil files) {
+    public KPrint(KExceptionManager kem, FileUtil files, TTYInfo tty, PrintOptions options) {
+        this.kem     = kem;
+        this.files   = files;
+        this.tty     = tty;
+        this.options = options;
+    }
+
+    //TODO(dwightguth): use Writer
+    public static void outputFile(String output) {
+        outputFile(output.getBytes());
+    }
+
+    public static void outputFile(byte[] output) {
         if (options.outputFile == null) {
             try {
                 System.out.write(output);
@@ -52,31 +72,39 @@ public class KPrint {
         }
     }
 
-    public static void prettyPrint(Definition def, Module module, FileUtil files, KompileOptions kompile, OutputModes output, Consumer<byte[]> print, K result, ColorSetting colorize) {
-        print.accept(prettyPrint(def, module, files, kompile, output, result, colorize));
+    public static void prettyPrint(Definition def, Module module, KompileOptions kompile, Consumer<byte[]> print, K result, ColorSetting colorize) {
+        print.accept(prettyPrint(def, module, kompile, result, colorize));
     }
 
-    public static byte[] prettyPrint(Definition def, Module module, FileUtil files, KompileOptions kompile, OutputModes output, K result, ColorSetting colorize) {
-        switch (output) {
+    public static void prettyPrint(Definition def, Module module, KompileOptions kompile, Consumer<byte[]> print, K result) {
+        print.accept(prettyPrint(def, module, kompile, result, options.color(tty.stdout, files.getEnv())));
+    }
+
+    public static byte[] prettyPrint(Definition def, Module module, KompileOptions kompile, K result, ColorSetting colorize) {
+        switch (options.output) {
         case KAST:
             return (ToKast.apply(result) + "\n").getBytes();
         case NONE:
             return "".getBytes();
         case PRETTY: {
             Module unparsingModule = RuleGrammarGenerator.getCombinedGrammar(module, false).getExtensionModule();
-            return (unparseTerm(result, unparsingModule, colorize, files, kompile) + "\n").getBytes();
+            return (unparseTerm(result, unparsingModule, kompile, colorize) + "\n").getBytes();
         } case PROGRAM: {
             RuleGrammarGenerator gen = new RuleGrammarGenerator(def);
             Module unparsingModule = RuleGrammarGenerator.getCombinedGrammar(gen.getProgramsGrammar(module), false).getParsingModule();
-            return (unparseTerm(result, unparsingModule, colorize, files, kompile) + "\n").getBytes();
+            return (unparseTerm(result, unparsingModule, kompile, colorize) + "\n").getBytes();
         } case BINARY:
             return ToBinary.apply(result);
         default:
-            throw KEMException.criticalError("Unsupported output mode: " + output);
+            throw KEMException.criticalError("Unsupported output mode: " + options.output);
         }
     }
 
-    public static String unparseTerm(K input, Module test, ColorSetting colorize, FileUtil files, KompileOptions kompile) {
+    public static String unparseTerm(K input, Module test, KompileOptions kompile) {
+        return unparseTerm(input, test, kompile, options.color(tty.stdout, files.getEnv()));
+    }
+
+    public static String unparseTerm(K input, Module test, KompileOptions kompile, ColorSetting colorize) {
         K sortedComm = new TransformK() {
             @Override
             public K apply(KApply k) {
@@ -88,7 +116,7 @@ public class KPrint {
                     List<K> items = new ArrayList<>(Assoc.flatten(k.klabel(), k.klist().items(), KLabel(att.get("unit"))));
                     List<Tuple2<String, K>> printed = new ArrayList<>();
                     for (K item : items) {
-                        String s = unparseInternal(test, ColorSetting.OFF, apply(item), files, kompile);
+                        String s = unparseInternal(test, apply(item), kompile, ColorSetting.OFF);
                         printed.add(Tuple2.apply(s, item));
                     }
                     printed.sort(Comparator.comparing(Tuple2::_1, new AlphanumComparator()));
@@ -110,12 +138,12 @@ public class KPrint {
                 return k;
             }
         }.apply(sortedComm);
-        return unparseInternal(test, colorize, alphaRenamed, files, kompile);
+        return unparseInternal(test, alphaRenamed, kompile, colorize);
     }
 
-    private static String unparseInternal(Module mod, ColorSetting colorize, K input, FileUtil files, KompileOptions kompile) {
+    private static String unparseInternal(Module mod, K input, KompileOptions kompile, ColorSetting colorize) {
         ExpandMacros expandMacros = new ExpandMacros(mod, files, kompile, true);
         return Formatter.format(
-                new AddBrackets(mod).addBrackets((ProductionReference) ParseInModule.disambiguateForUnparse(mod, KOREToTreeNodes.apply(KOREToTreeNodes.up(mod, expandMacros.expand(input)), mod))), colorize);
+                new AddBrackets(mod).addBrackets((ProductionReference) ParseInModule.disambiguateForUnparse(mod, KOREToTreeNodes.apply(KOREToTreeNodes.up(mod, expandMacros.expand(input)), mod))), options.color(tty.stdout, files.getEnv()));
     }
 }
