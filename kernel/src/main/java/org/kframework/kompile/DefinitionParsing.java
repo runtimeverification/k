@@ -256,15 +256,15 @@ public class DefinitionParsing {
                 .map(b -> (Bubble) b)
                 .filter(b -> !b.sentenceType().equals("config")).count() == 0)
             return module;
-        if (!scanner.getModule().importedModuleNames().contains(module.name())) {
-            // this scanner is not good for this module, so we must generate a new scanner.
-            scanner = null;
-        }
-        Scanner realScanner = scanner;
+
         Module ruleParserModule = gen.getRuleGrammar(module);
 
         ParseCache cache = loadCache(ruleParserModule);
         ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), isStrict);
+
+        // this scanner is not good for this module, so we must generate a new scanner.
+        boolean needNewScanner = !scanner.getModule().importedModuleNames().contains(module.name());
+        final Scanner realScanner = needNewScanner ? parser.getScanner() : scanner;
 
         Set<Sentence> ruleSet = stream(module.localSentences())
                 .parallel()
@@ -284,6 +284,10 @@ public class DefinitionParsing {
                 .map(this::upContext)
                 .collect(Collections.toSet());
 
+        if (needNewScanner) {
+            realScanner.close();//required for Windows.
+        }
+
         return Module(module.name(), module.imports(),
                 stream((Set<Sentence>) module.localSentences().$bar(ruleSet).$bar(contextSet)).filter(b -> !(b instanceof Bubble)).collect(Collections.toSet()), module.att());
     }
@@ -291,13 +295,18 @@ public class DefinitionParsing {
     public Rule parseRule(CompiledDefinition compiledDef, String contents, Source source) {
         errors = java.util.Collections.synchronizedSet(Sets.newHashSet());
         gen = new RuleGrammarGenerator(compiledDef.kompiledDefinition);
-        java.util.Set<K> res = performParse(new HashMap<>(), RuleGrammarGenerator.getCombinedGrammar(gen.getRuleGrammar(compiledDef.executionModule()), isStrict),
-                null, new Bubble("rule", contents, Att().add("contentStartLine", Integer.class, 1).add("contentStartColumn", Integer.class, 1).add(Source.class, source)))
-                .collect(Collectors.toSet());
-        if (!errors.isEmpty()) {
-            throw errors.iterator().next();
+        ParseInModule parser = RuleGrammarGenerator
+                .getCombinedGrammar(gen.getRuleGrammar(compiledDef.executionModule()), isStrict);
+        try (Scanner scanner = parser.getScanner()) { //required for Windows.
+            java.util.Set<K> res = performParse(new HashMap<>(), parser, scanner,
+                    new Bubble("rule", contents, Att().add("contentStartLine", Integer.class, 1)
+                            .add("contentStartColumn", Integer.class, 1).add(Source.class, source)))
+                    .collect(Collectors.toSet());
+            if (!errors.isEmpty()) {
+                throw errors.iterator().next();
+            }
+            return upRule(res.iterator().next());
         }
-        return upRule(res.iterator().next());
     }
 
     private Rule upRule(K contents) {
@@ -350,7 +359,9 @@ public class DefinitionParsing {
     private Stream<? extends K> parseBubble(Module module, Bubble b) {
         ParseCache cache = loadCache(gen.getConfigGrammar(module));
         ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), isStrict);
-        return performParse(cache.getCache(), parser, null, b);
+        try (Scanner scanner = parser.getScanner()) {
+            return performParse(cache.getCache(), parser, scanner, b);
+        }
     }
 
     private ParseInModule getParser(Module module) {

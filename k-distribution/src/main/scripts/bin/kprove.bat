@@ -1,4 +1,2 @@
-@ECHO OFF
-krun --backend java --prove %*
-
-
+@ECHO off
+call "%~dp0..\lib\k.bat" -kprove %*
