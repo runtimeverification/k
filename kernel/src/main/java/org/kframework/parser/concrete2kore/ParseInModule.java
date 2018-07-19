@@ -88,13 +88,12 @@ public class ParseInModule implements Serializable {
      */
     public Tuple2<Either<Set<ParseFailedException>, K>, Set<ParseFailedException>>
             parseString(String input, Sort startSymbol, Source source) {
-        return parseString(input, startSymbol, null, source, 1, 1, true);
+        try (Scanner scanner = getScanner()) {
+            return parseString(input, startSymbol, scanner, source, 1, 1, true);
+        }
     }
 
     private Scanner getGrammar(Scanner scanner) {
-        if(scanner == null) {
-            scanner = getScanner();
-        }
         Grammar g = grammar;
         if (g == null) {
             g = KSyntax2GrammarStatesFilter.getGrammar(this.parsingModule, scanner);

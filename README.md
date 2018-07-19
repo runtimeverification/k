@@ -7,7 +7,7 @@ This is a readme file for the developers.
 
 In short:
 ```
-sudo apt-get install build-essential m4 openjdk-8-jdk libgmp-dev libmpfr-dev pkg-config flex libfl-dev z3 libz3-dev maven opam python3
+sudo apt-get install build-essential m4 openjdk-8-jdk libgmp-dev libmpfr-dev pkg-config flex z3 libz3-dev maven opam python3
 ```
 
 If you install this list of dependencies, continue directly to the Install section.
