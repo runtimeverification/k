@@ -756,6 +756,9 @@ struct
   let hook_reverse c _ _ _ _ = match c with
       [Bytes b] -> [Bytes (reverse b)]
     | _ -> raise Not_implemented
+  let hook_concat c _ _ _ _ = match c with
+      [Bytes b1], [Bytes b2] -> [Bytes (Bytes.cat b1 b2)]
+    | _ -> raise Not_implemented
 end
 
 module STRING =

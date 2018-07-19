@@ -611,6 +611,8 @@ module BYTES-SYNTAX
   syntax Bytes ::= reverseBytes(Bytes) [function, hook(BYTES.reverse)]
 
   syntax Int ::= lengthBytes(Bytes) [function, hook(BYTES.length), smtlib(lengthBytes)]
+
+  syntax Bytes ::= Bytes "+Bytes" Bytes [function, hook(BYTES.concat), right]
 endmodule
 
 module BYTES-SYMBOLIC [symbolic]
@@ -666,6 +668,9 @@ module BYTES-SYMBOLIC [symbolic]
   rule lengthBytes(BS) => lengthBytes(BS, 0)
   rule lengthBytes(nilBytes, SIZE) => SIZE
   rule lengthBytes(B : BS, SIZE) => lengthBytes(BS, SIZE +Int 1)
+
+  rule nilBytes +Bytes B2 => B2
+  rule (B : BS) +Bytes B2 => B : (BS +Bytes B2)
 endmodule
 
 module BYTES
