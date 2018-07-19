@@ -723,9 +723,11 @@ public class SymbolicRewriter {
                         logStep(step, v, targetCallDataStr, term, true);
                     }
                     System.out.println("\n\nTerm throwing exception\n============================\n\n");
-                    KProve.prettyPrint(term.term());
-                    System.out.println("/\\");
-                    KProve.prettyPrint(term.constraint());
+                    //KProve.prettyPrint(term.term());
+                    System.out.println(term.term());
+                    System.out.print("/\\");
+                    //KProve.prettyPrint(term.constraint());
+                    System.out.println(term.constraint().toString().replaceAll("#And", "\n#And"));
                     e.printStackTrace();
                     throw e;
                 }
@@ -790,10 +792,12 @@ public class SymbolicRewriter {
             if (globalOptions.fast) {
                 System.out.println(term);
             } else {
-                KProve.prettyPrint(term.term());
+                //KProve.prettyPrint(term.term());
+                System.out.println(term.term());
             }
-            System.out.println("/\\");
-            KProve.prettyPrint(term.constraint());
+            System.out.print("/\\");
+            //KProve.prettyPrint(term.constraint());
+            System.out.println(term.constraint().toString().replaceAll("#And", "\n#And"));
             System.out.println();
         }
         return proofResults;
@@ -848,7 +852,9 @@ public class SymbolicRewriter {
         }
 
         if (globalOptions.log || forced || inNewStmt) {
-            KProve.prettyPrint(k);
+            //Pretty printing no longer viable, too slow after last rebase.
+            //KProve.prettyPrint(k);
+            System.out.println(k);
             System.out.println(output);
             System.out.println(statusCode);
             System.out.println("<localMem>");
@@ -881,8 +887,10 @@ public class SymbolicRewriter {
                 System.out.println(acctID);
                 System.out.println(storage);
             }
-            System.out.println("/\\");
-            KProve.prettyPrint(term.constraint());
+            System.out.print("/\\");
+            //pretty printing no longer viable
+            //KProve.prettyPrint(term.constraint());
+            System.out.println(term.constraint().toString().replaceAll("#And", "\n#And"));
         }
         if (!(theMap instanceof BuiltinMap || theMap instanceof Variable)) {
             throw new RuntimeException("<localMem> non-map format, aborting.");
