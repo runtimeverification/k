@@ -31,6 +31,7 @@ import org.kframework.kprove.KProve;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.api.io.FileSystem;
 import org.kframework.main.GlobalOptions;
+import org.kframework.main.Main;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.rewriter.SearchType;
 import org.kframework.utils.Stopwatch;
@@ -212,13 +213,18 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
 
             SymbolicRewriter rewriter = new SymbolicRewriter(rewritingContext, transitions, converter);
 
+            //todo kompileOptions.global == null, but shouldn't
+            if (rewritingContext.globalOptions.verbose) {
+                System.out.format("\nInitialization finished: %.3f s \n==================================\n",
+                        (System.currentTimeMillis() - Main.startTime) / 1000.);
+            }
             List<ConstrainedTerm> proofResults = javaRules.stream()
                     .filter(r -> !r.att().contains(Attribute.TRUSTED_KEY))
                     .map(r -> {
                         ConstrainedTerm lhs = r.createLhsPattern(termContext);
                         ConstrainedTerm rhs = r.createRhsPattern();
                         termContext.setInitialVariables(lhs.variableSet());
-                        return rewriter.proveRule(lhs, rhs, allRules, kem);
+                        return rewriter.proveRule(r, lhs, rhs, allRules, kem);
                     })
                     .flatMap(List::stream)
                     .collect(Collectors.toList());

@@ -30,10 +30,12 @@ import org.kframework.kore.FindK;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KORE;
+import org.kframework.main.Main;
 import org.kframework.rewriter.SearchType;
 import org.kframework.backend.java.utils.BitSet;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -578,10 +580,11 @@ public class SymbolicRewriter {
     }
 
     public List<ConstrainedTerm> proveRule(
-            ConstrainedTerm initialTerm,
+            Rule rule, ConstrainedTerm initialTerm,
             ConstrainedTerm targetTerm,
             List<Rule> specRules, KExceptionManager kem) {
         List<ConstrainedTerm> proofResults = new ArrayList<>();
+        int successPaths = 0;
         Set<ConstrainedTerm> visited = new HashSet<>();
         List<ConstrainedTerm> queue = new ArrayList<>();
         List<ConstrainedTerm> nextQueue = new ArrayList<>();
@@ -596,6 +599,7 @@ public class SymbolicRewriter {
             step++;
             for (ConstrainedTerm term : queue) {
                 if (term.implies(targetTerm)) {
+                    successPaths++;
                     continue;
                 }
 
@@ -681,6 +685,17 @@ public class SymbolicRewriter {
             guarded = true;
         }
 
+        if (proofResults.isEmpty()) {
+            System.out.format("\n==================================\nSPEC PROVED: %s %s\nExecution paths: %d\n",
+                    new File(rule.getSource().source()), rule.getLocation(), successPaths);
+        } else {
+            System.out.format("\n==================================\nSPEC FAILED: %s %s\n" +
+                            "Success execution paths: %d\nFailed execution paths: %d\n",
+                    new File(rule.getSource().source()), rule.getLocation(), successPaths, proofResults.size());
+        }
+        System.out.format("Longest path: %d steps\n", step);
+        System.out.format("Time so far: %.3f s\n==================================\n\n",
+                (System.currentTimeMillis() - Main.startTime) / 1000.);
         return proofResults;
     }
 

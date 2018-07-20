@@ -13,6 +13,7 @@ import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.krun.KRun;
 import org.kframework.main.GlobalOptions;
+import org.kframework.main.Main;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;
@@ -54,6 +55,11 @@ public class KProve {
         Tuple2<Definition, Module> compiled = getProofDefinition(options.specFile(files), options.defModule, options.specModule, compiledDefinition, backend, options.global, files, kem, sw);
         Rewriter rewriter = rewriterGenerator.apply(compiled._1().mainModule());
         Module specModule = compiled._2();
+        if (options.global.verbose) {
+            System.out.format("\nParsing finished: %.3f s \n==================================\n",
+                    (System.currentTimeMillis() - Main.startTime) / 1000.);
+        }
+
         K results = rewriter.prove(specModule);
         int exit;
         if (results instanceof KApply) {

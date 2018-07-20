@@ -38,6 +38,8 @@ import java.util.ServiceLoader;
 
 public class Main {
 
+    public static final long startTime = System.currentTimeMillis();
+
     /**
      * @param args
      *            - the running arguments for the K3 tool. First argument must be one of the following: kompile|kast|krun.
