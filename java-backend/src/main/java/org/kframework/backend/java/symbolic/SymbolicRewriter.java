@@ -46,6 +46,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.io.File;
 
@@ -606,14 +607,7 @@ public class SymbolicRewriter {
             System.out.println("\nTarget term\n=====================\n");
             System.out.println(targetTerm);
         }
-        String targetCallDataStr;
-        try {
-            targetCallDataStr = ((KList) ((KItem) ((KList) ((KItem) ((KList) ((KItem) ((KList) ((KItem) targetTerm.term()).kList())
-                    .get(5)).kList()).get(0)).klist()).get(5)).klist()).get(4).toString();
-        } catch (Exception e) {
-            System.err.println("Specification rule does not match expected spec form: " + targetTerm);
-            throw e;
-        }
+        KItem targetCallData = getCell((KItem) targetTerm.term(), "<callData>");
         int branchingRemaining = globalOptions.branchingAllowed;
         boolean nextStepLogEnabled = false;
         while (!queue.isEmpty()) {
@@ -628,14 +622,14 @@ public class SymbolicRewriter {
             for (ConstrainedTerm term : queue) {
                 v++;
                 Term generatedTop = term.term();
-                Term k = ((KList) ((KItem) generatedTop).kList()).get(0);
-                Term kContent = ((KList) ((KItem) k).klist()).get(0);
+                KItem k = getCell((KItem) generatedTop, "<k>");
+                Term kContent = k != null ? ((KList) k.klist()).get(0) : null;
                 BuiltinList kSequence = kContent instanceof BuiltinList ? (BuiltinList) kContent : null;
                 boolean isHalt = kSequence != null
                         ? kSequence.size() == 2 && kSequence.get(0) instanceof KItem
                         && kSequence.get(0).toString().equals("#halt_EVM(.KList)")
                         && !kSequence.get(1).toString().equals("#execute_EVM(.KList)")
-                        : kContent.toString().equals("#halt_EVM(.KList)");
+                        : kContent != null && kContent.toString().equals("#halt_EVM(.KList)");
                 boolean oldDebug =  globalOptions.debug;
                 boolean oldLog = globalOptions.log;
 
@@ -649,17 +643,17 @@ public class SymbolicRewriter {
                     successPaths++;
                     if (globalOptions.logBasic) {
                         System.out.println("\n============\nStep " + step + ": eliminated!\n============\n");
-                        logStep(step, v, targetCallDataStr, term, true);
+                        logStep(step, v, targetCallData, term, true);
                     }
                     continue;
                 } else {
-                    logStep(step, v, targetCallDataStr, term, step == 1 && globalOptions.logBasic);
+                    logStep(step, v, targetCallData, term, step == 1 && globalOptions.logBasic);
                 }
 
                 //stopping at halt
                 if (isHalt) {
                     if (!globalOptions.log) {
-                        logStep(step, v, targetCallDataStr, term, globalOptions.logBasic);
+                        logStep(step, v, targetCallData, term, globalOptions.logBasic);
                     }
                     System.out.println("Halt! Terminating branch.");
                     proofResults.add(term);
@@ -692,7 +686,7 @@ public class SymbolicRewriter {
                     if (result != null) {
                         nextStepLogEnabled = true;
                         if (!globalOptions.log) {
-                            logStep(step, v, targetCallDataStr, term, true);
+                            logStep(step, v, targetCallData, term, true);
                         }
                         // re-running constraint generation again for debug purposes
                         if (globalOptions.logBasic) {
@@ -720,7 +714,7 @@ public class SymbolicRewriter {
                     results = fastComputeRewriteStep(term, false, true, true, step);
                 } catch (Throwable e) {
                     if (!globalOptions.log) {
-                        logStep(step, v, targetCallDataStr, term, true);
+                        logStep(step, v, targetCallData, term, true);
                     }
                     System.out.println("\n\nTerm throwing exception\n============================\n\n");
                     //KProve.prettyPrint(term.term());
@@ -733,7 +727,7 @@ public class SymbolicRewriter {
                 }
                 if (results.isEmpty()) {
                     if (!globalOptions.log) {
-                        logStep(step, v, targetCallDataStr, term, true);
+                        logStep(step, v, targetCallData, term, true);
                     }
                     System.out.println("\nStep above: " + step + ", evaluation ended with no successors.");
                     /* final term */
@@ -743,7 +737,7 @@ public class SymbolicRewriter {
                 if (results.size() > 1) {
                     nextStepLogEnabled = true;
                     if (!globalOptions.log) {
-                        logStep(step, v, targetCallDataStr, term, true);
+                        logStep(step, v, targetCallData, term, true);
                     }
                     if (branchingRemaining == 0) {
                         System.out.println("\nHalt on branching!\n=====================\n");
@@ -816,34 +810,31 @@ public class SymbolicRewriter {
         global.profiler.printResult();
     }
 
-    private void logStep(int step, int v, String targetCallDataStr, ConstrainedTerm term, boolean forced) {
+    private void logStep(int step, int v, KItem targetCallData, ConstrainedTerm term, boolean forced) {
         if (!globalOptions.logBasic) {
             return;
         }
-        Term generatedTop = term.term();
-        Term k = ((KList) ((KItem) generatedTop).kList()).get(0);
-        Term ethereum = ((KList) ((KItem) generatedTop).kList()).get(5);
-        Term evm = ((KList) ((KItem) ethereum).klist()).get(0);
-        Term output = ((KList) ((KItem) evm).kList()).get(0);
-        Term statusCode = ((KList) ((KItem) evm).kList()).get(1);
-        Term callState = ((KList) ((KItem) evm).kList()).get(5);
-        Term callData = ((KList) ((KItem) callState).kList()).get(4);
-        Term wordStack = ((KList) ((KItem) callState).kList()).get(6);
-        Term localMem = ((KList) ((KItem) callState).kList()).get(7);
-        K theMap = ((KItem) localMem).klist().items().get(0);
-        Term pc = ((KList) ((KItem) callState).kList()).get(8);
-        Term gas = ((KList) ((KItem) callState).kList()).get(9);
+        KItem top = (KItem) term.term();
+        KItem k = getCell(top, "<k>");
+        Term kContent = k != null ? ((KList) k.klist()).get(0) : null;
+        BuiltinList kSequence = kContent instanceof BuiltinList ? (BuiltinList) kContent : null;
 
-        Term network = ((KList) ((KItem) ethereum).klist()).get(1);
-        BuiltinMap accounts = (BuiltinMap) ((KList) ((KItem) ((KList) ((KItem) network).kList())
-                .get(1)).klist()).get(0);
+        KItem output = getCell(top, "<output>");
+        KItem statusCode = getCell(top, "<statusCode>");
+        KItem localMem = getCell(top, "<localMem>");
+        KItem pc = getCell(top, "<pc>");
+        KItem gas = getCell(top, "<gas>");
+        KItem wordStack = getCell(top, "<wordStack>");
+        KItem callData = getCell(top, "<callData>");
+        KItem accounts = getCell(top, "<accounts>");
 
-        if (!(theMap instanceof BuiltinMap || theMap instanceof Variable)) {
+        K localMemMap = localMem != null ? localMem.klist().items().get(0) : null;
+        BuiltinMap accountsMap = accounts != null ? (BuiltinMap) ((KList) accounts.klist()).get(0) : null;
+
+        if (!(localMemMap instanceof BuiltinMap || localMemMap instanceof Variable)) {
             forced = true;
         }
 
-        Term kContent = ((KList) ((KItem) k).klist()).get(0);
-        BuiltinList kSequence = kContent instanceof BuiltinList ? (BuiltinList) kContent : null;
         boolean inNewStmt = globalOptions.logStmtsOnly && kSequence != null && inNewStmt(kSequence);
 
         if (globalOptions.log || forced || inNewStmt || globalOptions.logRulesPublic) {
@@ -854,47 +845,72 @@ public class SymbolicRewriter {
         if (globalOptions.log || forced || inNewStmt) {
             //Pretty printing no longer viable, too slow after last rebase.
             //KProve.prettyPrint(k);
-            System.out.println(k);
-            System.out.println(output);
-            System.out.println(statusCode);
-            System.out.println("<localMem>");
+            System.out.println(toStringOrEmpty(k));
+            System.out.println(toStringOrEmpty(output));
+            System.out.println(toStringOrEmpty(statusCode));
+            if (localMem != null) {
+                System.out.println("<localMem>");
 
-            if (theMap instanceof BuiltinMap) {
-                /*List<Term> entries = ((BuiltinMap) theMap).getKComponents();
-                for (int i = 0; i < entries.size(); i += 10) {
-                    System.out.println("\t" + entries.get(i));
-                    System.out.println("\t...");
-                }*/
-                System.out.println("...");
-            } else {
-                System.out.println("\tNon-map format:");
-                System.out.print("\t");
-                System.out.println(theMap);
+                if (localMemMap instanceof BuiltinMap) {
+                    /*List<Term> entries = ((BuiltinMap) localMemMap).getKComponents();
+                    for (int i = 0; i < entries.size(); i += 10) {
+                        System.out.println("\t" + entries.get(i));
+                        System.out.println("\t...");
+                    }*/
+                    System.out.println("...");
+                } else {
+                    System.out.println("\tNon-map format:");
+                    System.out.print("\t");
+                    System.out.println(localMemMap);
+                }
+                System.out.println("</localMem>");
             }
-            System.out.println("</localMem>");
 
-            System.out.println(pc);
-            System.out.println(gas);
-            System.out.println(wordStack);
-            String callDataStr = callData.toString();
-            if (!targetCallDataStr.equals(callDataStr)) {
+            System.out.println(toStringOrEmpty(pc));
+            System.out.println(toStringOrEmpty(gas));
+            System.out.println(toStringOrEmpty(wordStack));
+            if (targetCallData != null && callData != null && !targetCallData.equals(callData)) {
+                String callDataStr = toStringOrEmpty(callData);
                 System.out.println(callDataStr.substring(0, Math.min(callDataStr.length(), 300)));
             }
-            System.out.println("accounts: " + accounts.getEntries().size());
-            for (Map.Entry<Term, Term> acct : accounts.getEntries().entrySet()) {
-                Term acctID = acct.getKey();
-                K storage = ((KItem) acct.getValue()).klist().items().get(3);
-                System.out.println(acctID);
-                System.out.println(storage);
+            if (accountsMap != null) {
+                System.out.println("accounts: " + accountsMap.size());
+                for (Map.Entry<Term, Term> acct : accountsMap.getEntries().entrySet()) {
+                    Term acctID = acct.getKey();
+                    K storage = getCell((KItem) acct.getValue(), "<storage>");
+                    System.out.println(acctID);
+                    System.out.println(storage);
+                }
             }
             System.out.print("/\\");
             //pretty printing no longer viable
             //KProve.prettyPrint(term.constraint());
             System.out.println(term.constraint().toString().replaceAll("#And", "\n#And"));
         }
-        if (!(theMap instanceof BuiltinMap || theMap instanceof Variable)) {
+        if (localMem != null && !(localMemMap instanceof BuiltinMap || localMemMap instanceof Variable)) {
             throw new RuntimeException("<localMem> non-map format, aborting.");
         }
+    }
+
+    private String toStringOrEmpty(Object o) {
+        return o != null ? o.toString() : "";
+    }
+
+    private Pattern cellLabelPattern = Pattern.compile("<.+>");
+
+    private KItem getCell(KItem root, String label) {
+        if (root.klabel().name().equals(label)) {
+            return root;
+        }
+        for (K child : root.klist().items()) {
+            if (child instanceof KItem && cellLabelPattern.matcher(((KItem) child).klabel().name()).matches()) {
+                KItem result = getCell((KItem) child, label);
+                if (result != null) {
+                    return result;
+                }
+            }
+        }
+        return null;
     }
 
     private boolean inNewStmt(BuiltinList kSequence) {
