@@ -1,3 +1,4 @@
+// Copyright (c) 2018 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore.disambiguation;
 
 import org.kframework.builtin.KLabels;

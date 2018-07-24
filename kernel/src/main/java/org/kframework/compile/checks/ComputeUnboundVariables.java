@@ -1,3 +1,4 @@
+// Copyright (c) 2017-2018 K Team. All Rights Reserved.
 package org.kframework.compile.checks;
 
 import org.kframework.builtin.KLabels;
