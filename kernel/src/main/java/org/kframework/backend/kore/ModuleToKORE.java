@@ -142,8 +142,11 @@ public class ModuleToKORE {
         for (Rule rule : iterable(module.rules())) {
             K left = RewriteToTop.toLeft(rule.body());
             if (left instanceof KApply) {
-                KLabel label = ((KApply) left).klabel();
-                functionRules.put(label, rule);
+                KApply kapp = (KApply) left;
+                Production prod = production(kapp);
+                if (prod.att().contains(Attribute.FUNCTION_KEY)) {
+                    functionRules.put(kapp.klabel(), rule);
+                }
             }
         }
         computeDependencies(functionRules);
@@ -661,7 +664,14 @@ public class ModuleToKORE {
             if (left instanceof KApply) {
                 KApply kapp = (KApply) left;
                 if (r.att().contains(Attribute.ANYWHERE_KEY)) {
-                    anywhereKLabels.add(kapp.klabel());
+                    if (kapp.klabel().name().equals(KLabels.INJ)) {
+                        K k = kapp.items().get(0);
+                        if (k instanceof KApply) {
+                            anywhereKLabels.add(((KApply)k).klabel());
+                        }
+                    } else {
+                        anywhereKLabels.add(kapp.klabel());
+                    }
                 }
             }
         });
@@ -803,9 +813,9 @@ public class ModuleToKORE {
         if (k.equals(BooleanUtils.TRUE)) {
             sb.append("\\top{R}()");
         } else {
-            sb.append("\\equals{Bool{},R}(\n        ");
+            sb.append("\\equals{SortBool{},R}(\n        ");
             convert(k);
-            sb.append(",\n        \\dv{Bool{}}(\"true\"))");
+            sb.append(",\n        \\dv{SortBool{}}(\"true\"))");
         }
     }
 
@@ -815,11 +825,11 @@ public class ModuleToKORE {
             convert(result, false);
             sb.append("}()");
         } else {
-            sb.append("\\equals{Bool{},");
+            sb.append("\\equals{SortBool{},");
             convert(result, false);
             sb.append("}(\n        ");
             convert(k);
-            sb.append(",\n        \\dv{Bool{}}(\"true\"))");
+            sb.append(",\n        \\dv{SortBool{}}(\"true\"))");
         }
     }
 
@@ -889,8 +899,12 @@ public class ModuleToKORE {
         }
     }
 
+    private static final Production INJ_PROD = Production(KLabel(KLabels.INJ, Sort("From"), Sort("To")), Sort("To"), Seq(NonTerminal(Sort("From"))));
+
 
     private Production production(KApply term) {
+        if (term.klabel().name().equals(KLabels.INJ))
+            return Production(INJ_PROD.klabel(), INJ_PROD.sort(), INJ_PROD.items(), Att.empty().add("originalPrd", Production.class, INJ_PROD));
         scala.collection.Set<Production> prods = module.productionsFor().apply(((KApply) term).klabel());
         assert(prods.size() == 1);
         return computePolyProd(prods.head());
@@ -935,6 +949,7 @@ public class ModuleToKORE {
     }
 
     private void convert(Sort sort, boolean var) {
+        sb.append("Sort");
         convert(sort.name());
         if (!var) {
             sb.append("{");
@@ -1138,7 +1153,7 @@ public class ModuleToKORE {
             @Override
             public void apply(KApply k) {
                 if (impureFunctions.contains(k.klabel().name())) {
-                    throw KEMException.internalError("Cannot yet translate impure function to kore.", k);
+                    throw KEMException.internalError("Cannot yet translate impure function to kore: " + k.klabel().name(), k);
                 }
                 KLabel label = k.klabel();
                 if (polyKLabels.containsKey(k.klabel().name())) {
