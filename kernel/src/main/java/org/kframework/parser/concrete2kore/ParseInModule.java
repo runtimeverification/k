@@ -80,6 +80,16 @@ public class ParseInModule implements Serializable {
 
     public Module getParsingModule() { return parsingModule; }
 
+    public void initialize() {
+       disambModule.definedSorts();
+       disambModule.subsorts();
+       disambModule.priorities();
+       disambModule.leftAssoc();
+       disambModule.rightAssoc();
+       disambModule.productionsFor();
+       disambModule.overloads();
+    }
+
     /**
      * Parse as input the given string and start symbol using the module stored in the object.
      * @param input          the string to parse.

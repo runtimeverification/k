@@ -261,6 +261,9 @@ public class DefinitionParsing {
 
         ParseCache cache = loadCache(ruleParserModule);
         ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), isStrict);
+        if (stream(module.localSentences()).filter(s -> s instanceof Bubble).findAny().isPresent()) {
+            parser.initialize();
+        }
 
         // this scanner is not good for this module, so we must generate a new scanner.
         boolean needNewScanner = !scanner.getModule().importedModuleNames().contains(module.name());
