@@ -716,7 +716,7 @@ endmodule
 module ID-SYMBOLIC [symbolic]
   imports ID-SYNTAX
   syntax KItem  ::= "#parseToken"  "(" String "," String ")"  [function, hook(STRING.parseToken)]
-  rule String2Id(S:String) => #parseToken("Id", S)
+  rule String2Id(S:String) => {#parseToken("Id", S)}:>Id
 endmodule
 
 module K-EQUAL
