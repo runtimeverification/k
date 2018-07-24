@@ -25,7 +25,7 @@ module ARRAY-SYNTAX
   imports LIST
 
   syntax Array [hook(ARRAY.Array), unit(arrayCtor), element(_[_<-_])]
-  syntax Array ::= makeArray(Int, K) [function, hook(ARRAY.make)]
+  syntax Array ::= makeArray(Int, K) [function, hook(ARRAY.make), impure]
 
   syntax K ::= Array "[" Int "]" [function, hook(ARRAY.lookup)]
   syntax Array ::= Array "[" Int "<-" K "]" [function, hook(ARRAY.update), klabel(_[_<-_])]
@@ -43,8 +43,8 @@ module ARRAY-CONCRETE [concrete]
   imports LIST
   imports STRING-SYNTAX
 
-  syntax Array ::= makeEmptyArray(Int) [function, hook(ARRAY.makeEmpty)]
                  | arrayCtor(String, Int) [function, hook(ARRAY.ctor)]
+  syntax Array ::= makeEmptyArray(Int) [function, hook(ARRAY.makeEmpty), impure]
 endmodule
 
 module ARRAY-SYMBOLIC [symbolic]
