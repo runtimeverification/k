@@ -176,7 +176,7 @@ public class ParseInModule implements Serializable {
             return rez2;
         warn = rez2._2();
 
-        Term rez3 = new PushAmbiguitiesDownAndPreferAvoid().apply(rez2._1().right().get());
+        rez3 = new PushAmbiguitiesDownAndPreferAvoid(disambModule.overloads()).apply(rez2._1().right().get());
         rez2 = new AmbFilter().apply(rez3);
         warn = Sets.union(rez2._2(), warn);
         rez2 = new AddEmptyLists(disambModule).apply(rez2._1().right().get());
@@ -198,8 +198,7 @@ public class ParseInModule implements Serializable {
             rez2 = new AmbFilter().apply(rez.right().get());
             return rez2._1().right().get();
         }
-        Term rez3 = new RemoveOverloads(mod.overloads()).apply(rez2._1().right().get());
-        rez3 = new PushAmbiguitiesDownAndPreferAvoid().apply(rez3);
+        Term rez3 = new PushAmbiguitiesDownAndPreferAvoid(mod.overloads()).apply(rez2._1().right().get());
         rez2 = new AmbFilter().apply(rez3);
         return rez2._1().right().get();
     }

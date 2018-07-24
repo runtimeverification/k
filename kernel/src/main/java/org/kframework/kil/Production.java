@@ -109,7 +109,7 @@ public class Production extends ASTNode {
         String klabel = getAttribute("klabel");
         if (klabel == null && (isSyntacticSubsort() || containsAttribute("token") || containsAttribute("bracket"))) {
             return null;
-        } else if (klabel == null) {
+        } else if (klabel == null || (kore && getAttribute("symbol") == null)) {
             klabel = getPrefixLabel(kore);
         }
         return klabel.replace(" ", "");
@@ -126,6 +126,8 @@ public class Production extends ASTNode {
                 label += ((Terminal) pi).getTerminal();
             } else if (pi instanceof UserList) {
                 label += "_" + ((UserList) pi).separator + "_";
+                sorts.add(((UserList) pi).sort.name());
+                sorts.add(sort.name());
             }
         }
         return label + "_" + ownerModuleName + (kore ? "_" + sorts.stream().reduce("", (s1, s2) -> s1 + "_" + s2) : "");

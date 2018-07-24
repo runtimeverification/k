@@ -1,5 +1,6 @@
 package org.kframework.parser.concrete2kore.disambiguation;
 
+import org.kframework.POSet;
 import org.kframework.definition.Production;
 import org.kframework.parser.Ambiguity;
 import org.kframework.parser.ProductionReference;
@@ -15,6 +16,12 @@ import java.util.stream.Collectors;
  * Created by dwightguth on 5/3/17.
  */
 public class PushAmbiguitiesDownAndPreferAvoid extends SafeTransformer {
+
+    private POSet<Production> overloads;
+
+    public PushAmbiguitiesDownAndPreferAvoid(POSet<Production> overloads) {
+        this.overloads = overloads;
+    }
 
     public Term preferAvoid(Ambiguity amb) {
         List<Term> prefer = new ArrayList<>();
@@ -54,7 +61,11 @@ public class PushAmbiguitiesDownAndPreferAvoid extends SafeTransformer {
         Production prod = null;
         int arity = 0;
 
-        Term preferred = preferAvoid(a);
+        Term withoutOverloads = new RemoveOverloads(overloads).apply(a);
+        if (!(withoutOverloads instanceof Ambiguity)) {
+            return super.apply(withoutOverloads);
+        }
+        Term preferred = preferAvoid((Ambiguity)withoutOverloads);
         if (!(preferred instanceof Ambiguity)) {
             return super.apply(preferred);
         }

@@ -28,7 +28,7 @@ module ARRAY-SYNTAX
   syntax Array ::= makeArray(Int, K) [function, hook(ARRAY.make), impure]
 
   syntax K ::= Array "[" Int "]" [function, hook(ARRAY.lookup)]
-  syntax Array ::= Array "[" Int "<-" K "]" [function, hook(ARRAY.update), klabel(_[_<-_])]
+  syntax Array ::= Array "[" Int "<-" K "]" [function, hook(ARRAY.update), klabel(_[_<-_]), symbol]
   syntax Array ::= Array "[" Int "<-" "undef" "]" [function, hook(ARRAY.remove)]
   syntax Array ::= updateArray(Array, Int, List) [function, hook(ARRAY.updateAll)]
   /*@ Sets a range of indices (given by an index into the array and the number
@@ -43,8 +43,8 @@ module ARRAY-CONCRETE [concrete]
   imports LIST
   imports STRING-SYNTAX
 
-                 | arrayCtor(String, Int) [function, hook(ARRAY.ctor)]
   syntax Array ::= makeEmptyArray(Int) [function, hook(ARRAY.makeEmpty), impure]
+                 | arrayCtor(String, Int) [function, hook(ARRAY.ctor), symbol]
 endmodule
 
 module ARRAY-SYMBOLIC [symbolic]
@@ -92,20 +92,20 @@ module MAP
 
   /*@ Construct a new Map consisting of key/value pairs of two Maps (the keys of
    the two Maps are assumed disjoint) */
-  syntax Map ::= Map Map                        [left, function, hook(MAP.concat), klabel(_Map_), assoc, comm, unit(.Map), element(_|->_), index(0), format(%1%n%2)]
+  syntax Map ::= Map Map                        [left, function, hook(MAP.concat), klabel(_Map_), symbol, assoc, comm, unit(.Map), element(_|->_), index(0), format(%1%n%2)]
   /*@  Construct an empty Map */
-  syntax Map ::= ".Map"                         [function, hook(MAP.unit), klabel(.Map), latex(\dotCt{Map})]
+  syntax Map ::= ".Map"                         [function, hook(MAP.unit), klabel(.Map), symbol, latex(\dotCt{Map})]
                // breaks klabel uniqueness
                //| "."                            [function, hook(MAP.unit)]
   /*@ Construct a singleton Map (a Map with only one key/value pair). The key
    is on the left and the value is on the right */
-  syntax Map ::= K "|->" K                      [function, hook(MAP.element), klabel(_|->_), latex({#1}\mapsto{#2})]
+  syntax Map ::= K "|->" K                      [function, hook(MAP.element), klabel(_|->_), symbol, latex({#1}\mapsto{#2})]
 
   syntax priorities _|->_ > _Map_ .Map
   syntax non-assoc _|->_
 
   /*@ Retrieve the value associated with the given key */
-  syntax K ::= Map "[" K "]"                    [function, hook(MAP.lookup), klabel(Map:lookup)]
+  syntax K ::= Map "[" K "]"                    [function, hook(MAP.lookup), klabel(Map:lookup), symbol]
 
   syntax K ::= Map "[" K "]" "orDefault" K      [function, hook(MAP.lookupOrDefault), klabel(Map:lookupOrDefault)]
 
@@ -113,7 +113,7 @@ module MAP
   syntax Map ::= Map "[" K "<-" K "]"           [function, hook(MAP.update), prefer]
 
   /*@ Remove key/value pair associated with the key from map? */
-  syntax Map ::= Map "[" K "<-" "undef" "]"     [function, hook(MAP.remove), klabel(_[_<-undef])]
+  syntax Map ::= Map "[" K "<-" "undef" "]"     [function, hook(MAP.remove), klabel(_[_<-undef]), symbol]
 
   /*@ Get the difference of two maps interpreted as sets of entries
    ($M_1 \setminus M2$) */
@@ -156,23 +156,23 @@ module SET
    of unique items). */
 
   /*@ Construct a new Set as the union of two different sets ($A \cup B$) */
-  syntax Set ::= Set Set                  [left, function, hook(SET.concat), klabel(_Set_), assoc, comm, unit(.Set), idem, element(SetItem), format(%1%n%2)]
+  syntax Set ::= Set Set                  [left, function, hook(SET.concat), klabel(_Set_), symbol, assoc, comm, unit(.Set), idem, element(SetItem), format(%1%n%2)]
   /*@ Construct an empty Set */
-  syntax Set ::= ".Set"                   [function, hook(SET.unit), klabel(.Set), latex(\dotCt{Set})]
+  syntax Set ::= ".Set"                   [function, hook(SET.unit), klabel(.Set), symbol, latex(\dotCt{Set})]
                //| "."
   /*@ Construct a singleton Set (a Set with only one element $\{ a \}$). To add
    an element $a$ to a set $A$, construct the union of the singleton set
    $\{ a \}$ and $A$ ($\{ a \} \cup A$). */
-  syntax Set ::= SetItem(K)               [function, hook(SET.element), klabel(SetItem)]
+  syntax Set ::= SetItem(K)               [function, hook(SET.element), klabel(SetItem), symbol]
 
   /*@ Get the intersection of two sets ($A \cap B$) */
   syntax Set ::= intersectSet(Set, Set)   [function, hook(SET.intersection)]
 
   /*@ Get the difference of two sets ($A \setminus B$)*/
-  syntax Set ::= Set "-Set" Set           [function, hook(SET.difference), latex({#1}-_{\it Set}{#2}), klabel(Set:difference)]
+  syntax Set ::= Set "-Set" Set           [function, hook(SET.difference), latex({#1}-_{\it Set}{#2}), klabel(Set:difference), symbol]
 
   /*@ Check element membership in a set ($a \in A$) */
-  syntax Bool ::= K "in" Set              [function, hook(SET.in), klabel(Set:in)]
+  syntax Bool ::= K "in" Set              [function, hook(SET.in), klabel(Set:in), symbol]
 
   /*@ Check set inclusion ($A \subseteq B$) */
   syntax Bool ::= Set "<=Set" Set         [function, hook(SET.inclusion)]
@@ -227,20 +227,20 @@ module LIST
 
   /*@ Construct a new List as the concatenation of two Lists. This is similar to
    the append "@" operation in many functional programming languages. */
-  syntax List ::= List List               [left, function, hook(LIST.concat), klabel(_List_), smtlib(smt_seq_concat), assoc, unit(.List), element(ListItem), format(%1%n%2)]
+  syntax List ::= List List               [left, function, hook(LIST.concat), klabel(_List_), symbol, smtlib(smt_seq_concat), assoc, unit(.List), element(ListItem), format(%1%n%2)]
   /*@ Construct an empty List: */
-  syntax List ::= ".List"                 [function, hook(LIST.unit), klabel(.List), smtlib(smt_seq_nil), latex(\dotCt{List})]
+  syntax List ::= ".List"                 [function, hook(LIST.unit), klabel(.List), symbol, smtlib(smt_seq_nil), latex(\dotCt{List})]
                 //| "."
   /*@ Construct a singleton List (a list with only  one element) */
-  syntax List ::= ListItem(K)             [function, hook(LIST.element), klabel(ListItem), smtlib(smt_seq_elem)]
+  syntax List ::= ListItem(K)             [function, hook(LIST.element), klabel(ListItem), symbol, smtlib(smt_seq_elem)]
 
   /*@ Get an element form the List by index. Positive indices mean from the
    beginning (0 is the first element), and negative indices mean from the end
    (-1 is the last element). */
-  syntax K ::= List "[" Int "]"           [function, hook(LIST.get), klabel(List:get)]
+  syntax K ::= List "[" Int "]"           [function, hook(LIST.get), klabel(List:get), symbol]
 
   /*@ Remove elements from the beginning and the end of the List. */
-  syntax List ::= range(List, Int, Int)   [function, hook(LIST.range), klabel(List:range)]
+  syntax List ::= range(List, Int, Int)   [function, hook(LIST.range), klabel(List:range), symbol]
 
   /*@ Check element membership in the given list */
   syntax Bool ::= K "in" List             [function, hook(LIST.in), klabel(_inList_)]
@@ -268,8 +268,8 @@ endmodule
 module BOOL
   imports BASIC-K
   imports BOOL-SYNTAX
-  syntax Bool ::= "notBool" Bool          [function, klabel(notBool_), smtlib(not), boolOperation, latex(\neg_{\scriptstyle\it Bool}{#1}), hook(BOOL.not)]
-                > Bool "andBool" Bool     [function, klabel(_andBool_), left, smtlib(and), boolOperation, latex({#1}\wedge_{\scriptstyle\it Bool}{#2}), hook(BOOL.and)]
+  syntax Bool ::= "notBool" Bool          [function, klabel(notBool_), symbol, smtlib(not), boolOperation, latex(\neg_{\scriptstyle\it Bool}{#1}), hook(BOOL.not)]
+                > Bool "andBool" Bool     [function, klabel(_andBool_), symbol, left, smtlib(and), boolOperation, latex({#1}\wedge_{\scriptstyle\it Bool}{#2}), hook(BOOL.and)]
                 | Bool "andThenBool" Bool [function, left, smtlib(and), boolOperation, hook(BOOL.andThen)]
                 | Bool "xorBool" Bool     [function, left, smtlib(xor), boolOperation, hook(BOOL.xor)]
                 | Bool "orBool" Bool      [function, left, smtlib(or), boolOperation, latex({#1}\vee_{\scriptstyle\it Bool}{#2}), hook(BOOL.or)]
@@ -724,7 +724,7 @@ module K-EQUAL
   imports BASIC-K
 
   syntax Bool ::= left:
-                    K "==K" K           [function, smtlib(=), hook(KEQUAL.eq), klabel(_==K_), latex({#1}\mathrel{=_K}{#2}), equalEqualK]
+                    K "==K" K           [function, smtlib(=), hook(KEQUAL.eq), klabel(_==K_), symbol, latex({#1}\mathrel{=_K}{#2}), equalEqualK]
                 | K "=/=K" K          [function, smtlib(distinct), hook(KEQUAL.ne), latex({#1}\mathrel{\neq_K}{#2}), notEqualEqualK]
 
   syntax priorities equalEqualK notEqualEqualK > boolOperation mlOp
@@ -1255,9 +1255,9 @@ module STRATEGY
 
     syntax Strategy ::= #STUCK()
 
-    syntax StrategyApply ::= "^" #RuleTag                      [klabel(#applyRule)]
+    syntax StrategyApply ::= "^" #RuleTag                      [klabel(#applyRule), symbol]
 
-    syntax StrategyApplied ::= "~" #RuleTag                    [klabel(#appliedRule)]
+    syntax StrategyApplied ::= "~" #RuleTag                    [klabel(#appliedRule), symbol]
 
     syntax Strategy ::= StrategyApply | StrategyApplied
 

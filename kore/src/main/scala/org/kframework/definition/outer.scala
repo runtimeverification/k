@@ -66,19 +66,17 @@ trait Sorting {
 
   def computeOverloadPOSet(subsorts: POSet[Sort], prods: Set[Production]) = {
     def isLessThan(p1: Production, p2: Production): Boolean = {
-      p1 != p2 &&
         p1.klabel.isDefined &&
-        p1.klabel == p2.klabel &&
+        p1.klabelAtt == p2.klabelAtt &&
         subsorts.lessThanEq(p1.sort, p2.sort) &&
         p1.nonterminals.size == p2.nonterminals.size &&
         p1.nonterminals.zip(p2.nonterminals).forall(pair => subsorts.lessThanEq(pair._1.sort, pair._2.sort)) &&
-        (p1.sort != p2.sort || p1.nonterminals.map(_.sort) != p2.nonterminals.map(_.sort))
+        (p1.sort != p2.sort || p1.nonterminals.map(_.sort) != p2.nonterminals.map(_.sort)) &&
+        p1 != p2
     }
-    val pairs = for (x <- prods; y <- prods) yield (x, y)
-    val overloadRelations: Set[(Production, Production)] = pairs collect {
-      case (p1, p2) if isLessThan(p1, p2) => (p1, p2)
-    }
-    POSet(overloadRelations)
+    val prodsForOverloads = prods.toSeq.filter(_.klabelAtt.isDefined).groupBy(_.klabelAtt)
+    val pairs: Iterable[(Production, Production)] = for (x <- prodsForOverloads.values; p1 <- x; p2 <- x; if isLessThan(p1, p2)) yield (p1, p2)
+    POSet(pairs.toSet)
   }
 }
 
@@ -359,6 +357,8 @@ case class SyntaxSort(sort: Sort, att: Att = Att.empty) extends Sentence
 
 case class Production(klabel: Option[KLabel], sort: Sort, items: Seq[ProductionItem], att: Att)
   extends Sentence with ProductionToString {
+
+  lazy val klabelAtt: Option[String] = att.getOption("klabel")
 
   override def equals(that: Any) = that match {
     case p@Production(`klabel`, `sort`, `items`, _) => this.att.getOption("poly") == p.att.getOption("poly") && this.att.getOption("function") == p.att.getOption("function")
