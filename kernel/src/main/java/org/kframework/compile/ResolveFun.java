@@ -10,10 +10,15 @@ import org.kframework.definition.Production;
 import org.kframework.definition.ProductionItem;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
+import org.kframework.kore.InjectedKLabel;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
+import org.kframework.kore.KAs;
 import org.kframework.kore.KLabel;
+import org.kframework.kore.KSequence;
+import org.kframework.kore.KToken;
 import org.kframework.kore.KVariable;
+import org.kframework.kore.Sort;
 import org.kframework.kore.TransformK;
 import org.kframework.compile.checks.ComputeUnboundVariables;
 import org.kframework.utils.errorsystem.KEMException;
@@ -121,10 +126,10 @@ public class ResolveFun {
                 BooleanUtils.TRUE, BooleanUtils.TRUE, att);
     }
 
-    private List<K> closure(K k) {
+    private List<KVariable> closure(K k) {
         Set<KEMException> errors = new HashSet<>();
         Set<KVariable> vars = new HashSet<>();
-        List<K> result = new ArrayList<>();
+        List<KVariable> result = new ArrayList<>();
         new GatherVarsVisitor(true, errors, vars).apply(k);
         new ComputeUnboundVariables(true, errors, vars, result::add).apply(k);
         return result;
@@ -132,17 +137,33 @@ public class ResolveFun {
 
     private Production funProd(KLabel fun, K k) {
         List<ProductionItem> pis = new ArrayList<>();
+        K left = RewriteToTop.toLeft(k);
+        K right = RewriteToTop.toRight(k);
         pis.add(Terminal(fun.name()));
         pis.add(Terminal("("));
-        pis.add(NonTerminal(Sorts.K()));
-        for (K ignored : closure(k)) {
+        pis.add(NonTerminal(sort(left)));
+        for (KVariable var : closure(k)) {
             pis.add(Terminal(","));
-            pis.add(NonTerminal(Sorts.K()));
+            pis.add(NonTerminal(var.att().getOptional(Sort.class).orElse(Sorts.K())));
         }
         pis.add(Terminal(")"));
-        return Production(fun, Sorts.K(),
+        return Production(fun, sort(right),
                 immutable(pis),
                 Att().add("function"));
+    }
+
+    private Sort sort(K k) {
+        if (k instanceof KSequence)
+            return Sorts.K();
+        if (k instanceof KAs)
+            return sort(((KAs) k).pattern());
+        if (k instanceof InjectedKLabel)
+            return Sorts.KItem();
+        if (k instanceof KToken)
+            return ((KToken) k).sort();
+        if (k instanceof KApply)
+            return k.att().get(Production.class).sort();
+        throw KEMException.compilerError("Could not compute sort of term", k);
     }
 
     private Context resolve(Context context) {
