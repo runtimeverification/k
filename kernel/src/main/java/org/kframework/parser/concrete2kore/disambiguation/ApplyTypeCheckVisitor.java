@@ -3,9 +3,13 @@ package org.kframework.parser.concrete2kore.disambiguation;
 
 import com.google.common.collect.Sets;
 import org.kframework.POSet;
+import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.NonTerminal;
+import org.kframework.definition.Production;
+import org.kframework.kil.Attribute;
 import org.kframework.kore.Sort;
+import org.kframework.parser.Ambiguity;
 import org.kframework.parser.Constant;
 import org.kframework.parser.ProductionReference;
 import org.kframework.parser.SetsTransformerWithErrors;
@@ -29,19 +33,21 @@ public class ApplyTypeCheckVisitor extends SetsTransformerWithErrors<ParseFailed
     }
 
     public Either<java.util.Set<ParseFailedException>, Term> apply(TermCons tc) {
-        if (tc.production().klabel().isDefined()
-                && (tc.production().klabel().get().name().equals("#SyntacticCast")
-                || tc.production().klabel().get().name().startsWith("#SemanticCastTo")
-                || tc.production().klabel().get().name().equals("#InnerCast"))) {
-            Term t = tc.get(0);
-            boolean strict = !tc.production().klabel().get().name().startsWith("#SemanticCastTo");
-            Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheck2(VariableTypeInferenceFilter.getSortOfCast(tc), strict).apply(t);
-            if (rez.isLeft())
-                return rez;
-            tc = tc.with(0, rez.right().get());
-        } else {
-            for (int i = 0, j = 0; i < tc.production().items().size(); i++) {
-                if (tc.production().items().apply(i) instanceof NonTerminal) {
+        for (int i = 0, j = 0; i < tc.production().items().size(); i++) {
+            if (tc.production().items().apply(i) instanceof NonTerminal) {
+                if (tc.production().klabel().isDefined()
+                        && (tc.production().klabel().get().name().equals("#SyntacticCast")
+                        || tc.production().klabel().get().name().startsWith("#SemanticCastTo")
+                        || tc.production().klabel().get().name().equals("#InnerCast"))
+                        || (VariableTypeInferenceFilter.isFunctionRule(tc) && j == 0)) {
+                    Term t = tc.get(0);
+                    boolean strict = tc.production().klabel().get().name().equals("#SyntacticCast") || tc.production().klabel().get().name().equals("#InnerCast");
+                    Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheck2(VariableTypeInferenceFilter.getSortOfCast(tc), strict).apply(t);
+                    if (rez.isLeft())
+                        return rez;
+                    tc = tc.with(0, rez.right().get());
+                    j++;
+                } else {
                     Term t = tc.get(j);
                     Sort s = ((NonTerminal) tc.production().items().apply(i)).sort();
                     Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheck2(s).apply(t);
