@@ -86,7 +86,6 @@ public class KoreBackend implements Backend {
                 .andThen(d -> new ResolveContexts(kompileOptions).resolve(d))
                 .andThen(resolveSemanticCasts)
                 .andThen(generateSortPredicateSyntax)
-                .andThen(Kompile::resolveFreshConstants)
                 .andThen(AddImplicitComputationCell::transformDefinition)
                 .andThen(new Strategy(kompileOptions.experimental.heatCoolStrategies).addStrategyCellToRulesTransformer())
                 .andThen(ConcretizeCells::transformDefinition)
