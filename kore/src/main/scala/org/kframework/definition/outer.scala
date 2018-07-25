@@ -358,7 +358,7 @@ case class SyntaxSort(sort: Sort, att: Att = Att.empty) extends Sentence
 case class Production(klabel: Option[KLabel], sort: Sort, items: Seq[ProductionItem], att: Att)
   extends Sentence with ProductionToString {
 
-  lazy val klabelAtt: Option[String] = att.getOption("klabel")
+  lazy val klabelAtt: Option[String] = att.getOption("klabel").orElse(klabel.map(_.name))
 
   override def equals(that: Any) = that match {
     case p@Production(`klabel`, `sort`, `items`, _) => this.att.getOption("poly") == p.att.getOption("poly") && this.att.getOption("function") == p.att.getOption("function")

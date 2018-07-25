@@ -198,10 +198,11 @@ public class ParseInModule implements Serializable {
     }
 
     public static Term disambiguateForUnparse(Module mod, Term ambiguity) {
-        Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheckVisitor(mod.subsorts()).apply(ambiguity);
+        Term rez3 = new PushTopAmbiguityUp().apply(ambiguity);
+        Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheckVisitor(mod.subsorts()).apply(rez3);
         Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rez2;
         if (rez.isLeft()) {
-            rez2 = new AmbFilter().apply(ambiguity);
+            rez2 = new AmbFilter().apply(rez3);
             return rez2._1().right().get();
         }
         rez2 = new VariableTypeInferenceFilter(mod.subsorts(), mod.definedSorts(), mod.productionsFor(), false, false).apply(rez.right().get());
@@ -209,7 +210,7 @@ public class ParseInModule implements Serializable {
             rez2 = new AmbFilter().apply(rez.right().get());
             return rez2._1().right().get();
         }
-        Term rez3 = new PushAmbiguitiesDownAndPreferAvoid(mod.overloads()).apply(rez2._1().right().get());
+        rez3 = new PushAmbiguitiesDownAndPreferAvoid(mod.overloads()).apply(rez2._1().right().get());
         rez2 = new AmbFilter().apply(rez3);
         return rez2._1().right().get();
     }
