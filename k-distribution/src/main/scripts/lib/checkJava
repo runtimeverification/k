@@ -47,7 +47,7 @@ fi
 if [[ "$_java" ]]; then
     version=$(echo $version | awk -F '"' '/version/ {print $2}')
 #    echo version "$version"
-    if ! [[ "$version" > "$MIN_VERSION" ]]; then
+    if ! [ "$MIN_VERSION" = "`printf "$MIN_VERSION\n%s" "$version" | sort -V | head -1`" ]; then
         echoerr -e "\033[1;31mError:\033[0m K requires Java $MIN_VERSION to run but the detected version is $version."
         echoerr "Please either add Java $MIN_VERSION bin directory to the PATH or set the JAVA_HOME
 environment variable accordingly."
