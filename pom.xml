@@ -29,6 +29,12 @@
 
   <repositories>
     <repository>
+      <id>central</id>
+      <name>Central Repository</name>
+      <url>https://repo.maven.apache.org/maven2</url>
+      <snapshots><enabled>false</enabled></snapshots>
+    </repository>
+    <repository>
       <id>runtime.verification</id>
       <name>Runtime Verification Repository</name>
       <url>https://s3.amazonaws.com/repo.runtime.verification/repository/internal</url>
@@ -43,6 +49,22 @@
       <releases><enabled>false</enabled></releases>
     </repository>
   </repositories>
+
+  <pluginRepositories>
+    <pluginRepository>
+      <id>central</id>
+      <name>Central Repository</name>
+      <url>https://repo.maven.apache.org/maven2</url>
+      <layout>default</layout>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <releases>
+        <updatePolicy>never</updatePolicy>
+      </releases>
+    </pluginRepository>
+  </pluginRepositories>
+
   <distributionManagement>
     <repository>
       <id>runtime.verification</id>
