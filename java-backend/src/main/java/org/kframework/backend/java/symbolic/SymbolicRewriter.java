@@ -778,10 +778,6 @@ public class SymbolicRewriter {
             globalOptions.log = oldLogEnabled;
         }
 
-        if (globalOptions.verbose) {
-            printSummaryBox(rule, proofResults, successPaths, step);
-        }
-        //fixme rebase: check if not printed elsewhere
         for (ConstrainedTerm term : proofResults) {
             if (globalOptions.fast) {
                 System.out.println(term);
@@ -793,6 +789,10 @@ public class SymbolicRewriter {
             //KProve.prettyPrint(term.constraint());
             System.out.println(term.constraint().toString().replaceAll("#And", "\n#And"));
             System.out.println();
+        }
+
+        if (globalOptions.verbose) {
+            printSummaryBox(rule, proofResults, successPaths, step);
         }
         return proofResults;
     }
