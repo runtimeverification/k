@@ -7,20 +7,27 @@ import org.kframework.attributes.Att;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.MetaK;
 import org.kframework.backend.java.builtins.SortMembership;
-import org.kframework.backend.java.symbolic.*;
+import org.kframework.backend.java.symbolic.BuiltinFunction;
+import org.kframework.backend.java.symbolic.ConjunctiveFormula;
+import org.kframework.backend.java.symbolic.PatternMatcher;
+import org.kframework.backend.java.symbolic.RuleAuditing;
+import org.kframework.backend.java.symbolic.Stage;
+import org.kframework.backend.java.symbolic.Substitution;
+import org.kframework.backend.java.symbolic.Transformer;
+import org.kframework.backend.java.symbolic.Visitor;
+import org.kframework.backend.java.util.Constants;
 import org.kframework.backend.java.util.ImpureFunctionException;
 import org.kframework.backend.java.util.Profiler;
 import org.kframework.backend.java.util.RewriteEngineUtils;
 import org.kframework.backend.java.util.RuleSourceUtil;
 import org.kframework.backend.java.util.Subsorts;
-import org.kframework.backend.java.util.Constants;
+import org.kframework.backend.java.utils.BitSet;
 import org.kframework.builtin.KLabels;
 import org.kframework.kil.Attribute;
 import org.kframework.main.GlobalOptions;
-import org.kframework.backend.java.utils.BitSet;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
-import org.kframework.utils.errorsystem.KEMException;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -271,12 +278,23 @@ public class KItem extends Term implements KItemRepresentation {
         return global.kItemOps.isEvaluable(this, global.getDefinition());
     }
 
+    private static final boolean RESOLVE_FUNC_CACHED = true;
+
     public Term evaluateFunction(TermContext context) {
         global.profiler.resFuncNanoTimer.start();
         Term result;
         try {
-            result = global.kItemOps.evaluateFunction(this, context);
-            result.isEvaluated.add(context.getTopConstraint());
+            if (RESOLVE_FUNC_CACHED) {
+                ConjunctiveFormula constraint = getCacheConstraint(context);
+                result = cacheGet(constraint);
+                if (result == null) {
+                    result = global.kItemOps.evaluateFunction(this, context);
+                    result.cachePut(constraint, result);
+                    this.cachePut(constraint, result);
+                }
+            } else {
+                result = global.kItemOps.evaluateFunction(this, context);
+            }
         } finally {
             global.profiler.resFuncNanoTimer.stop();
         }
@@ -287,8 +305,17 @@ public class KItem extends Term implements KItemRepresentation {
         global.profiler.resFuncNanoTimer.start();
         Term result;
         try {
-            result = global.kItemOps.resolveFunctionAndAnywhere(this, context);
-            result.isEvaluated.add(context.getTopConstraint());
+            if (RESOLVE_FUNC_CACHED) {
+                ConjunctiveFormula constraint = getCacheConstraint(context);
+                result = cacheGet(constraint);
+                if (result == null) {
+                    result = global.kItemOps.resolveFunctionAndAnywhere(this, context);
+                    result.cachePut(constraint, result);
+                    this.cachePut(constraint, result);
+                }
+            } else {
+                result = global.kItemOps.resolveFunctionAndAnywhere(this, context);
+            }
         } finally {
             global.profiler.resFuncNanoTimer.stop();
         }
