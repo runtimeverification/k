@@ -76,7 +76,7 @@ public abstract class Term extends JavaSymbolicObject<Term> implements Comparabl
      * {@code evaluate} method instead.
      */
     public Term substituteAndEvaluate(Map<Variable, ? extends Term> substitution, TermContext context) {
-        return canSubstituteAndEvaluate(substitution, context.getTopConstraint()) ?
+        return canSubstituteAndEvaluate(substitution, context) ?
                (Term) this.accept(new SubstituteAndEvaluateTransformer(substitution, context)) :
                this;
     }

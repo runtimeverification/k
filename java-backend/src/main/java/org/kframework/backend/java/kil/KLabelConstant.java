@@ -71,6 +71,8 @@ public class KLabelConstant extends KLabel implements org.kframework.kore.KLabel
 
     private final String smtlib;
 
+    private final boolean isImpure;
+
     private final List<Integer> projectionAtt;
 
     private KLabelConstant(
@@ -109,6 +111,7 @@ public class KLabelConstant extends KLabel implements org.kframework.kore.KLabel
         this.projectionAtt = projectionAtt;
         this.isPattern = isPattern;
         this.smtlib = smtlib;
+        this.isImpure = productionAttributes.contains(Attribute.IMPURE_KEY);
     }
 
     /**
@@ -224,6 +227,10 @@ public class KLabelConstant extends KLabel implements org.kframework.kore.KLabel
      */
     public String smtlib() {
         return smtlib;
+    }
+
+    public boolean isImpure() {
+        return isImpure;
     }
 
     @Override
