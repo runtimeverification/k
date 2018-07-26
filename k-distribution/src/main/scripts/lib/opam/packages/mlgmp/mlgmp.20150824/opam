@@ -27,5 +27,5 @@ conflicts: [
   "apron" {= "20150518"}
 ]
 patches: [
-  "patch"
+  "patchfile"
 ]
