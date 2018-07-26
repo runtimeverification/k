@@ -14,9 +14,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.OutputStream;
+import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import org.apache.commons.io.output.WriterOutputStream;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Set;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
@@ -41,6 +44,7 @@ public class Debugg {
     private static String      currentRule;
     private static String      currentMatchRule;
     private static String      currentQuery;
+    private static String      currentImplication;
     private static long        startTime;
 
     public static void init(KProveOptions kproveOptions, FileUtil files, Module specModule, Module parsingModule, KPrint kprint) {
@@ -55,21 +59,30 @@ public class Debugg {
         Debugg.loggingPath = kproveOptions.debuggPath;
         try {
             Debugg.sessionId  = Integer.toString(Math.abs(Debugg.specModule.hashCode()));
-            Debugg.sessionDir = kproveOptions.debuggPath == null ? files.resolveKompiled(sessionId + ".debugg") : new File(kproveOptions.debuggPath);
+            Debugg.sessionDir = kproveOptions.debuggPath == null
+                              ? files.resolveKompiled(sessionId + ".debugg")
+                              : new File(kproveOptions.debuggPath);
             String path       = sessionDir.getAbsolutePath();
-            Debugg.nodesDir   = new File(Debugg.sessionDir, "nodes/");
+
+            Debugg.nodesDir   = new File(Debugg.sessionDir, "blobs/");
             Debugg.nodesDir.mkdirs();
-            Debugg.sessionLog = new PrintWriter(Debugg.sessionDir.getAbsolutePath() + "/debugg.log");
-            System.out.println("Debugg: " + Debugg.sessionDir.getAbsolutePath());
+            Debugg.sessionLog = new PrintWriter(Debugg.sessionDir.getAbsolutePath() + "/" + kproveOptions.debuggId + ".log");
+            System.out.println("Debugg: " + kproveOptions.debuggId);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
 
-        Debugg.currentTerm      = "NOTERM";
-        Debugg.currentRule      = "NORULE";
-        Debugg.currentMatchRule = "NORULE";
-        Debugg.currentQuery     = "NOQUERY";
-        Debugg.startTime        = System.currentTimeMillis();
+        if (Debugg.kprint.options.output == OutputModes.PRETTY) {
+            System.err.println("Cannot output in `pretty` mode when using Debugg. Defaulting to `json`.");
+            Debugg.kprint.options.output = OutputModes.JSON;
+        }
+
+        Debugg.currentImplication = "NOTERM";
+        Debugg.currentTerm        = "NOTERM";
+        Debugg.currentRule        = "NORULE";
+        Debugg.currentMatchRule   = "NORULE";
+        Debugg.currentQuery       = "NOQUERY";
+        Debugg.startTime          = System.currentTimeMillis();
     }
 
     public static enum LogEvent {
@@ -131,6 +144,7 @@ public class Debugg {
                 logPrefix = "branch";
                 break;
             case IMPLICATION:
+                currentImplication = nodeId;
                 logPrefix = "implication";
                 break;
             case Z3QUERY:
@@ -138,7 +152,7 @@ public class Debugg {
                 logPrefix = "z3query";
                 break;
             case Z3RESULT:
-                logPrefix = "z3result " + currentQuery + " " + currentMatchRule;
+                logPrefix = "z3result " + currentQuery + " " + currentMatchRule + " " + currentImplication;
                 break;
             case STEP:
                 logPrefix = "step";
@@ -155,13 +169,30 @@ public class Debugg {
         Debugg.sessionLog.close();
     }
 
+    private static String hash(K in) {
+        MessageDigest m = null;
+        String hashtext = "__";
+        try {
+            m = MessageDigest.getInstance("MD5");
+            m.reset();
+            m.update(in.toString().getBytes());
+            byte[] digest = m.digest();
+            BigInteger bigInt = new BigInteger(1,digest);
+            hashtext = bigInt.toString(16);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        return hashtext;
+    }
+
     private static String writeNode(K contents) {
         String fileCode   = Integer.toString(Math.abs(contents.hashCode()));
-        File   outputFile = new File(Debugg.nodesDir, fileCode + "." + kprint.options.output.ext());
+        File   outputFile = new File(Debugg.nodesDir, fileCode + "." + Debugg.kprint.options.output.ext());
         if (! outputFile.exists()) {
             try {
+                String out = new String(Debugg.kprint.serialize(contents, Debugg.kprint.options.output), StandardCharsets.UTF_8);
                 PrintWriter fOut = new PrintWriter(outputFile);
-                fOut.println(new String(kprint.serialize(contents, OutputModes.JSON), StandardCharsets.UTF_8));
+                fOut.println(out);
                 fOut.close();
             } catch (FileNotFoundException e) {
                 System.err.println("Could not open node output file: " + outputFile.getAbsolutePath());
