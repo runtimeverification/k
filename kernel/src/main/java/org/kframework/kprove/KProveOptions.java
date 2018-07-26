@@ -54,6 +54,9 @@ public class KProveOptions {
     @Parameter(names={"--debugg-path"}, description="Path where the debugg output should be stored")
     public String debuggPath;
 
+    @Parameter(names={"--debugg-id"}, description="Id of the current proof")
+    public String debuggId;
+
     @Parameter(names={"--spec-module", "-sm"}, description="Name of module containing specification to prove")
     public String specModule;
 
