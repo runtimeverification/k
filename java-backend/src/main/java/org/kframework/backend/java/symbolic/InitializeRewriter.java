@@ -15,6 +15,7 @@ import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.util.HookProvider;
+import org.kframework.backend.java.util.Profiler2;
 import org.kframework.builtin.KLabels;
 import org.kframework.compile.*;
 import org.kframework.definition.DefinitionTransformer;
@@ -31,7 +32,6 @@ import org.kframework.kprove.KProve;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.api.io.FileSystem;
 import org.kframework.main.GlobalOptions;
-import org.kframework.main.Main;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.rewriter.SearchType;
 import org.kframework.utils.Stopwatch;
@@ -197,6 +197,10 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
 
         @Override
         public K prove(Module mod) {
+            //todo kompileOptions.global == null, but shouldn't
+            if (rewritingContext.globalOptions.verbose) {
+                Profiler2.logParsingTime();
+            }
             List<Rule> rules = stream(mod.rules()).filter(r -> r.att().contains("specification")).collect(Collectors.toList());
             ProcessProofRules processProofRules = new ProcessProofRules(rules).invoke(rewritingContext, initCounterValue, module, definition);
             List<org.kframework.backend.java.kil.Rule> javaRules = processProofRules.getJavaRules();
@@ -213,10 +217,8 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
 
             SymbolicRewriter rewriter = new SymbolicRewriter(rewritingContext, transitions, converter);
 
-            //todo kompileOptions.global == null, but shouldn't
             if (rewritingContext.globalOptions.verbose) {
-                System.out.format("\nInitialization finished: %.3f s \n==================================\n",
-                        (System.currentTimeMillis() - Main.startTime) / 1000.);
+                Profiler2.logInitTime();
             }
             List<ConstrainedTerm> proofResults = javaRules.stream()
                     .filter(r -> !r.att().contains(Attribute.TRUSTED_KEY))

@@ -55,10 +55,6 @@ public class KProve {
         Tuple2<Definition, Module> compiled = getProofDefinition(options.specFile(files), options.defModule, options.specModule, compiledDefinition, backend, options.global, files, kem, sw);
         Rewriter rewriter = rewriterGenerator.apply(compiled._1().mainModule());
         Module specModule = compiled._2();
-        if (options.global.verbose) {
-            System.out.format("\nParsing finished: %.3f s \n==================================\n",
-                    (System.currentTimeMillis() - Main.startTime) / 1000.);
-        }
 
         K results = rewriter.prove(specModule);
         int exit;
