@@ -18,9 +18,13 @@ public class Profiler2 {
     private long initTimestamp;
 
     public final CounterStopwatch resFuncNanoTimer = new CounterStopwatch("resolveFunction");
+    public final CounterStopwatch logOverheadTimer = new CounterStopwatch("Log");
     public final CounterStopwatch queryBuildTimer = new CounterStopwatch("Z3 query build");
     public final Z3Profiler z3Implication = new Z3Profiler("Z3 implication");
     public final Z3Profiler z3Constraint = new Z3Profiler("Z3 constraint");
+
+    public int countResFuncTopUncached = 0;
+    public int countResFuncRecursiveUncached = 0;
 
     @Inject
     public Profiler2(StartTimeHolder startTimeHolder) {

@@ -291,6 +291,7 @@ public class KItem extends Term implements KItemRepresentation {
                     result = global.kItemOps.evaluateFunction(this, context);
                     result.cachePut(constraint, result);
                     this.cachePut(constraint, result);
+                    global.profiler.countResFuncTopUncached++;
                 }
             } else {
                 result = global.kItemOps.evaluateFunction(this, context);
@@ -312,6 +313,11 @@ public class KItem extends Term implements KItemRepresentation {
                     result = global.kItemOps.resolveFunctionAndAnywhere(this, context);
                     result.cachePut(constraint, result);
                     this.cachePut(constraint, result);
+                    if (global.profiler.resFuncNanoTimer.getLevel() == 1) {
+                        global.profiler.countResFuncTopUncached++;
+                    } else {
+                        global.profiler.countResFuncRecursiveUncached++;
+                    }
                 }
             } else {
                 result = global.kItemOps.resolveFunctionAndAnywhere(this, context);
