@@ -38,8 +38,6 @@ import java.util.ServiceLoader;
 
 public class Main {
 
-    public static final long startTime = System.currentTimeMillis();
-
     /**
      * @param args
      *            - the running arguments for the K3 tool. First argument must be one of the following: kompile|kast|krun.
@@ -83,16 +81,19 @@ public class Main {
 
     private final Provider<KExceptionManager> kem;
     private final Provider<FrontEnd> frontEnd;
+    private final Provider<StartTimeHolder> startTimeProvider;
     private final SimpleScope requestScope;
 
     @Inject
     public Main(
             Provider<KExceptionManager> kem,
             Provider<FrontEnd> frontEnd,
+            Provider<StartTimeHolder> startTimeProvider,
             @Named("requestScope") SimpleScope requestScope) {
         this.kem = kem;
         this.frontEnd = frontEnd;
         this.requestScope = requestScope;
+        this.startTimeProvider = startTimeProvider;
     }
 
     public SimpleScope getRequestScope() {
@@ -110,6 +111,7 @@ public class Main {
     }
 
     public int runApplication() {
+        startTimeProvider.get();//to trigger initialization
         KExceptionManager kem = this.kem.get();
         kem.installForUncaughtExceptions();
         try {

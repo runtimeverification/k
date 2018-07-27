@@ -1,13 +1,20 @@
 // Copyright (c) 2015-2018 K Team. All Rights Reserved.
 package org.kframework.backend.java.util;
 
+import com.google.inject.Inject;
 import org.kframework.main.Main;
+import org.kframework.main.StartTimeHolder;
+import org.kframework.utils.inject.RequestScoped;
 
 /**
  * @author Denis Bogdanas
  * Created on 23-Jul-18.
  */
+@RequestScoped
 public class Profiler2 {
+
+    private final long startTime;
+
     private long parsingTimestamp;
     private long initTimestamp;
 
@@ -16,10 +23,15 @@ public class Profiler2 {
     public final Z3Profiler z3Implication = new Z3Profiler("Z3 implication");
     public final Z3Profiler z3Constraint = new Z3Profiler("Z3 constraint");
 
+    @Inject
+    public Profiler2(StartTimeHolder startTimeHolder) {
+        this.startTime = startTimeHolder.getStartTime();
+    }
+
     public void printResult() {
         long currentTimestamp = System.currentTimeMillis();
-        System.err.format("Total time:            %.3f\n", (currentTimestamp - Main.startTime) / 1000.);
-        System.err.format("  Parsing time:        %.3f\n", (parsingTimestamp - Main.startTime) / 1000.);
+        System.err.format("Total time:            %.3f\n", (currentTimestamp - startTime) / 1000.);
+        System.err.format("  Parsing time:        %.3f\n", (parsingTimestamp - startTime) / 1000.);
         System.err.format("  Initialization time: %.3f\n", (initTimestamp - parsingTimestamp) / 1000.);
         System.err.format("  Execution time:      %.3f\n\n", (currentTimestamp - initTimestamp) / 1000.);
 
@@ -41,12 +53,16 @@ public class Profiler2 {
 
     public void logParsingTime() {
         parsingTimestamp = System.currentTimeMillis();
-        System.err.format("\nParsing finished: %.3f s\n", (parsingTimestamp - Main.startTime) / 1000.);
+        System.err.format("\nParsing finished: %.3f s\n", (parsingTimestamp - startTime) / 1000.);
     }
 
     public void logInitTime() {
         initTimestamp = System.currentTimeMillis();
         System.err.println("\nInitialization finished\n==================================");
         printResult();
+    }
+
+    public long getStartTime() {
+        return startTime;
     }
 }
