@@ -272,25 +272,25 @@ public class KItem extends Term implements KItemRepresentation, HasGlobalContext
     }
 
     public Term evaluateFunction(TermContext context) {
-        Profiler2.resFuncNanoTimer.start();
+        global.profiler.resFuncNanoTimer.start();
         Term result;
         try {
             result = global.kItemOps.evaluateFunction(this, context);
             result.isEvaluated.add(context.getTopConstraint());
         } finally {
-            Profiler2.resFuncNanoTimer.stop();
+            global.profiler.resFuncNanoTimer.stop();
         }
         return result;
     }
 
     public Term resolveFunctionAndAnywhere(TermContext context) {
-        Profiler2.resFuncNanoTimer.start();
+        global.profiler.resFuncNanoTimer.start();
         Term result;
         try {
             result = global.kItemOps.resolveFunctionAndAnywhere(this, context);
             result.isEvaluated.add(context.getTopConstraint());
         } finally {
-            Profiler2.resFuncNanoTimer.stop();
+            global.profiler.resFuncNanoTimer.stop();
         }
         return result;
     }

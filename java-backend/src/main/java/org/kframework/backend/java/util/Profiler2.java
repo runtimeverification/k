@@ -8,15 +8,15 @@ import org.kframework.main.Main;
  * Created on 23-Jul-18.
  */
 public class Profiler2 {
-    private static long parsingTimestamp;
-    private static long initTimestamp;
+    private long parsingTimestamp;
+    private long initTimestamp;
 
-    public static final CounterStopwatch resFuncNanoTimer = new CounterStopwatch("resolveFunction");
-    public static final CounterStopwatch queryBuildTimer = new CounterStopwatch("Z3 query build");
-    public static final Z3Profiler z3Implication = new Z3Profiler("Z3 implication");
-    public static final Z3Profiler z3Constraint = new Z3Profiler("Z3 constraint");
+    public final CounterStopwatch resFuncNanoTimer = new CounterStopwatch("resolveFunction");
+    public final CounterStopwatch queryBuildTimer = new CounterStopwatch("Z3 query build");
+    public final Z3Profiler z3Implication = new Z3Profiler("Z3 implication");
+    public final Z3Profiler z3Constraint = new Z3Profiler("Z3 constraint");
 
-    public static void printResult() {
+    public void printResult() {
         long currentTimestamp = System.currentTimeMillis();
         System.err.format("Total time:            %.3f\n", (currentTimestamp - Main.startTime) / 1000.);
         System.err.format("  Parsing time:        %.3f\n", (parsingTimestamp - Main.startTime) / 1000.);
@@ -39,12 +39,12 @@ public class Profiler2 {
         System.err.println("==================================\n");
     }
 
-    public static void logParsingTime() {
+    public void logParsingTime() {
         parsingTimestamp = System.currentTimeMillis();
         System.err.format("\nParsing finished: %.3f s\n", (parsingTimestamp - Main.startTime) / 1000.);
     }
 
-    public static void logInitTime() {
+    public void logInitTime() {
         initTimestamp = System.currentTimeMillis();
         System.err.println("\nInitialization finished\n==================================");
         printResult();

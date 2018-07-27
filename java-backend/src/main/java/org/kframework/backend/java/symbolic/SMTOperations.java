@@ -44,14 +44,14 @@ public class SMTOperations {
 
         boolean result = false;
         try {
-            Profiler2.queryBuildTimer.start();
+            constraint.globalContext().profiler.queryBuildTimer.start();
             CharSequence query;
             try {
                 query = KILtoSMTLib.translateConstraint(constraint);
             } finally {
-                Profiler2.queryBuildTimer.stop();
+                constraint.globalContext().profiler.queryBuildTimer.stop();
             }
-            result = z3.isUnsat(query, smtOptions.z3CnstrTimeout, Profiler2.z3Constraint);
+            result = z3.isUnsat(query, smtOptions.z3CnstrTimeout, constraint.globalContext().profiler.z3Constraint);
             if (result && RuleAuditing.isAuditBegun()) {
                 System.err.format("SMT query returned unsat: %s\n", query);
             }
@@ -70,14 +70,14 @@ public class SMTOperations {
             Set<Variable> rightOnlyVariables) {
         if (smtOptions.smt == SMTSolver.Z3) {
             try {
-                Profiler2.queryBuildTimer.start();
+                left.globalContext().profiler.queryBuildTimer.start();
                 CharSequence query;
                 try {
                     query = KILtoSMTLib.translateImplication(left, right, rightOnlyVariables);
                 } finally {
-                    Profiler2.queryBuildTimer.stop();
+                    left.globalContext().profiler.queryBuildTimer.stop();
                 }
-                return z3.isUnsat(query, smtOptions.z3ImplTimeout, Profiler2.z3Implication);
+                return z3.isUnsat(query, smtOptions.z3ImplTimeout, left.globalContext().profiler.z3Implication);
             } catch (UnsupportedOperationException | SMTTranslationFailure e) {
                 if (!smtOptions.ignoreMissingSMTLibWarning) {
                     kem.registerCriticalWarning(e.getMessage(), e);

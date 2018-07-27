@@ -55,7 +55,7 @@ public class SymbolicRewriter {
     private final TransitionCompositeStrategy strategy;
     private final List<String> transitions;
     private final Stopwatch stopwatch = Stopwatch.createUnstarted();
-    private final GlobalOptions globalOptions;
+    private final GlobalContext global;
     private final KOREtoBackendKIL constructor;
     private boolean transition;
     private final Set<ConstrainedTerm> superheated = Sets.newHashSet();
@@ -74,7 +74,7 @@ public class SymbolicRewriter {
         this.transitions = transitions;
         this.theFastMatcher = new FastRuleMatcher(global, definition.ruleTable.size());
         this.transition = true;
-        this.globalOptions = global.globalOptions;
+        this.global = global;
     }
 
     public KOREtoBackendKIL getConstructor() {
@@ -688,7 +688,7 @@ public class SymbolicRewriter {
             guarded = true;
         }
 
-        if (globalOptions.verbose) {
+        if (global.globalOptions.verbose) {
             printSummaryBox(rule, proofResults, successPaths, step);
         }
         return proofResults;
@@ -704,7 +704,7 @@ public class SymbolicRewriter {
                     new File(rule.getSource().source()), rule.getLocation(), successPaths, proofResults.size());
         }
         System.err.format("Longest path: %d steps\n", step);
-        Profiler2.printResult();
+        global.profiler.printResult();
     }
 
     /**
