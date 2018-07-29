@@ -1,14 +1,12 @@
 // Copyright (c) 2015-2018 K Team. All Rights Reserved.
 package org.kframework.backend.java.util;
 
-import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
 import org.kframework.backend.java.symbolic.ConjunctiveFormula;
 import org.kframework.main.StartTimeHolder;
 import org.kframework.utils.inject.RequestScoped;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.BinaryOperator;
@@ -29,16 +27,12 @@ public class Profiler2 {
     public final CounterStopwatch resFuncNanoTimer = new CounterStopwatch("resolveFunction");
     public final CounterStopwatch logOverheadTimer = new CounterStopwatch("Log");
     public final CounterStopwatch queryBuildTimer = new CounterStopwatch("Z3 query build");
-    public final Z3Profiler z3Constraint = new Z3Profiler("Z3 constraint");
 
     public int countResFuncTopUncached = 0;
     public int countResFuncRecursiveUncached = 0;
+    final Map<FormulaContext.Kind, Z3Profiler> z3Profilers = createZ3Profilers();
 
-    final Map<FormulaContext.Kind, Z3Profiler> implicationProfilers = createImplicationProfilers();
-    private Iterable<Z3Profiler> allZ3Profilers = Iterables.concat(Collections.singleton(z3Constraint),
-            implicationProfilers.values());
-
-    private Map<FormulaContext.Kind, Z3Profiler> createImplicationProfilers() {
+    private Map<FormulaContext.Kind, Z3Profiler> createZ3Profilers() {
         BinaryOperator<Z3Profiler> throwingMerger = (u, v) -> {
             throw new IllegalStateException(String.format("Duplicate key %s", u));
         };
@@ -61,7 +55,7 @@ public class Profiler2 {
 
         System.err.format("Init+Execution time:    %.3f\n", (currentTimestamp - parsingTimestamp) / 1000.);
         System.err.format("  query build time:     %s\n", queryBuildTimer);
-        for (Z3Profiler profiler : allZ3Profilers) {
+        for (Z3Profiler profiler : z3Profilers.values()) {
             if (profiler.getQueryCount() > 0) {
                 profiler.print();
             }
@@ -71,8 +65,8 @@ public class Profiler2 {
 
         System.err.format("resolveFunction top-level calls:   %d\n", resFuncNanoTimer.getCount());
 
-        System.err.format("\n  impliesSMT time:    %s\n", ConjunctiveFormula.impliesStopwatch);
-        System.err.format("    impliesSMT count: %s\n", ConjunctiveFormula.impliesStopwatch.getCount());
+        System.err.format("\nimpliesSMT time:    %s\n", ConjunctiveFormula.impliesStopwatch);
+        System.err.format("impliesSMT count: %s\n", ConjunctiveFormula.impliesStopwatch.getCount());
 
         //Has some overhead. Enable from class Profiler if needed, by setting value below to true.
         if (Profiler.enableProfilingMode.get()) {

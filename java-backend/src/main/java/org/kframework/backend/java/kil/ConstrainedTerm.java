@@ -22,7 +22,6 @@ import com.google.common.collect.Sets;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.kframework.backend.java.util.FormulaContext;
-import org.kframework.kprove.KProve;
 
 
 /**
@@ -270,7 +269,10 @@ public class ConstrainedTerm extends JavaSymbolicObject {
              * thus, there is no need to check satisfiability or expand patterns */
             boolean isMatching = candidate.isMatching(variables);
 
-            if (!isMatching && solution.checkUnsat()) {
+            if (!isMatching && solution.checkUnsat(
+                    //formulaContext param is intended for implication. We have to create a new one here.
+                    new FormulaContext(FormulaContext.implicationToConstrKind.get(formulaContext.kind),
+                            formulaContext.rule))) {
                 continue;
             }
 

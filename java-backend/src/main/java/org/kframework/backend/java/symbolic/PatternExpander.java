@@ -61,23 +61,24 @@ public class PatternExpander extends CopyOnWriteTransformer {
                     .add(inputKList, ruleInputKList)
                     .simplify(context);
             // TODO(AndreiS): there is only one solution here, so no list of constraints
-            if (unificationConstraint.isFalse()) {
+            if (unificationConstraint.isFalseExtended()) {
                 continue;
             }
 
+            FormulaContext formulaContext = new FormulaContext(FormulaContext.Kind.PatternConstr, rule);
             if (narrowing) {
                 ConjunctiveFormula globalConstraint = unificationConstraint
                         .addAll(constraint.equalities())
                         .addAll(rule.requires())
                         .simplify(context);
-                if (globalConstraint.isFalse() || globalConstraint.checkUnsat()) {
+                if (globalConstraint.isFalseExtended() || globalConstraint.checkUnsat(formulaContext)) {
                     continue;
                 }
                 globalConstraint = globalConstraint
                         .add(outputKList, ruleOutputKList)
                         .addAll(rule.ensures())
                         .simplify(context);
-                if (globalConstraint.isFalse() || globalConstraint.checkUnsat()) {
+                if (globalConstraint.isFalseExtended() || globalConstraint.checkUnsat(formulaContext)) {
                     continue;
                 }
             } else {
@@ -92,7 +93,7 @@ public class PatternExpander extends CopyOnWriteTransformer {
                         .simplify(context);
                 // this should be guaranteed by the above unificationConstraint.isMatching
                 assert requires.substitution().keySet().containsAll(existVariables);
-                if (requires.isFalse() || !constraint.implies(requires, existVariables,
+                if (requires.isFalseExtended() || !constraint.implies(requires, existVariables,
                         new FormulaContext(FormulaContext.Kind.PatternRule, rule))) {
                     continue;
                 }
@@ -103,8 +104,9 @@ public class PatternExpander extends CopyOnWriteTransformer {
                     .add(outputKList, ruleOutputKList)
                     .addAll(rule.ensures())
                     .simplify(context);
-            if (!unificationConstraint.isFalse() && !unificationConstraint.checkUnsat()) {
-                results.add(SymbolicRewriter.buildResult(rule, unificationConstraint, null, false, context));
+            if (!unificationConstraint.isFalseExtended() && !unificationConstraint.checkUnsat(formulaContext)) {
+                results.add(SymbolicRewriter.buildResult(rule, unificationConstraint, null, false, context,
+                        new FormulaContext(FormulaContext.Kind.PatternBuildResConstr, rule)));
             }
         }
 
