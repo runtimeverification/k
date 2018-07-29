@@ -37,6 +37,8 @@ public class GlobalContext implements Serializable {
     public final transient GlobalOptions globalOptions;
     public final transient Profiler2 profiler;
 
+    private boolean isExecutionPhase = true;
+
     public GlobalContext(
             FileSystem fs,
             GlobalOptions globalOptions,
@@ -95,4 +97,11 @@ public class GlobalContext implements Serializable {
         return def;
     }
 
+    public boolean isExecutionPhase() {
+        return isExecutionPhase;
+    }
+
+    public void setExecutionPhase(boolean executionPhase) {
+        isExecutionPhase = executionPhase;
+    }
 }

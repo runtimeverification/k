@@ -199,6 +199,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
             if (rewritingContext.globalOptions.verbose) {
                 rewritingContext.profiler.logParsingTime();
             }
+            rewritingContext.setExecutionPhase(false);
             List<Rule> rules = stream(mod.rules()).filter(r -> r.att().contains("specification")).collect(Collectors.toList());
             ProcessProofRules processProofRules = new ProcessProofRules(rules).invoke(rewritingContext, initCounterValue, module, definition);
             List<org.kframework.backend.java.kil.Rule> javaRules = processProofRules.getJavaRules();
@@ -218,6 +219,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
             if (rewritingContext.globalOptions.verbose) {
                 rewritingContext.profiler.logInitTime();
             }
+            rewritingContext.setExecutionPhase(true);
             List<ConstrainedTerm> proofResults = javaRules.stream()
                     .filter(r -> !r.att().contains(Attribute.TRUSTED_KEY))
                     .map(r -> {
