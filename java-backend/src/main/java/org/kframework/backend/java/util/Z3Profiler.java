@@ -7,6 +7,7 @@ package org.kframework.backend.java.util;
  */
 public class Z3Profiler {
     private CounterStopwatch sw;
+    private int requestCount;
     private int queryCount;
     private int totalTimeouts;
     private int nonTimeouts;
@@ -30,6 +31,13 @@ public class Z3Profiler {
         }
     }
 
+    /**
+     * Not all requests result in actual SMT query. Some might have the results already cached.
+     */
+    public void newRequest() {
+        requestCount++;
+    }
+
     public void startQuery() {
         queryCount++;
     }
@@ -38,18 +46,26 @@ public class Z3Profiler {
         return lastRunTimeout;
     }
 
+    public int getQueryCount() {
+        return queryCount;
+    }
+
     public void print() {
+        int cachedQueries = requestCount - queryCount;
         int unrecoveredTimeouts = queryCount - nonTimeouts;
         int recoveredTimeouts = totalTimeouts - unrecoveredTimeouts;
         System.err.format("  %s time:  %s\n", sw.getName(), sw);
         if (queryCount != 0) {
-            System.err.format("    %s queries:   %d\n", sw.getName(), queryCount);
+            System.err.format("    queries:            %d\n", queryCount);
+        }
+        if (cachedQueries > 0) {
+            System.err.format("    cached queries:     %d\n", cachedQueries);
         }
         if (unrecoveredTimeouts != 0) {
-            System.err.format("    %s timeouts:  %d\n", sw.getName(), unrecoveredTimeouts);
+            System.err.format("    timeouts:           %d\n", unrecoveredTimeouts);
         }
         if (recoveredTimeouts != 0) {
-            System.err.format("    %s recovered timeouts:    %d\n", sw.getName(), recoveredTimeouts);
+            System.err.format("    recovered timeouts: %d\n", recoveredTimeouts);
         }
     }
 }

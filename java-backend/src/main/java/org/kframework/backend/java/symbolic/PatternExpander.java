@@ -10,6 +10,7 @@ import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
+import org.kframework.backend.java.util.FormulaContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -91,7 +92,8 @@ public class PatternExpander extends CopyOnWriteTransformer {
                         .simplify(context);
                 // this should be guaranteed by the above unificationConstraint.isMatching
                 assert requires.substitution().keySet().containsAll(existVariables);
-                if (requires.isFalse() || !constraint.implies(requires, existVariables)) {
+                if (requires.isFalse() || !constraint.implies(requires, existVariables,
+                        new FormulaContext(FormulaContext.Kind.PatternRule, rule))) {
                     continue;
                 }
             }

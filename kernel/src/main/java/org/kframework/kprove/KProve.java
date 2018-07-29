@@ -51,10 +51,12 @@ public class KProve {
         Rewriter rewriter = rewriterGenerator.apply(compiled._1().mainModule());
         Module specModule = compiled._2();
 
-        options.global.logStmtsOnly |= options.global.log;
+        options.global.debug |= options.global.debugFull;
+        options.global.debugZ3Queries |= options.global.debug;
+        options.global.debugZ3 |= options.global.debugZ3Queries;
+        options.global.logStmtsOnly |= options.global.log || options.global.debugZ3;
         options.global.logBasic |= options.global.logStmtsOnly;
         options.global.verbose |= options.global.logBasic;
-        options.global.debug |= options.global.debugFull;
         K results = rewriter.prove(specModule);
         int exit;
         if (results instanceof KApply) {

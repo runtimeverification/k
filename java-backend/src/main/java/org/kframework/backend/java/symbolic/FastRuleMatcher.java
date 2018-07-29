@@ -9,6 +9,7 @@ import org.kframework.attributes.Att;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.compile.KOREtoBackendKIL;
 import org.kframework.backend.java.kil.*;
+import org.kframework.backend.java.util.FormulaContext;
 import org.kframework.backend.java.utils.BitSet;
 import org.kframework.builtin.KLabels;
 import org.kframework.kore.KApply;
@@ -96,6 +97,7 @@ public class FastRuleMatcher {
             } else {
                 patternConstraint = patternConstraint.addAll(rule.requires());
             }
+            FormulaContext formulaContext = new FormulaContext(FormulaContext.Kind.RegularRule, rule);
             List<Triple<ConjunctiveFormula, Boolean, Map<scala.collection.immutable.List<Pair<Integer, Integer>>, Term>>> ruleResults = ConstrainedTerm.evaluateConstraints(
                     constraints[i],
                     subject.constraint(),
@@ -103,7 +105,7 @@ public class FastRuleMatcher {
                     Sets.union(getLeftHandSide(pattern, i).variableSet(), patternConstraint.variableSet()).stream()
                             .filter(v -> !v.name().equals(KOREtoBackendKIL.THE_VARIABLE))
                             .collect(Collectors.toSet()),
-                    context);
+                    context, formulaContext);
             for (Triple<ConjunctiveFormula, Boolean, Map<scala.collection.immutable.List<Pair<Integer, Integer>>, Term>> triple : ruleResults) {
                 RuleMatchResult result = new RuleMatchResult(triple.getLeft(), triple.getMiddle(), triple.getRight(), i);
                 if (transitions.stream().anyMatch(rule.att()::contains)) {

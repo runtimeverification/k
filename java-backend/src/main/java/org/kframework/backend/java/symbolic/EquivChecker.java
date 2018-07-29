@@ -3,6 +3,7 @@
 package org.kframework.backend.java.symbolic;
 
 import org.kframework.backend.java.kil.ConstrainedTerm;
+import org.kframework.backend.java.util.FormulaContext;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -141,7 +142,8 @@ public class EquivChecker {
             loop:
                 for (ConstrainedTerm next : nexts) {
                     for (int i = 0; i < numSyncPoints; i++) {
-                        ConjunctiveFormula constraint = next.matchImplies(targetSyncNodes.get(i), true, null);
+                        ConjunctiveFormula constraint = next.matchImplies(targetSyncNodes.get(i), true, null,
+                                new FormulaContext(FormulaContext.Kind.EquivChecker, null));
                         if (constraint != null) {
                             SyncNode node = new SyncNode(currSyncNode.startSyncPoint, currSyncNode, next, constraint);
                             nextSyncNodes.get(i).add(node);
