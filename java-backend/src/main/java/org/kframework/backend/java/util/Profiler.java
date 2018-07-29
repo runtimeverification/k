@@ -81,14 +81,8 @@ public class Profiler {
 
     public static void printResult() {
         if (enableProfilingMode.get()) {
-            System.err.printf("%s(mc=%s, eval=%s[%s, %s], rew=%s) + %s%n",
-                    REWRITE_WITH_KOMPILED_RULES_TIMER, PATTERN_MATCH_TIMER,
-                    EVALUATE_SIDE_CONDITIONS_TIMER,
-                    EVALUATE_LOOKUP_CHOICE_TIMER, EVALUATE_REQUIRES_TIMER,
-                    LOCAL_REWRITE_BUILD_RHS_TIMER,
-                    REWRITE_WITH_UNKOMPILED_RULES_TIMER);
-            System.err.println(QUERY_RULE_INDEXING_TIMER);
-            System.err.println(DEEP_CLONE_TIMER);
+            System.err.printf("%s = %s%n", EVALUATE_LOOKUP_CHOICE_TIMER.name, EVALUATE_LOOKUP_CHOICE_TIMER.toString());
+            System.err.printf("%s = %s%n", EVALUATE_REQUIRES_TIMER.name, EVALUATE_REQUIRES_TIMER.toString());
             System.err.println("Top 10 most expensive functions:");
             SortedSet<ReentrantStopwatch> sorted = new TreeSet<>(new ReverseComparator<>());
             synchronized (FUNCTION_PROFILING_TIMERS) {
