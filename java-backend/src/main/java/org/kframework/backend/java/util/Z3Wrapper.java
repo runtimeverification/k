@@ -27,7 +27,7 @@ public class Z3Wrapper {
 
     private static final int Z3_RESTART_LIMIT = 3;
 
-    private static final Set<String> Z3_QUERY_RESULTS = ImmutableSet.of("unknown", "sat", "unsat");
+    public static final Set<String> Z3_QUERY_RESULTS = ImmutableSet.of("unknown", "sat", "unsat");
 
     public final String SMT_PRELUDE, CHECK_SAT;
     private final SMTOptions options;
@@ -134,6 +134,7 @@ public class Z3Wrapper {
         if (globalOptions.debugZ3) {
             System.err.println("\nZ3 query result: " + result);
         }
+        profiler.queryResult(result);
         return "unsat".equals(result);
     }
 }

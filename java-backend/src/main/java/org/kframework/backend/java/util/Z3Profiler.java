@@ -1,6 +1,9 @@
 // Copyright (c) 2015-2019 K Team. All Rights Reserved.
 package org.kframework.backend.java.util;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @author Denis Bogdanas
  * Created on 26-Jul-18.
@@ -9,9 +12,11 @@ public class Z3Profiler {
     private CounterStopwatch sw;
     private int requestCount;
     private int queryCount;
+    private int queryBuildFailureCount;
     private int totalTimeouts;
     private int nonTimeouts;
     private boolean lastRunTimeout;
+    private Map<String, Integer> queryResultCounts = new HashMap<>();
 
     Z3Profiler(String name) {
         sw = new CounterStopwatch(name);
@@ -31,11 +36,21 @@ public class Z3Profiler {
         }
     }
 
+    public void queryResult(String result) {
+        Integer cnt = queryResultCounts.get(result);
+        cnt = cnt != null ? cnt : 0;
+        queryResultCounts.put(result, cnt + 1);
+    }
+
     /**
      * Not all requests result in actual SMT query. Some might have the results already cached.
      */
     public void newRequest() {
         requestCount++;
+    }
+
+    public void newQueryBuildFailure() {
+        queryBuildFailureCount++;
     }
 
     public void startQuery() {
@@ -51,21 +66,30 @@ public class Z3Profiler {
     }
 
     public void print() {
-        int cachedQueries = requestCount - queryCount;
+        int cachedQueries = requestCount - queryCount - queryBuildFailureCount;
         int unrecoveredTimeouts = queryCount - nonTimeouts;
         int recoveredTimeouts = totalTimeouts - unrecoveredTimeouts;
         System.err.format("  %s time:  %s\n", sw.getName(), sw);
         if (queryCount != 0) {
-            System.err.format("    queries:            %d\n", queryCount);
+            System.err.format("    executed queries:     %d\n", queryCount);
+            for (String result : Z3Wrapper.Z3_QUERY_RESULTS) {
+                if (queryResultCounts.get(result) != null) {
+                    System.err.format("      %-14s:       %d\n", "unsat".equals(result) ? "unsat (proved)" : result,
+                            queryResultCounts.get(result));
+                }
+            }
         }
         if (cachedQueries > 0) {
-            System.err.format("    cached queries:     %d\n", cachedQueries);
+            System.err.format("    cached queries:       %d\n", cachedQueries);
+        }
+        if (queryBuildFailureCount > 0) {
+            System.err.format("    query build failures: %d\n", queryBuildFailureCount);
         }
         if (unrecoveredTimeouts != 0) {
-            System.err.format("    timeouts:           %d\n", unrecoveredTimeouts);
+            System.err.format("    timeouts:             %d\n", unrecoveredTimeouts);
         }
         if (recoveredTimeouts != 0) {
-            System.err.format("    recovered timeouts: %d\n", recoveredTimeouts);
+            System.err.format("    recovered timeouts:   %d\n", recoveredTimeouts);
         }
     }
 }

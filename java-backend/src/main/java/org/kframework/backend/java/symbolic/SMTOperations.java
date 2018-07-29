@@ -57,6 +57,8 @@ public class SMTOperations {
             }
         } catch (UnsupportedOperationException e) {
             e.printStackTrace();
+            kem.registerCriticalWarning("z3 constraint query: " + e.getMessage(), e);
+            constraint.globalContext().profiler.z3Constraint.newQueryBuildFailure();
         }
         return result;
     }
@@ -84,11 +86,14 @@ public class SMTOperations {
                 return z3.isUnsat(query, smtOptions.z3ImplTimeout, formulaContext.z3Profiler);
             } catch (UnsupportedOperationException | SMTTranslationFailure e) {
                 if (!smtOptions.ignoreMissingSMTLibWarning) {
-                    kem.registerCriticalWarning(e.getMessage(), e);
+                    //These warnings have different degree of relevance depending whether they are in init or execution phase
+                    String warnPrefix = left.globalContext().isExecutionPhase() ? "execution phase: " : "init phase: ";
+                    kem.registerCriticalWarning(warnPrefix + e.getMessage(), e);
                 }
                 if (global.debugZ3) {
                     System.err.format("\nZ3 warning: %s\n", e.getMessage());
                 }
+                formulaContext.z3Profiler.newQueryBuildFailure();
             }
         }
         return false;
