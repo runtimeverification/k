@@ -107,7 +107,7 @@ public class Z3Wrapper {
                 result = null;
                 String line = output.readLine();
                 while (line != null && line.startsWith("(error")) {
-                    System.err.println("\nz3 error: " + line);
+                    System.err.println("\nZ3 error: " + line);
                     result = line;
                     line = output.readLine();
                 }
@@ -124,15 +124,15 @@ public class Z3Wrapper {
             e.printStackTrace();
         } finally {
             if (globalOptions.verbose && profiler.isLastRunTimeout()) {
-                System.err.println("\nz3 likely timeout\n");
+                System.err.println("\nZ3 likely timeout");
             }
         }
         stateLog.log(StateLog.LogEvent.Z3RESULT, KToken(result, Sorts.Z3Result()));
         if (!Z3_QUERY_RESULTS.contains(result)) {
             throw KEMException.criticalError("Z3 crashed on input query:\n" + query + "\nresult:\n" + result);
         }
-        if (globalOptions.debug) {
-            System.err.println("\nz3 query result: " + result);
+        if (globalOptions.debugZ3) {
+            System.err.println("\nZ3 query result: " + result);
         }
         return "unsat".equals(result);
     }

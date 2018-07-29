@@ -4,6 +4,7 @@ package org.kframework.backend.java.symbolic;
 import org.kframework.main.GlobalOptions;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.Variable;
+import org.kframework.backend.java.util.FormulaContext;
 import org.kframework.backend.java.util.Z3Wrapper;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.options.SMTOptions;
@@ -67,7 +68,7 @@ public class SMTOperations {
     public boolean impliesSMT(
             ConjunctiveFormula left,
             ConjunctiveFormula right,
-            Set<Variable> existentialQuantVars) {
+            Set<Variable> existentialQuantVars, FormulaContext formulaContext) {
         if (smtOptions.smt == SMTSolver.Z3) {
             try {
                 left.globalContext().profiler.queryBuildTimer.start();
@@ -77,16 +78,16 @@ public class SMTOperations {
                 } finally {
                     left.globalContext().profiler.queryBuildTimer.stop();
                 }
-                if (global.debug) {
-                    System.err.format("\nz3 query: %s\n", query);
+                if (global.debugZ3Queries) {
+                    System.err.format("\nZ3 query:\n%s\n", query);
                 }
-                return z3.isUnsat(query, smtOptions.z3ImplTimeout, left.globalContext().profiler.z3Implication);
+                return z3.isUnsat(query, smtOptions.z3ImplTimeout, formulaContext.z3Profiler);
             } catch (UnsupportedOperationException | SMTTranslationFailure e) {
                 if (!smtOptions.ignoreMissingSMTLibWarning) {
                     kem.registerCriticalWarning(e.getMessage(), e);
                 }
-                if (global.debug) {
-                    System.err.println(e.getMessage() + "\n");
+                if (global.debugZ3) {
+                    System.err.format("\nZ3 warning: %s\n", e.getMessage());
                 }
             }
         }

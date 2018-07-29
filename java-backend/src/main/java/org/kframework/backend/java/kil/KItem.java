@@ -16,6 +16,7 @@ import org.kframework.backend.java.symbolic.Substitution;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Constants;
+import org.kframework.backend.java.util.FormulaContext;
 import org.kframework.backend.java.util.ImpureFunctionException;
 import org.kframework.backend.java.util.Profiler;
 import org.kframework.backend.java.util.RewriteEngineUtils;
@@ -612,7 +613,8 @@ public class KItem extends Term implements KItemRepresentation {
                                                 .add(rule.lookups())
                                                 .addAll(rule.requires()),
                                         context);
-                                if (!subject.unify(pattern, null).isEmpty()) {
+                                if (!subject.unify(pattern, null,
+                                        new FormulaContext(FormulaContext.Kind.OwiseRule, rule)).isEmpty()) {
                                     return kItem;
                                 }
                             }

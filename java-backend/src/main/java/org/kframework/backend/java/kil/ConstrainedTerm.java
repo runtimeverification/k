@@ -21,6 +21,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
+import org.kframework.backend.java.util.FormulaContext;
 import org.kframework.kprove.KProve;
 
 
@@ -96,8 +97,9 @@ public class ConstrainedTerm extends JavaSymbolicObject {
         return data.constraint;
     }
 
-    public boolean implies(ConstrainedTerm constrainedTerm) {
-        ConjunctiveFormula conjunctiveFormula = matchImplies(constrainedTerm, true, null);
+    public boolean implies(ConstrainedTerm constrainedTerm, Rule specRule) {
+        ConjunctiveFormula conjunctiveFormula = matchImplies(constrainedTerm, true, null,
+                new FormulaContext(FormulaContext.Kind.FinalImplication, specRule));
         return conjunctiveFormula != null;
     }
 
@@ -126,7 +128,8 @@ public class ConstrainedTerm extends JavaSymbolicObject {
      * occurring only in {@code matchRHSTerm} (but not in {@code this}) are
      * existentially quantified.
      */
-    public ConjunctiveFormula matchImplies(ConstrainedTerm matchRHSTerm, boolean expand, Set<String> matchingSymbols) {
+    public ConjunctiveFormula matchImplies(ConstrainedTerm matchRHSTerm, boolean expand, Set<String> matchingSymbols,
+                                           FormulaContext formulaContext) {
         ConjunctiveFormula constraint = ConjunctiveFormula.of(matchRHSTerm.termContext().global())
                 .add(data.constraint.substitution())
                 .add(data.term, matchRHSTerm.data.term)
@@ -194,7 +197,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
         ConjunctiveFormula implicationRHS = constraint.removeBindings(matchRHSOnlyVars);
         implicationRHS = (ConjunctiveFormula) implicationRHS.substituteAndEvaluate(implicationLHS.substitution(), context);
 
-        boolean implies = implicationLHS.implies(implicationRHS, matchRHSOnlyVars);
+        boolean implies = implicationLHS.implies(implicationRHS, matchRHSOnlyVars, formulaContext);
         if (!implies) {
             return null;
         }
@@ -213,7 +216,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
      */
     public List<Triple<ConjunctiveFormula, Boolean, Map<scala.collection.immutable.List<Pair<Integer, Integer>>, Term>>> unify(
             ConstrainedTerm constrainedTerm,
-            Set<Variable> variables) {
+            Set<Variable> variables, FormulaContext formulaContext) {
         /* unify the subject term and the pattern term without considering those associated constraints */
         ConjunctiveFormula unificationConstraint = FastRuleMatcher.unify(term(), constrainedTerm.term(), context);
         if (unificationConstraint.isFalse()) {
@@ -229,7 +232,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
                 constraint(),
                 constrainedTerm.constraint(),
                 variables == null ? constrainedTerm.variableSet() : variables,
-                context);
+                context, formulaContext);
     }
 
     public static List<Triple<ConjunctiveFormula, Boolean, Map<scala.collection.immutable.List<Pair<Integer, Integer>>, Term>>> evaluateConstraints(
@@ -237,7 +240,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
             ConjunctiveFormula subjectConstraint,
             ConjunctiveFormula patternConstraint,
             Set<Variable> variables,
-            TermContext context) {
+            TermContext context, FormulaContext formulaContext) {
         context.setTopConstraint(subjectConstraint);
         List<ConjunctiveFormula> candidates = constraint.getDisjunctiveNormalForm().conjunctions().stream()
                 .map(c -> c.addAndSimplify(patternConstraint, context))
@@ -284,7 +287,8 @@ public class ConstrainedTerm extends JavaSymbolicObject {
             assert solution.disjunctions().isEmpty();
             if (candidate.substitution().keySet().equals(variables)
                     && !candidate.isSubstitution()
-                    && subjectConstraint.implies(ConjunctiveFormula.of(context.global()).addAll(candidateConstraint.equalities()), Sets.newHashSet())) {
+                    && subjectConstraint.implies(ConjunctiveFormula.of(context.global())
+                    .addAll(candidateConstraint.equalities()), Sets.newHashSet(), formulaContext)) {
                 solutions.add(Triple.of(
                         subjectConstraint
                                 .addAndSimplify(candidateConstraint.substitution(), context)
