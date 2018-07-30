@@ -81,16 +81,19 @@ public class Main {
 
     private final Provider<KExceptionManager> kem;
     private final Provider<FrontEnd> frontEnd;
+    private final Provider<StartTimeHolder> startTimeProvider;
     private final SimpleScope requestScope;
 
     @Inject
     public Main(
             Provider<KExceptionManager> kem,
             Provider<FrontEnd> frontEnd,
+            Provider<StartTimeHolder> startTimeProvider,
             @Named("requestScope") SimpleScope requestScope) {
         this.kem = kem;
         this.frontEnd = frontEnd;
         this.requestScope = requestScope;
+        this.startTimeProvider = startTimeProvider;
     }
 
     public SimpleScope getRequestScope() {
@@ -108,6 +111,7 @@ public class Main {
     }
 
     public int runApplication() {
+        startTimeProvider.get();//to trigger initialization
         KExceptionManager kem = this.kem.get();
         kem.installForUncaughtExceptions();
         try {

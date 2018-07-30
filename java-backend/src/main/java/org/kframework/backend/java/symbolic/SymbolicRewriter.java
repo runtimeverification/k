@@ -25,15 +25,18 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.strategies.TransitionCompositeStrategy;
+import org.kframework.backend.java.util.Profiler2;
 import org.kframework.builtin.KLabels;
 import org.kframework.kore.FindK;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KORE;
+import org.kframework.main.GlobalOptions;
 import org.kframework.rewriter.SearchType;
 import org.kframework.backend.java.utils.BitSet;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -52,6 +55,7 @@ public class SymbolicRewriter {
     private final TransitionCompositeStrategy strategy;
     private final List<String> transitions;
     private final Stopwatch stopwatch = Stopwatch.createUnstarted();
+    private final GlobalContext global;
     private final KOREtoBackendKIL constructor;
     private boolean transition;
     private final Set<ConstrainedTerm> superheated = Sets.newHashSet();
@@ -70,6 +74,7 @@ public class SymbolicRewriter {
         this.transitions = transitions;
         this.theFastMatcher = new FastRuleMatcher(global, definition.ruleTable.size());
         this.transition = true;
+        this.global = global;
     }
 
     public KOREtoBackendKIL getConstructor() {
@@ -578,10 +583,11 @@ public class SymbolicRewriter {
     }
 
     public List<ConstrainedTerm> proveRule(
-            ConstrainedTerm initialTerm,
+            Rule rule, ConstrainedTerm initialTerm,
             ConstrainedTerm targetTerm,
             List<Rule> specRules, KExceptionManager kem) {
         List<ConstrainedTerm> proofResults = new ArrayList<>();
+        int successPaths = 0;
         Set<ConstrainedTerm> visited = new HashSet<>();
         List<ConstrainedTerm> queue = new ArrayList<>();
         List<ConstrainedTerm> nextQueue = new ArrayList<>();
@@ -596,6 +602,7 @@ public class SymbolicRewriter {
             step++;
             for (ConstrainedTerm term : queue) {
                 if (term.implies(targetTerm)) {
+                    successPaths++;
                     continue;
                 }
 
@@ -681,7 +688,23 @@ public class SymbolicRewriter {
             guarded = true;
         }
 
+        if (global.globalOptions.verbose) {
+            printSummaryBox(rule, proofResults, successPaths, step);
+        }
         return proofResults;
+    }
+
+    private void printSummaryBox(Rule rule, List<ConstrainedTerm> proofResults, int successPaths, int step) {
+        if (proofResults.isEmpty()) {
+            System.err.format("\nSPEC PROVED: %s %s\n==================================\nExecution paths: %d\n",
+                    new File(rule.getSource().source()), rule.getLocation(), successPaths);
+        } else {
+            System.err.format("\nSPEC FAILED: %s %s\n==================================\n" +
+                            "Success execution paths: %d\nFailed execution paths: %d\n",
+                    new File(rule.getSource().source()), rule.getLocation(), successPaths, proofResults.size());
+        }
+        System.err.format("Longest path: %d steps\n", step);
+        global.profiler.printResult();
     }
 
     /**

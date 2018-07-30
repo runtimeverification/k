@@ -8,6 +8,7 @@ import org.kframework.backend.java.symbolic.BuiltinFunction;
 import org.kframework.backend.java.symbolic.Equality.EqualityOperations;
 import org.kframework.backend.java.symbolic.SMTOperations;
 import org.kframework.backend.java.symbolic.Stage;
+import org.kframework.backend.java.util.Profiler2;
 import org.kframework.backend.java.util.Z3Wrapper;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.api.io.FileSystem;
@@ -32,6 +33,7 @@ public class GlobalContext implements Serializable {
     private final transient Map<String, MethodHandle> hookProvider;
     public final transient FileUtil files;
     public final transient GlobalOptions globalOptions;
+    public final transient Profiler2 profiler;
 
     public GlobalContext(
             FileSystem fs,
@@ -42,7 +44,8 @@ public class GlobalContext implements Serializable {
             SMTOptions smtOptions,
             Map<String, MethodHandle> hookProvider,
             FileUtil files,
-            Stage stage) {
+            Stage stage,
+            Profiler2 profiler) {
         this.fs = fs;
         this.globalOptions = globalOptions;
         this.krunOptions = krunOptions;
@@ -53,6 +56,7 @@ public class GlobalContext implements Serializable {
         this.constraintOps = new SMTOperations(() -> def, smtOptions, new Z3Wrapper(smtOptions, kem, globalOptions, files), kem, globalOptions);
         this.kItemOps = new KItemOperations(stage, deterministicFunctions, kem, this::builtins, globalOptions);
         this.stage = stage;
+        this.profiler = profiler;
     }
 
     @Inject
@@ -64,8 +68,9 @@ public class GlobalContext implements Serializable {
             FileSystem fs,
             FileUtil files,
             Map<String, MethodHandle> hookProvider,
-            Stage stage) {
-        this(fs, false, globalOptions, krunOptions, kem, smtOptions, hookProvider, files, stage);
+            Stage stage,
+            Profiler2 profiler) {
+        this(fs, false, globalOptions, krunOptions, kem, smtOptions, hookProvider, files, stage, profiler);
     }
 
     private transient BuiltinFunction builtinFunction;
