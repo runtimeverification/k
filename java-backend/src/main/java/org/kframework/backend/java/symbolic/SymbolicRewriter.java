@@ -614,11 +614,13 @@ public class SymbolicRewriter {
             step++;
             for (ConstrainedTerm term : queue) {
                 Debugg.log(Debugg.LogEvent.NODE, term.term(), term.constraint());
+                Debugg.setTarget(true);
                 if (term.implies(targetTerm)) {
                     successPaths++;
                     Debugg.log(Debugg.LogEvent.IMPLIESTARGET, term.term(), term.constraint());
                     continue;
                 }
+                Debugg.setTarget(false);
 
                 /* TODO(AndreiS): terminate the proof with failure based on the klabel _~>_
                 List<Term> leftKContents = term.term().getCellContentsByName("<k>");
