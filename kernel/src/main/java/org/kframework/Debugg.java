@@ -85,6 +85,14 @@ public class Debugg {
         Debugg.startTime          = System.currentTimeMillis();
     }
 
+    public static void setTarget(boolean b) {
+        if(b) {
+            Debugg.currentMatchRule = "IMPLIESTARGET";
+        } else {
+            Debugg.currentMatchRule = "NORULE";
+        }
+    }
+
     public static enum LogEvent {
         INIT, TARGET, IMPLIESTARGET, NODE, MARKEDNODE, RULE, SRSTEP, BRANCH, IMPLICATION, Z3QUERY, Z3RESULT, STEP, RSTEP, CRASH, MATCHRULE, CLOSE
     }
