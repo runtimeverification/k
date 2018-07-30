@@ -163,6 +163,8 @@ public class ResolveFun {
             return ((KToken) k).sort();
         if (k instanceof KApply)
             return k.att().get(Production.class).sort();
+        if (k instanceof KVariable)
+            return Sorts.K();
         throw KEMException.compilerError("Could not compute sort of term", k);
     }
 
