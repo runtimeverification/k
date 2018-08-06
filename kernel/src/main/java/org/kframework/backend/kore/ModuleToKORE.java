@@ -1100,7 +1100,9 @@ public class ModuleToKORE {
         case "module":
         case "endmodule":
         case "sort":
+        case "hooked-sort":
         case "symbol":
+        case "hooked-symbol":
         case "alias":
         case "axiom":
             sb.append(name).append("'Kywd'");
