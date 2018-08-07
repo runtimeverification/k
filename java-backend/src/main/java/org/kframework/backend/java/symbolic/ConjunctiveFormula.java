@@ -2,6 +2,7 @@
 package org.kframework.backend.java.symbolic;
 
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
@@ -1034,6 +1035,31 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
     @Override
     public String toString() {
         return toKore().toString();
+    }
+
+    public String toStringMultiline() {
+        Map<String, List<String>> nameToStreamMap = ImmutableMap.<String, List<String>>builder()
+                .put("substitutions:", substitution.equalities(global).stream()
+                        .map(equality -> equality.toK().toString()).sorted().collect(Collectors.toList()))
+                .put("equalities:", equalities.stream()
+                        .map(equality -> equality.toK().toString()).sorted().collect(Collectors.toList()))
+                .put("disjunctions:", disjunctions.stream()
+                        .map(disjunctiveFormula -> disjunctiveFormula.toKore().toString()).sorted()
+                        .collect(Collectors.toList()))
+                .build();
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("ConjunctiveFormula(");
+        for (String cat : nameToStreamMap.keySet()) {
+            if (!nameToStreamMap.get(cat).isEmpty()) {
+                sb.append("\n  ").append(cat);
+                for (String line : nameToStreamMap.get(cat)) {
+                    sb.append("\n    ").append(line);
+                }
+            }
+        }
+        sb.append("\n)");
+        return sb.toString();
     }
 
     @Override
