@@ -123,7 +123,7 @@ public class Z3Wrapper {
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            if (globalOptions.verbose && profiler.isLastRunTimeout()) {
+            if (globalOptions.debugZ3 && profiler.isLastRunTimeout()) {
                 System.err.println("\nZ3 likely timeout");
             }
         }

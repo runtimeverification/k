@@ -208,8 +208,8 @@ public class SymbolicRewriter {
                 result = result.expandPatterns(true);
                 if (result.constraint().isFalseExtended() || result.constraint().checkUnsat(
                         new FormulaContext(FormulaContext.Kind.RegularConstr, rule))) {
-                    if (global.globalOptions.logRulesPublic) {
-                        System.err.println("Execution path aborted");
+                    if (global.globalOptions.debugZ3) {
+                        System.err.println("Execution path aborted after expanding patterns");
                     }
                     continue;
                 }
@@ -219,13 +219,16 @@ public class SymbolicRewriter {
             if (rule.att().contains(Att.heat()) && transitions.stream().anyMatch(rule.att()::contains)) {
                 newSuperheated.add(result);
             } else if (rule.att().contains(Att.cool()) && transitions.stream().anyMatch(rule.att()::contains) && superheated.contains(subject)) {
-                if (global.globalOptions.logRulesPublic) {
-                    System.err.println("Execution path aborted");
+                if (global.globalOptions.debugZ3) {
+                    System.err.println("Execution path aborted, superheating logic");
                 }
                 continue;
             }
 
             global.stateLog.log(StateLog.LogEvent.RULE, rule.toKRewrite());
+            if (global.globalOptions.debugZ3 && !result.constraint().equals(subject.constraint())) {
+                System.err.format("New top constraint created: \n%s\n", subject.constraint().toStringMultiline());
+            }
             results.add(result);
         }
 
@@ -779,6 +782,9 @@ public class SymbolicRewriter {
             System.out.println(term.constraint().toString().replaceAll("#And", "\n#And"));
             System.out.println();
         }
+        if (proofResults.isEmpty()) {
+            System.out.println(KLabels.ML_TRUE);
+        }
 
         if (global.globalOptions.verbose) {
             printSummaryBox(rule, proofResults, successPaths, step);
@@ -876,10 +882,10 @@ public class SymbolicRewriter {
                     System.out.println(storage);
                 }
             }
-            System.out.print("/\\");
+            System.out.println("/\\");
             //pretty printing no longer viable
             //KProve.prettyPrint(term.constraint());
-            System.out.println(term.constraint().toString().replaceAll("#And", "\n#And"));
+            System.out.println(term.constraint().toStringMultiline());
         }
         global.profiler.logOverheadTimer.stop();
         if (localMem != null && !(localMemMap instanceof BuiltinMap || localMemMap instanceof Variable)) {

@@ -65,9 +65,10 @@ public class FormulaContext {
 
     public void printImplication(ConjunctiveFormula left, ConjunctiveFormula right, Boolean proved, boolean cached) {
         if (proved) {
-            System.err.format("\nZ3 Implication (%s) RHS proved: %s\n", kind.label, right);
+            System.err.format("\nZ3 Implication (%s) RHS proved:\n%s\n", kind.label, right.toStringMultiline());
         } else {
-            System.err.format("\nZ3 Implication (%s) failed:\n\t%s\n  implies \n\t%s\n", kind.label, left, right);
+            System.err.format("\nZ3 Implication (%s) failed:\n%s\n  implies \n%s\n",
+                    kind.label, left.toStringMultiline(), right.toStringMultiline());
         }
         if (cached) {
             System.err.println("cached result");
@@ -82,9 +83,9 @@ public class FormulaContext {
 
     public void printUnsat(ConjunctiveFormula formula, boolean unsat, boolean cached) {
         if (unsat) {
-            System.err.format("\nZ3 Constraint (%s) is unsat: %s\n", kind.label, formula);
+            System.err.format("\nZ3 Constraint (%s) is unsat:\n%s\n", kind.label, formula.toStringMultiline());
         } else {
-            System.err.format("\nZ3 Constraint (%s) is assumed sat: %s\n", kind.label, formula);
+            System.err.format("\nZ3 Constraint (%s) is assumed sat:\n%s\n", kind.label, formula.toStringMultiline());
         }
         if (cached) {
             System.err.println("cached result");
