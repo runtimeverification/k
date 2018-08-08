@@ -6,14 +6,17 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import org.kframework.POSet;
 import org.kframework.attributes.Location;
+import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
+import org.kframework.kil.Attribute;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.Sort;
 import org.kframework.compile.ResolveAnonVar;
 import org.kframework.parser.Ambiguity;
 import org.kframework.parser.Constant;
+import org.kframework.parser.ProductionReference;
 import org.kframework.parser.SafeTransformer;
 import org.kframework.parser.SetsGeneralTransformer;
 import org.kframework.parser.SetsTransformerWithErrors;
@@ -305,7 +308,11 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                     }
                     // after type inference for concrete sorts, reject erroneous branches
                     if (!decl.isEmpty()) {
-                        t = new ApplyTypeCheck(decl).apply(t).right().get();
+                        Either<Set<ParseFailedException>, Term> rez2 = new ApplyTypeCheck(decl).apply(t);
+                        if (rez2.isLeft()) {
+                            return new Tuple2<>(rez2, warnings);
+                        }
+                        t = rez2.right().get();
                     }
                 }
             }
@@ -361,8 +368,29 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
         }
     }
 
+    public static boolean isFunctionRule(TermCons tc) {
+        if (tc.production().sort().name().equals("RuleContent")) {
+            ProductionReference child = (ProductionReference) tc.get(0);
+            if (child.production().klabel().isDefined() && child.production().klabel().get().equals(KLabels.KREWRITE)) {
+                child = (ProductionReference)((TermCons)child).get(0);
+            }
+            return child.production().att().contains(Attribute.FUNCTION_KEY);
+        }
+        return false;
+    }
+
     public static Sort getSortOfCast(TermCons tc) {
         switch (tc.production().klabel().get().name()) {
+        case "#ruleNoConditions":
+        case "#ruleRequires":
+        case "#ruleEnsures":
+        case "#ruleRequiresEnsures": {
+            ProductionReference child = (ProductionReference) tc.get(0);
+            if (child.production().klabel().isDefined() && child.production().klabel().get().equals(KLabels.KREWRITE)) {
+                child = (ProductionReference)((TermCons)child).get(0);
+            }
+            return child.production().sort();
+        }
         case "#SyntacticCast":
         case "#OuterCast":
             return tc.production().sort();
@@ -380,15 +408,19 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
         public Tuple2<Either<java.util.Set<ParseFailedException>, Term>, java.util.Set<VarInfo>> apply(TermCons tc) {
             // TODO: (Radu) if this is cast, take the sort from annotations?
             Set<VarInfo> collector = Sets.newHashSet();
-            if (tc.production().klabel().isDefined()
-                    && (tc.production().klabel().get().name().equals("#SyntacticCast")
-                    || tc.production().klabel().get().name().startsWith("#SemanticCastTo")
-                    || tc.production().klabel().get().name().equals("#InnerCast"))) {
-                Term t = tc.get(0);
-                collector = new CollectVariables2(getSortOfCast(tc), VarType.USER).apply(t)._2();
-            } else {
-                for (int i = 0, j = 0; i < tc.production().items().size(); i++) {
-                    if (tc.production().items().apply(i) instanceof NonTerminal) {
+            for (int i = 0, j = 0; i < tc.production().items().size(); i++) {
+                if (tc.production().items().apply(i) instanceof NonTerminal) {
+                    if (tc.production().klabel().isDefined()
+                            && (tc.production().klabel().get().name().equals("#SyntacticCast")
+                            || tc.production().klabel().get().name().startsWith("#SemanticCastTo")
+                            || tc.production().klabel().get().name().equals("#InnerCast"))) {
+                        Term t = tc.get(0);
+                        collector = new CollectVariables2(getSortOfCast(tc), VarType.USER).apply(t)._2();
+                    } else if (tc.production().klabel().isDefined() && isFunctionRule(tc) && j == 0) {
+                        Term t = tc.get(0);
+                        collector = new CollectVariables2(getSortOfCast(tc), VarType.CONTEXT).apply(t)._2();
+                        j++;
+                    } else {
                         Term t = tc.get(j);
                         Set<VarInfo> vars = new CollectVariables2(((NonTerminal) tc.production().items().apply(i)).sort(), VarType.CONTEXT).apply(t)._2();
                         collector.addAll(vars);
@@ -431,19 +463,21 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
         }
 
         public Either<java.util.Set<ParseFailedException>, Term> apply(TermCons tc) {
-            if (tc.production().klabel().isDefined()
-                    && (tc.production().klabel().get().name().equals("#SyntacticCast")
-                    || tc.production().klabel().get().name().startsWith("#SemanticCastTo")
-                    || tc.production().klabel().get().name().equals("#InnerCast"))) {
-                Term t = tc.get(0);
-                boolean strictSortEquality = !tc.production().klabel().get().name().startsWith("#SemanticCastTo");
-                Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheck2(getSortOfCast(tc), true, strictSortEquality, strictSortEquality && inferSortChecks).apply(t);
-                if (rez.isLeft())
-                    return rez;
-                tc = tc.with(0, rez.right().get());
-            } else {
-                for (int i = 0, j = 0; i < tc.production().items().size(); i++) {
-                    if (tc.production().items().apply(i) instanceof NonTerminal) {
+            for (int i = 0, j = 0; i < tc.production().items().size(); i++) {
+                if (tc.production().items().apply(i) instanceof NonTerminal) {
+                    if (tc.production().klabel().isDefined()
+                            && (tc.production().klabel().get().name().equals("#SyntacticCast")
+                            || tc.production().klabel().get().name().startsWith("#SemanticCastTo")
+                            || tc.production().klabel().get().name().equals("#InnerCast")
+                            || (isFunctionRule(tc)) && j == 0)) {
+                        Term t = tc.get(0);
+                        boolean strictSortEquality = tc.production().klabel().get().name().equals("#SyntacticCast") || tc.production().klabel().get().name().equals("#InnerCast");
+                        Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheck2(getSortOfCast(tc), true, strictSortEquality, strictSortEquality && inferSortChecks).apply(t);
+                        if (rez.isLeft())
+                            return rez;
+                        tc = tc.with(0, rez.right().get());
+                        j++;
+                    } else {
                         Term t = tc.get(j);
                         Sort s = ((NonTerminal) tc.production().items().apply(i)).sort();
                         Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheck2(s, false, false, inferSortChecks).apply(t);
@@ -601,15 +635,17 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
         }
 
         public Term apply(TermCons tc) {
-            if (tc.production().klabel().isDefined()
-                    && (tc.production().klabel().get().name().equals("#SyntacticCast")
-                    || tc.production().klabel().get().name().startsWith("#SemanticCastTo")
-                    || tc.production().klabel().get().name().equals("#InnerCast"))) {
-                Term t = tc.get(0);
-                new CollectUndeclaredVariables2(getSortOfCast(tc)).apply(t);
-            } else {
-                for (int i = 0, j = 0; i < tc.production().items().size(); i++) {
-                    if (tc.production().items().apply(i) instanceof NonTerminal) {
+            for (int i = 0, j = 0; i < tc.production().items().size(); i++) {
+                if (tc.production().items().apply(i) instanceof NonTerminal) {
+                    if (tc.production().klabel().isDefined()
+                            && (tc.production().klabel().get().name().equals("#SyntacticCast")
+                            || tc.production().klabel().get().name().startsWith("#SemanticCastTo")
+                            || tc.production().klabel().get().name().equals("#InnerCast"))
+                            || (isFunctionRule(tc) && j == 0)) {
+                        Term t = tc.get(0);
+                        new CollectUndeclaredVariables2(getSortOfCast(tc)).apply(t);
+                        j++;
+                    } else {
                         Term t = tc.get(j);
                         new CollectUndeclaredVariables2(((NonTerminal) tc.production().items().apply(i)).sort()).apply(t);
                         j++;

@@ -68,7 +68,6 @@ public class ModuleToKORE {
         this.module = module;
         this.files = files;
     }
-    private static final boolean ATTRIBUTES = false;
     private static final boolean METAVAR = false;
 
     public String convert() {
@@ -79,44 +78,21 @@ public class ModuleToKORE {
         sb.append(prelude);
         Map<String, Boolean> attributes = new HashMap<>();
         sb.append("\n");
-        if (ATTRIBUTES) {
-            sb.append("module ATTRIBUTES\n\n  sort Attribute{} []\n");
-            for (Sort sort : iterable(module.definedSorts())) {
-                Att att = module.sortAttributesFor().get(sort).getOrElse(() -> KORE.Att());
-                collectAttributes(attributes, att);
-            }
-            for (Production prod : iterable(module.productions())) {
-                Att att = prod.att();
-                collectAttributes(attributes, att);
-            }
-            for (Rule r : iterable(module.rules())) {
-                Att att = r.att();
-                collectAttributes(attributes, att);
-            }
-            for (Map.Entry<String, Boolean> entry : attributes.entrySet()) {
-                if (entry.getValue()) {
-                    sb.append("  sort Att");
-                    convert(entry.getKey());
-                    sb.append("{} []\n");
-                    sb.append("  symbol ");
-                    convert(entry.getKey());
-                    sb.append("{}(Att");
-                    convert(entry.getKey());
-                    sb.append("{}):Attribute{}[]\n");
-                } else {
-                    sb.append("  symbol ");
-                    convert(entry.getKey());
-                    sb.append("{}():Attribute{}[]\n");
-                }
-            }
-            sb.append("endmodule []\n\n");
+        for (Sort sort : iterable(module.definedSorts())) {
+            Att att = module.sortAttributesFor().get(sort).getOrElse(() -> KORE.Att());
+            collectAttributes(attributes, att);
+        }
+        for (Production prod : iterable(module.productions())) {
+            Att att = prod.att();
+            collectAttributes(attributes, att);
+        }
+        for (Rule r : iterable(module.rules())) {
+            Att att = r.att();
+            collectAttributes(attributes, att);
         }
         sb.append("module ");
         convert(module.name());
         sb.append("\n\n// imports\n");
-        if (ATTRIBUTES) {
-            sb.append("  import ATTRIBUTES []\n");
-        }
         sb.append("  import K []\n\n// sorts\n");
         Set<String> dummyHookedSorts = new HashSet<>();
         dummyHookedSorts.add("SET.Set");
@@ -142,8 +118,11 @@ public class ModuleToKORE {
         for (Rule rule : iterable(module.rules())) {
             K left = RewriteToTop.toLeft(rule.body());
             if (left instanceof KApply) {
-                KLabel label = ((KApply) left).klabel();
-                functionRules.put(label, rule);
+                KApply kapp = (KApply) left;
+                Production prod = production(kapp);
+                if (prod.att().contains(Attribute.FUNCTION_KEY)) {
+                    functionRules.put(kapp.klabel(), rule);
+                }
             }
         }
         computeDependencies(functionRules);
@@ -219,7 +198,7 @@ public class ModuleToKORE {
                 convert(prod.sort(), prod);
                 sb.append(",K3:");
                 convert(prod.sort(), prod);
-                sb.append("))) [] // associativity\n");
+                sb.append("))) [assoc{}()] // associativity\n");
             }
             if (prod.att().contains(Attribute.COMMUTATIVE_KEY)) {
                 // s(K1, K2) = s(K2, K1)
@@ -246,7 +225,7 @@ public class ModuleToKORE {
                 convert(childSort, prod);
                 sb.append(",K1:");
                 convert(childSort, prod);
-                sb.append(")) [] // commutativity\n");
+                sb.append(")) [comm{}()] // commutativity\n");
             }
             if (prod.att().contains(Attribute.IDEMPOTENT_KEY)) {
                 // s(K, K) = K
@@ -268,7 +247,7 @@ public class ModuleToKORE {
                 convert(prod.sort(), prod);
                 sb.append("),K:");
                 convert(prod.sort(), prod);
-                sb.append(") [] // idempotency\n");
+                sb.append(") [idem{}()] // idempotency\n");
             }
             if (isFunction(prod) && prod.att().contains(Attribute.UNIT_KEY)) {
                 // s(K, unit) = K
@@ -292,7 +271,7 @@ public class ModuleToKORE {
                 convert(unit, false);
                 sb.append("()),K:");
                 convert(prod.sort(), prod);
-                sb.append(") [] // right unit\n");
+                sb.append(") [unit{}()] // right unit\n");
 
                 sb.append("  axiom");
                 convertParams(prod.klabel().get(), true);
@@ -306,7 +285,7 @@ public class ModuleToKORE {
                 convert(prod.sort(), prod);
                 sb.append("),K:");
                 convert(prod.sort(), prod);
-                sb.append(") [] // left unit\n");
+                sb.append(") [unit{}()] // left unit\n");
             }
             if (isFunctional(prod, functionRules, impurities)) {
                 // exists y . f(...) = y
@@ -329,7 +308,7 @@ public class ModuleToKORE {
                     convert(prod.nonterminal(i).sort(), prod);
                     conn = ", ";
                 }
-                sb.append("))) [] // functional\n");
+                sb.append("))) [functional{}()] // functional\n");
             }
             if (isConstructor(prod, functionRules, impurities)) {
                 // c(x1,x2,...) /\ c(y1,y2,...) -> c(x1/\y2,x2/\y2,...)
@@ -375,7 +354,7 @@ public class ModuleToKORE {
                         sb.append(")");
                         conn = ", ";
                     }
-                    sb.append(")) [] // no confusion same constructor\n");
+                    sb.append(")) [constructor{}()] // no confusion same constructor\n");
                 }
                 for (Production prod2 : iterable(module.productionsForSort().apply(prod.sort()))) {
                     // !(cx(x1,x2,...) /\ cy(y1,y2,...))
@@ -411,7 +390,7 @@ public class ModuleToKORE {
                         convert(prod2.nonterminal(i).sort(), prod2);
                         conn = ", ";
                     }
-                    sb.append("))) [] // no confusion different constructors\n");
+                    sb.append("))) [constructor{}()] // no confusion different constructors\n");
 
                 }
             }
@@ -486,7 +465,7 @@ public class ModuleToKORE {
             for (int i = 0; i < numTerms; i++) {
                 sb.append(")");
             }
-            sb.append(" [] // no junk");
+            sb.append(" [constructor{}()] // no junk");
             if (hasToken && !METAVAR) {
                 sb.append(" (TODO: fix bug with \\dv)");
             }
@@ -661,7 +640,14 @@ public class ModuleToKORE {
             if (left instanceof KApply) {
                 KApply kapp = (KApply) left;
                 if (r.att().contains(Attribute.ANYWHERE_KEY)) {
-                    anywhereKLabels.add(kapp.klabel());
+                    if (kapp.klabel().name().equals(KLabels.INJ)) {
+                        K k = kapp.items().get(0);
+                        if (k instanceof KApply) {
+                            anywhereKLabels.add(((KApply)k).klabel());
+                        }
+                    } else {
+                        anywhereKLabels.add(kapp.klabel());
+                    }
                 }
             }
         });
@@ -803,9 +789,9 @@ public class ModuleToKORE {
         if (k.equals(BooleanUtils.TRUE)) {
             sb.append("\\top{R}()");
         } else {
-            sb.append("\\equals{Bool{},R}(\n        ");
+            sb.append("\\equals{SortBool{},R}(\n        ");
             convert(k);
-            sb.append(",\n        \\dv{Bool{}}(\"true\"))");
+            sb.append(",\n        \\dv{SortBool{}}(\"true\"))");
         }
     }
 
@@ -815,11 +801,11 @@ public class ModuleToKORE {
             convert(result, false);
             sb.append("}()");
         } else {
-            sb.append("\\equals{Bool{},");
+            sb.append("\\equals{SortBool{},");
             convert(result, false);
             sb.append("}(\n        ");
             convert(k);
-            sb.append(",\n        \\dv{Bool{}}(\"true\"))");
+            sb.append(",\n        \\dv{SortBool{}}(\"true\"))");
         }
     }
 
@@ -889,8 +875,12 @@ public class ModuleToKORE {
         }
     }
 
+    private static final Production INJ_PROD = Production(KLabel(KLabels.INJ, Sort("From"), Sort("To")), Sort("To"), Seq(NonTerminal(Sort("From"))));
+
 
     private Production production(KApply term) {
+        if (term.klabel().name().equals(KLabels.INJ))
+            return Production(INJ_PROD.klabel(), INJ_PROD.sort(), INJ_PROD.items(), Att.empty().add("originalPrd", Production.class, INJ_PROD));
         scala.collection.Set<Production> prods = module.productionsFor().apply(((KApply) term).klabel());
         assert(prods.size() == 1);
         return computePolyProd(prods.head());
@@ -935,6 +925,7 @@ public class ModuleToKORE {
     }
 
     private void convert(Sort sort, boolean var) {
+        sb.append("Sort");
         convert(sort.name());
         if (!var) {
             sb.append("{");
@@ -950,25 +941,23 @@ public class ModuleToKORE {
 
     private void convert(Map<String, Boolean> attributes, Att att) {
         sb.append("[");
-        if (ATTRIBUTES) {
-            String conn = "";
-            for (Tuple2<Tuple2<String, Class<?>>, ?> attribute : iterable(att.att())) {
-                String name = attribute._1._1;
-                Class<?> cls = attribute._1._2;
-                Object val = attribute._2;
-                String strVal = val.toString();
-                sb.append(conn);
-                if (attributes.get(name) != null && attributes.get(name)) {
-                    sb.append(name).append("{}(\\dv{Att");
-                    convert(name);
-                    sb.append("{}}(");
-                    sb.append(StringUtil.enquoteCString(strVal));
-                    sb.append("))");
-                } else {
-                    sb.append(name).append("{}()");
-                }
-                conn = ", ";
+        String conn = "";
+        for (Tuple2<Tuple2<String, Class<?>>, ?> attribute : iterable(att.att())) {
+            String name = attribute._1._1;
+            Class<?> cls = attribute._1._2;
+            Object val = attribute._2;
+            String strVal = val.toString();
+            sb.append(conn);
+            if (attributes.get(name) != null && attributes.get(name)) {
+                convert(name);
+                sb.append("{}(");
+                sb.append(StringUtil.enquoteCString(strVal));
+                sb.append(")");
+            } else {
+                convert(name);
+                sb.append("{}()");
             }
+            conn = ", ";
         }
         sb.append("]");
     }
@@ -1107,6 +1096,19 @@ public class ModuleToKORE {
     };
 
     private void convert(String name) {
+        switch(name) {
+        case "module":
+        case "endmodule":
+        case "sort":
+        case "hooked-sort":
+        case "symbol":
+        case "hooked-symbol":
+        case "alias":
+        case "axiom":
+            sb.append(name).append("'Kywd'");
+            return;
+        default: break;
+        }
         boolean inIdent = true;
         for (int i = 0; i < name.length(); i++) {
             if (identChar.matcher(name).region(i, name.length()).lookingAt()) {
@@ -1138,7 +1140,7 @@ public class ModuleToKORE {
             @Override
             public void apply(KApply k) {
                 if (impureFunctions.contains(k.klabel().name())) {
-                    throw KEMException.internalError("Cannot yet translate impure function to kore.", k);
+                    throw KEMException.internalError("Cannot yet translate impure function to kore: " + k.klabel().name(), k);
                 }
                 KLabel label = k.klabel();
                 if (polyKLabels.containsKey(k.klabel().name())) {
