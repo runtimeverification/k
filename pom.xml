@@ -17,7 +17,6 @@
     <module>kernel</module>
     <module>ktree</module>
     <module>k-distribution</module>
-    <module>API</module>
     <module>java-backend</module>
     <module>ocaml-backend</module>
   </modules>
@@ -125,9 +124,9 @@
   <build>
     <extensions>
       <extension>
-        <groupId>org.springframework.build</groupId>
+        <groupId>org.zalando.org.springframework.build</groupId>
         <artifactId>aws-maven</artifactId>
-        <version>5.0.0.RELEASE</version>
+        <version>5.0.0.RELEASE-zal-2</version>
       </extension>
     </extensions>
     <pluginManagement>
