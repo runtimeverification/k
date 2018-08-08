@@ -97,7 +97,7 @@ public class AddSortInjections {
             for (int i = 0; i < prod.arity(); i++) {
                 Sort expectedSort = prod.nonterminal(i).sort();
                 if (polyPositions.contains(i + 1)) {
-                    expectedSort = parentSort;
+                    expectedSort = actualSort;
                 }
                 K child = kapp.items().get(i);
                 children.add(addInjections(child, expectedSort));
@@ -148,7 +148,7 @@ public class AddSortInjections {
                         otherPositions.remove(0);
                         Set<Sort> children = new HashSet<>();
                         for (int position : otherPositions) {
-                            children.add(sort(kapp.items().get(position-1), null));
+                            children.add(sort(kapp.items().get(position-1), expectedSort));
                         }
                         children.remove(null);
                         if (children.size() == 0) {
@@ -161,8 +161,8 @@ public class AddSortInjections {
             return production((KApply)term).sort();
         } else if (term instanceof KRewrite) {
             KRewrite rew = (KRewrite)term;
-            Sort leftSort = sort(rew.left(), null);
-            Sort rightSort = sort(rew.right(), null);
+            Sort leftSort = sort(rew.left(), expectedSort);
+            Sort rightSort = sort(rew.right(), expectedSort);
             if (leftSort == null && rightSort == null) {
                 return expectedSort;
             } else if (leftSort == null) {
@@ -191,7 +191,9 @@ public class AddSortInjections {
 
     private Production production(KApply term) {
         scala.collection.Set<Production> prods = mod.productionsFor().apply(((KApply) term).klabel());
-        assert(prods.size() == 1);
+        if (prods.size() != 1) {
+          throw KEMException.compilerError("Could not find production for KApply with label " + term.klabel(), term);
+        }
         return prods.head();
     }
 

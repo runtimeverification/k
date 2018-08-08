@@ -14,14 +14,13 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class RemoveOverloads extends SafeTransformer {
+public class RemoveOverloads {
     private final POSet<Production> overloads;
 
     public RemoveOverloads(POSet<Production> overloads) {
         this.overloads = overloads;
     }
 
-    @Override
     public Term apply(Ambiguity a) {
         Set<Production> productions = new HashSet<>();
         for (Term t : a.items()) {
@@ -29,14 +28,14 @@ public class RemoveOverloads extends SafeTransformer {
                 TermCons tc = (TermCons)t;
                 productions.add(tc.production());
             } else {
-                return super.apply(a);
+                return a;
             }
         }
         Set<Production> candidates = overloads.minimal(productions);
         Ambiguity result = Ambiguity.apply(a.items().stream().filter(t -> candidates.contains(((ProductionReference)t).production())).collect(Collectors.toSet()));
         if (result.items().size() == 1) {
-            return apply(result.items().iterator().next());
+            return result.items().iterator().next();
         }
-        return super.apply(result);
+        return result;
     }
 }

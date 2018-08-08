@@ -28,7 +28,7 @@ public class KompileOptions implements Serializable {
     public OuterParsingOptions outerParsing = new OuterParsingOptions();
 
     // Common options
-    @Parameter(names="--backend", description="Choose a backend. <backend> is one of [ocaml|coq]. Each creates the kompiled K definition.")
+    @Parameter(names="--backend", description="Choose a backend. <backend> is one of [ocaml|java|coq]. Each creates the kompiled K definition.")
     public String backend = Backends.OCAML;
 
     @Parameter(names="--doc-style", description="Specify a style option for the package 'k.sty' (when '--backend [pdf|latex]' is used) or path to an alternative .css file (when '--backend html' is used).")

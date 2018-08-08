@@ -10,6 +10,7 @@ import org.kframework.backend.java.builtins.SortMembership;
 import org.kframework.backend.java.symbolic.*;
 import org.kframework.backend.java.util.ImpureFunctionException;
 import org.kframework.backend.java.util.Profiler;
+import org.kframework.backend.java.util.Profiler2;
 import org.kframework.backend.java.util.RewriteEngineUtils;
 import org.kframework.backend.java.util.Subsorts;
 import org.kframework.backend.java.util.Constants;
@@ -271,14 +272,26 @@ public class KItem extends Term implements KItemRepresentation, HasGlobalContext
     }
 
     public Term evaluateFunction(TermContext context) {
-        Term result = global.kItemOps.evaluateFunction(this, context);
-        result.isEvaluated.add(context.getTopConstraint());
+        global.profiler.resFuncNanoTimer.start();
+        Term result;
+        try {
+            result = global.kItemOps.evaluateFunction(this, context);
+            result.isEvaluated.add(context.getTopConstraint());
+        } finally {
+            global.profiler.resFuncNanoTimer.stop();
+        }
         return result;
     }
 
     public Term resolveFunctionAndAnywhere(TermContext context) {
-        Term result = global.kItemOps.resolveFunctionAndAnywhere(this, context);
-        result.isEvaluated.add(context.getTopConstraint());
+        global.profiler.resFuncNanoTimer.start();
+        Term result;
+        try {
+            result = global.kItemOps.resolveFunctionAndAnywhere(this, context);
+            result.isEvaluated.add(context.getTopConstraint());
+        } finally {
+            global.profiler.resFuncNanoTimer.stop();
+        }
         return result;
     }
 

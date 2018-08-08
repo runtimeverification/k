@@ -80,6 +80,16 @@ public class ParseInModule implements Serializable {
 
     public Module getParsingModule() { return parsingModule; }
 
+    public void initialize() {
+       disambModule.definedSorts();
+       disambModule.subsorts();
+       disambModule.priorities();
+       disambModule.leftAssoc();
+       disambModule.rightAssoc();
+       disambModule.productionsFor();
+       disambModule.overloads();
+    }
+
     /**
      * Parse as input the given string and start symbol using the module stored in the object.
      * @param input          the string to parse.
@@ -88,13 +98,12 @@ public class ParseInModule implements Serializable {
      */
     public Tuple2<Either<Set<ParseFailedException>, K>, Set<ParseFailedException>>
             parseString(String input, Sort startSymbol, Source source) {
-        return parseString(input, startSymbol, null, source, 1, 1, true);
+        try (Scanner scanner = getScanner()) {
+            return parseString(input, startSymbol, scanner, source, 1, 1, true);
+        }
     }
 
     private Scanner getGrammar(Scanner scanner) {
-        if(scanner == null) {
-            scanner = getScanner();
-        }
         Grammar g = grammar;
         if (g == null) {
             g = KSyntax2GrammarStatesFilter.getGrammar(this.parsingModule, scanner);
@@ -166,10 +175,11 @@ public class ParseInModule implements Serializable {
         rez = new CorrectCastPriorityVisitor().apply(rez.right().get());
         if (rez.isLeft())
             return new Tuple2<>(rez, warn);
-        rez = new ApplyTypeCheckVisitor(disambModule.subsorts()).apply(rez.right().get());
+        rez = new PriorityVisitor(disambModule.priorities(), disambModule.leftAssoc(), disambModule.rightAssoc()).apply(rez.right().get());
         if (rez.isLeft())
             return new Tuple2<>(rez, warn);
-        rez = new PriorityVisitor(disambModule.priorities(), disambModule.leftAssoc(), disambModule.rightAssoc()).apply(rez.right().get());
+        Term rez3 = new PushTopAmbiguityUp().apply(rez.right().get());
+        rez = new ApplyTypeCheckVisitor(disambModule.subsorts()).apply(rez3);
         if (rez.isLeft())
             return new Tuple2<>(rez, warn);
         Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rez2 = new VariableTypeInferenceFilter(disambModule.subsorts(), disambModule.definedSorts(), disambModule.productionsFor(), strict && inferSortChecks, true).apply(rez.right().get());
@@ -177,7 +187,7 @@ public class ParseInModule implements Serializable {
             return rez2;
         warn = rez2._2();
 
-        Term rez3 = new PushAmbiguitiesDownAndPreferAvoid().apply(rez2._1().right().get());
+        rez3 = new PushAmbiguitiesDownAndPreferAvoid(disambModule.overloads()).apply(rez2._1().right().get());
         rez2 = new AmbFilter().apply(rez3);
         warn = Sets.union(rez2._2(), warn);
         rez2 = new AddEmptyLists(disambModule).apply(rez2._1().right().get());
@@ -188,10 +198,11 @@ public class ParseInModule implements Serializable {
     }
 
     public static Term disambiguateForUnparse(Module mod, Term ambiguity) {
-        Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheckVisitor(mod.subsorts()).apply(ambiguity);
+        Term rez3 = new PushTopAmbiguityUp().apply(ambiguity);
+        Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheckVisitor(mod.subsorts()).apply(rez3);
         Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rez2;
         if (rez.isLeft()) {
-            rez2 = new AmbFilter().apply(ambiguity);
+            rez2 = new AmbFilter().apply(rez3);
             return rez2._1().right().get();
         }
         rez2 = new VariableTypeInferenceFilter(mod.subsorts(), mod.definedSorts(), mod.productionsFor(), false, false).apply(rez.right().get());
@@ -199,8 +210,7 @@ public class ParseInModule implements Serializable {
             rez2 = new AmbFilter().apply(rez.right().get());
             return rez2._1().right().get();
         }
-        Term rez3 = new RemoveOverloads(mod.overloads()).apply(rez2._1().right().get());
-        rez3 = new PushAmbiguitiesDownAndPreferAvoid().apply(rez3);
+        rez3 = new PushAmbiguitiesDownAndPreferAvoid(mod.overloads()).apply(rez2._1().right().get());
         rez2 = new AmbFilter().apply(rez3);
         return rez2._1().right().get();
     }

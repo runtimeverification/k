@@ -1,25 +1,25 @@
 module BASIC-K
-  sort K{} []
-  sort KItem{} []
+  sort SortK{} []
+  sort SortKItem{} []
 endmodule []
 
 module KSEQ
   import BASIC-K []
 
-  symbol kseq{}(KItem{}, K{}) : K{} []
-  symbol append{}(K{}, K{}) : K{} []
-  symbol dotk{}() : K{} []
+  symbol kseq{}(SortKItem{}, SortK{}) : SortK{} []
+  symbol append{}(SortK{}, SortK{}) : SortK{} []
+  symbol dotk{}() : SortK{} []
 
   axiom{R}
-    \equals{K{},R}(
-      append{}(dotk{}(),K2:K{}),
-      K2:K{})
+    \equals{SortK{},R}(
+      append{}(dotk{}(),K2:SortK{}),
+      K2:SortK{})
   []
 
   axiom{R}
-    \equals{K{},R}(
-      append{}(kseq{}(K1:KItem{},K2:K{}),K3:K{}),
-      kseq{}(K1:KItem{},append{}(K2:K{},K3:K{})))
+    \equals{SortK{},R}(
+      append{}(kseq{}(K1:SortKItem{},K2:SortK{}),K3:SortK{}),
+      kseq{}(K1:SortKItem{},append{}(K2:SortK{},K3:SortK{})))
   []
 
 endmodule []

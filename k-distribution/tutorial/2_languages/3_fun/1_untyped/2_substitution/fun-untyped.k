@@ -220,7 +220,7 @@ module FUN-UNTYPED
   rule isVal(fun _) => true
   syntax KVariable ::= Name
   syntax Name ::= freshName(Int)    [freshGenerator, function]
-  rule freshName(I:Int) => #parseToken("Name", "#" +String Int2String(I))
+  rule freshName(I:Int) => {#parseToken("Name", "#" +String Int2String(I))}:>Name
 
   rule (. => getMatching(P, V)) ~> (fun P->_ | _) V:Val
   rule matchResult(M:Map) ~> (fun _->E | _) _ => E[M]

@@ -29,8 +29,8 @@ public class Context implements Serializable {
     @Deprecated @Inject(optional=true) public transient KRunOptions krunOptions;
 
     public void addProduction(Production p, boolean kore) {
-        if (p.getKLabel(kore) != null) {
-            tags.put(p.getKLabel(kore), p);
+        if (p.getKLabel(false) != null) {
+            tags.put(p.getKLabel(false), p);
         }
         for (Attribute<?> a : p.getAttributes().values()) {
             tags.put(a.getKey().toString(), p);
