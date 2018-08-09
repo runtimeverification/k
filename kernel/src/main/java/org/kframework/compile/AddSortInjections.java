@@ -67,7 +67,7 @@ public class AddSortInjections {
         return result;
     }
 
-    private K addInjections(K term, Sort expectedSort) {
+    public K addInjections(K term, Sort expectedSort) {
         Sort actualSort = sort(term, expectedSort);
         if (actualSort == null) {
             actualSort = expectedSort;
