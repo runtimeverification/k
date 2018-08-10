@@ -7,7 +7,7 @@ module KSEQ
   import BASIC-K []
 
   symbol kseq{}(SortKItem{}, SortK{}) : SortK{} []
-  symbol append{}(SortK{}, SortK{}) : SortK{} []
+  symbol append{}(SortK{}, SortK{}) : SortK{} [function{}()]
   symbol dotk{}() : SortK{} []
 
   axiom{R}
