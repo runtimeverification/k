@@ -595,7 +595,7 @@ module STRING-BUFFER-HOOKED [concrete]
   imports STRING
 
   syntax StringBuffer [hook(BUFFER.StringBuffer)]
-  syntax StringBuffer ::= ".StringBuffer" [function, functional, hook(BUFFER.empty), impure]
+  syntax StringBuffer ::= ".StringBuffer" [function, functional, hook(BUFFER.empty)] //master branch: also has [impure]
   syntax StringBuffer ::= StringBuffer "+String" String [function, functional, left, hook(BUFFER.concat), avoid]
   syntax String ::= StringBuffer2String ( StringBuffer ) [function, functional, hook(BUFFER.toString)]
 endmodule

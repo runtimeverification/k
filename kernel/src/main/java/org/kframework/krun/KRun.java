@@ -70,6 +70,7 @@ public class KRun {
     }
 
     public int run(CompiledDefinition compiledDef, KRunOptions options, Function<Module, Rewriter> rewriterGenerator, ExecutionMode executionMode) {
+        options.global.cacheFunctions = false;
         String pgmFileName = options.configurationCreation.pgm();
         K program;
         if (options.configurationCreation.term()) {

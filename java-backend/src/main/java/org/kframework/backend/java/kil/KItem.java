@@ -279,23 +279,35 @@ public class KItem extends Term implements KItemRepresentation {
         return global.kItemOps.isEvaluable(this, global.getDefinition());
     }
 
-    private static final boolean RESOLVE_FUNC_CACHED = true;
-
     public Term evaluateFunction(TermContext context) {
         global.profiler.resFuncNanoTimer.start();
         Term result;
         try {
-            if (RESOLVE_FUNC_CACHED) {
+            if (global.globalOptions.cacheFunctions) {
                 ConjunctiveFormula constraint = getCacheConstraint(context);
                 result = cacheGet(constraint);
                 if (result == null) {
+                    if (global.getDefinition().kLabelAttributesOf(klabel()).contains(Attribute.IMPURE_KEY)) {
+                        throw KEMException.criticalError(String.format(
+                                "Function caching doesn't work with impure functions(%s). " +
+                                "Please re-run with option '--cache-func false'", klabel()));
+                    }
                     result = global.kItemOps.evaluateFunction(this, context);
                     result.cachePut(constraint, result);
                     this.cachePut(constraint, result);
-                    global.profiler.countResFuncTopUncached++;
+                    if (global.profiler.resFuncNanoTimer.getLevel() == 1) {
+                        global.profiler.countResFuncTopUncached++;
+                    } else {
+                        global.profiler.countResFuncRecursiveUncached++;
+                    }
                 }
             } else {
                 result = global.kItemOps.evaluateFunction(this, context);
+                if (global.profiler.resFuncNanoTimer.getLevel() == 1) {
+                    global.profiler.countResFuncTopUncached++;
+                } else {
+                    global.profiler.countResFuncRecursiveUncached++;
+                }
             }
         } finally {
             global.profiler.resFuncNanoTimer.stop();
@@ -307,10 +319,15 @@ public class KItem extends Term implements KItemRepresentation {
         global.profiler.resFuncNanoTimer.start();
         Term result;
         try {
-            if (RESOLVE_FUNC_CACHED) {
+            if (global.globalOptions.cacheFunctions) {
                 ConjunctiveFormula constraint = getCacheConstraint(context);
                 result = cacheGet(constraint);
                 if (result == null) {
+                    if (global.getDefinition().kLabelAttributesOf(klabel()).contains(Attribute.IMPURE_KEY)) {
+                        throw KEMException.criticalError(String.format(
+                                "Function caching doesn't work with impure functions(%s). " +
+                                        "Please re-run with option '--cache-func false'", klabel()));
+                    }
                     result = global.kItemOps.resolveFunctionAndAnywhere(this, context);
                     result.cachePut(constraint, result);
                     this.cachePut(constraint, result);
@@ -322,6 +339,11 @@ public class KItem extends Term implements KItemRepresentation {
                 }
             } else {
                 result = global.kItemOps.resolveFunctionAndAnywhere(this, context);
+                if (global.profiler.resFuncNanoTimer.getLevel() == 1) {
+                    global.profiler.countResFuncTopUncached++;
+                } else {
+                    global.profiler.countResFuncRecursiveUncached++;
+                }
             }
         } finally {
             global.profiler.resFuncNanoTimer.stop();
