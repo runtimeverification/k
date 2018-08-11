@@ -131,5 +131,9 @@ public final class GlobalOptions {
             description="Log actual z3 queries. Activates --debug-z3 automatically.")
     public boolean debugZ3Queries = false;
 
+    @Parameter(names="--cache-func",
+            description="Cache evaluation results of pure functions. Only for kprove.", arity = 1)
+    public boolean cacheFunctions = true;
+
     public boolean logRulesPublic = false;
 }
