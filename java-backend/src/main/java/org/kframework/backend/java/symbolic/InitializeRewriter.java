@@ -157,6 +157,10 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
 
         @Override
         public RewriterResult execute(K k, Optional<Integer> depth) {
+            if (rewritingContext.globalOptions.verbose) {
+                rewritingContext.profiler.logParsingTime();
+            }
+            rewritingContext.setExecutionPhase(false);
             TermContext termContext = TermContext.builder(rewritingContext).freshCounter(initCounterValue).build();
             KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, termContext.global(), false);
             ResolveSemanticCasts resolveCasts = new ResolveSemanticCasts(true);
@@ -164,6 +168,10 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
             termContext.setKOREtoBackendKILConverter(converter);
             Term backendKil = converter.convert(macroExpander.expand(resolveCasts.resolve(k))).evaluate(termContext);
             SymbolicRewriter rewriter = new SymbolicRewriter(rewritingContext, transitions, converter);
+            if (rewritingContext.globalOptions.verbose) {
+                rewritingContext.profiler.logInitTime();
+            }
+            rewritingContext.setExecutionPhase(true);
             RewriterResult result = rewriter.rewrite(new ConstrainedTerm(backendKil, termContext), depth.orElse(-1));
             return result;
         }

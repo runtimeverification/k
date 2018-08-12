@@ -70,6 +70,8 @@ public class KLabelConstant extends KLabel implements org.kframework.kore.KLabel
 
     private final boolean isSortPredicate;
 
+    private final boolean isImpure;
+
     private final Sort predicateSort;
 
     private final String smtlib;
@@ -111,6 +113,7 @@ public class KLabelConstant extends KLabel implements org.kframework.kore.KLabel
         this.isFunction = isFunction;
         this.projectionAtt = projectionAtt;
         this.isPattern = isPattern;
+        this.isImpure = productionAttributes.contains(Attribute.IMPURE_KEY);
         this.smtlib = smtlib;
     }
 
@@ -185,6 +188,13 @@ public class KLabelConstant extends KLabel implements org.kframework.kore.KLabel
     @Override
     public boolean isPattern() {
         return isPattern;
+    }
+
+    /**
+     * Returns true iff this label has a production annotated with [impure].
+     */
+    public boolean isImpure() {
+        return isImpure;
     }
 
     /**
