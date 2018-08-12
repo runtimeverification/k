@@ -19,6 +19,7 @@ import org.kframework.backend.java.util.Constants;
 import org.kframework.backend.java.util.FormulaContext;
 import org.kframework.backend.java.util.ImpureFunctionException;
 import org.kframework.backend.java.util.Profiler;
+import org.kframework.backend.java.util.Profiler2;
 import org.kframework.backend.java.util.RewriteEngineUtils;
 import org.kframework.backend.java.util.RuleSourceUtil;
 import org.kframework.backend.java.util.Subsorts;
@@ -72,6 +73,7 @@ public class KItem extends Term implements KItemRepresentation {
     private Boolean anywhereApplicable = null;
 
     private BitSet[] childrenDontCareRuleMask = null;
+    private final Profiler2 profiler;
 
     public static KItem of(Term kLabel, Term kList, GlobalContext global) {
         return of(kLabel, kList, global, Att.empty(), null);
@@ -110,6 +112,7 @@ public class KItem extends Term implements KItemRepresentation {
         this.isExactSort = isExactSort;
         this.possibleSorts = possibleSorts;
         this.global = global;
+        this.profiler = null;
         this.enableCache = false;
     }
 
@@ -118,6 +121,7 @@ public class KItem extends Term implements KItemRepresentation {
         this.kLabel = kLabel;
         this.kList = kList;
         this.global = global;
+        this.profiler = global.profiler;
 
         Definition definition = global.getDefinition();
         this.childrenDontCareRuleMask = childrenDonCareRuleMask;
@@ -280,14 +284,14 @@ public class KItem extends Term implements KItemRepresentation {
     }
 
     public Term evaluateFunction(TermContext context) {
-        global.profiler.resFuncNanoTimer.start();
+        profiler.resFuncNanoTimer.start();
         Term result;
         try {
             if (global.globalOptions.cacheFunctions) {
                 ConjunctiveFormula constraint = getCacheConstraint(context);
                 result = cacheGet(constraint);
                 if (result == null) {
-                    if (global.getDefinition().kLabelAttributesOf(klabel()).contains(Attribute.IMPURE_KEY)) {
+                    if (kLabel instanceof KLabelConstant && ((KLabelConstant) kLabel).isImpure()) {
                         throw KEMException.criticalError(String.format(
                                 "Function caching doesn't work with impure functions(%s). " +
                                 "Please re-run with option '--cache-func false'", klabel()));
@@ -295,35 +299,35 @@ public class KItem extends Term implements KItemRepresentation {
                     result = global.kItemOps.evaluateFunction(this, context);
                     result.cachePut(constraint, result);
                     this.cachePut(constraint, result);
-                    if (global.profiler.resFuncNanoTimer.getLevel() == 1) {
-                        global.profiler.countResFuncTopUncached++;
+                    if (profiler.resFuncNanoTimer.getLevel() == 1) {
+                        profiler.countResFuncTopUncached++;
                     } else {
-                        global.profiler.countResFuncRecursiveUncached++;
+                        profiler.countResFuncRecursiveUncached++;
                     }
                 }
             } else {
                 result = global.kItemOps.evaluateFunction(this, context);
-                if (global.profiler.resFuncNanoTimer.getLevel() == 1) {
-                    global.profiler.countResFuncTopUncached++;
+                if (profiler.resFuncNanoTimer.getLevel() == 1) {
+                    profiler.countResFuncTopUncached++;
                 } else {
-                    global.profiler.countResFuncRecursiveUncached++;
+                    profiler.countResFuncRecursiveUncached++;
                 }
             }
         } finally {
-            global.profiler.resFuncNanoTimer.stop();
+            profiler.resFuncNanoTimer.stop();
         }
         return result;
     }
 
     public Term resolveFunctionAndAnywhere(TermContext context) {
-        global.profiler.resFuncNanoTimer.start();
+        profiler.resFuncNanoTimer.start();
         Term result;
         try {
             if (global.globalOptions.cacheFunctions) {
                 ConjunctiveFormula constraint = getCacheConstraint(context);
                 result = cacheGet(constraint);
                 if (result == null) {
-                    if (global.getDefinition().kLabelAttributesOf(klabel()).contains(Attribute.IMPURE_KEY)) {
+                    if (kLabel instanceof KLabelConstant && ((KLabelConstant) kLabel).isImpure()) {
                         throw KEMException.criticalError(String.format(
                                 "Function caching doesn't work with impure functions(%s). " +
                                         "Please re-run with option '--cache-func false'", klabel()));
@@ -331,22 +335,22 @@ public class KItem extends Term implements KItemRepresentation {
                     result = global.kItemOps.resolveFunctionAndAnywhere(this, context);
                     result.cachePut(constraint, result);
                     this.cachePut(constraint, result);
-                    if (global.profiler.resFuncNanoTimer.getLevel() == 1) {
-                        global.profiler.countResFuncTopUncached++;
+                    if (profiler.resFuncNanoTimer.getLevel() == 1) {
+                        profiler.countResFuncTopUncached++;
                     } else {
-                        global.profiler.countResFuncRecursiveUncached++;
+                        profiler.countResFuncRecursiveUncached++;
                     }
                 }
             } else {
                 result = global.kItemOps.resolveFunctionAndAnywhere(this, context);
-                if (global.profiler.resFuncNanoTimer.getLevel() == 1) {
-                    global.profiler.countResFuncTopUncached++;
+                if (profiler.resFuncNanoTimer.getLevel() == 1) {
+                    profiler.countResFuncTopUncached++;
                 } else {
-                    global.profiler.countResFuncRecursiveUncached++;
+                    profiler.countResFuncRecursiveUncached++;
                 }
             }
         } finally {
-            global.profiler.resFuncNanoTimer.stop();
+            profiler.resFuncNanoTimer.stop();
         }
         return result;
     }

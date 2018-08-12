@@ -93,6 +93,9 @@ public class SymbolicRewriter {
         ConstrainedTerm afterVariableRename = new ConstrainedTerm(constrainedTerm.term(), constrainedTerm.termContext());
 
         stopwatch.stop();
+        if (global.globalOptions.verbose) {
+            printSummaryBox(null, null, 1, step);
+        }
         return new RewriterResult(Optional.of(step), Optional.empty(), afterVariableRename.term());
     }
 
@@ -793,13 +796,17 @@ public class SymbolicRewriter {
     }
 
     private void printSummaryBox(Rule rule, List<ConstrainedTerm> proofResults, int successPaths, int step) {
-        if (proofResults.isEmpty()) {
-            System.err.format("\nSPEC PROVED: %s %s\n==================================\nExecution paths: %d\n",
-                    new File(rule.getSource().source()), rule.getLocation(), successPaths);
+        if (proofResults != null) {
+            if (proofResults.isEmpty()) {
+                System.err.format("\nSPEC PROVED: %s %s\n==================================\nExecution paths: %d\n",
+                        new File(rule.getSource().source()), rule.getLocation(), successPaths);
+            } else {
+                System.err.format("\nSPEC FAILED: %s %s\n==================================\n" +
+                                "Success execution paths: %d\nFailed execution paths: %d\n",
+                        new File(rule.getSource().source()), rule.getLocation(), successPaths, proofResults.size());
+            }
         } else {
-            System.err.format("\nSPEC FAILED: %s %s\n==================================\n" +
-                            "Success execution paths: %d\nFailed execution paths: %d\n",
-                    new File(rule.getSource().source()), rule.getLocation(), successPaths, proofResults.size());
+            System.err.print("\nEXECUTION FINISHED\n==================================\n");
         }
         System.err.format("Longest path: %d steps\n", step);
         global.profiler.printResult();
