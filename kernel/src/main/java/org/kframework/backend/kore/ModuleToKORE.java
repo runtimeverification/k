@@ -1135,7 +1135,10 @@ public class ModuleToKORE {
         }
     }
 
-    private void convert(K k) {
+    @Override
+    public String toString() { return sb.toString(); }
+
+    public void convert(K k) {
         new VisitK() {
             @Override
             public void apply(KApply k) {

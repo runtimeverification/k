@@ -91,6 +91,9 @@ public final class KastOptions {
     @Parameter(names="--expand-macros", description="Also expand macros in the parsed string.")
     public boolean expandMacros = false;
 
+    @Parameter(names="--kore", description="Output KORE-syntax instead of KAST-syntax.")
+    public boolean kore = false;
+
     @ParametersDelegate
     public Experimental experimental = new Experimental();
 
