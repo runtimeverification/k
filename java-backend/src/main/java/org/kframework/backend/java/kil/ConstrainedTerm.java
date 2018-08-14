@@ -131,7 +131,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
                 .add(data.constraint.substitution())
                 .add(data.term, constrainedTerm.data.term)
                 .simplifyBeforePatternFolding(context);
-        if (constraint.isFalse()) {
+        if (constraint.isFalseExtended()) {
             return null;
         }
 
@@ -226,7 +226,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
             ConjunctiveFormula solution = candidateConstraint.addAndSimplify(subjectConstraint, context);
             context.setTopConstraint(subjectConstraint);
 
-            if (solution.isFalse()) {
+            if (solution.isFalseExtended()) {
                 continue;
             }
 
