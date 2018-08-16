@@ -16,6 +16,7 @@ import org.kframework.builtin.KLabels;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -296,8 +297,21 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
         return truthValue == TruthValue.TRUE;
     }
 
+    public boolean isFalseExtended() {
+        return isFalse() || isFalseFromContradictions();
+    }
+
     public boolean isFalse() {
         return truthValue == TruthValue.FALSE;
+    }
+
+    /**
+     * @return true if formula contains both some element "T" and "T ==K false".
+     */
+    public boolean isFalseFromContradictions() {
+        Set<Term> elements = new HashSet<>(getKComponents());
+        return equalities.parallelStream()
+                .anyMatch(eq -> eq.rightHandSide().equals(BoolToken.FALSE) && elements.contains(eq.leftHandSide()));
     }
 
     public boolean isUnknown() {
@@ -665,7 +679,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
 
     public boolean implies(ConjunctiveFormula constraint, Set<Variable> rightOnlyVariables) {
         // TODO(AndreiS): this can prove "stuff -> false", it needs fixing
-        assert !constraint.isFalse();
+        assert !constraint.isFalseExtended();
 
         LinkedList<Pair<ConjunctiveFormula, ConjunctiveFormula>> implications = new LinkedList<>();
         implications.add(Pair.of(this, constraint));
@@ -673,7 +687,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
             Pair<ConjunctiveFormula, ConjunctiveFormula> implication = implications.remove();
             ConjunctiveFormula left = implication.getLeft();
             ConjunctiveFormula right = implication.getRight();
-            if (left.isFalse()) {
+            if (left.isFalseExtended()) {
                 continue;
             }
 
