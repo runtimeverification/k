@@ -1,6 +1,7 @@
 // Copyright (c) 2018 K Team. All Rights Reserved.
 package org.kframework.unparser;
 
+import com.google.inject.Inject;
 import com.davekoelle.AlphanumComparator;
 import org.kframework.attributes.Att;
 import org.kframework.compile.ExpandMacros;
@@ -48,6 +49,7 @@ public class KPrint {
         this(new KExceptionManager(new GlobalOptions()), FileUtil.testFileUtil(), new TTYInfo(false, false, false), new PrintOptions());
     }
 
+    @Inject
     public KPrint(KExceptionManager kem, FileUtil files, TTYInfo tty, PrintOptions options) {
         this.kem     = kem;
         this.files   = files;
