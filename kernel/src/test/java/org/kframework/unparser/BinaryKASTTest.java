@@ -29,7 +29,6 @@ public class BinaryKASTTest {
 
     @Test
     public void testWriteThenRead() throws Exception {
-        File tmp = File.createTempFile("tmp", null);
         byte[] str = ToBinary.apply(term);
         K result2 = BinaryParser.parse(str);
         assertEquals(term, result2);
@@ -37,7 +36,6 @@ public class BinaryKASTTest {
 
     @Test
     public void testConcatenate() throws Exception {
-        File tmp = File.createTempFile("tmp", null);
         byte[] str = ToBinary.apply(term);
         byte[] krewrite = new byte[str.length * 2 - 8];
         System.arraycopy(str, 0, krewrite, 0, str.length - 1);
