@@ -13,11 +13,14 @@ import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KEMException;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.io.StringReader;
 import java.util.Arrays;
 
 import javax.json.Json;
-import javax.json.JsonObject;
 import javax.json.JsonArray;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
 
 /**
  * Parses a Json term into the KORE data structures.
@@ -31,6 +34,15 @@ public class JsonParser {
                              , KREWRITE       = "KRewrite"
                              , INJECTEDKLABEL = "InjectedKLabel"
                              ;
+
+    public static K parse(byte[] data) throws UnsupportedEncodingException {
+        return parse(new String(data, "UTF-8"));
+    }
+
+    public static K parse(String data) {
+        JsonReader reader = Json.createReader(new StringReader(data));
+        return parseJson(reader.readObject());
+    }
 
     public static K parseJson(JsonObject data) {
         try {
