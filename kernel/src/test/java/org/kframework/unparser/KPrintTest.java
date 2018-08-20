@@ -34,6 +34,10 @@ public class KPrintTest {
 
     OutputModes[] outputModes = new OutputModes[] { OutputModes.JSON , OutputModes.BINARY };
 
+    private String asKast(K term) throws UnsupportedEncodingException {
+        return new String(new KPrint().serialize(term, OutputModes.KAST), "UTF-8");
+    }
+
     private K unparseThenParse(K origTerm, OutputModes outputMode) throws UnsupportedEncodingException {
         byte[] unparsed = new KPrint().serialize(origTerm, outputMode);
         switch (outputMode) {
@@ -52,7 +56,7 @@ public class KPrintTest {
     @Test
     public void testUnparseThenParse() throws Exception {
         for (OutputModes outputMode: outputModes) {
-            assertEquals(term, unparseThenParse(term, outputMode));
+            assertEquals(asKast(term), asKast(unparseThenParse(term, outputMode)));
         }
     }
 }
