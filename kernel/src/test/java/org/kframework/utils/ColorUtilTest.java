@@ -2,7 +2,7 @@
 package org.kframework.utils;
 
 import org.junit.Test;
-import org.kframework.krun.ColorSetting;
+import org.kframework.unparser.ColorSetting;
 
 import static org.junit.Assert.*;
 

@@ -1,3 +1,5 @@
+// Copyright (c) 2016-2018 K Team. All Rights Reserved.
+
 package org.kframework.unparser;
 
 public class Indenter implements Appendable {
