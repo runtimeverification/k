@@ -35,7 +35,7 @@ module ARRAY-SYNTAX
    of indices to set) to the same value. */
   syntax Array ::= fillArray(Array, Int, Int, K) [function, hook(ARRAY.fill)]
 
-  syntax Bool ::= Int "in_keys" "(" Array ")" [function, hook(ARRAY.in_keys)]
+  syntax Bool ::= Int "in_keys" "(" Array ")" [function, functional, hook(ARRAY.in_keys)]
 endmodule
 
 module ARRAY-CONCRETE [concrete]
@@ -94,12 +94,12 @@ module MAP
    the two Maps are assumed disjoint) */
   syntax Map ::= Map Map                        [left, function, hook(MAP.concat), klabel(_Map_), symbol, assoc, comm, unit(.Map), element(_|->_), index(0), format(%1%n%2)]
   /*@  Construct an empty Map */
-  syntax Map ::= ".Map"                         [function, hook(MAP.unit), klabel(.Map), symbol, latex(\dotCt{Map})]
+  syntax Map ::= ".Map"                         [function, functional, hook(MAP.unit), klabel(.Map), symbol, latex(\dotCt{Map})]
                // breaks klabel uniqueness
                //| "."                            [function, hook(MAP.unit)]
   /*@ Construct a singleton Map (a Map with only one key/value pair). The key
    is on the left and the value is on the right */
-  syntax Map ::= K "|->" K                      [function, hook(MAP.element), klabel(_|->_), symbol, latex({#1}\mapsto{#2})]
+  syntax Map ::= K "|->" K                      [function, functional, hook(MAP.element), klabel(_|->_), symbol, latex({#1}\mapsto{#2})]
 
   syntax priorities _|->_ > _Map_ .Map
   syntax non-assoc _|->_
@@ -107,40 +107,40 @@ module MAP
   /*@ Retrieve the value associated with the given key */
   syntax K ::= Map "[" K "]"                    [function, hook(MAP.lookup), klabel(Map:lookup), symbol]
 
-  syntax K ::= Map "[" K "]" "orDefault" K      [function, hook(MAP.lookupOrDefault), klabel(Map:lookupOrDefault)]
+  syntax K ::= Map "[" K "]" "orDefault" K      [function, functional, hook(MAP.lookupOrDefault), klabel(Map:lookupOrDefault)]
 
   /*@ Update a Map in form of  of keys and values: */
-  syntax Map ::= Map "[" K "<-" K "]"           [function, hook(MAP.update), prefer]
+  syntax Map ::= Map "[" K "<-" K "]"           [function, functional, hook(MAP.update), prefer]
 
   /*@ Remove key/value pair associated with the key from map? */
-  syntax Map ::= Map "[" K "<-" "undef" "]"     [function, hook(MAP.remove), klabel(_[_<-undef]), symbol]
+  syntax Map ::= Map "[" K "<-" "undef" "]"     [function, functional, hook(MAP.remove), klabel(_[_<-undef]), symbol]
 
   /*@ Get the difference of two maps interpreted as sets of entries
    ($M_1 \setminus M2$) */
-  syntax Map ::= Map "-Map" Map                 [function, hook(MAP.difference), latex({#1}-_{\it Map}{#2})]
+  syntax Map ::= Map "-Map" Map                 [function, functional, hook(MAP.difference), latex({#1}-_{\it Map}{#2})]
 
   /*@ Update the first map by adding all key/value pairs in the second map. If a
    key in the first map exists also in the second map, its associated value will
    be overwritten by the value from the second map. */
-  syntax Map ::= updateMap(Map, Map)            [function, hook(MAP.updateAll)]
+  syntax Map ::= updateMap(Map, Map)            [function, functional, hook(MAP.updateAll)]
 
   /*@ Update the Map by removing all key/value pairs with the key in the Set. */
-  syntax Map ::= removeAll(Map, Set)            [function, hook(MAP.removeAll)]
+  syntax Map ::= removeAll(Map, Set)            [function, functional, hook(MAP.removeAll)]
 
   /*@ Get a Set consisting of all keys in the Map:*/
-  syntax Set ::= keys(Map)                      [function, hook(MAP.keys)]
+  syntax Set ::= keys(Map)                      [function, functional, hook(MAP.keys)]
   syntax List ::= "keys_list" "(" Map ")"       [function, hook(MAP.keys_list)]
 
-  syntax Bool ::= K "in_keys" "(" Map ")"       [function, hook(MAP.in_keys)]
+  syntax Bool ::= K "in_keys" "(" Map ")"       [function, functional, hook(MAP.in_keys)]
 
   /*@ Get a List consisting of all values in the Map: */
   syntax List ::= values(Map)                   [function, hook(MAP.values)]
 
   /*@ Get the Map size (number of key/value pairs) */
-  syntax Int ::= size(Map)                      [function, hook(MAP.size), klabel(sizeMap)]
+  syntax Int ::= size(Map)                      [function, functional, hook(MAP.size), klabel(sizeMap)]
 
   /*@ Check map inclusion */
-  syntax Bool ::= Map "<=Map" Map               [function, hook(MAP.inclusion)]
+  syntax Bool ::= Map "<=Map" Map               [function, functional, hook(MAP.inclusion)]
 
   /*@ Get an arbitrarily chosen key of the Map  */
   syntax K ::= choice(Map)                      [function, hook(MAP.choice), klabel(Map:choice)]
@@ -156,29 +156,29 @@ module SET
    of unique items). */
 
   /*@ Construct a new Set as the union of two different sets ($A \cup B$) */
-  syntax Set ::= Set Set                  [left, function, hook(SET.concat), klabel(_Set_), symbol, assoc, comm, unit(.Set), idem, element(SetItem), format(%1%n%2)]
+  syntax Set ::= Set Set                  [left, function, functional, hook(SET.concat), klabel(_Set_), symbol, assoc, comm, unit(.Set), idem, element(SetItem), format(%1%n%2)]
   /*@ Construct an empty Set */
-  syntax Set ::= ".Set"                   [function, hook(SET.unit), klabel(.Set), symbol, latex(\dotCt{Set})]
+  syntax Set ::= ".Set"                   [function, functional, hook(SET.unit), klabel(.Set), symbol, latex(\dotCt{Set})]
                //| "."
   /*@ Construct a singleton Set (a Set with only one element $\{ a \}$). To add
    an element $a$ to a set $A$, construct the union of the singleton set
    $\{ a \}$ and $A$ ($\{ a \} \cup A$). */
-  syntax Set ::= SetItem(K)               [function, hook(SET.element), klabel(SetItem), symbol]
+  syntax Set ::= SetItem(K)               [function, functional, hook(SET.element), klabel(SetItem), symbol]
 
   /*@ Get the intersection of two sets ($A \cap B$) */
-  syntax Set ::= intersectSet(Set, Set)   [function, hook(SET.intersection)]
+  syntax Set ::= intersectSet(Set, Set)   [function, functional, hook(SET.intersection)]
 
   /*@ Get the difference of two sets ($A \setminus B$)*/
-  syntax Set ::= Set "-Set" Set           [function, hook(SET.difference), latex({#1}-_{\it Set}{#2}), klabel(Set:difference), symbol]
+  syntax Set ::= Set "-Set" Set           [function, functional, hook(SET.difference), latex({#1}-_{\it Set}{#2}), klabel(Set:difference), symbol]
 
   /*@ Check element membership in a set ($a \in A$) */
-  syntax Bool ::= K "in" Set              [function, hook(SET.in), klabel(Set:in), symbol]
+  syntax Bool ::= K "in" Set              [function, functional, hook(SET.in), klabel(Set:in), symbol]
 
   /*@ Check set inclusion ($A \subseteq B$) */
-  syntax Bool ::= Set "<=Set" Set         [function, hook(SET.inclusion)]
+  syntax Bool ::= Set "<=Set" Set         [function, functional, hook(SET.inclusion)]
 
   /*@ Get the cardinality of a set ($|A|$) */
-  syntax Int ::= size(Set)                [function, hook(SET.size)]
+  syntax Int ::= size(Set)                [function, functional, hook(SET.size)]
 
   /*@ Get an arbitrarily chosen element of the Set */
   syntax K ::= choice(Set)                [function, hook(SET.choice), klabel(Set:choice)]
@@ -227,12 +227,12 @@ module LIST
 
   /*@ Construct a new List as the concatenation of two Lists. This is similar to
    the append "@" operation in many functional programming languages. */
-  syntax List ::= List List               [left, function, hook(LIST.concat), klabel(_List_), symbol, smtlib(smt_seq_concat), assoc, unit(.List), element(ListItem), format(%1%n%2)]
+  syntax List ::= List List               [left, function, functional, hook(LIST.concat), klabel(_List_), symbol, smtlib(smt_seq_concat), assoc, unit(.List), element(ListItem), format(%1%n%2)]
   /*@ Construct an empty List: */
-  syntax List ::= ".List"                 [function, hook(LIST.unit), klabel(.List), symbol, smtlib(smt_seq_nil), latex(\dotCt{List})]
+  syntax List ::= ".List"                 [function, functional, hook(LIST.unit), klabel(.List), symbol, smtlib(smt_seq_nil), latex(\dotCt{List})]
                 //| "."
   /*@ Construct a singleton List (a list with only  one element) */
-  syntax List ::= ListItem(K)             [function, hook(LIST.element), klabel(ListItem), symbol, smtlib(smt_seq_elem)]
+  syntax List ::= ListItem(K)             [function, functional, hook(LIST.element), klabel(ListItem), symbol, smtlib(smt_seq_elem)]
 
   /*@ Get an element form the List by index. Positive indices mean from the
    beginning (0 is the first element), and negative indices mean from the end
@@ -243,10 +243,10 @@ module LIST
   syntax List ::= range(List, Int, Int)   [function, hook(LIST.range), klabel(List:range), symbol]
 
   /*@ Check element membership in the given list */
-  syntax Bool ::= K "in" List             [function, hook(LIST.in), klabel(_inList_)]
+  syntax Bool ::= K "in" List             [function, functional, hook(LIST.in), klabel(_inList_)]
 
   /*@ Get the list length */
-  syntax Int ::= size(List)               [function, hook(LIST.size), klabel (sizeList), smtlib(smt_seq_len)]
+  syntax Int ::= size(List)               [function, functional, hook(LIST.size), klabel (sizeList), smtlib(smt_seq_len)]
 endmodule
 
 module COLLECTIONS
@@ -255,7 +255,7 @@ module COLLECTIONS
   imports MAP
 
   syntax List ::= Set2List(Set) [function, hook(SET.set2list)]
-  syntax Set ::= List2Set(List) [function, hook(SET.list2set)]
+  syntax Set ::= List2Set(List) [function, functional, hook(SET.list2set)]
 
 endmodule
 
@@ -268,16 +268,16 @@ endmodule
 module BOOL
   imports BASIC-K
   imports BOOL-SYNTAX
-  syntax Bool ::= "notBool" Bool          [function, klabel(notBool_), symbol, smtlib(not), boolOperation, latex(\neg_{\scriptstyle\it Bool}{#1}), hook(BOOL.not)]
-                > Bool "andBool" Bool     [function, klabel(_andBool_), symbol, left, smtlib(and), boolOperation, latex({#1}\wedge_{\scriptstyle\it Bool}{#2}), hook(BOOL.and)]
-                | Bool "andThenBool" Bool [function, left, smtlib(and), boolOperation, hook(BOOL.andThen)]
-                | Bool "xorBool" Bool     [function, left, smtlib(xor), boolOperation, hook(BOOL.xor)]
-                | Bool "orBool" Bool      [function, left, smtlib(or), boolOperation, latex({#1}\vee_{\scriptstyle\it Bool}{#2}), hook(BOOL.or)]
-                | Bool "orElseBool" Bool  [function, left, smtlib(or), boolOperation, hook(BOOL.orElse)]
-                | Bool "impliesBool" Bool [function, left, smtlib(=>), boolOperation, hook(BOOL.implies)]
+  syntax Bool ::= "notBool" Bool          [function, functional, klabel(notBool_), symbol, smtlib(not), boolOperation, latex(\neg_{\scriptstyle\it Bool}{#1}), hook(BOOL.not)]
+                > Bool "andBool" Bool     [function, functional, klabel(_andBool_), symbol, left, smtlib(and), boolOperation, latex({#1}\wedge_{\scriptstyle\it Bool}{#2}), hook(BOOL.and)]
+                | Bool "andThenBool" Bool [function, functional, left, smtlib(and), boolOperation, hook(BOOL.andThen)]
+                | Bool "xorBool" Bool     [function, functional, left, smtlib(xor), boolOperation, hook(BOOL.xor)]
+                | Bool "orBool" Bool      [function, functional, left, smtlib(or), boolOperation, latex({#1}\vee_{\scriptstyle\it Bool}{#2}), hook(BOOL.or)]
+                | Bool "orElseBool" Bool  [function, functional, left, smtlib(or), boolOperation, hook(BOOL.orElse)]
+                | Bool "impliesBool" Bool [function, functional, left, smtlib(=>), boolOperation, hook(BOOL.implies)]
                 > left:
-                  Bool "==Bool" Bool      [function, left, smtlib(=), hook(BOOL.eq)]
-                | Bool "=/=Bool" Bool     [function, left, smtlib(distinct), hook(BOOL.ne)]
+                  Bool "==Bool" Bool      [function, functional, left, smtlib(=), hook(BOOL.eq)]
+                | Bool "=/=Bool" Bool     [function, functional, left, smtlib(distinct), hook(BOOL.ne)]
 
   rule notBool true => false
   rule notBool false => true
@@ -331,12 +331,12 @@ module INT
   imports BOOL
   imports K-EQUAL
 
-  syntax Int ::= "~Int" Int                     [function, latex(\mathop{\sim_{\scriptstyle\it Int}}{#1}), hook(INT.not)]
+  syntax Int ::= "~Int" Int                     [function, functional, latex(\mathop{\sim_{\scriptstyle\it Int}}{#1}), hook(INT.not)]
                > left:
                  Int "^Int" Int                 [function, left, smtlib(^), latex({#1}\mathrel{{\char`\^}_{\!\scriptstyle\it Int}}{#2}), hook(INT.pow)]
                | Int "^%Int" Int Int            [function, left, smtlib((mod (^ #1 #2) #3)), hook(INT.powmod)]
                > left:
-                 Int "*Int" Int                 [function, left, smtlib(*), latex({#1}\mathrel{\ast_{\scriptstyle\it Int}}{#2}), hook(INT.mul)]
+                 Int "*Int" Int                 [function, functional, left, smtlib(*), latex({#1}\mathrel{\ast_{\scriptstyle\it Int}}{#2}), hook(INT.mul)]
                /* FIXME: translate /Int and %Int into smtlib */
                /* /Int and %Int implement t-division */
                | Int "/Int" Int                 [function, left, smtlib(div), latex({#1}\mathrel{\div_{\scriptstyle\it Int}}{#2}), hook(INT.tdiv)]
@@ -345,20 +345,20 @@ module INT
                | Int "divInt" Int               [function, left, smtlib(div), hook(INT.ediv)]
                | Int "modInt" Int               [function, left, smtlib(mod), hook(INT.emod)]
                > left:
-                 Int "+Int" Int                 [function, left, smtlib(+), latex({#1}\mathrel{+_{\scriptstyle\it Int}}{#2}), hook(INT.add)]
-               | Int "-Int" Int                 [function, left, smtlib(-), latex({#1}\mathrel{-_{\scriptstyle\it Int}}{#2}), hook(INT.sub)]
+                 Int "+Int" Int                 [function, functional, left, smtlib(+), latex({#1}\mathrel{+_{\scriptstyle\it Int}}{#2}), hook(INT.add)]
+               | Int "-Int" Int                 [function, functional, left, smtlib(-), latex({#1}\mathrel{-_{\scriptstyle\it Int}}{#2}), hook(INT.sub)]
                > left:
                  Int ">>Int" Int                [function, left, latex({#1}\mathrel{\gg_{\scriptstyle\it Int}}{#2}), hook(INT.shr)]
                | Int "<<Int" Int                [function, left, latex({#1}\mathrel{\ll_{\scriptstyle\it Int}}{#2}), hook(INT.shl)]
                > left:
-                 Int "&Int" Int                 [function, left, latex({#1}\mathrel{\&_{\scriptstyle\it Int}}{#2}), hook(INT.and)]
+                 Int "&Int" Int                 [function, functional, left, latex({#1}\mathrel{\&_{\scriptstyle\it Int}}{#2}), hook(INT.and)]
                > left:
-                 Int "xorInt" Int               [function, left, latex({#1}\mathrel{\oplus_{\scriptstyle\it Int}}{#2}), hook(INT.xor)]
+                 Int "xorInt" Int               [function, functional, left, latex({#1}\mathrel{\oplus_{\scriptstyle\it Int}}{#2}), hook(INT.xor)]
                > left:
-                 Int "|Int" Int                 [function, left, latex({#1}\mathrel{|_{\scriptstyle\it Int}}{#2}), hook(INT.or)]
-  syntax Int ::= "minInt" "(" Int "," Int ")"   [function, smtlib(int_min), hook(INT.min)]
-               | "maxInt" "(" Int "," Int ")"   [function, smtlib(int_max), hook(INT.max)]
-               | absInt ( Int )                 [function, smtlib(int_abs), hook(INT.abs)]
+                 Int "|Int" Int                 [function, functional, left, latex({#1}\mathrel{|_{\scriptstyle\it Int}}{#2}), hook(INT.or)]
+  syntax Int ::= "minInt" "(" Int "," Int ")"   [function, functional, smtlib(int_min), hook(INT.min)]
+               | "maxInt" "(" Int "," Int ")"   [function, functional, smtlib(int_max), hook(INT.max)]
+               | absInt ( Int )                 [function, functional, smtlib(int_abs), hook(INT.abs)]
                | log2Int ( Int )                [function, hook(INT.log2)]
 
   syntax Int ::= bitRangeInt           ( Int, indexInt: Int, lengthInt: Int ) [function, hook(INT.bitRange)]
@@ -379,19 +379,19 @@ module INT
   rule minInt(I1:Int, I2:Int) => I1 requires I1 <=Int I2
   rule minInt(I1:Int, I2:Int) => I2 requires I1 >=Int I2
 
-  syntax Bool ::= Int "<=Int" Int         [function, left, smtlib(<=), latex({#1}\mathrel{\leq_{\scriptstyle\it Int}}{#2}), hook(INT.le)]
-                | Int "<Int" Int          [function, left, smtlib(<), latex({#1}\mathrel{<_{\scriptstyle\it Int}}{#2}), hook(INT.lt)]
-                | Int ">=Int" Int         [function, left, smtlib(>=), latex({#1}\mathrel{\geq_{\scriptstyle\it Int}}{#2}), hook(INT.ge)]
-                | Int ">Int" Int          [function, left, smtlib(>), latex({#1}\mathrel{>_{\scriptstyle\it Int}}{#2}), hook(INT.gt)]
-                | Int "==Int" Int         [function, left, smtlib(=), latex({#1}\mathrel{{=}{=}_{\scriptstyle\it Int}}{#2}), hook(INT.eq), klabel(_==Int_)]
-                | Int "=/=Int" Int        [function, left, smtlib(distinct), latex({#1}\mathrel{{=}{/}{=}_{\scriptstyle\it Int}}{#2}), hook(INT.ne)]
+  syntax Bool ::= Int "<=Int" Int         [function, functional, left, smtlib(<=), latex({#1}\mathrel{\leq_{\scriptstyle\it Int}}{#2}), hook(INT.le)]
+                | Int "<Int" Int          [function, functional, left, smtlib(<), latex({#1}\mathrel{<_{\scriptstyle\it Int}}{#2}), hook(INT.lt)]
+                | Int ">=Int" Int         [function, functional, left, smtlib(>=), latex({#1}\mathrel{\geq_{\scriptstyle\it Int}}{#2}), hook(INT.ge)]
+                | Int ">Int" Int          [function, functional, left, smtlib(>), latex({#1}\mathrel{>_{\scriptstyle\it Int}}{#2}), hook(INT.gt)]
+                | Int "==Int" Int         [function, functional, left, smtlib(=), latex({#1}\mathrel{{=}{=}_{\scriptstyle\it Int}}{#2}), hook(INT.eq), klabel(_==Int_)]
+                | Int "=/=Int" Int        [function, functional, left, smtlib(distinct), latex({#1}\mathrel{{=}{/}{=}_{\scriptstyle\it Int}}{#2}), hook(INT.ne)]
                 | Int "dividesInt" Int    [function]
 
   rule I1:Int ==Int I2:Int => I1 ==K I2
   rule I1:Int =/=Int I2:Int => notBool (I1 ==Int I2)
   rule (I1:Int dividesInt I2:Int) => (I2 %Int I1) ==Int 0
 
-  syntax Int ::= freshInt(Int)    [freshGenerator, function]
+  syntax Int ::= freshInt(Int)    [freshGenerator, function, functional]
   rule freshInt(I:Int) => I
 
   syntax Int ::= randInt(Int) [function, hook(INT.rand)]
@@ -410,20 +410,16 @@ module FLOAT
   imports BOOL
   imports INT-SYNTAX
 
-  syntax Int ::= precisionFloat(Float) [function, hook(FLOAT.precision)]
-               | exponentFloat(Float) [function, hook(FLOAT.exponent)]
-               | exponentBitsFloat(Float) [function, hook(FLOAT.exponentBits)]
+  syntax Int ::= precisionFloat(Float) [function, functional, hook(FLOAT.precision)]
+               | exponentFloat(Float) [function, functional, hook(FLOAT.exponent)]
+               | exponentBitsFloat(Float) [function, functional, hook(FLOAT.exponentBits)]
 
-  syntax Bool ::= signFloat(Float)      [function, hook(FLOAT.sign)]
-                | isNaN(Float)          [function, smtlib((not (== #1 #1))), hook(FLOAT.isNaN)]
-                | isInfinite(Float)     [function]
+  syntax Bool ::= signFloat(Float)      [function, functional, hook(FLOAT.sign)]
+                | isNaN(Float)          [function, functional, smtlib((not (== #1 #1))), hook(FLOAT.isNaN)]
+                | isInfinite(Float)     [function, functional]
   syntax MInt ::= significandFloat(Float) [function, hook(FLOAT.significand)]
 
-  syntax Float ::= fpNaN(Int, Int)              [smtlib((as NaN (_ FP #1 #2)))]
-                 | plusInfinity(Int, Int)       [smtlib((as plusInfinity (_ FP #1 #2)))]
-                 | minusInfinity(Int, Int)      [smtlib((as minusInfinity (_ FP #1 #2)))]
-
-  syntax Float ::= "--Float" Float             [function, smtlib(-), hook(FLOAT.neg)]
+  syntax Float ::= "--Float" Float             [function, functional, smtlib(-), hook(FLOAT.neg)]
                  > Float "^Float" Float        [function, left, latex({#1}^{#2}), hook(FLOAT.pow)]
                  > left:
                    Float "*Float" Float        [function, left, smtlib((* roundNearestTiesToEven #1 #2)), latex({#1}\mathrel{\ast_{\scriptstyle\it Float}}{#2}), hook(FLOAT.mul)]
@@ -434,18 +430,18 @@ module FLOAT
                  | Float "-Float" Float        [function, left, smtlib((- roundNearestTiesToEven #1 #2)), latex({#1}\mathrel{-_{\scriptstyle\it Float}}{#2}), hook(FLOAT.sub)]
 
   syntax Float ::= rootFloat(Float, Int)        [function, hook(FLOAT.root)]
-                 | absFloat(Float)              [function, smtlib(abs), hook(FLOAT.abs)]
+                 | absFloat(Float)              [function, functional, smtlib(abs), hook(FLOAT.abs)]
                  | roundFloat(Float, Int, Int)  [function, hook(FLOAT.round)]
-                 | floorFloat(Float)            [function, hook(FLOAT.floor)]
-                 | ceilFloat(Float)             [function, hook(FLOAT.ceil)]
-                 | expFloat(Float)              [function, hook(FLOAT.exp)]
+                 | floorFloat(Float)            [function, functional, hook(FLOAT.floor)]
+                 | ceilFloat(Float)             [function, functional, hook(FLOAT.ceil)]
+                 | expFloat(Float)              [function, functional, hook(FLOAT.exp)]
                  | logFloat(Float)              [function, hook(FLOAT.log)]
-                 | sinFloat(Float)              [function, hook(FLOAT.sin)]
-                 | cosFloat(Float)              [function, hook(FLOAT.cos)]
+                 | sinFloat(Float)              [function, functional, hook(FLOAT.sin)]
+                 | cosFloat(Float)              [function, functional, hook(FLOAT.cos)]
                  | tanFloat(Float)              [function, hook(FLOAT.tan)]
                  | asinFloat(Float)             [function, hook(FLOAT.asin)]
                  | acosFloat(Float)             [function, hook(FLOAT.acos)]
-                 | atanFloat(Float)             [function, hook(FLOAT.atan)]
+                 | atanFloat(Float)             [function, functional, hook(FLOAT.atan)]
                  | atan2Float(Float, Float)     [function, hook(FLOAT.atan2)]
                  | maxFloat(Float, Float)       [function, smtlib(max), hook(FLOAT.max)]
                  | minFloat(Float, Float)       [function, smtlib(min), hook(FLOAT.min)]
@@ -464,7 +460,7 @@ module FLOAT
   rule F1:Float =/=Float F2:Float => notBool (F1 ==Float F2)
 
   syntax Float ::= Int2Float(Int, Int, Int)    [function, latex({\\it{}Int2Float}), hook(FLOAT.int2float)]
-  syntax Int ::= Float2Int(Float)    [function, latex({\\it{}Float2Int}), hook(FLOAT.float2int)]
+  syntax Int ::= Float2Int(Float)    [function, functional, latex({\\it{}Float2Int}), hook(FLOAT.float2int)]
 
   rule sqrtFloat(F:Float) => rootFloat(F, 2)
 
@@ -491,11 +487,11 @@ module STRING
   imports FLOAT-SYNTAX
   imports K-EQUAL
 
-  syntax String ::= String "+String" String    [function, left, latex({#1}+_{\scriptstyle\it String}{#2}), hook(STRING.concat)]
+  syntax String ::= String "+String" String    [function, functional, left, latex({#1}+_{\scriptstyle\it String}{#2}), hook(STRING.concat)]
 
-  syntax Bool ::= String "==String" String [function, left, hook(STRING.eq)]
+  syntax Bool ::= String "==String" String [function, functional, left, hook(STRING.eq)]
 
-  syntax Int ::= lengthString ( String ) [function, hook(STRING.length)]
+  syntax Int ::= lengthString ( String ) [function, functional, hook(STRING.length)]
   syntax String ::= chrChar ( Int )      [function, hook(STRING.chr)]
   syntax Int ::= ordChar ( String )      [function, hook(STRING.ord)]
 
@@ -505,28 +501,28 @@ module STRING
   syntax Int ::= findChar ( String , String , Int )     [function, hook(STRING.findChar)]
   syntax Int ::= rfindChar ( String , String , Int )    [function, hook(STRING.rfindChar)]
 
-  syntax String ::= Float2String ( Float )              [function, hook(STRING.float2string)]
+  syntax String ::= Float2String ( Float )              [function, functional, hook(STRING.float2string)]
   syntax String ::= Float2String ( Float , String )     [function, klabel(FloatFormat), hook(STRING.floatFormat)]
   syntax Float  ::= String2Float ( String )             [function, hook(STRING.string2float)]
   syntax Int    ::= String2Int   ( String )             [function, hook(STRING.string2int)]
-  syntax String ::= Int2String   ( Int )                [function, hook(STRING.int2string)]
+  syntax String ::= Int2String   ( Int )                [function, functional, hook(STRING.int2string)]
   syntax String ::= Base2String  ( Int , Int )          [function, hook(STRING.base2string)]
   syntax Int    ::= String2Base  ( String , Int )       [function, hook(STRING.string2base)]
 
 
-  syntax String ::= "replaceAll" "(" String "," String "," String ")"      [function, hook(STRING.replaceAll)]
+  syntax String ::= "replaceAll" "(" String "," String "," String ")"      [function, functional, hook(STRING.replaceAll)]
   syntax String ::= "replace" "(" String "," String "," String "," Int ")" [function, hook(STRING.replace)]
-  syntax String ::= "replaceFirst" "(" String "," String "," String ")"    [function, hook(STRING.replaceFirst)]
-  syntax Int ::= "countAllOccurrences" "(" String "," String ")"            [function, hook(STRING.countAllOccurrences)]
+  syntax String ::= "replaceFirst" "(" String "," String "," String ")"    [function, functional, hook(STRING.replaceFirst)]
+  syntax Int ::= "countAllOccurrences" "(" String "," String ")"            [function, functional, hook(STRING.countAllOccurrences)]
 
-  syntax Bool ::= String "=/=String" String      [function, left, hook(STRING.ne)]
+  syntax Bool ::= String "=/=String" String      [function, functional, left, hook(STRING.ne)]
   rule S1:String =/=String S2:String => notBool (S1 ==String S2)
   rule S1:String ==String S2:String => S1 ==K S2
 
-  syntax Bool ::= String  "<String" String [function, hook(STRING.lt)]
-                | String "<=String" String [function, hook(STRING.le)]
-                | String  ">String" String [function, hook(STRING.gt)]
-                | String ">=String" String [function, hook(STRING.ge)]
+  syntax Bool ::= String  "<String" String [function, functional, hook(STRING.lt)]
+                | String "<=String" String [function, functional, hook(STRING.le)]
+                | String  ">String" String [function, functional, hook(STRING.gt)]
+                | String ">=String" String [function, functional, hook(STRING.ge)]
 
   syntax String ::= categoryChar(String)       [function, hook(STRING.category)]
                   | directionalityChar(String) [function, hook(STRING.directionality)]
@@ -568,9 +564,9 @@ module STRING-BUFFER-SYNTAX
   imports STRING
 
   syntax StringBuffer [hook(BUFFER.StringBuffer)]
-  syntax StringBuffer ::= ".StringBuffer" [function, hook(BUFFER.empty), impure]
-  syntax StringBuffer ::= StringBuffer "+String" String [function, left, hook(BUFFER.concat), avoid]
-  syntax String ::= StringBuffer2String ( StringBuffer ) [function, hook(BUFFER.toString)]
+  syntax StringBuffer ::= ".StringBuffer" [function, functional, hook(BUFFER.empty), impure]
+  syntax StringBuffer ::= StringBuffer "+String" String [function, functional, left, hook(BUFFER.concat), avoid]
+  syntax String ::= StringBuffer2String ( StringBuffer ) [function, functional, hook(BUFFER.toString)]
 endmodule
 
 module STRING-BUFFER-SYMBOLIC [symbolic]
@@ -593,26 +589,26 @@ endmodule
 module BYTES-SYNTAX
   syntax Bytes [hook(BYTES.Bytes)]
 
-  syntax Bytes ::= ".Bytes" [function, hook(BYTES.empty), impure]
+  syntax Bytes ::= ".Bytes" [function, functional, hook(BYTES.empty), impure]
   syntax Endianness ::= "LE" [klabel(littleEndianBytes)]
                       | "BE" [klabel(bigEndianBytes)]
   syntax Signedness ::= "Signed" [klabel(signedBytes)]
                       | "Unsigned" [klabel(unsignedBytes)]
-  syntax Int ::= Bytes2Int(Bytes, Endianness, Signedness) [function, hook(BYTES.bytes2int)]
-  syntax Bytes ::= Int2Bytes(Int, Int, Endianness) [function, hook(BYTES.int2bytes)]
-                 | Int2Bytes(Int, Endianness, Signedness) [function, klabel(Int2BytesNoLen)]
-  syntax String ::= Bytes2String(Bytes) [function, hook(BYTES.bytes2string)]
-  syntax Bytes ::= String2Bytes(String) [function, hook(BYTES.string2bytes)]
+  syntax Int ::= Bytes2Int(Bytes, Endianness, Signedness) [function, functional, hook(BYTES.bytes2int)]
+  syntax Bytes ::= Int2Bytes(Int, Int, Endianness) [function, functional, hook(BYTES.int2bytes)]
+                 | Int2Bytes(Int, Endianness, Signedness) [function, functional, klabel(Int2BytesNoLen)]
+  syntax String ::= Bytes2String(Bytes) [function, functional, hook(BYTES.bytes2string)]
+  syntax Bytes ::= String2Bytes(String) [function, functional, hook(BYTES.string2bytes)]
 
   syntax Bytes ::= substrBytes(Bytes, Int, Int) [function, hook(BYTES.substr)]
   syntax Bytes ::= replaceAtBytes(Bytes, Int, Bytes) [function, hook(BYTES.replaceAt)]
   syntax Bytes ::= padRightBytes(Bytes, Int, Int) [function, hook(BYTES.padRight)]
                  | padLeftBytes(Bytes, Int, Int) [function, hook(BYTES.padLeft)]
-  syntax Bytes ::= reverseBytes(Bytes) [function, hook(BYTES.reverse)]
+  syntax Bytes ::= reverseBytes(Bytes) [function, functional, hook(BYTES.reverse)]
 
-  syntax Int ::= lengthBytes(Bytes) [function, hook(BYTES.length), smtlib(lengthBytes)]
+  syntax Int ::= lengthBytes(Bytes) [function, functional, hook(BYTES.length), smtlib(lengthBytes)]
 
-  syntax Bytes ::= Bytes "+Bytes" Bytes [function, hook(BYTES.concat), right]
+  syntax Bytes ::= Bytes "+Bytes" Bytes [function, functional, hook(BYTES.concat), right]
 endmodule
 
 module BYTES-SYMBOLIC [symbolic]
@@ -700,9 +696,9 @@ module ID-SYNTAX
 
   syntax Id [token]
 
-  syntax String ::= Id2String ( Id )    [function, hook(STRING.token2string)]
-  syntax Id ::= String2Id (String) [function, hook(STRING.string2token)]
-  syntax Id ::= freshId(Int)    [freshGenerator, function]
+  syntax String ::= Id2String ( Id )    [function, functional, hook(STRING.token2string)]
+  syntax Id ::= String2Id (String) [function, functional, hook(STRING.string2token)]
+  syntax Id ::= freshId(Int)    [freshGenerator, function, functional]
 endmodule
 
 module ID
@@ -724,15 +720,15 @@ module K-EQUAL
   imports BASIC-K
 
   syntax Bool ::= left:
-                    K "==K" K           [function, smtlib(=), hook(KEQUAL.eq), klabel(_==K_), symbol, latex({#1}\mathrel{=_K}{#2}), equalEqualK]
-                | K "=/=K" K          [function, smtlib(distinct), hook(KEQUAL.ne), latex({#1}\mathrel{\neq_K}{#2}), notEqualEqualK]
+                    K "==K" K           [function, functional, smtlib(=), hook(KEQUAL.eq), klabel(_==K_), symbol, latex({#1}\mathrel{=_K}{#2}), equalEqualK]
+                | K "=/=K" K          [function, functional, smtlib(distinct), hook(KEQUAL.ne), latex({#1}\mathrel{\neq_K}{#2}), notEqualEqualK]
 
   syntax priorities equalEqualK notEqualEqualK > boolOperation mlOp
   rule K1:K =/=K K2:K => notBool (K1 ==K K2)
 
   rule K1:Bool ==Bool K2:Bool => K1 ==K K2
 
-  syntax K ::= "#if" Bool "#then" K "#else" K "#fi"   [function, smtlib(ite), hook(KEQUAL.ite), poly(0, 2, 3)]
+  syntax K ::= "#if" Bool "#then" K "#else" K "#fi"   [function, functional, smtlib(ite), hook(KEQUAL.ite), poly(0, 2, 3)]
 
   rule #if C:Bool #then B1 #else _ #fi => B1 requires C
   rule #if C:Bool #then _ #else B2 #fi => B2 requires notBool C
@@ -857,9 +853,9 @@ module K-IO
 
   rule #open(S:String) => #open(S:String, "r+")
 
-  syntax Int ::= "#stdin"   [function]
-                | "#stdout" [function]
-                | "#stderr" [function]
+  syntax Int ::= "#stdin"   [function, functional]
+                | "#stdout" [function, functional]
+                | "#stderr" [function, functional]
 
   rule #stdin => 0
   rule #stdout => 1
@@ -873,7 +869,7 @@ module K-IO
   syntax KItem ::= #system ( String ) [function, hook(IO.system), impure]
                  | "#systemResult" "(" Int /* exit code */ "," String /* stdout */ "," String /* stderr */ ")"
 
-  syntax K ::= #logToFile(String, String) [function, hook(IO.log), impure, returnsUnit]
+  syntax K ::= #logToFile(String, String) [function, functional, hook(IO.log), impure, returnsUnit]
 
 endmodule
 
@@ -1063,7 +1059,7 @@ module MINT
   syntax MInt ::= mi(Int, Int)    [function, hook(MINT.constructor)]
 
   /*@ Function returning the bit width of this machine integer. */
-  syntax Int ::= bitwidthMInt(MInt)   [function, hook(MINT.bitwidth)]
+  syntax Int ::= bitwidthMInt(MInt)   [function, functional, hook(MINT.bitwidth)]
 
   /*@
    * Functions returning the signed and unsigned interpretations of this
@@ -1072,11 +1068,11 @@ module MINT
    *           2^(bitwidth - 1) - 1
    *   uvalue  returns an integer between 0 and 2^bitwidth - 1
    */
-  syntax Int ::= svalueMInt(MInt)     [function, hook(MINT.svalue)]
-               | uvalueMInt(MInt)     [function, hook(MINT.uvalue), smtlib(bv2int)]
+  syntax Int ::= svalueMInt(MInt)     [function, functional, hook(MINT.svalue)]
+               | uvalueMInt(MInt)     [function, functional, hook(MINT.uvalue), smtlib(bv2int)]
 
   /*@ Checks whether a machine integer is zero */
-  syntax Bool ::= zeroMInt(MInt)    [function, hook(MINT.zero)]
+  syntax Bool ::= zeroMInt(MInt)    [function, functional, hook(MINT.zero)]
 
   /*@
    * Functions for signed and unsigned minimum and maximum values of a machine
@@ -1173,7 +1169,7 @@ module MINT
                 | orMInt(MInt, MInt)    [function, hook(MINT.or), smtlib(bvor)]
                 | xorMInt(MInt, MInt)   [function, hook(MINT.xor), smtlib(bvxor)]
 
-  syntax MInt ::= negMInt(MInt)   [function]
+  syntax MInt ::= negMInt(MInt)   [function, functional]
   rule negMInt(MI:MInt) => xorMInt(MI, mi(bitwidthMInt(MI), -1))
 
   /*@ Comparison operations */
