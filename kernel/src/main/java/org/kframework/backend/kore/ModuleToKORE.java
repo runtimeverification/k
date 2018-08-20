@@ -710,7 +710,7 @@ public class ModuleToKORE {
 
     private Att addKoreAttributes(Production prod, SetMultimap<KLabel, Rule> functionRules, Set<KLabel> impurities) {
         boolean isConstructor = !isFunction(prod);
-        boolean isFunctional = !prod.att().contains(Attribute.IMPURE_KEY);
+        boolean isFunctional = !isFunction(prod);
         if (prod.att().contains(Attribute.ASSOCIATIVE_KEY) ||
                 prod.att().contains(Attribute.COMMUTATIVE_KEY) ||
                 prod.att().contains(Attribute.IDEMPOTENT_KEY) ||
@@ -721,34 +721,8 @@ public class ModuleToKORE {
             if (r.att().contains(Attribute.ANYWHERE_KEY)) {
                 isConstructor = false;
             }
-            FoldK<Boolean> hasImpureFunction = new FoldK<Boolean>() {
-                @Override
-                public Boolean unit() {
-                    return false;
-                }
-
-                @Override
-                public Boolean merge(Boolean a, Boolean b) {
-                    return a || b;
-                }
-
-                @Override
-                public Boolean apply(KApply k) {
-                    if (k.klabel().name().equals(KLabels.INJ)) {
-                        return super.apply(k);
-                    }
-                    Production prod = production(k);
-                    if (impurities.contains(prod.klabel().get())) {
-                        return true;
-                    }
-                    return super.apply(k);
-                }
-            };
-            if (hasImpureFunction.apply(r.body()) || hasImpureFunction.apply(r.requires()) || hasImpureFunction.apply(r.ensures())) {
-                isFunctional = false;
-            }
         }
-        Att att = prod.att().remove("constructor").remove("functional");
+        Att att = prod.att().remove("constructor");
         if (isConstructor) {
             att = att.add("constructor");
         }
