@@ -49,7 +49,7 @@ public class JsonParser {
             if (! (data.containsKey("format") && data.containsKey("version") && data.containsKey("term"))) {
                 throw KEMException.criticalError("Must have `format`, `version`, and `term` fields in serialized Json!");
             }
-            if (data.getString("format") != "KAST") {
+            if (! data.getString("format").equals("KAST")) {
                 throw KEMException.criticalError("Only can deserialize 'KAST' format Json! Found: " + data.getString("format"));
             }
             if (data.getInt("version") != 1) {
@@ -65,7 +65,7 @@ public class JsonParser {
         switch (data.getString("node")) {
 
             case KTOKEN:
-                return new KToken(data.getString("name"), Outer.parseSort(data.getString("sort")));
+                return new KToken(data.getString("token"), Outer.parseSort(data.getString("sort")));
 
             case KAPPLY:
                 int arity = data.getInt("arity");
