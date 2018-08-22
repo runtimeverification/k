@@ -22,20 +22,22 @@ import org.kframework.utils.file.FileUtil;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.Assert.*;
 import static org.kframework.kore.KORE.*;
 
 public class KPrintTest {
 
-    K sharedTerm = KApply.of(KLabel("_|->_"), new KToken("x", Sort("Id")), new KToken("1", Sort("Int")));
-    K sharedTerm2 = new KToken("foo", Sort("Bar"));
+    private K cell(String cellName, K cellContent) {
+        return KApply.of(KLabel(cellName), cellContent);
+    }
 
-    K term = KApply.of(KLabel("<T>"), KApply.of(KLabel("<k>"), new KSequence(sharedTerm2,
-                    new KRewrite(new KVariable("Baz"), new KVariable("Baz2")), new InjectedKLabel(KLabel("_+_")), KApply.of(KLabel("foo")))),
-            KApply.of(new KVariable("Lbl"), sharedTerm, sharedTerm, sharedTerm2, sharedTerm));
-
-    OutputModes[] outputModes = new OutputModes[] { OutputModes.JSON , OutputModes.BINARY , OutputModes.KAST };
+    OutputModes[] outputModes = new OutputModes[] { OutputModes.JSON
+                                                  , OutputModes.BINARY
+                                                  , OutputModes.KAST
+                                                  };
 
     private String bytes2String(byte[] input) throws UnsupportedEncodingException {
         return new String(input, "UTF-8");
@@ -61,8 +63,24 @@ public class KPrintTest {
 
     @Test
     public void testUnparseThenParse() throws Exception {
-        for (OutputModes outputMode: outputModes) {
-            assertEquals(asKast(term), asKast(unparseThenParse(term, outputMode)));
+
+        List<K> terms = new ArrayList<>();
+        terms.add(KApply.of(KLabel("_|->_"), new KToken("x", Sort("Id")), new KToken("1", Sort("Int"))));
+        terms.add( new KToken("foo", Sort("Bar")) );
+        terms.add( KApply.of(KLabel("_+_"), new KVariable("Baz"), new KVariable("Baz2")) );
+        terms.add( cell("<k>", new KSequence( terms.get(1)
+                                            , terms.get(2)
+                                            , new InjectedKLabel(KLabel("_+_"))
+                                            , KApply.of(KLabel("foo"))
+                                            )
+                       )
+                 );
+        terms.add( KApply.of(KLabel("<T>"), terms.get(3), KApply.of(new KVariable("Lbl"), terms.get(0), terms.get(0), terms.get(1), terms.get(0))) );
+
+        for (K term: terms) {
+            for (OutputModes outputMode: outputModes) {
+                assertEquals(asKast(term), asKast(unparseThenParse(term, outputMode)));
+            }
         }
     }
 }
