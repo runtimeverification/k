@@ -1,8 +1,10 @@
-// Copyright (c) 2015-2018 K Team. All Rights Reserved.
+// Copyright (c) 2018 K Team. All Rights Reserved.
 package org.kframework.unparser;
 
 import org.junit.Ignore;
 import org.junit.Test;
+
+import org.kframework.attributes.Source;
 import org.kframework.kore.K;
 import org.kframework.kore.mini.InjectedKLabel;
 import org.kframework.kore.mini.KApply;
@@ -12,6 +14,7 @@ import org.kframework.kore.mini.KToken;
 import org.kframework.kore.mini.KVariable;
 import org.kframework.parser.binary.BinaryParser;
 import org.kframework.parser.json.JsonParser;
+import org.kframework.parser.kore.KoreParser;
 import org.kframework.unparser.KPrint;
 import org.kframework.unparser.OutputModes.*;
 import org.kframework.utils.file.FileUtil;
@@ -32,10 +35,14 @@ public class KPrintTest {
                     new KRewrite(new KVariable("Baz"), new KVariable("Baz2")), new InjectedKLabel(KLabel("_+_")), KApply.of(KLabel("foo")))),
             KApply.of(new KVariable("Lbl"), sharedTerm, sharedTerm, sharedTerm2, sharedTerm));
 
-    OutputModes[] outputModes = new OutputModes[] { OutputModes.JSON , OutputModes.BINARY };
+    OutputModes[] outputModes = new OutputModes[] { OutputModes.JSON , OutputModes.BINARY , OutputModes.KAST };
+
+    private String bytes2String(byte[] input) throws UnsupportedEncodingException {
+        return new String(input, "UTF-8");
+    }
 
     private String asKast(K term) throws UnsupportedEncodingException {
-        return new String(new KPrint().serialize(term, OutputModes.KAST), "UTF-8");
+        return bytes2String(new KPrint().serialize(term, OutputModes.KAST));
     }
 
     private K unparseThenParse(K origTerm, OutputModes outputMode) throws UnsupportedEncodingException {
@@ -45,11 +52,10 @@ public class KPrintTest {
                 return JsonParser.parse(unparsed);
             case BINARY:
                 return BinaryParser.parse(unparsed);
+            case KAST:
+               return KoreParser.parse(bytes2String(unparsed), new Source("KPrintTest"));
             default:
                 return new KToken("###", Sort("UnsupportedOutputMode"));
-            // TODO: How to invoke KAST parser?
-            // case KAST:
-            //    return KToken("hello", "false");
         }
     }
 
