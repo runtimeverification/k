@@ -74,7 +74,9 @@ public class AddSortInjections {
         }
         if (actualSort.equals(expectedSort)) {
             return visitChildren(term, expectedSort, actualSort);
-        } else {
+        } else if (expectedSort.equals(Sorts.K())) {
+            return KSequence(KApply(KLabel("inj", actualSort, Sorts.KItem()), KList(visitChildren(term, Sorts.KItem(), actualSort)), Att.empty().add(Sort.class, Sorts.KItem())));
+	} else {
             return KApply(KLabel("inj", actualSort, expectedSort), KList(visitChildren(term, expectedSort, actualSort)), Att.empty().add(Sort.class, expectedSort));
         }
     }
