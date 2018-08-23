@@ -4,6 +4,7 @@ package org.kframework.unparser;
 import com.google.inject.Inject;
 import com.davekoelle.AlphanumComparator;
 import org.kframework.attributes.Att;
+import org.kframework.builtin.Sorts;
 import org.kframework.compile.ExpandMacros;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
@@ -12,6 +13,7 @@ import org.kframework.kore.Assoc;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KVariable;
+import org.kframework.kore.Sort;
 import org.kframework.kore.TransformK;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.ProductionReference;
@@ -31,6 +33,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+
+import scala.Some;
+import scala.Option;
 
 import static org.kframework.kore.KORE.*;
 
@@ -175,5 +180,46 @@ public class KPrint {
         ExpandMacros expandMacros = new ExpandMacros(mod, files, kompileOptions, true);
         return Formatter.format(
                 new AddBrackets(mod).addBrackets((ProductionReference) ParseInModule.disambiguateForUnparse(mod, KOREToTreeNodes.apply(KOREToTreeNodes.up(mod, expandMacros.expand(input)), mod))), options.color(tty.stdout, files.getEnv()));
+    }
+
+    public K abstractTerm(Module mod, K term) {
+        return new TransformK() {
+            @Override
+            public K apply(KApply orig) {
+                K omitted   = omitTerm(mod, orig);
+                K tokenized = tokenizeTerm(mod, omitted);
+                return tokenized;
+            }
+        }.apply(term);
+    }
+
+    private K omitTerm(Module module, K k) {
+        if (! (k instanceof KApply)) return k;
+
+        KApply kapp = (KApply) k;
+        if (! options.omittedKLabels.contains(kapp.klabel().name())) return k;
+
+        Sort finalSort = Sorts.K();
+        Option<Sort> termSort = module.sortFor().get(kapp.klabel());
+        if (! termSort.isEmpty()) {
+            finalSort = termSort.get();
+        }
+        return KToken(kapp.klabel().name(), finalSort);
+    }
+
+    private K tokenizeTerm(Module module, K k) {
+        if (! (k instanceof KApply)) return k;
+
+        KApply kapp = (KApply) k;
+        if (! options.tokenizedKLabels.contains(kapp.klabel().name())) return k;
+
+        Module unparsingModule = RuleGrammarGenerator.getCombinedGrammar(module, false).getExtensionModule();
+        String tokenizedTerm   = unparseTerm(kapp, unparsingModule, ColorSetting.OFF);
+        Sort   finalSort       = Sorts.K();
+        Option<Sort> termSort  = module.sortFor().get(kapp.klabel());
+        if (! termSort.isEmpty()) {
+            finalSort = termSort.get();
+        }
+        return KToken(tokenizedTerm, finalSort);
     }
 }
