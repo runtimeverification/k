@@ -42,19 +42,25 @@ public class KPrint {
     private final KExceptionManager kem;
     private final FileUtil          files;
     private final TTYInfo           tty;
+    private final KompileOptions    kompileOptions;
 
     public final PrintOptions options;
 
     public KPrint() {
-        this(new KExceptionManager(new GlobalOptions()), FileUtil.testFileUtil(), new TTYInfo(false, false, false), new PrintOptions());
+        this(new KExceptionManager(new GlobalOptions()), FileUtil.testFileUtil(), new TTYInfo(false, false, false), new PrintOptions(), new KompileOptions());
+    }
+
+    public KPrint(KompileOptions kompileOptions) {
+        this(new KExceptionManager(new GlobalOptions()), FileUtil.testFileUtil(), new TTYInfo(false, false, false), new PrintOptions(), kompileOptions);
     }
 
     @Inject
-    public KPrint(KExceptionManager kem, FileUtil files, TTYInfo tty, PrintOptions options) {
-        this.kem     = kem;
-        this.files   = files;
-        this.tty     = tty;
-        this.options = options;
+    public KPrint(KExceptionManager kem, FileUtil files, TTYInfo tty, PrintOptions options, KompileOptions kompileOptions) {
+        this.kem            = kem;
+        this.files          = files;
+        this.tty            = tty;
+        this.options        = options;
+        this.kompileOptions = kompileOptions;
     }
 
     //TODO(dwightguth): use Writer
@@ -74,15 +80,19 @@ public class KPrint {
         }
     }
 
-    public void prettyPrint(Definition def, Module module, KompileOptions kompile, Consumer<byte[]> print, K result, ColorSetting colorize) {
-        print.accept(prettyPrint(def, module, kompile, result, colorize));
+    public void prettyPrint(Definition def, Module module, Consumer<byte[]> print, K result, ColorSetting colorize) {
+        print.accept(prettyPrint(def, module, result, colorize));
     }
 
-    public void prettyPrint(Definition def, Module module, KompileOptions kompile, Consumer<byte[]> print, K result) {
-        print.accept(prettyPrint(def, module, kompile, result, options.color(tty.stdout, files.getEnv())));
+    public void prettyPrint(Definition def, Module module, Consumer<byte[]> print, K result) {
+        print.accept(prettyPrint(def, module, result, options.color(tty.stdout, files.getEnv())));
     }
 
-    public byte[] prettyPrint(Definition def, Module module, KompileOptions kompile, K result, ColorSetting colorize) {
+    public byte[] prettyPrint(Definition def, Module module, K result) {
+        return prettyPrint(def, module, result, options.color(tty.stdout, files.getEnv()));
+    }
+
+    public byte[] prettyPrint(Definition def, Module module, K result, ColorSetting colorize) {
         switch (options.output) {
             case KAST:
             case NONE:
@@ -91,11 +101,11 @@ public class KPrint {
                 return serialize(result, options.output);
             case PRETTY: {
                 Module unparsingModule = RuleGrammarGenerator.getCombinedGrammar(module, false).getExtensionModule();
-                return (unparseTerm(result, unparsingModule, kompile, colorize) + "\n").getBytes();
+                return (unparseTerm(result, unparsingModule, colorize) + "\n").getBytes();
             } case PROGRAM: {
                 RuleGrammarGenerator gen = new RuleGrammarGenerator(def);
                 Module unparsingModule = RuleGrammarGenerator.getCombinedGrammar(gen.getProgramsGrammar(module), false).getParsingModule();
-                return (unparseTerm(result, unparsingModule, kompile, colorize) + "\n").getBytes();
+                return (unparseTerm(result, unparsingModule, colorize) + "\n").getBytes();
             } default:
                 throw KEMException.criticalError("Unsupported output mode: " + options.output);
         }
@@ -120,11 +130,11 @@ public class KPrint {
         }
     }
 
-    public String unparseTerm(K input, Module test, KompileOptions kompile) {
-        return unparseTerm(input, test, kompile, options.color(tty.stdout, files.getEnv()));
+    public String unparseTerm(K input, Module test) {
+        return unparseTerm(input, test, options.color(tty.stdout, files.getEnv()));
     }
 
-    public String unparseTerm(K input, Module test, KompileOptions kompile, ColorSetting colorize) {
+    public String unparseTerm(K input, Module test, ColorSetting colorize) {
         K sortedComm = new TransformK() {
             @Override
             public K apply(KApply k) {
@@ -136,7 +146,7 @@ public class KPrint {
                     List<K> items = new ArrayList<>(Assoc.flatten(k.klabel(), k.klist().items(), KLabel(att.get("unit"))));
                     List<Tuple2<String, K>> printed = new ArrayList<>();
                     for (K item : items) {
-                        String s = unparseInternal(test, apply(item), kompile, ColorSetting.OFF);
+                        String s = unparseInternal(test, apply(item), ColorSetting.OFF);
                         printed.add(Tuple2.apply(s, item));
                     }
                     printed.sort(Comparator.comparing(Tuple2::_1, new AlphanumComparator()));
@@ -158,11 +168,11 @@ public class KPrint {
                 return k;
             }
         }.apply(sortedComm);
-        return unparseInternal(test, alphaRenamed, kompile, colorize);
+        return unparseInternal(test, alphaRenamed, colorize);
     }
 
-    private String unparseInternal(Module mod, K input, KompileOptions kompile, ColorSetting colorize) {
-        ExpandMacros expandMacros = new ExpandMacros(mod, files, kompile, true);
+    private String unparseInternal(Module mod, K input, ColorSetting colorize) {
+        ExpandMacros expandMacros = new ExpandMacros(mod, files, kompileOptions, true);
         return Formatter.format(
                 new AddBrackets(mod).addBrackets((ProductionReference) ParseInModule.disambiguateForUnparse(mod, KOREToTreeNodes.apply(KOREToTreeNodes.up(mod, expandMacros.expand(input)), mod))), options.color(tty.stdout, files.getEnv()));
     }

@@ -88,7 +88,7 @@ public class KRun {
 
 
         if (result != null) {
-            kprint.prettyPrint(compiledDef.getParsedDefinition(), compiledDef.languageParsingModule(), compiledDef.kompileOptions, s -> kprint.outputFile(s), result._1());
+            kprint.prettyPrint(compiledDef.getParsedDefinition(), compiledDef.languageParsingModule(), s -> kprint.outputFile(s), result._1());
             return result._2();
         }
         return 0;

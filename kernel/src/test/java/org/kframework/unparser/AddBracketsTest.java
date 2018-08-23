@@ -97,7 +97,7 @@ public class AddBracketsTest {
         ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(gen.getProgramsGrammar(test), true);
         K parsed = parseTerm(pgm, parser);
         KPrint kprint = new KPrint();
-        String unparsed = kprint.unparseTerm(parsed, test, new KompileOptions());
+        String unparsed = kprint.unparseTerm(parsed, test);
         assertEquals(pgm, unparsed);
     }
 
