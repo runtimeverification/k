@@ -4,6 +4,7 @@ package org.kframework.unparser;
 import org.kframework.kore.InjectedKLabel;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
+import org.kframework.kore.KAs;
 import org.kframework.kore.KRewrite;
 import org.kframework.kore.KSequence;
 import org.kframework.kore.KToken;
@@ -112,6 +113,14 @@ public class ToJson {
             knode.add("lhs", toJson(rew.left()));
             knode.add("rhs", toJson(rew.right()));
             knode.add("att", rew.att().toString());
+
+        } else if (k instanceof KAs) {
+            KAs alias = (KAs) k;
+
+            knode.add("node", JsonParser.KAS);
+            knode.add("pattern", toJson(alias.pattern()));
+            knode.add("alias",   toJson(alias.alias()));
+            knode.add("att", alias.att().toString());
 
         } else if (k instanceof InjectedKLabel) {
             InjectedKLabel inj = (InjectedKLabel) k;

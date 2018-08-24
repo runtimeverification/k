@@ -3,6 +3,7 @@ package org.kframework.parser.json;
 
 import org.kframework.kore.K;
 import static org.kframework.kore.KORE.KLabel;
+import org.kframework.kore.KORE;
 import org.kframework.kore.mini.InjectedKLabel;
 import org.kframework.kore.mini.KApply;
 import org.kframework.kore.mini.KRewrite;
@@ -32,6 +33,7 @@ public class JsonParser {
                              , KSEQUENCE      = "KSequence"
                              , KVARIABLE      = "KVariable"
                              , KREWRITE       = "KRewrite"
+                             , KAS            = "KAs"
                              , INJECTEDKLABEL = "InjectedKLabel"
                              ;
 
@@ -88,6 +90,11 @@ public class JsonParser {
                 K lhs = toK(data.getJsonObject("lhs"));
                 K rhs = toK(data.getJsonObject("rhs"));
                 return new KRewrite(lhs, rhs);
+
+            case KAS:
+                K pattern = toK(data.getJsonObject("pattern"));
+                K alias   = toK(data.getJsonObject("alias"));
+                return KORE.KAs(pattern, alias);
 
             case INJECTEDKLABEL:
                 return new InjectedKLabel(KLabel(data.getString("name")));
