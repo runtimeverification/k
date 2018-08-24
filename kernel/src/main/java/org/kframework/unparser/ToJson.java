@@ -127,6 +127,7 @@ public class ToJson {
 
             knode.add("node", JsonParser.INJECTEDKLABEL);
             knode.add("name", inj.klabel().name());
+            knode.add("variable", inj.klabel() instanceof KVariable);
 
         }
         return knode.build();

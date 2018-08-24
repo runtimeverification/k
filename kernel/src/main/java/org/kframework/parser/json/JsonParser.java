@@ -2,6 +2,7 @@
 package org.kframework.parser.json;
 
 import org.kframework.kore.K;
+import org.kframework.kore.KLabel;
 import static org.kframework.kore.KORE.KLabel;
 import org.kframework.kore.KORE;
 import org.kframework.kore.mini.InjectedKLabel;
@@ -68,6 +69,9 @@ public class JsonParser {
     }
 
     private static K toK(JsonObject data) throws IOException {
+        String label;
+        KLabel klabel;
+
         switch (data.getString("node")) {
 
             case KTOKEN:
@@ -76,7 +80,11 @@ public class JsonParser {
             case KAPPLY:
                 int arity = data.getInt("arity");
                 K[] args  = toKs(arity, data.getJsonArray("args"));
-                return KApply.of(KLabel(data.getString("label")), args);
+                label     = data.getString("label");
+                klabel    = data.getBoolean("variable")
+                          ? new KVariable(label)
+                          : KLabel(label);
+                return KApply.of(klabel, args);
 
             case KSEQUENCE:
                 int seqLen = data.getInt("arity");
@@ -97,7 +105,11 @@ public class JsonParser {
                 return KORE.KAs(pattern, alias);
 
             case INJECTEDKLABEL:
-                return new InjectedKLabel(KLabel(data.getString("name")));
+                label  = data.getString("name");
+                klabel = data.getBoolean("variable")
+                       ? new KVariable(label)
+                       : KLabel(label);
+                return new InjectedKLabel(klabel);
 
             default:
                 throw KEMException.criticalError("Unexpected node found in KAST Json term: " + data.getString("node"));
