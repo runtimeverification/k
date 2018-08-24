@@ -1145,36 +1145,32 @@ public class ModuleToKORE {
 
             @Override
             public void apply(KSequence k) {
-                if (k.size() == 1) {
-                    apply(k.items().get(0));
-                } else {
-                    for (int i = 0; i < k.items().size(); i++) {
-                        K item = k.items().get(i);
-                        boolean isList = item.att().get(Sort.class).equals(Sorts.K());
-                        if (i == k.items().size() - 1) {
-                            if (isList) {
-                                apply(item);
-                            } else {
-                                sb.append("kseq{}(");
-                                apply(item);
-                                sb.append(",dotk{}())");
-                            }
-                        } else {
-                            if (item.att().get(Sort.class).equals(Sorts.K())) {
-                                sb.append("append{}(");
-                            } else {
-                                sb.append("kseq{}(");
-                            }
+                for (int i = 0; i < k.items().size(); i++) {
+                    K item = k.items().get(i);
+                    boolean isList = item.att().get(Sort.class).equals(Sorts.K());
+                    if (i == k.items().size() - 1) {
+                        if (isList) {
                             apply(item);
-                            sb.append(",");
+                        } else {
+                            sb.append("kseq{}(");
+                            apply(item);
+                            sb.append(",dotk{}())");
                         }
+                    } else {
+                        if (item.att().get(Sort.class).equals(Sorts.K())) {
+                            sb.append("append{}(");
+                        } else {
+                            sb.append("kseq{}(");
+                        }
+                        apply(item);
+                        sb.append(",");
                     }
-                    if (k.items().size() == 0) {
-                        sb.append("dotk{}()");
-                    }
-                    for (int i = 0; i < k.items().size() - 1; i++) {
-                        sb.append(")");
-                    }
+                }
+                if (k.items().size() == 0) {
+                    sb.append("dotk{}()");
+                }
+                for (int i = 0; i < k.items().size() - 1; i++) {
+                    sb.append(")");
                 }
             }
 
