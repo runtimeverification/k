@@ -39,15 +39,19 @@ public class KPrintTest {
                                                   , OutputModes.KAST
                                                   };
 
-    private String bytes2String(byte[] input) throws UnsupportedEncodingException {
-        return new String(input, "UTF-8");
+    private String bytes2String(byte[] input) {
+        try {
+            return new String(input, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new AssertionError("UTF-8 encoding not supported");
+        }
     }
 
-    private String asKast(K term) throws UnsupportedEncodingException {
+    private String asKast(K term) {
         return bytes2String(new KPrint().serialize(term, OutputModes.KAST));
     }
 
-    private K unparseThenParse(K origTerm, OutputModes outputMode) throws UnsupportedEncodingException {
+    private K unparseThenParse(K origTerm, OutputModes outputMode) {
         byte[] unparsed = new KPrint().serialize(origTerm, outputMode);
         switch (outputMode) {
             case JSON:

@@ -35,8 +35,12 @@ public class JsonParser {
                              , INJECTEDKLABEL = "InjectedKLabel"
                              ;
 
-    public static K parse(byte[] data) throws UnsupportedEncodingException {
-        return parse(new String(data, "UTF-8"));
+    public static K parse(byte[] data) {
+        try {
+            return parse(new String(data, "UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+            throw new AssertionError("UTF-8 encoding not supported");
+        }
     }
 
     public static K parse(String data) {
