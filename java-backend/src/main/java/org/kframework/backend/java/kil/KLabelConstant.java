@@ -264,7 +264,7 @@ public class KLabelConstant extends KLabel implements org.kframework.kore.KLabel
     public Multimap<Integer, Integer> getBinderMap() {
         if (isBinder()) {
             Multimap<Integer, Integer> binder = productionAttributes.getOptional("binder", Multimap.class).orElse(null);
-            assert signatures.size() == 1;
+            assert signatures.stream().map(s -> s.parameters().size()).distinct().count() == 1;
             return binder == null ? ImmutableMultimap.of(0, signatures.iterator().next().parameters().size() - 1) : binder;
         } else {
             return null;
