@@ -84,21 +84,39 @@ public class KPrint {
 
     public byte[] prettyPrint(Definition def, Module module, KompileOptions kompile, K result, ColorSetting colorize) {
         switch (options.output) {
-        case KAST:
-            return (ToKast.apply(result) + "\n").getBytes();
-        case NONE:
-            return "".getBytes();
-        case PRETTY: {
-            Module unparsingModule = RuleGrammarGenerator.getCombinedGrammar(module, false).getExtensionModule();
-            return (unparseTerm(result, unparsingModule, kompile, colorize) + "\n").getBytes();
-        } case PROGRAM: {
-            RuleGrammarGenerator gen = new RuleGrammarGenerator(def);
-            Module unparsingModule = RuleGrammarGenerator.getCombinedGrammar(gen.getProgramsGrammar(module), false).getParsingModule();
-            return (unparseTerm(result, unparsingModule, kompile, colorize) + "\n").getBytes();
-        } case BINARY:
-            return ToBinary.apply(result);
-        default:
-            throw KEMException.criticalError("Unsupported output mode: " + options.output);
+            case KAST:
+            case NONE:
+            case BINARY:
+            case JSON:
+                return serialize(result, options.output);
+            case PRETTY: {
+                Module unparsingModule = RuleGrammarGenerator.getCombinedGrammar(module, false).getExtensionModule();
+                return (unparseTerm(result, unparsingModule, kompile, colorize) + "\n").getBytes();
+            } case PROGRAM: {
+                RuleGrammarGenerator gen = new RuleGrammarGenerator(def);
+                Module unparsingModule = RuleGrammarGenerator.getCombinedGrammar(gen.getProgramsGrammar(module), false).getParsingModule();
+                return (unparseTerm(result, unparsingModule, kompile, colorize) + "\n").getBytes();
+            } default:
+                throw KEMException.criticalError("Unsupported output mode: " + options.output);
+        }
+    }
+
+    public byte[] serialize(K term) {
+        return serialize(term, options.output);
+    }
+
+    public byte[] serialize(K term, OutputModes outputMode) {
+        switch (outputMode) {
+            case KAST:
+                return (ToKast.apply(term) + "\n").getBytes();
+            case NONE:
+                return "".getBytes();
+            case BINARY:
+                return ToBinary.apply(term);
+            case JSON:
+                return ToJson.apply(term);
+            default:
+                throw KEMException.criticalError("Unsupported serialization mode: " + outputMode);
         }
     }
 
