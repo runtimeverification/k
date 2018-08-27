@@ -27,6 +27,7 @@ import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.util.StateLog;
 import org.kframework.backend.java.util.FormulaContext;
+import org.kframework.backend.java.util.RuleSourceUtil;
 import org.kframework.backend.java.utils.BitSet;
 import org.kframework.builtin.KLabels;
 import org.kframework.kore.FindK;
@@ -165,7 +166,7 @@ public class SymbolicRewriter {
             Rule rule = definition.ruleTable.get(matchResult.ruleIndex);
             global.stateLog.log(StateLog.LogEvent.RULEATTEMPT, rule.toKRewrite());
             if (global.globalOptions.logRulesPublic) {
-                System.err.println("\n" + rule);
+                RuleSourceUtil.printRuleAndSource(rule);
             }
 
             Substitution<Variable, Term> substitution =
@@ -940,7 +941,7 @@ public class SymbolicRewriter {
                         new FormulaContext(FormulaContext.Kind.SpecConstr, specRule));
                 global.stateLog.log(StateLog.LogEvent.SRULE, specRule.toKRewrite());
                 if (global.globalOptions.logRulesPublic) {
-                    System.err.println("\n" + specRule);
+                    RuleSourceUtil.printRuleAndSource(specRule);
                 }
                 return result;
             }
