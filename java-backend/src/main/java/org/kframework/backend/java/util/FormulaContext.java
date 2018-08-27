@@ -2,14 +2,9 @@
 package org.kframework.backend.java.util;
 
 import com.google.common.collect.ImmutableMap;
-import org.kframework.attributes.Location;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.symbolic.ConjunctiveFormula;
-import org.kframework.utils.file.FileUtil;
 
-import java.io.File;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -73,11 +68,7 @@ public class FormulaContext {
         if (cached) {
             System.err.println("cached result");
         }
-        File source = rule.source().isPresent() ? new File(rule.getSource().source()) : null;
-        System.err.format("\nSource: %s %s\n", source, rule.getLocation());
-        if (sourceShortEnough(rule)) {
-            System.err.println(loadSource(rule));
-        }
+        RuleSourceUtil.printRuleAndSource(rule);
         System.err.println("==================================");
     }
 
@@ -90,27 +81,7 @@ public class FormulaContext {
         if (cached) {
             System.err.println("cached result");
         }
-        File source = rule.source().isPresent() ? new File(rule.getSource().source()) : null;
-        System.err.format("\nSource: %s %s\n", source, rule.getLocation());
-        if (sourceShortEnough(rule)) {
-            System.err.println(loadSource(rule));
-        }
+        RuleSourceUtil.printRuleAndSource(rule);
         System.err.println("==================================");
-    }
-
-    private boolean sourceShortEnough(Rule rule) {
-        Location location = rule.getLocation();
-        return location != null && location.endLine() - location.startLine() <= 20;
-    }
-
-    private static final Map<Rule, String> cache = Collections.synchronizedMap(new HashMap<>());
-
-    private String loadSource(Rule rule) {
-        if (!cache.containsKey(rule)) {
-            if (rule.getSource() != null && rule.getLocation() != null) {
-                cache.put(rule, FileUtil.loadFragment(new File(rule.getSource().source()), rule.getLocation()));
-            }
-        }
-        return cache.get(rule);
     }
 }
