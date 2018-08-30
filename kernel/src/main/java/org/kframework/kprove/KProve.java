@@ -59,14 +59,7 @@ public class KProve {
 
         Debugg.init(options, files, specModule, compiled._1().getModule("LANGUAGE-PARSING").get(), kprint);
         Debugg.log("spec " + options.specFile(files).getAbsolutePath());
-        K results;
-        try {
-            results = rewriter.prove(specModule);
-        } catch (Exception e) {
-            Debugg.log(Debugg.LogEvent.CRASH);
-            Debugg.close();
-            throw e;
-        }
+        K results = rewriter.prove(specModule);
         int exit;
         if (results instanceof KApply) {
             KApply kapp = (KApply) results;
