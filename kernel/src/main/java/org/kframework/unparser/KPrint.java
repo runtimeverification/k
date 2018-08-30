@@ -186,37 +186,28 @@ public class KPrint {
         return new TransformK() {
             @Override
             public K apply(KApply orig) {
-                K omitted   = omitTerm(mod, orig);
-                K tokenized = tokenizeTerm(mod, omitted);
-                return tokenized;
+                String name = orig.klabel().name();
+                return options.omittedKLabels.contains(name)   ? omitTerm(mod, orig)
+                     : options.tokenizedKLabels.contains(name) ? tokenizeTerm(mod, orig)
+                     : orig ;
             }
         }.apply(term);
     }
 
-    private K omitTerm(Module module, K k) {
-        if (! (k instanceof KApply)) return k;
-
-        KApply kapp = (KApply) k;
-        if (! options.omittedKLabels.contains(kapp.klabel().name())) return k;
-
+    private K omitTerm(Module mod, KApply kapp) {
         Sort finalSort = Sorts.K();
-        Option<Sort> termSort = module.sortFor().get(kapp.klabel());
+        Option<Sort> termSort = mod.sortFor().get(kapp.klabel());
         if (! termSort.isEmpty()) {
             finalSort = termSort.get();
         }
         return KToken(kapp.klabel().name(), finalSort);
     }
 
-    private K tokenizeTerm(Module module, K k) {
-        if (! (k instanceof KApply)) return k;
-
-        KApply kapp = (KApply) k;
-        if (! options.tokenizedKLabels.contains(kapp.klabel().name())) return k;
-
-        Module unparsingModule = RuleGrammarGenerator.getCombinedGrammar(module, false).getExtensionModule();
+    private K tokenizeTerm(Module mod, KApply kapp) {
+        Module unparsingModule = RuleGrammarGenerator.getCombinedGrammar(mod, false).getExtensionModule();
         String tokenizedTerm   = unparseTerm(kapp, unparsingModule, ColorSetting.OFF);
         Sort   finalSort       = Sorts.K();
-        Option<Sort> termSort  = module.sortFor().get(kapp.klabel());
+        Option<Sort> termSort  = mod.sortFor().get(kapp.klabel());
         if (! termSort.isEmpty()) {
             finalSort = termSort.get();
         }
