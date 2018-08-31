@@ -799,7 +799,6 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
             if (global.globalOptions.debug) {
                 System.err.println("Attempting to prove: \n\t" + left + "\n  implies \n\t" + right);
             }
-            Debugg.log(Debugg.LogEvent.IMPLICATION, left, right);
 
             right = right.orientSubstitution(rightOnlyVariables);
             right = left.simplifyConstraint(right);
@@ -885,6 +884,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
             ConjunctiveFormula left,
             ConjunctiveFormula right,
             Set<Variable> rightOnlyVariables) {
+        Debugg.log(Debugg.LogEvent.IMPLICATION, left, right);
         Triple<ConjunctiveFormula, ConjunctiveFormula, Set<Variable>> triple = Triple.of(left, right, rightOnlyVariables);
         if (!impliesSMTCache.containsKey(triple)) {
             impliesSMTCache.put(triple, left.global.constraintOps.impliesSMT(left, right, rightOnlyVariables));
