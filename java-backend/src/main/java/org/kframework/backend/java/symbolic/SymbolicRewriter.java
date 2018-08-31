@@ -217,9 +217,11 @@ public class SymbolicRewriter {
             if (!matchResult.isMatching) {
                 // TODO(AndreiS): move these some other place
                 result = result.expandPatterns(true);
+                Debugg.log(Debugg.LogEvent.MATCHRULE, rule.toKRewrite());
                 if (result.constraint().isFalseExtended() || result.constraint().checkUnsat()) {
                     continue;
                 }
+                Debugg.resetMatchrule();
             }
 
             /* TODO(AndreiS): remove this hack for super strictness after strategies work */
@@ -729,7 +731,9 @@ public class SymbolicRewriter {
     private ConstrainedTerm applySpecRules(ConstrainedTerm constrainedTerm, List<Rule> specRules) {
         for (Rule specRule : specRules) {
             ConstrainedTerm pattern = specRule.createLhsPattern(constrainedTerm.termContext());
+            Debugg.log(Debugg.LogEvent.MATCHRULE, specRule.toKRewrite());
             ConjunctiveFormula constraint = constrainedTerm.matchImplies(pattern, true, specRule.matchingSymbols());
+            Debugg.resetMatchrule();
             if (constraint != null) {
                 ConstrainedTerm result = buildResult(specRule, constraint, null, true, constrainedTerm.termContext());
                 Debugg.log(Debugg.LogEvent.RULE, specRule.toKRewrite());

@@ -9,11 +9,13 @@ import com.google.common.collect.Multisets;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
+import org.kframework.Debugg;
 import org.kframework.attributes.Att;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.compile.KOREtoBackendKIL;
 import org.kframework.backend.java.kil.*;
 import org.kframework.builtin.KLabels;
+import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.backend.java.utils.BitSet;
 
@@ -99,6 +101,7 @@ public class FastRuleMatcher {
                 continue;
             }
 
+            Debugg.log(Debugg.LogEvent.RULE, rule.toKRewrite());
             // TODO(YilongL): remove TermContext from the signature once
             // ConstrainedTerm doesn't hold a TermContext anymore
             /* TODO(AndreiS): remove this hack for super strictness after strategies work */
