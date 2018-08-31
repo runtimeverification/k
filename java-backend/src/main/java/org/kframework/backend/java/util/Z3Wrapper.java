@@ -53,7 +53,7 @@ public class Z3Wrapper {
     public synchronized boolean isUnsat(CharSequence query, int timeout, Z3Profiler timer) {
         StringBuilder queryStr = new StringBuilder(query.length());
         queryStr.append(query);
-        Debugg.log(Debugg.LogEvent.Z3QUERY, KToken(queryStr.toString(), Sorts.Z3Query()));
+        Debugg.log(Debugg.LogEvent.Z3QUERY, KToken(SMT_PRELUDE + "\n" + queryStr.toString() + "\n" + CHECK_SAT + "\n", Sorts.Z3Query()));
         if (options.z3Executable) {
             return checkQueryWithExternalProcess(query, timeout, timer);
         } else {
