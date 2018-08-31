@@ -168,12 +168,16 @@ public class Debugg {
             case CRASH:
                 logPrefix = "crash";
                 break;
+            case CLOSE:
+                logPrefix = "close";
+                break;
         }
         Debugg.log(logPrefix + " " + currentTerm + " " + nodeId);
     }
 
     public static void close() {
         if (! Debugg.loggingOn) return;
+        Debugg.log(LogEvent.CLOSE);
         Debugg.sessionLog.close();
     }
 
