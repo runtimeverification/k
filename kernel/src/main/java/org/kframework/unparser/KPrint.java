@@ -97,7 +97,8 @@ public class KPrint {
         return prettyPrint(def, module, result, options.color(tty.stdout, files.getEnv()));
     }
 
-    public byte[] prettyPrint(Definition def, Module module, K result, ColorSetting colorize) {
+    public byte[] prettyPrint(Definition def, Module module, K orig, ColorSetting colorize) {
+        K result = abstractTerm(module, orig);
         switch (options.output) {
             case KAST:
             case NONE:
