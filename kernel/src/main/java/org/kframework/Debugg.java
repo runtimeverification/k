@@ -39,6 +39,7 @@ public class Debugg {
     private static PrintWriter sessionLog;
     private static String      currentTerm;
     private static String      currentRule;
+    private static String      currentMatchRule;
     private static String      currentQuery;
     private static long        startTime;
 
@@ -64,14 +65,19 @@ public class Debugg {
             e.printStackTrace();
         }
 
-        Debugg.currentTerm = "NOTERM";
-        Debugg.currentRule = "NORULE";
-        Debugg.currentQuery = "NOQUERY";
-        Debugg.startTime   = System.currentTimeMillis();
+        Debugg.currentTerm      = "NOTERM";
+        Debugg.currentRule      = "NORULE";
+        Debugg.currentMatchRule = "NORULE";
+        Debugg.currentQuery     = "NOQUERY";
+        Debugg.startTime        = System.currentTimeMillis();
     }
 
     public static enum LogEvent {
-        INIT, TARGET, IMPLIESTARGET, NODE, MARKEDNODE, RULE, SRSTEP, BRANCH, IMPLICATION, Z3QUERY, Z3RESULT, STEP, RSTEP, CRASH
+        INIT, TARGET, IMPLIESTARGET, NODE, MARKEDNODE, RULE, SRSTEP, BRANCH, IMPLICATION, Z3QUERY, Z3RESULT, STEP, RSTEP, CRASH, MATCHRULE, CLOSE
+    }
+
+    public static void resetMatchrule() {
+        currentMatchRule = "NORULE";
     }
 
     public static void log(String logItem) {
@@ -111,6 +117,10 @@ public class Debugg {
                 currentRule = nodeId;
                 logPrefix = "rule";
                 break;
+            case MATCHRULE:
+                currentMatchRule = nodeId;
+                logPrefix = "matchrule";
+                break;
             case SRSTEP:
                 logPrefix = "srstep " + currentRule;
                 break;
@@ -128,7 +138,7 @@ public class Debugg {
                 logPrefix = "z3query";
                 break;
             case Z3RESULT:
-                logPrefix = "z3result " + currentQuery;
+                logPrefix = "z3result " + currentQuery + " " + currentMatchRule;
                 break;
             case STEP:
                 logPrefix = "step";
