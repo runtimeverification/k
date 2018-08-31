@@ -158,10 +158,6 @@ public class SymbolicRewriter {
         throw new UnsupportedOperationException();
     }
 
-    private static K ruleToKRewrite(Rule rule) {
-        return KRewrite(rule.leftHandSide(), rule.rightHandSide(), rule.att());
-    }
-
     public List<ConstrainedTerm> fastComputeRewriteStep(ConstrainedTerm subject, boolean computeOne, boolean narrowing, boolean proofFlag) {
         List<ConstrainedTerm> results = new ArrayList<>();
         if (definition.automaton == null) {
@@ -178,7 +174,6 @@ public class SymbolicRewriter {
                 subject.termContext());
         for (FastRuleMatcher.RuleMatchResult matchResult : matches) {
             Rule rule = definition.ruleTable.get(matchResult.ruleIndex);
-            Debugg.log(Debugg.LogEvent.RULE, ruleToKRewrite(rule));
             Substitution<Variable, Term> substitution =
                     rule.att().contains(Att.refers_THIS_CONFIGURATION()) ?
                             matchResult.constraint.substitution().plus(new Variable(KLabels.THIS_CONFIGURATION, Sort.KSEQUENCE), filterOurStrategyCell(subject.term())) :
@@ -737,7 +732,7 @@ public class SymbolicRewriter {
             ConjunctiveFormula constraint = constrainedTerm.matchImplies(pattern, true, specRule.matchingSymbols());
             if (constraint != null) {
                 ConstrainedTerm result = buildResult(specRule, constraint, null, true, constrainedTerm.termContext());
-                Debugg.log(Debugg.LogEvent.RULE, ruleToKRewrite(specRule));
+                Debugg.log(Debugg.LogEvent.RULE, specRule.toKRewrite());
                 Debugg.log(Debugg.LogEvent.SRSTEP, constrainedTerm.term(), constrainedTerm.constraint(), result.term(), result.constraint());
                 return result;
             }
