@@ -85,4 +85,7 @@ public class PrintOptions {
 
     @Parameter(names={"--output-tokenize"}, listConverter=StringListConverter.class, description="KLabels to tokenize underneath (reducing output size).")
     public List<String> tokenizedKLabels = new ArrayList<String>();
+
+    @Parameter(names={"--output-flatten"}, listConverter=StringListConverter.class, description="(Assoc) KLabels to flatten into one list.")
+    public List<String> flattenedKLabels = new ArrayList<String>();
 }
