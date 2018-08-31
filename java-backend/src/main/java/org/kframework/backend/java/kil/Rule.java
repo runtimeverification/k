@@ -26,6 +26,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.kframework.kore.K;
+import static org.kframework.kore.KORE.KRewrite;
+
 
 /**
  * A K rule in the format of the Java Rewrite Engine.
@@ -152,6 +155,10 @@ public class Rule extends JavaSymbolicObject<Rule> {
 
     public ImmutableList<Term> ensures() {
         return ensures;
+    }
+
+    public K toKRewrite() {
+        return KRewrite(leftHandSide, rightHandSide, att());
     }
 
     public ConstrainedTerm createLhsPattern(TermContext termContext) {
