@@ -25,7 +25,7 @@ module KSEQ
 endmodule []
 
 module INJ
-  symbol inj{From,To}(From) : To []
+  symbol inj{From,To}(From) : To [injection{}()]
  
   axiom{S1,S2,S3,R} 
     \equals{S3,R}(
