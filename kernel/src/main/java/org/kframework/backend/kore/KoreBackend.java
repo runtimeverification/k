@@ -59,7 +59,7 @@ public class KoreBackend implements Backend {
         Module mainModule = def.kompiledDefinition.mainModule();
         mainModule = new GenerateSortPredicateRules(true).gen(mainModule);
         mainModule = ModuleTransformer.fromKTransformer(new AddSortInjections(mainModule)::addInjections, "Add sort injections").apply(mainModule);
-        String kore = new ModuleToKORE(mainModule, files).convert();
+        String kore = new ModuleToKORE(mainModule, files, def.topCellInitializer).convert();
         File defFile = kompileOptions.outerParsing.mainDefinitionFile(files);
         String name = defFile.getName();
         String basename = FilenameUtils.removeExtension(name);
