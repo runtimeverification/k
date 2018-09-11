@@ -68,7 +68,7 @@ public class ModuleToKORE {
     public ModuleToKORE(Module module, FileUtil files, KLabel topCellInitializer) {
         this.module = module;
         this.files = files;
-	this.topCellInitializer = topCellInitializer;
+        this.topCellInitializer = topCellInitializer;
     }
     private static final boolean METAVAR = false;
 
@@ -78,7 +78,7 @@ public class ModuleToKORE {
         String prelude = files.loadFromKBase("include/kore/prelude.kore");
         sb.append("[topCellInitializer{}(");
         convert(topCellInitializer, false);
-	sb.append("())]\n\n");
+        sb.append("())]\n\n");
         sb.append(prelude);
         Map<String, Boolean> attributes = new HashMap<>();
         sb.append("\n");
