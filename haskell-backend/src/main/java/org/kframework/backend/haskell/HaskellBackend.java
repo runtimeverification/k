@@ -1,9 +1,10 @@
 // Copyright (c) 2018 K Team. All Rights Reserved.
-package org.kframework.backend.kore;
+package org.kframework.backend.haskell;
 
 import com.google.inject.Inject;
-import org.apache.commons.io.FilenameUtils;
 import org.kframework.Strategy;
+import org.kframework.backend.java.compile.ConvertDataStructureToLookup;
+import org.kframework.backend.kore.ModuleToKORE;
 import org.kframework.compile.AddImplicitComputationCell;
 import org.kframework.compile.AddSortInjections;
 import org.kframework.compile.Backend;
@@ -11,6 +12,7 @@ import org.kframework.compile.ConcretizeCells;
 import org.kframework.compile.ExpandMacros;
 import org.kframework.compile.GenerateSortPredicateRules;
 import org.kframework.compile.GenerateSortPredicateSyntax;
+import org.kframework.compile.NormalizeAssoc;
 import org.kframework.compile.ResolveAnonVar;
 import org.kframework.compile.ResolveContexts;
 import org.kframework.compile.ResolveFun;
@@ -23,22 +25,22 @@ import org.kframework.definition.ModuleTransformer;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.Kompile;
 import org.kframework.kompile.KompileOptions;
+import org.kframework.kore.KORE;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 
-import java.io.File;
 import java.util.Collections;
 import java.util.Set;
 import java.util.function.Function;
 
-public class KoreBackend implements Backend {
+public class HaskellBackend implements Backend {
 
     private final KompileOptions kompileOptions;
     private final FileUtil files;
     private final KExceptionManager kem;
 
     @Inject
-    public KoreBackend(
+    public HaskellBackend(
             KompileOptions kompileOptions,
             FileUtil files,
             KExceptionManager kem) {
@@ -54,14 +56,12 @@ public class KoreBackend implements Backend {
         mainModule = new GenerateSortPredicateRules(true).gen(mainModule);
         mainModule = ModuleTransformer.fromKTransformer(new AddSortInjections(mainModule)::addInjections, "Add sort injections").apply(mainModule);
         String kore = new ModuleToKORE(mainModule, files, def.topCellInitializer).convert();
-        File defFile = kompileOptions.outerParsing.mainDefinitionFile(files);
-        String name = defFile.getName();
-        String basename = FilenameUtils.removeExtension(name);
-        files.saveToDefinitionDirectory(basename + ".kore", kore);
+        files.saveToKompiled("definition.kore", kore);
     }
 
     @Override
     public Function<Definition, Definition> steps() {
+        DefinitionTransformer convertDataStructureToLookup = DefinitionTransformer.fromSentenceTransformer((m, s) -> new ConvertDataStructureToLookup(m, false).convert(s), "convert data structures to lookups");
         DefinitionTransformer resolveStrict = DefinitionTransformer.from(new ResolveStrict(kompileOptions)::resolve, "resolving strict and seqstrict attributes");
         DefinitionTransformer resolveAnonVars = DefinitionTransformer.fromSentenceTransformer(new ResolveAnonVar()::resolve, "resolving \"_\" vars");
         DefinitionTransformer resolveSemanticCasts =
@@ -76,6 +76,8 @@ public class KoreBackend implements Backend {
                 .andThen(resolveFun)
                 .andThen(resolveStrict)
                 .andThen(expandMacros)
+                .andThen(DefinitionTransformer.fromSentenceTransformer(new NormalizeAssoc(KORE.c()), "normalize assoc"))
+                .andThen(convertDataStructureToLookup)
                 .andThen(resolveAnonVars)
                 .andThen(d -> new ResolveContexts(kompileOptions).resolve(d))
                 .andThen(resolveSemanticCasts)
