@@ -21,9 +21,11 @@ import static org.kframework.kore.KORE.*;
 public class ResolveHeatCoolAttribute {
 
     private Set<String> transitions;
+    private boolean kore;
 
-    public ResolveHeatCoolAttribute(Set<String> transitions) {
+    public ResolveHeatCoolAttribute(Set<String> transitions, boolean kore) {
         this.transitions = transitions;
+        this.kore = kore;
     }
 
     private Rule resolve(Rule rule) {
@@ -71,7 +73,7 @@ public class ResolveHeatCoolAttribute {
     }
 
     public Sentence resolve(Sentence s) {
-        if (!s.att().contains("heat") && !s.att().contains("cool")) {
+        if (!s.att().contains("heat") && (!s.att().contains("cool") || kore)) {
             return s;
         }
         if (s instanceof Rule) {
