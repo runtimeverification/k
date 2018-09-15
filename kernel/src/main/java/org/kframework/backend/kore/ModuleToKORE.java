@@ -60,11 +60,15 @@ public class ModuleToKORE {
     private final Set<String> impureFunctions = new HashSet<>();
     private final Map<String, List<Set<Integer>>> polyKLabels = new HashMap<>();
     private final KLabel topCellInitializer;
+    private final ModuleToKOREOptions options;
 
-    public ModuleToKORE(Module module, FileUtil files, KLabel topCellInitializer) {
+    public ModuleToKORE(Module module, FileUtil files, KLabel topCellInitializer) {this(module, files, topCellInitializer, new ModuleToKOREOptions());}
+
+    public ModuleToKORE(Module module, FileUtil files, KLabel topCellInitializer, ModuleToKOREOptions options) {
         this.module = module;
         this.files = files;
         this.topCellInitializer = topCellInitializer;
+        this.options = options;
     }
     private static final boolean METAVAR = false;
 
@@ -479,44 +483,55 @@ public class ModuleToKORE {
         sb.append("\n// rules\n");
         for (Rule rule : iterable(module.rules())) {
             boolean function = false;
-            Sort functionSort = null;
-            KLabel functionLabel = null;
+            boolean heating = rule.att().contains("heat");
+            boolean cooling = rule.att().contains("cool");
+            Sort productionSort = null;
+            KLabel productionLabel = null;
             K left = RewriteToTop.toLeft(rule.body());
             if (left instanceof KApply) {
                 Production prod = production((KApply)left);
+                Production originalPrd = prod.att().get("originalPrd", Production.class);
+                productionSort = originalPrd.sort();
+                productionLabel = originalPrd.klabel().get();
                 if (isFunction(prod)) {
-                    prod = prod.att().get("originalPrd", Production.class);
                     function = true;
-                    functionSort = prod.sort();
-                    functionLabel = prod.klabel().get();
+                }
+            }
+            boolean equation = function;
+            if (options.isHeatCoolToEquations()) {
+                if (cooling) // ignore cooling rules
+                    continue;
+                if (heating) { // transform heating rules to equations
+                    equation = true;
+                    assert productionSort != null : "Expecting a sort to be computed already.";
                 }
             }
             sb.append("// ");
             sb.append(rule.toString());
             sb.append("\n");
-            if (function) {
-                if (rule.att().contains("owise")) {
+            if (equation) {
+                if (function && rule.att().contains("owise")) {
                     sb.append("  axiom{R} ");
                     sb.append("\\implies{R} (\n    \\and{R} (\n      \\not{R} (\n        ");
-                    for (Rule notMatching : functionRules.get(functionLabel)) {
+                    for (Rule notMatching : functionRules.get(productionLabel)) {
                         if (notMatching.att().contains("owise")) {
                             continue;
                         }
                         sb.append("\\or{R} (\n          \\ceil{");
-                        convert(functionSort, false);
+                        convert(productionSort, false);
                         sb.append(",R} (\n            ");
                         Set<KVariable> vars = vars(notMatching);
                         for (KVariable var : vars) {
                             sb.append("\\exists{");
-                            convert(functionSort, false);
+                            convert(productionSort, false);
                             sb.append("} (");
                             convert(var);
                             sb.append(", \n              ");
                         }
                         sb.append("\\and{");
-                        convert(functionSort, false);
+                        convert(productionSort, false);
                         sb.append("} (\n                ");
-                        convertSideCondition(notMatching.requires(), functionSort);
+                        convertSideCondition(notMatching.requires(), productionSort);
                         sb.append(",\n                ");
                         convert(RewriteToTop.toLeft(notMatching.body()));
                         sb.append(")");
@@ -526,7 +541,7 @@ public class ModuleToKORE {
                         sb.append("),\n        ");
                     }
                     sb.append("\\bottom{R}()");
-                    for (Rule notMatching : functionRules.get(functionLabel)) {
+                    for (Rule notMatching : functionRules.get(productionLabel)) {
                         if (notMatching.att().contains("owise")) {
                             continue;
                         }
@@ -535,7 +550,7 @@ public class ModuleToKORE {
                     sb.append("),\n      ");
                     convertSideCondition(rule.requires());
                     sb.append("),\n    \\and{R} (\n      \\equals{");
-                    convert(functionSort, false);
+                    convert(productionSort, false);
                     sb.append(",R} (\n        ");
                     K right = RewriteToTop.toRight(rule.body());
                     convert(left);
@@ -551,7 +566,7 @@ public class ModuleToKORE {
                     sb.append("\\implies{R} (\n    ");
                     convertSideCondition(rule.requires());
                     sb.append(",\n    \\and{R} (\n      \\equals{");
-                    convert(functionSort, false);
+                    convert(productionSort, false);
                     sb.append(",R} (\n        ");
                     K right = RewriteToTop.toRight(rule.body());
                     convert(left);
