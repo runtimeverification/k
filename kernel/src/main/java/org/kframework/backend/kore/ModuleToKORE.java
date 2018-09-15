@@ -485,15 +485,23 @@ public class ModuleToKORE {
             boolean function = false;
             boolean heating = rule.att().contains("heat");
             boolean cooling = rule.att().contains("cool");
+            Production production = null;
             Sort productionSort = null;
+            List<Sort> productionSorts = null;
             KLabel productionLabel = null;
+            List<K> leftChildren = null;
             K left = RewriteToTop.toLeft(rule.body());
             if (left instanceof KApply) {
                 Production prod = production((KApply)left);
-                Production originalPrd = prod.att().get("originalPrd", Production.class);
-                productionSort = originalPrd.sort();
-                productionLabel = originalPrd.klabel().get();
+                production = prod.att().get("originalPrd", Production.class);
+                productionSort = production.sort();
+                productionSorts = stream(production.items())
+                        .filter(i -> i instanceof NonTerminal)
+                        .map(i -> (NonTerminal) i)
+                        .map(NonTerminal::sort).collect(Collectors.toList());
+                productionLabel = production.klabel().get();
                 if (isFunction(prod)) {
+                    leftChildren = ((KApply) left).items();
                     function = true;
                 }
             }
@@ -517,39 +525,60 @@ public class ModuleToKORE {
                         if (notMatching.att().contains("owise")) {
                             continue;
                         }
-                        sb.append("\\or{R} (\n          \\ceil{");
-                        convert(productionSort, false);
-                        sb.append(",R} (\n            ");
+                        sb.append("\\or{R} (\n");
                         Set<KVariable> vars = vars(notMatching);
                         for (KVariable var : vars) {
-                            sb.append("\\exists{");
-                            convert(productionSort, false);
-                            sb.append("} (");
+                            sb.append("          \\exists{R} (");
                             convert(var);
-                            sb.append(", \n              ");
+                            sb.append(",\n          ");
                         }
-                        sb.append("\\and{");
-                        convert(productionSort, false);
-                        sb.append("} (\n                ");
-                        convertSideCondition(notMatching.requires(), productionSort);
-                        sb.append(",\n                ");
-                        convert(RewriteToTop.toLeft(notMatching.body()));
-                        sb.append(")");
+                        sb.append("  \\and{R} (");
+                        sb.append("\n              ");
+                        convertSideCondition(notMatching.requires());
+                        sb.append(",\n              ");
+
+                        K notMatchingLeft = RewriteToTop.toLeft(notMatching.body());
+                        assert notMatchingLeft instanceof KApply : "expecting KApply but got " + notMatchingLeft.getClass();
+                        List<K> notMatchingChildren = ((KApply) notMatchingLeft).items();
+                        assert  notMatchingChildren.size() == leftChildren.size() : "assuming function with fixed arity";
+                        for (int childIdx = 0; childIdx < leftChildren.size(); childIdx ++) {
+                            sb.append("\\and{R} (");
+                            sb.append("\n                ");
+                            sb.append("\\ceil{");
+                            Sort childSort = productionSorts.get(childIdx);
+                            convert(childSort, false);
+                            sb.append(", R} (");
+                            sb.append("\n                  ");
+                            sb.append("\\and{");
+                            convert(childSort, false);
+                            sb.append("} (\n                    ");
+                            convert(leftChildren.get(childIdx));
+                            sb.append(",\n                    ");
+                            convert(notMatchingChildren.get(childIdx));
+                            sb.append("\n                )),");
+                        }
+                        sb.append("\n                \\top{R} ()");
+                        sb.append("\n              ");
+                        for (int childIdx = 0; childIdx < leftChildren.size(); childIdx ++) {
+                            sb.append(')');
+                        }
+                        sb.append("\n          )");
                         for (KVariable ignored : vars) {
                             sb.append(")");
                         }
-                        sb.append("),\n        ");
+                        sb.append(",\n          ");
                     }
                     sb.append("\\bottom{R}()");
+                    sb.append("\n        ");
                     for (Rule notMatching : functionRules.get(productionLabel)) {
                         if (notMatching.att().contains("owise")) {
                             continue;
                         }
                         sb.append(")");
                     }
-                    sb.append("),\n      ");
+                    sb.append("\n      ),\n      ");
                     convertSideCondition(rule.requires());
-                    sb.append("),\n    \\and{R} (\n      \\equals{");
+                    sb.append("\n    ),\n    \\and{R} (\n      \\equals{");
                     convert(productionSort, false);
                     sb.append(",R} (\n        ");
                     K right = RewriteToTop.toRight(rule.body());
