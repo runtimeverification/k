@@ -21,9 +21,15 @@ import static org.kframework.kore.KORE.*;
 public class ResolveHeatCoolAttribute {
 
     private Set<String> transitions;
+    private Mode mode;
 
-    public ResolveHeatCoolAttribute(Set<String> transitions) {
+    public static enum Mode {
+        KAST, KORE_EXEC, KORE_SYMBOLIC
+    }
+
+    public ResolveHeatCoolAttribute(Set<String> transitions, Mode mode) {
         this.transitions = transitions;
+        this.mode = mode;
     }
 
     private Rule resolve(Rule rule) {
@@ -71,7 +77,7 @@ public class ResolveHeatCoolAttribute {
     }
 
     public Sentence resolve(Sentence s) {
-        if (!s.att().contains("heat") && !s.att().contains("cool")) {
+        if (mode == Mode.KORE_SYMBOLIC || (!s.att().contains("heat") && (!s.att().contains("cool") || mode == Mode.KORE_EXEC))) {
             return s;
         }
         if (s instanceof Rule) {

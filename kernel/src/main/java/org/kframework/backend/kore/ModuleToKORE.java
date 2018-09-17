@@ -72,7 +72,7 @@ public class ModuleToKORE {
     }
     private static final boolean METAVAR = false;
 
-    public String convert() {
+    public String convert(boolean heatCoolEq) {
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(module);
         Sort topCell = configInfo.getRootCell();
         String prelude = files.loadFromKBase("include/kore/prelude.kore");
@@ -482,7 +482,8 @@ public class ModuleToKORE {
         }
         sb.append("\n// rules\n");
         for (Rule rule : iterable(module.rules())) {
-            boolean function = false;
+            boolean equation = false;
+            boolean owise = false;
             Sort functionSort = null;
             KLabel functionLabel = null;
             K left = RewriteToTop.toLeft(rule.body());
@@ -490,16 +491,20 @@ public class ModuleToKORE {
                 Production prod = production((KApply)left);
                 if (isFunction(prod)) {
                     prod = prod.att().get("originalPrd", Production.class);
-                    function = true;
+                    equation = true;
                     functionSort = prod.sort();
                     functionLabel = prod.klabel().get();
+                    owise = rule.att().contains("owise");
+                } else if ((rule.att().contains("heat") || rule.att().contains("cool")) && heatCoolEq) {
+                    equation = true;
+                    functionSort = topCell;
                 }
             }
             sb.append("// ");
             sb.append(rule.toString());
             sb.append("\n");
-            if (function) {
-                if (rule.att().contains("owise")) {
+            if (equation) {
+                if (owise) {
                     sb.append("  axiom{R} ");
                     sb.append("\\implies{R} (\n    \\and{R} (\n      \\not{R} (\n        ");
                     for (Rule notMatching : functionRules.get(functionLabel)) {
