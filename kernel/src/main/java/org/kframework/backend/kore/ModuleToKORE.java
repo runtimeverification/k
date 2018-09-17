@@ -63,10 +63,12 @@ public class ModuleToKORE {
     private final StringBuilder sb = new StringBuilder();
     private final Set<String> impureFunctions = new HashSet<>();
     private final Map<String, List<Set<Integer>>> polyKLabels = new HashMap<>();
+    private final KLabel topCellInitializer;
 
-    public ModuleToKORE(Module module, FileUtil files) {
+    public ModuleToKORE(Module module, FileUtil files, KLabel topCellInitializer) {
         this.module = module;
         this.files = files;
+        this.topCellInitializer = topCellInitializer;
     }
     private static final boolean METAVAR = false;
 
@@ -74,7 +76,9 @@ public class ModuleToKORE {
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(module);
         Sort topCell = configInfo.getRootCell();
         String prelude = files.loadFromKBase("include/kore/prelude.kore");
-        sb.append("[]\n\n");
+        sb.append("[topCellInitializer{}(");
+        convert(topCellInitializer, false);
+        sb.append("())]\n\n");
         sb.append(prelude);
         Map<String, Boolean> attributes = new HashMap<>();
         sb.append("\n");
