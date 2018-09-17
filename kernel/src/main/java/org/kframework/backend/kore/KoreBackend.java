@@ -42,6 +42,7 @@ public class KoreBackend implements Backend {
     private final KompileOptions kompileOptions;
     private final FileUtil files;
     private final KExceptionManager kem;
+    private final boolean execution;
 
     @Inject
     public KoreBackend(
@@ -51,6 +52,7 @@ public class KoreBackend implements Backend {
         this.kompileOptions = kompileOptions;
         this.files = files;
         this.kem = kem;
+        this.execution = false;
     }
 
 
@@ -59,7 +61,7 @@ public class KoreBackend implements Backend {
         Module mainModule = def.kompiledDefinition.mainModule();
         mainModule = new GenerateSortPredicateRules(true).gen(mainModule);
         mainModule = ModuleTransformer.fromKTransformer(new AddSortInjections(mainModule)::addInjections, "Add sort injections").apply(mainModule);
-        String kore = new ModuleToKORE(mainModule, files).convert();
+        String kore = new ModuleToKORE(mainModule, files).convert(!execution);
         File defFile = kompileOptions.outerParsing.mainDefinitionFile(files);
         String name = defFile.getName();
         String basename = FilenameUtils.removeExtension(name);
@@ -69,7 +71,7 @@ public class KoreBackend implements Backend {
     @Override
     public Function<Definition, Definition> steps() {
         DefinitionTransformer resolveStrict = DefinitionTransformer.from(new ResolveStrict(kompileOptions)::resolve, "resolving strict and seqstrict attributes");
-        DefinitionTransformer resolveHeatCoolAttribute = DefinitionTransformer.fromSentenceTransformer(new ResolveHeatCoolAttribute(new HashSet<>(kompileOptions.transition), true)::resolve, "resolving heat and cool attributes");
+        DefinitionTransformer resolveHeatCoolAttribute = DefinitionTransformer.fromSentenceTransformer(new ResolveHeatCoolAttribute(new HashSet<>(kompileOptions.transition), execution ? ResolveHeatCoolAttribute.Mode.KORE_EXEC : ResolveHeatCoolAttribute.Mode.KORE_SYMBOLIC)::resolve, "resolving heat and cool attributes");
         DefinitionTransformer resolveAnonVars = DefinitionTransformer.fromSentenceTransformer(new ResolveAnonVar()::resolve, "resolving \"_\" vars");
         DefinitionTransformer resolveSemanticCasts =
                 DefinitionTransformer.fromSentenceTransformer(new ResolveSemanticCasts(true)::resolve, "resolving semantic casts");
@@ -85,7 +87,7 @@ public class KoreBackend implements Backend {
                 .andThen(expandMacros)
                 .andThen(resolveAnonVars)
                 .andThen(d -> new ResolveContexts(kompileOptions).resolve(d))
-		.andThen(resolveHeatCoolAttribute)
+                .andThen(resolveHeatCoolAttribute)
                 .andThen(resolveSemanticCasts)
                 .andThen(generateSortPredicateSyntax)
                 .andThen(AddImplicitComputationCell::transformDefinition)
