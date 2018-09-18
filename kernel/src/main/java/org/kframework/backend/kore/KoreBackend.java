@@ -14,6 +14,7 @@ import org.kframework.compile.GenerateSortPredicateSyntax;
 import org.kframework.compile.ResolveAnonVar;
 import org.kframework.compile.ResolveContexts;
 import org.kframework.compile.ResolveFun;
+import org.kframework.compile.ResolveHeatCoolAttribute;
 import org.kframework.compile.ResolveSemanticCasts;
 import org.kframework.compile.ResolveStrict;
 import org.kframework.definition.Definition;
@@ -28,41 +29,57 @@ import org.kframework.utils.file.FileUtil;
 
 import java.io.File;
 import java.util.Collections;
+import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Function;
+
+import static org.kframework.compile.ResolveHeatCoolAttribute.Mode.*;
 
 public class KoreBackend implements Backend {
 
     private final KompileOptions kompileOptions;
-    private final FileUtil files;
+    protected final FileUtil files;
     private final KExceptionManager kem;
+    private final EnumSet<ResolveHeatCoolAttribute.Mode> heatCoolConditions;
+    private final boolean heatCoolEquations;
 
     @Inject
     public KoreBackend(
             KompileOptions kompileOptions,
             FileUtil files,
             KExceptionManager kem) {
+        this(kompileOptions, files, kem, EnumSet.of(HEAT_RESULT), false);
+    }
+
+    public KoreBackend(KompileOptions kompileOptions, FileUtil files, KExceptionManager kem, EnumSet<ResolveHeatCoolAttribute.Mode> heatCoolConditions, boolean heatCoolEquations) {
         this.kompileOptions = kompileOptions;
         this.files = files;
         this.kem = kem;
+        this.heatCoolConditions = heatCoolConditions;
+        this.heatCoolEquations = heatCoolEquations;
     }
-
 
     @Override
     public void accept(CompiledDefinition def) {
-        Module mainModule = def.kompiledDefinition.mainModule();
-        mainModule = new GenerateSortPredicateRules(true).gen(mainModule);
-        mainModule = ModuleTransformer.fromKTransformer(new AddSortInjections(mainModule)::addInjections, "Add sort injections").apply(mainModule);
-        String kore = new ModuleToKORE(mainModule, files, def.topCellInitializer).convert();
+        String kore = getKompiledString(def);
         File defFile = kompileOptions.outerParsing.mainDefinitionFile(files);
         String name = defFile.getName();
         String basename = FilenameUtils.removeExtension(name);
         files.saveToDefinitionDirectory(basename + ".kore", kore);
     }
 
+    protected String getKompiledString(CompiledDefinition def) {
+        Module mainModule = def.kompiledDefinition.mainModule();
+        mainModule = new GenerateSortPredicateRules(true).gen(mainModule);
+        mainModule = ModuleTransformer.fromKTransformer(new AddSortInjections(mainModule)::addInjections, "Add sort injections").apply(mainModule);
+        return new ModuleToKORE(mainModule, files, def.topCellInitializer).convert(heatCoolEquations);
+    }
+
     @Override
     public Function<Definition, Definition> steps() {
         DefinitionTransformer resolveStrict = DefinitionTransformer.from(new ResolveStrict(kompileOptions)::resolve, "resolving strict and seqstrict attributes");
+        DefinitionTransformer resolveHeatCoolAttribute = DefinitionTransformer.fromSentenceTransformer(new ResolveHeatCoolAttribute(new HashSet<>(kompileOptions.transition), heatCoolConditions)::resolve, "resolving heat and cool attributes");
         DefinitionTransformer resolveAnonVars = DefinitionTransformer.fromSentenceTransformer(new ResolveAnonVar()::resolve, "resolving \"_\" vars");
         DefinitionTransformer resolveSemanticCasts =
                 DefinitionTransformer.fromSentenceTransformer(new ResolveSemanticCasts(true)::resolve, "resolving semantic casts");
@@ -78,6 +95,7 @@ public class KoreBackend implements Backend {
                 .andThen(expandMacros)
                 .andThen(resolveAnonVars)
                 .andThen(d -> new ResolveContexts(kompileOptions).resolve(d))
+                .andThen(resolveHeatCoolAttribute)
                 .andThen(resolveSemanticCasts)
                 .andThen(generateSortPredicateSyntax)
                 .andThen(AddImplicitComputationCell::transformDefinition)

@@ -144,11 +144,7 @@ public class GenerateSortPredicateRules {
             return Stream.of(Rule(KRewrite(KApply(KLabel("is" + sort.toString()), KVariable("K")), BooleanUtils.TRUE), BooleanUtils.TRUE, BooleanUtils.TRUE));
         } else {
             List<Sentence> res = new ArrayList<>();
-            for (Sort s : iterable(mod.definedSorts())) {
-                if (mod.subsorts().lessThanEq(s, sort)) {
-                    res.add(Rule(KRewrite(KApply(KLabel("is" + sort.toString()), KVariable(s.name(), Att().add(Sort.class, s))), BooleanUtils.TRUE), BooleanUtils.TRUE, BooleanUtils.TRUE));
-                }
-            }
+            res.add(Rule(KRewrite(KApply(KLabel("is" + sort.toString()), KVariable(sort.name(), Att().add(Sort.class, sort))), BooleanUtils.TRUE), BooleanUtils.TRUE, BooleanUtils.TRUE));
             res.add(Rule(KRewrite(KApply(KLabel("is" + sort.toString()), KVariable("K")), BooleanUtils.FALSE), BooleanUtils.TRUE, BooleanUtils.TRUE, Att().add("owise")));
             return res.stream();
         }

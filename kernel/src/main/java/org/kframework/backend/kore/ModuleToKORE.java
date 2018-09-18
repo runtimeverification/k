@@ -47,7 +47,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -62,19 +61,15 @@ public class ModuleToKORE {
     private final Set<String> impureFunctions = new HashSet<>();
     private final Map<String, List<Set<Integer>>> polyKLabels = new HashMap<>();
     private final KLabel topCellInitializer;
-    private final ModuleToKOREOptions options;
 
-    public ModuleToKORE(Module module, FileUtil files, KLabel topCellInitializer) {this(module, files, topCellInitializer, new ModuleToKOREOptions());}
-
-    public ModuleToKORE(Module module, FileUtil files, KLabel topCellInitializer, ModuleToKOREOptions options) {
+    public ModuleToKORE(Module module, FileUtil files, KLabel topCellInitializer) {
         this.module = module;
         this.files = files;
         this.topCellInitializer = topCellInitializer;
-        this.options = options;
     }
     private static final boolean METAVAR = false;
 
-    public String convert() {
+    public String convert(boolean heatCoolEq) {
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(module);
         Sort topCell = configInfo.getRootCell();
         String prelude = files.loadFromKBase("include/kore/prelude.kore");
@@ -334,19 +329,11 @@ public class ModuleToKORE {
                     sb.append("} (");
                     applyPattern(prod, "X");
                     sb.append(", ");
+                    applyPattern(prod, "Y");
+                    sb.append("), ");
                     convert(prod.klabel().get(), prod);
                     sb.append("(");
                     String conn = "";
-                    for (int i = 0; i < prod.arity(); i++) {
-                        sb.append(conn);
-                        sb.append("Y").append(i).append(":");
-                        convert(prod.nonterminal(i).sort(), prod);
-                        conn = ", ";
-                    }
-                    sb.append(")), ");
-                    convert(prod.klabel().get(), prod);
-                    sb.append("(");
-                    conn = "";
                     for (int i = 0; i < prod.arity(); i++) {
                         sb.append(conn);
                         sb.append("\\and{");
@@ -364,6 +351,7 @@ public class ModuleToKORE {
                     // !(cx(x1,x2,...) /\ cy(y1,y2,...))
                     prod2 = computePolyProd(prod2);
                     if (prod2.klabel().isEmpty() || noConfusion.contains(Tuple2.apply(prod, prod2)) || prod.equals(prod2) || !isConstructor(prod2, functionRules, impurities)) {
+                        // TODO (traiansf): add no confusion axioms for constructor vs inj.
                         continue;
                     }
                     noConfusion.add(Tuple2.apply(prod, prod2));
@@ -377,16 +365,8 @@ public class ModuleToKORE {
                     sb.append("} (");
                     applyPattern(prod, "X");
                     sb.append(", ");
-                    convert(prod2.klabel().get(), prod);
-                    sb.append("(");
-                    String conn = "";
-                    for (int i = 0; i < prod2.arity(); i++) {
-                        sb.append(conn);
-                        sb.append("Y").append(i).append(":");
-                        convert(prod2.nonterminal(i).sort(), prod2);
-                        conn = ", ";
-                    }
-                    sb.append("))) [constructor{}()] // no confusion different constructors\n");
+                    applyPattern(prod2, "Y");
+                    sb.append(")) [constructor{}()] // no confusion different constructors\n");
 
                 }
             }
@@ -469,9 +449,8 @@ public class ModuleToKORE {
         }
         sb.append("\n// rules\n");
         for (Rule rule : iterable(module.rules())) {
-            boolean function = false;
-            boolean heating = rule.att().contains("heat");
-            boolean cooling = rule.att().contains("cool");
+            boolean equation = false;
+            boolean owise = false;
             Production production = null;
             Sort productionSort = null;
             List<Sort> productionSorts = null;
@@ -489,23 +468,18 @@ public class ModuleToKORE {
                 productionLabel = production.klabel().get();
                 if (isFunction(prod)) {
                     leftChildren = ((KApply) left).items();
-                    function = true;
-                }
-            }
-            boolean equation = function;
-            if (options.isHeatCoolToEquations()) {
-                if (cooling) // ignore cooling rules
-                    continue;
-                if (heating) { // transform heating rules to equations
                     equation = true;
-                    assert productionSort != null : "Expecting a sort to be computed already.";
+                    owise = rule.att().contains("owise");
+                } else if ((rule.att().contains("heat") || rule.att().contains("cool")) && heatCoolEq) {
+                    equation = true;
+                    productionSort = topCell;
                 }
             }
             sb.append("// ");
             sb.append(rule.toString());
             sb.append("\n");
             if (equation) {
-                if (function && rule.att().contains("owise")) {
+                if (owise) {
                     sb.append("  axiom{R} ");
                     sb.append("\\implies{R} (\n    \\and{R} (\n      \\not{R} (\n        ");
                     for (Rule notMatching : functionRules.get(productionLabel)) {
