@@ -4,16 +4,13 @@ package org.kframework.backend.kore;
 import com.google.inject.Inject;
 import org.apache.commons.io.FilenameUtils;
 import org.kframework.Strategy;
-import org.kframework.backend.Backends;
 import org.kframework.compile.AddImplicitComputationCell;
 import org.kframework.compile.AddSortInjections;
 import org.kframework.compile.Backend;
 import org.kframework.compile.ConcretizeCells;
 import org.kframework.compile.ExpandMacros;
-import org.kframework.compile.GenerateCoverage;
 import org.kframework.compile.GenerateSortPredicateRules;
 import org.kframework.compile.GenerateSortPredicateSyntax;
-import org.kframework.compile.NumberSentences;
 import org.kframework.compile.ResolveAnonVar;
 import org.kframework.compile.ResolveContexts;
 import org.kframework.compile.ResolveFun;
@@ -29,49 +26,60 @@ import org.kframework.kompile.Kompile;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
-import scala.Function1;
 
 import java.io.File;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Function;
 
+import static org.kframework.compile.ResolveHeatCoolAttribute.Mode.*;
+
 public class KoreBackend implements Backend {
 
     private final KompileOptions kompileOptions;
-    private final FileUtil files;
+    protected final FileUtil files;
     private final KExceptionManager kem;
-    private final boolean execution;
+    private final EnumSet<ResolveHeatCoolAttribute.Mode> heatCoolConditions;
+    private final boolean heatCoolEquations;
 
     @Inject
     public KoreBackend(
             KompileOptions kompileOptions,
             FileUtil files,
             KExceptionManager kem) {
+        this(kompileOptions, files, kem, EnumSet.of(HEAT_RESULT), false);
+    }
+
+    public KoreBackend(KompileOptions kompileOptions, FileUtil files, KExceptionManager kem, EnumSet<ResolveHeatCoolAttribute.Mode> heatCoolConditions, boolean heatCoolEquations) {
         this.kompileOptions = kompileOptions;
         this.files = files;
         this.kem = kem;
-        this.execution = false;
+        this.heatCoolConditions = heatCoolConditions;
+        this.heatCoolEquations = heatCoolEquations;
     }
-
 
     @Override
     public void accept(CompiledDefinition def) {
-        Module mainModule = def.kompiledDefinition.mainModule();
-        mainModule = new GenerateSortPredicateRules(true).gen(mainModule);
-        mainModule = ModuleTransformer.fromKTransformer(new AddSortInjections(mainModule)::addInjections, "Add sort injections").apply(mainModule);
-        String kore = new ModuleToKORE(mainModule, files, def.topCellInitializer).convert(!execution);
+        String kore = getKompiledString(def);
         File defFile = kompileOptions.outerParsing.mainDefinitionFile(files);
         String name = defFile.getName();
         String basename = FilenameUtils.removeExtension(name);
         files.saveToDefinitionDirectory(basename + ".kore", kore);
     }
 
+    protected String getKompiledString(CompiledDefinition def) {
+        Module mainModule = def.kompiledDefinition.mainModule();
+        mainModule = new GenerateSortPredicateRules(true).gen(mainModule);
+        mainModule = ModuleTransformer.fromKTransformer(new AddSortInjections(mainModule)::addInjections, "Add sort injections").apply(mainModule);
+        return new ModuleToKORE(mainModule, files, def.topCellInitializer).convert(heatCoolEquations);
+    }
+
     @Override
     public Function<Definition, Definition> steps() {
         DefinitionTransformer resolveStrict = DefinitionTransformer.from(new ResolveStrict(kompileOptions)::resolve, "resolving strict and seqstrict attributes");
-        DefinitionTransformer resolveHeatCoolAttribute = DefinitionTransformer.fromSentenceTransformer(new ResolveHeatCoolAttribute(new HashSet<>(kompileOptions.transition), execution ? ResolveHeatCoolAttribute.Mode.KORE_EXEC : ResolveHeatCoolAttribute.Mode.KORE_SYMBOLIC)::resolve, "resolving heat and cool attributes");
+        DefinitionTransformer resolveHeatCoolAttribute = DefinitionTransformer.fromSentenceTransformer(new ResolveHeatCoolAttribute(new HashSet<>(kompileOptions.transition), heatCoolConditions)::resolve, "resolving heat and cool attributes");
         DefinitionTransformer resolveAnonVars = DefinitionTransformer.fromSentenceTransformer(new ResolveAnonVar()::resolve, "resolving \"_\" vars");
         DefinitionTransformer resolveSemanticCasts =
                 DefinitionTransformer.fromSentenceTransformer(new ResolveSemanticCasts(true)::resolve, "resolving semantic casts");

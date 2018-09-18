@@ -13,6 +13,7 @@ import org.kframework.kore.Sort;
 import org.kframework.kore.TransformK;
 import org.kframework.parser.outer.Outer;
 
+import java.util.EnumSet;
 import java.util.Set;
 
 import static org.kframework.definition.Constructors.*;
@@ -21,15 +22,15 @@ import static org.kframework.kore.KORE.*;
 public class ResolveHeatCoolAttribute {
 
     private Set<String> transitions;
-    private Mode mode;
+    private EnumSet<Mode> modes;
 
     public static enum Mode {
-        KAST, KORE_EXEC, KORE_SYMBOLIC
+        HEAT_RESULT, COOL_RESULT_CONDITION, COOL_RESULT_INJECTION
     }
 
-    public ResolveHeatCoolAttribute(Set<String> transitions, Mode mode) {
+    public ResolveHeatCoolAttribute(Set<String> transitions, EnumSet<Mode> modes) {
         this.transitions = transitions;
-        this.mode = mode;
+        this.modes = modes;
     }
 
     private Rule resolve(Rule rule) {
@@ -47,21 +48,24 @@ public class ResolveHeatCoolAttribute {
                 context.att());
     }
 
-            private K transformBody(K body, Att att) {
-                if (att.contains("cool")) {
-                    return new TransformK() {
-                        public K apply(KVariable var) {
-                            if (var.name(). equals("HOLE") && transitions.stream().noneMatch(att::contains)) {
-                                return KVariable(var.name(), var.att().add(Sort.class, Outer.parseSort(att.getOptional("result").orElse("KResult"))));
-                            }
-                            return super.apply(var);
-                        }
-                    }.apply(body);
+    private K transformBody(K body, Att att) {
+        if (att.contains("cool") && modes.contains(Mode.COOL_RESULT_INJECTION)) {
+            return new TransformK() {
+                public K apply(KVariable var) {
+                    if (var.name(). equals("HOLE") && transitions.stream().noneMatch(att::contains)) {
+                        return KVariable(var.name(), var.att().add(Sort.class, Outer.parseSort(att.getOptional("result").orElse("KResult"))));
+                    }
+                    return super.apply(var);
                 }
-                return body;
-            }
+            }.apply(body);
+        }
+        return body;
+    }
 
     private K transform(K requires, Att att) {
+        if (att.contains("cool") && !modes.contains(Mode.COOL_RESULT_CONDITION)) {
+            return requires;
+        }
         String sort = att.<String>getOptional("result").orElse("KResult");
         KApply predicate = KApply(KLabel("is" + sort), KVariable("HOLE"));
         if (att.contains("heat")) {
@@ -77,7 +81,8 @@ public class ResolveHeatCoolAttribute {
     }
 
     public Sentence resolve(Sentence s) {
-        if (mode == Mode.KORE_SYMBOLIC || (!s.att().contains("heat") && (!s.att().contains("cool") || mode == Mode.KORE_EXEC))) {
+        if (!((modes.contains(Mode.HEAT_RESULT) && s.att().contains("heat"))
+                || ((modes.contains(Mode.COOL_RESULT_INJECTION) || modes.contains(Mode.COOL_RESULT_CONDITION)) && s.att().contains("cool")))) {
             return s;
         }
         if (s instanceof Rule) {

@@ -1,11 +1,9 @@
 // Copyright (c) 2018 K Team. All Rights Reserved.
 package org.kframework.backend.kore;
 
-import com.google.common.collect.BiMap;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 import com.google.common.collect.Sets;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import org.kframework.attributes.Att;
@@ -20,7 +18,6 @@ import org.kframework.definition.Production;
 import org.kframework.definition.ProductionItem;
 import org.kframework.definition.Rule;
 import org.kframework.kil.Attribute;
-import org.kframework.kore.FoldK;
 import org.kframework.kore.InjectedKLabel;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -37,11 +34,11 @@ import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
+import scala.Option;
 import scala.Tuple2;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -172,6 +169,24 @@ public class ModuleToKORE {
         Set<Tuple2<Production, Production>> noConfusion = new HashSet<>();
         for (Production prod : iterable(module.productions())) {
             prod = computePolyProd(prod);
+            if (prod.isSubsort()) {
+                Production finalProd = prod;
+                functionalPattern(prod, () -> {
+                    sb.append("inj{");
+                    convert(finalProd.getSubsortSort(), finalProd);
+                    sb.append(", ");
+                    convert(finalProd.sort(), finalProd);
+                    sb.append("} (From:");
+                    convert(finalProd.getSubsortSort(), finalProd);
+                    sb.append(")");
+                });
+                sb.append(" [subsort{");
+                convert(prod.getSubsortSort(), prod);
+                sb.append(", ");
+                convert(prod.sort(), prod);
+                sb.append("}()] // subsort\n");
+                continue;
+            }
             if (prod.klabel().isEmpty()) {
                 continue;
             }
@@ -184,7 +199,7 @@ public class ModuleToKORE {
                     throw KEMException.compilerError("Found an associative production with ill formed sorts", prod);
                 }
                 sb.append("  axiom");
-                convertParams(prod.klabel().get(), true);
+                convertParams(prod.klabel(), true);
                 sb.append(" \\equals{");
                 convert(prod.sort(), prod);
                 sb.append(", R} (");
@@ -219,7 +234,7 @@ public class ModuleToKORE {
                 }
                 Sort childSort = prod.nonterminal(0).sort();
                 sb.append("  axiom");
-                convertParams(prod.klabel().get(), true);
+                convertParams(prod.klabel(), true);
                 sb.append(" \\equals{");
                 convert(prod.sort(), prod);
                 sb.append(", R} (");
@@ -245,7 +260,7 @@ public class ModuleToKORE {
                     throw KEMException.compilerError("Found an associative production with ill formed sorts", prod);
                 }
                 sb.append("  axiom");
-                convertParams(prod.klabel().get(), true);
+                convertParams(prod.klabel(), true);
                 sb.append(" \\equals{");
                 convert(prod.sort(), prod);
                 sb.append(", R} (");
@@ -269,7 +284,7 @@ public class ModuleToKORE {
                 }
                 KLabel unit = KLabel(prod.att().get(Attribute.UNIT_KEY));
                 sb.append("  axiom");
-                convertParams(prod.klabel().get(), true);
+                convertParams(prod.klabel(), true);
                 sb.append("\\equals{");
                 convert(prod.sort(), prod);
                 sb.append(", R} (");
@@ -283,7 +298,7 @@ public class ModuleToKORE {
                 sb.append(") [unit{}()] // right unit\n");
 
                 sb.append("  axiom");
-                convertParams(prod.klabel().get(), true);
+                convertParams(prod.klabel(), true);
                 sb.append("\\equals{");
                 convert(prod.sort(), prod);
                 sb.append(", R} (");
@@ -298,60 +313,27 @@ public class ModuleToKORE {
             }
             if (isFunctional(prod, functionRules, impurities)) {
                 // exists y . f(...) = y
-                sb.append("  axiom");
-                convertParams(prod.klabel().get(), true);
-                sb.append(" \\exists{R} (Val:");
-                convert(prod.sort(), prod);
-                sb.append(", \\equals{");
-                convert(prod.sort(), prod);
-                sb.append(", R} (");
-                sb.append("Val:");
-                convert(prod.sort(), prod);
-                sb.append(", ");
-                convert(prod.klabel().get(), prod);
-                sb.append("(");
-                String conn = "";
-                for (int i = 0; i < prod.arity(); i++) {
-                    sb.append(conn);
-                    sb.append("K").append(i).append(":");
-                    convert(prod.nonterminal(i).sort(), prod);
-                    conn = ", ";
-                }
-                sb.append("))) [functional{}()] // functional\n");
+                Production finalProd = prod;
+                functionalPattern(prod, () -> applyPattern(finalProd, "K"));
+                sb.append(" [functional{}()] // functional\n");
             }
             if (isConstructor(prod, functionRules, impurities)) {
                 // c(x1,x2,...) /\ c(y1,y2,...) -> c(x1/\y2,x2/\y2,...)
                 if (prod.arity() > 0) {
                     sb.append("  axiom");
-                    convertParams(prod.klabel().get(), false);
+                    convertParams(prod.klabel(), false);
                     sb.append("\\implies{");
                     convert(prod.sort(), prod);
                     sb.append("} (\\and{");
                     convert(prod.sort(), prod);
                     sb.append("} (");
-                    convert(prod.klabel().get(), prod);
-                    sb.append("(");
-                    String conn = "";
-                    for (int i = 0; i < prod.arity(); i++) {
-                        sb.append(conn);
-                        sb.append("X").append(i).append(":");
-                        convert(prod.nonterminal(i).sort(), prod);
-                        conn = ", ";
-                    }
+                    applyPattern(prod, "X");
+                    sb.append(", ");
+                    applyPattern(prod, "Y");
                     sb.append("), ");
                     convert(prod.klabel().get(), prod);
                     sb.append("(");
-                    conn = "";
-                    for (int i = 0; i < prod.arity(); i++) {
-                        sb.append(conn);
-                        sb.append("Y").append(i).append(":");
-                        convert(prod.nonterminal(i).sort(), prod);
-                        conn = ", ";
-                    }
-                    sb.append(")), ");
-                    convert(prod.klabel().get(), prod);
-                    sb.append("(");
-                    conn = "";
+                    String conn = "";
                     for (int i = 0; i < prod.arity(); i++) {
                         sb.append(conn);
                         sb.append("\\and{");
@@ -369,37 +351,22 @@ public class ModuleToKORE {
                     // !(cx(x1,x2,...) /\ cy(y1,y2,...))
                     prod2 = computePolyProd(prod2);
                     if (prod2.klabel().isEmpty() || noConfusion.contains(Tuple2.apply(prod, prod2)) || prod.equals(prod2) || !isConstructor(prod2, functionRules, impurities)) {
+                        // TODO (traiansf): add no confusion axioms for constructor vs inj.
                         continue;
                     }
                     noConfusion.add(Tuple2.apply(prod, prod2));
                     noConfusion.add(Tuple2.apply(prod2, prod));
                     sb.append("  axiom");
-                    convertParams(prod.klabel().get(), false);
+                    convertParams(prod.klabel(), false);
                     sb.append("\\not{");
                     convert(prod.sort(), prod);
                     sb.append("} (\\and{");
                     convert(prod.sort(), prod);
                     sb.append("} (");
-                    convert(prod.klabel().get(), prod);
-                    sb.append("(");
-                    String conn = "";
-                    for (int i = 0; i < prod.arity(); i++) {
-                        sb.append(conn);
-                        sb.append("X").append(i).append(":");
-                        convert(prod.nonterminal(i).sort(), prod);
-                        conn = ", ";
-                    }
-                    sb.append("), ");
-                    convert(prod2.klabel().get(), prod);
-                    sb.append("(");
-                    conn = "";
-                    for (int i = 0; i < prod2.arity(); i++) {
-                        sb.append(conn);
-                        sb.append("Y").append(i).append(":");
-                        convert(prod2.nonterminal(i).sort(), prod2);
-                        conn = ", ";
-                    }
-                    sb.append("))) [constructor{}()] // no confusion different constructors\n");
+                    applyPattern(prod, "X");
+                    sb.append(", ");
+                    applyPattern(prod2, "Y");
+                    sb.append(")) [constructor{}()] // no confusion different constructors\n");
 
                 }
             }
@@ -484,20 +451,28 @@ public class ModuleToKORE {
         for (Rule rule : iterable(module.rules())) {
             boolean equation = false;
             boolean owise = false;
-            Sort functionSort = null;
-            KLabel functionLabel = null;
+            Production production = null;
+            Sort productionSort = null;
+            List<Sort> productionSorts = null;
+            KLabel productionLabel = null;
+            List<K> leftChildren = null;
             K left = RewriteToTop.toLeft(rule.body());
             if (left instanceof KApply) {
                 Production prod = production((KApply)left);
+                production = prod.att().get("originalPrd", Production.class);
+                productionSort = production.sort();
+                productionSorts = stream(production.items())
+                        .filter(i -> i instanceof NonTerminal)
+                        .map(i -> (NonTerminal) i)
+                        .map(NonTerminal::sort).collect(Collectors.toList());
+                productionLabel = production.klabel().get();
                 if (isFunction(prod)) {
-                    prod = prod.att().get("originalPrd", Production.class);
+                    leftChildren = ((KApply) left).items();
                     equation = true;
-                    functionSort = prod.sort();
-                    functionLabel = prod.klabel().get();
                     owise = rule.att().contains("owise");
                 } else if ((rule.att().contains("heat") || rule.att().contains("cool")) && heatCoolEq) {
                     equation = true;
-                    functionSort = topCell;
+                    productionSort = topCell;
                 }
             }
             sb.append("// ");
@@ -507,44 +482,65 @@ public class ModuleToKORE {
                 if (owise) {
                     sb.append("  axiom{R} ");
                     sb.append("\\implies{R} (\n    \\and{R} (\n      \\not{R} (\n        ");
-                    for (Rule notMatching : functionRules.get(functionLabel)) {
+                    for (Rule notMatching : functionRules.get(productionLabel)) {
                         if (notMatching.att().contains("owise")) {
                             continue;
                         }
-                        sb.append("\\or{R} (\n          \\ceil{");
-                        convert(functionSort, false);
-                        sb.append(",R} (\n            ");
+                        sb.append("\\or{R} (\n");
                         Set<KVariable> vars = vars(notMatching);
                         for (KVariable var : vars) {
-                            sb.append("\\exists{");
-                            convert(functionSort, false);
-                            sb.append("} (");
+                            sb.append("          \\exists{R} (");
                             convert(var);
-                            sb.append(", \n              ");
+                            sb.append(",\n          ");
                         }
-                        sb.append("\\and{");
-                        convert(functionSort, false);
-                        sb.append("} (\n                ");
-                        convertSideCondition(notMatching.requires(), functionSort);
-                        sb.append(",\n                ");
-                        convert(RewriteToTop.toLeft(notMatching.body()));
-                        sb.append(")");
+                        sb.append("  \\and{R} (");
+                        sb.append("\n              ");
+                        convertSideCondition(notMatching.requires());
+                        sb.append(",\n              ");
+
+                        K notMatchingLeft = RewriteToTop.toLeft(notMatching.body());
+                        assert notMatchingLeft instanceof KApply : "expecting KApply but got " + notMatchingLeft.getClass();
+                        List<K> notMatchingChildren = ((KApply) notMatchingLeft).items();
+                        assert  notMatchingChildren.size() == leftChildren.size() : "assuming function with fixed arity";
+                        for (int childIdx = 0; childIdx < leftChildren.size(); childIdx ++) {
+                            sb.append("\\and{R} (");
+                            sb.append("\n                ");
+                            sb.append("\\ceil{");
+                            Sort childSort = productionSorts.get(childIdx);
+                            convert(childSort, false);
+                            sb.append(", R} (");
+                            sb.append("\n                  ");
+                            sb.append("\\and{");
+                            convert(childSort, false);
+                            sb.append("} (\n                    ");
+                            convert(leftChildren.get(childIdx));
+                            sb.append(",\n                    ");
+                            convert(notMatchingChildren.get(childIdx));
+                            sb.append("\n                )),");
+                        }
+                        sb.append("\n                \\top{R} ()");
+                        sb.append("\n              ");
+                        for (int childIdx = 0; childIdx < leftChildren.size(); childIdx ++) {
+                            sb.append(')');
+                        }
+                        sb.append("\n          )");
                         for (KVariable ignored : vars) {
                             sb.append(")");
                         }
-                        sb.append("),\n        ");
+                        sb.append(",\n          ");
                     }
                     sb.append("\\bottom{R}()");
-                    for (Rule notMatching : functionRules.get(functionLabel)) {
+                    sb.append("\n        ");
+                    for (Rule notMatching : functionRules.get(productionLabel)) {
                         if (notMatching.att().contains("owise")) {
                             continue;
                         }
                         sb.append(")");
                     }
-                    sb.append("),\n      ");
+                    sb.append("\n      ),\n      ");
                     convertSideCondition(rule.requires());
-                    sb.append("),\n    \\and{R} (\n      \\equals{");
-                    convert(functionSort, false);
+                    sb.append("\n    ),\n    \\and{R} (\n      \\equals{");
+                    convert(productionSort, false);
                     sb.append(",R} (\n        ");
                     K right = RewriteToTop.toRight(rule.body());
                     convert(left);
@@ -560,7 +556,7 @@ public class ModuleToKORE {
                     sb.append("\\implies{R} (\n    ");
                     convertSideCondition(rule.requires());
                     sb.append(",\n    \\and{R} (\n      \\equals{");
-                    convert(functionSort, false);
+                    convert(productionSort, false);
                     sb.append(",R} (\n        ");
                     K right = RewriteToTop.toRight(rule.body());
                     convert(left);
@@ -594,6 +590,34 @@ public class ModuleToKORE {
         return sb.toString();
     }
 
+    private void functionalPattern(Production prod, Runnable functionPattern) {
+        sb.append("  axiom");
+        convertParams(prod.klabel(), true);
+        sb.append(" \\exists{R} (Val:");
+        convert(prod.sort(), prod);
+        sb.append(", \\equals{");
+        convert(prod.sort(), prod);
+        sb.append(", R} (");
+        sb.append("Val:");
+        convert(prod.sort(), prod);
+        sb.append(", ");
+        functionPattern.run();
+        sb.append("))");
+    }
+
+    private void applyPattern(Production prod, String varName) {
+        convert(prod.klabel().get(), prod);
+        sb.append("(");
+        String conn = "";
+        for (int i = 0; i < prod.arity(); i++) {
+            sb.append(conn);
+            sb.append(varName).append(i).append(":");
+            convert(prod.nonterminal(i).sort(), prod);
+            conn = ", ";
+        }
+        sb.append(')');
+    }
+
     private void convertTokenProd(Sort sort) {
         if (METAVAR) {
             sb.append("\\exists{");
@@ -608,17 +632,21 @@ public class ModuleToKORE {
         }
     }
 
-    private void convertParams(KLabel kLabel, boolean hasR) {
+    private void convertParams(Option<KLabel> maybeKLabel, boolean hasR) {
         sb.append("{");
         String conn = "";
         if (hasR) {
             sb.append("R");
-            conn = ", ";
+            if (maybeKLabel.isDefined()) {
+                conn = ", ";
+            }
         }
-        for (Sort param : iterable(kLabel.params())) {
-            sb.append(conn);
-            convert(param, true);
-            conn = ", ";
+        if (maybeKLabel.isDefined()) {
+            for (Sort param : iterable(maybeKLabel.get().params())) {
+                sb.append(conn);
+                convert(param, true);
+                conn = ", ";
+            }
         }
         sb.append("}");
     }
