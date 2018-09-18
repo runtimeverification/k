@@ -53,7 +53,7 @@ public class HaskellRewriter implements Function<Module, Rewriter> {
     @Override
     public Rewriter apply(Module module) {
         if (!module.equals(def.executionModule())) {
-            throw KEMException.criticalError("Invalid module specified for rewriting. Ocaml backend only supports rewriting over" +
+            throw KEMException.criticalError("Invalid module specified for rewriting. Haskell backend only supports rewriting over" +
                     " the definition's main module.");
         }
         return new Rewriter() {
