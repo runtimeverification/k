@@ -99,6 +99,7 @@ public class ModuleToKORE {
         dummyHookedSorts.add("SET.Set");
         dummyHookedSorts.add("MAP.Map");
         dummyHookedSorts.add("LIST.List");
+        dummyHookedSorts.add("ARRAY.Array");
         for (Sort sort : iterable(module.definedSorts())) {
             if (sort.equals(Sorts.K()) || sort.equals(Sorts.KItem())) {
                 continue;
@@ -108,10 +109,15 @@ public class ModuleToKORE {
             if (att.contains(Attribute.HOOK_KEY) && !dummyHookedSorts.contains(att.get(Attribute.HOOK_KEY))) {
                 sb.append("hooked-");
             } else if (att.contains(Attribute.HOOK_KEY)) {
-              Production concatProd = stream(module.productionsForSort().apply(sort)).filter(p -> p.att().contains("element")).findAny().get();
-              att = att.add("element", K.class, KApply(KLabel(concatProd.att().get("element"))));
-              att = att.add("concat", K.class, KApply(concatProd.klabel().get()));
-              att = att.add("unit", K.class, KApply(KLabel(concatProd.att().get("unit"))));
+                if (att.get(Attribute.HOOK_KEY).equals("ARRAY.Array")) {
+                    att = att.remove("element").add("element", K.class, KApply(KLabel(att.get("element"))));
+                    att = att.remove("unit").add("unit", K.class, KApply(KLabel(att.get("unit"))));
+                } else {
+                    Production concatProd = stream(module.productionsForSort().apply(sort)).filter(p -> p.att().contains("element")).findAny().get();
+                    att = att.add("element", K.class, KApply(KLabel(concatProd.att().get("element"))));
+                    att = att.add("concat", K.class, KApply(concatProd.klabel().get()));
+                    att = att.add("unit", K.class, KApply(KLabel(concatProd.att().get("unit"))));
+                }
             }
             sb.append("sort ");
             convert(sort, false);
