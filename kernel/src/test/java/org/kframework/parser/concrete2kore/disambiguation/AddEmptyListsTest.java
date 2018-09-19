@@ -76,7 +76,7 @@ public class AddEmptyListsTest {
         if (parseResult._1().isLeft()) {
             Assert.assertTrue("Unexpected parse errors" + parseResult._1().left().get(), false);
         }
-        K actual = new TreeNodesToKORE(Outer::parseSort).down(parseResult._1().right().get());
+        K actual = new TreeNodesToKORE(Outer::parseSort, false).down(parseResult._1().right().get());
         Assert.assertEquals(expected, actual);
         if (parseResult._2().size() != expectWarnings) {
             Assert.assertTrue("Unexpected parse warnings" + parseResult._2(), false);

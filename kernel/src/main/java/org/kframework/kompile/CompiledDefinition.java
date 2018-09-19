@@ -178,7 +178,7 @@ public class CompiledDefinition implements Serializable {
             if (res._1().isLeft()) {
                 throw res._1().left().get().iterator().next();
             }
-            return new TreeNodesToKORE(Outer::parseSort).down(res._1().right().get());
+            return new TreeNodesToKORE(Outer::parseSort, kompileOptions.strict()).down(res._1().right().get());
         };
     }
 
