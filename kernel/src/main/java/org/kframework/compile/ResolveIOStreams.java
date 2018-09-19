@@ -210,7 +210,7 @@ public class ResolveIOStreams {
         for (Sentence s : mutable(getStreamSyntaxModule(streamName).localSentences())) {
             if (s instanceof Production) {
                 Production production = (Production) s;
-                if (production.sort().toString().equals("Stream")) {
+                if (production.sort().toString().equals("Stream") || production.klabel().get().name().startsWith("project:")) {
                     sentences.add(production);
                 }
             }
