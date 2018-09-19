@@ -6,11 +6,13 @@ import org.kframework.attributes.HasLocation;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Module;
 import org.kframework.definition.Production;
+import org.kframework.kil.Attribute;
 import org.kframework.kore.FoldK;
 import org.kframework.kore.InjectedKLabel;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KAs;
+import org.kframework.kore.KLabel;
 import org.kframework.kore.KRewrite;
 import org.kframework.kore.KSequence;
 import org.kframework.kore.KToken;
@@ -27,6 +29,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.kframework.Collections.*;
@@ -38,9 +42,11 @@ import static org.kframework.Collections.iterable;
 public class AddSortInjections {
 
     private final Module mod;
+    private final Map<KLabel, KLabel> collectionFor;
 
     public AddSortInjections(Module mod) {
         this.mod = mod;
+	this.collectionFor = ConvertDataStructureToLookup.collectionFor(mod);
     }
 
     public K addInjections(K term) {
@@ -67,6 +73,12 @@ public class AddSortInjections {
         return result;
     }
 
+    public boolean collectionIsMap(KLabel collectionLabel) {
+        return mod.attributesFor().apply(collectionLabel).contains(Attribute.COMMUTATIVE_KEY)
+                && !mod.attributesFor().apply(collectionLabel).contains(Attribute.IDEMPOTENT_KEY)
+                && !mod.attributesFor().apply(collectionLabel).contains(Att.bag());
+    }
+
     public K addInjections(K term, Sort expectedSort) {
         Sort actualSort = sort(term, expectedSort);
         if (actualSort == null) {
@@ -81,7 +93,28 @@ public class AddSortInjections {
                 return KSequence(KApply(KLabel("inj", actualSort, Sorts.KItem()), KList(visitChildren(term, Sorts.KItem(), actualSort)), Att.empty().add(Sort.class, Sorts.KItem())));
             }
         } else {
-            return KApply(KLabel("inj", actualSort, expectedSort), KList(visitChildren(term, expectedSort, actualSort)), Att.empty().add(Sort.class, expectedSort));
+            String hookAtt = mod.sortAttributesFor().get(expectedSort).getOrElse(() -> Att()).getOptional("hook").orElse("");
+            if (hookAtt.equals("MAP.Map") || hookAtt.equals("SET.Set") || hookAtt.equals("LIST.List")) {
+                for (KLabel collectionLabel : collectionFor.keySet()) {
+                    Optional<String> wrapElement = mod.attributesFor().apply(collectionLabel).getOptional("wrapElement");
+                    if (wrapElement.isPresent()) {
+                        KLabel wrappedLabel = KLabel(wrapElement.get());
+                        KLabel elementLabel = KLabel(mod.attributesFor().apply(collectionLabel).get("element"));
+			KApply k = (KApply)term;
+                        if (k.klabel().equals(wrappedLabel)) {
+                            if (collectionIsMap(collectionLabel)) {
+                                // Map
+                                return KApply(elementLabel, KList(k.klist().items().get(0), visitChildren(k, expectedSort, actualSort)), Att.empty().add(Sort.class, expectedSort));
+                            } else {
+                                return KApply(elementLabel, KList(visitChildren(k, expectedSort, actualSort)), Att.empty().add(Sort.class, expectedSort));
+                            }
+                        }
+                    }
+                }
+                throw new AssertionError();
+            } else {
+                return KApply(KLabel("inj", actualSort, expectedSort), KList(visitChildren(term, expectedSort, actualSort)), Att.empty().add(Sort.class, expectedSort));
+            }
         }
     }
 

@@ -3,6 +3,7 @@ package org.kframework.backend.ocaml;
 
 import org.kframework.compile.ConfigurationInfo;
 import org.kframework.compile.ConfigurationInfoFromModule;
+import org.kframework.compile.ConvertDataStructureToLookup;
 import org.kframework.compile.LabelInfo;
 import org.kframework.compile.LabelInfoFromModule;
 import org.kframework.definition.Module;
