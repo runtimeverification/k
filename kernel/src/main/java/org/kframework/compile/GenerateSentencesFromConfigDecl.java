@@ -159,18 +159,18 @@ public class GenerateSentencesFromConfigDecl {
             // child of a leaf cell. Generate no productions, but inform parent that it has a child of a particular sort.
             // A leaf cell initializes to the value specified in the configuration declaration.
             Sort sort = kapp.att().get(Production.class).sort();
-	    Tuple2<K, Set<Sentence>> res = getLeafInitializer(term, m);
+            Tuple2<K, Set<Sentence>> res = getLeafInitializer(term, m);
             return Tuple4.apply(res._2(), Lists.newArrayList(sort), res._1(), true);
         } else if (term instanceof KToken) {
             // child of a leaf cell. Generate no productions, but inform parent that it has a child of a particular sort.
             // A leaf cell initializes to the value specified in the configuration declaration.
             KToken ktoken = (KToken) term;
-	    Tuple2<K, Set<Sentence>> res = getLeafInitializer(term, m);
+            Tuple2<K, Set<Sentence>> res = getLeafInitializer(term, m);
             return Tuple4.apply(res._2(), Lists.newArrayList(ktoken.sort()), res._1(), true);
         } else if (term instanceof KSequence || term instanceof KVariable || term instanceof InjectedKLabel) {
             // child of a leaf cell. Generate no productions, but inform parent that it has a child of a particular sort.
             // A leaf cell initializes to the value specified in the configuration declaration.
-	    Tuple2<K, Set<Sentence>> res = getLeafInitializer(term, m);
+            Tuple2<K, Set<Sentence>> res = getLeafInitializer(term, m);
             return Tuple4.apply(res._2(), Lists.newArrayList(Sorts.K()), res._1(), true);
         } else {
             throw KEMException.compilerError("Unexpected value found in configuration declaration, expected KToken, KSequence, or KApply", term);
@@ -215,7 +215,7 @@ public class GenerateSentencesFromConfigDecl {
     }
 
     private static KLabel getProjectLbl(Sort sort, Module m) {
-	KLabel lbl;
+        KLabel lbl;
         lbl = KLabel("project:" + sort.toString());
         return lbl;
     }
@@ -225,7 +225,7 @@ public class GenerateSentencesFromConfigDecl {
         KVariable var = KVariable("K", Att.empty().add(Sort.class, sort));
         return Set(Production(lbl, sort, Seq(Terminal(lbl.name()), Terminal("("), NonTerminal(Sorts.K()), Terminal(")")), Att.empty().add("function")), Rule(KRewrite(KApply(lbl, var), var), BooleanUtils.TRUE, BooleanUtils.TRUE));
     }
- 
+
     /**
      * Returns the body of an initializer for a leaf cell: replaces any configuration variables
      * with map lookups in the initialization map.
@@ -236,7 +236,7 @@ public class GenerateSentencesFromConfigDecl {
         class Holder {
             Set<Sentence> sentences = Set();
         }
-	Holder h = new Holder();
+        Holder h = new Holder();
         return Tuple2.apply(new TransformK() {
             private Sort sort;
 
@@ -254,7 +254,7 @@ public class GenerateSentencesFromConfigDecl {
                     if (sort.equals(Sorts.K())) {
                         return KApply(KLabel("Map:lookup"), INIT, k);
                     } else {
-			h.sentences = (Set<Sentence>) h.sentences.$bar(genProjection(sort, m));
+                        h.sentences = (Set<Sentence>) h.sentences.$bar(genProjection(sort, m));
                         return KApply(getProjectLbl(sort, m), KApply(KLabel("Map:lookup"), INIT, k));
                     }
                 }

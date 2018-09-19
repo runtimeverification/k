@@ -46,7 +46,7 @@ public class AddSortInjections {
 
     public AddSortInjections(Module mod) {
         this.mod = mod;
-	this.collectionFor = ConvertDataStructureToLookup.collectionFor(mod);
+        this.collectionFor = ConvertDataStructureToLookup.collectionFor(mod);
     }
 
     public K addInjections(K term) {
@@ -100,7 +100,7 @@ public class AddSortInjections {
                     if (wrapElement.isPresent()) {
                         KLabel wrappedLabel = KLabel(wrapElement.get());
                         KLabel elementLabel = KLabel(mod.attributesFor().apply(collectionLabel).get("element"));
-			KApply k = (KApply)term;
+                        KApply k = (KApply)term;
                         if (k.klabel().equals(wrappedLabel)) {
                             if (collectionIsMap(collectionLabel)) {
                                 // Map
