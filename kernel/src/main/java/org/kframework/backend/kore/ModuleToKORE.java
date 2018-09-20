@@ -1,6 +1,8 @@
 // Copyright (c) 2018 K Team. All Rights Reserved.
 package org.kframework.backend.kore;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 import com.google.common.collect.Sets;
@@ -56,6 +58,7 @@ import static org.kframework.kore.KORE.*;
 
 public class ModuleToKORE {
     private final Module module;
+    private final BiMap<String, String> kToKoreLabelMap = HashBiMap.create();
     private final FileUtil files;
     private final StringBuilder sb = new StringBuilder();
     private final Set<String> impureFunctions = new HashSet<>();
@@ -1117,6 +1120,10 @@ public class ModuleToKORE {
     };
 
     private void convert(String name) {
+        if (kToKoreLabelMap.containsKey(name)) {
+            sb.append(kToKoreLabelMap.get(name));
+            return;
+        }
         switch(name) {
         case "module":
         case "endmodule":
@@ -1127,33 +1134,37 @@ public class ModuleToKORE {
         case "alias":
         case "axiom":
             sb.append(name).append("'Kywd'");
+            kToKoreLabelMap.put(name, name + "'Kywd'");
             return;
         default: break;
         }
+        StringBuffer buffer = new StringBuffer();
         boolean inIdent = true;
         for (int i = 0; i < name.length(); i++) {
             if (identChar.matcher(name).region(i, name.length()).lookingAt()) {
                 if (!inIdent) {
                     inIdent = true;
-                    sb.append("'");
+                    buffer.append("'");
                 }
-                sb.append(name.charAt(i));
+                buffer.append(name.charAt(i));
             } else {
                 if (inIdent) {
                     inIdent = false;
-                    sb.append("'");
+                    buffer.append("'");
                 }
                 int charAt = (int) name.charAt(i);
                 if (charAt < 128 && asciiReadableEncoding[charAt] != null) {
-                    sb.append(asciiReadableEncoding[charAt]);
+                    buffer.append(asciiReadableEncoding[charAt]);
                 } else {
-                    sb.append(String.format("%04x", charAt));
+                    buffer.append(String.format("%04x", charAt));
                 }
             }
         }
         if (!inIdent) {
-            sb.append("'");
+            buffer.append("'");
         }
+        sb.append(buffer);
+        kToKoreLabelMap.put(name, buffer.toString());
     }
 
     @Override
@@ -1257,5 +1268,9 @@ public class ModuleToKORE {
                 throw KEMException.internalError("Cannot yet translate #klabel to kore", k);
             }
         }.apply(k);
+    }
+
+    public BiMap<String, String> getKToKoreLabelMap() {
+        return kToKoreLabelMap;
     }
 }

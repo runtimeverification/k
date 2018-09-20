@@ -1,6 +1,6 @@
-package org.kframework.kore
+package org.kframework.parser.kore
 
-import org.kframework.{kore => i}
+import org.kframework.parser.{kore => i}
 
 object implementation {
 
@@ -79,7 +79,7 @@ object implementation {
 
   object DefaultBuilders extends i.Builders {
 
-    import org.kframework.kore.implementation.{ConcreteClasses => d}
+    import org.kframework.parser.kore.implementation.{ConcreteClasses => d}
 
     def Definition(att: i.Attributes, modules: Seq[i.Module]): i.Definition = d.Definition(att, modules)
 

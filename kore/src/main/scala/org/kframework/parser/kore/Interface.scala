@@ -1,4 +1,4 @@
-package org.kframework.kore
+package org.kframework.parser.kore
 
 trait Definition {
   def att: Attributes

@@ -1,7 +1,7 @@
-package org.kframework.kore.parser
+package org.kframework.parser.kore.parser
 
-import org.kframework.kore._
-import org.kframework.kore
+import org.kframework.parser.kore._
+import org.kframework.parser.kore
 
 /** Function (i.e., unparser) from Kore to String. */
 

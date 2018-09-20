@@ -1,8 +1,9 @@
-package org.kframework.kore.parser
+package org.kframework.parser.kore.parser
 
 import org.apache.commons.lang3.StringEscapeUtils
-import org.kframework.kore._
-import org.kframework.kore
+import org.kframework.parser.kore._
+import org.kframework.parser.kore
+import org.kframework.parser.kore.implementation.DefaultBuilders
 
 /** Parsing error exception. */
 case class ParseError(msg: String) extends Exception(msg) // ParseError.msg eq Exception.detailMessage, i.e., msg() == getMessage()
@@ -41,12 +42,33 @@ class TextToKore(b: Builders) {
     parse(io.Source.fromFile(file))
   }
 
+  /** Parses the file and returns [[kore.Definition]]. */
+  @throws(classOf[ParseError])
+  def parsePattern(file: java.io.File): Pattern = {
+    parsePattern(io.Source.fromFile(file))
+  }
+
   /** Parses from the stream and returns [[kore.Definition]]. */
   @throws(classOf[ParseError])
   def parse(src: io.Source): Definition = {
     try {
       scanner.init(src)
       parseDefinition()
+    } catch {
+      case _: java.io.EOFException => throw ParseError("ERROR: Unexpected end of file while parsing")
+      case exc: ParseError => throw exc
+      case exc: Throwable => throw ParseError("ERROR: Unexpected error while parsing: " + exc.getMessage) // shouldn't be reachable
+    } finally {
+      scanner.close()
+    }
+  }
+
+  /** Parses from the stream and returns [[kore.Definition]]. */
+  @throws(classOf[ParseError])
+  def parsePattern(src: io.Source): Pattern = {
+    try {
+      scanner.init(src)
+      parsePattern()
     } catch {
       case _: java.io.EOFException => throw ParseError("ERROR: Unexpected end of file while parsing")
       case exc: ParseError => throw exc
@@ -514,35 +536,35 @@ class TextToKore(b: Builders) {
   private def parseString(): String = {
     def loop(s: StringBuilder): String = {
       scanner.next() match {
-        case '"' =>
-          s.toString()
-        case c =>
-          s += c; loop(s)
-        // case '\\' =>
-        //   val c = scanner.next()
-        //   var s1 = ""
-        //   c match {
-        //     case 'u' => // Unicode: 4 hex digits
-        //       val c1 = scanner.next()
-        //       val c2 = scanner.next()
-        //       val c3 = scanner.next()
-        //       val c4 = scanner.next()
-        //       s1 = StringEscapeUtils.unescapeJava("\\u" + c1 + c2 + c3 + c4)
-        //     case 'U' => // Unicode: 8 hex digits
-        //       val c1 = scanner.next()
-        //       val c2 = scanner.next()
-        //       val c3 = scanner.next()
-        //       val c4 = scanner.next()
-        //       val c5 = scanner.next()
-        //       val c6 = scanner.next()
-        //       val c7 = scanner.next()
-        //       val c8 = scanner.next()
-        //       s1 = StringEscapeUtils.unescapeJava("\\U" + c1 + c2 + c3 + c4 + c5 + c6 + c7 + c8)
-        //     case _ =>
-        //       s1 = StringEscapeUtils.unescapeJava("\\" + c)
-        //   }
-        //   s ++= s1;
-        //   loop(s)
+         case '\\' =>
+           val c = scanner.next()
+           var s1 = ""
+           c match {
+             case 'u' => // Unicode: 4 hex digits
+               val c1 = scanner.next()
+               val c2 = scanner.next()
+               val c3 = scanner.next()
+               val c4 = scanner.next()
+               s1 = StringEscapeUtils.unescapeJava("\\u" + c1 + c2 + c3 + c4)
+             case 'U' => // Unicode: 8 hex digits
+               val c1 = scanner.next()
+               val c2 = scanner.next()
+               val c3 = scanner.next()
+               val c4 = scanner.next()
+               val c5 = scanner.next()
+               val c6 = scanner.next()
+               val c7 = scanner.next()
+               val c8 = scanner.next()
+               s1 = StringEscapeUtils.unescapeJava("\\U" + c1 + c2 + c3 + c4 + c5 + c6 + c7 + c8)
+             case _ =>
+               s1 = StringEscapeUtils.unescapeJava("\\" + c)
+           }
+           s ++= s1;
+           loop(s)
+         case '"' =>
+           s.toString()
+         case c =>
+           s += c; loop(s)
       }
     }
 
@@ -743,13 +765,11 @@ class TextToKore(b: Builders) {
   private def error(expected: Char, actual: Char): ParseError = {
     error("'" + expected + "'", "'" + actual + "'")
   }
-
-
-
 }
 
 /** Collection of static methods. */
 object TextToKore {
+  def apply(): TextToKore = new TextToKore(DefaultBuilders)
   def apply(b: Builders): TextToKore = new TextToKore(b)
 
   // Lexicon checkers
@@ -763,7 +783,7 @@ object TextToKore {
   }
 
   def isObjectIdChar(c: Char): Boolean = {
-    isLetter(c) || isDigit(c) || c == ''' || c == '-'
+    isLetter(c) || isDigit(c) || c == '\'' || c == '-'
   }
 
 }
