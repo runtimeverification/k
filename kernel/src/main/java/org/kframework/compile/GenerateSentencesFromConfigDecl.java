@@ -251,7 +251,7 @@ public class GenerateSentencesFromConfigDecl {
             @Override
             public K apply(KToken k) {
                 if (k.sort().equals(Sorts.KConfigVar())) {
-                    if (sort.equals(Sorts.K())) {
+                    if (sort == null || sort.equals(Sorts.K())) {
                         return KApply(KLabel("Map:lookup"), INIT, k);
                     } else {
                         h.sentences = (Set<Sentence>) h.sentences.$bar(genProjection(sort, m));
