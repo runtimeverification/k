@@ -1,4 +1,4 @@
-package org.kframework.kore.parser
+package org.kframework.parser.kore.parser
 
 /** A scanner of an input stream.
   *

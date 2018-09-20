@@ -12,6 +12,12 @@ import org.kframework.kore.K;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.RunProcess;
 import org.kframework.main.Main;
+import org.kframework.parser.kore.Definition;
+import org.kframework.parser.kore.Pattern;
+import org.kframework.parser.kore.implementation;
+import org.kframework.parser.kore.parser.KoreToK;
+import org.kframework.parser.kore.parser.ParseError;
+import org.kframework.parser.kore.parser.TextToKore;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.rewriter.SearchType;
 import org.kframework.unparser.OutputModes;
@@ -81,12 +87,14 @@ public class HaskellRewriter implements Function<Module, Rewriter> {
                     String pgmPath = files.resolveTemp("pgm.kore").getAbsolutePath();
                     String[] koreCommand = haskellKRunOptions.haskellBackendCommand.split("\\s+");
                     String koreDirectory = haskellKRunOptions.haskellBackendHome;
+                    File koreOutputFile = files.resolveTemp("result.kore");
                     List<String> args = new ArrayList<String>();
                     args.addAll(Arrays.asList(koreCommand));
                     args.addAll(Arrays.asList(
                             defPath,
                             "--module", moduleName,
-                            "--pattern", pgmPath));
+                            "--pattern", pgmPath,
+                            "--output", koreOutputFile.getAbsolutePath()));
                     if (options.depth != null) {
                         args.add("--depth");
                         args.add(options.depth.toString());
@@ -95,10 +103,16 @@ public class HaskellRewriter implements Function<Module, Rewriter> {
                     try {
                         File korePath = koreDirectory == null ? null : new File(koreDirectory);
                         executeCommandBasic(korePath, koreCommand);
+                        TextToKore textToKore = TextToKore.apply();
+                        Pattern kore = textToKore.parsePattern(koreOutputFile);
+                        K outputK = KoreToK.apply(kore);
+                        return new RewriterResult(Optional.empty(), outputK);
                     } catch (IOException e) {
                         e.printStackTrace();
                     } catch (InterruptedException e) {
                         e.printStackTrace();
+                    } catch (ParseError parseError) {
+                        parseError.printStackTrace();
                     }
 
                 }
