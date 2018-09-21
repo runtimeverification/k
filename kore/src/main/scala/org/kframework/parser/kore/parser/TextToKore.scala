@@ -536,35 +536,35 @@ class TextToKore(b: Builders) {
   private def parseString(): String = {
     def loop(s: StringBuilder): String = {
       scanner.next() match {
-        case '"' =>
-          s.toString()
-        case c =>
-          s += c; loop(s)
-        // case '\\' =>
-        //   val c = scanner.next()
-        //   var s1 = ""
-        //   c match {
-        //     case 'u' => // Unicode: 4 hex digits
-        //       val c1 = scanner.next()
-        //       val c2 = scanner.next()
-        //       val c3 = scanner.next()
-        //       val c4 = scanner.next()
-        //       s1 = StringEscapeUtils.unescapeJava("\\u" + c1 + c2 + c3 + c4)
-        //     case 'U' => // Unicode: 8 hex digits
-        //       val c1 = scanner.next()
-        //       val c2 = scanner.next()
-        //       val c3 = scanner.next()
-        //       val c4 = scanner.next()
-        //       val c5 = scanner.next()
-        //       val c6 = scanner.next()
-        //       val c7 = scanner.next()
-        //       val c8 = scanner.next()
-        //       s1 = StringEscapeUtils.unescapeJava("\\U" + c1 + c2 + c3 + c4 + c5 + c6 + c7 + c8)
-        //     case _ =>
-        //       s1 = StringEscapeUtils.unescapeJava("\\" + c)
-        //   }
-        //   s ++= s1;
-        //   loop(s)
+         case '\\' =>
+           val c = scanner.next()
+           var s1 = ""
+           c match {
+             case 'u' => // Unicode: 4 hex digits
+               val c1 = scanner.next()
+               val c2 = scanner.next()
+               val c3 = scanner.next()
+               val c4 = scanner.next()
+               s1 = StringEscapeUtils.unescapeJava("\\u" + c1 + c2 + c3 + c4)
+             case 'U' => // Unicode: 8 hex digits
+               val c1 = scanner.next()
+               val c2 = scanner.next()
+               val c3 = scanner.next()
+               val c4 = scanner.next()
+               val c5 = scanner.next()
+               val c6 = scanner.next()
+               val c7 = scanner.next()
+               val c8 = scanner.next()
+               s1 = StringEscapeUtils.unescapeJava("\\U" + c1 + c2 + c3 + c4 + c5 + c6 + c7 + c8)
+             case _ =>
+               s1 = StringEscapeUtils.unescapeJava("\\" + c)
+           }
+           s ++= s1;
+           loop(s)
+         case '"' =>
+           s.toString()
+         case c =>
+           s += c; loop(s)
       }
     }
 

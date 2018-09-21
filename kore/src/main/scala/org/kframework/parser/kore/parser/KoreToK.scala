@@ -1,15 +1,19 @@
 package org.kframework.parser.kore.parser
 
+import org.kframework.kore.KORE
 import org.kframework.parser.kore
 import org.kframework.{kore => k}
-import org.kframework.kore.KORE
 
-/** Parsing error exception. */
-case class TranslationError(msg: String) extends RuntimeException(msg) // ParseError.msg eq Exception.detailMessage, i.e., msg() == getMessage()
+import scala.collection.JavaConverters._
+
+/** Translation error exception. */
+case class TranslationError(msg: String) extends RuntimeException(msg)
 
 /** Conversion function from Kore to K. */
 
-object KoreToK {
+class KoreToK (headToLabel_ : java.util.Properties) {
+
+  val koreToKLabel = headToLabel_.asScala.toMap;
 
   /** Returns a [[k.Sort]] from [[kore.Sort]]. */
   def apply(s: kore.Sort): k.Sort = s match {
@@ -25,10 +29,14 @@ object KoreToK {
 
   /** Returns a [[k.KLabel]] from [[kore.SymbolOrAlias]] */
   def apply(head: kore.SymbolOrAlias): k.KLabel = {
-    if (head.params.length != 0)  {
-      throw new TranslationError("Parameterized Heads currently unsupported")
+    KORE.KLabel(extractKLabel(head.ctr), head.params.map(p => apply(p)): _*)
+  }
+
+  private def extractKLabel(head: String): String = {
+    if (head.startsWith("Lbl")) {
+      extractKLabel(head.substring(3))
     } else {
-      KORE.KLabel(head.ctr)
+      koreToKLabel.applyOrElse(head, Function.const(head))
     }
   }
 
@@ -36,8 +44,16 @@ object KoreToK {
   def apply(pat: kore.Pattern): k.K = pat match {
     case kore.Variable(name, sort) =>
       KORE.KVariable(name, KORE.Att.add(classOf[k.Sort].toString, apply(sort).toString()))
-    case kore.Application(head, args) =>
-      KORE.KApply(apply(head), args.map((k) => apply(k)))
+    case kore.Application(head, args) => head.ctr match {
+      case "inj" =>
+        apply(args.head)
+      case "kseq" =>
+        KORE.KSequence(args.map(apply(_)): _*)
+      case "dotk" =>
+        KORE.KSequence()
+      case _ =>
+        KORE.KApply(apply(head), args.map((k) => apply(k)))
+    }
     case kore.Top(s) =>
       throw new TranslationError("Top patterns currently unsupported")
     case kore.Bottom(s) =>
