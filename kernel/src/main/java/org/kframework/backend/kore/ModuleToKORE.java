@@ -1240,7 +1240,7 @@ public class ModuleToKORE {
                 sb.append("Var");
                 convert(k.name());
                 sb.append(":");
-                convert(k.att().get(Sort.class), false);
+                convert(k.att().getOptional(Sort.class).orElse(Sorts.K()), false);
             }
 
             @Override

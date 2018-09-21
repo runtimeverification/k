@@ -169,7 +169,7 @@ public class AddSortInjections {
             return KSequence(children, att);
         } else if (term instanceof KAs) {
             KAs kas = (KAs)term;
-            return KAs(addInjections(kas.pattern(), parentSort), kas.alias(), att);
+            return KAs(addInjections(kas.pattern(), actualSort), kas.alias(), att);
         } else {
             throw KEMException.internalError("Invalid category of k found.", term);
         }
@@ -202,15 +202,8 @@ public class AddSortInjections {
             KRewrite rew = (KRewrite)term;
             Sort leftSort = sort(rew.left(), expectedSort);
             Sort rightSort = sort(rew.right(), expectedSort);
-            if (leftSort == null && rightSort == null) {
-                return expectedSort;
-            } else if (leftSort == null) {
-                return rightSort;
-            } else if (rightSort == null) {
-                return leftSort;
-            }
-            return lub(Arrays.asList(leftSort, rightSort), term);
-        } else if (term instanceof KToken) {
+            return lubSort(leftSort, rightSort, expectedSort, term);
+       } else if (term instanceof KToken) {
             return ((KToken) term).sort();
         } else if (term instanceof KVariable) {
             return term.att().getOptional(Sort.class).orElse(Sorts.K());
@@ -222,10 +215,24 @@ public class AddSortInjections {
         } else if (term instanceof InjectedKLabel) {
             return Sorts.KItem();
         } else if (term instanceof KAs) {
-            return sort(((KAs) term).pattern(), expectedSort);
+            KAs as = (KAs) term;
+            Sort patternSort = sort(as.pattern(), expectedSort);
+            Sort rightSort = sort(as.alias(), expectedSort);
+            return lubSort(patternSort, rightSort, expectedSort, term);
         } else {
             throw KEMException.internalError("Invalid category of k found.", term);
         }
+    }
+
+    private Sort lubSort(Sort leftSort, Sort rightSort, Sort expectedSort, HasLocation loc) {
+        if (leftSort == null && rightSort == null) {
+            return expectedSort;
+        } else if (leftSort == null) {
+            return rightSort;
+        } else if (rightSort == null) {
+            return leftSort;
+        }
+        return lub(Arrays.asList(leftSort, rightSort), loc);
     }
 
     private Production production(KApply term) {
