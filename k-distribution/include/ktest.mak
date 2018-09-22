@@ -15,8 +15,8 @@ DEFDIR?=.
 # path relative to current definition of output/input files
 RESULTDIR?=$(TESTDIR)
 # all tests in test directory with matching file extension
-TESTS=$(wildcard $(TESTDIR)/*.$(EXT))
-PROOF_TESTS=$(wildcard $(TESTDIR)/*-spec.k)
+TESTS?=$(wildcard $(TESTDIR)/*.$(EXT))
+PROOF_TESTS?=$(wildcard $(TESTDIR)/*-spec.k)
 
 CHECK=| diff -
 
