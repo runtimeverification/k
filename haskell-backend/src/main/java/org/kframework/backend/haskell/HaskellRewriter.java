@@ -110,7 +110,7 @@ public class HaskellRewriter implements Function<Module, Rewriter> {
                         if (executeCommandBasic(korePath, koreCommand) != 0) {
                             throw KEMException.criticalError("Haskell backend returned non-zero exit code");
                         }
-                        TextToKore textToKore = TextToKore.apply();
+                        TextToKore textToKore = new TextToKore();
                         Pattern kore = textToKore.parsePattern(koreOutputFile);
                         KoreToK koreToK = new KoreToK(idsToLabels);
                         K outputK = koreToK.apply(kore);

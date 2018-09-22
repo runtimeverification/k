@@ -1138,7 +1138,7 @@ public class ModuleToKORE {
             return;
         default: break;
         }
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         boolean inIdent = true;
         for (int i = 0; i < name.length(); i++) {
             if (identChar.matcher(name).region(i, name.length()).lookingAt()) {

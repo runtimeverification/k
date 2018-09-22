@@ -1,5 +1,6 @@
 package org.kframework.parser.kore.parser
 
+import org.kframework.builtin.{KLabels, Sorts}
 import org.kframework.kore.KORE
 import org.kframework.parser.kore
 import org.kframework.{kore => k}
@@ -55,13 +56,13 @@ class KoreToK (headToLabel_ : java.util.Properties) {
         KORE.KApply(apply(head), args.map((k) => apply(k)))
     }
     case kore.Top(s) =>
-      throw new TranslationError("Top patterns currently unsupported")
+      KORE.KApply(KLabels.ML_TRUE)
     case kore.Bottom(s) =>
-      throw new TranslationError("Bottom patterns currently unsupported")
+      KORE.KApply(KLabels.ML_FALSE)
     case kore.And(s, p, q) =>
-      throw new TranslationError("And patterns currently unsupported")
+      KORE.KApply(KLabels.ML_AND, apply(p), apply(q))
     case kore.Or(s, p, q) =>
-      throw new TranslationError("Or patterns currently unsupported")
+      KORE.KApply(KLabels.ML_OR, apply(p), apply(q))
     case kore.Not(s, p) =>
       throw new TranslationError("Not patterns currently unsupported")
     case kore.Implies(s, p, q) =>
@@ -72,9 +73,6 @@ class KoreToK (headToLabel_ : java.util.Properties) {
       throw new TranslationError("Exists patterns currently unsupported")
     case kore.Forall(s, v, p) =>
       throw new TranslationError("Forall patterns currently unsupported")
-    // case Next(s, p) =>
-    //   "\\next" + "{" + apply(s) + "}" +
-    //     "(" + apply(p) + ")"
     case kore.Rewrites(s, p, q) =>
       KORE.KRewrite(apply(p), apply(q))
     case kore.Ceil(s, rs, p) =>
@@ -82,12 +80,12 @@ class KoreToK (headToLabel_ : java.util.Properties) {
     case kore.Floor(s, rs, p) =>
       throw new TranslationError("Floor patterns currently unsupported")
     case kore.Equals(s1, s2, p, q) =>
-      throw new TranslationError("Floor patterns currently unsupported")
+      throw new TranslationError("Equals patterns currently unsupported")
     case kore.Mem(s, rs, p, q) =>
       throw new TranslationError("Mem patterns currently unsupported")
     case kore.DomainValue(s, str) =>
       KORE.KToken(str, apply(s))
     case kore.StringLiteral(str) =>
-      throw new TranslationError("String literal patterns currently unsupported")
+      KORE.KToken(str, Sorts.KString)
   }
 }

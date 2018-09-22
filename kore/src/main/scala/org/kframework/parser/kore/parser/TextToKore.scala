@@ -12,7 +12,12 @@ case class ParseError(msg: String) extends Exception(msg) // ParseError.msg eq E
   *
   * @constructor Creates a new parser.
   */
-class TextToKore(b: Builders) {
+class TextToKore(b: Builders = DefaultBuilders) {
+
+  def this() {
+    this(DefaultBuilders)
+  }
+
   private val scanner = new Scanner()
 
   /**
@@ -769,7 +774,6 @@ class TextToKore(b: Builders) {
 
 /** Collection of static methods. */
 object TextToKore {
-  def apply(): TextToKore = new TextToKore(DefaultBuilders)
   def apply(b: Builders): TextToKore = new TextToKore(b)
 
   // Lexicon checkers
