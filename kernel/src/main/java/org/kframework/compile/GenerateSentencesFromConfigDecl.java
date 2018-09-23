@@ -223,7 +223,11 @@ public class GenerateSentencesFromConfigDecl {
     private static Set<Sentence> genProjection(Sort sort, Module m) {
         KLabel lbl = getProjectLbl(sort, m);
         KVariable var = KVariable("K", Att.empty().add(Sort.class, sort));
-        return Set(Production(lbl, sort, Seq(Terminal(lbl.name()), Terminal("("), NonTerminal(Sorts.K()), Terminal(")")), Att().add("function").add("projection")), Rule(KRewrite(KApply(lbl, var), var), BooleanUtils.TRUE, BooleanUtils.TRUE, Att().add("projection")));
+        Rule r = Rule(KRewrite(KApply(lbl, var), var), BooleanUtils.TRUE, BooleanUtils.TRUE, Att().add("projection"));
+        if (m.definedKLabels().contains(lbl)) {
+            return Set(r);
+        }
+        return Set(Production(lbl, sort, Seq(Terminal(lbl.name()), Terminal("("), NonTerminal(Sorts.K()), Terminal(")")), Att().add("function").add("projection")), r);
     }
 
     /**
