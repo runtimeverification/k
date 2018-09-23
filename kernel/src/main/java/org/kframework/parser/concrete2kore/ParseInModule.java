@@ -207,7 +207,7 @@ public class ParseInModule implements Serializable {
         }
         rez2 = new VariableTypeInferenceFilter(mod.subsorts(), mod.definedSorts(), mod.productionsFor(), false, false).apply(rez.right().get());
         if (rez2._1().isLeft()) {
-            rez2 = new AmbFilter(flase).apply(rez.right().get());
+            rez2 = new AmbFilter(false).apply(rez.right().get());
             return rez2._1().right().get();
         }
         rez3 = new PushAmbiguitiesDownAndPreferAvoid(mod.overloads()).apply(rez2._1().right().get());
