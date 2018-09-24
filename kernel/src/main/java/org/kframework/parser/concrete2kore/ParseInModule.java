@@ -124,7 +124,7 @@ public class ParseInModule implements Serializable {
         if (result._1().isLeft()) {
             parseInfo = Left.apply(result._1().left().get());
         } else {
-            parseInfo = Right.apply(new TreeNodesToKORE(Outer::parseSort, inferSortChecks).apply(result._1().right().get()));
+            parseInfo = Right.apply(new TreeNodesToKORE(Outer::parseSort, inferSortChecks && strict).apply(result._1().right().get()));
         }
         return new Tuple2<>(parseInfo, result._2());
     }
