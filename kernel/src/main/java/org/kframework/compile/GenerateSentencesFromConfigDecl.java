@@ -520,7 +520,7 @@ public class GenerateSentencesFromConfigDecl {
         if (ensures != null) {
             att = att.add("topcell");
         }
-        att = att.add("cell");
+        att = att.add("cell").add("cellName", cellName);
         return att.addAll(getCellPropertiesAsAtt(k));
     }
 
