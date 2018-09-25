@@ -1,3 +1,4 @@
+// Copyright (c) 2018 K Team. All Rights Reserved.
 module TEST
   imports INT
   imports BOOL
