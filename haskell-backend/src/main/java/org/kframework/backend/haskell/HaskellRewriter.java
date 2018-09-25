@@ -12,20 +12,27 @@ import org.kframework.kore.K;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.RunProcess;
 import org.kframework.main.Main;
+import org.kframework.parser.kore.Pattern;
+import org.kframework.parser.kore.parser.KoreToK;
+import org.kframework.parser.kore.parser.ParseError;
+import org.kframework.parser.kore.parser.TextToKore;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.rewriter.SearchType;
 import org.kframework.unparser.OutputModes;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
+import org.kframework.utils.inject.DefinitionScoped;
 import org.kframework.utils.inject.RequestScoped;
 import scala.Tuple2;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.function.Function;
 
 
@@ -36,18 +43,22 @@ public class HaskellRewriter implements Function<Module, Rewriter> {
     private final CompiledDefinition def;
     private final KRunOptions options;
     private final HaskellKRunOptions haskellKRunOptions;
+    private final Properties idsToLabels;
 
     @Inject
     public HaskellRewriter(
             FileUtil files,
             CompiledDefinition def,
             KRunOptions options,
+            InitializeDefinition init,
             HaskellKRunOptions haskellKRunOptions
             ) {
         this.files = files;
         this.def = def;
         this.haskellKRunOptions = haskellKRunOptions;
         this.options = options;
+        this.idsToLabels = init.serialized;
+
     }
 
     @Override
@@ -81,12 +92,14 @@ public class HaskellRewriter implements Function<Module, Rewriter> {
                     String pgmPath = files.resolveTemp("pgm.kore").getAbsolutePath();
                     String[] koreCommand = haskellKRunOptions.haskellBackendCommand.split("\\s+");
                     String koreDirectory = haskellKRunOptions.haskellBackendHome;
+                    File koreOutputFile = files.resolveTemp("result.kore");
                     List<String> args = new ArrayList<String>();
                     args.addAll(Arrays.asList(koreCommand));
                     args.addAll(Arrays.asList(
                             defPath,
                             "--module", moduleName,
-                            "--pattern", pgmPath));
+                            "--pattern", pgmPath,
+                            "--output", koreOutputFile.getAbsolutePath()));
                     if (options.depth != null) {
                         args.add("--depth");
                         args.add(options.depth.toString());
@@ -94,11 +107,20 @@ public class HaskellRewriter implements Function<Module, Rewriter> {
                     koreCommand = args.toArray(koreCommand);
                     try {
                         File korePath = koreDirectory == null ? null : new File(koreDirectory);
-                        executeCommandBasic(korePath, koreCommand);
+                        if (executeCommandBasic(korePath, koreCommand) != 0) {
+                            throw KEMException.criticalError("Haskell backend returned non-zero exit code");
+                        }
+                        TextToKore textToKore = new TextToKore();
+                        Pattern kore = textToKore.parsePattern(koreOutputFile);
+                        KoreToK koreToK = new KoreToK(idsToLabels);
+                        K outputK = koreToK.apply(kore);
+                        return new RewriterResult(Optional.empty(), outputK);
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        throw KEMException.criticalError("I/O Error while executing", e);
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        throw KEMException.criticalError("Interrupted while executing", e);
+                    } catch (ParseError parseError) {
+                        throw KEMException.criticalError("Error parsing haskell backend output", parseError);
                     }
 
                 }
@@ -183,6 +205,22 @@ public class HaskellRewriter implements Function<Module, Rewriter> {
             // if we're not nailgun, we can't do the above because System.in won't be interruptible,
             // and we don't really want or need to anyway.
             return pb.inheritIO().start().waitFor();
+        }
+    }
+
+    @DefinitionScoped
+    public static class InitializeDefinition {
+        final Properties serialized;
+
+        @Inject
+        public InitializeDefinition(FileUtil files) {
+            try {
+                FileInputStream input = new FileInputStream(files.resolveKompiled("kore_to_k_labels.properties"));
+                serialized = new Properties();
+                serialized.load(input);
+            } catch (IOException e) {
+                throw KEMException.criticalError("Error while loading Kore to K label map", e);
+            }
         }
     }
 
