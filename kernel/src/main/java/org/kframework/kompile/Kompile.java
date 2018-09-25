@@ -257,7 +257,7 @@ public class Kompile {
     }
 
     public static Definition resolveFreshConstants(Definition input) {
-        return DefinitionTransformer.from(new ResolveFreshConstants(input)::resolve, "resolving !Var variables")
+        return DefinitionTransformer.from(new ResolveFreshConstants(input, false)::resolve, "resolving !Var variables")
                 .apply(input);
     }
 

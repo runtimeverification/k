@@ -102,6 +102,7 @@ public class ModuleToKORE {
         dummyHookedSorts.add("SET.Set");
         dummyHookedSorts.add("MAP.Map");
         dummyHookedSorts.add("LIST.List");
+        dummyHookedSorts.add("ARRAY.Array");
         for (Sort sort : iterable(module.definedSorts())) {
             if (sort.equals(Sorts.K()) || sort.equals(Sorts.KItem())) {
                 continue;
@@ -111,10 +112,15 @@ public class ModuleToKORE {
             if (att.contains(Attribute.HOOK_KEY) && !dummyHookedSorts.contains(att.get(Attribute.HOOK_KEY))) {
                 sb.append("hooked-");
             } else if (att.contains(Attribute.HOOK_KEY)) {
-              Production concatProd = stream(module.productionsForSort().apply(sort)).filter(p -> p.att().contains("element")).findAny().get();
-              att = att.add("element", K.class, KApply(KLabel(concatProd.att().get("element"))));
-              att = att.add("concat", K.class, KApply(concatProd.klabel().get()));
-              att = att.add("unit", K.class, KApply(KLabel(concatProd.att().get("unit"))));
+                if (att.get(Attribute.HOOK_KEY).equals("ARRAY.Array")) {
+                    att = att.remove("element").add("element", K.class, KApply(KLabel(att.get("element"))));
+                    att = att.remove("unit").add("unit", K.class, KApply(KLabel(att.get("unit"))));
+                } else {
+                    Production concatProd = stream(module.productionsForSort().apply(sort)).filter(p -> p.att().contains("element")).findAny().get();
+                    att = att.add("element", K.class, KApply(KLabel(concatProd.att().get("element"))));
+                    att = att.add("concat", K.class, KApply(concatProd.klabel().get()));
+                    att = att.add("unit", K.class, KApply(KLabel(concatProd.att().get("unit"))));
+                }
             }
             sb.append("sort ");
             convert(sort, false);
@@ -380,7 +386,7 @@ public class ModuleToKORE {
             int numTerms = 0;
             for (Production prod : iterable(mutable(module.productionsForSort()).getOrDefault(sort, Set()))) {
                 prod = computePolyProd(prod);
-                if (isFunction(prod)) {
+                if (isFunction(prod) || prod.isSubsort()) {
                     continue;
                 }
                 if (prod.klabel().isEmpty() && !((prod.att().contains("token") && !hasToken) || prod.isSubsort())) {
@@ -393,18 +399,6 @@ public class ModuleToKORE {
                 if (prod.att().contains("token") && !hasToken) {
                     convertTokenProd(sort);
                     hasToken = true;
-                } else if (prod.isSubsort()) {
-                    sb.append("\\exists{");
-                    convert(sort, false);
-                    sb.append("} (Val:");
-                    convert(prod.nonterminal(0).sort(), prod);
-                    sb.append(", inj{");
-                    convert(prod.nonterminal(0).sort(), prod);
-                    sb.append(", ");
-                    convert(sort, false);
-                    sb.append("} (Val:");
-                    convert(prod.nonterminal(0).sort(), prod);
-                    sb.append("))");
                 } else if (prod.klabel().isDefined()) {
                     for (int i = 0; i < prod.arity(); i++) {
                         sb.append("\\exists{");
@@ -427,6 +421,26 @@ public class ModuleToKORE {
                     }
                 }
                 sb.append(", ");
+            }
+            for (Sort s : iterable(module.definedSorts())) {
+                if (module.subsorts().lessThan(s, sort)) {
+                    numTerms++;
+                    sb.append("\\or{");
+                    convert(sort, false);
+                    sb.append("} (");
+                    sb.append("\\exists{");
+                    convert(sort, false);
+                    sb.append("} (Val:");
+                    convert(s, false);
+                    sb.append(", inj{");
+                    convert(s, false);
+                    sb.append(", ");
+                    convert(sort, false);
+                    sb.append("} (Val:");
+                    convert(s, false);
+                    sb.append("))");
+                    sb.append(", ");
+                }
             }
             Att sortAtt = module.sortAttributesFor().get(sort).getOrElse(() -> KORE.Att());
             if (!hasToken && sortAtt.contains("token")) {
@@ -1237,7 +1251,7 @@ public class ModuleToKORE {
                 sb.append("Var");
                 convert(k.name());
                 sb.append(":");
-                convert(k.att().get(Sort.class), false);
+                convert(k.att().getOptional(Sort.class).orElse(Sorts.K()), false);
             }
 
             @Override

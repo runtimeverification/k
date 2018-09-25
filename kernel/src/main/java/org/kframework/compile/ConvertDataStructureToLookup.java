@@ -1,5 +1,5 @@
 // Copyright (c) 2016-2018 Runtime Verification, Inc. (RV-Match team). All Rights Reserved.
-package org.kframework.backend.ocaml;
+package org.kframework.compile;
 
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Lists;

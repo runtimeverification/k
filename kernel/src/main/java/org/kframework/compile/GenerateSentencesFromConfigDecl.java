@@ -21,7 +21,7 @@ import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
 import scala.Option;
 import scala.Tuple2;
-import scala.Tuple3;
+import scala.Tuple4;
 import scala.collection.Set;
 
 import java.util.ArrayList;
@@ -78,7 +78,7 @@ public class GenerateSentencesFromConfigDecl {
      * @param m The module the configuration declaration is in. Used to get the sort of leaf cells.
      * @return A tuple of the sentences generated, a list of the sorts of the children of the cell, and the body of the initializer.
      */
-    private static Tuple3<Set<Sentence>, List<Sort>, K> genInternal(K term, K ensures, Att cfgAtt, Module m) {
+    private static Tuple4<Set<Sentence>, List<Sort>, K, Boolean> genInternal(K term, K ensures, Att cfgAtt, Module m) {
         if (term instanceof KApply) {
             KApply kapp = (KApply) term;
             if (kapp.klabel().name().equals("#configCell")) {
@@ -97,13 +97,13 @@ public class GenerateSentencesFromConfigDecl {
                                 boolean isStream = cellProperties.getOption("stream").isDefined();
 
                                 K cellContents = kapp.klist().items().get(2);
-                                Tuple3<Set<Sentence>, List<Sort>, K> childResult = genInternal(
+                                Tuple4<Set<Sentence>, List<Sort>, K, Boolean> childResult = genInternal(
                                         cellContents, null, cfgAtt, m);
 
-                                boolean isLeafCell = childResult._1().isEmpty();
-                                Tuple3<Set<Sentence>, Sort, K> myResult = computeSentencesOfWellFormedCell(isLeafCell, isStream, multiplicity, cfgAtt, m, cellName, cellProperties,
+                                boolean isLeafCell = childResult._4();
+                                Tuple4<Set<Sentence>, Sort, K, Boolean> myResult = computeSentencesOfWellFormedCell(isLeafCell, isStream, multiplicity, cfgAtt, m, cellName, cellProperties,
                                         childResult._2(), childResult._3(), ensures, hasConfigOrRegularVariable(cellContents));
-                                return Tuple3.apply((Set<Sentence>)childResult._1().$bar(myResult._1()), Lists.newArrayList(myResult._2()), myResult._3());
+                                return Tuple4.apply((Set<Sentence>)childResult._1().$bar(myResult._1()), Lists.newArrayList(myResult._2()), myResult._3(), false);
                             }
                         }
                     }
@@ -123,10 +123,10 @@ public class GenerateSentencesFromConfigDecl {
                                 if (realProds.size() == 1) { // should be only a single initializer
                                     if (realProds.head().items().size() == 1) {
                                         // XCell ::= "initXCell"
-                                        return Tuple3.apply(Set(), Lists.newArrayList(sort), KApply(KLabel(getInitLabel(sort))));
+                                        return Tuple4.apply(Set(), Lists.newArrayList(sort), KApply(KLabel(getInitLabel(sort))), true);
                                     } else if (realProds.head().items().size() == 4) {
                                         // XCell ::= "initXCell" "(" Map ")"
-                                        return Tuple3.apply(Set(), Lists.newArrayList(sort), KApply(KLabel(getInitLabel(sort)), INIT));
+                                        return Tuple4.apply(Set(), Lists.newArrayList(sort), KApply(KLabel(getInitLabel(sort)), INIT), true);
                                     }
                                 }
                             }
@@ -138,7 +138,7 @@ public class GenerateSentencesFromConfigDecl {
                 //is a cell bag, and thus represents the multiple children of its parent cell
                 if (ensures != null) {
                     //top level cell, therefore, should be the children of the generatedTop cell
-                    KToken cellLabel = KToken(KLabels.GENERATED_TOP_CELL, Sort("#CellName"));
+                    KToken cellLabel = KToken(KLabels.GENERATED_TOP_CELL_NAME, Sort("#CellName"));
                     K generatedTop = KApply(KLabel("#configCell"), cellLabel, KApply(KLabel("#cellPropertyListTerminator")), term, cellLabel);
                     return genInternal(generatedTop, ensures, cfgAtt, m);
                 }
@@ -148,26 +148,30 @@ public class GenerateSentencesFromConfigDecl {
                 List<K> initializers = Lists.newArrayList();
                 for (K cell : cells) {
                     //for each cell, generate the child and inform the parent of the children it contains
-                    Tuple3<Set<Sentence>, List<Sort>, K> childResult = genInternal(cell, null, cfgAtt, m);
+                    Tuple4<Set<Sentence>, List<Sort>, K, Boolean> childResult = genInternal(cell, null, cfgAtt, m);
                     accumSentences = (Set<Sentence>)accumSentences.$bar(childResult._1());
                     sorts.addAll(childResult._2());
                     initializers.add(childResult._3());
                 }
-                return Tuple3.apply(accumSentences, sorts, KApply(KLabels.CELLS, immutable(initializers)));
+                return Tuple4.apply(accumSentences, sorts, KApply(KLabels.CELLS, immutable(initializers)), false);
             }
             //TODO: call generic getSort method of some kind
             // child of a leaf cell. Generate no productions, but inform parent that it has a child of a particular sort.
             // A leaf cell initializes to the value specified in the configuration declaration.
-            return Tuple3.apply(Set(), Lists.newArrayList(kapp.att().get(Production.class).sort()), getLeafInitializer(term));
+            Sort sort = kapp.att().get(Production.class).sort();
+            Tuple2<K, Set<Sentence>> res = getLeafInitializer(term, m);
+            return Tuple4.apply(res._2(), Lists.newArrayList(sort), res._1(), true);
         } else if (term instanceof KToken) {
             // child of a leaf cell. Generate no productions, but inform parent that it has a child of a particular sort.
             // A leaf cell initializes to the value specified in the configuration declaration.
             KToken ktoken = (KToken) term;
-            return Tuple3.apply(Set(), Lists.newArrayList(ktoken.sort()), getLeafInitializer(term));
+            Tuple2<K, Set<Sentence>> res = getLeafInitializer(term, m);
+            return Tuple4.apply(res._2(), Lists.newArrayList(ktoken.sort()), res._1(), true);
         } else if (term instanceof KSequence || term instanceof KVariable || term instanceof InjectedKLabel) {
             // child of a leaf cell. Generate no productions, but inform parent that it has a child of a particular sort.
             // A leaf cell initializes to the value specified in the configuration declaration.
-            return Tuple3.apply(Set(), Lists.newArrayList(Sorts.K()), getLeafInitializer(term));
+            Tuple2<K, Set<Sentence>> res = getLeafInitializer(term, m);
+            return Tuple4.apply(res._2(), Lists.newArrayList(Sorts.K()), res._1(), true);
         } else {
             throw KEMException.compilerError("Unexpected value found in configuration declaration, expected KToken, KSequence, or KApply", term);
         }
@@ -210,22 +214,57 @@ public class GenerateSentencesFromConfigDecl {
         }
     }
 
+    private static KLabel getProjectLbl(Sort sort, Module m) {
+        KLabel lbl;
+        lbl = KLabel("project:" + sort.toString());
+        return lbl;
+    }
+
+    private static Set<Sentence> genProjection(Sort sort, Module m) {
+        KLabel lbl = getProjectLbl(sort, m);
+        KVariable var = KVariable("K", Att.empty().add(Sort.class, sort));
+        Rule r = Rule(KRewrite(KApply(lbl, var), var), BooleanUtils.TRUE, BooleanUtils.TRUE, Att().add("projection"));
+        if (m.definedKLabels().contains(lbl)) {
+            return Set(r);
+        }
+        return Set(Production(lbl, sort, Seq(Terminal(lbl.name()), Terminal("("), NonTerminal(Sorts.K()), Terminal(")")), Att().add("function").add("projection")), r);
+    }
+
     /**
      * Returns the body of an initializer for a leaf cell: replaces any configuration variables
      * with map lookups in the initialization map.
      * @param leafContents
      * @return
      */
-    private static K getLeafInitializer(K leafContents) {
-        return new TransformK() {
+    private static Tuple2<K, Set<Sentence>> getLeafInitializer(K leafContents, Module m) {
+        class Holder {
+            Set<Sentence> sentences = Set();
+        }
+        Holder h = new Holder();
+        return Tuple2.apply(new TransformK() {
+            private Sort sort;
+
+            @Override
+            public K apply(KApply k) {
+                if (k.klabel().name().startsWith("#SemanticCastTo")) {
+                    sort = k.att().get(Production.class).sort();
+                }
+                return super.apply(k);
+            }
+
             @Override
             public K apply(KToken k) {
                 if (k.sort().equals(Sorts.KConfigVar())) {
-                    return KApply(KLabel("Map:lookup"), INIT, k);
+                    if (sort == null || sort.equals(Sorts.K())) {
+                        return KApply(KLabel("Map:lookup"), INIT, k);
+                    } else {
+                        h.sentences = (Set<Sentence>) h.sentences.$bar(genProjection(sort, m));
+                        return KApply(getProjectLbl(sort, m), KApply(KLabel("Map:lookup"), INIT, k));
+                    }
                 }
                 return k;
             }
-        }.apply(leafContents);
+        }.apply(leafContents), h.sentences);
     }
 
     private static KVariable INIT = KVariable("Init", Att.empty().add(Sort.class, Sorts.Map()));
@@ -253,7 +292,7 @@ public class GenerateSentencesFromConfigDecl {
      * @return A tuple containing the sentences associated with the cell, the sort of the cell, and the term to be used to initialize
      * this cell in the initializer of its parent cell.
      */
-    private static Tuple3<Set<Sentence>, Sort, K> computeSentencesOfWellFormedCell(
+    private static Tuple4<Set<Sentence>, Sort, K, Boolean> computeSentencesOfWellFormedCell(
             boolean isLeaf,
             boolean isStream,
             Multiplicity multiplicity,
@@ -456,7 +495,7 @@ public class GenerateSentencesFromConfigDecl {
                 rhs = KApply(KLabel(initLabel));
             }
         }
-        return Tuple3.apply(immutable(sentences),cellsSort,rhs);
+        return Tuple4.apply(immutable(sentences),cellsSort,rhs, false);
     }
 
     /**
@@ -481,7 +520,7 @@ public class GenerateSentencesFromConfigDecl {
         if (ensures != null) {
             att = att.add("topcell");
         }
-        att = att.add("cell");
+        att = att.add("cell").add("cellName", cellName);
         return att.addAll(getCellPropertiesAsAtt(k));
     }
 

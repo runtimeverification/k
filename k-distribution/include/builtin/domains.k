@@ -345,7 +345,7 @@ module INT
                | Int "divInt" Int               [function, left, smtlib(div), hook(INT.ediv)]
                | Int "modInt" Int               [function, left, smtlib(mod), hook(INT.emod)]
                > left:
-                 Int "+Int" Int                 [function, functional, left, smtlib(+), latex({#1}\mathrel{+_{\scriptstyle\it Int}}{#2}), hook(INT.add)]
+                 Int "+Int" Int                 [function, functional, left, smtlib(+), latex({#1}\mathrel{+_{\scriptstyle\it Int}}{#2}), hook(INT.add), klabel(_+Int_), symbol]
                | Int "-Int" Int                 [function, functional, left, smtlib(-), latex({#1}\mathrel{-_{\scriptstyle\it Int}}{#2}), hook(INT.sub)]
                > left:
                  Int ">>Int" Int                [function, left, latex({#1}\mathrel{\gg_{\scriptstyle\it Int}}{#2}), hook(INT.shr)]

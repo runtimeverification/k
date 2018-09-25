@@ -35,5 +35,7 @@ object Sorts {
   val Bag = Sort("Bag")
   val Cell = Sort("Cell")
 
+  val GeneratedCounterCell = Sort("GeneratedCounterCell")
+
   val Id = Sort("Id")
 }

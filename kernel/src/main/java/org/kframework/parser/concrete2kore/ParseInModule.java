@@ -124,7 +124,7 @@ public class ParseInModule implements Serializable {
         if (result._1().isLeft()) {
             parseInfo = Left.apply(result._1().left().get());
         } else {
-            parseInfo = Right.apply(new TreeNodesToKORE(Outer::parseSort).apply(result._1().right().get()));
+            parseInfo = Right.apply(new TreeNodesToKORE(Outer::parseSort, inferSortChecks && strict).apply(result._1().right().get()));
         }
         return new Tuple2<>(parseInfo, result._2());
     }
@@ -188,7 +188,7 @@ public class ParseInModule implements Serializable {
         warn = rez2._2();
 
         rez3 = new PushAmbiguitiesDownAndPreferAvoid(disambModule.overloads()).apply(rez2._1().right().get());
-        rez2 = new AmbFilter().apply(rez3);
+        rez2 = new AmbFilter(strict && inferSortChecks).apply(rez3);
         warn = Sets.union(rez2._2(), warn);
         rez2 = new AddEmptyLists(disambModule).apply(rez2._1().right().get());
         warn = Sets.union(rez2._2(), warn);
@@ -202,16 +202,16 @@ public class ParseInModule implements Serializable {
         Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheckVisitor(mod.subsorts()).apply(rez3);
         Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rez2;
         if (rez.isLeft()) {
-            rez2 = new AmbFilter().apply(rez3);
+            rez2 = new AmbFilter(false).apply(rez3);
             return rez2._1().right().get();
         }
         rez2 = new VariableTypeInferenceFilter(mod.subsorts(), mod.definedSorts(), mod.productionsFor(), false, false).apply(rez.right().get());
         if (rez2._1().isLeft()) {
-            rez2 = new AmbFilter().apply(rez.right().get());
+            rez2 = new AmbFilter(false).apply(rez.right().get());
             return rez2._1().right().get();
         }
         rez3 = new PushAmbiguitiesDownAndPreferAvoid(mod.overloads()).apply(rez2._1().right().get());
-        rez2 = new AmbFilter().apply(rez3);
+        rez2 = new AmbFilter(false).apply(rez3);
         return rez2._1().right().get();
     }
 }
