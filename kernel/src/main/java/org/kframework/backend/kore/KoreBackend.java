@@ -25,15 +25,19 @@ import org.kframework.definition.ModuleTransformer;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.Kompile;
 import org.kframework.kompile.KompileOptions;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 
 import scala.Function1;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
+import java.util.Properties;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -76,7 +80,18 @@ public class KoreBackend implements Backend {
         Module mainModule = def.kompiledDefinition.mainModule();
         mainModule = new GenerateSortPredicateRules(true).gen(mainModule);
         mainModule = ModuleTransformer.fromKTransformer(new AddSortInjections(mainModule)::addInjections, "Add sort injections").apply(mainModule);
-        return new ModuleToKORE(mainModule, files, def.topCellInitializer).convert(heatCoolEquations);
+        ModuleToKORE moduleToKORE = new ModuleToKORE(mainModule, files, def.topCellInitializer);
+        String kompiledString = moduleToKORE.convert(heatCoolEquations);
+        Properties koreToKLabels = new Properties();
+        koreToKLabels.putAll(moduleToKORE.getKToKoreLabelMap().inverse());
+        try {
+            FileOutputStream output = new FileOutputStream(files.resolveKompiled("kore_to_k_labels.properties"));
+            koreToKLabels.store(output, "Properties file containing the mapping from kore to k labels");
+
+        } catch (IOException e) {
+            throw KEMException.criticalError("Error while saving kore to K labels map", e);
+        }
+        return kompiledString;
     }
 
     @Override

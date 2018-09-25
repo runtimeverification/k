@@ -6,7 +6,7 @@ import java.util.Optional
 import org.kframework.attributes._
 import org.kframework.builtin.Sorts
 import org.kframework.definition.{NonTerminal, Production}
-import org.kframework.kore
+import org.kframework.{kore => k}
 import org.kframework.kore.Unapply._
 import org.kframework.kore.{KORE, _}
 import org.pcollections.PStack
@@ -45,7 +45,7 @@ class TreeNodesToKORE(parseSort: java.util.function.Function[String, Sort], stri
     case t@KToken(s, sort) if sort == Sorts.KVariable =>
       KVariable(s.trim, t.att)
 
-    case t: kore.KToken => t
+    case t: k.KToken => t
 
     case t@KApply(KLabel("#KSequence"), items) =>
       KSequence(downList(items).asJava, t.att)
