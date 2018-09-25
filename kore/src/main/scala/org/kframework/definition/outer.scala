@@ -104,8 +104,16 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
 
   lazy val productions: Set[Production] = sentences collect { case p: Production => p }
 
+  lazy val localProductions: Set[Production] = localSentences collect { case p: Production => p }
+
   lazy val productionsFor: Map[KLabel, Set[Production]] =
     productions
+      .collect({ case p if p.klabel != None => p })
+      .groupBy(_.klabel.get)
+      .map { case (l, ps) => (l, ps) }
+
+  lazy val localProductionsFor: Map[KLabel, Set[Production]] =
+    localProductions
       .collect({ case p if p.klabel != None => p })
       .groupBy(_.klabel.get)
       .map { case (l, ps) => (l, ps) }
@@ -129,6 +137,10 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
   @transient
   lazy val definedKLabels: Set[KLabel] =
     (productionsFor.keys.toSet).filter(!_.isInstanceOf[KVariable])
+
+  @transient
+  lazy val localKLabels: Set[KLabel] =
+    (localProductionsFor.keys.toSet).filter(!_.isInstanceOf[KVariable])
 
   lazy val klabelsDefinedInRules: Map[KLabel, Int] = {
     def mergeMultiset(map1: Map[KLabel, Int], map2: Map[KLabel, Int]) = map1 ++ map2.map { case (k, v) => k -> (v + map1.getOrElse(k, 0)) }

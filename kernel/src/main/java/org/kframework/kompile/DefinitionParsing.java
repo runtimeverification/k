@@ -387,7 +387,7 @@ public class DefinitionParsing {
             parsedBubbles.getAndIncrement();
             kem.addAllKException(result._2().stream().map(e -> e.getKException()).collect(Collectors.toList()));
             if (result._1().isRight()) {
-                KApply k = (KApply) new TreeNodesToKORE(Outer::parseSort).down(result._1().right().get());
+                KApply k = (KApply) new TreeNodesToKORE(Outer::parseSort, isStrict).down(result._1().right().get());
                 k = KApply(k.klabel(), k.klist(), k.att().addAll(b.att().remove("contentStartLine").remove("contentStartColumn").remove(Source.class).remove(Location.class)));
                 cache.put(b.contents(), new ParsedSentence(k, new HashSet<>(result._2())));
                 return Stream.of(k);

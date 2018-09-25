@@ -98,6 +98,9 @@ public class CompiledDefinition implements Serializable {
                             if (k.klabel().name().contains("#SemanticCastTo")
                                     && k.items().size() == 1 && k.items().get(0) instanceof KApply) {
                                 KApply theMapLookup = (KApply) k.items().get(0);
+                                if (theMapLookup.klabel().name().startsWith("project:")) {
+                                    theMapLookup = (KApply) theMapLookup.items().get(0);
+                                }
                                 if (KLabels.MAP_LOOKUP.equals(theMapLookup.klabel())
                                         && theMapLookup.size() == 2 && theMapLookup.items().get(1) instanceof KToken) {
                                     KToken t = (KToken) theMapLookup.items().get(1);
@@ -178,7 +181,7 @@ public class CompiledDefinition implements Serializable {
             if (res._1().isLeft()) {
                 throw res._1().left().get().iterator().next();
             }
-            return new TreeNodesToKORE(Outer::parseSort).down(res._1().right().get());
+            return new TreeNodesToKORE(Outer::parseSort, kompileOptions.strict()).down(res._1().right().get());
         };
     }
 

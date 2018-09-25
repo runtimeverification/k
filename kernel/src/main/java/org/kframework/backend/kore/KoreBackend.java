@@ -13,6 +13,7 @@ import org.kframework.compile.GenerateSortPredicateRules;
 import org.kframework.compile.GenerateSortPredicateSyntax;
 import org.kframework.compile.ResolveAnonVar;
 import org.kframework.compile.ResolveContexts;
+import org.kframework.compile.ResolveFreshConstants;
 import org.kframework.compile.ResolveFun;
 import org.kframework.compile.ResolveHeatCoolAttribute;
 import org.kframework.compile.ResolveSemanticCasts;
@@ -26,6 +27,8 @@ import org.kframework.kompile.Kompile;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
+
+import scala.Function1;
 
 import java.io.File;
 import java.util.Collections;
@@ -87,6 +90,7 @@ public class KoreBackend implements Backend {
         DefinitionTransformer generateSortPredicateSyntax = DefinitionTransformer.from(new GenerateSortPredicateSyntax()::gen, "adding sort predicate productions");
         DefinitionTransformer subsortKItem = DefinitionTransformer.from(Kompile::subsortKItem, "subsort all sorts to KItem");
         DefinitionTransformer expandMacros = DefinitionTransformer.fromSentenceTransformer((m, s) -> new ExpandMacros(m, files, kompileOptions, false).expand(s), "expand macros");
+        Function1<Definition, Definition> resolveFreshConstants = d -> DefinitionTransformer.from(new ResolveFreshConstants(d, true)::resolve, "resolving !Var variables").apply(d);
 
         return def -> Kompile.excludeModulesByTag(excludedModuleTags(), def)
                 .andThen(d -> Kompile.resolveIOStreams(kem, d))
@@ -97,8 +101,9 @@ public class KoreBackend implements Backend {
                 .andThen(d -> new ResolveContexts(kompileOptions).resolve(d))
                 .andThen(resolveHeatCoolAttribute)
                 .andThen(resolveSemanticCasts)
-                .andThen(generateSortPredicateSyntax)
                 .andThen(AddImplicitComputationCell::transformDefinition)
+                .andThen(resolveFreshConstants)
+                .andThen(generateSortPredicateSyntax)
                 .andThen(new Strategy(kompileOptions.experimental.heatCoolStrategies).addStrategyCellToRulesTransformer())
                 .andThen(ConcretizeCells::transformDefinition)
                 .andThen(subsortKItem)

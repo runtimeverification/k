@@ -20,7 +20,11 @@ public class KLabels {
 
     public static final KLabel KREWRITE = KLabel("#KRewrite");
 
-    public static final String GENERATED_TOP_CELL = "generatedTop";
+    public static final String GENERATED_TOP_CELL_NAME = "generatedTop";
+    public static final KLabel GENERATED_TOP_CELL = KLabel("<generatedTop>");
+    public static final KLabel GENERATED_COUNTER_CELL = KLabel("<generatedCounter>");
+    public static final KLabel INIT_GENERATED_TOP_CELL = KLabel("initGeneratedTopCell");
+    public static final KLabel INIT_GENERATED_COUNTER_CELL = KLabel("initGeneratedCounterCell");
     public static final String THIS_CONFIGURATION = "THIS_CONFIGURATION";
     public static final KLabel ML_FALSE = KLabel("#False");
     public static final KLabel ML_TRUE = KLabel("#True");

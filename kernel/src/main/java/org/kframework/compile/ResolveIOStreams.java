@@ -204,13 +204,15 @@ public class ResolveIOStreams {
 
                     rule = Rule(body, rule.requires(), rule.ensures(), rule.att());
                     sentences.add(rule);
+                } else if (rule.att().contains("projection")) {
+                    sentences.add(rule);
                 }
             }
         }
         for (Sentence s : mutable(getStreamSyntaxModule(streamName).localSentences())) {
             if (s instanceof Production) {
                 Production production = (Production) s;
-                if (production.sort().toString().equals("Stream")) {
+                if (production.sort().toString().equals("Stream") || production.att().contains("projection")) {
                     sentences.add(production);
                 }
             }
