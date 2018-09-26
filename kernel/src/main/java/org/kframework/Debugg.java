@@ -32,7 +32,6 @@ public class Debugg {
     private static FileUtil files;
     private static Module   specModule;
     private static Module   parsingModule;
-    private static KPrint   kprint;
     private static boolean  loggingOn;
 
     private static String      loggingPath;
@@ -47,14 +46,13 @@ public class Debugg {
     private static String      currentImplication;
     private static long        startTime;
 
-    public static void init(KProveOptions kproveOptions, FileUtil files, Module specModule, Module parsingModule, KPrint kprint) {
+    public static void init(KProveOptions kproveOptions, FileUtil files, Module specModule, Module parsingModule) {
         Debugg.loggingOn = kproveOptions.debugg;
         if (! Debugg.loggingOn) return;
 
         Debugg.files         = files;
         Debugg.specModule    = specModule;
         Debugg.parsingModule = parsingModule;
-        Debugg.kprint        = kprint;
 
         Debugg.loggingPath = kproveOptions.debuggPath;
         try {
@@ -70,11 +68,6 @@ public class Debugg {
             System.out.println("Debugg: " + kproveOptions.debuggId);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-        }
-
-        if (Debugg.kprint.options.output == OutputModes.PRETTY) {
-            System.err.println("Cannot output in `pretty` mode when using Debugg. Defaulting to `json`.");
-            Debugg.kprint.options.output = OutputModes.JSON;
         }
 
         Debugg.currentImplication = "NOTERM";
@@ -199,10 +192,10 @@ public class Debugg {
 
     private static String writeNode(K contents) {
         String fileCode   = Integer.toString(Math.abs(contents.hashCode()));
-        File   outputFile = new File(Debugg.nodesDir, fileCode + "." + Debugg.kprint.options.output.ext());
+        File   outputFile = new File(Debugg.nodesDir, fileCode + "." + OutputModes.JSON.ext());
         if (! outputFile.exists()) {
             try {
-                String out = new String(Debugg.kprint.serialize(contents, Debugg.kprint.options.output), StandardCharsets.UTF_8);
+                String out = new String(KPrint.serialize(contents, OutputModes.JSON), StandardCharsets.UTF_8);
                 PrintWriter fOut = new PrintWriter(outputFile);
                 fOut.println(out);
                 fOut.close();

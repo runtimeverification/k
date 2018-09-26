@@ -57,7 +57,7 @@ public class KProve {
         Rewriter rewriter = rewriterGenerator.apply(compiled._1().mainModule());
         Module specModule = compiled._2();
 
-        Debugg.init(options, files, specModule, compiled._1().getModule("LANGUAGE-PARSING").get(), kprint);
+        Debugg.init(options, files, specModule, compiled._1().getModule("LANGUAGE-PARSING").get());
         Debugg.log("spec " + options.specFile(files).getAbsolutePath());
         K results = rewriter.prove(specModule);
         int exit;
