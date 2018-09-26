@@ -118,10 +118,10 @@ public class KPrint {
     }
 
     public byte[] serialize(K term) {
-        return serialize(term, options.output);
+        return KPrint.serialize(term, options.output);
     }
 
-    public byte[] serialize(K term, OutputModes outputMode) {
+    public static byte[] serialize(K term, OutputModes outputMode) {
         switch (outputMode) {
             case KAST:
                 return (ToKast.apply(term) + "\n").getBytes();
