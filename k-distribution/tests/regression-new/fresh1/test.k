@@ -5,7 +5,7 @@ module TEST
   imports MAP
 
   syntax Foo ::= foo(Int)
-  
+
   syntax Foo ::= freshFoo(Int)    [freshGenerator, function, functional]
   rule freshFoo(I:Int) => foo(I)
 
