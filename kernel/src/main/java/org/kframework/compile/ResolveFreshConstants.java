@@ -71,10 +71,14 @@ public class ResolveFreshConstants {
                     KApply kapp = (KApply) left;
                     if (kapp.klabel().equals(KLabels.INIT_GENERATED_TOP_CELL)) {
                         KApply right = (KApply)RewriteToTop.toRight(withFresh.body());
-                        List<K> items = new ArrayList<>(right.items());
+                        KApply cells = (KApply)right.items().get(1);
+                        List<K> items = new ArrayList<>(cells.items());
                         items.add(KApply(KLabels.INIT_GENERATED_COUNTER_CELL));
+                        KApply newCells = KApply(cells.klabel(), immutable(items));
+                        List<K> rightItems = new ArrayList<>(right.items());
+                        rightItems.set(1, newCells);
                         return Rule(
-                                KRewrite(left, KApply(right.klabel(), immutable(items))),
+                                KRewrite(left, KApply(right.klabel(), immutable(rightItems))),
                                 withFresh.requires(),
                                 withFresh.ensures(),
                                 withFresh.att());
@@ -177,7 +181,7 @@ public class ResolveFreshConstants {
     }
 
     private Production resolve(Production prod) {
-        if (kore && prod.klabel().isDefined() && prod.klabel().get() == KLabels.GENERATED_TOP_CELL) {
+        if (kore && prod.klabel().isDefined() && prod.klabel().get().equals(KLabels.GENERATED_TOP_CELL)) {
             List<ProductionItem> pis = stream(prod.items()).collect(Collectors.toCollection(ArrayList::new));
             int idx = 0;
             int i = 0;
@@ -212,9 +216,6 @@ public class ResolveFreshConstants {
     public Module resolve(Module m) {
         this.m = m;
         Set<Sentence> sentences = map(this::resolve, m.localSentences());
-        if (sentences.equals(m.localSentences())) {
-            return m;
-        }
         KToken counterCellLabel = KToken("generatedCounter", Sort("#CellName"));
         KApply freshCell = KApply(KLabel("#configCell"), counterCellLabel, KApply(KLabel("#cellPropertyListTerminator")), KToken("0", Sorts.Int()), counterCellLabel);
         if (m.equals(def.mainModule()) && kore) {
@@ -239,7 +240,10 @@ public class ResolveFreshConstants {
             Set<Sentence> newSentences = GenerateSentencesFromConfigDecl.gen(freshCell, BooleanUtils.TRUE, Att.empty(), mod.getExtensionModule());
             sentences = (Set<Sentence>) sentences.$bar(newSentences);
         }
-        return Module(m.name(), kore ? m.imports() : add(def.getModule("K-REFLECTION").get(), m.imports()), sentences, m.att());
+        if (sentences.equals(m.localSentences())) {
+            return m;
+        }
+        return new GenerateSortPredicateSyntax().gen(Module(m.name(), kore ? m.imports() : add(def.getModule("K-REFLECTION").get(), m.imports()), sentences, m.att()));
     }
 }
 
