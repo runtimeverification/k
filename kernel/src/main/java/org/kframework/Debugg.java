@@ -31,7 +31,6 @@ public class Debugg {
     // *ALL* `public` methods *MUST* return `void` and have their first line be `if (! Debugg.loggingOn) return;`
     private static FileUtil files;
     private static Module   specModule;
-    private static Module   parsingModule;
     private static boolean  loggingOn;
 
     private static String      loggingPath;
@@ -46,13 +45,12 @@ public class Debugg {
     private static String      currentImplication;
     private static long        startTime;
 
-    public static void init(GlobalOptions globalOptions, FileUtil files, Module specModule, Module parsingModule) {
+    public static void init(GlobalOptions globalOptions, FileUtil files, Module specModule) {
         Debugg.loggingOn = globalOptions.debugg;
         if (! Debugg.loggingOn) return;
 
-        Debugg.files         = files;
-        Debugg.specModule    = specModule;
-        Debugg.parsingModule = parsingModule;
+        Debugg.files      = files;
+        Debugg.specModule = specModule;
 
         Debugg.loggingPath = globalOptions.debuggPath;
         try {
