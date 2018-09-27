@@ -481,7 +481,9 @@ public class DefinitionToOcaml implements Serializable {
         sb.append("let res, steps = ");
         constructRun(sb, String.valueOf(depth));
         sb.append("\n");
-        sb.append("let () = output_string out ((string_of_int steps) ^ \"\\n\" ^ print_k_binary(res))\n");
+        sb.append("let () = output_string out ((string_of_int steps) ^ \"\\n\"");
+        sb.append("^ (string_of_int 1) ^ \"\\n\"");
+        sb.append("^ print_k_binary(res))\n");
     }
 
     public void ocamlOpenFile(String name, String file, StringBuilder sb) {
@@ -1191,7 +1193,21 @@ public class DefinitionToOcaml implements Serializable {
     private Set<KLabel> constants;
     private Map<KLabel, String> realStepFunctions = new HashMap<>();
 
+    private static StringBuilder indented(StringBuilder sb, int n) {
+        for (int i = 0; i < n; i++) {
+            sb.append('\t');
+        }
+        return sb;
+    }
+
+    private int indentDepth;
+
+    private StringBuilder indented(StringBuilder sb) {
+        return indented(sb, indentDepth);
+    }
+
     public String definition() {
+        indentDepth = 0;
         StringBuilder sb = new StringBuilder();
         sb.append("open Prelude\nopen Constants\nopen Constants.K\nmodule Def = struct\n");
         SetMultimap<KLabel, Rule> functionRules = HashMultimap.create();
@@ -1232,7 +1248,7 @@ public class DefinitionToOcaml implements Serializable {
 
         //compute fixed point. The only hook that actually requires this argument is KREFLECTION.fresh, so we will automatically
         //add the real definition of this function before we declare any function that requires it.
-        sb.append("let freshFunction (sort: string) (config: k) (counter: Z.t) : k = interned_bottom\n");
+        sb.append("\nlet freshFunction (sort: string) (config: k) (counter: Z.t) : k = interned_bottom\n");
         Set<KLabel> impurities = functions.stream().filter(lbl -> mainModule.attributesFor().apply(lbl).contains(Attribute.IMPURE_KEY)).collect(Collectors.toSet());
         impurities.addAll(ancestors(impurities, dependencies));
         constants = functions.stream().filter(lbl -> !impurities.contains(lbl) && stream(mainModule.productionsFor().apply(lbl)).filter(p -> p.arity() == 0).findAny().isPresent()).collect(Collectors.toSet());
@@ -1270,22 +1286,25 @@ public class DefinitionToOcaml implements Serializable {
                 conn = "let rec ";
                 isLetRec = true;
             }
+            int oldAlignDepth = indentDepth;
             for (KLabel functionLabel : component) {
+                indentDepth = oldAlignDepth;
                 String hook = mainModule.attributesFor().get(functionLabel).getOrElse(() -> Att()).<String>getOptional(Attribute.HOOK_KEY).orElse(".");
                 if (hook.equals("KREFLECTION.fresh")) {
                     sb.append(conn).append("freshFunction (sort: string) (config: k) (counter: Z.t) : k = match sort with \n");
                     for (Sort sort : iterable(mainModule.freshFunctionFor().keys())) {
-                        sb.append("| \"").append(sort.toString()).append("\" -> (");
+                        indented(sb).append("| \"").append(sort.toString()).append("\" -> (");
                         KLabel freshFunction = mainModule.freshFunctionFor().apply(sort);
                         encodeStringToFunction(sb, freshFunction);
                         sb.append(" ([Int counter]) config (-1))\n");
                     }
-                    sb.append("| _ -> invalid_arg (\"Cannot find fresh function for sort \" ^ sort)");
+                    indented(sb).append("| _ -> invalid_arg (\"Cannot find fresh function for sort \" ^ sort)");
                     if (isLetRec) {
                         conn = "and ";
                     }
                 }
                 if (functions.contains(functionLabel)) {
+                    indentDepth++;
                     sb.append(conn);
                     String functionName;
                     if (mainModule.attributesFor().apply(functionLabel).contains("memo")) {
@@ -1295,20 +1314,27 @@ public class DefinitionToOcaml implements Serializable {
                     }
                     int arity = getArity(functionLabel);
                     printFunctionParams(sb, arity);
-                    sb.append(" (config: k) (guard: int) : k = let lbl = \n");
+                    sb.append(" (config: k) (guard: int) : k =\n");
+                    indented(sb).append("let lbl = ");
                     encodeStringToIdentifier(sb, functionLabel);
-                    sb.append(" and sort = \n");
+                    sb.append('\n');
+                    indented(sb).append("and sort = ");
                     encodeStringToIdentifier(sb, mainModule.sortFor().apply(functionLabel));
-                    sb.append(" in ");
-                    sb.append("match c with \n");
+                    sb.append(" in\n");
+                    indented(sb).append("match c with \n");
                     String namespace = hook.substring(0, hook.indexOf('.'));
                     String function = hook.substring(namespace.length() + 1);
+
                     if (hookNamespaces.contains(namespace) || options.hookNamespaces.contains(namespace)) {
-                        sb.append("| _ -> try ").append(namespace).append(".hook_").append(function).append(" c lbl sort config freshFunction");
+                        indented(sb).append("| _ ->\n");
+                        indentDepth++;
+                        indented(sb).append("try ").append(namespace).append(".hook_").append(function).append(" c lbl sort config freshFunction");
                         if (mainModule.attributesFor().apply(functionLabel).contains("canTakeSteps")) {
                             sb.append(" eval");
                         }
-                        sb.append("\nwith Not_implemented -> match c with \n");
+                        sb.append(" with Not_implemented ->\n");
+                        indentDepth++;
+                        indented(sb).append("match c with\n");
                     } else if (!hook.equals(".")) {
                         kem.registerCompilerWarning("missing entry for hook " + hook);
                     }
@@ -1319,7 +1345,7 @@ public class DefinitionToOcaml implements Serializable {
                                 .filter(sort -> mainModule.sortAttributesFor().contains(sort)).forEach(sort -> {
                             String sortHook = mainModule.sortAttributesFor().apply(sort).<String>getOptional("hook").orElse("");
                             if (predicateRules.containsKey(sortHook)) {
-                                sb.append("| ");
+                                indented(sb).append("| ");
                                 sb.append(predicateRules.get(sortHook).apply(sort));
                                 sb.append("\n");
                             }
@@ -1328,7 +1354,7 @@ public class DefinitionToOcaml implements Serializable {
 
                     convertFunction(functionRules.get(functionLabel).stream().sorted(this::sortFunctionRules).collect(Collectors.toList()),
                             sb, functionName, RuleType.FUNCTION);
-                    sb.append("| _ -> raise (Stuck [denormalize (KApply(lbl, (denormalize").append(arity).append(" c)))])\n");
+                    indented(sb).append("| _ -> raise (Stuck [denormalize (KApply(lbl, (denormalize").append(arity).append(" c)))])\n");
                     if (constants.contains(functionLabel)) {
                         sb.append(conn.equals("let rec ") ? "and " : conn);
                         sb.append("const");
@@ -1349,7 +1375,7 @@ public class DefinitionToOcaml implements Serializable {
                     encodeStringToIdentifier(sb, functionLabel);
                     sb.append(" in match c with \n");
                     convertFunction(anywhereRules.get(functionLabel), sb, functionName, RuleType.ANYWHERE);
-                    sb.append("| ");
+                    indented(sb).append("| ");
                     for (int i = 0; i < arity; i++) {
                         sb.append("k").append(i);
                         if (i != arity - 1) {
@@ -1367,19 +1393,30 @@ public class DefinitionToOcaml implements Serializable {
                 } else if (functionLabel.name().isEmpty()) {
                     //placeholder for eval function;
                     sb.append(conn);
-                    sb.append("eval (c: normal_kitem) (config: k) : k = match c with KApply(lbl, kl) -> (match lbl with \n");
+                    sb.append("eval (c: normal_kitem) (config: k) : k =\n");
+                    indentDepth++;
+                    indented(sb).append("match c with\n");
+                    indentDepth++;
+                    indented(sb).append("| KApply(lbl, kl) -> (\n");
+                    indentDepth++;
+                    indented(sb).append("match lbl with \n");
                     for (KLabel label : Sets.union(functions, anywhereKLabels)) {
-                        sb.append("|");
+                        indented(sb).append("| ");
                         encodeStringToIdentifier(sb, label);
                         sb.append(" -> ");
                         encodeStringToFunction(sb, label);
                         int arity = getArity(label);
                         sb.append(" (normalize").append(arity).append(" kl) config (-1)\n");
                     }
-                    sb.append("| _ -> [denormalize c])\n");
-                    sb.append("| _ -> [denormalize c]\n");
+                    indented(sb).append("| _ -> [denormalize c]");
+                    indentDepth--;
+                    indented(sb).append(")\n");
+                    indentDepth--;
+                    indented(sb).append("| _ -> [denormalize c]\n");
                 }
             }
+            indentDepth = oldAlignDepth;
+            sb.append('\n');
         }
         List<Rule> unsortedRules = stream(mainModule.rules()).collect(Collectors.toList());
         if (options.reverse) {
@@ -1389,7 +1426,8 @@ public class DefinitionToOcaml implements Serializable {
                 .sorted(this::sortRules)
                 .filter(r -> !functionRules.values().contains(r) && !r.att().contains(Attribute.MACRO_KEY) && !r.att().contains(Attribute.ALIAS_KEY) && !r.att().contains(Attribute.ANYWHERE_KEY))
                 .collect(Collectors.toList());
-        sb.append("let rec get_next_op_from_exp(c: kitem) : (k -> k * (step_function)) = ");
+        indented(sb).append("let rec get_next_op_from_exp(c: kitem) : (k -> k * (step_function)) =\n");
+        indentDepth++;
         Set<KLabel> allStepFunctions = Sets.difference(mutable(mainModule.definedKLabels()), functions);
         Map<Optional<KLabel>, List<Rule>> groupedByStepFunction = sortedRules.stream().collect(
                 Collectors.groupingBy(r -> getNextOperation(RewriteToTop.toLeft(r.body()), false)));
@@ -1397,7 +1435,7 @@ public class DefinitionToOcaml implements Serializable {
             sb.append("match c with KApply1(_,hd :: tl) -> (\n");
             sb.append("match (normalize hd) with KApply(lbl,_) -> (match lbl with \n");
             for (KLabel lbl : allStepFunctions) {
-                sb.append("| ");
+                indented(sb).append("| ");
                 encodeStringToIdentifier(sb, lbl);
                 sb.append(" -> step");
                 if (groupedByStepFunction.containsKey(Optional.of(lbl))) {
@@ -1410,9 +1448,9 @@ public class DefinitionToOcaml implements Serializable {
                 }
                 sb.append("\n");
             }
-            sb.append("| _ -> stepNone) | _ -> stepNone) | _ -> stepNone\n");
+            indented(sb).append("| _ -> stepNone) | _ -> stepNone) | _ -> stepNone\n");
         } else {
-            sb.append("step\n");
+            indented(sb).append("step\n");
         }
         int ruleNum = writeStepFunction(sb, sortedRules, "step", 0);
         for (KLabel lbl : groupedByStepFunction.keySet().stream().filter(Optional::isPresent).map(Optional::get).collect(Collectors.toSet())) {
@@ -1427,39 +1465,39 @@ public class DefinitionToOcaml implements Serializable {
         }
 
         if (makeStuck != null) {
-            sb.append("let set_stuck (c: k) (config: k) (guard: int) : k * step_function = match c with \n");
+            sb.append("\nlet set_stuck (c: k) (config: k) (guard: int) : k * step_function = match c with \n");
             convertFunction(Collections.singletonList(makeStuck), sb, "step", RuleType.REGULAR);
-            sb.append("| _ -> (c, (StepFunc step))\n");
-            sb.append("let make_stuck (config: k) : k =\n");
+            indented(sb).append("| _ -> (c, (StepFunc step))\n");
+            sb.append("\nlet make_stuck (config: k) : k =\n");
             sb.append("  fst (set_stuck config config (-1))\n");
         } else {
-            sb.append("let make_stuck (config: k) : k = config\n");
+            sb.append("\nlet make_stuck (config: k) : k = config\n");
         }
 
         if (makeUnstuck != null) {
-            sb.append("let set_unstuck (c: k) (config: k) (guard: int) : k * step_function = match c with \n");
+            sb.append("\nlet set_unstuck (c: k) (config: k) (guard: int) : k * step_function = match c with \n");
             convertFunction(Collections.singletonList(makeUnstuck), sb, "step", RuleType.REGULAR);
             sb.append("| _ -> (c, (StepFunc step))\n");
-            sb.append("let make_unstuck (config: k) : k =\n");
+            sb.append("\nlet make_unstuck (config: k) : k =\n");
             sb.append("  fst (set_unstuck config config (-1))\n");
         } else {
-            sb.append("let make_unstuck (config: k) : k = config\n");
+            sb.append("\nlet make_unstuck (config: k) : k = config\n");
         }
 
         if (matchThreadSet == null) {
             // no threads
-            sb.append("let get_thread_set (config: k) : k = [Map(SortMap,Lbl_Map_,KMap.empty)]\n");
-            sb.append("let set_thread_set (config: k) (set: k) : k = config\n");
+            sb.append("\nlet get_thread_set (config: k) : k = [Map(SortMap,Lbl_Map_,KMap.empty)]\n");
+            sb.append("\nlet set_thread_set (config: k) (set: k) : k = config\n");
         } else {
             if (hasLookups(matchThreadSet)) {
                 sb.append("let rec ");
             } else {
                 sb.append("let ");
             }
-            sb.append("match_thread_set (c: k) (config: k) (guard: int) : k Subst.t = match c with \n");
+            sb.append("\nmatch_thread_set (c: k) (config: k) (guard: int) : k Subst.t = match c with \n");
             convertFunction(Collections.singletonList(matchThreadSet), sb, "match_thread_set", RuleType.PATTERN);
             sb.append("| _ -> failwith \"match_thread_set\"\n");
-            sb.append("let get_thread_set (config: k) : k =\n");
+            sb.append("\nlet get_thread_set (config: k) : k =\n");
             sb.append("  let subst = match_thread_set config config (-1) in\n");
             sb.append("  Subst.find \"Threads\" subst\n");
             if (hasLookups(rewriteThreadSet)) {
@@ -1467,11 +1505,11 @@ public class DefinitionToOcaml implements Serializable {
             } else {
                 sb.append("let ");
             }
-            sb.append("rewrite_thread_set (c: k) (config: k) (guard: int) (new_threads: k) : k = match c with \n");
+            sb.append("\nrewrite_thread_set (c: k) (config: k) (guard: int) (new_threads: k) : k = match c with \n");
             {
                 Rule r = rewriteThreadSet;
                 convertComment(r, sb);
-                sb.append("| ");
+                indented(sb).append("| ");
                 K left = RewriteToTop.toLeft(r.body());
                 K requires = r.requires();
                 VarInfo vars = new VarInfo();
@@ -1485,11 +1523,12 @@ public class DefinitionToOcaml implements Serializable {
                 sb.append(" -> ");
                 convertRHS(sb, RuleType.REGULAR, r, vars, suffix, ruleNum, "", false);
             }
-            sb.append("| _ -> failwith \"rewrite_thread_set\"\n");
-            sb.append("let set_thread_set (config: k) (set: k) : k =\n");
+            indented(sb).append("| _ -> failwith \"rewrite_thread_set\"\n");
+            sb.append("\nlet set_thread_set (config: k) (set: k) : k =\n");
             sb.append("  rewrite_thread_set config config (-1) set\n");
         }
-        sb.append("end\nlet () = Plugin.the_definition := Some (module Def)\n");
+        sb.append("end\n");
+        sb.append("\nlet () = Plugin.the_definition := Some (module Def)\n");
         return sb.toString();
     }
 
@@ -1624,26 +1663,30 @@ public class DefinitionToOcaml implements Serializable {
     }
 
     private int writeStepFunction(StringBuilder sb, List<Rule> sortedRules, String funcName, int ruleNum) {
+        int oldIndent = indentDepth;
         Map<Boolean, List<Rule>> groupedByLookup = sortedRules.stream()
                 .collect(Collectors.groupingBy(this::hasLookups));
-        sb.append("and ").append(funcName).append(" (c:k) : k * step_function =\n");
+        indented(sb).append("and ").append(funcName).append(" (c:k) : k * step_function =\n");
+        indentDepth++;
         if (options.checkRaces) {
             sb.append(" let (k, (i,_ ,_), s) as kis = one_").append(funcName).append(" c (-1) in ");
             sb.append("\n    let (k,i,s) = List.hd (RACE.valid_continuations (kis :: RACE.all_steps one_").append(funcName).append(" c i)) in (k,s)\n");
             sb.append("and one_").append(funcName).append(" (c: k) (start_after: int) : k * (int * RACE.rule_type * string) * step_function =\n");
         }
-        sb.append(" try let config = c in match c with \n");
+        indented(sb).append("try let config = c in match c with \n");
         if (groupedByLookup.containsKey(false)) {
             for (Rule r : groupedByLookup.get(false)) {
                 ruleNum = convert(r, sb, RuleType.REGULAR, ruleNum, funcName);
             }
         }
-        sb.append("| _ -> lookups_").append(funcName).append(" c c ").append(options.checkRaces ? "start_after" : "(-1)").append('\n');
-        sb.append("with Sys.Break -> raise (Stuck c)\n");
-        sb.append("and lookups_").append(funcName).append(" (c: k) (config: k) (guard: int) : k ")
+        indented(sb).append("| _ -> lookups_").append(funcName).append(" c c ").append(options.checkRaces ? "start_after" : "(-1)").append('\n');
+        indentDepth++;
+        indented(sb).append("with Sys.Break -> raise (Stuck c)\n");
+        indented(sb).append("and lookups_").append(funcName).append(" (c: k) (config: k) (guard: int) : k ")
                 .append(options.checkRaces ? "* (int * RACE.rule_type * string) " : "").append("* step_function = match c with \n");
         ruleNum = convert(groupedByLookup.getOrDefault(true, Collections.emptyList()), sb, funcName, "lookups_" + funcName, RuleType.REGULAR, ruleNum);
-        sb.append("| _ -> raise (Stuck c)\n");
+        indented(sb).append("| _ -> raise (Stuck c)\n");
+        indentDepth = oldIndent;
         return ruleNum;
     }
 
@@ -2324,7 +2367,7 @@ public class DefinitionToOcaml implements Serializable {
     private int convert(Rule r, StringBuilder sb, RuleType type, int ruleNum, String functionName) {
         try {
             convertComment(r, sb);
-            sb.append("| ");
+            indented(sb).append("| ");
             K left = RewriteToTop.toLeft(r.body());
             K requires = r.requires();
             VarInfo vars = new VarInfo();
@@ -2404,7 +2447,7 @@ public class DefinitionToOcaml implements Serializable {
     }
 
     private void convertComment(Rule r, StringBuilder sb) {
-        sb.append("(*{| rule ");
+        indented(sb).append("(*{| rule ");
         sb.append(ToKast.apply(r.body()).replace("|}", "| )"));
         sb.append(" requires ");
         sb.append(ToKast.apply(r.requires()).replace("|)", "| )"));
