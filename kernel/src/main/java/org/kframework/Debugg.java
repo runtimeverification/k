@@ -30,7 +30,7 @@ public class Debugg {
 
     // *ALL* `public` methods *MUST* return `void` and have their first line be `if (! this.loggingOn) return;`
     private final boolean loggingOn;
-    private final File    logFile;
+    private final File    loggingPath;
     private final File    blobsDir;
 
     private PrintWriter sessionLog;
@@ -42,14 +42,13 @@ public class Debugg {
     private String currentQuery;
     private String currentImplication;
 
-    public Debugg(GlobalOptions globalOptions, FileUtil files, String debuggId) {
+    public Debugg(GlobalOptions globalOptions, FileUtil files) {
         this.loggingOn = globalOptions.debugg;
 
-        File loggingPath = globalOptions.debuggPath == null
+        this.loggingPath = globalOptions.debuggPath == null
                          ? files.resolveKompiled("debugg")
                          : new File(globalOptions.debuggPath);
 
-        this.logFile  = new File(loggingPath, debuggId + ".log");
         this.blobsDir = new File(loggingPath, "blobs/");
         this.blobsDir.mkdirs();
 
@@ -60,14 +59,15 @@ public class Debugg {
         this.currentQuery       = "NOQUERY";
     }
 
-    public void start() {
+    public void init(String sessionId) {
+        File logFile = new File(this.loggingPath, sessionId + ".log");
         PrintWriter sessionLog;
         try {
-            this.sessionLog = new PrintWriter(this.logFile);
+            this.sessionLog = new PrintWriter(logFile);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        System.out.println("Debugg: " + this.logFile);
+        System.out.println("Debugg: " + logFile);
         this.startTime = System.currentTimeMillis();
     }
 

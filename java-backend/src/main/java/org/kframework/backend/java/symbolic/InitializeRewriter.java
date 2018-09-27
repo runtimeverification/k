@@ -212,6 +212,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
                     .map(org.kframework.backend.java.kil.Rule::renameVariables)
                     .collect(Collectors.toList());
 
+            rewritingContext.debugg.init("prove-" + Integer.toString(Math.abs(mod.hashCode())));
             SymbolicRewriter rewriter = new SymbolicRewriter(rewritingContext, transitions, converter);
 
             if (rewritingContext.globalOptions.verbose) {
