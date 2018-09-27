@@ -3,7 +3,6 @@ package org.kframework.kprove;
 
 import com.google.inject.Inject;
 import org.apache.commons.io.FilenameUtils;
-import org.kframework.Debugg;
 import org.kframework.attributes.Att;
 import org.kframework.compile.*;
 import org.kframework.definition.*;
@@ -59,8 +58,6 @@ public class KProve {
         Rewriter rewriter = rewriterGenerator.apply(compiled._1().mainModule());
         Module specModule = compiled._2();
 
-        Debugg.init(globalOptions, files, "prove-" + Integer.toString(Math.abs(specModule.hashCode())));
-        Debugg.log("spec " + options.specFile(files).getAbsolutePath());
         K results = rewriter.prove(specModule);
         int exit;
         if (results instanceof KApply) {
@@ -70,7 +67,6 @@ public class KProve {
             exit = 1;
         }
         kprint.prettyPrint(compiled._1(), compiled._1().getModule("LANGUAGE-PARSING").get(), s -> kprint.outputFile(s), results);
-        Debugg.close();
         return exit;
     }
 

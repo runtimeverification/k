@@ -88,6 +88,8 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
 
     private transient final GlobalContext global;
 
+    private final Debugg debugg;
+
     public ConjunctiveFormula(
             Substitution<Variable, Term> substitution,
             PersistentUniqueList<Equality> equalities,
@@ -106,6 +108,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
         this.truthValue = truthValue;
         this.falsifyingEquality = falsifyingEquality;
         this.global = global;
+        this.debugg = global.debugg;
     }
 
     public ConjunctiveFormula(
@@ -722,6 +725,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
             }
 
 
+            debugg.log(Debugg.LogEvent.IMPLICATION, left, right);
             if (!impliesSMT(left, right, rightOnlyVariables)) {
                 if (global.globalOptions.debug) {
                     System.err.println("Failure!");
@@ -780,7 +784,6 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
             ConjunctiveFormula left,
             ConjunctiveFormula right,
             Set<Variable> rightOnlyVariables) {
-        Debugg.log(Debugg.LogEvent.IMPLICATION, left, right);
         Triple<ConjunctiveFormula, ConjunctiveFormula, Set<Variable>> triple = Triple.of(left, right, rightOnlyVariables);
         if (!impliesSMTCache.containsKey(triple)) {
             impliesSMTCache.put(triple, left.global.constraintOps.impliesSMT(left, right, rightOnlyVariables));

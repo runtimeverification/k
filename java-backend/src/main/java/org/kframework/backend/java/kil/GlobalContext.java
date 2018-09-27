@@ -3,6 +3,7 @@
 package org.kframework.backend.java.kil;
 
 import com.google.inject.Inject;
+import org.kframework.Debugg;
 import org.kframework.backend.java.kil.KItem.KItemOperations;
 import org.kframework.backend.java.symbolic.BuiltinFunction;
 import org.kframework.backend.java.symbolic.Equality.EqualityOperations;
@@ -34,6 +35,7 @@ public class GlobalContext implements Serializable {
     public final transient FileUtil files;
     public final transient GlobalOptions globalOptions;
     public final transient Profiler2 profiler;
+    public final Debugg debugg;
 
     public GlobalContext(
             FileSystem fs,
@@ -53,7 +55,8 @@ public class GlobalContext implements Serializable {
         this.hookProvider = hookProvider;
         this.files = files;
         this.equalityOps = new EqualityOperations(() -> def);
-        this.constraintOps = new SMTOperations(() -> def, smtOptions, new Z3Wrapper(smtOptions, kem, globalOptions, files), kem, globalOptions);
+        this.debugg = new Debugg(globalOptions, files, "test-id");
+        this.constraintOps = new SMTOperations(() -> def, smtOptions, new Z3Wrapper(smtOptions, kem, globalOptions, files, debugg), kem, globalOptions);
         this.kItemOps = new KItemOperations(stage, deterministicFunctions, kem, this::builtins, globalOptions);
         this.stage = stage;
         this.profiler = profiler;

@@ -35,16 +35,19 @@ public class Z3Wrapper {
     private final GlobalOptions globalOptions;
     private final KExceptionManager kem;
     private final FileUtil files;
+    private final Debugg debugg;
 
     public Z3Wrapper(
             SMTOptions options,
             KExceptionManager kem,
             GlobalOptions globalOptions,
-            FileUtil files) {
+            FileUtil files,
+            Debugg debugg) {
         this.options = options;
         this.kem = kem;
         this.globalOptions = globalOptions;
         this.files = files;
+        this.debugg = debugg;
 
         SMT_PRELUDE = options.smtPrelude == null ? "" : files.loadFromWorkingDirectory(options.smtPrelude);
         CHECK_SAT = options.z3Tactic == null ? "(check-sat)" : "(check-sat-using " + options.z3Tactic + ")";
@@ -53,7 +56,7 @@ public class Z3Wrapper {
     public synchronized boolean isUnsat(CharSequence query, int timeout, Z3Profiler timer) {
         StringBuilder queryStr = new StringBuilder(query.length());
         queryStr.append(query);
-        Debugg.log(Debugg.LogEvent.Z3QUERY, KToken(SMT_PRELUDE + "\n" + queryStr.toString() + "\n" + CHECK_SAT + "\n", Sorts.Z3Query()));
+        debugg.log(Debugg.LogEvent.Z3QUERY, KToken(SMT_PRELUDE + "\n" + queryStr.toString() + "\n" + CHECK_SAT + "\n", Sorts.Z3Query()));
         if (options.z3Executable) {
             return checkQueryWithExternalProcess(query, timeout, timer);
         } else {
@@ -124,7 +127,7 @@ public class Z3Wrapper {
                 System.err.println("\nz3 likely timeout\n");
             }
         }
-        Debugg.log(Debugg.LogEvent.Z3RESULT, KToken(result, Sorts.Z3Result()));
+        debugg.log(Debugg.LogEvent.Z3RESULT, KToken(result, Sorts.Z3Result()));
         if (!Z3_QUERY_RESULTS.contains(result)) {
             throw KEMException.criticalError("Z3 crashed on input query:\n" + query + "\nresult:\n" + result);
         }
