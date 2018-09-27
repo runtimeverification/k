@@ -72,4 +72,8 @@ public abstract class FrontEnd {
     public static void printBootError(String message) {
         System.err.println(StringUtil.splitLines(KException.criticalError(message).toString()));
     }
+
+    public GlobalOptions globalOptions() {
+        return this.globalOptions;
+    }
 }

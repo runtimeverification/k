@@ -11,6 +11,7 @@ import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.Kompile;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
+import org.kframework.main.GlobalOptions;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.unparser.KPrint;
 import org.kframework.utils.Stopwatch;
@@ -30,17 +31,19 @@ import java.util.function.Function;
  */
 public class KProve {
 
+    private final GlobalOptions globalOptions;
     private final KExceptionManager kem;
     private final Stopwatch sw;
     private final FileUtil files;
     private final KPrint kprint;
 
     @Inject
-    public KProve(KExceptionManager kem, Stopwatch sw, FileUtil files, KPrint kprint) {
-        this.kem    = kem;
-        this.sw     = sw;
-        this.files  = files;
-        this.kprint = kprint;
+    public KProve(GlobalOptions globalOptions, KExceptionManager kem, Stopwatch sw, FileUtil files, KPrint kprint) {
+        this.globalOptions = globalOptions;
+        this.kem           = kem;
+        this.sw            = sw;
+        this.files         = files;
+        this.kprint        = kprint;
     }
 
     public int run(KProveOptions options, CompiledDefinition compiledDefinition, Backend backend, Function<Module, Rewriter> rewriterGenerator) {
@@ -48,7 +51,7 @@ public class KProve {
         Rewriter rewriter = rewriterGenerator.apply(compiled._1().mainModule());
         Module specModule = compiled._2();
 
-        Debugg.init(options, files, specModule, compiled._1().getModule("LANGUAGE-PARSING").get());
+        Debugg.init(globalOptions, files, specModule, compiled._1().getModule("LANGUAGE-PARSING").get());
         Debugg.log("spec " + options.specFile(files).getAbsolutePath());
         K results = rewriter.prove(specModule);
         int exit;
