@@ -55,7 +55,7 @@ public class GlobalContext implements Serializable {
         this.hookProvider = hookProvider;
         this.files = files;
         this.equalityOps = new EqualityOperations(() -> def);
-        this.debugg = new Debugg(globalOptions, files, "test-id");
+        this.debugg = new Debugg(globalOptions, files);
         this.constraintOps = new SMTOperations(() -> def, smtOptions, new Z3Wrapper(smtOptions, kem, globalOptions, files, debugg), kem, globalOptions);
         this.kItemOps = new KItemOperations(stage, deterministicFunctions, kem, this::builtins, globalOptions);
         this.stage = stage;
