@@ -59,7 +59,7 @@ public class KProve {
         Rewriter rewriter = rewriterGenerator.apply(compiled._1().mainModule());
         Module specModule = compiled._2();
 
-        Debugg.init(globalOptions, files, specModule);
+        Debugg.init(globalOptions, files, "prove-" + Integer.toString(Math.abs(specModule.hashCode())));
         Debugg.log("spec " + options.specFile(files).getAbsolutePath());
         K results = rewriter.prove(specModule);
         int exit;

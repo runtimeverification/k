@@ -45,7 +45,7 @@ public class Debugg {
     private static String      currentImplication;
     private static long        startTime;
 
-    public static void init(GlobalOptions globalOptions, FileUtil files, Module specModule) {
+    public static void init(GlobalOptions globalOptions, FileUtil files, String sessionId) {
         Debugg.loggingOn = globalOptions.debugg;
         if (! Debugg.loggingOn) return;
 
@@ -54,7 +54,7 @@ public class Debugg {
 
         Debugg.loggingPath = globalOptions.debuggPath;
         try {
-            Debugg.sessionId  = Integer.toString(Math.abs(Debugg.specModule.hashCode()));
+            Debugg.sessionId  = sessionId;
             Debugg.sessionDir = globalOptions.debuggPath == null
                               ? files.resolveKompiled(sessionId + ".debugg")
                               : new File(globalOptions.debuggPath);
