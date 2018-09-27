@@ -101,7 +101,7 @@ public class FastRuleMatcher {
                 continue;
             }
 
-            Debugg.log(Debugg.LogEvent.RULE, rule.toKRewrite());
+            global.debugg.log(Debugg.LogEvent.RULE, rule.toKRewrite());
             // TODO(YilongL): remove TermContext from the signature once
             // ConstrainedTerm doesn't hold a TermContext anymore
             /* TODO(AndreiS): remove this hack for super strictness after strategies work */

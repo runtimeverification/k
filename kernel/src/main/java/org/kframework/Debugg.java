@@ -28,57 +28,54 @@ import java.lang.Math;
 
 public class Debugg {
 
-    // *ALL* `public` methods *MUST* return `void` and have their first line be `if (! Debugg.loggingOn) return;`
-    private static FileUtil files;
-    private static Module   specModule;
-    private static boolean  loggingOn;
+    // *ALL* `public` methods *MUST* return `void` and have their first line be `if (! this.loggingOn) return;`
+    private final boolean loggingOn;
+    private final File    logFile;
+    private final File    blobsDir;
 
-    private static String      loggingPath;
-    private static String      sessionId;
-    private static File        sessionDir;
-    private static File        blobsDir;
-    private static PrintWriter sessionLog;
-    private static String      currentTerm;
-    private static String      currentRule;
-    private static String      currentMatchRule;
-    private static String      currentQuery;
-    private static String      currentImplication;
-    private static long        startTime;
+    private PrintWriter sessionLog;
 
-    public static void init(GlobalOptions globalOptions, FileUtil files, String sessionId) {
-        Debugg.loggingOn = globalOptions.debugg;
-        if (! Debugg.loggingOn) return;
+    private long   startTime;
+    private String currentTerm;
+    private String currentRule;
+    private String currentMatchRule;
+    private String currentQuery;
+    private String currentImplication;
 
-        Debugg.files       = files;
-        Debugg.loggingPath = globalOptions.debuggPath;
-        Debugg.sessionId   = sessionId;
+    public Debugg(GlobalOptions globalOptions, FileUtil files, String debuggId) {
+        this.loggingOn = globalOptions.debugg;
+
+        File loggingPath = globalOptions.debuggPath == null
+                         ? files.resolveKompiled("debugg")
+                         : new File(globalOptions.debuggPath);
+
+        this.logFile  = new File(loggingPath, debuggId + ".log");
+        this.blobsDir = new File(loggingPath, "blobs/");
+        this.blobsDir.mkdirs();
+
+        this.currentImplication = "NOTERM";
+        this.currentTerm        = "NOTERM";
+        this.currentRule        = "NORULE";
+        this.currentMatchRule   = "NORULE";
+        this.currentQuery       = "NOQUERY";
+    }
+
+    public void start() {
+        PrintWriter sessionLog;
         try {
-            Debugg.sessionDir = Debugg.loggingPath == null
-                              ? files.resolveKompiled(sessionId + ".debugg")
-                              : new File(globalOptions.debuggPath);
-            String path       = sessionDir.getAbsolutePath();
-
-            Debugg.blobsDir   = new File(Debugg.sessionDir, "blobs/");
-            Debugg.blobsDir.mkdirs();
-            Debugg.sessionLog = new PrintWriter(Debugg.sessionDir.getAbsolutePath() + "/" + globalOptions.debuggId + ".log");
-            System.out.println("Debugg: " + globalOptions.debuggId);
+            this.sessionLog = new PrintWriter(this.logFile);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-
-        Debugg.currentImplication = "NOTERM";
-        Debugg.currentTerm        = "NOTERM";
-        Debugg.currentRule        = "NORULE";
-        Debugg.currentMatchRule   = "NORULE";
-        Debugg.currentQuery       = "NOQUERY";
-        Debugg.startTime          = System.currentTimeMillis();
+        System.out.println("Debugg: " + this.logFile);
+        this.startTime = System.currentTimeMillis();
     }
 
-    public static void setTarget(boolean b) {
+    public void setTarget(boolean b) {
         if(b) {
-            Debugg.currentMatchRule = "IMPLIESTARGET";
+            this.currentMatchRule = "IMPLIESTARGET";
         } else {
-            Debugg.currentMatchRule = "NORULE";
+            this.currentMatchRule = "NORULE";
         }
     }
 
@@ -86,18 +83,18 @@ public class Debugg {
         INIT, TARGET, IMPLIESTARGET, NODE, MARKEDNODE, RULE, SRSTEP, BRANCH, IMPLICATION, Z3QUERY, Z3RESULT, STEP, RSTEP, CRASH, MATCHRULE, CLOSE
     }
 
-    public static void resetMatchrule() {
+    public void resetMatchrule() {
         currentMatchRule = "NORULE";
     }
 
-    public static void log(String logItem) {
-        if (! Debugg.loggingOn) return;
-        Debugg.sessionLog.println((System.currentTimeMillis() - Debugg.startTime) + " " + logItem);
-        Debugg.sessionLog.flush();
+    public void log(String logItem) {
+        if (! this.loggingOn) return;
+        this.sessionLog.println((System.currentTimeMillis() - this.startTime) + " " + logItem);
+        this.sessionLog.flush();
     }
 
-    public static void log(LogEvent logCode, K... terms) {
-        if (! Debugg.loggingOn) return;
+    public void log(LogEvent logCode, K... terms) {
+        if (! this.loggingOn) return;
         ArrayList<String> nodeIds = new ArrayList<String>();
         for (K term: terms) {
             nodeIds.add(writeNode(term));
@@ -161,13 +158,13 @@ public class Debugg {
                 logPrefix = "close";
                 break;
         }
-        Debugg.log(logPrefix + " " + currentTerm + " " + nodeId);
+        this.log(logPrefix + " " + currentTerm + " " + nodeId);
     }
 
-    public static void close() {
-        if (! Debugg.loggingOn) return;
-        Debugg.log(LogEvent.CLOSE);
-        Debugg.sessionLog.close();
+    public void close() {
+        if (! this.loggingOn) return;
+        this.log(LogEvent.CLOSE);
+        this.sessionLog.close();
     }
 
     private static String hash(K in) {
@@ -186,9 +183,9 @@ public class Debugg {
         return hashtext;
     }
 
-    private static String writeNode(K contents) {
+    private String writeNode(K contents) {
         String fileCode   = Integer.toString(Math.abs(contents.hashCode()));
-        File   outputFile = new File(Debugg.blobsDir, fileCode + "." + OutputModes.JSON.ext());
+        File   outputFile = new File(this.blobsDir, fileCode + "." + OutputModes.JSON.ext());
         if (! outputFile.exists()) {
             try {
                 String out = new String(KPrint.serialize(contents, OutputModes.JSON), StandardCharsets.UTF_8);

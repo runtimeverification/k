@@ -217,11 +217,11 @@ public class SymbolicRewriter {
             if (!matchResult.isMatching) {
                 // TODO(AndreiS): move these some other place
                 result = result.expandPatterns(true);
-                Debugg.log(Debugg.LogEvent.MATCHRULE, rule.toKRewrite());
+                global.debugg.log(Debugg.LogEvent.MATCHRULE, rule.toKRewrite());
                 if (result.constraint().isFalseExtended() || result.constraint().checkUnsat()) {
                     continue;
                 }
-                Debugg.resetMatchrule();
+                global.debugg.resetMatchrule();
             }
 
             /* TODO(AndreiS): remove this hack for super strictness after strategies work */
@@ -602,8 +602,8 @@ public class SymbolicRewriter {
 
         initialTerm = initialTerm.expandPatterns(true);
 
-        Debugg.log(Debugg.LogEvent.INIT,   initialTerm.term(), initialTerm.constraint());
-        Debugg.log(Debugg.LogEvent.TARGET, targetTerm.term(),  targetTerm.constraint());
+        global.debugg.log(Debugg.LogEvent.INIT,   initialTerm.term(), initialTerm.constraint());
+        global.debugg.log(Debugg.LogEvent.TARGET, targetTerm.term(),  targetTerm.constraint());
 
         visited.add(initialTerm);
         queue.add(initialTerm);
@@ -613,14 +613,14 @@ public class SymbolicRewriter {
         while (!queue.isEmpty()) {
             step++;
             for (ConstrainedTerm term : queue) {
-                Debugg.log(Debugg.LogEvent.NODE, term.term(), term.constraint());
-                Debugg.setTarget(true);
+                global.debugg.log(Debugg.LogEvent.NODE, term.term(), term.constraint());
+                global.debugg.setTarget(true);
                 if (term.implies(targetTerm)) {
                     successPaths++;
-                    Debugg.log(Debugg.LogEvent.IMPLIESTARGET, term.term(), term.constraint());
+                    global.debugg.log(Debugg.LogEvent.IMPLIESTARGET, term.term(), term.constraint());
                     continue;
                 }
-                Debugg.setTarget(false);
+                global.debugg.setTarget(false);
 
                 /* TODO(AndreiS): terminate the proof with failure based on the klabel _~>_
                 List<Term> leftKContents = term.term().getCellContentsByName("<k>");
@@ -689,9 +689,9 @@ public class SymbolicRewriter {
                                             cterm.constraint().substitution().keySet(),
                                             initialTerm.variableSet())),
                             cterm.termContext());
-                    Debugg.log(Debugg.LogEvent.RSTEP, term.term(), term.constraint(), result.term(), result.constraint());
+                    global.debugg.log(Debugg.LogEvent.RSTEP, term.term(), term.constraint(), result.term(), result.constraint());
                     if(results.size() > 1) {
-                        Debugg.log(Debugg.LogEvent.BRANCH, result.term(), result.constraint());
+                        global.debugg.log(Debugg.LogEvent.BRANCH, result.term(), result.constraint());
                     }
                     if (visited.add(result)) {
                         nextQueue.add(result);
@@ -733,13 +733,13 @@ public class SymbolicRewriter {
     private ConstrainedTerm applySpecRules(ConstrainedTerm constrainedTerm, List<Rule> specRules) {
         for (Rule specRule : specRules) {
             ConstrainedTerm pattern = specRule.createLhsPattern(constrainedTerm.termContext());
-            Debugg.log(Debugg.LogEvent.MATCHRULE, specRule.toKRewrite());
+            global.debugg.log(Debugg.LogEvent.MATCHRULE, specRule.toKRewrite());
             ConjunctiveFormula constraint = constrainedTerm.matchImplies(pattern, true, specRule.matchingSymbols());
-            Debugg.resetMatchrule();
+            global.debugg.resetMatchrule();
             if (constraint != null) {
                 ConstrainedTerm result = buildResult(specRule, constraint, null, true, constrainedTerm.termContext());
-                Debugg.log(Debugg.LogEvent.RULE, specRule.toKRewrite());
-                Debugg.log(Debugg.LogEvent.SRSTEP, constrainedTerm.term(), constrainedTerm.constraint(), result.term(), result.constraint());
+                global.debugg.log(Debugg.LogEvent.RULE, specRule.toKRewrite());
+                global.debugg.log(Debugg.LogEvent.SRSTEP, constrainedTerm.term(), constrainedTerm.constraint(), result.term(), result.constraint());
                 return result;
             }
         }
