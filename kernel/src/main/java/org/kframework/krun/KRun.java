@@ -16,6 +16,7 @@ import org.kframework.kore.KToken;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
 import org.kframework.krun.modes.ExecutionMode;
+import org.kframework.main.GlobalOptions;
 import org.kframework.main.Main;
 import org.kframework.parser.binary.BinaryParser;
 import org.kframework.parser.kore.KoreParser;
@@ -49,16 +50,18 @@ import static org.kframework.kore.KORE.*;
  */
 public class KRun {
 
+    private final GlobalOptions globalOptions;
     private final KExceptionManager kem;
     private final FileUtil files;
     private final TTYInfo tty;
     private final KPrint kprint;
 
-    public KRun(KExceptionManager kem, FileUtil files, TTYInfo tty, KPrint kprint) {
-        this.kem    = kem;
-        this.files  = files;
-        this.tty    = tty;
-        this.kprint = kprint;
+    public KRun(GlobalOptions globalOptions, KExceptionManager kem, FileUtil files, TTYInfo tty, KPrint kprint) {
+        this.globalOptions = globalOptions;
+        this.kem           = kem;
+        this.files         = files;
+        this.tty           = tty;
+        this.kprint        = kprint;
     }
 
     public static class InitialConfiguration {
