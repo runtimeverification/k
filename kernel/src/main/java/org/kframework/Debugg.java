@@ -36,7 +36,7 @@ public class Debugg {
     private static String      loggingPath;
     private static String      sessionId;
     private static File        sessionDir;
-    private static File        nodesDir;
+    private static File        blobsDir;
     private static PrintWriter sessionLog;
     private static String      currentTerm;
     private static String      currentRule;
@@ -49,19 +49,17 @@ public class Debugg {
         Debugg.loggingOn = globalOptions.debugg;
         if (! Debugg.loggingOn) return;
 
-        Debugg.files      = files;
-        Debugg.specModule = specModule;
-
+        Debugg.files       = files;
         Debugg.loggingPath = globalOptions.debuggPath;
+        Debugg.sessionId   = sessionId;
         try {
-            Debugg.sessionId  = sessionId;
-            Debugg.sessionDir = globalOptions.debuggPath == null
+            Debugg.sessionDir = Debugg.loggingPath == null
                               ? files.resolveKompiled(sessionId + ".debugg")
                               : new File(globalOptions.debuggPath);
             String path       = sessionDir.getAbsolutePath();
 
-            Debugg.nodesDir   = new File(Debugg.sessionDir, "blobs/");
-            Debugg.nodesDir.mkdirs();
+            Debugg.blobsDir   = new File(Debugg.sessionDir, "blobs/");
+            Debugg.blobsDir.mkdirs();
             Debugg.sessionLog = new PrintWriter(Debugg.sessionDir.getAbsolutePath() + "/" + globalOptions.debuggId + ".log");
             System.out.println("Debugg: " + globalOptions.debuggId);
         } catch (FileNotFoundException e) {
@@ -190,7 +188,7 @@ public class Debugg {
 
     private static String writeNode(K contents) {
         String fileCode   = Integer.toString(Math.abs(contents.hashCode()));
-        File   outputFile = new File(Debugg.nodesDir, fileCode + "." + OutputModes.JSON.ext());
+        File   outputFile = new File(Debugg.blobsDir, fileCode + "." + OutputModes.JSON.ext());
         if (! outputFile.exists()) {
             try {
                 String out = new String(KPrint.serialize(contents, OutputModes.JSON), StandardCharsets.UTF_8);
