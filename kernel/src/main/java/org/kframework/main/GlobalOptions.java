@@ -89,4 +89,13 @@ public final class GlobalOptions {
 
     @Parameter(names={"--warnings-to-errors", "-w2e"}, description="Convert warnings to errors.")
     public boolean warnings2errors = false;
+
+    @Parameter(names={"--debugg"}, description="Output proof debugging information")
+    public boolean debugg = false;
+
+    @Parameter(names={"--debugg-path"}, description="Path where the debugg output should be stored")
+    public String debuggPath;
+
+    @Parameter(names={"--debugg-id"}, description="Id of the current proof")
+    public String debuggId;
 }

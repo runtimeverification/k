@@ -3,7 +3,7 @@ package org.kframework;
 
 import org.kframework.definition.Module;
 import org.kframework.kore.K;
-import org.kframework.kprove.KProveOptions;
+import org.kframework.main.GlobalOptions;
 import org.kframework.krun.KRun;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.unparser.KPrint;
@@ -46,26 +46,26 @@ public class Debugg {
     private static String      currentImplication;
     private static long        startTime;
 
-    public static void init(KProveOptions kproveOptions, FileUtil files, Module specModule, Module parsingModule) {
-        Debugg.loggingOn = kproveOptions.debugg;
+    public static void init(GlobalOptions globalOptions, FileUtil files, Module specModule, Module parsingModule) {
+        Debugg.loggingOn = globalOptions.debugg;
         if (! Debugg.loggingOn) return;
 
         Debugg.files         = files;
         Debugg.specModule    = specModule;
         Debugg.parsingModule = parsingModule;
 
-        Debugg.loggingPath = kproveOptions.debuggPath;
+        Debugg.loggingPath = globalOptions.debuggPath;
         try {
             Debugg.sessionId  = Integer.toString(Math.abs(Debugg.specModule.hashCode()));
-            Debugg.sessionDir = kproveOptions.debuggPath == null
+            Debugg.sessionDir = globalOptions.debuggPath == null
                               ? files.resolveKompiled(sessionId + ".debugg")
-                              : new File(kproveOptions.debuggPath);
+                              : new File(globalOptions.debuggPath);
             String path       = sessionDir.getAbsolutePath();
 
             Debugg.nodesDir   = new File(Debugg.sessionDir, "blobs/");
             Debugg.nodesDir.mkdirs();
-            Debugg.sessionLog = new PrintWriter(Debugg.sessionDir.getAbsolutePath() + "/" + kproveOptions.debuggId + ".log");
-            System.out.println("Debugg: " + kproveOptions.debuggId);
+            Debugg.sessionLog = new PrintWriter(Debugg.sessionDir.getAbsolutePath() + "/" + globalOptions.debuggId + ".log");
+            System.out.println("Debugg: " + globalOptions.debuggId);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
