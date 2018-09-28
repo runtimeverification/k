@@ -66,6 +66,7 @@ public class Debugg {
     }
 
     public void init(String sessionId) {
+        if (! this.loggingOn) return;
         File logFile = new File(this.loggingPath, sessionId + ".log");
         PrintWriter sessionLog;
         try {
@@ -78,6 +79,7 @@ public class Debugg {
     }
 
     public void setTarget(boolean b) {
+        if (! this.loggingOn) return;
         if(b) {
             this.currentMatchRule = "IMPLIESTARGET";
         } else {
@@ -90,6 +92,7 @@ public class Debugg {
     }
 
     public void resetMatchrule() {
+        if (! this.loggingOn) return;
         currentMatchRule = "NORULE";
     }
 
