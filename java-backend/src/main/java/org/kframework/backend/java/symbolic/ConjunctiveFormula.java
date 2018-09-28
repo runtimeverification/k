@@ -7,6 +7,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
+import org.kframework.Debugg;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.util.Constants;
@@ -87,6 +88,8 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
 
     private transient final GlobalContext global;
 
+    private final Debugg debugg;
+
     public ConjunctiveFormula(
             Substitution<Variable, Term> substitution,
             PersistentUniqueList<Equality> equalities,
@@ -105,6 +108,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
         this.truthValue = truthValue;
         this.falsifyingEquality = falsifyingEquality;
         this.global = global;
+        this.debugg = global == null ? new Debugg() : global.debugg;
     }
 
     public ConjunctiveFormula(
@@ -720,6 +724,8 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 continue;
             }
 
+
+            debugg.log(Debugg.LogEvent.IMPLICATION, left, right);
             if (!impliesSMT(left, right, rightOnlyVariables)) {
                 if (global.globalOptions.debug) {
                     System.err.println("Failure!");

@@ -3,11 +3,15 @@ package org.kframework.unparser;
 
 import com.beust.jcommander.Parameter;
 import com.google.inject.Inject;
+
 import org.kframework.unparser.OutputModes;
 import org.kframework.unparser.ColorSetting;
 import org.kframework.utils.options.BaseEnumConverter;
+import org.kframework.utils.options.StringListConverter;
 
 import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
 
 public class PrintOptions {
 
@@ -76,4 +80,15 @@ public class PrintOptions {
         }
     }
 
+    @Parameter(names={"--output-omit"}, listConverter=StringListConverter.class, description="KLabels to omit from the output.")
+    public List<String> omittedKLabels = new ArrayList<String>();
+
+    @Parameter(names={"--output-tokenize"}, listConverter=StringListConverter.class, description="KLabels to tokenize underneath (reducing output size).")
+    public List<String> tokenizedKLabels = new ArrayList<String>();
+
+    @Parameter(names={"--output-flatten"}, listConverter=StringListConverter.class, description="(Assoc) KLabels to flatten into one list.")
+    public List<String> flattenedKLabels = new ArrayList<String>();
+
+    @Parameter(names={"--output-tostring"}, listConverter=StringListConverter.class, description="KLabels to call toString on.")
+    public List<String> tostringKLabels = new ArrayList<String>();
 }

@@ -6,6 +6,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.RewriterResult;
+import org.kframework.Debugg;
 import org.kframework.Strategy;
 import org.kframework.attributes.Att;
 import org.kframework.backend.java.builtins.BoolToken;
@@ -27,9 +28,11 @@ import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.strategies.TransitionCompositeStrategy;
 import org.kframework.backend.java.util.Profiler2;
 import org.kframework.builtin.KLabels;
+import org.kframework.builtin.Sorts;
 import org.kframework.kore.FindK;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
+import org.kframework.kore.KRewrite;
 import org.kframework.kore.KORE;
 import org.kframework.main.GlobalOptions;
 import org.kframework.rewriter.SearchType;
@@ -37,6 +40,9 @@ import org.kframework.backend.java.utils.BitSet;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
 import java.io.File;
+
+import static org.kframework.kore.KORE.KRewrite;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -211,9 +217,11 @@ public class SymbolicRewriter {
             if (!matchResult.isMatching) {
                 // TODO(AndreiS): move these some other place
                 result = result.expandPatterns(true);
+                global.debugg.log(Debugg.LogEvent.MATCHRULE, rule.toKRewrite());
                 if (result.constraint().isFalseExtended() || result.constraint().checkUnsat()) {
                     continue;
                 }
+                global.debugg.resetMatchrule();
             }
 
             /* TODO(AndreiS): remove this hack for super strictness after strategies work */
@@ -594,17 +602,25 @@ public class SymbolicRewriter {
 
         initialTerm = initialTerm.expandPatterns(true);
 
+        global.debugg.log(Debugg.LogEvent.INIT,   initialTerm.term(), initialTerm.constraint());
+        global.debugg.log(Debugg.LogEvent.TARGET, targetTerm.term(),  targetTerm.constraint());
+
         visited.add(initialTerm);
         queue.add(initialTerm);
         boolean guarded = false;
         int step = 0;
+
         while (!queue.isEmpty()) {
             step++;
             for (ConstrainedTerm term : queue) {
+                global.debugg.log(Debugg.LogEvent.NODE, term.term(), term.constraint());
+                global.debugg.setTarget(true);
                 if (term.implies(targetTerm)) {
                     successPaths++;
+                    global.debugg.log(Debugg.LogEvent.IMPLIESTARGET, term.term(), term.constraint());
                     continue;
                 }
+                global.debugg.setTarget(false);
 
                 /* TODO(AndreiS): terminate the proof with failure based on the klabel _~>_
                 List<Term> leftKContents = term.term().getCellContentsByName("<k>");
@@ -673,6 +689,10 @@ public class SymbolicRewriter {
                                             cterm.constraint().substitution().keySet(),
                                             initialTerm.variableSet())),
                             cterm.termContext());
+                    global.debugg.log(Debugg.LogEvent.RSTEP, term.term(), term.constraint(), result.term(), result.constraint());
+                    if(results.size() > 1) {
+                        global.debugg.log(Debugg.LogEvent.BRANCH, result.term(), result.constraint());
+                    }
                     if (visited.add(result)) {
                         nextQueue.add(result);
                     }
@@ -713,9 +733,15 @@ public class SymbolicRewriter {
     private ConstrainedTerm applySpecRules(ConstrainedTerm constrainedTerm, List<Rule> specRules) {
         for (Rule specRule : specRules) {
             ConstrainedTerm pattern = specRule.createLhsPattern(constrainedTerm.termContext());
+
+            global.debugg.log(Debugg.LogEvent.MATCHRULE, specRule.toKRewrite());
             ConjunctiveFormula constraint = constrainedTerm.matchImplies(pattern, true);
+            global.debugg.resetMatchrule();
             if (constraint != null) {
-                return buildResult(specRule, constraint, null, true, constrainedTerm.termContext());
+                ConstrainedTerm result = buildResult(specRule, constraint, null, true, constrainedTerm.termContext());
+                global.debugg.log(Debugg.LogEvent.RULE, specRule.toKRewrite());
+                global.debugg.log(Debugg.LogEvent.SRSTEP, constrainedTerm.term(), constrainedTerm.constraint(), result.term(), result.constraint());
+                return result;
             }
         }
         return null;

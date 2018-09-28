@@ -38,17 +38,19 @@ import static org.kframework.Collections.*;
  */
 public class KProve {
 
+    private final GlobalOptions globalOptions;
     private final KExceptionManager kem;
     private final Stopwatch sw;
     private final FileUtil files;
     private final KPrint kprint;
 
     @Inject
-    public KProve(KExceptionManager kem, Stopwatch sw, FileUtil files, KPrint kprint) {
-        this.kem    = kem;
-        this.sw     = sw;
-        this.files  = files;
-        this.kprint = kprint;
+    public KProve(GlobalOptions globalOptions, KExceptionManager kem, Stopwatch sw, FileUtil files, KPrint kprint) {
+        this.globalOptions = globalOptions;
+        this.kem           = kem;
+        this.sw            = sw;
+        this.files         = files;
+        this.kprint        = kprint;
     }
 
     public int run(KProveOptions options, CompiledDefinition compiledDefinition, Backend backend, Function<Module, Rewriter> rewriterGenerator) {
@@ -64,7 +66,7 @@ public class KProve {
         } else {
             exit = 1;
         }
-        kprint.prettyPrint(compiled._1(), compiled._1().getModule("LANGUAGE-PARSING").get(), compiledDefinition.kompileOptions, s -> kprint.outputFile(s), results);
+        kprint.prettyPrint(compiled._1(), compiled._1().getModule("LANGUAGE-PARSING").get(), s -> kprint.outputFile(s), results);
         return exit;
     }
 
