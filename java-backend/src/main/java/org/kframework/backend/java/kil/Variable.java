@@ -123,11 +123,7 @@ public class Variable extends Term implements org.kframework.kore.KVariable {
      * Returns a {@code String} representation of the name of this variable.
      */
     public String name() {
-        return name + "_" + originalName;
-    }
-
-    public String originalName() {
-        return originalName;
+        return name;
     }
 
     @Override
@@ -188,7 +184,7 @@ public class Variable extends Term implements org.kframework.kore.KVariable {
 
     @Override
     public String toString() {
-        return originalName + "." + name + ":" + sort;
+        return originalName + name + ":" + sort;
     }
 
     @Override
