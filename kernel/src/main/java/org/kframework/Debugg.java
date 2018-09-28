@@ -73,7 +73,7 @@ public class Debugg {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        System.out.println("Debugg: " + logFile);
+        System.err.println("Debugg: " + logFile);
         this.startTime = System.currentTimeMillis();
     }
 
