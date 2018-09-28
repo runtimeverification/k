@@ -42,6 +42,12 @@ public class Debugg {
     private String currentQuery;
     private String currentImplication;
 
+    public Debugg() {
+        this.loggingOn   = false;
+        this.loggingPath = null;
+        this.blobsDir    = null;
+    }
+
     public Debugg(GlobalOptions globalOptions, FileUtil files) {
         this.loggingOn = globalOptions.debugg;
 

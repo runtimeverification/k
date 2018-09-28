@@ -108,7 +108,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
         this.truthValue = truthValue;
         this.falsifyingEquality = falsifyingEquality;
         this.global = global;
-        this.debugg = global.debugg;
+        this.debugg = global == null ? new Debugg() : global.debugg;
     }
 
     public ConjunctiveFormula(
