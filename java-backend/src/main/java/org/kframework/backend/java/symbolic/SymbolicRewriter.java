@@ -966,8 +966,8 @@ public class SymbolicRewriter {
     private ConstrainedTerm applySpecRules(ConstrainedTerm constrainedTerm, List<Rule> specRules) {
         for (Rule specRule : specRules) {
             ConstrainedTerm pattern = specRule.createLhsPattern(constrainedTerm.termContext());
-            ConjunctiveFormula constraint = constrainedTerm.matchImplies(pattern, true, specRule.matchingSymbols(),
-                    new FormulaContext(FormulaContext.Kind.SpecRule, specRule), false);
+            ConjunctiveFormula constraint = constrainedTerm.matchImplies(pattern, true, false,
+                    new FormulaContext(FormulaContext.Kind.SpecRule, specRule), specRule.matchingSymbols());
             if (constraint != null) {
                 if (global.globalOptions.logRulesPublic) {
                     RuleSourceUtil.printRuleAndSource(specRule);

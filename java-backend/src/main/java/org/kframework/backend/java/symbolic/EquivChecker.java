@@ -142,8 +142,8 @@ public class EquivChecker {
             loop:
                 for (ConstrainedTerm next : nexts) {
                     for (int i = 0; i < numSyncPoints; i++) {
-                        ConjunctiveFormula constraint = next.matchImplies(targetSyncNodes.get(i), true, null,
-                                new FormulaContext(FormulaContext.Kind.EquivImplication, null), false);
+                        ConjunctiveFormula constraint = next.matchImplies(targetSyncNodes.get(i), true, false,
+                                new FormulaContext(FormulaContext.Kind.EquivImplication, null), null);
                         if (constraint != null) {
                             SyncNode node = new SyncNode(currSyncNode.startSyncPoint, currSyncNode, next, constraint);
                             nextSyncNodes.get(i).add(node);
