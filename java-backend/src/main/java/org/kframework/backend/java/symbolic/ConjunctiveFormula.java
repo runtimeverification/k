@@ -565,6 +565,49 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
         return new ConjunctiveFormula(substitution, equalities, disjunctions, truthValue, falsifyingEquality, global);
     }
 
+    /**
+     * For any abstraction function symbol #f:
+     *
+     *   #f(X) == #f(Y)  =>  X == Y
+     *
+     * even if #f is NOT injective.
+     */
+    public ConjunctiveFormula resolveMatchingSymbols(Set<String> matchingSymbols) {
+        PersistentUniqueList<Equality> equalities = this.equalities;
+        PersistentUniqueList<Equality> newEqualities = equalities;
+
+        while (!newEqualities.isEmpty()) {
+            PersistentUniqueList<Equality> curEqualities = newEqualities;
+            newEqualities = PersistentUniqueList.empty();
+
+            for (Equality equality : curEqualities) {
+                if (equality.leftHandSide() instanceof KItem && equality.rightHandSide() instanceof KItem) {
+                    KLabelConstant lKLabel = (KLabelConstant) ((KItem) equality.leftHandSide()).kLabel(); // #f
+                    KLabelConstant rKLabel = (KLabelConstant) ((KItem) equality.rightHandSide()).klabel(); // #f
+
+                    if (lKLabel.equals(rKLabel) && matchingSymbols.contains(lKLabel.name())) {
+                        KList lKList = (KList) ((KItem) equality.leftHandSide()).kList(); // X
+                        KList rKList = (KList) ((KItem) equality.rightHandSide()).kList(); // Y
+
+                        if (lKList.size() == rKList.size()) {
+                            for (int i = 0; i < lKList.size(); ++i) {
+                                Equality newEquality = new Equality(lKList.get(i), rKList.get(i), global); // X == Y
+                                equalities = equalities.plus(newEquality);
+                                newEqualities = newEqualities.plus(newEquality);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (equalities == this.equalities) {
+            return this;
+        } else {
+            return new ConjunctiveFormula(substitution, equalities, disjunctions, truthValue, falsifyingEquality, global);
+        }
+    }
+
     public ImmutableMapSubstitution<Variable, Term> getSubstitution(Variable variable, Term term) {
         if (RewriteEngineUtils.isSubsortedEq(variable, term, global.getDefinition())) {
             return ImmutableMapSubstitution.singleton(variable, term);
