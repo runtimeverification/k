@@ -26,6 +26,8 @@ import org.kframework.utils.file.TTYInfo;
 import scala.Tuple2;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -191,7 +193,7 @@ public class KPrint {
                 return options.omittedKLabels.contains(name)   ? omitTerm(mod, orig)
                      : options.tokenizedKLabels.contains(name) ? tokenizeTerm(mod, orig)
                      : options.flattenedKLabels.contains(name) ? flattenTerm(mod, orig)
-                     : options.tostringKLabels.contains(name)  ? tostringTerm(mod, orig)
+                     : options.tokastKLabels.contains(name)    ? toKASTTerm(mod, orig)
                      : orig ;
             }
         }.apply(term);
@@ -228,13 +230,18 @@ public class KPrint {
         return KApply(kapp.klabel(), KList(items), kapp.att());
     }
 
-    public static K tostringTerm(Module mod, KApply kapp) {
-        String       tostringTerm = kapp.toString();
-        Sort         finalSort    = Sorts.K();
-        Option<Sort> termSort     = mod.sortFor().get(kapp.klabel());
+    public static K toKASTTerm(Module mod, KApply kapp) {
+        String kastTerm;
+        try {
+            kastTerm = new String(KPrint.serialize(kapp, OutputModes.KAST), "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            kastTerm = kapp.toString();
+        }
+        Sort         finalSort = Sorts.K();
+        Option<Sort> termSort  = mod.sortFor().get(kapp.klabel());
         if (! termSort.isEmpty()) {
             finalSort = termSort.get();
         }
-        return KToken(tostringTerm, finalSort);
+        return KToken(kastTerm, finalSort);
     }
 }

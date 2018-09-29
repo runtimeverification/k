@@ -89,6 +89,6 @@ public class PrintOptions {
     @Parameter(names={"--output-flatten"}, listConverter=StringListConverter.class, description="(Assoc) KLabels to flatten into one list.")
     public List<String> flattenedKLabels = new ArrayList<String>();
 
-    @Parameter(names={"--output-tostring"}, listConverter=StringListConverter.class, description="KLabels to call toString on.")
-    public List<String> tostringKLabels = new ArrayList<String>();
+    @Parameter(names={"--output-tokast"}, listConverter=StringListConverter.class, description="KLabels to output as KAST tokens.")
+    public List<String> tokastKLabels = new ArrayList<String>();
 }
