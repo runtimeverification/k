@@ -110,7 +110,7 @@ public class BuiltinSetOperations {
     public static Term set2list(BuiltinSet set, TermContext context) {
         if (!set.isGround()) {
             return null;
-        }  
+        }
         BuiltinList.Builder builder = BuiltinList.builder(context.global());
         for (Term element : set.elements()) {
             builder.add(element);
@@ -121,7 +121,7 @@ public class BuiltinSetOperations {
     public static Term list2set(BuiltinList list, TermContext context) {
         if (!list.isGround()) {
             return null;
-        }  
+        }
         BuiltinSet.Builder builder = BuiltinSet.builder(context.global());
         for (Term element : list.getKComponents()) {
             builder.add(element);
