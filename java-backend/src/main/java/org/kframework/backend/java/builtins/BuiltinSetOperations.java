@@ -2,6 +2,7 @@
 package org.kframework.backend.java.builtins;
 
 import org.kframework.backend.java.kil.Bottom;
+import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.BuiltinSet;
 import org.kframework.backend.java.kil.DataStructures;
 import org.kframework.backend.java.kil.Sort;
@@ -106,4 +107,25 @@ public class BuiltinSetOperations {
         }
     }
 
+    public static Term set2list(BuiltinSet set, TermContext context) {
+        if (!set.isGround()) {
+            return null;
+        }  
+        BuiltinList.Builder builder = BuiltinList.builder(context.global());
+        for (Term element : set.elements()) {
+            builder.add(element);
+        }
+        return builder.build();
+    }
+
+    public static Term list2set(BuiltinList list, TermContext context) {
+        if (!list.isGround()) {
+            return null;
+        }  
+        BuiltinSet.Builder builder = BuiltinSet.builder(context.global());
+        for (Term element : list.getKComponents()) {
+            builder.add(element);
+        }
+        return builder.build();
+    }
 }
