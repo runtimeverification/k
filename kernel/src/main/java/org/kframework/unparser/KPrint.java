@@ -231,12 +231,7 @@ public class KPrint {
     }
 
     public static K toKASTTerm(Module mod, KApply kapp) {
-        String kastTerm;
-        try {
-            kastTerm = new String(KPrint.serialize(kapp, OutputModes.KAST), "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            kastTerm = kapp.toString();
-        }
+        String       kastTerm  = ToKast.apply(kapp);
         Sort         finalSort = Sorts.K();
         Option<Sort> termSort  = mod.sortFor().get(kapp.klabel());
         if (! termSort.isEmpty()) {
