@@ -163,13 +163,15 @@ public class KRun {
             K configVar = externalParse(parser, value, sort, Source.apply("<command line: -c" + name + ">"), compiledDef);
             output.put(KToken(configVarName, Sorts.KConfigVar()), configVar);
         }
-        if (options.io()) {
-            output.put(KToken("$STDIN", Sorts.KConfigVar()), KToken("\"\"", Sorts.String()));
-            output.put(KToken("$IO", Sorts.KConfigVar()), KToken("\"on\"", Sorts.String()));
-        } else {
-            String stdin = getStdinBuffer(tty.stdin);
-            output.put(KToken("$STDIN", Sorts.KConfigVar()), KToken("\"" + stdin + "\"", Sorts.String()));
-            output.put(KToken("$IO", Sorts.KConfigVar()), KToken("\"off\"", Sorts.String()));
+        if (compiledDef.kompiledDefinition.mainModule().definedSorts().contains(Sorts.String())) {
+            if (options.io()) {
+                output.put(KToken("$STDIN", Sorts.KConfigVar()), KToken("\"\"", Sorts.String()));
+                output.put(KToken("$IO", Sorts.KConfigVar()), KToken("\"on\"", Sorts.String()));
+            } else {
+                String stdin = getStdinBuffer(tty.stdin);
+                output.put(KToken("$STDIN", Sorts.KConfigVar()), KToken("\"" + stdin + "\"", Sorts.String()));
+                output.put(KToken("$IO", Sorts.KConfigVar()), KToken("\"off\"", Sorts.String()));
+            }
         }
         if (options.global.debug) {
             // on the critical path, so don't perform this check because it's slow unless we're debugging.
