@@ -114,7 +114,7 @@ public class HaskellRewriter implements Function<Module, Rewriter> {
                         Pattern kore = textToKore.parsePattern(koreOutputFile);
                         KoreToK koreToK = new KoreToK(idsToLabels);
                         K outputK = koreToK.apply(kore);
-                        return new RewriterResult(Optional.empty(), outputK);
+                        return new RewriterResult(Optional.empty(), Optional.empty(), outputK);
                     } catch (IOException e) {
                         throw KEMException.criticalError("I/O Error while executing", e);
                     } catch (InterruptedException e) {
@@ -124,7 +124,7 @@ public class HaskellRewriter implements Function<Module, Rewriter> {
                     }
 
                 }
-                return new RewriterResult(Optional.empty(), k);
+                return new RewriterResult(Optional.empty(), Optional.empty(), k);
             }
 
             @Override
