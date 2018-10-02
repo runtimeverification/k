@@ -1206,7 +1206,11 @@ public class ModuleToKORE {
                 sb.append("\\dv{");
                 convert(k.sort(), false);
                 sb.append("}(");
-                sb.append(StringUtil.enquoteCString(k.s()));
+                if (module.sortAttributesFor().get(k.sort()).getOrElse(() -> Att.empty()).getOptional("hook").orElse("").equals("STRING.String")) {
+                    sb.append(StringUtil.enquoteCString(StringUtil.unquoteKString(k.s())));
+                } else {
+                    sb.append(StringUtil.enquoteCString(k.s()));
+                }
                 sb.append(")");
             }
 

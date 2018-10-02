@@ -2,9 +2,11 @@ package org.kframework.parser.kore.parser
 
 import org.kframework.builtin.{KLabels, Sorts}
 import org.kframework.kore.KORE
+import org.kframework.attributes.Att
 import org.kframework.parser.kore
 import org.kframework.{kore => k}
 
+import scala.collection.Map
 import scala.collection.JavaConverters._
 
 /** Translation error exception. */
@@ -12,7 +14,7 @@ case class TranslationError(msg: String) extends RuntimeException(msg)
 
 /** Conversion function from Kore to K. */
 
-class KoreToK (headToLabel_ : java.util.Properties) {
+class KoreToK (headToLabel_ : java.util.Properties, sortAtt : Map[k.Sort, Att], enquote: String => String) {
 
   val koreToKLabel = headToLabel_.asScala.toMap;
 
@@ -84,7 +86,7 @@ class KoreToK (headToLabel_ : java.util.Properties) {
     case kore.Mem(s, rs, p, q) =>
       throw new TranslationError("Mem patterns currently unsupported")
     case kore.DomainValue(s, str) =>
-      KORE.KToken(str, apply(s))
+      KORE.KToken(if (sortAtt.get(apply(s)).getOrElse(KORE.Att).getOptional("hook").orElse("") == "STRING.String") enquote(str) else str, apply(s))
     case kore.StringLiteral(str) =>
       KORE.KToken(str, Sorts.KString)
   }
