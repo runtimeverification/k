@@ -58,7 +58,7 @@ public class KPrint {
     }
 
     public KPrint(KompileOptions kompileOptions) {
-        this(new KExceptionManager(new GlobalOptions()), FileUtil.testFileUtil(), new TTYInfo(false, false, false), new PrintOptions(), kompileOptions);
+        this(new KExceptionManager(kompileOptions.global), FileUtil.testFileUtil(), new TTYInfo(false, false, false), new PrintOptions(), kompileOptions);
     }
 
     @Inject
