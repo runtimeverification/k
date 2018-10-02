@@ -64,7 +64,7 @@ public class KProve {
         } else {
             exit = 1;
         }
-        kprint.prettyPrint(compiled._1(), compiled._1().getModule("LANGUAGE-PARSING").get(), compiledDefinition.kompileOptions, s -> kprint.outputFile(s), results);
+        kprint.prettyPrint(compiled._1(), compiled._1().getModule("LANGUAGE-PARSING").get(), s -> kprint.outputFile(s), results);
         return exit;
     }
 
