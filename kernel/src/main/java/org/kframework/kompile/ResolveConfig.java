@@ -31,12 +31,14 @@ import static org.kframework.definition.Constructors.*;
 class ResolveConfig {
     private final Definition def;
     private final boolean isStrict;
+    private final boolean kore;
     private final BiFunction<Module, Bubble, Stream<? extends K>> parseBubble;
     private Function<Module, ParseInModule> getParser;
 
-    ResolveConfig(Definition def, boolean isStrict, BiFunction<Module, Bubble, Stream<? extends K>> parseBubble, Function<Module, ParseInModule> getParser) {
+    ResolveConfig(Definition def, boolean isStrict, boolean kore, BiFunction<Module, Bubble, Stream<? extends K>> parseBubble, Function<Module, ParseInModule> getParser) {
         this.def = def;
         this.isStrict = isStrict;
+        this.kore = kore;
         this.parseBubble = parseBubble;
         this.getParser = getParser;
     }
@@ -78,7 +80,7 @@ class ResolveConfig {
                     }
                 })
                 .flatMap(
-                        configDecl -> stream(GenerateSentencesFromConfigDecl.gen(configDecl.body(), configDecl.ensures(), configDecl.att(), parser.getExtensionModule())))
+                        configDecl -> stream(GenerateSentencesFromConfigDecl.gen(configDecl.body(), configDecl.ensures(), configDecl.att(), parser.getExtensionModule(), kore)))
                 .collect(Collections.toSet());
 
         Set<Sentence> configDeclSyntax = stream(configDeclProductions).filter(Sentence::isSyntax).collect(Collections.toSet());

@@ -117,7 +117,7 @@ public class DefinitionParsing {
         }
 
         Module modWithConfig;
-        ResolveConfig resolveConfig = new ResolveConfig(definition.getParsedDefinition(), isStrict, this::parseBubble, this::getParser);
+        ResolveConfig resolveConfig = new ResolveConfig(definition.getParsedDefinition(), isStrict, kore, this::parseBubble, this::getParser);
         gen = new RuleGrammarGenerator(definition.getParsedDefinition());
 
         try {
@@ -220,7 +220,7 @@ public class DefinitionParsing {
             }
         }
 
-        ResolveConfig resolveConfig = new ResolveConfig(definitionWithConfigBubble, isStrict, this::parseBubble, this::getParser);
+        ResolveConfig resolveConfig = new ResolveConfig(definitionWithConfigBubble, isStrict, kore, this::parseBubble, this::getParser);
         gen = new RuleGrammarGenerator(definitionWithConfigBubble);
 
         try {
