@@ -68,7 +68,12 @@ public class CompiledDefinition implements Serializable {
         this.programStartSymbol = configurationVariableDefaultSorts.getOrDefault("$PGM", Sorts.K());
         this.topCellInitializer = topCellInitializer;
         this.languageParsingModule = kompiledDefinition.getModule("LANGUAGE-PARSING").get();
-        Rule exitCodeRule = getExitCodeRule(parsedDefinition);
+        Rule exitCodeRule;
+        if (kompileOptions.isKore()) {
+            exitCodeRule = null;
+        } else {
+            exitCodeRule = getExitCodeRule(parsedDefinition);
+        }
         if (exitCodeRule == null) {
             this.exitCodePattern = null;
         } else {

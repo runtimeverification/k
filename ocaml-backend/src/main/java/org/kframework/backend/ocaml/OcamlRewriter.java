@@ -134,7 +134,7 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
         if (options.experimental.statistics) {
             System.err.println("[" + steps + " steps]");
         }
-        return new RewriterResult(Optional.of(steps), BinaryParser.parse(Arrays.copyOfRange(output, s.indexOf('\n') + 1, output.length)));
+        return new RewriterResult(Optional.of(steps), Optional.empty(), BinaryParser.parse(Arrays.copyOfRange(output, s.indexOf('\n') + 1, output.length)));
     }
 
     private K parseOcamlSearchOutput(byte[] output) {

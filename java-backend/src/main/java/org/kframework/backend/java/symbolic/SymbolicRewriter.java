@@ -94,7 +94,7 @@ public class SymbolicRewriter {
         ConstrainedTerm afterVariableRename = new ConstrainedTerm(constrainedTerm.term(), constrainedTerm.termContext());
 
         stopwatch.stop();
-        return new RewriterResult(Optional.of(step), afterVariableRename.term());
+        return new RewriterResult(Optional.of(step), Optional.empty(), afterVariableRename.term());
     }
 
     private List<ConstrainedTerm> computeRewriteStep(ConstrainedTerm constrainedTerm, int step, boolean computeOne) {

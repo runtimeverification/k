@@ -230,14 +230,14 @@ public class ResolveFreshConstants {
 
                 KToken topCellToken = KToken(KLabels.GENERATED_TOP_CELL_NAME, Sort("#CellName"));
                 K generatedTop = KApply(KLabel("#configCell"), topCellToken, KApply(KLabel("#cellPropertyListTerminator")), KApply(KLabels.CELLS, KApply(KLabel("#externalCell"), cellName), freshCell), topCellToken);
-                Set<Sentence> newSentences = GenerateSentencesFromConfigDecl.gen(generatedTop, BooleanUtils.TRUE, Att.empty(), mod.getExtensionModule());
+                Set<Sentence> newSentences = GenerateSentencesFromConfigDecl.gen(generatedTop, BooleanUtils.TRUE, Att.empty(), mod.getExtensionModule(), true);
                 sentences = (Set<Sentence>) sentences.$bar(newSentences);
             }
         }
         if (kore && m.localKLabels().contains(KLabels.GENERATED_TOP_CELL)) {
             RuleGrammarGenerator gen = new RuleGrammarGenerator(def);
             ParseInModule mod = RuleGrammarGenerator.getCombinedGrammar(gen.getConfigGrammar(m), true);
-            Set<Sentence> newSentences = GenerateSentencesFromConfigDecl.gen(freshCell, BooleanUtils.TRUE, Att.empty(), mod.getExtensionModule());
+            Set<Sentence> newSentences = GenerateSentencesFromConfigDecl.gen(freshCell, BooleanUtils.TRUE, Att.empty(), mod.getExtensionModule(), true);
             sentences = (Set<Sentence>) sentences.$bar(newSentences);
         }
         if (sentences.equals(m.localSentences())) {
