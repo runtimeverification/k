@@ -1,8 +1,8 @@
 opam-version: "1"
 version: "4.06.1"
 src: "https://github.com/ocaml/ocaml/archive/4.06.1.tar.gz"
+patches: [ "%{root}%/repo/k/compilers/4.06.1/4.06.1+k/files/opam-compiler.patch" ]
 build: [
-  ["patch" "-p1" "-i" "%{root}%/repo/k/compilers/4.06.1/4.06.1+k/files/opam-compiler.patch"]
   ["./configure" "-prefix" prefix "-with-debug-runtime"]
   [make "world"]
   [make "world.opt"]
