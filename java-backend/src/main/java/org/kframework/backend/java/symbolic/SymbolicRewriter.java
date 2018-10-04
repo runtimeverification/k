@@ -37,6 +37,7 @@ import org.kframework.kore.KORE;
 import org.kframework.rewriter.SearchType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -47,7 +48,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.io.File;
 
 /**
  * @author AndreiS
@@ -635,43 +635,39 @@ public class SymbolicRewriter {
 
             for (ConstrainedTerm term : queue) {
                 v++;
-                Term generatedTop = term.term();
-                KItem k = getCell((KItem) generatedTop, "<k>");
-                Term kContent = k != null ? ((KList) k.klist()).get(0) : null;
-                BuiltinList kSequence = kContent instanceof BuiltinList ? (BuiltinList) kContent : null;
-                boolean isHalt = kSequence != null
-                        ? kSequence.size() == 2 && kSequence.get(0) instanceof KItem
-                        && kSequence.get(0).toString().equals("#halt_EVM(.KList)")
-                        && !kSequence.get(1).toString().equals("#execute_EVM(.KList)")
-                        : kContent != null && kContent.toString().equals("#halt_EVM(.KList)");
+                ConstrainedTerm termK = new ConstrainedTerm(getCell((KItem) term.term(), "<k>"),
+                        term.constraint(), term.termContext());
+                ConstrainedTerm targetK = new ConstrainedTerm(getCell((KItem) targetTerm.term(), "<k>"),
+                        targetTerm.constraint(), targetTerm.termContext());
+                //if <k> cell matches the target <k>, we consider this state final.
+                boolean kMatchesTarget = termK.matchesTermModuloSubstitutions(targetK);
+
                 boolean oldDebug =  global.globalOptions.debugZ3;
                 boolean oldLog = global.globalOptions.log;
 
-                if (isHalt && global.globalOptions.debugLastStep
+                if (kMatchesTarget && global.globalOptions.debugLastStep
                         || global.globalOptions.debugSteps.contains(String.valueOf(step))) {
                     global.globalOptions.debugZ3 = true;
                     global.globalOptions.log = true;
                 }
 
                 boolean alreadyLogged = logStep(step, v, targetCallData, term,
-                        step == 1 || isHalt, false);
-                if (term.implies(targetTerm, rule)) {
-                    if (global.globalOptions.logBasic) {
-                        logStep(step, v, targetCallData, term, true, alreadyLogged);
-                        System.out.println("\n============\nStep " + step + ": eliminated!\n============\n");
+                        step == 1 || kMatchesTarget, false);
+                if (kMatchesTarget) {
+                    if (term.implies(targetTerm, rule)) {
+                        if (global.globalOptions.logBasic) {
+                            logStep(step, v, targetCallData, term, true, alreadyLogged);
+                            System.out.println("\n============\nStep " + step + ": eliminated!\n============\n");
+                        }
+                        successPaths++;
+                    } else {
+                        //Kprove customization: if K matches target, further evaluation is probably useless. Halting.
+                        logStep(step, v, targetCallData, term, global.globalOptions.logBasic, alreadyLogged);
+                        System.out.println("Halt! Terminating branch.");
+                        proofResults.add(term);
                     }
-                    successPaths++;
                     continue;
                 }
-
-                //stopping at halt
-                if (isHalt) {
-                    logStep(step, v, targetCallData, term, global.globalOptions.logBasic, alreadyLogged);
-                    System.out.println("Halt! Terminating branch.");
-                    proofResults.add(term);
-                    continue;
-                }
-
 
                 /* TODO(AndreiS): terminate the proof with failure based on the klabel _~>_
                 List<Term> leftKContents = term.term().getCellContentsByName("<k>");
