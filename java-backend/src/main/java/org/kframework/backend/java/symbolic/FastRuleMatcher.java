@@ -238,7 +238,7 @@ public class FastRuleMatcher {
             if (patternStr.length() == lengthThreshold) {
                 patternStr += "...";
             }
-            System.err.format("\nFinal implication term not matching\nExpected:\n%s\nActual:\n%s\n",
+            System.err.format("\nFinal implication term not matching\nActual:\n%s\nExpected:\n%s\n",
                     subjectStr, patternStr);
         }
         return result;
