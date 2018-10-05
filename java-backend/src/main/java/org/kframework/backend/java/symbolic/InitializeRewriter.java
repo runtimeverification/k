@@ -156,13 +156,13 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
 
         @Override
         public RewriterResult execute(K k, Optional<Integer> depth) {
+            rewritingContext.debugg.init("execute-" + Integer.toString(Math.abs(k.hashCode())));
             TermContext termContext = TermContext.builder(rewritingContext).freshCounter(initCounterValue).build();
             KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, termContext.global(), false);
             ResolveSemanticCasts resolveCasts = new ResolveSemanticCasts(true);
             ExpandMacros macroExpander = new ExpandMacros(module, files, kompileOptions, false);
             termContext.setKOREtoBackendKILConverter(converter);
             Term backendKil = converter.convert(macroExpander.expand(resolveCasts.resolve(k))).evaluate(termContext);
-            rewritingContext.debugg.init("execute-" + Integer.toString(Math.abs(k.hashCode())));
             SymbolicRewriter rewriter = new SymbolicRewriter(rewritingContext, transitions, converter);
             RewriterResult result = rewriter.rewrite(new ConstrainedTerm(backendKil, termContext), depth.orElse(-1));
             return result;
@@ -176,6 +176,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
 
         @Override
         public K search(K initialConfiguration, Optional<Integer> depth, Optional<Integer> bound, Rule pattern, SearchType searchType) {
+            rewritingContext.debugg.init("search-" + Integer.toString(Math.abs(initialConfiguration.hashCode())));
             TermContext termContext = TermContext.builder(rewritingContext).freshCounter(initCounterValue).build();
             KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, termContext.global(), false);
             ResolveSemanticCasts resolveCasts = new ResolveSemanticCasts(true);
@@ -183,7 +184,6 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
             termContext.setKOREtoBackendKILConverter(converter);
             Term javaTerm = converter.convert(macroExpander.expand(resolveCasts.resolve(initialConfiguration))).evaluate(termContext);
             org.kframework.backend.java.kil.Rule javaPattern = converter.convert(Optional.empty(), transformFunction(JavaBackend::convertKSeqToKApply, pattern));
-            rewritingContext.debugg.init("search-" + Integer.toString(Math.abs(initialConfiguration.hashCode())));
             SymbolicRewriter rewriter = new SymbolicRewriter(rewritingContext, transitions, converter);
             return rewriter.search(javaTerm, javaPattern, bound.orElse(NEGATIVE_VALUE), depth.orElse(NEGATIVE_VALUE), searchType, termContext);
         }
@@ -200,6 +200,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
             if (rewritingContext.globalOptions.verbose) {
                 rewritingContext.profiler.logParsingTime();
             }
+            rewritingContext.debugg.init("prove-" + Integer.toString(Math.abs(mod.hashCode())));
             List<Rule> rules = stream(mod.rules()).filter(r -> r.att().contains("specification")).collect(Collectors.toList());
             ProcessProofRules processProofRules = new ProcessProofRules(rules).invoke(rewritingContext, initCounterValue, module, definition);
             List<org.kframework.backend.java.kil.Rule> javaRules = processProofRules.getJavaRules();
@@ -214,7 +215,6 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
                     .map(org.kframework.backend.java.kil.Rule::renameVariables)
                     .collect(Collectors.toList());
 
-            rewritingContext.debugg.init("prove-" + Integer.toString(Math.abs(mod.hashCode())));
             SymbolicRewriter rewriter = new SymbolicRewriter(rewritingContext, transitions, converter);
 
             if (rewritingContext.globalOptions.verbose) {
