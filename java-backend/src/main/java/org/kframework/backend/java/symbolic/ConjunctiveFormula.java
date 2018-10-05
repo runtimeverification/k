@@ -389,8 +389,8 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
      * between builtin data structures will remain intact if they cannot be
      * resolved completely.
      */
-    public ConjunctiveFormula simplifyBeforePatternFolding(TermContext context, boolean finalImplication) {
-        return simplify(false, false, context, finalImplication);
+    public ConjunctiveFormula simplifyBeforePatternFolding(TermContext context, boolean logFailures) {
+        return simplify(false, false, context, logFailures);
     }
 
     public ConjunctiveFormula simplifyModuloPatternFolding(TermContext context) {
@@ -401,7 +401,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
      * Simplifies this conjunctive formula as much as possible.
      * Decomposes equalities by using unification.
      */
-    private ConjunctiveFormula simplify(boolean patternFolding, boolean partialSimplification, TermContext context, boolean finalImplication) {
+    private ConjunctiveFormula simplify(boolean patternFolding, boolean partialSimplification, TermContext context, boolean logFailures) {
         assert !isFalse();
         ConjunctiveFormula originalTopConstraint = context.getTopConstraint();
         Substitution<Variable, Term> substitution = this.substitution;
@@ -431,7 +431,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                     if (equality.isSimplifiableByCurrentAlgorithm()) {
                         // (decompose + conflict)*
                         FastRuleMatcher unifier = new FastRuleMatcher(global, 1);
-                        ConjunctiveFormula unificationConstraint = unifier.unifyEquality(leftHandSide, rightHandSide, patternFolding, partialSimplification, false, context, finalImplication);
+                        ConjunctiveFormula unificationConstraint = unifier.unifyEquality(leftHandSide, rightHandSide, patternFolding, partialSimplification, false, context, logFailures);
                         if (unificationConstraint.isFalse()) {
                             return falsify(
                                     substitution,

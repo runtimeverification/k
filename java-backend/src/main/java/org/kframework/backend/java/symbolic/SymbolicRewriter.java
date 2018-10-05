@@ -596,6 +596,9 @@ public class SymbolicRewriter {
         List<ConstrainedTerm> nextQueue = new ArrayList<>();
 
         initialTerm = initialTerm.expandPatterns(true);
+        KItem initialKCell = getCell((KItem) initialTerm.term(), "<k>");
+        KItem targetKCell = getCell((KItem) targetTerm.term(), "<k>");
+        boolean initKEqualsTargetK = initialKCell == null || initialKCell.equals(targetKCell);
 
         global.stateLog.log(StateLog.LogEvent.REACHINIT,   initialTerm.term(), initialTerm.constraint());
         global.stateLog.log(StateLog.LogEvent.REACHTARGET, targetTerm.term(),  targetTerm.constraint());
@@ -644,20 +647,26 @@ public class SymbolicRewriter {
                 boolean alreadyLogged = logStep(step, v, targetCallData, term,
                         step == 1 || kMatchesTarget, false);
                 if (kMatchesTarget) {
-                    if (term.implies(targetTerm, rule)) {
+                    if (term.implies(targetTerm, rule, step > 1)) {
                         global.stateLog.log(StateLog.LogEvent.REACHPROVED, term.term(), term.constraint());
                     successPaths++;if (global.globalOptions.logBasic) {
                             logStep(step, v, targetCallData, term, true, alreadyLogged);
                             System.out.println("\n============\nStep " + step + ": eliminated!\n============\n");
                         }
                         successPaths++;
-                    } else {
-                        //Kprove customization: if K matches target, further evaluation is probably useless. Halting.
+                        continue;
+                    } else if (!initKEqualsTargetK) {
+                        //Kprove customization: if <k> matches target <k>, further evaluation is probably useless. Halting.
                         logStep(step, v, targetCallData, term, global.globalOptions.logBasic, alreadyLogged);
                         System.out.println("Halt! Terminating branch.");
                         proofResults.add(term);
+                        continue;
+                    } else {
+                        if (step > 1 && global.globalOptions.logBasic) {
+                            System.err.println("Circularity spec. " +
+                                    "Warnings 'Final implication term not matching' above possibly not an issue.");
+                        }
                     }
-                    continue;
                 }
 
                 /* TODO(AndreiS): terminate the proof with failure based on the klabel _~>_
@@ -929,8 +938,8 @@ public class SymbolicRewriter {
     private ConstrainedTerm applySpecRules(ConstrainedTerm constrainedTerm, List<Rule> specRules) {
         for (Rule specRule : specRules) {
             ConstrainedTerm pattern = specRule.createLhsPattern(constrainedTerm.termContext());
-            ConjunctiveFormula constraint = constrainedTerm.matchImplies(pattern, true, specRule.matchingSymbols(),
-                    new FormulaContext(FormulaContext.Kind.SpecRule, specRule), false);
+            ConjunctiveFormula constraint = constrainedTerm.matchImplies(pattern, true, false,
+                    new FormulaContext(FormulaContext.Kind.SpecRule, specRule), specRule.matchingSymbols());
             if (constraint != null) {
                 ConstrainedTerm result = buildResult(specRule, constraint, null, true, constrainedTerm.termContext(),
                         new FormulaContext(FormulaContext.Kind.SpecConstr, specRule));

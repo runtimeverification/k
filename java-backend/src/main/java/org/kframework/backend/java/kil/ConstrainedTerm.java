@@ -96,9 +96,9 @@ public class ConstrainedTerm extends JavaSymbolicObject {
         return data.constraint;
     }
 
-    public boolean implies(ConstrainedTerm constrainedTerm, Rule specRule) {
-        ConjunctiveFormula conjunctiveFormula = matchImplies(constrainedTerm, true, null,
-                new FormulaContext(FormulaContext.Kind.FinalImplication, specRule), true);
+    public boolean implies(ConstrainedTerm constrainedTerm, Rule specRule, boolean logFailures) {
+        ConjunctiveFormula conjunctiveFormula = matchImplies(constrainedTerm, true, logFailures,
+                new FormulaContext(FormulaContext.Kind.FinalImplication, specRule), null);
         return conjunctiveFormula != null;
     }
 
@@ -139,12 +139,12 @@ public class ConstrainedTerm extends JavaSymbolicObject {
      * occurring only in {@code matchRHSTerm} (but not in {@code this}) are
      * existentially quantified.
      */
-    public ConjunctiveFormula matchImplies(ConstrainedTerm matchRHSTerm, boolean expand, Set<String> matchingSymbols,
-                                           FormulaContext formulaContext, boolean finalImplication) {
+    public ConjunctiveFormula matchImplies(ConstrainedTerm matchRHSTerm, boolean expand, boolean logFailures,
+                                           FormulaContext formulaContext, Set<String> matchingSymbols) {
         ConjunctiveFormula constraint = ConjunctiveFormula.of(matchRHSTerm.termContext().global())
                 .add(data.constraint.substitution())
                 .add(data.term, matchRHSTerm.data.term)
-                .simplifyBeforePatternFolding(context, finalImplication);
+                .simplifyBeforePatternFolding(context, logFailures);
         if (constraint.isFalseExtended()) {
             return null;
         }
