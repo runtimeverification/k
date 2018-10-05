@@ -178,7 +178,7 @@ public class FastRuleMatcher {
     /**
      * Matches the subject against the pattern. The pattern does not contain any disjunctions.
      */
-    public ConjunctiveFormula unifyEquality(Term subject, Term pattern, boolean patternFold, boolean partialSimplification, boolean continuousSimplification, TermContext context, boolean finalImplication) {
+    public ConjunctiveFormula unifyEquality(Term subject, Term pattern, boolean patternFold, boolean partialSimplification, boolean continuousSimplification, TermContext context, boolean logFailures) {
         this.patternFold = patternFold;
         this.partialSimplification = partialSimplification;
         this.continuousSimplification = continuousSimplification;
@@ -187,7 +187,7 @@ public class FastRuleMatcher {
         empty = BitSet.apply(ruleCount);
         BitSet one = BitSet.apply(1);
         one.makeOnes(1);
-        BitSet theMatchingRules = matchAndLog(subject, pattern, one, List(), finalImplication);
+        BitSet theMatchingRules = matchAndLog(subject, pattern, one, List(), logFailures);
         if (theMatchingRules.get(0)) {
             return constraints[0];
         } else {
