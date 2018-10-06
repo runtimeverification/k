@@ -34,6 +34,7 @@ import org.kframework.kore.FindK;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KORE;
+import org.kframework.kprove.KProve;
 import org.kframework.rewriter.SearchType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
@@ -41,6 +42,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -75,6 +77,7 @@ public class SymbolicRewriter {
         this.theFastMatcher = new FastRuleMatcher(global, definition.ruleTable.size());
         this.transition = true;
         this.global = global;
+        parseLogCells();
     }
 
     public KOREtoBackendKIL getConstructor() {
@@ -779,15 +782,13 @@ public class SymbolicRewriter {
         }
 
         for (ConstrainedTerm term : proofResults) {
-            if (global.globalOptions.fast) {
-                System.out.println(term);
-            } else {
-                //KProve.prettyPrint(term.term());
-                System.out.println(term.term());
-            }
+            print(term.term(), prettyResult);
             System.out.print("/\\");
-            //KProve.prettyPrint(term.constraint());
-            System.out.println(term.constraint().toString().replaceAll("#And", "\n#And"));
+            if (prettyResult) {
+                KProve.prettyPrint(term.constraint());
+            } else {
+                System.out.println(term.constraint().toStringMultiline());
+            }
             System.out.println();
         }
         if (proofResults.isEmpty()) {
@@ -817,6 +818,28 @@ public class SymbolicRewriter {
         global.profiler.printResult();
     }
 
+    //map value = log format: true = pretty, false = toString()
+    private Map<String, Boolean> cellsToLog = new LinkedHashMap<>();
+    private boolean prettyPC;
+    private boolean prettyResult;
+
+    private void parseLogCells() {
+        for (String cell : global.globalOptions.logCells) {
+            boolean pretty = false;
+            if (cell.startsWith("(") && cell.endsWith(")")) {
+                pretty = true;
+                cell = cell.substring(1, cell.length() - 1);
+            }
+            if (cell.equals("#pc")) {
+                prettyPC = pretty;
+            } else if (cell.equals("#result")) {
+                prettyResult = pretty;
+            } else {
+                cellsToLog.put(cell, pretty);
+            }
+        }
+    }
+
     /**
      * @return whether it was actually logged
      */
@@ -826,26 +849,17 @@ public class SymbolicRewriter {
         }
         global.profiler.logOverheadTimer.start();
         KItem top = (KItem) term.term();
-        KItem k = getCell(top, "<k>");
-        Term kContent = k != null ? ((KList) k.klist()).get(0) : null;
-        BuiltinList kSequence = kContent instanceof BuiltinList ? (BuiltinList) kContent : null;
 
-        KItem output = getCell(top, "<output>");
-        KItem statusCode = getCell(top, "<statusCode>");
         KItem localMem = getCell(top, "<localMem>");
-        KItem pc = getCell(top, "<pc>");
-        KItem gas = getCell(top, "<gas>");
-        KItem wordStack = getCell(top, "<wordStack>");
-        KItem callData = getCell(top, "<callData>");
-        KItem accounts = getCell(top, "<accounts>");
-
         K localMemMap = localMem != null ? localMem.klist().items().get(0) : null;
-        BuiltinMap accountsMap = accounts != null ? (BuiltinMap) ((KList) accounts.klist()).get(0) : null;
 
         if (!(localMemMap instanceof BuiltinMap || localMemMap instanceof Variable)) {
             forced = true;
         }
 
+        KItem k = getCell(top, "<k>");
+        Term kContent = k != null ? ((KList) k.klist()).get(0) : null;
+        BuiltinList kSequence = kContent instanceof BuiltinList ? (BuiltinList) kContent : null;
         boolean inNewStmt = global.globalOptions.logStmtsOnly && kSequence != null && inNewStmt(kSequence);
 
         if (global.globalOptions.log || forced || inNewStmt || global.globalOptions.logRulesPublic) {
@@ -855,55 +869,86 @@ public class SymbolicRewriter {
 
         boolean actuallyLogged = global.globalOptions.log || forced || inNewStmt;
         if (actuallyLogged) {
-            //Pretty printing no longer viable, too slow after last rebase.
-            //KProve.prettyPrint(k);
-            System.out.println(toStringOrEmpty(k));
-            System.out.println(toStringOrEmpty(output));
-            System.out.println(toStringOrEmpty(statusCode));
-            if (localMem != null) {
-                System.out.println("<localMem>");
-
-                if (localMemMap instanceof BuiltinMap) {
-                    /*List<Term> entries = ((BuiltinMap) localMemMap).getKComponents();
-                    for (int i = 0; i < entries.size(); i += 10) {
-                        System.out.println("\t" + entries.get(i));
-                        System.out.println("\t...");
-                    }*/
-                    System.out.println("...");
-                } else {
-                    System.out.println("\tNon-map format:");
-                    System.out.print("\t");
-                    System.out.println(localMemMap);
+            for(String cellName : cellsToLog.keySet()) {
+                boolean pretty = cellsToLog.get(cellName);
+                KItem cell = getCell(top, "<" + cellName + ">");
+                if (cell == null) {
+                    continue;
                 }
-                System.out.println("</localMem>");
-            }
-
-            System.out.println(toStringOrEmpty(pc));
-            System.out.println(toStringOrEmpty(gas));
-            System.out.println(toStringOrEmpty(wordStack));
-            if (targetCallData != null && callData != null && !targetCallData.equals(callData)) {
-                String callDataStr = toStringOrEmpty(callData);
-                System.out.println(callDataStr.substring(0, Math.min(callDataStr.length(), 300)));
-            }
-            if (accountsMap != null) {
-                System.out.println("accounts: " + accountsMap.size());
-                for (Map.Entry<Term, Term> acct : accountsMap.getEntries().entrySet()) {
-                    Term acctID = acct.getKey();
-                    K storage = getCell((KItem) acct.getValue(), "<storage>");
-                    System.out.println(acctID);
-                    System.out.println(storage);
+                switch (cellName) {
+                case "callData":
+                    printCallData(targetCallData, cell, pretty);
+                    break;
+                case "accounts":
+                    printAccounts(cell, pretty);
+                    break;
+                case "localMem":
+                    printLocalMem(cell, pretty);
+                    break;
+                default:
+                    print(cell, pretty);
+                    break;
                 }
             }
+
             System.out.println("/\\");
-            //pretty printing no longer viable
-            //KProve.prettyPrint(term.constraint());
-            System.out.println(term.constraint().toStringMultiline());
+            if (prettyPC) {
+                KProve.prettyPrint(term.constraint());
+            } else {
+                System.out.println(term.constraint().toStringMultiline());
+            }
         }
         global.profiler.logOverheadTimer.stop();
         if (localMem != null && !(localMemMap instanceof BuiltinMap || localMemMap instanceof Variable)) {
             throw new RuntimeException("<localMem> non-map format, aborting.");
         }
         return actuallyLogged;
+    }
+
+    private void print(K cell, boolean pretty) {
+        if (pretty) {
+            KProve.prettyPrint(cell);
+        } else {
+            System.out.println(toStringOrEmpty(cell));
+        }
+    }
+
+    private void printCallData(KItem targetCallData, KItem callData, boolean pretty) {
+        if (targetCallData != null && callData != null && !targetCallData.equals(callData)) {
+            if (pretty) {
+                KProve.prettyPrint(callData);
+            } else {
+                String callDataStr = toStringOrEmpty(callData);
+                System.out.println(callDataStr.substring(0, Math.min(callDataStr.length(), 300)));
+            }
+        }
+    }
+
+    private void printAccounts(KItem accounts, boolean pretty) {
+        BuiltinMap accountsMap = accounts != null ? (BuiltinMap) ((KList) accounts.klist()).get(0) : null;
+        if (accountsMap != null) {
+            System.out.println("accounts: " + accountsMap.size());
+            for (Map.Entry<Term, Term> acct : accountsMap.getEntries().entrySet()) {
+                Term acctID = acct.getKey();
+                KItem storage = getCell((KItem) acct.getValue(), "<storage>");
+                print(acctID, pretty);
+                print(storage, pretty);
+            }
+        }
+    }
+
+    private void printLocalMem(KItem localMem, boolean pretty) {
+        K localMemMap = localMem != null ? localMem.klist().items().get(0) : null;
+        System.out.println("<localMem>");
+
+        if (localMemMap instanceof BuiltinMap) {
+            System.out.println("...");
+        } else {
+            System.out.println("\tNon-map format:");
+            System.out.print("\t");
+            print(localMemMap, pretty);
+        }
+        System.out.println("</localMem>");
     }
 
     private String toStringOrEmpty(Object o) {

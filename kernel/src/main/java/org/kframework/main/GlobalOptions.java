@@ -1,16 +1,16 @@
 // Copyright (c) 2014-2019 K Team. All Rights Reserved.
 package org.kframework.main;
 
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Set;
-
+import com.beust.jcommander.Parameter;
+import com.google.inject.Inject;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.options.BaseEnumConverter;
 
-import com.beust.jcommander.Parameter;
-import com.google.inject.Inject;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Set;
 
 public final class GlobalOptions {
 
@@ -95,8 +95,22 @@ public final class GlobalOptions {
     @Parameter(names={"--warnings-to-errors", "-w2e"}, description="Convert warnings to errors.")
     public boolean warnings2errors = false;
 
-    @Parameter(names="--fast", description="Print final configs with toString() rather than pretty print.")
-    public boolean fast = false;
+    @Parameter(names="--log-cells", description="Specify what subset of configuration has to be printed when" +
+            " an execution step is logged." +
+            " Usage format: --log-pretty \"v2,v2,...\" , where v1,v2,... are either cell names," +
+            " cell names in parentheses (like \"(k)\") or one of: \"(#pc)\", \"(#result)\". " +
+            " The cells specified without parentheses are printed with toString()." +
+            " The cells specified in parentheses are pretty-printed. Certain cells have custom formatting." +
+            " The last 2 options mean:" +
+            " (#pc) = pretty print the path condition (constraint)." +
+            " (#result) = fully pretty-print the final result (e.g. the configuration for paths that were not proved)." +
+            " This last option is very slow." +
+            " Default value is:" +
+            " --log-cells k,output,statusCode,localMem,pc,gas,wordStack,callData,accounts" +
+            " Recommended alternative value:" +
+            " --log-cells \"(k),output,statusCode,localMem,pc,gas,wordStack,callData,accounts,(#pc)\"")
+    public List<String> logCells = Arrays.asList("k", "output", "statusCode", "localMem", "pc", "gas", "wordStack",
+            "callData", "accounts");
 
     @Parameter(names="--branching-allowed", arity=1, description="Number of branching events allowed before a forcible stop.")
     public int branchingAllowed = Integer.MAX_VALUE;
