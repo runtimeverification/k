@@ -129,7 +129,6 @@ public class MinimizeTermConstruction {
             }
         }.apply(term);
     }
- 
 
     K transform(K term, boolean body) {
         AddSortInjections sorts = new AddSortInjections(module);
