@@ -153,9 +153,6 @@ public class AddSortInjections {
             return InjectedKLabel(((InjectedKLabel) term).klabel(), att);
         } else if (term instanceof KSequence) {
             KSequence kseq = (KSequence)term;
-            if (kseq.size() == 1) {
-                return visitChildren(kseq.items().get(0), parentSort, actualSort);
-            }
             List<K> children = new ArrayList<>();
             for (int i = 0; i < kseq.size(); i++) {
                 K child = kseq.items().get(i);
@@ -175,9 +172,12 @@ public class AddSortInjections {
         }
     }
 
-    private Sort sort(K term, Sort expectedSort) {
+    public Sort sort(K term, Sort expectedSort) {
         if (term instanceof KApply) {
             KApply kapp = (KApply)term;
+            if (kapp.klabel().name().equals("inj")) {
+                return kapp.klabel().params().apply(1);
+            }
             Production prod = production(kapp);
             if (prod.att().contains("poly")) {
                 List<Set<Integer>> poly = RuleGrammarGenerator.computePositions(prod);
@@ -208,9 +208,6 @@ public class AddSortInjections {
         } else if (term instanceof KVariable) {
             return term.att().getOptional(Sort.class).orElse(Sorts.K());
         } else if (term instanceof KSequence) {
-            if (((KSequence) term).size() == 1) {
-                return sort(((KSequence) term).items().get(0), expectedSort);
-            }
             return Sorts.K();
         } else if (term instanceof InjectedKLabel) {
             return Sorts.KItem();
