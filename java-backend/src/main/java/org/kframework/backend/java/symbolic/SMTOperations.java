@@ -46,6 +46,9 @@ public class SMTOperations {
         try {
             constraint.globalContext().profiler.queryBuildTimer.start();
             CharSequence query;
+            if (global.debugZ3Queries) {
+                System.err.println("\nAnonymous vars in query:");
+            }
             try {
                 query = KILtoSMTLib.translateConstraint(constraint).toString();
             } finally {
@@ -82,6 +85,9 @@ public class SMTOperations {
                 //From this point on, will be converted to toString() anyway.
                 left.globalContext().profiler.queryBuildTimer.start();
                 CharSequence query;
+                if (global.debugZ3Queries) {
+                    System.err.println("\nAnonymous vars in query:");
+                }
                 try {
                     query = KILtoSMTLib.translateImplication(left, right, existentialQuantVars).toString();
                 } finally {
