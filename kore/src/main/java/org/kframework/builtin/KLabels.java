@@ -32,8 +32,12 @@ public class KLabels {
     public static final KLabel ML_AND = KLabel("#And");
 
     public static final KLabel ListItem = KLabel("ListItem");
+    public static final KLabel MapItem = KLabel("_|->_");
+    public static final KLabel SetItem = KLabel("SetItem");
     public static final KLabel DotMap = KLabel(".Map");
     public static final KLabel List = KLabel("_List_");
+    public static final KLabel Set = KLabel("_Set_");
+    public static final KLabel Map = KLabel("_Map_");
     public static final KLabel DotList = KLabel(".List");
     public static final KLabel EQUALS_K = KLabel("_==K_");
 

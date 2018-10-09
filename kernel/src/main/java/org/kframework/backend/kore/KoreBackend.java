@@ -11,6 +11,7 @@ import org.kframework.compile.ConcretizeCells;
 import org.kframework.compile.ExpandMacros;
 import org.kframework.compile.GenerateSortPredicateRules;
 import org.kframework.compile.GenerateSortPredicateSyntax;
+import org.kframework.compile.MinimizeTermConstruction;
 import org.kframework.compile.ResolveAnonVar;
 import org.kframework.compile.ResolveContexts;
 import org.kframework.compile.ResolveFreshConstants;
@@ -80,6 +81,7 @@ public class KoreBackend implements Backend {
         Module mainModule = def.kompiledDefinition.mainModule();
         mainModule = new GenerateSortPredicateRules(true).gen(mainModule);
         mainModule = ModuleTransformer.fromKTransformer(new AddSortInjections(mainModule)::addInjections, "Add sort injections").apply(mainModule);
+        mainModule = ModuleTransformer.fromSentenceTransformer(new MinimizeTermConstruction(mainModule)::resolve, "Minimize term construction").apply(mainModule);
         ModuleToKORE moduleToKORE = new ModuleToKORE(mainModule, files, def.topCellInitializer);
         String kompiledString = moduleToKORE.convert(heatCoolEquations);
         Properties koreToKLabels = new Properties();

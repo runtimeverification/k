@@ -23,6 +23,7 @@ import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.DefinitionScoped;
 import org.kframework.utils.inject.RequestScoped;
+import org.kframework.utils.StringUtil;
 import scala.Tuple2;
 
 import java.io.File;
@@ -112,7 +113,7 @@ public class HaskellRewriter implements Function<Module, Rewriter> {
                         }
                         TextToKore textToKore = new TextToKore();
                         Pattern kore = textToKore.parsePattern(koreOutputFile);
-                        KoreToK koreToK = new KoreToK(idsToLabels);
+                        KoreToK koreToK = new KoreToK(idsToLabels, mod.sortAttributesFor(), StringUtil::enquoteKString);
                         K outputK = koreToK.apply(kore);
                         return new RewriterResult(Optional.empty(), Optional.empty(), outputK);
                     } catch (IOException e) {
