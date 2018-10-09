@@ -1,0 +1,17 @@
+After 3 steps, the execution got stuck in a function call.
+=== Stacktrace: ===
+- Level 4:
+isNice ( 0 )
+
+- Level 3:
+isPretty ( 0 )
+
+- Level 2:
+isBeautiful ( 0 )
+
+- Level 1:
+<T>
+  <k>
+    9 / 0
+  </k>
+</T>

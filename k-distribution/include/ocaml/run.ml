@@ -58,10 +58,16 @@ let schedule_next_thread (module Def: Plugin.Definition) (step_function: k -> (k
       | _ -> invalid_arg "mismatched constructor at top of split configuration"
   )
 
+let wrap n step_function c =
+  try
+    step_function c
+  with (FunctionEvalFailed stacktrace) -> raise (FunctionEvalFailed'
+    (n, (plug_config (List.hd stacktrace)) :: (List.tl stacktrace)))
+
 let rec take_steps (module Def: Plugin.Definition) (step_function: k -> (k * step_function)) (thread_pool: (k list * int * bool)) (config: k) (depth: int) (n: int) : k * int =
   if n = depth then (config, n)
   else (
-    match (try let res,func = (step_function config) in Step(res,func) with Stuck c -> NoStep c) with
+    match (try let res,func = (wrap n step_function config) in Step(res,func) with Stuck c -> NoStep c) with
     | Step (config,(StepFunc step_function)) -> (
         match schedule_next_thread (module Def) step_function false config thread_pool with
           | None -> (config, n)
@@ -74,11 +80,16 @@ let rec take_steps (module Def: Plugin.Definition) (step_function: k -> (k * ste
     )
   )
 
+let wrap_no_thread n step_function c =
+  try
+    step_function c
+  with (FunctionEvalFailed stacktrace) -> raise (FunctionEvalFailed' (n, stacktrace))
+
 let rec take_steps_no_thread (module Def: Plugin.Definition) (step_function: k -> (k * step_function)) (config: k) (depth: int) (n: int) : k * int =
   if n = depth then (
     (config, n)
   ) else (
-    match (try let (res, func) = (step_function config) in Step(res, func) with Stuck c -> NoStep c) with
+    match (try let (res, func) = (wrap_no_thread n step_function config) in Step(res, func) with Stuck c -> NoStep c) with
     | Step(config, StepFunc step_function) -> take_steps_no_thread (module Def) step_function config depth (n+1)
     | NoStep config -> (config, n)
   )

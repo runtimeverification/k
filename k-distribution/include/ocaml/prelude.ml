@@ -10,6 +10,8 @@ type k = K.t
 let _ = Gc.stat
 
 exception Stuck of k
+exception FunctionEvalFailed of (k list)
+exception FunctionEvalFailed' of (int * (k list))
 exception Not_implemented
 
 let interned_bottom = [Bottom]

@@ -3,6 +3,7 @@ package org.kframework.backend.ocaml;
 
 import com.google.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
+import org.kframework.EvaluationException;
 import org.kframework.RewriterResult;
 import org.kframework.builtin.KLabels;
 import org.kframework.definition.Module;
@@ -11,6 +12,7 @@ import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
 import org.kframework.kore.KVariable;
+import org.kframework.kore.mini.KApply;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.RunProcess;
 import org.kframework.kserver.KServerFrontEnd;
@@ -130,11 +132,41 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
 
     private RewriterResult parseOcamlRewriterOutput(byte[] output) {
         String s = new String(output);
-        int steps = Integer.parseInt(s.substring(0, s.indexOf('\n')));
+        int kastOffset = 0 ;
+
+        int n = s.indexOf('\n');
+        int steps = Integer.parseInt(s.substring(0, n));
+        kastOffset += n + 1;
+        s = s.substring(n + 1);
+
+        n = s.indexOf('\n');
+        int retcode = Integer.parseInt(s.substring(0, n));
+        s = s.substring(n + 1);
+        kastOffset += n + 1;
+
         if (options.experimental.statistics) {
             System.err.println("[" + steps + " steps]");
         }
-        return new RewriterResult(Optional.of(steps), Optional.empty(), BinaryParser.parse(Arrays.copyOfRange(output, s.indexOf('\n') + 1, output.length)));
+
+        byte[] kast = Arrays.copyOfRange(output, kastOffset, output.length);
+        ByteBuffer buffer = ByteBuffer.wrap(kast);
+
+        // Everything went fine
+        if (retcode == 1)
+            return new RewriterResult(Optional.of(steps), Optional.empty(), BinaryParser.parse(buffer));
+
+        // Unknown error code
+        if (retcode != 2)
+            throw new RuntimeException("Unexpected return code from the OCaml backend");
+
+        // Some intra-step evaluation got stuck
+        ArrayList<K> stacktrace = new ArrayList<K>();
+        while(buffer.hasRemaining()) {
+            K frame = BinaryParser.parse(buffer);
+            stacktrace.add(frame);
+        }
+
+        throw new EvaluationException(steps, stacktrace);
     }
 
     private K parseOcamlSearchOutput(byte[] output) {

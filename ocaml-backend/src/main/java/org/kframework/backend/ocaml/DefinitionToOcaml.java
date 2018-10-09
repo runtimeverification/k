@@ -400,8 +400,11 @@ public class DefinitionToOcaml implements Serializable {
         StringBuilder sb = new StringBuilder();
         ocamlProgramHeader(sb, true);
         ocamlTermInput(new KRun.InitialConfiguration(k), sb); //declares input
+        generateMain(sb);
         ocamlOpenFile("out", file, sb); //declares out
+        indented(sb).append("in ");
         runAndPrint(depth, sb); //calls run and prints to out
+        callMain(sb);
         return sb.toString();
     }
 
@@ -477,13 +480,34 @@ public class DefinitionToOcaml implements Serializable {
         sb.append("let _ = (try print_subst_binary subst (try_match res res (-1)) with Stuck c -> output_string subst \"\\x00\\x00\\x00\\x00\")\n");
     }
 
+    private void generateMain(StringBuilder sb) {
+        indentDepth = 0;
+        indented(sb).append("let main =\n");
+        indentDepth++;
+    }
+
+    private void callMain(StringBuilder sb) {
+        indentDepth = 0;
+        indented(sb).append("let _ = main");
+    }
+
     private void runAndPrint(int depth, StringBuilder sb) {
-        sb.append("let res, steps = ");
+        indented(sb).append("try (\n");
+        indentDepth++;
+        indented(sb).append("let res, steps = ");
         constructRun(sb, String.valueOf(depth));
+        sb.append("in\n");
+        indented(sb).append("output_string out (");
+        sb.append("(string_of_int steps) ^ \"\\n\"");
+        sb.append(" ^ (string_of_int 1) ^ \"\\n\"");
+        sb.append(" ^ print_k_binary(res))\n");
+        indentDepth = 1;
+        indented(sb).append(") with (FunctionEvalFailed' (n,stacktrace)) -> (output_string out (");
+        sb.append("(string_of_int n) ^ \"\\n\"");
+        sb.append(" ^ (string_of_int 2) ^ \"\\n\"");
+        sb.append(" ^ (List.fold_left (^) \"\" (List.map print_k_binary (rev stacktrace)))))\n");
+
         sb.append("\n");
-        sb.append("let () = output_string out ((string_of_int steps) ^ \"\\n\"");
-        sb.append("^ (string_of_int 1) ^ \"\\n\"");
-        sb.append("^ print_k_binary(res))\n");
     }
 
     public void ocamlOpenFile(String name, String file, StringBuilder sb) {
@@ -538,8 +562,8 @@ public class DefinitionToOcaml implements Serializable {
             sb.append("external load_plugin_path : unit -> string = \"load_plugin_path\"\n");
             sb.append("let () = Plugin.load (load_plugin_path ())");
         }
-        sb.append("\nopen Prelude\nopen Constants\nopen Constants.K\nopen Run\nlet () = Sys.catch_break true\n");
-        sb.append("let () = Gc.set { (Gc.get()) with Gc.minor_heap_size = 33554432 }");
+        sb.append("\nopen Prelude\nopen Constants\nopen Constants.K\nopen Run\nopen List\nlet () = Sys.catch_break true\n");
+        sb.append("let () = Gc.set { (Gc.get()) with Gc.minor_heap_size = 33554432 }\n");
     }
 
     private void ocamlCompileSerializedInput(KLabel topCellInitializer, StringBuilder sb) {
@@ -1321,6 +1345,8 @@ public class DefinitionToOcaml implements Serializable {
                     indented(sb).append("and sort = ");
                     encodeStringToIdentifier(sb, mainModule.sortFor().apply(functionLabel));
                     sb.append(" in\n");
+                    indented(sb).append("try (\n");
+                    indentDepth++;
                     indented(sb).append("match c with \n");
                     String namespace = hook.substring(0, hook.indexOf('.'));
                     String function = hook.substring(namespace.length() + 1);
@@ -1354,7 +1380,12 @@ public class DefinitionToOcaml implements Serializable {
 
                     convertFunction(functionRules.get(functionLabel).stream().sorted(this::sortFunctionRules).collect(Collectors.toList()),
                             sb, functionName, RuleType.FUNCTION);
-                    indented(sb).append("| _ -> raise (Stuck [denormalize (KApply(lbl, (denormalize").append(arity).append(" c)))])\n");
+                    indented(sb).append("| _ -> raise (FunctionEvalFailed [])\n");
+                    indentDepth--;
+                    indented(sb).append(") with (FunctionEvalFailed stack) -> ")
+                                .append("raise (FunctionEvalFailed ([denormalize (KApply(lbl, (denormalize")
+                                .append(arity)
+                                .append(" c)))] :: stack))\n");
                     if (constants.contains(functionLabel)) {
                         sb.append(conn.equals("let rec ") ? "and " : conn);
                         sb.append("const");
@@ -1673,7 +1704,10 @@ public class DefinitionToOcaml implements Serializable {
             sb.append("\n    let (k,i,s) = List.hd (RACE.valid_continuations (kis :: RACE.all_steps one_").append(funcName).append(" c i)) in (k,s)\n");
             sb.append("and one_").append(funcName).append(" (c: k) (start_after: int) : k * (int * RACE.rule_type * string) * step_function =\n");
         }
-        indented(sb).append("try let config = c in match c with \n");
+        indented(sb).append("try\n");
+        indentDepth++;
+        indented(sb).append("let config = c in\n");
+        indented(sb).append("match c with\n");
         if (groupedByLookup.containsKey(false)) {
             for (Rule r : groupedByLookup.get(false)) {
                 ruleNum = convert(r, sb, RuleType.REGULAR, ruleNum, funcName);
@@ -1681,7 +1715,9 @@ public class DefinitionToOcaml implements Serializable {
         }
         indented(sb).append("| _ -> lookups_").append(funcName).append(" c c ").append(options.checkRaces ? "start_after" : "(-1)").append('\n');
         indentDepth++;
-        indented(sb).append("with Sys.Break -> raise (Stuck c)\n");
+        indented(sb).append("with\n");
+        indented(sb).append("\t| Sys.Break -> raise (Stuck c)\n");
+        indented(sb).append("\t| (FunctionEvalFailed stacktrace) -> raise (FunctionEvalFailed (c::stacktrace))\n");
         indented(sb).append("and lookups_").append(funcName).append(" (c: k) (config: k) (guard: int) : k ")
                 .append(options.checkRaces ? "* (int * RACE.rule_type * string) " : "").append("* step_function = match c with \n");
         ruleNum = convert(groupedByLookup.getOrDefault(true, Collections.emptyList()), sb, funcName, "lookups_" + funcName, RuleType.REGULAR, ruleNum);
