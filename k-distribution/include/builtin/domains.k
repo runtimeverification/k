@@ -721,7 +721,7 @@ module K-EQUAL
 
   syntax Bool ::= left:
                     K "==K" K           [function, functional, smtlib(=), hook(KEQUAL.eq), klabel(_==K_), symbol, latex({#1}\mathrel{=_K}{#2}), equalEqualK]
-                | K "=/=K" K          [function, functional, smtlib(distinct), hook(KEQUAL.ne), latex({#1}\mathrel{\neq_K}{#2}), notEqualEqualK]
+                | K "=/=K" K          [function, functional, smtlib(distinct), hook(KEQUAL.ne), klabel(_=/=K_), symbol, latex({#1}\mathrel{\neq_K}{#2}), notEqualEqualK]
 
   syntax priorities equalEqualK notEqualEqualK > boolOperation mlOp
   rule K1:K =/=K K2:K => notBool (K1 ==K K2)
@@ -1249,7 +1249,7 @@ module STRATEGY
     syntax #RuleTag ::= #LowerId                           [token]
                       | #UpperId                           [token]
 
-    syntax Strategy ::= #STUCK()
+    syntax Strategy ::= #STUCK() [symbol]
 
     syntax StrategyApply ::= "^" #RuleTag                      [klabel(#applyRule), symbol]
 

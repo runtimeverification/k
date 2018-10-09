@@ -40,6 +40,7 @@ public class KLabels {
     public static final KLabel Map = KLabel("_Map_");
     public static final KLabel DotList = KLabel(".List");
     public static final KLabel EQUALS_K = KLabel("_==K_");
+    public static final KLabel NOT_EQUALS_K = KLabel("_=/=K_");
 
     public static final KLabel MAP_CHOICE = KLabel("Map:choice");
     public static final KLabel SET_CHOICE = KLabel("Set:choice");
