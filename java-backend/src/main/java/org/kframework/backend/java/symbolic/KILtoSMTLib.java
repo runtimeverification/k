@@ -58,6 +58,9 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
     public static final ImmutableSet<String> SMTLIB_BUILTIN_FUNCTIONS = ImmutableSet.of(
             "forall",
             "exists",
+            /* array theory */
+            "select",
+            "store",
             /* core theory */
             "not",
             "and",
