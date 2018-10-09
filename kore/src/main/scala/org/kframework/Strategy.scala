@@ -16,7 +16,7 @@ object Strategy {
   def addStrategyRuleToMainModule(mainModuleName: String) = {
     DefinitionTransformer(
       module =>
-        if (module.name != mainModuleName) {
+        if (module.name != mainModuleName || !module.importedModuleNames.contains("STRATEGY$SYNTAX")) {
           module
         } else {
           Module(module.name, module.imports, module.localSentences + Rule(
