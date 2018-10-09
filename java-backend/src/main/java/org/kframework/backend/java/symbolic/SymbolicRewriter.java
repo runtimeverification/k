@@ -735,6 +735,10 @@ public class SymbolicRewriter {
                 if (results.isEmpty()) {
                     logStep(step, v, targetCallData, term, true, alreadyLogged);
                     System.out.println("\nStep above: " + step + ", evaluation ended with no successors.");
+                    if (step == 1) {
+                        kem.registerCriticalWarning("Evaluation ended on 1st step. " +
+                                "Possible cause: non-functional term in constraint (path condition).");
+                    }
                     /* final term */
                     proofResults.add(term);
                 }
