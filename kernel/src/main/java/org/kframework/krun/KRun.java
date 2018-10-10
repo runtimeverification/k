@@ -93,8 +93,10 @@ public class KRun {
             }
             return 0;
         } catch (org.kframework.EvaluationException e) {
-            kprint.outputFile("After " + e.steps() + " steps, the execution got stuck in a function call.\n");
-            printStacktrace(compiledDef, e.stacktrace());
+            if (kprint.enabled()) {
+                kprint.outputFile("After " + e.steps() + " steps, the execution got stuck in a function call.\n");
+                printStacktrace(compiledDef, e.stacktrace());
+            }
             return 1;
         }
     }
