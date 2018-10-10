@@ -1,3 +1,4 @@
+// Copyright (c) 2018 Runtime Verification, Inc. (RV-Match team). All Rights Reserved.
 package org.kframework;
 
 import java.util.ArrayList;
