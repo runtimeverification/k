@@ -1,14 +1,47 @@
 package org.kframework
 
 import org.kframework.attributes.Att
+import org.kframework.builtin.BooleanUtils
 import org.kframework.builtin.KLabels
-import org.kframework.definition.{DefinitionTransformer, ModuleTransformer, Rule}
+import org.kframework.builtin.Sorts
+import org.kframework.definition.{DefinitionTransformer, ModuleTransformer, Module, Rule}
 import org.kframework.kore.KORE
+import org.kframework.kore.Sort
 import org.kframework.kore.Unapply.{KApply, KLabel}
 
 object Strategy {
   val strategyCellName = "<s>"
   val strategyCellLabel = KORE.KLabel(strategyCellName)
+
+  def addStrategyRuleToMainModule(mainModuleName: String) = {
+    DefinitionTransformer(
+      module =>
+        if (module.name != mainModuleName || !module.importedModuleNames.contains("STRATEGY$SYNTAX")) {
+          module
+        } else {
+          Module(module.name, module.imports, module.localSentences + Rule(
+            KORE.KApply(strategyCellLabel,
+              KORE.KApply(KLabels.NO_DOTS),
+              KORE.KRewrite(
+                KORE.KVariable("S", Att.empty.add(classOf[Sort], Sorts.KItem)),
+                KORE.KSequence(
+                  KORE.KApply(KORE.KLabel("#STUCK")),
+                  KORE.KVariable("S", Att.empty.add(classOf[Sort], Sorts.KItem)),
+                )
+              ),
+              KORE.KApply(KLabels.DOTS)
+            ),
+            KORE.KApply(
+              KLabels.NOT_EQUALS_K, 
+              KORE.KVariable("S", Att.empty.add(classOf[Sort], Sorts.KItem)),
+              KORE.KApply(KORE.KLabel("#STUCK")),
+            ),
+            BooleanUtils.TRUE,
+            Att.empty.add("owise")
+          ), module.att)
+        }
+    )
+  }
 }
 
 class Strategy(heatCool: Boolean) {

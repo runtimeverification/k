@@ -487,11 +487,11 @@ public class ModuleToKORE {
                 if (isFunction(prod)) {
                     leftChildren = ((KApply) left).items();
                     equation = true;
-                    owise = rule.att().contains("owise");
                 } else if ((rule.att().contains("heat") || rule.att().contains("cool")) && heatCoolEq) {
                     equation = true;
                     productionSort = topCell;
                 }
+                owise = rule.att().contains("owise");
             }
             sb.append("// ");
             sb.append(rule.toString());
@@ -587,7 +587,16 @@ public class ModuleToKORE {
                     sb.append("\n\n");
                 }
             } else if (!rule.att().contains(Attribute.MACRO_KEY) && !rule.att().contains(Attribute.ALIAS_KEY) && !rule.att().contains(Attribute.ANYWHERE_KEY)) {
-                sb.append("  axiom{} \\and{");
+                sb.append("  axiom{} ");
+                if (owise) {
+                    // hack to deal with the strategy axiom for now
+                    sb.append("\\implies{");
+                    convert(topCell, false);
+                    sb.append("}(\\bottom{");
+                    convert(topCell, false);
+                    sb.append("}(),");
+                }
+                sb.append("\\and{");
                 convert(topCell, false);
                 sb.append("} (\n    ");
                 convertSideCondition(rule.requires(), topCell);
@@ -597,7 +606,11 @@ public class ModuleToKORE {
                 convertSideCondition(rule.ensures(), topCell);
                 sb.append(", ");
                 convert(rule.body());
-                sb.append("))\n  ");
+                sb.append("))");
+                if (owise) {
+                    sb.append(")");
+                }
+                sb.append("\n  ");
                 convert(attributes, rule.att());
                 sb.append("\n\n");
             }
