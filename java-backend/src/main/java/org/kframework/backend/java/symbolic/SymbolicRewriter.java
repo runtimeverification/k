@@ -101,7 +101,7 @@ public class SymbolicRewriter {
 
         stopwatch.stop();
         if (global.globalOptions.verbose) {
-            printSummaryBox(null, null, 1, step);
+            printSummaryBox(null, null, 1, step, 0);
         }
         return new RewriterResult(Optional.of(step), Optional.empty(), afterVariableRename.term());
     }
@@ -640,6 +640,8 @@ public class SymbolicRewriter {
             }
 
             for (ConstrainedTerm term : queue) {
+                try { //not formatting to minimize git merge conflicts.
+
                 v++;
 
                 boolean boundaryCellsMatchTarget = boundaryCellsMatchTarget(term, boundaryPattern, targetBoundarySub);
@@ -761,6 +763,23 @@ public class SymbolicRewriter {
                         nextQueue.add(result);
                     }
                 }
+
+                if (Thread.currentThread().isInterrupted()) {
+                    throw new RuntimeException("Thread interrupted");
+                }
+                } catch (OutOfMemoryError e) {
+                    e.printStackTrace();
+                    printSummaryBox(rule, proofResults, successPaths, step, queue.size() + nextQueue.size() - v + 1);
+                    throw e;
+                } catch (RuntimeException | Error e) {
+                    System.err.println("\n" +
+                            "==========================================\n" +
+                            "Top term when exception was thrown:\n" +
+                            "==========================================\n");
+                    printTermAndConstraint(term);
+                    printSummaryBox(rule, proofResults, successPaths, step, queue.size() + nextQueue.size() - v + 1);
+                    throw e;
+                }
             }
 
             /* swap the queues */
@@ -792,7 +811,7 @@ public class SymbolicRewriter {
             }
         }
         if (global.globalOptions.verbose) {
-            printSummaryBox(rule, proofResults, successPaths, step);
+            printSummaryBox(rule, proofResults, successPaths, step, 0);
         }
         return tweakedProofResults;
     }
@@ -807,8 +826,12 @@ public class SymbolicRewriter {
         System.err.println();
     }
 
-    private void printSummaryBox(Rule rule, List<ConstrainedTerm> proofResults, int successPaths, int step) {
-        if (proofResults != null) {
+    private void printSummaryBox(Rule rule, List<ConstrainedTerm> proofResults, int successPaths, int step, int pathsInProgress) {
+        if (pathsInProgress != 0) {
+            System.err.format("\nSPEC ERROR: %s %s\n==================================\n" +
+                            "Success execution paths: %d\nFailed execution paths: %d\nPaths in progress: %d\n",
+                    new File(rule.getSource().source()), rule.getLocation(), successPaths, proofResults.size(), pathsInProgress);
+        } else if (proofResults != null) {
             if (proofResults.isEmpty()) {
                 System.err.format("\nSPEC PROVED: %s %s\n==================================\nExecution paths: %d\n",
                         new File(rule.getSource().source()), rule.getLocation(), successPaths);
