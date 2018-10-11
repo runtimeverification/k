@@ -1,5 +1,5 @@
 // Copyright (c) 2018 Runtime Verification, Inc. (RV-Match team). All Rights Reserved.
-module ARITH-THREADED-SYNTAX
+module ARITH-SYNTAX
   imports DOMAINS-SYNTAX
   syntax AExp  ::= Int
                  | "-" AExp                   [strict]
@@ -10,8 +10,8 @@ module ARITH-THREADED-SYNTAX
 endmodule
 
 
-module ARITH-THREADED
-  imports ARITH-THREADED-SYNTAX
+module ARITH
+  imports ARITH-SYNTAX
   imports DOMAINS
   syntax KResult ::= Int
 
