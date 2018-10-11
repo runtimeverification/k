@@ -15,6 +15,7 @@ import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.Kompile;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.ADT;
+import org.kframework.kore.KLabel;
 import org.kframework.kore.KSequence;
 import org.kframework.kore.Sort;
 import org.kframework.kore.VisitK;
@@ -127,12 +128,15 @@ public class JavaBackend implements Backend {
     private static Sentence markRegularRules(Definition d, ConfigurationInfoFromModule configInfo, Sentence s, String att) {
         if (s instanceof org.kframework.definition.Rule) {
             org.kframework.definition.Rule r = (org.kframework.definition.Rule) s;
-            if (r.body() instanceof KApply && d.mainModule().sortFor().apply(((KApply) r.body()).klabel()).equals(configInfo.topCell())) {
-                return org.kframework.definition.Rule.apply(r.body(), r.requires(), r.ensures(), r.att().add(att));
-            } else
-                return r;
-        } else
-            return s;
+            if (r.body() instanceof KApply) {
+                KLabel klabel = ((KApply) r.body()).klabel();
+                if (d.mainModule().sortFor().contains(klabel) //is false for rules in specification modules not part of semantics
+                        && d.mainModule().sortFor().apply(klabel).equals(configInfo.topCell())) {
+                    return Rule.apply(r.body(), r.requires(), r.ensures(), r.att().add(att));
+                }
+            }
+        }
+        return s;
     }
 
     private static Module markRegularRules(Definition d, Module mod) {
