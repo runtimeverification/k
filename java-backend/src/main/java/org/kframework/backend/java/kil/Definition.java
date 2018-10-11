@@ -5,6 +5,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
@@ -56,6 +57,7 @@ public class Definition extends JavaSymbolicObject {
         public final ImmutableMap<String, Att> kLabelAttributes;
         public final Map<Sort, org.kframework.kore.KLabel> freshFunctionNames;
         public final Map<Sort, Sort> smtSortFlattening;
+        public final Set<Sort> smtPreludeSorts;
 
         private DefinitionData(
                 Subsorts subsorts,
@@ -63,13 +65,15 @@ public class Definition extends JavaSymbolicObject {
                 SetMultimap<String, SortSignature> signatures,
                 ImmutableMap<String, Att> kLabelAttributes,
                 Map<Sort, org.kframework.kore.KLabel> freshFunctionNames,
-                Map<Sort, Sort> smtSortFlattening) {
+                Map<Sort, Sort> smtSortFlattening,
+                Set<Sort> smtPreludeSorts) {
             this.subsorts = subsorts;
             this.dataStructureSorts = dataStructureSorts;
             this.signatures = signatures;
             this.kLabelAttributes = kLabelAttributes;
             this.freshFunctionNames = freshFunctionNames;
             this.smtSortFlattening = smtSortFlattening;
+            this.smtPreludeSorts = smtPreludeSorts;
         }
     }
 
@@ -132,7 +136,8 @@ public class Definition extends JavaSymbolicObject {
                 JavaConverters.mapAsJavaMapConverter(module.freshFunctionFor()).asJava().entrySet().stream().collect(Collectors.toMap(
                         e -> Sort.of(e.getKey()),
                         e -> e.getValue())),
-                Collections.emptyMap()
+                Collections.emptyMap(),
+                getSmtPreludeSorts(module)
         );
         context = null;
 
@@ -168,6 +173,17 @@ public class Definition extends JavaSymbolicObject {
                     KLabel.parse(prod.att().<String>get(Attribute.UNIT_KEY)),
                     new HashMap<>());
             builder.put(prod.sort().toString(), sort);
+        }
+        return builder.build();
+    }
+
+    private Set<Sort> getSmtPreludeSorts(Module module) {
+        ImmutableSet.Builder<Sort> builder = ImmutableSet.builder();
+        for (org.kframework.definition.SyntaxSort decl : iterable(module.sortDeclarations())) {
+            Optional<?> isSmtPreludeSort = decl.att().getOptional(Attribute.SMT_PRELUDE_KEY);
+            if (isSmtPreludeSort.isPresent()) {
+                builder.add(Sort.of(decl.sort()));
+            }
         }
         return builder.build();
     }
@@ -364,6 +380,10 @@ public class Definition extends JavaSymbolicObject {
 
     public Map<Sort, Sort> smtSortFlattening() {
         return definitionData.smtSortFlattening;
+    }
+
+    public Set<Sort> smtPreludeSorts() {
+        return definitionData.smtPreludeSorts;
     }
 
     public DefinitionData definitionData() {

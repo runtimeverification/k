@@ -122,6 +122,7 @@ public class KoreBackend implements Backend {
                 .andThen(AddImplicitComputationCell::transformDefinition)
                 .andThen(resolveFreshConstants)
                 .andThen(new Strategy(kompileOptions.experimental.heatCoolStrategies).addStrategyCellToRulesTransformer())
+                .andThen(d -> Strategy.addStrategyRuleToMainModule(def.mainModule().name()).apply(d))
                 .andThen(ConcretizeCells::transformDefinition)
                 .andThen(subsortKItem)
                 .andThen(Kompile::addSemanticsModule)
