@@ -398,7 +398,7 @@ public class DefinitionToOcaml implements Serializable {
 
     public String execute(K k, int depth, String file) {
         StringBuilder sb = new StringBuilder();
-        ocamlProgramHeader(sb, true, "open List\n");
+        ocamlProgramHeader(sb, true);
         ocamlTermInput(new KRun.InitialConfiguration(k), sb); //declares input
         generateMain(sb);
         ocamlOpenFile("out", file, sb); //declares out
@@ -410,7 +410,7 @@ public class DefinitionToOcaml implements Serializable {
 
     public String match(K k, Rule r, String file) {
         StringBuilder sb = new StringBuilder();
-        ocamlProgramHeader(sb, true, "");
+        ocamlProgramHeader(sb, true);
         ocamlMatchPattern(r, sb); //declares try_match
         ocamlTermInput(new KRun.InitialConfiguration(k), sb); //declares input
         ocamlOpenFile("subst", file, sb); //declares subst
@@ -437,7 +437,7 @@ public class DefinitionToOcaml implements Serializable {
 
     public String executeAndMatch(K k, int depth, Rule r, String file, String substFile) {
         StringBuilder sb = new StringBuilder();
-        ocamlProgramHeader(sb, true, "");
+        ocamlProgramHeader(sb, true);
         ocamlMatchPattern(r, sb);  //declares try_match
         ocamlTermInput(new KRun.InitialConfiguration(k), sb);  //declares input
         ocamlOpenFile("out", file, sb); //declares out
@@ -458,7 +458,7 @@ public class DefinitionToOcaml implements Serializable {
 
     public String interpreter() {
         StringBuilder sb = new StringBuilder();
-        ocamlProgramHeader(sb, true, "");
+        ocamlProgramHeader(sb, true);
         ocamlMatchPattern(exitCodePattern, sb);  //declares try_match
         sb.append("let input, depth, out = Makeconfig.parse ()\n");
         sb.append("let res, _ = ");
@@ -505,7 +505,7 @@ public class DefinitionToOcaml implements Serializable {
         indented(sb).append(") with (FunctionEvalFailed' (n,stacktrace)) -> (output_string out (");
         sb.append("(string_of_int n) ^ \"\\n\"");
         sb.append(" ^ (string_of_int 2) ^ \"\\n\"");
-        sb.append(" ^ (List.fold_left (^) \"\" (List.map print_k_binary (rev stacktrace)))))\n");
+        sb.append(" ^ (List.fold_left (^) \"\" (List.map print_k_binary (List.rev stacktrace)))))\n");
 
         sb.append("\n");
     }
@@ -530,7 +530,7 @@ public class DefinitionToOcaml implements Serializable {
      */
     public String ocamlCompile(KLabel topCellInitializer, Rule exitCode, Integer dumpExitCode) {
         StringBuilder sb = new StringBuilder();
-        ocamlProgramHeader(sb, false, "");
+        ocamlProgramHeader(sb, false);
         sb.append("let () = CONFIG.set_sys_argv ()\n");
         ocamlCompileSerializedInput(topCellInitializer, sb);
         return ocamlFinishCompile(exitCode, dumpExitCode, sb);
@@ -555,7 +555,7 @@ public class DefinitionToOcaml implements Serializable {
         return sb.toString();
     }
 
-    private void ocamlProgramHeader(StringBuilder sb, boolean forcePlugin, String otherModules) {
+    private void ocamlProgramHeader(StringBuilder sb, boolean forcePlugin) {
         if (forcePlugin) {
             sb.append("let () = Plugin.load Sys.argv.(1)");
         } else if (options.ocamlopt()) {
@@ -563,7 +563,6 @@ public class DefinitionToOcaml implements Serializable {
             sb.append("let () = Plugin.load (load_plugin_path ())");
         }
         sb.append("\nopen Prelude\nopen Constants\nopen Constants.K\nopen Run\n");
-        sb.append(otherModules);
         sb.append("let () = Sys.catch_break true\n");
         sb.append("let () = Gc.set { (Gc.get()) with Gc.minor_heap_size = 33554432 }\n");
     }
@@ -607,7 +606,7 @@ public class DefinitionToOcaml implements Serializable {
      */
     public String marshal() {
         StringBuilder sb = new StringBuilder();
-        ocamlProgramHeader(sb, true, "");
+        ocamlProgramHeader(sb, true);
         sb.append("let serialize, input, file = Makeconfig.marshal ()\n");
         sb.append("let str = if serialize then Marshal.to_string (input : Prelude.k) [] else print_k_binary input\n");
         sb.append("let () = output_string file str\n");

@@ -101,7 +101,7 @@ public class KRun {
         }
     }
 
-    private void printStacktrace(CompiledDefinition compiledDef, ArrayList<K> stacktrace) {
+    private void printStacktrace(CompiledDefinition compiledDef, List<K> stacktrace) {
         kprint.outputFile("=== Stacktrace: ===\n");
         for(int i = 0; i < stacktrace.size(); i++) {
             if (i != 0)
