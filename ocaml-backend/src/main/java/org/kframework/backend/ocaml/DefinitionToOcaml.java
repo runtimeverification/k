@@ -498,7 +498,7 @@ public class DefinitionToOcaml implements Serializable {
         sb.append("\n");
         sb.append("    in (\n");
         sb.append("      output_string out ((string_of_int steps) ^ \"\\n\");\n");
-	    sb.append("      output_string out \"1\\n\";\n");
+        sb.append("      output_string out \"1\\n\";\n");
         sb.append("      output_string out (print_k_binary res)\n");
         sb.append("    )\n");
         sb.append("  ) with (FunctionEvalFailed' (steps,stacktrace)) -> (\n");
