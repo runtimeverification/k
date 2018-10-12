@@ -492,22 +492,20 @@ public class DefinitionToOcaml implements Serializable {
     }
 
     private void runAndPrint(int depth, StringBuilder sb) {
-        indented(sb).append("try (\n");
-        indentDepth++;
-        indented(sb).append("let res, steps = ");
+        sb.append("  try (\n");
+        sb.append("    let res, steps = ");
         constructRun(sb, String.valueOf(depth));
-        sb.append("in\n");
-        indented(sb).append("output_string out (");
-        sb.append("(string_of_int steps) ^ \"\\n\"");
-        sb.append(" ^ (string_of_int 1) ^ \"\\n\"");
-        sb.append(" ^ print_k_binary(res))\n");
-        indentDepth = 1;
-        indented(sb).append(") with (FunctionEvalFailed' (n,stacktrace)) -> (output_string out (");
-        sb.append("(string_of_int n) ^ \"\\n\"");
-        sb.append(" ^ (string_of_int 2) ^ \"\\n\"");
-        sb.append(" ^ (List.fold_left (^) \"\" (List.map print_k_binary (List.rev stacktrace)))))\n");
-
         sb.append("\n");
+        sb.append("    in (\n");
+        sb.append("      output_string out ((string_of_int steps) ^ \"\\n\");\n");
+	    sb.append("      output_string out \"1\\n\";\n");
+        sb.append("      output_string out (print_k_binary res)\n");
+        sb.append("    )\n");
+        sb.append("  ) with (FunctionEvalFailed' (steps,stacktrace)) -> (\n");
+        sb.append("    output_string out ((string_of_int steps) ^ \"\\n\");\n");
+        sb.append("    output_string out \"2\\n\";\n");
+        sb.append("    List.iter (fun k -> output_string out (print_k_binary k)) (List.rev stacktrace)\n");
+        sb.append("  )\n");
     }
 
     public void ocamlOpenFile(String name, String file, StringBuilder sb) {
@@ -549,9 +547,16 @@ public class DefinitionToOcaml implements Serializable {
             sb.append("else ());\n");
         }
         sb.append("exit code\n");
-        sb.append("with Stuck(res) -> (prerr_endline \"Execution failed (configuration dumped)\";\n");
-        sb.append("let out = open_out !CONFIG.output_file in output_string out (print_k res);\n");
-        sb.append("exit 139)\n");
+        sb.append("with\n");
+        sb.append("| Stuck(res) -> (prerr_endline \"Execution failed (configuration dumped)\";\n");
+        sb.append("  let out = open_out !CONFIG.output_file in output_string out (print_k res);\n");
+        sb.append("  exit 139)\n");
+        sb.append("| FunctionEvalFailed' (n,stacktrace) -> (\n");
+        sb.append("  prerr_endline (\"Execution failed after \" ^ (string_of_int n)  ^ \" steps (configuration dumped)\");\n");
+        sb.append("  let out = open_out !CONFIG.output_file in\n");
+        //sb.append("  output_string out (List.fold_left (^) \"\" (List.map print_k (List.rev stacktrace)));\n");
+        sb.append("  List.iter (fun k -> output_string out (print_k k ^ \"\\n\\n\")) (List.rev stacktrace);\n");
+        sb.append("  exit 139)\n");
         return sb.toString();
     }
 
