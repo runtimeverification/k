@@ -523,11 +523,11 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 KList rKList = (KList) ((KItem) equality.rightHandSide()).kList(); // Y, I, N
 
                 if (lKLabel.isProjection() && lKLabel.equals(rKLabel)) {
-                    // TODO: extract from [proj] attribute
+                    List<Integer> projAtt = lKLabel.getProjectionAtt();
+                    int idxVector = projAtt.get(0); // X
+                    int idxElem = projAtt.get(1); // I
+                    int idxSize = projAtt.get(2); // N
                     int sizeKList = 3;
-                    int idxVector = 0; // X
-                    int idxElem = 1; // I
-                    int idxSize = 2; // N
                     if (lKList.size() == sizeKList && rKList.size() == sizeKList) {
                         if (lKList.get(idxElem) instanceof IntToken && rKList.get(idxElem) instanceof IntToken
                                 && lKList.get(idxSize) instanceof IntToken && rKList.get(idxSize) instanceof IntToken) {
