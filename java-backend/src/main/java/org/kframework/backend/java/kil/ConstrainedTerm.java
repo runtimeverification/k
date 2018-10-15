@@ -135,6 +135,11 @@ public class ConstrainedTerm extends JavaSymbolicObject {
             return null;
         }
 
+        constraint = constraint.applyProjectionLemma();
+        if (constraint.isFalse()) {
+            return null;
+        }
+
         /* apply pattern folding */
         constraint = constraint.simplifyModuloPatternFolding(context)
                 .add(constrainedTerm.data.constraint)
@@ -148,6 +153,24 @@ public class ConstrainedTerm extends JavaSymbolicObject {
             if (constraint.isFalse()) {
                 return null;
             }
+        }
+
+        // evaluate/simplify equalities
+        context.setTopConstraint(data.constraint);
+        for (Equality equality : constraint.equalities()) {
+            Term equalityTerm = equality.toK();
+            Term evaluatedTerm = equalityTerm.evaluate(context);
+            if (!evaluatedTerm.equals(equalityTerm)) {
+                constraint = constraint.addAll(Collections.singletonList(evaluatedTerm));
+                if (constraint == null || constraint.isFalse()) {
+                    return null;
+                }
+            }
+        }
+        context.setTopConstraint(null);
+        constraint = constraint.simplifyModuloPatternFolding(context);
+        if (constraint.isFalse()) {
+            return null;
         }
 
         context.setTopConstraint(data.constraint);
