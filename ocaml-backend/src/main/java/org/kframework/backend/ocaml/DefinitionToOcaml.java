@@ -456,23 +456,34 @@ public class DefinitionToOcaml implements Serializable {
         sb.append("(input) (").append(depth).append(") ");
     }
 
+    private String runfn() {
+        if (this.threadCellExists) {
+            return "run";
+        } else {
+            return "run_no_thread_opt";
+        }
+    }
+
     public String interpreter() {
         StringBuilder sb = new StringBuilder();
         ocamlProgramHeader(sb, true);
         ocamlMatchPattern(exitCodePattern, sb);  //declares try_match
         sb.append("let input, depth, out = Makeconfig.parse ()\n");
-        sb.append("let res, _ = ");
-        if (this.threadCellExists) {
-            sb.append("run");
-        } else {
-            sb.append("run_no_thread_opt");
-        }
-        sb.append("(input) (depth)\n");
-        sb.append("let () = output_string out (print_k_binary(res))\n");
-        sb.append("let () = try let subst = try_match res res (-1) in\n");
-        sb.append("let code = get_exit_code subst in\n");
-        sb.append("exit code\n");
-        sb.append("with Stuck(res) -> output_string out (print_k_binary res); exit 112\n");
+        sb.append("let main =\n");
+        sb.append("  try (\n");
+        sb.append("    let res, _ = " + runfn() + "(input) (depth) in\n");
+        sb.append("    let () = output_string out (print_k_binary(res)) in\n");
+        sb.append("    let subst = try_match res res (-1) in\n");
+        sb.append("    let code = get_exit_code subst in\n");
+        sb.append("    exit code\n");
+        sb.append("  ) with\n");
+        sb.append("  | Stuck(res) -> (output_string out (print_k_binary res))\n");
+        sb.append("  | FunctionEvalFailed' (steps,stacktrace) -> (\n");
+        sb.append("    prerr_endline (\"Execution failed after \" ^ (string_of_int steps)  ^ \" steps (configuration dumped)\");\n");
+        sb.append("    output_string out (print_k_binary [List(SortList, Lbl_List_, List.rev stacktrace)])\n");
+        sb.append("  );  exit 112\n");
+        sb.append("\n");
+        sb.append("let _ = main");
         return sb.toString();
     }
 
@@ -504,7 +515,8 @@ public class DefinitionToOcaml implements Serializable {
         sb.append("  ) with (FunctionEvalFailed' (steps,stacktrace)) -> (\n");
         sb.append("    output_string out ((string_of_int steps) ^ \"\\n\");\n");
         sb.append("    output_string out \"2\\n\";\n");
-        sb.append("    List.iter (fun k -> output_string out (print_k_binary k)) (List.rev stacktrace)\n");
+        sb.append("    output_string out (print_k_binary [List(SortList, Lbl_List_, List.rev stacktrace)])\n");
+        //sb.append("    List.iter (fun k -> output_string out (print_k_binary k)) (List.rev stacktrace)\n");
         sb.append("  )\n");
     }
 
