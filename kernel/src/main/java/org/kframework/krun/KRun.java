@@ -84,35 +84,14 @@ public class KRun {
         InitialConfiguration config = new InitialConfiguration(program);
         program = null;
 
-        try {
-            Tuple2<K, Integer> result = executionMode.execute(config, rewriterGenerator, compiledDef);
+        Tuple2<K, Integer> result = executionMode.execute(config, rewriterGenerator, compiledDef);
 
-            if (result != null) {
-                prettyPrint(compiledDef, result._1());
-                return result._2();
-            }
-            return 0;
-        } catch (org.kframework.EvaluationException e) {
-            if (kprint.enabled()) {
-                kprint.outputFile("After " + e.steps() + " steps, the execution got stuck in a function call.\n");
-                printStacktrace(compiledDef, e.stacktrace());
-            }
-            return 1;
+
+        if (result != null) {
+            kprint.prettyPrint(compiledDef.getParsedDefinition(), compiledDef.languageParsingModule(), s -> kprint.outputFile(s), result._1());
+            return result._2();
         }
-    }
-
-    private void printStacktrace(CompiledDefinition compiledDef, List<K> stacktrace) {
-        kprint.outputFile("=== Stacktrace: ===\n");
-        for(int i = 0; i < stacktrace.size(); i++) {
-            if (i != 0)
-                kprint.outputFile("\n");
-            kprint.outputFile("- Level " + (stacktrace.size() - i) + ":\n");
-            prettyPrint(compiledDef, stacktrace.get(i));
-        }
-    }
-
-    private void prettyPrint(CompiledDefinition compiledDef, K k) {
-        kprint.prettyPrint(compiledDef.getParsedDefinition(), compiledDef.languageParsingModule(), s -> kprint.outputFile(s), k);
+        return 0;
     }
 
     /**

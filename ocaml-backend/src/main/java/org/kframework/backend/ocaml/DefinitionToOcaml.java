@@ -509,14 +509,11 @@ public class DefinitionToOcaml implements Serializable {
         sb.append("\n");
         sb.append("    in (\n");
         sb.append("      output_string out ((string_of_int steps) ^ \"\\n\");\n");
-        sb.append("      output_string out \"1\\n\";\n");
         sb.append("      output_string out (print_k_binary res)\n");
         sb.append("    )\n");
         sb.append("  ) with (FunctionEvalFailed' (steps,stacktrace)) -> (\n");
         sb.append("    output_string out ((string_of_int steps) ^ \"\\n\");\n");
-        sb.append("    output_string out \"2\\n\";\n");
         sb.append("    output_string out (print_k_binary [List(SortList, Lbl_List_, List.rev stacktrace)])\n");
-        //sb.append("    List.iter (fun k -> output_string out (print_k_binary k)) (List.rev stacktrace)\n");
         sb.append("  )\n");
     }
 
@@ -566,7 +563,6 @@ public class DefinitionToOcaml implements Serializable {
         sb.append("| FunctionEvalFailed' (n,stacktrace) -> (\n");
         sb.append("  prerr_endline (\"Execution failed after \" ^ (string_of_int n)  ^ \" steps (configuration dumped)\");\n");
         sb.append("  let out = open_out !CONFIG.output_file in\n");
-        //sb.append("  output_string out (List.fold_left (^) \"\" (List.map print_k (List.rev stacktrace)));\n");
         sb.append("  List.iter (fun k -> output_string out (print_k k ^ \"\\n\\n\")) (List.rev stacktrace);\n");
         sb.append("  exit 139)\n");
         return sb.toString();

@@ -1,16 +1,7 @@
-After 3 steps, the execution got stuck in a function call.
-=== Stacktrace: ===
-- Level 4:
-isNice ( 0 )
-
-- Level 3:
-isPretty ( 0 )
-
-- Level 2:
-isBeautiful ( 0 )
-
-- Level 1:
-<T>
+ListItem ( isNice ( 0 ) )
+ListItem ( isPretty ( 0 ) )
+ListItem ( isBeautiful ( 0 ) )
+ListItem ( <T>
   <threads>
     ThreadCellMapItem ( <k>
       9 / 0
@@ -20,4 +11,4 @@ isBeautiful ( 0 )
       </k>
     </thread> )
   </threads>
-</T>
+</T> )

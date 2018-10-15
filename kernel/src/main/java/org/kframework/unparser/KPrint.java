@@ -75,10 +75,6 @@ public class KPrint {
         outputFile(output.getBytes());
     }
 
-    public boolean enabled() {
-        return options.output != OutputModes.NONE;
-    }
-
     public void outputFile(byte[] output) {
         if (options.outputFile == null) {
             try {
