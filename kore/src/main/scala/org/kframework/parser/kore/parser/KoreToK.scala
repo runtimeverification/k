@@ -82,7 +82,7 @@ class KoreToK (headToLabel_ : java.util.Properties, sortAtt : Map[k.Sort, Att], 
     case kore.Floor(s, rs, p) =>
       throw new TranslationError("Floor patterns currently unsupported")
     case kore.Equals(s1, s2, p, q) =>
-      throw new TranslationError("Equals patterns currently unsupported")
+      KORE.KApply(KLabels.EQUALS_K, apply(p), apply(q))
     case kore.Mem(s, rs, p, q) =>
       throw new TranslationError("Mem patterns currently unsupported")
     case kore.DomainValue(s, str) =>

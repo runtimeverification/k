@@ -3,15 +3,19 @@ package org.kframework.backend.haskell;
 
 import com.google.inject.Inject;
 import org.kframework.RewriterResult;
+import org.kframework.attributes.Att;
 import org.kframework.backend.kore.ModuleToKORE;
 import org.kframework.builtin.KLabels;
 import org.kframework.compile.AddSortInjections;
 import org.kframework.compile.RewriteToTop;
 import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
+import org.kframework.kil.Syntax;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kore.K;
 import org.kframework.kore.KORE;
+import org.kframework.kore.KVariable;
+import org.kframework.kore.Sort;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.RunProcess;
 import org.kframework.main.Main;
@@ -38,6 +42,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.function.Function;
+
+import static org.kframework.builtin.BooleanUtils.TRUE;
 
 
 @RequestScoped
@@ -142,12 +148,21 @@ public class HaskellRewriter implements Function<Module, Rewriter> {
             @Override
             public K search(K initialConfiguration, Optional<Integer> depth, Optional<Integer> bound, Rule pattern, SearchType searchType) {
                 Module mod = def.executionModule();
-                ModuleToKORE converter = new ModuleToKORE(mod, files, def.topCellInitializer);
-                String koreOutput = getKoreString(initialConfiguration, mod, converter);
+                String koreOutput = getKoreString(initialConfiguration, mod, new ModuleToKORE(mod, files, def.topCellInitializer));
+                Sort initializerSort = mod.productionsFor().get(def.topCellInitializer).get().head().sort();
                 K patternTerm = RewriteToTop.toLeft(pattern.body());
+                if (patternTerm instanceof  KVariable) {
+                    patternTerm = KORE.KVariable(((KVariable) patternTerm).name(), Att.empty().add(Sort.class, initializerSort));
+                }
                 K patternCondition = pattern.requires();
-                K korePattern = KORE.KApply(KLabels.ML_AND, patternTerm, patternCondition);
-                String korePatternOutput = getKoreString(korePattern, mod, converter);
+                String patternTermKore = getKoreString(patternTerm, mod, new ModuleToKORE(mod, files, def.topCellInitializer));
+                String patternConditionKore;
+                if (patternCondition.equals(TRUE)) {
+                    patternConditionKore = "\\top{Sort" + initializerSort.name() + "{}}()";
+                } else {
+                    patternConditionKore = getKoreString(patternCondition, mod, new ModuleToKORE(mod, files, def.topCellInitializer));
+                }
+                String korePatternOutput = "\\and{Sort" + initializerSort.name() + "{}}(" + patternTermKore + ", " + patternConditionKore + ")";
                 String defPath = files.resolveKompiled("definition.kore").getAbsolutePath();
                 String moduleName = mod.name();
                 if (haskellKRunOptions.dryRun) {
@@ -210,7 +225,7 @@ public class HaskellRewriter implements Function<Module, Rewriter> {
                         }
                         TextToKore textToKore = new TextToKore();
                         Pattern kore = textToKore.parsePattern(koreOutputFile);
-                        KoreToK koreToK = new KoreToK(idsToLabels);
+                        KoreToK koreToK = new KoreToK(idsToLabels, mod.sortAttributesFor(), StringUtil::enquoteKString);
                         K outputK = koreToK.apply(kore);
                         return outputK;
                     } catch (IOException e) {
@@ -252,6 +267,9 @@ public class HaskellRewriter implements Function<Module, Rewriter> {
      * @throws InterruptedException
      */
     private int executeCommandBasic(File workingDir, String... command) throws IOException, InterruptedException {
+        if (options.global.debug) {
+            System.err.println("Executing command: " + String.join(" ", Arrays.asList(command)));
+        }
         int exit;
         ProcessBuilder pb = files.getProcessBuilder()
                 .command(command);
