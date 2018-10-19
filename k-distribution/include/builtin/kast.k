@@ -76,7 +76,9 @@ module KSEQ-SYMBOLIC
   syntax #Pattern ::= "#True" [klabel(#True), symbol]
   syntax #Pattern ::= "#False" [klabel(#False), symbol]
   syntax #Pattern ::= K
-                    | #Pattern "#And" #Pattern [klabel(#And), symbol, assoc, comm, unit(#True), mlOp, format(%1 %2%n%3)]
+                    | "(" #Pattern ")" [bracket]
+                    > #Pattern "#Equals" #Pattern [klabel(#Equals), symbol, mlOp, format(%i%1%d%n%2%n%i%3%d)]
+                    > #Pattern "#And" #Pattern [klabel(#And), symbol, assoc, comm, unit(#True), mlOp, format(%i%1%d%n%2%n%i%3%d)]
                     > #Pattern "#Or" #Pattern [klabel(#Or), symbol, assoc, comm, unit(#False), mlOp, format(%i%1%d%n%2%n%i%3%d)]
 endmodule
 
