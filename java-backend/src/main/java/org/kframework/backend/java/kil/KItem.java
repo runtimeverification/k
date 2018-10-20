@@ -38,6 +38,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 
@@ -448,6 +449,8 @@ public class KItem extends Term implements KItemRepresentation {
             return kItem.evaluable;
         }
 
+        private static volatile AtomicInteger exceptionLogCount = new AtomicInteger();
+
         /**
          * Evaluates this {@code KItem} if it is a predicate or function
          *
@@ -568,7 +571,7 @@ public class KItem extends Term implements KItemRepresentation {
                                         sb.append("\n\nCandidate rules:\n");
                                         RuleSourceUtil.appendRuleAndSource(appliedRule, sb);
                                         RuleSourceUtil.appendRuleAndSource(rule, sb);
-                                        sb.append("\n\nCandidate results:\n");
+                                        sb.append("Candidate results:\n");
                                         sb.append(result).append("\n");
                                         sb.append(rightHandSide).append("\n");
                                         throw KEMException.criticalError(sb.toString());
@@ -590,6 +593,27 @@ public class KItem extends Term implements KItemRepresentation {
                             if (!deterministicFunctions && result != null) {
                                 return result;
                             }
+                        } catch (RuntimeException | Error e) {
+                            final long lengthThreshold = 10000;
+                            final long maxExcLogCount = 10;
+                            if (context.global().javaExecutionOptions.logBasic
+                                    && exceptionLogCount.getAndIncrement() < maxExcLogCount) {
+                                try {
+                                    String kItemStr = kItem.toString();
+                                    kItemStr = kItemStr.substring(0, (int) Math.min(kItemStr.length(), lengthThreshold));
+                                    if (kItemStr.length() == lengthThreshold) {
+                                        kItemStr += "...";
+                                    }
+                                    StringBuffer ruleSb = new StringBuffer();
+                                    RuleSourceUtil.appendRuleAndSource(rule, ruleSb);
+                                    System.err.format("\nException while evaluating functional term:\n\t%s\n" +
+                                                    "and applying the rule\n\t%s",
+                                            kItemStr, ruleSb);
+                                } catch (Exception e1) {
+                                    //ignored
+                                }
+                            }
+                            throw e;
                         } finally {
                             if (RuleAuditing.isAuditBegun()) {
                                 if (RuleAuditing.getAuditingRule() == rule) {
