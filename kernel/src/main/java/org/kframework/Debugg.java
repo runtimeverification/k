@@ -186,7 +186,7 @@ public class Debugg {
         try {
             m = MessageDigest.getInstance("MD5");
             m.reset();
-            m.update(in.toString().getBytes());
+            m.update(KPrint.serialize(in, OutputModes.KAST));
             byte[] digest = m.digest();
             BigInteger bigInt = new BigInteger(1,digest);
             hashtext = bigInt.toString(16);
@@ -197,7 +197,7 @@ public class Debugg {
     }
 
     private String writeNode(K contents) {
-        String fileCode   = Integer.toString(Math.abs(contents.hashCode()));
+        String fileCode   = hash(contents);
         File   outputFile = new File(this.blobsDir, fileCode + "." + OutputModes.JSON.ext());
         if (! outputFile.exists()) {
             try {
