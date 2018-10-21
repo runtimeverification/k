@@ -33,6 +33,7 @@ public class Debugg {
     private final File    loggingPath;
     private final File    blobsDir;
 
+    private String      sessionId;
     private PrintWriter sessionLog;
 
     private long   startTime;
@@ -55,6 +56,8 @@ public class Debugg {
                          ? files.resolveKompiled("debugg")
                          : new File(globalOptions.debuggPath);
 
+        if (globalOptions.debuggId != null) this.sessionId = globalOptions.debuggId;
+
         this.blobsDir = new File(loggingPath, "blobs/");
         this.blobsDir.mkdirs();
 
@@ -65,16 +68,17 @@ public class Debugg {
         this.currentQuery       = "NOQUERY";
     }
 
-    public void init(String sessionId) {
+    public void init(String defaultSessionId) {
         if (! this.loggingOn) return;
-        File logFile = new File(this.loggingPath, sessionId + ".log");
+        if (this.sessionId == null) this.sessionId = defaultSessionId;
+        File logFile = new File(this.loggingPath, this.sessionId + ".log");
         PrintWriter sessionLog;
         try {
             this.sessionLog = new PrintWriter(logFile);
+            System.err.println("Debugg: " + logFile);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        System.err.println("Debugg: " + logFile);
         this.startTime = System.currentTimeMillis();
     }
 
