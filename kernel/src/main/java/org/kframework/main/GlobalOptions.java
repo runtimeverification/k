@@ -128,6 +128,9 @@ public final class GlobalOptions {
     @Parameter(names="--log-rules", description="Log applied rules.")
     public boolean logRules = false;
 
+    @Parameter(names="--log-target", description="Log target term.")
+    public boolean logTarget = false;
+
     @Parameter(names="--log-stmts-only", description="Log only steps that execute a statement, without intermediary steps. " +
             "Except when intermediary steps are important for other reason, like branching.")
     public boolean logStmtsOnly = false;
