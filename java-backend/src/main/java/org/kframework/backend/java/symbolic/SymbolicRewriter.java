@@ -613,7 +613,7 @@ public class SymbolicRewriter {
         //to avoid printing initialization-phase rules
         global.globalOptions.logRulesPublic = global.globalOptions.logRules;
 
-        if (global.globalOptions.log) {
+        if (global.globalOptions.logTarget) {
             System.out.println("\nTarget term\n=====================\n");
             System.out.println(targetTerm);
         }
