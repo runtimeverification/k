@@ -104,7 +104,7 @@ public class SMTOperations {
                     kem.registerCriticalWarning(warnPrefix + e.getMessage(), e);
                 }
                 if (global.debugZ3) {
-                    System.err.format("\nZ3 warning: %s\n", e.getMessage());
+                    System.err.format("\nZ3 warning. Query not generated: %s\n", e.getMessage());
                 }
                 formulaContext.z3Profiler.newQueryBuildFailure();
             }
