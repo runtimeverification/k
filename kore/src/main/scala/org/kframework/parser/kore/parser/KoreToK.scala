@@ -43,10 +43,18 @@ class KoreToK (headToLabel_ : java.util.Properties, sortAtt : Map[k.Sort, Att], 
     }
   }
 
+  private def extractVarName(name: String): String = {
+    if (name.startsWith("Var")) {
+      name.substring(3)
+    } else {
+      name
+    }
+  }
+
   /** Returns a [[k.K]] from [[kore.Pattern]]. */
   def apply(pat: kore.Pattern): k.K = pat match {
     case kore.Variable(name, sort) =>
-      KORE.KVariable(name, KORE.Att.add(classOf[k.Sort].toString, apply(sort).toString()))
+      KORE.KVariable(extractVarName(name), KORE.Att.add(classOf[k.Sort].toString, apply(sort).toString()))
     case kore.Application(head, args) => head.ctr match {
       case "inj" =>
         apply(args.head)
@@ -82,7 +90,7 @@ class KoreToK (headToLabel_ : java.util.Properties, sortAtt : Map[k.Sort, Att], 
     case kore.Floor(s, rs, p) =>
       throw new TranslationError("Floor patterns currently unsupported")
     case kore.Equals(s1, s2, p, q) =>
-      throw new TranslationError("Equals patterns currently unsupported")
+      KORE.KApply(KLabels.ML_EQUALS, apply(p), apply(q))
     case kore.Mem(s, rs, p, q) =>
       throw new TranslationError("Mem patterns currently unsupported")
     case kore.DomainValue(s, str) =>
