@@ -199,7 +199,7 @@ public class KPrint {
         }.apply(term);
     }
 
-    private K omitTerm(Module mod, KApply kapp) {
+    private static K omitTerm(Module mod, KApply kapp) {
         Sort finalSort = Sorts.K();
         Option<Sort> termSort = mod.sortFor().get(kapp.klabel());
         if (! termSort.isEmpty()) {
