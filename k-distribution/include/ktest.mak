@@ -49,7 +49,7 @@ else
 endif
 
 %-spec.k: kompile
-	$(KPROVE) -d $(DEFDIR) --z3-executable $@ $(CHECK) $@.out
+	$(KPROVE) $(KPROVE_FLAGS) -d $(DEFDIR) --z3-executable $@ $(CHECK) $@.out
 
 clean:
 	rm -rf $(DEFDIR)/$(DEF)-kompiled
