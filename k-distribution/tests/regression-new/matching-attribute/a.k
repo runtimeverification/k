@@ -1,3 +1,5 @@
+// Copyright (c) 2018 K Team. All Rights Reserved.
+
 requires "domains.k"
 
 module A
