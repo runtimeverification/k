@@ -270,7 +270,10 @@ public class Kompile {
     }
 
     public Set<Module> parseModules(CompiledDefinition definition, String mainModule, File definitionFile) {
-        return definitionParsing.parseModules(definition, mainModule, definitionFile);
+        Set<Module> modules = definitionParsing.parseModules(definition, mainModule, definitionFile);
+        int totalBubbles = definitionParsing.parsedBubbles.get() + definitionParsing.cachedBubbles.get();
+        sw.printIntermediate("Parse spec modules [" + definitionParsing.parsedBubbles.get() + "/" + totalBubbles + " rules]");
+        return modules;
     }
 
     private Sentence concretizeSentence(Sentence s, Definition input) {
