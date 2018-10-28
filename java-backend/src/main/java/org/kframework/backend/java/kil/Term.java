@@ -2,8 +2,6 @@
 package org.kframework.backend.java.kil;
 
 import org.kframework.attributes.Att;
-import org.kframework.attributes.Location;
-import org.kframework.attributes.Source;
 import org.kframework.backend.java.symbolic.BottomUpVisitor;
 import org.kframework.backend.java.symbolic.Evaluator;
 import org.kframework.backend.java.symbolic.SubstituteAndEvaluateTransformer;
@@ -11,6 +9,7 @@ import org.kframework.backend.java.util.Constants;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -80,6 +79,26 @@ public abstract class Term extends JavaSymbolicObject<Term> implements Comparabl
         return canSubstituteAndEvaluate(substitution, context.getTopConstraint()) ?
                (Term) this.accept(new SubstituteAndEvaluateTransformer(substitution, context)) :
                this;
+    }
+
+    /**
+     * Returns a new {@code Term} instance obtained from this term by applying
+     * substitution from {@code context.getTopConstraint().substitution()}.
+     * <p>
+     * Evaluates all pending functions and predicates.
+     * <p>
+     * Denis, K branch `gnosis` only: Now that function evaluation results are cached,
+     * I suspect this function can be safely used instead of evaluate() and substituteAndEvaluate() in all contexts.
+     * These two no longer have performance advantages.
+     */
+    public Term fullSubstituteAndEvaluate(TermContext context) {
+        Map<Variable, ? extends Term> substitution = context.getTopConstraint().substitution();
+        Term newTerm = !Collections.disjoint(variableSet(), substitution.keySet())
+                ? (Term) this.accept(new SubstituteAndEvaluateTransformer(substitution, context))
+                : this;
+        //Still required because SubstituteAndEvaluateTransformer only evaluates subterms affected by substitution.
+        newTerm = newTerm.evaluate(context);
+        return newTerm;
     }
 
     /**

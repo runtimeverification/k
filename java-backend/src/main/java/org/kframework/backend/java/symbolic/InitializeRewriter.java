@@ -325,24 +325,36 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
                 termContext.setKOREtoBackendKILConverter(converter);
                 javaRules = rules.stream()
                         .map(r -> converter.convert(Optional.<Module>empty(), r))
-                        .map(r -> new org.kframework.backend.java.kil.Rule(
-                                r.label(),
-                                evaluate(r.leftHandSide(), r.getRequires(), termContext),
-                                evaluate(r.rightHandSide(), r.getRequires(), termContext),
-                                r.requires(),
-                                r.ensures(),
-                                r.freshConstants(),
-                                r.freshVariables(),
-                                r.lookups(),
-                                r.att(),
-                                termContext.global()))
+                        .map(this::evaluateRule)
                         .collect(Collectors.toList());
                 return this;
             }
 
+            public org.kframework.backend.java.kil.Rule evaluateRule(org.kframework.backend.java.kil.Rule rule) {
+                //We need this ConsTerm only to evaluate the constraint. That's why we use an empty first argument.
+                ConstrainedTerm constraintHolder = new ConstrainedTerm(
+                        ConjunctiveFormula.of(termContext.global()),
+                        rule.getRequires(),
+                        termContext).expandPatterns(true);
+
+                ConjunctiveFormula constraint = constraintHolder.constraint();
+
+                return new org.kframework.backend.java.kil.Rule(
+                        rule.label(),
+                        evaluate(rule.leftHandSide(), constraint, termContext),
+                        evaluate(rule.rightHandSide(), constraint, termContext),
+                        rule.requires(),
+                        rule.ensures(),
+                        rule.freshConstants(),
+                        rule.freshVariables(),
+                        rule.lookups(),
+                        rule.att(),
+                        termContext.global());
+            }
+
             private Term evaluate(Term term, ConjunctiveFormula constraint, TermContext context) {
                 context.setTopConstraint(constraint);
-                Term newTerm = term.evaluate(context);
+                Term newTerm = term.fullSubstituteAndEvaluate(context);
                 context.setTopConstraint(null);
                 return newTerm;
             }
