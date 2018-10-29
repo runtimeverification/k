@@ -1,3 +1,4 @@
+// Copyright (c) 2014-2018 K Team. All Rights Reserved.
 package org.kframework.keq;
 
 import org.kframework.compile.Backend;
