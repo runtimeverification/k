@@ -21,7 +21,7 @@ import java.util.List;
 public class KExceptionManager {
     private final List<KException> exceptions = Collections.synchronizedList(new ArrayList<>());
 
-    private final GlobalOptions options;
+    public final GlobalOptions options;
 
     @Inject
     public KExceptionManager(GlobalOptions options) {
