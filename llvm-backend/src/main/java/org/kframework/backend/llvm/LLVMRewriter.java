@@ -70,8 +70,8 @@ public class LLVMRewriter implements Function<Module, Rewriter> {
             public RewriterResult execute(K k, Optional<Integer> depth) {
                 Module mod = def.executionModule();
                 ModuleToKORE converter = new ModuleToKORE(mod, files, def.topCellInitializer);
-                K kWithInjections = new AddSortInjections(mod).addInjections(k);
-                kWithInjections = new ResolveOverloadedTerminators(mod).resolve(kWithInjections);
+                K kWithInjections = new ResolveOverloadedTerminators(mod).resolve(k);
+                kWithInjections = new AddSortInjections(mod).addInjections(kWithInjections);
                 converter.convert(kWithInjections);
                 String koreOutput = "[initial-configuration{}(" + converter.toString() + ")]\n\nmodule TMP\nendmodule []\n";
                 String defPath = files.resolveKompiled("definition.kore").getAbsolutePath();
