@@ -44,6 +44,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -379,22 +380,26 @@ public class DefinitionParsing {
         Tuple2<Either<java.util.Set<ParseFailedException>, K>, java.util.Set<ParseFailedException>> result;
         if (cache.containsKey(b.contents())) {
             ParsedSentence parse = cache.get(b.contents());
-            cachedBubbles.getAndIncrement();
-            kem.addAllKException(parse.getWarnings().stream().map(e -> e.getKException()).collect(Collectors.toList()));
-            return Stream.of(parse.getParse());
-        } else {
-            result = parser.parseString(b.contents(), START_SYMBOL, scanner, source, startLine, startColumn, !b.att().contains("macro") && !b.att().contains("alias"));
-            parsedBubbles.getAndIncrement();
-            kem.addAllKException(result._2().stream().map(e -> e.getKException()).collect(Collectors.toList()));
-            if (result._1().isRight()) {
-                KApply k = (KApply) new TreeNodesToKORE(Outer::parseSort, isStrict).down(result._1().right().get());
-                k = KApply(k.klabel(), k.klist(), k.att().addAll(b.att().remove("contentStartLine").remove("contentStartColumn").remove(Source.class).remove(Location.class)));
-                cache.put(b.contents(), new ParsedSentence(k, new HashSet<>(result._2())));
-                return Stream.of(k);
-            } else {
-                errors.addAll(result._1().left().get());
-                return Stream.empty();
+            Optional<Source> cacheSource = parse.getParse().source();
+            //Cache might contain content from an identical file but another source path.
+            //The content will have wrong Source attribute and must be invalidated.
+            if (cacheSource.isPresent() && cacheSource.get().equals(source)) {
+                cachedBubbles.getAndIncrement();
+                kem.addAllKException(parse.getWarnings().stream().map(e -> e.getKException()).collect(Collectors.toList()));
+                return Stream.of(parse.getParse());
             }
+        }
+        result = parser.parseString(b.contents(), START_SYMBOL, scanner, source, startLine, startColumn, !b.att().contains("macro") && !b.att().contains("alias"));
+        parsedBubbles.getAndIncrement();
+        kem.addAllKException(result._2().stream().map(e -> e.getKException()).collect(Collectors.toList()));
+        if (result._1().isRight()) {
+            KApply k = (KApply) new TreeNodesToKORE(Outer::parseSort, isStrict).down(result._1().right().get());
+            k = KApply(k.klabel(), k.klist(), k.att().addAll(b.att().remove("contentStartLine").remove("contentStartColumn").remove(Source.class).remove(Location.class)));
+            cache.put(b.contents(), new ParsedSentence(k, new HashSet<>(result._2())));
+            return Stream.of(k);
+        } else {
+            errors.addAll(result._1().left().get());
+            return Stream.empty();
         }
     }
 }

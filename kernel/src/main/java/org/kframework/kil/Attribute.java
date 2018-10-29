@@ -32,6 +32,7 @@ public class Attribute<T> extends ASTNode {
     public static final String ALIAS_KEY = "alias";
     public static final String LEMMA_KEY = "lemma";
     public static final String TRUSTED_KEY = "trusted";
+    public static final String MATCHING_KEY = "matching";
 
     public static final String BITWIDTH_KEY = "bitwidth";
     public static final String EXPONENT_KEY = "exponent";
