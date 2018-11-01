@@ -206,4 +206,8 @@ public class MetaK {
     public static BoolToken isConcrete(Term term, TermContext context) {
         return BoolToken.of(term.isConcrete());
     }
+
+    public static BoolToken isVariable(Term term, TermContext context) {
+        return BoolToken.of(term.isVariable());
+    }
 }

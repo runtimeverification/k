@@ -560,6 +560,7 @@ struct
       [String sort] -> let res = ff sort config !freshCounter in freshCounter := Z.add !freshCounter Z.one; res
     | _ -> raise Not_implemented
   let hook_isConcrete _ _ _ _ _ = [Bool true]
+  let hook_isVariable _ _ _ _ _ = [Bool false]
   let hook_getenv c _ _ _ _ = match c with
       [String key] -> [String (Sys.getenv key)]
     | _ -> raise Not_implemented
