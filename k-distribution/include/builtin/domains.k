@@ -89,6 +89,24 @@ module ARRAY
   imports ARRAY-KORE
 endmodule
 
+module IMAP-SYNTAX
+    imports INT
+    syntax IMap [smt-prelude] // (define-sort IMap () (Array Int Int))
+    syntax IMap ::= store  ( IMap , Int , Int ) [function, smtlib(store),  smt-prelude]
+    syntax Int  ::= select ( IMap , Int )       [function, smtlib(select), smt-prelude]
+endmodule
+
+module IMAP-SYMBOLIC [symbolic]
+    imports IMAP-SYNTAX
+    rule select(store(M, K0, V), K) => V            requires K0  ==Int K
+    rule select(store(M, K0, V), K) => select(M, K) requires K0 =/=Int K
+endmodule
+
+module IMAP
+    imports IMAP-SYNTAX
+    imports IMAP-SYMBOLIC
+endmodule
+
 module MAP
   imports LIST
   imports SET
