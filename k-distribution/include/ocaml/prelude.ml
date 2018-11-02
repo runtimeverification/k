@@ -554,6 +554,9 @@ struct
   let hook_getKLabel c _ _ _ _ = match c with
       [k] -> (match (normalize k) with KApply (lbl, _) -> [InjectedKLabel lbl] | _ -> interned_bottom)
     | _ -> interned_bottom
+  let hook_getKLabelString c _ _ _ _ = match c with
+      [k] -> (match (normalize k) with KApply (lbl, _) -> [String (print_klabel_string lbl)] | _ -> interned_bottom)
+    | _ -> interned_bottom
   let hook_configuration c _ _ config _ = match c with
       () -> config
   let hook_fresh c _ _ config ff = match c with
