@@ -162,5 +162,9 @@ public final class GlobalOptions {
                     "also print used memory after System.gc(). Gives more precise information about memory usage.")
     public boolean logMemoryAfterGC = false;
 
+    @Parameter(names = "--log-success", description = "Log success final states. " +
+            "By default only failure final states are logged.")
+    public boolean logSuccessFinalStates = false;
+
     public boolean logRulesPublic = false;
 }
