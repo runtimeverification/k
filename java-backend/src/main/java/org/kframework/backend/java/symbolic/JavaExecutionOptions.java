@@ -107,6 +107,10 @@ public final class JavaExecutionOptions {
 
     public boolean logRulesPublic = false;
 
+    @Parameter(names = "--log-success", description = "Log success final states. " +
+            "By default only failure final states are logged.")
+    public boolean logSuccessFinalStates = false;
+
     public static class LogEventConverter extends BaseEnumConverter<StateLog.LogEvent> {
 
         public LogEventConverter(String optionName) {

@@ -592,6 +592,7 @@ public class SymbolicRewriter {
             ConstrainedTerm targetTerm,
             List<Rule> specRules, KExceptionManager kem) {
         List<ConstrainedTerm> proofResults = new ArrayList<>();
+        List<ConstrainedTerm> successResults = new ArrayList<>();
         int successPaths = 0;
         Set<ConstrainedTerm> visited = new HashSet<>();
         List<ConstrainedTerm> queue = new ArrayList<>();
@@ -635,6 +636,7 @@ public class SymbolicRewriter {
                         System.err.println("\n============\nStep " + step + ": eliminated!\n============\n");
                     }
                     successPaths++;
+                    successResults.add(term);
                     continue;
                 }
 
@@ -745,6 +747,15 @@ public class SymbolicRewriter {
             tweakedProofResults = ImmutableList.of(new ConstrainedTerm(BoolToken.FALSE, initialTerm.termContext()));
         }
 
+        if (global.javaExecutionOptions.logSuccessFinalStates) {
+            System.err.println("\n" +
+                    "==========================================\n" +
+                    "Success final states:\n" +
+                    "==========================================\n");
+            for (ConstrainedTerm result : successResults) {
+                printTermAndConstraint(result);
+            }
+        }
         if (global.globalOptions.verbose) {
             printSummaryBox(rule, proofResults, successPaths, step);
         }
