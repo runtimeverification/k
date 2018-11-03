@@ -25,9 +25,9 @@ import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
-import org.kframework.backend.java.util.StateLog;
 import org.kframework.backend.java.util.FormulaContext;
 import org.kframework.backend.java.util.RuleSourceUtil;
+import org.kframework.backend.java.util.StateLog;
 import org.kframework.backend.java.utils.BitSet;
 import org.kframework.builtin.KLabels;
 import org.kframework.kore.FindK;
@@ -35,8 +35,10 @@ import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KORE;
 import org.kframework.rewriter.SearchType;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -48,7 +50,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.io.File;
 
 /**
  * @author AndreiS
@@ -598,6 +599,9 @@ public class SymbolicRewriter {
         List<ConstrainedTerm> queue = new ArrayList<>();
         List<ConstrainedTerm> nextQueue = new ArrayList<>();
 
+        boolean noBoundaryCells = global.kproveOptions.boundaryCells.isEmpty();
+        ConstrainedTerm targetBoundary = buildBoundaryTerm(targetTerm);
+
         visited.add(initialTerm);
         queue.add(initialTerm);
         boolean guarded = false;
@@ -628,16 +632,35 @@ public class SymbolicRewriter {
 
             for (ConstrainedTerm term : queue) {
                 v++;
-                boolean alreadyLogged = logStep(step, v, term, step == 1, false);
-                if (term.implies(targetTerm, rule, false)) {
-                    global.stateLog.log(StateLog.LogEvent.REACHPROVED, term.term(), term.constraint());
-                    if (global.javaExecutionOptions.logBasic) {
-                        logStep(step, v, term, true, alreadyLogged);
-                        System.err.println("\n============\nStep " + step + ": eliminated!\n============\n");
+                ConstrainedTerm termBoundary = buildBoundaryTerm(term);
+                //if boundary cells match same cells in target, we consider this state final.
+                boolean boundaryCellsMatchTarget = !noBoundaryCells
+                        && termBoundary.matchesSyntacticallyModuloSubstitutions(targetBoundary);
+
+                //var required to avoid logging the same step multiple times.
+                boolean alreadyLogged = logStep(step, v, term,
+                        step == 1 || boundaryCellsMatchTarget, false);
+                if (noBoundaryCells || boundaryCellsMatchTarget) {
+                    if (term.implies(targetTerm, rule, !noBoundaryCells)) {
+                        global.stateLog.log(StateLog.LogEvent.REACHPROVED, term.term(), term.constraint());
+                        if (global.javaExecutionOptions.logBasic) {
+                            logStep(step, v, term, true, alreadyLogged);
+                            System.err.println("\n============\nStep " + step + ": eliminated!\n============\n");
+                        }
+                        successPaths++;
+                        successResults.add(term);
+                        continue;
+                    } else if (!noBoundaryCells && step > 1) {
+                        //If boundary cells in current term match boundary cells in target term but entire terms
+                        // don't match, halt execution.
+                        logStep(step, v, term, global.javaExecutionOptions.logBasic, alreadyLogged);
+                        System.err.println("Halt! Terminating branch.");
+                        proofResults.add(term);
+                        continue;
                     }
-                    successPaths++;
-                    successResults.add(term);
-                    continue;
+                    //else: case (noBoundaryCells || (step == 1 && boundaryCellsMatchTarget)) && final implication == false
+                    //  Do nothing. Boundary checking is disabled at step 1.
+                    //  Required for specs that match 1 full loop iteration.
                 }
 
                 /* TODO(AndreiS): terminate the proof with failure based on the klabel _~>_
@@ -812,6 +835,7 @@ public class SymbolicRewriter {
     }
 
     /**
+     * @param forced - if true, log this step when at least --log-basic is provided.
      * @return whether it was actually logged
      */
     private boolean logStep(int step, int v, ConstrainedTerm term, boolean forced, boolean alreadyLogged) {
@@ -878,6 +902,21 @@ public class SymbolicRewriter {
             }
         }
         return null;
+    }
+
+    public ConstrainedTerm buildBoundaryTerm(ConstrainedTerm term) {
+        KItem result;
+        try {
+            List<Term> cells = global.kproveOptions.boundaryCells.stream()
+                    .map(name -> getCell((KItem) term.term(), String.format("<%s>", name)))
+                    .collect(Collectors.toList());
+            result = KItem.of(KLabelConstant.of(KLabels.GENERATED_BOUNDARY_CELL, global.getDefinition()),
+                    KList.concatenate(cells), global);
+        } catch (NullPointerException e) {
+            throw KEMException
+                    .criticalError("One of boundary cells is null: " + global.kproveOptions.boundaryCells, e);
+        }
+        return new ConstrainedTerm(result, term.constraint(), term.termContext());
     }
 
     /**

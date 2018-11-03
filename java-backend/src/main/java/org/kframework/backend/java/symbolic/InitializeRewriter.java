@@ -26,6 +26,7 @@ import org.kframework.definition.Rule;
 import org.kframework.kil.Attribute;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
+import org.kframework.kprove.KProveOptions;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.api.io.FileSystem;
 import org.kframework.main.GlobalOptions;
@@ -67,6 +68,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
     private final Map<String, MethodHandle> hookProvider;
     private final List<String> transitions;
     private final KRunOptions krunOptions;
+    private final KProveOptions kproveOptions;
     private final FileUtil files;
     private final InitializeDefinition initializeDefinition;
     private static final int NEGATIVE_VALUE = -1;
@@ -82,6 +84,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
             KExceptionManager kem,
             SMTOptions smtOptions,
             KRunOptions krunOptions,
+            KProveOptions kproveOptions,
             KompileOptions kompileOptions,
             JavaExecutionOptions javaExecutionOptions,
             FileUtil files,
@@ -97,6 +100,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
         this.hookProvider = HookProvider.get(kem);
         this.transitions = kompileOptions.transition;
         this.krunOptions = krunOptions;
+        this.kproveOptions = kproveOptions;
         this.kompileOptions = kompileOptions;
         this.javaExecutionOptions = javaExecutionOptions;
         this.files = files;
@@ -109,12 +113,14 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
     public synchronized Rewriter apply(org.kframework.definition.Definition def) {
         Module mainModule = def.mainModule();
         TermContext initializingContext = TermContext.builder(new GlobalContext(fs, globalOptions, krunOptions,
-                javaExecutionOptions, kem, smtOptions, hookProvider, files, Stage.INITIALIZING, profiler, kprint, def))
+                kproveOptions, javaExecutionOptions, kem, smtOptions, hookProvider, files, Stage.INITIALIZING, profiler,
+                kprint, def))
                 .freshCounter(0).build();
         Definition definition;
         definition = initializeDefinition.invoke(mainModule, kem, initializingContext.global());
-        GlobalContext rewritingContext = new GlobalContext(fs, globalOptions, krunOptions, javaExecutionOptions, kem,
-                smtOptions, hookProvider, files, Stage.REWRITING, profiler, kprint, def);
+        GlobalContext rewritingContext = new GlobalContext(fs, globalOptions, krunOptions,
+                kproveOptions, javaExecutionOptions, kem, smtOptions, hookProvider, files, Stage.REWRITING, profiler,
+                kprint, def);
         rewritingContext.setDefinition(definition);
 
         return new SymbolicRewriterGlue(mainModule, definition, definition, transitions,

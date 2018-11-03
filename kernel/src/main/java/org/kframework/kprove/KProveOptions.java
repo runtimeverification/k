@@ -4,17 +4,16 @@ package org.kframework.kprove;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate;
-import com.google.inject.Inject;
 import org.kframework.unparser.PrintOptions;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.DefinitionLoadingOptions;
-import org.kframework.utils.options.OuterParsingOptions;
 import org.kframework.utils.options.SMTOptions;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.List;
 
 @RequestScoped
@@ -55,4 +54,12 @@ public class KProveOptions {
 
     @Parameter(names="--depth", description="The maximum number of computational steps to prove")
     public Integer depth;
+
+    @Parameter(names = "--boundary-cells", description = "The comma-separated list of cells used to mark the boundary " +
+            "of evaluation. If option is specified, execution ends when these cells in the current term match same " +
+            "cells in the target term. (Except for step 1, for which boundary checking is disabled.)" +
+            "If the whole current term matches target, execution is successful. " +
+            "Otherwise it fails on the present path. If option is not specified, full target term implication is checked " +
+            "on every step. Recommended value for KEVM: \"k,pc\"")
+    public List<String> boundaryCells = Collections.emptyList();
 }
