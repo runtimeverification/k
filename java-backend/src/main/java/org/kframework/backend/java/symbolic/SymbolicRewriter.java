@@ -775,7 +775,7 @@ public class SymbolicRewriter {
                 global.globalOptions.debugZ3 = oldDebug;
                 global.globalOptions.log = oldLog;
 
-                } catch (RuntimeException e) {
+                } catch (RuntimeException | Error e) {
                     System.err.println("\n" +
                             "==========================================\n" +
                             "Top term when exception was thrown:\n" +
