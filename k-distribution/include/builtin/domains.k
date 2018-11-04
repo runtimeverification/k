@@ -25,15 +25,15 @@ module ARRAY-SYNTAX
   imports LIST
 
   syntax Array [hook(ARRAY.Array), unit(arrayCtor), element(_[_<-_])]
-  syntax Array ::= makeArray(Int, K) [function, hook(ARRAY.make), impure]
+  syntax Array ::= makeArray(Int, KItem) [function, hook(ARRAY.make), impure]
 
-  syntax K ::= Array "[" Int "]" [function, hook(ARRAY.lookup)]
-  syntax Array ::= Array "[" Int "<-" K "]" [function, hook(ARRAY.update), klabel(_[_<-_]), symbol]
+  syntax KItem ::= Array "[" Int "]" [function, hook(ARRAY.lookup)]
+  syntax Array ::= Array "[" Int "<-" KItem "]" [function, hook(ARRAY.update), klabel(_[_<-_]), symbol]
   syntax Array ::= Array "[" Int "<-" "undef" "]" [function, hook(ARRAY.remove)]
   syntax Array ::= updateArray(Array, Int, List) [function, hook(ARRAY.updateAll)]
   /*@ Sets a range of indices (given by an index into the array and the number
    of indices to set) to the same value. */
-  syntax Array ::= fillArray(Array, Int, Int, K) [function, hook(ARRAY.fill)]
+  syntax Array ::= fillArray(Array, Int, Int, KItem) [function, hook(ARRAY.fill)]
 
   syntax Bool ::= Int "in_keys" "(" Array ")" [function, functional, hook(ARRAY.in_keys)]
 endmodule
@@ -52,24 +52,24 @@ module ARRAY-SYMBOLIC [symbolic]
   imports MAP
   imports INT
 
-  syntax Array ::= array(Map, Int, K)
+  syntax Array ::= array(Map, Int, KItem)
 
-  rule makeArray(Len:Int, K:K) => array(.Map, Len, K)
+  rule makeArray(Len:Int, K:KItem) => array(.Map, Len, K)
 
-  rule array(_ I |-> K:K, _, _) [ I:Int ] => K
-  rule array(M:Map, _, K:K) [ I:Int ] => K requires notBool I in_keys(M)
+  rule array(_ I |-> K:KItem, _, _) [ I:Int ] => K
+  rule array(M:Map, _, K:KItem) [ I:Int ] => K requires notBool I in_keys(M)
 
-  rule array(M:Map, Len:Int, K:K) [ I:Int <- K2:K ] => array(M [ I <- K2 ], Len, K)
+  rule array(M:Map, Len:Int, K:KItem) [ I:Int <- K2:KItem ] => array(M [ I <- K2 ], Len, K)
        requires I >=Int 0 andBool I <Int Len
-  rule array(M:Map, Len:Int, K:K) [ I:Int <- _ ] => array(M, Len, K)
+  rule array(M:Map, Len:Int, K:KItem) [ I:Int <- _ ] => array(M, Len, K)
        requires I<Int 0 orBool I >=Int Len
-  rule array(M:Map, Len:Int, K:K) [ I:Int <- undef ] => array(M [ I <- undef ], Len, K)
+  rule array(M:Map, Len:Int, K:KItem) [ I:Int <- undef ] => array(M [ I <- undef ], Len, K)
 
-  rule updateArray(array(M:Map, Len:Int, K:K), _, .List) => array(M, Len, K)
-  rule updateArray(array(M:Map, Len:Int, K:K), I:Int, ListItem(K2:K) L:List) => updateArray(array(M, Len, K) [ I <- K2 ], I +Int 1, L)
+  rule updateArray(array(M:Map, Len:Int, K:KItem), _, .List) => array(M, Len, K)
+  rule updateArray(array(M:Map, Len:Int, K:KItem), I:Int, ListItem(K2:KItem) L:List) => updateArray(array(M, Len, K) [ I <- K2 ], I +Int 1, L)
 
-  rule fillArray(array(M:Map, Len:Int, K:K), _, 0, _) => array(M, Len, K)
-  rule fillArray(array(M:Map, Len:Int, K:K), I:Int, N:Int, K2:K) => fillArray(array(M, Len, K) [ I <- K2 ], I +Int 1, N -Int 1, K2)
+  rule fillArray(array(M:Map, Len:Int, K:KItem), _, 0, _) => array(M, Len, K)
+  rule fillArray(array(M:Map, Len:Int, K:KItem), I:Int, N:Int, K2:KItem) => fillArray(array(M, Len, K) [ I <- K2 ], I +Int 1, N -Int 1, K2)
        requires N >Int 0
 
   rule I:Int in_keys(array(M:Map, _, _)) => I in_keys(M)
@@ -99,21 +99,21 @@ module MAP
                //| "."                            [function, hook(MAP.unit)]
   /*@ Construct a singleton Map (a Map with only one key/value pair). The key
    is on the left and the value is on the right */
-  syntax Map ::= K "|->" K                      [function, functional, hook(MAP.element), klabel(_|->_), symbol, latex({#1}\mapsto{#2})]
+  syntax Map ::= KItem "|->" KItem                      [function, functional, hook(MAP.element), klabel(_|->_), symbol, latex({#1}\mapsto{#2})]
 
   syntax priorities _|->_ > _Map_ .Map
   syntax non-assoc _|->_
 
   /*@ Retrieve the value associated with the given key */
-  syntax K ::= Map "[" K "]"                    [function, hook(MAP.lookup), klabel(Map:lookup), symbol]
+  syntax KItem ::= Map "[" KItem "]"                    [function, hook(MAP.lookup), klabel(Map:lookup), symbol]
 
-  syntax K ::= Map "[" K "]" "orDefault" K      [function, functional, hook(MAP.lookupOrDefault), klabel(Map:lookupOrDefault)]
+  syntax KItem ::= Map "[" KItem "]" "orDefault" KItem      [function, functional, hook(MAP.lookupOrDefault), klabel(Map:lookupOrDefault)]
 
   /*@ Update a Map in form of  of keys and values: */
-  syntax Map ::= Map "[" K "<-" K "]"           [function, functional, hook(MAP.update), prefer]
+  syntax Map ::= Map "[" KItem "<-" KItem "]"           [function, functional, hook(MAP.update), prefer]
 
   /*@ Remove key/value pair associated with the key from map? */
-  syntax Map ::= Map "[" K "<-" "undef" "]"     [function, functional, hook(MAP.remove), klabel(_[_<-undef]), symbol]
+  syntax Map ::= Map "[" KItem "<-" "undef" "]"     [function, functional, hook(MAP.remove), klabel(_[_<-undef]), symbol]
 
   /*@ Get the difference of two maps interpreted as sets of entries
    ($M_1 \setminus M2$) */
@@ -131,7 +131,7 @@ module MAP
   syntax Set ::= keys(Map)                      [function, functional, hook(MAP.keys)]
   syntax List ::= "keys_list" "(" Map ")"       [function, hook(MAP.keys_list)]
 
-  syntax Bool ::= K "in_keys" "(" Map ")"       [function, functional, hook(MAP.in_keys)]
+  syntax Bool ::= KItem "in_keys" "(" Map ")"       [function, functional, hook(MAP.in_keys)]
 
   /*@ Get a List consisting of all values in the Map: */
   syntax List ::= values(Map)                   [function, hook(MAP.values)]
@@ -143,7 +143,7 @@ module MAP
   syntax Bool ::= Map "<=Map" Map               [function, functional, hook(MAP.inclusion)]
 
   /*@ Get an arbitrarily chosen key of the Map  */
-  syntax K ::= choice(Map)                      [function, hook(MAP.choice), klabel(Map:choice)]
+  syntax KItem ::= choice(Map)                      [function, hook(MAP.choice), klabel(Map:choice)]
 endmodule
 
 module SET
@@ -163,7 +163,7 @@ module SET
   /*@ Construct a singleton Set (a Set with only one element $\{ a \}$). To add
    an element $a$ to a set $A$, construct the union of the singleton set
    $\{ a \}$ and $A$ ($\{ a \} \cup A$). */
-  syntax Set ::= SetItem(K)               [function, functional, hook(SET.element), klabel(SetItem), symbol]
+  syntax Set ::= SetItem(KItem)               [function, functional, hook(SET.element), klabel(SetItem), symbol]
 
   /*@ Get the intersection of two sets ($A \cap B$) */
   syntax Set ::= intersectSet(Set, Set)   [function, functional, hook(SET.intersection)]
@@ -172,7 +172,7 @@ module SET
   syntax Set ::= Set "-Set" Set           [function, functional, hook(SET.difference), latex({#1}-_{\it Set}{#2}), klabel(Set:difference), symbol]
 
   /*@ Check element membership in a set ($a \in A$) */
-  syntax Bool ::= K "in" Set              [function, functional, hook(SET.in), klabel(Set:in), symbol]
+  syntax Bool ::= KItem "in" Set              [function, functional, hook(SET.in), klabel(Set:in), symbol]
 
   /*@ Check set inclusion ($A \subseteq B$) */
   syntax Bool ::= Set "<=Set" Set         [function, functional, hook(SET.inclusion)]
@@ -181,7 +181,7 @@ module SET
   syntax Int ::= size(Set)                [function, functional, hook(SET.size)]
 
   /*@ Get an arbitrarily chosen element of the Set */
-  syntax K ::= choice(Set)                [function, hook(SET.choice), klabel(Set:choice)]
+  syntax KItem ::= choice(Set)                [function, hook(SET.choice), klabel(Set:choice)]
 
   /* set difference axioms */
   // TODO(AndreiS): remove this if not used
@@ -232,18 +232,18 @@ module LIST
   syntax List ::= ".List"                 [function, functional, hook(LIST.unit), klabel(.List), symbol, smtlib(smt_seq_nil), latex(\dotCt{List})]
                 //| "."
   /*@ Construct a singleton List (a list with only  one element) */
-  syntax List ::= ListItem(K)             [function, functional, hook(LIST.element), klabel(ListItem), symbol, smtlib(smt_seq_elem)]
+  syntax List ::= ListItem(KItem)             [function, functional, hook(LIST.element), klabel(ListItem), symbol, smtlib(smt_seq_elem)]
 
   /*@ Get an element form the List by index. Positive indices mean from the
    beginning (0 is the first element), and negative indices mean from the end
    (-1 is the last element). */
-  syntax K ::= List "[" Int "]"           [function, hook(LIST.get), klabel(List:get), symbol]
+  syntax KItem ::= List "[" Int "]"           [function, hook(LIST.get), klabel(List:get), symbol]
 
   /*@ Remove elements from the beginning and the end of the List. */
   syntax List ::= range(List, Int, Int)   [function, hook(LIST.range), klabel(List:range), symbol]
 
   /*@ Check element membership in the given list */
-  syntax Bool ::= K "in" List             [function, functional, hook(LIST.in), klabel(_inList_)]
+  syntax Bool ::= KItem "in" List             [function, functional, hook(LIST.in), klabel(_inList_)]
 
   /*@ Get the list length */
   syntax Int ::= size(List)               [function, functional, hook(LIST.size), klabel (sizeList), smtlib(smt_seq_len)]
