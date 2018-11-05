@@ -12,7 +12,6 @@ import org.kframework.utils.options.OuterParsingOptions;
 import org.kframework.utils.options.SMTOptions;
 import org.kframework.utils.options.StringListConverter;
 
-import java.io.File;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
@@ -22,10 +21,6 @@ import java.util.List;
 public class KompileOptions implements Serializable {
 
 
-    /**
-     * WARNING: this field will be non-null in kompile tool, but null when KompileOption is deserialized,
-     * as part of CompiledDefinition, in any other tool. usability depends on context.
-     */
     @ParametersDelegate
     public transient GlobalOptions global = new GlobalOptions();
 
@@ -124,8 +119,5 @@ public class KompileOptions implements Serializable {
 
         @Parameter(names="--kore-prove", description="Compile with the KORE pipeline for proving.")
         public boolean koreProve = false;
-
-        @Parameter(names="--cache-file", description="Location of parse cache file. Default is $KOMPILED_DIR/cache.bin.")
-        public File cacheFile = null;
     }
 }
