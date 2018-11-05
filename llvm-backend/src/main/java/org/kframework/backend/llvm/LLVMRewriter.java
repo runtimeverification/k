@@ -5,7 +5,6 @@ import com.google.inject.Inject;
 import org.kframework.RewriterResult;
 import org.kframework.backend.kore.ModuleToKORE;
 import org.kframework.compile.AddSortInjections;
-import org.kframework.compile.ResolveOverloadedTerminators;
 import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
 import org.kframework.kompile.CompiledDefinition;
@@ -70,8 +69,7 @@ public class LLVMRewriter implements Function<Module, Rewriter> {
             public RewriterResult execute(K k, Optional<Integer> depth) {
                 Module mod = def.executionModule();
                 ModuleToKORE converter = new ModuleToKORE(mod, files, def.topCellInitializer);
-                K kWithInjections = new ResolveOverloadedTerminators(mod).resolve(k);
-                kWithInjections = new AddSortInjections(mod).addInjections(kWithInjections);
+                K kWithInjections = new AddSortInjections(mod).addInjections(k);
                 converter.convert(kWithInjections);
                 String koreOutput = "[initial-configuration{}(" + converter.toString() + ")]\n\nmodule TMP\nendmodule []\n";
                 String defPath = files.resolveKompiled("definition.kore").getAbsolutePath();
