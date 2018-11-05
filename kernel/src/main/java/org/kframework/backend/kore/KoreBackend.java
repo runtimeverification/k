@@ -17,6 +17,7 @@ import org.kframework.compile.ResolveContexts;
 import org.kframework.compile.ResolveFreshConstants;
 import org.kframework.compile.ResolveFun;
 import org.kframework.compile.ResolveHeatCoolAttribute;
+import org.kframework.compile.ResolveOverloadedTerminators;
 import org.kframework.compile.ResolveSemanticCasts;
 import org.kframework.compile.ResolveStrict;
 import org.kframework.definition.Definition;
@@ -125,6 +126,7 @@ public class KoreBackend implements Backend {
                 .andThen(d -> Strategy.addStrategyRuleToMainModule(def.mainModule().name()).apply(d))
                 .andThen(ConcretizeCells::transformDefinition)
                 .andThen(subsortKItem)
+                .andThen(d -> DefinitionTransformer.fromKTransformer(new ResolveOverloadedTerminators(d.mainModule())::resolve, "resolve overloaded 0-ary productions").apply(d))
                 .andThen(Kompile::addSemanticsModule)
                 .apply(def);
     }
