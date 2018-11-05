@@ -44,7 +44,7 @@ public class ResolveOverloadedTerminators extends SetsTransformerWithErrors<Pars
             Production prod = candidates.iterator().next();
             prod = Production(prod.klabel(), prod.sort(), prod.items(), prod.att().add("originalPrd", Production.class, tc.production()));
             return super.apply(TermCons.apply(tc.items(), prod, tc.location(), tc.source()));
-        } 
+        }
         return super.apply(tc);
     }
 }
