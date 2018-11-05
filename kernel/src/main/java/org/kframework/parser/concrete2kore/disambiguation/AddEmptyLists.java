@@ -22,6 +22,7 @@ import org.kframework.utils.errorsystem.ParseFailedException;
 import org.pcollections.ConsPStack;
 import scala.Tuple2;
 import scala.util.Either;
+import scala.util.Left;
 import scala.util.Right;
 
 import java.util.ArrayList;
@@ -98,7 +99,12 @@ public class AddEmptyLists extends SetsGeneralTransformer<ParseFailedException, 
                             new KException(KException.ExceptionType.HIDDENWARNING, KException.KExceptionGroup.LISTS, msg, child.source().get(), child.location().get())));
                     newItems.add(child);
                 } else {
-                    UserList ul = lists.get(expectedSort).get(0);
+                    Set<Sort> least = subsorts.minimal(stream(listSorts).filter(s -> subsorts.greaterThanEq(lists.get(s).get(0).childSort, childSort) && subsorts.lessThanEq(s, expectedSort)).collect(Collectors.toList()));
+                    if (least.size() != 1) {
+                        KException ex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.INNER_PARSER, "Overloaded term does not have a least sort. Possible sorts: " + least, tc.source().orElse(null), tc.location().orElse(null));
+                        return new Tuple2<>(Left.apply(Sets.newHashSet(new ParseFailedException(ex))), warnings);
+                    }
+                    UserList ul = lists.get(least.iterator().next()).get(0);
                     TermCons terminator = TermCons.apply(ConsPStack.empty(), ul.pTerminator, child.location(), child.source());
                     // TermCons with PStack requires the elements to be in the reverse order
                     TermCons newTc = TermCons.apply(ConsPStack.from(Arrays.asList(terminator, child)), ul.pList, child.location(), child.source());
