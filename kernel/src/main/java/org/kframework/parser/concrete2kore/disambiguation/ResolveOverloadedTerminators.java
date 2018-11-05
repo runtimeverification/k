@@ -35,7 +35,7 @@ public class ResolveOverloadedTerminators extends SetsTransformerWithErrors<Pars
     @Override
     public Either<Set<ParseFailedException>, Term> apply(TermCons tc) {
         if (overloads.elements().contains(tc.production()) && tc.items().isEmpty()) {
-            Set<Production> candidates = stream(overloads.elements()).filter(p -> p.klabel().isDefined() && p.klabelAtt().equals(tc.production().klabelAtt())).collect(Collectors.toSet());
+            Set<Production> candidates = stream(overloads.elements()).filter(p -> p.klabel().isDefined() && p.klabelAtt().equals(tc.production().klabelAtt()) && overloads.lessThanEq(p, tc.production())).collect(Collectors.toSet());
             candidates = overloads.minimal(candidates);
             if (candidates.size() != 1) {
                 KException ex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.INNER_PARSER, "Overloaded term does not have a least sort. Possible sorts: " + candidates, tc.source().orElse(null), tc.location().orElse(null));
