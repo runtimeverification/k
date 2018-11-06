@@ -16,6 +16,7 @@ import org.kframework.attributes.Att;
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
+import org.kframework.compile.AddSortInjections;
 import org.kframework.compile.ConfigurationInfoFromModule;
 import org.kframework.compile.RewriteToTop;
 import org.kframework.definition.Module;
@@ -1242,6 +1243,9 @@ public class ModuleToKORE {
     public String toString() { return sb.toString(); }
 
     public void convert(K k) {
+        // injections should already be present, but this is an ugly hack to get around the
+        // cache persistence issue that means that Sort attributes on k terms might not be present.
+        k = new AddSortInjections(module).addInjections(k);
         new VisitK() {
             @Override
             public void apply(KApply k) {
