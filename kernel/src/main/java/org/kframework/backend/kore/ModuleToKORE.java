@@ -150,6 +150,12 @@ public class ModuleToKORE {
         impurities.addAll(ancestors(impurities, dependencies));
 
         sb.append("\n// symbols\n");
+        Set<Production> overloads = new HashSet<>();
+        for (Production lesser : iterable(module.overloads().elements())) {
+            for (Production greater : iterable(module.overloads().relations().get(lesser).getOrElse(() -> Collections.<Production>Set()))) {
+                overloads.add(greater);
+            }
+        }
         for (Production prod : iterable(module.productions())) {
             prod = computePolyProd(prod);
             if (prod.klabel().isEmpty()) {
@@ -176,7 +182,7 @@ public class ModuleToKORE {
             sb.append(") : ");
             convert(prod.sort(), prod);
             sb.append(" ");
-            convert(attributes, addKoreAttributes(prod, functionRules, impurities));
+            convert(attributes, addKoreAttributes(prod, functionRules, impurities, overloads));
             sb.append("\n");
         }
         sb.append("\n// generated axioms\n");
@@ -821,16 +827,16 @@ public class ModuleToKORE {
     private DirectedGraph<KLabel, Object> dependencies;
 
     private boolean isConstructor(Production prod, SetMultimap<KLabel, Rule> functionRules, Set<KLabel> impurities) {
-        Att att = addKoreAttributes(prod, functionRules, impurities);
+        Att att = addKoreAttributes(prod, functionRules, impurities, java.util.Collections.emptySet());
         return att.contains("constructor");
     }
 
     private boolean isFunctional(Production prod, SetMultimap<KLabel, Rule> functionRules, Set<KLabel> impurities) {
-        Att att = addKoreAttributes(prod, functionRules, impurities);
+        Att att = addKoreAttributes(prod, functionRules, impurities, java.util.Collections.emptySet());
         return att.contains("functional");
     }
 
-    private Att addKoreAttributes(Production prod, SetMultimap<KLabel, Rule> functionRules, Set<KLabel> impurities) {
+    private Att addKoreAttributes(Production prod, SetMultimap<KLabel, Rule> functionRules, Set<KLabel> impurities, Set<Production> overloads) {
         boolean isConstructor = !isFunction(prod);
         boolean isFunctional = !isFunction(prod);
         if (prod.att().contains(Attribute.ASSOCIATIVE_KEY) ||
@@ -850,6 +856,9 @@ public class ModuleToKORE {
         }
         if (isFunctional) {
             att = att.add("functional");
+        }
+        if (overloads.contains(prod)) {
+            att = att.add("anywhere");
         }
         return att;
     }
