@@ -119,6 +119,7 @@ public class ModuleToKORE {
                     if (att.get(Attribute.HOOK_KEY).equals("ARRAY.Array")) {
                         att = att.remove("element");
                         att = att.remove("unit");
+                        att = att.remove(Attribute.HOOK_KEY);
                     } else {
                         Production concatProd = stream(module.productionsForSort().apply(sort)).filter(p -> p.att().contains("element")).findAny().get();
                         att = att.add("element", K.class, KApply(KLabel(concatProd.att().get("element"))));
@@ -848,6 +849,9 @@ public class ModuleToKORE {
             }
         }
         Att att = prod.att().remove("constructor");
+        if (att.contains(Attribute.HOOK_KEY) && att.get(Attribute.HOOK_KEY).startsWith("ARRAY.")) {
+            att = att.remove("hook");
+        }
         if (isConstructor) {
             att = att.add("constructor");
         }
