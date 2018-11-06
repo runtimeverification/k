@@ -1,7 +1,5 @@
 #!/bin/sh
+
 opam init -y
-opam repository add k "$(dirname "$0")/../lib/opam" \
- || opam repository set-url k "$(dirname "$0")/../lib/opam"
-opam update
-opam switch 4.03.0+k$1
+"$(dirname "$0")/k-configure-opam-common"
 opam install -y mlgmp zarith uuidm
