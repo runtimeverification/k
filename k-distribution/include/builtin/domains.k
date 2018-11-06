@@ -25,7 +25,6 @@ module ARRAY-SYNTAX
   imports LIST
 
   syntax Array [hook(ARRAY.Array), unit(arrayCtor), element(_[_<-_])]
-  syntax Array ::= makeArray(Int, KItem) [function, hook(ARRAY.make), impure]
 
   syntax KItem ::= Array "[" Int "]" [function, hook(ARRAY.lookup)]
   syntax Array ::= Array "[" Int "<-" KItem "]" [function, hook(ARRAY.update), klabel(_[_<-_]), symbol]
@@ -45,6 +44,7 @@ module ARRAY-CONCRETE [concrete, kast]
 
   syntax Array ::= makeEmptyArray(Int) [function, hook(ARRAY.makeEmpty), impure]
                  | arrayCtor(String, Int) [function, hook(ARRAY.ctor), symbol]
+                 | makeArray(Int, KItem) [function, hook(ARRAY.make), impure, klabel(makeArrayOcaml)]
 endmodule
 
 module ARRAY-SYMBOLIC [symbolic]
@@ -57,30 +57,30 @@ endmodule
 
 module ARRAY-IN-K
   imports ARRAY-SYNTAX
-  imports MAP
+  imports LIST
+  imports K-EQUAL
   imports INT
 
-  syntax Array ::= array(Map, Int, KItem)
+  syntax Array ::= makeArray(Int, KItem) [function, hook(ARRAY.make)]
 
-  rule makeArray(Len:Int, K:KItem) => array(.Map, Len, K)
+  syntax Array ::= arr(List, Int, KItem)
 
-  rule array(_ I |-> K:KItem, _, _) [ I:Int ] => K
-  rule array(M:Map, _, K:KItem) [ I:Int ] => K requires notBool I in_keys(M)
+  rule makeArray(I::Int, D::KItem) => arr(.List, I, D)
 
-  rule array(M:Map, Len:Int, K:KItem) [ I:Int <- K2:KItem ] => array(M [ I <- K2 ], Len, K)
-       requires I >=Int 0 andBool I <Int Len
-  rule array(M:Map, Len:Int, K:KItem) [ I:Int <- _ ] => array(M, Len, K)
-       requires I<Int 0 orBool I >=Int Len
-  rule array(M:Map, Len:Int, K:KItem) [ I:Int <- undef ] => array(M [ I <- undef ], Len, K)
+  rule arr(L::List, _, D::KItem) [ IDX::Int ] => #if IDX >=Int size(L) #then D #else L[IDX] #fi
 
-  rule updateArray(array(M:Map, Len:Int, K:KItem), _, .List) => array(M, Len, K)
-  rule updateArray(array(M:Map, Len:Int, K:KItem), I:Int, ListItem(K2:KItem) L:List) => updateArray(array(M, Len, K) [ I <- K2 ], I +Int 1, L)
+  syntax List ::= ensureOffsetList(List, Int, KItem) [function]
+  rule ensureOffsetList(L::List, IDX::Int, D::KItem) => #if IDX >=Int size(L) #then updateList(makeList(IDX +Int 1, D), 0, L) #else L #fi
 
-  rule fillArray(array(M:Map, Len:Int, K:KItem), _, 0, _) => array(M, Len, K)
-  rule fillArray(array(M:Map, Len:Int, K:KItem), I:Int, N:Int, K2:KItem) => fillArray(array(M, Len, K) [ I <- K2 ], I +Int 1, N -Int 1, K2)
-       requires N >Int 0
+  rule arr(L::List, I::Int, D::KItem) [ IDX::Int <- VAL::KItem ] => arr(ensureOffsetList(L, IDX, D) [ IDX <- VAL ], I, D)
 
-  rule I:Int in_keys(array(M:Map, _, _)) => I in_keys(M)
+  rule arr(L::List, I::Int, D::KItem) [ IDX::Int <- undef ] => arr(L, I, D) [ IDX <- D ]
+
+  rule updateArray(arr(L::List, I::Int, D::KItem), IDX::Int, L2::List) => arr(updateList(ensureOffsetList(L, IDX +Int size(L2) -Int 1, D), IDX, L2), I, D)
+
+  rule fillArray(arr(L::List, I::Int, D::KItem), IDX::Int, LEN::Int, VAL::KItem) => arr(fillList(ensureOffsetList(L, IDX +Int LEN -Int 1, D), IDX, LEN, VAL), I, D)
+
+  rule IDX::Int in_keys(arr(_, I::Int, _)) => IDX >=Int 0 andBool IDX <Int I
 endmodule
 
 module ARRAY
@@ -247,6 +247,14 @@ module LIST
    beginning (0 is the first element), and negative indices mean from the end
    (-1 is the last element). */
   syntax KItem ::= List "[" Int "]"           [function, hook(LIST.get), klabel(List:get), symbol]
+
+  syntax List ::= List "[" Int "<-" KItem "]" [function, hook(LIST.update), klabel(List:set)]
+
+  syntax List ::= makeList(Int, KItem) [function, hook(LIST.make)]
+
+  syntax List ::= updateList(List, Int, List) [function, hook(LIST.updateAll)]
+
+  syntax List ::= fillList(List, Int, Int, KItem) [function, hook(LIST.fill)]
 
   /*@ Remove elements from the beginning and the end of the List. */
   syntax List ::= range(List, Int, Int)   [function, hook(LIST.range), klabel(List:range), symbol]
