@@ -160,9 +160,16 @@ public class HaskellRewriter implements Function<Module, Rewriter> {
                 if (patternCondition.equals(TRUE)) {
                     patternConditionKore = "\\top{Sort" + initializerSort.name() + "{}}()";
                 } else {
-                    patternConditionKore = getKoreString(patternCondition, mod, new ModuleToKORE(mod, files, def.topCellInitializer));
+                    patternConditionKore =
+                            "\\equals{SortBool{},Sort" + initializerSort.name() + "{}}("
+                            + getKoreString(patternCondition, mod, new ModuleToKORE(mod, files, def.topCellInitializer))
+                            + ", \\dv{SortBool{}}(\"true\")"
+                            + ")";
                 }
-                String korePatternOutput = "\\and{Sort" + initializerSort.name() + "{}}(" + patternTermKore + ", " + patternConditionKore + ")";
+                String korePatternOutput = "\\and{Sort" + initializerSort.name() + "{}}("
+                        + patternTermKore
+                        + ", " + patternConditionKore
+                        + ")";
                 String defPath = files.resolveKompiled("definition.kore").getAbsolutePath();
                 String moduleName = mod.name();
                 if (haskellKRunOptions.dryRun) {

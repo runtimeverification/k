@@ -30,6 +30,7 @@ public class KLabels {
     public static final KLabel ML_TRUE = KLabel("#True");
     public static final KLabel ML_OR = KLabel("#Or");
     public static final KLabel ML_AND = KLabel("#And");
+    public static final KLabel ML_CEIL = KLabel("#Ceil");
     public static final KLabel ML_EQUALS = KLabel("#Equals");
 
     public static final KLabel ListItem = KLabel("ListItem");
