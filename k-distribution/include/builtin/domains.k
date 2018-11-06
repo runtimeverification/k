@@ -38,7 +38,7 @@ module ARRAY-SYNTAX
   syntax Bool ::= Int "in_keys" "(" Array ")" [function, functional, hook(ARRAY.in_keys)]
 endmodule
 
-module ARRAY-CONCRETE [concrete]
+module ARRAY-CONCRETE [concrete, kast]
   imports ARRAY-SYNTAX
   imports LIST
   imports STRING-SYNTAX
@@ -48,6 +48,14 @@ module ARRAY-CONCRETE [concrete]
 endmodule
 
 module ARRAY-SYMBOLIC [symbolic]
+  imports ARRAY-IN-K
+endmodule
+
+module ARRAY-KORE [kore]
+  imports ARRAY-IN-K
+endmodule
+
+module ARRAY-IN-K
   imports ARRAY-SYNTAX
   imports MAP
   imports INT
@@ -78,6 +86,7 @@ endmodule
 module ARRAY
   imports ARRAY-CONCRETE
   imports ARRAY-SYMBOLIC
+  imports ARRAY-KORE
 endmodule
 
 module MAP
@@ -709,7 +718,7 @@ module ID
   rule freshId(I:Int) => String2Id("_" +String Int2String(I))
 endmodule
 
-module ID-SYMBOLIC [symbolic]
+module ID-SYMBOLIC [symbolic, kast]
   imports ID-SYNTAX
   syntax KItem  ::= "#parseToken"  "(" String "," String ")"  [function, hook(STRING.parseToken)]
   rule String2Id(S:String) => {#parseToken("Id", S)}:>Id

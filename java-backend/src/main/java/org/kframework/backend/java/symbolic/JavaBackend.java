@@ -32,7 +32,9 @@ import org.kframework.utils.file.FileUtil;
 import scala.Option;
 
 import static org.kframework.definition.Constructors.*;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
@@ -102,7 +104,7 @@ public class JavaBackend implements Backend {
                 .andThen(DefinitionTransformer.fromSentenceTransformer(JavaBackend::markSingleVariables, "mark single variables"))
                 .andThen(DefinitionTransformer.from(new AssocCommToAssoc(), "convert AC matching to A matching"))
                 .andThen(DefinitionTransformer.from(new MergeRules(), "merge rules into one rule with or clauses"))
-                .apply(Kompile.defaultSteps(kompileOptions, kem, files, excludedModuleTags()).apply(d));
+                .apply(Kompile.defaultSteps(kompileOptions, kem, files).apply(d));
              // .andThen(KoreToMiniToKore::apply) // for serialization/deserialization test
     }
 
@@ -203,6 +205,6 @@ public class JavaBackend implements Backend {
 
     @Override
     public Set<String> excludedModuleTags() {
-        return java.util.Collections.singleton("concrete");
+        return new HashSet<>(Arrays.asList("concrete", "kore"));
     }
 }
