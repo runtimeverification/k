@@ -126,6 +126,6 @@ public class KompileOptions implements Serializable {
         public boolean koreProve = false;
 
         @Parameter(names="--cache-file", description="Location of parse cache file. Default is $KOMPILED_DIR/cache.bin.")
-        public File cacheFile = null;
+        public String cacheFile;
     }
 }
