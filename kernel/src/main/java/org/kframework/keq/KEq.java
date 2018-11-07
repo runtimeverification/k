@@ -1,3 +1,4 @@
+// Copyright (c) 2014-2018 K Team. All Rights Reserved.
 package org.kframework.keq;
 
 import org.kframework.compile.Backend;
@@ -35,11 +36,11 @@ public class KEq {
             Function<Module, Rewriter> gen2) {
         Rewriter commonRewriter = commonGen.apply(commonDef.executionModule());
 
-        Tuple2<Definition, Module> compiled1 = KProve.getProofDefinition(files.resolveWorkingDirectory(keqOptions.spec1), keqOptions.defModule1, keqOptions.specModule1, def1, backend, keqOptions.global, files, kem, sw);
+        Tuple2<Definition, Module> compiled1 = KProve.getProofDefinition(files.resolveWorkingDirectory(keqOptions.spec1), keqOptions.defModule1, keqOptions.specModule1, def1, backend, files, kem, sw);
         Rewriter rewriter1 = gen1.apply(compiled1._1().mainModule());
         Module spec1 = compiled1._2();
 
-        Tuple2<Definition, Module> compiled2 = KProve.getProofDefinition(files.resolveWorkingDirectory(keqOptions.spec2), keqOptions.defModule2, keqOptions.specModule2, def2, backend, keqOptions.global, files, kem, sw);
+        Tuple2<Definition, Module> compiled2 = KProve.getProofDefinition(files.resolveWorkingDirectory(keqOptions.spec2), keqOptions.defModule2, keqOptions.specModule2, def2, backend, files, kem, sw);
         Rewriter rewriter2 = gen2.apply(compiled2._1().mainModule());
         Module spec2 = compiled2._2();
 
