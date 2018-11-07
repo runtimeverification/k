@@ -502,6 +502,10 @@ struct
   let hook_size c _ _ _ _ = match c with
       [List (_,_,l)] -> [Int (Z.of_int (List.length l))]
     | _ -> raise Not_implemented
+  let hook_make _ _ _ _ _ = raise Not_implemented
+  let hook_updateAll _ _ _ _ _ = raise Not_implemented
+  let hook_fill _ _ _ _ _ = raise Not_implemented
+  let hook_update _ _ _ _ _ = raise Not_implemented
 end
 
 module ARRAY =
