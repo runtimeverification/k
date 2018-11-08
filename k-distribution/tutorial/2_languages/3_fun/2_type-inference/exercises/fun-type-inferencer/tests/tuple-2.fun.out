@@ -1,1 +1,1 @@
-V ==K ( ( int , ( int , .TypeVars ) wrapper , .TypeVars ) pair , ( int , int , .TypeVars ) pair , .TypeVars ) pair
+V ==K ( ( int , ( int , .Bottoms ) wrapper , .Bottoms ) pair , ( int , int , .Bottoms ) pair , .Bottoms ) pair
