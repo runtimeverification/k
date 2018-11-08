@@ -37,8 +37,10 @@ class TreeNodesToKORE(parseSort: java.util.function.Function[String, Sort], stri
         case NonTerminal(sort, Some(x)) => map.getOrElse(x, anonVar(sort))
       }
       KApply(p.klabel.get, KList(realItems.asJava), locationToAtt(t.location, t.source).add(classOf[Production], realProd))
-    } else
-      KApply(p.klabel.get, KList(new util.ArrayList(items).asScala.reverse map apply asJava), locationToAtt(t.location, t.source).add(classOf[Production], p))
+    } else {
+      val realProd = if (p.att.contains("originalPrd", classOf[Production])) p.att.get("originalPrd", classOf[Production]) else p
+      KApply(p.klabel.get, KList(new util.ArrayList(items).asScala.reverse map apply asJava), locationToAtt(t.location, t.source).add(classOf[Production], realProd))
+    }
   }
 
   def down(t: K): K = t match {

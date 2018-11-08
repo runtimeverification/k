@@ -187,11 +187,16 @@ public class ParseInModule implements Serializable {
             return rez2;
         warn = rez2._2();
 
-        rez3 = new PushAmbiguitiesDownAndPreferAvoid(disambModule.overloads()).apply(rez2._1().right().get());
+        rez = new ResolveOverloadedTerminators(disambModule.overloads()).apply(rez2._1().right().get());
+        if (rez.isLeft())
+            return new Tuple2<>(rez, warn);
+        rez3 = new PushAmbiguitiesDownAndPreferAvoid(disambModule.overloads()).apply(rez.right().get());
         rez2 = new AmbFilter(strict && inferSortChecks).apply(rez3);
         warn = Sets.union(rez2._2(), warn);
         rez2 = new AddEmptyLists(disambModule).apply(rez2._1().right().get());
         warn = Sets.union(rez2._2(), warn);
+        if (rez2._1().isLeft())
+            return rez2;
         rez3 = new RemoveBracketVisitor().apply(rez2._1().right().get());
 
         return new Tuple2<>(Right.apply(rez3), warn);

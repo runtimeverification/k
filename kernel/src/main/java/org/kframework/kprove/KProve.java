@@ -3,7 +3,6 @@ package org.kframework.kprove;
 
 import com.google.inject.Inject;
 import org.apache.commons.io.FilenameUtils;
-import org.kframework.attributes.Att;
 import org.kframework.compile.*;
 import org.kframework.definition.*;
 import org.kframework.definition.Module;
@@ -11,9 +10,6 @@ import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.Kompile;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
-import org.kframework.krun.KRun;
-import org.kframework.main.GlobalOptions;
-import org.kframework.main.Main;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.unparser.KPrint;
 import org.kframework.utils.Stopwatch;
@@ -22,15 +18,10 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import scala.Option;
 import scala.Tuple2;
-import scala.collection.Set;
 
 import java.io.File;
 import java.util.*;
 import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-
-import static org.kframework.Collections.*;
 
 
 /**
@@ -52,7 +43,7 @@ public class KProve {
     }
 
     public int run(KProveOptions options, CompiledDefinition compiledDefinition, Backend backend, Function<Module, Rewriter> rewriterGenerator) {
-        Tuple2<Definition, Module> compiled = getProofDefinition(options.specFile(files), options.defModule, options.specModule, compiledDefinition, backend, options.global, files, kem, sw);
+        Tuple2<Definition, Module> compiled = getProofDefinition(options.specFile(files), options.defModule, options.specModule, compiledDefinition, backend, files, kem, sw);
         Rewriter rewriter = rewriterGenerator.apply(compiled._1().mainModule());
         Module specModule = compiled._2();
 
@@ -85,8 +76,8 @@ public class KProve {
         }
     });
 
-    public static Tuple2<Definition, Module> getProofDefinition(File proofFile, String defModuleName, String specModuleName, CompiledDefinition compiledDefinition, Backend backend, GlobalOptions options, FileUtil files, KExceptionManager kem, Stopwatch sw) {
-        Kompile kompile = new Kompile(compiledDefinition.kompileOptions, options, files, kem, sw, true);
+    public static Tuple2<Definition, Module> getProofDefinition(File proofFile, String defModuleName, String specModuleName, CompiledDefinition compiledDefinition, Backend backend, FileUtil files, KExceptionManager kem, Stopwatch sw) {
+        Kompile kompile = new Kompile(compiledDefinition.kompileOptions, files, kem, sw, true);
         if (defModuleName == null) {
             defModuleName = compiledDefinition.kompiledDefinition.mainModule().name();
         }
