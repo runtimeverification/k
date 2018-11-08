@@ -495,7 +495,7 @@ module STRING
   syntax String ::= chrChar ( Int )      [function, hook(STRING.chr)]
   syntax Int ::= ordChar ( String )      [function, hook(STRING.ord)]
 
-  syntax String ::= substrString ( String , Int , Int ) [function, hook(STRING.substr)]
+  syntax String ::= substrString ( String , Int , Int ) [function, functional, hook(STRING.substr)]
   syntax Int ::= findString ( String , String , Int )   [function, hook(STRING.find)]
   syntax Int ::= rfindString ( String , String , Int )  [function, hook(STRING.rfind)]
   syntax Int ::= findChar ( String , String , Int )     [function, hook(STRING.findChar)]
