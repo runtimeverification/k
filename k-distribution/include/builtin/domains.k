@@ -512,7 +512,7 @@ module STRING
   syntax String ::= chrChar ( Int )      [function, hook(STRING.chr)]
   syntax Int ::= ordChar ( String )      [function, hook(STRING.ord)]
 
-  syntax String ::= substrString ( String , Int , Int ) [function, hook(STRING.substr)]
+  syntax String ::= substrString ( String , Int , Int ) [function, functional, hook(STRING.substr)]
   syntax Int ::= findString ( String , String , Int )   [function, hook(STRING.find)]
   syntax Int ::= rfindString ( String , String , Int )  [function, hook(STRING.rfind)]
   syntax Int ::= findChar ( String , String , Int )     [function, hook(STRING.findChar)]
@@ -760,7 +760,9 @@ module K-REFLECTION
   syntax String ::= #sort(K) [function, hook(KREFLECTION.sort)]
   syntax KItem ::= #fresh(String)   [function, hook(KREFLECTION.fresh), impure]
   syntax KItem ::= getKLabel(K)  [function, hook(KREFLECTION.getKLabel)]
+  syntax String ::= #getKLabelString(K)  [function, hook(KREFLECTION.getKLabelString)]
   syntax Bool ::= #isConcrete(K) [function, hook(KREFLECTION.isConcrete)]
+  syntax Bool ::= #isVariable(K) [function, hook(KREFLECTION.isVariable)]
 
   syntax String ::= #getenv(String) [function, impure, hook(KREFLECTION.getenv)]
 
