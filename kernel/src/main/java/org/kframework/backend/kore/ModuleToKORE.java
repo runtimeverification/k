@@ -8,6 +8,10 @@ import com.google.common.collect.SetMultimap;
 import com.google.common.collect.Sets;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
+import org.kframework.Collections;
+import org.kframework.Collections;
+import org.kframework.Collections;
+import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.KLabels;
@@ -146,6 +150,12 @@ public class ModuleToKORE {
         impurities.addAll(ancestors(impurities, dependencies));
 
         sb.append("\n// symbols\n");
+        Set<Production> overloads = new HashSet<>();
+        for (Production lesser : iterable(module.overloads().elements())) {
+            for (Production greater : iterable(module.overloads().relations().get(lesser).getOrElse(() -> Collections.<Production>Set()))) {
+                overloads.add(greater);
+            }
+        }
         for (Production prod : iterable(module.productions())) {
             prod = computePolyProd(prod);
             if (prod.klabel().isEmpty()) {
@@ -172,7 +182,7 @@ public class ModuleToKORE {
             sb.append(") : ");
             convert(prod.sort(), prod);
             sb.append(" ");
-            convert(attributes, addKoreAttributes(prod, functionRules, impurities));
+            convert(attributes, addKoreAttributes(prod, functionRules, impurities, overloads));
             sb.append("\n");
         }
         sb.append("\n// generated axioms\n");
@@ -464,6 +474,51 @@ public class ModuleToKORE {
                 sb.append(" (TODO: fix bug with \\dv)");
             }
             sb.append("\n");
+        }
+        for (Production lesser : iterable(module.overloads().elements())) {
+            for (Production greater : iterable(module.overloads().relations().get(lesser).getOrElse(() -> Collections.<Production>Set()))) {
+                sb.append("  axiom{R} \\equals{");
+                convert(greater.sort(), greater);
+                sb.append(", R} (");
+                convert(greater.klabel().get(), greater);
+                sb.append("(");
+                String conn = "";
+                for (int i = 0; i < greater.nonterminals().size(); i++) {
+                    sb.append(conn);
+                    if (greater.nonterminal(i).sort().equals(lesser.nonterminal(i).sort())) {
+                        sb.append("K").append(i).append(":");
+                        convert(greater.nonterminal(i).sort(), greater);
+                    } else {
+                        sb.append("inj{");
+                        convert(lesser.nonterminal(i).sort(), lesser);
+                        sb.append(", ");
+                        convert(greater.nonterminal(i).sort(), greater);
+                        sb.append("} (K").append(i).append(":");
+                        convert(lesser.nonterminal(i).sort(), lesser);
+                        sb.append(")");
+                    }
+                    conn = ",";
+                }
+                sb.append("), inj{");
+                convert(lesser.sort(), lesser);
+                sb.append(", ");
+                convert(greater.sort(), greater);
+                sb.append("} (");
+                convert(lesser.klabel().get(), lesser);
+                sb.append("(");
+                conn = "";
+                for (int i = 0; i < lesser.nonterminals().size(); i++) {
+                    sb.append(conn);
+                    sb.append("K").append(i).append(":");
+                    convert(lesser.nonterminal(i).sort(), lesser);
+                    conn = ",";
+                }
+                sb.append("))) [overload{}(");
+                convert(greater.klabel().get(), greater);
+                sb.append("(), ");
+                convert(lesser.klabel().get(), lesser);
+                sb.append("())] // overloaded production\n");
+            }
         }
         sb.append("\n// rules\n");
         for (Rule rule : iterable(module.rules())) {
@@ -772,16 +827,16 @@ public class ModuleToKORE {
     private DirectedGraph<KLabel, Object> dependencies;
 
     private boolean isConstructor(Production prod, SetMultimap<KLabel, Rule> functionRules, Set<KLabel> impurities) {
-        Att att = addKoreAttributes(prod, functionRules, impurities);
+        Att att = addKoreAttributes(prod, functionRules, impurities, java.util.Collections.emptySet());
         return att.contains("constructor");
     }
 
     private boolean isFunctional(Production prod, SetMultimap<KLabel, Rule> functionRules, Set<KLabel> impurities) {
-        Att att = addKoreAttributes(prod, functionRules, impurities);
+        Att att = addKoreAttributes(prod, functionRules, impurities, java.util.Collections.emptySet());
         return att.contains("functional");
     }
 
-    private Att addKoreAttributes(Production prod, SetMultimap<KLabel, Rule> functionRules, Set<KLabel> impurities) {
+    private Att addKoreAttributes(Production prod, SetMultimap<KLabel, Rule> functionRules, Set<KLabel> impurities, Set<Production> overloads) {
         boolean isConstructor = !isFunction(prod);
         boolean isFunctional = !isFunction(prod);
         if (prod.att().contains(Attribute.ASSOCIATIVE_KEY) ||
@@ -801,6 +856,9 @@ public class ModuleToKORE {
         }
         if (isFunctional) {
             att = att.add("functional");
+        }
+        if (overloads.contains(prod)) {
+            att = att.add("anywhere");
         }
         return att;
     }

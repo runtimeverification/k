@@ -86,7 +86,7 @@ class KoreToK (headToLabel_ : java.util.Properties, sortAtt : Map[k.Sort, Att], 
     case kore.Rewrites(s, p, q) =>
       KORE.KRewrite(apply(p), apply(q))
     case kore.Ceil(s, rs, p) =>
-      throw new TranslationError("Ceil patterns currently unsupported")
+      KORE.KApply(KLabels.ML_CEIL, apply(p))
     case kore.Floor(s, rs, p) =>
       throw new TranslationError("Floor patterns currently unsupported")
     case kore.Equals(s1, s2, p, q) =>

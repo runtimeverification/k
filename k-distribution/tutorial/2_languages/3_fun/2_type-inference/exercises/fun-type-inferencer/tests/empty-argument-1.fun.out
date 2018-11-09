@@ -1,1 +1,1 @@
-V ==K ( .TypeVars ) nothing --> int
+V ==K ( .Bottoms ) nothing --> int

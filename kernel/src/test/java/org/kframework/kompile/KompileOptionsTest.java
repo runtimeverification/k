@@ -46,26 +46,12 @@ public class KompileOptionsTest {
         new JCommander(options, args);
         options.outerParsing.mainDefinitionFile(files);
         options.mainModule(files);
-        options.docStyle();
         options.syntaxModule(files);
     }
 
     @Test(expected=KEMException.class)
     public void testNoDefinition() throws Exception {
         parse();
-    }
-
-    @Test
-    public void testHtmlDocStyle() {
-        parse("--backend", "html", "foo.k");
-        assertEquals(Backends.HTML, options.backend);
-        assertEquals("k-definition.css", options.docStyle());
-    }
-
-    @Test
-    public void testDocStylePlus() {
-        parse("--doc-style", "+foo", "foo.k");
-        assertEquals("poster,style=bubble,foo", options.docStyle());
     }
 
     @Test

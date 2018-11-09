@@ -1,0 +1,18 @@
+opam repository add k "$(dirname "$0")/../lib/opam" \
+ || opam repository set-url k "$(dirname "$0")/../lib/opam"
+opam update
+
+OCAML_VERSION="4.03.1+k$1"
+case "$(opam --version)" in
+1.*)
+	echo Detected Opam version 1
+	opam switch "$OCAML_VERSION"
+	;;
+2.*)
+	echo Detected Opam version 2
+	opam switch create "$OCAML_VERSION" --repositories k,default
+	;;
+*)
+	echo Unknown version of Opam
+esac
+
