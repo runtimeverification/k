@@ -8,6 +8,7 @@ import org.kframework.backend.java.symbolic.Equality.EqualityOperations;
 import org.kframework.backend.java.symbolic.JavaExecutionOptions;
 import org.kframework.backend.java.symbolic.SMTOperations;
 import org.kframework.backend.java.symbolic.Stage;
+import org.kframework.backend.java.util.FormulaSimplificationCache;
 import org.kframework.backend.java.util.Profiler2;
 import org.kframework.backend.java.util.StateLog;
 import org.kframework.backend.java.util.Z3Wrapper;
@@ -41,6 +42,7 @@ public class GlobalContext implements Serializable {
     public final StateLog stateLog;
     public final PrettyPrinter prettyPrinter;
     public final transient FunctionCache functionCache = new FunctionCache();
+    public final transient FormulaSimplificationCache formulaCache = new FormulaSimplificationCache();
 
     private boolean isExecutionPhase = true;
 
