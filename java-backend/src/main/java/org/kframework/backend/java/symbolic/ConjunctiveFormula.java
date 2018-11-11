@@ -396,11 +396,25 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
         return simplify(true, true, context, false);
     }
 
+    private ConjunctiveFormula simplify(boolean patternFolding, boolean partialSimplification,
+                                        TermContext context, boolean logFailures) {
+        ConjunctiveFormula cachedResult = global.formulaCache
+                .cacheGet(this, patternFolding, partialSimplification, context);
+        if (cachedResult != null) {
+            return cachedResult;
+        }
+
+        ConjunctiveFormula result = simplifyImpl(patternFolding, partialSimplification, context, logFailures);
+        global.formulaCache.cachePut(this, patternFolding, partialSimplification, context, result);
+        return result;
+    }
+
     /**
      * Simplifies this conjunctive formula as much as possible.
      * Decomposes equalities by using unification.
      */
-    private ConjunctiveFormula simplify(boolean patternFolding, boolean partialSimplification, TermContext context, boolean logFailures) {
+    private ConjunctiveFormula simplifyImpl(boolean patternFolding, boolean partialSimplification, TermContext context,
+                                            boolean logFailures) {
         assert !isFalse();
         ConjunctiveFormula originalTopConstraint = context.getTopConstraint();
         Substitution<Variable, Term> substitution = this.substitution;
