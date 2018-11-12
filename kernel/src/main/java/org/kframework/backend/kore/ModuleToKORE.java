@@ -16,6 +16,7 @@ import org.kframework.attributes.Att;
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
+import org.kframework.compile.AddSortInjections;
 import org.kframework.compile.ConfigurationInfoFromModule;
 import org.kframework.compile.RewriteToTop;
 import org.kframework.definition.Module;
@@ -114,17 +115,20 @@ public class ModuleToKORE {
             sb.append("  ");
             Att att = module.sortAttributesFor().get(sort).getOrElse(() -> KORE.Att());
             if (att.contains(Attribute.HOOK_KEY)) {
-                sb.append("hooked-");
                 if (collectionSorts.contains(att.get(Attribute.HOOK_KEY))) {
                     if (att.get(Attribute.HOOK_KEY).equals("ARRAY.Array")) {
-                        att = att.remove("element").add("element", K.class, KApply(KLabel(att.get("element"))));
-                        att = att.remove("unit").add("unit", K.class, KApply(KLabel(att.get("unit"))));
+                        att = att.remove("element");
+                        att = att.remove("unit");
+                        att = att.remove(Attribute.HOOK_KEY);
                     } else {
                         Production concatProd = stream(module.productionsForSort().apply(sort)).filter(p -> p.att().contains("element")).findAny().get();
                         att = att.add("element", K.class, KApply(KLabel(concatProd.att().get("element"))));
                         att = att.add("concat", K.class, KApply(concatProd.klabel().get()));
                         att = att.add("unit", K.class, KApply(KLabel(concatProd.att().get("unit"))));
+                        sb.append("hooked-");
                     }
+                } else {
+                    sb.append("hooked-");
                 }
             }
             sb.append("sort ");
@@ -165,7 +169,7 @@ public class ModuleToKORE {
                 impureFunctions.add(prod.klabel().get().name());
             }
             sb.append("  ");
-            if (isFunction(prod) && prod.att().contains(Attribute.HOOK_KEY)) {
+            if (isFunction(prod) && prod.att().contains(Attribute.HOOK_KEY) && !prod.att().get(Attribute.HOOK_KEY).startsWith("ARRAY.")) {
                 sb.append("hooked-");
             }
             sb.append("symbol ");
@@ -851,6 +855,9 @@ public class ModuleToKORE {
             }
         }
         Att att = prod.att().remove("constructor");
+        if (att.contains(Attribute.HOOK_KEY) && att.get(Attribute.HOOK_KEY).startsWith("ARRAY.")) {
+            att = att.remove("hook");
+        }
         if (isConstructor) {
             att = att.add("constructor");
         }
@@ -1251,6 +1258,9 @@ public class ModuleToKORE {
     public String toString() { return sb.toString(); }
 
     public void convert(K k) {
+        // injections should already be present, but this is an ugly hack to get around the
+        // cache persistence issue that means that Sort attributes on k terms might not be present.
+        k = new AddSortInjections(module).addInjections(k);
         new VisitK() {
             @Override
             public void apply(KApply k) {

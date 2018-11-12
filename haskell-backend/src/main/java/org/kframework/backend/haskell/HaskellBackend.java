@@ -8,7 +8,10 @@ import org.kframework.kompile.KompileOptions;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 
+import java.util.Arrays;
+import java.util.Set;
 import java.util.EnumSet;
+import java.util.HashSet;
 
 import static org.kframework.compile.ResolveHeatCoolAttribute.Mode.*;
 
@@ -29,4 +32,8 @@ public class HaskellBackend extends KoreBackend {
         files.saveToKompiled("definition.kore", kore);
     }
 
+    @Override
+    public Set<String> excludedModuleTags() {
+        return new HashSet<>(Arrays.asList("concrete", "kast"));
+    }
 }
