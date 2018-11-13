@@ -38,7 +38,7 @@ public class SMTOptions implements Serializable {
     @Parameter(names="--maps-as-int-array", description="Abstracts map values as an array of ints.")
     public boolean mapAsIntArray = false;
 
-    @Parameter(names="--smt_prelude", description="Path to the SMT prelude file.")
+    @Parameter(names={"--smt-prelude", "--smt_prelude"}, description="Path to the SMT prelude file.")
     public String smtPrelude;
 
     @Parameter(names="--z3-executable", description="Invokes Z3 as an external process.")

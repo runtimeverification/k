@@ -10,8 +10,11 @@ import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class LLVMBackend extends KoreBackend {
 
@@ -52,4 +55,8 @@ public class LLVMBackend extends KoreBackend {
         }
     }
 
+    @Override
+    public Set<String> excludedModuleTags() {
+        return new HashSet<>(Arrays.asList("symbolic", "kast"));
+    }
 }

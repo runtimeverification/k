@@ -121,8 +121,11 @@ public class AddSortInjections {
     private K visitChildren(K term, Sort parentSort, Sort actualSort) {
         Att att = term.att().add(Sort.class, actualSort);
         if (term instanceof KApply) {
-            Production prod = production((KApply)term);
             KApply kapp = (KApply)term;
+            if (kapp.klabel().name().equals("inj")) {
+                return term;
+            }
+            Production prod = production(kapp);
             List<K> children = new ArrayList<>();
             Set<Integer> polyPositions = Collections.emptySet();
             if (prod.att().contains("poly")) {
@@ -133,7 +136,7 @@ public class AddSortInjections {
                     }
                 }
             }
-            for (int i = 0; i < prod.arity(); i++) {
+            for (int i = 0; i < kapp.items().size(); i++) {
                 Sort expectedSort = prod.nonterminal(i).sort();
                 if (polyPositions.contains(i + 1)) {
                     expectedSort = actualSort;
