@@ -37,6 +37,7 @@ public class LLVMBackend extends KoreBackend {
         args.add("llvm-kompile");
         args.add("definition.kore");
         args.add(def.kompiledDefinition.mainModule().name());
+        args.add("main");
         args.add("-o");
         args.add("interpreter");
         args.addAll(options.ccopts);
