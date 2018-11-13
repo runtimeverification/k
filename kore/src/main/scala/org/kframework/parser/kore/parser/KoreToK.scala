@@ -26,7 +26,8 @@ class KoreToK (headToLabel_ : java.util.Properties, sortAtt : Map[k.Sort, Att], 
         if (params.length != 0) {
           throw new TranslationError("Parameterized sorts currently unsupported")
         } else {
-          KORE.Sort(ctr)
+          assert(ctr.startsWith("Sort"))
+          KORE.Sort(ctr.substring( 4));
         }
   }
 
