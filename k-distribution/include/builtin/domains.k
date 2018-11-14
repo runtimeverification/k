@@ -576,7 +576,19 @@ module STRING
 
 endmodule
 
-module STRING-BUFFER-SYNTAX
+module STRING-BUFFER-IN-K
+  imports BASIC-K
+  imports STRING
+
+  syntax StringBuffer ::= ".StringBuffer" [function, functional]
+  syntax StringBuffer ::= String
+  syntax String ::= StringBuffer2String ( StringBuffer ) [function, functional]
+
+  rule .StringBuffer => ""
+  rule StringBuffer2String(S:String) => S
+endmodule
+
+module STRING-BUFFER-HOOKED
   imports BASIC-K
   imports STRING
 
@@ -586,21 +598,22 @@ module STRING-BUFFER-SYNTAX
   syntax String ::= StringBuffer2String ( StringBuffer ) [function, functional, hook(BUFFER.toString)]
 endmodule
 
+module STRING-BUFFER-CONCRETE [concrete, kast]
+  imports STRING-BUFFER-HOOKED
+endmodule
+
 module STRING-BUFFER-SYMBOLIC [symbolic]
-  imports STRING-BUFFER-SYNTAX
-  imports STRING-SYNTAX
-  imports BOOL-SYNTAX
+  imports STRING-BUFFER-IN-K
+endmodule
 
-  syntax StringBuffer ::= String
-
-  rule .StringBuffer => ""
-
-  rule StringBuffer2String(S:String) => S
+module STRING-BUFFER-KORE [kore]
+  imports STRING-BUFFER-IN-K
 endmodule
 
 module STRING-BUFFER
-  imports STRING-BUFFER-SYNTAX
+  imports STRING-BUFFER-CONCRETE
   imports STRING-BUFFER-SYMBOLIC
+  imports STRING-BUFFER-KORE
 endmodule
 
 module BYTES-SYNTAX
