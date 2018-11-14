@@ -3,6 +3,8 @@
 package org.kframework.backend.java.symbolic;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.IntStream;
 
 import org.kframework.backend.java.builtins.BoolToken;
@@ -140,8 +142,21 @@ public class Equality implements Serializable {
                 && rightHandSide.equals(equality.rightHandSide);
     }
 
+    //Copied from JavaSymbolicObject.
+    protected transient int hashCode = Constants.NO_HASHCODE;
+
     @Override
-    public int hashCode() {
+    public final int hashCode() {
+        int h = hashCode;
+        if (h == Constants.NO_HASHCODE) {
+            h = computeHash();
+            h = h == 0 ? 1 : h;
+            hashCode = h;
+        }
+        return h;
+    }
+
+    protected int computeHash() {
         int hashCode = 1;
         hashCode = hashCode * Constants.HASH_PRIME + leftHandSide.hashCode();
         hashCode = hashCode * Constants.HASH_PRIME + rightHandSide.hashCode();
@@ -151,6 +166,23 @@ public class Equality implements Serializable {
     @Override
     public String toString() {
         return leftHandSide + SEPARATOR + rightHandSide;
+    }
+
+    private static Map<Equality, String> toKToStringCache = new HashMap<>();
+
+    public String toKToString() {
+        if (global.globalOptions.cacheToString) {
+            String cached = toKToStringCache.get(this);
+            if (cached != null) {
+                return cached;
+            }
+
+            String result = toK().toString();
+            toKToStringCache.put(this, result);
+            return result;
+        } else {
+            return toK().toString();
+        }
     }
 
     public static class EqualityOperations {
