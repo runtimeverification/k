@@ -1054,11 +1054,11 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
     public String toStringMultiline() {
         Map<String, List<String>> nameToStreamMap = ImmutableMap.<String, List<String>>builder()
                 .put("substitutions:", substitution.equalities(global).stream()
-                        .map(equality -> equality.toK().toString()).sorted().collect(Collectors.toList()))
+                        .map(Equality::toKToString).sorted().collect(Collectors.toList()))
                 .put("equalities:", equalities.stream()
-                        .map(equality -> equality.toK().toString()).sorted().collect(Collectors.toList()))
+                        .map(Equality::toKToString).sorted().collect(Collectors.toList()))
                 .put("disjunctions:", disjunctions.stream()
-                        .map(disjunctiveFormula -> disjunctiveFormula.toKore().toString()).sorted()
+                        .map(DisjunctiveFormula::toString).sorted()
                         .collect(Collectors.toList()))
                 .build();
 

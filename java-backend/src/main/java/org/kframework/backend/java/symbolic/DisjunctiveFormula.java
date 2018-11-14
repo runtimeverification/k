@@ -15,7 +15,9 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.builtin.KLabels;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -93,9 +95,22 @@ public class DisjunctiveFormula extends Term implements CollectionInternalRepres
         return conjunctions.equals(disjunction.conjunctions);
     }
 
+    private static Map<DisjunctiveFormula, String> toStringCache = new HashMap<>();
+
     @Override
     public String toString() {
-        return toKore().toString();
+        if (global.globalOptions.cacheToString) {
+            String cached = toStringCache.get(this);
+            if (cached != null) {
+                return cached;
+            }
+
+            String result = toKore().toString();
+            toStringCache.put(this, result);
+            return result;
+        } else {
+            return toKore().toString();
+        }
     }
 
     @Override

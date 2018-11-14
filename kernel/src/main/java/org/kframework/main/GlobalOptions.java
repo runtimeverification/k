@@ -152,5 +152,10 @@ public final class GlobalOptions {
             description="Cache evaluation results of pure functions. Only for kprove.", arity = 1)
     public boolean cacheFunctions = true;
 
+    @Parameter(names="--cache-tostring",
+            description="Cache toString() result for KItem, Equality and DisjunctiveFormula. " +
+                    "Speeds up logging but eats more memory.", arity = 1)
+    public boolean cacheToString = true;
+
     public boolean logRulesPublic = false;
 }
