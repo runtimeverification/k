@@ -576,7 +576,7 @@ module STRING
 
 endmodule
 
-module STRING-BUFFER-IN-K
+module STRING-BUFFER-IN-K [symbolic]
   imports BASIC-K
   imports STRING
 
@@ -588,7 +588,7 @@ module STRING-BUFFER-IN-K
   rule StringBuffer2String(S:String) => S
 endmodule
 
-module STRING-BUFFER-HOOKED
+module STRING-BUFFER-HOOKED [concrete]
   imports BASIC-K
   imports STRING
 
@@ -598,17 +598,9 @@ module STRING-BUFFER-HOOKED
   syntax String ::= StringBuffer2String ( StringBuffer ) [function, functional, hook(BUFFER.toString)]
 endmodule
 
-module STRING-BUFFER-CONCRETE [concrete]
-  imports STRING-BUFFER-HOOKED
-endmodule
-
-module STRING-BUFFER-SYMBOLIC [symbolic]
-  imports STRING-BUFFER-IN-K
-endmodule
-
 module STRING-BUFFER
-  imports STRING-BUFFER-CONCRETE
-  imports STRING-BUFFER-SYMBOLIC
+  imports STRING-BUFFER-HOOKED
+  imports STRING-BUFFER-IN-K
 endmodule
 
 module BYTES-SYNTAX
