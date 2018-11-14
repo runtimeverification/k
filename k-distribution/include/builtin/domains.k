@@ -598,7 +598,7 @@ module STRING-BUFFER-HOOKED
   syntax String ::= StringBuffer2String ( StringBuffer ) [function, functional, hook(BUFFER.toString)]
 endmodule
 
-module STRING-BUFFER-CONCRETE [concrete, kast]
+module STRING-BUFFER-CONCRETE [concrete]
   imports STRING-BUFFER-HOOKED
 endmodule
 
@@ -606,14 +606,9 @@ module STRING-BUFFER-SYMBOLIC [symbolic]
   imports STRING-BUFFER-IN-K
 endmodule
 
-module STRING-BUFFER-KORE [kore]
-  imports STRING-BUFFER-IN-K
-endmodule
-
 module STRING-BUFFER
   imports STRING-BUFFER-CONCRETE
   imports STRING-BUFFER-SYMBOLIC
-  imports STRING-BUFFER-KORE
 endmodule
 
 module BYTES-SYNTAX
