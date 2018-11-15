@@ -581,9 +581,11 @@ module STRING-BUFFER-IN-K [symbolic]
   imports STRING
 
   syntax StringBuffer ::= ".StringBuffer" [function, functional]
+  syntax StringBuffer ::= StringBuffer "+String" String [function, functional, left, avoid]
   syntax StringBuffer ::= String
   syntax String ::= StringBuffer2String ( StringBuffer ) [function, functional]
 
+  rule {SB:String}:>StringBuffer +String S:String => SB +String S
   rule .StringBuffer => ""
   rule StringBuffer2String(S:String) => S
 endmodule
