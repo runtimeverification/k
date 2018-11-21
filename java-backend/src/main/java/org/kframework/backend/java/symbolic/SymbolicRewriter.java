@@ -838,14 +838,20 @@ public class SymbolicRewriter {
     }
 
     public void printTermAndConstraint(ConstrainedTerm term) {
-        print(term.term(), prettyResult);
-        System.out.print("/\\");
-        if (prettyResult) {
-            KProve.prettyPrint(term.constraint());
-        } else {
-            System.out.println(term.constraint().toStringMultiline());
+        boolean oldCacheToString = global.globalOptions.cacheToString;
+        global.globalOptions.cacheToString = false;
+        try {
+            print(term.term(), prettyResult);
+            System.out.print("/\\");
+            if (prettyResult) {
+                KProve.prettyPrint(term.constraint());
+            } else {
+                System.out.println(term.constraint().toStringMultiline());
+            }
+            System.out.println();
+        } finally {
+            global.globalOptions.cacheToString = oldCacheToString;
         }
-        System.out.println();
     }
 
     private void printSummaryBox(Rule rule, List<ConstrainedTerm> proofResults, int successPaths, int step) {
