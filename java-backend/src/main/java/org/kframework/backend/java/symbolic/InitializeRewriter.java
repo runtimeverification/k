@@ -156,7 +156,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
 
         @Override
         public RewriterResult execute(K k, Optional<Integer> depth) {
-            rewritingContext.debugg.init("execute-" + Integer.toString(Math.abs(k.hashCode())));
+            rewritingContext.stateLog.init("execute-" + Integer.toString(Math.abs(k.hashCode())));
             TermContext termContext = TermContext.builder(rewritingContext).freshCounter(initCounterValue).build();
             KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, termContext.global(), false);
             ResolveSemanticCasts resolveCasts = new ResolveSemanticCasts(true);
@@ -176,7 +176,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
 
         @Override
         public K search(K initialConfiguration, Optional<Integer> depth, Optional<Integer> bound, Rule pattern, SearchType searchType) {
-            rewritingContext.debugg.init("search-" + Integer.toString(Math.abs(initialConfiguration.hashCode())));
+            rewritingContext.stateLog.init("search-" + Integer.toString(Math.abs(initialConfiguration.hashCode())));
             TermContext termContext = TermContext.builder(rewritingContext).freshCounter(initCounterValue).build();
             KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, termContext.global(), false);
             ResolveSemanticCasts resolveCasts = new ResolveSemanticCasts(true);
@@ -200,7 +200,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
             if (rewritingContext.globalOptions.verbose) {
                 rewritingContext.profiler.logParsingTime();
             }
-            rewritingContext.debugg.init("prove-" + Integer.toString(Math.abs(mod.hashCode())));
+            rewritingContext.stateLog.init("prove-" + Integer.toString(Math.abs(mod.hashCode())));
             List<Rule> rules = stream(mod.rules()).filter(r -> r.att().contains("specification")).collect(Collectors.toList());
             ProcessProofRules processProofRules = new ProcessProofRules(rules).invoke(rewritingContext, initCounterValue, module, definition);
             List<org.kframework.backend.java.kil.Rule> javaRules = processProofRules.getJavaRules();

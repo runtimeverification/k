@@ -3,7 +3,6 @@ package org.kframework.kprove;
 
 import com.google.inject.Inject;
 import org.apache.commons.io.FilenameUtils;
-import org.kframework.Debugg;
 import org.kframework.compile.*;
 import org.kframework.definition.*;
 import org.kframework.definition.Module;

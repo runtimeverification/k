@@ -3,13 +3,13 @@
 package org.kframework.backend.java.kil;
 
 import com.google.inject.Inject;
-import org.kframework.Debugg;
 import org.kframework.backend.java.kil.KItem.KItemOperations;
 import org.kframework.backend.java.symbolic.BuiltinFunction;
 import org.kframework.backend.java.symbolic.Equality.EqualityOperations;
 import org.kframework.backend.java.symbolic.SMTOperations;
 import org.kframework.backend.java.symbolic.Stage;
 import org.kframework.backend.java.util.Profiler2;
+import org.kframework.backend.java.util.StateLog;
 import org.kframework.backend.java.util.Z3Wrapper;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.api.io.FileSystem;
@@ -35,7 +35,7 @@ public class GlobalContext implements Serializable {
     public final transient FileUtil files;
     public final transient GlobalOptions globalOptions;
     public final transient Profiler2 profiler;
-    public final Debugg debugg;
+    public final StateLog stateLog;
 
     public GlobalContext(
             FileSystem fs,
@@ -55,8 +55,8 @@ public class GlobalContext implements Serializable {
         this.hookProvider = hookProvider;
         this.files = files;
         this.equalityOps = new EqualityOperations(() -> def);
-        this.debugg = new Debugg(globalOptions, files);
-        this.constraintOps = new SMTOperations(() -> def, smtOptions, new Z3Wrapper(smtOptions, kem, globalOptions, files, debugg), kem, globalOptions);
+        this.stateLog = new StateLog(globalOptions, files);
+        this.constraintOps = new SMTOperations(() -> def, smtOptions, new Z3Wrapper(smtOptions, kem, globalOptions, files, stateLog), kem, globalOptions);
         this.kItemOps = new KItemOperations(stage, deterministicFunctions, kem, this::builtins, globalOptions);
         this.stage = stage;
         this.profiler = profiler;

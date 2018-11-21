@@ -1,5 +1,5 @@
 // Copyright (c) 2018 K Team. All Rights Reserved.
-package org.kframework;
+package org.kframework.backend.java.util;
 
 import org.kframework.definition.Module;
 import org.kframework.kore.K;
@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.lang.Math;
 
-public class Debugg {
+public class StateLog {
 
     // *ALL* `public` methods *MUST* return `void` and have their first line be `if (! this.loggingOn) return;`
     private final boolean loggingOn;
@@ -43,20 +43,20 @@ public class Debugg {
     private String currentQuery;
     private String currentImplication;
 
-    public Debugg() {
+    public StateLog() {
         this.loggingOn   = false;
         this.loggingPath = null;
         this.blobsDir    = null;
     }
 
-    public Debugg(GlobalOptions globalOptions, FileUtil files) {
-        this.loggingOn = globalOptions.debugg;
+    public StateLog(GlobalOptions globalOptions, FileUtil files) {
+        this.loggingOn = globalOptions.stateLog;
 
-        this.loggingPath = globalOptions.debuggPath == null
-                         ? files.resolveKompiled("debugg")
-                         : new File(globalOptions.debuggPath);
+        this.loggingPath = globalOptions.stateLogPath == null
+                         ? files.resolveKompiled("stateLog")
+                         : new File(globalOptions.stateLogPath);
 
-        if (globalOptions.debuggId != null) this.sessionId = globalOptions.debuggId;
+        if (globalOptions.stateLogId != null) this.sessionId = globalOptions.stateLogId;
 
         this.blobsDir = new File(loggingPath, "blobs/");
         this.blobsDir.mkdirs();
@@ -75,7 +75,7 @@ public class Debugg {
         PrintWriter sessionLog;
         try {
             this.sessionLog = new PrintWriter(logFile);
-            System.err.println("Debugg: " + logFile);
+            System.err.println("StateLog: " + logFile);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }

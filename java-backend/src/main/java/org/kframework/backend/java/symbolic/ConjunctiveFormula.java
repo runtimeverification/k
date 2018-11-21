@@ -7,12 +7,12 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
-import org.kframework.Debugg;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.util.Constants;
 import org.kframework.backend.java.util.RewriteEngineUtils;
+import org.kframework.backend.java.util.StateLog;
 import org.kframework.builtin.KLabels;
 
 import java.util.Collection;
@@ -89,7 +89,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
 
     private transient final GlobalContext global;
 
-    private final Debugg debugg;
+    private final StateLog stateLog;
 
     public ConjunctiveFormula(
             Substitution<Variable, Term> substitution,
@@ -109,7 +109,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
         this.truthValue = truthValue;
         this.falsifyingEquality = falsifyingEquality;
         this.global = global;
-        this.debugg = global == null ? new Debugg() : global.debugg;
+        this.stateLog = global == null ? new StateLog() : global.stateLog;
     }
 
     public ConjunctiveFormula(
@@ -829,7 +829,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
             }
 
 
-            debugg.log(Debugg.LogEvent.IMPLICATION, left, right);
+            stateLog.log(StateLog.LogEvent.IMPLICATION, left, right);
             if (!impliesSMT(left, right, rightOnlyVariables)) {
                 if (global.globalOptions.debug) {
                     System.err.println("Failure!");
