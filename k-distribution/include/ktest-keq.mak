@@ -23,7 +23,7 @@ $(DEF2)/$(DEF2)-kompiled/timestamp: $(DEF2).k
 	$(KOMPILE) $< -d $(DEF2) --backend java
 
 keq: $(SPEC1) $(SPEC2) kompile
-	$(KEQ) -d $(DEF0) -d1 $(DEF1) -d2 $(DEF2) -s1 $(SPEC1) -s2 $(SPEC2) -sm1 $(MODULE1) -sm2 $(MODULE2) --smt_prelude $(BASIC_SMT) --z3-executable
+	$(KEQ) -d $(DEF0) -d1 $(DEF1) -d2 $(DEF2) -s1 $(SPEC1) -s2 $(SPEC2) -sm1 $(MODULE1) -sm2 $(MODULE2) --smt_prelude $(BASIC_SMT)
 
 clean:
 	rm -rf $(DEF0) $(DEF1) $(DEF2)
