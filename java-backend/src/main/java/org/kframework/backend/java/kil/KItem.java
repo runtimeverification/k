@@ -9,7 +9,6 @@ import org.kframework.backend.java.builtins.MetaK;
 import org.kframework.backend.java.builtins.SortMembership;
 import org.kframework.backend.java.symbolic.BuiltinFunction;
 import org.kframework.backend.java.symbolic.ConjunctiveFormula;
-import org.kframework.backend.java.symbolic.DisjunctiveFormula;
 import org.kframework.backend.java.symbolic.PatternMatcher;
 import org.kframework.backend.java.symbolic.RuleAuditing;
 import org.kframework.backend.java.symbolic.Stage;
@@ -115,7 +114,7 @@ public class KItem extends Term implements KItemRepresentation {
         this.isExactSort = isExactSort;
         this.possibleSorts = possibleSorts;
         this.global = global;
-        this.profiler = null;
+        this.profiler = global.profiler;
         this.enableCache = false;
     }
 
