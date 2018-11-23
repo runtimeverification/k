@@ -24,7 +24,7 @@ public interface CollectionInternalRepresentation extends KItemRepresentation {
             result = new KItem(
                     constructorLabel(),
                     KList.concatenate(component, result),
-                    sort(),
+                    globalContext(), sort(),
                     true,
                     component.att());
         }
