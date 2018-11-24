@@ -98,7 +98,7 @@ public class SymbolicRewriter {
 
         stopwatch.stop();
         if (global.globalOptions.verbose) {
-            printSummaryBox(null, null, 1, step);
+            printSummaryBox(null, null, 1, step, 0);
         }
         return new RewriterResult(Optional.of(step), Optional.empty(), afterVariableRename.term());
     }
@@ -775,12 +775,20 @@ public class SymbolicRewriter {
                 global.globalOptions.debugZ3 = oldDebug;
                 global.globalOptions.log = oldLog;
 
+                if (Thread.currentThread().isInterrupted()) {
+                    throw new RuntimeException("Thread interrupted");
+                }
+                } catch (OutOfMemoryError e) {
+                    e.printStackTrace();
+                    printSummaryBox(rule, proofResults, successPaths, step, queue.size() + nextQueue.size() - v + 1);
+                    throw e;
                 } catch (RuntimeException | Error e) {
                     System.err.println("\n" +
                             "==========================================\n" +
                             "Top term when exception was thrown:\n" +
                             "==========================================\n");
                     printTermAndConstraint(term);
+                    printSummaryBox(rule, proofResults, successPaths, step, queue.size() + nextQueue.size() - v + 1);
                     throw e;
                 }
             }
@@ -804,7 +812,7 @@ public class SymbolicRewriter {
         }
 
         if (global.globalOptions.verbose) {
-            printSummaryBox(rule, proofResults, successPaths, step);
+            printSummaryBox(rule, proofResults, successPaths, step, 0);
         }
         return proofResults;
     }
@@ -826,8 +834,12 @@ public class SymbolicRewriter {
         }
     }
 
-    private void printSummaryBox(Rule rule, List<ConstrainedTerm> proofResults, int successPaths, int step) {
-        if (proofResults != null) {
+    private void printSummaryBox(Rule rule, List<ConstrainedTerm> proofResults, int successPaths, int step, int pathsInProgress) {
+        if (pathsInProgress != 0) {
+            System.err.format("\nSPEC ERROR: %s %s\n==================================\n" +
+                            "Success execution paths: %d\nFailed execution paths: %d\nPaths in progress: %d\n",
+                    new File(rule.getSource().source()), rule.getLocation(), successPaths, proofResults.size(), pathsInProgress);
+        } else if (proofResults != null) {
             if (proofResults.isEmpty()) {
                 System.err.format("\nSPEC PROVED: %s %s\n==================================\nExecution paths: %d\n",
                         new File(rule.getSource().source()), rule.getLocation(), successPaths);
@@ -952,7 +964,7 @@ public class SymbolicRewriter {
     private void printAccounts(KItem accounts, boolean pretty) {
         BuiltinMap accountsMap = accounts != null ? (BuiltinMap) ((KList) accounts.klist()).get(0) : null;
         if (accountsMap != null) {
-            System.out.println("accounts: " + accountsMap.size());
+            System.out.println("accounts: " + accountsMap.getEntries().size());
             for (Map.Entry<Term, Term> acct : accountsMap.getEntries().entrySet()) {
                 Term acctID = acct.getKey();
                 KItem storage = getCell((KItem) acct.getValue(), "<storage>");
