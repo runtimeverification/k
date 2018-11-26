@@ -49,10 +49,10 @@ public class Z3Wrapper {
     }
 
     public synchronized boolean isUnsat(CharSequence query, int timeout, Z3Profiler timer) {
-        if (options.z3Executable) {
-            return checkQueryWithExternalProcess(query, timeout, timer);
-        } else {
+        if (options.z3JNI) {
             return checkQueryWithLibrary(query, timeout);
+        } else {
+            return checkQueryWithExternalProcess(query, timeout, timer);
         }
     }
 

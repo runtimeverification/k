@@ -9,7 +9,7 @@ import org.kframework.kore.KList;
 import java.util.List;
 import java.util.stream.Stream;
 
-public interface KItemRepresentation extends KoreRepresentation, KApply {
+public interface KItemRepresentation extends KoreRepresentation, KApply, HasGlobalContext {
     default Term kLabel() {
         return ((KItem) toKore()).kLabel();
     }

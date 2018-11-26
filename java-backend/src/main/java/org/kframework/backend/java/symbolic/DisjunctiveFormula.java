@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
  *
  * @see org.kframework.backend.java.symbolic.ConjunctiveFormula
  */
-public class DisjunctiveFormula extends Term implements CollectionInternalRepresentation, HasGlobalContext {
+public class DisjunctiveFormula extends Term implements CollectionInternalRepresentation {
 
     private final PersistentUniqueList<ConjunctiveFormula> conjunctions;
 

@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 /**
  * Class representing an associative list.
  */
-public class BuiltinList extends Collection implements CollectionInternalRepresentation, HasGlobalContext {
+public class BuiltinList extends Collection implements CollectionInternalRepresentation {
 
     /**
      * Flattened list of children.

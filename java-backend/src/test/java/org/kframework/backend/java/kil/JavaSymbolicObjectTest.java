@@ -37,14 +37,14 @@ public class JavaSymbolicObjectTest extends BaseTestCase {
         assertEquals(Collections.singleton(v1), v1.variableSet());
         assertEquals(Collections.singleton(v1), v1.variableSet);
 
-        KItem k1 = new KItem(KLabelConstant.of(foo, definition), KList.EMPTY, Sort.of(KORE.Sort("bar@FOO")), true);
+        KItem k1 = new KItem(KLabelConstant.of(foo, definition), KList.EMPTY, null, Sort.of(KORE.Sort("bar@FOO")), true);
         assertEquals(Collections.emptySet(), k1.variableSet());
         assertEquals(Collections.emptySet(), k1.variableSet);
         assertEquals(Collections.emptySet(), k1.kLabel().variableSet);
         assertEquals(Collections.emptySet(), k1.kList().variableSet);
 
         Variable v2 = new Variable("bar", Sort.of(KORE.Sort("baz@FOO")));
-        KItem k2 = new KItem(KLabelConstant.of(foo, definition), v2, Sort.of(KORE.Sort("bar@FOO")), true);
+        KItem k2 = new KItem(KLabelConstant.of(foo, definition), v2, null, Sort.of(KORE.Sort("bar@FOO")), true);
         assertEquals(Collections.singleton(v2), k2.variableSet());
         assertEquals(Collections.singleton(v2), k2.variableSet);
         assertEquals(Collections.emptySet(), k2.kLabel().variableSet);
@@ -52,7 +52,7 @@ public class JavaSymbolicObjectTest extends BaseTestCase {
 
         Variable v3 = new Variable("baz", Sort.of(KORE.Sort("baz@FOO")));
         KList list = (KList) KList.concatenate(v3, k2);
-        KItem k3 = new KItem(KLabelConstant.of(foo, definition), list, Sort.of(KORE.Sort("bar@FOO")), true);
+        KItem k3 = new KItem(KLabelConstant.of(foo, definition), list, null, Sort.of(KORE.Sort("bar@FOO")), true);
         assertEquals(Sets.newHashSet(v2, v3), k3.variableSet());
         assertEquals(Sets.newHashSet(v2, v3), k3.variableSet);
         assertEquals(Collections.emptySet(), k3.kLabel().variableSet);
@@ -71,18 +71,18 @@ public class JavaSymbolicObjectTest extends BaseTestCase {
         Variable v1 = new Variable("foo", Sort.of(KORE.Sort("bar@FOO")));
         assertTrue(v1.isNormal());
 
-        KItem k1 = new KItem(KLabelConstant.of(foo, definition), KList.EMPTY, Sort.of(KORE.Sort("bar@FOO")), true);
+        KItem k1 = new KItem(KLabelConstant.of(foo, definition), KList.EMPTY, null, Sort.of(KORE.Sort("bar@FOO")), true);
         assertTrue(k1.isNormal());
         assertTrue(k1.kLabel().isNormal());
         assertTrue(k1.kList().isNormal());
 
-        KItem k2 = new KItem(KLabelConstant.of(isFoo, definition), KList.EMPTY, Sort.of(KORE.Sort("bar@FOO")), true);
+        KItem k2 = new KItem(KLabelConstant.of(isFoo, definition), KList.EMPTY, null, Sort.of(KORE.Sort("bar@FOO")), true);
         assertFalse(k2.isNormal());
         assertTrue(k2.kLabel().isNormal());
         assertTrue(k2.kList().isNormal());
 
         KList list = (KList) KList.concatenate(k1, k2);
-        KItem k3 = new KItem(KLabelConstant.of(foo, definition), list, Sort.of(KORE.Sort("bar@FOO")), true);
+        KItem k3 = new KItem(KLabelConstant.of(foo, definition), list, null, Sort.of(KORE.Sort("bar@FOO")), true);
         assertFalse(k3.isNormal());
         assertTrue(k3.kLabel().isNormal());
         assertSame(list, k3.kList());
