@@ -45,7 +45,8 @@ public class JavaBackendKModule extends AbstractKModule {
 
     @Override
     public List<Module> getKRunModules() {
-        return Collections.singletonList(new AbstractModule() {
+        List<Module> mods = super.getKRunModules();
+        mods.add(new AbstractModule() {
             @Override
             protected void configure() {
                 installJavaRewriter(binder());
@@ -55,17 +56,20 @@ public class JavaBackendKModule extends AbstractKModule {
                 checkPointBinder.addBinding("java").toInstance(50); //TODO(dwightguth): finesse this number
             }
         });
+        return mods;
     }
 
     @Override
     public List<Module> getKProveModules() {
-        return Collections.singletonList(new AbstractModule() {
+        List<Module> mods = super.getKProveModules();
+        mods.add(new AbstractModule() {
             @Override
             protected void configure() {
                 installJavaBackend(binder());
                 installJavaRewriter(binder());
             }
         });
+        return mods;
     }
 
     private void installJavaRewriter(Binder binder) {
@@ -77,12 +81,14 @@ public class JavaBackendKModule extends AbstractKModule {
 
     @Override
     public List<Module> getDefinitionSpecificKEqModules() {
-        return Collections.singletonList(new AbstractModule() {
+        List<Module> mods = super.getDefinitionSpecificKEqModules();
+        mods.add(new AbstractModule() {
             @Override
             protected void configure() {
                 installJavaBackend(binder());
                 installJavaRewriter(binder());
             }
         });
+        return mods;
     }
 }
