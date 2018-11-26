@@ -27,5 +27,13 @@ public final class JavaExecutionOptions {
             + "tagged with the javaBackendValue of --apply-tag, or fail with an error explaining why the rule did not apply.")
     public Integer auditingStep;
 
+    @Parameter(names={"--state-log"}, description="Output symbolic execution debugging information")
+    public boolean stateLog = false;
+
+    @Parameter(names={"--state-log-path"}, description="Path where the debugging information should be stored")
+    public String stateLogPath;
+
+    @Parameter(names={"--state-log-id"}, description="Id of the current execution")
+    public String stateLogId;
 }
 

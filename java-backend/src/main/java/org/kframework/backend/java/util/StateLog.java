@@ -1,9 +1,9 @@
 // Copyright (c) 2018 K Team. All Rights Reserved.
 package org.kframework.backend.java.util;
 
+import org.kframework.backend.java.symbolic.JavaExecutionOptions;
 import org.kframework.definition.Module;
 import org.kframework.kore.K;
-import org.kframework.main.GlobalOptions;
 import org.kframework.krun.KRun;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.unparser.KPrint;
@@ -49,14 +49,14 @@ public class StateLog {
         this.blobsDir    = null;
     }
 
-    public StateLog(GlobalOptions globalOptions, FileUtil files) {
-        this.loggingOn = globalOptions.stateLog;
+    public StateLog(JavaExecutionOptions javaExecutionOptions, FileUtil files) {
+        this.loggingOn = javaExecutionOptions.stateLog;
 
-        this.loggingPath = globalOptions.stateLogPath == null
+        this.loggingPath = javaExecutionOptions.stateLogPath == null
                          ? files.resolveKompiled("stateLog")
-                         : new File(globalOptions.stateLogPath);
+                         : new File(javaExecutionOptions.stateLogPath);
 
-        if (globalOptions.stateLogId != null) this.sessionId = globalOptions.stateLogId;
+        if (javaExecutionOptions.stateLogId != null) this.sessionId = javaExecutionOptions.stateLogId;
 
         this.blobsDir = new File(loggingPath, "blobs/");
         this.blobsDir.mkdirs();

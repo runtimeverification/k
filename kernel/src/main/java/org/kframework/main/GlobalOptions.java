@@ -89,13 +89,4 @@ public final class GlobalOptions {
 
     @Parameter(names={"--warnings-to-errors", "-w2e"}, description="Convert warnings to errors.")
     public boolean warnings2errors = false;
-
-    @Parameter(names={"--state-log"}, description="Output symbolic execution debugging information")
-    public boolean stateLog = false;
-
-    @Parameter(names={"--state-log-path"}, description="Path where the debugging information should be stored")
-    public String stateLogPath;
-
-    @Parameter(names={"--state-log-id"}, description="Id of the current execution")
-    public String stateLogId;
 }

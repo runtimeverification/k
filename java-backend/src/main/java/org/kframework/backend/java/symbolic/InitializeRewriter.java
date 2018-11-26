@@ -103,11 +103,11 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
 
     @Override
     public synchronized Rewriter apply(Module mainModule) {
-        TermContext initializingContext = TermContext.builder(new GlobalContext(fs, deterministicFunctions, globalOptions, krunOptions, kem, smtOptions, hookProvider, files, Stage.INITIALIZING, profiler))
+        TermContext initializingContext = TermContext.builder(new GlobalContext(fs, deterministicFunctions, globalOptions, krunOptions, javaExecutionOptions, kem, smtOptions, hookProvider, files, Stage.INITIALIZING, profiler))
                 .freshCounter(0).build();
         Definition definition;
         definition = initializeDefinition.invoke(mainModule, kem, initializingContext.global());
-        GlobalContext rewritingContext = new GlobalContext(fs, deterministicFunctions, globalOptions, krunOptions, kem, smtOptions, hookProvider, files, Stage.REWRITING, profiler);
+        GlobalContext rewritingContext = new GlobalContext(fs, deterministicFunctions, globalOptions, krunOptions, javaExecutionOptions, kem, smtOptions, hookProvider, files, Stage.REWRITING, profiler);
         rewritingContext.setDefinition(definition);
 
         return new SymbolicRewriterGlue(mainModule, definition, definition, transitions, initializingContext.getCounterValue(), rewritingContext, kem, files, kompileOptions, sw);
