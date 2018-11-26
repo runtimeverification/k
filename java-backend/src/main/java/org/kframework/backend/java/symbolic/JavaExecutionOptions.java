@@ -2,7 +2,9 @@
 package org.kframework.backend.java.symbolic;
 
 import com.beust.jcommander.Parameter;
+import org.kframework.utils.inject.RequestScoped;
 
+@RequestScoped
 public final class JavaExecutionOptions {
 
     @Parameter(names="--deterministic-functions", description="Throw assertion failure during "
