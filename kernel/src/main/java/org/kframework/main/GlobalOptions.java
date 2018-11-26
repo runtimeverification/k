@@ -157,5 +157,10 @@ public final class GlobalOptions {
                     "Speeds up logging but eats more memory.", arity = 1)
     public boolean cacheToString = true;
 
+    @Parameter(names = "--log-memory-after-gc",
+            description = "In the summary box, in addition to printing regular used memory, " +
+                    "also print used memory after System.gc(). Gives more precise information about memory usage.")
+    public boolean logMemoryAfterGC = false;
+
     public boolean logRulesPublic = false;
 }

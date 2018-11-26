@@ -27,6 +27,7 @@ import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.strategies.TransitionCompositeStrategy;
 import org.kframework.backend.java.util.FormulaContext;
+import org.kframework.backend.java.util.Profiler2;
 import org.kframework.backend.java.util.RuleSourceUtil;
 import org.kframework.backend.java.utils.BitSet;
 import org.kframework.builtin.KLabels;
@@ -928,8 +929,9 @@ public class SymbolicRewriter {
         boolean inNewStmt = global.globalOptions.logStmtsOnly && kSequence != null && inNewStmt(kSequence);
 
         if (global.globalOptions.log || forced || inNewStmt || global.globalOptions.logRulesPublic) {
-            System.out.format("\nSTEP %d v%d : %.3f s \n===================\n",
-                    step, v, (System.currentTimeMillis() - global.profiler.getStartTime()) / 1000.);
+            System.out.format("\nSTEP %d v%d : %.3f s, \t\t%d MB\n===================\n",
+                    step, v, (System.currentTimeMillis() - global.profiler.getStartTime()) / 1000.,
+                    Profiler2.usedMemory());
         }
 
         boolean actuallyLogged = global.globalOptions.log || forced || inNewStmt;
