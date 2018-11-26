@@ -192,7 +192,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
             rewritingContext.stateLog.log(StateLog.LogEvent.EXECINIT, backendKil, KApply(KLabels.ML_TRUE));
             SymbolicRewriter rewriter = new SymbolicRewriter(rewritingContext, transitions, converter);
             if (rewritingContext.globalOptions.verbose) {
-                rewritingContext.profiler.logInitTime();
+                rewritingContext.profiler.logInitTime(rewritingContext);
             }
             rewritingContext.setExecutionPhase(true);
             rewritingContext.javaExecutionOptions.logRulesPublic = rewritingContext.javaExecutionOptions.logRules;
@@ -257,7 +257,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
             SymbolicRewriter rewriter = new SymbolicRewriter(rewritingContext, transitions, converter);
 
             if (rewritingContext.globalOptions.verbose) {
-                rewritingContext.profiler.logInitTime();
+                rewritingContext.profiler.logInitTime(rewritingContext);
             }
             rewritingContext.setExecutionPhase(true);
             List<ConstrainedTerm> proofResults = javaRules.stream()
@@ -278,7 +278,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
                         termContext.setInitialVariables(lhs.variableSet());
                         termContext.setTopConstraint(null);
                         if (rewritingContext.javaExecutionOptions.cacheFunctionsOptimized) {
-                            rewritingContext.functionCache.clearCache();
+                            rewritingContext.functionCache.clear();
                         }
                         rewritingContext.stateLog.log(StateLog.LogEvent.REACHINIT,   lhs.term(), lhs.constraint());
                         rewritingContext.stateLog.log(StateLog.LogEvent.REACHTARGET, rhs.term(), rhs.constraint());

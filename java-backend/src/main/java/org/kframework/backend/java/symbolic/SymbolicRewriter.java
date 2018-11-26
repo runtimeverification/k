@@ -28,6 +28,7 @@ import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.util.FormulaContext;
 import org.kframework.backend.java.util.RuleSourceUtil;
 import org.kframework.backend.java.util.StateLog;
+import org.kframework.backend.java.util.TimeMemoryEntry;
 import org.kframework.backend.java.utils.BitSet;
 import org.kframework.builtin.KLabels;
 import org.kframework.kore.FindK;
@@ -630,6 +631,7 @@ public class SymbolicRewriter {
         int branchingRemaining = global.javaExecutionOptions.branchingAllowed;
         boolean nextStepLogEnabled = false;
         boolean originalLog = global.javaExecutionOptions.log;
+        prevStats = new TimeMemoryEntry(false);
         while (!queue.isEmpty()) {
             step++;
             int v = 0;
@@ -847,7 +849,7 @@ public class SymbolicRewriter {
             System.err.print("\nEXECUTION FINISHED\n==================================\n");
         }
         System.err.format("Longest path: %d steps\n", step);
-        global.profiler.printResult();
+        global.profiler.printResult(true, global);
     }
 
     //map value = log format: true = pretty, false = toString()
@@ -872,6 +874,8 @@ public class SymbolicRewriter {
         }
     }
 
+    private TimeMemoryEntry prevStats;
+
     /**
      * @param forced - if true, log this step when at least --log-basic is provided.
      * @return whether it was actually logged
@@ -884,8 +888,10 @@ public class SymbolicRewriter {
         KItem top = (KItem) term.term();
 
         if (global.javaExecutionOptions.log || forced || global.javaExecutionOptions.logRulesPublic) {
-            System.err.format("\nSTEP %d v%d : %.3f s \n===================\n",
-                    step, v, (System.currentTimeMillis() - global.profiler.getStartTime()) / 1000.);
+            TimeMemoryEntry now = new TimeMemoryEntry(false);
+            System.err.format("\nSTEP %d v%d : %s\n===================\n",
+                    step, v, global.profiler.stepLogString(now, prevStats));
+            prevStats = now;
         }
 
         boolean actuallyLogged = global.javaExecutionOptions.log || forced;
