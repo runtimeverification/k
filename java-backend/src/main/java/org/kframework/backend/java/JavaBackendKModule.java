@@ -6,6 +6,7 @@ import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.MapBinder;
+import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.backend.java.symbolic.InitializeRewriter;
@@ -17,6 +18,7 @@ import org.kframework.krun.ToolActivation;
 import org.kframework.krun.modes.ExecutionMode;
 import org.kframework.main.AbstractKModule;
 import org.kframework.rewriter.Rewriter;
+import org.kframework.utils.inject.Options;
 
 import java.util.Collections;
 import java.util.List;
@@ -68,6 +70,9 @@ public class JavaBackendKModule extends AbstractKModule {
                 MapBinder<String, Integer> checkPointBinder = MapBinder.newMapBinder(
                         binder(), String.class, Integer.class, Names.named("checkpointIntervalMap"));
                 checkPointBinder.addBinding("java").toInstance(50); //TODO(dwightguth): finesse this number
+
+                Multibinder<Class<?>> experimentalOptionsBinder = Multibinder.newSetBinder(binder(), new TypeLiteral<Class<?>>() {}, Options.class);
+                experimentalOptionsBinder.addBinding().toInstance(JavaExecutionOptions.class);
             }
         });
         return mods;
@@ -83,6 +88,9 @@ public class JavaBackendKModule extends AbstractKModule {
 
                 installJavaBackend(binder());
                 installJavaRewriter(binder());
+
+                Multibinder<Class<?>> experimentalOptionsBinder = Multibinder.newSetBinder(binder(), new TypeLiteral<Class<?>>() {}, Options.class);
+                experimentalOptionsBinder.addBinding().toInstance(JavaExecutionOptions.class);
             }
         });
         return mods;
