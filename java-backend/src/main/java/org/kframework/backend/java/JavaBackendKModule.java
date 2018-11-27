@@ -111,6 +111,9 @@ public class JavaBackendKModule extends AbstractKModule {
             protected void configure() {
                 installJavaBackend(binder());
                 installJavaRewriter(binder());
+
+                Multibinder<Class<?>> experimentalOptionsBinder = Multibinder.newSetBinder(binder(), new TypeLiteral<Class<?>>() {}, Options.class);
+                experimentalOptionsBinder.addBinding().toInstance(JavaExecutionOptions.class);
             }
         });
         return mods;
