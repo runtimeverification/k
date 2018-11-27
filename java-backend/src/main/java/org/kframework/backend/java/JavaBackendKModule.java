@@ -7,8 +7,10 @@ import com.google.inject.Module;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.name.Names;
+import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.backend.java.symbolic.InitializeRewriter;
 import org.kframework.backend.java.symbolic.JavaBackend;
+import org.kframework.backend.java.symbolic.JavaExecutionOptions;
 import org.kframework.compile.Backend;
 import org.kframework.kprove.KProve;
 import org.kframework.krun.ToolActivation;
@@ -24,6 +26,16 @@ import java.util.function.Function;
  * Created by dwightguth on 5/27/15.
  */
 public class JavaBackendKModule extends AbstractKModule {
+
+    @Override
+    public List<Pair<Class<?>, Boolean>> krunOptions() {
+        return Collections.singletonList(Pair.of(JavaExecutionOptions.class, true));
+    }
+
+    @Override
+    public List<Pair<Class<?>, Boolean>> kproveOptions() {
+        return Collections.singletonList(Pair.of(JavaExecutionOptions.class, true));
+    }
 
     @Override
     public List<Module> getKompileModules() {
@@ -49,6 +61,8 @@ public class JavaBackendKModule extends AbstractKModule {
         mods.add(new AbstractModule() {
             @Override
             protected void configure() {
+                bindOptions(JavaBackendKModule.this::krunOptions, binder());
+
                 installJavaRewriter(binder());
 
                 MapBinder<String, Integer> checkPointBinder = MapBinder.newMapBinder(
@@ -65,6 +79,8 @@ public class JavaBackendKModule extends AbstractKModule {
         mods.add(new AbstractModule() {
             @Override
             protected void configure() {
+                bindOptions(JavaBackendKModule.this::kproveOptions, binder());
+
                 installJavaBackend(binder());
                 installJavaRewriter(binder());
             }
