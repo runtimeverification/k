@@ -2,13 +2,17 @@
 package org.kframework.backend.java.util;
 
 import com.google.common.collect.ImmutableSet;
+
 import org.kframework.backend.java.z3.*;
+import org.kframework.builtin.Sorts;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.OS;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.options.SMTOptions;
+
+import static org.kframework.kore.KORE.KToken;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -30,16 +34,19 @@ public class Z3Wrapper {
     private final GlobalOptions globalOptions;
     private final KExceptionManager kem;
     private final FileUtil files;
+    private final StateLog stateLog;
 
     public Z3Wrapper(
             SMTOptions options,
             KExceptionManager kem,
             GlobalOptions globalOptions,
-            FileUtil files) {
+            FileUtil files,
+            StateLog stateLog) {
         this.options = options;
         this.kem = kem;
         this.globalOptions = globalOptions;
         this.files = files;
+        this.stateLog = stateLog;
 
         String defaultPrelude = "(set-option :auto-config false)\n"
                               + "(set-option :smt.mbqi false)\n";
@@ -49,6 +56,9 @@ public class Z3Wrapper {
     }
 
     public synchronized boolean isUnsat(CharSequence query, int timeout, Z3Profiler timer) {
+        StringBuilder queryStr = new StringBuilder(query.length());
+        queryStr.append(query);
+        stateLog.log(StateLog.LogEvent.Z3QUERY, KToken(SMT_PRELUDE + "\n" + queryStr.toString() + "\n" + CHECK_SAT + "\n", Sorts.Z3Query()));
         if (options.z3JNI) {
             return checkQueryWithLibrary(query, timeout);
         } else {
@@ -119,6 +129,7 @@ public class Z3Wrapper {
                 System.err.println("\nz3 likely timeout\n");
             }
         }
+        stateLog.log(StateLog.LogEvent.Z3RESULT, KToken(result, Sorts.Z3Result()));
         if (!Z3_QUERY_RESULTS.contains(result)) {
             throw KEMException.criticalError("Z3 crashed on input query:\n" + query + "\nresult:\n" + result);
         }

@@ -59,7 +59,7 @@ public class GlobalContext implements Serializable {
         this.files = files;
         this.equalityOps = new EqualityOperations(() -> def);
         this.stateLog = new StateLog(javaExecutionOptions, files);
-        this.constraintOps = new SMTOperations(() -> def, smtOptions, new Z3Wrapper(smtOptions, kem, globalOptions, files), kem, globalOptions);
+        this.constraintOps = new SMTOperations(() -> def, smtOptions, new Z3Wrapper(smtOptions, kem, globalOptions, files, stateLog), kem, globalOptions);
         this.kItemOps = new KItemOperations(stage, javaExecutionOptions.deterministicFunctions, kem, this::builtins, globalOptions);
         this.stage = stage;
         this.profiler = profiler;
