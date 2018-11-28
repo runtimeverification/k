@@ -12,6 +12,7 @@ import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.util.Constants;
 import org.kframework.backend.java.util.RewriteEngineUtils;
+import org.kframework.backend.java.util.StateLog;
 import org.kframework.builtin.KLabels;
 
 import javax.annotation.Nullable;
@@ -849,6 +850,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 continue;
             }
 
+            global.stateLog.log(StateLog.LogEvent.IMPLICATION, left, right);
             if (!impliesSMT(left, right, existentialQuantVars)) {
                 if (global.globalOptions.debug) {
                     System.err.println("Failure!");
