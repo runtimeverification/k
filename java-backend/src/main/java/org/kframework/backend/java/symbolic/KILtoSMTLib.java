@@ -184,10 +184,12 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
             ConjunctiveFormula rightHandSide,
             Set<Variable> existentialQuantVars) {
         KILtoSMTLib leftTransformer = new KILtoSMTLib(true, leftHandSide.globalContext());
-        KILtoSMTLib rightTransformer = new KILtoSMTLib(false,
+        // termAbstractionMap is shared between transformers
+        KILtoSMTLib rightTransformer = new KILtoSMTLib(true,
                 rightHandSide.globalContext().getDefinition(),
                 rightHandSide.globalContext().krunOptions,
-                rightHandSide.globalContext(), new HashMap<>());
+                rightHandSide.globalContext(), leftTransformer.termAbstractionMap);
+
         CharSequence leftExpression = leftTransformer.translate(leftHandSide).expression();
         String rightExpression = rightTransformer.translate(rightHandSide).expression().toString();
         StringBuilder sb = new StringBuilder(1024);
@@ -219,15 +221,21 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
     private final KRunOptions krunOptions;
 
     /**
-     * Flag set to true if it is sounds to skip equalities that cannot be translated.
+     * Flag indicating whether KItem terms and equalities that cannot be translated can be abstracted away into
+     * fresh variables. If the flag is false and untranslatable term is encountered, an exception will be thrown instead.
      */
     private final boolean skipUnsupportedEqualities;
     private final HashSet<Variable> variables;
     private final HashMap<Term, Variable> termAbstractionMap;
     private final HashMap<UninterpretedToken, Integer> tokenEncoding;
 
-    public KILtoSMTLib(boolean skipUnsupportedEqualities, GlobalContext global) {
+    private KILtoSMTLib(boolean skipUnsupportedEqualities, GlobalContext global) {
         this(skipUnsupportedEqualities, global.getDefinition(), global.krunOptions, global, new HashMap<>());
+    }
+
+    private KILtoSMTLib(boolean skipUnsupportedEqualities, Definition definition, KRunOptions krunOptions,
+                        GlobalContext global) {
+        this(skipUnsupportedEqualities, definition, krunOptions, global, new HashMap<>());
     }
 
     private KILtoSMTLib(boolean skipUnsupportedEqualities, Definition definition, KRunOptions krunOptions,
@@ -419,7 +427,7 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
             try {
                 CharSequence left = translateTerm(equality.leftHandSide());
                 CharSequence right = translateTerm(equality.rightHandSide());
-                sb.append(" (= ");
+                sb.append("\n\t(= ");
                 sb.append(left);
                 sb.append(" ");
                 sb.append(right);
@@ -450,7 +458,7 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
         }
     }
 
-    private CharSequence abstractThroughAnonVariable(Term term, RuntimeException e) {
+    private String abstractThroughAnonVariable(Term term, RuntimeException e) {
         if (skipUnsupportedEqualities){
                 Variable variable = termAbstractionMap.get(term);
                 if (variable == null) {
@@ -487,7 +495,8 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
             label = "store";
         }
         if (label == null) {
-            throw new SMTTranslationFailure("missing SMTLib translation for " + kLabel);
+            return new SMTLibTerm(abstractThroughAnonVariable(kItem,
+                    new SMTTranslationFailure("missing SMTLib translation for " + kLabel)));
         }
 
         if (krunOptions.experimental.smt.floatsAsPO) {
