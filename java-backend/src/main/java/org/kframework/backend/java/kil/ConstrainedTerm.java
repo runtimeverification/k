@@ -122,14 +122,14 @@ public class ConstrainedTerm extends JavaSymbolicObject {
     }
 
     /**
-     * Checks if this constrained term implies the given constrained term, assuming the variables
-     * occurring only in the given constrained term (but not in this constrained term) are
+     * Checks if {@code this} implies {@code matchRHSTerm}, assuming the variables
+     * occurring only in {@code matchRHSTerm} (but not in {@code this}) are
      * existentially quantified.
      */
-    public ConjunctiveFormula matchImplies(ConstrainedTerm constrainedTerm, boolean expand, Set<String> matchingSymbols) {
-        ConjunctiveFormula constraint = ConjunctiveFormula.of(constrainedTerm.termContext().global())
+    public ConjunctiveFormula matchImplies(ConstrainedTerm matchRHSTerm, boolean expand, Set<String> matchingSymbols) {
+        ConjunctiveFormula constraint = ConjunctiveFormula.of(matchRHSTerm.termContext().global())
                 .add(data.constraint.substitution())
-                .add(data.term, constrainedTerm.data.term)
+                .add(data.term, matchRHSTerm.data.term)
                 .simplifyBeforePatternFolding(context);
         if (constraint.isFalseExtended()) {
             return null;
@@ -149,7 +149,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
 
         /* apply pattern folding */
         constraint = constraint.simplifyModuloPatternFolding(context)
-                .add(constrainedTerm.data.constraint);
+                .add(matchRHSTerm.data.constraint);
         if (constraint.isFalse()) {
             return null;
         }
@@ -187,13 +187,15 @@ public class ConstrainedTerm extends JavaSymbolicObject {
         context.setTopConstraint(data.constraint);
         constraint = (ConjunctiveFormula) constraint.evaluate(context);
 
-        Set<Variable> rightOnlyVariables = Sets.difference(constraint.variableSet(), Sets.union(variableSet(), termContext().getInitialVariables()));
-        constraint = constraint.orientSubstitution(rightOnlyVariables);
+        Set<Variable> matchRHSOnlyVars = Sets.difference(constraint.variableSet(), Sets.union(variableSet(), termContext().getInitialVariables()));
+        constraint = constraint.orientSubstitution(matchRHSOnlyVars);
 
-        ConjunctiveFormula leftHandSide = data.constraint;
-        ConjunctiveFormula rightHandSide = constraint.removeBindings(rightOnlyVariables);
-        rightHandSide = (ConjunctiveFormula) rightHandSide.substituteAndEvaluate(leftHandSide.substitution(), context);
-        if (!leftHandSide.implies(rightHandSide, rightOnlyVariables)) {
+        ConjunctiveFormula implicationLHS = data.constraint;
+        ConjunctiveFormula implicationRHS = constraint.removeBindings(matchRHSOnlyVars);
+        implicationRHS = (ConjunctiveFormula) implicationRHS.substituteAndEvaluate(implicationLHS.substitution(), context);
+
+        boolean implies = implicationLHS.implies(implicationRHS, matchRHSOnlyVars);
+        if (!implies) {
             return null;
         }
 
