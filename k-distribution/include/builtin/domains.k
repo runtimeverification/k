@@ -709,6 +709,16 @@ module BYTES
   imports BYTES-IN-K
   imports INT
 
+  rule Int2Bytes(I, E, Unsigned) => Int2Bytes((log2Int(I) +Int 8) /Int 8, I, E)
+    requires I >Int 0
+  rule Int2Bytes(0, _::Endianness, _) => .Bytes
+  rule Int2Bytes(I, E, Signed) => Int2Bytes((log2Int(I) +Int 9) /Int 8, I, E)
+    requires I >Int 0
+  rule Int2Bytes(I, E, Signed) => Int2Bytes((log2Int(~Int I) +Int 9) /Int 8, I, E)
+    requires I <Int -1
+  rule Int2Bytes(-1, E, Signed) => Int2Bytes(1, -1, E)
+endmodule
+
 module ID-PROGRAM-PARSING
   imports BUILTIN-ID-TOKENS
   syntax Id ::= r"(?<![A-Za-z0-9\\_])[A-Za-z\\_][A-Za-z0-9\\_]*"     [prec(1), notInRules, token, autoReject]
