@@ -235,7 +235,7 @@ public class SymbolicRewriter {
 
             global.stateLog.log(StateLog.LogEvent.RULE, rule.toKRewrite());
             if (global.globalOptions.debugZ3 && !result.constraint().equals(subject.constraint())) {
-                System.err.format("New top constraint created: \n%s\n", subject.constraint().toStringMultiline());
+                System.err.format("New top constraint created: \n%s\n", result.constraint().toStringMultiline());
             }
             results.add(result);
         }
