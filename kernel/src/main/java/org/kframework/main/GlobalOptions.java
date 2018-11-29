@@ -166,5 +166,10 @@ public final class GlobalOptions {
             "By default only failure final states are logged.")
     public boolean logSuccessFinalStates = false;
 
+    @Parameter(names = "--halt-local-mem-non-map", description = "KEVM-specific. Halt when <localMem> cell at the end " +
+            "of a step is not a map. useful debug option when memory model is a K builtin map. " +
+            "Otherwise option should be false.")
+    public boolean haltOnLocalMemNonMap = false;
+
     public boolean logRulesPublic = false;
 }

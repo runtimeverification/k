@@ -902,7 +902,8 @@ public class SymbolicRewriter {
         KItem localMem = getCell(top, "<localMem>");
         K localMemMap = localMem != null ? localMem.klist().items().get(0) : null;
 
-        if (!(localMemMap instanceof BuiltinMap || localMemMap instanceof Variable)) {
+        if (global.globalOptions.haltOnLocalMemNonMap
+                && !(localMemMap instanceof BuiltinMap || localMemMap instanceof Variable)) {
             forced = true;
         }
 
@@ -949,7 +950,8 @@ public class SymbolicRewriter {
             }
         }
         global.profiler.logOverheadTimer.stop();
-        if (localMem != null && !(localMemMap instanceof BuiltinMap || localMemMap instanceof Variable)) {
+        if (global.globalOptions.haltOnLocalMemNonMap
+                && localMem != null && !(localMemMap instanceof BuiltinMap || localMemMap instanceof Variable)) {
             throw new RuntimeException("<localMem> non-map format, aborting.");
         }
         return actuallyLogged;
@@ -991,7 +993,7 @@ public class SymbolicRewriter {
         K localMemMap = localMem != null ? localMem.klist().items().get(0) : null;
         System.out.println("<localMem>");
 
-        if (localMemMap instanceof BuiltinMap) {
+        if (!global.globalOptions.haltOnLocalMemNonMap || localMemMap instanceof BuiltinMap) {
             System.out.println("...");
         } else {
             System.out.println("\tNon-map format:");
