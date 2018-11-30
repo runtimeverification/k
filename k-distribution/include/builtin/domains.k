@@ -757,14 +757,12 @@ endmodule
 module K-REFLECTION
   imports BASIC-K
   imports STRING
+  imports K-REFLECTION-SYMBOLIC
 
   syntax K ::= "#configuration" [function, impure, hook(KREFLECTION.configuration)]
   syntax String ::= #sort(K) [function, hook(KREFLECTION.sort)]
   syntax KItem ::= #fresh(String)   [function, hook(KREFLECTION.fresh), impure]
   syntax KItem ::= getKLabel(K)  [function, hook(KREFLECTION.getKLabel)]
-  syntax String ::= #getKLabelString(K)  [function, hook(KREFLECTION.getKLabelString)]
-  syntax Bool ::= #isConcrete(K) [function, hook(KREFLECTION.isConcrete)]
-  syntax Bool ::= #isVariable(K) [function, hook(KREFLECTION.isVariable)]
 
   syntax String ::= #getenv(String) [function, impure, hook(KREFLECTION.getenv)]
 
@@ -772,6 +770,18 @@ module K-REFLECTION
   // undefined
   syntax List ::= #argv() [function, hook(KREFLECTION.argv)]
 
+endmodule
+
+module K-REFLECTION-SYMBOLIC [symbolic]
+  imports BASIC-K
+  imports STRING
+
+  // return empty string if the term has no klabel
+  syntax String ::= #getKLabelString(K) [function, hook(KREFLECTION.getKLabelString)]
+
+  // return true if no variable nor unresolved function appears in any subterm
+  syntax Bool ::= #isConcrete(K) [function, hook(KREFLECTION.isConcrete)]
+  syntax Bool ::= #isVariable(K) [function, hook(KREFLECTION.isVariable)]
 endmodule
 
 module K-IO
