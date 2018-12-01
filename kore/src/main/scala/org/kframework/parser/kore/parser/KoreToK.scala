@@ -75,7 +75,7 @@ class KoreToK (headToLabel_ : java.util.Properties, sortAtt : Map[k.Sort, Att], 
     case kore.Or(s, p, q) =>
       KORE.KApply(KLabels.ML_OR, apply(p), apply(q))
     case kore.Not(s, p) =>
-      throw new TranslationError("Not patterns currently unsupported")
+      KORE.KApply(KLabels.ML_NOT, apply(p))
     case kore.Implies(s, p, q) =>
       throw new TranslationError("Implies patterns currently unsupported")
     case kore.Iff(s, p, q) =>
