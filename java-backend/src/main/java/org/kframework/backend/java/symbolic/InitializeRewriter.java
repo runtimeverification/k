@@ -9,6 +9,7 @@ import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.GlobalContext;
+import org.kframework.backend.java.kil.JavaSymbolicObject;
 import org.kframework.backend.java.kil.KItem;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.KList;
@@ -241,6 +242,9 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
                         ConstrainedTerm lhs = r.createLhsPattern(termContext);
                         ConstrainedTerm rhs = r.createRhsPattern();
                         termContext.setInitialVariables(lhs.variableSet());
+                        if (rewritingContext.globalOptions.cacheFunctionsOptimized) {
+                            JavaSymbolicObject.clearCache();
+                        }
                         return rewriter.proveRule(r, lhs, rhs, specRules, kem);
                     })
                     .flatMap(List::stream)

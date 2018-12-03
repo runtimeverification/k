@@ -154,6 +154,10 @@ public final class GlobalOptions {
             description="Cache evaluation results of pure functions. Only for kprove.", arity = 1)
     public boolean cacheFunctions = true;
 
+    @Parameter(names="--cache-func-optimized",
+            description="Clear function cache after initialization phase. Frees some memory. Only for kprove.")
+    public boolean cacheFunctionsOptimized = false;
+
     @Parameter(names="--cache-tostring",
             description="Cache toString() result for KItem, Equality and DisjunctiveFormula. " +
                     "Speeds up logging but eats more memory.", arity = 1)
