@@ -625,9 +625,13 @@ public class SymbolicRewriter {
         //to avoid printing initialization-phase rules
         global.globalOptions.logRulesPublic = global.globalOptions.logRules;
 
-        if (global.globalOptions.logTarget) {
+        if (prettyInitTerm != null) {
+            System.out.println("\nInitial term\n=====================\n");
+            printTermAndConstraint(initialTerm, prettyInitTerm);
+        }
+        if (prettyTarget != null) {
             System.out.println("\nTarget term\n=====================\n");
-            System.out.println(targetTerm);
+            printTermAndConstraint(targetTerm, prettyTarget);
         }
         KItem targetCallData = getCell((KItem) targetTerm.term(), "<callData>");
         int branchingRemaining = global.globalOptions.branchingAllowed;
@@ -818,7 +822,7 @@ public class SymbolicRewriter {
                             "==========================================\n" +
                             "Top term when exception was thrown:\n" +
                             "==========================================\n");
-                    printTermAndConstraint(term);
+                    printTermAndConstraint(term, prettyResult);
                     printSummaryBox(rule, proofResults, successPaths, step, queue.size() + nextQueue.size() - v + 1);
                     throw e;
                 }
@@ -835,20 +839,26 @@ public class SymbolicRewriter {
             global.globalOptions.log = oldLogEnabled;
         }
 
-        for (ConstrainedTerm term : proofResults) {
-            printTermAndConstraint(term);
+        if (prettyResult != null) {
+            System.err.println("\n" +
+                    "==========================================\n" +
+                    "Failure final states:\n" +
+                    "==========================================\n");
+            for (ConstrainedTerm term : proofResults) {
+                printTermAndConstraint(term, prettyResult);
+            }
         }
         if (proofResults.isEmpty()) {
             System.out.println(KLabels.ML_TRUE);
         }
 
         if (global.globalOptions.logSuccessFinalStates) {
-            System.err.println("\n" +
+            System.out.println("\n" +
                     "==========================================\n" +
                     "Success final states:\n" +
                     "==========================================\n");
             for (ConstrainedTerm result : successResults) {
-                printTermAndConstraint(result);
+                printTermAndConstraint(result, prettyResult);
             }
         }
         if (global.globalOptions.verbose) {
@@ -857,13 +867,17 @@ public class SymbolicRewriter {
         return proofResults;
     }
 
-    public void printTermAndConstraint(ConstrainedTerm term) {
+    public void printTermAndConstraint(ConstrainedTerm term, Boolean pretty) {
+        if (pretty == null) {
+            return;
+        }
         boolean oldCacheToString = global.globalOptions.cacheToString;
         global.globalOptions.cacheToString = false;
         try {
-            print(term.term(), prettyResult);
+            System.out.flush();
+            print(term.term(), pretty);
             System.out.print("/\\");
-            if (prettyResult) {
+            if (pretty) {
                 KProve.prettyPrint(term.constraint());
             } else {
                 System.out.println(term.constraint().toStringMultiline());
@@ -897,8 +911,14 @@ public class SymbolicRewriter {
 
     //map value = log format: true = pretty, false = toString()
     private Map<String, Boolean> cellsToLog = new LinkedHashMap<>();
-    private boolean prettyPC;
-    private boolean prettyResult;
+
+    /**
+     * null = do not print, false = toString, true = pretty.
+     */
+    private Boolean prettyPC;
+    private Boolean prettyResult;
+    private Boolean prettyInitTerm;
+    private Boolean prettyTarget;
 
     private void parseLogCells() {
         for (String cell : global.globalOptions.logCells) {
@@ -911,6 +931,10 @@ public class SymbolicRewriter {
                 prettyPC = pretty;
             } else if (cell.equals("#result")) {
                 prettyResult = pretty;
+            } else if (cell.equals("#initTerm")) {
+                prettyInitTerm = pretty;
+            } else if (cell.equals("#target")) {
+                prettyTarget = pretty;
             } else {
                 cellsToLog.put(cell, pretty);
             }
