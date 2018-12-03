@@ -13,6 +13,13 @@ module COLLECTIONS-TEST-SYNTAX
     rule set(1) => SetItem(1)
     rule set(2) => SetItem(1) SetItem(2) SetItem(3) SetItem(4)
     rule set(3) => SetItem(1) SetItem(1) SetItem(3) SetItem(4)
+
+    syntax List ::= list ( Int ) [function]
+ // ---------------------------------------
+    rule list(0) => .List
+    rule list(1) => ListItem(1)
+    rule list(2) => ListItem(1) ListItem(2) ListItem(3) ListItem(4)
+    rule list(3) => ListItem(1) ListItem(1) ListItem(3) ListItem(4)
 endmodule
 
 module COLLECTIONS-TEST
