@@ -62,6 +62,11 @@ public abstract class JavaSymbolicObject<T extends JavaSymbolicObject<T>>
 
     private Att att;
 
+    public static void clearCache() {
+        evaluationCache.clear();
+        nullConstraintEvalCache.clear();
+    }
+
     protected JavaSymbolicObject() {
         this(Att.empty());
     }
