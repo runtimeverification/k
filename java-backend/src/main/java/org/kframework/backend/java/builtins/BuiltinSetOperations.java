@@ -113,7 +113,7 @@ public class BuiltinSetOperations {
         }
         BuiltinList.Builder builder = BuiltinList.builder(context.global());
         for (Term element : set.elements()) {
-            builder.add(element);
+            builder.add(BuiltinListOperations.wrapListItem(element, context));
         }
         return builder.build();
     }
