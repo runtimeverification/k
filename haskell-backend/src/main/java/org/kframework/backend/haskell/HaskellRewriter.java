@@ -118,6 +118,10 @@ public class HaskellRewriter implements Function<Module, Rewriter> {
                         args.add("--depth");
                         args.add(options.depth.toString());
                     }
+                    if (options.experimental.smt.smtPrelude != null) {
+                        args.add("--smt-prelude");
+                        args.add(options.experimental.smt.smtPrelude);
+                    }
                     koreCommand = args.toArray(koreCommand);
                     try {
                         File korePath = koreDirectory == null ? null : new File(koreDirectory);
