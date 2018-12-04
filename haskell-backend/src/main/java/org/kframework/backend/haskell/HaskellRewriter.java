@@ -274,6 +274,10 @@ public class HaskellRewriter implements Function<Module, Rewriter> {
                         "--prove", specPath,
                         "--spec-module", specModule,
                         "--output", koreOutputFile.getAbsolutePath()));
+                if (kProveOptions.depth != null) {
+                    args.addAll(Arrays.asList(
+                        "--depth", kProveOptions.depth.toString()));
+                }
                 koreCommand = args.toArray(koreCommand);
                 System.out.println("Executing " + args);
                 try {
