@@ -1,2 +1,7 @@
 #!/usr/bin/env bash
-"$(dirname "$0")/kserver" &>> "$1" &
+
+if [[ "$KSERVER_SOCKET" == "" ]]; then
+  KSERVER_SOCKET="$HOME/.kserver"
+fi
+
+"$(dirname "$0")/kserver --socket $KSERVER_SOCKET" &>> "$1" &
