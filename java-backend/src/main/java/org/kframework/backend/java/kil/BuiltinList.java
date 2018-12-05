@@ -266,6 +266,16 @@ public class BuiltinList extends Collection implements CollectionInternalReprese
         return global;
     }
 
+    public static Term stripListItem(Term term) {
+        if (term instanceof KItem) {
+            KItem kitem = (KItem) term;
+            if (KLabels.ListItem.equals(kitem.klabel())) {
+                return ((KList) kitem.kList()).getContents().get(0);
+            }
+        }
+        return term;
+    }
+
     public static Builder builder(Sort sort, KLabelConstant operatorKLabel, KLabelConstant unitKLabel, GlobalContext global) {
         return new Builder(sort, operatorKLabel, unitKLabel, global);
     }

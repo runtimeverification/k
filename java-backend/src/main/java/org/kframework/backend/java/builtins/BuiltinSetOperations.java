@@ -5,9 +5,13 @@ import org.kframework.backend.java.kil.Bottom;
 import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.BuiltinSet;
 import org.kframework.backend.java.kil.DataStructures;
+import org.kframework.backend.java.kil.KItem;
+import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
+
+import org.kframework.builtin.KLabels;
 
 import com.google.common.collect.Sets;
 
@@ -113,19 +117,26 @@ public class BuiltinSetOperations {
         }
         BuiltinList.Builder builder = BuiltinList.builder(context.global());
         for (Term element : set.elements()) {
-            builder.add(element);
+            builder.add(BuiltinListOperations.wrapListItem(element, context));
         }
         return builder.build();
     }
 
-    public static Term list2set(BuiltinList list, TermContext context) {
-        if (!list.isGround()) {
+    public static Term list2set(Term term, TermContext context) {
+        if (!term.isGround()) {
             return null;
         }
-        BuiltinSet.Builder builder = BuiltinSet.builder(context.global());
-        for (Term element : list.getKComponents()) {
-            builder.add(element);
+        if (term instanceof BuiltinList) {
+            BuiltinSet.Builder builder = BuiltinSet.builder(context.global());
+            for (Term element : ((BuiltinList) term).getKComponents()) {
+                builder.add(BuiltinList.stripListItem(element));
+            }
+            return builder.build();
+        } else if (term instanceof KItem) {
+            BuiltinSet.Builder builder = BuiltinSet.builder(context.global());
+            builder.add(BuiltinList.stripListItem(term));
+            return builder.build();
         }
-        return builder.build();
+        return null;
     }
 }
