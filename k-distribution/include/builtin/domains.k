@@ -1308,14 +1308,6 @@ module STRATEGY
     configuration <s> $STRATEGY:K  </s>
 endmodule
 
-// module DEFAULT-STRATEGY
-//     imports syntax STRATEGY
-
-//     rule ~ regular => ^ regular [anywhere]
-
-//     rule initSCell(_) => <s> ^ regular </s>
-// endmodule
-
 module DEFAULT-STRATEGY-CONCRETE [concrete]
     imports syntax STRATEGY
     rule ~ regular => ^ regular [anywhere]
