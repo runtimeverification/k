@@ -15,6 +15,7 @@ import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.Kompile;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.ADT;
+import org.kframework.kore.KLabel;
 import org.kframework.kore.KSequence;
 import org.kframework.kore.Sort;
 import org.kframework.kore.VisitK;
@@ -31,7 +32,9 @@ import org.kframework.utils.file.FileUtil;
 import scala.Option;
 
 import static org.kframework.definition.Constructors.*;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
@@ -101,7 +104,7 @@ public class JavaBackend implements Backend {
                 .andThen(DefinitionTransformer.fromSentenceTransformer(JavaBackend::markSingleVariables, "mark single variables"))
                 .andThen(DefinitionTransformer.from(new AssocCommToAssoc(), "convert AC matching to A matching"))
                 .andThen(DefinitionTransformer.from(new MergeRules(), "merge rules into one rule with or clauses"))
-                .apply(Kompile.defaultSteps(kompileOptions, kem, files, excludedModuleTags()).apply(d));
+                .apply(Kompile.defaultSteps(kompileOptions, kem, files).apply(d));
              // .andThen(KoreToMiniToKore::apply) // for serialization/deserialization test
     }
 
@@ -127,12 +130,15 @@ public class JavaBackend implements Backend {
     private static Sentence markRegularRules(Definition d, ConfigurationInfoFromModule configInfo, Sentence s, String att) {
         if (s instanceof org.kframework.definition.Rule) {
             org.kframework.definition.Rule r = (org.kframework.definition.Rule) s;
-            if (r.body() instanceof KApply && d.mainModule().sortFor().apply(((KApply) r.body()).klabel()).equals(configInfo.topCell())) {
-                return org.kframework.definition.Rule.apply(r.body(), r.requires(), r.ensures(), r.att().add(att));
-            } else
-                return r;
-        } else
-            return s;
+            if (r.body() instanceof KApply) {
+                KLabel klabel = ((KApply) r.body()).klabel();
+                if (d.mainModule().sortFor().contains(klabel) //is false for rules in specification modules not part of semantics
+                        && d.mainModule().sortFor().apply(klabel).equals(configInfo.topCell())) {
+                    return Rule.apply(r.body(), r.requires(), r.ensures(), r.att().add(att));
+                }
+            }
+        }
+        return s;
     }
 
     private static Module markRegularRules(Definition d, Module mod) {
@@ -199,6 +205,6 @@ public class JavaBackend implements Backend {
 
     @Override
     public Set<String> excludedModuleTags() {
-        return java.util.Collections.singleton("concrete");
+        return new HashSet<>(Arrays.asList("concrete", "kore"));
     }
 }

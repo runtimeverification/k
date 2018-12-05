@@ -198,6 +198,14 @@ public class MetaK {
             kItem.att());
     }
 
+    public static StringToken getKLabelString(Term term, TermContext context) {
+        if (term instanceof KItem) {
+            return StringToken.of(((KItem) term).kLabel().toString());
+        } else {
+            return StringToken.of("");
+        }
+    }
+
     public static Term configuration(TermContext context) {
         //return KLabelInjection.injectionOf(context.getTopTerm(), context.global());
         return context.getTopTerm();
@@ -205,5 +213,9 @@ public class MetaK {
 
     public static BoolToken isConcrete(Term term, TermContext context) {
         return BoolToken.of(term.isConcrete());
+    }
+
+    public static BoolToken isVariable(Term term, TermContext context) {
+        return BoolToken.of(term.isVariable());
     }
 }

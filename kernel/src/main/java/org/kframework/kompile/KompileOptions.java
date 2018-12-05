@@ -21,6 +21,10 @@ import java.util.List;
 public class KompileOptions implements Serializable {
 
 
+    /**
+     * WARNING: this field will be non-null in kompile tool, but null when KompileOption is deserialized,
+     * as part of CompiledDefinition, in any other tool. usability depends on context.
+     */
     @ParametersDelegate
     public transient GlobalOptions global = new GlobalOptions();
 
@@ -28,30 +32,10 @@ public class KompileOptions implements Serializable {
     public OuterParsingOptions outerParsing = new OuterParsingOptions();
 
     // Common options
-    @Parameter(names="--backend", description="Choose a backend. <backend> is one of [ocaml|java|coq|kore|haskell]. Each creates the kompiled K definition.")
+    @Parameter(names="--backend", description="Choose a backend. <backend> is one of [ocaml|java|llvm|kore|haskell]. Each creates the kompiled K definition.")
     public String backend = Backends.OCAML;
 
-    @Parameter(names="--doc-style", description="Specify a style option for the package 'k.sty' (when '--backend [pdf|latex]' is used) or path to an alternative .css file (when '--backend html' is used).")
-    private String docStyle;
-
-    private static final String DEFAULT_DOC_STYLE = "poster,style=bubble";
     private boolean kore;
-
-    public String docStyle() {
-        if (backend.equals(Backends.HTML)) {
-            if (docStyle == null) {
-                return "k-definition.css";
-            }
-            return docStyle;
-        }
-        if (docStyle == null) {
-            return DEFAULT_DOC_STYLE;
-        }
-        if (docStyle.startsWith("+")) {
-            return DEFAULT_DOC_STYLE + "," + docStyle.substring(1);
-        }
-        return docStyle;
-    }
 
     @Parameter(names="--main-module", description="Specify main module in which a program starts to execute. This information is used by 'krun'. The default is the name of the given K definition file without the extension (.k).")
     private String mainModule;
@@ -119,5 +103,8 @@ public class KompileOptions implements Serializable {
 
         @Parameter(names="--kore-prove", description="Compile with the KORE pipeline for proving.")
         public boolean koreProve = false;
+
+        @Parameter(names="--cache-file", description="Location of parse cache file. Default is $KOMPILED_DIR/cache.bin.")
+        public String cacheFile;
     }
 }

@@ -2,10 +2,12 @@
 package org.kframework.backend.haskell;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.MapBinder;
 import org.apache.commons.lang3.tuple.Pair;
+import org.kframework.compile.Backend;
 import org.kframework.main.AbstractKModule;
 import org.kframework.rewriter.Rewriter;
 
@@ -24,13 +26,16 @@ public class HaskellBackendKModule extends AbstractKModule {
         mods.add(new AbstractModule() {
             @Override
             protected void configure() {
-
-                MapBinder<String, org.kframework.compile.Backend> mapBinder = MapBinder.newMapBinder(
-                        binder(), String.class, org.kframework.compile.Backend.class);
-                mapBinder.addBinding("haskell").to(HaskellBackend.class);
+                installHaskellBackend(binder());
             }
         });
         return mods;
+    }
+
+    private void installHaskellBackend(Binder binder) {
+        MapBinder<String, org.kframework.compile.Backend> mapBinder = MapBinder.newMapBinder(
+                binder, String.class, org.kframework.compile.Backend.class);
+        mapBinder.addBinding("haskell").to(HaskellBackend.class);
     }
 
     @Override
@@ -43,14 +48,28 @@ public class HaskellBackendKModule extends AbstractKModule {
         return Collections.singletonList(new AbstractModule() {
             @Override
             protected void configure() {
+                installHaskellRewriter(binder());
+            }
+        });
+    }
 
-                bindOptions(HaskellBackendKModule.this::krunOptions, binder());
+    private void installHaskellRewriter(Binder binder) {
+        bindOptions(HaskellBackendKModule.this::krunOptions, binder);
 
-                MapBinder<String, Function<org.kframework.definition.Module, Rewriter>> rewriterBinder = MapBinder.newMapBinder(
-                        binder(), TypeLiteral.get(String.class), new TypeLiteral<Function<org.kframework.definition.Module, Rewriter>>() {
-                        });
-                rewriterBinder.addBinding("haskell").to(HaskellRewriter.class);
+        MapBinder<String, Function<org.kframework.definition.Module, Rewriter>> rewriterBinder = MapBinder.newMapBinder(
+                binder, TypeLiteral.get(String.class), new TypeLiteral<Function<org.kframework.definition.Module, Rewriter>>() {
+                });
+        rewriterBinder.addBinding("haskell").to(HaskellRewriter.class);
+    }
 
+
+    @Override
+    public List<Module> getKProveModules() {
+        return Collections.singletonList(new AbstractModule() {
+            @Override
+            protected void configure() {
+                installHaskellBackend(binder());
+                installHaskellRewriter(binder());
             }
         });
     }

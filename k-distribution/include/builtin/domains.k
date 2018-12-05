@@ -25,59 +25,68 @@ module ARRAY-SYNTAX
   imports LIST
 
   syntax Array [hook(ARRAY.Array), unit(arrayCtor), element(_[_<-_])]
-  syntax Array ::= makeArray(Int, K) [function, hook(ARRAY.make), impure]
 
-  syntax K ::= Array "[" Int "]" [function, hook(ARRAY.lookup)]
-  syntax Array ::= Array "[" Int "<-" K "]" [function, hook(ARRAY.update), klabel(_[_<-_]), symbol]
+  syntax KItem ::= Array "[" Int "]" [function, hook(ARRAY.lookup)]
+  syntax Array ::= Array "[" Int "<-" KItem "]" [function, hook(ARRAY.update), klabel(_[_<-_]), symbol]
   syntax Array ::= Array "[" Int "<-" "undef" "]" [function, hook(ARRAY.remove)]
   syntax Array ::= updateArray(Array, Int, List) [function, hook(ARRAY.updateAll)]
   /*@ Sets a range of indices (given by an index into the array and the number
    of indices to set) to the same value. */
-  syntax Array ::= fillArray(Array, Int, Int, K) [function, hook(ARRAY.fill)]
+  syntax Array ::= fillArray(Array, Int, Int, KItem) [function, hook(ARRAY.fill)]
 
   syntax Bool ::= Int "in_keys" "(" Array ")" [function, functional, hook(ARRAY.in_keys)]
 endmodule
 
-module ARRAY-CONCRETE [concrete]
+module ARRAY-CONCRETE [concrete, kast]
   imports ARRAY-SYNTAX
   imports LIST
   imports STRING-SYNTAX
 
   syntax Array ::= makeEmptyArray(Int) [function, hook(ARRAY.makeEmpty), impure]
                  | arrayCtor(String, Int) [function, hook(ARRAY.ctor), symbol]
+                 | makeArray(Int, KItem) [function, hook(ARRAY.make), impure, klabel(makeArrayOcaml)]
 endmodule
 
 module ARRAY-SYMBOLIC [symbolic]
+  imports ARRAY-IN-K
+endmodule
+
+module ARRAY-KORE [kore]
+  imports ARRAY-IN-K
+endmodule
+
+module ARRAY-IN-K
   imports ARRAY-SYNTAX
-  imports MAP
+  imports LIST
+  imports K-EQUAL
   imports INT
 
-  syntax Array ::= array(Map, Int, K)
+  syntax Array ::= makeArray(Int, KItem) [function, hook(ARRAY.make)]
 
-  rule makeArray(Len:Int, K:K) => array(.Map, Len, K)
+  syntax Array ::= arr(List, Int, KItem)
 
-  rule array(_ I |-> K:K, _, _) [ I:Int ] => K
-  rule array(M:Map, _, K:K) [ I:Int ] => K requires notBool I in_keys(M)
+  rule makeArray(I::Int, D::KItem) => arr(.List, I, D)
 
-  rule array(M:Map, Len:Int, K:K) [ I:Int <- K2:K ] => array(M [ I <- K2 ], Len, K)
-       requires I >=Int 0 andBool I <Int Len
-  rule array(M:Map, Len:Int, K:K) [ I:Int <- _ ] => array(M, Len, K)
-       requires I<Int 0 orBool I >=Int Len
-  rule array(M:Map, Len:Int, K:K) [ I:Int <- undef ] => array(M [ I <- undef ], Len, K)
+  rule arr(L::List, _, D::KItem) [ IDX::Int ] => #if IDX >=Int size(L) #then D #else L[IDX] #fi
 
-  rule updateArray(array(M:Map, Len:Int, K:K), _, .List) => array(M, Len, K)
-  rule updateArray(array(M:Map, Len:Int, K:K), I:Int, ListItem(K2:K) L:List) => updateArray(array(M, Len, K) [ I <- K2 ], I +Int 1, L)
+  syntax List ::= ensureOffsetList(List, Int, KItem) [function]
+  rule ensureOffsetList(L::List, IDX::Int, D::KItem) => #if IDX >=Int size(L) #then updateList(makeList(IDX +Int 1, D), 0, L) #else L #fi
 
-  rule fillArray(array(M:Map, Len:Int, K:K), _, 0, _) => array(M, Len, K)
-  rule fillArray(array(M:Map, Len:Int, K:K), I:Int, N:Int, K2:K) => fillArray(array(M, Len, K) [ I <- K2 ], I +Int 1, N -Int 1, K2)
-       requires N >Int 0
+  rule arr(L::List, I::Int, D::KItem) [ IDX::Int <- VAL::KItem ] => arr(ensureOffsetList(L, IDX, D) [ IDX <- VAL ], I, D)
 
-  rule I:Int in_keys(array(M:Map, _, _)) => I in_keys(M)
+  rule arr(L::List, I::Int, D::KItem) [ IDX::Int <- undef ] => arr(L, I, D) [ IDX <- D ]
+
+  rule updateArray(arr(L::List, I::Int, D::KItem), IDX::Int, L2::List) => arr(updateList(ensureOffsetList(L, IDX +Int size(L2) -Int 1, D), IDX, L2), I, D)
+
+  rule fillArray(arr(L::List, I::Int, D::KItem), IDX::Int, LEN::Int, VAL::KItem) => arr(fillList(ensureOffsetList(L, IDX +Int LEN -Int 1, D), IDX, LEN, VAL), I, D)
+
+  rule IDX::Int in_keys(arr(_, I::Int, _)) => IDX >=Int 0 andBool IDX <Int I
 endmodule
 
 module ARRAY
   imports ARRAY-CONCRETE
   imports ARRAY-SYMBOLIC
+  imports ARRAY-KORE
 endmodule
 
 module MAP
@@ -99,21 +108,21 @@ module MAP
                //| "."                            [function, hook(MAP.unit)]
   /*@ Construct a singleton Map (a Map with only one key/value pair). The key
    is on the left and the value is on the right */
-  syntax Map ::= K "|->" K                      [function, functional, hook(MAP.element), klabel(_|->_), symbol, latex({#1}\mapsto{#2})]
+  syntax Map ::= KItem "|->" KItem                      [function, functional, hook(MAP.element), klabel(_|->_), symbol, latex({#1}\mapsto{#2})]
 
   syntax priorities _|->_ > _Map_ .Map
   syntax non-assoc _|->_
 
   /*@ Retrieve the value associated with the given key */
-  syntax K ::= Map "[" K "]"                    [function, hook(MAP.lookup), klabel(Map:lookup), symbol]
+  syntax KItem ::= Map "[" KItem "]"                    [function, hook(MAP.lookup), klabel(Map:lookup), symbol]
 
-  syntax K ::= Map "[" K "]" "orDefault" K      [function, functional, hook(MAP.lookupOrDefault), klabel(Map:lookupOrDefault)]
+  syntax KItem ::= Map "[" KItem "]" "orDefault" KItem      [function, functional, hook(MAP.lookupOrDefault), klabel(Map:lookupOrDefault)]
 
   /*@ Update a Map in form of  of keys and values: */
-  syntax Map ::= Map "[" K "<-" K "]"           [function, functional, hook(MAP.update), prefer]
+  syntax Map ::= Map "[" KItem "<-" KItem "]"           [function, functional, hook(MAP.update), prefer]
 
   /*@ Remove key/value pair associated with the key from map? */
-  syntax Map ::= Map "[" K "<-" "undef" "]"     [function, functional, hook(MAP.remove), klabel(_[_<-undef]), symbol]
+  syntax Map ::= Map "[" KItem "<-" "undef" "]"     [function, functional, hook(MAP.remove), klabel(_[_<-undef]), symbol]
 
   /*@ Get the difference of two maps interpreted as sets of entries
    ($M_1 \setminus M2$) */
@@ -131,7 +140,7 @@ module MAP
   syntax Set ::= keys(Map)                      [function, functional, hook(MAP.keys)]
   syntax List ::= "keys_list" "(" Map ")"       [function, hook(MAP.keys_list)]
 
-  syntax Bool ::= K "in_keys" "(" Map ")"       [function, functional, hook(MAP.in_keys)]
+  syntax Bool ::= KItem "in_keys" "(" Map ")"       [function, functional, hook(MAP.in_keys)]
 
   /*@ Get a List consisting of all values in the Map: */
   syntax List ::= values(Map)                   [function, hook(MAP.values)]
@@ -143,7 +152,7 @@ module MAP
   syntax Bool ::= Map "<=Map" Map               [function, functional, hook(MAP.inclusion)]
 
   /*@ Get an arbitrarily chosen key of the Map  */
-  syntax K ::= choice(Map)                      [function, hook(MAP.choice), klabel(Map:choice)]
+  syntax KItem ::= choice(Map)                      [function, hook(MAP.choice), klabel(Map:choice)]
 endmodule
 
 module SET
@@ -163,7 +172,7 @@ module SET
   /*@ Construct a singleton Set (a Set with only one element $\{ a \}$). To add
    an element $a$ to a set $A$, construct the union of the singleton set
    $\{ a \}$ and $A$ ($\{ a \} \cup A$). */
-  syntax Set ::= SetItem(K)               [function, functional, hook(SET.element), klabel(SetItem), symbol]
+  syntax Set ::= SetItem(KItem)               [function, functional, hook(SET.element), klabel(SetItem), symbol]
 
   /*@ Get the intersection of two sets ($A \cap B$) */
   syntax Set ::= intersectSet(Set, Set)   [function, functional, hook(SET.intersection)]
@@ -172,7 +181,7 @@ module SET
   syntax Set ::= Set "-Set" Set           [function, functional, hook(SET.difference), latex({#1}-_{\it Set}{#2}), klabel(Set:difference), symbol]
 
   /*@ Check element membership in a set ($a \in A$) */
-  syntax Bool ::= K "in" Set              [function, functional, hook(SET.in), klabel(Set:in), symbol]
+  syntax Bool ::= KItem "in" Set              [function, functional, hook(SET.in), klabel(Set:in), symbol]
 
   /*@ Check set inclusion ($A \subseteq B$) */
   syntax Bool ::= Set "<=Set" Set         [function, functional, hook(SET.inclusion)]
@@ -181,7 +190,7 @@ module SET
   syntax Int ::= size(Set)                [function, functional, hook(SET.size)]
 
   /*@ Get an arbitrarily chosen element of the Set */
-  syntax K ::= choice(Set)                [function, hook(SET.choice), klabel(Set:choice)]
+  syntax KItem ::= choice(Set)                [function, hook(SET.choice), klabel(Set:choice)]
 
   /* set difference axioms */
   // TODO(AndreiS): remove this if not used
@@ -232,18 +241,26 @@ module LIST
   syntax List ::= ".List"                 [function, functional, hook(LIST.unit), klabel(.List), symbol, smtlib(smt_seq_nil), latex(\dotCt{List})]
                 //| "."
   /*@ Construct a singleton List (a list with only  one element) */
-  syntax List ::= ListItem(K)             [function, functional, hook(LIST.element), klabel(ListItem), symbol, smtlib(smt_seq_elem)]
+  syntax List ::= ListItem(KItem)             [function, functional, hook(LIST.element), klabel(ListItem), symbol, smtlib(smt_seq_elem)]
 
   /*@ Get an element form the List by index. Positive indices mean from the
    beginning (0 is the first element), and negative indices mean from the end
    (-1 is the last element). */
-  syntax K ::= List "[" Int "]"           [function, hook(LIST.get), klabel(List:get), symbol]
+  syntax KItem ::= List "[" Int "]"           [function, hook(LIST.get), klabel(List:get), symbol]
+
+  syntax List ::= List "[" Int "<-" KItem "]" [function, hook(LIST.update), klabel(List:set)]
+
+  syntax List ::= makeList(Int, KItem) [function, hook(LIST.make)]
+
+  syntax List ::= updateList(List, Int, List) [function, hook(LIST.updateAll)]
+
+  syntax List ::= fillList(List, Int, Int, KItem) [function, hook(LIST.fill)]
 
   /*@ Remove elements from the beginning and the end of the List. */
   syntax List ::= range(List, Int, Int)   [function, hook(LIST.range), klabel(List:range), symbol]
 
   /*@ Check element membership in the given list */
-  syntax Bool ::= K "in" List             [function, functional, hook(LIST.in), klabel(_inList_)]
+  syntax Bool ::= KItem "in" List             [function, functional, hook(LIST.in), klabel(_inList_)]
 
   /*@ Get the list length */
   syntax Int ::= size(List)               [function, functional, hook(LIST.size), klabel (sizeList), smtlib(smt_seq_len)]
@@ -495,7 +512,7 @@ module STRING
   syntax String ::= chrChar ( Int )      [function, hook(STRING.chr)]
   syntax Int ::= ordChar ( String )      [function, hook(STRING.ord)]
 
-  syntax String ::= substrString ( String , Int , Int ) [function, hook(STRING.substr)]
+  syntax String ::= substrString ( String , Int , Int ) [function, functional, hook(STRING.substr)]
   syntax Int ::= findString ( String , String , Int )   [function, hook(STRING.find)]
   syntax Int ::= rfindString ( String , String , Int )  [function, hook(STRING.rfind)]
   syntax Int ::= findChar ( String , String , Int )     [function, hook(STRING.findChar)]
@@ -559,7 +576,21 @@ module STRING
 
 endmodule
 
-module STRING-BUFFER-SYNTAX
+module STRING-BUFFER-IN-K [symbolic]
+  imports BASIC-K
+  imports STRING
+
+  syntax StringBuffer ::= ".StringBuffer" [function, functional]
+  syntax StringBuffer ::= StringBuffer "+String" String [function, functional, left, avoid]
+  syntax StringBuffer ::= String
+  syntax String ::= StringBuffer2String ( StringBuffer ) [function, functional]
+
+  rule {SB:String}:>StringBuffer +String S:String => SB +String S
+  rule .StringBuffer => ""
+  rule StringBuffer2String(S:String) => S
+endmodule
+
+module STRING-BUFFER-HOOKED [concrete]
   imports BASIC-K
   imports STRING
 
@@ -569,24 +600,12 @@ module STRING-BUFFER-SYNTAX
   syntax String ::= StringBuffer2String ( StringBuffer ) [function, functional, hook(BUFFER.toString)]
 endmodule
 
-module STRING-BUFFER-SYMBOLIC [symbolic]
-  imports STRING-BUFFER-SYNTAX
-  imports STRING-SYNTAX
-  imports BOOL-SYNTAX
-
-  syntax StringBuffer ::= String
-
-  rule .StringBuffer => ""
-
-  rule StringBuffer2String(S:String) => S
-endmodule
-
 module STRING-BUFFER
-  imports STRING-BUFFER-SYNTAX
-  imports STRING-BUFFER-SYMBOLIC
+  imports STRING-BUFFER-HOOKED
+  imports STRING-BUFFER-IN-K
 endmodule
 
-module BYTES-SYNTAX
+module BYTES-HOOKED [concrete]
   syntax Bytes [hook(BYTES.Bytes)]
 
   syntax Bytes ::= ".Bytes" [function, functional, hook(BYTES.empty), impure]
@@ -611,8 +630,7 @@ module BYTES-SYNTAX
   syntax Bytes ::= Bytes "+Bytes" Bytes [function, functional, hook(BYTES.concat), right]
 endmodule
 
-module BYTES-SYMBOLIC [symbolic]
-  imports BYTES-SYNTAX
+module BYTES-IN-K [symbolic]
   imports INT
   imports K-EQUAL
   imports STRING
@@ -620,9 +638,15 @@ module BYTES-SYMBOLIC [symbolic]
 
   syntax Bytes ::= "nilBytes"
                  | Int ":" Bytes
+  syntax Endianness ::= "LE" [klabel(littleEndianBytes), symbol]
+                      | "BE" [klabel(bigEndianBytes), symbol]
+  syntax Signedness ::= "Signed" [klabel(signedBytes), symbol]
+                      | "Unsigned" [klabel(unsignedBytes), symbol]
 
+  syntax Bytes ::= ".Bytes" [function, functional]
   rule .Bytes => nilBytes
 
+  syntax Int ::= Bytes2Int(Bytes, Endianness, Signedness) [function, functional]
   rule Bytes2Int(nilBytes, _, _) => 0
   rule Bytes2Int(B : nilBytes, BE, Unsigned) => B
   rule Bytes2Int(B0 : B1 : BS, BE, Unsigned) => Bytes2Int(((B0 <<Int 8) |Int B1) : BS, BE, Unsigned)
@@ -630,49 +654,61 @@ module BYTES-SYMBOLIC [symbolic]
   rule Bytes2Int(B0 : BS, LE, S) => Bytes2Int(reverseBytes(B0 : BS), BE, S)
 
   syntax Bytes ::= Int2Bytes(Int, Bytes) [function, klabel(Int2BytesAux)]
+  syntax Bytes ::= Int2Bytes(Int, Int, Endianness) [function, functional]
+                 | Int2Bytes(Int, Endianness, Signedness) [function, functional, klabel(Int2BytesNoLen)]
   rule Int2Bytes(LEN, I, BE) => padLeftBytes(Int2Bytes(bitRangeInt(I, 0, LEN <<Int 3), nilBytes), LEN, #if I <Int 0 #then 255 #else 0 #fi)
   rule Int2Bytes(LEN, I, LE) => reverseBytes(Int2Bytes(LEN, I, BE))
   rule Int2Bytes(0, BS) => BS
   rule Int2Bytes(I, BS) => Int2Bytes(I >>Int 8, I &Int 255 : BS) requires I =/=Int 0
 
   syntax String ::= Bytes2String(Bytes, StringBuffer) [function, klabel(Bytes2StringAux)]
+  syntax String ::= Bytes2String(Bytes) [function, functional]
   rule Bytes2String(BS) => Bytes2String(BS, .StringBuffer)
   rule Bytes2String(nilBytes, BUFFER) => StringBuffer2String(BUFFER)
   rule Bytes2String(B : BS, BUFFER) => Bytes2String(BS, BUFFER +String chrChar(B))
 
+  syntax Bytes ::= String2Bytes(String) [function, functional]
   rule String2Bytes(S) => ordChar(substrString(S, 0, 1)) : String2Bytes(substrString(S, 1, lengthString(S))) requires lengthString(S) >=Int 1
   rule String2Bytes("") => nilBytes
 
+  syntax Bytes ::= substrBytes(Bytes, Int, Int) [function]
   rule substrBytes(BS, 0, 0) => nilBytes
   rule substrBytes(B : BS, N, M) => substrBytes(BS, N -Int 1, M -Int 1) requires N >Int 0
   rule substrBytes(B : BS, 0, M) => B : substrBytes(BS, 0, M -Int 1) requires M >Int 0
 
+  syntax Bytes ::= replaceAtBytes(Bytes, Int, Bytes) [function]
   rule replaceAtBytes(BS, _, nilBytes) => BS
   rule replaceAtBytes(B : BS, N, BS') => B : replaceAtBytes(BS, N -Int 1, BS') requires N >Int 0
   rule replaceAtBytes(_ : BS, 0, B : BS') => B : replaceAtBytes(BS, 0, BS')
 
+  syntax Bytes ::= padRightBytes(Bytes, Int, Int) [function]
+                 | padLeftBytes(Bytes, Int, Int) [function]
   rule padRightBytes(BS, LEN, VAL) => reverseBytes(padLeftBytes(reverseBytes(BS), LEN, VAL))
   rule padLeftBytes(BS, LEN, VAL) => BS requires lengthBytes(BS) >=Int LEN
   rule padLeftBytes(BS, LEN, VAL) => padLeftBytes(VAL : BS, LEN, VAL) requires lengthBytes(BS) <Int LEN
 
+  syntax Bytes ::= reverseBytes(Bytes) [function, functional]
   syntax Bytes ::= reverseBytes(Bytes, Bytes) [function, klabel(reverseBytesAux)]
   rule reverseBytes(BS) => reverseBytes(BS, nilBytes)
   rule reverseBytes(nilBytes, BS) => BS
   rule reverseBytes(B : BS, BS') => reverseBytes(BS, B : BS')
 
+  syntax Int ::= lengthBytes(Bytes) [function, functional, smtlib(lengthBytes)]
   syntax Int ::= lengthBytes(Bytes, Int) [function, klabel(lengthBytesAux), smtlib(lengthBytesAux)]
   rule lengthBytes(BS) => lengthBytes(BS, 0)
   rule lengthBytes(nilBytes, SIZE) => SIZE
   rule lengthBytes(B : BS, SIZE) => lengthBytes(BS, SIZE +Int 1)
 
+  syntax Bytes ::= Bytes "+Bytes" Bytes [function, functional, right]
   rule nilBytes +Bytes B2 => B2
   rule (B : BS) +Bytes B2 => B : (BS +Bytes B2)
 endmodule
 
 module BYTES
-  imports BYTES-SYNTAX
-  imports BYTES-SYMBOLIC
+  imports BYTES-HOOKED
+  imports BYTES-IN-K
   imports INT
+
   rule Int2Bytes(I, E, Unsigned) => Int2Bytes((log2Int(I) +Int 8) /Int 8, I, E)
     requires I >Int 0
   rule Int2Bytes(0, _::Endianness, _) => .Bytes
@@ -709,7 +745,7 @@ module ID
   rule freshId(I:Int) => String2Id("_" +String Int2String(I))
 endmodule
 
-module ID-SYMBOLIC [symbolic]
+module ID-SYMBOLIC [symbolic, kast]
   imports ID-SYNTAX
   syntax KItem  ::= "#parseToken"  "(" String "," String ")"  [function, hook(STRING.parseToken)]
   rule String2Id(S:String) => {#parseToken("Id", S)}:>Id
@@ -738,12 +774,12 @@ endmodule
 module K-REFLECTION
   imports BASIC-K
   imports STRING
+  imports K-REFLECTION-SYMBOLIC
 
   syntax K ::= "#configuration" [function, impure, hook(KREFLECTION.configuration)]
   syntax String ::= #sort(K) [function, hook(KREFLECTION.sort)]
   syntax KItem ::= #fresh(String)   [function, hook(KREFLECTION.fresh), impure]
   syntax KItem ::= getKLabel(K)  [function, hook(KREFLECTION.getKLabel)]
-  syntax Bool ::= #isConcrete(K) [function, hook(KREFLECTION.isConcrete)]
 
   syntax String ::= #getenv(String) [function, impure, hook(KREFLECTION.getenv)]
 
@@ -751,6 +787,18 @@ module K-REFLECTION
   // undefined
   syntax List ::= #argv() [function, hook(KREFLECTION.argv)]
 
+endmodule
+
+module K-REFLECTION-SYMBOLIC [symbolic]
+  imports BASIC-K
+  imports STRING
+
+  // return empty string if the term has no klabel
+  syntax String ::= #getKLabelString(K) [function, hook(KREFLECTION.getKLabelString)]
+
+  // return true if no variable nor unresolved function appears in any subterm
+  syntax Bool ::= #isConcrete(K) [function, hook(KREFLECTION.isConcrete)]
+  syntax Bool ::= #isVariable(K) [function, hook(KREFLECTION.isVariable)]
 endmodule
 
 module K-IO

@@ -154,6 +154,10 @@ public abstract class JavaSymbolicObject<T extends JavaSymbolicObject<T>>
         return isGround() && isNormal();
     }
 
+    public boolean isVariable() {
+        return this instanceof Variable;
+    }
+
      /**
      * Returns true if the function and anywhere symbols in this
      * {@code JavaSymbolicObject} have been evaluated under the given

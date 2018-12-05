@@ -97,7 +97,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
     }
 
     public boolean implies(ConstrainedTerm constrainedTerm) {
-        ConjunctiveFormula conjunctiveFormula = matchImplies(constrainedTerm, true);
+        ConjunctiveFormula conjunctiveFormula = matchImplies(constrainedTerm, true, null);
         return conjunctiveFormula != null;
     }
 
@@ -126,7 +126,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
      * occurring only in the given constrained term (but not in this constrained term) are
      * existentially quantified.
      */
-    public ConjunctiveFormula matchImplies(ConstrainedTerm constrainedTerm, boolean expand) {
+    public ConjunctiveFormula matchImplies(ConstrainedTerm constrainedTerm, boolean expand, Set<String> matchingSymbols) {
         ConjunctiveFormula constraint = ConjunctiveFormula.of(constrainedTerm.termContext().global())
                 .add(data.constraint.substitution())
                 .add(data.term, constrainedTerm.data.term)
@@ -140,10 +140,21 @@ public class ConstrainedTerm extends JavaSymbolicObject {
             return null;
         }
 
+        if (matchingSymbols != null) {
+            constraint = constraint.resolveMatchingSymbols(matchingSymbols);
+            if (constraint.isFalse()) {
+                return null;
+            }
+        }
+
         /* apply pattern folding */
         constraint = constraint.simplifyModuloPatternFolding(context)
-                .add(constrainedTerm.data.constraint)
-                .simplifyModuloPatternFolding(context);
+                .add(constrainedTerm.data.constraint);
+        if (constraint.isFalse()) {
+            return null;
+        }
+
+        constraint = constraint.simplifyModuloPatternFolding(context);
         if (constraint.isFalse()) {
             return null;
         }

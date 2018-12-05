@@ -41,15 +41,18 @@ public class Z3Wrapper {
         this.globalOptions = globalOptions;
         this.files = files;
 
-        SMT_PRELUDE = options.smtPrelude == null ? "" : files.loadFromWorkingDirectory(options.smtPrelude);
+        String defaultPrelude = "(set-option :auto-config false)\n"
+                              + "(set-option :smt.mbqi false)\n";
+
+        SMT_PRELUDE = options.smtPrelude == null ? defaultPrelude : files.loadFromWorkingDirectory(options.smtPrelude);
         CHECK_SAT = options.z3Tactic == null ? "(check-sat)" : "(check-sat-using " + options.z3Tactic + ")";
     }
 
     public synchronized boolean isUnsat(CharSequence query, int timeout, Z3Profiler timer) {
-        if (options.z3Executable) {
-            return checkQueryWithExternalProcess(query, timeout, timer);
-        } else {
+        if (options.z3JNI) {
             return checkQueryWithLibrary(query, timeout);
+        } else {
+            return checkQueryWithExternalProcess(query, timeout, timer);
         }
     }
 
