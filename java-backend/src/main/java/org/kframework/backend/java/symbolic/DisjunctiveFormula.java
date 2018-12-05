@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2016 K Team. All Rights Reserved.
+// Copyright (c) 2015-2018 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
 import org.kframework.backend.java.kil.CollectionInternalRepresentation;
@@ -12,6 +12,7 @@ import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.Kind;
 import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
+import org.kframework.builtin.KLabels;
 
 import java.util.Collection;
 import java.util.List;
@@ -22,7 +23,7 @@ import java.util.stream.Collectors;
  *
  * @see org.kframework.backend.java.symbolic.ConjunctiveFormula
  */
-public class DisjunctiveFormula extends Term implements CollectionInternalRepresentation, HasGlobalContext {
+public class DisjunctiveFormula extends Term implements CollectionInternalRepresentation {
 
     private final PersistentUniqueList<ConjunctiveFormula> conjunctions;
 
@@ -66,12 +67,12 @@ public class DisjunctiveFormula extends Term implements CollectionInternalRepres
 
     @Override
     public KLabel constructorLabel() {
-        return KLabelConstant.of("#Or", global.getDefinition());
+        return KLabelConstant.of(KLabels.ML_OR, global.getDefinition());
     }
 
     @Override
     public KItem unit() {
-        return KItem.of(KLabelConstant.of("#False", global.getDefinition()), KList.EMPTY, global);
+        return KItem.of(KLabelConstant.of(KLabels.ML_FALSE, global.getDefinition()), KList.EMPTY, global);
     }
     @Override
     protected int computeHash() {

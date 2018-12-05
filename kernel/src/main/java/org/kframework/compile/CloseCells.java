@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2016 K Team. All Rights Reserved.
+// Copyright (c) 2015-2018 K Team. All Rights Reserved.
 package org.kframework.compile;
 
 import com.google.common.collect.Sets;
@@ -95,7 +95,7 @@ public class CloseCells {
             if (s == null) {
                 newLabel = KVariable("DotVar" + (counter++), Att().add("anonymous"));
             } else {
-                newLabel = KVariable("DotVar" + (counter++), Att().add("anonymous").add(Attribute.SORT_KEY, s.name()));
+                newLabel = KVariable("DotVar" + (counter++), Att().add("anonymous").add(Sort.class, s));
             }
         } while (vars.contains(newLabel));
         vars.add(newLabel);
@@ -199,7 +199,7 @@ public class CloseCells {
                 newContents.addAll(contents);
                 for (Sort reqChild : requiredLeft) {
                     if (!cfg.cfg.isConstantInitializer(reqChild))
-                        throw KEMException.compilerError("Cannot close cell on right hand side because the initializer for " + reqChild.name() + " requires configuration variables.");
+                        throw KEMException.compilerError("Cannot close cell on right hand side because the initializer for " + reqChild.toString() + " requires configuration variables.");
                     newContents.add(cfg.getDefaultCell(reqChild));
                 }
                 return (KApply(label, KList(newContents)));
@@ -247,13 +247,13 @@ public class CloseCells {
             KLabel closeOperator = sortInfo.getCloseOperator(cellType);
             if (closeOperator == null) {
                 throw KEMException.criticalError("No operator registered for closing cells of sort "
-                        + cellType.name() + " when closing cell " + cell.toString());
+                        + cellType.toString() + " when closing cell " + cell.toString());
             }
             LabelInfo.AssocInfo info = labelInfo.getAssocInfo(closeOperator);
             if (!info.isAssoc() && openLeft && openRight) {
                 throw KEMException.criticalError(
                         "Ambiguity closing a cell. Operator " + closeOperator.toString()
-                                + " for sort " + cellType.name() + " is not associative, "
+                                + " for sort " + cellType.toString() + " is not associative, "
                                 + "but the cell has ellipses on both sides " + cell.toString());
             }
             if (info.isComm() && (!openLeft || !openRight || info.isAssoc())) {
@@ -278,8 +278,8 @@ public class CloseCells {
         if (item instanceof KApply) {
             required.remove(labelInfo.getCodomain(((KApply) item).klabel()));
         } else if (item instanceof KVariable) {
-            if (item.att().contains(Attribute.SORT_KEY)) {
-                Sort sort = Sort(item.att().get(Attribute.SORT_KEY));
+            if (item.att().contains(Sort.class)) {
+                Sort sort = item.att().get(Sort.class);
                 if (cfg.cfg.isCell(sort)) {
                     required.remove(sort);
                 } else {

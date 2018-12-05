@@ -1,0 +1,41 @@
+module BASIC-K
+  sort SortK{} []
+  sort SortKItem{} []
+endmodule []
+
+module KSEQ
+  import BASIC-K []
+
+  symbol kseq{}(SortKItem{}, SortK{}) : SortK{} []
+  symbol append{}(SortK{}, SortK{}) : SortK{} [function{}()]
+  symbol dotk{}() : SortK{} []
+
+  axiom{R}
+    \equals{SortK{},R}(
+      append{}(dotk{}(),K2:SortK{}),
+      K2:SortK{})
+  []
+
+  axiom{R}
+    \equals{SortK{},R}(
+      append{}(kseq{}(K1:SortKItem{},K2:SortK{}),K3:SortK{}),
+      kseq{}(K1:SortKItem{},append{}(K2:SortK{},K3:SortK{})))
+  []
+
+endmodule []
+
+module INJ
+  symbol inj{From,To}(From) : To [sortInjection{}()]
+ 
+  axiom{S1,S2,S3,R} 
+    \equals{S3,R}(
+      inj{S2,S3}(inj{S1,S2}(T:S1)),
+      inj{S1,S3}(T:S1))
+  []
+
+endmodule []
+
+module K
+  import KSEQ []
+  import INJ []
+endmodule []

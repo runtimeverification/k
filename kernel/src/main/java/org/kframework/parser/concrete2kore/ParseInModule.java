@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2016 K Team. All Rights Reserved.
+// Copyright (c) 2015-2018 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore;
 
 import com.google.common.collect.Sets;
@@ -8,21 +8,12 @@ import org.kframework.kore.K;
 import org.kframework.kore.Sort;
 import org.kframework.parser.Term;
 import org.kframework.parser.TreeNodesToKORE;
-import org.kframework.parser.concrete2kore.disambiguation.AddEmptyLists;
-import org.kframework.parser.concrete2kore.disambiguation.AmbFilter;
-import org.kframework.parser.concrete2kore.disambiguation.ApplyTypeCheckVisitor;
-import org.kframework.parser.concrete2kore.disambiguation.CorrectCastPriorityVisitor;
-import org.kframework.parser.concrete2kore.disambiguation.CorrectKSeqPriorityVisitor;
-import org.kframework.parser.concrete2kore.disambiguation.CorrectRewritePriorityVisitor;
-import org.kframework.parser.concrete2kore.disambiguation.PriorityVisitor;
-import org.kframework.parser.concrete2kore.disambiguation.PushAmbiguitiesDownAndPreferAvoid;
-import org.kframework.parser.concrete2kore.disambiguation.RemoveBracketVisitor;
-import org.kframework.parser.concrete2kore.disambiguation.TreeCleanerVisitor;
-import org.kframework.parser.concrete2kore.disambiguation.VariableTypeInferenceFilter;
+import org.kframework.parser.concrete2kore.disambiguation.*;
 import org.kframework.parser.concrete2kore.kernel.Grammar;
 import org.kframework.parser.concrete2kore.kernel.KSyntax2GrammarStatesFilter;
 import org.kframework.parser.concrete2kore.kernel.Parser;
 import org.kframework.parser.concrete2kore.kernel.Scanner;
+import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import scala.Tuple2;
@@ -89,6 +80,16 @@ public class ParseInModule implements Serializable {
 
     public Module getParsingModule() { return parsingModule; }
 
+    public void initialize() {
+       disambModule.definedSorts();
+       disambModule.subsorts();
+       disambModule.priorities();
+       disambModule.leftAssoc();
+       disambModule.rightAssoc();
+       disambModule.productionsFor();
+       disambModule.overloads();
+    }
+
     /**
      * Parse as input the given string and start symbol using the module stored in the object.
      * @param input          the string to parse.
@@ -97,13 +98,12 @@ public class ParseInModule implements Serializable {
      */
     public Tuple2<Either<Set<ParseFailedException>, K>, Set<ParseFailedException>>
             parseString(String input, Sort startSymbol, Source source) {
-        return parseString(input, startSymbol, null, source, 1, 1, true);
+        try (Scanner scanner = getScanner()) {
+            return parseString(input, startSymbol, scanner, source, 1, 1, true);
+        }
     }
 
     private Scanner getGrammar(Scanner scanner) {
-        if(scanner == null) {
-            scanner = getScanner();
-        }
         Grammar g = grammar;
         if (g == null) {
             g = KSyntax2GrammarStatesFilter.getGrammar(this.parsingModule, scanner);
@@ -124,7 +124,7 @@ public class ParseInModule implements Serializable {
         if (result._1().isLeft()) {
             parseInfo = Left.apply(result._1().left().get());
         } else {
-            parseInfo = Right.apply(TreeNodesToKORE.apply(result._1().right().get()));
+            parseInfo = Right.apply(new TreeNodesToKORE(Outer::parseSort, inferSortChecks && strict).apply(result._1().right().get()));
         }
         return new Tuple2<>(parseInfo, result._2());
     }
@@ -147,7 +147,7 @@ public class ParseInModule implements Serializable {
             parseStringTerm(String input, Sort startSymbol, Scanner scanner, Source source, int startLine, int startColumn, boolean inferSortChecks) {
         scanner = getGrammar(scanner);
 
-        Grammar.NonTerminal startSymbolNT = grammar.get(startSymbol.name());
+        Grammar.NonTerminal startSymbolNT = grammar.get(startSymbol.toString());
         Set<ParseFailedException> warn = Sets.newHashSet();
         if (startSymbolNT == null) {
             String msg = "Could not find start symbol: " + startSymbol;
@@ -175,24 +175,48 @@ public class ParseInModule implements Serializable {
         rez = new CorrectCastPriorityVisitor().apply(rez.right().get());
         if (rez.isLeft())
             return new Tuple2<>(rez, warn);
-        rez = new ApplyTypeCheckVisitor(disambModule.subsorts()).apply(rez.right().get());
-        if (rez.isLeft())
-            return new Tuple2<>(rez, warn);
         rez = new PriorityVisitor(disambModule.priorities(), disambModule.leftAssoc(), disambModule.rightAssoc()).apply(rez.right().get());
         if (rez.isLeft())
             return new Tuple2<>(rez, warn);
-        Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rez2 = new VariableTypeInferenceFilter(disambModule.subsorts(), disambModule.definedSorts(), disambModule.productionsFor(), strict && inferSortChecks).apply(rez.right().get());
+        Term rez3 = new PushTopAmbiguityUp().apply(rez.right().get());
+        rez = new ApplyTypeCheckVisitor(disambModule.subsorts()).apply(rez3);
+        if (rez.isLeft())
+            return new Tuple2<>(rez, warn);
+        Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rez2 = new VariableTypeInferenceFilter(disambModule.subsorts(), disambModule.definedSorts(), disambModule.productionsFor(), strict && inferSortChecks, true).apply(rez.right().get());
         if (rez2._1().isLeft())
             return rez2;
         warn = rez2._2();
 
-        Term rez3 = new PushAmbiguitiesDownAndPreferAvoid().apply(rez2._1().right().get());
-        rez2 = new AmbFilter().apply(rez3);
+        rez = new ResolveOverloadedTerminators(disambModule.overloads()).apply(rez2._1().right().get());
+        if (rez.isLeft())
+            return new Tuple2<>(rez, warn);
+        rez3 = new PushAmbiguitiesDownAndPreferAvoid(disambModule.overloads()).apply(rez.right().get());
+        rez2 = new AmbFilter(strict && inferSortChecks).apply(rez3);
         warn = Sets.union(rez2._2(), warn);
         rez2 = new AddEmptyLists(disambModule).apply(rez2._1().right().get());
         warn = Sets.union(rez2._2(), warn);
+        if (rez2._1().isLeft())
+            return rez2;
         rez3 = new RemoveBracketVisitor().apply(rez2._1().right().get());
 
         return new Tuple2<>(Right.apply(rez3), warn);
+    }
+
+    public static Term disambiguateForUnparse(Module mod, Term ambiguity) {
+        Term rez3 = new PushTopAmbiguityUp().apply(ambiguity);
+        Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheckVisitor(mod.subsorts()).apply(rez3);
+        Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rez2;
+        if (rez.isLeft()) {
+            rez2 = new AmbFilter(false).apply(rez3);
+            return rez2._1().right().get();
+        }
+        rez2 = new VariableTypeInferenceFilter(mod.subsorts(), mod.definedSorts(), mod.productionsFor(), false, false).apply(rez.right().get());
+        if (rez2._1().isLeft()) {
+            rez2 = new AmbFilter(false).apply(rez.right().get());
+            return rez2._1().right().get();
+        }
+        rez3 = new PushAmbiguitiesDownAndPreferAvoid(mod.overloads()).apply(rez2._1().right().get());
+        rez2 = new AmbFilter(false).apply(rez3);
+        return rez2._1().right().get();
     }
 }

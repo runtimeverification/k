@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2016 K Team. All Rights Reserved.
+// Copyright (c) 2013-2018 K Team. All Rights Reserved.
 package org.kframework.backend.java.builtins;
 
 import com.google.common.collect.MapDifference;
@@ -7,6 +7,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multisets;
 
 import org.kframework.backend.java.kil.*;
+import org.kframework.builtin.KLabels;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -166,7 +167,7 @@ public class BuiltinMapOperations {
         builder.addAll(map.getEntries().keySet());
         if (!map.isConcreteCollection()) {
             builder.add(KItem.of(
-                    KLabelConstant.of("keys", context.definition()),
+                    KLabelConstant.of(KLabels.MAP_KEYS, context.definition()),
                     KList.concatenate(BuiltinMap.concatenate(context.global(), map.baseTerms())),
                     context.global()));
         }

@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2016 K Team. All Rights Reserved.
+// Copyright (c) 2014-2018 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
 import com.google.common.collect.HashMultiset;
@@ -52,7 +52,7 @@ public class UnboundedVariablesCollector extends PrePostVisitor {
         preVisitor.addVisitor(new LocalVisitor(){
             @Override
             public void visit(Term node) {
-                if (!(node instanceof KList) && global.getDefinition().subsorts().isSubsortedEq(Sort.KVARIABLE, node.sort())) {
+                if (!(node instanceof KList) && !(node instanceof KLabel) && global.getDefinition().subsorts().isSubsortedEq(Sort.KVARIABLE, node.sort())) {
                     if (!boundVariables.contains(node)) {
                         unboundedVariables.add(node);
                     }

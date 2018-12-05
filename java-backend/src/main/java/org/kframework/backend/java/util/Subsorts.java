@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2016 K Team. All Rights Reserved.
+// Copyright (c) 2014-2018 K Team. All Rights Reserved.
 package org.kframework.backend.java.util;
 
 import com.google.common.collect.ArrayTable;
@@ -35,15 +35,15 @@ public class Subsorts implements Serializable {
 
     public Subsorts(Module module) {
         sorts = JavaConversions.asJavaCollection(module.definedSorts()).stream()
-                .map(s -> Sort.of(s.name()))
+                .map(Sort::of)
                 .collect(Collectors.toSet());
 
         this.subsort = ArrayTable.create(sorts, sorts);
         for (org.kframework.kore.Sort sort1 : Collections.iterable(module.definedSorts())) {
             for (org.kframework.kore.Sort sort2 : Collections.iterable(module.definedSorts())) {
                 subsort.put(
-                        Sort.of(sort1.name()),
-                        Sort.of(sort2.name()),
+                        Sort.of(sort1),
+                        Sort.of(sort2),
                         module.subsorts().$greater(sort1, sort2));
             }
         }

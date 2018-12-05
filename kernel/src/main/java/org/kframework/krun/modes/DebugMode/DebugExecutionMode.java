@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2016 K Team. All Rights Reserved.
+// Copyright (c) 2015-2018 K Team. All Rights Reserved.
 package org.kframework.krun.modes.DebugMode;
 
 import com.google.inject.Inject;
@@ -120,7 +120,7 @@ public class DebugExecutionMode implements ExecutionMode {
             } catch (FileNotFoundException fileNotFound) {
                 System.out.println(fileNotFound.getMessage());
             } catch (IOException inputException) {
-                KEMException.criticalError("Failed to read input from console");
+                throw KEMException.criticalError("Failed to read input from console");
             } catch (UserInterruptException interrupt) {
                 return null;
             }

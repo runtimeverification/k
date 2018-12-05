@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2016 K Team. All Rights Reserved.
+// Copyright (c) 2012-2018 K Team. All Rights Reserved.
 //require "modules/pattern-matching.k"
 
 /*!
@@ -150,6 +150,8 @@ the list is on a position which can be evaluated: */
   syntax Exps  ::= List{Exp,","}                   [strict]
   syntax Val
   syntax Vals ::= List{Val,","}
+  syntax Bottom
+  syntax Bottoms ::= List{Bottom,","}
 
 /*@ We next define the syntax of arithmetic constructs, together with
 their relative priorities and left-/non-associativities.  We also
@@ -446,6 +448,7 @@ add more values later.  */
   syntax Val ::= Int | Bool | String
   syntax Exp ::= Val
   syntax Exps ::= Vals
+  syntax Vals ::= Bottoms
   syntax KResult ::= Val
 
 
@@ -725,6 +728,7 @@ and of expressions in a binding, respectively. */
   /* Extra kore stuff */
   syntax KResult ::= Vals
   syntax Exps ::= Names
+  syntax Names ::= Bottoms
 
   /* Matching */
   syntax MatchResult ::= getMatching(Exp, Val)                      [function]

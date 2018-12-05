@@ -6,7 +6,7 @@ Appropriate installation instructions and bug reports are welcome from contribut
 
 1. Prerequisites:
   * Package dependencies:
-    `sudo apt-get update; sudo apt-get install build-essential m4 openjdk-8-jre libgmp-dev libmpfr-dev pkg-config flex z3 libz3-dev unzip`
+    `sudo apt-get update; sudo apt-get install build-essential m4 openjdk-8-jre libgmp-dev libmpfr-dev pkg-config flex z3 libz3-dev unzip python3`
 
 2. Install:
   * Move this directory, once extracted, to your preferred location.  For convenient usage,

@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2016 K Team. All Rights Reserved.
+// Copyright (c) 2015-2018 K Team. All Rights Reserved.
 package org.kframework.compile;
 
 import com.google.common.collect.HashMultimap;
@@ -16,8 +16,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static org.kframework.kore.KORE.KLabel;
-import static org.kframework.kore.KORE.Sort;
+import static org.kframework.kore.KORE.*;
 
 /**
  * Basic label information for cell completion
@@ -29,16 +28,16 @@ public class LabelInfo {
 
     private final Set<KLabel> functionLabels = new HashSet<>();
 
-    protected void addLabel(String result, String label) {
+    protected void addLabel(Sort result, String label) {
         addLabel(result, label, false);
     }
 
-    protected void addLabel(String result, String label, boolean isAssoc) {
+    protected void addLabel(Sort result, String label, boolean isAssoc) {
         addLabel(result, label, isAssoc, false, false);
     }
 
-    protected void addLabel(String result, String label, boolean isAssoc, boolean isComm, boolean isFunction) {
-        codomain.put(KLabel(label), Sort(result));
+    protected void addLabel(Sort result, String label, boolean isAssoc, boolean isComm, boolean isFunction) {
+        codomain.put(KLabel(label), result);
         AssocInfo info = new AssocInfo(isAssoc, isComm);
         if (assocInfo.containsKey(KLabel(label))) {
             assert assocInfo.get(KLabel(label)).equals(info);

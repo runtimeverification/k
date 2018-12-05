@@ -1,0 +1,327 @@
+diff --git a/bytecomp/matching.ml b/bytecomp/matching.ml
+index 7d54160..5a51708 100644
+--- a/bytecomp/matching.ml
++++ b/bytecomp/matching.ml
+@@ -82,7 +82,7 @@ let rec small_enough n = function
+       else small_enough (n-1) rem
+ 
+ let ctx_lshift ctx =
+-  if small_enough 31 ctx then
++  if small_enough (!Clflags.match_context_rows - 1) ctx then
+     List.map lshift ctx
+   else (* Context pruning *) begin
+     get_mins le_ctx (List.map lforget ctx)
+@@ -2194,7 +2194,7 @@ let mk_failaction_pos partial seen ctx defs  =
+       | _  -> scan_def ((List.map fst now,idef)::env) later rem in
+ 
+   let fail_pats = complete_pats_constrs seen in
+-  if List.length fail_pats < 32 then begin
++  if List.length fail_pats < !Clflags.match_context_rows then begin
+     let fail,jmps =
+       scan_def
+         []
+diff --git a/byterun/debugger.c b/byterun/debugger.c
+index 5e61584..55ccf62 100644
+--- a/byterun/debugger.c
++++ b/byterun/debugger.c
+@@ -161,6 +161,7 @@ static void winsock_cleanup(void)
+ void caml_debugger_init(void)
+ {
+   char * address;
++  size_t a_len;
+   char * port, * p;
+   struct hostent * host;
+   int n;
+@@ -188,11 +189,16 @@ void caml_debugger_init(void)
+     /* Unix domain */
+     sock_domain = PF_UNIX;
+     sock_addr.s_unix.sun_family = AF_UNIX;
++    a_len = strlen(address);
++    if (a_len >= sizeof(sock_addr.s_unix.sun_path)) {
++      caml_fatal_error("Debug socket path length exceeds maximum permitted length");
++    }
+     strncpy(sock_addr.s_unix.sun_path, address,
+-            sizeof(sock_addr.s_unix.sun_path));
++            sizeof(sock_addr.s_unix.sun_path) - 1);
++    sock_addr.s_unix.sun_path[sizeof(sock_addr.s_unix.sun_path) - 1] = '\0';
+     sock_addr_len =
+       ((char *)&(sock_addr.s_unix.sun_path) - (char *)&(sock_addr.s_unix))
+-        + strlen(address);
++        + a_len;
+ #else
+     caml_fatal_error("Unix sockets not supported");
+ #endif
+diff --git a/byterun/signals.c b/byterun/signals.c
+index 5c4e261..085f5f0 100644
+--- a/byterun/signals.c
++++ b/byterun/signals.c
+@@ -134,12 +134,12 @@ void caml_execute_signal(int signal_number, int in_signal_handler)
+ {
+   value res;
+ #ifdef POSIX_SIGNALS
+-  sigset_t sigs;
++  sigset_t nsigs, sigs;
+   /* Block the signal before executing the handler, and record in sigs
+      the original signal mask */
+-  sigemptyset(&sigs);
+-  sigaddset(&sigs, signal_number);
+-  sigprocmask(SIG_BLOCK, &sigs, &sigs);
++  sigemptyset(&nsigs);
++  sigaddset(&nsigs, signal_number);
++  sigprocmask(SIG_BLOCK, &nsigs, &sigs);
+ #endif
+   res = caml_callback_exn(
+            Field(caml_signal_handlers, signal_number),
+diff --git a/driver/main.ml b/driver/main.ml
+index 3bfd8f3..182a609 100644
+--- a/driver/main.ml
++++ b/driver/main.ml
+@@ -155,6 +155,7 @@ module Options = Main_args.Make_bytecomp_options (struct
+   let _where = print_standard_library
+   let _verbose = set verbose
+   let _nopervasives = set nopervasives
++  let _match_context_rows n = match_context_rows := n
+   let _dsource = set dump_source
+   let _dparsetree = set dump_parsetree
+   let _dtypedtree = set dump_typedtree
+diff --git a/driver/main_args.ml b/driver/main_args.ml
+index ea89daf..bfcecae 100644
+--- a/driver/main_args.ml
++++ b/driver/main_args.ml
+@@ -558,6 +558,10 @@ let mk_nopervasives f =
+   "-nopervasives", Arg.Unit f, " (undocumented)"
+ ;;
+ 
++let mk_match_context_rows f =
++  "-match-context-rows", Arg.Int f, "<n> (undocumented)"
++;;
++
+ let mk_use_prims f =
+   "-use-prims", Arg.String f, "<file>  (undocumented)"
+ ;;
+@@ -781,6 +785,7 @@ module type Compiler_options = sig
+   val _color : string -> unit
+ 
+   val _nopervasives : unit -> unit
++  val _match_context_rows : int -> unit
+   val _dtimings : unit -> unit
+ end
+ ;;
+@@ -986,6 +991,7 @@ struct
+     mk__ F.anonymous;
+ 
+     mk_nopervasives F._nopervasives;
++    mk_match_context_rows F._match_context_rows;
+     mk_use_prims F._use_prims;
+     mk_dsource F._dsource;
+     mk_dparsetree F._dparsetree;
+@@ -1143,6 +1149,7 @@ struct
+     mk__ F.anonymous;
+ 
+     mk_nopervasives F._nopervasives;
++    mk_match_context_rows F._match_context_rows;
+     mk_dsource F._dsource;
+     mk_dparsetree F._dparsetree;
+     mk_dtypedtree F._dtypedtree;
+diff --git a/driver/main_args.mli b/driver/main_args.mli
+index 49de50d..f5b889a 100644
+--- a/driver/main_args.mli
++++ b/driver/main_args.mli
+@@ -96,6 +96,7 @@ module type Compiler_options = sig
+   val _color : string -> unit
+ 
+   val _nopervasives : unit -> unit
++  val _match_context_rows : int -> unit
+   val _dtimings : unit -> unit
+ end
+ ;;
+diff --git a/driver/optmain.ml b/driver/optmain.ml
+index 8d1d3dd..ed859e7 100644
+--- a/driver/optmain.ml
++++ b/driver/optmain.ml
+@@ -231,6 +231,7 @@ module Options = Main_args.Make_optcomp_options (struct
+   let _where () = print_standard_library ()
+ 
+   let _nopervasives = set nopervasives
++  let _match_context_rows n = match_context_rows := n
+   let _dsource = set dump_source
+   let _dparsetree = set dump_parsetree
+   let _dtypedtree = set dump_typedtree
+diff --git a/tools/ocamlcp.ml b/tools/ocamlcp.ml
+index 5508b17..30e2e98 100644
+--- a/tools/ocamlcp.ml
++++ b/tools/ocamlcp.ml
+@@ -23,6 +23,9 @@ let option opt () = compargs := opt :: !compargs
+ let option_with_arg opt arg =
+   compargs := (Filename.quote arg) :: opt :: !compargs
+ ;;
++let option_with_int opt arg =
++  compargs := (string_of_int arg) :: opt :: !compargs
++;;
+ 
+ let make_archive = ref false;;
+ let with_impl = ref false;;
+@@ -115,6 +118,7 @@ module Options = Main_args.Make_bytecomp_options (struct
+   let _color s = option_with_arg "-color" s
+   let _where = option "-where"
+   let _nopervasives = option "-nopervasives"
++  let _match_context_rows n = option_with_int "-match-context-rows" n
+   let _dsource = option "-dsource"
+   let _dparsetree = option "-dparsetree"
+   let _dtypedtree = option "-dtypedtree"
+diff --git a/tools/ocamloptp.ml b/tools/ocamloptp.ml
+index b96d283..7ebcc70 100644
+--- a/tools/ocamloptp.ml
++++ b/tools/ocamloptp.ml
+@@ -140,6 +140,7 @@ module Options = Main_args.Make_optcomp_options (struct
+   let _where = option "-where"
+ 
+   let _nopervasives = option "-nopervasives"
++  let _match_context_rows n = option_with_int "-match-context-rows" n
+   let _dsource = option "-dsource"
+   let _dparsetree = option "-dparsetree"
+   let _dtypedtree = option "-dtypedtree"
+diff --git a/typing/parmatch.ml b/typing/parmatch.ml
+index cc2a780..96258f4 100644
+--- a/typing/parmatch.ml
++++ b/typing/parmatch.ml
+@@ -92,7 +92,7 @@ let rec compat p q =
+   | Tpat_tuple ps, Tpat_tuple qs -> compats ps qs
+   | Tpat_lazy p, Tpat_lazy q -> compat p q
+   | Tpat_construct (_, c1,ps1), Tpat_construct (_, c2,ps2) ->
+-      c1.cstr_tag = c2.cstr_tag && compats ps1 ps2
++      Types.equal_tag c1.cstr_tag c2.cstr_tag && compats ps1 ps2
+   | Tpat_variant(l1,Some p1, r1), Tpat_variant(l2,Some p2,_) ->
+       l1=l2 && compat p1 p2
+   | Tpat_variant (l1,None,r1), Tpat_variant(l2,None,_) ->
+@@ -273,7 +273,7 @@ let pretty_matrix (pss : matrix) =
+ let simple_match p1 p2 =
+   match p1.pat_desc, p2.pat_desc with
+   | Tpat_construct(_, c1, _), Tpat_construct(_, c2, _) ->
+-      c1.cstr_tag = c2.cstr_tag
++      Types.equal_tag c1.cstr_tag c2.cstr_tag
+   | Tpat_variant(l1, _, _), Tpat_variant(l2, _, _) ->
+       l1 = l2
+   | Tpat_constant(c1), Tpat_constant(c2) -> const_compare c1 c2 = 0
+@@ -671,6 +671,15 @@ let should_extend ext env = match ext with
+       Path.same path ext
+   | _ -> false
+ 
++module ConstructorTag =
++  struct
++    type t = Types.constructor_tag
++    let hash = Hashtbl.hash
++    let equal = Types.equal_tag
++  end
++
++module ConstructorTagHashtbl = Hashtbl.Make(ConstructorTag)
++
+ (* complement constructor tags *)
+ let complete_tags nconsts nconstrs tags =
+   let seen_const = Array.make nconsts false
+@@ -681,16 +690,16 @@ let complete_tags nconsts nconstrs tags =
+       | Cstr_block i -> seen_constr.(i) <- true
+       | _  -> assert false)
+     tags ;
+-  let r = ref [] in
++  let r = ConstructorTagHashtbl.create (nconsts+nconstrs) in
+   for i = 0 to nconsts-1 do
+     if not seen_const.(i) then
+-      r := Cstr_constant i :: !r
++      ConstructorTagHashtbl.add r (Cstr_constant i) ()
+   done ;
+   for i = 0 to nconstrs-1 do
+     if not seen_constr.(i) then
+-      r := Cstr_block i :: !r
++      ConstructorTagHashtbl.add r (Cstr_block i) ()
+   done ;
+-  !r
++  r
+ 
+ (* build a pattern from a constructor list *)
+ let pat_of_constr ex_pat cstr =
+@@ -763,7 +772,9 @@ let complete_constrs p all_tags =
+   let not_tags = complete_tags c.cstr_consts c.cstr_nonconsts all_tags in
+   let constrs = get_variant_constructors p.pat_env c.cstr_res in
+   let others =
+-    List.filter (fun cnstr -> List.mem cnstr.cstr_tag not_tags) constrs in
++    List.filter
++      (fun cnstr -> ConstructorTagHashtbl.mem not_tags cnstr.cstr_tag) 
++      constrs in
+   let const, nonconst =
+     List.partition (fun cnstr -> cnstr.cstr_arity = 0) others in
+   const @ nonconst
+@@ -1497,7 +1508,7 @@ let rec le_pat p q =
+   | _, Tpat_alias(q,_,_) -> le_pat p q
+   | Tpat_constant(c1), Tpat_constant(c2) -> const_compare c1 c2 = 0
+   | Tpat_construct(_,c1,ps), Tpat_construct(_,c2,qs) ->
+-      c1.cstr_tag = c2.cstr_tag && le_pats ps qs
++      Types.equal_tag c1.cstr_tag c2.cstr_tag && le_pats ps qs
+   | Tpat_variant(l1,Some p1,_), Tpat_variant(l2,Some p2,_) ->
+       (l1 = l2 && le_pat p1 p2)
+   | Tpat_variant(l1,None,r1), Tpat_variant(l2,None,_) ->
+@@ -1547,7 +1558,7 @@ let rec lub p q = match p.pat_desc,q.pat_desc with
+     let r = lub p q in
+     make_pat (Tpat_lazy r) p.pat_type p.pat_env
+ | Tpat_construct (lid, c1,ps1), Tpat_construct (_,c2,ps2)
+-      when  c1.cstr_tag = c2.cstr_tag  ->
++      when  Types.equal_tag c1.cstr_tag c2.cstr_tag  ->
+         let rs = lubs ps1 ps2 in
+         make_pat (Tpat_construct (lid, c1,rs))
+           p.pat_type p.pat_env
+diff --git a/typing/types.ml b/typing/types.ml
+index c908381..9db9727 100644
+--- a/typing/types.ml
++++ b/typing/types.ml
+@@ -304,6 +304,14 @@ and constructor_tag =
+   | Cstr_extension of Path.t * bool     (* Extension constructor
+                                            true if a constant false if a block*)
+ 
++let equal_tag t1 t2 = 
++  match (t1, t2) with
++  | Cstr_constant i1, Cstr_constant i2 -> i2 = i1
++  | Cstr_block i1, Cstr_block i2 -> i2 = i1
++  | Cstr_extension (path1, b1), Cstr_extension (path2, b2) -> 
++      Path.same path1 path2 && b1 = b2
++  | (Cstr_constant _|Cstr_block _|Cstr_extension _), _ -> false
++
+ type label_description =
+   { lbl_name: string;                   (* Short name *)
+     lbl_res: type_expr;                 (* Type of the result *)
+diff --git a/typing/types.mli b/typing/types.mli
+index 45c9ddc..c826afb 100644
+--- a/typing/types.mli
++++ b/typing/types.mli
+@@ -452,6 +452,8 @@ and constructor_tag =
+   | Cstr_extension of Path.t * bool     (* Extension constructor
+                                            true if a constant false if a block*)
+ 
++val equal_tag :  constructor_tag -> constructor_tag -> bool
++
+ type label_description =
+   { lbl_name: string;                   (* Short name *)
+     lbl_res: type_expr;                 (* Type of the result *)
+diff --git a/utils/clflags.ml b/utils/clflags.ml
+index b8ce959..2f29487 100644
+--- a/utils/clflags.ml
++++ b/utils/clflags.ml
+@@ -59,6 +59,7 @@ and output_complete_object = ref false  (* -output-complete-obj *)
+ and all_ccopts = ref ([] : string list)     (* -ccopt *)
+ and classic = ref false                 (* -nolabels *)
+ and nopervasives = ref false            (* -nopervasives *)
++and match_context_rows = ref 32         (* -match-context-rows *)
+ and preprocessor = ref(None : string option) (* -pp *)
+ and all_ppx = ref ([] : string list)        (* -ppx *)
+ let annotations = ref false             (* -annot *)
+diff --git a/utils/clflags.mli b/utils/clflags.mli
+index a5c9ec9..e694cbe 100644
+--- a/utils/clflags.mli
++++ b/utils/clflags.mli
+@@ -84,6 +84,7 @@ val output_complete_object : bool ref
+ val all_ccopts : string list ref
+ val classic : bool ref
+ val nopervasives : bool ref
++val match_context_rows : int ref
+ val open_modules : string list ref
+ val preprocessor : string option ref
+ val all_ppx : string list ref

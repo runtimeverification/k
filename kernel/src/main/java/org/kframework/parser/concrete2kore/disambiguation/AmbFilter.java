@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2016 K Team. All Rights Reserved.
+// Copyright (c) 2015-2018 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore.disambiguation;
 
 import com.google.common.collect.Sets;
@@ -8,6 +8,7 @@ import org.kframework.parser.ProductionReference;
 import org.kframework.parser.SetsGeneralTransformer;
 import org.kframework.parser.Term;
 import org.kframework.parser.TreeNodesToKORE;
+import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -23,6 +24,12 @@ import java.util.Set;
  */
 public class AmbFilter extends SetsGeneralTransformer<ParseFailedException, ParseFailedException> {
 
+    private final boolean strict;
+
+    public AmbFilter(boolean strict) {
+        this.strict = strict;
+    }
+
     @Override
     public Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> apply(Ambiguity amb) {
         K last = null;
@@ -30,7 +37,7 @@ public class AmbFilter extends SetsGeneralTransformer<ParseFailedException, Pars
         Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> candidate = null;
         for (Term t : amb.items()) {
             candidate = this.apply(t);
-            K next = TreeNodesToKORE.apply(new RemoveBracketVisitor().apply(candidate._1().right().get()));
+            K next = new TreeNodesToKORE(Outer::parseSort, strict).apply(new RemoveBracketVisitor().apply(candidate._1().right().get()));
             if (last != null) {
                 if (!last.equals(next)) {
                     equal = false;

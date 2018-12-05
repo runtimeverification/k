@@ -1,11 +1,9 @@
-// Copyright (c) 2014-2016 K Team. All Rights Reserved.
+// Copyright (c) 2014-2018 K Team. All Rights Reserved.
 package org.kframework.utils.errorsystem;
 
+import org.kframework.attributes.HasLocation;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
-import org.kframework.definition.Sentence;
-import org.kframework.kore.K;
-import org.kframework.parser.ProductionReference;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 
@@ -34,20 +32,12 @@ public class KEMException extends RuntimeException {
         return create(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message, e, null, null);
     }
 
-    public static KEMException criticalError(String message, ProductionReference node) {
+    public static KEMException criticalError(String message, HasLocation node) {
         return create(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message, null, node.location().orElse(null), node.source().orElse(null));
     }
 
-    public static KEMException criticalError(String message, Sentence node) {
-        return create(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message, null, node.att().getOptional(Location.class).orElse(null), node.att().getOptional(Source.class).orElse(null));
-    }
-
-    public static KEMException criticalError(String message, Throwable e, K node) {
-        return create(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message, e, node.att().getOptional(Location.class).orElse(null), node.att().getOptional(Source.class).orElse(null));
-    }
-
-    public static KEMException criticalError(String message, K node) {
-        return create(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message, null, node.att().getOptional(Location.class).orElse(null), node.att().getOptional(Source.class).orElse(null));
+    public static KEMException criticalError(String message, Throwable e, HasLocation node) {
+        return create(ExceptionType.ERROR, KExceptionGroup.CRITICAL, message, e, node.location().orElse(null), node.source().orElse(null));
     }
 
 
@@ -63,12 +53,8 @@ public class KEMException extends RuntimeException {
         return create(ExceptionType.ERROR, KExceptionGroup.INTERNAL, message, e, null, null);
     }
 
-    public static KEMException internalError(String message, K node) {
-        return create(ExceptionType.ERROR, KExceptionGroup.INTERNAL, message, null, node.att().getOptional(Location.class).orElse(null), node.att().getOptional(Source.class).orElse(null));
-    }
-
-    public static KEMException internalError(String message, Sentence node) {
-        return create(ExceptionType.ERROR, KExceptionGroup.INTERNAL, message, null, node.att().getOptional(Location.class).orElse(null), node.att().getOptional(Source.class).orElse(null));
+    public static KEMException internalError(String message, HasLocation node) {
+        return create(ExceptionType.ERROR, KExceptionGroup.INTERNAL, message, null, node.location().orElse(null), node.source().orElse(null));
     }
 
     public static KEMException compilerError(String message) {
@@ -79,16 +65,12 @@ public class KEMException extends RuntimeException {
         return create(ExceptionType.ERROR, KExceptionGroup.COMPILER, message, e, null, null);
     }
 
-    public static KEMException compilerError(String message, K node) {
-        return create(ExceptionType.ERROR, KExceptionGroup.COMPILER, message, null, node.att().getOptional(Location.class).orElse(null), node.att().getOptional(Source.class).orElse(null));
+    public static KEMException compilerError(String message, HasLocation node) {
+        return create(ExceptionType.ERROR, KExceptionGroup.COMPILER, message, null, node.location().orElse(null), node.source().orElse(null));
     }
 
-    public static KEMException compilerError(String message, Sentence node) {
-        return create(ExceptionType.ERROR, KExceptionGroup.COMPILER, message, null, node.att().getOptional(Location.class).orElse(null), node.att().getOptional(Source.class).orElse(null));
-    }
-
-    public static KEMException compilerError(String message, Throwable e, Sentence node) {
-        return create(ExceptionType.ERROR, KExceptionGroup.COMPILER, message, e, node.att().getOptional(Location.class).orElse(null), node.att().getOptional(Source.class).orElse(null));
+    public static KEMException compilerError(String message, Throwable e, HasLocation node) {
+        return create(ExceptionType.ERROR, KExceptionGroup.COMPILER, message, e, node.location().orElse(null), node.source().orElse(null));
     }
 
     public static KEMException innerParserError(String message) {

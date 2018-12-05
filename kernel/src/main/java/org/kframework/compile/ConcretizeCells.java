@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2016 K Team. All Rights Reserved.
+// Copyright (c) 2015-2018 K Team. All Rights Reserved.
 package org.kframework.compile;
 
 import org.kframework.compile.ConfigurationInfo;
@@ -6,6 +6,7 @@ import org.kframework.compile.ConfigurationInfoFromModule;
 import org.kframework.compile.LabelInfo;
 import org.kframework.compile.LabelInfoFromModule;
 import org.kframework.definition.*;
+import org.kframework.definition.Module;
 
 /**
  * Apply the configuration concretization process.

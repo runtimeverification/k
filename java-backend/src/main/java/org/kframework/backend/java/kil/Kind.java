@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2016 K Team. All Rights Reserved.
+// Copyright (c) 2013-2018 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
 import com.google.common.collect.EnumHashBiMap;
@@ -71,7 +71,7 @@ public enum Kind {
 
     @Override
     public String toString() {
-        return sorts.get(this).name();
+        return sorts.get(this).toString();
     }
 
 }

@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2016 K Team. All Rights Reserved.
+// Copyright (c) 2014-2018 K Team. All Rights Reserved.
 package org.kframework.kil.loader;
 
 import com.google.common.collect.HashMultimap;
@@ -28,9 +28,9 @@ public class Context implements Serializable {
     public KompileOptions kompileOptions;
     @Deprecated @Inject(optional=true) public transient KRunOptions krunOptions;
 
-    public void addProduction(Production p) {
-        if (p.getKLabel() != null) {
-            tags.put(p.getKLabel(), p);
+    public void addProduction(Production p, boolean kore) {
+        if (p.getKLabel(false) != null) {
+            tags.put(p.getKLabel(false), p);
         }
         for (Attribute<?> a : p.getAttributes().values()) {
             tags.put(a.getKey().toString(), p);

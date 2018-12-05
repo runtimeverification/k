@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2016 K Team. All Rights Reserved.
+// Copyright (c) 2015-2018 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
 
@@ -9,7 +9,7 @@ import org.kframework.kore.KList;
 import java.util.List;
 import java.util.stream.Stream;
 
-public interface KItemRepresentation extends KoreRepresentation, KApply {
+public interface KItemRepresentation extends KoreRepresentation, KApply, HasGlobalContext {
     default Term kLabel() {
         return ((KItem) toKore()).kLabel();
     }

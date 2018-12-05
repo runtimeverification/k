@@ -149,11 +149,15 @@ let strat_run_no_thread_opt (module Def: Plugin.Definition) (config: k) (depth: 
 
 let run (config: k) (depth: int) : (k list) * int =
   let module Def = (val Plugin.get () : Plugin.Definition) in
-  strat_run (module Def) config depth 0
+  let result = strat_run (module Def) config depth 0 in
+  Prelude.IO.flush_logs ();
+  result
 
 let run_no_thread_opt (config: k) (depth: int) : (k list) * int =
   let module Def = (val Plugin.get () : Plugin.Definition) in
-  strat_run_no_thread_opt (module Def) config depth 0
+  let result = strat_run_no_thread_opt (module Def) config depth 0 in
+  Prelude.IO.flush_logs ();
+  result
 
 module Makeconfig =
 struct

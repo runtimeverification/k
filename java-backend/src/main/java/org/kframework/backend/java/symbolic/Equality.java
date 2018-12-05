@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2016 K Team. All Rights Reserved.
+// Copyright (c) 2014-2018 K Team. All Rights Reserved.
 
 package org.kframework.backend.java.symbolic;
 
@@ -10,6 +10,7 @@ import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.util.Constants;
 
 import com.google.inject.Provider;
+import org.kframework.builtin.KLabels;
 
 /**
  * An equality between two canonicalized terms.
@@ -119,7 +120,7 @@ public class Equality implements Serializable {
 
     public KItem toK() {
         return KItem.of(
-                KLabelConstant.of("_==K_", global.getDefinition()),
+                KLabelConstant.of(KLabels.EQUALS_K, global.getDefinition()),
                 KList.concatenate(leftHandSide, rightHandSide),
                 global);
     }

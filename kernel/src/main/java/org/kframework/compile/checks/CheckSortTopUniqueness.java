@@ -1,14 +1,13 @@
-// Copyright (c) 2015-2016 K Team. All Rights Reserved.
+// Copyright (c) 2015-2018 K Team. All Rights Reserved.
 package org.kframework.compile.checks;
 
+import org.kframework.builtin.Sorts;
 import org.kframework.definition.Module;
 import org.kframework.definition.Production;
 import org.kframework.definition.Sentence;
 import org.kframework.definition.SyntaxSort;
 import org.kframework.kore.Sort;
 import org.kframework.utils.errorsystem.KEMException;
-
-import static org.kframework.kore.KORE.Sort;
 
 import java.util.Set;
 
@@ -51,10 +50,10 @@ public class CheckSortTopUniqueness {
     }
 
     private void check(Sort s, Sentence p) {
-        if (!s.equals(Sort("Cell")) &&
-                module.subsorts().lessThan(s, Sort("KList")) &&
-                module.subsorts().lessThan(s, Sort("Bag"))) {
-            errors.add(KEMException.compilerError("Multiple top sorts found for " + s.name() + ": KList and Bag.", p));
+        if (!s.equals(Sorts.Cell()) &&
+                module.subsorts().lessThan(s, Sorts.KList()) &&
+                module.subsorts().lessThan(s, Sorts.Bag())) {
+            errors.add(KEMException.compilerError("Multiple top sorts found for " + s.toString() + ": KList and Bag.", p));
         }
     }
 }

@@ -1,10 +1,11 @@
-// Copyright (c) 2015-2016 K Team. All Rights Reserved.
+// Copyright (c) 2015-2018 K Team. All Rights Reserved.
 package org.kframework;
 
 import static org.junit.Assert.*;
 
 import org.junit.Test;
 import org.kframework.definition.*;
+import org.kframework.definition.Module;
 import org.kframework.kore.K;
 import org.kframework.kore.Sort;
 import scala.Option;
@@ -18,7 +19,7 @@ import static org.kframework.Collections.*;
 public class ParserTest {
     private static final Sort xSort = Sort("X");
     Module m = Module.apply("TEST", Set(
-            Production.apply(xSort, Seq(Terminal.apply("x")), Att().add("klabel", "x"))
+            Production.apply(KLabel("x"), xSort, Seq(Terminal.apply("x")), Att())
     ));
 
     @Test

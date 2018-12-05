@@ -1,4 +1,4 @@
-// Copyright (c) 2015 K Team. All Rights Reserved.
+// Copyright (c) 2015-2018 K Team. All Rights Reserved.
 package org.kframework
 
 import java.util
@@ -128,7 +128,7 @@ class POSet[T](directRelations: Set[(T, T)]) extends Serializable {
 
   def minimal(sorts : util.Collection[T]) : util.Set[T] = {
     import scala.collection.JavaConversions._
-    maximal(sorts : Iterable[T])
+    minimal(sorts : Iterable[T])
   }
 
   override def toString() = {

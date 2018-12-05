@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2016 K Team. All Rights Reserved.
+// Copyright (c) 2015-2018 K Team. All Rights Reserved.
 package org.kframework.builtin;
 
 import org.kframework.kore.K;
@@ -20,6 +20,6 @@ public class BooleanUtils {
     }
     public static KApply not(K k) { return KApply(KLabel("notBool_"), k); }
 
-    public static final KToken TRUE = KToken("true", Sort("Bool"));
-    public static final KToken FALSE = KToken("false", Sort("Bool"));
+    public static final KToken TRUE = KToken("true", Sorts.Bool());
+    public static final KToken FALSE = KToken("false", Sorts.Bool());
 }

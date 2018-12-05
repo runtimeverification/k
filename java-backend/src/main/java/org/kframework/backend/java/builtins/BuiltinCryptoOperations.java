@@ -1,4 +1,4 @@
-// Copyright (c) 2016 K Team. All Rights Reserved.
+// Copyright (c) 2016-2018 K Team. All Rights Reserved.
 package org.kframework.backend.java.builtins;
 
 
@@ -23,6 +23,7 @@ import org.kframework.backend.java.builtins.crypto.BN128G1;
 import org.kframework.backend.java.builtins.crypto.BN128G2;
 import org.kframework.backend.java.builtins.crypto.Fp;
 import org.kframework.backend.java.builtins.crypto.PairingCheck;
+import org.kframework.kore.KORE;
 
 import java.math.BigInteger;
 import java.security.SignatureException;
@@ -125,7 +126,7 @@ public final class BuiltinCryptoOperations {
 
 
     private static KItem mkPoint(Fp x, Fp y, GlobalContext global) {
-        KLabelConstant G1_POINT_KLABEL = KLabelConstant.of("(_,_)", global.getDefinition());
+        KLabelConstant G1_POINT_KLABEL = KLabelConstant.of(KORE.KLabel("(_,_)"), global.getDefinition());
         return KItem.of(G1_POINT_KLABEL, KList.concatenate(IntToken.of(x.v()), IntToken.of(y.v())), global);
     }
 

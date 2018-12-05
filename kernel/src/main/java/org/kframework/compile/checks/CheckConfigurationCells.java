@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2016 K Team. All Rights Reserved.
+// Copyright (c) 2015-2018 K Team. All Rights Reserved.
 package org.kframework.compile.checks;
 
 import org.kframework.compile.ConfigurationInfoFromModule;
@@ -11,10 +11,10 @@ import org.kframework.kil.Attribute;
 import org.kframework.kore.Sort;
 import org.kframework.utils.errorsystem.KEMException;
 
-import static org.kframework.Collections.*;
-
 import java.util.HashSet;
 import java.util.Set;
+
+import static org.kframework.Collections.*;
 
 /**
  * Checks that no two cells with the same name are declared in the configuration.
@@ -35,7 +35,7 @@ public class CheckConfigurationCells {
         }
     }
 
-    private Set<String> cells = new HashSet<String>();
+    private Set<Sort> cells = new HashSet<>();
 
     private void check(Production p) {
         if (p.att().contains(Attribute.CELL_KEY)) {
@@ -43,11 +43,11 @@ public class CheckConfigurationCells {
                 if (i instanceof NonTerminal) {
                     Sort sort = ((NonTerminal) i).sort();
                     if (sort.name().endsWith("Cell")) {
-                        if (cells.contains(sort.name())) {
+                        if (cells.contains(sort)) {
                             Production cell = new ConfigurationInfoFromModule(module).cellProductionsFor().get(sort).get().head();
                             errors.add(KEMException.compilerError("Cell " + cell.klabel().get() + " found twice in configuration.", p));
                         }
-                        cells.add(sort.name());
+                        cells.add(sort);
                     }
                 }
             }

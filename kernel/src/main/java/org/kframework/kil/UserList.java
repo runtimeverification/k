@@ -1,6 +1,7 @@
-// Copyright (c) 2012-2016 K Team. All Rights Reserved.
+// Copyright (c) 2012-2018 K Team. All Rights Reserved.
 package org.kframework.kil;
 
+import org.kframework.kore.Sort;
 import org.kframework.utils.StringUtil;
 
 /**

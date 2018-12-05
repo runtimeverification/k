@@ -1,7 +1,8 @@
-// Copyright (c) 2015-2016 K Team. All Rights Reserved.
+// Copyright (c) 2015-2018 K Team. All Rights Reserved.
 package org.kframework.compile;
 
 import org.kframework.builtin.BooleanUtils;
+import org.kframework.builtin.Sorts;
 import org.kframework.definition.Context;
 import org.kframework.definition.Module;
 import org.kframework.definition.NonTerminal;
@@ -52,7 +53,7 @@ public class ResolveStrict {
     }
 
     private static KApply cast(Sort sort, K k) {
-        return KApply(KLabel("#SemanticCastTo" + sort.name()), k);
+        return KApply(KLabel("#SemanticCastTo" + sort.toString()), k);
     }
 
     public Set<Sentence> resolve(Production production, boolean sequential) {
@@ -101,7 +102,7 @@ public class ResolveStrict {
                 // Preserve sort information of the production
                 items.set(strictnessPosition, cast(production.nonterminal(strictnessPosition).sort(), KVariable("HOLE")));
             } else {
-                items.set(strictnessPosition, cast(Sort("KItem"), KVariable("HOLE")));
+                items.set(strictnessPosition, cast(Sorts.KItem(), KVariable("HOLE")));
             }
 
             // is seqstrict the elements before the argument should be KResult

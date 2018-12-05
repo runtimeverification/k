@@ -18,11 +18,11 @@ class MergeRules extends Function[Module, Module] {
 
 
   object ML {
-    val and = KLabel(KLabels.ML_AND)
-    val or = KLabel(KLabels.ML_OR)
-    val True = KApply(KLabel(KLabels.ML_TRUE))
-    val False = KApply(KLabel(KLabels.ML_FALSE))
-    val TrueToken: K = KToken("true", Sort("Bool"), Att.empty)
+    val and = KLabels.ML_AND
+    val or = KLabels.ML_OR
+    val True = KApply(KLabels.ML_TRUE)
+    val False = KApply(KLabels.ML_FALSE)
+    val TrueToken: K = KToken("true", Sorts.Bool, Att.empty)
   }
 
   import ML._
@@ -45,7 +45,7 @@ class MergeRules extends Function[Module, Module] {
 
   private def convertKRewriteToKApply(k: K): K = k match {
     case Unapply.KApply(label, children) => KApply(label, (children map convertKRewriteToKApply: _*))
-    case Unapply.KRewrite(l, r) => KApply(KLabel(KLabels.KREWRITE),l, r)
+    case Unapply.KRewrite(l, r) => KApply(KLabels.KREWRITE,l, r)
     case other => other
   }
 
@@ -58,7 +58,7 @@ class MergeRules extends Function[Module, Module] {
   }
 
   private def pushDisjunction(terms: Set[(K, K)])(implicit m: Module): K = {
-    val rwLabel = KLabel(KLabels.KREWRITE)
+    val rwLabel = KLabels.KREWRITE
 
     val termsWithoutRewrites: Set[(K, K)] = terms.map({
       case (Unapply.KApply(`rwLabel`, children), ruleP) => (children.head, ruleP)
@@ -73,8 +73,8 @@ class MergeRules extends Function[Module, Module] {
       .map {
         case (klabel: KLabel, ks: Set[(KApply, K)]) =>
           val klistPredicatePairs: Set[(Seq[K], K)] = ks map { case (kapply, ruleP) => (kapply.klist.items.asScala.toSeq, ruleP) }
-          val normalizedItemsPredicatePairs = if (isEffectiveAssoc(klabel, m) || klabel == KLabel(KLabels.KSEQ)) {
-            val unitKLabel: KLabel = if (klabel != KLabel(KLabels.KSEQ)) KLabel(m.attributesFor(klabel).get(Att.unit)) else KLabel(KLabels.DOTK)
+          val normalizedItemsPredicatePairs = if (isEffectiveAssoc(klabel, m) || klabel == KLabels.KSEQ) {
+            val unitKLabel: KLabel = if (klabel != KLabels.KSEQ) KLabel(m.attributesFor(klabel).get(Att.unit)) else KLabels.DOTK
             val unitK: K = KApply(unitKLabel)
             val flatItemsPredicatePairs: Set[(Seq[K], K)] = klistPredicatePairs map { case (items, ruleP) => (Assoc.flatten(klabel, items, unitKLabel), ruleP) }
             val maxLength: Int = (flatItemsPredicatePairs map { _._1.size }).max

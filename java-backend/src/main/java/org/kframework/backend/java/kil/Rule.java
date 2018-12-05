@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2016 K Team. All Rights Reserved.
+// Copyright (c) 2013-2018 K Team. All Rights Reserved.
 
 package org.kframework.backend.java.kil;
 
@@ -19,6 +19,7 @@ import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Constants;
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
+import org.kframework.kil.Attributes;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +43,7 @@ public class Rule extends JavaSymbolicObject<Rule> {
     private final ImmutableSet<Variable> freshVariables;
     private final ConjunctiveFormula lookups;
     private final GlobalContext global;
+    private final ImmutableSet<String> matchingSymbols;
 
     /**
      * Instructions for evaluating side condition of rule.
@@ -81,6 +83,7 @@ public class Rule extends JavaSymbolicObject<Rule> {
         this.freshVariables = ImmutableSet.copyOf(freshVariables);
         this.lookups = lookups;
         this.global = global;
+        this.matchingSymbols = att.contains(Attribute.MATCHING_KEY) ? ImmutableSet.copyOf(att.get(Attribute.MATCHING_KEY).split(",")) : ImmutableSet.of();
 
         isSortPredicate = isFunction() && definedKLabel().isSortPredicate();
         if (isSortPredicate) {
@@ -289,6 +292,10 @@ public class Rule extends JavaSymbolicObject<Rule> {
         return matchingVariables;
     }
 
+    public ImmutableSet<String> matchingSymbols() {
+        return matchingSymbols;
+    }
+
     @Override
     public boolean equals(Object object) {
         if (this == object) {
@@ -347,7 +354,7 @@ public class Rule extends JavaSymbolicObject<Rule> {
         if (ensures != null) {
             string += " ensures " + ensures;
         }
-        string += " [" + "Location: " + getLocation() + ", " + getSource() + "]";
+        string += " [" + "Location: " + location() + ", " + source() + "]";
         return string;
     }
 

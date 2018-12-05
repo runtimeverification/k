@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2016 K Team. All Rights Reserved.
+// Copyright (c) 2015-2018 K Team. All Rights Reserved.
 package org.kframework.compile;
 
 import org.junit.Assert;
@@ -6,13 +6,12 @@ import org.junit.Test;
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
-import org.kframework.compile.ConfigurationInfo;
-import org.kframework.compile.LabelInfo;
 import org.kframework.definition.Rule;
 import org.kframework.kil.Attribute;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KVariable;
+import org.kframework.kore.Sort;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
@@ -39,16 +38,16 @@ public class SortCellsTest {
         addConcat("ThreadCell", KLabel("_ThreadCellBag_"));
     }};
     LabelInfo labelInfo = new LabelInfo() {{
-        addLabel("TopCell", "<top>");
-        addLabel("ThreadCell", "<t>");
-        addLabel("KCell", "<k>");
-        addLabel("EnvCell", "<env>");
-        addLabel("OptCell", "<opt>");
+        addLabel(Sort("TopCell"), "<top>");
+        addLabel(Sort("ThreadCell"), "<t>");
+        addLabel(Sort("KCell"), "<k>");
+        addLabel(Sort("EnvCell"), "<env>");
+        addLabel(Sort("OptCell"), "<opt>");
     }};
 
     @Test
     public void testSimpleSplitting() {
-        KVariable Y = KVariable("Y", Att().add(Attribute.SORT_KEY, "OptCell"));
+        KVariable Y = KVariable("Y", Att().add(Sort.class, Sort("OptCell")));
         K term = KRewrite(cell("<t>", cell("<env>"), KVariable("X"), Y), KVariable("X"));
         K expected = KRewrite(cell("<t>", KVariable("X"), cell("<env>"), Y), cell("<t>-fragment", KVariable("X"), app("noEnvCell"), app(".OptCell")));
         KExceptionManager kem = new KExceptionManager(new GlobalOptions());
@@ -62,7 +61,7 @@ public class SortCellsTest {
      */
     @Test
     public void testSortedVar() {
-        KVariable Y = KVariable("Y", Att().add(Attribute.SORT_KEY, "OptCell"));
+        KVariable Y = KVariable("Y", Att().add(Sort.class, Sort("OptCell")));
         K term = KRewrite(cell("<t>", cell("<env>"), KVariable("X"), Y), Y);
         K expected = KRewrite(cell("<t>", KVariable("X"), cell("<env>"), Y), Y);
         KExceptionManager kem = new KExceptionManager(new GlobalOptions());
@@ -208,11 +207,11 @@ public class SortCellsTest {
         addConcat("ThreadCell", KLabel("_ThreadCellBag_"));
     }};
     LabelInfo bagLabelInfo = new LabelInfo() {{
-        addLabel("TopCell", "<top>");
-        addLabel("ThreadCell", "<t>");
-        addLabel("ExtraCell", "<extra>");
-        addLabel("K", "restore");
-        addLabel("ThreadCellBag","_ThreadCellBag_");
+        addLabel(Sort("TopCell"), "<top>");
+        addLabel(Sort("ThreadCell"), "<t>");
+        addLabel(Sort("ExtraCell"), "<extra>");
+        addLabel(Sorts.K(), "restore");
+        addLabel(Sort("ThreadCellBag"),"_ThreadCellBag_");
     }};
     @Test
     public void testFragmentBag() {
@@ -255,11 +254,11 @@ public class SortCellsTest {
      */
     @Test
     public void testPredicateExpansion() {
-        Rule term = new Rule(KRewrite(cell("<t>", cell("<env>"), KVariable("X"), KVariable("Y", Att().add(Attribute.SORT_KEY, "OptCell"))), KVariable("X"))
+        Rule term = new Rule(KRewrite(cell("<t>", cell("<env>"), KVariable("X"), KVariable("Y", Att().add(Sort.class, Sort("OptCell")))), KVariable("X"))
                 , app("isThreadCellFragment",KVariable("X"))
                 , BooleanUtils.TRUE
                 , Att());
-        K expectedBody = KRewrite(cell("<t>", KVariable("X"), cell("<env>"), KVariable("Y", Att().add(Attribute.SORT_KEY, "OptCell"))),
+        K expectedBody = KRewrite(cell("<t>", KVariable("X"), cell("<env>"), KVariable("Y", Att().add(Sort.class, Sort("OptCell")))),
                 cell("<t>-fragment", KVariable("X"), app("noEnvCell"), app(".OptCell")));
         Rule expected = new Rule(expectedBody
                 , BooleanUtils.and(BooleanUtils.TRUE, app("isKCell", KVariable("X")))
@@ -275,12 +274,12 @@ public class SortCellsTest {
      */
     @Test
     public void testUnrelatedPredicate() {
-        Rule term = new Rule(KRewrite(cell("<t>", cell("<env>"), KVariable("X"), KVariable("Y", Att().add(Attribute.SORT_KEY, "OptCell"))), KVariable("X"))
+        Rule term = new Rule(KRewrite(cell("<t>", cell("<env>"), KVariable("X"), KVariable("Y", Att().add(Sort.class, Sort("OptCell")))), KVariable("X"))
                 , app("isTopCellFragment",KVariable("X"))
                 , BooleanUtils.TRUE
                 , Att());
         K replacement = app("<t>-fragment", KVariable("X"), app("noEnvCell"), app(".OptCell"));
-        K expectedBody = KRewrite(cell("<t>", KVariable("X"), cell("<env>"), KVariable("Y", Att().add(Attribute.SORT_KEY, "OptCell"))), replacement);
+        K expectedBody = KRewrite(cell("<t>", KVariable("X"), cell("<env>"), KVariable("Y", Att().add(Sort.class, Sort("OptCell")))), replacement);
         Rule expected = new Rule(expectedBody
                 , app("isTopCellFragment", replacement)
                 , BooleanUtils.TRUE, Att());
@@ -295,8 +294,8 @@ public class SortCellsTest {
      */
     @Test
     public void testMultipleCells() {
-        KVariable T1 = KVariable("T1",Att().add(Attribute.SORT_KEY,"ThreadCell"));
-        KVariable T2 = KVariable("T2",Att().add(Attribute.SORT_KEY,"ThreadCell"));
+        KVariable T1 = KVariable("T1",Att().add(Sort.class,Sort("ThreadCell")));
+        KVariable T2 = KVariable("T2",Att().add(Sort.class,Sort("ThreadCell")));
         K term = cell("<top>",
                     KVariable("F"),
                     cell("<t>", KVariable("T")),
@@ -321,6 +320,6 @@ public class SortCellsTest {
     }
 
     KApply cells(K... ks) {
-        return KApply(KLabel(KLabels.CELLS), ks);
+        return KApply(KLabels.CELLS, ks);
     }
 }

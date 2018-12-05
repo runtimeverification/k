@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2016 K Team. All Rights Reserved.
+// Copyright (c) 2014-2018 K Team. All Rights Reserved.
 
 /*!
 \title{SIMPLE --- Untyped}
@@ -158,6 +158,9 @@ the constructs above). */
   syntax Exps ::= Ids
   syntax Val
   syntax Vals ::= List{Val,","}
+  syntax Bottom
+  syntax Bottoms ::= List{Bottom,","}
+  syntax Ids ::= Bottoms
 
 /*@ \subsection{Statements}
 Most of the statement constructs are standard for imperative languages.
@@ -276,6 +279,7 @@ languages, we finally tell the tool that values are \K results. */
                | lambda(Ids,Stmt)
   syntax Exp ::= Val
   syntax Exps ::= Vals
+  syntax Vals ::= Bottoms
   syntax KResult ::= Val
                    | Vals  // TODO: should not need this
 

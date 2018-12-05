@@ -111,7 +111,7 @@ public class OcamlCompileExecutionMode implements ExecutionMode {
                 rewriter.createResourceObject("kore_term");
                 rewriter.createResourceObject("marshal_term");
                 rewriter.createResourceObject("plugin_path");
-                String outputFile = options.prettyPrint.outputFile;
+                String outputFile = options.print.outputFile;
                 if (outputFile == null) {
                     outputFile = "a.out";
                 }

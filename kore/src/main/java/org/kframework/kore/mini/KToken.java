@@ -1,7 +1,8 @@
-// Copyright (c) 2016 K Team. All Rights Reserved.
+// Copyright (c) 2016-2018 K Team. All Rights Reserved.
 package org.kframework.kore.mini;
 
 import org.kframework.attributes.Att;
+import org.kframework.kore.Sort;
 
 /**
  * Created by dwightguth on 1/11/16.
@@ -9,9 +10,9 @@ import org.kframework.attributes.Att;
 public class KToken implements org.kframework.kore.KToken {
 
     private final String s;
-    private final String sort;
+    private final Sort sort;
 
-    public KToken(String s, String sort) {
+    public KToken(String s, Sort sort) {
         this.s = s;
         this.sort = sort;
     }
@@ -23,7 +24,7 @@ public class KToken implements org.kframework.kore.KToken {
 
     @Override
     public Sort sort() {
-        return new Sort(sort);
+        return sort;
     }
 
     @Override

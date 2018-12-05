@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2016 K Team. All Rights Reserved.
+// Copyright (c) 2014-2018 K Team. All Rights Reserved.
 module INCLUDE [Location(#token("3",Int),#token("1",Int),#token("12",Int),#token("9",Int)) Source(#token("src/test/resources/convertor-tests/include.k",KString))]
   syntax String ::= #String [Location(#token("6",Int),#token("21",Int),#token("6",Int),#token("27",Int)) Source(#token("src/test/resources/convertor-tests/include.k",KString))]
   syntax Map ::= ".Map" [Location(#token("8",Int),#token("18",Int),#token("8",Int),#token("74",Int)) Source(#token("src/test/resources/convertor-tests/include.k",KString)) function(#token("",AttributeValue)) hook(#token("Map:.Map",AttributeValue)) klabel(#token(".Map",KString))]

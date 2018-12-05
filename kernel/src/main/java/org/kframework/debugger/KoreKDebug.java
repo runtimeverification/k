@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2016 K Team. All Rights Reserved.
+// Copyright (c) 2015-2018 K Team. All Rights Reserved.
 package org.kframework.debugger;
 
 
@@ -281,5 +281,10 @@ public class KoreKDebug implements KDebug {
 
         );
         return watchNum;
+    }
+
+    @Override
+    public FileUtil files() {
+        return files;
     }
 }

@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2016 K Team. All Rights Reserved.
+// Copyright (c) 2013-2018 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
 import org.kframework.backend.java.symbolic.Transformer;
@@ -61,6 +61,11 @@ public class KLabelInjection extends KLabel {
 
     @Override
     public final boolean isFunction() {
+        return false;
+    }
+
+    @Override
+    public final boolean isProjection() {
         return false;
     }
 

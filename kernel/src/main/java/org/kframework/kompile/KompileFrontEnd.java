@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2016 K Team. All Rights Reserved.
+// Copyright (c) 2013-2018 K Team. All Rights Reserved.
 package org.kframework.kompile;
 
 import com.google.inject.Inject;
@@ -67,7 +67,7 @@ public class KompileFrontEnd extends FrontEnd {
 
         Kompile kompile = new Kompile(options, files, kem, sw);
         Backend backend = koreBackend.get();
-        CompiledDefinition def = kompile.run(options.outerParsing.mainDefinitionFile(files), options.mainModule(files), options.syntaxModule(files), backend.steps());
+        CompiledDefinition def = kompile.run(options.outerParsing.mainDefinitionFile(files), options.mainModule(files), options.syntaxModule(files), backend.steps(), backend.excludedModuleTags());
         loader.saveOrDie(files.resolveKompiled("compiled.bin"), def);
         backend.accept(def);
         loader.saveOrDie(files.resolveKompiled("timestamp"), "");

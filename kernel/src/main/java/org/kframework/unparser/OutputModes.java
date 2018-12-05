@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2016 K Team. All Rights Reserved.
+// Copyright (c) 2014-2018 K Team. All Rights Reserved.
 package org.kframework.unparser;
 
 /**
@@ -7,5 +7,5 @@ package org.kframework.unparser;
  *
  */
 public enum OutputModes {
-    PRETTY, SOUND, KAST, BINARY, NONE
+    PRETTY, PROGRAM, KAST, BINARY, JSON, NONE
 }

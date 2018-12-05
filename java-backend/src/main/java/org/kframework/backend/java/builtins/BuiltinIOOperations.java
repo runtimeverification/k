@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2016 K Team. All Rights Reserved.
+// Copyright (c) 2013-2018 K Team. All Rights Reserved.
 package org.kframework.backend.java.builtins;
 
 import org.kframework.backend.java.kil.BuiltinList;
@@ -7,6 +7,7 @@ import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
+import org.kframework.kore.KORE;
 import org.kframework.krun.RunProcess;
 import org.kframework.krun.RunProcess.ProcessOutput;
 import org.kframework.krun.api.io.FileSystem;
@@ -117,7 +118,7 @@ public class BuiltinIOOperations {
         //for (String c : args) { System.out.println(c); }
         ProcessOutput output = RunProcess.execute(environment, termContext.global().files.getProcessBuilder(), args);
 
-        KLabelConstant klabel = KLabelConstant.of("#systemResult(_,_,_)", termContext.definition());
+        KLabelConstant klabel = KLabelConstant.of(KORE.KLabel("#systemResult(_,_,_)"), termContext.definition());
         /*
         String klabelString = "#systemResult(_,_,_)";
         KLabelConstant klabel = KLabelConstant.of(klabelString, context);
@@ -131,7 +132,7 @@ public class BuiltinIOOperations {
 
     private static KItem processIOException(String errno, Term klist, TermContext termContext) {
         String klabelString = "#" + errno + "_K-IO";
-        KLabelConstant klabel = KLabelConstant.of(klabelString, termContext.definition());
+        KLabelConstant klabel = KLabelConstant.of(KORE.KLabel(klabelString), termContext.definition());
         assert termContext.definition().kLabels().contains(klabel) : "No KLabel in definition for errno '" + errno + "'";
         return KItem.of(klabel, klist, termContext.global());
     }

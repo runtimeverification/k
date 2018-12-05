@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2016 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2016-2018 K Team. All Rights Reserved. -->
 
 In more recent definitions, we prefer to make some `[structural]` rules
 `[macro]` rules.  Macros apply statically, before the program is executed,

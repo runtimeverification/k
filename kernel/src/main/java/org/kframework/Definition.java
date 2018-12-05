@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2016 K Team. All Rights Reserved.
+// Copyright (c) 2015-2018 K Team. All Rights Reserved.
 package org.kframework;
 
 import com.google.common.collect.Lists;
@@ -77,6 +77,7 @@ public class Definition {
                 source,
                 workingDir,
                 lookupDirectories,
+                false,
                 false
         );
 

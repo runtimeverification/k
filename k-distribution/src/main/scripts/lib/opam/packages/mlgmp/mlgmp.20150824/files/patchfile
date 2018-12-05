@@ -1,0 +1,677 @@
+diff -ruN mlgmp_ref/config.h mlgmp/config.h
+--- mlgmp_ref/config.h	2002-07-29 20:31:12.000000000 -0500
++++ mlgmp/config.h	2018-05-18 16:35:43.518092957 -0500
+@@ -3,6 +3,7 @@
+ #define NDEBUG
+ #undef TRACE
+ 
++#include <stdint.h>
+ #include <gmp.h>
+ #ifdef USE_MPFR
+ #include <mpfr.h>
+@@ -54,15 +55,15 @@
+ #define MPF_SIZE_ARCH32 16
+ #define MPF_SIZE_ARCH64 24
+ 
+-/* __mpfr_struct = 3 * int + ptr */
++/* __mpfr_struct = 2 * long + int + ptr */
+ #define MPFR_SIZE_ARCH32 16
+-#define MPFR_SIZE_ARCH64 24
++#define MPFR_SIZE_ARCH64 28
+ 
+-extern void serialize_int_4(int32 i);
++extern void serialize_int_4(int32_t i);
+ extern void serialize_block_1(void * data, long len);
+ 
+-extern uint32 deserialize_uint_4(void);
+-extern int32 deserialize_sint_4(void);
++extern uint32_t deserialize_uint_4(void);
++extern int32_t deserialize_sint_4(void);
+ extern void deserialize_block_1(void * data, long len);
+ 
+ #endif /* SERIALIZE */
+diff -ruN mlgmp_ref/gmp.ml mlgmp/gmp.ml
+--- mlgmp_ref/gmp.ml	2012-02-24 01:48:47.000000000 -0600
++++ mlgmp/gmp.ml	2018-05-18 16:35:43.530093046 -0500
+@@ -1,7 +1,8 @@
+ (*
+  * ML GMP - Interface between Objective Caml and GNU MP
+  * Copyright (C) 2001 David MONNIAUX
+- * to_string_base_digits Copyright (c) 2005 Olivier BUISSOU
++ * to_string_base_digits Copyright (c) 2005 Olivier BUISSOU 
++ * portions modified by Runtime Verification, Inc on 8/24/2015
+  * 
+  * This software is free software; you can redistribute it and/or
+  * modify it under the terms of the GNU Library General Public
+@@ -206,6 +207,8 @@
+ 
+ (* missing set/clear bit *)
+ 
++  external randseed: state: RNG.randstate_t->seed: t->unit =
++    "_mlgmp_z_randseed";;
+   external urandomb: state: RNG.randstate_t->nbits: int->t =
+     "_mlgmp_z_urandomb";;
+   external urandomm: state: RNG.randstate_t->n: t->t =
+@@ -415,11 +418,11 @@
+        ((if sign < 0 then "-" else "")
+        ^ (let lm=String.length mantissa
+         in if lm > 1
+-           then let tmp = String.create (succ lm)
+-                in String.blit mantissa 0 tmp 0 1;
+-                   String.blit mantissa 1 tmp 2 (pred lm);
+-                   String.set tmp 1 '.';
+-                   tmp
++           then let tmp = Bytes.create (succ lm)
++                in Bytes.blit_string mantissa 0 tmp 0 1;
++                   Bytes.blit_string mantissa 1 tmp 2 (pred lm);
++                   Bytes.set tmp 1 '.';
++                   Bytes.to_string tmp
+            else mantissa)
+        ^ (if base <= 10 then "E" else "@")
+        ^ (string_of_int (pred exponent)));;
+@@ -512,6 +515,14 @@
+       = "_mlgmp_fr_exp";;
+   external exp2_prec : prec: int -> mode: rounding_mode -> t->t
+       = "_mlgmp_fr_exp2";;
++  external exp10_prec : prec: int -> mode: rounding_mode -> t->t
++      = "_mlgmp_fr_exp10";;
++  external log_prec : prec: int -> mode: rounding_mode -> t->t
++      = "_mlgmp_fr_log";;
++  external log2_prec : prec: int -> mode: rounding_mode -> t->t
++      = "_mlgmp_fr_log2";;
++  external log10_prec : prec: int -> mode: rounding_mode -> t->t
++      = "_mlgmp_fr_log10";;
+   external pow_prec : prec: int -> mode: rounding_mode -> t->t->t
+       = "_mlgmp_fr_pow";;
+   external pow_prec_ui : prec: int -> mode: rounding_mode -> t->int->t
+@@ -527,11 +538,26 @@
+   external trunc_prec : prec: int -> t -> t = "_mlgmp_fr_trunc";;
+   external rint_prec : prec:int -> mode:rounding_mode -> t -> t = "_mlgmp_fr_rint"
+ 
++  external check_range :
++      prec:int -> mode:rounding_mode -> emin:int -> emax:int -> t -> t * int
++      = "_mlgmp_fr_check_range";;
++  external subnormalize :
++      t -> ternary:int -> mode:rounding_mode -> t
++      = "_mlgmp_fr_subnormalize";;
++  external nexttoward : emin:int -> emax:int -> t -> t -> t = "_mlgmp_fr_nexttoward"
++
+   external cmp : t->t->int = "_mlgmp_fr_cmp";;
+   external compare : t->t->int = "_mlgmp_fr_cmp";;
+   external sgn : t->int = "_mlgmp_fr_sgn";;
+   external eq : t->t-> prec: int->bool = "_mlgmp_fr_eq";;
+   external is_nan : t->bool = "_mlgmp_fr_is_nan";;
++  external is_inf : t->bool = "_mlgmp_fr_is_inf";;
++
++  external equal : t -> t -> bool = "_mlgmp_fr_equal";;
++  external greater : t -> t -> bool = "_mlgmp_fr_greater";;
++  external greaterequal : t -> t -> bool = "_mlgmp_fr_greaterequal";;
++  external less : t -> t -> bool = "_mlgmp_fr_less";;
++  external lessequal : t -> t -> bool = "_mlgmp_fr_lessequal";;
+ 
+   external urandomb : prec: int -> state: RNG.randstate_t -> t=
+     "_mlgmp_fr_urandomb";;
+@@ -589,6 +615,10 @@
+   let sqrt = default sqrt_prec
+   let exp = default exp_prec
+   let exp2 = default exp2_prec
++  let exp10 = default exp10_prec
++  let log = default log_prec
++  let log2 = default log2_prec
++  let log10 = default log10_prec
+   let pow = default pow_prec
+   let pow_ui = default pow_prec_ui
+ 
+@@ -597,8 +627,6 @@
+   let trunc = default_rnd trunc_prec
+   let rint = default rint_prec
+ 
+-  let equal x y = eq x y ~prec: 90;;
+-
+   let to_string_base_digits ~mode: mode
+      ~base: base ~digits: digits x =
+    let mantissa, exponent =
+@@ -608,11 +636,11 @@
+           then "Inf"
+           else (let lm=String.length mantissa
+         in if lm > 1
+-           then let tmp = String.create (succ lm)
+-                in String.blit mantissa 0 tmp 0 (1+i);
+-                   String.blit mantissa (1+i) tmp (2+i) ((pred lm)-i);
+-                   String.set tmp (1+i) '.';
+-                   tmp
++           then let tmp = Bytes.create (succ lm)
++                in Bytes.blit_string mantissa 0 tmp 0 (1+i);
++                   Bytes.blit_string mantissa (1+i) tmp (2+i) ((pred lm)-i);
++                   Bytes.set tmp (1+i) '.';
++                   Bytes.to_string tmp
+            else mantissa)
+        ^ (if base <= 10 then "E" else "@")
+        ^ (string_of_int (pred exponent)));;
+@@ -626,10 +654,7 @@
+    if sign = 0
+    then Z.zero
+    else
+-     let unsigned_mantissa, exponent = to_z_exp x in
+-     let mantissa = if sign<0
+-                    then Z.neg unsigned_mantissa
+-                    else unsigned_mantissa in
++     let mantissa, exponent = to_z_exp x in
+      if exponent < 0
+      then division mantissa (- exponent)
+      else Z.mul_2exp mantissa exponent;;
+diff -ruN mlgmp_ref/gmp.mli mlgmp/gmp.mli
+--- mlgmp_ref/gmp.mli	2012-02-24 01:48:02.000000000 -0600
++++ mlgmp/gmp.mli	2018-05-18 16:35:43.518092957 -0500
+@@ -128,6 +128,8 @@
+     external hamdist : t -> t -> int = "_mlgmp_z_hamdist"
+     external scan0 : t -> int -> int = "_mlgmp_z_scan0"
+     external scan1 : t -> int -> int = "_mlgmp_z_scan1"
++    external randseed : state:RNG.randstate_t -> seed:t -> unit
++      = "_mlgmp_z_randseed"
+     external urandomb : state:RNG.randstate_t -> nbits:int -> t
+       = "_mlgmp_z_urandomb"
+     external urandomm : state:RNG.randstate_t -> n:t -> t
+@@ -339,11 +341,25 @@
+     external floor_prec : prec:int -> t -> t = "_mlgmp_fr_floor"
+     external trunc_prec : prec:int -> t -> t = "_mlgmp_fr_trunc"
+     external rint_prec : prec:int -> mode:rounding_mode -> t -> t = "_mlgmp_fr_rint"
++    external check_range : 
++      prec:int -> mode:rounding_mode -> emin:int -> emax:int -> t -> t * int 
++      = "_mlgmp_fr_check_range"
++    external subnormalize : 
++      t -> ternary:int -> mode:rounding_mode -> t
++      = "_mlgmp_fr_subnormalize"
++    external nexttoward : emin:int -> emax:int -> t -> t -> t = "_mlgmp_fr_nexttoward"
+     external cmp : t -> t -> int = "_mlgmp_fr_cmp"
+     external compare : t -> t -> int = "_mlgmp_fr_cmp"
+     external sgn : t -> int = "_mlgmp_fr_sgn"
+     external eq : t -> t -> prec:int -> bool = "_mlgmp_fr_eq"
+     external is_nan : t -> bool = "_mlgmp_fr_is_nan"
++    external is_inf : t -> bool = "_mlgmp_fr_is_inf"
++    external equal : t -> t -> bool = "_mlgmp_fr_equal"
++    external greater : t -> t -> bool = "_mlgmp_fr_greater"
++    external greaterequal : t -> t -> bool = "_mlgmp_fr_greaterequal"
++    external less : t -> t -> bool = "_mlgmp_fr_less"
++    external lessequal : t -> t -> bool = "_mlgmp_fr_lessequal"
++
+     external urandomb : prec:int -> state:RNG.randstate_t -> t
+       = "_mlgmp_fr_urandomb"
+     val from_z : Z.t -> t
+@@ -389,6 +405,10 @@
+       = "_mlgmp_fr_exp";;
+   external exp2_prec : prec: int -> mode: rounding_mode -> t->t
+       = "_mlgmp_fr_exp2";;
++  external log_prec : prec: int -> mode: rounding_mode -> t->t
++      = "_mlgmp_fr_log";;
++  external log2_prec : prec: int -> mode: rounding_mode -> t->t
++      = "_mlgmp_fr_log2";;
+   external pow_prec : prec: int -> mode: rounding_mode -> t->t->t
+       = "_mlgmp_fr_pow";;
+   external pow_prec_ui : prec: int -> mode: rounding_mode -> t->int->t
+@@ -418,6 +438,10 @@
+     val sqrt : t -> t
+     val exp : t -> t
+     val exp2 : t -> t
++    val exp10 : t -> t
++    val log : t -> t
++    val log2 : t -> t
++    val log10 : t -> t
+     val pow : t -> t -> t
+     val pow_ui : t -> int -> t
+ 
+@@ -425,7 +449,6 @@
+     val ceil : t -> t
+     val trunc : t -> t
+     val rint : t -> t
+-    val equal : t -> t -> bool
+     val to_string_base_digits :
+       mode:rounding_mode -> base:int -> digits:int -> t -> string
+     val to_string : t -> string
+diff -ruN mlgmp_ref/Makefile mlgmp/Makefile
+--- mlgmp_ref/Makefile	2012-02-24 02:17:29.000000000 -0600
++++ mlgmp/Makefile	2018-05-18 16:35:43.518092957 -0500
+@@ -15,7 +15,7 @@
+ 	-cclib -lmpfr -cclib -lgmp -cclib -L$(DESTDIR)
+ 
+ #CC= icc
+-CFLAGS_MISC= -Wall -Wno-unused -Werror -g -O3
++CFLAGS_MISC= -Wall -Wno-unused -Werror -g -O3 -fPIC
+ #CFLAGS_MISC=
+ CFLAGS_INCLUDE= -I $(OCAML_LIBDIR) $(GMP_INCLUDES)
+ CFLAGS= $(CFLAGS_MISC) $(CFLAGS_INCLUDE)
+@@ -36,8 +36,8 @@
+ all:	$(LIBS) tests
+ 
+ install: all
+-	-mkdir $(DESTDIR)
+-	cp $(LIBS) gmp.mli $(DESTDIR)
++	-mkdir -p $(DESTDIR)
++	ocamlfind install gmp META $(LIBS) gmp.mli
+ 
+ tests:	$(LIBS) $(TESTS)
+ 	./test_suite
+@@ -68,7 +68,7 @@
+ 	$(RANLIB) $@
+ 
+ gmp.cma: gmp.cmo libmlgmp.a
+-	$(OCAMLC) $(OCAMLFLAGS) -a gmp.cmo -cclib -lmlgmp $(LIBFLAGS) -o $@
++	$(OCAMLC) $(OCAMLFLAGS) -custom -a gmp.cmo -cclib -lmlgmp $(LIBFLAGS) -o $@
+ 
+ gmp.a gmp.cmxa: gmp.cmx libmlgmp.a
+ 	$(OCAMLOPT) $(OCAMLFLAGS) -a gmp.cmx -cclib -lmlgmp  $(LIBFLAGS) -o $@
+@@ -91,7 +91,7 @@
+ 	$(OCAMLOPT) $+ -o $@
+ 
+ test_suite:	gmp.cma test_suite.cmo
+-	$(OCAMLC) -custom $+ -o $@
++	$(OCAMLC)  $+ -o $@
+ 
+ test_suite.opt:	gmp.cmxa test_suite.cmx
+ 	$(OCAMLOPT) $+ -o $@
+diff -ruN mlgmp_ref/META mlgmp/META
+--- mlgmp_ref/META	1969-12-31 18:00:00.000000000 -0600
++++ mlgmp/META	2018-05-18 16:35:43.518092957 -0500
+@@ -0,0 +1,11 @@
++version = "20150824"
++description = "GMP"
++archive(byte) = "gmp.cma"
++archive(byte, plugin) = "gmp.cma"
++archive(native) = "gmp.cmxa"
++archive(native, plugin) = "gmp.cmxs"
++exists_if = "gmp.cma"
++
++
++
++
+diff -ruN mlgmp_ref/mlgmp_f.c mlgmp/mlgmp_f.c
+--- mlgmp_ref/mlgmp_f.c	2012-02-24 02:10:11.000000000 -0600
++++ mlgmp/mlgmp_f.c	2018-05-18 16:35:43.518092957 -0500
+@@ -228,8 +228,7 @@
+ 
+ int _mlgmp_f_custom_compare(value a, value b)
+ {
+-  CAMLparam2(a, b);
+-  CAMLreturn(mpf_cmp(*mpf_val(a), *mpf_val(b)));
++  return mpf_cmp(*mpf_val(a), *mpf_val(b));
+ }
+ 
+ value _mlgmp_f_cmp(value a, value b)
+@@ -293,7 +292,6 @@
+ 			unsigned long * wsize_32,
+ 			unsigned long * wsize_64)
+ {
+-  CAMLparam1(v);
+   char *s;
+   int len;
+   mp_exp_t exponent;
+@@ -314,8 +312,6 @@
+ 
+   sprintf(exponent_buf, "@%08lx", (exponent & 0xFFFFFFFFUL));
+   serialize_block_1(exponent_buf, 9);
+-
+-  CAMLreturn0;
+ }
+ 
+ unsigned long _mlgmp_f_deserialize(void * dst)
+diff -ruN mlgmp_ref/mlgmp_fr.c mlgmp/mlgmp_fr.c
+--- mlgmp_ref/mlgmp_fr.c	2012-02-24 02:13:11.000000000 -0600
++++ mlgmp/mlgmp_fr.c	2018-05-18 16:35:43.518092957 -0500
+@@ -35,7 +35,7 @@
+ 
+ struct custom_operations _mlgmp_custom_fr =
+   {
+-    field(identifier)  "Gmp.F.t",
++    field(identifier)  "Gmp.FR.t",
+     field(finalize)    &_mlgmp_fr_finalize,
+     field(compare)     &_mlgmp_fr_custom_compare,
+     field(hash)        custom_hash_default,
+@@ -296,19 +296,88 @@
+ fr_unary_op(sqrt)
+ fr_unary_op(exp)
+ fr_unary_op(exp2)
++fr_unary_op(exp10)
++fr_unary_op(log)
++fr_unary_op(log2)
++fr_unary_op(log10)
+ 
+ fr_unary_op(rint)
+ fr_rounding_op(ceil)
+ fr_rounding_op(floor)
+ fr_rounding_op(trunc)
+ 
++/*** Round to exponent range */
++
++value _mlgmp_fr_check_range(value prec, value mode, value emin, value emax, value a)
++{
++#ifdef USE_MPFR
++  CAMLparam5(prec, mode, emin, emax, a);
++  CAMLlocal2(r, tuple);
++  r=alloc_init_mpfr(prec);
++  int t = mpfr_set(*mpfr_val(r), *mpfr_val(a), Mode_val(mode));
++  mp_exp_t last_emin = mpfr_get_emin();
++  mp_exp_t last_emax = mpfr_get_emax();
++  mpfr_set_emin(Long_val(emin));
++  mpfr_set_emax(Long_val(emax));
++  t = mpfr_check_range(*mpfr_val(r), t, Mode_val(mode));
++  mpfr_set_emin(last_emin);
++  mpfr_set_emax(last_emax);
++  tuple = alloc_tuple(2);
++  Store_field(tuple, 0, r);
++  Store_field(tuple, 1, Val_int(t));
++  CAMLreturn(tuple);
++#else
++  unimplemented(check_range);
++#endif
++}
++
++/*** Subnormalize */
++
++value _mlgmp_fr_subnormalize(value a, value ternary, value mode)
++{
++#ifdef USE_MPFR
++  CAMLparam3(a, ternary, mode);
++  CAMLlocal1(r);
++  r = alloc_mpfr();
++  mpfr_init2(*mpfr_val(r), mpfr_get_prec(*mpfr_val(a)));
++  mpfr_set(*mpfr_val(r), *mpfr_val(a), Mode_val(mode));
++  mpfr_subnormalize(*mpfr_val(r), Int_val(ternary), Mode_val(mode));
++  CAMLreturn(r);
++#else
++  unimplemented(subnormalize);
++#endif
++}
++
++/*** Next toward */
++
++value _mlgmp_fr_nexttoward(value emin, value emax, value a, value b)
++{
++#ifdef USE_MPFR
++  CAMLparam2(a, b);
++  CAMLlocal1(r);
++  r = alloc_mpfr();
++  mpfr_init2(*mpfr_val(r), mpfr_get_prec(*mpfr_val(a)));
++  mp_exp_t last_emin = mpfr_get_emin();
++  mp_exp_t last_emax = mpfr_get_emax();
++  mpfr_set_emin(Long_val(emin));
++  mpfr_set_emax(Long_val(emax));
++  mpfr_set(*mpfr_val(r), *mpfr_val(a), GMP_RNDN);
++  mpfr_nexttoward(*mpfr_val(r), *mpfr_val(b));
++  mpfr_set_emin(last_emin);
++  mpfr_set_emax(last_emax);
++  CAMLreturn(r);
++#else
++  unimplemented(nexttoward);
++#endif
++}
++  
++
+ /*** Compare */
+ 
+ int _mlgmp_fr_custom_compare(value a, value b)
+ {
+ #ifdef USE_MPFR
+-  CAMLparam2(a, b);
+-  CAMLreturn(mpfr_cmp(*mpfr_val(a), *mpfr_val(b)));
++  return mpfr_cmp(*mpfr_val(a), *mpfr_val(b));
+ #else
+   unimplemented(create);
+ #endif
+@@ -354,6 +423,18 @@
+ #endif
+ }
+ 
++value _mlgmp_fr_is_inf(value a)
++{
++#ifdef USE_MPFR
++  CAMLparam1(a);
++  CAMLreturn(mpfr_inf_p(*mpfr_val(a)) ? Val_true : Val_false);
++#else
++  unimplemented(is_nan);
++#endif
++}
++
++
++
+ value _mlgmp_fr_eq(value a, value b, value nbits)
+ {
+ #ifdef USE_MPFR
+@@ -365,6 +446,67 @@
+ #endif
+ }
+ 
++
++value _mlgmp_fr_equal(value a, value b)
++{
++#ifdef USE_MPFR
++  CAMLparam2(a, b);
++  CAMLreturn(mpfr_equal_p(*mpfr_val(a), *mpfr_val(b))
++	     ? Val_true : Val_false);
++#else
++  unimplemented(equal);
++#endif
++}
++
++
++value _mlgmp_fr_greater(value a, value b)
++{
++#ifdef USE_MPFR
++  CAMLparam2(a, b);
++  CAMLreturn(mpfr_greater_p(*mpfr_val(a), *mpfr_val(b))
++	     ? Val_true : Val_false);
++#else
++  unimplemented(greater);
++#endif
++}
++
++
++value _mlgmp_fr_greaterequal(value a, value b)
++{
++#ifdef USE_MPFR
++  CAMLparam2(a, b);
++  CAMLreturn(mpfr_greaterequal_p(*mpfr_val(a), *mpfr_val(b))
++	     ? Val_true : Val_false);
++#else
++  unimplemented(greaterequal);
++#endif
++}
++
++
++value _mlgmp_fr_less(value a, value b)
++{
++#ifdef USE_MPFR
++  CAMLparam2(a, b);
++  CAMLreturn(mpfr_less_p(*mpfr_val(a), *mpfr_val(b))
++	     ? Val_true : Val_false);
++#else
++  unimplemented(less);
++#endif
++}
++
++
++value _mlgmp_fr_lessequal(value a, value b)
++{
++#ifdef USE_MPFR
++  CAMLparam2(a, b);
++  CAMLreturn(mpfr_lessequal_p(*mpfr_val(a), *mpfr_val(b))
++	     ? Val_true : Val_false);
++#else
++  unimplemented(lessequal);
++#endif
++}
++
++
+ fr_binary_op_mpfr(reldiff)
+ 
+ 
+@@ -429,7 +571,7 @@
+ {
+ #ifdef USE_MPFR
+   CAMLparam0();
+-  register_custom_operations(& _mlgmp_custom_f);
++  register_custom_operations(& _mlgmp_custom_fr);
+   CAMLreturn(Val_unit);
+ #endif
+ }
+@@ -439,11 +581,10 @@
+ 			unsigned long * wsize_32,
+ 			unsigned long * wsize_64)
+ {
+-  CAMLparam1(v);
+   char *s;
+-  int len;
++  int len, minus_sign_length = 0, negative_mantissa = 0;
+   mp_exp_t exponent;
+-  char exponent_buf[10];
++  char exponent_buf[23];
+ 
+   *wsize_32 = MPFR_SIZE_ARCH32;
+   *wsize_64 = MPFR_SIZE_ARCH64;
+@@ -452,16 +593,25 @@
+ 
+   s = mpfr_get_str (NULL, &exponent, 16, 0, *mpfr_val(v), GMP_RNDN);
+   len = strlen(s);
+-  serialize_int_4(len + 11);
+-
+-  serialize_block_1("0.", 2);
+-  serialize_block_1(s, len);
+-  free(s);
+ 
+-  sprintf(exponent_buf, "@%08lx", (exponent & 0xFFFFFFFFUL));
+-  serialize_block_1(exponent_buf, 9);
++  if (exponent < 0)
++    minus_sign_length = 1;
++  if (s[0] == '-' && mpfr_number_p(*mpfr_val(v)))
++    negative_mantissa = 1;
++
++  if (mpfr_number_p(*mpfr_val(v))) {
++    serialize_int_4(len + minus_sign_length + 23);
++    if (negative_mantissa)
++      serialize_block_1("-", 1);
++    serialize_block_1("0.", 2);
++  } else {
++    serialize_int_4(len + minus_sign_length + 21);
++  }
++  serialize_block_1(s + negative_mantissa, len - negative_mantissa);
++  mpfr_free_str(s);
+ 
+-  CAMLreturn0;
++  sprintf(exponent_buf, "@%0*ld", 20 + minus_sign_length, (exponent));
++  serialize_block_1(exponent_buf, 21 + minus_sign_length);
+ }
+ 
+ unsigned long _mlgmp_fr_deserialize(void * dst)
+diff -ruN mlgmp_ref/mlgmp_q.c mlgmp/mlgmp_q.c
+--- mlgmp_ref/mlgmp_q.c	2012-02-24 02:16:14.000000000 -0600
++++ mlgmp/mlgmp_q.c	2018-05-18 16:35:43.518092957 -0500
+@@ -156,8 +156,7 @@
+ 
+ int _mlgmp_q_custom_compare(value a, value b)
+ {
+-  CAMLparam2(a, b);
+-  CAMLreturn(mpq_cmp(*mpq_val(a), *mpq_val(b)));
++  return mpq_cmp(*mpq_val(a), *mpq_val(b));
+ }
+ 
+ value _mlgmp_q_cmp(value a, value b)
+@@ -194,7 +193,6 @@
+ 			unsigned long * wsize_32,
+ 			unsigned long * wsize_64)
+ {
+-  CAMLparam1(v);
+   char *s;
+   int len;
+ 
+@@ -212,8 +210,6 @@
+   serialize_int_4(len);
+   serialize_block_1(s, len);
+   free(s);
+-
+-  CAMLreturn0;
+ }
+ 
+ unsigned long _mlgmp_q_deserialize(void * dst)
+@@ -241,7 +237,6 @@
+ 
+ long _mlgmp_q_hash(value v)
+ {
+-  CAMLparam1(v);
+   mpz_t dummy;
+   long r;
+   mpz_init(dummy);
+@@ -250,5 +245,5 @@
+     ^ mpz_mod_ui(dummy, mpq_numref(*mpq_val(v)), HASH_MODULUS);
+ 
+   mpz_clear(dummy);
+-  CAMLreturn(r);
++  return r;
+ }
+diff -ruN mlgmp_ref/mlgmp_z.c mlgmp/mlgmp_z.c
+--- mlgmp_ref/mlgmp_z.c	2012-02-24 02:15:29.000000000 -0600
++++ mlgmp/mlgmp_z.c	2018-05-18 16:35:43.518092957 -0500
+@@ -571,8 +571,7 @@
+ 
+ int _mlgmp_z_custom_compare(value a, value b)
+ {
+-  CAMLparam2(a, b);
+-  CAMLreturn(mpz_cmp(*mpz_val(a), *mpz_val(b)));
++  return mpz_cmp(*mpz_val(a), *mpz_val(b));
+ }
+ 
+ value _mlgmp_z_compare(value a, value b)
+@@ -742,6 +741,13 @@
+ z_random_op(urandomm)
+ z_random_op_ui(rrandomb)
+ 
++value _mlgmp_z_randseed(value state, value seed)
++{
++  CAMLparam2(state, seed);
++  gmp_randseed(*randstate_val(state), *mpz_val(seed));
++  CAMLreturn(Val_unit);
++}
++
+ /*** Serialization */
+ value _mlgmp_z_initialize()
+ {
+@@ -755,7 +761,6 @@
+ 			unsigned long * wsize_32,
+ 			unsigned long * wsize_64)
+ {
+-  CAMLparam1(v);
+   char *s;
+   int len;
+ 
+@@ -768,7 +773,6 @@
+   serialize_block_1(s, len);
+ 
+   free(s);
+-  CAMLreturn0;
+ }
+ 
+ unsigned long _mlgmp_z_deserialize(void * dst)
+@@ -791,7 +795,6 @@
+ 
+ long _mlgmp_z_hash(value v)
+ {
+-  CAMLparam1(v);
+   mpz_t dummy;
+   long r;
+   mpz_init(dummy);
+@@ -799,5 +802,5 @@
+   r = mpz_mod_ui(dummy, *mpz_val(v), HASH_MODULUS);
+ 
+   mpz_clear(dummy);
+-  CAMLreturn(r);
++  return r;
+ }
+diff -ruN mlgmp_ref/test_suite.ml mlgmp/test_suite.ml
+--- mlgmp_ref/test_suite.ml	2012-02-24 02:32:36.000000000 -0600
++++ mlgmp/test_suite.ml	2018-05-18 16:35:43.522092987 -0500
+@@ -82,6 +82,7 @@
+ 
+ begin
+ try
++assert ((FR.to_z_t (FR.from_int (- 578))) = (Z.from_int (- 578)));
+ assert ((FR.from_int 578) = (FR.from_string_base ~base: 10 "578"));
+ assert ((FR.from_int 578) = (FR.from_float 578.));
+ assert ((float_of_string (FR.to_string (FR.from_int 578))) = 578.);

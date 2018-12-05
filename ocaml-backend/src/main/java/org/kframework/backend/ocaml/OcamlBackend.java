@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
@@ -162,7 +163,7 @@ public class OcamlBackend implements Backend {
 
     @Override
     public Function<Definition, Definition> steps() {
-        return Kompile.defaultSteps(kompileOptions, kem, excludedModuleTags());
+        return Kompile.defaultSteps(kompileOptions, kem, files);
     }
 
     @Override
@@ -172,6 +173,6 @@ public class OcamlBackend implements Backend {
 
     @Override
     public Set<String> excludedModuleTags() {
-        return Collections.singleton("symbolic");
+        return new HashSet<>(Arrays.asList("symbolic", "kore"));
     }
 }

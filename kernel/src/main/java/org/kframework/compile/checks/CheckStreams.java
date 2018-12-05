@@ -1,6 +1,7 @@
-// Copyright (c) 2015-2016 K Team. All Rights Reserved.
+// Copyright (c) 2015-2018 K Team. All Rights Reserved.
 package org.kframework.compile.checks;
 
+import org.kframework.builtin.Sorts;
 import org.kframework.definition.Module;
 import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
@@ -8,8 +9,6 @@ import org.kframework.definition.ProductionItem;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.Sort;
 import org.kframework.utils.errorsystem.KEMException;
-
-import static org.kframework.kore.KORE.Sort;
 
 import java.util.Set;
 
@@ -39,8 +38,8 @@ public class CheckStreams {
             ProductionItem i = mutable(p.items()).get(1);
             if (i instanceof NonTerminal) {
                 Sort sort = ((NonTerminal) i).sort();
-                if (!module.subsorts().lessThanEq(sort, Sort("List"))) {
-                    errors.add(KEMException.compilerError("Wrong sort in streaming cell. Expected List, but found " + sort.name() + ".", p));
+                if (!module.subsorts().lessThanEq(sort, Sorts.List())) {
+                    errors.add(KEMException.compilerError("Wrong sort in streaming cell. Expected List, but found " + sort.toString() + ".", p));
                 }
             } else {
                 throw KEMException.internalError("Illegal arguments for stream cell.");

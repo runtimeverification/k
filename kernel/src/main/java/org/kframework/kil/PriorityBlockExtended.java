@@ -1,5 +1,7 @@
-// Copyright (c) 2012-2016 K Team. All Rights Reserved.
+// Copyright (c) 2012-2018 K Team. All Rights Reserved.
 package org.kframework.kil;
+
+import org.kframework.definition.Tag;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,18 +10,14 @@ import java.util.List;
  * @see PriorityExtended */
 public class PriorityBlockExtended extends ASTNode {
 
-    java.util.List<KLabelConstant> productions = new ArrayList<KLabelConstant>();
+    java.util.List<Tag> productions = new ArrayList<>();
 
-    public java.util.List<KLabelConstant> getProductions() {
+    public java.util.List<Tag> getProductions() {
         return productions;
     }
 
-    public void setProductions(java.util.List<KLabelConstant> productions) {
+    public void setProductions(java.util.List<Tag> productions) {
         this.productions = productions;
-    }
-
-    public PriorityBlockExtended() {
-        super();
     }
 
     public PriorityBlockExtended(PriorityBlockExtended node) {
@@ -27,7 +25,7 @@ public class PriorityBlockExtended extends ASTNode {
         this.productions.addAll(node.productions);
     }
 
-    public PriorityBlockExtended(java.util.List<KLabelConstant> productions) {
+    public PriorityBlockExtended(java.util.List<Tag> productions) {
         super();
         this.productions.addAll(productions);
     }
@@ -35,7 +33,7 @@ public class PriorityBlockExtended extends ASTNode {
     @Override
     public String toString() {
         String content = "";
-        for (KLabelConstant production : productions)
+        for (Tag production : productions)
             content += production + " ";
 
         if (content.length() > 2)
@@ -69,7 +67,7 @@ public class PriorityBlockExtended extends ASTNode {
     public int hashCode() {
         int hash = 0;
 
-        for (KLabelConstant prd : productions)
+        for (Tag prd : productions)
             hash += prd.hashCode();
         return hash;
     }
@@ -77,9 +75,5 @@ public class PriorityBlockExtended extends ASTNode {
     @Override
     public PriorityBlockExtended shallowCopy() {
         return new PriorityBlockExtended(this);
-    }
-
-    public List<KLabelConstant> getChildren(Enum<?> _void) {
-        return productions;
     }
 }

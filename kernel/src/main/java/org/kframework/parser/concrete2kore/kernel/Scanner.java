@@ -1,3 +1,4 @@
+// Copyright (c) 2016-2018 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore.kernel;
 
 import com.google.common.collect.ArrayListMultimap;
@@ -6,13 +7,14 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
+import org.kframework.builtin.Sorts;
 import org.kframework.definition.Module;
 import org.kframework.definition.RegexTerminal;
 import org.kframework.definition.Terminal;
 import org.kframework.definition.TerminalLike;
 import org.kframework.parser.concrete2kore.ParseInModule;
-import org.kframework.utils.StringUtil;
 import org.kframework.utils.OS;
+import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.ParseFailedException;
@@ -22,10 +24,11 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.*;
-import java.util.concurrent.ArrayBlockingQueue;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
@@ -37,12 +40,12 @@ public class Scanner implements AutoCloseable {
     private final File scanner;
     private final Module module;
 
-    private static final String FLEX_LIB = OS.current().equals(OS.OSX) ? "-ll" : "-lfl";
+    private static final String EXE_EXTENSION = OS.current().equals(OS.WINDOWS) ? ".exe" : "";
 
     public Scanner(ParseInModule module) {
-        tokens = KSyntax2GrammarStatesFilter.getTokens(module.getParsingModule());
-        scanner = getScanner();
-        this.module = module.seedModule();
+        this.tokens  = KSyntax2GrammarStatesFilter.getTokens(module.getParsingModule());
+        this.module  = module.seedModule();
+        this.scanner = getScanner();
     }
 
     public Module getModule() {
@@ -54,10 +57,6 @@ public class Scanner implements AutoCloseable {
         return tokens.entrySet().stream().filter(e -> e.getValue()._1() == kind).findAny().get().getKey();
     }
 
-    static final String multiLine = "(\\/\\*([^\\*]|(\\*+([^\\*\\/])))*\\*+\\/)";
-    static final String singleLine = "(\\/\\/[^\\n\\r]*)";
-    static final String whites = "([\\ \\n\\r\\t])";
-
     public File getScanner() {
         File scanner;
         // tokenization
@@ -68,6 +67,7 @@ public class Scanner implements AutoCloseable {
             flex.append("%{\n" +
                     "#include<stdio.h>\n" +
                     "#include<stddef.h>\n" +
+                    "#include <fcntl.h>\n" +
                     "#define ECHO do " +
                     " {" +
                     "   long long start_pos = yytext - buffer;" +
@@ -81,9 +81,11 @@ public class Scanner implements AutoCloseable {
                     "   fwrite(yytext, 1, len, stdout);" +
                     " } while (0) \n" +
                     "char *buffer;\n" +
-                    "%}\n" +
-                    "%%\n" +
-                    "("+ multiLine +"|"+ singleLine +"|"+ whites +")" + " ;\n");
+                    "%}\n\n" +
+                    "%%\n\n");
+            if (this.module.definedSorts().contains(Sorts.Layout())) {
+                flex.append(this.module.layout() + " ;\n");
+            }
             List<TerminalLike> ordered = tokens.keySet().stream().sorted((t1, t2) -> tokens.get(t2)._2() - tokens.get(t1)._2()).collect(Collectors.toList());
             for (TerminalLike key : ordered) {
                 if (key instanceof Terminal) {
@@ -95,10 +97,22 @@ public class Scanner implements AutoCloseable {
                 }
                 writeAction(flex, key);
             }
-            flex.append("%%\n" +
+            //WIN32 fix for line terminator issue: https://sourceforge.net/p/mingw/mailman/message/11374534/
+            flex.append("\n\n%%\n\n" +
                     "int main(int argc, char **argv) {\n" +
                     "  freopen(NULL, \"rb\", stdin);\n" +
                     "  freopen(NULL, \"wb\", stdout);\n" +
+                    "# ifdef WIN32\n" +
+                    "    if ( -1 == _setmode( _fileno( stdout ), _O_BINARY ) ) {\n" +
+                    "        perror ( \"generated scanner: Cannot set BINARY mode for stdout\" );\n" +
+                    "        exit(1);\n" +
+                    "    }\n" +
+                    "    if ( -1 == _setmode( _fileno( stdin ), _O_BINARY ) ) {\n" +
+                    "        perror ( \"generated scanner: Cannot set BINARY mode for stdin\" );\n" +
+                    "        exit(1);\n" +
+                    "    }\n" +
+                    "# endif  /* WIN32 */\n" +
+                    "\n" +
                     "  while(1) {\n" +
                     "    int length;\n" +
                     "    size_t nread = fread(&length, sizeof(length), 1, stdin);\n" +
@@ -120,18 +134,25 @@ public class Scanner implements AutoCloseable {
             FileUtils.write(scannerSource, flex);
             File scannerCSource = File.createTempFile("tmp-kompile-", ".c");
             scannerCSource.deleteOnExit();
-            ProcessBuilder pb = new ProcessBuilder("flex", "--nowarn", "-Ca", "-o", scannerCSource.getAbsolutePath(), scannerSource.getAbsolutePath()).inheritIO();
+            ProcessBuilder pb = new ProcessBuilder("flex", "--nowarn", "--noyywrap", "-Ca", "-o",
+                    scannerCSource.getAbsolutePath(), scannerSource.getAbsolutePath());
+            pb.inheritIO();
             int exit = pb.start().waitFor();
             if (exit != 0) {
-                throw KEMException.internalError("Flex returned nonzero exit code. See output for details.");
+                System.err.println(pb.command());
+                throw KEMException.internalError(
+                        "Flex returned nonzero exit code. See output for details. flex command: " + pb.command());
             }
-            scanner = File.createTempFile("tmp-kompile-", "");
+            scanner = File.createTempFile("tmp-kompile-", EXE_EXTENSION);
             scanner.deleteOnExit();
-            pb = new ProcessBuilder("gcc", scannerCSource.getAbsolutePath(), "-o", scanner.getAbsolutePath(), FLEX_LIB);
+            //Option -lfl unnecessary. Same effect achieved by --noyywrap above.
+            pb = new ProcessBuilder("gcc", scannerCSource.getAbsolutePath(), "-o", scanner.getAbsolutePath());
+            pb.inheritIO();
             exit = pb.start().waitFor();
             scanner.setExecutable(true);
             if (exit != 0) {
-                throw KEMException.internalError("gcc returned nonzero exit code. See output for details.");
+                throw KEMException.internalError(
+                        "gcc returned nonzero exit code. See output for details. gcc command: " + pb.command());
             }
         } catch (IOException | InterruptedException e) {
             throw KEMException.internalError("Failed to write file for scanner", e);
@@ -243,10 +264,9 @@ public class Scanner implements AutoCloseable {
             byte[] buf = input.getBytes("UTF-8");
             ByteBuffer size = ByteBuffer.allocate(4);
             size.order(ByteOrder.nativeOrder());
-            size.putInt(buf.length + 1);
+            size.putInt(buf.length);
             process.getOutputStream().write(size.array());
             process.getOutputStream().write(buf);
-            process.getOutputStream().write('\n');
             process.getOutputStream().flush();
             return readTokenizedOutput(process, source, lines, columns);
         } catch (IOException | InterruptedException e) {

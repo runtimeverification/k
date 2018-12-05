@@ -1,10 +1,13 @@
 package org.kframework.unparser
 
+import java.util
+
+import org.kframework.POSet
 import org.kframework.attributes.{Location, Source}
 import org.kframework.builtin.Sorts
 import org.kframework.definition._
 import org.kframework.kore.{KApply, KToken, KVariable, _}
-import org.kframework.parser.{Constant, ProductionReference, Term, TermCons}
+import org.kframework.parser.{KList => _, _}
 import org.pcollections.ConsPStack
 
 import collection._
@@ -14,22 +17,31 @@ object KOREToTreeNodes {
 
   import org.kframework.kore.KORE._
 
-  def apply(t: K, mod: Module): ProductionReference = t match {
-    case t: KToken => Constant(t.s, mod.tokenProductionsFor(Sort(t.sort.name)).head, t.att.getOptional(classOf[Location]), t.att.getOptional(classOf[Source]))
+  def wellTyped(p: Production, children: ConsPStack[Term], subsorts: POSet[Sort]): Boolean = {
+    if (p.nonterminals.lengthCompare(children.size()) != 0)
+      return false
+    true
+  }
+
+  def apply(t: K, mod: Module): Term = t match {
+    case t: KToken => Constant(t.s, mod.tokenProductionFor(t.sort), t.att.getOptional(classOf[Location]), t.att.getOptional(classOf[Source]))
     case a: KApply =>
-      val production: Production = mod.productionsFor(KLabel(a.klabel.name)).find(p => p.items.count(_.isInstanceOf[NonTerminal]) == a.klist.size && !p.att.contains("unparseAvoid")).get
-      TermCons(ConsPStack.from((a.klist.items.asScala map { i: K => apply(i, mod).asInstanceOf[Term] }).reverse asJava),
-        production, t.att.getOptional(classOf[Location]), t.att.getOptional(classOf[Source]))
+      val children = ConsPStack.from((a.klist.items.asScala map { i: K => apply(i, mod).asInstanceOf[Term] }).reverse asJava)
+      val productions: Set[Production] = mod.productionsFor(KLabel(a.klabel.name)).filter(p => wellTyped(p, children, mod.subsorts) && !p.att.contains("unparseAvoid"))
+      val loc = t.att.getOptional(classOf[Location])
+      val source = t.att.getOptional(classOf[Source])
+      if (productions.size == 1) {
+        TermCons(children, productions.head, loc, source)
+      } else {
+        Ambiguity(new util.HashSet(productions.map(p => TermCons(children, p, loc, source).asInstanceOf[Term]).asJava))
+      }
   }
 
   def up(mod: Module)(t: K): K = t match {
     case v: KVariable => KToken(v.name, Sorts.KVariable, v.att)
     case t: KToken =>
-      if (mod.tokenProductionsFor.contains(Sort(t.sort.name))) {
-        t
-      } else {
-        KToken(t.s, Sorts.KString, t.att)
-      }
+      val sort = Sort(t.sort.name, t.sort.params:_*)
+      KToken(t.s, sort, t.att)
     case s: KSequence =>
       if (s.items.size() == 0)
         KApply(KLabel("#EmptyK"), KList(), s.att)

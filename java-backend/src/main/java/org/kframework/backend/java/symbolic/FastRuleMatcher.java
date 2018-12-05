@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2016 K Team. All Rights Reserved.
+// Copyright (c) 2015-2018 K Team. All Rights Reserved.
 
 package org.kframework.backend.java.symbolic;
 
@@ -249,7 +249,7 @@ public class FastRuleMatcher {
         }
 
         // register the RHS of the rewrite we have just encountered, and continue matching on its LHS
-        if (pattern instanceof KItem && ((KItem) pattern).kLabel().toString().equals(KLabels.KREWRITE)) {
+        if (pattern instanceof KItem && KLabels.KREWRITE.equals(((KItem) pattern).kLabel())) {
             KApply rw = (KApply) pattern;
             InnerRHSRewrite innerRHSRewrite = (InnerRHSRewrite) rw.klist().items().get(1);
             BitSet theNewMask = match(subject, (Term) rw.klist().items().get(0), ruleMask, path);
@@ -527,7 +527,7 @@ public class FastRuleMatcher {
 
             @Override
             public Term transform(KItem kItem) {
-                if (!kItem.kLabel().toString().equals(KLabels.KREWRITE)) {
+                if (!KLabels.KREWRITE.equals(kItem.kLabel())) {
                     return (Term) super.transform(kItem);
                 }
 
@@ -550,7 +550,7 @@ public class FastRuleMatcher {
 
             @Override
             public Term transform(KItem kItem) {
-                if (!kItem.kLabel().toString().equals(KLabels.KREWRITE)) {
+                if (!KLabels.KREWRITE.equals(kItem.kLabel())) {
                     return (Term) super.transform(kItem);
                 }
 

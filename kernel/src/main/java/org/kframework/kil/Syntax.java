@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2016 K Team. All Rights Reserved.
+// Copyright (c) 2012-2018 K Team. All Rights Reserved.
 package org.kframework.kil;
 
 import com.beust.jcommander.internal.Lists;
@@ -67,39 +67,6 @@ public class Syntax extends ModuleItem {
             blocks = blocks.substring(0, blocks.length() - 3);
 
         return "  syntax " + sort + " ::= " + blocks + "\n";
-    }
-
-    @Override
-    public List<String> getLabels() {
-        List<String> lbls = new LinkedList<String>();
-        for (PriorityBlock pb : priorityBlocks) {
-            for (Production prod : pb.getProductions()) {
-                lbls.add(prod.getLabel());
-            }
-        }
-        return lbls;
-    }
-
-    @Override
-    public List<String> getKLabels() {
-        List<String> lbls = new LinkedList<String>();
-        if (priorityBlocks == null)
-            return lbls;
-        for (PriorityBlock pb : priorityBlocks) {
-            for (Production prod : pb.getProductions()) {
-                if (prod.getSort().isComputationSort() || prod.getSort().equals(Sort.KLABEL) && prod.isConstant()) {
-                    lbls.add(prod.getKLabelOfKItem());
-                }
-            }
-        }
-        return lbls;
-    }
-
-    @Override
-    public List<Sort> getAllSorts() {
-        List<Sort> sorts = new ArrayList<>();
-        sorts.add(sort.getSort());
-        return sorts;
     }
 
     @Override

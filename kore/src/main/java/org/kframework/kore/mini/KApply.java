@@ -1,4 +1,4 @@
-// Copyright (c) 2016 K Team. All Rights Reserved.
+// Copyright (c) 2016-2018 K Team. All Rights Reserved.
 package org.kframework.kore.mini;
 
 import org.kframework.attributes.Att;
@@ -25,9 +25,6 @@ public abstract class KApply extends AbstractList implements org.kframework.kore
     public static org.kframework.kore.KApply of(KLabel klabel, K... items) {
         switch(items.length) {
         case 0:
-            if (klabel instanceof org.kframework.kore.mini.KLabel) {
-                return (org.kframework.kore.mini.KLabel) klabel;
-            }
             return new KApply0(klabel);
         case 1:
             return new KApply1(klabel, items[0]);

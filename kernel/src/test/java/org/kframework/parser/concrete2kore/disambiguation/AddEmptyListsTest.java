@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2016 K Team. All Rights Reserved.
+// Copyright (c) 2015-2018 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore.disambiguation;
 
 import com.google.common.collect.Lists;
@@ -20,6 +20,7 @@ import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.concrete2kore.ParseInModule;
 import org.kframework.parser.concrete2kore.ParserUtils;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
+import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.file.FileUtil;
@@ -59,9 +60,9 @@ public class AddEmptyListsTest {
                         definitionFile,
                         definitionFile.getParentFile(),
                         Lists.newArrayList(Kompile.BUILTIN_DIRECTORY),
-                        false);
+                        false, false);
 
-        return new RuleGrammarGenerator(baseK, true);
+        return new RuleGrammarGenerator(baseK);
     }
 
     private void parseTerm(String term, String sort, K expected) {
@@ -75,7 +76,7 @@ public class AddEmptyListsTest {
         if (parseResult._1().isLeft()) {
             Assert.assertTrue("Unexpected parse errors" + parseResult._1().left().get(), false);
         }
-        K actual = TreeNodesToKORE.down(parseResult._1().right().get());
+        K actual = new TreeNodesToKORE(Outer::parseSort, false).down(parseResult._1().right().get());
         Assert.assertEquals(expected, actual);
         if (parseResult._2().size() != expectWarnings) {
             Assert.assertTrue("Unexpected parse warnings" + parseResult._2(), false);

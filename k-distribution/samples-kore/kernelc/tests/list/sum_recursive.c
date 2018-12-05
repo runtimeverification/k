@@ -1,4 +1,4 @@
-// Copyright (c) 2014 K Team. All Rights Reserved.
+// Copyright (c) 2014-2018 K Team. All Rights Reserved.
 /*
  * Function sum_recursive returns the sum of the elements of a
  * singly linked list. The sum is recursively computed.

@@ -1,0 +1,1 @@
+Bytes2String(substrBytes(String2Bytes("1234"), 1, 4))

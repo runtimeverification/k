@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2016 K Team. All Rights Reserved.
+// Copyright (c) 2015-2018 K Team. All Rights Reserved.
 package org.kframework.compile;
 
 import org.kframework.builtin.KLabels;
@@ -15,7 +15,7 @@ import static org.kframework.kore.KORE.*;
 public class KtoKORE extends TransformK {
     @Override
     public K apply(KApply k) {
-        if (k.klabel().name().equals(KLabels.KREWRITE)) {
+        if (KLabels.KREWRITE.equals(k.klabel())) {
             return KRewrite(apply(k.klist().items().get(0)), apply(k.klist().items().get(1)), k.att());
         } else {
             k = (KApply) super.apply(k);
@@ -26,7 +26,7 @@ public class KtoKORE extends TransformK {
     private KLabel apply(KLabel klabel) {
         if (klabel instanceof KVariable)
             return apply((KVariable) klabel);
-        return KLabel(klabel.name());
+        return KLabel(klabel.name(), klabel.params());
     }
 
     @Override
@@ -37,7 +37,7 @@ public class KtoKORE extends TransformK {
 
     @Override
     public K apply(KToken k) {
-        return KToken(k.s(), Sort(k.sort().name()), k.att());
+        return KToken(k.s(), Sort(k.sort().name(), k.sort().params()), k.att());
     }
 
     @Override

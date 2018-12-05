@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2016 K Team. All Rights Reserved.
+// Copyright (c) 2015-2018 K Team. All Rights Reserved.
 package org.kframework.compile;
 
 import org.kframework.compile.ConfigurationInfo;
@@ -73,7 +73,7 @@ public class AddTopCellToRules {
     }
 
     public Sentence addImplicitCells(Sentence s) {
-        if (s.att().contains(Attribute.MACRO_KEY) || s.att().contains(Attribute.ANYWHERE_KEY)) {
+        if (s.att().contains(Attribute.MACRO_KEY) || s.att().contains(Attribute.ALIAS_KEY) || s.att().contains(Attribute.ANYWHERE_KEY)) {
             return s;
         }
         if (s instanceof Rule) {

@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2016 K Team. All Rights Reserved.
+// Copyright (c) 2013-2018 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
 import com.google.common.collect.Multimap;
@@ -216,7 +216,7 @@ public abstract class AbstractUnifier implements Unifier {
     }
 
     public static boolean isKSeq(Term term) {
-        return term instanceof KItem && ((KItem) term).kLabel().toString().equals(KLabels.KSEQ);
+        return term instanceof KItem && KLabels.KSEQ.equals(((KItem) term).kLabel());
     }
 
     public static boolean isKSeqVar(Term term) {

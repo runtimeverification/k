@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2014-2016 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2014-2018 K Team. All Rights Reserved. -->
 
 *Dear reader: these `NOTES.md` documents are mostly for myself (Grigore), to
 keep track of changes and updates that need to be made as things evolve

@@ -1,8 +1,9 @@
-// Copyright (c) 2015-2016 K Team. All Rights Reserved.
+// Copyright (c) 2015-2018 K Team. All Rights Reserved.
 package org.kframework.kompile;
 
 import org.kframework.Collections;
 import org.kframework.builtin.BooleanUtils;
+import org.kframework.builtin.Sorts;
 import org.kframework.compile.GenerateSentencesFromConfigDecl;
 import org.kframework.definition.Bubble;
 import org.kframework.definition.Definition;
@@ -23,7 +24,6 @@ import java.util.stream.Stream;
 
 import static org.kframework.Collections.*;
 import static org.kframework.definition.Constructors.*;
-import static org.kframework.kore.KORE.*;
 
 /**
  * Expands configuration declaration to KORE productions and rules.
@@ -31,12 +31,14 @@ import static org.kframework.kore.KORE.*;
 class ResolveConfig {
     private final Definition def;
     private final boolean isStrict;
+    private final boolean kore;
     private final BiFunction<Module, Bubble, Stream<? extends K>> parseBubble;
     private Function<Module, ParseInModule> getParser;
 
-    ResolveConfig(Definition def, boolean isStrict, BiFunction<Module, Bubble, Stream<? extends K>> parseBubble, Function<Module, ParseInModule> getParser) {
+    ResolveConfig(Definition def, boolean isStrict, boolean kore, BiFunction<Module, Bubble, Stream<? extends K>> parseBubble, Function<Module, ParseInModule> getParser) {
         this.def = def;
         this.isStrict = isStrict;
+        this.kore = kore;
         this.parseBubble = parseBubble;
         this.getParser = getParser;
     }
@@ -51,7 +53,7 @@ class ResolveConfig {
 
         Set<Sentence> importedConfigurationSortsSubsortedToCell = stream(inputModule.productions())
                 .filter(p -> p.att().contains("cell"))
-                .map(p -> Production(Sort("Cell"), Seq(NonTerminal(p.sort())))).collect(Collections.toSet());
+                .map(p -> Production(Sorts.Cell(), Seq(NonTerminal(p.sort())))).collect(Collections.toSet());
 
         Module module = Module(inputModule.name(), (Set<Module>) inputModule.imports(),
                 (Set<Sentence>) inputModule.localSentences().$bar(importedConfigurationSortsSubsortedToCell),
@@ -78,7 +80,7 @@ class ResolveConfig {
                     }
                 })
                 .flatMap(
-                        configDecl -> stream(GenerateSentencesFromConfigDecl.gen(configDecl.body(), configDecl.ensures(), configDecl.att(), parser.getExtensionModule())))
+                        configDecl -> stream(GenerateSentencesFromConfigDecl.gen(configDecl.body(), configDecl.ensures(), configDecl.att(), parser.getExtensionModule(), kore)))
                 .collect(Collections.toSet());
 
         Set<Sentence> configDeclSyntax = stream(configDeclProductions).filter(Sentence::isSyntax).collect(Collections.toSet());

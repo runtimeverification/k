@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2013-2016 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2013-2018 K Team. All Rights Reserved. -->
 
 Define a variant of `callcc`, say `callCC`, which never returns to the
 current context unless a value is specifically passed to its argument

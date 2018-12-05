@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-MIN_VERSION="1.8"
+MIN_VERSION="8"
 echoerr() { echo "$@" 1>&2; }
 
 if type -p java >/dev/null; then
@@ -47,7 +47,12 @@ fi
 if [[ "$_java" ]]; then
     version=$(echo $version | awk -F '"' '/version/ {print $2}')
 #    echo version "$version"
-    if ! [[ "$version" > "$MIN_VERSION" ]]; then
+    if [[ $version = "1."* ]]; then
+      version=$(echo $version | sed -e 's/1\.\([0-9]*\)\(.*\)/\1/; 1q')
+    else
+      version=$(echo $version | sed -e 's/\([0-9]*\)\(.*\)/\1/; 1q')
+    fi
+    if [[ "$version" -lt "$MIN_VERSION" ]]; then
         echoerr -e "\033[1;31mError:\033[0m K requires Java $MIN_VERSION to run but the detected version is $version."
         echoerr "Please either add Java $MIN_VERSION bin directory to the PATH or set the JAVA_HOME
 environment variable accordingly."

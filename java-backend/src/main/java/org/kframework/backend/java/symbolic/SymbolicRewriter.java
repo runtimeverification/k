@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2016 K Team. All Rights Reserved.
+// Copyright (c) 2013-2018 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
 import com.google.common.base.Stopwatch;
@@ -25,14 +25,18 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.strategies.TransitionCompositeStrategy;
+import org.kframework.backend.java.util.Profiler2;
 import org.kframework.builtin.KLabels;
 import org.kframework.kore.FindK;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KORE;
+import org.kframework.main.GlobalOptions;
 import org.kframework.rewriter.SearchType;
 import org.kframework.backend.java.utils.BitSet;
+import org.kframework.utils.errorsystem.KExceptionManager;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -51,6 +55,7 @@ public class SymbolicRewriter {
     private final TransitionCompositeStrategy strategy;
     private final List<String> transitions;
     private final Stopwatch stopwatch = Stopwatch.createUnstarted();
+    private final GlobalContext global;
     private final KOREtoBackendKIL constructor;
     private boolean transition;
     private final Set<ConstrainedTerm> superheated = Sets.newHashSet();
@@ -69,6 +74,7 @@ public class SymbolicRewriter {
         this.transitions = transitions;
         this.theFastMatcher = new FastRuleMatcher(global, definition.ruleTable.size());
         this.transition = true;
+        this.global = global;
     }
 
     public KOREtoBackendKIL getConstructor() {
@@ -88,7 +94,7 @@ public class SymbolicRewriter {
         ConstrainedTerm afterVariableRename = new ConstrainedTerm(constrainedTerm.term(), constrainedTerm.termContext());
 
         stopwatch.stop();
-        return new RewriterResult(Optional.of(step), afterVariableRename.term());
+        return new RewriterResult(Optional.of(step), Optional.empty(), afterVariableRename.term());
     }
 
     private List<ConstrainedTerm> computeRewriteStep(ConstrainedTerm constrainedTerm, int step, boolean computeOne) {
@@ -110,7 +116,7 @@ public class SymbolicRewriter {
 
         K topOfStrategyCell = ((KApply) theStrategy.get()).klist().items().get(0);
 
-        if ((topOfStrategyCell instanceof KApply) && ((KApply) topOfStrategyCell).klabel().name().equals(KLabels.KSEQ)) {
+        if ((topOfStrategyCell instanceof KApply) && KLabels.KSEQ.equals(((KApply) topOfStrategyCell).klabel())) {
             topOfStrategyCell = ((KApply) topOfStrategyCell).klist().items().get(0);
         }
         boolean isStuck = !(topOfStrategyCell instanceof KApply) ||
@@ -205,7 +211,7 @@ public class SymbolicRewriter {
             if (!matchResult.isMatching) {
                 // TODO(AndreiS): move these some other place
                 result = result.expandPatterns(true);
-                if (result.constraint().isFalse() || result.constraint().checkUnsat()) {
+                if (result.constraint().isFalseExtended() || result.constraint().checkUnsat()) {
                     continue;
                 }
             }
@@ -391,7 +397,7 @@ public class SymbolicRewriter {
         if (expandPattern) {
             // TODO(AndreiS): move these some other place
             result = result.expandPatterns(true);
-            if (result.constraint().isFalse() || result.constraint().checkUnsat()) {
+            if (result.constraint().isFalseExtended() || result.constraint().checkUnsat()) {
                 result = null;
             }
         }
@@ -547,7 +553,7 @@ public class SymbolicRewriter {
 
     private void flattenList(List<K> unflat, List<K> flat) {
         unflat.forEach(x -> {
-            if (x instanceof KItem && ((KItem) x).klabel().name().equals(KLabels.AND)) {
+            if (x instanceof KItem && KLabels.AND.equals(((KItem) x).klabel())) {
                 flattenList(((KItem) x).items(), flat);
             } else {
                 flat.add(x);
@@ -573,14 +579,15 @@ public class SymbolicRewriter {
     private K disjunctResults(List<K> results) {
         return results.stream().map(x -> x instanceof ConjunctiveFormula ? processConjuncts((ConjunctiveFormula) x) : x)
                 .distinct()
-                .reduce((x, y) -> KORE.KApply(KORE.KLabel(KLabels.ML_OR), x, y)).orElse(KORE.KApply(KORE.KLabel(KLabels.ML_FALSE)));
+                .reduce((x, y) -> KORE.KApply(KLabels.ML_OR, x, y)).orElse(KORE.KApply(KLabels.ML_FALSE));
     }
 
     public List<ConstrainedTerm> proveRule(
-            ConstrainedTerm initialTerm,
+            Rule rule, ConstrainedTerm initialTerm,
             ConstrainedTerm targetTerm,
-            List<Rule> specRules) {
+            List<Rule> specRules, KExceptionManager kem) {
         List<ConstrainedTerm> proofResults = new ArrayList<>();
+        int successPaths = 0;
         Set<ConstrainedTerm> visited = new HashSet<>();
         List<ConstrainedTerm> queue = new ArrayList<>();
         List<ConstrainedTerm> nextQueue = new ArrayList<>();
@@ -595,6 +602,7 @@ public class SymbolicRewriter {
             step++;
             for (ConstrainedTerm term : queue) {
                 if (term.implies(targetTerm)) {
+                    successPaths++;
                     continue;
                 }
 
@@ -621,8 +629,13 @@ public class SymbolicRewriter {
                 if (guarded) {
                     ConstrainedTerm result = applySpecRules(term, specRules);
                     if (result != null) {
-                        if (visited.add(result))
+                        if (visited.add(result)) {
                             nextQueue.add(result);
+                        } else {
+                            if (term.equals(result)) {
+                                kem.registerCriticalWarning("Step " + step + ": infinite loop after applying a spec rule.");
+                            }
+                        }
                         continue;
                     }
                 }
@@ -675,7 +688,23 @@ public class SymbolicRewriter {
             guarded = true;
         }
 
+        if (global.globalOptions.verbose) {
+            printSummaryBox(rule, proofResults, successPaths, step);
+        }
         return proofResults;
+    }
+
+    private void printSummaryBox(Rule rule, List<ConstrainedTerm> proofResults, int successPaths, int step) {
+        if (proofResults.isEmpty()) {
+            System.err.format("\nSPEC PROVED: %s %s\n==================================\nExecution paths: %d\n",
+                    new File(rule.getSource().source()), rule.getLocation(), successPaths);
+        } else {
+            System.err.format("\nSPEC FAILED: %s %s\n==================================\n" +
+                            "Success execution paths: %d\nFailed execution paths: %d\n",
+                    new File(rule.getSource().source()), rule.getLocation(), successPaths, proofResults.size());
+        }
+        System.err.format("Longest path: %d steps\n", step);
+        global.profiler.printResult();
     }
 
     /**
@@ -684,7 +713,7 @@ public class SymbolicRewriter {
     private ConstrainedTerm applySpecRules(ConstrainedTerm constrainedTerm, List<Rule> specRules) {
         for (Rule specRule : specRules) {
             ConstrainedTerm pattern = specRule.createLhsPattern(constrainedTerm.termContext());
-            ConjunctiveFormula constraint = constrainedTerm.matchImplies(pattern, true);
+            ConjunctiveFormula constraint = constrainedTerm.matchImplies(pattern, true, specRule.matchingSymbols());
             if (constraint != null) {
                 return buildResult(specRule, constraint, null, true, constrainedTerm.termContext());
             }

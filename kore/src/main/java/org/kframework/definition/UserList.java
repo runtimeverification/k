@@ -1,8 +1,10 @@
-// Copyright (c) 2015-2016 K Team. All Rights Reserved.
+// Copyright (c) 2015-2018 K Team. All Rights Reserved.
 package org.kframework.definition;
 
 import org.kframework.Collections;
 import org.kframework.attributes.Att;
+import org.kframework.kore.KLabel;
+import org.kframework.kore.Sort;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -15,11 +17,11 @@ import java.util.stream.Collectors;
  * Class to hold easy to access information about user defined lists.
  */
 public class UserList {
-    public String sort = "";
-    public String childSort = null;
+    public Sort sort = null;
+    public Sort childSort = null;
     public String separator = null;
-    public String terminatorKLabel = null;
-    public String klabel = null;
+    public KLabel terminatorKLabel = null;
+    public KLabel klabel = null;
     public boolean nonEmpty = false;
     public Production pList = null, pTerminator = null;
     public org.kframework.attributes.Att attrs = null;
@@ -35,11 +37,11 @@ public class UserList {
     public static java.util.List<UserList> getLists(Set<Sentence> sentences) {
         Map<Boolean, List<Sentence>> separatedProds
                 = sentences.stream().collect(Collectors.groupingBy(p -> p instanceof Production && p.att().contains(Att.userList())));
-        Map<String, java.util.List<Sentence>> listsMap = separatedProds.getOrDefault(true, new LinkedList<>())
-                .stream().collect(Collectors.groupingBy(s -> ((Production) s).sort().name()));
+        Map<Sort, java.util.List<Sentence>> listsMap = separatedProds.getOrDefault(true, new LinkedList<>())
+                .stream().collect(Collectors.groupingBy(s -> ((Production) s).sort()));
 
         java.util.List<UserList> res = new ArrayList<>();
-        for (Map.Entry<String, java.util.List<Sentence>> x : listsMap.entrySet()) {
+        for (Map.Entry<Sort, java.util.List<Sentence>> x : listsMap.entrySet()) {
             UserList ul = new UserList();
             ul.sort = x.getKey();
             assert x.getValue().size() == 2;
@@ -48,14 +50,14 @@ public class UserList {
                 if (p.items().size() == 3) {
                     Terminal t = (Terminal) p.items().tail().head();
                     ul.separator = t.value();
-                    ul.klabel = p.klabel().get().name();
+                    ul.klabel = p.klabel().get();
                     ul.attrs = p.att().remove("klabel");
                     // should work without the Att.userList() att, i.e. for any list -- see #1892
                     ul.nonEmpty = ul.attrs.get(Att.userList()).equals("+");
-                    ul.childSort = ((NonTerminal) p.items().head()).sort().name();
+                    ul.childSort = ((NonTerminal) p.items().head()).sort();
                     ul.pList = p;
                 } else if (p.items().size() == 1 && p.items().head() instanceof Terminal) {
-                    ul.terminatorKLabel = p.klabel().get().name();
+                    ul.terminatorKLabel = p.klabel().get();
                     ul.pTerminator = p;
                 } else
                     throw new AssertionError("Didn't expect this type of production when recognizing userList patterns!");

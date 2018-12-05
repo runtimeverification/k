@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2016 K Team. All Rights Reserved.
+// Copyright (c) 2015-2018 K Team. All Rights Reserved.
 package org.kframework.krun.modes;
 
 import com.google.inject.Inject;
@@ -67,6 +67,7 @@ public class KRunExecutionMode implements ExecutionMode {
             Tuple2<RewriterResult, K> res = rewriter.executeAndMatch(k, Optional.ofNullable(kRunOptions.depth), pattern);
             return Tuple2.apply(res._2(), 0);
         }
-        return Tuple2.apply(rewriter.execute(k, Optional.ofNullable(kRunOptions.depth)).k(), 0);
+        RewriterResult res = rewriter.execute(k, Optional.ofNullable(kRunOptions.depth));
+        return Tuple2.apply(res.k(), res.exitCode().orElse(0));
     }
 }

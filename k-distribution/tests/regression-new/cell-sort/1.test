@@ -1,0 +1,6 @@
+addContract(foo);
+addFunction(foo, f1);
+addFunction(foo, f2);
+addFunction(foo, f3);
+
+testFunction(foo, f2); // but it works with f1 or f3 (first or last element)

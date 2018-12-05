@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2016 K Team. All Rights Reserved.
+// Copyright (c) 2015-2018 K Team. All Rights Reserved.
 package org.kframework.compile;
 
 import com.google.common.collect.ArrayListMultimap;
@@ -198,6 +198,6 @@ class TestConfiguration implements ConfigurationInfo {
 
     @Override
     public scala.collection.Set<Sort> getCellBagSortsOfCell(Sort k) {
-        return Set(Sort(k.name() + "Bag"));
+        return Set(Sort(k.name() + "Bag", k.params()));
     }
 }

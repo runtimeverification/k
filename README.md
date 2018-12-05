@@ -7,7 +7,7 @@ This is a readme file for the developers.
 
 In short:
 ```
-sudo apt-get install build-essential m4 openjdk-8-jdk libgmp-dev libmpfr-dev pkg-config flex z3 libz3-dev maven opam
+sudo apt-get install build-essential m4 openjdk-8-jdk libgmp-dev libmpfr-dev pkg-config flex z3 libz3-dev maven opam python3
 ```
 
 If you install this list of dependencies, continue directly to the Install section.
@@ -56,6 +56,7 @@ Also required:
 *   [pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config/)
 *   [z3](https://github.com/Z3Prover/z3)
 *   [opam](https://opam.ocaml.org/doc/Install.html)
+*   [python](https://www.python.org)
 
 These can all be installed from your package manager.
 

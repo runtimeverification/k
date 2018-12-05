@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2016 K Team. All Rights Reserved.
+// Copyright (c) 2014-2018 K Team. All Rights Reserved.
 module TEST
 
   configuration <T> <k> $PGM:K </k> <bag> <b multiplicity="*"> .K </b> </bag> </T>

@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2016 K Team. All Rights Reserved.
+// Copyright (c) 2015-2018 K Team. All Rights Reserved.
 package org.kframework.unparser;
 
 import org.kframework.kore.InjectedKLabel;
@@ -70,7 +70,7 @@ public class ToBinary {
             data.writeByte(BinaryParser.KTOKEN);
             add_intern(k);
             writeString(tok.s());
-            writeString(tok.sort().name());
+            writeString(tok.sort().toString());
 
         } else if (k instanceof KApply) {
             KApply app = (KApply) k;

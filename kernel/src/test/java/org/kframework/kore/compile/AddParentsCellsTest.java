@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2016 K Team. All Rights Reserved.
+// Copyright (c) 2015-2018 K Team. All Rights Reserved.
 
 package org.kframework.compile;
 
@@ -36,15 +36,15 @@ public class AddParentsCellsTest {
         addCell("MsgCell", "MsgIdCell", "<msgId>");
     }};
     final LabelInfo labelInfo = new LabelInfo() {{
-        addLabel("TCell","<T>");
-        addLabel("TSCell","<ts>");
-        addLabel("tCell","<t>");
-        addLabel("StateCell","<state>");
-        addLabel("SchedulerCell","<scheduler>");
-        addLabel("KCell","<k>");
-        addLabel("EnvCell","<env>");
-        addLabel("MsgCell","<msg>");
-        addLabel("MsgIdCell","<msgId>");
+        addLabel(Sort("TCell"),"<T>");
+        addLabel(Sort("TSCell"),"<ts>");
+        addLabel(Sort("tCell"),"<t>");
+        addLabel(Sort("StateCell"),"<state>");
+        addLabel(Sort("SchedulerCell"),"<scheduler>");
+        addLabel(Sort("KCell"),"<k>");
+        addLabel(Sort("EnvCell"),"<env>");
+        addLabel(Sort("MsgCell"),"<msg>");
+        addLabel(Sort("MsgIdCell"),"<msgId>");
     }};
     final AddParentCells pass = new AddParentCells(cfgInfo, labelInfo);
 
@@ -124,9 +124,9 @@ public class AddParentsCellsTest {
 
     @Test
     public void testRewriteWithCellVariable() {
-        K term = cell("<T>", KRewrite(KVariable("KCell", Att().add(Attribute.SORT_KEY, "KCell")), cell("<k>", intToToken(1))));
+        K term = cell("<T>", KRewrite(KVariable("KCell", Att().add(Sort.class, Sort("KCell"))), cell("<k>", intToToken(1))));
         K expected = cell("<T>", cell("<ts>",
-                cell("<t>", KRewrite(KVariable("KCell", Att().add(Attribute.SORT_KEY, "KCell")), cell("<k>", intToToken(1))))));
+                cell("<t>", KRewrite(KVariable("KCell", Att().add(Sort.class, Sort("KCell"))), cell("<k>", intToToken(1))))));
         Assert.assertEquals(expected, pass.concretizeCell(term));
     }
 
@@ -231,6 +231,6 @@ public class AddParentsCellsTest {
     }
 
     KApply cells(K... ks) {
-        return KApply(KLabel(KLabels.CELLS), ks);
+        return KApply(KLabels.CELLS, ks);
     }
 }

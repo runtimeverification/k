@@ -1,0 +1,1 @@
+Bytes2String(String2Bytes("1") +Bytes String2Bytes("2"))

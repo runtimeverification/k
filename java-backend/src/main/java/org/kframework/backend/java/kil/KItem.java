@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2016 K Team. All Rights Reserved.
+// Copyright (c) 2013-2018 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
 import com.google.common.collect.Sets;
@@ -10,6 +10,7 @@ import org.kframework.backend.java.builtins.SortMembership;
 import org.kframework.backend.java.symbolic.*;
 import org.kframework.backend.java.util.ImpureFunctionException;
 import org.kframework.backend.java.util.Profiler;
+import org.kframework.backend.java.util.Profiler2;
 import org.kframework.backend.java.util.RewriteEngineUtils;
 import org.kframework.backend.java.util.Subsorts;
 import org.kframework.backend.java.util.Constants;
@@ -47,7 +48,7 @@ import java.util.stream.Collectors;
  * @author AndreiS
  */
 @SuppressWarnings("serial")
-public class KItem extends Term implements KItemRepresentation, HasGlobalContext {
+public class KItem extends Term implements KItemRepresentation {
 
     private final Term kLabel;
     private final Term kList;
@@ -63,10 +64,6 @@ public class KItem extends Term implements KItemRepresentation, HasGlobalContext
     private Boolean anywhereApplicable = null;
 
     private BitSet[] childrenDontCareRuleMask = null;
-
-    public KItem(KLabel kLabel, Term kList, Sort sort, boolean isExactSort, Att att) {
-        this(kLabel, kList, sort, isExactSort, Collections.singleton(sort), att);
-    }
 
     public static KItem of(Term kLabel, Term kList, GlobalContext global) {
         return of(kLabel, kList, global, Att.empty(), null);
@@ -89,29 +86,23 @@ public class KItem extends Term implements KItemRepresentation, HasGlobalContext
         return new KItem(kLabel, kList, global, global.stage, att, childrenDontCareRuleMask);
     }
 
-    public KItem(Term kLabel, Term kList, Sort sort, boolean isExactSort) {
-        this(kLabel, kList, sort, isExactSort, null, null);
+    public KItem(KLabel kLabel, Term kList, GlobalContext global, Sort sort, boolean isExactSort, Att att) {
+        this(kLabel, kList, global, sort, isExactSort, Collections.singleton(sort), att);
     }
 
-    private KItem(Term kLabel, Term kList, Sort sort, boolean isExactSort, Set<Sort> possibleSorts, Att att) {
+    public KItem(Term kLabel, Term kList, GlobalContext global, Sort sort, boolean isExactSort) {
+        this(kLabel, kList, global, sort, isExactSort, null, null);
+    }
+
+    private KItem(Term kLabel, Term kList, GlobalContext global, Sort sort, boolean isExactSort, Set<Sort> possibleSorts, Att att) {
         super(computeKind(kLabel), att);
         this.kLabel = kLabel;
         this.kList = kList;
         this.sort = sort;
         this.isExactSort = isExactSort;
         this.possibleSorts = possibleSorts;
-        this.global = null;
+        this.global = global;
         this.enableCache = false;
-    }
-
-    private static Kind computeKind(Term kLabel) {
-        if (kLabel instanceof KLabelConstant) {
-            String name = ((KLabelConstant) kLabel).name();
-            if (name.equals(KLabels.DOTK) || name.equals(KLabels.KSEQ)) {
-                return Kind.K;
-            }
-        }
-        return Kind.KITEM;
     }
 
     private KItem(Term kLabel, Term kList, GlobalContext global, Stage stage, Att att, BitSet[] childrenDonCareRuleMask) {
@@ -147,6 +138,16 @@ public class KItem extends Term implements KItemRepresentation, HasGlobalContext
             possibleSorts = Collections.singleton(sort);
             enableCache = false;
         }
+    }
+
+    private static Kind computeKind(Term kLabel) {
+        if (kLabel instanceof KLabelConstant) {
+            org.kframework.kore.KLabel name = ((KLabelConstant) kLabel);
+            if (KLabels.DOTK.equals(name) || KLabels.KSEQ.equals(name)) {
+                return Kind.K;
+            }
+        }
+        return Kind.KITEM;
     }
 
     private void computeSort() {
@@ -271,14 +272,26 @@ public class KItem extends Term implements KItemRepresentation, HasGlobalContext
     }
 
     public Term evaluateFunction(TermContext context) {
-        Term result = global.kItemOps.evaluateFunction(this, context);
-        result.isEvaluated.add(context.getTopConstraint());
+        global.profiler.resFuncNanoTimer.start();
+        Term result;
+        try {
+            result = global.kItemOps.evaluateFunction(this, context);
+            result.isEvaluated.add(context.getTopConstraint());
+        } finally {
+            global.profiler.resFuncNanoTimer.stop();
+        }
         return result;
     }
 
     public Term resolveFunctionAndAnywhere(TermContext context) {
-        Term result = global.kItemOps.resolveFunctionAndAnywhere(this, context);
-        result.isEvaluated.add(context.getTopConstraint());
+        global.profiler.resFuncNanoTimer.start();
+        Term result;
+        try {
+            result = global.kItemOps.resolveFunctionAndAnywhere(this, context);
+            result.isEvaluated.add(context.getTopConstraint());
+        } finally {
+            global.profiler.resFuncNanoTimer.stop();
+        }
         return result;
     }
 
@@ -586,9 +599,9 @@ public class KItem extends Term implements KItemRepresentation, HasGlobalContext
      */
     public Term applyAnywhereRules(TermContext context) {
         // apply a .K ~> K => K normalization
-        if ((kLabel instanceof KLabelConstant) && ((KLabelConstant) kLabel).name().equals(KLabels.KSEQ)
+        if ((kLabel instanceof KLabelConstant) && KLabels.KSEQ.equals((KLabelConstant) kLabel)
                 && kList instanceof KList
-                && (((KList) kList).get(0) instanceof KItem && ((KItem) ((KList) kList).get(0)).kLabel.toString().equals(KLabels.DOTK) || ((KList) kList).get(0).equals(KSequence.EMPTY))) {
+                && (((KList) kList).get(0) instanceof KItem && KLabels.DOTK.equals(((KItem) ((KList) kList).get(0)).kLabel) || ((KList) kList).get(0).equals(KSequence.EMPTY))) {
             return ((KList) kList).get(1);
         }
 

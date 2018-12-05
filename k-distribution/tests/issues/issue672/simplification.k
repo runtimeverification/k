@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2016 K Team. All Rights Reserved.
+// Copyright (c) 2013-2018 K Team. All Rights Reserved.
 module DNF
   // implication
   rule B1:Bool impliesBool B2:Bool => notBool(B1) orBool B2 [simplification]

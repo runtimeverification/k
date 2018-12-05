@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2016 K Team. All Rights Reserved.
+// Copyright (c) 2014-2018 K Team. All Rights Reserved.
 package org.kframework.utils;
 
 import org.kframework.main.GlobalOptions;
@@ -31,7 +31,7 @@ public class Stopwatch {
     public void printIntermediate(String message) {
         long current = System.currentTimeMillis();
         if (options.verbose)
-            f.format("%-60s = %5d%n", message, current - lastIntermediate);
+            f.format("%-60s = %.3f s%n", message, (current - lastIntermediate) / 1000.);
         lastIntermediate = current;
     }
 

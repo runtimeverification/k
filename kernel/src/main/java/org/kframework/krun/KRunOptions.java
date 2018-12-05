@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2016 K Team. All Rights Reserved.
+// Copyright (c) 2014-2018 K Team. All Rights Reserved.
 package org.kframework.krun;
 
 import com.beust.jcommander.DynamicParameter;
@@ -10,6 +10,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.main.GlobalOptions;
 import org.kframework.rewriter.SearchType;
 import org.kframework.unparser.OutputModes;
+import org.kframework.unparser.PrintOptions;
 import org.kframework.utils.OS;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
@@ -154,7 +155,7 @@ public final class KRunOptions {
     }
 
     @ParametersDelegate
-    public PrettyPrintOptions prettyPrint = new PrettyPrintOptions();
+    public PrintOptions print = new PrintOptions();
 
     @Parameter(names="--search", description="In conjunction with it you can specify 3 options that are optional: pattern (the pattern used for search), bound (the number of desired solutions) and depth (the maximum depth of the search).")
     public boolean search = false;

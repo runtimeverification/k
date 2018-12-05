@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2016 K Team. All Rights Reserved.
+// Copyright (c) 2015-2018 K Team. All Rights Reserved.
 package org.kframework.backend.java.compile;
 
 import com.google.common.collect.HashMultiset;
@@ -198,7 +198,7 @@ public class ConvertDataStructureToLookup {
     KVariable newDotVariable(Sort sort) {
         KVariable newLabel;
         do {
-            newLabel = KVariable("_" + (counter++), Att.empty().add("sort", sort.name()));
+            newLabel = KVariable("_" + (counter++), Att.empty().add(Sort.class, sort));
         } while (vars.contains(newLabel));
         vars.add(newLabel);
         return newLabel;
@@ -256,7 +256,7 @@ public class ConvertDataStructureToLookup {
         return new TransformK() {
             @Override
             public K apply(KApply k) {
-                if (k.klabel().name().equals(KLabels.KSEQ))
+                if (KLabels.KSEQ.equals(k.klabel()))
                     return super.apply(k);
 
                 if (collectionFor.containsKey(k.klabel())) {
@@ -442,7 +442,7 @@ public class ConvertDataStructureToLookup {
                         if (element.getKey() instanceof KVariable && varConstraints.count(element.getKey()) == 1) {
                             state.add(KORE.KApply(KLabel("#mapChoice"), element.getKey(), map));
                         }
-                        state.add(KORE.KApply(KLabel("#match"), element.getValue(), KORE.KApply(KLabel(KLabels.MAP_LOOKUP), map, element.getKey())));
+                        state.add(KORE.KApply(KLabel("#match"), element.getValue(), KORE.KApply(KLabels.MAP_LOOKUP, map, element.getKey())));
                     }
                     if (lhsOf == null && RewriteToTop.hasRewrite(k)) {
                         // An outermost map may contain nested rewrites, so the term

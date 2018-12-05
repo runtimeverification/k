@@ -1,6 +1,7 @@
-// Copyright (c) 2015-2016 K Team. All Rights Reserved.
+// Copyright (c) 2015-2018 K Team. All Rights Reserved.
 package org.kframework.compile;
 
+import org.kframework.builtin.Sorts;
 import org.kframework.definition.Context;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
@@ -63,7 +64,7 @@ public class LiftToKSequence {
             public K apply(KAs k) {
                 K res = apply(k.pattern());
                 KVariable var = (KVariable) k.alias();
-                if (!(res instanceof KSequence) && var.att().<String>getOptional("sort").orElse("K").equals("K")) {
+                if (!(res instanceof KSequence) && var.att().getOptional(Sort.class).orElse(Sorts.K()).equals(Sorts.K())) {
                     res = KSequence(res);
                 }
                 return KAs(res, k.alias(), k.att());

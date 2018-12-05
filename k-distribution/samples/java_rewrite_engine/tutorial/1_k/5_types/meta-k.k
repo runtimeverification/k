@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2016 K Team. All Rights Reserved.
+// Copyright (c) 2013-2018 K Team. All Rights Reserved.
 module META-K
   syntax Set ::= #variables(KItem)        [function, hook(#META-K:#variables), impure]
   syntax KItem ::= #rename(KItem, Set)    [function, hook(#META-K:#rename), impure]

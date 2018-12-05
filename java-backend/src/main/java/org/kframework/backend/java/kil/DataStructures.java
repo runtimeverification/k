@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2016 K Team. All Rights Reserved.
+// Copyright (c) 2014-2018 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
 import org.kframework.backend.java.builtins.IntToken;
@@ -6,6 +6,8 @@ import org.kframework.builtin.KLabels;
 
 import java.util.Map;
 import java.util.Set;
+
+import static org.kframework.builtin.KLabels.*;
 
 
 /**
@@ -16,16 +18,6 @@ import java.util.Set;
  * @author AndreiS
  */
 public interface DataStructures {
-
-    String MAP_CHOICE = "Map:choice";
-    String SET_CHOICE = "Set:choice";
-    String LIST_GET = "List:get";
-    String MAP_LOOKUP = KLabels.MAP_LOOKUP;
-    String SET_MEMBERSHIP = "Set:in";
-    String LIST_RANGE = "List:range";
-    String MAP_UPDATE = "updateMap";
-    String MAP_REMOVE_ALL = "removeAll";
-    String SET_REMOVE_ALL = "Set:difference";
 
     static KItem lookup(Term base, Term key, TermContext context) {
         KLabelConstant klabel;
@@ -49,8 +41,8 @@ public interface DataStructures {
     static boolean isChoice(Term term) {
         return term instanceof KItem
                 && ((KItem) term).kLabel() instanceof KLabelConstant
-                && (((KItem) term).kLabel().toString().equals(MAP_CHOICE)
-                        || ((KItem) term).kLabel().toString().equals(SET_CHOICE))
+                && (MAP_CHOICE.equals(((KItem) term).kLabel())
+                        || SET_CHOICE.equals(((KItem) term).kLabel()))
                 && ((KItem) term).kList() instanceof KList
                 && ((KList) ((KItem) term).kList()).isConcreteCollection()
                 && ((KList) ((KItem) term).kList()).concreteSize() == 1;
@@ -59,9 +51,9 @@ public interface DataStructures {
     static boolean isLookup(Term term) {
         return term instanceof KItem
                 && ((KItem) term).kLabel() instanceof KLabelConstant
-                && (((KItem) term).kLabel().toString().equals(LIST_GET)
-                        || ((KItem) term).kLabel().toString().equals(MAP_LOOKUP)
-                        || ((KItem) term).kLabel().toString().equals(SET_MEMBERSHIP))
+                && (LIST_GET.equals(((KItem) term).kLabel())
+                        || MAP_LOOKUP.equals(((KItem) term).kLabel())
+                        || SET_MEMBERSHIP.equals(((KItem) term).kLabel()))
                 && ((KItem) term).kList() instanceof KList
                 && ((KList) ((KItem) term).kList()).isConcreteCollection()
                 && ((KList) ((KItem) term).kList()).concreteSize() == 2;
@@ -153,7 +145,7 @@ public interface DataStructures {
     static boolean isMapUpdate(Term term) {
         return term instanceof KItem
                 && ((KItem) term).kLabel() instanceof KLabelConstant
-                && ((KItem) term).kLabel().toString().equals(MAP_UPDATE)
+                && MAP_UPDATE.equals(((KItem) term).kLabel())
                 && ((KItem) term).kList() instanceof KList
                 && ((KList) ((KItem) term).kList()).isConcreteCollection()
                 && ((KList) ((KItem) term).kList()).concreteSize() == 2;

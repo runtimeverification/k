@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2016 K Team. All Rights Reserved.
+// Copyright (c) 2014-2018 K Team. All Rights Reserved.
 
 package org.kframework.kore.convertors;
 
@@ -42,7 +42,7 @@ public abstract class BaseTest {
         public DefinitionWithContext(Definition d, Context c) {
             this.definition = d;
             this.context = c;
-            new CollectProductionsVisitor(c).visit(d);
+            new CollectProductionsVisitor(false, c).visit(d);
         }
     }
 

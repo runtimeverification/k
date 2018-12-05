@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2016 K Team. All Rights Reserved.
+// Copyright (c) 2013-2018 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
 import java.util.Collections;
@@ -97,7 +97,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
     }
 
     public boolean implies(ConstrainedTerm constrainedTerm) {
-        ConjunctiveFormula conjunctiveFormula = matchImplies(constrainedTerm, true);
+        ConjunctiveFormula conjunctiveFormula = matchImplies(constrainedTerm, true, null);
         return conjunctiveFormula != null;
     }
 
@@ -126,19 +126,35 @@ public class ConstrainedTerm extends JavaSymbolicObject {
      * occurring only in the given constrained term (but not in this constrained term) are
      * existentially quantified.
      */
-    public ConjunctiveFormula matchImplies(ConstrainedTerm constrainedTerm, boolean expand) {
+    public ConjunctiveFormula matchImplies(ConstrainedTerm constrainedTerm, boolean expand, Set<String> matchingSymbols) {
         ConjunctiveFormula constraint = ConjunctiveFormula.of(constrainedTerm.termContext().global())
                 .add(data.constraint.substitution())
                 .add(data.term, constrainedTerm.data.term)
                 .simplifyBeforePatternFolding(context);
+        if (constraint.isFalseExtended()) {
+            return null;
+        }
+
+        constraint = constraint.applyProjectionLemma();
         if (constraint.isFalse()) {
             return null;
         }
 
+        if (matchingSymbols != null) {
+            constraint = constraint.resolveMatchingSymbols(matchingSymbols);
+            if (constraint.isFalse()) {
+                return null;
+            }
+        }
+
         /* apply pattern folding */
         constraint = constraint.simplifyModuloPatternFolding(context)
-                .add(constrainedTerm.data.constraint)
-                .simplifyModuloPatternFolding(context);
+                .add(constrainedTerm.data.constraint);
+        if (constraint.isFalse()) {
+            return null;
+        }
+
+        constraint = constraint.simplifyModuloPatternFolding(context);
         if (constraint.isFalse()) {
             return null;
         }
@@ -148,6 +164,24 @@ public class ConstrainedTerm extends JavaSymbolicObject {
             if (constraint.isFalse()) {
                 return null;
             }
+        }
+
+        // evaluate/simplify equalities
+        context.setTopConstraint(data.constraint);
+        for (Equality equality : constraint.equalities()) {
+            Term equalityTerm = equality.toK();
+            Term evaluatedTerm = equalityTerm.evaluate(context);
+            if (!evaluatedTerm.equals(equalityTerm)) {
+                constraint = constraint.addAll(Collections.singletonList(evaluatedTerm));
+                if (constraint == null || constraint.isFalse()) {
+                    return null;
+                }
+            }
+        }
+        context.setTopConstraint(null);
+        constraint = constraint.simplifyModuloPatternFolding(context);
+        if (constraint.isFalse()) {
+            return null;
         }
 
         context.setTopConstraint(data.constraint);
@@ -226,7 +260,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
             ConjunctiveFormula solution = candidateConstraint.addAndSimplify(subjectConstraint, context);
             context.setTopConstraint(subjectConstraint);
 
-            if (solution.isFalse()) {
+            if (solution.isFalseExtended()) {
                 continue;
             }
 

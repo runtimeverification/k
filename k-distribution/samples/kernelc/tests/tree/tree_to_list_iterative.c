@@ -1,4 +1,4 @@
-// Copyright (c) 2014 K Team. All Rights Reserved.
+// Copyright (c) 2014-2018 K Team. All Rights Reserved.
 /*
  * Function that iteratively transforms a binary tree into a singly linked list,
  * at the same time printing the list of elements in reverse order.

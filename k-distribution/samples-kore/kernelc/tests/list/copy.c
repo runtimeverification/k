@@ -1,4 +1,4 @@
-// Copyright (c) 2014 K Team. All Rights Reserved.
+// Copyright (c) 2014-2018 K Team. All Rights Reserved.
 /*
  * Function copy duplicates a singly linked list by allocating memory and
  * copying the content of the original list to the newly created one.

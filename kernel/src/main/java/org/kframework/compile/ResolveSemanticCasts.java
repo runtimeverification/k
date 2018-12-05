@@ -1,12 +1,17 @@
-// Copyright (c) 2015-2016 K Team. All Rights Reserved.
+// Copyright (c) 2015-2018 K Team. All Rights Reserved.
 package org.kframework.compile;
 
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.definition.Context;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
-import org.kframework.kil.Attribute;
-import org.kframework.kore.*;
+import org.kframework.kore.K;
+import org.kframework.kore.KApply;
+import org.kframework.kore.KVariable;
+import org.kframework.kore.Sort;
+import org.kframework.kore.TransformK;
+import org.kframework.kore.VisitK;
+import org.kframework.parser.outer.Outer;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -48,7 +53,7 @@ public class ResolveSemanticCasts {
         gatherCasts(rule.ensures());
         return new Rule(
                 transform(rule.body()),
-                addSideCondition(transform(rule.requires()), rule.att().contains("macro")),
+                addSideCondition(transform(rule.requires()), rule.att().contains("macro") || rule.att().contains("alias")),
                 transform(rule.ensures()),
                 rule.att());
     }
@@ -101,7 +106,7 @@ public class ResolveSemanticCasts {
                     K child = v.klist().items().get(0);
                     if (child instanceof KVariable) {
                         KVariable var = (KVariable) child;
-                        varToTypedVar.put(var, KVariable(var.name(), var.att().contains(Attribute.SORT_KEY) ? var.att() : var.att().add(Attribute.SORT_KEY, getSortNameOfCast(v))));
+                        varToTypedVar.put(var, KVariable(var.name(), var.att().contains(Sort.class) ? var.att() : var.att().add(Sort.class, Outer.parseSort(getSortNameOfCast(v)))));
                     }
                 }
                 super.apply(v);

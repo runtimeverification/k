@@ -15,8 +15,8 @@ DEFDIR?=.
 # path relative to current definition of output/input files
 RESULTDIR?=$(TESTDIR)
 # all tests in test directory with matching file extension
-TESTS=$(wildcard $(TESTDIR)/*.$(EXT))
-PROOF_TESTS=$(wildcard $(TESTDIR)/*-spec.k)
+TESTS?=$(wildcard $(TESTDIR)/*.$(EXT))
+PROOF_TESTS?=$(wildcard $(TESTDIR)/*-spec.k)
 
 CHECK=| diff -
 
@@ -49,7 +49,7 @@ else
 endif
 
 %-spec.k: kompile
-	$(KPROVE) -d $(DEFDIR) --z3-executable $@ $(CHECK) $@.out
+	$(KPROVE) $(KPROVE_FLAGS) -d $(DEFDIR) $@ $(CHECK) $@.out
 
 clean:
 	rm -rf $(DEFDIR)/$(DEF)-kompiled

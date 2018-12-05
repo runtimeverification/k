@@ -1,8 +1,9 @@
-// Copyright (c) 2014-2016 K Team. All Rights Reserved.
+// Copyright (c) 2014-2018 K Team. All Rights Reserved.
 package org.kframework.kil;
 
 import com.google.common.reflect.TypeToken;
 import com.google.inject.name.Names;
+import org.kframework.attributes.HasLocation;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 import org.kframework.kil.Attribute.Key;
@@ -11,12 +12,13 @@ import org.w3c.dom.Element;
 
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
+import java.util.Optional;
 import java.util.Scanner;
 
 /**
  * Base class for K AST. Useful for Visitors and Transformers.
  */
-public abstract class ASTNode implements Serializable {
+public abstract class ASTNode implements Serializable, HasLocation {
     /**
      *
      */
@@ -132,6 +134,9 @@ public abstract class ASTNode implements Serializable {
     public void setSource(Source source) {
         this.source = source;
     }
+
+    public Optional<Location> location() { return Optional.ofNullable(location); }
+    public Optional<Source> source() { return Optional.ofNullable(source); }
 
     /*
      * methods for easy attributes manipulation

@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2016 K Team. All Rights Reserved.
+// Copyright (c) 2013-2018 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -10,6 +10,7 @@ import org.kframework.backend.java.builtins.StringToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.utils.BitSet;
+import org.kframework.builtin.KLabels;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -162,7 +163,7 @@ public abstract class CopyOnWriteTransformer implements Transformer {
     }
 
     private Term normalizeKSeqList(KList kList) {
-        if (kList.size() > 1 && (kList.get(0) instanceof KItem) && ((KItem) (kList.get(0))).klabel().name().equals(KSEQUENCE_KLABEL)) {
+        if (kList.size() > 1 && (kList.get(0) instanceof KItem) && KLabels.KSEQ.equals(((KItem) (kList.get(0))).klabel())) {
             KItem kSeq = (KItem) (kList.get(0));
             if (kSeq.kList() instanceof KList) {
                 KList kSeqList = (KList) kSeq.klist();
@@ -174,7 +175,7 @@ public abstract class CopyOnWriteTransformer implements Transformer {
     }
 
     private Term addRightAssoc(Term term, Term toBeAdded) {
-        if (term instanceof KItem && ((KItem) term).klabel().name().equals(KSEQUENCE_KLABEL)) {
+        if (term instanceof KItem && KLabels.KSEQ.equals(((KItem) term).klabel())) {
             KItem kItem = (KItem) term;
             if (kItem.klist() instanceof KList) {
                 KList kList = (KList) kItem.kList();
@@ -187,7 +188,7 @@ public abstract class CopyOnWriteTransformer implements Transformer {
         //construct new KSequence Term
         GlobalContext globalContext = term instanceof HasGlobalContext ?
                 resolveGlobalContext((HasGlobalContext) term) : context.global();
-        return KItem.of(KLabelConstant.of(KSEQUENCE_KLABEL, context.definition()), KList.concatenate(term, toBeAdded),
+        return KItem.of(KLabelConstant.of(KLabels.KSEQ, context.definition()), KList.concatenate(term, toBeAdded),
                 globalContext, term.att());
     }
 

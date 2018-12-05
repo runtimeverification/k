@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2016 K Team. All Rights Reserved.
+// Copyright (c) 2015-2018 K Team. All Rights Reserved.
 package org.kframework.compile;
 
 import com.google.common.collect.ImmutableMap;
@@ -6,6 +6,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import org.kframework.attributes.Att;
 import org.kframework.builtin.BooleanUtils;
+import org.kframework.builtin.Sorts;
 import org.kframework.compile.ConfigurationInfo.Multiplicity;
 import org.kframework.definition.Context;
 import org.kframework.definition.Module;
@@ -140,8 +141,8 @@ public class SortCells {
             if (remainingCells == null) {
                 remainingCells = new LinkedHashSet<>(cfg.getChildren(cell));
             }
-            if (var.att().contains(Attribute.SORT_KEY)) {
-                Sort sort = Sort(var.att().get(Attribute.SORT_KEY));
+            if (var.att().contains(Sort.class)) {
+                Sort sort = var.att().get(Sort.class);
                 if (cfg.cfg.isCell(sort)) {
                     remainingCells.removeIf(s -> !s.equals(sort));
                 }
@@ -154,8 +155,8 @@ public class SortCells {
                         remainingCells.remove(s);
                     }
                 } else if (item instanceof KVariable && !item.equals(var)) {
-                    if (item.att().contains(Attribute.SORT_KEY)) {
-                        Sort sort = Sort(item.att().get(Attribute.SORT_KEY));
+                    if (item.att().contains(Sort.class)) {
+                        Sort sort = item.att().get(Sort.class);
                         remainingCells.remove(sort);
                     }
                 }
@@ -196,14 +197,14 @@ public class SortCells {
                 if (cfg.getMultiplicity(s) == Multiplicity.STAR) {
                     split = ImmutableMap.of(s, KVariable(
                             var.name(),
-                            var.att().add(Attribute.SORT_KEY, getPredicateSort(s).name())));
+                            var.att().add(Sort.class, getPredicateSort(s))));
                 } else {
-                    split = ImmutableMap.of(s, KVariable(var.name(), var.att().remove(Attribute.SORT_KEY)));
+                    split = ImmutableMap.of(s, KVariable(var.name(), var.att().add(Sort.class, s).add("cellSort")));
                 }
             } else {
                 split = new HashMap<>();
                 for (Sort cell : remainingCells) {
-                    split.put(cell, newDotVariable(var.att()));
+                    split.put(cell, newDotVariable(var.att().add(Sort.class, cell).add("cellSort")));
                 }
             }
             return split;
@@ -215,7 +216,7 @@ public class SortCells {
     KVariable newDotVariable(Att att) {
         KVariable newLabel;
         do {
-            newLabel = KVariable("_" + (counter++), att.remove("sort"));
+            newLabel = KVariable("_" + (counter++), att);
         } while (variables.containsKey(newLabel) || previousVars.contains(newLabel));
         variables.put(newLabel, null);
         return newLabel;
@@ -278,8 +279,8 @@ public class SortCells {
                 for (K item : items) {
                     if (item instanceof KVariable) {
                         KVariable var = (KVariable) item;
-                        if (var.att().contains(Attribute.SORT_KEY)) {
-                            Sort sort = Sort(var.att().get(Attribute.SORT_KEY));
+                        if (var.att().contains(Sort.class)) {
+                            Sort sort = var.att().get(Sort.class);
                             if (cfg.cfg.isCell(sort)) {
                                 if (!cellVariables.getOrDefault(var, sort).equals(sort)) {
                                     Sort prevSort = cellVariables.get(var);
@@ -626,12 +627,12 @@ public class SortCells {
                                     if (variables.containsKey(var)) {
                                         varinfo = variables.get(var);
                                     }
-                                    if (!var.att().contains(Attribute.SORT_KEY) && varinfo != null) {
+                                    if (!var.att().contains(Sort.class) && varinfo != null) {
                                         if (varinfo.var != null)
                                             var = varinfo.var;
                                     }
-                                    if (var.att().contains(Attribute.SORT_KEY)) {
-                                        Sort sort = Sort(var.att().get(Attribute.SORT_KEY));
+                                    if (var.att().contains(Sort.class)) {
+                                        Sort sort = var.att().get(Sort.class);
                                         if (cfg.cfg.isCell(sort)) {
                                             if (!subcellSorts.contains(sort)) {
                                                 throw new IllegalArgumentException("No such sub-cell " + sort + " in the cell " + cellLabel);
@@ -742,8 +743,8 @@ public class SortCells {
                         K item = k.klist().items().get(i);
                         if (item instanceof KVariable) {
                             KVariable var = (KVariable) item;
-                            if (var.att().contains(Attribute.SORT_KEY)) {
-                                Sort sort = Sort(var.att().get(Attribute.SORT_KEY));
+                            if (var.att().contains(Sort.class)) {
+                                Sort sort = var.att().get(Sort.class);
                                 if (!cfg.cfg.isCell(sort)) {
                                     if (!cellFragmentVars.containsKey(var)) {
                                         cellFragmentVars.put(var, new HashSet<>());
@@ -876,7 +877,7 @@ public class SortCells {
             List<Sort> sorts = JavaConversions.seqAsJavaList(sig._1());
             if (n >= sorts.size()) continue;
             sort = sorts.get(n);
-            if (!sort.name().equals("K")) {
+            if (!sort.equals(Sorts.K())) {
                 return sort;
             }
         }

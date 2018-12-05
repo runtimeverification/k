@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2016 K Team. All Rights Reserved.
+// Copyright (c) 2015-2018 K Team. All Rights Reserved.
 package org.kframework.compile;
 
 import org.kframework.Collections;
@@ -53,7 +53,7 @@ public class ResolveContexts {
                 .map(s -> (Context) s)
                 .flatMap(c -> this.resolve(c, input)).collect(Collectors.toCollection(HashSet::new));
         if (!rulesToAdd.isEmpty()) {
-            rulesToAdd.add(SyntaxSort(Sort("K")));
+            rulesToAdd.add(SyntaxSort(Sorts.K()));
         }
         return Module(input.name(), input.imports(), (scala.collection.Set<Sentence>) stream(input.localSentences()).filter(s -> !(s instanceof Context)).collect(Collections.toSet()).$bar(immutable(rulesToAdd)), input.att());
     }
@@ -134,14 +134,14 @@ public class ResolveContexts {
         items.add(Terminal(freezerLabel.name()));
         items.add(Terminal("("));
         for (int i = 0; i < vars.size(); i++) {
-            items.add(NonTerminal(Sort("K")));
+            items.add(NonTerminal(Sorts.K()));
             items.add(Terminal(","));
         }
         if (vars.size() > 0) {
             items.remove(items.size() - 1);
         }
         items.add(Terminal(")"));
-        Production freezer = Production(freezerLabel.name(), Sorts.KItem(), immutable(items), Att());
+        Production freezer = Production(freezerLabel, Sorts.KItem(), immutable(items), Att());
         K frozen = KApply(freezerLabel, vars.values().stream().collect(Collections.toList()));
         return Stream.of(freezer,
                 Rule(KRewrite(cooled, KSequence(heated, frozen)), requiresHeat, BooleanUtils.TRUE, context.att().add("heat")),

@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2016 K Team. All Rights Reserved.
+// Copyright (c) 2013-2018 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
 import com.google.common.collect.ImmutableMultimap;
@@ -12,12 +12,17 @@ import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
 import org.kframework.utils.errorsystem.KEMException;
+import scala.collection.Seq;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 
 /**
@@ -37,6 +42,7 @@ public class KLabelConstant extends KLabel implements org.kframework.kore.KLabel
 
     /* un-escaped label */
     private final String label;
+    private final Seq<org.kframework.kore.Sort> params;
 
     /**
      * see {@link #ordinal()}
@@ -68,13 +74,17 @@ public class KLabelConstant extends KLabel implements org.kframework.kore.KLabel
 
     private final String smtlib;
 
+    private final List<Integer> projectionAtt;
+
     private KLabelConstant(
             String label,
+            Seq<org.kframework.kore.Sort> params,
             int ordinal,
             Set<SortSignature> signatures,
             Set<Sort> allSorts,
             Att productionAttributes) {
         this.label = label;
+        this.params = params;
         this.ordinal = ordinal;
         this.signatures = signatures;
         this.productionAttributes = productionAttributes;
@@ -84,20 +94,22 @@ public class KLabelConstant extends KLabel implements org.kframework.kore.KLabel
         boolean isFunction;
         boolean isPattern = false;
         String smtlib = null;
+        List<Integer>  projectionAtt = null;
         // there are labels which are just predicates, but are not obligated to be sort membership predicates
-        if (!label.startsWith("is") || !allSorts.contains(Sort.of(label.substring("is".length())))) {
+        if (!productionAttributes.contains(Attribute.PREDICATE_KEY, org.kframework.kore.Sort.class)) {
             predicateSort = null;
-            isFunction = productionAttributes.contains(Attribute.FUNCTION_KEY)
-                    || productionAttributes.contains(Attribute.PREDICATE_KEY);
+            isFunction = productionAttributes.contains(Attribute.FUNCTION_KEY);
             isPattern = productionAttributes.contains(Attribute.PATTERN_KEY);
             smtlib = productionAttributes.getOptional(Attribute.SMTLIB_KEY).orElse(null);
+            projectionAtt = getProjectionAtt(productionAttributes);
         } else {
             /* a KLabel beginning with "is" represents a sort membership predicate */
             isFunction = true;
-            predicateSort = Sort.of(label.substring("is".length()));
+            predicateSort = Sort.of(productionAttributes.get(Attribute.PREDICATE_KEY, org.kframework.kore.Sort.class));
         }
         this.isSortPredicate = predicateSort != null;
         this.isFunction = isFunction;
+        this.projectionAtt = projectionAtt;
         this.isPattern = isPattern;
         this.smtlib = smtlib;
     }
@@ -110,14 +122,37 @@ public class KLabelConstant extends KLabel implements org.kframework.kore.KLabel
      * @param label string representation of the KLabel; must not be '`' escaped;
      * @return AST term representation the the KLabel;
      */
-    public static KLabelConstant of(String label, Definition definition) {
-        return cache.computeIfAbsent(Pair.of(definition.signaturesOf(label), definition.kLabelAttributesOf(label)), p -> new ConcurrentHashMap<>())
-                .computeIfAbsent(label, l -> new KLabelConstant(
-                        l,
+    public static KLabelConstant of(org.kframework.kore.KLabel label, Definition definition) {
+        return cache.computeIfAbsent(Pair.of(definition.signaturesOf(label.name()), definition.kLabelAttributesOf(label)), p -> new ConcurrentHashMap<>())
+                .computeIfAbsent(label.toString(), l -> new KLabelConstant(
+                        label.name(),
+                        label.params(),
                         maxOrdinal.getAndIncrement(),
-                        definition.signaturesOf(l),
+                        definition.signaturesOf(label.name()),
                         definition.allSorts(),
-                        definition.kLabelAttributesOf(l)));
+                        definition.kLabelAttributesOf(label)));
+    }
+
+    /*
+     * [proj(A,B,C)]  =>  (A,B,C)
+     * [proj]         =>  (0,1,2)  // by default
+     */
+    private List<Integer> getProjectionAtt(Att productionAttributes) {
+        Optional<String> proj = productionAttributes.getOptional(Attribute.PROJECTION_KEY);
+        if (proj.isPresent()) {
+            String projAtt = proj.get();
+            if (projAtt.isEmpty()) {
+                return Arrays.asList(0,1,2);
+            } else {
+                return Arrays.stream(proj.get().split(",")).map(s -> Integer.valueOf(s.trim())).collect(Collectors.toList());
+            }
+        } else {
+            return null;
+        }
+    }
+
+    public List<Integer> getProjectionAtt() {
+        return projectionAtt;
     }
 
     /**
@@ -136,6 +171,11 @@ public class KLabelConstant extends KLabel implements org.kframework.kore.KLabel
     @Override
     public boolean isFunction() {
         return isFunction;
+    }
+
+    @Override
+    public boolean isProjection() {
+        return projectionAtt != null;
     }
 
     /**
@@ -195,6 +235,9 @@ public class KLabelConstant extends KLabel implements org.kframework.kore.KLabel
     }
 
     @Override
+    public Seq<org.kframework.kore.Sort> params() { return params; }
+
+    @Override
     public boolean equals(Object object) {
         /* {@code KLabelConstant} objects are cached to ensure uniqueness */
         return this == object;
@@ -229,7 +272,7 @@ public class KLabelConstant extends KLabel implements org.kframework.kore.KLabel
                 Pair.of(signatures, productionAttributes),
                 p -> new ConcurrentHashMap<>());
         if (localCache.containsKey(label) && localCache.get(label).ordinal != this.ordinal) {
-            KEMException.criticalError("The ordinal for klabel: " + label + " is " + localCache.get(label).ordinal +
+            throw KEMException.criticalError("The ordinal for klabel: " + label + " is " + localCache.get(label).ordinal +
                     " in the cache and " + this.ordinal + " serialized.");
         }
         // TODO: fix bug: ordinals from deserialized objects may overlap with those of newly created objects
@@ -257,7 +300,7 @@ public class KLabelConstant extends KLabel implements org.kframework.kore.KLabel
     public Multimap<Integer, Integer> getBinderMap() {
         if (isBinder()) {
             Multimap<Integer, Integer> binder = productionAttributes.getOptional("binder", Multimap.class).orElse(null);
-            assert signatures.size() == 1;
+            assert signatures.stream().map(s -> s.parameters().size()).distinct().count() == 1;
             return binder == null ? ImmutableMultimap.of(0, signatures.iterator().next().parameters().size() - 1) : binder;
         } else {
             return null;

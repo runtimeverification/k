@@ -1,4 +1,4 @@
-// Copyright (c) 2014 K Team. All Rights Reserved.
+// Copyright (c) 2014-2018 K Team. All Rights Reserved.
 
 package org.kframework.definition
 
@@ -29,8 +29,10 @@ object Constructors {
 
   def Production(sort: Sort, items: Seq[ProductionItem]) = definition.Production(sort, items, Att.empty)
   def Production(sort: Sort, items: Seq[ProductionItem], att: attributes.Att) = definition.Production(sort, items, att)
-  def Production(klabel: String, sort: Sort, items: Seq[ProductionItem]) = definition.Production(klabel, sort, items)
-  def Production(klabel: String, sort: Sort, items: Seq[ProductionItem], att: attributes.Att) = definition.Production(klabel, sort, items, att)
+  def Production(klabel: KLabel, sort: Sort, items: Seq[ProductionItem]) = definition.Production(klabel, sort, items)
+  def Production(klabel: KLabel, sort: Sort, items: Seq[ProductionItem], att: attributes.Att) = definition.Production(klabel, sort, items, att)
+  def Production(klabel: Option[KLabel], sort: Sort, items: Seq[ProductionItem]) = definition.Production(klabel, sort, items, Att.empty)
+  def Production(klabel: Option[KLabel], sort: Sort, items: Seq[ProductionItem], att: attributes.Att) = definition.Production(klabel, sort, items, att)
 
   def Terminal(s: String) = definition.Terminal(s)
   def NonTerminal(sort: Sort) = definition.NonTerminal(sort, None)

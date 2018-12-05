@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2016 K Team. All Rights Reserved.
+// Copyright (c) 2015-2018 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore;
 
 import org.apache.commons.io.FileUtils;
@@ -104,7 +104,7 @@ public class ParserUtils {
         def.setMainSyntaxModule(mainModule);
 
         Context context = new Context();
-        new CollectProductionsVisitor(context).visit(def);
+        new CollectProductionsVisitor(false, context).visit(def);
 
         KILtoKORE kilToKore = new KILtoKORE(context);
         return kilToKore.apply(def).getModule(mainModule).get();
@@ -157,7 +157,7 @@ public class ParserUtils {
                     }
                 }
                 else
-                    throw KExceptionManager.criticalError("Could not find file: " +
+                    throw KEMException.criticalError("Could not find file: " +
                             definitionFileName + "\nLookup directories:" + allLookupDirectoris, di);
             }
         }
@@ -178,7 +178,8 @@ public class ParserUtils {
             Source source,
             File currentDirectory,
             List<File> lookupDirectories,
-            Set<File> requiredFiles) {
+            Set<File> requiredFiles,
+            boolean kore) {
 
         List<org.kframework.kil.Module> kilModules =
                 slurp(definitionText, source, currentDirectory, lookupDirectories, requiredFiles);
@@ -187,9 +188,9 @@ public class ParserUtils {
         def.setItems((List<DefinitionItem>) (Object) kilModules);
 
         Context context = new Context();
-        new CollectProductionsVisitor(context).visit(def);
+        new CollectProductionsVisitor(kore, context).visit(def);
 
-        KILtoKORE kilToKore = new KILtoKORE(context, false);
+        KILtoKORE kilToKore = new KILtoKORE(context, false, kore);
 
         HashMap<String, Module> koreModules = new HashMap<>();
         koreModules.putAll(previousModules.stream().collect(Collectors.toMap(Module::name, m -> m)));
@@ -204,8 +205,9 @@ public class ParserUtils {
             String definitionText,
             Source source,
             File currentDirectory,
-            List<File> lookupDirectories) {
-        Set<Module> modules = loadModules(previousModules, definitionText, source, currentDirectory, lookupDirectories, new HashSet<>());
+            List<File> lookupDirectories,
+            boolean kore) {
+        Set<Module> modules = loadModules(previousModules, definitionText, source, currentDirectory, lookupDirectories, new HashSet<>(), kore);
         Set<Module> allModules = new HashSet<>(modules);
         allModules.addAll(previousModules);
         Module mainModule = getMainModule(mainModuleName, allModules);
@@ -219,10 +221,11 @@ public class ParserUtils {
             File source,
             File currentDirectory,
             List<File> lookupDirectories,
-            boolean autoImportDomains) {
+            boolean autoImportDomains,
+            boolean kore) {
         return loadDefinition(mainModuleName, syntaxModuleName, definitionText,
                 Source.apply(source.getAbsolutePath()),
-                currentDirectory, lookupDirectories, autoImportDomains);
+                currentDirectory, lookupDirectories, autoImportDomains, kore);
     }
 
     public org.kframework.definition.Definition loadDefinition(
@@ -232,12 +235,13 @@ public class ParserUtils {
             Source source,
             File currentDirectory,
             List<File> lookupDirectories,
-            boolean autoImportDomains) {
+            boolean autoImportDomains,
+            boolean kore) {
         Set<Module> previousModules = new HashSet<>();
         Set<File> requiredFiles = new HashSet<>();
         if (autoImportDomains)
-            previousModules.addAll(loadModules(new HashSet<>(), Kompile.REQUIRE_PRELUDE_K, source, currentDirectory, lookupDirectories, requiredFiles));
-        Set<Module> modules = loadModules(previousModules, definitionText, source, currentDirectory, lookupDirectories, requiredFiles);
+            previousModules.addAll(loadModules(new HashSet<>(), Kompile.REQUIRE_PRELUDE_K, source, currentDirectory, lookupDirectories, requiredFiles, kore));
+        Set<Module> modules = loadModules(previousModules, definitionText, source, currentDirectory, lookupDirectories, requiredFiles, kore);
         modules.addAll(previousModules); // add the previous modules, since load modules is not additive
         Module mainModule = getMainModule(mainModuleName, modules);
         Optional<Module> opt;
@@ -261,18 +265,5 @@ public class ParserUtils {
                     + " in definition. Use --main-module to specify one.");
         }
         return opt.get();
-    }
-
-    public org.kframework.definition.Definition loadDefinition(
-            String mainModuleName,
-            String syntaxModuleName,
-            String definitionText,
-            File source,
-            File currentDirectory,
-            List<File> lookupDirectories,
-            boolean dropQuote, boolean autoImportDomains) {
-        return loadDefinition(mainModuleName, syntaxModuleName, definitionText,
-                source,
-                currentDirectory, lookupDirectories, dropQuote, autoImportDomains);
     }
 }

@@ -1,18 +1,19 @@
-// Copyright (c) 2014-2016 K Team. All Rights Reserved.
+// Copyright (c) 2014-2018 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore;
 
 import org.kframework.kil.Definition;
 import org.kframework.kil.Module;
 import org.kframework.kil.Production;
-import org.kframework.kil.Sort;
+import org.kframework.kore.Sort;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.loader.Context;
 
 public class CollectProductionsVisitor {
     private final Context context;
+    private final boolean kore;
 
-    public CollectProductionsVisitor(Context context) {
-        this.context = context;
+    public CollectProductionsVisitor(boolean kore, Context context) {
+        this.kore = kore; this.context = context;
     }
 
     private String moduleName;
@@ -31,7 +32,7 @@ public class CollectProductionsVisitor {
     public void visit(Production node) {
         node.setSort(sort);
         node.setOwnerModuleName(moduleName);
-        context.addProduction(node);
+        context.addProduction(node, kore);
     }
 
     public void visit(Definition def) {

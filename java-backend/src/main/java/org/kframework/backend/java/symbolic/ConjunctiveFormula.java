@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2016 K Team. All Rights Reserved.
+// Copyright (c) 2015-2018 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
 import com.google.common.collect.HashMultimap;
@@ -8,13 +8,16 @@ import com.google.common.collect.Sets;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.kframework.backend.java.builtins.BoolToken;
+import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.util.Constants;
 import org.kframework.backend.java.util.RewriteEngineUtils;
+import org.kframework.builtin.KLabels;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +33,7 @@ import java.util.stream.Stream;
  * @see org.kframework.backend.java.symbolic.Equality
  * @see org.kframework.backend.java.symbolic.DisjunctiveFormula
  */
-public class ConjunctiveFormula extends Term implements CollectionInternalRepresentation, HasGlobalContext {
+public class ConjunctiveFormula extends Term implements CollectionInternalRepresentation {
 
     public static final String SEPARATOR = " /\\ ";
 
@@ -295,8 +298,21 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
         return truthValue == TruthValue.TRUE;
     }
 
+    public boolean isFalseExtended() {
+        return isFalse() || isFalseFromContradictions();
+    }
+
     public boolean isFalse() {
         return truthValue == TruthValue.FALSE;
+    }
+
+    /**
+     * @return true if formula contains both some element "T" and "T ==K false".
+     */
+    public boolean isFalseFromContradictions() {
+        Set<Term> elements = new HashSet<>(getKComponents());
+        return equalities.parallelStream()
+                .anyMatch(eq -> eq.rightHandSide().equals(BoolToken.FALSE) && elements.contains(eq.leftHandSide()));
     }
 
     public boolean isUnknown() {
@@ -489,6 +505,109 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 global);
     }
 
+    /**
+     * Apply projection lemmas over equalities:
+     *     proj(X,0,N) == proj(Y,0,N) /\ ... /\ proj(X,N-1,N) == proj(Y,N-1,N)
+     *   iff
+     *     X == Y
+     */
+    public ConjunctiveFormula applyProjectionLemma() {
+        // Map: (X,Y) ==> N ==> {0,1,...,N-1}
+        Map<Equality, Map<Integer, Set<Integer>>> projEqualitiesMap = new HashMap<>();
+        for (Equality equality : this.equalities) {
+            if (equality.leftHandSide() instanceof KItem && equality.rightHandSide() instanceof KItem) {
+                KLabelConstant lKLabel = (KLabelConstant) ((KItem) equality.leftHandSide()).kLabel(); // proj
+                KLabelConstant rKLabel = (KLabelConstant) ((KItem) equality.rightHandSide()).klabel(); // proj
+
+                KList lKList = (KList) ((KItem) equality.leftHandSide()).kList(); // X, I, N
+                KList rKList = (KList) ((KItem) equality.rightHandSide()).kList(); // Y, I, N
+
+                if (lKLabel.isProjection() && lKLabel.equals(rKLabel)) {
+                    List<Integer> projAtt = lKLabel.getProjectionAtt();
+                    int idxVector = projAtt.get(0); // X
+                    int idxElem = projAtt.get(1); // I
+                    int idxSize = projAtt.get(2); // N
+                    int sizeKList = 3;
+                    if (lKList.size() == sizeKList && rKList.size() == sizeKList) {
+                        if (lKList.get(idxElem) instanceof IntToken && rKList.get(idxElem) instanceof IntToken
+                                && lKList.get(idxSize) instanceof IntToken && rKList.get(idxSize) instanceof IntToken) {
+                            int lElem = ((IntToken) lKList.get(idxElem)).intValue(); // I
+                            int rElem = ((IntToken) rKList.get(idxElem)).intValue(); // I
+                            int lSize = ((IntToken) lKList.get(idxSize)).intValue(); // N
+                            int rSize = ((IntToken) rKList.get(idxSize)).intValue(); // N
+                            if (lElem == rElem && lSize == rSize) {
+                                Equality newEquality = new Equality(lKList.get(idxVector), rKList.get(idxVector), global); // X == Y
+                                Map<Integer, Set<Integer>> projEqualities = projEqualitiesMap.get(newEquality); // N ==> {...,I,...}
+                                if (projEqualities == null) {
+                                    projEqualities = new HashMap<>();
+                                    Set<Integer> elemSet = new HashSet<>(); // {0,1,...,N-1}
+                                    for (int i = 0; i < lSize; i++) { elemSet.add(i); }
+                                    projEqualities.put(lSize, elemSet);
+                                    projEqualitiesMap.put(newEquality, projEqualities);
+                                }
+                                projEqualities.get(lSize).remove(lElem); // N ==> {...}
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        PersistentUniqueList<Equality> equalities = this.equalities;
+        for (Equality equality : projEqualitiesMap.keySet()) {
+            for (int size :projEqualitiesMap.get(equality).keySet()) {
+                if (projEqualitiesMap.get(equality).get(size).isEmpty()) {
+                    equalities = equalities.plus(equality);
+                }
+            }
+        }
+
+        return new ConjunctiveFormula(substitution, equalities, disjunctions, truthValue, falsifyingEquality, global);
+    }
+
+    /**
+     * For any abstraction function symbol #f:
+     *
+     *   #f(X) == #f(Y)  =>  X == Y
+     *
+     * even if #f is NOT injective.
+     */
+    public ConjunctiveFormula resolveMatchingSymbols(Set<String> matchingSymbols) {
+        PersistentUniqueList<Equality> equalities = this.equalities;
+        PersistentUniqueList<Equality> newEqualities = equalities;
+
+        while (!newEqualities.isEmpty()) {
+            PersistentUniqueList<Equality> curEqualities = newEqualities;
+            newEqualities = PersistentUniqueList.empty();
+
+            for (Equality equality : curEqualities) {
+                if (equality.leftHandSide() instanceof KItem && equality.rightHandSide() instanceof KItem) {
+                    KLabelConstant lKLabel = (KLabelConstant) ((KItem) equality.leftHandSide()).kLabel(); // #f
+                    KLabelConstant rKLabel = (KLabelConstant) ((KItem) equality.rightHandSide()).klabel(); // #f
+
+                    if (lKLabel.equals(rKLabel) && matchingSymbols.contains(lKLabel.name())) {
+                        KList lKList = (KList) ((KItem) equality.leftHandSide()).kList(); // X
+                        KList rKList = (KList) ((KItem) equality.rightHandSide()).kList(); // Y
+
+                        if (lKList.size() == rKList.size()) {
+                            for (int i = 0; i < lKList.size(); ++i) {
+                                Equality newEquality = new Equality(lKList.get(i), rKList.get(i), global); // X == Y
+                                equalities = equalities.plus(newEquality);
+                                newEqualities = newEqualities.plus(newEquality);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (equalities == this.equalities) {
+            return this;
+        } else {
+            return new ConjunctiveFormula(substitution, equalities, disjunctions, truthValue, falsifyingEquality, global);
+        }
+    }
+
     public ImmutableMapSubstitution<Variable, Term> getSubstitution(Variable variable, Term term) {
         if (RewriteEngineUtils.isSubsortedEq(variable, term, global.getDefinition())) {
             return ImmutableMapSubstitution.singleton(variable, term);
@@ -664,7 +783,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
 
     public boolean implies(ConjunctiveFormula constraint, Set<Variable> rightOnlyVariables) {
         // TODO(AndreiS): this can prove "stuff -> false", it needs fixing
-        assert !constraint.isFalse();
+        assert !constraint.isFalseExtended();
 
         LinkedList<Pair<ConjunctiveFormula, ConjunctiveFormula>> implications = new LinkedList<>();
         implications.add(Pair.of(this, constraint));
@@ -672,7 +791,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
             Pair<ConjunctiveFormula, ConjunctiveFormula> implication = implications.remove();
             ConjunctiveFormula left = implication.getLeft();
             ConjunctiveFormula right = implication.getRight();
-            if (left.isFalse()) {
+            if (left.isFalseExtended()) {
                 continue;
             }
 
@@ -807,12 +926,12 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
 
     @Override
     public KLabel constructorLabel() {
-        return KLabelConstant.of("#And", global.getDefinition());
+        return KLabelConstant.of(KLabels.ML_AND, global.getDefinition());
     }
 
     @Override
     public KItem unit() {
-        return KItem.of(KLabelConstant.of("#True", global.getDefinition()), KList.EMPTY, global);
+        return KItem.of(KLabelConstant.of(KLabels.ML_TRUE, global.getDefinition()), KList.EMPTY, global);
     }
 
     @Override

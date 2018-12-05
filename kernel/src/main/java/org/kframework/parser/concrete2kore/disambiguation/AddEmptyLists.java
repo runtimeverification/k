@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2016 K Team. All Rights Reserved.
+// Copyright (c) 2012-2018 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore.disambiguation;
 
 
@@ -22,6 +22,7 @@ import org.kframework.utils.errorsystem.ParseFailedException;
 import org.pcollections.ConsPStack;
 import scala.Tuple2;
 import scala.util.Either;
+import scala.util.Left;
 import scala.util.Right;
 
 import java.util.ArrayList;
@@ -48,7 +49,7 @@ public class AddEmptyLists extends SetsGeneralTransformer<ParseFailedException, 
     private final Module m;
     private final POSet<Sort> subsorts;
     private final scala.collection.Set<Sort> listSorts;
-    private final Map<String, List<UserList>> lists;
+    private final Map<Sort, List<UserList>> lists;
 
     public AddEmptyLists(Module m) {
         this.m = m;
@@ -98,8 +99,19 @@ public class AddEmptyLists extends SetsGeneralTransformer<ParseFailedException, 
                             new KException(KException.ExceptionType.HIDDENWARNING, KException.KExceptionGroup.LISTS, msg, child.source().get(), child.location().get())));
                     newItems.add(child);
                 } else {
-                    UserList ul = lists.get(expectedSort.name()).get(0);
-                    TermCons terminator = TermCons.apply(ConsPStack.empty(), ul.pTerminator, child.location(), child.source());
+                    Set<Sort> least = subsorts.minimal(stream(listSorts).filter(s -> subsorts.greaterThanEq(lists.get(s).get(0).childSort, childSort) && subsorts.lessThanEq(s, expectedSort)).collect(Collectors.toList()));
+                    if (least.size() != 1) {
+                        KException ex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.INNER_PARSER, "Overloaded term does not have a least sort. Possible sorts: " + least, tc.source().orElse(null), tc.location().orElse(null));
+                        return new Tuple2<>(Left.apply(Sets.newHashSet(new ParseFailedException(ex))), warnings);
+                    }
+                    UserList ul = lists.get(least.iterator().next()).get(0);
+                    Set<Sort> leastTerm = subsorts.minimal(stream(listSorts).filter(s -> subsorts.lessThanEq(s, expectedSort)).collect(Collectors.toList()));
+                    if (leastTerm.size() != 1) {
+                        KException ex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.INNER_PARSER, "List terminator for overloaded term does not have a least sort. Possible sorts: " + leastTerm, tc.source().orElse(null), tc.location().orElse(null));
+                        return new Tuple2<>(Left.apply(Sets.newHashSet(new ParseFailedException(ex))), warnings);
+                    }
+                    UserList ulTerm = lists.get(leastTerm.iterator().next()).get(0);
+                    TermCons terminator = TermCons.apply(ConsPStack.empty(), ulTerm.pTerminator, child.location(), child.source());
                     // TermCons with PStack requires the elements to be in the reverse order
                     TermCons newTc = TermCons.apply(ConsPStack.from(Arrays.asList(terminator, child)), ul.pList, child.location(), child.source());
                     newItems.add(newTc);
@@ -135,7 +147,7 @@ public class AddEmptyLists extends SetsGeneralTransformer<ParseFailedException, 
                     assert rawArgs.stream().allMatch(ProductionReference.class::isInstance);
                     @SuppressWarnings("unchecked") List<ProductionReference> args = (List<ProductionReference>) (List) rawArgs;
                     List<Sort> childSorts = args.stream().map(this::getSort).collect(Collectors.toList());
-                    if (!childSorts.contains(Sort("KList"))) { // try to exclude non-concrete lists
+                    if (!childSorts.contains(Sorts.KList())) { // try to exclude non-concrete lists
                         List<Production> validProductions = new ArrayList<>();
                     nextprod:
                         for (Production prod : productions) {
@@ -231,7 +243,7 @@ public class AddEmptyLists extends SetsGeneralTransformer<ParseFailedException, 
     private Optional<KLabel> klabelFromTerm(Term labelTerm) {
         if (labelTerm instanceof Constant) {
             Constant labelCon = (Constant) labelTerm;
-            if (labelCon.production().sort().name().equals("KLabel")) {
+            if (labelCon.production().sort().equals(Sorts.KLabel())) {
                 String labelVal = labelCon.value();
                 if (labelVal.charAt(0) == '`') {
                     return Optional.of(KLabel(labelVal.substring(1, labelVal.length() - 1)));

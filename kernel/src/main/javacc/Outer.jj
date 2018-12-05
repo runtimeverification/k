@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2016 K Team. All Rights Reserved.
+// Copyright (c) 2013-2018 K Team. All Rights Reserved.
 /* BUGS:
 
 Due to now JavaCC handles EOF, EOF cannot terminate a single-line comment
@@ -148,12 +148,15 @@ options {
 PARSER_BEGIN(Outer)
 package org.kframework.parser.outer;
 
+import org.kframework.definition.Tag;
+import org.kframework.kore.Sort;
+import org.kframework.attributes.Source;
+
 import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
 import org.kframework.kil.DefinitionItem;
 import org.kframework.kil.Import;
-import org.kframework.kil.KLabelConstant;
 import org.kframework.kil.Lexical;
 import org.kframework.kil.LiterateComment.LiterateCommentType;
 import org.kframework.kil.LiterateDefinitionComment;
@@ -169,8 +172,6 @@ import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.Require;
 import org.kframework.kil.NonTerminal;
-import org.kframework.kil.Sort;
-import org.kframework.attributes.Source;
 import org.kframework.kil.StringSentence;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Terminal;
@@ -195,6 +196,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static org.kframework.kore.KORE.Sort;
 
 // Comments get processed in an odd order that may cause them to be
 // out of order.  Thus we sort module items by their *end* position so
@@ -244,6 +247,17 @@ public class Outer {
     } catch (TokenMgrError e) {
       // TODO: report location
       throw KEMException.outerParserError(e.getMessage(), e, source, null);
+    }
+  }
+
+  public static Sort parseSort(String string) {
+    Outer parser = new Outer(new StringReader(string));
+    try {
+      return parser.SimpleSort();
+    } catch (ParseException e) {
+      throw KEMException.compilerError("Could not parse " + string + " as a sort.", e);
+    } catch (TokenMgrError e) {
+      throw KEMException.compilerError("Could not parse " + string + " as a sort.", e);
     }
   }
 
@@ -524,13 +538,24 @@ String StringRegex() : {}
   }
 }
 
+Sort SimpleSort() : { String str; Sort sort; List<Sort> params = new ArrayList<Sort>(); }
+{
+  UpperId() { str = image(); }
+  (
+    "{" sort = SimpleSort() { params.add(sort); }
+    ("," sort = SimpleSort() { params.add(sort); })*
+    "}"
+  )?
+  { return Sort(str, params); }
+}
+
 /** Parses and returns a NonTerminal but not a List, NeList, Lexer, or Token */
-NonTerminal SimpleSortID() : { Location loc = startLoc(); String str; Optional<String> name = Optional.empty(); }
+NonTerminal SimpleSortID() : { Location loc = startLoc(); Sort sort; Optional<String> name = Optional.empty(); }
 {
   (LOOKAHEAD((<UPPER_ID> | <LOWER_ID>) ":")
   (<UPPER_ID> | <LOWER_ID>) { name = Optional.of(image()); } ":")?
-  UpperId() { str = image(); }
-  { return markLoc(loc, new NonTerminal(Sort.of(str), name)); }
+  sort = SimpleSort()
+  { return markLoc(loc, new NonTerminal(sort, name)); }
 }
 
 /** Parses and returns a NonTerminal */
@@ -610,11 +635,11 @@ StringSentence Bubble(String type) :
 }
 
 /** Parses a list of KLabels and returns them */
-List<KLabelConstant> KLabels() :
-{ List<KLabelConstant> list = new ArrayList<KLabelConstant>(); }
+List<Tag> KLabels() :
+{ List<Tag> list = new ArrayList<Tag>(); }
 {
   // Note that we don't assign location information b/c KLabels are interned
-  (<KLABEL> { list.add(KLabelConstant.of(image())); })+
+  (<KLABEL> { list.add(new Tag(image())); })+
   // TODO: check if need context
   { return list; }
 }
@@ -822,7 +847,7 @@ void Sentence(Module module) :
   StringBuilder sb = new StringBuilder();
   NonTerminal nonTerminal;
   StringSentence ss;
-  List<KLabelConstant> list; }
+  List<Tag> list; }
 {
   ("rule" | "context" | "configuration")
   { type = image();
@@ -885,7 +910,7 @@ void Production(List<Production> prods) :
   )*
   ")"              { items.add(tokenLoc(new Terminal(image()))); }
 | (ProductionItem(items))+
-) { Production prod = new Production(new NonTerminal(Sort.of(""), Optional.empty()), items); }
+) { Production prod = new Production(new NonTerminal(Sort(""), Optional.empty()), items); }
   (Attributes(prod))?
   { if (klabel != null && prod.getAttribute("klabel") == null) {
       prod.addAttribute("klabel", klabel);
@@ -903,9 +928,9 @@ void ProductionItem(List<ProductionItem> items) :
 | str = StringRegex()           { items.add(tokenLoc(new Lexical(str, ""))); }
 | LOOKAHEAD("List" "{") "List"
   ( "{" UpperId() { str = image(); } "," sep = String() "}"
-    { items.add(markLoc(loc, new UserList(Sort.of(str), sep, "*"))); })
+    { items.add(markLoc(loc, new UserList(Sort(str), sep, "*"))); })
 | LOOKAHEAD("NeList" "{") "NeList"
   ( "{" UpperId() { str = image(); } "," sep = String() "}"
-    { items.add(markLoc(loc, new UserList(Sort.of(str), sep, "+"))); })
+    { items.add(markLoc(loc, new UserList(Sort(str), sep, "+"))); })
 | nonTerminal = SimpleSortID()  { items.add(nonTerminal); }
 }

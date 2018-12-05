@@ -1,9 +1,10 @@
-// Copyright (c) 2015-2016 K Team. All Rights Reserved.
+// Copyright (c) 2015-2018 K Team. All Rights Reserved.
 package org.kframework.debugger;
 
 
 import org.kframework.definition.Rule;
 import org.kframework.kore.K;
+import org.kframework.utils.file.FileUtil;
 
 import java.util.List;
 import java.util.Optional;
@@ -129,5 +130,7 @@ public interface KDebug {
      * @return The watch number of the watch removed, or -1 if watch not found in the list.
      */
     public int removeWatch(int watchNum);
+
+    FileUtil files();
 }
 

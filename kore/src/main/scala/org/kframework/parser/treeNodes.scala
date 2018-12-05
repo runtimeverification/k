@@ -1,4 +1,4 @@
-// Copyright (c) 2014 K Team. All Rights Reserved.
+// Copyright (c) 2014-2018 K Team. All Rights Reserved.
 
 package org.kframework.parser
 
@@ -38,17 +38,14 @@ case class TermCons private(items: PStack[Term], production: Production)
   def `with`(i: Int, e: Term) = TermCons(items.`with`(items.size() - 1 - i, e), production, location, source)
 
   def replaceChildren(newChildren: Collection[Term]) = TermCons(ConsPStack.from(newChildren), production, location, source)
-  override def toString() = production.klabel.getOrElse("NOKLABEL") + "(" + (new ArrayList(items).asScala.reverse mkString ",") + ")"
+  override def toString() = production.klabel.getOrElse("NOKLABEL") + "(...)"
 
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(TermCons.this);
 }
 
 case class Ambiguity(items: Set[Term])
   extends Term with HasChildren {
-  def replaceChildren(newChildren: Collection[Term]) = {
-    items.clear(); items.addAll(newChildren);
-    this
-  }
+  def replaceChildren(newChildren: Collection[Term]) = Ambiguity(new HashSet[Term](newChildren), location, source)
   override def toString() = "amb(" + (items.asScala mkString ",") + ")"
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(Ambiguity.this);
 }
@@ -105,10 +102,10 @@ object KList {
 
 object Ambiguity {
   @annotation.varargs def apply(items: Term*): Ambiguity = Ambiguity(items.to[mutable.Set].asJava)
-  def apply(items: Set[Term], location: Location, source: Source):Ambiguity = {
+  def apply(items: Set[Term], location: Optional[Location], source: Optional[Source]):Ambiguity = {
     val res = Ambiguity(items)
-    res.location = Optional.of(location)
-    res.source = Optional.of(source)
+    res.location = location
+    res.source = source
     res
   }
 }

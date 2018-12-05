@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2016 K Team. All Rights Reserved.
+// Copyright (c) 2014-2018 K Team. All Rights Reserved.
 package org.kframework.krun;
 
 import com.beust.jcommander.JCommander;
@@ -22,6 +22,7 @@ import org.kframework.main.GlobalOptions;
 import org.kframework.main.Tool;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.unparser.OutputModes;
+import org.kframework.unparser.PrintOptions;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
@@ -59,12 +60,12 @@ public class KRunModule extends AbstractModule {
     }
 
     @Provides
-    PrettyPrintOptions prettyPrintOptions(KRunOptions options) {
-        return options.prettyPrint;
+    PrintOptions printOptions(KRunOptions options) {
+        return options.print;
     }
 
     @Provides
-    OutputModes outputModes(PrettyPrintOptions options) {
+    OutputModes outputModes(PrintOptions options) {
         return options.output;
     }
 

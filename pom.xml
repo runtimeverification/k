@@ -17,9 +17,10 @@
     <module>kernel</module>
     <module>ktree</module>
     <module>k-distribution</module>
-    <module>API</module>
     <module>java-backend</module>
     <module>ocaml-backend</module>
+    <module>haskell-backend</module>
+    <module>llvm-backend</module>
   </modules>
 
   <scm>
@@ -28,6 +29,12 @@
   </scm>
 
   <repositories>
+    <repository>
+      <id>central</id>
+      <name>Central Repository</name>
+      <url>https://repo.maven.apache.org/maven2</url>
+      <snapshots><enabled>false</enabled></snapshots>
+    </repository>
     <repository>
       <id>runtime.verification</id>
       <name>Runtime Verification Repository</name>
@@ -43,6 +50,22 @@
       <releases><enabled>false</enabled></releases>
     </repository>
   </repositories>
+
+  <pluginRepositories>
+    <pluginRepository>
+      <id>central</id>
+      <name>Central Repository</name>
+      <url>https://repo.maven.apache.org/maven2</url>
+      <layout>default</layout>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <releases>
+        <updatePolicy>never</updatePolicy>
+      </releases>
+    </pluginRepository>
+  </pluginRepositories>
+
   <distributionManagement>
     <repository>
       <id>runtime.verification</id>
@@ -103,9 +126,9 @@
   <build>
     <extensions>
       <extension>
-        <groupId>org.springframework.build</groupId>
+        <groupId>org.zalando.org.springframework.build</groupId>
         <artifactId>aws-maven</artifactId>
-        <version>5.0.0.RELEASE</version>
+        <version>5.0.0.RELEASE-zal-2</version>
       </extension>
     </extensions>
     <pluginManagement>
@@ -189,7 +212,7 @@
               <configLocation>src/main/config/checkstyle-copyright.xml</configLocation>
               <failsOnError>true</failsOnError>
               <consoleOutput>true</consoleOutput>
-              <excludes>.idea/**,**/com/davekoelle/**,**/src/main/sdf/syntax/Integration.sdf</excludes>
+              <excludes>k-distribution/include/kore/prelude.kore,.idea/**,**/com/davekoelle/**,**/src/main/sdf/syntax/Integration.sdf</excludes>
             </configuration>
           </execution>
           <execution>
@@ -237,7 +260,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
-        <version>1.4.1</version>
+        <version>3.0.0-M2</version>
         <configuration>
           <rules>
             <requireJavaVersion>

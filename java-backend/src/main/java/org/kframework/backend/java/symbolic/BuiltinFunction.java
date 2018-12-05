@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2016 K Team. All Rights Reserved.
+// Copyright (c) 2013-2018 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
 import org.kframework.attributes.Att;
@@ -8,6 +8,8 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.util.ImpureFunctionException;
 import org.kframework.kil.Attribute;
+import org.kframework.kore.KLabel;
+import org.kframework.kore.KORE;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
@@ -71,7 +73,7 @@ public class BuiltinFunction {
                     continue;
                 }
 
-                table.put(KLabelConstant.of(entry.getKey(), definition), hookProvider.get(hookAttribute));
+                table.put(KLabelConstant.of(KORE.KLabel(entry.getKey()), definition), hookProvider.get(hookAttribute));
             }
         }
     }

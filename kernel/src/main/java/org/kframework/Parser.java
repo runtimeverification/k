@@ -1,8 +1,9 @@
-// Copyright (c) 2015-2016 K Team. All Rights Reserved.
+// Copyright (c) 2015-2018 K Team. All Rights Reserved.
 package org.kframework;
 
 import org.kframework.attributes.Source;
 import org.kframework.definition.*;
+import org.kframework.definition.Module;
 import org.kframework.kore.K;
 import org.kframework.kore.Sort;
 import org.kframework.parser.concrete2kore.ParseInModule;
@@ -28,7 +29,6 @@ public class Parser {
     private Parser(Module module) {
         // TODO: remove hack once the frontend is cleaner; also remove the IOException once the hack is cleared
         if (module.name().endsWith(RuleGrammarGenerator.RULE_CELLS)) {
-            org.kframework.definition.Definition definitionWithBuiltins = Definition.from("require \"domians.k\"", "K");
             this.parseInModule = RuleGrammarGenerator.getCombinedGrammar(module, true);
         } else {
             this.parseInModule = new ParseInModule(module);

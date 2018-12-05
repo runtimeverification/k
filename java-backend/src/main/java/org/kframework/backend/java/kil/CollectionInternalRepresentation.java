@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2016 K Team. All Rights Reserved.
+// Copyright (c) 2015-2018 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
 import java.util.List;
@@ -24,7 +24,7 @@ public interface CollectionInternalRepresentation extends KItemRepresentation {
             result = new KItem(
                     constructorLabel(),
                     KList.concatenate(component, result),
-                    sort(),
+                    globalContext(), sort(),
                     true,
                     component.att());
         }

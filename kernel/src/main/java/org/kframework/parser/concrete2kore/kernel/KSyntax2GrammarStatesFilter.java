@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2016 K Team. All Rights Reserved.
+// Copyright (c) 2014-2018 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore.kernel;
 
 import dk.brics.automaton.Automaton;
@@ -19,6 +19,7 @@ import org.kframework.utils.errorsystem.KEMException;
 import scala.Tuple2;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -46,11 +47,11 @@ public class KSyntax2GrammarStatesFilter {
         Set<Sort> sorts = Stream.concat(stream(module.definedSorts()), stream(module.usedCellSorts())).collect(Collectors.toSet());
         // create a NonTerminal for every declared sort
         for (Sort sort : sorts) {
-            grammar.add(grammar.new NonTerminal(sort.name()));
+            grammar.add(grammar.new NonTerminal(sort.toString()));
         }
 
         stream(module.productions()).forEach(p -> collectRejects(p, rejects));
-        stream(module.productions()).collect(Collectors.groupingBy(p -> p.sort())).entrySet().stream().sorted((e1, e2) -> e1.getKey().name().compareTo(e2.getKey().name())).forEach(e -> processProductions(e.getKey(), e.getValue(), grammar, rejects, scanner));
+        stream(module.productions()).collect(Collectors.groupingBy(p -> p.sort())).entrySet().stream().sorted(Comparator.comparing(e2 -> e2.getKey().toString())).forEach(e -> processProductions(e.getKey(), e.getValue(), grammar, rejects, scanner));
         grammar.compile(scanner);
         return grammar;
     }
@@ -123,7 +124,7 @@ public class KSyntax2GrammarStatesFilter {
             Grammar grammar,
             Set<String> autoRejects,
             Scanner scanner) {
-        NonTerminal nt = grammar.get(sort.name());
+        NonTerminal nt = grammar.get(sort.toString());
         assert nt != null : "Could not find in the grammar the required sort: " + sort;
         // all types of production follow pretty much the same pattern
         // previous = entryState
@@ -147,7 +148,7 @@ public class KSyntax2GrammarStatesFilter {
                 if (prdItem instanceof org.kframework.definition.NonTerminal) {
                     org.kframework.definition.NonTerminal srt = (org.kframework.definition.NonTerminal) prdItem;
                     Grammar.NonTerminalState nts = grammar.new NonTerminalState(sort + " ::= " + srt.sort(), nt,
-                            grammar.get(srt.sort().name()));
+                            grammar.get(srt.sort().toString()));
                     previous.next.add(nts);
                     previous = nts;
                 } else if (prdItem instanceof TerminalLike) {
@@ -157,7 +158,7 @@ public class KSyntax2GrammarStatesFilter {
                     if (!(lx instanceof Terminal) || !((Terminal) lx).value().isEmpty()) {
                         int token = scanner.resolve(lx);
                         Grammar.PrimitiveState pstate = grammar.new RegExState(
-                                sort.name() + ":" + token,
+                                sort.toString() + ":" + token,
                                 nt,
                                 token);
                         previous.next.add(pstate);

@@ -1,0 +1,155 @@
+diff --git a/bytecomp/matching.ml b/bytecomp/matching.ml
+index 32e8043..6dc9f26 100644
+--- a/bytecomp/matching.ml
++++ b/bytecomp/matching.ml
+@@ -95,7 +95,7 @@ let rec small_enough n = function
+       else small_enough (n-1) rem
+ 
+ let ctx_lshift ctx =
+-  if small_enough 31 ctx then
++  if small_enough (!Clflags.match_context_rows - 1) ctx then
+     List.map lshift ctx
+   else (* Context pruning *) begin
+     get_mins le_ctx (List.map lforget ctx)
+@@ -2183,7 +2183,7 @@ let mk_failaction_pos partial seen ctx defs  =
+       | _  -> scan_def ((List.map fst now,idef)::env) later rem in
+ 
+   let fail_pats = complete_pats_constrs seen in
+-  if List.length fail_pats < 32 then begin
++  if List.length fail_pats < !Clflags.match_context_rows then begin
+     let fail,jmps =
+       scan_def
+         []
+diff --git a/driver/main.ml b/driver/main.ml
+index 110ea3c..45d2161 100644
+--- a/driver/main.ml
++++ b/driver/main.ml
+@@ -111,6 +111,7 @@ module Options = Main_args.Make_bytecomp_options (struct
+   let _where = print_standard_library
+   let _verbose = set verbose
+   let _nopervasives = set nopervasives
++  let _match_context_rows n = match_context_rows := n
+   let _dsource = set dump_source
+   let _dparsetree = set dump_parsetree
+   let _dtypedtree = set dump_typedtree
+diff --git a/driver/main_args.ml b/driver/main_args.ml
+index 757c7ac..c3b8989 100644
+--- a/driver/main_args.ml
++++ b/driver/main_args.ml
+@@ -597,6 +597,10 @@ let mk_nopervasives f =
+   "-nopervasives", Arg.Unit f, " (undocumented)"
+ ;;
+ 
++let mk_match_context_rows f =
++  "-match-context-rows", Arg.Int f, "<n> (undocumented)"
++;;
++
+ let mk_use_prims f =
+   "-use-prims", Arg.String f, "<file>  (undocumented)"
+ ;;
+@@ -859,6 +863,7 @@ module type Compiler_options = sig
+   val _color : string -> unit
+ 
+   val _nopervasives : unit -> unit
++  val _match_context_rows : int -> unit
+   val _dtimings : unit -> unit
+   val _dprofile : unit -> unit
+ 
+@@ -1081,6 +1086,7 @@ struct
+     mk__ F.anonymous;
+ 
+     mk_nopervasives F._nopervasives;
++    mk_match_context_rows F._match_context_rows;
+     mk_use_prims F._use_prims;
+     mk_dsource F._dsource;
+     mk_dparsetree F._dparsetree;
+@@ -1254,6 +1260,7 @@ struct
+     mk__ F.anonymous;
+ 
+     mk_nopervasives F._nopervasives;
++    mk_match_context_rows F._match_context_rows;
+     mk_dsource F._dsource;
+     mk_dparsetree F._dparsetree;
+     mk_dtypedtree F._dtypedtree;
+diff --git a/driver/main_args.mli b/driver/main_args.mli
+index 3d6db53..e72e404 100644
+--- a/driver/main_args.mli
++++ b/driver/main_args.mli
+@@ -99,6 +99,7 @@ module type Compiler_options = sig
+   val _color : string -> unit
+ 
+   val _nopervasives : unit -> unit
++  val _match_context_rows : int -> unit
+   val _dtimings : unit -> unit
+   val _dprofile : unit -> unit
+ 
+diff --git a/driver/optmain.ml b/driver/optmain.ml
+index 33fc848..5d43442 100644
+--- a/driver/optmain.ml
++++ b/driver/optmain.ml
+@@ -195,6 +195,7 @@ module Options = Main_args.Make_optcomp_options (struct
+   let _where () = print_standard_library ()
+ 
+   let _nopervasives = set nopervasives
++  let _match_context_rows n = match_context_rows := n
+   let _dsource = set dump_source
+   let _dparsetree = set dump_parsetree
+   let _dtypedtree = set dump_typedtree
+diff --git a/tools/ocamlcp.ml b/tools/ocamlcp.ml
+index 0aeaf2c..b8f7b85 100644
+--- a/tools/ocamlcp.ml
++++ b/tools/ocamlcp.ml
+@@ -23,6 +23,9 @@ let option opt () = compargs := opt :: !compargs
+ let option_with_arg opt arg =
+   compargs := (Filename.quote arg) :: opt :: !compargs
+ ;;
++let option_with_int opt arg =
++  compargs := (string_of_int arg) :: opt :: !compargs
++;;
+ 
+ let make_archive = ref false;;
+ let with_impl = ref false;;
+@@ -118,6 +121,7 @@ module Options = Main_args.Make_bytecomp_options (struct
+   let _color s = option_with_arg "-color" s
+   let _where = option "-where"
+   let _nopervasives = option "-nopervasives"
++  let _match_context_rows n = option_with_int "-match-context-rows" n
+   let _dsource = option "-dsource"
+   let _dparsetree = option "-dparsetree"
+   let _dtypedtree = option "-dtypedtree"
+diff --git a/tools/ocamloptp.ml b/tools/ocamloptp.ml
+index 4683cc0..004514a 100644
+--- a/tools/ocamloptp.ml
++++ b/tools/ocamloptp.ml
+@@ -146,6 +146,7 @@ module Options = Main_args.Make_optcomp_options (struct
+ 
+   let _linscan = option "-linscan"
+   let _nopervasives = option "-nopervasives"
++  let _match_context_rows n = option_with_int "-match-context-rows" n
+   let _dsource = option "-dsource"
+   let _dparsetree = option "-dparsetree"
+   let _dtypedtree = option "-dtypedtree"
+diff --git a/utils/clflags.ml b/utils/clflags.ml
+index c502c41..cec0908 100644
+--- a/utils/clflags.ml
++++ b/utils/clflags.ml
+@@ -60,6 +60,7 @@ and output_complete_object = ref false  (* -output-complete-obj *)
+ and all_ccopts = ref ([] : string list)     (* -ccopt *)
+ and classic = ref false                 (* -nolabels *)
+ and nopervasives = ref false            (* -nopervasives *)
++and match_context_rows = ref 32         (* -match-context-rows *)
+ and preprocessor = ref(None : string option) (* -pp *)
+ and all_ppx = ref ([] : string list)        (* -ppx *)
+ let annotations = ref false             (* -annot *)
+diff --git a/utils/clflags.mli b/utils/clflags.mli
+index 9a15649..439ea07 100644
+--- a/utils/clflags.mli
++++ b/utils/clflags.mli
+@@ -87,6 +87,7 @@ val output_complete_object : bool ref
+ val all_ccopts : string list ref
+ val classic : bool ref
+ val nopervasives : bool ref
++val match_context_rows : int ref
+ val open_modules : string list ref
+ val preprocessor : string option ref
+ val all_ppx : string list ref

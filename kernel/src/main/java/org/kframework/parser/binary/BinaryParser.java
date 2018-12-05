@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2016 K Team. All Rights Reserved.
+// Copyright (c) 2015-2018 K Team. All Rights Reserved.
 package org.kframework.parser.binary;
 
 import org.kframework.kore.K;
@@ -9,6 +9,7 @@ import org.kframework.kore.mini.KRewrite;
 import org.kframework.kore.mini.KSequence;
 import org.kframework.kore.mini.KToken;
 import org.kframework.kore.mini.KVariable;
+import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KEMException;
 
 import java.io.IOException;
@@ -90,7 +91,7 @@ public class BinaryParser {
                 String s = readString();
                 String sort = readString();
                 Map<String, KToken> sortCache = ktokenCache.computeIfAbsent(sort, sort2 -> new HashMap<>());
-                KToken token = sortCache.computeIfAbsent(s, s2 -> new KToken(s, sort));
+                KToken token = sortCache.computeIfAbsent(s, s2 -> new KToken(s, Outer.parseSort(sort)));
                 stack.push(token);
                 break;
             case KAPPLY:
@@ -155,7 +156,7 @@ public class BinaryParser {
         String lbl = readString();
         if (data.get() != 0)
             return new KVariable(lbl);
-        return klabelCache.computeIfAbsent(lbl, org.kframework.kore.mini.KLabel::new);
+        return klabelCache.computeIfAbsent(lbl, org.kframework.kore.KORE::KLabel);
     }
 
     private String readString() throws IOException {

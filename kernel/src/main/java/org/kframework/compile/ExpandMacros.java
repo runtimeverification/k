@@ -1,6 +1,9 @@
-// Copyright (c) 2015-2016 K Team. All Rights Reserved.
+// Copyright (c) 2015-2018 K Team. All Rights Reserved.
 package org.kframework.compile;
 
+import org.kframework.attributes.Att;
+import org.kframework.attributes.Location;
+import org.kframework.attributes.Source;
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.definition.Context;
 import org.kframework.definition.Module;
@@ -20,6 +23,15 @@ import org.kframework.main.GlobalOptions;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
+
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,15 +54,42 @@ import static org.kframework.definition.Constructors.*;
  */
 public class ExpandMacros {
 
-    private final KExceptionManager kem;
-
     private final Map<KLabel, List<Rule>> macros;
     private final Module mod;
+    private final boolean cover;
+    private final PrintWriter coverage;
+    private final FileChannel channel;
+    private final boolean reverse;
 
-    public ExpandMacros(Module mod, KExceptionManager kem, FileUtil files, GlobalOptions globalOptions, KompileOptions kompileOptions) {
-        this.kem = kem;
+    public ExpandMacros(Module mod, FileUtil files, KompileOptions kompileOptions, boolean reverse) {
         this.mod = mod;
-        macros = stream(mod.rules()).filter(r -> r.att().contains("macro")).sorted(Comparator.comparing(r -> r.att().contains("owise"))).collect(Collectors.groupingBy(r -> ((KApply)RewriteToTop.toLeft(r.body())).klabel()));
+        this.reverse = reverse;
+        this.cover = kompileOptions.coverage;
+        files.resolveKompiled(".").mkdirs();
+        macros = stream(mod.rules()).filter(r -> isMacro(r.att(), reverse)).sorted(Comparator.comparing(r -> r.att().contains("owise"))).collect(Collectors.groupingBy(r -> ((KApply)getLeft(r, reverse)).klabel()));
+        if (cover) {
+            try {
+                FileOutputStream os = new FileOutputStream(files.resolveKompiled("coverage.txt"), true);
+                channel = os.getChannel();
+                coverage = new PrintWriter(new BufferedWriter(new OutputStreamWriter(os)));
+            } catch (IOException e) {
+                throw KEMException.internalError("Could not write list of rules to coverage document.", e);
+            }
+        } else {
+            channel = null;
+            coverage = null;
+        }
+    }
+
+    private K getLeft(Rule r, boolean reverse) {
+        if (reverse) {
+            return RewriteToTop.toRight(r.body());
+        }
+        return RewriteToTop.toLeft(r.body());
+    }
+
+    private boolean isMacro(Att att, boolean reverse) {
+        return att.contains("alias") || (!reverse && att.contains("macro"));
     }
 
     private Rule expand(Rule rule) {
@@ -70,36 +109,66 @@ public class ExpandMacros {
     public K expand(K term) {
         if (macros.size() == 0)
             return term;
-        return new TransformK() {
-            @Override
-            public K apply(KApply k) {
-                List<Rule> rules = macros.get(k.klabel());
-                if (rules == null)
-                    return super.apply(k);
-                K applied = super.apply(k);
-                for (Rule r : rules) {
-                    if (!r.requires().equals(BooleanUtils.TRUE)) {
-                        throw KEMException.compilerError("Cannot compute macros with side conditions.", r);
-                    }
-                    K left = RewriteToTop.toLeft(r.body());
-                    final Map<KVariable, K> subst = new HashMap<>();
-                    if (match(subst, left, applied, r)) {
-                        return apply(new TransformK() {
-                            @Override
-                            public K apply(KVariable k) {
-                                return subst.get(k);
-                            }
-                        }.apply(RewriteToTop.toRight(r.body())));
-                    }
-                }
-                return applied;
+        FileLock lock = null;
+        if (cover) {
+            try {
+                lock = channel.lock();
+            } catch (IOException e) {
+                throw KEMException.internalError("Could not lock coverage file", e);
             }
-        }.apply(term);
+        }
+        try {
+            K result = new TransformK() {
+                @Override
+                public K apply(KApply k) {
+                    List<Rule> rules = macros.get(k.klabel());
+                    if (rules == null)
+                        return super.apply(k);
+                    K applied = super.apply(k);
+                    for (Rule r : rules) {
+                        if (!r.requires().equals(BooleanUtils.TRUE)) {
+                            throw KEMException.compilerError("Cannot compute macros with side conditions.", r);
+                        }
+                        K left = RewriteToTop.toLeft(r.body());
+                        K right = RewriteToTop.toRight(r.body());
+                        if (reverse) {
+                            K tmp = left;
+                            left = right;
+                            right = tmp;
+                        }
+                        final Map<KVariable, K> subst = new HashMap<>();
+                        if (match(subst, left, applied, r)) {
+                            if (cover) {
+                                if (!r.att().contains("UNIQUE_ID")) System.out.println(r.toString());
+                                coverage.println(r.att().get("UNIQUE_ID"));
+                            }
+                            return apply(new TransformK() {
+                                @Override
+                                public K apply(KVariable k) {
+                                    return subst.get(k);
+                                }
+                            }.apply(right));
+                        }
+                    }
+                    return applied;
+                }
+            }.apply(term);
+           return result;
+        } finally {
+             if (cover) {
+                coverage.flush();
+                try {
+                    lock.close();
+                } catch (IOException e) {
+                    throw KEMException.internalError("Could not unlock coverage file", e);
+                }
+            }
+        }
     }
 
     private Set<Sort> sort(K k, Rule r) {
         if (k instanceof KVariable) {
-            return Collections.singleton(Sort(k.att().get(Attribute.SORT_KEY)));
+            return Collections.singleton(k.att().get(Sort.class));
         } else if (k instanceof KToken) {
             return Collections.singleton(((KToken)k).sort());
         } else if (k instanceof KApply) {
@@ -126,8 +195,8 @@ public class ExpandMacros {
             if (subst.containsKey(pattern)) {
                 return subst.get(pattern).equals(subject);
             } else {
-                if (pattern.att().contains(Attribute.SORT_KEY)) {
-                    Sort patternSort = Sort(pattern.att().get(Attribute.SORT_KEY));
+                if (pattern.att().contains(Sort.class)) {
+                    Sort patternSort = pattern.att().get(Sort.class);
                     if (sort(subject, r).stream().anyMatch(s -> mod.subsorts().lessThanEq(s, patternSort))) {
                         subst.put((KVariable)pattern, subject);
                         return true;
@@ -171,7 +240,7 @@ public class ExpandMacros {
     }
 
     public Sentence expand(Sentence s) {
-        if (s instanceof Rule && !s.att().contains("macro")) {
+        if (s instanceof Rule && !s.att().contains("macro") && !s.att().contains("alias")) {
             return expand((Rule) s);
         } else if (s instanceof Context) {
             return expand((Context) s);

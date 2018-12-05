@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2016 K Team. All Rights Reserved.
+// Copyright (c) 2015-2018 K Team. All Rights Reserved.
 package org.kframework.compile;
 
 import org.junit.Rule;
@@ -19,8 +19,8 @@ import static org.kframework.kore.KORE.*;
 public class CloseCellsTest {
 
     final SortInfo sortInfo = new SortInfo() {{
-        addOp("Map", "_Map_");
-        addOp("List", "_List_");
+        addOp(Sort("Map"), "_Map_");
+        addOp(Sort("List"), "_List_");
     }};
     final TestConfiguration cfgInfo = new TestConfiguration() {{
         addCell(null, "ThreadCell", "<thread>", Multiplicity.STAR);
@@ -31,12 +31,12 @@ public class CloseCellsTest {
         addDefault("KCell", cell("<k>", stringToToken("defaultK")));
     }};
     final LabelInfo labelInfo = new LabelInfo() {{
-        addLabel("KCell", "<k>");
-        addLabel("EnvCell", "<env>");
-        addLabel("ThreadCell", "<thread>");
-        addLabel("ListCell", "<list>");
-        addLabel("Map", "_Map_", true, true, true);
-        addLabel("List", "_List_", true, false, true);
+        addLabel(Sort("KCell"), "<k>");
+        addLabel(Sort("EnvCell"), "<env>");
+        addLabel(Sort("ThreadCell"), "<thread>");
+        addLabel(Sort("ListCell"), "<list>");
+        addLabel(Sort("Map"), "_Map_", true, true, true);
+        addLabel(Sort("List"), "_List_", true, false, true);
     }};
 
     @Test
@@ -56,11 +56,11 @@ public class CloseCellsTest {
 
     @Test
     public void testCloseList() {
-        K term = KApply(KLabel(KLabels.CELLS),
+        K term = KApply(KLabels.CELLS,
                 cell("<list>", true, false, intToToken(1)),
                 cell("<list>", false, true, intToToken(2)),
                 cell("<list>", true, true, intToToken(3)));
-        K expected = KApply(KLabel(KLabels.CELLS),
+        K expected = KApply(KLabels.CELLS,
                 ccell("<list>", KApply(KLabel("_List_"), KVariable("DotVar0"), intToToken(1))),
                 ccell("<list>", KApply(KLabel("_List_"), intToToken(2), KVariable("DotVar1"))),
                 ccell("<list>", KApply(KLabel("_List_"), KVariable("DotVar2"), KApply(KLabel("_List_"), intToToken(3), KVariable("DotVar3")))));
@@ -69,11 +69,11 @@ public class CloseCellsTest {
 
     @Test
     public void testCloseCellVar() {
-        K term = KApply(KLabel(KLabels.CELLS),
+        K term = KApply(KLabels.CELLS,
                 cell("<thread>", true, false, cell("<k>", intToToken(1))),
                 cell("<thread>", false, true, cell("<k>", intToToken(2))),
                 cell("<thread>", true, true, cell("<k>", intToToken(2))));
-        K expected = KApply(KLabel(KLabels.CELLS),
+        K expected = KApply(KLabels.CELLS,
                 ccell("<thread>", ccell("<k>", intToToken(1)), KVariable("DotVar0")),
                 ccell("<thread>", ccell("<k>", intToToken(2)), KVariable("DotVar1")),
                 ccell("<thread>", ccell("<k>", intToToken(2)), KVariable("DotVar2")));
@@ -117,6 +117,6 @@ public class CloseCellsTest {
 
 
     KApply cells(K... ks) {
-        return KApply(KLabel(KLabels.CELLS), ks);
+        return KApply(KLabels.CELLS, ks);
     }
 }

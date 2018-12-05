@@ -1,4 +1,4 @@
-// Copyright (c) 2014 K Team. All Rights Reserved.
+// Copyright (c) 2014-2018 K Team. All Rights Reserved.
 
 package org.kframework.definition
 
@@ -9,6 +9,7 @@ import org.kframework.kore.{KORE => con}
 case class Configuration(body: K, ensures: K, att: Att = Att.empty) extends Sentence with OuterKORE {
   override val isSyntax = true
   override val isNonSyntax = true
+  override def withAtt(att: Att) = Configuration(body, ensures, att)
 
   //  override def toString = "configuration " + xmlify(body) + " ensures " + ensures
 
@@ -45,4 +46,5 @@ case class Configuration(body: K, ensures: K, att: Att = Att.empty) extends Sent
 case class Bubble(sentenceType: String, contents: String, att: Att = Att.empty) extends Sentence {
   override val isSyntax = sentenceType == "config"
   override val isNonSyntax = true
+  override def withAtt(att: Att) = Bubble(sentenceType, contents, att)
 }

@@ -1,8 +1,9 @@
-// Copyright (c) 2015-2016 K Team. All Rights Reserved.
+// Copyright (c) 2015-2018 K Team. All Rights Reserved.
 package org.kframework.compile;
 
 import org.kframework.attributes.Location;
 import org.kframework.builtin.KLabels;
+import org.kframework.builtin.Sorts;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.definition.Production;
@@ -203,13 +204,15 @@ public class ResolveIOStreams {
 
                     rule = Rule(body, rule.requires(), rule.ensures(), rule.att());
                     sentences.add(rule);
+                } else if (rule.att().contains("projection")) {
+                    sentences.add(rule);
                 }
             }
         }
         for (Sentence s : mutable(getStreamSyntaxModule(streamName).localSentences())) {
             if (s instanceof Production) {
                 Production production = (Production) s;
-                if (production.sort().name().equals("Stream")) {
+                if (production.sort().toString().equals("Stream") || production.att().contains("projection")) {
                     sentences.add(production);
                 }
             }
@@ -353,8 +356,8 @@ public class ResolveIOStreams {
                     if (klist.size() == 3) {
                         KApply k1 = (KApply) klist.items().get(0);
                         KApply k3 = (KApply) klist.items().get(2);
-                        if (k1.klabel().name().equals(KLabels.NO_DOTS) && k1.klist().size() == 0 &&
-                                k3.klabel().name().equals(KLabels.DOTS) && k3.klist().size() == 0) {
+                        if (KLabels.NO_DOTS.equals(k1.klabel()) && k1.klist().size() == 0 &&
+                                KLabels.DOTS.equals(k3.klabel()) && k3.klist().size() == 0) {
 
                             KRewrite k2 = (KRewrite) klist.items().get(1);
                             KApply k2l = (KApply) k2.left();
@@ -412,10 +415,10 @@ public class ResolveIOStreams {
                         KVariable x = (KVariable) i;
                         switch (x.name()) {
                         case "?Sort":
-                            return KToken("\"" + sort + "\"", Sort("String"));
+                            return KToken("\"" + sort + "\"", Sorts.String());
                         case "?Delimiters":
                             // TODO(Daejun): support `delimiter` attribute in stream cell
-                            return KToken("\" \\n\\t\\r\"", Sort("String"));
+                            return KToken("\" \\n\\t\\r\"", Sorts.String());
                         default:
                             // fall through
                         }

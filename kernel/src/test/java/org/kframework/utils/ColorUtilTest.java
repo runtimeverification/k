@@ -1,8 +1,8 @@
-// Copyright (c) 2014-2016 K Team. All Rights Reserved.
+// Copyright (c) 2014-2018 K Team. All Rights Reserved.
 package org.kframework.utils;
 
 import org.junit.Test;
-import org.kframework.krun.ColorSetting;
+import org.kframework.unparser.ColorSetting;
 
 import static org.junit.Assert.*;
 

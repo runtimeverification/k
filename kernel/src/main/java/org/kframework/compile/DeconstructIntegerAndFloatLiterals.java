@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2016 K Team. All Rights Reserved.
+// Copyright (c) 2015-2018 K Team. All Rights Reserved.
 package org.kframework.compile;
 
 import org.kframework.builtin.BooleanUtils;
@@ -48,7 +48,7 @@ public class DeconstructIntegerAndFloatLiterals {
     }
 
     public Sentence convert(Sentence s) {
-        if (s.att().contains(Attribute.MACRO_KEY)) {
+        if (s.att().contains(Attribute.MACRO_KEY) || s.att().contains(Attribute.ALIAS_KEY)) {
             return s;
         }
         if (s instanceof Rule) {
@@ -93,7 +93,7 @@ public class DeconstructIntegerAndFloatLiterals {
     KVariable newDotVariable(Sort sort) {
         KVariable newLabel;
         do {
-            newLabel = KVariable("_" + (counter++), Att().add("sort", sort.name()));
+            newLabel = KVariable("_" + (counter++), Att().add(Sort.class, sort));
         } while (vars.contains(newLabel));
         vars.add(newLabel);
         return newLabel;

@@ -11,8 +11,8 @@ import org.kframework.kore._
 object NormalizeKSeq extends (K => K) {
   val self = this
 
-  val dotk = KLabel(KLabels.DOTK)
-  val kseq = KLabel(KLabels.KSEQ)
+  val dotk = KLabels.DOTK
+  val kseq = KLabels.KSEQ
 
   def apply(k: K): K = {
     k match {

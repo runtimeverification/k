@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2016 K Team. All Rights Reserved.
+// Copyright (c) 2015-2018 K Team. All Rights Reserved.
 
 package org.kframework.compile;
 
@@ -7,12 +7,9 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.Sets;
 import org.kframework.builtin.KLabels;
-import org.kframework.compile.ConfigurationInfo;
-import org.kframework.compile.LabelInfo;
 import org.kframework.definition.Context;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
-import org.kframework.kil.Attribute;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
@@ -173,8 +170,8 @@ public class AddParentCells {
         if (k instanceof KApply) {
             return getLevel((KApply) k);
         } else if (k instanceof KVariable) {
-            if (k.att().contains(Attribute.SORT_KEY)) {
-                Sort sort = Sort(k.att().get(Attribute.SORT_KEY));
+            if (k.att().contains(Sort.class)) {
+                Sort sort = k.att().get(Sort.class);
                 int level = cfg.cfg.getLevel(sort);
                 if (level >= 0) {
                     return Optional.of(level);
@@ -207,7 +204,7 @@ public class AddParentCells {
     Optional<KLabel> getParent(K k) {
         if (k instanceof KApply) {
             final KApply app = (KApply) k;
-            if (app.klabel().equals(KLabel(KLabels.CELLS))) {
+            if (KLabels.CELLS.equals(app.klabel())) {
                 List<K> items = app.klist().items();
                 if (items.isEmpty()) {
                     return Optional.empty();
@@ -226,7 +223,7 @@ public class AddParentCells {
                 return Optional.empty();
             }
         } else if (k instanceof KVariable) {
-            Sort sort = Sort(k.att().get(Attribute.SORT_KEY));
+            Sort sort = k.att().get(Sort.class);
             return Optional.of(cfg.getParent(sort));
         } else {
             Optional<KLabel> leftParent = getParent(((KRewrite) k).left());

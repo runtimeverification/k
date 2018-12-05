@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2016 K Team. All Rights Reserved.
+// Copyright (c) 2014-2018 K Team. All Rights Reserved.
 package org.kframework.utils.options;
 
 import com.beust.jcommander.Parameter;
@@ -38,15 +38,19 @@ public class SMTOptions implements Serializable {
     @Parameter(names="--maps-as-int-array", description="Abstracts map values as an array of ints.")
     public boolean mapAsIntArray = false;
 
-    @Parameter(names="--smt_prelude", description="Path to the SMT prelude file.")
+    @Parameter(names={"--smt-prelude", "--smt_prelude"}, description="Path to the SMT prelude file.")
     public String smtPrelude;
 
-    @Parameter(names="--z3-executable", description="Invokes Z3 as an external process.")
-    public boolean z3Executable = false;
+    @Parameter(names="--z3-jni", description="Invokes Z3 as JNI library. Default is external process. " +
+            "JNI is slightly faster, but can potentially lead to JVM crash.")
+    public boolean z3JNI = false;
 
     @Parameter(names="--z3-cnstr-timeout", description="The default soft timeout (in milli seconds) of Z3 for checking constraint satisfiability.")
     public int z3CnstrTimeout = 50;
 
     @Parameter(names="--z3-impl-timeout", description="The default soft timeout (in milli seconds) of Z3 for checking implication.")
     public int z3ImplTimeout = 5000;
+
+    @Parameter(names="--z3-tactic", description="The solver tactic to use to check satisfiability in Z3.")
+    public String z3Tactic;
 }
