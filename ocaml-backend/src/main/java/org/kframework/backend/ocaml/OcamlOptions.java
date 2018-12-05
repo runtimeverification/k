@@ -53,6 +53,9 @@ public class OcamlOptions implements Serializable {
     @Parameter(names="--check-races", description="Checks for races among regular rules.")
     public boolean checkRaces;
 
+    @Parameter(names="--ocaml-funtrace", description="Prints a trace when a function evaluation gets stuck.")
+    public boolean printFunctionTrace;
+
     public boolean ocamlopt() { return optimize2 || optimize3; }
     public boolean optimizeStep() { return optimize3 || optimizeG; }
 }
