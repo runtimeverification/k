@@ -1299,11 +1299,9 @@ module STRATEGY
 
     syntax Strategy ::= #STUCK() [symbol]
 
-    syntax StrategyApply ::= "^" #RuleTag                      [klabel(#applyRule), symbol]
+    syntax Strategy ::= "^" #RuleTag                      [klabel(#applyRule), symbol]
 
-    syntax StrategyApplied ::= "~" #RuleTag                    [klabel(#appliedRule), symbol]
-
-    syntax Strategy ::= StrategyApply | StrategyApplied
+    syntax Strategy ::= "~" #RuleTag                    [klabel(#appliedRule), symbol]
 
     configuration <s> $STRATEGY:K  </s>
 endmodule
@@ -1350,8 +1348,8 @@ module BASIC-STRATEGY
 
     rule <s> true ~> #FROZEN(CONFIGURATION:K) => true ...</s>
 
-//    rule <s> #STUCK ~> X:StrategyApply => false ...</s>
-    rule <s> X:StrategyApplied => true ...</s>
+//    rule <s> #STUCK ~> ^ _ => false ...</s>
+    rule <s> ~ _ => true ...</s>
 
     rule <s> A:Strategy ; B:Strategy => A ~> #SHOLE ; B ...</s> when notBool(isBool(A))
 
@@ -1362,7 +1360,7 @@ module BASIC-STRATEGY
     rule <s> false ; B:Strategy => false ...</s>
 
 // the second rule is stupid -- just made to sidestep what is likely a KSEQ normalization bug
-    rule <s> #STUCK() ~> A:StrategyApply => false ...</s>
+    rule <s> #STUCK() ~> ^ _ => false ...</s>
     rule <s> #STUCK() ~> false => false ...</s>
 
 endmodule
