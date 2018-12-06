@@ -141,7 +141,7 @@ public class ModuleToKORE {
             if (left instanceof KApply) {
                 KApply kapp = (KApply) left;
                 Production prod = production(kapp);
-                if (prod.att().contains(Attribute.FUNCTION_KEY)) {
+                if (prod.att().contains(Attribute.FUNCTION_KEY) || rule.att().contains(Attribute.ANYWHERE_KEY)) {
                     functionRules.put(kapp.klabel(), rule);
                 }
             }
@@ -571,7 +571,7 @@ public class ModuleToKORE {
                     .map(i -> (NonTerminal) i)
                     .map(NonTerminal::sort).collect(Collectors.toList());
             productionLabel = production.klabel().get();
-            if (isFunction(prod)) {
+            if (isFunction(prod) || rule.att().contains(Attribute.ANYWHERE_KEY)) {
                 leftChildren = ((KApply) left).items();
                 equation = true;
             } else if ((rule.att().contains("heat") || rule.att().contains("cool")) && heatCoolEq) {
@@ -673,7 +673,7 @@ public class ModuleToKORE {
                 convert(consideredAttributes, rule.att());
                 sb.append("\n\n");
             }
-        } else if (!rule.att().contains(Attribute.MACRO_KEY) && !rule.att().contains(Attribute.ALIAS_KEY) && !rule.att().contains(Attribute.ANYWHERE_KEY)) {
+        } else if (!rule.att().contains(Attribute.MACRO_KEY) && !rule.att().contains(Attribute.ALIAS_KEY)) {
             if (rulesAsClaims) {
                 sb.append("  claim{} ");
             } else {
@@ -876,9 +876,15 @@ public class ModuleToKORE {
                 (prod.att().contains(Attribute.FUNCTION_KEY) && prod.att().contains(Attribute.UNIT_KEY))) {
             isConstructor = false;
         }
+        boolean isAnywhere = false;
+        if (overloads.contains(prod)) {
+            isConstructor = false;
+            isAnywhere = true;
+        }
         for (Rule r : functionRules.get(prod.klabel().get())) {
             if (r.att().contains(Attribute.ANYWHERE_KEY)) {
                 isConstructor = false;
+                isAnywhere = true;
             }
         }
         Att att = prod.att().remove("constructor");
@@ -891,7 +897,7 @@ public class ModuleToKORE {
         if (isFunctional) {
             att = att.add("functional");
         }
-        if (overloads.contains(prod)) {
+        if (isAnywhere) {
             att = att.add("anywhere");
         }
         return att;
