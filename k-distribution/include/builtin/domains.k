@@ -1348,8 +1348,8 @@ module BASIC-STRATEGY
 
     rule <s> true ~> #FROZEN(CONFIGURATION:K) => true ...</s>
 
-//    rule <s> #STUCK ~> ^ _ => false ...</s>
-    rule <s> ~ _ => true ...</s>
+//    rule <s> #STUCK ~> #applyRule(_) => false ...</s>
+    rule <s> #appliedRule(_) => true ...</s>
 
     rule <s> A:Strategy ; B:Strategy => A ~> #SHOLE ; B ...</s> when notBool(isBool(A))
 
@@ -1360,7 +1360,7 @@ module BASIC-STRATEGY
     rule <s> false ; B:Strategy => false ...</s>
 
 // the second rule is stupid -- just made to sidestep what is likely a KSEQ normalization bug
-    rule <s> #STUCK() ~> ^ _ => false ...</s>
+    rule <s> #STUCK() ~> #applyRule(_) => false ...</s>
     rule <s> #STUCK() ~> false => false ...</s>
 
 endmodule
