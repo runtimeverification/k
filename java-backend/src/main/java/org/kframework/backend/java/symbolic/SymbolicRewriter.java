@@ -811,7 +811,7 @@ public class SymbolicRewriter {
             global.globalOptions.log = oldLogEnabled;
         }
 
-        if (prettyResult != null) {
+        if (prettyResult != null && !proofResults.isEmpty()) {
             System.err.println("\n" +
                     "==========================================\n" +
                     "Failure final states:\n" +
