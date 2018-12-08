@@ -634,6 +634,7 @@ public class SymbolicRewriter {
                 global.globalOptions.log = true;
             }
             nextStepLogEnabled = false;
+            if (global.globalOptions.logProgress && step % 100 == 0) { System.err.print("."); System.err.flush(); }
 
             for (ConstrainedTerm term : queue) {
                 try { //not formatting to minimize git merge conflicts.
