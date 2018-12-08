@@ -111,6 +111,9 @@ public final class JavaExecutionOptions {
             "By default only failure final states are logged.")
     public boolean logSuccessFinalStates = false;
 
+    @Parameter(names="--log-progress", description="Print progress bar")
+    public boolean logProgress = false;
+
     public static class LogEventConverter extends BaseEnumConverter<StateLog.LogEvent> {
 
         public LogEventConverter(String optionName) {

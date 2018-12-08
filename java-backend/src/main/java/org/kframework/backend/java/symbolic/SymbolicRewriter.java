@@ -625,6 +625,9 @@ public class SymbolicRewriter {
             int v = 0;
             global.javaExecutionOptions.log |= nextStepLogEnabled;
             nextStepLogEnabled = false;
+            if (global.javaExecutionOptions.logProgress && step % 100 == 0) {
+                System.err.print(".");
+            }
 
             for (ConstrainedTerm term : queue) {
                 v++;
