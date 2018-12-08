@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 /**
  * Class representing an associative list.
  */
-public class BuiltinList extends Collection implements CollectionInternalRepresentation, HasGlobalContext {
+public class BuiltinList extends Collection implements CollectionInternalRepresentation {
 
     /**
      * Flattened list of children.
@@ -264,6 +264,16 @@ public class BuiltinList extends Collection implements CollectionInternalReprese
     @Override
     public GlobalContext globalContext() {
         return global;
+    }
+
+    public static Term stripListItem(Term term) {
+        if (term instanceof KItem) {
+            KItem kitem = (KItem) term;
+            if (KLabels.ListItem.equals(kitem.klabel())) {
+                return ((KList) kitem.kList()).getContents().get(0);
+            }
+        }
+        return term;
     }
 
     public static Builder builder(Sort sort, KLabelConstant operatorKLabel, KLabelConstant unitKLabel, GlobalContext global) {

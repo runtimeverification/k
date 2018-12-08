@@ -198,8 +198,12 @@ public class MetaK {
             kItem.att());
     }
 
-    public static StringToken getKLabelString(KItem kItem, TermContext context) {
-        return StringToken.of(kItem.kLabel().toString());
+    public static StringToken getKLabelString(Term term, TermContext context) {
+        if (term instanceof KItem) {
+            return StringToken.of(((KItem) term).kLabel().toString());
+        } else {
+            return StringToken.of("");
+        }
     }
 
     public static Term configuration(TermContext context) {

@@ -12,7 +12,6 @@ import org.kframework.utils.options.OuterParsingOptions;
 import org.kframework.utils.options.SMTOptions;
 import org.kframework.utils.options.StringListConverter;
 
-import java.io.File;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;

@@ -9,9 +9,6 @@ import com.google.common.collect.Sets;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import org.kframework.Collections;
-import org.kframework.Collections;
-import org.kframework.Collections;
-import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.KLabels;
@@ -526,158 +523,188 @@ public class ModuleToKORE {
         }
         sb.append("\n// rules\n");
         for (Rule rule : iterable(module.rules())) {
-            boolean equation = false;
-            boolean owise = false;
-            Production production = null;
-            Sort productionSort = null;
-            List<Sort> productionSorts = null;
-            KLabel productionLabel = null;
-            List<K> leftChildren = null;
-            K left = RewriteToTop.toLeft(rule.body());
-            if (left instanceof KApply) {
-                Production prod = production((KApply)left);
-                production = prod.att().get("originalPrd", Production.class);
-                productionSort = production.sort();
-                productionSorts = stream(production.items())
-                        .filter(i -> i instanceof NonTerminal)
-                        .map(i -> (NonTerminal) i)
-                        .map(NonTerminal::sort).collect(Collectors.toList());
-                productionLabel = production.klabel().get();
-                if (isFunction(prod)) {
-                    leftChildren = ((KApply) left).items();
-                    equation = true;
-                } else if ((rule.att().contains("heat") || rule.att().contains("cool")) && heatCoolEq) {
-                    equation = true;
-                    productionSort = topCell;
-                }
-                owise = rule.att().contains("owise");
-            }
-            sb.append("// ");
-            sb.append(rule.toString());
-            sb.append("\n");
-            if (equation) {
-                if (owise) {
-                    sb.append("  axiom{R} ");
-                    sb.append("\\implies{R} (\n    \\and{R} (\n      \\not{R} (\n        ");
-                    for (Rule notMatching : functionRules.get(productionLabel)) {
-                        if (notMatching.att().contains("owise")) {
-                            continue;
-                        }
-                        sb.append("\\or{R} (\n");
-                        Set<KVariable> vars = vars(notMatching);
-                        for (KVariable var : vars) {
-                            sb.append("          \\exists{R} (");
-                            convert(var);
-                            sb.append(",\n          ");
-                        }
-                        sb.append("  \\and{R} (");
-                        sb.append("\n              ");
-                        convertSideCondition(notMatching.requires());
-                        sb.append(",\n              ");
-
-                        K notMatchingLeft = RewriteToTop.toLeft(notMatching.body());
-                        assert notMatchingLeft instanceof KApply : "expecting KApply but got " + notMatchingLeft.getClass();
-                        List<K> notMatchingChildren = ((KApply) notMatchingLeft).items();
-                        assert  notMatchingChildren.size() == leftChildren.size() : "assuming function with fixed arity";
-                        for (int childIdx = 0; childIdx < leftChildren.size(); childIdx ++) {
-                            sb.append("\\and{R} (");
-                            sb.append("\n                ");
-                            sb.append("\\ceil{");
-                            Sort childSort = productionSorts.get(childIdx);
-                            convert(childSort, false);
-                            sb.append(", R} (");
-                            sb.append("\n                  ");
-                            sb.append("\\and{");
-                            convert(childSort, false);
-                            sb.append("} (\n                    ");
-                            convert(leftChildren.get(childIdx));
-                            sb.append(",\n                    ");
-                            convert(notMatchingChildren.get(childIdx));
-                            sb.append("\n                )),");
-                        }
-                        sb.append("\n                \\top{R} ()");
-                        sb.append("\n              ");
-                        for (int childIdx = 0; childIdx < leftChildren.size(); childIdx ++) {
-                            sb.append(')');
-                        }
-                        sb.append("\n          )");
-                        for (KVariable ignored : vars) {
-                            sb.append(")");
-                        }
-                        sb.append(",\n          ");
-                    }
-                    sb.append("\\bottom{R}()");
-                    sb.append("\n        ");
-                    for (Rule notMatching : functionRules.get(productionLabel)) {
-                        if (notMatching.att().contains("owise")) {
-                            continue;
-                        }
-                        sb.append(")");
-                    }
-                    sb.append("\n      ),\n      ");
-                    convertSideCondition(rule.requires());
-                    sb.append("\n    ),\n    \\and{R} (\n      \\equals{");
-                    convert(productionSort, false);
-                    sb.append(",R} (\n        ");
-                    K right = RewriteToTop.toRight(rule.body());
-                    convert(left);
-                    sb.append(",\n        ");
-                    convert(right);
-                    sb.append("),\n      ");
-                    convertSideCondition(rule.ensures());
-                    sb.append("))\n  ");
-                    convert(attributes, rule.att());
-                    sb.append("\n\n");
-                } else {
-                    sb.append("  axiom{R} ");
-                    sb.append("\\implies{R} (\n    ");
-                    convertSideCondition(rule.requires());
-                    sb.append(",\n    \\and{R} (\n      \\equals{");
-                    convert(productionSort, false);
-                    sb.append(",R} (\n        ");
-                    K right = RewriteToTop.toRight(rule.body());
-                    convert(left);
-                    sb.append(",\n        ");
-                    convert(right);
-                    sb.append("),\n      ");
-                    convertSideCondition(rule.ensures());
-                    sb.append("))\n  ");
-                    convert(attributes, rule.att());
-                    sb.append("\n\n");
-                }
-            } else if (!rule.att().contains(Attribute.MACRO_KEY) && !rule.att().contains(Attribute.ALIAS_KEY) && !rule.att().contains(Attribute.ANYWHERE_KEY)) {
-                sb.append("  axiom{} ");
-                if (owise) {
-                    // hack to deal with the strategy axiom for now
-                    sb.append("\\implies{");
-                    convert(topCell, false);
-                    sb.append("}(\\bottom{");
-                    convert(topCell, false);
-                    sb.append("}(),");
-                }
-                sb.append("\\and{");
-                convert(topCell, false);
-                sb.append("} (\n    ");
-                convertSideCondition(rule.requires(), topCell);
-                sb.append(", \\and{");
-                convert(topCell, false);
-                sb.append("} (\n    ");
-                convertSideCondition(rule.ensures(), topCell);
-                sb.append(", ");
-                convert(rule.body());
-                sb.append("))");
-                if (owise) {
-                    sb.append(")");
-                }
-                sb.append("\n  ");
-                convert(attributes, rule.att());
-                sb.append("\n\n");
-            }
+            convertRule(rule, heatCoolEq, topCell, attributes, functionRules, false);
         }
         sb.append("endmodule ");
         convert(attributes, module.att());
         sb.append("\n");
         return sb.toString();
+    }
+
+    public String convertSpecificationModule(Module m) {
+        ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(module);
+        Sort topCell = configInfo.getRootCell();
+        sb.append("[]\n");
+        sb.append("module ");
+        convert(module.name());
+        sb.append("\n\n// imports\n");
+        for (Module im : iterable(m.imports())) {
+            if (im.name().contains("$SYNTAX")) continue;
+            sb.append("import ");
+            convert(im.name());
+            sb.append(" []\n");
+        }
+        for (Rule rule : iterable(module.localRules())) {
+            convertRule(rule, false, topCell, new HashMap<>(), HashMultimap.create(), true);
+        }
+        sb.append("endmodule ");
+        convert(new HashMap<>(), module.att());
+        sb.append("\n");
+        return sb.toString();
+    }
+
+    private void convertRule(Rule rule, boolean heatCoolEq, Sort topCellSort, Map<String, Boolean> consideredAttributes, SetMultimap<KLabel, Rule> functionRules, boolean rulesAsClaims) {
+        boolean equation = false;
+        boolean owise = false;
+        Production production = null;
+        Sort productionSort = null;
+        List<Sort> productionSorts = null;
+        KLabel productionLabel = null;
+        List<K> leftChildren = null;
+        K left = RewriteToTop.toLeft(rule.body());
+        if (left instanceof KApply) {
+            Production prod = production((KApply)left);
+            production = prod.att().get("originalPrd", Production.class);
+            productionSort = production.sort();
+            productionSorts = stream(production.items())
+                    .filter(i -> i instanceof NonTerminal)
+                    .map(i -> (NonTerminal) i)
+                    .map(NonTerminal::sort).collect(Collectors.toList());
+            productionLabel = production.klabel().get();
+            if (isFunction(prod)) {
+                leftChildren = ((KApply) left).items();
+                equation = true;
+            } else if ((rule.att().contains("heat") || rule.att().contains("cool")) && heatCoolEq) {
+                equation = true;
+                productionSort = topCellSort;
+            }
+            owise = rule.att().contains("owise");
+        }
+        sb.append("// ");
+        sb.append(rule.toString());
+        sb.append("\n");
+        if (equation) {
+            if (owise) {
+                sb.append("  axiom{R} ");
+                sb.append("\\implies{R} (\n    \\and{R} (\n      \\not{R} (\n        ");
+                for (Rule notMatching : functionRules.get(productionLabel)) {
+                    if (notMatching.att().contains("owise")) {
+                        continue;
+                    }
+                    sb.append("\\or{R} (\n");
+                    Set<KVariable> vars = vars(notMatching);
+                    for (KVariable var : vars) {
+                        sb.append("          \\exists{R} (");
+                        convert(var);
+                        sb.append(",\n          ");
+                    }
+                    sb.append("  \\and{R} (");
+                    sb.append("\n              ");
+                    convertSideCondition(notMatching.requires());
+                    sb.append(",\n              ");
+
+                    K notMatchingLeft = RewriteToTop.toLeft(notMatching.body());
+                    assert notMatchingLeft instanceof KApply : "expecting KApply but got " + notMatchingLeft.getClass();
+                    List<K> notMatchingChildren = ((KApply) notMatchingLeft).items();
+                    assert  notMatchingChildren.size() == leftChildren.size() : "assuming function with fixed arity";
+                    for (int childIdx = 0; childIdx < leftChildren.size(); childIdx ++) {
+                        sb.append("\\and{R} (");
+                        sb.append("\n                ");
+                        sb.append("\\ceil{");
+                        Sort childSort = productionSorts.get(childIdx);
+                        convert(childSort, false);
+                        sb.append(", R} (");
+                        sb.append("\n                  ");
+                        sb.append("\\and{");
+                        convert(childSort, false);
+                        sb.append("} (\n                    ");
+                        convert(leftChildren.get(childIdx));
+                        sb.append(",\n                    ");
+                        convert(notMatchingChildren.get(childIdx));
+                        sb.append("\n                )),");
+                    }
+                    sb.append("\n                \\top{R} ()");
+                    sb.append("\n              ");
+                    for (int childIdx = 0; childIdx < leftChildren.size(); childIdx ++) {
+                        sb.append(')');
+                    }
+                    sb.append("\n          )");
+                    for (KVariable ignored : vars) {
+                        sb.append(")");
+                    }
+                    sb.append(",\n          ");
+                }
+                sb.append("\\bottom{R}()");
+                sb.append("\n        ");
+                for (Rule notMatching : functionRules.get(productionLabel)) {
+                    if (notMatching.att().contains("owise")) {
+                        continue;
+                    }
+                    sb.append(")");
+                }
+                sb.append("\n      ),\n      ");
+                convertSideCondition(rule.requires());
+                sb.append("\n    ),\n    \\and{R} (\n      \\equals{");
+                convert(productionSort, false);
+                sb.append(",R} (\n        ");
+                K right = RewriteToTop.toRight(rule.body());
+                convert(left);
+                sb.append(",\n        ");
+                convert(right);
+                sb.append("),\n      ");
+                convertSideCondition(rule.ensures());
+                sb.append("))\n  ");
+                convert(consideredAttributes, rule.att());
+                sb.append("\n\n");
+            } else {
+                sb.append("  axiom{R} ");
+                sb.append("\\implies{R} (\n    ");
+                convertSideCondition(rule.requires());
+                sb.append(",\n    \\and{R} (\n      \\equals{");
+                convert(productionSort, false);
+                sb.append(",R} (\n        ");
+                K right = RewriteToTop.toRight(rule.body());
+                convert(left);
+                sb.append(",\n        ");
+                convert(right);
+                sb.append("),\n      ");
+                convertSideCondition(rule.ensures());
+                sb.append("))\n  ");
+                convert(consideredAttributes, rule.att());
+                sb.append("\n\n");
+            }
+        } else if (!rule.att().contains(Attribute.MACRO_KEY) && !rule.att().contains(Attribute.ALIAS_KEY) && !rule.att().contains(Attribute.ANYWHERE_KEY)) {
+            if (rulesAsClaims) {
+                sb.append("  claim{} ");
+            } else {
+                sb.append("  axiom{} ");
+            }
+            if (owise) {
+                // hack to deal with the strategy axiom for now
+                sb.append("\\implies{");
+                convert(topCellSort, false);
+                sb.append("}(\\bottom{");
+                convert(topCellSort, false);
+                sb.append("}(),");
+            }
+            sb.append("\\and{");
+            convert(topCellSort, false);
+            sb.append("} (\n    ");
+            convertSideCondition(rule.requires(), topCellSort);
+            sb.append(", \\and{");
+            convert(topCellSort, false);
+            sb.append("} (\n    ");
+            convertSideCondition(rule.ensures(), topCellSort);
+            sb.append(", ");
+            convert(rule.body());
+            sb.append("))");
+            if (owise) {
+                sb.append(")");
+            }
+            sb.append("\n  ");
+            convert(consideredAttributes, rule.att());
+            sb.append("\n\n");
+        }
     }
 
     private void functionalPattern(Production prod, Runnable functionPattern) {

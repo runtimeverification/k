@@ -52,4 +52,7 @@ public class KProveOptions {
 
     @Parameter(names={"--def-module", "-m"}, description="Name of module containing definition to prove under")
     public String defModule;
+
+    @Parameter(names="--depth", description="The maximum number of computational steps to prove")
+    public Integer depth;
 }

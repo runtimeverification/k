@@ -8,17 +8,22 @@ import org.kframework.compile.AddImplicitComputationCell;
 import org.kframework.compile.AddSortInjections;
 import org.kframework.compile.Backend;
 import org.kframework.compile.ConcretizeCells;
+import org.kframework.compile.ConfigurationInfoFromModule;
 import org.kframework.compile.ExpandMacros;
 import org.kframework.compile.GenerateSortPredicateRules;
 import org.kframework.compile.GenerateSortPredicateSyntax;
+import org.kframework.compile.LabelInfo;
+import org.kframework.compile.LabelInfoFromModule;
 import org.kframework.compile.MinimizeTermConstruction;
 import org.kframework.compile.ResolveAnonVar;
 import org.kframework.compile.ResolveContexts;
 import org.kframework.compile.ResolveFreshConstants;
 import org.kframework.compile.ResolveFun;
 import org.kframework.compile.ResolveHeatCoolAttribute;
+import org.kframework.compile.ResolveIOStreams;
 import org.kframework.compile.ResolveSemanticCasts;
 import org.kframework.compile.ResolveStrict;
+import org.kframework.compile.SortInfo;
 import org.kframework.definition.Definition;
 import org.kframework.definition.DefinitionTransformer;
 import org.kframework.definition.Module;
@@ -131,7 +136,30 @@ public class KoreBackend implements Backend {
 
     @Override
     public Function<Module, Module> specificationSteps(Definition def) {
-        throw new UnsupportedOperationException();
+        Module mod = def.mainModule();
+        ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(mod);
+        LabelInfo labelInfo = new LabelInfoFromModule(mod);
+        SortInfo sortInfo = SortInfo.fromModule(mod);
+        ModuleTransformer resolveAnonVars = ModuleTransformer.fromSentenceTransformer(
+                new ResolveAnonVar()::resolve,
+                "resolving \"_\" vars");
+        ModuleTransformer resolveSemanticCasts = ModuleTransformer.fromSentenceTransformer(
+                new ResolveSemanticCasts(true)::resolve,
+                "resolving semantic casts");
+        ModuleTransformer subsortKItem = ModuleTransformer.from(Kompile::subsortKItem, "subsort all sorts to KItem");
+        ModuleTransformer addImplicitComputationCell = ModuleTransformer.fromSentenceTransformer(
+                new AddImplicitComputationCell(configInfo, labelInfo),
+                "concretizing configuration");
+        ModuleTransformer concretizeCells = ModuleTransformer.fromSentenceTransformer(
+                new ConcretizeCells(configInfo, labelInfo, sortInfo, mod)::concretize,
+                "concretizing configuration");
+
+        return m -> resolveAnonVars
+                .andThen(resolveSemanticCasts)
+                .andThen(addImplicitComputationCell)
+                .andThen(concretizeCells)
+                .andThen(subsortKItem)
+                .apply(m);
     }
 
     @Override

@@ -34,7 +34,7 @@ import java.util.stream.Stream;
  * @see org.kframework.backend.java.symbolic.Equality
  * @see org.kframework.backend.java.symbolic.DisjunctiveFormula
  */
-public class ConjunctiveFormula extends Term implements CollectionInternalRepresentation, HasGlobalContext {
+public class ConjunctiveFormula extends Term implements CollectionInternalRepresentation {
 
     public static final String SEPARATOR = " /\\ ";
 
