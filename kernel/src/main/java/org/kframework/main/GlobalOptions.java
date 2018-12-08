@@ -142,6 +142,9 @@ public final class GlobalOptions {
                     " All custom logging only works for KEVM-based specs.")
     public boolean logBasic = false;
 
+    @Parameter(names="--log-progress", description="Print progress bar")
+    public boolean logProgress = false;
+
     @Parameter(names="--debug-z3",
             description="Log formulae fed to z3 together with the rule that triggered them.")
     public boolean debugZ3 = false;
