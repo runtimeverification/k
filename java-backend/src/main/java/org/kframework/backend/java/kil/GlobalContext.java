@@ -39,7 +39,6 @@ public class GlobalContext implements Serializable {
 
     public GlobalContext(
             FileSystem fs,
-            boolean deterministicFunctions,
             GlobalOptions globalOptions,
             KRunOptions krunOptions,
             JavaExecutionOptions javaExecutionOptions,
@@ -58,7 +57,7 @@ public class GlobalContext implements Serializable {
         this.files = files;
         this.equalityOps = new EqualityOperations(() -> def);
         this.constraintOps = new SMTOperations(() -> def, smtOptions, new Z3Wrapper(smtOptions, kem, globalOptions, files), kem, globalOptions);
-        this.kItemOps = new KItemOperations(stage, deterministicFunctions, kem, this::builtins, globalOptions);
+        this.kItemOps = new KItemOperations(stage, javaExecutionOptions.deterministicFunctions, kem, this::builtins, globalOptions);
         this.stage = stage;
         this.profiler = profiler;
     }
@@ -75,7 +74,7 @@ public class GlobalContext implements Serializable {
             Map<String, MethodHandle> hookProvider,
             Stage stage,
             Profiler2 profiler) {
-        this(fs, false, globalOptions, krunOptions, javaExecutionOptions, kem, smtOptions, hookProvider, files, stage, profiler);
+        this(fs, globalOptions, krunOptions, javaExecutionOptions, kem, smtOptions, hookProvider, files, stage, profiler);
     }
 
     private transient BuiltinFunction builtinFunction;

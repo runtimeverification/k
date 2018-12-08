@@ -58,7 +58,6 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
 
     private final FileSystem fs;
     private final Stopwatch sw;
-    private final boolean deterministicFunctions;
     private final GlobalOptions globalOptions;
     private final KExceptionManager kem;
     private final SMTOptions smtOptions;
@@ -87,7 +86,6 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
             Profiler2 profiler) {
         this.fs = fs;
         this.sw = sw;
-        this.deterministicFunctions = false;
         this.globalOptions = globalOptions;
         this.kem = kem;
         this.smtOptions = smtOptions;
@@ -103,11 +101,11 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
 
     @Override
     public synchronized Rewriter apply(Module mainModule) {
-        TermContext initializingContext = TermContext.builder(new GlobalContext(fs, deterministicFunctions, globalOptions, krunOptions, javaExecutionOptions, kem, smtOptions, hookProvider, files, Stage.INITIALIZING, profiler))
+        TermContext initializingContext = TermContext.builder(new GlobalContext(fs, globalOptions, krunOptions, javaExecutionOptions, kem, smtOptions, hookProvider, files, Stage.INITIALIZING, profiler))
                 .freshCounter(0).build();
         Definition definition;
         definition = initializeDefinition.invoke(mainModule, kem, initializingContext.global());
-        GlobalContext rewritingContext = new GlobalContext(fs, deterministicFunctions, globalOptions, krunOptions, javaExecutionOptions, kem, smtOptions, hookProvider, files, Stage.REWRITING, profiler);
+        GlobalContext rewritingContext = new GlobalContext(fs, globalOptions, krunOptions, javaExecutionOptions, kem, smtOptions, hookProvider, files, Stage.REWRITING, profiler);
         rewritingContext.setDefinition(definition);
 
         return new SymbolicRewriterGlue(mainModule, definition, definition, transitions, initializingContext.getCounterValue(), rewritingContext, kem, files, kompileOptions, sw);
