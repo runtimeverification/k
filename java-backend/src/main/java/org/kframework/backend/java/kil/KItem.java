@@ -582,7 +582,7 @@ public class KItem extends Term implements KItemRepresentation {
                                         sb.append("\n\nCandidate rules:\n");
                                         RuleSourceUtil.appendRuleAndSource(appliedRule, sb);
                                         RuleSourceUtil.appendRuleAndSource(rule, sb);
-                                        sb.append("\n\nCandidate results:\n");
+                                        sb.append("Candidate results:\n");
                                         sb.append(result).append("\n");
                                         sb.append(rightHandSide).append("\n");
                                         throw KEMException.criticalError(sb.toString());
@@ -609,18 +609,20 @@ public class KItem extends Term implements KItemRepresentation {
                             final long maxExcLogCount = 10;
                             if (context.global().globalOptions.logBasic
                                     && exceptionLogCount.getAndIncrement() < maxExcLogCount) {
-                                String kItemStr = kItem.toString();
-                                kItemStr = kItemStr.substring(0, (int) Math.min(kItemStr.length(), lengthThreshold));
-                                if (kItemStr.length() == lengthThreshold) {
-                                    kItemStr += "...";
+                                try {
+                                    String kItemStr = kItem.toString();
+                                    kItemStr = kItemStr.substring(0, (int) Math.min(kItemStr.length(), lengthThreshold));
+                                    if (kItemStr.length() == lengthThreshold) {
+                                        kItemStr += "...";
+                                    }
+                                    StringBuffer ruleSb = new StringBuffer();
+                                    RuleSourceUtil.appendRuleAndSource(rule, ruleSb);
+                                    System.err.format("\nException while evaluating functional term:\n\t%s\n" +
+                                                    "and applying the rule\n\t%s",
+                                            kItemStr, ruleSb);
+                                } catch (Exception e1) {
+                                    //ignored
                                 }
-                                String ruleStr = rule.toString();
-                                if (ruleStr.length() == lengthThreshold) {
-                                    ruleStr += "...";
-                                }
-                                System.err.format("\nException while evaluating functional term:\n\t%s\n" +
-                                                "and applying the rule\n\t%s\n\nException message: %s\n\n",
-                                        kItemStr, ruleStr, e.toString());
                             }
                             throw e;
                         } finally {
