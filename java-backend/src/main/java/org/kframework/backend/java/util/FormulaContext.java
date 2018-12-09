@@ -66,14 +66,12 @@ public class FormulaContext {
     }
 
     public void printImplication(ConjunctiveFormula left, ConjunctiveFormula right, Boolean proved, boolean cached) {
+        String cachedMsg = cached ? " (cached result)" : "";
         if (proved) {
-            System.err.format("\nZ3 Implication (%s) RHS proved:\n%s\n", kind.label, right.toStringMultiline());
+            System.err.format("\nZ3 Implication (%s) RHS proved%s:\n%s\n", kind.label, cachedMsg, right.toStringMultiline());
         } else {
-            System.err.format("\nZ3 Implication (%s) failed:\n%s\n  implies \n%s\n",
-                    kind.label, left.toStringMultiline(), right.toStringMultiline());
-        }
-        if (cached) {
-            System.err.println("cached result");
+            System.err.format("\nZ3 Implication (%s) failed%s:\n%s\n  implies \n%s\n",
+                    kind.label, cachedMsg, left.toStringMultiline(), right.toStringMultiline());
         }
         if (rule != null) {
             RuleSourceUtil.printRuleAndSource(rule);
@@ -82,13 +80,11 @@ public class FormulaContext {
     }
 
     public void printUnsat(ConjunctiveFormula formula, boolean unsat, boolean cached) {
+        String cachedMsg = cached ? " (cached result)" : "";
         if (unsat) {
-            System.err.format("\nZ3 Constraint (%s) is unsat:\n%s\n", kind.label, formula.toStringMultiline());
+            System.err.format("\nZ3 Constraint (%s) is unsat%s:\n%s\n", kind.label, cachedMsg, formula.toStringMultiline());
         } else {
-            System.err.format("\nZ3 Constraint (%s) is assumed sat:\n%s\n", kind.label, formula.toStringMultiline());
-        }
-        if (cached) {
-            System.err.println("cached result");
+            System.err.format("\nZ3 Constraint (%s) is assumed sat%s:\n%s\n", kind.label, cachedMsg, formula.toStringMultiline());
         }
         if (rule != null) {
             RuleSourceUtil.printRuleAndSource(rule);
