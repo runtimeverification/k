@@ -606,7 +606,7 @@ public class KItem extends Term implements KItemRepresentation {
                             }
                         } catch (RuntimeException | Error e) {
                             final long lengthThreshold = 10000;
-                            final long maxExcLogCount = 50;
+                            final long maxExcLogCount = 10;
                             if (context.global().globalOptions.logBasic
                                     && exceptionLogCount.getAndIncrement() < maxExcLogCount) {
                                 String kItemStr = kItem.toString();
@@ -621,8 +621,8 @@ public class KItem extends Term implements KItemRepresentation {
                                 System.err.format("\nException while evaluating functional term:\n\t%s\n" +
                                                 "and applying the rule\n\t%s\n\nException message: %s\n\n",
                                         kItemStr, ruleStr, e.toString());
-                                throw e;
                             }
+                            throw e;
                         } finally {
                             if (RuleAuditing.isAuditBegun()) {
                                 if (RuleAuditing.getAuditingRule() == rule) {
