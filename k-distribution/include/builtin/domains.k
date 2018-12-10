@@ -1306,10 +1306,20 @@ module STRATEGY
     configuration <s> $STRATEGY:K  </s>
 endmodule
 
+module DEFAULT-STRATEGY-CONCRETE [concrete]
+    imports syntax STRATEGY
+    rule ~ regular => ^ regular [anywhere]
+endmodule
+
+module DEFAULT-STRATEGY-SYMBOLIC [symbolic]
+    imports syntax STRATEGY
+    rule <s> ~ regular => ^ regular ... </s>
+endmodule
+
 module DEFAULT-STRATEGY
     imports syntax STRATEGY
-
-    rule ~ regular => ^ regular [anywhere]
+    imports DEFAULT-STRATEGY-CONCRETE
+    imports DEFAULT-STRATEGY-SYMBOLIC
 
     rule initSCell(_) => <s> ^ regular </s>
 endmodule
