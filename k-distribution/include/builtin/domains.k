@@ -90,6 +90,27 @@ module ARRAY
 endmodule
 
 module MAP
+  imports MAP-COMMON
+  imports MAP-IN-K
+  imports MAP-HOOKED
+endmodule
+
+module MAP-IN-K [symbolic]
+  imports MAP-COMMON
+  imports BOOL
+  
+  syntax KItem ::= Map "[" KItem "]" "orDefault" KItem      [function, functional, klabel(Map:lookupOrDefault)]
+
+  rule M [ X ] orDefault _ => M [ X ] requires X in_keys (M)
+  rule M [ X ] orDefault Y => Y       requires notBool (X in_keys (M))
+endmodule
+
+module MAP-HOOKED [concrete]
+  imports MAP-COMMON
+  syntax KItem ::= Map "[" KItem "]" "orDefault" KItem      [function, functional, hook(MAP.lookupOrDefault), klabel(Map:lookupOrDefault)]
+endmodule
+
+module MAP-COMMON
   imports LIST
   imports SET
 
@@ -115,8 +136,6 @@ module MAP
 
   /*@ Retrieve the value associated with the given key */
   syntax KItem ::= Map "[" KItem "]"                    [function, hook(MAP.lookup), klabel(Map:lookup), symbol]
-
-  syntax KItem ::= Map "[" KItem "]" "orDefault" KItem      [function, functional, hook(MAP.lookupOrDefault), klabel(Map:lookupOrDefault)]
 
   /*@ Update a Map in form of  of keys and values: */
   syntax Map ::= Map "[" KItem "<-" KItem "]"           [function, functional, hook(MAP.update), prefer]
