@@ -66,6 +66,7 @@ public class FormulaContext {
             System.err.format("\nZ3 Implication (%s) failed%s:\n%s\n  implies \n%s\n",
                     kind.label, cachedMsg, left.toStringMultiline(), right.toStringMultiline());
         }
+        System.err.println("\nRule for formula above:");
         RuleSourceUtil.printRuleAndSource(rule);
         System.err.println("==================================");
     }
@@ -77,6 +78,7 @@ public class FormulaContext {
         } else {
             System.err.format("\nZ3 Constraint (%s) is assumed sat%s:\n%s\n", kind.label, cachedMsg, formula.toStringMultiline());
         }
+        System.err.println("\nRule for formula above:");
         RuleSourceUtil.printRuleAndSource(rule);
         System.err.println("==================================");
     }
