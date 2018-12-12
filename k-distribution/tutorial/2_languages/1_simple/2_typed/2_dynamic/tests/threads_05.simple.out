@@ -20,7 +20,7 @@
       SetItem ( 1 )
     </terminated>
     <input>
-      ListItem ( #buffer ( "" ) )
+      ListItem ( #buffer ( "\n" ) )
       ListItem ( "off" )
       ListItem ( #istream ( 0 ) )
     </input>
@@ -56,7 +56,7 @@
       SetItem ( 1 )
     </terminated>
     <input>
-      ListItem ( #buffer ( "" ) )
+      ListItem ( #buffer ( "\n" ) )
       ListItem ( "off" )
       ListItem ( #istream ( 0 ) )
     </input>
@@ -92,7 +92,7 @@
       SetItem ( 1 )
     </terminated>
     <input>
-      ListItem ( #buffer ( "" ) )
+      ListItem ( #buffer ( "\n" ) )
       ListItem ( "off" )
       ListItem ( #istream ( 0 ) )
     </input>
@@ -128,7 +128,7 @@
       SetItem ( 1 )
     </terminated>
     <input>
-      ListItem ( #buffer ( "" ) )
+      ListItem ( #buffer ( "\n" ) )
       ListItem ( "off" )
       ListItem ( #istream ( 0 ) )
     </input>
@@ -164,7 +164,7 @@
       SetItem ( 1 )
     </terminated>
     <input>
-      ListItem ( #buffer ( "" ) )
+      ListItem ( #buffer ( "\n" ) )
       ListItem ( "off" )
       ListItem ( #istream ( 0 ) )
     </input>
