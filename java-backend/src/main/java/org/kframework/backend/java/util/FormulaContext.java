@@ -74,6 +74,7 @@ public class FormulaContext {
                     kind.label, cachedMsg, left.toStringMultiline(), right.toStringMultiline());
         }
         if (rule != null) {
+            System.err.println("\nRule for formula above:");
             RuleSourceUtil.printRuleAndSource(rule);
         }
         System.err.println("==================================");
@@ -87,6 +88,7 @@ public class FormulaContext {
             System.err.format("\nZ3 Constraint (%s) is assumed sat%s:\n%s\n", kind.label, cachedMsg, formula.toStringMultiline());
         }
         if (rule != null) {
+            System.err.println("\nRule for formula above:");
             RuleSourceUtil.printRuleAndSource(rule);
         }
         System.err.println("==================================");
