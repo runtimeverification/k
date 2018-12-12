@@ -18,7 +18,7 @@
       2 |-> 0
     </store>
     <input>
-      ListItem ( #buffer ( "" ) )
+      ListItem ( #buffer ( "\n" ) )
       ListItem ( "off" )
       ListItem ( #istream ( 0 ) )
     </input>
@@ -49,7 +49,7 @@
       2 |-> 0
     </store>
     <input>
-      ListItem ( #buffer ( "" ) )
+      ListItem ( #buffer ( "\n" ) )
       ListItem ( "off" )
       ListItem ( #istream ( 0 ) )
     </input>
@@ -80,7 +80,7 @@
       2 |-> 1
     </store>
     <input>
-      ListItem ( #buffer ( "" ) )
+      ListItem ( #buffer ( "\n" ) )
       ListItem ( "off" )
       ListItem ( #istream ( 0 ) )
     </input>
@@ -111,7 +111,7 @@
       2 |-> 2
     </store>
     <input>
-      ListItem ( #buffer ( "" ) )
+      ListItem ( #buffer ( "\n" ) )
       ListItem ( "off" )
       ListItem ( #istream ( 0 ) )
     </input>
@@ -142,7 +142,7 @@
       2 |-> 3
     </store>
     <input>
-      ListItem ( #buffer ( "" ) )
+      ListItem ( #buffer ( "\n" ) )
       ListItem ( "off" )
       ListItem ( #istream ( 0 ) )
     </input>
