@@ -32,6 +32,10 @@ public abstract class AbstractKModule implements KModule {
         return Collections.emptyList();
     }
 
+    public List<Pair<Class<?>, Boolean>> kproveOptions() {
+        return Collections.emptyList();
+    }
+
     public Map<String, String> javaBackendHooks() {
         return Collections.emptyMap();
     }
@@ -118,5 +122,14 @@ public abstract class AbstractKModule implements KModule {
     }
 
     @Override
-    public List<Module> getKProveModules() { return Lists.newArrayList(); }
+    public List<Module> getKProveModules() {
+        return Lists.newArrayList(new AbstractModule() {
+
+            @Override
+            protected void configure() {
+                bindOptions(AbstractKModule.this::kproveOptions, binder());
+                bindJavaBackendHooks(binder());
+            }
+        });
+    }
 }
