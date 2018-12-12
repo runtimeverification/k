@@ -41,8 +41,10 @@ public class RuleSourceUtil {
         Formatter formatter = new Formatter(out);
         if (sourceShortEnough(rule)) {
             formatter.format("%s\n", loadSource(rule));
+        } else if (rule.source().isPresent()) {
+            formatter.format("rule too long...\n");
         } else {
-            formatter.format("rule too long or location unknown...\n");
+            formatter.format("Rule with no source. toString() format:\n%s\n", rule.toString());
         }
         formatter.format("\tSource: %s %s\n\n", source, rule.getLocation());
     }
