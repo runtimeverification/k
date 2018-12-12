@@ -18,28 +18,18 @@ import java.util.Map;
 public class RuleSourceUtil {
     private static final Map<Rule, String> cache = Collections.synchronizedMap(new HashMap<>());
 
-    public static boolean sourceShortEnough(Rule rule) {
+    private static boolean sourceShortEnough(Rule rule) {
         Location location = rule.getLocation();
         return location != null && location.endLine() - location.startLine() <= 20;
     }
 
-    public static String loadSource(Rule rule) {
+    private static String loadSource(Rule rule) {
         if (!cache.containsKey(rule)) {
             if (rule.getSource() != null && rule.getLocation() != null) {
                 cache.putIfAbsent(rule, FileUtil.loadFragment(new File(rule.getSource().source()), rule.getLocation()));
             }
         }
         return cache.get(rule);
-    }
-
-    public static void printSourceAndRule(Rule rule) {
-        File source = rule.source().isPresent() ? new File(rule.getSource().source()) : null;
-        System.err.format("\nSource: %s %s\n", source, rule.getLocation());
-        if (sourceShortEnough(rule)) {
-            System.err.println(loadSource(rule));
-        } else {
-            System.err.println("rule too long or location unknown...");
-        }
     }
 
     public static void printRuleAndSource(Rule rule) {
