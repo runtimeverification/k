@@ -4,6 +4,7 @@ package org.kframework.backend.haskell;
 import com.google.inject.Inject;
 import org.kframework.RewriterResult;
 import org.kframework.attributes.Att;
+import org.kframework.backend.kore.KoreBackend;
 import org.kframework.backend.kore.ModuleToKORE;
 import org.kframework.compile.AddSortInjections;
 import org.kframework.compile.RewriteToTop;
@@ -258,10 +259,19 @@ public class HaskellRewriter implements Function<Module, Rewriter> {
 
             @Override
             public K prove(Module rules) {
-                ModuleToKORE converter = new ModuleToKORE(rules, files, def.topCellInitializer);
-                String koreOutput = converter.convertSpecificationModule(rules);
+                Module specModule;
+                if (!module.name().equals(def.kompiledDefinition.mainModule().name())) {
+                    specModule = module.addImport(def.kompiledDefinition.mainModule());
+                } else {
+                    specModule = module;
+                }
+                String kompiledModule = KoreBackend.getKompiledString(specModule, def.topCellInitializer, files, false);
+                files.saveToTemp("vdefinition.kore", kompiledModule);
+
+                ModuleToKORE rulesConverter = new ModuleToKORE(rules, files, def.topCellInitializer);
+                String koreOutput = rulesConverter.convertSpecificationModule(specModule, rules);
                 files.saveToTemp("spec.kore", koreOutput);
-                String defPath = files.resolveKompiled("definition.kore").getAbsolutePath();
+                String defPath = files.resolveTemp("vdefinition.kore").getAbsolutePath();
                 String specPath = files.resolveTemp("spec.kore").getAbsolutePath();
                 String[] koreCommand = haskellKRunOptions.haskellBackendCommand.split("\\s+");
                 String koreDirectory = haskellKRunOptions.haskellBackendHome;
@@ -269,14 +279,14 @@ public class HaskellRewriter implements Function<Module, Rewriter> {
                 List<String> args = new ArrayList<>();
                 String defModuleName =
                         kProveOptions.defModule == null ? def.executionModule().name() : kProveOptions.defModule;
-                String specModule = kProveOptions.specModule == null ? rules.name() : kProveOptions.specModule;
+                String specModuleName = kProveOptions.specModule == null ? rules.name() : kProveOptions.specModule;
 
                 args.addAll(Arrays.asList(koreCommand));
                 args.addAll(Arrays.asList(
                         defPath,
                         "--module", defModuleName,
                         "--prove", specPath,
-                        "--spec-module", specModule,
+                        "--spec-module", specModuleName,
                         "--output", koreOutputFile.getAbsolutePath()));
                 if (kProveOptions.depth != null) {
                     args.addAll(Arrays.asList(
