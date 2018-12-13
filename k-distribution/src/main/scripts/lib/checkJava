@@ -23,10 +23,15 @@ function setarch {
   fi
 }
 
-version=$(ng --nailgun-server local:$HOME/.kserver/socket org.kframework.main.JavaVersion 2>&1)
+if [[ "$KSERVER_SOCKET" == "" ]]; then
+  KSERVER_SOCKET="$HOME/.kserver"
+fi
+
+KSERVER_INSTANCE="ng --nailgun-server local:$KSERVER_SOCKET/socket"
+version=$($KSERVER_INSTANCE org.kframework.main.JavaVersion 2>&1)
 if [ $? -eq 0 ]; then
   setarch
-  JAVA="ng --nailgun-server local:$HOME/.kserver/socket"
+  JAVA="$KSERVER_INSTANCE"
 else
   version=$(ng org.kframework.main.JavaVersion 2>&1)
   if [ $? -eq 0 ]; then
