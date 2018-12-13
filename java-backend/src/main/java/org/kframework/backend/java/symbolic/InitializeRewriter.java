@@ -332,6 +332,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
             }
 
             public org.kframework.backend.java.kil.Rule evaluateRule(org.kframework.backend.java.kil.Rule rule) {
+                termContext.setTopConstraint(null);
                 //We need this ConsTerm only to evaluate the constraint. That's why we use an empty first argument.
                 ConstrainedTerm constraintHolder = new ConstrainedTerm(
                         ConjunctiveFormula.of(termContext.global()),
@@ -339,6 +340,9 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
                         termContext).expandPatterns(true);
 
                 ConjunctiveFormula constraint = constraintHolder.constraint();
+                termContext.setTopConstraint(constraint);
+                //simplify the constraint in its own context, to force full evaluation of terms.
+                constraint = constraint.simplify(termContext);
 
                 return new org.kframework.backend.java.kil.Rule(
                         rule.label(),
@@ -355,9 +359,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
 
             private Term evaluate(Term term, ConjunctiveFormula constraint, TermContext context) {
                 context.setTopConstraint(constraint);
-                Term newTerm = term.fullSubstituteAndEvaluate(context);
-                context.setTopConstraint(null);
-                return newTerm;
+                return term.fullSubstituteAndEvaluate(context);
             }
         }
     }
