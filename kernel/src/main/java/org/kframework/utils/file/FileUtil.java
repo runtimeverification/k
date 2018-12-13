@@ -7,17 +7,22 @@ import com.google.inject.util.Providers;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.BoundedInputStream;
 import org.apache.commons.lang3.tuple.Pair;
+import org.kframework.attributes.Location;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
 import javax.annotation.Nullable;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.io.Reader;
@@ -28,6 +33,8 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class FileUtil {
 
@@ -234,6 +241,30 @@ public class FileUtil {
     public static String load(File file) {
         try {
             return FileUtils.readFileToString(file);
+        } catch (IOException e) {
+            throw KEMException.criticalError("Could not read from file " + file.getAbsolutePath(), e);
+        }
+    }
+
+    /**
+     * Loads the given fragment of a file to String.
+     * <p>
+     * Source: https://stackoverflow.com/a/4305478/4182868
+     */
+    public static String loadFragment(File file, int pos, int len) {
+        try (FileInputStream stream = new FileInputStream(file)) {
+            stream.skip(pos);
+            return IOUtils.toString(new BoundedInputStream(stream, len));
+        } catch (IOException e) {
+            throw KEMException.criticalError("Could not read from file " + file.getAbsolutePath(), e);
+        }
+    }
+
+    public static String loadFragment(File file, Location location) {
+        try (Stream<String> lines = new BufferedReader(new InputStreamReader(new FileInputStream(file))).lines()
+                .skip(location.startLine() - 1)
+                .limit(location.endLine() - location.startLine() + 1)) {
+            return lines.collect(Collectors.joining("\n"));
         } catch (IOException e) {
             throw KEMException.criticalError("Could not read from file " + file.getAbsolutePath(), e);
         }

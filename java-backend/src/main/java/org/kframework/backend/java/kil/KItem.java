@@ -12,6 +12,7 @@ import org.kframework.backend.java.util.ImpureFunctionException;
 import org.kframework.backend.java.util.Profiler;
 import org.kframework.backend.java.util.Profiler2;
 import org.kframework.backend.java.util.RewriteEngineUtils;
+import org.kframework.backend.java.util.RuleSourceUtil;
 import org.kframework.backend.java.util.Subsorts;
 import org.kframework.backend.java.util.Constants;
 import org.kframework.builtin.KLabels;
@@ -460,6 +461,7 @@ public class KItem extends Term implements KItemRepresentation {
                 if (!definition.functionRules().get(kLabelConstant).isEmpty()) {
                     Term result = null;
                     Term owiseResult = null;
+                    Rule appliedRule = null;
 
                     // an argument is concrete if it doesn't contain variables or unresolved functions
                     boolean isConcrete = kList.getContents().stream().filter(elem -> !elem.isGround() || !elem.isNormal()).collect(Collectors.toList()).isEmpty();
@@ -511,12 +513,21 @@ public class KItem extends Term implements KItemRepresentation {
                                 owiseResult = rightHandSide;
                             } else {
                                 if (stage == Stage.REWRITING) {
-                                    if (result != null && !result.equals(rightHandSide)) {
-                                        throw KEMException.criticalError("[non-deterministic function definition]: more than one rule can apply to the function\n" + kItem);
+                                    if (deterministicFunctions && result != null && !result.equals(rightHandSide)) {
+                                        StringBuffer sb = new StringBuffer();
+                                        sb.append("[non-deterministic function definition]: more than one rule can apply to the term: \n").append(kItem);
+                                        sb.append("\n\nCandidate rules:\n");
+                                        RuleSourceUtil.appendRuleAndSource(appliedRule, sb);
+                                        RuleSourceUtil.appendRuleAndSource(rule, sb);
+                                        sb.append("\n\nCandidate results:\n");
+                                        sb.append(result).append("\n");
+                                        sb.append(rightHandSide).append("\n");
+                                        throw KEMException.criticalError(sb.toString());
                                     }
                                 }
                                 RuleAuditing.succeed(rule);
                                 result = rightHandSide;
+                                appliedRule = rule;
                             }
 
                             /*
