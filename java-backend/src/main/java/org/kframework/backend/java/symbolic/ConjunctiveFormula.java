@@ -14,6 +14,7 @@ import org.kframework.backend.java.util.Constants;
 import org.kframework.backend.java.util.RewriteEngineUtils;
 import org.kframework.builtin.KLabels;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -220,6 +221,19 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 global);
     }
 
+    /**
+     * @return A new conjunctive formula that contains the same content minus the given equality, if it is present.
+     * Returns the same formula if given equality is not present.
+     */
+    public static ConjunctiveFormula minus(@Nullable ConjunctiveFormula formula, @Nullable Equality equality) {
+        if (formula == null || !formula.equalities().contains(equality)) {
+            return formula;
+        }
+        return new ConjunctiveFormula(formula.substitution(),
+                formula.equalities().minus(equality),
+                formula.disjunctions(), formula.truthValue(), formula.globalContext());
+    }
+
     public ConjunctiveFormula unsafeAddVariableBinding(Variable variable, Term term) {
         // these assertions are commented out for performance reasons
         //assert term.substituteAndEvaluate(substitution, context) == term;
@@ -366,6 +380,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
      */
     private ConjunctiveFormula simplify(boolean patternFolding, boolean partialSimplification, TermContext context) {
         assert !isFalse();
+        ConjunctiveFormula originalTopConstraint = context.getTopConstraint();
         Substitution<Variable, Term> substitution = this.substitution;
         PersistentUniqueList<Equality> equalities = this.equalities;
         PersistentUniqueList<DisjunctiveFormula> disjunctions = this.disjunctions;
@@ -376,6 +391,11 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
             PersistentUniqueList<Equality> pendingEqualities = PersistentUniqueList.empty();
             for (int i = 0; i < equalities.size(); ++i) {
                 Equality equality = equalities.get(i);
+
+                //Any equality should be evaluated in the context of other entries but not itself, otherwise information
+                //loss can happen. Details: https://github.com/kframework/k-legacy/pull/2399#issuecomment-360680618
+                context.setTopConstraint(minus(originalTopConstraint, equality));
+
                 Term leftHandSide = equality.leftHandSide().substituteAndEvaluate(substitution, context);
                 Term rightHandSide = equality.rightHandSide().substituteAndEvaluate(substitution, context);
                 equality = new Equality(leftHandSide, rightHandSide, global);
@@ -484,6 +504,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
             equalities = pendingEqualities;
         } while (change);
 
+        context.setTopConstraint(originalTopConstraint);
         return ConjunctiveFormula.of(substitution, equalities, disjunctions, global);
     }
 
