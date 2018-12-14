@@ -63,17 +63,18 @@ public class SMTOperations {
 
     /**
      * Checks if {@code left => right}, or {@code left /\ !right} is unsat.
+     * Assuming that {@code existentialQuantVars} are existentially quantified.
      */
     public boolean impliesSMT(
             ConjunctiveFormula left,
             ConjunctiveFormula right,
-            Set<Variable> rightOnlyVariables) {
+            Set<Variable> existentialQuantVars) {
         if (smtOptions.smt == SMTSolver.Z3) {
             try {
                 left.globalContext().profiler.queryBuildTimer.start();
                 CharSequence query;
                 try {
-                    query = KILtoSMTLib.translateImplication(left, right, rightOnlyVariables);
+                    query = KILtoSMTLib.translateImplication(left, right, existentialQuantVars);
                 } finally {
                     left.globalContext().profiler.queryBuildTimer.stop();
                 }
