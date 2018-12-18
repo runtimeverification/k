@@ -17,6 +17,7 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.util.HookProvider;
 import org.kframework.backend.java.util.Profiler2;
+import org.kframework.backend.java.util.RuleSourceUtil;
 import org.kframework.builtin.KLabels;
 import org.kframework.compile.*;
 import org.kframework.definition.Module;
@@ -355,6 +356,11 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
             }
 
             public org.kframework.backend.java.kil.Rule evaluateRule(org.kframework.backend.java.kil.Rule rule) {
+                if (termContext.global().globalOptions.logBasic) {
+                    System.err.println("Pre-processing rule:");
+                    RuleSourceUtil.printRuleAndSource(rule);
+                    System.err.println("==================================");
+                }
                 termContext.setTopConstraint(null);
                 //We need this ConsTerm only to evaluate the constraint. That's why we use an empty first argument.
                 ConstrainedTerm constraintHolder = new ConstrainedTerm(
