@@ -391,6 +391,11 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
             }
 
             public org.kframework.backend.java.kil.Rule evaluateRule(org.kframework.backend.java.kil.Rule rule) {
+                if (termContext.global().javaExecutionOptions.logBasic) {
+                    System.err.println("Pre-processing rule:");
+                    RuleSourceUtil.printRuleAndSource(rule);
+                    System.err.println("==================================");
+                }
                 ConjunctiveFormula constraint = getEvaluatedConstraint(rule);
                 if (constraint.isFalseExtended()) {
                     StringBuilder sb = new StringBuilder();
