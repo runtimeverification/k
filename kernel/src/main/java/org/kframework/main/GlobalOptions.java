@@ -130,8 +130,11 @@ public final class GlobalOptions {
             "This may be useful because during spec rules new constraints are sometimes added to the path condition.")
     public boolean debugSpecRules = false;
 
-    @Parameter(names="--log-rules", description="Log applied rules.")
+    @Parameter(names="--log-rules", description="Log applied rules at execution phase.")
     public boolean logRules = false;
+
+    @Parameter(names="--log-rules-init", description="Log applied rules at initialization phase.")
+    public boolean logRulesInit = false;
 
     @Parameter(names="--log-stmts-only", description="Log only steps that execute a statement, without intermediary steps. " +
             "Except when intermediary steps are important for other reason, like branching.")

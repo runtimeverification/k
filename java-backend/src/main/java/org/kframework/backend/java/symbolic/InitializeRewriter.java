@@ -163,6 +163,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
                 rewritingContext.profiler.logParsingTime();
             }
             rewritingContext.setExecutionPhase(false);
+            rewritingContext.globalOptions.logRulesPublic = rewritingContext.globalOptions.logRulesInit;
             TermContext termContext = TermContext.builder(rewritingContext).freshCounter(initCounterValue).build();
             KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, termContext.global(), false);
             ResolveSemanticCasts resolveCasts = new ResolveSemanticCasts(true);
@@ -211,6 +212,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
                 rewritingContext.profiler.logParsingTime();
             }
             rewritingContext.setExecutionPhase(false);
+            rewritingContext.globalOptions.logRulesPublic = rewritingContext.globalOptions.logRulesInit;
             List<Rule> rules = stream(mod.rules()).filter(r -> r.att().contains("specification")).collect(Collectors.toList());
             ProcessProofRules processProofRules = new ProcessProofRules(rules).invoke(rewritingContext, initCounterValue, module, definition);
             List<org.kframework.backend.java.kil.Rule> javaRules = processProofRules.getJavaRules();
