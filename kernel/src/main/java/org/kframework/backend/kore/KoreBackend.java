@@ -31,6 +31,7 @@ import org.kframework.definition.ModuleTransformer;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.Kompile;
 import org.kframework.kompile.KompileOptions;
+import org.kframework.kore.KLabel;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
@@ -83,11 +84,14 @@ public class KoreBackend implements Backend {
     }
 
     protected String getKompiledString(CompiledDefinition def) {
-        Module mainModule = def.kompiledDefinition.mainModule();
+        return getKompiledString(def.kompiledDefinition.mainModule(), def.topCellInitializer, files, heatCoolEquations);
+    }
+
+    public static String getKompiledString(Module mainModule, KLabel topCellInitializer, FileUtil files, boolean heatCoolEquations) {
         mainModule = new GenerateSortPredicateRules(true).gen(mainModule);
         mainModule = ModuleTransformer.fromKTransformer(new AddSortInjections(mainModule)::addInjections, "Add sort injections").apply(mainModule);
         mainModule = ModuleTransformer.fromSentenceTransformer(new MinimizeTermConstruction(mainModule)::resolve, "Minimize term construction").apply(mainModule);
-        ModuleToKORE moduleToKORE = new ModuleToKORE(mainModule, files, def.topCellInitializer);
+        ModuleToKORE moduleToKORE = new ModuleToKORE(mainModule, files, topCellInitializer);
         String kompiledString = moduleToKORE.convert(heatCoolEquations);
         Properties koreToKLabels = new Properties();
         koreToKLabels.putAll(moduleToKORE.getKToKoreLabelMap().inverse());
@@ -150,6 +154,7 @@ public class KoreBackend implements Backend {
         ModuleTransformer addImplicitComputationCell = ModuleTransformer.fromSentenceTransformer(
                 new AddImplicitComputationCell(configInfo, labelInfo),
                 "concretizing configuration");
+        Function1<Module, Module> resolveFreshConstants = d -> ModuleTransformer.from(new ResolveFreshConstants(def, true)::resolve, "resolving !Var variables").apply(d);
         ModuleTransformer concretizeCells = ModuleTransformer.fromSentenceTransformer(
                 new ConcretizeCells(configInfo, labelInfo, sortInfo, mod)::concretize,
                 "concretizing configuration");
@@ -157,6 +162,7 @@ public class KoreBackend implements Backend {
         return m -> resolveAnonVars
                 .andThen(resolveSemanticCasts)
                 .andThen(addImplicitComputationCell)
+                .andThen(resolveFreshConstants)
                 .andThen(concretizeCells)
                 .andThen(subsortKItem)
                 .apply(m);
