@@ -13,6 +13,7 @@ object Sorts {
 
   val Bool = Sort("Bool")
   val Int = Sort("Int")
+  val MInt = Sort("MInt")
   val String = Sort("String")
   val Float = Sort("Float")
   val StringBuffer = Sort("StringBuffer")
