@@ -48,14 +48,14 @@
             <configuration>
               <target>
                 <mkdir dir="${project.build.directory}/build" />
-                <exec executable="cmake" dir="${project.build.directory}/build">
+                <exec executable="cmake" dir="${project.build.directory}/build" failonerror="true">
                   <arg value="-DCMAKE_BUILD_TYPE=${project.build.type}" />
                   <arg value="${project.basedir}/src/main/native/llvm-backend" />
                 </exec>
-                <exec executable="make" dir="${project.build.directory}/build">
+                <exec executable="make" dir="${project.build.directory}/build" failonerror="true">
                   <arg value="-j12" />
                 </exec>
-                <exec executable="make" dir="${project.build.directory}/build">
+                <exec executable="make" dir="${project.build.directory}/build" failonerror="true">
                   <arg value="install" />
                 </exec>
               </target>
