@@ -129,7 +129,7 @@ public class DefinitionToOcaml implements Serializable {
     static {
         ImmutableSet.Builder<String> builder = ImmutableSet.builder();
         builder.add("BOOL").add("FLOAT").add("INT").add("IO").add("K").add("KEQUAL").add("KREFLECTION").add("LIST");
-        builder.add("MAP").add("MINT").add("SET").add("STRING").add("ARRAY").add("BUFFER").add("BYTES");
+        builder.add("MAP").add("SET").add("STRING").add("ARRAY").add("BUFFER").add("BYTES");
         hookNamespaces = builder.build();
     }
 
