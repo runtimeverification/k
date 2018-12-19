@@ -10,6 +10,7 @@ import org.kframework.backend.java.symbolic.JavaExecutionOptions;
 import org.kframework.backend.java.symbolic.SMTOperations;
 import org.kframework.backend.java.symbolic.Stage;
 import org.kframework.backend.java.util.Profiler2;
+import org.kframework.backend.java.util.StateLog;
 import org.kframework.backend.java.util.Z3Wrapper;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.api.io.FileSystem;
@@ -36,6 +37,7 @@ public class GlobalContext implements Serializable {
     public final transient FileUtil files;
     public final transient GlobalOptions globalOptions;
     public final transient Profiler2 profiler;
+    public final StateLog stateLog;
 
     public GlobalContext(
             FileSystem fs,
@@ -56,7 +58,8 @@ public class GlobalContext implements Serializable {
         this.hookProvider = hookProvider;
         this.files = files;
         this.equalityOps = new EqualityOperations(() -> def);
-        this.constraintOps = new SMTOperations(() -> def, smtOptions, new Z3Wrapper(smtOptions, kem, globalOptions, files), kem, globalOptions);
+        this.stateLog = new StateLog(javaExecutionOptions, files);
+        this.constraintOps = new SMTOperations(() -> def, smtOptions, new Z3Wrapper(smtOptions, kem, globalOptions, files, stateLog), kem, globalOptions);
         this.kItemOps = new KItemOperations(stage, javaExecutionOptions.deterministicFunctions, kem, this::builtins, globalOptions);
         this.stage = stage;
         this.profiler = profiler;

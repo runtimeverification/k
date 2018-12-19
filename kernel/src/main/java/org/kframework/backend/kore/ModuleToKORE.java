@@ -17,10 +17,12 @@ import org.kframework.compile.AddSortInjections;
 import org.kframework.compile.ConfigurationInfoFromModule;
 import org.kframework.compile.RewriteToTop;
 import org.kframework.definition.Module;
+import org.kframework.definition.ModuleComment;
 import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
 import org.kframework.definition.ProductionItem;
 import org.kframework.definition.Rule;
+import org.kframework.definition.Sentence;
 import org.kframework.kil.Attribute;
 import org.kframework.kore.InjectedKLabel;
 import org.kframework.kore.K;
@@ -531,24 +533,26 @@ public class ModuleToKORE {
         return sb.toString();
     }
 
-    public String convertSpecificationModule(Module m) {
-        ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(module);
+    public String convertSpecificationModule(Module definition, Module spec) {
+        ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(definition);
         Sort topCell = configInfo.getRootCell();
         sb.append("[]\n");
         sb.append("module ");
-        convert(module.name());
+        convert(spec.name());
         sb.append("\n\n// imports\n");
-        for (Module im : iterable(m.imports())) {
-            if (im.name().contains("$SYNTAX")) continue;
-            sb.append("import ");
-            convert(im.name());
-            sb.append(" []\n");
-        }
-        for (Rule rule : iterable(module.localRules())) {
-            convertRule(rule, false, topCell, new HashMap<>(), HashMultimap.create(), true);
+        sb.append("import ");
+        convert(definition.name());
+        sb.append(" []\n");
+        sb.append("\n\n// claims\n");
+        for (Sentence sentence : iterable(spec.sentencesExcept(definition))) {
+            assert sentence instanceof Rule || sentence instanceof ModuleComment
+                : "Unexpected non-rule claim " + sentence.toString();
+            if (sentence instanceof Rule) {
+                convertRule((Rule) sentence, false, topCell, new HashMap<>(), HashMultimap.create(), true);
+            }
         }
         sb.append("endmodule ");
-        convert(new HashMap<>(), module.att());
+        convert(new HashMap<>(), spec.att());
         sb.append("\n");
         return sb.toString();
     }

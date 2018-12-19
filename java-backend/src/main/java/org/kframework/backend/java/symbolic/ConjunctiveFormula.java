@@ -12,6 +12,7 @@ import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.kil.*;
 import org.kframework.backend.java.util.Constants;
 import org.kframework.backend.java.util.RewriteEngineUtils;
+import org.kframework.backend.java.util.StateLog;
 import org.kframework.builtin.KLabels;
 
 import javax.annotation.Nullable;
@@ -802,12 +803,16 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
         return implies(constraint, Collections.emptySet());
     }
 
-    public boolean implies(ConjunctiveFormula constraint, Set<Variable> rightOnlyVariables) {
+    /**
+     * Checks if {@code this} implies {@code rightHandSide}, assuming that {@code existentialQuantVars}
+     * are existentially quantified.
+     */
+    public boolean implies(ConjunctiveFormula rightHandSide, Set<Variable> existentialQuantVars) {
         // TODO(AndreiS): this can prove "stuff -> false", it needs fixing
-        assert !constraint.isFalseExtended();
+        assert !rightHandSide.isFalseExtended();
 
         LinkedList<Pair<ConjunctiveFormula, ConjunctiveFormula>> implications = new LinkedList<>();
-        implications.add(Pair.of(this, constraint));
+        implications.add(Pair.of(this, rightHandSide));
         while (!implications.isEmpty()) {
             Pair<ConjunctiveFormula, ConjunctiveFormula> implication = implications.remove();
             ConjunctiveFormula left = implication.getLeft();
@@ -820,10 +825,10 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 System.err.println("Attempting to prove: \n\t" + left + "\n  implies \n\t" + right);
             }
 
-            right = right.orientSubstitution(rightOnlyVariables);
+            right = right.orientSubstitution(existentialQuantVars);
             right = left.simplifyConstraint(right);
-            right = right.orientSubstitution(rightOnlyVariables);
-            if (right.isTrue() || (right.equalities().isEmpty() && rightOnlyVariables.containsAll(right.substitution().keySet()))) {
+            right = right.orientSubstitution(existentialQuantVars);
+            if (right.isTrue() || (right.equalities().isEmpty() && existentialQuantVars.containsAll(right.substitution().keySet()))) {
                 if (global.globalOptions.debug) {
                     System.err.println("Implication proved by simplification");
                 }
@@ -845,7 +850,8 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 continue;
             }
 
-            if (!impliesSMT(left, right, rightOnlyVariables)) {
+            global.stateLog.log(StateLog.LogEvent.IMPLICATION, left, right);
+            if (!impliesSMT(left, right, existentialQuantVars)) {
                 if (global.globalOptions.debug) {
                     System.err.println("Failure!");
                 }
@@ -899,13 +905,17 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
 
     private static final Map<Triple<ConjunctiveFormula, ConjunctiveFormula, Set<Variable>>, Boolean> impliesSMTCache = Collections.synchronizedMap(new HashMap<>());
 
+    /**
+     * Checks if {@code left} implies {@code right}, assuming that {@code existentialQuantVars}
+     * are existentially quantified.
+     */
     private static boolean impliesSMT(
             ConjunctiveFormula left,
             ConjunctiveFormula right,
-            Set<Variable> rightOnlyVariables) {
-        Triple<ConjunctiveFormula, ConjunctiveFormula, Set<Variable>> triple = Triple.of(left, right, rightOnlyVariables);
+            Set<Variable> existentialQuantVars) {
+        Triple<ConjunctiveFormula, ConjunctiveFormula, Set<Variable>> triple = Triple.of(left, right, existentialQuantVars);
         if (!impliesSMTCache.containsKey(triple)) {
-            impliesSMTCache.put(triple, left.global.constraintOps.impliesSMT(left, right, rightOnlyVariables));
+            impliesSMTCache.put(triple, left.global.constraintOps.impliesSMT(left, right, existentialQuantVars));
         }
         return impliesSMTCache.get(triple);
     }

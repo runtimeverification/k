@@ -68,6 +68,11 @@
       <plugin>
         <artifactId>maven-antrun-plugin</artifactId>
         <version>1.7</version>
+        <configuration>
+          <environmentVariables>
+            <KSERVER_SOCKET>${project.build.directory}/.kserver</KSERVER_SOCKET>
+          </environmentVariables>
+        </configuration>
         <executions>
           <execution>
             <id>prepare-ktest</id>
