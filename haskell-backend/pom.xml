@@ -50,6 +50,12 @@
                 <exec executable="stack" dir="${project.basedir}/src/main/native/haskell-backend" failonerror="true">
                   <arg value="build" />
                 </exec>
+                <mkdir dir="${project.build.directory}/stack-install" />
+                <exec executable="stack" dir="${project.basedir}/src/main/native/haskell-backend" failonerror="true">
+                  <arg value="install" />
+                  <arg value="--local-bin-path" />
+                  <arg value="${project.build.directory}/stack-install" />
+                </exec>
               </target>
             </configuration>
             <goals>
