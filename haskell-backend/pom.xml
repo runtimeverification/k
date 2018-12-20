@@ -28,11 +28,35 @@
     </dependency>
   </dependencies>
 
+  <properties>
+    <project.build.type>Release</project.build.type>
+  </properties>
+
   <build>
     <plugins>
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>2.17</version>
+      </plugin>
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>1.7</version>
+        <executions>
+          <execution>
+            <id>build-haskell</id>
+            <phase>compile</phase>
+            <configuration>
+              <target>
+                <exec executable="stack" dir="${project.basedir}/src/main/native/haskell-backend" failonerror="true">
+                  <arg value="build" />
+                </exec>
+              </target>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
