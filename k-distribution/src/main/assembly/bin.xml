@@ -72,5 +72,11 @@
       <directory>${project.basedir}/../llvm-backend/target/build/install/include</directory>
       <outputDirectory>/include</outputDirectory>
     </fileSet>
+    <fileSet>
+      <directory>${project.basedir}/../haskell-backend/target/stack-install</directory>
+      <outputDirectory>/bin</outputDirectory>
+      <fileMode>775</fileMode>
+      <directoryMode>775</directoryMode>
+    </fileSet>
   </fileSets>
 </assembly>
