@@ -366,6 +366,12 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
                 termContext.setTopConstraint(constraint);
                 //simplify the constraint in its own context, to force full evaluation of terms.
                 constraint = constraint.simplify(termContext);
+                if (constraint.isFalseExtended()) {
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("Rule requires clause evaluates to false:\n");
+                    RuleSourceUtil.appendRuleAndSource(rule, sb);
+                    throw KEMException.criticalError(sb.toString());
+                }
 
                 return new org.kframework.backend.java.kil.Rule(
                         rule.label(),
