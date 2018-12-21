@@ -1265,22 +1265,22 @@ module MINT-IN-K [concrete, kast]
   rule bitwidthMInt(mint(W, _)) => W
 
   rule svalueMInt(mint(W, V)) => (-2 *Int (((1 <<Int (W -Int 1)) &Int V))) +Int uvalueMInt(mi(W, V))
-  rule uvalueMInt(mint(W, V)) => V 
+  rule uvalueMInt(mint(W, V)) => V
 
   rule zeroMInt(mint(_, V)) =>  V ==Int 0
-  
-  
+
+
   rule addMInt(mint(W, V1), mint(W, V2)) => mi(W, V1 +Int V2)
   rule subMInt(mint(W, V1), mint(W, V2)) => mi(W, V1 -Int V2)
   rule mulMInt(mint(W, V1), mint(W, V2)) => mi(W, V1 *Int V2)
 
-  
+
   rule sdivMInt(M1, M2) => ListItem(mi(bitwidthMInt(M1), svalueMInt(M1) /Int svalueMInt(M2))) ListItem(svalueMInt(M1) ==Int sminMInt(bitwidthMInt(M1)) andBool svalueMInt(M2) ==Int -1) requires svalueMInt(M2) =/=Int 0 andBool bitwidthMInt(M1) ==Int bitwidthMInt(M2)
 rule sremMInt(M1, M2) => ListItem(mi(bitwidthMInt(M1), svalueMInt(M1) %Int svalueMInt(M2))) ListItem(svalueMInt(M1) ==Int sminMInt(bitwidthMInt(M1)) andBool svalueMInt(M2) ==Int -1) requires svalueMInt(M2) =/=Int 0 andBool bitwidthMInt(M1) ==Int bitwidthMInt(M2)
- 
+
   rule udivMInt(mint(W, V1), mint(W, V2)) => mi(W, V1 /Int V2) requires V2 =/=Int 0
   rule uremMInt(mint(W, V1), mint(W, V2)) => mi(W, V1 %Int V2) requires V2 =/=Int 0
-  
+
   rule saddMInt(mint(W, V1), mint(W, V2)) => ListItem(mi(W, V1 +Int V2)) ListItem(soverflowMInt(W,  svalueMInt(mint(W, V1)) +Int svalueMInt(mint(W, V2))))
   rule uaddMInt(mint(W, V1), mint(W, V2)) => ListItem(mi(W, V1 +Int V2)) ListItem(uoverflowMInt(W, V1 +Int V2))
 
@@ -1292,23 +1292,23 @@ rule sremMInt(M1, M2) => ListItem(mi(bitwidthMInt(M1), svalueMInt(M1) %Int svalu
 
 
   rule shlMInt(mint(W, V), I) => mi(W, V <<Int I) requires I >=Int 0
-  rule ashrMInt(mint(W, V), I) => mi(W, (V >>Int I) |Int 
+  rule ashrMInt(mint(W, V), I) => mi(W, (V >>Int I) |Int
     ((V >>Int (W -Int 1) &Int 1) *Int ((1 <<Int W) -Int (1 <<Int (W -Int minInt(I, W)))))) requires I >=Int 0
   rule lshrMInt(mint(W, V), I) => mi(W, V >>Int I) requires I >=Int 0
 
   rule andMInt(mint(W, V1), mint(W, V2)) => mi(W, V1 &Int V2)
   rule orMInt(mint(W, V1), mint(W, V2)) => mi(W, V1 |Int V2)
   rule xorMInt(mint(W, V1), mint(W, V2)) => mi(W, V1 xorInt V2)
- 
+
   rule sltMInt(M1, M2) => svalueMInt(M1) <Int svalueMInt(M2) requires bitwidthMInt(M1) ==Int bitwidthMInt(M2)
   rule ultMInt(M1, M2) => uvalueMInt(M1) <Int uvalueMInt(M2) requires bitwidthMInt(M1) ==Int bitwidthMInt(M2)
-  
+
   rule sleMInt(M1, M2) => svalueMInt(M1) <=Int svalueMInt(M2) requires bitwidthMInt(M1) ==Int bitwidthMInt(M2)
   rule uleMInt(M1, M2) => uvalueMInt(M1) <=Int uvalueMInt(M2) requires bitwidthMInt(M1) ==Int bitwidthMInt(M2)
 
   rule sgtMInt(M1, M2) => svalueMInt(M1) >Int svalueMInt(M2) requires bitwidthMInt(M1) ==Int bitwidthMInt(M2)
   rule ugtMInt(M1, M2) => uvalueMInt(M1) >Int uvalueMInt(M2) requires bitwidthMInt(M1) ==Int bitwidthMInt(M2)
-  
+
   rule sgeMInt(M1, M2) => svalueMInt(M1) >=Int svalueMInt(M2) requires bitwidthMInt(M1) ==Int bitwidthMInt(M2)
   rule ugeMInt(M1, M2) => uvalueMInt(M1) >=Int uvalueMInt(M2) requires bitwidthMInt(M1) ==Int bitwidthMInt(M2)
 

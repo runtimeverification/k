@@ -1,3 +1,4 @@
+// Copyright (c) 2018 K Team. All Rights Reserved.
 require "domains.k"
 
 module MINT-TEST-SYNTAX

@@ -212,7 +212,7 @@
               <configLocation>src/main/config/checkstyle-copyright.xml</configLocation>
               <failsOnError>true</failsOnError>
               <consoleOutput>true</consoleOutput>
-              <excludes>k-distribution/include/kore/prelude.kore,.idea/**,**/com/davekoelle/**,**/src/main/sdf/syntax/Integration.sdf</excludes>
+              <excludes>k-distribution/include/kore/prelude.kore,.idea/**,**/com/davekoelle/**,**/src/main/sdf/syntax/Integration.sdf,k-distribution/tests/regression-new/fresh1/test.kore,k-distribution/tests/regression-new/fresh2/test.kore,k-distribution/tests/regression-new/imp-kore/imp.kore</excludes>
             </configuration>
           </execution>
           <execution>
