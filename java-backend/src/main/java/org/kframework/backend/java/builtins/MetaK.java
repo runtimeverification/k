@@ -14,6 +14,7 @@ import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.symbolic.ConjunctiveFormula;
 import org.kframework.backend.java.symbolic.CopyOnWriteTransformer;
 import org.kframework.backend.java.symbolic.PatternMatcher;
+import org.kframework.kore.KVariable;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -201,6 +202,8 @@ public class MetaK {
     public static StringToken getKLabelString(Term term, TermContext context) {
         if (term instanceof KItem) {
             return StringToken.of(((KItem) term).kLabel().toString());
+        } else if (term instanceof KVariable){
+            return null;
         } else {
             return StringToken.of("");
         }
