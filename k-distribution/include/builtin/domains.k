@@ -1093,7 +1093,7 @@ module STDOUT-STREAM
 
 endmodule
 
-module MINT
+module MINT-SYNTAX
   imports INT
   imports K-EQUAL
   imports LIST
@@ -1130,10 +1130,6 @@ module MINT
                | smaxMInt(Int)    [function]
                | uminMInt(Int)    [function]
                | umaxMInt(Int)    [function]
-  rule sminMInt(N:Int) => 0 -Int (1 <<Int (N -Int 1))
-  rule smaxMInt(N:Int) => (1 <<Int (N -Int 1)) -Int 1
-  rule uminMInt(_:Int) => 0
-  rule umaxMInt(N:Int) => (1 <<Int N) -Int 1
 
   /*@
    * Functions checking whether a given integer can be represented on as signed
@@ -1141,14 +1137,6 @@ module MINT
    */
   syntax Bool ::= soverflowMInt(Int, Int)   [function]
                 | uoverflowMInt(Int, Int)   [function]
-  rule
-    soverflowMInt(N:Int, I:Int)
-  =>
-    I <Int sminMInt(N) orBool I >Int smaxMInt(N)
-  rule
-    uoverflowMInt(N:Int, I:Int)
-  =>
-    I <Int uminMInt(N) orBool I >Int umaxMInt(N)
 
   /*@
    * Projection functions for results of operations with overflow.
@@ -1158,9 +1146,7 @@ module MINT
    *                              the execution of the operation
    */
   syntax MInt ::= miMInt(List)          [function]
-  rule miMInt(ListItem(MI:MInt) ListItem(_:Bool)) => MI
   syntax Bool ::= overflowMInt(List)    [function]
-  rule overflowMInt(ListItem(_:MInt) ListItem(B:Bool)) => B
 
   /*@
    * Arithmetic and comparison operations
@@ -1218,7 +1204,6 @@ module MINT
                 | xorMInt(MInt, MInt)   [function, hook(MINT.xor), smtlib(bvxor)]
 
   syntax MInt ::= negMInt(MInt)   [function, functional]
-  rule negMInt(MI:MInt) => xorMInt(MI, mi(bitwidthMInt(MI), -1))
 
   /*@ Comparison operations */
   syntax Bool ::= sltMInt(MInt, MInt)   [function, hook(MINT.slt), smtlib(bvslt)]
@@ -1265,26 +1250,105 @@ module MINT
    * for deserializing an integer from a sequence of bytes.
    */
   syntax MInt ::= mIntOfDigits(List)   [function, hook(MINT.fromDigits)]
+endmodule
+
+module MINT-IN-K [concrete, kast]
+  imports MINT-SYNTAX
+
+  syntax Int ::= MaskInt(Int, Int) [function]
+  rule MaskInt(W, V) => V &Int ((1 <<Int W) -Int 1)
+
+  syntax MInt ::= mint(Int, Int)
+
+  rule mi(W, V) => mint(W, MaskInt(W, (1 <<Int W) +Int V)) requires W >Int 0
+
+  rule bitwidthMInt(mint(W, _)) => W
+
+  rule svalueMInt(mint(W, V)) => (-2 *Int (((1 <<Int (W -Int 1)) &Int V))) +Int uvalueMInt(mi(W, V))
+  rule uvalueMInt(mint(W, V)) => V 
+
+  rule zeroMInt(mint(_, V)) =>  V ==Int 0
+  
+  
+  rule addMInt(mint(W, V1), mint(W, V2)) => mi(W, V1 +Int V2)
+  rule subMInt(mint(W, V1), mint(W, V2)) => mi(W, V1 -Int V2)
+  rule mulMInt(mint(W, V1), mint(W, V2)) => mi(W, V1 *Int V2)
+
+  
+  rule sdivMInt(M1, M2) => ListItem(mi(bitwidthMInt(M1), svalueMInt(M1) /Int svalueMInt(M2))) ListItem(svalueMInt(M1) ==Int sminMInt(bitwidthMInt(M1)) andBool svalueMInt(M2) ==Int -1) requires svalueMInt(M2) =/=Int 0 andBool bitwidthMInt(M1) ==Int bitwidthMInt(M2)
+rule sremMInt(M1, M2) => ListItem(mi(bitwidthMInt(M1), svalueMInt(M1) %Int svalueMInt(M2))) ListItem(svalueMInt(M1) ==Int sminMInt(bitwidthMInt(M1)) andBool svalueMInt(M2) ==Int -1) requires svalueMInt(M2) =/=Int 0 andBool bitwidthMInt(M1) ==Int bitwidthMInt(M2)
+ 
+  rule udivMInt(mint(W, V1), mint(W, V2)) => mi(W, V1 /Int V2) requires V2 =/=Int 0
+  rule uremMInt(mint(W, V1), mint(W, V2)) => mi(W, V1 %Int V2) requires V2 =/=Int 0
+  
+  rule saddMInt(mint(W, V1), mint(W, V2)) => ListItem(mi(W, V1 +Int V2)) ListItem(soverflowMInt(W,  svalueMInt(mint(W, V1)) +Int svalueMInt(mint(W, V2))))
+  rule uaddMInt(mint(W, V1), mint(W, V2)) => ListItem(mi(W, V1 +Int V2)) ListItem(uoverflowMInt(W, V1 +Int V2))
+
+  rule ssubMInt(mint(W, V1), mint(W, V2)) => ListItem(mi(W, V1 -Int V2)) ListItem(soverflowMInt(W,  svalueMInt(mint(W, V1)) -Int svalueMInt(mint(W, V2))))
+  rule usubMInt(mint(W, V1), mint(W, V2)) => ListItem(mi(W, V1 -Int V2)) ListItem(uoverflowMInt(W, V1 -Int V2))
+
+  rule smulMInt(mint(W, V1), mint(W, V2)) => ListItem(mi(W, V1 *Int V2)) ListItem(soverflowMInt(W,  svalueMInt(mint(W, V1)) *Int svalueMInt(mint(W, V2))))
+  rule umulMInt(mint(W, V1), mint(W, V2)) => ListItem(mi(W, V1 *Int V2)) ListItem(uoverflowMInt(W, V1 *Int V2))
+
+
+  rule shlMInt(mint(W, V), I) => mi(W, V <<Int I) requires I >=Int 0
+  rule ashrMInt(mint(W, V), I) => mi(W, (V >>Int I) |Int 
+    ((V >>Int (W -Int 1) &Int 1) *Int ((1 <<Int W) -Int (1 <<Int (W -Int minInt(I, W)))))) requires I >=Int 0
+  rule lshrMInt(mint(W, V), I) => mi(W, V >>Int I) requires I >=Int 0
+
+  rule andMInt(mint(W, V1), mint(W, V2)) => mi(W, V1 &Int V2)
+  rule orMInt(mint(W, V1), mint(W, V2)) => mi(W, V1 |Int V2)
+  rule xorMInt(mint(W, V1), mint(W, V2)) => mi(W, V1 xorInt V2)
+ 
+  rule sltMInt(M1, M2) => svalueMInt(M1) <Int svalueMInt(M2) requires bitwidthMInt(M1) ==Int bitwidthMInt(M2)
+  rule ultMInt(M1, M2) => uvalueMInt(M1) <Int uvalueMInt(M2) requires bitwidthMInt(M1) ==Int bitwidthMInt(M2)
+  
+  rule sleMInt(M1, M2) => svalueMInt(M1) <=Int svalueMInt(M2) requires bitwidthMInt(M1) ==Int bitwidthMInt(M2)
+  rule uleMInt(M1, M2) => uvalueMInt(M1) <=Int uvalueMInt(M2) requires bitwidthMInt(M1) ==Int bitwidthMInt(M2)
+
+  rule sgtMInt(M1, M2) => svalueMInt(M1) >Int svalueMInt(M2) requires bitwidthMInt(M1) ==Int bitwidthMInt(M2)
+  rule ugtMInt(M1, M2) => uvalueMInt(M1) >Int uvalueMInt(M2) requires bitwidthMInt(M1) ==Int bitwidthMInt(M2)
+  
+  rule sgeMInt(M1, M2) => svalueMInt(M1) >=Int svalueMInt(M2) requires bitwidthMInt(M1) ==Int bitwidthMInt(M2)
+  rule ugeMInt(M1, M2) => uvalueMInt(M1) >=Int uvalueMInt(M2) requires bitwidthMInt(M1) ==Int bitwidthMInt(M2)
+
+  rule eqMInt(mint(W, V1), mint(W, V2)) => V1 ==Int V2
+  rule neMInt(mint(W, V1), mint(W, V2)) => V1 =/=Int V2
+
+  rule sMaxMInt(M1, M2) => M1 requires bitwidthMInt(M1) ==Int bitwidthMInt(M2) andBool svalueMInt(M1) >=Int svalueMInt(M2)
+  rule sMaxMInt(M1, M2) => M2 requires bitwidthMInt(M1) ==Int bitwidthMInt(M2) andBool svalueMInt(M1) <Int svalueMInt(M2)
+
+  rule sMinMInt(M1, M2) => M2 requires bitwidthMInt(M1) ==Int bitwidthMInt(M2) andBool svalueMInt(M1) >=Int svalueMInt(M2)
+  rule sMinMInt(M1, M2) => M1 requires bitwidthMInt(M1) ==Int bitwidthMInt(M2) andBool svalueMInt(M1) <Int svalueMInt(M2)
+
+  rule concatenateMInt(mint(W1, V1), mint(W2, V2)) => mi(W1 +Int W2, (V1 <<Int W2) |Int V2)
+
+  rule extractMInt(mint(W, V), A, B) => mi(B -Int A, ((1 <<Int (B -Int A)) -Int 1) &Int (V >>Int (W -Int B)) ) requires B >Int A
+endmodule
+
+module MINT
+  imports MINT-SYNTAX
+  imports MINT-IN-K
+
+  rule sminMInt(N) => 0 -Int (1 <<Int (N -Int 1))
+  rule smaxMInt(N) => (1 <<Int (N -Int 1)) -Int 1
+  rule uminMInt(_) => 0
+  rule umaxMInt(N) => (1 <<Int N) -Int 1
+
+  rule soverflowMInt(W:Int, V:Int) => V <Int sminMInt(W) orBool V >Int smaxMInt(W)
+  rule uoverflowMInt(W:Int, V:Int) => V <Int uminMInt(W) orBool V >Int umaxMInt(W)
+
+  rule miMInt(ListItem(MI:MInt) ListItem(_:Bool)) => MI
+  rule overflowMInt(ListItem(_:MInt) ListItem(B:Bool)) => B
+
+  rule digitsOfMInt(MI, N, M) => digitsOfMInt(MI, N, M -Int 1) ListItem(extractMInt(MI, N *Int (M -Int 1), N *Int M)) requires M >Int 0
+  rule digitsOfMInt(_, _, 0) => .List
 
   // TODO(AndreiS): change
-  rule zeroMInt(MI:MInt) => eqMInt(MI, xorMInt(MI, MI))
+  rule negMInt(MI) => xorMInt(MI, mi(bitwidthMInt(MI), -1))
 
-  /*@
-   * Conversion to and from a list of digits
-   */
-  rule
-    digitsOfMInt(MI:MInt, N:Int, M:Int)
-  =>
-    digitsOfMInt(MI, N, M -Int 1)
-    ListItem(extractMInt(MI, N *Int (M -Int 1), N *Int M))
-  when M >Int 0
-  rule digitsOfMInt(_:MInt, _:Int, 0) => .List
-
-  rule
-    mIntOfDigits(ListItem(MI1:MInt) ListItem(MI2:MInt) L:List)
-  =>
-    concatenateMInt(MI1, mIntOfDigits(ListItem(MI2) L))
-  rule mIntOfDigits(ListItem(MI:MInt)) => MI
+  rule mIntOfDigits(ListItem(MI1) ListItem(MI2) L) => concatenateMInt(MI1, mIntOfDigits(ListItem(MI2) L))
+  rule mIntOfDigits(ListItem(MI)) => MI
 endmodule
 
 module CONFIGURATION-PRIMITIVES
