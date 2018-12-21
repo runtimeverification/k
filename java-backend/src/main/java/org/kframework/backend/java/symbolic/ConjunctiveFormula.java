@@ -420,127 +420,130 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
         PersistentUniqueList<Equality> equalities = this.equalities;
         PersistentUniqueList<DisjunctiveFormula> disjunctions = this.disjunctions;
 
-        boolean change;
-        do {
-            change = false;
-            PersistentUniqueList<Equality> pendingEqualities = PersistentUniqueList.empty();
-            for (int i = 0; i < equalities.size(); ++i) {
-                Equality equality = equalities.get(i);
+        try {
+            boolean change;
+            do {
+                change = false;
+                PersistentUniqueList<Equality> pendingEqualities = PersistentUniqueList.empty();
+                for (int i = 0; i < equalities.size(); ++i) {
+                    Equality equality = equalities.get(i);
 
-                //Any equality should be evaluated in the context of other entries but not itself, otherwise information
-                //loss can happen. Details: https://github.com/kframework/k-legacy/pull/2399#issuecomment-360680618
-                context.setTopConstraint(minus(originalTopConstraint, equality));
+                    //Any equality should be evaluated in the context of other entries but not itself, otherwise information
+                    //loss can happen. Details: https://github.com/kframework/k-legacy/pull/2399#issuecomment-360680618
+                    context.setTopConstraint(minus(originalTopConstraint, equality));
 
-                Term leftHandSide = equality.leftHandSide().substituteAndEvaluate(substitution, context);
-                Term rightHandSide = equality.rightHandSide().substituteAndEvaluate(substitution, context);
-                equality = new Equality(leftHandSide, rightHandSide, global);
-                if (equality.isTrue()) {
-                    // delete
-                } else if (equality.truthValue() == TruthValue.FALSE) {
-                    // conflict
-                    return falsify(substitution, equalities, disjunctions, equality);
-                } else {
-                    if (equality.isSimplifiableByCurrentAlgorithm()) {
-                        // (decompose + conflict)*
-                        FastRuleMatcher unifier = new FastRuleMatcher(global, 1);
-                        ConjunctiveFormula unificationConstraint = unifier.unifyEquality(leftHandSide, rightHandSide, patternFolding, partialSimplification, false, context, logFailures);
-                        if (unificationConstraint.isFalse()) {
-                            return falsify(
-                                    substitution,
-                                    equalities,
-                                    disjunctions,
-                                    new Equality(
-                                            unifier.unificationFailureLeftHandSide(),
-                                            unifier.unificationFailureRightHandSide(),
-                                            global));
-                        }
-
-                        // TODO(AndreiS): fix this in a general way
-                        if (unificationConstraint.equalities.contains(equality)) {
-                            pendingEqualities = pendingEqualities.plus(equality);
-                            continue;
-                        }
-
-                        equalities = equalities.plusAll(i + 1, unificationConstraint.equalities);
-                        equalities = equalities.plusAll(i + 1, unificationConstraint.substitution.equalities(global));
-                        disjunctions = disjunctions.plusAll(unificationConstraint.disjunctions);
-                    } else if (leftHandSide instanceof Variable && rightHandSide instanceof Variable
-                            && leftHandSide.sort().equals(rightHandSide.sort())) {
-                        // eliminate: special case when both the left-hand-side and the right-hand-side can be eliminated
-                        ImmutableMapSubstitution<Variable, Term> eliminationSubstitution;
-                        if (leftHandSide.toString().compareTo(rightHandSide.toString()) < 0) {
-                            eliminationSubstitution = ImmutableMapSubstitution.singleton((Variable) leftHandSide, rightHandSide);
-                        } else {
-                            eliminationSubstitution = ImmutableMapSubstitution.singleton((Variable) rightHandSide, leftHandSide);
-                        }
-
-                        substitution = ImmutableMapSubstitution.composeAndEvaluate(
-                                substitution,
-                                eliminationSubstitution,
-                                context);
-                        change = true;
-                        if (substitution.isFalse(global)) {
-                            return falsify(substitution, equalities, disjunctions, equality);
-                        }
-                    } else if (leftHandSide instanceof Variable
-                            && !rightHandSide.variableSet().contains(leftHandSide)) {
-                        // eliminate
-                        ImmutableMapSubstitution<Variable, Term> eliminationSubstitution = getSubstitution(
-                                (Variable) leftHandSide,
-                                rightHandSide);
-                        if (eliminationSubstitution == null) {
-                            pendingEqualities = pendingEqualities.plus(equality);
-                            continue;
-                        }
-
-                        substitution = ImmutableMapSubstitution.composeAndEvaluate(
-                                substitution,
-                                eliminationSubstitution,
-                                context);
-                        change = true;
-                        if (substitution.isFalse(global)) {
-                            return falsify(substitution, equalities, disjunctions, equality);
-                        }
-                    } else if (rightHandSide instanceof Variable
-                            && !leftHandSide.variableSet().contains(rightHandSide)) {
-                        // swap + eliminate
-                        ImmutableMapSubstitution<Variable, Term> eliminationSubstitution = getSubstitution(
-                                (Variable) rightHandSide,
-                                leftHandSide);
-                        if (eliminationSubstitution == null) {
-                            pendingEqualities = pendingEqualities.plus(equality);
-                            continue;
-                        }
-
-                        substitution = ImmutableMapSubstitution.composeAndEvaluate(
-                                substitution,
-                                eliminationSubstitution,
-                                context);
-                        change = true;
-                        if (substitution.isFalse(global)) {
-                            return falsify(substitution, equalities, disjunctions, equality);
-                        }
-                    } else if (leftHandSide instanceof Variable
-                            && rightHandSide.isNormal()
-                            && rightHandSide.variableSet().contains(leftHandSide)) {
-                        // occurs
-                        return falsify(substitution, equalities, disjunctions, equality);
-                    } else if (rightHandSide instanceof Variable
-                            && leftHandSide.isNormal()
-                            && leftHandSide.variableSet().contains(rightHandSide)) {
-                        // swap + occurs
+                    Term leftHandSide = equality.leftHandSide().substituteAndEvaluate(substitution, context);
+                    Term rightHandSide = equality.rightHandSide().substituteAndEvaluate(substitution, context);
+                    equality = new Equality(leftHandSide, rightHandSide, global);
+                    if (equality.isTrue()) {
+                        // delete
+                    } else if (equality.truthValue() == TruthValue.FALSE) {
+                        // conflict
                         return falsify(substitution, equalities, disjunctions, equality);
                     } else {
-                        // unsimplified equation
-                        pendingEqualities = pendingEqualities.plus(equality);
+                        if (equality.isSimplifiableByCurrentAlgorithm()) {
+                            // (decompose + conflict)*
+                            FastRuleMatcher unifier = new FastRuleMatcher(global, 1);
+                            ConjunctiveFormula unificationConstraint = unifier.unifyEquality(leftHandSide, rightHandSide, patternFolding, partialSimplification, false, context, logFailures);
+                            if (unificationConstraint.isFalse()) {
+                                return falsify(
+                                        substitution,
+                                        equalities,
+                                        disjunctions,
+                                        new Equality(
+                                                unifier.unificationFailureLeftHandSide(),
+                                                unifier.unificationFailureRightHandSide(),
+                                                global));
+                            }
+
+                            // TODO(AndreiS): fix this in a general way
+                            if (unificationConstraint.equalities.contains(equality)) {
+                                pendingEqualities = pendingEqualities.plus(equality);
+                                continue;
+                            }
+
+                            equalities = equalities.plusAll(i + 1, unificationConstraint.equalities);
+                            equalities = equalities.plusAll(i + 1, unificationConstraint.substitution.equalities(global));
+                            disjunctions = disjunctions.plusAll(unificationConstraint.disjunctions);
+                        } else if (leftHandSide instanceof Variable && rightHandSide instanceof Variable
+                                && leftHandSide.sort().equals(rightHandSide.sort())) {
+                            // eliminate: special case when both the left-hand-side and the right-hand-side can be eliminated
+                            ImmutableMapSubstitution<Variable, Term> eliminationSubstitution;
+                            if (leftHandSide.toString().compareTo(rightHandSide.toString()) < 0) {
+                                eliminationSubstitution = ImmutableMapSubstitution.singleton((Variable) leftHandSide, rightHandSide);
+                            } else {
+                                eliminationSubstitution = ImmutableMapSubstitution.singleton((Variable) rightHandSide, leftHandSide);
+                            }
+
+                            substitution = ImmutableMapSubstitution.composeAndEvaluate(
+                                    substitution,
+                                    eliminationSubstitution,
+                                    context);
+                            change = true;
+                            if (substitution.isFalse(global)) {
+                                return falsify(substitution, equalities, disjunctions, equality);
+                            }
+                        } else if (leftHandSide instanceof Variable
+                                && !rightHandSide.variableSet().contains(leftHandSide)) {
+                            // eliminate
+                            ImmutableMapSubstitution<Variable, Term> eliminationSubstitution = getSubstitution(
+                                    (Variable) leftHandSide,
+                                    rightHandSide);
+                            if (eliminationSubstitution == null) {
+                                pendingEqualities = pendingEqualities.plus(equality);
+                                continue;
+                            }
+
+                            substitution = ImmutableMapSubstitution.composeAndEvaluate(
+                                    substitution,
+                                    eliminationSubstitution,
+                                    context);
+                            change = true;
+                            if (substitution.isFalse(global)) {
+                                return falsify(substitution, equalities, disjunctions, equality);
+                            }
+                        } else if (rightHandSide instanceof Variable
+                                && !leftHandSide.variableSet().contains(rightHandSide)) {
+                            // swap + eliminate
+                            ImmutableMapSubstitution<Variable, Term> eliminationSubstitution = getSubstitution(
+                                    (Variable) rightHandSide,
+                                    leftHandSide);
+                            if (eliminationSubstitution == null) {
+                                pendingEqualities = pendingEqualities.plus(equality);
+                                continue;
+                            }
+
+                            substitution = ImmutableMapSubstitution.composeAndEvaluate(
+                                    substitution,
+                                    eliminationSubstitution,
+                                    context);
+                            change = true;
+                            if (substitution.isFalse(global)) {
+                                return falsify(substitution, equalities, disjunctions, equality);
+                            }
+                        } else if (leftHandSide instanceof Variable
+                                && rightHandSide.isNormal()
+                                && rightHandSide.variableSet().contains(leftHandSide)) {
+                            // occurs
+                            return falsify(substitution, equalities, disjunctions, equality);
+                        } else if (rightHandSide instanceof Variable
+                                && leftHandSide.isNormal()
+                                && leftHandSide.variableSet().contains(rightHandSide)) {
+                            // swap + occurs
+                            return falsify(substitution, equalities, disjunctions, equality);
+                        } else {
+                            // unsimplified equation
+                            pendingEqualities = pendingEqualities.plus(equality);
+                        }
                     }
                 }
-            }
-            equalities = pendingEqualities;
-        } while (change);
+                equalities = pendingEqualities;
+            } while (change);
 
-        context.setTopConstraint(originalTopConstraint);
-        return ConjunctiveFormula.of(substitution, equalities, disjunctions, global);
+            return ConjunctiveFormula.of(substitution, equalities, disjunctions, global);
+        } finally {
+            context.setTopConstraint(originalTopConstraint);
+        }
     }
 
     private ConjunctiveFormula falsify(
