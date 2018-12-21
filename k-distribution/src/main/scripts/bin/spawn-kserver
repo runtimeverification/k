@@ -1,7 +1,4 @@
 #!/usr/bin/env bash
 
-if [[ "$KSERVER_SOCKET" == "" ]]; then
-  KSERVER_SOCKET="$HOME/.kserver"
-fi
-
+source "$(dirname "$0")/../lib/setenv"
 "$(dirname "$0")/kserver" --socket "$KSERVER_SOCKET" &>> "$1" &
