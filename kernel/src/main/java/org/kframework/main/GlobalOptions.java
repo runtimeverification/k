@@ -8,6 +8,7 @@ import org.kframework.utils.options.BaseEnumConverter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -182,6 +183,11 @@ public final class GlobalOptions {
             "of a step is not a map. useful debug option when memory model is a K builtin map. " +
             "Otherwise option should be false.")
     public boolean haltOnLocalMemNonMap = false;
+
+    @Parameter(names = "--halt-cells", description = "The comma-separated list of cells on which early halt check is " +
+            "performed. If the content of these cells matches the respective cells in target term, execution will halt" +
+            "regardless of the content of other cells. Recommended value for KEVM: \"k,pc\"")
+    public List<String> haltCells = Collections.singletonList("k");
 
     public boolean logRulesPublic = false;
 }

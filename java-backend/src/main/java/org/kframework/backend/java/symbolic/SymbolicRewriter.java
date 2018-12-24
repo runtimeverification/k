@@ -614,9 +614,11 @@ public class SymbolicRewriter {
         List<ConstrainedTerm> nextQueue = new ArrayList<>();
 
         initialTerm = initialTerm.expandPatterns(true);
-        KItem initialKCell = getCell((KItem) initialTerm.term(), "<k>");
-        KItem targetKCell = getCell((KItem) targetTerm.term(), "<k>");
-        boolean initKEqualsTargetK = initialKCell == null || initialKCell.equals(targetKCell);
+        KItem initHaltCells = buildHaltCells((KItem) initialTerm.term());
+        KItem targetHaltCells = buildHaltCells((KItem) targetTerm.term());
+        ConstrainedTerm targetHalt
+                = new ConstrainedTerm(targetHaltCells, targetTerm.constraint(), targetTerm.termContext());
+        boolean initHaltEqualsTargetHalt = targetHaltCells == null || initHaltCells.equals(targetHaltCells);
 
         visited.add(initialTerm);
         queue.add(initialTerm);
@@ -650,25 +652,24 @@ public class SymbolicRewriter {
                 try { //not formatting to minimize git merge conflicts.
 
                 v++;
-                ConstrainedTerm termK = new ConstrainedTerm(getCell((KItem) term.term(), "<k>"),
+                ConstrainedTerm termHalt = new ConstrainedTerm(buildHaltCells((KItem) term.term()),
                         term.constraint(), term.termContext());
-                ConstrainedTerm targetK = new ConstrainedTerm(getCell((KItem) targetTerm.term(), "<k>"),
-                        targetTerm.constraint(), targetTerm.termContext());
-                //if <k> cell matches the target <k>, we consider this state final.
-                boolean kMatchesTarget = termK.matchesTermModuloSubstitutions(targetK);
+                //if halt cells match same cells in target, we consider this state final.
+                boolean haltCellsMatchTarget
+                        = targetHaltCells == null || termHalt.matchesTermModuloSubstitutions(targetHalt);
 
                 boolean oldDebug =  global.globalOptions.debugZ3;
                 boolean oldLog = global.globalOptions.log;
 
-                if (kMatchesTarget && global.globalOptions.debugLastStep
+                if (haltCellsMatchTarget && global.globalOptions.debugLastStep
                         || global.globalOptions.debugSteps.contains(String.valueOf(step))) {
                     global.globalOptions.debugZ3 = true;
                     global.globalOptions.log = true;
                 }
 
                 boolean alreadyLogged = logStep(step, v, targetCallData, term,
-                        step == 1 || kMatchesTarget, false);
-                if (kMatchesTarget) {
+                        step == 1 || haltCellsMatchTarget, false);
+                if (haltCellsMatchTarget) {
                     if (term.implies(targetTerm, rule, step > 1)) {
                         if (global.globalOptions.logBasic) {
                             logStep(step, v, targetCallData, term, true, alreadyLogged);
@@ -677,17 +678,15 @@ public class SymbolicRewriter {
                         successPaths++;
                         successResults.add(term);
                         continue;
-                    } else if (!initKEqualsTargetK) {
+                    } else if (!initHaltEqualsTargetHalt) {
                         //Kprove customization: if <k> matches target <k>, further evaluation is probably useless. Halting.
                         logStep(step, v, targetCallData, term, global.globalOptions.logBasic, alreadyLogged);
                         System.err.println("Halt! Terminating branch.");
                         proofResults.add(term);
                         continue;
-                    } else {
-                        if (step > 1 && global.globalOptions.logBasic) {
+                    } else if (targetHaltCells != null && step > 1 && global.globalOptions.logBasic) {
                             System.err.println("Circularity spec. " +
                                     "Warnings 'Final implication term not matching' above possibly not an issue.");
-                        }
                     }
                 }
 
@@ -1080,6 +1079,17 @@ public class SymbolicRewriter {
             }
         }
         return null;
+    }
+
+    private KItem buildHaltCells(KItem root) {
+        if (global.globalOptions.haltCells.isEmpty()) {
+            return null;
+        }
+        List<Term> cells = global.globalOptions.haltCells.stream()
+                .map(name -> getCell(root, String.format("<%s>", name)))
+                .collect(Collectors.toList());
+        return KItem.of(KLabelConstant.of(KLabels.HALT_CELLS_CELL, global.getDefinition()), KList.concatenate(cells),
+                global);
     }
 
     private boolean inNewStmt(BuiltinList kSequence) {
