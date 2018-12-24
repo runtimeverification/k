@@ -113,7 +113,7 @@ public class Z3Wrapper {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            throw KEMException.criticalError("Exception while invoking Z3", e);
         } finally {
             if (globalOptions.debugZ3 && profiler.isLastRunTimeout()) {
                 System.err.println("\nZ3 likely timeout");
