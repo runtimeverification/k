@@ -12,6 +12,7 @@ import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.unparser.KPrint;
+import org.kframework.utils.InterrupterRunnable;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -56,6 +57,10 @@ public class KProve {
         options.global.logStmtsOnly |= options.global.log || options.global.debugZ3;
         options.global.logBasic |= options.global.logStmtsOnly;
         options.global.verbose |= options.global.logBasic;
+        if (options.global.verbose) {
+            //will interrupt the thread on Ctrl+C and print the summary.
+            Runtime.getRuntime().addShutdownHook(new Thread(new InterrupterRunnable(Thread.currentThread())));
+        }
         K results = rewriter.prove(specModule);
         int exit;
         if (results instanceof KApply) {
