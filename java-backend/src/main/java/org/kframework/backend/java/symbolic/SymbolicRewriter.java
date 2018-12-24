@@ -1016,16 +1016,21 @@ public class SymbolicRewriter {
 
     private void printLocalMem(KItem localMem, boolean pretty) {
         K localMemMap = localMem != null ? localMem.klist().items().get(0) : null;
-        System.err.println("<localMem>");
 
-        if (!global.globalOptions.haltOnLocalMemNonMap || localMemMap instanceof BuiltinMap) {
-            System.err.println("...");
+        if (global.globalOptions.haltOnLocalMemNonMap) {
+            System.err.println("<localMem>");
+
+            if (localMemMap instanceof BuiltinMap) {
+                System.err.println("...");
+            } else {
+                System.err.println("\tNon-map format:");
+                System.err.print("\t");
+                print(localMemMap, pretty);
+            }
+            System.err.println("</localMem>");
         } else {
-            System.err.println("\tNon-map format:");
-            System.err.print("\t");
-            print(localMemMap, pretty);
+            print(localMem, pretty);
         }
-        System.err.println("</localMem>");
     }
 
     private String toStringOrEmpty(Object o) {
