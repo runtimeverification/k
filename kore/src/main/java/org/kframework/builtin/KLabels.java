@@ -62,4 +62,6 @@ public class KLabels {
     public static final KLabel MAP_KEYS = KLabel("keys");
 
     public static final String INJ = "inj";
+
+    public static final KLabel HALT_CELLS_CELL = KLabel("<haltCells>");
 }
