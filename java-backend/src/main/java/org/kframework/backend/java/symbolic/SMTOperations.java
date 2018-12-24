@@ -106,7 +106,7 @@ public class SMTOperations {
                 if (global.debugZ3) {
                     System.err.format("\nZ3 warning. Query not generated: %s\n", e.getMessage());
                 }
-                formulaContext.z3Profiler.newQueryBuildFailure();
+                formulaContext.queryBuildFailure();
             }
         }
         return false;
