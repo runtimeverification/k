@@ -20,7 +20,7 @@ export KSERVER_SOCKET
 
 notif "CLEANING REPO"
 mvn clean
-git clean -dfx
+git clean -dffx
 
 notif "SETTING UP OPAM/PERL ENVIRONMENTS"
 eval `opam config env`
