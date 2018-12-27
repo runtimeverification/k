@@ -10,6 +10,10 @@ notif() {
 
 NPROCS="${NPROCS:-$(grep -c '^processor' /proc/cpuinfo)}"
 WORKSPACE="${WORKSPACE:-$(pwd)}"
+
+K_EXERCISES_REPO="${K_EXERCISES_REPO:-git@github.com:kframework/k-exercises.git}"
+RVMATCH_REPO="${RVMATCH_REPO:-git@github.com:runtimeverification/rv-match.git}"
+
 KSERVER_SOCKET="$WORKSPACE/kserver"
 KSERVER_LOG="$WORKSPACE/kserver.log"
 export KSERVER_SOCKET
@@ -34,7 +38,7 @@ sleep 5
 
 notif "CLONING K EXERCISES"
 rm -rf k-exercises
-git clone 'git@github.com:kframework/k-exercises.git'
+git clone "$K_EXERCISES_REPO" k-exercises
 
 notif "RUNNING K EXERCISES"
 (   cd k-exercises/tutorial
@@ -46,7 +50,7 @@ notif "KILLING KSERVER"
 
 notif "CLONING/PREPARING RV-MATCH"
 rm -rf rv-match
-git clone git@github.com:runtimeverification/rv-match.git
+git clone "$RVMATCH_REPO" rv-match
 (   cd rv-match
     git submodule update --init -- c-semantics k
     cd k
