@@ -14,6 +14,10 @@ KSERVER_SOCKET="$WORKSPACE/kserver"
 KSERVER_LOG="$WORKSPACE/kserver.log"
 export KSERVER_SOCKET
 
+notif "CLEANING REPO"
+mvn clean
+git clean -dfx
+
 notif "SETTING UP OPAM/PERL ENVIRONMENTS"
 eval `opam config env`
 eval `perl -I$HOME/perl5/lib/perl5 -Mlocal::lib`
