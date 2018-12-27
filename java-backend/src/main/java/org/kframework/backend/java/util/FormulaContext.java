@@ -72,8 +72,12 @@ public class FormulaContext {
         } else if (proved) {
             System.err.format("\nZ3 Implication (%s) RHS proved%s:\n%s\n", kind.label, cachedMsg, right.toStringMultiline());
         } else {
-            System.err.format("\nZ3 Implication (%s) failed%s:\n%s\n  implies \n%s\n",
-                    kind.label, cachedMsg, left.toStringMultiline(), right.toStringMultiline());
+            if (rule.globalContext().javaExecutionOptions.logImplicationLHS) {
+                System.err.format("\nZ3 Implication (%s) failed%s:\n%s\n  implies \n%s\n",
+                        kind.label, cachedMsg, left.toStringMultiline(), right.toStringMultiline());
+            } else {
+                System.err.format("\nZ3 Implication (%s) RHS failed%s:\n%s\n", kind.label, cachedMsg, right.toStringMultiline());
+            }
         }
         System.err.println("\nRule for formula above:");
         RuleSourceUtil.printRuleAndSource(rule);
