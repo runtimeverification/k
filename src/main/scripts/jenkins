@@ -41,12 +41,14 @@ rm -rf k-exercises
 git clone "$K_EXERCISES_REPO" k-exercises
 
 notif "RUNNING K EXERCISES"
+exit_status='0'
 (   cd k-exercises/tutorial
     make -j"$NPROCS"
-)
+) || exit_status="$?"
 
 notif "KILLING KSERVER"
 ./k-distribution/target/release/k/bin/stop-kserver || true
+[[ "$exit_status" == '0' ]] || exit "$exit_status"
 
 notif "CLONING/PREPARING RV-MATCH"
 rm -rf rv-match
