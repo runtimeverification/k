@@ -891,8 +891,12 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 continue;
             }
 
-            global.stateLog.log(StateLog.LogEvent.IMPLICATION, left, right);
-            if (!impliesSMT(left, right, existentialQuantVars, formulaContext)) {
+            //Removing LHS substitution because it's not used to build Z3 query anyway.
+            //Improves Z3 cache efficiency.
+            ConjunctiveFormula leftWithoutSubst = ConjunctiveFormula.of(ImmutableMapSubstitution.empty(),
+                    left.equalities(), left.disjunctions(), left.globalContext());
+            global.stateLog.log(StateLog.LogEvent.IMPLICATION, leftWithoutSubst, right);
+            if (!impliesSMT(leftWithoutSubst, right, existentialQuantVars, formulaContext)) {
                 if (global.globalOptions.debug) {
                     System.err.println("Failure!");
                 }
