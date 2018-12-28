@@ -630,8 +630,8 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
      * even if #f is NOT injective.
      */
     public ConjunctiveFormula resolveMatchingSymbols(Set<String> matchingSymbols) {
-        PersistentUniqueList<Equality> equalities = this.equalities;
-        PersistentUniqueList<Equality> newEqualities = equalities;
+        PersistentUniqueList<Equality> resultEqualities = PersistentUniqueList.empty();
+        PersistentUniqueList<Equality> newEqualities = this.equalities;
 
         while (!newEqualities.isEmpty()) {
             PersistentUniqueList<Equality> curEqualities = newEqualities;
@@ -649,19 +649,21 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                         if (lKList.size() == rKList.size()) {
                             for (int i = 0; i < lKList.size(); ++i) {
                                 Equality newEquality = new Equality(lKList.get(i), rKList.get(i), global); // X == Y
-                                equalities = equalities.plus(newEquality);
                                 newEqualities = newEqualities.plus(newEquality);
                             }
+                            continue;
                         }
                     }
                 }
+                //anything but continue above
+                resultEqualities = resultEqualities.plus(equality);
             }
         }
 
-        if (equalities == this.equalities) {
+        if (resultEqualities.equals(this.equalities)) {
             return this;
         } else {
-            return new ConjunctiveFormula(substitution, equalities, disjunctions, truthValue, falsifyingEquality, global);
+            return new ConjunctiveFormula(substitution, resultEqualities, disjunctions, truthValue, falsifyingEquality, global);
         }
     }
 
