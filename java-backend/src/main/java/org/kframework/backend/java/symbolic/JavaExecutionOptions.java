@@ -30,8 +30,8 @@ public final class JavaExecutionOptions {
     public Integer auditingStep;
 
     @Parameter(names = "--log-subst", description = "When a ConjunctiveFormula is logged, also log substitutions. " +
-            "Used in combination with --debug-z3.")
-    public boolean logSubst = false;
+            "Enabled by default. Disable to reduce log size. Used in combination with --debug-z3.", arity = 1)
+    public boolean logSubst = true;
 
     @Parameter(names = "--log-implication-lhs", description = "When a ConjunctiveFormula for implication is logged, " +
             "log both LHS and RHS. This is the default behavior. If this option is false, only RHS will be logged, " +
