@@ -49,6 +49,8 @@
               <target>
                 <mkdir dir="${project.build.directory}/build" />
                 <exec executable="cmake" dir="${project.build.directory}/build" failonerror="true">
+                  <env key="CC" value="clang-6.0" />
+                  <env key="CXX" value="clang++-6.0" />
                   <arg value="-DCMAKE_BUILD_TYPE=${project.build.type}" />
                   <arg value="${project.basedir}/src/main/native/llvm-backend" />
                 </exec>
