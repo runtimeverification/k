@@ -10,7 +10,7 @@ source $HOME/.cargo/env
 
 echo "=== RUNNING LOCAL TESTS ==="
 cd ${WORKSPACE}/k-pr
-git submodule update --init
+git submodule update --init --recursive
 mvn verify -U
 
 echo "=== RUNNING K EXERCISES ==="
