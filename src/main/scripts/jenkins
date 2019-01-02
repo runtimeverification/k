@@ -25,6 +25,8 @@ make -j"$nprocs"
 ../../k-distribution/target/release/k/bin/stop-kserver || true
 
 echo "=== RUNNING RV-MATCH TESTS ==="
+cd ${WORKSPACE}/k-pr
+mvn clean
 cd ${WORKSPACE}
 rm -rf rv-match
 git clone git@github.com:runtimeverification/rv-match.git
