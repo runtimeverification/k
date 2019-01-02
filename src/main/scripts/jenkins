@@ -6,6 +6,7 @@ nprocs="$(grep -c '^processor' /proc/cpuinfo)"
 
 eval `opam config env`
 eval `perl -I$HOME/perl5/lib/perl5 -Mlocal::lib`
+source $HOME/.cargo/env
 
 echo "=== RUNNING LOCAL TESTS ==="
 cd ${WORKSPACE}/k-pr
