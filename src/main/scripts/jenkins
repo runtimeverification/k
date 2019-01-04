@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+set -e
+
+nprocs="$(grep -c '^processor' /proc/cpuinfo)"
+
+eval `opam config env`
+eval `perl -I$HOME/perl5/lib/perl5 -Mlocal::lib`
+
+echo "=== RUNNING LOCAL TESTS ==="
+cd ${WORKSPACE}/k-pr
+git submodule update --init
+mvn verify -U
+
+echo "=== RUNNING K EXERCISES ==="
+cd ${WORKSPACE}/k-pr
+rm -rf k-exercises
+git clone 'git@github.com:kframework/k-exercises.git'
+cd k-exercises/tutorial
+export KSERVER_SOCKET=$(pwd)/kserver
+../../k-distribution/target/release/k/bin/spawn-kserver kserver.log
+sleep 5
+make -j"$nprocs"
+../../k-distribution/target/release/k/bin/stop-kserver || true
+
+echo "=== RUNNING RV-MATCH TESTS ==="
+cd ${WORKSPACE}
+rm -rf rv-match
+git clone git@github.com:runtimeverification/rv-match.git
+cd rv-match
+git submodule update --init -- c-semantics
+rm -rf k
+cp -r ${WORKSPACE}/k-pr k
+mvn verify -U -DskipKTest -DbuildProfile=x86_64-gcc-glibc

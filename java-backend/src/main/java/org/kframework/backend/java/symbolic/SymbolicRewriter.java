@@ -26,6 +26,7 @@ import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.strategies.TransitionCompositeStrategy;
 import org.kframework.backend.java.util.Profiler2;
+import org.kframework.backend.java.util.StateLog;
 import org.kframework.builtin.KLabels;
 import org.kframework.kore.FindK;
 import org.kframework.kore.K;
@@ -37,6 +38,7 @@ import org.kframework.backend.java.utils.BitSet;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
 import java.io.File;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -153,6 +155,7 @@ public class SymbolicRewriter {
     }
 
     public List<ConstrainedTerm> fastComputeRewriteStep(ConstrainedTerm subject, boolean computeOne, boolean narrowing, boolean proofFlag) {
+        global.stateLog.log(StateLog.LogEvent.NODE, subject.term(), subject.constraint());
         List<ConstrainedTerm> results = new ArrayList<>();
         if (definition.automaton == null) {
             return results;
@@ -168,6 +171,7 @@ public class SymbolicRewriter {
                 subject.termContext());
         for (FastRuleMatcher.RuleMatchResult matchResult : matches) {
             Rule rule = definition.ruleTable.get(matchResult.ruleIndex);
+            global.stateLog.log(StateLog.LogEvent.RULEATTEMPT, rule.toKRewrite());
             Substitution<Variable, Term> substitution =
                     rule.att().contains(Att.refers_THIS_CONFIGURATION()) ?
                             matchResult.constraint.substitution().plus(new Variable(KLabels.THIS_CONFIGURATION, Sort.KSEQUENCE), filterOurStrategyCell(subject.term())) :
@@ -221,6 +225,7 @@ public class SymbolicRewriter {
                 continue;
             }
 
+            global.stateLog.log(StateLog.LogEvent.RULE, rule.toKRewrite());
             results.add(result);
         }
 
@@ -591,14 +596,19 @@ public class SymbolicRewriter {
 
         initialTerm = initialTerm.expandPatterns(true);
 
+        global.stateLog.log(StateLog.LogEvent.REACHINIT,   initialTerm.term(), initialTerm.constraint());
+        global.stateLog.log(StateLog.LogEvent.REACHTARGET, targetTerm.term(),  targetTerm.constraint());
+
         visited.add(initialTerm);
         queue.add(initialTerm);
         boolean guarded = false;
         int step = 0;
+
         while (!queue.isEmpty()) {
             step++;
             for (ConstrainedTerm term : queue) {
                 if (term.implies(targetTerm)) {
+                    global.stateLog.log(StateLog.LogEvent.REACHPROVED, term.term(), term.constraint());
                     successPaths++;
                     continue;
                 }
@@ -712,7 +722,9 @@ public class SymbolicRewriter {
             ConstrainedTerm pattern = specRule.createLhsPattern(constrainedTerm.termContext());
             ConjunctiveFormula constraint = constrainedTerm.matchImplies(pattern, true, specRule.matchingSymbols());
             if (constraint != null) {
-                return buildResult(specRule, constraint, null, true, constrainedTerm.termContext());
+                ConstrainedTerm result = buildResult(specRule, constraint, null, true, constrainedTerm.termContext());
+                global.stateLog.log(StateLog.LogEvent.SRULE, specRule.toKRewrite());
+                return result;
             }
         }
         return null;

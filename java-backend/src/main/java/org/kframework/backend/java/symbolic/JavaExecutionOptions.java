@@ -2,7 +2,14 @@
 package org.kframework.backend.java.symbolic;
 
 import com.beust.jcommander.Parameter;
+
+import org.kframework.backend.java.util.StateLog;
 import org.kframework.utils.inject.RequestScoped;
+import org.kframework.utils.options.BaseEnumConverter;
+
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.List;
 
 @RequestScoped
 public final class JavaExecutionOptions {
@@ -29,5 +36,28 @@ public final class JavaExecutionOptions {
             + "tagged with the javaBackendValue of --apply-tag, or fail with an error explaining why the rule did not apply.")
     public Integer auditingStep;
 
+    @Parameter(names={"--state-log"}, description="Output symbolic execution debugging information")
+    public boolean stateLog = false;
+
+    @Parameter(names={"--state-log-path"}, description="Path where the debugging information should be stored")
+    public String stateLogPath;
+
+    @Parameter(names={"--state-log-id"}, description="Id of the current execution")
+    public String stateLogId;
+
+    @Parameter(names={"--state-log-events"}, converter=LogEventConverter.class, description="Comma-separated list of events to log: [OPEN|REACHINIT|REACHTARGET|REACHPROVED|NODE|RULE|SRULE|RULEATTEMPT|IMPLICATION|Z3QUERY|Z3RESULT|CLOSE]")
+    public List<StateLog.LogEvent> stateLogEvents = Collections.emptyList();
+
+    public static class LogEventConverter extends BaseEnumConverter<StateLog.LogEvent> {
+
+        public LogEventConverter(String optionName) {
+            super(optionName);
+        }
+
+        @Override
+        public Class<StateLog.LogEvent> enumClass() {
+            return StateLog.LogEvent.class;
+        }
+    }
 }
 
