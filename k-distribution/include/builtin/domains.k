@@ -356,8 +356,8 @@ module INT
                  Int "*Int" Int                 [function, functional, left, smtlib(*), latex({#1}\mathrel{\ast_{\scriptstyle\it Int}}{#2}), hook(INT.mul)]
                /* FIXME: translate /Int and %Int into smtlib */
                /* /Int and %Int implement t-division */
-               | Int "/Int" Int                 [function, left, smtlib(div), latex({#1}\mathrel{\div_{\scriptstyle\it Int}}{#2}), hook(INT.tdiv)]
-               | Int "%Int" Int                 [function, left, smtlib(mod), latex({#1}\mathrel{\%_{\scriptstyle\it Int}}{#2}), hook(INT.tmod)]
+               | Int "/Int" Int                 [function, left, smtlib((ite (>= #1 0) (div #1 #2) (div (- #1) (- #2)))), latex({#1}\mathrel{\div_{\scriptstyle\it Int}}{#2}), hook(INT.tdiv)]
+               | Int "%Int" Int                 [function, left, smtlib((ite (>= #1 0) (mod #1 #2) (- (mod (- #1) (- #2))))), latex({#1}\mathrel{\%_{\scriptstyle\it Int}}{#2}), hook(INT.tmod)]
                /* divInt and modInt implement e-division */
                | Int "divInt" Int               [function, left, smtlib(div), hook(INT.ediv)]
                | Int "modInt" Int               [function, left, smtlib(mod), hook(INT.emod)]
