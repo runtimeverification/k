@@ -36,7 +36,6 @@ notif "STARTING KSERVER"
 sleep 5
 
 notif "CLONING K EXERCISES"
-rm -rf k-exercises
 git clone "$K_EXERCISES_REPO" k-exercises
 
 notif "RUNNING K EXERCISES"
