@@ -8,7 +8,7 @@ notif() {
             "\n" >&2
 }
 
-NPROCS="${NPROCS:-$(grep -c '^processor' /proc/cpuinfo)}"
+NPROCS="${NPROCS:-$(nproc)}"
 WORKSPACE="${WORKSPACE:-$(pwd)}"
 
 K_EXERCISES_REPO="${K_EXERCISES_REPO:-git@github.com:kframework/k-exercises.git}"
