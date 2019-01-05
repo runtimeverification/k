@@ -19,7 +19,6 @@ KSERVER_LOG="$WORKSPACE/kserver.log"
 export KSERVER_SOCKET
 
 notif "CLEANING REPO"
-mvn clean
 git clean -dffx
 
 notif "SETTING UP OPAM/PERL ENVIRONMENTS"
