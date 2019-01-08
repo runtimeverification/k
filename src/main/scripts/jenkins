@@ -50,8 +50,6 @@ notif "KILLING KSERVER"
 [[ "$exit_status" == '0' ]] || exit "$exit_status"
 
 notif "CLONING/PREPARING RV-MATCH"
-cd ${WORKSPACE}/k-pr
-mvn clean
 rm -rf rv-match
 git clone "$RVMATCH_REPO" rv-match
 (   cd rv-match
