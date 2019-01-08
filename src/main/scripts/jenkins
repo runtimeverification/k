@@ -57,6 +57,7 @@ git clone "$RVMATCH_REPO" rv-match
     cd k
     git fetch ../../
     git checkout FETCH_HEAD
+    git submodule update --init --recursive
     mvn package -DskipTests
 )
 
