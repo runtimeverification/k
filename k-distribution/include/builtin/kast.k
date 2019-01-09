@@ -84,7 +84,7 @@ module KSEQ-SYMBOLIC
                     > #Pattern "#Or" #Pattern [klabel(#Or), symbol, assoc, comm, unit(#False), mlOp, format(%i%1%d%n%2%n%i%3%d)]
                     > #Pattern "#Implies" #Pattern [klabel(#Implies), symbol, mlOp, format(%i%1%d%n%2%n%i%3%d)]
                     > "#Exists" #KVariable "." #Pattern [klabel(#Exists), symbol, mlOp]
-                    > "#Forall" #KVariable "." #Pattern [klabel(#Forall), symbol, mlOp]
+                    | "#Forall" #KVariable "." #Pattern [klabel(#Forall), symbol, mlOp]
 endmodule
 
 module KCELLS
