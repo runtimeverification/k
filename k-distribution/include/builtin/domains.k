@@ -92,6 +92,7 @@ endmodule
 module MAP
   imports LIST
   imports SET
+  imports BOOL
 
   syntax Map [hook(MAP.Map)]
 
@@ -117,6 +118,8 @@ module MAP
   syntax KItem ::= Map "[" KItem "]"                    [function, hook(MAP.lookup), klabel(Map:lookup), symbol]
 
   syntax KItem ::= Map "[" KItem "]" "orDefault" KItem      [function, functional, hook(MAP.lookupOrDefault), klabel(Map:lookupOrDefault)]
+  rule M [ X ] orDefault _ => M [ X ] requires X in_keys (M)
+  rule M [ X ] orDefault Y => Y       requires notBool (X in_keys (M))
 
   /*@ Update a Map in form of  of keys and values: */
   syntax Map ::= Map "[" KItem "<-" KItem "]"           [function, functional, hook(MAP.update), prefer]
