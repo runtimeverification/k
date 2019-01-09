@@ -259,17 +259,11 @@ public class HaskellRewriter implements Function<Module, Rewriter> {
 
             @Override
             public K prove(Module rules) {
-                Module specModule;
-                if (!module.name().equals(def.kompiledDefinition.mainModule().name())) {
-                    specModule = module.addImport(def.kompiledDefinition.mainModule());
-                } else {
-                    specModule = module;
-                }
-                String kompiledModule = KoreBackend.getKompiledString(specModule, def.topCellInitializer, files, false);
+                String kompiledModule = KoreBackend.getKompiledString(module, def.topCellInitializer, files, false);
                 files.saveToTemp("vdefinition.kore", kompiledModule);
 
                 ModuleToKORE rulesConverter = new ModuleToKORE(rules, files, def.topCellInitializer);
-                String koreOutput = rulesConverter.convertSpecificationModule(specModule, rules);
+                String koreOutput = rulesConverter.convertSpecificationModule(module, rules);
                 files.saveToTemp("spec.kore", koreOutput);
                 String defPath = files.resolveTemp("vdefinition.kore").getAbsolutePath();
                 String specPath = files.resolveTemp("spec.kore").getAbsolutePath();
