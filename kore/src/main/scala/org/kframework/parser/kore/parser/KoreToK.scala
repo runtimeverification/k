@@ -77,11 +77,11 @@ class KoreToK (headToLabel_ : java.util.Properties, sortAtt : Map[k.Sort, Att], 
     case kore.Not(s, p) =>
       KORE.KApply(KLabels.ML_NOT, apply(p))
     case kore.Implies(s, p, q) =>
-      throw new TranslationError("Implies patterns currently unsupported")
+      KORE.KApply(KLabels.ML_IMPLIES, apply(p), apply(q))
     case kore.Iff(s, p, q) =>
       throw new TranslationError("Iff patterns currently unsupported")
     case kore.Exists(s, v, p) =>
-      throw new TranslationError("Exists patterns currently unsupported")
+      KORE.KApply(KLabels.ML_EXISTS, apply(v), apply(p))
     case kore.Forall(s, v, p) =>
       throw new TranslationError("Forall patterns currently unsupported")
     case kore.Rewrites(s, p, q) =>
