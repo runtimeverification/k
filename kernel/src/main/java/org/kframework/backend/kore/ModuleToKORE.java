@@ -691,16 +691,22 @@ public class ModuleToKORE {
                 convert(topCellSort, false);
                 sb.append("}(),");
             }
-            sb.append("\\and{");
+            K right = RewriteToTop.toRight(rule.body());
+            sb.append("\\rewrites{");
             convert(topCellSort, false);
             sb.append("} (\n    ");
+            sb.append("  \\and{");
+            convert(topCellSort, false);
+            sb.append("} (\n      ");
             convertSideCondition(rule.requires(), topCellSort);
-            sb.append(", \\and{");
+            sb.append(", ");
+            convert(left);
+            sb.append("), \\and{");
             convert(topCellSort, false);
-            sb.append("} (\n    ");
+            sb.append("} (\n      ");
             convertSideCondition(rule.ensures(), topCellSort);
             sb.append(", ");
-            convert(rule.body());
+            convert(right);
             sb.append("))");
             if (owise) {
                 sb.append(")");
