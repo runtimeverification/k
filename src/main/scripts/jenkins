@@ -26,6 +26,11 @@ eval `opam config env`
 eval `perl -I$HOME/perl5/lib/perl5 -Mlocal::lib`
 source $HOME/.cargo/env
 
+notif "UPGRADING LOCAL STACK"
+export PATH=$HOME/.local/bin:$PATH
+stack upgrade --force-download
+stack --version
+
 notif "CLONING SUBMODULES"
 git submodule update --init --recursive
 
