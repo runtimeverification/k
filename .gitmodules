@@ -1,0 +1,3 @@
+[submodule "llvm-backend/src/main/native/llvm-backend"]
+	path = llvm-backend/src/main/native/llvm-backend
+	url = https://github.com/kframework/llvm-backend
