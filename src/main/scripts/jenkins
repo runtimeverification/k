@@ -24,9 +24,10 @@ git clean -dffx
 notif "SETTING UP OPAM/PERL ENVIRONMENTS"
 eval `opam config env`
 eval `perl -I$HOME/perl5/lib/perl5 -Mlocal::lib`
+source $HOME/.cargo/env
 
 notif "CLONING SUBMODULES"
-git submodule update --init
+git submodule update --init --recursive
 
 notif "BUILDING/RUNNING LOCAL TESTS"
 mvn verify -U
@@ -56,6 +57,7 @@ git clone "$RVMATCH_REPO" rv-match
     cd k
     git fetch ../../
     git checkout FETCH_HEAD
+    git submodule update --init --recursive
     mvn package -DskipTests
 )
 
