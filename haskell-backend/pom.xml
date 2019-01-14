@@ -28,10 +28,6 @@
     </dependency>
   </dependencies>
 
-  <properties>
-    <project.build.type>Release</project.build.type>
-  </properties>
-
   <build>
     <plugins>
       <plugin>
