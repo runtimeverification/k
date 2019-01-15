@@ -13,5 +13,11 @@
           results="array"
           skip="pdf" >
     </test>
+    <test definition="mint-in-k/mint-test.k"
+          extension="mint"
+          programs="mint"
+          results="mint"
+          skip="pdf" >
+    </test> 
     <include file="mint/config.xml" directory="mint" skip="pdf" />
 </tests>
