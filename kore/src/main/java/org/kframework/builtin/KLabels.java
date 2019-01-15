@@ -33,6 +33,9 @@ public class KLabels {
     public static final KLabel ML_NOT = KLabel("#Not");
     public static final KLabel ML_CEIL = KLabel("#Ceil");
     public static final KLabel ML_EQUALS = KLabel("#Equals");
+    public static final KLabel ML_IMPLIES = KLabel("#Implies");
+    public static final KLabel ML_EXISTS = KLabel("#Exists");
+    public static final KLabel ML_FORALL = KLabel("#Forall");
 
     public static final KLabel ListItem = KLabel("ListItem");
     public static final KLabel MapItem = KLabel("_|->_");
