@@ -8,7 +8,7 @@ notif() {
             "\n" >&2
 }
 
-NPROCS="${NPROCS:-$(grep -c '^processor' /proc/cpuinfo)}"
+NPROCS="${NPROCS:-$(nproc)}"
 WORKSPACE="${WORKSPACE:-$(pwd)}"
 
 K_EXERCISES_REPO="${K_EXERCISES_REPO:-git@github.com:kframework/k-exercises.git}"
@@ -19,15 +19,15 @@ KSERVER_LOG="$WORKSPACE/kserver.log"
 export KSERVER_SOCKET
 
 notif "CLEANING REPO"
-mvn clean
-git clean -dfx
+git clean -dffx
 
 notif "SETTING UP OPAM/PERL ENVIRONMENTS"
 eval `opam config env`
 eval `perl -I$HOME/perl5/lib/perl5 -Mlocal::lib`
+source $HOME/.cargo/env
 
 notif "CLONING SUBMODULES"
-git submodule update --init
+git submodule update --init --recursive
 
 notif "BUILDING/RUNNING LOCAL TESTS"
 mvn verify -U
@@ -37,16 +37,17 @@ notif "STARTING KSERVER"
 sleep 5
 
 notif "CLONING K EXERCISES"
-rm -rf k-exercises
 git clone "$K_EXERCISES_REPO" k-exercises
 
 notif "RUNNING K EXERCISES"
+exit_status='0'
 (   cd k-exercises/tutorial
     make -j"$NPROCS"
-)
+) || exit_status="$?"
 
 notif "KILLING KSERVER"
 ./k-distribution/target/release/k/bin/stop-kserver || true
+[[ "$exit_status" == '0' ]] || exit "$exit_status"
 
 notif "CLONING/PREPARING RV-MATCH"
 rm -rf rv-match
@@ -56,6 +57,7 @@ git clone "$RVMATCH_REPO" rv-match
     cd k
     git fetch ../../
     git checkout FETCH_HEAD
+    git submodule update --init --recursive
     mvn package -DskipTests
 )
 
