@@ -7,7 +7,14 @@ This is a readme file for the developers.
 
 In short:
 ```
-sudo apt-get install build-essential m4 openjdk-8-jdk libgmp-dev libmpfr-dev pkg-config flex z3 libz3-dev maven opam python3
+git submodule update --init --recursive
+sudo apt-get install build-essential m4 openjdk-8-jdk libgmp-dev libmpfr-dev pkg-config flex z3 libz3-dev maven opam python3 cmake clang-6.0 clang++-6.0 llvm-6.0 zlib1g-dev bison libboost-test-dev libyaml-cpp-dev libjemalloc-dev
+curl https://sh.rustup.rs -sSf | sh
+source $HOME/.cargo/env
+rustup toolchain install 1.28.0
+rustup default 1.28.0
+curl -sSL https://get.haskellstack.org/ | sh
+
 ```
 
 If you install this list of dependencies, continue directly to the Install section.
@@ -43,6 +50,20 @@ to the installation directory of the JDK (not to be mistaken with JRE).
 You can test if it works by calling `mvn -version` in a Terminal.
 This will provide the information about the JDK Maven is using, in case
 it is the wrong one.
+
+## Rust 1.28 (and Cargo)
+
+To install, go to https://rustup.rs/ and follow the instructions. Then, once rustup is installed, run:
+```
+source $HOME/.cargo/env
+rustup toolchain install 1.28.0
+rustup default 1.28.0
+```
+
+## Haskell Stack
+
+To install, go to https://docs.haskellstack.org/en/stable/README/ and follow the instructions.
+
 	
 ## Miscellaneous
 

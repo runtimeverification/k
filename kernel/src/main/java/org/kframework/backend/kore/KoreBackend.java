@@ -122,11 +122,11 @@ public class KoreBackend implements Backend {
         return def -> resolveIO
                 .andThen(resolveFun)
                 .andThen(resolveStrict)
-                .andThen(expandMacros)
                 .andThen(resolveAnonVars)
                 .andThen(d -> new ResolveContexts(kompileOptions).resolve(d))
                 .andThen(resolveHeatCoolAttribute)
                 .andThen(resolveSemanticCasts)
+                .andThen(expandMacros)
                 .andThen(generateSortPredicateSyntax)
                 .andThen(AddImplicitComputationCell::transformDefinition)
                 .andThen(resolveFreshConstants)
