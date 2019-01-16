@@ -21,6 +21,11 @@
       <version>3.3.2</version>
     </dependency>
     <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>2.4</version>
+    </dependency>
+    <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
       <version>18.0</version>
@@ -77,5 +82,10 @@
         </configuration>
       </plugin>
     </plugins>
+    <resources>
+      <resource>
+        <directory>haskell-backend/src/main/native/haskell-backend/src/test/resources</directory>
+      </resource>
+    </resources>
   </build>
 </project>
