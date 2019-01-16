@@ -53,12 +53,7 @@ public abstract class BitVector<T extends Number> extends Token {
     public static BitVector of(BigInteger value, int bitwidth) {
         assert bitwidth > 0;
 
-        switch (bitwidth) {
-            case Integer.SIZE:
-                return Int32Token.of(value.intValue());
-            default:
-                return BigIntegerBitVector.of(value, bitwidth);
-        }
+        return BigIntegerBitVector.of(value, bitwidth);
     }
 
     /**
