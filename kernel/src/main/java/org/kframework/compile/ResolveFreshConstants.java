@@ -26,6 +26,7 @@ import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
 import scala.collection.Set;
+import scala.collection.JavaConverters;
 import scala.Option;
 
 import java.util.ArrayList;
@@ -243,7 +244,37 @@ public class ResolveFreshConstants {
         if (sentences.equals(m.localSentences())) {
             return m;
         }
-        return new GenerateSortPredicateSyntax().gen(Module(m.name(), kore ? m.imports() : add(def.getModule("K-REFLECTION").get(), m.imports()), sentences, m.att()));
+        Set<Sentence> finalSentences = JavaConverters.asScalaSet(stream(sentences).map(s -> s instanceof Production ? fixTopCellProductionFormat((Production) s) : s).collect(Collectors.toSet()));
+        return new GenerateSortPredicateSyntax().gen(Module(m.name(), kore ? m.imports() : add(def.getModule("K-REFLECTION").get(), m.imports()), finalSentences, m.att()));
+    }
+
+    private Production fixTopCellProductionFormat(Production prod) {
+        if (this.kore && prod.klabel().isDefined() && prod.klabel().get().equals(KLabels.GENERATED_TOP_CELL)) {
+            List<Integer> cellPositions = new ArrayList<Integer>();
+            int i = 1;
+            for (ProductionItem p: JavaConverters.seqAsJavaList(prod.items())) {
+                if (p instanceof NonTerminal) {
+                    NonTerminal nt = (NonTerminal) p;
+                    if (! nt.sort().name().equals("GeneratedCounterCell")) {
+                        cellPositions.add(i);
+                    }
+                }
+                i++;
+            }
+            StringBuilder format = new StringBuilder();
+            if (cellPositions.size() == 1) {
+                format.append("%").append(cellPositions.get(0));
+            } else {
+                format.append("%1%i");
+                int j;
+                for (j = 0; j < cellPositions.size(); j++) {
+                    format.append("%n%").append(cellPositions.get(j));
+                }
+                format.append("%d%n%").append(cellPositions.get(j - 1) + 1);
+            }
+            return Production(prod.klabel(), prod.sort(), prod.items(), prod.att().add("format", format.toString()));
+        }
+        return prod;
     }
 }
 
