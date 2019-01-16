@@ -100,7 +100,11 @@ public class KPrint {
     }
 
     public byte[] prettyPrint(Definition def, Module module, K orig, ColorSetting colorize) {
-        K result = abstractTerm(module, orig);
+        K result = orig;
+        if (!options.anonymousSubstitution) {
+            result = new SubstitutionPruning().pruneSubstitution(result);
+        }
+        result = abstractTerm(module, result);
         switch (options.output) {
             case KAST:
             case NONE:

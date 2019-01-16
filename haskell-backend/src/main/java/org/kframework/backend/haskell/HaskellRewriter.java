@@ -15,6 +15,8 @@ import org.kframework.kore.K;
 import org.kframework.kore.KORE;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
+import org.kframework.kore.TransformK;
+import org.kframework.kore.VisitK;
 import org.kframework.kprove.KProveOptions;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.RunProcess;
@@ -39,9 +41,13 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.Set;
 import java.util.function.Function;
 
 import static org.kframework.builtin.BooleanUtils.*;
@@ -165,6 +171,7 @@ public class HaskellRewriter implements Function<Module, Rewriter> {
                 if (patternTerm instanceof  KVariable) {
                     patternTerm = KORE.KVariable(((KVariable) patternTerm).name(), Att.empty().add(Sort.class, initializerSort));
                 }
+                Map<String, KVariable> generatedVars = collectGeneratedVariables(patternTerm);
                 K patternCondition = pattern.requires();
                 String patternTermKore = getKoreString(patternTerm, mod, new ModuleToKORE(mod, files, def.topCellInitializer));
                 String patternConditionKore;
@@ -245,7 +252,7 @@ public class HaskellRewriter implements Function<Module, Rewriter> {
                         Pattern kore = textToKore.parsePattern(koreOutputFile);
                         KoreToK koreToK = new KoreToK(idsToLabels, mod.sortAttributesFor(), StringUtil::enquoteKString);
                         K outputK = koreToK.apply(kore);
-                        return outputK;
+                        return markGeneratedVariables(generatedVars, outputK);
                     } catch (IOException e) {
                         throw KEMException.criticalError("I/O Error while executing", e);
                     } catch (InterruptedException e) {
@@ -312,6 +319,28 @@ public class HaskellRewriter implements Function<Module, Rewriter> {
                 throw new UnsupportedOperationException();
             }
         };
+    }
+
+    private K markGeneratedVariables(Map<String, KVariable> generatedVars, K outputK) {
+        TransformK markVars = new TransformK() {
+            @Override
+            public K apply(KVariable k) {
+                return generatedVars.getOrDefault(k.name(), k);
+            }
+        };
+        return markVars.apply(outputK);
+    }
+
+    private Map<String, KVariable> collectGeneratedVariables(K patternTerm) {
+        Map<String, KVariable> generatedVars = new HashMap<>();
+        VisitK visitor = new VisitK() {
+            @Override
+            public void apply(KVariable k) {
+                if (k.att().contains("anonymous")) generatedVars.put(k.name(), k);
+            }
+        };
+        visitor.apply(patternTerm);
+        return generatedVars;
     }
 
     private static String getKoreString(K initialConfiguration, Module mod, ModuleToKORE converter) {

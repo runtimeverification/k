@@ -80,6 +80,9 @@ public class PrintOptions {
         }
     }
 
+    @Parameter(names={"--output-anonymous-substitutions"}, description="Whether to force printing of assignments to anonymous variables in search/match substitutions.")
+    public boolean anonymousSubstitution = false;
+
     @Parameter(names={"--output-omit"}, listConverter=StringListConverter.class, description="KLabels to omit from the output.")
     public List<String> omittedKLabels = new ArrayList<String>();
 

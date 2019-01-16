@@ -544,14 +544,9 @@ public class SymbolicRewriter {
         return k;
     }
 
-    private Substitution<Variable, Term> filterSubstitution(Substitution<Variable, Term> subst) {
-        Set<Variable> anonKeys = subst.keySet().stream().filter(v -> v.att().contains("anonymous")).collect(Collectors.toSet());
-        return subst.minusAll(anonKeys);
-    }
-
     private K processConjuncts(ConjunctiveFormula conjunct) {
         conjunct = new ConjunctiveFormula(
-            filterSubstitution(conjunct.substitution()),
+            conjunct.substitution(),
             conjunct.equalities(),
             conjunct.disjunctions(),
             conjunct.truthValue(),

@@ -949,8 +949,8 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
     public List<Term> getKComponents() {
         Stream<Term> stream = Stream.concat(
                 Stream.concat(
-                        substitution.equalities(global).stream().map(Equality::toK),
-                        equalities.stream().map(Equality::toK)),
+                        substitution.equalities(global).stream().map(Equality::toML),
+                        equalities.stream().map(Equality::toML)),
                 disjunctions.stream().map(DisjunctiveFormula::toKore));
         return stream.collect(Collectors.toList());
     }

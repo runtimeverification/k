@@ -125,6 +125,13 @@ public class Equality implements Serializable {
                 global);
     }
 
+    public KItem toML() {
+        return KItem.of(
+                KLabelConstant.of(KLabels.ML_EQUALS, global.getDefinition()),
+                KList.concatenate(leftHandSide, rightHandSide),
+                global);
+    }
+
     @Override
     public boolean equals(Object object) {
         if (this == object) {
