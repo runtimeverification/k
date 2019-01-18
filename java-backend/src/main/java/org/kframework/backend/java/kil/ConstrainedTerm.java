@@ -138,6 +138,9 @@ public class ConstrainedTerm extends JavaSymbolicObject {
      * Checks if {@code this} implies {@code matchRHSTerm}, assuming the variables
      * occurring only in {@code matchRHSTerm} (but not in {@code this}) are
      * existentially quantified.
+     *
+     * @return If implication value is {@code true}, return the unification constraint:
+     * implicationLHS /\ implicationRHS. Otherwise return {@code true}.
      */
     public ConjunctiveFormula matchImplies(ConstrainedTerm matchRHSTerm, boolean expand, boolean logFailures,
                                            FormulaContext formulaContext, Set<String> matchingSymbols) {
