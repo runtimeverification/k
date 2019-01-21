@@ -1,1 +1,3 @@
-S ==K "Start\nIn spawned thread\n"
+  S
+#Equals
+  "Start\nIn spawned thread\n"

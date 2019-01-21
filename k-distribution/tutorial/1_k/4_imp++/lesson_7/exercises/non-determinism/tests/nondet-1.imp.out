@@ -1,11 +1,23 @@
-  S ==K "10"
+    S
+  #Equals
+    "10"
 #Or
-  S ==K "11"
+    S
+  #Equals
+    "11"
 #Or
-  S ==K "20"
+    S
+  #Equals
+    "20"
 #Or
-  S ==K "23"
+    S
+  #Equals
+    "23"
 #Or
-  S ==K "30"
+    S
+  #Equals
+    "30"
 #Or
-  S ==K "32"
+    S
+  #Equals
+    "32"

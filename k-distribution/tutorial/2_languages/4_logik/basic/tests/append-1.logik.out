@@ -1,1 +1,3 @@
-Solution ==K ( V:Term |-> cons ( a , cons ( b , nil , .Terms ) , .Terms ) )
+  Solution
+#Equals
+  V:Term |-> cons ( a , cons ( b , nil , .Terms ) , .Terms )

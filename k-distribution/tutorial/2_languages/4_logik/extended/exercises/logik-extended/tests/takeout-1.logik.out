@@ -1,3 +1,7 @@
-  Solution ==K ( L:Term |-> cons ( a , cons ( b , nil , .Vals ) , .Vals ) )
+    Solution
+  #Equals
+    L:Term |-> cons ( a , cons ( b , nil , .Vals ) , .Vals )
 #Or
-  Solution ==K ( L:Term |-> cons ( b , cons ( a , nil , .Vals ) , .Vals ) )
+    Solution
+  #Equals
+    L:Term |-> cons ( b , cons ( a , nil , .Vals ) , .Vals )

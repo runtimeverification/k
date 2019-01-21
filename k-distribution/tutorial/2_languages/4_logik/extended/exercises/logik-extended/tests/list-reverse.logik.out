@@ -1,1 +1,3 @@
-Solution ==K ( L:Term |-> [ 3 , .Vals | [ 2 , .Vals | [ 1 , .Vals | [ .Vals ] ] ] ] )
+  Solution
+#Equals
+  L:Term |-> [ 3 , .Vals | [ 2 , .Vals | [ 1 , .Vals | [ .Vals ] ] ] ]

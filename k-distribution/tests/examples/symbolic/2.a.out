@@ -1,6 +1,10 @@
 Solution 1
 <T> <k> false </k> </T>
- AND V0 ==K false
+   AND V0
+ #Equals
+   false
 Solution 2
 <T> <k> true </k> </T>
- AND V0 ==K true
+   AND V0
+ #Equals
+   true

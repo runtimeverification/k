@@ -1,3 +1,7 @@
-  S ==K "2\n"
+    S
+  #Equals
+    "2\n"
 #Or
-  S ==K "3\n"
+    S
+  #Equals
+    "3\n"

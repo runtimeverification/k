@@ -1,1 +1,3 @@
-T ==K int -> ( int -> int )
+  T
+#Equals
+  int -> ( int -> int )

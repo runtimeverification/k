@@ -1,7 +1,15 @@
-  S ==K "31"
+    S
+  #Equals
+    "31"
 #Or
-  S ==K "301"
+    S
+  #Equals
+    "301"
 #Or
-  S ==K "310"
+    S
+  #Equals
+    "310"
 #Or
-  S ==K "3010"
+    S
+  #Equals
+    "3010"

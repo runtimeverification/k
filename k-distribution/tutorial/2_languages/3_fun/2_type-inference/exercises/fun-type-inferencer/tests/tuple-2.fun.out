@@ -1,1 +1,3 @@
-V ==K ( ( int , ( int , .Bottoms ) wrapper , .Bottoms ) pair , ( int , int , .Bottoms ) pair , .Bottoms ) pair
+  V
+#Equals
+  ( ( int , ( int , .Bottoms ) wrapper , .Bottoms ) pair , ( int , int , .Bottoms ) pair , .Bottoms ) pair

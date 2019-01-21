@@ -1,69 +1,79 @@
-  Result ==K <T>
-    <k>
-      3 / 0 ~> #freezer_=_;_IMP-SYNTAX0_ ( y )
-    </k>
-    <env>
-      x |-> 1
-      y |-> 2
-    </env>
-    <store>
-      1 |-> 3
-      2 |-> 0
-    </store>
-  </T>
+    Result
+  #Equals
+    <T>
+      <k>
+        3 / 0 ~> #freezer_=_;_IMP-SYNTAX0_ ( y )
+      </k>
+      <env>
+        x |-> 1
+        y |-> 2
+      </env>
+      <store>
+        1 |-> 3
+        2 |-> 0
+      </store>
+    </T>
 #Or
-  Result ==K <T>
-    <k>
-      .
-    </k>
-    <env>
-      x |-> 1
-      y |-> 2
-    </env>
-    <store>
-      1 |-> 3
-      2 |-> 0
-    </store>
-  </T>
+    Result
+  #Equals
+    <T>
+      <k>
+        .
+      </k>
+      <env>
+        x |-> 1
+        y |-> 2
+      </env>
+      <store>
+        1 |-> 3
+        2 |-> 0
+      </store>
+    </T>
 #Or
-  Result ==K <T>
-    <k>
-      .
-    </k>
-    <env>
-      x |-> 1
-      y |-> 2
-    </env>
-    <store>
-      1 |-> 3
-      2 |-> 1
-    </store>
-  </T>
+    Result
+  #Equals
+    <T>
+      <k>
+        .
+      </k>
+      <env>
+        x |-> 1
+        y |-> 2
+      </env>
+      <store>
+        1 |-> 3
+        2 |-> 1
+      </store>
+    </T>
 #Or
-  Result ==K <T>
-    <k>
-      .
-    </k>
-    <env>
-      x |-> 1
-      y |-> 2
-    </env>
-    <store>
-      1 |-> 3
-      2 |-> 2
-    </store>
-  </T>
+    Result
+  #Equals
+    <T>
+      <k>
+        .
+      </k>
+      <env>
+        x |-> 1
+        y |-> 2
+      </env>
+      <store>
+        1 |-> 3
+        2 |-> 2
+      </store>
+    </T>
 #Or
-  Result ==K <T>
-    <k>
-      .
-    </k>
-    <env>
-      x |-> 1
-      y |-> 2
-    </env>
-    <store>
-      1 |-> 3
-      2 |-> 3
-    </store>
-  </T>
+    Result
+  #Equals
+    <T>
+      <k>
+        .
+      </k>
+      <env>
+        x |-> 1
+        y |-> 2
+      </env>
+      <store>
+        1 |-> 3
+        2 |-> 3
+      </store>
+    </T>

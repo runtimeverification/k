@@ -1,1 +1,3 @@
-V ==K ( V0 , V1 , V2 , .Bottoms ) triple --> V1
+  V
+#Equals
+  ( V0 , V1 , V2 , .Bottoms ) triple --> V1

@@ -1,11 +1,23 @@
-  S ==K "123"
+    S
+  #Equals
+    "123"
 #Or
-  S ==K "132"
+    S
+  #Equals
+    "132"
 #Or
-  S ==K "213"
+    S
+  #Equals
+    "213"
 #Or
-  S ==K "231"
+    S
+  #Equals
+    "231"
 #Or
-  S ==K "312"
+    S
+  #Equals
+    "312"
 #Or
-  S ==K "321"
+    S
+  #Equals
+    "321"

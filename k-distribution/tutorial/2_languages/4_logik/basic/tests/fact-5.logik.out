@@ -1,1 +1,3 @@
-Solution ==K ( X:Term |-> john )
+  Solution
+#Equals
+  X:Term |-> john

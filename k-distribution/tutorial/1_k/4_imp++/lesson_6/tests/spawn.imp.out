@@ -1,47 +1,95 @@
-    Out ==K "x = 11\n"
+      Out
+    #Equals
+      "x = 11\n"
   #And
-    Store ==K ( 1 |-> 11 )
+      Store
+    #Equals
+      1 |-> 11
 #Or
-    Out ==K "x = 11\n"
+      Out
+    #Equals
+      "x = 11\n"
   #And
-    Store ==K ( 1 |-> 21 )
+      Store
+    #Equals
+      1 |-> 21
 #Or
-    Out ==K "x = 11\n"
+      Out
+    #Equals
+      "x = 11\n"
   #And
-    Store ==K ( 1 |-> 33 )
+      Store
+    #Equals
+      1 |-> 33
 #Or
-    Out ==K "x = 16\n"
+      Out
+    #Equals
+      "x = 16\n"
   #And
-    Store ==K ( 1 |-> 16 )
+      Store
+    #Equals
+      1 |-> 16
 #Or
-    Out ==K "x = 21\n"
+      Out
+    #Equals
+      "x = 21\n"
   #And
-    Store ==K ( 1 |-> 21 )
+      Store
+    #Equals
+      1 |-> 21
 #Or
-    Out ==K "x = 23\n"
+      Out
+    #Equals
+      "x = 23\n"
   #And
-    Store ==K ( 1 |-> 11 )
+      Store
+    #Equals
+      1 |-> 11
 #Or
-    Out ==K "x = 23\n"
+      Out
+    #Equals
+      "x = 23\n"
   #And
-    Store ==K ( 1 |-> 16 )
+      Store
+    #Equals
+      1 |-> 16
 #Or
-    Out ==K "x = 23\n"
+      Out
+    #Equals
+      "x = 23\n"
   #And
-    Store ==K ( 1 |-> 21 )
+      Store
+    #Equals
+      1 |-> 21
 #Or
-    Out ==K "x = 23\n"
+      Out
+    #Equals
+      "x = 23\n"
   #And
-    Store ==K ( 1 |-> 33 )
+      Store
+    #Equals
+      1 |-> 33
 #Or
-    Out ==K "x = 33\n"
+      Out
+    #Equals
+      "x = 33\n"
   #And
-    Store ==K ( 1 |-> 11 )
+      Store
+    #Equals
+      1 |-> 11
 #Or
-    Out ==K "x = 33\n"
+      Out
+    #Equals
+      "x = 33\n"
   #And
-    Store ==K ( 1 |-> 16 )
+      Store
+    #Equals
+      1 |-> 16
 #Or
-    Out ==K "x = 33\n"
+      Out
+    #Equals
+      "x = 33\n"
   #And
-    Store ==K ( 1 |-> 33 )
+      Store
+    #Equals
+      1 |-> 33

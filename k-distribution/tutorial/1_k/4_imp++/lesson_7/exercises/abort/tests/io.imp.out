@@ -1,1 +1,3 @@
-S ==K "Input two numbers: Their sum is: 5\n"
+  S
+#Equals
+  "Input two numbers: Their sum is: 5\n"

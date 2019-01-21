@@ -1,1 +1,3 @@
-V ==K Pair ( Pair ( 1 , Wrapper ( 2 , .Bottoms ) , .Bottoms ) , Pair ( 3 , 4 , .Bottoms ) , .Bottoms )
+  V
+#Equals
+  Pair ( Pair ( 1 , Wrapper ( 2 , .Bottoms ) , .Bottoms ) , Pair ( 3 , 4 , .Bottoms ) , .Bottoms )

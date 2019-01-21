@@ -1,3 +1,7 @@
-  Solution ==K ( X:Term |-> c )
+    Solution
+  #Equals
+    X:Term |-> c
 #Or
-  Solution ==K ( X:Term |-> e )
+    Solution
+  #Equals
+    X:Term |-> e

@@ -1,1 +1,3 @@
-Solution ==K ( R:Term |-> 120 )
+  Solution
+#Equals
+  R:Term |-> 120

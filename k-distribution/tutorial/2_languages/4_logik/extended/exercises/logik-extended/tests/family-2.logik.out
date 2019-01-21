@@ -1,5 +1,11 @@
-  Solution ==K ( X:Term |-> david )
+    Solution
+  #Equals
+    X:Term |-> david
 #Or
-  Solution ==K ( X:Term |-> jim )
+    Solution
+  #Equals
+    X:Term |-> jim
 #Or
-  Solution ==K ( X:Term |-> steve )
+    Solution
+  #Equals
+    X:Term |-> steve

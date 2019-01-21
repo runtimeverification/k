@@ -1,1 +1,3 @@
-V ==K lambda y . ( ( lambda x . lambda y . ( x y ) ) y )
+  V
+#Equals
+  lambda y . ( ( lambda x . lambda y . ( x y ) ) y )

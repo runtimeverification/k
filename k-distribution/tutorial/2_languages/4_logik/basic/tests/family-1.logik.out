@@ -1,39 +1,59 @@
-  Solution ==K ( A:Term |-> jim )
-  B:Term |-> john
-  X:Term |-> david
+    Solution
+  #Equals
+    A:Term |-> jim
+    B:Term |-> john
+    X:Term |-> david
 #Or
-  Solution ==K ( A:Term |-> nathan )
-  B:Term |-> david
-  X:Term |-> jim
+    Solution
+  #Equals
+    A:Term |-> nathan
+    B:Term |-> david
+    X:Term |-> jim
 #Or
-  Solution ==K ( A:Term |-> nathan )
-  B:Term |-> david
-  X:Term |-> steve
+    Solution
+  #Equals
+    A:Term |-> nathan
+    B:Term |-> david
+    X:Term |-> steve
 #Or
-  Solution ==K ( A:Term |-> nathan )
-  B:Term |-> jim
-  X:Term |-> steve
+    Solution
+  #Equals
+    A:Term |-> nathan
+    B:Term |-> jim
+    X:Term |-> steve
 #Or
-  Solution ==K ( A:Term |-> nathan )
-  B:Term |-> john
-  X:Term |-> david
+    Solution
+  #Equals
+    A:Term |-> nathan
+    B:Term |-> john
+    X:Term |-> david
 #Or
-  Solution ==K ( A:Term |-> nathan )
-  B:Term |-> john
-  X:Term |-> jim
+    Solution
+  #Equals
+    A:Term |-> nathan
+    B:Term |-> john
+    X:Term |-> jim
 #Or
-  Solution ==K ( A:Term |-> nathan )
-  B:Term |-> john
-  X:Term |-> steve
+    Solution
+  #Equals
+    A:Term |-> nathan
+    B:Term |-> john
+    X:Term |-> steve
 #Or
-  Solution ==K ( A:Term |-> steve )
-  B:Term |-> david
-  X:Term |-> jim
+    Solution
+  #Equals
+    A:Term |-> steve
+    B:Term |-> david
+    X:Term |-> jim
 #Or
-  Solution ==K ( A:Term |-> steve )
-  B:Term |-> john
-  X:Term |-> david
+    Solution
+  #Equals
+    A:Term |-> steve
+    B:Term |-> john
+    X:Term |-> david
 #Or
-  Solution ==K ( A:Term |-> steve )
-  B:Term |-> john
-  X:Term |-> jim
+    Solution
+  #Equals
+    A:Term |-> steve
+    B:Term |-> john
+    X:Term |-> jim

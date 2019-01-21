@@ -1,1 +1,3 @@
-S ==K "child spawned\nchild halted\n"
+  S
+#Equals
+  "child spawned\nchild halted\n"

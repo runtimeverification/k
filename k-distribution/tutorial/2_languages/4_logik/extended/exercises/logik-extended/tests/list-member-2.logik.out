@@ -1,11 +1,23 @@
-  Solution ==K ( X:Term |-> 1 )
+    Solution
+  #Equals
+    X:Term |-> 1
 #Or
-  Solution ==K ( X:Term |-> 2 )
+    Solution
+  #Equals
+    X:Term |-> 2
 #Or
-  Solution ==K ( X:Term |-> 3 )
+    Solution
+  #Equals
+    X:Term |-> 3
 #Or
-  Solution ==K ( X:Term |-> 4 )
+    Solution
+  #Equals
+    X:Term |-> 4
 #Or
-  Solution ==K ( X:Term |-> 5 )
+    Solution
+  #Equals
+    X:Term |-> 5
 #Or
-  Solution ==K ( X:Term |-> 6 )
+    Solution
+  #Equals
+    X:Term |-> 6

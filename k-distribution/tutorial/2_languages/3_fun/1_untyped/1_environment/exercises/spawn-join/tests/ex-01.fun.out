@@ -1,7 +1,15 @@
-  S ==K "22"
+    S
+  #Equals
+    "22"
 #Or
-  S ==K "23"
+    S
+  #Equals
+    "23"
 #Or
-  S ==K "32"
+    S
+  #Equals
+    "32"
 #Or
-  S ==K "33"
+    S
+  #Equals
+    "33"

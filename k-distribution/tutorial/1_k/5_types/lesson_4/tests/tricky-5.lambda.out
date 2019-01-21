@@ -1,1 +1,3 @@
-T ==K ( ( int -> V0 ) -> ( int -> V0 ) )
+  T
+#Equals
+  ( int -> V0 ) -> ( int -> V0 )

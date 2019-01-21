@@ -1,11 +1,23 @@
-  S ==K "Hi from thread 1!\nHi from thread 2!\nHi from thread 3!\n"
+    S
+  #Equals
+    "Hi from thread 1!\nHi from thread 2!\nHi from thread 3!\n"
 #Or
-  S ==K "Hi from thread 1!\nHi from thread 3!\nHi from thread 2!\n"
+    S
+  #Equals
+    "Hi from thread 1!\nHi from thread 3!\nHi from thread 2!\n"
 #Or
-  S ==K "Hi from thread 2!\nHi from thread 1!\nHi from thread 3!\n"
+    S
+  #Equals
+    "Hi from thread 2!\nHi from thread 1!\nHi from thread 3!\n"
 #Or
-  S ==K "Hi from thread 2!\nHi from thread 3!\nHi from thread 1!\n"
+    S
+  #Equals
+    "Hi from thread 2!\nHi from thread 3!\nHi from thread 1!\n"
 #Or
-  S ==K "Hi from thread 3!\nHi from thread 1!\nHi from thread 2!\n"
+    S
+  #Equals
+    "Hi from thread 3!\nHi from thread 1!\nHi from thread 2!\n"
 #Or
-  S ==K "Hi from thread 3!\nHi from thread 2!\nHi from thread 1!\n"
+    S
+  #Equals
+    "Hi from thread 3!\nHi from thread 2!\nHi from thread 1!\n"

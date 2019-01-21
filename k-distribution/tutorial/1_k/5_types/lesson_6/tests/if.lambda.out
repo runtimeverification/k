@@ -1,1 +1,3 @@
-T ==K bool -> ( V0 -> ( V0 -> V0 ) )
+  T
+#Equals
+  bool -> ( V0 -> ( V0 -> V0 ) )

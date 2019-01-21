@@ -1,7 +1,15 @@
-  S ==K "5"
+    S
+  #Equals
+    "5"
 #Or
-  S ==K "10"
+    S
+  #Equals
+    "10"
 #Or
-  S ==K "15"
+    S
+  #Equals
+    "15"
 #Or
-  S ==K "20"
+    S
+  #Equals
+    "20"

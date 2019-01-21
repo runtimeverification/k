@@ -2,4 +2,6 @@ Search results:
 
 Solution 1:
 V:K@SORT-K -->
-true ~> _0:KResult ==K _1:Sort
+  true ~> _0:KResult
+#Equals
+  _1:Sort

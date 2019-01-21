@@ -1,13 +1,27 @@
-  S ==K "1"
+    S
+  #Equals
+    "1"
 #Or
-  S ==K "2"
+    S
+  #Equals
+    "2"
 #Or
-  S ==K "3"
+    S
+  #Equals
+    "3"
 #Or
-  S ==K "4"
+    S
+  #Equals
+    "4"
 #Or
-  S ==K "5"
+    S
+  #Equals
+    "5"
 #Or
-  S ==K "6"
+    S
+  #Equals
+    "6"
 #Or
-  S ==K "7"
+    S
+  #Equals
+    "7"

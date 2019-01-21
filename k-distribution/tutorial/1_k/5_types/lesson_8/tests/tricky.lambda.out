@@ -1,1 +1,3 @@
-T ==K bool -> bool
+  T
+#Equals
+  bool -> bool

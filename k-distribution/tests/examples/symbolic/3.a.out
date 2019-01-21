@@ -1,9 +1,15 @@
 Solution 1
 <T> <k> "default" </k> </T>
- AND V0 ==K ""
+   AND V0
+ #Equals
+   ""
 Solution 2
 <T> <k> "f" </k> </T>
- AND V0 ==K "f"
+   AND V0
+ #Equals
+   "f"
 Solution 3
 <T> <k> "t" </k> </T>
- AND V0 ==K "t"
+   AND V0
+ #Equals
+   "t"
