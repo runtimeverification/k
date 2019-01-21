@@ -18,6 +18,7 @@ import java.lang.annotation.Annotation;
 public class Attribute<T> extends ASTNode {
 
     public static final String FUNCTION_KEY = "function";
+    public static final String SIMPLIFICATION_KEY = "simplification";
     public static final String ASSOCIATIVE_KEY = "assoc";
     public static final String COMMUTATIVE_KEY = "comm";
     public static final String IDEMPOTENT_KEY = "idem";
