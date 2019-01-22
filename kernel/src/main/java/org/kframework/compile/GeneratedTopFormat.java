@@ -2,7 +2,7 @@
 package org.kframework.compile;
 
 import org.kframework.builtin.KLabels;
-// import org.kframework.builtin.Sorts;
+import org.kframework.builtin.Sorts;
 import org.kframework.definition.Module;
 import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
@@ -27,8 +27,7 @@ public class GeneratedTopFormat {
             for (ProductionItem p: JavaConverters.seqAsJavaList(prod.items())) {
                 if (p instanceof NonTerminal) {
                     NonTerminal nt = (NonTerminal) p;
-                    // if (! nt.sort().equals(Sorts.GeneratedCounterSort)) {
-                    if (! nt.sort().name().equals("GeneratedCounterCell")) {
+                    if (! nt.sort().equals(Sorts.GeneratedCounterCell())) {
                         cellPositions.add(i);
                     }
                 }
