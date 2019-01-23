@@ -119,9 +119,9 @@
   <build>
     <extensions>
       <extension>
-        <groupId>org.zalando.org.springframework.build</groupId>
+        <groupId>com.github.platform-team</groupId>
         <artifactId>aws-maven</artifactId>
-        <version>5.0.0.RELEASE-zal-2</version>
+        <version>6.0.0</version>
       </extension>
     </extensions>
     <pluginManagement>

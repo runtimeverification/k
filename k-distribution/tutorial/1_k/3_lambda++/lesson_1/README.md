@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2012-2018 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2012-2019 K Team. All Rights Reserved. -->
 
 ### Abrupt Changes of Control
 
