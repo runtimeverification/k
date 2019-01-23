@@ -46,6 +46,7 @@
             <id>build-llvm</id>
             <phase>compile</phase>
             <configuration>
+              <skip>${llvm.backend.skip}</skip>
               <target>
                 <mkdir dir="${project.build.directory}/build" />
                 <exec executable="cmake" dir="${project.build.directory}/build" failonerror="true">
