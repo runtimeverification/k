@@ -48,20 +48,3 @@ exit_status='0'
 notif "KILLING KSERVER"
 ./k-distribution/target/release/k/bin/stop-kserver || true
 [[ "$exit_status" == '0' ]] || exit "$exit_status"
-
-notif "CLONING/PREPARING RV-MATCH"
-rm -rf rv-match
-git clone "$RVMATCH_REPO" rv-match
-(   cd rv-match
-    git submodule update --init -- c-semantics k
-    cd k
-    git fetch ../../
-    git checkout FETCH_HEAD
-    git submodule update --init --recursive
-    mvn package -DskipTests
-)
-
-notif "RUNNING RV-MATCH TESTS"
-(   cd rv-match
-    mvn verify -U -DskipKTest -DbuildProfile=x86_64-gcc-glibc
-)
