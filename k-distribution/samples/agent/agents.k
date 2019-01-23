@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2018 K Team. All Rights Reserved.
+// Copyright (c) 2012-2019 K Team. All Rights Reserved.
 require "int.k"
 require "bool.k"
 require "seq.k"

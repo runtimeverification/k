@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2010-2018 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2010-2019 K Team. All Rights Reserved. -->
 
 ### Configuration Abstraction, Part 1; Types of Rules
 
