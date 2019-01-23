@@ -1,4 +1,4 @@
-// Copyright (c) 2018 K Team. All Rights Reserved.
+// Copyright (c) 2018-2019 K Team. All Rights Reserved.
 package org.kframework.backend.kore;
 
 import com.google.inject.Inject;
@@ -122,11 +122,11 @@ public class KoreBackend implements Backend {
         return def -> resolveIO
                 .andThen(resolveFun)
                 .andThen(resolveStrict)
-                .andThen(expandMacros)
                 .andThen(resolveAnonVars)
                 .andThen(d -> new ResolveContexts(kompileOptions).resolve(d))
                 .andThen(resolveHeatCoolAttribute)
                 .andThen(resolveSemanticCasts)
+                .andThen(expandMacros)
                 .andThen(generateSortPredicateSyntax)
                 .andThen(AddImplicitComputationCell::transformDefinition)
                 .andThen(resolveFreshConstants)

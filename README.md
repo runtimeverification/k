@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2010-2018 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2010-2019 K Team. All Rights Reserved. -->
 [![Join the chat at https://gitter.im/kframework/k](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/kframework/k?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 This is a readme file for the developers.
@@ -7,6 +7,7 @@ This is a readme file for the developers.
 
 In short:
 ```
+git submodule update --init --recursive
 sudo apt-get install build-essential m4 openjdk-8-jdk libgmp-dev libmpfr-dev pkg-config flex z3 libz3-dev maven opam python3 cmake clang-6.0 clang++-6.0 llvm-6.0 zlib1g-dev bison libboost-test-dev libyaml-cpp-dev libjemalloc-dev
 curl https://sh.rustup.rs -sSf | sh
 source $HOME/.cargo/env

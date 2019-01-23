@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2018 K Team. All Rights Reserved.
+// Copyright (c) 2015-2019 K Team. All Rights Reserved.
 
 // Module defining only the sorts K and KString, useful for modularity
 module SORT-K
@@ -82,6 +82,9 @@ module KSEQ-SYMBOLIC
                     > #Pattern "#Equals" #Pattern [klabel(#Equals), symbol, mlOp, format(%i%1%d%n%2%n%i%3%d)]
                     > #Pattern "#And" #Pattern [klabel(#And), symbol, assoc, comm, unit(#True), mlOp, format(%i%1%d%n%2%n%i%3%d)]
                     > #Pattern "#Or" #Pattern [klabel(#Or), symbol, assoc, comm, unit(#False), mlOp, format(%i%1%d%n%2%n%i%3%d)]
+                    > #Pattern "#Implies" #Pattern [klabel(#Implies), symbol, mlOp, format(%i%1%d%n%2%n%i%3%d)]
+                    > "#Exists" #KVariable "." #Pattern [klabel(#Exists), symbol, mlOp]
+                    | "#Forall" #KVariable "." #Pattern [klabel(#Forall), symbol, mlOp]
 endmodule
 
 module KCELLS
