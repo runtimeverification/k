@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2018 K Team. All Rights Reserved.
+// Copyright (c) 2015-2019 K Team. All Rights Reserved.
 package org.kframework.kompile;
 
 import com.google.inject.Inject;

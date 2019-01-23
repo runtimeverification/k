@@ -1,4 +1,4 @@
-// Copyright (c) 2018 K Team. All Rights Reserved.
+// Copyright (c) 2018-2019 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore.disambiguation;
 
 import org.kframework.POSet;

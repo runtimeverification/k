@@ -1,4 +1,4 @@
-<!-- Copyright (c) 2010-2018 K Team. All Rights Reserved. -->
+<!-- Copyright (c) 2010-2019 K Team. All Rights Reserved. -->
 
 ### Extending/Changing an Existing Language Syntax
 
