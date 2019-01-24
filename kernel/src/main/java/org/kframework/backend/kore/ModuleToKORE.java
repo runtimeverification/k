@@ -1115,7 +1115,7 @@ public class ModuleToKORE {
             } else if (attributes.get(name) != null && attributes.get(name)) {
                 convert(name);
                 sb.append("{}(");
-                sb.append(StringUtil.enquoteCString(strVal));
+                sb.append(StringUtil.enquoteKString(strVal));
                 sb.append(")");
             } else {
                 convert(name);
@@ -1341,9 +1341,9 @@ public class ModuleToKORE {
                 convert(k.sort(), false);
                 sb.append("}(");
                 if (module.sortAttributesFor().get(k.sort()).getOrElse(() -> Att.empty()).getOptional("hook").orElse("").equals("STRING.String")) {
-                    sb.append(StringUtil.enquoteCString(StringUtil.unquoteKString(k.s())));
+                    sb.append(k.s());
                 } else {
-                    sb.append(StringUtil.enquoteCString(k.s()));
+                    sb.append(StringUtil.enquoteKString(k.s()));
                 }
                 sb.append(")");
             }

@@ -2,9 +2,9 @@ package org.kframework.unparser
 
 import java.io.PrintStream
 
-import org.apache.commons.lang3.StringEscapeUtils
 import org.kframework.kore.Unapply._
 import org.kframework.kore.{KLabel, InjectedKLabel, K, KApply}
+import org.kframework.utils.StringUtil
 
 import scala.collection.JavaConverters._
 
@@ -23,7 +23,7 @@ object ToKast {
 
   def apply(l: KLabel): String = unparse(false, l)
 
-  def escape(s: String): String = StringEscapeUtils.escapeJava(s)
+  def escape(s: String): String = StringUtil.enquoteKString(s)
 
   def unparse(inParen: Boolean, l: KLabel) : String = {
     var name: String = ""
@@ -69,7 +69,7 @@ object ToKast {
    * @param k The term to print
    */
   def unparse(accumulator:String=>Unit, inParen: Boolean, prec: Int, k: K): Unit = k match {
-    case KToken(s, sort) => accumulator("#token(\"" + escape(s) + "\",\"" + escape(sort.toString) + "\")")
+    case KToken(s, sort) => accumulator("#token(" + escape(s) + "," + escape(sort.toString) + ")")
     case InjectedKLabel(l) => accumulator("#klabel("+apply(l)+")")
     case KVariable(v) => accumulator(v.toString)
     case KApply(l, List()) => accumulator(unparse(inParen,l)+"(.KList)")
