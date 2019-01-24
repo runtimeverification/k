@@ -5,6 +5,9 @@ pipeline {
       args '-u 0'
     }
   }
+  options {
+    skipDefaultCheckout true
+  }
   stages {
     stage('Checkout code') {
       steps {
