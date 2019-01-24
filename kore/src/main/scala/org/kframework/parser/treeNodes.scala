@@ -8,7 +8,7 @@ import java.util._
 import java.lang.Iterable
 import org.pcollections.{ConsPStack, PStack}
 import collection.JavaConverters._
-import org.apache.commons.lang3.StringEscapeUtils
+import org.kframework.utils.StringUtil
 
 import scala.collection.mutable;
 
@@ -27,7 +27,7 @@ trait HasChildren {
 }
 
 case class Constant private(value: String, production: Production) extends ProductionReference {
-  override def toString = "#token(" + production.sort + ",\"" + StringEscapeUtils.escapeJava(value) + "\")"
+  override def toString = "#token(" + production.sort + "," + StringUtil.enquoteKString(value) + ")"
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(Constant.this);
 }
 
