@@ -1,9 +1,9 @@
 package org.kframework.parser.kore.parser
 
-import org.apache.commons.lang3.StringEscapeUtils
 import org.kframework.parser.kore._
 import org.kframework.parser.kore
 import org.kframework.parser.kore.implementation.DefaultBuilders
+import org.kframework.utils.StringUtil
 
 /** Parsing error exception. */
 case class ParseError(msg: String) extends Exception(msg) // ParseError.msg eq Exception.detailMessage, i.e., msg() == getMessage()
@@ -540,41 +540,28 @@ class TextToKore(b: Builders = DefaultBuilders) {
 
   private def parseString(): String = {
     def loop(s: StringBuilder): String = {
-      scanner.next() match {
+      val c = scanner.next()
+      s += c;
+      c match {
          case '\\' =>
-           val c = scanner.next()
-           var s1 = ""
-           c match {
-             case 'u' => // Unicode: 4 hex digits
-               val c1 = scanner.next()
-               val c2 = scanner.next()
-               val c3 = scanner.next()
-               val c4 = scanner.next()
-               s1 = StringEscapeUtils.unescapeJava("\\u" + c1 + c2 + c3 + c4)
-             case 'U' => // Unicode: 8 hex digits
-               val c1 = scanner.next()
-               val c2 = scanner.next()
-               val c3 = scanner.next()
-               val c4 = scanner.next()
-               val c5 = scanner.next()
-               val c6 = scanner.next()
-               val c7 = scanner.next()
-               val c8 = scanner.next()
-               s1 = StringEscapeUtils.unescapeJava("\\U" + c1 + c2 + c3 + c4 + c5 + c6 + c7 + c8)
-             case _ =>
-               s1 = StringEscapeUtils.unescapeJava("\\" + c)
-           }
-           s ++= s1;
+           // Always grab one character after the escaping backslash. We do not
+           // need to grab the entire escape sequence now, because actual
+           // unquoting does not happen until we have the entire string literal;
+           // this is only to prevent parsing the final quote prematurely.
+           s += scanner.next();
            loop(s)
          case '"' =>
-           s.toString()
+           StringUtil.unquoteKString(s.toString())
          case c =>
-           s += c; loop(s)
+           loop(s)
       }
     }
 
     scanner.nextWithSkippingWhitespaces() match {
-      case '"' => loop(new StringBuilder())
+      case '"' =>
+        val s = new StringBuilder()
+        s += '"';
+        loop(s)
       case err => throw error('"', err) // shouldn't be reachable
     }
   }
@@ -753,7 +740,7 @@ class TextToKore(b: Builders = DefaultBuilders) {
   private def error(expected: String, actual: String): ParseError = {
     ParseError(
       "ERROR: " + "Line " + scanner.lineNum + ": Column " + scanner.columnNum + ": " +
-        "Expected " + expected + ", but " + actual // StringEscapeUtils.escapeJava(actual)
+        "Expected " + expected + ", but " + actual
         + System.lineSeparator() + scanner.line + System.lineSeparator() +
         List.fill(scanner.columnNum - 1)(' ').mkString + "^"
     )
