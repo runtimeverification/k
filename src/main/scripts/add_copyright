@@ -9,6 +9,18 @@
 EXTENSION="${1##*.}"
 YEAR=
 BLAME="`git log --follow --format=%ci "$1" | awk '{print $1}'`"
+if [ -n "`echo $BLAME | grep 2018`" ]
+then
+  YEAR=2018-
+fi
+if [ -n "`echo $BLAME | grep 2017`" ]
+then
+  YEAR=2017-
+fi
+if [ -n "`echo $BLAME | grep 2016`" ]
+then
+  YEAR=2016-
+fi
 if [ -n "`echo $BLAME | grep 2015`" ]
 then
   YEAR=2015-
@@ -41,17 +53,17 @@ then
 fi
 if [ $EXTENSION = "xml" -o $EXTENSION = "xsd" ]
 then
-  sed -i '1s/^/<?xml version="1.0" encoding="UTF-8"?>\n<!-- Copyright (c) '$YEAR'2018 K Team. All Rights Reserved. -->\n/' "$1"
+  sed -i '1s/^/<?xml version="1.0" encoding="UTF-8"?>\n<!-- Copyright (c) '$YEAR'2019 K Team. All Rights Reserved. -->\n/' "$1"
 fi
 if [ $EXTENSION = "md" ]
 then
-  sed -i '1s/^/<!-- Copyright (c) '$YEAR'2018 K Team. All Rights Reserved. -->\n/' "$1"
+  sed -i '1s/^/<!-- Copyright (c) '$YEAR'2019 K Team. All Rights Reserved. -->\n/' "$1"
 fi
 if [ $EXTENSION = "k" -o $EXTENSION = "java" -o $EXTENSION = "jj" ]
 then
-  sed -i '1s/^/\/\/ Copyright (c) '$YEAR'2018 K Team. All Rights Reserved.\n/' "$1"
+  sed -i '1s/^/\/\/ Copyright (c) '$YEAR'2019 K Team. All Rights Reserved.\n/' "$1"
 fi
 if [ $EXTENSION = "css" ]
 then
-  sed -i '1s/^/\/\* Copyright (c) '$YEAR'2018 K Team. All Rights Reserved. \*\/\n/' "$1"
+  sed -i '1s/^/\/\* Copyright (c) '$YEAR'2019 K Team. All Rights Reserved. \*\/\n/' "$1"
 fi
