@@ -1,4 +1,4 @@
-// Copyright (c) 2018 K Team. All Rights Reserved.
+// Copyright (c) 2018-2019 K Team. All Rights Reserved.
 package org.kframework.backend.kore;
 
 import com.google.common.collect.BiMap;
@@ -558,6 +558,7 @@ public class ModuleToKORE {
     }
 
     private void convertRule(Rule rule, boolean heatCoolEq, Sort topCellSort, Map<String, Boolean> consideredAttributes, SetMultimap<KLabel, Rule> functionRules, boolean rulesAsClaims) {
+        ConstructorChecks constructorChecks = new ConstructorChecks(module);
         boolean equation = false;
         boolean owise = false;
         Production production = null;
@@ -566,6 +567,7 @@ public class ModuleToKORE {
         KLabel productionLabel = null;
         List<K> leftChildren = null;
         K left = RewriteToTop.toLeft(rule.body());
+        boolean constructorBased = constructorChecks.isConstructorBased(left);
         if (left instanceof KApply) {
             Production prod = production((KApply)left);
             production = prod.att().get("originalPrd", Production.class);
@@ -588,6 +590,14 @@ public class ModuleToKORE {
         sb.append(rule.toString());
         sb.append("\n");
         if (equation) {
+            if (!constructorBased) {
+                if (!consideredAttributes.containsKey(Attribute.SIMPLIFICATION_KEY)) {
+                    consideredAttributes.put(Attribute.SIMPLIFICATION_KEY, false);
+                }
+                if (!rule.att().contains(Attribute.SIMPLIFICATION_KEY)) {
+                    rule = rule.withAtt(rule.att().add(Attribute.SIMPLIFICATION_KEY));
+                }
+            }
             if (owise) {
                 sb.append("  axiom{R} ");
                 sb.append("\\implies{R} (\n    \\and{R} (\n      \\not{R} (\n        ");
@@ -1105,7 +1115,7 @@ public class ModuleToKORE {
             } else if (attributes.get(name) != null && attributes.get(name)) {
                 convert(name);
                 sb.append("{}(");
-                sb.append(StringUtil.enquoteCString(strVal));
+                sb.append(StringUtil.enquoteKString(strVal));
                 sb.append(")");
             } else {
                 convert(name);
@@ -1331,9 +1341,9 @@ public class ModuleToKORE {
                 convert(k.sort(), false);
                 sb.append("}(");
                 if (module.sortAttributesFor().get(k.sort()).getOrElse(() -> Att.empty()).getOptional("hook").orElse("").equals("STRING.String")) {
-                    sb.append(StringUtil.enquoteCString(StringUtil.unquoteKString(k.s())));
+                    sb.append(k.s());
                 } else {
-                    sb.append(StringUtil.enquoteCString(k.s()));
+                    sb.append(StringUtil.enquoteKString(k.s()));
                 }
                 sb.append(")");
             }

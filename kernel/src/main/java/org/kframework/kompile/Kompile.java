@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2018 K Team. All Rights Reserved.
+// Copyright (c) 2015-2019 K Team. All Rights Reserved.
 package org.kframework.kompile;
 
 import com.google.inject.Inject;
@@ -155,6 +155,7 @@ public class Kompile {
                 DefinitionTransformer.fromSentenceTransformer(new ResolveSemanticCasts(kompileOptions.backend.equals(Backends.JAVA))::resolve, "resolving semantic casts");
         DefinitionTransformer resolveFun = DefinitionTransformer.from(new ResolveFun()::resolve, "resolving #fun");
         DefinitionTransformer generateSortPredicateSyntax = DefinitionTransformer.from(new GenerateSortPredicateSyntax()::gen, "adding sort predicate productions");
+        DefinitionTransformer generatedTopFormat = DefinitionTransformer.from(GeneratedTopFormat::resolve, "setting generatedTop format attribute");
         DefinitionTransformer subsortKItem = DefinitionTransformer.from(Kompile::subsortKItem, "subsort all sorts to KItem");
         GenerateCoverage cov = new GenerateCoverage(kompileOptions.coverage, files);
         DefinitionTransformer genCoverage = DefinitionTransformer.fromRuleBodyTransformerWithRule(cov::gen, "generate coverage instrumentation");
@@ -171,6 +172,7 @@ public class Kompile {
                 .andThen(resolveSemanticCasts)
                 .andThen(generateSortPredicateSyntax)
                 .andThen(Kompile::resolveFreshConstants)
+                .andThen(generatedTopFormat)
                 .andThen(AddImplicitComputationCell::transformDefinition)
                 .andThen(new Strategy(kompileOptions.experimental.heatCoolStrategies).addStrategyCellToRulesTransformer())
                 .andThen(ConcretizeCells::transformDefinition)

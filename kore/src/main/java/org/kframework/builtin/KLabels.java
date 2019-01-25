@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2018 K Team. All Rights Reserved.
+// Copyright (c) 2015-2019 K Team. All Rights Reserved.
 
 package org.kframework.builtin;
 
@@ -38,13 +38,15 @@ public class KLabels {
     public static final KLabel ML_FORALL = KLabel("#Forall");
 
     public static final KLabel ListItem = KLabel("ListItem");
-    public static final KLabel MapItem = KLabel("_|->_");
-    public static final KLabel SetItem = KLabel("SetItem");
-    public static final KLabel DotMap = KLabel(".Map");
     public static final KLabel List = KLabel("_List_");
-    public static final KLabel Set = KLabel("_Set_");
-    public static final KLabel Map = KLabel("_Map_");
     public static final KLabel DotList = KLabel(".List");
+    public static final KLabel MapItem = KLabel("_|->_");
+    public static final KLabel Map = KLabel("_Map_");
+    public static final KLabel DotMap = KLabel(".Map");
+    public static final KLabel SetItem = KLabel("SetItem");
+    public static final KLabel Set = KLabel("_Set_");
+    public static final KLabel DotSet = KLabel(".Set");
+
     public static final KLabel EQUALS_K = KLabel("_==K_");
     public static final KLabel NOT_EQUALS_K = KLabel("_=/=K_");
 

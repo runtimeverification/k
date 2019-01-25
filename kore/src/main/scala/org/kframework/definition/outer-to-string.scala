@@ -1,6 +1,6 @@
 package org.kframework.definition
 
-import org.apache.commons.lang3.StringEscapeUtils
+import org.kframework.utils.StringUtil
 import collection._
 
 trait ModuleToString {
@@ -38,7 +38,7 @@ trait SyntaxSortToString {
 
 trait TerminalToString {
   self: Terminal =>
-  override def toString = "\"" + StringEscapeUtils.escapeJava(value) + "\""
+  override def toString = StringUtil.enquoteKString(value)
 }
 
 trait NonTerminalToString {
@@ -49,11 +49,11 @@ trait NonTerminalToString {
 trait RegexTerminalToString {
   self: RegexTerminal =>
   override def toString = {
-    "r\"" + StringEscapeUtils.escapeJava(
+    "r" + StringUtil.enquoteKString(
       (if ("#" == precedeRegex) "" else "(?<!" + precedeRegex + ")" ) +
       regex +
       (if ("#" == followRegex) "" else "(?!" + precedeRegex + ")" )
-    ) + "\""
+    )
   }
 }
 

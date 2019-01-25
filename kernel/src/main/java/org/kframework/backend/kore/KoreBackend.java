@@ -1,4 +1,4 @@
-// Copyright (c) 2018 K Team. All Rights Reserved.
+// Copyright (c) 2018-2019 K Team. All Rights Reserved.
 package org.kframework.backend.kore;
 
 import com.google.inject.Inject;
@@ -10,6 +10,7 @@ import org.kframework.compile.Backend;
 import org.kframework.compile.ConcretizeCells;
 import org.kframework.compile.ConfigurationInfoFromModule;
 import org.kframework.compile.ExpandMacros;
+import org.kframework.compile.GeneratedTopFormat;
 import org.kframework.compile.GenerateSortPredicateRules;
 import org.kframework.compile.GenerateSortPredicateSyntax;
 import org.kframework.compile.LabelInfo;
@@ -117,6 +118,7 @@ public class KoreBackend implements Backend {
         DefinitionTransformer subsortKItem = DefinitionTransformer.from(Kompile::subsortKItem, "subsort all sorts to KItem");
         DefinitionTransformer expandMacros = DefinitionTransformer.fromSentenceTransformer((m, s) -> new ExpandMacros(m, files, kompileOptions, false).expand(s), "expand macros");
         Function1<Definition, Definition> resolveFreshConstants = d -> DefinitionTransformer.from(new ResolveFreshConstants(d, true)::resolve, "resolving !Var variables").apply(d);
+        DefinitionTransformer generatedTopFormat = DefinitionTransformer.from(GeneratedTopFormat::resolve, "setting generatedTop format attribute");
         Function1<Definition, Definition> resolveIO = (d -> Kompile.resolveIOStreams(kem, d));
 
         return def -> resolveIO
@@ -130,6 +132,7 @@ public class KoreBackend implements Backend {
                 .andThen(generateSortPredicateSyntax)
                 .andThen(AddImplicitComputationCell::transformDefinition)
                 .andThen(resolveFreshConstants)
+                .andThen(generatedTopFormat)
                 .andThen(new Strategy(kompileOptions.experimental.heatCoolStrategies).addStrategyCellToRulesTransformer())
                 .andThen(d -> Strategy.addStrategyRuleToMainModule(def.mainModule().name()).apply(d))
                 .andThen(ConcretizeCells::transformDefinition)

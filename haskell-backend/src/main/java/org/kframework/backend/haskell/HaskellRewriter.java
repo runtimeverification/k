@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2018 K Team. All Rights Reserved.
+// Copyright (c) 2014-2019 K Team. All Rights Reserved.
 package org.kframework.backend.haskell;
 
 import com.google.inject.Inject;
@@ -259,17 +259,11 @@ public class HaskellRewriter implements Function<Module, Rewriter> {
 
             @Override
             public K prove(Module rules) {
-                Module specModule;
-                if (!module.name().equals(def.kompiledDefinition.mainModule().name())) {
-                    specModule = module.addImport(def.kompiledDefinition.mainModule());
-                } else {
-                    specModule = module;
-                }
-                String kompiledModule = KoreBackend.getKompiledString(specModule, def.topCellInitializer, files, false);
+                String kompiledModule = KoreBackend.getKompiledString(module, def.topCellInitializer, files, false);
                 files.saveToTemp("vdefinition.kore", kompiledModule);
 
                 ModuleToKORE rulesConverter = new ModuleToKORE(rules, files, def.topCellInitializer);
-                String koreOutput = rulesConverter.convertSpecificationModule(specModule, rules);
+                String koreOutput = rulesConverter.convertSpecificationModule(module, rules);
                 files.saveToTemp("spec.kore", koreOutput);
                 String defPath = files.resolveTemp("vdefinition.kore").getAbsolutePath();
                 String specPath = files.resolveTemp("spec.kore").getAbsolutePath();
