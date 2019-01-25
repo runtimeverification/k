@@ -62,7 +62,7 @@ pipeline {
         GITHUB_TOKEN = credentials('rv-jenkins')
       }
       steps {
-       sh '''
+       sh $/
           echo 'Setting up environment...'
           eval `opam config env`
           . $HOME/.cargo/env
@@ -75,7 +75,7 @@ pipeline {
           curl --data-binary @k-distribution/target/k-nightly.tar.gz -H "Authorization: token $GITHUB_TOKEN" -H "Content-Type: application/gzip" https://uploads.github.com/repos/kframework/k/releases/$ID/assets?'name=nightly.tar.gz&label=Prebuilt+K+binary'
           curl -X PATCH --data '{"draft": false}' https://api.github.com/repos/kframework/k/releases/$ID?access_token=$GITHUB_TOKEN
           curl --data '{"state": "success","target_url": "'$BUILD_URL'","description": "Build succeeded."}' https://api.github.com/repos/kframework/k/statuses/$(git rev-parse origin/master)?access_token=$GITHUB_TOKEN
-        '''
+        /$
       }
     }
   }
