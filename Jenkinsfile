@@ -87,6 +87,7 @@ pipeline {
           cd tutorial
           echo 'Testing tutorial in user environment...'
           make -j`nproc`
+        '''
       }
       post {
         always {
