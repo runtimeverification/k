@@ -27,10 +27,6 @@ public class BuiltinListTest {
 
     @Before
     public void setUp() {
-        when(globalContext.getDefinition()).thenReturn(definition);
-        when(definition.subsorts()).thenReturn(subsorts);
-        when(subsorts.isSubsortedEq(Sort.LIST, Sort.LIST)).thenReturn(true);
-        when(subsorts.isSubsortedEq(Sort.LIST, Sort.INT)).thenReturn(true);
     }
 
     @Test
