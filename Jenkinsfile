@@ -57,6 +57,7 @@ pipeline {
             dir('kframework-5.0.0') {
               checkout scm
               sh '''
+                . $HOME/.cargo/env
                 dpkg-buildpackage
               '''
             }
