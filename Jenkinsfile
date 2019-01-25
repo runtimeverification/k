@@ -11,6 +11,14 @@ pipeline {
   stages {
     stage('Run in build environment') {
       stages {
+        stage("Init title") {
+          when { changeRequest() }
+          steps {
+            script {
+              currentBuild.displayName = "PR ${env.CHANGE_ID}: ${env.CHANGE_TITLE}"
+            }
+          }
+        }
         stage('Checkout code') {
           steps {
             sh 'rm -rf ./*'
