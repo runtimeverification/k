@@ -16,7 +16,6 @@ import org.kframework.backend.java.symbolic.PersistentUniqueList;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Constants;
-import org.kframework.kil.ASTNode;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
