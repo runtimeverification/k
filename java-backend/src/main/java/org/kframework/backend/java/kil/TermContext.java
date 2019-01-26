@@ -9,7 +9,6 @@ import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.krun.api.io.FileSystem;
 import org.kframework.utils.errorsystem.KEMException;
 
-import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;

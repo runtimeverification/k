@@ -24,15 +24,12 @@ import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
-import org.kframework.backend.java.strategies.TransitionCompositeStrategy;
-import org.kframework.backend.java.util.Profiler2;
 import org.kframework.backend.java.util.StateLog;
 import org.kframework.builtin.KLabels;
 import org.kframework.kore.FindK;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KORE;
-import org.kframework.main.GlobalOptions;
 import org.kframework.rewriter.SearchType;
 import org.kframework.backend.java.utils.BitSet;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -54,7 +51,6 @@ import java.util.stream.Collectors;
  */
 public class SymbolicRewriter {
 
-    private final TransitionCompositeStrategy strategy;
     private final List<String> transitions;
     private final Stopwatch stopwatch = Stopwatch.createUnstarted();
     private final GlobalContext global;
@@ -72,7 +68,6 @@ public class SymbolicRewriter {
         this.definition = global.getDefinition();
         this.allRuleBits = BitSet.apply(definition.ruleTable.size());
         this.allRuleBits.makeOnes(definition.ruleTable.size());
-        this.strategy = new TransitionCompositeStrategy(transitions);
         this.transitions = transitions;
         this.theFastMatcher = new FastRuleMatcher(global, definition.ruleTable.size());
         this.transition = true;
@@ -135,23 +130,15 @@ public class SymbolicRewriter {
         Att emptyAtt = Att.empty();
 
         K stuck = constructor.KApply1(constructor.KLabel(Att.stuck()), constructor.KList(Collections.emptyList()), emptyAtt);
-        List<K> items = new LinkedList<K>(((KApply) theStrategy.get()).klist().items());
+        List<K> items = new LinkedList<>(((KApply) theStrategy.get()).klist().items());
         items.add(0, stuck);
         K sContent = constructor.KApply1(constructor.KLabel(KLabels.KSEQ), constructor.KList(items), emptyAtt);
         K s = constructor.KApply1(((KApply) theStrategy.get()).klabel(), constructor.KList(Collections.singletonList(sContent)), emptyAtt);
-        K entireConf = constructor.KApply1(((KApply) subject.term()).klabel(),
+        Term entireConf = constructor.KApply1(((KApply) subject.term()).klabel(),
                 constructor.KList(((KApply) subject.term()).klist().stream().map(k ->
                         k instanceof KApply && ((KApply) k).klabel().name().contains(Strategy.strategyCellName()) ? s : k).collect(Collectors.toList())), emptyAtt);
-        return Optional.of(new ConstrainedTerm((Term) entireConf, subject.termContext()));
+        return Optional.of(new ConstrainedTerm(entireConf, subject.termContext()));
 
-    }
-
-    private boolean strategyIsRestore(ConstrainedTerm subject) {
-        throw new UnsupportedOperationException();
-    }
-
-    private boolean strategyIsSave(ConstrainedTerm subject) {
-        throw new UnsupportedOperationException();
     }
 
     public List<ConstrainedTerm> fastComputeRewriteStep(ConstrainedTerm subject, boolean computeOne, boolean narrowing, boolean proofFlag) {
@@ -256,7 +243,7 @@ public class SymbolicRewriter {
                 }
             }.apply(theNew).head();
 
-            strategyCell = (K) ((Term) strategyCell).accept(new CopyOnWriteTransformer() {
+            strategyCell = ((Term) strategyCell).accept(new CopyOnWriteTransformer() {
                 @Override
                 public JavaSymbolicObject transform(KItem kItem) {
                     if (kItem.kLabel() instanceof KLabelConstant && ((KLabelConstant) kItem.kLabel()).name().equals("#RESTORE_CONFIGURATION")) {
@@ -299,12 +286,16 @@ public class SymbolicRewriter {
             if (subject instanceof KItem) {
                 KItem kItemSubject = (KItem) subject;
                 List<Term> newContents = new ArrayList<>(((KList) kItemSubject.kList()).getContents());
-                newContents.set(path.head().getLeft(), buildRHS(newContents.get(path.head().getLeft()), substitution, (scala.collection.immutable.List<Pair<Integer, Integer>>) path.tail(), rhs, context));
+                //noinspection RedundantCast
+                newContents.set(path.head().getLeft(), buildRHS(newContents.get(path.head().getLeft()), substitution,
+                        (scala.collection.immutable.List<Pair<Integer, Integer>>) path.tail(), rhs, context));
                 return KItem.of(kItemSubject.kLabel(), KList.concatenate(newContents), context.global()).applyAnywhereRules(context);
             } else if (subject instanceof BuiltinList) {
                 BuiltinList builtinListSubject = (BuiltinList) subject;
                 List<Term> newContents = new ArrayList<>(builtinListSubject.children);
-                newContents.set(path.head().getLeft(), buildRHS(newContents.get(path.head().getLeft()), substitution, (scala.collection.immutable.List<Pair<Integer, Integer>>) path.tail(), rhs, context));
+                //noinspection RedundantCast
+                newContents.set(path.head().getLeft(), buildRHS(newContents.get(path.head().getLeft()), substitution,
+                        (scala.collection.immutable.List<Pair<Integer, Integer>>) path.tail(), rhs, context));
                 return BuiltinList
                         .builder(builtinListSubject.sort, builtinListSubject.operatorKLabel, builtinListSubject.unitKLabel, builtinListSubject.globalContext())
                         .addAll(newContents)
@@ -339,6 +330,7 @@ public class SymbolicRewriter {
         for (int i = 0; i < contents.size(); i++) {
             Pair<Integer, Integer> pair = Pair.of(i, i + 1);
             if (commonPath.containsKey(pair)) {
+                //noinspection RedundantCast
                 List<Pair<scala.collection.immutable.List<Pair<Integer, Integer>>, Term>> theInnerRewrites = commonPath.get(pair).stream().map(p -> Pair.of(
                         (scala.collection.immutable.List<Pair<Integer, Integer>>) p.getLeft().tail(), p.getRight())).collect(Collectors.toList());
                 newContents.add(buildRHS(contents.get(i), substitution, theInnerRewrites, context));
@@ -349,7 +341,9 @@ public class SymbolicRewriter {
 
         if (subject instanceof KItem) {
             return KItem.of(((KItem) subject).kLabel(), KList.concatenate(newContents), context.global()).applyAnywhereRules(context);
-        } else if (subject instanceof BuiltinList) {
+        } else
+            //noinspection ConstantConditions
+            if (subject instanceof BuiltinList) {
             return BuiltinList
                     .builder(((BuiltinList) subject).sort, ((BuiltinList) subject).operatorKLabel, ((BuiltinList) subject).unitKLabel, ((BuiltinList) subject).globalContext())
                     .addAll(newContents)
@@ -368,7 +362,7 @@ public class SymbolicRewriter {
     public static ConstrainedTerm buildResult(
             Rule rule,
             ConjunctiveFormula constraint,
-            Term subject,
+            @SuppressWarnings("unused") Term subject,
             boolean expandPattern,
             TermContext context) {
         for (Variable variable : rule.freshConstants()) {
@@ -418,6 +412,7 @@ public class SymbolicRewriter {
             Rule pattern,
             int bound,
             TermContext context) {
+        //noinspection AssertWithSideEffects
         assert Sets.intersection(subject.term().variableSet(),
                 subject.constraint().substitution().keySet()).isEmpty();
         assert pattern.requires().stream().allMatch(BoolToken.TRUE::equals) && pattern.lookups().getKComponents().isEmpty();
@@ -431,11 +426,7 @@ public class SymbolicRewriter {
                 searchResults.add(conjunct);
             }
         }
-        if (searchResults.size() == bound) {
-            return true;
-        }
-        return false;
-
+        return searchResults.size() == bound;
     }
 
     /**
@@ -553,16 +544,6 @@ public class SymbolicRewriter {
         return k;
     }
 
-    private void flattenList(List<K> unflat, List<K> flat) {
-        unflat.forEach(x -> {
-            if (x instanceof KItem && KLabels.AND.equals(((KItem) x).klabel())) {
-                flattenList(((KItem) x).items(), flat);
-            } else {
-                flat.add(x);
-            }
-        });
-    }
-
     private Substitution<Variable, Term> filterSubstitution(Substitution<Variable, Term> subst) {
         Set<Variable> anonKeys = subst.keySet().stream().filter(v -> v.att().contains("anonymous")).collect(Collectors.toSet());
         return subst.minusAll(anonKeys);
@@ -651,25 +632,6 @@ public class SymbolicRewriter {
                 if (results.isEmpty()) {
                     /* final term */
                     proofResults.add(term);
-                } else {
-//                    for (Rule rule : appliedRules) {
-//                        System.err.println(rule.getLocation() + " " + rule.getSource());
-//                    }
-
-                    /* add helper rule */
-                    HashSet<Variable> ruleVariables = new HashSet<>(initialTerm.variableSet());
-                    ruleVariables.addAll(targetTerm.variableSet());
-
-                    /*
-                    rules.add(new Rule(
-                            term.term().substitute(freshSubstitution, definition),
-                            targetTerm.term().substitute(freshSubstitution, definition),
-                            term.constraint().substitute(freshSubstitution, definition),
-                            Collections.<Variable>emptyList(),
-                            new SymbolicConstraint(definition).substitute(freshSubstitution, definition),
-                            IndexingPair.getIndexingPair(term.term()),
-                            new Attributes()));
-                     */
                 }
 
                 for (ConstrainedTerm cterm : results) {

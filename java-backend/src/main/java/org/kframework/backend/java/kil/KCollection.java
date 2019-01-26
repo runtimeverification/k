@@ -8,7 +8,6 @@ import java.util.stream.Stream;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Constants;
-import org.kframework.kil.ASTNode;
 
 import com.google.common.base.Joiner;
 import org.kframework.kore.K;

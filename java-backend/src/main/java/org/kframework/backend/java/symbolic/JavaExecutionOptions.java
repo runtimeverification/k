@@ -8,7 +8,6 @@ import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.BaseEnumConverter;
 
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.List;
 
 @RequestScoped
