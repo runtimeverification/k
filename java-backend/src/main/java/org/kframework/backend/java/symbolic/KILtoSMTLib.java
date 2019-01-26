@@ -423,7 +423,7 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
     @Override
     public SMTLibTerm transform(ConjunctiveFormula constraint) {
         assert constraint.disjunctions().isEmpty() : "disjunctions are not supported by SMT translation";
-        Set<Equality> equalities = Sets.newHashSet(constraint.equalities());
+        Set<Equality> equalities = Sets.newLinkedHashSet(constraint.equalities());
         if (!allowNewVars) {
             constraint.substitution().entrySet().stream()
                     .map(entry -> new Equality(entry.getKey(), entry.getValue(), constraint.globalContext()))
