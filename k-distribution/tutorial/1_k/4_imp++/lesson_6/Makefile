@@ -1,6 +1,7 @@
 DEF=imp
 EXT=imp
-KOMPILE_FLAGS=--backend java --transition "division lookup increment assignment read print"
+KOMPILE_FLAGS=--transition "division lookup increment assignment read print"
+KOMPILE_BACKEND?=java
 KRUN_FLAGS=--output none
 
 include ../../../../include/ktest.mak

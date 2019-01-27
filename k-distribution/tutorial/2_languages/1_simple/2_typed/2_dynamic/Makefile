@@ -3,7 +3,8 @@ DEF=simple-typed-dynamic
 EXT=simple
 TESTDIR?=../programs/*
 RESULTDIR=tests
-KOMPILE_FLAGS=--transition strict --backend java
+KOMPILE_FLAGS=--transition strict
+KOMPILE_BACKEND?=java
 KRUN_FLAGS=--output none
 
 %/threads/threads_05.simple: kompile

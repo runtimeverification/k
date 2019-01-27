@@ -1,7 +1,7 @@
 MAKEFILE_PATH := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 DEF=logik
 EXT=logik	
-KOMPILE_FLAGS=--backend java
+KOMPILE_BACKEND?=java
 KRUN_FLAGS=--search --pattern "<solution> Solution:Map </solution>"
 
 include $(MAKEFILE_PATH)/../../../../include/ktest.mak

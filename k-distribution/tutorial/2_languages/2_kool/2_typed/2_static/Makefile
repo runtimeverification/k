@@ -1,7 +1,8 @@
 MAKEFILE_PATH := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 DEF=kool-typed-static
 EXT=kool
-KOMPILE_FLAGS=--backend java --transition "inheritance-cycle transition"
+KOMPILE_FLAGS=--transition "inheritance-cycle transition"
+KOMPILE_BACKEND?=java
 KRUN_FLAGS=--output none
 TESTDIR?=../programs
 RESULTDIR=tests
