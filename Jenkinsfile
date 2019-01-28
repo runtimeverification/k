@@ -1,12 +1,15 @@
 pipeline {
   agent {
-    dockerfile {
-      additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
-      containerPerStageRoot true
-    }
+    label 'docker'
   }
   stages {
     stage('Run in build environment') {
+      agent {
+        dockerfile {
+          additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
+          reuseNode true
+        }
+      }
       stages {
         stage("Init title") {
           when { changeRequest() }
@@ -85,6 +88,12 @@ pipeline {
       }
     }
     stage('Deploy') {
+      agent {
+        dockerfile {
+          additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
+          reuseNode true
+        }
+      }
       when { 
         not { changeRequest() }
         branch 'master'
