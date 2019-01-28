@@ -66,6 +66,7 @@ pipeline {
       agent {
         docker {
           image 'ubuntu:bionic'
+          customWorkspace "install-ws"
           args '-u 0'
         }
       }
