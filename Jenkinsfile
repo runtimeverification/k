@@ -5,19 +5,7 @@ pipeline {
       args '-u 0'
     }
   }
-  options {
-    skipDefaultCheckout true
-  }
   stages {
-    stage('Checkout code') {
-      steps {
-        sh 'rm -rf ./*'
-        checkout scm
-        dir('k-exercises') {
-          git url: 'git@github.com:kframework/k-exercises.git'
-        }
-      }
-    }
     stage('Install dependencies') {
       steps {
         sh '''
@@ -37,6 +25,9 @@ pipeline {
     }
     stage('Build and Test') {
       steps {
+        dir('k-exercises') {
+          git credentialsId: 'rv-jenkins', url: 'git@github.com:kframework/k-exercises.git'
+        }
         sh '''
           echo 'Setting up environment...'
           eval `opam config env`
@@ -62,7 +53,7 @@ pipeline {
         GITHUB_TOKEN = credentials('rv-jenkins')
       }
       steps {
-       sh '''
+        sh '''
           echo 'Setting up environment...'
           eval `opam config env`
           . $HOME/.cargo/env
