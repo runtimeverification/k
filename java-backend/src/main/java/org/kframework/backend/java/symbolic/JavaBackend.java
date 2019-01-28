@@ -3,7 +3,6 @@ package org.kframework.backend.java.symbolic;
 
 import com.google.inject.Inject;
 import org.kframework.AddConfigurationRecoveryFlags;
-import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.backend.Backends;
 import org.kframework.builtin.KLabels;
@@ -17,7 +16,6 @@ import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.ADT;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.KSequence;
-import org.kframework.kore.Sort;
 import org.kframework.kore.VisitK;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -29,7 +27,6 @@ import org.kframework.kore.TransformK;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
-import scala.Option;
 
 import static org.kframework.definition.Constructors.*;
 import java.util.Arrays;

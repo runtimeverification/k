@@ -2,7 +2,6 @@
 package org.kframework.backend.java.util;
 
 import com.google.inject.Inject;
-import org.kframework.main.Main;
 import org.kframework.main.StartTimeHolder;
 import org.kframework.utils.inject.RequestScoped;
 
