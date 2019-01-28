@@ -72,6 +72,7 @@ pipeline {
       steps {
         unstash "bionic"
         sh '''
+          apt-get update
           apt install ./kframework_5.0.0_amd64.deb
           cd /usr/lib/kframework
           echo 'Starting kserver...'
