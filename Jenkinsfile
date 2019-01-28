@@ -66,10 +66,10 @@ pipeline {
       agent {
         docker {
           image 'ubuntu:bionic'
-          customWorkspace "install-ws"
           args '-u 0'
         }
       }
+      options { skipDefaultCheckout() }
       steps {
         unstash "bionic"
         sh '''
