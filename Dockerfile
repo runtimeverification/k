@@ -13,7 +13,7 @@ RUN groupadd -g $GROUP_ID user && \
 USER $USER_ID:$GROUP_ID
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain 1.28.0
 
+ADD k-distribution/src/main/scripts/bin/k-configure-opam-dev k-distribution/src/main/scripts/bin/k-configure-opam-common k-distribution/src/main/scripts/lib/opam /home/user/k/lib
 RUN    cd /home/user                                                          \
-    && git clone 'https://github.com/kframework/k' --branch=nightly-0f3835d3a \
-    && ./k/k-distribution/src/main/scripts/bin/k-configure-opam-dev           \
+    && ./k/lib/k-configure-opam-dev
     && rm -rf k
