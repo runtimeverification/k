@@ -1,28 +1,10 @@
 pipeline {
   agent {
-    docker {
-      image 'ubuntu:bionic'
-      args '-u 0'
+    dockerfile {
+      additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
     }
   }
   stages {
-    stage('Install dependencies') {
-      steps {
-        sh '''
-          apt-get update
-          apt-get install -y git debhelper maven openjdk-8-jdk cmake libboost-test-dev libyaml-cpp-dev libjemalloc-dev flex bison clang-6.0 zlib1g-dev libgmp-dev libmpfr-dev gcc z3 libz3-dev opam pkg-config curl
-          update-alternatives --set java /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java
-          k-distribution/src/main/scripts/bin/k-configure-opam-dev
-          curl https://sh.rustup.rs -sSf | sh -s -- -y
-          . $HOME/.cargo/env
-          rustup toolchain install 1.28.0
-          rustup default 1.28.0
-          curl -sSL https://get.haskellstack.org/ | sh      
-          mkdir -p ~/.stack
-          echo 'allow-different-user: true' > ~/.stack/config.yaml
-        '''
-      }
-    }
     stage('Build and Test') {
       steps {
         dir('k-exercises') {
