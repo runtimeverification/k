@@ -1341,7 +1341,7 @@ public class ModuleToKORE {
                 convert(k.sort(), false);
                 sb.append("}(");
                 if (module.sortAttributesFor().get(k.sort()).getOrElse(() -> Att.empty()).getOptional("hook").orElse("").equals("STRING.String")) {
-                    sb.append(k.s());
+                    sb.append(StringUtil.enquoteKString(k.s()));
                 } else {
                     sb.append(StringUtil.enquoteKString(k.s()));
                 }
