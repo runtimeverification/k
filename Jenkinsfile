@@ -7,9 +7,6 @@ pipeline {
   stages {
     stage('Build and Test') {
       steps {
-        dir('k-exercises') {
-          git credentialsId: 'rv-jenkins', url: 'git@github.com:kframework/k-exercises.git'
-        }
         sh '''
           echo 'Setting up environment...'
           eval `opam config env`
@@ -18,13 +15,25 @@ pipeline {
           mvn verify -U
           echo 'Starting kserver...'
           k-distribution/target/release/k/bin/spawn-kserver kserver.log
+        '''
+      }
+    }
+    stage('K Exercises Integration') {
+      steps {
+        dir('k-exercises') {
+          git credentialsId: 'rv-jenkins', url: 'git@github.com:kframework/k-exercises.git'
+        }
+        sh '''
+          echo 'Setting up environment...'
+          eval `opam config env`
+          . $HOME/.cargo/env
           cd k-exercises/tutorial
           make -j`nproc`
         '''
       }
     }
     stage('Deploy') {
-      when { 
+      when {
         not { changeRequest() }
         branch 'master'
       }
