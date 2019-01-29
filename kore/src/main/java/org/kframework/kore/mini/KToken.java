@@ -3,6 +3,7 @@ package org.kframework.kore.mini;
 
 import org.kframework.attributes.Att;
 import org.kframework.kore.Sort;
+import org.kframework.utils.StringUtil;
 
 /**
  * Created by dwightguth on 1/11/16.
@@ -52,6 +53,11 @@ public class KToken implements org.kframework.kore.KToken {
         if (!s.equals(kToken.s)) return false;
         return sort.equals(kToken.sort);
 
+    }
+
+    @Override
+    public String toString() {
+        return "#token(" + StringUtil.enquoteKString(s) + "," + StringUtil.enquoteKString(sort.toString()) + ")";
     }
 
     @Override

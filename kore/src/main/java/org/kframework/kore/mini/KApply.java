@@ -9,6 +9,7 @@ import org.kframework.kore.KList;
 import java.util.AbstractList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -101,9 +102,13 @@ public abstract class KApply extends AbstractList implements org.kframework.kore
 
     @Override
     public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + klabel.hashCode();
-        return result;
+        return klabel.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return klabel.toString() + "(" + items().stream().map(Object::toString)
+                .collect(Collectors.joining(", ")) + ")";
     }
 
     @Override
