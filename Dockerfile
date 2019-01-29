@@ -1,4 +1,4 @@
-ARG OS_IMAGE=ubuntu:bionic
+ARG OS_IMAGE
 FROM $OS_IMAGE
 
 RUN apt-get update
