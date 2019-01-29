@@ -1,4 +1,5 @@
-FROM ubuntu:bionic
+ARG OS_IMAGE=ubuntu:bionic
+FROM $OS_IMAGE
 
 RUN apt-get update
 RUN apt-get install -y git debhelper maven openjdk-8-jdk cmake libboost-test-dev libyaml-cpp-dev libjemalloc-dev flex bison clang-6.0 zlib1g-dev libgmp-dev libmpfr-dev gcc z3 libz3-dev opam pkg-config curl
