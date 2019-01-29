@@ -282,15 +282,10 @@ public class KItem extends Term implements KItemRepresentation {
         global.profiler.resFuncNanoTimer.start();
         Term result;
         try {
-            if (global.javaExecutionOptions.cacheFunctions) {
+            if (global.javaExecutionOptions.cacheFunctions && isPure()) {
                 ConjunctiveFormula constraint = getCacheConstraint(context);
                 result = cacheGet(constraint);
                 if (result == null) {
-                    if (global.getDefinition().kLabelAttributesOf(klabel()).contains(Attribute.IMPURE_KEY)) {
-                        throw KEMException.criticalError(String.format(
-                                "Function caching doesn't work with impure functions(%s). " +
-                                "Please re-run with option '--cache-func false'", klabel()));
-                    }
                     result = global.kItemOps.evaluateFunction(this, context);
                     result.cachePut(constraint, result);
                     this.cachePut(constraint, result);
@@ -308,15 +303,10 @@ public class KItem extends Term implements KItemRepresentation {
         global.profiler.resFuncNanoTimer.start();
         Term result;
         try {
-            if (global.javaExecutionOptions.cacheFunctions) {
+            if (global.javaExecutionOptions.cacheFunctions && isPure()) {
                 ConjunctiveFormula constraint = getCacheConstraint(context);
                 result = cacheGet(constraint);
                 if (result == null) {
-                    if (global.getDefinition().kLabelAttributesOf(klabel()).contains(Attribute.IMPURE_KEY)) {
-                        throw KEMException.criticalError(String.format(
-                                "Function caching doesn't work with impure functions(%s). " +
-                                        "Please re-run without option '--cache-func'", klabel()));
-                    }
                     result = global.kItemOps.resolveFunctionAndAnywhere(this, context);
                     result.cachePut(constraint, result);
                     this.cachePut(constraint, result);

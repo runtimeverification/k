@@ -54,6 +54,7 @@ public abstract class JavaSymbolicObject<T extends JavaSymbolicObject<T>>
     volatile transient PSet<Variable> variableSet = null;
     volatile transient Boolean isGround = null;
     volatile transient Boolean isNormal = null;
+    volatile transient Boolean isPure = null;
     volatile transient Set<Term> userVariableSet = null;
 
     //For performance improvement. Faster than accessing evaluationCache directly.
@@ -161,6 +162,18 @@ public abstract class JavaSymbolicObject<T extends JavaSymbolicObject<T>>
             new IsNormalFieldInitializer().visitNode(this);
         }
         return isNormal;
+    }
+
+    /**
+     * Returns true if this {@code JavaSymbolicObject} has no impure functions, false otherwise.
+     * <p>
+     * Impure functions return different results each time they are evaluated, thus their results cannot be cached.
+     */
+    public boolean isPure() {
+        if (isPure == null) {
+            new IsPureFieldInitializer().visitNode(this);
+        }
+        return isPure;
     }
 
     public boolean isConcrete() {
