@@ -38,6 +38,7 @@ public class GlobalContext implements Serializable {
     public final transient GlobalOptions globalOptions;
     public final transient Profiler2 profiler;
     public final StateLog stateLog;
+    public final transient FunctionCache functionCache = new FunctionCache();
 
     public GlobalContext(
             FileSystem fs,

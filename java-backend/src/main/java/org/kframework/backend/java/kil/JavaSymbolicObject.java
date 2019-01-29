@@ -2,13 +2,10 @@
 
 package org.kframework.backend.java.kil;
 
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Table;
 import org.kframework.attributes.Att;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 import org.kframework.backend.java.symbolic.BinderSubstitutionTransformer;
-import org.kframework.backend.java.symbolic.ConjunctiveFormula;
 import org.kframework.backend.java.symbolic.IncrementalCollector;
 import org.kframework.backend.java.symbolic.LocalVisitor;
 import org.kframework.backend.java.symbolic.SubstitutionTransformer;
@@ -20,7 +17,6 @@ import org.pcollections.HashTreePSet;
 import org.pcollections.PSet;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -34,9 +30,6 @@ import java.util.Set;
  */
 public abstract class JavaSymbolicObject<T extends JavaSymbolicObject<T>>
         implements K, Transformable, Visitable {
-
-    private static Table<JavaSymbolicObject<?>, ConjunctiveFormula, Term> evaluationCache = HashBasedTable.create();
-    private static Map<JavaSymbolicObject<?>, Term> nullConstraintEvalCache = new HashMap<>();
 
     /**
      * Field used for caching the hash code
@@ -57,16 +50,7 @@ public abstract class JavaSymbolicObject<T extends JavaSymbolicObject<T>>
     volatile transient Boolean isPure = null;
     volatile transient Set<Term> userVariableSet = null;
 
-    //For performance improvement. Faster than accessing evaluationCache directly.
-    private transient Map<ConjunctiveFormula, Term> evaluationCacheRow = evaluationCache.row(this);
-    private transient Term nullConstraintEvalResult;
-
     private Att att;
-
-    public static void clearCache() {
-        evaluationCache.clear();
-        nullConstraintEvalCache.clear();
-    }
 
     protected JavaSymbolicObject() {
         this(Att.empty());
@@ -115,13 +99,6 @@ public abstract class JavaSymbolicObject<T extends JavaSymbolicObject<T>>
      */
     public T renameVariables() {
         return substitute(Variable.rename(variableSet()));
-    }
-
-    /**
-     * Returns true if a call to {@link org.kframework.backend.java.kil.Term#substituteAndEvaluate(java.util.Map, TermContext)} may simplify this term.
-     */
-    public boolean canSubstituteAndEvaluate(Map<Variable, ? extends Term> substitution, TermContext context) {
-        return !Collections.disjoint(variableSet(), substitution.keySet()) || !isEvaluated(context);
     }
 
     /**
@@ -182,44 +159,6 @@ public abstract class JavaSymbolicObject<T extends JavaSymbolicObject<T>>
 
     public boolean isVariable() {
         return this instanceof Variable;
-    }
-
-    /**
-     * Return the {@code context.getTopConstraint()} adapted to be used as cache key without functionality changes.
-     * <p>
-     * Ground terms don't need the constraint. They are evaluated and cached in a separate map to improve performance.
-     */
-    ConjunctiveFormula getCacheConstraint(TermContext context) {
-        return isGround() ? null : context.getTopConstraint();
-    }
-
-     /**
-     * Returns true if the function and anywhere symbols in this
-     * {@code JavaSymbolicObject} have been evaluated under the given
-     * {@code context.getTopConstraint()}, false otherwise.
-     */
-    private boolean isEvaluated(TermContext context) {
-        return this.equals(cacheGet(getCacheConstraint(context)));
-    }
-
-    Term cacheGet(ConjunctiveFormula constraint) {
-        if (constraint == null) {
-            if (nullConstraintEvalResult == null) {
-                nullConstraintEvalResult = nullConstraintEvalCache.get(this);
-            }
-            return nullConstraintEvalResult;
-        } else {
-            return evaluationCacheRow.get(constraint);
-        }
-    }
-
-    void cachePut(ConjunctiveFormula constraint, Term result) {
-        if (constraint == null) {
-            nullConstraintEvalCache.put(this, result);
-            nullConstraintEvalResult = result;
-        } else {
-            evaluationCacheRow.put(constraint, result);
-        }
     }
 
     /**

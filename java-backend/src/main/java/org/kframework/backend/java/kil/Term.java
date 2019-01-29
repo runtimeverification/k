@@ -3,6 +3,7 @@ package org.kframework.backend.java.kil;
 
 import org.kframework.attributes.Att;
 import org.kframework.backend.java.symbolic.BottomUpVisitor;
+import org.kframework.backend.java.symbolic.ConjunctiveFormula;
 import org.kframework.backend.java.symbolic.Evaluator;
 import org.kframework.backend.java.symbolic.SubstituteAndEvaluateTransformer;
 import org.kframework.backend.java.util.Constants;
@@ -21,6 +22,10 @@ import java.util.Map;
  */
 public abstract class Term extends JavaSymbolicObject<Term> implements Comparable<Term>,
         org.kframework.kore.K {
+
+    //For performance improvement. Faster than accessing evaluationCache directly.
+    private transient Map<ConjunctiveFormula, Term> evaluationCacheRow;
+    private transient Term nullConstraintEvalResult;
 
     protected final Kind kind;
     // protected final boolean normalized;
@@ -99,6 +104,57 @@ public abstract class Term extends JavaSymbolicObject<Term> implements Comparabl
         //Still required because SubstituteAndEvaluateTransformer only evaluates subterms affected by substitution.
         newTerm = newTerm.evaluate(context);
         return newTerm;
+    }
+
+    /**
+     * Returns true if a call to {@link org.kframework.backend.java.kil.Term#substituteAndEvaluate(java.util.Map, TermContext)} may simplify this term.
+     */
+    public boolean canSubstituteAndEvaluate(Map<Variable, ? extends Term> substitution, TermContext context) {
+        return !Collections.disjoint(variableSet(), substitution.keySet()) || !isEvaluated(context);
+    }
+
+    /**
+     * Return the {@code context.getTopConstraint()} adapted to be used as cache key without functionality changes.
+     * <p>
+     * Ground terms don't need the constraint. They are evaluated and cached in a separate map to improve performance.
+     */
+    ConjunctiveFormula getCacheConstraint(TermContext context) {
+        return isGround() ? null : context.getTopConstraint();
+    }
+
+    /**
+     * Returns true if the function and anywhere symbols in this
+     * {@code JavaSymbolicObject} have been evaluated under the given
+     * {@code context.getTopConstraint()}, false otherwise.
+     */
+    private boolean isEvaluated(TermContext context) {
+        return this.equals(cacheGet(getCacheConstraint(context), context));
+    }
+
+    Term cacheGet(ConjunctiveFormula constraint, TermContext context) {
+        if (constraint == null) {
+            if (nullConstraintEvalResult == null) {
+                nullConstraintEvalResult = context.global().functionCache.nullConstraintEvalCache.get(this);
+            }
+            return nullConstraintEvalResult;
+        } else {
+            if (evaluationCacheRow == null) {
+                evaluationCacheRow = context.global().functionCache.evaluationCache.row(this);
+            }
+            return evaluationCacheRow.get(constraint);
+        }
+    }
+
+    void cachePut(ConjunctiveFormula constraint, Term result, TermContext context) {
+        if (constraint == null) {
+            context.global().functionCache.nullConstraintEvalCache.put(this, result);
+            nullConstraintEvalResult = result;
+        } else {
+            if (evaluationCacheRow == null) {
+                evaluationCacheRow = context.global().functionCache.evaluationCache.row(this);
+            }
+            evaluationCacheRow.put(constraint, result);
+        }
     }
 
     /**

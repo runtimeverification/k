@@ -284,11 +284,11 @@ public class KItem extends Term implements KItemRepresentation {
         try {
             if (global.javaExecutionOptions.cacheFunctions && isPure()) {
                 ConjunctiveFormula constraint = getCacheConstraint(context);
-                result = cacheGet(constraint);
+                result = cacheGet(constraint, context);
                 if (result == null) {
                     result = global.kItemOps.evaluateFunction(this, context);
-                    result.cachePut(constraint, result);
-                    this.cachePut(constraint, result);
+                    result.cachePut(constraint, result, context);
+                    this.cachePut(constraint, result, context);
                 }
             } else {
                 result = global.kItemOps.evaluateFunction(this, context);
@@ -305,11 +305,11 @@ public class KItem extends Term implements KItemRepresentation {
         try {
             if (global.javaExecutionOptions.cacheFunctions && isPure()) {
                 ConjunctiveFormula constraint = getCacheConstraint(context);
-                result = cacheGet(constraint);
+                result = cacheGet(constraint, context);
                 if (result == null) {
                     result = global.kItemOps.resolveFunctionAndAnywhere(this, context);
-                    result.cachePut(constraint, result);
-                    this.cachePut(constraint, result);
+                    result.cachePut(constraint, result, context);
+                    this.cachePut(constraint, result, context);
                 }
             } else {
                 result = global.kItemOps.resolveFunctionAndAnywhere(this, context);
