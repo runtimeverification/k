@@ -21,6 +21,7 @@ import org.kframework.parser.binary.BinaryParser;
 import org.kframework.parser.kore.KoreParser;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.unparser.KPrint;
+import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -169,7 +170,7 @@ public class KRun {
                 output.put(KToken("$IO", Sorts.KConfigVar()), KToken("\"on\"", Sorts.String()));
             } else {
                 String stdin = getStdinBuffer(tty.stdin);
-                output.put(KToken("$STDIN", Sorts.KConfigVar()), KToken("\"" + stdin + "\"", Sorts.String()));
+                output.put(KToken("$STDIN", Sorts.KConfigVar()), KToken(StringUtil.enquoteKString(stdin), Sorts.String()));
                 output.put(KToken("$IO", Sorts.KConfigVar()), KToken("\"off\"", Sorts.String()));
             }
         }

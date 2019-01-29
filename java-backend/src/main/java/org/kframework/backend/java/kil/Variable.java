@@ -8,8 +8,6 @@ import org.kframework.attributes.Att;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Constants;
-import org.kframework.kore.ADT;
-import org.kframework.kore.K;
 import scala.collection.Seq;
 
 import java.util.Map;

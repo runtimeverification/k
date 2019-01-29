@@ -177,6 +177,7 @@ public abstract class JavaSymbolicObject<T extends JavaSymbolicObject<T>>
     public Set<Term> userVariableSet(GlobalContext global) {
         if (userVariableSet == null) {
             final Map<JavaSymbolicObject, Set<Term>> intermediate = new IdentityHashMap<>();
+            @SuppressWarnings("unchecked")
             IncrementalCollector<Term> visitor = new IncrementalCollector<>(
                     (set, term) -> term.userVariableSet = set,
                     term -> term.userVariableSet,

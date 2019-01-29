@@ -7,7 +7,6 @@ import org.kframework.utils.errorsystem.KEMException;
 
 import java.io.ObjectStreamException;
 import java.io.Serializable;
-import java.util.List;
 import org.kframework.kore.KORE;
 import scala.collection.Seq;
 

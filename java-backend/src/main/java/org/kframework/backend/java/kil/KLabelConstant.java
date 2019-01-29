@@ -3,14 +3,11 @@ package org.kframework.backend.java.kil;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
-import com.google.common.reflect.TypeToken;
-import com.google.inject.name.Names;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.attributes.Att;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.kil.Attribute;
-import org.kframework.kil.Attributes;
 import org.kframework.utils.errorsystem.KEMException;
 import scala.collection.Seq;
 
