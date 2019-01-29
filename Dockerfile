@@ -1,6 +1,7 @@
 ARG BASE_IMAGE=ubuntu:bionic
 FROM ${BASE_IMAGE}
 
+RUN if [ "$BASE_IMAGE" = "debian:stretch" ]; then echo "deb http://ftp.debian.org/debian stretch-backports main" >> /etc/apt/sources.list; fi
 RUN apt-get update
 RUN apt-get install -y git debhelper maven openjdk-8-jdk cmake libboost-test-dev libyaml-cpp-dev libjemalloc-dev flex bison clang-6.0 zlib1g-dev libgmp-dev libmpfr-dev gcc z3 libz3-dev opam pkg-config curl
 RUN update-alternatives --set java /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java
