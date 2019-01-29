@@ -17,12 +17,9 @@ pipeline {
         stage('Build and Package on Ubuntu Bionic') {
           stages {
             stage('Build on Ubuntu Bionic') {
-              environment {
-                OS="ubuntu:bionic"
-              }
               agent {
                 dockerfile {
-                  additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg OS=${OS}'
+                  additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg OS=ubuntu:bionic'
                   reuseNode true
                 }
               }
@@ -93,12 +90,9 @@ pipeline {
         stage('Build and Package on Ubuntu Xenial') {
           stages {
             stage('Build on Ubuntu Xenial') {
-              environment {
-                OS="ubuntu:xenial"
-              }
               agent {
                 dockerfile {
-                  additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg OS=${OS}'
+                  additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg OS=ubuntu:xenial'
                 }
               }
               stages {
@@ -139,12 +133,9 @@ pipeline {
         stage('Build and Package on Debian Stretch') {
           stages {
             stage('Build on Debian Stretch') {
-              environment {
-                OS="debian:stretch"
-              }
               agent {
                 dockerfile {
-                  additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg OS=${OS}'
+                  additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg OS=debian:stretch'
                 }
               }
               stages {
@@ -187,7 +178,7 @@ pipeline {
     stage('Deploy') {
       agent {
         dockerfile {
-          additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg OS=${OS}'
+          additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg OS=ubuntu:bionic'
           reuseNode true
         }
       }
@@ -200,7 +191,6 @@ pipeline {
         AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')
         AWS_REGION='us-east-2'
         GITHUB_TOKEN = credentials('rv-jenkins')
-        OS="ubuntu:bionic"
       }
       steps {
         ansiColor('xterm') {
