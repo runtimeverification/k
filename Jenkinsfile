@@ -19,7 +19,7 @@ pipeline {
             stage('Build on Ubuntu Bionic') {
               agent {
                 dockerfile {
-                  additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg OS_IMAGE=ubuntu:bionic'
+                  additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg OS=ubuntu:bionic'
                   reuseNode true
                 }
               }
@@ -92,7 +92,7 @@ pipeline {
             stage('Build on Ubuntu Xenial') {
               agent {
                 dockerfile {
-                  additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg OS_IMAGE=ubuntu:xenial'
+                  additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg OS=ubuntu:xenial'
                 }
               }
               stages {
@@ -135,7 +135,7 @@ pipeline {
             stage('Build on Debian Stretch') {
               agent {
                 dockerfile {
-                  additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg OS_IMAGE=debian:stretch'
+                  additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg OS=debian:stretch'
                 }
               }
               stages {
@@ -178,7 +178,7 @@ pipeline {
     stage('Deploy') {
       agent {
         dockerfile {
-          additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg OS_IMAGE=ubuntu:bionic'
+          additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg OS=ubuntu:bionic'
           reuseNode true
         }
       }
