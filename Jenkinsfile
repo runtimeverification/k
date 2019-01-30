@@ -12,8 +12,8 @@ pipeline {
       }
     }
     stage('Build and Package K') {
-      failFast true
-      parallel {
+//      failFast true
+//      parallel {
         stage('Build and Package on Ubuntu Bionic') {
           stages {
             stage('Build on Ubuntu Bionic') {
@@ -173,7 +173,7 @@ pipeline {
             }
           }
         }
-      }
+//      }
     }
     stage('Deploy') {
       agent {
