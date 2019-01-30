@@ -42,6 +42,7 @@
             <id>build-haskell</id>
             <phase>compile</phase>
             <configuration>
+              <skip>${haskell.backend.skip}</skip>
               <target>
                 <exec executable="stack" dir="${project.basedir}/src/main/native/haskell-backend" failonerror="true">
                   <arg value="build" />
