@@ -1,5 +1,6 @@
 ARG BASE_IMAGE=ubuntu:bionic
 FROM ${BASE_IMAGE}
+ARG BASE_IMAGE
 
 RUN if [ "$BASE_IMAGE" = "debian:stretch" ]; then echo "Enabling backports..."; echo "deb http://ftp.debian.org/debian stretch-backports main" > /etc/apt/sources.list.d/stretch-backports.list; fi
 RUN apt-get update
