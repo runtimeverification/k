@@ -18,7 +18,7 @@
 	dh $@ 
 
 override_dh_auto_build:
-	mvn package
+	mvn package -DskipTests
 
 override_dh_auto_install:
 	src/main/scripts/debian_package
