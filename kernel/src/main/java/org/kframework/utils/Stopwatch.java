@@ -37,8 +37,16 @@ public class Stopwatch {
 
     public void printTotal(String message) {
         printIntermediate("Cleanup");
-        if (options.verbose)
-            f.format("%-60s = %5d%n", message, lastIntermediate - start);
+        if (options.verbose) {
+            double ms = (lastIntermediate - start) / 1000.;
+            if (lastIntermediate - start < 60000) // less than 1 minute
+                f.format("%-60s = %.3f s%n", message, ms);
+            else {
+                long min = (lastIntermediate - start) / 60000;
+                long sec = (lastIntermediate - start) / 1000 % 60;
+                f.format("%-60s = %.3f s (%dm %ds)%n", message, ms, min, sec);
+            }
+        }
     }
 
     public long getIntermediateMilliseconds() {
