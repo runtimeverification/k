@@ -34,6 +34,33 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <version>2.17</version>
       </plugin>
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>1.7</version>
+        <executions>
+          <execution>
+            <id>build-haskell</id>
+            <phase>compile</phase>
+            <configuration>
+              <skip>${haskell.backend.skip}</skip>
+              <target>
+                <exec executable="stack" dir="${project.basedir}/src/main/native/haskell-backend" failonerror="true">
+                  <arg value="build" />
+                </exec>
+                <mkdir dir="${project.build.directory}/stack-install" />
+                <exec executable="stack" dir="${project.basedir}/src/main/native/haskell-backend" failonerror="true">
+                  <arg value="install" />
+                  <arg value="--local-bin-path" />
+                  <arg value="${project.build.directory}/stack-install" />
+                </exec>
+              </target>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 </project>

@@ -1,6 +1,6 @@
 DEF=test
 EXT=test
 TESTDIR=.
-KOMPILE_FLAGS=--backend java
+KOMPILE_BACKEND?=java
 
 include ../../../include/ktest.mak
