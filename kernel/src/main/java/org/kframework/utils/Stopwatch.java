@@ -31,22 +31,25 @@ public class Stopwatch {
     public void printIntermediate(String message) {
         long current = System.currentTimeMillis();
         if (options.verbose)
-            f.format("%-60s = %.3f s%n", message, (current - lastIntermediate) / 1000.);
+            f.format("%-60s = %s%n", message, milisecondsToTime(lastIntermediate - start));
         lastIntermediate = current;
     }
 
     public void printTotal(String message) {
         printIntermediate("Cleanup");
-        if (options.verbose) {
-            double ms = (lastIntermediate - start) / 1000.;
-            if (lastIntermediate - start < 60000) // less than 1 minute
-                f.format("%-60s = %.3f s%n", message, ms);
-            else {
-                long min = (lastIntermediate - start) / 60000;
-                long sec = (lastIntermediate - start) / 1000 % 60;
-                f.format("%-60s = %.3f s (%dm %ds)%n", message, ms, min, sec);
-            }
-        }
+        if (options.verbose)
+            f.format("%-60s = %s%n", message, milisecondsToTime(lastIntermediate - start));
+    }
+
+    private static String milisecondsToTime(long miliseconds) {
+        long h = miliseconds / 3600000;
+        long m = miliseconds % 3600000 / 60000;
+        double s = miliseconds % 60000 / 1000.;
+        if (h > 0)
+            return String.format("%dh %02dm %02ds", h, m, (long) s);
+        if (m > 0)
+            return String.format("%dm %02ds", m, (long) s);
+        return String.format("%6.3fs", s);
     }
 
     public long getIntermediateMilliseconds() {
