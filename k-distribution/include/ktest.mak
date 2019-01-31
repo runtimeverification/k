@@ -17,6 +17,8 @@ RESULTDIR?=$(TESTDIR)
 # all tests in test directory with matching file extension
 TESTS?=$(wildcard $(TESTDIR)/*.$(EXT))
 PROOF_TESTS?=$(wildcard $(TESTDIR)/*-spec.k)
+# default KOMPILE_BACKEND
+KOMPILE_BACKEND?=ocaml
 
 CHECK=| diff -
 
@@ -29,7 +31,7 @@ all: kompile krun proofs
 kompile: $(DEFDIR)/$(DEF)-kompiled/timestamp
 
 $(DEFDIR)/%-kompiled/timestamp: %.k
-	$(KOMPILE) $(KOMPILE_FLAGS) $(DEBUG) $< -d $(DEFDIR)
+	$(KOMPILE) $(KOMPILE_FLAGS) --backend $(KOMPILE_BACKEND) $(DEBUG) $< -d $(DEFDIR)
 krun: $(TESTS)
 
 proofs: $(PROOF_TESTS)

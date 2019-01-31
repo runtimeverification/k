@@ -1,7 +1,6 @@
-DEF=test
-EXT=test
+DEF=no-dup-rules
+EXT=ndr
 TESTDIR=.
 KOMPILE_BACKEND?=java
-KRUN_FLAGS=-cSTRATEGY='^ F2B'
 
 include ../../../include/ktest.mak

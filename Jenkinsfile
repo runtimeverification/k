@@ -12,9 +12,7 @@ pipeline {
       }
     }
     stage('Build and Package K') {
-//      failFast true
-//      parallel {
-        stages {
+      stages {
         stage('Build and Package on Ubuntu Bionic') {
           stages {
             stage('Build on Ubuntu Bionic') {
@@ -73,6 +71,7 @@ pipeline {
                 docker {
                   image 'ubuntu:bionic'
                   args '-u 0'
+                  reuseNode true
                 }
               }
               options { skipDefaultCheckout() }
@@ -116,6 +115,7 @@ pipeline {
                 docker {
                   image 'ubuntu:xenial'
                   args '-u 0'
+                  reuseNode true
                 }
               }
               options { skipDefaultCheckout() }
@@ -159,6 +159,7 @@ pipeline {
                 docker {
                   image 'debian:stretch'
                   args '-u 0'
+                  reuseNode true
                 }
               }
               options { skipDefaultCheckout() }

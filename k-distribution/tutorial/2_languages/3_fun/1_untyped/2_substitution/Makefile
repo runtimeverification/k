@@ -3,7 +3,7 @@ DEF=fun-untyped
 EXT=fun
 TESTDIR?=../../programs
 RESULTDIR=tests
-KOMPILE_FLAGS=--backend java
+KOMPILE_BACKEND?=java
 KRUN_FLAGS=--pattern "<k> V:K </k>"
 
 %/calcc-looping.fun \
