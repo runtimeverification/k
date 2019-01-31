@@ -67,6 +67,7 @@ pipeline {
         docker {
           image 'ubuntu:bionic'
           args '-u 0'
+          reuseNode true
         }
       }
       options { skipDefaultCheckout() }
