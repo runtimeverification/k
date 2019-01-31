@@ -161,7 +161,7 @@ public class ModuleToKORE {
         }
         for (Production prod : iterable(module.productions())) {
             prod = computePolyProd(prod);
-            if (prod.klabel().isEmpty()) {
+            if (prod.klabel().isEmpty() || prod.att().contains(Attribute.CEIL_KEY)) {
                 continue;
             }
             if (impurities.contains(prod.klabel().get())) {
@@ -525,7 +525,29 @@ public class ModuleToKORE {
         }
         sb.append("\n// rules\n");
         for (Rule rule : iterable(module.rules())) {
-            convertRule(rule, heatCoolEq, topCell, attributes, functionRules, false);
+            if (rule.att().contains(Attribute.CEIL_KEY)) {
+                KRewrite rewrite = (KRewrite) rule.body();
+                KApply ceil = (KApply) rewrite.left();
+                KApply ceilInj = (KApply) ((KSequence) ceil.klist().items().get(0)).items().get(0);
+                Sort ceilInnerSort = scala.collection.JavaConverters.seqAsJavaList(ceilInj.klabel().params()).get(0);
+                K ceilPattern = ceilInj.klist().items().get(0);
+                K boolPattern = rewrite.right();
+                sb.append("  axiom{R,C} ");
+                sb.append("\\implies{R} (\n    ");
+                convertSideCondition(rule.requires());
+                sb.append(",\n    \\and{R} (\n      \\equals{C,R} (\n          \\ceil{");
+                convert(ceilInnerSort, false);
+                sb.append(",C} (\n        ");
+                convert(ceilPattern);
+                sb.append("),\n        \\equals{SortBool{},C} (\n          ");
+                convert(boolPattern);
+                sb.append(",\n          \\dv{SortBool{}}(\"true\"))),\n        ");
+                convertSideCondition(rule.ensures());
+                sb.append("))\n  [ceil{}()]");
+                sb.append("\n\n");
+            } else {
+                convertRule(rule, heatCoolEq, topCell, attributes, functionRules, false);
+            }
         }
         sb.append("endmodule ");
         convert(attributes, module.att());

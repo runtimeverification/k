@@ -378,6 +378,14 @@ module INT
                | absInt ( Int )                 [function, functional, smtlib(int_abs), hook(INT.abs)]
                | log2Int ( Int )                [function, hook(INT.log2)]
 
+  /**
+   * Definability conditions for _/Int_ and _%Int_
+   */
+
+  rule #ceil(I1:Int /Int I2:Int) => I2 =/=Int 0 [ceil]
+  rule #ceil(I1:Int %Int I2:Int) => I2 =/=Int 0 [ceil]
+
+
   syntax Int ::= bitRangeInt           ( Int, indexInt: Int, lengthInt: Int ) [function, hook(INT.bitRange)]
   syntax Int ::= signExtendBitRangeInt ( Int, indexInt: Int, lengthInt: Int ) [function, hook(INT.signExtendBitRange)]
 
@@ -771,6 +779,10 @@ module K-EQUAL
   syntax Bool ::= left:
                   K ":=K" K           [function, functional, klabel(_:=K_), symbol, equalsEqualsK]
                 | K ":/=K" K          [function, functional, klabel(_:/=K_), symbol, notEqualsEqualsK]
+
+  /*@ Support for writing ML ceil expressions in K */
+
+  syntax Bool ::= "#ceil" "(" K ")"   [function, ceil, klabel(#ceil)]
 
   syntax priorities equalEqualK notEqualEqualK > boolOperation mlOp
   rule K1:K =/=K K2:K => notBool (K1 ==K K2)

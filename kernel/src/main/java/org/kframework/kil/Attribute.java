@@ -29,6 +29,7 @@ public class Attribute<T> extends ASTNode {
     public static final String PATTERN_KEY = "pattern";
     public static final String PATTERN_FOLDING_KEY = "pattern-folding";
     public static final String HOOK_KEY = "hook";
+    public static final String CEIL_KEY = "ceil";
     public static final String MACRO_KEY = "macro";
     public static final String ALIAS_KEY = "alias";
     public static final String LEMMA_KEY = "lemma";
