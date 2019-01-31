@@ -3,7 +3,8 @@ DEF=fun-untyped
 EXT=fun
 TESTDIR?=../../programs
 RESULTDIR=tests
-KOMPILE_FLAGS?=--transition strict --backend java
+KOMPILE_FLAGS?=--transition strict
+KOMPILE_BACKEND?=java
 KRUN_FLAGS?=--pattern "<k> V:K </k>"
 
 %/references-5.fun: kompile
