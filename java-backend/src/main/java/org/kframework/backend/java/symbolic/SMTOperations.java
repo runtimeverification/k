@@ -4,7 +4,6 @@ package org.kframework.backend.java.symbolic;
 import org.kframework.main.GlobalOptions;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.Variable;
-import org.kframework.backend.java.util.Profiler2;
 import org.kframework.backend.java.util.Z3Wrapper;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.options.SMTOptions;

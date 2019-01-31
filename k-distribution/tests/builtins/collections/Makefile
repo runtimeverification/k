@@ -1,6 +1,6 @@
 DEF=collections-test
 EXT=col
 TESTDIR=.
-KOMPILE_FLAGS=--backend java
+KOMPILE_BACKEND?=java
 
 include ../../../include/ktest.mak

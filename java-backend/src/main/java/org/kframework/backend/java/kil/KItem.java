@@ -10,7 +10,6 @@ import org.kframework.backend.java.builtins.SortMembership;
 import org.kframework.backend.java.symbolic.*;
 import org.kframework.backend.java.util.ImpureFunctionException;
 import org.kframework.backend.java.util.Profiler;
-import org.kframework.backend.java.util.Profiler2;
 import org.kframework.backend.java.util.RewriteEngineUtils;
 import org.kframework.backend.java.util.RuleSourceUtil;
 import org.kframework.backend.java.util.Subsorts;
@@ -174,7 +173,7 @@ public class KItem extends Term implements KItemRepresentation {
         Set<Sort> sorts = Sets.newHashSet();
         Set<Sort> possibleSorts = Sets.newHashSet();
 
-        /**
+        /*
          * Sort checks in the Java engine are not implemented as
          * rewrite rules, so we need to precompute the sort of
          * terms. However, right now, we also want to allow users
@@ -558,7 +557,7 @@ public class KItem extends Term implements KItemRepresentation {
                                 return kItem;
                             }
 
-                            /**
+                            /*
                              * apply the "[owise]" rule only if this kItem does not unify with any
                              * of the left-hand-sides of the other rules (no other rule may apply)
                              */
@@ -610,7 +609,7 @@ public class KItem extends Term implements KItemRepresentation {
      */
     public Term applyAnywhereRules(TermContext context) {
         // apply a .K ~> K => K normalization
-        if ((kLabel instanceof KLabelConstant) && KLabels.KSEQ.equals((KLabelConstant) kLabel)
+        if ((kLabel instanceof KLabelConstant) && KLabels.KSEQ.equals(kLabel)
                 && kList instanceof KList
                 && (((KList) kList).get(0) instanceof KItem && KLabels.DOTK.equals(((KItem) ((KList) kList).get(0)).kLabel) || ((KList) kList).get(0).equals(KSequence.EMPTY))) {
             return ((KList) kList).get(1);
