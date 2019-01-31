@@ -1,5 +1,5 @@
 DEF=imp
 EXT=imp
-KOMPILE_FLAGS=--backend java
+KOMPILE_BACKEND?=java
 
 include ../../../include/ktest.mak

@@ -14,7 +14,6 @@ source $HOME/.cargo/env
 rustup toolchain install 1.28.0
 rustup default 1.28.0
 curl -sSL https://get.haskellstack.org/ | sh
-
 ```
 
 If you install this list of dependencies, continue directly to the Install section.
@@ -62,9 +61,9 @@ rustup default 1.28.0
 
 ## Haskell Stack
 
-To install, go to https://docs.haskellstack.org/en/stable/README/ and follow the instructions.
+To install, go to <https://docs.haskellstack.org/en/stable/README/> and follow the instructions.
+You may need to do `stack upgrade` to ensure the latest version of Haskell Stack.
 
-	
 ## Miscellaneous
 
 Also required:
