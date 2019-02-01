@@ -17,8 +17,20 @@ RUN groupadd -g $GROUP_ID user && \
 USER $USER_ID:$GROUP_ID
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain 1.28.0
 
-RUN mkdir -p /home/user/.tmp-opam/lib && mkdir -p /home/user/.tmp-opam/bin
 ADD k-distribution/src/main/scripts/bin/k-configure-opam-dev k-distribution/src/main/scripts/bin/k-configure-opam-common /home/user/.tmp-opam/bin/
 ADD k-distribution/src/main/scripts/lib/opam  /home/user/.tmp-opam/lib/opam/
 RUN    cd /home/user \
     && ./.tmp-opam/bin/k-configure-opam-dev
+
+ENV LC_ALL=C.UTF-8
+ADD --chown=user:user haskell-backend/src/main/native/haskell-backend/stack.yaml /home/user/.tmp-haskell/
+ADD --chown=user:user haskell-backend/src/main/native/haskell-backend/src/main/haskell/kore/package.yaml /home/user/.tmp-haskell/src/main/haskell/kore/
+RUN    cd /home/user/.tmp-haskell \
+    && stack build --only-dependencies --test --bench --haddock --library-profiling
+
+ADD --chown=user:user llvm-backend/src/main/native/llvm-backend/matching/stack.yaml /home/user/.tmp-haskell2/
+ADD --chown=user:user llvm-backend/src/main/native/llvm-backend/matching/package.yaml /home/user/.tmp-haskell2/
+ADD --chown=user:user llvm-backend/src/main/native/llvm-backend/matching/submodules/kore/stack.yaml /home/user/.tmp-haskell2/submodules/kore/
+ADD --chown=user:user llvm-backend/src/main/native/llvm-backend/matching/submodules/kore/src/main/haskell/kore/package.yaml /home/user/.tmp-haskell2/submodules/kore/src/main/haskell/kore/
+RUN    cd /home/user/.tmp-haskell2 \
+    && stack build --only-dependencies --test --bench --haddock --library-profiling
