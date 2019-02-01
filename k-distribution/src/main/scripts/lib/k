@@ -4,5 +4,6 @@ if [[ `uname` == *MINGW* || `uname` == *MSYS* || `uname` == *CYGWIN* ]]; then
 else
   source "$(dirname "$0")/setenv"
   ulimit -s `ulimit -H -s`
+  #eval $JAVA -agentlib:jdwp=transport=dt_socket,server=n,address=Denis-PC:5005,suspend=y org.kframework.main.Main '"$@"'
   eval $JAVA org.kframework.main.Main '"$@"'
 fi
