@@ -1,5 +1,5 @@
 <!-- Copyright (c) 2012-2019 K Team. All Rights Reserved. -->
-Here are instructions for installing K from the release tar.gz archive.
+Here are instructions for installing K from the release tar.gz archive. If you have installed via the distro package, you do not need to follow these instructinos
 
 We have only tested this on Ubuntu, although it may work on other distributions.
 Appropriate installation instructions and bug reports are welcome from contributors.
