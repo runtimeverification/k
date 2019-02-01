@@ -608,6 +608,17 @@ public class SymbolicRewriter {
 
             for (ConstrainedTerm term : queue) {
                 v++;
+                Term generatedTop = term.term();
+                KItem k = getCell((KItem) generatedTop, "<k>");
+                Term kContent = k != null ? ((KList) k.klist()).get(0) : null;
+                BuiltinList kSequence = kContent instanceof BuiltinList ? (BuiltinList) kContent : null;
+                boolean isHalt = kSequence != null
+                                 //case <k> has multiple items: first must be #halt, second - not #execute
+                                 ? kSequence.size() == 2 && kSequence.get(0) instanceof KItem
+                                         && kSequence.get(0).toString().equals("#halt_EVM(.KList)")
+                                         && !kSequence.get(1).toString().equals("#execute_EVM(.KList)")
+                                 //case <k> has only one item: it must be #halt
+                                 : kContent != null && kContent.toString().equals("#halt_EVM(.KList)");
                 boolean oldLog = globalOptions.log;
 
                 if (term.implies(targetTerm)) {
@@ -617,6 +628,18 @@ public class SymbolicRewriter {
                         System.out.println("\n============\nStep " + step + ": eliminated!\n============\n");
                         logStep(step, v, targetCallData, term, true);
                     }
+                    continue;
+                } else {
+                    logStep(step, v, targetCallData, term, step == 1 && globalOptions.logBasic);
+                }
+
+                //stopping at halt
+                if (isHalt) {
+                    if (!globalOptions.log) {
+                        logStep(step, v, targetCallData, term, globalOptions.logBasic);
+                    }
+                    System.out.println("Halt! Terminating branch.");
+                    proofResults.add(term);
                     continue;
                 } else {
                     logStep(step, v, targetCallData, term, step == 1 && globalOptions.logBasic);
