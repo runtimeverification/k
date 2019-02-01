@@ -4,7 +4,8 @@ KOMPILE_FLAGS=--transition "division lookup increment assignment read print"
 KOMPILE_BACKEND?=java
 KRUN_FLAGS=--output none
 
-include ../../../../include/ktest.mak
+include ../../../find-k.mak
+include ${K_HOME}/include/ktest.mak
 
 
 tests/div.imp: kompile
