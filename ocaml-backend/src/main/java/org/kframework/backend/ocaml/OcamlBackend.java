@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2018 Runtime Verification, Inc. (RV-Match team). All Rights Reserved.
+// Copyright (c) 2015-2019 Runtime Verification, Inc. (RV-Match team). All Rights Reserved.
 package org.kframework.backend.ocaml;
 
 import com.google.inject.Inject;
@@ -70,7 +70,7 @@ public class OcamlBackend implements Backend {
             files.saveToKompiled("execution_pgm.ml", execution_pmg_ocaml);
 
             ProcessBuilder pb = files.getProcessBuilder();
-            int exit = pb.command("ocamllex", "lexer.mll").directory(files.resolveKompiled(".")).inheritIO().start().waitFor();
+            int exit = pb.command("ocamllex", "-q", "lexer.mll").directory(files.resolveKompiled(".")).inheritIO().start().waitFor();
             if (exit != 0) {
                 throw KEMException.criticalError("ocamllex returned nonzero exit code: " + exit + "\nExamine output to see errors.");
             }
