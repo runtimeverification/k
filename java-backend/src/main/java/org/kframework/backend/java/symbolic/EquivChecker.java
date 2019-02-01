@@ -132,7 +132,7 @@ public class EquivChecker {
             ++steps;
             for (ConstrainedTerm curr : queue) {
 
-                java.util.List<ConstrainedTerm> nexts = rewriter.fastComputeRewriteStep(curr, false, true, true);
+                java.util.List<ConstrainedTerm> nexts = rewriter.fastComputeRewriteStep(curr, false, true, true, steps);
 
                 if (nexts.isEmpty()) {
                     /* final term */
@@ -142,7 +142,7 @@ public class EquivChecker {
             loop:
                 for (ConstrainedTerm next : nexts) {
                     for (int i = 0; i < numSyncPoints; i++) {
-                        ConjunctiveFormula constraint = next.matchImplies(targetSyncNodes.get(i), true,
+                        ConjunctiveFormula constraint = next.matchImplies(targetSyncNodes.get(i), true, false,
                                 new FormulaContext(FormulaContext.Kind.EquivImplication, null, next.termContext().global()), null);
                         if (constraint != null) {
                             SyncNode node = new SyncNode(currSyncNode.startSyncPoint, currSyncNode, next, constraint);
