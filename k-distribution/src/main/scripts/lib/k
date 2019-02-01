@@ -4,5 +4,11 @@ if [[ `uname` == *MINGW* || `uname` == *MSYS* || `uname` == *CYGWIN* ]]; then
 else
   source "$(dirname "$0")/setenv"
   ulimit -s `ulimit -H -s`
-  eval $JAVA org.kframework.main.Main '"$@"'
+  if [ "$1" = "-kast" ]; then
+    eval $JAVA org.kframework.main.Main '"$@"'
+  else
+    # uncomment for Intellij remote debugger
+    #eval $JAVA -agentlib:jdwp=transport=dt_socket,server=n,address=localhost:5005,suspend=y org.kframework.main.Main '"$@"'
+    eval $JAVA org.kframework.main.Main '"$@"'
+  fi
 fi
