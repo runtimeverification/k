@@ -12,6 +12,7 @@ import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.FreshOperations;
 import org.kframework.backend.java.compile.KOREtoBackendKIL;
 import org.kframework.backend.java.kil.BuiltinList;
+import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.ConstrainedTerm;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.GlobalContext;
@@ -30,11 +31,10 @@ import org.kframework.kore.FindK;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KORE;
+import org.kframework.main.GlobalOptions;
 import org.kframework.rewriter.SearchType;
 import org.kframework.backend.java.utils.BitSet;
 import org.kframework.utils.errorsystem.KExceptionManager;
-
-import java.io.File;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,7 +44,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.io.File;
 
 /**
  * @author AndreiS
@@ -53,8 +55,9 @@ public class SymbolicRewriter {
 
     private final List<String> transitions;
     private final Stopwatch stopwatch = Stopwatch.createUnstarted();
-    private final GlobalContext global;
     private final KOREtoBackendKIL constructor;
+    private final GlobalOptions globalOptions;
+    private final GlobalContext global;
     private boolean transition;
     private final Set<ConstrainedTerm> superheated = Sets.newHashSet();
     private final Set<ConstrainedTerm> newSuperheated = Sets.newHashSet();
@@ -72,6 +75,7 @@ public class SymbolicRewriter {
         this.theFastMatcher = new FastRuleMatcher(global, definition.ruleTable.size());
         this.transition = true;
         this.global = global;
+        this.globalOptions = global.globalOptions;
     }
 
     public KOREtoBackendKIL getConstructor() {
@@ -95,7 +99,7 @@ public class SymbolicRewriter {
     }
 
     private List<ConstrainedTerm> computeRewriteStep(ConstrainedTerm constrainedTerm, int step, boolean computeOne) {
-        return fastComputeRewriteStep(constrainedTerm, computeOne, false, false);
+        return fastComputeRewriteStep(constrainedTerm, computeOne, false, false, step);
     }
 
     /**
@@ -141,7 +145,7 @@ public class SymbolicRewriter {
 
     }
 
-    public List<ConstrainedTerm> fastComputeRewriteStep(ConstrainedTerm subject, boolean computeOne, boolean narrowing, boolean proofFlag) {
+    public List<ConstrainedTerm> fastComputeRewriteStep(ConstrainedTerm subject, boolean computeOne, boolean narrowing, boolean proofFlag, int step) {
         global.stateLog.log(StateLog.LogEvent.NODE, subject.term(), subject.constraint());
         List<ConstrainedTerm> results = new ArrayList<>();
         if (definition.automaton == null) {
@@ -155,7 +159,7 @@ public class SymbolicRewriter {
                 computeOne,
                 transitions,
                 proofFlag,
-                subject.termContext());
+                subject.termContext(), step);
         for (FastRuleMatcher.RuleMatchResult matchResult : matches) {
             Rule rule = definition.ruleTable.get(matchResult.ruleIndex);
             global.stateLog.log(StateLog.LogEvent.RULEATTEMPT, rule.toKRewrite());
@@ -584,14 +588,38 @@ public class SymbolicRewriter {
         queue.add(initialTerm);
         boolean guarded = false;
         int step = 0;
+        globalOptions.logBasic |= globalOptions.logStmtsOnly | globalOptions.log;
 
+        if (globalOptions.log) {
+            System.out.println("\nTarget term\n=====================\n");
+            System.out.println(targetTerm);
+        }
+        KItem targetCallData = getCell((KItem) targetTerm.term(), "<callData>");
+        int branchingRemaining = globalOptions.branchingAllowed;
+        boolean nextStepLogEnabled = false;
         while (!queue.isEmpty()) {
             step++;
+            int v = 0;
+            boolean oldLogEnabled = globalOptions.log;
+            if (nextStepLogEnabled) {
+                globalOptions.log = true;
+            }
+            nextStepLogEnabled = false;
+
             for (ConstrainedTerm term : queue) {
+                v++;
+                boolean oldLog = globalOptions.log;
+
                 if (term.implies(targetTerm)) {
                     global.stateLog.log(StateLog.LogEvent.REACHPROVED, term.term(), term.constraint());
                     successPaths++;
+                    if (globalOptions.logBasic) {
+                        System.out.println("\n============\nStep " + step + ": eliminated!\n============\n");
+                        logStep(step, v, targetCallData, term, true);
+                    }
                     continue;
+                } else {
+                    logStep(step, v, targetCallData, term, step == 1 && globalOptions.logBasic);
                 }
 
                 /* TODO(AndreiS): terminate the proof with failure based on the klabel _~>_
@@ -617,6 +645,14 @@ public class SymbolicRewriter {
                 if (guarded) {
                     ConstrainedTerm result = applySpecRules(term, specRules);
                     if (result != null) {
+                        nextStepLogEnabled = true;
+                        if (!globalOptions.log) {
+                            logStep(step, v, targetCallData, term, true);
+                        }
+                        // re-running constraint generation again for debug purposes
+                        if (globalOptions.logBasic) {
+                            System.err.println("\nApplying specification rule\n=========================\n");
+                        }
                         if (visited.add(result)) {
                             nextQueue.add(result);
                         } else {
@@ -628,12 +664,50 @@ public class SymbolicRewriter {
                     }
                 }
 
-                List<ConstrainedTerm> results = fastComputeRewriteStep(term, false, true, true);
+                List<ConstrainedTerm> results;
+                try {
+                    results = fastComputeRewriteStep(term, false, true, true, step);
+                    // DISABLE EXCEPTION CHECKSTYLE
+                } catch (Throwable e) {
+                    // ENABLE EXCEPTION CHECKSTYLE
+                    if (!globalOptions.log) {
+                        logStep(step, v, targetCallData, term, true);
+                    }
+                    System.out.println("\n\nTerm throwing exception\n============================\n\n");
+                    //KProve.prettyPrint(term.term());
+                    System.out.println(term.term());
+                    System.out.print("/\\");
+                    //KProve.prettyPrint(term.constraint());
+                    System.out.println(term.constraint().toString().replaceAll("#And", "\n#And"));
+                    e.printStackTrace();
+                    throw e;
+                }
                 if (results.isEmpty()) {
+                    if (!globalOptions.log) {
+                        logStep(step, v, targetCallData, term, true);
+                    }
+                    System.out.println("\nStep above: " + step + ", evaluation ended with no successors.");
                     /* final term */
                     proofResults.add(term);
                 }
 
+                if (results.size() > 1) {
+                    nextStepLogEnabled = true;
+                    if (!globalOptions.log) {
+                        logStep(step, v, targetCallData, term, true);
+                    }
+                    if (branchingRemaining == 0) {
+                        System.out.println("\nHalt on branching!\n=====================\n");
+
+                        proofResults.addAll(results);
+                        continue;
+                    } else {
+                        branchingRemaining--;
+                        if (globalOptions.logBasic) {
+                            System.out.println("\nBranching!\n=====================\n");
+                        }
+                    }
+                }
                 for (ConstrainedTerm cterm : results) {
                     ConstrainedTerm result = new ConstrainedTerm(
                             cterm.term(),
@@ -646,6 +720,7 @@ public class SymbolicRewriter {
                         nextQueue.add(result);
                     }
                 }
+                globalOptions.log = oldLog;
             }
 
             /* swap the queues */
@@ -655,10 +730,20 @@ public class SymbolicRewriter {
             nextQueue = temp;
             nextQueue.clear();
             guarded = true;
+
+            globalOptions.log = oldLogEnabled;
         }
 
-        if (global.globalOptions.verbose) {
+        if (globalOptions.verbose) {
             printSummaryBox(rule, proofResults, successPaths, step);
+        }
+        for (ConstrainedTerm term : proofResults) {
+            //KProve.prettyPrint(term.term());
+            System.out.println(term.term());
+            System.out.print("/\\");
+            //KProve.prettyPrint(term.constraint());
+            System.out.println(term.constraint().toString().replaceAll("#And", "\n#And"));
+            System.out.println();
         }
         return proofResults;
     }
@@ -674,6 +759,114 @@ public class SymbolicRewriter {
         }
         System.err.format("Longest path: %d steps\n", step);
         global.profiler.printResult();
+    }
+
+    private void logStep(int step, int v, KItem targetCallData, ConstrainedTerm term, boolean forced) {
+        if (!globalOptions.logBasic) {
+            return;
+        }
+        KItem top = (KItem) term.term();
+        KItem k = getCell(top, "<k>");
+        Term kContent = k != null ? ((KList) k.klist()).get(0) : null;
+        BuiltinList kSequence = kContent instanceof BuiltinList ? (BuiltinList) kContent : null;
+
+        KItem output = getCell(top, "<output>");
+        KItem statusCode = getCell(top, "<statusCode>");
+        KItem localMem = getCell(top, "<localMem>");
+        KItem pc = getCell(top, "<pc>");
+        KItem gas = getCell(top, "<gas>");
+        KItem wordStack = getCell(top, "<wordStack>");
+        KItem callData = getCell(top, "<callData>");
+        KItem accounts = getCell(top, "<accounts>");
+
+        K localMemMap = localMem != null ? localMem.klist().items().get(0) : null;
+        BuiltinMap accountsMap = accounts != null ? (BuiltinMap) ((KList) accounts.klist()).get(0) : null;
+
+        if (!(localMemMap instanceof BuiltinMap || localMemMap instanceof Variable)) {
+            forced = true;
+        }
+
+        boolean inNewStmt = globalOptions.logStmtsOnly && kSequence != null && inNewStmt(kSequence);
+
+        if (globalOptions.log || forced || inNewStmt) {
+            System.out.format("\nSTEP %d v%d : %.3f s \n===================\n",
+                    step, v, (System.currentTimeMillis() - global.profiler.getStartTime()) / 1000.);
+        }
+
+        if (globalOptions.log || forced || inNewStmt) {
+            //Pretty printing no longer viable, too slow after last rebase.
+            //KProve.prettyPrint(k);
+            System.out.println(toStringOrEmpty(k));
+            System.out.println(toStringOrEmpty(output));
+            System.out.println(toStringOrEmpty(statusCode));
+            if (localMem != null) {
+                System.out.println("<localMem>");
+
+                if (localMemMap instanceof BuiltinMap) {
+                    /*List<Term> entries = ((BuiltinMap) localMemMap).getKComponents();
+                    for (int i = 0; i < entries.size(); i += 10) {
+                        System.out.println("\t" + entries.get(i));
+                        System.out.println("\t...");
+                    }*/
+                    System.out.println("...");
+                } else {
+                    System.out.println("\tNon-map format:");
+                    System.out.print("\t");
+                    System.out.println(localMemMap);
+                }
+                System.out.println("</localMem>");
+            }
+
+            System.out.println(toStringOrEmpty(pc));
+            System.out.println(toStringOrEmpty(gas));
+            System.out.println(toStringOrEmpty(wordStack));
+            if (targetCallData != null && callData != null && !targetCallData.equals(callData)) {
+                String callDataStr = toStringOrEmpty(callData);
+                System.out.println(callDataStr.substring(0, Math.min(callDataStr.length(), 300)));
+            }
+            if (accountsMap != null) {
+                System.out.println("accounts: " + accountsMap.size());
+                for (Map.Entry<Term, Term> acct : accountsMap.getEntries().entrySet()) {
+                    Term acctID = acct.getKey();
+                    K storage = getCell((KItem) acct.getValue(), "<storage>");
+                    System.out.println(acctID);
+                    System.out.println(storage);
+                }
+            }
+            System.out.print("/\\");
+            //pretty printing no longer viable
+            //KProve.prettyPrint(term.constraint());
+            System.out.println(term.constraint().toString().replaceAll("#And", "\n#And"));
+        }
+        if (localMem != null && !(localMemMap instanceof BuiltinMap || localMemMap instanceof Variable)) {
+            throw new RuntimeException("<localMem> non-map format, aborting.");
+        }
+    }
+
+    private String toStringOrEmpty(Object o) {
+        return o != null ? o.toString() : "";
+    }
+
+    private Pattern cellLabelPattern = Pattern.compile("<.+>");
+
+    private KItem getCell(KItem root, String label) {
+        if (root.klabel().name().equals(label)) {
+            return root;
+        }
+        for (K child : root.klist().items()) {
+            if (child instanceof KItem && cellLabelPattern.matcher(((KItem) child).klabel().name()).matches()) {
+                KItem result = getCell((KItem) child, label);
+                if (result != null) {
+                    return result;
+                }
+            }
+        }
+        return null;
+    }
+
+    private boolean inNewStmt(BuiltinList kSequence) {
+        return kSequence.size() >= 2 && !kSequence.get(0).toString().startsWith("#")
+                && kSequence.get(1).toString().startsWith("#pc");
     }
 
     /**
