@@ -845,7 +845,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
             }
 
             if (global.globalOptions.debug) {
-                System.err.format("Attempting to prove: \n\t%s\n  implies \n\t%s\n", left, right);
+                System.err.format("\nAttempting to prove:\n================= \n\t%s\n  implies \n\t%s\n", left, right);
             }
 
             right = right.orientSubstitution(existentialQuantVars);
