@@ -89,19 +89,4 @@ public final class GlobalOptions {
 
     @Parameter(names={"--warnings-to-errors", "-w2e"}, description="Convert warnings to errors.")
     public boolean warnings2errors = false;
-
-    @Parameter(names="--branching-allowed", arity=1, description="Number of branching events allowed before a forcible stop.")
-    public int branchingAllowed = Integer.MAX_VALUE;
-
-    @Parameter(names="--log", description="Log every step. KEVM only.")
-    public boolean log = false;
-
-    @Parameter(names="--log-stmts-only", description="Log only steps that execute a statement, without intermediary steps. " +
-            "Except when intermediary steps are important for other reason, like branching. KEVM only.")
-    public boolean logStmtsOnly = false;
-
-    @Parameter(names="--log-basic",
-            description="Log most basic information: summary of initial step, final steps and final implications." +
-                    " All custom logging only works for KEVM-based specs.")
-    public boolean logBasic = false;
 }
