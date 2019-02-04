@@ -9,4 +9,5 @@ RESULTDIR=tests
 %/cycle.kool: kompile
 	true
 
-include $(MAKEFILE_PATH)/../../../../../include/ktest.mak
+include $(MAKEFILE_PATH)/../../../../find-k.mak
+include ${K_HOME}/include/ktest.mak
