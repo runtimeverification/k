@@ -4,4 +4,5 @@ EXT=kool
 KOMPILE_FLAGS=-O2
 KRUN_FLAGS=--output none
 
-include $(MAKEFILE_PATH)/../../../../include/ktest.mak
+include $(MAKEFILE_PATH)/../../../find-k.mak
+include ${K_HOME}/include/ktest.mak

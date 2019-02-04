@@ -6,7 +6,8 @@ KOMPILE_FLAGS=--transition strict
 KOMPILE_BACKEND?=java
 KRUN_FLAGS=--output none
 
-include $(MAKEFILE_PATH)/../../../../include/ktest.mak
+include $(MAKEFILE_PATH)/../../../find-k.mak
+include ${K_HOME}/include/ktest.mak
 
 tests/threads/threads_05.simple: kompile
 	cat $@.in 2>/dev/null | $(KRUN) $@ -d $(DEFDIR) --search --bound 5 $(CHECK) $@.out
