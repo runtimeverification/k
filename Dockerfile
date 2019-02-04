@@ -32,3 +32,6 @@ ADD --chown=user:user llvm-backend/src/main/native/llvm-backend/matching/submodu
 ADD --chown=user:user llvm-backend/src/main/native/llvm-backend/matching/submodules/kore/src/main/haskell/kore/package.yaml /home/user/.tmp-haskell2/src/main/haskell/kore/
 RUN    cd /home/user/.tmp-haskell2 \
     && stack build --only-dependencies --test
+
+ADD pom.xml ktree/pom.xml llvm-backend/pom.xml haskell-backend/pom.xml ocaml-backend/pom.xml kernel/pom.xml java-backend/pom.xml k-distribution/pom.xml kore/pom.xml /home/user/.tmp-maven/
+RUN mvn dependency:go-offline 
