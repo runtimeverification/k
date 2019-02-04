@@ -230,6 +230,9 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
                         ConstrainedTerm lhs = r.createLhsPattern(termContext);
                         ConstrainedTerm rhs = r.createRhsPattern();
                         termContext.setInitialVariables(lhs.variableSet());
+                        if (rewritingContext.javaExecutionOptions.cacheFunctionsOptimized) {
+                            rewritingContext.functionCache.clearCache();
+                        }
                         return rewriter.proveRule(r, lhs, rhs, allRules, kem);
                     })
                     .flatMap(List::stream)
