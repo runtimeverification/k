@@ -185,8 +185,8 @@ pipeline {
                 unstash "stretch"
                 sh '''
                   echo "deb http://ftp.debian.org/debian stretch-backports main" > /etc/apt/sources.list.d/stretch-backports.list
+                  src/main/scripts/test-in-container
                 '''
-                sh 'src/main/scripts/test-in-container'
               }
               post {
                 always {
