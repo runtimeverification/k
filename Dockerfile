@@ -28,9 +28,7 @@ ADD --chown=user:user haskell-backend/src/main/native/haskell-backend/src/main/h
 RUN    cd /home/user/.tmp-haskell \
     && stack build --only-dependencies --test --bench --haddock --library-profiling
 
-ADD --chown=user:user llvm-backend/src/main/native/llvm-backend/matching/stack.yaml /home/user/.tmp-haskell2/
-ADD --chown=user:user llvm-backend/src/main/native/llvm-backend/matching/package.yaml /home/user/.tmp-haskell2/
-ADD --chown=user:user llvm-backend/src/main/native/llvm-backend/matching/submodules/kore/stack.yaml /home/user/.tmp-haskell2/submodules/kore/
-ADD --chown=user:user llvm-backend/src/main/native/llvm-backend/matching/submodules/kore/src/main/haskell/kore/package.yaml /home/user/.tmp-haskell2/submodules/kore/src/main/haskell/kore/
+ADD --chown=user:user llvm-backend/src/main/native/llvm-backend/matching/submodules/kore/stack.yaml /home/user/.tmp-haskell2/
+ADD --chown=user:user llvm-backend/src/main/native/llvm-backend/matching/submodules/kore/src/main/haskell/kore/package.yaml /home/user/.tmp-haskell2/src/main/haskell/kore/
 RUN    cd /home/user/.tmp-haskell2 \
     && stack build --only-dependencies --test
