@@ -9,7 +9,7 @@ import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 import org.apache.commons.lang3.tuple.Pair;
-import org.kframework.backend.java.symbolic.InitializeRewriter;
+import org.kframework.backend.java.symbolic.JavaRewriter;
 import org.kframework.backend.java.symbolic.JavaBackend;
 import org.kframework.backend.java.symbolic.JavaExecutionOptions;
 import org.kframework.compile.Backend;
@@ -98,7 +98,7 @@ public class JavaBackendKModule extends AbstractKModule {
         MapBinder<String, Function<Definition, Rewriter>> rewriterBinder = MapBinder.newMapBinder(
                 binder, TypeLiteral.get(String.class), new TypeLiteral<Function<Definition, Rewriter>>() {
                 });
-        rewriterBinder.addBinding("java").to(InitializeRewriter.class);
+        rewriterBinder.addBinding("java").to(JavaRewriter.class);
     }
 
     @Override
