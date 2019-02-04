@@ -88,6 +88,14 @@ pipeline {
           }
         }
         stage('Build and Package on Ubuntu Xenial') {
+          when {
+            anyOf {
+              not { changeRequest() } 
+              changelog '.*^\\[build-system\\] .+$'
+              changeset 'Jenkinsfile'
+              changeset 'Dockerfile'
+            }
+          }
           stages {
             stage('Build on Ubuntu Xenial') {
               agent {
@@ -133,6 +141,14 @@ pipeline {
           }
         }
         stage('Build and Package on Debian Stretch') {
+          when {
+            anyOf {
+              not { changeRequest() } 
+              changelog '.*^\\[build-system\\] .+$'
+              changeset 'Jenkinsfile'
+              changeset 'Dockerfile'
+            }
+          }
           stages {
             stage('Build on Debian Stretch') {
               agent {
