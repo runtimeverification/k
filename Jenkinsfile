@@ -93,6 +93,7 @@ pipeline {
               agent {
                 dockerfile {
                   additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=ubuntu:xenial'
+                  reuseNode true
                 }
               }
               stages {
@@ -137,6 +138,7 @@ pipeline {
               agent {
                 dockerfile {
                   additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=debian:stretch'
+                  reuseNode true
                 }
               }
               stages {
