@@ -59,7 +59,7 @@ import static org.kframework.kore.KORE.*;
 /**
  * Created by dwightguth on 5/6/15.
  */
-public class InitializeRewriter implements Function<org.kframework.definition.Definition, Rewriter> {
+public class JavaRewriter implements Function<org.kframework.definition.Definition, Rewriter> {
 
     private final FileSystem fs;
     private final Stopwatch sw;
@@ -79,7 +79,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
     private final JavaExecutionOptions javaExecutionOptions;
 
     @Inject
-    public InitializeRewriter(
+    public JavaRewriter(
             FileSystem fs,
             GlobalOptions globalOptions,
             KExceptionManager kem,
