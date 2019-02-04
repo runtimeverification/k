@@ -26,14 +26,14 @@ ENV LC_ALL=C.UTF-8
 ADD --chown=user:user haskell-backend/src/main/native/haskell-backend/stack.yaml /home/user/.tmp-haskell/
 ADD --chown=user:user haskell-backend/src/main/native/haskell-backend/src/main/haskell/kore/package.yaml /home/user/.tmp-haskell/src/main/haskell/kore/
 RUN    cd /home/user/.tmp-haskell \
-    && stack build --only-dependencies --test --bench --haddock --library-profiling
+    && stack build --only-snapshot --test --bench --haddock --library-profiling
 
 ADD --chown=user:user llvm-backend/src/main/native/llvm-backend/matching/stack.yaml /home/user/.tmp-haskell2/
 ADD --chown=user:user llvm-backend/src/main/native/llvm-backend/matching/package.yaml /home/user/.tmp-haskell2/
 ADD --chown=user:user llvm-backend/src/main/native/llvm-backend/matching/submodules/kore/stack.yaml /home/user/.tmp-haskell2/submodules/kore/
 ADD --chown=user:user llvm-backend/src/main/native/llvm-backend/matching/submodules/kore/src/main/haskell/kore/package.yaml /home/user/.tmp-haskell2/submodules/kore/src/main/haskell/kore/
 RUN    cd /home/user/.tmp-haskell2 \
-    && stack build --only-dependencies --test
+    && stack build --only-snapshot --test
 
 ADD pom.xml ktree/pom.xml llvm-backend/pom.xml haskell-backend/pom.xml ocaml-backend/pom.xml kernel/pom.xml java-backend/pom.xml k-distribution/pom.xml kore/pom.xml /home/user/.tmp-maven/
 RUN mvn dependency:go-offline 
