@@ -61,6 +61,7 @@ pipeline {
                   pacman -Syy
                   pacman -U kframework-5.0.0.pkg.tar.xz
                   src/main/scripts/test-in-container
+                '''
               }
               post {
                 always {
