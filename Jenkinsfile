@@ -13,11 +13,69 @@ pipeline {
     }
     stage('Build and Package K') {
       stages {
+        stage('Build and Package on Arch Linux') {
+          when {
+            anyOf {
+              not { changeRequest() } 
+              changelog '.*^\\[build-system\\] .+$'
+              changeset 'Jenkinsfile'
+              changeset 'Dockerfile'
+            }
+          }
+          stages {
+            stage('Build on Arch Linux') {
+              agent {
+                dockerfile {
+                  dir 'arch'
+                  additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=ubuntu:xenial'
+                  reuseNode true
+                }
+              }
+              stages {
+                stage('Build Pacman Package') {
+                  steps {
+                    checkout scm
+                    dir('arch') {
+                      sh '''
+                        . $HOME/.cargo/env
+                        makepkg
+                      '''
+                    }
+                    stash name: "arch", includes: "kframework-5.0.0.pkg.tar.xz"
+                  }
+                }
+              }
+            }
+            stage('Test Arch Package') {
+              agent {
+                docker {
+                  image 'archlinux/base'
+                  args '-u 0'
+                  reuseNode true
+                }
+              }
+              options { skipDefaultCheckout() }
+              steps {
+                unstash "arch"
+                sh '''
+                  pacman -Syy
+                  pacman -U kframework-5.0.0.pkg.tar.xz
+                  src/main/scripts/test-in-container
+              }
+              post {
+                always {
+                  sh 'stop-kserver || true'
+                }
+              }
+            }
+          }
+        }
         stage('Build and Package on Ubuntu Bionic') {
           stages {
             stage('Build on Ubuntu Bionic') {
               agent {
                 dockerfile {
+                  dir 'debian'
                   additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=ubuntu:bionic'
                   reuseNode true
                 }
@@ -77,7 +135,7 @@ pipeline {
               options { skipDefaultCheckout() }
               steps {
                 unstash "bionic"
-                sh 'src/main/scripts/test-in-container'
+                sh 'src/main/scripts/test-in-container-debian'
               }
               post {
                 always {
@@ -100,6 +158,7 @@ pipeline {
             stage('Build on Ubuntu Xenial') {
               agent {
                 dockerfile {
+                  dir 'debian'
                   additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=ubuntu:xenial'
                   reuseNode true
                 }
@@ -130,7 +189,7 @@ pipeline {
               options { skipDefaultCheckout() }
               steps {
                 unstash "xenial"
-                sh 'src/main/scripts/test-in-container'
+                sh 'src/main/scripts/test-in-container-debian'
               }
               post {
                 always {
@@ -153,6 +212,7 @@ pipeline {
             stage('Build on Debian Stretch') {
               agent {
                 dockerfile {
+                  dir 'debian'
                   additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=debian:stretch'
                   reuseNode true
                 }
@@ -185,7 +245,7 @@ pipeline {
                 unstash "stretch"
                 sh '''
                   echo "deb http://ftp.debian.org/debian stretch-backports main" > /etc/apt/sources.list.d/stretch-backports.list
-                  src/main/scripts/test-in-container
+                  src/main/scripts/test-in-container-debian
                 '''
               }
               post {
@@ -201,6 +261,7 @@ pipeline {
     stage('Deploy') {
       agent {
         dockerfile {
+          dir 'debian'
           additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=ubuntu:bionic'
           reuseNode true
         }

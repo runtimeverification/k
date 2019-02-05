@@ -21,7 +21,7 @@ override_dh_auto_build:
 	mvn package -DskipTests
 
 override_dh_auto_install:
-	src/main/scripts/debian_package
+	DESTDIR=debian/kframework src/main/scripts/package
 
 override_dh_strip:
 	dh_strip -Xliballoc.a -Xlibarithmetic.a -XlibAST.a -Xlibconfigurationparser.a -XlibParser.a -Xlibstrings.a
