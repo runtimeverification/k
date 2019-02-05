@@ -18,8 +18,8 @@ pipeline {
             stage('Build on Arch Linux') {
               agent {
                 dockerfile {
-                  dir 'arch'
-                  additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=ubuntu:xenial'
+                  filename 'Dockerfile.arch'
+                  additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
                   reuseNode true
                 }
               }
@@ -68,7 +68,7 @@ pipeline {
             stage('Build on Ubuntu Bionic') {
               agent {
                 dockerfile {
-                  dir 'debian'
+                  filename 'Dockerfile.debian'
                   additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=ubuntu:bionic'
                   reuseNode true
                 }
@@ -151,7 +151,7 @@ pipeline {
             stage('Build on Ubuntu Xenial') {
               agent {
                 dockerfile {
-                  dir 'debian'
+                  filename 'Dockerfile.debian'
                   additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=ubuntu:xenial'
                   reuseNode true
                 }
@@ -205,7 +205,7 @@ pipeline {
             stage('Build on Debian Stretch') {
               agent {
                 dockerfile {
-                  dir 'debian'
+                  filename 'Dockerfile.debian'
                   additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=debian:stretch'
                   reuseNode true
                 }
@@ -254,7 +254,7 @@ pipeline {
     stage('Deploy') {
       agent {
         dockerfile {
-          dir 'debian'
+          filename 'Dockerfile.debian'
           additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=ubuntu:bionic'
           reuseNode true
         }
