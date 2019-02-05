@@ -228,9 +228,20 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
             List<ConstrainedTerm> proofResults = javaRules.stream()
                     .filter(r -> !r.att().contains(Attribute.TRUSTED_KEY))
                     .map(r -> {
-                        ConstrainedTerm lhs = r.createLhsPattern(termContext);
-                        ConstrainedTerm rhs = r.createRhsPattern();
+                        //Build LHS with fully evaluated constraint. Then expand patterns.
+                        ConjunctiveFormula constraint = processProofRules.getEvaluatedConstraint(r);
+                        ConstrainedTerm lhs = new ConstrainedTerm(r.leftHandSide(), constraint, termContext);
+                        termContext.setTopConstraint(constraint);
+                        lhs = lhs.expandPatterns(true);
+
+                        //Build RHS with fully evaluated ensures. RHS term is already evaluated.
+                        ConjunctiveFormula ensures = (ConjunctiveFormula) processProofRules.evaluate(
+                                ConjunctiveFormula.of(termContext.global()).addAll(r.ensures()), constraint, termContext);
+                        ConstrainedTerm rhs = new ConstrainedTerm(
+                                r.rightHandSide(), ensures, TermContext.builder(termContext.global()).build());
+
                         termContext.setInitialVariables(lhs.variableSet());
+                        termContext.setTopConstraint(null);
                         if (rewritingContext.javaExecutionOptions.cacheFunctionsOptimized) {
                             rewritingContext.functionCache.clearCache();
                         }
@@ -344,17 +355,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
             }
 
             public org.kframework.backend.java.kil.Rule evaluateRule(org.kframework.backend.java.kil.Rule rule) {
-                termContext.setTopConstraint(null);
-                //We need this ConsTerm only to evaluate the constraint. That's why we use an empty first argument.
-                ConstrainedTerm constraintHolder = new ConstrainedTerm(
-                        ConjunctiveFormula.of(termContext.global()),
-                        rule.getRequires(),
-                        termContext).expandPatterns(true);
-
-                ConjunctiveFormula constraint = constraintHolder.constraint();
-                termContext.setTopConstraint(constraint);
-                //simplify the constraint in its own context, to force full evaluation of terms.
-                constraint = constraint.simplify(termContext);
+                ConjunctiveFormula constraint = getEvaluatedConstraint(rule);
                 if (constraint.isFalseExtended()) {
                     StringBuilder sb = new StringBuilder();
                     sb.append("Rule requires clause evaluates to false:\n");
@@ -373,6 +374,21 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
                         rule.lookups(),
                         rule.att(),
                         termContext.global());
+            }
+
+            public ConjunctiveFormula getEvaluatedConstraint(org.kframework.backend.java.kil.Rule rule) {
+                termContext.setTopConstraint(null);
+                //We need this ConsTerm only to evaluate the constraint. That's why we use an empty first argument.
+                ConstrainedTerm constraintHolder = new ConstrainedTerm(
+                        ConjunctiveFormula.of(termContext.global()),
+                        rule.getRequires(),
+                        termContext).expandPatterns(true);
+
+                ConjunctiveFormula constraint = constraintHolder.constraint();
+                termContext.setTopConstraint(constraint);
+                //simplify the constraint in its own context, to force full evaluation of terms.
+                constraint = constraint.simplify(termContext);
+                return constraint;
             }
 
             private Term evaluate(Term term, ConjunctiveFormula constraint, TermContext context) {
