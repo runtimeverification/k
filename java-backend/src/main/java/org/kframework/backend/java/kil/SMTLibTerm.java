@@ -6,14 +6,14 @@ import org.kframework.backend.java.symbolic.Visitor;
 
 public class SMTLibTerm extends Term {
 
-    private final String expression;
+    private final CharSequence expression;
 
-    public SMTLibTerm(String expression) {
+    public SMTLibTerm(CharSequence expression) {
         super(Kind.KITEM);
         this.expression = expression;
     }
 
-    public String expression() {
+    public CharSequence expression() {
         return expression;
     }
 

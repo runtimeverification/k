@@ -46,7 +46,7 @@ public class SMTOperations {
             constraint.globalContext().profiler.queryBuildTimer.start();
             CharSequence query;
             try {
-                query = KILtoSMTLib.translateConstraint(constraint);
+                query = KILtoSMTLib.translateConstraint(constraint).toString();
             } finally {
                 constraint.globalContext().profiler.queryBuildTimer.stop();
             }
@@ -73,9 +73,12 @@ public class SMTOperations {
                 left.globalContext().profiler.queryBuildTimer.start();
                 CharSequence query;
                 try {
-                    query = KILtoSMTLib.translateImplication(left, right, existentialQuantVars);
+                    query = KILtoSMTLib.translateImplication(left, right, existentialQuantVars).toString();
                 } finally {
                     left.globalContext().profiler.queryBuildTimer.stop();
+                }
+                if (global.debug) {
+                    System.err.format("\nz3 query: %s\n", query);
                 }
                 return z3.isUnsat(query, smtOptions.z3ImplTimeout, left.globalContext().profiler.z3Implication);
             } catch (UnsupportedOperationException | SMTTranslationFailure e) {
