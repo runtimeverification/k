@@ -2,12 +2,10 @@
 
 package org.kframework.backend.java.kil;
 
-import com.google.common.collect.Sets;
 import org.kframework.attributes.Att;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 import org.kframework.backend.java.symbolic.BinderSubstitutionTransformer;
-import org.kframework.backend.java.symbolic.ConjunctiveFormula;
 import org.kframework.backend.java.symbolic.IncrementalCollector;
 import org.kframework.backend.java.symbolic.LocalVisitor;
 import org.kframework.backend.java.symbolic.SubstitutionTransformer;
@@ -49,7 +47,7 @@ public abstract class JavaSymbolicObject<T extends JavaSymbolicObject<T>>
     volatile transient PSet<Variable> variableSet = null;
     volatile transient Boolean isGround = null;
     volatile transient Boolean isNormal = null;
-    volatile transient Set<ConjunctiveFormula> isEvaluated = Sets.newHashSet();
+    volatile transient Boolean isPure = null;
     volatile transient Set<Term> userVariableSet = null;
 
     private Att att;
@@ -104,13 +102,6 @@ public abstract class JavaSymbolicObject<T extends JavaSymbolicObject<T>>
     }
 
     /**
-     * Returns true if a call to {@link org.kframework.backend.java.kil.Term#substituteAndEvaluate(java.util.Map, TermContext)} may simplify this term.
-     */
-    public boolean canSubstituteAndEvaluate(Map<Variable, ? extends Term> substitution, ConjunctiveFormula constraint) {
-        return !Sets.intersection(substitution.keySet(), variableSet()).isEmpty() || !isEvaluated(constraint);
-    }
-
-    /**
      * Returns a lazily computed {@code Set} view of the variables in this
      * {@code JavaSymbolicObject}.
      */
@@ -150,21 +141,24 @@ public abstract class JavaSymbolicObject<T extends JavaSymbolicObject<T>>
         return isNormal;
     }
 
+    /**
+     * Returns true if this {@code JavaSymbolicObject} has no impure functions, false otherwise.
+     * <p>
+     * Impure functions return different results each time they are evaluated, thus their results cannot be cached.
+     */
+    public boolean isPure() {
+        if (isPure == null) {
+            new IsPureFieldInitializer().visitNode(this);
+        }
+        return isPure;
+    }
+
     public boolean isConcrete() {
         return isGround() && isNormal();
     }
 
     public boolean isVariable() {
         return this instanceof Variable;
-    }
-
-     /**
-     * Returns true if the function and anywhere symbols in this
-     * {@code JavaSymbolicObject} have been evaluated under the given
-     * {@code ConjunctiveFormula}, false otherwise.
-     */
-    public boolean isEvaluated(ConjunctiveFormula constraint) {
-        return isEvaluated.contains(constraint);
     }
 
     /**

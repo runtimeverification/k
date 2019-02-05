@@ -16,6 +16,7 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.util.HookProvider;
 import org.kframework.backend.java.util.Profiler2;
+import org.kframework.backend.java.util.RuleSourceUtil;
 import org.kframework.builtin.KLabels;
 import org.kframework.compile.*;
 import org.kframework.definition.Module;
@@ -230,6 +231,9 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
                         ConstrainedTerm lhs = r.createLhsPattern(termContext);
                         ConstrainedTerm rhs = r.createRhsPattern();
                         termContext.setInitialVariables(lhs.variableSet());
+                        if (rewritingContext.javaExecutionOptions.cacheFunctionsOptimized) {
+                            rewritingContext.functionCache.clearCache();
+                        }
                         return rewriter.proveRule(r, lhs, rhs, allRules, kem);
                     })
                     .flatMap(List::stream)
@@ -351,6 +355,12 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
                 termContext.setTopConstraint(constraint);
                 //simplify the constraint in its own context, to force full evaluation of terms.
                 constraint = constraint.simplify(termContext);
+                if (constraint.isFalseExtended()) {
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("Rule requires clause evaluates to false:\n");
+                    RuleSourceUtil.appendRuleAndSource(rule, sb);
+                    throw KEMException.criticalError(sb.toString());
+                }
 
                 return new org.kframework.backend.java.kil.Rule(
                         rule.label(),
