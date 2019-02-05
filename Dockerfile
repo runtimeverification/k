@@ -43,6 +43,6 @@ ADD ocaml-backend/pom.xml /home/user/.tmp-maven/ocaml-backend/
 ADD kernel/pom.xml /home/user/.tmp-maven/kernel/
 ADD java-backend/pom.xml /home/user/.tmp-maven/java-backend/
 ADD k-distribution/pom.xml /home/user/.tmp-maven/k-distribution/
-ADD kore/pom.xml /home/u/home/user/.tmp-maven/kore/
+ADD kore/pom.xml /home/user/.tmp-maven/kore/
 RUN    cd /home/user/.tmp-maven \
     && mvn dependency:go-offline 
