@@ -35,6 +35,14 @@ ADD --chown=user:user llvm-backend/src/main/native/llvm-backend/matching/submodu
 RUN    cd /home/user/.tmp-haskell2 \
     && stack build --only-snapshot --test
 
-ADD pom.xml ktree/pom.xml llvm-backend/pom.xml haskell-backend/pom.xml ocaml-backend/pom.xml kernel/pom.xml java-backend/pom.xml k-distribution/pom.xml kore/pom.xml /home/user/.tmp-maven/
+ADD pom.xml /home/user/.tmp-maven/
+ADD ktree/pom.xml /home/user/.tmp-maven/ktree/
+ADD llvm-backend/pom.xml /home/user/.tmp-maven/llvm-backend/
+ADD haskell-backend/pom.xml /home/user/.tmp-maven/haskell-backend/
+ADD ocaml-backend/pom.xml /home/user/.tmp-maven/ocaml-backend/
+ADD kernel/pom.xml /home/user/.tmp-maven/kernel/
+ADD java-backend/pom.xml /home/user/.tmp-maven/java-backend/
+ADD k-distribution/pom.xml /home/user/.tmp-maven/k-distribution/
+ADD kore/pom.xml /home/u/home/user/.tmp-maven/kore/
 RUN    cd /home/user/.tmp-maven \
     && mvn dependency:go-offline 
