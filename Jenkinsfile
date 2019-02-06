@@ -27,11 +27,9 @@ pipeline {
                 stage('Build Pacman Package') {
                   steps {
                     checkout scm
-                    dir('arch') {
-                      sh '''
-                        makepkg
-                      '''
-                    }
+                    sh '''
+                      makepkg
+                    '''
                     stash name: "arch", includes: "kframework-5.0.0.pkg.tar.xz"
                   }
                 }
