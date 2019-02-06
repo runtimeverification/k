@@ -25,7 +25,7 @@ md5sums=()
 validpgpkeys=()
 
 prepare() {
-	cd "$pkgname-$pkgver"
+	true
 }
 
 build() {
@@ -33,11 +33,11 @@ build() {
 }
 
 check() {
-	cd "$pkgname-$pkgver"
+	true
 }
 
 package() {
-	export DESTDIR="$pkgname-$pkgver/$pkgdir" 
-	src/main/scripts/package
-	install -Dm644 LICENSE.md "$DESTDIR/usr/share/licenses/$pkgname/LICENSE"
+	export DESTDIR="$pkgdir/" 
+	DESTDIR="$pkgdir/" src/main/scripts/package
+	install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
 }
