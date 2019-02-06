@@ -16,7 +16,7 @@ RUN rustup default 1.28.0
 ADD k-distribution/src/main/scripts/bin/k-configure-opam-dev k-distribution/src/main/scripts/bin/k-configure-opam-common /home/user/.tmp-opam/bin/
 ADD k-distribution/src/main/scripts/lib/opam  /home/user/.tmp-opam/lib/opam/
 RUN    cd /home/user \
-    && ./.tmp-opam/bin/k-configure-opam-dev
+    && INIT_ARGS=--disable-sandboxing ./.tmp-opam/bin/k-configure-opam-dev
 
 ENV LC_ALL=C.UTF-8
 ADD --chown=user:user haskell-backend/src/main/native/haskell-backend/stack.yaml /home/user/.tmp-haskell/
