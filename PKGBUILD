@@ -25,6 +25,7 @@ md5sums=()
 validpgpkeys=()
 
 prepare() {
+	cd "$pkgname-$pkgver"
 }
 
 build() {
@@ -32,6 +33,7 @@ build() {
 }
 
 check() {
+	cd "$pkgname-$pkgver"
 }
 
 package() {
