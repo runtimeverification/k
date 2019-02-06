@@ -24,19 +24,18 @@ noextract=()
 md5sums=()
 validpgpkeys=()
 
-prepare() {}
+prepare() {
+}
 
 build() {
-	cd ..
 	mvn package -DskipTests
 }
 
-check() {}
-
+check() {
+}
 
 package() {
-	cd ..
-	export DESTDIR="arch/$pkgname-$pkgver/$pkgdir" 
+	export DESTDIR="$pkgname-$pkgver/$pkgdir" 
 	src/main/scripts/package
 	install -Dm644 LICENSE.md "$DESTDIR/usr/share/licenses/$pkgname/LICENSE"
 }
