@@ -29,7 +29,6 @@ pipeline {
                     checkout scm
                     dir('arch') {
                       sh '''
-                        . $HOME/.cargo/env
                         makepkg
                       '''
                     }
