@@ -1,7 +1,7 @@
 FROM archlinux/base
 
 RUN pacman -Syy && \
-    pacman -S --noconfirm git maven jdk-openjdk cmake boost yaml-cpp jemalloc clang zlib gmp mpfr z3 opam curl stack rustup base base-devel
+    pacman -S --noconfirm git maven jdk-openjdk cmake boost yaml-cpp jemalloc clang llvm zlib gmp mpfr z3 opam curl stack rustup base base-devel
 
 ARG USER_ID=1000
 ARG GROUP_ID=1000
