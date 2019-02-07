@@ -740,6 +740,20 @@ public class SymbolicRewriter {
             global.javaExecutionOptions.log = originalLog;
         }
 
+        for (ConstrainedTerm term : proofResults) {
+            print(term.term(), prettyResult);
+            System.out.print("/\\");
+            if (prettyResult) {
+                global.prettyPrinter.prettyPrint(term.constraint());
+            } else {
+                System.out.println(term.constraint().toStringMultiline());
+            }
+            System.out.println();
+        }
+        if (proofResults.isEmpty()) {
+            System.out.println(KLabels.ML_TRUE);
+        }
+
         if (global.globalOptions.verbose) {
             printSummaryBox(rule, proofResults, successPaths, step);
         }
