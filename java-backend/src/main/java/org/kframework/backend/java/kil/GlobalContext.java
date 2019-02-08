@@ -15,7 +15,6 @@ import org.kframework.backend.java.util.Z3Wrapper;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.api.io.FileSystem;
 import org.kframework.main.GlobalOptions;
-import org.kframework.unparser.PrettyPrinter;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.options.SMTOptions;
@@ -39,7 +38,6 @@ public class GlobalContext implements Serializable {
     public final transient GlobalOptions globalOptions;
     public final transient Profiler2 profiler;
     public final StateLog stateLog;
-    private PrettyPrinter prettyPrinter;
     public final transient FunctionCache functionCache = new FunctionCache();
 
     public GlobalContext(
@@ -101,11 +99,4 @@ public class GlobalContext implements Serializable {
         return def;
     }
 
-    public PrettyPrinter getPrettyPrinter() {
-        return prettyPrinter;
-    }
-
-    public void setPrettyPrinter(PrettyPrinter prettyPrinter) {
-        this.prettyPrinter = prettyPrinter;
-    }
 }
