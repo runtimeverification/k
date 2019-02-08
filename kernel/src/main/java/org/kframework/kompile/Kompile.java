@@ -155,7 +155,6 @@ public class Kompile {
                 DefinitionTransformer.fromSentenceTransformer(new ResolveSemanticCasts(kompileOptions.backend.equals(Backends.JAVA))::resolve, "resolving semantic casts");
         DefinitionTransformer resolveFun = DefinitionTransformer.from(new ResolveFun()::resolve, "resolving #fun");
         DefinitionTransformer generateSortPredicateSyntax = DefinitionTransformer.from(new GenerateSortPredicateSyntax()::gen, "adding sort predicate productions");
-        DefinitionTransformer generatedTopFormat = DefinitionTransformer.from(GeneratedTopFormat::resolve, "setting generatedTop format attribute");
         DefinitionTransformer subsortKItem = DefinitionTransformer.from(Kompile::subsortKItem, "subsort all sorts to KItem");
         GenerateCoverage cov = new GenerateCoverage(kompileOptions.coverage, files);
         DefinitionTransformer genCoverage = DefinitionTransformer.fromRuleBodyTransformerWithRule(cov::gen, "generate coverage instrumentation");

@@ -118,7 +118,6 @@ public class KoreBackend implements Backend {
         DefinitionTransformer subsortKItem = DefinitionTransformer.from(Kompile::subsortKItem, "subsort all sorts to KItem");
         DefinitionTransformer expandMacros = DefinitionTransformer.fromSentenceTransformer((m, s) -> new ExpandMacros(m, files, kompileOptions, false).expand(s), "expand macros");
         Function1<Definition, Definition> resolveFreshConstants = d -> DefinitionTransformer.from(m -> GeneratedTopFormat.resolve(new ResolveFreshConstants(d, true).resolve(m)), "resolving !Var variables").apply(d);
-        DefinitionTransformer generatedTopFormat = DefinitionTransformer.from(GeneratedTopFormat::resolve, "setting generatedTop format attribute");
         Function1<Definition, Definition> resolveIO = (d -> Kompile.resolveIOStreams(kem, d));
 
         return def -> resolveIO
