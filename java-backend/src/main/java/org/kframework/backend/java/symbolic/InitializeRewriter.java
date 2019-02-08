@@ -30,6 +30,8 @@ import org.kframework.krun.api.io.FileSystem;
 import org.kframework.main.GlobalOptions;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.rewriter.SearchType;
+import org.kframework.unparser.PrettyPrinter;
+import org.kframework.unparser.WantsPrettyPrinter;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -121,7 +123,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
     }
 
 
-    public static class SymbolicRewriterGlue implements Rewriter {
+    public static class SymbolicRewriterGlue implements Rewriter, WantsPrettyPrinter {
 
         public final Definition definition;
         public Definition miniKoreDefinition;
@@ -154,6 +156,11 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
             this.initCounterValue = initCounterValue;
             this.rewritingContext = rewritingContext;
             this.kem = kem;
+        }
+
+        @Override
+        public void setPrettyPrinter(PrettyPrinter prettyPrinter) {
+            this.rewritingContext.setPrettyPrinter(prettyPrinter);
         }
 
         @Override

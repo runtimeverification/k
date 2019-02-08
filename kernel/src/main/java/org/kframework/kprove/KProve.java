@@ -12,6 +12,8 @@ import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.unparser.KPrint;
+import org.kframework.unparser.PrettyPrinter;
+import org.kframework.unparser.WantsPrettyPrinter;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -44,8 +46,14 @@ public class KProve {
 
     public int run(KProveOptions options, CompiledDefinition compiledDefinition, Backend backend, Function<Module, Rewriter> rewriterGenerator) {
         Tuple2<Definition, Module> compiled = getProofDefinition(options.specFile(files), options.defModule, options.specModule, compiledDefinition, backend, files, kem, sw);
-        Rewriter rewriter = rewriterGenerator.apply(compiled._1().mainModule());
+        Definition def = compiled._1();
+        Rewriter rewriter = rewriterGenerator.apply(def.mainModule());
         Module specModule = compiled._2();
+        Module languageModule = def.getModule("LANGUAGE-PARSING").get();
+        PrettyPrinter prettyPrinter = new PrettyPrinter(kprint, def, languageModule);
+        if (rewriter instanceof WantsPrettyPrinter) {
+            ((WantsPrettyPrinter) rewriter).setPrettyPrinter(prettyPrinter);
+        }
 
         K results = rewriter.prove(specModule);
         int exit;
@@ -55,7 +63,7 @@ public class KProve {
         } else {
             exit = 1;
         }
-        kprint.prettyPrint(compiled._1(), compiled._1().getModule("LANGUAGE-PARSING").get(), s -> kprint.outputFile(s), results);
+        prettyPrinter.prettyPrint(results);
         return exit;
     }
 
