@@ -6,6 +6,8 @@ import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.symbolic.ConjunctiveFormula;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Map;
 
 /**
@@ -53,11 +55,11 @@ public class FormulaContext {
     public final Rule rule;
     public Z3Profiler z3Profiler;
 
-    public FormulaContext(Kind kind, Rule rule) {
+    public FormulaContext(Kind kind, @Nonnull Rule rule) {
         this(kind, rule, rule.globalContext());
     }
 
-    public FormulaContext(Kind kind, Rule rule, GlobalContext globalContext) {
+    public FormulaContext(Kind kind, @Nullable Rule rule, @Nonnull GlobalContext globalContext) {
         this.kind = kind;
         this.rule = rule;
         this.z3Profiler = globalContext.profiler.z3Profilers.get(kind);
@@ -73,7 +75,9 @@ public class FormulaContext {
         if (cached) {
             System.err.println("cached result");
         }
-        RuleSourceUtil.printRuleAndSource(rule);
+        if (rule != null) {
+            RuleSourceUtil.printRuleAndSource(rule);
+        }
         System.err.println("==================================");
     }
 
@@ -86,7 +90,9 @@ public class FormulaContext {
         if (cached) {
             System.err.println("cached result");
         }
-        RuleSourceUtil.printRuleAndSource(rule);
+        if (rule != null) {
+            RuleSourceUtil.printRuleAndSource(rule);
+        }
         System.err.println("==================================");
     }
 }
