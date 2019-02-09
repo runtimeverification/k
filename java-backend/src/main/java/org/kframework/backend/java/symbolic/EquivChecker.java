@@ -143,7 +143,7 @@ public class EquivChecker {
                 for (ConstrainedTerm next : nexts) {
                     for (int i = 0; i < numSyncPoints; i++) {
                         ConjunctiveFormula constraint = next.matchImplies(targetSyncNodes.get(i), true, false,
-                                new FormulaContext(FormulaContext.Kind.EquivImplication, null), null);
+                                new FormulaContext(FormulaContext.Kind.EquivImplication, null, next.termContext().global()), null);
                         if (constraint != null) {
                             SyncNode node = new SyncNode(currSyncNode.startSyncPoint, currSyncNode, next, constraint);
                             nextSyncNodes.get(i).add(node);
@@ -187,7 +187,7 @@ public class EquivChecker {
                     ConjunctiveFormula c0 = ConjunctiveFormula.of(startEnsures.get(ct1.startSyncPoint));
                     ConjunctiveFormula e = ConjunctiveFormula.of(targetEnsures.get(i));
                     ConjunctiveFormula c = c1.add(c2).add(c0).simplify(); // TODO: termContext ??
-                    if (!c.isFalse() && !c.checkUnsat(new FormulaContext(FormulaContext.Kind.EquivConstr, null))
+                    if (!c.isFalse() && !c.checkUnsat(new FormulaContext(FormulaContext.Kind.EquivConstr, null, c.globalContext()))
                             && c.smartImplies(e) /* c.implies(e, Collections.emptySet()) */) {
                         ct1.mark = Mark.BLACK;
                         ct2.mark = Mark.BLACK;

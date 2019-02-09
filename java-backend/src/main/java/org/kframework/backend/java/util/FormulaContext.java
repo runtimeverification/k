@@ -2,6 +2,7 @@
 package org.kframework.backend.java.util;
 
 import com.google.common.collect.ImmutableMap;
+import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.symbolic.ConjunctiveFormula;
 
@@ -53,9 +54,13 @@ public class FormulaContext {
     public Z3Profiler z3Profiler;
 
     public FormulaContext(Kind kind, Rule rule) {
+        this(kind, rule, rule.globalContext());
+    }
+
+    public FormulaContext(Kind kind, Rule rule, GlobalContext globalContext) {
         this.kind = kind;
         this.rule = rule;
-        this.z3Profiler = rule.globalContext().profiler.z3Profilers.get(kind);
+        this.z3Profiler = globalContext.profiler.z3Profilers.get(kind);
     }
 
     public void printImplication(ConjunctiveFormula left, ConjunctiveFormula right, Boolean proved, boolean cached) {

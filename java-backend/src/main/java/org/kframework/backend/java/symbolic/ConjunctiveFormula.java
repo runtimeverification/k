@@ -831,7 +831,8 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
          */
 
         constraint = (ConjunctiveFormula) constraint.substitute(this.substitution());
-        return implies(constraint, Collections.emptySet(), new FormulaContext(FormulaContext.Kind.EquivImplication, null));
+        return implies(constraint, Collections.emptySet(),
+                new FormulaContext(FormulaContext.Kind.EquivImplication, null, constraint.global));
     }
 
     /**
