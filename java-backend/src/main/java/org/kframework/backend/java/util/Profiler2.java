@@ -2,8 +2,15 @@
 package org.kframework.backend.java.util;
 
 import com.google.inject.Inject;
+import org.kframework.backend.java.symbolic.ConjunctiveFormula;
 import org.kframework.main.StartTimeHolder;
 import org.kframework.utils.inject.RequestScoped;
+
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.function.BinaryOperator;
+import java.util.stream.Collectors;
 
 /**
  * @author Denis Bogdanas
@@ -18,9 +25,21 @@ public class Profiler2 {
     private long initTimestamp;
 
     public final CounterStopwatch resFuncNanoTimer = new CounterStopwatch("resolveFunction");
+    public final CounterStopwatch logOverheadTimer = new CounterStopwatch("Log");
     public final CounterStopwatch queryBuildTimer = new CounterStopwatch("Z3 query build");
-    public final Z3Profiler z3Implication = new Z3Profiler("Z3 implication");
-    public final Z3Profiler z3Constraint = new Z3Profiler("Z3 constraint");
+
+    public int countResFuncTopUncached = 0;
+    public int countResFuncRecursiveUncached = 0;
+    final Map<FormulaContext.Kind, Z3Profiler> z3Profilers = createZ3Profilers();
+
+    private Map<FormulaContext.Kind, Z3Profiler> createZ3Profilers() {
+        BinaryOperator<Z3Profiler> throwingMerger = (u, v) -> {
+            throw new IllegalStateException(String.format("Duplicate key %s", u));
+        };
+        return Arrays.stream(FormulaContext.Kind.values())
+                .collect(Collectors.toMap(kind -> kind, kind -> new Z3Profiler("Z3 " + kind.label),
+                        throwingMerger, LinkedHashMap::new));
+    }
 
     @Inject
     public Profiler2(StartTimeHolder startTimeHolder) {
@@ -35,12 +54,31 @@ public class Profiler2 {
         System.err.format("  Execution time:      %.3f\n\n", (currentTimestamp - initTimestamp) / 1000.);
 
         System.err.format("Init+Execution time:    %.3f\n", (currentTimestamp - parsingTimestamp) / 1000.);
-        System.err.format("  query build time:     %s\n", queryBuildTimer);
-        z3Constraint.print();
-        z3Implication.print();
-        System.err.format("  resolveFunction time: %s\n", resFuncNanoTimer);
+        if (queryBuildTimer.getCount() > 0) {
+            System.err.format("  query build time:     %s\n", queryBuildTimer);
+        }
+        for (Z3Profiler profiler : z3Profilers.values()) {
+            if (profiler.getQueryCount() > 0) {
+                profiler.print();
+            }
+        }
 
-        System.err.format("resolveFunction top-level calls:   %d\n", resFuncNanoTimer.getCount());
+        System.err.format("  resolveFunction time: %s\n", resFuncNanoTimer);
+        if (logOverheadTimer.getCount() > 0) {
+            System.err.format("  log time:             %s\n\n", logOverheadTimer);
+        }
+
+        System.err.format("resolveFunction top-level uncached: %d\n", countResFuncTopUncached);
+        int countCached = resFuncNanoTimer.getCount() - countResFuncTopUncached;
+        if (countCached > 0) {
+            System.err.format("resolveFunction top-level cached:   %d\n", countCached);
+        }
+        System.err.format("resolveFunction recursive uncached: %d\n", countResFuncRecursiveUncached);
+
+        if (ConjunctiveFormula.impliesStopwatch.getCount() > 0) {
+            System.err.format("\nimpliesSMT time:    %s\n", ConjunctiveFormula.impliesStopwatch);
+            System.err.format("impliesSMT count: %s\n", ConjunctiveFormula.impliesStopwatch.getCount());
+        }
 
         //Has some overhead. Enable from class Profiler if needed, by setting value below to true.
         if (Profiler.enableProfilingMode.get()) {

@@ -7,6 +7,7 @@ import org.kframework.backend.java.util.StateLog;
 import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.BaseEnumConverter;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -53,6 +54,47 @@ public final class JavaExecutionOptions {
     @Parameter(names="--cache-func-optimized",
             description="Clear function cache after initialization phase. Frees some memory. Use IN ADDITION to --cache-func")
     public boolean cacheFunctionsOptimized = false;
+
+    @Parameter(names="--branching-allowed", arity=1, description="Number of branching events allowed before a forcible stop.")
+    public int branchingAllowed = Integer.MAX_VALUE;
+
+    @Parameter(names="--log", description="Log every step. KEVM only.")
+    public boolean log = false;
+
+    @Parameter(names="--log-basic",
+            description="Log most basic information: summary of initial step, final steps and final implications." +
+                    " All custom logging only works for KEVM-based specs.")
+    public boolean logBasic = false;
+
+    @Parameter(names="--log-cells", description="Specify what subset of configuration has to be printed when" +
+            " an execution step is logged." +
+            " Usage format: --log-pretty \"v2,v2,...\" , where v1,v2,... are either cell names," +
+            " cell names in parentheses (like \"(k)\") or one of: \"(#pc)\", \"(#result)\". " +
+            " The cells specified without parentheses are printed with toString()." +
+            " The cells specified in parentheses are pretty-printed. Certain cells have custom formatting." +
+            " The last 2 options mean:" +
+            " (#pc) = pretty print the path condition (constraint)." +
+            " (#result) = fully pretty-print the final result (e.g. the configuration for paths that were not proved)." +
+            " This last option is very slow." +
+            " Default value is:" +
+            " --log-cells k,output,statusCode,localMem,pc,gas,wordStack,callData,accounts" +
+            " Recommended alternative value:" +
+            " --log-cells \"(k),output,statusCode,localMem,pc,gas,wordStack,callData,accounts,(#pc)\"")
+    public List<String> logCells = Arrays.asList("k", "output", "statusCode", "localMem", "pc", "gas", "wordStack",
+            "callData", "accounts");
+
+    @Parameter(names="--log-rules", description="Log applied rules.")
+    public boolean logRules = false;
+
+    @Parameter(names="--debug-z3",
+            description="Log formulae fed to z3 together with the rule that triggered them.")
+    public boolean debugZ3 = false;
+
+    @Parameter(names="--debug-z3-queries",
+            description="Log actual z3 queries. Activates --debug-z3 automatically.")
+    public boolean debugZ3Queries = false;
+
+    public boolean logRulesPublic = false;
 
     public static class LogEventConverter extends BaseEnumConverter<StateLog.LogEvent> {
 
