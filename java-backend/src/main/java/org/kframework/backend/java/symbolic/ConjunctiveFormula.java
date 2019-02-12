@@ -616,8 +616,8 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
      * even if #f is NOT injective.
      */
     public ConjunctiveFormula resolveMatchingSymbols(Set<String> matchingSymbols) {
-        PersistentUniqueList<Equality> equalities = this.equalities;
-        PersistentUniqueList<Equality> newEqualities = equalities;
+        PersistentUniqueList<Equality> resultEqualities = PersistentUniqueList.empty();
+        PersistentUniqueList<Equality> newEqualities = this.equalities;
 
         while (!newEqualities.isEmpty()) {
             PersistentUniqueList<Equality> curEqualities = newEqualities;
@@ -635,19 +635,21 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                         if (lKList.size() == rKList.size()) {
                             for (int i = 0; i < lKList.size(); ++i) {
                                 Equality newEquality = new Equality(lKList.get(i), rKList.get(i), global); // X == Y
-                                equalities = equalities.plus(newEquality);
                                 newEqualities = newEqualities.plus(newEquality);
                             }
+                            continue;
                         }
                     }
                 }
+                //anything but continue above
+                resultEqualities = resultEqualities.plus(equality);
             }
         }
 
-        if (equalities == this.equalities) {
+        if (resultEqualities.equals(this.equalities)) {
             return this;
         } else {
-            return new ConjunctiveFormula(substitution, equalities, disjunctions, truthValue, falsifyingEquality, global);
+            return new ConjunctiveFormula(substitution, resultEqualities, disjunctions, truthValue, falsifyingEquality, global);
         }
     }
 
@@ -871,8 +873,12 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 continue;
             }
 
-            global.stateLog.log(StateLog.LogEvent.IMPLICATION, left, right);
-            if (!impliesSMT(left, right, existentialQuantVars)) {
+            //Removing LHS substitution because it's not used to build Z3 query anyway.
+            //Improves Z3 cache efficiency.
+            ConjunctiveFormula leftWithoutSubst = ConjunctiveFormula.of(ImmutableMapSubstitution.empty(),
+                    left.equalities(), left.disjunctions(), left.globalContext());
+            global.stateLog.log(StateLog.LogEvent.IMPLICATION, leftWithoutSubst, right);
+            if (!impliesSMT(leftWithoutSubst, right, existentialQuantVars)) {
                 if (global.globalOptions.debug) {
                     System.err.println("Failure!");
                 }

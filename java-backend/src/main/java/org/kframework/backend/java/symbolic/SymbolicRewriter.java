@@ -586,7 +586,7 @@ public class SymbolicRewriter {
         while (!queue.isEmpty()) {
             step++;
             for (ConstrainedTerm term : queue) {
-                if (term.implies(targetTerm)) {
+                if (term.implies(targetTerm, rule)) {
                     global.stateLog.log(StateLog.LogEvent.REACHPROVED, term.term(), term.constraint());
                     successPaths++;
                     continue;
