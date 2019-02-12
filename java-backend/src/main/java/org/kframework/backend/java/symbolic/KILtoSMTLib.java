@@ -13,6 +13,7 @@ import org.kframework.backend.java.builtins.FloatToken;
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.BuiltinList;
+import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.kil.JavaSymbolicObject;
@@ -422,7 +423,7 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
     @Override
     public SMTLibTerm transform(ConjunctiveFormula constraint) {
         assert constraint.disjunctions().isEmpty() : "disjunctions are not supported by SMT translation";
-        Set<Equality> equalities = Sets.newHashSet(constraint.equalities());
+        Set<Equality> equalities = Sets.newLinkedHashSet(constraint.equalities());
         if (!allowNewVars) {
             constraint.substitution().entrySet().stream()
                     .map(entry -> new Equality(entry.getKey(), entry.getValue(), constraint.globalContext()))
@@ -584,6 +585,12 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
         } else {
             return new SMTLibTerm(label);
         }
+    }
+
+    @Override
+    public JavaSymbolicObject transform(BuiltinMap builtinMap) {
+        return new SMTLibTerm(abstractThroughAnonVariable(builtinMap,
+                new SMTTranslationFailure("BuiltinMap can be translated to Z3 only through fresh var")));
     }
 
     @Override
