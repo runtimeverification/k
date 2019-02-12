@@ -2,7 +2,6 @@
 
 package org.kframework.backend.java.kil;
 
-import com.google.inject.Inject;
 import org.kframework.backend.java.kil.KItem.KItemOperations;
 import org.kframework.backend.java.symbolic.BuiltinFunction;
 import org.kframework.backend.java.symbolic.Equality.EqualityOperations;
@@ -15,6 +14,8 @@ import org.kframework.backend.java.util.Z3Wrapper;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.api.io.FileSystem;
 import org.kframework.main.GlobalOptions;
+import org.kframework.unparser.KPrint;
+import org.kframework.backend.java.util.PrettyPrinter;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.options.SMTOptions;
@@ -38,6 +39,7 @@ public class GlobalContext implements Serializable {
     public final transient GlobalOptions globalOptions;
     public final transient Profiler2 profiler;
     public final StateLog stateLog;
+    public final PrettyPrinter prettyPrinter;
     public final transient FunctionCache functionCache = new FunctionCache();
 
     public GlobalContext(
@@ -50,7 +52,9 @@ public class GlobalContext implements Serializable {
             Map<String, MethodHandle> hookProvider,
             FileUtil files,
             Stage stage,
-            Profiler2 profiler) {
+            Profiler2 profiler,
+            KPrint kprint,
+            org.kframework.definition.Definition coreDefinition) {
         this.fs = fs;
         this.globalOptions = globalOptions;
         this.krunOptions = krunOptions;
@@ -64,21 +68,7 @@ public class GlobalContext implements Serializable {
         this.kItemOps = new KItemOperations(stage, javaExecutionOptions.deterministicFunctions, kem, this::builtins, globalOptions);
         this.stage = stage;
         this.profiler = profiler;
-    }
-
-    @Inject
-    public GlobalContext(
-            GlobalOptions globalOptions,
-            SMTOptions smtOptions,
-            KExceptionManager kem,
-            KRunOptions krunOptions,
-            JavaExecutionOptions javaExecutionOptions,
-            FileSystem fs,
-            FileUtil files,
-            Map<String, MethodHandle> hookProvider,
-            Stage stage,
-            Profiler2 profiler) {
-        this(fs, globalOptions, krunOptions, javaExecutionOptions, kem, smtOptions, hookProvider, files, stage, profiler);
+        prettyPrinter = new PrettyPrinter(kprint, coreDefinition);
     }
 
     private transient BuiltinFunction builtinFunction;
@@ -98,5 +88,4 @@ public class GlobalContext implements Serializable {
     public Definition getDefinition() {
         return def;
     }
-
 }

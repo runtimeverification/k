@@ -42,9 +42,9 @@ public class KProve {
         this.kprint = kprint;
     }
 
-    public int run(KProveOptions options, CompiledDefinition compiledDefinition, Backend backend, Function<Module, Rewriter> rewriterGenerator) {
+    public int run(KProveOptions options, CompiledDefinition compiledDefinition, Backend backend, Function<Definition, Rewriter> rewriterGenerator) {
         Tuple2<Definition, Module> compiled = getProofDefinition(options.specFile(files), options.defModule, options.specModule, compiledDefinition, backend, files, kem, sw);
-        Rewriter rewriter = rewriterGenerator.apply(compiled._1().mainModule());
+        Rewriter rewriter = rewriterGenerator.apply(compiled._1());
         Module specModule = compiled._2();
 
         K results = rewriter.prove(specModule);

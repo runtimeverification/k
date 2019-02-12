@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import org.kframework.RewriterResult;
 import org.kframework.backend.kore.ModuleToKORE;
 import org.kframework.compile.AddSortInjections;
+import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
 import org.kframework.kompile.CompiledDefinition;
@@ -38,7 +39,7 @@ import java.util.function.Function;
 
 
 @RequestScoped
-public class LLVMRewriter implements Function<Module, Rewriter> {
+public class LLVMRewriter implements Function<Definition, Rewriter> {
 
     private final FileUtil files;
     private final CompiledDefinition def;
@@ -59,7 +60,8 @@ public class LLVMRewriter implements Function<Module, Rewriter> {
     }
 
     @Override
-    public Rewriter apply(Module module) {
+    public Rewriter apply(Definition definition) {
+        Module module = definition.mainModule();
         if (!module.equals(def.executionModule())) {
             throw KEMException.criticalError("Invalid module specified for rewriting. LLVM backend only supports rewriting over" +
                     " the definition's main module.");

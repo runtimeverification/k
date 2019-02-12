@@ -5,7 +5,7 @@ import com.google.inject.Inject;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.kframework.builtin.Sorts;
-import org.kframework.definition.Module;
+import org.kframework.definition.Definition;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.Assoc;
@@ -60,7 +60,7 @@ public class OcamlCompileExecutionMode implements ExecutionMode {
     }
 
     @Override
-    public Tuple2<K, Integer> execute(KRun.InitialConfiguration k, Function<Module, Rewriter> ignored, CompiledDefinition compiledDefinition) {
+    public Tuple2<K, Integer> execute(KRun.InitialConfiguration k, Function<Definition, Rewriter> ignored, CompiledDefinition compiledDefinition) {
         if (compiledDefinition.exitCodePattern != null) {
             // serializedVars will not be evaluated at program load.
             // This is faster, but their definition may not include impure functions

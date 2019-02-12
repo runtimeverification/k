@@ -8,6 +8,7 @@ import org.kframework.backend.kore.KoreBackend;
 import org.kframework.backend.kore.ModuleToKORE;
 import org.kframework.compile.AddSortInjections;
 import org.kframework.compile.RewriteToTop;
+import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
 import org.kframework.kompile.CompiledDefinition;
@@ -48,7 +49,7 @@ import static org.kframework.builtin.BooleanUtils.*;
 
 
 @RequestScoped
-public class HaskellRewriter implements Function<Module, Rewriter> {
+public class HaskellRewriter implements Function<Definition, Rewriter> {
 
     private final FileUtil files;
     private final CompiledDefinition def;
@@ -79,7 +80,8 @@ public class HaskellRewriter implements Function<Module, Rewriter> {
     }
 
     @Override
-    public Rewriter apply(Module module) {
+    public Rewriter apply(Definition definition) {
+        Module module = definition.mainModule();
         if (!module.equals(def.executionModule()) && kProveOptions.specModule != null) {
             throw KEMException.criticalError("Invalid module specified for rewriting. Haskell backend only supports rewriting over" +
                     " the definition's main module.");

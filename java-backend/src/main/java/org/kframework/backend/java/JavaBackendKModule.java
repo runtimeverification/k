@@ -13,9 +13,7 @@ import org.kframework.backend.java.symbolic.InitializeRewriter;
 import org.kframework.backend.java.symbolic.JavaBackend;
 import org.kframework.backend.java.symbolic.JavaExecutionOptions;
 import org.kframework.compile.Backend;
-import org.kframework.kprove.KProve;
-import org.kframework.krun.ToolActivation;
-import org.kframework.krun.modes.ExecutionMode;
+import org.kframework.definition.Definition;
 import org.kframework.main.AbstractKModule;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.utils.inject.Options;
@@ -97,8 +95,8 @@ public class JavaBackendKModule extends AbstractKModule {
     }
 
     private void installJavaRewriter(Binder binder) {
-        MapBinder<String, Function<org.kframework.definition.Module, Rewriter>> rewriterBinder = MapBinder.newMapBinder(
-                binder, TypeLiteral.get(String.class), new TypeLiteral<Function<org.kframework.definition.Module, Rewriter>>() {
+        MapBinder<String, Function<Definition, Rewriter>> rewriterBinder = MapBinder.newMapBinder(
+                binder, TypeLiteral.get(String.class), new TypeLiteral<Function<Definition, Rewriter>>() {
                 });
         rewriterBinder.addBinding("java").to(InitializeRewriter.class);
     }

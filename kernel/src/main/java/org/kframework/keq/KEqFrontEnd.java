@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import com.google.inject.Module;
 import com.google.inject.Provider;
 import org.kframework.compile.Backend;
+import org.kframework.definition.Definition;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
@@ -39,9 +40,9 @@ public class KEqFrontEnd extends FrontEnd {
     private final Provider<CompiledDefinition> compiledDef;
     private final Provider<CompiledDefinition> compiledDef1;
     private final Provider<CompiledDefinition> compiledDef2;
-    private final Provider<Function<org.kframework.definition.Module, Rewriter>> initializeRewriter;
-    private final Provider<Function<org.kframework.definition.Module, Rewriter>> initializeRewriter1;
-    private final Provider<Function<org.kframework.definition.Module, Rewriter>> initializeRewriter2;
+    private final Provider<Function<Definition, Rewriter>> initializeRewriter;
+    private final Provider<Function<Definition, Rewriter>> initializeRewriter1;
+    private final Provider<Function<Definition, Rewriter>> initializeRewriter2;
 
     @Inject
     public KEqFrontEnd(
@@ -61,9 +62,9 @@ public class KEqFrontEnd extends FrontEnd {
             @Main Provider<CompiledDefinition> compiledDef,
             @Spec1 Provider<CompiledDefinition> compiledDef1,
             @Spec2 Provider<CompiledDefinition> compiledDef2,
-            @Main Provider<Function<org.kframework.definition.Module, Rewriter>> initializeRewriter,
-            @Spec1 Provider<Function<org.kframework.definition.Module, Rewriter>> initializeRewriter1,
-            @Spec2 Provider<Function<org.kframework.definition.Module, Rewriter>> initializeRewriter2) {
+            @Main Provider<Function<Definition, Rewriter>> initializeRewriter,
+            @Spec1 Provider<Function<Definition, Rewriter>> initializeRewriter1,
+            @Spec2 Provider<Function<Definition, Rewriter>> initializeRewriter2) {
         super(kem, globalOptions, usage, experimentalUsage, jarInfo, files);
         this.scope = scope;
         this.kompiledDir = kompiledDir;
@@ -85,7 +86,7 @@ public class KEqFrontEnd extends FrontEnd {
     @Override
     protected int run() {
         CompiledDefinition commonDef, def1, def2;
-        Function<org.kframework.definition.Module, Rewriter> commonRewriter, rewriter1, rewriter2;
+        Function<Definition, Rewriter> commonRewriter, rewriter1, rewriter2;
         Backend backend;
         scope.enter(kompiledDir.get());
         try {
