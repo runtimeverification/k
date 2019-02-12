@@ -95,8 +95,8 @@ public class ConstrainedTerm extends JavaSymbolicObject {
         return data.constraint;
     }
 
-    public boolean implies(ConstrainedTerm constrainedTerm) {
-        ConjunctiveFormula conjunctiveFormula = matchImplies(constrainedTerm, true, null);
+    public boolean implies(ConstrainedTerm constrainedTerm, Rule specRule) {
+        ConjunctiveFormula conjunctiveFormula = matchImplies(constrainedTerm, true, specRule.matchingSymbols());
         return conjunctiveFormula != null;
     }
 
@@ -124,6 +124,9 @@ public class ConstrainedTerm extends JavaSymbolicObject {
      * Checks if {@code this} implies {@code matchRHSTerm}, assuming the variables
      * occurring only in {@code matchRHSTerm} (but not in {@code this}) are
      * existentially quantified.
+     *
+     * @return If implication value is {@code true}, return the unification constraint:
+     * implicationLHS /\ implicationRHS. Otherwise return {@code true}.
      */
     public ConjunctiveFormula matchImplies(ConstrainedTerm matchRHSTerm, boolean expand, Set<String> matchingSymbols) {
         ConjunctiveFormula constraint = ConjunctiveFormula.of(matchRHSTerm.termContext().global())
