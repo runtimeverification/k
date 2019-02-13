@@ -240,7 +240,9 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
             rewritingContext.stateLog.open("prove-" + Integer.toString(Math.abs(mod.hashCode())));
             rewritingContext.setExecutionPhase(false);
             rewritingContext.javaExecutionOptions.logRulesPublic = rewritingContext.javaExecutionOptions.logRulesInit;
-            List<Rule> rules = stream(mod.rules()).filter(r -> r.att().contains("specification")).collect(Collectors.toList());
+            List<Rule> rules = stream(mod.rules())
+                    .sorted(Comparator.comparingInt(rule -> rule.body().hashCode()))
+                    .filter(r -> r.att().contains("specification")).collect(Collectors.toList());
             ProcessProofRules processProofRules = new ProcessProofRules(rules).invoke(rewritingContext, initCounterValue, module, definition);
             List<org.kframework.backend.java.kil.Rule> javaRules = processProofRules.getJavaRules();
             KOREtoBackendKIL converter = processProofRules.getConverter();
@@ -527,6 +529,8 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
 
             JavaConversions.setAsJavaSet(module.attributesFor().keySet()).stream()
                     .map(l -> KLabelConstant.of(l, definition))
+                    //sorting to eliminate non-determinism in logs
+                    .sorted(Comparator.comparing(KLabelConstant::label))
                     .forEach(definition::addKLabel);
             definition.addKoreRules(module, global);
             cache.put(module, definition);
