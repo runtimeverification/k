@@ -16,6 +16,7 @@ import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
 import org.kframework.main.Tool;
 import org.kframework.rewriter.Rewriter;
+import org.kframework.unparser.PrintOptions;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
@@ -70,6 +71,11 @@ public class KEqModule extends AbstractModule {
 
     @Provides
     SMTOptions smtOptions(KEqOptions options) { return options.smt; }
+
+    @Provides
+    PrintOptions printOptions(KEqOptions options) {
+        return options.print;
+    }
 
     public static class MainExecutionContextModule extends AnnotatedByDefinitionModule {
 
