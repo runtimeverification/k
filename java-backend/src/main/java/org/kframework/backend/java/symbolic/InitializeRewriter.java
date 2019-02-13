@@ -30,6 +30,7 @@ import org.kframework.krun.api.io.FileSystem;
 import org.kframework.main.GlobalOptions;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.rewriter.SearchType;
+import org.kframework.unparser.KPrint;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -55,7 +56,7 @@ import static org.kframework.kore.KORE.*;
 /**
  * Created by dwightguth on 5/6/15.
  */
-public class InitializeRewriter implements Function<Module, Rewriter> {
+public class InitializeRewriter implements Function<org.kframework.definition.Definition, Rewriter> {
 
     private final FileSystem fs;
     private final Stopwatch sw;
@@ -69,6 +70,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
     private final InitializeDefinition initializeDefinition;
     private static final int NEGATIVE_VALUE = -1;
     private final KompileOptions kompileOptions;
+    private final KPrint kprint;
     private final Profiler2 profiler;
     private final JavaExecutionOptions javaExecutionOptions;
 
@@ -84,6 +86,7 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
             FileUtil files,
             InitializeDefinition initializeDefinition,
             Stopwatch sw,
+            KPrint kprint,
             Profiler2 profiler) {
         this.fs = fs;
         this.sw = sw;
@@ -97,19 +100,24 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
         this.javaExecutionOptions = javaExecutionOptions;
         this.files = files;
         this.initializeDefinition = initializeDefinition;
+        this.kprint = kprint;
         this.profiler = profiler;
     }
 
     @Override
-    public synchronized Rewriter apply(Module mainModule) {
-        TermContext initializingContext = TermContext.builder(new GlobalContext(fs, globalOptions, krunOptions, javaExecutionOptions, kem, smtOptions, hookProvider, files, Stage.INITIALIZING, profiler))
+    public synchronized Rewriter apply(org.kframework.definition.Definition def) {
+        Module mainModule = def.mainModule();
+        TermContext initializingContext = TermContext.builder(new GlobalContext(fs, globalOptions, krunOptions,
+                javaExecutionOptions, kem, smtOptions, hookProvider, files, Stage.INITIALIZING, profiler, kprint, def))
                 .freshCounter(0).build();
         Definition definition;
         definition = initializeDefinition.invoke(mainModule, kem, initializingContext.global());
-        GlobalContext rewritingContext = new GlobalContext(fs, globalOptions, krunOptions, javaExecutionOptions, kem, smtOptions, hookProvider, files, Stage.REWRITING, profiler);
+        GlobalContext rewritingContext = new GlobalContext(fs, globalOptions, krunOptions, javaExecutionOptions, kem,
+                smtOptions, hookProvider, files, Stage.REWRITING, profiler, kprint, def);
         rewritingContext.setDefinition(definition);
 
-        return new SymbolicRewriterGlue(mainModule, definition, definition, transitions, initializingContext.getCounterValue(), rewritingContext, kem, files, kompileOptions, sw);
+        return new SymbolicRewriterGlue(mainModule, definition, definition, transitions,
+                initializingContext.getCounterValue(), rewritingContext, kem, files, kompileOptions, sw);
     }
 
     public static Rule transformFunction(Function<K, K> f, Rule r) {

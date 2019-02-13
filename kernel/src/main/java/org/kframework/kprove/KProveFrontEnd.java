@@ -6,12 +6,8 @@ import com.google.inject.Inject;
 import com.google.inject.Module;
 import com.google.inject.Provider;
 import org.kframework.compile.Backend;
+import org.kframework.definition.Definition;
 import org.kframework.kompile.CompiledDefinition;
-import org.kframework.krun.KRun;
-import org.kframework.krun.KRunModule;
-import org.kframework.krun.KRunOptions;
-import org.kframework.krun.RewriterModule;
-import org.kframework.krun.modes.ExecutionMode;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
 import org.kframework.rewriter.Rewriter;
@@ -51,7 +47,7 @@ public class KProveFrontEnd extends FrontEnd {
     private final FileUtil files;
     private final Provider<CompiledDefinition> compiledDef;
     private final Provider<Backend> backend;
-    private final Provider<Function<org.kframework.definition.Module, Rewriter>> initializeRewriter;
+    private final Provider<Function<Definition, Rewriter>> initializeRewriter;
     private final TTYInfo tty;
     private final Stopwatch sw;
 
@@ -68,7 +64,7 @@ public class KProveFrontEnd extends FrontEnd {
             FileUtil files,
             Provider<CompiledDefinition> compiledDef,
             Provider<Backend> backend,
-            Provider<Function<org.kframework.definition.Module, Rewriter>> initializeRewriter,
+            Provider<Function<Definition, Rewriter>> initializeRewriter,
             TTYInfo tty,
             Stopwatch sw) {
         super(kem, options, usage, experimentalUsage, jarInfo, files);

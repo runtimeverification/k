@@ -6,7 +6,7 @@ import org.kframework.attributes.Source;
 import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.ConfigurationInfoFromModule;
-import org.kframework.definition.Module;
+import org.kframework.definition.Definition;
 import org.kframework.definition.Rule;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kore.Assoc;
@@ -70,7 +70,7 @@ public class KRun {
         }
     }
 
-    public int run(CompiledDefinition compiledDef, KRunOptions options, Function<Module, Rewriter> rewriterGenerator, ExecutionMode executionMode) {
+    public int run(CompiledDefinition compiledDef, KRunOptions options, Function<Definition, Rewriter> rewriterGenerator, ExecutionMode executionMode) {
         String pgmFileName = options.configurationCreation.pgm();
         K program;
         if (options.configurationCreation.term()) {

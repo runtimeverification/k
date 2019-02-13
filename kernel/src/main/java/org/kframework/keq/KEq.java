@@ -31,17 +31,17 @@ public class KEq {
             CompiledDefinition def2,
             KEqOptions keqOptions,
             Backend backend,
-            Function<Module, Rewriter> commonGen,
-            Function<Module, Rewriter> gen1,
-            Function<Module, Rewriter> gen2) {
-        Rewriter commonRewriter = commonGen.apply(commonDef.executionModule());
+            Function<Definition, Rewriter> commonGen,
+            Function<Definition, Rewriter> gen1,
+            Function<Definition, Rewriter> gen2) {
+        Rewriter commonRewriter = commonGen.apply(commonDef.kompiledDefinition);
 
         Tuple2<Definition, Module> compiled1 = KProve.getProofDefinition(files.resolveWorkingDirectory(keqOptions.spec1), keqOptions.defModule1, keqOptions.specModule1, def1, backend, files, kem, sw);
-        Rewriter rewriter1 = gen1.apply(compiled1._1().mainModule());
+        Rewriter rewriter1 = gen1.apply(compiled1._1());
         Module spec1 = compiled1._2();
 
         Tuple2<Definition, Module> compiled2 = KProve.getProofDefinition(files.resolveWorkingDirectory(keqOptions.spec2), keqOptions.defModule2, keqOptions.specModule2, def2, backend, files, kem, sw);
-        Rewriter rewriter2 = gen2.apply(compiled2._1().mainModule());
+        Rewriter rewriter2 = gen2.apply(compiled2._1());
         Module spec2 = compiled2._2();
 
         boolean isEquivalent = commonRewriter.equivalence(rewriter1, rewriter2, spec1, spec2);

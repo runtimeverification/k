@@ -13,7 +13,7 @@ import jline.console.completer.NullCompleter;
 import jline.console.completer.StringsCompleter;
 import org.kframework.debugger.KDebug;
 import org.kframework.debugger.KoreKDebug;
-import org.kframework.definition.Module;
+import org.kframework.definition.Definition;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kore.K;
 import org.kframework.krun.KRun;
@@ -88,8 +88,8 @@ public class DebugExecutionMode implements ExecutionMode {
 
 
     @Override
-    public Tuple2<K, Integer> execute(KRun.InitialConfiguration k, Function<Module, Rewriter> rewriter, CompiledDefinition compiledDefinition) {
-        KDebug debugger = new KoreKDebug(k.theConfig, rewriter.apply(compiledDefinition.executionModule()), checkpointInterval, files, kem, kRunOptions, compiledDefinition);
+    public Tuple2<K, Integer> execute(KRun.InitialConfiguration k, Function<Definition, Rewriter> rewriterGenerator, CompiledDefinition compiledDefinition) {
+        KDebug debugger = new KoreKDebug(k.theConfig, rewriterGenerator.apply(compiledDefinition.kompiledDefinition), checkpointInterval, files, kem, kRunOptions, compiledDefinition);
         ConsoleReader reader = getConsoleReader();
         while (true) {
             try {

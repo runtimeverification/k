@@ -5,14 +5,13 @@ import com.google.inject.Inject;
 import org.kframework.RewriterResult;
 import org.kframework.attributes.Source;
 import org.kframework.builtin.BooleanUtils;
-import org.kframework.definition.Module;
+import org.kframework.definition.Definition;
 import org.kframework.definition.Rule;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kore.K;
 import org.kframework.kore.KORE;
 import org.kframework.krun.KRun;
 import org.kframework.krun.KRunOptions;
-import org.kframework.krun.SearchResult;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
@@ -39,8 +38,8 @@ public class KRunExecutionMode implements ExecutionMode {
     }
 
     @Override
-    public Tuple2<K, Integer> execute(KRun.InitialConfiguration config, Function<Module, Rewriter> rewriterGenerator, CompiledDefinition compiledDefinition) {
-        Rewriter rewriter = rewriterGenerator.apply(compiledDefinition.executionModule());
+    public Tuple2<K, Integer> execute(KRun.InitialConfiguration config, Function<Definition, Rewriter> rewriterGenerator, CompiledDefinition compiledDefinition) {
+        Rewriter rewriter = rewriterGenerator.apply(compiledDefinition.kompiledDefinition);
         K k = config.theConfig;
         Rule pattern = null, parsedPattern = null;
         if (kRunOptions.pattern != null) {

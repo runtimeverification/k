@@ -4,6 +4,7 @@ package org.kframework.keq;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate;
 import org.kframework.main.GlobalOptions;
+import org.kframework.unparser.PrintOptions;
 import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.DefinitionLoadingOptions;
 import org.kframework.utils.options.SMTOptions;
@@ -18,6 +19,9 @@ public final class KEqOptions {
 
     @ParametersDelegate
     public SMTOptions smt = new SMTOptions();
+
+    @ParametersDelegate
+    public PrintOptions print = new PrintOptions();
 
     @Parameter(names={"--definition1", "-d1"}, description="Path to the directory in which the first kompiled " +
             "K definition resides. The default is the unique, only directory with the suffix '-kompiled' " +
