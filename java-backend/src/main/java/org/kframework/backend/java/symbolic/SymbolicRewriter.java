@@ -75,7 +75,6 @@ public class SymbolicRewriter {
         this.theFastMatcher = new FastRuleMatcher(global, definition.ruleTable.size());
         this.transition = true;
         this.global = global;
-        parseLogCells();
     }
 
     public KOREtoBackendKIL getConstructor() {
@@ -102,7 +101,7 @@ public class SymbolicRewriter {
     }
 
     private List<ConstrainedTerm> computeRewriteStep(ConstrainedTerm constrainedTerm, int step, boolean computeOne) {
-        return fastComputeRewriteStep(constrainedTerm, computeOne, false, false, step);
+        return fastComputeRewriteStep(constrainedTerm, computeOne, false, false);
     }
 
     /**
@@ -148,7 +147,7 @@ public class SymbolicRewriter {
 
     }
 
-    public List<ConstrainedTerm> fastComputeRewriteStep(ConstrainedTerm subject, boolean computeOne, boolean narrowing, boolean proofFlag, int step) {
+    public List<ConstrainedTerm> fastComputeRewriteStep(ConstrainedTerm subject, boolean computeOne, boolean narrowing, boolean proofFlag) {
         global.stateLog.log(StateLog.LogEvent.NODE, subject.term(), subject.constraint());
         List<ConstrainedTerm> results = new ArrayList<>();
         if (definition.automaton == null) {
@@ -162,13 +161,10 @@ public class SymbolicRewriter {
                 computeOne,
                 transitions,
                 proofFlag,
-                subject.termContext(), step);
+                subject.termContext());
         for (FastRuleMatcher.RuleMatchResult matchResult : matches) {
             Rule rule = definition.ruleTable.get(matchResult.ruleIndex);
             global.stateLog.log(StateLog.LogEvent.RULEATTEMPT, rule.toKRewrite());
-            if (global.javaExecutionOptions.logRulesPublic) {
-                RuleSourceUtil.printRuleAndSource(rule);
-            }
 
             Substitution<Variable, Term> substitution =
                     rule.att().contains(Att.refers_THIS_CONFIGURATION()) ?
@@ -604,35 +600,15 @@ public class SymbolicRewriter {
         boolean guarded = false;
         int step = 0;
 
-        global.javaExecutionOptions.logBasic |= global.javaExecutionOptions.log;
-        global.globalOptions.verbose |= global.javaExecutionOptions.logBasic;
         global.javaExecutionOptions.debugZ3Queries |= global.globalOptions.debug;
         global.javaExecutionOptions.debugZ3 |= global.javaExecutionOptions.debugZ3Queries;
-        //to avoid printing initialization-phase rules
-        global.javaExecutionOptions.logRulesPublic = global.javaExecutionOptions.logRules;
 
-        if (global.javaExecutionOptions.log) {
-            System.out.println("\nTarget term\n=====================\n");
-            System.out.println(targetTerm);
-        }
-        int branchingRemaining = global.javaExecutionOptions.branchingAllowed;
-        boolean nextStepLogEnabled = false;
-        boolean originalLog = global.javaExecutionOptions.log;
         while (!queue.isEmpty()) {
             step++;
-            int v = 0;
-            global.javaExecutionOptions.log |= nextStepLogEnabled;
-            nextStepLogEnabled = false;
 
             for (ConstrainedTerm term : queue) {
-                v++;
-                boolean alreadyLogged = logStep(step, v, term, step == 1, false);
-                if (term.implies(targetTerm, rule, false)) {
+                if (term.implies(targetTerm, rule)) {
                     global.stateLog.log(StateLog.LogEvent.REACHPROVED, term.term(), term.constraint());
-                    if (global.javaExecutionOptions.logBasic) {
-                        logStep(step, v, term, true, alreadyLogged);
-                        System.out.println("\n============\nStep " + step + ": eliminated!\n============\n");
-                    }
                     successPaths++;
                     continue;
                 }
@@ -660,12 +636,6 @@ public class SymbolicRewriter {
                 if (guarded) {
                     ConstrainedTerm result = applySpecRules(term, specRules);
                     if (result != null) {
-                        nextStepLogEnabled = true;
-                        logStep(step, v, term, true, alreadyLogged);
-                        // re-running constraint generation again for debug purposes
-                        if (global.javaExecutionOptions.logBasic) {
-                            System.err.println("\nApplying specification rule\n=========================\n");
-                        }
                         if (visited.add(result)) {
                             nextQueue.add(result);
                         } else {
@@ -677,44 +647,12 @@ public class SymbolicRewriter {
                     }
                 }
 
-                List<ConstrainedTerm> results;
-                try {
-                    results = fastComputeRewriteStep(term, false, true, true, step);
-                    // DISABLE EXCEPTION CHECKSTYLE
-                } catch (Throwable e) {
-                    // ENABLE EXCEPTION CHECKSTYLE
-                    logStep(step, v, term, true, alreadyLogged);
-                    System.out.println("\n\nTerm throwing exception\n============================\n\n");
-                    //KProve.prettyPrint(term.term());
-                    System.out.println(term.term());
-                    System.out.print("/\\");
-                    //KProve.prettyPrint(term.constraint());
-                    System.out.println(term.constraint().toString().replaceAll("#And", "\n#And"));
-                    e.printStackTrace();
-                    throw e;
-                }
+                List<ConstrainedTerm> results = fastComputeRewriteStep(term, false, true, true);
                 if (results.isEmpty()) {
-                    logStep(step, v, term, true, alreadyLogged);
-                    System.out.println("\nStep above: " + step + ", evaluation ended with no successors.");
                     /* final term */
                     proofResults.add(term);
                 }
 
-                if (results.size() > 1) {
-                    nextStepLogEnabled = true;
-                    logStep(step, v, term, true, alreadyLogged);
-                    if (branchingRemaining == 0) {
-                        System.out.println("\nHalt on branching!\n=====================\n");
-
-                        proofResults.addAll(results);
-                        continue;
-                    } else {
-                        branchingRemaining--;
-                        if (global.javaExecutionOptions.logBasic) {
-                            System.out.println("\nBranching!\n=====================\n");
-                        }
-                    }
-                }
                 for (ConstrainedTerm cterm : results) {
                     ConstrainedTerm result = new ConstrainedTerm(
                             cterm.term(),
@@ -736,8 +674,6 @@ public class SymbolicRewriter {
             nextQueue = temp;
             nextQueue.clear();
             guarded = true;
-
-            global.javaExecutionOptions.log = originalLog;
         }
 
         if (global.globalOptions.verbose) {
@@ -763,109 +699,18 @@ public class SymbolicRewriter {
         global.profiler.printResult();
     }
 
-    //map value = log format: true = pretty, false = toString()
-    private Map<String, Boolean> cellsToLog = new LinkedHashMap<>();
-    private boolean prettyPC;
-    private boolean prettyResult;
-
-    private void parseLogCells() {
-        for (String cell : global.javaExecutionOptions.logCells) {
-            boolean pretty = false;
-            if (cell.startsWith("(") && cell.endsWith(")")) {
-                pretty = true;
-                cell = cell.substring(1, cell.length() - 1);
-            }
-            if (cell.equals("#pc")) {
-                prettyPC = pretty;
-            } else if (cell.equals("#result")) {
-                prettyResult = pretty;
-            } else {
-                cellsToLog.put(cell, pretty);
-            }
-        }
-    }
-
-    /**
-     * @return whether it was actually logged
-     */
-    private boolean logStep(int step, int v, ConstrainedTerm term, boolean forced, boolean alreadyLogged) {
-        if (alreadyLogged || !global.javaExecutionOptions.logBasic) {
-            return false;
-        }
-        global.profiler.logOverheadTimer.start();
-        KItem top = (KItem) term.term();
-
-        if (global.javaExecutionOptions.log || forced || global.javaExecutionOptions.logRulesPublic) {
-            System.out.format("\nSTEP %d v%d : %.3f s \n===================\n",
-                    step, v, (System.currentTimeMillis() - global.profiler.getStartTime()) / 1000.);
-        }
-
-        boolean actuallyLogged = global.javaExecutionOptions.log || forced;
-        if (actuallyLogged) {
-            for(String cellName : cellsToLog.keySet()) {
-                boolean pretty = cellsToLog.get(cellName);
-                KItem cell = getCell(top, "<" + cellName + ">");
-                if (cell == null) {
-                    continue;
-                }
-                print(cell, pretty);
-            }
-
-            System.out.println("/\\");
-            if (prettyPC) {
-                global.prettyPrinter.prettyPrint(term.constraint());
-            } else {
-                System.out.println(term.constraint().toStringMultiline());
-            }
-        }
-        global.profiler.logOverheadTimer.stop();
-        return actuallyLogged;
-    }
-
-    private void print(K cell, boolean pretty) {
-        if (pretty) {
-            global.prettyPrinter.prettyPrint(cell);
-        } else {
-            System.out.println(toStringOrEmpty(cell));
-        }
-    }
-
-    private String toStringOrEmpty(Object o) {
-        return o != null ? o.toString() : "";
-    }
-
-    private Pattern cellLabelPattern = Pattern.compile("<.+>");
-
-    private KItem getCell(KItem root, String label) {
-        if (root.klabel().name().equals(label)) {
-            return root;
-        }
-        for (K child : root.klist().items()) {
-            if (child instanceof KItem && cellLabelPattern.matcher(((KItem) child).klabel().name()).matches()) {
-                KItem result = getCell((KItem) child, label);
-                if (result != null) {
-                    return result;
-                }
-            }
-        }
-        return null;
-    }
-
     /**
      * Applies the first applicable specification rule and returns the result.
      */
     private ConstrainedTerm applySpecRules(ConstrainedTerm constrainedTerm, List<Rule> specRules) {
         for (Rule specRule : specRules) {
             ConstrainedTerm pattern = specRule.createLhsPattern(constrainedTerm.termContext());
-            ConjunctiveFormula constraint = constrainedTerm.matchImplies(pattern, true, false,
+            ConjunctiveFormula constraint = constrainedTerm.matchImplies(pattern, true,
                     new FormulaContext(FormulaContext.Kind.SpecRule, specRule), specRule.matchingSymbols());
             if (constraint != null) {
                 ConstrainedTerm result = buildResult(specRule, constraint, null, true, constrainedTerm.termContext(),
                         new FormulaContext(FormulaContext.Kind.SpecConstr, specRule));
                 global.stateLog.log(StateLog.LogEvent.SRULE, specRule.toKRewrite());
-                if (global.javaExecutionOptions.logRulesPublic) {
-                    RuleSourceUtil.printRuleAndSource(specRule);
-                }
                 return result;
             }
         }

@@ -372,7 +372,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
 
 
     public ConjunctiveFormula simplify() {
-        return simplify(false, true, TermContext.builder(global).build(), false);
+        return simplify(false, true, TermContext.builder(global).build());
     }
 
     /**
@@ -380,7 +380,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
      * Decomposes equalities by using unification.
      */
     public ConjunctiveFormula simplify(TermContext context) {
-        return simplify(false, true, context, false);
+        return simplify(false, true, context);
     }
 
     /**
@@ -388,19 +388,19 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
      * between builtin data structures will remain intact if they cannot be
      * resolved completely.
      */
-    public ConjunctiveFormula simplifyBeforePatternFolding(TermContext context, boolean logFailures) {
-        return simplify(false, false, context, logFailures);
+    public ConjunctiveFormula simplifyBeforePatternFolding(TermContext context) {
+        return simplify(false, false, context);
     }
 
     public ConjunctiveFormula simplifyModuloPatternFolding(TermContext context) {
-        return simplify(true, true, context, false);
+        return simplify(true, true, context);
     }
 
     /**
      * Simplifies this conjunctive formula as much as possible.
      * Decomposes equalities by using unification.
      */
-    private ConjunctiveFormula simplify(boolean patternFolding, boolean partialSimplification, TermContext context, boolean logFailures) {
+    private ConjunctiveFormula simplify(boolean patternFolding, boolean partialSimplification, TermContext context) {
         assert !isFalse();
         ConjunctiveFormula originalTopConstraint = context.getTopConstraint();
         Substitution<Variable, Term> substitution = this.substitution;
@@ -431,7 +431,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                         if (equality.isSimplifiableByCurrentAlgorithm()) {
                             // (decompose + conflict)*
                             FastRuleMatcher unifier = new FastRuleMatcher(global, 1);
-                            ConjunctiveFormula unificationConstraint = unifier.unifyEquality(leftHandSide, rightHandSide, patternFolding, partialSimplification, false, context, logFailures);
+                            ConjunctiveFormula unificationConstraint = unifier.unifyEquality(leftHandSide, rightHandSide, patternFolding, partialSimplification, false, context);
                             if (unificationConstraint.isFalse()) {
                                 return falsify(
                                         substitution,

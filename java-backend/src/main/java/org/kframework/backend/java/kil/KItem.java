@@ -579,10 +579,6 @@ public class KItem extends Term implements KItemRepresentation {
                                 appliedRule = rule;
                             }
 
-                            if (kItem.global.javaExecutionOptions.logRulesPublic && result != null) {
-                                RuleSourceUtil.printRuleAndSource(rule);
-                            }
-
                             /*
                              * If the function definitions do not need to be deterministic, try them in order
                              * and apply the first one that matches.
@@ -700,10 +696,6 @@ public class KItem extends Term implements KItemRepresentation {
                 RuleAuditing.succeed(rule);
                 Term rightHandSide = rule.rightHandSide();
                 rightHandSide = rightHandSide.substituteAndEvaluate(solution, context);
-
-                if (global.javaExecutionOptions.logRulesPublic) {
-                    RuleSourceUtil.printRuleAndSource(rule);
-                }
                 return rightHandSide;
             } finally {
                 if (RuleAuditing.isAuditBegun()) {
