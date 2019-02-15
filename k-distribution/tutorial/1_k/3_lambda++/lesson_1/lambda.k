@@ -7,15 +7,14 @@ module LAMBDA-SEMANTICS
   imports SUBSTITUTION
   imports syntax DEFAULT-CONFIGURATION
 
-  syntax Val ::= Id
-               | "lambda" Id "." Exp  [binder, latex(\lambda{#1}.{#2})]
+  syntax Val ::= KVar
+               | "lambda" KVar "." Exp  [binder, latex(\lambda{#1}.{#2})]
   syntax Exp ::= Val
                | Exp Exp              [strict, left]
                | "(" Exp ")"          [bracket]
-  syntax KVariable ::= Id
   syntax KResult ::= Val
 
-  rule (lambda X:Id . E:Exp) V:Val => E[V / X]
+  rule (lambda X:KVar . E:Exp) V:Val => E[V / X]
 
   syntax Val ::= Int | Bool
   syntax Exp ::= Exp "*" Exp          [strict, left]
@@ -31,12 +30,12 @@ module LAMBDA-SEMANTICS
   rule if true  then E else _ => E
   rule if false then _ else E => E
 
-  syntax Exp ::= "let" Id "=" Exp "in" Exp
+  syntax Exp ::= "let" KVar "=" Exp "in" Exp
   rule let X = E in E':Exp => (lambda X . E') E                        [macro]
 
-  syntax Exp ::= "letrec" Id Id "=" Exp "in" Exp
-               | "mu" Id "." Exp                 [binder, latex(\mu{#1}.{#2})]
-  rule letrec F:Id X = E in E' => let F = mu F . lambda X . E in E'    [macro]
+  syntax Exp ::= "letrec" KVar KVar "=" Exp "in" Exp
+               | "mu" KVar "." Exp                 [binder, latex(\mu{#1}.{#2})]
+  rule letrec F:KVar X = E in E' => let F = mu F . lambda X . E in E'    [macro]
   rule mu X . E => E[(mu X . E) / X]
 
   syntax Exp ::= "callcc" Exp  [strict]

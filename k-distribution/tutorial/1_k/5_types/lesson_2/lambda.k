@@ -10,14 +10,12 @@ module LAMBDA
                 | Type "->" Type
                 | "(" Type ")"                 [bracket]
 
-  syntax Exp ::= Id
-               | "lambda" Id ":" Type "." Exp  [binder]
+  syntax Exp ::= KVar
+               | "lambda" KVar ":" Type "." Exp  [binder]
                | Exp Exp                       [strict, left]
                | "(" Exp ")"                   [bracket]
 
   syntax Exp ::= Type
-
-  syntax KVariable ::= Id
 
   syntax KResult ::= Type
 
@@ -42,11 +40,11 @@ module LAMBDA
   syntax Exp ::= "if" Exp "then" Exp "else" Exp                       [strict]
   rule if bool then T:Type else T => T
 
-  syntax Exp ::= "let" Id ":" Type "=" Exp "in" Exp
+  syntax Exp ::= "let" KVar ":" Type "=" Exp "in" Exp
   rule let X : T = E in E' => (lambda X : T . E') E                   [macro]
 
-  syntax Exp ::= "letrec" Id ":" Type Id ":" Type "=" Exp "in" Exp
-               | "mu" Id ":" Type "." Exp                             [binder]
+  syntax Exp ::= "letrec" KVar ":" Type KVar ":" Type "=" Exp "in" Exp
+               | "mu" KVar ":" Type "." Exp                             [binder]
   rule letrec F : T1  X : T2 = E in E'
     => let F : T1 = mu F : T1 . lambda X : T2 . E in E'               [macro]
   rule mu X : T . E => (T -> T) (E[T/X])
