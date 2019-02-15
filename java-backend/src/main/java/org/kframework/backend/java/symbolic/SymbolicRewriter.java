@@ -25,26 +25,27 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.util.StateLog;
+import org.kframework.backend.java.util.FormulaContext;
+import org.kframework.backend.java.utils.BitSet;
 import org.kframework.builtin.KLabels;
 import org.kframework.kore.FindK;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KORE;
 import org.kframework.rewriter.SearchType;
-import org.kframework.backend.java.utils.BitSet;
 import org.kframework.utils.errorsystem.KExceptionManager;
-
-import java.io.File;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.io.File;
 
 /**
  * @author AndreiS
@@ -53,8 +54,8 @@ public class SymbolicRewriter {
 
     private final List<String> transitions;
     private final Stopwatch stopwatch = Stopwatch.createUnstarted();
-    private final GlobalContext global;
     private final KOREtoBackendKIL constructor;
+    private final GlobalContext global;
     private boolean transition;
     private final Set<ConstrainedTerm> superheated = Sets.newHashSet();
     private final Set<ConstrainedTerm> newSuperheated = Sets.newHashSet();
@@ -91,6 +92,9 @@ public class SymbolicRewriter {
         ConstrainedTerm afterVariableRename = new ConstrainedTerm(constrainedTerm.term(), constrainedTerm.termContext());
 
         stopwatch.stop();
+        if (global.globalOptions.verbose) {
+            printSummaryBox(null, null, 1, step);
+        }
         return new RewriterResult(Optional.of(step), Optional.empty(), afterVariableRename.term());
     }
 
@@ -159,6 +163,7 @@ public class SymbolicRewriter {
         for (FastRuleMatcher.RuleMatchResult matchResult : matches) {
             Rule rule = definition.ruleTable.get(matchResult.ruleIndex);
             global.stateLog.log(StateLog.LogEvent.RULEATTEMPT, rule.toKRewrite());
+
             Substitution<Variable, Term> substitution =
                     rule.att().contains(Att.refers_THIS_CONFIGURATION()) ?
                             matchResult.constraint.substitution().plus(new Variable(KLabels.THIS_CONFIGURATION, Sort.KSEQUENCE), filterOurStrategyCell(subject.term())) :
@@ -200,7 +205,11 @@ public class SymbolicRewriter {
             if (!matchResult.isMatching) {
                 // TODO(AndreiS): move these some other place
                 result = result.expandPatterns(true);
-                if (result.constraint().isFalseExtended() || result.constraint().checkUnsat()) {
+                if (result.constraint().isFalseExtended() || result.constraint().checkUnsat(
+                        new FormulaContext(FormulaContext.Kind.RegularConstr, rule))) {
+                    if (global.javaExecutionOptions.debugZ3) {
+                        System.err.println("Execution path aborted after expanding patterns");
+                    }
                     continue;
                 }
             }
@@ -209,10 +218,16 @@ public class SymbolicRewriter {
             if (rule.att().contains(Att.heat()) && transitions.stream().anyMatch(rule.att()::contains)) {
                 newSuperheated.add(result);
             } else if (rule.att().contains(Att.cool()) && transitions.stream().anyMatch(rule.att()::contains) && superheated.contains(subject)) {
+                if (global.javaExecutionOptions.debugZ3) {
+                    System.err.println("Execution path aborted, superheating logic");
+                }
                 continue;
             }
 
             global.stateLog.log(StateLog.LogEvent.RULE, rule.toKRewrite());
+            if (global.javaExecutionOptions.debugZ3 && !result.constraint().equals(subject.constraint())) {
+                System.err.format("New top constraint created: \n%s\n", result.constraint().toStringMultiline());
+            }
             results.add(result);
         }
 
@@ -364,7 +379,7 @@ public class SymbolicRewriter {
             ConjunctiveFormula constraint,
             @SuppressWarnings("unused") Term subject,
             boolean expandPattern,
-            TermContext context) {
+            TermContext context, FormulaContext formulaContext) {
         for (Variable variable : rule.freshConstants()) {
             constraint = constraint.add(
                     variable,
@@ -393,7 +408,7 @@ public class SymbolicRewriter {
         if (expandPattern) {
             // TODO(AndreiS): move these some other place
             result = result.expandPatterns(true);
-            if (result.constraint().isFalseExtended() || result.constraint().checkUnsat()) {
+            if (result.constraint().isFalseExtended() || result.constraint().checkUnsat(formulaContext)) {
                 result = null;
             }
         }
@@ -583,8 +598,12 @@ public class SymbolicRewriter {
         boolean guarded = false;
         int step = 0;
 
+        global.javaExecutionOptions.debugZ3Queries |= global.globalOptions.debug;
+        global.javaExecutionOptions.debugZ3 |= global.javaExecutionOptions.debugZ3Queries;
+
         while (!queue.isEmpty()) {
             step++;
+
             for (ConstrainedTerm term : queue) {
                 if (term.implies(targetTerm, rule)) {
                     global.stateLog.log(StateLog.LogEvent.REACHPROVED, term.term(), term.constraint());
@@ -662,13 +681,17 @@ public class SymbolicRewriter {
     }
 
     private void printSummaryBox(Rule rule, List<ConstrainedTerm> proofResults, int successPaths, int step) {
-        if (proofResults.isEmpty()) {
-            System.err.format("\nSPEC PROVED: %s %s\n==================================\nExecution paths: %d\n",
-                    new File(rule.getSource().source()), rule.getLocation(), successPaths);
+        if (proofResults != null) {
+            if (proofResults.isEmpty()) {
+                System.err.format("\nSPEC PROVED: %s %s\n==================================\nExecution paths: %d\n",
+                        new File(rule.getSource().source()), rule.getLocation(), successPaths);
+            } else {
+                System.err.format("\nSPEC FAILED: %s %s\n==================================\n" +
+                                "Success execution paths: %d\nFailed execution paths: %d\n",
+                        new File(rule.getSource().source()), rule.getLocation(), successPaths, proofResults.size());
+            }
         } else {
-            System.err.format("\nSPEC FAILED: %s %s\n==================================\n" +
-                            "Success execution paths: %d\nFailed execution paths: %d\n",
-                    new File(rule.getSource().source()), rule.getLocation(), successPaths, proofResults.size());
+            System.err.print("\nEXECUTION FINISHED\n==================================\n");
         }
         System.err.format("Longest path: %d steps\n", step);
         global.profiler.printResult();
@@ -680,9 +703,11 @@ public class SymbolicRewriter {
     private ConstrainedTerm applySpecRules(ConstrainedTerm constrainedTerm, List<Rule> specRules) {
         for (Rule specRule : specRules) {
             ConstrainedTerm pattern = specRule.createLhsPattern(constrainedTerm.termContext());
-            ConjunctiveFormula constraint = constrainedTerm.matchImplies(pattern, true, specRule.matchingSymbols());
+            ConjunctiveFormula constraint = constrainedTerm.matchImplies(pattern, true,
+                    new FormulaContext(FormulaContext.Kind.SpecRule, specRule), specRule.matchingSymbols());
             if (constraint != null) {
-                ConstrainedTerm result = buildResult(specRule, constraint, null, true, constrainedTerm.termContext());
+                ConstrainedTerm result = buildResult(specRule, constraint, null, true, constrainedTerm.termContext(),
+                        new FormulaContext(FormulaContext.Kind.SpecConstr, specRule));
                 global.stateLog.log(StateLog.LogEvent.SRULE, specRule.toKRewrite());
                 return result;
             }

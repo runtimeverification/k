@@ -12,10 +12,26 @@ import org.apache.commons.lang3.tuple.Triple;
 import org.kframework.attributes.Att;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.compile.KOREtoBackendKIL;
-import org.kframework.backend.java.kil.*;
+import org.kframework.backend.java.kil.BuiltinList;
+import org.kframework.backend.java.kil.BuiltinMap;
+import org.kframework.backend.java.kil.BuiltinSet;
+import org.kframework.backend.java.kil.ConstrainedTerm;
+import org.kframework.backend.java.kil.GlobalContext;
+import org.kframework.backend.java.kil.InnerRHSRewrite;
+import org.kframework.backend.java.kil.KItem;
+import org.kframework.backend.java.kil.KLabelConstant;
+import org.kframework.backend.java.kil.KList;
+import org.kframework.backend.java.kil.LocalRewriteTerm;
+import org.kframework.backend.java.kil.Rule;
+import org.kframework.backend.java.kil.RuleAutomatonDisjunction;
+import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermContext;
+import org.kframework.backend.java.kil.Token;
+import org.kframework.backend.java.kil.Variable;
+import org.kframework.backend.java.util.FormulaContext;
+import org.kframework.backend.java.utils.BitSet;
 import org.kframework.builtin.KLabels;
 import org.kframework.kore.KApply;
-import org.kframework.backend.java.utils.BitSet;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -108,6 +124,7 @@ public class FastRuleMatcher {
             } else {
                 patternConstraint = patternConstraint.addAll(rule.requires());
             }
+            FormulaContext formulaContext = new FormulaContext(FormulaContext.Kind.RegularRule, rule);
             List<Triple<ConjunctiveFormula, Boolean, Map<scala.collection.immutable.List<Pair<Integer, Integer>>, Term>>> ruleResults = ConstrainedTerm.evaluateConstraints(
                     constraints[i],
                     subject.constraint(),
@@ -115,7 +132,7 @@ public class FastRuleMatcher {
                     Sets.union(getLeftHandSide(pattern, i).variableSet(), patternConstraint.variableSet()).stream()
                             .filter(v -> !v.name().equals(KOREtoBackendKIL.THE_VARIABLE))
                             .collect(Collectors.toSet()),
-                    context);
+                    context, formulaContext);
             for (Triple<ConjunctiveFormula, Boolean, Map<scala.collection.immutable.List<Pair<Integer, Integer>>, Term>> triple : ruleResults) {
                 RuleMatchResult result = new RuleMatchResult(triple.getLeft(), triple.getMiddle(), triple.getRight(), i);
                 if (transitions.stream().anyMatch(rule.att()::contains)) {

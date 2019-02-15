@@ -17,7 +17,7 @@ public class CounterStopwatch implements Comparable<CounterStopwatch> {
     private int level = 0;
     private int count;
 
-    CounterStopwatch(String name) {
+    public CounterStopwatch(String name) {
         this.name = name;
     }
 

@@ -3,6 +3,7 @@
 package org.kframework.backend.java.symbolic;
 
 import org.kframework.backend.java.kil.ConstrainedTerm;
+import org.kframework.backend.java.util.FormulaContext;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -141,7 +142,8 @@ public class EquivChecker {
             loop:
                 for (ConstrainedTerm next : nexts) {
                     for (int i = 0; i < numSyncPoints; i++) {
-                        ConjunctiveFormula constraint = next.matchImplies(targetSyncNodes.get(i), true, null);
+                        ConjunctiveFormula constraint = next.matchImplies(targetSyncNodes.get(i), true,
+                                new FormulaContext(FormulaContext.Kind.EquivImplication, null, next.termContext().global()), null);
                         if (constraint != null) {
                             SyncNode node = new SyncNode(currSyncNode.startSyncPoint, currSyncNode, next, constraint);
                             nextSyncNodes.get(i).add(node);
@@ -185,7 +187,8 @@ public class EquivChecker {
                     ConjunctiveFormula c0 = ConjunctiveFormula.of(startEnsures.get(ct1.startSyncPoint));
                     ConjunctiveFormula e = ConjunctiveFormula.of(targetEnsures.get(i));
                     ConjunctiveFormula c = c1.add(c2).add(c0).simplify(); // TODO: termContext ??
-                    if (!c.isFalse() && !c.checkUnsat() && c.smartImplies(e) /* c.implies(e, Collections.emptySet()) */) {
+                    if (!c.isFalse() && !c.checkUnsat(new FormulaContext(FormulaContext.Kind.EquivConstr, null, c.globalContext()))
+                            && c.smartImplies(e) /* c.implies(e, Collections.emptySet()) */) {
                         ct1.mark = Mark.BLACK;
                         ct2.mark = Mark.BLACK;
                     }

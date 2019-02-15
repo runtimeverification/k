@@ -54,6 +54,14 @@ public final class JavaExecutionOptions {
             description="Clear function cache after initialization phase. Frees some memory. Use IN ADDITION to --cache-func")
     public boolean cacheFunctionsOptimized = false;
 
+    @Parameter(names="--debug-z3",
+            description="Log formulae fed to z3 together with the rule that triggered them.")
+    public boolean debugZ3 = false;
+
+    @Parameter(names="--debug-z3-queries",
+            description="Log actual z3 queries. Activates --debug-z3 automatically.")
+    public boolean debugZ3Queries = false;
+
     public static class LogEventConverter extends BaseEnumConverter<StateLog.LogEvent> {
 
         public LogEventConverter(String optionName) {

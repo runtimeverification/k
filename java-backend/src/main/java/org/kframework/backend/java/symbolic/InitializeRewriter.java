@@ -167,6 +167,10 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
         @Override
         public RewriterResult execute(K k, Optional<Integer> depth) {
             rewritingContext.stateLog.open("execute-" + Integer.toString(Math.abs(k.hashCode())));
+            if (rewritingContext.globalOptions.verbose) {
+                rewritingContext.profiler.logParsingTime();
+            }
+            rewritingContext.setExecutionPhase(false);
             TermContext termContext = TermContext.builder(rewritingContext).freshCounter(initCounterValue).build();
             KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, termContext.global(), false);
             ResolveSemanticCasts resolveCasts = new ResolveSemanticCasts(true);
@@ -174,6 +178,10 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
             termContext.setKOREtoBackendKILConverter(converter);
             Term backendKil = converter.convert(macroExpander.expand(resolveCasts.resolve(k))).evaluate(termContext);
             SymbolicRewriter rewriter = new SymbolicRewriter(rewritingContext, transitions, converter);
+            if (rewritingContext.globalOptions.verbose) {
+                rewritingContext.profiler.logInitTime();
+            }
+            rewritingContext.setExecutionPhase(true);
             RewriterResult result = rewriter.rewrite(new ConstrainedTerm(backendKil, termContext), depth.orElse(-1));
             rewritingContext.stateLog.close();
             return result;
@@ -214,12 +222,13 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
                 rewritingContext.profiler.logParsingTime();
             }
             rewritingContext.stateLog.open("prove-" + Integer.toString(Math.abs(mod.hashCode())));
+            rewritingContext.setExecutionPhase(false);
             List<Rule> rules = stream(mod.rules()).filter(r -> r.att().contains("specification")).collect(Collectors.toList());
             ProcessProofRules processProofRules = new ProcessProofRules(rules).invoke(rewritingContext, initCounterValue, module, definition);
             List<org.kframework.backend.java.kil.Rule> javaRules = processProofRules.getJavaRules();
             KOREtoBackendKIL converter = processProofRules.getConverter();
             TermContext termContext = processProofRules.getTermContext();
-            List<org.kframework.backend.java.kil.Rule> allRules = javaRules.stream()
+            List<org.kframework.backend.java.kil.Rule> specRules = javaRules.stream()
                     .map(org.kframework.backend.java.kil.Rule::renameVariables)
                     .collect(Collectors.toList());
 
@@ -233,6 +242,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
             if (rewritingContext.globalOptions.verbose) {
                 rewritingContext.profiler.logInitTime();
             }
+            rewritingContext.setExecutionPhase(true);
             List<ConstrainedTerm> proofResults = javaRules.stream()
                     .filter(r -> !r.att().contains(Attribute.TRUSTED_KEY))
                     .map(r -> {
@@ -253,7 +263,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
                         if (rewritingContext.javaExecutionOptions.cacheFunctionsOptimized) {
                             rewritingContext.functionCache.clearCache();
                         }
-                        return rewriter.proveRule(r, lhs, rhs, allRules, kem);
+                        return rewriter.proveRule(r, lhs, rhs, specRules, kem);
                     })
                     .flatMap(List::stream)
                     .collect(Collectors.toList());
