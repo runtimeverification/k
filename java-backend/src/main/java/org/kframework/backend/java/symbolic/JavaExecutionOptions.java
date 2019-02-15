@@ -58,12 +58,12 @@ public final class JavaExecutionOptions {
     @Parameter(names="--branching-allowed", arity=1, description="Number of branching events allowed before a forcible stop.")
     public int branchingAllowed = Integer.MAX_VALUE;
 
-    @Parameter(names="--log", description="Log every step. KEVM only.")
+    @Parameter(names="--log", description="Log every step.")
     public boolean log = false;
 
     @Parameter(names="--log-basic",
-            description="Log most basic information: summary of initial step, final steps and final implications." +
-                    " All custom logging only works for KEVM-based specs.")
+            description="Log most basic information: summary of initial step, final steps and final implications, " +
+                    "branching points.")
     public boolean logBasic = false;
 
     @Parameter(names="--log-cells", description="Specify what subset of configuration has to be printed when" +
@@ -83,7 +83,9 @@ public final class JavaExecutionOptions {
     public List<String> logCells = Arrays.asList("k", "output", "statusCode", "localMem", "pc", "gas", "wordStack",
             "callData", "accounts");
 
-    @Parameter(names="--log-rules", description="Log applied rules.")
+    @Parameter(names="--log-rules", description="Log applied rules." +
+            "Including \"virtual rewrites\", e.g. rules applied in side conditions of other rules, that in the end " +
+            "don't have all their side conditions satisfied and are not applied.")
     public boolean logRules = false;
 
     @Parameter(names="--debug-z3",
