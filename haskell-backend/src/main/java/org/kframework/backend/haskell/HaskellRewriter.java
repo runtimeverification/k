@@ -7,11 +7,13 @@ import org.kframework.attributes.Att;
 import org.kframework.backend.kore.KoreBackend;
 import org.kframework.backend.kore.ModuleToKORE;
 import org.kframework.compile.AddSortInjections;
+import org.kframework.compile.ExpandMacros;
 import org.kframework.compile.RewriteToTop;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
 import org.kframework.kompile.CompiledDefinition;
+import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
 import org.kframework.kore.KORE;
 import org.kframework.kore.KVariable;
@@ -54,6 +56,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
     private final FileUtil files;
     private final CompiledDefinition def;
     private final KRunOptions options;
+    private final KompileOptions kompileOptions;
     private final KExceptionManager kem;
     private final HaskellKRunOptions haskellKRunOptions;
     private final KProveOptions kProveOptions;
@@ -64,6 +67,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
             FileUtil files,
             CompiledDefinition def,
             KRunOptions kRunOptions,
+            KompileOptions kompileOptions,
             KProveOptions kProveOptions,
             InitializeDefinition init,
             KExceptionManager kem,
@@ -74,6 +78,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
         this.kem = kem;
         this.haskellKRunOptions = haskellKRunOptions;
         this.options = kRunOptions;
+        this.kompileOptions = kompileOptions;
         this.kProveOptions = kProveOptions;
         this.idsToLabels = init.serialized;
 
@@ -304,8 +309,10 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
         };
     }
 
-    private static String getKoreString(K initialConfiguration, Module mod, ModuleToKORE converter) {
-        K kWithInjections = new AddSortInjections(mod).addInjections(initialConfiguration);
+    private String getKoreString(K initialConfiguration, Module mod, ModuleToKORE converter) {
+        ExpandMacros macroExpander = new ExpandMacros(mod, files, kompileOptions, false);
+        K withMacros = macroExpander.expand(initialConfiguration);
+        K kWithInjections = new AddSortInjections(mod).addInjections(withMacros);
         converter.convert(kWithInjections);
         return converter.toString();
     }
