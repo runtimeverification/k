@@ -182,6 +182,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
                 rewritingContext.profiler.logInitTime();
             }
             rewritingContext.setExecutionPhase(true);
+            rewritingContext.javaExecutionOptions.logRulesPublic = rewritingContext.javaExecutionOptions.logRules;
             RewriterResult result = rewriter.rewrite(new ConstrainedTerm(backendKil, termContext), depth.orElse(-1));
             rewritingContext.stateLog.close();
             return result;
