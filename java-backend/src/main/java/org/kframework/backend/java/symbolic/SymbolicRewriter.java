@@ -821,9 +821,15 @@ public class SymbolicRewriter {
     }
 
     public void printTermAndConstraint(ConstrainedTerm term, boolean pretty) {
-        print(term.term(), pretty);
-        printConstraint(term.constraint(), pretty);
-        System.err.println();
+        boolean oldCacheToString = global.javaExecutionOptions.cacheToString;
+        global.javaExecutionOptions.cacheToString = false;
+        try {
+            print(term.term(), pretty);
+            printConstraint(term.constraint(), pretty);
+            System.err.println();
+        } finally {
+            global.javaExecutionOptions.cacheToString = oldCacheToString;
+        }
     }
 
     private void printSummaryBox(Rule rule, List<ConstrainedTerm> proofResults, int successPaths, int step, int pathsInProgress) {
