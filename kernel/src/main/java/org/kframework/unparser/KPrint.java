@@ -223,7 +223,7 @@ public class KPrint {
         if (! termSort.isEmpty()) {
             finalSort = termSort.get();
         }
-        return KToken(kapp.klabel().name(), finalSort);
+        return KApply(kapp.klabel(), KToken(kapp.klabel().name(), finalSort));
     }
 
     private K tokenizeTerm(Module mod, KApply kapp) {
@@ -234,7 +234,7 @@ public class KPrint {
         if (! termSort.isEmpty()) {
             finalSort = termSort.get();
         }
-        return KToken(tokenizedTerm, finalSort);
+        return KApply(kapp.klabel(), KToken(tokenizedTerm, finalSort));
     }
 
     private static K toKASTTerm(Module mod, KApply kapp) {
