@@ -359,7 +359,7 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
     private CharSequence appendConstantDeclarations(StringBuilder sb, Set<Variable> variables) {
         for (Variable variable : variables) {
             sb.append("(declare-fun ");
-            sb.append("|").append(variable.name()).append("|");
+            sb.append("|").append(variable.longName()).append("|");
             sb.append(" () ");
             String sortName;
             sortName = getSortName(variable);
@@ -372,7 +372,7 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
     private CharSequence appendQuantifiedVariables(StringBuilder sb, Set<Variable> variables) {
         for (Variable variable : variables) {
             sb.append("(");
-            sb.append("|").append(variable.name()).append("|");
+            sb.append("|").append(variable.longName()).append("|");
             sb.append(" ");
             String sortName;
             sortName = getSortName(variable);
@@ -478,11 +478,14 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
             if (allowNewVars) {
                 variable = Variable.getAnonVariable(term.sort());
                 termAbstractionMap.put(term, variable);
+                if (globalContext.javaExecutionOptions.debugZ3Queries) {
+                    System.err.format("\t%s ::= %s\n", variable.longName(), term);
+                }
             } else {
                 throw e;
             }
         }
-        return variable.name();
+        return variable.longName();
     }
 
     @Override
@@ -559,7 +562,7 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
         switch (label) {
             case "exists":
                 Variable variable = (Variable) kList.get(0);
-                label = "exists ((" + variable.name() + " " + variable.sort() + ")) ";
+                label = "exists ((" + variable.longName() + " " + variable.sort() + ")) ";
                 arguments = ImmutableList.of(kList.get(1));
                 break;
             case "extract":
@@ -647,7 +650,7 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
     @Override
     public SMTLibTerm transform(Variable variable) {
         variables.add(variable);
-        return new SMTLibTerm("|" + variable.name() + "|");
+        return new SMTLibTerm("|" + variable.longName() + "|");
     }
 
 }

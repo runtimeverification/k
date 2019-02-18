@@ -45,6 +45,9 @@ public class SMTOperations {
         try {
             constraint.globalContext().profiler.queryBuildTimer.start();
             CharSequence query;
+            if (javaExecutionOptions.debugZ3Queries) {
+                System.err.println("\nAnonymous vars in query:");
+            }
             try {
                 query = KILtoSMTLib.translateConstraint(constraint).toString();
             } finally {
@@ -80,6 +83,9 @@ public class SMTOperations {
             try {
                 left.globalContext().profiler.queryBuildTimer.start();
                 CharSequence query;
+                if (javaExecutionOptions.debugZ3Queries) {
+                    System.err.println("\nAnonymous vars in query:");
+                }
                 try {
                     query = KILtoSMTLib.translateImplication(left, right, existentialQuantVars).toString();
                 } finally {

@@ -124,6 +124,10 @@ public class Variable extends Term implements org.kframework.kore.KVariable {
         return name;
     }
 
+    public String longName() {
+        return originalName + name;
+    }
+
     @Override
     public Seq<org.kframework.kore.Sort> params() {
         return Seq();
