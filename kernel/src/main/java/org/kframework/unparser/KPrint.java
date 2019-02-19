@@ -26,7 +26,7 @@ import org.kframework.utils.file.TTYInfo;
 import scala.Tuple2;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.OutputStream;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -36,7 +36,6 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import scala.Some;
 import scala.Option;
 
 import static org.kframework.kore.KORE.*;
@@ -76,9 +75,13 @@ public class KPrint {
     }
 
     public void outputFile(byte[] output) {
+        outputFile(output, System.out);
+    }
+
+    public void outputFile(byte[] output, OutputStream out) {
         if (options.outputFile == null) {
             try {
-                System.out.write(output);
+                out.write(output);
             } catch (IOException e) {
                 throw KEMException.internalError(e.getMessage(), e);
             }
