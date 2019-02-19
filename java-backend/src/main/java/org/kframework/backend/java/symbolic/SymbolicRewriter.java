@@ -36,6 +36,7 @@ import org.kframework.kore.KORE;
 import org.kframework.rewriter.SearchType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -685,11 +686,7 @@ public class SymbolicRewriter {
                     // ENABLE EXCEPTION CHECKSTYLE
                     logStep(step, v, term, true, alreadyLogged);
                     System.out.println("\n\nTerm throwing exception\n============================\n\n");
-                    //KProve.prettyPrint(term.term());
-                    System.out.println(term.term());
-                    System.out.print("/\\");
-                    //KProve.prettyPrint(term.constraint());
-                    System.out.println(term.constraint().toString().replaceAll("#And", "\n#And"));
+                    printTermAndConstraint(term, false);
                     e.printStackTrace();
                     throw e;
                 }
@@ -741,14 +738,7 @@ public class SymbolicRewriter {
         }
 
         for (ConstrainedTerm term : proofResults) {
-            print(term.term(), prettyResult);
-            System.out.print("/\\");
-            if (prettyResult) {
-                global.prettyPrinter.prettyPrint(term.constraint());
-            } else {
-                System.out.println(term.constraint().toStringMultiline());
-            }
-            System.out.println();
+            printTermAndConstraint(term);
         }
         if (proofResults.isEmpty()) {
             System.out.println(KLabels.ML_TRUE);
@@ -758,6 +748,16 @@ public class SymbolicRewriter {
             printSummaryBox(rule, proofResults, successPaths, step);
         }
         return proofResults;
+    }
+
+    public void printTermAndConstraint(ConstrainedTerm term) {
+        printTermAndConstraint(term, prettyResult);
+    }
+
+    public void printTermAndConstraint(ConstrainedTerm term, boolean pretty) {
+        print(term.term(), System.out, pretty);
+        printConstraint(term.constraint(), System.out, pretty);
+        System.out.println();
     }
 
     private void printSummaryBox(Rule rule, List<ConstrainedTerm> proofResults, int successPaths, int step) {
@@ -810,7 +810,7 @@ public class SymbolicRewriter {
         KItem top = (KItem) term.term();
 
         if (global.javaExecutionOptions.log || forced || global.javaExecutionOptions.logRulesPublic) {
-            System.out.format("\nSTEP %d v%d : %.3f s \n===================\n",
+            System.err.format("\nSTEP %d v%d : %.3f s \n===================\n",
                     step, v, (System.currentTimeMillis() - global.profiler.getStartTime()) / 1000.);
         }
 
@@ -822,25 +822,28 @@ public class SymbolicRewriter {
                 if (cell == null) {
                     continue;
                 }
-                print(cell, pretty);
+                print(cell, System.err, pretty);
             }
-
-            System.out.println("/\\");
-            if (prettyPC) {
-                global.prettyPrinter.prettyPrint(term.constraint());
-            } else {
-                System.out.println(term.constraint().toStringMultiline());
-            }
+            printConstraint(term.constraint(), System.err, prettyPC);
         }
         global.profiler.logOverheadTimer.stop();
         return actuallyLogged;
     }
 
-    private void print(K cell, boolean pretty) {
+    private void print(K cell, PrintStream out, boolean pretty) {
         if (pretty) {
-            global.prettyPrinter.prettyPrint(cell);
+            global.prettyPrinter.prettyPrint(cell, out);
         } else {
-            System.out.println(toStringOrEmpty(cell));
+            out.println(toStringOrEmpty(cell));
+        }
+    }
+
+    private void printConstraint(ConjunctiveFormula constraint, PrintStream out, boolean pretty) {
+        out.println("/\\");
+        if (pretty) {
+            global.prettyPrinter.prettyPrint(constraint, out);
+        } else {
+            out.println(constraint.toStringMultiline());
         }
     }
 
