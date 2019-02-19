@@ -58,6 +58,12 @@ public final class JavaExecutionOptions {
             description="Clear function cache after initialization phase. Frees some memory. Use IN ADDITION to --cache-func")
     public boolean cacheFunctionsOptimized = false;
 
+    @Parameter(names="--format-failures", description="Format failure final states. By default they are printed all " +
+            "on one line, using ConstrainedTerm.toString(). If option is enabled, they are printed a bit nicer, " +
+            "using custom ConjunctiveFormula formatter, but still fast. Disabled by default for output compatibility " +
+            "with other backends. Recommended to enable for Java backend.")
+    public boolean formatFailures = false;
+
     @Parameter(names="--branching-allowed", arity=1, description="Number of branching events allowed before a forcible stop.")
     public int branchingAllowed = Integer.MAX_VALUE;
 

@@ -737,11 +737,12 @@ public class SymbolicRewriter {
             global.javaExecutionOptions.log = originalLog;
         }
 
-        for (ConstrainedTerm term : proofResults) {
-            printTermAndConstraint(term);
-        }
-        if (proofResults.isEmpty()) {
-            System.out.println(KLabels.ML_TRUE);
+        if (global.javaExecutionOptions.formatFailures && !proofResults.isEmpty()) {
+            for (ConstrainedTerm term : proofResults) {
+                printTermAndConstraint(term);
+            }
+            proofResults.clear();
+            proofResults.add(new ConstrainedTerm(BoolToken.FALSE, initialTerm.termContext()));
         }
 
         if (global.globalOptions.verbose) {
