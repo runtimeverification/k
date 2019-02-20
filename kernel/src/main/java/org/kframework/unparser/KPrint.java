@@ -158,17 +158,19 @@ public class KPrint {
     public K abstractTerm(Module mod, K term) {
         K collectionsSorted = sortCollections(mod, term);
         K alphaRenamed      = options.noAlphaRenaming ? collectionsSorted : alphaRename(collectionsSorted);
-        return new TransformK() {
+        K squashedTerm      = new TransformK() {
             @Override
             public K apply(KApply orig) {
                 String name = orig.klabel().name();
                 return options.omittedKLabels.contains(name)   ? omitTerm(mod, orig)
                      : options.tokenizedKLabels.contains(name) ? tokenizeTerm(mod, orig)
-                     : options.flattenedKLabels.contains(name) ? flattenTerm(mod, orig)
                      : options.tokastKLabels.contains(name)    ? toKASTTerm(mod, orig)
                      : super.apply(orig) ;
             }
         }.apply(alphaRenamed);
+        K flattenedTerm = flattenTerms(mod, squashedTerm);
+
+        return flattenedTerm;
     }
 
     private K sortCollections(Module mod, K input) {
@@ -230,6 +232,27 @@ public class KPrint {
         return KToken(tokenizedTerm, finalSort);
     }
 
+    private static K toKASTTerm(Module mod, KApply kapp) {
+        String       kastTerm  = ToKast.apply(kapp);
+        Sort         finalSort = Sorts.K();
+        Option<Sort> termSort  = mod.sortFor().get(kapp.klabel());
+        if (! termSort.isEmpty()) {
+            finalSort = termSort.get();
+        }
+        return KToken(kastTerm, finalSort);
+    }
+
+    private K flattenTerms(Module mod, K input) {
+        return new TransformK() {
+            @Override
+            public K apply(KApply orig) {
+                String name = orig.klabel().name();
+                return options.flattenedKLabels.contains(name) ? flattenTerm(mod, orig)
+                     : super.apply(orig) ;
+            }
+        }.apply(input);
+    }
+
     private static K flattenTerm(Module mod, KApply kapp) {
         List<K> items = new ArrayList<>();
         Att att = mod.attributesFor().apply(KLabel(kapp.klabel().name()));
@@ -239,15 +262,5 @@ public class KPrint {
             items = kapp.klist().items();
         }
         return KApply(kapp.klabel(), KList(items), kapp.att());
-    }
-
-    private static K toKASTTerm(Module mod, KApply kapp) {
-        String       kastTerm  = ToKast.apply(kapp);
-        Sort         finalSort = Sorts.K();
-        Option<Sort> termSort  = mod.sortFor().get(kapp.klabel());
-        if (! termSort.isEmpty()) {
-            finalSort = termSort.get();
-        }
-        return KToken(kastTerm, finalSort);
     }
 }
