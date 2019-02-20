@@ -146,7 +146,29 @@ public class KPrint {
     }
 
     public String unparseTerm(K input, Module test, ColorSetting colorize) {
-        return unparseInternal(test, sortCollections(test, input), colorize);
+        return unparseInternal(test, input, colorize);
+    }
+
+    private String unparseInternal(Module mod, K input, ColorSetting colorize) {
+        ExpandMacros expandMacros = new ExpandMacros(mod, files, kompileOptions, true);
+        return Formatter.format(
+                new AddBrackets(mod).addBrackets((ProductionReference) ParseInModule.disambiguateForUnparse(mod, KOREToTreeNodes.apply(KOREToTreeNodes.up(mod, expandMacros.expand(input)), mod))), options.color(tty.stdout, files.getEnv()));
+    }
+
+    public K abstractTerm(Module mod, K term) {
+        K collectionsSorted = sortCollections(mod, term);
+        K alphaRenamed      = options.noAlphaRenaming ? collectionsSorted : alphaRename(collectionsSorted);
+        return new TransformK() {
+            @Override
+            public K apply(KApply orig) {
+                String name = orig.klabel().name();
+                return options.omittedKLabels.contains(name)   ? omitTerm(mod, orig)
+                     : options.tokenizedKLabels.contains(name) ? tokenizeTerm(mod, orig)
+                     : options.flattenedKLabels.contains(name) ? flattenTerm(mod, orig)
+                     : options.tokastKLabels.contains(name)    ? toKASTTerm(mod, orig)
+                     : orig ;
+            }
+        }.apply(alphaRenamed);
     }
 
     private K sortCollections(Module mod, K input) {
@@ -186,27 +208,6 @@ public class KPrint {
                 return k;
             }
         }.apply(input);
-    }
-
-    private String unparseInternal(Module mod, K input, ColorSetting colorize) {
-        ExpandMacros expandMacros = new ExpandMacros(mod, files, kompileOptions, true);
-        return Formatter.format(
-                new AddBrackets(mod).addBrackets((ProductionReference) ParseInModule.disambiguateForUnparse(mod, KOREToTreeNodes.apply(KOREToTreeNodes.up(mod, expandMacros.expand(input)), mod))), options.color(tty.stdout, files.getEnv()));
-    }
-
-    public K abstractTerm(Module mod, K term) {
-        K alphaRenamed = options.noAlphaRenaming ? term : alphaRename(term);
-        return new TransformK() {
-            @Override
-            public K apply(KApply orig) {
-                String name = orig.klabel().name();
-                return options.omittedKLabels.contains(name)   ? omitTerm(mod, orig)
-                     : options.tokenizedKLabels.contains(name) ? tokenizeTerm(mod, orig)
-                     : options.flattenedKLabels.contains(name) ? flattenTerm(mod, orig)
-                     : options.tokastKLabels.contains(name)    ? toKASTTerm(mod, orig)
-                     : orig ;
-            }
-        }.apply(alphaRenamed);
     }
 
     private static K omitTerm(Module mod, KApply kapp) {
