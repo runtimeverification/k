@@ -167,9 +167,8 @@ public class KPrint {
                 return super.apply(k);
             }
         }.apply(input);
-        K alphaRenamed = alphaRename(sortedComm);
 
-        return unparseInternal(test, alphaRenamed, colorize);
+        return unparseInternal(test, sortedComm, colorize);
     }
 
     private K alphaRename(K input) {
@@ -194,6 +193,7 @@ public class KPrint {
     }
 
     public K abstractTerm(Module mod, K term) {
+        K alphaRenamed = options.noAlphaRenaming ? term : alphaRename(term);
         return new TransformK() {
             @Override
             public K apply(KApply orig) {
@@ -204,7 +204,7 @@ public class KPrint {
                      : options.tokastKLabels.contains(name)    ? toKASTTerm(mod, orig)
                      : orig ;
             }
-        }.apply(term);
+        }.apply(alphaRenamed);
     }
 
     private static K omitTerm(Module mod, KApply kapp) {

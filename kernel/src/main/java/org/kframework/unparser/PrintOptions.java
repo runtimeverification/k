@@ -91,4 +91,7 @@ public class PrintOptions {
 
     @Parameter(names={"--output-tokast"}, listConverter=StringListConverter.class, description="KLabels to output as KAST tokens.")
     public List<String> tokastKLabels = new ArrayList<String>();
+
+    @Parameter(names={"--no-alpha-renaming"}, listConverter=StringListConverter.class, description="KLabels to output as KAST tokens.")
+    public boolean noAlphaRenaming = false;
 }
