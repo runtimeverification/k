@@ -167,7 +167,13 @@ public class KPrint {
                 return super.apply(k);
             }
         }.apply(input);
-        K alphaRenamed = new TransformK() {
+        K alphaRenamed = alphaRename(sortedComm);
+
+        return unparseInternal(test, alphaRenamed, colorize);
+    }
+
+    private K alphaRename(K input) {
+        return new TransformK() {
             Map<KVariable, KVariable> renames = new HashMap<>();
             int newCount = 0;
 
@@ -178,8 +184,7 @@ public class KPrint {
                 }
                 return k;
             }
-        }.apply(sortedComm);
-        return unparseInternal(test, alphaRenamed, colorize);
+        }.apply(input);
     }
 
     private String unparseInternal(Module mod, K input, ColorSetting colorize) {
