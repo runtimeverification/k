@@ -2,6 +2,7 @@
 package org.kframework.backend.java.symbolic;
 
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.tuple.Pair;
@@ -737,18 +738,18 @@ public class SymbolicRewriter {
             global.javaExecutionOptions.log = originalLog;
         }
 
+        List<ConstrainedTerm> tweakedProofResults = proofResults;
         if (global.javaExecutionOptions.formatFailures && !proofResults.isEmpty()) {
             for (ConstrainedTerm term : proofResults) {
                 printTermAndConstraint(term);
             }
-            proofResults.clear();
-            proofResults.add(new ConstrainedTerm(BoolToken.FALSE, initialTerm.termContext()));
+            tweakedProofResults = ImmutableList.of(new ConstrainedTerm(BoolToken.FALSE, initialTerm.termContext()));
         }
 
         if (global.globalOptions.verbose) {
             printSummaryBox(rule, proofResults, successPaths, step);
         }
-        return proofResults;
+        return tweakedProofResults;
     }
 
     public void printTermAndConstraint(ConstrainedTerm term) {
