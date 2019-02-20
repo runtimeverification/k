@@ -146,18 +146,22 @@ public class KPrint {
     }
 
     public String unparseTerm(K input, Module test, ColorSetting colorize) {
-        K sortedComm = new TransformK() {
+        return unparseInternal(test, sortCollections(test, input), colorize);
+    }
+
+    private K sortCollections(Module mod, K input) {
+        return new TransformK() {
             @Override
             public K apply(KApply k) {
                 if (k.klabel() instanceof KVariable) {
                     return super.apply(k);
                 }
-                Att att = test.attributesFor().apply(KLabel(k.klabel().name()));
+                Att att = mod.attributesFor().apply(KLabel(k.klabel().name()));
                 if (att.contains("comm") && att.contains("assoc") && att.contains("unit")) {
                     List<K> items = new ArrayList<>(Assoc.flatten(k.klabel(), k.klist().items(), KLabel(att.get("unit"))));
                     List<Tuple2<String, K>> printed = new ArrayList<>();
                     for (K item : items) {
-                        String s = unparseInternal(test, apply(item), ColorSetting.OFF);
+                        String s = unparseInternal(mod, apply(item), ColorSetting.OFF);
                         printed.add(Tuple2.apply(s, item));
                     }
                     printed.sort(Comparator.comparing(Tuple2::_1, new AlphanumComparator()));
@@ -167,8 +171,6 @@ public class KPrint {
                 return super.apply(k);
             }
         }.apply(input);
-
-        return unparseInternal(test, sortedComm, colorize);
     }
 
     private K alphaRename(K input) {
