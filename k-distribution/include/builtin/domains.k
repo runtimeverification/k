@@ -755,8 +755,14 @@ module K-EQUAL
   imports BOOL
   imports BASIC-K
 
+  /*@ Equality over terms. In addition to equality over
+      concrete patterns, K also supports computing equality
+      between a concrete pattern and a symbolic pattern.
+      This is compiled efficiently down to pattern matching,
+      and can be used by putting a term with unbound variables
+      in the right child of ==K or =/=K. */
   syntax Bool ::= left:
-                    K "==K" K           [function, functional, smtlib(=), hook(KEQUAL.eq), klabel(_==K_), symbol, latex({#1}\mathrel{=_K}{#2}), equalEqualK]
+                  K "==K" K           [function, functional, smtlib(=), hook(KEQUAL.eq), klabel(_==K_), symbol, latex({#1}\mathrel{=_K}{#2}), equalEqualK]
                 | K "=/=K" K          [function, functional, smtlib(distinct), hook(KEQUAL.ne), klabel(_=/=K_), symbol, latex({#1}\mathrel{\neq_K}{#2}), notEqualEqualK]
 
   syntax priorities equalEqualK notEqualEqualK > boolOperation mlOp
