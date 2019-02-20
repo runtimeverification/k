@@ -141,7 +141,7 @@ public class StateLog {
             File   outputFile = new File(this.blobsDir, fileCode + "." + OutputModes.JSON.ext());
             if (! outputFile.exists()) {
                 try {
-                    String out = new String(this.prettyPrinter.kprint.prettyPrint(this.prettyPrinter.def, this.prettyPrinter.module, contents), StandardCharsets.UTF_8);
+                    String out = new String(this.prettyPrinter.prettyPrintBytes(contents), StandardCharsets.UTF_8);
                     PrintWriter fOut = new PrintWriter(outputFile);
                     fOut.println(out);
                     fOut.close();
