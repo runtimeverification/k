@@ -85,29 +85,15 @@ public class ResolveFun {
             @Override
             public K apply(KApply k) {
                 KLabel lbl = k.klabel();
-                if (!(lbl instanceof KVariable) && lbl.name().equals("#fun2") || lbl.name().equals("#fun3") || lbl.equals(KLabels.EQUALS_K) || lbl.equals(KLabels.NOT_EQUALS_K)) {
-                    if (lbl.equals(KLabels.EQUALS_K) || lbl.equals(KLabels.NOT_EQUALS_K)) {
-                        Set<KEMException> errors = new HashSet<>();
-                        Set<KVariable> vars = new HashSet<>();
-                        List<KVariable> result = new ArrayList<>();
-                        new GatherVarsVisitor(true, errors, vars).apply(body);
-                        new GatherVarsVisitor(false, errors, vars).apply(k.items().get(1));
-                        new ComputeUnboundVariables(false, errors, vars, result::add).apply(k.items().get(1));
-                        if (result.isEmpty()) {
-                          return super.apply(k);
-                        }
-                    }
+                if (!(lbl instanceof KVariable) && lbl.name().equals("#fun2") || lbl.name().equals("#fun3") || lbl.equals(KLabels.IN_K) || lbl.equals(KLabels.NOT_IN_K)) {
                     String nameHint1 = "", nameHint2 = "";
                     K arg, body;
-                    if (lbl.name().equals("#fun2")) {
-                        body = k.items().get(0);
-                        arg = k.items().get(1);
-                    } else if (lbl.name().equals("#fun3")) {
+                    if (lbl.name().equals("#fun3")) {
                         body = KRewrite(k.items().get(0), k.items().get(1));
                         arg = k.items().get(2);
                     } else {
-                        body = k.items().get(1);
-                        arg = k.items().get(0);
+                        body = k.items().get(0);
+                        arg = k.items().get(1);
                     }
                     if (arg instanceof KVariable) {
                         nameHint1 = ((KVariable) arg).name();
@@ -132,7 +118,7 @@ public class ResolveFun {
                     klist.add(apply(arg));
                     klist.addAll(closure(body));
                     K funCall = KApply(fun, KList(klist));
-                    if (lbl.equals(KLabels.NOT_EQUALS_K)) {
+                    if (lbl.equals(KLabels.NOT_IN_K)) {
                       return BooleanUtils.not(funCall);
                     }
                     return funCall;
