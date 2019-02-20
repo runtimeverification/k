@@ -166,7 +166,7 @@ public class KPrint {
                      : options.tokenizedKLabels.contains(name) ? tokenizeTerm(mod, orig)
                      : options.flattenedKLabels.contains(name) ? flattenTerm(mod, orig)
                      : options.tokastKLabels.contains(name)    ? toKASTTerm(mod, orig)
-                     : orig ;
+                     : super.apply(orig) ;
             }
         }.apply(alphaRenamed);
     }
