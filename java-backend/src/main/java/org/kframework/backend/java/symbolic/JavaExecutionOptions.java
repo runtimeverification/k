@@ -51,6 +51,9 @@ public final class JavaExecutionOptions {
     @Parameter(names="--cache-func", description="Cache evaluation results of pure functions. Enabled by default.", arity = 1)
     public boolean cacheFunctions = true;
 
+    @Parameter(names="--cache-formulas", description="Cache results of ConjunctiveFormula.simplify().")
+    public boolean cacheFormulas = false;
+
     @Parameter(names="--cache-func-optimized",
             description="Clear function cache after initialization phase. Frees some memory. Use IN ADDITION to --cache-func")
     public boolean cacheFunctionsOptimized = false;
