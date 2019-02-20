@@ -158,17 +158,8 @@ public class KPrint {
     public K abstractTerm(Module mod, K term) {
         K collectionsSorted = sortCollections(mod, term);
         K alphaRenamed      = options.noAlphaRenaming ? collectionsSorted : alphaRename(collectionsSorted);
-        K squashedTerm      = new TransformK() {
-            @Override
-            public K apply(KApply orig) {
-                String name = orig.klabel().name();
-                return options.omittedKLabels.contains(name)   ? omitTerm(mod, orig)
-                     : options.tokenizedKLabels.contains(name) ? tokenizeTerm(mod, orig)
-                     : options.tokastKLabels.contains(name)    ? toKASTTerm(mod, orig)
-                     : super.apply(orig) ;
-            }
-        }.apply(alphaRenamed);
-        K flattenedTerm = flattenTerms(mod, squashedTerm);
+        K squashedTerm      = squashTerms(mod, alphaRenamed);
+        K flattenedTerm     = flattenTerms(mod, squashedTerm);
 
         return flattenedTerm;
     }
@@ -208,6 +199,19 @@ public class KPrint {
                     return renames.computeIfAbsent(k, k2 -> KVariable("V" + newCount++, k.att()));
                 }
                 return k;
+            }
+        }.apply(input);
+    }
+
+    private K squashTerms(Module mod, K input) {
+        return new TransformK() {
+            @Override
+            public K apply(KApply orig) {
+                String name = orig.klabel().name();
+                return options.omittedKLabels.contains(name)   ? omitTerm(mod, orig)
+                     : options.tokenizedKLabels.contains(name) ? tokenizeTerm(mod, orig)
+                     : options.tokastKLabels.contains(name)    ? toKASTTerm(mod, orig)
+                     : super.apply(orig) ;
             }
         }.apply(input);
     }
