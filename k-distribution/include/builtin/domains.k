@@ -277,7 +277,7 @@ module COLLECTIONS
 endmodule
 
 module BOOL-SYNTAX
-  syntax Bool [hook(BOOL.Bool)]
+  syntax Bool [hook(BOOL.Bool), smtlib(Bool)]
   syntax Bool ::= "true"  [token]
   syntax Bool ::= "false" [token]
 endmodule
@@ -334,7 +334,7 @@ module BOOL
 endmodule
 
 module UNSIGNED-INT-SYNTAX
-  syntax Int [hook(INT.Int)]
+  syntax Int [hook(INT.Int), smtlib(Int)]
   syntax Int ::= r"[0-9]+" [prefer, token, prec(2)]
 endmodule
 
