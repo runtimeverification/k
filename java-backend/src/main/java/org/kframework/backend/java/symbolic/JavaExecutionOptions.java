@@ -74,6 +74,10 @@ public final class JavaExecutionOptions {
     @Parameter(names="--log", description="Log every step.")
     public boolean log = false;
 
+    @Parameter(names="--log-stmts-only", description="Log only steps that execute a statement, without intermediary steps. " +
+            "Except when intermediary steps are important for other reason, like branching. KEVM only.")
+    public boolean logStmtsOnly = false;
+
     @Parameter(names="--log-basic",
             description="Log most basic information: summary of initial step, final steps and final implications, " +
                     "branching points.")
@@ -123,6 +127,11 @@ public final class JavaExecutionOptions {
     @Parameter(names = "--debug-formulas", description = "All logging messages of --debug-z3-queries " +
             "+ log all formulas that are attempted to prove. This is the most verbose logging option.")
     public boolean debugFormulas = false;
+
+    @Parameter(names = "--halt-local-mem-non-map", description = "KEVM-specific. Halt when <localMem> cell at the end " +
+            "of a step is not a map. useful debug option when memory model is a K builtin map. " +
+            "Otherwise option should be false.")
+    public boolean haltOnLocalMemNonMap = false;
 
     public boolean logRulesPublic = false;
     public boolean logFunctionEvalPublic = false;

@@ -114,7 +114,8 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
     public void chainOptions() {
         javaExecutionOptions.debugZ3Queries |= javaExecutionOptions.debugFormulas;
         javaExecutionOptions.debugZ3 |= javaExecutionOptions.debugZ3Queries;
-        javaExecutionOptions.logBasic |= javaExecutionOptions.log || javaExecutionOptions.debugZ3;
+        javaExecutionOptions.logStmtsOnly |= javaExecutionOptions.log || javaExecutionOptions.debugZ3;
+        javaExecutionOptions.logBasic |= javaExecutionOptions.logStmtsOnly;
         globalOptions.verbose |= javaExecutionOptions.logBasic;
     }
 
