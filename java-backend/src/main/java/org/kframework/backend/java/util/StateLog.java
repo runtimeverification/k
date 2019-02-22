@@ -66,7 +66,7 @@ public class StateLog {
 
         if (javaExecutionOptions.stateLogId != null) this.sessionId = javaExecutionOptions.stateLogId;
 
-        this.blobsDir = new File(loggingPath, "blobs/");
+        this.blobsDir = new File(loggingPath, this.sessionId + "_blobs/");
         this.blobsDir.mkdirs();
 
         this.logEvents     = javaExecutionOptions.stateLogEvents;
