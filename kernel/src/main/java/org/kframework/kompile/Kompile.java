@@ -11,6 +11,7 @@ import org.kframework.compile.*;
 import org.kframework.compile.checks.CheckConfigurationCells;
 import org.kframework.compile.checks.CheckImports;
 import org.kframework.compile.checks.CheckKLabels;
+import org.kframework.compile.checks.CheckLabels;
 import org.kframework.compile.checks.CheckRHSVariables;
 import org.kframework.compile.checks.CheckRewrite;
 import org.kframework.compile.checks.CheckSortTopUniqueness;
@@ -236,6 +237,8 @@ public class Kompile {
         Consumer<Module> checkModuleKLabels = m -> stream(m.localSentences()).forEach(s -> checkKLabels.check(s, m));
         stream(parsedDef.mainModule().importedModules()).forEach(checkModuleKLabels);
         checkModuleKLabels.accept(parsedDef.mainModule());
+
+        stream(parsedDef.modules()).forEach(m -> stream(m.localSentences()).forEach(new CheckLabels(errors)::check));
 
         if (!errors.isEmpty()) {
             kem.addAllKException(errors.stream().map(e -> e.exception).collect(Collectors.toList()));

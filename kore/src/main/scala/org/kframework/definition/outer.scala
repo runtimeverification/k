@@ -308,6 +308,7 @@ trait Sentence extends HasLocation {
   def withAtt(att: Att): Sentence
   def location: Optional[Location] = att.getOptional(classOf[Location])
   def source: Optional[Source] = att.getOptional(classOf[Source])
+  def label: Optional[String] = att.getOptional("label")
 }
 
 // deprecated
