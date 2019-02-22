@@ -2,6 +2,7 @@
 package org.kframework.backend.java.symbolic;
 
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.tuple.Pair;
@@ -591,6 +592,7 @@ public class SymbolicRewriter {
             ConstrainedTerm targetTerm,
             List<Rule> specRules, KExceptionManager kem) {
         List<ConstrainedTerm> proofResults = new ArrayList<>();
+        List<ConstrainedTerm> successResults = new ArrayList<>();
         int successPaths = 0;
         Set<ConstrainedTerm> visited = new HashSet<>();
         List<ConstrainedTerm> queue = new ArrayList<>();
@@ -612,8 +614,8 @@ public class SymbolicRewriter {
         global.javaExecutionOptions.logRulesPublic = global.javaExecutionOptions.logRules;
 
         if (global.javaExecutionOptions.log) {
-            System.out.println("\nTarget term\n=====================\n");
-            System.out.println(targetTerm);
+            System.err.println("\nTarget term\n=====================\n");
+            System.err.println(targetTerm);
         }
         int branchingRemaining = global.javaExecutionOptions.branchingAllowed;
         boolean nextStepLogEnabled = false;
@@ -623,6 +625,9 @@ public class SymbolicRewriter {
             int v = 0;
             global.javaExecutionOptions.log |= nextStepLogEnabled;
             nextStepLogEnabled = false;
+            if (global.javaExecutionOptions.logProgress && step % 100 == 0) {
+                System.err.print(".");
+            }
 
             for (ConstrainedTerm term : queue) {
                 v++;
@@ -631,9 +636,10 @@ public class SymbolicRewriter {
                     global.stateLog.log(StateLog.LogEvent.REACHPROVED, term.term(), term.constraint());
                     if (global.javaExecutionOptions.logBasic) {
                         logStep(step, v, term, true, alreadyLogged);
-                        System.out.println("\n============\nStep " + step + ": eliminated!\n============\n");
+                        System.err.println("\n============\nStep " + step + ": eliminated!\n============\n");
                     }
                     successPaths++;
+                    successResults.add(term);
                     continue;
                 }
 
@@ -684,18 +690,14 @@ public class SymbolicRewriter {
                 } catch (Throwable e) {
                     // ENABLE EXCEPTION CHECKSTYLE
                     logStep(step, v, term, true, alreadyLogged);
-                    System.out.println("\n\nTerm throwing exception\n============================\n\n");
-                    //KProve.prettyPrint(term.term());
-                    System.out.println(term.term());
-                    System.out.print("/\\");
-                    //KProve.prettyPrint(term.constraint());
-                    System.out.println(term.constraint().toString().replaceAll("#And", "\n#And"));
+                    System.err.println("\n\nTerm throwing exception\n============================\n\n");
+                    printTermAndConstraint(term, false);
                     e.printStackTrace();
                     throw e;
                 }
                 if (results.isEmpty()) {
                     logStep(step, v, term, true, alreadyLogged);
-                    System.out.println("\nStep above: " + step + ", evaluation ended with no successors.");
+                    System.err.println("\nStep above: " + step + ", evaluation ended with no successors.");
                     /* final term */
                     proofResults.add(term);
                 }
@@ -704,14 +706,14 @@ public class SymbolicRewriter {
                     nextStepLogEnabled = true;
                     logStep(step, v, term, true, alreadyLogged);
                     if (branchingRemaining == 0) {
-                        System.out.println("\nHalt on branching!\n=====================\n");
+                        System.err.println("\nHalt on branching!\n=====================\n");
 
                         proofResults.addAll(results);
                         continue;
                     } else {
                         branchingRemaining--;
                         if (global.javaExecutionOptions.logBasic) {
-                            System.out.println("\nBranching!\n=====================\n");
+                            System.err.println("\nBranching!\n=====================\n");
                         }
                     }
                 }
@@ -740,10 +742,37 @@ public class SymbolicRewriter {
             global.javaExecutionOptions.log = originalLog;
         }
 
+        List<ConstrainedTerm> tweakedProofResults = proofResults;
+        if (global.javaExecutionOptions.formatFailures && !proofResults.isEmpty()) {
+            for (ConstrainedTerm term : proofResults) {
+                printTermAndConstraint(term);
+            }
+            tweakedProofResults = ImmutableList.of(new ConstrainedTerm(BoolToken.FALSE, initialTerm.termContext()));
+        }
+
+        if (global.javaExecutionOptions.logSuccessFinalStates) {
+            System.err.println("\n" +
+                    "==========================================\n" +
+                    "Success final states:\n" +
+                    "==========================================\n");
+            for (ConstrainedTerm result : successResults) {
+                printTermAndConstraint(result);
+            }
+        }
         if (global.globalOptions.verbose) {
             printSummaryBox(rule, proofResults, successPaths, step);
         }
-        return proofResults;
+        return tweakedProofResults;
+    }
+
+    public void printTermAndConstraint(ConstrainedTerm term) {
+        printTermAndConstraint(term, prettyResult);
+    }
+
+    public void printTermAndConstraint(ConstrainedTerm term, boolean pretty) {
+        print(term.term(), pretty);
+        printConstraint(term.constraint(), pretty);
+        System.err.println();
     }
 
     private void printSummaryBox(Rule rule, List<ConstrainedTerm> proofResults, int successPaths, int step) {
@@ -796,7 +825,7 @@ public class SymbolicRewriter {
         KItem top = (KItem) term.term();
 
         if (global.javaExecutionOptions.log || forced || global.javaExecutionOptions.logRulesPublic) {
-            System.out.format("\nSTEP %d v%d : %.3f s \n===================\n",
+            System.err.format("\nSTEP %d v%d : %.3f s \n===================\n",
                     step, v, (System.currentTimeMillis() - global.profiler.getStartTime()) / 1000.);
         }
 
@@ -810,13 +839,7 @@ public class SymbolicRewriter {
                 }
                 print(cell, pretty);
             }
-
-            System.out.println("/\\");
-            if (prettyPC) {
-                global.prettyPrinter.prettyPrint(term.constraint());
-            } else {
-                System.out.println(term.constraint().toStringMultiline());
-            }
+            printConstraint(term.constraint(), prettyPC);
         }
         global.profiler.logOverheadTimer.stop();
         return actuallyLogged;
@@ -824,9 +847,18 @@ public class SymbolicRewriter {
 
     private void print(K cell, boolean pretty) {
         if (pretty) {
-            global.prettyPrinter.prettyPrint(cell);
+            global.prettyPrinter.prettyPrint(cell, System.err);
         } else {
-            System.out.println(toStringOrEmpty(cell));
+            System.err.println(toStringOrEmpty(cell));
+        }
+    }
+
+    private void printConstraint(ConjunctiveFormula constraint, boolean pretty) {
+        System.err.println("/\\");
+        if (pretty) {
+            global.prettyPrinter.prettyPrint(constraint, System.err);
+        } else {
+            System.err.println(constraint.toStringMultiline());
         }
     }
 

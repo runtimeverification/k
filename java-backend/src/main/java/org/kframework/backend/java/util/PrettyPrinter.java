@@ -1,11 +1,12 @@
 // Copyright (c) 2019 K Team. All Rights Reserved.
 package org.kframework.backend.java.util;
 
-import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.kore.K;
 import org.kframework.unparser.KPrint;
+
+import java.io.OutputStream;
 
 /**
  * @author Denis Bogdanas
@@ -23,6 +24,10 @@ public class PrettyPrinter {
     }
 
     public void prettyPrint(K target) {
-        kprint.prettyPrint(def, module, kprint::outputFile, target);
+        prettyPrint(target, System.out);
+    }
+
+    public void prettyPrint(K target, OutputStream out) {
+        kprint.prettyPrint(def, module, output -> kprint.outputFile(output, out), target);
     }
 }
