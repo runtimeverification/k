@@ -166,7 +166,7 @@ public class SymbolicRewriter {
                 subject.termContext(), step);
         for (FastRuleMatcher.RuleMatchResult matchResult : matches) {
             Rule rule = definition.ruleTable.get(matchResult.ruleIndex);
-            global.stateLog.log(StateLog.LogEvent.RULEATTEMPT, rule.toKRewrite());
+            global.stateLog.log(StateLog.LogEvent.RULEATTEMPT, rule.toKRewrite(), subject.term(), subject.constraint());
             if (global.javaExecutionOptions.logRulesPublic) {
                 RuleSourceUtil.printRuleAndSource(rule);
             }
