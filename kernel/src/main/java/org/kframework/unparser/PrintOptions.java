@@ -94,4 +94,7 @@ public class PrintOptions {
 
     @Parameter(names={"--no-alpha-renaming"}, listConverter=StringListConverter.class, description="KLabels to output as KAST tokens.")
     public boolean noAlphaRenaming = false;
+
+    @Parameter(names={"--no-sort-collections"}, listConverter=StringListConverter.class, description="Do not sort collections before printing (for speed).")
+    public boolean noSortCollections = false;
 }
