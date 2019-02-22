@@ -68,7 +68,7 @@ public class ConstructorChecks {
 
     private boolean isConstructorLike(KLabel klabel) {
         String labelName = klabel.name();
-	if (isBuiltinLabel(klabel)) return false;
+        if (isBuiltinLabel(klabel)) return false;
         if (isInjectionLabel(labelName) || isBuiltinModuloConstructor(klabel)) return true;
         Set<Production> productionSet = module.productionsFor().apply(klabel);
         assert productionSet.size() == 1 : "Should not have more than one production";
