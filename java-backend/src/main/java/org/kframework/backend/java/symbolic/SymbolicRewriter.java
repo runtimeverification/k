@@ -598,9 +598,6 @@ public class SymbolicRewriter {
         List<ConstrainedTerm> queue = new ArrayList<>();
         List<ConstrainedTerm> nextQueue = new ArrayList<>();
 
-        global.stateLog.log(StateLog.LogEvent.REACHINIT,   initialTerm.term(), initialTerm.constraint());
-        global.stateLog.log(StateLog.LogEvent.REACHTARGET, targetTerm.term(),  targetTerm.constraint());
-
         visited.add(initialTerm);
         queue.add(initialTerm);
         boolean guarded = false;
