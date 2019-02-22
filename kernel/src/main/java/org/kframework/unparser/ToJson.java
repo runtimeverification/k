@@ -19,6 +19,7 @@ import java.io.ByteArrayOutputStream;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Optional;
 
 import javax.json.Json;
 import javax.json.stream.JsonGenerator;
@@ -105,6 +106,12 @@ public class ToJson {
 
             knode.add("node", JsonParser.KVARIABLE);
             knode.add("name", var.name());
+            Optional<String> origName = var.att().getOptional("originalName");
+            if (origName.isPresent()) {
+                knode.add("originalName", origName.get());
+            } else {
+                knode.add("originalName", var.name());
+            }
 
         } else if (k instanceof KRewrite) {
             KRewrite rew = (KRewrite) k;
