@@ -28,12 +28,13 @@ object KOREToTreeNodes {
     case a: KApply =>
       val children = ConsPStack.from((a.klist.items.asScala map { i: K => apply(i, mod).asInstanceOf[Term] }).reverse asJava)
       val productions: Set[Production] = mod.productionsFor(KLabel(a.klabel.name)).filter(p => wellTyped(p, children, mod.subsorts) && !p.att.contains("unparseAvoid"))
+      val minProds: Set[Production] = mod.overloads.minimal(productions)
       val loc = t.att.getOptional(classOf[Location])
       val source = t.att.getOptional(classOf[Source])
-      if (productions.size == 1) {
-        TermCons(children, productions.head, loc, source)
+      if (minProds.size == 1) {
+        TermCons(children, minProds.head, loc, source)
       } else {
-        Ambiguity(new util.HashSet(productions.map(p => TermCons(children, p, loc, source).asInstanceOf[Term]).asJava))
+        Ambiguity(new util.HashSet(minProds.map(p => TermCons(children, p, loc, source).asInstanceOf[Term]).asJava))
       }
   }
 
