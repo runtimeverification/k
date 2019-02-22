@@ -17,6 +17,7 @@ import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.util.HookProvider;
 import org.kframework.backend.java.util.Profiler2;
 import org.kframework.backend.java.util.RuleSourceUtil;
+import org.kframework.backend.java.util.StateLog;
 import org.kframework.builtin.KLabels;
 import org.kframework.compile.*;
 import org.kframework.definition.Module;
@@ -263,6 +264,8 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
                         if (rewritingContext.javaExecutionOptions.cacheFunctionsOptimized) {
                             rewritingContext.functionCache.clearCache();
                         }
+                        rewritingContext.stateLog.log(StateLog.LogEvent.REACHINIT,   lhs.term(), lhs.constraint());
+                        rewritingContext.stateLog.log(StateLog.LogEvent.REACHTARGET, rhs.term(), rhs.constraint());
                         return rewriter.proveRule(r, lhs, rhs, specRules, kem);
                     })
                     .flatMap(List::stream)
