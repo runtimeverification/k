@@ -24,7 +24,6 @@ import org.kframework.definition.Rule;
 import org.kframework.kil.Attribute;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
-import org.kframework.kore.KApply;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.api.io.FileSystem;
 import org.kframework.main.GlobalOptions;
@@ -270,8 +269,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
                     .collect(Collectors.toList());
 
             K result = proofResults.stream()
-                    .map(ConstrainedTerm::term)
-                    .map(t -> (KApply) t)
+                    .map(constrainedTerm -> (K) constrainedTerm.term())
                     .reduce(((k1, k2) -> KApply(KLabels.ML_AND, k1, k2))).orElse(KApply(KLabels.ML_TRUE));
             rewritingContext.stateLog.close();
             return result;
