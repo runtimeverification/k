@@ -17,17 +17,18 @@ object KOREToTreeNodes {
 
   import org.kframework.kore.KORE._
 
-  def wellTyped(p: Production, children: ConsPStack[Term], subsorts: POSet[Sort]): Boolean = {
-    if (p.nonterminals.lengthCompare(children.size()) != 0)
+  def wellTyped(p: Production, children: Iterable[Term], subsorts: POSet[Sort]): Boolean = {
+    if (p.nonterminals.lengthCompare(children.size) != 0)
       return false
-    true
+    return p.nonterminals.zip(children).forall(p => !p._2.isInstanceOf[ProductionReference] || subsorts.lessThanEq(p._2.asInstanceOf[ProductionReference].production.sort, p._1.sort))
   }
 
   def apply(t: K, mod: Module): Term = t match {
     case t: KToken => Constant(t.s, mod.tokenProductionFor(t.sort), t.att.getOptional(classOf[Location]), t.att.getOptional(classOf[Source]))
     case a: KApply =>
-      val children = ConsPStack.from((a.klist.items.asScala map { i: K => apply(i, mod).asInstanceOf[Term] }).reverse asJava)
-      val productions: Set[Production] = mod.productionsFor(KLabel(a.klabel.name)).filter(p => wellTyped(p, children, mod.subsorts) && !p.att.contains("unparseAvoid"))
+      val scalaChildren = a.klist.items.asScala map { i: K => apply(i, mod).asInstanceOf[Term] }
+      val children = ConsPStack.from(scalaChildren.reverse asJava)
+      val productions: Set[Production] = mod.productionsFor(KLabel(a.klabel.name)).filter(p => wellTyped(p, scalaChildren, mod.subsorts) && !p.att.contains("unparseAvoid"))
       val minProds: Set[Production] = mod.overloads.minimal(productions)
       val loc = t.att.getOptional(classOf[Location])
       val source = t.att.getOptional(classOf[Source])
