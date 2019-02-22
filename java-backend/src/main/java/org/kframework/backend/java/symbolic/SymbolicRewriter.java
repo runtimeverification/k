@@ -231,7 +231,7 @@ public class SymbolicRewriter {
                 continue;
             }
 
-            global.stateLog.log(StateLog.LogEvent.RULE, rule.toKRewrite());
+            global.stateLog.log(StateLog.LogEvent.RULE, rule.toKRewrite(), subject.term(), subject.constraint(), result.term(), result.constraint());
             if (global.javaExecutionOptions.debugZ3 && !result.constraint().equals(subject.constraint())) {
                 System.err.format("New top constraint created: \n%s\n", result.constraint().toStringMultiline());
             }
@@ -894,7 +894,7 @@ public class SymbolicRewriter {
             if (constraint != null) {
                 ConstrainedTerm result = buildResult(specRule, constraint, null, true, constrainedTerm.termContext(),
                         new FormulaContext(FormulaContext.Kind.SpecConstr, specRule));
-                global.stateLog.log(StateLog.LogEvent.SRULE, specRule.toKRewrite());
+                global.stateLog.log(StateLog.LogEvent.SRULE, specRule.toKRewrite(), constrainedTerm.term(), constrainedTerm.constraint(), result.term(), result.constraint());
                 if (global.javaExecutionOptions.logRulesPublic) {
                     RuleSourceUtil.printRuleAndSource(specRule);
                 }
