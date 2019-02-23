@@ -14,6 +14,7 @@ import org.kframework.utils.errorsystem.KEMException;
 import java.io.IOException;
 import java.io.DataOutputStream;
 import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 
 import java.util.Optional;
 
@@ -35,48 +36,48 @@ public class ToLatex {
     public static void apply(DataOutputStream out, K k) throws IOException {
         if (k instanceof KToken) {
             KToken tok = (KToken) k;
-            out.write(tok.s().getBytes());
+            out.write(tok.s().getBytes(StandardCharsets.UTF_8));
 
         } else if (k instanceof KApply) {
             KApply app = (KApply) k;
 
-            out.write(("\\" + app.klabel().name()).getBytes());
+            out.write(("\\" + app.klabel().name()).getBytes(StandardCharsets.UTF_8));
 
             for (K item : app.klist().asIterable()) {
-                out.write("{".getBytes());
+                out.write("{".getBytes(StandardCharsets.UTF_8));
                 ToLatex.apply(out, item);
-                out.write("}".getBytes());
+                out.write("}".getBytes(StandardCharsets.UTF_8));
             }
 
         } else if (k instanceof KSequence) {
             KSequence kseq = (KSequence) k;
 
-            out.write("KSequence unimplemented".getBytes());
+            out.write("KSequence unimplemented".getBytes(StandardCharsets.UTF_8));
 
         } else if (k instanceof KVariable) {
             KVariable var = (KVariable) k;
 
             Optional<String> origName = var.att().getOptional("originalName");
             if (origName.isPresent()) {
-                out.write(origName.get().getBytes());
+                out.write(origName.get().getBytes(StandardCharsets.UTF_8));
             } else {
-                out.write(var.name().getBytes());
+                out.write(var.name().getBytes(StandardCharsets.UTF_8));
             }
 
         } else if (k instanceof KRewrite) {
             KRewrite rew = (KRewrite) k;
 
-            out.write("KRewrite unimplemented".getBytes());
+            out.write("KRewrite unimplemented".getBytes(StandardCharsets.UTF_8));
 
         } else if (k instanceof KAs) {
             KAs alias = (KAs) k;
 
-            out.write("KAs unimplemented".getBytes());
+            out.write("KAs unimplemented".getBytes(StandardCharsets.UTF_8));
 
         } else if (k instanceof InjectedKLabel) {
             KAs alias = (KAs) k;
 
-            out.write("InjectedKLabel unimplemented".getBytes());
+            out.write("InjectedKLabel unimplemented".getBytes(StandardCharsets.UTF_8));
 
         }
     }
