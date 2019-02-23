@@ -40,12 +40,13 @@ public class ToLatex {
     public static void apply(DataOutputStream out, K k) throws IOException {
         if (k instanceof KToken) {
             KToken tok = (KToken) k;
-            out.write(tok.s().getBytes(StandardCharsets.UTF_8));
+
+            out.write(("\\texttt{ " + tok.s() + " }").getBytes(StandardCharsets.UTF_8));
 
         } else if (k instanceof KApply) {
             KApply app = (KApply) k;
 
-            out.write(latexedKLabel("\\" + app.klabel().name()).getBytes(StandardCharsets.UTF_8));
+            out.write(("\\" + latexedKLabel(app.klabel().name())).getBytes(StandardCharsets.UTF_8));
 
             for (K item : app.klist().asIterable()) {
                 out.write("{".getBytes(StandardCharsets.UTF_8));
