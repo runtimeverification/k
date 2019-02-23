@@ -178,7 +178,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
             ExpandMacros macroExpander = new ExpandMacros(module, files, kompileOptions, false);
             termContext.setKOREtoBackendKILConverter(converter);
             Term backendKil = converter.convert(macroExpander.expand(resolveCasts.resolve(k))).evaluate(termContext);
-            rewritingContext.stateLog.log(StateLog.LogEvent.EXECINIT, backendKil, BooleanUtils.TRUE);
+            rewritingContext.stateLog.log(StateLog.LogEvent.EXECINIT, backendKil, KApply(KLabels.ML_TRUE));
             SymbolicRewriter rewriter = new SymbolicRewriter(rewritingContext, transitions, converter);
             if (rewritingContext.globalOptions.verbose) {
                 rewritingContext.profiler.logInitTime();
@@ -205,7 +205,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
             ExpandMacros macroExpander = new ExpandMacros(module, files, kompileOptions, false);
             termContext.setKOREtoBackendKILConverter(converter);
             Term javaTerm = converter.convert(macroExpander.expand(resolveCasts.resolve(initialConfiguration))).evaluate(termContext);
-            rewritingContext.stateLog.log(StateLog.LogEvent.SEARCHINIT, javaTerm, BooleanUtils.TRUE);
+            rewritingContext.stateLog.log(StateLog.LogEvent.SEARCHINIT, javaTerm, KApply(KLabels.ML_TRUE));
             org.kframework.backend.java.kil.Rule javaPattern = converter.convert(Optional.empty(), transformFunction(JavaBackend::convertKSeqToKApply, pattern));
             SymbolicRewriter rewriter = new SymbolicRewriter(rewritingContext, transitions, converter);
             K result = rewriter.search(javaTerm, javaPattern, bound.orElse(NEGATIVE_VALUE), depth.orElse(NEGATIVE_VALUE), searchType, termContext);
