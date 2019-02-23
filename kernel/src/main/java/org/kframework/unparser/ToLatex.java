@@ -33,6 +33,10 @@ public class ToLatex {
         }
     }
 
+    public static String latexedKLabel(String orig) {
+        return orig.replaceAll("[^a-zA-Z]", "");
+    }
+
     public static void apply(DataOutputStream out, K k) throws IOException {
         if (k instanceof KToken) {
             KToken tok = (KToken) k;
@@ -41,7 +45,7 @@ public class ToLatex {
         } else if (k instanceof KApply) {
             KApply app = (KApply) k;
 
-            out.write(("\\" + app.klabel().name()).getBytes(StandardCharsets.UTF_8));
+            out.write(latexedKLabel("\\" + app.klabel().name()).getBytes(StandardCharsets.UTF_8));
 
             for (K item : app.klist().asIterable()) {
                 out.write("{".getBytes(StandardCharsets.UTF_8));
