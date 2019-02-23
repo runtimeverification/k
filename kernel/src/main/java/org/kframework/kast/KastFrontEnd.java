@@ -12,23 +12,27 @@ import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kore.K;
 import org.kframework.main.FrontEnd;
 import org.kframework.parser.outer.Outer;
+import org.kframework.unparser.KPrint;
+import org.kframework.unparser.PrintOptions;
 import org.kframework.unparser.ToKast;
-import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.Environment;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
 import org.kframework.utils.file.KompiledDir;
+import org.kframework.utils.file.TTYInfo;
 import org.kframework.utils.inject.CommonModule;
 import org.kframework.utils.inject.DefinitionScope;
 import org.kframework.utils.inject.JCommanderModule;
 import org.kframework.utils.inject.JCommanderModule.ExperimentalUsage;
 import org.kframework.utils.inject.JCommanderModule.Usage;
+import org.kframework.utils.Stopwatch;
 import scala.Option;
 
 import java.io.File;
 import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -51,6 +55,7 @@ public class KastFrontEnd extends FrontEnd {
     private final Provider<File> kompiledDir;
     private final Provider<CompiledDefinition> compiledDef;
     private final DefinitionScope scope;
+    private final TTYInfo ttyInfo;
 
     @Inject
     KastFrontEnd(
@@ -64,7 +69,8 @@ public class KastFrontEnd extends FrontEnd {
             Provider<FileUtil> files,
             @KompiledDir Provider<File> kompiledDir,
             Provider<CompiledDefinition> compiledDef,
-            DefinitionScope scope) {
+            DefinitionScope scope,
+            TTYInfo ttyInfo) {
         super(kem, options.global, usage, experimentalUsage, jarInfo, files);
         this.options = options;
         this.sw = sw;
@@ -74,6 +80,7 @@ public class KastFrontEnd extends FrontEnd {
         this.kompiledDir = kompiledDir;
         this.compiledDef = compiledDef;
         this.scope = scope;
+        this.ttyInfo = ttyInfo;
     }
 
     /**
@@ -88,6 +95,7 @@ public class KastFrontEnd extends FrontEnd {
             Source source = options.source();
 
             CompiledDefinition def = compiledDef.get();
+            KPrint kprint = new KPrint(kem, files.get(), ttyInfo, options.print, compiledDef.get().kompileOptions);
             org.kframework.kore.Sort sort = options.sort;
             if (sort == null) {
                 if (env.get("KRUN_SORT") != null) {
