@@ -11,6 +11,7 @@ import org.kframework.backend.java.symbolic.Stage;
 import org.kframework.backend.java.util.FormulaSimplificationCache;
 import org.kframework.backend.java.util.Profiler2;
 import org.kframework.backend.java.util.StateLog;
+import org.kframework.backend.java.util.ToStringCache;
 import org.kframework.backend.java.util.Z3Wrapper;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.api.io.FileSystem;
@@ -43,6 +44,7 @@ public class GlobalContext implements Serializable {
     public final PrettyPrinter prettyPrinter;
     public final transient FunctionCache functionCache = new FunctionCache();
     public final transient FormulaSimplificationCache formulaCache = new FormulaSimplificationCache();
+    public final transient ToStringCache toStringCache = new ToStringCache();
 
     private boolean isExecutionPhase = true;
 
