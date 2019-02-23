@@ -22,7 +22,9 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -36,18 +38,20 @@ public class StateLog {
     private final File           blobsDir;
     private final List<LogEvent> logEvents;
 
-    private String      sessionId;
-    private PrintWriter sessionLog;
+    private String              sessionId;
+    private PrintWriter         sessionLog;
+    private Map<Integer,String> writtenHashes;
 
     private boolean inited;
     private long    startTime;
 
     public StateLog() {
-        this.inited      = false;
-        this.loggingOn   = false;
-        this.loggingPath = null;
-        this.blobsDir    = null;
-        this.logEvents   = Collections.emptyList();
+        this.inited        = false;
+        this.loggingOn     = false;
+        this.loggingPath   = null;
+        this.blobsDir      = null;
+        this.logEvents     = Collections.emptyList();
+        this.writtenHashes = new HashMap<Integer,String>();
     }
 
     public StateLog(JavaExecutionOptions javaExecutionOptions, FileUtil files) {
@@ -63,7 +67,8 @@ public class StateLog {
         this.blobsDir = new File(loggingPath, "blobs/");
         this.blobsDir.mkdirs();
 
-        this.logEvents = javaExecutionOptions.stateLogEvents;
+        this.logEvents     = javaExecutionOptions.stateLogEvents;
+        this.writtenHashes = new HashMap<Integer,String>();
     }
 
     public void open(String defaultSessionId) {
@@ -125,19 +130,25 @@ public class StateLog {
     }
 
     private String writeNode(K contents) {
-        String fileCode   = hash(contents);
-        File   outputFile = new File(this.blobsDir, fileCode + "." + OutputModes.JSON.ext());
-        if (! outputFile.exists()) {
-            try {
-                String out = new String(KPrint.serialize(contents, OutputModes.JSON), StandardCharsets.UTF_8);
-                PrintWriter fOut = new PrintWriter(outputFile);
-                fOut.println(out);
-                fOut.close();
-            } catch (FileNotFoundException e) {
-                System.err.println("Could not open node output file: " + outputFile.getAbsolutePath());
-                e.printStackTrace();
+        int objectHash = contents.hashCode();
+        if (writtenHashes.containsKey(objectHash)) {
+            return writtenHashes.get(objectHash);
+        } else {
+            String fileCode   = hash(contents);
+            File   outputFile = new File(this.blobsDir, fileCode + "." + OutputModes.JSON.ext());
+            if (! outputFile.exists()) {
+                try {
+                    String out = new String(KPrint.serialize(contents, OutputModes.JSON), StandardCharsets.UTF_8);
+                    PrintWriter fOut = new PrintWriter(outputFile);
+                    fOut.println(out);
+                    fOut.close();
+                    writtenHashes.put(objectHash,fileCode);
+                } catch (FileNotFoundException e) {
+                    System.err.println("Could not open node output file: " + outputFile.getAbsolutePath());
+                    e.printStackTrace();
+                }
             }
+            return fileCode;
         }
-        return fileCode;
     }
 }
