@@ -77,12 +77,13 @@ public class StateLog {
     public void open(String defaultSessionId) {
         if ((! this.loggingOn) || this.inited) return;
         this.inited = true;
-        if (this.sessionId == null) this.sessionId = defaultSessionId;
+        boolean sessionIdNotSet = this.sessionId == null;
+        if (sessionIdNotSet) this.sessionId = defaultSessionId;
         File logFile = new File(this.loggingPath, this.sessionId + ".log");
         PrintWriter sessionLog;
         try {
             this.sessionLog = new PrintWriter(logFile);
-            System.err.println("StateLog: " + logFile);
+            if(sessionIdNotSet) System.out.println("StateLog: " + logFile);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
