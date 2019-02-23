@@ -38,48 +38,48 @@ public class ToLatex {
     public static void apply(DataOutputStream out, K k) throws IOException {
         if (k instanceof KToken) {
             KToken tok = (KToken) k;
-            out.writeUTF(tok.s());
+            out.write(tok.s().getBytes());
 
         } else if (k instanceof KApply) {
             KApply app = (KApply) k;
 
-            out.writeUTF("\\" + app.klabel().name());
+            out.write(("\\" + app.klabel().name()).getBytes());
 
             for (K item : app.klist().asIterable()) {
-                out.writeUTF("{");
+                out.write("{".getBytes());
                 ToLatex.apply(out, item);
-                out.writeUTF("}");
+                out.write("}".getBytes());
             }
 
         } else if (k instanceof KSequence) {
             KSequence kseq = (KSequence) k;
 
-            out.writeUTF("KSequence unimplemented");
+            out.write("KSequence unimplemented".getBytes());
 
         } else if (k instanceof KVariable) {
             KVariable var = (KVariable) k;
 
             Optional<String> origName = var.att().getOptional("originalName");
             if (origName.isPresent()) {
-                out.writeUTF(origName.get());
+                out.write(origName.get().getBytes());
             } else {
-                out.writeUTF(var.name());
+                out.write(var.name().getBytes());
             }
 
         } else if (k instanceof KRewrite) {
             KRewrite rew = (KRewrite) k;
 
-            out.writeUTF("KRewrite unimplemented");
+            out.write("KRewrite unimplemented".getBytes());
 
         } else if (k instanceof KAs) {
             KAs alias = (KAs) k;
 
-            out.writeUTF("KAs unimplemented");
+            out.write("KAs unimplemented".getBytes());
 
         } else if (k instanceof InjectedKLabel) {
             KAs alias = (KAs) k;
 
-            out.writeUTF("InjectedKLabel unimplemented");
+            out.write("InjectedKLabel unimplemented".getBytes());
 
         }
     }
