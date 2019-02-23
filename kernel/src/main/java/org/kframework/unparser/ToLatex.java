@@ -12,12 +12,9 @@ import org.kframework.kore.KVariable;
 import org.kframework.utils.errorsystem.KEMException;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.DataOutputStream;
 import java.io.ByteArrayOutputStream;
 
-import java.util.Map;
-import java.util.HashMap;
 import java.util.Optional;
 
 /**
