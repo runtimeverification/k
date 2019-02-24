@@ -34,7 +34,7 @@ public class ToLatex {
     }
 
     public static String latexedKLabel(String orig) {
-        return orig.replaceAll("[^a-zA-Z]", "");
+        return "klabel" + orig.replaceAll("[^a-zA-Z]", "");
     }
 
     public static void apply(DataOutputStream out, K k) throws IOException {
