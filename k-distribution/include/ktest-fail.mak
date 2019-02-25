@@ -20,7 +20,7 @@ all: kompile
 kompile: $(DEFDIR)/$(DEF)-kompiled/timestamp
 
 $(DEFDIR)/%-kompiled/timestamp: %.k
-	$(KOMPILE) $(KOMPILE_FLAGS) --backend $(KOMPILE_BACKEND) $(DEBUG) $< -d $(DEFDIR) 2>&1 | sed 's!'`pwd`/'!!g' $(CHECK) $<.out $(CHECK2)
+	$(KOMPILE) $(KOMPILE_FLAGS) --backend $(KOMPILE_BACKEND) $(DEBUG) $< -d $(DEFDIR) 2>&1 | sed 's!'`pwd`'/\(\./\)\?!!g' $(CHECK) $<.out $(CHECK2)
 
 # run all tests and regenerate output files
 update-results: kompile
