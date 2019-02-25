@@ -34,10 +34,12 @@ import org.kframework.kore.FindK;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KORE;
+import org.kframework.kprove.KProve;
 import org.kframework.rewriter.SearchType;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -591,7 +593,7 @@ public class SymbolicRewriter {
     public List<ConstrainedTerm> proveRule(
             Rule rule, ConstrainedTerm initialTerm,
             ConstrainedTerm targetTerm,
-            List<Rule> specRules, KExceptionManager kem) {
+            List<Rule> specRules, KExceptionManager kem, @Nullable Rule boundaryPattern) {
         List<ConstrainedTerm> proofResults = new ArrayList<>();
         List<ConstrainedTerm> successResults = new ArrayList<>();
         int successPaths = 0;
@@ -599,8 +601,14 @@ public class SymbolicRewriter {
         List<ConstrainedTerm> queue = new ArrayList<>();
         List<ConstrainedTerm> nextQueue = new ArrayList<>();
 
-        boolean noBoundaryCells = global.kproveOptions.boundaryCells.isEmpty();
-        ConstrainedTerm targetBoundary = buildBoundaryTerm(targetTerm);
+        List<Substitution<Variable, Term>> targetBoundarySub = null;
+        if (boundaryPattern != null) {
+            targetBoundarySub = getBoundarySubstitution(targetTerm, boundaryPattern);
+            if (targetBoundarySub.isEmpty()) {
+                throw KEMException.criticalError(
+                        "Boundary pattern does not match the target term. Pattern: " + boundaryPattern.leftHandSide());
+            }
+        }
 
         visited.add(initialTerm);
         queue.add(initialTerm);
@@ -632,16 +640,13 @@ public class SymbolicRewriter {
 
             for (ConstrainedTerm term : queue) {
                 v++;
-                ConstrainedTerm termBoundary = buildBoundaryTerm(term);
-                //if boundary cells match same cells in target, we consider this state final.
-                boolean boundaryCellsMatchTarget = !noBoundaryCells
-                        && termBoundary.matchesSyntacticallyModuloSubstitutions(targetBoundary);
 
+                boolean boundaryCellsMatchTarget = boundaryCellsMatchTarget(term, boundaryPattern, targetBoundarySub);
                 //var required to avoid logging the same step multiple times.
                 boolean alreadyLogged = logStep(step, v, term,
                         step == 1 || boundaryCellsMatchTarget, false);
-                if (noBoundaryCells || boundaryCellsMatchTarget) {
-                    if (term.implies(targetTerm, rule, !noBoundaryCells)) {
+                if (boundaryPattern == null || boundaryCellsMatchTarget) {
+                    if (term.implies(targetTerm, rule, !(boundaryPattern == null))) {
                         global.stateLog.log(StateLog.LogEvent.REACHPROVED, term.term(), term.constraint());
                         if (global.javaExecutionOptions.logBasic) {
                             logStep(step, v, term, true, alreadyLogged);
@@ -650,7 +655,7 @@ public class SymbolicRewriter {
                         successPaths++;
                         successResults.add(term);
                         continue;
-                    } else if (!noBoundaryCells && step > 1) {
+                    } else if (boundaryPattern != null && step > 1) {
                         //If boundary cells in current term match boundary cells in target term but entire terms
                         // don't match, halt execution.
                         logStep(step, v, term, global.javaExecutionOptions.logBasic, alreadyLogged);
@@ -904,19 +909,42 @@ public class SymbolicRewriter {
         return null;
     }
 
-    public ConstrainedTerm buildBoundaryTerm(ConstrainedTerm term) {
-        KItem result;
-        try {
-            List<Term> cells = global.kproveOptions.boundaryCells.stream()
-                    .map(name -> getCell((KItem) term.term(), String.format("<%s>", name)))
-                    .collect(Collectors.toList());
-            result = KItem.of(KLabelConstant.of(KLabels.GENERATED_BOUNDARY_CELL, global.getDefinition()),
-                    KList.concatenate(cells), global);
-        } catch (NullPointerException e) {
-            throw KEMException
-                    .criticalError("One of boundary cells is null: " + global.kproveOptions.boundaryCells, e);
+    public boolean boundaryCellsMatchTarget(ConstrainedTerm term, Rule boundaryPattern,
+                                            List<Substitution<Variable, Term>> targetBoundarySub) {
+        if (boundaryPattern == null) {
+            return false;
         }
-        return new ConstrainedTerm(result, term.constraint(), term.termContext());
+        List<Substitution<Variable, Term>> termBoundarySub = getBoundarySubstitution(term, boundaryPattern);
+        if (targetBoundarySub.size() != termBoundarySub.size()) {
+            throw KEMException.criticalError(String.format(
+                    "Boundary pattern has different number of matches in current term and target.\n " +
+                            "Current term: %s, target: %s", termBoundarySub, targetBoundarySub));
+        }
+        for (int i = 0; i < targetBoundarySub.size(); i++) {
+            //Keeping term substitution as is and converting target substitution to equalities,
+            //to build a simplifiable formula.
+            ConjunctiveFormula boundaryEq = ConjunctiveFormula.of(termBoundarySub.get(i),
+                    PersistentUniqueList.from(targetBoundarySub.get(i).equalities(global)),
+                    PersistentUniqueList.empty(), global);
+            if (boundaryEq.simplify().isFalse()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Match the pattern, then in resulting substitution keep only entries that start with "BOUND".
+     */
+    public List<Substitution<Variable, Term>> getBoundarySubstitution(ConstrainedTerm term, Rule boundaryPattern) {
+        List<Substitution<Variable, Term>> match = FastRuleMatcher.match(
+                term.term(), boundaryPattern.leftHandSide(), term.termContext());
+        List<Substitution<Variable, Term>> result = match.stream().map(sub ->
+                ImmutableMapSubstitution.from(sub.entrySet().stream()
+                        .filter(entry -> entry.getKey().name().startsWith(KProve.BOUNDARY_CELL_PREFIX))
+                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))))
+                .collect(Collectors.toList());
+        return result;
     }
 
     /**

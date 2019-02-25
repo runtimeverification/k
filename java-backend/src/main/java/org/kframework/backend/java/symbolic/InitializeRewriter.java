@@ -18,9 +18,9 @@ import org.kframework.backend.java.util.HookProvider;
 import org.kframework.backend.java.util.Profiler2;
 import org.kframework.backend.java.util.RuleSourceUtil;
 import org.kframework.backend.java.util.StateLog;
-import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.KLabels;
-import org.kframework.compile.*;
+import org.kframework.compile.ExpandMacros;
+import org.kframework.compile.ResolveSemanticCasts;
 import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
 import org.kframework.kil.Attribute;
@@ -42,6 +42,7 @@ import scala.Function1;
 import scala.Tuple2;
 import scala.collection.JavaConversions;
 
+import javax.annotation.Nullable;
 import java.lang.invoke.MethodHandle;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -135,6 +136,10 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
         return Rule.apply(f.apply(r.body()), f.apply(r.requires()), f.apply(r.ensures()), r.att());
     }
 
+    public static org.kframework.backend.java.kil.Rule convertToJavaPattern(KOREtoBackendKIL converter, Rule pattern) {
+        return pattern == null ? null : converter.convert(
+                Optional.empty(), transformFunction(JavaBackend::convertKSeqToKApply, pattern));
+    }
 
     public static class SymbolicRewriterGlue implements Rewriter {
 
@@ -212,7 +217,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
             termContext.setKOREtoBackendKILConverter(converter);
             Term javaTerm = converter.convert(macroExpander.expand(resolveCasts.resolve(initialConfiguration))).evaluate(termContext);
             rewritingContext.stateLog.log(StateLog.LogEvent.SEARCHINIT, javaTerm, KApply(KLabels.ML_TRUE));
-            org.kframework.backend.java.kil.Rule javaPattern = converter.convert(Optional.empty(), transformFunction(JavaBackend::convertKSeqToKApply, pattern));
+            org.kframework.backend.java.kil.Rule javaPattern = convertToJavaPattern(converter, pattern);
             SymbolicRewriter rewriter = new SymbolicRewriter(rewritingContext, transitions, converter);
             K result = rewriter.search(javaTerm, javaPattern, bound.orElse(NEGATIVE_VALUE), depth.orElse(NEGATIVE_VALUE), searchType, termContext);
             rewritingContext.stateLog.close();
@@ -226,7 +231,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
         }
 
         @Override
-        public K prove(Module mod) {
+        public K prove(Module mod, @Nullable Rule boundaryPattern) {
             //todo kompileOptions.global == null, but shouldn't
             if (rewritingContext.globalOptions.verbose) {
                 rewritingContext.profiler.logParsingTime();
@@ -238,6 +243,8 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
             List<org.kframework.backend.java.kil.Rule> javaRules = processProofRules.getJavaRules();
             KOREtoBackendKIL converter = processProofRules.getConverter();
             TermContext termContext = processProofRules.getTermContext();
+            org.kframework.backend.java.kil.Rule javaBoundaryPattern = convertToJavaPattern(converter, boundaryPattern);
+
             List<org.kframework.backend.java.kil.Rule> specRules = javaRules.stream()
                     .map(org.kframework.backend.java.kil.Rule::renameVariables)
                     .collect(Collectors.toList());
@@ -275,7 +282,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
                         }
                         rewritingContext.stateLog.log(StateLog.LogEvent.REACHINIT,   lhs.term(), lhs.constraint());
                         rewritingContext.stateLog.log(StateLog.LogEvent.REACHTARGET, rhs.term(), rhs.constraint());
-                        return rewriter.proveRule(r, lhs, rhs, specRules, kem);
+                        return rewriter.proveRule(r, lhs, rhs, specRules, kem, javaBoundaryPattern);
                     })
                     .flatMap(List::stream)
                     .collect(Collectors.toList());
