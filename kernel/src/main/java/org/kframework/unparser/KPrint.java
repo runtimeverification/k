@@ -174,9 +174,10 @@ public class KPrint {
     }
 
     public K abstractTerm(Module mod, K term) {
-        K collectionsSorted = options.noSortCollections ? term              : sortCollections(mod, term);
-        K alphaRenamed      = options.noAlphaRenaming   ? collectionsSorted : alphaRename(collectionsSorted);
-        K squashedTerm      = squashTerms(mod, alphaRenamed);
+        K collectionsSorted = options.noSortCollections    ? term              : sortCollections(mod, term);
+        K alphaRenamed      = options.noAlphaRenaming      ? collectionsSorted : alphaRename(collectionsSorted);
+        K origNames         = options.restoreOriginalNames ? alphaRenamed      : restoreOriginalNameIfPresent(alphaRenamed);
+        K squashedTerm      = squashTerms(mod, origNames);
         K flattenedTerm     = flattenTerms(mod, squashedTerm);
 
         return flattenedTerm;
@@ -216,6 +217,18 @@ public class KPrint {
             public K apply(KVariable k) {
                 if (k.att().contains("anonymous")) {
                     return renames.computeIfAbsent(k, k2 -> KVariable("V" + newCount++, k.att()));
+                }
+                return k;
+            }
+        }.apply(input);
+    }
+
+    private K restoreOriginalNameIfPresent(K input) {
+        return new TransformK() {
+            @Override
+            public K apply(KVariable k) {
+                if (k.att().contains("originalName")) {
+                    return KVariable(k.att().get("originalName"), k.att());
                 }
                 return k;
             }
