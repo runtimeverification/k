@@ -107,7 +107,6 @@ public class KPrint {
     }
 
     public byte[] prettyPrint(Definition def, Module module, K orig, ColorSetting colorize, OutputModes outputMode) {
-        K result = abstractTerm(module, orig);
         switch (outputMode) {
             case KAST:
             case NONE:
@@ -116,6 +115,7 @@ public class KPrint {
             case PRETTY:
                 return prettyPrint(module, orig, colorize, outputMode);
             case PROGRAM: {
+                K result = abstractTerm(module, orig);
                 RuleGrammarGenerator gen = new RuleGrammarGenerator(def);
                 Module unparsingModule = RuleGrammarGenerator.getCombinedGrammar(gen.getProgramsGrammar(module), false).getParsingModule();
                 return (unparseTerm(result, unparsingModule, colorize) + "\n").getBytes();
