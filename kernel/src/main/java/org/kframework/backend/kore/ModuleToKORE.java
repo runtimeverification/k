@@ -1045,9 +1045,38 @@ public class ModuleToKORE {
         return computePolyProd(prods.head());
     }
 
+    private String convertBuiltinLabel(String klabel) {
+      switch(klabel) {
+      case "#False":
+        return "\\bottom";
+      case "#True":
+        return "\\top";
+      case "#Or":
+        return "\\or";
+      case "#And":
+        return "\\and";
+      case "#Not":
+        return "\\not";
+      case "#Ceil":
+        return "\\ceil";
+      case "#Equals":
+        return "\\equals";
+      case "#Implies":
+        return "\\implies";
+      case "#Exists":
+        return "\\exists";
+      case "#Forall":
+        return "\\forall";
+      default:
+        throw KEMException.compilerError("Unsuppored kore connective in rule: " + klabel);
+      }
+    }
+
     private void convert(KLabel klabel, boolean var) {
         if (klabel.name().equals(KLabels.INJ)) {
             sb.append(klabel.name());
+        } else if (ConstructorChecks.isBuiltinLabel(klabel)) {
+            sb.append(convertBuiltinLabel(klabel.name()));
         } else {
             sb.append("Lbl");
             convert(klabel.name());

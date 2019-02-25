@@ -3,6 +3,7 @@ package org.kframework.compile;
 
 import org.kframework.attributes.Att;
 import org.kframework.builtin.BooleanUtils;
+import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Context;
 import org.kframework.definition.Module;
@@ -27,6 +28,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 import static org.kframework.Collections.*;
@@ -83,15 +85,15 @@ public class ResolveFun {
             @Override
             public K apply(KApply k) {
                 KLabel lbl = k.klabel();
-                if (!(lbl instanceof KVariable) && lbl.name().equals("#fun2") || lbl.name().equals("#fun3")) {
+                if (!(lbl instanceof KVariable) && lbl.name().equals("#fun2") || lbl.name().equals("#fun3") || lbl.equals(KLabels.IN_K) || lbl.equals(KLabels.NOT_IN_K)) {
                     String nameHint1 = "", nameHint2 = "";
                     K arg, body;
-                    if (lbl.name().equals("#fun2")) {
-                        body = k.items().get(0);
-                        arg = k.items().get(1);
-                    } else {
+                    if (lbl.name().equals("#fun3")) {
                         body = KRewrite(k.items().get(0), k.items().get(1));
                         arg = k.items().get(2);
+                    } else {
+                        body = k.items().get(0);
+                        arg = k.items().get(1);
                     }
                     if (arg instanceof KVariable) {
                         nameHint1 = ((KVariable) arg).name();
@@ -104,12 +106,22 @@ public class ResolveFun {
                         nameHint2 = ((KApply) body).klabel().name();
                     }
                     KLabel fun = getUniqueLambdaLabel(nameHint1, nameHint2);
-                    funProds.add(funProd(fun, body));
-                    funRules.add(funRule(fun, body, k.att()));
+                    if (lbl.name().equals("#fun3") || lbl.name().equals("#fun2")) {
+                        funProds.add(funProd(fun, body));
+                        funRules.add(funRule(fun, body, k.att()));
+                    } else {
+                        funProds.add(predProd(fun, body));
+                        funRules.add(predRule(fun, body, k.att()));
+                        funRules.add(owiseRule(fun, body, k.att()));
+                    }
                     List<K> klist = new ArrayList<>();
                     klist.add(apply(arg));
                     klist.addAll(closure(body));
-                    return KApply(fun, KList(klist));
+                    K funCall = KApply(fun, KList(klist));
+                    if (lbl.equals(KLabels.NOT_IN_K)) {
+                      return BooleanUtils.not(funCall);
+                    }
+                    return funCall;
                 }
                 return super.apply(k);
             }
@@ -117,12 +129,25 @@ public class ResolveFun {
     }
 
     private Rule funRule(KLabel fun, K k, Att att) {
-        K resolved = transform(k);
+        return lambdaRule(fun, k, k, att, RewriteToTop::toRight);
+    }
+
+    private Rule predRule(KLabel fun, K k, Att att) {
+        return lambdaRule(fun, k, k, att, x -> BooleanUtils.TRUE);
+    }
+
+    private Rule owiseRule(KLabel fun, K k, Att att) {
+        Sort sort = sort(k);
+        return lambdaRule(fun, KApply(KLabel("#SemanticCastTo" + sort.toString()), KVariable("_Owise")), k, att.add("owise"), x -> BooleanUtils.FALSE);
+    }
+
+    private Rule lambdaRule(KLabel fun, K body, K closure, Att att, UnaryOperator<K> getRHS) {
+        K resolved = transform(body);
         K withAnonVars = new ResolveAnonVar().resolveK(resolved);
         List<K> klist = new ArrayList<>();
         klist.add(RewriteToTop.toLeft(withAnonVars));
-        klist.addAll(closure(k));
-        return Rule(KRewrite(KApply(fun, KList(klist)), RewriteToTop.toRight(withAnonVars)),
+        klist.addAll(closure(closure));
+        return Rule(KRewrite(KApply(fun, KList(klist)), getRHS.apply(withAnonVars)),
                 BooleanUtils.TRUE, BooleanUtils.TRUE, att);
     }
 
@@ -136,9 +161,16 @@ public class ResolveFun {
     }
 
     private Production funProd(KLabel fun, K k) {
+        return lambdaProd(fun, k, sort(RewriteToTop.toRight(k)));
+    }
+
+    private Production predProd(KLabel fun, K k) {
+        return lambdaProd(fun, k, Sorts.Bool());
+    }
+
+    private Production lambdaProd(KLabel fun, K k, Sort rhs) {
         List<ProductionItem> pis = new ArrayList<>();
         K left = RewriteToTop.toLeft(k);
-        K right = RewriteToTop.toRight(k);
         pis.add(Terminal(fun.name()));
         pis.add(Terminal("("));
         pis.add(NonTerminal(sort(left)));
@@ -147,7 +179,7 @@ public class ResolveFun {
             pis.add(NonTerminal(var.att().getOptional(Sort.class).orElse(Sorts.K())));
         }
         pis.add(Terminal(")"));
-        return Production(fun, sort(right),
+        return Production(fun, rhs,
                 immutable(pis),
                 Att().add("function"));
     }
