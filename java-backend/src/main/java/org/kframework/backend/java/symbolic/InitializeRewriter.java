@@ -17,6 +17,8 @@ import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.util.HookProvider;
 import org.kframework.backend.java.util.Profiler2;
 import org.kframework.backend.java.util.RuleSourceUtil;
+import org.kframework.backend.java.util.StateLog;
+import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.KLabels;
 import org.kframework.compile.*;
 import org.kframework.definition.Module;
@@ -176,6 +178,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
             ExpandMacros macroExpander = new ExpandMacros(module, files, kompileOptions, false);
             termContext.setKOREtoBackendKILConverter(converter);
             Term backendKil = converter.convert(macroExpander.expand(resolveCasts.resolve(k))).evaluate(termContext);
+            rewritingContext.stateLog.log(StateLog.LogEvent.EXECINIT, backendKil, KApply(KLabels.ML_TRUE));
             SymbolicRewriter rewriter = new SymbolicRewriter(rewritingContext, transitions, converter);
             if (rewritingContext.globalOptions.verbose) {
                 rewritingContext.profiler.logInitTime();
@@ -202,6 +205,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
             ExpandMacros macroExpander = new ExpandMacros(module, files, kompileOptions, false);
             termContext.setKOREtoBackendKILConverter(converter);
             Term javaTerm = converter.convert(macroExpander.expand(resolveCasts.resolve(initialConfiguration))).evaluate(termContext);
+            rewritingContext.stateLog.log(StateLog.LogEvent.SEARCHINIT, javaTerm, KApply(KLabels.ML_TRUE));
             org.kframework.backend.java.kil.Rule javaPattern = converter.convert(Optional.empty(), transformFunction(JavaBackend::convertKSeqToKApply, pattern));
             SymbolicRewriter rewriter = new SymbolicRewriter(rewritingContext, transitions, converter);
             K result = rewriter.search(javaTerm, javaPattern, bound.orElse(NEGATIVE_VALUE), depth.orElse(NEGATIVE_VALUE), searchType, termContext);
@@ -263,6 +267,8 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
                         if (rewritingContext.javaExecutionOptions.cacheFunctionsOptimized) {
                             rewritingContext.functionCache.clearCache();
                         }
+                        rewritingContext.stateLog.log(StateLog.LogEvent.REACHINIT,   lhs.term(), lhs.constraint());
+                        rewritingContext.stateLog.log(StateLog.LogEvent.REACHTARGET, rhs.term(), rhs.constraint());
                         return rewriter.proveRule(r, lhs, rhs, specRules, kem);
                     })
                     .flatMap(List::stream)

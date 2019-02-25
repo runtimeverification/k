@@ -166,7 +166,7 @@ public class SymbolicRewriter {
                 subject.termContext(), step);
         for (FastRuleMatcher.RuleMatchResult matchResult : matches) {
             Rule rule = definition.ruleTable.get(matchResult.ruleIndex);
-            global.stateLog.log(StateLog.LogEvent.RULEATTEMPT, rule.toKRewrite());
+            global.stateLog.log(StateLog.LogEvent.RULEATTEMPT, rule.toKRewrite(), subject.term(), subject.constraint());
             if (global.javaExecutionOptions.logRulesPublic) {
                 RuleSourceUtil.printRuleAndSource(rule);
             }
@@ -231,7 +231,7 @@ public class SymbolicRewriter {
                 continue;
             }
 
-            global.stateLog.log(StateLog.LogEvent.RULE, rule.toKRewrite());
+            global.stateLog.log(StateLog.LogEvent.RULE, rule.toKRewrite(), subject.term(), subject.constraint(), result.term(), result.constraint());
             if (global.javaExecutionOptions.debugZ3 && !result.constraint().equals(subject.constraint())) {
                 System.err.format("New top constraint created: \n%s\n", result.constraint().toStringMultiline());
             }
@@ -598,9 +598,6 @@ public class SymbolicRewriter {
         List<ConstrainedTerm> queue = new ArrayList<>();
         List<ConstrainedTerm> nextQueue = new ArrayList<>();
 
-        global.stateLog.log(StateLog.LogEvent.REACHINIT,   initialTerm.term(), initialTerm.constraint());
-        global.stateLog.log(StateLog.LogEvent.REACHTARGET, targetTerm.term(),  targetTerm.constraint());
-
         visited.add(initialTerm);
         queue.add(initialTerm);
         boolean guarded = false;
@@ -894,7 +891,7 @@ public class SymbolicRewriter {
             if (constraint != null) {
                 ConstrainedTerm result = buildResult(specRule, constraint, null, true, constrainedTerm.termContext(),
                         new FormulaContext(FormulaContext.Kind.SpecConstr, specRule));
-                global.stateLog.log(StateLog.LogEvent.SRULE, specRule.toKRewrite());
+                global.stateLog.log(StateLog.LogEvent.SRULE, specRule.toKRewrite(), constrainedTerm.term(), constrainedTerm.constraint(), result.term(), result.constraint());
                 if (global.javaExecutionOptions.logRulesPublic) {
                     RuleSourceUtil.printRuleAndSource(specRule);
                 }

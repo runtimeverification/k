@@ -114,6 +114,7 @@ public class Variable extends Term implements org.kframework.kore.KVariable {
         Variable var = Variable.getAnonVariable(sort);
         var.copyAttributesFrom(this);
         var.originalName = this.name;
+        var.addAttribute("originalName", this.name);
         return var;
     }
 
