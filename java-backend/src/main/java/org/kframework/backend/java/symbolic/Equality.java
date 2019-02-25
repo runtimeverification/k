@@ -112,7 +112,6 @@ public class Equality implements Serializable {
     public boolean isSimplifiableByCurrentAlgorithm() {
         return !leftHandSide.isSymbolic() && !rightHandSide.isSymbolic()
                 && (!(leftHandSide instanceof BuiltinMap) && !(rightHandSide instanceof BuiltinMap))
-                && !(leftHandSide instanceof BuiltinList) && !(rightHandSide instanceof BuiltinList)
                 && !(leftHandSide instanceof BuiltinSet) && !(rightHandSide instanceof BuiltinSet)
                 || BuiltinMap.isMapUnifiableByCurrentAlgorithm(leftHandSide, rightHandSide)
                 || BuiltinSet.isSetUnifiableByCurrentAlgorithm(leftHandSide, rightHandSide);
