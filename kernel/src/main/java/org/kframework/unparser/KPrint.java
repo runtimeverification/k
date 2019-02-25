@@ -165,18 +165,19 @@ public class KPrint {
     }
 
     private K sortCollections(Module mod, K input) {
+        Module unparsingModule = RuleGrammarGenerator.getCombinedGrammar(mod, false).getExtensionModule();
         return new TransformK() {
             @Override
             public K apply(KApply k) {
                 if (k.klabel() instanceof KVariable) {
                     return super.apply(k);
                 }
-                Att att = mod.attributesFor().apply(KLabel(k.klabel().name()));
+                Att att = unparsingModule.attributesFor().apply(KLabel(k.klabel().name()));
                 if (att.contains("comm") && att.contains("assoc") && att.contains("unit")) {
                     List<K> items = new ArrayList<>(Assoc.flatten(k.klabel(), k.klist().items(), KLabel(att.get("unit"))));
                     List<Tuple2<String, K>> printed = new ArrayList<>();
                     for (K item : items) {
-                        String s = unparseInternal(mod, apply(item), ColorSetting.OFF);
+                        String s = unparseInternal(unparsingModule, apply(item), ColorSetting.OFF);
                         printed.add(Tuple2.apply(s, item));
                     }
                     printed.sort(Comparator.comparing(Tuple2::_1, new AlphanumComparator()));

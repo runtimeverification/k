@@ -6,6 +6,7 @@ import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
 import org.kframework.definition.ProductionItem;
 import org.kframework.definition.Terminal;
+import org.kframework.kil.loader.Constants;
 import org.kframework.parser.Constant;
 import org.kframework.parser.Term;
 import org.kframework.parser.TermCons;
@@ -100,7 +101,9 @@ public class Formatter {
                             boolean assoc = false;
                             if (inner instanceof TermCons) {
                                 TermCons innerTc = (TermCons)inner;
-                                if (innerTc.production().equals(tc.production()) && tc.production().att().contains("assoc")) {
+                                Production origProd = tc.production().att().getOptional(Constants.ORIGINAL_PRD, Production.class).orElse(tc.production());
+                                Production innerOrigProd = innerTc.production().att().getOptional(Constants.ORIGINAL_PRD, Production.class).orElse(innerTc.production());
+                                if (innerOrigProd.equals(origProd) && origProd.att().contains("assoc")) {
                                     assoc = true;
                                 }
                             }

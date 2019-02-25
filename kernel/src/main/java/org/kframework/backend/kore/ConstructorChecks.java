@@ -68,11 +68,19 @@ public class ConstructorChecks {
 
     private boolean isConstructorLike(KLabel klabel) {
         String labelName = klabel.name();
+        if (isBuiltinLabel(klabel)) return false;
         if (isInjectionLabel(labelName) || isBuiltinModuloConstructor(klabel)) return true;
         Set<Production> productionSet = module.productionsFor().apply(klabel);
         assert productionSet.size() == 1 : "Should not have more than one production";
         Production production = productionSet.head();
         return !production.att().contains(Att.Function());
+    }
+
+    public static boolean isBuiltinLabel(KLabel label) {
+        return label.name().equals(KLabels.ML_FALSE.name()) || label.name().equals(KLabels.ML_TRUE.name()) || label.name().equals(KLabels.ML_OR.name()) ||
+               label.name().equals(KLabels.ML_AND.name()) || label.name().equals(KLabels.ML_NOT.name()) || label.name().equals(KLabels.ML_CEIL.name()) ||
+               label.name().equals(KLabels.ML_EQUALS.name()) || label.name().equals(KLabels.ML_IMPLIES.name()) || label.name().equals(KLabels.ML_EXISTS.name()) ||
+               label.name().equals(KLabels.ML_FORALL.name());
     }
 
     private boolean isBuiltinModuloConstructor(KLabel label) {

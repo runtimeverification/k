@@ -17,23 +17,25 @@ object KOREToTreeNodes {
 
   import org.kframework.kore.KORE._
 
-  def wellTyped(p: Production, children: ConsPStack[Term], subsorts: POSet[Sort]): Boolean = {
-    if (p.nonterminals.lengthCompare(children.size()) != 0)
-      return false
-    true
+  def wellTyped(p: Production, children: Iterable[Term], subsorts: POSet[Sort]): Boolean = {
+    return p.nonterminals.zip(children).forall(p => !p._2.isInstanceOf[ProductionReference] || subsorts.lessThanEq(p._2.asInstanceOf[ProductionReference].production.sort, p._1.sort))
   }
 
   def apply(t: K, mod: Module): Term = t match {
     case t: KToken => Constant(t.s, mod.tokenProductionFor(t.sort), t.att.getOptional(classOf[Location]), t.att.getOptional(classOf[Source]))
     case a: KApply =>
-      val children = ConsPStack.from((a.klist.items.asScala map { i: K => apply(i, mod).asInstanceOf[Term] }).reverse asJava)
-      val productions: Set[Production] = mod.productionsFor(KLabel(a.klabel.name)).filter(p => wellTyped(p, children, mod.subsorts) && !p.att.contains("unparseAvoid"))
+      val scalaChildren = a.klist.items.asScala map { i: K => apply(i, mod).asInstanceOf[Term] }
+      val children = ConsPStack.from(scalaChildren.reverse asJava)
+      val allProds: Set[Production] = mod.productionsFor(KLabel(a.klabel.name)).filter(p => p.nonterminals.lengthCompare(children.size) == 0 && !p.att.contains("unparseAvoid"))
+      val typedProds: Set[Production] = allProds.filter(p => wellTyped(p, scalaChildren, mod.subsorts))
+      // if no productions are left, then the term is ill-sorted, but don't return the empty ambiguity because we want to fail gracefully.
+      val minProds: Set[Production] = mod.overloads.minimal(if (typedProds.size == 0) allProds else typedProds)
       val loc = t.att.getOptional(classOf[Location])
       val source = t.att.getOptional(classOf[Source])
-      if (productions.size == 1) {
-        TermCons(children, productions.head, loc, source)
+      if (minProds.size == 1) {
+        TermCons(children, minProds.head, loc, source)
       } else {
-        Ambiguity(new util.HashSet(productions.map(p => TermCons(children, p, loc, source).asInstanceOf[Term]).asJava))
+        Ambiguity(new util.HashSet(minProds.map(p => TermCons(children, p, loc, source).asInstanceOf[Term]).asJava))
       }
   }
 
