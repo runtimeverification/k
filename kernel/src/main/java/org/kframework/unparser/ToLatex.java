@@ -57,7 +57,7 @@ public class ToLatex {
         } else if (k instanceof KSequence) {
             KSequence kseq = (KSequence) k;
 
-            out.write("KSequence unimplemented".getBytes(StandardCharsets.UTF_8));
+            throw KEMException.criticalError("KSequence unimplemented", k);
 
         } else if (k instanceof KVariable) {
             KVariable var = (KVariable) k;
@@ -72,7 +72,7 @@ public class ToLatex {
         } else if (k instanceof KRewrite) {
             KRewrite rew = (KRewrite) k;
 
-            out.write("KRewrite unimplemented".getBytes(StandardCharsets.UTF_8));
+            throw KEMException.criticalError("KRewrite unimplemented", k);
 
         } else if (k instanceof KAs) {
             KAs alias = (KAs) k;
@@ -82,7 +82,8 @@ public class ToLatex {
         } else if (k instanceof InjectedKLabel) {
             KAs alias = (KAs) k;
 
-            out.write("InjectedKLabel unimplemented".getBytes(StandardCharsets.UTF_8));
+            throw KEMException.criticalError("InjectedKLabel unimplemented", k);
+
 
         }
     }
