@@ -282,9 +282,14 @@ public class KPrint {
         return new TransformK() {
             @Override
             public K apply(KApply orig) {
+                K newK = super.apply(orig);
+                if (! (newK instanceof KApply)) {
+                    return newK;
+                }
+                KApply kapp = (KApply) newK;
                 String name = orig.klabel().name();
-                return options.flattenedKLabels.contains(name) ? flattenTerm(mod, orig)
-                     : super.apply(orig) ;
+                return options.flattenedKLabels.contains(name) ? flattenTerm(mod, kapp)
+                     : kapp ;
             }
         }.apply(input);
     }
