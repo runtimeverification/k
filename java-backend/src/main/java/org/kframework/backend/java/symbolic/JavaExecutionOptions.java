@@ -45,18 +45,23 @@ public final class JavaExecutionOptions {
     @Parameter(names={"--state-log-id"}, description="Id of the current execution")
     public String stateLogId;
 
-    @Parameter(names={"--state-log-events"}, converter=LogEventConverter.class, description="Comma-separated list of events to log: [OPEN|REACHINIT|REACHTARGET|REACHPROVED|NODE|RULE|SRULE|RULEATTEMPT|IMPLICATION|Z3QUERY|Z3RESULT|CLOSE]")
+    @Parameter(names={"--state-log-events"}, converter=LogEventConverter.class, description="Comma-separated list of events to log: [OPEN|REACHINIT|REACHTARGET|REACHPROVED|EXECINIT|SEARCHINIT|NODE|RULE|SRULE|RULEATTEMPT|IMPLICATION|Z3QUERY|Z3RESULT|CLOSE]")
     public List<StateLog.LogEvent> stateLogEvents = Collections.emptyList();
 
     @Parameter(names="--cache-func", description="Cache evaluation results of pure functions. Enabled by default.", arity = 1)
     public boolean cacheFunctions = true;
 
-    @Parameter(names="--cache-formulas", description="Cache results of ConjunctiveFormula.simplify().")
-    public boolean cacheFormulas = false;
-
     @Parameter(names="--cache-func-optimized",
             description="Clear function cache after initialization phase. Frees some memory. Use IN ADDITION to --cache-func")
     public boolean cacheFunctionsOptimized = false;
+
+    @Parameter(names="--cache-formulas", description="Cache results of ConjunctiveFormula.simplify().")
+    public boolean cacheFormulas = false;
+
+    @Parameter(names="--cache-tostring",
+            description="Cache toString() result for KItem, Equality and DisjunctiveFormula. " +
+                    "Speeds up logging but eats more memory.", arity = 1)
+    public boolean cacheToString = true;
 
     @Parameter(names="--format-failures", description="Format failure final states. By default they are printed all " +
             "on one line, using ConstrainedTerm.toString(). If option is enabled, they are printed a bit nicer, " +
