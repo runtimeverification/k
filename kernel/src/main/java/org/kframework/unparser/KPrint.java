@@ -103,13 +103,17 @@ public class KPrint {
     }
 
     public byte[] prettyPrint(Definition def, Module module, K orig, ColorSetting colorize) {
+        return prettyPrint(def, module, orig, colorize, options.output);
+    }
+
+    public byte[] prettyPrint(Definition def, Module module, K orig, ColorSetting colorize, OutputModes outputMode) {
         K result = abstractTerm(module, orig);
-        switch (options.output) {
+        switch (outputMode) {
             case KAST:
             case NONE:
             case BINARY:
             case JSON:
-                return serialize(result, options.output);
+                return serialize(result, outputMode);
             case PRETTY: {
                 Module unparsingModule = RuleGrammarGenerator.getCombinedGrammar(module, false).getExtensionModule();
                 return (unparseTerm(result, unparsingModule, colorize) + "\n").getBytes();
@@ -118,7 +122,7 @@ public class KPrint {
                 Module unparsingModule = RuleGrammarGenerator.getCombinedGrammar(gen.getProgramsGrammar(module), false).getParsingModule();
                 return (unparseTerm(result, unparsingModule, colorize) + "\n").getBytes();
             } default:
-                throw KEMException.criticalError("Unsupported output mode: " + options.output);
+                throw KEMException.criticalError("Unsupported output mode: " + outputMode);
         }
     }
 
