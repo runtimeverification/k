@@ -371,6 +371,9 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
     public static boolean isFunctionRule(TermCons tc) {
         if (tc.production().sort().name().equals("RuleContent")) {
             ProductionReference child = (ProductionReference) tc.get(0);
+            if (child.production().klabel().isDefined() && child.production().klabel().get().name().equals("#withConfig")) {
+                child = (ProductionReference)((TermCons)child).get(0);
+            }
             if (child.production().klabel().isDefined() && child.production().klabel().get().equals(KLabels.KREWRITE)) {
                 child = (ProductionReference)((TermCons)child).get(0);
             }
@@ -386,6 +389,9 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
         case "#ruleEnsures":
         case "#ruleRequiresEnsures": {
             ProductionReference child = (ProductionReference) tc.get(0);
+            if (child.production().klabel().isDefined() && child.production().klabel().get().name().equals("#withConfig")) {
+                child = (ProductionReference)((TermCons)child).get(0);
+            }
             if (child.production().klabel().isDefined() && child.production().klabel().get().equals(KLabels.KREWRITE)) {
                 child = (ProductionReference)((TermCons)child).get(0);
             }

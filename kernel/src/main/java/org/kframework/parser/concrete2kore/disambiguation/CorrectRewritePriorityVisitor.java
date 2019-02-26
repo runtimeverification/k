@@ -33,21 +33,8 @@ public class CorrectRewritePriorityVisitor extends SetsTransformerWithErrors<Par
         exceptions.add("#ruleEnsures");
         exceptions.add("#ruleRequiresEnsures");
         exceptions.add("#KRewrite");
+        exceptions.add("#withConfig");
         exceptions.add("#KList");
-    }
-
-    @Override
-    public Either<java.util.Set<ParseFailedException>, Term> apply(Ambiguity amb) {
-        // if the ambiguity has rewrites at the top, prefer them, and eliminate the rest
-        scala.collection.Set<Term> rewrites = amb.items().stream().filter(o ->
-                o instanceof TermCons &&
-                        ((TermCons) o).production().klabel().isDefined() &&
-                        ((TermCons) o).production().klabel().get().name().equals("#KRewrite")).collect(Collections.toSet());
-        if (rewrites.size() == 0 || rewrites.size() == amb.items().size())
-            return super.apply(amb);
-        if (rewrites.size() == 1)
-            return Right.apply(rewrites.head());
-        return super.apply(Ambiguity.apply(mutable(rewrites)));
     }
 
     @Override

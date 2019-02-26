@@ -96,6 +96,8 @@ module KCELLS
                | Cell
   syntax Bag ::= "(" Bag ")" [bracket]
   syntax K ::= Bag
+  syntax K ::= K Bag    [klabel(#withConfig), symbol, avoid, poly(0, 1)]
+  syntax non-assoc #withConfig
   syntax Bag ::= KBott
 endmodule
 
@@ -228,6 +230,7 @@ module K
 
   syntax K ::= K "=>" K [klabel(#KRewrite), symbol, poly(0, 1, 2)]
   syntax non-assoc #KRewrite
+  syntax priority #KRewrite > #withConfig
 
   syntax K ::= K "#as" K [klabel(#KAs), symbol, poly(0, 1, 2)]
   // functions that preserve sorts and can therefore have inner rewrites
