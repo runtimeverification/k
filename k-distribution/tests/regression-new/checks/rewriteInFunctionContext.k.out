@@ -1,0 +1,7 @@
+[Error] Compiler: Had 1 structural errors.
+[Error] Compiler: Rewrites are not allowed in the context of a function rule.
+	Source(rewriteInFunctionContext.k)
+	Location(11,12,11,18)
+[Warning] Compiler: Could not find main syntax module with name
+REWRITEINFUNCTIONCONTEXT-SYNTAX in definition.  Use --syntax-module to specify
+one. Using REWRITEINFUNCTIONCONTEXT as default.

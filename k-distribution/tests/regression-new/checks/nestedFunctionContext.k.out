@@ -1,0 +1,10 @@
+[Error] Compiler: Function context is not allowed to be nested.
+	Source(nestedFunctionContext.k)
+	Location(14,7,15,20)
+[Error] Compiler: Function context is not allowed to be nested.
+	Source(nestedFunctionContext.k)
+	Location(19,12,19,34)
+[Error] Compiler: Had 2 structural errors.
+[Warning] Compiler: Could not find main syntax module with name
+NESTEDFUNCTIONCONTEXT-SYNTAX in definition.  Use --syntax-module to specify
+one. Using NESTEDFUNCTIONCONTEXT as default.
