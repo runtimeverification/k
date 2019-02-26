@@ -87,17 +87,16 @@ interleaved) order.
 
 //@ The initial syntax of our $\lambda$-calculus:
 
-  syntax Val ::= Id
-               | "lambda" Id "." Exp  [binder, latex(\lambda{#1}.{#2})]
+  syntax Val ::= KVar
+               | "lambda" KVar "." Exp  [binder, latex(\lambda{#1}.{#2})]
   syntax Exp ::= Val
                | Exp Exp              [left, strict]
                | "(" Exp ")"          [bracket]
-  syntax KVariable ::= Id
   syntax KResult ::= Val
 
 //@ \section{$\beta$-reduction}
 
-  rule (lambda X:Id . E:Exp) V:Val => E[V / X]
+  rule (lambda X:KVar . E:Exp) V:Val => E[V / X]
 
 /*@ \section{Integer and Boolean Builtins}
 The LAMBDA arithmetic and Boolean expression constructs are simply rewritten
@@ -132,7 +131,7 @@ Note that the \texttt{if} construct is strict only in its first argument. */
 The let binder is a derived construct, because it can be defined using
 $\lambda$. */
 
-  syntax Exp ::= "let" Id "=" Exp "in" Exp
+  syntax Exp ::= "let" KVar "=" Exp "in" Exp
   rule let X = E in E':Exp => (lambda X . E') E                         [macro]
 
 /*@ \section{Letrec Binder}
@@ -140,8 +139,8 @@ We prefer a definition based on the $\mu$ construct.  Note that $\mu$ is not
 really necessary, but it makes the definition of letrec easier to understand
 and faster to execute. */
 
-  syntax Exp ::= "letrec" Id Id "=" Exp "in" Exp
-               | "mu" Id "." Exp                  [binder, latex(\mu{#1}.{#2})]
-  rule letrec F:Id X:Id = E in E' => let F = mu F . lambda X . E in E' [macro]
+  syntax Exp ::= "letrec" KVar KVar "=" Exp "in" Exp
+               | "mu" KVar "." Exp                  [binder, latex(\mu{#1}.{#2})]
+  rule letrec F:KVar X:KVar = E in E' => let F = mu F . lambda X . E in E' [macro]
   rule mu X . E => E[(mu X . E) / X]
 endmodule
