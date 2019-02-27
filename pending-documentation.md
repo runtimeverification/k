@@ -59,6 +59,18 @@ foo(K, Record) => #fun(record(... field: _ => K))(Record)
 #fun(V::Val => isFoo(V) andBool isBar(V))(someFunctionReturningVal())
 ```
 
+Desugared code:
+
+```
+foo(K, Record) => lambda(Record, K)
+rule lambda(record(... field: _), K) => record(... Field: K)
+```
+
+```
+lambda(someFunctionReturningVal())
+rule lambda(V::Val) => isFoo(V) andBool isBar(V)
+```
+
 Note in the first case that we introduce implicitly a closure here. K is bound from outside the anonymous function and gets implicitly passed as a second argument to the anonymous function.
 
 ## Poly Attribute
@@ -112,10 +124,19 @@ On occasion it is highly desirable to be able to look up information from the gl
 ```
 syntax Int ::= foo(Int) [function, withConfig]
 
-rule foo(0) => I
+rule [[ foo(0) => I ]]
      <bar> I </bar>
 
 rule something => foo(0)
 ```
 
 This is completely desugared by the K frontend and does not require any special support in the backend. It is an error to have a rewrite inside function context, as we do not currently support propogating such changes back into the global configuration.
+
+Desugared code:
+
+```
+syntax Int ::= foo(Int, GeneratedTopCell) [function, withConfig]
+
+rule foo(0, <generatedTop>... <bar> I </bar> ...</generatedTop> #as Configuration) => I
+rule <generatedTop>... <k> something ...</k> ...</generatedTop> #as Configuration => <generatedTop>... <k> foo(0, Configuration> ...</k> ...</generatedTop>
+```
