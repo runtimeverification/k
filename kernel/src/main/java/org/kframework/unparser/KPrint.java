@@ -176,7 +176,7 @@ public class KPrint {
     public K abstractTerm(Module mod, K term) {
         K collectionsSorted = options.noSortCollections    ? term              : sortCollections(mod, term);
         K alphaRenamed      = options.noAlphaRenaming      ? collectionsSorted : alphaRename(collectionsSorted);
-        K origNames         = options.restoreOriginalNames ? alphaRenamed      : restoreOriginalNameIfPresent(alphaRenamed);
+        K origNames         = options.restoreOriginalNames ? restoreOriginalNameIfPresent(alphaRenamed) : alphaRenamed;
         K squashedTerm      = squashTerms(mod, origNames);
         K flattenedTerm     = flattenTerms(mod, squashedTerm);
 
