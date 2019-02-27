@@ -1,4 +1,3 @@
-DEFDIR=..
 DEF=../boundary-cells-test
 EXT=a
 TESTDIR=..
