@@ -1,10 +1,12 @@
-DEFDIR=$(abspath $(dir $(abspath $(firstword $(MAKEFILE_LIST))))/.. )
-DEF=boundary-cells-test
+DEFDIR=..
+DEF=../boundary-cells-test
 EXT=a
+TESTDIR=..
+RESULTDIR=.
+
 KOMPILE_FLAGS=--syntax-module BOUNDARY-CELLS-TEST
 KOMPILE_BACKEND?=java
 
-TESTDIR=..
-RESULTDIR=.
+KPROVE_FLAGS=
 
 include ../../../../include/ktest.mak

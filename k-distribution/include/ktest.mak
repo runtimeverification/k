@@ -51,7 +51,11 @@ else
 endif
 
 %-spec.k: kompile
-	$(KPROVE) $(KPROVE_FLAGS) -d $(DEFDIR) $@ $(CHECK) $@.out
+ifeq ($(TESTDIR),$(RESULTDIR))
+	$(KPROVE) $@ $(KPROVE_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $@.out
+else
+	$(KPROVE) $@ $(KPROVE_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $(RESULTDIR)/$(notdir $@).out
+endif
 
 clean:
 	rm -rf $(DEFDIR)/$(DEF)-kompiled
