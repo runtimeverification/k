@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Formatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -449,8 +450,6 @@ public class KItem extends Term implements KItemRepresentation {
             return kItem.evaluable;
         }
 
-        private static volatile AtomicInteger exceptionLogCount = new AtomicInteger();
-
         /**
          * Evaluates this {@code KItem} if it is a predicate or function
          *
@@ -593,27 +592,13 @@ public class KItem extends Term implements KItemRepresentation {
                             if (!deterministicFunctions && result != null) {
                                 return result;
                             }
-                        } catch (RuntimeException | Error e) {
-                            final long lengthThreshold = 10000;
-                            final long maxExcLogCount = 10;
-                            if (context.global().javaExecutionOptions.logBasic
-                                    && exceptionLogCount.getAndIncrement() < maxExcLogCount) {
-                                try {
-                                    String kItemStr = kItem.toString();
-                                    kItemStr = kItemStr.substring(0, (int) Math.min(kItemStr.length(), lengthThreshold));
-                                    if (kItemStr.length() == lengthThreshold) {
-                                        kItemStr += "...";
-                                    }
-                                    StringBuffer ruleSb = new StringBuffer();
-                                    RuleSourceUtil.appendRuleAndSource(rule, ruleSb);
-                                    System.err.format("\nException while evaluating functional term:\n\t%s\n" +
-                                                    "and applying the rule\n\t%s",
-                                            kItemStr, ruleSb);
-                                } catch (Exception e1) {
-                                    //ignored
-                                }
-                            }
+                        } catch (KEMException e) {
+                            addDetailedStackFrame(e, kItem, rule, context);
                             throw e;
+                        } catch (RuntimeException | Error e) {
+                            KEMException newExc = KEMException.criticalError("", e);
+                            addDetailedStackFrame(newExc, kItem, rule, context);
+                            throw newExc;
                         } finally {
                             if (RuleAuditing.isAuditBegun()) {
                                 if (RuleAuditing.getAuditingRule() == rule) {
@@ -665,6 +650,29 @@ public class KItem extends Term implements KItemRepresentation {
                 return kItem;
             } finally {
                 Profiler.stopTimer(Profiler.getTimerForFunction(kLabelConstant));
+            }
+        }
+
+        public void addDetailedStackFrame(KEMException e, KItem kItem, Rule rule, TermContext context) {
+            final long lengthThreshold = 10000; //Maximum length of a KItem.toString() in a frame.
+            final long maxExcLogCount = 10; //Do not add more than this number of frames.
+            if (context.global().globalOptions.verbose
+                    && context.exceptionLogCount.getAndIncrement() < maxExcLogCount) {
+                try {
+                    String kItemStr = kItem.toString();
+                    kItemStr = kItemStr.substring(0, (int) Math.min(kItemStr.length(), lengthThreshold));
+                    if (kItemStr.length() == lengthThreshold) {
+                        kItemStr += "...";
+                    }
+                    StringBuffer ruleSb = new StringBuffer();
+                    RuleSourceUtil.appendRuleAndSource(rule, ruleSb);
+                    StringBuffer sb = new StringBuffer();
+                    new Formatter(sb).format("while evaluating functional term:\n\t%s\n  and applying the rule\n%s",
+                            kItemStr, ruleSb);
+                    e.exception.addTraceFrame(sb);
+                } catch (Exception e1) {
+                    //ignored
+                }
             }
         }
     }
