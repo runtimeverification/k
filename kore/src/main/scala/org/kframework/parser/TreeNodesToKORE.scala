@@ -20,7 +20,7 @@ class TreeNodesToKORE(parseSort: java.util.function.Function[String, Sort], stri
   def apply(t: Term): K = t match {
     case c@Constant(s, p) => KToken(s, p.sort, locationToAtt(c.location, c.source))
     case t@TermCons(items, p) => termConsToKApply(t, items, p)
-    case Ambiguity(items) => KApply(KLabel("AMB"), KList(items.asScala.toList map apply asJava), Att)
+    case Ambiguity(items) => KApply(KLabel("amb"), KList(items.asScala.toList map apply asJava), Att)
   }
 
   def anonVar(sort: Sort): K = {
