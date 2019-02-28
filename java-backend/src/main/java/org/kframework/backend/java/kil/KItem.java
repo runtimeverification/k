@@ -654,7 +654,7 @@ public class KItem extends Term implements KItemRepresentation {
         }
 
         public void addDetailedStackFrame(KEMException e, KItem kItem, Rule rule, TermContext context) {
-            final long lengthThreshold = 10000; //Maximum length of a KItem.toString() in a frame.
+            final long lengthThreshold = 1000; //Maximum length of a KItem.toString() in a frame.
             final long maxExcLogCount = 10; //Do not add more than this number of frames.
             if (context.global().globalOptions.verbose
                     && context.exceptionLogCount.getAndIncrement() < maxExcLogCount) {
@@ -670,6 +670,9 @@ public class KItem extends Term implements KItemRepresentation {
                     new Formatter(sb).format("while evaluating functional term:\n\t%s\n  and applying the rule\n%s",
                             kItemStr, ruleSb);
                     e.exception.addTraceFrame(sb);
+                } catch (StackOverflowError e1) {
+                    //rollback the counter so that the frames above could log.
+                    context.exceptionLogCount.getAndDecrement();
                 } catch (Exception e1) {
                     //ignored
                 }
