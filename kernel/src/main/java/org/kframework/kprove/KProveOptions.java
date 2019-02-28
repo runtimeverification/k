@@ -60,6 +60,6 @@ public class KProveOptions {
             "cells in the target term. (Except for step 1, for which boundary checking is disabled.)" +
             "If the whole current term matches target, execution is successful. " +
             "Otherwise it fails on the present path. If option is not specified, full target term implication is checked " +
-            "on every step. Recommended value for KEVM: \"k,pc\"")
+            "on every step. In most specifications boundary is marked by \"k\".")
     public List<String> boundaryCells = Collections.emptyList();
 }
