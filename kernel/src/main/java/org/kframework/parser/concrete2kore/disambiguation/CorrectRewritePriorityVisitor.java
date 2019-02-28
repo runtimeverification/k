@@ -38,6 +38,20 @@ public class CorrectRewritePriorityVisitor extends SetsTransformerWithErrors<Par
     }
 
     @Override
+    public Either<java.util.Set<ParseFailedException>, Term> apply(Ambiguity amb) {
+        // if the ambiguity has rewrites at the top, prefer them, and eliminate the rest
+        scala.collection.Set<Term> rewrites = amb.items().stream().filter(o ->
+                o instanceof TermCons &&
+                        ((TermCons) o).production().klabel().isDefined() &&
+                        ((TermCons) o).production().klabel().get().name().equals("#KRewrite")).collect(Collections.toSet());
+        if (rewrites.size() == 0 || rewrites.size() == amb.items().size())
+            return super.apply(amb);
+        if (rewrites.size() == 1)
+            return Right.apply(rewrites.head());
+        return super.apply(Ambiguity.apply(mutable(rewrites)));
+    }
+
+    @Override
     public Either<java.util.Set<ParseFailedException>, Term> apply(TermCons tc) {
         assert tc.production() != null : this.getClass() + ":" + " production not found." + tc;
         if (!tc.production().isSyntacticSubsort() && tc.production().klabel().isDefined()
