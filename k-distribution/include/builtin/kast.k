@@ -96,7 +96,7 @@ module KCELLS
                | Cell
   syntax Bag ::= "(" Bag ")" [bracket]
   syntax K ::= Bag
-  syntax #RuleBody ::= "[[" K "]]" Bag    [klabel(#withConfig), symbol, avoid]
+  syntax #RuleBody ::= "[" "[" K "]" "]" Bag    [klabel(#withConfig), symbol, avoid]
   syntax non-assoc #withConfig
   syntax Bag ::= KBott
 endmodule
