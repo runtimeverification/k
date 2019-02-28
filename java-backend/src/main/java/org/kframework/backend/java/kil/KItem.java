@@ -595,7 +595,9 @@ public class KItem extends Term implements KItemRepresentation {
                         } catch (KEMException e) {
                             addDetailedStackFrame(e, kItem, rule, context);
                             throw e;
+                            // DISABLE EXCEPTION CHECKSTYLE
                         } catch (RuntimeException | Error e) {
+                            // ENABLE EXCEPTION CHECKSTYLE
                             KEMException newExc = KEMException.criticalError("", e);
                             addDetailedStackFrame(newExc, kItem, rule, context);
                             throw newExc;
@@ -673,7 +675,9 @@ public class KItem extends Term implements KItemRepresentation {
                 } catch (StackOverflowError e1) {
                     //rollback the counter so that the frames above could log.
                     context.exceptionLogCount.getAndDecrement();
+                    // DISABLE EXCEPTION CHECKSTYLE
                 } catch (Exception e1) {
+                    // ENABLE EXCEPTION CHECKSTYLE
                     //ignored
                 }
             }
