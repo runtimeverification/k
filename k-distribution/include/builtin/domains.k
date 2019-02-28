@@ -381,9 +381,9 @@ module INT
   syntax Int ::= bitRangeInt           ( Int, indexInt: Int, lengthInt: Int ) [function, hook(INT.bitRange)]
   syntax Int ::= signExtendBitRangeInt ( Int, indexInt: Int, lengthInt: Int ) [function, hook(INT.signExtendBitRange)]
 
-  rule bitRangeInt(I, IDX, LEN) => (I >>Int IDX) modInt (1 <<Int LEN)
+  rule bitRangeInt(I::Int, IDX::Int, LEN::Int) => (I >>Int IDX) modInt (1 <<Int LEN)
 
-  rule signExtendBitRangeInt(I, IDX, LEN) => (bitRangeInt(I, IDX, LEN) +Int (1 <<Int (LEN -Int 1))) modInt (1 <<Int LEN) -Int (1 <<Int (LEN -Int 1))
+  rule signExtendBitRangeInt(I::Int, IDX::Int, LEN::Int) => (bitRangeInt(I, IDX, LEN) +Int (1 <<Int (LEN -Int 1))) modInt (1 <<Int LEN) -Int (1 <<Int (LEN -Int 1))
 
   rule I1:Int divInt I2:Int => (I1 -Int (I1 modInt I2)) /Int I2
   requires I2 =/=Int 0
@@ -709,14 +709,14 @@ module BYTES
   imports BYTES-IN-K
   imports INT
 
-  rule Int2Bytes(I, E, Unsigned) => Int2Bytes((log2Int(I) +Int 8) /Int 8, I, E)
+  rule Int2Bytes(I::Int, E::Endianness, Unsigned) => Int2Bytes((log2Int(I) +Int 8) /Int 8, I, E)
     requires I >Int 0
   rule Int2Bytes(0, _::Endianness, _) => .Bytes
-  rule Int2Bytes(I, E, Signed) => Int2Bytes((log2Int(I) +Int 9) /Int 8, I, E)
+  rule Int2Bytes(I::Int, E::Endianness, Signed) => Int2Bytes((log2Int(I) +Int 9) /Int 8, I, E)
     requires I >Int 0
-  rule Int2Bytes(I, E, Signed) => Int2Bytes((log2Int(~Int I) +Int 9) /Int 8, I, E)
+  rule Int2Bytes(I::Int, E::Endianness, Signed) => Int2Bytes((log2Int(~Int I) +Int 9) /Int 8, I, E)
     requires I <Int -1
-  rule Int2Bytes(-1, E, Signed) => Int2Bytes(1, -1, E)
+  rule Int2Bytes(-1, E::Endianness, Signed) => Int2Bytes(1, -1, E)
 endmodule
 
 module ID-PROGRAM-PARSING
@@ -779,8 +779,8 @@ module K-EQUAL
 
   syntax K ::= "#if" Bool "#then" K "#else" K "#fi"   [function, functional, smtlib(ite), hook(KEQUAL.ite), poly(0, 2, 3)]
 
-  rule #if C:Bool #then B1 #else _ #fi => B1 requires C
-  rule #if C:Bool #then _ #else B2 #fi => B2 requires notBool C
+  rule #if C:Bool #then B1::K #else _ #fi => B1 requires C
+  rule #if C:Bool #then _ #else B2::K #fi => B2 requires notBool C
 
 endmodule
 
