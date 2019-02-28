@@ -1,15 +1,19 @@
 module TEST
-  imports SET
+  imports INT
   imports BOOL
 
 syntax SimpleType ::= "int" | "float" | "double"
 
-syntax Type ::= t(m: Set, st: SimpleType)
+syntax Type ::= t(m1: Int, m2: Int, st: SimpleType)
 
-syntax Type ::= "floatingType"
+syntax Type ::= "floatingType" | "intType"
 
-rule floatingType => t(?_, (float #Or double)) [macro]
+rule floatingType => t(?_, ?_, (float #Or double)) [macro]
 
 rule floatingType => .K
+
+rule intType => t(?Foo, ?Foo, int) [macro]
+
+rule intType => .K
 
 endmodule
