@@ -130,7 +130,7 @@ rule [[ foo(0) => I ]]
 rule something => foo(0)
 ```
 
-This is completely desugared by the K frontend and does not require any special support in the backend. It is an error to have a rewrite inside function context, as we do not currently support propogating such changes back into the global configuration.
+This is completely desugared by the K frontend and does not require any special support in the backend. It is an error to have a rewrite inside function context, as we do not currently support propogating such changes back into the global configuration. It is also an error if the context is not at the top level of a rule body.
 
 Desugared code:
 
