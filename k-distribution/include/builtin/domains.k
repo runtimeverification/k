@@ -404,7 +404,7 @@ module INT
                 | Int "=/=Int" Int        [function, functional, left, smtlib(distinct), latex({#1}\mathrel{{=}{/}{=}_{\scriptstyle\it Int}}{#2}), hook(INT.ne)]
                 | Int "dividesInt" Int    [function]
 
-  rule I1:Int ==Int I2:Int => I1 ==K I2
+  rule I1:Int ==Int I2:Int => I1 ==K I2 [concrete]
   rule I1:Int =/=Int I2:Int => notBool (I1 ==Int I2)
   rule (I1:Int dividesInt I2:Int) => (I2 %Int I1) ==Int 0
 
