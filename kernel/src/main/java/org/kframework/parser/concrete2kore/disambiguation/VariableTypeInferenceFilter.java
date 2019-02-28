@@ -147,12 +147,12 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
         }
 
         public boolean isAnyVar() {
-            return var.value().equals(ResolveAnonVar.ANON_VAR.name());
+            return var.value().equals(ResolveAnonVar.ANON_VAR.name()) || var.value().equals(ResolveAnonVar.FRESH_ANON_VAR.name());
         }
     }
 
     private static VarKey getVarKey(Constant c) {
-        if (c.value().equals(ResolveAnonVar.ANON_VAR.name())) {
+        if (c.value().equals(ResolveAnonVar.ANON_VAR.name()) || c.value().equals(ResolveAnonVar.FRESH_ANON_VAR.name())) {
             return new VarKey(c); // wildcard values are compared including location
         } else {
             return new VarKey(Constant.apply(c.value(), c.production(), Optional.empty(), Optional.empty()));
