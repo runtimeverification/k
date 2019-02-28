@@ -59,7 +59,7 @@ import static org.kframework.kore.KORE.*;
  * @cos refactored this code out of Kompile but none (or close to none) of it was originally written by him.
  */
 public class DefinitionParsing {
-    public static final Sort START_SYMBOL = Sort("RuleContent");
+    public static final Sort START_SYMBOL = Sort("#RuleContent");
     private final File cacheFile;
     private boolean autoImportDomains;
     private boolean kore;
