@@ -155,4 +155,4 @@ rule bar(I) => baz(?_, I) [macro]
 rule bar(I) => I
 ```
 
-This will rewrite `baz(0, foo)` to `foo`. First `baz(0, foo)` will be rewritten statically to `baz(0, foobar)`. Then the non-macro rule will apply (because the rule will have been rewritten to `rule baz(_, I) => I`). Then `foobar` will be rewritten statically after rewriting finishes to `foo` via the reverse form of the alias.
+This will rewrite `baz(0, foo)` to `foo`. First `baz(0, foo)` will be rewritten statically to `baz(0, foobar)`. Then the non-`macro` rule will apply (because the rule will have been rewritten to `rule baz(_, I) => I`). Then `foobar` will be rewritten statically after rewriting finishes to `foo` via the reverse form of the alias.
