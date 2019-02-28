@@ -7,7 +7,7 @@ syntax Int ::= foo(Int)
 
 configuration <k> $PGM:K </k> <bar> 0 </bar>
 
-rule foo(0) => 0
+rule [[ foo(0) => 0 ]]
      <bar> 0 => 1 </bar>
 
 endmodule

@@ -5,6 +5,6 @@ module FUNCTIONCONTEXTINREWRITE
 
 configuration <k> $PGM:K </k> <bar> 0 </bar>
 
-rule 0 => (1 <bar> 0 </bar>)
+rule 0 => ([[ 1 ]] <bar> 0 </bar>)
 
 endmodule
