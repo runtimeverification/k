@@ -42,144 +42,14 @@ import java.util.Set;
 
 public class    KILtoSMTLib extends CopyOnWriteTransformer {
 
-    public static final ImmutableSet<Sort> SMTLIB_BUILTIN_SORTS = ImmutableSet.of(
-            Sort.BOOL,
-            Sort.INT,
-            Sort.BIT_VECTOR,
-            Sort.of(Sorts.Float()),
-            Sort.of(Sorts.String()),
-            Sort.of(KORE.Sort("IntSet")),
-            Sort.of(KORE.Sort("MIntSet")),
-            Sort.of(KORE.Sort("FloatSet")),
-            Sort.of(KORE.Sort("StringSet")),
-            Sort.of(KORE.Sort("IntSeq")),
-            Sort.of(KORE.Sort("MIntSeq")),
-            Sort.of(KORE.Sort("FloatSeq")),
-            Sort.of(KORE.Sort("StringSeq")));
-    public static final ImmutableSet<String> SMTLIB_BUILTIN_FUNCTIONS = ImmutableSet.of(
-            "forall",
-            "exists",
-            /* array theory */
-            "select",
-            "store",
-            /* core theory */
-            "not",
-            "and",
-            "or",
-            "xor",
-            "=>",
-            "=",
-            "distinct",
-            "ite",
-            /* int theory */
-            "+",
-            "-",
-            "*",
-            "div",
-            "mod",
-            "abs",
-            "<=",
-            "<",
-            ">=",
-            ">",
-            "^",
-            /* extra int theory */
-            "int_max",
-            "int_min",
-            "int_abs",
-            /* extra float theory */
-            "remainder",
-            "min",
-            "max",
-            "==",
-            /* bit vector theory */
-            "concat",
-            "extract",
-            "bvnot",
-            "bvneg",
-            "bvand",
-            "bvor",
-            "bvadd",
-            "bvmul",
-            "bvudiv",
-            "bvurem",
-            "bvshl",
-            "bvlshr",
-            "bvult",
-            /* z3-specific bit vector theory */
-            "bvsub",
-            "bvxor",
-            "bvslt",
-            "bvule",
-            "bvsle",
-            "bvugt",
-            "bvsgt",
-            "bvuge",
-            "bvsge",
-            "bv2int",
-            /* bit vector extras */
-            "mint_signed_of_unsigned",
-            /* string theory */
-            "string_lt",
-            "string_le",
-            "string_gt",
-            "string_ge",
-            /* set theory */
-            "smt_set_mem", "smt_miset_mem",
-            "smt_set_add", "smt_miset_add",
-            "smt_set_emp", "smt_miset_emp",
-            "smt_set_cup", "smt_miset_cup",
-            "smt_set_cap", "smt_miset_cap",
-            "smt_set_com", "smt_miset_com",
-            "smt_set_ele", "smt_miset_ele",
-            "smt_set_dif", "smt_miset_dif",
-            "smt_set_sub", "smt_miset_sub",
-            "smt_set_lt", "smt_miset_lt",
-            "smt_set_le", "smt_miset_le",
-            /* float set theory */
-            "float_set_mem",
-            "float_set_add",
-            "float_set_emp",
-            "float_set_cup",
-            "float_set_cap",
-            "float_set_com",
-            "float_set_ele",
-            "float_set_dif",
-            "float_set_sub",
-            "float_set_lt",
-            "float_set_le",
-            /* string set theory */
-            "string_set_mem",
-            "string_set_add",
-            "string_set_emp",
-            "string_set_cup",
-            "string_set_cap",
-            "string_set_com",
-            "string_set_ele",
-            "string_set_dif",
-            "string_set_sub",
-            "string_set_lt",
-            "string_set_le",
-            /* associative sequence theory */
-            "smt_seq_concat",
-            "smt_seq_elem",
-            "smt_seq_nil",
-            "smt_seq_len",
-            "smt_seq_sum",
-            "smt_seq2set",
-            "smt_seq_sorted",
-            "smt_seq_filter",
-            /* bool2int */
-            "smt_bool2int");
-
-    public static CharSequence translateConstraint(ConjunctiveFormula constraint) {
+    public static CharSequence translateConstraint(ConjunctiveFormula constraint, Set<Sort> smtLibBuiltinSorts, Set<String> smtLibBuiltinFunctions) {
         KILtoSMTLib kil2SMT = new KILtoSMTLib(true, constraint.globalContext());
 
         //this line has side effects used later
         CharSequence expression = kil2SMT.translate(constraint).expression();
 
         StringBuilder sb = new StringBuilder(1024);
-        kil2SMT.appendSortAndFunctionDeclarations(sb, kil2SMT.variables());
+        kil2SMT.appendSortAndFunctionDeclarations(sb, kil2SMT.variables(), smtLibBuiltinSorts, smtLibBuiltinFunctions);
         kil2SMT.appendAxioms(sb);
         kil2SMT.appendConstantDeclarations(sb, kil2SMT.variables());
         sb.append("(assert ")
@@ -196,7 +66,9 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
     public static CharSequence translateImplication(
             ConjunctiveFormula leftHandSide,
             ConjunctiveFormula rightHandSide,
-            Set<Variable> existentialQuantVars) {
+            Set<Variable> existentialQuantVars,
+            Set<Sort> smtLibBuiltinSorts,
+            Set<String> smtLibBuiltinFunctions) {
         KILtoSMTLib leftTransformer = new KILtoSMTLib(true, leftHandSide.globalContext());
         // termAbstractionMap is shared between transformers
         KILtoSMTLib rightTransformer = new KILtoSMTLib(false,
@@ -209,7 +81,7 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
         StringBuilder sb = new StringBuilder(1024);
         Sets.SetView<Variable> allVars = Sets.union(leftTransformer.variables(), rightTransformer.variables());
         Set<Variable> usedExistentialQuantVars = Sets.intersection(existentialQuantVars, rightTransformer.variables());
-        leftTransformer.appendSortAndFunctionDeclarations(sb, allVars);
+        leftTransformer.appendSortAndFunctionDeclarations(sb, allVars, smtLibBuiltinSorts, smtLibBuiltinFunctions);
         leftTransformer.appendAxioms(sb);
         leftTransformer.appendConstantDeclarations(sb, Sets.difference(allVars, usedExistentialQuantVars));
 
@@ -278,13 +150,13 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
         }
     }
 
-    private StringBuilder appendSortAndFunctionDeclarations(StringBuilder sb, Set<Variable> variables) {
+    private StringBuilder appendSortAndFunctionDeclarations(StringBuilder sb, Set<Variable> variables, Set<Sort> smtLibBuiltinSorts, Set<String> smtLibBuiltinFunctions) {
         Set<Sort> sorts = new LinkedHashSet<>();
         List<KLabelConstant> functions = new ArrayList<>();
         for (KLabelConstant kLabel : definition.kLabels()) {
             String smtlib = kLabel.getAttr(Attribute.SMTLIB_KEY);
             Boolean inSmtPrelude = kLabel.getAttr(Attribute.SMT_PRELUDE_KEY) != null;
-            if (smtlib != null && !inSmtPrelude && !SMTLIB_BUILTIN_FUNCTIONS.contains(smtlib) && !smtlib.startsWith("(")) {
+            if (smtlib != null && !inSmtPrelude && !smtLibBuiltinFunctions.contains(smtlib) && !smtlib.startsWith("(")) {
                 functions.add(kLabel);
                 assert kLabel.signatures().size() == 1;
                 SortSignature signature = kLabel.signatures().iterator().next();
@@ -298,7 +170,7 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
             sorts.add(renameSort(variable.sort()));
         }
 
-        for (Sort sort : Sets.difference(sorts, Sets.union(SMTLIB_BUILTIN_SORTS, definition.smtPreludeSorts()))) {
+        for (Sort sort : Sets.difference(sorts, Sets.union(smtLibBuiltinSorts, definition.smtPreludeSorts()))) {
             if (sort.equals(Sort.MAP) && krunOptions.experimental.smt.mapAsIntArray) {
                 sb.append("(define-sort Map () (Array Int Int))");
             } else {
