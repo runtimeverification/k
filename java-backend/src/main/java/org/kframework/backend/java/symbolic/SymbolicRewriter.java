@@ -35,6 +35,7 @@ import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KORE;
 import org.kframework.kprove.KProve;
+import org.kframework.kprove.KProveOptions;
 import org.kframework.rewriter.SearchType;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -646,7 +647,9 @@ public class SymbolicRewriter {
                 boolean alreadyLogged = logStep(step, v, term,
                         step == 1 || boundaryCellsMatchTarget, false);
                 if (boundaryPattern == null || boundaryCellsMatchTarget) {
+                    //Only test the full implication if there is no boundary pattern or if it is matched.
                     if (term.implies(targetTerm, rule, !(boundaryPattern == null))) {
+                        //If current term matches the target term, current execution path is proved.
                         global.stateLog.log(StateLog.LogEvent.REACHPROVED, term.term(), term.constraint());
                         if (global.javaExecutionOptions.logBasic) {
                             logStep(step, v, term, true, alreadyLogged);
@@ -663,9 +666,9 @@ public class SymbolicRewriter {
                         proofResults.add(term);
                         continue;
                     }
-                    //else: case (noBoundaryCells || (step == 1 && boundaryCellsMatchTarget)) && final implication == false
-                    //  Do nothing. Boundary checking is disabled at step 1.
-                    //  Required for specs that match 1 full loop iteration.
+                    //else: case (no boundary pattern || (step == 1 && boundaryCellsMatchTarget)) && final implication == false
+                    //  Do nothing. Boundary checking is disabled if there is no boundary pattern, or at step 1.
+                    //  Disabling on step 1 is useful for specs that match 1 full loop iteration.
                 }
 
                 /* TODO(AndreiS): terminate the proof with failure based on the klabel _~>_
@@ -909,6 +912,17 @@ public class SymbolicRewriter {
         return null;
     }
 
+    /**
+     * @return true if all boundary substitutions for {@code term} match the substitution on same position in
+     * {@code targetBoundarySub}. False otherwise.
+     * <p>
+     * We consider 2 boundary substitutions to match if the equality {@code currentMatch ==K targetMatch} is not false.
+     * That is, if the match contains symbolic terms,
+     * and equality is neither true nor false, boundaryCellsMatchTarget will be true. This is because option
+     * `--boundary-cells` is not designed to be used in conjunction with symbolic reasoning. Specification boundary
+     * should not depend on symbolic values. And if we cannot decide if the boundary matches or not, we still want to
+     * test if the full current term matches the target.
+     */
     public boolean boundaryCellsMatchTarget(ConstrainedTerm term, Rule boundaryPattern,
                                             List<Substitution<Variable, Term>> targetBoundarySub) {
         if (boundaryPattern == null) {
@@ -922,7 +936,8 @@ public class SymbolicRewriter {
         }
         for (int i = 0; i < targetBoundarySub.size(); i++) {
             //Keeping term substitution as is and converting target substitution to equalities,
-            //to build a simplifiable formula.
+            //to build a simplifiable formula. In `simplify()` substitutions will be substituted into equalities,
+            //and simplified if LHS == RHS.
             ConjunctiveFormula boundaryEq = ConjunctiveFormula.of(termBoundarySub.get(i),
                     PersistentUniqueList.from(targetBoundarySub.get(i).equalities(global)),
                     PersistentUniqueList.empty(), global);
@@ -934,7 +949,20 @@ public class SymbolicRewriter {
     }
 
     /**
-     * Match the pattern, then in resulting substitution keep only entries that start with "BOUND".
+     * Match the pattern, then in resulting substitutions keep only vars that start with "BOUND".
+     * <p>
+     * The result of pattern matching is a a list of substitutions, each having 2 kinds of variables:
+     * <p>
+     * 1. Cell body for cells mentioned in {@code KProveOptions.boundaryCells}. These vars will have the name
+     * starting with {@code KProve.BOUNDARY_CELL_PREFIX}. They have to be preserved.
+     * <p>
+     * 2. The rest of the config. These will be anonymous vars with name starting with `_`.
+     * <p>
+     * It is a list because a pattern can match the same term in several ways. This function retains only the vars
+     * from 1st category, in each substitution from the list.
+     *
+     * @see KProveOptions
+     * @see KProve
      */
     public List<Substitution<Variable, Term>> getBoundarySubstitution(ConstrainedTerm term, Rule boundaryPattern) {
         List<Substitution<Variable, Term>> match = FastRuleMatcher.match(
