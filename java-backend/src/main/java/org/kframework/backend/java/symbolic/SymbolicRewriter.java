@@ -640,13 +640,14 @@ public class SymbolicRewriter {
             }
 
             for (ConstrainedTerm term : queue) {
+                boolean alreadyLogged = false;
                 try { //not formatting to minimize git merge conflicts.
 
                 v++;
 
                 boolean boundaryCellsMatchTarget = boundaryCellsMatchTarget(term, boundaryPattern, targetBoundarySub);
                 //var required to avoid logging the same step multiple times.
-                boolean alreadyLogged = logStep(step, v, term,
+                alreadyLogged = logStep(step, v, term,
                         step == 1 || boundaryCellsMatchTarget, false);
                 if (boundaryPattern == null || boundaryCellsMatchTarget) {
                     //Only test the full implication if there is no boundary pattern or if it is matched.
@@ -706,25 +707,15 @@ public class SymbolicRewriter {
                             nextQueue.add(result);
                         } else {
                             if (term.equals(result)) {
-                                kem.registerCriticalWarning("Step " + step + ": infinite loop after applying a spec rule.");
+                                throw KEMException.criticalError(
+                                        "Step " + step + ": infinite loop after applying a spec rule.");
                             }
                         }
                         continue;
                     }
                 }
 
-                List<ConstrainedTerm> results;
-                try {
-                    results = fastComputeRewriteStep(term, false, true, true, step);
-                    // DISABLE EXCEPTION CHECKSTYLE
-                } catch (Throwable e) {
-                    // ENABLE EXCEPTION CHECKSTYLE
-                    logStep(step, v, term, true, alreadyLogged);
-                    System.err.println("\n\nTerm throwing exception\n============================\n\n");
-                    printTermAndConstraint(term, false);
-                    e.printStackTrace();
-                    throw e;
-                }
+                List<ConstrainedTerm> results = fastComputeRewriteStep(term, false, true, true, step);
                 if (results.isEmpty()) {
                     logStep(step, v, term, true, alreadyLogged);
                     System.err.println("\nStep above: " + step + ", evaluation ended with no successors.");
@@ -765,18 +756,21 @@ public class SymbolicRewriter {
                 }
 
                 if (Thread.currentThread().isInterrupted()) {
-                    throw new RuntimeException("Thread interrupted");
+                    throw KEMException.criticalError("Thread interrupted");
                 }
+                    // DISABLE EXCEPTION CHECKSTYLE
                 } catch (OutOfMemoryError e) {
-                    e.printStackTrace();
+                    e.printStackTrace(); //to avoid hiding this exception in case another OOMError is thrown.
                     printSummaryBox(rule, proofResults, successPaths, step, queue.size() + nextQueue.size() - v + 1);
                     throw e;
-                } catch (RuntimeException | Error e) {
+                } catch (Throwable e) {
+                    // ENABLE EXCEPTION CHECKSTYLE
+                    logStep(step, v, term, true, alreadyLogged);
                     System.err.println("\n" +
                             "==========================================\n" +
                             "Top term when exception was thrown:\n" +
                             "==========================================\n");
-                    printTermAndConstraint(term);
+                    printTermAndConstraint(term, false);
                     printSummaryBox(rule, proofResults, successPaths, step, queue.size() + nextQueue.size() - v + 1);
                     throw e;
                 }
@@ -821,6 +815,7 @@ public class SymbolicRewriter {
     }
 
     public void printTermAndConstraint(ConstrainedTerm term, boolean pretty) {
+        //Disabling toString cache to minimise chance of OutOfMemoryError.
         boolean oldCacheToString = global.javaExecutionOptions.cacheToString;
         global.javaExecutionOptions.cacheToString = false;
         try {
@@ -832,11 +827,13 @@ public class SymbolicRewriter {
         }
     }
 
-    private void printSummaryBox(Rule rule, List<ConstrainedTerm> proofResults, int successPaths, int step, int pathsInProgress) {
+    private void printSummaryBox(Rule rule, List<ConstrainedTerm> proofResults, int successPaths, int step,
+                                 int pathsInProgress) {
         if (pathsInProgress != 0) {
             System.err.format("\nSPEC ERROR: %s %s\n==================================\n" +
                             "Success execution paths: %d\nFailed execution paths: %d\nPaths in progress: %d\n",
-                    new File(rule.getSource().source()), rule.getLocation(), successPaths, proofResults.size(), pathsInProgress);
+                    new File(rule.getSource().source()), rule.getLocation(), successPaths, proofResults.size(),
+                    pathsInProgress);
         } else if (proofResults != null) {
             if (proofResults.isEmpty()) {
                 System.err.format("\nSPEC PROVED: %s %s\n==================================\nExecution paths: %d\n",
