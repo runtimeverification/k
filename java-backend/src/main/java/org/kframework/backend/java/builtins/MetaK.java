@@ -15,6 +15,7 @@ import org.kframework.backend.java.symbolic.ConjunctiveFormula;
 import org.kframework.backend.java.symbolic.CopyOnWriteTransformer;
 import org.kframework.backend.java.symbolic.PatternMatcher;
 import org.kframework.kore.KVariable;
+import org.kframework.parser.kore.KoreParser;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -197,6 +198,16 @@ public class MetaK {
         // TODO(AndreiS): handle KLabel variables
         return KItem.of(new KLabelInjection(kItem.kLabel()), KList.EMPTY, context.global(),
             kItem.att());
+    }
+
+    /**
+     * Hook that provides access to the kore parser.
+     * @param kast String representation of the AST.
+     * @param termContext the term context
+     * @return backend AST
+     */
+    public static Term parseKore(StringToken kast, TermContext termContext) {
+        return termContext.getKOREtoBackendKILConverter().convert(KoreParser.parse(kast.stringValue(), termContext.getSource()));
     }
 
     public static StringToken getKLabelString(Term term, TermContext context) {

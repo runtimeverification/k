@@ -114,7 +114,7 @@ public class BuiltinIOOperations {
 
     public static Term system(StringToken term, TermContext termContext) {
         Map<String, String> environment = new HashMap<>();
-        String[] args = term.stringValue().split("\001", -1);
+        String[] args = term.stringValue().split(" ", -1);
         //for (String c : args) { System.out.println(c); }
         ProcessOutput output = RunProcess.execute(environment, termContext.global().files.getProcessBuilder(), args);
 

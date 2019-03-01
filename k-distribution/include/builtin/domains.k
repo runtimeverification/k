@@ -860,6 +860,12 @@ module K-REFLECTION-SYMBOLIC [symbolic]
   syntax Bool ::= #isVariable(K) [function, hook(KREFLECTION.isVariable)]
 endmodule
 
+module META
+  imports STRING-SYNTAX
+  // Takes as input a string and returns a K term
+  syntax KItem ::= #parseKore(String) [function, hook(META.parseKore), impure]
+endmodule
+
 module K-IO
   imports LIST
   imports STRING
