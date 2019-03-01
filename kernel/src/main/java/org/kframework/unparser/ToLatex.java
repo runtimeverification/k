@@ -66,7 +66,14 @@ public class ToLatex {
         } else if (k instanceof KSequence) {
             KSequence kseq = (KSequence) k;
 
-            throw KEMException.criticalError("KSequence unimplemented", k);
+            writeString(out, "\\klabelKSequence{");
+
+            for (K item : kseq.asIterable()) {
+                apply(out, item);
+                writeString(out, "}{\\klabelKSequence{");
+            }
+
+            writeString(out, "}{\\klabelKSequenceUnit{}}");
 
         } else if (k instanceof KVariable) {
             KVariable var = (KVariable) k;
@@ -81,7 +88,13 @@ public class ToLatex {
         } else if (k instanceof KRewrite) {
             KRewrite rew = (KRewrite) k;
 
-            throw KEMException.criticalError("KRewrite unimplemented", k);
+            writeString(out, "\\klabelKRewrite{");
+            apply(out, rew.left());
+            writeString(out, "}{");
+            apply(out, rew.right());
+            writeString(out, "}{");
+            apply(out, rew.att());
+            writeString(out, "}");
 
         } else if (k instanceof KAs) {
             KAs alias = (KAs) k;
