@@ -218,30 +218,40 @@ public class FastRuleMatcher {
     }
 
     /**
-     * If match fails and --log-basic or above is provided, print a warning message with expected and actual term.
-     * Helps debugging spec issues related to final implication.
+     * If (1) match fails (2) --log-basic or above is provided and (3) logFailures == true,
+     * print a warning message with expected and actual term. Helps debugging spec issues related to final implication.
+     * <p>
+     * If exception is thrown during matching, print the warning message regardless of logFailures value.
      */
     private BitSet matchAndLog(Term subject, Term pattern, BitSet ruleMask,
                                scala.collection.immutable.List<Pair<Integer, Integer>> path,
                                boolean logFailures) {
-        BitSet result = match(subject, pattern, ruleMask, path, logFailures);
+        BitSet result;
+        try {
+            result = match(subject, pattern, ruleMask, path, logFailures);
+            // DISABLE EXCEPTION CHECKSTYLE
+        } catch (Throwable e) {
+            // ENABLE EXCEPTION CHECKSTYLE
+            System.err.format("\nException during matching rule pattern:\n\t%s\nSubject:\n%s\nPattern:\n%s\n",
+                    e.getMessage(), getLogString(subject), getLogString(pattern));
+            throw e;
+        }
 
-        final long lengthThreshold = 10000;
         if (logFailures && global.javaExecutionOptions.logBasic && result.isEmpty()) {
-            String subjectStr = subject.toString();
-            subjectStr = subjectStr.substring(0, (int) Math.min(subjectStr.length(), lengthThreshold));
-            if (subjectStr.length() == lengthThreshold) {
-                subjectStr += "...";
-            }
-            String patternStr = pattern.toString();
-            patternStr = patternStr.substring(0, (int) Math.min(patternStr.length(), lengthThreshold));
-            if (patternStr.length() == lengthThreshold) {
-                patternStr += "...";
-            }
             System.err.format("\nFinal implication term not matching\nActual:\n%s\nExpected:\n%s\n",
-                    subjectStr, patternStr);
+                    getLogString(subject), getLogString(pattern));
         }
         return result;
+    }
+
+    private String getLogString(Term subject) {
+        final long lengthThreshold = 10000;
+        String subjectStr = subject.toString();
+        subjectStr = subjectStr.substring(0, (int) Math.min(subjectStr.length(), lengthThreshold));
+        if (subjectStr.length() == lengthThreshold) {
+            subjectStr += "...";
+        }
+        return subjectStr;
     }
 
     private BitSet match(Term subject, Term pattern, BitSet ruleMask, scala.collection.immutable.List<Pair<Integer, Integer>> path,
@@ -364,8 +374,10 @@ public class FastRuleMatcher {
         } else if (subject instanceof BuiltinSet && pattern instanceof BuiltinSet) {
             return unifySet((BuiltinSet) subject, (BuiltinSet) pattern, ruleMask, path);
         } else {
-            assert subject instanceof KItem || subject instanceof BuiltinList || subject instanceof Token || subject instanceof BuiltinMap : "unexpected class at matching: " + subject.getClass();
-            assert pattern instanceof KItem || pattern instanceof BuiltinList || pattern instanceof Token : "unexpected class at matching: " + pattern.getClass();
+            assert subject instanceof KItem || subject instanceof BuiltinList || subject instanceof Token ||
+                    subject instanceof BuiltinMap : "unexpected subject class at matching: " + subject.getClass();
+            assert pattern instanceof KItem || pattern instanceof BuiltinList || pattern instanceof Token :
+                    "unexpected pattern class at matching: " + pattern.getClass();
             return empty;
         }
     }
