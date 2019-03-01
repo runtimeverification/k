@@ -37,21 +37,25 @@ public class ToLatex {
         return "klabel" + orig.replaceAll("[^a-zA-Z]", "");
     }
 
+    private static void writeString(DataOutputStream out, String str) throws IOException {
+        out.write(str.getBytes(StandardCharsets.UTF_8));
+    }
+
     public static void apply(DataOutputStream out, K k) throws IOException {
         if (k instanceof KToken) {
             KToken tok = (KToken) k;
 
-            out.write(("\\texttt{ " + tok.s() + " }").getBytes(StandardCharsets.UTF_8));
+            writeString(out, ("\\texttt{ " + tok.s() + " }"));
 
         } else if (k instanceof KApply) {
             KApply app = (KApply) k;
 
-            out.write(("\\" + latexedKLabel(app.klabel().name())).getBytes(StandardCharsets.UTF_8));
+            writeString(out, ("\\" + latexedKLabel(app.klabel().name())));
 
             for (K item : app.klist().asIterable()) {
-                out.write("{".getBytes(StandardCharsets.UTF_8));
+                writeString(out, "{");
                 ToLatex.apply(out, item);
-                out.write("}".getBytes(StandardCharsets.UTF_8));
+                writeString(out, "}");
             }
 
         } else if (k instanceof KSequence) {
@@ -64,9 +68,9 @@ public class ToLatex {
 
             Optional<String> origName = var.att().getOptional("originalName");
             if (origName.isPresent()) {
-                out.write(origName.get().getBytes(StandardCharsets.UTF_8));
+                writeString(out, origName.get());
             } else {
-                out.write(var.name().getBytes(StandardCharsets.UTF_8));
+                writeString(out, var.name());
             }
 
         } else if (k instanceof KRewrite) {
@@ -77,7 +81,7 @@ public class ToLatex {
         } else if (k instanceof KAs) {
             KAs alias = (KAs) k;
 
-            out.write("KAs unimplemented".getBytes(StandardCharsets.UTF_8));
+            writeString(out, "KAs unimplemented");
 
         } else if (k instanceof InjectedKLabel) {
             KAs alias = (KAs) k;
