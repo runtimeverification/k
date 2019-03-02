@@ -4,7 +4,9 @@ package org.kframework.unparser;
 import com.davekoelle.AlphanumComparator;
 import com.google.inject.Inject;
 import org.kframework.attributes.Att;
+import org.kframework.backend.kore.ModuleToKORE;
 import org.kframework.builtin.Sorts;
+import org.kframework.compile.AddSortInjections;
 import org.kframework.compile.ExpandMacros;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
@@ -120,7 +122,12 @@ public class KPrint {
             case PRETTY:
             case PROGRAM:
                 return prettyPrint(def.kompiledDefinition, module, orig, colorize, outputMode);
-            default:
+            case KORE: {
+                K result = abstractTerm(module, new AddSortInjections(module).addInjections(orig));
+                ModuleToKORE converter = new ModuleToKORE(module, files, def.topCellInitializer);
+                converter.convert(result);
+                System.out.println(converter.toString());
+            } default:
                 throw KEMException.criticalError("Unsupported output mode: " + outputMode);
         }
     }
