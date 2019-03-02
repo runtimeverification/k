@@ -1,13 +1,14 @@
 // Copyright (c) 2018-2019 K Team. All Rights Reserved.
 package org.kframework.unparser;
 
-import com.google.inject.Inject;
 import com.davekoelle.AlphanumComparator;
+import com.google.inject.Inject;
 import org.kframework.attributes.Att;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.ExpandMacros;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
+import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.Assoc;
 import org.kframework.kore.K;
@@ -16,9 +17,9 @@ import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
 import org.kframework.kore.TransformK;
 import org.kframework.main.GlobalOptions;
-import org.kframework.parser.ProductionReference;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.parser.concrete2kore.ParseInModule;
+import org.kframework.parser.ProductionReference;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
@@ -106,6 +107,14 @@ public class KPrint {
         return prettyPrint(def, module, orig, colorize, options.output);
     }
 
+    public byte[] prettyPrint(CompiledDefinition def, Module module, K orig) {
+        return prettyPrint(def, module, orig, options.color(tty.stdout, files.getEnv()), options.output);
+    }
+
+    public byte[] prettyPrint(CompiledDefinition def, Module module, K orig, ColorSetting colorize, OutputModes outputMode) {
+        return prettyPrint(def.kompiledDefinition, module, orig, colorize, outputMode);
+    }
+
     public byte[] prettyPrint(Definition def, Module module, K orig, ColorSetting colorize, OutputModes outputMode) {
         switch (outputMode) {
             case KAST:
@@ -120,7 +129,7 @@ public class KPrint {
                 Module unparsingModule = RuleGrammarGenerator.getCombinedGrammar(gen.getProgramsGrammar(module), false).getParsingModule();
                 return (unparseTerm(result, unparsingModule, colorize) + "\n").getBytes();
             } default:
-                throw KEMException.criticalError("Unsupported output mode: " + outputMode);
+                throw KEMException.criticalError("Unsupported output mode without a CompiledDefinition: " + outputMode);
         }
     }
 
