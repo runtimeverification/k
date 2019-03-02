@@ -5,7 +5,6 @@ import com.google.inject.Inject;
 import com.google.inject.Module;
 import com.google.inject.Provider;
 import org.kframework.attributes.Source;
-import org.kframework.backend.kore.ModuleToKORE;
 import org.kframework.compile.AddSortInjections;
 import org.kframework.compile.ExpandMacros;
 import org.kframework.kompile.CompiledDefinition;
@@ -118,17 +117,10 @@ public class KastFrontEnd extends FrontEnd {
                 compiledMod = def.kompiledDefinition.getModule(options.module).get();
             }
             K parsed = def.getParser(mod, sort, kem).apply(FileUtil.read(stringToParse), source);
-            if (options.expandMacros || options.kore) {
+            if (options.expandMacros) {
                 parsed = new ExpandMacros(compiledMod, files, def.kompileOptions, false).expand(parsed);
             }
-            if (options.kore) {
-              ModuleToKORE converter = new ModuleToKORE(compiledMod, files, def.topCellInitializer);
-              parsed = new AddSortInjections(compiledMod).addInjections(parsed, sort);
-              converter.convert(parsed);
-              System.out.println(converter.toString());
-            } else {
-              System.out.println(new String(kprint.prettyPrint(def, compiledMod, parsed), StandardCharsets.UTF_8));
-            }
+            System.out.println(new String(kprint.prettyPrint(def, compiledMod, parsed), StandardCharsets.UTF_8));
             sw.printTotal("Total");
             return 0;
         } finally {
