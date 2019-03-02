@@ -1,6 +1,7 @@
 // Copyright (c) 2019 K Team. All Rights Reserved.
 package org.kframework.unparser;
 
+import org.kframework.attributes.Att;
 import org.kframework.kore.InjectedKLabel;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -39,6 +40,10 @@ public class ToLatex {
 
     private static void writeString(DataOutputStream out, String str) throws IOException {
         out.write(str.getBytes(StandardCharsets.UTF_8));
+    }
+
+    public static void apply(DataOutputStream out, Att att) throws IOException {
+        writeString(out, ("\\outerAtt{" + att.toString() + "}"));
     }
 
     public static void apply(DataOutputStream out, K k) throws IOException {
