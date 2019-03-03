@@ -18,6 +18,7 @@ SUBDIRS=issue-2273 \
 	equals-pattern \
 	or-llvm \
 	or-ocaml \
+	issue-101 \
 	issue-313 \
 	checks \
 	withConfig \
