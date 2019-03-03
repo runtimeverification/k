@@ -127,7 +127,7 @@ public class KastFrontEnd extends FrontEnd {
               converter.convert(parsed);
               System.out.println(converter.toString());
             } else {
-              System.out.println(ToKast.apply(parsed));
+              System.out.println(new String(kprint.prettyPrint(def, compiledMod, parsed), StandardCharsets.UTF_8));
             }
             sw.printTotal("Total");
             return 0;
