@@ -67,9 +67,9 @@ public final class KRunOptions {
             String kastBinary = getKast(files);
             if (parser == null) {
                 if (term()) {
-                    return kastBinary + " -m " + mainModuleName;
+                    return kastBinary + " --output kast -m " + mainModuleName;
                 } else {
-                    return kastBinary;
+                    return kastBinary + " --output kast";
                 }
             } else {
                 return parser;
