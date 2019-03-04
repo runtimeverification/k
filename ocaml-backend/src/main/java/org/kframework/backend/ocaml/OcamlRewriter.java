@@ -357,7 +357,8 @@ public class OcamlRewriter implements Function<Definition, Rewriter> {
             }
             args.addAll(Arrays.asList("-I", files.resolveKompiled(".").getAbsolutePath(),
                             files.resolveKompiled("plugin.cmo").getAbsolutePath(), files.resolveKompiled("parser.cmo").getAbsolutePath(),
-                            files.resolveKompiled("lexer.cmo").getAbsolutePath(), files.resolveKompiled("run.cmo").getAbsolutePath()));
+                            files.resolveKompiled("lexer.cmo").getAbsolutePath(), files.resolveKompiled("hooks.cmo").getAbsolutePath(),
+                            files.resolveKompiled("run.cmo").getAbsolutePath()));
             args.add(files.resolveKompiled("realdef.cmo").getAbsolutePath());
             args.add(files.resolveTemp(name).getAbsolutePath());
             pb = pb.command(args);
