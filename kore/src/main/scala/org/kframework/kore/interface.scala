@@ -30,7 +30,7 @@ trait KItem extends K
 
 trait KLabel {
   def name: String
-  def params: Seq[Sort]
+  def params: Seq[SortParam]
   override def equals(other: Any) = other match {
     case l: KLabel => name == l.name && params == l.params
     case _ => false
@@ -50,9 +50,12 @@ trait KToken extends KItem {
   def computeHashCode = sort.hashCode() * 13 + s.hashCode
 }
 
-trait Sort {
+trait SortParam {
   def name: String
-  def params: Seq[Sort]
+}
+
+trait Sort extends SortParam {
+  def params: Seq[SortParam]
   override def equals(other: Any) = other match {
     case other: Sort => name == other.name && params == other.params
     case _ => false

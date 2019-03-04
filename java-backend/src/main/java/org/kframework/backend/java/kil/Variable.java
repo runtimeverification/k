@@ -130,7 +130,7 @@ public class Variable extends Term implements org.kframework.kore.KVariable {
     }
 
     @Override
-    public Seq<org.kframework.kore.Sort> params() {
+    public Seq<org.kframework.kore.SortParam> params() {
         return Seq();
     }
 

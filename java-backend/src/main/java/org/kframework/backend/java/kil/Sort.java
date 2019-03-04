@@ -56,7 +56,7 @@ public final class Sort implements org.kframework.kore.Sort, Serializable {
      * {@code String} representation of this {@code Sort}.
      */
     private final String name;
-    private final Seq<org.kframework.kore.Sort> params;
+    private final Seq<org.kframework.kore.SortParam> params;
 
     private final int ordinal;
 
@@ -73,7 +73,7 @@ public final class Sort implements org.kframework.kore.Sort, Serializable {
     }
 
 
-    private Sort(String name, Seq<org.kframework.kore.Sort> params, int ordinal) {
+    private Sort(String name, Seq<org.kframework.kore.SortParam> params, int ordinal) {
         this.name = name;
         this.params = params;
         this.ordinal = ordinal;
@@ -84,7 +84,7 @@ public final class Sort implements org.kframework.kore.Sort, Serializable {
     }
 
     @Override
-    public Seq<org.kframework.kore.Sort> params() {
+    public Seq<org.kframework.kore.SortParam> params() {
         return params;
     }
 

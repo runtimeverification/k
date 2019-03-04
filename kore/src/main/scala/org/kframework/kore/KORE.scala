@@ -45,7 +45,7 @@ object KORE extends Constructors with ScalaSugared {
   //  def toKSequence: Collector[K, KSequence] =
   //    Collector(() => new CombinerFromBuilder(KSequence.newBuilder()))
 
-  @annotation.varargs override def KLabel(name: String, params: Sort*): KLabel = ADT.KLabel(name, params:_*)
+  @annotation.varargs override def KLabel(name: String, params: SortParam*): KLabel = ADT.KLabel(name, params:_*)
 
   override def KApply(klabel: KLabel, klist: KList, att: Att): KApply = ADT.KApply(klabel, klist, att)
 
@@ -54,7 +54,7 @@ object KORE extends Constructors with ScalaSugared {
 
   override def KVariable(name: String, att: Att): KVariable = ADT.KVariable(name, att)
 
-  @annotation.varargs override def Sort(name: String, params: Sort*): Sort = ADT.Sort(name, params:_*)
+  @annotation.varargs override def Sort(name: String, params: SortParam*): Sort = ADT.Sort(name, params:_*)
 
   def Sort(name: String, params: java.util.List[Sort]): Sort = ADT.Sort(name, params.asScala:_*)
 

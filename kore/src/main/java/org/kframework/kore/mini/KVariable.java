@@ -3,6 +3,7 @@ package org.kframework.kore.mini;
 
 import org.kframework.attributes.Att;
 import org.kframework.kore.Sort;
+import org.kframework.kore.SortParam;
 import scala.collection.Seq;
 
 import static org.kframework.Collections.Seq;
@@ -29,7 +30,7 @@ public class KVariable implements org.kframework.kore.KVariable {
     }
 
     @Override
-    public Seq<Sort> params() {
+    public Seq<SortParam> params() {
         return Seq();
     }
 

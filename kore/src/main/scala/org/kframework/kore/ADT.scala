@@ -16,7 +16,7 @@ import collection.JavaConverters._
 
 object ADT {
 
-  case class KLabel(name: String, params: kore.Sort*) extends kore.KLabel {
+  case class KLabel(name: String, params: kore.SortParam*) extends kore.KLabel {
     override def toString = {
       if (params.isEmpty) {
         name
@@ -66,7 +66,7 @@ object ADT {
     def params = Seq()
   }
 
-  case class Sort(name: String, params: kore.Sort*) extends kore.Sort {
+  case class Sort(name: String, params: kore.SortParam*) extends kore.Sort {
     override def toString = {
       if (params.isEmpty) {
         name
@@ -74,6 +74,10 @@ object ADT {
         name + "{" + params.map(_.toString).reduce((s1, s2) => s1 + "," + s2) + "}"
       }
     }
+  }
+
+  case class SortVariable(name: String) extends kore.SortParam {
+    override def toString: String = name
   }
 
   case class KToken(s: String, sort: kore.Sort, att: Att = Att.empty) extends kore.KToken

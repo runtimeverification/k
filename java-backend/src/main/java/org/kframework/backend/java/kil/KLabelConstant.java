@@ -39,7 +39,7 @@ public class KLabelConstant extends KLabel implements org.kframework.kore.KLabel
 
     /* un-escaped label */
     private final String label;
-    private final Seq<org.kframework.kore.Sort> params;
+    private final Seq<org.kframework.kore.SortParam> params;
 
     /**
      * see {@link #ordinal()}
@@ -77,7 +77,7 @@ public class KLabelConstant extends KLabel implements org.kframework.kore.KLabel
 
     private KLabelConstant(
             String label,
-            Seq<org.kframework.kore.Sort> params,
+            Seq<org.kframework.kore.SortParam> params,
             int ordinal,
             Set<SortSignature> signatures,
             Set<Sort> allSorts,
@@ -239,7 +239,7 @@ public class KLabelConstant extends KLabel implements org.kframework.kore.KLabel
     }
 
     @Override
-    public Seq<org.kframework.kore.Sort> params() { return params; }
+    public Seq<org.kframework.kore.SortParam> params() { return params; }
 
     @Override
     public boolean equals(Object object) {
