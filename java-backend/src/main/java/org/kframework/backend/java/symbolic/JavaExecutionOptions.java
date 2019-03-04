@@ -95,12 +95,11 @@ public final class JavaExecutionOptions {
             " Options specified in parentheses are pretty-printed. Certain cells have custom formatting." +
             " Pretty-printing options are considerably slower than default toString printing." +
             " Especially when full configuration is printed." +
-            " Default value is:" +
-            " --log-cells k,output,statusCode,localMem,pc,gas,wordStack,callData,accounts,#pc,#result" +
+            " Default value is selected to work with any semantics:" +
+            " --log-cells k,#pc,#result" +
             " Recommended alternative:" +
-            " --log-cells \"(k),output,statusCode,localMem,pc,gas,wordStack,callData,accounts,(#pc),#result\"")
-    public List<String> logCells = Arrays.asList("k", "output", "statusCode", "localMem", "pc", "gas", "wordStack",
-            "callData", "accounts", "#pc", "#result");
+            " --log-cells \"(k),(#pc),#result\"")
+    public List<String> logCells = Arrays.asList("k", "#pc", "#result");
 
     @Parameter(names="--log-rules", description="Log applied rules." +
             "Including \"virtual rewrites\", e.g. rules applied in side conditions of other rules, that in the end " +
