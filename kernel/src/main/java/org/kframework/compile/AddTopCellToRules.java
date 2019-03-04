@@ -11,6 +11,7 @@ import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.KRewrite;
+import scala.Option;
 
 import static org.kframework.kore.KORE.*;
 
@@ -28,14 +29,17 @@ public class AddTopCellToRules {
 
     private final ConfigurationInfo cfg;
     private final LabelInfo labelInfo;
+    private final Option<LabelInfo> kLabelInfo;
 
-    public AddTopCellToRules(ConfigurationInfo cfg, LabelInfo labelInfo) {
+    public AddTopCellToRules(ConfigurationInfo cfg, LabelInfo labelInfo, Option<LabelInfo> kLabelInfo) {
         this.cfg = cfg;
         this.labelInfo = labelInfo;
+        this.kLabelInfo = kLabelInfo;
     }
 
     public K addImplicitCells(K term) {
         if (labelInfo.isFunction(term)) return term;
+        if (kLabelInfo.nonEmpty() && kLabelInfo.get().isFunction(term)) return term;
         return addRootCell(term);
     }
 

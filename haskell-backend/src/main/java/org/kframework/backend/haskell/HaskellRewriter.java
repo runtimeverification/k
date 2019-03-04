@@ -35,6 +35,7 @@ import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.DefinitionScoped;
 import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.StringUtil;
+import scala.Option;
 import scala.Tuple2;
 
 import java.io.File;
@@ -95,8 +96,9 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
             @Override
             public RewriterResult execute(K k, Optional<Integer> depth) {
                 Module mod = def.executionModule();
-                ModuleToKORE converter = new ModuleToKORE(mod, files, def.topCellInitializer);
-                String koreOutput = getKoreString(k, mod, converter);
+                Option<Module> kMod = def.kModule();
+                ModuleToKORE converter = new ModuleToKORE(mod, kMod, files, def.topCellInitializer);
+                String koreOutput = getKoreString(k, mod, kMod, converter);
                 String defPath = files.resolveKompiled("definition.kore").getAbsolutePath();
                 String moduleName = mod.name();
 
@@ -161,21 +163,22 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
             @Override
             public K search(K initialConfiguration, Optional<Integer> depth, Optional<Integer> bound, Rule pattern, SearchType searchType) {
                 Module mod = def.executionModule();
-                String koreOutput = getKoreString(initialConfiguration, mod, new ModuleToKORE(mod, files, def.topCellInitializer));
+                Option<Module> kModule = def.kModule();
+                String koreOutput = getKoreString(initialConfiguration, mod, kModule, new ModuleToKORE(mod, kModule, files, def.topCellInitializer));
                 Sort initializerSort = mod.productionsFor().get(def.topCellInitializer).get().head().sort();
                 K patternTerm = RewriteToTop.toLeft(pattern.body());
                 if (patternTerm instanceof  KVariable) {
                     patternTerm = KORE.KVariable(((KVariable) patternTerm).name(), Att.empty().add(Sort.class, initializerSort));
                 }
                 K patternCondition = pattern.requires();
-                String patternTermKore = getKoreString(patternTerm, mod, new ModuleToKORE(mod, files, def.topCellInitializer));
+                String patternTermKore = getKoreString(patternTerm, mod, kModule, new ModuleToKORE(mod, kModule, files, def.topCellInitializer));
                 String patternConditionKore;
                 if (patternCondition.equals(TRUE)) {
                     patternConditionKore = "\\top{Sort" + initializerSort.name() + "{}}()";
                 } else {
                     patternConditionKore =
                             "\\equals{SortBool{},Sort" + initializerSort.name() + "{}}("
-                            + getKoreString(patternCondition, mod, new ModuleToKORE(mod, files, def.topCellInitializer))
+                            + getKoreString(patternCondition, mod, kModule, new ModuleToKORE(mod, kModule, files, def.topCellInitializer))
                             + ", \\dv{SortBool{}}(\"true\")"
                             + ")";
                 }
@@ -246,10 +249,10 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
 
             @Override
             public K prove(Module rules) {
-                String kompiledModule = KoreBackend.getKompiledString(module, def.topCellInitializer, files, false);
+                String kompiledModule = KoreBackend.getKompiledString(module, def.topCellInitializer, def.kModule(), files, false);
                 files.saveToTemp("vdefinition.kore", kompiledModule);
 
-                ModuleToKORE rulesConverter = new ModuleToKORE(rules, files, def.topCellInitializer);
+                ModuleToKORE rulesConverter = new ModuleToKORE(rules, def.kModule(), files, def.topCellInitializer);
                 String koreOutput = rulesConverter.convertSpecificationModule(module, rules);
                 files.saveToTemp("spec.kore", koreOutput);
                 String defPath = files.resolveTemp("vdefinition.kore").getAbsolutePath();
@@ -309,10 +312,10 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
         };
     }
 
-    private String getKoreString(K initialConfiguration, Module mod, ModuleToKORE converter) {
+    private String getKoreString(K initialConfiguration, Module mod, Option<Module> kMod, ModuleToKORE converter) {
         ExpandMacros macroExpander = new ExpandMacros(mod, files, kompileOptions, false);
         K withMacros = macroExpander.expand(initialConfiguration);
-        K kWithInjections = new AddSortInjections(mod).addInjections(withMacros);
+        K kWithInjections = new AddSortInjections(mod, kMod).addInjections(withMacros);
         converter.convert(kWithInjections);
         return converter.toString();
     }

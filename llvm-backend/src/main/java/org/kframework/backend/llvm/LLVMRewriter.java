@@ -21,19 +21,18 @@ import org.kframework.parser.kore.parser.ParseError;
 import org.kframework.parser.kore.parser.TextToKore;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.rewriter.SearchType;
-import org.kframework.unparser.OutputModes;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.DefinitionScoped;
 import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.StringUtil;
+import scala.Option;
 import scala.Tuple2;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
@@ -75,10 +74,11 @@ public class LLVMRewriter implements Function<Definition, Rewriter> {
             @Override
             public RewriterResult execute(K k, Optional<Integer> depth) {
                 Module mod = def.executionModule();
+                Option<Module> kModule = def.kModule();
                 ExpandMacros macroExpander = new ExpandMacros(mod, files, kompileOptions, false);
-                ModuleToKORE converter = new ModuleToKORE(mod, files, def.topCellInitializer);
+                ModuleToKORE converter = new ModuleToKORE(mod, kModule, files, def.topCellInitializer);
                 K withMacros = macroExpander.expand(k);
-                K kWithInjections = new AddSortInjections(mod).addInjections(withMacros);
+                K kWithInjections = new AddSortInjections(mod, kModule).addInjections(withMacros);
                 converter.convert(kWithInjections);
                 String koreOutput = "[initial-configuration{}(" + converter.toString() + ")]\n\nmodule TMP\nendmodule []\n";
                 String defPath = files.resolveKompiled("definition.kore").getAbsolutePath();

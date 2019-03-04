@@ -3,10 +3,9 @@ package org.kframework.compile;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.kframework.Collections;
+import org.kframework.attributes.Att;
 import org.kframework.builtin.BooleanUtils;
-import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
-import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
@@ -19,6 +18,7 @@ import org.kframework.kore.KLabel;
 import org.kframework.kore.KRewrite;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
+import scala.Option;
 import scala.collection.Set;
 
 import java.util.ArrayList;
@@ -46,9 +46,11 @@ public class GenerateSortPredicateRules {
 
     private Module mod;
     private java.util.Set<Rule> predicateRules;
+    private final Option<Module> kModule;
     private boolean kore;
 
-    public GenerateSortPredicateRules(boolean kore) {
+    public GenerateSortPredicateRules(Option<Module> kModule, boolean kore) {
+        this.kModule = kModule;
         this.kore = kore;
     }
 
@@ -173,7 +175,14 @@ public class GenerateSortPredicateRules {
             KRewrite rw = (KRewrite) r.body();
             if (rw.left() instanceof KApply) {
                 topKLabel = ((KApply) rw.left()).klabel();
-                sort = mod.attributesFor().apply(topKLabel).getOptional(Attribute.PREDICATE_KEY, Sort.class);
+                Option<Att> labelAtts = mod.attributesFor().get(topKLabel);
+                if (labelAtts.isEmpty() && kModule.nonEmpty()) {
+                    labelAtts = kModule.get().attributesFor().get(topKLabel);
+                }
+                if (labelAtts.isEmpty()) {
+                    throw new AssertionError("Cannot find KLabel " + topKLabel.name());
+                }
+                sort = labelAtts.get().getOptional(Attribute.PREDICATE_KEY, Sort.class);
             } else {
                 sort = Optional.empty();
             }

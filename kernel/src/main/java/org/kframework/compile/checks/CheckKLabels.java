@@ -30,9 +30,11 @@ import static org.kframework.kore.KORE.*;
  * the requirement that all klabels be unique, or that all klabels be qualified by their module name.
  */
 public class CheckKLabels {
+    private final Module kModule;
     private final Set<KEMException> errors;
 
-    public CheckKLabels(Set<KEMException> errors) {
+    public CheckKLabels(Module kModule, Set<KEMException> errors) {
+        this.kModule = kModule;
         this.errors = errors;
     }
 
@@ -55,7 +57,7 @@ public class CheckKLabels {
             private void apply(KLabel klabel, K k) {
                 if (klabel instanceof KVariable)
                     return;
-                if (!m.definedKLabels().apply(klabel) && !isInternalKLabel(klabel.name(), m)) {
+                if (!m.definedKLabels().apply(klabel) && !isInternalKLabel(klabel, m)) {
                     errors.add(KEMException.compilerError("Found klabel " + klabel.name() + " not defined in any production.", k));
                 }
             }
@@ -81,9 +83,13 @@ public class CheckKLabels {
         }
     }
 
-    private final ImmutableSet<String> internalNames = ImmutableSet.of("#cells", "#dots", "#noDots", "#Or", "#fun2", "#fun3");
+    private final ImmutableSet<String> internalNames = ImmutableSet.of("#cells", "#dots", "#noDots", "#fun2", "#fun3");
 
-    private boolean isInternalKLabel(String name, Module m) {
-        return name.startsWith("#SemanticCastTo") || internalNames.contains(name) || (name.startsWith("is") && m.definedSorts().apply(Outer.parseSort(name.substring(2))));
+    private boolean isInternalKLabel(KLabel kLabel, Module m) {
+        String name = kLabel.name();
+        return name.startsWith("#SemanticCastTo")
+                || internalNames.contains(name)
+                || (name.startsWith("is") && m.definedSorts().apply(Outer.parseSort(name.substring(2))))
+                || kModule.definedKLabels().apply(kLabel);
     }
 }

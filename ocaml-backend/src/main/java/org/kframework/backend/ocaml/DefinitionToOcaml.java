@@ -238,7 +238,7 @@ public class DefinitionToOcaml implements Serializable {
                     .anyMatch(p -> (p.att().contains("thread") && p.att().contains("cell")));
     }
     public void initialize(CompiledDefinition def) {
-        Function1<Module, Module> generatePredicates = new GenerateSortPredicateRules(false)::gen;
+        Function1<Module, Module> generatePredicates = new GenerateSortPredicateRules(def.kModule(), false)::gen;
         this.convertDataStructure = new ConvertDataStructureToLookup(def.executionModule(), true);
         ModuleTransformer convertLookups = ModuleTransformer.fromSentenceTransformer(convertDataStructure::convert, "convert data structures to lookups");
         ModuleTransformer liftToKSequence = ModuleTransformer.fromSentenceTransformer(new LiftToKSequence()::lift, "lift K into KSequence");

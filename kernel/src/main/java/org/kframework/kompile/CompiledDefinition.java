@@ -55,6 +55,7 @@ public class CompiledDefinition implements Serializable {
     public final HashMap<String, Sort> configurationVariableDefaultSorts = new HashMap<>();
     public final KLabel topCellInitializer;
     private final Module languageParsingModule;
+    private final Option<Module> kModule;
     public final Rule exitCodePattern;
     private Map<String, Rule> cachedcompiledPatterns = new ConcurrentHashMap<>();
     private Map<String, Rule> cachedParsedPatterns = new ConcurrentHashMap<>();
@@ -68,6 +69,7 @@ public class CompiledDefinition implements Serializable {
         this.programStartSymbol = configurationVariableDefaultSorts.getOrDefault("$PGM", Sorts.K());
         this.topCellInitializer = topCellInitializer;
         this.languageParsingModule = kompiledDefinition.getModule("LANGUAGE-PARSING").get();
+        this.kModule = kompiledDefinition.kModule();
         Rule exitCodeRule;
         if (kompileOptions.isKore()) {
             exitCodeRule = null;
@@ -140,6 +142,13 @@ public class CompiledDefinition implements Serializable {
      */
     public Module executionModule() {
         return kompiledDefinition.mainModule();
+    }
+
+    /**
+     * The K module
+     */
+    public Option<Module> kModule() {
+        return kModule;
     }
 
     public String mainSyntaxModuleName() { return parsedDefinition.att().<String>getOptional(Att.syntaxModule()).get(); }

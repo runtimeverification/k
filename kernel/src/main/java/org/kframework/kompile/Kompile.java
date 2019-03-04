@@ -27,12 +27,15 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
 import scala.Function1;
+import scala.Option;
 
 import java.io.File;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -224,15 +227,15 @@ public class Kompile {
 
         stream(parsedDef.modules()).forEach(new CheckImports(parsedDef.mainModule(), kem)::check);
 
-        Set<String> moduleNames = new HashSet<>();
+        Map<String, Module> parsedModules = new HashMap<>();
         stream(parsedDef.modules()).forEach(m -> {
-            if (moduleNames.contains(m.name())) {
+            if (parsedModules.containsKey(m.name())) {
                 errors.add(KEMException.compilerError("Found multiple modules with name: " + m.name()));
             }
-            moduleNames.add(m.name());
+            parsedModules.put(m.name(), m);
         });
 
-        CheckKLabels checkKLabels = new CheckKLabels(errors);
+        CheckKLabels checkKLabels = new CheckKLabels(parsedModules.get(RuleGrammarGenerator.K), errors);
         // only check imported modules because otherwise we might have false positives
         Consumer<Module> checkModuleKLabels = m -> stream(m.localSentences()).forEach(s -> checkKLabels.check(s, m));
         stream(parsedDef.mainModule().importedModules()).forEach(checkModuleKLabels);
@@ -281,7 +284,8 @@ public class Kompile {
     private Sentence concretizeSentence(Sentence s, Definition input) {
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(input.mainModule());
         LabelInfo labelInfo = new LabelInfoFromModule(input.mainModule());
+        Option<LabelInfo> kLabelInfo = input.kModule().map(LabelInfoFromModule::new);
         SortInfo sortInfo = SortInfo.fromModule(input.mainModule());
-        return new ConcretizeCells(configInfo, labelInfo, sortInfo, input.mainModule()).concretize(s);
+        return new ConcretizeCells(configInfo, labelInfo, kLabelInfo, sortInfo, input.mainModule()).concretize(s);
     }
 }

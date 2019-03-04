@@ -18,10 +18,9 @@ import org.kframework.kore.KSequence;
 import org.kframework.kore.KToken;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
-import org.kframework.kore.TransformK;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
-import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KEMException;
+import scala.Option;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,8 +32,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.kframework.Collections.*;
-import static org.kframework.definition.Constructors.*;
 import static org.kframework.kore.KORE.*;
 
 import static org.kframework.Collections.iterable;
@@ -42,11 +39,13 @@ import static org.kframework.Collections.iterable;
 public class AddSortInjections {
 
     private final Module mod;
+    private final Option<Module> kMod;
     private final Map<KLabel, KLabel> collectionFor;
 
-    public AddSortInjections(Module mod) {
+    public AddSortInjections(Module mod, Option<Module> kMod) {
         this.mod = mod;
         this.collectionFor = ConvertDataStructureToLookup.collectionFor(mod);
+        this.kMod = kMod;
     }
 
     public K addInjections(K term) {
@@ -181,7 +180,7 @@ public class AddSortInjections {
         if (term instanceof KApply) {
             KApply kapp = (KApply)term;
             if (kapp.klabel().name().equals("inj")) {
-                return kapp.klabel().params().apply(1);
+                return (Sort) kapp.klabel().params().apply(1);
             } else if (kapp.klabel().name().equals("#Or")) {
                 Sort leftSort = sort(kapp.items().get(0), expectedSort);
                 Sort rightSort = sort(kapp.items().get(1), expectedSort);
@@ -242,8 +241,17 @@ public class AddSortInjections {
     }
 
     private Production production(KApply term) {
-        scala.collection.Set<Production> prods = mod.productionsFor().apply(((KApply) term).klabel());
-        if (prods.size() != 1) {
+        Option<scala.collection.Set<Production>> prodsOption = mod.productionsFor().get(term.klabel());
+        scala.collection.Set<Production> prods = null;
+        if (prodsOption.nonEmpty()) {
+            prods = prodsOption.get();
+        } else if (kMod.nonEmpty()) {
+            prodsOption = kMod.get().productionsFor().get(term.klabel());
+            if (prodsOption.nonEmpty()) {
+                prods = prodsOption.get();
+            }
+        }
+        if (prods == null || prods.size() != 1) {
           throw KEMException.compilerError("Could not find production for KApply with label " + term.klabel(), term);
         }
         return prods.head();

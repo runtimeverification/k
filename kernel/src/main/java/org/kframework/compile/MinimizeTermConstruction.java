@@ -2,13 +2,13 @@
 package org.kframework.compile;
 
 import org.kframework.attributes.Att;
-import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Context;
 import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.*;
+import scala.Option;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,9 +24,11 @@ public class MinimizeTermConstruction {
     private final Set<K> usedOnRhs = new HashSet<>();
 
     private final Module module;
+    private final Option<Module> kModule;
 
-    public MinimizeTermConstruction(Module module) {
+    public MinimizeTermConstruction(Module module, Option<Module> kModule) {
         this.module = module;
+        this.kModule = kModule;
     }
 
     void resetVars() {
@@ -88,7 +90,7 @@ public class MinimizeTermConstruction {
    }
 
    void gatherTerms(K term, boolean body) {
-        AddSortInjections sorts = new AddSortInjections(module);
+        AddSortInjections sorts = new AddSortInjections(module, kModule);
         new RewriteAwareVisitor(body, new HashSet<>()) {
             @Override
             public void apply(K k) {
@@ -131,7 +133,6 @@ public class MinimizeTermConstruction {
     }
 
     K transform(K term, boolean body) {
-        AddSortInjections sorts = new AddSortInjections(module);
         return new RewriteAwareTransformer(body) {
             @Override
             public K apply(K k) {

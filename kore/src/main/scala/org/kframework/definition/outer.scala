@@ -45,6 +45,8 @@ case class Definition(
 
   lazy val modules = entryModules flatMap allModules
 
+  lazy val kModule = getModule("K")
+
   def getModule(name: String): Option[Module] = modules find { case m: Module => m.name == name; case _ => false }
 
   override def hashCode = mainModule.hashCode

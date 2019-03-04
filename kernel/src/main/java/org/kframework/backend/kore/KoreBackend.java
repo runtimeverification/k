@@ -21,7 +21,6 @@ import org.kframework.compile.ResolveContexts;
 import org.kframework.compile.ResolveFreshConstants;
 import org.kframework.compile.ResolveFun;
 import org.kframework.compile.ResolveHeatCoolAttribute;
-import org.kframework.compile.ResolveIOStreams;
 import org.kframework.compile.ResolveSemanticCasts;
 import org.kframework.compile.ResolveStrict;
 import org.kframework.compile.SortInfo;
@@ -38,6 +37,7 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 
 import scala.Function1;
+import scala.Option;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -85,14 +85,15 @@ public class KoreBackend implements Backend {
     }
 
     protected String getKompiledString(CompiledDefinition def) {
-        return getKompiledString(def.kompiledDefinition.mainModule(), def.topCellInitializer, files, heatCoolEquations);
+        return getKompiledString(def.kompiledDefinition.mainModule(), def.topCellInitializer, def.kModule(), files, heatCoolEquations);
     }
 
-    public static String getKompiledString(Module mainModule, KLabel topCellInitializer, FileUtil files, boolean heatCoolEquations) {
-        mainModule = new GenerateSortPredicateRules(true).gen(mainModule);
-        mainModule = ModuleTransformer.fromKTransformer(new AddSortInjections(mainModule)::addInjections, "Add sort injections").apply(mainModule);
-        mainModule = ModuleTransformer.fromSentenceTransformer(new MinimizeTermConstruction(mainModule)::resolve, "Minimize term construction").apply(mainModule);
-        ModuleToKORE moduleToKORE = new ModuleToKORE(mainModule, files, topCellInitializer);
+    public static String getKompiledString(Module mainModule, KLabel topCellInitializer, Option<Module> kModule, FileUtil files, boolean heatCoolEquations) {
+        mainModule = new GenerateSortPredicateRules(kModule, true).gen(mainModule);
+        mainModule = ModuleTransformer.fromSentenceTransformer(new MinimizeTermConstruction(mainModule, kModule)::resolve, "Parameterize ML constructs").apply(mainModule);
+        mainModule = ModuleTransformer.fromKTransformer(new AddSortInjections(mainModule, kModule)::addInjections, "Add sort injections").apply(mainModule);
+        mainModule = ModuleTransformer.fromSentenceTransformer(new MinimizeTermConstruction(mainModule, kModule)::resolve, "Minimize term construction").apply(mainModule);
+        ModuleToKORE moduleToKORE = new ModuleToKORE(mainModule, kModule, files, topCellInitializer);
         String kompiledString = moduleToKORE.convert(heatCoolEquations);
         Properties koreToKLabels = new Properties();
         koreToKLabels.putAll(moduleToKORE.getKToKoreLabelMap().inverse());
@@ -144,6 +145,7 @@ public class KoreBackend implements Backend {
         Module mod = def.mainModule();
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(mod);
         LabelInfo labelInfo = new LabelInfoFromModule(mod);
+        Option<LabelInfo> kLabelInfo = def.kModule().map(LabelInfoFromModule::new);
         SortInfo sortInfo = SortInfo.fromModule(mod);
         ModuleTransformer resolveAnonVars = ModuleTransformer.fromSentenceTransformer(
                 new ResolveAnonVar()::resolve,
@@ -153,11 +155,11 @@ public class KoreBackend implements Backend {
                 "resolving semantic casts");
         ModuleTransformer subsortKItem = ModuleTransformer.from(Kompile::subsortKItem, "subsort all sorts to KItem");
         ModuleTransformer addImplicitComputationCell = ModuleTransformer.fromSentenceTransformer(
-                new AddImplicitComputationCell(configInfo, labelInfo),
+                new AddImplicitComputationCell(configInfo, labelInfo, kLabelInfo),
                 "concretizing configuration");
         Function1<Module, Module> resolveFreshConstants = d -> ModuleTransformer.from(new ResolveFreshConstants(def, true)::resolve, "resolving !Var variables").apply(d);
         ModuleTransformer concretizeCells = ModuleTransformer.fromSentenceTransformer(
-                new ConcretizeCells(configInfo, labelInfo, sortInfo, mod)::concretize,
+                new ConcretizeCells(configInfo, labelInfo, kLabelInfo, sortInfo, mod)::concretize,
                 "concretizing configuration");
 
         return m -> resolveAnonVars

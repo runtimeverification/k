@@ -1,12 +1,9 @@
 // Copyright (c) 2015-2019 K Team. All Rights Reserved.
 package org.kframework.compile;
 
-import org.kframework.compile.ConfigurationInfo;
-import org.kframework.compile.ConfigurationInfoFromModule;
-import org.kframework.compile.LabelInfo;
-import org.kframework.compile.LabelInfoFromModule;
 import org.kframework.definition.*;
 import org.kframework.definition.Module;
+import scala.Option;
 
 /**
  * Apply the configuration concretization process.
@@ -37,9 +34,10 @@ public class ConcretizeCells {
     public static Definition transformDefinition(Definition input) {
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(input.mainModule());
         LabelInfo labelInfo = new LabelInfoFromModule(input.mainModule());
+        Option<LabelInfo> kLabelInfo = input.kModule().map(LabelInfoFromModule::new);
         SortInfo sortInfo = SortInfo.fromModule(input.mainModule());
         return DefinitionTransformer.fromSentenceTransformer(
-                new ConcretizeCells(configInfo, labelInfo, sortInfo, input.mainModule())::concretize,
+                new ConcretizeCells(configInfo, labelInfo, kLabelInfo, sortInfo, input.mainModule())::concretize,
                 "concretizing configuration"
         ).apply(input);
     }
@@ -50,17 +48,17 @@ public class ConcretizeCells {
         LabelInfo labelInfo = new LabelInfoFromModule(mod);
         SortInfo sortInfo = SortInfo.fromModule(mod);
         return ModuleTransformer.fromSentenceTransformer(
-                new ConcretizeCells(configInfo, labelInfo, sortInfo, mod)::concretize,
+                new ConcretizeCells(configInfo, labelInfo, Option.empty(), sortInfo, mod)::concretize,
                 "concretizing configuration").apply(mod);
     }
 
 
-    public ConcretizeCells(ConfigurationInfo configurationInfo, LabelInfo labelInfo, SortInfo sortInfo, Module module) {
+    public ConcretizeCells(ConfigurationInfo configurationInfo, LabelInfo labelInfo, Option<LabelInfo> kLabelInfo, SortInfo sortInfo, Module module) {
         this.configurationInfo = configurationInfo;
         this.labelInfo = labelInfo;
         this.sortInfo = sortInfo;
         this.module = module;
-        addRootCell = new AddTopCellToRules(configurationInfo, labelInfo);
+        addRootCell = new AddTopCellToRules(configurationInfo, labelInfo, kLabelInfo);
         addParentCells = new AddParentCells(configurationInfo, labelInfo);
         closeCells = new CloseCells(configurationInfo, sortInfo, labelInfo);
         sortCells = new SortCells(configurationInfo, labelInfo, module);
