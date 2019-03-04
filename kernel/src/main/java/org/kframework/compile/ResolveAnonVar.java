@@ -74,9 +74,7 @@ public class ResolveAnonVar {
         return new TransformK() {
             @Override
             public K apply(KVariable k) {
-                if (ANON_VAR.equals(k)) {
-                    return newDotVariable();
-                } else if (FRESH_ANON_VAR.equals(k)) {
+                if (ANON_VAR.equals(k) || FRESH_ANON_VAR.equals(k)) {
                     return newDotVariable();
                 }
                 return super.apply(k);
