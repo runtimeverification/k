@@ -40,6 +40,7 @@ public class StateLog {
 
     private String              sessionId;
     private PrintWriter         sessionLog;
+    private PrettyPrinter       prettyPrinter;
     private Map<Integer,String> writtenHashes;
 
     private boolean inited;
@@ -51,10 +52,11 @@ public class StateLog {
         this.loggingPath   = null;
         this.blobsDir      = null;
         this.logEvents     = Collections.emptyList();
+        this.prettyPrinter = null;
         this.writtenHashes = new HashMap<Integer,String>();
     }
 
-    public StateLog(JavaExecutionOptions javaExecutionOptions, FileUtil files) {
+    public StateLog(JavaExecutionOptions javaExecutionOptions, FileUtil files, PrettyPrinter prettyPrinter) {
         this.inited    = false;
         this.loggingOn = javaExecutionOptions.stateLog;
 
@@ -64,22 +66,24 @@ public class StateLog {
 
         if (javaExecutionOptions.stateLogId != null) this.sessionId = javaExecutionOptions.stateLogId;
 
-        this.blobsDir = new File(loggingPath, "blobs/");
+        this.blobsDir = new File(loggingPath, this.sessionId + "_blobs/");
         this.blobsDir.mkdirs();
 
         this.logEvents     = javaExecutionOptions.stateLogEvents;
+        this.prettyPrinter = prettyPrinter;
         this.writtenHashes = new HashMap<Integer,String>();
     }
 
     public void open(String defaultSessionId) {
         if ((! this.loggingOn) || this.inited) return;
         this.inited = true;
-        if (this.sessionId == null) this.sessionId = defaultSessionId;
+        boolean sessionIdNotSet = this.sessionId == null;
+        if (sessionIdNotSet) this.sessionId = defaultSessionId;
         File logFile = new File(this.loggingPath, this.sessionId + ".log");
         PrintWriter sessionLog;
         try {
             this.sessionLog = new PrintWriter(logFile);
-            System.err.println("StateLog: " + logFile);
+            if(sessionIdNotSet) System.out.println("StateLog: " + logFile);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -138,7 +142,7 @@ public class StateLog {
             File   outputFile = new File(this.blobsDir, fileCode + "." + OutputModes.JSON.ext());
             if (! outputFile.exists()) {
                 try {
-                    String out = new String(KPrint.serialize(contents, OutputModes.JSON), StandardCharsets.UTF_8);
+                    String out = new String(this.prettyPrinter.prettyPrintBytes(contents), StandardCharsets.UTF_8);
                     PrintWriter fOut = new PrintWriter(outputFile);
                     fOut.println(out);
                     fOut.close();

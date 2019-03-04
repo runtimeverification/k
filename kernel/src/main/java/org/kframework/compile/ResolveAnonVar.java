@@ -14,6 +14,7 @@ import static org.kframework.kore.KORE.*;
 public class ResolveAnonVar {
 
     public static KVariable ANON_VAR = KVariable("_");
+    public static KVariable FRESH_ANON_VAR = KVariable("?_");
 
     private Set<KVariable> vars = new HashSet<>();
 
@@ -73,7 +74,7 @@ public class ResolveAnonVar {
         return new TransformK() {
             @Override
             public K apply(KVariable k) {
-                if (ANON_VAR.equals(k)) {
+                if (ANON_VAR.equals(k) || FRESH_ANON_VAR.equals(k)) {
                     return newDotVariable();
                 }
                 return super.apply(k);

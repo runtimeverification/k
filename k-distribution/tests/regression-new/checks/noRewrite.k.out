@@ -1,0 +1,7 @@
+[Error] Compiler: Had 1 structural errors.
+[Error] Compiler: Rules must have at least one rewrite.
+	Source(noRewrite.k)
+	Location(3,6,3,7)
+[Warning] Compiler: Could not find main syntax module with name
+NOREWRITE-SYNTAX in definition.  Use --syntax-module to specify one. Using
+NOREWRITE as default.
