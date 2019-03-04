@@ -19,6 +19,7 @@ import org.kframework.kore.KToken;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
 import org.kframework.kore.TransformK;
+import org.kframework.kore.VisitK;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -92,7 +93,37 @@ public class ExpandMacros {
         return att.contains("alias") || (!reverse && att.contains("macro"));
     }
 
+    private Set<KVariable> vars = new HashSet<>();
+
+    void resetVars() {
+        vars.clear();
+    }
+
+    void gatherVars(K term) {
+        new VisitK() {
+            @Override
+            public void apply(KVariable v) {
+                vars.add(v);
+                super.apply(v);
+            }
+        }.apply(term);
+    }
+
+    private int counter = 0;
+    KVariable newDotVariable() {
+        KVariable newLabel;
+        do {
+            newLabel = KVariable("_" + (counter++), Att().add("anonymous"));
+        } while (vars.contains(newLabel));
+        vars.add(newLabel);
+        return newLabel;
+    }
+
     private Rule expand(Rule rule) {
+        resetVars();
+        gatherVars(rule.body());
+        gatherVars(rule.requires());
+        gatherVars(rule.ensures());
         return Rule(expand(rule.body()),
                 expand(rule.requires()),
                 expand(rule.ensures()),
@@ -100,6 +131,9 @@ public class ExpandMacros {
     }
 
     private Context expand(Context context) {
+        resetVars();
+        gatherVars(context.body());
+        gatherVars(context.requires());
         return Context(
                 expand(context.body()),
                 expand(context.requires()),
@@ -145,7 +179,12 @@ public class ExpandMacros {
                             return apply(new TransformK() {
                                 @Override
                                 public K apply(KVariable k) {
-                                    return subst.get(k);
+                                    K result = subst.get(k);
+                                    if (result == null) {
+                                      result = newDotVariable();
+                                      subst.put(k, result);
+                                    }
+                                    return result;
                                 }
                             }.apply(right));
                         }

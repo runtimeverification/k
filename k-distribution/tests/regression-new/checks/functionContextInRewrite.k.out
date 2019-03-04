@@ -1,0 +1,7 @@
+[Error] Compiler: Had 1 parsing errors.
+[Error] Inner Parser: Parse error: unexpected token '['.
+	Source(functionContextInRewrite.k)
+	Location(8,12,8,13)
+[Warning] Compiler: Could not find main syntax module with name
+FUNCTIONCONTEXTINREWRITE-SYNTAX in definition.  Use --syntax-module to specify
+one. Using FUNCTIONCONTEXTINREWRITE as default.

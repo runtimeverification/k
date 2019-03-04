@@ -35,6 +35,8 @@ public class CheckRewrite {
         class Holder {
             boolean hasRewrite = false;
             boolean inRewrite = false;
+            boolean inFunctionContext = false;
+            boolean inFunctionBody = false;
         }
         Holder h = new Holder();
         new VisitK() {
@@ -43,6 +45,9 @@ public class CheckRewrite {
                 boolean inRewrite = h.inRewrite;
                 if (h.inRewrite) {
                     errors.add(KEMException.compilerError("Rewrites are not allowed to be nested.", k));
+                }
+                if (h.inFunctionContext) {
+                    errors.add(KEMException.compilerError("Rewrites are not allowed in the context of a function rule.", k));
                 }
                 h.hasRewrite = true;
                 h.inRewrite = true;
@@ -56,8 +61,12 @@ public class CheckRewrite {
                     if (k.klabel().name().equals("#fun2")) {
                         boolean wasInRewrite = h.inRewrite;
                         boolean hadRewrite = h.hasRewrite;
+                        boolean wasInFunctionContext = h.inFunctionContext;
+                        boolean wasInFunctionBody = h.inFunctionBody;
                         h.inRewrite = false;
                         h.hasRewrite = false;
+                        h.inFunctionContext = false;
+                        h.inFunctionBody = false;
                         apply(k.items().get(0));
                         if (!h.hasRewrite) {
                             errors.add(KEMException.compilerError("#fun expressions must have at least one rewrite.", k));
@@ -66,20 +75,43 @@ public class CheckRewrite {
                         // don't create spurious reports if this constraint was violated by the user.
                         h.inRewrite = wasInRewrite;
                         h.hasRewrite = hadRewrite;
+                        h.inFunctionContext = wasInFunctionContext;
+                        h.inFunctionBody = wasInFunctionBody;
                         apply(k.items().get(1));
                     } else {
                         boolean wasInRewrite = h.inRewrite;
                         boolean hadRewrite = h.hasRewrite;
+                        boolean wasInFunctionContext = h.inFunctionContext;
+                        boolean wasInFunctionBody = h.inFunctionBody;
                         h.inRewrite = true;
                         h.hasRewrite = true;
+                        h.inFunctionContext = false;
+                        h.inFunctionBody = false;
                         apply(k.items().get(0));
                         apply(k.items().get(1));
                         // in well formed programs this should always reset to true and true, but we want to make sure we
                         // don't create spurious reports if this constraint was violated by the user.
                         h.inRewrite = wasInRewrite;
                         h.hasRewrite = hadRewrite;
+                        h.inFunctionContext = wasInFunctionContext;
+                        h.inFunctionBody = wasInFunctionBody;
                         apply(k.items().get(2));
                     }
+                } else if (!(k.klabel() instanceof KVariable) && k.klabel().name().equals("#withConfig")) {
+                    boolean inFunctionContext = h.inFunctionContext;
+                    boolean inFunctionBody = h.inFunctionBody;
+                    if (h.inFunctionContext || h.inFunctionBody) {
+                        errors.add(KEMException.compilerError("Function context is not allowed to be nested.", k));
+                    }
+                    if (h.inRewrite) {
+                      errors.add(KEMException.compilerError("Function context is not allowed inside a rewrite.", k));
+                    }
+                    h.inFunctionBody = true;
+                    apply(k.items().get(0));
+                    h.inFunctionBody = inFunctionBody;
+                    h.inFunctionContext = true;
+                    apply(k.items().get(1));
+                    h.inFunctionContext = inFunctionContext;
                 } else {
                     super.apply(k);
                 }

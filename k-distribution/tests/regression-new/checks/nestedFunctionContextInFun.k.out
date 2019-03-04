@@ -1,0 +1,10 @@
+[Error] Compiler: Had 2 parsing errors.
+[Error] Inner Parser: Parse error: unexpected token '['.
+	Source(nestedFunctionContextInFun.k)
+	Location(10,16,10,17)
+[Error] Inner Parser: Parse error: unexpected token '['.
+	Source(nestedFunctionContextInFun.k)
+	Location(8,16,8,17)
+[Warning] Compiler: Could not find main syntax module with name
+NESTEDFUNCTIONCONTEXTINFUN-SYNTAX in definition.  Use --syntax-module to
+specify one. Using NESTEDFUNCTIONCONTEXTINFUN as default.

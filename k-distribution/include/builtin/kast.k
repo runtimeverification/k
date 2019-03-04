@@ -96,6 +96,8 @@ module KCELLS
                | Cell
   syntax Bag ::= "(" Bag ")" [bracket]
   syntax K ::= Bag
+  syntax #RuleBody ::= "[" "[" K "]" "]" Bag    [klabel(#withConfig), symbol, avoid]
+  syntax non-assoc #withConfig
   syntax Bag ::= KBott
 endmodule
 
@@ -131,12 +133,14 @@ endmodule
 module REQUIRES-ENSURES
   imports BASIC-K
 
-  syntax RuleContent ::= K                                 [klabel("#ruleNoConditions"), symbol]
-                       | K "requires" K                    [klabel("#ruleRequires"), symbol]
-                       | K "when" K                        [klabel("#ruleRequires"), symbol]
-                       | K "ensures"  K                    [klabel("#ruleEnsures"), symbol]
-                       | K "requires" K "ensures" K        [klabel("#ruleRequiresEnsures"), symbol]
-                       | K "when" K "ensures" K            [klabel("#ruleRequiresEnsures"), symbol]
+  syntax #RuleBody ::= K
+
+  syntax #RuleContent ::= #RuleBody                                 [klabel("#ruleNoConditions"), symbol]
+                        | #RuleBody "requires" K                    [klabel("#ruleRequires"), symbol]
+                        | #RuleBody "when" K                        [klabel("#ruleRequires"), symbol]
+                        | #RuleBody "ensures"  K                    [klabel("#ruleEnsures"), symbol]
+                        | #RuleBody "requires" K "ensures" K        [klabel("#ruleRequiresEnsures"), symbol]
+                        | #RuleBody "when" K "ensures" K            [klabel("#ruleRequiresEnsures"), symbol]
 endmodule
 
 module K-TOP-SORT
@@ -228,6 +232,7 @@ module K
 
   syntax K ::= K "=>" K [klabel(#KRewrite), symbol, poly(0, 1, 2)]
   syntax non-assoc #KRewrite
+  syntax priority #KRewrite > #withConfig
 
   syntax K ::= K "#as" K [klabel(#KAs), symbol, poly(0, 1, 2)]
   // functions that preserve sorts and can therefore have inner rewrites
