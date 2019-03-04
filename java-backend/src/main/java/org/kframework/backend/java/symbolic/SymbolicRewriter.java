@@ -872,16 +872,22 @@ public class SymbolicRewriter {
                 pretty = true;
                 cell = cell.substring(1, cell.length() - 1);
             }
-            if (cell.equals("#pc")) {
+            switch (cell) {
+            case "#pc":
                 prettyPC = pretty;
-            } else if (cell.equals("#result")) {
+                break;
+            case "#result":
                 prettyResult = pretty;
-            } else if (cell.equals("#initTerm")) {
+                break;
+            case "#initTerm":
                 prettyInitTerm = pretty;
-            } else if (cell.equals("#target")) {
+                break;
+            case "#target":
                 prettyTarget = pretty;
-            } else {
+                break;
+            default:
                 cellsToLog.put(cell, pretty);
+                break;
             }
         }
     }
