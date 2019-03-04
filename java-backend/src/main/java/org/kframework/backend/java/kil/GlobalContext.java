@@ -69,13 +69,13 @@ public class GlobalContext implements Serializable {
         this.hookProvider = hookProvider;
         this.files = files;
         this.equalityOps = new EqualityOperations(() -> def);
-        this.stateLog = new StateLog(javaExecutionOptions, files);
-        this.constraintOps = new SMTOperations(() -> def, smtOptions,
-                new Z3Wrapper(smtOptions, kem, javaExecutionOptions, files, stateLog), kem, javaExecutionOptions);
+        prettyPrinter = new PrettyPrinter(kprint, coreDefinition);
+        this.stateLog = new StateLog(javaExecutionOptions, files, prettyPrinter);
+        this.constraintOps = new SMTOperations(() -> def, smtOptions, new Z3Wrapper(smtOptions, kem, javaExecutionOptions, files, stateLog), kem, javaExecutionOptions);
         this.kItemOps = new KItemOperations(stage, javaExecutionOptions.deterministicFunctions, kem, this::builtins, globalOptions);
         this.stage = stage;
         this.profiler = profiler;
-        prettyPrinter = new PrettyPrinter(kprint, coreDefinition);
+
     }
 
     private transient BuiltinFunction builtinFunction;

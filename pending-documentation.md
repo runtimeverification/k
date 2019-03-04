@@ -140,3 +140,19 @@ syntax Int ::= foo(Int, GeneratedTopCell) [function, withConfig]
 rule foo(0, <generatedTop>... <bar> I </bar> ...</generatedTop> #as Configuration) => I
 rule <generatedTop>... <k> something ...</k> ...</generatedTop> #as Configuration => <generatedTop>... <k> foo(0, Configuration> ...</k> ...</generatedTop>
 ```
+
+## Macros and Aliases
+
+A rule can be tagged with the `macro` or `alias` attribute. In both cases, what this signifies is that this is a macro rule. Macro rules are applied statically during compilation on all terms that they match, and statically before program execution on the initial configuration. Currently, macros are required to not have side conditions, although they can contain sort checks. When a rule is tagged with the `alias` attribute, it is also applied statically in reverse prior to unparsing on the final configuration. Note that a macro can have unbound variables in the right hand side. When such a macro exists, it should be used only on the left hand side of rules, unless the user is performing symbolic execution and expects to introduce symbolic terms into the subject being rewritten. However, when used on the left hand side of a rule, it functions similarly to a pattern alias, and allows the user to concisely express a reusable pattern that they wish to match on in multiple places.
+
+For example, consider the following semantics:
+
+```
+syntax KItem ::= "foo" | "foobar"
+syntax KItem ::= bar(KItem) | baz(Int, KItem)
+rule foo => foobar [alias]
+rule bar(I) => baz(?_, I) [macro]
+rule bar(I) => I
+```
+
+This will rewrite `baz(0, foo)` to `foo`. First `baz(0, foo)` will be rewritten statically to `baz(0, foobar)`. Then the non-`macro` rule will apply (because the rule will have been rewritten to `rule baz(_, I) => I`). Then `foobar` will be rewritten statically after rewriting finishes to `foo` via the reverse form of the alias.
