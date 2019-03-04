@@ -2,6 +2,6 @@
 klabel <topCell2>
   while executing phase "concretizing configuration" on sentence at
 	Source(test.k)
-	Location(14,6,18,17)
+	Location(16,6,20,17)
 [Warning] Compiler: Could not find main syntax module with name TEST-SYNTAX in
 definition.  Use --syntax-module to specify one. Using TEST as default.

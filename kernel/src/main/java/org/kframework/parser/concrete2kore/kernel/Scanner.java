@@ -146,7 +146,7 @@ public class Scanner implements AutoCloseable {
             scanner = File.createTempFile("tmp-kompile-", EXE_EXTENSION);
             scanner.deleteOnExit();
             //Option -lfl unnecessary. Same effect achieved by --noyywrap above.
-            pb = new ProcessBuilder("gcc", scannerCSource.getAbsolutePath(), "-o", scanner.getAbsolutePath());
+            pb = new ProcessBuilder("gcc", scannerCSource.getAbsolutePath(), "-o", scanner.getAbsolutePath(), "-Wno-unused-result");
             pb.inheritIO();
             exit = pb.start().waitFor();
             scanner.setExecutable(true);
