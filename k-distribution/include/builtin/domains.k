@@ -935,6 +935,10 @@ module K-IO
 
   syntax K ::= #logToFile(String, String) [function, functional, hook(IO.log), impure, returnsUnit]
 
+  syntax String ::= #projectString(IOString) [function]
+  rule #projectString(S:String) => S
+  syntax Int ::= #projectInt(IOInt) [function]
+  rule #projectInt(I:Int) => I
 endmodule
 
 // NOTE: DO NOT DIRECTLY IMPORT *-STREAM MODULES
@@ -955,7 +959,7 @@ module STDIN-STREAM
   rule [stdinGetc]:
        <stdin>
        ListItem(#parseInput(_:String, Delimiters:String))
-       ListItem(#buffer(S:String => S +String chrChar(#getc(N))))
+       ListItem(#buffer(S:String => S +String chrChar(#projectString(#getc(N)))))
        ListItem("on")
        ListItem(#istream(N:Int))
        </stdin>
