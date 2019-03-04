@@ -818,7 +818,7 @@ module K-IO
   imports LIST
   imports STRING
 
-  syntax IOError ::= "#EOF" [klabel(#EOF), symbol] | "#noparse" [klabel(#noparse), symbol] | #unknownIOError(Int)
+  syntax IOError ::= "#EOF" [klabel(#EOF), symbol] | "#noparse" [klabel(#noparse), symbol] | #unknownIOError(Int) [symbol]
                    | "#E2BIG" [klabel(#E2BIG), symbol]
                    | "#EACCES" [klabel(#EACCES), symbol]
                    | "#EAGAIN" [klabel(#EAGAIN), symbol]
