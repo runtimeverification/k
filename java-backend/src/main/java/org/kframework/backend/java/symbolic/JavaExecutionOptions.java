@@ -83,19 +83,24 @@ public final class JavaExecutionOptions {
     @Parameter(names="--log-cells", description="Specify what subset of configuration has to be printed when" +
             " an execution step is logged." +
             " Usage format: --log-pretty \"v2,v2,...\" , where v1,v2,... are either cell names," +
-            " cell names in parentheses (like \"(k)\") or one of: \"(#pc)\", \"(#result)\". " +
-            " The cells specified without parentheses are printed with toString()." +
-            " The cells specified in parentheses are pretty-printed. Certain cells have custom formatting." +
-            " The last 2 options mean:" +
-            " (#pc) = pretty print the path condition (constraint)." +
-            " (#result) = fully pretty-print the final result (e.g. the configuration for paths that were not proved)." +
-            " This last option is very slow." +
+            " one of: \"#pc\", \"#initTerm\", \"#target\", \"#result\" . Any of the options above can be wrapped into" +
+            " parentheses like (#pc). When a cell name is specified, that cell will be printed. The last special values" +
+            " have the following meaning:" +
+            " #pc - path condition to be printed at each logging step." +
+            " #initTerm - full initial term." +
+            " #target - full target term." +
+            " #result - evaluation result, e.g. full final terms." +
+            " The last 3 are printed only at the beginning or end of evaluation respectively." +
+            " Options specified without parentheses are printed with toString()." +
+            " Options specified in parentheses are pretty-printed. Certain cells have custom formatting." +
+            " Pretty-printing options are considerably slower than default toString printing." +
+            " Especially when full configuration is printed." +
             " Default value is:" +
-            " --log-cells k,output,statusCode,localMem,pc,gas,wordStack,callData,accounts" +
-            " Recommended alternative value:" +
-            " --log-cells \"(k),output,statusCode,localMem,pc,gas,wordStack,callData,accounts,(#pc)\"")
+            " --log-cells k,output,statusCode,localMem,pc,gas,wordStack,callData,accounts,#pc,#result" +
+            " Recommended alternative:" +
+            " --log-cells \"(k),output,statusCode,localMem,pc,gas,wordStack,callData,accounts,(#pc),#result\"")
     public List<String> logCells = Arrays.asList("k", "output", "statusCode", "localMem", "pc", "gas", "wordStack",
-            "callData", "accounts");
+            "callData", "accounts", "#pc", "#result");
 
     @Parameter(names="--log-rules", description="Log applied rules." +
             "Including \"virtual rewrites\", e.g. rules applied in side conditions of other rules, that in the end " +

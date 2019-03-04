@@ -623,9 +623,13 @@ public class SymbolicRewriter {
         //to avoid printing initialization-phase rules
         global.javaExecutionOptions.logRulesPublic = global.javaExecutionOptions.logRules;
 
-        if (global.javaExecutionOptions.log) {
+        if (prettyInitTerm != null) {
+            System.err.println("\nInitial term\n=====================\n");
+            printTermAndConstraint(initialTerm, prettyInitTerm);
+        }
+        if (prettyTarget != null) {
             System.err.println("\nTarget term\n=====================\n");
-            System.err.println(targetTerm);
+            printTermAndConstraint(targetTerm, prettyTarget);
         }
         int branchingRemaining = global.javaExecutionOptions.branchingAllowed;
         boolean nextStepLogEnabled = false;
@@ -788,30 +792,30 @@ public class SymbolicRewriter {
         }
 
         List<ConstrainedTerm> tweakedProofResults = proofResults;
-        if (global.javaExecutionOptions.formatFailures && !proofResults.isEmpty()) {
+        if (global.javaExecutionOptions.formatFailures && !proofResults.isEmpty() && prettyResult != null) {
+            System.err.println("\n" +
+                    "==========================================\n" +
+                    "Failure final states:\n" +
+                    "==========================================\n");
             for (ConstrainedTerm term : proofResults) {
-                printTermAndConstraint(term);
+                printTermAndConstraint(term, prettyResult);
             }
             tweakedProofResults = ImmutableList.of(new ConstrainedTerm(BoolToken.FALSE, initialTerm.termContext()));
         }
 
-        if (global.javaExecutionOptions.logSuccessFinalStates) {
+        if (global.javaExecutionOptions.logSuccessFinalStates  && !successResults.isEmpty() && prettyResult != null) {
             System.err.println("\n" +
                     "==========================================\n" +
                     "Success final states:\n" +
                     "==========================================\n");
             for (ConstrainedTerm result : successResults) {
-                printTermAndConstraint(result);
+                printTermAndConstraint(result, prettyResult);
             }
         }
         if (global.globalOptions.verbose) {
             printSummaryBox(rule, proofResults, successPaths, step, 0);
         }
         return tweakedProofResults;
-    }
-
-    public void printTermAndConstraint(ConstrainedTerm term) {
-        printTermAndConstraint(term, prettyResult);
     }
 
     public void printTermAndConstraint(ConstrainedTerm term, boolean pretty) {
@@ -852,8 +856,14 @@ public class SymbolicRewriter {
 
     //map value = log format: true = pretty, false = toString()
     private Map<String, Boolean> cellsToLog = new LinkedHashMap<>();
-    private boolean prettyPC;
-    private boolean prettyResult;
+
+    /**
+     * null = do not print, false = toString, true = pretty.
+     */
+    private Boolean prettyPC;
+    private Boolean prettyResult;
+    private Boolean prettyInitTerm;
+    private Boolean prettyTarget;
 
     private void parseLogCells() {
         for (String cell : global.javaExecutionOptions.logCells) {
@@ -866,6 +876,10 @@ public class SymbolicRewriter {
                 prettyPC = pretty;
             } else if (cell.equals("#result")) {
                 prettyResult = pretty;
+            } else if (cell.equals("#initTerm")) {
+                prettyInitTerm = pretty;
+            } else if (cell.equals("#target")) {
+                prettyTarget = pretty;
             } else {
                 cellsToLog.put(cell, pretty);
             }
@@ -898,7 +912,9 @@ public class SymbolicRewriter {
                 }
                 print(cell, pretty);
             }
-            printConstraint(term.constraint(), prettyPC);
+            if (prettyPC != null) {
+                printConstraint(term.constraint(), prettyPC);
+            }
         }
         global.profiler.logOverheadTimer.stop();
         return actuallyLogged;
