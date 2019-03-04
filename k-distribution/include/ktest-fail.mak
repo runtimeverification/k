@@ -6,21 +6,25 @@ KOMPILE=$(abspath $(MAKEFILE_PATH)/../bin/kompile)
 KDEP=$(abspath $(MAKEFILE_PATH)/../bin/kdep)
 # path to put -kompiled directory in
 DEFDIR?=.
+# all tests in test directory with matching file extension
+TESTS?=$(wildcard $(DEFDIR)/*.k)
 # default KOMPILE_BACKEND
 KOMPILE_BACKEND?=ocaml
 
 CHECK=| diff -
 
-.PHONY: kompile all clean update-results
+.PHONY: kompile all clean update-results dummy
 
 # run all tests
 all: kompile
 
 # run only kompile
-kompile: $(DEFDIR)/$(DEF)-kompiled/timestamp
+kompile: $(TESTS)
 
-$(DEFDIR)/%-kompiled/timestamp: %.k
-	$(KOMPILE) $(KOMPILE_FLAGS) --backend $(KOMPILE_BACKEND) $(DEBUG) $< -d $(DEFDIR) 2>&1 | sed 's!'`pwd`'/\(\./\)\?!!g' $(CHECK) $<.out $(CHECK2)
+dummy:
+
+%.k: dummy
+	$(KOMPILE) $(KOMPILE_FLAGS) --backend $(KOMPILE_BACKEND) $(DEBUG) $@ -d $(DEFDIR) 2>&1 | sed 's!'`pwd`'/\(\./\)\?!!g' $(CHECK) $@.out $(CHECK2)
 
 # run all tests and regenerate output files
 update-results: kompile
@@ -28,10 +32,4 @@ update-results: CHECK=>
 update-results: CHECK2=|| true
 
 clean:
-	rm -rf $(DEFDIR)/$(DEF)-kompiled
-
-.depend:
-	@$(KDEP) $(DEF).k > .depend-tmp
-	@mv .depend-tmp .depend
-
--include .depend
+	rm -rf $(DEFDIR)/*-kompiled
