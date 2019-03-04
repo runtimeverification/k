@@ -762,6 +762,8 @@ public class SymbolicRewriter {
                     }
                 } catch (OutOfMemoryError e) {
                     e.printStackTrace(); //to avoid hiding this exception in case another OOMError is thrown.
+                    //Activate cache profiling to see which cache caused the error.
+                    global.javaExecutionOptions.profileMemAdv = true;
                     printSummaryBox(rule, proofResults, successPaths, step, queue.size() + nextQueue.size() - v + 1);
                     throw e;
                     // DISABLE EXCEPTION CHECKSTYLE
