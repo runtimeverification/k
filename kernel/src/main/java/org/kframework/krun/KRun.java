@@ -6,7 +6,7 @@ import org.kframework.attributes.Source;
 import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.ConfigurationInfoFromModule;
-import org.kframework.definition.Module;
+import org.kframework.definition.Definition;
 import org.kframework.definition.Rule;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kore.Assoc;
@@ -21,6 +21,7 @@ import org.kframework.parser.binary.BinaryParser;
 import org.kframework.parser.kore.KoreParser;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.unparser.KPrint;
+import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -69,7 +70,7 @@ public class KRun {
         }
     }
 
-    public int run(CompiledDefinition compiledDef, KRunOptions options, Function<Module, Rewriter> rewriterGenerator, ExecutionMode executionMode) {
+    public int run(CompiledDefinition compiledDef, KRunOptions options, Function<Definition, Rewriter> rewriterGenerator, ExecutionMode executionMode) {
         String pgmFileName = options.configurationCreation.pgm();
         K program;
         if (options.configurationCreation.term()) {
@@ -169,7 +170,7 @@ public class KRun {
                 output.put(KToken("$IO", Sorts.KConfigVar()), KToken("\"on\"", Sorts.String()));
             } else {
                 String stdin = getStdinBuffer(tty.stdin);
-                output.put(KToken("$STDIN", Sorts.KConfigVar()), KToken("\"" + stdin + "\"", Sorts.String()));
+                output.put(KToken("$STDIN", Sorts.KConfigVar()), KToken(StringUtil.enquoteKString(stdin), Sorts.String()));
                 output.put(KToken("$IO", Sorts.KConfigVar()), KToken("\"off\"", Sorts.String()));
             }
         }

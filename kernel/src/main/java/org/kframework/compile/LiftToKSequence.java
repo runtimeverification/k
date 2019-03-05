@@ -2,6 +2,7 @@
 package org.kframework.compile;
 
 import org.kframework.builtin.Sorts;
+import org.kframework.builtin.KLabels;
 import org.kframework.definition.Context;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
@@ -51,7 +52,7 @@ public class LiftToKSequence {
                 List<K> children = new ArrayList<>();
                 for (K child : k.klist().items()) {
                     K res = apply(child);
-                    if (res instanceof KSequence) {
+                    if (res instanceof KSequence || k.klabel().equals(KLabels.ML_OR)) {
                         children.add(res);
                     } else {
                         children.add(KSequence(res));

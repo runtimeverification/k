@@ -2,7 +2,7 @@
 package org.kframework.backend.ocaml;
 
 import com.google.inject.Inject;
-import org.kframework.definition.Module;
+import org.kframework.definition.Definition;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
@@ -48,7 +48,7 @@ public class InterpreterExecutionMode implements ExecutionMode {
     }
 
     @Override
-    public Tuple2<K, Integer> execute(KRun.InitialConfiguration k, Function<Module, Rewriter> unused, CompiledDefinition compiledDefinition) {
+    public Tuple2<K, Integer> execute(KRun.InitialConfiguration k, Function<Definition, Rewriter> unused, CompiledDefinition compiledDefinition) {
         OcamlRewriter rewriter = new OcamlRewriter(files, converter, options);
         K config = k.theConfig;
         k.theConfig = null;

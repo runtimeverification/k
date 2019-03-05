@@ -3,9 +3,9 @@ package org.kframework.backend.java.util;
 
 import com.google.common.collect.ImmutableSet;
 
+import org.kframework.backend.java.symbolic.JavaExecutionOptions;
 import org.kframework.backend.java.z3.*;
 import org.kframework.builtin.Sorts;
-import org.kframework.main.GlobalOptions;
 import org.kframework.utils.OS;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -27,11 +27,11 @@ public class Z3Wrapper {
 
     private static final int Z3_RESTART_LIMIT = 3;
 
-    private static final Set<String> Z3_QUERY_RESULTS = ImmutableSet.of("unknown", "sat", "unsat");
+    public static final Set<String> Z3_QUERY_RESULTS = ImmutableSet.of("unknown", "sat", "unsat");
 
     public final String SMT_PRELUDE, CHECK_SAT;
     private final SMTOptions options;
-    private final GlobalOptions globalOptions;
+    private final JavaExecutionOptions javaExecutionOptions;
     private final KExceptionManager kem;
     private final FileUtil files;
     private final StateLog stateLog;
@@ -39,12 +39,12 @@ public class Z3Wrapper {
     public Z3Wrapper(
             SMTOptions options,
             KExceptionManager kem,
-            GlobalOptions globalOptions,
+            JavaExecutionOptions javaExecutionOptions,
             FileUtil files,
             StateLog stateLog) {
         this.options = options;
         this.kem = kem;
-        this.globalOptions = globalOptions;
+        this.javaExecutionOptions = javaExecutionOptions;
         this.files = files;
         this.stateLog = stateLog;
 
@@ -56,9 +56,7 @@ public class Z3Wrapper {
     }
 
     public synchronized boolean isUnsat(CharSequence query, int timeout, Z3Profiler timer) {
-        StringBuilder queryStr = new StringBuilder(query.length());
-        queryStr.append(query);
-        stateLog.log(StateLog.LogEvent.Z3QUERY, KToken(SMT_PRELUDE + "\n" + queryStr.toString() + "\n" + CHECK_SAT + "\n", Sorts.Z3Query()));
+        stateLog.log(StateLog.LogEvent.Z3QUERY, KToken(SMT_PRELUDE + "\n" + query + "\n" + CHECK_SAT + "\n", Sorts.Z3Query()));
         if (options.z3JNI) {
             return checkQueryWithLibrary(query, timeout);
         } else {
@@ -109,7 +107,7 @@ public class Z3Wrapper {
                 result = null;
                 String line = output.readLine();
                 while (line != null && line.startsWith("(error")) {
-                    System.err.println("\nz3 error: " + line);
+                    System.err.println("\nZ3 error: " + line);
                     result = line;
                     line = output.readLine();
                 }
@@ -123,19 +121,20 @@ public class Z3Wrapper {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            throw KEMException.criticalError("Exception while invoking Z3", e);
         } finally {
-            if (globalOptions.verbose && profiler.isLastRunTimeout()) {
-                System.err.println("\nz3 likely timeout\n");
+            if (javaExecutionOptions.debugZ3 && profiler.isLastRunTimeout()) {
+                System.err.println("\nZ3 likely timeout");
             }
         }
         stateLog.log(StateLog.LogEvent.Z3RESULT, KToken(result, Sorts.Z3Result()));
         if (!Z3_QUERY_RESULTS.contains(result)) {
             throw KEMException.criticalError("Z3 crashed on input query:\n" + query + "\nresult:\n" + result);
         }
-        if (globalOptions.debug) {
-            System.err.println("\nz3 query result: " + result);
+        if (javaExecutionOptions.debugZ3) {
+            System.err.println("\nZ3 query result: " + result);
         }
+        profiler.queryResult(result);
         return "unsat".equals(result);
     }
 }

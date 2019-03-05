@@ -8,8 +8,6 @@ import org.kframework.attributes.Att;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Constants;
-import org.kframework.kore.ADT;
-import org.kframework.kore.K;
 import scala.collection.Seq;
 
 import java.util.Map;
@@ -116,6 +114,7 @@ public class Variable extends Term implements org.kframework.kore.KVariable {
         Variable var = Variable.getAnonVariable(sort);
         var.copyAttributesFrom(this);
         var.originalName = this.name;
+        var.addAttribute("originalName", this.name);
         return var;
     }
 
@@ -124,6 +123,10 @@ public class Variable extends Term implements org.kframework.kore.KVariable {
      */
     public String name() {
         return name;
+    }
+
+    public String longName() {
+        return originalName + name;
     }
 
     @Override

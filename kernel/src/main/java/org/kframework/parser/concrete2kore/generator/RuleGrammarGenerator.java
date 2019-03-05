@@ -20,6 +20,7 @@ import org.kframework.kil.loader.Constants;
 import org.kframework.kore.Sort;
 import org.kframework.parser.concrete2kore.ParseInModule;
 import scala.collection.Seq;
+import scala.Option;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,7 +54,6 @@ public class RuleGrammarGenerator {
         kSorts.add(Sorts.KLabel());
         kSorts.add(Sorts.KList());
         kSorts.add(Sorts.KItem());
-        kSorts.add(Sort("RuleContent"));
         kSorts.add(Sorts.KConfigVar());
         kSorts.add(Sorts.KString());
     }
@@ -141,11 +141,17 @@ public class RuleGrammarGenerator {
         } else {
             Module newMod = ModuleTransformer.from(oldMod -> {
                 Set<Module> imports = stream(oldMod.imports()).map(_import -> {
-                    if (_import.name().equals(ID)) {
-                        return baseK.getModule(ID_PROGRAM_PARSING).get();
-                    } else if (_import.name().equals(ID_SYNTAX)) {
-                        return baseK.getModule(ID_PROGRAM_PARSING_SYNTAX).get();
+                    if (_import.name().endsWith("$SYNTAX")) {
+                        Option<Module> programParsing = baseK.getModule(_import.name().substring(0, _import.name().length()-"$SYNTAX".length()) + "-PROGRAM-PARSING$SYNTAX");
+                        if (programParsing.isDefined()) {
+                            return programParsing.get();
+                        }
+                        return _import;
                     } else {
+                        Option<Module> programParsing = baseK.getModule(_import.name() + "-PROGRAM-PARSING");
+                        if (programParsing.isDefined()) {
+                            return programParsing.get();
+                        }
                         return _import;
                     }
                 }).collect(Collectors.toSet());
@@ -163,7 +169,7 @@ public class RuleGrammarGenerator {
                 modules.add(baseK.getModule(DEFAULT_LAYOUT).get());
             }
 
-            return Module.apply(mod.name() + POSTFIX, immutable(modules), Set(), Att());
+            return Module.apply(mod.name() + "-PROGRAM-GRAMMAR", immutable(modules), Set(), Att());
         }
     }
 
@@ -404,10 +410,6 @@ public class RuleGrammarGenerator {
                 makeAllSortTuples(level-1, size, sorts, res, indices);
             }
         }
-    }
-
-    private boolean isExceptionSort(Sort srt) {
-        return kSorts.contains(srt) || srt.name().startsWith("#");
     }
 
     private static Set<Sentence> makeCasts(Sort outerSort, Sort innerSort, Sort castSort) {

@@ -2,6 +2,7 @@
 package org.kframework.backend.java.symbolic;
 
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
@@ -9,8 +10,28 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.IntToken;
-import org.kframework.backend.java.kil.*;
+import org.kframework.backend.java.kil.Bottom;
+import org.kframework.backend.java.kil.BuiltinList;
+import org.kframework.backend.java.kil.BuiltinMap;
+import org.kframework.backend.java.kil.CollectionInternalRepresentation;
+import org.kframework.backend.java.kil.ConstrainedTerm;
+import org.kframework.backend.java.kil.DataStructures;
+import org.kframework.backend.java.kil.GlobalContext;
+import org.kframework.backend.java.kil.JavaSymbolicObject;
+import org.kframework.backend.java.kil.KItem;
+import org.kframework.backend.java.kil.KLabel;
+import org.kframework.backend.java.kil.KLabelConstant;
+import org.kframework.backend.java.kil.KList;
+import org.kframework.backend.java.kil.Kind;
+import org.kframework.backend.java.kil.LocalRewriteTerm;
+import org.kframework.backend.java.kil.Sort;
+import org.kframework.backend.java.kil.SortSignature;
+import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermContext;
+import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.util.Constants;
+import org.kframework.backend.java.util.CounterStopwatch;
+import org.kframework.backend.java.util.FormulaContext;
 import org.kframework.backend.java.util.RewriteEngineUtils;
 import org.kframework.backend.java.util.StateLog;
 import org.kframework.builtin.KLabels;
@@ -351,7 +372,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
 
 
     public ConjunctiveFormula simplify() {
-        return simplify(false, true, TermContext.builder(global).build());
+        return simplify(false, true, TermContext.builder(global).build(), false);
     }
 
     /**
@@ -359,7 +380,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
      * Decomposes equalities by using unification.
      */
     public ConjunctiveFormula simplify(TermContext context) {
-        return simplify(false, true, context);
+        return simplify(false, true, context, false);
     }
 
     /**
@@ -367,146 +388,163 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
      * between builtin data structures will remain intact if they cannot be
      * resolved completely.
      */
-    public ConjunctiveFormula simplifyBeforePatternFolding(TermContext context) {
-        return simplify(false, false, context);
+    public ConjunctiveFormula simplifyBeforePatternFolding(TermContext context, boolean logFailures) {
+        return simplify(false, false, context, logFailures);
     }
 
     public ConjunctiveFormula simplifyModuloPatternFolding(TermContext context) {
-        return simplify(true, true, context);
+        return simplify(true, true, context, false);
+    }
+
+    private ConjunctiveFormula simplify(boolean patternFolding, boolean partialSimplification,
+                                        TermContext context, boolean logFailures) {
+        ConjunctiveFormula cachedResult = global.formulaCache
+                .cacheGet(this, patternFolding, partialSimplification, context);
+        if (cachedResult != null) {
+            return cachedResult;
+        }
+
+        ConjunctiveFormula result = simplifyImpl(patternFolding, partialSimplification, context, logFailures);
+        global.formulaCache.cachePut(this, patternFolding, partialSimplification, context, result);
+        return result;
     }
 
     /**
      * Simplifies this conjunctive formula as much as possible.
      * Decomposes equalities by using unification.
      */
-    private ConjunctiveFormula simplify(boolean patternFolding, boolean partialSimplification, TermContext context) {
+    private ConjunctiveFormula simplifyImpl(boolean patternFolding, boolean partialSimplification, TermContext context,
+                                            boolean logFailures) {
         assert !isFalse();
         ConjunctiveFormula originalTopConstraint = context.getTopConstraint();
         Substitution<Variable, Term> substitution = this.substitution;
         PersistentUniqueList<Equality> equalities = this.equalities;
         PersistentUniqueList<DisjunctiveFormula> disjunctions = this.disjunctions;
 
-        boolean change;
-        do {
-            change = false;
-            PersistentUniqueList<Equality> pendingEqualities = PersistentUniqueList.empty();
-            for (int i = 0; i < equalities.size(); ++i) {
-                Equality equality = equalities.get(i);
+        try {
+            boolean change;
+            do {
+                change = false;
+                PersistentUniqueList<Equality> pendingEqualities = PersistentUniqueList.empty();
+                for (int i = 0; i < equalities.size(); ++i) {
+                    Equality equality = equalities.get(i);
 
-                //Any equality should be evaluated in the context of other entries but not itself, otherwise information
-                //loss can happen. Details: https://github.com/kframework/k-legacy/pull/2399#issuecomment-360680618
-                context.setTopConstraint(minus(originalTopConstraint, equality));
+                    //Any equality should be evaluated in the context of other entries but not itself, otherwise information
+                    //loss can happen. Details: https://github.com/kframework/k-legacy/pull/2399#issuecomment-360680618
+                    context.setTopConstraint(minus(originalTopConstraint, equality));
 
-                Term leftHandSide = equality.leftHandSide().substituteAndEvaluate(substitution, context);
-                Term rightHandSide = equality.rightHandSide().substituteAndEvaluate(substitution, context);
-                equality = new Equality(leftHandSide, rightHandSide, global);
-                if (equality.isTrue()) {
-                    // delete
-                } else if (equality.truthValue() == TruthValue.FALSE) {
-                    // conflict
-                    return falsify(substitution, equalities, disjunctions, equality);
-                } else {
-                    if (equality.isSimplifiableByCurrentAlgorithm()) {
-                        // (decompose + conflict)*
-                        FastRuleMatcher unifier = new FastRuleMatcher(global, 1);
-                        ConjunctiveFormula unificationConstraint = unifier.unifyEquality(leftHandSide, rightHandSide, patternFolding, partialSimplification, false, context);
-                        if (unificationConstraint.isFalse()) {
-                            return falsify(
-                                    substitution,
-                                    equalities,
-                                    disjunctions,
-                                    new Equality(
-                                            unifier.unificationFailureLeftHandSide(),
-                                            unifier.unificationFailureRightHandSide(),
-                                            global));
-                        }
-
-                        // TODO(AndreiS): fix this in a general way
-                        if (unificationConstraint.equalities.contains(equality)) {
-                            pendingEqualities = pendingEqualities.plus(equality);
-                            continue;
-                        }
-
-                        equalities = equalities.plusAll(i + 1, unificationConstraint.equalities);
-                        equalities = equalities.plusAll(i + 1, unificationConstraint.substitution.equalities(global));
-                        disjunctions = disjunctions.plusAll(unificationConstraint.disjunctions);
-                    } else if (leftHandSide instanceof Variable && rightHandSide instanceof Variable
-                            && leftHandSide.sort().equals(rightHandSide.sort())) {
-                        // eliminate: special case when both the left-hand-side and the right-hand-side can be eliminated
-                        ImmutableMapSubstitution<Variable, Term> eliminationSubstitution;
-                        if (leftHandSide.toString().compareTo(rightHandSide.toString()) < 0) {
-                            eliminationSubstitution = ImmutableMapSubstitution.singleton((Variable) leftHandSide, rightHandSide);
-                        } else {
-                            eliminationSubstitution = ImmutableMapSubstitution.singleton((Variable) rightHandSide, leftHandSide);
-                        }
-
-                        substitution = ImmutableMapSubstitution.composeAndEvaluate(
-                                substitution,
-                                eliminationSubstitution,
-                                context);
-                        change = true;
-                        if (substitution.isFalse(global)) {
-                            return falsify(substitution, equalities, disjunctions, equality);
-                        }
-                    } else if (leftHandSide instanceof Variable
-                            && !rightHandSide.variableSet().contains(leftHandSide)) {
-                        // eliminate
-                        ImmutableMapSubstitution<Variable, Term> eliminationSubstitution = getSubstitution(
-                                (Variable) leftHandSide,
-                                rightHandSide);
-                        if (eliminationSubstitution == null) {
-                            pendingEqualities = pendingEqualities.plus(equality);
-                            continue;
-                        }
-
-                        substitution = ImmutableMapSubstitution.composeAndEvaluate(
-                                substitution,
-                                eliminationSubstitution,
-                                context);
-                        change = true;
-                        if (substitution.isFalse(global)) {
-                            return falsify(substitution, equalities, disjunctions, equality);
-                        }
-                    } else if (rightHandSide instanceof Variable
-                            && !leftHandSide.variableSet().contains(rightHandSide)) {
-                        // swap + eliminate
-                        ImmutableMapSubstitution<Variable, Term> eliminationSubstitution = getSubstitution(
-                                (Variable) rightHandSide,
-                                leftHandSide);
-                        if (eliminationSubstitution == null) {
-                            pendingEqualities = pendingEqualities.plus(equality);
-                            continue;
-                        }
-
-                        substitution = ImmutableMapSubstitution.composeAndEvaluate(
-                                substitution,
-                                eliminationSubstitution,
-                                context);
-                        change = true;
-                        if (substitution.isFalse(global)) {
-                            return falsify(substitution, equalities, disjunctions, equality);
-                        }
-                    } else if (leftHandSide instanceof Variable
-                            && rightHandSide.isNormal()
-                            && rightHandSide.variableSet().contains(leftHandSide)) {
-                        // occurs
-                        return falsify(substitution, equalities, disjunctions, equality);
-                    } else if (rightHandSide instanceof Variable
-                            && leftHandSide.isNormal()
-                            && leftHandSide.variableSet().contains(rightHandSide)) {
-                        // swap + occurs
+                    Term leftHandSide = equality.leftHandSide().substituteAndEvaluate(substitution, context);
+                    Term rightHandSide = equality.rightHandSide().substituteAndEvaluate(substitution, context);
+                    equality = new Equality(leftHandSide, rightHandSide, global);
+                    if (equality.isTrue()) {
+                        // delete
+                    } else if (equality.truthValue() == TruthValue.FALSE) {
+                        // conflict
                         return falsify(substitution, equalities, disjunctions, equality);
                     } else {
-                        // unsimplified equation
-                        pendingEqualities = pendingEqualities.plus(equality);
+                        if (equality.isSimplifiableByCurrentAlgorithm()) {
+                            // (decompose + conflict)*
+                            FastRuleMatcher unifier = new FastRuleMatcher(global, 1);
+                            ConjunctiveFormula unificationConstraint = unifier.unifyEquality(leftHandSide, rightHandSide, patternFolding, partialSimplification, false, context, logFailures);
+                            if (unificationConstraint.isFalse()) {
+                                return falsify(
+                                        substitution,
+                                        equalities,
+                                        disjunctions,
+                                        new Equality(
+                                                unifier.unificationFailureLeftHandSide(),
+                                                unifier.unificationFailureRightHandSide(),
+                                                global));
+                            }
+
+                            // TODO(AndreiS): fix this in a general way
+                            if (unificationConstraint.equalities.contains(equality)) {
+                                pendingEqualities = pendingEqualities.plus(equality);
+                                continue;
+                            }
+
+                            equalities = equalities.plusAll(i + 1, unificationConstraint.equalities);
+                            equalities = equalities.plusAll(i + 1, unificationConstraint.substitution.equalities(global));
+                            disjunctions = disjunctions.plusAll(unificationConstraint.disjunctions);
+                        } else if (leftHandSide instanceof Variable && rightHandSide instanceof Variable
+                                && leftHandSide.sort().equals(rightHandSide.sort())) {
+                            // eliminate: special case when both the left-hand-side and the right-hand-side can be eliminated
+                            ImmutableMapSubstitution<Variable, Term> eliminationSubstitution;
+                            if (leftHandSide.toString().compareTo(rightHandSide.toString()) < 0) {
+                                eliminationSubstitution = ImmutableMapSubstitution.singleton((Variable) leftHandSide, rightHandSide);
+                            } else {
+                                eliminationSubstitution = ImmutableMapSubstitution.singleton((Variable) rightHandSide, leftHandSide);
+                            }
+
+                            substitution = ImmutableMapSubstitution.composeAndEvaluate(
+                                    substitution,
+                                    eliminationSubstitution,
+                                    context);
+                            change = true;
+                            if (substitution.isFalse(global)) {
+                                return falsify(substitution, equalities, disjunctions, equality);
+                            }
+                        } else if (leftHandSide instanceof Variable
+                                && !rightHandSide.variableSet().contains(leftHandSide)) {
+                            // eliminate
+                            ImmutableMapSubstitution<Variable, Term> eliminationSubstitution = getSubstitution(
+                                    (Variable) leftHandSide,
+                                    rightHandSide);
+                            if (eliminationSubstitution == null) {
+                                pendingEqualities = pendingEqualities.plus(equality);
+                                continue;
+                            }
+
+                            substitution = ImmutableMapSubstitution.composeAndEvaluate(
+                                    substitution,
+                                    eliminationSubstitution,
+                                    context);
+                            change = true;
+                            if (substitution.isFalse(global)) {
+                                return falsify(substitution, equalities, disjunctions, equality);
+                            }
+                        } else if (rightHandSide instanceof Variable
+                                && !leftHandSide.variableSet().contains(rightHandSide)) {
+                            // swap + eliminate
+                            ImmutableMapSubstitution<Variable, Term> eliminationSubstitution = getSubstitution(
+                                    (Variable) rightHandSide,
+                                    leftHandSide);
+                            if (eliminationSubstitution == null) {
+                                pendingEqualities = pendingEqualities.plus(equality);
+                                continue;
+                            }
+
+                            substitution = ImmutableMapSubstitution.composeAndEvaluate(
+                                    substitution,
+                                    eliminationSubstitution,
+                                    context);
+                            change = true;
+                            if (substitution.isFalse(global)) {
+                                return falsify(substitution, equalities, disjunctions, equality);
+                            }
+                        } else if (leftHandSide instanceof Variable
+                                && rightHandSide.isNormal()
+                                && rightHandSide.variableSet().contains(leftHandSide)) {
+                            // occurs
+                            return falsify(substitution, equalities, disjunctions, equality);
+                        } else if (rightHandSide instanceof Variable
+                                && leftHandSide.isNormal()
+                                && leftHandSide.variableSet().contains(rightHandSide)) {
+                            // swap + occurs
+                            return falsify(substitution, equalities, disjunctions, equality);
+                        } else {
+                            // unsimplified equation
+                            pendingEqualities = pendingEqualities.plus(equality);
+                        }
                     }
                 }
-            }
-            equalities = pendingEqualities;
-        } while (change);
+                equalities = pendingEqualities;
+            } while (change);
 
-        context.setTopConstraint(originalTopConstraint);
-        return ConjunctiveFormula.of(substitution, equalities, disjunctions, global);
+            return ConjunctiveFormula.of(substitution, equalities, disjunctions, global);
+        } finally {
+            context.setTopConstraint(originalTopConstraint);
+        }
     }
 
     private ConjunctiveFormula falsify(
@@ -595,8 +633,8 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
      * even if #f is NOT injective.
      */
     public ConjunctiveFormula resolveMatchingSymbols(Set<String> matchingSymbols) {
-        PersistentUniqueList<Equality> equalities = this.equalities;
-        PersistentUniqueList<Equality> newEqualities = equalities;
+        PersistentUniqueList<Equality> resultEqualities = PersistentUniqueList.empty();
+        PersistentUniqueList<Equality> newEqualities = this.equalities;
 
         while (!newEqualities.isEmpty()) {
             PersistentUniqueList<Equality> curEqualities = newEqualities;
@@ -614,19 +652,21 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                         if (lKList.size() == rKList.size()) {
                             for (int i = 0; i < lKList.size(); ++i) {
                                 Equality newEquality = new Equality(lKList.get(i), rKList.get(i), global); // X == Y
-                                equalities = equalities.plus(newEquality);
                                 newEqualities = newEqualities.plus(newEquality);
                             }
+                            continue;
                         }
                     }
                 }
+                //anything but continue above
+                resultEqualities = resultEqualities.plus(equality);
             }
         }
 
-        if (equalities == this.equalities) {
+        if (resultEqualities.equals(this.equalities)) {
             return this;
         } else {
-            return new ConjunctiveFormula(substitution, equalities, disjunctions, truthValue, falsifyingEquality, global);
+            return new ConjunctiveFormula(substitution, resultEqualities, disjunctions, truthValue, falsifyingEquality, global);
         }
     }
 
@@ -778,8 +818,13 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 .collect(Collectors.toList()), global);
     }
 
-    public boolean checkUnsat() {
-        return global.constraintOps.checkUnsat(this);
+    public boolean checkUnsat(FormulaContext formulaContext) {
+        formulaContext.z3Profiler.newRequest();
+        boolean unsat = global.constraintOps.checkUnsat(this, formulaContext);
+        if (global.javaExecutionOptions.debugZ3) {
+            formulaContext.printUnsat(this, unsat, false);
+        }
+        return unsat;
     }
 
     public boolean smartImplies(ConjunctiveFormula constraint) {
@@ -800,16 +845,17 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
          */
 
         constraint = (ConjunctiveFormula) constraint.substitute(this.substitution());
-        return implies(constraint, Collections.emptySet());
+        return implies(constraint, Collections.emptySet(),
+                new FormulaContext(FormulaContext.Kind.EquivImplication, null, constraint.global));
     }
 
     /**
      * Checks if {@code this} implies {@code rightHandSide}, assuming that {@code existentialQuantVars}
      * are existentially quantified.
      */
-    public boolean implies(ConjunctiveFormula rightHandSide, Set<Variable> existentialQuantVars) {
+    public boolean implies(ConjunctiveFormula rightHandSide, Set<Variable> existentialQuantVars, FormulaContext formulaContext) {
         // TODO(AndreiS): this can prove "stuff -> false", it needs fixing
-        assert !rightHandSide.isFalseExtended();
+        assert !rightHandSide.isFalse();
 
         LinkedList<Pair<ConjunctiveFormula, ConjunctiveFormula>> implications = new LinkedList<>();
         implications.add(Pair.of(this, rightHandSide));
@@ -822,7 +868,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
             }
 
             if (global.globalOptions.debug) {
-                System.err.println("Attempting to prove: \n\t" + left + "\n  implies \n\t" + right);
+                System.err.format("\nAttempting to prove:\n================= \n\t%s\n  implies \n\t%s\n", left, right);
             }
 
             right = right.orientSubstitution(existentialQuantVars);
@@ -842,7 +888,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 // TODO (AndreiS): handle KList variables
                 Term condition = ((KList) ite.kList()).get(0);
                 if (global.globalOptions.debug) {
-                    System.err.println("Split on " + condition);
+                    System.err.format("Split on %s\n", condition);
                 }
                 TermContext context = TermContext.builder(global).build();
                 implications.add(Pair.of(left.add(condition, BoolToken.TRUE).simplify(context), right));
@@ -850,8 +896,12 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 continue;
             }
 
-            global.stateLog.log(StateLog.LogEvent.IMPLICATION, left, right);
-            if (!impliesSMT(left, right, existentialQuantVars)) {
+            //Removing LHS substitution because it's not used to build Z3 query anyway.
+            //Improves Z3 cache efficiency.
+            ConjunctiveFormula leftWithoutSubst = ConjunctiveFormula.of(ImmutableMapSubstitution.empty(),
+                    left.equalities(), left.disjunctions(), left.globalContext());
+            global.stateLog.log(StateLog.LogEvent.IMPLICATION, leftWithoutSubst, right);
+            if (!impliesSMT(leftWithoutSubst, right, existentialQuantVars, formulaContext)) {
                 if (global.globalOptions.debug) {
                     System.err.println("Failure!");
                 }
@@ -905,6 +955,8 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
 
     private static final Map<Triple<ConjunctiveFormula, ConjunctiveFormula, Set<Variable>>, Boolean> impliesSMTCache = Collections.synchronizedMap(new HashMap<>());
 
+    public static CounterStopwatch impliesStopwatch = new CounterStopwatch("impliesSMT");
+
     /**
      * Checks if {@code left} implies {@code right}, assuming that {@code existentialQuantVars}
      * are existentially quantified.
@@ -912,12 +964,27 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
     private static boolean impliesSMT(
             ConjunctiveFormula left,
             ConjunctiveFormula right,
-            Set<Variable> existentialQuantVars) {
-        Triple<ConjunctiveFormula, ConjunctiveFormula, Set<Variable>> triple = Triple.of(left, right, existentialQuantVars);
-        if (!impliesSMTCache.containsKey(triple)) {
-            impliesSMTCache.put(triple, left.global.constraintOps.impliesSMT(left, right, existentialQuantVars));
+            Set<Variable> existentialQuantVars,
+            FormulaContext formulaContext) {
+        impliesStopwatch.start();
+        formulaContext.z3Profiler.newRequest();
+        try {
+            Triple<ConjunctiveFormula, ConjunctiveFormula, Set<Variable>> triple = Triple.of(left, right, existentialQuantVars);
+            boolean cached = true;
+            if (!impliesSMTCache.containsKey(triple)) {
+                impliesSMTCache.put(triple,
+                        left.global.constraintOps.impliesSMT(left, right, existentialQuantVars, formulaContext));
+                cached = false;
+            }
+            Boolean result = impliesSMTCache.get(triple);
+
+            if (left.globalContext().javaExecutionOptions.debugZ3) {
+                formulaContext.printImplication(left, right, result, cached);
+            }
+            return result;
+        } finally {
+            impliesStopwatch.stop();
         }
-        return impliesSMTCache.get(triple);
     }
 
     public boolean hasMapEqualities() {
@@ -993,6 +1060,31 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
     @Override
     public String toString() {
         return toKore().toString();
+    }
+
+    public String toStringMultiline() {
+        Map<String, List<String>> nameToStreamMap = ImmutableMap.<String, List<String>>builder()
+                .put("substitutions:", substitution.equalities(global).stream()
+                        .map(equality -> equality.toK().toString()).sorted().collect(Collectors.toList()))
+                .put("equalities:", equalities.stream()
+                        .map(equality -> equality.toK().toString()).sorted().collect(Collectors.toList()))
+                .put("disjunctions:", disjunctions.stream()
+                        .map(disjunctiveFormula -> disjunctiveFormula.toKore().toString()).sorted()
+                        .collect(Collectors.toList()))
+                .build();
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("ConjunctiveFormula(");
+        for (String cat : nameToStreamMap.keySet()) {
+            if (!nameToStreamMap.get(cat).isEmpty()) {
+                sb.append("\n  ").append(cat);
+                for (String line : nameToStreamMap.get(cat)) {
+                    sb.append("\n    ").append(line);
+                }
+            }
+        }
+        sb.append("\n)");
+        return sb.toString();
     }
 
     @Override

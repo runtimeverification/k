@@ -7,26 +7,35 @@ import org.kframework.attributes.Att;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.builtins.MetaK;
 import org.kframework.backend.java.builtins.SortMembership;
-import org.kframework.backend.java.symbolic.*;
+import org.kframework.backend.java.symbolic.BuiltinFunction;
+import org.kframework.backend.java.symbolic.ConjunctiveFormula;
+import org.kframework.backend.java.symbolic.PatternMatcher;
+import org.kframework.backend.java.symbolic.RuleAuditing;
+import org.kframework.backend.java.symbolic.Stage;
+import org.kframework.backend.java.symbolic.Substitution;
+import org.kframework.backend.java.symbolic.Transformer;
+import org.kframework.backend.java.symbolic.Visitor;
+import org.kframework.backend.java.util.Constants;
+import org.kframework.backend.java.util.FormulaContext;
 import org.kframework.backend.java.util.ImpureFunctionException;
 import org.kframework.backend.java.util.Profiler;
 import org.kframework.backend.java.util.Profiler2;
 import org.kframework.backend.java.util.RewriteEngineUtils;
 import org.kframework.backend.java.util.RuleSourceUtil;
 import org.kframework.backend.java.util.Subsorts;
-import org.kframework.backend.java.util.Constants;
+import org.kframework.backend.java.utils.BitSet;
 import org.kframework.builtin.KLabels;
 import org.kframework.kil.Attribute;
 import org.kframework.main.GlobalOptions;
-import org.kframework.backend.java.utils.BitSet;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
-import org.kframework.utils.errorsystem.KEMException;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Formatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -65,6 +74,7 @@ public class KItem extends Term implements KItemRepresentation {
     private Boolean anywhereApplicable = null;
 
     private BitSet[] childrenDontCareRuleMask = null;
+    private final Profiler2 profiler;
 
     public static KItem of(Term kLabel, Term kList, GlobalContext global) {
         return of(kLabel, kList, global, Att.empty(), null);
@@ -103,6 +113,7 @@ public class KItem extends Term implements KItemRepresentation {
         this.isExactSort = isExactSort;
         this.possibleSorts = possibleSorts;
         this.global = global;
+        this.profiler = global.profiler;
         this.enableCache = false;
     }
 
@@ -111,6 +122,7 @@ public class KItem extends Term implements KItemRepresentation {
         this.kLabel = kLabel;
         this.kList = kList;
         this.global = global;
+        this.profiler = global.profiler;
 
         Definition definition = global.getDefinition();
         this.childrenDontCareRuleMask = childrenDonCareRuleMask;
@@ -174,7 +186,7 @@ public class KItem extends Term implements KItemRepresentation {
         Set<Sort> sorts = Sets.newHashSet();
         Set<Sort> possibleSorts = Sets.newHashSet();
 
-        /**
+        /*
          * Sort checks in the Java engine are not implemented as
          * rewrite rules, so we need to precompute the sort of
          * terms. However, right now, we also want to allow users
@@ -273,25 +285,63 @@ public class KItem extends Term implements KItemRepresentation {
     }
 
     public Term evaluateFunction(TermContext context) {
-        global.profiler.resFuncNanoTimer.start();
+        profiler.resFuncNanoTimer.start();
         Term result;
         try {
-            result = global.kItemOps.evaluateFunction(this, context);
-            result.isEvaluated.add(context.getTopConstraint());
+            if (global.javaExecutionOptions.cacheFunctions && isPure()) {
+                ConjunctiveFormula constraint = getCacheConstraint(context);
+                result = cacheGet(constraint, context);
+                if (result == null) {
+                    result = global.kItemOps.evaluateFunction(this, context);
+                    result.cachePut(constraint, result, context);
+                    this.cachePut(constraint, result, context);
+                    if (profiler.resFuncNanoTimer.getLevel() == 1) {
+                        profiler.countResFuncTopUncached++;
+                    } else {
+                        profiler.countResFuncRecursiveUncached++;
+                    }
+                }
+            } else {
+                result = global.kItemOps.evaluateFunction(this, context);
+                if (profiler.resFuncNanoTimer.getLevel() == 1) {
+                    profiler.countResFuncTopUncached++;
+                } else {
+                    profiler.countResFuncRecursiveUncached++;
+                }
+            }
         } finally {
-            global.profiler.resFuncNanoTimer.stop();
+            profiler.resFuncNanoTimer.stop();
         }
         return result;
     }
 
     public Term resolveFunctionAndAnywhere(TermContext context) {
-        global.profiler.resFuncNanoTimer.start();
+        profiler.resFuncNanoTimer.start();
         Term result;
         try {
-            result = global.kItemOps.resolveFunctionAndAnywhere(this, context);
-            result.isEvaluated.add(context.getTopConstraint());
+            if (global.javaExecutionOptions.cacheFunctions && isPure()) {
+                ConjunctiveFormula constraint = getCacheConstraint(context);
+                result = cacheGet(constraint, context);
+                if (result == null) {
+                    result = global.kItemOps.resolveFunctionAndAnywhere(this, context);
+                    result.cachePut(constraint, result, context);
+                    this.cachePut(constraint, result, context);
+                    if (profiler.resFuncNanoTimer.getLevel() == 1) {
+                        profiler.countResFuncTopUncached++;
+                    } else {
+                        profiler.countResFuncRecursiveUncached++;
+                    }
+                }
+            } else {
+                result = global.kItemOps.resolveFunctionAndAnywhere(this, context);
+                if (profiler.resFuncNanoTimer.getLevel() == 1) {
+                    profiler.countResFuncTopUncached++;
+                } else {
+                    profiler.countResFuncRecursiveUncached++;
+                }
+            }
         } finally {
-            global.profiler.resFuncNanoTimer.stop();
+            profiler.resFuncNanoTimer.stop();
         }
         return result;
     }
@@ -519,7 +569,7 @@ public class KItem extends Term implements KItemRepresentation {
                                         sb.append("\n\nCandidate rules:\n");
                                         RuleSourceUtil.appendRuleAndSource(appliedRule, sb);
                                         RuleSourceUtil.appendRuleAndSource(rule, sb);
-                                        sb.append("\n\nCandidate results:\n");
+                                        sb.append("Candidate results:\n");
                                         sb.append(result).append("\n");
                                         sb.append(rightHandSide).append("\n");
                                         throw KEMException.criticalError(sb.toString());
@@ -530,6 +580,10 @@ public class KItem extends Term implements KItemRepresentation {
                                 appliedRule = rule;
                             }
 
+                            if (kItem.global.javaExecutionOptions.logRulesPublic && result != null) {
+                                RuleSourceUtil.printRuleAndSource(rule);
+                            }
+
                             /*
                              * If the function definitions do not need to be deterministic, try them in order
                              * and apply the first one that matches.
@@ -537,6 +591,15 @@ public class KItem extends Term implements KItemRepresentation {
                             if (!deterministicFunctions && result != null) {
                                 return result;
                             }
+                        } catch (KEMException e) {
+                            addDetailedStackFrame(e, kItem, rule, context);
+                            throw e;
+                            // DISABLE EXCEPTION CHECKSTYLE
+                        } catch (RuntimeException | AssertionError | StackOverflowError e) {
+                            // ENABLE EXCEPTION CHECKSTYLE
+                            KEMException newExc = KEMException.criticalError("", e);
+                            addDetailedStackFrame(newExc, kItem, rule, context);
+                            throw newExc;
                         } finally {
                             if (RuleAuditing.isAuditBegun()) {
                                 if (RuleAuditing.getAuditingRule() == rule) {
@@ -558,7 +621,7 @@ public class KItem extends Term implements KItemRepresentation {
                                 return kItem;
                             }
 
-                            /**
+                            /*
                              * apply the "[owise]" rule only if this kItem does not unify with any
                              * of the left-hand-sides of the other rules (no other rule may apply)
                              */
@@ -576,7 +639,8 @@ public class KItem extends Term implements KItemRepresentation {
                                                 .add(rule.lookups())
                                                 .addAll(rule.requires()),
                                         context);
-                                if (!subject.unify(pattern, null).isEmpty()) {
+                                if (!subject.unify(pattern, null,
+                                        new FormulaContext(FormulaContext.Kind.OwiseRule, rule)).isEmpty()) {
                                     return kItem;
                                 }
                             }
@@ -587,6 +651,34 @@ public class KItem extends Term implements KItemRepresentation {
                 return kItem;
             } finally {
                 Profiler.stopTimer(Profiler.getTimerForFunction(kLabelConstant));
+            }
+        }
+
+        public void addDetailedStackFrame(KEMException e, KItem kItem, Rule rule, TermContext context) {
+            final long lengthThreshold = 1000; //Maximum length of a KItem.toString() in a frame.
+            final long maxExcLogCount = 10; //Do not add more than this number of frames.
+            if (context.global().globalOptions.verbose
+                    && context.exceptionLogCount.getAndIncrement() < maxExcLogCount) {
+                try {
+                    String kItemStr = kItem.toString();
+                    kItemStr = kItemStr.substring(0, (int) Math.min(kItemStr.length(), lengthThreshold));
+                    if (kItemStr.length() == lengthThreshold) {
+                        kItemStr += "...";
+                    }
+                    StringBuffer ruleSb = new StringBuffer();
+                    RuleSourceUtil.appendRuleAndSource(rule, ruleSb);
+                    StringBuffer sb = new StringBuffer();
+                    new Formatter(sb).format("while evaluating functional term:\n\t%s\n  and applying the rule\n%s",
+                            kItemStr, ruleSb);
+                    e.exception.addTraceFrame(sb);
+                } catch (StackOverflowError e1) {
+                    //rollback the counter so that the frames above could log.
+                    context.exceptionLogCount.getAndDecrement();
+                    // DISABLE EXCEPTION CHECKSTYLE
+                } catch (Exception e1) {
+                    // ENABLE EXCEPTION CHECKSTYLE
+                    //ignored
+                }
             }
         }
     }
@@ -610,7 +702,7 @@ public class KItem extends Term implements KItemRepresentation {
      */
     public Term applyAnywhereRules(TermContext context) {
         // apply a .K ~> K => K normalization
-        if ((kLabel instanceof KLabelConstant) && KLabels.KSEQ.equals((KLabelConstant) kLabel)
+        if ((kLabel instanceof KLabelConstant) && KLabels.KSEQ.equals(kLabel)
                 && kList instanceof KList
                 && (((KList) kList).get(0) instanceof KItem && KLabels.DOTK.equals(((KItem) ((KList) kList).get(0)).kLabel) || ((KList) kList).get(0).equals(KSequence.EMPTY))) {
             return ((KList) kList).get(1);
@@ -646,6 +738,10 @@ public class KItem extends Term implements KItemRepresentation {
                 RuleAuditing.succeed(rule);
                 Term rightHandSide = rule.rightHandSide();
                 rightHandSide = rightHandSide.substituteAndEvaluate(solution, context);
+
+                if (global.javaExecutionOptions.logRulesPublic) {
+                    RuleSourceUtil.printRuleAndSource(rule);
+                }
                 return rightHandSide;
             } finally {
                 if (RuleAuditing.isAuditBegun()) {
@@ -730,6 +826,19 @@ public class KItem extends Term implements KItemRepresentation {
 
     @Override
     public String toString() {
+        String cached = global.toStringCache.get(this);
+        if (cached != null) {
+            return cached;
+        }
+
+        String result = toStringImpl();
+        if (global.javaExecutionOptions.cacheToString) {
+            global.toStringCache.put(this, result);
+        }
+        return result;
+    }
+
+    public String toStringImpl() {
         return kLabel + "(" + kList.toString() + ")";
     }
 

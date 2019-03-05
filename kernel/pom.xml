@@ -33,21 +33,40 @@
       <groupId>com.google.inject</groupId>
       <artifactId>guice</artifactId>
       <version>4.0-beta5</version>
+      <classifier>no_aop</classifier>
     </dependency>
     <dependency>
       <groupId>com.google.inject.extensions</groupId>
       <artifactId>guice-multibindings</artifactId>
       <version>4.0-beta5</version>
+      <exclusions>
+        <exclusion>
+          <groupId>com.google.inject</groupId>
+	  <artifactId>guice</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>com.google.inject.extensions</groupId>
       <artifactId>guice-grapher</artifactId>
       <version>4.0-beta5</version>
+      <exclusions>
+        <exclusion>
+          <groupId>com.google.inject</groupId>
+	  <artifactId>guice</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>com.google.inject.extensions</groupId>
       <artifactId>guice-throwingproviders</artifactId>
       <version>4.0-beta5</version>
+      <exclusions>
+        <exclusion>
+          <groupId>com.google.inject</groupId>
+	  <artifactId>guice</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>com.google.code.findbugs</groupId>
@@ -209,16 +228,6 @@
           <doCheck>false</doCheck>
           <doUpdate>false</doUpdate>
           <shortRevisionLength>7</shortRevisionLength>
-        </configuration>
-      </plugin>
-      <plugin>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.17</version>
-        <configuration>
-          <systemPropertyVariables>
-            <java.awt.headless>true</java.awt.headless>
-          </systemPropertyVariables>
-          <argLine>-Dfile.encoding=UTF-8</argLine>
         </configuration>
       </plugin>
       <plugin>

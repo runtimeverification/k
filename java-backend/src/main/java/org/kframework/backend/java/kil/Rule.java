@@ -7,8 +7,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import org.apache.commons.collections15.list.UnmodifiableList;
 import org.kframework.attributes.Att;
-import org.kframework.attributes.Location;
-import org.kframework.attributes.Source;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.rewritemachine.GenerateRHSInstructions;
 import org.kframework.backend.java.rewritemachine.RHSInstruction;
@@ -17,9 +15,7 @@ import org.kframework.backend.java.symbolic.Equality;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Constants;
-import org.kframework.kil.ASTNode;
 import org.kframework.kil.Attribute;
-import org.kframework.kil.Attributes;
 
 import java.util.ArrayList;
 import java.util.List;

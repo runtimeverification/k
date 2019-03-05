@@ -1,4 +1,5 @@
 DEF=imp
 EXT=imp
 
-include ../../../../include/ktest.mak
+include ../../../find-k.mak
+include ${K_HOME}/include/ktest.mak

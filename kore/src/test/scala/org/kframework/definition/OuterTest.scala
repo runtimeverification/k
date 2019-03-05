@@ -5,6 +5,7 @@ package org.kframework.definition
 import org.junit.{Assert, Test}
 import org.kframework.kore.KORE.Att
 import org.kframework.kore.KORE.Sort
+import org.kframework.kore.KORE.KLabel
 
 class OuterTest {
   @Test def isPrefixTest: Unit = {
@@ -47,5 +48,11 @@ class OuterTest {
       Production(sort1, Seq(Terminal("foo"), Terminal("("), Terminal("..."), Terminal("bar"), Terminal(":"), nt1, Terminal(")")), newAtt),
       Production(sort1, Seq(Terminal("foo"), Terminal("("), Terminal("..."), Terminal("bar"), Terminal(":"), nt1, Terminal(","), Terminal("baz"), Terminal(":"), nt2,Terminal(")")), newAtt)
     ), records)
+  }
+
+  @Test def klabelAttEquality: Unit = {
+    val prod1 = Production(Some(KLabel("foo")), Sort("Foo"), Seq(), Att.add("klabel", "foo"))
+    val prod2 = Production(Some(KLabel("foo")), Sort("Foo"), Seq(), Att.add("klabel", "bar"))
+    Assert.assertNotEquals(prod1, prod2)
   }
 }

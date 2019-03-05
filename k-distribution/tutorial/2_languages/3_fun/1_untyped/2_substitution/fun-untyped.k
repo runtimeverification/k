@@ -218,7 +218,7 @@ module FUN-UNTYPED
   syntax Val ::= ConstructorName
 
   rule isVal(fun _) => true
-  syntax KVariable ::= Name
+  syntax KVar ::= Name
   syntax Name ::= freshName(Int)    [freshGenerator, function]
   rule freshName(I:Int) => {#parseToken("Name", "#" +String Int2String(I))}:>Name
 

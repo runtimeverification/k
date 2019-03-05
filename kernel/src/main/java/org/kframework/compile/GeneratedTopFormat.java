@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2018 K Team. All Rights Reserved.
+// Copyright (c) 2019 K Team. All Rights Reserved.
 package org.kframework.compile;
 
 import org.kframework.builtin.KLabels;
@@ -50,7 +50,7 @@ public class GeneratedTopFormat {
     }
 
     public static Module resolve(Module m) {
-        Set<Sentence> newSentences = JavaConverters.asScalaSet(stream(m.sentences()).map(s -> s instanceof Production ? resolve((Production) s) : s).collect(Collectors.toSet()));
+        Set<Sentence> newSentences = JavaConverters.asScalaSet(stream(m.localSentences()).map(s -> s instanceof Production ? resolve((Production) s) : s).collect(Collectors.toSet()));
         return Module(m.name(), m.imports(), newSentences, m.att());
     }
 

@@ -11,6 +11,7 @@ import org.kframework.compile.*;
 import org.kframework.compile.checks.CheckConfigurationCells;
 import org.kframework.compile.checks.CheckImports;
 import org.kframework.compile.checks.CheckKLabels;
+import org.kframework.compile.checks.CheckLabels;
 import org.kframework.compile.checks.CheckRHSVariables;
 import org.kframework.compile.checks.CheckRewrite;
 import org.kframework.compile.checks.CheckSortTopUniqueness;
@@ -154,15 +155,17 @@ public class Kompile {
         DefinitionTransformer resolveSemanticCasts =
                 DefinitionTransformer.fromSentenceTransformer(new ResolveSemanticCasts(kompileOptions.backend.equals(Backends.JAVA))::resolve, "resolving semantic casts");
         DefinitionTransformer resolveFun = DefinitionTransformer.from(new ResolveFun()::resolve, "resolving #fun");
+        DefinitionTransformer resolveFunctionWithConfig = DefinitionTransformer.fromSentenceTransformer(new ResolveFunctionWithConfig()::resolve, "resolving functions with config context");
         DefinitionTransformer generateSortPredicateSyntax = DefinitionTransformer.from(new GenerateSortPredicateSyntax()::gen, "adding sort predicate productions");
-        DefinitionTransformer generatedTopFormat = DefinitionTransformer.from(GeneratedTopFormat::resolve, "setting generatedTop format attribute");
         DefinitionTransformer subsortKItem = DefinitionTransformer.from(Kompile::subsortKItem, "subsort all sorts to KItem");
         GenerateCoverage cov = new GenerateCoverage(kompileOptions.coverage, files);
         DefinitionTransformer genCoverage = DefinitionTransformer.fromRuleBodyTransformerWithRule(cov::gen, "generate coverage instrumentation");
         DefinitionTransformer numberSentences = DefinitionTransformer.fromSentenceTransformer(new NumberSentences()::number, "number sentences uniquely");
+        DefinitionTransformer resolveConfigVar = DefinitionTransformer.fromSentenceTransformer(new ResolveFunctionWithConfig()::resolveConfigVar, "Adding configuration variable to lhs");
         Function1<Definition, Definition> resolveIO = (d -> Kompile.resolveIOStreams(kem, d));
 
         return def -> resolveIO
+                .andThen(resolveFunctionWithConfig)
                 .andThen(resolveFun)
                 .andThen(resolveStrict)
                 .andThen(resolveAnonVars)
@@ -172,7 +175,6 @@ public class Kompile {
                 .andThen(resolveSemanticCasts)
                 .andThen(generateSortPredicateSyntax)
                 .andThen(Kompile::resolveFreshConstants)
-                .andThen(generatedTopFormat)
                 .andThen(AddImplicitComputationCell::transformDefinition)
                 .andThen(new Strategy(kompileOptions.experimental.heatCoolStrategies).addStrategyCellToRulesTransformer())
                 .andThen(ConcretizeCells::transformDefinition)
@@ -180,6 +182,7 @@ public class Kompile {
                 .andThen(d -> { cov.close(); return d; })
                 .andThen(subsortKItem)
                 .andThen(Kompile::addSemanticsModule)
+                .andThen(resolveConfigVar)
                 .apply(def);
     }
 
@@ -239,6 +242,8 @@ public class Kompile {
         stream(parsedDef.mainModule().importedModules()).forEach(checkModuleKLabels);
         checkModuleKLabels.accept(parsedDef.mainModule());
 
+        stream(parsedDef.modules()).forEach(m -> stream(m.localSentences()).forEach(new CheckLabels(errors)::check));
+
         if (!errors.isEmpty()) {
             kem.addAllKException(errors.stream().map(e -> e.exception).collect(Collectors.toList()));
             throw KEMException.compilerError("Had " + errors.size() + " structural errors.");
@@ -258,7 +263,7 @@ public class Kompile {
     }
 
     public static Definition resolveFreshConstants(Definition input) {
-        return DefinitionTransformer.from(new ResolveFreshConstants(input, false)::resolve, "resolving !Var variables")
+        return DefinitionTransformer.from(m -> GeneratedTopFormat.resolve(new ResolveFreshConstants(input, false).resolve(m)), "resolving !Var variables")
                 .apply(input);
     }
 

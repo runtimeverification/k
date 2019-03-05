@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.kframework.RewriterResult;
 import org.kframework.builtin.KLabels;
+import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
 import org.kframework.kompile.CompiledDefinition;
@@ -13,7 +14,6 @@ import org.kframework.kore.K;
 import org.kframework.kore.KVariable;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.RunProcess;
-import org.kframework.kserver.KServerFrontEnd;
 import org.kframework.main.GlobalOptions;
 import org.kframework.main.Main;
 import org.kframework.parser.binary.BinaryParser;
@@ -45,7 +45,7 @@ import java.util.stream.Stream;
 import static org.kframework.kore.KORE.*;
 
 @RequestScoped
-public class OcamlRewriter implements Function<Module, Rewriter> {
+public class OcamlRewriter implements Function<Definition, Rewriter> {
 
     private final FileUtil files;
     private final CompiledDefinition def;
@@ -80,7 +80,8 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
     }
 
     @Override
-    public Rewriter apply(Module module) {
+    public Rewriter apply(Definition definition) {
+        Module module = definition.mainModule();
         if (!module.equals(def.executionModule())) {
             throw KEMException.criticalError("Invalid module specified for rewriting. Ocaml backend only supports rewriting over" +
                     " the definition's main module.");
@@ -117,7 +118,7 @@ public class OcamlRewriter implements Function<Module, Rewriter> {
             }
 
             @Override
-            public K prove(Module rules) {
+            public K prove(Module rules, Rule boundaryPattern) {
                 throw new UnsupportedOperationException();
             }
 

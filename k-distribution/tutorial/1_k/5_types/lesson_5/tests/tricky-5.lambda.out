@@ -1,1 +1,1 @@
-T ==K ( ( int -> V0 ) -> ( int -> V0 ) )
+T ==K ( int -> V0 ) -> ( int -> V0 )

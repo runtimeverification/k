@@ -1,4 +1,5 @@
 // Copyright (c) 2015-2018 Runtime Verification, Inc. (RV-Match team). All Rights Reserved.
+
 package org.kframework.backend.ocaml;
 
 import com.google.common.base.Joiner;
@@ -23,6 +24,7 @@ import org.kframework.attributes.Att;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 import org.kframework.builtin.BooleanUtils;
+import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.*;
 import org.kframework.definition.Module;
@@ -2751,6 +2753,14 @@ public class DefinitionToOcaml implements Serializable {
                     sb.append(")");
                 }
                 inBooleanExp = stack;
+                return;
+            }
+            if (k.klabel().equals(KLabels.ML_OR)) {
+                sb.append("((");
+                apply(k.items().get(0));
+                sb.append(")|(");
+                apply(k.items().get(1));
+                sb.append("))");
                 return;
             }
             if (ConvertDataStructureToLookup.isLookupKLabel(k)) {

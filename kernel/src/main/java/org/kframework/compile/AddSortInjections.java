@@ -124,6 +124,8 @@ public class AddSortInjections {
             KApply kapp = (KApply)term;
             if (kapp.klabel().name().equals("inj")) {
                 return term;
+            } else if (kapp.klabel().name().equals("#Or")) {
+                return KApply(KLabel(kapp.klabel().name(), actualSort), KList(addInjections(kapp.items().get(0), actualSort), addInjections(kapp.items().get(1), actualSort)), att);
             }
             Production prod = production(kapp);
             List<K> children = new ArrayList<>();
@@ -180,6 +182,10 @@ public class AddSortInjections {
             KApply kapp = (KApply)term;
             if (kapp.klabel().name().equals("inj")) {
                 return kapp.klabel().params().apply(1);
+            } else if (kapp.klabel().name().equals("#Or")) {
+                Sort leftSort = sort(kapp.items().get(0), expectedSort);
+                Sort rightSort = sort(kapp.items().get(1), expectedSort);
+                return lubSort(leftSort, rightSort, expectedSort, term);
             }
             Production prod = production(kapp);
             if (prod.att().contains("poly")) {

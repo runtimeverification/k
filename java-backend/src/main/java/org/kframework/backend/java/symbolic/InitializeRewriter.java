@@ -16,19 +16,23 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.util.HookProvider;
 import org.kframework.backend.java.util.Profiler2;
+import org.kframework.backend.java.util.RuleSourceUtil;
+import org.kframework.backend.java.util.StateLog;
 import org.kframework.builtin.KLabels;
-import org.kframework.compile.*;
+import org.kframework.compile.ExpandMacros;
+import org.kframework.compile.ResolveSemanticCasts;
 import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
 import org.kframework.kil.Attribute;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
-import org.kframework.kore.KApply;
+import org.kframework.kprove.KProveOptions;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.api.io.FileSystem;
 import org.kframework.main.GlobalOptions;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.rewriter.SearchType;
+import org.kframework.unparser.KPrint;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -38,6 +42,7 @@ import scala.Function1;
 import scala.Tuple2;
 import scala.collection.JavaConversions;
 
+import javax.annotation.Nullable;
 import java.lang.invoke.MethodHandle;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -54,7 +59,7 @@ import static org.kframework.kore.KORE.*;
 /**
  * Created by dwightguth on 5/6/15.
  */
-public class InitializeRewriter implements Function<Module, Rewriter> {
+public class InitializeRewriter implements Function<org.kframework.definition.Definition, Rewriter> {
 
     private final FileSystem fs;
     private final Stopwatch sw;
@@ -64,10 +69,12 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
     private final Map<String, MethodHandle> hookProvider;
     private final List<String> transitions;
     private final KRunOptions krunOptions;
+    private final KProveOptions kproveOptions;
     private final FileUtil files;
     private final InitializeDefinition initializeDefinition;
     private static final int NEGATIVE_VALUE = -1;
     private final KompileOptions kompileOptions;
+    private final KPrint kprint;
     private final Profiler2 profiler;
     private final JavaExecutionOptions javaExecutionOptions;
 
@@ -78,11 +85,13 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
             KExceptionManager kem,
             SMTOptions smtOptions,
             KRunOptions krunOptions,
+            KProveOptions kproveOptions,
             KompileOptions kompileOptions,
             JavaExecutionOptions javaExecutionOptions,
             FileUtil files,
             InitializeDefinition initializeDefinition,
             Stopwatch sw,
+            KPrint kprint,
             Profiler2 profiler) {
         this.fs = fs;
         this.sw = sw;
@@ -92,23 +101,31 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
         this.hookProvider = HookProvider.get(kem);
         this.transitions = kompileOptions.transition;
         this.krunOptions = krunOptions;
+        this.kproveOptions = kproveOptions;
         this.kompileOptions = kompileOptions;
         this.javaExecutionOptions = javaExecutionOptions;
         this.files = files;
         this.initializeDefinition = initializeDefinition;
+        this.kprint = kprint;
         this.profiler = profiler;
     }
 
     @Override
-    public synchronized Rewriter apply(Module mainModule) {
-        TermContext initializingContext = TermContext.builder(new GlobalContext(fs, globalOptions, krunOptions, javaExecutionOptions, kem, smtOptions, hookProvider, files, Stage.INITIALIZING, profiler))
+    public synchronized Rewriter apply(org.kframework.definition.Definition def) {
+        Module mainModule = def.mainModule();
+        TermContext initializingContext = TermContext.builder(new GlobalContext(fs, globalOptions, krunOptions,
+                kproveOptions, javaExecutionOptions, kem, smtOptions, hookProvider, files, Stage.INITIALIZING, profiler,
+                kprint, def))
                 .freshCounter(0).build();
         Definition definition;
         definition = initializeDefinition.invoke(mainModule, kem, initializingContext.global());
-        GlobalContext rewritingContext = new GlobalContext(fs, globalOptions, krunOptions, javaExecutionOptions, kem, smtOptions, hookProvider, files, Stage.REWRITING, profiler);
+        GlobalContext rewritingContext = new GlobalContext(fs, globalOptions, krunOptions,
+                kproveOptions, javaExecutionOptions, kem, smtOptions, hookProvider, files, Stage.REWRITING, profiler,
+                kprint, def);
         rewritingContext.setDefinition(definition);
 
-        return new SymbolicRewriterGlue(mainModule, definition, definition, transitions, initializingContext.getCounterValue(), rewritingContext, kem, files, kompileOptions, sw);
+        return new SymbolicRewriterGlue(mainModule, definition, definition, transitions,
+                initializingContext.getCounterValue(), rewritingContext, kem, files, kompileOptions, sw);
     }
 
     public static Rule transformFunction(Function<K, K> f, Rule r) {
@@ -119,6 +136,10 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
         return Rule.apply(f.apply(r.body()), f.apply(r.requires()), f.apply(r.ensures()), r.att());
     }
 
+    public static org.kframework.backend.java.kil.Rule convertToJavaPattern(KOREtoBackendKIL converter, Rule pattern) {
+        return pattern == null ? null : converter.convert(
+                Optional.empty(), transformFunction(JavaBackend::convertKSeqToKApply, pattern));
+    }
 
     public static class SymbolicRewriterGlue implements Rewriter {
 
@@ -158,13 +179,23 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
         @Override
         public RewriterResult execute(K k, Optional<Integer> depth) {
             rewritingContext.stateLog.open("execute-" + Integer.toString(Math.abs(k.hashCode())));
+            if (rewritingContext.globalOptions.verbose) {
+                rewritingContext.profiler.logParsingTime();
+            }
+            rewritingContext.setExecutionPhase(false);
             TermContext termContext = TermContext.builder(rewritingContext).freshCounter(initCounterValue).build();
             KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, termContext.global(), false);
             ResolveSemanticCasts resolveCasts = new ResolveSemanticCasts(true);
             ExpandMacros macroExpander = new ExpandMacros(module, files, kompileOptions, false);
             termContext.setKOREtoBackendKILConverter(converter);
             Term backendKil = converter.convert(macroExpander.expand(resolveCasts.resolve(k))).evaluate(termContext);
+            rewritingContext.stateLog.log(StateLog.LogEvent.EXECINIT, backendKil, KApply(KLabels.ML_TRUE));
             SymbolicRewriter rewriter = new SymbolicRewriter(rewritingContext, transitions, converter);
+            if (rewritingContext.globalOptions.verbose) {
+                rewritingContext.profiler.logInitTime();
+            }
+            rewritingContext.setExecutionPhase(true);
+            rewritingContext.javaExecutionOptions.logRulesPublic = rewritingContext.javaExecutionOptions.logRules;
             RewriterResult result = rewriter.rewrite(new ConstrainedTerm(backendKil, termContext), depth.orElse(-1));
             rewritingContext.stateLog.close();
             return result;
@@ -185,7 +216,8 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
             ExpandMacros macroExpander = new ExpandMacros(module, files, kompileOptions, false);
             termContext.setKOREtoBackendKILConverter(converter);
             Term javaTerm = converter.convert(macroExpander.expand(resolveCasts.resolve(initialConfiguration))).evaluate(termContext);
-            org.kframework.backend.java.kil.Rule javaPattern = converter.convert(Optional.empty(), transformFunction(JavaBackend::convertKSeqToKApply, pattern));
+            rewritingContext.stateLog.log(StateLog.LogEvent.SEARCHINIT, javaTerm, KApply(KLabels.ML_TRUE));
+            org.kframework.backend.java.kil.Rule javaPattern = convertToJavaPattern(converter, pattern);
             SymbolicRewriter rewriter = new SymbolicRewriter(rewritingContext, transitions, converter);
             K result = rewriter.search(javaTerm, javaPattern, bound.orElse(NEGATIVE_VALUE), depth.orElse(NEGATIVE_VALUE), searchType, termContext);
             rewritingContext.stateLog.close();
@@ -199,18 +231,21 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
         }
 
         @Override
-        public K prove(Module mod) {
+        public K prove(Module mod, @Nullable Rule boundaryPattern) {
             //todo kompileOptions.global == null, but shouldn't
             if (rewritingContext.globalOptions.verbose) {
                 rewritingContext.profiler.logParsingTime();
             }
             rewritingContext.stateLog.open("prove-" + Integer.toString(Math.abs(mod.hashCode())));
+            rewritingContext.setExecutionPhase(false);
             List<Rule> rules = stream(mod.rules()).filter(r -> r.att().contains("specification")).collect(Collectors.toList());
             ProcessProofRules processProofRules = new ProcessProofRules(rules).invoke(rewritingContext, initCounterValue, module, definition);
             List<org.kframework.backend.java.kil.Rule> javaRules = processProofRules.getJavaRules();
             KOREtoBackendKIL converter = processProofRules.getConverter();
             TermContext termContext = processProofRules.getTermContext();
-            List<org.kframework.backend.java.kil.Rule> allRules = javaRules.stream()
+            org.kframework.backend.java.kil.Rule javaBoundaryPattern = convertToJavaPattern(converter, boundaryPattern);
+
+            List<org.kframework.backend.java.kil.Rule> specRules = javaRules.stream()
                     .map(org.kframework.backend.java.kil.Rule::renameVariables)
                     .collect(Collectors.toList());
 
@@ -224,20 +259,36 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
             if (rewritingContext.globalOptions.verbose) {
                 rewritingContext.profiler.logInitTime();
             }
+            rewritingContext.setExecutionPhase(true);
             List<ConstrainedTerm> proofResults = javaRules.stream()
                     .filter(r -> !r.att().contains(Attribute.TRUSTED_KEY))
                     .map(r -> {
-                        ConstrainedTerm lhs = r.createLhsPattern(termContext);
-                        ConstrainedTerm rhs = r.createRhsPattern();
+                        //Build LHS with fully evaluated constraint. Then expand patterns.
+                        ConjunctiveFormula constraint = processProofRules.getEvaluatedConstraint(r);
+                        ConstrainedTerm lhs = new ConstrainedTerm(r.leftHandSide(), constraint, termContext);
+                        termContext.setTopConstraint(constraint);
+                        lhs = lhs.expandPatterns(true);
+
+                        //Build RHS with fully evaluated ensures. RHS term is already evaluated.
+                        ConjunctiveFormula ensures = (ConjunctiveFormula) processProofRules.evaluate(
+                                ConjunctiveFormula.of(termContext.global()).addAll(r.ensures()), constraint, termContext);
+                        ConstrainedTerm rhs = new ConstrainedTerm(
+                                r.rightHandSide(), ensures, TermContext.builder(termContext.global()).build());
+
                         termContext.setInitialVariables(lhs.variableSet());
-                        return rewriter.proveRule(r, lhs, rhs, allRules, kem);
+                        termContext.setTopConstraint(null);
+                        if (rewritingContext.javaExecutionOptions.cacheFunctionsOptimized) {
+                            rewritingContext.functionCache.clearCache();
+                        }
+                        rewritingContext.stateLog.log(StateLog.LogEvent.REACHINIT,   lhs.term(), lhs.constraint());
+                        rewritingContext.stateLog.log(StateLog.LogEvent.REACHTARGET, rhs.term(), rhs.constraint());
+                        return rewriter.proveRule(r, lhs, rhs, specRules, kem, javaBoundaryPattern);
                     })
                     .flatMap(List::stream)
                     .collect(Collectors.toList());
 
             K result = proofResults.stream()
-                    .map(ConstrainedTerm::term)
-                    .map(t -> (KApply) t)
+                    .map(constrainedTerm -> (K) constrainedTerm.term())
                     .reduce(((k1, k2) -> KApply(KLabels.ML_AND, k1, k2))).orElse(KApply(KLabels.ML_TRUE));
             rewritingContext.stateLog.close();
             return result;
@@ -340,17 +391,13 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
             }
 
             public org.kframework.backend.java.kil.Rule evaluateRule(org.kframework.backend.java.kil.Rule rule) {
-                termContext.setTopConstraint(null);
-                //We need this ConsTerm only to evaluate the constraint. That's why we use an empty first argument.
-                ConstrainedTerm constraintHolder = new ConstrainedTerm(
-                        ConjunctiveFormula.of(termContext.global()),
-                        rule.getRequires(),
-                        termContext).expandPatterns(true);
-
-                ConjunctiveFormula constraint = constraintHolder.constraint();
-                termContext.setTopConstraint(constraint);
-                //simplify the constraint in its own context, to force full evaluation of terms.
-                constraint = constraint.simplify(termContext);
+                ConjunctiveFormula constraint = getEvaluatedConstraint(rule);
+                if (constraint.isFalseExtended()) {
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("Rule requires clause evaluates to false:\n");
+                    RuleSourceUtil.appendRuleAndSource(rule, sb);
+                    throw KEMException.criticalError(sb.toString());
+                }
 
                 return new org.kframework.backend.java.kil.Rule(
                         rule.label(),
@@ -363,6 +410,21 @@ public class InitializeRewriter implements Function<Module, Rewriter> {
                         rule.lookups(),
                         rule.att(),
                         termContext.global());
+            }
+
+            public ConjunctiveFormula getEvaluatedConstraint(org.kframework.backend.java.kil.Rule rule) {
+                termContext.setTopConstraint(null);
+                //We need this ConsTerm only to evaluate the constraint. That's why we use an empty first argument.
+                ConstrainedTerm constraintHolder = new ConstrainedTerm(
+                        ConjunctiveFormula.of(termContext.global()),
+                        rule.getRequires(),
+                        termContext).expandPatterns(true);
+
+                ConjunctiveFormula constraint = constraintHolder.constraint();
+                termContext.setTopConstraint(constraint);
+                //simplify the constraint in its own context, to force full evaluation of terms.
+                constraint = constraint.simplify(termContext);
+                return constraint;
             }
 
             private Term evaluate(Term term, ConjunctiveFormula constraint, TermContext context) {

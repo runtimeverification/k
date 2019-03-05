@@ -9,9 +9,9 @@ import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.krun.api.io.FileSystem;
 import org.kframework.utils.errorsystem.KEMException;
 
-import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -30,6 +30,8 @@ public class TermContext extends JavaSymbolicObject {
     private ConjunctiveFormula topConstraint;
 
     private KOREtoBackendKIL converter;
+
+    public final AtomicInteger exceptionLogCount = new AtomicInteger();
 
     private TermContext(GlobalContext global, AtomicLong counter) {
         this.global = global;

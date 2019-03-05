@@ -7,6 +7,7 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.name.Names;
 import org.apache.commons.lang3.tuple.Pair;
+import org.kframework.definition.Definition;
 import org.kframework.krun.ToolActivation;
 import org.kframework.krun.modes.ExecutionMode;
 import org.kframework.main.AbstractKModule;
@@ -54,8 +55,8 @@ public class OcamlBackendKModule extends AbstractKModule {
 
                 bindOptions(OcamlBackendKModule.this::krunOptions, binder());
 
-                MapBinder<String, Function<org.kframework.definition.Module, Rewriter>> rewriterBinder = MapBinder.newMapBinder(
-                        binder(), TypeLiteral.get(String.class), new TypeLiteral<Function<org.kframework.definition.Module, Rewriter>>() {
+                MapBinder<String, Function<Definition, Rewriter>> rewriterBinder = MapBinder.newMapBinder(
+                        binder(), TypeLiteral.get(String.class), new TypeLiteral<Function<Definition, Rewriter>>() {
                         });
                 rewriterBinder.addBinding("ocaml").to(OcamlRewriter.class);
 
