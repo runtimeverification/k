@@ -109,17 +109,17 @@ public class KException implements Serializable {
 
     private int frames = 0;
     private int identicalFrames = 1;
-    private String lastFrame;
-    public void addTraceFrame(String frame) {
+    private CharSequence lastFrame;
+    public void addTraceFrame(CharSequence frame) {
         if (frames < 1024) {
             if (frame.equals(lastFrame)) {
                 identicalFrames++;
             } else {
                 if (identicalFrames > 1) {
-                    trace.append(" * " + identicalFrames);
+                    trace.append(" * ").append(identicalFrames);
                     identicalFrames = 1;
                 }
-                trace.append("\n  " + frame);
+                trace.append("\n  ").append(frame);
                 lastFrame = frame;
                 frames++;
             }

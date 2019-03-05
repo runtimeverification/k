@@ -75,15 +75,18 @@ module KSEQ-SYMBOLIC
 
   syntax KBott ::= "#True" [klabel(#True), symbol, poly(0)]
   syntax KBott ::= "#False" [klabel(#False), symbol, poly(0)]
-  syntax KBott ::= "#Not" "(" K ")" [klabel(#Not), symbol, mlOp, poly(0, 1)]
-                 | "#Ceil" "(" K ")" [klabel(#Ceil), symbol, mlOp, poly(0; 1)]
-                 | "#Floor" "(" K ")" [klabel(#Floor), symbol, mlOp, poly(0; 1)]
-                 > K "#Equals" K [klabel(#Equals), symbol, mlOp, format(%i%1%d%n%2%n%i%3%d), poly(0; 1, 2)]
-                 > K "#And" K [klabel(#And), symbol, assoc, left, comm, unit(#True), mlOp, poly(0, 1, 2), format(%i%1%d%n%2%n%i%3%d)]
-                 > K "#Or" K [klabel(#Or), symbol, assoc, left, comm, unit(#False), mlOp, poly(0, 1, 2), format(%i%1%d%n%2%n%i%3%d)]
-                 > K "#Implies" K [klabel(#Implies), symbol, mlOp, poly(0, 1, 2), format(%i%1%d%n%2%n%i%3%d)]
-                 > "#Exists" #KVariable "." K [klabel(#Exists), symbol, mlOp, poly(0, 2)]
-                 | "#Forall" #KVariable "." K [klabel(#Forall), symbol, mlOp, poly(0, 2)]
+  syntax KBott ::= "#Not" "(" K ")" [klabel(#Not), symbol, mlOp, poly(0, 1), mlUnary]
+                 | "#Ceil" "(" K ")" [klabel(#Ceil), symbol, mlOp, poly(0; 1), mlUnary]
+                 | "#Floor" "(" K ")" [klabel(#Floor), symbol, mlOp, poly(0; 1), mlUnary]
+  syntax K ::= "{" K "#Equals" K "}" [klabel(#Equals), symbol, mlOp, format(%i%1%d%n%2%n%i%3%d), poly(0; 1, 2), mlEquals]
+             > K "#And" K [klabel(#And), symbol, assoc, left, comm, unit(#True), mlOp, poly(0, 1, 2), format(%i%1%d%n%2%n%i%3%d)]
+             > K "#Or" K [klabel(#Or), symbol, assoc, left, comm, unit(#False), mlOp, poly(0, 1, 2), format(%i%1%d%n%2%n%i%3%d)]
+             > K "#Implies" K [klabel(#Implies), symbol, mlOp, poly(0, 1, 2), format(%i%1%d%n%2%n%i%3%d), mlImplies]
+  syntax KBott ::= "#Exists" #KVariable "." K [klabel(#Exists), symbol, mlOp, poly(0, 2), mlQuantifier]
+                 | "#Forall" #KVariable "." K [klabel(#Forall), symbol, mlOp, poly(0, 2), mlQuantifier]
+
+  syntax priority mlUnary > mlEquals
+  syntax priority mlImplies > mlQuantifier
 endmodule
 
 module KCELLS

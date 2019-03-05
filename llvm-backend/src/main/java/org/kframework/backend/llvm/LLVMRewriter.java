@@ -123,7 +123,7 @@ public class LLVMRewriter implements Function<Definition, Rewriter> {
             }
 
             @Override
-            public K prove(Module rules) {
+            public K prove(Module rules, Rule boundaryPattern) {
                 throw new UnsupportedOperationException();
             }
 
