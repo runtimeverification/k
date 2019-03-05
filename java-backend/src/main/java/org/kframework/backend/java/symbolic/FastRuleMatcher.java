@@ -230,9 +230,7 @@ public class FastRuleMatcher {
         try {
             result = match(subject, pattern, ruleMask, path, logFailures);
             // DISABLE EXCEPTION CHECKSTYLE
-        } catch (OutOfMemoryError e) {
-            throw e;
-        } catch (Throwable e) {
+        } catch (RuntimeException | AssertionError | StackOverflowError e) {
             // ENABLE EXCEPTION CHECKSTYLE
             System.err.format("\nException during matching rule pattern:\n\t%s\nSubject:\n%s\nPattern:\n%s\n",
                     e.getMessage(), getLogString(subject), getLogString(pattern));
