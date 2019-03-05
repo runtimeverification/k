@@ -96,4 +96,7 @@ public final class GlobalOptions {
             "interruption and print diagnostics information. Currently interruption detection is implemented in " +
             "Java Backend. If K is invoked from KServer (e.g. Nailgun), the option is ignored.")
     public int shutdownWaitTime = 0;
+
+    @Parameter(names={"--no-exc-wrap"}, description="Do not wrap exception messages to 80 chars. Keep long lines.")
+    public boolean noExcWrap = false;
 }
