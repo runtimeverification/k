@@ -594,11 +594,7 @@ public class KItem extends Term implements KItemRepresentation {
                         } catch (KEMException e) {
                             addDetailedStackFrame(e, kItem, rule, context);
                             throw e;
-                            // DISABLE EXCEPTION CHECKSTYLE
-                        } catch (OutOfMemoryError e) {
-                            throw e;
-                        } catch (Throwable e) {
-                            // ENABLE EXCEPTION CHECKSTYLE
+                        } catch (AssertionError | StackOverflowError | Exception e) {
                             KEMException newExc = KEMException.criticalError("", e);
                             addDetailedStackFrame(newExc, kItem, rule, context);
                             throw newExc;
