@@ -1,0 +1,7 @@
+[Error] Compiler: #fun expressions must have at least one rewrite.
+	Source(noRewriteInFun.k)
+	Location(3,11,3,21)
+[Error] Compiler: Had 1 structural errors.
+[Warning] Compiler: Could not find main syntax module with name
+NOREWRITEINFUN-SYNTAX in definition.  Use --syntax-module to specify one. Using
+NOREWRITEINFUN as default.

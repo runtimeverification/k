@@ -75,15 +75,18 @@ module KSEQ-SYMBOLIC
 
   syntax KBott ::= "#True" [klabel(#True), symbol, poly(0)]
   syntax KBott ::= "#False" [klabel(#False), symbol, poly(0)]
-  syntax KBott ::= "#Not" "(" K ")" [klabel(#Not), symbol, mlOp, poly(0, 1)]
-                 | "#Ceil" "(" K ")" [klabel(#Ceil), symbol, mlOp, poly(0; 1)]
-                 | "#Floor" "(" K ")" [klabel(#Floor), symbol, mlOp, poly(0; 1)]
-                 > K "#Equals" K [klabel(#Equals), symbol, mlOp, format(%i%1%d%n%2%n%i%3%d), poly(0; 1, 2)]
-                 > K "#And" K [klabel(#And), symbol, assoc, left, comm, unit(#True), mlOp, poly(0, 1, 2), format(%i%1%d%n%2%n%i%3%d)]
-                 > K "#Or" K [klabel(#Or), symbol, assoc, left, comm, unit(#False), mlOp, poly(0, 1, 2), format(%i%1%d%n%2%n%i%3%d)]
-                 > K "#Implies" K [klabel(#Implies), symbol, mlOp, poly(0, 1, 2), format(%i%1%d%n%2%n%i%3%d)]
-                 > "#Exists" #KVariable "." K [klabel(#Exists), symbol, mlOp, poly(0, 2)]
-                 | "#Forall" #KVariable "." K [klabel(#Forall), symbol, mlOp, poly(0, 2)]
+  syntax KBott ::= "#Not" "(" K ")" [klabel(#Not), symbol, mlOp, poly(0, 1), mlUnary]
+                 | "#Ceil" "(" K ")" [klabel(#Ceil), symbol, mlOp, poly(0; 1), mlUnary]
+                 | "#Floor" "(" K ")" [klabel(#Floor), symbol, mlOp, poly(0; 1), mlUnary]
+  syntax K ::= "{" K "#Equals" K "}" [klabel(#Equals), symbol, mlOp, format(%i%1%d%n%2%n%i%3%d), poly(0; 1, 2), mlEquals]
+             > K "#And" K [klabel(#And), symbol, assoc, left, comm, unit(#True), mlOp, poly(0, 1, 2), format(%i%1%d%n%2%n%i%3%d)]
+             > K "#Or" K [klabel(#Or), symbol, assoc, left, comm, unit(#False), mlOp, poly(0, 1, 2), format(%i%1%d%n%2%n%i%3%d)]
+             > K "#Implies" K [klabel(#Implies), symbol, mlOp, poly(0, 1, 2), format(%i%1%d%n%2%n%i%3%d), mlImplies]
+  syntax KBott ::= "#Exists" #KVariable "." K [klabel(#Exists), symbol, mlOp, poly(0, 2), mlQuantifier]
+                 | "#Forall" #KVariable "." K [klabel(#Forall), symbol, mlOp, poly(0, 2), mlQuantifier]
+
+  syntax priority mlUnary > mlEquals
+  syntax priority mlImplies > mlQuantifier
 endmodule
 
 module KCELLS
@@ -96,6 +99,8 @@ module KCELLS
                | Cell
   syntax Bag ::= "(" Bag ")" [bracket]
   syntax K ::= Bag
+  syntax #RuleBody ::= "[" "[" K "]" "]" Bag    [klabel(#withConfig), symbol, avoid]
+  syntax non-assoc #withConfig
   syntax Bag ::= KBott
 endmodule
 
@@ -131,12 +136,14 @@ endmodule
 module REQUIRES-ENSURES
   imports BASIC-K
 
-  syntax RuleContent ::= K                                 [klabel("#ruleNoConditions"), symbol]
-                       | K "requires" K                    [klabel("#ruleRequires"), symbol]
-                       | K "when" K                        [klabel("#ruleRequires"), symbol]
-                       | K "ensures"  K                    [klabel("#ruleEnsures"), symbol]
-                       | K "requires" K "ensures" K        [klabel("#ruleRequiresEnsures"), symbol]
-                       | K "when" K "ensures" K            [klabel("#ruleRequiresEnsures"), symbol]
+  syntax #RuleBody ::= K
+
+  syntax #RuleContent ::= #RuleBody                                 [klabel("#ruleNoConditions"), symbol]
+                        | #RuleBody "requires" K                    [klabel("#ruleRequires"), symbol]
+                        | #RuleBody "when" K                        [klabel("#ruleRequires"), symbol]
+                        | #RuleBody "ensures"  K                    [klabel("#ruleEnsures"), symbol]
+                        | #RuleBody "requires" K "ensures" K        [klabel("#ruleRequiresEnsures"), symbol]
+                        | #RuleBody "when" K "ensures" K            [klabel("#ruleRequiresEnsures"), symbol]
 endmodule
 
 module K-TOP-SORT
@@ -228,6 +235,7 @@ module K
 
   syntax K ::= K "=>" K [klabel(#KRewrite), symbol, poly(0, 1, 2)]
   syntax non-assoc #KRewrite
+  syntax priority #KRewrite > #withConfig
 
   syntax K ::= K "#as" K [klabel(#KAs), symbol, poly(0, 1, 2)]
   // functions that preserve sorts and can therefore have inner rewrites
