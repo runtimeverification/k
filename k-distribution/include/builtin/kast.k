@@ -68,8 +68,8 @@ module ML-SYNTAX
 
   syntax #KVariable ::= r"(?<![A-Za-z0-9_\\$!\\?])(\\!|\\?)?([A-Z][A-Za-z0-9'_]*|_)"   [token, prec(1), autoReject]
 
-  syntax K ::= "#True" [klabel(#True), symbol, poly(0)]
-  syntax K ::= "#False" [klabel(#False), symbol, poly(0)]
+  syntax K ::= "#True" [klabel(#True), mlOp, symbol, poly(0)]
+  syntax K ::= "#False" [klabel(#False), mlOp, symbol, poly(0)]
   syntax K ::= "#Not" "(" K ")" [klabel(#Not), symbol, mlOp, poly(0, 1), mlUnary]
              | "#Ceil" "(" K ")" [klabel(#Ceil), symbol, mlOp, poly(0; 1), mlUnary]
              | "#Floor" "(" K ")" [klabel(#Floor), symbol, mlOp, poly(0; 1), mlUnary]

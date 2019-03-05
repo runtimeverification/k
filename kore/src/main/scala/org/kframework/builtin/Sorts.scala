@@ -42,4 +42,6 @@ object Sorts {
 
   val Z3Query  = Sort("Z3Query")
   val Z3Result = Sort("Z3Result")
+
+  val SortParam = Sort("SortParam")
 }
