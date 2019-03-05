@@ -130,7 +130,9 @@ public class KExceptionManager {
                     continue;
                 }
                 printStackTrace(e);
-                System.err.println(StringUtil.splitLines(e.toString(options.verbose)));
+                String msg = options.noExcWrap ? e.toString(options.verbose)
+                                               : StringUtil.splitLines(e.toString(options.verbose));
+                System.err.println(msg);
                 last = e;
             }
         }
