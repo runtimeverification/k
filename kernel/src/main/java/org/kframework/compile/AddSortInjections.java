@@ -242,7 +242,7 @@ public class AddSortInjections {
     }
 
     private Production production(KApply term) {
-        scala.collection.Set<Production> prods = mod.productionsFor().apply(((KApply) term).klabel());
+        scala.collection.Set<Production> prods = mod.productionsFor().apply(term.klabel());
         if (prods.size() != 1) {
           throw KEMException.compilerError("Could not find production for KApply with label " + term.klabel(), term);
         }
