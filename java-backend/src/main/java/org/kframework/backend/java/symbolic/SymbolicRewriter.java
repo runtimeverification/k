@@ -758,12 +758,12 @@ public class SymbolicRewriter {
                 if (Thread.currentThread().isInterrupted()) {
                     throw KEMException.criticalError("Thread interrupted");
                 }
-                    // DISABLE EXCEPTION CHECKSTYLE
                 } catch (OutOfMemoryError e) {
                     e.printStackTrace(); //to avoid hiding this exception in case another OOMError is thrown.
                     printSummaryBox(rule, proofResults, successPaths, step, queue.size() + nextQueue.size() - v + 1);
                     throw e;
-                } catch (Throwable e) {
+                    // DISABLE EXCEPTION CHECKSTYLE
+                } catch (RuntimeException | AssertionError | StackOverflowError e) {
                     // ENABLE EXCEPTION CHECKSTYLE
                     logStep(step, v, term, true, alreadyLogged);
                     System.err.println("\n" +
