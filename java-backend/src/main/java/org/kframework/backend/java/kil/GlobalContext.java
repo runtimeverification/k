@@ -13,6 +13,7 @@ import org.kframework.backend.java.util.Profiler2;
 import org.kframework.backend.java.util.StateLog;
 import org.kframework.backend.java.util.ToStringCache;
 import org.kframework.backend.java.util.Z3Wrapper;
+import org.kframework.kprove.KProveOptions;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.api.io.FileSystem;
 import org.kframework.main.GlobalOptions;
@@ -34,6 +35,7 @@ public class GlobalContext implements Serializable {
     public final transient SMTOperations constraintOps;
     public final transient KItemOperations kItemOps;
     public final transient KRunOptions krunOptions;
+    public final transient KProveOptions kproveOptions;
     public final transient JavaExecutionOptions javaExecutionOptions;
     public final transient KExceptionManager kem;
     private final transient Map<String, MethodHandle> hookProvider;
@@ -52,6 +54,7 @@ public class GlobalContext implements Serializable {
             FileSystem fs,
             GlobalOptions globalOptions,
             KRunOptions krunOptions,
+            KProveOptions kproveOptions,
             JavaExecutionOptions javaExecutionOptions,
             KExceptionManager kem,
             SMTOptions smtOptions,
@@ -64,18 +67,19 @@ public class GlobalContext implements Serializable {
         this.fs = fs;
         this.globalOptions = globalOptions;
         this.krunOptions = krunOptions;
+        this.kproveOptions = kproveOptions;
         this.javaExecutionOptions = javaExecutionOptions;
         this.kem = kem;
         this.hookProvider = hookProvider;
         this.files = files;
         this.equalityOps = new EqualityOperations(() -> def);
-        this.stateLog = new StateLog(javaExecutionOptions, files);
-        this.constraintOps = new SMTOperations(() -> def, smtOptions,
-                new Z3Wrapper(smtOptions, kem, javaExecutionOptions, files, stateLog), kem, javaExecutionOptions);
+        prettyPrinter = new PrettyPrinter(kprint, coreDefinition);
+        this.stateLog = new StateLog(javaExecutionOptions, files, prettyPrinter);
+        this.constraintOps = new SMTOperations(() -> def, smtOptions, new Z3Wrapper(smtOptions, kem, javaExecutionOptions, files, stateLog), kem, javaExecutionOptions);
         this.kItemOps = new KItemOperations(stage, javaExecutionOptions.deterministicFunctions, kem, this::builtins, globalOptions);
         this.stage = stage;
         this.profiler = profiler;
-        prettyPrinter = new PrettyPrinter(kprint, coreDefinition);
+
     }
 
     private transient BuiltinFunction builtinFunction;
