@@ -39,7 +39,6 @@ import java.util.Formatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 
@@ -596,7 +595,9 @@ public class KItem extends Term implements KItemRepresentation {
                             addDetailedStackFrame(e, kItem, rule, context);
                             throw e;
                             // DISABLE EXCEPTION CHECKSTYLE
-                        } catch (RuntimeException | Error e) {
+                        } catch (OutOfMemoryError e) {
+                            throw e;
+                        } catch (Throwable e) {
                             // ENABLE EXCEPTION CHECKSTYLE
                             KEMException newExc = KEMException.criticalError("", e);
                             addDetailedStackFrame(newExc, kItem, rule, context);
