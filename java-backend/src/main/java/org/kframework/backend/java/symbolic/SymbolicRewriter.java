@@ -641,38 +641,38 @@ public class SymbolicRewriter {
 
             for (ConstrainedTerm term : queue) {
                 boolean alreadyLogged = false;
-                try { //not formatting to minimize git merge conflicts.
-
-                v++;
-
-                boolean boundaryCellsMatchTarget = boundaryCellsMatchTarget(term, boundaryPattern, targetBoundarySub);
-                //var required to avoid logging the same step multiple times.
-                alreadyLogged = logStep(step, v, term,
-                        step == 1 || boundaryCellsMatchTarget, false);
-                if (boundaryPattern == null || boundaryCellsMatchTarget) {
-                    //Only test the full implication if there is no boundary pattern or if it is matched.
-                    if (term.implies(targetTerm, rule, !(boundaryPattern == null))) {
-                        //If current term matches the target term, current execution path is proved.
-                        global.stateLog.log(StateLog.LogEvent.REACHPROVED, term.term(), term.constraint());
-                        if (global.javaExecutionOptions.logBasic) {
-                            logStep(step, v, term, true, alreadyLogged);
-                            System.err.println("\n============\nStep " + step + ": eliminated!\n============\n");
+                try {
+                    v++;
+                    boolean boundaryCellsMatchTarget =
+                            boundaryCellsMatchTarget(term, boundaryPattern, targetBoundarySub);
+                    //var required to avoid logging the same step multiple times.
+                    alreadyLogged = logStep(step, v, term,
+                            step == 1 || boundaryCellsMatchTarget, false);
+                    if (boundaryPattern == null || boundaryCellsMatchTarget) {
+                        //Only test the full implication if there is no boundary pattern or if it is matched.
+                        if (term.implies(targetTerm, rule, !(boundaryPattern == null))) {
+                            //If current term matches the target term, current execution path is proved.
+                            global.stateLog.log(StateLog.LogEvent.REACHPROVED, term.term(), term.constraint());
+                            if (global.javaExecutionOptions.logBasic) {
+                                logStep(step, v, term, true, alreadyLogged);
+                                System.err.println("\n============\nStep " + step + ": eliminated!\n============\n");
+                            }
+                            successPaths++;
+                            successResults.add(term);
+                            continue;
+                        } else if (boundaryPattern != null && step > 1) {
+                            //If boundary cells in current term match boundary cells in target term but entire terms
+                            // don't match, halt execution.
+                            logStep(step, v, term, global.javaExecutionOptions.logBasic, alreadyLogged);
+                            System.err.println("Halt! Terminating branch.");
+                            proofResults.add(term);
+                            continue;
                         }
-                        successPaths++;
-                        successResults.add(term);
-                        continue;
-                    } else if (boundaryPattern != null && step > 1) {
-                        //If boundary cells in current term match boundary cells in target term but entire terms
-                        // don't match, halt execution.
-                        logStep(step, v, term, global.javaExecutionOptions.logBasic, alreadyLogged);
-                        System.err.println("Halt! Terminating branch.");
-                        proofResults.add(term);
-                        continue;
+                        //else: case (no boundary pattern || (step == 1 && boundaryCellsMatchTarget))
+                        //      && final implication == false
+                        //  Do nothing. Boundary checking is disabled if there is no boundary pattern, or at step 1.
+                        //  Disabling on step 1 is useful for specs that match 1 full loop iteration.
                     }
-                    //else: case (no boundary pattern || (step == 1 && boundaryCellsMatchTarget)) && final implication == false
-                    //  Do nothing. Boundary checking is disabled if there is no boundary pattern, or at step 1.
-                    //  Disabling on step 1 is useful for specs that match 1 full loop iteration.
-                }
 
                 /* TODO(AndreiS): terminate the proof with failure based on the klabel _~>_
                 List<Term> leftKContents = term.term().getCellContentsByName("<k>");
@@ -694,70 +694,70 @@ public class SymbolicRewriter {
                     }
                 }*/
 
-                if (guarded) {
-                    ConstrainedTerm result = applySpecRules(term, specRules);
-                    if (result != null) {
+                    if (guarded) {
+                        ConstrainedTerm result = applySpecRules(term, specRules);
+                        if (result != null) {
+                            nextStepLogEnabled = true;
+                            logStep(step, v, term, true, alreadyLogged);
+                            // re-running constraint generation again for debug purposes
+                            if (global.javaExecutionOptions.logBasic) {
+                                System.err.println("\nApplying specification rule\n=========================\n");
+                            }
+                            if (visited.add(result)) {
+                                nextQueue.add(result);
+                            } else {
+                                if (term.equals(result)) {
+                                    throw KEMException.criticalError(
+                                            "Step " + step + ": infinite loop after applying a spec rule.");
+                                }
+                            }
+                            continue;
+                        }
+                    }
+
+                    List<ConstrainedTerm> results = fastComputeRewriteStep(term, false, true, true, step);
+                    if (results.isEmpty()) {
+                        logStep(step, v, term, true, alreadyLogged);
+                        System.err.println("\nStep above: " + step + ", evaluation ended with no successors.");
+                        if (step == 1) {
+                            kem.registerCriticalWarning("Evaluation ended on 1st step. " +
+                                    "Possible cause: non-functional term in constraint (path condition).");
+                        }
+                        /* final term */
+                        proofResults.add(term);
+                    }
+
+                    if (results.size() > 1) {
                         nextStepLogEnabled = true;
                         logStep(step, v, term, true, alreadyLogged);
-                        // re-running constraint generation again for debug purposes
-                        if (global.javaExecutionOptions.logBasic) {
-                            System.err.println("\nApplying specification rule\n=========================\n");
-                        }
-                        if (visited.add(result)) {
-                            nextQueue.add(result);
+                        if (branchingRemaining == 0) {
+                            System.err.println("\nHalt on branching!\n=====================\n");
+
+                            proofResults.addAll(results);
+                            continue;
                         } else {
-                            if (term.equals(result)) {
-                                throw KEMException.criticalError(
-                                        "Step " + step + ": infinite loop after applying a spec rule.");
+                            branchingRemaining--;
+                            if (global.javaExecutionOptions.logBasic) {
+                                System.err.println("\nBranching!\n=====================\n");
                             }
                         }
-                        continue;
                     }
-                }
-
-                List<ConstrainedTerm> results = fastComputeRewriteStep(term, false, true, true, step);
-                if (results.isEmpty()) {
-                    logStep(step, v, term, true, alreadyLogged);
-                    System.err.println("\nStep above: " + step + ", evaluation ended with no successors.");
-                    if (step == 1) {
-                        kem.registerCriticalWarning("Evaluation ended on 1st step. " +
-                                "Possible cause: non-functional term in constraint (path condition).");
-                    }
-                    /* final term */
-                    proofResults.add(term);
-                }
-
-                if (results.size() > 1) {
-                    nextStepLogEnabled = true;
-                    logStep(step, v, term, true, alreadyLogged);
-                    if (branchingRemaining == 0) {
-                        System.err.println("\nHalt on branching!\n=====================\n");
-
-                        proofResults.addAll(results);
-                        continue;
-                    } else {
-                        branchingRemaining--;
-                        if (global.javaExecutionOptions.logBasic) {
-                            System.err.println("\nBranching!\n=====================\n");
+                    for (ConstrainedTerm cterm : results) {
+                        ConstrainedTerm result = new ConstrainedTerm(
+                                cterm.term(),
+                                cterm.constraint().removeBindings(
+                                        Sets.difference(
+                                                cterm.constraint().substitution().keySet(),
+                                                initialTerm.variableSet())),
+                                cterm.termContext());
+                        if (visited.add(result)) {
+                            nextQueue.add(result);
                         }
                     }
-                }
-                for (ConstrainedTerm cterm : results) {
-                    ConstrainedTerm result = new ConstrainedTerm(
-                            cterm.term(),
-                            cterm.constraint().removeBindings(
-                                    Sets.difference(
-                                            cterm.constraint().substitution().keySet(),
-                                            initialTerm.variableSet())),
-                            cterm.termContext());
-                    if (visited.add(result)) {
-                        nextQueue.add(result);
-                    }
-                }
 
-                if (Thread.currentThread().isInterrupted()) {
-                    throw KEMException.criticalError("Thread interrupted");
-                }
+                    if (Thread.currentThread().isInterrupted()) {
+                        throw KEMException.criticalError("Thread interrupted");
+                    }
                 } catch (OutOfMemoryError e) {
                     e.printStackTrace(); //to avoid hiding this exception in case another OOMError is thrown.
                     printSummaryBox(rule, proofResults, successPaths, step, queue.size() + nextQueue.size() - v + 1);
