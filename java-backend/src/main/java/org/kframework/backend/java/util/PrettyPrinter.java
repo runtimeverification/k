@@ -30,4 +30,8 @@ public class PrettyPrinter {
     public void prettyPrint(K target, OutputStream out) {
         kprint.prettyPrint(def, module, output -> kprint.outputFile(output, out), target);
     }
+
+    public byte[] prettyPrintBytes(K target) {
+        return kprint.prettyPrint(def, module, target);
+    }
 }

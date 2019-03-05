@@ -147,12 +147,12 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
         }
 
         public boolean isAnyVar() {
-            return var.value().equals(ResolveAnonVar.ANON_VAR.name());
+            return var.value().equals(ResolveAnonVar.ANON_VAR.name()) || var.value().equals(ResolveAnonVar.FRESH_ANON_VAR.name());
         }
     }
 
     private static VarKey getVarKey(Constant c) {
-        if (c.value().equals(ResolveAnonVar.ANON_VAR.name())) {
+        if (c.value().equals(ResolveAnonVar.ANON_VAR.name()) || c.value().equals(ResolveAnonVar.FRESH_ANON_VAR.name())) {
             return new VarKey(c); // wildcard values are compared including location
         } else {
             return new VarKey(Constant.apply(c.value(), c.production(), Optional.empty(), Optional.empty()));
@@ -369,8 +369,11 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
     }
 
     public static boolean isFunctionRule(TermCons tc) {
-        if (tc.production().sort().name().equals("RuleContent")) {
+        if ((tc.production().sort().name().equals("#RuleContent") || tc.production().sort().name().equals("#RuleBody")) && !(tc.get(0) instanceof TermCons && isFunctionRule((TermCons)tc.get(0)))) {
             ProductionReference child = (ProductionReference) tc.get(0);
+            if (child.production().klabel().isDefined() && child.production().klabel().get().name().equals("#withConfig")) {
+                child = (ProductionReference)((TermCons)child).get(0);
+            }
             if (child.production().klabel().isDefined() && child.production().klabel().get().equals(KLabels.KREWRITE)) {
                 child = (ProductionReference)((TermCons)child).get(0);
             }
@@ -384,8 +387,12 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
         case "#ruleNoConditions":
         case "#ruleRequires":
         case "#ruleEnsures":
-        case "#ruleRequiresEnsures": {
+        case "#ruleRequiresEnsures":
+        case "#withConfig": {
             ProductionReference child = (ProductionReference) tc.get(0);
+            if (child.production().klabel().isDefined() && child.production().klabel().get().name().equals("#withConfig")) {
+                child = (ProductionReference)((TermCons)child).get(0);
+            }
             if (child.production().klabel().isDefined() && child.production().klabel().get().equals(KLabels.KREWRITE)) {
                 child = (ProductionReference)((TermCons)child).get(0);
             }

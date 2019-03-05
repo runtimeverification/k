@@ -54,7 +54,6 @@ public class RuleGrammarGenerator {
         kSorts.add(Sorts.KLabel());
         kSorts.add(Sorts.KList());
         kSorts.add(Sorts.KItem());
-        kSorts.add(Sort("RuleContent"));
         kSorts.add(Sorts.KConfigVar());
         kSorts.add(Sorts.KString());
     }
@@ -411,10 +410,6 @@ public class RuleGrammarGenerator {
                 makeAllSortTuples(level-1, size, sorts, res, indices);
             }
         }
-    }
-
-    private boolean isExceptionSort(Sort srt) {
-        return kSorts.contains(srt) || srt.name().startsWith("#");
     }
 
     private static Set<Sentence> makeCasts(Sort outerSort, Sort innerSort, Sort castSort) {
