@@ -2,9 +2,9 @@
   B:Term |-> john
   ( X:Term |-> david )
 #Or
-  Solution ==K ( A:Term |-> nathan
+  Solution ==K ( A:Term |-> nathan )
   B:Term |-> david
-  X:Term |-> jim )
+  ( X:Term |-> jim )
 #Or
   Solution ==K ( A:Term |-> nathan )
   B:Term |-> david
@@ -26,9 +26,9 @@
   B:Term |-> john
   ( X:Term |-> steve )
 #Or
-  Solution ==K ( A:Term |-> steve
+  Solution ==K ( A:Term |-> steve )
   B:Term |-> david
-  X:Term |-> jim )
+  ( X:Term |-> jim )
 #Or
   Solution ==K ( A:Term |-> steve )
   B:Term |-> john
