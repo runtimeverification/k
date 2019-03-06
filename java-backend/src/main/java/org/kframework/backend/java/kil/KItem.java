@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Formatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -568,7 +569,7 @@ public class KItem extends Term implements KItemRepresentation {
                                         sb.append("\n\nCandidate rules:\n");
                                         RuleSourceUtil.appendRuleAndSource(appliedRule, sb);
                                         RuleSourceUtil.appendRuleAndSource(rule, sb);
-                                        sb.append("\n\nCandidate results:\n");
+                                        sb.append("Candidate results:\n");
                                         sb.append(result).append("\n");
                                         sb.append(rightHandSide).append("\n");
                                         throw KEMException.criticalError(sb.toString());
@@ -590,6 +591,15 @@ public class KItem extends Term implements KItemRepresentation {
                             if (!deterministicFunctions && result != null) {
                                 return result;
                             }
+                        } catch (KEMException e) {
+                            addDetailedStackFrame(e, kItem, rule, context);
+                            throw e;
+                            // DISABLE EXCEPTION CHECKSTYLE
+                        } catch (RuntimeException | AssertionError | StackOverflowError e) {
+                            // ENABLE EXCEPTION CHECKSTYLE
+                            KEMException newExc = KEMException.criticalError("", e);
+                            addDetailedStackFrame(newExc, kItem, rule, context);
+                            throw newExc;
                         } finally {
                             if (RuleAuditing.isAuditBegun()) {
                                 if (RuleAuditing.getAuditingRule() == rule) {
@@ -641,6 +651,34 @@ public class KItem extends Term implements KItemRepresentation {
                 return kItem;
             } finally {
                 Profiler.stopTimer(Profiler.getTimerForFunction(kLabelConstant));
+            }
+        }
+
+        public void addDetailedStackFrame(KEMException e, KItem kItem, Rule rule, TermContext context) {
+            final long lengthThreshold = 1000; //Maximum length of a KItem.toString() in a frame.
+            final long maxExcLogCount = 10; //Do not add more than this number of frames.
+            if (context.global().globalOptions.verbose
+                    && context.exceptionLogCount.getAndIncrement() < maxExcLogCount) {
+                try {
+                    String kItemStr = kItem.toString();
+                    kItemStr = kItemStr.substring(0, (int) Math.min(kItemStr.length(), lengthThreshold));
+                    if (kItemStr.length() == lengthThreshold) {
+                        kItemStr += "...";
+                    }
+                    StringBuffer ruleSb = new StringBuffer();
+                    RuleSourceUtil.appendRuleAndSource(rule, ruleSb);
+                    StringBuffer sb = new StringBuffer();
+                    new Formatter(sb).format("while evaluating functional term:\n\t%s\n  and applying the rule\n%s",
+                            kItemStr, ruleSb);
+                    e.exception.addTraceFrame(sb);
+                } catch (StackOverflowError e1) {
+                    //rollback the counter so that the frames above could log.
+                    context.exceptionLogCount.getAndDecrement();
+                    // DISABLE EXCEPTION CHECKSTYLE
+                } catch (Exception e1) {
+                    // ENABLE EXCEPTION CHECKSTYLE
+                    //ignored
+                }
             }
         }
     }

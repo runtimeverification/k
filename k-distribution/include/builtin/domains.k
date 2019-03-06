@@ -381,9 +381,9 @@ module INT
   syntax Int ::= bitRangeInt           ( Int, indexInt: Int, lengthInt: Int ) [function, hook(INT.bitRange)]
   syntax Int ::= signExtendBitRangeInt ( Int, indexInt: Int, lengthInt: Int ) [function, hook(INT.signExtendBitRange)]
 
-  rule bitRangeInt(I, IDX, LEN) => (I >>Int IDX) modInt (1 <<Int LEN)
+  rule bitRangeInt(I::Int, IDX::Int, LEN::Int) => (I >>Int IDX) modInt (1 <<Int LEN)
 
-  rule signExtendBitRangeInt(I, IDX, LEN) => (bitRangeInt(I, IDX, LEN) +Int (1 <<Int (LEN -Int 1))) modInt (1 <<Int LEN) -Int (1 <<Int (LEN -Int 1))
+  rule signExtendBitRangeInt(I::Int, IDX::Int, LEN::Int) => (bitRangeInt(I, IDX, LEN) +Int (1 <<Int (LEN -Int 1))) modInt (1 <<Int LEN) -Int (1 <<Int (LEN -Int 1))
 
   rule I1:Int divInt I2:Int => (I1 -Int (I1 modInt I2)) /Int I2
   requires I2 =/=Int 0
@@ -709,14 +709,14 @@ module BYTES
   imports BYTES-IN-K
   imports INT
 
-  rule Int2Bytes(I, E, Unsigned) => Int2Bytes((log2Int(I) +Int 8) /Int 8, I, E)
+  rule Int2Bytes(I::Int, E::Endianness, Unsigned) => Int2Bytes((log2Int(I) +Int 8) /Int 8, I, E)
     requires I >Int 0
   rule Int2Bytes(0, _::Endianness, _) => .Bytes
-  rule Int2Bytes(I, E, Signed) => Int2Bytes((log2Int(I) +Int 9) /Int 8, I, E)
+  rule Int2Bytes(I::Int, E::Endianness, Signed) => Int2Bytes((log2Int(I) +Int 9) /Int 8, I, E)
     requires I >Int 0
-  rule Int2Bytes(I, E, Signed) => Int2Bytes((log2Int(~Int I) +Int 9) /Int 8, I, E)
+  rule Int2Bytes(I::Int, E::Endianness, Signed) => Int2Bytes((log2Int(~Int I) +Int 9) /Int 8, I, E)
     requires I <Int -1
-  rule Int2Bytes(-1, E, Signed) => Int2Bytes(1, -1, E)
+  rule Int2Bytes(-1, E::Endianness, Signed) => Int2Bytes(1, -1, E)
 endmodule
 
 module ID-PROGRAM-PARSING
@@ -779,8 +779,8 @@ module K-EQUAL
 
   syntax K ::= "#if" Bool "#then" K "#else" K "#fi"   [function, functional, smtlib(ite), hook(KEQUAL.ite), poly(0, 2, 3)]
 
-  rule #if C:Bool #then B1 #else _ #fi => B1 requires C
-  rule #if C:Bool #then _ #else B2 #fi => B2 requires notBool C
+  rule #if C:Bool #then B1::K #else _ #fi => B1 requires C
+  rule #if C:Bool #then _ #else B2::K #fi => B2 requires notBool C
 
 endmodule
 
@@ -818,81 +818,84 @@ module K-IO
   imports LIST
   imports STRING
 
-  syntax IOError ::= "#EOF" | "#noparse" | #unknownIOError(Int)
-                   | "#E2BIG"
-                   | "#EACCES"
-                   | "#EAGAIN"
-                   | "#EBADF"
-                   | "#EBUSY"
-                   | "#ECHILD"
-                   | "#EDEADLK"
-                   | "#EDOM"
-                   | "#EEXIST"
-                   | "#EFAULT"
-                   | "#EFBIG"
-                   | "#EINTR"
-                   | "#EINVAL"
-                   | "#EIO"
-                   | "#EISDIR"
-                   | "#EMFILE"
-                   | "#EMLINK"
-                   | "#ENAMETOOLONG"
-                   | "#ENFILE"
-                   | "#ENODEV"
-                   | "#ENOENT"
-                   | "#ENOEXEC"
-                   | "#ENOLCK"
-                   | "#ENOMEM"
-                   | "#ENOSPC"
-                   | "#ENOSYS"
-                   | "#ENOTDIR"
-                   | "#ENOTEMPTY"
-                   | "#ENOTTY"
-                   | "#ENXIO"
-                   | "#EPERM"
-                   | "#EPIPE"
-                   | "#ERANGE"
-                   | "#EROFS"
-                   | "#ESPIPE"
-                   | "#ESRCH"
-                   | "#EXDEV"
-                   | "#EWOULDBLOCK"
-                   | "#EINPROGRESS"
-                   | "#EALREADY"
-                   | "#ENOTSOCK"
-                   | "#EDESTADDRREQ"
-                   | "#EMSGSIZE"
-                   | "#EPROTOTYPE"
-                   | "#ENOPROTOOPT"
-                   | "#EPROTONOSUPPORT"
-                   | "#ESOCKTNOSUPPORT"
-                   | "#EOPNOTSUPP"
-                   | "#EPFNOSUPPORT"
-                   | "#EAFNOSUPPORT"
-                   | "#EADDRINUSE"
-                   | "#EADDRNOTAVAIL"
-                   | "#ENETDOWN"
-                   | "#ENETUNREACH"
-                   | "#ENETRESET"
-                   | "#ECONNABORTED"
-                   | "#ECONNRESET"
-                   | "#ENOBUFS"
-                   | "#EISCONN"
-                   | "#ENOTCONN"
-                   | "#ESHUTDOWN"
-                   | "#ETOOMANYREFS"
-                   | "#ETIMEDOUT"
-                   | "#ECONNREFUSED"
-                   | "#EHOSTDOWN"
-                   | "#EHOSTUNREACH"
-                   | "#ELOOP"
-                   | "#EOVERFLOW"
+  syntax IOError ::= "#EOF" [klabel(#EOF), symbol] | "#noparse" [klabel(#noparse), symbol] | #unknownIOError(Int) [symbol]
+                   | "#E2BIG" [klabel(#E2BIG), symbol]
+                   | "#EACCES" [klabel(#EACCES), symbol]
+                   | "#EAGAIN" [klabel(#EAGAIN), symbol]
+                   | "#EBADF" [klabel(#EBADF), symbol]
+                   | "#EBUSY" [klabel(#EBUSY), symbol]
+                   | "#ECHILD" [klabel(#ECHILD), symbol]
+                   | "#EDEADLK" [klabel(#EDEADLK), symbol]
+                   | "#EDOM" [klabel(#EDOM), symbol]
+                   | "#EEXIST" [klabel(#EEXIST), symbol]
+                   | "#EFAULT" [klabel(#EFAULT), symbol]
+                   | "#EFBIG" [klabel(#EFBIG), symbol]
+                   | "#EINTR" [klabel(#EINTR), symbol]
+                   | "#EINVAL" [klabel(#EINVAL), symbol]
+                   | "#EIO" [klabel(#EIO), symbol]
+                   | "#EISDIR" [klabel(#EISDIR), symbol]
+                   | "#EMFILE" [klabel(#EMFILE), symbol]
+                   | "#EMLINK" [klabel(#EMLINK), symbol]
+                   | "#ENAMETOOLONG" [klabel(#ENAMETOOLONG), symbol]
+                   | "#ENFILE" [klabel(#ENFILE), symbol]
+                   | "#ENODEV" [klabel(#ENODEV), symbol]
+                   | "#ENOENT" [klabel(#ENOENT), symbol]
+                   | "#ENOEXEC" [klabel(#ENOEXEC), symbol]
+                   | "#ENOLCK" [klabel(#ENOLCK), symbol]
+                   | "#ENOMEM" [klabel(#ENOMEM), symbol]
+                   | "#ENOSPC" [klabel(#ENOSPC), symbol]
+                   | "#ENOSYS" [klabel(#ENOSYS), symbol]
+                   | "#ENOTDIR" [klabel(#ENOTDIR), symbol]
+                   | "#ENOTEMPTY" [klabel(#ENOTEMPTY), symbol]
+                   | "#ENOTTY" [klabel(#ENOTTY), symbol]
+                   | "#ENXIO" [klabel(#ENXIO), symbol]
+                   | "#EPERM" [klabel(#EPERM), symbol]
+                   | "#EPIPE" [klabel(#EPIPE), symbol]
+                   | "#ERANGE" [klabel(#ERANGE), symbol]
+                   | "#EROFS" [klabel(#EROFS), symbol]
+                   | "#ESPIPE" [klabel(#ESPIPE), symbol]
+                   | "#ESRCH" [klabel(#ESRCH), symbol]
+                   | "#EXDEV" [klabel(#EXDEV), symbol]
+                   | "#EWOULDBLOCK" [klabel(#EWOULDBLOCK), symbol]
+                   | "#EINPROGRESS" [klabel(#EINPROGRESS), symbol]
+                   | "#EALREADY" [klabel(#EALREADY), symbol]
+                   | "#ENOTSOCK" [klabel(#ENOTSOCK), symbol]
+                   | "#EDESTADDRREQ" [klabel(#EDESTADDRREQ), symbol]
+                   | "#EMSGSIZE" [klabel(#EMSGSIZE), symbol]
+                   | "#EPROTOTYPE" [klabel(#EPROTOTYPE), symbol]
+                   | "#ENOPROTOOPT" [klabel(#ENOPROTOOPT), symbol]
+                   | "#EPROTONOSUPPORT" [klabel(#EPROTONOSUPPORT), symbol]
+                   | "#ESOCKTNOSUPPORT" [klabel(#ESOCKTNOSUPPORT), symbol]
+                   | "#EOPNOTSUPP" [klabel(#EOPNOTSUPP), symbol]
+                   | "#EPFNOSUPPORT" [klabel(#EPFNOSUPPORT), symbol]
+                   | "#EAFNOSUPPORT" [klabel(#EAFNOSUPPORT), symbol]
+                   | "#EADDRINUSE" [klabel(#EADDRINUSE), symbol]
+                   | "#EADDRNOTAVAIL" [klabel(#EADDRNOTAVAIL), symbol]
+                   | "#ENETDOWN" [klabel(#ENETDOWN), symbol]
+                   | "#ENETUNREACH" [klabel(#ENETUNREACH), symbol]
+                   | "#ENETRESET" [klabel(#ENETRESET), symbol]
+                   | "#ECONNABORTED" [klabel(#ECONNABORTED), symbol]
+                   | "#ECONNRESET" [klabel(#ECONNRESET), symbol]
+                   | "#ENOBUFS" [klabel(#ENOBUFS), symbol]
+                   | "#EISCONN" [klabel(#EISCONN), symbol]
+                   | "#ENOTCONN" [klabel(#ENOTCONN), symbol]
+                   | "#ESHUTDOWN" [klabel(#ESHUTDOWN), symbol]
+                   | "#ETOOMANYREFS" [klabel(#ETOOMANYREFS), symbol]
+                   | "#ETIMEDOUT" [klabel(#ETIMEDOUT), symbol]
+                   | "#ECONNREFUSED" [klabel(#ECONNREFUSED), symbol]
+                   | "#EHOSTDOWN" [klabel(#EHOSTDOWN), symbol]
+                   | "#EHOSTUNREACH" [klabel(#EHOSTUNREACH), symbol]
+                   | "#ELOOP" [klabel(#ELOOP), symbol]
+                   | "#EOVERFLOW" [klabel(#EOVERFLOW), symbol]
 
-  syntax Int ::= "#open" "(" String ")" [function]
+  syntax IOInt ::= Int | IOError
+  syntax IOString ::= String | IOError
+
+  syntax IOInt ::= "#open" "(" String ")" [function]
                | "#open" "(" String "," String ")" [function, hook(IO.open), impure]
                | "#tell" "(" Int ")" [function, hook(IO.tell), impure]
                | "#getc" "(" Int ")"             [function, hook(IO.getc), impure]
-  syntax String ::= "#read" "(" Int "," Int ")"    [function, hook(IO.read), impure]
+  syntax IOString ::= "#read" "(" Int "," Int ")"    [function, hook(IO.read), impure]
 
   syntax K ::= "#close" "(" Int ")" [function, hook(IO.close), impure]
              | "#seek" "(" Int "," Int ")" [function, hook(IO.seek), impure]
@@ -932,6 +935,10 @@ module K-IO
 
   syntax K ::= #logToFile(String, String) [function, functional, hook(IO.log), impure, returnsUnit]
 
+  syntax String ::= #projectString(IOString) [function]
+  rule #projectString(S:String) => S
+  syntax Int ::= #projectInt(IOInt) [function]
+  rule #projectInt(I:Int) => I
 endmodule
 
 // NOTE: DO NOT DIRECTLY IMPORT *-STREAM MODULES
@@ -952,7 +959,7 @@ module STDIN-STREAM
   rule [stdinGetc]:
        <stdin>
        ListItem(#parseInput(_:String, Delimiters:String))
-       ListItem(#buffer(S:String => S +String chrChar(#getc(N))))
+       ListItem(#buffer(S:String => S +String chrChar(#projectInt(#getc(N)))))
        ListItem("on")
        ListItem(#istream(N:Int))
        </stdin>

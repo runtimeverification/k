@@ -245,7 +245,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
             }
 
             @Override
-            public K prove(Module rules) {
+            public K prove(Module rules, Rule boundaryPattern) {
                 String kompiledModule = KoreBackend.getKompiledString(module, def.topCellInitializer, files, false);
                 files.saveToTemp("vdefinition.kore", kompiledModule);
 

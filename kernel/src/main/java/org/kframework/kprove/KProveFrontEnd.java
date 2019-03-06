@@ -89,7 +89,7 @@ public class KProveFrontEnd extends FrontEnd {
                         kproveOptions.specFile(files).getAbsolutePath());
             }
             KPrint kprint = new KPrint(kem, files, tty, kproveOptions.print, compiledDef.get().kompileOptions);
-            return new KProve(kem, sw, files, kprint).run(kproveOptions, compiledDef.get(), backend.get(), initializeRewriter.get());
+            return new KProve(kem, sw, files, kprint, kproveOptions).run(kproveOptions, compiledDef.get(), backend.get(), initializeRewriter.get());
         } finally {
             scope.exit();
         }
