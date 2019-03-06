@@ -27,6 +27,7 @@ SUBDIRS=issue-2273 \
 	boundary-cells-opt/bc-c1 \
 	boundary-cells-opt/bc-c2 \
 	boundary-cells-opt/bc-c1c2 \
-	prelude-warnings
+	prelude-warnings \
+	equals-formatting
 
 include ../../include/ktest-group.mak
