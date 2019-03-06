@@ -618,7 +618,7 @@ public class SymbolicRewriter {
 
         global.javaExecutionOptions.logBasic |= global.javaExecutionOptions.log;
         global.globalOptions.verbose |= global.javaExecutionOptions.logBasic;
-        global.javaExecutionOptions.debugZ3Queries |= global.globalOptions.debug;
+        global.javaExecutionOptions.debugZ3Queries |= global.javaExecutionOptions.debugFormulas;
         global.javaExecutionOptions.debugZ3 |= global.javaExecutionOptions.debugZ3Queries;
         //to avoid printing initialization-phase rules
         global.javaExecutionOptions.logRulesPublic = global.javaExecutionOptions.logRules;
