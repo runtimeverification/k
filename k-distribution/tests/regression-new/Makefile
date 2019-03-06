@@ -28,6 +28,7 @@ SUBDIRS=issue-2273 \
 	boundary-cells-opt/bc-c2 \
 	boundary-cells-opt/bc-c1c2 \
 	prelude-warnings \
-	equals-formatting
+	equals-formatting \
+	kore-brackets
 
 include ../../include/ktest-group.mak
