@@ -78,7 +78,7 @@ module KSEQ-SYMBOLIC
   syntax KBott ::= "#Not" "(" K ")" [klabel(#Not), symbol, mlOp, poly(0, 1), mlUnary]
                  | "#Ceil" "(" K ")" [klabel(#Ceil), symbol, mlOp, poly(0; 1), mlUnary]
                  | "#Floor" "(" K ")" [klabel(#Floor), symbol, mlOp, poly(0; 1), mlUnary]
-  syntax K ::= "{" K "#Equals" K "}" [klabel(#Equals), symbol, mlOp, format(%i%1%d%n%2%n%i%3%d%n%4%n%i%5%d), poly(0; 1, 2), mlEquals]
+  syntax K ::= "{" K "#Equals" K "}" [klabel(#Equals), symbol, mlOp, format(%1%i%n%2%d%n%3%i%n%4%d%n%5), poly(0; 1, 2), mlEquals]
              > K "#And" K [klabel(#And), symbol, assoc, left, comm, unit(#True), mlOp, poly(0, 1, 2), format(%i%1%d%n%2%n%i%3%d)]
              > K "#Or" K [klabel(#Or), symbol, assoc, left, comm, unit(#False), mlOp, poly(0, 1, 2), format(%i%1%d%n%2%n%i%3%d)]
              > K "#Implies" K [klabel(#Implies), symbol, mlOp, poly(0, 1, 2), format(%i%1%d%n%2%n%i%3%d), mlImplies]
