@@ -13,6 +13,7 @@ import org.kframework.compile.ExpandMacros;
 import org.kframework.compile.GeneratedTopFormat;
 import org.kframework.compile.GenerateSortPredicateRules;
 import org.kframework.compile.GenerateSortPredicateSyntax;
+import org.kframework.compile.GuardOrPatterns;
 import org.kframework.compile.LabelInfo;
 import org.kframework.compile.LabelInfoFromModule;
 import org.kframework.compile.MinimizeTermConstruction;
@@ -112,6 +113,7 @@ public class KoreBackend implements Backend {
         DefinitionTransformer resolveStrict = DefinitionTransformer.from(new ResolveStrict(kompileOptions)::resolve, "resolving strict and seqstrict attributes");
         DefinitionTransformer resolveHeatCoolAttribute = DefinitionTransformer.fromSentenceTransformer(new ResolveHeatCoolAttribute(new HashSet<>(kompileOptions.transition), heatCoolConditions)::resolve, "resolving heat and cool attributes");
         DefinitionTransformer resolveAnonVars = DefinitionTransformer.fromSentenceTransformer(new ResolveAnonVar()::resolve, "resolving \"_\" vars");
+        DefinitionTransformer guardOrs = DefinitionTransformer.fromSentenceTransformer(new GuardOrPatterns()::resolve, "resolving or patterns");
         DefinitionTransformer resolveSemanticCasts =
                 DefinitionTransformer.fromSentenceTransformer(new ResolveSemanticCasts(true)::resolve, "resolving semantic casts");
         DefinitionTransformer resolveFun = DefinitionTransformer.from(new ResolveFun()::resolve, "resolving #fun");
@@ -128,6 +130,7 @@ public class KoreBackend implements Backend {
                 .andThen(resolveFun)
                 .andThen(resolveStrict)
                 .andThen(resolveAnonVars)
+                .andThen(guardOrs)
                 .andThen(d -> new ResolveContexts(kompileOptions).resolve(d))
                 .andThen(resolveHeatCoolAttribute)
                 .andThen(resolveSemanticCasts)
