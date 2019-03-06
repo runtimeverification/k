@@ -581,11 +581,6 @@ struct
     | _ -> raise Not_implemented
 end
 
-module META =
-struct
-  let hook_parseKore c _ _ _ _ = raise Not_implemented
-end
-
 module IO =
 struct
   let hook_close c _ _ _ _ = match c with
@@ -654,13 +649,6 @@ struct
     output_string out_chan (Buffer.contents txt);
     close_out out_chan
 
-  let load_file f =
-    let ic = open_in f in
-    let n = in_channel_length ic in
-    let s = really_input_string ic n in
-    close_in ic;
-    (s)
-
   let flush_logs () =
     Hashtbl.iter flush_log log_files 
 
@@ -671,13 +659,22 @@ struct
   let hook_parseInModule _ _ _ _ _ = raise Not_implemented
   let hook_system c _ _ _ _ = match c with
     | [String path] ->
-      let tmp_stdout = Filename.temp_file "" ".txt" in
-      let tmp_stderr = Filename.temp_file "" ".txt" in
-      let out = Sys.command @@ path ^ " > " ^ tmp_stdout ^ " 2> " ^ tmp_stderr in
-      let flout = load_file tmp_stdout in
-      let flerr = load_file tmp_stderr in
-      [KApply3((parse_klabel "#systemResult(_,_,_)_K-IO"), [Int (Z.of_int out)], [String flout], [String flerr])]
-    | _ -> raise Not_implemented
+      let ic, oc = Unix.open_process path in
+      let buf_out = Buffer.create 4096
+      and buf_err = Buffer.create 128 in
+      (try
+         while true do Buffer.add_channel buf_out ic 1 done
+       with End_of_file -> ());
+      (try
+         while true do Buffer.add_channel buf_err ic 2 done
+       with End_of_file -> ());
+      let exit_status = Unix.close_process (ic, oc) in
+      let exit_code = match exit_status with
+        | Unix.WEXITED n -> n
+        | Unix.WSIGNALED n -> n
+        | Unix.WSTOPPED n -> n
+      in
+      [KApply3((parse_klabel "#systemResult(_,_,_)_K-IO"), [Int (Z.of_int exit_code)], [String (Buffer.contents buf_out)], [String (Buffer.contents buf_err)])]
   let hook_parseWithProds _ _ _ _ _ = raise Not_implemented
   let hook_parseString c _ _ _ _ = match c with
     | [String path], [KToken(srt, s)] ->
