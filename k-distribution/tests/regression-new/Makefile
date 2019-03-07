@@ -33,6 +33,6 @@ SUBDIRS=issue-2273 \
 	quadratic-poly-unparsing \
 	io-java \
 	symbolic-int-function \
-
+	kore-output \
 
 include ../../include/ktest-group.mak
