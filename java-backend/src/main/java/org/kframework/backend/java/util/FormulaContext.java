@@ -79,7 +79,7 @@ public class FormulaContext {
         } else if (proved) {
             System.err.format("\nZ3 Implication (%s) RHS proved%s:\n%s\n", kind.label, cachedMsg, right.toStringMultiline());
         } else {
-            System.err.format("\nZ3 Implication (%s) failed%s:\n%s\n  implies \n%s\n",
+            System.err.format("\nZ3 Implication (%s) failed%s:\n%s\n  implies\n%s\n",
                     kind.label, cachedMsg, left.toStringMultiline(), right.toStringMultiline());
         }
         if (rule != null) {
