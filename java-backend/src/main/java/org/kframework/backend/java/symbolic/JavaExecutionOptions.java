@@ -106,6 +106,9 @@ public final class JavaExecutionOptions {
             "don't have all their side conditions satisfied and are not applied.")
     public boolean logRules = false;
 
+    @Parameter(names="--log-rules-init", description="Log applied rules at initialization phase.")
+    public boolean logRulesInit = false;
+
     @Parameter(names="--debug-z3",
             description="Log formulae fed to z3 together with the rule that triggered them.")
     public boolean debugZ3 = false;
