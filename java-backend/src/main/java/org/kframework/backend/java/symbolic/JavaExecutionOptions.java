@@ -110,6 +110,10 @@ public final class JavaExecutionOptions {
             description="Log actual z3 queries. Activates --debug-z3 automatically.")
     public boolean debugZ3Queries = false;
 
+    @Parameter(names = "--debug-formulas", description = "All logging messages of --debug-z3-queries " +
+            "+ log all formulas that are attempted to prove. This is the most verbose logging option.")
+    public boolean debugFormulas = false;
+
     public boolean logRulesPublic = false;
 
     @Parameter(names = "--log-success", description = "Log success final states. " +
