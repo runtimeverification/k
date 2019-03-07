@@ -69,16 +69,16 @@ module ML-SYNTAX
   syntax #KVariable ::= r"(?<![A-Za-z0-9_\\$!\\?])(\\!|\\?)?([A-Z][A-Za-z0-9'_]*|_)"   [token, prec(1), autoReject]
 
   syntax K ::= "#True" [klabel(#True), mlOp, symbol, poly(0)]
-  syntax K ::= "#False" [klabel(#False), mlOp, symbol, poly(0)]
-  syntax K ::= "#Not" "(" K ")" [klabel(#Not), symbol, mlOp, poly(0, 1), mlUnary]
+             | "#False" [klabel(#False), mlOp, symbol, poly(0)]
+             | "#Not" "(" K ")" [klabel(#Not), symbol, mlOp, poly(0, 1), mlUnary]
              | "#Ceil" "(" K ")" [klabel(#Ceil), symbol, mlOp, poly(0; 1), mlUnary]
              | "#Floor" "(" K ")" [klabel(#Floor), symbol, mlOp, poly(0; 1), mlUnary]
-  syntax K ::= "{" K "#Equals" K "}" [klabel(#Equals), symbol, mlOp, format(%i%1%d%n%2%n%i%3%d), poly(0; 1, 2), mlEquals]
+             | "#Exists" #KVariable "." K [klabel(#Exists), symbol, mlOp, poly(0, 2), mlQuantifier]
+             | "#Forall" #KVariable "." K [klabel(#Forall), symbol, mlOp, poly(0, 2), mlQuantifier]
+  syntax K ::= "{" K "#Equals" K "}" [klabel(#Equals), symbol, mlOp, format(%1%i%n%2%d%n%3%i%n%4%d%n%5), poly(0; 1, 2), mlEquals]
              > K "#And" K [klabel(#And), symbol, assoc, left, comm, unit(#True), mlOp, poly(0, 1, 2), format(%i%1%d%n%2%n%i%3%d)]
              > K "#Or" K [klabel(#Or), symbol, assoc, left, comm, unit(#False), mlOp, poly(0, 1, 2), format(%i%1%d%n%2%n%i%3%d)]
              > K "#Implies" K [klabel(#Implies), symbol, mlOp, poly(0, 1, 2), format(%i%1%d%n%2%n%i%3%d), mlImplies]
-  syntax K ::= "#Exists" #KVariable "." K [klabel(#Exists), symbol, mlOp, poly(0, 2), mlQuantifier]
-             | "#Forall" #KVariable "." K [klabel(#Forall), symbol, mlOp, poly(0, 2), mlQuantifier]
 
   syntax priority mlUnary > mlEquals
   syntax priority mlImplies > mlQuantifier
