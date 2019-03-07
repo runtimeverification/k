@@ -65,7 +65,7 @@ public class CounterStopwatch implements Comparable<CounterStopwatch> {
 
     @Override
     public String toString() {
-        return String.format("%.3f s", (double) duration / 1000000000);
+        return String.format("%8.3f s", (double) duration / 1000000000);
     }
 
     @Override

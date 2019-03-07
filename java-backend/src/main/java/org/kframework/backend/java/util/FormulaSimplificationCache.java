@@ -50,15 +50,26 @@ public class FormulaSimplificationCache {
     public ConjunctiveFormula cacheGet(ConjunctiveFormula formula, boolean patternFolding,
                                        boolean partialSimplification, TermContext context) {
         return context.global().javaExecutionOptions.cacheFormulas
-                ? evaluationCache.get(new Entry(formula, patternFolding, partialSimplification, context.getTopConstraint()))
-                : null;
+               ? evaluationCache
+                       .get(new Entry(formula, patternFolding, partialSimplification, context.getTopConstraint()))
+               : null;
     }
 
     public void cachePut(ConjunctiveFormula formula, boolean patternFolding, boolean partialSimplification,
                          TermContext context, ConjunctiveFormula result) {
         if (context.global().javaExecutionOptions.cacheFormulas) {
-            evaluationCache.put(new Entry(formula, patternFolding, partialSimplification, context.getTopConstraint()), result);
-            evaluationCache.put(new Entry(result, patternFolding, partialSimplification, context.getTopConstraint()), result);
+            evaluationCache.put(
+                    new Entry(formula, patternFolding, partialSimplification, context.getTopConstraint()), result);
+            evaluationCache.put(
+                    new Entry(result, patternFolding, partialSimplification, context.getTopConstraint()), result);
         }
+    }
+
+    public void clear() {
+        evaluationCache.clear();
+    }
+
+    public int size() {
+        return evaluationCache.size();
     }
 }
