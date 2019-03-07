@@ -54,6 +54,7 @@ public class FormulaContext {
     public final Kind kind;
     public final Rule rule;
     public Z3Profiler z3Profiler;
+    private boolean queryBuildFailure;
 
     public FormulaContext(Kind kind, @Nonnull Rule rule) {
         this(kind, rule, rule.globalContext());
@@ -65,32 +66,38 @@ public class FormulaContext {
         this.z3Profiler = globalContext.profiler.z3Profilers.get(kind);
     }
 
+    public void queryBuildFailure() {
+        z3Profiler.newQueryBuildFailure();
+        queryBuildFailure = true;
+    }
+
     public void printImplication(ConjunctiveFormula left, ConjunctiveFormula right, Boolean proved, boolean cached) {
-        if (proved) {
-            System.err.format("\nZ3 Implication (%s) RHS proved:\n%s\n", kind.label, right.toStringMultiline());
+        String cachedMsg = cached ? " (cached result)" : "";
+        if (queryBuildFailure) {
+            System.err.format("\nZ3 Implication (%s) RHS dropped (cannot be proved)%s:\n%s\n", kind.label, cachedMsg,
+                    right.toStringMultiline());
+        } else if (proved) {
+            System.err.format("\nZ3 Implication (%s) RHS proved%s:\n%s\n", kind.label, cachedMsg, right.toStringMultiline());
         } else {
-            System.err.format("\nZ3 Implication (%s) failed:\n%s\n  implies \n%s\n",
-                    kind.label, left.toStringMultiline(), right.toStringMultiline());
-        }
-        if (cached) {
-            System.err.println("cached result");
+            System.err.format("\nZ3 Implication (%s) failed%s:\n%s\n  implies\n%s\n",
+                    kind.label, cachedMsg, left.toStringMultiline(), right.toStringMultiline());
         }
         if (rule != null) {
+            System.err.println("\nRule for formula above:");
             RuleSourceUtil.printRuleAndSource(rule);
         }
         System.err.println("==================================");
     }
 
     public void printUnsat(ConjunctiveFormula formula, boolean unsat, boolean cached) {
+        String cachedMsg = cached ? " (cached result)" : "";
         if (unsat) {
-            System.err.format("\nZ3 Constraint (%s) is unsat:\n%s\n", kind.label, formula.toStringMultiline());
+            System.err.format("\nZ3 Constraint (%s) is unsat%s:\n%s\n", kind.label, cachedMsg, formula.toStringMultiline());
         } else {
-            System.err.format("\nZ3 Constraint (%s) is assumed sat:\n%s\n", kind.label, formula.toStringMultiline());
-        }
-        if (cached) {
-            System.err.println("cached result");
+            System.err.format("\nZ3 Constraint (%s) is assumed sat%s:\n%s\n", kind.label, cachedMsg, formula.toStringMultiline());
         }
         if (rule != null) {
+            System.err.println("\nRule for formula above:");
             RuleSourceUtil.printRuleAndSource(rule);
         }
         System.err.println("==================================");
