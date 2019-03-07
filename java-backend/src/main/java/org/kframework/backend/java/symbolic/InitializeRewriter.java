@@ -183,6 +183,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
                 rewritingContext.profiler.logParsingTime();
             }
             rewritingContext.setExecutionPhase(false);
+            rewritingContext.javaExecutionOptions.logRulesPublic = rewritingContext.javaExecutionOptions.logRulesInit;
             TermContext termContext = TermContext.builder(rewritingContext).freshCounter(initCounterValue).build();
             KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, termContext.global(), false);
             ResolveSemanticCasts resolveCasts = new ResolveSemanticCasts(true);
@@ -192,7 +193,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
             rewritingContext.stateLog.log(StateLog.LogEvent.EXECINIT, backendKil, KApply(KLabels.ML_TRUE));
             SymbolicRewriter rewriter = new SymbolicRewriter(rewritingContext, transitions, converter);
             if (rewritingContext.globalOptions.verbose) {
-                rewritingContext.profiler.logInitTime();
+                rewritingContext.profiler.logInitTime(rewritingContext);
             }
             rewritingContext.setExecutionPhase(true);
             rewritingContext.javaExecutionOptions.logRulesPublic = rewritingContext.javaExecutionOptions.logRules;
@@ -238,6 +239,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
             }
             rewritingContext.stateLog.open("prove-" + Integer.toString(Math.abs(mod.hashCode())));
             rewritingContext.setExecutionPhase(false);
+            rewritingContext.javaExecutionOptions.logRulesPublic = rewritingContext.javaExecutionOptions.logRulesInit;
             List<Rule> rules = stream(mod.rules()).filter(r -> r.att().contains("specification")).collect(Collectors.toList());
             ProcessProofRules processProofRules = new ProcessProofRules(rules).invoke(rewritingContext, initCounterValue, module, definition);
             List<org.kframework.backend.java.kil.Rule> javaRules = processProofRules.getJavaRules();
@@ -257,7 +259,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
             SymbolicRewriter rewriter = new SymbolicRewriter(rewritingContext, transitions, converter);
 
             if (rewritingContext.globalOptions.verbose) {
-                rewritingContext.profiler.logInitTime();
+                rewritingContext.profiler.logInitTime(rewritingContext);
             }
             rewritingContext.setExecutionPhase(true);
             List<ConstrainedTerm> proofResults = javaRules.stream()
@@ -278,7 +280,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
                         termContext.setInitialVariables(lhs.variableSet());
                         termContext.setTopConstraint(null);
                         if (rewritingContext.javaExecutionOptions.cacheFunctionsOptimized) {
-                            rewritingContext.functionCache.clearCache();
+                            rewritingContext.functionCache.clear();
                         }
                         rewritingContext.stateLog.log(StateLog.LogEvent.REACHINIT,   lhs.term(), lhs.constraint());
                         rewritingContext.stateLog.log(StateLog.LogEvent.REACHTARGET, rhs.term(), rhs.constraint());
@@ -391,6 +393,11 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
             }
 
             public org.kframework.backend.java.kil.Rule evaluateRule(org.kframework.backend.java.kil.Rule rule) {
+                if (termContext.global().javaExecutionOptions.logBasic) {
+                    System.err.println("Pre-processing rule:");
+                    RuleSourceUtil.printRuleAndSource(rule);
+                    System.err.println("==================================");
+                }
                 ConjunctiveFormula constraint = getEvaluatedConstraint(rule);
                 if (constraint.isFalseExtended()) {
                     StringBuilder sb = new StringBuilder();

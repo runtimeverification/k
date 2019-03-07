@@ -9,9 +9,9 @@ import org.kframework.utils.inject.RequestScoped;
  */
 @RequestScoped
 public class StartTimeHolder {
-    private long startTime = System.currentTimeMillis();
+    private long startTimeNano = System.nanoTime();
 
-    public long getStartTime() {
-        return startTime;
+    public long getStartTimeNano() {
+        return startTimeNano;
     }
 }

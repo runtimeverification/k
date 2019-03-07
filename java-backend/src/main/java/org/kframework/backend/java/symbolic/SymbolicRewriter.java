@@ -28,6 +28,7 @@ import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.util.FormulaContext;
 import org.kframework.backend.java.util.RuleSourceUtil;
 import org.kframework.backend.java.util.StateLog;
+import org.kframework.backend.java.util.TimeMemoryEntry;
 import org.kframework.backend.java.utils.BitSet;
 import org.kframework.builtin.KLabels;
 import org.kframework.kore.FindK;
@@ -101,7 +102,7 @@ public class SymbolicRewriter {
 
         stopwatch.stop();
         if (global.globalOptions.verbose) {
-            printSummaryBox(null, null, 1, step);
+            printSummaryBox(null, null, 1, step, 0);
         }
         return new RewriterResult(Optional.of(step), Optional.empty(), afterVariableRename.term());
     }
@@ -616,20 +617,25 @@ public class SymbolicRewriter {
         boolean guarded = false;
         int step = 0;
 
-        global.javaExecutionOptions.logBasic |= global.javaExecutionOptions.log;
-        global.globalOptions.verbose |= global.javaExecutionOptions.logBasic;
-        global.javaExecutionOptions.debugZ3Queries |= global.globalOptions.debug;
+        global.javaExecutionOptions.debugZ3Queries |= global.javaExecutionOptions.debugFormulas;
         global.javaExecutionOptions.debugZ3 |= global.javaExecutionOptions.debugZ3Queries;
+        global.javaExecutionOptions.logBasic |= global.javaExecutionOptions.log || global.javaExecutionOptions.debugZ3;
+        global.globalOptions.verbose |= global.javaExecutionOptions.logBasic;
         //to avoid printing initialization-phase rules
         global.javaExecutionOptions.logRulesPublic = global.javaExecutionOptions.logRules;
 
-        if (global.javaExecutionOptions.log) {
+        if (prettyInitTerm != null) {
+            System.err.println("\nInitial term\n=====================\n");
+            printTermAndConstraint(initialTerm, prettyInitTerm);
+        }
+        if (prettyTarget != null) {
             System.err.println("\nTarget term\n=====================\n");
-            System.err.println(targetTerm);
+            printTermAndConstraint(targetTerm, prettyTarget);
         }
         int branchingRemaining = global.javaExecutionOptions.branchingAllowed;
         boolean nextStepLogEnabled = false;
         boolean originalLog = global.javaExecutionOptions.log;
+        prevStats = new TimeMemoryEntry(false);
         while (!queue.isEmpty()) {
             step++;
             int v = 0;
@@ -640,36 +646,39 @@ public class SymbolicRewriter {
             }
 
             for (ConstrainedTerm term : queue) {
-                v++;
-
-                boolean boundaryCellsMatchTarget = boundaryCellsMatchTarget(term, boundaryPattern, targetBoundarySub);
-                //var required to avoid logging the same step multiple times.
-                boolean alreadyLogged = logStep(step, v, term,
-                        step == 1 || boundaryCellsMatchTarget, false);
-                if (boundaryPattern == null || boundaryCellsMatchTarget) {
-                    //Only test the full implication if there is no boundary pattern or if it is matched.
-                    if (term.implies(targetTerm, rule, !(boundaryPattern == null))) {
-                        //If current term matches the target term, current execution path is proved.
-                        global.stateLog.log(StateLog.LogEvent.REACHPROVED, term.term(), term.constraint());
-                        if (global.javaExecutionOptions.logBasic) {
-                            logStep(step, v, term, true, alreadyLogged);
-                            System.err.println("\n============\nStep " + step + ": eliminated!\n============\n");
+                boolean alreadyLogged = false;
+                try {
+                    v++;
+                    boolean boundaryCellsMatchTarget =
+                            boundaryCellsMatchTarget(term, boundaryPattern, targetBoundarySub);
+                    //var required to avoid logging the same step multiple times.
+                    alreadyLogged = logStep(step, v, term,
+                            step == 1 || boundaryCellsMatchTarget, false);
+                    if (boundaryPattern == null || boundaryCellsMatchTarget) {
+                        //Only test the full implication if there is no boundary pattern or if it is matched.
+                        if (term.implies(targetTerm, rule, !(boundaryPattern == null))) {
+                            //If current term matches the target term, current execution path is proved.
+                            global.stateLog.log(StateLog.LogEvent.REACHPROVED, term.term(), term.constraint());
+                            if (global.javaExecutionOptions.logBasic) {
+                                logStep(step, v, term, true, alreadyLogged);
+                                System.err.println("\n============\nStep " + step + ": eliminated!\n============\n");
+                            }
+                            successPaths++;
+                            successResults.add(term);
+                            continue;
+                        } else if (boundaryPattern != null && step > 1) {
+                            //If boundary cells in current term match boundary cells in target term but entire terms
+                            // don't match, halt execution.
+                            logStep(step, v, term, global.javaExecutionOptions.logBasic, alreadyLogged);
+                            System.err.println("Halt! Terminating branch.");
+                            proofResults.add(term);
+                            continue;
                         }
-                        successPaths++;
-                        successResults.add(term);
-                        continue;
-                    } else if (boundaryPattern != null && step > 1) {
-                        //If boundary cells in current term match boundary cells in target term but entire terms
-                        // don't match, halt execution.
-                        logStep(step, v, term, global.javaExecutionOptions.logBasic, alreadyLogged);
-                        System.err.println("Halt! Terminating branch.");
-                        proofResults.add(term);
-                        continue;
+                        //else: case (no boundary pattern || (step == 1 && boundaryCellsMatchTarget))
+                        //      && final implication == false
+                        //  Do nothing. Boundary checking is disabled if there is no boundary pattern, or at step 1.
+                        //  Disabling on step 1 is useful for specs that match 1 full loop iteration.
                     }
-                    //else: case (no boundary pattern || (step == 1 && boundaryCellsMatchTarget)) && final implication == false
-                    //  Do nothing. Boundary checking is disabled if there is no boundary pattern, or at step 1.
-                    //  Disabling on step 1 is useful for specs that match 1 full loop iteration.
-                }
 
                 /* TODO(AndreiS): terminate the proof with failure based on the klabel _~>_
                 List<Term> leftKContents = term.term().getCellContentsByName("<k>");
@@ -691,71 +700,87 @@ public class SymbolicRewriter {
                     }
                 }*/
 
-                if (guarded) {
-                    ConstrainedTerm result = applySpecRules(term, specRules);
-                    if (result != null) {
+                    if (guarded) {
+                        ConstrainedTerm result = applySpecRules(term, specRules);
+                        if (result != null) {
+                            nextStepLogEnabled = true;
+                            logStep(step, v, term, true, alreadyLogged);
+                            // re-running constraint generation again for debug purposes
+                            if (global.javaExecutionOptions.logBasic) {
+                                System.err.println("\nApplying specification rule\n=========================\n");
+                            }
+                            if (visited.add(result)) {
+                                nextQueue.add(result);
+                            } else {
+                                if (term.equals(result)) {
+                                    throw KEMException.criticalError(
+                                            "Step " + step + ": infinite loop after applying a spec rule.");
+                                }
+                            }
+                            continue;
+                        }
+                    }
+
+                    List<ConstrainedTerm> results = fastComputeRewriteStep(term, false, true, true, step);
+                    if (results.isEmpty()) {
+                        logStep(step, v, term, true, alreadyLogged);
+                        System.err.println("\nStep above: " + step + ", evaluation ended with no successors.");
+                        if (step == 1) {
+                            kem.registerCriticalWarning("Evaluation ended on 1st step. " +
+                                    "Possible cause: non-functional term in constraint (path condition).");
+                        }
+                        /* final term */
+                        proofResults.add(term);
+                    }
+
+                    if (results.size() > 1) {
                         nextStepLogEnabled = true;
                         logStep(step, v, term, true, alreadyLogged);
-                        // re-running constraint generation again for debug purposes
-                        if (global.javaExecutionOptions.logBasic) {
-                            System.err.println("\nApplying specification rule\n=========================\n");
-                        }
-                        if (visited.add(result)) {
-                            nextQueue.add(result);
+                        if (branchingRemaining == 0) {
+                            System.err.println("\nHalt on branching!\n=====================\n");
+
+                            proofResults.addAll(results);
+                            continue;
                         } else {
-                            if (term.equals(result)) {
-                                kem.registerCriticalWarning("Step " + step + ": infinite loop after applying a spec rule.");
+                            branchingRemaining--;
+                            if (global.javaExecutionOptions.logBasic) {
+                                System.err.println("\nBranching!\n=====================\n");
                             }
                         }
-                        continue;
                     }
-                }
-
-                List<ConstrainedTerm> results;
-                try {
-                    results = fastComputeRewriteStep(term, false, true, true, step);
-                    // DISABLE EXCEPTION CHECKSTYLE
-                } catch (Throwable e) {
-                    // ENABLE EXCEPTION CHECKSTYLE
-                    logStep(step, v, term, true, alreadyLogged);
-                    System.err.println("\n\nTerm throwing exception\n============================\n\n");
-                    printTermAndConstraint(term, false);
-                    e.printStackTrace();
-                    throw e;
-                }
-                if (results.isEmpty()) {
-                    logStep(step, v, term, true, alreadyLogged);
-                    System.err.println("\nStep above: " + step + ", evaluation ended with no successors.");
-                    /* final term */
-                    proofResults.add(term);
-                }
-
-                if (results.size() > 1) {
-                    nextStepLogEnabled = true;
-                    logStep(step, v, term, true, alreadyLogged);
-                    if (branchingRemaining == 0) {
-                        System.err.println("\nHalt on branching!\n=====================\n");
-
-                        proofResults.addAll(results);
-                        continue;
-                    } else {
-                        branchingRemaining--;
-                        if (global.javaExecutionOptions.logBasic) {
-                            System.err.println("\nBranching!\n=====================\n");
+                    for (ConstrainedTerm cterm : results) {
+                        ConstrainedTerm result = new ConstrainedTerm(
+                                cterm.term(),
+                                cterm.constraint().removeBindings(
+                                        Sets.difference(
+                                                cterm.constraint().substitution().keySet(),
+                                                initialTerm.variableSet())),
+                                cterm.termContext());
+                        if (visited.add(result)) {
+                            nextQueue.add(result);
                         }
                     }
-                }
-                for (ConstrainedTerm cterm : results) {
-                    ConstrainedTerm result = new ConstrainedTerm(
-                            cterm.term(),
-                            cterm.constraint().removeBindings(
-                                    Sets.difference(
-                                            cterm.constraint().substitution().keySet(),
-                                            initialTerm.variableSet())),
-                            cterm.termContext());
-                    if (visited.add(result)) {
-                        nextQueue.add(result);
+
+                    if (Thread.currentThread().isInterrupted()) {
+                        throw KEMException.criticalError("Thread interrupted");
                     }
+                } catch (OutOfMemoryError e) {
+                    e.printStackTrace(); //to avoid hiding this exception in case another OOMError is thrown.
+                    //Activate cache profiling to see which cache caused the error.
+                    global.javaExecutionOptions.profileMemAdv = true;
+                    printSummaryBox(rule, proofResults, successPaths, step, queue.size() + nextQueue.size() - v + 1);
+                    throw e;
+                    // DISABLE EXCEPTION CHECKSTYLE
+                } catch (RuntimeException | AssertionError | StackOverflowError e) {
+                    // ENABLE EXCEPTION CHECKSTYLE
+                    logStep(step, v, term, true, alreadyLogged);
+                    System.err.println("\n" +
+                            "==========================================\n" +
+                            "Top term when exception was thrown:\n" +
+                            "==========================================\n");
+                    printTermAndConstraint(term, false);
+                    printSummaryBox(rule, proofResults, successPaths, step, queue.size() + nextQueue.size() - v + 1);
+                    throw e;
                 }
             }
 
@@ -771,40 +796,53 @@ public class SymbolicRewriter {
         }
 
         List<ConstrainedTerm> tweakedProofResults = proofResults;
-        if (global.javaExecutionOptions.formatFailures && !proofResults.isEmpty()) {
+        if (global.javaExecutionOptions.formatFailures && !proofResults.isEmpty() && prettyResult != null) {
+            System.err.println("\n" +
+                    "==========================================\n" +
+                    "Failure final states:\n" +
+                    "==========================================\n");
             for (ConstrainedTerm term : proofResults) {
-                printTermAndConstraint(term);
+                printTermAndConstraint(term, prettyResult);
             }
             tweakedProofResults = ImmutableList.of(new ConstrainedTerm(BoolToken.FALSE, initialTerm.termContext()));
         }
 
-        if (global.javaExecutionOptions.logSuccessFinalStates) {
+        if (global.javaExecutionOptions.logSuccessFinalStates  && !successResults.isEmpty() && prettyResult != null) {
             System.err.println("\n" +
                     "==========================================\n" +
                     "Success final states:\n" +
                     "==========================================\n");
             for (ConstrainedTerm result : successResults) {
-                printTermAndConstraint(result);
+                printTermAndConstraint(result, prettyResult);
             }
         }
         if (global.globalOptions.verbose) {
-            printSummaryBox(rule, proofResults, successPaths, step);
+            printSummaryBox(rule, proofResults, successPaths, step, 0);
         }
         return tweakedProofResults;
     }
 
-    public void printTermAndConstraint(ConstrainedTerm term) {
-        printTermAndConstraint(term, prettyResult);
-    }
-
     public void printTermAndConstraint(ConstrainedTerm term, boolean pretty) {
-        print(term.term(), pretty);
-        printConstraint(term.constraint(), pretty);
-        System.err.println();
+        //Disabling toString cache to minimise chance of OutOfMemoryError.
+        boolean oldCacheToString = global.javaExecutionOptions.cacheToString;
+        global.javaExecutionOptions.cacheToString = false;
+        try {
+            print(term.term(), pretty);
+            printConstraint(term.constraint(), pretty);
+            System.err.println();
+        } finally {
+            global.javaExecutionOptions.cacheToString = oldCacheToString;
+        }
     }
 
-    private void printSummaryBox(Rule rule, List<ConstrainedTerm> proofResults, int successPaths, int step) {
-        if (proofResults != null) {
+    private void printSummaryBox(Rule rule, List<ConstrainedTerm> proofResults, int successPaths, int step,
+                                 int pathsInProgress) {
+        if (pathsInProgress != 0) {
+            System.err.format("\nSPEC ERROR: %s %s\n==================================\n" +
+                            "Success execution paths: %d\nFailed execution paths: %d\nPaths in progress: %d\n",
+                    new File(rule.getSource().source()), rule.getLocation(), successPaths, proofResults.size(),
+                    pathsInProgress);
+        } else if (proofResults != null) {
             if (proofResults.isEmpty()) {
                 System.err.format("\nSPEC PROVED: %s %s\n==================================\nExecution paths: %d\n",
                         new File(rule.getSource().source()), rule.getLocation(), successPaths);
@@ -817,13 +855,19 @@ public class SymbolicRewriter {
             System.err.print("\nEXECUTION FINISHED\n==================================\n");
         }
         System.err.format("Longest path: %d steps\n", step);
-        global.profiler.printResult();
+        global.profiler.printResult(true, global);
     }
 
     //map value = log format: true = pretty, false = toString()
     private Map<String, Boolean> cellsToLog = new LinkedHashMap<>();
-    private boolean prettyPC;
-    private boolean prettyResult;
+
+    /**
+     * null = do not print, false = toString, true = pretty.
+     */
+    private Boolean prettyPC;
+    private Boolean prettyResult;
+    private Boolean prettyInitTerm;
+    private Boolean prettyTarget;
 
     private void parseLogCells() {
         for (String cell : global.javaExecutionOptions.logCells) {
@@ -832,15 +876,27 @@ public class SymbolicRewriter {
                 pretty = true;
                 cell = cell.substring(1, cell.length() - 1);
             }
-            if (cell.equals("#pc")) {
+            switch (cell) {
+            case "#pc":
                 prettyPC = pretty;
-            } else if (cell.equals("#result")) {
+                break;
+            case "#result":
                 prettyResult = pretty;
-            } else {
+                break;
+            case "#initTerm":
+                prettyInitTerm = pretty;
+                break;
+            case "#target":
+                prettyTarget = pretty;
+                break;
+            default:
                 cellsToLog.put(cell, pretty);
+                break;
             }
         }
     }
+
+    private TimeMemoryEntry prevStats;
 
     /**
      * @param forced - if true, log this step when at least --log-basic is provided.
@@ -854,8 +910,10 @@ public class SymbolicRewriter {
         KItem top = (KItem) term.term();
 
         if (global.javaExecutionOptions.log || forced || global.javaExecutionOptions.logRulesPublic) {
-            System.err.format("\nSTEP %d v%d : %.3f s \n===================\n",
-                    step, v, (System.currentTimeMillis() - global.profiler.getStartTime()) / 1000.);
+            TimeMemoryEntry now = new TimeMemoryEntry(false);
+            System.err.format("\nSTEP %d v%d : %s\n===================\n",
+                    step, v, global.profiler.stepLogString(now, prevStats));
+            prevStats = now;
         }
 
         boolean actuallyLogged = global.javaExecutionOptions.log || forced;
@@ -868,7 +926,9 @@ public class SymbolicRewriter {
                 }
                 print(cell, pretty);
             }
-            printConstraint(term.constraint(), prettyPC);
+            if (prettyPC != null) {
+                printConstraint(term.constraint(), prettyPC);
+            }
         }
         global.profiler.logOverheadTimer.stop();
         return actuallyLogged;

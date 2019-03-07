@@ -2,7 +2,6 @@
 package org.kframework.backend.java.symbolic;
 
 import com.beust.jcommander.Parameter;
-
 import org.kframework.backend.java.util.StateLog;
 import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.BaseEnumConverter;
@@ -83,24 +82,31 @@ public final class JavaExecutionOptions {
     @Parameter(names="--log-cells", description="Specify what subset of configuration has to be printed when" +
             " an execution step is logged." +
             " Usage format: --log-pretty \"v2,v2,...\" , where v1,v2,... are either cell names," +
-            " cell names in parentheses (like \"(k)\") or one of: \"(#pc)\", \"(#result)\". " +
-            " The cells specified without parentheses are printed with toString()." +
-            " The cells specified in parentheses are pretty-printed. Certain cells have custom formatting." +
-            " The last 2 options mean:" +
-            " (#pc) = pretty print the path condition (constraint)." +
-            " (#result) = fully pretty-print the final result (e.g. the configuration for paths that were not proved)." +
-            " This last option is very slow." +
-            " Default value is:" +
-            " --log-cells k,output,statusCode,localMem,pc,gas,wordStack,callData,accounts" +
-            " Recommended alternative value:" +
-            " --log-cells \"(k),output,statusCode,localMem,pc,gas,wordStack,callData,accounts,(#pc)\"")
-    public List<String> logCells = Arrays.asList("k", "output", "statusCode", "localMem", "pc", "gas", "wordStack",
-            "callData", "accounts");
+            " one of: \"#pc\", \"#initTerm\", \"#target\", \"#result\" . Any of the options above can be wrapped into" +
+            " parentheses like (#pc). When a cell name is specified, that cell will be printed. The last special values" +
+            " have the following meaning:" +
+            " #pc - path condition to be printed at each logging step." +
+            " #initTerm - full initial term." +
+            " #target - full target term." +
+            " #result - evaluation result, e.g. full final terms." +
+            " The last 3 are printed only at the beginning or end of evaluation respectively." +
+            " Options specified without parentheses are printed with toString()." +
+            " Options specified in parentheses are pretty-printed. Certain cells have custom formatting." +
+            " Pretty-printing options are considerably slower than default toString printing." +
+            " Especially when full configuration is printed." +
+            " Default value is selected to work with any semantics:" +
+            " --log-cells k,#pc,#result" +
+            " Recommended alternative:" +
+            " --log-cells \"(k),(#pc),#result\"")
+    public List<String> logCells = Arrays.asList("k", "#pc", "#result");
 
     @Parameter(names="--log-rules", description="Log applied rules." +
             "Including \"virtual rewrites\", e.g. rules applied in side conditions of other rules, that in the end " +
             "don't have all their side conditions satisfied and are not applied.")
     public boolean logRules = false;
+
+    @Parameter(names="--log-rules-init", description="Log applied rules at initialization phase.")
+    public boolean logRulesInit = false;
 
     @Parameter(names="--debug-z3",
             description="Log formulae fed to z3 together with the rule that triggered them.")
@@ -110,6 +116,10 @@ public final class JavaExecutionOptions {
             description="Log actual z3 queries. Activates --debug-z3 automatically.")
     public boolean debugZ3Queries = false;
 
+    @Parameter(names = "--debug-formulas", description = "All logging messages of --debug-z3-queries " +
+            "+ log all formulas that are attempted to prove. This is the most verbose logging option.")
+    public boolean debugFormulas = false;
+
     public boolean logRulesPublic = false;
 
     @Parameter(names = "--log-success", description = "Log success final states. " +
@@ -118,6 +128,13 @@ public final class JavaExecutionOptions {
 
     @Parameter(names="--log-progress", description="Print progress bar")
     public boolean logProgress = false;
+
+    @Parameter(names = "--profile-mem-adv",
+            description = "Show advanced memory and garbage collector statistics in the " +
+                    "summary box. In addition to basic statistics, show statistics after System.gc() invocation " +
+                    "and statistics for main runtime caches. " +
+                    "WARNING: Execution time with this option is longer because System.gc() is invoked in 3 places.")
+    public boolean profileMemAdv = false;
 
     public static class LogEventConverter extends BaseEnumConverter<StateLog.LogEvent> {
 

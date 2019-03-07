@@ -16,8 +16,12 @@ public class FunctionCache {
     final Table<JavaSymbolicObject<?>, ConjunctiveFormula, Term> evaluationCache = HashBasedTable.create();
     final Map<JavaSymbolicObject<?>, Term> nullConstraintEvalCache = new HashMap<>();
 
-    public void clearCache() {
+    public void clear() {
         evaluationCache.clear();
         nullConstraintEvalCache.clear();
+    }
+
+    public int size() {
+        return evaluationCache.size() + nullConstraintEvalCache.size();
     }
 }
