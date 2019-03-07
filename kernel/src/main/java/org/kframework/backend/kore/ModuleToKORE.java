@@ -42,6 +42,7 @@ import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
 import scala.Option;
 import scala.Tuple2;
+import scala.collection.Seq;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -585,9 +586,8 @@ public class ModuleToKORE {
                     .map(NonTerminal::sort).collect(Collectors.toList());
             productionLabel = production.klabel().get();
             if (ConstructorChecks.isBuiltinLabel(productionLabel)) {
-                for (Sort sort : iterable(((KApply) left).klabel().params())) {
-                    productionSort = sort;
-                }
+                Seq<Sort> params = ((KApply) left).klabel().params();
+                if (params.nonEmpty()) productionSort = params.last();
             }
             if (isFunction(prod) || rule.att().contains(Attribute.ANYWHERE_KEY) || ConstructorChecks.isBuiltinLabel(productionLabel)) {
                 leftChildren = ((KApply) left).items();
@@ -1140,9 +1140,10 @@ public class ModuleToKORE {
     }
 
     private void convert(Sort sort, boolean var) {
-        if (sort.equals(Sorts.SortParam())) {
-            sb.append("Q");
-            extraSortParams.add("Q");
+        if (sort.name().equals(AddSortInjections.SORTPARAM_NAME)) {
+            String sortVar = sort.params().headOption().get().name();
+            sb.append(sortVar);
+            extraSortParams.add(sortVar);
             return;
         }
         sb.append("Sort");

@@ -23,6 +23,7 @@ import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.utils.errorsystem.KEMException;
+import scala.collection.Seq;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,8 +41,10 @@ import static org.kframework.Collections.iterable;
 
 public class AddSortInjections {
 
+    public static final String SORTPARAM_NAME = "SortParam";
     private final Module mod;
     private final Map<KLabel, KLabel> collectionFor;
+    private static int freshSortParamCounter = 0;
 
     public AddSortInjections(Module mod) {
         this.mod = mod;
@@ -50,7 +53,7 @@ public class AddSortInjections {
 
     public K addTopSortInjections(K body) {
         Sort sort = sort(body, null);
-        if (sort == null) sort = Sorts.SortParam();
+        if (sort == null) sort = freshSortParam();
         return addSortInjections(body, sort);
     }
 
@@ -150,12 +153,13 @@ public class AddSortInjections {
             } else if (kapp.klabel().name().equals("#Or")) {
                 return KApply(KLabel(kapp.klabel().name(), actualSort), KList(addSortInjections(kapp.items().get(0), actualSort), addSortInjections(kapp.items().get(1), actualSort)), att);
             } else if (kapp.klabel().name().equals("#Ceil")) {
-                Sort childSort = sort(kapp.items().get(0), Sorts.SortParam());
+                Sort childSort = sort(kapp.items().get(0), freshSortParam());
                 return KApply(KLabel(kapp.klabel().name(), childSort, actualSort), KList(addSortInjections(kapp.items().get(0), childSort)), att);
             } else if (kapp.klabel().name().equals("#Equals")) {
-                Sort leftSort = sort(kapp.items().get(0), Sorts.SortParam());
-                Sort rightSort = sort(kapp.items().get(0), Sorts.SortParam());
-                Sort childSort = lubSort(leftSort, rightSort, Sorts.SortParam(), kapp);
+                Sort freshSortVar = freshSortParam();
+                Sort leftSort = sort(kapp.items().get(0), freshSortVar);
+                Sort rightSort = sort(kapp.items().get(0), freshSortVar);
+                Sort childSort = lubSort(leftSort, rightSort, freshSortVar, kapp);
                 return KApply(KLabel(kapp.klabel().name(), childSort, actualSort), KList(addSortInjections(kapp.items().get(0), childSort), addSortInjections(kapp.items().get(1), childSort)), att);
             }
             Production prod = production(kapp);
@@ -217,8 +221,8 @@ public class AddSortInjections {
                 Sort leftSort = sort(kapp.items().get(0), expectedSort);
                 Sort rightSort = sort(kapp.items().get(1), expectedSort);
                 return lubSort(leftSort, rightSort, expectedSort, term);
-            } else if (kapp.klabel().name().equals("#Equals")) return expectedSort;
-            else if (kapp.klabel().name().equals("#Ceil")) return expectedSort;
+            } else if (kapp.klabel().name().equals("#Equals")
+                    || kapp.klabel().name().equals("#Ceil")) return mlSort(kapp.klabel(), expectedSort);
             Production prod = production(kapp);
             if (prod.att().contains("poly")) {
                 List<Set<Integer>> poly = RuleGrammarGenerator.computePositions(prod);
@@ -262,6 +266,11 @@ public class AddSortInjections {
         }
     }
 
+    private Sort mlSort(KLabel klabel, Sort expectedSort) {
+        Seq<Sort> params = klabel.params();
+        return params.isEmpty() ? expectedSort : params.last();
+    }
+
     private Sort lubSort(Sort leftSort, Sort rightSort, Sort expectedSort, HasLocation loc) {
         if (leftSort == null && rightSort == null) {
             return expectedSort;
@@ -282,9 +291,14 @@ public class AddSortInjections {
     }
 
     private Sort lub(Collection<Sort> entries, HasLocation loc) {
-        entries = entries.stream().filter(s -> !s.equals(Sorts.SortParam())).collect(Collectors.toList());
-        if (entries.size() == 0) return Sorts.SortParam();
-        Set<Sort> bounds = upperBounds(entries);
+        Collection<Sort> filteredEntries = entries.stream().filter(s -> !s.name().equals(SORTPARAM_NAME)).collect(Collectors.toList());
+        if (filteredEntries.isEmpty()) {
+            if (entries.isEmpty()) {
+                throw KEMException.internalError("Could not compute least upper bound for rewrite sort.", loc);
+            }
+            return entries.iterator().next();
+        }
+        Set<Sort> bounds = upperBounds(filteredEntries);
         Set<Sort> lub = mod.subsorts().minimal(bounds);
         if (lub.size() != 1) {
             throw KEMException.internalError("Could not compute least upper bound for rewrite sort.", loc);
@@ -310,5 +324,9 @@ public class AddSortInjections {
             maxs.add(sort);
         }
         return maxs;
+    }
+
+    private Sort freshSortParam() {
+        return Sort(SORTPARAM_NAME, Sort("Q" + freshSortParamCounter++));
     }
 }
