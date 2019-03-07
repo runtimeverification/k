@@ -42,7 +42,6 @@ import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
 import scala.Option;
 import scala.Tuple2;
-import scala.collection.Seq;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -65,11 +64,10 @@ public class ModuleToKORE {
     private final Module module;
     private final BiMap<String, String> kToKoreLabelMap = HashBiMap.create();
     private final FileUtil files;
-    private StringBuilder sb = new StringBuilder();
+    private final StringBuilder sb = new StringBuilder();
     private final Set<String> impureFunctions = new HashSet<>();
     private final Map<String, List<Set<Integer>>> polyKLabels = new HashMap<>();
     private final KLabel topCellInitializer;
-    private final Set<String> extraSortParams = new HashSet<>();
 
     public ModuleToKORE(Module module, FileUtil files, KLabel topCellInitializer) {
         this.module = module;
@@ -162,7 +160,7 @@ public class ModuleToKORE {
             }
         }
         for (Production prod : iterable(module.productions())) {
-            if (prod.att().contains("mlOp")) {
+            if (isBuiltinProduction(prod)) {
                 continue;
             }
             prod = computePolyProd(prod);
@@ -196,7 +194,7 @@ public class ModuleToKORE {
         sb.append("\n// generated axioms\n");
         Set<Tuple2<Production, Production>> noConfusion = new HashSet<>();
         for (Production prod : iterable(module.productions())) {
-            if (prod.att().contains("mlOp")) {
+            if (isBuiltinProduction(prod)) {
                 continue;
             }
             prod = computePolyProd(prod);
@@ -541,6 +539,10 @@ public class ModuleToKORE {
         return sb.toString();
     }
 
+    private static boolean isBuiltinProduction(Production prod) {
+        return prod.klabel().nonEmpty() && ConstructorChecks.isBuiltinLabel(prod.klabel().get());
+    }
+
     public String convertSpecificationModule(Module definition, Module spec) {
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(definition);
         Sort topCell = configInfo.getRootCell();
@@ -566,6 +568,9 @@ public class ModuleToKORE {
     }
 
     private void convertRule(Rule rule, boolean heatCoolEq, Sort topCellSort, Map<String, Boolean> consideredAttributes, SetMultimap<KLabel, Rule> functionRules, boolean rulesAsClaims) {
+        // injections should already be present, but this is an ugly hack to get around the
+        // cache persistence issue that means that Sort attributes on k terms might not be present.
+        rule = new AddSortInjections(module).addInjections(rule);
         ConstructorChecks constructorChecks = new ConstructorChecks(module);
         boolean equation = false;
         boolean owise = false;
@@ -586,8 +591,8 @@ public class ModuleToKORE {
                     .map(NonTerminal::sort).collect(Collectors.toList());
             productionLabel = production.klabel().get();
             if (ConstructorChecks.isBuiltinLabel(productionLabel)) {
-                Seq<Sort> params = ((KApply) left).klabel().params();
-                if (params.nonEmpty()) productionSort = params.last();
+                Option<Sort> termSort = left.att().getOption(Sort.class);
+                if (termSort.nonEmpty()) productionSort = termSort.get();
             }
             if (isFunction(prod) || rule.att().contains(Attribute.ANYWHERE_KEY) || ConstructorChecks.isBuiltinLabel(productionLabel)) {
                 leftChildren = ((KApply) left).items();
@@ -611,9 +616,12 @@ public class ModuleToKORE {
                 }
             }
             sb.append("  axiom{R");
-            StringBuilder oldSB = sb;
-            sb = new StringBuilder();
-            extraSortParams.clear();
+            Option<Set> sortParams = rule.att().getOption("sortParams", Set.class);
+            if (sortParams.nonEmpty()) {
+                for (Object sort : sortParams.get())
+                    sb.append("," + sort);
+            }
+            sb.append("} ");
             if (owise) {
                 sb.append("\\implies{R} (\n    \\and{R} (\n      \\not{R} (\n        ");
                 for (Rule notMatching : functionRules.get(productionLabel)) {
@@ -701,12 +709,6 @@ public class ModuleToKORE {
                 convert(consideredAttributes, rule.att());
                 sb.append("\n\n");
             }
-            for (String param : extraSortParams) {
-                oldSB.append("," + param);
-            }
-            oldSB.append("} ");
-            oldSB.append(sb);
-            sb = oldSB;
         } else if (!rule.att().contains(Attribute.MACRO_KEY) && !rule.att().contains(Attribute.ALIAS_KEY)) {
             if (rulesAsClaims) {
                 sb.append("  claim{} ");
@@ -945,7 +947,7 @@ public class ModuleToKORE {
 
     private boolean isFunction(Production prod) {
         Production realProd = prod.att().get("originalPrd", Production.class);
-        if (!realProd.att().contains(Attribute.FUNCTION_KEY) && !realProd.att().contains(Attribute.ML_SYMBOL_KEY)) {
+        if (!realProd.att().contains(Attribute.FUNCTION_KEY) && !isBuiltinProduction(realProd)) {
             return false;
         }
         return true;
@@ -1055,24 +1057,19 @@ public class ModuleToKORE {
     }
 
     private static final Production INJ_PROD = Production(KLabel(KLabels.INJ, Sort("From"), Sort("To")), Sort("To"), Seq(NonTerminal(Sort("From"))));
-    private static final Production CEIL_PROD = Production(KLabel(KLabels.ML_CEIL.name(), Sort("From"), Sort("To")), Sort("To"), Seq(NonTerminal(Sort("From"))));
-    private static final Production EQUALS_PROD =
-            Production(KLabel(KLabels.ML_EQUALS.name(), Sort("From"), Sort("To")), Sort("To"), Seq(NonTerminal(Sort("From")), NonTerminal(Sort("From"))));
 
 
     private Production production(KApply term) {
-        if (term.klabel().name().equals(KLabels.INJ))
+        KLabel klabel = term.klabel();
+        if (klabel.name().equals(KLabels.INJ))
             return Production(INJ_PROD.klabel(), INJ_PROD.sort(), INJ_PROD.items(), Att.empty().add("originalPrd", Production.class, INJ_PROD));
-        if (term.klabel().name().equals(KLabels.ML_CEIL.name()))
-            return Production(CEIL_PROD.klabel(), CEIL_PROD.sort(), CEIL_PROD.items(), Att.empty().add("originalPrd", Production.class, CEIL_PROD));
-        if (term.klabel().name().equals(KLabels.ML_EQUALS.name()))
-            return Production(EQUALS_PROD.klabel(), EQUALS_PROD.sort(), EQUALS_PROD.items(), Att.empty().add("originalPrd", Production.class, EQUALS_PROD));
-        scala.collection.Set<Production> prods = module.productionsFor().apply((term).klabel());
-        assert(prods.size() == 1);
-        return computePolyProd(prods.head());
+        Option<scala.collection.Set<Production>> prods = module.productionsFor().get(klabel);
+        assert(prods.nonEmpty());
+        assert(prods.get().size() == 1);
+        return computePolyProd(prods.get().head());
     }
 
-    private String convertBuiltinLabel(String klabel) {
+    private String convertBuiltinLabelName(String klabel) {
       switch(klabel) {
       case "#False":
         return "\\bottom";
@@ -1099,11 +1096,27 @@ public class ModuleToKORE {
       }
     }
 
+    private void convertBuiltinLabel(KLabel klabel, KApply term) {
+        sb.append(convertBuiltinLabelName(klabel.name()));
+        sb.append('{');
+        switch (klabel.name()) {
+        case "#Ceil":
+        case "#Floor":
+        case "#Equals":
+            Sort childSort = term.klist().items().get(0).att().get(Sort.class);
+            convert(childSort, false);
+            sb.append(',');
+        }
+        Sort termSort = term.att().get(Sort.class);
+        convert(termSort, false);
+        sb.append('}');
+    }
+
     private void convert(KLabel klabel, boolean var) {
         if (klabel.name().equals(KLabels.INJ)) {
             sb.append(klabel.name());
         } else if (ConstructorChecks.isBuiltinLabel(klabel)) {
-            sb.append(convertBuiltinLabel(klabel.name()));
+            sb.append(convertBuiltinLabelName(klabel.name()));
         } else {
             sb.append("Lbl");
             convert(klabel.name());
@@ -1143,7 +1156,6 @@ public class ModuleToKORE {
         if (sort.name().equals(AddSortInjections.SORTPARAM_NAME)) {
             String sortVar = sort.params().headOption().get().name();
             sb.append(sortVar);
-            extraSortParams.add(sortVar);
             return;
         }
         sb.append("Sort");
@@ -1373,9 +1385,6 @@ public class ModuleToKORE {
     public String toString() { return sb.toString(); }
 
     public void convert(K k) {
-        // injections should already be present, but this is an ugly hack to get around the
-        // cache persistence issue that means that Sort attributes on k terms might not be present.
-        k = new AddSortInjections(module).addTopSortInjections(k);
         new VisitK() {
             @Override
             public void apply(KApply k) {
@@ -1386,7 +1395,11 @@ public class ModuleToKORE {
                 if (polyKLabels.containsKey(k.klabel().name()) && !ConstructorChecks.isBuiltinLabel(label)) {
                     label = computePolyKLabel(k);
                 }
-                convert(label, false);
+                if (ConstructorChecks.isBuiltinLabel(label)) {
+                    convertBuiltinLabel(label, k);
+                } else {
+                    convert(label, false);
+                }
                 sb.append("(");
                 String conn = "";
                 for (K item : k.items()) {

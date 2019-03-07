@@ -377,7 +377,6 @@ module INT-COMMON
                | absInt ( Int )                 [function, functional, smtlib(int_abs), hook(INT.abs)]
                | log2Int ( Int )                [function, hook(INT.log2)]
 
-
   syntax Int ::= bitRangeInt           ( Int, indexInt: Int, lengthInt: Int ) [function, hook(INT.bitRange)]
   syntax Int ::= signExtendBitRangeInt ( Int, indexInt: Int, lengthInt: Int ) [function, hook(INT.signExtendBitRange)]
 
@@ -398,8 +397,8 @@ module INT-SYMBOLIC [symbolic, kore]
    * Definability conditions for _/Int_ and _%Int_
    */
 
-  rule #Ceil(I1:Int /Int I2:Int) => {(I2 =/=Int 0) #Equals true}
-  rule #Ceil(I1:Int %Int I2:Int) => {(I2 =/=Int 0) #Equals true}
+  rule #Ceil(I1:Int /Int I2:Int) => {(I2 =/=Int 0) #Equals true} [anywhere]
+  rule #Ceil(I1:Int %Int I2:Int) => {(I2 =/=Int 0) #Equals true} [anywhere]
 endmodule
 
 module INT

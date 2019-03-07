@@ -23,7 +23,6 @@ import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.utils.errorsystem.KEMException;
-import scala.collection.Seq;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,7 +32,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;import java.util.stream.Collectors;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.kframework.kore.KORE.*;
 
@@ -41,20 +41,16 @@ import static org.kframework.Collections.iterable;
 
 public class AddSortInjections {
 
-    public static final String SORTPARAM_NAME = "SortParam";
     private final Module mod;
     private final Map<KLabel, KLabel> collectionFor;
-    private static int freshSortParamCounter = 0;
+
+    private int freshSortParamCounter = 0;
+    private Set<String> sortParams = new HashSet<>();
+    public static final String SORTPARAM_NAME = "SortParam";
 
     public AddSortInjections(Module mod) {
         this.mod = mod;
         this.collectionFor = ConvertDataStructureToLookup.collectionFor(mod);
-    }
-
-    public K addTopSortInjections(K body) {
-        Sort sort = sort(body, null);
-        if (sort == null) sort = freshSortParam();
-        return addSortInjections(body, sort);
     }
 
     public Sentence addInjections(Sentence s) {
@@ -65,6 +61,18 @@ public class AddSortInjections {
         } else {
             return s;
         }
+    }
+
+    public Rule addInjections(Rule rule) {
+        initSortParams();
+        K body = addTopSortInjections(rule.body());
+        K requires = internalAddSortInjections(rule.requires(), Sorts.Bool());
+        K ensures = internalAddSortInjections(rule.ensures(), Sorts.Bool());
+        Att att = rule.att();
+        if (!sortParams.isEmpty()) {
+            att = att.add("sortParams", Set.class, new HashSet<>(sortParams));
+        }
+        return new Rule(body, requires, ensures, att);
     }
 
     public K addInjections(K term) {
@@ -91,13 +99,24 @@ public class AddSortInjections {
         return result;
     }
 
-    public boolean collectionIsMap(KLabel collectionLabel) {
+    public K addSortInjections(K term, Sort topSort) {
+        initSortParams();
+        return internalAddSortInjections(term, topSort);
+    }
+
+    private boolean collectionIsMap(KLabel collectionLabel) {
         return mod.attributesFor().apply(collectionLabel).contains(Attribute.COMMUTATIVE_KEY)
                 && !mod.attributesFor().apply(collectionLabel).contains(Attribute.IDEMPOTENT_KEY)
                 && !mod.attributesFor().apply(collectionLabel).contains(Att.bag());
     }
 
-    public K addSortInjections(K term, Sort expectedSort) {
+    private K addTopSortInjections(K body) {
+        Sort sort = sort(body, null);
+        if (sort == null) sort = freshSortParam();
+        return internalAddSortInjections(body, sort);
+    }
+
+    private K internalAddSortInjections(K term, Sort expectedSort) {
         Sort actualSort = sort(term, expectedSort);
         if (actualSort == null) {
             actualSort = expectedSort;
@@ -137,30 +156,41 @@ public class AddSortInjections {
     }
 
     private Context addInjections(Context context) {
-        return new Context(addSortInjections(context.body(), Sorts.K()), addSortInjections(context.requires(), Sorts.Bool()), context.att());
+        return new Context(internalAddSortInjections(context.body(), Sorts.K()), internalAddSortInjections(context.requires(), Sorts.Bool()), context.att());
     }
 
-    private Rule addInjections(Rule rule) {
-        return new Rule(addTopSortInjections(rule.body()), addSortInjections(rule.requires(), Sorts.Bool()), addSortInjections(rule.ensures(), Sorts.Bool()), rule.att());
+    private void initSortParams() {
+        freshSortParamCounter = 0;
+        sortParams.clear();
     }
 
     private K visitChildren(K term, Sort parentSort, Sort actualSort) {
         Att att = term.att().add(Sort.class, actualSort);
+        if (actualSort.name().equals(SORTPARAM_NAME)) {
+            sortParams.add(actualSort.params().head().name());
+        }
         if (term instanceof KApply) {
             KApply kapp = (KApply)term;
-            if (kapp.klabel().name().equals("inj")) {
+            KLabel klabel = kapp.klabel();
+            switch (klabel.name()) {
+            case "inj":
                 return term;
-            } else if (kapp.klabel().name().equals("#Or")) {
-                return KApply(KLabel(kapp.klabel().name(), actualSort), KList(addSortInjections(kapp.items().get(0), actualSort), addSortInjections(kapp.items().get(1), actualSort)), att);
-            } else if (kapp.klabel().name().equals("#Ceil")) {
+            case "#True":
+            case "#False":
+                return KApply(klabel, kapp.klist(), att);
+            case "#Floor":
+            case "#Ceil":
                 Sort childSort = sort(kapp.items().get(0), freshSortParam());
-                return KApply(KLabel(kapp.klabel().name(), childSort, actualSort), KList(addSortInjections(kapp.items().get(0), childSort)), att);
-            } else if (kapp.klabel().name().equals("#Equals")) {
+                return KApply(klabel,
+                        KList(internalAddSortInjections(kapp.items().get(0), childSort)), att);
+            case "#Equals":
                 Sort freshSortVar = freshSortParam();
                 Sort leftSort = sort(kapp.items().get(0), freshSortVar);
                 Sort rightSort = sort(kapp.items().get(0), freshSortVar);
-                Sort childSort = lubSort(leftSort, rightSort, freshSortVar, kapp);
-                return KApply(KLabel(kapp.klabel().name(), childSort, actualSort), KList(addSortInjections(kapp.items().get(0), childSort), addSortInjections(kapp.items().get(1), childSort)), att);
+                Sort innerSort = lubSort(leftSort, rightSort, freshSortVar, kapp);
+                return KApply(klabel,
+                        KList(internalAddSortInjections(kapp.items().get(0), innerSort),
+                                internalAddSortInjections(kapp.items().get(1), innerSort)), att);
             }
             Production prod = production(kapp);
             List<K> children = new ArrayList<>();
@@ -179,12 +209,12 @@ public class AddSortInjections {
                     expectedSort = actualSort;
                 }
                 K child = kapp.items().get(i);
-                children.add(addSortInjections(child, expectedSort));
+                children.add(internalAddSortInjections(child, expectedSort));
             }
-            return KApply(kapp.klabel(), KList(children), att);
+            return KApply(klabel, KList(children), att);
         } else if (term instanceof KRewrite) {
             KRewrite rew = (KRewrite) term;
-            return KRewrite(addSortInjections(rew.left(), actualSort), addSortInjections(rew.right(), actualSort), att);
+            return KRewrite(internalAddSortInjections(rew.left(), actualSort), internalAddSortInjections(rew.right(), actualSort), att);
         } else if (term instanceof KVariable) {
             return KVariable(((KVariable) term).name(), att);
         } else if (term instanceof KToken) {
@@ -198,15 +228,15 @@ public class AddSortInjections {
                 K child = kseq.items().get(i);
                 Sort childSort = sort(child, Sorts.KItem());
                 if (childSort.equals(Sorts.K())) {
-                    children.add(addSortInjections(child, Sorts.K()));
+                    children.add(internalAddSortInjections(child, Sorts.K()));
                 } else {
-                    children.add(addSortInjections(child, Sorts.KItem()));
+                    children.add(internalAddSortInjections(child, Sorts.KItem()));
                 }
             }
             return KSequence(children, att);
         } else if (term instanceof KAs) {
             KAs kas = (KAs)term;
-            return KAs(addSortInjections(kas.pattern(), actualSort), kas.alias(), att);
+            return KAs(internalAddSortInjections(kas.pattern(), actualSort), kas.alias(), att);
         } else {
             throw KEMException.internalError("Invalid category of k found.", term);
         }
@@ -215,14 +245,16 @@ public class AddSortInjections {
     public Sort sort(K term, Sort expectedSort) {
         if (term instanceof KApply) {
             KApply kapp = (KApply)term;
-            if (kapp.klabel().name().equals("inj")) {
+            switch (kapp.klabel().name()) {
+            case "inj":
                 return kapp.klabel().params().apply(1);
-            } else if (kapp.klabel().name().equals("#Or")) {
-                Sort leftSort = sort(kapp.items().get(0), expectedSort);
-                Sort rightSort = sort(kapp.items().get(1), expectedSort);
-                return lubSort(leftSort, rightSort, expectedSort, term);
-            } else if (kapp.klabel().name().equals("#Equals")
-                    || kapp.klabel().name().equals("#Ceil")) return mlSort(kapp.klabel(), expectedSort);
+            case "#Equals":
+            case "#Ceil":
+            case "#Floor":
+            case "#True":
+            case "#False":
+                return expectedSort;
+            }
             Production prod = production(kapp);
             if (prod.att().contains("poly")) {
                 List<Set<Integer>> poly = RuleGrammarGenerator.computePositions(prod);
@@ -264,11 +296,6 @@ public class AddSortInjections {
         } else {
             throw KEMException.internalError("Invalid category of k found.", term);
         }
-    }
-
-    private Sort mlSort(KLabel klabel, Sort expectedSort) {
-        Seq<Sort> params = klabel.params();
-        return params.isEmpty() ? expectedSort : params.last();
     }
 
     private Sort lubSort(Sort leftSort, Sort rightSort, Sort expectedSort, HasLocation loc) {
