@@ -2700,7 +2700,11 @@ public class DefinitionToOcaml implements Serializable {
         }
     }
 
-    private void applyVarLhs(KVariable k, StringBuilder sb, VarInfo vars) {
+    private void applyVarLhs(KVariable k, StringBuilder sb, VarInfo vars, boolean inOr) {
+        if (inOr && k.att().contains("anonymous")) {
+          sb.append("_");
+          return;
+        }
         String varName = encodeStringToVariable(k.name());
         vars.vars.put(k, varName);
         Sort s = k.att().getOptional(Sort.class).orElse(Sort(""));
@@ -2737,6 +2741,7 @@ public class DefinitionToOcaml implements Serializable {
         private boolean inBooleanExp;
         private boolean topAnywherePre;
         private boolean topAnywherePost;
+        private boolean inOr = false;
 
         @Override
         public void apply(KApply k) {
@@ -2757,9 +2762,12 @@ public class DefinitionToOcaml implements Serializable {
             }
             if (k.klabel().equals(KLabels.ML_OR)) {
                 sb.append("((");
+                boolean wasInOr = inOr;
+                inOr = true;
                 apply(k.items().get(0));
                 sb.append(")|(");
                 apply(k.items().get(1));
+                inOr = wasInOr;
                 sb.append("))");
                 return;
             }
@@ -3040,7 +3048,7 @@ public class DefinitionToOcaml implements Serializable {
             if (rhs) {
                 applyVarRhs(k, sb, vars);
             } else {
-                applyVarLhs(k, sb, vars);
+                applyVarLhs(k, sb, vars, inOr);
             }
             if (inBooleanExp) {
                 sb.append("])");
