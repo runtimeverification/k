@@ -1,0 +1,44 @@
+#!/bin/sh -e
+
+if [ `id -u` -ne 0 ]; then
+  echo "$0: error: This script must be run as root."
+  exit 1
+fi
+TAG=`git describe HEAD --tags`
+. /etc/os-release
+case $ID in
+	ubuntu)
+		CODENAME=$UBUNTU_CODENAME
+		case $CODENAME in
+			xenial)
+				;;
+			bionic)
+				;;
+			*)
+				echo "Unsupported Ubuntu version, try building from source."
+				exit 1
+				;;
+		esac
+		;;
+	debian)
+		case $VERSION_ID in
+			9)
+				CODENAME=stretch
+				;;
+			*)
+				echo "Unsupported Debian version, try building from source."
+				exit 1
+				;;
+		esac
+		;;
+	*)
+		echo "Unsupported Linux distro, try building from source."
+		exit 1
+		;;
+esac
+
+apt-get update
+apt-get install -y curl
+curl -L https://github.com/kframework/k/releases/download/$TAG/kframework_5.0.0_amd64_$CODENAME.deb -o kframework_5.0.0_amd64.deb
+apt-get install -y ./kframework_5.0.0_amd64.deb
+rm -f kframework_5.0.0_amd64.deb
