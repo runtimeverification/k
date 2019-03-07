@@ -415,7 +415,7 @@ public class SymbolicRewriter {
         /* rename rule variables in both the term and the constraint */
         term = term.substituteWithBinders(renameSubst);
         constraint = ((ConjunctiveFormula) constraint.substituteWithBinders(renameSubst)).simplify(context);
-
+        constraint.globalContext().stateLog.log(StateLog.LogEvent.CHECKINGCONSTRAINT, constraint); // check if one comes here outside of specRule
         ConstrainedTerm result = new ConstrainedTerm(term, constraint, context);
         if (expandPattern) {
             // TODO(AndreiS): move these some other place
@@ -1037,6 +1037,7 @@ public class SymbolicRewriter {
             ConjunctiveFormula constraint = constrainedTerm.matchImplies(pattern, true, false,
                     new FormulaContext(FormulaContext.Kind.SpecRule, specRule), specRule.matchingSymbols());
             if (constraint != null) {
+                global.stateLog.log(StateLog.LogEvent.RULEATTEMPT, specRule.toKRewrite(), constrainedTerm.term(), constrainedTerm.constraint());
                 ConstrainedTerm result = buildResult(specRule, constraint, null, true, constrainedTerm.termContext(),
                         new FormulaContext(FormulaContext.Kind.SpecConstr, specRule));
                 global.stateLog.log(StateLog.LogEvent.SRULE, specRule.toKRewrite(), constrainedTerm.term(), constrainedTerm.constraint(), result.term(), result.constraint());
