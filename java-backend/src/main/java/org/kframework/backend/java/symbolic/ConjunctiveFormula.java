@@ -552,9 +552,10 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
             PersistentUniqueList<Equality> equalities,
             PersistentUniqueList<DisjunctiveFormula> disjunctions,
             Equality equality) {
-        if (RuleAuditing.isAuditBegun()) {
-            System.err.println("Unification failure: " + equality.leftHandSide()
-                    + " does not unify with " + equality.rightHandSide());
+        if ((RuleAuditing.isAuditBegun() || global.javaExecutionOptions.debugZ3)
+                && !(equality.leftHandSide() instanceof BoolToken && equality.rightHandSide() instanceof BoolToken)) {
+            System.err.format("Unification failure: %s does not unify with %s\n",
+                    equality.leftHandSide(), equality.rightHandSide());
         }
         return new ConjunctiveFormula(
                 substitution,
@@ -867,7 +868,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 continue;
             }
 
-            if (global.globalOptions.debug) {
+            if (global.javaExecutionOptions.debugFormulas) {
                 System.err.format("\nAttempting to prove:\n================= \n\t%s\n  implies \n\t%s\n", left, right);
             }
 
@@ -875,7 +876,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
             right = left.simplifyConstraint(right);
             right = right.orientSubstitution(existentialQuantVars);
             if (right.isTrue() || (right.equalities().isEmpty() && existentialQuantVars.containsAll(right.substitution().keySet()))) {
-                if (global.globalOptions.debug) {
+                if (global.javaExecutionOptions.debugFormulas) {
                     System.err.println("Implication proved by simplification");
                 }
                 continue;
@@ -887,7 +888,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 KItem ite = ifThenElseFinder.result.get(0);
                 // TODO (AndreiS): handle KList variables
                 Term condition = ((KList) ite.kList()).get(0);
-                if (global.globalOptions.debug) {
+                if (global.javaExecutionOptions.debugFormulas) {
                     System.err.format("Split on %s\n", condition);
                 }
                 TermContext context = TermContext.builder(global).build();
@@ -902,12 +903,12 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                     left.equalities(), left.disjunctions(), left.globalContext());
             global.stateLog.log(StateLog.LogEvent.IMPLICATION, leftWithoutSubst, right);
             if (!impliesSMT(leftWithoutSubst, right, existentialQuantVars, formulaContext)) {
-                if (global.globalOptions.debug) {
+                if (global.javaExecutionOptions.debugFormulas) {
                     System.err.println("Failure!");
                 }
                 return false;
             } else {
-                if (global.globalOptions.debug) {
+                if (global.javaExecutionOptions.debugFormulas) {
                     System.err.println("Proved!");
                 }
             }
