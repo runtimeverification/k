@@ -29,6 +29,7 @@ SUBDIRS=issue-2273 \
 	boundary-cells-opt/bc-c1c2 \
 	prelude-warnings \
 	equals-formatting \
-	kore-brackets
+	kore-brackets \
+	quadratic-poly-unparsing
 
 include ../../include/ktest-group.mak
