@@ -34,5 +34,6 @@ SUBDIRS=issue-2273 \
 	io-java \
 	symbolic-int-function \
 	kore-output \
+	kore-poly-productions \
 
 include ../../include/ktest-group.mak
