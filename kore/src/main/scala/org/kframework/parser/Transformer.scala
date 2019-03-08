@@ -4,8 +4,6 @@ package org.kframework.parser
 
 import java.util
 
-import com.google.common.collect.Sets
-
 import collection.JavaConverters._
 import org.kframework.Collections._
 
@@ -128,17 +126,25 @@ trait EAsSet[E] {
   /**
    * Merges the set of problematic (i.e., Left) results.
    */
-  def mergeErrors(a: java.util.Set[E], b: java.util.Set[E]): java.util.Set[E] = Sets.union(a, b)
+  def mergeErrors(a: java.util.Set[E], b: java.util.Set[E]): java.util.Set[E] = {
+    val c = new java.util.HashSet[E](a);
+    c.addAll(b);
+    c
+  }
 
-  val errorUnit: java.util.Set[E] = Sets.newHashSet()
+  val errorUnit: java.util.Set[E] = new java.util.HashSet[E]()
 }
 
 trait WAsSet[W] {
-  val warningUnit: java.util.Set[W] = Sets.newHashSet();
+  val warningUnit: java.util.Set[W] = new java.util.HashSet[W]()
   /**
    * Merges the set of problematic (i.e., Left) results.
    */
-  def mergeWarnings(a: java.util.Set[W], b: java.util.Set[W]): java.util.Set[W] = Sets.union(a, b)
+  def mergeWarnings(a: java.util.Set[W], b: java.util.Set[W]): java.util.Set[W] = {
+    val c = new java.util.HashSet[W](a);
+    c.addAll(b);
+    c
+  }
 }
 
 abstract class SetsGeneralTransformer[E, W]
