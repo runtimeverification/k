@@ -126,7 +126,7 @@ public class KPrint {
                 K result = abstractTerm(module, new AddSortInjections(module).addInjections(orig));
                 ModuleToKORE converter = new ModuleToKORE(module, files, def.topCellInitializer);
                 converter.convert(result);
-                System.out.println(converter.toString());
+                return converter.toString().getBytes();
             } default:
                 throw KEMException.criticalError("Unsupported output mode: " + outputMode);
         }
