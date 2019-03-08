@@ -1,0 +1,39 @@
+  {
+    Result
+  #Equals
+    <k>
+      final1
+    </k>
+  }
+#Or
+  {
+    Result
+  #Equals
+    <k>
+      final2
+    </k>
+  }
+#Or
+  {
+    Result
+  #Equals
+    <k>
+      initial
+    </k>
+  }
+#Or
+  {
+    Result
+  #Equals
+    <k>
+      next1
+    </k>
+  }
+#Or
+  {
+    Result
+  #Equals
+    <k>
+      next2
+    </k>
+  }
