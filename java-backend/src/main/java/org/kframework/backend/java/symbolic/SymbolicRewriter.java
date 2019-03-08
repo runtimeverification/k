@@ -28,6 +28,7 @@ import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.util.FormulaContext;
 import org.kframework.backend.java.util.RuleSourceUtil;
 import org.kframework.backend.java.util.StateLog;
+import org.kframework.backend.java.util.TimeMemoryEntry;
 import org.kframework.backend.java.utils.BitSet;
 import org.kframework.builtin.KLabels;
 import org.kframework.kore.FindK;
@@ -616,20 +617,25 @@ public class SymbolicRewriter {
         boolean guarded = false;
         int step = 0;
 
-        global.javaExecutionOptions.logBasic |= global.javaExecutionOptions.log;
-        global.globalOptions.verbose |= global.javaExecutionOptions.logBasic;
         global.javaExecutionOptions.debugZ3Queries |= global.javaExecutionOptions.debugFormulas;
         global.javaExecutionOptions.debugZ3 |= global.javaExecutionOptions.debugZ3Queries;
+        global.javaExecutionOptions.logBasic |= global.javaExecutionOptions.log || global.javaExecutionOptions.debugZ3;
+        global.globalOptions.verbose |= global.javaExecutionOptions.logBasic;
         //to avoid printing initialization-phase rules
         global.javaExecutionOptions.logRulesPublic = global.javaExecutionOptions.logRules;
 
-        if (global.javaExecutionOptions.log) {
+        if (prettyInitTerm != null) {
+            System.err.println("\nInitial term\n=====================\n");
+            printTermAndConstraint(initialTerm, prettyInitTerm);
+        }
+        if (prettyTarget != null) {
             System.err.println("\nTarget term\n=====================\n");
-            System.err.println(targetTerm);
+            printTermAndConstraint(targetTerm, prettyTarget);
         }
         int branchingRemaining = global.javaExecutionOptions.branchingAllowed;
         boolean nextStepLogEnabled = false;
         boolean originalLog = global.javaExecutionOptions.log;
+        prevStats = new TimeMemoryEntry(false);
         while (!queue.isEmpty()) {
             step++;
             int v = 0;
@@ -760,6 +766,8 @@ public class SymbolicRewriter {
                     }
                 } catch (OutOfMemoryError e) {
                     e.printStackTrace(); //to avoid hiding this exception in case another OOMError is thrown.
+                    //Activate cache profiling to see which cache caused the error.
+                    global.javaExecutionOptions.profileMemAdv = true;
                     printSummaryBox(rule, proofResults, successPaths, step, queue.size() + nextQueue.size() - v + 1);
                     throw e;
                     // DISABLE EXCEPTION CHECKSTYLE
@@ -788,30 +796,30 @@ public class SymbolicRewriter {
         }
 
         List<ConstrainedTerm> tweakedProofResults = proofResults;
-        if (global.javaExecutionOptions.formatFailures && !proofResults.isEmpty()) {
+        if (global.javaExecutionOptions.formatFailures && !proofResults.isEmpty() && prettyResult != null) {
+            System.err.println("\n" +
+                    "==========================================\n" +
+                    "Failure final states:\n" +
+                    "==========================================\n");
             for (ConstrainedTerm term : proofResults) {
-                printTermAndConstraint(term);
+                printTermAndConstraint(term, prettyResult);
             }
             tweakedProofResults = ImmutableList.of(new ConstrainedTerm(BoolToken.FALSE, initialTerm.termContext()));
         }
 
-        if (global.javaExecutionOptions.logSuccessFinalStates) {
+        if (global.javaExecutionOptions.logSuccessFinalStates  && !successResults.isEmpty() && prettyResult != null) {
             System.err.println("\n" +
                     "==========================================\n" +
                     "Success final states:\n" +
                     "==========================================\n");
             for (ConstrainedTerm result : successResults) {
-                printTermAndConstraint(result);
+                printTermAndConstraint(result, prettyResult);
             }
         }
         if (global.globalOptions.verbose) {
             printSummaryBox(rule, proofResults, successPaths, step, 0);
         }
         return tweakedProofResults;
-    }
-
-    public void printTermAndConstraint(ConstrainedTerm term) {
-        printTermAndConstraint(term, prettyResult);
     }
 
     public void printTermAndConstraint(ConstrainedTerm term, boolean pretty) {
@@ -847,13 +855,19 @@ public class SymbolicRewriter {
             System.err.print("\nEXECUTION FINISHED\n==================================\n");
         }
         System.err.format("Longest path: %d steps\n", step);
-        global.profiler.printResult();
+        global.profiler.printResult(true, global);
     }
 
     //map value = log format: true = pretty, false = toString()
     private Map<String, Boolean> cellsToLog = new LinkedHashMap<>();
-    private boolean prettyPC;
-    private boolean prettyResult;
+
+    /**
+     * null = do not print, false = toString, true = pretty.
+     */
+    private Boolean prettyPC;
+    private Boolean prettyResult;
+    private Boolean prettyInitTerm;
+    private Boolean prettyTarget;
 
     private void parseLogCells() {
         for (String cell : global.javaExecutionOptions.logCells) {
@@ -862,15 +876,27 @@ public class SymbolicRewriter {
                 pretty = true;
                 cell = cell.substring(1, cell.length() - 1);
             }
-            if (cell.equals("#pc")) {
+            switch (cell) {
+            case "#pc":
                 prettyPC = pretty;
-            } else if (cell.equals("#result")) {
+                break;
+            case "#result":
                 prettyResult = pretty;
-            } else {
+                break;
+            case "#initTerm":
+                prettyInitTerm = pretty;
+                break;
+            case "#target":
+                prettyTarget = pretty;
+                break;
+            default:
                 cellsToLog.put(cell, pretty);
+                break;
             }
         }
     }
+
+    private TimeMemoryEntry prevStats;
 
     /**
      * @param forced - if true, log this step when at least --log-basic is provided.
@@ -884,8 +910,10 @@ public class SymbolicRewriter {
         KItem top = (KItem) term.term();
 
         if (global.javaExecutionOptions.log || forced || global.javaExecutionOptions.logRulesPublic) {
-            System.err.format("\nSTEP %d v%d : %.3f s \n===================\n",
-                    step, v, (System.currentTimeMillis() - global.profiler.getStartTime()) / 1000.);
+            TimeMemoryEntry now = new TimeMemoryEntry(false);
+            System.err.format("\nSTEP %d v%d : %s\n===================\n",
+                    step, v, global.profiler.stepLogString(now, prevStats));
+            prevStats = now;
         }
 
         boolean actuallyLogged = global.javaExecutionOptions.log || forced;
@@ -898,7 +926,9 @@ public class SymbolicRewriter {
                 }
                 print(cell, pretty);
             }
-            printConstraint(term.constraint(), prettyPC);
+            if (prettyPC != null) {
+                printConstraint(term.constraint(), prettyPC);
+            }
         }
         global.profiler.logOverheadTimer.stop();
         return actuallyLogged;
