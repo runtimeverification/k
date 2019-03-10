@@ -76,7 +76,7 @@ public class GlobalContext implements Serializable {
         prettyPrinter = new PrettyPrinter(kprint, coreDefinition);
         this.stateLog = new StateLog(javaExecutionOptions, files, prettyPrinter);
         this.constraintOps = new SMTOperations(() -> def, smtOptions, new Z3Wrapper(smtOptions, kem, javaExecutionOptions, files, stateLog), kem, javaExecutionOptions);
-        this.kItemOps = new KItemOperations(stage, javaExecutionOptions.deterministicFunctions, kem, this::builtins, globalOptions);
+        this.kItemOps = new KItemOperations(stage, javaExecutionOptions.deterministicFunctions, kem, this::builtins, globalOptions, stateLog);
         this.stage = stage;
         this.profiler = profiler;
 

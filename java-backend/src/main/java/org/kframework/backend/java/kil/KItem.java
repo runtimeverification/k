@@ -22,8 +22,9 @@ import org.kframework.backend.java.util.Profiler;
 import org.kframework.backend.java.util.Profiler2;
 import org.kframework.backend.java.util.RewriteEngineUtils;
 import org.kframework.backend.java.util.RuleSourceUtil;
-import org.kframework.backend.java.util.Subsorts;
 import org.kframework.backend.java.utils.BitSet;
+import org.kframework.backend.java.util.StateLog;
+import org.kframework.backend.java.util.Subsorts;
 import org.kframework.builtin.KLabels;
 import org.kframework.kil.Attribute;
 import org.kframework.main.GlobalOptions;
@@ -343,18 +344,21 @@ public class KItem extends Term implements KItemRepresentation {
         private final KExceptionManager kem;
         private final Provider<BuiltinFunction> builtins;
         private final GlobalOptions options;
+        private final StateLog stateLog;
 
         public KItemOperations(
                 Stage stage,
                 boolean deterministicFunctions,
                 KExceptionManager kem,
                 Provider<BuiltinFunction> builtins,
-                GlobalOptions options) {
+                GlobalOptions options,
+                StateLog stateLog) {
             this.stage = stage;
             this.deterministicFunctions = deterministicFunctions;
             this.kem = kem;
             this.builtins = builtins;
             this.options = options;
+            this.stateLog = stateLog;
         }
 
         private static final String TRACE_MSG = "Function evaluation triggered infinite recursion. Trace:";
@@ -533,6 +537,8 @@ public class KItem extends Term implements KItemRepresentation {
                                 //rule creates fresh vars, therefore result is not cacheable
                                 rightHandSide.isCacheable = false;
                             }
+
+                            stateLog.log(StateLog.LogEvent.FRULE, rule.toKRewrite(), kItem, rightHandSide);
 
                             if (rule.att().contains("owise")) {
                                 if (owiseResult != null) {
