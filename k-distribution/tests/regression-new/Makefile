@@ -30,6 +30,7 @@ SUBDIRS=issue-2273 \
 	prelude-warnings \
 	equals-formatting \
 	kore-brackets \
-	quadratic-poly-unparsing
+	quadratic-poly-unparsing \
+	symbolic-int-function
 
 include ../../include/ktest-group.mak
