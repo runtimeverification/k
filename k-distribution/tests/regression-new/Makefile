@@ -12,6 +12,7 @@ SUBDIRS=issue-2273 \
 	proj-attribute \
 	matching-attribute \
 	smt-prelude-attribute \
+	smtlib2 \
 	is-variable \
 	no-dup-rules \
 	owise-haskell \
