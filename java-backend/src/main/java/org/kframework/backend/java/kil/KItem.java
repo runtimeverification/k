@@ -284,37 +284,6 @@ public class KItem extends Term implements KItemRepresentation {
         return global.kItemOps.isEvaluable(this, global.getDefinition());
     }
 
-    public Term evaluateFunction(TermContext context) {
-        profiler.resFuncNanoTimer.start();
-        Term result;
-        try {
-            if (global.javaExecutionOptions.cacheFunctions && isPure()) {
-                ConjunctiveFormula constraint = getCacheConstraint(context);
-                result = cacheGet(constraint, context);
-                if (result == null) {
-                    result = global.kItemOps.evaluateFunction(this, context);
-                    result.cachePut(constraint, result, context);
-                    this.cachePut(constraint, result, context);
-                    if (profiler.resFuncNanoTimer.getLevel() == 1) {
-                        profiler.countResFuncTopUncached++;
-                    } else {
-                        profiler.countResFuncRecursiveUncached++;
-                    }
-                }
-            } else {
-                result = global.kItemOps.evaluateFunction(this, context);
-                if (profiler.resFuncNanoTimer.getLevel() == 1) {
-                    profiler.countResFuncTopUncached++;
-                } else {
-                    profiler.countResFuncRecursiveUncached++;
-                }
-            }
-        } finally {
-            profiler.resFuncNanoTimer.stop();
-        }
-        return result;
-    }
-
     public Term resolveFunctionAndAnywhere(TermContext context) {
         profiler.resFuncNanoTimer.start();
         Term result;
