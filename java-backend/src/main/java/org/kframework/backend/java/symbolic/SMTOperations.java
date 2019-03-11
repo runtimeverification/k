@@ -98,7 +98,13 @@ public class SMTOperations {
                 if (!smtOptions.ignoreMissingSMTLibWarning) {
                     //These warnings have different degree of relevance depending whether they are in init or execution phase
                     String warnPrefix = left.globalContext().isExecutionPhase() ? "execution phase: " : "init phase: ";
-                    kem.registerCriticalWarning(warnPrefix + e.getMessage(),
+                    String warnMsg = warnPrefix + e.getMessage() + " .";
+                    if (!javaExecutionOptions.debugZ3) {
+                        warnMsg += " Please re-run with the --debug-z3 flag.";
+                    }
+                    warnMsg += " Search the logs starting with 'Z3 warning' to see the Z3 implication " +
+                            "that generated the warning.";
+                    kem.registerInternalWarning(warnMsg,
                             //Do not print stack trace for SMTTranslationFailure
                             e instanceof SMTTranslationFailure ? null : e);
                 }
