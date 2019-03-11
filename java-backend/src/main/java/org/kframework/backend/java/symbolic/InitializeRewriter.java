@@ -108,6 +108,14 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
         this.initializeDefinition = initializeDefinition;
         this.kprint = kprint;
         this.profiler = profiler;
+        chainOptions();
+    }
+
+    public void chainOptions() {
+        javaExecutionOptions.debugZ3Queries |= javaExecutionOptions.debugFormulas;
+        javaExecutionOptions.debugZ3 |= javaExecutionOptions.debugZ3Queries;
+        javaExecutionOptions.logBasic |= javaExecutionOptions.log || javaExecutionOptions.debugZ3;
+        globalOptions.verbose |= javaExecutionOptions.logBasic;
     }
 
     @Override
@@ -262,6 +270,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
                 rewritingContext.profiler.logInitTime(rewritingContext);
             }
             rewritingContext.setExecutionPhase(true);
+            rewritingContext.javaExecutionOptions.logRulesPublic = rewritingContext.javaExecutionOptions.logRules;
             List<ConstrainedTerm> proofResults = javaRules.stream()
                     .filter(r -> !r.att().contains(Attribute.TRUSTED_KEY))
                     .map(r -> {

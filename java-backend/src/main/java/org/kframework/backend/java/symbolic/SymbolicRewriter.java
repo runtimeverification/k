@@ -617,13 +617,6 @@ public class SymbolicRewriter {
         boolean guarded = false;
         int step = 0;
 
-        global.javaExecutionOptions.debugZ3Queries |= global.javaExecutionOptions.debugFormulas;
-        global.javaExecutionOptions.debugZ3 |= global.javaExecutionOptions.debugZ3Queries;
-        global.javaExecutionOptions.logBasic |= global.javaExecutionOptions.log || global.javaExecutionOptions.debugZ3;
-        global.globalOptions.verbose |= global.javaExecutionOptions.logBasic;
-        //to avoid printing initialization-phase rules
-        global.javaExecutionOptions.logRulesPublic = global.javaExecutionOptions.logRules;
-
         if (prettyInitTerm != null) {
             System.err.println("\nInitial term\n=====================\n");
             printTermAndConstraint(initialTerm, prettyInitTerm);
