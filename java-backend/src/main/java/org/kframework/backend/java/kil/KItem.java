@@ -288,13 +288,17 @@ public class KItem extends Term implements KItemRepresentation {
         profiler.resFuncNanoTimer.start();
         Term result;
         try {
-            if (global.javaExecutionOptions.cacheFunctions && isPure()) {
+            if (global.javaExecutionOptions.cacheFunctions) {
                 ConjunctiveFormula constraint = getCacheConstraint(context);
                 result = cacheGet(constraint, context);
                 if (result == null) {
                     result = global.kItemOps.resolveFunctionAndAnywhere(this, context);
+
+                    //store `result |-> result` in cache in any case, but `this |-> result` only if pair is cacheable.
                     result.cachePut(constraint, result, context);
-                    this.cachePut(constraint, result, context);
+                    if (result.isCacheable(this)) {
+                        this.cachePut(constraint, result, context);
+                    }
                     if (profiler.resFuncNanoTimer.getLevel() == 1) {
                         profiler.countResFuncTopUncached++;
                     } else {
@@ -514,15 +518,21 @@ public class KItem extends Term implements KItemRepresentation {
                             }
 
                             /* rename fresh variables of the rule */
+                            boolean hasFreshVars = false;
                             for (Variable freshVar : rule.variableSet()) {
                                 if (!solution.containsKey(freshVar)) {
                                     solution = solution.plus(freshVar, freshVar.getFreshCopy());
+                                    hasFreshVars = true;
                                 }
                             }
                             Term rightHandSide = RewriteEngineUtils.construct(
                                     rule.rhsInstructions(),
                                     solution,
                                     context);
+                            if (hasFreshVars) {
+                                //rule creates fresh vars, therefore result is not cacheable
+                                rightHandSide.isCacheable = false;
+                            }
 
                             if (rule.att().contains("owise")) {
                                 if (owiseResult != null) {
