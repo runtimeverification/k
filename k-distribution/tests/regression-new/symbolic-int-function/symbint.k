@@ -3,10 +3,12 @@
 module SYMBINT-SYNTAX
   imports INT
 
-  syntax Int ::= "symbolicInt" [function]
-  rule symbolicInt => ?V:Int
+  syntax Int ::= "symbolicIntMemo"   [function, memo]
+               | "symbolicIntNoMemo" [function]
+  rule symbolicIntMemo   => ?V:Int
+  rule symbolicIntNoMemo => ?V:Int
 
-  syntax Int ::= "init" | final ( Int , Int )
+  syntax Int ::= init ( Int ) | final ( Int , Int )
 endmodule
 
 module SYMBINT
@@ -14,5 +16,6 @@ module SYMBINT
 
   configuration <k> $PGM:Int </k>
 
-  rule <k> init => final(symbolicInt, symbolicInt) </k>
+  rule <k> init(0) => final(symbolicIntMemo, symbolicIntMemo) </k>
+  rule <k> init(1) => final(symbolicIntNoMemo, symbolicIntNoMemo) </k>
 endmodule
