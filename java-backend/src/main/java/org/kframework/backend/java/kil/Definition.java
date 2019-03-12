@@ -29,8 +29,10 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -80,7 +82,7 @@ public class Definition extends JavaSymbolicObject {
     private final List<Rule> macros = Lists.newArrayList();
     private final Multimap<KLabelConstant, Rule> functionRules = ArrayListMultimap.create();
     private final Multimap<KLabelConstant, Rule> sortPredicateRules = HashMultimap.create();
-    private final Multimap<KLabelConstant, Rule> anywhereRules = HashMultimap.create();
+    private final Multimap<KLabelConstant, Rule> anywhereRules = ArrayListMultimap.create();
     private final Multimap<KLabelConstant, Rule> patternRules = ArrayListMultimap.create();
     private final List<Rule> patternFoldingRules = new ArrayList<>();
 
@@ -106,7 +108,7 @@ public class Definition extends JavaSymbolicObject {
     private final Map<KItem.CacheTableColKey, KItem.CacheTableValue> sortCacheTable = new HashMap<>();
 
     public Definition(org.kframework.definition.Module module, KExceptionManager kem) {
-        kLabels = new HashSet<>();
+        kLabels = new LinkedHashSet<>();
         this.kem = kem;
 
         Module moduleWithPolyProds = RuleGrammarGenerator.getCombinedGrammar(module, false).getExtensionModule();
@@ -197,6 +199,10 @@ public class Definition extends JavaSymbolicObject {
         List<org.kframework.definition.Rule> koreRules = JavaConversions.setAsJavaSet(module.rules()).stream()
                 .filter(r -> !r.att().contains(AUTOMATON))
                 .collect(Collectors.toList());
+
+        //Ensures that rule order in all collections remains the same across across different executions.
+        koreRules.sort(Comparator.comparingInt(rule -> rule.body().hashCode()));
+
         koreRules.forEach(r -> {
             if (r.att().contains(Att.topRule())) {
                 reverseRuleTable.put(r.hashCode(), reverseRuleTable.size());
