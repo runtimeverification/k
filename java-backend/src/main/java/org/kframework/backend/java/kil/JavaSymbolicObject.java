@@ -47,7 +47,7 @@ public abstract class JavaSymbolicObject<T extends JavaSymbolicObject<T>>
     volatile transient PSet<Variable> variableSet = null;
     volatile transient Boolean isGround = null;
     volatile transient Boolean isNormal = null;
-    volatile transient Boolean isPure = null;
+    volatile transient Boolean isCacheable = null;
     volatile transient Set<Term> userVariableSet = null;
 
     private Att att;
@@ -142,15 +142,23 @@ public abstract class JavaSymbolicObject<T extends JavaSymbolicObject<T>>
     }
 
     /**
-     * Returns true if this {@code JavaSymbolicObject} has no impure functions, false otherwise.
+     * MUST only be called on evaluation result of argument {@code unevaluatedItem}
+     * <p>
+     * Returns true if this {@code JavaSymbolicObject} did not encounter [impure] functions during evaluation,
+     * false otherwise.
      * <p>
      * Impure functions return different results each time they are evaluated, thus their results cannot be cached.
      */
-    public boolean isPure() {
-        if (isPure == null) {
-            new IsPureFieldInitializer().visitNode(this);
+    protected boolean isCacheable(KItem unevaluatedItem) {
+        if (unevaluatedItem.kLabel() instanceof KLabelConstant
+                && ((KLabelConstant) unevaluatedItem.kLabel()).isImpure()) {
+            isCacheable = false;
+        } else {
+            if (isCacheable == null) {
+                new IsCacheableFieldInitializer().visitNode(this);
+            }
         }
-        return isPure;
+        return isCacheable;
     }
 
     public boolean isConcrete() {
