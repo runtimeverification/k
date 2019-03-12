@@ -72,9 +72,13 @@ public class BuiltinMapOperations {
     }
 
     public static Term update(Term map, Term key, Term value, TermContext context) {
-        BuiltinMap.Builder builder = BuiltinMap.builder(context.global());
-        builder.put(key, value);
-        return updateAll(map, (BuiltinMap) builder.build(), context);
+        if((map instanceof BuiltinMap) && ((BuiltinMap) map).isConcreteCollection() && key.isConcrete()) {
+            BuiltinMap.Builder builder = BuiltinMap.builder(context.global());
+            builder.put(key, value);
+            return updateAll(map, (BuiltinMap) builder.build(), context);
+        } else {
+            return  null;
+        }
     }
 
     public static Term remove(Term map, Term key, TermContext context) {
