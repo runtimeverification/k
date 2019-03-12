@@ -69,11 +69,6 @@ public final class GlobalOptions {
         }
     }
 
-    @Inject
-    public void init() {
-        debug |= debugWarnings;
-    }
-
     @Parameter(names={"--help", "-h"}, description="Print this help message", help = true)
     public boolean help = false;
 
@@ -89,7 +84,8 @@ public final class GlobalOptions {
     @Parameter(names="--debug", description="Print debugging output messages and error stack traces")
     public boolean debug = false;
 
-    @Parameter(names="--debug-warnings", description="Print debugging output messages and error/warning stack traces")
+    @Parameter(names="--debug-warnings", description="Print error/warning stack traces. " +
+            "Does not include other --debug functionality.")
     public boolean debugWarnings = false;
 
     @Parameter(names={"--warnings", "-w"}, converter=WarningsConverter.class, description="Warning level. Values: [all|normal|none]")
