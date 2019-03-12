@@ -68,10 +68,10 @@ public class BuiltinVisitorOperations {
                 public JavaSymbolicObject transform(KItem kItem) {
                     /* TODO(YilongL): we need a way to pass the
                      * `copyOnShareSubstAndEval` argument of
-                     * KItem#evaluateFunction to the evaluation of builtin
+                     * KItem#resolveFunctionAndAnywhere to the evaluation of builtin
                      * function that needs such information; or even better, a
                      * new mechanism for invoking builtin functions */
-                    return kItem.evaluateFunction(context);
+                    return kItem.resolveFunctionAndAnywhere(context);
                 }
             });
 
@@ -84,7 +84,7 @@ public class BuiltinVisitorOperations {
                     KList.concatenate(visitParams),
                     context.global(),
                     term.att());
-            return ((KItem) term).evaluateFunction(context);
+            return ((KItem) term).resolveFunctionAndAnywhere(context);
         }
 
         private boolean evaluateGuard(Term term) {
