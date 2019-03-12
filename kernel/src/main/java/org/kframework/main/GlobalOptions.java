@@ -82,10 +82,9 @@ public final class GlobalOptions {
     public boolean verbose = false;
 
     @Parameter(names="--debug", description="Print debugging output messages and error stack traces")
-    public boolean debug = false;
+    private boolean debug = false;
 
-    @Parameter(names="--debug-warnings", description="Print error/warning stack traces. " +
-            "Does not include other --debug functionality.")
+    @Parameter(names="--debug-warnings", description="Print debugging output messages and error/warning stack traces")
     public boolean debugWarnings = false;
 
     @Parameter(names={"--warnings", "-w"}, converter=WarningsConverter.class, description="Warning level. Values: [all|normal|none]")
@@ -103,4 +102,8 @@ public final class GlobalOptions {
 
     @Parameter(names={"--no-exc-wrap"}, description="Do not wrap exception messages to 80 chars. Keep long lines.")
     public boolean noExcWrap = false;
+
+    public boolean debug() {
+        return debug | debugWarnings;
+    }
 }
