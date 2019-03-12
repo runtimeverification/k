@@ -104,9 +104,7 @@ public class SMTOperations {
                     }
                     warnMsg += " Search the logs starting with 'Z3 warning' to see the Z3 implication " +
                             "that generated the warning.";
-                    kem.registerInternalWarning(warnMsg,
-                            //Do not print stack trace for SMTTranslationFailure
-                            e instanceof SMTTranslationFailure ? null : e);
+                    kem.registerInternalWarning(warnMsg, e);
                 }
                 if (javaExecutionOptions.debugZ3) {
                     System.err.format("\nZ3 warning. Query not generated: %s\n", e.getMessage());
