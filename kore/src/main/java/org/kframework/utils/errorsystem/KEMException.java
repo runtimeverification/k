@@ -20,6 +20,11 @@ public class KEMException extends RuntimeException {
         this.exception = e;
     }
 
+    KEMException(KException e, ExceptionType type) {
+        super(e.toString(), e.getException());
+        this.exception = new KException(type, e.exceptionGroup, e.getMessage(), e.getSource(), e.getLocation(), e.getException());
+    }
+
     public static KEMException debuggerError(String message) {
         return create(ExceptionType.ERROR, KExceptionGroup.DEBUGGER, message, null, null, null);
     }

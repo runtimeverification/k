@@ -32,6 +32,7 @@ SUBDIRS=issue-2273 \
 	kore-brackets \
 	quadratic-poly-unparsing \
 	io-java \
+	fatalWarnings \
 
 
 include ../../include/ktest-group.mak
