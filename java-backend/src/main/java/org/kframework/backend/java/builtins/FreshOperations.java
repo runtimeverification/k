@@ -34,7 +34,7 @@ public class FreshOperations {
                 KLabelConstant.of(name, context.definition()),
                 KList.singleton(IntToken.of(context.freshConstant())),
                 context.global());
-        return freshFunction.evaluateFunction(context);
+        return freshFunction.resolveFunctionAndAnywhere(context);
     }
 
 }

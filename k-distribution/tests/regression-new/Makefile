@@ -32,6 +32,7 @@ SUBDIRS=issue-2273 \
 	kore-brackets \
 	quadratic-poly-unparsing \
 	io-java \
+	symbolic-int-function \
 
 
 include ../../include/ktest-group.mak
