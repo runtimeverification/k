@@ -104,6 +104,6 @@ public final class GlobalOptions {
     public boolean noExcWrap = false;
 
     public boolean debug() {
-        return debug | debugWarnings;
+        return debug || debugWarnings;
     }
 }
