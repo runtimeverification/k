@@ -19,15 +19,17 @@ SUBDIRS=issue-2273 \
 	or-llvm \
 	or-ocaml \
 	issue-313 \
-        checks \
+	checks \
 	withConfig \
 	withConfig-llvm \
 	pattern-macro \
-        boundary-cells-opt/bc-none \
+	boundary-cells-opt/bc-none \
 	boundary-cells-opt/bc-c1 \
 	boundary-cells-opt/bc-c2 \
 	boundary-cells-opt/bc-c1c2 \
 	prelude-warnings \
-	equals-formatting
+	equals-formatting \
+	kore-brackets \
+	quadratic-poly-unparsing
 
 include ../../include/ktest-group.mak

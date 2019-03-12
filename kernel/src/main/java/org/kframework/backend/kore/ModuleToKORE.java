@@ -991,7 +991,7 @@ public class ModuleToKORE {
     }
 
     private Production computePolyProd(Production prod) {
-        if (!prod.att().contains("poly"))
+        if (prod.klabel().isEmpty() || !prod.att().contains("poly"))
             return prod.withAtt(prod.att().add("originalPrd", Production.class, prod));
         List<Set<Integer>> poly = RuleGrammarGenerator.computePositions(prod);
         polyKLabels.put(prod.klabel().get().name(), poly);
