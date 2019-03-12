@@ -406,7 +406,7 @@ public class ModuleToKORE {
             int numTerms = 0;
             for (Production prod : iterable(mutable(module.productionsForSort()).getOrDefault(sort, Set()))) {
                 prod = computePolyProd(prod);
-                if (isFunction(prod) || prod.isSubsort()) {
+                if (isFunction(prod) || prod.isSubsort() || isBuiltinProduction(prod)) {
                     continue;
                 }
                 if (prod.klabel().isEmpty() && !((prod.att().contains("token") && !hasToken) || prod.isSubsort())) {
@@ -582,19 +582,14 @@ public class ModuleToKORE {
         K left = RewriteToTop.toLeft(rule.body());
         boolean constructorBased = constructorChecks.isConstructorBased(left);
         if (left instanceof KApply) {
-            Production prod = production((KApply)left);
-            production = prod.att().get("originalPrd", Production.class);
+            production = production((KApply)left, true);
             productionSort = production.sort();
             productionSorts = stream(production.items())
                     .filter(i -> i instanceof NonTerminal)
                     .map(i -> (NonTerminal) i)
                     .map(NonTerminal::sort).collect(Collectors.toList());
             productionLabel = production.klabel().get();
-            if (ConstructorChecks.isBuiltinLabel(productionLabel)) {
-                Option<Sort> termSort = left.att().getOption(Sort.class);
-                if (termSort.nonEmpty()) productionSort = termSort.get();
-            }
-            if (isFunction(prod) || rule.att().contains(Attribute.ANYWHERE_KEY) || ConstructorChecks.isBuiltinLabel(productionLabel)) {
+            if (isFunction(production) || rule.att().contains(Attribute.ANYWHERE_KEY)) {
                 leftChildren = ((KApply) left).items();
                 equation = true;
             } else if ((rule.att().contains("heat") || rule.att().contains("cool")) && heatCoolEq) {
@@ -947,7 +942,7 @@ public class ModuleToKORE {
 
     private boolean isFunction(Production prod) {
         Production realProd = prod.att().get("originalPrd", Production.class);
-        if (!realProd.att().contains(Attribute.FUNCTION_KEY) && !isBuiltinProduction(realProd)) {
+        if (!realProd.att().contains(Attribute.FUNCTION_KEY)) {
             return false;
         }
         return true;
@@ -991,6 +986,10 @@ public class ModuleToKORE {
     }
 
     private Production computePolyProd(Production prod) {
+        return computePolyProd(prod, null);
+    }
+
+    private Production computePolyProd(Production prod, KApply k) {
         if (prod.klabel().isEmpty() || !prod.att().contains("poly"))
             return prod.withAtt(prod.att().add("originalPrd", Production.class, prod));
         List<Set<Integer>> poly = RuleGrammarGenerator.computePositions(prod);
@@ -1001,6 +1000,14 @@ public class ModuleToKORE {
         for (int i = 0; i < poly.size(); i++) {
             Set<Integer> positions = poly.get(i);
             Sort sort = Sort("S" + i);
+            if (k != null) {
+                int firstPos = positions.iterator().next();
+                if (firstPos == 0) {
+                    sort = k.att().get(Sort.class);
+                } else {
+                    sort = k.klist().items().get(firstPos - 1).att().get(Sort.class);
+                }
+            }
             params.add(sort);
             for (int j : positions) {
                 if (j == 0) {
@@ -1060,16 +1067,20 @@ public class ModuleToKORE {
 
 
     private Production production(KApply term) {
+        return production(term, false);
+    }
+
+    private Production production(KApply term, boolean instantiatePolySorts) {
         KLabel klabel = term.klabel();
         if (klabel.name().equals(KLabels.INJ))
             return Production(INJ_PROD.klabel(), INJ_PROD.sort(), INJ_PROD.items(), Att.empty().add("originalPrd", Production.class, INJ_PROD));
         Option<scala.collection.Set<Production>> prods = module.productionsFor().get(klabel);
         assert(prods.nonEmpty());
         assert(prods.get().size() == 1);
-        return computePolyProd(prods.get().head());
+        return computePolyProd(prods.get().head(), instantiatePolySorts ? term : null);
     }
 
-    private String convertBuiltinLabelName(String klabel) {
+    private String convertBuiltinLabel(String klabel) {
       switch(klabel) {
       case "#False":
         return "\\bottom";
@@ -1096,27 +1107,11 @@ public class ModuleToKORE {
       }
     }
 
-    private void convertBuiltinLabel(KLabel klabel, KApply term) {
-        sb.append(convertBuiltinLabelName(klabel.name()));
-        sb.append('{');
-        switch (klabel.name()) {
-        case "#Ceil":
-        case "#Floor":
-        case "#Equals":
-            Sort childSort = term.klist().items().get(0).att().get(Sort.class);
-            convert(childSort, false);
-            sb.append(',');
-        }
-        Sort termSort = term.att().get(Sort.class);
-        convert(termSort, false);
-        sb.append('}');
-    }
-
     private void convert(KLabel klabel, boolean var) {
         if (klabel.name().equals(KLabels.INJ)) {
             sb.append(klabel.name());
         } else if (ConstructorChecks.isBuiltinLabel(klabel)) {
-            sb.append(convertBuiltinLabelName(klabel.name()));
+            sb.append(convertBuiltinLabel(klabel.name()));
         } else {
             sb.append("Lbl");
             convert(klabel.name());
@@ -1392,14 +1387,10 @@ public class ModuleToKORE {
                     throw KEMException.internalError("Cannot yet translate impure function to kore: " + k.klabel().name(), k);
                 }
                 KLabel label = k.klabel();
-                if (polyKLabels.containsKey(k.klabel().name()) && !ConstructorChecks.isBuiltinLabel(label)) {
+                if (polyKLabels.containsKey(k.klabel().name())) {
                     label = computePolyKLabel(k);
                 }
-                if (ConstructorChecks.isBuiltinLabel(label)) {
-                    convertBuiltinLabel(label, k);
-                } else {
-                    convert(label, false);
-                }
+                convert(label, false);
                 sb.append("(");
                 String conn = "";
                 for (K item : k.items()) {
