@@ -40,10 +40,9 @@ public class KExceptionManager {
     }
 
     private void printStackTrace(KException e) {
-        if (e.getException() != null) {
-            if (options.debug) {
-                e.getException().printStackTrace();
-            }
+        if (e.getException() != null &&
+                (options.debugWarnings || (options.debug && e.getType() == ExceptionType.ERROR))) {
+            e.getException().printStackTrace();
         }
     }
 
