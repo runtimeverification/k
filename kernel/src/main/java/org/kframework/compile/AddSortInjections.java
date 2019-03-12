@@ -175,26 +175,8 @@ public class AddSortInjections {
             if (kapp.klabel().name().equals("inj")) {
                 return term;
             }
-//            case "#True":
-//            case "#False":
-//                return KApply(klabel, kapp.klist(), att);
-//            case "#Floor":
-//            case "#Ceil":
-//                Sort childSort = sort(kapp.items().get(0), freshSortParam());
-//                return KApply(klabel,
-//                        KList(internalAddSortInjections(kapp.items().get(0), childSort)), att);
-//            case "#Equals":
-//                Sort freshSortVar = freshSortParam();
-//                Sort leftSort = sort(kapp.items().get(0), freshSortVar);
-//                Sort rightSort = sort(kapp.items().get(1), freshSortVar);
-//                Sort innerSort = lubSort(leftSort, rightSort, freshSortVar, kapp);
-//                return KApply(klabel,
-//                        KList(internalAddSortInjections(kapp.items().get(0), innerSort),
-//                                internalAddSortInjections(kapp.items().get(1), innerSort)), att);
-//            }
             Production prod = production(kapp);
             List<K> children = new ArrayList<>();
-            Set<Integer> polyPositions = Collections.emptySet();
             Map<Integer,Sort> expectedSorts = new HashMap<>();
             if (prod.att().contains("poly")) {
                 List<Set<Integer>> poly = RuleGrammarGenerator.computePositions(prod);
@@ -319,11 +301,9 @@ public class AddSortInjections {
     }
 
     private Sort lub(Collection<Sort> entries, HasLocation loc) {
+        assert !entries.isEmpty();
         Collection<Sort> filteredEntries = entries.stream().filter(s -> !s.name().equals(SORTPARAM_NAME)).collect(Collectors.toList());
-        if (filteredEntries.isEmpty()) {
-            if (entries.isEmpty()) {
-                throw KEMException.internalError("Could not compute least upper bound for rewrite sort.", loc);
-            }
+        if (filteredEntries.isEmpty()) { // if all sorts are parameters, take the first
             return entries.iterator().next();
         }
         Set<Sort> bounds = upperBounds(filteredEntries);
