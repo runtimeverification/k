@@ -69,6 +69,11 @@ public final class GlobalOptions {
         }
     }
 
+    @Inject
+    public void init() {
+        debug |= debugWarnings;
+    }
+
     @Parameter(names={"--help", "-h"}, description="Print this help message", help = true)
     public boolean help = false;
 
