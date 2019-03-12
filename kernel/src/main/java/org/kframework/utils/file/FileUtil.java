@@ -78,7 +78,7 @@ public class FileUtil {
     }
 
     public void deleteTempDir(KExceptionManager kem) {
-        if (!options.debug) {
+        if (!options.debug()) {
             try {
                 FileUtils.deleteDirectory(tempDir);
             } catch (IOException e) {
