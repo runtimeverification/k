@@ -4,7 +4,7 @@ ARG BASE_IMAGE
 
 RUN if [ "$BASE_IMAGE" = "debian:stretch" ]; then echo "Enabling backports..."; echo "deb http://ftp.debian.org/debian stretch-backports main" > /etc/apt/sources.list.d/stretch-backports.list; fi
 RUN apt-get update
-RUN apt-get install -y git debhelper maven openjdk-8-jdk cmake libboost-test-dev libyaml-cpp-dev libjemalloc-dev flex bison clang-6.0 zlib1g-dev libgmp-dev libmpfr-dev gcc z3 libz3-dev opam pkg-config curl
+RUN apt-get install -y git debhelper maven openjdk-8-jdk cmake libboost-test-dev libyaml-cpp-dev libjemalloc-dev flex bison clang-6.0 llvm-6.0-tools zlib1g-dev libgmp-dev libmpfr-dev gcc z3 libz3-dev opam pkg-config curl
 RUN update-alternatives --set java /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java
 ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
 RUN curl -sSL https://get.haskellstack.org/ | sh      
@@ -15,7 +15,9 @@ RUN groupadd -g $GROUP_ID user && \
     useradd -m -u $USER_ID -s /bin/sh -g user user
 
 USER $USER_ID:$GROUP_ID
-RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain 1.28.0
+
+ADD llvm-backend/src/main/native/llvm-backend/install-rust llvm-backend/src/main/native/llvm-backend/rust-checksum /home/user/
+RUN cd /home/user/ && ./install-rust
 
 ADD k-distribution/src/main/scripts/bin/k-configure-opam-dev k-distribution/src/main/scripts/bin/k-configure-opam-common /home/user/.tmp-opam/bin/
 ADD k-distribution/src/main/scripts/lib/opam  /home/user/.tmp-opam/lib/opam/
