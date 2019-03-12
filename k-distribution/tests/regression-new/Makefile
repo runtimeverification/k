@@ -30,6 +30,8 @@ SUBDIRS=issue-2273 \
 	prelude-warnings \
 	equals-formatting \
 	kore-brackets \
-	quadratic-poly-unparsing
+	quadratic-poly-unparsing \
+	io-java \
+
 
 include ../../include/ktest-group.mak
