@@ -29,6 +29,7 @@ import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.util.FormulaContext;
+import org.kframework.backend.java.util.StateLog;
 import org.kframework.backend.java.utils.BitSet;
 import org.kframework.builtin.KLabels;
 import org.kframework.kore.KApply;
@@ -125,6 +126,7 @@ public class FastRuleMatcher {
                 patternConstraint = patternConstraint.addAll(rule.requires());
             }
             FormulaContext formulaContext = new FormulaContext(FormulaContext.Kind.RegularRule, rule);
+            global.stateLog.log(StateLog.LogEvent.RULEATTEMPT, rule.toKRewrite(), subject.term(), subject.constraint());
             List<Triple<ConjunctiveFormula, Boolean, Map<scala.collection.immutable.List<Pair<Integer, Integer>>, Term>>> ruleResults = ConstrainedTerm.evaluateConstraints(
                     constraints[i],
                     subject.constraint(),
