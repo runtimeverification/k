@@ -1,6 +1,7 @@
 // Copyright (c) 2015-2019 K Team. All Rights Reserved.
 package org.kframework.backend.java.symbolic;
 
+import com.google.inject.Provider;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.util.FormulaContext;
@@ -10,8 +11,6 @@ import org.kframework.utils.options.SMTOptions;
 import org.kframework.utils.options.SMTSolver;
 
 import java.util.Set;
-
-import com.google.inject.Provider;
 
 public class SMTOperations {
 
@@ -99,7 +98,13 @@ public class SMTOperations {
                 if (!smtOptions.ignoreMissingSMTLibWarning) {
                     //These warnings have different degree of relevance depending whether they are in init or execution phase
                     String warnPrefix = left.globalContext().isExecutionPhase() ? "execution phase: " : "init phase: ";
-                    kem.registerCriticalWarning(warnPrefix + e.getMessage(), e);
+                    String warnMsg = warnPrefix + e.getMessage() + " .";
+                    if (!javaExecutionOptions.debugZ3) {
+                        warnMsg += " Please re-run with the --debug-z3 flag.";
+                    }
+                    warnMsg += " Search the logs starting with 'Z3 warning' to see the Z3 implication " +
+                            "that generated the warning.";
+                    kem.registerInternalWarning(warnMsg, e);
                 }
                 if (javaExecutionOptions.debugZ3) {
                     System.err.format("\nZ3 warning. Query not generated: %s\n", e.getMessage());
