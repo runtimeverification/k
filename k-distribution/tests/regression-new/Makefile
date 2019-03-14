@@ -36,6 +36,7 @@ SUBDIRS=issue-2273 \
 	io-java \
 	fatalWarnings \
 	symbolic-int-function \
+	map-symbolic-tests \
 
 
 include ../../include/ktest-group.mak
