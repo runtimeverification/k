@@ -27,7 +27,6 @@ import org.kframework.utils.errorsystem.KEMException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -36,9 +35,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.kframework.Collections.*;
 import static org.kframework.kore.KORE.*;
-
-import static org.kframework.Collections.iterable;
 
 public class AddSortInjections {
 
@@ -47,7 +45,7 @@ public class AddSortInjections {
 
     private int freshSortParamCounter = 0;
     private Set<String> sortParams = new HashSet<>();
-    public static final String SORTPARAM_NAME = "SortParam";
+    public static final String SORTPARAM_NAME = "#SortParam";
 
     public AddSortInjections(Module mod) {
         this.mod = mod;

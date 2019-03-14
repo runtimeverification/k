@@ -613,8 +613,8 @@ public class ModuleToKORE {
             sb.append("  axiom{R");
             Option<Set> sortParams = rule.att().getOption("sortParams", Set.class);
             if (sortParams.nonEmpty()) {
-                for (Object sort : sortParams.get())
-                    sb.append("," + sort);
+                for (Object sortParamName : sortParams.get())
+                    sb.append("," + sortParamName);
             }
             sb.append("} ");
             if (owise) {
