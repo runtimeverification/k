@@ -15,183 +15,219 @@ pipeline {
       }
     }
     stage('Build and Package K') {
-      stages {
-        stage('Build and Package on Ubuntu Bionic') {
+      failFast true
+      parallel {
+        stage('Build and Package K on Linux') {
           stages {
-            stage('Build on Ubuntu Bionic') {
-              agent {
-                dockerfile {
-                  additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=ubuntu:bionic'
-                  reuseNode true
-                }
-              }
+            stage('Build and Package on Ubuntu Bionic') {
               stages {
-                stage('Checkout code') {
-                  steps {
-                    dir('k-exercises') {
-                      git url: 'git@github.com:kframework/k-exercises.git'
+                stage('Build on Ubuntu Bionic') {
+                  agent {
+                    dockerfile {
+                      additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=ubuntu:bionic'
+                      reuseNode true
+                    }
+                  }
+                  stages {
+                    stage('Checkout code') {
+                      steps {
+                        dir('k-exercises') {
+                          git url: 'git@github.com:kframework/k-exercises.git'
+                        }
+                      }
+                    }
+                    stage('Build and Test K') {
+                      steps {
+                        sh '''
+                          echo 'Setting up environment...'
+                          eval `opam config env`
+                          . $HOME/.cargo/env
+                          echo 'Building K...'
+                          mvn verify -U
+                          echo 'Starting kserver...'
+                          k-distribution/target/release/k/bin/spawn-kserver kserver.log
+                          cd k-exercises/tutorial
+                          make -j`nproc`
+                        '''
+                      }
+                    }
+                    stage('Build Debian Package') {
+                      steps {
+                        dir('kframework-5.0.0') {
+                          checkout scm
+                          sh '''
+                            . $HOME/.cargo/env
+                            dpkg-buildpackage
+                          '''
+                        }
+                        stash name: "bionic", includes: "kframework_5.0.0_amd64.deb"
+                      }
+                    }
+                  }
+                  post {
+                    always {
+                      sh 'k-distribution/target/release/k/bin/stop-kserver || true'
                     }
                   }
                 }
-                stage('Build and Test K') {
+                stage('Test Debian Package') {
+                  agent {
+                    docker {
+                      image 'ubuntu:bionic'
+                      args '-u 0'
+                      reuseNode true
+                    }
+                  }
+                  options { skipDefaultCheckout() }
+                  steps {
+                    unstash "bionic"
+                    sh 'src/main/scripts/test-in-container'
+                  }
+                  post {
+                    always {
+                      sh 'stop-kserver || true'
+                    }
+                  }
+                }
+              }
+            }
+            stage('Build and Package on Ubuntu Xenial') {
+              when {
+                anyOf {
+                  not { changeRequest() } 
+                  changelog '.*^\\[build-system\\] .+$'
+                  changeset 'Jenkinsfile'
+                  changeset 'Dockerfile'
+                }
+              }
+              stages {
+                stage('Build on Ubuntu Xenial') {
+                  agent {
+                    dockerfile {
+                      additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=ubuntu:xenial'
+                      reuseNode true
+                    }
+                  }
+                  stages {
+                    stage('Build Debian Package') {
+                      steps {
+                        dir('kframework-5.0.0') {
+                          checkout scm
+                          sh '''
+                            . $HOME/.cargo/env
+                            dpkg-buildpackage
+                          '''
+                        }
+                        stash name: "xenial", includes: "kframework_5.0.0_amd64.deb"
+                      }
+                    }
+                  }
+                }
+                stage('Test Debian Package') {
+                  agent {
+                    docker {
+                      image 'ubuntu:xenial'
+                      args '-u 0'
+                      reuseNode true
+                    }
+                  }
+                  options { skipDefaultCheckout() }
+                  steps {
+                    unstash "xenial"
+                    sh 'src/main/scripts/test-in-container'
+                  }
+                  post {
+                    always {
+                      sh 'stop-kserver || true'
+                    }
+                  }
+                }
+              }
+            }
+            stage('Build and Package on Debian Stretch') {
+              when {
+                anyOf {
+                  not { changeRequest() } 
+                  changelog '.*^\\[build-system\\] .+$'
+                  changeset 'Jenkinsfile'
+                  changeset 'Dockerfile'
+                }
+              }
+              stages {
+                stage('Build on Debian Stretch') {
+                  agent {
+                    dockerfile {
+                      additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=debian:stretch'
+                      reuseNode true
+                    }
+                  }
+                  stages {
+                    stage('Build Debian Package') {
+                      steps {
+                        dir('kframework-5.0.0') {
+                          checkout scm
+                          sh '''
+                            . $HOME/.cargo/env
+                            dpkg-buildpackage
+                          '''
+                        }
+                        stash name: "stretch", includes: "kframework_5.0.0_amd64.deb"
+                      }
+                    }
+                  }
+                }
+                stage('Test Debian Package') {
+                  agent {
+                    docker {
+                      image 'debian:stretch'
+                      args '-u 0'
+                      reuseNode true
+                    }
+                  }
+                  options { skipDefaultCheckout() }
+                  steps {
+                    unstash "stretch"
+                    sh '''
+                      echo "deb http://ftp.debian.org/debian stretch-backports main" > /etc/apt/sources.list.d/stretch-backports.list
+                      src/main/scripts/test-in-container
+                    '''
+                  }
+                  post {
+                    always {
+                      sh 'stop-kserver || true'
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        stage('Build and Package on Mac OS') {
+          when {
+            anyOf {
+              not { changeRequest() } 
+              changelog '.*^\\[build-system\\] .+$'
+              changeset 'Jenkinsfile'
+              changeset 'Dockerfile'
+            }
+          }
+          stages {
+            stage('Build on Mac OS') {
+              agent {
+                label 'anka'
+              }
+              stages {
+                stage('Build and Test on Mac OS') {
                   steps {
                     sh '''
                       echo 'Setting up environment...'
+                      ./src/main/scripts/brew-install-deps'
                       eval `opam config env`
                       . $HOME/.cargo/env
                       echo 'Building K...'
                       mvn verify -U
-                      echo 'Starting kserver...'
-                      k-distribution/target/release/k/bin/spawn-kserver kserver.log
-                      cd k-exercises/tutorial
-                      make -j`nproc`
                     '''
                   }
-                }
-                stage('Build Debian Package') {
-                  steps {
-                    dir('kframework-5.0.0') {
-                      checkout scm
-                      sh '''
-                        . $HOME/.cargo/env
-                        dpkg-buildpackage
-                      '''
-                    }
-                    stash name: "bionic", includes: "kframework_5.0.0_amd64.deb"
-                  }
-                }
-              }
-              post {
-                always {
-                  sh 'k-distribution/target/release/k/bin/stop-kserver || true'
-                }
-              }
-            }
-            stage('Test Debian Package') {
-              agent {
-                docker {
-                  image 'ubuntu:bionic'
-                  args '-u 0'
-                  reuseNode true
-                }
-              }
-              options { skipDefaultCheckout() }
-              steps {
-                unstash "bionic"
-                sh 'src/main/scripts/test-in-container'
-              }
-              post {
-                always {
-                  sh 'stop-kserver || true'
-                }
-              }
-            }
-          }
-        }
-        stage('Build and Package on Ubuntu Xenial') {
-          when {
-            anyOf {
-              not { changeRequest() } 
-              changelog '.*^\\[build-system\\] .+$'
-              changeset 'Jenkinsfile'
-              changeset 'Dockerfile'
-            }
-          }
-          stages {
-            stage('Build on Ubuntu Xenial') {
-              agent {
-                dockerfile {
-                  additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=ubuntu:xenial'
-                  reuseNode true
-                }
-              }
-              stages {
-                stage('Build Debian Package') {
-                  steps {
-                    dir('kframework-5.0.0') {
-                      checkout scm
-                      sh '''
-                        . $HOME/.cargo/env
-                        dpkg-buildpackage
-                      '''
-                    }
-                    stash name: "xenial", includes: "kframework_5.0.0_amd64.deb"
-                  }
-                }
-              }
-            }
-            stage('Test Debian Package') {
-              agent {
-                docker {
-                  image 'ubuntu:xenial'
-                  args '-u 0'
-                  reuseNode true
-                }
-              }
-              options { skipDefaultCheckout() }
-              steps {
-                unstash "xenial"
-                sh 'src/main/scripts/test-in-container'
-              }
-              post {
-                always {
-                  sh 'stop-kserver || true'
-                }
-              }
-            }
-          }
-        }
-        stage('Build and Package on Debian Stretch') {
-          when {
-            anyOf {
-              not { changeRequest() } 
-              changelog '.*^\\[build-system\\] .+$'
-              changeset 'Jenkinsfile'
-              changeset 'Dockerfile'
-            }
-          }
-          stages {
-            stage('Build on Debian Stretch') {
-              agent {
-                dockerfile {
-                  additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=debian:stretch'
-                  reuseNode true
-                }
-              }
-              stages {
-                stage('Build Debian Package') {
-                  steps {
-                    dir('kframework-5.0.0') {
-                      checkout scm
-                      sh '''
-                        . $HOME/.cargo/env
-                        dpkg-buildpackage
-                      '''
-                    }
-                    stash name: "stretch", includes: "kframework_5.0.0_amd64.deb"
-                  }
-                }
-              }
-            }
-            stage('Test Debian Package') {
-              agent {
-                docker {
-                  image 'debian:stretch'
-                  args '-u 0'
-                  reuseNode true
-                }
-              }
-              options { skipDefaultCheckout() }
-              steps {
-                unstash "stretch"
-                sh '''
-                  echo "deb http://ftp.debian.org/debian stretch-backports main" > /etc/apt/sources.list.d/stretch-backports.list
-                  src/main/scripts/test-in-container
-                '''
-              }
-              post {
-                always {
-                  sh 'stop-kserver || true'
                 }
               }
             }
