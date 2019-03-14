@@ -16,7 +16,7 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.ObjectStreamException;
-import java.io.OutputStream;
+import java.nio.channels.FileLock;
 
 @RequestScoped
 public class BinaryLoader {
@@ -24,18 +24,17 @@ public class BinaryLoader {
     private final KExceptionManager kem;
 
     @Inject
-    public BinaryLoader(
-            KExceptionManager kem) {
+    public BinaryLoader(KExceptionManager kem) {
         this.kem = kem;
     }
 
-    public void save(File fileName, Object o) throws IOException {
+    public void saveWithLock(File fileName, Object o) throws IOException {
         File dir = fileName.getAbsoluteFile().getParentFile();
         if (!dir.exists() && !dir.mkdirs()) {
             throw KEMException.criticalError("Could not create directory " + dir);
         }
-        try (OutputStream out = new FileOutputStream(fileName)) {
-            save(out, o);
+        try (FileOutputStream out = new FileOutputStream(fileName)) {
+            saveWithLock(out, o);
         }
     }
 
@@ -44,28 +43,20 @@ public class BinaryLoader {
         if (!dir.exists() && !dir.mkdirs()) {
             throw KEMException.criticalError("Could not create directory " + dir);
         }
-        try (OutputStream out = new FileOutputStream(fileName)) {
-            saveOrDie(out, o, fileName.getAbsolutePath());
+        try (FileOutputStream out = new FileOutputStream(fileName)) {
+            saveWithLock(out, o);
         } catch (IOException e) {
-            throw KEMException.criticalError("Could not write to " + fileName, e);
+            throw KEMException.criticalError("Could not write to " + fileName.getAbsolutePath(), e);
         }
     }
 
-    private void saveOrDie(OutputStream out, Object o, String fileName) {
-        try {
-            save(out, o);
-        } catch (IOException e) {
-            throw KEMException.criticalError("Could not write to " + fileName, e);
-        }
-    }
-
-    public void saveOrDie(OutputStream out, Object o) {
-        saveOrDie(out, o, "output stream");
-    }
-
-    public void save(OutputStream out, Object o) throws IOException {
-        try(ObjectOutputStream serializer
-                = new ObjectOutputStream(new BufferedOutputStream(out))) {
+    /**
+     * Locks the file before writing, so that it cannot be read by another instance of K. If the file is currently in
+     * use, this method will block until lock can be acquired.
+     */
+    public void saveWithLock(FileOutputStream out, Object o) throws IOException {
+        out.getChannel().lock(); //Lock is released automatically when serializer is closed.
+        try (ObjectOutputStream serializer = new ObjectOutputStream(new BufferedOutputStream(out))) {
             serializer.writeObject(o);
         }
     }
