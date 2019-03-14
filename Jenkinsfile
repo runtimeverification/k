@@ -221,7 +221,7 @@ pipeline {
                   steps {
                     sh '''
                       echo 'Setting up environment...'
-                      ./src/main/scripts/brew-install-deps'
+                      ./src/main/scripts/brew-install-deps
                       eval `opam config env`
                       . $HOME/.cargo/env
                       echo 'Building K...'
