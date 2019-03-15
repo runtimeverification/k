@@ -32,6 +32,7 @@ public class KLabels {
     public static final KLabel ML_AND = KLabel("#And");
     public static final KLabel ML_NOT = KLabel("#Not");
     public static final KLabel ML_CEIL = KLabel("#Ceil");
+    public static final KLabel ML_FLOOR = KLabel("#Floor");
     public static final KLabel ML_EQUALS = KLabel("#Equals");
     public static final KLabel ML_IMPLIES = KLabel("#Implies");
     public static final KLabel ML_EXISTS = KLabel("#Exists");
