@@ -189,7 +189,7 @@ public class AddSortInjections {
                         List<Sort> polySorts = positions.stream()
                                 .map(p -> sort(kapp.items().get(p - 1), freshSortParam))
                                 .collect(Collectors.toList());
-                        expectedSort = lub(polySorts, kapp);
+                        expectedSort = lub(polySorts, null, kapp);
                     }
                     for (Integer p : positions) {
                         expectedSorts.put(p - 1, expectedSort);
@@ -253,7 +253,7 @@ public class AddSortInjections {
                         if (children.size() == 0) {
                             return expectedSort;
                         }
-                        return lub(children, term);
+                        return lub(children, expectedSort, term);
                     }
                 }
             }
@@ -289,7 +289,7 @@ public class AddSortInjections {
         } else if (rightSort == null) {
             return leftSort;
         }
-        return lub(Arrays.asList(leftSort, rightSort), loc);
+        return lub(Arrays.asList(leftSort, rightSort), expectedSort, loc);
     }
 
     private Production production(KApply term) {
@@ -300,13 +300,16 @@ public class AddSortInjections {
         return prods.head();
     }
 
-    private Sort lub(Collection<Sort> entries, HasLocation loc) {
+    private Sort lub(Collection<Sort> entries, Sort expectedSort, HasLocation loc) {
         assert !entries.isEmpty();
         Collection<Sort> filteredEntries = entries.stream().filter(s -> !s.name().equals(SORTPARAM_NAME)).collect(Collectors.toList());
         if (filteredEntries.isEmpty()) { // if all sorts are parameters, take the first
             return entries.iterator().next();
         }
         Set<Sort> bounds = upperBounds(filteredEntries);
+        if (expectedSort != null && !expectedSort.name().equals(SORTPARAM_NAME) && !expectedSort.equals(Sorts.KItem())) {
+            bounds.removeIf(s -> !mod.subsorts().lessThanEq(s, expectedSort));
+        }
         Set<Sort> lub = mod.subsorts().minimal(bounds);
         if (lub.size() != 1) {
             throw KEMException.internalError("Could not compute least upper bound for rewrite sort.", loc);
