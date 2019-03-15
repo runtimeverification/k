@@ -15,7 +15,6 @@ SUBDIRS=issue-2273 \
 	is-variable \
 	no-dup-rules \
 	imp-haskell \
-	imp-llvm \
 	equals-pattern \
 	or-llvm \
 	or-ocaml \

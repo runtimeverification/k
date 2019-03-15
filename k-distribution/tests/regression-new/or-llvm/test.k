@@ -3,7 +3,6 @@
 module TEST
   imports INT
   imports BOOL
-  imports ML-SYNTAX
 
   syntax KItem ::= "foo" | "bar" | "baz" | test(K) | test2(K, K)
   rule foo #Or bar #Or baz => 0

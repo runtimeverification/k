@@ -10,7 +10,7 @@ object RewriteToTop {
     case t: KRewrite => t.left
     case t: KApply => KApply(t.klabel, immutable(t.klist.items) map toLeft, t.att)
     case t: KSequence => KSequence(mutable(immutable(t.items) map toLeft toList), t.att)
-    case t: KAs => KAs(toLeft(t.pattern), t.alias, t.att)
+    case t: KAs => KAs(toLeft(t.pattern), t.alias)
     case other => other
   }
 

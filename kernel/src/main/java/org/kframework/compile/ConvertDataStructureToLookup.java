@@ -106,25 +106,23 @@ public class ConvertDataStructureToLookup {
     }
 
     public static Map<KLabel, KLabel> collectionFor(Module m) {
-        return stream(m.productions())
-                .filter(p -> p.att().contains(Attribute.ASSOCIATIVE_KEY) && p.att().contains("element"))
-                .flatMap(p -> {
-                    Set<Tuple2<KLabel, KLabel>> set = new HashSet<>();
-                    set.add(Tuple2.apply(p.klabel().get(), p.klabel().get()));
-                    if (p.att().contains(Attribute.UNIT_KEY)) {
-                        set.add(Tuple2.apply(KLabel(p.att().get(Attribute.UNIT_KEY)), p.klabel().get()));
-                    }
-                    if (p.att().contains("element")) {
-                        set.add(Tuple2.apply(KLabel(p.att().get("element")), p.klabel().get()));
-                    }
-                    if (p.att().contains("filterElement")) {
-                        set.add(Tuple2.apply(KLabel(p.att().get("filterElement")), p.klabel().get()));
-                    }
-                    if (p.att().contains("wrapElement")) {
-                        set.add(Tuple2.apply(KLabel(p.att().get("wrapElement")), p.klabel().get()));
-                    }
-                    return set.stream();
-                }).distinct().collect(Collectors.toMap(Tuple2::_1, Tuple2::_2));
+        return stream(m.productions()).filter(p -> p.att().contains(Attribute.ASSOCIATIVE_KEY)).flatMap(p -> {
+            Set<Tuple2<KLabel, KLabel>> set = new HashSet<>();
+            set.add(Tuple2.apply(p.klabel().get(), p.klabel().get()));
+            if (p.att().contains(Attribute.UNIT_KEY)) {
+                set.add(Tuple2.apply(KLabel(p.att().get(Attribute.UNIT_KEY)), p.klabel().get()));
+            }
+            if (p.att().contains("element")) {
+                set.add(Tuple2.apply(KLabel(p.att().get("element")), p.klabel().get()));
+            }
+            if (p.att().contains("filterElement")) {
+                set.add(Tuple2.apply(KLabel(p.att().get("filterElement")), p.klabel().get()));
+            }
+            if (p.att().contains("wrapElement")) {
+                set.add(Tuple2.apply(KLabel(p.att().get("wrapElement")), p.klabel().get()));
+            }
+            return set.stream();
+        }).distinct().collect(Collectors.toMap(Tuple2::_1, Tuple2::_2));
     }
 
     public static Set<KLabel> filteredMapConstructors(Module m) {
