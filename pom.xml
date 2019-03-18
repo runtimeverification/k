@@ -359,7 +359,7 @@
         <native.exe.type>uexe</native.exe.type>
         <native.exe.extension />
 	<native.script.extension />
-	<llvm.dir>/usr/local/opt/llvm@6/</llvm.dir>
+	<prefix.path>/usr/local/opt/llvm@6/:/usr/local/opt/bison</prefix.path>
       </properties>
     </profile>
     <profile>
