@@ -31,6 +31,7 @@ import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.ParseFailedException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.file.FileUtil;
 import scala.Option;
 import scala.Tuple2;
@@ -395,7 +396,7 @@ public class DefinitionParsing {
         if (kem.options.warnings2errors && !result._2().isEmpty()) {
           for (KEMException err : result._2()) {
             if (kem.options.warnings.includesExceptionType(err.exception.getType())) {
-              errors.add(err);
+              errors.add(KEMException.asError(err));
             }
           }
         } else {

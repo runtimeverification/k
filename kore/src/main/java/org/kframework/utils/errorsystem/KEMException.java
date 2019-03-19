@@ -94,6 +94,10 @@ public class KEMException extends RuntimeException {
         return create(ExceptionType.ERROR, KExceptionGroup.OUTER_PARSER, message, e, location, source);
     }
 
+    public static KEMException asError(KEMException warning) {
+        return new KEMException(warning.exception, ExceptionType.ERROR);
+    }
+
     @Override
     public String getMessage() {
         return exception.toString();
