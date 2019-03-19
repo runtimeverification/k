@@ -33,6 +33,7 @@ SUBDIRS=issue-2273 \
 	kore-brackets \
 	quadratic-poly-unparsing \
 	io-java \
+	fatalWarnings \
 	symbolic-int-function \
 
 
