@@ -15,6 +15,7 @@ SUBDIRS=issue-2273 \
 	is-variable \
 	no-dup-rules \
 	imp-haskell \
+	imp-llvm \
 	equals-pattern \
 	or-llvm \
 	or-ocaml \
@@ -33,6 +34,7 @@ SUBDIRS=issue-2273 \
 	quadratic-poly-unparsing \
 	io-java \
 	fatalWarnings \
+	symbolic-int-function \
 
 
 include ../../include/ktest-group.mak

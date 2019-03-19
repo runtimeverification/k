@@ -3,16 +3,14 @@
 requires "kast.k"
 
 module EQ-SYNTAX
-  imports KSEQ-SYMBOLIC
-  imports INT
-
-  syntax Pgm ::= KBott
+  imports INT-SYNTAX
 
   syntax Pgm ::= init ( Int )
 endmodule
 
 module EQ
   imports EQ-SYNTAX
+  imports ML-SYNTAX
 
   configuration <k color="green"> $PGM:Pgm </k>
 

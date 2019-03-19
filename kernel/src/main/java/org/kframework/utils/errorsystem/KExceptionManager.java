@@ -30,7 +30,7 @@ public class KExceptionManager {
     public void installForUncaughtExceptions() {
         Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
             String message = "Uncaught exception thrown of type " + e.getClass().getSimpleName();
-            if (!options.debug) {
+            if (!options.debug()) {
                 message += ".\nPlease rerun your program with the --debug flag to generate a stack trace, "
                         + "and file a bug report at https://github.com/kframework/k/issues";
             }
@@ -40,10 +40,9 @@ public class KExceptionManager {
     }
 
     private void printStackTrace(KException e) {
-        if (e.getException() != null) {
-            if (options.debug) {
-                e.getException().printStackTrace();
-            }
+        if (e.getException() != null &&
+                (options.debugWarnings || (options.debug() && e.getType() == ExceptionType.ERROR))) {
+            e.getException().printStackTrace();
         }
     }
 

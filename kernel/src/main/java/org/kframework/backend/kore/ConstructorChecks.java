@@ -77,10 +77,10 @@ public class ConstructorChecks {
     }
 
     public static boolean isBuiltinLabel(KLabel label) {
-        return label.name().equals(KLabels.ML_FALSE.name()) || label.name().equals(KLabels.ML_TRUE.name()) || label.name().equals(KLabels.ML_OR.name()) ||
-               label.name().equals(KLabels.ML_AND.name()) || label.name().equals(KLabels.ML_NOT.name()) || label.name().equals(KLabels.ML_CEIL.name()) ||
-               label.name().equals(KLabels.ML_EQUALS.name()) || label.name().equals(KLabels.ML_IMPLIES.name()) || label.name().equals(KLabels.ML_EXISTS.name()) ||
-               label.name().equals(KLabels.ML_FORALL.name());
+        return label.name().equals(KLabels.ML_FALSE.name()) || label.name().equals(KLabels.ML_TRUE.name()) || label.name().equals(KLabels.ML_NOT.name()) ||
+               label.name().equals(KLabels.ML_OR.name()) || label.name().equals(KLabels.ML_AND.name()) || label.name().equals(KLabels.ML_IMPLIES.name()) ||
+               label.name().equals(KLabels.ML_EQUALS.name()) || label.name().equals(KLabels.ML_CEIL.name()) || label.name().equals(KLabels.ML_FLOOR.name()) ||
+               label.name().equals(KLabels.ML_EXISTS.name()) || label.name().equals(KLabels.ML_FORALL.name());
     }
 
     private boolean isBuiltinModuloConstructor(KLabel label) {

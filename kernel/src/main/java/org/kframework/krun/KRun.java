@@ -174,7 +174,7 @@ public class KRun {
                 output.put(KToken("$IO", Sorts.KConfigVar()), KToken("\"off\"", Sorts.String()));
             }
         }
-        if (options.global.debug) {
+        if (options.global.debug()) {
             // on the critical path, so don't perform this check because it's slow unless we're debugging.
             checkConfigVars(output.keySet(), compiledDef);
         }
