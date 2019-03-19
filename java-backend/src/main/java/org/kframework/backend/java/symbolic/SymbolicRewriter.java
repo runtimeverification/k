@@ -183,6 +183,7 @@ public class SymbolicRewriter {
             Rule rule = definition.ruleTable.get(matchResult.ruleIndex);
             global.stateLog.log(StateLog.LogEvent.RULEATTEMPT, rule.toKRewrite(), subject.term(), subject.constraint());
             if (global.javaExecutionOptions.logRulesPublic) {
+                System.err.println("\nRegular rule matched:");
                 RuleSourceUtil.printRuleAndSource(rule);
             }
 
@@ -192,6 +193,9 @@ public class SymbolicRewriter {
                             matchResult.constraint.substitution();
             // start the optimized substitution
 
+            if (global.javaExecutionOptions.logRulesPublic) {
+                System.err.println("\nBuilding match result\n-------------------------\n");
+            }
             // get a map from AST paths to (fine-grained, inner) rewrite RHSs
             assert (matchResult.rewrites.size() > 0);
             Term theNew;
@@ -206,12 +210,18 @@ public class SymbolicRewriter {
                         subject.termContext());
             }
 
+            if (global.javaExecutionOptions.logRulesPublic) {
+                System.err.println("\nEvaluating rule application result\n-------------------------\n");
+            }
             if (!matchResult.isMatching) {
                 theNew = theNew.substituteAndEvaluate(substitution, subject.termContext());
             }
 
             theNew = restoreConfigurationIfNecessary(subject, rule, theNew);
 
+            if (global.javaExecutionOptions.logRulesPublic) {
+                System.err.println("\nEvaluating constraint\n-------------------------\n");
+            }
             /* eliminate bindings of the substituted variables */
             ConjunctiveFormula constraint = matchResult.constraint;
             constraint = constraint.removeBindings(rule.variableSet());
@@ -728,6 +738,10 @@ public class SymbolicRewriter {
                         }
                     }
 
+                    if (global.javaExecutionOptions.logRulesPublic) {
+                        System.err.println("\nRegular rule application phase\n" +
+                                "==========================================\n");
+                    }
                     List<ConstrainedTerm> results = fastComputeRewriteStep(term, false, true, true, step,
                             initialTerm);
                     if (results.isEmpty()) {
@@ -1085,11 +1099,19 @@ public class SymbolicRewriter {
      * Applies the first applicable specification rule and returns the result.
      */
     private ConstrainedTerm applySpecRules(ConstrainedTerm constrainedTerm, List<Rule> specRules) {
+        if (global.javaExecutionOptions.logRulesPublic) {
+            System.err.println("\nSpec rule application phase\n" +
+                    "==========================================\n");
+        }
         for (Rule specRule : specRules) {
             ConstrainedTerm pattern = specRule.createLhsPattern(constrainedTerm.termContext());
             ConjunctiveFormula constraint = constrainedTerm.matchImplies(pattern, true, false,
                     new FormulaContext(FormulaContext.Kind.SpecRule, specRule), specRule.matchingSymbols());
             if (constraint != null) {
+                if (global.javaExecutionOptions.logRulesPublic) {
+                    System.err.println("\nSpec rule matched, building result\n" +
+                            "==========================================\n");
+                }
                 global.stateLog.log(StateLog.LogEvent.SRULEATTEMPT, specRule.toKRewrite(), constrainedTerm.term(), constrainedTerm.constraint());
                 ConstrainedTerm result = buildResult(specRule, constraint, null, true, constrainedTerm.termContext(),
                         new FormulaContext(FormulaContext.Kind.SpecConstr, specRule));

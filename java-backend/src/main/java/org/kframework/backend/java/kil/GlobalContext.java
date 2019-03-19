@@ -9,6 +9,7 @@ import org.kframework.backend.java.symbolic.JavaExecutionOptions;
 import org.kframework.backend.java.symbolic.SMTOperations;
 import org.kframework.backend.java.symbolic.Stage;
 import org.kframework.backend.java.util.FormulaSimplificationCache;
+import org.kframework.backend.java.util.PrettyPrinter;
 import org.kframework.backend.java.util.Profiler2;
 import org.kframework.backend.java.util.StateLog;
 import org.kframework.backend.java.util.ToStringCache;
@@ -18,7 +19,6 @@ import org.kframework.krun.KRunOptions;
 import org.kframework.krun.api.io.FileSystem;
 import org.kframework.main.GlobalOptions;
 import org.kframework.unparser.KPrint;
-import org.kframework.backend.java.util.PrettyPrinter;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.options.SMTOptions;
@@ -106,5 +106,14 @@ public class GlobalContext implements Serializable {
 
     public void setExecutionPhase(boolean executionPhase) {
         isExecutionPhase = executionPhase;
+        if (!executionPhase) {
+            profiler.logParsingTime(this);
+            javaExecutionOptions.logRulesPublic = javaExecutionOptions.logRulesInit;
+            javaExecutionOptions.logFunctionTargetPublic = false;
+        } else {
+            profiler.logInitTime(this);
+            javaExecutionOptions.logRulesPublic = javaExecutionOptions.logRules;
+            javaExecutionOptions.logFunctionTargetPublic = javaExecutionOptions.logFunctionTarget;
+        }
     }
 }

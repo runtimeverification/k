@@ -432,8 +432,13 @@ public class KItem extends Term implements KItemRepresentation {
                         Term[] arguments = kList.getContents().toArray(new Term[kList.getContents().size()]);
                         Term result = builtins.get().invoke(context, kLabelConstant, arguments);
                         if (result != null && !result.equals(kItem)) {
+                            Term evalResult = result.evaluate(context);
+                            if (evalResult != result && context.global().javaExecutionOptions.logRulesPublic) {
+                                System.err.format("\nEvaluated builtin KLabel, nesting %d\n" +
+                                        "-------------------------\n", kItem.profiler.resFuncNanoTimer.getLevel());
+                            }
                             kItem.profiler.evalFuncBuiltinCounter.increment();
-                            return result.evaluate(context);
+                            return evalResult;
                         }
                     } catch (ClassCastException e) {
                         // DISABLE EXCEPTION CHECKSTYLE
@@ -506,6 +511,10 @@ public class KItem extends Term implements KItemRepresentation {
                                 }
                                 solution = matches.get(0);
                             }
+                            if (context.global().javaExecutionOptions.logRulesPublic) {
+                                System.err.format("\nApplying function rule, nesting %d\n" +
+                                        "-------------------------\n", kItem.profiler.resFuncNanoTimer.getLevel());
+                            }
 
                             /* rename fresh variables of the rule */
                             boolean hasFreshVars = false;
@@ -519,7 +528,7 @@ public class KItem extends Term implements KItemRepresentation {
                                     rule.rhsInstructions(),
                                     solution,
                                     context);
-                            if (hasFreshVars) {
+                            if (rightHandSide != null && hasFreshVars) {
                                 //rule creates fresh vars, therefore result is not cacheable
                                 rightHandSide.isCacheable = false;
                             }
@@ -549,8 +558,12 @@ public class KItem extends Term implements KItemRepresentation {
                                 appliedRule = rule;
                             }
 
-                            if (kItem.global.javaExecutionOptions.logRulesPublic && result != null) {
+                            if (kItem.global.javaExecutionOptions.logRulesPublic) {
+                                String msg = result != null ? "Rule applied" : "Rule application failed";
+                                System.err.format("\n%s, nesting %d\n", msg,
+                                        kItem.profiler.resFuncNanoTimer.getLevel());
                                 RuleSourceUtil.printRuleAndSource(rule);
+                                System.err.println("-------------------------");
                             }
 
                             /*
@@ -558,7 +571,7 @@ public class KItem extends Term implements KItemRepresentation {
                              * and apply the first one that matches.
                              */
                             if (!deterministicFunctions && result != null) {
-                                return result;
+                                break;
                             }
                         } catch (KEMException e) {
                             addDetailedStackFrame(e, kItem, rule, context);
@@ -583,6 +596,9 @@ public class KItem extends Term implements KItemRepresentation {
                     }
 
                     if (result != null) {
+                        if (kItem.global.javaExecutionOptions.logFunctionTargetPublic) {
+                            System.err.format("KItem evaluated: %s\n", kItem);
+                        }
                         kItem.profiler.evalFuncRuleCounter.increment();
                         return result;
                     } else if (owiseResult != null) {
