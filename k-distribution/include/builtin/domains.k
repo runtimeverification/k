@@ -786,7 +786,7 @@ module K-EQUAL
       change in the future).*/
 
   syntax Bool ::= left:
-                  K ":=K" K           [function, functional, klabel(_:=K_), symbol, equalsEqualsK]
+                  K ":=K" K           [function, functional, klabel(_:=K_), symbol, equalEqualK]
                 | K ":/=K" K          [function, functional, klabel(_:/=K_), symbol, notEqualEqualK]
 
   syntax priorities equalEqualK notEqualEqualK > boolOperation mlOp
