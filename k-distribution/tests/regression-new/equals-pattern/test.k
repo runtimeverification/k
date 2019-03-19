@@ -23,6 +23,9 @@ rule baz(baz(A:KItem)) => #fun(baz(B) => baz(A) :=K baz(B))(baz(A))
 rule stuff(K) => 1
           requires StringLiteral(...) :/=K K
                andBool WStringLiteral(...) :/=K K
+rule stuff(K) => 1
+          requires StringLiteral(...) :=K K
+               andBool WStringLiteral(...) :=K K
 endmodule
 
 module TEST
