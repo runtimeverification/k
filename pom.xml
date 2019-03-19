@@ -359,7 +359,7 @@
         <native.exe.type>uexe</native.exe.type>
         <native.exe.extension />
 	<native.script.extension />
-	<prefix.path>/usr/local/opt/llvm@6/;/usr/local/opt/bison</prefix.path>
+	<prefix.path>/usr/local/opt/llvm@6/;/usr/local/opt/bison;/usr/local/opt/flex</prefix.path>
       </properties>
     </profile>
     <profile>
