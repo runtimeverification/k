@@ -173,6 +173,12 @@ module MAP-SYMBOLIC [symbolic]
 
   // potential infinite loop
   // rule (MAP:Map [ K1 <- V1 ]) [ K2 <- V2 ] => MAP [ K2 <- V2 ] [ K1 <- V1 ] requires K1 =/=K K2
+
+  rule K1 in_keys(M K2 |-> _) => true          requires K1  ==K K2 orBool K1 in_keys(M)
+  rule K1 in_keys(M K2 |-> _) => K1 in_keys(M) requires K1 =/=K K2
+
+  rule K1 in_keys(M [ K2 <- _ ]) => true          requires K1  ==K K2 orBool K1 in_keys(M)
+  rule K1 in_keys(M [ K2 <- _ ]) => K1 in_keys(M) requires K1 =/=K K2
 endmodule
 
 module SET
