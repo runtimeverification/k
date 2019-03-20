@@ -87,6 +87,7 @@ pipeline {
                   post {
                     always {
                       sh 'stop-kserver || true'
+                      archiveArtifacts 'kserver.log k-distribution/target/kserver.log'
                     }
                   }
                 }
@@ -140,6 +141,7 @@ pipeline {
                   post {
                     always {
                       sh 'stop-kserver || true'
+                      archiveArtifacts 'kserver.log k-distribution/target/kserver.log'
                     }
                   }
                 }
@@ -196,6 +198,7 @@ pipeline {
                   post {
                     always {
                       sh 'stop-kserver || true'
+                      archiveArtifacts 'kserver.log k-distribution/target/kserver.log'
                     }
                   }
                 }
@@ -233,7 +236,9 @@ pipeline {
               }
 
               post {
-                archiveArtifacts 'kserver.log k-distribution/target/kserver.log'
+                always {
+                  archiveArtifacts 'kserver.log k-distribution/target/kserver.log'
+                }
               }
             }
           }
