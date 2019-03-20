@@ -284,7 +284,7 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
         for (KLabelConstant kLabel : definition.kLabels()) {
             String smtlib = kLabel.getAttr(Attribute.SMTLIB_KEY);
             Boolean inSmtPrelude = kLabel.getAttr(Attribute.SMT_PRELUDE_KEY) != null;
-            if (smtlib != null && !inSmtPrelude && !SMTLIB_BUILTIN_FUNCTIONS.contains(smtlib) && !smtlib.startsWith("(")) {
+            if (smtlib != null && !inSmtPrelude && !smtlib.startsWith("(")) {
                 functions.add(kLabel);
                 assert kLabel.signatures().size() == 1;
                 SortSignature signature = kLabel.signatures().iterator().next();

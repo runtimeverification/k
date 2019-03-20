@@ -71,6 +71,8 @@ public class KLabelConstant extends KLabel implements org.kframework.kore.KLabel
 
     private final String smtlib;
 
+    private boolean isSMTHook;
+
     private final boolean isImpure;
 
     private final List<Integer> projectionAtt;
@@ -99,7 +101,10 @@ public class KLabelConstant extends KLabel implements org.kframework.kore.KLabel
             predicateSort = null;
             isFunction = productionAttributes.contains(Attribute.FUNCTION_KEY);
             isPattern = productionAttributes.contains(Attribute.PATTERN_KEY);
-            smtlib = productionAttributes.getOptional(Attribute.SMTLIB_KEY).orElse(null);
+            smtlib = productionAttributes.getOptional(Attribute.SMTLIB_KEY)
+                    .orElse(productionAttributes.getOptional(Attribute.SMTHOOK_KEY)
+                            .orElse(null));
+            isSMTHook = productionAttributes.contains(Attribute.SMTHOOK_KEY);
             projectionAtt = getProjectionAtt(productionAttributes);
         } else {
             /* a KLabel beginning with "is" represents a sort membership predicate */
@@ -227,6 +232,13 @@ public class KLabelConstant extends KLabel implements org.kframework.kore.KLabel
      */
     public String smtlib() {
         return smtlib;
+    }
+
+    /**
+     * @return whether this KLabel is hooked to an internal op in the SMT solver
+     */
+    public boolean isSMTHook() {
+        return isSMTHook;
     }
 
     public boolean isImpure() {
