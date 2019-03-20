@@ -1,3 +1,4 @@
 <k>
-  lookupResult ( 3 )
+  lookupResult ( ( X |-> 3
+  y |-> 4 ) [ x <- 5 ] [ X ] )
 </k>

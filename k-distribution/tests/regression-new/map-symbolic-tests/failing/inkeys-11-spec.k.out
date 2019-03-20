@@ -1,5 +1,4 @@
 <k>
-  inkeysResult ( Y in_keys ( M
-  X |-> 0
-  ( Z |-> 1 ) ) )
+  inkeysResult ( Y in_keys ( X |-> 0
+  Z |-> 1 ) )
 </k>

@@ -1,3 +1,3 @@
 <k>
-  lookupResult ( MAP [ Z <- 2 ] [ Z ] )
+  lookupResult ( 2 )
 </k>
