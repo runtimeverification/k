@@ -5,6 +5,7 @@ import org.kframework.attributes.Att;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 import org.kframework.builtin.BooleanUtils;
+import org.kframework.builtin.Sorts;
 import org.kframework.definition.Context;
 import org.kframework.definition.Module;
 import org.kframework.definition.Production;
@@ -207,7 +208,7 @@ public class ExpandMacros {
 
     private Set<Sort> sort(K k, Rule r) {
         if (k instanceof KVariable) {
-            return Collections.singleton(k.att().get(Sort.class));
+            return Collections.singleton(k.att().getOptional(Sort.class).orElse(Sorts.K()));
         } else if (k instanceof KToken) {
             return Collections.singleton(((KToken)k).sort());
         } else if (k instanceof KApply) {
