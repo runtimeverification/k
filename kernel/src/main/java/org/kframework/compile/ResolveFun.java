@@ -106,13 +106,14 @@ public class ResolveFun {
                         nameHint2 = ((KApply) body).klabel().name();
                     }
                     KLabel fun = getUniqueLambdaLabel(nameHint1, nameHint2);
+                    Sort argSort = sort(arg);
                     if (lbl.name().equals("#fun3") || lbl.name().equals("#fun2")) {
-                        funProds.add(funProd(fun, body));
+                        funProds.add(funProd(fun, body, argSort));
                         funRules.add(funRule(fun, body, k.att()));
                     } else {
-                        funProds.add(predProd(fun, body));
+                        funProds.add(predProd(fun, body, argSort));
                         funRules.add(predRule(fun, body, k.att()));
-                        funRules.add(owiseRule(fun, body, k.att()));
+                        funRules.add(owiseRule(fun, body, argSort, k.att()));
                     }
                     List<K> klist = new ArrayList<>();
                     klist.add(apply(arg));
@@ -136,9 +137,8 @@ public class ResolveFun {
         return lambdaRule(fun, k, k, att, x -> BooleanUtils.TRUE);
     }
 
-    private Rule owiseRule(KLabel fun, K k, Att att) {
-        Sort sort = sort(k);
-        return lambdaRule(fun, KApply(KLabel("#SemanticCastTo" + sort.toString()), KVariable("_Owise")), k, att.add("owise"), x -> BooleanUtils.FALSE);
+    private Rule owiseRule(KLabel fun, K k, Sort arg, Att att) {
+        return lambdaRule(fun, KApply(KLabel("#SemanticCastTo" + arg.toString()), KVariable("_Owise")), k, att.add("owise"), x -> BooleanUtils.FALSE);
     }
 
     private Rule lambdaRule(KLabel fun, K body, K closure, Att att, UnaryOperator<K> getRHS) {
@@ -160,20 +160,19 @@ public class ResolveFun {
         return result;
     }
 
-    private Production funProd(KLabel fun, K k) {
-        return lambdaProd(fun, k, sort(RewriteToTop.toRight(k)));
+    private Production funProd(KLabel fun, K k, Sort arg) {
+        return lambdaProd(fun, k, arg, sort(RewriteToTop.toRight(k)));
     }
 
-    private Production predProd(KLabel fun, K k) {
-        return lambdaProd(fun, k, Sorts.Bool());
+    private Production predProd(KLabel fun, K k, Sort arg) {
+        return lambdaProd(fun, k, arg, Sorts.Bool());
     }
 
-    private Production lambdaProd(KLabel fun, K k, Sort rhs) {
+    private Production lambdaProd(KLabel fun, K k, Sort arg, Sort rhs) {
         List<ProductionItem> pis = new ArrayList<>();
-        K left = RewriteToTop.toLeft(k);
         pis.add(Terminal(fun.name()));
         pis.add(Terminal("("));
-        pis.add(NonTerminal(sort(left)));
+        pis.add(NonTerminal(arg));
         for (KVariable var : closure(k)) {
             pis.add(Terminal(","));
             pis.add(NonTerminal(var.att().getOptional(Sort.class).orElse(Sorts.K())));
