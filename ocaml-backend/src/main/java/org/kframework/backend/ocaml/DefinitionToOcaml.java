@@ -2701,11 +2701,18 @@ public class DefinitionToOcaml implements Serializable {
     }
 
     private void applyVarLhs(KVariable k, StringBuilder sb, VarInfo vars, boolean inOr) {
+        String varName;
         if (inOr && k.att().contains("anonymous")) {
-          sb.append("_");
-          return;
+            sb.append("_");
+            return;
+        } else if (inOr) {
+            StringBuilder sb2 = new StringBuilder();
+            sb2.append("var");
+            encodeStringToAlphanumeric(sb2, k.name());
+            varName = sb2.toString();
+        } else {
+            varName = encodeStringToVariable(k.name());
         }
-        String varName = encodeStringToVariable(k.name());
         vars.vars.put(k, varName);
         Sort s = k.att().getOptional(Sort.class).orElse(Sort(""));
         if (mainModule.sortAttributesFor().contains(s)) {
