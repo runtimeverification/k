@@ -208,7 +208,7 @@ public class ExpandMacros {
 
     private Set<Sort> sort(K k, Rule r) {
         if (k instanceof KVariable) {
-            return Collections.singleton(k.att().getOptional(Sort.class).orElse(Sorts.K()));
+            return Collections.singleton(k.att().getOptional(Sort.class).orElse(null));
         } else if (k instanceof KToken) {
             return Collections.singleton(((KToken)k).sort());
         } else if (k instanceof KApply) {
@@ -221,7 +221,9 @@ public class ExpandMacros {
            for (int i = 0; i < kapp.items().size(); i++) {
               final int idx = i;
               Set<Sort> sorts = sort(kapp.items().get(idx), r);
-              prods.removeIf(p -> sorts.stream().noneMatch(s -> mod.subsorts().lessThanEq(s, p.nonterminal(idx).sort())));
+              if (!sorts.contains(null)) {
+                  prods.removeIf(p -> sorts.stream().noneMatch(s -> mod.subsorts().lessThanEq(s, p.nonterminal(idx).sort())));
+              }
            }
            Set<Sort> candidates = prods.stream().map(Production::sort).collect(Collectors.toSet());
            return candidates;
@@ -237,7 +239,7 @@ public class ExpandMacros {
             } else {
                 if (pattern.att().contains(Sort.class)) {
                     Sort patternSort = pattern.att().get(Sort.class);
-                    if (sort(subject, r).stream().anyMatch(s -> mod.subsorts().lessThanEq(s, patternSort))) {
+                    if (sort(subject, r).stream().anyMatch(s -> s == null || mod.subsorts().lessThanEq(s, patternSort))) {
                         subst.put((KVariable)pattern, subject);
                         return true;
                     } else {
