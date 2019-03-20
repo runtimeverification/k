@@ -16,6 +16,7 @@ import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
+import org.kframework.kore.KSequence;
 import org.kframework.kore.KToken;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
@@ -227,6 +228,8 @@ public class ExpandMacros {
            }
            Set<Sort> candidates = prods.stream().map(Production::sort).collect(Collectors.toSet());
            return candidates;
+        } else if (k instanceof KSequence) {
+            return Collections.singleton(Sorts.K());
         } else {
             throw KEMException.compilerError("Cannot compute macros with sort check on terms that are not KApply, KToken, or KVariable.", r);
         }
