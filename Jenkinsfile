@@ -67,6 +67,7 @@ pipeline {
                   post {
                     always {
                       sh 'k-distribution/target/release/k/bin/stop-kserver || true'
+                      archiveArtifacts 'kserver.log k-distribution/target/kserver.log'
                     }
                   }
                 }
@@ -229,6 +230,10 @@ pipeline {
                     '''
                   }
                 }
+              }
+
+              post {
+                archiveArtifacts 'kserver.log k-distribution/target/kserver.log'
               }
             }
           }
