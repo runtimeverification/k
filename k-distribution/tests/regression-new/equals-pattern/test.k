@@ -4,7 +4,7 @@ module TEST-SYNTAX
   imports INT
   imports K-EQUAL
 
-syntax KItem ::= foo(Int) | bar(Int) | baz(KItem) | stuff(K) 
+syntax KItem ::= foo(Int) | bar(Int) | baz(KItem) | stuff(K)
 
 syntax Contant ::= StringLiteral(K) | WStringLiteral(K)
 
