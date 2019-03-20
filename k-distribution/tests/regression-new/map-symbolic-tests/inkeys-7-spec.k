@@ -1,6 +1,6 @@
 // Copyright (c) 2019 K Team. All Rights Reserved.
 
-requires "../map-tests.k"
+requires "map-tests.k"
 
 module INKEYS-7-SPEC
     imports MAP-TESTS
