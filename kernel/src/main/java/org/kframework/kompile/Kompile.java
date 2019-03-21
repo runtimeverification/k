@@ -109,6 +109,7 @@ public class Kompile {
         Definition parsedDef = parseDefinition(definitionFile, mainModuleName, mainProgramsModuleName, excludedModuleTags);
         sw.printIntermediate("Parse definition [" + definitionParsing.parsedBubbles.get() + "/" + (definitionParsing.parsedBubbles.get() + definitionParsing.cachedBubbles.get()) + " rules]");
 
+        files.saveToKompiled("parsed.txt", parsedDef.toString());
         checkDefinition(parsedDef);
 
         Definition kompiledDefinition = pipeline.apply(parsedDef);
