@@ -3,6 +3,8 @@ package org.kframework.krun;
 
 import org.kframework.utils.errorsystem.KEMException;
 
+import org.apache.commons.io.IOUtils;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,11 +24,9 @@ public class RunProcess {
      */
     public static Thread getOutputStreamThread(Supplier<InputStream> in, PrintStream out) {
         return new Thread(() -> {
-                    InputStream input = in.get();
-                    Scanner scan = new Scanner(input);
-                    while (scan.hasNextLine()) {
-                        out.println(scan.nextLine());
-                    }
+                    try {
+                        IOUtils.copy(in.get(), out);
+                    } catch (IOException e) {}
                 });
     }
 
