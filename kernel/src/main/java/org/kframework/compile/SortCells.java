@@ -441,7 +441,7 @@ public class SortCells {
                         if (s == null) {
                             s = cfg.getCellCollectionCell(label);
                             if (s == null) {
-                                throw new IllegalArgumentException("Attempting to split non-cell term " + item);
+                                throw KEMException.compilerError("Attempting to split non-cell term " + item, item);
                             }
                         }
                         return Collections.singletonMap(s, apply(item));
