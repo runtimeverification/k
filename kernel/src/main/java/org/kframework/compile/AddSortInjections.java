@@ -130,7 +130,7 @@ public class AddSortInjections {
             }
         } else {
             String hookAtt = mod.sortAttributesFor().get(expectedSort).getOrElse(() -> Att()).getOptional("hook").orElse("");
-            if (hookAtt.equals("MAP.Map") || hookAtt.equals("SET.Set") || hookAtt.equals("LIST.List")) {
+            if ((hookAtt.equals("MAP.Map") || hookAtt.equals("SET.Set") || hookAtt.equals("LIST.List")) && term instanceof KApply) {
                 for (KLabel collectionLabel : collectionFor.keySet()) {
                     Optional<String> wrapElement = mod.attributesFor().apply(collectionLabel).getOptional("wrapElement");
                     if (wrapElement.isPresent()) {
