@@ -6,7 +6,7 @@ module TEST-SYNTAX
 
 syntax KItem ::= foo(Int) | bar(Int) | baz(KItem) | stuff(K)
 
-syntax Contant ::= StringLiteral(K) | WStringLiteral(K)
+syntax Constant ::= StringLiteral(K) | WStringLiteral(K)
 
 rule I:Int => foo(_) :=K foo(I)
   requires I ==Int 0
