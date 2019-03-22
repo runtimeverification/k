@@ -6,7 +6,7 @@ module SORT-K
 endmodule
 
 module BASIC-K
-  imports SORT-K
+  imports ML-SYNTAX
   syntax KItem [hook(K.KItem)]
   syntax K     ::= KItem
   syntax KConfigVar [token]
@@ -64,7 +64,7 @@ endmodule
 
 
 module ML-SYNTAX
-  imports BASIC-K
+  imports SORT-K
 
   syntax #KVariable
 
