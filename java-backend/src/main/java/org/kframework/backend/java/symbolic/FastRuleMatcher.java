@@ -33,10 +33,12 @@ import org.kframework.backend.java.util.StateLog;
 import org.kframework.backend.java.utils.BitSet;
 import org.kframework.builtin.KLabels;
 import org.kframework.kore.KApply;
+import org.kframework.utils.errorsystem.KEMException;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Formatter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -231,12 +233,15 @@ public class FastRuleMatcher {
         BitSet result;
         try {
             result = match(subject, pattern, ruleMask, path, logFailures);
+        } catch (KEMException e) {
+            addDetailedStackFrame(e, subject, pattern);
+            throw e;
             // DISABLE EXCEPTION CHECKSTYLE
         } catch (RuntimeException | AssertionError | StackOverflowError e) {
             // ENABLE EXCEPTION CHECKSTYLE
-            System.err.format("\nException during matching rule pattern:\n\t%s\nSubject:\n%s\nPattern:\n%s\n",
-                    e.getMessage(), getLogString(subject), getLogString(pattern));
-            throw e;
+            KEMException newExc = KEMException.criticalError("", e);
+            addDetailedStackFrame(newExc, subject, pattern);
+            throw newExc;
         }
 
         if (logFailures && global.javaExecutionOptions.logBasic && result.isEmpty()) {
@@ -244,6 +249,13 @@ public class FastRuleMatcher {
                     getLogString(subject), getLogString(pattern));
         }
         return result;
+    }
+
+    private void addDetailedStackFrame(KEMException e, Term subject, Term pattern) {
+        StringBuffer sb = new StringBuffer();
+        new Formatter(sb).format("while matching rule pattern:\n    Subject: %s\n    Pattern: %s",
+                getLogString(subject), getLogString(pattern));
+        e.exception.addTraceFrame(sb);
     }
 
     private String getLogString(Term subject) {
