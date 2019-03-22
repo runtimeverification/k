@@ -13,6 +13,7 @@ import org.kframework.definition.Production;
 import org.kframework.definition.ProductionItem;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
+import org.kframework.kil.Attribute;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
@@ -60,13 +61,26 @@ public class ResolveFreshConstants {
         analyze(rule.ensures());
         finishAnalysis();
         if (kore) {
+            K left = RewriteToTop.toLeft(rule.body());
+            if (left instanceof KApply) {
+                KApply kapp = (KApply)left;
+                if (kapp.klabel().equals("#withConfig")) {
+                    left = kapp.items().get(0);
+                }
+                if (left instanceof KApply) {
+                    kapp = (KApply)left;
+                    if (m.attributesFor().get(kapp.klabel()).getOrElse(() -> Att()).contains(Attribute.FUNCTION_KEY)) {
+                        return rule;
+                    }
+                }
+            }
             Rule withFresh = Rule(
                     addFreshCell(transform(rule.body())),
                     transform(rule.requires()),
                     transform(rule.ensures()),
                     rule.att());
             if (rule.att().contains("initializer")) {
-                K left = RewriteToTop.toLeft(withFresh.body());
+                left = RewriteToTop.toLeft(withFresh.body());
                 if (left instanceof KApply) {
                     KApply kapp = (KApply) left;
                     if (kapp.klabel().equals(KLabels.INIT_GENERATED_TOP_CELL)) {
@@ -133,7 +147,7 @@ public class ResolveFreshConstants {
         }
     }
 
-    private static KVariable FRESH = KVariable("!Fresh", Att.empty().add(Sort.class, Sorts.Int()));
+    private static KVariable FRESH = KVariable("_Fresh", Att.empty().add(Sort.class, Sorts.Int()));
 
     private K transform(K term) {
         return new TransformK() {
