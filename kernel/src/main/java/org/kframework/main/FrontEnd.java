@@ -68,9 +68,10 @@ public abstract class FrontEnd {
             retval = 113;
             if (globalOptions.debug()) {
                 e.printStackTrace();
+            } else {
+                kem.registerThrown(e);
+                kem.print();
             }
-            kem.registerThrown(e);
-            kem.print();
         }
         return retval;
     }
