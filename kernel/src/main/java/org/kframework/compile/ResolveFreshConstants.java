@@ -61,26 +61,13 @@ public class ResolveFreshConstants {
         analyze(rule.ensures());
         finishAnalysis();
         if (kore) {
-            K left = RewriteToTop.toLeft(rule.body());
-            if (left instanceof KApply) {
-                KApply kapp = (KApply)left;
-                if (kapp.klabel().equals("#withConfig")) {
-                    left = kapp.items().get(0);
-                }
-                if (left instanceof KApply) {
-                    kapp = (KApply)left;
-                    if (m.attributesFor().get(kapp.klabel()).getOrElse(() -> Att()).contains(Attribute.FUNCTION_KEY)) {
-                        return rule;
-                    }
-                }
-            }
             Rule withFresh = Rule(
                     addFreshCell(transform(rule.body())),
                     transform(rule.requires()),
                     transform(rule.ensures()),
                     rule.att());
             if (rule.att().contains("initializer")) {
-                left = RewriteToTop.toLeft(withFresh.body());
+                K left = RewriteToTop.toLeft(withFresh.body());
                 if (left instanceof KApply) {
                     KApply kapp = (KApply) left;
                     if (kapp.klabel().equals(KLabels.INIT_GENERATED_TOP_CELL)) {
@@ -96,6 +83,19 @@ public class ResolveFreshConstants {
                                 withFresh.requires(),
                                 withFresh.ensures(),
                                 withFresh.att());
+                    }
+                }
+            }
+            K left = RewriteToTop.toLeft(rule.body());
+            if (left instanceof KApply) {
+                KApply kapp = (KApply)left;
+                if (kapp.klabel().equals("#withConfig")) {
+                    left = kapp.items().get(0);
+                }
+                if (left instanceof KApply) {
+                    kapp = (KApply)left;
+                    if (m.attributesFor().get(kapp.klabel()).getOrElse(() -> Att()).contains(Attribute.FUNCTION_KEY)) {
+                        return rule;
                     }
                 }
             }
