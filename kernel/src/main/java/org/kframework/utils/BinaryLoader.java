@@ -40,6 +40,8 @@ public class BinaryLoader {
             saveSynchronized(out, o);
         } catch (IOException e) {
             throw KEMException.criticalError("Could not write to " + fileName.getAbsolutePath(), e);
+        } catch (InterruptedException e) {
+            throw KEMException.criticalError("Interrupted while locking to write " + fileName, e);
         }
     }
 
@@ -47,9 +49,9 @@ public class BinaryLoader {
      * Locks the file before writing, so that it cannot be read by another instance of K. If the file is currently in
      * use, this method will block until lock can be acquired.
      */
-    public void saveSynchronized(FileOutputStream out, Object o) throws IOException {
+    public void saveSynchronized(FileOutputStream out, Object o) throws IOException, InterruptedException {
         //To protect from concurrent access from another thread
-        lock.writeLock().lock();
+        lock.writeLock().lockInterruptibly();
         try {
             //To protect from concurrent access to same file from another process
             out.getChannel().lock(); //Lock is released automatically when serializer is closed.
@@ -61,8 +63,8 @@ public class BinaryLoader {
         }
     }
 
-    public Object loadSynchronized(InputStream in) throws IOException, ClassNotFoundException {
-        lock.readLock().lock();
+    public Object loadSynchronized(InputStream in) throws IOException, ClassNotFoundException, InterruptedException {
+        lock.readLock().lockInterruptibly();
         try (ObjectInputStream deserializer = new ObjectInputStream(in)) {
             Object obj = deserializer.readObject();
             return obj;
@@ -72,10 +74,14 @@ public class BinaryLoader {
     }
 
     public <T> T load(Class<T> cls, File fileName) throws IOException, ClassNotFoundException {
-        return cls.cast(load(fileName));
+        try {
+            return cls.cast(load(fileName));
+        } catch (InterruptedException e) {
+            throw KEMException.criticalError("Interrupted while locking to read " + fileName, e);
+        }
     }
 
-    public <T> T load(Class<T> cls, InputStream in) throws IOException, ClassNotFoundException {
+    public <T> T load(Class<T> cls, InputStream in) throws IOException, ClassNotFoundException, InterruptedException {
         return cls.cast(loadSynchronized(in));
     }
 
@@ -87,14 +93,13 @@ public class BinaryLoader {
         }
     }
 
-    public Object load(File fileName) throws IOException, ClassNotFoundException {
+    public Object load(File fileName) throws IOException, ClassNotFoundException, InterruptedException {
         try (InputStream in = new BufferedInputStream(new FileInputStream(fileName))) {
             return loadSynchronized(in);
         }
     }
 
     public <T> T loadOrDie(Class<T> cls, InputStream in, String fileName) {
-
         try {
             return load(cls, in);
         } catch (ClassNotFoundException e) {
@@ -104,6 +109,8 @@ public class BinaryLoader {
                     + "the latest version of the K tool. Please re-run kompile and try again.", e);
         } catch (IOException e) {
             throw KEMException.criticalError("Could not read from " + fileName, e);
+        } catch (InterruptedException e) {
+            throw KEMException.criticalError("Interrupted while locking to read " + fileName, e);
         }
     }
 }
