@@ -155,15 +155,19 @@ public class Profiler2 {
         return list.toArray(new TimeMemoryEntry[]{});
     }
 
-    public void logParsingTime() {
+    public void logParsingTime(GlobalContext context) {
         parsingStats = new TimeMemoryEntry(javaExecutionOptions.profileMemAdv);
-        System.err.format("\nParsing finished: %8.3f s\n", parsingStats.timeDiff(startStats));
+        if (context.globalOptions.verbose) {
+            System.err.format("\nParsing finished: %8.3f s\n", parsingStats.timeDiff(startStats));
+        }
     }
 
     public void logInitTime(GlobalContext context) {
         initStats = new TimeMemoryEntry(javaExecutionOptions.profileMemAdv);
-        System.err.println("\nInitialization finished\n==================================");
-        printResult(false, context);
+        if (context.globalOptions.verbose) {
+            System.err.println("\nInitialization finished\n==================================");
+            printResult(false, context);
+        }
     }
 
     public String stepLogString(TimeMemoryEntry currentStats, TimeMemoryEntry prevStats) {
