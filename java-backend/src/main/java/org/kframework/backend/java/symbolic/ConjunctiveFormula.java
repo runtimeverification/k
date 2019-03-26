@@ -1061,7 +1061,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
     }
 
     public String toStringMultiline() {
-        Map<String, List<String>> nameToStreamMap = ImmutableMap.<String, List<String>>builder()
+        Map<String, List<String>> categoryToEntriesMap = ImmutableMap.<String, List<String>>builder()
                 .put("substitutions:", substitution.equalities(global).stream()
                         .map(equality -> equality.toK().toString()).sorted().collect(Collectors.toList()))
                 .put("equalities:", equalities.stream()
@@ -1071,12 +1071,75 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                         .collect(Collectors.toList()))
                 .build();
 
+        return toStringByCategory(categoryToEntriesMap);
+    }
+
+    /**
+     * Separately groups entries that are common between {@code this}
+     * and {@code initFormula}, and entries that are only found in to {@code this}.
+     *
+     * @return string representation of {@this}
+     */
+    public String toStringDifferentiated(ConjunctiveFormula initFormula) {
+        List<Equality> substitution = this.substitution.equalities(global);
+        Set<Equality> initSubstitution = new HashSet<>(initFormula.substitution.equalities(global));
+
+        Map<String, List<String>> categoryToEntriesMap = addNewElements(
+                ImmutableMap.<String, List<String>>builder()
+                        .put("init substitutions:", substitution.stream()
+                                .filter(initSubstitution::contains)
+                                .map(equality -> equality.toK().toString()).sorted().collect(Collectors.toList()))
+                        .put("init equalities:", this.equalities.stream()
+                                .filter(initFormula.equalities::contains)
+                                .map(equality -> equality.toK().toString()).sorted().collect(Collectors.toList()))
+                        .put("init disjunctions:", disjunctions.stream()
+                                .filter(initFormula.disjunctions::contains)
+                                .map(disjunctiveFormula -> disjunctiveFormula.toKore().toString()).sorted()
+                                .collect(Collectors.toList())),
+                initFormula, substitution, initSubstitution).build();
+
+        return toStringByCategory(categoryToEntriesMap);
+    }
+
+    /**
+     * @return string representation of entries that are new compared to {@code initFormula}
+     */
+    public String toStringNewElements(ConjunctiveFormula initFormula) {
+        List<Equality> substitution = this.substitution.equalities(global);
+        Set<Equality> initSubstitution = new HashSet<>(initFormula.substitution.equalities(global));
+
+        Map<String, List<String>> categoryToEntriesMap = addNewElements(ImmutableMap.builder(),
+                initFormula, substitution, initSubstitution)
+                .build();
+        return toStringByCategory(categoryToEntriesMap);
+    }
+
+    public ImmutableMap.Builder<String, List<String>> addNewElements(ImmutableMap.Builder<String, List<String>> builder,
+                                                                     ConjunctiveFormula initFormula,
+                                                                     List<Equality> substitution,
+                                                                     Set<Equality> initSubstitution) {
+        builder
+                .put("new substitutions:", substitution.stream()
+                        .filter(eq -> !initSubstitution.contains(eq))
+                        .map(equality -> equality.toK().toString()).sorted().collect(Collectors.toList()))
+                .put("new equalities:", this.equalities.stream()
+                        .filter(eq -> !initFormula.equalities.contains(eq))
+                        .map(equality -> equality.toK().toString()).sorted().collect(Collectors.toList()))
+                .put("new disjunctions:", disjunctions.stream()
+                        .filter(eq -> !initFormula.disjunctions.contains(eq))
+                        .map(disjunctiveFormula -> disjunctiveFormula.toKore().toString()).sorted()
+                        .collect(Collectors.toList()));
+
+        return builder;
+    }
+
+    public String toStringByCategory(Map<String, List<String>> categoryToEntriesMap) {
         StringBuilder sb = new StringBuilder();
         sb.append("ConjunctiveFormula(");
-        for (String cat : nameToStreamMap.keySet()) {
-            if (!nameToStreamMap.get(cat).isEmpty()) {
+        for (String cat : categoryToEntriesMap.keySet()) {
+            if (!categoryToEntriesMap.get(cat).isEmpty()) {
                 sb.append("\n  ").append(cat);
-                for (String line : nameToStreamMap.get(cat)) {
+                for (String line : categoryToEntriesMap.get(cat)) {
                     sb.append("\n    ").append(line);
                 }
             }

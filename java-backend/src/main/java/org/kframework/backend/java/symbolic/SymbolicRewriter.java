@@ -90,9 +90,10 @@ public class SymbolicRewriter {
 
     public RewriterResult rewrite(ConstrainedTerm constrainedTerm, int bound) {
         stopwatch.start();
+        ConstrainedTerm initTerm = constrainedTerm;
         int step = 0;
         List<ConstrainedTerm> results;
-        while (step != bound && !(results = computeRewriteStep(constrainedTerm, step, true)).isEmpty()) {
+        while (step != bound && !(results = computeRewriteStep(constrainedTerm, step, true, initTerm)).isEmpty()) {
             /* get the first solution */
             constrainedTerm = results.get(0);
             step++;
@@ -107,8 +108,9 @@ public class SymbolicRewriter {
         return new RewriterResult(Optional.of(step), Optional.empty(), afterVariableRename.term());
     }
 
-    private List<ConstrainedTerm> computeRewriteStep(ConstrainedTerm constrainedTerm, int step, boolean computeOne) {
-        return fastComputeRewriteStep(constrainedTerm, computeOne, false, false, step);
+    private List<ConstrainedTerm> computeRewriteStep(ConstrainedTerm constrainedTerm, int step, boolean computeOne,
+                                                     ConstrainedTerm initTerm) {
+        return fastComputeRewriteStep(constrainedTerm, computeOne, false, false, step, initTerm);
     }
 
     /**
@@ -154,7 +156,9 @@ public class SymbolicRewriter {
 
     }
 
-    public List<ConstrainedTerm> fastComputeRewriteStep(ConstrainedTerm subject, boolean computeOne, boolean narrowing, boolean proofFlag, int step) {
+    public List<ConstrainedTerm> fastComputeRewriteStep(ConstrainedTerm subject, boolean computeOne, boolean narrowing,
+                                                        boolean proofFlag, int step,
+                                                        ConstrainedTerm initTerm) {
         global.stateLog.log(StateLog.LogEvent.NODE, subject.term(), subject.constraint());
         List<ConstrainedTerm> results = new ArrayList<>();
         if (definition.automaton == null) {
@@ -238,7 +242,8 @@ public class SymbolicRewriter {
 
             global.stateLog.log(StateLog.LogEvent.RULE, rule.toKRewrite(), subject.term(), subject.constraint(), result.term(), result.constraint());
             if (global.javaExecutionOptions.debugZ3 && !result.constraint().equals(subject.constraint())) {
-                System.err.format("New top constraint created: \n%s\n", result.constraint().toStringMultiline());
+                System.err.format("New top constraint created: \n%s\n",
+                        result.constraint().toStringDifferentiated(initTerm.constraint()));
             }
             results.add(result);
         }
@@ -519,7 +524,7 @@ public class SymbolicRewriter {
                 ConstrainedTerm term = entry.getKey();
                 Integer currentDepth = entry.getValue();
 
-                List<ConstrainedTerm> results = computeRewriteStep(term, step, false);
+                List<ConstrainedTerm> results = computeRewriteStep(term, step, false, initCnstrTerm);
 
                 if (results.isEmpty() && searchType == SearchType.FINAL) {
                     if (addSearchResult(searchResults, term, pattern, bound, context)) {
@@ -619,11 +624,11 @@ public class SymbolicRewriter {
 
         if (prettyInitTerm != null) {
             System.err.println("\nInitial term\n=====================\n");
-            printTermAndConstraint(initialTerm, prettyInitTerm);
+            printTermAndConstraint(initialTerm, prettyInitTerm, initialTerm);
         }
         if (prettyTarget != null) {
             System.err.println("\nTarget term\n=====================\n");
-            printTermAndConstraint(targetTerm, prettyTarget);
+            printTermAndConstraint(targetTerm, prettyTarget, initialTerm);
         }
         int branchingRemaining = global.javaExecutionOptions.branchingAllowed;
         boolean nextStepLogEnabled = false;
@@ -646,14 +651,14 @@ public class SymbolicRewriter {
                             boundaryCellsMatchTarget(term, boundaryPattern, targetBoundarySub);
                     //var required to avoid logging the same step multiple times.
                     alreadyLogged = logStep(step, v, term,
-                            step == 1 || boundaryCellsMatchTarget, false);
+                            step == 1 || boundaryCellsMatchTarget, false, initialTerm);
                     if (boundaryPattern == null || boundaryCellsMatchTarget) {
                         //Only test the full implication if there is no boundary pattern or if it is matched.
                         if (term.implies(targetTerm, rule, !(boundaryPattern == null))) {
                             //If current term matches the target term, current execution path is proved.
                             global.stateLog.log(StateLog.LogEvent.REACHPROVED, term.term(), term.constraint());
                             if (global.javaExecutionOptions.logBasic) {
-                                logStep(step, v, term, true, alreadyLogged);
+                                logStep(step, v, term, true, alreadyLogged, initialTerm);
                                 System.err.println("\n============\nStep " + step + ": eliminated!\n============\n");
                             }
                             successPaths++;
@@ -662,7 +667,7 @@ public class SymbolicRewriter {
                         } else if (boundaryPattern != null && step > 1) {
                             //If boundary cells in current term match boundary cells in target term but entire terms
                             // don't match, halt execution.
-                            logStep(step, v, term, global.javaExecutionOptions.logBasic, alreadyLogged);
+                            logStep(step, v, term, global.javaExecutionOptions.logBasic, alreadyLogged, initialTerm);
                             System.err.println("Halt! Terminating branch.");
                             proofResults.add(term);
                             continue;
@@ -697,7 +702,7 @@ public class SymbolicRewriter {
                         ConstrainedTerm result = applySpecRules(term, specRules);
                         if (result != null) {
                             nextStepLogEnabled = true;
-                            logStep(step, v, term, true, alreadyLogged);
+                            logStep(step, v, term, true, alreadyLogged, initialTerm);
                             // re-running constraint generation again for debug purposes
                             if (global.javaExecutionOptions.logBasic) {
                                 System.err.println("\nApplying specification rule\n=========================\n");
@@ -714,9 +719,10 @@ public class SymbolicRewriter {
                         }
                     }
 
-                    List<ConstrainedTerm> results = fastComputeRewriteStep(term, false, true, true, step);
+                    List<ConstrainedTerm> results = fastComputeRewriteStep(term, false, true, true, step,
+                            initialTerm);
                     if (results.isEmpty()) {
-                        logStep(step, v, term, true, alreadyLogged);
+                        logStep(step, v, term, true, alreadyLogged, initialTerm);
                         System.err.println("\nStep above: " + step + ", evaluation ended with no successors.");
                         if (step == 1) {
                             kem.registerCriticalWarning("Evaluation ended on 1st step. " +
@@ -728,7 +734,7 @@ public class SymbolicRewriter {
 
                     if (results.size() > 1) {
                         nextStepLogEnabled = true;
-                        logStep(step, v, term, true, alreadyLogged);
+                        logStep(step, v, term, true, alreadyLogged, initialTerm);
                         if (branchingRemaining == 0) {
                             System.err.println("\nHalt on branching!\n=====================\n");
 
@@ -766,12 +772,12 @@ public class SymbolicRewriter {
                     // DISABLE EXCEPTION CHECKSTYLE
                 } catch (RuntimeException | AssertionError | StackOverflowError e) {
                     // ENABLE EXCEPTION CHECKSTYLE
-                    logStep(step, v, term, true, alreadyLogged);
+                    logStep(step, v, term, true, alreadyLogged, initialTerm);
                     System.err.println("\n" +
                             "==========================================\n" +
                             "Top term when exception was thrown:\n" +
                             "==========================================\n");
-                    printTermAndConstraint(term, false);
+                    printTermAndConstraint(term, false, initialTerm);
                     printSummaryBox(rule, proofResults, successPaths, step, queue.size() + nextQueue.size() - v + 1);
                     throw e;
                 }
@@ -788,6 +794,24 @@ public class SymbolicRewriter {
             global.javaExecutionOptions.log = originalLog;
         }
 
+        List<ConstrainedTerm> tweakedProofResults =
+                printFormattedFailuresAndGetTweakedResults(initialTerm, proofResults);
+        printSuccessFinalStates(initialTerm, successResults);
+        printSuccessPCDiff(initialTerm, successResults);
+        if (global.globalOptions.verbose) {
+            printSummaryBox(rule, proofResults, successPaths, step, 0);
+        }
+        return tweakedProofResults;
+    }
+
+    /**
+     * Print formatted failure final states, when {@code javaExecutionOptions.formatFailures} is true.
+     *
+     * @return proofResults, if {@code javaExecutionOptions.formatFailures} is false, otherwise get
+     * {@code BoolToken.FALSE}
+     */
+    public List<ConstrainedTerm> printFormattedFailuresAndGetTweakedResults(ConstrainedTerm initialTerm,
+                                                                            List<ConstrainedTerm> proofResults) {
         List<ConstrainedTerm> tweakedProofResults = proofResults;
         if (global.javaExecutionOptions.formatFailures && !proofResults.isEmpty() && prettyResult != null) {
             System.err.println("\n" +
@@ -795,33 +819,48 @@ public class SymbolicRewriter {
                     "Failure final states:\n" +
                     "==========================================\n");
             for (ConstrainedTerm term : proofResults) {
-                printTermAndConstraint(term, prettyResult);
+                printTermAndConstraint(term, prettyResult, initialTerm);
             }
             tweakedProofResults = ImmutableList.of(new ConstrainedTerm(BoolToken.FALSE, initialTerm.termContext()));
         }
+        return tweakedProofResults;
+    }
 
+    /**
+     * Print formatted success final states, when {@code javaExecutionOptions.logSuccessFinalStates} is true.
+     */
+    public void printSuccessFinalStates(ConstrainedTerm initialTerm, List<ConstrainedTerm> successResults) {
         if (global.javaExecutionOptions.logSuccessFinalStates  && !successResults.isEmpty() && prettyResult != null) {
             System.err.println("\n" +
                     "==========================================\n" +
                     "Success final states:\n" +
                     "==========================================\n");
             for (ConstrainedTerm result : successResults) {
-                printTermAndConstraint(result, prettyResult);
+                printTermAndConstraint(result, prettyResult, initialTerm);
             }
         }
-        if (global.globalOptions.verbose) {
-            printSummaryBox(rule, proofResults, successPaths, step, 0);
-        }
-        return tweakedProofResults;
     }
 
-    public void printTermAndConstraint(ConstrainedTerm term, boolean pretty) {
+    private void printSuccessPCDiff(ConstrainedTerm initialTerm, List<ConstrainedTerm> successResults) {
+        if (global.javaExecutionOptions.logSuccessPCDiff && !successResults.isEmpty() && prettyResult != null) {
+            System.out.println("\n" +
+                    "==========================================\n" +
+                    "Diff between initial path condition and final state path condition, success paths:\n" +
+                    "==========================================\n");
+            for (ConstrainedTerm result : successResults) {
+                System.out.println(result.constraint().toStringNewElements(initialTerm.constraint()));
+            }
+        }
+    }
+
+    public void printTermAndConstraint(ConstrainedTerm term, boolean pretty,
+                                       ConstrainedTerm initTerm) {
         //Disabling toString cache to minimise chance of OutOfMemoryError.
         boolean oldCacheToString = global.javaExecutionOptions.cacheToString;
         global.javaExecutionOptions.cacheToString = false;
         try {
             print(term.term(), pretty);
-            printConstraint(term.constraint(), pretty);
+            printConstraint(term.constraint(), pretty, initTerm);
             System.err.println();
         } finally {
             global.javaExecutionOptions.cacheToString = oldCacheToString;
@@ -893,9 +932,11 @@ public class SymbolicRewriter {
 
     /**
      * @param forced - if true, log this step when at least --log-basic is provided.
+     * @param initTerm
      * @return whether it was actually logged
      */
-    private boolean logStep(int step, int v, ConstrainedTerm term, boolean forced, boolean alreadyLogged) {
+    private boolean logStep(int step, int v, ConstrainedTerm term, boolean forced,
+                            boolean alreadyLogged, ConstrainedTerm initTerm) {
         if (alreadyLogged || !global.javaExecutionOptions.logBasic) {
             return false;
         }
@@ -920,7 +961,7 @@ public class SymbolicRewriter {
                 print(cell, pretty);
             }
             if (prettyPC != null) {
-                printConstraint(term.constraint(), prettyPC);
+                printConstraint(term.constraint(), prettyPC, initTerm);
             }
         }
         global.profiler.logOverheadTimer.stop();
@@ -935,12 +976,13 @@ public class SymbolicRewriter {
         }
     }
 
-    private void printConstraint(ConjunctiveFormula constraint, boolean pretty) {
+    private void printConstraint(ConjunctiveFormula constraint, boolean pretty,
+                                 ConstrainedTerm initTerm) {
         System.err.println("/\\");
         if (pretty) {
             global.prettyPrinter.prettyPrint(constraint, System.err);
         } else {
-            System.err.println(constraint.toStringMultiline());
+            System.err.println(constraint.toStringDifferentiated(initTerm.constraint()));
         }
     }
 

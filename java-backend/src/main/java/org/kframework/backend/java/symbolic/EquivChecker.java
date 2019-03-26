@@ -125,14 +125,16 @@ public class EquivChecker {
         java.util.List<ConstrainedTerm> queue = new ArrayList<>();
         java.util.List<ConstrainedTerm> nextQueue = new ArrayList<>();
 
-        queue.add(currSyncNode.currSyncNode);
+        ConstrainedTerm initTerm = currSyncNode.currSyncNode;
+        queue.add(initTerm);
 
         int steps = 0;
         while (!queue.isEmpty()) {
             ++steps;
             for (ConstrainedTerm curr : queue) {
 
-                java.util.List<ConstrainedTerm> nexts = rewriter.fastComputeRewriteStep(curr, false, true, true, steps);
+                java.util.List<ConstrainedTerm> nexts = rewriter.fastComputeRewriteStep(curr, false, true, true, steps,
+                        initTerm);
 
                 if (nexts.isEmpty()) {
                     /* final term */

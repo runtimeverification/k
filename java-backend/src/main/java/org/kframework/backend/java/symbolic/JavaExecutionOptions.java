@@ -126,6 +126,10 @@ public final class JavaExecutionOptions {
             "By default only failure final states are logged.")
     public boolean logSuccessFinalStates = false;
 
+    @Parameter(names = "--log-success-pc-diff", description = "Log to stdout the difference between final state path " +
+            "condition and initial state path condition, for success paths.")
+    public boolean logSuccessPCDiff = false;
+
     @Parameter(names="--log-progress", description="Print progress bar")
     public boolean logProgress = false;
 
