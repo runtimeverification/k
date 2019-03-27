@@ -4,7 +4,7 @@ module MAP-TESTS-SYNTAX
     imports MAP
     imports INT
 
-    syntax MyId ::= "x" | "y" | "z"
+    syntax MyId ::= "x" | "y" | "z" | foo ( MyId )
 
     syntax Test ::= Int | Map
                   | lookup       ( K ) | assignment       ( Map ) | inkeys       ( Bool )
