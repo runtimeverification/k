@@ -15,6 +15,7 @@ import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.AddSortInjections;
 import org.kframework.compile.ConfigurationInfoFromModule;
+import org.kframework.compile.RefreshRules;
 import org.kframework.compile.RewriteToTop;
 import org.kframework.definition.Module;
 import org.kframework.definition.ModuleComment;
@@ -56,8 +57,8 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static org.kframework.definition.Constructors.*;
 import static org.kframework.Collections.*;
+import static org.kframework.definition.Constructors.*;
 import static org.kframework.kore.KORE.*;
 
 public class ModuleToKORE {
@@ -619,7 +620,7 @@ public class ModuleToKORE {
             sb.append("} ");
             if (owise) {
                 sb.append("\\implies{R} (\n    \\and{R} (\n      \\not{R} (\n        ");
-                for (Rule notMatching : functionRules.get(productionLabel)) {
+                for (Rule notMatching : RefreshRules.refresh(functionRules.get(productionLabel))) {
                     if (notMatching.att().contains("owise")) {
                         continue;
                     }

@@ -1,9 +1,7 @@
 // Copyright (c) 2015-2019 K Team. All Rights Reserved.
 package org.kframework.compile;
 
-import org.kframework.definition.Context;
 import org.kframework.definition.Rule;
-import org.kframework.definition.Sentence;
 import org.kframework.kore.K;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.TransformK;
@@ -13,7 +11,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.kframework.definition.Constructors.*;
 import static org.kframework.kore.KORE.*;
