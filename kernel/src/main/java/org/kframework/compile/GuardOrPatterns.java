@@ -74,7 +74,7 @@ public class GuardOrPatterns {
             @Override
             public K apply(KApply k) {
               if (k.klabel().equals(KLabels.ML_OR)) {
-                return KAs(k, newDotVariable());
+                return KAs(k, newDotVariable(k.att().get(Production.class).sort()));
               }
               return super.apply(k);
             }
@@ -92,10 +92,10 @@ public class GuardOrPatterns {
     }
 
     private int counter = 0;
-    KVariable newDotVariable() {
+    KVariable newDotVariable(Sort s) {
         KVariable newLabel;
         do {
-            newLabel = KVariable("_" + (counter++), Att().add("anonymous"));
+            newLabel = KVariable("_" + (counter++), Att().add("anonymous").add(Sort.class, s));
         } while (vars.contains(newLabel));
         vars.add(newLabel);
         return newLabel;
