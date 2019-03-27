@@ -124,27 +124,25 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                 if (haskellKRunOptions.dryRun) {
                     System.out.println(String.join(" ", koreCommand));
                     options.print.output = OutputModes.NONE;
-                } else {
-                    try {
-                        File korePath = koreDirectory == null ? null : new File(koreDirectory);
-                        if (executeCommandBasic(korePath, koreCommand) != 0) {
-                            throw KEMException.criticalError("Haskell backend returned non-zero exit code");
-                        }
-                        TextToKore textToKore = new TextToKore();
-                        Pattern kore = textToKore.parsePattern(koreOutputFile);
-                        KoreToK koreToK = new KoreToK(idsToLabels, mod.sortAttributesFor(), StringUtil::enquoteKString);
-                        K outputK = koreToK.apply(kore);
-                        return new RewriterResult(Optional.empty(), Optional.empty(), outputK);
-                    } catch (IOException e) {
-                        throw KEMException.criticalError("I/O Error while executing", e);
-                    } catch (InterruptedException e) {
-                        throw KEMException.criticalError("Interrupted while executing", e);
-                    } catch (ParseError parseError) {
-                        throw KEMException.criticalError("Error parsing haskell backend output", parseError);
-                    }
+                    return new RewriterResult(Optional.empty(), Optional.empty(), k);
                 }
-
-                return new RewriterResult(Optional.empty(), Optional.empty(), k);
+                try {
+                    File korePath = koreDirectory == null ? null : new File(koreDirectory);
+                    if (executeCommandBasic(korePath, koreCommand) != 0) {
+                        throw KEMException.criticalError("Haskell backend returned non-zero exit code");
+                    }
+                    TextToKore textToKore = new TextToKore();
+                    Pattern kore = textToKore.parsePattern(koreOutputFile);
+                    KoreToK koreToK = new KoreToK(idsToLabels, mod.sortAttributesFor(), StringUtil::enquoteKString);
+                    K outputK = koreToK.apply(kore);
+                    return new RewriterResult(Optional.empty(), Optional.empty(), outputK);
+                } catch (IOException e) {
+                    throw KEMException.criticalError("I/O Error while executing", e);
+                } catch (InterruptedException e) {
+                    throw KEMException.criticalError("Interrupted while executing", e);
+                } catch (ParseError parseError) {
+                    throw KEMException.criticalError("Error parsing haskell backend output", parseError);
+                }
             }
 
             @Override
@@ -221,27 +219,25 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                 if (haskellKRunOptions.dryRun) {
                     System.out.println(String.join(" ", koreCommand));
                     options.print.output = OutputModes.NONE;
-                } else {
-                    try {
-                        File korePath = koreDirectory == null ? null : new File(koreDirectory);
-                        if (executeCommandBasic(korePath, koreCommand) != 0) {
-                            throw KEMException.criticalError("Haskell backend returned non-zero exit code");
-                        }
-                        TextToKore textToKore = new TextToKore();
-                        Pattern kore = textToKore.parsePattern(koreOutputFile);
-                        KoreToK koreToK = new KoreToK(idsToLabels, mod.sortAttributesFor(), StringUtil::enquoteKString);
-                        K outputK = koreToK.apply(kore);
-                        return outputK;
-                    } catch (IOException e) {
-                        throw KEMException.criticalError("I/O Error while executing", e);
-                    } catch (InterruptedException e) {
-                        throw KEMException.criticalError("Interrupted while executing", e);
-                    } catch (ParseError parseError) {
-                        throw KEMException.criticalError("Error parsing haskell backend output", parseError);
-                    }
+                    return initialConfiguration;
                 }
-
-                return initialConfiguration;
+                try {
+                    File korePath = koreDirectory == null ? null : new File(koreDirectory);
+                    if (executeCommandBasic(korePath, koreCommand) != 0) {
+                        throw KEMException.criticalError("Haskell backend returned non-zero exit code");
+                    }
+                    TextToKore textToKore = new TextToKore();
+                    Pattern kore = textToKore.parsePattern(koreOutputFile);
+                    KoreToK koreToK = new KoreToK(idsToLabels, mod.sortAttributesFor(), StringUtil::enquoteKString);
+                    K outputK = koreToK.apply(kore);
+                    return outputK;
+                } catch (IOException e) {
+                    throw KEMException.criticalError("I/O Error while executing", e);
+                } catch (InterruptedException e) {
+                    throw KEMException.criticalError("Interrupted while executing", e);
+                } catch (ParseError parseError) {
+                    throw KEMException.criticalError("Error parsing haskell backend output", parseError);
+                }
             }
 
             @Override
@@ -281,27 +277,26 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                 if (haskellKRunOptions.dryRun) {
                     System.out.println(String.join(" ", koreCommand));
                     options.print.output = OutputModes.NONE;
-                } else {
-                    System.out.println("Executing " + args);
-                    try {
-                        File korePath = koreDirectory == null ? null : new File(koreDirectory);
-                        if (executeCommandBasic(korePath, koreCommand) != 0) {
-                            kem.registerCriticalWarning("Haskell backend returned non-zero exit code");
-                        }
-                        TextToKore textToKore = new TextToKore();
-                        Pattern kore = textToKore.parsePattern(koreOutputFile);
-                        KoreToK koreToK = new KoreToK(idsToLabels, rules.sortAttributesFor(), StringUtil::enquoteKString);
-                        K outputK = koreToK.apply(kore);
-                        return outputK;
-                    } catch (IOException e) {
-                        throw KEMException.criticalError("I/O Error while executing", e);
-                    } catch (InterruptedException e) {
-                        throw KEMException.criticalError("Interrupted while executing", e);
-                    } catch (ParseError parseError) {
-                        throw KEMException.criticalError("Error parsing haskell backend output", parseError);
-                    }
+                    return boundaryPattern.body();
                 }
-                return boundaryPattern.body();
+                System.out.println("Executing " + args);
+                try {
+                    File korePath = koreDirectory == null ? null : new File(koreDirectory);
+                    if (executeCommandBasic(korePath, koreCommand) != 0) {
+                        kem.registerCriticalWarning("Haskell backend returned non-zero exit code");
+                    }
+                    TextToKore textToKore = new TextToKore();
+                    Pattern kore = textToKore.parsePattern(koreOutputFile);
+                    KoreToK koreToK = new KoreToK(idsToLabels, rules.sortAttributesFor(), StringUtil::enquoteKString);
+                    K outputK = koreToK.apply(kore);
+                    return outputK;
+                } catch (IOException e) {
+                    throw KEMException.criticalError("I/O Error while executing", e);
+                } catch (InterruptedException e) {
+                    throw KEMException.criticalError("Interrupted while executing", e);
+                } catch (ParseError parseError) {
+                    throw KEMException.criticalError("Error parsing haskell backend output", parseError);
+                }
             }
 
             @Override
