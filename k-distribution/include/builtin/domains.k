@@ -155,6 +155,32 @@ module MAP
   syntax KItem ::= choice(Map)                      [function, hook(MAP.choice), klabel(Map:choice)]
 endmodule
 
+module MAP-SYMBOLIC [symbolic]
+  imports MAP
+  imports K-EQUAL
+  rule .Map [ K1 <- V1 ] => K1 |-> V1
+
+  rule ((K1 |-> V1) MAP) [ K2 ] => V1         requires K1  ==K K2
+  rule ((K1 |-> V1) MAP) [ K2 ] => MAP [ K2 ] requires K1 =/=K K2
+
+  rule (MAP:Map [ K1 <- V1 ]) [ K2 ] => V1         requires K1  ==K K2
+  rule (MAP:Map [ K1 <- V1 ]) [ K2 ] => MAP [ K2 ] requires K1 =/=K K2
+
+  rule ((K1 |-> V1) MAP) [ K2 <- V2 ] => (K1 |-> V2) MAP                requires K1  ==K K2
+  rule ((K1 |-> V1) MAP) [ K2 <- V2 ] => (K1 |-> V1) (MAP [ K2 <- V2 ]) requires K1 =/=K K2
+
+  rule (MAP:Map [ K1 <- V1 ]) [ K2 <- V2 ] => MAP              [ K1 <- V2 ] requires K1  ==K K2
+
+  // potential infinite loop
+  // rule (MAP:Map [ K1 <- V1 ]) [ K2 <- V2 ] => MAP [ K2 <- V2 ] [ K1 <- V1 ] requires K1 =/=K K2
+
+  rule K1 in_keys(M K2 |-> _) => true          requires K1  ==K K2 orBool K1 in_keys(M)
+  rule K1 in_keys(M K2 |-> _) => K1 in_keys(M) requires K1 =/=K K2
+
+  rule K1 in_keys(M [ K2 <- _ ]) => true          requires K1  ==K K2 orBool K1 in_keys(M)
+  rule K1 in_keys(M [ K2 <- _ ]) => K1 in_keys(M) requires K1 =/=K K2
+endmodule
+
 module SET
   imports INT-SYNTAX
   imports BASIC-K
