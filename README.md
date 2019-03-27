@@ -8,7 +8,7 @@ This is a readme file for the developers.
 In short:
 ```
 git submodule update --init --recursive
-sudo apt-get install build-essential m4 openjdk-8-jdk libgmp-dev libmpfr-dev pkg-config flex z3 libz3-dev maven opam python3 cmake clang-6.0 clang++-6.0 llvm-6.0 zlib1g-dev bison libboost-test-dev libyaml-cpp-dev libjemalloc-dev
+sudo apt-get install build-essential m4 openjdk-8-jdk libgmp-dev libmpfr-dev pkg-config flex z3 libz3-dev maven opam python3 cmake gcc clang-6.0 clang++-6.0 llvm-6.0 llvm-6.0-tools zlib1g-dev bison libboost-test-dev libyaml-cpp-dev libjemalloc-dev
 curl https://sh.rustup.rs -sSf | sh
 source $HOME/.cargo/env
 rustup toolchain install 1.28.0
