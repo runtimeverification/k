@@ -4,7 +4,6 @@ package org.kframework.backend.java.util;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import org.kframework.backend.java.kil.GlobalContext;
-import org.kframework.backend.java.symbolic.ConjunctiveFormula;
 import org.kframework.backend.java.symbolic.JavaExecutionOptions;
 import org.kframework.main.StartTimeHolder;
 import org.kframework.utils.inject.RequestScoped;
@@ -37,6 +36,7 @@ public class Profiler2 {
     public final CounterStopwatch resFuncNanoTimer = new CounterStopwatch("resolveFunction");
     public final CounterStopwatch logOverheadTimer = new CounterStopwatch("Log");
     public final CounterStopwatch queryBuildTimer = new CounterStopwatch("Z3 query build");
+    public final CounterStopwatch impliesSMTTimer = new CounterStopwatch("impliesSMT");
 
     public int countResFuncTopUncached = 0;
     public int countResFuncRecursiveUncached = 0;
@@ -91,9 +91,9 @@ public class Profiler2 {
         }
         System.err.format("resolveFunction recursive uncached: %d\n", countResFuncRecursiveUncached);
 
-        if (ConjunctiveFormula.impliesStopwatch.getCount() > 0) {
-            System.err.format("\nimpliesSMT time :    %s\n", ConjunctiveFormula.impliesStopwatch);
-            System.err.format("impliesSMT count:    %s\n", ConjunctiveFormula.impliesStopwatch.getCount());
+        if (impliesSMTTimer.getCount() > 0) {
+            System.err.format("\nimpliesSMT time :    %s\n", impliesSMTTimer);
+            System.err.format("impliesSMT count:    %s\n", impliesSMTTimer.getCount());
         }
 
         //Has some overhead. Enable from class Profiler if needed, by setting value below to true.

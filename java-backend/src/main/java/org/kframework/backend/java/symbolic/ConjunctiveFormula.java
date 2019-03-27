@@ -30,7 +30,6 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.util.Constants;
-import org.kframework.backend.java.util.CounterStopwatch;
 import org.kframework.backend.java.util.FormulaContext;
 import org.kframework.backend.java.util.RewriteEngineUtils;
 import org.kframework.backend.java.util.StateLog;
@@ -956,8 +955,6 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
 
     private static final Map<Triple<ConjunctiveFormula, ConjunctiveFormula, Set<Variable>>, Boolean> impliesSMTCache = Collections.synchronizedMap(new HashMap<>());
 
-    public static CounterStopwatch impliesStopwatch = new CounterStopwatch("impliesSMT");
-
     /**
      * Checks if {@code left} implies {@code right}, assuming that {@code existentialQuantVars}
      * are existentially quantified.
@@ -967,7 +964,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
             ConjunctiveFormula right,
             Set<Variable> existentialQuantVars,
             FormulaContext formulaContext) {
-        impliesStopwatch.start();
+        left.global.profiler.impliesSMTTimer.start();
         formulaContext.z3Profiler.newRequest();
         try {
             Triple<ConjunctiveFormula, ConjunctiveFormula, Set<Variable>> triple = Triple.of(left, right, existentialQuantVars);
@@ -984,7 +981,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
             }
             return result;
         } finally {
-            impliesStopwatch.stop();
+            left.global.profiler.impliesSMTTimer.stop();
         }
     }
 
