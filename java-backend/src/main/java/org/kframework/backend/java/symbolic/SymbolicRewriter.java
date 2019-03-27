@@ -156,9 +156,13 @@ public class SymbolicRewriter {
 
     }
 
+    /**
+     * @param proofFlag if true, ignore rules related to I/O.
+     * @param step      for debugging only
+     * @param initTerm  for logging only
+     */
     public List<ConstrainedTerm> fastComputeRewriteStep(ConstrainedTerm subject, boolean computeOne, boolean narrowing,
-                                                        boolean proofFlag, int step,
-                                                        ConstrainedTerm initTerm) {
+                                                        boolean proofFlag, int step, ConstrainedTerm initTerm) {
         global.stateLog.log(StateLog.LogEvent.NODE, subject.term(), subject.constraint());
         List<ConstrainedTerm> results = new ArrayList<>();
         if (definition.automaton == null) {
