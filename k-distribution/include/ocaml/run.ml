@@ -55,7 +55,7 @@ let schedule_next_thread (module Def: Plugin.Definition) (step_function: k -> (k
             Some (config, Def.step, (threads, 0, last_resort))
           )
         )
-      | _ -> invalid_arg "mismatched constructor at top of split configuration"
+      | _ -> invalid_arg ("mismatched constructor at top of split configuration: " ^ (print_k config))
   )
 
 let rec take_steps (module Def: Plugin.Definition) (step_function: k -> (k * step_function)) (thread_pool: (k list * int * bool)) (config: k) (depth: int) (n: int) : k * int =

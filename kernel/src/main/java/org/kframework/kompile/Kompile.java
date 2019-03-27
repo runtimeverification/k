@@ -109,6 +109,7 @@ public class Kompile {
         Definition parsedDef = parseDefinition(definitionFile, mainModuleName, mainProgramsModuleName, excludedModuleTags);
         sw.printIntermediate("Parse definition [" + definitionParsing.parsedBubbles.get() + "/" + (definitionParsing.parsedBubbles.get() + definitionParsing.cachedBubbles.get()) + " rules]");
 
+        files.saveToKompiled("parsed.txt", parsedDef.toString());
         checkDefinition(parsedDef);
 
         Definition kompiledDefinition = pipeline.apply(parsedDef);
@@ -175,6 +176,7 @@ public class Kompile {
                 .andThen(numberSentences)
                 .andThen(resolveHeatCoolAttribute)
                 .andThen(resolveSemanticCasts)
+                .andThen(subsortKItem)
                 .andThen(expandMacros)
                 .andThen(guardOrs)
                 .andThen(generateSortPredicateSyntax)
@@ -184,7 +186,6 @@ public class Kompile {
                 .andThen(ConcretizeCells::transformDefinition)
                 .andThen(genCoverage)
                 .andThen(d -> { cov.close(); return d; })
-                .andThen(subsortKItem)
                 .andThen(Kompile::addSemanticsModule)
                 .andThen(resolveConfigVar)
                 .apply(def);

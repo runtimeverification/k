@@ -20,6 +20,11 @@ public class KEMException extends RuntimeException {
         this.exception = e;
     }
 
+    KEMException(KException e, ExceptionType type) {
+        super(e.toString(), e.getException());
+        this.exception = new KException(type, e.exceptionGroup, e.getMessage(), e.getSource(), e.getLocation(), e.getException());
+    }
+
     public static KEMException debuggerError(String message) {
         return create(ExceptionType.ERROR, KExceptionGroup.DEBUGGER, message, null, null, null);
     }
@@ -87,6 +92,10 @@ public class KEMException extends RuntimeException {
 
     public static KEMException outerParserError(String message, Throwable e, Source source, Location location) {
         return create(ExceptionType.ERROR, KExceptionGroup.OUTER_PARSER, message, e, location, source);
+    }
+
+    public static KEMException asError(KEMException warning) {
+        return new KEMException(warning.exception, ExceptionType.ERROR);
     }
 
     @Override

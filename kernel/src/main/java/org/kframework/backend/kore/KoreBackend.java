@@ -133,6 +133,7 @@ public class KoreBackend implements Backend {
                 .andThen(d -> new ResolveContexts(kompileOptions).resolve(d))
                 .andThen(resolveHeatCoolAttribute)
                 .andThen(resolveSemanticCasts)
+                .andThen(subsortKItem)
                 .andThen(expandMacros)
                 .andThen(guardOrs)
                 .andThen(generateSortPredicateSyntax)
@@ -141,7 +142,6 @@ public class KoreBackend implements Backend {
                 .andThen(new Strategy(kompileOptions.experimental.heatCoolStrategies).addStrategyCellToRulesTransformer())
                 .andThen(d -> Strategy.addStrategyRuleToMainModule(def.mainModule().name()).apply(d))
                 .andThen(ConcretizeCells::transformDefinition)
-                .andThen(subsortKItem)
                 .andThen(Kompile::addSemanticsModule)
                 .andThen(resolveConfigVar)
                 .apply(def);

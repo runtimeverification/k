@@ -10,7 +10,7 @@ import java.util.Map;
 
 public class KException implements Serializable {
     protected final ExceptionType type;
-    private final KExceptionGroup exceptionGroup;
+    final KExceptionGroup exceptionGroup;
     private final Source source;
     private final Location location;
     private final String message;

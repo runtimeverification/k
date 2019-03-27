@@ -1,5 +1,6 @@
 package org.kframework.definition
 
+import org.kframework.attributes.{Location,Source}
 import org.kframework.utils.StringUtil
 import collection._
 
@@ -28,7 +29,7 @@ trait RuleToString {
 
 trait ProductionToString {
   self: Production =>
-  override def toString = "syntax " + sort + " ::= " + items.mkString(" ")
+  override def toString = "syntax " + sort + " ::= " + items.mkString(" ") + att.remove(classOf[Source]).remove(classOf[Location]).remove("productionID").postfixString
 }
 
 trait SyntaxSortToString {

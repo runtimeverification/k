@@ -14,6 +14,7 @@ SUBDIRS=issue-2273 \
 	smt-prelude-attribute \
 	is-variable \
 	no-dup-rules \
+	owise-haskell \
 	imp-haskell \
 	imp-llvm \
 	equals-pattern \
@@ -33,6 +34,7 @@ SUBDIRS=issue-2273 \
 	kore-brackets \
 	quadratic-poly-unparsing \
 	io-java \
+	fatalWarnings \
 	symbolic-int-function \
 
 
