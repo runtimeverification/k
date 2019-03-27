@@ -56,11 +56,11 @@ public class GuardOrPatterns {
         return transform(k, m);
     }
 
-    public synchronized Sentence resolve(Sentence s) {
+    public synchronized Sentence resolve(Module m, Sentence s) {
         if (s instanceof Rule) {
-            return resolve((Rule) s);
+            return resolve(m, (Rule) s);
         } else if (s instanceof Context) {
-            return resolve((Context) s);
+            return resolve(m, (Context) s);
         } else {
             return s;
         }
