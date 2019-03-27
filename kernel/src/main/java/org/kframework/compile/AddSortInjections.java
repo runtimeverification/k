@@ -310,7 +310,7 @@ public class AddSortInjections {
         }
         Set<Sort> lub = mod.subsorts().minimal(bounds);
         if (lub.size() != 1) {
-            throw KEMException.internalError("Could not compute least upper bound for rewrite sort.", loc);
+            throw KEMException.internalError("Could not compute least upper bound for rewrite sort. Possible candidates: " + lub, loc);
         }
         return lub.iterator().next();
     }
