@@ -187,9 +187,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
         @Override
         public RewriterResult execute(K k, Optional<Integer> depth) {
             rewritingContext.stateLog.open("execute-" + Integer.toString(Math.abs(k.hashCode())));
-            if (rewritingContext.globalOptions.verbose) {
-                rewritingContext.profiler.logParsingTime();
-            }
+            rewritingContext.profiler.logParsingTime(rewritingContext);
             rewritingContext.setExecutionPhase(false);
             rewritingContext.javaExecutionOptions.logRulesPublic = rewritingContext.javaExecutionOptions.logRulesInit;
             TermContext termContext = TermContext.builder(rewritingContext).freshCounter(initCounterValue).build();
@@ -200,9 +198,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
             Term backendKil = converter.convert(macroExpander.expand(resolveCasts.resolve(k))).evaluate(termContext);
             rewritingContext.stateLog.log(StateLog.LogEvent.EXECINIT, backendKil, KApply(KLabels.ML_TRUE));
             SymbolicRewriter rewriter = new SymbolicRewriter(rewritingContext, transitions, converter);
-            if (rewritingContext.globalOptions.verbose) {
-                rewritingContext.profiler.logInitTime(rewritingContext);
-            }
+            rewritingContext.profiler.logInitTime(rewritingContext);
             rewritingContext.setExecutionPhase(true);
             rewritingContext.javaExecutionOptions.logRulesPublic = rewritingContext.javaExecutionOptions.logRules;
             RewriterResult result = rewriter.rewrite(new ConstrainedTerm(backendKil, termContext), depth.orElse(-1));
@@ -242,10 +238,8 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
         @Override
         public K prove(Module mod, @Nullable Rule boundaryPattern) {
             //todo kompileOptions.global == null, but shouldn't
-            if (rewritingContext.globalOptions.verbose) {
-                rewritingContext.profiler.logParsingTime();
-            }
             rewritingContext.stateLog.open("prove-" + Integer.toString(Math.abs(mod.hashCode())));
+            rewritingContext.profiler.logParsingTime(rewritingContext);
             rewritingContext.setExecutionPhase(false);
             rewritingContext.javaExecutionOptions.logRulesPublic = rewritingContext.javaExecutionOptions.logRulesInit;
             List<Rule> rules = stream(mod.rules())
@@ -268,9 +262,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
 
             SymbolicRewriter rewriter = new SymbolicRewriter(rewritingContext, transitions, converter);
 
-            if (rewritingContext.globalOptions.verbose) {
-                rewritingContext.profiler.logInitTime(rewritingContext);
-            }
+            rewritingContext.profiler.logInitTime(rewritingContext);
             rewritingContext.setExecutionPhase(true);
             rewritingContext.javaExecutionOptions.logRulesPublic = rewritingContext.javaExecutionOptions.logRules;
             List<ConstrainedTerm> proofResults = javaRules.stream()
