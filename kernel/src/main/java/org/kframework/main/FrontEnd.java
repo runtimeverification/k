@@ -70,8 +70,8 @@ public abstract class FrontEnd {
                 e.printStackTrace();
             } else {
                 kem.registerThrown(e);
-                kem.print();
             }
+            kem.print();
         }
         return retval;
     }
