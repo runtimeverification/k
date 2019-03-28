@@ -1,0 +1,5 @@
+<k>
+  assignmentResult ( MAP
+  foo ( X ) |-> BAL_TO
+  foo ( Y ) |-> BAL_FROM -Int 30 )
+</k>
