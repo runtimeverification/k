@@ -147,7 +147,7 @@ public class AddSortInjections {
                         }
                     }
                 }
-                throw new AssertionError();
+                return KApply(KLabel("inj", actualSort, expectedSort), KList(visitChildren(term, actualSort)), Att.empty().add(Sort.class, expectedSort));
             } else {
                 return KApply(KLabel("inj", actualSort, expectedSort), KList(visitChildren(term, actualSort)), Att.empty().add(Sort.class, expectedSort));
             }
