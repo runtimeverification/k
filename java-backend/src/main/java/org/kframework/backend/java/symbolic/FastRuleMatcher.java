@@ -689,7 +689,16 @@ public class FastRuleMatcher {
     }
 
     private BitSet unifyMap(BuiltinMap map, BuiltinMap otherMap, BitSet ruleMask, scala.collection.immutable.List<Pair<Integer, Integer>> path, boolean logFailures) {
-        assert map.collectionFunctions().isEmpty() && otherMap.collectionFunctions().isEmpty();
+        if (!(map.collectionFunctions().isEmpty() && otherMap.collectionFunctions().isEmpty())) {
+            String mapErrorString = "Unevaluated function symbols in Map unification problem between:\n"
+                                  + "\n"
+                                  + "    " + map.toString() + "\n"
+                                  + "\n"
+                                  + "and:\n"
+                                  + "\n"
+                                  + "    " + otherMap.toString() + "\n";
+            throw KEMException.criticalError(mapErrorString);
+        }
 
         Map<Term, Term> entries = map.getEntries();
         Map<Term, Term> otherEntries = otherMap.getEntries();
