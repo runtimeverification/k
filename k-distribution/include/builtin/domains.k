@@ -470,27 +470,30 @@ module FLOAT
   imports BOOL
   imports INT-SYNTAX
 
+
+// For floating point SMT hooks: http://smtlib.cs.uiowa.edu/theories-FloatingPoint.shtml
+
   syntax Int ::= precisionFloat(Float) [function, functional, hook(FLOAT.precision)]
                | exponentFloat(Float) [function, functional, hook(FLOAT.exponent)]
                | exponentBitsFloat(Float) [function, functional, hook(FLOAT.exponentBits)]
 
   syntax Bool ::= signFloat(Float)      [function, functional, hook(FLOAT.sign)]
-                | isNaN(Float)          [function, functional, smt-hook((not (= #1 #1))), hook(FLOAT.isNaN)]
+                | isNaN(Float)          [function, functional, smt-hook(fp.isNaN), hook(FLOAT.isNaN)]
                 | isInfinite(Float)     [function, functional]
   syntax MInt ::= significandFloat(Float) [function, hook(FLOAT.significand)]
 
-  syntax Float ::= "--Float" Float             [function, functional, smt-hook(-), hook(FLOAT.neg)]
+  syntax Float ::= "--Float" Float             [function, functional, smt-hook(fp.neg), hook(FLOAT.neg)]
                  > Float "^Float" Float        [function, left, latex({#1}^{#2}), hook(FLOAT.pow)]
                  > left:
-                   Float "*Float" Float        [function, left, smt-hook((* roundNearestTiesToEven #1 #2)), latex({#1}\mathrel{\ast_{\scriptstyle\it Float}}{#2}), hook(FLOAT.mul)]
-                 | Float "/Float" Float        [function, left, smt-hook((/ roundNearestTiesToEven #1 #2)), latex({#1}\mathrel{\div_{\scriptstyle\it Float}}{#2}), hook(FLOAT.div)]
-                 | Float "%Float" Float        [function, left, smt-hook((remainder roundNearestTiesToEven #1 #2)), latex({#1}\mathrel{\%_{\scriptstyle\it Float}}{#2}), hook(FLOAT.rem)]
+                   Float "*Float" Float        [function, left, smt-hook((fp.mul roundNearestTiesToEven #1 #2)), latex({#1}\mathrel{\ast_{\scriptstyle\it Float}}{#2}), hook(FLOAT.mul)]
+                 | Float "/Float" Float        [function, left, smt-hook((fp.div roundNearestTiesToEven #1 #2)), latex({#1}\mathrel{\div_{\scriptstyle\it Float}}{#2}), hook(FLOAT.div)]
+                 | Float "%Float" Float        [function, left, smt-hook((fp.rem roundNearestTiesToEven #1 #2)), latex({#1}\mathrel{\%_{\scriptstyle\it Float}}{#2}), hook(FLOAT.rem)]
                  > left:
-                   Float "+Float" Float        [function, left, smt-hook((+ roundNearestTiesToEven #1 #2)), latex({#1}\mathrel{+_{\scriptstyle\it Float}}{#2}), hook(FLOAT.add)]
-                 | Float "-Float" Float        [function, left, smt-hook((- roundNearestTiesToEven #1 #2)), latex({#1}\mathrel{-_{\scriptstyle\it Float}}{#2}), hook(FLOAT.sub)]
+                   Float "+Float" Float        [function, left, smt-hook((fp.add roundNearestTiesToEven #1 #2)), latex({#1}\mathrel{+_{\scriptstyle\it Float}}{#2}), hook(FLOAT.add)]
+                 | Float "-Float" Float        [function, left, smt-hook((fp.sub roundNearestTiesToEven #1 #2)), latex({#1}\mathrel{-_{\scriptstyle\it Float}}{#2}), hook(FLOAT.sub)]
 
   syntax Float ::= rootFloat(Float, Int)        [function, hook(FLOAT.root)]
-                 | absFloat(Float)              [function, functional, smt-hook(abs), hook(FLOAT.abs)]
+                 | absFloat(Float)              [function, functional, smt-hook(fp.abs), hook(FLOAT.abs)]
                  | roundFloat(Float, Int, Int)  [function, hook(FLOAT.round)]
                  | floorFloat(Float)            [function, functional, hook(FLOAT.floor)]
                  | ceilFloat(Float)             [function, functional, hook(FLOAT.ceil)]
@@ -503,18 +506,18 @@ module FLOAT
                  | acosFloat(Float)             [function, hook(FLOAT.acos)]
                  | atanFloat(Float)             [function, functional, hook(FLOAT.atan)]
                  | atan2Float(Float, Float)     [function, hook(FLOAT.atan2)]
-                 | maxFloat(Float, Float)       [function, smt-hook(max), hook(FLOAT.max)]
-                 | minFloat(Float, Float)       [function, smt-hook(min), hook(FLOAT.min)]
+                 | maxFloat(Float, Float)       [function, smt-hook(fp.max), hook(FLOAT.max)]
+                 | minFloat(Float, Float)       [function, smt-hook(fp.min), hook(FLOAT.min)]
                  | sqrtFloat(Float)             [function]
                  | maxValueFloat(Int, Int)      [function, hook(FLOAT.maxValue)]
                  | minValueFloat(Int, Int)      [function, hook(FLOAT.minValue)]
 
-  syntax Bool ::= Float "<=Float" Float       [function, left, smt-hook(<=), latex({#1}\mathrel{\leq_{\scriptstyle\it Float}}{#2}), hook(FLOAT.le)]
-                | Float "<Float" Float        [function, left, smt-hook(<), latex({#1}\mathrel{<_{\scriptstyle\it Float}}{#2}), hook(FLOAT.lt)]
-                | Float ">=Float" Float       [function, left, smt-hook(>=), latex({#1}\mathrel{\geq_{\scriptstyle\it Float}}{#2}), hook(FLOAT.ge)]
-                | Float ">Float" Float        [function, left, smt-hook(>), latex({#1}\mathrel{>_{\scriptstyle\it Float}}{#2}), hook(FLOAT.gt)]
-                | Float "==Float" Float       [function, left, smt-hook(=), latex({#1}\mathrel{==_{\scriptstyle\it Float}}{#2}), hook(FLOAT.eq), klabel(_==Float_)]
-                | Float "=/=Float" Float      [function, left, smt-hook((not (= #1 #2))), latex({#1}\mathrel{\neq_{\scriptstyle\it Float}}{#2})]
+  syntax Bool ::= Float "<=Float" Float       [function, left, smt-hook(fp.leq), latex({#1}\mathrel{\leq_{\scriptstyle\it Float}}{#2}), hook(FLOAT.le)]
+                | Float "<Float" Float        [function, left, smt-hook(fp.lt), latex({#1}\mathrel{<_{\scriptstyle\it Float}}{#2}), hook(FLOAT.lt)]
+                | Float ">=Float" Float       [function, left, smt-hook(fp.geq), latex({#1}\mathrel{\geq_{\scriptstyle\it Float}}{#2}), hook(FLOAT.ge)]
+                | Float ">Float" Float        [function, left, smt-hook(fg.gt), latex({#1}\mathrel{>_{\scriptstyle\it Float}}{#2}), hook(FLOAT.gt)]
+                | Float "==Float" Float       [function, left, smt-hook(fp.eq), latex({#1}\mathrel{==_{\scriptstyle\it Float}}{#2}), hook(FLOAT.eq), klabel(_==Float_)]
+                | Float "=/=Float" Float      [function, left, smt-hook((not (fp.eq #1 #2))), latex({#1}\mathrel{\neq_{\scriptstyle\it Float}}{#2})]
 
 
   rule F1:Float =/=Float F2:Float => notBool (F1 ==Float F2)
