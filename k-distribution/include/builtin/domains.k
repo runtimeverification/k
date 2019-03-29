@@ -375,7 +375,7 @@ module INT-COMMON
   syntax Int ::= "~Int" Int                     [function, functional, latex(\mathop{\sim_{\scriptstyle\it Int}}{#1}), hook(INT.not)]
                > left:
                  Int "^Int" Int                 [function, left, smt-hook(^), latex({#1}\mathrel{{\char`\^}_{\!\scriptstyle\it Int}}{#2}), hook(INT.pow)]
-               | Int "^%Int" Int Int            [function, left, smtlib((mod (^ #1 #2) #3)), hook(INT.powmod)]
+               | Int "^%Int" Int Int            [function, left, smt-hook((mod (^ #1 #2) #3)), hook(INT.powmod)]
                > left:
                  Int "*Int" Int                 [function, functional, left, smt-hook(*), latex({#1}\mathrel{\ast_{\scriptstyle\it Int}}{#2}), hook(INT.mul)]
                /* FIXME: translate /Int and %Int into smtlib */
@@ -475,19 +475,19 @@ module FLOAT
                | exponentBitsFloat(Float) [function, functional, hook(FLOAT.exponentBits)]
 
   syntax Bool ::= signFloat(Float)      [function, functional, hook(FLOAT.sign)]
-                | isNaN(Float)          [function, functional, smtlib((not (== #1 #1))), hook(FLOAT.isNaN)]
+                | isNaN(Float)          [function, functional, smt-hook((not (= #1 #1))), hook(FLOAT.isNaN)]
                 | isInfinite(Float)     [function, functional]
   syntax MInt ::= significandFloat(Float) [function, hook(FLOAT.significand)]
 
   syntax Float ::= "--Float" Float             [function, functional, smt-hook(-), hook(FLOAT.neg)]
                  > Float "^Float" Float        [function, left, latex({#1}^{#2}), hook(FLOAT.pow)]
                  > left:
-                   Float "*Float" Float        [function, left, smtlib((* roundNearestTiesToEven #1 #2)), latex({#1}\mathrel{\ast_{\scriptstyle\it Float}}{#2}), hook(FLOAT.mul)]
-                 | Float "/Float" Float        [function, left, smtlib((/ roundNearestTiesToEven #1 #2)), latex({#1}\mathrel{\div_{\scriptstyle\it Float}}{#2}), hook(FLOAT.div)]
-                 | Float "%Float" Float        [function, left, smtlib((remainder roundNearestTiesToEven #1 #2)), latex({#1}\mathrel{\%_{\scriptstyle\it Float}}{#2}), hook(FLOAT.rem)]
+                   Float "*Float" Float        [function, left, smt-hook((* roundNearestTiesToEven #1 #2)), latex({#1}\mathrel{\ast_{\scriptstyle\it Float}}{#2}), hook(FLOAT.mul)]
+                 | Float "/Float" Float        [function, left, smt-hook((/ roundNearestTiesToEven #1 #2)), latex({#1}\mathrel{\div_{\scriptstyle\it Float}}{#2}), hook(FLOAT.div)]
+                 | Float "%Float" Float        [function, left, smt-hook((remainder roundNearestTiesToEven #1 #2)), latex({#1}\mathrel{\%_{\scriptstyle\it Float}}{#2}), hook(FLOAT.rem)]
                  > left:
-                   Float "+Float" Float        [function, left, smtlib((+ roundNearestTiesToEven #1 #2)), latex({#1}\mathrel{+_{\scriptstyle\it Float}}{#2}), hook(FLOAT.add)]
-                 | Float "-Float" Float        [function, left, smtlib((- roundNearestTiesToEven #1 #2)), latex({#1}\mathrel{-_{\scriptstyle\it Float}}{#2}), hook(FLOAT.sub)]
+                   Float "+Float" Float        [function, left, smt-hook((+ roundNearestTiesToEven #1 #2)), latex({#1}\mathrel{+_{\scriptstyle\it Float}}{#2}), hook(FLOAT.add)]
+                 | Float "-Float" Float        [function, left, smt-hook((- roundNearestTiesToEven #1 #2)), latex({#1}\mathrel{-_{\scriptstyle\it Float}}{#2}), hook(FLOAT.sub)]
 
   syntax Float ::= rootFloat(Float, Int)        [function, hook(FLOAT.root)]
                  | absFloat(Float)              [function, functional, smt-hook(abs), hook(FLOAT.abs)]
@@ -503,8 +503,8 @@ module FLOAT
                  | acosFloat(Float)             [function, hook(FLOAT.acos)]
                  | atanFloat(Float)             [function, functional, hook(FLOAT.atan)]
                  | atan2Float(Float, Float)     [function, hook(FLOAT.atan2)]
-                 | maxFloat(Float, Float)       [function, smtlib(max), hook(FLOAT.max)]
-                 | minFloat(Float, Float)       [function, smtlib(min), hook(FLOAT.min)]
+                 | maxFloat(Float, Float)       [function, smt-hook(max), hook(FLOAT.max)]
+                 | minFloat(Float, Float)       [function, smt-hook(min), hook(FLOAT.min)]
                  | sqrtFloat(Float)             [function]
                  | maxValueFloat(Int, Int)      [function, hook(FLOAT.maxValue)]
                  | minValueFloat(Int, Int)      [function, hook(FLOAT.minValue)]
@@ -513,8 +513,8 @@ module FLOAT
                 | Float "<Float" Float        [function, left, smt-hook(<), latex({#1}\mathrel{<_{\scriptstyle\it Float}}{#2}), hook(FLOAT.lt)]
                 | Float ">=Float" Float       [function, left, smt-hook(>=), latex({#1}\mathrel{\geq_{\scriptstyle\it Float}}{#2}), hook(FLOAT.ge)]
                 | Float ">Float" Float        [function, left, smt-hook(>), latex({#1}\mathrel{>_{\scriptstyle\it Float}}{#2}), hook(FLOAT.gt)]
-                | Float "==Float" Float       [function, left, smtlib(==), latex({#1}\mathrel{==_{\scriptstyle\it Float}}{#2}), hook(FLOAT.eq), klabel(_==Float_)]
-                | Float "=/=Float" Float      [function, left, smtlib((not (== #1 #2))), latex({#1}\mathrel{\neq_{\scriptstyle\it Float}}{#2})]
+                | Float "==Float" Float       [function, left, smt-hook(=), latex({#1}\mathrel{==_{\scriptstyle\it Float}}{#2}), hook(FLOAT.eq), klabel(_==Float_)]
+                | Float "=/=Float" Float      [function, left, smt-hook((not (= #1 #2))), latex({#1}\mathrel{\neq_{\scriptstyle\it Float}}{#2})]
 
 
   rule F1:Float =/=Float F2:Float => notBool (F1 ==Float F2)
@@ -1295,8 +1295,8 @@ module MINT
                 | eqMInt(MInt, MInt)    [function, hook(MINT.eq), smt-hook(=)]
                 | neMInt(MInt, MInt)    [function, hook(MINT.ne), smt-hook(distinct)]
 
-  syntax MInt ::= sMaxMInt(MInt, MInt) [function, smtlib((ite (bvslt #1 #2) #2 #1))]
-                | sMinMInt(MInt, MInt) [function, smtlib((ite (bvslt #1 #2) #1 #2))]
+  syntax MInt ::= sMaxMInt(MInt, MInt) [function, smt-hook((ite (bvslt #1 #2) #2 #1))]
+                | sMinMInt(MInt, MInt) [function, smt-hook((ite (bvslt #1 #2) #1 #2))]
 
   /*@
    * Returns a machine integer with the underlying bits; the bits of the first
