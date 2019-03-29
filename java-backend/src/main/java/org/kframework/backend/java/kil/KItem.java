@@ -597,7 +597,9 @@ public class KItem extends Term implements KItemRepresentation {
 
                     if (result != null) {
                         if (kItem.global.javaExecutionOptions.logFunctionTargetPublic) {
-                            System.err.format("KItem evaluated: %s\n", kItem);
+                            System.err.format(""
+                                    + "KItem evaluated: %s\n"
+                                    + "             to: %s\n", kItem, result);
                         }
                         kItem.profiler.evalFuncRuleCounter.increment();
                         return result;
