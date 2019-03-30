@@ -34,6 +34,8 @@ public class Profiler2 {
     private List<TimeMemoryEntry> cacheMeasuringStats = new ArrayList<>();
 
     public final CounterStopwatch resFuncNanoTimer = new CounterStopwatch("resolveFunction");
+    public final CounterStopwatch evaluateFunctionNanoTimer = new CounterStopwatch("evaluateFunction");
+    public final CounterStopwatch applyAnywhereRulesNanoTimer = new CounterStopwatch("applyAnywhereRules");
     public final CounterStopwatch logOverheadTimer = new CounterStopwatch("Log");
     public final CounterStopwatch queryBuildTimer = new CounterStopwatch("Z3 query build");
     public final CounterStopwatch impliesSMTTimer = new CounterStopwatch("impliesSMT");
@@ -65,7 +67,7 @@ public class Profiler2 {
         TimeMemoryEntry[] intermediate = getIntermediateStats(initStats);
         System.err.format("\n\nInit+Execution time:    %8.3f s\n",
                 currentStats.timeDiff(parsingStats, intermediate));
-        if (queryBuildTimer.getCount() > 0) {
+        if (queryBuildTimer.getCountTop() > 0) {
             System.err.format("  query build time:     %s\n", queryBuildTimer);
         }
         for (Z3Profiler profiler : z3Profilers.values()) {
@@ -74,9 +76,20 @@ public class Profiler2 {
             }
         }
 
-        System.err.format("  resolveFunction time: %s\n", resFuncNanoTimer);
-        if (logOverheadTimer.getCount() > 0) {
-            System.err.format("  log time:             %s\n", logOverheadTimer);
+        System.err.format("  Time and top-level event counts:\n");
+        System.err.format("  resolveFunctionAndAnywhere time: %s,      # %10d\n",
+                resFuncNanoTimer, resFuncNanoTimer.getCountTop());
+        System.err.format("    evaluateFunction time          : %s,      # %10d\n",
+                evaluateFunctionNanoTimer, evaluateFunctionNanoTimer.getCountTop());
+        System.err.format("    applyAnywhereRules time        : %s,      # %10d\n",
+                applyAnywhereRulesNanoTimer, applyAnywhereRulesNanoTimer.getCountTop());
+        CounterStopwatch resFuncOther = resFuncNanoTimer
+                .minus(evaluateFunctionNanoTimer).minus(applyAnywhereRulesNanoTimer);
+        System.err.format("    resolveFunc... remaining time  : %s\n", resFuncOther);
+        System.err.format("                         # cached  : %10s,      # %10d\n", "", resFuncOther.getCountTop());
+        if (logOverheadTimer.getCountTop() > 0) {
+            System.err.format("  log time                       : %s,      # %10d\n",
+                    logOverheadTimer, logOverheadTimer.getCountTop());
         }
 
         if (afterExecution) {
@@ -84,16 +97,20 @@ public class Profiler2 {
         }
         printCacheStats(currentStats, afterExecution, context);
 
+        System.err.format("resolveFunction top-level       : %d\n", resFuncNanoTimer.getCountTop());
         System.err.format("resolveFunction top-level uncached: %d\n", countResFuncTopUncached);
-        int countCached = resFuncNanoTimer.getCount() - countResFuncTopUncached;
+        int countCached = resFuncNanoTimer.getCountTop() - countResFuncTopUncached;
         if (countCached > 0) {
             System.err.format("resolveFunction top-level cached:   %d\n", countCached);
         }
+        System.err.format("resolveFunction recursive       : %d\n", resFuncNanoTimer.getCountRecursive());
         System.err.format("resolveFunction recursive uncached: %d\n", countResFuncRecursiveUncached);
+        System.err.format("resolveFunction recursive cached  : %d\n",
+                resFuncNanoTimer.getCountRecursive() - countResFuncRecursiveUncached);
 
-        if (impliesSMTTimer.getCount() > 0) {
+        if (impliesSMTTimer.getCountTop() > 0) {
             System.err.format("\nimpliesSMT time :    %s\n", impliesSMTTimer);
-            System.err.format("impliesSMT count:    %s\n", impliesSMTTimer.getCount());
+            System.err.format("impliesSMT count:    %s\n", impliesSMTTimer.getCountTop());
         }
 
         //Has some overhead. Enable from class Profiler if needed, by setting value below to true.

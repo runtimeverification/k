@@ -15,7 +15,8 @@ public class CounterStopwatch implements Comparable<CounterStopwatch> {
     private long lastStartNano;
 
     private int level = 0;
-    private int count;
+    private int countTop;
+    private int countRecursive;
 
     public CounterStopwatch(String name) {
         this.name = name;
@@ -24,7 +25,9 @@ public class CounterStopwatch implements Comparable<CounterStopwatch> {
     public void start() {
         if (level == 0) {
             lastStartNano = System.nanoTime();
-            count++;
+            countTop++;
+        } else {
+            countRecursive++;
         }
         level++;
     }
@@ -73,8 +76,12 @@ public class CounterStopwatch implements Comparable<CounterStopwatch> {
         return Long.compare(duration, o.duration);
     }
 
-    public int getCount() {
-        return count;
+    public int getCountTop() {
+        return countTop;
+    }
+
+    public int getCountRecursive() {
+        return countRecursive;
     }
 
     public int getLevel() {
@@ -83,5 +90,12 @@ public class CounterStopwatch implements Comparable<CounterStopwatch> {
 
     public String getName() {
         return name;
+    }
+
+    public CounterStopwatch minus(CounterStopwatch other) {
+        CounterStopwatch result = new CounterStopwatch("");
+        result.countTop = this.countTop - other.countTop;
+        result.duration = this.duration - other.duration;
+        return result;
     }
 }

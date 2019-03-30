@@ -428,7 +428,7 @@ public class KItem extends Term implements KItemRepresentation {
          * @param context                 a term context
          * @return the evaluated result on success, or this {@code KItem} otherwise
          */
-        public Term evaluateFunction(KItem kItem, TermContext context) {
+        private Term evaluateFunction(KItem kItem, TermContext context) {
             if (!kItem.isEvaluable()) {
                 return kItem;
             }
@@ -437,6 +437,7 @@ public class KItem extends Term implements KItemRepresentation {
             KLabelConstant kLabelConstant = (KLabelConstant) kItem.kLabel;
 
             Profiler.startTimer(Profiler.getTimerForFunction(kLabelConstant));
+            kItem.profiler.evaluateFunctionNanoTimer.start();
 
             try {
                 KList kList = (KList) kItem.kList;
@@ -630,6 +631,7 @@ public class KItem extends Term implements KItemRepresentation {
                 return kItem;
             } finally {
                 Profiler.stopTimer(Profiler.getTimerForFunction(kLabelConstant));
+                kItem.profiler.evaluateFunctionNanoTimer.stop();
             }
         }
 
@@ -679,63 +681,69 @@ public class KItem extends Term implements KItemRepresentation {
      * @param context                 a term context
      * @return the result on success, or this {@code KItem} otherwise
      */
-    public Term applyAnywhereRules(TermContext context) {
-        // apply a .K ~> K => K normalization
-        if ((kLabel instanceof KLabelConstant) && KLabels.KSEQ.equals(kLabel)
-                && kList instanceof KList
-                && (((KList) kList).get(0) instanceof KItem && KLabels.DOTK.equals(((KItem) ((KList) kList).get(0)).kLabel) || ((KList) kList).get(0).equals(KSequence.EMPTY))) {
-            return ((KList) kList).get(1);
-        }
+    private Term applyAnywhereRules(TermContext context) {
+        profiler.applyAnywhereRulesNanoTimer.start();
+        try {
+            // apply a .K ~> K => K normalization
+            if ((kLabel instanceof KLabelConstant) && KLabels.KSEQ.equals(kLabel)
+                    && kList instanceof KList
+                    && (((KList) kList).get(0) instanceof KItem &&
+                    KLabels.DOTK.equals(((KItem) ((KList) kList).get(0)).kLabel) ||
+                    ((KList) kList).get(0).equals(KSequence.EMPTY))) {
+                return ((KList) kList).get(1);
+            }
 
-        if (!isAnywhereApplicable(context)) {
-            return this;
-        }
+            if (!isAnywhereApplicable(context)) {
+                return this;
+            }
 
-        Definition definition = context.definition();
-        KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
+            Definition definition = context.definition();
+            KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
 
-        /* apply [anywhere] rules */
-        /* TODO(YilongL): make KLabelConstant dependent on Definition and store
-         * anywhere rules in KLabelConstant */
-        for (Rule rule : definition.anywhereRules().get(kLabelConstant)) {
-            try {
-                if (rule == RuleAuditing.getAuditingRule()) {
-                    RuleAuditing.beginAudit();
-                } else if (RuleAuditing.isAuditBegun() && RuleAuditing.getAuditingRule() == null) {
-                    System.err.println("\nAuditing " + rule + "...\n");
-                }
-                /* anywhere rules should be applied by pattern match rather than unification */
-                Map<Variable, Term> solution;
-                List<Substitution<Variable, Term>> matches = PatternMatcher.match(this, rule, context);
-                if (matches.isEmpty()) {
-                    continue;
-                } else {
-                    assert matches.size() == 1 : "unexpected non-deterministic anywhere rule " + rule;
-                    solution = matches.get(0);
-                }
-
-                RuleAuditing.succeed(rule);
-                Term rightHandSide = rule.rightHandSide();
-                rightHandSide = rightHandSide.substituteAndEvaluate(solution, context);
-
-                if (global.javaExecutionOptions.logRulesPublic) {
-                    RuleSourceUtil.printRuleAndSource(rule);
-                }
-                return rightHandSide;
-            } finally {
-                if (RuleAuditing.isAuditBegun()) {
-                    if (RuleAuditing.getAuditingRule() == rule) {
-                        RuleAuditing.endAudit();
+            /* apply [anywhere] rules */
+            /* TODO(YilongL): make KLabelConstant dependent on Definition and store
+             * anywhere rules in KLabelConstant */
+            for (Rule rule : definition.anywhereRules().get(kLabelConstant)) {
+                try {
+                    if (rule == RuleAuditing.getAuditingRule()) {
+                        RuleAuditing.beginAudit();
+                    } else if (RuleAuditing.isAuditBegun() && RuleAuditing.getAuditingRule() == null) {
+                        System.err.println("\nAuditing " + rule + "...\n");
                     }
-                    if (!RuleAuditing.isSuccess()
-                            && RuleAuditing.getAuditingRule() == rule) {
-                        throw RuleAuditing.fail();
+                    /* anywhere rules should be applied by pattern match rather than unification */
+                    Map<Variable, Term> solution;
+                    List<Substitution<Variable, Term>> matches = PatternMatcher.match(this, rule, context);
+                    if (matches.isEmpty()) {
+                        continue;
+                    } else {
+                        assert matches.size() == 1 : "unexpected non-deterministic anywhere rule " + rule;
+                        solution = matches.get(0);
+                    }
+
+                    RuleAuditing.succeed(rule);
+                    Term rightHandSide = rule.rightHandSide();
+                    rightHandSide = rightHandSide.substituteAndEvaluate(solution, context);
+
+                    if (global.javaExecutionOptions.logRulesPublic) {
+                        RuleSourceUtil.printRuleAndSource(rule);
+                    }
+                    return rightHandSide;
+                } finally {
+                    if (RuleAuditing.isAuditBegun()) {
+                        if (RuleAuditing.getAuditingRule() == rule) {
+                            RuleAuditing.endAudit();
+                        }
+                        if (!RuleAuditing.isSuccess()
+                                && RuleAuditing.getAuditingRule() == rule) {
+                            throw RuleAuditing.fail();
+                        }
                     }
                 }
             }
+            return this;
+        } finally {
+            profiler.applyAnywhereRulesNanoTimer.stop();
         }
-
-        return this;
     }
 
     @Override
