@@ -434,7 +434,7 @@ public class KItem extends Term implements KItemRepresentation {
                         if (result != null && !result.equals(kItem)) {
                             Term evalResult = result.evaluate(context);
                             if (evalResult != result && context.global().javaExecutionOptions.logRulesPublic) {
-                                System.err.format("\nEvaluated builtin KLabel, nesting %d\n" +
+                                System.err.format("\nEvaluated builtin KLabel, lvl %d\n" +
                                         "-------------------------\n", kItem.profiler.resFuncNanoTimer.getLevel());
                             }
                             kItem.profiler.evalFuncBuiltinCounter.increment();
@@ -512,7 +512,7 @@ public class KItem extends Term implements KItemRepresentation {
                                 solution = matches.get(0);
                             }
                             if (context.global().javaExecutionOptions.logRulesPublic) {
-                                System.err.format("\nApplying function rule, nesting %d\n" +
+                                System.err.format("\nApplying function rule, lvl %d\n" +
                                         "-------------------------\n", kItem.profiler.resFuncNanoTimer.getLevel());
                             }
 
@@ -560,7 +560,7 @@ public class KItem extends Term implements KItemRepresentation {
 
                             if (kItem.global.javaExecutionOptions.logRulesPublic) {
                                 String msg = result != null ? "Rule applied" : "Rule application failed";
-                                System.err.format("\n%s, nesting %d\n", msg,
+                                System.err.format("\n%s, lvl %d\n", msg,
                                         kItem.profiler.resFuncNanoTimer.getLevel());
                                 RuleSourceUtil.printRuleAndSource(rule);
                                 System.err.println("-------------------------");
