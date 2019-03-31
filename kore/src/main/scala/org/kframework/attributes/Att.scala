@@ -6,8 +6,6 @@ import org.kframework.Collections._
 
 case class Att(att: Map[(String, Class[_]), Any]) extends AttributesToString {
 
-  override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(Att.this)
-
   def contains(cls: Class[_]): Boolean = att.contains((cls.getName, cls))
   def contains(key: String): Boolean = att.contains((key, classOf[String]))
   def contains(key: String, cls: Class[_]): Boolean = att.contains((key, cls))
