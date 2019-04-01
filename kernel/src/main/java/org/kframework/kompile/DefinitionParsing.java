@@ -46,7 +46,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -279,42 +278,24 @@ public class DefinitionParsing {
             boolean needNewScanner = !scanner.getModule().importedModuleNames().contains(module.name());
             final Scanner realScanner = needNewScanner ? parser.getScanner() : scanner;
 
-            // we create a fork/join pool for this because InheritableThreadLocal in ParseInModule.java does not
-            // work if we use the common pool, because its threads will already have been created by the time
-            // the constructor for ParseInModule was called above.
-            ForkJoinPool pool = new ForkJoinPool(ForkJoinPool.commonPool().getParallelism());
+            Set<Sentence> ruleSet = stream(module.localSentences())
+                    .parallel()
+                    .filter(s -> s instanceof Bubble)
+                    .map(b -> (Bubble) b)
+                    .filter(b -> b.sentenceType().equals("rule"))
+                    .flatMap(b -> performParse(cache.getCache(), parser, realScanner, b))
+                    .map(this::upRule)
+                .collect(Collections.toSet());
 
-            Set<Sentence> ruleSet, contextSet;
-            try {
-                ruleSet = pool.submit(() -> stream(module.localSentences())
-                        .parallel()
-                        .filter(s -> s instanceof Bubble)
-                        .map(b -> (Bubble) b)
-                        .filter(b -> b.sentenceType().equals("rule"))
-                        .flatMap(b -> performParse(cache.getCache(), parser, realScanner, b))
-                        .map(this::upRule)
-                        .collect(Collections.<Sentence>toSet())).get();
+            Set<Sentence> contextSet = stream(module.localSentences())
+                    .parallel()
+                    .filter(s -> s instanceof Bubble)
+                    .map(b -> (Bubble) b)
+                    .filter(b -> b.sentenceType().equals("context"))
+                    .flatMap(b -> performParse(cache.getCache(), parser, realScanner, b))
+                    .map(this::upContext)
+                .collect(Collections.toSet());
 
-                contextSet = pool.submit(() -> stream(module.localSentences())
-                        .parallel()
-                        .filter(s -> s instanceof Bubble)
-                        .map(b -> (Bubble) b)
-                        .filter(b -> b.sentenceType().equals("context"))
-                        .flatMap(b -> performParse(cache.getCache(), parser, realScanner, b))
-                        .map(this::upContext)
-                        .collect(Collections.<Sentence>toSet())).get();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw KEMException.internalError("Parser interrupted", e);
-            } catch (ExecutionException e) {
-                if (e.getCause() instanceof RuntimeException) {
-                    throw (RuntimeException)e.getCause();
-                } else if (e.getCause() instanceof Error) {
-                    throw (Error)e.getCause();
-                } else {
-                    throw KEMException.internalError("Checked exception during parsing", e);
-                }
-            }
             if (needNewScanner) {
                 realScanner.close();//required for Windows.
             }

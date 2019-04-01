@@ -70,7 +70,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
         this.files = files;
         if (profileRules) {
             try {
-                timing.set(new BufferedWriter(new FileWriter(files.resolveKompiled("timing.log"), true)));
+                timing = new BufferedWriter(new FileWriter(files.resolveKompiled("timing" + Thread.currentThread().getId() + ".log"), true));
             } catch (IOException e) {
                 throw KEMException.internalError("Failed to open timing.log", e);
             }
@@ -151,7 +151,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
         return new Tuple2<>(parseInfo, result._2());
     }
 
-    private InheritableThreadLocal<Writer> timing = new InheritableThreadLocal<>();
+    private Writer timing;
 
     /**
      * Parse the given input. This function is private because the final disambiguation
@@ -234,7 +234,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
             if (profileRules) {
                 long stop = System.nanoTime();
                 try {
-                    Writer t = timing.get();
+                    Writer t = timing;
                     synchronized(t) {
                         t.write(source.toString());
                         t.write(':');
@@ -256,7 +256,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
         if (scanner != null) {
             scanner.close();
         }
-        Writer t = timing.get();
+        Writer t = timing;
         if (t != null) {
             synchronized(t) {
                 try {
