@@ -34,6 +34,7 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Formatter;
 import java.util.List;
@@ -429,15 +430,9 @@ public class KItem extends Term implements KItemRepresentation {
          * @return the evaluated result on success, or this {@code KItem} otherwise
          */
         private Term evaluateFunction(KItem kItem, TermContext context) {
-            if (!kItem.isEvaluable()) {
-                return kItem;
-            }
-
-            Definition definition = context.definition();
-            KLabelConstant kLabelConstant = (KLabelConstant) kItem.kLabel;
-
-            Profiler.startTimer(Profiler.getTimerForFunction(kLabelConstant));
             kItem.profiler.evaluateFunctionNanoTimer.start();
+            KLabelConstant kLabelConstant = (KLabelConstant) kItem.kLabel;
+            Profiler.startTimer(Profiler.getTimerForFunction(kLabelConstant));
 
             try {
                 KList kList = (KList) kItem.kList;
@@ -474,6 +469,7 @@ public class KItem extends Term implements KItemRepresentation {
                 // TODO(YilongL): maybe we can move sort membership evaluation after
                 // applying user-defined rules to allow the users to provide their
                 // own rules for checking sort membership
+                Definition definition = context.definition();
                 if (kLabelConstant.isSortPredicate() && kList.getContents().size() == 1) {
                     Term checkResult = SortMembership.check(kItem, definition);
                     if (checkResult != kItem) {
@@ -482,14 +478,15 @@ public class KItem extends Term implements KItemRepresentation {
                 }
 
                 /* apply rules for user defined functions */
-                if (!definition.functionRules().get(kLabelConstant).isEmpty()) {
+                Collection<Rule> rulesForKLabel = definition.functionRules().get(kLabelConstant);
+                if (!rulesForKLabel.isEmpty()) {
                     Term result = null;
                     Term owiseResult = null;
                     Rule appliedRule = null;
 
                     // an argument is concrete if it doesn't contain variables or unresolved functions
                     boolean isConcrete = kList.getContents().stream().filter(elem -> !elem.isGround() || !elem.isNormal()).collect(Collectors.toList()).isEmpty();
-                    for (Rule rule : definition.functionRules().get(kLabelConstant)) {
+                    for (Rule rule : rulesForKLabel) {
                         try {
                             if (rule == RuleAuditing.getAuditingRule()) {
                                 RuleAuditing.beginAudit();
@@ -605,7 +602,7 @@ public class KItem extends Term implements KItemRepresentation {
                              * apply the "[owise]" rule only if this kItem does not unify with any
                              * of the left-hand-sides of the other rules (no other rule may apply)
                              */
-                            for (Rule rule : definition.functionRules().get(kLabelConstant)) {
+                            for (Rule rule : rulesForKLabel) {
                                 if (rule.att().contains("owise")) {
                                     continue;
                                 }

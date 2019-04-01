@@ -1,6 +1,8 @@
 // Copyright (c) 2015-2019 K Team. All Rights Reserved.
 package org.kframework.backend.java.util;
 
+import org.apache.commons.lang3.mutable.MutableInt;
+
 /**
  * A stopwatch that can be reentered recursively. Also counts the number of top-level invocations.
  * Time counted in nanoseconds, but displayed in ms.
@@ -14,29 +16,39 @@ public class CounterStopwatch implements Comparable<CounterStopwatch> {
     private long duration;
     private long lastStartNano;
 
-    private int level = 0;
+    private final MutableInt level;
     private int countTop;
     private int countRecursive;
 
     public CounterStopwatch(String name) {
+        this(name, new MutableInt());
+    }
+
+    /**
+     * @param levelHolder Allows several Stopwatches share the same levelHolder, when they profile mutually recursive
+     *                    functions.
+     */
+    public CounterStopwatch(String name, MutableInt levelHolder) {
         this.name = name;
+        this.level = levelHolder;
     }
 
     public void start() {
-        if (level == 0) {
+        if (level.intValue() == 0) {
             lastStartNano = System.nanoTime();
             countTop++;
         } else {
             countRecursive++;
         }
-        level++;
+        level.increment();
     }
 
     /**
      * Should be called in a finally block to avoid exceptions leaving the level incremented.
      */
     public void stop() {
-        level--;
+        level.decrement();
+        int level = this.level.intValue();
         if (level == 0) {
             duration += (System.nanoTime() - lastStartNano);
         } else if (level < 0) {
@@ -50,7 +62,8 @@ public class CounterStopwatch implements Comparable<CounterStopwatch> {
      * Should be called in a finally block to avoid exceptions leaving the level incremented.
      */
     public long stopAndGetDuration() {
-        level--;
+        level.decrement();
+        int level = this.level.intValue();
         if (level == 0) {
             long lastDuration = System.nanoTime() - lastStartNano;
             this.duration += lastDuration;
@@ -62,7 +75,7 @@ public class CounterStopwatch implements Comparable<CounterStopwatch> {
     }
 
     public void reset() {
-        level = 0;
+        level.setValue(0);
         duration = 0;
     }
 
@@ -85,6 +98,10 @@ public class CounterStopwatch implements Comparable<CounterStopwatch> {
     }
 
     public int getLevel() {
+        return level.intValue();
+    }
+
+    public MutableInt getSharedLevelHolder() {
         return level;
     }
 

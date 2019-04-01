@@ -35,7 +35,8 @@ public class Profiler2 {
 
     public final CounterStopwatch resFuncNanoTimer = new CounterStopwatch("resolveFunction");
     public final CounterStopwatch evaluateFunctionNanoTimer = new CounterStopwatch("evaluateFunction");
-    public final CounterStopwatch applyAnywhereRulesNanoTimer = new CounterStopwatch("applyAnywhereRules");
+    public final CounterStopwatch applyAnywhereRulesNanoTimer
+            = new CounterStopwatch("applyAnywhereRules", evaluateFunctionNanoTimer.getSharedLevelHolder());
     public final CounterStopwatch logOverheadTimer = new CounterStopwatch("Log");
     public final CounterStopwatch queryBuildTimer = new CounterStopwatch("Z3 query build");
     public final CounterStopwatch impliesSMTTimer = new CounterStopwatch("impliesSMT");
