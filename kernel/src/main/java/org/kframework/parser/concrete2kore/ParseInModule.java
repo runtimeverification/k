@@ -15,13 +15,19 @@ import org.kframework.parser.concrete2kore.kernel.Parser;
 import org.kframework.parser.concrete2kore.kernel.Scanner;
 import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KException;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.ParseFailedException;
+import org.kframework.utils.file.FileUtil;
 import scala.Tuple2;
 import scala.util.Either;
 import scala.util.Left;
 import scala.util.Right;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.Serializable;
+import java.io.Writer;
 import java.util.Collections;
 import java.util.Set;
 
@@ -30,7 +36,7 @@ import java.util.Set;
  * for that module in thread safe way.
  * Declarative disambiguation filters are also applied.
  */
-public class ParseInModule implements Serializable {
+public class ParseInModule implements Serializable, AutoCloseable {
     private final Module seedModule;
     private final Module extensionModule;
     /**
@@ -48,16 +54,27 @@ public class ParseInModule implements Serializable {
     private final Module parsingModule;
     private volatile Grammar grammar = null;
     private final boolean strict;
+    private final boolean profileRules;
+    private final FileUtil files;
     public ParseInModule(Module seedModule) {
-        this(seedModule, seedModule, seedModule, seedModule, true);
+        this(seedModule, seedModule, seedModule, seedModule, true, false, null);
     }
 
-    public ParseInModule(Module seedModule, Module extensionModule, Module disambModule, Module parsingModule, boolean strict) {
+    public ParseInModule(Module seedModule, Module extensionModule, Module disambModule, Module parsingModule, boolean strict, boolean profileRules, FileUtil files) {
         this.seedModule = seedModule;
         this.extensionModule = extensionModule;
         this.disambModule = disambModule;
         this.parsingModule = parsingModule;
         this.strict = strict;
+        this.profileRules = profileRules;
+        this.files = files;
+        if (profileRules) {
+            try {
+                timing.set(new BufferedWriter(new FileWriter(files.resolveKompiled("timing.log"), true)));
+            } catch (IOException e) {
+                throw KEMException.internalError("Failed to open timing.log", e);
+            }
+        }
     }
 
     /**
@@ -112,8 +129,13 @@ public class ParseInModule implements Serializable {
         return scanner;
     }
 
+    private Scanner scanner;
+
     public Scanner getScanner() {
-        return new Scanner(this);
+        if (scanner == null) {
+            scanner = new Scanner(this);
+        }
+        return scanner;
     }
 
     public Tuple2<Either<Set<ParseFailedException>, K>, Set<ParseFailedException>>
@@ -128,6 +150,8 @@ public class ParseInModule implements Serializable {
         }
         return new Tuple2<>(parseInfo, result._2());
     }
+
+    private InheritableThreadLocal<Writer> timing = new InheritableThreadLocal<>();
 
     /**
      * Parse the given input. This function is private because the final disambiguation
@@ -147,59 +171,101 @@ public class ParseInModule implements Serializable {
             parseStringTerm(String input, Sort startSymbol, Scanner scanner, Source source, int startLine, int startColumn, boolean inferSortChecks) {
         scanner = getGrammar(scanner);
 
-        Grammar.NonTerminal startSymbolNT = grammar.get(startSymbol.toString());
-        Set<ParseFailedException> warn = Sets.newHashSet();
-        if (startSymbolNT == null) {
-            String msg = "Could not find start symbol: " + startSymbol;
-            KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg);
-            return new Tuple2<>(Left.apply(Sets.newHashSet(new ParseFailedException(kex))), warn);
+        long start = 0;
+        if (profileRules) {
+            start = System.nanoTime();
         }
 
-        Term parsed;
         try {
-            Parser parser = new Parser(input, scanner, source, startLine, startColumn);
-            parsed = parser.parse(startSymbolNT, 0);
-        } catch (ParseFailedException e) {
-            return Tuple2.apply(Left.apply(Collections.singleton(e)), Collections.emptySet());
+            Grammar.NonTerminal startSymbolNT = grammar.get(startSymbol.toString());
+            Set<ParseFailedException> warn = Sets.newHashSet();
+            if (startSymbolNT == null) {
+                String msg = "Could not find start symbol: " + startSymbol;
+                KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg);
+                return new Tuple2<>(Left.apply(Sets.newHashSet(new ParseFailedException(kex))), warn);
+            }
+
+            Term parsed;
+            try {
+                Parser parser = new Parser(input, scanner, source, startLine, startColumn);
+                parsed = parser.parse(startSymbolNT, 0);
+            } catch (ParseFailedException e) {
+                return Tuple2.apply(Left.apply(Collections.singleton(e)), Collections.emptySet());
+            }
+
+            Either<Set<ParseFailedException>, Term> rez = new TreeCleanerVisitor().apply(parsed);
+            if (rez.isLeft())
+                return new Tuple2<>(rez, warn);
+            rez = new CorrectRewritePriorityVisitor().apply(rez.right().get());
+            if (rez.isLeft())
+                return new Tuple2<>(rez, warn);
+            rez = new CorrectKSeqPriorityVisitor().apply(rez.right().get());
+            if (rez.isLeft())
+                return new Tuple2<>(rez, warn);
+            rez = new CorrectCastPriorityVisitor().apply(rez.right().get());
+            if (rez.isLeft())
+                return new Tuple2<>(rez, warn);
+            rez = new PriorityVisitor(disambModule.priorities(), disambModule.leftAssoc(), disambModule.rightAssoc()).apply(rez.right().get());
+            if (rez.isLeft())
+                return new Tuple2<>(rez, warn);
+            Term rez3 = new PushTopAmbiguityUp().apply(rez.right().get());
+            rez = new ApplyTypeCheckVisitor(disambModule.subsorts()).apply(rez3);
+            if (rez.isLeft())
+                return new Tuple2<>(rez, warn);
+            Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rez2 = new VariableTypeInferenceFilter(disambModule.subsorts(), disambModule.definedSorts(), disambModule.productionsFor(), strict && inferSortChecks, true).apply(rez.right().get());
+            if (rez2._1().isLeft())
+                return rez2;
+            warn = rez2._2();
+
+            rez = new ResolveOverloadedTerminators(disambModule.overloads()).apply(rez2._1().right().get());
+            if (rez.isLeft())
+                return new Tuple2<>(rez, warn);
+            rez3 = new PushAmbiguitiesDownAndPreferAvoid(disambModule.overloads()).apply(rez.right().get());
+            rez2 = new AmbFilter(strict && inferSortChecks).apply(rez3);
+            warn = Sets.union(rez2._2(), warn);
+            rez2 = new AddEmptyLists(disambModule).apply(rez2._1().right().get());
+            warn = Sets.union(rez2._2(), warn);
+            if (rez2._1().isLeft())
+                return rez2;
+            rez3 = new RemoveBracketVisitor().apply(rez2._1().right().get());
+
+            return new Tuple2<>(Right.apply(rez3), warn);
+        } finally {
+            if (profileRules) {
+                long stop = System.nanoTime();
+                try {
+                    Writer t = timing.get();
+                    synchronized(t) {
+                        t.write(source.toString());
+                        t.write(':');
+                        t.write(Integer.toString(startLine));
+                        t.write(':');
+                        t.write(Integer.toString(startColumn));
+                        t.write(' ');
+                        t.write(Double.toString((stop - start) / 1000000000.0));
+                        t.write('\n');
+                    }
+                } catch (IOException e) {
+                  throw KEMException.internalError("Could not write to timing.log", e);
+                }
+            }
         }
+    }
 
-        Either<Set<ParseFailedException>, Term> rez = new TreeCleanerVisitor().apply(parsed);
-        if (rez.isLeft())
-            return new Tuple2<>(rez, warn);
-        rez = new CorrectRewritePriorityVisitor().apply(rez.right().get());
-        if (rez.isLeft())
-            return new Tuple2<>(rez, warn);
-        rez = new CorrectKSeqPriorityVisitor().apply(rez.right().get());
-        if (rez.isLeft())
-            return new Tuple2<>(rez, warn);
-        rez = new CorrectCastPriorityVisitor().apply(rez.right().get());
-        if (rez.isLeft())
-            return new Tuple2<>(rez, warn);
-        rez = new PriorityVisitor(disambModule.priorities(), disambModule.leftAssoc(), disambModule.rightAssoc()).apply(rez.right().get());
-        if (rez.isLeft())
-            return new Tuple2<>(rez, warn);
-        Term rez3 = new PushTopAmbiguityUp().apply(rez.right().get());
-        rez = new ApplyTypeCheckVisitor(disambModule.subsorts()).apply(rez3);
-        if (rez.isLeft())
-            return new Tuple2<>(rez, warn);
-        Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rez2 = new VariableTypeInferenceFilter(disambModule.subsorts(), disambModule.definedSorts(), disambModule.productionsFor(), strict && inferSortChecks, true).apply(rez.right().get());
-        if (rez2._1().isLeft())
-            return rez2;
-        warn = rez2._2();
-
-        rez = new ResolveOverloadedTerminators(disambModule.overloads()).apply(rez2._1().right().get());
-        if (rez.isLeft())
-            return new Tuple2<>(rez, warn);
-        rez3 = new PushAmbiguitiesDownAndPreferAvoid(disambModule.overloads()).apply(rez.right().get());
-        rez2 = new AmbFilter(strict && inferSortChecks).apply(rez3);
-        warn = Sets.union(rez2._2(), warn);
-        rez2 = new AddEmptyLists(disambModule).apply(rez2._1().right().get());
-        warn = Sets.union(rez2._2(), warn);
-        if (rez2._1().isLeft())
-            return rez2;
-        rez3 = new RemoveBracketVisitor().apply(rez2._1().right().get());
-
-        return new Tuple2<>(Right.apply(rez3), warn);
+    public void close() {
+        if (scanner != null) {
+            scanner.close();
+        }
+        Writer t = timing.get();
+        if (t != null) {
+            synchronized(t) {
+                try {
+                    t.close();
+                } catch (IOException e) {
+                    throw KEMException.internalError("Could not close timing.log", e);
+                }
+            }
+        }
     }
 
     public static Term disambiguateForUnparse(Module mod, Term ambiguity) {

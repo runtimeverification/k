@@ -65,7 +65,7 @@ public class KompileFrontEnd extends FrontEnd {
                     options.outerParsing.mainDefinitionFile(files).getAbsolutePath());
         }
 
-        Kompile kompile = new Kompile(options, files, kem, sw);
+        Kompile kompile = new Kompile(options, files, kem, sw, !options.profileRules);
         Backend backend = koreBackend.get();
         CompiledDefinition def = kompile.run(options.outerParsing.mainDefinitionFile(files), options.mainModule(files), options.syntaxModule(files), backend.steps(), backend.excludedModuleTags());
         sw.printIntermediate("Kompile to kore");
