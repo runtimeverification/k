@@ -442,6 +442,7 @@ public class KItem extends Term implements KItemRepresentation {
                         Term[] arguments = kList.getContents().toArray(new Term[kList.getContents().size()]);
                         Term result = builtins.get().invoke(context, kLabelConstant, arguments);
                         if (result != null && !result.equals(kItem)) {
+                            kItem.profiler.evalFuncBuiltinCounter.increment();
                             return result.evaluate(context);
                         }
                     } catch (ClassCastException e) {
@@ -473,6 +474,7 @@ public class KItem extends Term implements KItemRepresentation {
                 if (kLabelConstant.isSortPredicate() && kList.getContents().size() == 1) {
                     Term checkResult = SortMembership.check(kItem, definition);
                     if (checkResult != kItem) {
+                        kItem.profiler.evalFuncSortPredicateCounter.increment();
                         return checkResult;
                     }
                 }
@@ -591,6 +593,7 @@ public class KItem extends Term implements KItemRepresentation {
                     }
 
                     if (result != null) {
+                        kItem.profiler.evalFuncRuleCounter.increment();
                         return result;
                     } else if (owiseResult != null) {
                         if (!kItem.isGround()) {
@@ -622,8 +625,12 @@ public class KItem extends Term implements KItemRepresentation {
                                 }
                             }
                         }
+                        kItem.profiler.evalFuncOwiseCounter.increment();
                         return owiseResult;
                     }
+                    kItem.profiler.evalFuncNoRuleApplicableCounter.increment();
+                } else {
+                    kItem.profiler.evalFuncNoRuleCounter.increment();
                 }
                 return kItem;
             } finally {
@@ -687,10 +694,12 @@ public class KItem extends Term implements KItemRepresentation {
                     && (((KList) kList).get(0) instanceof KItem &&
                     KLabels.DOTK.equals(((KItem) ((KList) kList).get(0)).kLabel) ||
                     ((KList) kList).get(0).equals(KSequence.EMPTY))) {
+                profiler.applyAnywhereBuiltinCounter.increment();
                 return ((KList) kList).get(1);
             }
 
             if (!isAnywhereApplicable(context)) {
+                profiler.applyAnywhereNoRuleCounter.increment();
                 return this;
             }
 
@@ -724,6 +733,7 @@ public class KItem extends Term implements KItemRepresentation {
                     if (global.javaExecutionOptions.logRulesPublic) {
                         RuleSourceUtil.printRuleAndSource(rule);
                     }
+                    profiler.applyAnywhereRuleCounter.increment();
                     return rightHandSide;
                 } finally {
                     if (RuleAuditing.isAuditBegun()) {
@@ -737,6 +747,7 @@ public class KItem extends Term implements KItemRepresentation {
                     }
                 }
             }
+            profiler.applyAnywhereNoRuleApplicableCounter.increment();
             return this;
         } finally {
             profiler.applyAnywhereRulesNanoTimer.stop();

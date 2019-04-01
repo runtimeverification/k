@@ -33,13 +33,26 @@ public class Profiler2 {
     private TimeMemoryEntry initStats;
     private List<TimeMemoryEntry> cacheMeasuringStats = new ArrayList<>();
 
-    public final CounterStopwatch resFuncNanoTimer = new CounterStopwatch("resolveFunction");
-    public final CounterStopwatch evaluateFunctionNanoTimer = new CounterStopwatch("evaluateFunction");
-    public final CounterStopwatch applyAnywhereRulesNanoTimer
-            = new CounterStopwatch("applyAnywhereRules", evaluateFunctionNanoTimer.getSharedLevelHolder());
-    public final CounterStopwatch logOverheadTimer = new CounterStopwatch("Log");
-    public final CounterStopwatch queryBuildTimer = new CounterStopwatch("Z3 query build");
-    public final CounterStopwatch impliesSMTTimer = new CounterStopwatch("impliesSMT");
+    public final CounterStopwatch resFuncNanoTimer = new CounterStopwatch("resolveFunctionAndAnywhere time");
+    public final CounterStopwatch evaluateFunctionNanoTimer = resFuncNanoTimer.newSubTimer("evaluateFunction time");
+    public final Counter evalFuncBuiltinCounter = evaluateFunctionNanoTimer.newCounter("builtin evaluation");
+    public final Counter evalFuncRuleCounter = evaluateFunctionNanoTimer.newCounter("function rule");
+    public final Counter evalFuncSortPredicateCounter = evaluateFunctionNanoTimer.newCounter("sort predicate");
+    public final Counter evalFuncOwiseCounter = evaluateFunctionNanoTimer.newCounter("owise rule");
+    public final Counter evalFuncNoRuleApplicableCounter = evaluateFunctionNanoTimer.newCounter("no rule applicable");
+    public final Counter evalFuncNoRuleCounter = evaluateFunctionNanoTimer.newCounter("no function rules");
+
+    public final CounterStopwatch applyAnywhereRulesNanoTimer = resFuncNanoTimer
+            .newSubTimer("applyAnywhereRules time", evaluateFunctionNanoTimer.getSharedLevelHolder());
+    public final Counter applyAnywhereBuiltinCounter = applyAnywhereRulesNanoTimer.newCounter("builtin evaluation");
+    public final Counter applyAnywhereRuleCounter = applyAnywhereRulesNanoTimer.newCounter("anywhere rule");
+    public final Counter applyAnywhereNoRuleApplicableCounter =
+            applyAnywhereRulesNanoTimer.newCounter("no rule applicable");
+    public final Counter applyAnywhereNoRuleCounter = applyAnywhereRulesNanoTimer.newCounter("no anywhere rules");
+
+    public final CounterStopwatch logOverheadTimer = new CounterStopwatch("log time");
+    public final CounterStopwatch queryBuildTimer = new CounterStopwatch("query build time");
+    public final CounterStopwatch impliesSMTTimer = new CounterStopwatch("impliesSMT time");
 
     public int countResFuncTopUncached = 0;
     public int countResFuncRecursiveUncached = 0;
@@ -68,30 +81,16 @@ public class Profiler2 {
         TimeMemoryEntry[] intermediate = getIntermediateStats(initStats);
         System.err.format("\n\nInit+Execution time:    %8.3f s\n",
                 currentStats.timeDiff(parsingStats, intermediate));
-        if (queryBuildTimer.getCountTop() > 0) {
-            System.err.format("  query build time:     %s\n", queryBuildTimer);
-        }
+        printTimer("  ", queryBuildTimer, null);
         for (Z3Profiler profiler : z3Profilers.values()) {
-            if (profiler.getQueryCount() > 0) {
-                profiler.print();
-            }
+            profiler.print();
         }
 
+        //todo print nested too
         System.err.format("  Time and top-level event counts:\n");
-        System.err.format("  resolveFunctionAndAnywhere time: %s,      # %10d\n",
-                resFuncNanoTimer, resFuncNanoTimer.getCountTop());
-        System.err.format("    evaluateFunction time          : %s,      # %10d\n",
-                evaluateFunctionNanoTimer, evaluateFunctionNanoTimer.getCountTop());
-        System.err.format("    applyAnywhereRules time        : %s,      # %10d\n",
-                applyAnywhereRulesNanoTimer, applyAnywhereRulesNanoTimer.getCountTop());
-        CounterStopwatch resFuncOther = resFuncNanoTimer
-                .minus(evaluateFunctionNanoTimer).minus(applyAnywhereRulesNanoTimer);
-        System.err.format("    resolveFunc... remaining time  : %s\n", resFuncOther);
-        System.err.format("                         # cached  : %10s,      # %10d\n", "", resFuncOther.getCountTop());
-        if (logOverheadTimer.getCountTop() > 0) {
-            System.err.format("  log time                       : %s,      # %10d\n",
-                    logOverheadTimer, logOverheadTimer.getCountTop());
-        }
+        printTimer("  ", resFuncNanoTimer, "remaining time & # cached");
+        printTimer("  ", logOverheadTimer, null);
+        printTimer("  ", impliesSMTTimer, null);
 
         if (afterExecution) {
             System.err.format("\nMax memory : %d MB\n", Runtime.getRuntime().maxMemory() / (1024 * 1024));
@@ -109,17 +108,28 @@ public class Profiler2 {
         System.err.format("resolveFunction recursive cached  : %d\n",
                 resFuncNanoTimer.getCountRecursive() - countResFuncRecursiveUncached);
 
-        if (impliesSMTTimer.getCountTop() > 0) {
-            System.err.format("\nimpliesSMT time :    %s\n", impliesSMTTimer);
-            System.err.format("impliesSMT count:    %s\n", impliesSMTTimer.getCountTop());
-        }
-
         //Has some overhead. Enable from class Profiler if needed, by setting value below to true.
         if (Profiler.enableProfilingMode.get()) {
             System.err.println("==================");
             Profiler.printResult();
         }
         System.err.println("==================================\n");
+    }
+
+    public static void printTimer(String prefix, CounterStopwatch timer, String leftoverTimerName) {
+        if (timer.getDuration() == 0 && timer.getCountTop() == 0) {
+            return;
+        }
+        System.err.format("%s%-33s: %s,      # %10d\n", prefix, timer.getName(), timer, timer.getCountTop());
+        for (CounterStopwatch subTimer : timer.getSubTimers(leftoverTimerName)) {
+            printTimer(prefix + "  ", subTimer, "remaining");
+        }
+        for (Counter counter : timer.getCounters("other")) {
+            if (counter.getCountTop() > 0) {
+                System.err.format("%s%-33s: %10s,      # %10d\n",
+                        prefix + "  ", counter.getName(), "", counter.getCountTop());
+            }
+        }
     }
 
     private void printStats(TimeMemoryEntry currentStats, boolean afterExecution) {

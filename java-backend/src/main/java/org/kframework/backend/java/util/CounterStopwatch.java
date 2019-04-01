@@ -3,6 +3,10 @@ package org.kframework.backend.java.util;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * A stopwatch that can be reentered recursively. Also counts the number of top-level invocations.
  * Time counted in nanoseconds, but displayed in ms.
@@ -19,6 +23,8 @@ public class CounterStopwatch implements Comparable<CounterStopwatch> {
     private final MutableInt level;
     private int countTop;
     private int countRecursive;
+    private List<Counter> counters = new ArrayList<>();
+    private List<CounterStopwatch> subTimers = new ArrayList<>();
 
     public CounterStopwatch(String name) {
         this(name, new MutableInt());
@@ -31,6 +37,14 @@ public class CounterStopwatch implements Comparable<CounterStopwatch> {
     public CounterStopwatch(String name, MutableInt levelHolder) {
         this.name = name;
         this.level = levelHolder;
+    }
+
+    protected CounterStopwatch(String name, MutableInt level, long duration, int countTop, int countRecursive) {
+        this.name = name;
+        this.level = level;
+        this.duration = duration;
+        this.countTop = countTop;
+        this.countRecursive = countRecursive;
     }
 
     public void start() {
@@ -97,6 +111,10 @@ public class CounterStopwatch implements Comparable<CounterStopwatch> {
         return countRecursive;
     }
 
+    public long getDuration() {
+        return duration;
+    }
+
     public int getLevel() {
         return level.intValue();
     }
@@ -113,6 +131,53 @@ public class CounterStopwatch implements Comparable<CounterStopwatch> {
         CounterStopwatch result = new CounterStopwatch("");
         result.countTop = this.countTop - other.countTop;
         result.duration = this.duration - other.duration;
+        return result;
+    }
+
+    public Counter newCounter(String name) {
+        Counter counter = new Counter(name, level);
+        counters.add(counter);
+        return counter;
+    }
+
+    private Counter leftoverCounter(String name) {
+        return new Counter(name, level,
+                countTop - counters.stream().mapToInt(Counter::getCountTop).sum(),
+                countRecursive - counters.stream().mapToInt(Counter::getCountRecursive).sum());
+    }
+
+    public List<Counter> getCounters(String leftoverCounterName) {
+        if (counters.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<Counter> result = new ArrayList<>(counters);
+        result.add(leftoverCounter(leftoverCounterName));
+        return result;
+    }
+
+    public CounterStopwatch newSubTimer(String name, MutableInt levelHolder) {
+        CounterStopwatch subTimer = new CounterStopwatch(name, levelHolder);
+        subTimers.add(subTimer);
+        return subTimer;
+    }
+
+    public CounterStopwatch newSubTimer(String name) {
+        return newSubTimer(name, new MutableInt());
+    }
+
+    private CounterStopwatch leftoverTimer(String name) {
+        return new CounterStopwatch(name, new MutableInt(),
+                duration - subTimers.stream().mapToLong(CounterStopwatch::getDuration).sum(),
+                countTop - subTimers.stream().mapToInt(CounterStopwatch::getCountTop).sum(),
+                countRecursive - subTimers.stream().mapToInt(CounterStopwatch::getCountRecursive).sum());
+    }
+
+    public List<CounterStopwatch> getSubTimers(String leftoverTimerName) {
+        if (subTimers.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<CounterStopwatch> result = new ArrayList<>(subTimers);
+        result.add(leftoverTimer(leftoverTimerName));
         return result;
     }
 }

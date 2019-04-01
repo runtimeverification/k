@@ -19,7 +19,7 @@ public class Z3Profiler {
     private Map<String, Integer> queryResultCounts = new HashMap<>();
 
     Z3Profiler(String name) {
-        sw = new CounterStopwatch(name);
+        sw = new CounterStopwatch(name + " time");
     }
 
     public void startRun() {
@@ -61,17 +61,18 @@ public class Z3Profiler {
         return lastRunTimeout;
     }
 
-    public int getQueryCount() {
-        return queryCount;
-    }
-
     public void print() {
+        if (queryCount == 0) {
+            return;
+        }
         int cachedQueries = requestCount - queryCount - queryBuildFailureCount;
         int unrecoveredTimeouts = queryCount - nonTimeouts;
         int recoveredTimeouts = totalTimeouts - unrecoveredTimeouts;
-        System.err.format("  %-28s time:  %s\n", sw.getName(), sw);
+        Profiler2.printTimer("  ", sw, null);
         if (queryCount != 0) {
-            System.err.format("    executed queries:     %d\n", queryCount);
+            if (queryCount != sw.getCountTop()) {
+                System.err.format("    executed queries:     %d\n", queryCount);
+            }
             for (String result : Z3Wrapper.Z3_QUERY_RESULTS) {
                 if (queryResultCounts.get(result) != null) {
                     System.err.format("      %-14s:       %d\n", "unsat".equals(result) ? "unsat (proved)" : result,
