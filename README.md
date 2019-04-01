@@ -9,10 +9,7 @@ In short:
 ```
 git submodule update --init --recursive
 sudo apt-get install build-essential m4 openjdk-8-jdk libgmp-dev libmpfr-dev pkg-config flex z3 libz3-dev maven opam python3 cmake gcc clang-6.0 clang++-6.0 llvm-6.0 llvm-6.0-tools zlib1g-dev bison libboost-test-dev libyaml-cpp-dev libjemalloc-dev
-curl https://sh.rustup.rs -sSf | sh
-source $HOME/.cargo/env
-rustup toolchain install 1.28.0
-rustup default 1.28.0
+llvm-backend/src/main/native/llvm-backend/install-rust
 curl -sSL https://get.haskellstack.org/ | sh
 ```
 
@@ -50,14 +47,22 @@ You can test if it works by calling `mvn -version` in a Terminal.
 This will provide the information about the JDK Maven is using, in case
 it is the wrong one.
 
-## Rust 1.28 (and Cargo)
+## Rust 1.33 (and Cargo)
 
-To install, go to https://rustup.rs/ and follow the instructions. Then, once rustup is installed, run:
+To install if you don't already have rustup installed, run:
 ```
-source $HOME/.cargo/env
-rustup toolchain install 1.28.0
-rustup default 1.28.0
+llvm-backend/src/main/native/llvm-backend/install-rust
 ```
+
+If you already have rustup installed, you can build rustc 1.33 from source (https://static.rust-lang.org/dist/rustc-1.33.0-src.tar.gz) and install it via:
+
+```
+./configure --llvm-root=/usr/lib/llvm-6.0 --enable-llvm-link-shared
+./x.py build
+rustup toolchain link rust-1.33.0-llvm-6.0 build/x86_64-*/stage2
+```
+
+We do not currently support any of the default rustup toolchains. Note that you will need at least cargo 0.32.0 (which comes with rust 1.31.0) as your default toolchain to build our rust code.
 
 ## Haskell Stack
 
