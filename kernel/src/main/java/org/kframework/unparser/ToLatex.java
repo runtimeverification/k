@@ -114,6 +114,8 @@ public class ToLatex {
             writeString(out, inj.klabel().name());
             writeString(out, "}");
 
+        } else {
+            throw KEMException.criticalError("Unimplemented for LaTeX serialization: ", k);
         }
     }
 }
