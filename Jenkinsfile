@@ -19,7 +19,7 @@ pipeline {
               agent {
                 dockerfile {
                   filename 'Dockerfile.arch'
-                  additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
+                  additionalBuildArgs '--pull --build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
                   reuseNode true
                 }
               }
