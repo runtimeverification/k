@@ -81,16 +81,17 @@ public class Profiler2 {
         TimeMemoryEntry[] intermediate = getIntermediateStats(initStats);
         System.err.format("\n\nInit+Execution time:    %8.3f s\n",
                 currentStats.timeDiff(parsingStats, intermediate));
-        printTimer("  ", queryBuildTimer, null);
+        printTimer("  ", queryBuildTimer, null, true);
         for (Z3Profiler profiler : z3Profilers.values()) {
             profiler.print();
         }
 
-        //todo print nested too
         System.err.format("  Time and top-level event counts:\n");
-        printTimer("  ", resFuncNanoTimer, "remaining time & # cached");
-        printTimer("  ", logOverheadTimer, null);
-        printTimer("  ", impliesSMTTimer, null);
+        printTimer("  ", resFuncNanoTimer, "remaining time & # cached", true);
+        printTimer("  ", logOverheadTimer, null, true);
+        printTimer("  ", impliesSMTTimer, null, true);
+        System.err.format("\n  Recursive event counts:\n");
+        printTimer("  ", resFuncNanoTimer, "# cached", false);
 
         if (afterExecution) {
             System.err.format("\nMax memory : %d MB\n", Runtime.getRuntime().maxMemory() / (1024 * 1024));
@@ -116,18 +117,23 @@ public class Profiler2 {
         System.err.println("==================================\n");
     }
 
-    public static void printTimer(String prefix, CounterStopwatch timer, String leftoverTimerName) {
+    /**
+     * @param topCount true - print top count and time. false - print recursive count and no time.
+     */
+    public static void printTimer(String prefix, CounterStopwatch timer, String leftoverTimerName, boolean topCount) {
         if (timer.getDuration() == 0 && timer.getCountTop() == 0) {
             return;
         }
-        System.err.format("%s%-33s: %s,      # %10d\n", prefix, timer.getName(), timer, timer.getCountTop());
+        String formatString = "%s%-33s: %10s,      # %10d\n";
+        System.err.format(formatString, prefix, timer.getName(), topCount ? timer : "",
+                topCount ? timer.getCountTop() : timer.getCountRecursive());
         for (CounterStopwatch subTimer : timer.getSubTimers(leftoverTimerName)) {
-            printTimer(prefix + "  ", subTimer, "remaining");
+            printTimer(prefix + "  ", subTimer, "remaining", topCount);
         }
         for (Counter counter : timer.getCounters("other")) {
             if (counter.getCountTop() > 0) {
-                System.err.format("%s%-33s: %10s,      # %10d\n",
-                        prefix + "  ", counter.getName(), "", counter.getCountTop());
+                System.err.format(formatString, prefix + "  ", counter.getName(), "",
+                        topCount ? counter.getCountTop() : counter.getCountRecursive());
             }
         }
     }

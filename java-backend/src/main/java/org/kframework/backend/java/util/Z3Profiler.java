@@ -68,7 +68,7 @@ public class Z3Profiler {
         int cachedQueries = requestCount - queryCount - queryBuildFailureCount;
         int unrecoveredTimeouts = queryCount - nonTimeouts;
         int recoveredTimeouts = totalTimeouts - unrecoveredTimeouts;
-        Profiler2.printTimer("  ", sw, null);
+        Profiler2.printTimer("  ", sw, null, true);
         if (queryCount != 0) {
             if (queryCount != sw.getCountTop()) {
                 System.err.format("    executed queries:     %d\n", queryCount);
