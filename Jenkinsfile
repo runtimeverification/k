@@ -2,6 +2,9 @@ pipeline {
   agent {
     label 'docker'
   }
+  options {
+    ansiColor('xterm')
+  }
   stages {
     stage("Init title") {
       when { changeRequest() }
@@ -32,19 +35,17 @@ pipeline {
                 }
                 stage('Build and Test K') {
                   steps {
-                    ansiColor('xterm') {
-                      sh '''
-                        echo 'Setting up environment...'
-                        eval `opam config env`
-                        . $HOME/.cargo/env
-                        echo 'Building K...'
-                        mvn verify -U
-                        echo 'Starting kserver...'
-                        k-distribution/target/release/k/bin/spawn-kserver kserver.log
-                        cd k-exercises/tutorial
-                        make -j`nproc`
-                      '''
-                    }
+                    sh '''
+                      echo 'Setting up environment...'
+                      eval `opam config env`
+                      . $HOME/.cargo/env
+                      echo 'Building K...'
+                      mvn verify -U
+                      echo 'Starting kserver...'
+                      k-distribution/target/release/k/bin/spawn-kserver kserver.log
+                      cd k-exercises/tutorial
+                      make -j`nproc`
+                    '''
                   }
                 }
                 stage('Build Debian Package') {
@@ -216,34 +217,32 @@ pipeline {
         GITHUB_TOKEN = credentials('rv-jenkins')
       }
       steps {
-        ansiColor('xterm') {
-          dir("bionic") {
-            unstash "bionic"
-          }
-          dir("xenial") {
-            unstash "xenial"
-          }
-          dir("stretch") {
-            unstash "stretch"
-          }
-          sh '''
-            echo 'Setting up environment...'
-            eval `opam config env`
-            . $HOME/.cargo/env
-            echo 'Deploying K...'
-            mvn deploy -DskipKTest -Dcheckstyle.skip # TODO: fix checkstyle bug
-            COMMIT=$(git rev-parse --short HEAD)
-            DESCRIPTION='This is the nightly release of the K framework. To install, download the appropriate binary package and install using your package manager. You can install via `sudo apt-get install ./kframework_5.0.0_amd64_$ID.deb` for the appropriate version codename $ID. On Debian Stretch, you also must first enable stretch-backports by running `sudo echo \\"deb http://ftp.debian.org/debian stretch-backports main\\" > /etc/apt/sources.list.d/stretch-backports.list; sudo apt-get update`. If your OS is not supported, you can download and extract the \\"Platform-Independent K binary\\", and follow the instructions in INSTALL.md within the target directory. Note however that this will not support the Haskell or LLVM Backends. On Windows, start by installing [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10) with Ubuntu (or an Ubuntu VM), after which you can install like Ubuntu. K requires gcc and other Linux libraries to run, and building on native Windows, Cygwin, or MINGW is not supported.'
-            RESPONSE=`curl --data '{"tag_name": "nightly-'$COMMIT'","name": "Nightly build of K framework at commit '$COMMIT'","body": "'"$DESCRIPTION"'", "draft": true,"prerelease": true}' https://api.github.com/repos/kframework/k/releases?access_token=$GITHUB_TOKEN`
-            ID=`echo "$RESPONSE" | grep '"id": [0-9]*,' -o | head -1 | grep '[0-9]*' -o`
-            curl --data-binary @k-distribution/target/k-nightly.tar.gz -H "Authorization: token $GITHUB_TOKEN" -H "Content-Type: application/gzip" https://uploads.github.com/repos/kframework/k/releases/$ID/assets?'name=nightly.tar.gz&label=Platform-Indepdendent+K+binary'
-            curl --data-binary @bionic/kframework_5.0.0_amd64.deb -H "Authorization: token $GITHUB_TOKEN" -H "Content-Type: application/vnd.debian.binary-package" https://uploads.github.com/repos/kframework/k/releases/$ID/assets?'name=kframework_5.0.0_amd64_bionic.deb&label=Ubuntu+Bionic+Debian+Package'
-            curl --data-binary @xenial/kframework_5.0.0_amd64.deb -H "Authorization: token $GITHUB_TOKEN" -H "Content-Type: application/vnd.debian.binary-package" https://uploads.github.com/repos/kframework/k/releases/$ID/assets?'name=kframework_5.0.0_amd64_xenial.deb&label=Ubuntu+Xenial+Debian+Package'
-            curl --data-binary @stretch/kframework_5.0.0_amd64.deb -H "Authorization: token $GITHUB_TOKEN" -H "Content-Type: application/vnd.debian.binary-package" https://uploads.github.com/repos/kframework/k/releases/$ID/assets?'name=kframework_5.0.0_amd64_stretch.deb&label=Debian+Stretch+Debian+Package'
-            curl -X PATCH --data '{"draft": false}' https://api.github.com/repos/kframework/k/releases/$ID?access_token=$GITHUB_TOKEN
-            curl --data '{"state": "success","target_url": "'$BUILD_URL'","description": "Build succeeded."}' https://api.github.com/repos/kframework/k/statuses/$(git rev-parse origin/master)?access_token=$GITHUB_TOKEN
-          '''
+        dir("bionic") {
+          unstash "bionic"
         }
+        dir("xenial") {
+          unstash "xenial"
+        }
+        dir("stretch") {
+          unstash "stretch"
+        }
+        sh '''
+          echo 'Setting up environment...'
+          eval `opam config env`
+          . $HOME/.cargo/env
+          echo 'Deploying K...'
+          mvn deploy -DskipKTest -Dcheckstyle.skip # TODO: fix checkstyle bug
+          COMMIT=$(git rev-parse --short HEAD)
+          DESCRIPTION='This is the nightly release of the K framework. To install, download the appropriate binary package and install using your package manager. You can install via `sudo apt-get install ./kframework_5.0.0_amd64_$ID.deb` for the appropriate version codename $ID. On Debian Stretch, you also must first enable stretch-backports by running `sudo echo \\"deb http://ftp.debian.org/debian stretch-backports main\\" > /etc/apt/sources.list.d/stretch-backports.list; sudo apt-get update`. If your OS is not supported, you can download and extract the \\"Platform-Independent K binary\\", and follow the instructions in INSTALL.md within the target directory. Note however that this will not support the Haskell or LLVM Backends. On Windows, start by installing [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10) with Ubuntu (or an Ubuntu VM), after which you can install like Ubuntu. K requires gcc and other Linux libraries to run, and building on native Windows, Cygwin, or MINGW is not supported.'
+          RESPONSE=`curl --data '{"tag_name": "nightly-'$COMMIT'","name": "Nightly build of K framework at commit '$COMMIT'","body": "'"$DESCRIPTION"'", "draft": true,"prerelease": true}' https://api.github.com/repos/kframework/k/releases?access_token=$GITHUB_TOKEN`
+          ID=`echo "$RESPONSE" | grep '"id": [0-9]*,' -o | head -1 | grep '[0-9]*' -o`
+          curl --data-binary @k-distribution/target/k-nightly.tar.gz -H "Authorization: token $GITHUB_TOKEN" -H "Content-Type: application/gzip" https://uploads.github.com/repos/kframework/k/releases/$ID/assets?'name=nightly.tar.gz&label=Platform-Indepdendent+K+binary'
+          curl --data-binary @bionic/kframework_5.0.0_amd64.deb -H "Authorization: token $GITHUB_TOKEN" -H "Content-Type: application/vnd.debian.binary-package" https://uploads.github.com/repos/kframework/k/releases/$ID/assets?'name=kframework_5.0.0_amd64_bionic.deb&label=Ubuntu+Bionic+Debian+Package'
+          curl --data-binary @xenial/kframework_5.0.0_amd64.deb -H "Authorization: token $GITHUB_TOKEN" -H "Content-Type: application/vnd.debian.binary-package" https://uploads.github.com/repos/kframework/k/releases/$ID/assets?'name=kframework_5.0.0_amd64_xenial.deb&label=Ubuntu+Xenial+Debian+Package'
+          curl --data-binary @stretch/kframework_5.0.0_amd64.deb -H "Authorization: token $GITHUB_TOKEN" -H "Content-Type: application/vnd.debian.binary-package" https://uploads.github.com/repos/kframework/k/releases/$ID/assets?'name=kframework_5.0.0_amd64_stretch.deb&label=Debian+Stretch+Debian+Package'
+          curl -X PATCH --data '{"draft": false}' https://api.github.com/repos/kframework/k/releases/$ID?access_token=$GITHUB_TOKEN
+          curl --data '{"state": "success","target_url": "'$BUILD_URL'","description": "Build succeeded."}' https://api.github.com/repos/kframework/k/statuses/$(git rev-parse origin/master)?access_token=$GITHUB_TOKEN
+        '''
       }
     }
   }
