@@ -1052,7 +1052,7 @@ public class ModuleToKORE {
         }
     }
 
-    private static final Production INJ_PROD = Production(KLabel(KLabels.INJ), Sort("K"), Seq(NonTerminal(Sort("K"))), Att().add("poly", "1; 0, 2"));
+    private static final Production INJ_PROD = Production(KLabel(KLabels.INJ), Sort("K"), Seq(NonTerminal(Sort("K"))), Att().add("poly", "1; 0"));
 
 
     private Production production(KApply term) {
