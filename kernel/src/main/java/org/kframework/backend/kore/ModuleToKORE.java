@@ -150,7 +150,7 @@ public class ModuleToKORE {
             }
         }
         computeDependencies(functionRules);
-        Set<KLabel> impurities = functionRules.keySet().stream().filter(lbl -> module.attributesFor().apply(lbl).contains(Attribute.IMPURE_KEY)).collect(Collectors.toSet());
+        Set<KLabel> impurities = functionRules.keySet().stream().filter(lbl -> module.attributesFor().get(lbl).getOrElse(() -> Att()).contains(Attribute.IMPURE_KEY)).collect(Collectors.toSet());
         impurities.addAll(ancestors(impurities, dependencies));
 
         sb.append("\n// symbols\n");
