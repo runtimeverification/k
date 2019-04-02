@@ -1,7 +1,7 @@
 FROM archlinux/base
 
 RUN pacman -Syy && \
-    pacman -S --noconfirm git maven jdk-openjdk cmake boost yaml-cpp jemalloc clang llvm zlib gmp mpfr z3 opam curl stack rustup base-devel base python perl
+    pacman -S --noconfirm git maven jdk-openjdk cmake boost yaml-cpp jemalloc clang llvm zlib gmp mpfr z3 opam curl stack rustup base-devel base python
 
 ARG USER_ID=1000
 ARG GROUP_ID=1000
@@ -9,6 +9,8 @@ RUN groupadd -g $GROUP_ID user && \
     useradd -m -u $USER_ID -s /bin/sh -g user user
 
 USER $USER_ID:$GROUP_ID
+
+ENV PATH="${PATH}:/usr/bin/core_perl"
 
 ADD llvm-backend/src/main/native/llvm-backend/install-rust llvm-backend/src/main/native/llvm-backend/rust-checksum /home/user/
 RUN cd /home/user/ && ./install-rust
