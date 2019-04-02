@@ -35,6 +35,8 @@ import org.kframework.backend.java.util.RewriteEngineUtils;
 import org.kframework.backend.java.util.StateLog;
 import org.kframework.builtin.KLabels;
 
+import org.pcollections.PSet;
+
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Collections;
@@ -793,6 +795,52 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
 
     public ConjunctiveFormula expandPatterns(boolean narrowing, TermContext context) {
         return new ConstrainedTerm(Bottom.BOTTOM, this, context).expandPatterns(narrowing).constraint();
+    }
+
+    private static boolean varsIntersect(PSet<Variable> vs1, PSet<Variable> vs2) {
+        for (Variable v : vs1) {
+            if (vs2.contains(v)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static ConjunctiveFormula getRestrictedConstraint(Term term, TermContext context) {
+
+        ConjunctiveFormula currentConstraint = context.getTopConstraint();
+        if (! currentConstraint.isUnknown()) {
+            return currentConstraint;   // current constraint is either true or false
+        } else {
+            PSet<Variable> termVariables = term.variableSet();
+            if (! varsIntersect(currentConstraint.variableSet(), termVariables)) {
+                return ConjunctiveFormula.of(context.global());    // current constraint does not restrict term, so use true
+            } else {
+                Set<DisjunctiveFormula> disjuncts = new HashSet<DisjunctiveFormula>();
+                for (ConjunctiveFormula conjunct: currentConstraint.getDisjunctiveNormalForm().conjunctions()) {
+                    if (varsIntersect(conjunct.variableSet(), termVariables)) {
+                        Set<Equality> conjuncts = new HashSet<Equality>();
+                        for (Equality equality: conjunct.equalities()) {
+                            if (varsIntersect(equality.variableSet(), termVariables)) {
+                                conjuncts.add(equality);
+                            }
+                        }
+                        ConjunctiveFormula newConjunct = ConjunctiveFormula.of( ImmutableMapSubstitution.empty()
+                                                                              , PersistentUniqueList.from(conjuncts)
+                                                                              , PersistentUniqueList.empty()
+                                                                              , context.global()
+                                                                              );
+                        disjuncts.add(newConjunct.getDisjunctiveNormalForm());
+                    }
+                }
+                ConjunctiveFormula finalConjunct = ConjunctiveFormula.of( ImmutableMapSubstitution.empty()
+                                                                        , PersistentUniqueList.empty()
+                                                                        , PersistentUniqueList.from(disjuncts)
+                                                                        , context.global()
+                                                                        );
+                return finalConjunct;
+            }
+        }
     }
 
     public DisjunctiveFormula getDisjunctiveNormalForm() {
