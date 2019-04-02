@@ -54,8 +54,6 @@ public class Profiler2 {
     public final CounterStopwatch queryBuildTimer = new CounterStopwatch("query build time");
     public final CounterStopwatch impliesSMTTimer = new CounterStopwatch("impliesSMT time");
 
-    public int countResFuncTopUncached = 0;
-    public int countResFuncRecursiveUncached = 0;
     final Map<FormulaContext.Kind, Z3Profiler> z3Profilers = createZ3Profilers();
 
     private Map<FormulaContext.Kind, Z3Profiler> createZ3Profilers() {
@@ -86,7 +84,7 @@ public class Profiler2 {
             profiler.print();
         }
 
-        System.err.format("  Time and top-level event counts:\n");
+        System.err.format("\n  Time and top-level event counts:\n");
         printTimer("  ", resFuncNanoTimer, "remaining time & # cached", true);
         printTimer("  ", logOverheadTimer, null, true);
         printTimer("  ", impliesSMTTimer, null, true);
@@ -97,17 +95,6 @@ public class Profiler2 {
             System.err.format("\nMax memory : %d MB\n", Runtime.getRuntime().maxMemory() / (1024 * 1024));
         }
         printCacheStats(currentStats, afterExecution, context);
-
-        System.err.format("resolveFunction top-level       : %d\n", resFuncNanoTimer.getCountTop());
-        System.err.format("resolveFunction top-level uncached: %d\n", countResFuncTopUncached);
-        int countCached = resFuncNanoTimer.getCountTop() - countResFuncTopUncached;
-        if (countCached > 0) {
-            System.err.format("resolveFunction top-level cached:   %d\n", countCached);
-        }
-        System.err.format("resolveFunction recursive       : %d\n", resFuncNanoTimer.getCountRecursive());
-        System.err.format("resolveFunction recursive uncached: %d\n", countResFuncRecursiveUncached);
-        System.err.format("resolveFunction recursive cached  : %d\n",
-                resFuncNanoTimer.getCountRecursive() - countResFuncRecursiveUncached);
 
         //Has some overhead. Enable from class Profiler if needed, by setting value below to true.
         if (Profiler.enableProfilingMode.get()) {

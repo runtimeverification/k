@@ -300,19 +300,9 @@ public class KItem extends Term implements KItemRepresentation {
                     if (result.isCacheable(this)) {
                         this.cachePut(constraint, result, context);
                     }
-                    if (profiler.resFuncNanoTimer.getLevel() == 1) {
-                        profiler.countResFuncTopUncached++;
-                    } else {
-                        profiler.countResFuncRecursiveUncached++;
-                    }
                 }
             } else {
                 result = global.kItemOps.resolveFunctionAndAnywhere(this, context);
-                if (profiler.resFuncNanoTimer.getLevel() == 1) {
-                    profiler.countResFuncTopUncached++;
-                } else {
-                    profiler.countResFuncRecursiveUncached++;
-                }
             }
         } finally {
             profiler.resFuncNanoTimer.stop();
