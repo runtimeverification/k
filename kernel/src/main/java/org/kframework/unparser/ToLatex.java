@@ -59,7 +59,7 @@ public class ToLatex {
 
             for (K item : app.klist().asIterable()) {
                 writeString(out, "{");
-                ToLatex.apply(out, item);
+                apply(out, item);
                 writeString(out, "}");
             }
 
@@ -99,13 +99,20 @@ public class ToLatex {
         } else if (k instanceof KAs) {
             KAs alias = (KAs) k;
 
-            writeString(out, "KAs unimplemented");
+            writeString(out, "\\kas{");
+            apply(out, alias.pattern());
+            writeString(out, "}{");
+            apply(out, alias.alias());
+            writeString(out, "}{");
+            apply(out, alias.att());
+            writeString(out, "}");
 
         } else if (k instanceof InjectedKLabel) {
-            KAs alias = (KAs) k;
+            InjectedKLabel inj = (InjectedKLabel) k;
 
-            throw KEMException.criticalError("InjectedKLabel unimplemented", k);
-
+            writeString(out, "\\injectedKLabels{");
+            writeString(out, inj.klabel().name());
+            writeString(out, "}");
 
         }
     }
