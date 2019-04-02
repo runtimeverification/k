@@ -63,7 +63,7 @@ public class ResolveFunctionWithConfig {
       return new TransformK() {
         @Override
         public K apply(KApply kapp) {
-          if (kapp.equals(term) || (term instanceof KRewrite && ((KRewrite)term).left().equals(kapp))) {
+          if (!kapp.items().isEmpty() && kapp.items().get(kapp.items().size() - 1).att().contains("withConfig")) {
             return super.apply(kapp);
           }
           if (module.attributesFor().get(kapp.klabel()).getOrElse(() -> Att()).contains("withConfig")) {
@@ -104,7 +104,7 @@ public class ResolveFunctionWithConfig {
           } else {
             secondChild = IncompleteCellUtils.make(KLabels.GENERATED_TOP_CELL, true, cell, true);
           }
-          List<K> items = Stream.concat(funKApp.items().stream(), Stream.of(KAs(secondChild, CONFIG_VAR))).collect(Collections.toList());
+          List<K> items = Stream.concat(funKApp.items().stream(), Stream.of(KAs(secondChild, CONFIG_VAR, Att().add("withConfig")))).collect(Collections.toList());
           K result = KApply(funKApp.klabel(), KList(items), funKApp.att());
           if (rhs == null) {
             return result;
