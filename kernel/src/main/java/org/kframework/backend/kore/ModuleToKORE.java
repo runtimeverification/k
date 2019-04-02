@@ -879,18 +879,6 @@ public class ModuleToKORE {
             visitor.apply(entry.getValue().body());
             visitor.apply(entry.getValue().requires());
         }
-
-        for (KLabel label : Sets.union(functionRules.keySet(), anywhereKLabels)) {
-            String hook = module.attributesFor().apply(label).<String>getOptional(Attribute.HOOK_KEY).orElse(".");
-
-            if (hook.equals("KREFLECTION.fresh")) {
-                for (KLabel freshFunction : iterable(module.freshFunctionFor().values())) {
-                    dependencies.addEdge(new Object(), label, freshFunction);
-                }
-            }
-            //eval depends on everything
-            dependencies.addEdge(new Object(), KLabel(""), label);
-        }
     }
 
     private DirectedGraph<KLabel, Object> dependencies;
