@@ -1052,7 +1052,7 @@ public class ModuleToKORE {
         }
     }
 
-    private static final Production INJ_PROD = Production(KLabel(KLabels.INJ, Sort("From"), Sort("To")), Sort("To"), Seq(NonTerminal(Sort("From"))), Att().add("poly", "1; 0, 2"));
+    private static final Production INJ_PROD = Production(KLabel(KLabels.INJ), Sort("K"), Seq(NonTerminal(Sort("K"))), Att().add("poly", "1; 0, 2"));
 
 
     private Production production(KApply term) {
@@ -1062,7 +1062,7 @@ public class ModuleToKORE {
     private Production production(KApply term, boolean instantiatePolySorts) {
         KLabel klabel = term.klabel();
         if (klabel.name().equals(KLabels.INJ))
-            return Production(INJ_PROD.klabel(), INJ_PROD.sort(), INJ_PROD.items(), Att.empty().add("originalPrd", Production.class, INJ_PROD));
+            return computePolyProd(INJ_PROD, instantiatePolySorts ? term : null);
         Option<scala.collection.Set<Production>> prods = module.productionsFor().get(klabel);
         assert(prods.nonEmpty());
         assert(prods.get().size() == 1);
