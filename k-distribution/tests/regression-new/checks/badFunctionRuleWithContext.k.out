@@ -1,0 +1,8 @@
+[Error] Compiler: Had 1 parsing errors.
+[Error] Critical: Unexpected sort Bool for term parsed as production syntax
+Bool ::= "false" [token()]. Expected Int.
+	Source(badFunctionRuleWithContext.k)
+	Location(10,23,10,28)
+[Warning] Compiler: Could not find main syntax module with name
+BADFUNCTIONRULEWITHCONTEXT-SYNTAX in definition.  Use --syntax-module to
+specify one. Using BADFUNCTIONRULEWITHCONTEXT as default.

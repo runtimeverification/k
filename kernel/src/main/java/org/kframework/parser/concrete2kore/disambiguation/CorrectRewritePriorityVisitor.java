@@ -33,6 +33,7 @@ public class CorrectRewritePriorityVisitor extends SetsTransformerWithErrors<Par
         exceptions.add("#ruleEnsures");
         exceptions.add("#ruleRequiresEnsures");
         exceptions.add("#KRewrite");
+        exceptions.add("#withConfig");
         exceptions.add("#KList");
     }
 

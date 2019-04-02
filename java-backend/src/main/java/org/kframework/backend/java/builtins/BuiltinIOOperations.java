@@ -131,7 +131,7 @@ public class BuiltinIOOperations {
     }
 
     private static KItem processIOException(String errno, Term klist, TermContext termContext) {
-        String klabelString = "#" + errno + "_K-IO";
+        String klabelString = "#" + errno;
         KLabelConstant klabel = KLabelConstant.of(KORE.KLabel(klabelString), termContext.definition());
         assert termContext.definition().kLabels().contains(klabel) : "No KLabel in definition for errno '" + errno + "'";
         return KItem.of(klabel, klist, termContext.global());

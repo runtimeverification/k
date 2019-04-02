@@ -2,6 +2,7 @@
 package org.kframework.backend.java.symbolic;
 
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.tuple.Pair;
@@ -24,26 +25,34 @@ import org.kframework.backend.java.kil.Sort;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
+import org.kframework.backend.java.util.FormulaContext;
+import org.kframework.backend.java.util.RuleSourceUtil;
 import org.kframework.backend.java.util.StateLog;
+import org.kframework.backend.java.util.TimeMemoryEntry;
+import org.kframework.backend.java.utils.BitSet;
 import org.kframework.builtin.KLabels;
 import org.kframework.kore.FindK;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KORE;
+import org.kframework.kprove.KProve;
+import org.kframework.kprove.KProveOptions;
 import org.kframework.rewriter.SearchType;
-import org.kframework.backend.java.utils.BitSet;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
+import javax.annotation.Nullable;
 import java.io.File;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -53,8 +62,8 @@ public class SymbolicRewriter {
 
     private final List<String> transitions;
     private final Stopwatch stopwatch = Stopwatch.createUnstarted();
-    private final GlobalContext global;
     private final KOREtoBackendKIL constructor;
+    private final GlobalContext global;
     private boolean transition;
     private final Set<ConstrainedTerm> superheated = Sets.newHashSet();
     private final Set<ConstrainedTerm> newSuperheated = Sets.newHashSet();
@@ -72,6 +81,7 @@ public class SymbolicRewriter {
         this.theFastMatcher = new FastRuleMatcher(global, definition.ruleTable.size());
         this.transition = true;
         this.global = global;
+        parseLogCells();
     }
 
     public KOREtoBackendKIL getConstructor() {
@@ -80,9 +90,10 @@ public class SymbolicRewriter {
 
     public RewriterResult rewrite(ConstrainedTerm constrainedTerm, int bound) {
         stopwatch.start();
+        ConstrainedTerm initTerm = constrainedTerm;
         int step = 0;
         List<ConstrainedTerm> results;
-        while (step != bound && !(results = computeRewriteStep(constrainedTerm, step, true)).isEmpty()) {
+        while (step != bound && !(results = computeRewriteStep(constrainedTerm, step, true, initTerm)).isEmpty()) {
             /* get the first solution */
             constrainedTerm = results.get(0);
             step++;
@@ -91,11 +102,15 @@ public class SymbolicRewriter {
         ConstrainedTerm afterVariableRename = new ConstrainedTerm(constrainedTerm.term(), constrainedTerm.termContext());
 
         stopwatch.stop();
+        if (global.globalOptions.verbose) {
+            printSummaryBox(null, null, 1, step, 0);
+        }
         return new RewriterResult(Optional.of(step), Optional.empty(), afterVariableRename.term());
     }
 
-    private List<ConstrainedTerm> computeRewriteStep(ConstrainedTerm constrainedTerm, int step, boolean computeOne) {
-        return fastComputeRewriteStep(constrainedTerm, computeOne, false, false);
+    private List<ConstrainedTerm> computeRewriteStep(ConstrainedTerm constrainedTerm, int step, boolean computeOne,
+                                                     ConstrainedTerm initTerm) {
+        return fastComputeRewriteStep(constrainedTerm, computeOne, false, false, step, initTerm);
     }
 
     /**
@@ -141,7 +156,13 @@ public class SymbolicRewriter {
 
     }
 
-    public List<ConstrainedTerm> fastComputeRewriteStep(ConstrainedTerm subject, boolean computeOne, boolean narrowing, boolean proofFlag) {
+    /**
+     * @param proofFlag if true, ignore rules related to I/O.
+     * @param step      for debugging only
+     * @param initTerm  for logging only
+     */
+    public List<ConstrainedTerm> fastComputeRewriteStep(ConstrainedTerm subject, boolean computeOne, boolean narrowing,
+                                                        boolean proofFlag, int step, ConstrainedTerm initTerm) {
         global.stateLog.log(StateLog.LogEvent.NODE, subject.term(), subject.constraint());
         List<ConstrainedTerm> results = new ArrayList<>();
         if (definition.automaton == null) {
@@ -155,10 +176,14 @@ public class SymbolicRewriter {
                 computeOne,
                 transitions,
                 proofFlag,
-                subject.termContext());
+                subject.termContext(), step);
         for (FastRuleMatcher.RuleMatchResult matchResult : matches) {
             Rule rule = definition.ruleTable.get(matchResult.ruleIndex);
-            global.stateLog.log(StateLog.LogEvent.RULEATTEMPT, rule.toKRewrite());
+            global.stateLog.log(StateLog.LogEvent.RULEATTEMPT, rule.toKRewrite(), subject.term(), subject.constraint());
+            if (global.javaExecutionOptions.logRulesPublic) {
+                RuleSourceUtil.printRuleAndSource(rule);
+            }
+
             Substitution<Variable, Term> substitution =
                     rule.att().contains(Att.refers_THIS_CONFIGURATION()) ?
                             matchResult.constraint.substitution().plus(new Variable(KLabels.THIS_CONFIGURATION, Sort.KSEQUENCE), filterOurStrategyCell(subject.term())) :
@@ -200,7 +225,11 @@ public class SymbolicRewriter {
             if (!matchResult.isMatching) {
                 // TODO(AndreiS): move these some other place
                 result = result.expandPatterns(true);
-                if (result.constraint().isFalseExtended() || result.constraint().checkUnsat()) {
+                if (result.constraint().isFalseExtended() || result.constraint().checkUnsat(
+                        new FormulaContext(FormulaContext.Kind.RegularConstr, rule))) {
+                    if (global.javaExecutionOptions.debugZ3) {
+                        System.err.println("Execution path aborted after expanding patterns");
+                    }
                     continue;
                 }
             }
@@ -209,10 +238,17 @@ public class SymbolicRewriter {
             if (rule.att().contains(Att.heat()) && transitions.stream().anyMatch(rule.att()::contains)) {
                 newSuperheated.add(result);
             } else if (rule.att().contains(Att.cool()) && transitions.stream().anyMatch(rule.att()::contains) && superheated.contains(subject)) {
+                if (global.javaExecutionOptions.debugZ3) {
+                    System.err.println("Execution path aborted, superheating logic");
+                }
                 continue;
             }
 
-            global.stateLog.log(StateLog.LogEvent.RULE, rule.toKRewrite());
+            global.stateLog.log(StateLog.LogEvent.RULE, rule.toKRewrite(), subject.term(), subject.constraint(), result.term(), result.constraint());
+            if (global.javaExecutionOptions.debugZ3 && !result.constraint().equals(subject.constraint())) {
+                System.err.format("New top constraint created: \n%s\n",
+                        result.constraint().toStringDifferentiated(initTerm.constraint()));
+            }
             results.add(result);
         }
 
@@ -364,7 +400,7 @@ public class SymbolicRewriter {
             ConjunctiveFormula constraint,
             @SuppressWarnings("unused") Term subject,
             boolean expandPattern,
-            TermContext context) {
+            TermContext context, FormulaContext formulaContext) {
         for (Variable variable : rule.freshConstants()) {
             constraint = constraint.add(
                     variable,
@@ -388,12 +424,12 @@ public class SymbolicRewriter {
         /* rename rule variables in both the term and the constraint */
         term = term.substituteWithBinders(renameSubst);
         constraint = ((ConjunctiveFormula) constraint.substituteWithBinders(renameSubst)).simplify(context);
-
+        constraint.globalContext().stateLog.log(StateLog.LogEvent.CHECKINGCONSTRAINT, constraint); // check if one comes here outside of specRule
         ConstrainedTerm result = new ConstrainedTerm(term, constraint, context);
         if (expandPattern) {
             // TODO(AndreiS): move these some other place
             result = result.expandPatterns(true);
-            if (result.constraint().isFalseExtended() || result.constraint().checkUnsat()) {
+            if (result.constraint().isFalseExtended() || result.constraint().checkUnsat(formulaContext)) {
                 result = null;
             }
         }
@@ -492,7 +528,7 @@ public class SymbolicRewriter {
                 ConstrainedTerm term = entry.getKey();
                 Integer currentDepth = entry.getValue();
 
-                List<ConstrainedTerm> results = computeRewriteStep(term, step, false);
+                List<ConstrainedTerm> results = computeRewriteStep(term, step, false, initCnstrTerm);
 
                 if (results.isEmpty() && searchType == SearchType.FINAL) {
                     if (addSearchResult(searchResults, term, pattern, bound, context)) {
@@ -568,31 +604,83 @@ public class SymbolicRewriter {
     public List<ConstrainedTerm> proveRule(
             Rule rule, ConstrainedTerm initialTerm,
             ConstrainedTerm targetTerm,
-            List<Rule> specRules, KExceptionManager kem) {
+            List<Rule> specRules, KExceptionManager kem, @Nullable Rule boundaryPattern) {
         List<ConstrainedTerm> proofResults = new ArrayList<>();
+        List<ConstrainedTerm> successResults = new ArrayList<>();
         int successPaths = 0;
         Set<ConstrainedTerm> visited = new HashSet<>();
         List<ConstrainedTerm> queue = new ArrayList<>();
         List<ConstrainedTerm> nextQueue = new ArrayList<>();
 
-        initialTerm = initialTerm.expandPatterns(true);
-
-        global.stateLog.log(StateLog.LogEvent.REACHINIT,   initialTerm.term(), initialTerm.constraint());
-        global.stateLog.log(StateLog.LogEvent.REACHTARGET, targetTerm.term(),  targetTerm.constraint());
+        List<Substitution<Variable, Term>> targetBoundarySub = null;
+        if (boundaryPattern != null) {
+            targetBoundarySub = getBoundarySubstitution(targetTerm, boundaryPattern);
+            if (targetBoundarySub.isEmpty()) {
+                throw KEMException.criticalError(
+                        "Boundary pattern does not match the target term. Pattern: " + boundaryPattern.leftHandSide());
+            }
+        }
 
         visited.add(initialTerm);
         queue.add(initialTerm);
         boolean guarded = false;
         int step = 0;
 
+        if (prettyInitTerm != null) {
+            System.err.println("\nInitial term\n=====================\n");
+            printTermAndConstraint(initialTerm, prettyInitTerm, initialTerm);
+        }
+        if (prettyTarget != null) {
+            System.err.println("\nTarget term\n=====================\n");
+            printTermAndConstraint(targetTerm, prettyTarget, initialTerm);
+        }
+        int branchingRemaining = global.javaExecutionOptions.branchingAllowed;
+        boolean nextStepLogEnabled = false;
+        boolean originalLog = global.javaExecutionOptions.log;
+        prevStats = new TimeMemoryEntry(false);
         while (!queue.isEmpty()) {
             step++;
+            int v = 0;
+            global.javaExecutionOptions.log |= nextStepLogEnabled;
+            nextStepLogEnabled = false;
+            if (global.javaExecutionOptions.logProgress && step % 100 == 0) {
+                System.err.print(".");
+            }
+
             for (ConstrainedTerm term : queue) {
-                if (term.implies(targetTerm)) {
-                    global.stateLog.log(StateLog.LogEvent.REACHPROVED, term.term(), term.constraint());
-                    successPaths++;
-                    continue;
-                }
+                boolean alreadyLogged = false;
+                try {
+                    v++;
+                    boolean boundaryCellsMatchTarget =
+                            boundaryCellsMatchTarget(term, boundaryPattern, targetBoundarySub);
+                    //var required to avoid logging the same step multiple times.
+                    alreadyLogged = logStep(step, v, term,
+                            step == 1 || boundaryCellsMatchTarget, false, initialTerm);
+                    if (boundaryPattern == null || boundaryCellsMatchTarget) {
+                        //Only test the full implication if there is no boundary pattern or if it is matched.
+                        if (term.implies(targetTerm, rule, !(boundaryPattern == null))) {
+                            //If current term matches the target term, current execution path is proved.
+                            global.stateLog.log(StateLog.LogEvent.REACHPROVED, term.term(), term.constraint());
+                            if (global.javaExecutionOptions.logBasic) {
+                                logStep(step, v, term, true, alreadyLogged, initialTerm);
+                                System.err.println("\n============\nStep " + step + ": eliminated!\n============\n");
+                            }
+                            successPaths++;
+                            successResults.add(term);
+                            continue;
+                        } else if (boundaryPattern != null && step > 1) {
+                            //If boundary cells in current term match boundary cells in target term but entire terms
+                            // don't match, halt execution.
+                            logStep(step, v, term, global.javaExecutionOptions.logBasic, alreadyLogged, initialTerm);
+                            System.err.println("Halt! Terminating branch.");
+                            proofResults.add(term);
+                            continue;
+                        }
+                        //else: case (no boundary pattern || (step == 1 && boundaryCellsMatchTarget))
+                        //      && final implication == false
+                        //  Do nothing. Boundary checking is disabled if there is no boundary pattern, or at step 1.
+                        //  Disabling on step 1 is useful for specs that match 1 full loop iteration.
+                    }
 
                 /* TODO(AndreiS): terminate the proof with failure based on the klabel _~>_
                 List<Term> leftKContents = term.term().getCellContentsByName("<k>");
@@ -614,37 +702,88 @@ public class SymbolicRewriter {
                     }
                 }*/
 
-                if (guarded) {
-                    ConstrainedTerm result = applySpecRules(term, specRules);
-                    if (result != null) {
-                        if (visited.add(result)) {
-                            nextQueue.add(result);
+                    if (guarded) {
+                        ConstrainedTerm result = applySpecRules(term, specRules);
+                        if (result != null) {
+                            nextStepLogEnabled = true;
+                            logStep(step, v, term, true, alreadyLogged, initialTerm);
+                            // re-running constraint generation again for debug purposes
+                            if (global.javaExecutionOptions.logBasic) {
+                                System.err.println("\nApplying specification rule\n=========================\n");
+                            }
+                            if (visited.add(result)) {
+                                nextQueue.add(result);
+                            } else {
+                                if (term.equals(result)) {
+                                    throw KEMException.criticalError(
+                                            "Step " + step + ": infinite loop after applying a spec rule.");
+                                }
+                            }
+                            continue;
+                        }
+                    }
+
+                    List<ConstrainedTerm> results = fastComputeRewriteStep(term, false, true, true, step,
+                            initialTerm);
+                    if (results.isEmpty()) {
+                        logStep(step, v, term, true, alreadyLogged, initialTerm);
+                        System.err.println("\nStep above: " + step + ", evaluation ended with no successors.");
+                        if (step == 1) {
+                            kem.registerCriticalWarning("Evaluation ended on 1st step. " +
+                                    "Possible cause: non-functional term in constraint (path condition).");
+                        }
+                        /* final term */
+                        proofResults.add(term);
+                    }
+
+                    if (results.size() > 1) {
+                        nextStepLogEnabled = true;
+                        logStep(step, v, term, true, alreadyLogged, initialTerm);
+                        if (branchingRemaining == 0) {
+                            System.err.println("\nHalt on branching!\n=====================\n");
+
+                            proofResults.addAll(results);
+                            continue;
                         } else {
-                            if (term.equals(result)) {
-                                kem.registerCriticalWarning("Step " + step + ": infinite loop after applying a spec rule.");
+                            branchingRemaining--;
+                            if (global.javaExecutionOptions.logBasic) {
+                                System.err.println("\nBranching!\n=====================\n");
                             }
                         }
-                        continue;
                     }
-                }
-
-                List<ConstrainedTerm> results = fastComputeRewriteStep(term, false, true, true);
-                if (results.isEmpty()) {
-                    /* final term */
-                    proofResults.add(term);
-                }
-
-                for (ConstrainedTerm cterm : results) {
-                    ConstrainedTerm result = new ConstrainedTerm(
-                            cterm.term(),
-                            cterm.constraint().removeBindings(
-                                    Sets.difference(
-                                            cterm.constraint().substitution().keySet(),
-                                            initialTerm.variableSet())),
-                            cterm.termContext());
-                    if (visited.add(result)) {
-                        nextQueue.add(result);
+                    for (ConstrainedTerm cterm : results) {
+                        ConstrainedTerm result = new ConstrainedTerm(
+                                cterm.term(),
+                                cterm.constraint().removeBindings(
+                                        Sets.difference(
+                                                cterm.constraint().substitution().keySet(),
+                                                initialTerm.variableSet())),
+                                cterm.termContext());
+                        if (visited.add(result)) {
+                            nextQueue.add(result);
+                        }
                     }
+
+                    if (Thread.currentThread().isInterrupted()) {
+                        throw KEMException.criticalError("Thread interrupted");
+                    }
+                } catch (OutOfMemoryError e) {
+                    e.printStackTrace(); //to avoid hiding this exception in case another OOMError is thrown.
+                    //Activate cache profiling to see which cache caused the error.
+                    global.javaExecutionOptions.profileMemAdv = true;
+                    printSummaryBox(rule, proofResults, successPaths, step, queue.size() + nextQueue.size() - v + 1);
+                    throw e;
+                    // DISABLE EXCEPTION CHECKSTYLE
+                } catch (RuntimeException | AssertionError | StackOverflowError e) {
+                    // ENABLE EXCEPTION CHECKSTYLE
+                    logStep(step, v, term, true, alreadyLogged, initialTerm);
+                    System.err.println("\n" +
+                            "==========================================\n" +
+                            "Top term when exception was thrown:\n" +
+                            "==========================================\n");
+                    printTermAndConstraint(term, false, initialTerm);
+                    printSummaryBox(rule, proofResults, successPaths, step, queue.size() + nextQueue.size() - v + 1);
+                    throw e;
                 }
             }
 
@@ -655,25 +794,284 @@ public class SymbolicRewriter {
             nextQueue = temp;
             nextQueue.clear();
             guarded = true;
+
+            global.javaExecutionOptions.log = originalLog;
         }
 
+        List<ConstrainedTerm> tweakedProofResults =
+                printFormattedFailuresAndGetTweakedResults(initialTerm, proofResults);
+        printSuccessFinalStates(initialTerm, successResults);
+        printSuccessPCDiff(initialTerm, successResults);
         if (global.globalOptions.verbose) {
-            printSummaryBox(rule, proofResults, successPaths, step);
+            printSummaryBox(rule, proofResults, successPaths, step, 0);
         }
-        return proofResults;
+        return tweakedProofResults;
     }
 
-    private void printSummaryBox(Rule rule, List<ConstrainedTerm> proofResults, int successPaths, int step) {
-        if (proofResults.isEmpty()) {
-            System.err.format("\nSPEC PROVED: %s %s\n==================================\nExecution paths: %d\n",
-                    new File(rule.getSource().source()), rule.getLocation(), successPaths);
+    /**
+     * Print formatted failure final states, when {@code javaExecutionOptions.formatFailures} is true.
+     *
+     * @return proofResults, if {@code javaExecutionOptions.formatFailures} is false, otherwise get
+     * {@code BoolToken.FALSE}
+     */
+    public List<ConstrainedTerm> printFormattedFailuresAndGetTweakedResults(ConstrainedTerm initialTerm,
+                                                                            List<ConstrainedTerm> proofResults) {
+        List<ConstrainedTerm> tweakedProofResults = proofResults;
+        if (global.javaExecutionOptions.formatFailures && !proofResults.isEmpty() && prettyResult != null) {
+            System.err.println("\n" +
+                    "==========================================\n" +
+                    "Failure final states:\n" +
+                    "==========================================\n");
+            for (ConstrainedTerm term : proofResults) {
+                printTermAndConstraint(term, prettyResult, initialTerm);
+            }
+            tweakedProofResults = ImmutableList.of(new ConstrainedTerm(BoolToken.FALSE, initialTerm.termContext()));
+        }
+        return tweakedProofResults;
+    }
+
+    /**
+     * Print formatted success final states, when {@code javaExecutionOptions.logSuccessFinalStates} is true.
+     */
+    public void printSuccessFinalStates(ConstrainedTerm initialTerm, List<ConstrainedTerm> successResults) {
+        if (global.javaExecutionOptions.logSuccessFinalStates  && !successResults.isEmpty() && prettyResult != null) {
+            System.err.println("\n" +
+                    "==========================================\n" +
+                    "Success final states:\n" +
+                    "==========================================\n");
+            for (ConstrainedTerm result : successResults) {
+                printTermAndConstraint(result, prettyResult, initialTerm);
+            }
+        }
+    }
+
+    private void printSuccessPCDiff(ConstrainedTerm initialTerm, List<ConstrainedTerm> successResults) {
+        if (global.javaExecutionOptions.logSuccessPCDiff && !successResults.isEmpty() && prettyResult != null) {
+            System.out.println("\n" +
+                    "==========================================\n" +
+                    "Diff between initial path condition and final state path condition, success paths:\n" +
+                    "==========================================\n");
+            for (ConstrainedTerm result : successResults) {
+                System.out.println(result.constraint().toStringNewElements(initialTerm.constraint()));
+            }
+        }
+    }
+
+    public void printTermAndConstraint(ConstrainedTerm term, boolean pretty,
+                                       ConstrainedTerm initTerm) {
+        //Disabling toString cache to minimise chance of OutOfMemoryError.
+        boolean oldCacheToString = global.javaExecutionOptions.cacheToString;
+        global.javaExecutionOptions.cacheToString = false;
+        try {
+            print(term.term(), pretty);
+            printConstraint(term.constraint(), pretty, initTerm);
+            System.err.println();
+        } finally {
+            global.javaExecutionOptions.cacheToString = oldCacheToString;
+        }
+    }
+
+    private void printSummaryBox(Rule rule, List<ConstrainedTerm> proofResults, int successPaths, int step,
+                                 int pathsInProgress) {
+        if (pathsInProgress != 0) {
+            System.err.format("\nSPEC ERROR: %s %s\n==================================\n" +
+                            "Success execution paths: %d\nFailed execution paths: %d\nPaths in progress: %d\n",
+                    new File(rule.getSource().source()), rule.getLocation(), successPaths, proofResults.size(),
+                    pathsInProgress);
+        } else if (proofResults != null) {
+            if (proofResults.isEmpty()) {
+                System.err.format("\nSPEC PROVED: %s %s\n==================================\nExecution paths: %d\n",
+                        new File(rule.getSource().source()), rule.getLocation(), successPaths);
+            } else {
+                System.err.format("\nSPEC FAILED: %s %s\n==================================\n" +
+                                "Success execution paths: %d\nFailed execution paths: %d\n",
+                        new File(rule.getSource().source()), rule.getLocation(), successPaths, proofResults.size());
+            }
         } else {
-            System.err.format("\nSPEC FAILED: %s %s\n==================================\n" +
-                            "Success execution paths: %d\nFailed execution paths: %d\n",
-                    new File(rule.getSource().source()), rule.getLocation(), successPaths, proofResults.size());
+            System.err.print("\nEXECUTION FINISHED\n==================================\n");
         }
         System.err.format("Longest path: %d steps\n", step);
-        global.profiler.printResult();
+        global.profiler.printResult(true, global);
+    }
+
+    //map value = log format: true = pretty, false = toString()
+    private Map<String, Boolean> cellsToLog = new LinkedHashMap<>();
+
+    /**
+     * null = do not print, false = toString, true = pretty.
+     */
+    private Boolean prettyPC;
+    private Boolean prettyResult;
+    private Boolean prettyInitTerm;
+    private Boolean prettyTarget;
+
+    private void parseLogCells() {
+        for (String cell : global.javaExecutionOptions.logCells) {
+            boolean pretty = false;
+            if (cell.startsWith("(") && cell.endsWith(")")) {
+                pretty = true;
+                cell = cell.substring(1, cell.length() - 1);
+            }
+            switch (cell) {
+            case "#pc":
+                prettyPC = pretty;
+                break;
+            case "#result":
+                prettyResult = pretty;
+                break;
+            case "#initTerm":
+                prettyInitTerm = pretty;
+                break;
+            case "#target":
+                prettyTarget = pretty;
+                break;
+            default:
+                cellsToLog.put(cell, pretty);
+                break;
+            }
+        }
+    }
+
+    private TimeMemoryEntry prevStats;
+
+    /**
+     * @param forced - if true, log this step when at least --log-basic is provided.
+     * @param initTerm
+     * @return whether it was actually logged
+     */
+    private boolean logStep(int step, int v, ConstrainedTerm term, boolean forced,
+                            boolean alreadyLogged, ConstrainedTerm initTerm) {
+        if (alreadyLogged || !global.javaExecutionOptions.logBasic) {
+            return false;
+        }
+        global.profiler.logOverheadTimer.start();
+        KItem top = (KItem) term.term();
+
+        if (global.javaExecutionOptions.log || forced || global.javaExecutionOptions.logRulesPublic) {
+            TimeMemoryEntry now = new TimeMemoryEntry(false);
+            System.err.format("\nSTEP %d v%d : %s\n===================\n",
+                    step, v, global.profiler.stepLogString(now, prevStats));
+            prevStats = now;
+        }
+
+        boolean actuallyLogged = global.javaExecutionOptions.log || forced;
+        if (actuallyLogged) {
+            for(String cellName : cellsToLog.keySet()) {
+                boolean pretty = cellsToLog.get(cellName);
+                KItem cell = getCell(top, "<" + cellName + ">");
+                if (cell == null) {
+                    continue;
+                }
+                print(cell, pretty);
+            }
+            if (prettyPC != null) {
+                printConstraint(term.constraint(), prettyPC, initTerm);
+            }
+        }
+        global.profiler.logOverheadTimer.stop();
+        return actuallyLogged;
+    }
+
+    private void print(K cell, boolean pretty) {
+        if (pretty) {
+            global.prettyPrinter.prettyPrint(cell, System.err);
+        } else {
+            System.err.println(toStringOrEmpty(cell));
+        }
+    }
+
+    private void printConstraint(ConjunctiveFormula constraint, boolean pretty,
+                                 ConstrainedTerm initTerm) {
+        System.err.println("/\\");
+        if (pretty) {
+            global.prettyPrinter.prettyPrint(constraint, System.err);
+        } else {
+            System.err.println(constraint.toStringDifferentiated(initTerm.constraint()));
+        }
+    }
+
+    private String toStringOrEmpty(Object o) {
+        return o != null ? o.toString() : "";
+    }
+
+    private Pattern cellLabelPattern = Pattern.compile("<.+>");
+
+    private KItem getCell(KItem root, String label) {
+        if (root.klabel().name().equals(label)) {
+            return root;
+        }
+        for (K child : root.klist().items()) {
+            if (child instanceof KItem && cellLabelPattern.matcher(((KItem) child).klabel().name()).matches()) {
+                KItem result = getCell((KItem) child, label);
+                if (result != null) {
+                    return result;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @return true if all boundary substitutions for {@code term} match the substitution on same position in
+     * {@code targetBoundarySub}. False otherwise.
+     * <p>
+     * We consider 2 boundary substitutions to match if the equality {@code currentMatch ==K targetMatch} is not false.
+     * That is, if the match contains symbolic terms,
+     * and equality is neither true nor false, boundaryCellsMatchTarget will be true. This is because option
+     * `--boundary-cells` is not designed to be used in conjunction with symbolic reasoning. Specification boundary
+     * should not depend on symbolic values. And if we cannot decide if the boundary matches or not, we still want to
+     * test if the full current term matches the target.
+     */
+    public boolean boundaryCellsMatchTarget(ConstrainedTerm term, Rule boundaryPattern,
+                                            List<Substitution<Variable, Term>> targetBoundarySub) {
+        if (boundaryPattern == null) {
+            return false;
+        }
+        List<Substitution<Variable, Term>> termBoundarySub = getBoundarySubstitution(term, boundaryPattern);
+        if (targetBoundarySub.size() != termBoundarySub.size()) {
+            throw KEMException.criticalError(String.format(
+                    "Boundary pattern has different number of matches in current term and target.\n " +
+                            "Current term: %s, target: %s", termBoundarySub, targetBoundarySub));
+        }
+        for (int i = 0; i < targetBoundarySub.size(); i++) {
+            //Keeping term substitution as is and converting target substitution to equalities,
+            //to build a simplifiable formula. In `simplify()` substitutions will be substituted into equalities,
+            //and simplified if LHS == RHS.
+            ConjunctiveFormula boundaryEq = ConjunctiveFormula.of(termBoundarySub.get(i),
+                    PersistentUniqueList.from(targetBoundarySub.get(i).equalities(global)),
+                    PersistentUniqueList.empty(), global);
+            if (boundaryEq.simplify().isFalse()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Match the pattern, then in resulting substitutions keep only vars that start with "BOUND".
+     * <p>
+     * The result of pattern matching is a a list of substitutions, each having 2 kinds of variables:
+     * <p>
+     * 1. Cell body for cells mentioned in {@code KProveOptions.boundaryCells}. These vars will have the name
+     * starting with {@code KProve.BOUNDARY_CELL_PREFIX}. They have to be preserved.
+     * <p>
+     * 2. The rest of the config. These will be anonymous vars with name starting with `_`.
+     * <p>
+     * It is a list because a pattern can match the same term in several ways. This function retains only the vars
+     * from 1st category, in each substitution from the list.
+     *
+     * @see KProveOptions
+     * @see KProve
+     */
+    public List<Substitution<Variable, Term>> getBoundarySubstitution(ConstrainedTerm term, Rule boundaryPattern) {
+        List<Substitution<Variable, Term>> match = FastRuleMatcher.match(
+                term.term(), boundaryPattern.leftHandSide(), term.termContext());
+        List<Substitution<Variable, Term>> result = match.stream().map(sub ->
+                ImmutableMapSubstitution.from(sub.entrySet().stream()
+                        .filter(entry -> entry.getKey().name().startsWith(KProve.BOUNDARY_CELL_PREFIX))
+                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))))
+                .collect(Collectors.toList());
+        return result;
     }
 
     /**
@@ -682,10 +1080,16 @@ public class SymbolicRewriter {
     private ConstrainedTerm applySpecRules(ConstrainedTerm constrainedTerm, List<Rule> specRules) {
         for (Rule specRule : specRules) {
             ConstrainedTerm pattern = specRule.createLhsPattern(constrainedTerm.termContext());
-            ConjunctiveFormula constraint = constrainedTerm.matchImplies(pattern, true, specRule.matchingSymbols());
+            ConjunctiveFormula constraint = constrainedTerm.matchImplies(pattern, true, false,
+                    new FormulaContext(FormulaContext.Kind.SpecRule, specRule), specRule.matchingSymbols());
             if (constraint != null) {
-                ConstrainedTerm result = buildResult(specRule, constraint, null, true, constrainedTerm.termContext());
-                global.stateLog.log(StateLog.LogEvent.SRULE, specRule.toKRewrite());
+                global.stateLog.log(StateLog.LogEvent.SRULEATTEMPT, specRule.toKRewrite(), constrainedTerm.term(), constrainedTerm.constraint());
+                ConstrainedTerm result = buildResult(specRule, constraint, null, true, constrainedTerm.termContext(),
+                        new FormulaContext(FormulaContext.Kind.SpecConstr, specRule));
+                global.stateLog.log(StateLog.LogEvent.SRULE, specRule.toKRewrite(), constrainedTerm.term(), constrainedTerm.constraint(), result.term(), result.constraint());
+                if (global.javaExecutionOptions.logRulesPublic) {
+                    RuleSourceUtil.printRuleAndSource(specRule);
+                }
                 return result;
             }
         }

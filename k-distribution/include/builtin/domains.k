@@ -155,6 +155,32 @@ module MAP
   syntax KItem ::= choice(Map)                      [function, hook(MAP.choice), klabel(Map:choice)]
 endmodule
 
+module MAP-SYMBOLIC [symbolic]
+  imports MAP
+  imports K-EQUAL
+  rule .Map [ K1 <- V1 ] => K1 |-> V1
+
+  rule ((K1 |-> V1) MAP) [ K2 ] => V1         requires K1  ==K K2
+  rule ((K1 |-> V1) MAP) [ K2 ] => MAP [ K2 ] requires K1 =/=K K2
+
+  rule (MAP:Map [ K1 <- V1 ]) [ K2 ] => V1         requires K1  ==K K2
+  rule (MAP:Map [ K1 <- V1 ]) [ K2 ] => MAP [ K2 ] requires K1 =/=K K2
+
+  rule ((K1 |-> V1) MAP) [ K2 <- V2 ] => (K1 |-> V2) MAP                requires K1  ==K K2
+  rule ((K1 |-> V1) MAP) [ K2 <- V2 ] => (K1 |-> V1) (MAP [ K2 <- V2 ]) requires K1 =/=K K2
+
+  rule (MAP:Map [ K1 <- V1 ]) [ K2 <- V2 ] => MAP              [ K1 <- V2 ] requires K1  ==K K2
+
+  // potential infinite loop
+  // rule (MAP:Map [ K1 <- V1 ]) [ K2 <- V2 ] => MAP [ K2 <- V2 ] [ K1 <- V1 ] requires K1 =/=K K2
+
+  rule K1 in_keys(M K2 |-> _) => true          requires K1  ==K K2 orBool K1 in_keys(M)
+  rule K1 in_keys(M K2 |-> _) => K1 in_keys(M) requires K1 =/=K K2
+
+  rule K1 in_keys(M [ K2 <- _ ]) => true          requires K1  ==K K2 orBool K1 in_keys(M)
+  rule K1 in_keys(M [ K2 <- _ ]) => K1 in_keys(M) requires K1 =/=K K2
+endmodule
+
 module SET
   imports INT-SYNTAX
   imports BASIC-K
@@ -285,16 +311,16 @@ endmodule
 module BOOL
   imports BASIC-K
   imports BOOL-SYNTAX
-  syntax Bool ::= "notBool" Bool          [function, functional, klabel(notBool_), symbol, smtlib(not), boolOperation, latex(\neg_{\scriptstyle\it Bool}{#1}), hook(BOOL.not)]
-                > Bool "andBool" Bool     [function, functional, klabel(_andBool_), symbol, left, smtlib(and), boolOperation, latex({#1}\wedge_{\scriptstyle\it Bool}{#2}), hook(BOOL.and)]
-                | Bool "andThenBool" Bool [function, functional, left, smtlib(and), boolOperation, hook(BOOL.andThen)]
-                | Bool "xorBool" Bool     [function, functional, left, smtlib(xor), boolOperation, hook(BOOL.xor)]
-                | Bool "orBool" Bool      [function, functional, left, smtlib(or), boolOperation, latex({#1}\vee_{\scriptstyle\it Bool}{#2}), hook(BOOL.or)]
-                | Bool "orElseBool" Bool  [function, functional, left, smtlib(or), boolOperation, hook(BOOL.orElse)]
-                | Bool "impliesBool" Bool [function, functional, left, smtlib(=>), boolOperation, hook(BOOL.implies)]
+  syntax Bool ::= "notBool" Bool          [function, functional, klabel(notBool_), symbol, smt-hook(not), boolOperation, latex(\neg_{\scriptstyle\it Bool}{#1}), hook(BOOL.not)]
+                > Bool "andBool" Bool     [function, functional, klabel(_andBool_), symbol, left, smt-hook(and), boolOperation, latex({#1}\wedge_{\scriptstyle\it Bool}{#2}), hook(BOOL.and)]
+                | Bool "andThenBool" Bool [function, functional, left, smt-hook(and), boolOperation, hook(BOOL.andThen)]
+                | Bool "xorBool" Bool     [function, functional, left, smt-hook(xor), boolOperation, hook(BOOL.xor)]
+                | Bool "orBool" Bool      [function, functional, left, smt-hook(or), boolOperation, latex({#1}\vee_{\scriptstyle\it Bool}{#2}), hook(BOOL.or)]
+                | Bool "orElseBool" Bool  [function, functional, left, smt-hook(or), boolOperation, hook(BOOL.orElse)]
+                | Bool "impliesBool" Bool [function, functional, left, smt-hook(=>), boolOperation, hook(BOOL.implies)]
                 > left:
-                  Bool "==Bool" Bool      [function, functional, left, smtlib(=), hook(BOOL.eq)]
-                | Bool "=/=Bool" Bool     [function, functional, left, smtlib(distinct), hook(BOOL.ne)]
+                  Bool "==Bool" Bool      [function, functional, left, smt-hook(=), hook(BOOL.eq)]
+                | Bool "=/=Bool" Bool     [function, functional, left, smt-hook(distinct), hook(BOOL.ne)]
 
   rule notBool true => false
   rule notBool false => true
@@ -343,27 +369,25 @@ module INT-SYNTAX
   syntax Int ::= r"[\\+-]?[0-9]+" [prefer, token, prec(2)]
 endmodule
 
-module INT
+module INT-COMMON
   imports INT-SYNTAX
   imports BOOL
-  imports K-EQUAL
-
   syntax Int ::= "~Int" Int                     [function, functional, latex(\mathop{\sim_{\scriptstyle\it Int}}{#1}), hook(INT.not)]
                > left:
-                 Int "^Int" Int                 [function, left, smtlib(^), latex({#1}\mathrel{{\char`\^}_{\!\scriptstyle\it Int}}{#2}), hook(INT.pow)]
-               | Int "^%Int" Int Int            [function, left, smtlib((mod (^ #1 #2) #3)), hook(INT.powmod)]
+                 Int "^Int" Int                 [function, left, smt-hook(^), latex({#1}\mathrel{{\char`\^}_{\!\scriptstyle\it Int}}{#2}), hook(INT.pow)]
+               | Int "^%Int" Int Int            [function, left, smt-hook((mod (^ #1 #2) #3)), hook(INT.powmod)]
                > left:
-                 Int "*Int" Int                 [function, functional, left, smtlib(*), latex({#1}\mathrel{\ast_{\scriptstyle\it Int}}{#2}), hook(INT.mul)]
+                 Int "*Int" Int                 [function, functional, left, smt-hook(*), latex({#1}\mathrel{\ast_{\scriptstyle\it Int}}{#2}), hook(INT.mul)]
                /* FIXME: translate /Int and %Int into smtlib */
                /* /Int and %Int implement t-division */
-               | Int "/Int" Int                 [function, left, smtlib(div), latex({#1}\mathrel{\div_{\scriptstyle\it Int}}{#2}), hook(INT.tdiv)]
-               | Int "%Int" Int                 [function, left, smtlib(mod), latex({#1}\mathrel{\%_{\scriptstyle\it Int}}{#2}), hook(INT.tmod)]
+               | Int "/Int" Int                 [function, left, smt-hook(div), latex({#1}\mathrel{\div_{\scriptstyle\it Int}}{#2}), hook(INT.tdiv)]
+               | Int "%Int" Int                 [function, left, smt-hook(mod), latex({#1}\mathrel{\%_{\scriptstyle\it Int}}{#2}), hook(INT.tmod)]
                /* divInt and modInt implement e-division */
-               | Int "divInt" Int               [function, left, smtlib(div), hook(INT.ediv)]
-               | Int "modInt" Int               [function, left, smtlib(mod), hook(INT.emod)]
+               | Int "divInt" Int               [function, left, smt-hook(div), hook(INT.ediv)]
+               | Int "modInt" Int               [function, left, smt-hook(mod), hook(INT.emod)]
                > left:
-                 Int "+Int" Int                 [function, functional, left, smtlib(+), latex({#1}\mathrel{+_{\scriptstyle\it Int}}{#2}), hook(INT.add), klabel(_+Int_), symbol]
-               | Int "-Int" Int                 [function, functional, left, smtlib(-), latex({#1}\mathrel{-_{\scriptstyle\it Int}}{#2}), hook(INT.sub)]
+                 Int "+Int" Int                 [function, functional, left, smt-hook(+), latex({#1}\mathrel{+_{\scriptstyle\it Int}}{#2}), hook(INT.add), klabel(_+Int_), symbol]
+               | Int "-Int" Int                 [function, functional, left, smt-hook(-), latex({#1}\mathrel{-_{\scriptstyle\it Int}}{#2}), hook(INT.sub)]
                > left:
                  Int ">>Int" Int                [function, left, latex({#1}\mathrel{\gg_{\scriptstyle\it Int}}{#2}), hook(INT.shr)]
                | Int "<<Int" Int                [function, left, latex({#1}\mathrel{\ll_{\scriptstyle\it Int}}{#2}), hook(INT.shl)]
@@ -373,6 +397,7 @@ module INT
                  Int "xorInt" Int               [function, functional, left, latex({#1}\mathrel{\oplus_{\scriptstyle\it Int}}{#2}), hook(INT.xor)]
                > left:
                  Int "|Int" Int                 [function, functional, left, latex({#1}\mathrel{|_{\scriptstyle\it Int}}{#2}), hook(INT.or)]
+
   syntax Int ::= "minInt" "(" Int "," Int ")"   [function, functional, smtlib(int_min), hook(INT.min)]
                | "maxInt" "(" Int "," Int ")"   [function, functional, smtlib(int_max), hook(INT.max)]
                | absInt ( Int )                 [function, functional, smtlib(int_abs), hook(INT.abs)]
@@ -381,9 +406,35 @@ module INT
   syntax Int ::= bitRangeInt           ( Int, indexInt: Int, lengthInt: Int ) [function, hook(INT.bitRange)]
   syntax Int ::= signExtendBitRangeInt ( Int, indexInt: Int, lengthInt: Int ) [function, hook(INT.signExtendBitRange)]
 
-  rule bitRangeInt(I, IDX, LEN) => (I >>Int IDX) modInt (1 <<Int LEN)
+  syntax Bool ::= Int "<=Int" Int         [function, functional, left, smt-hook(<=), latex({#1}\mathrel{\leq_{\scriptstyle\it Int}}{#2}), hook(INT.le)]
+                | Int "<Int" Int          [function, functional, left, smt-hook(<), latex({#1}\mathrel{<_{\scriptstyle\it Int}}{#2}), hook(INT.lt)]
+                | Int ">=Int" Int         [function, functional, left, smt-hook(>=), latex({#1}\mathrel{\geq_{\scriptstyle\it Int}}{#2}), hook(INT.ge)]
+                | Int ">Int" Int          [function, functional, left, smt-hook(>), latex({#1}\mathrel{>_{\scriptstyle\it Int}}{#2}), hook(INT.gt)]
+                | Int "==Int" Int         [function, functional, left, smt-hook(=), latex({#1}\mathrel{{=}{=}_{\scriptstyle\it Int}}{#2}), hook(INT.eq), klabel(_==Int_)]
+                | Int "=/=Int" Int        [function, functional, left, smt-hook(distinct), latex({#1}\mathrel{{=}{/}{=}_{\scriptstyle\it Int}}{#2}), hook(INT.ne)]
+                | Int "dividesInt" Int    [function]
+endmodule
 
-  rule signExtendBitRangeInt(I, IDX, LEN) => (bitRangeInt(I, IDX, LEN) +Int (1 <<Int (LEN -Int 1))) modInt (1 <<Int LEN) -Int (1 <<Int (LEN -Int 1))
+module INT-SYMBOLIC [symbolic, kore]
+  imports  INT-COMMON
+  imports ML-SYNTAX
+
+  /**
+   * Definability conditions for _/Int_ and _%Int_
+   */
+
+  rule #Ceil(I1:Int /Int I2:Int) => {(I2 =/=Int 0) #Equals true} [anywhere]
+  rule #Ceil(I1:Int %Int I2:Int) => {(I2 =/=Int 0) #Equals true} [anywhere]
+endmodule
+
+module INT
+  imports INT-COMMON
+  imports INT-SYMBOLIC
+  imports K-EQUAL
+
+  rule bitRangeInt(I::Int, IDX::Int, LEN::Int) => (I >>Int IDX) modInt (1 <<Int LEN)
+
+  rule signExtendBitRangeInt(I::Int, IDX::Int, LEN::Int) => (bitRangeInt(I, IDX, LEN) +Int (1 <<Int (LEN -Int 1))) modInt (1 <<Int LEN) -Int (1 <<Int (LEN -Int 1))
 
   rule I1:Int divInt I2:Int => (I1 -Int (I1 modInt I2)) /Int I2
   requires I2 =/=Int 0
@@ -395,14 +446,6 @@ module INT
 
   rule minInt(I1:Int, I2:Int) => I1 requires I1 <=Int I2
   rule minInt(I1:Int, I2:Int) => I2 requires I1 >=Int I2
-
-  syntax Bool ::= Int "<=Int" Int         [function, functional, left, smtlib(<=), latex({#1}\mathrel{\leq_{\scriptstyle\it Int}}{#2}), hook(INT.le)]
-                | Int "<Int" Int          [function, functional, left, smtlib(<), latex({#1}\mathrel{<_{\scriptstyle\it Int}}{#2}), hook(INT.lt)]
-                | Int ">=Int" Int         [function, functional, left, smtlib(>=), latex({#1}\mathrel{\geq_{\scriptstyle\it Int}}{#2}), hook(INT.ge)]
-                | Int ">Int" Int          [function, functional, left, smtlib(>), latex({#1}\mathrel{>_{\scriptstyle\it Int}}{#2}), hook(INT.gt)]
-                | Int "==Int" Int         [function, functional, left, smtlib(=), latex({#1}\mathrel{{=}{=}_{\scriptstyle\it Int}}{#2}), hook(INT.eq), klabel(_==Int_)]
-                | Int "=/=Int" Int        [function, functional, left, smtlib(distinct), latex({#1}\mathrel{{=}{/}{=}_{\scriptstyle\it Int}}{#2}), hook(INT.ne)]
-                | Int "dividesInt" Int    [function]
 
   rule I1:Int ==Int I2:Int => I1 ==K I2
   rule I1:Int =/=Int I2:Int => notBool (I1 ==Int I2)
@@ -427,27 +470,30 @@ module FLOAT
   imports BOOL
   imports INT-SYNTAX
 
+
+// For floating point SMT hooks: http://smtlib.cs.uiowa.edu/theories-FloatingPoint.shtml
+
   syntax Int ::= precisionFloat(Float) [function, functional, hook(FLOAT.precision)]
                | exponentFloat(Float) [function, functional, hook(FLOAT.exponent)]
                | exponentBitsFloat(Float) [function, functional, hook(FLOAT.exponentBits)]
 
   syntax Bool ::= signFloat(Float)      [function, functional, hook(FLOAT.sign)]
-                | isNaN(Float)          [function, functional, smtlib((not (== #1 #1))), hook(FLOAT.isNaN)]
+                | isNaN(Float)          [function, functional, smt-hook(fp.isNaN), hook(FLOAT.isNaN)]
                 | isInfinite(Float)     [function, functional]
   syntax MInt ::= significandFloat(Float) [function, hook(FLOAT.significand)]
 
-  syntax Float ::= "--Float" Float             [function, functional, smtlib(-), hook(FLOAT.neg)]
+  syntax Float ::= "--Float" Float             [function, functional, smt-hook(fp.neg), hook(FLOAT.neg)]
                  > Float "^Float" Float        [function, left, latex({#1}^{#2}), hook(FLOAT.pow)]
                  > left:
-                   Float "*Float" Float        [function, left, smtlib((* roundNearestTiesToEven #1 #2)), latex({#1}\mathrel{\ast_{\scriptstyle\it Float}}{#2}), hook(FLOAT.mul)]
-                 | Float "/Float" Float        [function, left, smtlib((/ roundNearestTiesToEven #1 #2)), latex({#1}\mathrel{\div_{\scriptstyle\it Float}}{#2}), hook(FLOAT.div)]
-                 | Float "%Float" Float        [function, left, smtlib((remainder roundNearestTiesToEven #1 #2)), latex({#1}\mathrel{\%_{\scriptstyle\it Float}}{#2}), hook(FLOAT.rem)]
+                   Float "*Float" Float        [function, left, smt-hook((fp.mul roundNearestTiesToEven #1 #2)), latex({#1}\mathrel{\ast_{\scriptstyle\it Float}}{#2}), hook(FLOAT.mul)]
+                 | Float "/Float" Float        [function, left, smt-hook((fp.div roundNearestTiesToEven #1 #2)), latex({#1}\mathrel{\div_{\scriptstyle\it Float}}{#2}), hook(FLOAT.div)]
+                 | Float "%Float" Float        [function, left, smt-hook((fp.rem roundNearestTiesToEven #1 #2)), latex({#1}\mathrel{\%_{\scriptstyle\it Float}}{#2}), hook(FLOAT.rem)]
                  > left:
-                   Float "+Float" Float        [function, left, smtlib((+ roundNearestTiesToEven #1 #2)), latex({#1}\mathrel{+_{\scriptstyle\it Float}}{#2}), hook(FLOAT.add)]
-                 | Float "-Float" Float        [function, left, smtlib((- roundNearestTiesToEven #1 #2)), latex({#1}\mathrel{-_{\scriptstyle\it Float}}{#2}), hook(FLOAT.sub)]
+                   Float "+Float" Float        [function, left, smt-hook((fp.add roundNearestTiesToEven #1 #2)), latex({#1}\mathrel{+_{\scriptstyle\it Float}}{#2}), hook(FLOAT.add)]
+                 | Float "-Float" Float        [function, left, smt-hook((fp.sub roundNearestTiesToEven #1 #2)), latex({#1}\mathrel{-_{\scriptstyle\it Float}}{#2}), hook(FLOAT.sub)]
 
   syntax Float ::= rootFloat(Float, Int)        [function, hook(FLOAT.root)]
-                 | absFloat(Float)              [function, functional, smtlib(abs), hook(FLOAT.abs)]
+                 | absFloat(Float)              [function, functional, smt-hook(fp.abs), hook(FLOAT.abs)]
                  | roundFloat(Float, Int, Int)  [function, hook(FLOAT.round)]
                  | floorFloat(Float)            [function, functional, hook(FLOAT.floor)]
                  | ceilFloat(Float)             [function, functional, hook(FLOAT.ceil)]
@@ -460,18 +506,18 @@ module FLOAT
                  | acosFloat(Float)             [function, hook(FLOAT.acos)]
                  | atanFloat(Float)             [function, functional, hook(FLOAT.atan)]
                  | atan2Float(Float, Float)     [function, hook(FLOAT.atan2)]
-                 | maxFloat(Float, Float)       [function, smtlib(max), hook(FLOAT.max)]
-                 | minFloat(Float, Float)       [function, smtlib(min), hook(FLOAT.min)]
+                 | maxFloat(Float, Float)       [function, smt-hook(fp.max), hook(FLOAT.max)]
+                 | minFloat(Float, Float)       [function, smt-hook(fp.min), hook(FLOAT.min)]
                  | sqrtFloat(Float)             [function]
                  | maxValueFloat(Int, Int)      [function, hook(FLOAT.maxValue)]
                  | minValueFloat(Int, Int)      [function, hook(FLOAT.minValue)]
 
-  syntax Bool ::= Float "<=Float" Float       [function, left, smtlib(<=), latex({#1}\mathrel{\leq_{\scriptstyle\it Float}}{#2}), hook(FLOAT.le)]
-                | Float "<Float" Float        [function, left, smtlib(<), latex({#1}\mathrel{<_{\scriptstyle\it Float}}{#2}), hook(FLOAT.lt)]
-                | Float ">=Float" Float       [function, left, smtlib(>=), latex({#1}\mathrel{\geq_{\scriptstyle\it Float}}{#2}), hook(FLOAT.ge)]
-                | Float ">Float" Float        [function, left, smtlib(>), latex({#1}\mathrel{>_{\scriptstyle\it Float}}{#2}), hook(FLOAT.gt)]
-                | Float "==Float" Float       [function, left, smtlib(==), latex({#1}\mathrel{==_{\scriptstyle\it Float}}{#2}), hook(FLOAT.eq), klabel(_==Float_)]
-                | Float "=/=Float" Float      [function, left, smtlib((not (== #1 #2))), latex({#1}\mathrel{\neq_{\scriptstyle\it Float}}{#2})]
+  syntax Bool ::= Float "<=Float" Float       [function, left, smt-hook(fp.leq), latex({#1}\mathrel{\leq_{\scriptstyle\it Float}}{#2}), hook(FLOAT.le)]
+                | Float "<Float" Float        [function, left, smt-hook(fp.lt), latex({#1}\mathrel{<_{\scriptstyle\it Float}}{#2}), hook(FLOAT.lt)]
+                | Float ">=Float" Float       [function, left, smt-hook(fp.geq), latex({#1}\mathrel{\geq_{\scriptstyle\it Float}}{#2}), hook(FLOAT.ge)]
+                | Float ">Float" Float        [function, left, smt-hook(fg.gt), latex({#1}\mathrel{>_{\scriptstyle\it Float}}{#2}), hook(FLOAT.gt)]
+                | Float "==Float" Float       [function, left, smt-hook(fp.eq), latex({#1}\mathrel{==_{\scriptstyle\it Float}}{#2}), hook(FLOAT.eq), klabel(_==Float_)]
+                | Float "=/=Float" Float      [function, left, smt-hook((not (fp.eq #1 #2))), latex({#1}\mathrel{\neq_{\scriptstyle\it Float}}{#2})]
 
 
   rule F1:Float =/=Float F2:Float => notBool (F1 ==Float F2)
@@ -709,14 +755,14 @@ module BYTES
   imports BYTES-IN-K
   imports INT
 
-  rule Int2Bytes(I, E, Unsigned) => Int2Bytes((log2Int(I) +Int 8) /Int 8, I, E)
+  rule Int2Bytes(I::Int, E::Endianness, Unsigned) => Int2Bytes((log2Int(I) +Int 8) /Int 8, I, E)
     requires I >Int 0
   rule Int2Bytes(0, _::Endianness, _) => .Bytes
-  rule Int2Bytes(I, E, Signed) => Int2Bytes((log2Int(I) +Int 9) /Int 8, I, E)
+  rule Int2Bytes(I::Int, E::Endianness, Signed) => Int2Bytes((log2Int(I) +Int 9) /Int 8, I, E)
     requires I >Int 0
-  rule Int2Bytes(I, E, Signed) => Int2Bytes((log2Int(~Int I) +Int 9) /Int 8, I, E)
+  rule Int2Bytes(I::Int, E::Endianness, Signed) => Int2Bytes((log2Int(~Int I) +Int 9) /Int 8, I, E)
     requires I <Int -1
-  rule Int2Bytes(-1, E, Signed) => Int2Bytes(1, -1, E)
+  rule Int2Bytes(-1, E::Endianness, Signed) => Int2Bytes(1, -1, E)
 endmodule
 
 module ID-PROGRAM-PARSING
@@ -756,18 +802,31 @@ module K-EQUAL
   imports BASIC-K
 
   syntax Bool ::= left:
-                    K "==K" K           [function, functional, smtlib(=), hook(KEQUAL.eq), klabel(_==K_), symbol, latex({#1}\mathrel{=_K}{#2}), equalEqualK]
-                | K "=/=K" K          [function, functional, smtlib(distinct), hook(KEQUAL.ne), klabel(_=/=K_), symbol, latex({#1}\mathrel{\neq_K}{#2}), notEqualEqualK]
+                  K "==K" K           [function, functional, smt-hook(=), hook(KEQUAL.eq), klabel(_==K_), symbol, latex({#1}\mathrel{=_K}{#2}), equalEqualK]
+                | K "=/=K" K          [function, functional, smt-hook(distinct), hook(KEQUAL.ne), klabel(_=/=K_), symbol, latex({#1}\mathrel{\neq_K}{#2}), notEqualEqualK]
+
+  /*@ Set membership over terms. In addition to equality over
+      concrete patterns, K also supports computing equality
+      between a concrete pattern and a symbolic pattern.
+      This is compiled efficiently down to pattern matching,
+      and can be used by putting a term with unbound variables
+      in the left child of :=K or =/=K. Note that this does not
+      bind variables used on the lhs however (although this may
+      change in the future).*/
+
+  syntax Bool ::= left:
+                  K ":=K" K           [function, functional, klabel(_:=K_), symbol, equalEqualK]
+                | K ":/=K" K          [function, functional, klabel(_:/=K_), symbol, notEqualEqualK]
 
   syntax priorities equalEqualK notEqualEqualK > boolOperation mlOp
   rule K1:K =/=K K2:K => notBool (K1 ==K K2)
 
   rule K1:Bool ==Bool K2:Bool => K1 ==K K2
 
-  syntax K ::= "#if" Bool "#then" K "#else" K "#fi"   [function, functional, smtlib(ite), hook(KEQUAL.ite), poly(0, 2, 3)]
+  syntax K ::= "#if" Bool "#then" K "#else" K "#fi"   [function, functional, smt-hook(ite), hook(KEQUAL.ite), poly(0, 2, 3)]
 
-  rule #if C:Bool #then B1 #else _ #fi => B1 requires C
-  rule #if C:Bool #then _ #else B2 #fi => B2 requires notBool C
+  rule #if C:Bool #then B1::K #else _ #fi => B1 requires C
+  rule #if C:Bool #then _ #else B2::K #fi => B2 requires notBool C
 
 endmodule
 
@@ -805,81 +864,84 @@ module K-IO
   imports LIST
   imports STRING
 
-  syntax IOError ::= "#EOF" | "#noparse" | #unknownIOError(Int)
-                   | "#E2BIG"
-                   | "#EACCES"
-                   | "#EAGAIN"
-                   | "#EBADF"
-                   | "#EBUSY"
-                   | "#ECHILD"
-                   | "#EDEADLK"
-                   | "#EDOM"
-                   | "#EEXIST"
-                   | "#EFAULT"
-                   | "#EFBIG"
-                   | "#EINTR"
-                   | "#EINVAL"
-                   | "#EIO"
-                   | "#EISDIR"
-                   | "#EMFILE"
-                   | "#EMLINK"
-                   | "#ENAMETOOLONG"
-                   | "#ENFILE"
-                   | "#ENODEV"
-                   | "#ENOENT"
-                   | "#ENOEXEC"
-                   | "#ENOLCK"
-                   | "#ENOMEM"
-                   | "#ENOSPC"
-                   | "#ENOSYS"
-                   | "#ENOTDIR"
-                   | "#ENOTEMPTY"
-                   | "#ENOTTY"
-                   | "#ENXIO"
-                   | "#EPERM"
-                   | "#EPIPE"
-                   | "#ERANGE"
-                   | "#EROFS"
-                   | "#ESPIPE"
-                   | "#ESRCH"
-                   | "#EXDEV"
-                   | "#EWOULDBLOCK"
-                   | "#EINPROGRESS"
-                   | "#EALREADY"
-                   | "#ENOTSOCK"
-                   | "#EDESTADDRREQ"
-                   | "#EMSGSIZE"
-                   | "#EPROTOTYPE"
-                   | "#ENOPROTOOPT"
-                   | "#EPROTONOSUPPORT"
-                   | "#ESOCKTNOSUPPORT"
-                   | "#EOPNOTSUPP"
-                   | "#EPFNOSUPPORT"
-                   | "#EAFNOSUPPORT"
-                   | "#EADDRINUSE"
-                   | "#EADDRNOTAVAIL"
-                   | "#ENETDOWN"
-                   | "#ENETUNREACH"
-                   | "#ENETRESET"
-                   | "#ECONNABORTED"
-                   | "#ECONNRESET"
-                   | "#ENOBUFS"
-                   | "#EISCONN"
-                   | "#ENOTCONN"
-                   | "#ESHUTDOWN"
-                   | "#ETOOMANYREFS"
-                   | "#ETIMEDOUT"
-                   | "#ECONNREFUSED"
-                   | "#EHOSTDOWN"
-                   | "#EHOSTUNREACH"
-                   | "#ELOOP"
-                   | "#EOVERFLOW"
+  syntax IOError ::= "#EOF" [klabel(#EOF), symbol] | "#noparse" [klabel(#noparse), symbol] | #unknownIOError(Int) [symbol]
+                   | "#E2BIG" [klabel(#E2BIG), symbol]
+                   | "#EACCES" [klabel(#EACCES), symbol]
+                   | "#EAGAIN" [klabel(#EAGAIN), symbol]
+                   | "#EBADF" [klabel(#EBADF), symbol]
+                   | "#EBUSY" [klabel(#EBUSY), symbol]
+                   | "#ECHILD" [klabel(#ECHILD), symbol]
+                   | "#EDEADLK" [klabel(#EDEADLK), symbol]
+                   | "#EDOM" [klabel(#EDOM), symbol]
+                   | "#EEXIST" [klabel(#EEXIST), symbol]
+                   | "#EFAULT" [klabel(#EFAULT), symbol]
+                   | "#EFBIG" [klabel(#EFBIG), symbol]
+                   | "#EINTR" [klabel(#EINTR), symbol]
+                   | "#EINVAL" [klabel(#EINVAL), symbol]
+                   | "#EIO" [klabel(#EIO), symbol]
+                   | "#EISDIR" [klabel(#EISDIR), symbol]
+                   | "#EMFILE" [klabel(#EMFILE), symbol]
+                   | "#EMLINK" [klabel(#EMLINK), symbol]
+                   | "#ENAMETOOLONG" [klabel(#ENAMETOOLONG), symbol]
+                   | "#ENFILE" [klabel(#ENFILE), symbol]
+                   | "#ENODEV" [klabel(#ENODEV), symbol]
+                   | "#ENOENT" [klabel(#ENOENT), symbol]
+                   | "#ENOEXEC" [klabel(#ENOEXEC), symbol]
+                   | "#ENOLCK" [klabel(#ENOLCK), symbol]
+                   | "#ENOMEM" [klabel(#ENOMEM), symbol]
+                   | "#ENOSPC" [klabel(#ENOSPC), symbol]
+                   | "#ENOSYS" [klabel(#ENOSYS), symbol]
+                   | "#ENOTDIR" [klabel(#ENOTDIR), symbol]
+                   | "#ENOTEMPTY" [klabel(#ENOTEMPTY), symbol]
+                   | "#ENOTTY" [klabel(#ENOTTY), symbol]
+                   | "#ENXIO" [klabel(#ENXIO), symbol]
+                   | "#EPERM" [klabel(#EPERM), symbol]
+                   | "#EPIPE" [klabel(#EPIPE), symbol]
+                   | "#ERANGE" [klabel(#ERANGE), symbol]
+                   | "#EROFS" [klabel(#EROFS), symbol]
+                   | "#ESPIPE" [klabel(#ESPIPE), symbol]
+                   | "#ESRCH" [klabel(#ESRCH), symbol]
+                   | "#EXDEV" [klabel(#EXDEV), symbol]
+                   | "#EWOULDBLOCK" [klabel(#EWOULDBLOCK), symbol]
+                   | "#EINPROGRESS" [klabel(#EINPROGRESS), symbol]
+                   | "#EALREADY" [klabel(#EALREADY), symbol]
+                   | "#ENOTSOCK" [klabel(#ENOTSOCK), symbol]
+                   | "#EDESTADDRREQ" [klabel(#EDESTADDRREQ), symbol]
+                   | "#EMSGSIZE" [klabel(#EMSGSIZE), symbol]
+                   | "#EPROTOTYPE" [klabel(#EPROTOTYPE), symbol]
+                   | "#ENOPROTOOPT" [klabel(#ENOPROTOOPT), symbol]
+                   | "#EPROTONOSUPPORT" [klabel(#EPROTONOSUPPORT), symbol]
+                   | "#ESOCKTNOSUPPORT" [klabel(#ESOCKTNOSUPPORT), symbol]
+                   | "#EOPNOTSUPP" [klabel(#EOPNOTSUPP), symbol]
+                   | "#EPFNOSUPPORT" [klabel(#EPFNOSUPPORT), symbol]
+                   | "#EAFNOSUPPORT" [klabel(#EAFNOSUPPORT), symbol]
+                   | "#EADDRINUSE" [klabel(#EADDRINUSE), symbol]
+                   | "#EADDRNOTAVAIL" [klabel(#EADDRNOTAVAIL), symbol]
+                   | "#ENETDOWN" [klabel(#ENETDOWN), symbol]
+                   | "#ENETUNREACH" [klabel(#ENETUNREACH), symbol]
+                   | "#ENETRESET" [klabel(#ENETRESET), symbol]
+                   | "#ECONNABORTED" [klabel(#ECONNABORTED), symbol]
+                   | "#ECONNRESET" [klabel(#ECONNRESET), symbol]
+                   | "#ENOBUFS" [klabel(#ENOBUFS), symbol]
+                   | "#EISCONN" [klabel(#EISCONN), symbol]
+                   | "#ENOTCONN" [klabel(#ENOTCONN), symbol]
+                   | "#ESHUTDOWN" [klabel(#ESHUTDOWN), symbol]
+                   | "#ETOOMANYREFS" [klabel(#ETOOMANYREFS), symbol]
+                   | "#ETIMEDOUT" [klabel(#ETIMEDOUT), symbol]
+                   | "#ECONNREFUSED" [klabel(#ECONNREFUSED), symbol]
+                   | "#EHOSTDOWN" [klabel(#EHOSTDOWN), symbol]
+                   | "#EHOSTUNREACH" [klabel(#EHOSTUNREACH), symbol]
+                   | "#ELOOP" [klabel(#ELOOP), symbol]
+                   | "#EOVERFLOW" [klabel(#EOVERFLOW), symbol]
 
-  syntax Int ::= "#open" "(" String ")" [function]
+  syntax IOInt ::= Int | IOError
+  syntax IOString ::= String | IOError
+
+  syntax IOInt ::= "#open" "(" String ")" [function]
                | "#open" "(" String "," String ")" [function, hook(IO.open), impure]
                | "#tell" "(" Int ")" [function, hook(IO.tell), impure]
                | "#getc" "(" Int ")"             [function, hook(IO.getc), impure]
-  syntax String ::= "#read" "(" Int "," Int ")"    [function, hook(IO.read), impure]
+  syntax IOString ::= "#read" "(" Int "," Int ")"    [function, hook(IO.read), impure]
 
   syntax K ::= "#close" "(" Int ")" [function, hook(IO.close), impure]
              | "#seek" "(" Int "," Int ")" [function, hook(IO.seek), impure]
@@ -919,6 +981,10 @@ module K-IO
 
   syntax K ::= #logToFile(String, String) [function, functional, hook(IO.log), impure, returnsUnit]
 
+  syntax String ::= #projectString(IOString) [function]
+  rule #projectString(S:String) => S
+  syntax Int ::= #projectInt(IOInt) [function]
+  rule #projectInt(I:Int) => I
 endmodule
 
 // NOTE: DO NOT DIRECTLY IMPORT *-STREAM MODULES
@@ -939,7 +1005,7 @@ module STDIN-STREAM
   rule [stdinGetc]:
        <stdin>
        ListItem(#parseInput(_:String, Delimiters:String))
-       ListItem(#buffer(S:String => S +String chrChar(#getc(N))))
+       ListItem(#buffer(S:String => S +String chrChar(#projectInt(#getc(N)))))
        ListItem("on")
        ListItem(#istream(N:Int))
        </stdin>
@@ -1117,7 +1183,7 @@ module MINT
    *   uvalue  returns an integer between 0 and 2^bitwidth - 1
    */
   syntax Int ::= svalueMInt(MInt)     [function, functional, hook(MINT.svalue)]
-               | uvalueMInt(MInt)     [function, functional, hook(MINT.uvalue), smtlib(bv2int)]
+               | uvalueMInt(MInt)     [function, functional, hook(MINT.uvalue), smt-hook(bv2int)]
 
   /*@ Checks whether a machine integer is zero */
   syntax Bool ::= zeroMInt(MInt)    [function, functional, hook(MINT.zero)]
@@ -1172,9 +1238,9 @@ module MINT
    * Addition, subtraction, and multiplication are the same for signed and
    * unsigned integers represented in 2's complement
    */
-  syntax MInt ::= addMInt(MInt, MInt)   [function, hook(MINT.add), smtlib(bvadd)]
-                | subMInt(MInt, MInt)   [function, hook(MINT.sub), smtlib(bvsub)]
-                | mulMInt(MInt, MInt)   [function, hook(MINT.mul), smtlib(bvmul)]
+  syntax MInt ::= addMInt(MInt, MInt)   [function, hook(MINT.add), smt-hook(bvadd)]
+                | subMInt(MInt, MInt)   [function, hook(MINT.sub), smt-hook(bvsub)]
+                | mulMInt(MInt, MInt)   [function, hook(MINT.mul), smt-hook(bvmul)]
 
   /*@
    * Division and reminder
@@ -1187,8 +1253,8 @@ module MINT
    */
   syntax List ::= sdivMInt(MInt, MInt)    [function, hook(MINT.sdiv)]
                 | sremMInt(MInt, MInt)    [function, hook(MINT.srem)]
-  syntax MInt ::= udivMInt(MInt, MInt)    [function, hook(MINT.udiv), smtlib(bvudiv)]
-                | uremMInt(MInt, MInt)    [function, hook(MINT.urem), smtlib(bvurem)]
+  syntax MInt ::= udivMInt(MInt, MInt)    [function, hook(MINT.udiv), smt-hook(bvudiv)]
+                | uremMInt(MInt, MInt)    [function, hook(MINT.urem), smt-hook(bvurem)]
 
   /*@
    * Addition, subtraction and multiplication with overflow detection; each
@@ -1208,32 +1274,32 @@ module MINT
    * ashrMInt   arithmetic shift: filling with leftmost bit (sign extension)
    * lshrMInt   logical shift: filling with zeros
    */
-  syntax MInt ::= shlMInt(MInt, Int)    [function, hook(MINT.shl), smtlib(bvshl)]
+  syntax MInt ::= shlMInt(MInt, Int)    [function, hook(MINT.shl), smt-hook(bvshl)]
                 | ashrMInt(MInt, Int)   [function, hook(MINT.ashr)]
-                | lshrMInt(MInt, Int)   [function, hook(MINT.lshr), smtlib(bvlshr)]
+                | lshrMInt(MInt, Int)   [function, hook(MINT.lshr), smt-hook(bvlshr)]
 
   /*@ Bitwise operations */
-  syntax MInt ::= andMInt(MInt, MInt)   [function, hook(MINT.and), smtlib(bvand)]
-                | orMInt(MInt, MInt)    [function, hook(MINT.or), smtlib(bvor)]
-                | xorMInt(MInt, MInt)   [function, hook(MINT.xor), smtlib(bvxor)]
+  syntax MInt ::= andMInt(MInt, MInt)   [function, hook(MINT.and), smt-hook(bvand)]
+                | orMInt(MInt, MInt)    [function, hook(MINT.or), smt-hook(bvor)]
+                | xorMInt(MInt, MInt)   [function, hook(MINT.xor), smt-hook(bvxor)]
 
   syntax MInt ::= negMInt(MInt)   [function, functional]
   rule negMInt(MI:MInt) => xorMInt(MI, mi(bitwidthMInt(MI), -1))
 
   /*@ Comparison operations */
-  syntax Bool ::= sltMInt(MInt, MInt)   [function, hook(MINT.slt), smtlib(bvslt)]
-                | ultMInt(MInt, MInt)   [function, hook(MINT.ult), smtlib(bvult)]
-                | sleMInt(MInt, MInt)   [function, hook(MINT.sle), smtlib(bvsle)]
-                | uleMInt(MInt, MInt)   [function, hook(MINT.ule), smtlib(bvule)]
-                | sgtMInt(MInt, MInt)   [function, hook(MINT.sgt), smtlib(bvsgt)]
-                | ugtMInt(MInt, MInt)   [function, hook(MINT.ugt), smtlib(bvugt)]
-                | sgeMInt(MInt, MInt)   [function, hook(MINT.sge), smtlib(bvsge)]
-                | ugeMInt(MInt, MInt)   [function, hook(MINT.uge), smtlib(bvuge)]
-                | eqMInt(MInt, MInt)    [function, hook(MINT.eq), smtlib(=)]
-                | neMInt(MInt, MInt)    [function, hook(MINT.ne), smtlib(distinct)]
+  syntax Bool ::= sltMInt(MInt, MInt)   [function, hook(MINT.slt), smt-hook(bvslt)]
+                | ultMInt(MInt, MInt)   [function, hook(MINT.ult), smt-hook(bvult)]
+                | sleMInt(MInt, MInt)   [function, hook(MINT.sle), smt-hook(bvsle)]
+                | uleMInt(MInt, MInt)   [function, hook(MINT.ule), smt-hook(bvule)]
+                | sgtMInt(MInt, MInt)   [function, hook(MINT.sgt), smt-hook(bvsgt)]
+                | ugtMInt(MInt, MInt)   [function, hook(MINT.ugt), smt-hook(bvugt)]
+                | sgeMInt(MInt, MInt)   [function, hook(MINT.sge), smt-hook(bvsge)]
+                | ugeMInt(MInt, MInt)   [function, hook(MINT.uge), smt-hook(bvuge)]
+                | eqMInt(MInt, MInt)    [function, hook(MINT.eq), smt-hook(=)]
+                | neMInt(MInt, MInt)    [function, hook(MINT.ne), smt-hook(distinct)]
 
-  syntax MInt ::= sMaxMInt(MInt, MInt) [function, smtlib((ite (bvslt #1 #2) #2 #1))]
-                | sMinMInt(MInt, MInt) [function, smtlib((ite (bvslt #1 #2) #1 #2))]
+  syntax MInt ::= sMaxMInt(MInt, MInt) [function, smt-hook((ite (bvslt #1 #2) #2 #1))]
+                | sMinMInt(MInt, MInt) [function, smt-hook((ite (bvslt #1 #2) #1 #2))]
 
   /*@
    * Returns a machine integer with the underlying bits; the bits of the first
@@ -1248,7 +1314,7 @@ module MINT
    * machine integer in the given range. The bit on position 0 is the most
    * significant bit.
    */
-  syntax MInt ::= extractMInt(MInt, Int, Int)   [function, hook(MINT.extract), smtlib(extract)]
+  syntax MInt ::= extractMInt(MInt, Int, Int)   [function, hook(MINT.extract), smt-hook(extract)]
 
   /*@
    * digitsOfMInt(mInt, digitBitWidth, count)

@@ -1,4 +1,5 @@
 // Copyright (c) 2015-2018 Runtime Verification, Inc. (RV-Match team). All Rights Reserved.
+
 package org.kframework.backend.ocaml;
 
 import com.google.common.base.Joiner;
@@ -23,6 +24,7 @@ import org.kframework.attributes.Att;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 import org.kframework.builtin.BooleanUtils;
+import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.*;
 import org.kframework.definition.Module;
@@ -2698,8 +2700,19 @@ public class DefinitionToOcaml implements Serializable {
         }
     }
 
-    private void applyVarLhs(KVariable k, StringBuilder sb, VarInfo vars) {
-        String varName = encodeStringToVariable(k.name());
+    private void applyVarLhs(KVariable k, StringBuilder sb, VarInfo vars, boolean inOr) {
+        String varName;
+        if (inOr && k.att().contains("anonymous")) {
+            sb.append("_");
+            return;
+        } else if (inOr) {
+            StringBuilder sb2 = new StringBuilder();
+            sb2.append("var");
+            encodeStringToAlphanumeric(sb2, k.name());
+            varName = sb2.toString();
+        } else {
+            varName = encodeStringToVariable(k.name());
+        }
         vars.vars.put(k, varName);
         Sort s = k.att().getOptional(Sort.class).orElse(Sort(""));
         if (mainModule.sortAttributesFor().contains(s)) {
@@ -2735,6 +2748,7 @@ public class DefinitionToOcaml implements Serializable {
         private boolean inBooleanExp;
         private boolean topAnywherePre;
         private boolean topAnywherePost;
+        private boolean inOr = false;
 
         @Override
         public void apply(KApply k) {
@@ -2751,6 +2765,17 @@ public class DefinitionToOcaml implements Serializable {
                     sb.append(")");
                 }
                 inBooleanExp = stack;
+                return;
+            }
+            if (k.klabel().equals(KLabels.ML_OR)) {
+                sb.append("((");
+                boolean wasInOr = inOr;
+                inOr = true;
+                apply(k.items().get(0));
+                sb.append(")|(");
+                apply(k.items().get(1));
+                inOr = wasInOr;
+                sb.append("))");
                 return;
             }
             if (ConvertDataStructureToLookup.isLookupKLabel(k)) {
@@ -3030,7 +3055,7 @@ public class DefinitionToOcaml implements Serializable {
             if (rhs) {
                 applyVarRhs(k, sb, vars);
             } else {
-                applyVarLhs(k, sb, vars);
+                applyVarLhs(k, sb, vars, inOr);
             }
             if (inBooleanExp) {
                 sb.append("])");

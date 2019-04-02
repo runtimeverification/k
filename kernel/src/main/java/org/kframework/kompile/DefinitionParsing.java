@@ -31,6 +31,7 @@ import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.ParseFailedException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.file.FileUtil;
 import scala.Option;
 import scala.Tuple2;
@@ -59,7 +60,7 @@ import static org.kframework.kore.KORE.*;
  * @cos refactored this code out of Kompile but none (or close to none) of it was originally written by him.
  */
 public class DefinitionParsing {
-    public static final Sort START_SYMBOL = Sort("RuleContent");
+    public static final Sort START_SYMBOL = Sort("#RuleContent");
     private final File cacheFile;
     private boolean autoImportDomains;
     private boolean kore;
@@ -392,7 +393,15 @@ public class DefinitionParsing {
         }
         result = parser.parseString(b.contents(), START_SYMBOL, scanner, source, startLine, startColumn, !b.att().contains("macro") && !b.att().contains("alias"));
         parsedBubbles.getAndIncrement();
-        kem.addAllKException(result._2().stream().map(e -> e.getKException()).collect(Collectors.toList()));
+        if (kem.options.warnings2errors && !result._2().isEmpty()) {
+          for (KEMException err : result._2()) {
+            if (kem.options.warnings.includesExceptionType(err.exception.getType())) {
+              errors.add(KEMException.asError(err));
+            }
+          }
+        } else {
+          kem.addAllKException(result._2().stream().map(e -> e.getKException()).collect(Collectors.toList()));
+        }
         if (result._1().isRight()) {
             KApply k = (KApply) new TreeNodesToKORE(Outer::parseSort, isStrict).down(result._1().right().get());
             k = KApply(k.klabel(), k.klist(), k.att().addAll(b.att().remove("contentStartLine").remove("contentStartColumn").remove(Source.class).remove(Location.class)));

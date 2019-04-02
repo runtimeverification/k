@@ -308,6 +308,7 @@ trait Sentence extends HasLocation {
   def withAtt(att: Att): Sentence
   def location: Optional[Location] = att.getOptional(classOf[Location])
   def source: Optional[Source] = att.getOptional(classOf[Source])
+  def label: Optional[String] = att.getOptional("label")
 }
 
 // deprecated
@@ -380,7 +381,7 @@ case class Production(klabel: Option[KLabel], sort: Sort, items: Seq[ProductionI
   lazy val klabelAtt: Option[String] = att.getOption("klabel").orElse(klabel.map(_.name))
 
   override def equals(that: Any) = that match {
-    case p@Production(`klabel`, `sort`, `items`, _) => this.att.getOption("poly") == p.att.getOption("poly") && this.att.getOption("function") == p.att.getOption("function")
+    case p@Production(`klabel`, `sort`, `items`, _) => this.klabelAtt == p.klabelAtt && this.att.getOption("poly") == p.att.getOption("poly") && this.att.getOption("function") == p.att.getOption("function")
     case _ => false
   }
 

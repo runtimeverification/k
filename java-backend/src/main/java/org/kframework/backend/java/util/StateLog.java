@@ -22,7 +22,9 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -36,21 +38,25 @@ public class StateLog {
     private final File           blobsDir;
     private final List<LogEvent> logEvents;
 
-    private String      sessionId;
-    private PrintWriter sessionLog;
+    private String              sessionId;
+    private PrintWriter         sessionLog;
+    private PrettyPrinter       prettyPrinter;
+    private Map<Integer,String> writtenHashes;
 
     private boolean inited;
     private long    startTime;
 
     public StateLog() {
-        this.inited      = false;
-        this.loggingOn   = false;
-        this.loggingPath = null;
-        this.blobsDir    = null;
-        this.logEvents   = Collections.emptyList();
+        this.inited        = false;
+        this.loggingOn     = false;
+        this.loggingPath   = null;
+        this.blobsDir      = null;
+        this.logEvents     = Collections.emptyList();
+        this.prettyPrinter = null;
+        this.writtenHashes = new HashMap<Integer,String>();
     }
 
-    public StateLog(JavaExecutionOptions javaExecutionOptions, FileUtil files) {
+    public StateLog(JavaExecutionOptions javaExecutionOptions, FileUtil files, PrettyPrinter prettyPrinter) {
         this.inited    = false;
         this.loggingOn = javaExecutionOptions.stateLog;
 
@@ -60,21 +66,24 @@ public class StateLog {
 
         if (javaExecutionOptions.stateLogId != null) this.sessionId = javaExecutionOptions.stateLogId;
 
-        this.blobsDir = new File(loggingPath, "blobs/");
+        this.blobsDir = new File(loggingPath, this.sessionId + "_blobs/");
         this.blobsDir.mkdirs();
 
-        this.logEvents = javaExecutionOptions.stateLogEvents;
+        this.logEvents     = javaExecutionOptions.stateLogEvents;
+        this.prettyPrinter = prettyPrinter;
+        this.writtenHashes = new HashMap<Integer,String>();
     }
 
     public void open(String defaultSessionId) {
         if ((! this.loggingOn) || this.inited) return;
         this.inited = true;
-        if (this.sessionId == null) this.sessionId = defaultSessionId;
+        boolean sessionIdNotSet = this.sessionId == null;
+        if (sessionIdNotSet) this.sessionId = defaultSessionId;
         File logFile = new File(this.loggingPath, this.sessionId + ".log");
         PrintWriter sessionLog;
         try {
             this.sessionLog = new PrintWriter(logFile);
-            System.err.println("StateLog: " + logFile);
+            if(sessionIdNotSet) System.out.println("StateLog: " + logFile);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -83,7 +92,7 @@ public class StateLog {
     }
 
     public static enum LogEvent {
-        OPEN, REACHINIT, REACHTARGET, REACHPROVED, NODE, RULE, SRULE, RULEATTEMPT, IMPLICATION, Z3QUERY, Z3RESULT, CLOSE
+        OPEN, REACHINIT, REACHTARGET, REACHPROVED, EXECINIT, SEARCHINIT, NODE, RULE, SRULE, RULEATTEMPT, SRULEATTEMPT, IMPLICATION, Z3QUERY, Z3RESULT, CLOSE, CHECKINGCONSTRAINT
     }
 
     public void log(String logItem) {
@@ -125,19 +134,25 @@ public class StateLog {
     }
 
     private String writeNode(K contents) {
-        String fileCode   = hash(contents);
-        File   outputFile = new File(this.blobsDir, fileCode + "." + OutputModes.JSON.ext());
-        if (! outputFile.exists()) {
-            try {
-                String out = new String(KPrint.serialize(contents, OutputModes.JSON), StandardCharsets.UTF_8);
-                PrintWriter fOut = new PrintWriter(outputFile);
-                fOut.println(out);
-                fOut.close();
-            } catch (FileNotFoundException e) {
-                System.err.println("Could not open node output file: " + outputFile.getAbsolutePath());
-                e.printStackTrace();
+        int objectHash = contents.hashCode();
+        if (writtenHashes.containsKey(objectHash)) {
+            return writtenHashes.get(objectHash);
+        } else {
+            String fileCode   = hash(contents);
+            File   outputFile = new File(this.blobsDir, fileCode + "." + OutputModes.JSON.ext());
+            if (! outputFile.exists()) {
+                try {
+                    String out = new String(this.prettyPrinter.prettyPrintBytes(contents), StandardCharsets.UTF_8);
+                    PrintWriter fOut = new PrintWriter(outputFile);
+                    fOut.println(out);
+                    fOut.close();
+                    writtenHashes.put(objectHash,fileCode);
+                } catch (FileNotFoundException e) {
+                    System.err.println("Could not open node output file: " + outputFile.getAbsolutePath());
+                    e.printStackTrace();
+                }
             }
+            return fileCode;
         }
-        return fileCode;
     }
 }

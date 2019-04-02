@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Module;
 import com.google.inject.Provider;
+import org.kframework.definition.Definition;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.krun.modes.ExecutionMode;
 import org.kframework.main.FrontEnd;
@@ -45,7 +46,7 @@ public class KRunFrontEnd extends FrontEnd {
     private final KRunOptions krunOptions;
     private final FileUtil files;
     private final Provider<CompiledDefinition> compiledDef;
-    private final Provider<Function<org.kframework.definition.Module, Rewriter>> initializeRewriter;
+    private final Provider<Function<Definition, Rewriter>> initializeRewriter;
     private final Provider<ExecutionMode> executionMode;
     private final TTYInfo tty;
 
@@ -61,7 +62,7 @@ public class KRunFrontEnd extends FrontEnd {
             KRunOptions krunOptions,
             FileUtil files,
             Provider<CompiledDefinition> compiledDef,
-            Provider<Function<org.kframework.definition.Module, Rewriter>> initializeRewriter,
+            Provider<Function<Definition, Rewriter>> initializeRewriter,
             Provider<ExecutionMode> executionMode,
             TTYInfo tty) {
         super(kem, options, usage, experimentalUsage, jarInfo, files);

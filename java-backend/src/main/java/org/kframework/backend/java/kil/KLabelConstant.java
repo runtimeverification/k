@@ -99,7 +99,9 @@ public class KLabelConstant extends KLabel implements org.kframework.kore.KLabel
             predicateSort = null;
             isFunction = productionAttributes.contains(Attribute.FUNCTION_KEY);
             isPattern = productionAttributes.contains(Attribute.PATTERN_KEY);
-            smtlib = productionAttributes.getOptional(Attribute.SMTLIB_KEY).orElse(null);
+            smtlib = productionAttributes.getOptional(Attribute.SMTLIB_KEY)
+                    .orElse(productionAttributes.getOptional(Attribute.SMTHOOK_KEY)
+                            .orElse(null));
             projectionAtt = getProjectionAtt(productionAttributes);
         } else {
             /* a KLabel beginning with "is" represents a sort membership predicate */

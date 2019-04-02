@@ -11,7 +11,6 @@ import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.inject.RequestScoped;
 
-import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -29,27 +28,21 @@ public class KExceptionManager {
     }
 
     public void installForUncaughtExceptions() {
-        Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
-
-            @Override
-            public void uncaughtException(Thread t, Throwable e) {
-                if (options.debug) {
-                    e.printStackTrace();
-                }
-                exceptions.add(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL,
-                        "Uncaught exception thrown of type " + e.getClass().getSimpleName()
-                        + ".\nPlease rerun your program with the --debug flag to generate a stack trace, "
-                        + "and file a bug report at https://github.com/kframework/k/issues", e));
-                print();
+        Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
+            String message = "Uncaught exception thrown of type " + e.getClass().getSimpleName();
+            if (!options.debug()) {
+                message += ".\nPlease rerun your program with the --debug flag to generate a stack trace, "
+                        + "and file a bug report at https://github.com/kframework/k/issues";
             }
+            exceptions.add(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, message, e));
+            print();
         });
     }
 
     private void printStackTrace(KException e) {
-        if (e.getException() != null) {
-            if (options.debug) {
-                e.getException().printStackTrace();
-            }
+        if (e.getException() != null &&
+                (options.debugWarnings || (options.debug() && e.getType() == ExceptionType.ERROR))) {
+            e.getException().printStackTrace();
         }
     }
 
@@ -114,9 +107,10 @@ public class KExceptionManager {
     private void registerInternal(KException exception, boolean _throw) {
         if (!options.warnings.includesExceptionType(exception.type))
             return;
-        exceptions.add(exception);
         if (_throw && (exception.type == ExceptionType.ERROR || options.warnings2errors)) {
-            throw new KEMException(exception);
+            throw new KEMException(exception, ExceptionType.ERROR);
+        } else {
+          exceptions.add(exception);
         }
     }
 
@@ -130,7 +124,9 @@ public class KExceptionManager {
                     continue;
                 }
                 printStackTrace(e);
-                System.err.println(StringUtil.splitLines(e.toString(options.verbose)));
+                String msg = options.noExcWrap ? e.toString(options.verbose)
+                                               : StringUtil.splitLines(e.toString(options.verbose));
+                System.err.println(msg);
                 last = e;
             }
         }

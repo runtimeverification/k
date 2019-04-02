@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import org.kframework.attributes.Att;
+import org.kframework.attributes.HasLocation;
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.ConfigurationInfo.Multiplicity;
@@ -356,6 +357,14 @@ public class SortCells {
         return app.klabel().equals(expectedPredicate);
     }
 
+    private int indexOf(List<Sort> l, Sort o, KApply loc) {
+      int idx = l.indexOf(o);
+      if (idx == -1) {
+        throw KEMException.compilerError("Expected to find sort " + o.toString() + " in the children of cell with klabel " + loc.klabel(), loc);
+      }
+      return idx;
+    }
+
     /**
      * Expand away cell fragment variables, and correctly order the children of cells.
      * There are three significnat contexts for expanding cell fragments -
@@ -392,19 +401,19 @@ public class SortCells {
                     for (K item : k.klist().items()) {
                         Map<Sort, K> split = getSplit(item);
                         for (Map.Entry<Sort, K> e : split.entrySet()) {
-                            int idx = order.indexOf(e.getKey());
+                            int idx = indexOf(order, e.getKey(), k);
                             if (ordered.get(idx) != null) {
                                 ordered.set(idx, concatenateStarCells(e.getKey(), Arrays.asList(ordered.get(idx), e.getValue())));
                             } else {
-                                ordered.set(order.indexOf(e.getKey()), e.getValue());
+                                ordered.set(idx, e.getValue());
                             }
                         }
                     }
-                    order.stream().filter(s -> ordered.get(order.indexOf(s)) == null).forEach(sort -> {
+                    order.stream().filter(s -> ordered.get(indexOf(order, s, k)) == null).forEach(sort -> {
                         if (cfg.getMultiplicity(sort) == Multiplicity.ONE) {
                             throw KEMException.compilerError("Missing cell of multiplicity=\"1\": " + sort, k);
                         } else {
-                            ordered.set(order.indexOf(sort), cfg.cfg.getUnit(sort));
+                            ordered.set(indexOf(order, sort, k), cfg.cfg.getUnit(sort));
                         }
                     });
                     return KApply(k.klabel(), KList(ordered), k.att());
@@ -432,7 +441,7 @@ public class SortCells {
                         if (s == null) {
                             s = cfg.getCellCollectionCell(label);
                             if (s == null) {
-                                throw new IllegalArgumentException("Attempting to split non-cell term " + item);
+                                throw KEMException.compilerError("Attempting to split non-cell term " + item, item);
                             }
                         }
                         return Collections.singletonMap(s, apply(item));

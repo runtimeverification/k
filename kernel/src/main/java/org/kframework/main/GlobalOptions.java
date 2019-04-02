@@ -81,12 +81,29 @@ public final class GlobalOptions {
     @Parameter(names={"--verbose", "-v"}, description="Print verbose output messages")
     public boolean verbose = false;
 
-    @Parameter(names="--debug", description="Print debugging output messages")
-    public boolean debug = false;
+    @Parameter(names="--debug", description="Print debugging output messages and error stack traces")
+    private boolean debug = false;
+
+    @Parameter(names="--debug-warnings", description="Print debugging output messages and error/warning stack traces")
+    public boolean debugWarnings = false;
 
     @Parameter(names={"--warnings", "-w"}, converter=WarningsConverter.class, description="Warning level. Values: [all|normal|none]")
     public Warnings warnings = Warnings.NORMAL;
 
     @Parameter(names={"--warnings-to-errors", "-w2e"}, description="Convert warnings to errors.")
     public boolean warnings2errors = false;
+
+    @Parameter(names={"--shutdown-wait-time"}, description="If the option is set, a shutdown hook will be registered " +
+            "that, once invoked, interrupts the main thread and waits its termination. The wait time is the argument " +
+            "of this option, in ms. Useful if K is interrupted by Ctrl+C, because it allows the backend to detect " +
+            "interruption and print diagnostics information. Currently interruption detection is implemented in " +
+            "Java Backend. If K is invoked from KServer (e.g. Nailgun), the option is ignored.")
+    public int shutdownWaitTime = 0;
+
+    @Parameter(names={"--no-exc-wrap"}, description="Do not wrap exception messages to 80 chars. Keep long lines.")
+    public boolean noExcWrap = false;
+
+    public boolean debug() {
+        return debug || debugWarnings;
+    }
 }

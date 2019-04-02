@@ -32,6 +32,7 @@ public class KLabels {
     public static final KLabel ML_AND = KLabel("#And");
     public static final KLabel ML_NOT = KLabel("#Not");
     public static final KLabel ML_CEIL = KLabel("#Ceil");
+    public static final KLabel ML_FLOOR = KLabel("#Floor");
     public static final KLabel ML_EQUALS = KLabel("#Equals");
     public static final KLabel ML_IMPLIES = KLabel("#Implies");
     public static final KLabel ML_EXISTS = KLabel("#Exists");
@@ -49,6 +50,8 @@ public class KLabels {
 
     public static final KLabel EQUALS_K = KLabel("_==K_");
     public static final KLabel NOT_EQUALS_K = KLabel("_=/=K_");
+    public static final KLabel IN_K = KLabel("_:=K_");
+    public static final KLabel NOT_IN_K = KLabel("_:/=K_");
 
     public static final KLabel MAP_CHOICE = KLabel("Map:choice");
     public static final KLabel SET_CHOICE = KLabel("Set:choice");

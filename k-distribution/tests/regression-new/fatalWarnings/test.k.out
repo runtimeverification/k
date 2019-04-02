@@ -1,0 +1,2 @@
+[Error] Compiler: Could not find main syntax module with name TEST-SYNTAX in
+definition.  Use --syntax-module to specify one. Using TEST as default.

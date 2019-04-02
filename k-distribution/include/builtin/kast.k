@@ -63,28 +63,35 @@ module KSEQ
 endmodule
 
 
+module ML-SYNTAX
+  imports BASIC-K
+
+  syntax #KVariable
+
+  syntax K ::= "#True" [klabel(#True), symbol, poly(0)]
+             | "#False" [klabel(#False), symbol, poly(0)]
+             | "#Not" "(" K ")" [klabel(#Not), symbol, mlOp, poly(0, 1)]
+             | "#Ceil" "(" K ")" [klabel(#Ceil), symbol, mlOp, poly(1; 0)]
+             | "#Floor" "(" K ")" [klabel(#Floor), symbol, mlOp, poly(1; 0)]
+             > "{" K "#Equals" K "}" [klabel(#Equals), symbol, mlOp, format(%1%i%n%2%d%n%3%i%n%4%d%n%5), poly(1, 2; 0)]
+             > K "#And" K [klabel(#And), symbol, assoc, left, comm, unit(#True), mlOp, poly(0, 1, 2), format(%i%1%d%n%2%n%i%3%d)]
+             > K "#Or" K [klabel(#Or), symbol, assoc, left, comm, unit(#False), mlOp, poly(0, 1, 2), format(%i%1%d%n%2%n%i%3%d)]
+             > K "#Implies" K [klabel(#Implies), symbol, mlOp, poly(0, 1, 2), format(%i%1%d%n%2%n%i%3%d)]
+             > "#Exists" #KVariable "." K [klabel(#Exists), symbol, mlOp, poly(0, 2)]
+             | "#Forall" #KVariable "." K [klabel(#Forall), symbol, mlOp, poly(0, 2)]
+endmodule
+
 // To be used when parsing/pretty-printing symbolic configurations
 module KSEQ-SYMBOLIC
   imports KSEQ
+  imports ML-SYNTAX
+
   syntax #KVariable ::= r"(?<![A-Za-z0-9_\\$!\\?])(\\!|\\?)?([A-Z][A-Za-z0-9'_]*|_)"   [token, prec(1), autoReject]
                       | #UpperId                                                       [token, autoReject]
   syntax KConfigVar ::= r"(?<![A-Za-z0-9_\\$!\\?])(\\$)([A-Z][A-Za-z0-9'_]*)"          [token, autoReject]
   syntax KBott      ::= #KVariable
   syntax KBott      ::= KConfigVar
   syntax KLabel     ::= #KVariable
-
-  syntax #Pattern ::= "#True" [klabel(#True), symbol]
-  syntax #Pattern ::= "#False" [klabel(#False), symbol]
-  syntax #Pattern ::= K
-                    | "(" #Pattern ")" [bracket]
-                    | "#Not" "(" #Pattern ")" [klabel(#Not), symbol, mlOp]
-                    | "#Ceil" "(" #Pattern ")" [klabel(#Ceil), symbol, mlOp]
-                    > #Pattern "#Equals" #Pattern [klabel(#Equals), symbol, mlOp, format(%i%1%d%n%2%n%i%3%d)]
-                    > #Pattern "#And" #Pattern [klabel(#And), symbol, assoc, comm, unit(#True), mlOp, format(%i%1%d%n%2%n%i%3%d)]
-                    > #Pattern "#Or" #Pattern [klabel(#Or), symbol, assoc, comm, unit(#False), mlOp, format(%i%1%d%n%2%n%i%3%d)]
-                    > #Pattern "#Implies" #Pattern [klabel(#Implies), symbol, mlOp, format(%i%1%d%n%2%n%i%3%d)]
-                    > "#Exists" #KVariable "." #Pattern [klabel(#Exists), symbol, mlOp]
-                    | "#Forall" #KVariable "." #Pattern [klabel(#Forall), symbol, mlOp]
 endmodule
 
 module KCELLS
@@ -97,6 +104,8 @@ module KCELLS
                | Cell
   syntax Bag ::= "(" Bag ")" [bracket]
   syntax K ::= Bag
+  syntax #RuleBody ::= "[" "[" K "]" "]" Bag    [klabel(#withConfig), symbol, avoid]
+  syntax non-assoc #withConfig
   syntax Bag ::= KBott
 endmodule
 
@@ -132,12 +141,14 @@ endmodule
 module REQUIRES-ENSURES
   imports BASIC-K
 
-  syntax RuleContent ::= K                                 [klabel("#ruleNoConditions"), symbol]
-                       | K "requires" K                    [klabel("#ruleRequires"), symbol]
-                       | K "when" K                        [klabel("#ruleRequires"), symbol]
-                       | K "ensures"  K                    [klabel("#ruleEnsures"), symbol]
-                       | K "requires" K "ensures" K        [klabel("#ruleRequiresEnsures"), symbol]
-                       | K "when" K "ensures" K            [klabel("#ruleRequiresEnsures"), symbol]
+  syntax #RuleBody ::= K
+
+  syntax #RuleContent ::= #RuleBody                                 [klabel("#ruleNoConditions"), symbol]
+                        | #RuleBody "requires" K                    [klabel("#ruleRequires"), symbol]
+                        | #RuleBody "when" K                        [klabel("#ruleRequires"), symbol]
+                        | #RuleBody "ensures"  K                    [klabel("#ruleEnsures"), symbol]
+                        | #RuleBody "requires" K "ensures" K        [klabel("#ruleRequiresEnsures"), symbol]
+                        | #RuleBody "when" K "ensures" K            [klabel("#ruleRequiresEnsures"), symbol]
 endmodule
 
 module K-TOP-SORT
@@ -229,6 +240,7 @@ module K
 
   syntax K ::= K "=>" K [klabel(#KRewrite), symbol, poly(0, 1, 2)]
   syntax non-assoc #KRewrite
+  syntax priority #KRewrite > #withConfig
 
   syntax K ::= K "#as" K [klabel(#KAs), symbol, poly(0, 1, 2)]
   // functions that preserve sorts and can therefore have inner rewrites

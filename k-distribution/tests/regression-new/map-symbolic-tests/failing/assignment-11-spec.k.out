@@ -1,0 +1,5 @@
+<k>
+  assignmentResult ( X |-> 1
+  Y |-> 2
+  ( MAP [ Z <- 3 ] ) )
+</k>

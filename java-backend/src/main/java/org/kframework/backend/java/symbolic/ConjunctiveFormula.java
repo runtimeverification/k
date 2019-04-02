@@ -2,6 +2,7 @@
 package org.kframework.backend.java.symbolic;
 
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
@@ -29,6 +30,7 @@ import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.util.Constants;
+import org.kframework.backend.java.util.FormulaContext;
 import org.kframework.backend.java.util.RewriteEngineUtils;
 import org.kframework.backend.java.util.StateLog;
 import org.kframework.builtin.KLabels;
@@ -369,7 +371,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
 
 
     public ConjunctiveFormula simplify() {
-        return simplify(false, true, TermContext.builder(global).build());
+        return simplify(false, true, TermContext.builder(global).build(), false);
     }
 
     /**
@@ -377,7 +379,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
      * Decomposes equalities by using unification.
      */
     public ConjunctiveFormula simplify(TermContext context) {
-        return simplify(false, true, context);
+        return simplify(false, true, context, false);
     }
 
     /**
@@ -385,19 +387,33 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
      * between builtin data structures will remain intact if they cannot be
      * resolved completely.
      */
-    public ConjunctiveFormula simplifyBeforePatternFolding(TermContext context) {
-        return simplify(false, false, context);
+    public ConjunctiveFormula simplifyBeforePatternFolding(TermContext context, boolean logFailures) {
+        return simplify(false, false, context, logFailures);
     }
 
     public ConjunctiveFormula simplifyModuloPatternFolding(TermContext context) {
-        return simplify(true, true, context);
+        return simplify(true, true, context, false);
+    }
+
+    private ConjunctiveFormula simplify(boolean patternFolding, boolean partialSimplification,
+                                        TermContext context, boolean logFailures) {
+        ConjunctiveFormula cachedResult = global.formulaCache
+                .cacheGet(this, patternFolding, partialSimplification, context);
+        if (cachedResult != null) {
+            return cachedResult;
+        }
+
+        ConjunctiveFormula result = simplifyImpl(patternFolding, partialSimplification, context, logFailures);
+        global.formulaCache.cachePut(this, patternFolding, partialSimplification, context, result);
+        return result;
     }
 
     /**
      * Simplifies this conjunctive formula as much as possible.
      * Decomposes equalities by using unification.
      */
-    private ConjunctiveFormula simplify(boolean patternFolding, boolean partialSimplification, TermContext context) {
+    private ConjunctiveFormula simplifyImpl(boolean patternFolding, boolean partialSimplification, TermContext context,
+                                            boolean logFailures) {
         assert !isFalse();
         ConjunctiveFormula originalTopConstraint = context.getTopConstraint();
         Substitution<Variable, Term> substitution = this.substitution;
@@ -428,7 +444,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                         if (equality.isSimplifiableByCurrentAlgorithm()) {
                             // (decompose + conflict)*
                             FastRuleMatcher unifier = new FastRuleMatcher(global, 1);
-                            ConjunctiveFormula unificationConstraint = unifier.unifyEquality(leftHandSide, rightHandSide, patternFolding, partialSimplification, false, context);
+                            ConjunctiveFormula unificationConstraint = unifier.unifyEquality(leftHandSide, rightHandSide, patternFolding, partialSimplification, false, context, logFailures);
                             if (unificationConstraint.isFalse()) {
                                 return falsify(
                                         substitution,
@@ -535,9 +551,10 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
             PersistentUniqueList<Equality> equalities,
             PersistentUniqueList<DisjunctiveFormula> disjunctions,
             Equality equality) {
-        if (RuleAuditing.isAuditBegun()) {
-            System.err.println("Unification failure: " + equality.leftHandSide()
-                    + " does not unify with " + equality.rightHandSide());
+        if ((RuleAuditing.isAuditBegun() || global.javaExecutionOptions.debugZ3)
+                && !(equality.leftHandSide() instanceof BoolToken && equality.rightHandSide() instanceof BoolToken)) {
+            System.err.format("Unification failure: %s does not unify with %s\n",
+                    equality.leftHandSide(), equality.rightHandSide());
         }
         return new ConjunctiveFormula(
                 substitution,
@@ -616,8 +633,8 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
      * even if #f is NOT injective.
      */
     public ConjunctiveFormula resolveMatchingSymbols(Set<String> matchingSymbols) {
-        PersistentUniqueList<Equality> equalities = this.equalities;
-        PersistentUniqueList<Equality> newEqualities = equalities;
+        PersistentUniqueList<Equality> resultEqualities = PersistentUniqueList.empty();
+        PersistentUniqueList<Equality> newEqualities = this.equalities;
 
         while (!newEqualities.isEmpty()) {
             PersistentUniqueList<Equality> curEqualities = newEqualities;
@@ -635,19 +652,21 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                         if (lKList.size() == rKList.size()) {
                             for (int i = 0; i < lKList.size(); ++i) {
                                 Equality newEquality = new Equality(lKList.get(i), rKList.get(i), global); // X == Y
-                                equalities = equalities.plus(newEquality);
                                 newEqualities = newEqualities.plus(newEquality);
                             }
+                            continue;
                         }
                     }
                 }
+                //anything but continue above
+                resultEqualities = resultEqualities.plus(equality);
             }
         }
 
-        if (equalities == this.equalities) {
+        if (resultEqualities.equals(this.equalities)) {
             return this;
         } else {
-            return new ConjunctiveFormula(substitution, equalities, disjunctions, truthValue, falsifyingEquality, global);
+            return new ConjunctiveFormula(substitution, resultEqualities, disjunctions, truthValue, falsifyingEquality, global);
         }
     }
 
@@ -799,8 +818,13 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 .collect(Collectors.toList()), global);
     }
 
-    public boolean checkUnsat() {
-        return global.constraintOps.checkUnsat(this);
+    public boolean checkUnsat(FormulaContext formulaContext) {
+        formulaContext.z3Profiler.newRequest();
+        boolean unsat = global.constraintOps.checkUnsat(this, formulaContext);
+        if (global.javaExecutionOptions.debugZ3) {
+            formulaContext.printUnsat(this, unsat, false);
+        }
+        return unsat;
     }
 
     public boolean smartImplies(ConjunctiveFormula constraint) {
@@ -821,14 +845,15 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
          */
 
         constraint = (ConjunctiveFormula) constraint.substitute(this.substitution());
-        return implies(constraint, Collections.emptySet());
+        return implies(constraint, Collections.emptySet(),
+                new FormulaContext(FormulaContext.Kind.EquivImplication, null, constraint.global));
     }
 
     /**
      * Checks if {@code this} implies {@code rightHandSide}, assuming that {@code existentialQuantVars}
      * are existentially quantified.
      */
-    public boolean implies(ConjunctiveFormula rightHandSide, Set<Variable> existentialQuantVars) {
+    public boolean implies(ConjunctiveFormula rightHandSide, Set<Variable> existentialQuantVars, FormulaContext formulaContext) {
         // TODO(AndreiS): this can prove "stuff -> false", it needs fixing
         assert !rightHandSide.isFalse();
 
@@ -842,15 +867,15 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 continue;
             }
 
-            if (global.globalOptions.debug) {
-                System.err.format("Attempting to prove: \n\t%s\n  implies \n\t%s\n", left, right);
+            if (global.javaExecutionOptions.debugFormulas) {
+                System.err.format("\nAttempting to prove:\n================= \n\t%s\n  implies \n\t%s\n", left, right);
             }
 
             right = right.orientSubstitution(existentialQuantVars);
             right = left.simplifyConstraint(right);
             right = right.orientSubstitution(existentialQuantVars);
             if (right.isTrue() || (right.equalities().isEmpty() && existentialQuantVars.containsAll(right.substitution().keySet()))) {
-                if (global.globalOptions.debug) {
+                if (global.javaExecutionOptions.debugFormulas) {
                     System.err.println("Implication proved by simplification");
                 }
                 continue;
@@ -862,7 +887,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 KItem ite = ifThenElseFinder.result.get(0);
                 // TODO (AndreiS): handle KList variables
                 Term condition = ((KList) ite.kList()).get(0);
-                if (global.globalOptions.debug) {
+                if (global.javaExecutionOptions.debugFormulas) {
                     System.err.format("Split on %s\n", condition);
                 }
                 TermContext context = TermContext.builder(global).build();
@@ -871,14 +896,18 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 continue;
             }
 
-            global.stateLog.log(StateLog.LogEvent.IMPLICATION, left, right);
-            if (!impliesSMT(left, right, existentialQuantVars)) {
-                if (global.globalOptions.debug) {
+            //Removing LHS substitution because it's not used to build Z3 query anyway.
+            //Improves Z3 cache efficiency.
+            ConjunctiveFormula leftWithoutSubst = ConjunctiveFormula.of(ImmutableMapSubstitution.empty(),
+                    left.equalities(), left.disjunctions(), left.globalContext());
+            global.stateLog.log(StateLog.LogEvent.IMPLICATION, leftWithoutSubst, right);
+            if (!impliesSMT(leftWithoutSubst, right, existentialQuantVars, formulaContext)) {
+                if (global.javaExecutionOptions.debugFormulas) {
                     System.err.println("Failure!");
                 }
                 return false;
             } else {
-                if (global.globalOptions.debug) {
+                if (global.javaExecutionOptions.debugFormulas) {
                     System.err.println("Proved!");
                 }
             }
@@ -933,12 +962,27 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
     private static boolean impliesSMT(
             ConjunctiveFormula left,
             ConjunctiveFormula right,
-            Set<Variable> existentialQuantVars) {
-        Triple<ConjunctiveFormula, ConjunctiveFormula, Set<Variable>> triple = Triple.of(left, right, existentialQuantVars);
-        if (!impliesSMTCache.containsKey(triple)) {
-            impliesSMTCache.put(triple, left.global.constraintOps.impliesSMT(left, right, existentialQuantVars));
+            Set<Variable> existentialQuantVars,
+            FormulaContext formulaContext) {
+        left.global.profiler.impliesSMTTimer.start();
+        formulaContext.z3Profiler.newRequest();
+        try {
+            Triple<ConjunctiveFormula, ConjunctiveFormula, Set<Variable>> triple = Triple.of(left, right, existentialQuantVars);
+            boolean cached = true;
+            if (!impliesSMTCache.containsKey(triple)) {
+                impliesSMTCache.put(triple,
+                        left.global.constraintOps.impliesSMT(left, right, existentialQuantVars, formulaContext));
+                cached = false;
+            }
+            Boolean result = impliesSMTCache.get(triple);
+
+            if (left.globalContext().javaExecutionOptions.debugZ3) {
+                formulaContext.printImplication(left, right, result, cached);
+            }
+            return result;
+        } finally {
+            left.global.profiler.impliesSMTTimer.stop();
         }
-        return impliesSMTCache.get(triple);
     }
 
     public boolean hasMapEqualities() {
@@ -1014,6 +1058,94 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
     @Override
     public String toString() {
         return toKore().toString();
+    }
+
+    public String toStringMultiline() {
+        Map<String, List<String>> categoryToEntriesMap = ImmutableMap.<String, List<String>>builder()
+                .put("substitutions:", substitution.equalities(global).stream()
+                        .map(equality -> equality.toK().toString()).sorted().collect(Collectors.toList()))
+                .put("equalities:", equalities.stream()
+                        .map(equality -> equality.toK().toString()).sorted().collect(Collectors.toList()))
+                .put("disjunctions:", disjunctions.stream()
+                        .map(disjunctiveFormula -> disjunctiveFormula.toKore().toString()).sorted()
+                        .collect(Collectors.toList()))
+                .build();
+
+        return toStringByCategory(categoryToEntriesMap);
+    }
+
+    /**
+     * Separately groups entries that are common between {@code this}
+     * and {@code initFormula}, and entries that are only found in to {@code this}.
+     *
+     * @return string representation of {@this}
+     */
+    public String toStringDifferentiated(ConjunctiveFormula initFormula) {
+        List<Equality> substitution = this.substitution.equalities(global);
+        Set<Equality> initSubstitution = new HashSet<>(initFormula.substitution.equalities(global));
+
+        Map<String, List<String>> categoryToEntriesMap = addNewElements(
+                ImmutableMap.<String, List<String>>builder()
+                        .put("init substitutions:", substitution.stream()
+                                .filter(initSubstitution::contains)
+                                .map(equality -> equality.toK().toString()).sorted().collect(Collectors.toList()))
+                        .put("init equalities:", this.equalities.stream()
+                                .filter(initFormula.equalities::contains)
+                                .map(equality -> equality.toK().toString()).sorted().collect(Collectors.toList()))
+                        .put("init disjunctions:", disjunctions.stream()
+                                .filter(initFormula.disjunctions::contains)
+                                .map(disjunctiveFormula -> disjunctiveFormula.toKore().toString()).sorted()
+                                .collect(Collectors.toList())),
+                initFormula, substitution, initSubstitution).build();
+
+        return toStringByCategory(categoryToEntriesMap);
+    }
+
+    /**
+     * @return string representation of entries that are new compared to {@code initFormula}
+     */
+    public String toStringNewElements(ConjunctiveFormula initFormula) {
+        List<Equality> substitution = this.substitution.equalities(global);
+        Set<Equality> initSubstitution = new HashSet<>(initFormula.substitution.equalities(global));
+
+        Map<String, List<String>> categoryToEntriesMap = addNewElements(ImmutableMap.builder(),
+                initFormula, substitution, initSubstitution)
+                .build();
+        return toStringByCategory(categoryToEntriesMap);
+    }
+
+    public ImmutableMap.Builder<String, List<String>> addNewElements(ImmutableMap.Builder<String, List<String>> builder,
+                                                                     ConjunctiveFormula initFormula,
+                                                                     List<Equality> substitution,
+                                                                     Set<Equality> initSubstitution) {
+        builder
+                .put("new substitutions:", substitution.stream()
+                        .filter(eq -> !initSubstitution.contains(eq))
+                        .map(equality -> equality.toK().toString()).sorted().collect(Collectors.toList()))
+                .put("new equalities:", this.equalities.stream()
+                        .filter(eq -> !initFormula.equalities.contains(eq))
+                        .map(equality -> equality.toK().toString()).sorted().collect(Collectors.toList()))
+                .put("new disjunctions:", disjunctions.stream()
+                        .filter(eq -> !initFormula.disjunctions.contains(eq))
+                        .map(disjunctiveFormula -> disjunctiveFormula.toKore().toString()).sorted()
+                        .collect(Collectors.toList()));
+
+        return builder;
+    }
+
+    public String toStringByCategory(Map<String, List<String>> categoryToEntriesMap) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("ConjunctiveFormula(");
+        for (String cat : categoryToEntriesMap.keySet()) {
+            if (!categoryToEntriesMap.get(cat).isEmpty()) {
+                sb.append("\n  ").append(cat);
+                for (String line : categoryToEntriesMap.get(cat)) {
+                    sb.append("\n    ").append(line);
+                }
+            }
+        }
+        sb.append("\n)");
+        return sb.toString();
     }
 
     @Override

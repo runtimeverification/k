@@ -5,6 +5,7 @@ import org.kframework.attributes.Att;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 import org.kframework.builtin.BooleanUtils;
+import org.kframework.builtin.Sorts;
 import org.kframework.definition.Context;
 import org.kframework.definition.Module;
 import org.kframework.definition.Production;
@@ -15,10 +16,12 @@ import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
+import org.kframework.kore.KSequence;
 import org.kframework.kore.KToken;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
 import org.kframework.kore.TransformK;
+import org.kframework.kore.VisitK;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -92,7 +95,37 @@ public class ExpandMacros {
         return att.contains("alias") || (!reverse && att.contains("macro"));
     }
 
+    private Set<KVariable> vars = new HashSet<>();
+
+    void resetVars() {
+        vars.clear();
+    }
+
+    void gatherVars(K term) {
+        new VisitK() {
+            @Override
+            public void apply(KVariable v) {
+                vars.add(v);
+                super.apply(v);
+            }
+        }.apply(term);
+    }
+
+    private int counter = 0;
+    KVariable newDotVariable() {
+        KVariable newLabel;
+        do {
+            newLabel = KVariable("_" + (counter++), Att().add("anonymous"));
+        } while (vars.contains(newLabel));
+        vars.add(newLabel);
+        return newLabel;
+    }
+
     private Rule expand(Rule rule) {
+        resetVars();
+        gatherVars(rule.body());
+        gatherVars(rule.requires());
+        gatherVars(rule.ensures());
         return Rule(expand(rule.body()),
                 expand(rule.requires()),
                 expand(rule.ensures()),
@@ -100,6 +133,9 @@ public class ExpandMacros {
     }
 
     private Context expand(Context context) {
+        resetVars();
+        gatherVars(context.body());
+        gatherVars(context.requires());
         return Context(
                 expand(context.body()),
                 expand(context.requires()),
@@ -145,7 +181,12 @@ public class ExpandMacros {
                             return apply(new TransformK() {
                                 @Override
                                 public K apply(KVariable k) {
-                                    return subst.get(k);
+                                    K result = subst.get(k);
+                                    if (result == null) {
+                                      result = newDotVariable();
+                                      subst.put(k, result);
+                                    }
+                                    return result;
                                 }
                             }.apply(right));
                         }
@@ -168,7 +209,7 @@ public class ExpandMacros {
 
     private Set<Sort> sort(K k, Rule r) {
         if (k instanceof KVariable) {
-            return Collections.singleton(k.att().get(Sort.class));
+            return Collections.singleton(k.att().getOptional(Sort.class).orElse(null));
         } else if (k instanceof KToken) {
             return Collections.singleton(((KToken)k).sort());
         } else if (k instanceof KApply) {
@@ -181,10 +222,14 @@ public class ExpandMacros {
            for (int i = 0; i < kapp.items().size(); i++) {
               final int idx = i;
               Set<Sort> sorts = sort(kapp.items().get(idx), r);
-              prods.removeIf(p -> sorts.stream().noneMatch(s -> mod.subsorts().lessThanEq(s, p.nonterminal(idx).sort())));
+              if (!sorts.contains(null)) {
+                  prods.removeIf(p -> sorts.stream().noneMatch(s -> mod.subsorts().lessThanEq(s, p.nonterminal(idx).sort())));
+              }
            }
            Set<Sort> candidates = prods.stream().map(Production::sort).collect(Collectors.toSet());
            return candidates;
+        } else if (k instanceof KSequence) {
+            return Collections.singleton(Sorts.K());
         } else {
             throw KEMException.compilerError("Cannot compute macros with sort check on terms that are not KApply, KToken, or KVariable.", r);
         }
@@ -197,7 +242,7 @@ public class ExpandMacros {
             } else {
                 if (pattern.att().contains(Sort.class)) {
                     Sort patternSort = pattern.att().get(Sort.class);
-                    if (sort(subject, r).stream().anyMatch(s -> mod.subsorts().lessThanEq(s, patternSort))) {
+                    if (sort(subject, r).stream().anyMatch(s -> s == null || mod.subsorts().lessThanEq(s, patternSort))) {
                         subst.put((KVariable)pattern, subject);
                         return true;
                     } else {

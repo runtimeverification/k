@@ -13,6 +13,7 @@ import org.kframework.backend.java.builtins.FloatToken;
 import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.UninterpretedToken;
 import org.kframework.backend.java.kil.BuiltinList;
+import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.kil.JavaSymbolicObject;
@@ -33,8 +34,8 @@ import org.kframework.krun.KRunOptions;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Formatter;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -238,17 +239,18 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
      * fresh variables. If the flag is false and untranslatable term is encountered, an exception will be thrown instead.
      */
     private final boolean allowNewVars;
-    private final HashSet<Variable> variables;
-    private final HashMap<Term, Variable> termAbstractionMap;
-    private final HashMap<UninterpretedToken, Integer> tokenEncoding;
+    //All sets/maps are LinkedHashXXX, to avoid non-determinism when iterated and produce consistent logs.
+    private final LinkedHashSet<Variable> variables;
+    private final LinkedHashMap<Term, Variable> termAbstractionMap;
+    private final LinkedHashMap<UninterpretedToken, Integer> tokenEncoding;
 
     private KILtoSMTLib(boolean allowNewVars, GlobalContext global) {
-        this(allowNewVars, global.getDefinition(), global.krunOptions, global, new HashMap<>());
+        this(allowNewVars, global.getDefinition(), global.krunOptions, global, new LinkedHashMap<>());
     }
 
     private KILtoSMTLib(boolean allowNewVars, Definition definition, KRunOptions krunOptions,
                         GlobalContext global) {
-        this(allowNewVars, definition, krunOptions, global, new HashMap<>());
+        this(allowNewVars, definition, krunOptions, global, new LinkedHashMap<>());
     }
 
     /**
@@ -257,14 +259,14 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
      *                     substituted. Also, if true, substitutions will be translated into Z3 as equalities.
      */
     private KILtoSMTLib(boolean allowNewVars, Definition definition, KRunOptions krunOptions,
-                        GlobalContext global, HashMap<Term, Variable> termAbstractionMap) {
+                        GlobalContext global, LinkedHashMap<Term, Variable> termAbstractionMap) {
         this.allowNewVars = allowNewVars;
         this.definition = definition;
         this.krunOptions = krunOptions;
         this.globalContext = global;
         this.termAbstractionMap = termAbstractionMap;
-        variables = new HashSet<>();
-        tokenEncoding = new HashMap<>();
+        variables = new LinkedHashSet<>();
+        tokenEncoding = new LinkedHashMap<>();
     }
 
     private SMTLibTerm translate(JavaSymbolicObject object) {
@@ -277,7 +279,7 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
     }
 
     private StringBuilder appendSortAndFunctionDeclarations(StringBuilder sb, Set<Variable> variables) {
-        Set<Sort> sorts = new HashSet<>();
+        Set<Sort> sorts = new LinkedHashSet<>();
         List<KLabelConstant> functions = new ArrayList<>();
         for (KLabelConstant kLabel : definition.kLabels()) {
             String smtlib = kLabel.getAttr(Attribute.SMTLIB_KEY);
@@ -358,7 +360,7 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
     private CharSequence appendConstantDeclarations(StringBuilder sb, Set<Variable> variables) {
         for (Variable variable : variables) {
             sb.append("(declare-fun ");
-            sb.append("|").append(variable.name()).append("|");
+            sb.append("|").append(variable.longName()).append("|");
             sb.append(" () ");
             String sortName;
             sortName = getSortName(variable);
@@ -371,7 +373,7 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
     private CharSequence appendQuantifiedVariables(StringBuilder sb, Set<Variable> variables) {
         for (Variable variable : variables) {
             sb.append("(");
-            sb.append("|").append(variable.name()).append("|");
+            sb.append("|").append(variable.longName()).append("|");
             sb.append(" ");
             String sortName;
             sortName = getSortName(variable);
@@ -422,7 +424,7 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
     @Override
     public SMTLibTerm transform(ConjunctiveFormula constraint) {
         assert constraint.disjunctions().isEmpty() : "disjunctions are not supported by SMT translation";
-        Set<Equality> equalities = Sets.newHashSet(constraint.equalities());
+        Set<Equality> equalities = Sets.newLinkedHashSet(constraint.equalities());
         if (!allowNewVars) {
             constraint.substitution().entrySet().stream()
                     .map(entry -> new Equality(entry.getKey(), entry.getValue(), constraint.globalContext()))
@@ -477,11 +479,14 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
             if (allowNewVars) {
                 variable = Variable.getAnonVariable(term.sort());
                 termAbstractionMap.put(term, variable);
+                if (globalContext.javaExecutionOptions.debugZ3Queries) {
+                    System.err.format("\t%s ::= %s\n", variable.longName(), term);
+                }
             } else {
                 throw e;
             }
         }
-        return variable.name();
+        return variable.longName();
     }
 
     @Override
@@ -558,7 +563,7 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
         switch (label) {
             case "exists":
                 Variable variable = (Variable) kList.get(0);
-                label = "exists ((" + variable.name() + " " + variable.sort() + ")) ";
+                label = "exists ((" + variable.longName() + " " + variable.sort() + ")) ";
                 arguments = ImmutableList.of(kList.get(1));
                 break;
             case "extract":
@@ -584,6 +589,12 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
         } else {
             return new SMTLibTerm(label);
         }
+    }
+
+    @Override
+    public JavaSymbolicObject transform(BuiltinMap builtinMap) {
+        return new SMTLibTerm(abstractThroughAnonVariable(builtinMap,
+                new SMTTranslationFailure("BuiltinMap can be translated to Z3 only through fresh var")));
     }
 
     @Override
@@ -640,7 +651,7 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
     @Override
     public SMTLibTerm transform(Variable variable) {
         variables.add(variable);
-        return new SMTLibTerm("|" + variable.name() + "|");
+        return new SMTLibTerm("|" + variable.longName() + "|");
     }
 
 }

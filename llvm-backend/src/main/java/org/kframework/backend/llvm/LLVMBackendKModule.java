@@ -6,6 +6,7 @@ import com.google.inject.Module;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.MapBinder;
 import org.apache.commons.lang3.tuple.Pair;
+import org.kframework.definition.Definition;
 import org.kframework.main.AbstractKModule;
 import org.kframework.rewriter.Rewriter;
 
@@ -44,8 +45,8 @@ public class LLVMBackendKModule extends AbstractKModule {
         return Collections.singletonList(new AbstractModule() {
             @Override
             protected void configure() {
-                MapBinder<String, Function<org.kframework.definition.Module, Rewriter>> rewriterBinder = MapBinder.newMapBinder(
-                        binder(), TypeLiteral.get(String.class), new TypeLiteral<Function<org.kframework.definition.Module, Rewriter>>() {
+                MapBinder<String, Function<Definition, Rewriter>> rewriterBinder = MapBinder.newMapBinder(
+                        binder(), TypeLiteral.get(String.class), new TypeLiteral<Function<Definition, Rewriter>>() {
                         });
                 rewriterBinder.addBinding("llvm").to(LLVMRewriter.class);
 

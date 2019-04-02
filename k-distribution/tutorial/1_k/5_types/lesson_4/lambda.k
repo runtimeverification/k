@@ -6,25 +6,24 @@ module LAMBDA
   imports DOMAINS
   imports SUBSTITUTION
 
-  syntax Exp ::= Int | Bool | Id
+  syntax Exp ::= Int | Bool | KVar
                | "(" Exp ")"                      [bracket]
                | Exp Exp                          [strict, left]
                > Exp "*" Exp                      [strict, left]
                | Exp "/" Exp                      [strict]
                > Exp "+" Exp                      [strict, left]
                > Exp "<=" Exp                     [strict]
-               > "lambda" Id "." Exp              [binder]
+               > "lambda" KVar "." Exp              [binder]
                | "if" Exp "then" Exp "else" Exp   [strict]
-               | "let" Id "=" Exp "in" Exp        [binder]
-               | "letrec" Id Id "=" Exp "in" Exp  [binder]
-               | "mu" Id "." Exp                  [binder]
+               | "let" KVar "=" Exp "in" Exp        [binder]
+               | "letrec" KVar KVar "=" Exp "in" Exp  [binder]
+               | "mu" KVar "." Exp                  [binder]
 
   syntax Type ::= "int" | "bool"
                 | Type "->" Type
                 | "(" Type ")"                    [bracket]
 
   syntax Exp ::= Type
-  syntax KVariable ::= Id
   syntax KResult ::= Type
 
   configuration <k color="green"> $PGM:Exp </k>
