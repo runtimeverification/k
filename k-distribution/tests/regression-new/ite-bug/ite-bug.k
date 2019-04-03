@@ -4,7 +4,7 @@ module ITE-BUG-SYNTAX
     imports INT
     imports K-EQUAL
 
-    syntax Pgm ::= "init" | Instr
+    syntax Pgm ::= Instr
     syntax Instr ::= "JUMPI" Int Int
     syntax Int ::= bool2Word ( Bool ) [function]
 
@@ -28,5 +28,9 @@ module ITE-BUG
     rule bool2Word( B:Bool ) => 1 requires B
     rule bool2Word( B:Bool ) => 0 requires notBool B
 
-    rule <k> init => #if 3 <Int 4 #then 1 #else -1 #fi </k>
+  rule bool2Word(A)  ==K 0 => notBool(A)
+  rule bool2Word(A)  ==K 1 => A
+  rule bool2Word(A)  =/=K 0 => A
+  rule bool2Word(A)  =/=K 1 => notBool(A)
+
 endmodule
