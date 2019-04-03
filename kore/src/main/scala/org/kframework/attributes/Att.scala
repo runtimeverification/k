@@ -30,17 +30,14 @@ case class Att(att: Map[(String, String), Any]) extends AttributesToString {
 
   def add(key: String): Att = add(key, "")
   def add(key: String, value: String): Att = add(key, Att.stringClassName, value)
-  def add[T](key: Class[T], value: T): Att = add(key.getName, key, value)
+  def add[T](key: Class[T], value: T): Att = add(key.getName, key.getName, value)
   def add[T](key: String, cls: Class[T], value: T): Att = add(key, cls.getName, value)
-  def add[T](key: String, clsStr: String, value: T): Att = Att(att + ((key, clsStr) -> value))
+  private def add[T](key: String, clsStr: String, value: T): Att = Att(att + ((key, clsStr) -> value))
   def addAll(thatAtt: Att) = Att(att ++ thatAtt.att)
-  def from(thatAtt: java.util.Map[String, String]): Att =
-    Att(immutable(thatAtt).map { case (k, v) => ((k, Att.stringClassName), v) }.toMap)
 
   def remove(key: String): Att = remove(key, Att.stringClassName)
-  def remove(key: Class[_]): Att = remove(key.getName, key)
-  def remove(key: String, cls: Class[_]): Att = remove(key, cls.getName)
-  def remove(key: String, clsStr: String): Att = Att(att - ((key, clsStr)))
+  def remove(key: Class[_]): Att = remove(key.getName, key.getName)
+  private def remove(key: String, clsStr: String): Att = Att(att - ((key, clsStr)))
 }
 
 object Att {
@@ -71,6 +68,9 @@ object Att {
   val variable = "variable"
 
   private val stringClassName = classOf[String].getName
+
+  def from(thatAtt: java.util.Map[String, String]): Att =
+    Att(immutable(thatAtt).map { case (k, v) => ((k, Att.stringClassName), v) }.toMap)
 }
 
 trait AttributesToString {

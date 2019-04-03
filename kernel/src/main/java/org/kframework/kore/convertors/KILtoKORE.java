@@ -397,7 +397,7 @@ public class KILtoKORE extends KILTransformation<Object> {
 
                 }).collect(Collectors.toMap(Tuple2::_1, Tuple2::_2));
 
-        return Att().from(attributesSet)
+        return Att.from(attributesSet)
                 .addAll(attributesFromLocation(t.getLocation()))
                 .addAll(attributesFromSource(t.getSource()));
     }
