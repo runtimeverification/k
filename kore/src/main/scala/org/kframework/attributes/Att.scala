@@ -37,6 +37,7 @@ case class Att(att: Map[(String, String), Any]) extends AttributesToString {
 
   def remove(key: String): Att = remove(key, Att.stringClassName)
   def remove(key: Class[_]): Att = remove(key.getName, key.getName)
+  def remove(key: String, cls: Class[_]): Att = remove(key, cls.getName)
   private def remove(key: String, clsStr: String): Att = Att(att - ((key, clsStr)))
 }
 
