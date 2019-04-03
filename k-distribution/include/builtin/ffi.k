@@ -2,9 +2,6 @@
 require "domains.k"
 
 module FFI-SYNTAX
-  imports INT-SYNTAX
-  imports FLOAT-SYNTAX
-
   syntax FFIType ::= "#void" [klabel(#void), symbol]
                   | "#uint8" [klabel(#uint8), symbol]
                   | "#sint8" [klabel(#sint8), symbol]
