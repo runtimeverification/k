@@ -25,7 +25,7 @@ module FFI-SYNTAX
                   | "#ulong" [klabel(#ulong), symbol]
                   | "#slong" [klabel(#slong), symbol]
                   | "#longdouble" [klabel(#longdouble), symbol]
-                  
+
 endmodule
 
 module FFI
@@ -34,6 +34,9 @@ module FFI
   imports LIST
   imports STRING
 
-  /*@ The FFI call takes a string for the symbol to call, a list of bytes, a list of types, and a return type. */
-  syntax Bytes ::= "#ffiCall" "(" String "," List "," List "," FFIType ")" [function, hook(FFI.call), impure]
+  /*@ The FFI call takes an int for the symbol to call, a list of bytes, a list of types, and a return type. */
+  syntax Bytes ::= "#ffiCall" "(" Int "," List "," List "," FFIType ")" [function, hook(FFI.call), impure]
+
+  /*@ Given a function symbol, return its address as an Int */
+  syntax Int ::= "#functionAddress" "(" String ")" [function, hook(FFI.address)]
 endmodule
