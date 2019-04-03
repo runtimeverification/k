@@ -87,7 +87,7 @@ public class Kompile {
         File cacheFile = kompileOptions.experimental.cacheFile != null
                 ? files.resolveWorkingDirectory(kompileOptions.experimental.cacheFile) : files.resolveKompiled("cache.bin");
         this.definitionParsing = new DefinitionParsing(
-                lookupDirectories, kompileOptions.strict(), kem,
+                lookupDirectories, kompileOptions.strict(), kompileOptions.profileRules, kem, files,
                 parser, cacheParses, cacheFile, !kompileOptions.outerParsing.noPrelude, kompileOptions.isKore());
         this.sw = sw;
     }
@@ -106,6 +106,13 @@ public class Kompile {
      * @return
      */
     public CompiledDefinition run(File definitionFile, String mainModuleName, String mainProgramsModuleName, Function<Definition, Definition> pipeline, Set<String> excludedModuleTags) {
+        if (kompileOptions.profileRules) {
+            for (File f : files.resolveKompiled(".").listFiles()) {
+                if (f.getName().matches("timing[0-9]+\\.log")) {
+                    f.delete();
+                }
+            }
+        }
         Definition parsedDef = parseDefinition(definitionFile, mainModuleName, mainProgramsModuleName, excludedModuleTags);
         sw.printIntermediate("Parse definition [" + definitionParsing.parsedBubbles.get() + "/" + (definitionParsing.parsedBubbles.get() + definitionParsing.cachedBubbles.get()) + " rules]");
 

@@ -37,7 +37,7 @@ SUBDIRS=issue-2273 \
 	fatalWarnings \
 	symbolic-int-function \
 	map-symbolic-tests \
+	profile \
 	ffi-llvm \
-
 
 include ../../include/ktest-group.mak
