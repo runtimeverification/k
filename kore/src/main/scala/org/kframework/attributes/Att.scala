@@ -5,8 +5,8 @@ import java.util.Optional
 import org.kframework.Collections._
 
 /**
-  * 2nd value in key is always a class name. For a key of type (s1, s2), value must be of type class.forName(s2).
-  */
+ * 2nd value in key is always a class name. For a key of type (s1, s2), value must be of type class.forName(s2).
+ */
 case class Att(att: Map[(String, String), Any]) extends AttributesToString {
 
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(Att.this)
@@ -25,7 +25,8 @@ case class Att(att: Map[(String, String), Any]) extends AttributesToString {
   def getOptional[T](key: Class[T]): Optional[T] = optionToOptional(getOption(key))
   def getOptional[T](key: String, cls: Class[T]): Optional[T] = optionToOptional(getOption(key, cls))
 
-  private def optionToOptional[T](option: Option[T]): Optional[T] = option match { case None => Optional.empty(); case Some(x) => Optional.of(x); }
+  private def optionToOptional[T](option: Option[T]): Optional[T] =
+    option match {case None => Optional.empty(); case Some(x) => Optional.of(x);}
 
   def add(key: String): Att = add(key, "")
   def add(key: String, value: String): Att = add(key, Att.stringClassName, value)
@@ -33,8 +34,8 @@ case class Att(att: Map[(String, String), Any]) extends AttributesToString {
   def add[T](key: String, cls: Class[T], value: T): Att = add(key, cls.getName, value)
   def add[T](key: String, clsStr: String, value: T): Att = Att(att + ((key, clsStr) -> value))
   def addAll(thatAtt: Att) = Att(att ++ thatAtt.att)
-  def from(thatAtt: java.util.Map[String, String]): Att
-    = Att(immutable(thatAtt).map { case (k, v) => ((k, Att.stringClassName), v)}.toMap)
+  def from(thatAtt: java.util.Map[String, String]): Att =
+    Att(immutable(thatAtt).map { case (k, v) => ((k, Att.stringClassName), v) }.toMap)
 
   def remove(key: String): Att = remove(key, Att.stringClassName)
   def remove(key: Class[_]): Att = remove(key.getName, key)
@@ -75,12 +76,9 @@ object Att {
 trait AttributesToString {
   self: Att =>
 
-  override def toString =
-    "[" +
-      toStrings.sorted.mkString(" ") +
-    "]"
+  override def toString: String = "[" + toStrings.sorted.mkString(" ") + "]"
 
-  def postfixString = {
+  def postfixString: String = {
     if (toStrings.isEmpty) "" else " " + toString()
   }
 
