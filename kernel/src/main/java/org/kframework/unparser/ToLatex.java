@@ -66,14 +66,14 @@ public class ToLatex {
         } else if (k instanceof KSequence) {
             KSequence kseq = (KSequence) k;
 
-            writeString(out, "\\klabelKSequence{");
+            writeString(out, "\\kseq{");
 
             for (K item : kseq.asIterable()) {
                 apply(out, item);
-                writeString(out, "}{\\klabelKSequence{");
+                writeString(out, "}{\\kseq{");
             }
 
-            writeString(out, "}{\\klabelKSequenceUnit{}}");
+            writeString(out, "}{\\dotk{}}");
 
         } else if (k instanceof KVariable) {
             KVariable var = (KVariable) k;
@@ -88,7 +88,7 @@ public class ToLatex {
         } else if (k instanceof KRewrite) {
             KRewrite rew = (KRewrite) k;
 
-            writeString(out, "\\klabelKRewrite{");
+            writeString(out, "\\krewrites{");
             apply(out, rew.left());
             writeString(out, "}{");
             apply(out, rew.right());
@@ -110,7 +110,7 @@ public class ToLatex {
         } else if (k instanceof InjectedKLabel) {
             InjectedKLabel inj = (InjectedKLabel) k;
 
-            writeString(out, "\\injectedKLabels{");
+            writeString(out, "\\injectedklabel{");
             writeString(out, inj.klabel().name());
             writeString(out, "}");
 
