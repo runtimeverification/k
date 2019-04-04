@@ -20,6 +20,7 @@ import org.kframework.kore.KLabel;
 import org.kframework.kore.KRewrite;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
+import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import scala.collection.Set;
 
 import java.util.ArrayList;
@@ -50,6 +51,9 @@ public class GenerateSortProjections {
     }
 
     public Stream<? extends Sentence> gen(Sort sort) {
+        if (RuleGrammarGenerator.isParserSort(sort)) {
+            return Stream.empty();
+        }
         KLabel lbl = getProjectLbl(sort, mod);
         KVariable var = KVariable("K", Att.empty().add(Sort.class, sort));
         Rule r = Rule(KRewrite(KApply(lbl, var), var), BooleanUtils.TRUE, BooleanUtils.TRUE, Att().add("projection"));
