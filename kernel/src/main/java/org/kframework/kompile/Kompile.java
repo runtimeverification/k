@@ -166,6 +166,7 @@ public class Kompile {
         DefinitionTransformer resolveFun = DefinitionTransformer.from(new ResolveFun()::resolve, "resolving #fun");
         DefinitionTransformer resolveFunctionWithConfig = DefinitionTransformer.fromSentenceTransformer(new ResolveFunctionWithConfig()::resolve, "resolving functions with config context");
         DefinitionTransformer generateSortPredicateSyntax = DefinitionTransformer.from(new GenerateSortPredicateSyntax()::gen, "adding sort predicate productions");
+        DefinitionTransformer generateSortProjections = DefinitionTransformer.from(new GenerateSortProjections()::gen, "adding sort projections");
         DefinitionTransformer subsortKItem = DefinitionTransformer.from(Kompile::subsortKItem, "subsort all sorts to KItem");
         DefinitionTransformer expandMacros = DefinitionTransformer.fromSentenceTransformer((m, s) -> new ExpandMacros(m, files, kompileOptions, false).expand(s), "expand macros");
         GenerateCoverage cov = new GenerateCoverage(kompileOptions.coverage, files);
@@ -187,6 +188,7 @@ public class Kompile {
                 .andThen(expandMacros)
                 .andThen(guardOrs)
                 .andThen(generateSortPredicateSyntax)
+                .andThen(generateSortProjections)
                 .andThen(Kompile::resolveFreshConstants)
                 .andThen(AddImplicitComputationCell::transformDefinition)
                 .andThen(new Strategy(kompileOptions.experimental.heatCoolStrategies).addStrategyCellToRulesTransformer())
