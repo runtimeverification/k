@@ -45,6 +45,7 @@ import scala.Option;
 import scala.Tuple2;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -53,8 +54,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
-import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.kframework.Collections.*;
@@ -1184,138 +1185,18 @@ public class ModuleToKORE {
         sb.append("]");
     }
 
-    private static final Pattern identChar = Pattern.compile("[A-Za-z0-9\\-]");
+    private static String[] asciiReadableEncodingKoreCalc() {
+        String[] koreEncoder = Arrays.copyOf(StringUtil.asciiReadableEncodingDefault, StringUtil.asciiReadableEncodingDefault.length);
+        koreEncoder[0x2d] = "-";
+        koreEncoder[0x3c] = "-LT-";
+        koreEncoder[0x3e] = "-GT-";
+        koreEncoder[0x40] = "-AT-";
+        koreEncoder[0x5e] = "Xor-";
+        return koreEncoder;
+    }
 
-    public static String[] asciiReadableEncoding = new String[] {
-            null,// 00
-            null,// 01
-            null,// 02
-            null,// 03
-            null,// 04
-            null,// 05
-            null,// 06
-            null,// 07
-            null,// 08
-            null,// 09
-            null,// 0a
-            null,// 0b
-            null,// 0c
-            null,// 0d
-            null,// 0e
-            null,// 0f
-            null,// 10
-            null,// 11
-            null,// 12
-            null,// 13
-            null,// 14
-            null,// 15
-            null,// 16
-            null,// 17
-            null,// 18
-            null,// 19
-            null,// 1a
-            null,// 1b
-            null,// 1c
-            null,// 1d
-            null,// 1e
-            null,// 1f
-            "Spce",// 20
-            "Bang",// 21
-            "Quot",// 22
-            "Hash",// 23
-            "Dolr",// 24
-            "Perc",// 25
-            "And",// 26
-            "Apos",// 27
-            "LPar",// 28
-            "RPar",// 29
-            "Star",// 2a
-            "Plus",// 2b
-            "Comm",// 2c
-            "-",// 2d
-            "Stop",// 2e
-            "Slsh",// 2f
-            "0",// 30
-            "1",// 31
-            "2",// 32
-            "3",// 33
-            "4",// 34
-            "5",// 35
-            "6",// 36
-            "7",// 37
-            "8",// 38
-            "9",// 39
-            "Coln",// 3a
-            "SCln",// 3b
-            "-LT-",// 3c
-            "Eqls",// 3d
-            "-GT-",// 3e
-            "Ques",// 3f
-            "-AT-",// 40
-            "A",// 41
-            "B",// 42
-            "C",// 43
-            "D",// 44
-            "E",// 45
-            "F",// 46
-            "G",// 47
-            "H",// 48
-            "I",// 49
-            "J",// 4a
-            "K",// 4b
-            "L",// 4c
-            "M",// 4d
-            "N",// 4e
-            "O",// 4f
-            "P",// 50
-            "Q",// 51
-            "R",// 52
-            "S",// 53
-            "T",// 54
-            "U",// 55
-            "V",// 56
-            "W",// 57
-            "X",// 58
-            "Y",// 59
-            "Z",// 5a
-            "LSqB",// 5b
-            "Bash",// 5c
-            "RSqB",// 5d
-            "Xor-",// 5e
-            "Unds",// 5f
-            "BQuo",// 60
-            "a",// 61
-            "b",// 62
-            "c",// 63
-            "d",// 64
-            "e",// 65
-            "f",// 66
-            "g",// 67
-            "h",// 68
-            "i",// 69
-            "j",// 6a
-            "k",// 6b
-            "l",// 6c
-            "m",// 6d
-            "n",// 6e
-            "o",// 6f
-            "p",// 70
-            "q",// 71
-            "r",// 72
-            "s",// 73
-            "t",// 74
-            "u",// 75
-            "v",// 76
-            "w",// 77
-            "x",// 78
-            "y",// 79
-            "z",// 7a
-            "LBra",// 7b
-            "Pipe",// 7c
-            "RBra",// 7d
-            "Tild",// 7e
-            null// 7f
-    };
+    private static final Pattern identChar = Pattern.compile("[A-Za-z0-9\\-]");
+    public static String[] asciiReadableEncodingKore = asciiReadableEncodingKoreCalc();
 
     private void convert(String name) {
         if (kToKoreLabelMap.containsKey(name)) {
@@ -1337,30 +1218,7 @@ public class ModuleToKORE {
         default: break;
         }
         StringBuilder buffer = new StringBuilder();
-        boolean inIdent = true;
-        for (int i = 0; i < name.length(); i++) {
-            if (identChar.matcher(name).region(i, name.length()).lookingAt()) {
-                if (!inIdent) {
-                    inIdent = true;
-                    buffer.append("'");
-                }
-                buffer.append(name.charAt(i));
-            } else {
-                if (inIdent) {
-                    inIdent = false;
-                    buffer.append("'");
-                }
-                int charAt = (int) name.charAt(i);
-                if (charAt < 128 && asciiReadableEncoding[charAt] != null) {
-                    buffer.append(asciiReadableEncoding[charAt]);
-                } else {
-                    buffer.append(String.format("%04x", charAt));
-                }
-            }
-        }
-        if (!inIdent) {
-            buffer.append("'");
-        }
+        StringUtil.encodeStringToAlphanumeric(buffer, name, asciiReadableEncodingKore, identChar, "'");
         sb.append(buffer);
         kToKoreLabelMap.put(name, buffer.toString());
     }
