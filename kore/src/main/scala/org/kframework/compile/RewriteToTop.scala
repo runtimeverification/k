@@ -1,8 +1,9 @@
 package org.kframework.compile
 
 import org.kframework.Collections._
-import org.kframework.kore.KORE.{KApply, KAs, KSequence}
+import org.kframework.kore.KORE.{KApply, KAs, KSequence, KLabel}
 import org.kframework.kore.{KRewrite, _}
+import org.kframework.utils.errorsystem.KEMException;
 
 
 object RewriteToTop {
@@ -16,7 +17,7 @@ object RewriteToTop {
 
   def toRight(rewrite: K): K = rewrite match {
     case t: KRewrite => toRight(t.right) // recurse here because of KAs
-    case t: KApply => KApply(t.klabel, immutable(t.klist.items) map toRight, t.att)
+    case t: KApply => compactInjections(KApply(t.klabel, immutable(t.klist.items) map toRight, t.att))
     case t: KSequence => KSequence(mutable(immutable(t.items) map toRight toList), t.att)
     case t: KAs => t.alias
     case other => other
@@ -56,5 +57,35 @@ object RewriteToTop {
 
   private def makeRewriteIfNeeded(k: K): K = if (toLeft(k) != toRight(k)) ADT.KRewrite(toLeft(k), toRight(k)) else k
 
+  private def compactInjections(k: K): K = k match {
+    case kapp: KApply =>
+      val args: Seq[K] = immutable(kapp.klist.items)
+      if (isInjection(kapp) && args.length == 1 && isInjection(args.head)) {
+        val kappInner: KApply = args.head.asInstanceOf[KApply]
+        val sortsOuter: List[Sort] = kapp.klabel.params.toList
+        val sortsInner: List[Sort] = kappInner.klabel.params.toList
+        if (sortsOuter.length != 2 || sortsInner.length != 2) {
+          throw KEMException.internalError(
+                  "Injection compaction error: found injection with more than two sort parameters")
+        }
+        val sortOuterIn:  Sort = sortsOuter.head
+        val sortOuterOut: Sort = sortsOuter.last
+        val sortInnerIn:  Sort = sortsInner.head
+        val sortInnerOut: Sort = sortsInner.last
+        if (sortInnerOut != sortOuterIn) {
+          throw KEMException.internalError(
+                  "Injection compaction error: found nested injections with incompatible sorts")
+        }
+        KApply(KLabel("inj", List(sortInnerIn, sortOuterOut): _*), kappInner.klist, kapp.att)
+      } else {
+        kapp
+      }
+    case other => other
+  }
+
+  private def isInjection(k: K): Boolean = k match {
+    case kapp: KApply => kapp.klabel.name == "inj"
+    case other => false
+  }
 
 }
