@@ -11,13 +11,16 @@ import org.kframework.kore.KSequence;
 import org.kframework.kore.KToken;
 import org.kframework.kore.KVariable;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.StringUtil;
 
 import java.io.IOException;
 import java.io.DataOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 
+import java.util.Arrays;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 /**
  * Writes a KAST term to the LaTeX format.
@@ -34,8 +37,29 @@ public class ToLatex {
         }
     }
 
+    private static String[] asciiReadableEncodingLatexCalc() {
+        String[] latexEncoder = Arrays.copyOf(StringUtil.asciiReadableEncodingDefault, StringUtil.asciiReadableEncodingDefault.length);
+        latexEncoder[0x30] = "Zero";
+        latexEncoder[0x31] = "I";
+        latexEncoder[0x32] = "II";
+        latexEncoder[0x33] = "III";
+        latexEncoder[0x34] = "IV";
+        latexEncoder[0x35] = "V";
+        latexEncoder[0x36] = "VI";
+        latexEncoder[0x37] = "VII";
+        latexEncoder[0x38] = "VIII";
+        latexEncoder[0x39] = "IX";
+        latexEncoder[0x7a] = "ActZ";
+        return latexEncoder;
+    }
+
+    public static final Pattern identChar = Pattern.compile("[A-Za-y]");
+    public static String[] asciiReadableEncodingLatex = asciiReadableEncodingLatexCalc();
+
     public static String latexedKLabel(String orig) {
-        return "klabel" + orig.replaceAll("[^a-zA-Z]", "");
+        StringBuilder buffer = new StringBuilder();
+        StringUtil.encodeStringToAlphanumeric(buffer, orig, asciiReadableEncodingLatex, identChar, "z");
+        return "klabel" + buffer.toString();
     }
 
     private static void writeString(DataOutputStream out, String str) throws IOException {
