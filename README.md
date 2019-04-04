@@ -95,6 +95,42 @@ which will significantly speed up the incremental build process.
 
 After running `mvn package` for the first time, you should run ``k-distribution/target/release/k/bin/k-configure-opam; eval `opam config env` ``. This performs first-time setup of the OCAML backend.
 
+## Installing on fresh Windows Subsystem for Linux
+
+1. Install the Ubuntu package from the Windows Store, which as of now is an alias for the Ubuntu LTS 18.04 package. During installation you will be asked to create a new user. 
+2. Download the latest K distribution for Ubuntu Bionic from https://github.com/kframework/k/releases 
+    to a temporary directory, for example `d:\temp` 
+
+3. Open linux bash. For example by running:
+```
+ubuntu1804
+```
+
+4. Run the following commands:
+
+    `$ sudo apt-get update`
+    
+    `$ cd <download dir>`. In our example download dir is `/mnt/d/temp`
+    
+    `$ sudo apt-get install ./kframework_5.0.0_amd64_bionic.deb`
+        This will install ~1.4GB of dependencies and will take some time.
+        K will be installed to `/usr/lib/kframework`
+
+5. Copy the tutorial to some work directory, for example `/mnt/d/k-tutorial`. Otherwise, you won't be able to run the
+examples from default installation dir if you are not `root`:
+
+```    
+$ cp -R /usr/lib/kframework/tutorial /mnt/d/k-tutorial
+```
+
+6. Now you can try to run some programs:
+
+```bash
+$ cd /mnt/d/k-tutorial/2_languages/1_simple/1_untyped
+$ make kompile
+$ krun tests/diverse/factorial.simple
+```
+
 # IDE Setup
 
 ## General
