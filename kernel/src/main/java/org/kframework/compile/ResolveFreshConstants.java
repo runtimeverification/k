@@ -13,6 +13,7 @@ import org.kframework.definition.Production;
 import org.kframework.definition.ProductionItem;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
+import org.kframework.kil.Attribute;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
@@ -85,6 +86,19 @@ public class ResolveFreshConstants {
                     }
                 }
             }
+            K left = RewriteToTop.toLeft(rule.body());
+            if (left instanceof KApply) {
+                KApply kapp = (KApply)left;
+                if (kapp.klabel().equals("#withConfig")) {
+                    left = kapp.items().get(0);
+                }
+                if (left instanceof KApply) {
+                    kapp = (KApply)left;
+                    if (m.attributesFor().get(kapp.klabel()).getOrElse(() -> Att()).contains(Attribute.FUNCTION_KEY)) {
+                        return rule;
+                    }
+                }
+            }
             return withFresh;
         }
         return Rule(
@@ -133,7 +147,7 @@ public class ResolveFreshConstants {
         }
     }
 
-    private static KVariable FRESH = KVariable("!Fresh", Att.empty().add(Sort.class, Sorts.Int()));
+    private static KVariable FRESH = KVariable("_Fresh", Att.empty().add(Sort.class, Sorts.Int()));
 
     private K transform(K term) {
         return new TransformK() {

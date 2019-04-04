@@ -150,7 +150,7 @@ public class ModuleToKORE {
             }
         }
         computeDependencies(functionRules);
-        Set<KLabel> impurities = functionRules.keySet().stream().filter(lbl -> module.attributesFor().apply(lbl).contains(Attribute.IMPURE_KEY)).collect(Collectors.toSet());
+        Set<KLabel> impurities = functionRules.keySet().stream().filter(lbl -> module.attributesFor().get(lbl).getOrElse(() -> Att()).contains(Attribute.IMPURE_KEY)).collect(Collectors.toSet());
         impurities.addAll(ancestors(impurities, dependencies));
 
         sb.append("\n// symbols\n");
@@ -879,18 +879,6 @@ public class ModuleToKORE {
             visitor.apply(entry.getValue().body());
             visitor.apply(entry.getValue().requires());
         }
-
-        for (KLabel label : Sets.union(functionRules.keySet(), anywhereKLabels)) {
-            String hook = module.attributesFor().apply(label).<String>getOptional(Attribute.HOOK_KEY).orElse(".");
-
-            if (hook.equals("KREFLECTION.fresh")) {
-                for (KLabel freshFunction : iterable(module.freshFunctionFor().values())) {
-                    dependencies.addEdge(new Object(), label, freshFunction);
-                }
-            }
-            //eval depends on everything
-            dependencies.addEdge(new Object(), KLabel(""), label);
-        }
     }
 
     private DirectedGraph<KLabel, Object> dependencies;
@@ -1064,7 +1052,7 @@ public class ModuleToKORE {
         }
     }
 
-    private static final Production INJ_PROD = Production(KLabel(KLabels.INJ, Sort("From"), Sort("To")), Sort("To"), Seq(NonTerminal(Sort("From"))));
+    private static final Production INJ_PROD = Production(KLabel(KLabels.INJ), Sort("K"), Seq(NonTerminal(Sort("K"))), Att().add("poly", "1; 0"));
 
 
     private Production production(KApply term) {
@@ -1074,7 +1062,7 @@ public class ModuleToKORE {
     private Production production(KApply term, boolean instantiatePolySorts) {
         KLabel klabel = term.klabel();
         if (klabel.name().equals(KLabels.INJ))
-            return Production(INJ_PROD.klabel(), INJ_PROD.sort(), INJ_PROD.items(), Att.empty().add("originalPrd", Production.class, INJ_PROD));
+            return computePolyProd(INJ_PROD, instantiatePolySorts ? term : null);
         Option<scala.collection.Set<Production>> prods = module.productionsFor().get(klabel);
         assert(prods.nonEmpty());
         assert(prods.get().size() == 1);
