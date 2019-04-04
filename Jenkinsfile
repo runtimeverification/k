@@ -234,7 +234,6 @@ pipeline {
                   }
                 }
               }
-
               post {
                 always {
                   archiveArtifacts 'kserver.log,k-distribution/target/kserver.log'
