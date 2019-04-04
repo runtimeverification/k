@@ -98,7 +98,7 @@ After running `mvn package` for the first time, you should run ``k-distribution/
 ## Installing on fresh Windows Subsystem for Linux
 
 1. Install the Ubuntu package from the Windows Store, which as of now is an alias for the Ubuntu LTS 18.04 package. 
-2. Download the latest Ubuntu Bionic distribution from https://github.com/kframework/k/releases 
+2. Download the latest K distribution for Ubuntu Bionic from https://github.com/kframework/k/releases 
     to a temporary directory, for example `d:\temp`
     
 3. Optional. By default the WSL bash user is root. It is recommended to run K as a non-root user, otherwise K will print warnings for each executed command.
@@ -106,15 +106,24 @@ Follow for example [this guide](https://www.tenforums.com/tutorials/128052-add-u
 
 4. Open linux bash. 
 5. Run the following commands:
-    $ `sudo apt-get update`
-    $ `cd <download dir>`. In our example it is `cd /mnt/d/temp`
-    $ `sudo apt-get install ./kframework_5.0.0_amd64_bionic.deb`
+
+    `$ sudo apt-get update`
+    
+    `$ cd <download dir>`. In our example download dir is `/mnt/d/temp`
+    
+    `$ sudo apt-get install ./kframework_5.0.0_amd64_bionic.deb`
         This will install ~1.4GB of dependencies and will take some time.
-        F will be installed to `/usr/lib/kframework`
+        K will be installed to `/usr/lib/kframework`
+    
+    `$ sudo chown -R <username> /usr/lib/kframework` where `<username>` is the user you created at step 3.
+
 6. Now you can try to run some programs:
-    $ `cd /usr/lib/kframework/tutorial/2_languages/1_simple/1_untyped`
-    $ `make kompile`
-    $ `krun tests/diverse/factorial.simple`
+
+```bash
+$ cd /usr/lib/kframework/tutorial/2_languages/1_simple/1_untyped
+$ make kompile
+$ krun tests/diverse/factorial.simple
+```
 
 # IDE Setup
 
