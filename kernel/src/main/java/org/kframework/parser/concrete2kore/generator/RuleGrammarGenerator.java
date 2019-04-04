@@ -19,6 +19,7 @@ import org.kframework.definition.UserList;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kore.Sort;
 import org.kframework.parser.concrete2kore.ParseInModule;
+import org.kframework.utils.file.FileUtil;
 import scala.collection.Seq;
 import scala.Option;
 
@@ -177,6 +178,11 @@ public class RuleGrammarGenerator {
         return kSorts.contains(s) || s.name().startsWith("#");
     }
 
+    /* use this overload if you don't need to profile rule parse times. */
+    public static ParseInModule getCombinedGrammar(Module mod, boolean strict) {
+      return getCombinedGrammar(mod, strict, false, null);
+    }
+
     /**
      * Create the rule parser for the given module.
      * It creates a module which includes the given module and the base K module given to the
@@ -186,7 +192,7 @@ public class RuleGrammarGenerator {
      * @param mod module for which to create the parser.
      * @return parser which applies disambiguation filters by default.
      */
-    public static ParseInModule getCombinedGrammar(Module mod, boolean strict) {
+    public static ParseInModule getCombinedGrammar(Module mod, boolean strict, boolean timing, FileUtil files) {
         Set<Sentence> prods = new HashSet<>();
         Set<Sentence> extensionProds = new HashSet<>();
         Set<Sentence> disambProds;
@@ -381,7 +387,7 @@ public class RuleGrammarGenerator {
         Module extensionM = new Module(mod.name() + "-EXTENSION", Set(mod), immutable(extensionProds), mod.att());
         Module disambM = new Module(mod.name() + "-DISAMB", Set(), immutable(disambProds), mod.att());
         Module parseM = new Module(mod.name() + "-PARSER", Set(), immutable(parseProds), mod.att());
-        return new ParseInModule(mod, extensionM, disambM, parseM, strict);
+        return new ParseInModule(mod, extensionM, disambM, parseM, strict, timing, files);
     }
 
     public static List<Set<Integer>> computePositions(Production p) {

@@ -2,8 +2,6 @@
 package org.kframework.utils.file;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.inject.util.Providers;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -39,18 +37,18 @@ import java.util.stream.Stream;
 public class FileUtil {
 
     private final File tempDir;
-    private final Provider<File> kompiledDir;
+    private final File kompiledDir;
     private final File workingDir;
-    private final Provider<File> definitionDir;
+    private final File definitionDir;
     private final GlobalOptions options;
     private final Map<String, String> env;
 
     @Inject
     public FileUtil(
             @TempDir File tempDir,
-            @DefinitionDir @Nullable Provider<File> definitionDir,
+            @DefinitionDir @Nullable File definitionDir,
             @WorkingDir File workingDir,
-            @KompiledDir @Nullable Provider<File> kompiledDir,
+            @KompiledDir @Nullable File kompiledDir,
             GlobalOptions options,
             @Environment Map<String, String> env) {
         this.tempDir = tempDir;
@@ -63,7 +61,7 @@ public class FileUtil {
 
     public static FileUtil testFileUtil() {
         File workingDir = new File(".");
-        return new FileUtil(workingDir, Providers.of(workingDir), workingDir, Providers.of(workingDir), new GlobalOptions(), System.getenv());
+        return new FileUtil(workingDir, workingDir, workingDir, workingDir, new GlobalOptions(), System.getenv());
     }
 
     public ProcessBuilder getProcessBuilder() {
@@ -166,11 +164,11 @@ public class FileUtil {
     }
 
     public File resolveKompiled(String file) {
-        return new File(kompiledDir.get(), file);
+        return new File(kompiledDir, file);
     }
 
     public File resolveDefinitionDirectory(String file) {
-        return new File(definitionDir.get(), file);
+        return new File(definitionDir, file);
     }
 
     public File resolveWorkingDirectory(String file) {

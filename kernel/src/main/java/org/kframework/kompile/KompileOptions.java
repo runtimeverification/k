@@ -70,6 +70,9 @@ public class KompileOptions implements Serializable {
     @Parameter(names="--coverage", description="Generate coverage data when executing semantics.")
     public boolean coverage;
 
+    @Parameter(names="--profile-rule-parsing", description="Generate time in seconds to parse each rule in the semantics. Found in -kompiled directory under timing.log.")
+    public boolean profileRules;
+
     @ParametersDelegate
     public Experimental experimental = new Experimental();
 
