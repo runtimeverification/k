@@ -3,7 +3,7 @@
 brew update
 brew install maven cmake boost yaml-cpp jemalloc llvm@6 gmp mpfr z3 opam pkg-config bison flex
 
-curl -sSL https://get.haskellstack.org/ | sh      
+curl -sSL https://get.haskellstack.org/ | sh
 
 llvm-backend/src/main/native/llvm-backend/install-rust
 

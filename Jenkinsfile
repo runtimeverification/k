@@ -96,7 +96,7 @@ pipeline {
             stage('Build and Package on Ubuntu Xenial') {
               when {
                 anyOf {
-                  not { changeRequest() } 
+                  not { changeRequest() }
                   changelog '.*^\\[build-system\\] .+$'
                   changeset 'Jenkinsfile'
                   changeset 'Dockerfile'
