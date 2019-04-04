@@ -69,8 +69,11 @@ import scala.Tuple3;
 import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -81,10 +84,8 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Queue;
-import java.util.Set;
-import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.regex.Pattern;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -1870,7 +1871,7 @@ public class DefinitionToOcaml implements Serializable {
     }
 
     private static String[] asciiReadableEncodingOcamlCalc() {
-        String[] ocamlEncoder = StringUtil.asciiReadableEncodingDefault;
+        String[] ocamlEncoder = Arrays.copyOf(StringUtil.asciiReadableEncodingDefault, StringUtil.asciiReadableEncodingDefault.length);
         ocamlEncoder[0x3c] = "_LT_";
         ocamlEncoder[0x3e] = "_GT_";
         ocamlEncoder[0x40] = "_AT_";
