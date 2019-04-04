@@ -5,6 +5,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.beust.jcommander.JCommander;
 
+import java.util.regex.Pattern;
+
 public class StringUtil {
     /**
      * Unescape the textual representation of a string specific to SDF and Maude.
@@ -779,4 +781,31 @@ public class StringUtil {
             "Tild",// 7e
             null// 7f
     };
+
+    public static void encodeStringToAlphanumeric(StringBuilder sb, String name, String[] asciiReadableEncodingTable, Pattern identChar) {
+        boolean inIdent = true;
+        for (int i = 0; i < name.length(); i++) {
+            if (identChar.matcher(name).region(i, name.length()).lookingAt()) {
+                if (!inIdent) {
+                    inIdent = true;
+                    sb.append("'");
+                }
+                sb.append(name.charAt(i));
+            } else {
+                if (inIdent) {
+                    inIdent = false;
+                    sb.append("'");
+                }
+                int charAt = (int) name.charAt(i);
+                if (charAt < 128 && asciiReadableEncodingTable[charAt] != null) {
+                    sb.append(asciiReadableEncodingTable[charAt]);
+                } else {
+                    sb.append(String.format("%04x", charAt));
+                }
+            }
+        }
+        if (!inIdent) {
+            sb.append("'");
+        }
+    }
 }

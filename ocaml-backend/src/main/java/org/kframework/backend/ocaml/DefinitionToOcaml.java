@@ -118,7 +118,6 @@ public class DefinitionToOcaml implements Serializable {
         this.sortHooks = defSortHooks;
         this.options = options;
     }
-    public static final Pattern identChar = Pattern.compile("[A-Za-z0-9_]");
 
     public static final ImmutableSet<String> hookNamespaces;
     private transient ImmutableMap<String, Function<String, String>> sortHooks;
@@ -1880,37 +1879,12 @@ public class DefinitionToOcaml implements Serializable {
         return ocamlEncoder;
     }
 
+    public static final Pattern identChar = Pattern.compile("[A-Za-z0-9_]");
     public static String[] asciiReadableEncodingOcaml = asciiReadableEncodingOcamlCalc();
 
     private static void encodeStringToAlphanumeric(StringBuilder sb, String name) {
-        boolean inIdent = true;
-        for (int i = 0; i < name.length(); i++) {
-            if (identChar.matcher(name).region(i, name.length()).lookingAt()) {
-                if (!inIdent) {
-                    inIdent = true;
-                    sb.append("'");
-                }
-                sb.append(name.charAt(i));
-            } else {
-                if (inIdent) {
-                    inIdent = false;
-                    sb.append("'");
-                }
-                int charAt = (int) name.charAt(i);
-                if (charAt < 128 && asciiReadableEncodingOcaml[charAt] != null) {
-                    sb.append(asciiReadableEncodingOcaml[charAt]);
-                } else {
-                    sb.append(String.format("%04x", charAt));
-                }
-            }
-        }
-        if (!inIdent) {
-            sb.append("'");
-        }
+        StringUtil.encodeStringToAlphanumeric(sb, name, asciiReadableEncodingOcaml, identChar);
     }
-
-
-
 
     private enum RuleType {
         FUNCTION, ANYWHERE, REGULAR, PATTERN
