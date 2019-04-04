@@ -38,6 +38,7 @@ SUBDIRS=issue-2273 \
 	symbolic-int-function \
 	map-symbolic-tests \
 	profile \
+	cast \
 
 
 include ../../include/ktest-group.mak
