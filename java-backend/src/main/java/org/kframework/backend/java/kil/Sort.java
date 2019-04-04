@@ -50,7 +50,7 @@ public final class Sort implements org.kframework.kore.Sort, Serializable {
     public static final Sort KVARIABLE      =   Sort.of(KORE.Sort("KVar"));
 
     public static final Sort META_VARIABLE  =   Sort.of(KORE.Sort("MetaVariable"));
-    public static final Sort BOTTOM         =   Sort.of(KORE.Sort("Bottom"));
+    public static final Sort BOTTOM         =   Sort.of(KORE.Sort("#Bottom"));
 
     /**
      * {@code String} representation of this {@code Sort}.
