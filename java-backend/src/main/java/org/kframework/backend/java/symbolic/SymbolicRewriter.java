@@ -325,7 +325,8 @@ public class SymbolicRewriter {
                 //noinspection RedundantCast
                 newContents.set(path.head().getLeft(), buildRHS(newContents.get(path.head().getLeft()), substitution,
                         (scala.collection.immutable.List<Pair<Integer, Integer>>) path.tail(), rhs, context));
-                return KItem.of(kItemSubject.kLabel(), KList.concatenate(newContents), context.global()).applyAnywhereRules(context);
+                return KItem.of(kItemSubject.kLabel(), KList.concatenate(newContents), context.global())
+                        .resolveFunctionAndAnywhere(context);
             } else if (subject instanceof BuiltinList) {
                 BuiltinList builtinListSubject = (BuiltinList) subject;
                 List<Term> newContents = new ArrayList<>(builtinListSubject.children);
@@ -376,7 +377,8 @@ public class SymbolicRewriter {
         }
 
         if (subject instanceof KItem) {
-            return KItem.of(((KItem) subject).kLabel(), KList.concatenate(newContents), context.global()).applyAnywhereRules(context);
+            return KItem.of(((KItem) subject).kLabel(), KList.concatenate(newContents), context.global())
+                    .resolveFunctionAndAnywhere(context);
         } else
             //noinspection ConstantConditions
             if (subject instanceof BuiltinList) {
