@@ -1184,8 +1184,6 @@ public class ModuleToKORE {
         sb.append("]");
     }
 
-    private static final Pattern identChar = Pattern.compile("[A-Za-z0-9\\-]");
-
     private static String[] asciiReadableEncodingKoreCalc() {
         String[] koreEncoder = StringUtil.asciiReadableEncodingDefault;
         koreEncoder[0x2d] = "-";
@@ -1196,6 +1194,7 @@ public class ModuleToKORE {
         return koreEncoder;
     }
 
+    private static final Pattern identChar = Pattern.compile("[A-Za-z0-9\\-]");
     public static String[] asciiReadableEncodingKore = asciiReadableEncodingKoreCalc();
 
     private void convert(String name) {
@@ -1218,30 +1217,7 @@ public class ModuleToKORE {
         default: break;
         }
         StringBuilder buffer = new StringBuilder();
-        boolean inIdent = true;
-        for (int i = 0; i < name.length(); i++) {
-            if (identChar.matcher(name).region(i, name.length()).lookingAt()) {
-                if (!inIdent) {
-                    inIdent = true;
-                    buffer.append("'");
-                }
-                buffer.append(name.charAt(i));
-            } else {
-                if (inIdent) {
-                    inIdent = false;
-                    buffer.append("'");
-                }
-                int charAt = (int) name.charAt(i);
-                if (charAt < 128 && asciiReadableEncodingKore[charAt] != null) {
-                    buffer.append(asciiReadableEncodingKore[charAt]);
-                } else {
-                    buffer.append(String.format("%04x", charAt));
-                }
-            }
-        }
-        if (!inIdent) {
-            buffer.append("'");
-        }
+        StringUtil.encodeStringToAlphanumeric(buffer, name, asciiReadableEncodingKore, identChar);
         sb.append(buffer);
         kToKoreLabelMap.put(name, buffer.toString());
     }
