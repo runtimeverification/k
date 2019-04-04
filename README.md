@@ -126,7 +126,7 @@ $ cp -R /usr/lib/kframework/tutorial /mnt/d/k-tutorial
 6. Now you can try to run some programs:
 
 ```bash
-$ /mnt/d/k-tutorial/2_languages/1_simple/1_untyped
+$ cd /mnt/d/k-tutorial/2_languages/1_simple/1_untyped
 $ make kompile
 $ krun tests/diverse/factorial.simple
 ```
