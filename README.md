@@ -97,15 +97,16 @@ After running `mvn package` for the first time, you should run ``k-distribution/
 
 ## Installing on fresh Windows Subsystem for Linux
 
-1. Install the Ubuntu package from the Windows Store, which as of now is an alias for the Ubuntu LTS 18.04 package. 
+1. Install the Ubuntu package from the Windows Store, which as of now is an alias for the Ubuntu LTS 18.04 package. During installation you will be asked to create a new user. 
 2. Download the latest K distribution for Ubuntu Bionic from https://github.com/kframework/k/releases 
-    to a temporary directory, for example `d:\temp`
-    
-3. Optional. By default the WSL bash user is root. It is recommended to run K as a non-root user, otherwise K will print warnings for each executed command.
-Follow for example [this guide](https://www.tenforums.com/tutorials/128052-add-user-windows-subsystem-linux-wsl-distro-windows-10-a.html) to create a new user and [this guide](https://askubuntu.com/questions/816732/how-to-change-default-user-in-wsl-ubuntu-bash-on-windows-10) to make it the default user for `bash`.  
+    to a temporary directory, for example `d:\temp` 
 
-4. Open linux bash. 
-5. Run the following commands:
+3. Open linux bash. For example by running:
+```
+ubuntu1804
+```
+
+4. Run the following commands:
 
     `$ sudo apt-get update`
     
@@ -114,13 +115,18 @@ Follow for example [this guide](https://www.tenforums.com/tutorials/128052-add-u
     `$ sudo apt-get install ./kframework_5.0.0_amd64_bionic.deb`
         This will install ~1.4GB of dependencies and will take some time.
         K will be installed to `/usr/lib/kframework`
-    
-    `$ sudo chown -R <username> /usr/lib/kframework` where `<username>` is the user you created at step 3.
+
+5. Copy the tutorial to some work directory, for example `/mnt/d/k-tutorial`. Otherwise, you won't be able to run the
+examples from default installation dir if you are not `root`:
+
+```    
+$ cp -R /usr/lib/kframework/tutorial /mnt/d/k-tutorial
+```
 
 6. Now you can try to run some programs:
 
 ```bash
-$ cd /usr/lib/kframework/tutorial/2_languages/1_simple/1_untyped
+$ /mnt/d/k-tutorial/2_languages/1_simple/1_untyped
 $ make kompile
 $ krun tests/diverse/factorial.simple
 ```
