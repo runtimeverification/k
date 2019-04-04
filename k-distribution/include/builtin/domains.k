@@ -631,7 +631,7 @@ module STRING-BUFFER-IN-K [symbolic]
   syntax StringBuffer ::= String
   syntax String ::= StringBuffer2String ( StringBuffer ) [function, functional]
 
-  rule {SB:String}:>StringBuffer +String S:String => SB +String S
+  rule (SB:String)::StringBuffer +String S:String => SB +String S
   rule .StringBuffer => ""
   rule StringBuffer2String(S:String) => S
 endmodule
@@ -1131,7 +1131,7 @@ module STDOUT-STREAM
   // Send first char from the buffer to the server
   rule [stdoutWrite]:
        <stdout>
-       ListItem(#ostream({(.K => #write(N, S)) ~> N:Int}:>Int))
+       ListItem(#ostream(N:Int => {#write(N, S) ~> N:Int}:>Int))
        ListItem("on")
        ListItem(#buffer(S:String => ""))
        _:List
