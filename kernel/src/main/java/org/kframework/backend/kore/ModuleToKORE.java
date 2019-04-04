@@ -1218,7 +1218,7 @@ public class ModuleToKORE {
         default: break;
         }
         StringBuilder buffer = new StringBuilder();
-        StringUtil.encodeStringToAlphanumeric(buffer, name, asciiReadableEncodingKore, identChar);
+        StringUtil.encodeStringToAlphanumeric(buffer, name, asciiReadableEncodingKore, identChar, "'");
         sb.append(buffer);
         kToKoreLabelMap.put(name, buffer.toString());
     }

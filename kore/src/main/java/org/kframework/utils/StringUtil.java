@@ -782,19 +782,19 @@ public class StringUtil {
             null// 7f
     };
 
-    public static void encodeStringToAlphanumeric(StringBuilder sb, String name, String[] asciiReadableEncodingTable, Pattern identChar) {
+    public static void encodeStringToAlphanumeric(StringBuilder sb, String name, String[] asciiReadableEncodingTable, Pattern identChar, String escapeChar) {
         boolean inIdent = true;
         for (int i = 0; i < name.length(); i++) {
             if (identChar.matcher(name).region(i, name.length()).lookingAt()) {
                 if (!inIdent) {
                     inIdent = true;
-                    sb.append("'");
+                    sb.append(escapeChar);
                 }
                 sb.append(name.charAt(i));
             } else {
                 if (inIdent) {
                     inIdent = false;
-                    sb.append("'");
+                    sb.append(escapeChar);
                 }
                 int charAt = (int) name.charAt(i);
                 if (charAt < 128 && asciiReadableEncodingTable[charAt] != null) {

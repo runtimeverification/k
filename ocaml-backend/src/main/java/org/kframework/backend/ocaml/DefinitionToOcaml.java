@@ -1884,7 +1884,7 @@ public class DefinitionToOcaml implements Serializable {
     public static String[] asciiReadableEncodingOcaml = asciiReadableEncodingOcamlCalc();
 
     private static void encodeStringToAlphanumeric(StringBuilder sb, String name) {
-        StringUtil.encodeStringToAlphanumeric(sb, name, asciiReadableEncodingOcaml, identChar);
+        StringUtil.encodeStringToAlphanumeric(sb, name, asciiReadableEncodingOcaml, identChar, "'");
     }
 
     private enum RuleType {
