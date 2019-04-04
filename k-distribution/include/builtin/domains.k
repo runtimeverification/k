@@ -1358,18 +1358,20 @@ module CONFIGURATION-PRIMITIVES
 endmodule
 
 module STRATEGY
+    syntax #RuleTag
+
+    syntax Strategy ::= #STUCK()     [symbol]
+                      | "^" #RuleTag [symbol, klabel(#applyRule)]
+                      | "~" #RuleTag [symbol, klabel(#appliedRule)]
+
+    configuration <s> $STRATEGY:K </s>
+endmodule
+
+module RULE-TAG-SYNTAX
     imports BUILTIN-ID-TOKENS
 
-    syntax #RuleTag ::= #LowerId                           [token]
-                      | #UpperId                           [token]
-
-    syntax Strategy ::= #STUCK() [symbol]
-
-    syntax Strategy ::= "^" #RuleTag                      [klabel(#applyRule), symbol]
-
-    syntax Strategy ::= "~" #RuleTag                    [klabel(#appliedRule), symbol]
-
-    configuration <s> $STRATEGY:K  </s>
+    syntax #RuleTag ::= #LowerId [token]
+                      | #UpperId [token]
 endmodule
 
 module DEFAULT-STRATEGY-CONCRETE [concrete]
