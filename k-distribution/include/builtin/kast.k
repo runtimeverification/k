@@ -6,7 +6,7 @@ module SORT-K
 endmodule
 
 module BASIC-K
-  imports SORT-K
+  imports ML-SYNTAX
   syntax KItem [hook(K.KItem)]
   syntax K     ::= KItem
   syntax KConfigVar [token]
@@ -54,9 +54,9 @@ endmodule
 module KSEQ
   imports KAST
   imports K-TOP-SORT
-  syntax KBott ::= ".K"      [klabel(#EmptyK), symbol, unparseAvoid]
-                 | "."       [klabel(#EmptyK), symbol]
-                 | ".::K"    [klabel(#EmptyK), symbol, unparseAvoid]
+  syntax K ::= ".K"      [klabel(#EmptyK), symbol, unparseAvoid]
+             | "."       [klabel(#EmptyK), symbol]
+             | ".::K"    [klabel(#EmptyK), symbol, unparseAvoid]
   syntax K ::= K "~>" K  [klabel(#KSequence), left, assoc, unit(#EmptyK), symbol]
   syntax left #KSequence
   syntax K     ::= "(" K ")"    [bracket, poly(0, 1)]
@@ -64,7 +64,7 @@ endmodule
 
 
 module ML-SYNTAX
-  imports BASIC-K
+  imports SORT-K
 
   syntax #KVariable
 
