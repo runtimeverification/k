@@ -1388,6 +1388,7 @@ module DEFAULT-STRATEGY
     imports syntax STRATEGY
     imports DEFAULT-STRATEGY-CONCRETE
     imports DEFAULT-STRATEGY-SYMBOLIC
+    imports RULE-TAG-SYNTAX
 
     rule initSCell(_) => <s> ^ regular </s>
 endmodule
