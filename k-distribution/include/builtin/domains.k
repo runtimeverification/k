@@ -1392,53 +1392,39 @@ module DEFAULT-STRATEGY
     rule initSCell(_) => <s> ^ regular </s>
 endmodule
 
-module BASIC-STRATEGY
+module STRATEGY-ABSTRACT
     imports STRATEGY
-    imports BOOL
-    imports CONFIGURATION-PRIMITIVES
 
-    syntax Strategy ::= Bool
+    syntax AtomicStrategy ::= #RuleTag
+ // ----------------------------------
+    rule <s> #appliedRule(_) => . ... </s>
 
-    syntax Hole ::= "#SHOLE" | "#FROZEN" "(" K ")"
+    syntax Strategy ::= ".Strategy"
+                      | "^" AtomicStrategy [klabel(#applyAtomicStrategy)]
+                      | "(" Strategy ")" [bracket]
+ // ----------------------------------------------
+    rule <s> .Strategy => . ... </s>
+    rule <s> #applyAtomicStrategy(RT) => #applyRule(RT) ... </s>
 
-    syntax Strategy ::= Hole
+    syntax KItem ::= #catchSTUCK       ( Strategy )            [function]
+                   | #catchSTUCKorElse ( Strategy , Strategy )
+ // ----------------------------------------------------------
+    rule #catchSTUCK(S) => #catchSTUCKorElse(S, .Strategy)
 
-    syntax Strategy ::= "if" Strategy "then" Strategy "else" Strategy
-                        > Strategy "*"
-                        > Strategy ";" Strategy                             [right]
-                        > Strategy "||" Strategy                            [right]
+    rule <s> #STUCK() ~> (S:Strategy => .) ... </s>
 
+    rule <s> #catchSTUCKorElse(_, S') => S' ... </s>
+    rule <s> #STUCK() ~> #catchSTUCKorElse(S, _) => S ... </s>
 
-    rule <s> S:Strategy* => if S then S* else true ...</s>
+    syntax Strategy ::= Strategy ";" Strategy [left]
+ // ------------------------------------------------
+    rule <s> S:Strategy ; S':Strategy => S ~> S' ... </s>
 
-    rule <s> A:Strategy || B:Strategy => A ~> #FROZEN(THIS_CONFIGURATION:K) ~> #SHOLE || B ...</s> when notBool(isBool(A))
-    rule <s> A:Bool ~> #SHOLE || B:Strategy => A || B ...</s>
-    rule <s> false || B:Strategy => B ...</s>
-    rule <s> true || B:Strategy => true ...</s>
+    syntax AtomicStrategy ::= AtomicStrategy "|" AtomicStrategy [left, klabel(#alternateRule)]
+ // ------------------------------------------------------------------------------------------
+    rule <s> ^ (AS | AS') => ^ AS ~> #catchSTUCK(^ AS') ... </s>
 
-    rule <s> if true then B:Strategy else C:Strategy => B ...</s>
-    rule <s> if false then B:Strategy else C:Strategy => C ...</s>
-
-    rule <s> if A:Strategy then B:Strategy else C:Strategy => (A ~> #FROZEN(THIS_CONFIGURATION:K) ~> if #SHOLE then B else C) ...</s> when notBool(isBool(A))
-    rule <s> A:Bool ~> if #SHOLE then B:Strategy else C:Strategy => if A then B else C ...</s>
-
-    rule <s> false ~> #FROZEN(CONFIGURATION:K) => #RESTORE_CONFIGURATION(CONFIGURATION) ~> false  ...</s>
-
-    rule <s> true ~> #FROZEN(CONFIGURATION:K) => true ...</s>
-
-//    rule <s> #STUCK ~> #applyRule(_) => false ...</s>
-    rule <s> #appliedRule(_) => true ...</s>
-
-    rule <s> A:Strategy ; B:Strategy => A ~> #SHOLE ; B ...</s> when notBool(isBool(A))
-
-    rule <s> A:Bool ~> #SHOLE ; B:Strategy => A ; B ...</s>
-
-    rule <s> true ; B:Strategy => B ...</s>
-
-    rule <s> false ; B:Strategy => false ...</s>
-
-// the second rule is stupid -- just made to sidestep what is likely a KSEQ normalization bug
-    rule <s> #STUCK() ~> #applyRule(_) => false ...</s>
-    rule <s> #STUCK() ~> false => false ...</s>
-
+    syntax AtomicStrategy ::= AtomicStrategy "*" [klabel(#repeatRule)]
+ // ------------------------------------------------------------------
+    rule <s> ^ (AS *) => ^ AS ~> #catchSTUCKorElse(.Strategy, ^ (AS *)) ... </s>
 endmodule
