@@ -9,7 +9,7 @@ import org.kframework.utils.errorsystem.KEMException;
 object RewriteToTop {
   def toLeft(rewrite: K): K = rewrite match {
     case t: KRewrite => t.left
-    case t: KApply => KApply(t.klabel, immutable(t.klist.items) map toLeft, t.att)
+    case t: KApply => compactInjections(KApply(t.klabel, immutable(t.klist.items) map toLeft, t.att))
     case t: KSequence => KSequence(mutable(immutable(t.items) map toLeft toList), t.att)
     case t: KAs => KAs(toLeft(t.pattern), t.alias, t.att)
     case other => other
