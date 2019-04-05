@@ -38,6 +38,6 @@ SUBDIRS=issue-2273 \
 	symbolic-int-function \
 	map-symbolic-tests \
 	profile \
-
+	ffi-llvm \
 
 include ../../include/ktest-group.mak
