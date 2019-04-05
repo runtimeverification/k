@@ -3,11 +3,14 @@ package org.kframework.krun;
 
 import org.kframework.utils.errorsystem.KEMException;
 
+import org.apache.commons.io.IOUtils;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.function.Supplier;
 
 // instantiate processes
@@ -21,15 +24,8 @@ public class RunProcess {
      */
     public static Thread getOutputStreamThread(Supplier<InputStream> in, PrintStream out) {
         return new Thread(() -> {
-                    int count;
-                    byte[] buffer = new byte[8192];
                     try {
-                        while (true) {
-                            count = in.get().read(buffer);
-                            if (count < 0)
-                                break;
-                            out.write(buffer, 0, count);
-                        }
+                        IOUtils.copy(in.get(), out);
                     } catch (IOException e) {}
                 });
     }
