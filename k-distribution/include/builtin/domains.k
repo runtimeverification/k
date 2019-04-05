@@ -1376,11 +1376,13 @@ endmodule
 
 module DEFAULT-STRATEGY-CONCRETE [concrete]
     imports syntax STRATEGY
+    imports RULE-TAG-SYNTAX
     rule ~ regular => ^ regular [anywhere]
 endmodule
 
 module DEFAULT-STRATEGY-SYMBOLIC [symbolic]
     imports syntax STRATEGY
+    imports RULE-TAG-SYNTAX
     rule <s> ~ regular => ^ regular ... </s>
 endmodule
 
@@ -1388,7 +1390,6 @@ module DEFAULT-STRATEGY
     imports syntax STRATEGY
     imports DEFAULT-STRATEGY-CONCRETE
     imports DEFAULT-STRATEGY-SYMBOLIC
-    imports RULE-TAG-SYNTAX
 
     rule initSCell(_) => <s> ^ regular </s>
 endmodule
