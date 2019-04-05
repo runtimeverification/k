@@ -653,6 +653,7 @@ public class SymbolicRewriter {
                 boolean alreadyLogged = false;
                 try {
                     v++;
+                    term.termContext().setTopConstraint(null); //To remove leftover constraint from previous step
                     boolean boundaryCellsMatchTarget =
                             boundaryCellsMatchTarget(term, boundaryPattern, targetBoundarySub);
                     //var required to avoid logging the same step multiple times.
@@ -729,7 +730,9 @@ public class SymbolicRewriter {
                             initialTerm);
                     if (results.isEmpty()) {
                         logStep(step, v, term, true, alreadyLogged, initialTerm);
-                        System.err.println("\nStep above: " + step + ", evaluation ended with no successors.");
+                        if (global.javaExecutionOptions.logBasic) {
+                            System.err.println("\nStep above: " + step + ", evaluation ended with no successors.");
+                        }
                         if (step == 1) {
                             kem.registerCriticalWarning("Evaluation ended on 1st step. " +
                                     "Possible cause: non-functional term in constraint (path condition).");
