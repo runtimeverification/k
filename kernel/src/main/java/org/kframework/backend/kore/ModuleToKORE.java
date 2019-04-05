@@ -381,7 +381,7 @@ public class ModuleToKORE {
                 for (Production prod2 : iterable(module.productionsForSort().apply(prod.sort()))) {
                     // !(cx(x1,x2,...) /\ cy(y1,y2,...))
                     prod2 = computePolyProd(prod2);
-                    if (prod2.klabel().isEmpty() || noConfusion.contains(Tuple2.apply(prod, prod2)) || prod.equals(prod2) || !isConstructor(prod2, functionRules, impurities)) {
+                    if (prod2.klabel().isEmpty() || noConfusion.contains(Tuple2.apply(prod, prod2)) || prod.equals(prod2) || !isConstructor(prod2, functionRules, impurities) || isBuiltinProduction(prod2)) {
                         // TODO (traiansf): add no confusion axioms for constructor vs inj.
                         continue;
                     }
