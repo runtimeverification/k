@@ -38,6 +38,8 @@ SUBDIRS=issue-2273 \
 	symbolic-int-function \
 	map-symbolic-tests \
 	profile \
+	ffi-llvm \
+	ite-bug \
 	cast \
 
 

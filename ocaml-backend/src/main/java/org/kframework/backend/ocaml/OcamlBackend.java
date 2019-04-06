@@ -117,7 +117,7 @@ public class OcamlBackend implements Backend {
                 }
 
                 args.clear();
-                args.addAll(Arrays.asList("-g", "-passopt", "stdlib." + libExt, "-linkpkg", flag, "-o", "realdef." + sharedLibExt, "realdef." + ext));
+                args.addAll(Arrays.asList("-g", flag, "-o", "realdef." + sharedLibExt, "realdef." + ext));
                 args.addAll(3, options.packages.stream().flatMap(pkg -> Stream.of("-package", pkg)).collect(Collectors.toList()));
                 args.add(0, ocamlfind);
                 if (options.ocamlopt()) {
