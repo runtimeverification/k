@@ -426,6 +426,7 @@ public class KItem extends Term implements KItemRepresentation {
 
             try {
                 KList kList = (KList) kItem.kList;
+                int nestingLevel = kItem.profiler.resFuncNanoTimer.getLevel();
 
                 if (builtins.get().isBuiltinKLabel(kLabelConstant)) {
                     try {
@@ -433,9 +434,9 @@ public class KItem extends Term implements KItemRepresentation {
                         Term result = builtins.get().invoke(context, kLabelConstant, arguments);
                         if (result != null && !result.equals(kItem)) {
                             Term evalResult = result.evaluate(context);
-                            if (evalResult != result && context.global().javaExecutionOptions.logRulesPublic) {
-                                System.err.format("\nEvaluated builtin KLabel, lvl %d\n" +
-                                        "-------------------------\n", kItem.profiler.resFuncNanoTimer.getLevel());
+                            if (context.global().javaExecutionOptions.logRulesPublic) {
+                                System.err.format("\nKItem lvl %d, %23s: %s\n",
+                                        nestingLevel, "builtin evaluation", kLabelConstant);
                             }
                             kItem.profiler.evalFuncBuiltinCounter.increment();
                             return evalResult;
@@ -480,6 +481,13 @@ public class KItem extends Term implements KItemRepresentation {
                     Term result = null;
                     Term owiseResult = null;
                     Rule appliedRule = null;
+                    if (kItem.global.javaExecutionOptions.logRulesPublic) {
+                        if (nestingLevel == 1) {
+                            System.err.print("-------------------------\n");
+                        }
+                        System.err.format("KItem lvl %d, %23s: %s\n",
+                                nestingLevel, "starting evaluation", kLabelConstant);
+                    }
 
                     // an argument is concrete if it doesn't contain variables or unresolved functions
                     boolean isConcrete = kList.getContents().stream().filter(elem -> !elem.isGround() || !elem.isNormal()).collect(Collectors.toList()).isEmpty();
@@ -512,8 +520,8 @@ public class KItem extends Term implements KItemRepresentation {
                                 solution = matches.get(0);
                             }
                             if (context.global().javaExecutionOptions.logRulesPublic) {
-                                System.err.format("\nApplying function rule, lvl %d\n" +
-                                        "-------------------------\n", kItem.profiler.resFuncNanoTimer.getLevel());
+                                System.err.format("\nKItem lvl %d, %23s: %s, source: %s\n",
+                                        nestingLevel, "function rule applying", kLabelConstant, rule.getSource());
                             }
 
                             /* rename fresh variables of the rule */
@@ -559,11 +567,9 @@ public class KItem extends Term implements KItemRepresentation {
                             }
 
                             if (kItem.global.javaExecutionOptions.logRulesPublic) {
-                                String msg = result != null ? "Rule applied" : "Rule application failed";
-                                System.err.format("\n%s, lvl %d\n", msg,
-                                        kItem.profiler.resFuncNanoTimer.getLevel());
+                                String msg = result != null ? "rule applied" : "rule application failed";
+                                System.err.format("\nKItem lvl %d, %23s: %s\n", nestingLevel, msg, kLabelConstant);
                                 RuleSourceUtil.printRuleAndSource(rule);
-                                System.err.println("-------------------------");
                             }
 
                             /*
@@ -595,18 +601,20 @@ public class KItem extends Term implements KItemRepresentation {
                         }
                     }
 
+                    processMatchResult:
                     if (result != null) {
                         if (kItem.global.javaExecutionOptions.logFunctionTargetPublic) {
                             System.err.format(""
-                                    + "KItem evaluated: %s\n"
-                                    + "             to: %s\n", kItem, result);
+                                    + "KItem lvl %d, %23s: %s\n"
+                                    + "             %23s: %s\n", nestingLevel, "evaluated", kItem, "to", result);
                         }
                         kItem.profiler.evalFuncRuleCounter.increment();
                         return result;
                     } else if (owiseResult != null) {
+                        boolean anyRegRuleUnify = false;
                         if (!kItem.isGround()) {
                             if (context.global().stage != Stage.REWRITING) {
-                                return kItem;
+                                break processMatchResult;
                             }
 
                             /*
@@ -629,12 +637,24 @@ public class KItem extends Term implements KItemRepresentation {
                                         context);
                                 if (!subject.unify(pattern, null,
                                         new FormulaContext(FormulaContext.Kind.OwiseRule, rule)).isEmpty()) {
-                                    return kItem;
+                                    anyRegRuleUnify = true;
+                                    break;
                                 }
                             }
                         }
-                        kItem.profiler.evalFuncOwiseCounter.increment();
-                        return owiseResult;
+                        if (!anyRegRuleUnify) {
+                            if (kItem.global.javaExecutionOptions.logFunctionTargetPublic) {
+                                System.err.format(""
+                                                + "KItem lvl %d, %23s: %s\n"
+                                                + "             %23s: %s\n",
+                                        nestingLevel, "evaluated (owise)", kItem, "to", owiseResult);
+                            }
+                            kItem.profiler.evalFuncOwiseCounter.increment();
+                            return owiseResult;
+                        }
+                    }
+                    if (kItem.global.javaExecutionOptions.logFunctionTargetPublic) {
+                        System.err.format("KItem lvl %d, %23s: %s\n", nestingLevel, "no rule applicable", kItem);
                     }
                     kItem.profiler.evalFuncNoRuleApplicableCounter.increment();
                 } else {
