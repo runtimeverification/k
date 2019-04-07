@@ -434,10 +434,7 @@ public class KItem extends Term implements KItemRepresentation {
                         Term result = builtins.get().invoke(context, kLabelConstant, arguments);
                         if (result != null && !result.equals(kItem)) {
                             Term evalResult = result.evaluate(context);
-                            if (context.global().javaExecutionOptions.logRulesPublic) {
-                                System.err.format("\nKItem lvl %d, %23s: %s\n",
-                                        nestingLevel, "builtin evaluation", kLabelConstant);
-                            }
+                            KItemLog.logBuiltinEval(kLabelConstant, nestingLevel, kItem.global);
                             kItem.profiler.evalFuncBuiltinCounter.increment();
                             return evalResult;
                         }
@@ -481,13 +478,7 @@ public class KItem extends Term implements KItemRepresentation {
                     Term result = null;
                     Term owiseResult = null;
                     Rule appliedRule = null;
-                    if (kItem.global.javaExecutionOptions.logRulesPublic) {
-                        if (nestingLevel == 1) {
-                            System.err.print("-------------------------\n");
-                        }
-                        System.err.format("KItem lvl %d, %23s: %s\n",
-                                nestingLevel, "starting evaluation", kLabelConstant);
-                    }
+                    KItemLog.logStartingEval(kLabelConstant, nestingLevel, kItem.global);
 
                     // an argument is concrete if it doesn't contain variables or unresolved functions
                     boolean isConcrete = kList.getContents().stream().filter(elem -> !elem.isGround() || !elem.isNormal()).collect(Collectors.toList()).isEmpty();
@@ -519,10 +510,7 @@ public class KItem extends Term implements KItemRepresentation {
                                 }
                                 solution = matches.get(0);
                             }
-                            if (context.global().javaExecutionOptions.logRulesPublic) {
-                                System.err.format("\nKItem lvl %d, %23s: %s, source: %s\n",
-                                        nestingLevel, "function rule applying", kLabelConstant, rule.getSource());
-                            }
+                            KItemLog.logApplyingFuncRule(kLabelConstant, nestingLevel, rule, kItem.global);
 
                             /* rename fresh variables of the rule */
                             boolean hasFreshVars = false;
@@ -566,11 +554,8 @@ public class KItem extends Term implements KItemRepresentation {
                                 appliedRule = rule;
                             }
 
-                            if (kItem.global.javaExecutionOptions.logRulesPublic) {
-                                String msg = result != null ? "rule applied" : "rule application failed";
-                                System.err.format("\nKItem lvl %d, %23s: %s\n", nestingLevel, msg, kLabelConstant);
-                                RuleSourceUtil.printRuleAndSource(rule);
-                            }
+                            KItemLog.logRuleApplied(kLabelConstant, nestingLevel, result != null, rule,
+                                    kItem.global);
 
                             /*
                              * If the function definitions do not need to be deterministic, try them in order
@@ -603,11 +588,7 @@ public class KItem extends Term implements KItemRepresentation {
 
                     processMatchResult:
                     if (result != null) {
-                        if (kItem.global.javaExecutionOptions.logFunctionTargetPublic) {
-                            System.err.format(""
-                                    + "KItem lvl %d, %23s: %s\n"
-                                    + "             %23s: %s\n", nestingLevel, "evaluated", kItem, "to", result);
-                        }
+                        KItemLog.logEvaluated(kItem, result, nestingLevel);
                         kItem.profiler.evalFuncRuleCounter.increment();
                         return result;
                     } else if (owiseResult != null) {
@@ -643,19 +624,12 @@ public class KItem extends Term implements KItemRepresentation {
                             }
                         }
                         if (!anyRegRuleUnify) {
-                            if (kItem.global.javaExecutionOptions.logFunctionTargetPublic) {
-                                System.err.format(""
-                                                + "KItem lvl %d, %23s: %s\n"
-                                                + "             %23s: %s\n",
-                                        nestingLevel, "evaluated (owise)", kItem, "to", owiseResult);
-                            }
+                            KItemLog.logEvaluatedOwise(kItem, owiseResult, nestingLevel);
                             kItem.profiler.evalFuncOwiseCounter.increment();
                             return owiseResult;
                         }
                     }
-                    if (kItem.global.javaExecutionOptions.logFunctionTargetPublic) {
-                        System.err.format("KItem lvl %d, %23s: %s\n", nestingLevel, "no rule applicable", kItem);
-                    }
+                    KItemLog.logNoRuleApplicable(kItem, nestingLevel);
                     kItem.profiler.evalFuncNoRuleApplicableCounter.increment();
                 } else {
                     kItem.profiler.evalFuncNoRuleCounter.increment();
@@ -758,9 +732,8 @@ public class KItem extends Term implements KItemRepresentation {
                     Term rightHandSide = rule.rightHandSide();
                     rightHandSide = rightHandSide.substituteAndEvaluate(solution, context);
 
-                    if (global.javaExecutionOptions.logRulesPublic) {
-                        RuleSourceUtil.printRuleAndSource(rule);
-                    }
+                    KItemLog.logAnywhereRule(kLabelConstant, profiler.applyAnywhereRulesNanoTimer.getLevel(),
+                            rule, global);
                     profiler.applyAnywhereRuleCounter.increment();
                     return rightHandSide;
                 } finally {
