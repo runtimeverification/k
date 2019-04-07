@@ -3,6 +3,9 @@ package org.kframework.backend.java.kil;
 
 import org.kframework.backend.java.util.RuleSourceUtil;
 
+import java.util.ArrayList;
+import java.util.Collections;
+
 /**
  * @author Denis Bogdanas
  * Created on 07-Apr-19.
@@ -10,9 +13,20 @@ import org.kframework.backend.java.util.RuleSourceUtil;
 public class KItemLog {
     private KItemLog() {}
 
+    private static ArrayList<String> indents = new ArrayList<>(Collections.singleton(""));
+
+    private static synchronized String indent(int n) {
+        if (!(n < indents.size())) {
+            for (int i = indents.size(); i <= n; i++) {
+                indents.add(indents.get(i - 1) + "  ");
+            }
+        }
+        return indents.get(n);
+    }
+
     static void logBuiltinEval(KLabelConstant kLabelConstant, int nestingLevel, GlobalContext global) {
         if (global.javaExecutionOptions.logRulesPublic) {
-            System.err.format("\nKItem lvl %d, %23s: %s\n",
+            System.err.format("\n%sKItem lvl %d, %23s: %s\n", indent(nestingLevel - 1),
                     nestingLevel, "builtin evaluation", kLabelConstant);
         }
     }
@@ -22,7 +36,7 @@ public class KItemLog {
             if (nestingLevel == 1) {
                 System.err.print("\n-------------------------");
             }
-            System.err.format("\nKItem lvl %d, %23s: %s\n",
+            System.err.format("\n%sKItem lvl %d, %23s: %s\n", indent(nestingLevel - 1),
                     nestingLevel, "starting evaluation", kLabelConstant);
         }
     }
@@ -30,8 +44,8 @@ public class KItemLog {
     static void logApplyingFuncRule(KLabelConstant kLabelConstant, int nestingLevel,
                                     Rule rule, GlobalContext global) {
         if (global.javaExecutionOptions.logRulesPublic) {
-            System.err.format("\nKItem lvl %d, %23s: %s, source: %s\n",
-                    nestingLevel, "function rule applying", kLabelConstant, rule.getSource());
+            System.err.format("\n%sKItem lvl %d, %23s: %s, source: %s %s\n", indent(nestingLevel - 1),
+                    nestingLevel, "function rule applying", kLabelConstant, rule.getSource(), rule.getLocation());
         }
     }
 
@@ -53,19 +67,23 @@ public class KItemLog {
 
     static void logNoRuleApplicable(KItem kItem, int nestingLevel) {
         if (kItem.globalContext().javaExecutionOptions.logFunctionTargetPublic) {
-            System.err.format("KItem lvl %d, %23s: %s\n", nestingLevel, "no rule applicable", kItem);
+            System.err
+                    .format("%sKItem lvl %d, %23s: %s\n", indent(nestingLevel - 1), nestingLevel, "no rule applicable",
+                            kItem);
         }
     }
 
     private static void logEvaluatedImpl(KItem kItem, Term result, int nestingLevel, String evaluated) {
         if (kItem.globalContext().javaExecutionOptions.logRulesPublic) {
             String formatStr = "" +
-                    "KItem lvl %d, %23s: %s\n"
-                    + "             %23s: %s\n";
+                    "%sKItem lvl %d, %23s: %s\n"
+                    + "%s             %23s: %s\n";
             if (kItem.globalContext().javaExecutionOptions.logFunctionTargetPublic) {
-                System.err.format(formatStr, nestingLevel, evaluated, kItem, "to", result);
+                System.err.format(formatStr, indent(nestingLevel - 1), nestingLevel, evaluated, kItem,
+                        indent(nestingLevel - 1), "to", result);
             } else {
-                System.err.format(formatStr, nestingLevel, evaluated, kItem.klabel(), "to",
+                System.err.format(formatStr, indent(nestingLevel - 1), nestingLevel, evaluated, kItem.klabel(),
+                        indent(nestingLevel - 1), "to",
                         result instanceof KItem ? ((KItem) result).klabel() : result);
             }
         }
@@ -78,7 +96,7 @@ public class KItemLog {
     }
 
     private static void logRuleApplying(KLabelConstant kLabelConstant, int nestingLevel, Rule rule, String msg) {
-        System.err.format("\nKItem lvl %d, %23s: %s\n", nestingLevel, msg, kLabelConstant);
+        System.err.format("\n%sKItem lvl %d, %23s: %s\n", indent(nestingLevel - 1), nestingLevel, msg, kLabelConstant);
         RuleSourceUtil.printRuleAndSource(rule);
     }
 }
