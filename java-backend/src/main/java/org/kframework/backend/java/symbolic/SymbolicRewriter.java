@@ -172,18 +172,21 @@ public class SymbolicRewriter {
         }
         List<FastRuleMatcher.RuleMatchResult> matches = theFastMatcher.matchRulePattern(
                 subject,
-                definition.automaton.leftHandSide(),
                 allRuleBits,
                 narrowing,
                 computeOne,
                 transitions,
                 proofFlag,
                 subject.termContext(), step);
+        if (global.javaExecutionOptions.logRulesPublic) {
+            System.err.format("\nRegular rule processing matched phase, step %d\n" +
+                    "==========================================\n", step);
+        }
         for (FastRuleMatcher.RuleMatchResult matchResult : matches) {
             Rule rule = definition.ruleTable.get(matchResult.ruleIndex);
             global.stateLog.log(StateLog.LogEvent.RULEATTEMPT, rule.toKRewrite(), subject.term(), subject.constraint());
             if (global.javaExecutionOptions.logRulesPublic) {
-                System.err.print("\nRegular rule: matched:\n-------------------------\n");
+                System.err.print("\nRegular rule: processing matched:\n-------------------------\n");
                 RuleSourceUtil.printRuleAndSource(rule);
             }
 
@@ -667,12 +670,16 @@ public class SymbolicRewriter {
                     v++;
                     term.termContext().setTopConstraint(null); //To remove leftover constraint from previous step
                     boolean boundaryCellsMatchTarget =
-                            boundaryCellsMatchTarget(term, boundaryPattern, targetBoundarySub);
+                            boundaryCellsMatchTarget(term, boundaryPattern, targetBoundarySub, step);
                     //var required to avoid logging the same step multiple times.
                     alreadyLogged = logStep(step, v, term,
                             step == 1 || boundaryCellsMatchTarget, false, initialTerm);
                     if (boundaryPattern == null || boundaryCellsMatchTarget) {
                         //Only test the full implication if there is no boundary pattern or if it is matched.
+                        if (global.javaExecutionOptions.logRulesPublic) {
+                            System.err.format("\nRegular rule final implication phase, step %d\n" +
+                                    "==========================================\n", step);
+                        }
                         if (term.implies(targetTerm, rule, !(boundaryPattern == null))) {
                             //If current term matches the target term, current execution path is proved.
                             global.stateLog.log(StateLog.LogEvent.REACHPROVED, term.term(), term.constraint());
@@ -738,10 +745,6 @@ public class SymbolicRewriter {
                         }
                     }
 
-                    if (global.javaExecutionOptions.logRulesPublic) {
-                        System.err.println("\nRegular rule application phase\n" +
-                                "==========================================\n");
-                    }
                     List<ConstrainedTerm> results = fastComputeRewriteStep(term, false, true, true, step,
                             initialTerm);
                     if (results.isEmpty()) {
@@ -1044,9 +1047,13 @@ public class SymbolicRewriter {
      * test if the full current term matches the target.
      */
     public boolean boundaryCellsMatchTarget(ConstrainedTerm term, Rule boundaryPattern,
-                                            List<Substitution<Variable, Term>> targetBoundarySub) {
+                                            List<Substitution<Variable, Term>> targetBoundarySub, int step) {
         if (boundaryPattern == null) {
             return false;
+        }
+        if (global.javaExecutionOptions.logRulesPublic) {
+            System.err.format("\nRegular rule match boundary phase, step %d\n" +
+                    "==========================================\n", step);
         }
         List<Substitution<Variable, Term>> termBoundarySub = getBoundarySubstitution(term, boundaryPattern);
         if (targetBoundarySub.size() != termBoundarySub.size()) {

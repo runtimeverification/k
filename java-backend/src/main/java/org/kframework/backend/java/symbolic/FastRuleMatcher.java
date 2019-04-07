@@ -96,7 +96,6 @@ public class FastRuleMatcher {
      */
     public List<RuleMatchResult> matchRulePattern(
             ConstrainedTerm subject,
-            Term pattern,
             BitSet ruleMask,
             boolean narrowing,
             boolean computeOne,
@@ -107,8 +106,17 @@ public class FastRuleMatcher {
         ruleMask.stream().forEach(i -> constraints[i] = ConjunctiveFormula.of(context.global()));
         empty = BitSet.apply(ruleCount);
 
-        BitSet theMatchingRules = matchAndLog(subject.term(), pattern, ruleMask, List(), false);
+        if (global.javaExecutionOptions.logRulesPublic) {
+            System.err.format("\nRegular rule automaton phase, step %d\n" +
+                    "==========================================\n", step);
+        }
+        Term automatonLHS = global.getDefinition().automaton.leftHandSide();
+        BitSet theMatchingRules = matchAndLog(subject.term(), automatonLHS, ruleMask, List(), false);
 
+        if (global.javaExecutionOptions.logRulesPublic) {
+            System.err.format("\nRegular rule attempting to match phase, step %d\n" +
+                    "==========================================\n", step);
+        }
         List<RuleMatchResult> structuralResults = new ArrayList<>();
         List<RuleMatchResult> transitionResults = new ArrayList<>();
         for (int i = theMatchingRules.nextSetBit(0); i >= 0; i = theMatchingRules.nextSetBit(i + 1)) {
@@ -116,6 +124,10 @@ public class FastRuleMatcher {
             // skip over IO rules when in prove rules
             if (proveFlag && rule.att().contains("stream")) {
                 continue;
+            }
+            if (global.javaExecutionOptions.logRulesPublic) {
+                System.err.format("\nRegular rule: attempting to match: %s %s\n-------------------------\n",
+                        rule.getSource(), rule.getLocation());
             }
 
             // TODO(YilongL): remove TermContext from the signature once
@@ -133,7 +145,7 @@ public class FastRuleMatcher {
                     constraints[i],
                     subject.constraint(),
                     patternConstraint,
-                    Sets.union(getLeftHandSide(pattern, i).variableSet(), patternConstraint.variableSet()).stream()
+                    Sets.union(getLeftHandSide(automatonLHS, i).variableSet(), patternConstraint.variableSet()).stream()
                             .filter(v -> !v.name().equals(KOREtoBackendKIL.THE_VARIABLE))
                             .collect(Collectors.toSet()),
                     context, formulaContext);
@@ -143,6 +155,14 @@ public class FastRuleMatcher {
                     transitionResults.add(result);
                 } else {
                     structuralResults.add(result);
+                }
+            }
+            if (global.javaExecutionOptions.logRulesPublic) {
+                if (ruleResults.isEmpty()) {
+                    System.err.format("\nRegular rule: matching failed %s %s\n", rule.getSource(), rule.getLocation());
+                } else {
+                    System.err.format("\nRegular rule: matching successful(%d times), %s %s\n",
+                            ruleResults.size(), rule.getSource(), rule.getLocation());
                 }
             }
         }
