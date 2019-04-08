@@ -10,8 +10,7 @@ public class RemoveBracketVisitor extends SafeTransformer {
     public Term apply(TermCons tc) {
         if (tc.production().att().contains("bracket") ||
                 tc.production().klabel().get().name().equals("#SyntacticCast") ||
-                tc.production().klabel().get().name().equals("#InnerCast") ||
-                tc.production().klabel().get().name().equals("#OuterCast"))
+                tc.production().klabel().get().name().equals("#InnerCast"))
         {
             return apply(tc.get(0));
         }

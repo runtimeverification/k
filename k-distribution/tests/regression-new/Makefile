@@ -40,6 +40,7 @@ SUBDIRS=issue-2273 \
 	profile \
 	ffi-llvm \
 	ite-bug \
+	cast \
 
 
 include ../../include/ktest-group.mak
