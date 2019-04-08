@@ -1131,7 +1131,7 @@ module STDOUT-STREAM
   // Send first char from the buffer to the server
   rule [stdoutWrite]:
        <stdout>
-       ListItem(#ostream({(.K => #write(N, S)) ~> N:Int}:>Int))
+       ListItem(#ostream(N:Int => {#write(N, S) ~> N:Int}:>Int))
        ListItem("on")
        ListItem(#buffer(S:String => ""))
        _:List

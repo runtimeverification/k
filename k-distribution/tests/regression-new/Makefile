@@ -39,5 +39,8 @@ SUBDIRS=issue-2273 \
 	map-symbolic-tests \
 	profile \
 	ffi-llvm \
+	ite-bug \
+	cast \
+
 
 include ../../include/ktest-group.mak

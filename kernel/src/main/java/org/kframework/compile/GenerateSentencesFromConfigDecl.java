@@ -217,22 +217,6 @@ public class GenerateSentencesFromConfigDecl {
         }
     }
 
-    private static KLabel getProjectLbl(Sort sort, Module m) {
-        KLabel lbl;
-        lbl = KLabel("project:" + sort.toString());
-        return lbl;
-    }
-
-    private static Set<Sentence> genProjection(Sort sort, Module m) {
-        KLabel lbl = getProjectLbl(sort, m);
-        KVariable var = KVariable("K", Att.empty().add(Sort.class, sort));
-        Rule r = Rule(KRewrite(KApply(lbl, var), var), BooleanUtils.TRUE, BooleanUtils.TRUE, Att().add("projection"));
-        if (m.definedKLabels().contains(lbl)) {
-            return Set(r);
-        }
-        return Set(Production(lbl, sort, Seq(Terminal(lbl.name()), Terminal("("), NonTerminal(Sorts.K()), Terminal(")")), Att().add("function").add("projection")), r);
-    }
-
     /**
      * Returns the body of an initializer for a leaf cell: replaces any configuration variables
      * with map lookups in the initialization map.
@@ -261,8 +245,7 @@ public class GenerateSentencesFromConfigDecl {
                     if (sort == null || sort.equals(Sorts.K())) {
                         return KApply(KLabel("Map:lookup"), INIT, k);
                     } else {
-                        h.sentences = (Set<Sentence>) h.sentences.$bar(genProjection(sort, m));
-                        return KApply(getProjectLbl(sort, m), KApply(KLabel("Map:lookup"), INIT, k));
+                        return KApply(GenerateSortProjections.getProjectLbl(sort, m), KApply(KLabel("Map:lookup"), INIT, k));
                     }
                 }
                 return k;
