@@ -31,6 +31,7 @@ import org.kframework.backend.java.util.StateLog;
 import org.kframework.backend.java.util.TimeMemoryEntry;
 import org.kframework.backend.java.utils.BitSet;
 import org.kframework.builtin.KLabels;
+import org.kframework.builtin.Rules;
 import org.kframework.kore.FindK;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -132,7 +133,7 @@ public class SymbolicRewriter {
             topOfStrategyCell = ((KApply) topOfStrategyCell).klist().items().get(0);
         }
         boolean isStuck = !(topOfStrategyCell instanceof KApply) ||
-                ((KApply) topOfStrategyCell).klabel().name().equals(Att.stuck());
+                ((KApply) topOfStrategyCell).klabel().name().equals(KLabels.STUCK.name());
 
 
         // if we are stuck (i.e., in this method) and the #STUCK marker is the top of the strategy cell, do nothing
@@ -144,7 +145,7 @@ public class SymbolicRewriter {
 
         Att emptyAtt = Att.empty();
 
-        K stuck = constructor.KApply1(constructor.KLabel(Att.stuck()), constructor.KList(Collections.emptyList()), emptyAtt);
+        K stuck = constructor.KApply1(KLabels.STUCK, constructor.KList(Collections.emptyList()), emptyAtt);
         List<K> items = new LinkedList<>(((KApply) theStrategy.get()).klist().items());
         items.add(0, stuck);
         K sContent = constructor.KApply1(constructor.KLabel(KLabels.KSEQ), constructor.KList(items), emptyAtt);
@@ -152,8 +153,9 @@ public class SymbolicRewriter {
         Term entireConf = constructor.KApply1(((KApply) subject.term()).klabel(),
                 constructor.KList(((KApply) subject.term()).klist().stream().map(k ->
                         k instanceof KApply && ((KApply) k).klabel().name().contains(Strategy.strategyCellName()) ? s : k).collect(Collectors.toList())), emptyAtt);
-        return Optional.of(new ConstrainedTerm(entireConf, subject.termContext()));
-
+        ConstrainedTerm stuckTerm = new ConstrainedTerm(entireConf, subject.constraint(), subject.termContext());
+        global.stateLog.log(StateLog.LogEvent.RULE, Rules.STUCK_RULE, subject.term(), subject.constraint(), stuckTerm.term(), stuckTerm.constraint());
+        return Optional.of(stuckTerm);
     }
 
     /**
