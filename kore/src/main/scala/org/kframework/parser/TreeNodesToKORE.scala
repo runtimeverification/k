@@ -39,7 +39,8 @@ class TreeNodesToKORE(parseSort: java.util.function.Function[String, Sort], stri
       KApply(p.klabel.get, KList(realItems.asJava), locationToAtt(t.location, t.source).add(classOf[Production], realProd))
     } else {
       val realProd = if (p.att.contains("originalPrd", classOf[Production])) p.att.get("originalPrd", classOf[Production]) else p
-      KApply(p.klabel.get, KList(new util.ArrayList(items).asScala.reverse map apply asJava), locationToAtt(t.location, t.source).add(classOf[Production], realProd))
+      val klabel = if (p.klabel.get.name == "#OuterCast") KLabel("project:" ++ p.sort.toString) else p.klabel.get
+      KApply(klabel, KList(new util.ArrayList(items).asScala.reverse map apply asJava), locationToAtt(t.location, t.source).add(classOf[Production], realProd))
     }
   }
 
