@@ -5,6 +5,7 @@ import com.google.common.collect.Sets;
 import org.kframework.POSet;
 import org.kframework.builtin.KLabels;
 import org.kframework.definition.Production;
+import org.kframework.kil.loader.Constants;
 import org.kframework.kore.KLabel;
 import org.kframework.parser.SafeTransformer;
 import org.kframework.parser.SetsTransformerWithErrors;
@@ -42,7 +43,8 @@ public class ResolveOverloadedTerminators extends SetsTransformerWithErrors<Pars
                 return Left.apply(Sets.newHashSet(new ParseFailedException(ex)));
             }
             Production prod = candidates.iterator().next();
-            prod = Production(prod.klabel(), prod.sort(), prod.items(), prod.att().add("originalPrd", Production.class, tc.production()));
+            prod = Production(prod.klabel(), prod.sort(), prod.items(), prod.att()
+                    .add(Constants.ORIGINAL_PRD, Production.class, tc.production()));
             return super.apply(TermCons.apply(tc.items(), prod, tc.location(), tc.source()));
         }
         return super.apply(tc);

@@ -2,7 +2,8 @@
 module TEST
     imports DOMAINS
     imports STRATEGY
-    imports BASIC-STRATEGY
+    imports STRATEGY-ABSTRACT
+    imports RULE-TAG-SYNTAX
 
     configuration
       <TEST>

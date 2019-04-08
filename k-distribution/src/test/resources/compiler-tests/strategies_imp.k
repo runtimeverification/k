@@ -5,7 +5,8 @@ module IMP-SYNTAX
   imports ID
   imports INT-SYNTAX
   imports BOOL-SYNTAX
-  imports BASIC-STRATEGY
+  imports STRATEGY-ABSTRACT
+  imports RULE-TAG-SYNTAX
 
   syntax AExp  ::= Int | Id
                  | AExp "/" AExp              [left, strict]
