@@ -122,7 +122,7 @@ public abstract class KCollection extends Collection implements Iterable<Term>, 
      * @return the resulting term after kind promotion
      */
     public static Term upKind(Term term, Kind kind) {
-        assert term.kind() == Kind.KITEM || term.kind() == Kind.K || term.kind() == Kind.KLIST;
+        assert term.kind() == Kind.KITEM || term.kind() == Kind.K || term.kind() == Kind.KLIST : "Bad term not a k: " + term;
         assert kind == Kind.KITEM || kind == Kind.K || kind == Kind.KLIST;
 
         if (term.kind() == kind) {

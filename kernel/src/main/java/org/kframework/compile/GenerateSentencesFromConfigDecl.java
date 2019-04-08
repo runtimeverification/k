@@ -16,6 +16,7 @@ import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.definition.SyntaxSort;
 import org.kframework.kil.Attribute;
+import org.kframework.kil.loader.Constants;
 import org.kframework.kore.*;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
@@ -119,7 +120,9 @@ public class GenerateSentencesFromConfigDecl {
                             Sort sort = Sort(getSortOfCell(cellName));
                             Option<Set<Production>> initializerProduction = m.productionsFor().get(KLabel(getInitLabel(sort)));
                             if (initializerProduction.isDefined()) {
-                                Set<Production> realProds = stream(initializerProduction.get()).filter(p -> !p.att().contains("recordPrd", Production.class)).collect(Collections.toSet());
+                                Set<Production> realProds = stream(initializerProduction.get())
+                                        .filter(p -> !p.att().contains(Constants.RECORD_PRD, Production.class))
+                                        .collect(Collections.toSet());
                                 if (realProds.size() == 1) { // should be only a single initializer
                                     if (realProds.head().items().size() == 1) {
                                         // XCell ::= "initXCell"
@@ -214,22 +217,6 @@ public class GenerateSentencesFromConfigDecl {
         }
     }
 
-    private static KLabel getProjectLbl(Sort sort, Module m) {
-        KLabel lbl;
-        lbl = KLabel("project:" + sort.toString());
-        return lbl;
-    }
-
-    private static Set<Sentence> genProjection(Sort sort, Module m) {
-        KLabel lbl = getProjectLbl(sort, m);
-        KVariable var = KVariable("K", Att.empty().add(Sort.class, sort));
-        Rule r = Rule(KRewrite(KApply(lbl, var), var), BooleanUtils.TRUE, BooleanUtils.TRUE, Att().add("projection"));
-        if (m.definedKLabels().contains(lbl)) {
-            return Set(r);
-        }
-        return Set(Production(lbl, sort, Seq(Terminal(lbl.name()), Terminal("("), NonTerminal(Sorts.K()), Terminal(")")), Att().add("function").add("projection")), r);
-    }
-
     /**
      * Returns the body of an initializer for a leaf cell: replaces any configuration variables
      * with map lookups in the initialization map.
@@ -258,8 +245,7 @@ public class GenerateSentencesFromConfigDecl {
                     if (sort == null || sort.equals(Sorts.K())) {
                         return KApply(KLabel("Map:lookup"), INIT, k);
                     } else {
-                        h.sentences = (Set<Sentence>) h.sentences.$bar(genProjection(sort, m));
-                        return KApply(getProjectLbl(sort, m), KApply(KLabel("Map:lookup"), INIT, k));
+                        return KApply(GenerateSortProjections.getProjectLbl(sort, m), KApply(KLabel("Map:lookup"), INIT, k));
                     }
                 }
                 return k;
