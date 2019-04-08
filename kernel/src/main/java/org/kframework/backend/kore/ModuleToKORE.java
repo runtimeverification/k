@@ -25,6 +25,7 @@ import org.kframework.definition.ProductionItem;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kil.Attribute;
+import org.kframework.kil.loader.Constants;
 import org.kframework.kore.InjectedKLabel;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -931,7 +932,7 @@ public class ModuleToKORE {
     }
 
     private boolean isFunction(Production prod) {
-        Production realProd = prod.att().get("originalPrd", Production.class);
+        Production realProd = prod.att().get(Constants.ORIGINAL_PRD, Production.class);
         if (!realProd.att().contains(Attribute.FUNCTION_KEY)) {
             return false;
         }
@@ -981,7 +982,7 @@ public class ModuleToKORE {
 
     private Production computePolyProd(Production prod, KApply k) {
         if (prod.klabel().isEmpty() || !prod.att().contains("poly"))
-            return prod.withAtt(prod.att().add("originalPrd", Production.class, prod));
+            return prod.withAtt(prod.att().add(Constants.ORIGINAL_PRD, Production.class, prod));
         List<Set<Integer>> poly = RuleGrammarGenerator.computePositions(prod);
         polyKLabels.put(prod.klabel().get().name(), poly);
         List<Sort> params = new ArrayList<>();
@@ -1017,7 +1018,8 @@ public class ModuleToKORE {
                 items.add(item);
             }
         }
-        return Production(KLabel(prod.klabel().get().name(), immutable(params)), returnSort, immutable(items), prod.att().add("originalPrd", Production.class, prod));
+        return Production(KLabel(prod.klabel().get().name(), immutable(params)), returnSort, immutable(items),
+                prod.att().add(Constants.ORIGINAL_PRD, Production.class, prod));
     }
 
     private KLabel computePolyKLabel(KApply k) {
@@ -1038,9 +1040,8 @@ public class ModuleToKORE {
 
 
     private void collectAttributes(Map<String, Boolean> attributes, Att att) {
-        for (Tuple2<Tuple2<String, Class<?>>, ?> attribute : iterable(att.att())) {
+        for (Tuple2<Tuple2<String, String>, ?> attribute : iterable(att.att())) {
             String name = attribute._1._1;
-            Class<?> cls = attribute._1._2;
             Object val = attribute._2;
             String strVal = val.toString();
             if (strVal.equals("")) {
@@ -1160,13 +1161,13 @@ public class ModuleToKORE {
     private void convert(Map<String, Boolean> attributes, Att att) {
         sb.append("[");
         String conn = "";
-        for (Tuple2<Tuple2<String, Class<?>>, ?> attribute : iterable(att.att())) {
+        for (Tuple2<Tuple2<String, String>, ?> attribute : iterable(att.att())) {
             String name = attribute._1._1;
-            Class<?> cls = attribute._1._2;
+            String clsName = attribute._1._2;
             Object val = attribute._2;
             String strVal = val.toString();
             sb.append(conn);
-            if (cls.equals(K.class)) {
+            if (clsName.equals(K.class.getName())) {
                 convert(name);
                 sb.append("{}(");
                 convert((K) val);
