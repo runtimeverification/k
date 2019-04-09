@@ -206,7 +206,7 @@ public class MetaK {
      * @param termContext the term context
      * @return backend AST
      */
-    public static Term parseKore(StringToken kast, TermContext termContext) {
+    public static Term parseAST(StringToken kast, TermContext termContext) {
         return termContext.getKOREtoBackendKILConverter().convert(KoreParser.parse(kast.stringValue(), termContext.getSource()));
     }
 

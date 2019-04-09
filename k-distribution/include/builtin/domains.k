@@ -863,7 +863,7 @@ endmodule
 module META
   imports STRING-SYNTAX
   // Takes as input a string and returns a K term
-  syntax KItem ::= #parseKore(String) [function, hook(META.parseKore), impure]
+  syntax KItem ::= #parseAST(String) [function, hook(META.parseAST), impure]
 endmodule
 
 module K-IO
