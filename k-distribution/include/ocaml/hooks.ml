@@ -296,6 +296,12 @@ struct
       in
       [KApply3((parse_klabel "#systemResult(_,_,_)_K-IO"), [Int (Z.of_int exit_code)], [String (Buffer.contents buf_out)], [String (Buffer.contents buf_err)])]
   let hook_loadDefinition _ _ _ _ _ = raise Not_implemented
+  let hook_tempFilename c _ _ _ _ = match c with
+    | [String prefix], [String suffix] -> [String (Filename.temp_file prefix suffix)]
+    | _ -> raise Not_implemented
+  let hook_remove c _ _ _ _ = match c with
+    | [String fname] -> Sys.remove fname ; []
+    | _ -> raise Not_implemented
 
 end
 

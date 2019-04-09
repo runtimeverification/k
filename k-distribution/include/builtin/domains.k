@@ -986,6 +986,10 @@ module K-IO
                  | "#systemResult" "(" Int /* exit code */ "," String /* stdout */ "," String /* stderr */ ")"
 
   syntax K ::= #logToFile(String, String) [function, functional, hook(IO.log), impure, returnsUnit]
+  // #tempFilename ( prefix:String, suffix:String):String - creates a temporary file in the default system location
+  syntax String ::= #tempFilename(String, String)  [function, functional, hook(IO.tempFilename), impure]
+  syntax KItem ::= #remove(String) [function, functional, hook(IO.remove), impure, returnsUnit]
+
 
   syntax String ::= #projectString(IOString) [function]
   rule #projectString(S:String) => S

@@ -122,7 +122,17 @@ public class BuiltinIOOperations {
         String stdout = output.stdout != null ? new String(output.stdout) : "";
         String stderr = output.stderr != null ? new String(output.stderr) : "";
         return KItem.of(klabel, KList.concatenate(IntToken.of(output.exitCode),
-            StringToken.of(stdout.trim()), StringToken.of(stderr.trim())), termContext.global());
+                StringToken.of(stdout.trim()), StringToken.of(stderr.trim())), termContext.global());
+    }
+
+    public static Term tempFilename(StringToken prefix, StringToken suffix, TermContext termContext) throws IOException {
+        return StringToken.of(File.createTempFile("tmp" + prefix.stringValue(), suffix.stringValue()).getAbsolutePath());
+    }
+
+    public static Term remove(StringToken fname, TermContext termContext) {
+        File f = new File(fname.stringValue());
+        f.delete();
+        return BuiltinList.kSequenceBuilder(termContext.global()).build();
     }
 
     private static KItem processIOException(String errno, Term klist, TermContext termContext) {
