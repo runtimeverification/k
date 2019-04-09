@@ -124,7 +124,23 @@ public class ResolveFunctionWithConfig {
         return prod;
     }
 
-    public K resolveConfigVar(K term) {
+    public K resolveConfigVar(K body, K requires, K ensures) {
+      FoldK<Boolean> hasConfig = new FoldK<Boolean>() {
+          @Override
+          public Boolean unit() {
+              return false;
+          }
+
+          @Override
+          public Boolean apply(KVariable k) {
+              return k.name().equals("_Configuration");
+          }
+
+          @Override
+          public Boolean merge(Boolean a, Boolean b) {
+              return a || b;
+          }
+      };
       if (new FoldK<Boolean>() {
             @Override
             public Boolean unit() {
@@ -140,34 +156,19 @@ public class ResolveFunctionWithConfig {
             public Boolean merge(Boolean a, Boolean b) {
                 return a || b;
             }
-        }.apply(term) && new FoldK<Boolean>() {
-            @Override
-            public Boolean unit() {
-                return false;
-            }
-
-            @Override
-            public Boolean apply(KVariable k) {
-                return k.name().equals("_Configuration");
-            }
-
-            @Override
-            public Boolean merge(Boolean a, Boolean b) {
-                return a || b;
-            }
-        }.apply(term)) {
-            K left = RewriteToTop.toLeft(term);
+        }.apply(body) && (hasConfig.apply(body) || hasConfig.apply(requires) || hasConfig.apply(ensures))) {
+            K left = RewriteToTop.toLeft(body);
             if (left instanceof KApply && ((KApply)left).klabel().equals(KLabels.GENERATED_TOP_CELL)) {
-                term = KRewrite(KAs(RewriteToTop.toLeft(term), CONFIG_VAR), RewriteToTop.toRight(term));
+                body = KRewrite(KAs(RewriteToTop.toLeft(body), CONFIG_VAR), RewriteToTop.toRight(body));
             }
         }
-        return term;
+        return body;
     }
 
     public Sentence resolveConfigVar(Sentence s) {
       if (s instanceof Rule) {
         Rule r = (Rule)s;
-        return Rule(resolveConfigVar(r.body()), r.requires(), r.ensures(), r.att());
+        return Rule(resolveConfigVar(r.body(), r.requires(), r.ensures()), r.requires(), r.ensures(), r.att());
       }
       return s;
     }
