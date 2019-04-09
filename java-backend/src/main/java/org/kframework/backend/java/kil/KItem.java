@@ -496,7 +496,8 @@ public class KItem extends Term implements KItemRepresentation {
                             }
 
                             Substitution<Variable, Term> solution;
-                            List<Substitution<Variable, Term>> matches = PatternMatcher.match(kItem, rule, context);
+                            List<Substitution<Variable, Term>> matches = PatternMatcher.match(kItem, rule, context,
+                                    "KItem", nestingLevel);
                             if (matches.isEmpty()) {
                                 continue;
                             } else {
@@ -720,7 +721,8 @@ public class KItem extends Term implements KItemRepresentation {
                     }
                     /* anywhere rules should be applied by pattern match rather than unification */
                     Map<Variable, Term> solution;
-                    List<Substitution<Variable, Term>> matches = PatternMatcher.match(this, rule, context);
+                    List<Substitution<Variable, Term>> matches = PatternMatcher.match(this, rule, context,
+                            "KItem anywhere", profiler.applyAnywhereRulesNanoTimer.getLevel());
                     if (matches.isEmpty()) {
                         continue;
                     } else {

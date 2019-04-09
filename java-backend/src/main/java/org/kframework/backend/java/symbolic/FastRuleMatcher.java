@@ -675,7 +675,8 @@ public class FastRuleMatcher {
         while (!queue.isEmpty()) {
             BuiltinMap candidate = queue.remove();
             for (Rule rule : global.getDefinition().patternFoldingRules()) {
-                for (Substitution<Variable, Term> substitution : PatternMatcher.match(candidate, rule, context)) {
+                for (Substitution<Variable, Term> substitution : PatternMatcher.match(candidate, rule, context,
+                        "unifyMap", 1)) {
                     BuiltinMap result = (BuiltinMap) rule.rightHandSide().substituteAndEvaluate(substitution, context);
                     if (foldedMaps.add(result)) {
                         queue.add(result);
