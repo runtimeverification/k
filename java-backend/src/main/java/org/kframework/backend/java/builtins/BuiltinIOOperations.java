@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.nio.charset.CharacterCodingException;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.tools.ant.types.Commandline;
 
 
 /**
@@ -114,16 +115,10 @@ public class BuiltinIOOperations {
 
     public static Term system(StringToken term, TermContext termContext) {
         Map<String, String> environment = new HashMap<>();
-        String[] args = term.stringValue().split(" ", -1);
-        //for (String c : args) { System.out.println(c); }
+        String[] args = Commandline.translateCommandline(term.stringValue());
         ProcessOutput output = RunProcess.execute(environment, termContext.global().files.getProcessBuilder(), args);
 
         KLabelConstant klabel = KLabelConstant.of(KORE.KLabel("#systemResult(_,_,_)_K-IO"), termContext.definition());
-        /*
-        String klabelString = "#systemResult(_,_,_)";
-        KLabelConstant klabel = KLabelConstant.of(klabelString, context);
-        assert def.kLabels().contains(klabel) : "No KLabel in definition for " + klabelString;
-        */
         String stdout = output.stdout != null ? new String(output.stdout) : "";
         String stderr = output.stderr != null ? new String(output.stderr) : "";
         return KItem.of(klabel, KList.concatenate(IntToken.of(output.exitCode),
