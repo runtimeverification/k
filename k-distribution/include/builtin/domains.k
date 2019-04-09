@@ -566,6 +566,7 @@ module STRING
 
   syntax String ::= Float2String ( Float )              [function, functional, hook(STRING.float2string)]
   syntax String ::= Float2String ( Float , String )     [function, klabel(FloatFormat), hook(STRING.floatFormat)]
+  syntax String ::= tokenToString( K )                  [function, hook(STRING.token2string)]
   syntax Float  ::= String2Float ( String )             [function, hook(STRING.string2float)]
   syntax Int    ::= String2Int   ( String )             [function, hook(STRING.string2int)]
   syntax String ::= Int2String   ( Int )                [function, functional, hook(STRING.int2string)]
