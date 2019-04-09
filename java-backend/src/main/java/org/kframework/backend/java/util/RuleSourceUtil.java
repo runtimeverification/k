@@ -37,8 +37,11 @@ public class RuleSourceUtil {
     }
 
     public static void appendRuleAndSource(Rule rule, Appendable out) {
+        appendRuleAndSource(rule, new Formatter(out));
+    }
+
+    public static void appendRuleAndSource(Rule rule, Formatter formatter) {
         File source = rule.source().isPresent() ? new File(rule.getSource().source()) : null;
-        Formatter formatter = new Formatter(out);
         if (sourceShortEnough(rule)) {
             formatter.format("%s\n", loadSource(rule));
         } else if (rule.source().isPresent()) {
@@ -46,6 +49,6 @@ public class RuleSourceUtil {
         } else {
             formatter.format("Rule with no source. toString() format:\n%s\n", rule.toString());
         }
-        formatter.format("\tSource: %s %s\n\n", source, rule.getLocation());
+        formatter.format("\tSource: %s %s\n", source, rule.getLocation());
     }
 }

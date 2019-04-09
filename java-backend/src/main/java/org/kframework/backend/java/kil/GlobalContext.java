@@ -19,12 +19,18 @@ import org.kframework.krun.KRunOptions;
 import org.kframework.krun.api.io.FileSystem;
 import org.kframework.main.GlobalOptions;
 import org.kframework.unparser.KPrint;
+import org.kframework.utils.StringUtil;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.options.SMTOptions;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.lang.invoke.MethodHandle;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.Formatter;
 import java.util.Map;
 
 public class GlobalContext implements Serializable {
@@ -49,6 +55,9 @@ public class GlobalContext implements Serializable {
     public final transient ToStringCache toStringCache = new ToStringCache();
 
     private boolean isExecutionPhase = true;
+
+    private transient Formatter log = new Formatter(System.err);
+    private transient Deque<Formatter> logStack = new ArrayDeque<>();
 
     public GlobalContext(
             FileSystem fs,
@@ -75,7 +84,8 @@ public class GlobalContext implements Serializable {
         this.equalityOps = new EqualityOperations(() -> def);
         prettyPrinter = new PrettyPrinter(kprint, coreDefinition);
         this.stateLog = new StateLog(javaExecutionOptions, files, prettyPrinter);
-        this.constraintOps = new SMTOperations(() -> def, smtOptions, new Z3Wrapper(smtOptions, kem, javaExecutionOptions, files, stateLog), kem, javaExecutionOptions);
+        this.constraintOps = new SMTOperations(() -> def, smtOptions,
+                new Z3Wrapper(smtOptions, kem, javaExecutionOptions, files, stateLog, this), kem, javaExecutionOptions);
         this.kItemOps = new KItemOperations(stage, javaExecutionOptions.deterministicFunctions, kem, this::builtins, globalOptions);
         this.stage = stage;
         this.profiler = profiler;
@@ -114,6 +124,29 @@ public class GlobalContext implements Serializable {
             profiler.logInitTime(this);
             javaExecutionOptions.logRulesPublic = javaExecutionOptions.logRules;
             javaExecutionOptions.logFunctionTargetPublic = javaExecutionOptions.logFunctionTarget;
+        }
+    }
+
+    public Formatter log() {
+        return log;
+    }
+
+    public void openLogWrapper() {
+        logStack.push(log);
+        log = new Formatter(new StringBuilder());
+    }
+
+    /**
+     * Flush the last log wrapper into the parent log, with all lines indented by {@code indent}.
+     */
+    public void flushLogWrapper(String indent) {
+        StringBuilder sb = (StringBuilder) log.out();
+        StringUtil.replaceAll(sb, "\n", "\n" + indent, false);
+        log = logStack.pop();
+        try {
+            log.out().append(sb);
+        } catch (IOException e) {
+            throw KEMException.criticalError(e.getMessage(), e);
         }
     }
 }

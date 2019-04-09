@@ -8,6 +8,7 @@ import org.kframework.backend.java.symbolic.ConjunctiveFormula;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Formatter;
 import java.util.Map;
 
 /**
@@ -71,34 +72,37 @@ public class FormulaContext {
     }
 
     public void printImplication(ConjunctiveFormula left, ConjunctiveFormula right, Boolean proved, boolean cached) {
+        Formatter log = left.globalContext().log();
         String cachedMsg = cached ? " (cached result)" : "";
         if (queryBuildFailure) {
-            System.err.format("\nZ3 Implication (%s) RHS dropped (cannot be proved)%s:\n%s\n", kind.label, cachedMsg,
+            log.format("\nZ3 Implication (%s) RHS dropped (cannot be proved)%s:\n%s\n", kind.label, cachedMsg,
                     right.toStringMultiline());
         } else if (proved) {
-            System.err.format("\nZ3 Implication (%s) RHS proved%s:\n%s\n", kind.label, cachedMsg, right.toStringMultiline());
+            log.format("\nZ3 Implication (%s) RHS proved%s:\n%s\n", kind.label, cachedMsg, right.toStringMultiline());
         } else {
-            System.err.format("\nZ3 Implication (%s) failed%s:\n%s\n  implies\n%s\n",
+            log.format("\nZ3 Implication (%s) failed%s:\n%s\n  implies\n%s\n",
                     kind.label, cachedMsg, left.toStringMultiline(), right.toStringMultiline());
         }
         if (rule != null) {
-            System.err.println("\nRule for formula above:");
-            RuleSourceUtil.printRuleAndSource(rule);
+            log.format("\nRule for formula above:\n");
+            RuleSourceUtil.appendRuleAndSource(rule, log);
         }
-        System.err.println("==================================");
+        log.format("-------------\n");
     }
 
     public void printUnsat(ConjunctiveFormula formula, boolean unsat, boolean cached) {
+        Formatter log = formula.globalContext().log();
         String cachedMsg = cached ? " (cached result)" : "";
         if (unsat) {
-            System.err.format("\nZ3 Constraint (%s) is unsat%s:\n%s\n", kind.label, cachedMsg, formula.toStringMultiline());
+            log.format("\nZ3 Constraint (%s) is unsat%s:\n%s\n", kind.label, cachedMsg, formula.toStringMultiline());
         } else {
-            System.err.format("\nZ3 Constraint (%s) is assumed sat%s:\n%s\n", kind.label, cachedMsg, formula.toStringMultiline());
+            log.format("\nZ3 Constraint (%s) is assumed sat%s:\n%s\n", kind.label, cachedMsg,
+                    formula.toStringMultiline());
         }
         if (rule != null) {
-            System.err.println("\nRule for formula above:");
-            RuleSourceUtil.printRuleAndSource(rule);
+            log.format("\nRule for formula above:\n");
+            RuleSourceUtil.appendRuleAndSource(rule, log);
         }
-        System.err.println("==================================");
+        log.format("-------------\n");
     }
 }

@@ -1,9 +1,8 @@
 // Copyright (c) 2014-2019 K Team. All Rights Reserved.
 package org.kframework.utils;
 
-import org.apache.commons.lang3.StringUtils;
-
 import com.beust.jcommander.JCommander;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.regex.Pattern;
 
@@ -807,5 +806,22 @@ public class StringUtil {
         if (!inIdent) {
             sb.append("'");
         }
+    }
+
+    public static void replaceAll(StringBuilder builder, String from, String to, boolean includeLastChars) {
+        int index = getNextIndex(builder, from, 0, includeLastChars);
+        while (index != -1) {
+            builder.replace(index, index + from.length(), to);
+            index += to.length(); // Move to the end of the replacement
+            index = getNextIndex(builder, from, index, includeLastChars);
+        }
+    }
+
+    private static int getNextIndex(StringBuilder builder, String from, int index, boolean includeLastChars) {
+        int nextIndex = builder.indexOf(from, index);
+        if (!includeLastChars && nextIndex == builder.length() - from.length()) {
+            nextIndex = -1;
+        }
+        return nextIndex;
     }
 }

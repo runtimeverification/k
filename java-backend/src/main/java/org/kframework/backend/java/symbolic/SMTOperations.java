@@ -10,6 +10,7 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.options.SMTOptions;
 import org.kframework.utils.options.SMTSolver;
 
+import java.util.Formatter;
 import java.util.Set;
 
 public class SMTOperations {
@@ -40,12 +41,13 @@ public class SMTOperations {
             return false;
         }
 
+        Formatter log = constraint.globalContext().log();
         boolean result = false;
         try {
             constraint.globalContext().profiler.queryBuildTimer.start();
             CharSequence query;
             if (javaExecutionOptions.debugZ3Queries) {
-                System.err.println("\nAnonymous vars in query:");
+                log.format("\nAnonymous vars in query:\n");
             }
             try {
                 query = KILtoSMTLib.translateConstraint(constraint).toString();
@@ -53,17 +55,17 @@ public class SMTOperations {
                 constraint.globalContext().profiler.queryBuildTimer.stop();
             }
             if (javaExecutionOptions.debugZ3Queries) {
-                System.err.format("\nZ3 constraint query:\n%s\n", query);
+                log.format("\nZ3 constraint query:\n%s\n", query);
             }
             result = z3.isUnsat(query, smtOptions.z3CnstrTimeout, formulaContext.z3Profiler);
             if (result && RuleAuditing.isAuditBegun()) {
-                System.err.format("SMT query returned unsat: %s\n", query);
+                log.format("SMT query returned unsat: %s\n", query);
             }
         } catch (UnsupportedOperationException e) {
             e.printStackTrace();
             kem.registerCriticalWarning("z3 constraint query: " + e.getMessage(), e);
             if (javaExecutionOptions.debugZ3) {
-                System.err.format("\nZ3 constraint warning: %s\n", e.getMessage());
+                log.format("\nZ3 constraint warning: %s\n", e.getMessage());
             }
             formulaContext.z3Profiler.newQueryBuildFailure();
         }
@@ -79,11 +81,12 @@ public class SMTOperations {
             ConjunctiveFormula right,
             Set<Variable> existentialQuantVars, FormulaContext formulaContext) {
         if (smtOptions.smt == SMTSolver.Z3) {
+            Formatter log = left.globalContext().log();
             try {
                 left.globalContext().profiler.queryBuildTimer.start();
                 CharSequence query;
                 if (javaExecutionOptions.debugZ3Queries) {
-                    System.err.println("\nAnonymous vars in query:");
+                    log.format("\nAnonymous vars in query:\n");
                 }
                 try {
                     query = KILtoSMTLib.translateImplication(left, right, existentialQuantVars).toString();
@@ -91,7 +94,7 @@ public class SMTOperations {
                     left.globalContext().profiler.queryBuildTimer.stop();
                 }
                 if (javaExecutionOptions.debugZ3Queries) {
-                    System.err.format("\nZ3 query:\n%s\n", query);
+                    log.format("\nZ3 query:\n%s\n", query);
                 }
                 return z3.isUnsat(query, smtOptions.z3ImplTimeout, formulaContext.z3Profiler);
             } catch (UnsupportedOperationException | SMTTranslationFailure e) {
@@ -107,7 +110,7 @@ public class SMTOperations {
                     kem.registerInternalWarning(warnMsg, e);
                 }
                 if (javaExecutionOptions.debugZ3) {
-                    System.err.format("\nZ3 warning. Query not generated: %s\n", e.getMessage());
+                    log.format("\nZ3 warning. Query not generated: %s\n", e.getMessage());
                 }
                 formulaContext.queryBuildFailure();
             }

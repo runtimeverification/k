@@ -495,7 +495,7 @@ public class KItem extends Term implements KItemRepresentation {
                             if (rule == RuleAuditing.getAuditingRule()) {
                                 RuleAuditing.beginAudit();
                             } else if (RuleAuditing.isAuditBegun() && RuleAuditing.getAuditingRule() == null) {
-                                System.err.println("\nAuditing " + rule + "...\n");
+                                context.global().log().format("\nAuditing " + rule + "...\n\n");
                             }
 
                             // a concrete rule is skipped if some argument is not concrete
@@ -504,8 +504,13 @@ public class KItem extends Term implements KItemRepresentation {
                             }
 
                             Substitution<Variable, Term> solution;
-                            List<Substitution<Variable, Term>> matches = PatternMatcher.match(kItem, rule, context,
-                                    "KItem", nestingLevel);
+                            List<Substitution<Variable, Term>> matches;
+                            kItem.global.openLogWrapper();
+                            try {
+                                matches = PatternMatcher.match(kItem, rule, context, "KItem", nestingLevel);
+                            } finally {
+                                kItem.global.flushLogWrapper(KItemLog.indent(nestingLevel));
+                            }
                             if (matches.isEmpty()) {
                                 continue;
                             } else {
@@ -721,7 +726,7 @@ public class KItem extends Term implements KItemRepresentation {
                     if (rule == RuleAuditing.getAuditingRule()) {
                         RuleAuditing.beginAudit();
                     } else if (RuleAuditing.isAuditBegun() && RuleAuditing.getAuditingRule() == null) {
-                        System.err.println("\nAuditing " + rule + "...\n");
+                        context.global().log().format("\nAuditing " + rule + "...\n\n");
                     }
                     /* anywhere rules should be applied by pattern match rather than unification */
                     Map<Variable, Term> solution;
