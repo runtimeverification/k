@@ -118,7 +118,7 @@ public class BuiltinIOOperations {
         //for (String c : args) { System.out.println(c); }
         ProcessOutput output = RunProcess.execute(environment, termContext.global().files.getProcessBuilder(), args);
 
-        KLabelConstant klabel = KLabelConstant.of(KORE.KLabel("#systemResult(_,_,_)"), termContext.definition());
+        KLabelConstant klabel = KLabelConstant.of(KORE.KLabel("#systemResult(_,_,_)_K-IO"), termContext.definition());
         /*
         String klabelString = "#systemResult(_,_,_)";
         KLabelConstant klabel = KLabelConstant.of(klabelString, context);

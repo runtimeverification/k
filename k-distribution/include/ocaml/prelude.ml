@@ -581,6 +581,11 @@ struct
     | _ -> raise Not_implemented
 end
 
+module META =
+struct
+  let hook_parseKore c _ _ _ _ = raise Not_implemented
+end
+
 module IO =
 struct
   let hook_close c _ _ _ _ = match c with
@@ -649,6 +654,13 @@ struct
     output_string out_chan (Buffer.contents txt);
     close_out out_chan
 
+  let load_file f =
+    let ic = open_in f in
+    let n = in_channel_length ic in
+    let s = really_input_string ic n in
+    close_in ic;
+    (s)
+
   let flush_logs () =
     Hashtbl.iter flush_log log_files 
 
@@ -657,7 +669,33 @@ struct
   let hook_opendir _ _ _ _ _ = raise Not_implemented
   let hook_parse _ _ _ _ _ = raise Not_implemented
   let hook_parseInModule _ _ _ _ _ = raise Not_implemented
-  let hook_system _ _ _ _ _ = raise Not_implemented
+  let hook_system c _ _ _ _ = match c with
+    | [String path] ->
+      let tmp_stdout = Filename.temp_file "" ".txt" in
+      let tmp_stderr = Filename.temp_file "" ".txt" in
+      let out = Sys.command @@ path ^ " > " ^ tmp_stdout ^ " 2> " ^ tmp_stderr in
+      let flout = load_file tmp_stdout in
+      let flerr = load_file tmp_stderr in
+      [KApply3((parse_klabel "#systemResult(_,_,_)_K-IO"), [Int (Z.of_int out)], [String flout], [String flerr])]
+    | _ -> raise Not_implemented
+  let hook_parseWithProds _ _ _ _ _ = raise Not_implemented
+  let hook_parseString c _ _ _ _ = match c with
+    | [String path], [KToken(srt, s)] ->
+      let tmp_stdout = Filename.temp_file "" ".txt" in
+        let tmp_stderr = Filename.temp_file "" ".txt" in
+        let out = Sys.command @@ "cat b.test > " ^ tmp_stdout ^ " 2> " ^ tmp_stderr in
+        let fn = match out with
+          | 0 -> tmp_stdout
+          | _ -> tmp_stderr in
+        let f = open_in fn in
+        let rez = input_line f in
+        close_in f ;
+        [String rez]
+    | _ -> raise Not_implemented
+  (*parse_k*)
+  let hook_parseFile _ _ _ _ _ = raise Not_implemented
+  let hook_loadDefinition _ _ _ _ _ = raise Not_implemented
+
 end
 
 module BOOL =
