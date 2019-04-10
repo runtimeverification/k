@@ -31,13 +31,17 @@ public class KItemLog {
         }
     }
 
-    static void logStartingEval(KLabelConstant kLabelConstant, int nestingLevel, GlobalContext global) {
+    static void logStartingEval(KLabelConstant kLabelConstant, int nestingLevel, GlobalContext global,
+                                TermContext termContext) {
         if (global.javaExecutionOptions.logRulesPublic) {
             if (nestingLevel == 1) {
                 System.err.print("\n-------------------------");
             }
             System.err.format("\n%sKItem lvl %d, %23s: %s\n", indent(nestingLevel - 1),
                     nestingLevel, "starting evaluation", kLabelConstant);
+            if (termContext.getTopConstraint() == null) {
+                System.err.format("%s%13s%23s  null constraint\n", indent(nestingLevel - 1), "", "");
+            }
         }
     }
 

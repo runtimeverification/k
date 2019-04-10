@@ -478,7 +478,7 @@ public class KItem extends Term implements KItemRepresentation {
                     Term result = null;
                     Term owiseResult = null;
                     Rule appliedRule = null;
-                    KItemLog.logStartingEval(kLabelConstant, nestingLevel, kItem.global);
+                    KItemLog.logStartingEval(kLabelConstant, nestingLevel, kItem.global, context);
 
                     // an argument is concrete if it doesn't contain variables or unresolved functions
                     boolean isConcrete = kList.getContents().stream().filter(elem -> !elem.isGround() || !elem.isNormal()).collect(Collectors.toList()).isEmpty();
