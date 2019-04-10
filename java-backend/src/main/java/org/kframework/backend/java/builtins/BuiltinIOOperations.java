@@ -17,9 +17,7 @@ import java.io.IOException;
 import java.nio.charset.CharacterCodingException;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.tools.ant.types.Commandline;
 import org.kframework.utils.OS;
-import org.kframework.utils.StringUtil;
 
 
 /**
