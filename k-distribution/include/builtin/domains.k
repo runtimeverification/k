@@ -864,7 +864,7 @@ endmodule
 module META
   imports STRING-SYNTAX
   // Takes as input a string and returns a K term
-  syntax KItem ::= #parseAST(String) [function, hook(META.parseAST), impure]
+  syntax KItem ::= #parseAST(String) [function, hook(META.parseAST), poly(0)]
 endmodule
 
 module K-IO
@@ -962,12 +962,6 @@ module K-IO
                  | "#lstat" "(" String ")" [function, hook(IO.lstat), impure]
                  | "#opendir" "(" String ")" [function, hook(IO.opendir), impure]
 
-  syntax KItem ::= #parse ( String , String ) [function, hook(IO.parse), impure]
-  syntax KItem ::= #parseInModule(String, // input
-                                  String, // start symbol
-                                  String) // module name
-                                  [function, hook(IO.parseInModule), impure]
-
   rule #open(S:String) => #open(S:String, "r+")
 
   syntax Int ::= "#stdin"   [function, functional]
@@ -984,12 +978,16 @@ module K-IO
 // System
 
   syntax KItem ::= #system ( String ) [function, hook(IO.system), impure]
+                   // executes the given command line with `sh -c cmd:String` on unix or
+                   // `cmd /c cmd:String` on windows and returns #systemResult
+                 | #spawn  ( String ) [function, hook(IO.spawn),  impure]
                  | "#systemResult" "(" Int /* exit code */ "," String /* stdout */ "," String /* stderr */ ")"
 
   syntax K ::= #logToFile(String, String) [function, functional, hook(IO.log), impure, returnsUnit]
   // #tempFilename ( prefix:String, suffix:String):IOString - creates a temporary file in the default system location
   syntax IOString ::= #tempFilename(String, String)  [function, functional, hook(IO.tempFilename), impure]
-  syntax KItem ::= #remove(String) [function, functional, hook(IO.remove), impure, returnsUnit]
+  // Remove a file or empty directory from the disk. Returns .K on success or an IOError on failure.
+  syntax K ::= #remove(String) [function, functional, hook(IO.remove), impure]
 
 
   syntax String ::= #projectString(IOString) [function]

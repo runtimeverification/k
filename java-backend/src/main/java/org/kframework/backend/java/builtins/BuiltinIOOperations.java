@@ -18,6 +18,8 @@ import java.nio.charset.CharacterCodingException;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.tools.ant.types.Commandline;
+import org.kframework.utils.OS;
+import org.kframework.utils.StringUtil;
 
 
 /**
@@ -106,17 +108,42 @@ public class BuiltinIOOperations {
         }
     }
 
-    public static Term parse(StringToken term1, StringToken term2, TermContext termContext) {
-        throw new RuntimeException("Not implemented!");
-    }
-
-    public static Term parseInModule(StringToken input, StringToken startSymbol, StringToken moduleName, TermContext termContext) {
-        throw new RuntimeException("Not implemented!");
-    }
-
     public static Term system(StringToken term, TermContext termContext) {
         Map<String, String> environment = new HashMap<>();
-        String[] args = Commandline.translateCommandline(term.stringValue());
+        String[] args = term.stringValue().split("\001", -1);
+        //for (String c : args) { System.out.println(c); }
+        ProcessOutput output = RunProcess.execute(environment, termContext.global().files.getProcessBuilder(), args);
+
+        KLabelConstant klabel = KLabelConstant.of(KORE.KLabel("#systemResult(_,_,_)"), termContext.definition());
+        /*
+        String klabelString = "#systemResult(_,_,_)";
+        KLabelConstant klabel = KLabelConstant.of(klabelString, context);
+        assert def.kLabels().contains(klabel) : "No KLabel in definition for " + klabelString;
+        */
+        String stdout = output.stdout != null ? new String(output.stdout) : "";
+        String stderr = output.stderr != null ? new String(output.stderr) : "";
+        return KItem.of(klabel, KList.concatenate(IntToken.of(output.exitCode),
+                StringToken.of(stdout.trim()), StringToken.of(stderr.trim())), termContext.global());
+    }
+
+    /**
+     * Executes the given command line with `sh -c 'cmd'` on unix
+     * and `cmd /c 'cmd'` on windows.
+     * @param term
+     * @param termContext
+     * @return a #systemResult term containing the exit code, stdout:String, stderr:String
+     */
+    public static Term spawn(StringToken term, TermContext termContext) {
+        Map<String, String> environment = new HashMap<>();
+        String[] args = new String[3];
+        if (OS.current() == OS.WINDOWS) {
+            args[0] = "cmd";
+            args[1] = "/c";
+        } else {
+            args[0] = "sh";
+            args[1] = "-c";
+        }
+        args[2] = term.stringValue();
         ProcessOutput output = RunProcess.execute(environment, termContext.global().files.getProcessBuilder(), args);
 
         KLabelConstant klabel = KLabelConstant.of(KORE.KLabel("#systemResult(_,_,_)_K-IO"), termContext.definition());
@@ -132,8 +159,10 @@ public class BuiltinIOOperations {
 
     public static Term remove(StringToken fname, TermContext termContext) {
         File f = new File(fname.stringValue());
-        f.delete();
-        return BuiltinList.kSequenceBuilder(termContext.global()).build();
+        if (f.delete())
+            return BuiltinList.kSequenceBuilder(termContext.global()).build();
+        else
+            return processIOException("EPERM", termContext);
     }
 
     private static KItem processIOException(String errno, Term klist, TermContext termContext) {
