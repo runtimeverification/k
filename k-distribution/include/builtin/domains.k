@@ -631,7 +631,7 @@ module STRING-BUFFER-IN-K [symbolic]
   syntax StringBuffer ::= String
   syntax String ::= StringBuffer2String ( StringBuffer ) [function, functional]
 
-  rule {SB:String}:>StringBuffer +String S:String => SB +String S
+  rule {SB:String +String S:String}<:StringBuffer => (SB +String S)::String
   rule .StringBuffer => ""
   rule StringBuffer2String(S:String) => S
 endmodule
