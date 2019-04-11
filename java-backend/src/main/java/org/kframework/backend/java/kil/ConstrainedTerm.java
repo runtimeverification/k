@@ -192,7 +192,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
         context.setTopConstraint(data.constraint);
         constraint = (ConjunctiveFormula) constraint.evaluate(context);
 
-        Set<Variable> matchRHSOnlyVars = Sets.difference(constraint.variableSet(), Sets.union(variableSet(), termContext().getInitialVariables()));
+        Set<Variable> matchRHSOnlyVars = Sets.difference(constraint.variableSet(), Sets.union(variableSet(), termContext().getInitialLhsVariables()));
         constraint = constraint.orientSubstitution(matchRHSOnlyVars);
 
         ConjunctiveFormula implicationLHS = data.constraint;
