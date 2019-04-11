@@ -505,9 +505,10 @@ public class KItem extends Term implements KItemRepresentation {
                                     if (deterministicFunctions) {
                                         throw KEMException.criticalError("More than one possible match. " +
                                                 "Function " + kLabelConstant + " might be non-deterministic.");
+                                    } else {
+                                        kem.registerInternalWarning("More than one possible match. " +
+                                                "Behaviors might be lost.");
                                     }
-                                    kem.registerInternalWarning("More than one possible match. " +
-                                            "Behaviors might be lost.");
                                 }
                                 solution = matches.get(0);
                             }
@@ -587,48 +588,14 @@ public class KItem extends Term implements KItemRepresentation {
                         }
                     }
 
-                    processMatchResult:
                     if (result != null) {
                         KItemLog.logEvaluated(kItem, result, nestingLevel);
                         kItem.profiler.evalFuncRuleCounter.increment();
                         return result;
-                    } else if (owiseResult != null) {
-                        boolean anyRegRuleUnify = false;
-                        if (!kItem.isGround()) {
-                            if (context.global().stage != Stage.REWRITING) {
-                                break processMatchResult;
-                            }
-
-                            /*
-                             * apply the "[owise]" rule only if this kItem does not unify with any
-                             * of the left-hand-sides of the other rules (no other rule may apply)
-                             */
-                            for (Rule rule : rulesForKLabel) {
-                                if (rule.att().contains("owise")) {
-                                    continue;
-                                }
-
-                                ConstrainedTerm subject = new ConstrainedTerm(
-                                        kItem.kList(),
-                                        context);
-                                ConstrainedTerm pattern = new ConstrainedTerm(
-                                        ((KItem) rule.leftHandSide()).kList(),
-                                        ConjunctiveFormula.of(context.global())
-                                                .add(rule.lookups())
-                                                .addAll(rule.requires()),
-                                        context);
-                                if (!subject.unify(pattern, null,
-                                        new FormulaContext(FormulaContext.Kind.OwiseRule, rule)).isEmpty()) {
-                                    anyRegRuleUnify = true;
-                                    break;
-                                }
-                            }
-                        }
-                        if (!anyRegRuleUnify) {
-                            KItemLog.logEvaluatedOwise(kItem, owiseResult, nestingLevel);
-                            kItem.profiler.evalFuncOwiseCounter.increment();
-                            return owiseResult;
-                        }
+                    } else if (owiseResult != null && owiseApplicable(kItem, context, rulesForKLabel)) {
+                        KItemLog.logEvaluatedOwise(kItem, owiseResult, nestingLevel);
+                        kItem.profiler.evalFuncOwiseCounter.increment();
+                        return owiseResult;
                     }
                     KItemLog.logNoRuleApplicable(kItem, nestingLevel);
                     kItem.profiler.evalFuncNoRuleApplicableCounter.increment();
@@ -640,6 +607,37 @@ public class KItem extends Term implements KItemRepresentation {
                 Profiler.stopTimer(Profiler.getTimerForFunction(kLabelConstant));
                 kItem.profiler.evaluateFunctionNanoTimer.stop();
             }
+        }
+
+        private boolean owiseApplicable(KItem kItem, TermContext context, Collection<Rule> rulesForKLabel) {
+            if (!kItem.isGround()) {
+                if (context.global().stage != Stage.REWRITING) {
+                    return false;
+                }
+
+                /*
+                 * apply the "[owise]" rule only if this kItem does not unify with any
+                 * of the left-hand-sides of the other rules (no other rule may apply)
+                 */
+                for (Rule rule : rulesForKLabel) {
+                    if (rule.att().contains("owise")) {
+                        continue;
+                    }
+
+                    ConstrainedTerm subject = new ConstrainedTerm(kItem.kList(), context);
+                    ConstrainedTerm pattern = new ConstrainedTerm(
+                            ((KItem) rule.leftHandSide()).kList(),
+                            ConjunctiveFormula.of(context.global())
+                                    .add(rule.lookups())
+                                    .addAll(rule.requires()),
+                            context);
+                    if (!subject.unify(pattern, null,
+                            new FormulaContext(FormulaContext.Kind.OwiseRule, rule)).isEmpty()) {
+                        return false;
+                    }
+                }
+            }
+            return true;
         }
 
         public void addDetailedStackFrame(KEMException e, KItem kItem, Rule rule, TermContext context) {
