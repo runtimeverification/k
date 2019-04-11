@@ -105,4 +105,16 @@ public class FormulaContext {
         }
         log.format("-------------\n");
     }
+
+    public void printTargetFormula(ConjunctiveFormula formula) {
+        if (formula.globalContext().javaExecutionOptions.logRulesPublic) {
+            IndentingFormatter log = formula.globalContext().log();
+            log.format("\nImplication (%s) RHS to prove:\n%s\n", kind.label, formula.toStringMultiline());
+            if (rule != null) {
+                log.format("\nRule for formula above:\n");
+                RuleSourceUtil.appendRuleAndSource(rule, log);
+            }
+            log.format("-------------\n");
+        }
+    }
 }
