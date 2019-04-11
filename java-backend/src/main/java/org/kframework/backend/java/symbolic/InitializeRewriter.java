@@ -409,8 +409,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
                         rule.freshConstants(),
                         rule.freshVariables(),
                         rule.lookups(),
-                        rule.att(),
-                        termContext.global());
+                        rule.att());
             }
 
             public ConjunctiveFormula getEvaluatedConstraint(org.kframework.backend.java.kil.Rule rule) {
@@ -492,8 +491,8 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
                 // TODO: split requires for each side and for both sides in createLhsPattern
                 startSyncNodes.add(startRule.createLhsPattern(processProofRules.termContext));
                 targetSyncNodes.add(targetRule.createLhsPattern(processProofRules.termContext));
-                startEnsures.add(startRule.getEnsures());
-                targetEnsures.add(targetRule.getEnsures());
+                startEnsures.add(startRule.getEnsures(processProofRules.termContext.global()));
+                targetEnsures.add(targetRule.getEnsures(processProofRules.termContext.global()));
 
                 // assert rule1.containsAttribute(Attribute.TRUSTED_KEY) == rule2.containsAttribute(Attribute.TRUSTED_KEY);
                 trusted.add(startRule.att().contains(Attribute.TRUSTED_KEY));

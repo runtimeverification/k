@@ -632,7 +632,7 @@ public class KItem extends Term implements KItemRepresentation {
                                     .addAll(rule.requires()),
                             context);
                     if (!subject.unify(pattern, null,
-                            new FormulaContext(FormulaContext.Kind.OwiseRule, rule)).isEmpty()) {
+                            new FormulaContext(FormulaContext.Kind.OwiseRule, rule, context.global())).isEmpty()) {
                         return false;
                     }
                 }

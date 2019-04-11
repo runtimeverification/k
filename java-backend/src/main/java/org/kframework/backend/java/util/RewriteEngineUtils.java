@@ -145,7 +145,7 @@ public class RewriteEngineUtils {
                     if (!evaluatedReq.isGround()
                             && context.getTopConstraint() != null
                             && context.getTopConstraint().implies(ConjunctiveFormula.of(context.global()).add(evaluatedReq, BoolToken.TRUE), Collections.emptySet(),
-                            new FormulaContext(FormulaContext.Kind.FunctionRule, rule))) {
+                            new FormulaContext(FormulaContext.Kind.FunctionRule, rule, context.global()))) {
                         i++;
                         continue;
                     }

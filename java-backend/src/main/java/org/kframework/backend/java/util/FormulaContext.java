@@ -56,10 +56,9 @@ public class FormulaContext {
     public Z3Profiler z3Profiler;
     private boolean queryBuildFailure;
 
-    public FormulaContext(Kind kind, @Nonnull Rule rule) {
-        this(kind, rule, rule.globalContext());
-    }
-
+    /**
+     * @param globalContext - do not use it for logging, only for getting the profiler!
+     */
     public FormulaContext(Kind kind, @Nullable Rule rule, @Nonnull GlobalContext globalContext) {
         this.kind = kind;
         this.rule = rule;
