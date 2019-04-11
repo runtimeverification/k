@@ -120,20 +120,17 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
 
     @Override
     public synchronized Rewriter apply(org.kframework.definition.Definition def) {
-        Module mainModule = def.mainModule();
-        TermContext initializingContext = TermContext.builder(new GlobalContext(fs, globalOptions, krunOptions,
+        GlobalContext initializingContext = new GlobalContext(fs, globalOptions, krunOptions,
                 kproveOptions, javaExecutionOptions, kem, smtOptions, hookProvider, files, Stage.INITIALIZING, profiler,
-                kprint, def))
-                .freshCounter(0).build();
-        Definition definition;
-        definition = initializeDefinition.invoke(mainModule, kem, initializingContext.global());
+                kprint, def);
+        Definition definition = initializeDefinition.invoke(def.mainModule(), kem, initializingContext);
         GlobalContext rewritingContext = new GlobalContext(fs, globalOptions, krunOptions,
                 kproveOptions, javaExecutionOptions, kem, smtOptions, hookProvider, files, Stage.REWRITING, profiler,
                 kprint, def);
         rewritingContext.setDefinition(definition);
 
-        return new SymbolicRewriterGlue(mainModule, definition, definition, transitions,
-                initializingContext.getCounterValue(), rewritingContext, kem, files, kompileOptions, sw);
+        return new SymbolicRewriterGlue(def.mainModule(), definition, definition, transitions,
+                0, rewritingContext, kem, files, kompileOptions, sw);
     }
 
     public static Rule transformFunction(Function<K, K> f, Rule r) {
