@@ -61,6 +61,15 @@ import java.util.stream.Collectors;
 @SuppressWarnings("serial")
 public class KItem extends Term implements KItemRepresentation {
 
+    /**
+     * Possible types:
+     * <p>
+     * KLabelConstant - regular KLabel, assumed in most cases.
+     * <p>
+     * KLabelInjection - used in some cases, requires empty KList.
+     * <p>
+     * KVariable - was probably supported in the past but no longer supported by the backend.
+     */
     private final Term kLabel;
     private final Term kList;
 
