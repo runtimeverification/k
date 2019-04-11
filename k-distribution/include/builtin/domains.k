@@ -986,6 +986,11 @@ module K-IO
   syntax K ::= #logToFile(String, String) [function, functional, hook(IO.log), impure, returnsUnit]
   // #tempFilename ( prefix:String, suffix:String):IOString - creates a temporary file in the default system location
   syntax IOString ::= #tempFilename(String, String)  [function, functional, hook(IO.tempFilename), impure]
+  // #make safe temp ( prefix:String, suffix:String):IOFile - creates a temporary file in the default system location
+  syntax IOFile ::= #mkstemp(String, String) [function, hook(IO.mkstemp)]
+  syntax IOFile ::= IOError
+                    // #tempFile(path: String, fd: Int)
+                  | "#tempFile" "(" String "," Int ")"
   // Remove a file or empty directory from the disk. Returns .K on success or an IOError on failure.
   syntax K ::= #remove(String) [function, functional, hook(IO.remove), impure]
 

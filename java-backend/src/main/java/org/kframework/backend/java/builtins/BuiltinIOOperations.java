@@ -121,7 +121,7 @@ public class BuiltinIOOperations {
         String stdout = output.stdout != null ? new String(output.stdout) : "";
         String stderr = output.stderr != null ? new String(output.stderr) : "";
         return KItem.of(klabel, KList.concatenate(IntToken.of(output.exitCode),
-                StringToken.of(stdout.trim()), StringToken.of(stderr.trim())), termContext.global());
+            StringToken.of(stdout.trim()), StringToken.of(stderr.trim())), termContext.global());
     }
 
     /**
@@ -153,6 +153,18 @@ public class BuiltinIOOperations {
 
     public static Term tempFilename(StringToken prefix, StringToken suffix, TermContext termContext) throws IOException {
         return StringToken.of(File.createTempFile("tmp" + prefix.stringValue(), suffix.stringValue()).getAbsolutePath());
+    }
+
+    public static Term mkstemp(StringToken prefix, StringToken suffix, TermContext termContext) throws IOException {
+        FileSystem fs = termContext.fileSystem();
+        try {
+            File f = File.createTempFile("tmp" + prefix.stringValue(), suffix.stringValue());
+            KLabelConstant klabel = KLabelConstant.of(KORE.KLabel("#tempFile(_,_)_K-IO"), termContext.definition());
+            return KItem.of(klabel, KList.concatenate(StringToken.of(f.getAbsolutePath()),
+                    IntToken.of(fs.open(f.getAbsolutePath(), "w"))), termContext.global());
+        } catch (IOException e) {
+            return processIOException(e.getMessage(), termContext);
+        }
     }
 
     public static Term remove(StringToken fname, TermContext termContext) {
