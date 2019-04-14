@@ -19,13 +19,11 @@ import org.kframework.krun.KRunOptions;
 import org.kframework.krun.api.io.FileSystem;
 import org.kframework.main.GlobalOptions;
 import org.kframework.unparser.KPrint;
-import org.kframework.utils.StringUtil;
-import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.IndentingFormatter;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.options.SMTOptions;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.lang.invoke.MethodHandle;
 import java.util.ArrayDeque;
@@ -56,8 +54,9 @@ public class GlobalContext implements Serializable {
 
     private boolean isExecutionPhase = true;
 
-    private transient Formatter log = new Formatter(System.err);
-    private transient Deque<Formatter> logStack = new ArrayDeque<>();
+    private transient Formatter systemErrFormatter = new Formatter(System.err);
+    private transient IndentingFormatter log = new IndentingFormatter(systemErrFormatter, "");
+    private transient Deque<IndentingFormatter> logStack = new ArrayDeque<>();
 
     public GlobalContext(
             FileSystem fs,
@@ -127,26 +126,16 @@ public class GlobalContext implements Serializable {
         }
     }
 
-    public Formatter log() {
+    public IndentingFormatter log() {
         return log;
     }
 
-    public void openLogWrapper() {
+    public void newLogIndent(String indent) {
         logStack.push(log);
-        log = new Formatter(new StringBuilder());
+        log = new IndentingFormatter(systemErrFormatter, indent);
     }
 
-    /**
-     * Flush the last log wrapper into the parent log, with all lines indented by {@code indent}.
-     */
-    public void flushLogWrapper(String indent) {
-        StringBuilder sb = (StringBuilder) log.out();
-        StringUtil.replaceAll(sb, "\n", "\n" + indent, false);
+    public void restorePreviousLogIndent() {
         log = logStack.pop();
-        try {
-            log.out().append(sb);
-        } catch (IOException e) {
-            throw KEMException.criticalError(e.getMessage(), e);
-        }
     }
 }

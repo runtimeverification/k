@@ -5,10 +5,10 @@ import com.google.common.collect.ImmutableMap;
 import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.kil.Rule;
 import org.kframework.backend.java.symbolic.ConjunctiveFormula;
+import org.kframework.utils.IndentingFormatter;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Formatter;
 import java.util.Map;
 
 /**
@@ -72,7 +72,7 @@ public class FormulaContext {
     }
 
     public void printImplication(ConjunctiveFormula left, ConjunctiveFormula right, Boolean proved, boolean cached) {
-        Formatter log = left.globalContext().log();
+        IndentingFormatter log = left.globalContext().log();
         String cachedMsg = cached ? " (cached result)" : "";
         if (queryBuildFailure) {
             log.format("\nZ3 Implication (%s) RHS dropped (cannot be proved)%s:\n%s\n", kind.label, cachedMsg,
@@ -91,7 +91,7 @@ public class FormulaContext {
     }
 
     public void printUnsat(ConjunctiveFormula formula, boolean unsat, boolean cached) {
-        Formatter log = formula.globalContext().log();
+        IndentingFormatter log = formula.globalContext().log();
         String cachedMsg = cached ? " (cached result)" : "";
         if (unsat) {
             log.format("\nZ3 Constraint (%s) is unsat%s:\n%s\n", kind.label, cachedMsg, formula.toStringMultiline());

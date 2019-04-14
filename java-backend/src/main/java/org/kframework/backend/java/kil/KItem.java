@@ -505,11 +505,11 @@ public class KItem extends Term implements KItemRepresentation {
 
                             Substitution<Variable, Term> solution;
                             List<Substitution<Variable, Term>> matches;
-                            kItem.global.openLogWrapper();
+                            kItem.global.newLogIndent(KItemLog.indent(nestingLevel));
                             try {
                                 matches = PatternMatcher.match(kItem, rule, context, "KItem", nestingLevel);
                             } finally {
-                                kItem.global.flushLogWrapper(KItemLog.indent(nestingLevel));
+                                kItem.global.restorePreviousLogIndent();
                             }
                             if (matches.isEmpty()) {
                                 continue;

@@ -6,11 +6,11 @@ import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.util.FormulaContext;
 import org.kframework.backend.java.util.Z3Wrapper;
+import org.kframework.utils.IndentingFormatter;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.options.SMTOptions;
 import org.kframework.utils.options.SMTSolver;
 
-import java.util.Formatter;
 import java.util.Set;
 
 public class SMTOperations {
@@ -41,7 +41,7 @@ public class SMTOperations {
             return false;
         }
 
-        Formatter log = constraint.globalContext().log();
+        IndentingFormatter log = constraint.globalContext().log();
         boolean result = false;
         try {
             constraint.globalContext().profiler.queryBuildTimer.start();
@@ -81,7 +81,7 @@ public class SMTOperations {
             ConjunctiveFormula right,
             Set<Variable> existentialQuantVars, FormulaContext formulaContext) {
         if (smtOptions.smt == SMTSolver.Z3) {
-            Formatter log = left.globalContext().log();
+            IndentingFormatter log = left.globalContext().log();
             try {
                 left.globalContext().profiler.queryBuildTimer.start();
                 CharSequence query;
