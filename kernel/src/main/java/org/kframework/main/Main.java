@@ -217,9 +217,6 @@ public class Main {
                         }
                     }
                     break;
-            case "-kpp":
-                    modules = KppFrontEnd.getModules();
-                    break;
                 default:
                     invalidJarArguments();
                     throw new AssertionError("unreachable");

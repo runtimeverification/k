@@ -44,7 +44,7 @@ public class KProveFrontEnd extends FrontEnd {
     private final Provider<File> kompiledDir;
     private final KExceptionManager kem;
     private final KProveOptions kproveOptions;
-    private final FileUtil files;
+    private final Provider<FileUtil> files;
     private final Provider<CompiledDefinition> compiledDef;
     private final Provider<Backend> backend;
     private final Provider<Function<Definition, Rewriter>> initializeRewriter;
@@ -61,7 +61,7 @@ public class KProveFrontEnd extends FrontEnd {
             @KompiledDir Provider<File> kompiledDir,
             KExceptionManager kem,
             KProveOptions kproveOptions,
-            FileUtil files,
+            Provider<FileUtil> files,
             Provider<CompiledDefinition> compiledDef,
             Provider<Backend> backend,
             Provider<Function<Definition, Rewriter>> initializeRewriter,
@@ -84,12 +84,12 @@ public class KProveFrontEnd extends FrontEnd {
     protected int run() {
         scope.enter(kompiledDir.get());
         try {
-            if (!kproveOptions.specFile(files).exists()) {
+            if (!kproveOptions.specFile(files.get()).exists()) {
                 throw KEMException.criticalError("Definition file doesn't exist: " +
-                        kproveOptions.specFile(files).getAbsolutePath());
+                        kproveOptions.specFile(files.get()).getAbsolutePath());
             }
-            KPrint kprint = new KPrint(kem, files, tty, kproveOptions.print, compiledDef.get().kompileOptions);
-            return new KProve(kem, sw, files, kprint, kproveOptions).run(kproveOptions, compiledDef.get(), backend.get(), initializeRewriter.get());
+            KPrint kprint = new KPrint(kem, files.get(), tty, kproveOptions.print, compiledDef.get().kompileOptions);
+            return new KProve(kem, sw, files.get(), kprint, kproveOptions).run(kproveOptions, compiledDef.get(), backend.get(), initializeRewriter.get());
         } finally {
             scope.exit();
         }
