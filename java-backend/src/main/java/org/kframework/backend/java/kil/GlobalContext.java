@@ -131,11 +131,17 @@ public class GlobalContext implements Serializable {
     }
 
     public void newLogIndent(String indent) {
+        if (!javaExecutionOptions.logRulesPublic) {
+            return;
+        }
         logStack.push(log);
         log = new IndentingFormatter(systemErrFormatter, indent);
     }
 
     public void restorePreviousLogIndent() {
+        if (!javaExecutionOptions.logRulesPublic) {
+            return;
+        }
         log = logStack.pop();
     }
 }

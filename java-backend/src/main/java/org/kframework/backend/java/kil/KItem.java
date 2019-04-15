@@ -431,10 +431,11 @@ public class KItem extends Term implements KItemRepresentation {
             kItem.profiler.evaluateFunctionNanoTimer.start();
             KLabelConstant kLabelConstant = (KLabelConstant) kItem.kLabel;
             Profiler.startTimer(Profiler.getTimerForFunction(kLabelConstant));
+            int nestingLevel = kItem.profiler.evaluateFunctionNanoTimer.getLevel();
+            kItem.global.newLogIndent(KItemLog.indent(nestingLevel - 1));
 
             try {
                 KList kList = (KList) kItem.kList;
-                int nestingLevel = kItem.profiler.resFuncNanoTimer.getLevel();
 
                 if (builtins.get().isBuiltinKLabel(kLabelConstant)) {
                     try {
@@ -504,13 +505,8 @@ public class KItem extends Term implements KItemRepresentation {
                             }
 
                             Substitution<Variable, Term> solution;
-                            List<Substitution<Variable, Term>> matches;
-                            kItem.global.newLogIndent(KItemLog.indent(nestingLevel));
-                            try {
-                                matches = PatternMatcher.match(kItem, rule, context, "KItem", nestingLevel);
-                            } finally {
-                                kItem.global.restorePreviousLogIndent();
-                            }
+                            List<Substitution<Variable, Term>> matches =
+                                    PatternMatcher.match(kItem, rule, context, "KItem", nestingLevel);
                             if (matches.isEmpty()) {
                                 continue;
                             } else {
@@ -617,6 +613,7 @@ public class KItem extends Term implements KItemRepresentation {
                 }
                 return kItem;
             } finally {
+                kItem.global.restorePreviousLogIndent();
                 Profiler.stopTimer(Profiler.getTimerForFunction(kLabelConstant));
                 kItem.profiler.evaluateFunctionNanoTimer.stop();
             }

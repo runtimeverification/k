@@ -105,19 +105,18 @@ public class KItemLog {
 
     static void logAnywhereRule(KLabelConstant kLabelConstant, int nestingLevel, Rule rule, GlobalContext global) {
         if (global.javaExecutionOptions.logRulesPublic) {
-            logRuleApplying(kLabelConstant, nestingLevel, rule, "anywhere rule applied", global);
+            global.newLogIndent(indent(nestingLevel - 1) + " ");
+            try {
+                logRuleApplying(kLabelConstant, nestingLevel, rule, "anywhere rule applied", global);
+            } finally {
+                global.restorePreviousLogIndent();
+            }
         }
     }
 
     private static void logRuleApplying(KLabelConstant kLabelConstant, int nestingLevel, Rule rule, String msg,
                                         GlobalContext global) {
-        global.log().format("\n KItem lvl %d, %23s: %s\n", nestingLevel,
-                msg, kLabelConstant);
-        global.newLogIndent(indent(nestingLevel - 1) + " ");
-        try {
-            RuleSourceUtil.appendRuleAndSource(rule, global.log());
-        } finally {
-            global.restorePreviousLogIndent();
-        }
+        global.log().format("\n KItem lvl %d, %23s: %s\n", nestingLevel, msg, kLabelConstant);
+        RuleSourceUtil.appendRuleAndSource(rule, global.log());
     }
 }
