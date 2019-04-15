@@ -136,6 +136,8 @@ public class ToJson {
             knode.add("name", inj.klabel().name());
             knode.add("variable", inj.klabel() instanceof KVariable);
 
+        } else {
+            throw KEMException.criticalError("Unimplemented for JSON serialization: ", k);
         }
         return knode.build();
     }
