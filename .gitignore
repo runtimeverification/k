@@ -6,6 +6,7 @@
 *-kompiled
 *.pdf
 *.swp
+*.kore
 .metadata
 .recommenders
 .cache
