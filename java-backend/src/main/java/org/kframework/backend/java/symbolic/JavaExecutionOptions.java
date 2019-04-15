@@ -105,6 +105,10 @@ public final class JavaExecutionOptions {
             "don't have all their side conditions satisfied and are not applied.")
     public boolean logRules = false;
 
+    @Parameter(names="--log-func-target", description="Log all symbolic KItems on which function evaluation produced " +
+            "a different result than original item. Potentially very verbose.")
+    public boolean logFunctionTarget = false;
+
     @Parameter(names="--log-rules-init", description="Log applied rules at initialization phase.")
     public boolean logRulesInit = false;
 
@@ -121,6 +125,7 @@ public final class JavaExecutionOptions {
     public boolean debugFormulas = false;
 
     public boolean logRulesPublic = false;
+    public boolean logFunctionTargetPublic = false;
 
     @Parameter(names = "--log-success", description = "Log success final states. " +
             "By default only failure final states are logged.")

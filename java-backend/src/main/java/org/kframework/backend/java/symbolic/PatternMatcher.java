@@ -6,7 +6,19 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.MapDifference;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import org.kframework.backend.java.kil.*;
+import org.kframework.backend.java.kil.BuiltinList;
+import org.kframework.backend.java.kil.BuiltinMap;
+import org.kframework.backend.java.kil.BuiltinSet;
+import org.kframework.backend.java.kil.ConcreteCollectionVariable;
+import org.kframework.backend.java.kil.GlobalContext;
+import org.kframework.backend.java.kil.KCollection;
+import org.kframework.backend.java.kil.KItem;
+import org.kframework.backend.java.kil.KItemLog;
+import org.kframework.backend.java.kil.Kind;
+import org.kframework.backend.java.kil.Rule;
+import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.TermContext;
+import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.util.RewriteEngineUtils;
 
 import java.util.ArrayList;
@@ -104,17 +116,21 @@ public class PatternMatcher extends AbstractUnifier {
      *            the rule
      * @param context
      *            the term context
+     * @param logMsg for logging
+     * @param nestingLevel for logging
      * @return a list of possible instantiations of the left-hand side of the
      *         rule (each instantiation is represented as a substitution mapping
      *         variables in the pattern to sub-terms in the subject)
      */
-    public static List<Substitution<Variable, Term>> match(Term subject, Rule rule, TermContext context) {
+    public static List<Substitution<Variable, Term>> match(Term subject, Rule rule, TermContext context,
+                                                           String logMsg, int nestingLevel) {
         PatternMatcher matcher = new PatternMatcher(rule.isFunction() || rule.isLemma(), true, context);
 
         if (!matcher.patternMatch(subject, rule.leftHandSide())) {
             return Collections.emptyList();
         }
 
+        KItemLog.logEvaluatingConstraints(subject, nestingLevel, rule, context.global(), logMsg);
         return RewriteEngineUtils.evaluateConditions(rule, matcher.substitutions(), context);
     }
 
