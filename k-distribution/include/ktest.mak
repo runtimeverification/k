@@ -8,6 +8,12 @@ KRUN=$(abspath $(MAKEFILE_PATH)/../bin/krun)
 KDEP=$(abspath $(MAKEFILE_PATH)/../bin/kdep)
 # and kprove
 KPROVE=$(abspath $(MAKEFILE_PATH)/../bin/kprove)
+# and kast
+KAST=$(abspath $(MAKEFILE_PATH)/../bin/kast)
+# and keq
+KEQ=$(abspath $(MAKEFILE_PATH)/../bin/keq)
+# and kserver
+KSERVER=$(abspath $(MAKEFILE_PATH)/../bin/kserver)
 # and ksearch
 KSEARCH=$(abspath $(MAKEFILE_PATH)/../bin/krun) --search-all
 # path relative to current definition of test programs

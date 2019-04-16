@@ -1,6 +1,7 @@
 // Copyright (c) 2015-2019 K Team. All Rights Reserved.
 package org.kframework.kdep;
 
+import com.google.inject.Provider;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Module;
@@ -48,8 +49,8 @@ public class KDepFrontEnd extends FrontEnd {
     private final OuterParsingOptions options;
     private final KExceptionManager kem;
     private final Stopwatch sw;
-    private final FileUtil files;
-    private final ParserUtils parser;
+    private final Provider<FileUtil> files;
+    private final GlobalOptions globalOptions;
 
     @Inject
     public KDepFrontEnd(
@@ -60,13 +61,13 @@ public class KDepFrontEnd extends FrontEnd {
             @ExperimentalUsage String experimentalUsage,
             Stopwatch sw,
             JarInfo jarInfo,
-            FileUtil files) {
+            Provider<FileUtil> files) {
         super(kem, globalOptions, usage, experimentalUsage, jarInfo, files);
         this.options = options;
+        this.globalOptions = globalOptions;
         this.kem = kem;
         this.sw = sw;
         this.files = files;
-        this.parser = new ParserUtils(files::resolveWorkingDirectory, kem, globalOptions);
     }
 
     public static List<Module> getModules() {
@@ -79,11 +80,12 @@ public class KDepFrontEnd extends FrontEnd {
 
     @Override
     protected int run() {
+        ParserUtils parser = new ParserUtils(files.get()::resolveWorkingDirectory, kem, globalOptions);
         List<org.kframework.kil.Module> modules = new ArrayList<>();
-        Source source = Source.apply(options.mainDefinitionFile(files).getAbsolutePath());
-        File currentDirectory = options.mainDefinitionFile(files).getParentFile();
+        Source source = Source.apply(options.mainDefinitionFile(files.get()).getAbsolutePath());
+        File currentDirectory = options.mainDefinitionFile(files.get()).getParentFile();
         List<File> lookupDirectories = ListUtils.union(options.includes.stream()
-                        .map(files::resolveWorkingDirectory).collect(Collectors.toList()),
+                        .map(files.get()::resolveWorkingDirectory).collect(Collectors.toList()),
                 Lists.newArrayList(Kompile.BUILTIN_DIRECTORY));
 
         Set<File> requiredFiles = new HashSet<>();
@@ -96,13 +98,13 @@ public class KDepFrontEnd extends FrontEnd {
                     requiredFiles));
         }
 
-        modules.addAll(parser.slurp(FileUtil.load(options.mainDefinitionFile(files)),
+        modules.addAll(parser.slurp(FileUtil.load(options.mainDefinitionFile(files.get())),
                 source,
                 currentDirectory,
                 lookupDirectories,
                 requiredFiles));;
         Set<File> allFiles = modules.stream().map(m -> new File(m.getSource().source())).collect(Collectors.toSet());
-        System.out.println(files.resolveWorkingDirectory(".").toURI().relativize(files.resolveKompiled("timestamp").toURI()).getPath() + " : \\");
+        System.out.println(files.get().resolveWorkingDirectory(".").toURI().relativize(files.get().resolveKompiled("timestamp").toURI()).getPath() + " : \\");
         for (File file : allFiles) {
             System.out.println("    " + file.getAbsolutePath() + " \\");
         }

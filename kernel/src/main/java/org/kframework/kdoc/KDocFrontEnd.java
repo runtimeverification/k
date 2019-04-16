@@ -40,7 +40,7 @@ public class KDocFrontEnd extends FrontEnd {
             @Usage String usage,
             @ExperimentalUsage String experimentalUsage,
             JarInfo jarInfo,
-            FileUtil files,
+            Provider<FileUtil> files,
             Provider<PosterBackend> backend) {
         super(kem, globalOptions, usage, experimentalUsage, jarInfo, files);
         this.options = options;
