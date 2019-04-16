@@ -131,7 +131,7 @@ public class BuiltinIOOperations {
      * @param termContext
      * @return a #systemResult term containing the exit code, stdout:String, stderr:String
      */
-    public static Term spawn(StringToken term, TermContext termContext) {
+    public static Term sharpSpawn(StringToken term, TermContext termContext) {
         Map<String, String> environment = new HashMap<>();
         String[] args = new String[3];
         if (OS.current() == OS.WINDOWS) {

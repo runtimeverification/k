@@ -278,7 +278,7 @@ struct
   let hook_lstat _ _ _ _ _ = raise Not_implemented
   let hook_opendir _ _ _ _ _ = raise Not_implemented
   let hook_system c _ _ _ _ = raise Not_implemented
-  let hook_spawn c _ _ _ _ = match c with
+  let hook_sharpSpawn c _ _ _ _ = match c with
     | [String path] ->
       let ic, oc = Unix.open_process path in
       let buf_out = Buffer.create 4096

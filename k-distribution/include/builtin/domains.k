@@ -870,6 +870,7 @@ endmodule
 module K-IO
   imports LIST
   imports STRING
+  imports META
 
   syntax IOError ::= "#EOF" [klabel(#EOF), symbol] | "#noparse" [klabel(#noparse), symbol] | #unknownIOError(Int) [symbol]
                    | "#E2BIG" [klabel(#E2BIG), symbol]
@@ -980,7 +981,7 @@ module K-IO
   syntax KItem ::= #system ( String ) [function, hook(IO.system), impure]
                    // executes the given command line with `sh -c cmd:String` on unix or
                    // `cmd /c cmd:String` on windows and returns #systemResult
-                 | #spawn  ( String ) [function, hook(IO.spawn),  impure]
+                 | #spawn  ( String ) [function, hook(IO.sharpSpawn), impure]
                  | "#systemResult" "(" Int /* exit code */ "," String /* stdout */ "," String /* stderr */ ")"
 
   syntax K ::= #logToFile(String, String) [function, functional, hook(IO.log), impure, returnsUnit]
@@ -1009,6 +1010,7 @@ endmodule
 
 module STDIN-STREAM
   imports K-IO
+  imports META
 
   syntax Stream ::= #istream(Int)
   syntax Stream ::= #parseInput(String, String)
@@ -1051,13 +1053,12 @@ module STDIN-STREAM
   rule [stdinParseArbitrarySort]:
        <stdin>
        (ListItem(#parseInput(Sort:String, Delimiters:String))
-       => ListItem(#parse(substrString(S, 0, findChar(S, Delimiters, 0)), Sort)))
+       => ListItem(#parseAST(substrString(S, 0, findChar(S, Delimiters, 0)))))
        ListItem(#buffer(S:String => substrString(S,findChar(S, Delimiters, 0) +Int 1, lengthString(S))))
        _:List
        </stdin>
     requires findChar(S, Delimiters, 0) =/=Int -1
-       andBool Sort =/=String "String"
-       andBool Sort =/=String "Int"
+       andBool Sort ==String "K"
        andBool lengthString(S) >Int 1 // [stdin]
        [stream]
 
