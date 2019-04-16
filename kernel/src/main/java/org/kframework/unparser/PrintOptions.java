@@ -22,6 +22,10 @@ public class PrintOptions {
         this.color = color;
     }
 
+    public PrintOptions(OutputModes output) {
+        this.output = output;
+    }
+
     //TODO(dwightguth): remove in Guice 4.0
     @Inject
     public PrintOptions(Void v) {

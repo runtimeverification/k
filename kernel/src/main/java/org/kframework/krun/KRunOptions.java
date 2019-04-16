@@ -64,7 +64,7 @@ public final class KRunOptions {
         public String parser;
 
         public String parser(String mainModuleName, FileUtil files) {
-            String kastBinary = getKast(files) + " --output kast";
+            String kastBinary = getKast(files);
             if (parser == null) {
                 if (term()) {
                     return kastBinary + " -m " + mainModuleName;
@@ -86,7 +86,7 @@ public final class KRunOptions {
         private Map<String, String> configVars = new HashMap<>();
 
         public Map<String, Pair<String, String>> configVars(String mainModuleName, FileUtil files) {
-            String kastBinary = getKast(files) + " --output kast";
+            String kastBinary = getKast(files);
             Map<String, Pair<String, String>> result = new HashMap<>();
             for (Map.Entry<String, String> entry : configVars.entrySet()) {
                 String cfgParser = kastBinary + " -m " + mainModuleName + " -e";
