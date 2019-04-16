@@ -1409,16 +1409,13 @@ endmodule
 module STRATEGY-ABSTRACT
     imports STRATEGY
 
-    syntax AtomicStrategy ::= #RuleTag
- // ----------------------------------
-    rule <s> #appliedRule(_) => . ... </s>
+    syntax #RuleTag ::= "(" #RuleTag ")" [bracket]
+ // ----------------------------------------------
 
     syntax Strategy ::= ".Strategy"
-                      | "^" AtomicStrategy [klabel(#applyAtomicStrategy)]
                       | "(" Strategy ")" [bracket]
  // ----------------------------------------------
     rule <s> .Strategy => . ... </s>
-    rule <s> #applyAtomicStrategy(RT) => #applyRule(RT) ... </s>
 
     syntax KItem ::= #catchSTUCK       ( Strategy )            [function]
                    | #catchSTUCKorElse ( Strategy , Strategy )
@@ -1434,11 +1431,11 @@ module STRATEGY-ABSTRACT
  // ------------------------------------------------
     rule <s> S:Strategy ; S':Strategy => S ~> S' ... </s>
 
-    syntax AtomicStrategy ::= AtomicStrategy "|" AtomicStrategy [left, klabel(#alternateRule)]
- // ------------------------------------------------------------------------------------------
-    rule <s> ^ (AS | AS') => ^ AS ~> #catchSTUCK(^ AS') ... </s>
+    syntax #RuleTag ::= #RuleTag "|" #RuleTag [left, klabel(#alternateRule)]
+ // ------------------------------------------------------------------------
+    rule <s> #applyRule(#alternateRule(RT, RT')) => #applyRule(RT) ~> #catchSTUCK(#applyRule(RT')) ... </s>
 
-    syntax AtomicStrategy ::= AtomicStrategy "*" [klabel(#repeatRule)]
- // ------------------------------------------------------------------
-    rule <s> ^ (AS *) => ^ AS ~> #catchSTUCKorElse(.Strategy, ^ (AS *)) ... </s>
+    syntax #RuleTag ::= #RuleTag "*" [klabel(#repeatRule)]
+ // ------------------------------------------------------
+    rule <s> #applyRule(#repeatRule(RT)) => #applyRule(RT) ~> #catchSTUCKorElse(.Strategy, #applyRule(#repeatRule(RT))) ... </s>
 endmodule
