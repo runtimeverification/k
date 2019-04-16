@@ -6,7 +6,7 @@ Strategy: ^ regular
     a
   </k>
   <trace>
-    .List
+    ListItem ( ~ regular )
   </trace>
   <s>
     #STUCK ( )
@@ -20,7 +20,8 @@ Strategy: ^ regular ; ^ a2c
     c
   </k>
   <trace>
-    .List
+    ListItem ( ~ regular )
+    ListItem ( ~ a2c )
   </trace>
   <s>
     #STUCK ( )
@@ -34,7 +35,9 @@ Strategy: ^ regular ; ^ a2c ; ^ c2a
     a
   </k>
   <trace>
-    .List
+    ListItem ( ~ regular )
+    ListItem ( ~ a2c )
+    ListItem ( ~ c2a )
   </trace>
   <s>
     #STUCK ( )
@@ -48,7 +51,8 @@ Strategy: ^ regular ; ^ a2c ; ^ a2b
     c
   </k>
   <trace>
-    .List
+    ListItem ( ~ regular )
+    ListItem ( ~ a2c )
   </trace>
   <s>
     #STUCK ( )
@@ -62,7 +66,7 @@ Strategy: ^ regular ; ^ c2a | a2b
     b
   </k>
   <trace>
-    .List
+    ListItem ( ~ regular )
   </trace>
   <s>
     #STUCK ( )

@@ -17,6 +17,9 @@ module STRATEGIES
         <s/>
       </wrapper>
 
+    rule <s> ~ regular => . ... </s>
+         <trace> ... (.List => ListItem(~ regular)) </trace>
+
     rule <s> ~ a2b => . ... </s>
          <trace> ... (.List => ListItem(~ a2b)) </trace>
 
