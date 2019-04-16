@@ -1,0 +1,70 @@
+
+Strategy: ^ regular
+================================================================================
+<wrapper>
+  <k>
+    a
+  </k>
+  <trace>
+    .List
+  </trace>
+  <s>
+    #STUCK ( )
+  </s>
+</wrapper>
+
+Strategy: ^ regular ; ^ a2c
+================================================================================
+<wrapper>
+  <k>
+    c
+  </k>
+  <trace>
+    .List
+  </trace>
+  <s>
+    #STUCK ( )
+  </s>
+</wrapper>
+
+Strategy: ^ regular ; ^ a2c ; ^ c2a
+================================================================================
+<wrapper>
+  <k>
+    a
+  </k>
+  <trace>
+    .List
+  </trace>
+  <s>
+    #STUCK ( )
+  </s>
+</wrapper>
+
+Strategy: ^ regular ; ^ a2c ; ^ a2b
+================================================================================
+<wrapper>
+  <k>
+    c
+  </k>
+  <trace>
+    .List
+  </trace>
+  <s>
+    #STUCK ( )
+  </s>
+</wrapper>
+
+Strategy: ^ regular ; ^ c2a | a2b
+================================================================================
+<wrapper>
+  <k>
+    b
+  </k>
+  <trace>
+    .List
+  </trace>
+  <s>
+    #STUCK ( )
+  </s>
+</wrapper>

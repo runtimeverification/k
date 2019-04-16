@@ -26,6 +26,7 @@ RESULTDIR?=$(TESTDIR)
 TESTS?=$(wildcard $(TESTDIR)/*.$(EXT))
 PROOF_TESTS?=$(wildcard $(TESTDIR)/*-spec.k)
 SEARCH_TESTS?=$(wildcard $(TESTDIR)/*.$(EXT).search)
+STRAT_TESTS?=$(wildcard $(TESTDIR)/*.strat)
 # default KOMPILE_BACKEND
 KOMPILE_BACKEND?=ocaml
 
@@ -34,7 +35,7 @@ CHECK=| diff -
 .PHONY: kompile krun all clean update-results proofs
 
 # run all tests
-all: kompile krun proofs searches
+all: kompile krun proofs searches strat
 
 # run only kompile
 kompile: $(DEFDIR)/$(DEF)-kompiled/timestamp
@@ -47,6 +48,8 @@ krun: $(TESTS)
 proofs: $(PROOF_TESTS)
 
 searches: $(SEARCH_TESTS)
+
+strat: $(STRAT_TESTS)
 
 # run all tests and regenerate output files
 update-results: krun proofs
@@ -74,6 +77,25 @@ ifeq ($(TESTDIR),$(RESULTDIR))
 	$(KSEARCH) $@ $(KSEARCH_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $@.out
 else
 	$(KSEARCH) $@ $(KSEARCH_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $(RESULTDIR)/$(notdir $@).out
+endif
+
+%.strat: kompile
+ifeq ($(TESTDIR),$(RESULTDIR))
+	( while read strat_line ; do                                                                    \
+	      echo                                                                                    ; \
+	      echo "Strategy: $${strat_line}"                                                         ; \
+	      echo "================================================================================" ; \
+	      $(KRUN) $@.input $(KRUN_FLAGS) $(DEBUG) -d $(DEFDIR) -cSTRATEGY="$${strat_line}"        ; \
+	  done                                                                                        ; \
+	) < $@ $(CHECK) $@.out
+else
+	( while read strat_line ; do                                                                    \
+	      echo                                                                                    ; \
+	      echo "Strategy: $${strat_line}"                                                         ; \
+	      echo "================================================================================" ; \
+	      $(KRUN) $@.input $(KRUN_FLAGS) $(DEBUG) -d $(DEFDIR) -cSTRATEGY="$${strat_line}"        ; \
+	  done                                                                                        ; \
+	) < $@ $(CHECK) $(RESULT_DIR)/$(notdir $@).out
 endif
 
 clean:
