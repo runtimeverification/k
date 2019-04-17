@@ -1,5 +1,5 @@
 # Maintainer: Dwight Guth <dwight.guth@runtimeverification.com>
-pkgname=kframwork
+pkgname=kframework
 pkgver=5.0.0
 pkgrel=1
 epoch=
