@@ -66,11 +66,17 @@ object implementation {
 
     case class StringLiteral(str: String) extends i.StringLiteral
 
-    case class SortVariable(name: String) extends i.SortVariable
+    case class SortVariable(name: String) extends i.SortVariable {
+      override def toString = name
+    }
 
-    case class CompoundSort(ctr: String, params: Seq[i.Sort]) extends i.CompoundSort
+    case class CompoundSort(ctr: String, params: Seq[i.Sort]) extends i.CompoundSort {
+      override def toString = ctr + "{" + params.map(_.toString).mkString(", ") + "}"
+    }
 
-    case class SymbolOrAlias(ctr: String, params: Seq[i.Sort]) extends i.SymbolOrAlias
+    case class SymbolOrAlias(ctr: String, params: Seq[i.Sort]) extends i.SymbolOrAlias {
+      override def toString = ctr + "{" + params.map(_.toString).mkString(", ") + "}"
+    }
 
     case class Symbol(ctr: String, params: Seq[i.Sort]) extends i.Symbol
 
@@ -125,13 +131,13 @@ object implementation {
 
     // def Next(s: i.Sort, _1: i.Pattern): i.Pattern = d.Next(s, _1)
 
-    def Rewrites(s: i.Sort, _1: i.Pattern, _2: i.Pattern): i.Pattern = d.Rewrites(s, _1, _2)
+    def Rewrites(s: i.Sort, _1: i.Pattern, _2: i.Pattern): i.Rewrites = d.Rewrites(s, _1, _2)
 
     def Ceil(s: i.Sort, rs: i.Sort, p: Pattern): i.Pattern = d.Ceil(s, rs, p)
 
     def Floor(s: i.Sort, rs: i.Sort, p: Pattern): i.Pattern = d.Floor(s, rs, p)
 
-    def Equals(s: i.Sort, rs: i.Sort, _1: i.Pattern, _2: i.Pattern): i.Pattern = d.Equals(s, rs, _1, _2)
+    def Equals(s: i.Sort, rs: i.Sort, _1: i.Pattern, _2: i.Pattern): i.Equals = d.Equals(s, rs, _1, _2)
 
     def Mem(s: i.Sort, rs: i.Sort, p: i.Pattern, q: i.Pattern): i.Pattern = d.Mem(s, rs, p, q)
 
