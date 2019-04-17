@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Module;
+import com.google.inject.Provider;
 import com.martiansoftware.nailgun.NGContext;
 import com.martiansoftware.nailgun.NGListeningAddress;
 import com.martiansoftware.nailgun.NGServer;
@@ -51,7 +52,7 @@ public class KServerFrontEnd extends FrontEnd {
             @Usage String usage,
             @ExperimentalUsage String experimentalUsage,
             JarInfo jarInfo,
-            FileUtil files) {
+            Provider<FileUtil> files) {
         super(kem, options.global, usage, experimentalUsage, jarInfo, files);
         this.options = options;
     }

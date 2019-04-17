@@ -41,6 +41,8 @@ SUBDIRS=issue-2273 \
 	ffi-llvm \
 	ite-bug \
 	cast \
+	help \
+	exit-code-no-gen-top \
 
 
 include ../../include/ktest-group.mak
