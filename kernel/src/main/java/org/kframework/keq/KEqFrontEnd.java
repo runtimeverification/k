@@ -34,7 +34,7 @@ public class KEqFrontEnd extends FrontEnd {
     private final Provider<File> kompiledDir2;
     private final KExceptionManager kem;
     private final KEqOptions keqOptions;
-    private final FileUtil files;
+    private final Provider<FileUtil> files;
     private final Stopwatch sw;
     private final Provider<Backend> backend;
     private final Provider<CompiledDefinition> compiledDef;
@@ -56,7 +56,7 @@ public class KEqFrontEnd extends FrontEnd {
             @Spec2(KompiledDir.class) Provider<File> kompiledDir2,
             KExceptionManager kem,
             KEqOptions keqOptions,
-            @Main FileUtil files,
+            @Main Provider<FileUtil> files,
             Stopwatch sw,
             @Main Provider<Backend> backend,
             @Main Provider<CompiledDefinition> compiledDef,
@@ -110,7 +110,7 @@ public class KEqFrontEnd extends FrontEnd {
         } finally {
             scope.exit();
         }
-        return new KEq(kem, files, sw).run(commonDef, def1, def2,
+        return new KEq(kem, files.get(), sw).run(commonDef, def1, def2,
                 keqOptions,
                 backend,
                 commonRewriter, rewriter1, rewriter2);
