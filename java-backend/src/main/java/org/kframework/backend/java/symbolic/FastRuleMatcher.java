@@ -272,10 +272,8 @@ public class FastRuleMatcher {
     }
 
     private void addDetailedStackFrame(KEMException e, Term subject, Term pattern) {
-        StringBuffer sb = new StringBuffer();
-        new Formatter(sb).format("while matching rule pattern:\n    Subject: %s\n    Pattern: %s",
+        e.exception.formatTraceFrame("while matching rule pattern:\n    Subject: %s\n    Pattern: %s",
                 getLogString(subject), getLogString(pattern));
-        e.exception.addTraceFrame(sb);
     }
 
     private String getLogString(Term subject) {
