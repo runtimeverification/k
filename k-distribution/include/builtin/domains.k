@@ -863,7 +863,7 @@ endmodule
 module META
   imports STRING-SYNTAX
   // Takes as input a string and returns a K term
-  syntax KItem ::= #parseAST(String) [function, hook(META.parseAST), poly(0)]
+  syntax KItem ::= #parseKAST(String) [function, hook(META.parseKAST), poly(0)]
 endmodule
 
 module K-IO
@@ -1051,7 +1051,7 @@ module STDIN-STREAM
   rule [stdinParseArbitrarySort]:
        <stdin>
        (ListItem(#parseInput(Sort:String, Delimiters:String))
-       => ListItem(#parseAST(substrString(S, 0, findChar(S, Delimiters, 0)))))
+       => ListItem(#parseKAST(substrString(S, 0, findChar(S, Delimiters, 0)))))
        ListItem(#buffer(S:String => substrString(S,findChar(S, Delimiters, 0) +Int 1, lengthString(S))))
        _:List
        </stdin>
