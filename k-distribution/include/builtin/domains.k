@@ -983,8 +983,6 @@ module K-IO
                  | "#systemResult" "(" Int /* exit code */ "," String /* stdout */ "," String /* stderr */ ")"
 
   syntax K ::= #logToFile(String, String) [function, functional, hook(IO.log), impure, returnsUnit]
-  // #tempFilename ( prefix:String, suffix:String):IOString - creates a temporary file in the default system location
-  syntax IOString ::= #tempFilename(String, String)  [function, functional, hook(IO.tempFilename), impure]
   // #make safe temp ( prefix:String, suffix:String):IOFile - creates a temporary file in the default system location
   syntax IOFile ::= #mkstemp(String, String) [function, hook(IO.mkstemp), impure]
   syntax IOFile ::= IOError
