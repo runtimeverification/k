@@ -106,32 +106,14 @@ public class BuiltinIOOperations {
         }
     }
 
-    public static Term system(StringToken term, TermContext termContext) {
-        Map<String, String> environment = new HashMap<>();
-        String[] args = term.stringValue().split("\001", -1);
-        //for (String c : args) { System.out.println(c); }
-        ProcessOutput output = RunProcess.execute(environment, termContext.global().files.getProcessBuilder(), args);
-
-        KLabelConstant klabel = KLabelConstant.of(KORE.KLabel("#systemResult(_,_,_)"), termContext.definition());
-        /*
-        String klabelString = "#systemResult(_,_,_)";
-        KLabelConstant klabel = KLabelConstant.of(klabelString, context);
-        assert def.kLabels().contains(klabel) : "No KLabel in definition for " + klabelString;
-        */
-        String stdout = output.stdout != null ? new String(output.stdout) : "";
-        String stderr = output.stderr != null ? new String(output.stderr) : "";
-        return KItem.of(klabel, KList.concatenate(IntToken.of(output.exitCode),
-            StringToken.of(stdout.trim()), StringToken.of(stderr.trim())), termContext.global());
-    }
-
     /**
      * Executes the given command line with `sh -c 'cmd'` on unix
      * and `cmd /c 'cmd'` on windows.
      * @param term
      * @param termContext
-     * @return a #systemResult term containing the exit code, stdout:String, stderr:String
+     * @return a #systemResult term containing the exit code, stdout:String, stderr:Stringh
      */
-    public static Term sharpSpawn(StringToken term, TermContext termContext) {
+    public static Term system(StringToken term, TermContext termContext) {
         Map<String, String> environment = new HashMap<>();
         String[] args = new String[3];
         if (OS.current() == OS.WINDOWS) {
@@ -149,10 +131,6 @@ public class BuiltinIOOperations {
         String stderr = output.stderr != null ? new String(output.stderr) : "";
         return KItem.of(klabel, KList.concatenate(IntToken.of(output.exitCode),
                 StringToken.of(stdout.trim()), StringToken.of(stderr.trim())), termContext.global());
-    }
-
-    public static Term tempFilename(StringToken prefix, StringToken suffix, TermContext termContext) throws IOException {
-        return StringToken.of(File.createTempFile("tmp" + prefix.stringValue(), suffix.stringValue()).getAbsolutePath());
     }
 
     public static Term mkstemp(StringToken prefix, StringToken suffix, TermContext termContext) throws IOException {

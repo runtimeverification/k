@@ -566,7 +566,6 @@ module STRING
 
   syntax String ::= Float2String ( Float )              [function, functional, hook(STRING.float2string)]
   syntax String ::= Float2String ( Float , String )     [function, klabel(FloatFormat), hook(STRING.floatFormat)]
-  syntax String ::= tokenToString( K )                  [function, hook(STRING.token2string)]
   syntax Float  ::= String2Float ( String )             [function, hook(STRING.string2float)]
   syntax Int    ::= String2Int   ( String )             [function, hook(STRING.string2int)]
   syntax String ::= Int2String   ( Int )                [function, functional, hook(STRING.int2string)]
@@ -978,17 +977,16 @@ module K-IO
 // ------------------------------
 // System
 
+  // executes the given command line with `sh -c cmd:String` on unix or
+  // `cmd /c cmd:String` on windows and returns #systemResult
   syntax KItem ::= #system ( String ) [function, hook(IO.system), impure]
-                   // executes the given command line with `sh -c cmd:String` on unix or
-                   // `cmd /c cmd:String` on windows and returns #systemResult
-                 | #spawn  ( String ) [function, hook(IO.sharpSpawn), impure]
                  | "#systemResult" "(" Int /* exit code */ "," String /* stdout */ "," String /* stderr */ ")"
 
   syntax K ::= #logToFile(String, String) [function, functional, hook(IO.log), impure, returnsUnit]
   // #tempFilename ( prefix:String, suffix:String):IOString - creates a temporary file in the default system location
   syntax IOString ::= #tempFilename(String, String)  [function, functional, hook(IO.tempFilename), impure]
   // #make safe temp ( prefix:String, suffix:String):IOFile - creates a temporary file in the default system location
-  syntax IOFile ::= #mkstemp(String, String) [function, hook(IO.mkstemp)]
+  syntax IOFile ::= #mkstemp(String, String) [function, hook(IO.mkstemp), impure]
   syntax IOFile ::= IOError
                     // #tempFile(path: String, fd: Int)
                   | "#tempFile" "(" String "," Int ")"
