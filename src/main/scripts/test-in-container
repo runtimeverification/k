@@ -1,8 +1,9 @@
 #!/bin/sh -ex
 cp -R /usr/lib/kframework/tutorial ~
+WD=`pwd`
 cd
 echo 'Starting kserver...'
-/usr/lib/kframework/bin/spawn-kserver kserver.log
+/usr/lib/kframework/bin/spawn-kserver $WD/kserver.log
 cd tutorial
 echo 'Testing tutorial in user environment...'
 make -j`nproc`

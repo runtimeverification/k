@@ -34,8 +34,8 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.Formatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -299,19 +299,9 @@ public class KItem extends Term implements KItemRepresentation {
                     if (result.isCacheable(this)) {
                         this.cachePut(constraint, result, context);
                     }
-                    if (profiler.resFuncNanoTimer.getLevel() == 1) {
-                        profiler.countResFuncTopUncached++;
-                    } else {
-                        profiler.countResFuncRecursiveUncached++;
-                    }
                 }
             } else {
                 result = global.kItemOps.resolveFunctionAndAnywhere(this, context);
-                if (profiler.resFuncNanoTimer.getLevel() == 1) {
-                    profiler.countResFuncTopUncached++;
-                } else {
-                    profiler.countResFuncRecursiveUncached++;
-                }
             }
         } finally {
             profiler.resFuncNanoTimer.stop();
@@ -428,25 +418,24 @@ public class KItem extends Term implements KItemRepresentation {
          * @param context                 a term context
          * @return the evaluated result on success, or this {@code KItem} otherwise
          */
-        public Term evaluateFunction(KItem kItem, TermContext context) {
-            if (!kItem.isEvaluable()) {
-                return kItem;
-            }
-
-            Definition definition = context.definition();
+        private Term evaluateFunction(KItem kItem, TermContext context) {
+            kItem.profiler.evaluateFunctionNanoTimer.start();
             KLabelConstant kLabelConstant = (KLabelConstant) kItem.kLabel;
-
             Profiler.startTimer(Profiler.getTimerForFunction(kLabelConstant));
 
             try {
                 KList kList = (KList) kItem.kList;
+                int nestingLevel = kItem.profiler.resFuncNanoTimer.getLevel();
 
                 if (builtins.get().isBuiltinKLabel(kLabelConstant)) {
                     try {
                         Term[] arguments = kList.getContents().toArray(new Term[kList.getContents().size()]);
                         Term result = builtins.get().invoke(context, kLabelConstant, arguments);
                         if (result != null && !result.equals(kItem)) {
-                            return result.evaluate(context);
+                            Term evalResult = result.evaluate(context);
+                            KItemLog.logBuiltinEval(kLabelConstant, nestingLevel, kItem.global);
+                            kItem.profiler.evalFuncBuiltinCounter.increment();
+                            return evalResult;
                         }
                     } catch (ClassCastException e) {
                         // DISABLE EXCEPTION CHECKSTYLE
@@ -473,22 +462,26 @@ public class KItem extends Term implements KItemRepresentation {
                 // TODO(YilongL): maybe we can move sort membership evaluation after
                 // applying user-defined rules to allow the users to provide their
                 // own rules for checking sort membership
+                Definition definition = context.definition();
                 if (kLabelConstant.isSortPredicate() && kList.getContents().size() == 1) {
                     Term checkResult = SortMembership.check(kItem, definition);
                     if (checkResult != kItem) {
+                        kItem.profiler.evalFuncSortPredicateCounter.increment();
                         return checkResult;
                     }
                 }
 
                 /* apply rules for user defined functions */
-                if (!definition.functionRules().get(kLabelConstant).isEmpty()) {
+                Collection<Rule> rulesForKLabel = definition.functionRules().get(kLabelConstant);
+                if (!rulesForKLabel.isEmpty()) {
                     Term result = null;
                     Term owiseResult = null;
                     Rule appliedRule = null;
+                    KItemLog.logStartingEval(kLabelConstant, nestingLevel, kItem.global, context);
 
                     // an argument is concrete if it doesn't contain variables or unresolved functions
                     boolean isConcrete = kList.getContents().stream().filter(elem -> !elem.isGround() || !elem.isNormal()).collect(Collectors.toList()).isEmpty();
-                    for (Rule rule : definition.functionRules().get(kLabelConstant)) {
+                    for (Rule rule : rulesForKLabel) {
                         try {
                             if (rule == RuleAuditing.getAuditingRule()) {
                                 RuleAuditing.beginAudit();
@@ -502,7 +495,8 @@ public class KItem extends Term implements KItemRepresentation {
                             }
 
                             Substitution<Variable, Term> solution;
-                            List<Substitution<Variable, Term>> matches = PatternMatcher.match(kItem, rule, context);
+                            List<Substitution<Variable, Term>> matches = PatternMatcher.match(kItem, rule, context,
+                                    "KItem", nestingLevel);
                             if (matches.isEmpty()) {
                                 continue;
                             } else {
@@ -510,12 +504,14 @@ public class KItem extends Term implements KItemRepresentation {
                                     if (deterministicFunctions) {
                                         throw KEMException.criticalError("More than one possible match. " +
                                                 "Function " + kLabelConstant + " might be non-deterministic.");
+                                    } else {
+                                        kem.registerInternalWarning("More than one possible match. " +
+                                                "Behaviors might be lost.");
                                     }
-                                    kem.registerInternalWarning("More than one possible match. " +
-                                            "Behaviors might be lost.");
                                 }
                                 solution = matches.get(0);
                             }
+                            KItemLog.logApplyingFuncRule(kLabelConstant, nestingLevel, rule, kItem.global);
 
                             /* rename fresh variables of the rule */
                             boolean hasFreshVars = false;
@@ -529,7 +525,7 @@ public class KItem extends Term implements KItemRepresentation {
                                     rule.rhsInstructions(),
                                     solution,
                                     context);
-                            if (hasFreshVars) {
+                            if (rightHandSide != null && hasFreshVars) {
                                 //rule creates fresh vars, therefore result is not cacheable
                                 rightHandSide.isCacheable = false;
                             }
@@ -543,7 +539,7 @@ public class KItem extends Term implements KItemRepresentation {
                             } else {
                                 if (stage == Stage.REWRITING) {
                                     if (deterministicFunctions && result != null && !result.equals(rightHandSide)) {
-                                        StringBuffer sb = new StringBuffer();
+                                        StringBuilder sb = new StringBuilder();
                                         sb.append("[non-deterministic function definition]: more than one rule can apply to the term: \n").append(kItem);
                                         sb.append("\n\nCandidate rules:\n");
                                         RuleSourceUtil.appendRuleAndSource(appliedRule, sb);
@@ -559,16 +555,15 @@ public class KItem extends Term implements KItemRepresentation {
                                 appliedRule = rule;
                             }
 
-                            if (kItem.global.javaExecutionOptions.logRulesPublic && result != null) {
-                                RuleSourceUtil.printRuleAndSource(rule);
-                            }
+                            KItemLog.logRuleApplied(kLabelConstant, nestingLevel, result != null, rule,
+                                    kItem.global);
 
                             /*
                              * If the function definitions do not need to be deterministic, try them in order
                              * and apply the first one that matches.
                              */
                             if (!deterministicFunctions && result != null) {
-                                return result;
+                                break;
                             }
                         } catch (KEMException e) {
                             addDetailedStackFrame(e, kItem, rule, context);
@@ -593,44 +588,55 @@ public class KItem extends Term implements KItemRepresentation {
                     }
 
                     if (result != null) {
+                        KItemLog.logEvaluated(kItem, result, nestingLevel);
+                        kItem.profiler.evalFuncRuleCounter.increment();
                         return result;
-                    } else if (owiseResult != null) {
-                        if (!kItem.isGround()) {
-                            if (context.global().stage != Stage.REWRITING) {
-                                return kItem;
-                            }
-
-                            /*
-                             * apply the "[owise]" rule only if this kItem does not unify with any
-                             * of the left-hand-sides of the other rules (no other rule may apply)
-                             */
-                            for (Rule rule : definition.functionRules().get(kLabelConstant)) {
-                                if (rule.att().contains("owise")) {
-                                    continue;
-                                }
-
-                                ConstrainedTerm subject = new ConstrainedTerm(
-                                        kItem.kList(),
-                                        context);
-                                ConstrainedTerm pattern = new ConstrainedTerm(
-                                        ((KItem) rule.leftHandSide()).kList(),
-                                        ConjunctiveFormula.of(context.global())
-                                                .add(rule.lookups())
-                                                .addAll(rule.requires()),
-                                        context);
-                                if (!subject.unify(pattern, null,
-                                        new FormulaContext(FormulaContext.Kind.OwiseRule, rule)).isEmpty()) {
-                                    return kItem;
-                                }
-                            }
-                        }
+                    } else if (owiseResult != null && owiseApplicable(kItem, context, rulesForKLabel)) {
+                        KItemLog.logEvaluatedOwise(kItem, owiseResult, nestingLevel);
+                        kItem.profiler.evalFuncOwiseCounter.increment();
                         return owiseResult;
                     }
+                    KItemLog.logNoRuleApplicable(kItem, nestingLevel);
+                    kItem.profiler.evalFuncNoRuleApplicableCounter.increment();
+                } else {
+                    kItem.profiler.evalFuncNoRuleCounter.increment();
                 }
                 return kItem;
             } finally {
                 Profiler.stopTimer(Profiler.getTimerForFunction(kLabelConstant));
+                kItem.profiler.evaluateFunctionNanoTimer.stop();
             }
+        }
+
+        private boolean owiseApplicable(KItem kItem, TermContext context, Collection<Rule> rulesForKLabel) {
+            if (!kItem.isGround()) {
+                if (context.global().stage != Stage.REWRITING) {
+                    return false;
+                }
+
+                /*
+                 * apply the "[owise]" rule only if this kItem does not unify with any
+                 * of the left-hand-sides of the other rules (no other rule may apply)
+                 */
+                for (Rule rule : rulesForKLabel) {
+                    if (rule.att().contains("owise")) {
+                        continue;
+                    }
+
+                    ConstrainedTerm subject = new ConstrainedTerm(kItem.kList(), context);
+                    ConstrainedTerm pattern = new ConstrainedTerm(
+                            ((KItem) rule.leftHandSide()).kList(),
+                            ConjunctiveFormula.of(context.global())
+                                    .add(rule.lookups())
+                                    .addAll(rule.requires()),
+                            context);
+                    if (!subject.unify(pattern, null,
+                            new FormulaContext(FormulaContext.Kind.OwiseRule, rule)).isEmpty()) {
+                        return false;
+                    }
+                }
+            }
+            return true;
         }
 
         public void addDetailedStackFrame(KEMException e, KItem kItem, Rule rule, TermContext context) {
@@ -644,12 +650,10 @@ public class KItem extends Term implements KItemRepresentation {
                     if (kItemStr.length() == lengthThreshold) {
                         kItemStr += "...";
                     }
-                    StringBuffer ruleSb = new StringBuffer();
+                    StringBuilder ruleSb = new StringBuilder();
                     RuleSourceUtil.appendRuleAndSource(rule, ruleSb);
-                    StringBuffer sb = new StringBuffer();
-                    new Formatter(sb).format("while evaluating functional term:\n\t%s\n  and applying the rule\n%s",
+                    e.exception.formatTraceFrame("while evaluating functional term:\n\t%s\n  and applying the rule\n%s",
                             kItemStr, ruleSb);
-                    e.exception.addTraceFrame(sb);
                 } catch (StackOverflowError e1) {
                     //rollback the counter so that the frames above could log.
                     context.exceptionLogCount.getAndDecrement();
@@ -679,63 +683,73 @@ public class KItem extends Term implements KItemRepresentation {
      * @param context                 a term context
      * @return the result on success, or this {@code KItem} otherwise
      */
-    public Term applyAnywhereRules(TermContext context) {
-        // apply a .K ~> K => K normalization
-        if ((kLabel instanceof KLabelConstant) && KLabels.KSEQ.equals(kLabel)
-                && kList instanceof KList
-                && (((KList) kList).get(0) instanceof KItem && KLabels.DOTK.equals(((KItem) ((KList) kList).get(0)).kLabel) || ((KList) kList).get(0).equals(KSequence.EMPTY))) {
-            return ((KList) kList).get(1);
-        }
+    private Term applyAnywhereRules(TermContext context) {
+        profiler.applyAnywhereRulesNanoTimer.start();
+        try {
+            // apply a .K ~> K => K normalization
+            if ((kLabel instanceof KLabelConstant) && KLabels.KSEQ.equals(kLabel)
+                    && kList instanceof KList
+                    && (((KList) kList).get(0) instanceof KItem &&
+                    KLabels.DOTK.equals(((KItem) ((KList) kList).get(0)).kLabel) ||
+                    ((KList) kList).get(0).equals(KSequence.EMPTY))) {
+                profiler.applyAnywhereBuiltinCounter.increment();
+                return ((KList) kList).get(1);
+            }
 
-        if (!isAnywhereApplicable(context)) {
-            return this;
-        }
+            if (!isAnywhereApplicable(context)) {
+                profiler.applyAnywhereNoRuleCounter.increment();
+                return this;
+            }
 
-        Definition definition = context.definition();
-        KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
+            Definition definition = context.definition();
+            KLabelConstant kLabelConstant = (KLabelConstant) kLabel;
 
-        /* apply [anywhere] rules */
-        /* TODO(YilongL): make KLabelConstant dependent on Definition and store
-         * anywhere rules in KLabelConstant */
-        for (Rule rule : definition.anywhereRules().get(kLabelConstant)) {
-            try {
-                if (rule == RuleAuditing.getAuditingRule()) {
-                    RuleAuditing.beginAudit();
-                } else if (RuleAuditing.isAuditBegun() && RuleAuditing.getAuditingRule() == null) {
-                    System.err.println("\nAuditing " + rule + "...\n");
-                }
-                /* anywhere rules should be applied by pattern match rather than unification */
-                Map<Variable, Term> solution;
-                List<Substitution<Variable, Term>> matches = PatternMatcher.match(this, rule, context);
-                if (matches.isEmpty()) {
-                    continue;
-                } else {
-                    assert matches.size() == 1 : "unexpected non-deterministic anywhere rule " + rule;
-                    solution = matches.get(0);
-                }
-
-                RuleAuditing.succeed(rule);
-                Term rightHandSide = rule.rightHandSide();
-                rightHandSide = rightHandSide.substituteAndEvaluate(solution, context);
-
-                if (global.javaExecutionOptions.logRulesPublic) {
-                    RuleSourceUtil.printRuleAndSource(rule);
-                }
-                return rightHandSide;
-            } finally {
-                if (RuleAuditing.isAuditBegun()) {
-                    if (RuleAuditing.getAuditingRule() == rule) {
-                        RuleAuditing.endAudit();
+            /* apply [anywhere] rules */
+            /* TODO(YilongL): make KLabelConstant dependent on Definition and store
+             * anywhere rules in KLabelConstant */
+            for (Rule rule : definition.anywhereRules().get(kLabelConstant)) {
+                try {
+                    if (rule == RuleAuditing.getAuditingRule()) {
+                        RuleAuditing.beginAudit();
+                    } else if (RuleAuditing.isAuditBegun() && RuleAuditing.getAuditingRule() == null) {
+                        System.err.println("\nAuditing " + rule + "...\n");
                     }
-                    if (!RuleAuditing.isSuccess()
-                            && RuleAuditing.getAuditingRule() == rule) {
-                        throw RuleAuditing.fail();
+                    /* anywhere rules should be applied by pattern match rather than unification */
+                    Map<Variable, Term> solution;
+                    List<Substitution<Variable, Term>> matches = PatternMatcher.match(this, rule, context,
+                            "KItem anywhere", profiler.applyAnywhereRulesNanoTimer.getLevel());
+                    if (matches.isEmpty()) {
+                        continue;
+                    } else {
+                        assert matches.size() == 1 : "unexpected non-deterministic anywhere rule " + rule;
+                        solution = matches.get(0);
+                    }
+
+                    RuleAuditing.succeed(rule);
+                    Term rightHandSide = rule.rightHandSide();
+                    rightHandSide = rightHandSide.substituteAndEvaluate(solution, context);
+
+                    KItemLog.logAnywhereRule(kLabelConstant, profiler.applyAnywhereRulesNanoTimer.getLevel(),
+                            rule, global);
+                    profiler.applyAnywhereRuleCounter.increment();
+                    return rightHandSide;
+                } finally {
+                    if (RuleAuditing.isAuditBegun()) {
+                        if (RuleAuditing.getAuditingRule() == rule) {
+                            RuleAuditing.endAudit();
+                        }
+                        if (!RuleAuditing.isSuccess()
+                                && RuleAuditing.getAuditingRule() == rule) {
+                            throw RuleAuditing.fail();
+                        }
                     }
                 }
             }
+            profiler.applyAnywhereNoRuleApplicableCounter.increment();
+            return this;
+        } finally {
+            profiler.applyAnywhereRulesNanoTimer.stop();
         }
-
-        return this;
     }
 
     @Override

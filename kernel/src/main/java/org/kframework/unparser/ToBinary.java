@@ -117,6 +117,8 @@ public class ToBinary {
             writeString(inj.klabel().name());
             data.writeBoolean(inj.klabel() instanceof KVariable);
 
+        } else {
+            throw KEMException.criticalError("Unimplemented for Binary serialization: ", k);
         }
     }
 

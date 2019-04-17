@@ -63,7 +63,7 @@ public class ResolveFunctionWithConfig {
       return new TransformK() {
         @Override
         public K apply(KApply kapp) {
-          if (kapp.equals(term) || (term instanceof KRewrite && ((KRewrite)term).left().equals(kapp))) {
+          if (!kapp.items().isEmpty() && kapp.items().get(kapp.items().size() - 1).att().contains("withConfig")) {
             return super.apply(kapp);
           }
           if (module.attributesFor().get(kapp.klabel()).getOrElse(() -> Att()).contains("withConfig")) {
@@ -104,7 +104,7 @@ public class ResolveFunctionWithConfig {
           } else {
             secondChild = IncompleteCellUtils.make(KLabels.GENERATED_TOP_CELL, true, cell, true);
           }
-          List<K> items = Stream.concat(funKApp.items().stream(), Stream.of(KAs(secondChild, CONFIG_VAR))).collect(Collections.toList());
+          List<K> items = Stream.concat(funKApp.items().stream(), Stream.of(KAs(secondChild, CONFIG_VAR, Att().add("withConfig")))).collect(Collections.toList());
           K result = KApply(funKApp.klabel(), KList(items), funKApp.att());
           if (rhs == null) {
             return result;
@@ -124,7 +124,23 @@ public class ResolveFunctionWithConfig {
         return prod;
     }
 
-    public K resolveConfigVar(K term) {
+    public K resolveConfigVar(K body, K requires, K ensures) {
+      FoldK<Boolean> hasConfig = new FoldK<Boolean>() {
+          @Override
+          public Boolean unit() {
+              return false;
+          }
+
+          @Override
+          public Boolean apply(KVariable k) {
+              return k.name().equals("_Configuration");
+          }
+
+          @Override
+          public Boolean merge(Boolean a, Boolean b) {
+              return a || b;
+          }
+      };
       if (new FoldK<Boolean>() {
             @Override
             public Boolean unit() {
@@ -140,34 +156,19 @@ public class ResolveFunctionWithConfig {
             public Boolean merge(Boolean a, Boolean b) {
                 return a || b;
             }
-        }.apply(term) && new FoldK<Boolean>() {
-            @Override
-            public Boolean unit() {
-                return false;
-            }
-
-            @Override
-            public Boolean apply(KVariable k) {
-                return k.name().equals("_Configuration");
-            }
-
-            @Override
-            public Boolean merge(Boolean a, Boolean b) {
-                return a || b;
-            }
-        }.apply(term)) {
-            K left = RewriteToTop.toLeft(term);
+        }.apply(body) && (hasConfig.apply(body) || hasConfig.apply(requires) || hasConfig.apply(ensures))) {
+            K left = RewriteToTop.toLeft(body);
             if (left instanceof KApply && ((KApply)left).klabel().equals(KLabels.GENERATED_TOP_CELL)) {
-                term = KRewrite(KAs(RewriteToTop.toLeft(term), CONFIG_VAR), RewriteToTop.toRight(term));
+                body = KRewrite(KAs(RewriteToTop.toLeft(body), CONFIG_VAR), RewriteToTop.toRight(body));
             }
         }
-        return term;
+        return body;
     }
 
     public Sentence resolveConfigVar(Sentence s) {
       if (s instanceof Rule) {
         Rule r = (Rule)s;
-        return Rule(resolveConfigVar(r.body()), r.requires(), r.ensures(), r.att());
+        return Rule(resolveConfigVar(r.body(), r.requires(), r.ensures()), r.requires(), r.ensures(), r.att());
       }
       return s;
     }

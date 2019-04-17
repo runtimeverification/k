@@ -17,6 +17,7 @@ import org.kframework.krun.RunProcess;
 import org.kframework.main.Main;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
+import org.kframework.utils.file.DefinitionDir;
 import org.kframework.utils.file.KompiledDir;
 import org.kframework.utils.inject.Concrete;
 import org.kframework.utils.inject.DefinitionScope;
@@ -75,6 +76,7 @@ public abstract class BaseTestCase {
             bind(KompileOptions.class).toInstance(context.kompileOptions);
             bind(Definition.class).toInstance(definition);
             bind(File.class).annotatedWith(KompiledDir.class).toInstance(kompiledDir);
+            bind(File.class).annotatedWith(DefinitionDir.class).toInstance(definitionDir);
             bind(Definition.class).annotatedWith(Concrete.class).toInstance(definition);
         }
 

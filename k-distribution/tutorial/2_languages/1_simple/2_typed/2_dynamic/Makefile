@@ -5,7 +5,7 @@ TESTDIR?=../programs/*
 RESULTDIR=tests
 KOMPILE_FLAGS=--transition strict
 KOMPILE_BACKEND?=java
-KRUN_FLAGS=--output none
+KRUN_FLAGS=--output none --smt none
 
 %/threads/threads_05.simple: kompile
 	cat tests/threads_05.simple.in 2>/dev/null | $(KRUN) $@ -d $(DEFDIR) --search --bound 5 $(CHECK) tests/threads_05.simple.out

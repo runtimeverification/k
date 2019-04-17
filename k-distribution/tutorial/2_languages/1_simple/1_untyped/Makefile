@@ -4,7 +4,7 @@ EXT=simple
 TESTDIR=tests/*
 KOMPILE_FLAGS=--transition strict
 KOMPILE_BACKEND?=java
-KRUN_FLAGS=--output none
+KRUN_FLAGS=--output none --smt none
 
 include $(MAKEFILE_PATH)/../../../find-k.mak
 include ${K_HOME}/include/ktest.mak

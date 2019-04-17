@@ -13,6 +13,7 @@ import org.kframework.compile.ExpandMacros;
 import org.kframework.compile.GeneratedTopFormat;
 import org.kframework.compile.GenerateSortPredicateRules;
 import org.kframework.compile.GenerateSortPredicateSyntax;
+import org.kframework.compile.GenerateSortProjections;
 import org.kframework.compile.GuardOrPatterns;
 import org.kframework.compile.LabelInfo;
 import org.kframework.compile.LabelInfoFromModule;
@@ -113,12 +114,13 @@ public class KoreBackend implements Backend {
         DefinitionTransformer resolveStrict = DefinitionTransformer.from(new ResolveStrict(kompileOptions)::resolve, "resolving strict and seqstrict attributes");
         DefinitionTransformer resolveHeatCoolAttribute = DefinitionTransformer.fromSentenceTransformer(new ResolveHeatCoolAttribute(new HashSet<>(kompileOptions.transition), heatCoolConditions)::resolve, "resolving heat and cool attributes");
         DefinitionTransformer resolveAnonVars = DefinitionTransformer.fromSentenceTransformer(new ResolveAnonVar()::resolve, "resolving \"_\" vars");
-        DefinitionTransformer guardOrs = DefinitionTransformer.fromSentenceTransformer(new GuardOrPatterns()::resolve, "resolving or patterns");
+        DefinitionTransformer guardOrs = DefinitionTransformer.fromSentenceTransformer(new GuardOrPatterns(true)::resolve, "resolving or patterns");
         DefinitionTransformer resolveSemanticCasts =
                 DefinitionTransformer.fromSentenceTransformer(new ResolveSemanticCasts(true)::resolve, "resolving semantic casts");
         DefinitionTransformer resolveFun = DefinitionTransformer.from(new ResolveFun()::resolve, "resolving #fun");
         DefinitionTransformer resolveFunctionWithConfig = DefinitionTransformer.fromSentenceTransformer(new ResolveFunctionWithConfig()::resolve, "resolving functions with config context");
         DefinitionTransformer generateSortPredicateSyntax = DefinitionTransformer.from(new GenerateSortPredicateSyntax()::gen, "adding sort predicate productions");
+        DefinitionTransformer generateSortProjections = DefinitionTransformer.from(new GenerateSortProjections()::gen, "adding sort projections");
         DefinitionTransformer subsortKItem = DefinitionTransformer.from(Kompile::subsortKItem, "subsort all sorts to KItem");
         DefinitionTransformer expandMacros = DefinitionTransformer.fromSentenceTransformer((m, s) -> new ExpandMacros(m, files, kompileOptions, false).expand(s), "expand macros");
         Function1<Definition, Definition> resolveFreshConstants = d -> DefinitionTransformer.from(m -> GeneratedTopFormat.resolve(new ResolveFreshConstants(d, true).resolve(m)), "resolving !Var variables").apply(d);
@@ -137,6 +139,7 @@ public class KoreBackend implements Backend {
                 .andThen(expandMacros)
                 .andThen(guardOrs)
                 .andThen(generateSortPredicateSyntax)
+                .andThen(generateSortProjections)
                 .andThen(AddImplicitComputationCell::transformDefinition)
                 .andThen(resolveFreshConstants)
                 .andThen(new Strategy(kompileOptions.experimental.heatCoolStrategies).addStrategyCellToRulesTransformer())

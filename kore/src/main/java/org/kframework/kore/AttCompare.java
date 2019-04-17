@@ -66,7 +66,7 @@ public class AttCompare {
         return true;
     }
 
-    private Map<Tuple2<String, Class<?>>, Object> filterAtt(Att att) {
+    private Map<Tuple2<String, String>, Object> filterAtt(Att att) {
         return att.att().filterKeys(tuple -> attNames.contains(tuple._1()));
     }
 

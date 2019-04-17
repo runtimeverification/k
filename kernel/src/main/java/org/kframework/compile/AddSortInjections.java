@@ -130,7 +130,7 @@ public class AddSortInjections {
             }
         } else {
             String hookAtt = mod.sortAttributesFor().get(expectedSort).getOrElse(() -> Att()).getOptional("hook").orElse("");
-            if (hookAtt.equals("MAP.Map") || hookAtt.equals("SET.Set") || hookAtt.equals("LIST.List")) {
+            if ((hookAtt.equals("MAP.Map") || hookAtt.equals("SET.Set") || hookAtt.equals("LIST.List")) && term instanceof KApply) {
                 for (KLabel collectionLabel : collectionFor.keySet()) {
                     Optional<String> wrapElement = mod.attributesFor().apply(collectionLabel).getOptional("wrapElement");
                     if (wrapElement.isPresent()) {
@@ -147,10 +147,8 @@ public class AddSortInjections {
                         }
                     }
                 }
-                throw new AssertionError();
-            } else {
-                return KApply(KLabel("inj", actualSort, expectedSort), KList(visitChildren(term, actualSort)), Att.empty().add(Sort.class, expectedSort));
             }
+            return KApply(KLabel("inj", actualSort, expectedSort), KList(visitChildren(term, actualSort)), Att.empty().add(Sort.class, expectedSort));
         }
     }
 
@@ -291,6 +289,9 @@ public class AddSortInjections {
     }
 
     private Production production(KApply term) {
+        if (term.klabel() instanceof KVariable) {
+          throw KEMException.internalError("KORE does not yet support KLabel variables.", term);
+        }
         scala.collection.Set<Production> prods = mod.productionsFor().apply(((KApply) term).klabel());
         if (prods.size() != 1) {
           throw KEMException.compilerError("Could not find production for KApply with label " + term.klabel(), term);
@@ -310,7 +311,7 @@ public class AddSortInjections {
         }
         Set<Sort> lub = mod.subsorts().minimal(bounds);
         if (lub.size() != 1) {
-            throw KEMException.internalError("Could not compute least upper bound for rewrite sort.", loc);
+            throw KEMException.internalError("Could not compute least upper bound for rewrite sort. Possible candidates: " + lub, loc);
         }
         return lub.iterator().next();
     }

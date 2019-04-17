@@ -5,6 +5,7 @@ import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 
 import java.io.Serializable;
+import java.util.Formatter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -124,6 +125,12 @@ public class KException implements Serializable {
                 frames++;
             }
         }
+    }
+
+    public void formatTraceFrame(String format, Object... args) {
+        StringBuilder sb = new StringBuilder();
+        new Formatter(sb).format(format, args);
+        addTraceFrame(sb);
     }
 
     public Source getSource() {

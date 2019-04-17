@@ -87,7 +87,7 @@ public class Kompile {
         File cacheFile = kompileOptions.experimental.cacheFile != null
                 ? files.resolveWorkingDirectory(kompileOptions.experimental.cacheFile) : files.resolveKompiled("cache.bin");
         this.definitionParsing = new DefinitionParsing(
-                lookupDirectories, kompileOptions.strict(), kem,
+                lookupDirectories, kompileOptions.strict(), kompileOptions.profileRules, kem, files,
                 parser, cacheParses, cacheFile, !kompileOptions.outerParsing.noPrelude, kompileOptions.isKore());
         this.sw = sw;
     }
@@ -106,6 +106,13 @@ public class Kompile {
      * @return
      */
     public CompiledDefinition run(File definitionFile, String mainModuleName, String mainProgramsModuleName, Function<Definition, Definition> pipeline, Set<String> excludedModuleTags) {
+        if (kompileOptions.profileRules) {
+            for (File f : files.resolveKompiled(".").listFiles()) {
+                if (f.getName().matches("timing[0-9]+\\.log")) {
+                    f.delete();
+                }
+            }
+        }
         Definition parsedDef = parseDefinition(definitionFile, mainModuleName, mainProgramsModuleName, excludedModuleTags);
         sw.printIntermediate("Parse definition [" + definitionParsing.parsedBubbles.get() + "/" + (definitionParsing.parsedBubbles.get() + definitionParsing.cachedBubbles.get()) + " rules]");
 
@@ -153,12 +160,13 @@ public class Kompile {
         DefinitionTransformer resolveStrict = DefinitionTransformer.from(new ResolveStrict(kompileOptions)::resolve, "resolving strict and seqstrict attributes");
         DefinitionTransformer resolveHeatCoolAttribute = DefinitionTransformer.fromSentenceTransformer(new ResolveHeatCoolAttribute(new HashSet<>(kompileOptions.transition), EnumSet.of(HEAT_RESULT, COOL_RESULT_CONDITION, COOL_RESULT_INJECTION))::resolve, "resolving heat and cool attributes");
         DefinitionTransformer resolveAnonVars = DefinitionTransformer.fromSentenceTransformer(new ResolveAnonVar()::resolve, "resolving \"_\" vars");
-        DefinitionTransformer guardOrs = DefinitionTransformer.fromSentenceTransformer(new GuardOrPatterns()::resolve, "resolving or patterns");
+        DefinitionTransformer guardOrs = DefinitionTransformer.fromSentenceTransformer(new GuardOrPatterns(false)::resolve, "resolving or patterns");
         DefinitionTransformer resolveSemanticCasts =
                 DefinitionTransformer.fromSentenceTransformer(new ResolveSemanticCasts(kompileOptions.backend.equals(Backends.JAVA))::resolve, "resolving semantic casts");
         DefinitionTransformer resolveFun = DefinitionTransformer.from(new ResolveFun()::resolve, "resolving #fun");
         DefinitionTransformer resolveFunctionWithConfig = DefinitionTransformer.fromSentenceTransformer(new ResolveFunctionWithConfig()::resolve, "resolving functions with config context");
         DefinitionTransformer generateSortPredicateSyntax = DefinitionTransformer.from(new GenerateSortPredicateSyntax()::gen, "adding sort predicate productions");
+        DefinitionTransformer generateSortProjections = DefinitionTransformer.from(new GenerateSortProjections()::gen, "adding sort projections");
         DefinitionTransformer subsortKItem = DefinitionTransformer.from(Kompile::subsortKItem, "subsort all sorts to KItem");
         DefinitionTransformer expandMacros = DefinitionTransformer.fromSentenceTransformer((m, s) -> new ExpandMacros(m, files, kompileOptions, false).expand(s), "expand macros");
         GenerateCoverage cov = new GenerateCoverage(kompileOptions.coverage, files);
@@ -180,6 +188,7 @@ public class Kompile {
                 .andThen(expandMacros)
                 .andThen(guardOrs)
                 .andThen(generateSortPredicateSyntax)
+                .andThen(generateSortProjections)
                 .andThen(Kompile::resolveFreshConstants)
                 .andThen(AddImplicitComputationCell::transformDefinition)
                 .andThen(new Strategy(kompileOptions.experimental.heatCoolStrategies).addStrategyCellToRulesTransformer())

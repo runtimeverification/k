@@ -37,6 +37,12 @@ SUBDIRS=issue-2273 \
 	fatalWarnings \
 	symbolic-int-function \
 	map-symbolic-tests \
+	profile \
+	ffi-llvm \
+	ite-bug \
+	cast \
+	help \
+	exit-code-no-gen-top \
 
 
 include ../../include/ktest-group.mak

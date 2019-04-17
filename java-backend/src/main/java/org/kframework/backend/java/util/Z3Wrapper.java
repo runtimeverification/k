@@ -2,9 +2,13 @@
 package org.kframework.backend.java.util;
 
 import com.google.common.collect.ImmutableSet;
-
+import org.apache.commons.io.IOUtils;
 import org.kframework.backend.java.symbolic.JavaExecutionOptions;
-import org.kframework.backend.java.z3.*;
+import org.kframework.backend.java.z3.Z3Context;
+import org.kframework.backend.java.z3.Z3Exception;
+import org.kframework.backend.java.z3.Z3Params;
+import org.kframework.backend.java.z3.Z3Solver;
+import org.kframework.backend.java.z3.Z3Status;
 import org.kframework.builtin.Sorts;
 import org.kframework.utils.OS;
 import org.kframework.utils.errorsystem.KEMException;
@@ -12,20 +16,16 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.options.SMTOptions;
 
-import static org.kframework.kore.KORE.KToken;
-
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.Set;
+
+import static org.kframework.kore.KORE.*;
 
 /**
  * @author Traian
  */
 public class Z3Wrapper {
-
-    private static final int Z3_RESTART_LIMIT = 3;
 
     public static final Set<String> Z3_QUERY_RESULTS = ImmutableSet.of("unknown", "sat", "unsat");
 
@@ -48,15 +48,17 @@ public class Z3Wrapper {
         this.files = files;
         this.stateLog = stateLog;
 
-        String defaultPrelude = "(set-option :auto-config false)\n"
-                              + "(set-option :smt.mbqi false)\n";
+        String defaultPrelude = ""
+                + "(set-option :auto-config false)\n"
+                + "(set-option :smt.mbqi false)\n";
 
         SMT_PRELUDE = options.smtPrelude == null ? defaultPrelude : files.loadFromWorkingDirectory(options.smtPrelude);
         CHECK_SAT = options.z3Tactic == null ? "(check-sat)" : "(check-sat-using " + options.z3Tactic + ")";
     }
 
     public synchronized boolean isUnsat(CharSequence query, int timeout, Z3Profiler timer) {
-        stateLog.log(StateLog.LogEvent.Z3QUERY, KToken(SMT_PRELUDE + "\n" + query + "\n" + CHECK_SAT + "\n", Sorts.Z3Query()));
+        stateLog.log(StateLog.LogEvent.Z3QUERY,
+                KToken(SMT_PRELUDE + "\n" + query + "\n" + CHECK_SAT + "\n", Sorts.Z3Query()));
         if (options.z3JNI) {
             return checkQueryWithLibrary(query, timeout);
         } else {
@@ -87,43 +89,35 @@ public class Z3Wrapper {
      * @return true if query result is unsat, false otherwise.
      */
     private boolean checkQueryWithExternalProcess(CharSequence query, int timeout, Z3Profiler profiler) {
-        String result = "";
+        String result;
         profiler.startQuery();
         try {
-            for (int i = 0; i < Z3_RESTART_LIMIT; i++) {
-                ProcessBuilder pb = files.getProcessBuilder().command(
-                        OS.current().getNativeExecutable("z3"),
-                        "-in",
-                        "-smt2",
-                        "-t:" + timeout);
-                pb.redirectInput(ProcessBuilder.Redirect.PIPE);
-                pb.redirectOutput(ProcessBuilder.Redirect.PIPE);
-                profiler.startRun();
-                Process z3Process = pb.start();
-                PrintWriter input = new PrintWriter(z3Process.getOutputStream());
-                BufferedReader output = new BufferedReader(new InputStreamReader(z3Process.getInputStream()));
-                input.format("%s%s%s\n", SMT_PRELUDE, query, CHECK_SAT);
-                input.close();
-                result = null;
-                String line = output.readLine();
-                while (line != null && line.startsWith("(error")) {
-                    System.err.println("\nZ3 error: " + line);
-                    result = line;
-                    line = output.readLine();
-                }
-                if (line != null) {
-                    result = line;
-                }
-                z3Process.destroy();
-                profiler.endRun(timeout);
-                if (result != null) {
-                    break;
-                }
+            ProcessBuilder pb = files.getProcessBuilder().command(
+                    OS.current().getNativeExecutable("z3"),
+                    "-in",
+                    "-smt2",
+                    "-t:" + timeout);
+            pb.redirectInput(ProcessBuilder.Redirect.PIPE);
+            pb.redirectOutput(ProcessBuilder.Redirect.PIPE);
+            profiler.startRun();
+            Process z3Process = pb.start();
+            PrintWriter input = new PrintWriter(z3Process.getOutputStream());
+            input.format("%s%s%s\n", SMT_PRELUDE, query, CHECK_SAT);
+            input.close();
+            // When the process dies, that input stream does not go away automatically.
+            // https://stackoverflow.com/a/7100172/4182868
+            result = IOUtils.toString(z3Process.getInputStream()).trim();
+            z3Process.destroy();
+            profiler.endRun(timeout);
+
+            if (result.isEmpty()) {
+                result = "Z3 error: ended with no output";
             }
         } catch (IOException e) {
             throw KEMException.criticalError("Exception while invoking Z3", e);
         } finally {
             if (javaExecutionOptions.debugZ3 && profiler.isLastRunTimeout()) {
+                //In case of timeout, result is "unknown", so evaluation can proceed.
                 System.err.println("\nZ3 likely timeout");
             }
         }
@@ -138,4 +132,3 @@ public class Z3Wrapper {
         return "unsat".equals(result);
     }
 }
-

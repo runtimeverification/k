@@ -36,7 +36,7 @@ public class KompileFrontEnd extends FrontEnd {
     private final Stopwatch sw;
     private final KExceptionManager kem;
     private final BinaryLoader loader;
-    private final FileUtil files;
+    private final Provider<FileUtil> files;
 
     @Inject
     KompileFrontEnd(
@@ -48,7 +48,7 @@ public class KompileFrontEnd extends FrontEnd {
             KExceptionManager kem,
             BinaryLoader loader,
             JarInfo jarInfo,
-            FileUtil files) {
+            Provider<FileUtil> files) {
         super(kem, options.global, usage, experimentalUsage, jarInfo, files);
         this.options = options;
         this.koreBackend = koreBackend;
@@ -60,20 +60,20 @@ public class KompileFrontEnd extends FrontEnd {
 
     @Override
     public int run() {
-        if (!options.outerParsing.mainDefinitionFile(files).exists()) {
+        if (!options.outerParsing.mainDefinitionFile(files.get()).exists()) {
             throw KEMException.criticalError("Definition file doesn't exist: " +
-                    options.outerParsing.mainDefinitionFile(files).getAbsolutePath());
+                    options.outerParsing.mainDefinitionFile(files.get()).getAbsolutePath());
         }
 
-        Kompile kompile = new Kompile(options, files, kem, sw);
+        Kompile kompile = new Kompile(options, files.get(), kem, sw, !options.profileRules);
         Backend backend = koreBackend.get();
-        CompiledDefinition def = kompile.run(options.outerParsing.mainDefinitionFile(files), options.mainModule(files), options.syntaxModule(files), backend.steps(), backend.excludedModuleTags());
+        CompiledDefinition def = kompile.run(options.outerParsing.mainDefinitionFile(files.get()), options.mainModule(files.get()), options.syntaxModule(files.get()), backend.steps(), backend.excludedModuleTags());
         sw.printIntermediate("Kompile to kore");
-        loader.saveOrDie(files.resolveKompiled("compiled.bin"), def);
+        loader.saveOrDie(files.get().resolveKompiled("compiled.bin"), def);
         sw.printIntermediate("Save to disk");
         backend.accept(def);
         sw.printIntermediate("Backend");
-        loader.saveOrDie(files.resolveKompiled("timestamp"), "");
+        loader.saveOrDie(files.get().resolveKompiled("timestamp"), "");
         sw.printTotal("Total");
         return 0;
     }

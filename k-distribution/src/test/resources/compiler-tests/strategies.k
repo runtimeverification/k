@@ -2,7 +2,8 @@
 requires "domains.k"
 
 module A-STRATEGY
-    imports BASIC-STRATEGY
+    imports STRATEGY-ABSTRACT
+    imports RULE-TAG-SYNTAX
 endmodule
 
 module A
