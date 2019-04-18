@@ -36,7 +36,7 @@ pipeline {
                         sh '''
                           makepkg
                         '''
-                        stash name: "arch", includes: "kframework-5.0.0.pkg.tar.xz"
+                        stash name: "arch", includes: "kframework-5.0.0-1-x86_64.pkg.tar.xz"
                       }
                     }
                   }
@@ -54,7 +54,7 @@ pipeline {
                     unstash "arch"
                     sh '''
                       pacman -Syy
-                      pacman -U kframework-5.0.0.pkg.tar.xz
+                      pacman -U kframework-5.0.0-1-x86_64.pkg.tar.xz
                       src/main/scripts/test-in-container
                     '''
                   }
