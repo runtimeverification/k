@@ -120,20 +120,17 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
 
     @Override
     public synchronized Rewriter apply(org.kframework.definition.Definition def) {
-        Module mainModule = def.mainModule();
-        TermContext initializingContext = TermContext.builder(new GlobalContext(fs, globalOptions, krunOptions,
+        GlobalContext initializingContext = new GlobalContext(fs, globalOptions, krunOptions,
                 kproveOptions, javaExecutionOptions, kem, smtOptions, hookProvider, files, Stage.INITIALIZING, profiler,
-                kprint, def))
-                .freshCounter(0).build();
-        Definition definition;
-        definition = initializeDefinition.invoke(mainModule, kem, initializingContext.global());
+                kprint, def);
+        Definition definition = initializeDefinition.invoke(def.mainModule(), kem, initializingContext);
         GlobalContext rewritingContext = new GlobalContext(fs, globalOptions, krunOptions,
                 kproveOptions, javaExecutionOptions, kem, smtOptions, hookProvider, files, Stage.REWRITING, profiler,
                 kprint, def);
         rewritingContext.setDefinition(definition);
 
-        return new SymbolicRewriterGlue(mainModule, definition, definition, transitions,
-                initializingContext.getCounterValue(), rewritingContext, kem, files, kompileOptions, sw);
+        return new SymbolicRewriterGlue(def.mainModule(), definition, definition, transitions,
+                0, rewritingContext, kem, files, kompileOptions, sw);
     }
 
     public static Rule transformFunction(Function<K, K> f, Rule r) {
@@ -192,7 +189,6 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
             KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, termContext.global(), false);
             ResolveSemanticCasts resolveCasts = new ResolveSemanticCasts(true);
             ExpandMacros macroExpander = new ExpandMacros(module, files, kompileOptions, false);
-            termContext.setKOREtoBackendKILConverter(converter);
             Term backendKil = converter.convert(macroExpander.expand(resolveCasts.resolve(k))).evaluate(termContext);
             rewritingContext.stateLog.log(StateLog.LogEvent.EXECINIT, backendKil, KApply(KLabels.ML_TRUE));
             rewritingContext.setExecutionPhase(true);
@@ -215,7 +211,6 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
             KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, termContext.global(), false);
             ResolveSemanticCasts resolveCasts = new ResolveSemanticCasts(true);
             ExpandMacros macroExpander = new ExpandMacros(module, files, kompileOptions, false);
-            termContext.setKOREtoBackendKILConverter(converter);
             Term javaTerm = converter.convert(macroExpander.expand(resolveCasts.resolve(initialConfiguration))).evaluate(termContext);
             rewritingContext.stateLog.log(StateLog.LogEvent.SEARCHINIT, javaTerm, KApply(KLabels.ML_TRUE));
             org.kframework.backend.java.kil.Rule javaPattern = convertToJavaPattern(converter, pattern);
@@ -271,7 +266,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
                         ConstrainedTerm rhs = new ConstrainedTerm(
                                 r.rightHandSide(), ensures, TermContext.builder(termContext.global()).build());
 
-                        termContext.setInitialVariables(lhs.variableSet());
+                        termContext.setInitialLhsVariables(lhs.variableSet());
                         termContext.setTopConstraint(null);
                         if (rewritingContext.javaExecutionOptions.cacheFunctionsOptimized) {
                             rewritingContext.functionCache.clear();
@@ -378,7 +373,6 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
             public ProcessProofRules invoke(GlobalContext rewritingContext, long initCounterValue, Module module, Definition definition) {
                 termContext = TermContext.builder(rewritingContext).freshCounter(initCounterValue).build();
                 converter = new KOREtoBackendKIL(module, definition, termContext.global(), false);
-                termContext.setKOREtoBackendKILConverter(converter);
                 javaRules = rules.stream()
                         .map(r -> converter.convert(Optional.<Module>empty(), r))
                         .map(this::evaluateRule)
