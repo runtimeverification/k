@@ -36,7 +36,6 @@ import java.io.ObjectOutputStream;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Formatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -61,6 +60,15 @@ import java.util.stream.Collectors;
 @SuppressWarnings("serial")
 public class KItem extends Term implements KItemRepresentation {
 
+    /**
+     * Possible types:
+     * <p>
+     * KLabelConstant - regular KLabel, assumed in most cases.
+     * <p>
+     * KLabelInjection - used in some cases, requires empty KList.
+     * <p>
+     * KVariable - was probably supported in the past but no longer supported by the backend.
+     */
     private final Term kLabel;
     private final Term kList;
 
@@ -540,7 +548,7 @@ public class KItem extends Term implements KItemRepresentation {
                             } else {
                                 if (stage == Stage.REWRITING) {
                                     if (deterministicFunctions && result != null && !result.equals(rightHandSide)) {
-                                        StringBuffer sb = new StringBuffer();
+                                        StringBuilder sb = new StringBuilder();
                                         sb.append("[non-deterministic function definition]: more than one rule can apply to the term: \n").append(kItem);
                                         sb.append("\n\nCandidate rules:\n");
                                         RuleSourceUtil.appendRuleAndSource(appliedRule, sb);
@@ -651,12 +659,10 @@ public class KItem extends Term implements KItemRepresentation {
                     if (kItemStr.length() == lengthThreshold) {
                         kItemStr += "...";
                     }
-                    StringBuffer ruleSb = new StringBuffer();
+                    StringBuilder ruleSb = new StringBuilder();
                     RuleSourceUtil.appendRuleAndSource(rule, ruleSb);
-                    StringBuffer sb = new StringBuffer();
-                    new Formatter(sb).format("while evaluating functional term:\n\t%s\n  and applying the rule\n%s",
+                    e.exception.formatTraceFrame("while evaluating functional term:\n\t%s\n  and applying the rule\n%s",
                             kItemStr, ruleSb);
-                    e.exception.addTraceFrame(sb);
                 } catch (StackOverflowError e1) {
                     //rollback the counter so that the frames above could log.
                     context.exceptionLogCount.getAndDecrement();
