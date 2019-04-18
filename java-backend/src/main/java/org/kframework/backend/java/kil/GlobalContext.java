@@ -118,11 +118,11 @@ public class GlobalContext implements Serializable {
         if (!executionPhase) {
             profiler.logParsingTime(this);
             javaExecutionOptions.logRulesPublic = javaExecutionOptions.logRulesInit;
-            javaExecutionOptions.logFunctionTargetPublic = false;
+            javaExecutionOptions.logFunctionEvalPublic = false;
         } else {
             profiler.logInitTime(this);
             javaExecutionOptions.logRulesPublic = javaExecutionOptions.logRules;
-            javaExecutionOptions.logFunctionTargetPublic = javaExecutionOptions.logFunctionTarget;
+            javaExecutionOptions.logFunctionEvalPublic = javaExecutionOptions.logFunctionEval;
         }
     }
 

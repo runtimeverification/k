@@ -82,7 +82,7 @@ public class KItemLog {
     }
 
     static void logNoRuleApplicable(KItem kItem, int nestingLevel) {
-        if (kItem.globalContext().javaExecutionOptions.logFunctionTargetPublic) {
+        if (kItem.globalContext().javaExecutionOptions.logFunctionEvalPublic) {
             kItem.globalContext().log().format("KItem lvl %d, %23s: %s\n",
                     nestingLevel, "no rule applicable", kItem);
         }
@@ -94,7 +94,7 @@ public class KItemLog {
                     "KItem lvl %d, %23s: %s\n"
                     + "             %23s: %s\n";
             IndentingFormatter log = kItem.globalContext().log();
-            if (kItem.globalContext().javaExecutionOptions.logFunctionTargetPublic) {
+            if (kItem.globalContext().javaExecutionOptions.logFunctionEvalPublic) {
                 log.format(formatStr, nestingLevel, evaluated, kItem, "to", result);
             } else {
                 log.format(formatStr, nestingLevel, evaluated, kItem.klabel(),
