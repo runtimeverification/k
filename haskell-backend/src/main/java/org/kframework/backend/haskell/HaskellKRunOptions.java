@@ -16,4 +16,6 @@ public class HaskellKRunOptions {
     @Parameter(names="--haskell-backend-home", description="Directory where the Haskel backend source installation resides.")
     public String haskellBackendHome = System.getenv("KORE_HOME");
 
+    @Parameter(names="--all-path-reachability", description="Whether to interpret claims as All Path Reachability Claims.")
+    public boolean allPathReachability = false;
 }

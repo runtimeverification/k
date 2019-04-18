@@ -24,7 +24,6 @@ import org.kframework.compile.ResolveFreshConstants;
 import org.kframework.compile.ResolveFun;
 import org.kframework.compile.ResolveFunctionWithConfig;
 import org.kframework.compile.ResolveHeatCoolAttribute;
-import org.kframework.compile.ResolveIOStreams;
 import org.kframework.compile.ResolveSemanticCasts;
 import org.kframework.compile.ResolveStrict;
 import org.kframework.compile.SortInfo;
