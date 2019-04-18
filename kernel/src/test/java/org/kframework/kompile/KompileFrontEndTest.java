@@ -29,7 +29,7 @@ public class KompileFrontEndTest extends IOTestCase {
     @Test
     public void testHelp() throws IOException {
         options.global.help = true;
-        new KompileFrontEnd(options, "foo", "", Providers.of(koreBackend), sw, kem, loader, jarInfo, files).main();
+        new KompileFrontEnd(options, "foo", "", Providers.of(koreBackend), sw, kem, loader, jarInfo, Providers.of(files)).main();
         assertEquals("foo", stdout.toString());
     }
 
@@ -37,14 +37,14 @@ public class KompileFrontEndTest extends IOTestCase {
     @Test
     public void testExperimentalHelp() throws IOException {
         options.global.helpExperimental = true;
-        new KompileFrontEnd(options, "", "foo", Providers.of(koreBackend), sw, kem, loader, jarInfo, files).main();
+        new KompileFrontEnd(options, "", "foo", Providers.of(koreBackend), sw, kem, loader, jarInfo, Providers.of(files)).main();
         assertEquals("foo", stdout.toString());
     }
 
     @Test
     public void testVersion() {
         options.global.version = true;
-        new KompileFrontEnd(options, "", "foo", Providers.of(koreBackend), sw, kem, loader, jarInfo, files).main();
+        new KompileFrontEnd(options, "", "foo", Providers.of(koreBackend), sw, kem, loader, jarInfo, Providers.of(files)).main();
         verify(jarInfo).printVersionMessage();
     }
 }

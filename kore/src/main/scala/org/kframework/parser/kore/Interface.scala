@@ -47,12 +47,7 @@ object SortDeclaration {
   = Some(arg.params, arg.sort, arg.att)
 }
 
-trait HookSortDeclaration extends Declaration {
-  def params: Seq[SortVariable]
-
-  def sort: Sort
-
-  def att: Attributes
+trait HookSortDeclaration extends SortDeclaration {
 }
 
 object HookSortDeclaration {
@@ -75,14 +70,7 @@ object SymbolDeclaration {
   = Some(arg.symbol, arg.argSorts, arg.returnSort, arg.att)
 }
 
-trait HookSymbolDeclaration extends Declaration {
-  def symbol: Symbol
-
-  def argSorts: Seq[Sort]
-
-  def returnSort: Sort
-
-  def att: Attributes
+trait HookSymbolDeclaration extends SymbolDeclaration {
 }
 
 object HookSymbolDeclaration {
@@ -287,18 +275,29 @@ object Floor {
 //   def unapply(arg: Next): Option[(Sort, Pattern)] = Some(arg.s, arg._1)
 // }
 
+trait GeneralizedRewrite {
+  def sort: Sort
+  def getLeftHandSide: Seq[Pattern]
+  def getRightHandSide: Pattern
+}
+
 /**
   * \rewrites(P, Q) is defined as a predicate pattern floor(P implies Q)
   * Therefore a rewrites-to pattern is parametric on two sorts.
   * One is the sort of patterns P and Q;
   * The other is the sort of the context.
   */
-trait Rewrites extends Pattern {
+trait Rewrites extends Pattern with GeneralizedRewrite {
   def s: Sort // the sort of the two patterns P and Q
+
+  def sort = s
 
   def _1: Pattern
 
   def _2: Pattern
+
+  def getLeftHandSide = Seq(_1)
+  def getRightHandSide = _2
 }
 
 object Rewrites {
@@ -306,14 +305,22 @@ object Rewrites {
     Some(arg.s, arg._1, arg._2)
 }
 
-trait Equals extends Pattern {
+trait Equals extends Pattern with GeneralizedRewrite {
   def s: Sort // the sort of the two patterns that are being compared
 
   def rs: Sort // the sort of the context where the equality pattern is being placed
 
+  def sort = rs
+
   def _1: Pattern
 
   def _2: Pattern
+
+  def getLeftHandSide = _1 match {
+    case Application(_, ps) => ps
+  }
+
+  def getRightHandSide = _2
 }
 
 object Equals {

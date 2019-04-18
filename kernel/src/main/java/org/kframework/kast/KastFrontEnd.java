@@ -46,7 +46,7 @@ public class KastFrontEnd extends FrontEnd {
     private final KastOptions options;
     private final Stopwatch sw;
     private final KExceptionManager kem;
-    private final FileUtil files;
+    private final Provider<FileUtil> files;
     private final Map<String, String> env;
     private final Provider<File> kompiledDir;
     private final Provider<CompiledDefinition> compiledDef;
@@ -61,7 +61,7 @@ public class KastFrontEnd extends FrontEnd {
             KExceptionManager kem,
             JarInfo jarInfo,
             @Environment Map<String, String> env,
-            FileUtil files,
+            Provider<FileUtil> files,
             @KompiledDir Provider<File> kompiledDir,
             Provider<CompiledDefinition> compiledDef,
             DefinitionScope scope) {
@@ -111,10 +111,10 @@ public class KastFrontEnd extends FrontEnd {
             }
             K parsed = def.getParser(mod, sort, kem).apply(FileUtil.read(stringToParse), source);
             if (options.expandMacros || options.kore) {
-                parsed = new ExpandMacros(compiledMod, files, def.kompileOptions, false).expand(parsed);
+                parsed = new ExpandMacros(compiledMod, files.get(), def.kompileOptions, false).expand(parsed);
             }
             if (options.kore) {
-              ModuleToKORE converter = new ModuleToKORE(compiledMod, files, def.topCellInitializer);
+              ModuleToKORE converter = new ModuleToKORE(compiledMod, files.get(), def.topCellInitializer);
               parsed = new AddSortInjections(compiledMod).addSortInjections(parsed, sort);
               converter.convert(parsed);
               System.out.println(converter.toString());

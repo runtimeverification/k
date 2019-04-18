@@ -44,7 +44,7 @@ public class KRunFrontEnd extends FrontEnd {
     private final Provider<File> kompiledDir;
     private final KExceptionManager kem;
     private final KRunOptions krunOptions;
-    private final FileUtil files;
+    private final Provider<FileUtil> files;
     private final Provider<CompiledDefinition> compiledDef;
     private final Provider<Function<Definition, Rewriter>> initializeRewriter;
     private final Provider<ExecutionMode> executionMode;
@@ -60,7 +60,7 @@ public class KRunFrontEnd extends FrontEnd {
             @KompiledDir Provider<File> kompiledDir,
             KExceptionManager kem,
             KRunOptions krunOptions,
-            FileUtil files,
+            Provider<FileUtil> files,
             Provider<CompiledDefinition> compiledDef,
             Provider<Function<Definition, Rewriter>> initializeRewriter,
             Provider<ExecutionMode> executionMode,
@@ -83,14 +83,14 @@ public class KRunFrontEnd extends FrontEnd {
     public int run() {
         scope.enter(kompiledDir.get());
         try {
-            KPrint kprint = new KPrint(kem, files, tty, krunOptions.print, compiledDef.get().kompileOptions);
+            KPrint kprint = new KPrint(kem, files.get(), tty, krunOptions.print, compiledDef.get().kompileOptions);
             for (int i = 0; i < krunOptions.experimental.profile - 1; i++) {
-                new KRun(kem, files, tty, kprint).run(compiledDef.get(),
+                new KRun(kem, files.get(), tty, kprint).run(compiledDef.get(),
                         krunOptions,
                         initializeRewriter.get(),
                         executionMode.get());
             }
-            return new KRun(kem, files, tty, kprint).run(compiledDef.get(),
+            return new KRun(kem, files.get(), tty, kprint).run(compiledDef.get(),
                     krunOptions,
                     initializeRewriter.get(),
                     executionMode.get());
