@@ -84,6 +84,7 @@ public class KItem extends Term implements KItemRepresentation {
 
     private BitSet[] childrenDontCareRuleMask = null;
     private final Profiler2 profiler;
+    private boolean evaluatedRecursively = false;
 
     public static KItem of(Term kLabel, Term kList, GlobalContext global) {
         return of(kLabel, kList, global, Att.empty(), null);
@@ -791,6 +792,14 @@ public class KItem extends Term implements KItemRepresentation {
         //return !(kLabel instanceof KLabel) || ((KLabel) kLabel).isFunction();
         return kLabel instanceof KLabel
                 && (((KLabel) kLabel).isFunction() || ((KLabel) kLabel).isPattern());
+    }
+
+    public boolean isEvaluatedRecursively() {
+        return evaluatedRecursively;
+    }
+
+    public void setEvaluatedRecursively(boolean evaluatedRecursively) {
+        this.evaluatedRecursively = evaluatedRecursively;
     }
 
     @Override
