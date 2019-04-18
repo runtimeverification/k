@@ -16,8 +16,6 @@ syntax KItem ::= K "-" K [strict]
 
 rule I1:Int - I2:Int => I1 -Int I2
 
-context assertEqual(HOLE, _:KItem)
-
 rule open(S1:String, S2:String) => #open(S1, S2)
 rule tell(I:Int) => #tell(I)
 rule getc(I:Int) => #getc(I)
@@ -29,9 +27,5 @@ rule write(I:Int, S:String) => #write(I, S)
 rule system(S:String) => #system(S)
 rule mkstemp(Prefix:String, Suffix:String) => #mkstemp(Prefix, Suffix)
 rule #tempFile(Path:String, Fd:Int) => #close(Fd) ~> #remove(Path)
-
-rule assertEqual(K1:Int, K2:Int) => . when K1 ==Int K2
-rule assertEqual(K1:String, K2:String) => . when K1 ==String K2
-rule assertEqual(K1:IOError, K2:IOError) => . when K1 ==K K2
 
 endmodule

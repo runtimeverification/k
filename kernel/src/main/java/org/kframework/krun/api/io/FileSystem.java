@@ -26,7 +26,7 @@ public interface FileSystem {
     @exception IOException Thrown if the underlying system call returns an error code. The message
     is expected to be a mnemonic from errno.h.
     */
-    public long open(String path, String mode) throws IOException;
+    public long open(java.io.File path, String mode) throws IOException;
 
     /**
     Closer a file descriptor.

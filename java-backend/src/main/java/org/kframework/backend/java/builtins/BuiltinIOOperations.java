@@ -32,7 +32,7 @@ public class BuiltinIOOperations {
     public static Term open(StringToken term1, StringToken term2, TermContext termContext) {
         FileSystem fs = termContext.fileSystem();
         try {
-            return IntToken.of(fs.open(term1.stringValue(), term2.stringValue()));
+            return IntToken.of(fs.open(new java.io.File(term1.stringValue()), term2.stringValue()));
         } catch (IOException e) {
             return processIOException(e.getMessage(), termContext);
         }
@@ -114,7 +114,7 @@ public class BuiltinIOOperations {
      * @return a #systemResult term containing the exit code, stdout:String, stderr:Stringh
      */
     public static Term system(StringToken term, TermContext termContext) {
-        Map<String, String> environment = new HashMap<>();
+        Map<String, String> environment = termContext.global().files.getEnv();
         String[] args = new String[3];
         if (OS.current() == OS.WINDOWS) {
             args[0] = "cmd";
@@ -130,7 +130,7 @@ public class BuiltinIOOperations {
         String stdout = output.stdout != null ? new String(output.stdout) : "";
         String stderr = output.stderr != null ? new String(output.stderr) : "";
         return KItem.of(klabel, KList.concatenate(IntToken.of(output.exitCode),
-                StringToken.of(stdout.trim()), StringToken.of(stderr.trim())), termContext.global());
+                StringToken.of(stdout), StringToken.of(stderr)), termContext.global());
     }
 
     public static Term mkstemp(StringToken prefix, StringToken suffix, TermContext termContext) throws IOException {
@@ -139,7 +139,7 @@ public class BuiltinIOOperations {
             File f = File.createTempFile("tmp" + prefix.stringValue(), suffix.stringValue());
             KLabelConstant klabel = KLabelConstant.of(KORE.KLabel("#tempFile(_,_)_K-IO"), termContext.definition());
             return KItem.of(klabel, KList.concatenate(StringToken.of(f.getAbsolutePath()),
-                    IntToken.of(fs.open(f.getAbsolutePath(), "w"))), termContext.global());
+                    IntToken.of(fs.open(f, "w"))), termContext.global());
         } catch (IOException e) {
             return processIOException(e.getMessage(), termContext);
         }

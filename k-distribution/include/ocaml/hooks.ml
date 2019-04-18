@@ -279,20 +279,21 @@ struct
   let hook_opendir _ _ _ _ _ = raise Not_implemented
   let hook_system c _ _ _ _ = match c with
     | [String path] ->
-      let ic, oc = Unix.open_process path in
+      let ic, oc, ec = Unix.open_process_full path (Unix.environment ()) in
       let buf_out = Buffer.create 4096
       and buf_err = Buffer.create 128 in
       (try
          while true do Buffer.add_channel buf_out ic 1 done
        with End_of_file -> ());
       (try
-         while true do Buffer.add_channel buf_err ic 2 done
+         while true do Buffer.add_channel buf_err ec 1 done
        with End_of_file -> ());
-      let exit_status = Unix.close_process (ic, oc) in
+      let exit_status = Unix.close_process_full (ic, oc, ec) in
       let exit_code = match exit_status with
         | Unix.WEXITED n -> n
-        | Unix.WSIGNALED n -> n
-        | Unix.WSTOPPED n -> n
+        (* according to: https://unix.stackexchange.com/questions/99112/default-exit-code-when-process-is-terminated *)
+        | Unix.WSIGNALED n -> (128 + n)
+        | Unix.WSTOPPED n -> (128 + n)
       in
       [KApply3((parse_klabel "#systemResult(_,_,_)_K-IO"), [Int (Z.of_int exit_code)], [String (Buffer.contents buf_out)], [String (Buffer.contents buf_err)])]
   let hook_mkstemp c _ _ _ _ = match c with

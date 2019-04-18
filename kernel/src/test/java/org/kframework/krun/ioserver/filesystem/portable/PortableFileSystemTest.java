@@ -32,7 +32,7 @@ public class PortableFileSystemTest extends BaseTestCase {
             }
         });
         PortableFileSystem fs = new PortableFileSystem(kem, files);
-        long fd = fs.open(new java.io.File(getClass().getResource("/fs-test.txt").toURI()).getAbsolutePath(), "r");
+        long fd = fs.open(new java.io.File(getClass().getResource("/fs-test.txt").toURI()), "r");
         File f = fs.get(fd);
         byte[] file = "foo\n".getBytes(Charset.forName("ASCII"));
         Assert.assertArrayEquals(file, f.read(4));

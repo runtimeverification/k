@@ -34,6 +34,7 @@ SUBDIRS=issue-2273 \
 	kore-brackets \
 	quadratic-poly-unparsing \
 	io-java \
+	io-ocaml \
 	fatalWarnings \
 	symbolic-int-function \
 	map-symbolic-tests \
