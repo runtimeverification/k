@@ -1148,6 +1148,13 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
         return sb.toString();
     }
 
+    public ConjunctiveFormula removeAnonymousSubstitutions() {
+        List<Variable> anonymousVars = substitution.keySet().stream().filter(Variable::isOriginalAnonymous)
+                .collect(Collectors.toList());
+        return new ConjunctiveFormula(substitution.minusAll(anonymousVars),
+                equalities, disjunctions, truthValue, falsifyingEquality, global);
+    }
+
     @Override
     public void accept(Visitor visitor) {
         visitor.visit(this);
