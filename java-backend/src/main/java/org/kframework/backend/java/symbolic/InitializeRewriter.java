@@ -373,6 +373,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
             public ProcessProofRules invoke(GlobalContext rewritingContext, long initCounterValue, Module module, Definition definition) {
                 termContext = TermContext.builder(rewritingContext).freshCounter(initCounterValue).build();
                 converter = new KOREtoBackendKIL(module, definition, termContext.global(), false);
+                termContext.setKOREtoBackendKILConverter(converter);
                 javaRules = rules.stream()
                         .map(r -> converter.convert(Optional.<Module>empty(), r))
                         .map(this::evaluateRule)

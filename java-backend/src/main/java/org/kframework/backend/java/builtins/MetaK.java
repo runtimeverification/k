@@ -207,7 +207,7 @@ public class MetaK {
      * @return backend AST
      */
     public static Term parseKAST(StringToken kast, TermContext termContext) {
-        return termContext.getKOREtoBackendKILConverter().convert(KoreParser.parse(kast.stringValue(), termContext.getSource()));
+        return termContext.getKOREtoBackendKILConverter().convert(KoreParser.parse(kast.stringValue(), kast.getSource()));
     }
 
     public static StringToken getKLabelString(Term term, TermContext context) {
