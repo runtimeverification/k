@@ -246,7 +246,8 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                 files.saveToTemp("vdefinition.kore", kompiledModule);
 
                 ModuleToKORE rulesConverter = new ModuleToKORE(rules, files, def.topCellInitializer);
-                String koreOutput = rulesConverter.convertSpecificationModule(module, rules);
+                String koreOutput = rulesConverter.convertSpecificationModule(module, rules,
+                        haskellKRunOptions.allPathReachability);
                 files.saveToTemp("spec.kore", koreOutput);
                 String defPath = files.resolveTemp("vdefinition.kore").getAbsolutePath();
                 String specPath = files.resolveTemp("spec.kore").getAbsolutePath();
@@ -272,6 +273,9 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                 if (options.experimental.smt.smtPrelude != null) {
                     args.add("--smt-prelude");
                     args.add(options.experimental.smt.smtPrelude);
+                }
+                if (haskellKRunOptions.allPathReachability) {
+                    args.add("--all-path-reachability");
                 }
                 koreCommand = args.toArray(koreCommand);
                 if (haskellKRunOptions.dryRun) {

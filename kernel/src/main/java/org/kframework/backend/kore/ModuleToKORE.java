@@ -5,7 +5,6 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
-import com.google.common.collect.Sets;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import org.kframework.Collections;
@@ -64,6 +63,8 @@ import static org.kframework.definition.Constructors.*;
 import static org.kframework.kore.KORE.*;
 
 public class ModuleToKORE {
+    public static final String ONE_PATH_OP = "weakExistsFinally";
+    public static final String ALL_PATH_OP = "weakAlwaysFinally";
     private final Module module;
     private final BiMap<String, String> kToKoreLabelMap = HashBiMap.create();
     private final FileUtil files;
@@ -534,7 +535,7 @@ public class ModuleToKORE {
         }
         sb.append("\n// rules\n");
         for (Rule rule : iterable(module.rules())) {
-            convertRule(rule, heatCoolEq, topCell, attributes, functionRules, false);
+            convertRule(rule, heatCoolEq, topCell, attributes, functionRules, false, false);
         }
         sb.append("endmodule ");
         convert(attributes, module.att());
@@ -546,7 +547,7 @@ public class ModuleToKORE {
         return prod.klabel().nonEmpty() && ConstructorChecks.isBuiltinLabel(prod.klabel().get());
     }
 
-    public String convertSpecificationModule(Module definition, Module spec) {
+    public String convertSpecificationModule(Module definition, Module spec, boolean allPathReachability) {
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(definition);
         Sort topCell = configInfo.getRootCell();
         sb.append("[]\n");
@@ -561,7 +562,7 @@ public class ModuleToKORE {
             assert sentence instanceof Rule || sentence instanceof ModuleComment
                 : "Unexpected non-rule claim " + sentence.toString();
             if (sentence instanceof Rule) {
-                convertRule((Rule) sentence, false, topCell, new HashMap<>(), HashMultimap.create(), true);
+                convertRule((Rule) sentence, false, topCell, new HashMap<>(), HashMultimap.create(), true, allPathReachability);
             }
         }
         sb.append("endmodule ");
@@ -570,7 +571,7 @@ public class ModuleToKORE {
         return sb.toString();
     }
 
-    private void convertRule(Rule rule, boolean heatCoolEq, Sort topCellSort, Map<String, Boolean> consideredAttributes, SetMultimap<KLabel, Rule> functionRules, boolean rulesAsClaims) {
+    private void convertRule(Rule rule, boolean heatCoolEq, Sort topCellSort, Map<String, Boolean> consideredAttributes, SetMultimap<KLabel, Rule> functionRules, boolean rulesAsClaims, boolean allPathReachability) {
         // injections should already be present, but this is an ugly hack to get around the
         // cache persistence issue that means that Sort attributes on k terms might not be present.
         rule = new AddSortInjections(module).addInjections(rule);
@@ -722,7 +723,11 @@ public class ModuleToKORE {
                 sb.append("}(),");
             }
             K right = RewriteToTop.toRight(rule.body());
-            sb.append("\\rewrites{");
+            if (rulesAsClaims) {
+                sb.append("\\implies{");
+            } else {
+                sb.append("\\rewrites{");
+            }
             convert(topCellSort, false);
             sb.append("} (\n    ");
             sb.append("  \\and{");
@@ -731,15 +736,28 @@ public class ModuleToKORE {
             convertSideCondition(rule.requires(), topCellSort);
             sb.append(", ");
             convert(left);
-            sb.append("), \\and{");
+            sb.append("), ");
+            if (rulesAsClaims) {
+                if (allPathReachability) {
+                    sb.append(ALL_PATH_OP + "{");
+                } else {
+                    sb.append(ONE_PATH_OP + "{");
+                }
+                convert(topCellSort, false);
+                sb.append("} (\n      ");
+            }
+            sb.append("\\and{");
             convert(topCellSort, false);
             sb.append("} (\n      ");
             convertSideCondition(rule.ensures(), topCellSort);
             sb.append(", ");
             convert(right);
             sb.append("))");
+            if (rulesAsClaims) {
+                sb.append(')');
+            }
             if (owise) {
-                sb.append(")");
+                sb.append(')');
             }
             sb.append("\n  ");
             convert(consideredAttributes, rule.att());
