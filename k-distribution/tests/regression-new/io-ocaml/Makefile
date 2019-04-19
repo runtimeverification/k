@@ -1,6 +1,6 @@
 DEF=test
 EXT=test
-TESTDIR=.
+TESTDIR=../io-java
 KOMPILE_BACKEND=ocaml$
 PREPARE=./prepare.sh
 
