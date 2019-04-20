@@ -794,6 +794,10 @@ public class KItem extends Term implements KItemRepresentation {
                 && (((KLabel) kLabel).isFunction() || ((KLabel) kLabel).isPattern());
     }
 
+    /**
+     * @return true if this KItem is ground and has been evaluated recursively, otherwise false.
+     * @see KItem#evaluate(TermContext)
+     */
     public boolean isEvaluatedRecursively() {
         return evaluatedRecursively;
     }
