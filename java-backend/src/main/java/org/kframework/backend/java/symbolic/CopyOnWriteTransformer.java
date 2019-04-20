@@ -406,7 +406,6 @@ public abstract class CopyOnWriteTransformer implements Transformer {
                 || processedEnsures.equals(rule.ensures())
                 || processedFreshConstants.equals(rule.freshConstants())
                 || processedLookups != rule.lookups()) {
-            GlobalContext global = context == null ? rule.globalContext() : context.global();
             return new Rule(
                     rule.label(),
                     processedLeftHandSide,
@@ -416,8 +415,8 @@ public abstract class CopyOnWriteTransformer implements Transformer {
                     processedFreshConstants,
                     processedFreshVariables,
                     processedLookups,
-                    rule.att(),
-                    global);
+                    rule.att()
+            );
         } else {
             return rule;
         }
