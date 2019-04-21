@@ -3,6 +3,7 @@ package org.kframework.backend.java.util;
 
 import com.google.common.collect.ImmutableSet;
 import org.apache.commons.io.IOUtils;
+import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.symbolic.JavaExecutionOptions;
 import org.kframework.backend.java.z3.Z3Context;
 import org.kframework.backend.java.z3.Z3Exception;
@@ -35,18 +36,20 @@ public class Z3Wrapper {
     private final KExceptionManager kem;
     private final FileUtil files;
     private final StateLog stateLog;
+    private final GlobalContext global;
 
     public Z3Wrapper(
             SMTOptions options,
             KExceptionManager kem,
             JavaExecutionOptions javaExecutionOptions,
             FileUtil files,
-            StateLog stateLog) {
+            StateLog stateLog, GlobalContext globalContext) {
         this.options = options;
         this.kem = kem;
         this.javaExecutionOptions = javaExecutionOptions;
         this.files = files;
         this.stateLog = stateLog;
+        this.global = globalContext;
 
         String defaultPrelude = ""
                 + "(set-option :auto-config false)\n"
@@ -118,7 +121,7 @@ public class Z3Wrapper {
         } finally {
             if (javaExecutionOptions.debugZ3 && profiler.isLastRunTimeout()) {
                 //In case of timeout, result is "unknown", so evaluation can proceed.
-                System.err.println("\nZ3 likely timeout");
+                global.log().format("\nZ3 likely timeout\n");
             }
         }
         stateLog.log(StateLog.LogEvent.Z3RESULT, KToken(result, Sorts.Z3Result()));
@@ -126,7 +129,7 @@ public class Z3Wrapper {
             throw KEMException.criticalError("Z3 crashed on input query:\n" + query + "\nresult:\n" + result);
         }
         if (javaExecutionOptions.debugZ3) {
-            System.err.println("\nZ3 query result: " + result);
+            global.log().format("\nZ3 query result: %s\n", result);
         }
         profiler.queryResult(result);
         return "unsat".equals(result);

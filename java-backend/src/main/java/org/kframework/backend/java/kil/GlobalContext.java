@@ -19,12 +19,16 @@ import org.kframework.krun.KRunOptions;
 import org.kframework.krun.api.io.FileSystem;
 import org.kframework.main.GlobalOptions;
 import org.kframework.unparser.KPrint;
+import org.kframework.utils.IndentingFormatter;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.options.SMTOptions;
 
 import java.io.Serializable;
 import java.lang.invoke.MethodHandle;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.Formatter;
 import java.util.Map;
 
 public class GlobalContext implements Serializable {
@@ -49,6 +53,10 @@ public class GlobalContext implements Serializable {
     public final transient ToStringCache toStringCache = new ToStringCache();
 
     private boolean isExecutionPhase = true;
+
+    private transient Formatter systemErrFormatter = new Formatter(System.err);
+    private transient IndentingFormatter log = new IndentingFormatter(systemErrFormatter, "");
+    private transient Deque<IndentingFormatter> logStack = new ArrayDeque<>();
 
     public GlobalContext(
             FileSystem fs,
@@ -75,7 +83,8 @@ public class GlobalContext implements Serializable {
         this.equalityOps = new EqualityOperations(() -> def);
         prettyPrinter = new PrettyPrinter(kprint, coreDefinition);
         this.stateLog = new StateLog(javaExecutionOptions, files, prettyPrinter);
-        this.constraintOps = new SMTOperations(() -> def, smtOptions, new Z3Wrapper(smtOptions, kem, javaExecutionOptions, files, stateLog), kem, javaExecutionOptions);
+        this.constraintOps = new SMTOperations(() -> def, smtOptions,
+                new Z3Wrapper(smtOptions, kem, javaExecutionOptions, files, stateLog, this), kem, javaExecutionOptions);
         this.kItemOps = new KItemOperations(stage, javaExecutionOptions.deterministicFunctions, kem, this::builtins, globalOptions);
         this.stage = stage;
         this.profiler = profiler;
@@ -115,5 +124,24 @@ public class GlobalContext implements Serializable {
             javaExecutionOptions.logRulesPublic = javaExecutionOptions.logRules;
             javaExecutionOptions.logFunctionTargetPublic = javaExecutionOptions.logFunctionTarget;
         }
+    }
+
+    public IndentingFormatter log() {
+        return log;
+    }
+
+    public void newLogIndent(String indent) {
+        if (!javaExecutionOptions.logRulesPublic) {
+            return;
+        }
+        logStack.push(log);
+        log = new IndentingFormatter(systemErrFormatter, indent);
+    }
+
+    public void restorePreviousLogIndent() {
+        if (!javaExecutionOptions.logRulesPublic) {
+            return;
+        }
+        log = logStack.pop();
     }
 }

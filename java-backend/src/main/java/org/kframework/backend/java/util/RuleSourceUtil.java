@@ -3,6 +3,7 @@ package org.kframework.backend.java.util;
 
 import org.kframework.attributes.Location;
 import org.kframework.backend.java.kil.Rule;
+import org.kframework.utils.IndentingFormatter;
 import org.kframework.utils.file.FileUtil;
 
 import java.io.File;
@@ -37,8 +38,11 @@ public class RuleSourceUtil {
     }
 
     public static void appendRuleAndSource(Rule rule, Appendable out) {
+        appendRuleAndSource(rule, new Formatter(out));
+    }
+
+    public static void appendRuleAndSource(Rule rule, Formatter formatter) {
         File source = rule.source().isPresent() ? new File(rule.getSource().source()) : null;
-        Formatter formatter = new Formatter(out);
         if (sourceShortEnough(rule)) {
             formatter.format("%s\n", loadSource(rule));
         } else if (rule.source().isPresent()) {
@@ -46,6 +50,18 @@ public class RuleSourceUtil {
         } else {
             formatter.format("Rule with no source. toString() format:\n%s\n", rule.toString());
         }
-        formatter.format("\tSource: %s %s\n\n", source, rule.getLocation());
+        formatter.format("\tSource: %s %s\n", source, rule.getLocation());
+    }
+
+    public static void appendRuleAndSource(Rule rule, IndentingFormatter formatter) {
+        File source = rule.source().isPresent() ? new File(rule.getSource().source()) : null;
+        if (sourceShortEnough(rule)) {
+            formatter.format("%s\n", loadSource(rule));
+        } else if (rule.source().isPresent()) {
+            formatter.format("rule too long...\n");
+        } else {
+            formatter.format("Rule with no source. toString() format:\n%s\n", rule.toString());
+        }
+        formatter.format("\tSource: %s %s\n", source, rule.getLocation());
     }
 }
