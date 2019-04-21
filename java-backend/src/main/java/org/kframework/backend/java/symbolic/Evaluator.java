@@ -24,7 +24,15 @@ public class Evaluator extends CopyOnWriteTransformer {
 
     @Override
     public JavaSymbolicObject transform(KItem kItem) {
-        return ((KItem) super.transform(kItem)).resolveFunctionAndAnywhere(context);
+        if (kItem.isEvaluatedRecursively()) {
+            return kItem;
+        }
+        Term result = ((KItem) super.transform(kItem)).resolveFunctionAndAnywhere(context);
+        if (result instanceof KItem && result.isGround()) {
+            ((KItem) result).setEvaluatedRecursively(true);
+        }
+
+        return result;
     }
 
     @Override
