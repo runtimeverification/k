@@ -760,10 +760,7 @@ public class SymbolicRewriter {
                     for (ConstrainedTerm cterm : results) {
                         ConstrainedTerm result = new ConstrainedTerm(
                                 cterm.term(),
-                                cterm.constraint().removeSubstitutionVars(
-                                        Sets.difference(
-                                                cterm.constraint().substitution().keySet(),
-                                                initialTerm.variableSet())),
+                                cterm.constraint().retainSubstitutionVars(initialTerm.variableSet()),
                                 cterm.termContext());
                         if (visited.add(result)) {
                             nextQueue.add(result);

@@ -370,6 +370,20 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 global);
     }
 
+    /**
+     * Builds a new ConjunctiveFormula with the same content as original, but retaining only the substitutions given as
+     * argument.
+     * <p>
+     * E.g. new substitution = this substitution intersected with variablesToRetain.
+     */
+    public ConjunctiveFormula retainSubstitutionVars(Set<Variable> variablesToRetain) {
+        return ConjunctiveFormula.of(
+                substitution.retainAll(variablesToRetain),
+                equalities,
+                disjunctions,
+                global);
+    }
+
     public ConjunctiveFormula simplify() {
         return simplify(false, true, TermContext.builder(global).build(), false);
     }
