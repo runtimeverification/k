@@ -199,7 +199,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
         constraint = constraint.orientSubstitution(matchRHSOnlyVars);
 
         ConjunctiveFormula implicationLHS = data.constraint;
-        ConjunctiveFormula implicationRHS = constraint.removeBindings(matchRHSOnlyVars);
+        ConjunctiveFormula implicationRHS = constraint.removeSubstitutionVars(matchRHSOnlyVars);
         implicationRHS = (ConjunctiveFormula) implicationRHS.substituteAndEvaluate(implicationLHS.substitution(), context);
 
         boolean implies = implicationLHS.implies(implicationRHS, matchRHSOnlyVars, formulaContext);
