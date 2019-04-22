@@ -160,6 +160,8 @@ public class ConstrainedTerm extends JavaSymbolicObject {
             return null;
         }
 
+        formulaContext.printTargetFormula(constraint);
+
         constraint = constraint.simplifyModuloPatternFolding(context);
         if (constraint.isFalse()) {
             return null;
