@@ -139,6 +139,13 @@ public class Variable extends Term implements org.kframework.kore.KVariable {
     }
 
     /**
+     * For logging only.
+     */
+    public boolean isOriginalAnonymous() {
+        return originalName.startsWith("_");
+    }
+
+    /**
      * @return the ordinal, a unique index indentifing the variable
      */
     public int ordinal() {
