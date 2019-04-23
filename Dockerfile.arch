@@ -1,6 +1,6 @@
 FROM archlinux/base
 
-RUN pacman -Syy && \
+RUN pacman -Syyu && \
     pacman -S --noconfirm git maven jdk-openjdk cmake boost yaml-cpp jemalloc clang llvm lld zlib gmp mpfr z3 opam curl stack rustup base-devel base python
 
 ARG USER_ID=1000
