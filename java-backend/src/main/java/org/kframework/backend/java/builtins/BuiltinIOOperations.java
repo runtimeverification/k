@@ -12,10 +12,12 @@ import org.kframework.krun.RunProcess;
 import org.kframework.krun.RunProcess.ProcessOutput;
 import org.kframework.krun.api.io.FileSystem;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.CharacterCodingException;
 import java.util.HashMap;
 import java.util.Map;
+import org.kframework.utils.OS;
 
 
 /**
@@ -30,7 +32,7 @@ public class BuiltinIOOperations {
     public static Term open(StringToken term1, StringToken term2, TermContext termContext) {
         FileSystem fs = termContext.fileSystem();
         try {
-            return IntToken.of(fs.open(term1.stringValue(), term2.stringValue()));
+            return IntToken.of(fs.open(new java.io.File(term1.stringValue()), term2.stringValue()));
         } catch (IOException e) {
             return processIOException(e.getMessage(), termContext);
         }
@@ -104,30 +106,51 @@ public class BuiltinIOOperations {
         }
     }
 
-    public static Term parse(StringToken term1, StringToken term2, TermContext termContext) {
-        throw new RuntimeException("Not implemented!");
-    }
-
-    public static Term parseInModule(StringToken input, StringToken startSymbol, StringToken moduleName, TermContext termContext) {
-        throw new RuntimeException("Not implemented!");
-    }
-
+    /**
+     * Executes the given command line with `sh -c 'cmd'` on unix
+     * and `cmd /c 'cmd'` on windows.
+     * @param term
+     * @param termContext
+     * @return a #systemResult term containing the exit code, stdout:String, stderr:Stringh
+     */
     public static Term system(StringToken term, TermContext termContext) {
-        Map<String, String> environment = new HashMap<>();
-        String[] args = term.stringValue().split("\001", -1);
-        //for (String c : args) { System.out.println(c); }
+        Map<String, String> environment = termContext.global().files.getEnv();
+        String[] args = new String[3];
+        if (OS.current() == OS.WINDOWS) {
+            args[0] = "cmd";
+            args[1] = "/c";
+        } else {
+            args[0] = "sh";
+            args[1] = "-c";
+        }
+        args[2] = term.stringValue();
         ProcessOutput output = RunProcess.execute(environment, termContext.global().files.getProcessBuilder(), args);
 
-        KLabelConstant klabel = KLabelConstant.of(KORE.KLabel("#systemResult(_,_,_)"), termContext.definition());
-        /*
-        String klabelString = "#systemResult(_,_,_)";
-        KLabelConstant klabel = KLabelConstant.of(klabelString, context);
-        assert def.kLabels().contains(klabel) : "No KLabel in definition for " + klabelString;
-        */
+        KLabelConstant klabel = KLabelConstant.of(KORE.KLabel("#systemResult(_,_,_)_K-IO"), termContext.definition());
         String stdout = output.stdout != null ? new String(output.stdout) : "";
         String stderr = output.stderr != null ? new String(output.stderr) : "";
         return KItem.of(klabel, KList.concatenate(IntToken.of(output.exitCode),
-            StringToken.of(stdout.trim()), StringToken.of(stderr.trim())), termContext.global());
+                StringToken.of(stdout), StringToken.of(stderr)), termContext.global());
+    }
+
+    public static Term mkstemp(StringToken prefix, StringToken suffix, TermContext termContext) throws IOException {
+        FileSystem fs = termContext.fileSystem();
+        try {
+            File f = File.createTempFile("tmp" + prefix.stringValue(), suffix.stringValue());
+            KLabelConstant klabel = KLabelConstant.of(KORE.KLabel("#tempFile(_,_)_K-IO"), termContext.definition());
+            return KItem.of(klabel, KList.concatenate(StringToken.of(f.getAbsolutePath()),
+                    IntToken.of(fs.open(f, "w"))), termContext.global());
+        } catch (IOException e) {
+            return processIOException(e.getMessage(), termContext);
+        }
+    }
+
+    public static Term remove(StringToken fname, TermContext termContext) {
+        File f = new File(fname.stringValue());
+        if (f.delete())
+            return BuiltinList.kSequenceBuilder(termContext.global()).build();
+        else
+            return processIOException("EPERM", termContext);
     }
 
     private static KItem processIOException(String errno, Term klist, TermContext termContext) {

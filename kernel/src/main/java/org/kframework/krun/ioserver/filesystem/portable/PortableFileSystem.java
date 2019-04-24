@@ -54,7 +54,7 @@ public class PortableFileSystem implements FileSystem {
 
     private long fdCounter = 3;
 
-    public long open(String path, String mode) throws IOException {
+    public long open(java.io.File path, String mode) throws IOException {
         if (!("r".equals(mode) || "w".equals(mode) || "rw".equals(mode))) {
             throw new IllegalArgumentException();
         }
