@@ -281,7 +281,7 @@ struct
     | [String path] ->
       let ic, oc, ec = Unix.open_process_full path (Unix.environment ()) in
       let buf_out = Buffer.create 4096
-      and buf_err = Buffer.create 128 in
+      and buf_err = Buffer.create 4096 in
       (try
          while true do Buffer.add_channel buf_out ic 1 done
        with End_of_file -> ());
