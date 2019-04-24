@@ -379,8 +379,8 @@ public class KOREtoBackendKIL {
                 Collections.emptySet(),
                 Collections.emptySet(),
                 lookups,
-                att,
-                global);
+                att
+        );
         /* rename variables in function, anywhere, and pattern rules to avoid name conflicts
         with automaton variables and with each other */
         if (backendKILRule.att().contains(Attribute.FUNCTION_KEY)

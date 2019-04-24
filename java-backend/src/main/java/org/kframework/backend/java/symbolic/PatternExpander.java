@@ -65,7 +65,7 @@ public class PatternExpander extends CopyOnWriteTransformer {
                 continue;
             }
 
-            FormulaContext formulaContext = new FormulaContext(FormulaContext.Kind.PatternConstr, rule);
+            FormulaContext formulaContext = new FormulaContext(FormulaContext.Kind.PatternConstr, rule, context.global());
             if (narrowing) {
                 ConjunctiveFormula globalConstraint = unificationConstraint
                         .addAll(constraint.equalities())
@@ -94,7 +94,7 @@ public class PatternExpander extends CopyOnWriteTransformer {
                 // this should be guaranteed by the above unificationConstraint.isMatching
                 assert requires.substitution().keySet().containsAll(existVariables);
                 if (requires.isFalse() || !constraint.implies(requires, existVariables,
-                        new FormulaContext(FormulaContext.Kind.PatternRule, rule))) {
+                        new FormulaContext(FormulaContext.Kind.PatternRule, rule, context.global()))) {
                     continue;
                 }
             }
@@ -106,7 +106,7 @@ public class PatternExpander extends CopyOnWriteTransformer {
                     .simplify(context);
             if (!unificationConstraint.isFalse() && !unificationConstraint.checkUnsat(formulaContext)) {
                 results.add(SymbolicRewriter.buildResult(rule, unificationConstraint, null, false, context,
-                        new FormulaContext(FormulaContext.Kind.PatternBuildResConstr, rule)));
+                        new FormulaContext(FormulaContext.Kind.PatternBuildResConstr, rule, context.global())));
             }
         }
 

@@ -553,7 +553,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
             Equality equality) {
         if ((RuleAuditing.isAuditBegun() || global.javaExecutionOptions.debugZ3)
                 && !(equality.leftHandSide() instanceof BoolToken && equality.rightHandSide() instanceof BoolToken)) {
-            System.err.format("Unification failure: %s does not unify with %s\n",
+            global.log().format("Unification failure: %s does not unify with %s\n",
                     equality.leftHandSide(), equality.rightHandSide());
         }
         return new ConjunctiveFormula(
@@ -868,7 +868,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
             }
 
             if (global.javaExecutionOptions.debugFormulas) {
-                System.err.format("\nAttempting to prove:\n================= \n\t%s\n  implies \n\t%s\n", left, right);
+                global.log().format("\nAttempting to prove:\n================= \n\t%s\n  implies \n\t%s\n", left, right);
             }
 
             right = right.orientSubstitution(existentialQuantVars);
@@ -876,7 +876,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
             right = right.orientSubstitution(existentialQuantVars);
             if (right.isTrue() || (right.equalities().isEmpty() && existentialQuantVars.containsAll(right.substitution().keySet()))) {
                 if (global.javaExecutionOptions.debugFormulas) {
-                    System.err.println("Implication proved by simplification");
+                    global.log().format("Implication proved by simplification\n");
                 }
                 continue;
             }
@@ -888,7 +888,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 // TODO (AndreiS): handle KList variables
                 Term condition = ((KList) ite.kList()).get(0);
                 if (global.javaExecutionOptions.debugFormulas) {
-                    System.err.format("Split on %s\n", condition);
+                    global.log().format("Split on %s\n", condition);
                 }
                 TermContext context = TermContext.builder(global).build();
                 implications.add(Pair.of(left.add(condition, BoolToken.TRUE).simplify(context), right));
@@ -903,12 +903,12 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
             global.stateLog.log(StateLog.LogEvent.IMPLICATION, leftWithoutSubst, right);
             if (!impliesSMT(leftWithoutSubst, right, existentialQuantVars, formulaContext)) {
                 if (global.javaExecutionOptions.debugFormulas) {
-                    System.err.println("Failure!");
+                    global.log().format("Failure!\n");
                 }
                 return false;
             } else {
                 if (global.javaExecutionOptions.debugFormulas) {
-                    System.err.println("Proved!");
+                    global.log().format("Proved!\n");
                 }
             }
         }
@@ -1146,6 +1146,13 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
         }
         sb.append("\n)");
         return sb.toString();
+    }
+
+    public ConjunctiveFormula removeAnonymousSubstitutions() {
+        List<Variable> anonymousVars = substitution.keySet().stream().filter(Variable::isOriginalAnonymous)
+                .collect(Collectors.toList());
+        return new ConjunctiveFormula(substitution.minusAll(anonymousVars),
+                equalities, disjunctions, truthValue, falsifyingEquality, global);
     }
 
     @Override

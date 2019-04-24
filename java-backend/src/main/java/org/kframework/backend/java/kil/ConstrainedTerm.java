@@ -98,7 +98,8 @@ public class ConstrainedTerm extends JavaSymbolicObject {
 
     public boolean implies(ConstrainedTerm constrainedTerm, Rule specRule, boolean logFailures) {
         ConjunctiveFormula conjunctiveFormula = matchImplies(constrainedTerm, true, logFailures,
-                new FormulaContext(FormulaContext.Kind.FinalImplication, specRule), specRule.matchingSymbols());
+                new FormulaContext(FormulaContext.Kind.FinalImplication, specRule, constrainedTerm.context.global()),
+                specRule.matchingSymbols());
         return conjunctiveFormula != null;
     }
 
@@ -158,6 +159,8 @@ public class ConstrainedTerm extends JavaSymbolicObject {
         if (constraint.isFalse()) {
             return null;
         }
+
+        formulaContext.printTargetFormula(constraint);
 
         constraint = constraint.simplifyModuloPatternFolding(context);
         if (constraint.isFalse()) {
@@ -275,7 +278,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
             if (!isMatching && solution.checkUnsat(
                     //formulaContext param is intended for implication. We have to create a new one here.
                     new FormulaContext(FormulaContext.implicationToConstrKind.get(formulaContext.kind),
-                            formulaContext.rule))) {
+                            formulaContext.rule, context.global()))) {
                 continue;
             }
 

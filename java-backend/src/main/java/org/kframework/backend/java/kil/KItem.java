@@ -84,6 +84,7 @@ public class KItem extends Term implements KItemRepresentation {
 
     private BitSet[] childrenDontCareRuleMask = null;
     private final Profiler2 profiler;
+    private boolean evaluatedRecursively = false;
 
     public static KItem of(Term kLabel, Term kList, GlobalContext global) {
         return of(kLabel, kList, global, Att.empty(), null);
@@ -431,10 +432,11 @@ public class KItem extends Term implements KItemRepresentation {
             kItem.profiler.evaluateFunctionNanoTimer.start();
             KLabelConstant kLabelConstant = (KLabelConstant) kItem.kLabel;
             Profiler.startTimer(Profiler.getTimerForFunction(kLabelConstant));
+            int nestingLevel = kItem.profiler.evaluateFunctionNanoTimer.getLevel();
+            kItem.global.newLogIndent(KItemLog.indent(nestingLevel - 1));
 
             try {
                 KList kList = (KList) kItem.kList;
-                int nestingLevel = kItem.profiler.resFuncNanoTimer.getLevel();
 
                 if (builtins.get().isBuiltinKLabel(kLabelConstant)) {
                     try {
@@ -495,7 +497,7 @@ public class KItem extends Term implements KItemRepresentation {
                             if (rule == RuleAuditing.getAuditingRule()) {
                                 RuleAuditing.beginAudit();
                             } else if (RuleAuditing.isAuditBegun() && RuleAuditing.getAuditingRule() == null) {
-                                System.err.println("\nAuditing " + rule + "...\n");
+                                context.global().log().format("\nAuditing " + rule + "...\n\n");
                             }
 
                             // a concrete rule is skipped if some argument is not concrete
@@ -504,8 +506,8 @@ public class KItem extends Term implements KItemRepresentation {
                             }
 
                             Substitution<Variable, Term> solution;
-                            List<Substitution<Variable, Term>> matches = PatternMatcher.match(kItem, rule, context,
-                                    "KItem", nestingLevel);
+                            List<Substitution<Variable, Term>> matches =
+                                    PatternMatcher.match(kItem, rule, context, "KItem", nestingLevel);
                             if (matches.isEmpty()) {
                                 continue;
                             } else {
@@ -612,6 +614,7 @@ public class KItem extends Term implements KItemRepresentation {
                 }
                 return kItem;
             } finally {
+                kItem.global.restorePreviousLogIndent();
                 Profiler.stopTimer(Profiler.getTimerForFunction(kLabelConstant));
                 kItem.profiler.evaluateFunctionNanoTimer.stop();
             }
@@ -640,7 +643,7 @@ public class KItem extends Term implements KItemRepresentation {
                                     .addAll(rule.requires()),
                             context);
                     if (!subject.unify(pattern, null,
-                            new FormulaContext(FormulaContext.Kind.OwiseRule, rule)).isEmpty()) {
+                            new FormulaContext(FormulaContext.Kind.OwiseRule, rule, context.global())).isEmpty()) {
                         return false;
                     }
                 }
@@ -721,7 +724,7 @@ public class KItem extends Term implements KItemRepresentation {
                     if (rule == RuleAuditing.getAuditingRule()) {
                         RuleAuditing.beginAudit();
                     } else if (RuleAuditing.isAuditBegun() && RuleAuditing.getAuditingRule() == null) {
-                        System.err.println("\nAuditing " + rule + "...\n");
+                        context.global().log().format("\nAuditing " + rule + "...\n\n");
                     }
                     /* anywhere rules should be applied by pattern match rather than unification */
                     Map<Variable, Term> solution;
@@ -791,6 +794,18 @@ public class KItem extends Term implements KItemRepresentation {
         //return !(kLabel instanceof KLabel) || ((KLabel) kLabel).isFunction();
         return kLabel instanceof KLabel
                 && (((KLabel) kLabel).isFunction() || ((KLabel) kLabel).isPattern());
+    }
+
+    /**
+     * @return true if this KItem is ground and has been evaluated recursively, otherwise false.
+     * @see KItem#evaluate(TermContext)
+     */
+    public boolean isEvaluatedRecursively() {
+        return evaluatedRecursively;
+    }
+
+    public void setEvaluatedRecursively(boolean evaluatedRecursively) {
+        this.evaluatedRecursively = evaluatedRecursively;
     }
 
     @Override

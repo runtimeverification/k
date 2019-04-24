@@ -41,7 +41,6 @@ public class Rule extends JavaSymbolicObject<Rule> {
     private final ImmutableSet<Variable> freshConstants;
     private final ImmutableSet<Variable> freshVariables;
     private final ConjunctiveFormula lookups;
-    private final GlobalContext global;
     private final ImmutableSet<String> matchingSymbols;
 
     /**
@@ -70,8 +69,7 @@ public class Rule extends JavaSymbolicObject<Rule> {
             Set<Variable> freshConstants,
             Set<Variable> freshVariables,
             ConjunctiveFormula lookups,
-            Att att,
-            GlobalContext global) {
+            Att att) {
         super(att);
         this.label = label;
         this.leftHandSide = leftHandSide;
@@ -81,7 +79,6 @@ public class Rule extends JavaSymbolicObject<Rule> {
         this.freshConstants = ImmutableSet.copyOf(freshConstants);
         this.freshVariables = ImmutableSet.copyOf(freshVariables);
         this.lookups = lookups;
-        this.global = global;
         this.matchingSymbols = att.contains(Attribute.MATCHING_KEY) ? ImmutableSet.copyOf(att.get(Attribute.MATCHING_KEY).split(",")) : ImmutableSet.of();
 
         isSortPredicate = isFunction() && definedKLabel().isSortPredicate();
@@ -141,10 +138,6 @@ public class Rule extends JavaSymbolicObject<Rule> {
         return label;
     }
 
-    public GlobalContext globalContext() {
-        return global;
-    }
-
     public ImmutableList<Term> requires() {
         return requires;
     }
@@ -166,13 +159,6 @@ public class Rule extends JavaSymbolicObject<Rule> {
                 termContext);
     }
 
-    public ConstrainedTerm createRhsPattern() {
-        return new ConstrainedTerm(
-                rightHandSide,
-                ConjunctiveFormula.of(global).addAll(ensures),
-                TermContext.builder(global).build());
-    }
-
     public ConstrainedTerm createLhsPattern(TermContext termContext, int idx) {
         // TODO(YilongL): remove TermContext from the signature once
         // ConstrainedTerm doesn't hold a TermContext anymore
@@ -182,18 +168,11 @@ public class Rule extends JavaSymbolicObject<Rule> {
                 termContext);
     }
 
-    public ConstrainedTerm createRhsPattern(int idx) {
-        return new ConstrainedTerm(
-                (Term) ((KList) ((KItem) rightHandSide).kList()).items().get(idx-1), //rightHandSide,
-                ConjunctiveFormula.of(global), //.addAll(ensures),
-                TermContext.builder(global).build());
-    }
-
     public ConjunctiveFormula getRequires() {
         return ConjunctiveFormula.of(lookups).addAll(requires);
     }
 
-    public ConjunctiveFormula getEnsures() {
+    public ConjunctiveFormula getEnsures(GlobalContext global) {
         return ConjunctiveFormula.of(global).addAll(ensures);
     }
 

@@ -139,7 +139,7 @@ public class FastRuleMatcher {
             } else {
                 patternConstraint = patternConstraint.addAll(rule.requires());
             }
-            FormulaContext formulaContext = new FormulaContext(FormulaContext.Kind.RegularRule, rule);
+            FormulaContext formulaContext = new FormulaContext(FormulaContext.Kind.RegularRule, rule, context.global());
             global.stateLog.log(StateLog.LogEvent.RULEATTEMPT, rule.toKRewrite(), subject.term(), subject.constraint());
             List<Triple<ConjunctiveFormula, Boolean, Map<scala.collection.immutable.List<Pair<Integer, Integer>>, Term>>> ruleResults = ConstrainedTerm.evaluateConstraints(
                     constraints[i],
