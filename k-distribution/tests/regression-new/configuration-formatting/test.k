@@ -1,5 +1,7 @@
 module TEST
   imports INT
+  imports SET
+  imports STRING-SYNTAX
 
   configuration
     <t>
@@ -13,7 +15,6 @@ module TEST
       </ms>
       <ls> <l multiplicity="*" type="List"> 2:Int </l> </ls>
       <ss> <x multiplicity="*" type="Set"> 2:Int </x> </ss>
-      <bs> <b multiplicity="*"> 2:Int </b> </bs>
     </t>
 
   rule <ms> ( .Bag
@@ -31,9 +32,4 @@ module TEST
                 <x> 1 </x>
               )
        </ss>
-  rule <bs> ( .Bag
-           => <b> 1 </b>
-              <b> 1 </b>
-              )
-       </bs>
 endmodule

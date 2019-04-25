@@ -1,6 +1,6 @@
 DEF=test
 EXT=test
 TESTDIR=.
-KOMPILE_BACKEND=java
+KOMPILE_BACKEND=ocaml
 
 include ../../../include/ktest.mak

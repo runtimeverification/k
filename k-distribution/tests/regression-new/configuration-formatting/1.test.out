@@ -2,23 +2,16 @@
   <k>
     1
   </k>
-  <foo>
-    1
-  </foo>
+  foo(1)
   <ms>
-    <id>
-      1
-    </id> |-> <m>
+    <m>
       <id>
         1
       </id>
       <val>
         1
       </val>
-    </m>
-    <id>
-      2
-    </id> |-> <m>
+    </m> <m>
       <id>
         2
       </id>
@@ -28,22 +21,15 @@
     </m>
   </ms>
   <ls>
-    LCellListItem ( <l>
+    <l>
       1
-    </l> ) LCellListItem ( <l>
+    </l> <l>
       1
-    </l> )
+    </l>
   </ls>
   <ss>
-    SetItem ( <x>
+    <x>
       1
-    </x> )
+    </x>
   </ss>
-  <bs>
-    <b>
-      1
-    </b> <b>
-      1
-    </b>
-  </bs>
 </t>
