@@ -223,7 +223,7 @@ struct
     | _ -> raise Not_implemented
   let hook_read c _ _ _ _ = match c with
       [Int fd], [Int len] -> unix_error (fun () -> let l = (Z.to_int len) in
-        let b = Bytes.create l in let _ = Unix.read (Hashtbl.find file_descriptors fd) b 0 l in [String (Bytes.to_string b)])
+        let b = Bytes.create l in let bread = Unix.read (Hashtbl.find file_descriptors fd) b 0 l in [String (Bytes.sub_string b 0 bread)])
     | _ -> raise Not_implemented
   let hook_seek c _ _ _ _ = match c with
       [Int fd], [Int off] -> unix_error (fun () -> let o = (Z.to_int off) in let _ = Unix.lseek (Hashtbl.find file_descriptors fd) o Unix.SEEK_SET in [])
@@ -714,5 +714,6 @@ open Lexer
 module META =
 struct
   let hook_parseKAST c _ _ _ _ = match c with
-    | [String s] -> Lexer.parse_k s
+    | [String s] -> (try Lexer.parse_k s with
+      | _ -> [KApply0(parse_klabel("#noparse"))])
 end
