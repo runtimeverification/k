@@ -45,6 +45,7 @@ SUBDIRS=issue-2273 \
 	help \
 	exit-code-no-gen-top \
 	issue-425 \
+	spec-rule-application \
 
 
 include ../../include/ktest-group.mak
