@@ -241,7 +241,7 @@ pipeline {
                   steps {
                     unstash "arch"
                     sh '''
-                      pacman -Syyu
+                      pacman -Syyu --noconfirm
                       pacman -U --noconfirm kframework-5.0.0-1-x86_64.pkg.tar.xz
                       src/main/scripts/test-in-container
                     '''
