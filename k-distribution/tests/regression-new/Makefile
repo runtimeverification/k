@@ -44,6 +44,7 @@ SUBDIRS=issue-2273 \
 	cast \
 	help \
 	exit-code-no-gen-top \
+	issue-425 \
 
 
 include ../../include/ktest-group.mak
