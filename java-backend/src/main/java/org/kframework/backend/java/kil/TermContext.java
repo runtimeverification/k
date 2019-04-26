@@ -2,6 +2,7 @@
 package org.kframework.backend.java.kil;
 
 import com.google.common.collect.Sets;
+import org.kframework.backend.java.compile.KOREtoBackendKIL;
 import org.kframework.backend.java.symbolic.ConjunctiveFormula;
 import org.kframework.krun.api.io.FileSystem;
 import org.kframework.utils.errorsystem.KEMException;
@@ -26,6 +27,8 @@ public class TermContext {
     private Term topTerm;
 
     private ConjunctiveFormula topConstraint;
+
+    private KOREtoBackendKIL converter;
 
     public final AtomicInteger exceptionLogCount = new AtomicInteger();
 
@@ -81,6 +84,10 @@ public class TermContext {
     public void setTopTerm(Term topTerm) {
         this.topTerm = topTerm;
     }
+
+    public KOREtoBackendKIL getKOREtoBackendKILConverter() {return this.converter;}
+
+    public void setKOREtoBackendKILConverter(KOREtoBackendKIL converter) { this.converter = converter; }
 
     public ConjunctiveFormula getTopConstraint() {
         return topConstraint;

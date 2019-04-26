@@ -860,9 +860,16 @@ module K-REFLECTION-SYMBOLIC [symbolic]
   syntax Bool ::= #isVariable(K) [function, hook(KREFLECTION.isVariable)]
 endmodule
 
+module META
+  imports STRING-SYNTAX
+  // Takes as input a string and returns a K term
+  syntax KItem ::= #parseKAST(String) [function, hook(META.parseKAST), poly(0)]
+endmodule
+
 module K-IO
   imports LIST
   imports STRING
+  imports META
 
   syntax IOError ::= "#EOF" [klabel(#EOF), symbol] | "#noparse" [klabel(#noparse), symbol] | #unknownIOError(Int) [symbol]
                    | "#E2BIG" [klabel(#E2BIG), symbol]
@@ -955,12 +962,6 @@ module K-IO
                  | "#lstat" "(" String ")" [function, hook(IO.lstat), impure]
                  | "#opendir" "(" String ")" [function, hook(IO.opendir), impure]
 
-  syntax KItem ::= #parse ( String , String ) [function, hook(IO.parse), impure]
-  syntax KItem ::= #parseInModule(String, // input
-                                  String, // start symbol
-                                  String) // module name
-                                  [function, hook(IO.parseInModule), impure]
-
   rule #open(S:String) => #open(S:String, "r+")
 
   syntax Int ::= "#stdin"   [function, functional]
@@ -976,10 +977,20 @@ module K-IO
 // ------------------------------
 // System
 
+  // executes the given command line with `sh -c cmd:String` on unix or
+  // `cmd /c cmd:String` on windows and returns #systemResult
   syntax KItem ::= #system ( String ) [function, hook(IO.system), impure]
                  | "#systemResult" "(" Int /* exit code */ "," String /* stdout */ "," String /* stderr */ ")"
 
   syntax K ::= #logToFile(String, String) [function, functional, hook(IO.log), impure, returnsUnit]
+  // #make safe temp ( prefix:String, suffix:String):IOFile - creates a temporary file in the default system location
+  syntax IOFile ::= #mkstemp(String, String) [function, hook(IO.mkstemp), impure]
+  syntax IOFile ::= IOError
+                    // #tempFile(path: String, fd: Int)
+                  | "#tempFile" "(" String "," Int ")"
+  // Remove a file or empty directory from the disk. Returns .K on success or an IOError on failure.
+  syntax K ::= #remove(String) [function, functional, hook(IO.remove), impure]
+
 
   syntax String ::= #projectString(IOString) [function]
   rule #projectString(S:String) => S
@@ -995,6 +1006,7 @@ endmodule
 
 module STDIN-STREAM
   imports K-IO
+  imports META
 
   syntax Stream ::= #istream(Int)
   syntax Stream ::= #parseInput(String, String)
@@ -1037,13 +1049,12 @@ module STDIN-STREAM
   rule [stdinParseArbitrarySort]:
        <stdin>
        (ListItem(#parseInput(Sort:String, Delimiters:String))
-       => ListItem(#parse(substrString(S, 0, findChar(S, Delimiters, 0)), Sort)))
+       => ListItem(#parseKAST(substrString(S, 0, findChar(S, Delimiters, 0)))))
        ListItem(#buffer(S:String => substrString(S,findChar(S, Delimiters, 0) +Int 1, lengthString(S))))
        _:List
        </stdin>
     requires findChar(S, Delimiters, 0) =/=Int -1
-       andBool Sort =/=String "String"
-       andBool Sort =/=String "Int"
+       andBool Sort ==String "K"
        andBool lengthString(S) >Int 1 // [stdin]
        [stream]
 

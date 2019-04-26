@@ -4,7 +4,7 @@ import org.kframework.attributes.Att
 import org.kframework.builtin.BooleanUtils
 import org.kframework.builtin.KLabels
 import org.kframework.builtin.Sorts
-import org.kframework.definition.{DefinitionTransformer, ModuleTransformer, Module, Rule}
+import org.kframework.definition.{DefinitionTransformer, ModuleTransformer, Module, Rule, Definition}
 import org.kframework.kore.KORE
 import org.kframework.kore.Sort
 import org.kframework.kore.Unapply.{KApply, KLabel}
@@ -47,7 +47,7 @@ object Strategy {
 class Strategy(heatCool: Boolean) {
   import Strategy._
 
-  val addStrategyCellToRulesTransformer =
+  def addStrategyCellToRulesTransformer(defn: Definition) =
     DefinitionTransformer(
       ModuleTransformer.fromSentenceTransformer({
         (module, r) =>
@@ -55,7 +55,7 @@ class Strategy(heatCool: Boolean) {
 
           import rich._
           
-          if (!module.importedModuleNames.contains("STRATEGY$SYNTAX")) {
+          if (!defn.mainModule.importedModuleNames.contains("STRATEGY$SYNTAX")) {
             r
           } else
             r match {

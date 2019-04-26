@@ -61,6 +61,7 @@ public class OcamlBackend implements Backend {
             FileUtils.copyFile(files.resolveKBase("include/ocaml/prelude.ml"), files.resolveKompiled("prelude.ml"));
             FileUtils.copyFile(files.resolveKBase("include/ocaml/lexer.mll"), files.resolveKompiled("lexer.mll"));
             FileUtils.copyFile(files.resolveKBase("include/ocaml/parser.mly"), files.resolveKompiled("parser.mly"));
+            FileUtils.copyFile(files.resolveKBase("include/ocaml/hooks.ml"), files.resolveKompiled("hooks.ml"));
             FileUtils.copyFile(files.resolveKBase("include/ocaml/run.ml"), files.resolveKompiled("run.ml"));
             FileUtils.copyFile(files.resolveKBase("include/ocaml/marshalvalue.ml"), files.resolveKompiled("marshalvalue.ml"));
             FileUtils.copyFile(files.resolveKBase("include/ocaml/plugin.ml"), files.resolveKompiled("plugin.ml"));
@@ -79,7 +80,7 @@ public class OcamlBackend implements Backend {
                 throw KEMException.criticalError("ocamlyacc returned nonzero exit code: " + exit + "\nExamine output to see errors.");
             }
             List<String> args = new ArrayList<>(Arrays.asList("-c", "-g", "-package", "gmp", "-package", "zarith", "-package", "uuidm",
-                "-safe-string", "-w", "a-4-6-11-26-27-44", "-match-context-rows", "2", "constants.ml", "prelude.ml", "plugin.ml", "parser.mli", "parser.ml", "lexer.ml", "run.ml", "realdef.ml"));
+                "-safe-string", "-w", "a-4-6-11-26-27-44", "-match-context-rows", "2", "constants.ml", "prelude.ml", "plugin.ml", "parser.mli", "parser.ml", "lexer.ml", "hooks.ml", "run.ml", "realdef.ml"));
             args.addAll(2, options.packages.stream().flatMap(p -> Stream.of("-package", p)).collect(Collectors.toList()));
             if (!options.genMLOnly) {
                 String ocamlfind = getOcamlFind(files);

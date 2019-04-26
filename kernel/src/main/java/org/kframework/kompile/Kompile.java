@@ -191,7 +191,7 @@ public class Kompile {
                 .andThen(generateSortProjections)
                 .andThen(Kompile::resolveFreshConstants)
                 .andThen(AddImplicitComputationCell::transformDefinition)
-                .andThen(new Strategy(kompileOptions.experimental.heatCoolStrategies).addStrategyCellToRulesTransformer())
+                .andThen(d -> new Strategy(kompileOptions.experimental.heatCoolStrategies).addStrategyCellToRulesTransformer(d).apply(d))
                 .andThen(ConcretizeCells::transformDefinition)
                 .andThen(genCoverage)
                 .andThen(d -> { cov.close(); return d; })
