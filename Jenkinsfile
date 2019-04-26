@@ -208,6 +208,14 @@ pipeline {
               }
             }
             stage('Build and Package on Arch Linux') {
+              when {
+                anyOf {
+                  not { changeRequest() } 
+                  changelog '.*^\\[build-system\\] .+$'
+                  changeset 'Jenkinsfile'
+                  changeset 'Dockerfile'
+                }
+              }
               stages {
                 stage('Build on Arch Linux') {
                   agent {
