@@ -1,50 +1,50 @@
-SUBDIRS=issue-2273 \
-	concrete-function \
-	cell_map \
-	string_escape \
-	imp-kore \
-	poly-sort \
+SUBDIRS= \
 	bit-range \
 	bit-range-ocaml \
+	boundary-cells-opt/bc-c1 \
+	boundary-cells-opt/bc-c1c2 \
+	boundary-cells-opt/bc-c2 \
+	boundary-cells-opt/bc-none \
+	cast \
 	cell-sort \
+	cell_map \
+	checks \
+	concrete-function \
+	equals-formatting \
+	equals-pattern \
+	exit-code-no-gen-top \
+	fatalWarnings \
+	ffi-llvm \
 	fresh1 \
 	fresh2 \
-	proj-attribute \
-	matching-attribute \
-	smt-prelude-attribute \
-	is-variable \
-	no-dup-rules \
-	owise-haskell \
+	help \
 	imp-haskell \
+	imp-kore \
 	imp-llvm \
-	equals-pattern \
-	or-llvm \
-	or-ocaml \
-	issue-313 \
-	checks \
-	withConfig \
-	withConfig-llvm \
-	pattern-macro \
-	boundary-cells-opt/bc-none \
-	boundary-cells-opt/bc-c1 \
-	boundary-cells-opt/bc-c2 \
-	boundary-cells-opt/bc-c1c2 \
-	prelude-warnings \
-	equals-formatting \
-	kore-brackets \
-	quadratic-poly-unparsing \
 	io-java \
 	io-ocaml \
-	fatalWarnings \
-	symbolic-int-function \
-	map-symbolic-tests \
-	profile \
-	ffi-llvm \
-	ite-bug \
-	cast \
-	help \
-	exit-code-no-gen-top \
+	is-variable \
+	issue-313 \
 	issue-425 \
-
+	ite-bug \
+	kore-brackets \
+	map-symbolic-tests \
+	matching-attribute \
+	no-dup-rules \
+	or-llvm \
+	or-ocaml \
+	owise-haskell \
+	pattern-macro \
+	poly-sort \
+	prelude-warnings \
+	profile \
+	proj-attribute \
+	quadratic-poly-unparsing \
+	smt-prelude-attribute \
+	string_escape \
+	symbolic-int-function \
+	withConfig \
+	withConfig-llvm \
+    issue-2273 \
 
 include ../../include/ktest-group.mak
