@@ -10,6 +10,7 @@ SUBDIRS= \
 	cell_map \
 	checks \
 	concrete-function \
+	configuration-formatting \
 	equals-formatting \
 	equals-pattern \
 	exit-code-no-gen-top \
