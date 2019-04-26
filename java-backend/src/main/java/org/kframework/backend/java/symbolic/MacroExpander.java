@@ -87,8 +87,7 @@ public class MacroExpander extends CopyOnWriteTransformer {
                 rule.freshConstants(),
                 rule.freshVariables(),
                 processedLookups,
-                rule.att(),
-                rule.globalContext());
+                rule.att());
     }
 
     public Term processTerm(Term term) {

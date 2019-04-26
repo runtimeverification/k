@@ -24,15 +24,15 @@ public class PortableFileSystemTest extends BaseTestCase {
 
     @Test
     public void testReadFile() throws Exception {
-        when(files.resolveWorkingDirectory(Matchers.anyString())).thenAnswer(new Answer<java.io.File>() {
+        when(files.resolveWorkingDirectory(Matchers.any(java.io.File.class))).thenAnswer(new Answer<java.io.File>() {
             @Override
             public java.io.File answer(InvocationOnMock invocation)
                     throws Throwable {
-                return new java.io.File((String)invocation.getArguments()[0]);
+                return (java.io.File)invocation.getArguments()[0];
             }
         });
         PortableFileSystem fs = new PortableFileSystem(kem, files);
-        long fd = fs.open(new java.io.File(getClass().getResource("/fs-test.txt").toURI()).getAbsolutePath(), "r");
+        long fd = fs.open(new java.io.File(getClass().getResource("/fs-test.txt").toURI()), "r");
         File f = fs.get(fd);
         byte[] file = "foo\n".getBytes(Charset.forName("ASCII"));
         Assert.assertArrayEquals(file, f.read(4));

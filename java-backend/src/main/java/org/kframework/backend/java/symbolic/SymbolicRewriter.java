@@ -241,7 +241,7 @@ public class SymbolicRewriter {
                 // TODO(AndreiS): move these some other place
                 result = result.expandPatterns(true);
                 if (result.constraint().isFalseExtended() || result.constraint().checkUnsat(
-                        new FormulaContext(FormulaContext.Kind.RegularConstr, rule))) {
+                        new FormulaContext(FormulaContext.Kind.RegularConstr, rule, global))) {
                     if (global.javaExecutionOptions.debugZ3) {
                         System.err.println("Execution path aborted after expanding patterns");
                     }
@@ -1113,7 +1113,7 @@ public class SymbolicRewriter {
         for (Rule specRule : specRules) {
             ConstrainedTerm pattern = specRule.createLhsPattern(constrainedTerm.termContext());
             ConjunctiveFormula constraint = constrainedTerm.matchImplies(pattern, true, false,
-                    new FormulaContext(FormulaContext.Kind.SpecRule, specRule), specRule.matchingSymbols());
+                    new FormulaContext(FormulaContext.Kind.SpecRule, specRule, global), specRule.matchingSymbols());
             if (constraint != null) {
                 if (global.javaExecutionOptions.logRulesPublic) {
                     System.err.format("\nSpec rule matched, building result for: %s %s\n-------------------------\n",
@@ -1121,7 +1121,7 @@ public class SymbolicRewriter {
                 }
                 global.stateLog.log(StateLog.LogEvent.SRULEATTEMPT, specRule.toKRewrite(), constrainedTerm.term(), constrainedTerm.constraint());
                 ConstrainedTerm result = buildResult(specRule, constraint, null, true, constrainedTerm.termContext(),
-                        new FormulaContext(FormulaContext.Kind.SpecConstr, specRule));
+                        new FormulaContext(FormulaContext.Kind.SpecConstr, specRule, global));
                 global.stateLog.log(StateLog.LogEvent.SRULE, specRule.toKRewrite(), constrainedTerm.term(), constrainedTerm.constraint(), result.term(), result.constraint());
                 if (global.javaExecutionOptions.logRulesPublic) {
                     RuleSourceUtil.printRuleAndSource(specRule);

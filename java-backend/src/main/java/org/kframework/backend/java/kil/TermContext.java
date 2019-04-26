@@ -4,11 +4,10 @@ package org.kframework.backend.java.kil;
 import com.google.common.collect.Sets;
 import org.kframework.backend.java.compile.KOREtoBackendKIL;
 import org.kframework.backend.java.symbolic.ConjunctiveFormula;
-import org.kframework.backend.java.symbolic.Transformer;
-import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.krun.api.io.FileSystem;
 import org.kframework.utils.errorsystem.KEMException;
 
+import javax.annotation.Nonnull;
 import java.math.BigInteger;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -17,13 +16,13 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * An object containing context specific to a particular configuration.
  */
-public class TermContext extends JavaSymbolicObject {
+public class TermContext {
 
     private final AtomicLong counter;
 
     private final GlobalContext global;
 
-    private Set<Variable> initialVariables;
+    private Set<Variable> initialLhsVariables;
 
     private Term topTerm;
 
@@ -36,19 +35,15 @@ public class TermContext extends JavaSymbolicObject {
     private TermContext(GlobalContext global, AtomicLong counter) {
         this.global = global;
         this.counter = counter;
-        this.initialVariables = Sets.newHashSet();
+        this.initialLhsVariables = Sets.newHashSet();
     }
 
-    public Set<Variable> getInitialVariables() {
-        return initialVariables;
+    public Set<Variable> getInitialLhsVariables() {
+        return initialLhsVariables;
     }
 
-    public void setInitialVariables(Set<Variable> initialVariables) {
-        if (initialVariables == null) {
-            Sets.newHashSet();
-        } else {
-            this.initialVariables = initialVariables;
-        }
+    public void setInitialLhsVariables(@Nonnull Set<Variable> initialLhsVariables) {
+        this.initialLhsVariables = initialLhsVariables;
     }
 
 
@@ -100,16 +95,6 @@ public class TermContext extends JavaSymbolicObject {
 
     public void setTopConstraint(ConjunctiveFormula topConstraint) {
         this.topConstraint = topConstraint;
-    }
-
-    @Override
-    public JavaSymbolicObject accept(Transformer transformer) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void accept(Visitor visitor) {
-        throw new UnsupportedOperationException();
     }
 
     public static Builder builder(GlobalContext globalContext) {

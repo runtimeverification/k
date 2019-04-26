@@ -339,10 +339,13 @@ public class OcamlRewriter implements Function<Definition, Rewriter> {
             if (!converter.options.noLinkPrelude) {
                 args.add(files.resolveKompiled("constants.cmx").getAbsolutePath());
                 args.add(files.resolveKompiled("prelude.cmx").getAbsolutePath());
+                args.add(files.resolveKompiled("plugin.cmx").getAbsolutePath());
+                args.add(files.resolveKompiled("parser.cmx").getAbsolutePath());
+                args.add(files.resolveKompiled("lexer.cmx").getAbsolutePath());
+                args.add(files.resolveKompiled("hooks.cmx").getAbsolutePath());
+                args.add(files.resolveKompiled("run.cmx").getAbsolutePath());
             }
             args.addAll(Arrays.asList("-I", files.resolveKompiled(".").getAbsolutePath(),
-                    files.resolveKompiled("plugin.cmx").getAbsolutePath(), files.resolveKompiled("parser.cmx").getAbsolutePath(),
-                    files.resolveKompiled("lexer.cmx").getAbsolutePath(), files.resolveKompiled("run.cmx").getAbsolutePath(),
                     files.resolveTemp(name).getAbsolutePath()));
             args.add("-inline");
             args.add("20");
@@ -354,10 +357,13 @@ public class OcamlRewriter implements Function<Definition, Rewriter> {
             if (!converter.options.noLinkPrelude) {
                 args.add(files.resolveKompiled("constants.cmo").getAbsolutePath());
                 args.add(files.resolveKompiled("prelude.cmo").getAbsolutePath());
+                args.add(files.resolveKompiled("plugin.cmo").getAbsolutePath());
+                args.add(files.resolveKompiled("parser.cmo").getAbsolutePath());
+                args.add(files.resolveKompiled("lexer.cmo").getAbsolutePath());
+                args.add(files.resolveKompiled("hooks.cmo").getAbsolutePath());
+                args.add(files.resolveKompiled("run.cmo").getAbsolutePath());
             }
-            args.addAll(Arrays.asList("-I", files.resolveKompiled(".").getAbsolutePath(),
-                            files.resolveKompiled("plugin.cmo").getAbsolutePath(), files.resolveKompiled("parser.cmo").getAbsolutePath(),
-                            files.resolveKompiled("lexer.cmo").getAbsolutePath(), files.resolveKompiled("run.cmo").getAbsolutePath()));
+            args.addAll(Arrays.asList("-I", files.resolveKompiled(".").getAbsolutePath()));
             args.add(files.resolveKompiled("realdef.cmo").getAbsolutePath());
             args.add(files.resolveTemp(name).getAbsolutePath());
             pb = pb.command(args);

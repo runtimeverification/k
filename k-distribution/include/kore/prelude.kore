@@ -38,4 +38,13 @@ endmodule []
 module K
   import KSEQ []
   import INJ []
+
+  // Defnitions for reachability aliases
+  // Until we will have `mu` we resort to dummy definitions
+  alias weakExistsFinally{A}(A) : A
+  where weakExistsFinally{A}(X:A) := X:A []
+
+  alias weakAlwaysFinally{A}(A) : A
+  where weakAlwaysFinally{A}(X:A) := X:A []
+
 endmodule []

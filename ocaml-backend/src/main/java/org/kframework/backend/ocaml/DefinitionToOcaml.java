@@ -130,7 +130,7 @@ public class DefinitionToOcaml implements Serializable {
     static {
         ImmutableSet.Builder<String> builder = ImmutableSet.builder();
         builder.add("BOOL").add("FLOAT").add("INT").add("IO").add("K").add("KEQUAL").add("KREFLECTION").add("LIST");
-        builder.add("MAP").add("SET").add("STRING").add("ARRAY").add("BUFFER").add("BYTES");
+        builder.add("MAP").add("SET").add("STRING").add("ARRAY").add("BUFFER").add("BYTES").add("META");
         hookNamespaces = builder.build();
     }
 
@@ -528,7 +528,7 @@ public class DefinitionToOcaml implements Serializable {
             sb.append("external load_plugin_path : unit -> string = \"load_plugin_path\"\n");
             sb.append("let () = Plugin.load (load_plugin_path ())");
         }
-        sb.append("\nopen Prelude\nopen Constants\nopen Constants.K\nopen Run\nlet () = Sys.catch_break true\n");
+        sb.append("\nopen Prelude\nopen Constants\nopen Constants.K\nopen Hooks\nopen Run\nlet () = Sys.catch_break true\n");
         sb.append("let () = Gc.set { (Gc.get()) with Gc.minor_heap_size = 33554432 }");
     }
 
@@ -1176,7 +1176,7 @@ public class DefinitionToOcaml implements Serializable {
 
     public String definition() {
         StringBuilder sb = new StringBuilder();
-        sb.append("open Prelude\nopen Constants\nopen Constants.K\nmodule Def = struct\n");
+        sb.append("open Prelude\nopen Constants\nopen Constants.K\nopen Hooks\nmodule Def = struct\n");
         SetMultimap<KLabel, Rule> functionRules = HashMultimap.create();
         ListMultimap<KLabel, Rule> anywhereRules = ArrayListMultimap.create();
         anywhereKLabels = new HashSet<>();
