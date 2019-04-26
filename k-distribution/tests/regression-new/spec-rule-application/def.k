@@ -5,11 +5,12 @@ module DEF
                   | "mid"   Int
                   | "end"   Int
                   | "aux"   Term //use to control level of nesting
+                  | "binop" Term Term
                   | Int
 
     configuration <T>
       <k> $PGM:K </k>
-      <var> 0 </var>
+      <var> 0:Term </var>
     </T>
 
     rule start X => mid X
