@@ -385,7 +385,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
     }
 
     public ConjunctiveFormula simplify() {
-        return simplify(false, true, TermContext.builder(global).build(), false);
+        return simplify(false, true, TermContext.builder(global).build(), Collections.emptySet(), false);
     }
 
     /**
@@ -393,7 +393,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
      * Decomposes equalities by using unification.
      */
     public ConjunctiveFormula simplify(TermContext context) {
-        return simplify(false, true, context, false);
+        return simplify(false, true, context, Collections.emptySet(), false);
     }
 
     /**
@@ -401,33 +401,43 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
      * between builtin data structures will remain intact if they cannot be
      * resolved completely.
      */
-    public ConjunctiveFormula simplifyBeforePatternFolding(TermContext context, boolean logFailures) {
-        return simplify(false, false, context, logFailures);
+    public ConjunctiveFormula simplifyBeforePatternFolding(TermContext context, Set<Variable> rhsOnlyVariables,
+                                                           boolean logFailures) {
+        return simplify(false, false, context, rhsOnlyVariables, logFailures);
     }
 
-    public ConjunctiveFormula simplifyModuloPatternFolding(TermContext context) {
-        return simplify(true, true, context, false);
+    public ConjunctiveFormula simplifyModuloPatternFolding(TermContext context, Set<Variable> rhsOnlyVariables) {
+        return simplify(true, true, context, rhsOnlyVariables, false);
     }
 
+    /**
+     * Simplifies this conjunctive formula as much as possible. Decomposes equalities by using unification.
+     *
+     * @param patternFolding        If this and {@code partialSimplification} are false, equalities between builtin data
+     *                              structures will remain intact if they cannot be resolved completely.
+     * @param partialSimplification
+     * @param context
+     * @param rhsOnlyVariables      When generating substitutions, substitutions for these vars will be preferred. A
+     *                              wrong/empty set here won't affect soundness but will affect completeness.
+     * @param logFailures
+     * @return
+     */
     private ConjunctiveFormula simplify(boolean patternFolding, boolean partialSimplification,
-                                        TermContext context, boolean logFailures) {
+                                        TermContext context, Set<Variable> rhsOnlyVariables, boolean logFailures) {
         ConjunctiveFormula cachedResult = global.formulaCache
-                .cacheGet(this, patternFolding, partialSimplification, context);
+                .cacheGet(this, patternFolding, partialSimplification, rhsOnlyVariables, context);
         if (cachedResult != null) {
             return cachedResult;
         }
 
-        ConjunctiveFormula result = simplifyImpl(patternFolding, partialSimplification, context, logFailures);
-        global.formulaCache.cachePut(this, patternFolding, partialSimplification, context, result);
+        ConjunctiveFormula result = simplifyImpl(patternFolding, partialSimplification, context, rhsOnlyVariables,
+                logFailures);
+        global.formulaCache.cachePut(this, patternFolding, partialSimplification, context, rhsOnlyVariables, result);
         return result;
     }
 
-    /**
-     * Simplifies this conjunctive formula as much as possible.
-     * Decomposes equalities by using unification.
-     */
     private ConjunctiveFormula simplifyImpl(boolean patternFolding, boolean partialSimplification, TermContext context,
-                                            boolean logFailures) {
+                                            Set<Variable> rhsOnlyVariables, boolean logFailures) {
         assert !isFalse();
         ConjunctiveFormula originalTopConstraint = context.getTopConstraint();
         Substitution<Variable, Term> substitution = this.substitution;
@@ -775,6 +785,11 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 && disjunctions.isEmpty();
     }
 
+    /**
+     * 1. Inverts the substitutions of the form LHSVar = RHSVar, where RHSVar is in {@code variables}.
+     * <p>
+     * 2. Does some extra magic for KLabel objects annotated with "metabinder".
+     */
     public ConjunctiveFormula orientSubstitution(Set<Variable> variables) {
         if (substitution.keySet().containsAll(variables)) {
             return this;
