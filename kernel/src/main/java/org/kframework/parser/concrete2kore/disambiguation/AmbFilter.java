@@ -63,7 +63,7 @@ public class AmbFilter extends SetsGeneralTransformer<ParseFailedException, Pars
             // TODO: use the unparser
             //Unparser unparser = new Unparser(context);
             //msg += "\n   " + unparser.print(elem).replace("\n", "\n   ");
-            msg += "\n    " + elem;
+            msg += "\n    " + new RemoveBracketVisitor().apply(elem);
         }
         // TODO: add location information
         ParseFailedException w = new ParseFailedException(
