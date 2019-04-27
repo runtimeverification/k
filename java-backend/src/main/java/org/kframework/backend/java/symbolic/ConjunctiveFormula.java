@@ -36,6 +36,7 @@ import org.kframework.backend.java.util.StateLog;
 import org.kframework.builtin.KLabels;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -459,6 +460,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                     Term leftHandSide = equality.leftHandSide().substituteAndEvaluate(substitution, context);
                     Term rightHandSide = equality.rightHandSide().substituteAndEvaluate(substitution, context);
                     equality = new Equality(leftHandSide, rightHandSide, global);
+                    //noinspection StatementWithEmptyBody
                     if (equality.isTrue()) {
                         // delete
                     } else if (equality.truthValue() == TruthValue.FALSE) {
@@ -487,39 +489,24 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                         equalities = equalities.plusAll(i + 1, unificationConstraint.equalities);
                         equalities = equalities.plusAll(i + 1, unificationConstraint.substitution.equalities(global));
                         disjunctions = disjunctions.plusAll(unificationConstraint.disjunctions);
-                        //Equality can be replaced by substitution
-                    } else if (varToVarSubstitutable(leftHandSide, rightHandSide)
-                            || varToTermSubstitutable(leftHandSide, rightHandSide)
-                            || varToTermSubstitutable(rightHandSide, leftHandSide)) {
-                        ImmutableMapSubstitution<Variable, Term> newVarSubstitution =
-                                varToVarSubstitutable(leftHandSide, rightHandSide)
-                                //Choice for the sake of determinism
-                                ? leftHandSide.toString().compareTo(rightHandSide.toString()) < 0
-                                  ? getSubstitution((Variable) leftHandSide, rightHandSide)
-                                  : getSubstitution((Variable) rightHandSide, leftHandSide)
-                                : varToTermSubstitutable(leftHandSide, rightHandSide)
-                                  ? getSubstitution((Variable) leftHandSide, rightHandSide)
-                                  : getSubstitution((Variable) rightHandSide, leftHandSide);
 
-                        if (newVarSubstitution == null) {
-                            pendingEqualities = pendingEqualities.plus(equality);
-                            continue;
-                        }
-
-                        substitution = ImmutableMapSubstitution.composeAndEvaluate(
-                                substitution,
-                                newVarSubstitution,
-                                context);
-                        change = true;
-                        if (substitution.isFalse(global)) {
-                            return falsify(substitution, equalities, disjunctions, equality);
-                        }
                     } else if (varToNormalTermNonSubstitutable(leftHandSide, rightHandSide)
                             || varToNormalTermNonSubstitutable(rightHandSide, leftHandSide)) {
                         return falsify(substitution, equalities, disjunctions, equality);
-                    } else {
-                        // unsimplified equation
-                        pendingEqualities = pendingEqualities.plus(equality);
+                    } else { //Attempt to replace equality by substitution
+                        ImmutableMapSubstitution<Variable, Term> newVarSubstitution =
+                                getSubstitutionIfPossibleUnoriented(leftHandSide, rightHandSide);
+
+                        if (newVarSubstitution != null) {
+                            substitution = ImmutableMapSubstitution.composeAndEvaluate(substitution, newVarSubstitution,
+                                    context);
+                            change = true;
+                            if (substitution.isFalse(global)) {
+                                return falsify(substitution, equalities, disjunctions, equality);
+                            }
+                        } else {
+                            pendingEqualities = pendingEqualities.plus(equality);
+                        }
                     }
                 }
                 equalities = pendingEqualities;
@@ -531,20 +518,23 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
         }
     }
 
+    private ImmutableMapSubstitution<Variable, Term> getSubstitutionIfPossibleUnoriented(Term leftHandSide,
+                                                                                         Term rightHandSide) {
+        ImmutableMapSubstitution<Variable, Term> leftToRightSub =
+                getSubstitutionIfPossible(leftHandSide, rightHandSide);
+        ImmutableMapSubstitution<Variable, Term> rightToLeftSub
+                = getSubstitutionIfPossible(rightHandSide, leftHandSide);
+        return leftToRightSub != null
+               ? rightToLeftSub != null
+                 ? leftHandSide.toString().compareTo(rightHandSide.toString()) < 0 ? leftToRightSub : rightToLeftSub
+                 : leftToRightSub
+               : rightToLeftSub;
+    }
+
     private boolean varToNormalTermNonSubstitutable(Term leftHandSide, Term rightHandSide) {
         return leftHandSide instanceof Variable
                 && rightHandSide.variableSet().contains(leftHandSide)
                 && rightHandSide.isNormal();
-    }
-
-    private boolean varToVarSubstitutable(Term leftHandSide, Term rightHandSide) {
-        return leftHandSide instanceof Variable && rightHandSide instanceof Variable
-                && leftHandSide.sort().equals(rightHandSide.sort());
-    }
-
-    private boolean varToTermSubstitutable(Term varCandidate, Term termCandidate) {
-        return varCandidate instanceof Variable
-                && !termCandidate.variableSet().contains(varCandidate);
     }
 
     private ConjunctiveFormula falsify(
@@ -671,18 +661,30 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
         }
     }
 
-    public ImmutableMapSubstitution<Variable, Term> getSubstitution(Variable variable, Term term) {
-        if (RewriteEngineUtils.isSubsortedEq(variable, term, global.getDefinition())) {
+    /**
+     * @return The substitution corresponding to variableCandidate=term, if it is valid. May contain multiple
+     * assignments. Or {@code null} if such substitution is not valid.
+     */
+    public ImmutableMapSubstitution<Variable, Term> getSubstitutionIfPossible(Term variableCandidate, Term term) {
+        if (!(variableCandidate instanceof Variable)) {
+            return null;
+        }
+
+        Variable variable = (Variable) variableCandidate;
+        if (term.variableSet().contains(variable)) {
+            return null;
+        } else if (RewriteEngineUtils.isSubsortedEq(variable, term, global.getDefinition())) {
             return ImmutableMapSubstitution.singleton(variable, term);
-        } else if (term instanceof KItem && ((KItem) term).kLabel() instanceof KLabelConstant && ((KItem) term).kList() instanceof KList
+        } else if (term instanceof KItem && ((KItem) term).kLabel() instanceof KLabelConstant
+                && ((KItem) term).kList() instanceof KList
                 && ((KLabelConstant) ((KItem) term).kLabel()).isConstructor()
                 && ((KList) ((KItem) term).kList()).getContents().stream().allMatch(Variable.class::isInstance)) {
-            /**
-             * Hack for a special case of order-sorted unification. If the term is an overloaded klabel applied to a klist of variables,
-             * and the sort of the term if too generic (i.e. not equal or subsorted to the sort of the variable),
-             * then it may be possible that one of the overloaded signatures may give the term a sort compatible with that of the variable.
-             * In that case, the variables in the klist are substituted with variables of the appropriate sorts.
-             */
+            /* Hack for a special case of order-sorted unification. If the term is an overloaded klabel applied to
+            a klist of variables, and the sort of the term if too generic (i.e. not equal or subsorted to the sort
+            of the variable), then it may be possible that one of the overloaded signatures may give the term a sort
+            compatible with that of the variable. In that case, the variables in the klist are substituted with
+            variables of the appropriate sorts.
+            */
             KItem kItem = (KItem) term;
             KLabelConstant kLabelConstant = (KLabelConstant) kItem.kLabel();
             KList kList = (KList) kItem.kList();
@@ -697,28 +699,15 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                     .findAny().get();
             ImmutableMapSubstitution<Variable, Term> substitution = ImmutableMapSubstitution.empty();
             for (int i = 0; i < kList.size(); i++) {
-                substitution = substitution.plus((Variable) kList.get(i), Variable.getAnonVariable(signature.parameters().get(i)));
+                substitution = substitution.plus((Variable) kList.get(i),
+                        Variable.getAnonVariable(signature.parameters().get(i)));
                 if (substitution == null) {
                     return null;
                 }
             }
-            substitution = substitution.plus(
-                    variable,
-                    KItem.of(kLabelConstant, KList.concatenate(substitution.keySet().stream().collect(Collectors.toList())), global));
+            substitution = substitution.plus(variable,
+                    KItem.of(kLabelConstant, KList.concatenate(new ArrayList<>(substitution.keySet())), global));
             return substitution;
-        } else if (term instanceof Variable) {
-            if (RewriteEngineUtils.isSubsortedEq(term, variable, global.getDefinition())) {
-                return ImmutableMapSubstitution.singleton((Variable) term, variable);
-            } else {
-                Sort leastSort = global.getDefinition().subsorts().getGLBSort(
-                        variable.sort(),
-                        term.sort());
-                assert leastSort != null;
-
-                Variable freshVariable = Variable.getAnonVariable(leastSort);
-                return ImmutableMapSubstitution.<Variable, Term>singleton(variable, freshVariable)
-                        .plus((Variable) term, freshVariable);
-            }
         } else {
             return null;
         }
