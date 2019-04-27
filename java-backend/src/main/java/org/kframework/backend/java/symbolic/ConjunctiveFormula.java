@@ -531,35 +531,37 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 }
                 equalities = pendingEqualities;
 
-                //Part 3. Extracting substitutions, any.
-                pendingEqualities = PersistentUniqueList.empty();
-                for (int i = 0; i < equalities.size(); ++i) {
-                    Equality equality = equalities.get(i);
+                //Part 3. Extracting substitutions, any. Only if no other simplification is possible.
+                if (!change) {
+                    pendingEqualities = PersistentUniqueList.empty();
+                    for (int i = 0; i < equalities.size(); ++i) {
+                        Equality equality = equalities.get(i);
 
-                    //Any equality should be evaluated in the context of other entries but not itself, otherwise information
-                    //loss can happen. Details: https://github.com/kframework/k-legacy/pull/2399#issuecomment-360680618
-                    context.setTopConstraint(minus(originalTopConstraint, equality));
+                        //Any equality should be evaluated in the context of other entries but not itself, otherwise information
+                        //loss can happen. Details: https://github.com/kframework/k-legacy/pull/2399#issuecomment-360680618
+                        context.setTopConstraint(minus(originalTopConstraint, equality));
 
-                    Term leftHandSide = equality.leftHandSide().substituteAndEvaluate(substitution, context);
-                    Term rightHandSide = equality.rightHandSide().substituteAndEvaluate(substitution, context);
-                    equality = new Equality(leftHandSide, rightHandSide, global);
+                        Term leftHandSide = equality.leftHandSide().substituteAndEvaluate(substitution, context);
+                        Term rightHandSide = equality.rightHandSide().substituteAndEvaluate(substitution, context);
+                        equality = new Equality(leftHandSide, rightHandSide, global);
 
-                    //Attempt to replace equality by substitution
-                    ImmutableMapSubstitution<Variable, Term> newVarSubstitution =
-                            getSubstitutionIfPossibleUnoriented(leftHandSide, rightHandSide, null);
+                        //Attempt to replace equality by substitution
+                        ImmutableMapSubstitution<Variable, Term> newVarSubstitution =
+                                getSubstitutionIfPossibleUnoriented(leftHandSide, rightHandSide, null);
 
-                    if (newVarSubstitution != null) {
-                        substitution = ImmutableMapSubstitution.composeAndEvaluate(substitution, newVarSubstitution,
-                                context);
-                        change = true;
-                        if (substitution.isFalse(global)) {
-                            return falsify(substitution, equalities, disjunctions, equality);
+                        if (newVarSubstitution != null) {
+                            substitution = ImmutableMapSubstitution.composeAndEvaluate(substitution, newVarSubstitution,
+                                    context);
+                            change = true;
+                            if (substitution.isFalse(global)) {
+                                return falsify(substitution, equalities, disjunctions, equality);
+                            }
+                        } else {
+                            pendingEqualities = pendingEqualities.plus(equality);
                         }
-                    } else {
-                        pendingEqualities = pendingEqualities.plus(equality);
                     }
+                    equalities = pendingEqualities;
                 }
-                equalities = pendingEqualities;
             } while (change);
 
             return ConjunctiveFormula.of(substitution, equalities, disjunctions, global);
