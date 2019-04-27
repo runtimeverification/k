@@ -9,6 +9,7 @@ import org.kframework.definition.{NonTerminal, Production}
 import org.kframework.{kore => k}
 import org.kframework.kore.Unapply._
 import org.kframework.kore.{KORE, _}
+import org.kframework.utils.errorsystem.KEMException
 import org.pcollections.PStack
 
 import scala.collection.JavaConverters._
@@ -39,6 +40,8 @@ class TreeNodesToKORE(parseSort: java.util.function.Function[String, Sort], stri
       KApply(p.klabel.get, KList(realItems.asJava), locationToAtt(t.location, t.source).add(classOf[Production], realProd))
     } else {
       val realProd = if (p.att.contains("originalPrd", classOf[Production])) p.att.get("originalPrd", classOf[Production]) else p
+      if (p.klabel.isEmpty)
+        throw KEMException.internalError("Missing klabel in production: " + p, t)
       val klabel = if (p.klabel.get.name == "#OuterCast") KLabel("project:" ++ p.sort.toString) else p.klabel.get
       KApply(klabel, KList(new util.ArrayList(items).asScala.reverse map apply asJava), locationToAtt(t.location, t.source).add(classOf[Production], realProd))
     }
