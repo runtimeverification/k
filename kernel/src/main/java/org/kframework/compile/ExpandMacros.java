@@ -112,10 +112,10 @@ public class ExpandMacros {
     }
 
     private int counter = 0;
-    KVariable newDotVariable() {
+    KVariable newDotVariable(Att att) {
         KVariable newLabel;
         do {
-            newLabel = KVariable("_" + (counter++), Att().add("anonymous"));
+            newLabel = KVariable("_" + (counter++), att.add("anonymous"));
         } while (vars.contains(newLabel));
         vars.add(newLabel);
         return newLabel;
@@ -183,7 +183,7 @@ public class ExpandMacros {
                                 public K apply(KVariable k) {
                                     K result = subst.get(k);
                                     if (result == null) {
-                                      result = newDotVariable();
+                                      result = newDotVariable(k.att());
                                       subst.put(k, result);
                                     }
                                     return result;
