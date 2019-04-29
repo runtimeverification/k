@@ -30,16 +30,10 @@ ADD --chown=user:user haskell-backend/src/main/native/haskell-backend/kore/packa
 RUN    cd /home/user/.tmp-haskell \
     && stack build --only-snapshot --test --bench --no-haddock-deps --haddock --library-profiling
 
-ADD --chown=user:user llvm-backend/src/main/native/llvm-backend/matching/stack.yaml /home/user/.tmp-haskell2/
-ADD --chown=user:user llvm-backend/src/main/native/llvm-backend/matching/package.yaml /home/user/.tmp-haskell2/
-ADD --chown=user:user llvm-backend/src/main/native/llvm-backend/matching/submodules/kore/stack.yaml /home/user/.tmp-haskell2/submodules/kore/
-ADD --chown=user:user llvm-backend/src/main/native/llvm-backend/matching/submodules/kore/src/main/haskell/kore/package.yaml /home/user/.tmp-haskell2/submodules/kore/src/main/haskell/kore/
-RUN    cd /home/user/.tmp-haskell2 \
-    && stack build --only-snapshot --test
-
 ADD pom.xml /home/user/.tmp-maven/
 ADD ktree/pom.xml /home/user/.tmp-maven/ktree/
 ADD llvm-backend/pom.xml /home/user/.tmp-maven/llvm-backend/
+ADD llvm-backend/src/main/native/llvm-backend/matching/pom.xml /home/user/.tmp-maven/llvm-backend/src/main/native/llvm-backend/matching/
 ADD haskell-backend/pom.xml /home/user/.tmp-maven/haskell-backend/
 ADD ocaml-backend/pom.xml /home/user/.tmp-maven/ocaml-backend/
 ADD kernel/pom.xml /home/user/.tmp-maven/kernel/

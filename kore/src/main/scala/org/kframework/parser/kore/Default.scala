@@ -68,14 +68,17 @@ object implementation {
 
     case class SortVariable(name: String) extends i.SortVariable {
       override def toString = name
+      override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
     }
 
     case class CompoundSort(ctr: String, params: Seq[i.Sort]) extends i.CompoundSort {
-      override def toString = ctr + "{" + params.map(_.toString).mkString(", ") + "}"
+      override lazy val toString = ctr + "{" + params.map(_.toString).mkString(", ") + "}"
+      override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
     }
 
     case class SymbolOrAlias(ctr: String, params: Seq[i.Sort]) extends i.SymbolOrAlias {
-      override def toString = ctr + "{" + params.map(_.toString).mkString(", ") + "}"
+      override lazy val toString = ctr + "{" + params.map(_.toString).mkString(", ") + "}"
+      override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(this)
     }
 
     case class Symbol(ctr: String, params: Seq[i.Sort]) extends i.Symbol

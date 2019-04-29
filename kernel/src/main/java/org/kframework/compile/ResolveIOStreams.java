@@ -81,7 +81,7 @@ public class ResolveIOStreams {
                     sentences.addAll(getStreamModuleSentences(p));
                 }
             }
-            return Module(m.name(), m.imports(), immutable(sentences), m.att());
+            return Module(m.name(), (Set<Module>)m.imports().$bar(Set(definition.getModule("K-IO").get())), immutable(sentences), m.att());
         }
     }
 

@@ -17,6 +17,7 @@
     <module>ocaml-backend</module>
     <module>haskell-backend</module>
     <module>llvm-backend</module>
+    <module>llvm-backend/src/main/native/llvm-backend/matching</module>
   </modules>
 
   <scm>
