@@ -147,7 +147,7 @@ class TextToKore(b: Builders = DefaultBuilders) {
   private def parseModule(): Module = {
     consumeWithLeadingWhitespaces("module")
     val name = parseId(parsingLevel = objt)
-    val decls = parseDeclarations(Seq())
+    val decls = parseDeclarations(Seq()).reverse
     consumeWithLeadingWhitespaces("endmodule")
     val att = parseAttributes()
     b.Module(name, decls, att)
@@ -189,7 +189,7 @@ class TextToKore(b: Builders = DefaultBuilders) {
            val nameStr = parseId()
            val att = parseAttributes()
            val decl = b.Import(nameStr, att)
-           parseDeclarations(decls :+ decl)
+           parseDeclarations(decl +: decls)
         case ('s', 'o') => // sort declaration
           consume("rt")
           val ctr = parseId(parsingLevel = objt)
@@ -198,7 +198,7 @@ class TextToKore(b: Builders = DefaultBuilders) {
           consumeWithLeadingWhitespaces("}")
           val att = parseAttributes()
           val decl = b.SortDeclaration(params, b.CompoundSort(ctr, params), att)
-          parseDeclarations(decls :+ decl)
+          parseDeclarations(decl +: decls)
         case ('s', 'y') => // symbol declaration
           consume("mbol")
           val ctr = parseId() // previousParsingLevel is set here
@@ -213,7 +213,7 @@ class TextToKore(b: Builders = DefaultBuilders) {
           val returnSort = parseSort(parsingLevel = previousParsingLevel)
           val att = parseAttributes()
           val decl = b.SymbolDeclaration(symbol, argSorts, returnSort, att)
-          parseDeclarations(decls :+ decl)
+          parseDeclarations(decl +: decls)
         case ('h', 'o') => // hook-sort or hook-symbol declaration
           consume("oked-")
           val c1 = scanner.next()
@@ -227,7 +227,7 @@ class TextToKore(b: Builders = DefaultBuilders) {
               consumeWithLeadingWhitespaces("}")
               val att = parseAttributes()
               val decl = b.HookSortDeclaration(params, b.CompoundSort(ctr, params), att)
-              parseDeclarations(decls :+ decl)
+              parseDeclarations(decl +: decls)
             case ('s', 'y') => // hook-symbol
               consume("mbol")
               val ctr = parseId() // previousParsingLevel is set here
@@ -242,7 +242,7 @@ class TextToKore(b: Builders = DefaultBuilders) {
               val returnSort = parseSort(parsingLevel = previousParsingLevel)
               val att = parseAttributes()
               val decl = b.HookSymbolDeclaration(symbol, argSorts, returnSort, att)
-              parseDeclarations(decls :+ decl)
+              parseDeclarations(decl +: decls)
             case (e1, e2) => // error
               throw error("sort, symbol", e1)
           }
@@ -264,7 +264,7 @@ class TextToKore(b: Builders = DefaultBuilders) {
           val rightPattern = parsePattern()
           val att = parseAttributes()
           val decl = b.AliasDeclaration(alias, argSorts, returnSort, leftPattern, rightPattern, att)
-          parseDeclarations(decls :+ decl)
+          parseDeclarations(decl +: decls)
         case ('a', 'x') => // axiom declaration
           consume("iom")
           consumeWithLeadingWhitespaces("{")
@@ -273,7 +273,7 @@ class TextToKore(b: Builders = DefaultBuilders) {
           val pattern = parsePattern()
           val att = parseAttributes()
           val decl = b.AxiomDeclaration(params, pattern, att)
-          parseDeclarations(decls :+ decl)
+          parseDeclarations(decl +: decls)
         case (e1, e2) =>
           throw error("sort, symbol, alias, axiom", e1)
       }

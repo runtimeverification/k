@@ -524,11 +524,14 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
             public Either<java.util.Set<ParseFailedException>, Term> apply(Constant c) {
                 if (c.production().sort().equals(Sorts.KVariable())) {
                     Sort declared = decl.get(getVarKey(c));
-                    if (declared != null && !(declared.equals(Sorts.K()) && subsorts.lessThanEq(sort, Sorts.KList()))) { // if the declared/inferred sort is K, make sure it can fit in the context (ex. is not a KLabel)
+                    if (declared != null) {
                         if ((!strictSortEquality && !subsorts.lessThanEq(declared, sort)) || (strictSortEquality && !declared.equals(sort))) {
                             String msg = "Unexpected sort " + declared + " for term " + c.value() + ". Expected " + sort + ".";
                             KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg, c.source().orElse(null), c.location().orElse(null));
                             return Left.apply(Sets.newHashSet(new VariableTypeClashException(kex)));
+                        }
+                        if (declared.equals(Sorts.K())) {
+                          return Right.apply(c);
                         }
                         return wrapTermWithCast(c, declared);
                     }
