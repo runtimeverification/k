@@ -188,7 +188,7 @@ module SMTLIB2
   rule SMTLIB2ScriptToString( COMMAND SCRIPT )
     => SMTLIB2CommandToString( COMMAND ) +String "\n" +String SMTLIB2ScriptToString( SCRIPT )
 
-  syntax CheckSATResult ::= CheckSATHelper(/*Query*/String, String/*Command*/)
+  syntax CheckSATResult ::= CheckSATHelper(/*Query*/String, String/*Command*/) [function]
   syntax CheckSATResult ::= "CheckSAT.doWrite"  "(" /*Query*/String "," /*Command*/String "," IOFile ")"       [function]
   syntax CheckSATResult ::= "CheckSAT.doClose"  "(" /*Query*/String "," /*Command*/String "," IOFile "," K ")" [function]
   syntax CheckSATResult ::= "CheckSAT.doSystem" "(" /*Query*/String "," /*Command*/String "," String "," K ")" [function]
