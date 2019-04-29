@@ -2,7 +2,7 @@
 
 package org.kframework.parser
 
-import org.kframework.attributes.{Source, Location}
+import org.kframework.attributes.{Source, Location, HasLocation}
 import org.kframework.definition.Production
 import org.kframework.kore.KORE.Sort
 import java.util._
@@ -13,7 +13,7 @@ import org.kframework.utils.StringUtil
 
 import scala.collection.mutable;
 
-trait Term {
+trait Term extends HasLocation {
   var location: Optional[Location] = Optional.empty()
   var source: Optional[Source] = Optional.empty()
 }
