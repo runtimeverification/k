@@ -136,7 +136,10 @@ public class ConstrainedTerm extends JavaSymbolicObject {
         ConjunctiveFormula constraint = ConjunctiveFormula.of(matchRHSTerm.termContext().global())
                 .add(data.constraint.substitution())
                 .add(data.term, matchRHSTerm.data.term)
-                .simplifyBeforePatternFolding(context, logFailures);
+                .add(matchRHSTerm.data.constraint);
+        Set<Variable> matchRHSOnlyVars = Sets.difference(constraint.variableSet(),
+                Sets.union(variableSet(), termContext().getInitialLhsVariables()));
+        constraint = constraint.simplifyBeforePatternFolding(context, matchRHSOnlyVars, logFailures);
         if (constraint.isFalseExtended()) {
             return null;
         }
@@ -154,21 +157,16 @@ public class ConstrainedTerm extends JavaSymbolicObject {
         }
 
         /* apply pattern folding */
-        constraint = constraint.simplifyModuloPatternFolding(context)
-                .add(matchRHSTerm.data.constraint);
+        constraint = constraint.simplifyModuloPatternFolding(context, matchRHSOnlyVars);
         if (constraint.isFalse()) {
             return null;
         }
 
         formulaContext.printTargetFormula(constraint);
 
-        constraint = constraint.simplifyModuloPatternFolding(context);
-        if (constraint.isFalse()) {
-            return null;
-        }
-
         if (expand) {
-            constraint = constraint.expandPatterns(false, context).simplifyModuloPatternFolding(context);
+            constraint = constraint.expandPatterns(false, context)
+                    .simplifyModuloPatternFolding(context, matchRHSOnlyVars);
             if (constraint.isFalse()) {
                 return null;
             }
@@ -187,7 +185,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
             }
         }
         context.setTopConstraint(null);
-        constraint = constraint.simplifyModuloPatternFolding(context);
+        constraint = constraint.simplifyModuloPatternFolding(context, matchRHSOnlyVars);
         if (constraint.isFalse()) {
             return null;
         }
@@ -195,7 +193,6 @@ public class ConstrainedTerm extends JavaSymbolicObject {
         context.setTopConstraint(data.constraint);
         constraint = (ConjunctiveFormula) constraint.evaluate(context);
 
-        Set<Variable> matchRHSOnlyVars = Sets.difference(constraint.variableSet(), Sets.union(variableSet(), termContext().getInitialLhsVariables()));
         constraint = constraint.orientSubstitution(matchRHSOnlyVars);
 
         ConjunctiveFormula implicationLHS = data.constraint;
