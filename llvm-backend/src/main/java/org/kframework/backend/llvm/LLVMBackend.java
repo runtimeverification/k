@@ -2,6 +2,7 @@
 package org.kframework.backend.llvm;
 
 import com.google.inject.Inject;
+import org.kframework.backend.llvm.matching.Matching;
 import org.kframework.backend.kore.KoreBackend;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.KompileOptions;
@@ -35,11 +36,12 @@ public class LLVMBackend extends KoreBackend {
     public void accept(CompiledDefinition def) {
         String kore = getKompiledString(def);
         files.saveToKompiled("definition.kore", kore);
+        Matching.writeDecisionTreeToFile(files.resolveKompiled("definition.kore"), def.kompiledDefinition.mainModule().name(), files.resolveKompiled("dt"));
         ProcessBuilder pb = files.getProcessBuilder();
         List<String> args = new ArrayList<>();
         args.add("llvm-kompile");
         args.add("definition.kore");
-        args.add(def.kompiledDefinition.mainModule().name());
+        args.add("dt");
         args.add("main");
         args.add("-o");
         args.add("interpreter");
