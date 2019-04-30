@@ -355,13 +355,14 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
     }
 
     /**
-     * Removes specified variable bindings from this constraint.
+     * Builds a new ConjunctiveFormula with the same content as original, but without the substitutions given as
+     * argument.
      * <p>
      * Note: this method should only be used to garbage collect useless
      * bindings. It is called to remove all bindings of the rewrite rule
      * variables after building the rewrite result.
      */
-    public ConjunctiveFormula removeBindings(Set<Variable> variablesToRemove) {
+    public ConjunctiveFormula removeSubstitutionVars(Set<Variable> variablesToRemove) {
         return ConjunctiveFormula.of(
                 substitution.minusAll(variablesToRemove),
                 equalities,
@@ -369,6 +370,19 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 global);
     }
 
+    /**
+     * Builds a new ConjunctiveFormula with the same content as original, but retaining only the substitutions given as
+     * argument.
+     * <p>
+     * E.g. new substitution = this substitution intersected with variablesToRetain.
+     */
+    public ConjunctiveFormula retainSubstitutionVars(Set<Variable> variablesToRetain) {
+        return ConjunctiveFormula.of(
+                substitution.retainAll(variablesToRetain),
+                equalities,
+                disjunctions,
+                global);
+    }
 
     public ConjunctiveFormula simplify() {
         return simplify(false, true, TermContext.builder(global).build(), false);
@@ -837,7 +851,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
         constraint = constraint.orientSubstitution(rightOnlyVariables);
 
         ConjunctiveFormula leftHandSide = data.constraint;
-        ConjunctiveFormula rightHandSide = constraint.removeBindings(rightOnlyVariables);
+        ConjunctiveFormula rightHandSide = constraint.removeSubstitutionVars(rightOnlyVariables);
         rightHandSide = (ConjunctiveFormula) rightHandSide.substitute(leftHandSide.substitution());
         if (!leftHandSide.implies(rightHandSide, rightOnlyVariables)) {
             return null;
