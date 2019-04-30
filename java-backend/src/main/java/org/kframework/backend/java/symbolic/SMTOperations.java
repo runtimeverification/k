@@ -7,6 +7,7 @@ import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.util.FormulaContext;
 import org.kframework.backend.java.util.Z3Wrapper;
 import org.kframework.utils.IndentingFormatter;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.options.SMTOptions;
 import org.kframework.utils.options.SMTSolver;
@@ -68,6 +69,9 @@ public class SMTOperations {
                 log.format("\nZ3 constraint warning: %s\n", e.getMessage());
             }
             formulaContext.z3Profiler.newQueryBuildFailure();
+        } catch (KEMException e) {
+            e.exception.formatTraceFrame("\nwhile checking satisfiability for:\n%s", constraint.toStringMultiline());
+            throw e;
         }
         return result;
     }
@@ -113,6 +117,10 @@ public class SMTOperations {
                     log.format("\nZ3 warning. Query not generated: %s\n", e.getMessage());
                 }
                 formulaContext.queryBuildFailure();
+            } catch (KEMException e) {
+                e.exception.formatTraceFrame("\nwhile proving implication LHS:\n%s\nRHS:\n%s",
+                        left.toStringMultiline(), right.toStringMultiline());
+                throw e;
             }
         }
         return false;
