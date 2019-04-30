@@ -227,7 +227,7 @@ public class SymbolicRewriter {
             }
             /* eliminate bindings of the substituted variables */
             ConjunctiveFormula constraint = matchResult.constraint;
-            constraint = constraint.removeBindings(rule.variableSet());
+            constraint = constraint.removeSubstitutionVars(rule.variableSet());
 
             /* get fresh substitutions of rule variables */
             Map<Variable, Variable> renameSubst = Variable.rename(rule.variableSet());
@@ -433,7 +433,7 @@ public class SymbolicRewriter {
         Term term = rule.rightHandSide().substituteAndEvaluate(constraint.substitution(), context);
 
         /* eliminate bindings of the substituted variables */
-        constraint = constraint.removeBindings(substitutedVars);
+        constraint = constraint.removeSubstitutionVars(substitutedVars);
 
         /* get fresh substitutions of rule variables */
         Map<Variable, Variable> renameSubst = Variable.rename(rule.variableSet());
@@ -640,7 +640,6 @@ public class SymbolicRewriter {
 
         visited.add(initialTerm);
         queue.add(initialTerm);
-        boolean guarded = false;
         int step = 0;
 
         if (prettyInitTerm != null) {
@@ -704,27 +703,8 @@ public class SymbolicRewriter {
                         //  Disabling on step 1 is useful for specs that match 1 full loop iteration.
                     }
 
-                /* TODO(AndreiS): terminate the proof with failure based on the klabel _~>_
-                List<Term> leftKContents = term.term().getCellContentsByName("<k>");
-                List<Term> rightKContents = targetTerm.term().getCellContentsByName("<k>");
-                // TODO(YilongL): the `get(0)` seems hacky
-                if (leftKContents.size() == 1 && rightKContents.size() == 1) {
-                    Pair<Term, Variable> leftKPattern = KSequence.splitContentAndFrame(leftKContents.get(0));
-                    Pair<Term, Variable> rightKPattern = KSequence.splitContentAndFrame(rightKContents.get(0));
-                    if (leftKPattern.getRight() != null && rightKPattern.getRight() != null
-                            && leftKPattern.getRight().equals(rightKPattern.getRight())) {
-                        BoolToken matchable = MetaK.matchable(
-                                leftKPattern.getLeft(),
-                                rightKPattern.getLeft(),
-                                term.termContext());
-                        if (matchable != null && matchable.booleanValue()) {
-                            proofResults.add(term);
-                            continue;
-                        }
-                    }
-                }*/
-
-                    if (guarded) {
+                    //Attempt to apply a spec rule, except on first step.
+                    if (step > 1) {
                         ConstrainedTerm result = applySpecRules(term, specRules);
                         if (result != null) {
                             nextStepLogEnabled = true;
@@ -745,6 +725,7 @@ public class SymbolicRewriter {
                         }
                     }
 
+                    //Apply a regular rule
                     List<ConstrainedTerm> results = fastComputeRewriteStep(term, false, true, true, step,
                             initialTerm);
                     if (results.isEmpty()) {
@@ -775,13 +756,11 @@ public class SymbolicRewriter {
                             }
                         }
                     }
+                    //Build results of regular rule application
                     for (ConstrainedTerm cterm : results) {
                         ConstrainedTerm result = new ConstrainedTerm(
                                 cterm.term(),
-                                cterm.constraint().removeBindings(
-                                        Sets.difference(
-                                                cterm.constraint().substitution().keySet(),
-                                                initialTerm.variableSet())),
+                                cterm.constraint().retainSubstitutionVars(initialTerm.variableSet()),
                                 cterm.termContext());
                         if (visited.add(result)) {
                             nextQueue.add(result);
@@ -817,7 +796,6 @@ public class SymbolicRewriter {
             queue = nextQueue;
             nextQueue = temp;
             nextQueue.clear();
-            guarded = true;
 
             global.javaExecutionOptions.log = originalLog;
         }
