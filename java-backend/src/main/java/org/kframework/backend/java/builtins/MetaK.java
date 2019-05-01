@@ -14,6 +14,7 @@ import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.symbolic.ConjunctiveFormula;
 import org.kframework.backend.java.symbolic.CopyOnWriteTransformer;
+import org.kframework.backend.java.symbolic.JavaBackend;
 import org.kframework.backend.java.symbolic.PatternMatcher;
 import org.kframework.kore.K;
 import org.kframework.kore.KORE;
@@ -212,7 +213,7 @@ public class MetaK {
      */
     public static Term parseKAST(StringToken kast, TermContext termContext) {
         try {
-            return termContext.getKOREtoBackendKILConverter().convert(KoreParser.parse(kast.stringValue(), kast.getSource()));
+            return termContext.getKOREtoBackendKILConverter().convert(JavaBackend.convertKSeqToKApply(KoreParser.parse(kast.stringValue(), kast.getSource())));
         } catch (KEMException e) {
             KLabelConstant klabel = KLabelConstant.of(KORE.KLabel("#noparse"), termContext.definition());
             return KItem.of(klabel, KList.EMPTY, termContext.global());
