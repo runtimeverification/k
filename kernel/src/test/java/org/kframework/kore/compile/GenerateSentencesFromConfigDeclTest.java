@@ -86,7 +86,7 @@ public class GenerateSentencesFromConfigDeclTest {
                         Seq(NonTerminal(Sort("ThreadCell")))),
                 Production(KLabel("ThreadCellBagItem"), Sort("ThreadCellBag"),
                         Seq(Terminal("ThreadCellBagItem"), Terminal("("), NonTerminal(Sort("ThreadCell")), Terminal(")")),
-                        Att().add("function").add("hook","BAG.element")),
+                        Att().add("function").add("hook","BAG.element").add("format", "%3")),
                 Production(KLabel("<thread>"), Sort("ThreadCell"),
                         Seq(Terminal("<thread>"), NonTerminal(Sort("KCell")), NonTerminal(Sort("OptCell")), Terminal("</thread>")),
                         Att().add("cell").add("cellName", "thread").add("multiplicity","*").add("format", "%1%i%n%2%n%3%d%n%4")),
