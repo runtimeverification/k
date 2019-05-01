@@ -1,6 +1,0 @@
-#!/bin/bash
-mkdir -p debian/kframework/usr/bin
-mkdir -p debian/kframework/usr/lib/kframework
-cp -R k-distribution/target/release/k/* debian/kframework/usr/lib/kframework
-cp k-distribution/src/main/scripts/distro-bin/* debian/kframework/usr/bin
-

@@ -9,6 +9,8 @@ import org.kframework.backend.java.kil.TermContext;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 public interface Substitution<K extends Term, V extends Term> extends Map<K, V> {
@@ -24,6 +26,14 @@ public interface Substitution<K extends Term, V extends Term> extends Map<K, V> 
             }
         }
         return result;
+    }
+
+    /**
+     * @return Intersection of this substitution and parameter substitution.
+     */
+    default Substitution<K, V> retainAll(Set<? extends K> keysToRetain) {
+        return ImmutableMapSubstitution.from(
+                keySet().stream().filter(keysToRetain::contains).collect(Collectors.toMap(key -> key, this::get)));
     }
 
     Substitution<K, V> minus(K key);

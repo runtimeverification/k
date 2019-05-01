@@ -309,18 +309,21 @@ public class GenerateSentencesFromConfigDecl {
 
         String klabel = "<" + cellName + ">";
         Att att = cellProperties.addAll(configAtt);
+
         StringBuilder format = new StringBuilder();
-        format.append("%1%i");
-        int i;
-        for (i = 2; i < 2 + childSorts.size(); i++) {
-            format.append("%n%").append(i);
+        if (!cellProperties.contains("format")) {
+            format.append("%1%i");
+            int i;
+            for (i = 2; i < 2 + childSorts.size(); i++) {
+                format.append("%n%").append(i);
+            }
+            format.append("%d%n%").append(i);
+            att = att.add("format", format.toString());
         }
-        format.append("%d%n%").append(i);
-        att = att.add("format", format.toString());
+
         // syntax Cell ::= "<cell>" Children... "</cell>" [cell, cellProperties, configDeclAttributes]
         if(!m.definedKLabels().contains(KLabel(klabel)) && multiplicity != Multiplicity.OPTIONAL) {
-            Production cellProduction = Production(KLabel(klabel), sort, immutable(items),
-                    att);
+            Production cellProduction = Production(KLabel(klabel), sort, immutable(items), att);
             sentences.add(cellProduction);
         }
 
@@ -436,13 +439,13 @@ public class GenerateSentencesFromConfigDecl {
                         NonTerminal(childSorts.get(0)),
                         Terminal(","),
                         NonTerminal(sort),
-                        Terminal(")")), Att().add(Attribute.HOOK_KEY, elementHook).add(Attribute.FUNCTION_KEY));
+                        Terminal(")")), Att().add(Attribute.HOOK_KEY, elementHook).add(Attribute.FUNCTION_KEY).add("format", "%5"));
             } else {
                 bagElement = Production(KLabel(bagSort.name() + "Item"), bagSort, Seq(
                         Terminal(bagSort.name() + "Item"),
                         Terminal("("),
                         NonTerminal(sort),
-                        Terminal(")")), Att().add(Attribute.HOOK_KEY, elementHook).add(Attribute.FUNCTION_KEY));
+                        Terminal(")")), Att().add(Attribute.HOOK_KEY, elementHook).add(Attribute.FUNCTION_KEY).add("format", "%3"));
             }
             Sentence bagUnit = Production(KLabel("." + bagSort.name()), bagSort, Seq(Terminal("." + bagSort.name())), Att().add(Attribute.HOOK_KEY, unitHook).add(Attribute.FUNCTION_KEY));
             Sentence bag = Production(KLabel("_" + bagSort + "_"), bagSort, Seq(NonTerminal(bagSort), NonTerminal(bagSort)),

@@ -1,0 +1,42 @@
+Main test suite, that doesn't target specific formula simplification scenarios
+==================================================
+
+Part 0. X (in term) = Y (in pattern) matching. Function evaluation for pattern RHS.
+==============
+01. inc(Y) in pattern LHS. Function with no side conditions.
+02. `requires Z ==Int incPos(Y)` - Function in requires, used in RHS. Does not affect matching.
+031. X = Y,   `mid Y => end incPos(Y)` - Function in pattern RHS.
+032. X = Y-1, `mid Y => end incPos(Y)` - Function in pattern RHS.
+033. X+1 = Y, `mid Y => end incPos(Y)` - Function in pattern RHS.
+
+Part 1. X (in term) = Y (in pattern) matching.
+==============
+11. inc(Y) in pattern LHS. Function with no side conditions. Evaluation required for planned matching.
+12. `requires Z ==Int incPos(Y)` - Function in requires, used in another cell in LHS.
+13. `requires Y ==Int incPos(Y) -Int 1` - Function in requires, used in LHS, same var as one matched in LHS.
+14. `<var> incPos(Y) +Int 1 </var>` - Function directly in another cell in LHS.
+15. `requires incPos(Y) ==Int Y +Int 1` - Function in requires that is not substitution.
+
+Part 2. X+1 (in term) = Y (in pattern) matching.
+==============
+21. `inc(Y)`` in pattern LHS. Function with no side conditions. Evaluation required for planned matching.
+22. `requires Z ==Int incPos(Y)` - Function in requires, used in another cell in LHS.
+23. `requires Y ==Int incPos(Y) -Int 1` - Function in requires, used in LHS, same var as one matched in LHS.
+24. `<var> incPos(Y) +Int 1 </var>` - Function directly in another cell in LHS.
+25. `requires incPos(Y) ==Int Y +Int 1` - Function in requires that is not substitution.
+
+Part 3. X (in term) = Y-1 (in pattern) matching.
+Not supported by kprove. Adding here just as documentation.
+==============
+32. `requires Z ==Int incPos(Y)` - Function in requires, used in another cell in LHS.
+33. `requires Y ==Int incPos(Y) -Int 1` - Function in requires, used in LHS, same var as one matched in LHS.
+34. `<var> incPos(Y) +Int 1 </var>` - Function directly in another cell in LHS.
+35. `requires incPos(Y) ==Int Y +Int 1` - Function in requires that is not substitution.
+
+Part 3 fails, because equality X = Y-1 cannot be used to evaluate incPos().
+    - It cannot be used as substitution, because X is a variable in implication LHS and RHS, and you cannot
+        apply a substitution from RHS to both LHS and RHS.
+    - It cannot be used as equality when evaluating side condition of incPos() either,
+        because you cannot use one part of not-yet-proved matching constraint to evaluate another part.
+    - This would pass, if incPos() would be translated to Z3 as smt-lemma.
+
