@@ -6,13 +6,10 @@ import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.inject.RequestScoped;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.ObjectStreamException;
@@ -55,7 +52,7 @@ public class BinaryLoader {
         try {
             //To protect from concurrent access to same file from another process
             out.getChannel().lock(); //Lock is released automatically when serializer is closed.
-            try (ObjectOutputStream serializer = new ObjectOutputStream(new BufferedOutputStream(out))) {
+            try (ObjectOutputStream serializer = new ObjectOutputStream(out)) { //already buffered
                 serializer.writeObject(o);
             }
         } finally {
@@ -63,11 +60,18 @@ public class BinaryLoader {
         }
     }
 
-    public Object loadSynchronized(InputStream in) throws IOException, ClassNotFoundException, InterruptedException {
+    public Object loadSynchronized(FileInputStream in)
+            throws IOException, ClassNotFoundException, InterruptedException {
+        //To protect from concurrent access from another thread
         lock.readLock().lockInterruptibly();
-        try (ObjectInputStream deserializer = new ObjectInputStream(in)) {
-            Object obj = deserializer.readObject();
-            return obj;
+        try {
+            //To protect from concurrent access to same file from another process
+            //Lock is released automatically when serializer is closed.
+            in.getChannel().lock(0L, Long.MAX_VALUE, true);
+            try (ObjectInputStream deserializer = new ObjectInputStream(in)) { //already buffered
+                Object obj = deserializer.readObject();
+                return obj;
+            }
         } finally {
             lock.readLock().unlock();
         }
@@ -81,12 +85,13 @@ public class BinaryLoader {
         }
     }
 
-    public <T> T load(Class<T> cls, InputStream in) throws IOException, ClassNotFoundException, InterruptedException {
+    public <T> T load(Class<T> cls, FileInputStream in)
+            throws IOException, ClassNotFoundException, InterruptedException {
         return cls.cast(loadSynchronized(in));
     }
 
     public <T> T loadOrDie(Class<T> cls, File fileName) {
-        try (InputStream in = new BufferedInputStream(new FileInputStream(fileName))) {
+        try (FileInputStream in = new FileInputStream(fileName)) {
             return loadOrDie(cls, in, fileName.getAbsolutePath());
         } catch (IOException e) {
             throw KEMException.criticalError("Could not read from " + fileName, e);
@@ -94,12 +99,12 @@ public class BinaryLoader {
     }
 
     public Object load(File fileName) throws IOException, ClassNotFoundException, InterruptedException {
-        try (InputStream in = new BufferedInputStream(new FileInputStream(fileName))) {
+        try (FileInputStream in = new FileInputStream(fileName)) {
             return loadSynchronized(in);
         }
     }
 
-    public <T> T loadOrDie(Class<T> cls, InputStream in, String fileName) {
+    public <T> T loadOrDie(Class<T> cls, FileInputStream in, String fileName) {
         try {
             return load(cls, in);
         } catch (ClassNotFoundException e) {
