@@ -11,6 +11,7 @@ import org.kframework.definition.Context;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.K;
+import org.kframework.kore.KAs;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.KRewrite;
@@ -303,6 +304,8 @@ public class AddParentCells {
         } else if (term instanceof KSequence) {
             return KSequence(((KSequence) term).stream()
                     .map(this::concretize).collect(Collectors.toList()));
+        } else if (term instanceof KAs) {
+            return KAs(concretize(((KAs)term).pattern()), ((KAs)term).alias(), term.att());
         } else {
             return term;
         }
