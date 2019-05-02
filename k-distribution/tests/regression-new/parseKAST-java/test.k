@@ -3,7 +3,10 @@ module TEST
   imports META
 
 syntax K ::= parseKAST(String)
+syntax K ::= "#noparse"
 
 rule parseKAST(S) => #parseKAST(S)
+// messages from different backend can be different so hide it
+rule #noParse(_) => #noparse
 
 endmodule

@@ -715,5 +715,5 @@ module META =
 struct
   let hook_parseKAST c _ _ _ _ = match c with
     | [String s] -> (try Lexer.parse_k s with
-      | _ -> [KApply0(parse_klabel("#noparse"))])
+      | e -> [KApply1(parse_klabel("#noParse"), [String (Printexc.to_string e)])])
 end

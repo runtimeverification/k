@@ -215,8 +215,8 @@ public class MetaK {
         try {
             return termContext.getKOREtoBackendKILConverter().convert(JavaBackend.convertKSeqToKApply(KoreParser.parse(kast.stringValue(), kast.getSource())));
         } catch (KEMException e) {
-            KLabelConstant klabel = KLabelConstant.of(KORE.KLabel("#noparse"), termContext.definition());
-            return KItem.of(klabel, KList.EMPTY, termContext.global());
+            KLabelConstant klabel = KLabelConstant.of(KORE.KLabel("#noParse"), termContext.definition());
+            return KItem.of(klabel, StringToken.of(e.getMessage()), termContext.global());
         }
     }
 
