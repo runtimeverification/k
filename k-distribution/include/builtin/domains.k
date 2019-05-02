@@ -864,6 +864,7 @@ module META
   imports STRING-SYNTAX
   // Takes as input a string and returns a K term
   syntax KItem ::= #parseKAST(String) [function, hook(META.parseKAST), poly(0)]
+  syntax IOError ::= "#noParse" "(" String ")" [klabel(#noParse), symbol]
 endmodule
 
 module K-IO
@@ -871,7 +872,7 @@ module K-IO
   imports STRING
   imports META
 
-  syntax IOError ::= "#EOF" [klabel(#EOF), symbol] | "#noparse" [klabel(#noparse), symbol] | #unknownIOError(Int) [symbol]
+  syntax IOError ::= "#EOF" [klabel(#EOF), symbol] | #unknownIOError(Int) [symbol]
                    | "#E2BIG" [klabel(#E2BIG), symbol]
                    | "#EACCES" [klabel(#EACCES), symbol]
                    | "#EAGAIN" [klabel(#EAGAIN), symbol]

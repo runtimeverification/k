@@ -61,6 +61,8 @@ public class BuiltinIOOperations {
         try {
             return StringToken.of(fs.get(term1.longValue()).read(term2.intValue()));
         } catch (IOException e) {
+            if (e.getMessage().equals("EOF"))
+                return StringToken.of("");
             return processIOException(e.getMessage(), termContext);
         }
     }
