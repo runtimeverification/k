@@ -23,6 +23,7 @@ import org.kframework.kore.Sort;
 import org.kframework.kore.TransformK;
 import org.kframework.kore.VisitK;
 import org.kframework.main.GlobalOptions;
+import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
@@ -112,10 +113,10 @@ public class ExpandMacros {
     }
 
     private int counter = 0;
-    KVariable newDotVariable() {
+    KVariable newDotVariable(Att att) {
         KVariable newLabel;
         do {
-            newLabel = KVariable("_" + (counter++), Att().add("anonymous"));
+            newLabel = KVariable("_" + (counter++), att.add("anonymous"));
         } while (vars.contains(newLabel));
         vars.add(newLabel);
         return newLabel;
@@ -183,7 +184,7 @@ public class ExpandMacros {
                                 public K apply(KVariable k) {
                                     K result = subst.get(k);
                                     if (result == null) {
-                                      result = newDotVariable();
+                                      result = newDotVariable(k.att());
                                       subst.put(k, result);
                                     }
                                     return result;
@@ -207,6 +208,20 @@ public class ExpandMacros {
         }
     }
 
+    private boolean hasPolyAtt(Production prod, int idx) {
+      if (!prod.att().contains("poly")) {
+        return false;
+      }
+      List<Set<Integer>> poly = RuleGrammarGenerator.computePositions(prod);
+      for (Set<Integer> positions : poly) {
+        if (positions.contains(0) && positions.contains(idx)) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+
     private Set<Sort> sort(K k, Rule r) {
         if (k instanceof KVariable) {
             return Collections.singleton(k.att().getOptional(Sort.class).orElse(null));
@@ -219,14 +234,19 @@ public class ExpandMacros {
            }
            Set<Production> prods = new HashSet<>(mutable(mod.productionsFor().apply(kapp.klabel())));
            prods.removeIf(p -> p.arity() != kapp.items().size());
+           Set<Sort> polySorts = new HashSet<>();
            for (int i = 0; i < kapp.items().size(); i++) {
               final int idx = i;
               Set<Sort> sorts = sort(kapp.items().get(idx), r);
+              if (prods.stream().anyMatch(p -> hasPolyAtt(p, idx))) {
+                  polySorts.addAll(sorts);
+              }
               if (!sorts.contains(null)) {
-                  prods.removeIf(p -> sorts.stream().noneMatch(s -> mod.subsorts().lessThanEq(s, p.nonterminal(idx).sort())));
+                  prods.removeIf(p -> !hasPolyAtt(p, idx) && sorts.stream().noneMatch(s -> mod.subsorts().lessThanEq(s, p.nonterminal(idx).sort())));
               }
            }
            Set<Sort> candidates = prods.stream().map(Production::sort).collect(Collectors.toSet());
+           candidates.addAll(polySorts);
            return candidates;
         } else if (k instanceof KSequence) {
             return Collections.singleton(Sorts.K());

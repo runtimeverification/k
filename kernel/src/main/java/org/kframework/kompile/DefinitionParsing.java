@@ -396,7 +396,7 @@ public class DefinitionParsing {
                 return Stream.of(parse.getParse());
             }
         }
-        result = parser.parseString(b.contents(), START_SYMBOL, scanner, source, startLine, startColumn, !b.att().contains("macro") && !b.att().contains("alias"));
+        result = parser.parseString(b.contents(), START_SYMBOL, scanner, source, startLine, startColumn, true);
         parsedBubbles.getAndIncrement();
         if (kem.options.warnings2errors && !result._2().isEmpty()) {
           for (KEMException err : result._2()) {
