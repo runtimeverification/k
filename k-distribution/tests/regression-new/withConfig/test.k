@@ -7,7 +7,7 @@ syntax KItem ::= foo(Int) [withConfig, function]
                | baz(Int) [withConfig, function]
 syntax Bool ::= isZero() [withConfig, function]
 
-configuration <k> $PGM:K </k> <bar> 0 </bar>
+configuration <k> $PGM:K </k> <stuff> <bar> 0 </bar> </stuff>
 
 rule [[ foo(I:Int) => baz(I) ]]
      <bar> I </bar>

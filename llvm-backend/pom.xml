@@ -55,11 +55,14 @@
                   <arg value="-DCMAKE_BUILD_TYPE=${project.build.type}" />
                   <arg value="${project.basedir}/src/main/native/llvm-backend" />
                 </exec>
+                <property environment="env"/>
                 <exec executable="make" dir="${project.build.directory}/build" failonerror="true">
                   <arg value="-j12" />
+		  <env key="PATH" value="${env.PATH}:${env.HOME}/.cargo/bin" />
                 </exec>
                 <exec executable="make" dir="${project.build.directory}/build" failonerror="true">
                   <arg value="install" />
+		  <env key="PATH" value="${env.PATH}:${env.HOME}/.cargo/bin" />
                 </exec>
               </target>
             </configuration>
