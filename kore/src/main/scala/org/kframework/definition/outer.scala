@@ -198,6 +198,13 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
   def isSort(klabel: KLabel, s: Sort) = subsorts.<(sortFor(klabel), s)
 
   lazy val rules: Set[Rule] = sentences collect { case r: Rule => r }
+  lazy val rulesFor: Map[KLabel, Set[Rule]] = rules.groupBy(r => {
+    r.body match {
+      case Unapply.KApply(s, _) => s
+      case Unapply.KRewrite(Unapply.KApply(s, _), _) => s
+      case _ => KORE.KLabel("")
+    }
+  })
   lazy val contexts: Set[Context] = sentences collect { case r: Context => r }
 
   lazy val localRules: Set[Rule] = localSentences collect { case r: Rule => r }
@@ -381,7 +388,7 @@ case class Production(klabel: Option[KLabel], sort: Sort, items: Seq[ProductionI
   lazy val klabelAtt: Option[String] = att.getOption("klabel").orElse(klabel.map(_.name))
 
   override def equals(that: Any) = that match {
-    case p@Production(`klabel`, `sort`, `items`, _) => this.klabelAtt == p.klabelAtt && this.att.getOption("poly") == p.att.getOption("poly") && this.att.getOption("function") == p.att.getOption("function")
+    case p@Production(`klabel`, `sort`, `items`, _) => this.klabelAtt == p.klabelAtt && this.att.getOption("poly") == p.att.getOption("poly") && this.att.getOption("function") == p.att.getOption("function") && this.att.getOption("withConfig") == p.att.getOption("withConfig")
     case _ => false
   }
 

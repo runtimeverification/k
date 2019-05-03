@@ -1,6 +1,7 @@
 // Copyright (c) 2015-2019 K Team. All Rights Reserved.
 package org.kframework.compile;
 
+import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.KLabels;
@@ -14,6 +15,7 @@ import org.kframework.definition.ProductionItem;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kil.Attribute;
+import org.kframework.kore.FoldK;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
@@ -211,6 +213,45 @@ public class ResolveFreshConstants {
         return prod;
     }
 
+    private Production resolveFunction(Production prod) {
+        if(!prod.att().contains(Attribute.FUNCTION_KEY)) {
+            return prod;
+        }
+        if (prod.klabel().isEmpty()) {
+            return prod;
+        }
+        for (Rule r : iterable(m.rulesFor().getOrElse(prod.klabel().get(), () -> Collections.<Rule>Set()))) {
+            FoldK<Boolean> hasFreshVar = new FoldK<Boolean>() {
+                @Override
+                public Boolean unit() {
+                    return false;
+                }
+    
+                @Override
+                public Boolean merge(Boolean a, Boolean b) {
+                    return a || b;
+                }
+    
+                @Override
+                public Boolean apply(KVariable k) {
+                    return k.name().startsWith("!");
+                }
+            };
+            if (hasFreshVar.apply(RewriteToTop.toRight(r.body())) || hasFreshVar.apply(r.requires()) || hasFreshVar.apply(r.ensures())) {
+                return Production(prod.klabel(), prod.sort(), prod.items(), prod.att().add("withConfig"));
+            }
+        }
+        return prod;
+    }
+
+    public Sentence resolveFunction(Module m, Sentence s) {
+        this.m = def.mainModule();
+        if (s instanceof Production) {
+            return resolveFunction((Production) s);
+        }
+        return s;
+    }
+
     private Sentence resolve(Sentence s) {
         if (s instanceof Rule) {
             return resolve((Rule) s);
@@ -247,6 +288,10 @@ public class ResolveFreshConstants {
                 Set<Sentence> newSentences = GenerateSentencesFromConfigDecl.gen(generatedTop, BooleanUtils.TRUE, Att.empty(), mod.getExtensionModule(), true);
                 sentences = (Set<Sentence>) sentences.$bar(newSentences);
             }
+            java.util.Set<Sentence> counterSentences = new HashSet<>();
+            counterSentences.add(Production(KLabel("getGeneratedCounterCell"), Sorts.GeneratedCounterCell(), Seq(Terminal("getGeneratedCounterCell"), Terminal("("), NonTerminal(Sorts.GeneratedTopCell()), Terminal(")")), Att.empty().add("function")));
+            counterSentences.add(Rule(KRewrite(KApply(KLabel("getGeneratedCounterCell"), IncompleteCellUtils.make(KLabels.GENERATED_TOP_CELL, true, KVariable("Cell", Att.empty().add(Sort.class, Sorts.GeneratedCounterCell())), true)), KVariable("Cell", Att.empty().add(Sort.class, Sorts.GeneratedCounterCell()))), BooleanUtils.TRUE, BooleanUtils.TRUE));
+            sentences = (Set<Sentence>) sentences.$bar(immutable(counterSentences));
         }
         if (kore && m.localKLabels().contains(KLabels.GENERATED_TOP_CELL)) {
             RuleGrammarGenerator gen = new RuleGrammarGenerator(def);
