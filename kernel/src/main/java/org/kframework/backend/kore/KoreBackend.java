@@ -123,10 +123,12 @@ public class KoreBackend implements Backend {
         DefinitionTransformer subsortKItem = DefinitionTransformer.from(Kompile::subsortKItem, "subsort all sorts to KItem");
         DefinitionTransformer expandMacros = DefinitionTransformer.fromSentenceTransformer((m, s) -> new ExpandMacros(m, files, kompileOptions, false).expand(s), "expand macros");
         Function1<Definition, Definition> resolveFreshConstants = d -> DefinitionTransformer.from(m -> GeneratedTopFormat.resolve(new ResolveFreshConstants(d, true).resolve(m)), "resolving !Var variables").apply(d);
+        Function1<Definition, Definition> resolveFreshConstantsInFunctions = d -> DefinitionTransformer.fromSentenceTransformer(new ResolveFreshConstants(d, true)::resolveFunction, "resolving !Var variables in functions").apply(d);
         DefinitionTransformer resolveConfigVar = DefinitionTransformer.fromSentenceTransformer(new ResolveFunctionWithConfig()::resolveConfigVar, "Adding configuration variable to lhs");
         Function1<Definition, Definition> resolveIO = (d -> Kompile.resolveIOStreams(kem, d));
 
         return def -> resolveIO
+                .andThen(resolveFreshConstantsInFunctions)
                 .andThen(resolveFunctionWithConfig)
                 .andThen(resolveFun)
                 .andThen(resolveStrict)
