@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.ObjectStreamException;
+import java.nio.channels.OverlappingFileLockException;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -67,7 +68,11 @@ public class BinaryLoader {
         try {
             //To protect from concurrent access to same file from another process
             //Lock is released automatically when serializer is closed.
-            in.getChannel().lock(0L, Long.MAX_VALUE, true);
+            try {
+                in.getChannel().lock(0L, Long.MAX_VALUE, true);
+            } catch (OverlappingFileLockException e) {
+                //We are in Nailgun mode. File lock is not needed.
+            }
             try (ObjectInputStream deserializer = new ObjectInputStream(in)) { //already buffered
                 Object obj = deserializer.readObject();
                 return obj;
