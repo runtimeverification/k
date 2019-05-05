@@ -52,7 +52,7 @@ searches: $(SEARCH_TESTS)
 strat: $(STRAT_TESTS)
 
 # run all tests and regenerate output files
-update-results: krun proofs
+update-results: all
 update-results: CHECK=>
 
 # run a single test. older versions of make run pattern rules in order, so
