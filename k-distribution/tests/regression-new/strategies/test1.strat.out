@@ -67,6 +67,7 @@ Strategy: ^ regular ; ^ c2a | a2b
   </k>
   <trace>
     ListItem ( ~ regular )
+    ListItem ( ~ a2b )
   </trace>
   <s>
     #STUCK ( )
