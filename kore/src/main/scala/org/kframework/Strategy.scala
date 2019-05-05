@@ -67,8 +67,8 @@ class Strategy(heatCool: Boolean) {
                     def makeRewrite(tag: String) =
                       KORE.KSequence(
                         KORE.KRewrite(
-                          KORE.KApply(KORE.KLabel("#applyRule"), KORE.KToken(tag, KORE.Sort("#RuleTag"))),
-                          KORE.KApply(KORE.KLabel("#appliedRule"), KORE.KToken(tag, KORE.Sort("#RuleTag")))),
+                          KORE.KApply(KORE.KLabel("#applyRule"), KORE.KToken(tag, KORE.Sort("RuleTag"))),
+                          KORE.KApply(KORE.KLabel("#appliedRule"), KORE.KToken(tag, KORE.Sort("RuleTag")))),
                         KORE.KVariable("SREST"))
 
                     val strategy =
