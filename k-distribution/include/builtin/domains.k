@@ -1422,7 +1422,7 @@ module STRATEGY-ABSTRACT
  // ----------------------------------------------------------
     rule #catchSTUCK(S) => #catchSTUCKorElse(S, .Strategy)
 
-    // rule <s> #STUCK() ~> (S:Strategy => .) ... </s>
+    rule <s> #STUCK() ~> (S:Strategy => .) ... </s>
 
     rule <s> #catchSTUCKorElse(_, S') => S' ... </s>
     rule <s> #STUCK() ~> #catchSTUCKorElse(S, _) => S ... </s>
@@ -1434,9 +1434,8 @@ module STRATEGY-ABSTRACT
     syntax RuleTag ::= RuleTag "|" RuleTag [left, klabel(#alternateRule)]
  // ---------------------------------------------------------------------
     rule <s> ^ RT:RuleTag | RT':RuleTag => ^ RT ~> #catchSTUCK(^ RT') ... </s>
-    // rule <s> #applyRule(#alternateRule(RT, RT')) => #applyRule(RT) ~> #catchSTUCK(#applyRule(RT')) ... </s>
 
     syntax RuleTag ::= RuleTag "*" [klabel(#repeatRule)]
  // ----------------------------------------------------
-    rule <s> #applyRule(#repeatRule(RT)) => #applyRule(RT) ~> #catchSTUCKorElse(.Strategy, #applyRule(#repeatRule(RT))) ... </s>
+    rule <s> ^ RT:RuleTag * => ^ RT ~> #catchSTUCKorElse(.Strategy, ^ RT *) ... </s>
 endmodule
