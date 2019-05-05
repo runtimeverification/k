@@ -85,7 +85,9 @@ ifeq ($(TESTDIR),$(RESULTDIR))
 	      echo                                                                                    ; \
 	      echo "Strategy: $${strat_line}"                                                         ; \
 	      echo "================================================================================" ; \
-	      $(KRUN) $@.input $(KRUN_FLAGS) $(DEBUG) -d $(DEFDIR) -cSTRATEGY="$${strat_line}"        ; \
+	      ( set -x                                                                                ; \
+	        $(KRUN) $@.input $(KRUN_FLAGS) $(DEBUG) -d $(DEFDIR) -cSTRATEGY="$${strat_line}"      ; \
+	      )                                                                                       ; \
 	  done                                                                                        ; \
 	) < $@ $(CHECK) $@.out
 else
@@ -93,7 +95,9 @@ else
 	      echo                                                                                    ; \
 	      echo "Strategy: $${strat_line}"                                                         ; \
 	      echo "================================================================================" ; \
-	      $(KRUN) $@.input $(KRUN_FLAGS) $(DEBUG) -d $(DEFDIR) -cSTRATEGY="$${strat_line}"        ; \
+	      ( set -x                                                                                ; \
+	        $(KRUN) $@.input $(KRUN_FLAGS) $(DEBUG) -d $(DEFDIR) -cSTRATEGY="$${strat_line}"      ; \
+	      )                                                                                       ; \
 	  done                                                                                        ; \
 	) < $@ $(CHECK) $(RESULT_DIR)/$(notdir $@).out
 endif
