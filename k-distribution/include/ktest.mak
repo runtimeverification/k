@@ -81,25 +81,9 @@ endif
 
 %.strat: kompile
 ifeq ($(TESTDIR),$(RESULTDIR))
-	( while read strat_line ; do                                                                    \
-	      echo                                                                                    ; \
-	      echo "Strategy: $${strat_line}"                                                         ; \
-	      echo "================================================================================" ; \
-	      ( set -x                                                                                ; \
-	        $(KRUN) $@.input $(KRUN_FLAGS) $(DEBUG) -d $(DEFDIR) -cSTRATEGY="$${strat_line}"      ; \
-	      )                                                                                       ; \
-	  done                                                                                        ; \
-	) < $@ $(CHECK) $@.out
+	$(KRUN) $@.input $(KRUN_FLAGS) $(DEBUG) -d $(DEFDIR) -cSTRATEGY="$(shell cat $@)" $(CHECK) $@.out
 else
-	( while read strat_line ; do                                                                    \
-	      echo                                                                                    ; \
-	      echo "Strategy: $${strat_line}"                                                         ; \
-	      echo "================================================================================" ; \
-	      ( set -x                                                                                ; \
-	        $(KRUN) $@.input $(KRUN_FLAGS) $(DEBUG) -d $(DEFDIR) -cSTRATEGY="$${strat_line}"      ; \
-	      )                                                                                       ; \
-	  done                                                                                        ; \
-	) < $@ $(CHECK) $(RESULT_DIR)/$(notdir $@).out
+	$(KRUN) $@.input $(KRUN_FLAGS) $(DEBUG) -d $(DEFDIR) -cSTRATEGY="$(shell cat $@)" $(CHECK) $(RESULT_DIR)/$(notdir $@).out
 endif
 
 clean:
