@@ -23,6 +23,10 @@ public class OuterParsingOptions implements Serializable {
     @Inject
     public OuterParsingOptions(Void v) {}
 
+    public OuterParsingOptions(File mainDefinitionFile) {
+      this.mainDefinitionFile = mainDefinitionFile;
+    }
+
     @Parameter(description="<file>")
     private List<String> parameters;
 
