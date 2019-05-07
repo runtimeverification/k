@@ -1,3 +1,8 @@
-<k>
-  2 ~> test ( foo )
-</k>
+<generatedTop>
+  <k>
+    2 ~> test ( foo )
+  </k>
+  <c>
+    0
+  </c>
+</generatedTop>

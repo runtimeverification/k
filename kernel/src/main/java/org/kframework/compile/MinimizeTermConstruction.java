@@ -100,6 +100,9 @@ public class MinimizeTermConstruction {
 
             @Override
             public void apply(KApply k) {
+                if (k.klabel().equals(KLabels.ML_OR)) {
+                  return;
+                }
                 String hook = module.attributesFor().get(k.klabel()).getOrElse(() -> Att.empty()).getOptional("hook").orElse("");
                 if (hook.equals("SET.element")
                         || hook.equals("LIST.element")

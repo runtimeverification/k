@@ -75,24 +75,6 @@ public class AddSortInjections {
     }
 
     public K addInjections(K term) {
-        if (new FoldK<Boolean>() {
-            @Override
-            public Boolean unit() {
-                return false;
-            }
-
-            @Override
-            public Boolean apply(KRewrite k) {
-                return true;
-            }
-
-            @Override
-            public Boolean merge(Boolean a, Boolean b) {
-                return a || b;
-            }
-        }.apply(term)) {
-            term = KRewrite(RewriteToTop.toLeft(term), RewriteToTop.toRight(term));
-        }
         Sort topSort = sort(term, Sorts.K());
         K result = addSortInjections(term, topSort);
         return result;
@@ -110,6 +92,24 @@ public class AddSortInjections {
     }
 
     private K addTopSortInjections(K body) {
+        if (new FoldK<Boolean>() {
+            @Override
+            public Boolean unit() {
+                return false;
+            }
+
+            @Override
+            public Boolean apply(KRewrite k) {
+                return true;
+            }
+
+            @Override
+            public Boolean merge(Boolean a, Boolean b) {
+                return a || b;
+            }
+        }.apply(body)) {
+            body = KRewrite(RewriteToTop.toLeft(body), RewriteToTop.toRight(body));
+        }
         Sort sort = sort(body, null);
         if (sort == null) sort = freshSortParam();
         return internalAddSortInjections(body, sort);
