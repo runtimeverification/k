@@ -25,6 +25,8 @@ public class Attribute<T> extends ASTNode {
     public static final String PROJECTION_KEY = "proj";
     public static final String UNIT_KEY = "unit";
     public static final String PREDICATE_KEY = "predicate";
+    public static final String KORE_KEY = "kore";
+    public static final String ML_BINDER_KEY = "mlBinder";
     public static final String ANYWHERE_KEY = Constants.ANYWHERE;
     public static final String PATTERN_KEY = "pattern";
     public static final String PATTERN_FOLDING_KEY = "pattern-folding";

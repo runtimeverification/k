@@ -87,17 +87,15 @@ public class KoreBackend implements Backend {
     }
 
     protected String getKompiledString(CompiledDefinition def) {
-        return getKompiledString(def.kompiledDefinition.mainModule(), def.topCellInitializer, files, heatCoolEquations);
+        Module mainModule = getKompiledModule(def.kompiledDefinition.mainModule());
+        ModuleToKORE converter = new ModuleToKORE(mainModule, files, def.topCellInitializer);
+        return getKompiledString(converter, files, heatCoolEquations);
     }
 
-    public static String getKompiledString(Module mainModule, KLabel topCellInitializer, FileUtil files, boolean heatCoolEquations) {
-        mainModule = new GenerateSortPredicateRules(true).gen(mainModule);
-        mainModule = ModuleTransformer.fromSentenceTransformer(new AddSortInjections(mainModule)::addInjections, "Add sort injections").apply(mainModule);
-        mainModule = ModuleTransformer.fromSentenceTransformer(new MinimizeTermConstruction(mainModule)::resolve, "Minimize term construction").apply(mainModule);
-        ModuleToKORE moduleToKORE = new ModuleToKORE(mainModule, files, topCellInitializer);
-        String kompiledString = moduleToKORE.convert(heatCoolEquations);
+    public static String getKompiledString(ModuleToKORE converter, FileUtil files, boolean heatCoolEquations) {
+        String kompiledString = converter.convert(heatCoolEquations);
         Properties koreToKLabels = new Properties();
-        koreToKLabels.putAll(moduleToKORE.getKToKoreLabelMap().inverse());
+        koreToKLabels.putAll(converter.getKToKoreLabelMap().inverse());
         try {
             FileOutputStream output = new FileOutputStream(files.resolveKompiled("kore_to_k_labels.properties"));
             koreToKLabels.store(output, "Properties file containing the mapping from kore to k labels");
@@ -106,6 +104,13 @@ public class KoreBackend implements Backend {
             throw KEMException.criticalError("Error while saving kore to K labels map", e);
         }
         return kompiledString;
+    }
+
+    public static Module getKompiledModule(Module mainModule) {
+        mainModule = new GenerateSortPredicateRules(true).gen(mainModule);
+        mainModule = ModuleTransformer.fromSentenceTransformer(new AddSortInjections(mainModule)::addInjections, "Add sort injections").apply(mainModule);
+        mainModule = ModuleTransformer.fromSentenceTransformer(new MinimizeTermConstruction(mainModule)::resolve, "Minimize term construction").apply(mainModule);
+        return mainModule;
     }
 
     @Override
