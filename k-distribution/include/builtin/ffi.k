@@ -22,7 +22,7 @@ module FFI-SYNTAX
                   | "#ulong" [klabel(#ulong), symbol]
                   | "#slong" [klabel(#slong), symbol]
                   | "#longdouble" [klabel(#longdouble), symbol]
-                  | "#struct" [klabel(#struct), symbol]
+                  | "#struct" "(" List ")" [klabel(#struct), symbol]
 
 endmodule
 
