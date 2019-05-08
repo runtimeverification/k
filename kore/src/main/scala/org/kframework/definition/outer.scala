@@ -388,7 +388,7 @@ case class Production(klabel: Option[KLabel], sort: Sort, items: Seq[ProductionI
   lazy val klabelAtt: Option[String] = att.getOption("klabel").orElse(klabel.map(_.name))
 
   override def equals(that: Any) = that match {
-    case p@Production(`klabel`, `sort`, `items`, _) => this.klabelAtt == p.klabelAtt && this.att.getOption("poly") == p.att.getOption("poly") && this.att.getOption("function") == p.att.getOption("function") && this.att.getOption("withConfig") == p.att.getOption("withConfig")
+    case p@Production(`klabel`, `sort`, `items`, _) => this.klabelAtt == p.klabelAtt && this.att.getOption("poly") == p.att.getOption("poly") && this.att.getOption("function") == p.att.getOption("function")
     case _ => false
   }
 

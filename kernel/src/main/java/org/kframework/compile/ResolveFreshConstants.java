@@ -213,45 +213,6 @@ public class ResolveFreshConstants {
         return prod;
     }
 
-    private Production resolveFunction(Production prod) {
-        if(!prod.att().contains(Attribute.FUNCTION_KEY)) {
-            return prod;
-        }
-        if (prod.klabel().isEmpty()) {
-            return prod;
-        }
-        for (Rule r : iterable(m.rulesFor().getOrElse(prod.klabel().get(), () -> Collections.<Rule>Set()))) {
-            FoldK<Boolean> hasFreshVar = new FoldK<Boolean>() {
-                @Override
-                public Boolean unit() {
-                    return false;
-                }
-    
-                @Override
-                public Boolean merge(Boolean a, Boolean b) {
-                    return a || b;
-                }
-    
-                @Override
-                public Boolean apply(KVariable k) {
-                    return k.name().startsWith("!");
-                }
-            };
-            if (hasFreshVar.apply(RewriteToTop.toRight(r.body())) || hasFreshVar.apply(r.requires()) || hasFreshVar.apply(r.ensures())) {
-                return Production(prod.klabel(), prod.sort(), prod.items(), prod.att().add("withConfig"));
-            }
-        }
-        return prod;
-    }
-
-    public Sentence resolveFunction(Module m, Sentence s) {
-        this.m = def.mainModule();
-        if (s instanceof Production) {
-            return resolveFunction((Production) s);
-        }
-        return s;
-    }
-
     private Sentence resolve(Sentence s) {
         if (s instanceof Rule) {
             return resolve((Rule) s);

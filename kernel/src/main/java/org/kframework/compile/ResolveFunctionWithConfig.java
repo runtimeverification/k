@@ -7,6 +7,7 @@ import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Context;
+import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.definition.Production;
 import org.kframework.definition.ProductionItem;
@@ -42,6 +43,16 @@ import static org.kframework.kore.KORE.*;
 
 public class ResolveFunctionWithConfig {
 
+    private Set<KLabel> withConfigFunctions = new HashSet<>();
+
+    public ResolveFunctionWithConfig(Definition d) {
+      Module mod = d.mainModule();
+      ComputeTransitiveFunctionDependencies deps = new ComputeTransitiveFunctionDependencies(mod);
+      Set<KLabel> functions = stream(mod.productions()).filter(p -> p.att().contains(Attribute.FUNCTION_KEY)).map(p -> p.klabel().get()).collect(Collectors.toSet());
+      withConfigFunctions.addAll(functions.stream().filter(f -> stream(mod.rulesFor().getOrElse(f, () -> Collections.<Rule>Set())).anyMatch(r -> r.body() instanceof KApply && ((KApply)r.body()).klabel().name().equals("#withConfig"))).collect(Collectors.toSet()));
+      withConfigFunctions.addAll(deps.ancestors(withConfigFunctions));
+    }
+
     private Rule resolve(Rule rule, Module m) {
         return new Rule(
                 transform(resolve(rule.body(), m), m),
@@ -66,7 +77,7 @@ public class ResolveFunctionWithConfig {
           if (!kapp.items().isEmpty() && kapp.items().get(kapp.items().size() - 1).att().contains("withConfig")) {
             return super.apply(kapp);
           }
-          if (module.attributesFor().get(kapp.klabel()).getOrElse(() -> Att()).contains("withConfig")) {
+          if (withConfigFunctions.contains(kapp.klabel())) {
             return KApply(kapp.klabel(), KList(Stream.concat(kapp.items().stream().map(this::apply), Stream.of(CONFIG_VAR)).collect(Collections.toList())), kapp.att());
           }
           return super.apply(kapp);
@@ -117,7 +128,7 @@ public class ResolveFunctionWithConfig {
     }
 
     private Production resolve(Production prod) {
-        if (prod.att().contains("withConfig")) {
+        if (prod.klabel().isDefined() && withConfigFunctions.contains(prod.klabel().get())) {
             List<ProductionItem> pis = Stream.concat(stream(prod.items()), Stream.of(NonTerminal(Sorts.GeneratedTopCell()))).collect(Collections.toList());
             return Production(prod.klabel(), prod.sort(), pis, prod.att());
         }
