@@ -49,8 +49,34 @@ public class ResolveFunctionWithConfig {
       Module mod = d.mainModule();
       ComputeTransitiveFunctionDependencies deps = new ComputeTransitiveFunctionDependencies(mod);
       Set<KLabel> functions = stream(mod.productions()).filter(p -> p.att().contains(Attribute.FUNCTION_KEY)).map(p -> p.klabel().get()).collect(Collectors.toSet());
-      withConfigFunctions.addAll(functions.stream().filter(f -> stream(mod.rulesFor().getOrElse(f, () -> Collections.<Rule>Set())).anyMatch(r -> r.body() instanceof KApply && ((KApply)r.body()).klabel().name().equals("#withConfig"))).collect(Collectors.toSet()));
+      withConfigFunctions.addAll(functions.stream().filter(f -> stream(mod.rulesFor().getOrElse(f, () -> Collections.<Rule>Set())).anyMatch(r -> ruleNeedsConfig(r))).collect(Collectors.toSet()));
       withConfigFunctions.addAll(deps.ancestors(withConfigFunctions));
+    }
+
+    private boolean ruleNeedsConfig(Rule r) {
+        if (r.body() instanceof KApply && ((KApply)r.body()).klabel().name().equals("#withConfig")) {
+            return true;
+        }
+        FoldK<Boolean> hasFreshVar = new FoldK<Boolean>() {
+            @Override
+            public Boolean unit() {
+                return false;
+            }
+
+            @Override
+            public Boolean merge(Boolean a, Boolean b) {
+                return a || b;
+            }
+
+            @Override
+            public Boolean apply(KVariable k) {
+                return k.name().startsWith("!");
+            }
+        };
+        if (hasFreshVar.apply(RewriteToTop.toRight(r.body())) || hasFreshVar.apply(r.requires()) || hasFreshVar.apply(r.ensures())) {
+            return true;
+        }
+        return false;
     }
 
     private Rule resolve(Rule rule, Module m) {
