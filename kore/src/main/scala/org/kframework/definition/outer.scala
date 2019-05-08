@@ -200,6 +200,8 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
   lazy val rules: Set[Rule] = sentences collect { case r: Rule => r }
   lazy val rulesFor: Map[KLabel, Set[Rule]] = rules.groupBy(r => {
     r.body match {
+      case Unapply.KApply(Unapply.KLabel("#withConfig"), Unapply.KApply(s, _) :: _) => s
+      case Unapply.KApply(Unapply.KLabel("#withConfig"), Unapply.KRewrite(Unapply.KApply(s, _), _) :: _) => s
       case Unapply.KApply(s, _) => s
       case Unapply.KRewrite(Unapply.KApply(s, _), _) => s
       case _ => KORE.KLabel("")
