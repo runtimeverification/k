@@ -240,11 +240,12 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
 
             @Override
             public K prove(Module rules, Rule boundaryPattern) {
-                String kompiledModule = KoreBackend.getKompiledString(module, def.topCellInitializer, files, false);
-                files.saveToTemp("vdefinition.kore", kompiledModule);
+                Module kompiledModule = KoreBackend.getKompiledModule(module);
+                ModuleToKORE converter = new ModuleToKORE(kompiledModule, files, def.topCellInitializer);
+                String kompiledString = KoreBackend.getKompiledString(converter, files, false);
+                files.saveToTemp("vdefinition.kore", kompiledString);
 
-                ModuleToKORE rulesConverter = new ModuleToKORE(rules, files, def.topCellInitializer);
-                String koreOutput = rulesConverter.convertSpecificationModule(module, rules,
+                String koreOutput = converter.convertSpecificationModule(module, rules,
                         haskellKRunOptions.allPathReachability);
                 files.saveToTemp("spec.kore", koreOutput);
                 String defPath = files.resolveTemp("vdefinition.kore").getAbsolutePath();

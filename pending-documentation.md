@@ -119,10 +119,10 @@ Here any of foo, bar, or baz will match this rule. Note that the behavior is ill
 
 ## Matching global context in function rules
 
-On occasion it is highly desirable to be able to look up information from the global configuration and match against it when evaluating a function. For this purpose, we introduce the `withConfig` attribute on function productions. This attribute allows the user to match on *function context* from within a function rule:
+On occasion it is highly desirable to be able to look up information from the global configuration and match against it when evaluating a function. For this purpose, we introduce a new syntax for function rules. This syntax allows the user to match on *function context* from within a function rule:
 
 ```
-syntax Int ::= foo(Int) [function, withConfig]
+syntax Int ::= foo(Int) [function]
 
 rule [[ foo(0) => I ]]
      <bar> I </bar>
@@ -135,7 +135,7 @@ This is completely desugared by the K frontend and does not require any special 
 Desugared code:
 
 ```
-syntax Int ::= foo(Int, GeneratedTopCell) [function, withConfig]
+syntax Int ::= foo(Int, GeneratedTopCell) [function]
 
 rule foo(0, <generatedTop>... <bar> I </bar> ...</generatedTop> #as Configuration) => I
 rule <generatedTop>... <k> something ...</k> ...</generatedTop> #as Configuration => <generatedTop>... <k> foo(0, Configuration> ...</k> ...</generatedTop>
