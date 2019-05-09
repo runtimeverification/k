@@ -2,7 +2,6 @@
 package org.kframework.backend.haskell;
 
 import com.google.inject.Inject;
-import org.kframework.RewriterResult;
 import org.kframework.attributes.Att;
 import org.kframework.backend.kore.KoreBackend;
 import org.kframework.backend.kore.ModuleToKORE;
@@ -21,11 +20,13 @@ import org.kframework.kore.Sort;
 import org.kframework.kprove.KProveOptions;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.RunProcess;
+import org.kframework.main.GlobalOptions;
 import org.kframework.main.Main;
-import org.kframework.parser.kore.Pattern;
 import org.kframework.parser.kore.parser.KoreToK;
 import org.kframework.parser.kore.parser.ParseError;
 import org.kframework.parser.kore.parser.TextToKore;
+import org.kframework.parser.kore.Pattern;
+import org.kframework.RewriterResult;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.rewriter.SearchType;
 import org.kframework.unparser.OutputModes;
@@ -35,6 +36,7 @@ import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.DefinitionScoped;
 import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.StringUtil;
+
 import scala.Tuple2;
 
 import java.io.File;
@@ -55,6 +57,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
 
     private final FileUtil files;
     private final CompiledDefinition def;
+    private final GlobalOptions globalOptions;
     private final KRunOptions krunOptions;
     private final KompileOptions kompileOptions;
     private final KExceptionManager kem;
@@ -66,6 +69,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
     public HaskellRewriter(
             FileUtil files,
             CompiledDefinition def,
+            GlobalOptions globalOptions,
             KRunOptions krunOptions,
             KompileOptions kompileOptions,
             KProveOptions kProveOptions,
@@ -78,6 +82,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
         this.kem = kem;
         this.haskellKRunOptions = haskellKRunOptions;
         this.krunOptions = krunOptions;
+        this.globalOptions = globalOptions;
         this.kompileOptions = kompileOptions;
         this.kProveOptions = kProveOptions;
         this.idsToLabels = init.serialized;
@@ -282,7 +287,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                     krunOptions.print.output = OutputModes.NONE;
                     return boundaryPattern.body();
                 }
-                if (krunOptions.global.verbose) {
+                if (globalOptions.verbose) {
                     System.err.println("Executing " + args);
                 }
                 try {
@@ -329,7 +334,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
      * @throws InterruptedException
      */
     private int executeCommandBasic(File workingDir, String... command) throws IOException, InterruptedException {
-        if (krunOptions.global.verbose) {
+        if (globalOptions.verbose) {
             System.err.println("Executing command: " + String.join(" ", Arrays.asList(command)));
         }
         int exit;
