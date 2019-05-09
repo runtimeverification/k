@@ -301,12 +301,13 @@ public class AddSortInjections {
 
     private Sort lub(Collection<Sort> entries, Sort expectedSort, HasLocation loc) {
         assert !entries.isEmpty();
+        entries = new HashSet<>(entries);
         Collection<Sort> filteredEntries = entries.stream().filter(s -> !s.name().equals(SORTPARAM_NAME)).collect(Collectors.toList());
         if (filteredEntries.isEmpty()) { // if all sorts are parameters, take the first
             return entries.iterator().next();
         }
         Set<Sort> bounds = upperBounds(filteredEntries);
-        if (expectedSort != null && !expectedSort.name().equals(SORTPARAM_NAME) && !expectedSort.equals(Sorts.KItem())) {
+        if (expectedSort != null && !expectedSort.name().equals(SORTPARAM_NAME) && !expectedSort.equals(Sorts.KItem()) && !expectedSort.equals(Sorts.K())) {
             bounds.removeIf(s -> !mod.subsorts().lessThanEq(s, expectedSort));
         }
         Set<Sort> lub = mod.subsorts().minimal(bounds);
