@@ -18,7 +18,6 @@ import org.kframework.kore.KORE;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
 import org.kframework.kprove.KProveOptions;
-import org.kframework.krun.KRunOptions;
 import org.kframework.krun.RunProcess;
 import org.kframework.main.GlobalOptions;
 import org.kframework.main.Main;
@@ -59,7 +58,6 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
 
     private final GlobalOptions globalOptions;
     private final SMTOptions smtOptions;
-    private final KRunOptions krunOptions;
     private final KompileOptions kompileOptions;
     private final KProveOptions kProveOptions;
     private final HaskellKRunOptions haskellKRunOptions;
@@ -73,7 +71,6 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
     public HaskellRewriter(
             GlobalOptions globalOptions,
             SMTOptions smtOptions,
-            KRunOptions krunOptions,
             KompileOptions kompileOptions,
             KProveOptions kProveOptions,
             InitializeDefinition init,
@@ -86,7 +83,6 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
         this.globalOptions = globalOptions;
         this.smtOptions = smtOptions;
         this.haskellKRunOptions = haskellKRunOptions;
-        this.krunOptions = krunOptions;
         this.kompileOptions = kompileOptions;
         this.kProveOptions = kProveOptions;
         this.files = files;
