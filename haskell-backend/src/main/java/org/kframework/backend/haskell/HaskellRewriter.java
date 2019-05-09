@@ -122,7 +122,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                         "--output", koreOutputFile.getAbsolutePath()));
                 if (depth.isPresent()) {
                     args.add("--depth");
-                    args.add(depth.toString());
+                    args.add(Integer.toString(depth.get()));
                 }
                 if (smtOptions.smtPrelude != null) {
                     args.add("--smt-prelude");
