@@ -282,7 +282,9 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                     options.print.output = OutputModes.NONE;
                     return boundaryPattern.body();
                 }
-                System.out.println("Executing " + args);
+                if (options.global.verbose) {
+                    System.err.println("Executing " + args);
+                }
                 try {
                     File korePath = koreDirectory == null ? null : new File(koreDirectory);
                     if (executeCommandBasic(korePath, koreCommand) != 0) {
@@ -327,7 +329,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
      * @throws InterruptedException
      */
     private int executeCommandBasic(File workingDir, String... command) throws IOException, InterruptedException {
-        if (options.global.debug()) {
+        if (options.global.verbose) {
             System.err.println("Executing command: " + String.join(" ", Arrays.asList(command)));
         }
         int exit;
