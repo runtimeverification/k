@@ -846,6 +846,10 @@ module K-REFLECTION
   // undefined
   syntax List ::= #argv() [function, hook(KREFLECTION.argv)]
 
+  // Takes as input a string and returns a K term
+  syntax KItem ::= #parseKAST(String) [function, hook(KREFLECTION.parseKAST), poly(0)]
+  syntax IOError ::= "#noParse" "(" String ")" [klabel(#noParse), symbol]
+
 endmodule
 
 module K-REFLECTION-SYMBOLIC [symbolic]
@@ -860,17 +864,10 @@ module K-REFLECTION-SYMBOLIC [symbolic]
   syntax Bool ::= #isVariable(K) [function, hook(KREFLECTION.isVariable)]
 endmodule
 
-module META
-  imports STRING-SYNTAX
-  // Takes as input a string and returns a K term
-  syntax KItem ::= #parseKAST(String) [function, hook(META.parseKAST), poly(0)]
-  syntax IOError ::= "#noParse" "(" String ")" [klabel(#noParse), symbol]
-endmodule
-
 module K-IO
   imports LIST
   imports STRING
-  imports META
+  imports K-REFLECTION
 
   syntax IOError ::= "#EOF" [klabel(#EOF), symbol] | #unknownIOError(Int) [symbol]
                    | "#E2BIG" [klabel(#E2BIG), symbol]
@@ -1007,7 +1004,7 @@ endmodule
 
 module STDIN-STREAM
   imports K-IO
-  imports META
+  imports K-REFLECTION
 
   syntax Stream ::= #istream(Int)
   syntax Stream ::= #parseInput(String, String)

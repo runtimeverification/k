@@ -1,6 +1,6 @@
 // Copyright (c) 2013-2019 K Team. All Rights Reserved.
 module TEST
-  imports META
+  imports K-REFLECTION
 
 syntax K ::= parseKAST(String)
 syntax K ::= "#noparse"
