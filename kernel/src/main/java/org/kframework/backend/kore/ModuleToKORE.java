@@ -23,6 +23,7 @@ import org.kframework.definition.ProductionItem;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kil.Attribute;
+import org.kframework.kil.Attributes;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kore.InjectedKLabel;
 import org.kframework.kore.K;
@@ -68,6 +69,7 @@ public class ModuleToKORE {
     private final Set<String> impureFunctions = new HashSet<>();
     private final Map<String, List<Set<Integer>>> polyKLabels = new HashMap<>();
     private final KLabel topCellInitializer;
+    private final Set<String> mlBinders = new HashSet<>();
 
     public ModuleToKORE(Module module, FileUtil files, KLabel topCellInitializer) {
         this.module = module;
@@ -544,6 +546,7 @@ public class ModuleToKORE {
     }
 
     public String convertSpecificationModule(Module definition, Module spec, boolean allPathReachability) {
+        sb.setLength(0); // reset string writer
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(definition);
         Sort topCell = configInfo.getRootCell();
         sb.append("[]\n");
@@ -574,6 +577,7 @@ public class ModuleToKORE {
         ConstructorChecks constructorChecks = new ConstructorChecks(module);
         boolean equation = false;
         boolean owise = false;
+        boolean kore = rule.att().contains(Attribute.KORE_KEY);
         Production production = null;
         Sort productionSort = null;
         List<Sort> productionSorts = null;
@@ -582,14 +586,14 @@ public class ModuleToKORE {
         K left = RewriteToTop.toLeft(rule.body());
         boolean constructorBased = constructorChecks.isConstructorBased(left);
         if (left instanceof KApply) {
-            production = production((KApply)left, true);
+            production = production((KApply) left, true);
             productionSort = production.sort();
             productionSorts = stream(production.items())
                     .filter(i -> i instanceof NonTerminal)
                     .map(i -> (NonTerminal) i)
                     .map(NonTerminal::sort).collect(Collectors.toList());
             productionLabel = production.klabel().get();
-            if (isFunction(production) || rule.att().contains(Attribute.ANYWHERE_KEY)) {
+            if (isFunction(production) || rule.att().contains(Attribute.ANYWHERE_KEY) && !kore) {
                 leftChildren = ((KApply) left).items();
                 equation = true;
             } else if ((rule.att().contains("heat") || rule.att().contains("cool")) && heatCoolEq) {
@@ -638,8 +642,8 @@ public class ModuleToKORE {
                     K notMatchingLeft = RewriteToTop.toLeft(notMatching.body());
                     assert notMatchingLeft instanceof KApply : "expecting KApply but got " + notMatchingLeft.getClass();
                     List<K> notMatchingChildren = ((KApply) notMatchingLeft).items();
-                    assert  notMatchingChildren.size() == leftChildren.size() : "assuming function with fixed arity";
-                    for (int childIdx = 0; childIdx < leftChildren.size(); childIdx ++) {
+                    assert notMatchingChildren.size() == leftChildren.size() : "assuming function with fixed arity";
+                    for (int childIdx = 0; childIdx < leftChildren.size(); childIdx++) {
                         sb.append("\\and{R} (");
                         sb.append("\n                ");
                         sb.append("\\ceil{");
@@ -657,7 +661,7 @@ public class ModuleToKORE {
                     }
                     sb.append("\n                \\top{R} ()");
                     sb.append("\n              ");
-                    for (int childIdx = 0; childIdx < leftChildren.size(); childIdx ++) {
+                    for (int childIdx = 0; childIdx < leftChildren.size(); childIdx++) {
                         sb.append(')');
                     }
                     sb.append("\n          )");
@@ -704,6 +708,16 @@ public class ModuleToKORE {
                 convert(consideredAttributes, rule.att());
                 sb.append("\n\n");
             }
+        } else if (kore) {
+            if (rulesAsClaims) {
+                sb.append("  claim{} ");
+            } else {
+                sb.append("  axiom{} ");
+            }
+            convert(left);
+            sb.append("\n  ");
+            convert(consideredAttributes, rule.att());
+            sb.append("\n\n");
         } else if (!rule.att().contains(Attribute.MACRO_KEY) && !rule.att().contains(Attribute.ALIAS_KEY)) {
             if (rulesAsClaims) {
                 sb.append("  claim{} ");
@@ -921,7 +935,11 @@ public class ModuleToKORE {
         if (prod.klabel().isEmpty() || !prod.att().contains("poly"))
             return prod.withAtt(prod.att().add(Constants.ORIGINAL_PRD, Production.class, prod));
         List<Set<Integer>> poly = RuleGrammarGenerator.computePositions(prod);
-        polyKLabels.put(prod.klabel().get().name(), poly);
+        String labelName = prod.klabel().get().name();
+        if (prod.att().contains(Attribute.ML_BINDER_KEY)) {
+            mlBinders.add(labelName);
+        }
+        polyKLabels.put(labelName, poly);
         List<Sort> params = new ArrayList<>();
         List<NonTerminal> children = new ArrayList<>(mutable(prod.nonterminals()));
         Sort returnSort = prod.sort();
@@ -955,12 +973,16 @@ public class ModuleToKORE {
                 items.add(item);
             }
         }
-        return Production(KLabel(prod.klabel().get().name(), immutable(params)), returnSort, immutable(items),
+        return Production(KLabel(labelName, immutable(params)), returnSort, immutable(items),
                 prod.att().add(Constants.ORIGINAL_PRD, Production.class, prod));
     }
 
     private KLabel computePolyKLabel(KApply k) {
-        List<Set<Integer>> poly = polyKLabels.get(k.klabel().name());
+        String labelName = k.klabel().name();
+        List<Set<Integer>> poly = polyKLabels.get(labelName);
+        if (mlBinders.contains(labelName)) { // ML binders are not parametric in the variable so we remove it
+            poly.remove(0);
+        }
         List<Sort> params = new ArrayList<>();
         for (Set<Integer> positions : poly) {
             int pos = positions.iterator().next();
@@ -972,7 +994,7 @@ public class ModuleToKORE {
             }
             params.add(sort);
         }
-        return KLabel(k.klabel().name(), immutable(params));
+        return KLabel(labelName, immutable(params));
     }
 
 

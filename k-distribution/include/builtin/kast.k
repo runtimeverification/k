@@ -77,8 +77,8 @@ module ML-SYNTAX
              > K "#And" K [klabel(#And), symbol, assoc, left, comm, unit(#True), mlOp, poly(0, 1, 2), format(%i%1%d%n%2%n%i%3%d)]
              > K "#Or" K [klabel(#Or), symbol, assoc, left, comm, unit(#False), mlOp, poly(0, 1, 2), format(%i%1%d%n%2%n%i%3%d)]
              > K "#Implies" K [klabel(#Implies), symbol, mlOp, poly(0, 1, 2), format(%i%1%d%n%2%n%i%3%d)]
-             > "#Exists" #KVariable "." K [klabel(#Exists), symbol, mlOp, poly(0, 2)]
-             | "#Forall" #KVariable "." K [klabel(#Forall), symbol, mlOp, poly(0, 2)]
+             > "#Exists" K "." K [klabel(#Exists), symbol, mlOp, poly(1; 0, 2), mlBinder]
+             | "#Forall" K "." K [klabel(#Forall), symbol, mlOp, poly(1; 0, 2), mlBinder]
 endmodule
 
 // To be used when parsing/pretty-printing symbolic configurations
