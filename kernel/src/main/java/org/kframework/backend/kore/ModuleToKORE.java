@@ -5,14 +5,13 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
-import edu.uci.ics.jung.graph.DirectedGraph;
-import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.AddSortInjections;
+import org.kframework.compile.ComputeTransitiveFunctionDependencies;
 import org.kframework.compile.ConfigurationInfoFromModule;
 import org.kframework.compile.RefreshRules;
 import org.kframework.compile.RewriteToTop;
@@ -49,11 +48,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.regex.Pattern;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -152,9 +148,9 @@ public class ModuleToKORE {
                 }
             }
         }
-        computeDependencies(functionRules);
+        ComputeTransitiveFunctionDependencies deps = new ComputeTransitiveFunctionDependencies(module);
         Set<KLabel> impurities = functionRules.keySet().stream().filter(lbl -> module.attributesFor().get(lbl).getOrElse(() -> Att()).contains(Attribute.IMPURE_KEY)).collect(Collectors.toSet());
-        impurities.addAll(ancestors(impurities, dependencies));
+        impurities.addAll(deps.ancestors(impurities));
 
         sb.append("\n// symbols\n");
         Set<Production> overloads = new HashSet<>();
@@ -825,83 +821,6 @@ public class ModuleToKORE {
         }
         sb.append("}");
     }
-
-    private static <V> Set<V> ancestors(
-            Collection<? extends V> startNodes, DirectedGraph<V, ?> graph)
-    {
-        Queue<V> queue = new LinkedList<V>();
-        queue.addAll(startNodes);
-        Set<V> visited = new LinkedHashSet<V>(startNodes);
-        while(!queue.isEmpty())
-        {
-            V v = queue.poll();
-            Collection<V> neighbors = graph.getPredecessors(v);
-            for (V n : neighbors)
-            {
-                if (!visited.contains(n))
-                {
-                    queue.offer(n);
-                    visited.add(n);
-                }
-            }
-        }
-        return visited;
-    }
-
-    private void computeDependencies(SetMultimap<KLabel, Rule> functionRules) {
-        dependencies = new DirectedSparseGraph<>();
-
-        Set<KLabel> anywhereKLabels = new HashSet<>();
-        stream(module.rules()).filter(r -> !r.att().contains(Attribute.MACRO_KEY) && !r.att().contains(Attribute.ALIAS_KEY)).forEach(r -> {
-            K left = RewriteToTop.toLeft(r.body());
-            if (left instanceof KApply) {
-                KApply kapp = (KApply) left;
-                if (r.att().contains(Attribute.ANYWHERE_KEY)) {
-                    if (kapp.klabel().name().equals(KLabels.INJ)) {
-                        K k = kapp.items().get(0);
-                        if (k instanceof KApply) {
-                            anywhereKLabels.add(((KApply)k).klabel());
-                        }
-                    } else {
-                        anywhereKLabels.add(kapp.klabel());
-                    }
-                }
-            }
-        });
-
-        class GetPredecessors extends VisitK {
-            private final KLabel current;
-
-            private GetPredecessors(KLabel current) {
-                this.current = current;
-            }
-
-            @Override
-            public void apply(KApply k) {
-                if (k.klabel().name().equals(KLabels.INJ)) {
-                    super.apply(k);
-                    return;
-                }
-                Production prod = production(k);
-                if (isFunction(prod) || anywhereKLabels.contains(k.klabel())) {
-                    dependencies.addEdge(new Object(), current, k.klabel());
-                }
-                if (k.klabel() instanceof KVariable) {
-                    // this function requires a call to eval, so we need to add the dummy dependency
-                    dependencies.addEdge(new Object(), current, KLabel(""));
-                }
-                super.apply(k);
-            }
-        }
-
-        for (Map.Entry<KLabel, Rule> entry : functionRules.entries()) {
-            GetPredecessors visitor = new GetPredecessors(entry.getKey());
-            visitor.apply(entry.getValue().body());
-            visitor.apply(entry.getValue().requires());
-        }
-    }
-
-    private DirectedGraph<KLabel, Object> dependencies;
 
     private boolean isConstructor(Production prod, SetMultimap<KLabel, Rule> functionRules, Set<KLabel> impurities) {
         Att att = addKoreAttributes(prod, functionRules, impurities, java.util.Collections.emptySet());
