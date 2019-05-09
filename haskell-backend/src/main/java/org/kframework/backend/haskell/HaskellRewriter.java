@@ -29,6 +29,7 @@ import org.kframework.parser.kore.Pattern;
 import org.kframework.RewriterResult;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.rewriter.SearchType;
+import org.kframework.unparser.KPrint;
 import org.kframework.unparser.OutputModes;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -56,41 +57,43 @@ import static org.kframework.builtin.BooleanUtils.*;
 @RequestScoped
 public class HaskellRewriter implements Function<Definition, Rewriter> {
 
-    private final FileUtil files;
-    private final CompiledDefinition def;
     private final GlobalOptions globalOptions;
     private final SMTOptions smtOptions;
     private final KRunOptions krunOptions;
     private final KompileOptions kompileOptions;
-    private final KExceptionManager kem;
-    private final HaskellKRunOptions haskellKRunOptions;
     private final KProveOptions kProveOptions;
+    private final HaskellKRunOptions haskellKRunOptions;
+    private final FileUtil files;
+    private final CompiledDefinition def;
+    private final KExceptionManager kem;
+    private final KPrint kprint;
     private final Properties idsToLabels;
 
     @Inject
     public HaskellRewriter(
-            FileUtil files,
-            CompiledDefinition def,
             GlobalOptions globalOptions,
             SMTOptions smtOptions,
             KRunOptions krunOptions,
             KompileOptions kompileOptions,
             KProveOptions kProveOptions,
             InitializeDefinition init,
+            HaskellKRunOptions haskellKRunOptions,
+            FileUtil files,
+            CompiledDefinition def,
             KExceptionManager kem,
-            HaskellKRunOptions haskellKRunOptions
+            KPrint kprint
             ) {
-        this.files = files;
-        this.def = def;
-        this.kem = kem;
         this.globalOptions = globalOptions;
         this.smtOptions = smtOptions;
         this.haskellKRunOptions = haskellKRunOptions;
         this.krunOptions = krunOptions;
         this.kompileOptions = kompileOptions;
         this.kProveOptions = kProveOptions;
+        this.files = files;
+        this.def = def;
+        this.kem = kem;
+        this.kprint = kprint;
         this.idsToLabels = init.serialized;
-
     }
 
     @Override
@@ -123,7 +126,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                         "--output", koreOutputFile.getAbsolutePath()));
                 if (depth.isPresent()) {
                     args.add("--depth");
-                    args.add(krunOptions.depth.toString());
+                    args.add(depth.toString());
                 }
                 if (smtOptions.smtPrelude != null) {
                     args.add("--smt-prelude");
@@ -132,7 +135,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                 koreCommand = args.toArray(koreCommand);
                 if (haskellKRunOptions.dryRun) {
                     System.out.println(String.join(" ", koreCommand));
-                    krunOptions.print.output = OutputModes.NONE;
+                    kprint.options.output = OutputModes.NONE;
                     return new RewriterResult(Optional.empty(), Optional.empty(), k);
                 }
                 try {
@@ -225,7 +228,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                 koreCommand = args.toArray(koreCommand);
                 if (haskellKRunOptions.dryRun) {
                     System.out.println(String.join(" ", koreCommand));
-                    krunOptions.print.output = OutputModes.NONE;
+                    kprint.options.output = OutputModes.NONE;
                     return initialConfiguration;
                 }
                 try {
@@ -288,7 +291,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                 koreCommand = args.toArray(koreCommand);
                 if (haskellKRunOptions.dryRun) {
                     System.out.println(String.join(" ", koreCommand));
-                    krunOptions.print.output = OutputModes.NONE;
+                    kprint.options.output = OutputModes.NONE;
                     return boundaryPattern.body();
                 }
                 if (globalOptions.verbose) {
