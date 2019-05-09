@@ -121,7 +121,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                         "--module", moduleName,
                         "--pattern", pgmPath,
                         "--output", koreOutputFile.getAbsolutePath()));
-                if (krunOptions.depth != null) {
+                if (depth.isPresent()) {
                     args.add("--depth");
                     args.add(krunOptions.depth.toString());
                 }
