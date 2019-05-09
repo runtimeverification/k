@@ -35,6 +35,7 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.DefinitionScoped;
 import org.kframework.utils.inject.RequestScoped;
+import org.kframework.utils.options.SMTOptions;
 import org.kframework.utils.StringUtil;
 
 import scala.Tuple2;
@@ -58,6 +59,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
     private final FileUtil files;
     private final CompiledDefinition def;
     private final GlobalOptions globalOptions;
+    private final SMTOptions smtOptions;
     private final KRunOptions krunOptions;
     private final KompileOptions kompileOptions;
     private final KExceptionManager kem;
@@ -70,6 +72,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
             FileUtil files,
             CompiledDefinition def,
             GlobalOptions globalOptions,
+            SMTOptions smtOptions,
             KRunOptions krunOptions,
             KompileOptions kompileOptions,
             KProveOptions kProveOptions,
@@ -80,9 +83,10 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
         this.files = files;
         this.def = def;
         this.kem = kem;
+        this.globalOptions = globalOptions;
+        this.smtOptions = smtOptions;
         this.haskellKRunOptions = haskellKRunOptions;
         this.krunOptions = krunOptions;
-        this.globalOptions = globalOptions;
         this.kompileOptions = kompileOptions;
         this.kProveOptions = kProveOptions;
         this.idsToLabels = init.serialized;
@@ -121,9 +125,9 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                     args.add("--depth");
                     args.add(krunOptions.depth.toString());
                 }
-                if (krunOptions.experimental.smt.smtPrelude != null) {
+                if (smtOptions.smtPrelude != null) {
                     args.add("--smt-prelude");
-                    args.add(krunOptions.experimental.smt.smtPrelude);
+                    args.add(smtOptions.smtPrelude);
                 }
                 koreCommand = args.toArray(koreCommand);
                 if (haskellKRunOptions.dryRun) {
@@ -214,9 +218,9 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                     args.add("--bound");
                     args.add(bound.get().toString());
                 }
-                if (krunOptions.experimental.smt.smtPrelude != null) {
+                if (smtOptions.smtPrelude != null) {
                     args.add("--smt-prelude");
-                    args.add(krunOptions.experimental.smt.smtPrelude);
+                    args.add(smtOptions.smtPrelude);
                 }
                 koreCommand = args.toArray(koreCommand);
                 if (haskellKRunOptions.dryRun) {
@@ -274,9 +278,9 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                     args.addAll(Arrays.asList(
                         "--depth", kProveOptions.depth.toString()));
                 }
-                if (krunOptions.experimental.smt.smtPrelude != null) {
+                if (smtOptions.smtPrelude != null) {
                     args.add("--smt-prelude");
-                    args.add(krunOptions.experimental.smt.smtPrelude);
+                    args.add(smtOptions.smtPrelude);
                 }
                 if (haskellKRunOptions.allPathReachability) {
                     args.add("--all-path-reachability");
