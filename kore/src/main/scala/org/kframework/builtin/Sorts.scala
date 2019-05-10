@@ -8,6 +8,8 @@ import org.kframework.kore.KORE.Sort
 object Sorts {
   val Layout = Sort("#Layout")
 
+  val RuleTag = Sort("#RuleTag")
+
   val KString = Sort("KString")
   val KBool = Sort("KBool")
 

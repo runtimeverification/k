@@ -1,0 +1,18 @@
+<wrapper>
+  <k>
+    loop ( 0 )
+  </k>
+  <trace>
+    ListItem ( ~ regular )
+    ListItem ( ~ a2c )
+    ListItem ( ~ c2loop )
+    ListItem ( ~ loopRule )
+    ListItem ( ~ loopRule )
+    ListItem ( ~ loopRule )
+    ListItem ( ~ loopRule )
+    ListItem ( ~ loopRule )
+  </trace>
+  <s>
+    #STUCK ( )
+  </s>
+</wrapper>

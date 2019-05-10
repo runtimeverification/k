@@ -62,7 +62,6 @@ module KSEQ
   syntax K     ::= "(" K ")"    [bracket, poly(0, 1)]
 endmodule
 
-
 module ML-SYNTAX
   imports SORT-K
 
