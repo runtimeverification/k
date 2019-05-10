@@ -1370,7 +1370,9 @@ module CONFIGURATION-PRIMITIVES
 endmodule
 
 module STRATEGY
-    syntax #RuleTag
+    imports K-VARIABLE
+
+    syntax #RuleTag ::= #KVariable
 
     syntax Strategy ::= #STUCK()    [symbol]
                       | "^" #RuleTag [symbol, klabel(#applyRule)]
