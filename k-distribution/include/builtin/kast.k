@@ -62,13 +62,10 @@ module KSEQ
   syntax K     ::= "(" K ")"    [bracket, poly(0, 1)]
 endmodule
 
-module K-VARIABLE
-  syntax #KVariable
-endmodule
-
 module ML-SYNTAX
   imports SORT-K
-  imports K-VARIABLE
+
+  syntax #KVariable
 
   syntax K ::= "#True" [klabel(#True), symbol, poly(0)]
              | "#False" [klabel(#False), symbol, poly(0)]

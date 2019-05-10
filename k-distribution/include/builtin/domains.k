@@ -1370,7 +1370,7 @@ module CONFIGURATION-PRIMITIVES
 endmodule
 
 module STRATEGY
-    imports K-VARIABLE
+    imports ML-SYNTAX
 
     syntax #RuleTag ::= #KVariable
 
