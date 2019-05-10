@@ -200,7 +200,7 @@ public class RuleGrammarGenerator {
         if (mod.importedModuleNames().contains(AUTO_CASTS)) { // create the diamond
             Set<Sentence> temp;
             for (Sort srt : iterable(mod.definedSorts())) {
-                if (!isParserSort(srt) || mod.subsorts().directlyLessThan(Sorts.KVariable(), Sorts.RuleTag())) {
+                if (!isParserSort(srt) || mod.subsorts().directlyLessThan(Sorts.KVariable(), srt)) {
                     // K ::= K "::Sort" | K ":Sort" | K "<:Sort" | K ":>Sort"
                     prods.addAll(makeCasts(Sorts.KBott(), Sorts.K(), srt));
                 }
