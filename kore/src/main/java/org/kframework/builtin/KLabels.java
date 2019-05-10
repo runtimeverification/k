@@ -42,6 +42,7 @@ public class KLabels {
     public static final KLabel ML_IMPLIES = KLabel("#Implies");
     public static final KLabel ML_EXISTS = KLabel("#Exists");
     public static final KLabel ML_FORALL = KLabel("#Forall");
+    public static final KLabel CTL_AG = KLabel("#AG");
 
     public static final KLabel ListItem = KLabel("ListItem");
     public static final KLabel List = KLabel("_List_");
