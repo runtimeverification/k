@@ -1385,7 +1385,6 @@ module RULE-TAG-SYNTAX
     imports BUILTIN-ID-TOKENS
 
     syntax #RuleTag ::= #LowerId [token]
-                      | #UpperId [token]
 endmodule
 
 module DEFAULT-STRATEGY-CONCRETE [concrete]
