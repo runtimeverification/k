@@ -75,24 +75,6 @@ public class AddSortInjections {
     }
 
     public K addInjections(K term) {
-        if (new FoldK<Boolean>() {
-            @Override
-            public Boolean unit() {
-                return false;
-            }
-
-            @Override
-            public Boolean apply(KRewrite k) {
-                return true;
-            }
-
-            @Override
-            public Boolean merge(Boolean a, Boolean b) {
-                return a || b;
-            }
-        }.apply(term)) {
-            term = KRewrite(RewriteToTop.toLeft(term), RewriteToTop.toRight(term));
-        }
         Sort topSort = sort(term, Sorts.K());
         K result = addSortInjections(term, topSort);
         return result;
@@ -110,6 +92,24 @@ public class AddSortInjections {
     }
 
     private K addTopSortInjections(K body) {
+        if (new FoldK<Boolean>() {
+            @Override
+            public Boolean unit() {
+                return false;
+            }
+
+            @Override
+            public Boolean apply(KRewrite k) {
+                return true;
+            }
+
+            @Override
+            public Boolean merge(Boolean a, Boolean b) {
+                return a || b;
+            }
+        }.apply(body)) {
+            body = KRewrite(RewriteToTop.toLeft(body), RewriteToTop.toRight(body));
+        }
         Sort sort = sort(body, null);
         if (sort == null) sort = freshSortParam();
         return internalAddSortInjections(body, sort);
@@ -301,12 +301,13 @@ public class AddSortInjections {
 
     private Sort lub(Collection<Sort> entries, Sort expectedSort, HasLocation loc) {
         assert !entries.isEmpty();
+        entries = new HashSet<>(entries);
         Collection<Sort> filteredEntries = entries.stream().filter(s -> !s.name().equals(SORTPARAM_NAME)).collect(Collectors.toList());
         if (filteredEntries.isEmpty()) { // if all sorts are parameters, take the first
             return entries.iterator().next();
         }
         Set<Sort> bounds = upperBounds(filteredEntries);
-        if (expectedSort != null && !expectedSort.name().equals(SORTPARAM_NAME) && !expectedSort.equals(Sorts.KItem())) {
+        if (expectedSort != null && !expectedSort.name().equals(SORTPARAM_NAME) && !expectedSort.equals(Sorts.KItem()) && !expectedSort.equals(Sorts.K())) {
             bounds.removeIf(s -> !mod.subsorts().lessThanEq(s, expectedSort));
         }
         Set<Sort> lub = mod.subsorts().minimal(bounds);

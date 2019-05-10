@@ -2,7 +2,6 @@
 package org.kframework.backend.haskell;
 
 import com.google.inject.Inject;
-import org.kframework.RewriterResult;
 import org.kframework.attributes.Att;
 import org.kframework.backend.kore.KoreBackend;
 import org.kframework.backend.kore.ModuleToKORE;
@@ -19,22 +18,26 @@ import org.kframework.kore.KORE;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
 import org.kframework.kprove.KProveOptions;
-import org.kframework.krun.KRunOptions;
 import org.kframework.krun.RunProcess;
+import org.kframework.main.GlobalOptions;
 import org.kframework.main.Main;
-import org.kframework.parser.kore.Pattern;
 import org.kframework.parser.kore.parser.KoreToK;
 import org.kframework.parser.kore.parser.ParseError;
 import org.kframework.parser.kore.parser.TextToKore;
+import org.kframework.parser.kore.Pattern;
+import org.kframework.RewriterResult;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.rewriter.SearchType;
+import org.kframework.unparser.KPrint;
 import org.kframework.unparser.OutputModes;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.DefinitionScoped;
 import org.kframework.utils.inject.RequestScoped;
+import org.kframework.utils.options.SMTOptions;
 import org.kframework.utils.StringUtil;
+
 import scala.Tuple2;
 
 import java.io.File;
@@ -53,35 +56,40 @@ import static org.kframework.builtin.BooleanUtils.*;
 @RequestScoped
 public class HaskellRewriter implements Function<Definition, Rewriter> {
 
+    private final GlobalOptions globalOptions;
+    private final SMTOptions smtOptions;
+    private final KompileOptions kompileOptions;
+    private final KProveOptions kProveOptions;
+    private final HaskellKRunOptions haskellKRunOptions;
     private final FileUtil files;
     private final CompiledDefinition def;
-    private final KRunOptions options;
-    private final KompileOptions kompileOptions;
     private final KExceptionManager kem;
-    private final HaskellKRunOptions haskellKRunOptions;
-    private final KProveOptions kProveOptions;
+    private final KPrint kprint;
     private final Properties idsToLabels;
 
     @Inject
     public HaskellRewriter(
-            FileUtil files,
-            CompiledDefinition def,
-            KRunOptions kRunOptions,
+            GlobalOptions globalOptions,
+            SMTOptions smtOptions,
             KompileOptions kompileOptions,
             KProveOptions kProveOptions,
             InitializeDefinition init,
+            HaskellKRunOptions haskellKRunOptions,
+            FileUtil files,
+            CompiledDefinition def,
             KExceptionManager kem,
-            HaskellKRunOptions haskellKRunOptions
+            KPrint kprint
             ) {
+        this.globalOptions = globalOptions;
+        this.smtOptions = smtOptions;
+        this.haskellKRunOptions = haskellKRunOptions;
+        this.kompileOptions = kompileOptions;
+        this.kProveOptions = kProveOptions;
         this.files = files;
         this.def = def;
         this.kem = kem;
-        this.haskellKRunOptions = haskellKRunOptions;
-        this.options = kRunOptions;
-        this.kompileOptions = kompileOptions;
-        this.kProveOptions = kProveOptions;
+        this.kprint = kprint;
         this.idsToLabels = init.serialized;
-
     }
 
     @Override
@@ -112,18 +120,18 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                         "--module", moduleName,
                         "--pattern", pgmPath,
                         "--output", koreOutputFile.getAbsolutePath()));
-                if (options.depth != null) {
+                if (depth.isPresent()) {
                     args.add("--depth");
-                    args.add(options.depth.toString());
+                    args.add(Integer.toString(depth.get()));
                 }
-                if (options.experimental.smt.smtPrelude != null) {
+                if (smtOptions.smtPrelude != null) {
                     args.add("--smt-prelude");
-                    args.add(options.experimental.smt.smtPrelude);
+                    args.add(smtOptions.smtPrelude);
                 }
                 koreCommand = args.toArray(koreCommand);
                 if (haskellKRunOptions.dryRun) {
                     System.out.println(String.join(" ", koreCommand));
-                    options.print.output = OutputModes.NONE;
+                    kprint.options.output = OutputModes.NONE;
                     return new RewriterResult(Optional.empty(), Optional.empty(), k);
                 }
                 try {
@@ -209,14 +217,14 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                     args.add("--bound");
                     args.add(bound.get().toString());
                 }
-                if (options.experimental.smt.smtPrelude != null) {
+                if (smtOptions.smtPrelude != null) {
                     args.add("--smt-prelude");
-                    args.add(options.experimental.smt.smtPrelude);
+                    args.add(smtOptions.smtPrelude);
                 }
                 koreCommand = args.toArray(koreCommand);
                 if (haskellKRunOptions.dryRun) {
                     System.out.println(String.join(" ", koreCommand));
-                    options.print.output = OutputModes.NONE;
+                    kprint.options.output = OutputModes.NONE;
                     return initialConfiguration;
                 }
                 try {
@@ -240,11 +248,12 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
 
             @Override
             public K prove(Module rules, Rule boundaryPattern) {
-                String kompiledModule = KoreBackend.getKompiledString(module, def.topCellInitializer, files, false);
-                files.saveToTemp("vdefinition.kore", kompiledModule);
+                Module kompiledModule = KoreBackend.getKompiledModule(module);
+                ModuleToKORE converter = new ModuleToKORE(kompiledModule, files, def.topCellInitializer);
+                String kompiledString = KoreBackend.getKompiledString(converter, files, false);
+                files.saveToTemp("vdefinition.kore", kompiledString);
 
-                ModuleToKORE rulesConverter = new ModuleToKORE(rules, files, def.topCellInitializer);
-                String koreOutput = rulesConverter.convertSpecificationModule(module, rules,
+                String koreOutput = converter.convertSpecificationModule(module, rules,
                         haskellKRunOptions.allPathReachability);
                 files.saveToTemp("spec.kore", koreOutput);
                 String defPath = files.resolveTemp("vdefinition.kore").getAbsolutePath();
@@ -268,9 +277,9 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                     args.addAll(Arrays.asList(
                         "--depth", kProveOptions.depth.toString()));
                 }
-                if (options.experimental.smt.smtPrelude != null) {
+                if (smtOptions.smtPrelude != null) {
                     args.add("--smt-prelude");
-                    args.add(options.experimental.smt.smtPrelude);
+                    args.add(smtOptions.smtPrelude);
                 }
                 if (haskellKRunOptions.allPathReachability) {
                     args.add("--all-path-reachability");
@@ -278,10 +287,12 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                 koreCommand = args.toArray(koreCommand);
                 if (haskellKRunOptions.dryRun) {
                     System.out.println(String.join(" ", koreCommand));
-                    options.print.output = OutputModes.NONE;
+                    kprint.options.output = OutputModes.NONE;
                     return boundaryPattern.body();
                 }
-                System.out.println("Executing " + args);
+                if (globalOptions.verbose) {
+                    System.err.println("Executing " + args);
+                }
                 try {
                     File korePath = koreDirectory == null ? null : new File(koreDirectory);
                     if (executeCommandBasic(korePath, koreCommand) != 0) {
@@ -326,7 +337,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
      * @throws InterruptedException
      */
     private int executeCommandBasic(File workingDir, String... command) throws IOException, InterruptedException {
-        if (options.global.debug()) {
+        if (globalOptions.verbose) {
             System.err.println("Executing command: " + String.join(" ", Arrays.asList(command)));
         }
         int exit;

@@ -47,4 +47,9 @@ module K
   alias weakAlwaysFinally{A}(A) : A
   where weakAlwaysFinally{A}(X:A) := X:A []
 
+  // Definitions for CTL aliases
+  // Until we will have `mu` we resort to dummy definitions
+  alias allPathGlobally{A}(A) : A
+  where allPathGlobally{A}(X:A) := X:A []
+
 endmodule []

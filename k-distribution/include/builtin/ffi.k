@@ -2,6 +2,7 @@
 require "domains.k"
 
 module FFI-SYNTAX
+  imports LIST
   syntax FFIType ::= "#void" [klabel(#void), symbol]
                   | "#uint8" [klabel(#uint8), symbol]
                   | "#sint8" [klabel(#sint8), symbol]
@@ -22,13 +23,13 @@ module FFI-SYNTAX
                   | "#ulong" [klabel(#ulong), symbol]
                   | "#slong" [klabel(#slong), symbol]
                   | "#longdouble" [klabel(#longdouble), symbol]
+                  | "#struct" "(" List ")" [klabel(#struct), symbol]
 
 endmodule
 
 module FFI
   imports FFI-SYNTAX
   imports BYTES
-  imports LIST
   imports STRING
 
   /*@ The FFI call takes an int for the symbol to call, a list of bytes, a list of types, and a return type. */

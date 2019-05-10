@@ -5,14 +5,13 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
-import edu.uci.ics.jung.graph.DirectedGraph;
-import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.AddSortInjections;
+import org.kframework.compile.ComputeTransitiveFunctionDependencies;
 import org.kframework.compile.ConfigurationInfoFromModule;
 import org.kframework.compile.RefreshRules;
 import org.kframework.compile.RewriteToTop;
@@ -24,6 +23,7 @@ import org.kframework.definition.ProductionItem;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kil.Attribute;
+import org.kframework.kil.Attributes;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kore.InjectedKLabel;
 import org.kframework.kore.K;
@@ -49,11 +49,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.regex.Pattern;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -72,6 +69,7 @@ public class ModuleToKORE {
     private final Set<String> impureFunctions = new HashSet<>();
     private final Map<String, List<Set<Integer>>> polyKLabels = new HashMap<>();
     private final KLabel topCellInitializer;
+    private final Set<String> mlBinders = new HashSet<>();
 
     public ModuleToKORE(Module module, FileUtil files, KLabel topCellInitializer) {
         this.module = module;
@@ -152,9 +150,9 @@ public class ModuleToKORE {
                 }
             }
         }
-        computeDependencies(functionRules);
+        ComputeTransitiveFunctionDependencies deps = new ComputeTransitiveFunctionDependencies(module);
         Set<KLabel> impurities = functionRules.keySet().stream().filter(lbl -> module.attributesFor().get(lbl).getOrElse(() -> Att()).contains(Attribute.IMPURE_KEY)).collect(Collectors.toSet());
-        impurities.addAll(ancestors(impurities, dependencies));
+        impurities.addAll(deps.ancestors(impurities));
 
         sb.append("\n// symbols\n");
         Set<Production> overloads = new HashSet<>();
@@ -548,6 +546,7 @@ public class ModuleToKORE {
     }
 
     public String convertSpecificationModule(Module definition, Module spec, boolean allPathReachability) {
+        sb.setLength(0); // reset string writer
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(definition);
         Sort topCell = configInfo.getRootCell();
         sb.append("[]\n");
@@ -578,6 +577,7 @@ public class ModuleToKORE {
         ConstructorChecks constructorChecks = new ConstructorChecks(module);
         boolean equation = false;
         boolean owise = false;
+        boolean kore = rule.att().contains(Attribute.KORE_KEY);
         Production production = null;
         Sort productionSort = null;
         List<Sort> productionSorts = null;
@@ -586,14 +586,14 @@ public class ModuleToKORE {
         K left = RewriteToTop.toLeft(rule.body());
         boolean constructorBased = constructorChecks.isConstructorBased(left);
         if (left instanceof KApply) {
-            production = production((KApply)left, true);
+            production = production((KApply) left, true);
             productionSort = production.sort();
             productionSorts = stream(production.items())
                     .filter(i -> i instanceof NonTerminal)
                     .map(i -> (NonTerminal) i)
                     .map(NonTerminal::sort).collect(Collectors.toList());
             productionLabel = production.klabel().get();
-            if (isFunction(production) || rule.att().contains(Attribute.ANYWHERE_KEY)) {
+            if (isFunction(production) || rule.att().contains(Attribute.ANYWHERE_KEY) && !kore) {
                 leftChildren = ((KApply) left).items();
                 equation = true;
             } else if ((rule.att().contains("heat") || rule.att().contains("cool")) && heatCoolEq) {
@@ -642,8 +642,8 @@ public class ModuleToKORE {
                     K notMatchingLeft = RewriteToTop.toLeft(notMatching.body());
                     assert notMatchingLeft instanceof KApply : "expecting KApply but got " + notMatchingLeft.getClass();
                     List<K> notMatchingChildren = ((KApply) notMatchingLeft).items();
-                    assert  notMatchingChildren.size() == leftChildren.size() : "assuming function with fixed arity";
-                    for (int childIdx = 0; childIdx < leftChildren.size(); childIdx ++) {
+                    assert notMatchingChildren.size() == leftChildren.size() : "assuming function with fixed arity";
+                    for (int childIdx = 0; childIdx < leftChildren.size(); childIdx++) {
                         sb.append("\\and{R} (");
                         sb.append("\n                ");
                         sb.append("\\ceil{");
@@ -661,7 +661,7 @@ public class ModuleToKORE {
                     }
                     sb.append("\n                \\top{R} ()");
                     sb.append("\n              ");
-                    for (int childIdx = 0; childIdx < leftChildren.size(); childIdx ++) {
+                    for (int childIdx = 0; childIdx < leftChildren.size(); childIdx++) {
                         sb.append(')');
                     }
                     sb.append("\n          )");
@@ -708,6 +708,16 @@ public class ModuleToKORE {
                 convert(consideredAttributes, rule.att());
                 sb.append("\n\n");
             }
+        } else if (kore) {
+            if (rulesAsClaims) {
+                sb.append("  claim{} ");
+            } else {
+                sb.append("  axiom{} ");
+            }
+            convert(left);
+            sb.append("\n  ");
+            convert(consideredAttributes, rule.att());
+            sb.append("\n\n");
         } else if (!rule.att().contains(Attribute.MACRO_KEY) && !rule.att().contains(Attribute.ALIAS_KEY)) {
             if (rulesAsClaims) {
                 sb.append("  claim{} ");
@@ -826,83 +836,6 @@ public class ModuleToKORE {
         sb.append("}");
     }
 
-    private static <V> Set<V> ancestors(
-            Collection<? extends V> startNodes, DirectedGraph<V, ?> graph)
-    {
-        Queue<V> queue = new LinkedList<V>();
-        queue.addAll(startNodes);
-        Set<V> visited = new LinkedHashSet<V>(startNodes);
-        while(!queue.isEmpty())
-        {
-            V v = queue.poll();
-            Collection<V> neighbors = graph.getPredecessors(v);
-            for (V n : neighbors)
-            {
-                if (!visited.contains(n))
-                {
-                    queue.offer(n);
-                    visited.add(n);
-                }
-            }
-        }
-        return visited;
-    }
-
-    private void computeDependencies(SetMultimap<KLabel, Rule> functionRules) {
-        dependencies = new DirectedSparseGraph<>();
-
-        Set<KLabel> anywhereKLabels = new HashSet<>();
-        stream(module.rules()).filter(r -> !r.att().contains(Attribute.MACRO_KEY) && !r.att().contains(Attribute.ALIAS_KEY)).forEach(r -> {
-            K left = RewriteToTop.toLeft(r.body());
-            if (left instanceof KApply) {
-                KApply kapp = (KApply) left;
-                if (r.att().contains(Attribute.ANYWHERE_KEY)) {
-                    if (kapp.klabel().name().equals(KLabels.INJ)) {
-                        K k = kapp.items().get(0);
-                        if (k instanceof KApply) {
-                            anywhereKLabels.add(((KApply)k).klabel());
-                        }
-                    } else {
-                        anywhereKLabels.add(kapp.klabel());
-                    }
-                }
-            }
-        });
-
-        class GetPredecessors extends VisitK {
-            private final KLabel current;
-
-            private GetPredecessors(KLabel current) {
-                this.current = current;
-            }
-
-            @Override
-            public void apply(KApply k) {
-                if (k.klabel().name().equals(KLabels.INJ)) {
-                    super.apply(k);
-                    return;
-                }
-                Production prod = production(k);
-                if (isFunction(prod) || anywhereKLabels.contains(k.klabel())) {
-                    dependencies.addEdge(new Object(), current, k.klabel());
-                }
-                if (k.klabel() instanceof KVariable) {
-                    // this function requires a call to eval, so we need to add the dummy dependency
-                    dependencies.addEdge(new Object(), current, KLabel(""));
-                }
-                super.apply(k);
-            }
-        }
-
-        for (Map.Entry<KLabel, Rule> entry : functionRules.entries()) {
-            GetPredecessors visitor = new GetPredecessors(entry.getKey());
-            visitor.apply(entry.getValue().body());
-            visitor.apply(entry.getValue().requires());
-        }
-    }
-
-    private DirectedGraph<KLabel, Object> dependencies;
-
     private boolean isConstructor(Production prod, SetMultimap<KLabel, Rule> functionRules, Set<KLabel> impurities) {
         Att att = addKoreAttributes(prod, functionRules, impurities, java.util.Collections.emptySet());
         return att.contains("constructor");
@@ -1002,7 +935,11 @@ public class ModuleToKORE {
         if (prod.klabel().isEmpty() || !prod.att().contains("poly"))
             return prod.withAtt(prod.att().add(Constants.ORIGINAL_PRD, Production.class, prod));
         List<Set<Integer>> poly = RuleGrammarGenerator.computePositions(prod);
-        polyKLabels.put(prod.klabel().get().name(), poly);
+        String labelName = prod.klabel().get().name();
+        if (prod.att().contains(Attribute.ML_BINDER_KEY)) {
+            mlBinders.add(labelName);
+        }
+        polyKLabels.put(labelName, poly);
         List<Sort> params = new ArrayList<>();
         List<NonTerminal> children = new ArrayList<>(mutable(prod.nonterminals()));
         Sort returnSort = prod.sort();
@@ -1036,12 +973,16 @@ public class ModuleToKORE {
                 items.add(item);
             }
         }
-        return Production(KLabel(prod.klabel().get().name(), immutable(params)), returnSort, immutable(items),
+        return Production(KLabel(labelName, immutable(params)), returnSort, immutable(items),
                 prod.att().add(Constants.ORIGINAL_PRD, Production.class, prod));
     }
 
     private KLabel computePolyKLabel(KApply k) {
-        List<Set<Integer>> poly = polyKLabels.get(k.klabel().name());
+        String labelName = k.klabel().name();
+        List<Set<Integer>> poly = polyKLabels.get(labelName);
+        if (mlBinders.contains(labelName)) { // ML binders are not parametric in the variable so we remove it
+            poly.remove(0);
+        }
         List<Sort> params = new ArrayList<>();
         for (Set<Integer> positions : poly) {
             int pos = positions.iterator().next();
@@ -1053,7 +994,7 @@ public class ModuleToKORE {
             }
             params.add(sort);
         }
-        return KLabel(k.klabel().name(), immutable(params));
+        return KLabel(labelName, immutable(params));
     }
 
 
@@ -1111,6 +1052,8 @@ public class ModuleToKORE {
         return "\\exists";
       case "#Forall":
         return "\\forall";
+      case "#AG":
+        return "allPathGlobally";
       default:
         throw KEMException.compilerError("Unsuppored kore connective in rule: " + klabel);
       }

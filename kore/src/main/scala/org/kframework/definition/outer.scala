@@ -198,6 +198,15 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
   def isSort(klabel: KLabel, s: Sort) = subsorts.<(sortFor(klabel), s)
 
   lazy val rules: Set[Rule] = sentences collect { case r: Rule => r }
+  lazy val rulesFor: Map[KLabel, Set[Rule]] = rules.groupBy(r => {
+    r.body match {
+      case Unapply.KApply(Unapply.KLabel("#withConfig"), Unapply.KApply(s, _) :: _) => s
+      case Unapply.KApply(Unapply.KLabel("#withConfig"), Unapply.KRewrite(Unapply.KApply(s, _), _) :: _) => s
+      case Unapply.KApply(s, _) => s
+      case Unapply.KRewrite(Unapply.KApply(s, _), _) => s
+      case _ => KORE.KLabel("")
+    }
+  })
   lazy val contexts: Set[Context] = sentences collect { case r: Context => r }
 
   lazy val localRules: Set[Rule] = localSentences collect { case r: Rule => r }

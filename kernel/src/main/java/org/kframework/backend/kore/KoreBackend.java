@@ -87,17 +87,15 @@ public class KoreBackend implements Backend {
     }
 
     protected String getKompiledString(CompiledDefinition def) {
-        return getKompiledString(def.kompiledDefinition.mainModule(), def.topCellInitializer, files, heatCoolEquations);
+        Module mainModule = getKompiledModule(def.kompiledDefinition.mainModule());
+        ModuleToKORE converter = new ModuleToKORE(mainModule, files, def.topCellInitializer);
+        return getKompiledString(converter, files, heatCoolEquations);
     }
 
-    public static String getKompiledString(Module mainModule, KLabel topCellInitializer, FileUtil files, boolean heatCoolEquations) {
-        mainModule = new GenerateSortPredicateRules(true).gen(mainModule);
-        mainModule = ModuleTransformer.fromSentenceTransformer(new AddSortInjections(mainModule)::addInjections, "Add sort injections").apply(mainModule);
-        mainModule = ModuleTransformer.fromSentenceTransformer(new MinimizeTermConstruction(mainModule)::resolve, "Minimize term construction").apply(mainModule);
-        ModuleToKORE moduleToKORE = new ModuleToKORE(mainModule, files, topCellInitializer);
-        String kompiledString = moduleToKORE.convert(heatCoolEquations);
+    public static String getKompiledString(ModuleToKORE converter, FileUtil files, boolean heatCoolEquations) {
+        String kompiledString = converter.convert(heatCoolEquations);
         Properties koreToKLabels = new Properties();
-        koreToKLabels.putAll(moduleToKORE.getKToKoreLabelMap().inverse());
+        koreToKLabels.putAll(converter.getKToKoreLabelMap().inverse());
         try {
             FileOutputStream output = new FileOutputStream(files.resolveKompiled("kore_to_k_labels.properties"));
             koreToKLabels.store(output, "Properties file containing the mapping from kore to k labels");
@@ -106,6 +104,13 @@ public class KoreBackend implements Backend {
             throw KEMException.criticalError("Error while saving kore to K labels map", e);
         }
         return kompiledString;
+    }
+
+    public static Module getKompiledModule(Module mainModule) {
+        mainModule = new GenerateSortPredicateRules(true).gen(mainModule);
+        mainModule = ModuleTransformer.fromSentenceTransformer(new AddSortInjections(mainModule)::addInjections, "Add sort injections").apply(mainModule);
+        mainModule = ModuleTransformer.fromSentenceTransformer(new MinimizeTermConstruction(mainModule)::resolve, "Minimize term construction").apply(mainModule);
+        return mainModule;
     }
 
     @Override
@@ -117,13 +122,13 @@ public class KoreBackend implements Backend {
         DefinitionTransformer resolveSemanticCasts =
                 DefinitionTransformer.fromSentenceTransformer(new ResolveSemanticCasts(true)::resolve, "resolving semantic casts");
         DefinitionTransformer resolveFun = DefinitionTransformer.from(new ResolveFun()::resolve, "resolving #fun");
-        DefinitionTransformer resolveFunctionWithConfig = DefinitionTransformer.fromSentenceTransformer(new ResolveFunctionWithConfig()::resolve, "resolving functions with config context");
+        Function1<Definition, Definition> resolveFunctionWithConfig = d -> DefinitionTransformer.fromSentenceTransformer(new ResolveFunctionWithConfig(d)::resolve, "resolving functions with config context").apply(d);
         DefinitionTransformer generateSortPredicateSyntax = DefinitionTransformer.from(new GenerateSortPredicateSyntax()::gen, "adding sort predicate productions");
         DefinitionTransformer generateSortProjections = DefinitionTransformer.from(new GenerateSortProjections()::gen, "adding sort projections");
         DefinitionTransformer subsortKItem = DefinitionTransformer.from(Kompile::subsortKItem, "subsort all sorts to KItem");
         DefinitionTransformer expandMacros = DefinitionTransformer.fromSentenceTransformer((m, s) -> new ExpandMacros(m, files, kompileOptions, false).expand(s), "expand macros");
         Function1<Definition, Definition> resolveFreshConstants = d -> DefinitionTransformer.from(m -> GeneratedTopFormat.resolve(new ResolveFreshConstants(d, true).resolve(m)), "resolving !Var variables").apply(d);
-        DefinitionTransformer resolveConfigVar = DefinitionTransformer.fromSentenceTransformer(new ResolveFunctionWithConfig()::resolveConfigVar, "Adding configuration variable to lhs");
+        Function1<Definition, Definition> resolveConfigVar = d -> DefinitionTransformer.fromSentenceTransformer(new ResolveFunctionWithConfig(d)::resolveConfigVar, "Adding configuration variable to lhs").apply(d);
         Function1<Definition, Definition> resolveIO = (d -> Kompile.resolveIOStreams(kem, d));
 
         return def -> resolveIO
@@ -161,6 +166,7 @@ public class KoreBackend implements Backend {
         ModuleTransformer resolveSemanticCasts = ModuleTransformer.fromSentenceTransformer(
                 new ResolveSemanticCasts(true)::resolve,
                 "resolving semantic casts");
+        ModuleTransformer expandMacros = ModuleTransformer.fromSentenceTransformer((m, s) -> new ExpandMacros(m, files, kompileOptions, false).expand(s), "expand macros");
         ModuleTransformer subsortKItem = ModuleTransformer.from(Kompile::subsortKItem, "subsort all sorts to KItem");
         ModuleTransformer addImplicitComputationCell = ModuleTransformer.fromSentenceTransformer(
                 new AddImplicitComputationCell(configInfo, labelInfo),
@@ -172,6 +178,7 @@ public class KoreBackend implements Backend {
 
         return m -> resolveAnonVars
                 .andThen(resolveSemanticCasts)
+                .andThen(expandMacros)
                 .andThen(addImplicitComputationCell)
                 .andThen(resolveFreshConstants)
                 .andThen(concretizeCells)
