@@ -114,7 +114,7 @@ public class KastFrontEnd extends FrontEnd {
                 parsed = new ExpandMacros(compiledMod, files.get(), def.kompileOptions, false).expand(parsed);
             }
             if (options.kore) {
-              ModuleToKORE converter = new ModuleToKORE(compiledMod, files.get(), def.topCellInitializer);
+              ModuleToKORE converter = new ModuleToKORE(compiledMod, files.get(), def.topCellInitializer, def.kompileOptions);
               parsed = new AddSortInjections(compiledMod).addSortInjections(parsed, sort);
               converter.convert(parsed);
               System.out.println(converter.toString());

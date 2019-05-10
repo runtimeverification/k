@@ -1,3 +1,4 @@
+open Lexer
 open Constants
 open Constants.K
 open Prelude
@@ -190,6 +191,10 @@ struct
     | _ -> raise Not_implemented
   let hook_argv c _ _ _ _ = match c with
       () -> [List (SortList, Lbl_List_,(Array.fold_right (fun arg res -> [String arg] :: res) !CONFIG.sys_argv []))]
+  let hook_parseKAST c _ _ _ _ = match c with
+    | [String s] -> (try Lexer.parse_k s with
+      | e -> [KApply1(parse_klabel("#noParse"), [String (Printexc.to_string e)])])
+    | _ -> raise Not_implemented
 end
 
 module KEQUAL =
@@ -296,6 +301,7 @@ struct
         | Unix.WSTOPPED n -> (128 + n)
       in
       [KApply3((parse_klabel "#systemResult(_,_,_)_K-IO"), [Int (Z.of_int exit_code)], [String (Buffer.contents buf_out)], [String (Buffer.contents buf_err)])]
+    | _ -> raise Not_implemented
   let hook_mkstemp c _ _ _ _ = match c with
     | [String prefix], [String suffix] -> unix_error (fun () ->
             unix_error (fun () -> let path, outChannel = Filename.open_temp_file prefix suffix in
@@ -708,12 +714,4 @@ struct
   let hook_exponent c _ _ _ _ = match c with
       [Float (f,e,p)] -> (match deconstruct_float f e p with (_, exp, _) -> [Int (Z.of_int exp)])
     | _ -> raise Not_implemented
-end
-open Lexer
-
-module META =
-struct
-  let hook_parseKAST c _ _ _ _ = match c with
-    | [String s] -> (try Lexer.parse_k s with
-      | e -> [KApply1(parse_klabel("#noParse"), [String (Printexc.to_string e)])])
 end

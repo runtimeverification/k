@@ -130,7 +130,7 @@ public class DefinitionToOcaml implements Serializable {
     static {
         ImmutableSet.Builder<String> builder = ImmutableSet.builder();
         builder.add("BOOL").add("FLOAT").add("INT").add("IO").add("K").add("KEQUAL").add("KREFLECTION").add("LIST");
-        builder.add("MAP").add("SET").add("STRING").add("ARRAY").add("BUFFER").add("BYTES").add("META");
+        builder.add("MAP").add("SET").add("STRING").add("ARRAY").add("BUFFER").add("BYTES");
         hookNamespaces = builder.build();
     }
 
@@ -1286,7 +1286,7 @@ public class DefinitionToOcaml implements Serializable {
                     sb.append("match c with \n");
                     String namespace = hook.substring(0, hook.indexOf('.'));
                     String function = hook.substring(namespace.length() + 1);
-                    if (hookNamespaces.contains(namespace) || options.hookNamespaces.contains(namespace)) {
+                    if (hookNamespaces.contains(namespace) || kompileOptions.hookNamespaces.contains(namespace)) {
                         sb.append("| _ -> try ").append(namespace).append(".hook_").append(function).append(" c lbl sort config freshFunction");
                         if (mainModule.attributesFor().apply(functionLabel).contains("canTakeSteps")) {
                             sb.append(" eval");
