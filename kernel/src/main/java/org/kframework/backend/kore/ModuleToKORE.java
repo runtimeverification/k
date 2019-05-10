@@ -25,6 +25,7 @@ import org.kframework.definition.Sentence;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
 import org.kframework.kil.loader.Constants;
+import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.InjectedKLabel;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -70,11 +71,13 @@ public class ModuleToKORE {
     private final Map<String, List<Set<Integer>>> polyKLabels = new HashMap<>();
     private final KLabel topCellInitializer;
     private final Set<String> mlBinders = new HashSet<>();
+    private final KompileOptions options;
 
-    public ModuleToKORE(Module module, FileUtil files, KLabel topCellInitializer) {
+    public ModuleToKORE(Module module, FileUtil files, KLabel topCellInitializer, KompileOptions options) {
         this.module = module;
         this.files = files;
         this.topCellInitializer = topCellInitializer;
+        this.options = options;
     }
     private static final boolean METAVAR = false;
 

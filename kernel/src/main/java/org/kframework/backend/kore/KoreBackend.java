@@ -88,7 +88,7 @@ public class KoreBackend implements Backend {
 
     protected String getKompiledString(CompiledDefinition def) {
         Module mainModule = getKompiledModule(def.kompiledDefinition.mainModule());
-        ModuleToKORE converter = new ModuleToKORE(mainModule, files, def.topCellInitializer);
+        ModuleToKORE converter = new ModuleToKORE(mainModule, files, def.topCellInitializer, def.kompileOptions);
         return getKompiledString(converter, files, heatCoolEquations);
     }
 
