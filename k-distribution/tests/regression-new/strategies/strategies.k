@@ -27,10 +27,6 @@ module STRATEGIES
 
     rule <k> loop(I => I -Int 1) ... </k> requires I >Int 0 [tag(loopRule)]
 
-    rule <s> ~ regular  => . ... </s> <trace> ... (.List => ListItem(~ regular )) </trace>
-    rule <s> ~ a2b      => . ... </s> <trace> ... (.List => ListItem(~ a2b     )) </trace>
-    rule <s> ~ a2c      => . ... </s> <trace> ... (.List => ListItem(~ a2c     )) </trace>
-    rule <s> ~ c2a      => . ... </s> <trace> ... (.List => ListItem(~ c2a     )) </trace>
-    rule <s> ~ c2loop   => . ... </s> <trace> ... (.List => ListItem(~ c2loop  )) </trace>
-    rule <s> ~ loopRule => . ... </s> <trace> ... (.List => ListItem(~ loopRule)) </trace>
+    rule <s> ~ RT:#RuleTag => . ... </s>
+         <trace> ... (.List => ListItem(~ RT)) </trace>
 endmodule
