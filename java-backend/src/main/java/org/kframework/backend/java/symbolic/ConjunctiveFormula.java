@@ -1139,6 +1139,9 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 }
             }
         }
+        if (isFalse()) {
+            sb.append("\n  truth: FALSE");
+        }
         sb.append("\n)");
         return sb.toString();
     }

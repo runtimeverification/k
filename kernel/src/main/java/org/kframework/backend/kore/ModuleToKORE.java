@@ -8,6 +8,7 @@ import com.google.common.collect.SetMultimap;
 import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.builtin.BooleanUtils;
+import org.kframework.builtin.Hooks;
 import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.AddSortInjections;
@@ -25,6 +26,7 @@ import org.kframework.definition.Sentence;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.Attributes;
 import org.kframework.kil.loader.Constants;
+import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.InjectedKLabel;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -70,11 +72,13 @@ public class ModuleToKORE {
     private final Map<String, List<Set<Integer>>> polyKLabels = new HashMap<>();
     private final KLabel topCellInitializer;
     private final Set<String> mlBinders = new HashSet<>();
+    private final KompileOptions options;
 
-    public ModuleToKORE(Module module, FileUtil files, KLabel topCellInitializer) {
+    public ModuleToKORE(Module module, FileUtil files, KLabel topCellInitializer, KompileOptions options) {
         this.module = module;
         this.files = files;
         this.topCellInitializer = topCellInitializer;
+        this.options = options;
     }
     private static final boolean METAVAR = false;
 
@@ -173,7 +177,7 @@ public class ModuleToKORE {
                 impureFunctions.add(prod.klabel().get().name());
             }
             sb.append("  ");
-            if (isFunction(prod) && prod.att().contains(Attribute.HOOK_KEY) && !prod.att().get(Attribute.HOOK_KEY).startsWith("ARRAY.")) {
+            if (isFunction(prod) && prod.att().contains(Attribute.HOOK_KEY) && isRealHook(prod.att())) {
                 sb.append("hooked-");
             }
             sb.append("symbol ");
@@ -541,6 +545,17 @@ public class ModuleToKORE {
         return sb.toString();
     }
 
+    private boolean isRealHook(Att att) {
+      String hook = att.get(Attribute.HOOK_KEY);
+      if (hook.startsWith("ARRAY.")) {
+        return false;
+      }
+      if (options.hookNamespaces.stream().anyMatch(ns -> hook.startsWith(ns + "."))) {
+        return true;
+      }
+      return Hooks.namespaces.stream().anyMatch(ns -> hook.startsWith(ns + "."));
+    }
+
     private static boolean isBuiltinProduction(Production prod) {
         return prod.klabel().nonEmpty() && ConstructorChecks.isBuiltinLabel(prod.klabel().get());
     }
@@ -867,7 +882,7 @@ public class ModuleToKORE {
             }
         }
         Att att = prod.att().remove("constructor");
-        if (att.contains(Attribute.HOOK_KEY) && att.get(Attribute.HOOK_KEY).startsWith("ARRAY.")) {
+        if (att.contains(Attribute.HOOK_KEY) && !isRealHook(att)) {
             att = att.remove("hook");
         }
         if (isConstructor) {

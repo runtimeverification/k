@@ -76,7 +76,7 @@ public class LLVMRewriter implements Function<Definition, Rewriter> {
             public RewriterResult execute(K k, Optional<Integer> depth) {
                 Module mod = def.executionModule();
                 ExpandMacros macroExpander = new ExpandMacros(mod, files, kompileOptions, false);
-                ModuleToKORE converter = new ModuleToKORE(mod, files, def.topCellInitializer);
+                ModuleToKORE converter = new ModuleToKORE(mod, files, def.topCellInitializer, kompileOptions);
                 K withMacros = macroExpander.expand(k);
                 K kWithInjections = new AddSortInjections(mod).addInjections(withMacros);
                 converter.convert(kWithInjections);
