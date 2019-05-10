@@ -73,6 +73,9 @@ public class KompileOptions implements Serializable {
     @Parameter(names="--profile-rule-parsing", description="Generate time in seconds to parse each rule in the semantics. Found in -kompiled directory under timing.log.")
     public boolean profileRules;
 
+    @Parameter(names="--hook-namespaces", listConverter=StringListConverter.class, description="<string> is a whitespace-separated list of namespaces to include in the hooks defined in the definition")
+    public List<String> hookNamespaces = Collections.emptyList();
+
     @ParametersDelegate
     public Experimental experimental = new Experimental();
 
