@@ -1067,6 +1067,8 @@ public class ModuleToKORE {
         return "\\exists";
       case "#Forall":
         return "\\forall";
+      case "#AG":
+        return "allPathGlobally";
       default:
         throw KEMException.compilerError("Unsuppored kore connective in rule: " + klabel);
       }

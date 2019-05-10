@@ -166,6 +166,7 @@ public class KoreBackend implements Backend {
         ModuleTransformer resolveSemanticCasts = ModuleTransformer.fromSentenceTransformer(
                 new ResolveSemanticCasts(true)::resolve,
                 "resolving semantic casts");
+        ModuleTransformer expandMacros = ModuleTransformer.fromSentenceTransformer((m, s) -> new ExpandMacros(m, files, kompileOptions, false).expand(s), "expand macros");
         ModuleTransformer subsortKItem = ModuleTransformer.from(Kompile::subsortKItem, "subsort all sorts to KItem");
         ModuleTransformer addImplicitComputationCell = ModuleTransformer.fromSentenceTransformer(
                 new AddImplicitComputationCell(configInfo, labelInfo),
@@ -177,6 +178,7 @@ public class KoreBackend implements Backend {
 
         return m -> resolveAnonVars
                 .andThen(resolveSemanticCasts)
+                .andThen(expandMacros)
                 .andThen(addImplicitComputationCell)
                 .andThen(resolveFreshConstants)
                 .andThen(concretizeCells)
