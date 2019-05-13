@@ -148,11 +148,18 @@ pipeline {
                   }
                 }
               }
+              post {
+                failure {
+                  slackSend color: '#cb2431'                                            \
+                          , channel: '#k'                                               \
+                          , message: "Ubuntu Xenial Packaging Failed: ${env.BUILD_URL}"
+                }
+              }
             }
             stage('Build and Package on Debian Stretch') {
               when {
                 anyOf {
-                  not { changeRequest() } 
+                  not { changeRequest() }
                   changelog '.*^\\[build-system\\] .+$'
                   changeset 'Jenkinsfile'
                   changeset 'Dockerfile'
@@ -206,11 +213,18 @@ pipeline {
                   }
                 }
               }
+              post {
+                failure {
+                  slackSend color: '#cb2431'                                             \
+                          , channel: '#k'                                                \
+                          , message: "Debian Stretch Packaging Failed: ${env.BUILD_URL}"
+                }
+              }
             }
             stage('Build and Package on Arch Linux') {
               when {
                 anyOf {
-                  not { changeRequest() } 
+                  not { changeRequest() }
                   changelog '.*^\\[build-system\\] .+$'
                   changeset 'Jenkinsfile'
                   changeset 'Dockerfile'
@@ -262,6 +276,13 @@ pipeline {
                   }
                 }
               }
+              post {
+                failure {
+                  slackSend color: '#cb2431'                                         \
+                          , channel: '#k'                                            \
+                          , message: "Arch Linux Packaging Failed: ${env.BUILD_URL}"
+                }
+              }
             }
           }
         }
@@ -269,7 +290,7 @@ pipeline {
           when {
             expression { return false } // disabled until we get a license
             anyOf {
-              not { changeRequest() } 
+              not { changeRequest() }
               changelog '.*^\\[build-system\\] .+$'
               changeset 'Jenkinsfile'
               changeset 'Dockerfile'
@@ -301,6 +322,13 @@ pipeline {
               }
             }
           }
+          post {
+            failure {
+              slackSend color: '#cb2431'                                    \
+                      , channel: '#k'                                       \
+                      , message: "MacOS Packaging Failed: ${env.BUILD_URL}"
+            }
+          }
         }
       }
     }
@@ -312,7 +340,7 @@ pipeline {
           reuseNode true
         }
       }
-      when { 
+      when {
         not { changeRequest() }
         branch 'master'
         beforeAgent true
@@ -355,6 +383,13 @@ pipeline {
           curl -X PATCH --data '{"draft": false}' https://api.github.com/repos/kframework/k/releases/$ID?access_token=$GITHUB_TOKEN
           curl --data '{"state": "success","target_url": "'$BUILD_URL'","description": "Build succeeded."}' https://api.github.com/repos/kframework/k/statuses/$(git rev-parse origin/master)?access_token=$GITHUB_TOKEN
         '''
+      }
+      post {
+        failure {
+          slackSend color: '#cb2431'                                 \
+                  , channel: '#k'                                    \
+                  , message: "Deploy Phase Failed: ${env.BUILD_URL}"
+        }
       }
     }
   }
