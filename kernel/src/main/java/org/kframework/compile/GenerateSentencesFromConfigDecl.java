@@ -102,7 +102,7 @@ public class GenerateSentencesFromConfigDecl {
                                         cellContents, null, cfgAtt, m, kore);
 
                                 boolean isLeafCell = childResult._4();
-                                Tuple4<Set<Sentence>, Sort, K, Boolean> myResult = computeSentencesOfWellFormedCell(isLeafCell, isStream, kore, multiplicity, cfgAtt, m, cellName, cellProperties,
+                                Tuple4<Set<Sentence>, Sort, K, Boolean> myResult = computeSentencesOfWellFormedCell(isLeafCell, isStream, multiplicity, cfgAtt, m, cellName, cellProperties,
                                         childResult._2(), childResult._3(), ensures, hasConfigOrRegularVariable(cellContents));
                                 return Tuple4.apply((Set<Sentence>)childResult._1().$bar(myResult._1()), Lists.newArrayList(myResult._2()), myResult._3(), false);
                             }
@@ -281,7 +281,6 @@ public class GenerateSentencesFromConfigDecl {
     private static Tuple4<Set<Sentence>, Sort, K, Boolean> computeSentencesOfWellFormedCell(
             boolean isLeaf,
             boolean isStream,
-            boolean kore,
             Multiplicity multiplicity,
             Att configAtt,
             Module m,
@@ -486,7 +485,7 @@ public class GenerateSentencesFromConfigDecl {
             }
         }
 
-        if (cellProperties.contains("exit") && kore) {
+        if (cellProperties.contains("exit")) {
             KLabel getExitCodeLabel = KLabel("getExitCode");
             Production getExitCode = Production(getExitCodeLabel, Sorts.Int(), Seq(Terminal("getExitCode"), Terminal("("), NonTerminal(Sorts.GeneratedTopCell()), Terminal(")")), Att.empty().add("function"));
             sentences.add(getExitCode);
