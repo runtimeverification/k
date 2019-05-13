@@ -288,7 +288,6 @@ pipeline {
         }
         stage('Build and Package on Mac OS') {
           when {
-            expression { return false } // disabled until we get a license
             anyOf {
               not { changeRequest() }
               changelog '.*^\\[build-system\\] .+$'
