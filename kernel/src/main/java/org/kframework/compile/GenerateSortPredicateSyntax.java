@@ -26,7 +26,7 @@ public class GenerateSortPredicateSyntax {
             Production prod = Production(KLabel("is" + sort.toString()), Sorts.Bool(),
                     Seq(Terminal("is" + sort.toString()), Terminal("("), NonTerminal(Sorts.K()), Terminal(")")),
                     Att().add(Attribute.FUNCTION_KEY).add(Attribute.PREDICATE_KEY, Sort.class, sort));
-            if (!mod.productions().contains(prod))
+            if (!mod.productionsFor().contains(prod.klabel().get()) || mod.productionsFor().apply(prod.klabel().get()).isEmpty())
                 res.add(prod);
         }
         if (!res.isEmpty()) {

@@ -176,6 +176,7 @@ public class Kompile {
         Function1<Definition, Definition> resolveIO = (d -> Kompile.resolveIOStreams(kem, d));
 
         return def -> resolveIO
+                .andThen(generateSortPredicateSyntax)
                 .andThen(resolveFunctionWithConfig)
                 .andThen(resolveFun)
                 .andThen(resolveStrict)
@@ -187,7 +188,6 @@ public class Kompile {
                 .andThen(subsortKItem)
                 .andThen(expandMacros)
                 .andThen(guardOrs)
-                .andThen(generateSortPredicateSyntax)
                 .andThen(generateSortProjections)
                 .andThen(Kompile::resolveFreshConstants)
                 .andThen(AddImplicitComputationCell::transformDefinition)

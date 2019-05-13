@@ -56,7 +56,7 @@ public class GenerateSortPredicateRules {
         this.mod = mod;
         predicateRules = stream(mod.rules()).filter(this::isPredicate).collect(Collectors.toSet());
         return Module(mod.name(), mod.imports(), (Set<Sentence>) mod.localSentences().$bar(stream(mod.definedSorts())
-                .flatMap(this::gen).collect(Collections.toSet())), mod.att());
+                .flatMap(this::gen).map(s -> new ResolveFunctionWithConfig(mod).resolve(mod, s)).collect(Collections.toSet())), mod.att());
     }
 
     private Stream<? extends Sentence> gen(Sort sort) {
@@ -67,10 +67,6 @@ public class GenerateSortPredicateRules {
             return Stream.empty();
         }
         List<Sentence> res = new ArrayList<>();
-        Production prod = Production(KLabel("is" + sort.toString()), Sorts.Bool(),
-                Seq(Terminal("is" + sort.toString()), Terminal("("), NonTerminal(Sorts.K()), Terminal(")")),
-                Att().add(Attribute.FUNCTION_KEY).add(Attribute.PREDICATE_KEY, Sort.class, sort));
-        res.add(prod);
         java.util.Set<Sort> nonProtectingSubsorts = new HashSet<>();
         nonProtectingSubsorts.add(sort);
         // we compute the set of subsorts which protect the parent sort (ie do not add terms to it)
