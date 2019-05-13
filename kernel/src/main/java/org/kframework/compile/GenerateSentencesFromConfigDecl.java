@@ -486,11 +486,10 @@ public class GenerateSentencesFromConfigDecl {
         }
 
         if (cellProperties.contains("exit")) {
-            KLabel getExitCodeLabel = KLabel("getExitCode");
-            Production getExitCode = Production(getExitCodeLabel, Sorts.Int(), Seq(Terminal("getExitCode"), Terminal("("), NonTerminal(Sorts.GeneratedTopCell()), Terminal(")")), Att.empty().add("function"));
+            Production getExitCode = Production(KLabels.GET_EXIT_CODE, Sorts.Int(), Seq(Terminal("getExitCode"), Terminal("("), NonTerminal(Sorts.GeneratedTopCell()), Terminal(")")), Att.empty().add("function"));
             sentences.add(getExitCode);
             KVariable var = KVariable("Exit", Att.empty().add(Sort.class, Sorts.Int()));
-            Rule getExitCodeRule = Rule(KRewrite(KApply(getExitCodeLabel, IncompleteCellUtils.make(KLabels.GENERATED_TOP_CELL, true, IncompleteCellUtils.make(KLabel(klabel), false, var, false), true)), var), BooleanUtils.TRUE, BooleanUtils.TRUE);
+            Rule getExitCodeRule = Rule(KRewrite(KApply(KLabels.GET_EXIT_CODE, IncompleteCellUtils.make(KLabels.GENERATED_TOP_CELL, true, IncompleteCellUtils.make(KLabel(klabel), false, var, false), true)), var), BooleanUtils.TRUE, BooleanUtils.TRUE);
             sentences.add(getExitCodeRule);
         }
         return Tuple4.apply(immutable(sentences),cellsSort,rhs, false);

@@ -7,6 +7,8 @@ import org.kframework.kore.KLabel;
 import static org.kframework.kore.KORE.KLabel;
 
 public class KLabels {
+    public static final KLabel GET_EXIT_CODE = KLabel("getExitCode");
+
     public static final KLabel AND = KLabel("_andBool_");
     public static final KLabel OR = KLabel("_orBool_");
 
