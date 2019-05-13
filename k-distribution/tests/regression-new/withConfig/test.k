@@ -32,4 +32,10 @@ rule 4 => ancestor()
 syntax KItem ::= ancestor() [function]
 rule ancestor() => foo(0)
 
+syntax Foo ::= term()
+rule isFoo(_:Int) => isZero()
+
+rule 5 => 6
+  requires isFoo(5)
+
 endmodule
