@@ -2,7 +2,7 @@
 
 requires "kast.k"
 
-module EQ-SYNTAX
+module KAST-OUT-SYNTAX
   imports INT-SYNTAX
   imports ML-SYNTAX
 
@@ -11,7 +11,7 @@ module EQ-SYNTAX
   rule init(1) => { 3 #Equals 3 } [macro]
 endmodule
 
-module EQ
-  imports EQ-SYNTAX
+module KAST-OUT
+  imports KAST-OUT-SYNTAX
   configuration <k color="green"> $PGM:Pgm </k>
 endmodule
