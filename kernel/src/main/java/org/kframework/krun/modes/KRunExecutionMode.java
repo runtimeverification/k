@@ -67,6 +67,6 @@ public class KRunExecutionMode implements ExecutionMode {
             return Tuple2.apply(res._2(), 0);
         }
         RewriterResult res = rewriter.execute(k, Optional.ofNullable(kRunOptions.depth));
-        return Tuple2.apply(res.k(), res.exitCode().orElse(0));
+        return Tuple2.apply(res.k(), res.exitCode());
     }
 }

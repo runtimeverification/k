@@ -132,7 +132,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                 if (haskellKRunOptions.dryRun) {
                     System.out.println(String.join(" ", koreCommand));
                     kprint.options.output = OutputModes.NONE;
-                    return new RewriterResult(Optional.empty(), Optional.empty(), k);
+                    return new RewriterResult(Optional.empty(), -1, k);
                 }
                 try {
                     File korePath = koreDirectory == null ? null : new File(koreDirectory);
@@ -141,7 +141,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                     Pattern kore = textToKore.parsePattern(koreOutputFile);
                     KoreToK koreToK = new KoreToK(idsToLabels, mod.sortAttributesFor(), StringUtil::enquoteKString);
                     K outputK = koreToK.apply(kore);
-                    return new RewriterResult(Optional.empty(), Optional.of(execStatus), outputK);
+                    return new RewriterResult(Optional.empty(), execStatus, outputK);
                 } catch (IOException e) {
                     throw KEMException.criticalError("I/O Error while executing", e);
                 } catch (InterruptedException e) {

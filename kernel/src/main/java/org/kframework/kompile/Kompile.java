@@ -277,7 +277,7 @@ public class Kompile {
     }
 
     public static Definition resolveFreshConstants(Definition input) {
-        return DefinitionTransformer.from(m -> GeneratedTopFormat.resolve(new ResolveFreshConstants(input, false).resolve(m)), "resolving !Var variables")
+        return DefinitionTransformer.from(m -> GeneratedTopFormat.resolve(new ResolveFreshConstants(input, true).resolve(m)), "resolving !Var variables")
                 .apply(input);
     }
 

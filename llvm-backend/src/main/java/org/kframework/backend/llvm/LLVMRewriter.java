@@ -97,7 +97,7 @@ public class LLVMRewriter implements Function<Definition, Rewriter> {
                     Pattern kore = textToKore.parsePattern(koreOutputFile);
                     KoreToK koreToK = new KoreToK(idsToLabels, mod.sortAttributesFor(), StringUtil::enquoteKString);
                     K outputK = koreToK.apply(kore);
-                    return new RewriterResult(Optional.empty(), Optional.of(exit), outputK);
+                    return new RewriterResult(Optional.empty(), exit, outputK);
                 } catch (IOException e) {
                     throw KEMException.criticalError("I/O Error while executing", e);
                 } catch (InterruptedException e) {

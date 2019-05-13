@@ -10,6 +10,7 @@ import org.kframework.RewriterResult;
 import org.kframework.Strategy;
 import org.kframework.attributes.Att;
 import org.kframework.backend.java.builtins.BoolToken;
+import org.kframework.backend.java.builtins.IntToken;
 import org.kframework.backend.java.builtins.FreshOperations;
 import org.kframework.backend.java.compile.KOREtoBackendKIL;
 import org.kframework.backend.java.kil.BuiltinList;
@@ -106,7 +107,28 @@ public class SymbolicRewriter {
         if (global.globalOptions.verbose) {
             printSummaryBox(null, null, 1, step, 0);
         }
-        return new RewriterResult(Optional.of(step), Optional.empty(), afterVariableRename.term());
+
+        int exitCode = 0;
+        try {
+            //List<K> items = new ArrayList<K>();
+            //items.add(afterVariableRename.term());
+            //Term getExitCode = constructor.KApply1(KLabels.GET_EXIT_CODE, KORE.KList(items), afterVariableRename.att());
+            //ConstrainedTerm exitCodePattern = new ConstrainedTerm(getExitCode, constrainedTerm.termContext());
+            //List<ConstrainedTerm> exitCodes = computeRewriteStep(exitCodePattern, 0, true, initTerm);
+            //System.out.println(exitCodes);
+            //exitCode = ((IntToken) exitCodePattern.term()).unsignedByteValue();
+            KItem getExitCode = KItem.of(KLabelConstant.of(KLabels.GET_EXIT_CODE, this.definition), KList.concatenate(afterVariableRename.term()), this.global, afterVariableRename.att());
+            System.out.println("stage: " + global.stage.toString());
+            System.out.println(getExitCode.toString());
+            Term exitCodePattern = getExitCode.resolveFunctionAndAnywhere(afterVariableRename.termContext());
+            System.out.println(exitCodePattern.toString());
+            exitCode = ((IntToken) exitCodePattern).unsignedByteValue();
+        } catch (ArithmeticException e) {
+            System.err.println("ArithmeticException");
+        } catch (ClassCastException e) {
+            System.err.println("ClassCastException");
+        }
+        return new RewriterResult(Optional.of(step), exitCode, afterVariableRename.term());
     }
 
     private List<ConstrainedTerm> computeRewriteStep(ConstrainedTerm constrainedTerm, int step, boolean computeOne,
