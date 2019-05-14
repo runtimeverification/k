@@ -18,6 +18,7 @@ import org.kframework.kore.KLabel;
 import org.kframework.kore.KRewrite;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.VisitK;
+import org.kframework.kore.TransformK;
 import org.kframework.utils.errorsystem.KEMException;
 
 import java.util.ArrayList;
@@ -121,8 +122,25 @@ public class ResolveContexts {
                 super.apply(k);
             }
         }.process(body);
+        K cooled = new VisitK() {
+            K cooled;
+            public K process(K k) {
+                apply(k);
+                if (cooled != null)
+                    return cooled;
+                else
+                    return k;
+            }
 
-        K cooled = RewriteToTop.toLeft(body);
+            @Override
+            public void apply(KApply k) {
+                if (input.attributesFor().getOrElse(k.klabel(), () -> Att()).contains("maincell")) {
+                  cooled = k.items().get(1);
+                }
+                super.apply(k);
+            }
+        }.process(RewriteToTop.toLeft(body));
+
         // TODO(dwightguth): generate freezers better for pretty-printing purposes
         List<ProductionItem> items = new ArrayList<>();
         KLabel freezerLabel;
@@ -144,8 +162,20 @@ public class ResolveContexts {
         Production freezer = Production(freezerLabel, Sorts.KItem(), immutable(items), Att());
         K frozen = KApply(freezerLabel, vars.values().stream().collect(Collections.toList()));
         return Stream.of(freezer,
-                Rule(KRewrite(cooled, KSequence(heated, frozen)), requiresHeat, BooleanUtils.TRUE, context.att().add("heat")),
-                Rule(KRewrite(KSequence(heated, frozen), cooled), requiresCool, BooleanUtils.TRUE, context.att().add("cool")));
+                Rule(insert(body, KRewrite(cooled, KSequence(heated, frozen)), input), requiresHeat, BooleanUtils.TRUE, context.att().add("heat")),
+                Rule(insert(body, KRewrite(KSequence(heated, frozen), cooled), input), requiresCool, BooleanUtils.TRUE, context.att().add("cool")));
+    }
+
+    private K insert(K body, K rewrite, Module mod) {
+      return new TransformK() {
+          @Override
+          public K apply(KApply k) {
+              if (mod.attributesFor().getOrElse(k.klabel(), () -> Att()).contains("maincell")) {
+                  return KApply(k.klabel(), k.items().get(0), rewrite, k.items().get(2));
+              }
+              return super.apply(k);
+          }
+      }.apply(body);
     }
 
     /**
