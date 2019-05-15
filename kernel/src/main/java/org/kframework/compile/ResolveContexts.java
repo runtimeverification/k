@@ -167,15 +167,25 @@ public class ResolveContexts {
     }
 
     private K insert(K body, K rewrite, Module mod) {
-      return new TransformK() {
+      class Holder {
+          boolean found = false;
+      }
+      Holder h = new Holder();
+      K inserted = new TransformK() {
           @Override
           public K apply(KApply k) {
               if (mod.attributesFor().getOrElse(k.klabel(), () -> Att()).contains("maincell")) {
+                  h.found = true;
                   return KApply(k.klabel(), k.items().get(0), rewrite, k.items().get(2));
               }
               return super.apply(k);
           }
       }.apply(body);
+      if (h.found) {
+          return inserted;
+      } else {
+          return rewrite;
+      }
     }
 
     /**
