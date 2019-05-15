@@ -2,7 +2,7 @@
 
 requires "map-tests.k"
 
-module LOOKUP-23-SPEC
+module LOOKUP-24-SPEC
     imports MAP-TESTS
 
     rule <k> lookup ( (y |-> 4) [ x ] ==K 4 ) => . </k>
