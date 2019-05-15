@@ -10,6 +10,8 @@ import org.kframework.attributes.Source;
 import org.kframework.kore.Sort;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.outer.Outer;
+import org.kframework.unparser.OutputModes;
+import org.kframework.unparser.PrintOptions;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.RequestScoped;
@@ -66,6 +68,9 @@ public final class KastOptions {
 
     @ParametersDelegate
     public DefinitionLoadingOptions definitionLoading = new DefinitionLoadingOptions();
+
+    @ParametersDelegate
+    public PrintOptions print = new PrintOptions(OutputModes.KAST);
 
     @Parameter(names={"--expression", "-e"}, description="An expression to parse passed on the command " +
     "line. It is an error to provide both this option and a file to parse.")

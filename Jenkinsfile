@@ -148,11 +148,18 @@ pipeline {
                   }
                 }
               }
+              post {
+                failure {
+                  slackSend color: '#cb2431'                                            \
+                          , channel: '#k'                                               \
+                          , message: "Ubuntu Xenial Packaging Failed: ${env.BUILD_URL}"
+                }
+              }
             }
             stage('Build and Package on Debian Stretch') {
               when {
                 anyOf {
-                  not { changeRequest() } 
+                  not { changeRequest() }
                   changelog '.*^\\[build-system\\] .+$'
                   changeset 'Jenkinsfile'
                   changeset 'Dockerfile'
@@ -206,11 +213,18 @@ pipeline {
                   }
                 }
               }
+              post {
+                failure {
+                  slackSend color: '#cb2431'                                             \
+                          , channel: '#k'                                                \
+                          , message: "Debian Stretch Packaging Failed: ${env.BUILD_URL}"
+                }
+              }
             }
             stage('Build and Package on Arch Linux') {
               when {
                 anyOf {
-                  not { changeRequest() } 
+                  not { changeRequest() }
                   changelog '.*^\\[build-system\\] .+$'
                   changeset 'Jenkinsfile'
                   changeset 'Dockerfile'
@@ -262,14 +276,20 @@ pipeline {
                   }
                 }
               }
+              post {
+                failure {
+                  slackSend color: '#cb2431'                                         \
+                          , channel: '#k'                                            \
+                          , message: "Arch Linux Packaging Failed: ${env.BUILD_URL}"
+                }
+              }
             }
           }
         }
         stage('Build and Package on Mac OS') {
           when {
-            expression { return false } // disabled until we get a license
             anyOf {
-              not { changeRequest() } 
+              not { changeRequest() }
               changelog '.*^\\[build-system\\] .+$'
               changeset 'Jenkinsfile'
               changeset 'Dockerfile'
@@ -301,6 +321,13 @@ pipeline {
               }
             }
           }
+          post {
+            failure {
+              slackSend color: '#cb2431'                                    \
+                      , channel: '#k'                                       \
+                      , message: "MacOS Packaging Failed: ${env.BUILD_URL}"
+            }
+          }
         }
       }
     }
@@ -312,7 +339,7 @@ pipeline {
           reuseNode true
         }
       }
-      when { 
+      when {
         not { changeRequest() }
         branch 'master'
         beforeAgent true
@@ -341,6 +368,7 @@ pipeline {
           eval `opam config env`
           . $HOME/.cargo/env
           echo 'Deploying K...'
+          hash -r
           mvn deploy -DskipKTest -Dcheckstyle.skip # TODO: fix checkstyle bug
           COMMIT=$(git rev-parse --short HEAD)
           DESCRIPTION='This is the nightly release of the K framework. To install, download the appropriate binary package and install using your package manager. You can install a debian package via `sudo apt-get install ./kframework_5.0.0_amd64_$ID.deb` for the appropriate version codename $ID. On Debian Stretch, you also must first enable stretch-backports by running `sudo echo \\"deb http://ftp.debian.org/debian stretch-backports main\\" > /etc/apt/sources.list.d/stretch-backports.list; sudo apt-get update`. You can install on Arch Linux using `sudo pacman -S ./kframework-5.0.0-1-x86_64.pkg.tar.xz`. If your OS is not supported, you can download and extract the \\"Platform-Independent K binary\\", and follow the instructions in INSTALL.md within the target directory. Note however that this will not support the Haskell or LLVM Backends. On Windows, start by installing [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10) with Ubuntu (or an Ubuntu VM), after which you can install like Ubuntu. K requires gcc and other Linux libraries to run, and building on native Windows, Cygwin, or MINGW is not supported.'
@@ -354,6 +382,13 @@ pipeline {
           curl -X PATCH --data '{"draft": false}' https://api.github.com/repos/kframework/k/releases/$ID?access_token=$GITHUB_TOKEN
           curl --data '{"state": "success","target_url": "'$BUILD_URL'","description": "Build succeeded."}' https://api.github.com/repos/kframework/k/statuses/$(git rev-parse origin/master)?access_token=$GITHUB_TOKEN
         '''
+      }
+      post {
+        failure {
+          slackSend color: '#cb2431'                                 \
+                  , channel: '#k'                                    \
+                  , message: "Deploy Phase Failed: ${env.BUILD_URL}"
+        }
       }
     }
   }

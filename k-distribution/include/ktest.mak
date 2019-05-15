@@ -16,6 +16,8 @@ KEQ=$(abspath $(MAKEFILE_PATH)/../bin/keq)
 KSERVER=$(abspath $(MAKEFILE_PATH)/../bin/kserver)
 # and ksearch
 KSEARCH=$(abspath $(MAKEFILE_PATH)/../bin/krun) --search-all
+# and kast
+KAST=$(abspath $(MAKEFILE_PATH)/../bin/kast)
 # path relative to current definition of test programs
 TESTDIR?=tests
 # path to put -kompiled directory in
@@ -27,6 +29,7 @@ TESTS?=$(wildcard $(TESTDIR)/*.$(EXT))
 PROOF_TESTS?=$(wildcard $(TESTDIR)/*-spec.k)
 SEARCH_TESTS?=$(wildcard $(TESTDIR)/*.$(EXT).search)
 STRAT_TESTS?=$(wildcard $(TESTDIR)/*.strat)
+KAST_TESTS?=$(wildcard $(TESTDIR)/*.kast)
 # default KOMPILE_BACKEND
 KOMPILE_BACKEND?=ocaml
 
@@ -35,7 +38,7 @@ CHECK=| diff -
 .PHONY: kompile krun all clean update-results proofs
 
 # run all tests
-all: kompile krun proofs searches strat
+all: kompile krun proofs searches strat kast
 
 # run only kompile
 kompile: $(DEFDIR)/$(DEF)-kompiled/timestamp
@@ -50,6 +53,8 @@ proofs: $(PROOF_TESTS)
 searches: $(SEARCH_TESTS)
 
 strat: $(STRAT_TESTS)
+
+kast: $(KAST_TESTS)
 
 # run all tests and regenerate output files
 update-results: all
@@ -84,6 +89,13 @@ ifeq ($(TESTDIR),$(RESULTDIR))
 	$(KRUN) $@.input $(KRUN_FLAGS) $(DEBUG) -d $(DEFDIR) -cSTRATEGY="$(shell cat $@)" $(CHECK) $@.out
 else
 	$(KRUN) $@.input $(KRUN_FLAGS) $(DEBUG) -d $(DEFDIR) -cSTRATEGY="$(shell cat $@)" $(CHECK) $(RESULT_DIR)/$(notdir $@).out
+endif
+
+%.kast: kompile
+ifeq ($(TESTDIR),$(RESULTDIR))
+	$(KAST) $@ $(KAST_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $@.out
+else
+	$(KAST) $@ $(KAST_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $(RESULTDIR)/$(notdir $@).out
 endif
 
 clean:
