@@ -1,4 +1,3 @@
-open Lexer
 open Constants
 open Constants.K
 open Prelude
