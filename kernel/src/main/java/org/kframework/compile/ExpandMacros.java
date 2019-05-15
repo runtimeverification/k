@@ -64,6 +64,7 @@ public class ExpandMacros {
     private final PrintWriter coverage;
     private final FileChannel channel;
     private final boolean reverse;
+    private final ResolveFunctionWithConfig transformer;
 
     public ExpandMacros(Module mod, FileUtil files, KompileOptions kompileOptions, boolean reverse) {
         this.mod = mod;
@@ -71,6 +72,7 @@ public class ExpandMacros {
         this.cover = kompileOptions.coverage;
         files.resolveKompiled(".").mkdirs();
         macros = stream(mod.rules()).filter(r -> isMacro(r.att(), reverse)).sorted(Comparator.comparing(r -> r.att().contains("owise"))).collect(Collectors.groupingBy(r -> ((KApply)getLeft(r, reverse)).klabel()));
+        transformer = new ResolveFunctionWithConfig(mod);
         if (cover) {
             try {
                 FileOutputStream os = new FileOutputStream(files.resolveKompiled("coverage.txt"), true);
@@ -306,9 +308,9 @@ public class ExpandMacros {
 
     public Sentence expand(Sentence s) {
         if (s instanceof Rule && !s.att().contains("macro") && !s.att().contains("alias")) {
-            return new ResolveFunctionWithConfig(mod).resolve(mod, expand((Rule) s));
+            return transformer.resolve(mod, expand((Rule) s));
         } else if (s instanceof Context) {
-            return new ResolveFunctionWithConfig(mod).resolve(mod, expand((Context) s));
+            return transformer.resolve(mod, expand((Context) s));
         } else {
             return s;
         }
