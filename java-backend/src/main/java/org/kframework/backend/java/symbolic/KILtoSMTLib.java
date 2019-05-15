@@ -30,6 +30,7 @@ import org.kframework.builtin.Sorts;
 import org.kframework.kil.Attribute;
 import org.kframework.kore.KORE;
 import org.kframework.krun.KRunOptions;
+import org.kframework.utils.errorsystem.KEMException;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -423,7 +424,10 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
      */
     @Override
     public SMTLibTerm transform(ConjunctiveFormula constraint) {
-        assert constraint.disjunctions().isEmpty() : "disjunctions are not supported by SMT translation";
+        if (!constraint.disjunctions().isEmpty()) {
+            throw KEMException.criticalError(
+                    "disjunctions are not supported by SMT translation for:\n" + constraint.toStringMultiline());
+        }
         Set<Equality> equalities = Sets.newLinkedHashSet(constraint.equalities());
         if (!allowNewVars) {
             constraint.substitution().entrySet().stream()
