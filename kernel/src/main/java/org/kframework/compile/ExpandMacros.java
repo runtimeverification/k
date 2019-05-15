@@ -306,9 +306,9 @@ public class ExpandMacros {
 
     public Sentence expand(Sentence s) {
         if (s instanceof Rule && !s.att().contains("macro") && !s.att().contains("alias")) {
-            return expand((Rule) s);
+            return new ResolveFunctionWithConfig(mod).resolve(mod, expand((Rule) s));
         } else if (s instanceof Context) {
-            return expand((Context) s);
+            return new ResolveFunctionWithConfig(mod).resolve(mod, expand((Context) s));
         } else {
             return s;
         }

@@ -46,7 +46,10 @@ public class ResolveFunctionWithConfig {
     private Set<KLabel> withConfigFunctions = new HashSet<>();
 
     public ResolveFunctionWithConfig(Definition d) {
-      Module mod = d.mainModule();
+      this(d.mainModule());
+    }
+
+    public ResolveFunctionWithConfig(Module mod) {
       ComputeTransitiveFunctionDependencies deps = new ComputeTransitiveFunctionDependencies(mod);
       Set<KLabel> functions = stream(mod.productions()).filter(p -> p.att().contains(Attribute.FUNCTION_KEY)).map(p -> p.klabel().get()).collect(Collectors.toSet());
       withConfigFunctions.addAll(functions.stream().filter(f -> stream(mod.rulesFor().getOrElse(f, () -> Collections.<Rule>Set())).anyMatch(r -> ruleNeedsConfig(r))).collect(Collectors.toSet()));
@@ -57,7 +60,7 @@ public class ResolveFunctionWithConfig {
         if (r.body() instanceof KApply && ((KApply)r.body()).klabel().name().equals("#withConfig")) {
             return true;
         }
-        FoldK<Boolean> hasFreshVar = new FoldK<Boolean>() {
+        FoldK<Boolean> hasVarNeedsConfig = new FoldK<Boolean>() {
             @Override
             public Boolean unit() {
                 return false;
@@ -70,10 +73,10 @@ public class ResolveFunctionWithConfig {
 
             @Override
             public Boolean apply(KVariable k) {
-                return k.name().startsWith("!");
+                return k.name().startsWith("!") || k.name().equals("_Configuration");
             }
         };
-        if (hasFreshVar.apply(RewriteToTop.toRight(r.body())) || hasFreshVar.apply(r.requires()) || hasFreshVar.apply(r.ensures())) {
+        if (hasVarNeedsConfig.apply(RewriteToTop.toRight(r.body())) || hasVarNeedsConfig.apply(r.requires()) || hasVarNeedsConfig.apply(r.ensures())) {
             return true;
         }
         return false;
@@ -94,7 +97,7 @@ public class ResolveFunctionWithConfig {
                 context.att());
     }
 
-    public static final KVariable CONFIG_VAR = KVariable("_Configuration", Att().add(Sort.class, Sorts.GeneratedTopCell()));
+    public static final KVariable CONFIG_VAR = KVariable("_Configuration", Att().add(Sort.class, Sorts.GeneratedTopCell()).add("withConfig"));
 
     private K transform(K term, Module module) {
       return new TransformK() {
@@ -211,6 +214,9 @@ public class ResolveFunctionWithConfig {
     }
 
     public Sentence resolve(Module m, Sentence s) {
+        if (s.att().contains(Attribute.MACRO_KEY) || s.att().contains(Attribute.ALIAS_KEY)) {
+            return s;
+        }
         if (s instanceof Rule) {
             return resolve((Rule) s, m);
         } else if (s instanceof Context) {
