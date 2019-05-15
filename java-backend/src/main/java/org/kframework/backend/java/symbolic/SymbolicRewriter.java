@@ -1105,11 +1105,11 @@ public class SymbolicRewriter {
                 if (result != null) {
                     global.stateLog.log(StateLog.LogEvent.SRULE, specRule.toKRewrite(), constrainedTerm.term(),
                             constrainedTerm.constraint(), result.term(), result.constraint());
-                } else {
-                    global.stateLog.log(StateLog.LogEvent.SRULE, specRule.toKRewrite(), constrainedTerm.term(),
-                            constrainedTerm.constraint());
                 }
                 if (global.javaExecutionOptions.logRulesPublic) {
+                    if (result == null) {
+                        System.err.println("Spec rule application: matched but failed to build result");
+                    }
                     RuleSourceUtil.printRuleAndSource(specRule);
                 }
                 return result;
