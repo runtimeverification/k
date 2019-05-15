@@ -94,11 +94,15 @@ public class SymbolicRewriter {
         stopwatch.start();
         ConstrainedTerm initTerm = constrainedTerm;
         int step = 0;
+        prevStats = new TimeMemoryEntry(false);
+
         List<ConstrainedTerm> results;
         while (step != bound && !(results = computeRewriteStep(constrainedTerm, step, true, initTerm)).isEmpty()) {
             /* get the first solution */
             constrainedTerm = results.get(0);
+
             step++;
+            logStep(step, 1, constrainedTerm, false, false, initTerm);
         }
 
         ConstrainedTerm afterVariableRename = new ConstrainedTerm(constrainedTerm.term(), constrainedTerm.termContext());
