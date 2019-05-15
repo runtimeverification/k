@@ -18,6 +18,7 @@ import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.kil.JavaSymbolicObject;
 import org.kframework.backend.java.kil.KItem;
+import org.kframework.backend.java.kil.KItemRepresentation;
 import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.Rule;
@@ -962,13 +963,12 @@ public class SymbolicRewriter {
 
         boolean actuallyLogged = global.javaExecutionOptions.log || forced;
         if (actuallyLogged) {
-            for(String cellName : cellsToLog.keySet()) {
+            for (String cellName : cellsToLog.keySet()) {
                 boolean pretty = cellsToLog.get(cellName);
-                KItem cell = getCell(top, "<" + cellName + ">");
-                if (cell == null) {
-                    continue;
+                List<KItem> cells = getCells(top, "<" + cellName + ">");
+                for (KItem cell : cells) {
+                    print(cell, pretty);
                 }
-                print(cell, pretty);
             }
             if (prettyPC != null) {
                 printConstraint(term.constraint(), prettyPC, initTerm);
@@ -1000,21 +1000,26 @@ public class SymbolicRewriter {
         return o != null ? o.toString() : "";
     }
 
-    private Pattern cellLabelPattern = Pattern.compile("<.+>");
+    private Pattern cellLabelPattern = Pattern.compile("<.+>|.+CellBag_");
 
-    private KItem getCell(KItem root, String label) {
-        if (root.klabel().name().equals(label)) {
-            return root;
+    private List<KItem> getCells(KItem root, String label) {
+        List<KItem> result = new ArrayList<>();
+        collectCells(root, label, result);
+        return result;
+    }
+
+    private void collectCells(KItemRepresentation root, String label, List<KItem> result) {
+        if (root instanceof KItem && root.klabel().name().equals(label)) {
+            result.add((KItem) root);
+            return;
         }
+
         for (K child : root.klist().items()) {
-            if (child instanceof KItem && cellLabelPattern.matcher(((KItem) child).klabel().name()).matches()) {
-                KItem result = getCell((KItem) child, label);
-                if (result != null) {
-                    return result;
-                }
+            if ((child instanceof KItem && cellLabelPattern.matcher(((KItem) child).klabel().name()).matches())
+                    || child instanceof BuiltinList/*child might be a bag of cells*/) {
+                collectCells((KItemRepresentation) child, label, result);
             }
         }
-        return null;
     }
 
     /**
