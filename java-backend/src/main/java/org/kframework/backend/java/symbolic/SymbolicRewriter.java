@@ -416,6 +416,8 @@ public class SymbolicRewriter {
      * It applies the unification constraint on the right-hand side of the rewrite rule,
      * if the rule is not compiled for fast rewriting.
      * It uses build instructions, if the rule is compiled for fast rewriting.
+     *
+     * @return {@code null} if result constraint is unsatisfiable.
      */
     public static ConstrainedTerm buildResult(
             Rule rule,
@@ -1109,8 +1111,14 @@ public class SymbolicRewriter {
                 global.stateLog.log(StateLog.LogEvent.SRULEATTEMPT, specRule.toKRewrite(), constrainedTerm.term(), constrainedTerm.constraint());
                 ConstrainedTerm result = buildResult(specRule, constraint, null, true, constrainedTerm.termContext(),
                         new FormulaContext(FormulaContext.Kind.SpecConstr, specRule, global));
-                global.stateLog.log(StateLog.LogEvent.SRULE, specRule.toKRewrite(), constrainedTerm.term(), constrainedTerm.constraint(), result.term(), result.constraint());
+                if (result != null) {
+                    global.stateLog.log(StateLog.LogEvent.SRULE, specRule.toKRewrite(), constrainedTerm.term(),
+                            constrainedTerm.constraint(), result.term(), result.constraint());
+                }
                 if (global.javaExecutionOptions.logRulesPublic) {
+                    if (result == null) {
+                        System.err.println("Spec rule application: matched but failed to build result");
+                    }
                     RuleSourceUtil.printRuleAndSource(specRule);
                 }
                 return result;
