@@ -67,12 +67,16 @@ public class ExpandMacros {
     private final ResolveFunctionWithConfig transformer;
 
     public ExpandMacros(Module mod, FileUtil files, KompileOptions kompileOptions, boolean reverse) {
+        this(new ResolveFunctionWithConfig(mod), mod, files, kompileOptions, reverse);
+    }
+
+    public ExpandMacros(ResolveFunctionWithConfig transformer, Module mod, FileUtil files, KompileOptions kompileOptions, boolean reverse) {
         this.mod = mod;
         this.reverse = reverse;
         this.cover = kompileOptions.coverage;
         files.resolveKompiled(".").mkdirs();
         macros = stream(mod.rules()).filter(r -> isMacro(r.att(), reverse)).sorted(Comparator.comparing(r -> r.att().contains("owise"))).collect(Collectors.groupingBy(r -> ((KApply)getLeft(r, reverse)).klabel()));
-        transformer = new ResolveFunctionWithConfig(mod);
+        this.transformer = transformer;
         if (cover) {
             try {
                 FileOutputStream os = new FileOutputStream(files.resolveKompiled("coverage.txt"), true);
