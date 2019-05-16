@@ -528,7 +528,7 @@ public class DefinitionToOcaml implements Serializable {
             sb.append("external load_plugin_path : unit -> string = \"load_plugin_path\"\n");
             sb.append("let () = Plugin.load (load_plugin_path ())");
         }
-        sb.append("\nopen Prelude\nopen Constants\nopen Constants.K\nopen Hooks\nopen Run\nlet () = Sys.catch_break true\n");
+        sb.append("\nopen Prelude\nopen Constants\nopen Constants.K\nopen Run\nlet () = Sys.catch_break true\n");
         sb.append("let () = Gc.set { (Gc.get()) with Gc.minor_heap_size = 33554432 }");
     }
 
