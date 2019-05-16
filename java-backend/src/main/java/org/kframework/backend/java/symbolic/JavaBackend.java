@@ -90,7 +90,10 @@ public class JavaBackend implements Backend {
                 .andThen(DefinitionTransformer.fromSentenceTransformer(JavaBackend::convertListItemToNonFunction, "remove function attribute from ListItem production"))
                 .andThen(DefinitionTransformer.fromSentenceTransformer(new NormalizeAssoc(KORE.c()), "normalize assoc"))
                 .andThen(DefinitionTransformer.from(AddBottomSortForListsWithIdenticalLabels.singleton(), "add bottom sorts for lists"))
-                .andThen(DefinitionTransformer.fromSentenceTransformer((m, s) -> new ExpandMacros(m, files, kompileOptions, false).expand(s), "expand macros"))
+                .andThen(d2 -> {
+                  ResolveFunctionWithConfig transformer = new ResolveFunctionWithConfig(d2);
+                  return DefinitionTransformer.fromSentenceTransformer((m, s) -> new ExpandMacros(transformer, m, files, kompileOptions, false).expand(s), "expand macros").apply(d2);
+                })
                 .andThen(DefinitionTransformer.fromSentenceTransformer(new NormalizeAssoc(KORE.c()), "normalize assoc"))
                 .andThen(convertDataStructureToLookup)
                 .andThen(DefinitionTransformer.fromRuleBodyTransformer(JavaBackend::ADTKVariableToSortedVariable, "ADT.KVariable to SortedVariable"))
@@ -114,7 +117,10 @@ public class JavaBackend implements Backend {
                 .andThen(ConcretizeCells::transformModule)
                 .andThen(ModuleTransformer.fromRuleBodyTransformer(RewriteToTop::bubbleRewriteToTopInsideCells, "bubble out rewrites below cells"))
                 .andThen(AddBottomSortForListsWithIdenticalLabels.singleton())
-                .andThen(ModuleTransformer.fromSentenceTransformer((mod, s) -> new ExpandMacros(mod, files, kompileOptions, false).expand(s), "expand macros"))
+                .andThen(m2 -> {
+                  ResolveFunctionWithConfig transformer = new ResolveFunctionWithConfig(m2);
+                  return ModuleTransformer.fromSentenceTransformer((mod, s) -> new ExpandMacros(transformer, mod, files, kompileOptions, false).expand(s), "expand macros").apply(m2);
+                })
                 .andThen(ModuleTransformer.fromKTransformerWithModuleInfo(convertCellCollections::apply, "convert cell to the underlying collections"))
                 .andThen(ModuleTransformer.fromRuleBodyTransformer(JavaBackend::ADTKVariableToSortedVariable, "ADT.KVariable to SortedVariable"))
                 .andThen(ModuleTransformer.fromRuleBodyTransformer(JavaBackend::convertKSeqToKApply, "kseq to kapply"))
