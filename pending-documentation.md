@@ -156,3 +156,44 @@ rule bar(I) => I
 ```
 
 This will rewrite `baz(0, foo)` to `foo`. First `baz(0, foo)` will be rewritten statically to `baz(0, foobar)`. Then the non-`macro` rule will apply (because the rule will have been rewritten to `rule baz(_, I) => I`). Then `foobar` will be rewritten statically after rewriting finishes to `foo` via the reverse form of the alias.
+
+## Other
+
+Backend features not yet given documentation:
+
+* Parser of KORE terms and definitions
+* Term representation of K terms
+* Hooked sorts and symbols
+* Substituting a substitution into the RHS of a rule
+  * domain values
+  * functions
+  * variables
+  * symbols
+  * polymorphism
+  * hooks
+  * injection compaction
+  * overload compaction
+* Pattern Matching / Unification of subject and LHS of rule
+  * domain values
+  * symbols
+  * side conditions
+  * and/or patterns
+  * list patterns
+  * nonlinear variables
+  * map/set patterns
+    * deterministic
+    * nondeterministic
+  * modulo injections
+  * modulo overloads
+* Stepping
+  * initialization
+  * termination
+* Print kore terms
+* Equality/comparison of terms
+* Owise rules
+* Strategy #STUCK axiom
+* User substitution
+  * binders
+  * kvar
+
+To get a complete list of hooks supported by K, you can run `grep -P -R "(?<=[^-])hook\([^)]*\)" k-distribution/include/builtin/ --include "*.k" -ho | sed 's/hook(//' | sed 's/)//' | sort | uniq | grep -v org.kframework`. All of these hooks will also eventually need documentation.
