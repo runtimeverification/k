@@ -185,7 +185,15 @@ Here K1, K2, K3, K4 etc can be any pattern except a pattern containing both func
 
 In the above examples, E1, E2, E3, and E4 can be any pattern that is normally allowed on the lhs of a rule.
 
-When a map or set key contains function symbols, we know that the variables in that key are bound (because of the above restriction), so it is possible to evaluate the function to a concrete term prior to performing the lookup. Indeed, this is the precise semantics which occurs; the function is evaluated and the result is looked up in the collection.
+When a map or set key contains function symbols, we know that the variables in that key are bound (because of the above restriction), so it is possible to evaluate the function to a concrete term prior to performing the lookup. Indeed, this is the precise semantics which occurs; the function is evaluated and the result is looked up in the collection. For example:
+
+```
+syntax Int ::= f(Int) [function]
+rule f(I:Int) => I +Int 1
+rule <k> I:Int => . ...</k> <state>... SetItem(f(I)) ...</state>
+```
+
+This will rewrite I to . if and only if the state cell contains I + 1.
 
 Note that in the case of Set and Map, one guarantee is that K1, K2, K3, and K4 represent /distinct/ elements. Pattern matching fails if the correct number of distinct elements cannot be found.
 
