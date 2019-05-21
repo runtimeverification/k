@@ -157,6 +157,38 @@ rule bar(I) => I
 
 This will rewrite `baz(0, foo)` to `foo`. First `baz(0, foo)` will be rewritten statically to `baz(0, foobar)`. Then the non-`macro` rule will apply (because the rule will have been rewritten to `rule baz(_, I) => I`). Then `foobar` will be rewritten statically after rewriting finishes to `foo` via the reverse form of the alias.
 
+## Collection patterns
+
+It is allowed to write patterns on the left hand side of rules which refer to complex terms of sort Map, List, and Set, despite these patterns ostensibly breaking the rule that terms which are functions should not appear on the left hand side of rules. Such terms are destructured into pattern matching operations. The following forms are allowed:
+
+```
+// 0 or more elements followed by 0 or 1 variables of sort List followed by 0 or more elements
+ListItem(E1) ListItem(E2) L:List ListItem(E3) ListItem(E4)
+
+// the empty list
+.List
+
+// 0 or more elements in any order plus 0 or 1 variables of sort Set in any order
+SetItem(K1) SetItem(K2) S::Set SetItem(K3) SetItem(K4)
+
+// the empty set
+.Set
+
+// 0 or more elements in any order plus by 0 or 1 variables of sort Map in any order
+K1 |-> E1 K2 |-> E2 M::Map K3 |-> E3 K4 |-> E4
+
+// the empty map
+.Map
+```
+
+Here K1, K2, K3, K4 etc can be any pattern except a pattern containing both function symbols and unbound variables. An unbound variable is a variable whose binding cannot be determined by means of decomposing non-set-or-map patterns or map elements whose keys contain no unbound variables. This is determined recursively, ie, the term `K1 |-> E2 E2 |-> E3 E3 |-> E4` is considered to contain no unbound variables. Note that in the pattern `K1 |-> E2 K3 |-> E4 E4 |-> E5`, K1 and K3 are unbound, but E4 is bound because it is bound by deconstructing the key E3, even though E3 is itself unbound.
+
+In the above examples, E1, E2, E3, and E4 can be any pattern that is normally allowed on the lhs of a rule.
+
+When a map or set key contains function symbols, we know that the variables in that key are bound (because of the above restriction), so it is possible to evaluate the function to a concrete term prior to performing the lookup. Indeed, this is the precise semantics which occurs; the function is evaluated and the result is looked up in the collection.
+
+Note that in the case of Set and Map, one guarantee is that K1, K2, K3, and K4 represent /distinct/ elements. Pattern matching fails if the correct number of distinct elements cannot be found.
+
 ## Other
 
 Backend features not yet given documentation:
