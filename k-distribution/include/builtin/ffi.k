@@ -33,11 +33,11 @@ module FFI
   imports STRING
 
   /*@ The FFI call takes an int for the symbol to call, a list of bytes, a list of types, and a return type. */
-  syntax Bytes ::= "#ffiCall" "(" Int "," List "," List "," FFIType ")" [function, hook(FFI.call), impure]
+  syntax Bytes ::= "#ffiCall" "(" Int "," List "," List "," FFIType ")" [function, hook(FFI.call)]
   /*@ The variadic FFI call takes an int for the symbol to call, a list of bytes, a list of fixed types, a list of variadic types and a return type. */
-                 | "#ffiCall" "(" Int "," List "," List "," List "," FFIType ")" [function, hook(FFI.call_variadic), impure]
+                 | "#ffiCall" "(" Int "," List "," List "," List "," FFIType ")" [function, hook(FFI.call_variadic)]
   /*@ The FFI call takes a boolean isVariadic, an int for the symbol to call, a list of bytes, a list of types and a return type. */
-                 | "#ffiCall" "(" Bool "," Int "," List "," List "," Int "," FFIType ")" [function, impure]
+                 | "#ffiCall" "(" Bool "," Int "," List "," List "," Int "," FFIType ")" [function]
 
   /*@ Given a function symbol, return its address as an Int */
   syntax Int ::= "#functionAddress" "(" String ")" [function, hook(FFI.address)]
