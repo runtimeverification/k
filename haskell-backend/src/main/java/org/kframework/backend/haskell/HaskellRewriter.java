@@ -21,10 +21,8 @@ import org.kframework.kprove.KProveOptions;
 import org.kframework.krun.RunProcess;
 import org.kframework.main.GlobalOptions;
 import org.kframework.main.Main;
-import org.kframework.parser.kore.parser.KoreToK;
+import org.kframework.parser.KoreToK;
 import org.kframework.parser.kore.parser.ParseError;
-import org.kframework.parser.kore.parser.TextToKore;
-import org.kframework.parser.kore.Pattern;
 import org.kframework.RewriterResult;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.rewriter.SearchType;
@@ -36,7 +34,6 @@ import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.DefinitionScoped;
 import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.SMTOptions;
-import org.kframework.utils.StringUtil;
 
 import scala.Tuple2;
 
@@ -137,10 +134,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                 try {
                     File korePath = koreDirectory == null ? null : new File(koreDirectory);
                     int execStatus = executeCommandBasic(korePath, koreCommand);
-                    TextToKore textToKore = new TextToKore();
-                    Pattern kore = textToKore.parsePattern(koreOutputFile);
-                    KoreToK koreToK = new KoreToK(idsToLabels, mod.sortAttributesFor(), StringUtil::enquoteKString);
-                    K outputK = koreToK.apply(kore);
+                    K outputK = KoreToK.parseKoreToK(koreOutputFile, idsToLabels, mod.sortAttributesFor());
                     return new RewriterResult(Optional.empty(), Optional.of(execStatus), outputK);
                 } catch (IOException e) {
                     throw KEMException.criticalError("I/O Error while executing", e);
@@ -232,10 +226,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                     if (executeCommandBasic(korePath, koreCommand) != 0) {
                         throw KEMException.criticalError("Haskell backend returned non-zero exit code");
                     }
-                    TextToKore textToKore = new TextToKore();
-                    Pattern kore = textToKore.parsePattern(koreOutputFile);
-                    KoreToK koreToK = new KoreToK(idsToLabels, mod.sortAttributesFor(), StringUtil::enquoteKString);
-                    K outputK = koreToK.apply(kore);
+                    K outputK = KoreToK.parseKoreToK(koreOutputFile, idsToLabels, mod.sortAttributesFor());
                     return outputK;
                 } catch (IOException e) {
                     throw KEMException.criticalError("I/O Error while executing", e);
@@ -298,10 +289,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                     if (executeCommandBasic(korePath, koreCommand) != 0) {
                         kem.registerCriticalWarning("Haskell backend returned non-zero exit code");
                     }
-                    TextToKore textToKore = new TextToKore();
-                    Pattern kore = textToKore.parsePattern(koreOutputFile);
-                    KoreToK koreToK = new KoreToK(idsToLabels, rules.sortAttributesFor(), StringUtil::enquoteKString);
-                    K outputK = koreToK.apply(kore);
+                    K outputK = KoreToK.parseKoreToK(koreOutputFile, idsToLabels, rules.sortAttributesFor());
                     return outputK;
                 } catch (IOException e) {
                     throw KEMException.criticalError("I/O Error while executing", e);
