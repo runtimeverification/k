@@ -15,25 +15,20 @@ import org.kframework.kore.K;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.RunProcess;
 import org.kframework.main.Main;
-import org.kframework.parser.kore.Pattern;
-import org.kframework.parser.kore.parser.KoreToK;
+import org.kframework.parser.KoreToK;
 import org.kframework.parser.kore.parser.ParseError;
-import org.kframework.parser.kore.parser.TextToKore;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.rewriter.SearchType;
-import org.kframework.unparser.OutputModes;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.DefinitionScoped;
 import org.kframework.utils.inject.RequestScoped;
-import org.kframework.utils.StringUtil;
 import scala.Tuple2;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
@@ -81,8 +76,6 @@ public class LLVMRewriter implements Function<Definition, Rewriter> {
                 K kWithInjections = new AddSortInjections(mod).addInjections(withMacros);
                 converter.convert(kWithInjections);
                 String koreOutput = "[initial-configuration{}(" + converter.toString() + ")]\n\nmodule TMP\nendmodule []\n";
-                String defPath = files.resolveKompiled("definition.kore").getAbsolutePath();
-                String moduleName = mod.name();
                 files.saveToTemp("pgm.kore", koreOutput);
                 String pgmPath = files.resolveTemp("pgm.kore").getAbsolutePath();
                 File koreOutputFile = files.resolveTemp("result.kore");
@@ -93,10 +86,7 @@ public class LLVMRewriter implements Function<Definition, Rewriter> {
                 args.add(koreOutputFile.getAbsolutePath());
                 try {
                     int exit = executeCommandBasic(files.resolveWorkingDirectory("."), args);
-                    TextToKore textToKore = new TextToKore();
-                    Pattern kore = textToKore.parsePattern(koreOutputFile);
-                    KoreToK koreToK = new KoreToK(idsToLabels, mod.sortAttributesFor(), StringUtil::enquoteKString);
-                    K outputK = koreToK.apply(kore);
+                    K outputK = KoreToK.parseKoreToK(koreOutputFile, idsToLabels, mod.sortAttributesFor());
                     return new RewriterResult(Optional.empty(), Optional.of(exit), outputK);
                 } catch (IOException e) {
                     throw KEMException.criticalError("I/O Error while executing", e);
