@@ -74,12 +74,11 @@ def gen_spec_defn(spec_template, rule_template, spec_config, spec_tree):
 def usage():
     usage_strs = [ "usage: " + sys.argv[0]
                  , ""
-                 , "    " + sys.argv[0] + " <spec_defn_tmpl> <spec_rule_tmp> <spec_ini> <output_dir> <spec_tree_name>*"
+                 , "    " + sys.argv[0] + " <spec_defn_tmpl> <spec_rule_tmp> <spec_ini> <spec_tree_name>*"
                  , ""
                  , "        <spec_defn_tmpl>: template K definition to use."
                  , "        <spec_rule_tmpl>: template K rule specification to use."
                  , "        <spec_ini>:       ini format file describing tree of K proofs."
-                 , "        <output_dir>:     directory to write K specs out to."
                  , "        <spec_tree_name>: subtree of specification names to generate (defaults to pgm.specs)."
                  ]
     print("\n".join(usage_strs))
@@ -93,7 +92,7 @@ if __name__ == '__main__':
     spec_rule_tmpl = open(sys.argv[2], "r").read()
     spec_ini_file  = sys.argv[3]
     spec_ini       = open(spec_ini_file, "r").read()
-    output_dir     = sys.argv[4]
+    output_dir     = path.dirname(spec_ini)
 
     spec_config = configparser.ConfigParser(comment_prefixes=(';'))
     spec_config.read(spec_ini)
