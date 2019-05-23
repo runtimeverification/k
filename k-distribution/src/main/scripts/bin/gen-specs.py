@@ -58,7 +58,7 @@ def gen_spec_defn(spec_template, rule_template, spec_config, spec_tree):
     rule_name_list = []
 
     for rname in rule_name_list_all:
-        if not any(sec_name.startswith(sec + "-") for sec_name in secs):
+        if not any(sec_name.startswith(rname + "-") for sec_name in spec_config.sections()):
             rule_name_list.append(rname)
 
     if len(rule_name_list) == 0:
@@ -92,13 +92,13 @@ if __name__ == '__main__':
     spec_defn_tmpl = open(sys.argv[1], "r").read()
     spec_rule_tmpl = open(sys.argv[2], "r").read()
     spec_ini_file  = sys.argv[3]
-    spec_ini       = open(spec_ini_file, "r").read()
-    output_dir     = path.dirname(spec_ini)
+    output_dir     = path.dirname(spec_ini_file)
 
     spec_config = configparser.ConfigParser(comment_prefixes=(';'))
-    spec_config.read(spec_ini)
+    spec_config.read(spec_ini_file)
 
-    if 'pgm' not in spec_config:
+
+    if 'pgm' not in spec_config.sections():
         print("File " + spec_ini_file + " must have a 'pgm' section!")
         sys.exit(1)
 
@@ -107,6 +107,6 @@ if __name__ == '__main__':
         spec_trees = spec_config['pgm']['specs'].split()
 
     for spec_tree in spec_trees:
-        spec_defn_str = gen_spec_defn(module_template, spec_template, spec_config, spec_tree)
+        spec_defn_str = gen_spec_defn(spec_defn_tmpl, spec_rule_tmpl, spec_config, spec_tree)
         with open(output_dir + "/" + spec_tree + "-spec.k", "w") as spec_out:
             spec_out.write(spec_defn_str)
