@@ -43,9 +43,6 @@ def inherit_get(config, section):
         return merged
 
 def gen_spec_rules(rule_template, spec_config, rule_name_list):
-    if 'pgm' not in spec_config:
-        print('''Must specify a "pgm" section in the .ini file.''')
-        sys.exit(1)
     pgm_config = spec_config['pgm']
     rule_spec_list = []
     for name in rule_name_list:
@@ -77,18 +74,18 @@ def gen_spec_defn(spec_template, rule_template, spec_config, spec_tree):
 def usage():
     usage_strs = [ "usage: " + sys.argv[0]
                  , ""
-                 , "    " + sys.argv[0] + " <spec_defn_tmpl> <spec_rule_tmp> <spec_ini> <output_dir> <spec_tree_name>+"
+                 , "    " + sys.argv[0] + " <spec_defn_tmpl> <spec_rule_tmp> <spec_ini> <output_dir> <spec_tree_name>*"
                  , ""
                  , "        <spec_defn_tmpl>: template K definition to use."
                  , "        <spec_rule_tmpl>: template K rule specification to use."
                  , "        <spec_ini>:       ini format file describing tree of K proofs."
                  , "        <output_dir>:     directory to write K specs out to."
-                 , "        <spec_tree_name>: subtree of specification names to generate."
+                 , "        <spec_tree_name>: subtree of specification names to generate (defaults to pgm.specs)."
                  ]
     print("\n".join(usage_strs))
 
 if __name__ == '__main__':
-    if len(sys.argv) < 6:
+    if len(sys.argv) < 5:
         usage()
         sys.exit(1)
 
@@ -101,7 +98,15 @@ if __name__ == '__main__':
     spec_config = configparser.ConfigParser(comment_prefixes=(';'))
     spec_config.read(spec_ini)
 
-    for spec_tree in sys.argv[5:]:
+    if 'pgm' not in spec_config:
+        print("File " + spec_ini_file + " must have a 'pgm' section!")
+        sys.exit(1)
+
+    spec_trees = sys.argv[5:]
+    if len(spec_trees) == 0:
+        spec_trees = spec_config['pgm']['specs'].split()
+
+    for spec_tree in spec_trees:
         spec_defn_str = gen_spec_defn(module_template, spec_template, spec_config, spec_tree)
         with open(output_dir + "/" + spec_tree + "-spec.k", "w") as spec_out:
             spec_out.write(spec_defn_str)
