@@ -77,7 +77,7 @@ def gen_spec_defn(spec_template, rule_template, spec_config, spec_tree):
 def usage():
     usage_strs = [ "usage: " + sys.argv[0]
                  , ""
-                 , "    " + sys.argv[0] + " <spec_defn_tmpl> <spec_rule_tmp> <spec_ini> <spec_tree_name>+"
+                 , "    " + sys.argv[0] + " <spec_defn_tmpl> <spec_rule_tmp> <spec_ini> <output_dir> <spec_tree_name>+"
                  , ""
                  , "        <spec_defn_tmpl>: template K definition to use."
                  , "        <spec_rule_tmpl>: template K rule specification to use."
@@ -88,17 +88,20 @@ def usage():
     print("\n".join(usage_strs))
 
 if __name__ == '__main__':
-    if len(sys.argv) < 5:
+    if len(sys.argv) < 6:
         usage()
         sys.exit(1)
 
     spec_defn_tmpl = open(sys.argv[1], "r").read()
     spec_rule_tmpl = open(sys.argv[2], "r").read()
-    spec_ini       = open(sys.argv[3], "r").read()
+    spec_ini_file  = sys.argv[3]
+    spec_ini       = open(spec_ini_file, "r").read()
     output_dir     = sys.argv[4]
 
     spec_config = configparser.ConfigParser(comment_prefixes=(';'))
     spec_config.read(spec_ini)
 
-    for spec_tree in sys.argv[3:]:
+    for spec_tree in sys.argv[5:]:
         spec_defn_str = gen_spec_defn(module_template, spec_template, spec_config, spec_tree)
+        with open(output_dir + "/" + spec_tree + "-spec.k", "w") as spec_out:
+            spec_out.write(spec_defn_str)
