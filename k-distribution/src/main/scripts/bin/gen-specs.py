@@ -85,7 +85,7 @@ def usage():
     print("\n".join(usage_strs))
 
 if __name__ == '__main__':
-    if len(sys.argv) < 5:
+    if len(sys.argv) < 4:
         usage()
         sys.exit(1)
 
@@ -102,7 +102,7 @@ if __name__ == '__main__':
         print("File " + spec_ini_file + " must have a 'pgm' section!")
         sys.exit(1)
 
-    spec_trees = sys.argv[5:]
+    spec_trees = sys.argv[4:]
     if len(spec_trees) == 0:
         spec_trees = spec_config['pgm']['specs'].split()
 
