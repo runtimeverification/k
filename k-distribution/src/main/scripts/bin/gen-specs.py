@@ -72,9 +72,10 @@ def gen_spec_defn(spec_template, rule_template, spec_config, spec_tree):
     return spec_defn
 
 def usage():
+    exec_name = path.basename(sys.argv[0])
     usage_strs = [ "usage: " + sys.argv[0]
                  , ""
-                 , "    " + sys.argv[0] + " <spec_defn_tmpl> <spec_rule_tmp> <spec_ini> <spec_tree_name>*"
+                 , "    " + exec_name + " <spec_defn_tmpl> <spec_rule_tmp> <spec_ini> <spec_tree_name>*"
                  , ""
                  , "        <spec_defn_tmpl>: template K definition to use."
                  , "        <spec_rule_tmpl>: template K rule specification to use."
