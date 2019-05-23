@@ -126,7 +126,10 @@ public class KoreBackend implements Backend {
         DefinitionTransformer generateSortPredicateSyntax = DefinitionTransformer.from(new GenerateSortPredicateSyntax()::gen, "adding sort predicate productions");
         DefinitionTransformer generateSortProjections = DefinitionTransformer.from(new GenerateSortProjections()::gen, "adding sort projections");
         DefinitionTransformer subsortKItem = DefinitionTransformer.from(Kompile::subsortKItem, "subsort all sorts to KItem");
-        DefinitionTransformer expandMacros = DefinitionTransformer.fromSentenceTransformer((m, s) -> new ExpandMacros(m, files, kompileOptions, false).expand(s), "expand macros");
+        Function1<Definition, Definition> expandMacros = d -> {
+          ResolveFunctionWithConfig transformer = new ResolveFunctionWithConfig(d);
+          return DefinitionTransformer.fromSentenceTransformer((m, s) -> new ExpandMacros(transformer, m, files, kompileOptions, false).expand(s), "expand macros").apply(d);
+        };
         Function1<Definition, Definition> resolveFreshConstants = d -> DefinitionTransformer.from(m -> GeneratedTopFormat.resolve(new ResolveFreshConstants(d, true).resolve(m)), "resolving !Var variables").apply(d);
         Function1<Definition, Definition> resolveConfigVar = d -> DefinitionTransformer.fromSentenceTransformer(new ResolveFunctionWithConfig(d)::resolveConfigVar, "Adding configuration variable to lhs").apply(d);
         Function1<Definition, Definition> resolveIO = (d -> Kompile.resolveIOStreams(kem, d));
@@ -166,7 +169,10 @@ public class KoreBackend implements Backend {
         ModuleTransformer resolveSemanticCasts = ModuleTransformer.fromSentenceTransformer(
                 new ResolveSemanticCasts(true)::resolve,
                 "resolving semantic casts");
-        ModuleTransformer expandMacros = ModuleTransformer.fromSentenceTransformer((m, s) -> new ExpandMacros(m, files, kompileOptions, false).expand(s), "expand macros");
+        Function1<Module, Module> expandMacros = m -> {
+          ResolveFunctionWithConfig transformer = new ResolveFunctionWithConfig(m);
+          return ModuleTransformer.fromSentenceTransformer((m2, s) -> new ExpandMacros(transformer, m2, files, kompileOptions, false).expand(s), "expand macros").apply(m);
+        };
         ModuleTransformer subsortKItem = ModuleTransformer.from(Kompile::subsortKItem, "subsort all sorts to KItem");
         ModuleTransformer addImplicitComputationCell = ModuleTransformer.fromSentenceTransformer(
                 new AddImplicitComputationCell(configInfo, labelInfo),

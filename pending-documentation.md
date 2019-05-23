@@ -156,3 +156,84 @@ rule bar(I) => I
 ```
 
 This will rewrite `baz(0, foo)` to `foo`. First `baz(0, foo)` will be rewritten statically to `baz(0, foobar)`. Then the non-`macro` rule will apply (because the rule will have been rewritten to `rule baz(_, I) => I`). Then `foobar` will be rewritten statically after rewriting finishes to `foo` via the reverse form of the alias.
+
+## Collection patterns
+
+It is allowed to write patterns on the left hand side of rules which refer to complex terms of sort Map, List, and Set, despite these patterns ostensibly breaking the rule that terms which are functions should not appear on the left hand side of rules. Such terms are destructured into pattern matching operations. The following forms are allowed:
+
+```
+// 0 or more elements followed by 0 or 1 variables of sort List followed by 0 or more elements
+ListItem(E1) ListItem(E2) L:List ListItem(E3) ListItem(E4)
+
+// the empty list
+.List
+
+// 0 or more elements in any order plus 0 or 1 variables of sort Set in any order
+SetItem(K1) SetItem(K2) S::Set SetItem(K3) SetItem(K4)
+
+// the empty set
+.Set
+
+// 0 or more elements in any order plus by 0 or 1 variables of sort Map in any order
+K1 |-> E1 K2 |-> E2 M::Map K3 |-> E3 K4 |-> E4
+
+// the empty map
+.Map
+```
+
+Here K1, K2, K3, K4 etc can be any pattern except a pattern containing both function symbols and unbound variables. An unbound variable is a variable whose binding cannot be determined by means of decomposing non-set-or-map patterns or map elements whose keys contain no unbound variables. This is determined recursively, ie, the term `K1 |-> E2 E2 |-> E3 E3 |-> E4` is considered to contain no unbound variables. Note that in the pattern `K1 |-> E2 K3 |-> E4 E4 |-> E5`, K1 and K3 are unbound, but E4 is bound because it is bound by deconstructing the key E3, even though E3 is itself unbound.
+
+In the above examples, E1, E2, E3, and E4 can be any pattern that is normally allowed on the lhs of a rule.
+
+When a map or set key contains function symbols, we know that the variables in that key are bound (because of the above restriction), so it is possible to evaluate the function to a concrete term prior to performing the lookup. Indeed, this is the precise semantics which occurs; the function is evaluated and the result is looked up in the collection. For example:
+
+```
+syntax Int ::= f(Int) [function]
+rule f(I:Int) => I +Int 1
+rule <k> I:Int => . ...</k> <state>... SetItem(f(I)) ...</state>
+```
+
+This will rewrite I to . if and only if the state cell contains I + 1.
+
+Note that in the case of Set and Map, one guarantee is that K1, K2, K3, and K4 represent /distinct/ elements. Pattern matching fails if the correct number of distinct elements cannot be found.
+
+## Other
+
+Backend features not yet given documentation:
+
+* Parser of KORE terms and definitions
+* Term representation of K terms
+* Hooked sorts and symbols
+* Substituting a substitution into the RHS of a rule
+  * domain values
+  * functions
+  * variables
+  * symbols
+  * polymorphism
+  * hooks
+  * injection compaction
+  * overload compaction
+* Pattern Matching / Unification of subject and LHS of rule
+  * domain values
+  * symbols
+  * side conditions
+  * and/or patterns
+  * list patterns
+  * nonlinear variables
+  * map/set patterns
+    * deterministic
+    * nondeterministic
+  * modulo injections
+  * modulo overloads
+* Stepping
+  * initialization
+  * termination
+* Print kore terms
+* Equality/comparison of terms
+* Owise rules
+* Strategy #STUCK axiom
+* User substitution
+  * binders
+  * kvar
+
+To get a complete list of hooks supported by K, you can run `grep -P -R "(?<=[^-])hook\([^)]*\)" k-distribution/include/builtin/ --include "*.k" -ho | sed 's/hook(//' | sed 's/)//' | sort | uniq | grep -v org.kframework`. All of these hooks will also eventually need documentation.

@@ -56,6 +56,11 @@ public class Subsorts implements Serializable {
     public boolean isSubsorted(Sort bigSort, Sort smallSort) {
         Boolean isSubsorted = subsort.get(bigSort, smallSort);
         if (isSubsorted == null) {
+            if (smallSort == Sort.BOTTOM) {
+                return true;
+            } else if (bigSort == Sort.BOTTOM) {
+                return false;
+            }
             if (subsort.containsRow(bigSort)) {
                 throw KEMException.criticalError("Sort " + smallSort.toString() + " is undefined.");
             } else {

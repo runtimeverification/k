@@ -181,7 +181,8 @@ public class KList extends KCollection implements org.kframework.kore.KList {
                 }
             } else if (term.kind() == Kind.KITEM
                     || term.kind() == Kind.K
-                    || term.kind == Kind.CELL_COLLECTION) {
+                    || term.kind() == Kind.BOTTOM
+                    || term.kind() == Kind.CELL_COLLECTION) {
                 contentsBuilder.add(term);
             } else if (term instanceof KItemProjection) {
                 // TODO(AndreiS): fix KItem projection

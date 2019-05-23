@@ -32,4 +32,9 @@ rule 4 => ancestor()
 syntax KItem ::= ancestor() [function]
 rule ancestor() => foo(0)
 
+syntax KItem ::= macro()
+rule macro() => ancestor() [macro]
+
+rule 5 => macro()
+
 endmodule
