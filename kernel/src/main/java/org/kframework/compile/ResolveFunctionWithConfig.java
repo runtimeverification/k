@@ -59,7 +59,7 @@ public class ResolveFunctionWithConfig {
       ConfigurationInfoFromModule info = new ConfigurationInfoFromModule(mod);
       topCell = info.topCell();
       topCellLabel = info.getCellLabel(topCell);
-      CONFIG_VAR = KVariable("_Configuration", Att().add(Sort.class, topCell).add("withConfig")); 
+      CONFIG_VAR = KVariable("_Configuration", Att().add(Sort.class, topCell).add("withConfig"));
     }
 
     private boolean ruleNeedsConfig(Rule r) {
