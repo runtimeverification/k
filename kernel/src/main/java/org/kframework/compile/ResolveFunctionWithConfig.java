@@ -43,7 +43,9 @@ import static org.kframework.kore.KORE.*;
 
 public class ResolveFunctionWithConfig {
 
-    private Set<KLabel> withConfigFunctions = new HashSet<>();
+    private final Set<KLabel> withConfigFunctions = new HashSet<>();
+    private final Sort topCell;
+    private final KLabel topCellLabel;
 
     public ResolveFunctionWithConfig(Definition d) {
       this(d.mainModule());
@@ -54,6 +56,10 @@ public class ResolveFunctionWithConfig {
       Set<KLabel> functions = stream(mod.productions()).filter(p -> p.att().contains(Attribute.FUNCTION_KEY)).map(p -> p.klabel().get()).collect(Collectors.toSet());
       withConfigFunctions.addAll(functions.stream().filter(f -> stream(mod.rulesFor().getOrElse(f, () -> Collections.<Rule>Set())).anyMatch(r -> ruleNeedsConfig(r))).collect(Collectors.toSet()));
       withConfigFunctions.addAll(deps.ancestors(withConfigFunctions));
+      ConfigurationInfoFromModule info = new ConfigurationInfoFromModule(mod);
+      topCell = info.topCell();
+      topCellLabel = info.getCellLabel(topCell);
+      CONFIG_VAR = KVariable("_Configuration", Att().add(Sort.class, topCell).add("withConfig")); 
     }
 
     private boolean ruleNeedsConfig(Rule r) {
@@ -97,7 +103,7 @@ public class ResolveFunctionWithConfig {
                 context.att());
     }
 
-    public static final KVariable CONFIG_VAR = KVariable("_Configuration", Att().add(Sort.class, Sorts.GeneratedTopCell()).add("withConfig"));
+    public final KVariable CONFIG_VAR;
 
     private K transform(K term, Module module) {
       return new TransformK() {
@@ -139,10 +145,10 @@ public class ResolveFunctionWithConfig {
           }
           KApply cellKApp = (KApply)cell;
           K secondChild;
-          if (cellKApp.klabel().equals(KLabels.GENERATED_TOP_CELL)) {
+          if (cellKApp.klabel().equals(topCellLabel)) {
             secondChild = cell;
           } else {
-            secondChild = IncompleteCellUtils.make(KLabels.GENERATED_TOP_CELL, true, cell, true);
+            secondChild = IncompleteCellUtils.make(topCellLabel, true, cell, true);
           }
           List<K> items = Stream.concat(funKApp.items().stream(), Stream.of(KAs(secondChild, CONFIG_VAR, Att().add("withConfig")))).collect(Collections.toList());
           K result = KApply(funKApp.klabel(), KList(items), funKApp.att());
@@ -158,7 +164,7 @@ public class ResolveFunctionWithConfig {
 
     private Production resolve(Production prod) {
         if (prod.klabel().isDefined() && withConfigFunctions.contains(prod.klabel().get())) {
-            List<ProductionItem> pis = Stream.concat(stream(prod.items()), Stream.of(NonTerminal(Sorts.GeneratedTopCell()))).collect(Collections.toList());
+            List<ProductionItem> pis = Stream.concat(stream(prod.items()), Stream.of(NonTerminal(topCell))).collect(Collections.toList());
             return Production(prod.klabel(), prod.sort(), pis, prod.att());
         }
         return prod;
@@ -198,7 +204,7 @@ public class ResolveFunctionWithConfig {
             }
         }.apply(body) && (hasConfig.apply(body) || hasConfig.apply(requires) || hasConfig.apply(ensures))) {
             K left = RewriteToTop.toLeft(body);
-            if (left instanceof KApply && ((KApply)left).klabel().equals(KLabels.GENERATED_TOP_CELL)) {
+            if (left instanceof KApply && ((KApply)left).klabel().equals(topCellLabel)) {
                 body = KRewrite(KAs(RewriteToTop.toLeft(body), CONFIG_VAR), RewriteToTop.toRight(body));
             }
         }
