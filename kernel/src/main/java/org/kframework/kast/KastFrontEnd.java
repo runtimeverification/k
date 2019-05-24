@@ -120,7 +120,7 @@ public class KastFrontEnd extends FrontEnd {
             }
             K parsed = def.getParser(mod, sort, kem).apply(FileUtil.read(stringToParse), source);
             if (options.expandMacros || options.kore) {
-                parsed = new ExpandMacros(null, compiledMod, files.get(), def.kompileOptions, false).expand(parsed);
+                parsed = ExpandMacros.forNonSentences(compiledMod, files.get(), def.kompileOptions, false).expand(parsed);
             }
             if (options.kore) {
               ModuleToKORE converter = new ModuleToKORE(compiledMod, files.get(), def.topCellInitializer, def.kompileOptions);

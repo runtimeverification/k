@@ -66,11 +66,16 @@ public class ExpandMacros {
     private final boolean reverse;
     private final ResolveFunctionWithConfig transformer;
 
-    // note that because of the constraints required on ResolveFunctionWithConfig, this overload
-    // MUST NOT be called unless reverse=true OR mod is the main module of the definition. And if
-    // reverse=true, you MUST NOT call the resolve overload for sentences.
-    public ExpandMacros(Module mod, FileUtil files, KompileOptions kompileOptions, boolean reverse) {
-        this(reverse ? null : new ResolveFunctionWithConfig(mod), mod, files, kompileOptions, reverse);
+    public static ExpandMacros fromMainModule(Module mod, FileUtil files, KompileOptions kompileOptions, boolean reverse) {
+        return new ExpandMacros(mod, files, kompileOptions, reverse, true);
+    }
+
+    public static ExpandMacros forNonSentences(Module mod, FileUtil files, KompileOptions kompileOptions, boolean reverse) {
+        return new ExpandMacros(mod, files, kompileOptions, reverse, false);
+    }
+
+    private ExpandMacros(Module mod, FileUtil files, KompileOptions kompileOptions, boolean reverse, boolean sentences) {
+        this(sentences ? new ResolveFunctionWithConfig(mod) : null, mod, files, kompileOptions, reverse);
     }
 
     public ExpandMacros(ResolveFunctionWithConfig transformer, Module mod, FileUtil files, KompileOptions kompileOptions, boolean reverse) {
