@@ -28,7 +28,7 @@ object KOREToTreeNodes {
         for (set <- poly.asScala) {
           val pos = set.iterator.next
           val sort = if (pos == 0) p.sort else p.nonterminals(pos).sort
-          if (sort != params(i)) {
+          if (i < params.size && sort != params(i)) {
             wrong = true
           }
           i+=1
