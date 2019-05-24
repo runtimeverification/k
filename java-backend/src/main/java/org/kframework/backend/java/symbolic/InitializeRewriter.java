@@ -188,7 +188,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
             TermContext termContext = TermContext.builder(rewritingContext).freshCounter(initCounterValue).build();
             KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, termContext.global(), false);
             ResolveSemanticCasts resolveCasts = new ResolveSemanticCasts(true);
-            ExpandMacros macroExpander = ExpandMacros.fromMainModule(module, files, kompileOptions, false);
+            ExpandMacros macroExpander = ExpandMacros.forNonSentences(module, files, kompileOptions, false);
             termContext.setKOREtoBackendKILConverter(converter);
             Term backendKil = converter.convert(macroExpander.expand(resolveCasts.resolve(k))).evaluate(termContext);
             rewritingContext.stateLog.log(StateLog.LogEvent.EXECINIT, backendKil, KApply(KLabels.ML_TRUE));
@@ -211,7 +211,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
             TermContext termContext = TermContext.builder(rewritingContext).freshCounter(initCounterValue).build();
             KOREtoBackendKIL converter = new KOREtoBackendKIL(module, definition, termContext.global(), false);
             ResolveSemanticCasts resolveCasts = new ResolveSemanticCasts(true);
-            ExpandMacros macroExpander = ExpandMacros.fromMainModule(module, files, kompileOptions, false);
+            ExpandMacros macroExpander = ExpandMacros.forNonSentences(module, files, kompileOptions, false);
             termContext.setKOREtoBackendKILConverter(converter);
             Term javaTerm = converter.convert(macroExpander.expand(resolveCasts.resolve(initialConfiguration))).evaluate(termContext);
             rewritingContext.stateLog.log(StateLog.LogEvent.SEARCHINIT, javaTerm, KApply(KLabels.ML_TRUE));
