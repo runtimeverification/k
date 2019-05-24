@@ -164,6 +164,7 @@ public class FileUtil {
     }
 
     public File resolveKompiled(String file) {
+        if (kompiledDir == null) return null;
         return new File(kompiledDir, file);
     }
 

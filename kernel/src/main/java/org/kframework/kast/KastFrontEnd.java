@@ -167,9 +167,12 @@ public class KastFrontEnd extends FrontEnd {
         @Inject
         public InitializeDefinition(FileUtil files) {
             try {
-                FileInputStream input = new FileInputStream(files.resolveKompiled("kore_to_k_labels.properties"));
                 koreToKLabels = new Properties();
-                koreToKLabels.load(input);
+                File file = files.resolveKompiled("kore_to_k_labels.properties");
+                if (file != null) {
+                    FileInputStream input = new FileInputStream(file);
+                    koreToKLabels.load(input);
+                }
             } catch (IOException e) {
                 throw KEMException.criticalError("Error while loading Kore to K label map", e);
             }
