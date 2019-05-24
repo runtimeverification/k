@@ -26,7 +26,7 @@ DEFDIR?=.
 RESULTDIR?=$(TESTDIR)
 # all tests in test directory with matching file extension
 TESTS?=$(wildcard $(TESTDIR)/*.$(EXT))
-PROOF_TESTS?=$(wildcard $(TESTDIR)/*-spec.k)
+PROOF_TESTS?=$(wildcard $(TESTDIR)/*-spec.k $(TESTDIR)/*-spec-broken.k)
 SEARCH_TESTS?=$(wildcard $(TESTDIR)/*.$(EXT).search)
 STRAT_TESTS?=$(wildcard $(TESTDIR)/*.strat)
 KAST_TESTS?=$(wildcard $(TESTDIR)/*.kast)
@@ -68,6 +68,13 @@ ifeq ($(TESTDIR),$(RESULTDIR))
 	cat $@.in 2>/dev/null | $(KRUN) $@ $(KRUN_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $@.out
 else
 	cat $(RESULTDIR)/$(notdir $@).in 2>/dev/null | $(KRUN) $@ $(KRUN_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $(RESULTDIR)/$(notdir $@).out
+endif
+
+%-spec-broken.k: kompile
+ifeq ($(TESTDIR),$(RESULTDIR))
+	! $(KPROVE) $@ $(KPROVE_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $@.out
+else
+	! $(KPROVE) $@ $(KPROVE_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $(RESULTDIR)/$(notdir $@).out
 endif
 
 %-spec.k: kompile
