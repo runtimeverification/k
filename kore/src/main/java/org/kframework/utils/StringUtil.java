@@ -5,7 +5,11 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.beust.jcommander.JCommander;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class StringUtil {
     /**
@@ -807,5 +811,11 @@ public class StringUtil {
         if (!inIdent) {
             sb.append("'");
         }
+    }
+
+    public static List<Set<Integer>> computePoly(String poly) {
+      return Arrays.asList(poly.split(";"))
+        .stream().map(l -> Arrays.asList(l.split(",")).stream()
+        .map(s -> Integer.valueOf(s.trim())).collect(Collectors.toSet())).collect(Collectors.toList());
     }
 }
