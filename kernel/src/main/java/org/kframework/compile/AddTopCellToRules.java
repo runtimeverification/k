@@ -10,7 +10,13 @@ import org.kframework.kil.Attribute;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
+import org.kframework.kore.KList;
 import org.kframework.kore.KRewrite;
+import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 import static org.kframework.kore.KORE.*;
 
@@ -42,9 +48,37 @@ public class AddTopCellToRules {
     protected K addRootCell(K term) {
         KLabel root = cfg.getCellLabel(cfg.getRootCell());
 
-        if (term instanceof KApply && ((KApply) term).klabel().equals(root)) {
-            return term;
-        } else if (term instanceof KRewrite) {
+        // KApply instance
+        if (term instanceof KApply) {
+            KLabel kLabel = ((KApply) term).klabel();
+            if(kLabel.equals(root)) {
+                return term;
+            }
+            String polyStr = labelInfo.getPolyInfo(kLabel);
+            if(polyStr != null) {
+                List<Set<Integer>> polyPositions = RuleGrammarGenerator.computePositions(polyStr);
+                for (Set<Integer> pos: polyPositions) {
+                    if (pos.contains(0) && pos.size() > 1) {
+                        // recursively call addRoot on the children whose type is the same as return type
+                        List<K> oldChildren = ((KApply) term).klist().items();
+                        List<K> newChildren = new ArrayList<>();
+                        for (int i = 0; i < oldChildren.size(); i++){
+                            if (pos.contains(i + 1)) {
+                                newChildren.add(addRootCell(oldChildren.get(i)));
+                            } else {
+                                newChildren.add(oldChildren.get(i));
+                            }
+
+                        }
+                        return KApply(kLabel, KList(newChildren));
+                    }
+                }
+            }
+
+        }
+
+        // KRewrite instance
+        if (term instanceof KRewrite) {
             KRewrite rew = (KRewrite) term;
             K left = addRootCell(rew.left());
             if (left == rew.left()) {
@@ -52,9 +86,10 @@ public class AddTopCellToRules {
             } else {
                 return IncompleteCellUtils.make(root, true, term, true);
             }
-        } else {
-            return IncompleteCellUtils.make(root, true, term, true);
         }
+
+        // default
+        return IncompleteCellUtils.make(root, true, term, true);
     }
 
     public Rule addImplicitCells(Rule rule) {
@@ -73,7 +108,7 @@ public class AddTopCellToRules {
     }
 
     public Sentence addImplicitCells(Sentence s) {
-        if (AddImplicitComputationCell.skipSentence(s)) {
+        if (skipSentence(s)) {
             return s;
         }
         if (s instanceof Rule) {
@@ -83,5 +118,10 @@ public class AddTopCellToRules {
         } else {
             return s;
         }
+    }
+
+    private boolean skipSentence(Sentence s) {
+        return s.att().contains(Attribute.MACRO_KEY) || s.att().contains(Attribute.ALIAS_KEY)
+                || s.att().contains(Attribute.ANYWHERE_KEY);
     }
 }

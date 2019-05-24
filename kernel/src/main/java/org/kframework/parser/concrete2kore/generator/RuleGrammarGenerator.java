@@ -391,9 +391,14 @@ public class RuleGrammarGenerator {
     }
 
     public static List<Set<Integer>> computePositions(Production p) {
-        return (List<Set<Integer>>) Arrays.asList(p.att().get("poly").split(";"))
-                            .stream().map(l -> Arrays.asList(l.split(",")).stream()
-                                    .map(s -> Integer.valueOf(s.trim())).collect(Collectors.toSet())).collect(Collectors.toList());
+        return computePositions(p.att().get("poly"));
+    }
+
+    public static List<Set<Integer>> computePositions(String p) {
+        return (List<Set<Integer>>) Arrays.asList(p.split(";"))
+                .stream().map(l -> Arrays.asList(l.split(",")).stream()
+                        .map(s -> Integer.valueOf(s.trim())).collect(Collectors.toSet())).collect(Collectors.toList());
+
     }
 
     private static List<List<Sort>> makeAllSortTuples(int size, Module mod) {
