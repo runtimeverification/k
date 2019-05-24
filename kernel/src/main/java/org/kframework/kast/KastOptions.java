@@ -17,6 +17,7 @@ import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.DefinitionLoadingOptions;
 
+import java.io.File;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.List;
@@ -28,19 +29,36 @@ public final class KastOptions {
     private List<String> parameters;
 
     public Reader stringToParse() {
-        if (parameters != null && parameters.size() > 0 && expression != null) {
-            throw KEMException.criticalError("It is an error to provide both a file and an expression to parse.");
-        }
+        checkFileExprExclusion();
         if (expression != null) {
             return new StringReader(expression);
         }
+        checkSingleFile();
+        return files.get().readFromWorkingDirectory(parameters.get(0));
+    }
+
+    public File fileToParse() {
+        checkFileExprExclusion();
+        if (expression != null) {
+            throw KEMException.criticalError("expression input not implemented for --k2kore");
+        }
+        checkSingleFile();
+        return files.get().resolveWorkingDirectory(parameters.get(0));
+    }
+
+    private void checkFileExprExclusion() {
+        if (parameters != null && parameters.size() > 0 && expression != null) {
+            throw KEMException.criticalError("It is an error to provide both a file and an expression to parse.");
+        }
+    }
+
+    private void checkSingleFile() {
         if (parameters != null && parameters.size() > 1) {
             throw KEMException.criticalError("You can only parse one program at a time.");
         }
         if (parameters == null || parameters.size() != 1) {
             throw KEMException.criticalError("You have to provide a file in order to kast a program.");
         }
-        return files.get().readFromWorkingDirectory(parameters.get(0));
     }
 
     private Provider<FileUtil> files;
@@ -98,6 +116,9 @@ public final class KastOptions {
 
     @Parameter(names="--kore", description="Output KORE-syntax instead of KAST-syntax.")
     public boolean kore = false;
+
+    @Parameter(names="--kore2k", description="Parse KORE-syntax and output K-syntax.")
+    public boolean koreToK = false;
 
     @ParametersDelegate
     public Experimental experimental = new Experimental();

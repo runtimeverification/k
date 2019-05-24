@@ -12,8 +12,11 @@ import org.kframework.definition.Module;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kore.K;
 import org.kframework.main.FrontEnd;
+import org.kframework.parser.KoreToK;
+import org.kframework.parser.kore.parser.ParseError;
 import org.kframework.parser.outer.Outer;
 import org.kframework.unparser.KPrint;
+import org.kframework.unparser.OutputModes;
 import org.kframework.unparser.PrintOptions;
 import org.kframework.unparser.ToKast;
 import org.kframework.utils.errorsystem.KEMException;
@@ -32,11 +35,14 @@ import org.kframework.utils.Stopwatch;
 import scala.Option;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 public class KastFrontEnd extends FrontEnd {
 
@@ -57,6 +63,7 @@ public class KastFrontEnd extends FrontEnd {
     private final Provider<CompiledDefinition> compiledDef;
     private final DefinitionScope scope;
     private final TTYInfo ttyInfo;
+    private final Properties idsToLabels;
 
     @Inject
     KastFrontEnd(
@@ -71,7 +78,9 @@ public class KastFrontEnd extends FrontEnd {
             @KompiledDir Provider<File> kompiledDir,
             Provider<CompiledDefinition> compiledDef,
             DefinitionScope scope,
-            TTYInfo ttyInfo) {
+            TTYInfo ttyInfo,
+            InitializeDefinition init
+            ) {
         super(kem, options.global, usage, experimentalUsage, jarInfo, files);
         this.options = options;
         this.sw = sw;
@@ -82,6 +91,7 @@ public class KastFrontEnd extends FrontEnd {
         this.compiledDef = compiledDef;
         this.scope = scope;
         this.ttyInfo = ttyInfo;
+        idsToLabels = init.getKoreToKLabels();
     }
 
     /**
@@ -92,11 +102,9 @@ public class KastFrontEnd extends FrontEnd {
     public int run() {
         scope.enter(kompiledDir.get());
         try {
-            Reader stringToParse = options.stringToParse();
             Source source = options.source();
 
             CompiledDefinition def = compiledDef.get();
-            KPrint kprint = new KPrint(kem, files.get(), ttyInfo, options.print, compiledDef.get().kompileOptions);
             org.kframework.kore.Sort sort = options.sort;
             if (sort == null) {
                 if (env.get("KRUN_SORT") != null) {
@@ -112,11 +120,22 @@ public class KastFrontEnd extends FrontEnd {
                 throw KEMException.innerParserError("Module " + options.module + " not found. Specify a module with -m.");
             }
             Module mod = maybeMod.get();
-            Module compiledMod = def.kompiledDefinition.getModule(options.module).get();
-
-            K parsed = def.getParser(mod, sort, kem).apply(FileUtil.read(stringToParse), source);
-            if (options.expandMacros || options.kore) {
-                parsed = ExpandMacros.forNonSentences(compiledMod, files.get(), def.kompileOptions, false).expand(parsed);
+            Module compiledMod;
+            if (options.koreToK) {
+                compiledMod = def.languageParsingModule();
+            } else {
+                compiledMod = def.kompiledDefinition.getModule(def.mainSyntaxModuleName()).get();
+            }
+            K parsed;
+            if (options.koreToK) {
+                parsed = KoreToK.parseKoreToK(options.fileToParse(), idsToLabels, mod.sortAttributesFor());
+                options.print = new PrintOptions(OutputModes.PRETTY);
+            } else {
+                Reader stringToParse = options.stringToParse();
+                parsed = def.getParser(mod, sort, kem).apply(FileUtil.read(stringToParse), source);
+                if (options.expandMacros || options.kore) {
+                    parsed = ExpandMacros.forNonSentences(compiledMod, files.get(), def.kompileOptions, false).expand(parsed);
+                }
             }
 
             if (options.kore) {
@@ -125,12 +144,35 @@ public class KastFrontEnd extends FrontEnd {
               converter.convert(parsed);
               System.out.println(converter.toString());
             } else {
+              KPrint kprint = new KPrint(kem, files.get(), ttyInfo, options.print, compiledDef.get().kompileOptions);
               System.out.println(new String(kprint.prettyPrint(def, compiledMod, parsed), StandardCharsets.UTF_8));
             }
             sw.printTotal("Total");
             return 0;
+        } catch (ParseError parseError) {
+            parseError.printStackTrace();
         } finally {
             scope.exit();
+        }
+        return 1;
+    }
+
+    public static class InitializeDefinition {
+        public Properties getKoreToKLabels() {
+            return koreToKLabels;
+        }
+
+        final private Properties koreToKLabels;
+
+        @Inject
+        public InitializeDefinition(FileUtil files) {
+            try {
+                FileInputStream input = new FileInputStream(files.resolveKompiled("kore_to_k_labels.properties"));
+                koreToKLabels = new Properties();
+                koreToKLabels.load(input);
+            } catch (IOException e) {
+                throw KEMException.criticalError("Error while loading Kore to K label map", e);
+            }
         }
     }
 }

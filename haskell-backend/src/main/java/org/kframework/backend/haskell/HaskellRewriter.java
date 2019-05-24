@@ -86,7 +86,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
         this.def = def;
         this.kem = kem;
         this.kprint = kprint;
-        this.idsToLabels = init.serialized;
+        this.idsToLabels = init.getKoreToKLabels();
     }
 
     @Override
@@ -374,19 +374,22 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
 
     @DefinitionScoped
     public static class InitializeDefinition {
-        final Properties serialized;
+        public Properties getKoreToKLabels() {
+            return koreToKLabels;
+        }
+
+        final private Properties koreToKLabels;
 
         @Inject
         public InitializeDefinition(FileUtil files) {
             try {
                 FileInputStream input = new FileInputStream(files.resolveKompiled("kore_to_k_labels.properties"));
-                serialized = new Properties();
-                serialized.load(input);
+                koreToKLabels = new Properties();
+                koreToKLabels.load(input);
             } catch (IOException e) {
                 throw KEMException.criticalError("Error while loading Kore to K label map", e);
             }
         }
     }
-
 }
 
