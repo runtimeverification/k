@@ -42,26 +42,27 @@ def inherit_get(config, section):
                 del merged[key]
         return merged
 
-def gen_spec_rule(rule_template, pgm_config, spec_config, rule_name, trusted = False):
+def gen_spec_rule(rule_template, pgm_config, rule_config, rule_name, trusted = False):
     rule_spec = rule_template
-    for config in [ inherit_get(spec_config, rule_name) , pgm_config ]:
+    for config in [ rule_config , pgm_config ]:
         rule_spec = subst_all(rule_spec, config)
-    rule_spec = subst(rule_spec, "rulename", rname)
+    rule_spec = subst(rule_spec, "rulename", rule_name)
     if trusted:
-        rule_spec += "\n    [trusted]"
+        rule_spec += "    [trusted]"
     return rule_spec
 
 def gen_spec_rules(rule_template, spec_config, rule_name_list):
     pgm_config = spec_config['pgm']
     rule_spec_list = []
-    trusted_rule_names = {}
+    trusted_rule_names = set([])
     for rname in rule_name_list:
-        rule_spec = gen_spec_rule(rule_template, pgm_config, spec_config, rname)
+        rule_config = inherit_get(spec_config, rname)
+        rule_spec = gen_spec_rule(rule_template, pgm_config, rule_config, rname)
         rule_spec_list.append(rule_spec)
-        if 'depends' in spec_config[rname]:
-            trusted_rule_names = trusted_rule_names.union(set(spec_config[rname]['depends'].split()))
+        if 'depends' in rule_config:
+            trusted_rule_names = trusted_rule_names.union(set(rule_config['depends'].split()))
     for trname in trusted_rule_names:
-        rule_spec = gen_spec_rule(rule_template, pgm_config, spec_config, trname, trusted = True)
+        rule_spec = gen_spec_rule(rule_template, pgm_config, rule_config, trname, trusted = True)
         rule_spec_list.append(rule_spec)
     return "\n".join(rule_spec_list)
 
