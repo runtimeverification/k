@@ -1,6 +1,7 @@
 // Copyright (c) 2015-2019 K Team. All Rights Reserved.
 package org.kframework.compile;
 
+import org.kframework.backend.kore.ConstructorChecks;
 import org.kframework.compile.ConfigurationInfo;
 import org.kframework.compile.LabelInfo;
 import org.kframework.definition.Context;
@@ -51,30 +52,44 @@ public class AddTopCellToRules {
         // KApply instance
         if (term instanceof KApply) {
             KLabel kLabel = ((KApply) term).klabel();
-            if(kLabel.equals(root)) {
-                return term;
-            }
-            String polyStr = labelInfo.getPolyInfo(kLabel);
-            if(polyStr != null) {
-                List<Set<Integer>> polyPositions = RuleGrammarGenerator.computePositions(polyStr);
-                for (Set<Integer> pos: polyPositions) {
-                    if (pos.contains(0) && pos.size() > 1) {
-                        // recursively call addRoot on the children whose type is the same as return type
-                        List<K> oldChildren = ((KApply) term).klist().items();
-                        List<K> newChildren = new ArrayList<>();
-                        for (int i = 0; i < oldChildren.size(); i++){
-                            if (pos.contains(i + 1)) {
-                                newChildren.add(addRootCell(oldChildren.get(i)));
-                            } else {
-                                newChildren.add(oldChildren.get(i));
-                            }
+            if (ConstructorChecks.isBuiltinLabel(kLabel)) {
+                // builtin-labels (ML connectives)
+                String polyStr = labelInfo.getPolyInfo(kLabel);
+                if(polyStr != null) {
+                    // connectives that have poly attribute
+                    List<Set<Integer>> polyPositions = RuleGrammarGenerator.computePositions(polyStr);
+                    for (Set<Integer> pos: polyPositions) {
+                        if (pos.contains(0)) {
+                            if (pos.size() > 1) {
+                                // recursively call addRoot on the children whose type is the same as the return type
+                                List<K> oldChildren = ((KApply) term).klist().items();
+                                List<K> newChildren = new ArrayList<>();
+                                for (int i = 0; i < oldChildren.size(); i++) {
+                                    if (pos.contains(i + 1)) {
+                                        newChildren.add(addRootCell(oldChildren.get(i)));
+                                    } else {
+                                        newChildren.add(oldChildren.get(i));
+                                    }
 
+                                }
+                                return KApply(kLabel, KList(newChildren));
+                            } else {
+                                // only one group can contain 0
+                                return term;
+                            }
                         }
-                        return KApply(kLabel, KList(newChildren));
                     }
+                    // if 0 doesn't appear in the poly attribute
+                    return term;
+                } else {
+                    // connectives that don't have poly attribute
+                    return term;
+                }
+            } else {
+                if (kLabel.equals(root)) {
+                    return term;
                 }
             }
-
         }
 
         // KRewrite instance
