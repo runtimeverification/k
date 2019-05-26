@@ -65,12 +65,11 @@ def gen_spec_rules(rule_template, spec_config, rule_name_list, trusted = False):
         rule_config = inherit_get(spec_config, rname)
         rule_spec = gen_spec_rule(rule_template, pgm_config, rule_config, rname, trusted = trusted)
         rule_spec_list.append(rule_spec)
-        if '_lemmas' in rule_config:
+        if not trusted and '_lemmas' in rule_config:
             lemma_names = lemma_names.union(set(rule_config['_lemmas'].split()))
-    for trname in lemma_names:
-        rule_spec = gen_spec_rule(rule_template, pgm_config, rule_config, trname, trusted = True)
-        rule_spec_list.append(rule_spec)
-    return '\n'.join(rule_spec_list)
+    if len(lemma_names) > 0:
+        rule_spec_list += gen_spec_rules(rule_template, spec_config, list(lemma_names), trusted = True)
+    return rule_spec_list
 
 def gen_spec_defn(spec_template, rule_template, spec_config, spec_name, output_dir):
     case_name_list_all = list(filter(lambda sec: sec.startswith(spec_name + '-'), spec_config.sections()))
@@ -80,9 +79,8 @@ def gen_spec_defn(spec_template, rule_template, spec_config, spec_name, output_d
         if not any(sec_name.startswith(rname + '-') for sec_name in spec_config.sections()):
             case_name_list.append(rname)
 
-    rules = '\n'.join( [ gen_spec_rules(rule_template, spec_config, [spec_name])
-                       , gen_spec_rules(rule_template, spec_config, case_name_list, trusted = True)
-                       ]
+    rules = '\n'.join( gen_spec_rules(rule_template, spec_config, [spec_name])
+                     + gen_spec_rules(rule_template, spec_config, case_name_list, trusted = True)
                      )
 
     spec_defn_tmpl = subst(spec_template, 'module', spec_name.upper())
@@ -91,7 +89,7 @@ def gen_spec_defn(spec_template, rule_template, spec_config, spec_name, output_d
     write_spec_file(output_dir, spec_name, spec_defn)
 
     if len(case_name_list) > 0:
-        case_rules = gen_spec_rules(rule_template, spec_config, case_name_list)
+        case_rules = '\n'.join(gen_spec_rules(rule_template, spec_config, case_name_list))
 
         spec_case_name      = spec_name + '_cases'
         spec_case_defn_tmpl = subst(spec_template, 'module', spec_case_name.upper())
