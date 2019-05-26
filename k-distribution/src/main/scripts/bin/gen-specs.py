@@ -9,7 +9,7 @@ def write_spec_file(output_dir, spec_name, spec_defn):
     output_file = output_dir + '/' + spec_name + '-spec.k'
     with open(output_file, 'w') as spec_out:
         spec_out.write(spec_defn)
-        print('Wrote spec file: ' + output_file)
+        print('Spec file: ' + output_file)
 
 # TODO: for Python 3.5 or higher: z = {**x, **y}
 def merge_two_dicts(x, y):
