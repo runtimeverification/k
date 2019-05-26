@@ -1,0 +1,18 @@
+// Copyright (c) 2019 K Team. All Rights Reserved.
+
+module F-SPEC
+  imports INI-SPEC-GEN
+
+    // f
+    rule <k> x => z </k>
+         <fooC> Y:Int </fooC>
+      requires true
+
+    // g
+    rule <k> foo(X:Int) => z </k>
+         <fooC> Y:Int </fooC>
+      requires true
+    [trusted]
+
+
+endmodule
