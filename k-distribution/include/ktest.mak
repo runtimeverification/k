@@ -78,17 +78,17 @@ else
 endif
 
 %-spec.k: kompile
-ifeq ($(TESTDIR),$(RESULTDIR))
-	$(KPROVE) $@ $(KPROVE_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $@.out
-else
-	$(KPROVE) $@ $(KPROVE_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $(RESULTDIR)/$(notdir $@).out
-endif
 ifeq ($(PROOF_INI_GENERATED),true)
 ifeq ($(TESTDIR),$(RESULTDIR))
 	cat $@ $(CHECK) $@.ini-out
 else
 	cat $@ $(CHECK) $(RESULTDIR)/$(notdir @).ini-out
 endif
+endif
+ifeq ($(TESTDIR),$(RESULTDIR))
+	$(KPROVE) $@ $(KPROVE_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $@.out
+else
+	$(KPROVE) $@ $(KPROVE_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $(RESULTDIR)/$(notdir $@).out
 endif
 
 %.search: kompile
