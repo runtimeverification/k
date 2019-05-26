@@ -8,6 +8,8 @@ KRUN=$(abspath $(MAKEFILE_PATH)/../bin/krun)
 KDEP=$(abspath $(MAKEFILE_PATH)/../bin/kdep)
 # and kprove
 KPROVE=$(abspath $(MAKEFILE_PATH)/../bin/kprove)
+# and kprove_ini
+KPROVE_INI=$(abspath $(MAKEFILE_PATH)/../bin/kprove_ini)
 # and kast
 KAST=$(abspath $(MAKEFILE_PATH)/../bin/kast)
 # and keq
@@ -26,7 +28,12 @@ DEFDIR?=.
 RESULTDIR?=$(TESTDIR)
 # all tests in test directory with matching file extension
 TESTS?=$(wildcard $(TESTDIR)/*.$(EXT))
+ifeq ($(wildcard spec.ini),)
 PROOF_TESTS?=$(wildcard $(TESTDIR)/*-spec.k)
+else
+PROOF_TESTS:=$(shell $(KPROVE_INI) $(TESTDIR)/defn-tmpl.k $(TESTDIR)/rule-tmpl.k $(TESTDIR)/spec.ini)
+PROOF_INI_GENERATED:=true
+endif
 SEARCH_TESTS?=$(wildcard $(TESTDIR)/*.$(EXT).search)
 STRAT_TESTS?=$(wildcard $(TESTDIR)/*.strat)
 KAST_TESTS?=$(wildcard $(TESTDIR)/*.kast)
@@ -76,6 +83,13 @@ ifeq ($(TESTDIR),$(RESULTDIR))
 else
 	$(KPROVE) $@ $(KPROVE_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $(RESULTDIR)/$(notdir $@).out
 endif
+ifeq ($(PROOF_INI_GENERATED),true)
+ifeq ($(TESTDIR),$(RESULTDIR))
+	cat $@ $(CHECK) $@.ini-out
+else
+	cat $@ $(CHECK) $(RESULTDIR)/$(notdir @).ini-out
+endif
+endif
 
 %.search: kompile
 ifeq ($(TESTDIR),$(RESULTDIR))
@@ -100,6 +114,9 @@ endif
 
 clean:
 	rm -rf $(DEFDIR)/$(DEF)-kompiled
+ifeq ($(PROOF_INI_GENERATED),true)
+	rm -rf $(PROOF_TESTS)
+endif
 
 .depend:
 	@$(KDEP) $(DEF).k > .depend-tmp

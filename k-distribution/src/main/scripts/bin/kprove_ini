@@ -6,10 +6,11 @@ import re
 import configparser
 
 def write_spec_file(output_dir, spec_name, spec_defn):
-    output_file = output_dir + '/' + spec_name + '-spec.k'
+    spec_file_name = spec_name + '-spec.k'
+    output_file = output_dir + '/' + spec_file_name
     with open(output_file, 'w') as spec_out:
         spec_out.write(spec_defn)
-        print('Spec file: ' + output_file)
+        print(spec_file_name)
 
 # TODO: for Python 3.5 or higher: z = {**x, **y}
 def merge_two_dicts(x, y):
@@ -108,7 +109,7 @@ def usage():
                  , '        <spec_ini>:       ini format file describing tree of K proofs.'
                  , '        <spec_name>:      name of specification to generate (defaults to pgm.specs).'
                  ]
-    print('\n'.join(usage_strs))
+    sys.stderr.write('\n'.join(usage_strs))
 
 if __name__ == '__main__':
     if len(sys.argv) < 4:
@@ -124,7 +125,7 @@ if __name__ == '__main__':
     spec_config.read(spec_ini_file)
 
     if 'pgm' not in spec_config.sections():
-        print('File ' + spec_ini_file + ' must have a `pgm` section!')
+        sys.stderr.write('File ' + spec_ini_file + ' must have a `pgm` section!')
         sys.exit(1)
 
     spec_names = sys.argv[4:]
