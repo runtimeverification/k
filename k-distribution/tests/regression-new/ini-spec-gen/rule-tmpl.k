@@ -1,4 +1,5 @@
     // {RULENAME}
     rule <k> {K} </k>
-         <fooC> {FOO} </fooC>
+         <fooC> {FOOC} </fooC>
+         <alt> {ALT} </alt>
       requires {REQUIRES}
