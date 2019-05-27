@@ -8,8 +8,8 @@ KRUN=$(abspath $(MAKEFILE_PATH)/../bin/krun)
 KDEP=$(abspath $(MAKEFILE_PATH)/../bin/kdep)
 # and kprove
 KPROVE=$(abspath $(MAKEFILE_PATH)/../bin/kprove)
-# and kprove_ini
-KPROVE_INI=$(abspath $(MAKEFILE_PATH)/../bin/kprove_ini)
+# and kprove-ini
+KPROVE_INI=$(abspath $(MAKEFILE_PATH)/../bin/kprove-ini)
 # and kast
 KAST=$(abspath $(MAKEFILE_PATH)/../bin/kast)
 # and keq
