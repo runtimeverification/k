@@ -6,17 +6,20 @@ module G-SPEC
     // g
     rule <k> foo(X:Int) => z </k>
          <fooC> Y:Int </fooC>
+         <alt> left </alt>
       requires true
 
     // g-case-1
     rule <k> foo(X:Int) => z </k>
          <fooC> Y:Int </fooC>
+         <alt> left </alt>
       requires X <=Int 8
     [trusted]
 
     // g-case-2
     rule <k> foo(X:Int) => z </k>
          <fooC> Y:Int </fooC>
+         <alt> left </alt>
       requires X >Int 8
     [trusted]
 

@@ -6,11 +6,13 @@ module F-SPEC
     // f
     rule <k> x => z </k>
          <fooC> Y:Int </fooC>
+         <alt> left </alt>
       requires true
 
     // g
     rule <k> foo(X:Int) => z </k>
          <fooC> Y:Int </fooC>
+         <alt> left </alt>
       requires true
     [trusted]
 

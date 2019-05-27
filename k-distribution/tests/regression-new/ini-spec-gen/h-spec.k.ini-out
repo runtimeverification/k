@@ -4,19 +4,22 @@ module H-SPEC
   imports INI-SPEC-GEN
 
     // h
-    rule <k> bar(X) => baz(0) </k>
+    rule <k> bar(X) => end </k>
          <fooC> Y:Int </fooC>
+         <alt> left </alt>
       requires true
 
     // h-1
-    rule <k> bar(X) => baz(0) </k>
+    rule <k> bar(X) => end </k>
          <fooC> Y:Int </fooC>
+         <alt> left </alt>
       requires Y <=Int 3
     [trusted]
 
     // h-2
-    rule <k> bar(X) => baz(0) </k>
+    rule <k> bar(X) => end </k>
          <fooC> Y:Int </fooC>
+         <alt> left </alt>
       requires Y >Int 3
     [trusted]
 
