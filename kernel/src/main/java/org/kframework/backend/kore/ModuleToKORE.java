@@ -864,6 +864,7 @@ public class ModuleToKORE {
     private Att addKoreAttributes(Production prod, SetMultimap<KLabel, Rule> functionRules, Set<KLabel> impurities, Set<Production> overloads) {
         boolean isConstructor = !isFunction(prod);
         boolean isFunctional = !isFunction(prod);
+        boolean isOverloaded = false;
         if (prod.att().contains(Attribute.ASSOCIATIVE_KEY) ||
                 prod.att().contains(Attribute.COMMUTATIVE_KEY) ||
                 prod.att().contains(Attribute.IDEMPOTENT_KEY) ||
@@ -872,7 +873,7 @@ public class ModuleToKORE {
         }
         boolean isAnywhere = false;
         if (overloads.contains(prod)) {
-            isConstructor = false;
+            isOverloaded = true;
             isAnywhere = true;
         }
         for (Rule r : functionRules.get(prod.klabel().get())) {
@@ -893,6 +894,9 @@ public class ModuleToKORE {
         }
         if (isAnywhere) {
             att = att.add("anywhere");
+        }
+        if (isOverloaded) {
+            att = att.add("overload");
         }
         return att;
     }
