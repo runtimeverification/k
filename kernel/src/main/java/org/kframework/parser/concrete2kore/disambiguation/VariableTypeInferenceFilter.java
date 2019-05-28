@@ -371,9 +371,6 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
     }
 
     public static boolean isFunctionRule(TermCons tc, boolean isAnywhere) {
-        if (isAnywhere) {
-            return true;
-        }
         if ((tc.production().sort().name().equals("#RuleContent") || tc.production().sort().name().equals("#RuleBody")) && !(tc.get(0) instanceof TermCons && isFunctionRule((TermCons)tc.get(0), isAnywhere))) {
             ProductionReference child = (ProductionReference) tc.get(0);
             if (child.production().klabel().isDefined() && child.production().klabel().get().name().equals("#withConfig")) {
@@ -382,7 +379,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
             if (child.production().klabel().isDefined() && child.production().klabel().get().equals(KLabels.KREWRITE)) {
                 child = (ProductionReference)((TermCons)child).get(0);
             }
-            return child.production().att().contains(Attribute.FUNCTION_KEY);
+            return child.production().att().contains(Attribute.FUNCTION_KEY) || isAnywhere;
         }
         return false;
     }
