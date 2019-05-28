@@ -1,8 +1,8 @@
-module WIDENINGANYWHERE
-
-syntax Foo ::= "foo"
-syntax KItem ::= "bar"
-
-rule foo => bar [anywhere]
-
-endmodule
+[Error] Compiler: Had 1 parsing errors.
+[Error] Critical: Unexpected sort KItem for term parsed as production syntax
+KItem ::= "bar". Expected Foo.
+	Source(wideningAnywhere.k)
+	Location(6,13,6,16)
+[Warning] Compiler: Could not find main syntax module with name
+WIDENINGANYWHERE-SYNTAX in definition.  Use --syntax-module to specify one.
+Using WIDENINGANYWHERE as default.
