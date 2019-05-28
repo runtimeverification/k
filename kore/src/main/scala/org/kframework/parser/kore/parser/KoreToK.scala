@@ -21,7 +21,7 @@ class KoreToK (headToLabel_ : java.util.Properties, sortAtt : Map[k.Sort, Att], 
   /** Returns a [[k.Sort]] from [[kore.Sort]]. */
   def apply(s: kore.Sort): k.Sort = s match {
       case kore.SortVariable(name) =>
-        throw new TranslationError("Unexpected Sort Variable")
+        Sorts.K
       case kore.CompoundSort(ctr, params) =>
         if (params.length != 0) {
           throw new TranslationError("Parameterized sorts currently unsupported")
