@@ -14,6 +14,7 @@ import org.kframework.kore.Sort;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.kframework.kore.KORE.*;
@@ -28,6 +29,8 @@ public class LabelInfo {
 
     private final Set<KLabel> functionLabels = new HashSet<>();
 
+    private final Map<KLabel, String> polyInfo = Maps.newHashMap();
+
     protected void addLabel(Sort result, String label) {
         addLabel(result, label, false);
     }
@@ -37,15 +40,27 @@ public class LabelInfo {
     }
 
     protected void addLabel(Sort result, String label, boolean isAssoc, boolean isComm, boolean isFunction) {
-        codomain.put(KLabel(label), result);
+        addLabel(result, label, isAssoc, isComm, isFunction, Optional.empty());
+    }
+
+    protected void addLabel(Sort result, String label, boolean isAssoc, boolean isComm, boolean isFunction, Optional<String> polyLabel) {
+        KLabel kLabel = KLabel(label);
+        codomain.put(kLabel, result);
         AssocInfo info = new AssocInfo(isAssoc, isComm);
-        if (assocInfo.containsKey(KLabel(label))) {
-            assert assocInfo.get(KLabel(label)).equals(info);
+        if (assocInfo.containsKey(kLabel)) {
+            assert assocInfo.get(kLabel).equals(info);
         } else {
-            assocInfo.put(KLabel(label), new AssocInfo(isAssoc, isComm));
+            assocInfo.put(kLabel, new AssocInfo(isAssoc, isComm));
         }
         if (isFunction) {
-            functionLabels.add(KLabel(label));
+            functionLabels.add(kLabel);
+        }
+        if (polyLabel.isPresent()) {
+            if (polyInfo.containsKey(kLabel)){
+                assert polyInfo.get(kLabel).equals(polyLabel.get());
+            } else {
+                polyInfo.put(kLabel, polyLabel.get());
+            }
         }
     }
 
@@ -98,5 +113,12 @@ public class LabelInfo {
         public boolean isComm() {
             return isComm;
         }
+    }
+
+    /**
+     * Get the poly attribute for the KLabel.
+     */
+    public String getPolyInfo(KLabel l) {
+        return polyInfo.get(l);
     }
 }
