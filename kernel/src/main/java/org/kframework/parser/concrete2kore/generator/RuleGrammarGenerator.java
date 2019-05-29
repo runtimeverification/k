@@ -395,6 +395,10 @@ public class RuleGrammarGenerator {
         return StringUtil.computePoly(p.att().get("poly"));
     }
 
+    public static List<Set<Integer>> computePositions(String p) {
+        return StringUtil.computePoly(p);
+    }
+
     private static List<List<Sort>> makeAllSortTuples(int size, Module mod) {
         List<List<Sort>> res = new ArrayList<>();
         List<Sort> allSorts = stream(mod.definedSorts()).filter(s -> !isParserSort(s)).collect(Collectors.toList());

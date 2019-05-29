@@ -8,6 +8,7 @@ import org.kframework.attributes.Source;
 import org.kframework.backend.kore.ModuleToKORE;
 import org.kframework.compile.AddSortInjections;
 import org.kframework.compile.ExpandMacros;
+import org.kframework.compile.ExpandMacros;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kore.K;
 import org.kframework.main.FrontEnd;
@@ -119,7 +120,7 @@ public class KastFrontEnd extends FrontEnd {
             }
             K parsed = def.getParser(mod, sort, kem).apply(FileUtil.read(stringToParse), source);
             if (options.expandMacros || options.kore) {
-                parsed = new ExpandMacros(compiledMod, files.get(), def.kompileOptions, false).expand(parsed);
+                parsed = ExpandMacros.forNonSentences(compiledMod, files.get(), def.kompileOptions, false).expand(parsed);
             }
             if (options.kore) {
               ModuleToKORE converter = new ModuleToKORE(compiledMod, files.get(), def.topCellInitializer, def.kompileOptions);
