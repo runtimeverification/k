@@ -160,7 +160,7 @@ struct
     | _ -> raise Not_implemented
 
   let hook_ctor c _ sort _ _ = match c with
-      _, [Int len] -> [Array (sort,interned_bottom,(Dynarray.make (Z.to_int len) interned_bottom))]
+      _, [Int len], d -> [Array (sort,d,(Dynarray.make (Z.to_int len) d))]
     | _ -> raise Not_implemented
 end
 
