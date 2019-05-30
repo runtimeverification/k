@@ -106,6 +106,8 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
 
   lazy val productions: Set[Production] = sentences collect { case p: Production => p }
 
+  lazy val sortedProductions: Seq[Production] = productions.toSeq.sorted
+
   lazy val localProductions: Set[Production] = localSentences collect { case p: Production => p }
 
   lazy val productionsFor: Map[KLabel, Set[Production]] =
@@ -208,6 +210,8 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
     }
   })
   lazy val contexts: Set[Context] = sentences collect { case r: Context => r }
+
+  lazy val sortedRules: Seq[Rule] = rules.toSeq.sorted
 
   lazy val localRules: Set[Rule] = localSentences collect { case r: Rule => r }
 
@@ -331,6 +335,22 @@ case class Rule(body: K, requires: K, ensures: K, att: Att = Att.empty) extends 
   override val isSyntax = false
   override val isNonSyntax = true
   override def withAtt(att: Att) = Rule(body, requires, ensures, att)
+}
+
+object Rule {
+  implicit val ord: Ordering[Rule] = new Ordering[Rule] {
+    def compare(a: Rule, b: Rule): Int = {
+      val c1 = Ordering[K].compare(a.body, b.body)
+      if (c1 == 0) {
+        val c2 = Ordering[K].compare(a.requires, b.requires)
+        if (c2 == 0) {
+          Ordering[K].compare(a.ensures, b.ensures)
+        }
+        c2
+      }
+      c1
+    }
+  }
 }
 
 case class ModuleComment(comment: String, att: Att = Att.empty) extends Sentence with OuterKORE {
@@ -474,6 +494,12 @@ case class Production(klabel: Option[KLabel], sort: Sort, items: Seq[ProductionI
 }
 
 object Production {
+  implicit val ord = new Ordering[Production] {
+    def compare(a: Production, b: Production): Int = {
+      Ordering[Option[String]].compare(a.klabel.map(_.name), b.klabel.map(_.name))
+    }
+  }
+
   def apply(klabel: KLabel, sort: Sort, items: Seq[ProductionItem], att: Att = Att.empty): Production = {
     Production(Some(klabel), sort, items, att)
   }

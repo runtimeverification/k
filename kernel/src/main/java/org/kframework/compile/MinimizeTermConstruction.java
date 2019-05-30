@@ -33,6 +33,7 @@ public class MinimizeTermConstruction {
         vars.clear();
         cache.clear();
         usedOnRhs.clear();
+        counter = 0;
     }
 
     private Rule resolve(Rule rule) {

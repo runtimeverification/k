@@ -20,6 +20,7 @@ import org.kframework.kil.loader.Constants;
 import org.kframework.kore.Sort;
 import org.kframework.parser.concrete2kore.ParseInModule;
 import org.kframework.utils.file.FileUtil;
+import org.kframework.utils.StringUtil;
 import scala.collection.Seq;
 import scala.Option;
 
@@ -391,14 +392,11 @@ public class RuleGrammarGenerator {
     }
 
     public static List<Set<Integer>> computePositions(Production p) {
-        return computePositions(p.att().get("poly"));
+        return StringUtil.computePoly(p.att().get("poly"));
     }
 
     public static List<Set<Integer>> computePositions(String p) {
-        return (List<Set<Integer>>) Arrays.asList(p.split(";"))
-                .stream().map(l -> Arrays.asList(l.split(",")).stream()
-                        .map(s -> Integer.valueOf(s.trim())).collect(Collectors.toSet())).collect(Collectors.toList());
-
+        return StringUtil.computePoly(p);
     }
 
     private static List<List<Sort>> makeAllSortTuples(int size, Module mod) {

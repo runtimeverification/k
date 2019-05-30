@@ -20,6 +20,7 @@ public class ResolveAnonVar {
 
     void resetVars() {
         vars.clear();
+        counter = 0;
     }
 
     private Rule resolve(Rule rule) {
