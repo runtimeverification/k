@@ -284,6 +284,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
             K result = proofResults.stream()
                     .map(constrainedTerm -> (K) constrainedTerm.term())
                     .reduce(((k1, k2) -> KApply(KLabels.ML_AND, k1, k2))).orElse(KApply(KLabels.ML_TRUE));
+            rewritingContext.stateLog.log(StateLog.LogEvent.REACHRESULT, result);
             rewritingContext.stateLog.close();
             return result;
         }
