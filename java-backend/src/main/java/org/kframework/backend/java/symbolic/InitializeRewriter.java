@@ -218,6 +218,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
             org.kframework.backend.java.kil.Rule javaPattern = convertToJavaPattern(converter, pattern);
             SymbolicRewriter rewriter = new SymbolicRewriter(rewritingContext, transitions, converter);
             K result = rewriter.search(javaTerm, javaPattern, bound.orElse(NEGATIVE_VALUE), depth.orElse(NEGATIVE_VALUE), searchType, termContext);
+            rewritingContext.stateLog.log(StateLog.LogEvent.SEARCHREACH, result);
             rewritingContext.stateLog.close();
             return result;
         }
