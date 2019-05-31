@@ -62,7 +62,7 @@ class TextToKore(b: Builders = DefaultBuilders) {
     } catch {
       case _: java.io.EOFException => throw ParseError("ERROR: Unexpected end of file while parsing")
       case exc: ParseError => throw exc
-      case exc: Throwable => throw ParseError("ERROR: Unexpected error while parsing: " + exc.getMessage) // shouldn't be reachable
+      case exc: Throwable => throw ParseError("ERROR: Unexpected error while parsing: " + exc.getMessage, e) // shouldn't be reachable
     } finally {
       scanner.close()
     }
