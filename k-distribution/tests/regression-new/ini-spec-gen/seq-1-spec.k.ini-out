@@ -1,0 +1,20 @@
+// Copyright (c) 2019 K Team. All Rights Reserved.
+
+module SEQ-1-SPEC
+  imports INI-SPEC-GEN
+
+    // seq-1
+    rule <k> seq(1) => seq(3) </k>
+         <fooC> Y:Int </fooC>
+         <alt> left </alt>
+      requires true
+
+    // seq-2
+    rule <k> seq(2) => seq(3) </k>
+         <fooC> Y:Int </fooC>
+         <alt> left </alt>
+      requires true
+    [trusted]
+
+
+endmodule

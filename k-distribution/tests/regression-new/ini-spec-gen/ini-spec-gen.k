@@ -2,7 +2,7 @@
 
 module INI-SPEC-GEN-SYNTAX
     imports INT
-    syntax MyId ::= "x" | "y" | "z" | foo ( Int ) | bar ( Int ) | baz ( Int ) | begin ( Int ) | end ( Int ) | "end"
+    syntax MyId ::= "x" | "y" | "z" | foo ( Int ) | bar ( Int ) | baz ( Int ) | begin ( Int ) | end ( Int ) | "end" | seq ( Int )
     syntax Alternate ::= "left" | "right"
 endmodule
 
@@ -30,5 +30,9 @@ module INI-SPEC-GEN
 
     rule <k> end(X) => baz(X) ... </k> requires X <=Int 0
     rule <k> end(X) => end    ... </k> requires X  >Int 0
+
+    rule <k> seq(0) => seq(1) ... </k>
+    rule <k> seq(1) => seq(2) ... </k>
+    rule <k> seq(2) => seq(3) ... </k>
 endmodule
 
