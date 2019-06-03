@@ -2,7 +2,7 @@
 
 import sys
 import json
-import util
+from util import *
 
 def KApply(label, args):
     return { "node": "KApply", "label": label, "variable": False, "arity": len(args), "args": args }
@@ -139,7 +139,7 @@ SET_expressions = { "Set:in"  : binOpStr("in")
                   , "SetItem" : appliedLabelStr("SetItem")
                   }
 
-K_symbols = util.combineDicts(K_builtin_labels, BOOL_expressions, INT_predicates, INT_expressions, MAP_expressions, LIST_expressions, SET_expressions)
+K_symbols = combineDicts(K_builtin_labels, BOOL_expressions, INT_predicates, INT_expressions, MAP_expressions, LIST_expressions, SET_expressions)
 
 def prettyPrintKast(kast, symbolTable):
     if kast is None or kast == {}:
@@ -194,8 +194,4 @@ def prettyPrintKast(kast, symbolTable):
     warning("Error turning to kast!")
     print(kast)
     fatal("Error unparsing!")
-
-def readKastTerm(termPath):
-    with open(termPath, "r") as termFile:
-        return normalizeKLabels(json.loads(termFile.read())['term'])
 
