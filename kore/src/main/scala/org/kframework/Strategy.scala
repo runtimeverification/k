@@ -4,6 +4,7 @@ import org.kframework.attributes.Att
 import org.kframework.builtin.BooleanUtils
 import org.kframework.builtin.KLabels
 import org.kframework.builtin.Sorts
+import org.kframework.compile.RewriteToTop
 import org.kframework.definition.{DefinitionTransformer, ModuleTransformer, Module, Rule, Definition}
 import org.kframework.kore.KORE
 import org.kframework.kore.Sort
@@ -55,13 +56,13 @@ class Strategy(heatCool: Boolean) {
 
           import rich._
           
-          if (!defn.mainModule.importedModuleNames.contains("STRATEGY$SYNTAX")) {
+          if (!defn.mainModule.importedModuleNames.contains("STRATEGY$SYNTAX") || r.att.contains("anywhere") || r.att.contains("macro")) {
             r
           } else
             r match {
               case r: Rule if !r.body.contains({ case k: kore.KApply => k.klabel.name.contains("<s>") }) =>
-                val newBody = r.body match {
-                  case KApply(klabel, _) if !module.attributesFor.contains(klabel) || !klabel.att.contains(Att.Function) =>
+                val newBody = RewriteToTop.toLeft(r.body) match {
+                  case KApply(klabel, _) if !module.attributesFor.contains(klabel) || !module.attributesFor(klabel).contains(Att.Function) =>
                     // todo: "!module.attributesFor.contains(klabel) ||" when #1723 is fixed
 
                     def makeRewrite(tag: String) =
