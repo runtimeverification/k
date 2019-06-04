@@ -211,27 +211,26 @@ def readKastTerm(termPath):
     with open(termPath, "r") as termFile:
         return normalizeKLabels(json.loads(termFile.read())['term'])
 
-def writeSpecFile(specName, module, symbolTable, subDir = None):
-    specFile = specName + ".k"
-    specText = prettyPrintKast(module, symbolTable)
-    if subDir is not None:
-        specFile = subDir + "/" + specFile
-    with open(specFile, "w") as sfile:
-        sfile.write(prettyPrintKast(module, symbolTable))
-    return (specFile, specText)
+def writeKDefinition(fileName, kDef, symbolTable):
+    if not isKDefinition(kDef):
+        notif("Not a K Definition!")
+        print(kDef)
+        sys.exit(1)
+    specText = prettyPrintKast(kDef, symbolTable)
+    with open(fileName, "w") as sfile:
+        sfile.write(specText)
+        notif("Wrote spec file: " + fileName)
+        print(specText)
+        sys.stdout.flush()
+        return
+    fatal("Could not write spec file: " + fileName)
 
-def proveRules(specName, kRules, symbolTable, proveArgs, subDir = None):
-    writtenRules = [ minimizeRule(kRule) for kRule in kRules ]
-    if len(writtenRules) == 0:
-        notif("No rules to prove!!")
-        return False
-    kModule = KModule(specName.upper() + "-SPEC", [KImport("EVM")], writtenRules)
-    (specFile, specText) = writeSpecFile(specName + "-spec", kModule, symbolTable, subDir = subDir)
-    notif("Attempting to prove rules:")
-    print(specText)
+def proveSpec(fileName, kproveArgs = []):
+    notif("Attempting to prove spec: " + fileName)
+    proveCommand = ["kprove", fileName] + kproveArgs
+    print("Command: " + str(proveCommand))
     sys.stdout.flush()
-    kproveProc = subprocess.run(["kprove", specFile] + proveArgs)
-    print()
+    kproveProc = subprocess.run(proveCommand)
     if kproveProc.returncode == 0:
         notif("Proof success!!")
         return True

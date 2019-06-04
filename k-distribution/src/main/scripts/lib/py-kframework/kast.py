@@ -46,6 +46,18 @@ def KModule(name, imports, rules):
 def isKModule(k):
     return k["node"] == "KModule"
 
+def KRequire(krequire):
+    return { "node": "KRequire", "require": krequire }
+
+def isKRequire(k):
+    return k["node"] == "KRequire"
+
+def KDefinition(name, requires, modules):
+    return { "node": "KDefinition", "name": name, "requires": requires, "modules": modules }
+
+def isKDefinition(k):
+    return k["node"] == "KDefinition"
+
 def isCellKLabel(label):
     return label[0] == "<" and label[-1] == ">"
 
@@ -189,6 +201,13 @@ def prettyPrintKast(kast, symbolTable):
         return "module " + name                    + "\n    " \
              + "\n    ".join(contents.split("\n")) + "\n" \
              + "endmodule"
+    if isKRequire(kast):
+        return "requires \"" + kast["require"] + ".k\""
+    if isKDefinition(kast):
+        name = kast["name"]
+        requires = "\n".join([prettyPrintKast(require, symbolTable) for require in kast["requires"]])
+        modules = "\n\n".join([prettyPrintKast(module, symbolTable) for module in kast["modules"]])
+        return requires + "\n\n" + modules
 
     print()
     warning("Error turning to kast!")
