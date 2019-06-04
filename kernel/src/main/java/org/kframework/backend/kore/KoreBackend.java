@@ -122,16 +122,16 @@ public class KoreBackend implements Backend {
         DefinitionTransformer resolveSemanticCasts =
                 DefinitionTransformer.fromSentenceTransformer(new ResolveSemanticCasts(true)::resolve, "resolving semantic casts");
         DefinitionTransformer resolveFun = DefinitionTransformer.from(new ResolveFun(true)::resolve, "resolving #fun");
-        Function1<Definition, Definition> resolveFunctionWithConfig = d -> DefinitionTransformer.fromSentenceTransformer(new ResolveFunctionWithConfig(d)::resolve, "resolving functions with config context").apply(d);
+        Function1<Definition, Definition> resolveFunctionWithConfig = d -> DefinitionTransformer.fromSentenceTransformer(new ResolveFunctionWithConfig(d, true)::resolve, "resolving functions with config context").apply(d);
         DefinitionTransformer generateSortPredicateSyntax = DefinitionTransformer.from(new GenerateSortPredicateSyntax()::gen, "adding sort predicate productions");
         DefinitionTransformer generateSortProjections = DefinitionTransformer.from(new GenerateSortProjections()::gen, "adding sort projections");
         DefinitionTransformer subsortKItem = DefinitionTransformer.from(Kompile::subsortKItem, "subsort all sorts to KItem");
         Function1<Definition, Definition> expandMacros = d -> {
-          ResolveFunctionWithConfig transformer = new ResolveFunctionWithConfig(d);
+          ResolveFunctionWithConfig transformer = new ResolveFunctionWithConfig(d, true);
           return DefinitionTransformer.fromSentenceTransformer((m, s) -> new ExpandMacros(transformer, m, files, kompileOptions, false).expand(s), "expand macros").apply(d);
         };
         Function1<Definition, Definition> resolveFreshConstants = d -> DefinitionTransformer.from(m -> GeneratedTopFormat.resolve(new ResolveFreshConstants(d, true).resolve(m)), "resolving !Var variables").apply(d);
-        Function1<Definition, Definition> resolveConfigVar = d -> DefinitionTransformer.fromSentenceTransformer(new ResolveFunctionWithConfig(d)::resolveConfigVar, "Adding configuration variable to lhs").apply(d);
+        Function1<Definition, Definition> resolveConfigVar = d -> DefinitionTransformer.fromSentenceTransformer(new ResolveFunctionWithConfig(d, true)::resolveConfigVar, "Adding configuration variable to lhs").apply(d);
         Function1<Definition, Definition> resolveIO = (d -> Kompile.resolveIOStreams(kem, d));
 
         return def -> resolveIO
@@ -170,7 +170,7 @@ public class KoreBackend implements Backend {
                 new ResolveSemanticCasts(true)::resolve,
                 "resolving semantic casts");
         Function1<Module, Module> expandMacros = m -> {
-          ResolveFunctionWithConfig transformer = new ResolveFunctionWithConfig(m);
+          ResolveFunctionWithConfig transformer = new ResolveFunctionWithConfig(m, true);
           return ModuleTransformer.fromSentenceTransformer((m2, s) -> new ExpandMacros(transformer, m2, files, kompileOptions, false).expand(s), "expand macros").apply(m);
         };
         ModuleTransformer subsortKItem = ModuleTransformer.from(Kompile::subsortKItem, "subsort all sorts to KItem");
