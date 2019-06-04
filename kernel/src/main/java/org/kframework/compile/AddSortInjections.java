@@ -22,6 +22,7 @@ import org.kframework.kore.KToken;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
+import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KEMException;
 
 import java.util.ArrayList;
@@ -233,6 +234,15 @@ public class AddSortInjections {
             KApply kapp = (KApply)term;
             if (kapp.klabel().name().equals("inj")) {
                 return kapp.klabel().params().apply(1);
+            }
+            if (kapp.klabel().name().startsWith("#SemanticCastTo")) {
+                return Outer.parseSort(kapp.klabel().name().substring("#SemanticCastTo".length()));
+            }
+            if (kapp.klabel().name().equals("#fun2")) {
+                return sort(kapp.items().get(0), expectedSort);
+            }
+            if (kapp.klabel().name().equals("#fun3")) {
+                return sort(kapp.items().get(1), expectedSort);
             }
             Production prod = production(kapp);
             if (prod.att().contains("poly")) {

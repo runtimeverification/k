@@ -54,6 +54,11 @@ import static org.kframework.kore.KORE.*;
  */
 public class ResolveFun {
 
+    public ResolveFun(boolean kore) {
+      this.kore = kore;
+    }
+
+    private final boolean kore;
     private final Set<Production> funProds = new HashSet<>();
     private final Set<Rule> funRules = new HashSet<>();
     private Module module;
@@ -192,8 +197,14 @@ public class ResolveFun {
             return Sorts.KItem();
         if (k instanceof KToken)
             return ((KToken) k).sort();
-        if (k instanceof KApply)
-            return k.att().get(Production.class).sort();
+        if (k instanceof KApply) {
+            if (kore) {
+                AddSortInjections inj = new AddSortInjections(module);
+                return inj.sort(k, Sorts.K());
+            } else {
+                return k.att().get(Production.class).sort();
+            }
+        }
         if (k instanceof KVariable)
             return Sorts.K();
         throw KEMException.compilerError("Could not compute sort of term", k);
