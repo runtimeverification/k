@@ -24,7 +24,6 @@ module FFI-SYNTAX
                   | "#slong" [klabel(#slong), symbol]
                   | "#longdouble" [klabel(#longdouble), symbol]
                   | "#struct" "(" List ")" [klabel(#struct), symbol]
-
 endmodule
 
 module FFI
