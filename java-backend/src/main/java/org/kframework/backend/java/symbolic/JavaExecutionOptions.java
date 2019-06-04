@@ -44,7 +44,7 @@ public final class JavaExecutionOptions {
     @Parameter(names={"--state-log-id"}, description="Id of the current execution")
     public String stateLogId;
 
-    @Parameter(names={"--state-log-events"}, converter=LogEventConverter.class, description="Comma-separated list of events to log: [OPEN|REACHINIT|REACHTARGET|REACHPROVED|EXECINIT|SEARCHINIT|NODE|RULE|SRULE|RULEATTEMPT|SRULEATTEMPT|CHECKINGCONSTRAINT|IMPLICATION|Z3QUERY|Z3RESULT|CLOSE]")
+    @Parameter(names={"--state-log-events"}, converter=LogEventConverter.class, description="Comma-separated list of events to log: [OPEN|REACHINIT|REACHTARGET|REACHPROVED|REACHUNPROVED|EXECINIT|SEARCHINIT|SEARCHREACH|NODE|RULE|SRULE|RULEATTEMPT|SRULEATTEMPT|CHECKINGCONSTRAINT|IMPLICATION|Z3QUERY|Z3RESULT|CLOSE]")
     public List<StateLog.LogEvent> stateLogEvents = Collections.emptyList();
 
     @Parameter(names="--cache-func", description="Cache evaluation results of pure functions. Enabled by default.", arity = 1)

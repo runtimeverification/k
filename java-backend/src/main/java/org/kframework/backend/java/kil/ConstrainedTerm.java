@@ -133,78 +133,81 @@ public class ConstrainedTerm extends JavaSymbolicObject {
      */
     public ConjunctiveFormula matchImplies(ConstrainedTerm matchRHSTerm, boolean expand, boolean logFailures,
                                            FormulaContext formulaContext, Set<String> matchingSymbols) {
-        ConjunctiveFormula constraint = ConjunctiveFormula.of(matchRHSTerm.termContext().global())
-                .add(data.constraint.substitution())
-                .add(data.term, matchRHSTerm.data.term)
-                .add(matchRHSTerm.data.constraint);
-        Set<Variable> matchRHSOnlyVars = Sets.difference(constraint.variableSet(),
-                Sets.union(variableSet(), termContext().getInitialLhsVariables()));
-        constraint = constraint.simplifyBeforePatternFolding(context, matchRHSOnlyVars, logFailures);
-        if (constraint.isFalseExtended()) {
-            return null;
-        }
-
-        constraint = constraint.applyProjectionLemma();
-        if (constraint.isFalse()) {
-            return null;
-        }
-
-        if (matchingSymbols != null) {
-            constraint = constraint.resolveMatchingSymbols(matchingSymbols);
-            if (constraint.isFalse()) {
-                return null;
-            }
-        }
-
-        /* apply pattern folding */
-        constraint = constraint.simplifyModuloPatternFolding(context, matchRHSOnlyVars);
-        if (constraint.isFalse()) {
-            return null;
-        }
-
-        formulaContext.printTargetFormula(constraint);
-
-        if (expand) {
-            constraint = constraint.expandPatterns(false, context)
-                    .simplifyModuloPatternFolding(context, matchRHSOnlyVars);
-            if (constraint.isFalse()) {
-                return null;
-            }
-        }
-
-        // evaluate/simplify equalities
         context.setTopConstraint(data.constraint);
-        for (Equality equality : constraint.equalities()) {
-            Term equalityTerm = equality.toK();
-            Term evaluatedTerm = equalityTerm.evaluate(context);
-            if (!evaluatedTerm.equals(equalityTerm)) {
-                constraint = constraint.addAll(Collections.singletonList(evaluatedTerm));
-                if (constraint == null || constraint.isFalse()) {
+        try {
+            ConjunctiveFormula constraint = ConjunctiveFormula.of(matchRHSTerm.termContext().global())
+                    .add(data.constraint.substitution())
+                    .add(data.term, matchRHSTerm.data.term)
+                    .add(matchRHSTerm.data.constraint);
+            Set<Variable> matchRHSOnlyVars = Sets.difference(constraint.variableSet(),
+                    Sets.union(variableSet(), termContext().getInitialLhsVariables()));
+            constraint = constraint.simplifyBeforePatternFolding(context, matchRHSOnlyVars, logFailures);
+            if (constraint.isFalseExtended()) {
+                return null;
+            }
+
+            constraint = constraint.applyProjectionLemma();
+            if (constraint.isFalse()) {
+                return null;
+            }
+
+            if (matchingSymbols != null) {
+                constraint = constraint.resolveMatchingSymbols(matchingSymbols);
+                if (constraint.isFalse()) {
                     return null;
                 }
             }
+
+            /* apply pattern folding */
+            constraint = constraint.simplifyModuloPatternFolding(context, matchRHSOnlyVars);
+            if (constraint.isFalse()) {
+                return null;
+            }
+
+            formulaContext.printTargetFormula(constraint);
+
+            if (expand) {
+                constraint = constraint.expandPatterns(false, context)
+                        .simplifyModuloPatternFolding(context, matchRHSOnlyVars);
+                if (constraint.isFalse()) {
+                    return null;
+                }
+            }
+
+            // evaluate/simplify equalities
+            for (Equality equality : constraint.equalities()) {
+                Term equalityTerm = equality.toK();
+                Term evaluatedTerm = equalityTerm.evaluate(context);
+                if (!evaluatedTerm.equals(equalityTerm)) {
+                    constraint = constraint.addAll(Collections.singletonList(evaluatedTerm));
+                    if (constraint == null || constraint.isFalse()) {
+                        return null;
+                    }
+                }
+            }
+            constraint = constraint.simplifyModuloPatternFolding(context, matchRHSOnlyVars);
+            if (constraint.isFalse()) {
+                return null;
+            }
+
+            constraint = (ConjunctiveFormula) constraint.evaluate(context);
+
+            constraint = constraint.orientSubstitution(matchRHSOnlyVars);
+
+            ConjunctiveFormula implicationLHS = data.constraint;
+            ConjunctiveFormula implicationRHS = constraint.removeSubstitutionVars(matchRHSOnlyVars);
+            implicationRHS =
+                    (ConjunctiveFormula) implicationRHS.substituteAndEvaluate(implicationLHS.substitution(), context);
+
+            boolean implies = implicationLHS.implies(implicationRHS, matchRHSOnlyVars, formulaContext);
+            if (!implies) {
+                return null;
+            }
+
+            return data.constraint.addAndSimplify(constraint, context);
+        } finally {
+            context.setTopConstraint(null);
         }
-        context.setTopConstraint(null);
-        constraint = constraint.simplifyModuloPatternFolding(context, matchRHSOnlyVars);
-        if (constraint.isFalse()) {
-            return null;
-        }
-
-        context.setTopConstraint(data.constraint);
-        constraint = (ConjunctiveFormula) constraint.evaluate(context);
-
-        constraint = constraint.orientSubstitution(matchRHSOnlyVars);
-
-        ConjunctiveFormula implicationLHS = data.constraint;
-        ConjunctiveFormula implicationRHS = constraint.removeSubstitutionVars(matchRHSOnlyVars);
-        implicationRHS = (ConjunctiveFormula) implicationRHS.substituteAndEvaluate(implicationLHS.substitution(), context);
-
-        boolean implies = implicationLHS.implies(implicationRHS, matchRHSOnlyVars, formulaContext);
-        if (!implies) {
-            return null;
-        }
-
-        return data.constraint.addAndSimplify(constraint, context);
     }
 
     public Term term() {

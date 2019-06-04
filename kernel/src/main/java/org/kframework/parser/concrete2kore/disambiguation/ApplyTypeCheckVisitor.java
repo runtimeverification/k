@@ -27,9 +27,11 @@ import java.util.Set;
 
 public class ApplyTypeCheckVisitor extends SetsTransformerWithErrors<ParseFailedException> {
     private final POSet<Sort> subsorts;
+    private final boolean isAnywhere;
 
-    public ApplyTypeCheckVisitor(POSet<Sort> subsorts) {
+    public ApplyTypeCheckVisitor(POSet<Sort> subsorts, boolean isAnywhere) {
         this.subsorts = subsorts;
+        this.isAnywhere = isAnywhere;
     }
 
     public Either<java.util.Set<ParseFailedException>, Term> apply(TermCons tc) {
@@ -39,7 +41,7 @@ public class ApplyTypeCheckVisitor extends SetsTransformerWithErrors<ParseFailed
                         && (tc.production().klabel().get().name().equals("#SyntacticCast")
                         || tc.production().klabel().get().name().startsWith("#SemanticCastTo")
                         || tc.production().klabel().get().name().equals("#InnerCast"))
-                        || (VariableTypeInferenceFilter.isFunctionRule(tc) && j == 0)) {
+                        || (VariableTypeInferenceFilter.isFunctionRule(tc, isAnywhere) && j == 0)) {
                     Term t = tc.get(0);
                     boolean strict = tc.production().klabel().get().name().equals("#SyntacticCast") || tc.production().klabel().get().name().equals("#InnerCast");
                     Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheck2(VariableTypeInferenceFilter.getSortOfCast(tc), strict).apply(t);
