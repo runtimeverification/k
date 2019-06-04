@@ -871,6 +871,13 @@ public class ModuleToKORE {
                 (prod.att().contains(Attribute.FUNCTION_KEY) && prod.att().contains(Attribute.UNIT_KEY))) {
             isConstructor = false;
         }
+        // Later we might set !isConstructor because there are anywhere rules,
+        // but if a symbol is a constructor at this point, then it is still
+        // injective.
+        boolean isInjective = isConstructor;
+        if (prod.att().contains(Attribute.INJECTIVE_KEY)) {
+            isInjective = true;
+        }
         boolean isAnywhere = false;
         if (overloads.contains(prod)) {
             isConstructor = false;
@@ -894,6 +901,9 @@ public class ModuleToKORE {
         }
         if (isAnywhere) {
             att = att.add("anywhere");
+        }
+        if (isInjective) {
+            att = att.add("injective");
         }
         return att;
     }
