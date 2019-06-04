@@ -2,13 +2,13 @@
 package org.kframework.kast;
 
 import com.google.inject.Inject;
-import com.google.inject.Module;
 import com.google.inject.Provider;
 import org.kframework.attributes.Source;
 import org.kframework.backend.kore.ModuleToKORE;
 import org.kframework.compile.AddSortInjections;
 import org.kframework.compile.ExpandMacros;
 import org.kframework.compile.ExpandMacros;
+import org.kframework.definition.Module;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kore.K;
 import org.kframework.main.FrontEnd;
@@ -40,8 +40,8 @@ import java.util.Map;
 
 public class KastFrontEnd extends FrontEnd {
 
-    public static List<Module> getModules() {
-        List<Module> modules = new ArrayList<>();
+    public static List<com.google.inject.Module> getModules() {
+        List<com.google.inject.Module> modules = new ArrayList<>();
         modules.add(new KastModule());
         modules.add(new JCommanderModule());
         modules.add(new CommonModule());
@@ -105,23 +105,20 @@ public class KastFrontEnd extends FrontEnd {
                     sort = def.programStartSymbol;
                 }
             }
-            org.kframework.definition.Module mod;
-            org.kframework.definition.Module compiledMod;
-            if (options.module == null) {
-                mod = def.programParsingModuleFor(def.mainSyntaxModuleName(), kem).get();
-                compiledMod = def.kompiledDefinition.getModule(def.mainSyntaxModuleName()).get();
-            } else {
-                Option<org.kframework.definition.Module> mod2 = def.programParsingModuleFor(options.module, kem);
-                if (mod2.isEmpty()) {
-                    throw KEMException.innerParserError("Module " + options.module + " not found. Specify a module with -m.");
-                }
-                mod = mod2.get();
-                compiledMod = def.kompiledDefinition.getModule(options.module).get();
+
+            options.module = options.module == null ? def.mainSyntaxModuleName() : options.module;
+            Option<Module> maybeMod = def.programParsingModuleFor(options.module, kem);
+            if (maybeMod.isEmpty()) {
+                throw KEMException.innerParserError("Module " + options.module + " not found. Specify a module with -m.");
             }
+            Module mod = maybeMod.get();
+            Module compiledMod = def.kompiledDefinition.getModule(options.module).get();
+
             K parsed = def.getParser(mod, sort, kem).apply(FileUtil.read(stringToParse), source);
             if (options.expandMacros || options.kore) {
                 parsed = ExpandMacros.forNonSentences(compiledMod, files.get(), def.kompileOptions, false).expand(parsed);
             }
+
             if (options.kore) {
               ModuleToKORE converter = new ModuleToKORE(compiledMod, files.get(), def.topCellInitializer, def.kompileOptions);
               parsed = new AddSortInjections(compiledMod).addSortInjections(parsed, sort);
