@@ -75,7 +75,7 @@ public class ExpandMacros {
     }
 
     private ExpandMacros(Module mod, FileUtil files, KompileOptions kompileOptions, boolean reverse, boolean sentences) {
-        this(sentences ? new ResolveFunctionWithConfig(mod) : null, mod, files, kompileOptions, reverse);
+        this(sentences ? new ResolveFunctionWithConfig(mod, kompileOptions.isKore()) : null, mod, files, kompileOptions, reverse);
     }
 
     public ExpandMacros(ResolveFunctionWithConfig transformer, Module mod, FileUtil files, KompileOptions kompileOptions, boolean reverse) {
