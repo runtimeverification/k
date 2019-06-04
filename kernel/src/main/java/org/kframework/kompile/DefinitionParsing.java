@@ -396,7 +396,7 @@ public class DefinitionParsing {
                 return Stream.of(parse.getParse());
             }
         }
-        result = parser.parseString(b.contents(), START_SYMBOL, scanner, source, startLine, startColumn, true);
+        result = parser.parseString(b.contents(), START_SYMBOL, scanner, source, startLine, startColumn, true, b.att().contains("anywhere"));
         parsedBubbles.getAndIncrement();
         if (kem.options.warnings2errors && !result._2().isEmpty()) {
           for (KEMException err : result._2()) {
