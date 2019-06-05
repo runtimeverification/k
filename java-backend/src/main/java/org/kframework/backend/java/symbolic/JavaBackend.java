@@ -91,7 +91,7 @@ public class JavaBackend implements Backend {
                 .andThen(DefinitionTransformer.fromSentenceTransformer(new NormalizeAssoc(KORE.c()), "normalize assoc"))
                 .andThen(DefinitionTransformer.from(AddBottomSortForListsWithIdenticalLabels.singleton(), "add bottom sorts for lists"))
                 .andThen(d2 -> {
-                  ResolveFunctionWithConfig transformer = new ResolveFunctionWithConfig(d2);
+                  ResolveFunctionWithConfig transformer = new ResolveFunctionWithConfig(d2, false);
                   return DefinitionTransformer.fromSentenceTransformer((m, s) -> new ExpandMacros(transformer, m, files, kompileOptions, false).expand(s), "expand macros").apply(d2);
                 })
                 .andThen(DefinitionTransformer.fromSentenceTransformer(new NormalizeAssoc(KORE.c()), "normalize assoc"))
@@ -118,7 +118,7 @@ public class JavaBackend implements Backend {
                 .andThen(ModuleTransformer.fromRuleBodyTransformer(RewriteToTop::bubbleRewriteToTopInsideCells, "bubble out rewrites below cells"))
                 .andThen(AddBottomSortForListsWithIdenticalLabels.singleton())
                 .andThen(m2 -> {
-                  ResolveFunctionWithConfig transformer = new ResolveFunctionWithConfig(m2);
+                  ResolveFunctionWithConfig transformer = new ResolveFunctionWithConfig(m2, false);
                   return ModuleTransformer.fromSentenceTransformer((mod, s) -> new ExpandMacros(transformer, mod, files, kompileOptions, false).expand(s), "expand macros").apply(m2);
                 })
                 .andThen(ModuleTransformer.fromKTransformerWithModuleInfo(convertCellCollections::apply, "convert cell to the underlying collections"))
