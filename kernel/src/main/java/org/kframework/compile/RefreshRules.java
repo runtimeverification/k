@@ -8,8 +8,10 @@ import org.kframework.kore.TransformK;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.kframework.definition.Constructors.*;
@@ -23,8 +25,13 @@ import static org.kframework.kore.KORE.*;
  */
 public class RefreshRules {
 
+    private final Set<String> avoidVars;
     private int counter = 0;
     private Map<KVariable, String> vars = new HashMap<>();
+
+    public RefreshRules(Set<String> avoidVars) {
+        this.avoidVars = avoidVars;
+    }
 
     /**
      * Refreshes a rule
@@ -34,7 +41,7 @@ public class RefreshRules {
      * name.
      */
     public static Rule refresh(Rule rule) {
-        return new RefreshRules().applyRefresh(rule);
+        return new RefreshRules(new HashSet<>()).applyRefresh(rule);
     }
 
     /**
@@ -42,8 +49,8 @@ public class RefreshRules {
      * @param rules The rules to be refreshed.
      * @return The refreshed version of {@code rules}
      */
-    public static Collection<Rule> refresh(Collection<Rule> rules) {
-        RefreshRules refreshRules = new RefreshRules();
+    public static Collection<Rule> refresh(Collection<Rule> rules, Set<String> avoidVars) {
+        RefreshRules refreshRules = new RefreshRules(avoidVars);
         return rules.stream().map(refreshRules::applyRefreshResetVars).collect(Collectors.toCollection(LinkedList::new));
     }
 
@@ -67,7 +74,11 @@ public class RefreshRules {
                 if (var.att().contains("refreshed"))
                     return var;
                 if (!vars.containsKey(var)) {
-                    vars.put(var, "_" + counter++);
+                    String newVarName;
+                    do {
+                        newVarName = "_" + counter++;
+                    } while (avoidVars.contains(newVarName));
+                    vars.put(var, newVarName);
                 }
                 return KVariable(vars.get(var), var.att().add("refreshed", var.name()));
             }
