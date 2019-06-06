@@ -637,8 +637,9 @@ public class ModuleToKORE {
             }
             sb.append("} ");
             if (owise) {
+                Set<String> varNames = vars(rule).stream().map(KVariable::name).collect(Collectors.toSet());
                 sb.append("\\implies{R} (\n    \\and{R} (\n      \\not{R} (\n        ");
-                for (Rule notMatching : RefreshRules.refresh(functionRules.get(productionLabel))) {
+                for (Rule notMatching : RefreshRules.refresh(functionRules.get(productionLabel), varNames)) {
                     if (notMatching.att().contains("owise")) {
                         continue;
                     }
@@ -994,7 +995,7 @@ public class ModuleToKORE {
 
     private KLabel computePolyKLabel(KApply k) {
         String labelName = k.klabel().name();
-        List<Set<Integer>> poly = polyKLabels.get(labelName);
+        List<Set<Integer>> poly = new ArrayList<>(polyKLabels.get(labelName));
         if (mlBinders.contains(labelName)) { // ML binders are not parametric in the variable so we remove it
             poly.remove(0);
         }
@@ -1203,6 +1204,30 @@ public class ModuleToKORE {
     @Override
     public String toString() { return sb.toString(); }
 
+    public Set<K> collectAnonymousVariables(K k){
+        Set <K> anonymousVariables = new HashSet<>();
+        new VisitK() {
+            @Override
+            public void apply(KApply k) {
+                if (mlBinders.contains(k.klabel().name()) && k.items().get(0).att().contains("anonymous")){
+                    throw KEMException.internalError("Nested quantifier over anonymous variables.");
+                }
+                for (K item : k.items()) {
+                    apply(item);
+                }
+            }
+
+            @Override
+            public void apply(KVariable k) {
+                if (k.att().contains("anonymous")) {
+                    anonymousVariables.add(k);
+                }
+            }
+
+        }.apply(k);
+        return anonymousVariables;
+    }
+
     public void convert(K k) {
         new VisitK() {
             @Override
@@ -1214,13 +1239,31 @@ public class ModuleToKORE {
                 if (polyKLabels.containsKey(k.klabel().name())) {
                     label = computePolyKLabel(k);
                 }
-                convert(label, false);
-                sb.append("(");
                 String conn = "";
-                for (K item : k.items()) {
+                if (mlBinders.contains(k.klabel().name()) && k.items().get(0).att().contains("anonymous")){
+                    // Handle #Forall _ / #Exists _
+                    Set<K> anonymousVariables = collectAnonymousVariables(k.items().get(1));
+
+                    // Quantify over all anonymous variables.
+                    for (K variable : anonymousVariables) {
+                        sb.append(conn);
+                        convert(label, false);
+                        sb.append("(");
+                        apply(variable);
+                        conn = ",";
+                    }
+
+                    // We assume that mlBinder only has two children.
                     sb.append(conn);
-                    apply(item);
-                    conn = ",";
+                    apply(k.items().get(1));
+                } else {
+                    convert(label, false);
+                    sb.append("(");
+                    for (K item : k.items()) {
+                        sb.append(conn);
+                        apply(item);
+                        conn = ",";
+                    }
                 }
                 sb.append(")");
             }
