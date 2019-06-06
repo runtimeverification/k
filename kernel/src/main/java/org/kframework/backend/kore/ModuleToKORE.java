@@ -637,8 +637,9 @@ public class ModuleToKORE {
             }
             sb.append("} ");
             if (owise) {
+                Set<String> varNames = vars(rule).stream().map(KVariable::name).collect(Collectors.toSet());
                 sb.append("\\implies{R} (\n    \\and{R} (\n      \\not{R} (\n        ");
-                for (Rule notMatching : RefreshRules.refresh(functionRules.get(productionLabel))) {
+                for (Rule notMatching : RefreshRules.refresh(functionRules.get(productionLabel), varNames)) {
                     if (notMatching.att().contains("owise")) {
                         continue;
                     }
