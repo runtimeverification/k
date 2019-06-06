@@ -63,7 +63,7 @@ public class AddImplicitComputationCell implements UnaryOperator<Sentence> {
         }
     }
 
-    static boolean skipSentence(Sentence s) {
+    private boolean skipSentence(Sentence s) {
         return s.att().contains(Attribute.MACRO_KEY) || s.att().contains(Attribute.ALIAS_KEY)
                 || s.att().contains(Attribute.ANYWHERE_KEY) || s.att().contains(Attribute.KORE_KEY);
     }

@@ -96,11 +96,11 @@ public class ModuleToKORE {
             Att att = module.sortAttributesFor().get(sort).getOrElse(() -> KORE.Att());
             collectAttributes(attributes, att);
         }
-        for (Production prod : iterable(module.productions())) {
+        for (Production prod : iterable(module.sortedProductions())) {
             Att att = prod.att();
             collectAttributes(attributes, att);
         }
-        for (Rule r : iterable(module.rules())) {
+        for (Rule r : iterable(module.sortedRules())) {
             Att att = r.att();
             collectAttributes(attributes, att);
         }
@@ -144,7 +144,7 @@ public class ModuleToKORE {
         }
 
         SetMultimap<KLabel, Rule> functionRules = HashMultimap.create();
-        for (Rule rule : iterable(module.rules())) {
+        for (Rule rule : iterable(module.sortedRules())) {
             K left = RewriteToTop.toLeft(rule.body());
             if (left instanceof KApply) {
                 KApply kapp = (KApply) left;
@@ -165,7 +165,7 @@ public class ModuleToKORE {
                 overloads.add(greater);
             }
         }
-        for (Production prod : iterable(module.productions())) {
+        for (Production prod : iterable(module.sortedProductions())) {
             if (isBuiltinProduction(prod)) {
                 continue;
             }
@@ -199,7 +199,7 @@ public class ModuleToKORE {
         }
         sb.append("\n// generated axioms\n");
         Set<Tuple2<Production, Production>> noConfusion = new HashSet<>();
-        for (Production prod : iterable(module.productions())) {
+        for (Production prod : iterable(module.sortedProductions())) {
             if (isBuiltinProduction(prod)) {
                 continue;
             }
@@ -382,7 +382,7 @@ public class ModuleToKORE {
                     }
                     sb.append(")) [constructor{}()] // no confusion same constructor\n");
                 }
-                for (Production prod2 : iterable(module.productionsForSort().apply(prod.sort()))) {
+                for (Production prod2 : iterable(module.productionsForSort().apply(prod.sort()).toSeq().sorted(Production.ord()))) {
                     // !(cx(x1,x2,...) /\ cy(y1,y2,...))
                     prod2 = computePolyProd(prod2);
                     if (prod2.klabel().isEmpty() || noConfusion.contains(Tuple2.apply(prod, prod2)) || prod.equals(prod2) || !isConstructor(prod2, functionRules, impurities) || isBuiltinProduction(prod2)) {
@@ -410,7 +410,7 @@ public class ModuleToKORE {
             sb.append("  axiom{} ");
             boolean hasToken = false;
             int numTerms = 0;
-            for (Production prod : iterable(mutable(module.productionsForSort()).getOrDefault(sort, Set()))) {
+            for (Production prod : iterable(mutable(module.productionsForSort()).getOrDefault(sort, Set()).toSeq().sorted(Production.ord()))) {
                 prod = computePolyProd(prod);
                 if (isFunction(prod) || prod.isSubsort() || isBuiltinProduction(prod)) {
                     continue;
@@ -536,7 +536,7 @@ public class ModuleToKORE {
             }
         }
         sb.append("\n// rules\n");
-        for (Rule rule : iterable(module.rules())) {
+        for (Rule rule : iterable(module.sortedRules())) {
             convertRule(rule, heatCoolEq, topCell, attributes, functionRules, false, false);
         }
         sb.append("endmodule ");

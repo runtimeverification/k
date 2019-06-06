@@ -116,7 +116,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
     public Tuple2<Either<Set<ParseFailedException>, K>, Set<ParseFailedException>>
             parseString(String input, Sort startSymbol, Source source) {
         try (Scanner scanner = getScanner()) {
-            return parseString(input, startSymbol, scanner, source, 1, 1, true);
+            return parseString(input, startSymbol, scanner, source, 1, 1, true, false);
         }
     }
 
@@ -139,9 +139,9 @@ public class ParseInModule implements Serializable, AutoCloseable {
     }
 
     public Tuple2<Either<Set<ParseFailedException>, K>, Set<ParseFailedException>>
-        parseString(String input, Sort startSymbol, Scanner scanner, Source source, int startLine, int startColumn, boolean inferSortChecks) {
+        parseString(String input, Sort startSymbol, Scanner scanner, Source source, int startLine, int startColumn, boolean inferSortChecks, boolean isAnywhere) {
         final Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> result
-                = parseStringTerm(input, startSymbol, scanner, source, startLine, startColumn, inferSortChecks);
+                = parseStringTerm(input, startSymbol, scanner, source, startLine, startColumn, inferSortChecks, isAnywhere);
         Either<Set<ParseFailedException>, K> parseInfo;
         if (result._1().isLeft()) {
             parseInfo = Left.apply(result._1().left().get());
@@ -168,7 +168,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
      * @return
      */
     private Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>>
-            parseStringTerm(String input, Sort startSymbol, Scanner scanner, Source source, int startLine, int startColumn, boolean inferSortChecks) {
+            parseStringTerm(String input, Sort startSymbol, Scanner scanner, Source source, int startLine, int startColumn, boolean inferSortChecks, boolean isAnywhere) {
         scanner = getGrammar(scanner);
 
         long start = 0;
@@ -209,10 +209,10 @@ public class ParseInModule implements Serializable, AutoCloseable {
             if (rez.isLeft())
                 return new Tuple2<>(rez, warn);
             Term rez3 = new PushTopAmbiguityUp().apply(rez.right().get());
-            rez = new ApplyTypeCheckVisitor(disambModule.subsorts()).apply(rez3);
+            rez = new ApplyTypeCheckVisitor(disambModule.subsorts(), isAnywhere).apply(rez3);
             if (rez.isLeft())
                 return new Tuple2<>(rez, warn);
-            Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rez2 = new VariableTypeInferenceFilter(disambModule.subsorts(), disambModule.definedSorts(), disambModule.productionsFor(), strict && inferSortChecks, true).apply(rez.right().get());
+            Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rez2 = new VariableTypeInferenceFilter(disambModule.subsorts(), disambModule.definedSorts(), disambModule.productionsFor(), strict && inferSortChecks, true, isAnywhere).apply(rez.right().get());
             if (rez2._1().isLeft())
                 return rez2;
             warn = rez2._2();
@@ -270,13 +270,13 @@ public class ParseInModule implements Serializable, AutoCloseable {
 
     public static Term disambiguateForUnparse(Module mod, Term ambiguity) {
         Term rez3 = new PushTopAmbiguityUp().apply(ambiguity);
-        Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheckVisitor(mod.subsorts()).apply(rez3);
+        Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheckVisitor(mod.subsorts(), false).apply(rez3);
         Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rez2;
         if (rez.isLeft()) {
             rez2 = new AmbFilter(false).apply(rez3);
             return rez2._1().right().get();
         }
-        rez2 = new VariableTypeInferenceFilter(mod.subsorts(), mod.definedSorts(), mod.productionsFor(), false, false).apply(rez.right().get());
+        rez2 = new VariableTypeInferenceFilter(mod.subsorts(), mod.definedSorts(), mod.productionsFor(), false, false, false).apply(rez.right().get());
         if (rez2._1().isLeft()) {
             rez2 = new AmbFilter(false).apply(rez.right().get());
             return rez2._1().right().get();

@@ -450,6 +450,8 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
             do {
                 change = false;
                 PersistentUniqueList<Equality> pendingEqualities = PersistentUniqueList.empty();
+
+                //Part 1. Unifications.
                 for (int i = 0; i < equalities.size(); ++i) {
                     Equality equality = equalities.get(i);
 
@@ -493,9 +495,9 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                     } else if (varToNormalTermNonSubstitutable(leftHandSide, rightHandSide)
                             || varToNormalTermNonSubstitutable(rightHandSide, leftHandSide)) {
                         return falsify(substitution, equalities, disjunctions, equality);
-                    } else { //Attempt to replace equality by substitution
+                    } else { //Attempt to replace equality by substitution, RHS to LHS only
                         ImmutableMapSubstitution<Variable, Term> newVarSubstitution =
-                                getSubstitutionIfPossibleUnoriented(leftHandSide, rightHandSide);
+                                getSubstitutionIfPossibleUnoriented(leftHandSide, rightHandSide, rhsOnlyVariables);
 
                         if (newVarSubstitution != null) {
                             substitution = ImmutableMapSubstitution.composeAndEvaluate(substitution, newVarSubstitution,
@@ -510,31 +512,45 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                     }
                 }
                 equalities = pendingEqualities;
+
+                //Part 2. Extracting substitutions, any. Only if no other simplification is possible.
+                if (!change && !rhsOnlyVariables.isEmpty()) {
+                    pendingEqualities = PersistentUniqueList.empty();
+                    for (int i = 0; i < equalities.size(); ++i) {
+                        Equality equality = equalities.get(i);
+
+                        //Any equality should be evaluated in the context of other entries but not itself, otherwise information
+                        //loss can happen. Details: https://github.com/kframework/k-legacy/pull/2399#issuecomment-360680618
+                        context.setTopConstraint(minus(originalTopConstraint, equality));
+
+                        Term leftHandSide = equality.leftHandSide().substituteAndEvaluate(substitution, context);
+                        Term rightHandSide = equality.rightHandSide().substituteAndEvaluate(substitution, context);
+                        equality = new Equality(leftHandSide, rightHandSide, global);
+
+                        //Attempt to replace equality by substitution
+                        ImmutableMapSubstitution<Variable, Term> newVarSubstitution =
+                                getSubstitutionIfPossibleUnoriented(leftHandSide, rightHandSide,
+                                        Collections.emptySet());
+
+                        if (newVarSubstitution != null) {
+                            substitution = ImmutableMapSubstitution.composeAndEvaluate(substitution, newVarSubstitution,
+                                    context);
+                            change = true;
+                            if (substitution.isFalse(global)) {
+                                return falsify(substitution, equalities, disjunctions, equality);
+                            }
+                        } else {
+                            pendingEqualities = pendingEqualities.plus(equality);
+                        }
+                    }
+                    equalities = pendingEqualities;
+                }
             } while (change);
 
             return ConjunctiveFormula.of(substitution, equalities, disjunctions, global);
         } finally {
             context.setTopConstraint(originalTopConstraint);
         }
-    }
-
-    private ImmutableMapSubstitution<Variable, Term> getSubstitutionIfPossibleUnoriented(Term leftHandSide,
-                                                                                         Term rightHandSide) {
-        ImmutableMapSubstitution<Variable, Term> leftToRightSub =
-                getSubstitutionIfPossible(leftHandSide, rightHandSide);
-        ImmutableMapSubstitution<Variable, Term> rightToLeftSub
-                = getSubstitutionIfPossible(rightHandSide, leftHandSide);
-        return leftToRightSub != null
-               ? rightToLeftSub != null
-                 ? leftHandSide.toString().compareTo(rightHandSide.toString()) < 0 ? leftToRightSub : rightToLeftSub
-                 : leftToRightSub
-               : rightToLeftSub;
-    }
-
-    private boolean varToNormalTermNonSubstitutable(Term leftHandSide, Term rightHandSide) {
-        return leftHandSide instanceof Variable
-                && rightHandSide.variableSet().contains(leftHandSide)
-                && rightHandSide.isNormal();
     }
 
     private ConjunctiveFormula falsify(
@@ -661,16 +677,42 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
         }
     }
 
+    private boolean varToNormalTermNonSubstitutable(Term leftHandSide, Term rightHandSide) {
+        return leftHandSide instanceof Variable
+                && rightHandSide.variableSet().contains(leftHandSide)
+                && rightHandSide.isNormal();
+    }
+
+    private ImmutableMapSubstitution<Variable, Term> getSubstitutionIfPossibleUnoriented(Term leftHandSide,
+                                                                                         Term rightHandSide,
+                                                                                         Set<Variable> allowedVariables) {
+        ImmutableMapSubstitution<Variable, Term> leftToRightSub =
+                getSubstitutionIfPossible(leftHandSide, rightHandSide, allowedVariables);
+        ImmutableMapSubstitution<Variable, Term> rightToLeftSub
+                = getSubstitutionIfPossible(rightHandSide, leftHandSide, allowedVariables);
+        return leftToRightSub != null
+               ? rightToLeftSub != null
+                 ? leftHandSide.toString().compareTo(rightHandSide.toString()) < 0 ? leftToRightSub : rightToLeftSub
+                 : leftToRightSub
+               : rightToLeftSub;
+    }
+
     /**
+     * @param allowedVariables if not empty, then allow only substitutions to variables in this set.
      * @return The substitution corresponding to variableCandidate=term, if it is valid. May contain multiple
      * assignments. Or {@code null} if such substitution is not valid.
      */
-    public ImmutableMapSubstitution<Variable, Term> getSubstitutionIfPossible(Term variableCandidate, Term term) {
+    public ImmutableMapSubstitution<Variable, Term> getSubstitutionIfPossible(Term variableCandidate, Term term,
+                                                                              Set<Variable> allowedVariables) {
         if (!(variableCandidate instanceof Variable)) {
             return null;
         }
 
         Variable variable = (Variable) variableCandidate;
+        if (!allowedVariables.isEmpty() && !allowedVariables.contains(variable)) {
+            return null;
+        }
+
         if (term.variableSet().contains(variable)) {
             return null;
         } else if (RewriteEngineUtils.isSubsortedEq(variable, term, global.getDefinition())) {

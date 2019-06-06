@@ -9,6 +9,7 @@ module MAP-TESTS-SYNTAX
     syntax Test ::= Int | Map
                   | lookup       ( K ) | assignment       ( Map ) | inkeys       ( Bool )
                   | lookupResult ( K ) | assignmentResult ( Map ) | inkeysResult ( Bool )
+                  | remove       ( K ) | removeResult       ( K )
 endmodule
 
 module MAP-TESTS
@@ -20,4 +21,5 @@ module MAP-TESTS
     rule <k> lookup     ( K ) => lookupResult     ( K ) </k>
     rule <k> assignment ( M ) => assignmentResult ( M ) </k>
     rule <k> inkeys     ( M ) => inkeysResult     ( M ) </k>
+    rule <k> remove     ( K ) => removeResult     ( K ) </k>
 endmodule

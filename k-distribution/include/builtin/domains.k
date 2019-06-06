@@ -43,7 +43,7 @@ module ARRAY-CONCRETE [concrete, kast]
   imports STRING-SYNTAX
 
   syntax Array ::= makeEmptyArray(Int) [function, hook(ARRAY.makeEmpty), impure]
-                 | arrayCtor(String, Int) [function, hook(ARRAY.ctor), symbol]
+                 | arrayCtor(String, Int, KItem) [function, hook(ARRAY.ctor), symbol]
                  | makeArray(Int, KItem) [function, hook(ARRAY.make), impure, klabel(makeArrayOcaml)]
 endmodule
 
