@@ -39,8 +39,8 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
 
 
   private val cellInitializer: Map[Sort, KApply] =
-    m.productions.filter(p => cellSorts(p.sort) && p.att.contains("initializer"))
-      .map(p => (p.sort, KApply(p.klabel.get))).toMap
+    m.productions.filter(p => (cellSorts(p.sort) || cellBagSorts(p.sort)) && p.att.contains("initializer"))
+      .map(p => (p.sort, KApply(p.klabel.get))).flatMap({ case (s, app) => if (cellBagSorts(s)) getCellSortsOfCellBag(s).map((_, app)) else Seq((s, app))}).toMap
 
   private val edges: Set[(Sort, Sort)] = cellProductions.toList.flatMap { case (s,p) =>
     p.items.flatMap{
@@ -147,7 +147,7 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
   override def getCellForConcat(concat: KLabel): Option[Sort] = cellSorts
     .map(s => (s, getCellBagSortsOfCell(s)))
     .filter(_._2.size == 1)
-    .filter(p => cellBagProductions(p._2.head).klabel.get.equals(concat))
+    .filter(p => cellBagProductions(p._2.head).klabel.get.equals(concat) || (cellInitializer.contains(p._1) && cellInitializer(p._1).klabel == concat))
     .map(_._1)
     .headOption
 
