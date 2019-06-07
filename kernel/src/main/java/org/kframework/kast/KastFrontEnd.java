@@ -13,6 +13,7 @@ import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kore.K;
 import org.kframework.main.FrontEnd;
 import org.kframework.parser.InputModes;
+import org.kframework.parser.KRead;
 import org.kframework.parser.json.JsonParser;
 import org.kframework.parser.outer.Outer;
 import org.kframework.unparser.KPrint;
@@ -99,6 +100,7 @@ public class KastFrontEnd extends FrontEnd {
 
             CompiledDefinition def = compiledDef.get();
             KPrint kprint = new KPrint(kem, files.get(), ttyInfo, options.print, compiledDef.get().kompileOptions);
+            KRead kread = new KRead(kem);
 
             org.kframework.kore.Sort sort = options.sort;
             if (sort == null) {
@@ -116,14 +118,7 @@ public class KastFrontEnd extends FrontEnd {
             Module mod = maybeMod.get();
             Module compiledMod = def.kompiledDefinition.getModule(options.module).get();
 
-            K parsed;
-            if (options.input == InputModes.PROGRAM) {
-                parsed = def.getParser(mod, sort, kem).apply(FileUtil.read(stringToParse), source);
-            } else if (options.input == InputModes.JSON) {
-                parsed = JsonParser.parse(FileUtil.read(stringToParse));
-            } else {
-                throw KEMException.criticalError("Unknown input mode: " + options.input.toString());
-            }
+            K parsed = kread.prettyRead(mod, sort, def, source, FileUtil.read(stringToParse), options.input);
 
             if (options.expandMacros || options.kore) {
                 parsed = ExpandMacros.forNonSentences(compiledMod, files.get(), def.kompileOptions, false).expand(parsed);
