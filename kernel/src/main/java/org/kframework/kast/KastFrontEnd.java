@@ -12,6 +12,8 @@ import org.kframework.definition.Module;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kore.K;
 import org.kframework.main.FrontEnd;
+import org.kframework.parser.InputModes;
+import org.kframework.parser.json.JsonParser;
 import org.kframework.parser.outer.Outer;
 import org.kframework.unparser.KPrint;
 import org.kframework.unparser.PrintOptions;
@@ -97,6 +99,7 @@ public class KastFrontEnd extends FrontEnd {
 
             CompiledDefinition def = compiledDef.get();
             KPrint kprint = new KPrint(kem, files.get(), ttyInfo, options.print, compiledDef.get().kompileOptions);
+
             org.kframework.kore.Sort sort = options.sort;
             if (sort == null) {
                 if (env.get("KRUN_SORT") != null) {
@@ -105,7 +108,6 @@ public class KastFrontEnd extends FrontEnd {
                     sort = def.programStartSymbol;
                 }
             }
-
             options.module = options.module == null ? def.mainSyntaxModuleName() : options.module;
             Option<Module> maybeMod = def.programParsingModuleFor(options.module, kem);
             if (maybeMod.isEmpty()) {
@@ -114,7 +116,15 @@ public class KastFrontEnd extends FrontEnd {
             Module mod = maybeMod.get();
             Module compiledMod = def.kompiledDefinition.getModule(options.module).get();
 
-            K parsed = def.getParser(mod, sort, kem).apply(FileUtil.read(stringToParse), source);
+            K parsed;
+            if (options.input == InputModes.PROGRAM) {
+                parsed = def.getParser(mod, sort, kem).apply(FileUtil.read(stringToParse), source);
+            } else if (options.input == InputModes.JSON) {
+                parsed = JsonParser.parse(FileUtil.read(stringToParse));
+            } else {
+                throw KEMException.criticalError("Unknown input mode: " + options.input.toString());
+            }
+
             if (options.expandMacros || options.kore) {
                 parsed = ExpandMacros.forNonSentences(compiledMod, files.get(), def.kompileOptions, false).expand(parsed);
             }
