@@ -2,5 +2,5 @@
 package org.kframework.parser;
 
 public enum InputModes {
-    PROGRAM, JSON;
+    PROGRAM, KAST, JSON;
 }
