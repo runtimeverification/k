@@ -54,6 +54,13 @@ class Strategy(heatCool: Boolean) {
         (module, r) =>
           val rich = kore.Rich(module)
 
+          def isFunctionRhs(body: kore.K): Boolean = {
+            RewriteToTop.toRight(body) match {
+              case KApply(klabel, _) if module.attributesFor.contains(klabel) && module.attributesFor(klabel).contains(Att.Function) => true
+              case _ => false
+            }
+          }
+
           import rich._
           
           if (!defn.mainModule.importedModuleNames.contains("STRATEGY$SYNTAX") || r.att.contains("anywhere") || r.att.contains("macro")) {
@@ -62,7 +69,7 @@ class Strategy(heatCool: Boolean) {
             r match {
               case r: Rule if !r.body.contains({ case k: kore.KApply => k.klabel.name.contains("<s>") }) =>
                 val newBody = RewriteToTop.toLeft(r.body) match {
-                  case KApply(klabel, _) if !module.attributesFor.contains(klabel) || !module.attributesFor(klabel).contains(Att.Function) =>
+                  case KApply(klabel, _) if !isFunctionRhs(r.body) && (!module.attributesFor.contains(klabel) || !module.attributesFor(klabel).contains(Att.Function)) =>
                     // todo: "!module.attributesFor.contains(klabel) ||" when #1723 is fixed
 
                     def makeRewrite(tag: String) =
