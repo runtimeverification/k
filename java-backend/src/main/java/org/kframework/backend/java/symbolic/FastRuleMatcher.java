@@ -38,7 +38,6 @@ import org.kframework.utils.errorsystem.KEMException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Formatter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -61,6 +60,7 @@ public class FastRuleMatcher {
 
     private ConjunctiveFormula[] constraints;
     private final int ruleCount;
+    private BitSet ruleMask;
 
     private BitSet empty;
 
@@ -86,6 +86,13 @@ public class FastRuleMatcher {
         this.global = global;
         this.ruleCount = ruleCount;
         constraints = new ConjunctiveFormula[this.ruleCount];
+        ruleMask = makeAllRuleBits(ruleCount);
+    }
+
+    static BitSet makeAllRuleBits(int size) {
+        BitSet result = BitSet.apply(size);
+        result.makeOnes(size);
+        return result;
     }
 
     /**
@@ -96,7 +103,6 @@ public class FastRuleMatcher {
      */
     public List<RuleMatchResult> matchRulePattern(
             ConstrainedTerm subject,
-            BitSet ruleMask,
             boolean narrowing,
             boolean computeOne,
             List<String> transitions,
@@ -174,6 +180,18 @@ public class FastRuleMatcher {
         } else {
             return transitionResults;
         }
+    }
+
+    public List<Rule> matchSpecRule(ConstrainedTerm subject, List<Rule> rules, Rule automaton, TermContext context) {
+        ruleMask.stream().forEach(i -> constraints[i] = ConjunctiveFormula.of(context.global()));
+        empty = BitSet.apply(ruleCount);
+        BitSet matchingRuleBits = matchAndLog(subject.term(), automaton.leftHandSide(), ruleMask, List(), false);
+
+        List<Rule> matchingRules = new ArrayList<>();
+        for (int i = matchingRuleBits.nextSetBit(0); i >= 0; i = matchingRuleBits.nextSetBit(i + 1)) {
+            matchingRules.add(rules.get(i));
+        }
+        return matchingRules;
     }
 
     public static class RuleMatchResult {

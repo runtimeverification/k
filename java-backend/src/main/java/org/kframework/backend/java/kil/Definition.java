@@ -187,7 +187,7 @@ public class Definition extends JavaSymbolicObject {
     }
 
     private static final Set<String> automatonAttributes
-            = Sets.newHashSet(JavaBackend.MAIN_AUTOMATON);
+            = Sets.newHashSet(JavaBackend.MAIN_AUTOMATON, JavaBackend.SPEC_AUTOMATON);
 
     /**
      * Converts the org.kframework.Rules to backend Rules, also plugging in the automaton rule

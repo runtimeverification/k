@@ -40,6 +40,7 @@ import java.util.function.Function;
 public class JavaBackend implements Backend {
 
     public static final String MAIN_AUTOMATON = "mainAutomaton";
+    public static final String SPEC_AUTOMATON = "specAutomaton";
 
     private final KExceptionManager kem;
     private final FileUtil files;
@@ -130,6 +131,7 @@ public class JavaBackend implements Backend {
                 .andThen(mod -> JavaBackend.markSpecRules(def, mod))
                 .andThen(ModuleTransformer.fromSentenceTransformer(new AddConfigurationRecoveryFlags()::apply, "add refers_THIS_CONFIGURATION_marker"))
                 .andThen(restoreDefinitionModulesTransformer(def))
+                .andThen(ModuleTransformer.from(new MergeRules(SPEC_AUTOMATON, Att.specification())::apply, "merge spec rules into one rule with or clauses"))
                 .apply(m);
     }
 
