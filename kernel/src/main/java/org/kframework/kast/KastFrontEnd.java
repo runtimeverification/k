@@ -100,7 +100,7 @@ public class KastFrontEnd extends FrontEnd {
 
             CompiledDefinition def = compiledDef.get();
             KPrint kprint = new KPrint(kem, files.get(), ttyInfo, options.print, compiledDef.get().kompileOptions);
-            KRead kread = new KRead(kem);
+            KRead kread = new KRead(kem, files.get());
 
             org.kframework.kore.Sort sort = options.sort;
             if (sort == null) {
