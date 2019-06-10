@@ -101,7 +101,7 @@ public class GenerateSentencesFromConfigDeclTest {
                 Production(KLabel("initThreadsCell"), Sort("ThreadsCell"),
                         Seq(Terminal("initThreadsCell"), Terminal("("), NonTerminal(Sort("Map")), Terminal(")")),
                         productionAtts),
-                Production(KLabel("initThreadCell"), Sort("ThreadCell"),
+                Production(KLabel("initThreadCell"), Sort("ThreadCellBag"),
                         Seq(Terminal("initThreadCell"), Terminal("("), NonTerminal(Sort("Map")), Terminal(")")),
                         productionAtts),
                 Production(KLabel("initKCell"), Sort("KCell"),
