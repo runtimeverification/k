@@ -10,6 +10,7 @@ import org.kframework.kompile.CompiledDefinition;
 import org.kframework.krun.modes.ExecutionMode;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
+import org.kframework.parser.KRead;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.unparser.KPrint;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -82,18 +83,21 @@ public class KRunFrontEnd extends FrontEnd {
      */
     public int run() {
         scope.enter(kompiledDir.get());
+        KRead kread = new KRead(kem, files.get());
         try {
             KPrint kprint = new KPrint(kem, files.get(), tty, krunOptions.print, compiledDef.get().kompileOptions);
             for (int i = 0; i < krunOptions.experimental.profile - 1; i++) {
                 new KRun(kem, files.get(), tty, kprint).run(compiledDef.get(),
                         krunOptions,
                         initializeRewriter.get(),
-                        executionMode.get());
+                        executionMode.get(),
+                        kread);
             }
             return new KRun(kem, files.get(), tty, kprint).run(compiledDef.get(),
                     krunOptions,
                     initializeRewriter.get(),
-                    executionMode.get());
+                    executionMode.get(),
+                    kread);
         } finally {
             scope.exit();
         }
