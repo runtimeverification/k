@@ -307,7 +307,7 @@ public class KOREtoBackendKIL {
         else if (k instanceof org.kframework.kore.KRewrite) {
             return KItem.of(KLabelConstant.of(KLabels.KREWRITE, definition), KList.concatenate(convert(((KRewrite) k).left()), convert(((KRewrite) k).right())), global);
         } else
-            throw new AssertionError("BUM!");
+            throw new AssertionError("Do not know how to convert term to KIL!\n" + k.toString());
     }
 
 
