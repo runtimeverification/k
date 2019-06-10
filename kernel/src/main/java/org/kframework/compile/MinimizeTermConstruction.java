@@ -179,7 +179,7 @@ public class MinimizeTermConstruction {
                 inBad = stack;
                 return result;
             }
- 
+
         }.apply(term);
     }
 
