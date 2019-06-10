@@ -38,7 +38,6 @@ public class KRead {
     }
 
     public static K deserialize(String stringToParse, InputModes inputMode) {
-        K parsed;
         switch (inputMode) {
             case JSON:
                 return JsonParser.parse(stringToParse);
