@@ -15,6 +15,7 @@ import org.kframework.kil.Attribute;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
+import org.kframework.kore.KAs;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.KSequence;
 import org.kframework.kore.KToken;
@@ -264,6 +265,8 @@ public class ExpandMacros {
            return candidates;
         } else if (k instanceof KSequence) {
             return Collections.singleton(Sorts.K());
+        } else if (k instanceof KAs) {
+            return sort(((KAs)k).pattern(), r);
         } else {
             throw KEMException.compilerError("Cannot compute macros with sort check on terms that are not KApply, KToken, or KVariable.", r);
         }
