@@ -24,18 +24,18 @@ import org.kframework.main.GlobalOptions;
 import org.kframework.main.Main;
 import org.kframework.parser.InputModes;
 import org.kframework.parser.ProductionReference;
+import org.kframework.parser.binary.BinaryParser;
 import org.kframework.parser.concrete2kore.ParseInModule;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
-import org.kframework.parser.binary.BinaryParser;
 import org.kframework.parser.json.JsonParser;
 import org.kframework.parser.kore.KoreParser;
+import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.TTYInfo;
-import org.kframework.utils.StringUtil;
 import scala.Tuple2;
 
 import java.io.BufferedReader;
@@ -49,8 +49,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import scala.Option;
@@ -95,7 +95,20 @@ public class KRead {
 
     /* Parsing code from KRun: */
 
-    public K externalParse(String parser, String value, Sort startSymbol, Source source, CompiledDefinition compiledDef) {
+    public K KRunParse(CompiledDefinition compiledDef, KRunOptions options, TTYInfo tty) {
+        String pgmFileName = options.configurationCreation.pgm();
+        K program;
+        if (options.configurationCreation.term()) {
+            program = externalParse(options.configurationCreation.parser(compiledDef.executionModule().name(), files),
+                    pgmFileName, compiledDef.programStartSymbol, Source.apply("<parameters>"), compiledDef);
+        } else {
+            program = parseConfigVars(options, compiledDef, tty);
+        }
+
+        return program;
+    }
+
+    private K externalParse(String parser, String value, Sort startSymbol, Source source, CompiledDefinition compiledDef) {
         List<String> tokens = new ArrayList<>(Arrays.asList(parser.split(" ")));
         tokens.add(value);
         Map<String, String> environment = new HashMap<>();
@@ -163,11 +176,11 @@ public class KRead {
         }
     }
 
-    public KApply plugConfigVars(CompiledDefinition compiledDef, Map<KToken, K> output) {
+    private KApply plugConfigVars(CompiledDefinition compiledDef, Map<KToken, K> output) {
         return KApply(compiledDef.topCellInitializer, output.entrySet().stream().map(e -> KApply(KLabel("_|->_"), e.getKey(), e.getValue())).reduce(KApply(KLabel(".Map")), (a, b) -> KApply(KLabel("_Map_"), a, b)));
     }
 
-    public static String getStdinBuffer(boolean ttyStdin) {
+    private static String getStdinBuffer(boolean ttyStdin) {
         String buffer = "";
 
         try {
