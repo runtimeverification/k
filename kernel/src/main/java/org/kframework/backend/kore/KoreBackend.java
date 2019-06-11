@@ -189,6 +189,7 @@ public class KoreBackend implements Backend {
                 .andThen(resolveFreshConstants)
                 .andThen(concretizeCells)
                 .andThen(subsortKItem)
+                .andThen(restoreDefinitionModulesTransformer(def))
                 .apply(m);
     }
 

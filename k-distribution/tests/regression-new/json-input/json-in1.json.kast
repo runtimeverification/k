@@ -1,0 +1,1 @@
+{"format":"KAST","version":1,"term":{"node":"KApply","label":"#Equals","variable":false,"arity":2,"args":[{"node":"KToken","sort":"Int","token":"3"},{"node":"KToken","sort":"Int","token":"4"}]}}
