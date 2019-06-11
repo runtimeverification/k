@@ -1256,6 +1256,10 @@ public class ModuleToKORE {
                     // We assume that mlBinder only has two children.
                     sb.append(conn);
                     apply(k.items().get(1));
+
+                    for (int i = 0; i < anonymousVariables.size(); i++) {
+                        sb.append(")");
+                    }
                 } else {
                     convert(label, false);
                     sb.append("(");
@@ -1264,8 +1268,8 @@ public class ModuleToKORE {
                         apply(item);
                         conn = ",";
                     }
+                    sb.append(")");
                 }
-                sb.append(")");
             }
 
             @Override

@@ -333,11 +333,18 @@ public class GenerateSentencesFromConfigDecl {
         String initLabel = getInitLabel(sort);
         Sentence initializer;
         Rule initializerRule;
+        Sort initSort = sort;
+
+        if (multiplicity == Multiplicity.STAR) {
+            String type = cellProperties.<String>getOptional("type").orElse("Bag");
+            initSort = Sort(sortName + type);
+        }
+
         if (hasConfigurationOrRegularVariable || isStream) {
-            initializer = Production(KLabel(initLabel), sort, Seq(Terminal(initLabel), Terminal("("), NonTerminal(Sorts.Map()), Terminal(")")), Att().add("initializer").add("function").add("noThread"));
+            initializer = Production(KLabel(initLabel), initSort, Seq(Terminal(initLabel), Terminal("("), NonTerminal(Sorts.Map()), Terminal(")")), Att().add("initializer").add("function").add("noThread"));
             initializerRule = Rule(KRewrite(KApply(KLabel(initLabel), INIT), IncompleteCellUtils.make(KLabel("<" + cellName + ">"), false, childInitializer, false)), BooleanUtils.TRUE, ensures == null ? BooleanUtils.TRUE : ensures, Att().add("initializer"));
         } else {
-            initializer = Production(KLabel(initLabel), sort, Seq(Terminal(initLabel)), Att().add("initializer").add("function").add("noThread"));
+            initializer = Production(KLabel(initLabel), initSort, Seq(Terminal(initLabel)), Att().add("initializer").add("function").add("noThread"));
             initializerRule = Rule(KRewrite(KApply(KLabel(initLabel)), IncompleteCellUtils.make(KLabel("<" + cellName + ">"), false, childInitializer, false)), BooleanUtils.TRUE, ensures == null ? BooleanUtils.TRUE : ensures, Att().add("initializer"));
         }
         if (!m.definedKLabels().contains(KLabel(initLabel))) {
