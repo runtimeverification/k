@@ -144,13 +144,42 @@ public class MinimizeTermConstruction {
                         return cache.get(k);
                     }
                 }
-                if (isLHS() && !isRHS()) {
+                if (isLHS() && !isRHS() && !inBad) {
                     if (usedOnRhs.contains(k)) {
                         return KAs(super.apply(k), cache.get(k), Att.empty().add(Sort.class, cache.get(k).att().get(Sort.class)));
                     }
                 }
                 return super.apply(k);
             }
+
+            boolean inBad = false;
+
+            @Override
+            public K apply(KApply k) {
+                boolean stack = inBad;
+                if (k.klabel().equals(KLabels.ML_OR)) {
+                    inBad = true;
+                }
+                String hook = module.attributesFor().get(k.klabel()).getOrElse(() -> Att.empty()).getOptional("hook").orElse("");
+                if (hook.equals("SET.element")
+                        || hook.equals("LIST.element")
+                        || hook.equals("LIST.concat")
+                        || hook.equals("MAP.concat")
+                        || hook.equals("SET.concat")) {
+                    inBad = true;
+                }
+                if (hook.equals("MAP.element")) {
+                    inBad = true;
+                    K key = apply(k.items().get(0));
+                    inBad = stack;
+                    K val = apply(k.items().get(1));
+                    return KApply(k.klabel(), KList(key, val), k.att());
+                }
+                K result = super.apply(k);
+                inBad = stack;
+                return result;
+            }
+
         }.apply(term);
     }
 

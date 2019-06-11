@@ -1,7 +1,7 @@
 #!/bin/bash -ex
 
 brew update
-brew install maven cmake boost yaml-cpp jemalloc llvm@6 gmp mpfr z3 opam pkg-config bison flex
+brew install maven cmake boost libyaml jemalloc llvm@6 gmp mpfr z3 opam pkg-config bison flex
 
 curl -sSL https://get.haskellstack.org/ | sh
 

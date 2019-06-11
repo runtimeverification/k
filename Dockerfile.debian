@@ -4,7 +4,7 @@ ARG BASE_IMAGE
 
 RUN if [ "$BASE_IMAGE" = "debian:stretch" ]; then echo "Enabling backports..."; echo "deb http://ftp.debian.org/debian stretch-backports main" > /etc/apt/sources.list.d/stretch-backports.list; fi
 RUN apt-get update && \
-    apt-get install -y git debhelper maven openjdk-8-jdk cmake libboost-test-dev libyaml-cpp-dev libjemalloc-dev flex bison clang-6.0 llvm-6.0-tools lld-6.0 zlib1g-dev libgmp-dev libmpfr-dev gcc z3 libz3-dev opam pkg-config curl
+    apt-get install -y git debhelper maven openjdk-8-jdk cmake libboost-test-dev libyaml-dev libjemalloc-dev flex bison clang-6.0 llvm-6.0-tools lld-6.0 zlib1g-dev libgmp-dev libmpfr-dev gcc z3 libz3-dev opam pkg-config curl
 RUN update-alternatives --set java /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java
 ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
 RUN curl -sSL https://get.haskellstack.org/ | sh      
