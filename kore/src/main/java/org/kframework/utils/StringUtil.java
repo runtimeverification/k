@@ -813,6 +813,16 @@ public class StringUtil {
         }
     }
 
+    public static String decodeKoreString(String encoded) {
+        for (int i = 0; i < asciiReadableEncodingDefault.length; i++) {
+            String encoding = asciiReadableEncodingDefault[i];
+            if (encoding == null) continue;
+            encoding = "'" + encoding + "'";
+            encoded = encoded.replaceAll(encoding, String.valueOf((char) i));
+        }
+        return encoded;
+    }
+
     public static List<Set<Integer>> computePoly(String poly) {
       return Arrays.asList(poly.split(";"))
         .stream().map(l -> Arrays.asList(l.split(",")).stream()

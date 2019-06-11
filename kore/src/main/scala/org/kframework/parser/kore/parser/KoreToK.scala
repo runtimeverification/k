@@ -4,6 +4,7 @@ import org.kframework.builtin.{KLabels, Sorts}
 import org.kframework.kore.KORE
 import org.kframework.attributes.Att
 import org.kframework.parser.kore
+import org.kframework.utils.StringUtil
 import org.kframework.{kore => k}
 
 import scala.collection.Map
@@ -46,9 +47,9 @@ class KoreToK (headToLabel_ : java.util.Properties, sortAtt : Map[k.Sort, Att], 
 
   private def extractVarName(name: String): String = {
     if (name.startsWith("Var")) {
-      name.substring(3)
+      StringUtil.decodeKoreString(name.substring(3))
     } else {
-      name
+      StringUtil.decodeKoreString(name)
     }
   }
 
