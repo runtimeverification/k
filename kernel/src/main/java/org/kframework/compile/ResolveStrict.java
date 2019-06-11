@@ -6,6 +6,7 @@ import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Context;
 import org.kframework.definition.ContextAlias;
+import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
@@ -38,22 +39,24 @@ import static org.kframework.kore.KORE.*;
 public class ResolveStrict {
 
     private final KompileOptions kompileOptions;
+    private final Definition d;
 
-    public ResolveStrict(KompileOptions kompileOptions) {
+    public ResolveStrict(KompileOptions kompileOptions, Definition d) {
         this.kompileOptions = kompileOptions;
+        this.d = d;
     }
 
-    public Set<Sentence> resolve(Set<Production> strictProductions, Module input) {
+    public Set<Sentence> resolve(Set<Production> strictProductions) {
         Set<Sentence> sentences = new HashSet<>();
         for (Production prod : strictProductions) {
             if (!prod.klabel().isDefined()) {
                 throw KEMException.compilerError("Only productions with a KLabel can be strict.", prod);
             }
             if (prod.att().contains(Attribute.STRICT_KEY)) {
-                sentences.addAll(resolve(prod, false, input));
+                sentences.addAll(resolve(prod, false));
             }
             if (prod.att().contains(Attribute.SEQSTRICT_KEY)) {
-                sentences.addAll(resolve(prod, true, input));
+                sentences.addAll(resolve(prod, true));
             }
         }
         return sentences;
@@ -80,18 +83,11 @@ public class ResolveStrict {
         }
     }
 
-    private void setAliases(String attribute, Set<ContextAlias> aliases, Module mod, Production prod) {
+    private void setAliases(String attribute, Set<ContextAlias> aliases, Production prod) {
         String[] strictAttrs = attribute.split(",");
         for (String strictAttr : strictAttrs) {
             String label = strictAttr.trim();
-            if (label.indexOf('.') == -1) {
-                String modName = mod.name();
-                if (mod.name().endsWith("$SYNTAX")) {
-                    modName = mod.name().substring(0, mod.name().length() - "$SYNTAX".length());
-                }
-                label = modName + "." + label;
-            }
-            Option<Sentence> s = mod.labeled().get(label);
+            Option<Sentence> s = d.mainModule().labeled().get(label);
             if (s.isDefined()) {
                 if (s.get() instanceof ContextAlias) {
                     aliases.add((ContextAlias)s.get());
@@ -107,7 +103,7 @@ public class ResolveStrict {
 
     private static final ContextAlias DEFAULT_ALIAS = ContextAlias(KVariable("HERE"), BooleanUtils.TRUE, Att.empty());
 
-    public Set<Sentence> resolve(Production production, boolean sequential, Module input) {
+    public Set<Sentence> resolve(Production production, boolean sequential) {
         long arity = stream(production.items()).filter(i -> i instanceof NonTerminal).count();
         List<Integer> strictnessPositions = new ArrayList<>();
         Set<ContextAlias> aliases = new HashSet<>();
@@ -132,10 +128,10 @@ public class ResolveStrict {
                 for (int i = 1; i <= arity; i++) {
                     strictnessPositions.add(i);
                 }
-                setAliases(components[0].trim(), aliases, input, production);
+                setAliases(components[0].trim(), aliases, production);
               }
             } else if (components.length == 2) {
-              setAliases(components[0].trim(), aliases, input, production);
+              setAliases(components[0].trim(), aliases, production);
               setPositions(components[1].trim(), strictnessPositions, arity, production);
             }
         }
@@ -210,7 +206,7 @@ public class ResolveStrict {
         Set<Sentence> contextsToAdd = resolve(stream(input.localSentences())
                 .filter(s -> s instanceof Production)
                 .map(s -> (Production) s)
-                .filter(p -> p.att().contains("strict") || p.att().contains("seqstrict")).collect(Collectors.toSet()), input);
+                .filter(p -> p.att().contains("strict") || p.att().contains("seqstrict")).collect(Collectors.toSet()));
         return Module(input.name(), input.imports(), (scala.collection.Set<Sentence>) stream(input.localSentences()).filter(s -> !(s instanceof ContextAlias)).collect(Collections.toSet()).$bar(immutable(contextsToAdd)), input.att());
     }
 }
