@@ -149,7 +149,7 @@ public class ModuleToKORE {
             if (left instanceof KApply) {
                 KApply kapp = (KApply) left;
                 Production prod = production(kapp);
-                if (prod.att().contains(Attribute.FUNCTION_KEY) || rule.att().contains(Attribute.ANYWHERE_KEY)) {
+                if (prod.att().contains(Attribute.FUNCTION_KEY) || rule.att().contains(Attribute.ANYWHERE_KEY) || rule.att().contains(Attribute.MACRO_KEY)) {
                     functionRules.put(kapp.klabel(), rule);
                 }
             }
@@ -875,11 +875,14 @@ public class ModuleToKORE {
         // injective.
         boolean isInjective = isConstructor;
 
+        boolean isMacro = false;
         boolean isAnywhere = false;
         isAnywhere |= overloads.contains(prod);
         for (Rule r : functionRules.get(prod.klabel().get())) {
+            isMacro |= r.att().contains(Attribute.MACRO_KEY);
             isAnywhere |= r.att().contains(Attribute.ANYWHERE_KEY);
         }
+        isConstructor &= !isMacro;
         isConstructor &= !isAnywhere;
 
         Att att = prod.att().remove("constructor");
@@ -897,6 +900,9 @@ public class ModuleToKORE {
         }
         if (isInjective) {
             att = att.add("injective");
+        }
+        if (isMacro) {
+            att = att.add("macro");
         }
         return att;
     }
