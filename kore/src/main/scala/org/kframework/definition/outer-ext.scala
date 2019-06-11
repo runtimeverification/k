@@ -44,7 +44,7 @@ case class Configuration(body: K, ensures: K, att: Att = Att.empty) extends Sent
 }
 
 case class Bubble(sentenceType: String, contents: String, att: Att = Att.empty) extends Sentence {
-  override val isSyntax = sentenceType == "config"
-  override val isNonSyntax = true
+  override val isSyntax = sentenceType == "config" || sentenceType == "alias"
+  override val isNonSyntax = sentenceType != "alias"
   override def withAtt(att: Att) = Bubble(sentenceType, contents, att)
 }
