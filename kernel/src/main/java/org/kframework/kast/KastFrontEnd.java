@@ -63,7 +63,7 @@ public class KastFrontEnd extends FrontEnd {
     private final Provider<CompiledDefinition> compiledDef;
     private final DefinitionScope scope;
     private final TTYInfo ttyInfo;
-    private final Properties idsToLabels;
+    private final InitializeDefinition idsToLabelsProvider;
 
     @Inject
     KastFrontEnd(
@@ -91,7 +91,7 @@ public class KastFrontEnd extends FrontEnd {
         this.compiledDef = compiledDef;
         this.scope = scope;
         this.ttyInfo = ttyInfo;
-        idsToLabels = init.getKoreToKLabels();
+        idsToLabelsProvider = init;
     }
 
     /**
@@ -128,7 +128,7 @@ public class KastFrontEnd extends FrontEnd {
             }
             K parsed;
             if (options.koreToK) {
-                parsed = KoreToK.parseKoreToK(options.fileToParse(), idsToLabels, mod.sortAttributesFor());
+                parsed = KoreToK.parseKoreToK(options.fileToParse(), idsToLabelsProvider.getKoreToKLabels(), mod.sortAttributesFor());
                 options.print = new PrintOptions(OutputModes.PRETTY);
             } else {
                 Reader stringToParse = options.stringToParse();
@@ -158,14 +158,10 @@ public class KastFrontEnd extends FrontEnd {
     }
 
     public static class InitializeDefinition {
+        private final FileUtil files;
+
         public Properties getKoreToKLabels() {
-            return koreToKLabels;
-        }
-
-        final private Properties koreToKLabels;
-
-        @Inject
-        public InitializeDefinition(FileUtil files) {
+            if (koreToKLabels != null) return koreToKLabels;
             try {
                 koreToKLabels = new Properties();
                 File file = files.resolveKompiled("kore_to_k_labels.properties");
@@ -176,6 +172,15 @@ public class KastFrontEnd extends FrontEnd {
             } catch (IOException e) {
                 throw KEMException.criticalError("Error while loading Kore to K label map", e);
             }
+            return koreToKLabels;
+        }
+
+        private Properties koreToKLabels = null;
+
+        @Inject
+        public InitializeDefinition(FileUtil files) {
+            this.files = files;
+
         }
     }
 }
