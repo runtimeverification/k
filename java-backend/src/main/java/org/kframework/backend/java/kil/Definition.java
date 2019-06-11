@@ -33,7 +33,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -85,7 +84,8 @@ public class Definition extends JavaSymbolicObject {
     private final Multimap<KLabelConstant, Rule> patternRules = ArrayListMultimap.create();
     private final List<Rule> patternFoldingRules = new ArrayList<>();
 
-    private Set<KLabelConstant> kLabels;
+    private final Set<KLabelConstant> kLabels = new LinkedHashSet<>();
+    private final Set<KLabelConstant> kLabelsPublic = Collections.unmodifiableSet(kLabels);
 
     private DefinitionData definitionData;
     private transient Context context;
@@ -106,7 +106,6 @@ public class Definition extends JavaSymbolicObject {
     private final Map<KItem.CacheTableColKey, KItem.CacheTableValue> sortCacheTable = new HashMap<>();
 
     public Definition(org.kframework.definition.Module module, KExceptionManager kem) {
-        kLabels = new LinkedHashSet<>();
         this.kem = kem;
 
         Module moduleWithPolyProds = RuleGrammarGenerator.getCombinedGrammar(module, false).getExtensionModule();
@@ -234,7 +233,6 @@ public class Definition extends JavaSymbolicObject {
 
     public Definition(DefinitionData definitionData, KExceptionManager kem, Map<Integer, Rule> ruleTable,
                       Map<String, Rule> automatons) {
-        kLabels = new HashSet<>();
         this.kem = kem;
         this.ruleTable = ruleTable;
         this.automatons = automatons;
@@ -249,7 +247,7 @@ public class Definition extends JavaSymbolicObject {
 
     public void addKLabelCollection(Collection<KLabelConstant> kLabels) {
         for (KLabelConstant kLabel : kLabels) {
-            this.kLabels.add(kLabel);
+            addKLabel(kLabel);
         }
     }
 
@@ -329,7 +327,7 @@ public class Definition extends JavaSymbolicObject {
     }
 
     public Set<KLabelConstant> kLabels() {
-        return Collections.unmodifiableSet(kLabels);
+        return kLabelsPublic;
     }
 
     public List<Rule> macros() {
