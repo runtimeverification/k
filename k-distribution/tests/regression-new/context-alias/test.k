@@ -3,9 +3,10 @@ module TEST
   imports ID
   imports MAP
 
-configuration <k> $PGM:K </k> <shouldHeat> false </shouldHeat> <state> .Map </state>
+configuration <k> $PGM:K </k> <shouldHeat> false </shouldHeat> <state> .Map </state> <stuff> false </stuff>
 
 context alias [heatable]: <k> HERE ...</k> <shouldHeat> true </shouldHeat>
+context alias [heatable]: <k> HERE ...</k> <stuff> true </stuff>
 
 syntax Expr ::= Expr "+" Expr [strict(heatable)]
               | Id "=" Expr [strict(heatable; 2)]

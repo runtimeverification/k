@@ -8,4 +8,7 @@
   <state>
     x |-> 2
   </state>
+  <stuff>
+    false
+  </stuff>
 </generatedTop>
