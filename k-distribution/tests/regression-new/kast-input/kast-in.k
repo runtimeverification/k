@@ -2,7 +2,7 @@
 
 requires "kast.k"
 
-module KORE-IN-SYNTAX
+module KAST-IN-SYNTAX
   imports INT-SYNTAX
   imports ML-SYNTAX
 
@@ -11,7 +11,7 @@ module KORE-IN-SYNTAX
   rule init(1) => { 3 #Equals 3 } [macro]
 endmodule
 
-module KORE-IN
-  imports KORE-IN-SYNTAX
+module KAST-IN
+  imports KAST-IN-SYNTAX
   configuration <k color="green"> $PGM:Pgm </k>
 endmodule
