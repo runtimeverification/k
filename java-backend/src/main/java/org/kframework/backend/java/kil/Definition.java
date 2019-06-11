@@ -186,41 +186,47 @@ public class Definition extends JavaSymbolicObject {
         return builder.build();
     }
 
+    private static final Set<String> automatonAttributes
+            = Sets.newHashSet(JavaBackend.MAIN_AUTOMATON);
+
     /**
      * Converts the org.kframework.Rules to backend Rules, also plugging in the automaton rule
      */
     public void addKoreRules(Module module, GlobalContext global) {
         KOREtoBackendKIL transformer = new KOREtoBackendKIL(module, this, global, true);
-        Set<String> automatonNames = Sets.newHashSet(JavaBackend.MAIN_AUTOMATON);
 
-        List<org.kframework.definition.Rule> koreRules = JavaConversions.setAsJavaSet(module.rules()).stream()
-                .filter(rule -> !containsAnyAttribute(rule, automatonNames))
+        //Add regular rules from all modules
+        JavaConversions.setAsJavaSet(module.rules()).stream()
+                .filter(rule -> !containsAnyAttribute(rule, automatonAttributes))
                 //Ensures that rule order in all collections remains the same across across different executions.
-                .sorted(Comparator.comparingInt(rule -> rule.body().hashCode())).collect(Collectors.toList());
+                .sorted(Comparator.comparingInt(rule -> rule.body().hashCode()))
+                .forEach(rule -> addKoreRule(rule, transformer, module));
 
-        //Ensures that rule order in all collections remains the same across across different executions.
+        //Add automaton from this module only
+        JavaConversions.setAsJavaSet(module.localRules()).stream()
+                .filter(rule -> containsAnyAttribute(rule, automatonAttributes))
+                .forEach(rule -> addKoreAutomaton(rule, transformer, module));
+    }
 
-        koreRules.forEach(r -> {
-            if (r.att().contains(Att.topRule())) {
-                reverseRuleTable.put(r.hashCode(), reverseRuleTable.size());
-            }
-        });
+    /**
+     * @return the converted rule
+     */
+    public Rule addKoreRule(org.kframework.definition.Rule rule, KOREtoBackendKIL transformer, Module module) {
+        Rule convertedRule = transformer.convert(module, rule);
+        addRule(convertedRule);
+        if (rule.att().contains(Att.topRule()) || rule.att().contains(Att.specification())) {
+            reverseRuleTable.put(rule.hashCode(), reverseRuleTable.size());
+            ruleTable.put(reverseRuleTable.get(rule.hashCode()), convertedRule);
+        }
+        return convertedRule;
+    }
 
-        koreRules.forEach(r -> {
-            Rule convertedRule = transformer.convert(module, r);
-            addRule(convertedRule);
-            if (r.att().contains(Att.topRule())) {
-                ruleTable.put(reverseRuleTable.get(r.hashCode()), convertedRule);
-            }
-        });
-
-        automatons = JavaConversions.setAsJavaSet(module.localRules())
-                .stream().filter(rule -> containsAnyAttribute(rule, automatonNames))
-                .map(rule -> transformer.convert(module, rule))
-                .collect(Collectors.toMap(
-                        rule -> getFirstContainedAttribute(rule, automatonNames),
-                        rule -> rule
-                ));
+    /**
+     * Automaton must be added after regular rules that it includes.
+     */
+    public void addKoreAutomaton(org.kframework.definition.Rule rule, KOREtoBackendKIL transformer, Module module) {
+        Rule convertedRule = transformer.convert(module, rule);
+        automatons.put(getFirstContainedAttribute(convertedRule, automatonAttributes), convertedRule);
     }
 
     public boolean containsAnyAttribute(org.kframework.definition.Rule rule, Set<String> attributeNames) {
