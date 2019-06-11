@@ -863,29 +863,25 @@ public class ModuleToKORE {
     }
 
     private Att addKoreAttributes(Production prod, SetMultimap<KLabel, Rule> functionRules, Set<KLabel> impurities, Set<Production> overloads) {
-        boolean isConstructor = !isFunction(prod);
         boolean isFunctional = !isFunction(prod);
-        if (prod.att().contains(Attribute.ASSOCIATIVE_KEY) ||
-                prod.att().contains(Attribute.COMMUTATIVE_KEY) ||
-                prod.att().contains(Attribute.IDEMPOTENT_KEY) ||
-                (prod.att().contains(Attribute.FUNCTION_KEY) && prod.att().contains(Attribute.UNIT_KEY))) {
-            isConstructor = false;
-        }
+        boolean isConstructor = !isFunction(prod);
+        isConstructor &= !prod.att().contains(Attribute.ASSOCIATIVE_KEY);
+        isConstructor &= !prod.att().contains(Attribute.COMMUTATIVE_KEY);
+        isConstructor &= !prod.att().contains(Attribute.IDEMPOTENT_KEY);
+        isConstructor &= !(prod.att().contains(Attribute.FUNCTION_KEY) && prod.att().contains(Attribute.UNIT_KEY));
+
         // Later we might set !isConstructor because there are anywhere rules,
         // but if a symbol is a constructor at this point, then it is still
         // injective.
         boolean isInjective = isConstructor;
+
         boolean isAnywhere = false;
-        if (overloads.contains(prod)) {
-            isConstructor = false;
-            isAnywhere = true;
-        }
+        isAnywhere |= overloads.contains(prod);
         for (Rule r : functionRules.get(prod.klabel().get())) {
-            if (r.att().contains(Attribute.ANYWHERE_KEY)) {
-                isConstructor = false;
-                isAnywhere = true;
-            }
+            isAnywhere |= r.att().contains(Attribute.ANYWHERE_KEY);
         }
+        isConstructor &= !isAnywhere;
+
         Att att = prod.att().remove("constructor");
         if (att.contains(Attribute.HOOK_KEY) && !isRealHook(att)) {
             att = att.remove("hook");
