@@ -107,7 +107,7 @@ States:
    - GROUP_STATE: used in body of Group (i.e., a character class)
 
  - Tertiary States: (switch for one token)
-   - MODNAME_STATE: used after "module", "interface" or "imports"
+   - MODNAME_STATE: used after "module", "imports"
 
 To avoid clutter we make separate token declarations for only those
 tokens that are used in multiple places (in the DEFAULT state).
@@ -457,14 +457,12 @@ PARSER_END(Outer)
 
 | <SYNTAX: "syntax">
 | <ENDMODULE: "endmodule">
-| <ENDINTERFACE: "endinterface">
 
 | <PRIORITY: "priority"> : KLABEL_STATE
 | <PRIORITIES: "priorities"> : KLABEL_STATE
 | <NON_ASSOC: "non-assoc"> // : KLABEL_STATE
 
 | <MODULE: "module"> : MODNAME_STATE
-| <INTERFACE: "interface"> : MODNAME_STATE
 | <IMPORTS: "imports"> : MODNAME_STATE
 | <IMPORTS2: "import"> : MODNAME_STATE
 
@@ -588,7 +586,6 @@ NonTerminal SortID() : { NonTerminal nonTerminal; }
 {
   "syntax"        { matchedToken.kind = SYNTAX; } : DEFAULT
 | "endmodule"     { matchedToken.kind = ENDMODULE; } : DEFAULT
-| "endinterface"  { matchedToken.kind = ENDINTERFACE; } : DEFAULT
 
 | "rule"          { matchedToken.kind = RULE;    } : BUBBLE_STATE
 | "configuration" { matchedToken.kind = CONFIGURATION;  } : BUBBLE_STATE
@@ -624,7 +621,6 @@ StringSentence Bubble(String type) :
 {
   "syntax"        { matchedToken.kind = SYNTAX; } : DEFAULT
 | "endmodule"     { matchedToken.kind = ENDMODULE; } : DEFAULT
-| "endinterface"  { matchedToken.kind = ENDINTERFACE; } : DEFAULT
 
 | "rule"          { matchedToken.kind = RULE;    } : BUBBLE_STATE
 | "configuration" { matchedToken.kind = CONFIGURATION;  } : BUBBLE_STATE
