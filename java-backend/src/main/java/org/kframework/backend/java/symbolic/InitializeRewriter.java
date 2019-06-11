@@ -4,6 +4,7 @@ package org.kframework.backend.java.symbolic;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import org.kframework.RewriterResult;
+import org.kframework.attributes.Att;
 import org.kframework.backend.java.compile.KOREtoBackendKIL;
 import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.ConstrainedTerm;
@@ -143,7 +144,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
 
     public static org.kframework.backend.java.kil.Rule convertToJavaPattern(KOREtoBackendKIL converter, Rule pattern) {
         return pattern == null ? null : converter.convert(
-                Optional.empty(), transformFunction(JavaBackend::convertKSeqToKApply, pattern));
+                null, transformFunction(JavaBackend::convertKSeqToKApply, pattern));
     }
 
     public class SymbolicRewriterGlue implements Rewriter {
@@ -214,7 +215,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
             rewritingContext.setExecutionPhase(false);
             List<Rule> rules = stream(mod.rules())
                     .sorted(Comparator.comparingInt(rule -> rule.body().hashCode()))
-                    .filter(r -> r.att().contains("specification")).collect(Collectors.toList());
+                    .filter(r -> r.att().contains(Att.specification())).collect(Collectors.toList());
             ProcessProofRules processProofRules = new ProcessProofRules(rules).invoke(rewritingContext, initCounterValue, module, definition);
             List<org.kframework.backend.java.kil.Rule> javaRules = processProofRules.getJavaRules();
             KOREtoBackendKIL converter = processProofRules.getConverter();
@@ -365,7 +366,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
                 converter = new KOREtoBackendKIL(module, definition, termContext.global(), false);
                 termContext.setKOREtoBackendKILConverter(converter);
                 javaRules = rules.stream()
-                        .map(r -> converter.convert(Optional.<Module>empty(), r))
+                        .map(r -> converter.convert(null, r))
                         .map(this::evaluateRule)
                         .collect(Collectors.toList());
                 return this;

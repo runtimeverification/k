@@ -208,7 +208,7 @@ public class Definition extends JavaSymbolicObject {
         });
 
         koreRules.forEach(r -> {
-            Rule convertedRule = transformer.convert(Optional.of(module), r);
+            Rule convertedRule = transformer.convert(module, r);
             addRule(convertedRule);
             if (r.att().contains(Att.topRule())) {
                 ruleTable.put(reverseRuleTable.get(r.hashCode()), convertedRule);
@@ -217,7 +217,7 @@ public class Definition extends JavaSymbolicObject {
 
         automatons = JavaConversions.setAsJavaSet(module.localRules())
                 .stream().filter(rule -> containsAnyAttribute(rule, automatonNames))
-                .map(rule -> transformer.convert(Optional.of(module), rule))
+                .map(rule -> transformer.convert(module, rule))
                 .collect(Collectors.toMap(
                         rule -> getFirstContainedAttribute(rule, automatonNames),
                         rule -> rule
