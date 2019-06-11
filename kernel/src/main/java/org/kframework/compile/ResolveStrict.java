@@ -176,7 +176,7 @@ public class ResolveStrict {
                       return var;
                     }
                 }.apply(alias.body());
-                Context ctx = Context(body, BooleanUtils.and(requires, alias.requires()), production.att().addAll(alias.att()));
+                Context ctx = Context(body, BooleanUtils.and(requires, alias.requires()), production.att().addAll(alias.att()).remove("label"));
                 sentences.add(ctx);
             }
         }
