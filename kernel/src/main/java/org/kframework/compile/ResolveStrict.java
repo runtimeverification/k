@@ -102,7 +102,7 @@ public class ResolveStrict {
                 throw KEMException.compilerError("Found rule label \"" + label + "\" in strictness attribute which did not refer to any sentence.", prod);
             }
         }
-       
+
     }
 
     private static final ContextAlias DEFAULT_ALIAS = ContextAlias(KVariable("HERE"), BooleanUtils.TRUE, Att.empty());
