@@ -102,7 +102,6 @@ public class KProve {
         Module defModule = getModule(defModuleName, modulesMap, compiledDefinition.getParsedDefinition());
         Module specModule = getModule(specModuleName, modulesMap, compiledDefinition.getParsedDefinition());
         specModule = backend.specificationSteps(compiledDefinition.kompiledDefinition).apply(specModule);
-        specModule = spliceModule(specModule, compiledDefinition.kompiledDefinition);
         Definition combinedDef = Definition.apply(defModule, compiledDefinition.getParsedDefinition().entryModules(), compiledDefinition.getParsedDefinition().att());
         Definition compiled = compileDefinition(backend, combinedDef);
         return Tuple2.apply(compiled, specModule);
@@ -115,10 +114,6 @@ public class KProve {
             cache.put(combinedDef, compiled);
         }
         return compiled;
-    }
-
-    private static Module spliceModule(Module specModule, Definition kompiledDefinition) {
-        return ModuleTransformer.from(mod -> kompiledDefinition.getModule(mod.name()).isDefined() ? kompiledDefinition.getModule(mod.name()).get() : mod, "splice imports of specification module").apply(specModule);
     }
 
     /**

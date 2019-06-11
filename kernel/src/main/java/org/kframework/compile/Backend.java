@@ -3,10 +3,8 @@ package org.kframework.compile;
 
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
-import org.kframework.definition.Rule;
-import org.kframework.definition.Sentence;
+import org.kframework.definition.ModuleTransformer;
 import org.kframework.kompile.CompiledDefinition;
-import org.kframework.kompile.Kompile;
 
 import java.util.Set;
 import java.util.function.Function;
@@ -23,4 +21,11 @@ public interface Backend {
     Function<Module, Module> specificationSteps(Definition def);
 
     Set<String> excludedModuleTags();
+
+    default ModuleTransformer restoreDefinitionModulesTransformer(Definition kompiledDefinition) {
+        return ModuleTransformer.from(mod -> kompiledDefinition.getModule(mod.name()).isDefined()
+                                             ? kompiledDefinition.getModule(mod.name()).get()
+                                             : mod,
+                "restore definition modules to same state as in definition");
+    }
 }
