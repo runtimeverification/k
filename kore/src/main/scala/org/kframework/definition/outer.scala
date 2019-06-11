@@ -95,7 +95,7 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
 
   lazy val sentences: Set[Sentence] = localSentences | importedSentences
 
-  lazy val labeled: Map[String, Sentence] = sentences.filter(_.label.isPresent).groupBy(_.label.get).mapValues(_.head).map(identity) // map(identity) to preserve serializability
+  lazy val labeled: Map[String, Set[Sentence]] = sentences.filter(_.label.isPresent).groupBy(_.label.get)
 
   /** All the imported modules, calculated recursively. */
   lazy val importedModules: Set[Module] = imports | (imports flatMap {

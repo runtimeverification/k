@@ -87,12 +87,14 @@ public class ResolveStrict {
         String[] strictAttrs = attribute.split(",");
         for (String strictAttr : strictAttrs) {
             String label = strictAttr.trim();
-            Option<Sentence> s = d.mainModule().labeled().get(label);
-            if (s.isDefined()) {
-                if (s.get() instanceof ContextAlias) {
-                    aliases.add((ContextAlias)s.get());
-                } else {
-                    throw KEMException.compilerError("Found rule label \"" + label + "\" in strictness attribute of production " + prod + " which does not refer to a context alias.", s.get());
+            Option<scala.collection.Set<Sentence>> ss = d.mainModule().labeled().get(label);
+            if (ss.isDefined()) {
+                for (Sentence s : iterable(ss.get())) {
+                    if (s instanceof ContextAlias) {
+                        aliases.add((ContextAlias)s);
+                    } else {
+                        throw KEMException.compilerError("Found rule label \"" + label + "\" in strictness attribute of production " + prod + " which does not refer to a context alias.", s);
+                    }
                 }
             } else {
                 throw KEMException.compilerError("Found rule label \"" + label + "\" in strictness attribute which did not refer to any sentence.", prod);
