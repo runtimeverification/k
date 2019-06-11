@@ -11,7 +11,7 @@ On Ubuntu:
 
 ```
 git submodule update --init --recursive
-sudo apt-get install build-essential m4 openjdk-8-jdk libgmp-dev libmpfr-dev pkg-config flex z3 libz3-dev maven opam python3 cmake gcc clang-6.0 clang++-6.0 llvm-6.0 llvm-6.0-tools zlib1g-dev bison libboost-test-dev libyaml-cpp-dev libjemalloc-dev
+sudo apt-get install build-essential m4 openjdk-8-jdk libgmp-dev libmpfr-dev pkg-config flex z3 libz3-dev maven opam python3 cmake gcc clang-6.0 clang++-6.0 llvm-6.0 llvm-6.0-tools zlib1g-dev bison libboost-test-dev libyaml-dev libjemalloc-dev
 llvm-backend/src/main/native/llvm-backend/install-rust
 curl -sSL https://get.haskellstack.org/ | sh
 ```
@@ -20,7 +20,7 @@ On Arch (from source):
 
 ```
 git submodule update --init --recursive
-sudo pacman -S git maven jdk-openjdk cmake boost yaml-cpp jemalloc clang llvm lld zlib gmp mpfr z3 opam curl stack rustup base-devel base python
+sudo pacman -S git maven jdk-openjdk cmake boost libyaml jemalloc clang llvm lld zlib gmp mpfr z3 opam curl stack rustup base-devel base python
 export PATH=$PATH:/usr/bin/core_perl
 llvm-backend/src/main/native/llvm-backend/install-rust
 makepkg
