@@ -129,8 +129,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
                 kprint, def);
         rewritingContext.setDefinition(definition);
 
-        return new SymbolicRewriterGlue(def.mainModule(), definition, definition, transitions,
-                0, rewritingContext, kem, files, kompileOptions, sw);
+        return new SymbolicRewriterGlue(definition, def.mainModule(), rewritingContext);
     }
 
     public static Rule transformFunction(Function<K, K> f, Rule r) {
@@ -146,39 +145,18 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
                 Optional.empty(), transformFunction(JavaBackend::convertKSeqToKApply, pattern));
     }
 
-    public static class SymbolicRewriterGlue implements Rewriter {
+    public class SymbolicRewriterGlue implements Rewriter {
 
         public final Definition definition;
-        public Definition miniKoreDefinition;
         public final Module module;
         private final long initCounterValue;
         public final GlobalContext rewritingContext;
-        private final KExceptionManager kem;
-        private final FileUtil files;
-        private final List<String> transitions;
-        private KompileOptions kompileOptions;
-        private final Stopwatch sw;
 
-        public SymbolicRewriterGlue(
-                Module module,
-                Definition definition,
-                Definition miniKoreDefinition,
-                List<String> transitions,
-                long initCounterValue,
-                GlobalContext rewritingContext,
-                KExceptionManager kem,
-                FileUtil files, KompileOptions kompileOptions,
-                Stopwatch sw) {
-            this.transitions = transitions;
-            this.files = files;
-            this.kompileOptions = kompileOptions;
-            this.sw = sw;
+        public SymbolicRewriterGlue(Definition definition, Module module, GlobalContext rewritingContext) {
             this.definition = definition;
-            this.miniKoreDefinition = miniKoreDefinition;
             this.module = module;
-            this.initCounterValue = initCounterValue;
+            this.initCounterValue = 0L;
             this.rewritingContext = rewritingContext;
-            this.kem = kem;
         }
 
         @Override
@@ -324,7 +302,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
                     state1.rewriter, state2.rewriter);
         }
 
-        private static ConjunctiveFormula getConjunctiveFormula(ConjunctiveFormula e1, ConjunctiveFormula e2, GlobalContext global) {
+        private ConjunctiveFormula getConjunctiveFormula(ConjunctiveFormula e1, ConjunctiveFormula e2, GlobalContext global) {
 
             ConjunctiveFormula ensure = ConjunctiveFormula.of(global);
 
@@ -342,7 +320,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
             return ensure;
         }
 
-        private static ImmutableList<Term> getChildren(ConjunctiveFormula e) {
+        private ImmutableList<Term> getChildren(ConjunctiveFormula e) {
             // TODO: make it better
             assert e.equalities().size() == 1;
             assert e.equalities().get(0).leftHandSide() instanceof KItem;
@@ -355,7 +333,11 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
             return ((BuiltinList) ((KList) ((KItem) e.equalities().get(0).leftHandSide()).kList()).getContents().get(0)).children;
         }
 
-        static class ProcessProofRules {
+        private List<String> getTransitions() {
+            return transitions;
+        }
+
+        private class ProcessProofRules {
             private List<Rule> rules;
             private TermContext termContext;
             private KOREtoBackendKIL converter;
@@ -445,15 +427,9 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
         final SymbolicRewriter rewriter;
 
         EquivalenceState(SymbolicRewriterGlue glue, Module spec) {
-            GlobalOptions globalOptions = glue.rewritingContext.globalOptions;
-            FileUtil files = glue.files;
-            KExceptionManager kem = glue.kem;
-            Stopwatch sw = glue.sw;
-            KompileOptions options = glue.kompileOptions;
-
             List<Rule> rules = stream(spec.rules()).filter(r -> r.att().contains(Att.specification())).collect(Collectors.toList());
 
-            SymbolicRewriterGlue.ProcessProofRules processProofRules = new SymbolicRewriterGlue.ProcessProofRules(rules);
+            SymbolicRewriterGlue.ProcessProofRules processProofRules = glue.new ProcessProofRules(rules);
             processProofRules.invoke(glue.rewritingContext, glue.initCounterValue, glue.module, glue.definition);
 
             List<org.kframework.backend.java.kil.Rule> specRules = processProofRules.javaRules;
@@ -475,7 +451,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
                     .collect(Collectors.toList());
 
             //// prove spec rules
-            rewriter = new SymbolicRewriter(glue.rewritingContext, glue.transitions, processProofRules.converter);
+            rewriter = new SymbolicRewriter(glue.rewritingContext, glue.getTransitions(), processProofRules.converter);
             assert (specRules.size() == targetSpecRules.size());
 
             startSyncNodes = new ArrayList<>();
