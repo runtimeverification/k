@@ -6,9 +6,9 @@ endmodule []
 module KSEQ
   import BASIC-K []
 
-  symbol kseq{}(SortKItem{}, SortK{}) : SortK{} []
+  symbol kseq{}(SortKItem{}, SortK{}) : SortK{} [constructor{}()]
   symbol append{}(SortK{}, SortK{}) : SortK{} [function{}()]
-  symbol dotk{}() : SortK{} []
+  symbol dotk{}() : SortK{} [constructor{}()]
 
   axiom{R}
     \equals{SortK{},R}(
