@@ -1,2 +1,6 @@
-#Equals(#token("3","Int"),#token("4","Int"))
+{
+  3
+#Equals
+  4
+}
 
