@@ -46,6 +46,7 @@ object ModuleTransformer {
       sentence match {
         case r: Rule => Rule.apply(ff(module, r.body), ff(module, r.requires), ff(module, r.ensures), r.att)
         case c: Context => Context.apply(ff(module, c.body), ff(module, c.requires), c.att)
+        case c: ContextAlias => ContextAlias.apply(ff(module, c.body), ff(module, c.requires), c.att)
         case o => o
       }
     }, name)
