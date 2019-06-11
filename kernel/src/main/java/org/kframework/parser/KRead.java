@@ -12,7 +12,7 @@ import org.kframework.main.GlobalOptions;
 import org.kframework.parser.InputModes;
 import org.kframework.parser.binary.BinaryParser;
 import org.kframework.parser.json.JsonParser;
-import org.kframework.parser.kore.KoreParser;
+import org.kframework.parser.kast.KastParser;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
@@ -37,7 +37,7 @@ public class KRead {
             case PROGRAM:
                 return def.getParser(mod, sort, kem).apply(stringToParse, source);
             case KAST:
-                return KoreParser.parse(stringToParse, source);
+                return KastParser.parse(stringToParse, source);
             case BINARY:
                 return BinaryParser.parse(stringToParse.getBytes());
             default:

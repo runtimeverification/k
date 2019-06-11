@@ -5,7 +5,7 @@ import org.apache.commons.io.FileUtils;
 import org.kframework.attributes.Source;
 import org.kframework.kore.K;
 import org.kframework.parser.binary.BinaryParser;
-import org.kframework.parser.kore.KoreParser;
+import org.kframework.parser.kast.KastParser;
 import org.kframework.utils.errorsystem.KEMException;
 
 import javax.swing.*;
@@ -72,7 +72,7 @@ public class KTreeViewer {
     private static K loadFile(File file) throws IOException {
         try {
             try {
-                return KoreParser.parse(FileUtils.readFileToString(file),
+                return KastParser.parse(FileUtils.readFileToString(file),
                         new Source(file.getName()));
             } catch (KEMException e) {
                 FileChannel input = FileChannel.open(file.toPath(), StandardOpenOption.READ);

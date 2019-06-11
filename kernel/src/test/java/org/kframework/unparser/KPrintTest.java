@@ -14,7 +14,7 @@ import org.kframework.kore.mini.KToken;
 import org.kframework.kore.mini.KVariable;
 import org.kframework.parser.binary.BinaryParser;
 import org.kframework.parser.json.JsonParser;
-import org.kframework.parser.kore.KoreParser;
+import org.kframework.parser.kast.KastParser;
 import org.kframework.unparser.KPrint;
 import org.kframework.unparser.OutputModes.*;
 import org.kframework.utils.file.FileUtil;
@@ -59,7 +59,7 @@ public class KPrintTest {
             case BINARY:
                 return BinaryParser.parse(unparsed);
             case KAST:
-               return KoreParser.parse(bytes2String(unparsed), new Source("KPrintTest"));
+               return KastParser.parse(bytes2String(unparsed), new Source("KPrintTest"));
             default:
                 return new KToken("###", Sort("UnsupportedOutputMode"));
         }
