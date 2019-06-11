@@ -127,6 +127,7 @@ public class JavaBackend implements Backend {
                 .andThen(ModuleTransformer.fromRuleBodyTransformer(NormalizeKSeq.self(), "normalize kseq"))
                 .andThen(mod -> JavaBackend.markRegularRules(def, mod))
                 .andThen(ModuleTransformer.fromSentenceTransformer(new AddConfigurationRecoveryFlags()::apply, "add refers_THIS_CONFIGURATION_marker"))
+                .andThen(restoreDefinitionModulesTransformer(def))
                 .apply(m);
     }
 
