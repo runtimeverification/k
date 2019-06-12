@@ -80,7 +80,7 @@ public class KRun {
         K program;
         if (options.configurationCreation.term()) {
             program = externalParse(options.configurationCreation.parser,
-                    pgmFileName, compiledDef.programStartSymbol, Source.apply("<parameters>"), compiledDef);
+                    pgmFileName, compiledDef.programStartSymbol, Source.apply("<parameters>"), compiledDef, options);
         } else {
             program = parseConfigVars(options, compiledDef);
         }
@@ -166,7 +166,7 @@ public class KRun {
             String parser = entry.getValue().getRight();
             String configVarName = "$" + name;
             Sort sort = compiledDef.configurationVariableDefaultSorts.getOrDefault(configVarName, compiledDef.programStartSymbol);
-            K configVar = externalParse(parser, value, sort, Source.apply("<command line: -c" + name + ">"), compiledDef);
+            K configVar = externalParse(parser, value, sort, Source.apply("<command line: -c" + name + ">"), compiledDef, options);
             output.put(KToken(configVarName, Sorts.KConfigVar()), configVar);
         }
         if (compiledDef.kompiledDefinition.mainModule().definedSorts().contains(Sorts.String())) {
@@ -230,14 +230,14 @@ public class KRun {
         return KApply(compiledDef.topCellInitializer, output.entrySet().stream().map(e -> KApply(KLabel("_|->_"), e.getKey(), e.getValue())).reduce(KApply(KLabel(".Map")), (a, b) -> KApply(KLabel("_Map_"), a, b)));
     }
 
-    public K externalParse(String parser, String value, Sort startSymbol, Source source, CompiledDefinition compiledDef) {
+    public K externalParse(String parser, String value, Sort startSymbol, Source source, CompiledDefinition compiledDef, KRunOptions options) {
         if ( parser == null ) {
             KRead kread = new KRead(kem);
             Reader fileToRead = files.readFromWorkingDirectory(value);
             String module = compiledDef.mainSyntaxModuleName();
             Option<Module> maybeMod = compiledDef.programParsingModuleFor(module, kem);
             Module mod = maybeMod.get();
-            return kread.prettyRead(mod, startSymbol, compiledDef, source, FileUtil.read(fileToRead), InputModes.PROGRAM);
+            return kread.prettyRead(mod, startSymbol, compiledDef, source, FileUtil.read(fileToRead), options.kreadOptions.input);
         } else {
             List<String> tokens = new ArrayList<>(Arrays.asList(parser.split(" ")));
             tokens.add(value);
