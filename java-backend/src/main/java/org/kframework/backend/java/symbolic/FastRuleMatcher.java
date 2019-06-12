@@ -13,6 +13,7 @@ import org.apache.commons.lang3.tuple.Triple;
 import org.kframework.attributes.Att;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.compile.KOREtoBackendKIL;
+import org.kframework.backend.java.kil.Bottom;
 import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.BuiltinSet;
@@ -643,7 +644,8 @@ public class FastRuleMatcher {
                 return (Term) ruleAutomatonDisjunction.disjunctions().stream()
                         .filter(p -> p.getRight().get(i))
                         .map(Pair::getLeft)
-                        .findAny().get()
+                        //If automaton doesn't include this rule, return BOTTOM, that will remove this rule from BitSet.
+                        .findAny().orElse(Bottom.BOTTOM)
                         .accept(this);
             }
 
@@ -666,7 +668,8 @@ public class FastRuleMatcher {
                 return (Term) ruleAutomatonDisjunction.disjunctions().stream()
                         .filter(p -> p.getRight().get(i))
                         .map(Pair::getLeft)
-                        .findAny().get()
+                        //If automaton doesn't include this rule, return BOTTOM, that will remove this rule from BitSet.
+                        .findAny().orElse(Bottom.BOTTOM)
                         .accept(this);
             }
 
