@@ -9,6 +9,7 @@ import com.google.inject.Provider;
 import org.kframework.attributes.Source;
 import org.kframework.kore.Sort;
 import org.kframework.main.GlobalOptions;
+import org.kframework.parser.KReadOptions;
 import org.kframework.parser.outer.Outer;
 import org.kframework.parser.InputModes;
 import org.kframework.unparser.OutputModes;
@@ -101,21 +102,8 @@ public final class KastOptions {
     @Parameter(names="--kore", description="Output KORE-syntax instead of KAST-syntax.")
     public boolean kore = false;
 
-    @Parameter(names={"--input", "-i"}, converter=InputModeConverter.class,
-            description="How to read kast input in. <mode> is either [program|binary|kast|json].")
-    public InputModes input = InputModes.PROGRAM;
-
-    public static class InputModeConverter extends BaseEnumConverter<InputModes> {
-
-        public InputModeConverter(String optionName) {
-            super(optionName);
-        }
-
-        @Override
-        public Class<InputModes> enumClass() {
-            return InputModes.class;
-        }
-    }
+    @ParametersDelegate
+    public KReadOptions kreadOptions = new KReadOptions();
 
     @ParametersDelegate
     public Experimental experimental = new Experimental();
