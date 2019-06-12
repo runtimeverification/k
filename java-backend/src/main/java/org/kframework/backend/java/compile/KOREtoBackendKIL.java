@@ -296,18 +296,20 @@ public class KOREtoBackendKIL {
             return (Term) k;
         else if (k instanceof org.kframework.kore.KToken)
             return KToken(((org.kframework.kore.KToken) k).s(), ((org.kframework.kore.KToken) k).sort(), k.att());
-        else if (k instanceof org.kframework.kore.KApply) {
+        else if (k instanceof org.kframework.kore.KApply)
             return KApply1(((KApply) k).klabel(), ((KApply) k).klist(), k.att());
-        } else if (k instanceof org.kframework.kore.KSequence)
+        else if (k instanceof org.kframework.kore.KSequence)
             return KSequence(((org.kframework.kore.KSequence) k).items(), k.att());
         else if (k instanceof org.kframework.kore.KVariable)
             return KVariable(((org.kframework.kore.KVariable) k).name(), k.att());
         else if (k instanceof org.kframework.kore.InjectedKLabel)
             return InjectedKLabel(((org.kframework.kore.InjectedKLabel) k).klabel(), k.att());
-        else if (k instanceof org.kframework.kore.KRewrite) {
+        else if (k instanceof org.kframework.kore.KRewrite)
             return KItem.of(KLabelConstant.of(KLabels.KREWRITE, definition), KList.concatenate(convert(((KRewrite) k).left()), convert(((KRewrite) k).right())), global);
-        } else
-            throw new AssertionError("BUM!");
+        else if (k instanceof org.kframework.kore.KAs)
+            throw new AssertionError("Conversion of KAs unsupported on Java backend!\n" + k.toString());
+        else
+            throw new AssertionError("Do not know how to convert term to KIL!\n" + k.toString());
     }
 
 
