@@ -217,24 +217,20 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
                     .sorted(Comparator.comparingInt(rule -> rule.body().hashCode()))
                     .filter(r -> r.att().contains(Att.specification())).collect(Collectors.toList());
             ProcessProofRules processProofRules = new ProcessProofRules(rules).invoke(rewritingContext, initCounterValue, module, definition);
-            List<org.kframework.backend.java.kil.Rule> javaRules = processProofRules.getJavaRules();
+            List<org.kframework.backend.java.kil.Rule> specRules = processProofRules.getJavaRules();
             KOREtoBackendKIL converter = processProofRules.getConverter();
             TermContext termContext = processProofRules.getTermContext();
             org.kframework.backend.java.kil.Rule javaBoundaryPattern = convertToJavaPattern(converter, boundaryPattern);
 
-            List<org.kframework.backend.java.kil.Rule> specRules = javaRules.stream()
-                    .map(org.kframework.backend.java.kil.Rule::renameVariables)
-                    .collect(Collectors.toList());
-
-            // rename all variables again to avoid any potential conflicts with the rules in the semantics
-            javaRules = javaRules.stream()
+            // rename all variables to avoid any potential conflicts with the rules in the semantics
+            List<org.kframework.backend.java.kil.Rule> proofObligationRules = specRules.stream()
                     .map(org.kframework.backend.java.kil.Rule::renameVariables)
                     .collect(Collectors.toList());
 
             SymbolicRewriter rewriter = new SymbolicRewriter(rewritingContext, transitions, converter);
 
             rewritingContext.setExecutionPhase(true);
-            List<ConstrainedTerm> proofResults = javaRules.stream()
+            List<ConstrainedTerm> proofResults = proofObligationRules.stream()
                     .filter(r -> !r.att().contains(Attribute.TRUSTED_KEY))
                     .map(r -> {
                         //Build LHS with fully evaluated constraint. Then expand patterns.
@@ -442,19 +438,13 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
                 }
             });
 
-            // rename all variables again to avoid any potential conflicts with the rules in the semantics
-            specRules = specRules.stream()
-                    .map(org.kframework.backend.java.kil.Rule::renameVariables)
-                    .collect(Collectors.toList());
-
-            // rename all variables again to avoid any potential conflicts with the rules in the semantics
-            List<org.kframework.backend.java.kil.Rule> targetSpecRules = specRules.stream()
+            // rename all variables to avoid any potential conflicts with the rules in the semantics
+            List<org.kframework.backend.java.kil.Rule> proofObligationRules = specRules.stream()
                     .map(org.kframework.backend.java.kil.Rule::renameVariables)
                     .collect(Collectors.toList());
 
             //// prove spec rules
             rewriter = new SymbolicRewriter(glue.rewritingContext, glue.getTransitions(), processProofRules.converter);
-            assert (specRules.size() == targetSpecRules.size());
 
             startSyncNodes = new ArrayList<>();
             targetSyncNodes = new ArrayList<>();
@@ -464,7 +454,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
 
             for (int i = 0; i < specRules.size(); i++) {
                 org.kframework.backend.java.kil.Rule startRule = specRules.get(i);
-                org.kframework.backend.java.kil.Rule targetRule = targetSpecRules.get(i);
+                org.kframework.backend.java.kil.Rule targetRule = proofObligationRules.get(i);
 
                 // assert rule1.getEnsures().equals(rule2.getEnsures());
 
