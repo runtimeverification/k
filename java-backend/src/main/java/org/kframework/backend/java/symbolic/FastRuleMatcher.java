@@ -110,7 +110,7 @@ public class FastRuleMatcher {
             System.err.format("\nRegular rule automaton phase, step %d\n" +
                     "==========================================\n", step);
         }
-        Term automatonLHS = global.getDefinition().automaton.leftHandSide();
+        Term automatonLHS = global.getDefinition().mainAutomaton().leftHandSide();
         BitSet theMatchingRules = matchAndLog(subject.term(), automatonLHS, ruleMask, List(), false);
 
         if (global.javaExecutionOptions.logRulesPublic) {

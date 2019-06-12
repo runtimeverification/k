@@ -451,7 +451,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
             Stopwatch sw = glue.sw;
             KompileOptions options = glue.kompileOptions;
 
-            List<Rule> rules = stream(spec.rules()).filter(r -> r.att().contains("specification")).collect(Collectors.toList());
+            List<Rule> rules = stream(spec.rules()).filter(r -> r.att().contains(Att.specification())).collect(Collectors.toList());
 
             SymbolicRewriterGlue.ProcessProofRules processProofRules = new SymbolicRewriterGlue.ProcessProofRules(rules);
             processProofRules.invoke(glue.rewritingContext, glue.initCounterValue, glue.module, glue.definition);

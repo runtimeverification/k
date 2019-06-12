@@ -10,8 +10,10 @@ import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.SetMultimap;
+import com.google.common.collect.Sets;
 import org.kframework.attributes.Att;
 import org.kframework.backend.java.compile.KOREtoBackendKIL;
+import org.kframework.backend.java.symbolic.JavaBackend;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Subsorts;
@@ -47,9 +49,6 @@ import static org.kframework.Collections.*;
  * @author AndreiS
  */
 public class Definition extends JavaSymbolicObject {
-
-    public static final String AUTOMATON = "automaton";
-
 
     private static class DefinitionData implements Serializable {
         public final Subsorts subsorts;
@@ -93,11 +92,10 @@ public class Definition extends JavaSymbolicObject {
 
     private transient KExceptionManager kem;
 
-    // new indexing data
     /**
-     * the automaton rule used by {@link org.kframework.backend.java.symbolic.FastRuleMatcher}
+     * the automaton rules used by {@link org.kframework.backend.java.symbolic.FastRuleMatcher}
      */
-    public Rule automaton = null;
+    public Map<String, Rule> automatons = new HashMap<>();
     /**
      * all the rules indexed with the ordinal used by {@link org.kframework.backend.java.symbolic.FastRuleMatcher}
      */
@@ -194,14 +192,14 @@ public class Definition extends JavaSymbolicObject {
      */
     public void addKoreRules(Module module, GlobalContext global) {
         KOREtoBackendKIL transformer = new KOREtoBackendKIL(module, this, global, true);
-
+        Set<String> automatonNames = Sets.newHashSet(JavaBackend.MAIN_AUTOMATON);
 
         List<org.kframework.definition.Rule> koreRules = JavaConversions.setAsJavaSet(module.rules()).stream()
-                .filter(r -> !r.att().contains(AUTOMATON))
-                .collect(Collectors.toList());
+                .filter(rule -> !containsAnyAttribute(rule, automatonNames))
+                //Ensures that rule order in all collections remains the same across across different executions.
+                .sorted(Comparator.comparingInt(rule -> rule.body().hashCode())).collect(Collectors.toList());
 
         //Ensures that rule order in all collections remains the same across across different executions.
-        koreRules.sort(Comparator.comparingInt(rule -> rule.body().hashCode()));
 
         koreRules.forEach(r -> {
             if (r.att().contains(Att.topRule())) {
@@ -217,23 +215,29 @@ public class Definition extends JavaSymbolicObject {
             }
         });
 
-
-        Optional<org.kframework.definition.Rule> koreAutomaton = JavaConversions.setAsJavaSet(module.localRules()).stream()
-                .filter(r -> r.att().contains(AUTOMATON))
-                .collect(Collectors.collectingAndThen(
-                        Collectors.toList(),
-                        list -> list.size() == 1 ? Optional.of(list.get(0)) : Optional.empty()
+        automatons = JavaConversions.setAsJavaSet(module.localRules())
+                .stream().filter(rule -> containsAnyAttribute(rule, automatonNames))
+                .map(rule -> transformer.convert(Optional.of(module), rule))
+                .collect(Collectors.toMap(
+                        rule -> getFirstContainedAttribute(rule, automatonNames),
+                        rule -> rule
                 ));
-        if (koreAutomaton.isPresent()) {
-            automaton = transformer.convert(Optional.of(module), koreAutomaton.get());
-        }
     }
 
-    public Definition(DefinitionData definitionData, KExceptionManager kem, Map<Integer, Rule> ruleTable, Rule automaton) {
+    public boolean containsAnyAttribute(org.kframework.definition.Rule rule, Set<String> attributeNames) {
+        return attributeNames.stream().anyMatch(name -> rule.att().contains(name));
+    }
+
+    public String getFirstContainedAttribute(Rule rule, Set<String> attributeNames) {
+        return attributeNames.stream().filter(name -> rule.att().contains(name)).findFirst().orElse(null);
+    }
+
+    public Definition(DefinitionData definitionData, KExceptionManager kem, Map<Integer, Rule> ruleTable,
+                      Map<String, Rule> automatons) {
         kLabels = new HashSet<>();
         this.kem = kem;
         this.ruleTable = ruleTable;
-        this.automaton = automaton;
+        this.automatons = automatons;
 
         this.definitionData = definitionData;
         this.context = null;
@@ -395,4 +399,7 @@ public class Definition extends JavaSymbolicObject {
         return definitionData;
     }
 
+    public Rule mainAutomaton() {
+        return automatons.get(JavaBackend.MAIN_AUTOMATON);
+    }
 }
