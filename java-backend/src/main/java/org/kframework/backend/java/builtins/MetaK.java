@@ -19,7 +19,7 @@ import org.kframework.backend.java.symbolic.PatternMatcher;
 import org.kframework.kore.K;
 import org.kframework.kore.KORE;
 import org.kframework.kore.KVariable;
-import org.kframework.parser.kore.KoreParser;
+import org.kframework.parser.kast.KastParser;
 import org.kframework.utils.errorsystem.KEMException;
 
 import java.util.HashSet;
@@ -213,7 +213,7 @@ public class MetaK {
      */
     public static Term parseKAST(StringToken kast, TermContext termContext) {
         try {
-            return termContext.getKOREtoBackendKILConverter().convert(JavaBackend.convertKSeqToKApply(KoreParser.parse(kast.stringValue(), kast.getSource())));
+            return termContext.getKOREtoBackendKILConverter().convert(JavaBackend.convertKSeqToKApply(KastParser.parse(kast.stringValue(), kast.getSource())));
         } catch (KEMException e) {
             KLabelConstant klabel = KLabelConstant.of(KORE.KLabel("#noParse"), termContext.definition());
             return KItem.of(klabel, StringToken.of(e.getMessage()), termContext.global());

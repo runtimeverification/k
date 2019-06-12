@@ -8,8 +8,8 @@ options {
   // FORCE_LA_CHECK = true; // Useful for development, but causes a warning in Production()
 }
 
-PARSER_BEGIN(KoreParser)
-package org.kframework.parser.kore;
+PARSER_BEGIN(KastParser)
+package org.kframework.parser.kast;
 
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
@@ -29,9 +29,9 @@ import java.util.stream.Stream;
 
 import static org.kframework.kore.KORE.*;
 
-public class KoreParser {
+public class KastParser {
 	public static K parse(String kast, Source source) {
-		KoreParser parser = new KoreParser(new StringReader(kast));
+		KastParser parser = new KastParser(new StringReader(kast));
 		try {
 			return parser.k();
 		} catch (ParseException e) {
@@ -56,7 +56,7 @@ public class KoreParser {
 	}
 
 }
-PARSER_END(KoreParser)
+PARSER_END(KastParser)
 
 SKIP :
 {
