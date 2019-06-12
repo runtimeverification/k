@@ -63,19 +63,6 @@ public final class KRunOptions {
         @Parameter(names={"--parser"}, description="Command used to parse programs. Default is \"kast\"")
         public String parser;
 
-        public String parser(String mainModuleName, FileUtil files) {
-            String kastBinary = getKast(files);
-            if (parser == null) {
-                if (term()) {
-                    return kastBinary + " -m " + mainModuleName;
-                } else {
-                    return kastBinary;
-                }
-            } else {
-                return parser;
-            }
-        }
-
         @DynamicParameter(names={"--config-parser", "-p"}, description="Command used to parse " +
                 "configuration variables. Default is \"kast --parser ground -e\". See description of " +
                 "--parser. For example, -pPGM=\"kast\" specifies that the configuration variable $PGM " +
@@ -99,7 +86,7 @@ public final class KRunOptions {
                 if (configVars.containsKey("PGM")) {
                     throw KEMException.criticalError("Cannot specify both -cPGM and a program to parse.");
                 }
-                result.put("PGM", Pair.of(pgm(), parser(mainModuleName, files)));
+                result.put("PGM", Pair.of(pgm(), parser));
             }
             if (configVars.containsKey("STDIN") || configVars.containsKey("IO")) {
                 throw KEMException.criticalError("Cannot specify -cSTDIN or -cIO which are reserved for the builtin K-IO module.");

@@ -7,6 +7,7 @@ import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.ConfigurationInfoFromModule;
 import org.kframework.definition.Definition;
+import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kore.Assoc;
@@ -17,6 +18,8 @@ import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
 import org.kframework.krun.modes.ExecutionMode;
 import org.kframework.main.Main;
+import org.kframework.parser.InputModes;
+import org.kframework.parser.KRead;
 import org.kframework.parser.binary.BinaryParser;
 import org.kframework.parser.kast.KastParser;
 import org.kframework.rewriter.Rewriter;
@@ -28,11 +31,13 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.TTYInfo;
+import scala.Option;
 import scala.Tuple2;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -74,7 +79,7 @@ public class KRun {
         String pgmFileName = options.configurationCreation.pgm();
         K program;
         if (options.configurationCreation.term()) {
-            program = externalParse(options.configurationCreation.parser(compiledDef.executionModule().name(), files),
+            program = externalParse(options.configurationCreation.parser,
                     pgmFileName, compiledDef.programStartSymbol, Source.apply("<parameters>"), compiledDef);
         } else {
             program = parseConfigVars(options, compiledDef);
@@ -226,23 +231,32 @@ public class KRun {
     }
 
     public K externalParse(String parser, String value, Sort startSymbol, Source source, CompiledDefinition compiledDef) {
-        List<String> tokens = new ArrayList<>(Arrays.asList(parser.split(" ")));
-        tokens.add(value);
-        Map<String, String> environment = new HashMap<>();
-        environment.put("KRUN_SORT", startSymbol.toString());
-        environment.put("KRUN_COMPILED_DEF", files.resolveDefinitionDirectory(".").getAbsolutePath());
-        RunProcess.ProcessOutput output = RunProcess.execute(environment, files.getProcessBuilder(), tokens.toArray(new String[tokens.size()]));
-
-        if (output.exitCode != 0) {
-            throw new ParseFailedException(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, "Parser returned a non-zero exit code: "
-                    + output.exitCode + "\nStdout:\n" + new String(output.stdout) + "\nStderr:\n" + new String(output.stderr)));
-        }
-
-        byte[] kast = output.stdout != null ? output.stdout : new byte[0];
-        if (BinaryParser.isBinaryKast(kast)) {
-            return BinaryParser.parse(kast);
+        if ( parser == null ) {
+            KRead kread = new KRead(kem);
+            Reader fileToRead = files.readFromWorkingDirectory(value);
+            String module = compiledDef.mainSyntaxModuleName();
+            Option<Module> maybeMod = compiledDef.programParsingModuleFor(module, kem);
+            Module mod = maybeMod.get();
+            return kread.prettyRead(mod, startSymbol, compiledDef, source, FileUtil.read(fileToRead), InputModes.PROGRAM);
         } else {
-            return KastParser.parse(new String(kast), source);
+            List<String> tokens = new ArrayList<>(Arrays.asList(parser.split(" ")));
+            tokens.add(value);
+            Map<String, String> environment = new HashMap<>();
+            environment.put("KRUN_SORT", startSymbol.toString());
+            environment.put("KRUN_COMPILED_DEF", files.resolveDefinitionDirectory(".").getAbsolutePath());
+            RunProcess.ProcessOutput output = RunProcess.execute(environment, files.getProcessBuilder(), tokens.toArray(new String[tokens.size()]));
+
+            if (output.exitCode != 0) {
+                throw new ParseFailedException(new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, "Parser returned a non-zero exit code: "
+                        + output.exitCode + "\nStdout:\n" + new String(output.stdout) + "\nStderr:\n" + new String(output.stderr)));
+            }
+
+            byte[] kast = output.stdout != null ? output.stdout : new byte[0];
+            if (BinaryParser.isBinaryKast(kast)) {
+                return BinaryParser.parse(kast);
+            } else {
+                return KastParser.parse(new String(kast), source);
+            }
         }
     }
 }
