@@ -120,7 +120,7 @@ public final class KastOptions {
     public boolean kore = false;
 
     @Parameter(names={"--input", "-i"}, converter=InputModeConverter.class,
-            description="How to read kast input in. <mode> is either [program|kast|json|kore].")
+            description="How to read kast input in. <mode> is either [program|binary|kast|json|kore].")
     public InputModes input = InputModes.PROGRAM;
 
     public static class InputModeConverter extends BaseEnumConverter<InputModes> {

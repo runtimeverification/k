@@ -39,6 +39,8 @@ import java.util.function.Function;
 
 public class JavaBackend implements Backend {
 
+    public static final String MAIN_AUTOMATON = "mainAutomaton";
+
     private final KExceptionManager kem;
     private final FileUtil files;
     private final GlobalOptions globalOptions;
@@ -103,7 +105,7 @@ public class JavaBackend implements Backend {
                 .andThen(DefinitionTransformer.fromSentenceTransformer(new AddConfigurationRecoveryFlags(), "add refers_THIS_CONFIGURATION_marker"))
                 .andThen(DefinitionTransformer.fromSentenceTransformer(JavaBackend::markSingleVariables, "mark single variables"))
                 .andThen(DefinitionTransformer.from(new AssocCommToAssoc(), "convert AC matching to A matching"))
-                .andThen(DefinitionTransformer.from(new MergeRules(), "merge rules into one rule with or clauses"))
+                .andThen(DefinitionTransformer.from(new MergeRules(MAIN_AUTOMATON, Att.topRule()), "merge regular rules into one rule with or clauses"))
                 .apply(Kompile.defaultSteps(kompileOptions, kem, files).apply(d));
              // .andThen(KoreToMiniToKore::apply) // for serialization/deserialization test
     }
@@ -125,7 +127,7 @@ public class JavaBackend implements Backend {
                 .andThen(ModuleTransformer.fromRuleBodyTransformer(JavaBackend::ADTKVariableToSortedVariable, "ADT.KVariable to SortedVariable"))
                 .andThen(ModuleTransformer.fromRuleBodyTransformer(JavaBackend::convertKSeqToKApply, "kseq to kapply"))
                 .andThen(ModuleTransformer.fromRuleBodyTransformer(NormalizeKSeq.self(), "normalize kseq"))
-                .andThen(mod -> JavaBackend.markRegularRules(def, mod))
+                .andThen(mod -> JavaBackend.markSpecRules(def, mod))
                 .andThen(ModuleTransformer.fromSentenceTransformer(new AddConfigurationRecoveryFlags()::apply, "add refers_THIS_CONFIGURATION_marker"))
                 .andThen(restoreDefinitionModulesTransformer(def))
                 .apply(m);
@@ -145,9 +147,9 @@ public class JavaBackend implements Backend {
         return s;
     }
 
-    private static Module markRegularRules(Definition d, Module mod) {
+    private static Module markSpecRules(Definition d, Module mod) {
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(d.mainModule());
-        return ModuleTransformer.fromSentenceTransformer(s -> markRegularRules(d, configInfo, s, "specification"), "mark regular rules").apply(mod);
+        return ModuleTransformer.fromSentenceTransformer(s -> markRegularRules(d, configInfo, s, Att.specification()), "mark specification rules").apply(mod);
     }
 
         /**
