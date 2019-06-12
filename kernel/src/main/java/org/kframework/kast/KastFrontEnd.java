@@ -11,6 +11,7 @@ import org.kframework.definition.Module;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kore.K;
 import org.kframework.main.FrontEnd;
+import org.kframework.parser.InputModes;
 import org.kframework.parser.KRead;
 import org.kframework.parser.outer.Outer;
 import org.kframework.unparser.KPrint;
@@ -112,13 +113,22 @@ public class KastFrontEnd extends FrontEnd {
                     sort = def.programStartSymbol;
                 }
             }
-            options.module = options.module == null ? def.mainSyntaxModuleName() : options.module;
+            Module compiledMod = null;
+            if (options.module == null) {
+                options.module = def.mainSyntaxModuleName();
+                switch (options.input) {
+                case KORE:
+                    compiledMod = def.languageParsingModule();
+                    break;
+                default:
+                    compiledMod = def.kompiledDefinition.getModule(def.mainSyntaxModuleName()).get();
+                }
+            }
             Option<Module> maybeMod = def.programParsingModuleFor(options.module, kem);
             if (maybeMod.isEmpty()) {
                 throw KEMException.innerParserError("Module " + options.module + " not found. Specify a module with -m.");
             }
             Module mod = maybeMod.get();
-            Module compiledMod = def.kompiledDefinition.getModule(options.module).get();
 
             K parsed = kread.prettyRead(mod, sort, def, source, FileUtil.read(stringToParse), options.input);
 
