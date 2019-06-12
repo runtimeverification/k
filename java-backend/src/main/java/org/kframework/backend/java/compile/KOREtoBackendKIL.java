@@ -23,6 +23,7 @@ import org.kframework.kore.KRewrite;
 import org.kframework.kore.KToken;
 import org.kframework.kore.KVariable;
 
+import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -312,13 +313,15 @@ public class KOREtoBackendKIL {
             throw new AssertionError("Do not know how to convert term to KIL!\n" + k.toString());
     }
 
-
-    public Rule convert(Optional<Module> module, org.kframework.definition.Rule rule) {
+    /**
+     * @param module Required to know if it's a function rule.
+     */
+    public Rule convert(@Nullable Module module, org.kframework.definition.Rule rule) {
         K leftHandSide = RewriteToTop.toLeft(rule.body());
         Att att = rule.att();
 
-        if (module.isPresent()) {
-            if (leftHandSide instanceof KApply && module.get().attributesFor().apply(((KApply) leftHandSide).klabel()).contains(Attribute.FUNCTION_KEY)) {
+        if (module != null) {
+            if (leftHandSide instanceof KApply && module.attributesFor().apply(((KApply) leftHandSide).klabel()).contains(Attribute.FUNCTION_KEY)) {
                 att = att.add(Attribute.FUNCTION_KEY);
             }
         }

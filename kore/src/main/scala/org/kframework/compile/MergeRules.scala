@@ -14,7 +14,7 @@ import collection._
 /**
   * Compiler pass for merging the rules as expected by FastRuleMatcher
   */
-class MergeRules extends Function[Module, Module] {
+class MergeRules(val automatonAttribute: String, filterAttribute: String) extends Function[Module, Module] {
 
 
   object ML {
@@ -30,13 +30,11 @@ class MergeRules extends Function[Module, Module] {
   val isRulePredicate = KLabel("isRule")
 
   def apply(m: Module): Module = {
-    val topRules = m.rules filter {_.att.contains(Att.topRule)}
+    val rulesToMerge = m.rules filter {_.att.contains(filterAttribute)}
 
-    if (topRules.nonEmpty) {
-      val newBody = pushDisjunction(topRules map { r => (convertKRewriteToKApply(r.body), KApply(isRulePredicate,KToken(r.hashCode.toString, Sorts.K, Att.empty))) })(m)
-      //      val newRequires = makeOr((topRules map whatever(_.requires) map { case (a, b) => and(a, b) }).toSeq: _*)
-      //val automatonRule = Rule(newBody, newRequires, TrueToken, Att().add("automaton"))
-      val automatonRule = Rule(newBody, TrueToken, TrueToken, Att.empty.add("automaton"))
+    if (rulesToMerge.nonEmpty) {
+      val newBody = pushDisjunction(rulesToMerge map { r => (convertKRewriteToKApply(r.body), KApply(isRulePredicate,KToken(r.hashCode.toString, Sorts.K, Att.empty))) })(m)
+      val automatonRule = Rule(newBody, TrueToken, TrueToken, Att.empty.add(automatonAttribute))
       Module(m.name, m.imports, m.localSentences + automatonRule, m.att)
     } else {
       m

@@ -172,7 +172,7 @@ public class SymbolicRewriter {
                                                         boolean proofFlag, int step, ConstrainedTerm initTerm) {
         global.stateLog.log(StateLog.LogEvent.NODE, subject.term(), subject.constraint());
         List<ConstrainedTerm> results = new ArrayList<>();
-        if (definition.automaton == null) {
+        if (definition.mainAutomaton() == null) {
             return results;
         }
         List<FastRuleMatcher.RuleMatchResult> matches = theFastMatcher.matchRulePattern(

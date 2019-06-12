@@ -49,6 +49,7 @@ object Att {
    * attribute marking the top rule label
    */
   val topRule = "topRule"
+  val specification = "specification"
   val userList = "userList"
   val generatedByListSubsorting = "generatedByListSubsorting"
   val generatedBy = "generatedBy"
