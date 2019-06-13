@@ -21,10 +21,8 @@ import org.kframework.kprove.KProveOptions;
 import org.kframework.krun.RunProcess;
 import org.kframework.main.GlobalOptions;
 import org.kframework.main.Main;
-import org.kframework.parser.kore.parser.KoreToK;
+import org.kframework.parser.KoreParser;
 import org.kframework.parser.kore.parser.ParseError;
-import org.kframework.parser.kore.parser.TextToKore;
-import org.kframework.parser.kore.Pattern;
 import org.kframework.RewriterResult;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.rewriter.SearchType;
@@ -36,7 +34,6 @@ import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.DefinitionScoped;
 import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.SMTOptions;
-import org.kframework.utils.StringUtil;
 
 import scala.Tuple2;
 
@@ -89,7 +86,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
         this.def = def;
         this.kem = kem;
         this.kprint = kprint;
-        this.idsToLabels = init.serialized;
+        this.idsToLabels = init.getKoreToKLabels();
     }
 
     @Override
@@ -137,10 +134,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                 try {
                     File korePath = koreDirectory == null ? null : new File(koreDirectory);
                     int execStatus = executeCommandBasic(korePath, koreCommand);
-                    TextToKore textToKore = new TextToKore();
-                    Pattern kore = textToKore.parsePattern(koreOutputFile);
-                    KoreToK koreToK = new KoreToK(idsToLabels, mod.sortAttributesFor(), StringUtil::enquoteKString);
-                    K outputK = koreToK.apply(kore);
+                    K outputK = new KoreParser(files.resolveKoreToKLabelsFile(), mod.sortAttributesFor()).parseFile(koreOutputFile);
                     return new RewriterResult(Optional.empty(), Optional.of(execStatus), outputK);
                 } catch (IOException e) {
                     throw KEMException.criticalError("I/O Error while executing", e);
@@ -232,10 +226,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                     if (executeCommandBasic(korePath, koreCommand) != 0) {
                         throw KEMException.criticalError("Haskell backend returned non-zero exit code");
                     }
-                    TextToKore textToKore = new TextToKore();
-                    Pattern kore = textToKore.parsePattern(koreOutputFile);
-                    KoreToK koreToK = new KoreToK(idsToLabels, mod.sortAttributesFor(), StringUtil::enquoteKString);
-                    K outputK = koreToK.apply(kore);
+                    K outputK = new KoreParser(files.resolveKoreToKLabelsFile(), mod.sortAttributesFor()).parseFile(koreOutputFile);
                     return outputK;
                 } catch (IOException e) {
                     throw KEMException.criticalError("I/O Error while executing", e);
@@ -298,10 +289,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                     if (executeCommandBasic(korePath, koreCommand) != 0) {
                         kem.registerCriticalWarning("Haskell backend returned non-zero exit code");
                     }
-                    TextToKore textToKore = new TextToKore();
-                    Pattern kore = textToKore.parsePattern(koreOutputFile);
-                    KoreToK koreToK = new KoreToK(idsToLabels, rules.sortAttributesFor(), StringUtil::enquoteKString);
-                    K outputK = koreToK.apply(kore);
+                    K outputK = new KoreParser(files.resolveKoreToKLabelsFile(), rules.sortAttributesFor()).parseFile(koreOutputFile);
                     return outputK;
                 } catch (IOException e) {
                     throw KEMException.criticalError("I/O Error while executing", e);
@@ -386,19 +374,22 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
 
     @DefinitionScoped
     public static class InitializeDefinition {
-        final Properties serialized;
+        public Properties getKoreToKLabels() {
+            return koreToKLabels;
+        }
+
+        final private Properties koreToKLabels;
 
         @Inject
         public InitializeDefinition(FileUtil files) {
             try {
-                FileInputStream input = new FileInputStream(files.resolveKompiled("kore_to_k_labels.properties"));
-                serialized = new Properties();
-                serialized.load(input);
+                FileInputStream input = new FileInputStream(files.resolveKoreToKLabelsFile());
+                koreToKLabels = new Properties();
+                koreToKLabels.load(input);
             } catch (IOException e) {
                 throw KEMException.criticalError("Error while loading Kore to K label map", e);
             }
         }
     }
-
 }
 
