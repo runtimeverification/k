@@ -39,7 +39,7 @@ public class InnerRHSRewrite extends Term {
 
     @Override
     public boolean isExactSort() {
-        throw new UnsupportedOperationException();
+        return true;
     }
 
     @Override
@@ -49,7 +49,7 @@ public class InnerRHSRewrite extends Term {
 
     @Override
     public Sort sort() {
-        throw new UnsupportedOperationException();
+        return Sort.BOTTOM;
     }
 
     @Override
