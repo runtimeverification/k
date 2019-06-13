@@ -80,6 +80,10 @@ public class Definition extends JavaSymbolicObject {
 
     private final List<Rule> rules = Lists.newArrayList();
     private final List<Rule> macros = Lists.newArrayList();
+    private final List<Rule> specRules = new ArrayList<>();
+
+    @SuppressWarnings("unused") //for debug
+    public final List<Rule> specRulesPublic = Collections.unmodifiableList(specRules);
     private final Multimap<KLabelConstant, Rule> functionRules = ArrayListMultimap.create();
     private final Multimap<KLabelConstant, Rule> sortPredicateRules = HashMultimap.create();
     private final Multimap<KLabelConstant, Rule> anywhereRules = ArrayListMultimap.create();
@@ -294,6 +298,9 @@ public class Definition extends JavaSymbolicObject {
             anywhereRules.put(rule.anywhereKLabel(), rule);
         } else {
             rules.add(rule);
+            if (rule.att().contains(Att.specification())) {
+                specRules.add(rule);
+            }
         }
     }
 
