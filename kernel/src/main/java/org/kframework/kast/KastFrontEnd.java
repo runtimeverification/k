@@ -30,14 +30,11 @@ import org.kframework.utils.Stopwatch;
 import scala.Option;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 public class KastFrontEnd extends FrontEnd {
 
@@ -72,8 +69,7 @@ public class KastFrontEnd extends FrontEnd {
             @KompiledDir Provider<File> kompiledDir,
             Provider<CompiledDefinition> compiledDef,
             DefinitionScope scope,
-            TTYInfo ttyInfo
-            ) {
+            TTYInfo ttyInfo) {
         super(kem, options.global, usage, experimentalUsage, jarInfo, files);
         this.options = options;
         this.sw = sw;
@@ -109,7 +105,7 @@ public class KastFrontEnd extends FrontEnd {
                     sort = def.programStartSymbol;
                 }
             }
-            Module compiledMod = null;
+            Module compiledMod;
             if (options.module == null) {
                 options.module = def.mainSyntaxModuleName();
                 switch (options.input) {
@@ -119,6 +115,8 @@ public class KastFrontEnd extends FrontEnd {
                 default:
                     compiledMod = def.kompiledDefinition.getModule(def.mainSyntaxModuleName()).get();
                 }
+            } else {
+                compiledMod = def.kompiledDefinition.getModule(options.module).get();
             }
             Option<Module> maybeMod = def.programParsingModuleFor(options.module, kem);
             if (maybeMod.isEmpty()) {

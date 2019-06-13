@@ -9,7 +9,6 @@ import org.kframework.kore.Sort;
 import org.kframework.parser.binary.BinaryParser;
 import org.kframework.parser.json.JsonParser;
 import org.kframework.parser.kast.KastParser;
-import org.kframework.parser.kore.parser.ParseError;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
@@ -33,7 +32,7 @@ public class KRead {
                 return deserialize(stringToParse, inputMode);
             case KORE:
                 return new KoreParser(files.resolveKoreToKLabelsFile(), mod.sortAttributesFor()).parseString(stringToParse);
-        case PROGRAM:
+            case PROGRAM:
                 return def.getParser(mod, sort, kem).apply(stringToParse, source);
             case KAST:
                 return KastParser.parse(stringToParse, source);
