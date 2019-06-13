@@ -98,7 +98,7 @@ public class KoreBackend implements Backend {
         Properties koreToKLabels = new Properties();
         koreToKLabels.putAll(converter.getKToKoreLabelMap().inverse());
         try {
-            FileOutputStream output = new FileOutputStream(files.resolveKompiled("kore_to_k_labels.properties"));
+            FileOutputStream output = new FileOutputStream(files.resolveKoreToKLabelsFile());
             koreToKLabels.store(output, "Properties file containing the mapping from kore to k labels");
 
         } catch (IOException e) {

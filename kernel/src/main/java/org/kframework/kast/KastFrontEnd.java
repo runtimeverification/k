@@ -11,7 +11,6 @@ import org.kframework.definition.Module;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kore.K;
 import org.kframework.main.FrontEnd;
-import org.kframework.parser.InputModes;
 import org.kframework.parser.KRead;
 import org.kframework.parser.outer.Outer;
 import org.kframework.unparser.KPrint;
@@ -59,7 +58,6 @@ public class KastFrontEnd extends FrontEnd {
     private final Provider<CompiledDefinition> compiledDef;
     private final DefinitionScope scope;
     private final TTYInfo ttyInfo;
-    private final IdToKLabelsProvider idToKLabelsProvider;
 
     @Inject
     KastFrontEnd(
@@ -74,8 +72,7 @@ public class KastFrontEnd extends FrontEnd {
             @KompiledDir Provider<File> kompiledDir,
             Provider<CompiledDefinition> compiledDef,
             DefinitionScope scope,
-            TTYInfo ttyInfo,
-            IdToKLabelsProvider idToKLabelsProvider
+            TTYInfo ttyInfo
             ) {
         super(kem, options.global, usage, experimentalUsage, jarInfo, files);
         this.options = options;
@@ -87,7 +84,6 @@ public class KastFrontEnd extends FrontEnd {
         this.compiledDef = compiledDef;
         this.scope = scope;
         this.ttyInfo = ttyInfo;
-        this.idToKLabelsProvider = idToKLabelsProvider;
     }
 
     /**
@@ -103,7 +99,7 @@ public class KastFrontEnd extends FrontEnd {
 
             CompiledDefinition def = compiledDef.get();
             KPrint kprint = new KPrint(kem, files.get(), ttyInfo, options.print, compiledDef.get().kompileOptions);
-            KRead kread = new KRead(options, kem, idToKLabelsProvider);
+            KRead kread = new KRead(kem, files.get());
 
             org.kframework.kore.Sort sort = options.sort;
             if (sort == null) {
@@ -148,34 +144,6 @@ public class KastFrontEnd extends FrontEnd {
             return 0;
         } finally {
             scope.exit();
-        }
-    }
-
-
-    public static class IdToKLabelsProvider {
-        private final FileUtil files;
-
-        public Properties getKoreToKLabels() {
-            if (koreToKLabels != null) return koreToKLabels;
-            try {
-                koreToKLabels = new Properties();
-                File file = files.resolveKompiled("kore_to_k_labels.properties");
-                if (file != null) {
-                    FileInputStream input = new FileInputStream(file);
-                    koreToKLabels.load(input);
-                }
-            } catch (IOException e) {
-                throw KEMException.criticalError("Error while loading Kore to K label map", e);
-            }
-            return koreToKLabels;
-        }
-
-        private Properties koreToKLabels = null;
-
-        @Inject
-        public IdToKLabelsProvider(FileUtil files) {
-            this.files = files;
-
         }
     }
 }

@@ -15,7 +15,7 @@ import org.kframework.kore.K;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.RunProcess;
 import org.kframework.main.Main;
-import org.kframework.parser.KoreToK;
+import org.kframework.parser.KoreParser;
 import org.kframework.parser.kore.parser.ParseError;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.rewriter.SearchType;
@@ -86,7 +86,7 @@ public class LLVMRewriter implements Function<Definition, Rewriter> {
                 args.add(koreOutputFile.getAbsolutePath());
                 try {
                     int exit = executeCommandBasic(files.resolveWorkingDirectory("."), args);
-                    K outputK = KoreToK.parseKoreToK(koreOutputFile, idsToLabels, mod.sortAttributesFor());
+                    K outputK = new KoreParser(files.resolveKoreToKLabelsFile(), mod.sortAttributesFor()).parseFile(koreOutputFile);
                     return new RewriterResult(Optional.empty(), Optional.of(exit), outputK);
                 } catch (IOException e) {
                     throw KEMException.criticalError("I/O Error while executing", e);
@@ -185,7 +185,7 @@ public class LLVMRewriter implements Function<Definition, Rewriter> {
         @Inject
         public InitializeDefinition(FileUtil files) {
             try {
-                FileInputStream input = new FileInputStream(files.resolveKompiled("kore_to_k_labels.properties"));
+                FileInputStream input = new FileInputStream(files.resolveKoreToKLabelsFile());
                 serialized = new Properties();
                 serialized.load(input);
             } catch (IOException e) {
