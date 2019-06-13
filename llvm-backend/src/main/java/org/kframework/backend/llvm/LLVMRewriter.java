@@ -118,6 +118,11 @@ public class LLVMRewriter implements Function<Definition, Rewriter> {
             }
 
             @Override
+            public K bmc(Module rules) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
             public boolean equivalence(Rewriter firstDef, Rewriter secondDef, Module firstSpec, Module secondSpec) {
                 throw new UnsupportedOperationException();
             }

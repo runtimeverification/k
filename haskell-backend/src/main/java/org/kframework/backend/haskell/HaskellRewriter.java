@@ -237,33 +237,54 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                 }
             }
 
-            @Override
-            public RewriterResult prove(Module rules, Rule boundaryPattern) {
-                Module kompiledModule = KoreBackend.getKompiledModule(module);
-                ModuleToKORE converter = new ModuleToKORE(kompiledModule, files, def.topCellInitializer, kompileOptions);
+
+            private String saveKoreDefinitionToTemp(ModuleToKORE converter) {
                 String kompiledString = KoreBackend.getKompiledString(converter, files, false);
                 files.saveToTemp("vdefinition.kore", kompiledString);
+                String defPath = files.resolveTemp("vdefinition.kore").getAbsolutePath();
+                return defPath;
+            }
 
+            private String saveKoreSpecToTemp(ModuleToKORE converter, Module rules) {
                 String koreOutput = converter.convertSpecificationModule(module, rules,
                         haskellKRunOptions.allPathReachability);
                 files.saveToTemp("spec.kore", koreOutput);
-                String defPath = files.resolveTemp("vdefinition.kore").getAbsolutePath();
                 String specPath = files.resolveTemp("spec.kore").getAbsolutePath();
-                String[] koreCommand = haskellKRunOptions.haskellBackendCommand.split("\\s+");
-                String koreDirectory = haskellKRunOptions.haskellBackendHome;
-                File koreOutputFile = files.resolveTemp("result.kore");
-                List<String> args = new ArrayList<>();
-                String defModuleName =
-                        kProveOptions.defModule == null ? def.executionModule().name() : kProveOptions.defModule;
-                String specModuleName = kProveOptions.specModule == null ? rules.name() : kProveOptions.specModule;
+                return specPath;
+            }
 
+            private List<String> buildCommonProvingCommand(String defPath, String specPath, String outPath,
+                                                           String defModuleName, String specModuleName){
+                String[] koreCommand = haskellKRunOptions.haskellBackendCommand.split("\\s+");
+
+                List<String> args = new ArrayList<>();
                 args.addAll(Arrays.asList(koreCommand));
                 args.addAll(Arrays.asList(
                         defPath,
                         "--module", defModuleName,
                         "--prove", specPath,
                         "--spec-module", specModuleName,
-                        "--output", koreOutputFile.getAbsolutePath()));
+                        "--output", outPath));
+                return args;
+            }
+
+            @Override
+            public RewriterResult prove(Module rules, Rule boundaryPattern) {
+                Module kompiledModule = KoreBackend.getKompiledModule(module);
+                ModuleToKORE converter = new ModuleToKORE(kompiledModule, files, def.topCellInitializer, kompileOptions);
+                String defPath = saveKoreDefinitionToTemp(converter);
+                String specPath = saveKoreSpecToTemp(converter, rules);
+                File koreOutputFile = files.resolveTemp("result.kore");
+
+                String koreDirectory = haskellKRunOptions.haskellBackendHome;
+
+                String defModuleName =
+                        kProveOptions.defModule == null ? def.executionModule().name() : kProveOptions.defModule;
+                String specModuleName = kProveOptions.specModule == null ? rules.name() : kProveOptions.specModule;
+
+                List<String> args = buildCommonProvingCommand(defPath, specPath, koreOutputFile.getAbsolutePath(),
+                        defModuleName, specModuleName);
+
                 if (kProveOptions.depth != null) {
                     args.addAll(Arrays.asList(
                         "--depth", kProveOptions.depth.toString()));
@@ -275,7 +296,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                 if (haskellKRunOptions.allPathReachability) {
                     args.add("--all-path-reachability");
                 }
-                koreCommand = args.toArray(koreCommand);
+                String[] koreCommand = args.toArray(new String[args.size()]);
                 if (haskellKRunOptions.dryRun) {
                     globalOptions.debugWarnings = true; // sets this so the kprove directory is not removed.
                     System.out.println(String.join(" ", koreCommand));
@@ -302,6 +323,10 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                     outputK = KORE.KApply(KLabels.ML_FALSE);
                 }
                 return new RewriterResult(Optional.empty(), Optional.of(exit), outputK);
+            }
+
+            public K bmc (Module rules) {
+                throw new UnsupportedOperationException();
             }
 
             @Override

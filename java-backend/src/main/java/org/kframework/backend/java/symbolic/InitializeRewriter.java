@@ -273,6 +273,11 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
         }
 
         @Override
+        public K bmc(Module mod) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
         public boolean equivalence(Rewriter firstDef, Rewriter secondDef, Module firstSpec, Module secondSpec) {
             if (!(firstDef instanceof SymbolicRewriterGlue) || !(secondDef instanceof SymbolicRewriterGlue)) {
                 throw KEMException.criticalError("All three definitions must be compiled with --backend java in order" +
