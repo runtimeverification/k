@@ -6,9 +6,11 @@ endmodule []
 module KSEQ
   import BASIC-K []
 
-  symbol kseq{}(SortKItem{}, SortK{}) : SortK{} [constructor{}()]
+  // TODO: Provide constructor and functional axioms for `kseq` and `dotk`.
+  symbol kseq{}(SortKItem{}, SortK{}) : SortK{} [constructor{}(),functional{}()]
+  symbol dotk{}() : SortK{} [constructor{}(),functional{}()]
+
   symbol append{}(SortK{}, SortK{}) : SortK{} [function{}()]
-  symbol dotk{}() : SortK{} [constructor{}()]
 
   axiom{R}
     \equals{SortK{},R}(
