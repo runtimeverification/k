@@ -1,2 +1,9 @@
 #!/usr/bin/env sh
-"$(dirname "$0")/../lib/k" -kompile "$@"
+
+SANITIZED_ARGS="$(echo "$@" | perl -pe 's/\-O.\s+//g')"
+
+echo "$@" | grep --quiet '\-O2' && SANITIZED_ARGS="${SANITIZED_ARGS} -O2"
+echo "$@" | grep --quiet '\-O3' && SANITIZED_ARGS="${SANITIZED_ARGS} -O3"
+echo "$@" | grep --quiet '\-Og' && SANITIZED_ARGS="${SANITIZED_ARGS} -Og"
+
+"$(dirname "$0")/../lib/k" -kompile "${SANITIZED_ARGS}"
