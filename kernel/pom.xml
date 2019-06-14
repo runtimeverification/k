@@ -42,7 +42,7 @@
       <exclusions>
         <exclusion>
           <groupId>com.google.inject</groupId>
-	  <artifactId>guice</artifactId>
+          <artifactId>guice</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
@@ -53,7 +53,7 @@
       <exclusions>
         <exclusion>
           <groupId>com.google.inject</groupId>
-	  <artifactId>guice</artifactId>
+          <artifactId>guice</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
@@ -64,7 +64,7 @@
       <exclusions>
         <exclusion>
           <groupId>com.google.inject</groupId>
-	  <artifactId>guice</artifactId>
+          <artifactId>guice</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
@@ -254,4 +254,3 @@
     </plugins>
   </build>
 </project>
-
