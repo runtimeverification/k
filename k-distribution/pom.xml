@@ -24,7 +24,7 @@
       <artifactId>kernel</artifactId>
       <version>${project.version}</version>
     </dependency>
-	<dependency>
+    <dependency>
       <groupId>com.runtimeverification.k</groupId>
       <artifactId>kernel</artifactId>
       <version>${project.version}</version>
@@ -245,4 +245,3 @@
     </plugins>
   </build>
 </project>
-
