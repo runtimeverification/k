@@ -34,14 +34,15 @@ import org.kframework.definition.ModuleTransformer;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.Kompile;
 import org.kframework.kompile.KompileOptions;
-import org.kframework.kore.KLabel;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 
+import org.kframework.utils.inject.DefinitionScoped;
 import scala.Function1;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Collections;
@@ -97,7 +98,7 @@ public class KoreBackend implements Backend {
         Properties koreToKLabels = new Properties();
         koreToKLabels.putAll(converter.getKToKoreLabelMap().inverse());
         try {
-            FileOutputStream output = new FileOutputStream(files.resolveKompiled("kore_to_k_labels.properties"));
+            FileOutputStream output = new FileOutputStream(files.resolveKoreToKLabelsFile());
             koreToKLabels.store(output, "Properties file containing the mapping from kore to k labels");
 
         } catch (IOException e) {
@@ -189,6 +190,7 @@ public class KoreBackend implements Backend {
                 .andThen(resolveFreshConstants)
                 .andThen(concretizeCells)
                 .andThen(subsortKItem)
+                .andThen(restoreDefinitionModulesTransformer(def))
                 .apply(m);
     }
 

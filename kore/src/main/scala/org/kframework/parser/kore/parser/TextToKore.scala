@@ -52,10 +52,16 @@ class TextToKore(b: Builders = DefaultBuilders) {
     parse(io.Source.fromFile(file))
   }
 
-  /** Parses the file and returns [[kore.Definition]]. */
+  /** Parses the file and returns [[kore.Pattern]]. */
   @throws(classOf[ParseError])
   def parsePattern(file: java.io.File): Pattern = {
     parsePattern(io.Source.fromFile(file))
+  }
+
+  /** Parses the file and returns [[kore.Pattern]]. */
+  @throws(classOf[ParseError])
+  def parsePattern(str: String): Pattern = {
+    parsePattern(io.Source.fromString(str))
   }
 
   /** Parses from the stream and returns [[kore.Definition]]. */

@@ -7,15 +7,13 @@ import org.kframework.attributes.Source;
 import org.kframework.backend.kore.ModuleToKORE;
 import org.kframework.compile.AddSortInjections;
 import org.kframework.compile.ExpandMacros;
-import org.kframework.compile.ExpandMacros;
 import org.kframework.definition.Module;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kore.K;
 import org.kframework.main.FrontEnd;
+import org.kframework.parser.KRead;
 import org.kframework.parser.outer.Outer;
 import org.kframework.unparser.KPrint;
-import org.kframework.unparser.PrintOptions;
-import org.kframework.unparser.ToKast;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.Environment;
@@ -97,6 +95,8 @@ public class KastFrontEnd extends FrontEnd {
 
             CompiledDefinition def = compiledDef.get();
             KPrint kprint = new KPrint(kem, files.get(), ttyInfo, options.print, compiledDef.get().kompileOptions);
+            KRead kread = new KRead(kem, files.get());
+
             org.kframework.kore.Sort sort = options.sort;
             if (sort == null) {
                 if (env.get("KRUN_SORT") != null) {
@@ -105,16 +105,27 @@ public class KastFrontEnd extends FrontEnd {
                     sort = def.programStartSymbol;
                 }
             }
-
-            options.module = options.module == null ? def.mainSyntaxModuleName() : options.module;
+            Module compiledMod;
+            if (options.module == null) {
+                options.module = def.mainSyntaxModuleName();
+                switch (options.input) {
+                case KORE:
+                    compiledMod = def.languageParsingModule();
+                    break;
+                default:
+                    compiledMod = def.kompiledDefinition.getModule(def.mainSyntaxModuleName()).get();
+                }
+            } else {
+                compiledMod = def.kompiledDefinition.getModule(options.module).get();
+            }
             Option<Module> maybeMod = def.programParsingModuleFor(options.module, kem);
             if (maybeMod.isEmpty()) {
                 throw KEMException.innerParserError("Module " + options.module + " not found. Specify a module with -m.");
             }
             Module mod = maybeMod.get();
-            Module compiledMod = def.kompiledDefinition.getModule(options.module).get();
 
-            K parsed = def.getParser(mod, sort, kem).apply(FileUtil.read(stringToParse), source);
+            K parsed = kread.prettyRead(mod, sort, def, source, FileUtil.read(stringToParse), options.input);
+
             if (options.expandMacros || options.kore) {
                 parsed = ExpandMacros.forNonSentences(compiledMod, files.get(), def.kompileOptions, false).expand(parsed);
             }
