@@ -164,8 +164,13 @@ def prettyPrintKast(kast, symbolTable):
         label = kast["label"]
         args  = kast["args"]
         if isCellKLabel(label):
-            contents = "\n".join([ prettyPrintKast(arg, symbolTable) for arg in args ])
-            return label + "\n  " + "\n  ".join(contents.split("\n")) + "\n</" + label[1:]
+            contents = [ prettyPrintKast(arg, symbolTable) for arg in args ]
+            cellStr  = "\n  ".join("\n".join(contents).split("\n"))
+            if len(contents) == 1:
+                cellStr = label + " "    + cellStr + " </"  + label[1:]
+            else:
+                cellStr = label + "\n  " + cellStr + "\n</" + label[1:]
+            return cellStr
         if label in symbolTable:
             newArgs = [prettyPrintKast(arg, symbolTable) for arg in args]
             return symbolTable[kast["label"]](*newArgs)
