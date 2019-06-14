@@ -12,6 +12,7 @@ import org.kframework.compile.RewriteToTop;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
+import org.kframework.kbmc.KBMCOptions;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
@@ -57,6 +58,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
     private final SMTOptions smtOptions;
     private final KompileOptions kompileOptions;
     private final KProveOptions kProveOptions;
+    private final KBMCOptions kbmcOptions;
     private final HaskellKRunOptions haskellKRunOptions;
     private final FileUtil files;
     private final CompiledDefinition def;
@@ -70,6 +72,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
             SMTOptions smtOptions,
             KompileOptions kompileOptions,
             KProveOptions kProveOptions,
+            KBMCOptions kbmcOptions,
             InitializeDefinition init,
             HaskellKRunOptions haskellKRunOptions,
             FileUtil files,
@@ -82,6 +85,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
         this.haskellKRunOptions = haskellKRunOptions;
         this.kompileOptions = kompileOptions;
         this.kProveOptions = kProveOptions;
+        this.kbmcOptions = kbmcOptions;
         this.files = files;
         this.def = def;
         this.kem = kem;
@@ -326,7 +330,49 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
             }
 
             public K bmc (Module rules) {
-                throw new UnsupportedOperationException();
+                Module kompiledModule = KoreBackend.getKompiledModule(module);
+                ModuleToKORE converter = new ModuleToKORE(kompiledModule, files, def.topCellInitializer, kompileOptions);
+                String defPath = saveKoreDefinitionToTemp(converter);
+                String specPath = saveKoreSpecToTemp(converter, rules);
+                File koreOutputFile = files.resolveTemp("result.kore");
+
+                String koreDirectory = haskellKRunOptions.haskellBackendHome;
+
+                String defModuleName =
+                        kbmcOptions.defModule == null ? def.executionModule().name() : kbmcOptions.defModule;
+                String specModuleName = kbmcOptions.specModule == null ? rules.name() : kbmcOptions.specModule;
+
+                List<String> args = buildCommonProvingCommand(defPath, specPath, koreOutputFile.getAbsolutePath(),
+                        defModuleName, specModuleName);
+                args.add("--bmc");
+                if (kbmcOptions.graphSearch != null) {
+                    args.addAll(Arrays.asList(
+                            "--graph-search", kbmcOptions.graphSearch.toString()));
+                }
+
+                String[] koreCommand = args.toArray(new String[args.size()]);
+                if (haskellKRunOptions.dryRun) {
+                    System.out.println(String.join(" ", koreCommand));
+                    kprint.options.output = OutputModes.NONE;
+                    return KORE.KApply(KLabels.ML_FALSE);
+                }
+                if (globalOptions.verbose) {
+                    System.err.println("Executing " + args);
+                }
+                try {
+                    File korePath = koreDirectory == null ? null : new File(koreDirectory);
+                    if (executeCommandBasic(korePath, koreCommand) != 0) {
+                        kem.registerCriticalWarning("Haskell backend returned non-zero exit code");
+                    }
+                    K outputK = new KoreParser(files.resolveKoreToKLabelsFile(), rules.sortAttributesFor()).parseFile(koreOutputFile);
+                    return outputK;
+                } catch (IOException e) {
+                    throw KEMException.criticalError("I/O Error while executing", e);
+                } catch (InterruptedException e) {
+                    throw KEMException.criticalError("Interrupted while executing", e);
+                } catch (ParseError parseError) {
+                    throw KEMException.criticalError("Error parsing haskell backend output", parseError);
+                }
             }
 
             @Override
