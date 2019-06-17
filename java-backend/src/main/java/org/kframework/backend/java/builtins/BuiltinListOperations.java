@@ -75,7 +75,7 @@ public class BuiltinListOperations {
     public static BoolToken in(Term element, Term list, TermContext context) {
         if (list instanceof BuiltinList) {
             BuiltinList builtinList = (BuiltinList) list;
-            if (builtinList.contains(element)) {
+            if (builtinList.contains(wrapListItem(element, context))) {
                 return BoolToken.TRUE;
             } else if (element.isGround() && builtinList.isGround()) {
                 return BoolToken.FALSE;
@@ -88,7 +88,7 @@ public class BuiltinListOperations {
                 throw new IllegalArgumentException();
             }
 
-            if (list.equals(element)) {
+            if (list.equals(wrapListItem(element, context))) {
                 return BoolToken.TRUE;
             } else if (element.isGround() && list.isGround()) {
                 return BoolToken.FALSE;
