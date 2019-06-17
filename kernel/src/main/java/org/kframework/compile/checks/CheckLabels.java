@@ -1,6 +1,7 @@
 // Copyright (c) 2019 K Team. All Rights Reserved.
 package org.kframework.compile.checks;
 
+import org.kframework.definition.ContextAlias;
 import org.kframework.definition.Module;
 import org.kframework.definition.Sentence;
 import org.kframework.utils.errorsystem.KEMException;
@@ -21,6 +22,9 @@ public class CheckLabels {
     private final Set<String> labels = new TreeSet<>();
 
     public void check(Sentence sentence) {
+        if (sentence instanceof ContextAlias) {
+            return;
+        }
         if (sentence.label().isPresent()) {
             String label = sentence.label().get();
             if (!labels.add(label)) {

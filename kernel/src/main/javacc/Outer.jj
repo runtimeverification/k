@@ -107,7 +107,7 @@ States:
    - GROUP_STATE: used in body of Group (i.e., a character class)
 
  - Tertiary States: (switch for one token)
-   - MODNAME_STATE: used after "module", "interface" or "imports"
+   - MODNAME_STATE: used after "module", "imports"
 
 To avoid clutter we make separate token declarations for only those
 tokens that are used in multiple places (in the DEFAULT state).
@@ -452,19 +452,17 @@ PARSER_END(Outer)
 <DEFAULT> TOKEN : 
 {
   <RULE: "rule"> : BUBBLE_STATE
-| <CONTEXT: "context"> : BUBBLE_STATE
+| <CONTEXT: "context"> : CONTEXT_STATE
 | <CONFIGURATION: "configuration"> : BUBBLE_STATE
 
 | <SYNTAX: "syntax">
 | <ENDMODULE: "endmodule">
-| <ENDINTERFACE: "endinterface">
 
 | <PRIORITY: "priority"> : KLABEL_STATE
 | <PRIORITIES: "priorities"> : KLABEL_STATE
 | <NON_ASSOC: "non-assoc"> // : KLABEL_STATE
 
 | <MODULE: "module"> : MODNAME_STATE
-| <INTERFACE: "interface"> : MODNAME_STATE
 | <IMPORTS: "imports"> : MODNAME_STATE
 | <IMPORTS2: "import"> : MODNAME_STATE
 
@@ -578,21 +576,25 @@ NonTerminal SortID() : { NonTerminal nonTerminal; }
 
 /**** String Sentence Bubbles ****/
 
-<BUBBLE_STATE> SPECIAL_TOKEN:
+<BUBBLE_STATE, CONTEXT_STATE> SPECIAL_TOKEN:
 {
   <([" ", "\t", "\r", "\n"])+>
 | <BUBBLE_COMMENT: <COMMENT>> { parser.comment(matchedToken); }
 }
 
-<BUBBLE_STATE> TOKEN:
+<CONTEXT_STATE> TOKEN:
+{
+  <ALIAS: "alias"> : BUBBLE_STATE
+}
+
+<BUBBLE_STATE, CONTEXT_STATE> TOKEN:
 {
   "syntax"        { matchedToken.kind = SYNTAX; } : DEFAULT
 | "endmodule"     { matchedToken.kind = ENDMODULE; } : DEFAULT
-| "endinterface"  { matchedToken.kind = ENDINTERFACE; } : DEFAULT
 
 | "rule"          { matchedToken.kind = RULE;    } : BUBBLE_STATE
 | "configuration" { matchedToken.kind = CONFIGURATION;  } : BUBBLE_STATE
-| "context"       { matchedToken.kind = CONTEXT; } : BUBBLE_STATE
+| "context"       { matchedToken.kind = CONTEXT; } : CONTEXT_STATE
 
 // Note that "BUBBLE" must be last so it doesn't match keywords
 | <BUBBLE: (~[" ", "\t", "\r", "\n"])+>
@@ -624,11 +626,10 @@ StringSentence Bubble(String type) :
 {
   "syntax"        { matchedToken.kind = SYNTAX; } : DEFAULT
 | "endmodule"     { matchedToken.kind = ENDMODULE; } : DEFAULT
-| "endinterface"  { matchedToken.kind = ENDINTERFACE; } : DEFAULT
 
 | "rule"          { matchedToken.kind = RULE;    } : BUBBLE_STATE
 | "configuration" { matchedToken.kind = CONFIGURATION;  } : BUBBLE_STATE
-| "context"       { matchedToken.kind = CONTEXT; } : BUBBLE_STATE
+| "context"       { matchedToken.kind = CONTEXT; } : CONTEXT_STATE
 
 | ">"             { matchedToken.kind = GT; }
 | <KLABEL: (~[" ", "\t", "\r", "\n"])+> // Must be last
@@ -849,7 +850,7 @@ void Sentence(Module module) :
   StringSentence ss;
   List<Tag> list; }
 {
-  ("rule" | "context" | "configuration")
+  ("rule" | LOOKAHEAD("context" <ALIAS>) "context" <ALIAS> | "configuration" | "context")
   { type = image();
     // Note that we must change the "type"
     if (type.equals("configuration")) { type = "config"; } }
