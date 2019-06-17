@@ -12,6 +12,7 @@ import org.kframework.definition.ProductionItem;
 import org.kframework.definition.Sentence;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.FindK;
+import org.kframework.kore.FoldK;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
@@ -83,11 +84,33 @@ public class ResolveContexts {
 
         int currentHolePosition[] = new int[] { 0 };
         int finalHolePosition[] = new int[] { 0 };
+        // does this context have a main cell?
+        boolean hasMainCell = new FoldK<Boolean>() {
+            @Override
+            public Boolean apply(KApply k) {
+                if (input.attributesFor().getOrElse(k.klabel(), () -> Att()).contains("maincell")) {
+                    return true;
+                }
+                return super.apply(k);
+            }
+
+            @Override
+            public Boolean unit() {
+                return false;
+            }
+
+            @Override
+            public Boolean merge(Boolean a, Boolean b) {
+                return a || b;
+            }
+        }.apply(body);
+
         // Find a heated hole
         // e.g., context ++(HOLE => lvalue(HOLE))
         K heated = new VisitK() {
             K heated;
             KVariable holeVar;
+            boolean inMainCell = false;
 
             public K process(K k) {
                 apply(k);
@@ -105,21 +128,29 @@ public class ResolveContexts {
 
             @Override
             public void apply(KVariable k) {
-                if (!k.name().equals("HOLE")) {
-                    vars.put(k, k);
-                    finalHolePosition[0] = currentHolePosition[0];
-                } else {
-                    holeVar = k;
-                    currentHolePosition[0]++;
+                if (inMainCell || !hasMainCell) {
+                    if (!k.name().equals("HOLE")) {
+                        vars.put(k, k);
+                        finalHolePosition[0] = currentHolePosition[0];
+                    } else {
+                        holeVar = k;
+                        currentHolePosition[0]++;
+                    }
                 }
                 super.apply(k);
             }
 
             @Override
             public void apply(KApply k) {
-                if (k.klabel() instanceof KVariable)
+                if (input.attributesFor().getOrElse(k.klabel(), () -> Att()).contains("maincell")) {
+                    inMainCell = true;
+                }
+                if (k.klabel() instanceof KVariable && (inMainCell || !hasMainCell))
                     vars.put((KVariable) k.klabel(), InjectedKLabel(k.klabel()));
                 super.apply(k);
+                if (input.attributesFor().getOrElse(k.klabel(), () -> Att()).contains("maincell")) {
+                    inMainCell = false;
+                }
             }
         }.process(body);
         K cooled = new VisitK() {
