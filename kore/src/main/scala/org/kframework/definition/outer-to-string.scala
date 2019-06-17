@@ -72,7 +72,12 @@ trait SyntaxAssociativityToString {
 
 trait ContextToString {
   self: Context =>
-  override def toString = "context " + body + " requires " + requires
+  override def toString = Seq("context", body, "requires", requires, att).mkString(" ")
+}
+
+trait ContextAliasToString {
+  self: ContextAlias =>
+  override def toString = Seq("context", "alias", body, "requires", requires, att).mkString(" ")
 }
 
 trait SyntaxPriorityToString {

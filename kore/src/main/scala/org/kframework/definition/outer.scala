@@ -95,6 +95,8 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
 
   lazy val sentences: Set[Sentence] = localSentences | importedSentences
 
+  lazy val labeled: Map[String, Set[Sentence]] = sentences.filter(_.label.isPresent).groupBy(_.label.get)
+
   /** All the imported modules, calculated recursively. */
   lazy val importedModules: Set[Module] = imports | (imports flatMap {
     _.importedModules
@@ -330,6 +332,13 @@ case class Context(body: K, requires: K, att: Att = Att.empty) extends Sentence 
   override val isNonSyntax = true
   override def withAtt(att: Att) = Context(body, requires, att)
 }
+
+case class ContextAlias(body: K, requires: K, att: Att = Att.empty) extends Sentence with OuterKORE with ContextAliasToString {
+  override val isSyntax = true
+  override val isNonSyntax = false
+  override def withAtt(att: Att) = ContextAlias(body, requires, att)
+}
+
 
 case class Rule(body: K, requires: K, ensures: K, att: Att = Att.empty) extends Sentence with RuleToString with OuterKORE {
   override val isSyntax = false

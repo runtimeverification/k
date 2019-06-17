@@ -7,6 +7,7 @@ import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Context;
+import org.kframework.definition.ContextAlias;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.definition.Production;
@@ -103,6 +104,13 @@ public class ResolveFunctionWithConfig {
 
     private Context resolve(Context context, Module m) {
         return new Context(
+                transform(context.body(), m),
+                transform(context.requires(), m),
+                context.att());
+    }
+
+    private ContextAlias resolve(ContextAlias context, Module m) {
+        return new ContextAlias(
                 transform(context.body(), m),
                 transform(context.requires(), m),
                 context.att());
@@ -232,6 +240,8 @@ public class ResolveFunctionWithConfig {
             return resolve((Rule) s, m);
         } else if (s instanceof Context) {
             return resolve((Context) s, m);
+        } else if (s instanceof ContextAlias) {
+            return resolve((ContextAlias) s, m);
         } else if (s instanceof Production) {
             return resolve((Production) s);
         } else {

@@ -6,6 +6,7 @@ import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Context;
+import org.kframework.definition.ContextAlias;
 import org.kframework.definition.Module;
 import org.kframework.definition.Production;
 import org.kframework.definition.ProductionItem;
@@ -217,11 +218,20 @@ public class ResolveFun {
                 context.att());
     }
 
+    private ContextAlias resolve(ContextAlias context) {
+        return new ContextAlias(
+                transform(context.body()),
+                transform(context.requires()),
+                context.att());
+    }
+
     public Sentence resolve(Sentence s) {
         if (s instanceof Rule) {
             return resolve((Rule) s);
         } else if (s instanceof Context) {
             return resolve((Context) s);
+        } else if (s instanceof ContextAlias) {
+            return resolve((ContextAlias) s);
         } else {
             return s;
         }
