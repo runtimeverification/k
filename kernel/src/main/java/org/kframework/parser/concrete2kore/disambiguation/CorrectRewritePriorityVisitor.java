@@ -47,7 +47,7 @@ public class CorrectRewritePriorityVisitor extends SetsTransformerWithErrors<Par
         if (rewrites.size() == 0 || rewrites.size() == amb.items().size())
             return super.apply(amb);
         if (rewrites.size() == 1)
-            return Right.apply(rewrites.head());
+            return apply(rewrites.head());
         return super.apply(Ambiguity.apply(mutable(rewrites)));
     }
 
