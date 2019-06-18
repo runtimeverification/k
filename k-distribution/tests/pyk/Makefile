@@ -3,25 +3,25 @@ K_BIN     := $(K_RELEASE)/bin
 K_LIB     := $(K_RELEASE)/lib
 
 KOMPILE = $(K_BIN)/kompile
-KRUN    = $(K_BIN)/krun
-KPROVE  = $(K_BIN)/kprove
 KAST    = $(K_BIN)/kast
-
-PATH := $(PATH):$(K_BIN)
-export PATH
 
 PYTHONPATH := $(K_LIB)/py-kframework
 export PYTHONPATH
 
+.PHONY: all clean pyk
+
 all: pyk
 
-imp_kompiled:=imp-kompiled/interpreter
+clean:
+	rm -rf *-kompiled *.out
+
+imp_kompiled:=imp-kompiled/compiled.bin
 
 pyk: build-config.out $(imp_kompiled)
-	kast --output pretty --sort TCell $<
+	$(KAST) --output pretty --sort TCell -m IMP $<
 
-build-config.out:
-	python3 build-config.py > build-config.out
+build-config.out: build-config.py
+	python3 $< > $@
 
 $(imp_kompiled): imp.k $(KOMPILE)
-	$(KOMPILE) --backend llvm $<
+	$(KOMPILE) --backend kore $<

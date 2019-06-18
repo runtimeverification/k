@@ -35,6 +35,7 @@ module IMP
   imports MAP
 
   syntax KResult ::= Int | Bool
+  syntax KItem   ::= Pgm
 
   configuration <T color="yellow">
                   <k color="green"> $PGM:Pgm </k>
