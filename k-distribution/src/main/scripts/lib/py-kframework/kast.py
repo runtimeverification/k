@@ -92,6 +92,12 @@ def appliedLabelStr(symbol):
 def constLabel(symbol):
     return (lambda: symbol)
 
+def assocWithUnit(assocJoin, unit):
+    def _assocWithUnit(*args):
+        newArgs = [ arg for arg in args if arg != unit ]
+        return assocJoin.join(newArgs)
+    return _assocWithUnit
+
 def underbarUnparsing(symbol):
     splitSymbol = symbol.split("_")
     numArgs = len([symb for symb in splitSymbol if symb == ""])
@@ -165,9 +171,9 @@ def prettyPrintKast(kast, symbolTable):
         label = kast["label"]
         args  = kast["args"]
         if isCellKLabel(label):
-            contents = [ prettyPrintKast(arg, symbolTable) for arg in args ]
-            cellStr  = "\n  ".join("\n".join(contents).split("\n"))
-            if len(contents) == 1:
+            cellLines = "\n".join([ prettyPrintKast(arg, symbolTable) for arg in args ]).split("\n")
+            cellStr   = "\n  ".join(cellLines)
+            if len(cellLines) == 1:
                 cellStr = label + " "    + cellStr + " </"  + label[1:]
             else:
                 cellStr = label + "\n  " + cellStr + "\n</" + label[1:]
