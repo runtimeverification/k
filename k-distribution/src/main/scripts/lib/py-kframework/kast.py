@@ -140,6 +140,7 @@ MAP_expressions = { "_[_<-_]_MAP" : paren(underbarUnparsing("_[_<-_]"))
                   , "_Map_"       : paren(underbarUnparsing("__"))
                   , "_|->_"       : paren(underbarUnparsing("_|->_"))
                   , "_[_<-undef]" : paren(underbarUnparsing("_[_ <- undef ]"))
+                  , ".Map"        : constLabel(".Map")
                   }
 
 LIST_expressions = { "_List_"   : (lambda a1, a2: a1 + " " + a2)
