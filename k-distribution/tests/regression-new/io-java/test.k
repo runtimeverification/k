@@ -5,14 +5,14 @@ module TEST
   imports K-IO
 
 syntax KItem ::= open(String, String) | tell(Int) | getc(Int) | read(Int, Int)
-syntax KItem ::= close(Int) | seek(Int, K) [strict(2)] | putc(Int, Int) | write(Int, String)
+syntax KItem ::= close(Int) | seek(Int, KItem) [strict(2)] | putc(Int, Int) | write(Int, String)
 syntax KItem ::= system(String) | mkstemp(String, String) | remove(String)
 
 syntax KItem ::= assertEqual(K, K)
 
 syntax KResult ::= Int | String | IOError
 
-syntax KItem ::= K "-" K [strict]
+syntax KItem ::= KItem "-" KItem [strict]
 
 rule I1:Int - I2:Int => I1 -Int I2
 
