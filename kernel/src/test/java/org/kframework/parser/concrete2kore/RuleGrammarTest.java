@@ -423,7 +423,7 @@ public class RuleGrammarTest {
         parseRule("l(_) => .K", def, 0,
                 KApply(KLabel("#ruleNoConditions"),KApply(KLabel("#KRewrite"),
                         KApply(KLabel("#KApply"),
-                            KToken("l",Sort("KLabel")), KToken("_",Sort("#KVariable"))),
+                            KToken("l",Sort("KLabel")), KApply(KLabel("#SemanticCastToK"), KToken("_",Sort("#KVariable")))),
                 KApply(KLabel("#EmptyK"))
                 )));
     }
