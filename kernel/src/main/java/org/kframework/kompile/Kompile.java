@@ -9,6 +9,7 @@ import org.kframework.backend.Backends;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.*;
 import org.kframework.compile.checks.CheckConfigurationCells;
+import org.kframework.compile.checks.CheckHOLE;
 import org.kframework.compile.checks.CheckImports;
 import org.kframework.compile.checks.CheckKLabels;
 import org.kframework.compile.checks.CheckLabels;
@@ -244,6 +245,8 @@ public class Kompile {
         stream(parsedDef.modules()).forEach(m -> stream(m.localSentences()).forEach(new CheckRewrite(errors, m)::check));
 
         stream(parsedDef.modules()).forEach(new CheckImports(parsedDef.mainModule(), kem)::check);
+
+        stream(parsedDef.modules()).forEach(m -> stream(m.localSentences()).forEach(new CheckHOLE(errors, m)::check));
 
         Set<String> moduleNames = new HashSet<>();
         stream(parsedDef.modules()).forEach(m -> {
