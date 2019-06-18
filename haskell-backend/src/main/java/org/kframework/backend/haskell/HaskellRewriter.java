@@ -298,7 +298,8 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                 } catch (InterruptedException e) {
                     throw KEMException.criticalError("Interrupted while executing", e);
                 } catch (ParseError parseError) {
-                    throw KEMException.criticalError("Error parsing haskell backend output", parseError);
+                    kem.registerCriticalWarning("Error parsing haskell backend output", parseError);
+                    return KORE.KApply(KLabels.ML_FALSE);
                 }
             }
 
