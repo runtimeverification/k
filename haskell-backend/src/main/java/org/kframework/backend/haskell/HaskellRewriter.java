@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import org.kframework.attributes.Att;
 import org.kframework.backend.kore.KoreBackend;
 import org.kframework.backend.kore.ModuleToKORE;
+import org.kframework.builtin.KLabels;
 import org.kframework.compile.AddSortInjections;
 import org.kframework.compile.ExpandMacros;
 import org.kframework.compile.RewriteToTop;
@@ -14,6 +15,7 @@ import org.kframework.definition.Rule;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
+import org.kframework.kore.KApply;
 import org.kframework.kore.KORE;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
@@ -48,7 +50,6 @@ import java.util.Properties;
 import java.util.function.Function;
 
 import static org.kframework.builtin.BooleanUtils.*;
-
 
 @RequestScoped
 public class HaskellRewriter implements Function<Definition, Rewriter> {
@@ -277,9 +278,10 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                 }
                 koreCommand = args.toArray(koreCommand);
                 if (haskellKRunOptions.dryRun) {
+                    globalOptions.debugWarnings = true; // sets this so the kprove directory is not removed.
                     System.out.println(String.join(" ", koreCommand));
                     kprint.options.output = OutputModes.NONE;
-                    return boundaryPattern.body();
+                    return KORE.KApply(KLabels.ML_FALSE);
                 }
                 if (globalOptions.verbose) {
                     System.err.println("Executing " + args);
@@ -296,7 +298,8 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                 } catch (InterruptedException e) {
                     throw KEMException.criticalError("Interrupted while executing", e);
                 } catch (ParseError parseError) {
-                    throw KEMException.criticalError("Error parsing haskell backend output", parseError);
+                    kem.registerCriticalWarning("Error parsing haskell backend output", parseError);
+                    return KORE.KApply(KLabels.ML_FALSE);
                 }
             }
 
