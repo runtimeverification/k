@@ -66,7 +66,7 @@ public class ResolveStrict {
         return KApply(KLabel("#SemanticCastTo" + sort.toString()), k);
     }
 
-    private void setPositions(String attribute, List<Integer> strictnessPositions, long arity, Production loc) {
+    public static void setPositions(String attribute, List<Integer> strictnessPositions, long arity, Production loc) {
         String[] strictAttrs = attribute.split(",");
         for (String strictAttr : strictAttrs) {
             try {
@@ -75,10 +75,14 @@ public class ResolveStrict {
                     throw new IndexOutOfBoundsException();
                 strictnessPositions.add(pos);
             } catch (NumberFormatException | IndexOutOfBoundsException e) {
-                throw KEMException.compilerError(
+                if (arity == 0) {
+                    throw KEMException.compilerError("Cannot put a strict attribute on a production with no nonterminals", loc);
+                } else {
+                    throw KEMException.compilerError(
                         "Expecting a number between 1 and " + arity + ", but found " + strictAttr + " as a" +
                                 " strict position in " + Arrays.toString(strictAttrs),
                         loc);
+                }
             }
         }
     }
@@ -106,7 +110,7 @@ public class ResolveStrict {
     private static final ContextAlias DEFAULT_ALIAS = ContextAlias(KVariable("HERE"), BooleanUtils.TRUE, Att.empty());
 
     public Set<Sentence> resolve(Production production, boolean sequential) {
-        long arity = stream(production.items()).filter(i -> i instanceof NonTerminal).count();
+        long arity = production.nonterminals().size();
         List<Integer> strictnessPositions = new ArrayList<>();
         Set<ContextAlias> aliases = new HashSet<>();
         String attribute;
@@ -123,18 +127,20 @@ public class ResolveStrict {
         } else {
             String[] components = attribute.split(";");
             if (components.length == 1) {
-              if (Character.isDigit(components[0].trim().charAt(0))) {
-                aliases.add(DEFAULT_ALIAS);
-                setPositions(components[0].trim(), strictnessPositions, arity, production);
-              } else {
-                for (int i = 1; i <= arity; i++) {
-                    strictnessPositions.add(i);
+                if (Character.isDigit(components[0].trim().charAt(0))) {
+                    aliases.add(DEFAULT_ALIAS);
+                    setPositions(components[0].trim(), strictnessPositions, arity, production);
+                } else {
+                    for (int i = 1; i <= arity; i++) {
+                        strictnessPositions.add(i);
+                    }
+                    setAliases(components[0].trim(), aliases, production);
                 }
-                setAliases(components[0].trim(), aliases, production);
-              }
             } else if (components.length == 2) {
-              setAliases(components[0].trim(), aliases, production);
-              setPositions(components[1].trim(), strictnessPositions, arity, production);
+                setAliases(components[0].trim(), aliases, production);
+                setPositions(components[1].trim(), strictnessPositions, arity, production);
+            } else {
+                throw KEMException.compilerError("Invalid strict attribute containing multiple semicolons.", production);
             }
         }
 
