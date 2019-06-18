@@ -710,7 +710,7 @@ void BasicElement(StringBuilder sb, StringBuilder follow) : {}
 { <GROUP: ( ["a"-"z", "A"-"Z", "0"-"9"]
           | "-" | "\t" | "\n" | "\r" | " "
           | "\\" ["t", "n", "r", " "]
-          | "\\" ~["a"-"z", "A"-"Z", "\t"])*>
+          | "\\" ~["a"-"z", "A"-"Z", "\t"])+>
     { if (image.length() > 0)
       if (image.charAt(0) == '-' ||
     		(image.charAt(image.length() - 1) == '-'
