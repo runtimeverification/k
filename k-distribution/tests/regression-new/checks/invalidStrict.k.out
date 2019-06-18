@@ -1,0 +1,32 @@
+[Error] Compiler: Cannot heat a HOLE of sort K. Did you mean to sort it to
+KItem?
+	Source(invalidStrict.k)
+	Location(20,15,20,21)
+[Error] Compiler: Cannot heat a HOLE of sort K. Did you mean to sort it to
+KItem?
+	Source(invalidStrict.k)
+	Location(22,15,22,19)
+[Error] Compiler: Cannot heat a nonterminal of sort K. Did you mean KItem?
+	Source(invalidStrict.k)
+	Location(10,16,10,30)
+[Error] Compiler: Cannot heat a nonterminal of sort K. Did you mean KItem?
+	Source(invalidStrict.k)
+	Location(12,16,12,40)
+[Error] Compiler: Cannot heat a nonterminal of sort K. Did you mean KItem?
+	Source(invalidStrict.k)
+	Location(26,16,26,39)
+[Error] Compiler: Cannot put a strict attribute on a production with no
+nonterminals
+	Source(invalidStrict.k)
+	Location(4,16,4,32)
+[Error] Compiler: Expecting a number between 1 and 1, but found 2 as a strict
+position in [2]
+	Source(invalidStrict.k)
+	Location(6,16,6,35)
+[Error] Compiler: Had 8 structural errors.
+[Error] Compiler: Invalid strict attribute containing multiple semicolons.
+	Source(invalidStrict.k)
+	Location(8,16,8,45)
+[Warning] Compiler: Could not find main syntax module with name
+INVALIDSTRICT-SYNTAX in definition.  Use --syntax-module to specify one. Using
+INVALIDSTRICT as default.
