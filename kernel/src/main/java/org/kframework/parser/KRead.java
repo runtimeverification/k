@@ -13,6 +13,16 @@ import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.Character;
+
+import javax.json.Json;
+import javax.json.JsonException;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+
 public class KRead {
 
     private final KExceptionManager kem;
@@ -49,6 +59,31 @@ public class KRead {
                 return JsonParser.parse(stringToParse);
             default:
                 throw KEMException.criticalError("Unsupported input mode: " + inputMode);
+        }
+    }
+
+    public static K autoDeserialize(byte[] kast, Source source) {
+        if (BinaryParser.isBinaryKast(kast))
+            return BinaryParser.parse(kast);
+
+        InputStream input = new ByteArrayInputStream(kast);
+        int c;
+        try {
+            while (Character.isWhitespace(c = input.read()));
+        } catch (IOException e) {
+            throw KEMException.criticalError("Could not read output from parser: ", e);
+        }
+
+        if ( c == '{' ) {
+            JsonReader reader = Json.createReader(new ByteArrayInputStream(kast));
+            JsonObject data = reader.readObject();
+            return JsonParser.parseJson(data);
+        }
+
+        try {
+            return KastParser.parse(new String(kast), source);
+        } catch ( KEMException e ) {
+            throw KEMException.criticalError("Could not read input: " + source.source());
         }
     }
 }
