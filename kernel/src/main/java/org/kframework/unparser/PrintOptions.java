@@ -3,15 +3,12 @@ package org.kframework.unparser;
 
 import com.beust.jcommander.Parameter;
 import com.google.inject.Inject;
-
-import org.kframework.unparser.OutputModes;
-import org.kframework.unparser.ColorSetting;
 import org.kframework.utils.options.BaseEnumConverter;
 import org.kframework.utils.options.StringListConverter;
 
-import java.util.Map;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class PrintOptions {
 
@@ -69,7 +66,7 @@ public class PrintOptions {
     public String outputFile;
 
     @Parameter(names={"--output", "-o"}, converter=OutputModeConverter.class,
-            description="How to display krun results. <mode> is either [pretty|program|kast|binary|json|latex|none].")
+            description="How to display krun results. <mode> is either [pretty|program|kast|binary|json|latex|kore|none].")
     public OutputModes output = OutputModes.PRETTY;
 
     public static class OutputModeConverter extends BaseEnumConverter<OutputModes> {
