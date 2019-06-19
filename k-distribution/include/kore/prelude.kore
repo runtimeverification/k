@@ -43,8 +43,8 @@ module K
 
   // Defnitions for reachability aliases
   // Until we will have `mu` we resort to dummy definitions
-  alias #wEF{A}(A) : A
-  where #wEF{A}(X:A) := X:A []
+  alias weakExistsFinally{A}(A) : A
+  where weakExistsFinally{A}(X:A) := X:A []
 
   alias weakAlwaysFinally{A}(A) : A
   where weakAlwaysFinally{A}(X:A) := X:A []

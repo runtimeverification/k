@@ -79,7 +79,7 @@ module ML-SYNTAX
              > "#Exists" K "." K [klabel(#Exists), symbol, mlOp, poly(1; 0, 2), mlBinder]
              | "#Forall" K "." K [klabel(#Forall), symbol, mlOp, poly(1; 0, 2), mlBinder]
              | "#AG" "(" K ")" [klabel(#AG), symbol, mlOp, poly(0, 1)]
-             | "#wEF" "(" K ")" [klabel(#wEF), symbol, mlOp, poly(0, 1)]
+             | "#WeakExistsFinally" "(" K ")" [klabel(weakExistsFinally), symbol, mlOp, poly(0, 1)]
 
 endmodule
 
