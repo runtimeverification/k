@@ -67,6 +67,16 @@ def replaceKLabels(pattern, klabelMap):
         return k
     return traverseBottomUp(pattern, replace)
 
+def rewriteWith(rule, pattern):
+    (ruleLHS, ruleRHS) = rule
+    matchingSubst = match(ruleLHS, pattern)
+    if matchingSubst is not None:
+        return substitute(ruleRHS, matchingSubst)
+    return pattern
+
+def rewriteAnywhereWith(rule, pattern):
+    return traverseBottomUp(pattern, lambda p: rewriteWith(rule, p))
+
 def normalizeKLabels(k):
     newK = replaceKLabels(k, { "#And" : "_andBool__BOOL" , "#Or" : "_orBool__BOOL" })
     simplifyRules = [ (KApply("_==K_", [KVariable("#LHS"), KToken("true", "Bool")]),  KVariable("#LHS"))
@@ -78,16 +88,6 @@ def normalizeKLabels(k):
     for rule in simplifyRules:
         newK = rewriteAnywhereWith(rule, newK)
     return newK
-
-def rewriteWith(rule, pattern):
-    (ruleLHS, ruleRHS) = rule
-    matchingSubst = match(ruleLHS, pattern)
-    if matchingSubst is not None:
-        return substitute(ruleRHS, matchingSubst)
-    return pattern
-
-def rewriteAnywhereWith(rule, pattern):
-    return traverseBottomUp(pattern, lambda p: rewriteWith(rule, p))
 
 def getOccurances(kast, pattern):
     occurances = []
