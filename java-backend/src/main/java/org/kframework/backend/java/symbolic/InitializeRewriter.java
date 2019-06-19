@@ -27,6 +27,8 @@ import org.kframework.definition.Rule;
 import org.kframework.kil.Attribute;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
+import org.kframework.kore.KApply;
+import org.kframework.kore.KORE;
 import org.kframework.kprove.KProveOptions;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.api.io.FileSystem;
@@ -210,7 +212,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
         }
 
         @Override
-        public K prove(Module mod, @Nullable Rule boundaryPattern) {
+        public RewriterResult prove(Module mod, @Nullable Rule boundaryPattern) {
             rewritingContext.stateLog.open("prove-" + Integer.toString(Math.abs(mod.hashCode())));
             rewritingContext.setExecutionPhase(false);
             List<Rule> rules = stream(mod.rules())
@@ -263,9 +265,16 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
 
             K result = proofResults.stream()
                     .map(constrainedTerm -> (K) constrainedTerm.term())
-                    .reduce(((k1, k2) -> KApply(KLabels.ML_AND, k1, k2))).orElse(KApply(KLabels.ML_TRUE));
+                    .reduce(((k1, k2) -> KORE.KApply(KLabels.ML_AND, k1, k2))).orElse(KORE.KApply(KLabels.ML_TRUE));
+            int exit;
+            if (result instanceof KApply) {
+                KApply kapp = (KApply) result;
+                exit = kapp.klabel().name().equals("#True") ? 0 : 1;
+            } else {
+                exit = 1;
+            }
             rewritingContext.stateLog.close();
-            return result;
+            return new RewriterResult(Optional.empty(), Optional.of(exit), result);
         }
 
         @Override
