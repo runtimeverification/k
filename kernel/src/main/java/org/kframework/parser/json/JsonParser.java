@@ -2,12 +2,24 @@
 package org.kframework.parser.json;
 
 import org.kframework.attributes.Att;
+import org.kframework.definition.Associativity;
+import org.kframework.definition.Bubble;
 import org.kframework.definition.Context;
+import org.kframework.definition.Configuration;
 import org.kframework.definition.Definition;
+import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Module;
 import org.kframework.definition.ModuleComment;
+import org.kframework.definition.Production;
+import org.kframework.definition.ProductionItem;
+import org.kframework.definition.RegexTerminal;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
+import org.kframework.definition.SyntaxAssociativity;
+import org.kframework.definition.SyntaxPriority;
+import org.kframework.definition.SyntaxSort;
+import org.kframework.definition.Tag;
+import org.kframework.definition.Terminal;
 import org.kframework.kore.K;
 import org.kframework.kore.KLabel;
 import static org.kframework.kore.KORE.KLabel;
@@ -25,6 +37,8 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.io.StringReader;
 import java.util.Arrays;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -32,33 +46,41 @@ import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
+import javax.json.JsonStructure;
 
+import scala.Option;
 import scala.collection.JavaConverters;
+import scala.collection.Seq;
+import scala.collection.IndexedSeq;
 
 /**
  * Parses a Json term into the KORE data structures.
  */
 public class JsonParser {
 
-    public static final String KDEFINITION          = "KDefinition"
-                             , KATT                 = "KAtt"
-                             , KCONFIGURATION       = "KConfiguration"
-                             , KBUBBLE              = "KBubble"
-                             , KMODULE              = "KModule"
-                             , KCONTEXT             = "KContext"
-                             , KRULE                = "KRule"
-                             , KMODULECOMMENT       = "KModuleComment"
-                             , KSYNTAXPRIORITY      = "KSyntaxPriority"
-                             , KSYNTAXASSOCIATIVITY = "KSyntaxAssociativity"
-                             , KTOKEN               = "KToken"
-                             , KSYNTAXSORT          = "KSyntaxSort"
-                             , KPRODUCTION          = "KProduction"
+    public static final String INJECTEDKLABEL       = "InjectedKLabel"
                              , KAPPLY               = "KApply"
-                             , KSEQUENCE            = "KSequence"
-                             , KVARIABLE            = "KVariable"
-                             , KREWRITE             = "KRewrite"
                              , KAS                  = "KAs"
-                             , INJECTEDKLABEL       = "InjectedKLabel"
+                             , KATT                 = "KAtt"
+                             , KBUBBLE              = "KBubble"
+                             , KCONFIGURATION       = "KConfiguration"
+                             , KCONTEXT             = "KContext"
+                             , KDEFINITION          = "KDefinition"
+                             , KNONTERMINAL         = "KNonTerminal"
+                             , KMODULE              = "KModule"
+                             , KMODULECOMMENT       = "KModuleComment"
+                             , KPRODUCTION          = "KProduction"
+                             , KREGEXTERMINAL       = "KRegexTerminal"
+                             , KREWRITE             = "KRewrite"
+                             , KRULE                = "KRule"
+                             , KSEQUENCE            = "KSequence"
+                             , KSORT                = "KSort"
+                             , KSYNTAXASSOCIATIVITY = "KSyntaxAssociativity"
+                             , KSYNTAXPRIORITY      = "KSyntaxPriority"
+                             , KSYNTAXSORT          = "KSyntaxSort"
+                             , KTERMINAL            = "KTerminal"
+                             , KTOKEN               = "KToken"
+                             , KVARIABLE            = "KVariable"
                              ;
 
 /////////////////////////////
@@ -99,11 +121,31 @@ public class JsonParser {
         if (! data.getString("node").equals(KDEFINITION))
             throw KEMException.criticalError("Unexpected node found in KAST Json term: " + data.getString("node"));
 
-        Module mainModule = toMod(data.getJsonObject("mainModule"));
+        /* First pass of parsing modules: Get the modules without their imports */
+        String mainModuleName = data.getString("mainModule");
         JsonArray mods = data.getJsonArray("entryModules");
         Module[] modArray = toMods(mods.size(), mods);
-        Set<Module> entryModules = new HashSet<>(Arrays.asList(modArray));
-        return new Definition(mainModule, JavaConverters.asScalaSet(entryModules), toAtt(data.getJsonObject("att")));
+        scala.collection.Set<Module> entryModules = JavaConverters.asScalaSet(new HashSet<>(Arrays.asList(modArray)));
+
+        /* Second pass: Add in the imports for each Module */
+        Set<Module> modulesWithImports = new HashSet<>();
+        for (int i = 0; i < mods.size(); i++) {
+            JsonObject modJson = mods.getValuesAs(JsonObject.class).get(i);
+            String modName = modJson.getString("name");
+            Module mod = Module.withName(modName, entryModules).get();
+            JsonArray modImportStrings = modJson.getJsonArray("imports");
+            for (int j = 0; j < modImportStrings.size(); j++) {
+                String importName = modImportStrings.getString(j);
+                mod = mod.addImport( Module.withName(importName, entryModules).get() );
+            }
+            modulesWithImports.add(mod);
+        }
+
+        scala.collection.Set<Module> finalModules = JavaConverters.asScalaSet(modulesWithImports);
+        Option<Module> maybeMainModule = Module.withName(mainModuleName, finalModules);
+        Module mainModule = maybeMainModule.get();
+
+        return new Definition(mainModule, finalModules, toAtt(data.getJsonObject("att")));
     }
 
 /////////////////////////
@@ -116,15 +158,11 @@ public class JsonParser {
 
         String name = data.getString("name");
 
-        JsonArray mods = data.getJsonArray("imports");
-        Module[] modArray = toMods(mods.size(), mods);
-        Set<Module> modImports = new HashSet<>(Arrays.asList(modArray));
-
         JsonArray sens = data.getJsonArray("localSentences");
         Sentence[] senArray = toSens(sens.size(), sens);
         Set<Sentence> localSentences = new HashSet<>(Arrays.asList(senArray));
 
-        return new Module(name, JavaConverters.asScalaSet(modImports), JavaConverters.asScalaSet(localSentences), toAtt(data.getJsonObject("att")));
+        return Module.apply(name, JavaConverters.asScalaSet(localSentences), toAtt(data.getJsonObject("att")));
     }
 
     private static Module[] toMods(int arity, JsonArray data) throws IOException {
@@ -160,10 +198,24 @@ public class JsonParser {
                 return new ModuleComment(comment, att);
             }
             case KSYNTAXPRIORITY: {
-                
+                JsonArray priorities = data.getJsonArray("priorities");
+                Att att = toAtt(data.getJsonObject("att"));
+                return new SyntaxPriority(toPriorities(priorities.size(), priorities), att);
             }
             case KSYNTAXASSOCIATIVITY: {
                 
+            }
+            case KCONFIGURATION: {
+
+            }
+            case KSYNTAXSORT: {
+
+            }
+            case KBUBBLE: {
+
+            }
+            case KPRODUCTION: {
+                return new ModuleComment("Dummy comment", Att.empty());
             }
             default:
                 throw KEMException.criticalError("Unexpected node found in KAST Json term: " + data.getString("node"));
@@ -176,6 +228,28 @@ public class JsonParser {
             items[i] = toSen(data.getValuesAs(JsonObject.class).get(i));
         }
         return items;
+    }
+
+    private static scala.collection.Set<Tag> toTags(int arity, JsonArray data) {
+        Set<Tag> tags = new HashSet<>();
+        for (int i = 0; i < arity; i++) {
+            String tagString = data.getString(i);
+            Tag tag = new Tag(tagString);
+            tags.add(tag);
+        }
+        return JavaConverters.asScalaSet(tags);
+    }
+
+    /* Used only for parsing KSYNTAXPRIORITY */
+    private static Seq<scala.collection.Set<Tag>> toPriorities(int arity, JsonArray data) {
+        List<scala.collection.Set<Tag>> priorities = new ArrayList<>();
+
+        for (int i = 0; i < arity; i++) {
+            JsonArray tags = data.getValuesAs(JsonArray.class).get(i);
+            priorities.add(toTags(tags.size(), tags));
+        }
+
+        return JavaConverters.iterableAsScalaIterableConverter(priorities).asScala().toSeq();
     }
 
 //////////////////////

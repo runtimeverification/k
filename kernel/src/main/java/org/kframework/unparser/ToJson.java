@@ -7,23 +7,29 @@ import org.kframework.definition.Bubble;
 import org.kframework.definition.Context;
 import org.kframework.definition.Configuration;
 import org.kframework.definition.Definition;
+import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Module;
 import org.kframework.definition.ModuleComment;
 import org.kframework.definition.Production;
+import org.kframework.definition.ProductionItem;
+import org.kframework.definition.RegexTerminal;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.definition.SyntaxAssociativity;
 import org.kframework.definition.SyntaxPriority;
 import org.kframework.definition.SyntaxSort;
 import org.kframework.definition.Tag;
+import org.kframework.definition.Terminal;
 import org.kframework.kore.InjectedKLabel;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KAs;
+import org.kframework.kore.KLabel;
 import org.kframework.kore.KRewrite;
 import org.kframework.kore.KSequence;
 import org.kframework.kore.KToken;
 import org.kframework.kore.KVariable;
+import org.kframework.kore.Sort;
 import org.kframework.parser.json.JsonParser;
 import org.kframework.utils.errorsystem.KEMException;
 
@@ -45,10 +51,11 @@ import javax.json.JsonObjectBuilder;
 import javax.json.JsonWriter;
 import javax.json.JsonStructure;
 
+import scala.Enumeration;
+import scala.Option;
 import scala.collection.JavaConverters;
 import scala.collection.Seq;
 import scala.collection.Set;
-import scala.Enumeration;
 
 /**
  * Writes a KAST term to the KAST Json format.
@@ -230,6 +237,9 @@ public class ToJson {
         JsonObjectBuilder jcon = Json.createObjectBuilder();
 
         jcon.add("node", JsonParser.KCONFIGURATION);
+        jcon.add("body", toJson(con.body()));
+        jcon.add("ensures", toJson(con.ensures()));
+        jcon.add("att", toJson(con.att()));
 
         return jcon.build();
     }
@@ -238,16 +248,21 @@ public class ToJson {
         JsonObjectBuilder jbub = Json.createObjectBuilder();
 
         jbub.add("node", JsonParser.KBUBBLE);
+        jbub.add("sentenceType", bub.sentenceType());
+        jbub.add("contents", bub.contents());
+        jbub.add("att", toJson(bub.att()));
 
         return jbub.build();
     }
 
-    public static JsonStructure toJson(SyntaxSort sort) {
-        JsonObjectBuilder jsort = Json.createObjectBuilder();
+    public static JsonStructure toJson(SyntaxSort syn) {
+        JsonObjectBuilder jsyn = Json.createObjectBuilder();
 
-        jsort.add("node", JsonParser.KSYNTAXSORT);
+        jsyn.add("node", JsonParser.KSYNTAXSORT);
+        jsyn.add("sort", toJson(syn.sort()));
+        jsyn.add("att", toJson(syn.att()));
 
-        return jsort.build();
+        return jsyn.build();
     }
 
     public static JsonStructure toJson(Production pro) {
@@ -255,7 +270,51 @@ public class ToJson {
 
         jpro.add("node", JsonParser.KPRODUCTION);
 
+        Option<KLabel> klabel = pro.klabel();
+        if (! klabel.isEmpty()) {
+            jpro.add("klabel", klabel.get().name());
+        }
+
+        Seq<ProductionItem> items = pro.items();
+        JsonArrayBuilder productionItems = Json.createArrayBuilder();
+        for (ProductionItem p : JavaConverters.seqAsJavaList(items)) {
+            JsonObjectBuilder obj = Json.createObjectBuilder();
+
+            if (p instanceof NonTerminal) {
+                NonTerminal t = (NonTerminal) p;
+                obj.add("node", JsonParser.KNONTERMINAL);
+                obj.add("sort", toJson(t.sort()));
+                Option<String> name = t.name();
+                if (! name.isEmpty())
+                    obj.add("name", name.get());
+            } else if (p instanceof RegexTerminal) {
+                RegexTerminal t = (RegexTerminal) p;
+                obj.add("node", JsonParser.KREGEXTERMINAL);
+                obj.add("precedeRegex", t.precedeRegex());
+                obj.add("regex", t.regex());
+                obj.add("followRegex", t.followRegex());
+            } else if (p instanceof Terminal) {
+                Terminal t = (Terminal) p;
+                obj.add("node", JsonParser.KTERMINAL);
+                obj.add("value", t.value());
+            }
+
+            productionItems.add(obj.build());
+        }
+
+        jpro.add("sort", toJson(pro.sort()));
+        jpro.add("att", toJson(pro.att()));
+
         return jpro.build();
+    }
+
+    public static JsonStructure toJson(Sort sort) {
+        JsonObjectBuilder jsort = Json.createObjectBuilder();
+
+        jsort.add("node", JsonParser.KSORT);
+        jsort.add("name", sort.name());
+
+        return jsort.build();
     }
 
 //////////////////////

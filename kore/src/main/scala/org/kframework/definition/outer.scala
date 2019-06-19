@@ -84,6 +84,12 @@ object Module {
   def apply(name: String, unresolvedLocalSentences: Set[Sentence]): Module = {
     new Module(name, Set(), unresolvedLocalSentences, Att.empty)
   }
+
+  def apply(name: String, unresolvedLocalSentences: Set[Sentence], att: Att): Module = {
+    new Module(name, Set(), unresolvedLocalSentences, att)
+  }
+
+  def withName(name: String, modules: Set[Module]): Option[Module] = modules.find(M => M.name.equals(name))
 }
 
 case class Module(val name: String, val imports: Set[Module], localSentences: Set[Sentence], @(Nonnull@param) val att: Att = Att.empty)
