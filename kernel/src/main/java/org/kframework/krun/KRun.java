@@ -17,8 +17,7 @@ import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
 import org.kframework.krun.modes.ExecutionMode;
 import org.kframework.main.Main;
-import org.kframework.parser.binary.BinaryParser;
-import org.kframework.parser.kast.KastParser;
+import org.kframework.parser.KRead;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.unparser.KPrint;
 import org.kframework.utils.StringUtil;
@@ -239,10 +238,6 @@ public class KRun {
         }
 
         byte[] kast = output.stdout != null ? output.stdout : new byte[0];
-        if (BinaryParser.isBinaryKast(kast)) {
-            return BinaryParser.parse(kast);
-        } else {
-            return KastParser.parse(new String(kast), source);
-        }
+        return KRead.autoDeserialize(kast, source);
     }
 }
