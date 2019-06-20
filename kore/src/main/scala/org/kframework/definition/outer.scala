@@ -313,6 +313,11 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
   }
 }
 
+case class FlatModule(name: String, imports: Set[String], importsSyntax: Set[String], localSentences: Set[Sentence], @(Nonnull@param) val att: Att = Att.empty)
+  extends ModuleToString with OuterKORE with Sorting with Serializable {
+
+}
+
 // hooked but different from core, Import is a sentence here
 
 trait Sentence extends HasLocation {
