@@ -139,14 +139,15 @@ public class KPrint {
                 return (unparseTerm(result, unparsingModule, colorize) + "\n").getBytes();
             }
             case KORE:
-                if (compiledDefinition.isPresent()) {
-                    CompiledDefinition cdef = compiledDefinition.get();
-                    ModuleToKORE converter = new ModuleToKORE(module, files, cdef.topCellInitializer, kompileOptions);
-                    K result = ExpandMacros.forNonSentences(module, files, kompileOptions, false).expand(orig);
-                    result = new AddSortInjections(module).addInjections(result);
-                    converter.convert(result);
-                    return converter.toString().getBytes();
+                if (!compiledDefinition.isPresent()) {
+                    throw KEMException.criticalError("KORE output requires a compiled definition.");
                 }
+                CompiledDefinition cdef = compiledDefinition.get();
+                ModuleToKORE converter = new ModuleToKORE(module, files, cdef.topCellInitializer, kompileOptions);
+                K result = ExpandMacros.forNonSentences(module, files, kompileOptions, false).expand(orig);
+                result = new AddSortInjections(module).addInjections(result);
+                converter.convert(result);
+                return converter.toString().getBytes();
             default:
                 throw KEMException.criticalError("Unsupported output mode without a CompiledDefinition: " + outputMode);
         }
