@@ -8,12 +8,9 @@ import org.kframework.attributes.Source;
 import org.kframework.compile.Backend;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
-import org.kframework.definition.ModuleTransformer;
 import org.kframework.definition.Rule;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.Kompile;
-import org.kframework.kore.K;
-import org.kframework.kore.KApply;
 import org.kframework.krun.KRun;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.unparser.KPrint;
@@ -62,7 +59,7 @@ public class KProve {
 
         RewriterResult results = rewriter.prove(specModule, boundaryPattern);
         kprint.prettyPrint(compiled._1(), compiled._1().getModule("LANGUAGE-PARSING").get(), s -> kprint.outputFile(s), results.k());
-        return results.exitCode().orElse(-1);
+        return results.exitCode().orElse(KEMException.TERMINATED_WITH_ERRORS_EXIT_CODE);
     }
 
     private static Module getModule(String defModule, Map<String, Module> modules, Definition oldDef) {
