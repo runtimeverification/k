@@ -69,7 +69,7 @@ class Strategy(heatCool: Boolean) {
             r match {
               case r: Rule if !r.body.contains({ case k: kore.KApply => k.klabel.name.contains("<s>") }) =>
                 val newBody = RewriteToTop.toLeft(r.body) match {
-                  case KApply(klabel, _) if !isFunctionRhs(r.body) && (!module.attributesFor.contains(klabel) || !module.attributesFor(klabel).contains(Att.Function)) =>
+                  case KApply(klabel, _) if !isFunctionRhs(r.body) && (!defn.mainModule.attributesFor.contains(klabel) || !defn.mainModule.attributesFor(klabel).contains(Att.Function)) =>
                     // todo: "!module.attributesFor.contains(klabel) ||" when #1723 is fixed
 
                     def makeRewrite(tag: String) =
