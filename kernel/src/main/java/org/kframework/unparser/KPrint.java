@@ -4,7 +4,9 @@ package org.kframework.unparser;
 import com.davekoelle.AlphanumComparator;
 import com.google.inject.Inject;
 import org.kframework.attributes.Att;
+import org.kframework.backend.kore.ModuleToKORE;
 import org.kframework.builtin.Sorts;
+import org.kframework.compile.AddSortInjections;
 import org.kframework.compile.ExpandMacros;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
@@ -34,6 +36,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -52,21 +55,27 @@ public class KPrint {
     private final KompileOptions    kompileOptions;
 
     public final PrintOptions options;
+    private final Optional<CompiledDefinition> compiledDefinition;
 
     public KPrint() {
-        this(new KExceptionManager(new GlobalOptions()), FileUtil.testFileUtil(), new TTYInfo(false, false, false), new PrintOptions(), new KompileOptions());
+        this(new KExceptionManager(new GlobalOptions()), FileUtil.testFileUtil(), new TTYInfo(false, false, false), new PrintOptions(), Optional.empty(), new KompileOptions());
     }
 
-    public KPrint(KompileOptions kompileOptions) {
-        this(new KExceptionManager(kompileOptions.global), FileUtil.testFileUtil(), new TTYInfo(false, false, false), new PrintOptions(), kompileOptions);
+    public KPrint(CompiledDefinition compiledDefinition) {
+        this(new KExceptionManager(compiledDefinition.kompileOptions.global), FileUtil.testFileUtil(), new TTYInfo(false, false, false), new PrintOptions(), compiledDefinition);
     }
 
     @Inject
-    public KPrint(KExceptionManager kem, FileUtil files, TTYInfo tty, PrintOptions options, KompileOptions kompileOptions) {
+    public KPrint(KExceptionManager kem, FileUtil files, TTYInfo tty, PrintOptions options, CompiledDefinition compiledDefinition) {
+        this(kem, files, tty, options, Optional.of(compiledDefinition), compiledDefinition.kompileOptions);
+    }
+
+    public KPrint(KExceptionManager kem, FileUtil files, TTYInfo tty, PrintOptions options, Optional<CompiledDefinition> compiledDefinition, KompileOptions kompileOptions) {
         this.kem            = kem;
         this.files          = files;
         this.tty            = tty;
         this.options        = options;
+        this.compiledDefinition = compiledDefinition;
         this.kompileOptions = kompileOptions;
     }
 
@@ -128,7 +137,18 @@ public class KPrint {
                 RuleGrammarGenerator gen = new RuleGrammarGenerator(def);
                 Module unparsingModule = RuleGrammarGenerator.getCombinedGrammar(gen.getProgramsGrammar(module), false).getParsingModule();
                 return (unparseTerm(result, unparsingModule, colorize) + "\n").getBytes();
-            } default:
+            }
+            case KORE:
+                if (!compiledDefinition.isPresent()) {
+                    throw KEMException.criticalError("KORE output requires a compiled definition.");
+                }
+                CompiledDefinition cdef = compiledDefinition.get();
+                ModuleToKORE converter = new ModuleToKORE(module, files, cdef.topCellInitializer, kompileOptions);
+                K result = ExpandMacros.forNonSentences(module, files, kompileOptions, false).expand(orig);
+                result = new AddSortInjections(module).addInjections(result);
+                converter.convert(result);
+                return converter.toString().getBytes();
+            default:
                 throw KEMException.criticalError("Unsupported output mode without a CompiledDefinition: " + outputMode);
         }
     }

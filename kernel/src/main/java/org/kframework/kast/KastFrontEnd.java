@@ -94,7 +94,7 @@ public class KastFrontEnd extends FrontEnd {
             Source source = options.source();
 
             CompiledDefinition def = compiledDef.get();
-            KPrint kprint = new KPrint(kem, files.get(), ttyInfo, options.print, compiledDef.get().kompileOptions);
+            KPrint kprint = new KPrint(kem, files.get(), ttyInfo, options.print, compiledDef.get());
             KRead kread = new KRead(kem, files.get());
 
             org.kframework.kore.Sort sort = options.sort;
@@ -126,18 +126,11 @@ public class KastFrontEnd extends FrontEnd {
 
             K parsed = kread.prettyRead(mod, sort, def, source, FileUtil.read(stringToParse), options.input);
 
-            if (options.expandMacros || options.kore) {
+            if (options.expandMacros) {
                 parsed = ExpandMacros.forNonSentences(compiledMod, files.get(), def.kompileOptions, false).expand(parsed);
             }
 
-            if (options.kore) {
-              ModuleToKORE converter = new ModuleToKORE(compiledMod, files.get(), def.topCellInitializer, def.kompileOptions);
-              parsed = new AddSortInjections(compiledMod).addSortInjections(parsed, sort);
-              converter.convert(parsed);
-              System.out.println(converter.toString());
-            } else {
-              System.out.println(new String(kprint.prettyPrint(def, compiledMod, parsed), StandardCharsets.UTF_8));
-            }
+            System.out.println(new String(kprint.prettyPrint(def, compiledMod, parsed), StandardCharsets.UTF_8));
             sw.printTotal("Total");
             return 0;
         } finally {

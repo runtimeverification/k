@@ -7,7 +7,6 @@ import org.kframework.attributes.Source;
 import org.kframework.compile.Backend;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
-import org.kframework.definition.ModuleTransformer;
 import org.kframework.definition.Rule;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.Kompile;

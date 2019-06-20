@@ -7,7 +7,7 @@ package org.kframework.unparser;
  *
  */
 public enum OutputModes {
-    PRETTY, PROGRAM, KAST, BINARY, JSON, LATEX, NONE;
+    PRETTY, PROGRAM, KAST, BINARY, JSON, LATEX, KORE, NONE;
 
     private String extension;
     static {
@@ -17,6 +17,7 @@ public enum OutputModes {
         BINARY.extension  = "kbin";
         JSON.extension    = "json";
         LATEX.extension   = "tex";
+        KORE.extension    = "kore";
         NONE.extension    = "";
     }
 
