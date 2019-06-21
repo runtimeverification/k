@@ -311,11 +311,27 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
   override def equals(that: Any) = that match {
     case m: Module => m.name == name && m.sentences == sentences
   }
+
+  def toFlatModules() : (String, Set[FlatModule]) = {
+    val flatSelf = new FlatModule(name, importedModuleNames, sentences, att)
+    val flatModules = Set(flatSelf) ++
+      (imports.size match {
+        case 0 => Set()
+        case _ => imports.map(m => m.toFlatModules._2).flatten
+      })
+    (name, flatModules)
+  }
+
 }
 
-case class FlatModule(name: String, imports: Set[String], importsSyntax: Set[String], localSentences: Set[Sentence], @(Nonnull@param) val att: Att = Att.empty)
-  extends ModuleToString with OuterKORE with Sorting with Serializable {
+object FlatModule {
+  def apply(name: String, unresolvedLocalSentences: Set[Sentence]): FlatModule = {
+    new FlatModule(name, Set(), unresolvedLocalSentences, Att.empty)
+  }
+}
 
+case class FlatModule(name: String, imports: Set[String], localSentences: Set[Sentence], @(Nonnull@param) val att: Att = Att.empty)
+  extends OuterKORE with Sorting with Serializable {
 }
 
 // hooked but different from core, Import is a sentence here
