@@ -66,7 +66,7 @@ public abstract class FrontEnd {
             }
         } catch (KEMException e) {
             // terminated with errors, so we need to return nonzero error code.
-            retval = 113;
+            retval = KEMException.TERMINATED_WITH_ERRORS_EXIT_CODE;
             if (globalOptions.debug()) {
                 e.printStackTrace();
             } else {
