@@ -59,7 +59,7 @@ public class KILtoKORE extends KILTransformation<Object> {
         kore = false;
     }
 
-    private FlatModule toFlatModule(Module m) {
+    public FlatModule toFlatModule(Module m) {
         String name = m.getName();
 
         Set<org.kframework.definition.Sentence> items = m.getItems().stream()
@@ -86,7 +86,11 @@ public class KILtoKORE extends KILTransformation<Object> {
                 .filter(mod -> mod.getName().equals(d.getMainModule())).findFirst().get();
 
         HashMap<String, org.kframework.definition.Module> koreModules = new HashMap<>();
-        apply(mainModule, kilModules, koreModules);
+
+        FlatModule mainFlatModule = toFlatModule(mainModule);
+        Set<FlatModule> flatModules = kilModules.stream().map(m -> toFlatModule(m)).collect(Collectors.toSet());
+        org.kframework.definition.Module.apply(mainFlatModule, immutable(flatModules), JavaConverters.mapAsScalaMapConverter(koreModules).asScala(), Seq());
+        //apply(mainModule, kilModules, koreModules);
 
         // Set<org.kframework.definition.Module> modules = kilModules.map(i ->
         // apply((Module) i))
@@ -101,9 +105,10 @@ public class KILtoKORE extends KILTransformation<Object> {
 
     public org.kframework.definition.Module apply(Module mainModule, Set<Module> allKilModules,
                                                   Map<String, org.kframework.definition.Module> koreModules) {
-        FlatModule mainFlatModule = toFlatModule(mainModule);
-        Set<FlatModule> flatModules = allKilModules.stream().map(m -> toFlatModule(m)).collect(Collectors.toSet());
-        return org.kframework.definition.Module.apply(mainFlatModule, immutable(flatModules), JavaConverters.mapAsScalaMapConverter(koreModules).asScala(), Seq());
+        //FlatModule mainFlatModule = toFlatModule(mainModule);
+        //Set<FlatModule> flatModules = allKilModules.stream().map(m -> toFlatModule(m)).collect(Collectors.toSet());
+        //return org.kframework.definition.Module.apply(mainFlatModule, immutable(flatModules), JavaConverters.mapAsScalaMapConverter(koreModules).asScala(), Seq());
+        return apply(mainModule, allKilModules, koreModules, Seq());
     }
 
     private org.kframework.definition.Module apply(Module mainModule, Set<Module> allKilModules,
@@ -155,16 +160,18 @@ public class KILtoKORE extends KILTransformation<Object> {
                 }
             };
 
+        org.kframework.attributes.Att att = convertAttributes(mainModule);
+
         Set<org.kframework.definition.Module> importedSyntaxModules = importedSyntax.stream()
                 .map(resolveImport).collect(Collectors.toSet());
         Set<org.kframework.definition.Sentence> syntaxItems = items.stream().filter(org.kframework.definition.Sentence::isSyntax).collect(Collectors.toSet());
-        org.kframework.definition.Module newSyntaxModule = Module(new Import(mainModule.getName()).getImportSyntax().getName(), immutable(importedSyntaxModules), immutable(syntaxItems), convertAttributes(mainModule));
+        org.kframework.definition.Module newSyntaxModule = Module(new Import(mainModule.getName()).getImportSyntax().getName(), immutable(importedSyntaxModules), immutable(syntaxItems), att);
 
         Set<org.kframework.definition.Module> importedModules = Stream.concat(importedModuleNames.stream()
                 .map(resolveImport), Stream.of(newSyntaxModule)).collect(Collectors.toSet());
         Set<org.kframework.definition.Sentence> nonSyntaxItems = items.stream().filter(org.kframework.definition.Sentence::isNonSyntax).collect(Collectors.toSet());
         org.kframework.definition.Module newModule = Module(mainModule.getName(), immutable(importedModules), immutable(nonSyntaxItems),
-                convertAttributes(mainModule));
+                att);
 
         newSyntaxModule.checkSorts();
         newModule.checkSorts();
