@@ -5,18 +5,14 @@ import org.kframework.debugger.DebuggerMatchResult;
 import org.kframework.debugger.DebuggerState;
 import org.kframework.debugger.KDebug;
 import org.kframework.kompile.CompiledDefinition;
-import org.kframework.krun.KRun;
 import org.kframework.unparser.ColorSetting;
 import org.kframework.unparser.KPrint;
-import org.kframework.unparser.OutputModes;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-
-import static org.kframework.krun.KRun.*;
 
 /**
  * Created by Manasvi on 7/22/15.
@@ -84,7 +80,7 @@ public class Commands {
             CommandUtils utils = new CommandUtils(isSource);
             DebuggerState requestedState = session.getActiveState();
             if (requestedState != null) {
-                new KPrint(compiledDefinition.kompileOptions).prettyPrint(compiledDefinition.getParsedDefinition(), compiledDefinition.languageParsingModule(), s -> utils.print(s), requestedState.getCurrentK(), ColorSetting.ON);
+                new KPrint(compiledDefinition).prettyPrint(compiledDefinition.getParsedDefinition(), compiledDefinition.languageParsingModule(), s -> utils.print(s), requestedState.getCurrentK(), ColorSetting.ON);
             } else {
                 throw KEMException.debuggerError("\"Requested State/Configuration Unreachable\",");
             }
@@ -307,7 +303,7 @@ public class Commands {
             if (disableOutput) {
                 return;
             }
-            new KPrint(compiledDefinition.kompileOptions).prettyPrint(compiledDefinition.getParsedDefinition(), compiledDefinition.languageParsingModule(), s -> System.out.println(s), result.getSubstitutions(), ColorSetting.ON);
+            new KPrint(compiledDefinition).prettyPrint(compiledDefinition.getParsedDefinition(), compiledDefinition.languageParsingModule(), s -> System.out.println(s), result.getSubstitutions(), ColorSetting.ON);
         }
 
         private void print(byte[] bytes){

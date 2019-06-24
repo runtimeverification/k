@@ -532,9 +532,6 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                             KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg, c.source().orElse(null), c.location().orElse(null));
                             return Left.apply(Sets.newHashSet(new VariableTypeClashException(kex)));
                         }
-                        if (declared.equals(Sorts.K())) {
-                          return Right.apply(c);
-                        }
                         return wrapTermWithCast(c, declared);
                     }
                 }

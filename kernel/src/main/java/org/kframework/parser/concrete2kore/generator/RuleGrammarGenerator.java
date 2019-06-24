@@ -251,7 +251,9 @@ public class RuleGrammarGenerator {
                             }
                         }
                     }
-                    prods.add(Production(p.klabel(), returnSort, immutable(pis), p.att().add(Constants.ORIGINAL_PRD, Production.class, p)));
+                    if (!(pis.size() == 1 && pis.get(0) instanceof NonTerminal && ((NonTerminal)pis.get(0)).sort().equals(returnSort))) {
+                        prods.add(Production(p.klabel(), returnSort, immutable(pis), p.att().add(Constants.ORIGINAL_PRD, Production.class, p)));
+                    }
                 }
             }
         }
@@ -401,7 +403,7 @@ public class RuleGrammarGenerator {
 
     private static List<List<Sort>> makeAllSortTuples(int size, Module mod) {
         List<List<Sort>> res = new ArrayList<>();
-        List<Sort> allSorts = stream(mod.definedSorts()).filter(s -> !isParserSort(s)).collect(Collectors.toList());
+        List<Sort> allSorts = stream(mod.definedSorts()).filter(s -> !isParserSort(s) || s.equals(Sorts.KItem())).collect(Collectors.toList());
         makeAllSortTuples(size, size, allSorts, res, new int[size]);
         return res;
     }

@@ -116,9 +116,6 @@ public final class KastOptions {
     @Parameter(names="--expand-macros", description="Also expand macros in the parsed string.")
     public boolean expandMacros = false;
 
-    @Parameter(names="--kore", description="Output KORE-syntax instead of KAST-syntax.")
-    public boolean kore = false;
-
     @Parameter(names={"--input", "-i"}, converter=InputModeConverter.class,
             description="How to read kast input in. <mode> is either [program|binary|kast|json|kore].")
     public InputModes input = InputModes.PROGRAM;
