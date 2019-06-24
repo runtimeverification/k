@@ -100,10 +100,10 @@ object Module {
       var modOption = allModules.find(m => m.name.equals(baseName))
       if (modOption.nonEmpty) {
         var mod = modOption.get
-        var tryResult = koreModules.get(baseName)
+        var tryResult = koreModules.get(mod.name)
         if (tryResult.isEmpty) {
           var result = apply(mod, allModules, koreModules, mainMod +: visitedModules)
-          if (Import.isSyntax(mod.name))
+          if (Import.isSyntax(importName))
             result = koreModules.get(importName).get
           result
         } else tryResult.get
@@ -121,6 +121,9 @@ object Module {
     var importedModules = importedModuleNames.map(resolveImport) ++ Set(newSyntaxModule)
     var nonSyntaxItems = items.filter(s => s.isNonSyntax)
     var newModule = new Module(mainMod.name, importedModules, nonSyntaxItems, att)
+
+    newSyntaxModule.checkSorts()
+    newModule.checkSorts()
 
     koreModules += ((newModule.name, newModule))
     koreModules += ((newSyntaxModule.name, newSyntaxModule))
