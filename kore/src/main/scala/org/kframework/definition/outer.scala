@@ -96,10 +96,10 @@ object Module {
     // TODO: Implement CheckListDecl.check
 
     def resolveImport(importName: String): Module = {
-      var modOption = allModules.find(m => m.name.equals(importName))
+      var baseName = Import.noSyntax(importName)
+      var modOption = allModules.find(m => m.name.equals(baseName))
       if (modOption.nonEmpty) {
         var mod = modOption.get
-        var baseName = Import.noSyntax(mod.name)
         var tryResult = koreModules.get(baseName)
         if (tryResult.isEmpty) {
           var result = apply(mod, allModules, koreModules, mainMod +: visitedModules)
@@ -115,12 +115,12 @@ object Module {
 
     var importedSyntaxModules = importedSyntax.map(resolveImport)
     var syntaxItems = items.filter(s => s.isSyntax)
-    // var attributes = convertAttributes                   TODO: implement this
-    var newSyntaxModule = new Module(mainMod.name ++ Import.syntaxString, importedSyntaxModules, syntaxItems, Att.empty)
+    var att = mainMod.att
+    var newSyntaxModule = new Module(Import.asSyntax(mainMod.name), importedSyntaxModules, syntaxItems, att)
 
     var importedModules = importedModuleNames.map(resolveImport) ++ Set(newSyntaxModule)
     var nonSyntaxItems = items.filter(s => s.isNonSyntax)
-    var newModule = new Module(mainMod.name, importedModules, nonSyntaxItems, Att.empty)
+    var newModule = new Module(mainMod.name, importedModules, nonSyntaxItems, att)
 
     koreModules += ((newModule.name, newModule))
     koreModules += ((newSyntaxModule.name, newSyntaxModule))
