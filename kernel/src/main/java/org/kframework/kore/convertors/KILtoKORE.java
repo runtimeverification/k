@@ -8,6 +8,7 @@ import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 import org.kframework.compile.checks.CheckListDecl;
 import org.kframework.definition.Associativity;
+import org.kframework.definition.FlatModule;
 import org.kframework.definition.ModuleComment;
 import org.kframework.definition.ProductionItem;
 import org.kframework.definition.RegexTerminal;
@@ -21,6 +22,7 @@ import org.kframework.kil.Terminal;
 import org.kframework.utils.errorsystem.KEMException;
 import scala.Enumeration.Value;
 import scala.Tuple2;
+import scala.collection.JavaConverters;
 import scala.collection.Seq;
 
 import java.util.ArrayList;
@@ -57,6 +59,21 @@ public class KILtoKORE extends KILTransformation<Object> {
         kore = false;
     }
 
+    private FlatModule toFlatModule(Module m) {
+        String name = m.getName();
+
+        Set<org.kframework.definition.Sentence> items = m.getItems().stream()
+                .filter(j -> !(j instanceof org.kframework.kil.Import))
+                .flatMap(j -> apply(j).stream()).collect(Collectors.toSet());
+
+        Set<String> importedModuleNames = m.getItems().stream()
+                .filter(imp -> imp instanceof Import)
+                .map(imp -> ((Import) imp).getName())
+                .collect(Collectors.toSet());
+
+        return new FlatModule(name, immutable(importedModuleNames), immutable(items), convertAttributes(m.getAttributes()));
+    }
+
     public org.kframework.definition.Definition apply(Definition d) {
 //        Set<org.kframework.definition.Require> requires = d.getItems().stream()
 //                .filter(i -> i instanceof Require).map(i -> apply((Require) i))
@@ -84,7 +101,9 @@ public class KILtoKORE extends KILTransformation<Object> {
 
     public org.kframework.definition.Module apply(Module mainModule, Set<Module> allKilModules,
                                                   Map<String, org.kframework.definition.Module> koreModules) {
-        return apply(mainModule, allKilModules, koreModules, Seq());
+        FlatModule mainFlatModule = toFlatModule(mainModule);
+        Set<FlatModule> flatModules = allKilModules.stream().map(m -> toFlatModule(m)).collect(Collectors.toSet());
+        return org.kframework.definition.Module.apply(mainFlatModule, immutable(flatModules), JavaConverters.mapAsScalaMapConverter(koreModules).asScala(), Seq());
     }
 
     private org.kframework.definition.Module apply(Module mainModule, Set<Module> allKilModules,
