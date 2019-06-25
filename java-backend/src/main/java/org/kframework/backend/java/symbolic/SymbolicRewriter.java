@@ -1097,15 +1097,18 @@ public class SymbolicRewriter {
             System.err.format("\nSpec rule application phase, step %d\n" +
                     "==========================================\n", step);
         }
-        List<Pair<Rule, Integer>> automatonMatchedRules =
+        //Work in progress: spec rules automaton. Use in for loop below.
+        /*List<Pair<Rule, Integer>> automatonMatchedRules =
                 theFastMatcher.matchWithAutomaton(constrainedTerm, definition.specAutomaton());
 
         if (global.javaExecutionOptions.logRulesPublic && !automatonMatchedRules.isEmpty()) {
             System.err.format("\nSpec rule application, rules matched by automaton: %d\n" +
                     "------------------------------------------\n", automatonMatchedRules.size());
-        }
-        for (Pair<Rule, Integer> match : automatonMatchedRules) {
-            Rule specRule = match.getLeft();
+        }*/
+
+        //for (Pair<Rule, Integer> match : automatonMatchedRules) {
+        for (Rule specRule : definition.specRulesPublic) {
+            //Rule specRule = match.getLeft();
             ConstrainedTerm pattern = specRule.createLhsPattern(constrainedTerm.termContext());
             ConjunctiveFormula constraint = constrainedTerm.matchImplies(pattern, true, false,
                     new FormulaContext(FormulaContext.Kind.SpecRule, specRule, global), specRule.matchingSymbols());
