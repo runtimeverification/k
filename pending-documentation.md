@@ -216,6 +216,25 @@ non-deterministic.  This behavior can be achieved by using set variables to stan
 
 Any variable prefixed by `@` will be considered a set variable.
 
+### Example
+
+Below is a simplification rule which motivated this extension:
+
+```
+  rule #Ceil(@I1:Int /Int @I2:Int) =>
+    {(@I2 =/=Int 0) #Equals true} #And #Ceil(@I1) #And #Ceil(@I2) 
+    [anywhere]
+```
+
+This rule basically says that `@I1:Int /Int @I2:Int` is defined if `@I1` and `@I2` are defined and
+`@I2` is not 0. using sets variables here is important as it allows the simplification rule to apply
+_any_ symbolic patterns, without caring whether they are defined or not. This allows simplifying
+the expression `#Ceil((A:Int /Int B:Int) / C:Int)` to
+`{(C =/=Int 0) #Equals true} #And #Ceil(C) #And ({(B =/=Int 0) #Equals true} #And #Ceil(B) #And #Ceil(A)` 
+
+See [kframework/kore#729](https://github.com/kframework/kore/issues/729) for more details.
+
+
 ### Caution
 
 Set variables are currently only supported by the Haskell backend. The use of rules with set variables should be sound
