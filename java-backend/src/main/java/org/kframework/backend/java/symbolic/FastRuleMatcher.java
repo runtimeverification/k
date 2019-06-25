@@ -374,8 +374,14 @@ public class FastRuleMatcher {
             BitSet theNewMask = matchAndLog(subject, (Term) rw.klist().items().get(0), ruleMask, path, logFailures);
 
             for (int i = theNewMask.nextSetBit(0); i >= 0; i = theNewMask.nextSetBit(i + 1)) {
-                if (innerRHSRewrite.theRHS[i] != null) {
-                    constraints[i] = constraints[i].add(new LocalRewriteTerm(path.reverse(), innerRHSRewrite.theRHS[i]), BoolToken.TRUE);
+                if (i < innerRHSRewrite.theRHS.length) {
+                    if (innerRHSRewrite.theRHS[i] != null) {
+                        constraints[i] = constraints[i]
+                                .add(new LocalRewriteTerm(path.reverse(), innerRHSRewrite.theRHS[i]), BoolToken.TRUE);
+                    }
+                } else {
+                    //rule index i is not handled by this automaton.
+                    theNewMask.clear(i);
                 }
             }
             return theNewMask;
