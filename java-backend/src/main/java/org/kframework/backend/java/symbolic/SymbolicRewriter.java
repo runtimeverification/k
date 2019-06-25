@@ -87,8 +87,13 @@ public class SymbolicRewriter {
     }
 
     public RewriterResult rewrite(ConstrainedTerm constrainedTerm, int bound) {
-        stopwatch.start();
         ConstrainedTerm initTerm = constrainedTerm;
+        if (prettyInitTerm != null) {
+            System.err.println("\nInitial term\n=====================\n");
+            printTermAndConstraint(initTerm, prettyInitTerm, initTerm);
+        }
+
+        stopwatch.start();
         int step = 0;
         prevStats = new TimeMemoryEntry(false);
 
