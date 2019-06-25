@@ -36,7 +36,7 @@ public class LLVMBackend extends KoreBackend {
     public void accept(CompiledDefinition def) {
         String kore = getKompiledString(def);
         files.saveToKompiled("definition.kore", kore);
-        Matching.writeDecisionTreeToFile(files.resolveKompiled("definition.kore"), def.kompiledDefinition.mainModule().name(), files.resolveKompiled("dt"));
+        Matching.writeDecisionTreeToFile(files.resolveKompiled("definition.kore"), options.heuristic, files.resolveKompiled("dt"));
         ProcessBuilder pb = files.getProcessBuilder();
         List<String> args = new ArrayList<>();
         args.add("llvm-kompile");
