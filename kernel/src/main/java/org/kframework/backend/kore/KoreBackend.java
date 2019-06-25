@@ -4,6 +4,7 @@ package org.kframework.backend.kore;
 import com.google.inject.Inject;
 import org.apache.commons.io.FilenameUtils;
 import org.kframework.Strategy;
+import org.kframework.compile.AddCoolLikeAtt;
 import org.kframework.compile.AddImplicitComputationCell;
 import org.kframework.compile.AddSortInjections;
 import org.kframework.compile.Backend;
@@ -127,6 +128,7 @@ public class KoreBackend implements Backend {
         DefinitionTransformer generateSortPredicateSyntax = DefinitionTransformer.from(new GenerateSortPredicateSyntax()::gen, "adding sort predicate productions");
         DefinitionTransformer generateSortProjections = DefinitionTransformer.from(new GenerateSortProjections()::gen, "adding sort projections");
         DefinitionTransformer subsortKItem = DefinitionTransformer.from(Kompile::subsortKItem, "subsort all sorts to KItem");
+        Function1<Definition, Definition> addCoolLikeAtt = d -> DefinitionTransformer.fromSentenceTransformer(new AddCoolLikeAtt(d.mainModule())::add, "add cool-like attribute").apply(d);
         Function1<Definition, Definition> expandMacros = d -> {
           ResolveFunctionWithConfig transformer = new ResolveFunctionWithConfig(d, true);
           return DefinitionTransformer.fromSentenceTransformer((m, s) -> new ExpandMacros(transformer, m, files, kompileOptions, false).expand(s), "expand macros").apply(d);
@@ -155,6 +157,7 @@ public class KoreBackend implements Backend {
                 .andThen(ConcretizeCells::transformDefinition)
                 .andThen(Kompile::addSemanticsModule)
                 .andThen(resolveConfigVar)
+                .andThen(addCoolLikeAtt)
                 .apply(def);
     }
 
