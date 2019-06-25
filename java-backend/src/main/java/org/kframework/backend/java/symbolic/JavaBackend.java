@@ -114,24 +114,39 @@ public class JavaBackend implements Backend {
     @Override
     public Function<Module, Module> specificationSteps(Definition def) {
         BiFunction<Module, K, K> convertCellCollections = (Module m, K k) -> new ConvertDataStructureToLookup(m, false).convert(k);
+
+        ModuleTransformer convertDataStructureToLookup = ModuleTransformer.fromSentenceTransformer((m, s) -> new ConvertDataStructureToLookup(m, false).convert(s), "convert data structures to lookups");
+
+        //Commented steps are (possibly) required for spec automaton generation.
         return m -> ModuleTransformer.fromSentenceTransformer(new ResolveAnonVar()::resolve, "resolve anonymous varaibles")
                 .andThen(ModuleTransformer.fromSentenceTransformer(s -> new ResolveSemanticCasts(kompileOptions.backend.equals(Backends.JAVA)).resolve(s), "resolve semantic casts"))
                 .andThen(AddImplicitComputationCell::transformModule)
                 .andThen(ConcretizeCells::transformModule)
                 .andThen(ModuleTransformer.fromRuleBodyTransformer(RewriteToTop::bubbleRewriteToTopInsideCells, "bubble out rewrites below cells"))
+                //.andThen(ModuleTransformer.fromSentenceTransformer(new NormalizeAssoc(KORE.c()), "normalize assoc"))
                 .andThen(AddBottomSortForListsWithIdenticalLabels.singleton())
                 .andThen(m2 -> {
                   ResolveFunctionWithConfig transformer = new ResolveFunctionWithConfig(m2, false);
                   return ModuleTransformer.fromSentenceTransformer((mod, s) -> new ExpandMacros(transformer, mod, files, kompileOptions, false).expand(s), "expand macros").apply(m2);
                 })
+                //.andThen(ModuleTransformer.fromSentenceTransformer(new NormalizeAssoc(KORE.c()), "normalize assoc"))
+
+                //A subset of convertDataStructureToLookup. Does not simplify _Map_ terms.
                 .andThen(ModuleTransformer.fromKTransformerWithModuleInfo(convertCellCollections::apply, "convert cell to the underlying collections"))
+                //Point where implementation of spec automaton got stuck.
+                //Candidate for spec automaton generation. Simplifies _Map_, but introduces map lookup side conditions that cannot be evaluated in current term.
+                //thus we possibly need lookups for automaton building, but not for spec rules to be proved/applied.
+                //.andThen(convertDataStructureToLookup)
+
                 .andThen(ModuleTransformer.fromRuleBodyTransformer(JavaBackend::ADTKVariableToSortedVariable, "ADT.KVariable to SortedVariable"))
                 .andThen(ModuleTransformer.fromRuleBodyTransformer(JavaBackend::convertKSeqToKApply, "kseq to kapply"))
                 .andThen(ModuleTransformer.fromRuleBodyTransformer(NormalizeKSeq.self(), "normalize kseq"))
                 .andThen(mod -> JavaBackend.markSpecRules(def, mod))
                 .andThen(ModuleTransformer.fromSentenceTransformer(new AddConfigurationRecoveryFlags()::apply, "add refers_THIS_CONFIGURATION_marker"))
+                //.andThen(ModuleTransformer.fromSentenceTransformer(JavaBackend::markSingleVariables, "mark single variables"))
+                //.andThen(ModuleTransformer.from(new AssocCommToAssoc()::apply, "convert AC matching to A matching"))
                 .andThen(restoreDefinitionModulesTransformer(def))
-                .andThen(ModuleTransformer.from(new MergeRules(SPEC_AUTOMATON, Att.specification())::apply, "merge spec rules into one rule with or clauses"))
+                //.andThen(ModuleTransformer.from(new MergeRules(SPEC_AUTOMATON, Att.specification())::apply, "merge spec rules into one rule with or clauses"))
                 .apply(m);
     }
 
