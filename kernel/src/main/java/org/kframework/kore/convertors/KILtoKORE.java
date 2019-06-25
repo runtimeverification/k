@@ -71,7 +71,9 @@ public class KILtoKORE extends KILTransformation<Object> {
                 .map(imp -> ((Import) imp).getName())
                 .collect(Collectors.toSet());
 
-        return new FlatModule(name, immutable(importedModuleNames), immutable(items), convertAttributes(m.getAttributes()));
+        Att att = convertAttributes(m);
+
+        return new FlatModule(name, immutable(importedModuleNames), immutable(items), att);
     }
 
     public org.kframework.definition.Definition apply(Definition d) {
@@ -87,10 +89,7 @@ public class KILtoKORE extends KILTransformation<Object> {
 
         HashMap<String, org.kframework.definition.Module> koreModules = new HashMap<>();
 
-        FlatModule mainFlatModule = toFlatModule(mainModule);
-        Set<FlatModule> flatModules = kilModules.stream().map(m -> toFlatModule(m)).collect(Collectors.toSet());
-        org.kframework.definition.Module.apply(mainFlatModule, immutable(flatModules), JavaConverters.mapAsScalaMapConverter(koreModules).asScala(), Seq());
-        //apply(mainModule, kilModules, koreModules);
+        apply(mainModule, kilModules, koreModules);
 
         // Set<org.kframework.definition.Module> modules = kilModules.map(i ->
         // apply((Module) i))
@@ -105,91 +104,12 @@ public class KILtoKORE extends KILTransformation<Object> {
 
     public org.kframework.definition.Module apply(Module mainModule, Set<Module> allKilModules,
                                                   Map<String, org.kframework.definition.Module> koreModules) {
-        //FlatModule mainFlatModule = toFlatModule(mainModule);
-        //Set<FlatModule> flatModules = allKilModules.stream().map(m -> toFlatModule(m)).collect(Collectors.toSet());
-        //return org.kframework.definition.Module.apply(mainFlatModule, immutable(flatModules), JavaConverters.mapAsScalaMapConverter(koreModules).asScala(), Seq());
-        return apply(mainModule, allKilModules, koreModules, Seq());
-    }
+        FlatModule mainFlatModule = toFlatModule(mainModule);
+        Set<FlatModule> flatModules = allKilModules.stream().map(m -> toFlatModule(m)).collect(Collectors.toSet());
+        org.kframework.definition.Module result = org.kframework.definition.Module.apply(mainFlatModule, immutable(flatModules), JavaConverters.mapAsScalaMapConverter(koreModules).asScala(), Seq());
 
-    private org.kframework.definition.Module apply(Module mainModule, Set<Module> allKilModules,
-                                                  Map<String, org.kframework.definition.Module> koreModules,
-                                                  scala.collection.Seq<Module> visitedModules) {
-        // Record the current module name for constructing the label attribute.
-        moduleName = mainModule.getName();
 
-        checkCircularModuleImports(mainModule, visitedModules);
-        CheckListDecl.check(mainModule);
-        Set<org.kframework.definition.Sentence> items = mainModule.getItems().stream()
-                .filter(j -> !(j instanceof org.kframework.kil.Import))
-                .flatMap(j -> apply(j).stream()).collect(Collectors.toSet());
-
-        Set<Import> importedModuleNames = mainModule.getItems().stream()
-                .filter(imp -> imp instanceof Import)
-                .map(imp -> (Import) imp)
-                .collect(Collectors.toSet());
-
-        Set<Import> importedSyntax = importedModuleNames.stream()
-                .map(Import::getImportSyntax)
-                .collect(Collectors.toSet());
-
-        Function<Import, org.kframework.definition.Module> resolveImport =
-            imp -> {
-                String name;
-                if (imp.isImportSyntax()) {
-                    name = imp.getMainModuleName();
-                } else {
-                    name = imp.getName();
-                }
-                Optional<Module> theModule = allKilModules.stream()
-                        .filter(m -> m.getName().equals(name))
-                        .findFirst();
-                if (theModule.isPresent()) {
-                    Module mod = theModule.get();
-                    org.kframework.definition.Module result = koreModules.get(mod.getName());
-                    if (result == null) {
-                        result = apply(mod, allKilModules, koreModules, cons(mainModule, visitedModules));
-                    }
-                    if (imp.isImportSyntax()) {
-                        return koreModules.get(imp.getName());
-                    }
-                    return result;
-                } else if (koreModules.containsKey(imp.getName())) {
-                    return koreModules.get(imp.getName());
-                } else {
-                    throw KEMException.compilerError("Could not find module: " + imp.getName(), imp);
-                }
-            };
-
-        org.kframework.attributes.Att att = convertAttributes(mainModule);
-
-        Set<org.kframework.definition.Module> importedSyntaxModules = importedSyntax.stream()
-                .map(resolveImport).collect(Collectors.toSet());
-        Set<org.kframework.definition.Sentence> syntaxItems = items.stream().filter(org.kframework.definition.Sentence::isSyntax).collect(Collectors.toSet());
-        org.kframework.definition.Module newSyntaxModule = Module(new Import(mainModule.getName()).getImportSyntax().getName(), immutable(importedSyntaxModules), immutable(syntaxItems), att);
-
-        Set<org.kframework.definition.Module> importedModules = Stream.concat(importedModuleNames.stream()
-                .map(resolveImport), Stream.of(newSyntaxModule)).collect(Collectors.toSet());
-        Set<org.kframework.definition.Sentence> nonSyntaxItems = items.stream().filter(org.kframework.definition.Sentence::isNonSyntax).collect(Collectors.toSet());
-        org.kframework.definition.Module newModule = Module(mainModule.getName(), immutable(importedModules), immutable(nonSyntaxItems),
-                att);
-
-        newSyntaxModule.checkSorts();
-        newModule.checkSorts();
-
-        koreModules.put(newModule.name(), newModule);
-        koreModules.put(newSyntaxModule.name(), newSyntaxModule);
-        return newModule;
-    }
-
-    private static void checkCircularModuleImports(Module mainModule, scala.collection.Seq<Module> visitedModules) {
-        if (visitedModules.contains(mainModule)) {
-            String msg = "Found circularity in module imports: ";
-            for (Module m : mutable(visitedModules)) { // JavaConversions.seqAsJavaList(visitedModules)
-                msg += m.getName() + " < ";
-            }
-            msg += visitedModules.head().getName();
-            throw KEMException.compilerError(msg);
-        }
+        return result;
     }
 
     @SuppressWarnings("unchecked")

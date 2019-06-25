@@ -122,6 +122,8 @@ object Module {
     var nonSyntaxItems = items.filter(s => s.isNonSyntax)
     var newModule = new Module(mainMod.name, importedModules, nonSyntaxItems, att)
 
+    newModule.imports.map(m => System.out.println(m.name));
+
     newSyntaxModule.checkSorts()
     newModule.checkSorts()
 
