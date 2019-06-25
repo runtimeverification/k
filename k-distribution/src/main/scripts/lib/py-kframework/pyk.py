@@ -182,7 +182,7 @@ def minimizeRule(rule):
     ruleBody = pushDownRewrites(ruleBody)
 
     if ruleRequires is not None:
-        constraints = flattenLabel("_andBool__BOOL", ruleRequires)
+        constraints = flattenLabel("_andBool_", ruleRequires)
         ruleRequires = KToken("true", "Bool")
         substitutions = {}
         for constraint in constraints:
@@ -197,7 +197,7 @@ def minimizeRule(rule):
                     mapEntry = KApply("_|->_", [lhs["args"][1], rhs])
                     substitutions[mapName] = KApply("_Map_", [mapEntry, KVariable(mapName + "_REST")])
                     continue
-            ruleRequires = KApply("_andBool__BOOL", [ruleRequires, constraint])
+            ruleRequires = KApply("_andBool_", [ruleRequires, constraint])
 
         ruleBody = substitute(ruleBody, substitutions)
         ruleRequires = normalizeKLabels(ruleRequires)
@@ -205,6 +205,10 @@ def minimizeRule(rule):
     ruleBody = inlineCellMaps(ruleBody)
     ruleBody = uselessVarsToDots(ruleBody, requires = ruleRequires, ensures = ruleEnsures)
     ruleBody = collapseDots(ruleBody)
+
+    if (ruleRequires == KToken("true", "Bool")):
+        ruleRequires = None
+
     return KRule(ruleBody, requires = ruleRequires, ensures = ruleEnsures, atts = ruleAtts)
 
 def readKastTerm(termPath):
