@@ -21,4 +21,7 @@ public class LLVMKompileOptions {
             return Arrays.asList(str);
         }
     }
+
+    @Parameter(names="--heuristic", description="A string of single characters representing a sequence of heuristics to use during pattern matching compilation. Valid choices are f, d, b, a, l, r, n, p, q, _, N, L, R.")
+    public String heuristic = "qbaL";
 }
