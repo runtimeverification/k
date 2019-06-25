@@ -3,6 +3,6 @@ EXT=wasm
 TESTDIR=.
 KOMPILE_BACKEND?=java
 
-KPROVE_FLAGS+=-m KWASM-LEMMAS
+KAST_FLAGS+=--sort KCell -m WASM
 
 include ../../../include/ktest.mak
