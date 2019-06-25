@@ -301,9 +301,12 @@ public class KOREtoBackendKIL {
             return KApply1(((KApply) k).klabel(), ((KApply) k).klist(), k.att());
         else if (k instanceof org.kframework.kore.KSequence)
             return KSequence(((org.kframework.kore.KSequence) k).items(), k.att());
-        else if (k instanceof org.kframework.kore.KVariable)
-            return KVariable(((org.kframework.kore.KVariable) k).name(), k.att());
-        else if (k instanceof org.kframework.kore.InjectedKLabel)
+        else if (k instanceof org.kframework.kore.KVariable) {
+            KVariable variable = (KVariable) k;
+            if (variable.name().startsWith("@"))
+                throw new AssertionError("Set variables not supported in the Java backend!\n" + k.toString());
+            return KVariable(variable.name(), k.att());
+        } else if (k instanceof org.kframework.kore.InjectedKLabel)
             return InjectedKLabel(((org.kframework.kore.InjectedKLabel) k).klabel(), k.att());
         else if (k instanceof org.kframework.kore.KRewrite)
             return KItem.of(KLabelConstant.of(KLabels.KREWRITE, definition), KList.concatenate(convert(((KRewrite) k).left()), convert(((KRewrite) k).right())), global);

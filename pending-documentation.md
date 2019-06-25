@@ -197,6 +197,31 @@ This will rewrite I to . if and only if the state cell contains I + 1.
 
 Note that in the case of Set and Map, one guarantee is that K1, K2, K3, and K4 represent /distinct/ elements. Pattern matching fails if the correct number of distinct elements cannot be found.
 
+## Set Variables
+
+### Motivation
+
+Set variables were introduced as part of Matching Mu Logic, the mathematical foundations for K.
+In Matching Mu Logic, terms evaluate to sets of values. This is useful for both capturing partiality (as in `3/0`) and
+capturing non-determinism (as in `3 #Or 5`).
+Consequently, symbol interpretation is extended to have a collective interpretation over sets of input values.
+
+Usually, K rules are given using regular variables, which expect that the term they match is both defined and has a
+unique interpretation.
+
+However, it is sometimes useful to have simplification rules which work over any kind of pattern, be it undefined or
+non-deterministic.  This behavior can be achieved by using set variables to stand for any kind of pattern.
+
+### Syntax
+
+Any variable prefixed by `@` will be considered a set variable.
+
+### Caution
+
+Set variables are currently only supported by the Haskell backend. The use of rules with set variables should be sound
+for all other backends which just execute by rewriting, however it might not be safe for backends which want to
+guarantee coverage.
+
 ## Other
 
 Backend features not yet given documentation:
