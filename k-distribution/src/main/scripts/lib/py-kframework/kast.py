@@ -124,10 +124,12 @@ BOOL_expressions = { "_andBool_" : binOpStr("\nandBool")
                    , "_==K_"     : binOpStr("==K")
                    }
 
-INT_predicates = { "_<Int_"  : binOpStr("<Int")
-                 , "_>Int_"  : binOpStr(">Int")
-                 , "_<=Int_" : binOpStr("<=Int")
-                 , "_>=Int_" : binOpStr(">=Int")
+INT_predicates = { "_<Int_"   : binOpStr("<Int")
+                 , "_>Int_"   : binOpStr(">Int")
+                 , "_<=Int_"  : binOpStr("<=Int")
+                 , "_>=Int_"  : binOpStr(">=Int")
+                 , "_==Int_"  : binOpStr("==Int")
+                 , "_=/=Int_" : binOpStr("=/=Int")
                  }
 
 INT_expressions = { "_+Int_"   : paren(binOpStr("+Int"))

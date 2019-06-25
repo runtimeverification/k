@@ -78,11 +78,11 @@ def rewriteAnywhereWith(rule, pattern):
     return traverseBottomUp(pattern, lambda p: rewriteWith(rule, p))
 
 def normalizeKLabels(k):
-    newK = replaceKLabels(k, { "#And" : "_andBool__BOOL" , "#Or" : "_orBool__BOOL" })
+    newK = replaceKLabels(k, { "#And" : "_andBool_" , "#Or" : "_orBool_" })
     simplifyRules = [ (KApply("_==K_", [KVariable("#LHS"), KToken("true", "Bool")]),  KVariable("#LHS"))
-                    , (KApply("_==K_", [KVariable("#LHS"), KToken("false", "Bool")]), KApply("notBool__BOOL", [KVariable("#LHS")]))
-                    , (KApply("_andBool__BOOL", [KToken("true", "Bool"), KVariable("#REST")]), KVariable("#REST"))
-                    , (KApply("_andBool__BOOL", [KVariable("#REST"), KToken("true", "Bool")]), KVariable("#REST"))
+                    , (KApply("_==K_", [KVariable("#LHS"), KToken("false", "Bool")]), KApply("notBool_", [KVariable("#LHS")]))
+                    , (KApply("_andBool_", [KToken("true", "Bool"), KVariable("#REST")]), KVariable("#REST"))
+                    , (KApply("_andBool_", [KVariable("#REST"), KToken("true", "Bool")]), KVariable("#REST"))
                     , (KApply("#True", []), KToken("true", "Bool"))
                     ]
     for rule in simplifyRules:
