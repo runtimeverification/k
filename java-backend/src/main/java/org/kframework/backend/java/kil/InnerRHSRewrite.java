@@ -61,4 +61,9 @@ public class InnerRHSRewrite extends Term {
     public void accept(Visitor visitor) {
         visitor.visit(this);
     }
+
+    @Override
+    public String toString() {
+        return "InnerRHSRewrite{ " + Arrays.toString(theRHS) + " }";
+    }
 }
