@@ -8,20 +8,27 @@ KAST    = $(K_BIN)/kast
 PYTHONPATH := $(K_LIB)/py-kframework
 export PYTHONPATH
 
-.PHONY: all clean pyk
+.PHONY: all clean pyk test-kast
 
-all: pyk
+all: test-kast
 
 clean:
-	rm -rf *-kompiled *.out
+	rm -rf *-kompiled kast-tests/*.out kast-tests/*.gen
 
 imp_kompiled:=imp-kompiled/compiled.bin
 
-pyk: build-config.out $(imp_kompiled)
-	$(KAST) --output pretty --sort TCell -m IMP $<
-
-build-config.out: build-config.py
-	python3 $< > $@
-
 $(imp_kompiled): imp.k $(KOMPILE)
 	$(KOMPILE) --backend kore $<
+
+pyk_kast_tests = $(wildcard kast-tests/*.json)
+
+kast-tests/%.json.kast: kast-tests/%.out
+	git --no-pager diff --no-index kast-tests/$*.expected kast-tests/$*.out
+
+kast-tests/%.out: kast-tests/%.gen $(imp_kompiled)
+	$(KAST) --output pretty --sort $(basename $(basename $*)) -m IMP $< > $@
+
+kast-tests/%.gen: build-config.py kast-tests/%.json
+	python3 $< kast-tests/$*.json > kast-tests/$*.gen
+
+test-kast: $(pyk_kast_tests:=.kast)

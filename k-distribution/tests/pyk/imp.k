@@ -6,26 +6,26 @@ module IMP-SYNTAX
   imports ID
 
   syntax AExp  ::= Int | Id
-                 | "-" Int                    [format(%1%2)]
-                 | AExp "/" AExp              [left, strict, color(pink)]
-                 > AExp "+" AExp              [left, strict, color(pink)]
+                 | "-" Int                    [klabae(-_), symbol, format(%1%2)]
+                 | AExp "/" AExp              [klabel(_/_), symbol, left, strict, color(pink)]
+                 > AExp "+" AExp              [klabel(_+_), symbol, left, strict, color(pink)]
                  | "(" AExp ")"               [bracket]
   syntax BExp  ::= Bool
-                 | AExp "<=" AExp             [seqstrict, latex({#1}\leq{#2}), color(pink)]
-                 | "!" BExp                   [strict, color(pink)]
-                 > BExp "&&" BExp             [left, strict(1), color(pink)]
+                 | AExp "<=" AExp             [klabel(_<=_), symbol, seqstrict, latex({#1}\leq{#2}), color(pink)]
+                 | "!" BExp                   [klabel(!_), symbol, strict, color(pink)]
+                 > BExp "&&" BExp             [klabel(_&&_), symbol, left, strict(1), color(pink)]
                  | "(" BExp ")"               [bracket]
-  syntax Block ::= "{" "}"
-                 | "{" Stmt "}"               [format(%1%i%n%2%d%n%3)]
+  syntax Block ::= "{" "}"                    [klabel({}), symbol]
+                 | "{" Stmt "}"               [klabel({_}), symbol, format(%1%i%n%2%d%n%3)]
   syntax Stmt  ::= Block
-                 | Id "=" AExp ";"            [strict(2), color(pink), format(%1 %2 %3%4)]
+                 | Id "=" AExp ";"            [klabel(_=_;), symbol, strict(2), color(pink), format(%1 %2 %3%4)]
                  | "if" "(" BExp ")"
-                   Block "else" Block         [strict(1), colors(yellow, white, white, yellow), format(%1 %2%3%4 %5 %6 %7)]
-                 | "while" "(" BExp ")" Block [colors(yellow,white,white), format(%1 %2%3%4 %5)]
-                 > Stmt Stmt                  [left, format(%1%n%2)]
+                   Block "else" Block         [klabel(if(_)_else_), symbol, strict(1), colors(yellow, white, white, yellow), format(%1 %2%3%4 %5 %6 %7)]
+                 | "while" "(" BExp ")" Block [klabel(while(_)_), symbol, colors(yellow,white,white), format(%1 %2%3%4 %5)]
+                 > Stmt Stmt                  [klabel(__), symbol, left, format(%1%n%2)]
 
-  syntax Pgm ::= "int" Ids ";" Stmt           [format(%1 %2%3%n%4), colors(yellow,pink)]
-  syntax Ids ::= List{Id,","} [format(%1%2 %3)]
+  syntax Pgm ::= "int" Ids ";" Stmt           [klabel(int_;_), symbol, format(%1 %2%3%n%4), colors(yellow,pink)]
+  syntax Ids ::= List{Id,","}                 [klabel(_,_), symbol, format(%1%2 %3)]
 endmodule
 
 module IMP
