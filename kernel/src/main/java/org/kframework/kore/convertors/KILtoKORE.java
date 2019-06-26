@@ -106,9 +106,7 @@ public class KILtoKORE extends KILTransformation<Object> {
                                                   Map<String, org.kframework.definition.Module> koreModules) {
         FlatModule mainFlatModule = toFlatModule(mainModule);
         Set<FlatModule> flatModules = allKilModules.stream().map(m -> toFlatModule(m)).collect(Collectors.toSet());
-        org.kframework.definition.Module result = org.kframework.definition.Module.apply(mainFlatModule, immutable(flatModules), JavaConverters.mapAsScalaMapConverter(koreModules).asScala(), Seq());
-
-
+        org.kframework.definition.Module result = mainFlatModule.toModule(immutable(flatModules), JavaConverters.mapAsScalaMapConverter(koreModules).asScala(), Seq());
         return result;
     }
 

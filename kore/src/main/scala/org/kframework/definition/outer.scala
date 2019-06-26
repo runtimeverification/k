@@ -84,54 +84,6 @@ object Module {
   def apply(name: String, unresolvedLocalSentences: Set[Sentence]): Module = {
     new Module(name, Set(), unresolvedLocalSentences, Att.empty)
   }
-
-  def apply(mainMod: FlatModule, allModules: Set[FlatModule], koreModules: scala.collection.mutable.Map[String, Module], visitedModules: Seq[FlatModule]): Module = {
-    var mainModName = mainMod.name
-    var items = mainMod.localSentences
-    var importedModuleNames = mainMod.imports
-    var importedSyntax = importedModuleNames.map(m => Import.asSyntax(m))
-
-    if (visitedModules.contains(mainMod))
-      throw KEMException.compilerError("Found circularity in module imports")
-    // TODO: Implement CheckListDecl.check
-
-    def resolveImport(importName: String): Module = {
-      var baseName = Import.noSyntax(importName)
-      var modOption = allModules.find(m => m.name.equals(baseName))
-      if (modOption.nonEmpty) {
-        var mod = modOption.get
-        var result = koreModules.get(mod.name)
-        if (result.isEmpty) {
-          result = Some(apply(mod, allModules, koreModules, mainMod +: visitedModules))
-        }
-        if (Import.isSyntax(importName)) {
-          result = Some(koreModules.get(importName).get)
-        }
-          result.get
-      } else if (koreModules.contains(importName))
-          koreModules.get(importName).get
-        else
-          throw KEMException.compilerError("Could not find module: " + importName)
-    }
-
-    var importedSyntaxModules = importedSyntax.map(resolveImport)
-    var syntaxItems = items.filter(s => s.isSyntax)
-    var att = mainMod.att
-    var newSyntaxModule = new Module(Import.asSyntax(mainMod.name), importedSyntaxModules, syntaxItems, att)
-
-    var importedModules = importedModuleNames.map(resolveImport) ++ Set(newSyntaxModule)
-
-    var nonSyntaxItems = items.filter(s => s.isNonSyntax)
-    var newModule = new Module(mainMod.name, importedModules, nonSyntaxItems, att)
-
-    newSyntaxModule.checkSorts()
-    newModule.checkSorts()
-
-    koreModules += ((newModule.name, newModule))
-    koreModules += ((newSyntaxModule.name, newSyntaxModule))
-
-    newModule
-  }
 }
 
 case class Module(val name: String, val imports: Set[Module], localSentences: Set[Sentence], @(Nonnull@param) val att: Att = Att.empty)
@@ -370,16 +322,6 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
     (name, flatModules)
   }
 
-}
-
-object FlatModule {
-  def apply(name: String, unresolvedLocalSentences: Set[Sentence]): FlatModule = {
-    new FlatModule(name, Set(), unresolvedLocalSentences, Att.empty)
-  }
-}
-
-case class FlatModule(name: String, imports: Set[String], localSentences: Set[Sentence], @(Nonnull@param) val att: Att = Att.empty)
-  extends OuterKORE with Sorting with Serializable {
 }
 
 object Import {
