@@ -126,7 +126,6 @@ public class DefinitionParsing {
             }
         }
 
-        Module modWithConfig;
         ResolveConfig resolveConfig = new ResolveConfig(definition.getParsedDefinition(), isStrict, kore, this::parseBubble, this::getParser);
         gen = new RuleGrammarGenerator(definition.getParsedDefinition());
 
