@@ -119,7 +119,7 @@ module MAP
   syntax KItem ::= Map "[" KItem "]" "orDefault" KItem      [function, functional, hook(MAP.lookupOrDefault), klabel(Map:lookupOrDefault)]
 
   /*@ Update a Map in form of  of keys and values: */
-  syntax Map ::= Map "[" KItem "<-" KItem "]"           [function, functional, hook(MAP.update), prefer]
+  syntax Map ::= Map "[" KItem "<-" KItem "]"           [function, functional, klabel(Map:update), symbol, hook(MAP.update), prefer]
 
   /*@ Remove key/value pair associated with the key from map? */
   syntax Map ::= Map "[" KItem "<-" "undef" "]"     [function, functional, hook(MAP.remove), klabel(_[_<-undef]), symbol]
@@ -313,14 +313,14 @@ module BOOL
   imports BOOL-SYNTAX
   syntax Bool ::= "notBool" Bool          [function, functional, klabel(notBool_), symbol, smt-hook(not), boolOperation, latex(\neg_{\scriptstyle\it Bool}{#1}), hook(BOOL.not)]
                 > Bool "andBool" Bool     [function, functional, klabel(_andBool_), symbol, left, smt-hook(and), boolOperation, latex({#1}\wedge_{\scriptstyle\it Bool}{#2}), hook(BOOL.and)]
-                | Bool "andThenBool" Bool [function, functional, left, smt-hook(and), boolOperation, hook(BOOL.andThen)]
-                | Bool "xorBool" Bool     [function, functional, left, smt-hook(xor), boolOperation, hook(BOOL.xor)]
-                | Bool "orBool" Bool      [function, functional, left, smt-hook(or), boolOperation, latex({#1}\vee_{\scriptstyle\it Bool}{#2}), hook(BOOL.or)]
-                | Bool "orElseBool" Bool  [function, functional, left, smt-hook(or), boolOperation, hook(BOOL.orElse)]
-                | Bool "impliesBool" Bool [function, functional, left, smt-hook(=>), boolOperation, hook(BOOL.implies)]
+                | Bool "andThenBool" Bool [function, functional, klabel(_andThenBool_), symbol, left, smt-hook(and), boolOperation, hook(BOOL.andThen)]
+                | Bool "xorBool" Bool     [function, functional, klabel(_xorBool_), symbol, left, smt-hook(xor), boolOperation, hook(BOOL.xor)]
+                | Bool "orBool" Bool      [function, functional, klabel(_orBool_), left, smt-hook(or), boolOperation, latex({#1}\vee_{\scriptstyle\it Bool}{#2}), hook(BOOL.or)]
+                | Bool "orElseBool" Bool  [function, functional, klabel(_orElseBool_), symbol, left, smt-hook(or), boolOperation, hook(BOOL.orElse)]
+                | Bool "impliesBool" Bool [function, functional, klabel(_impliesBool_), symbol, left, smt-hook(=>), boolOperation, hook(BOOL.implies)]
                 > left:
-                  Bool "==Bool" Bool      [function, functional, left, smt-hook(=), hook(BOOL.eq)]
-                | Bool "=/=Bool" Bool     [function, functional, left, smt-hook(distinct), hook(BOOL.ne)]
+                  Bool "==Bool" Bool      [function, functional, klabel(_==Bool_), symbol, left, smt-hook(=), hook(BOOL.eq)]
+                | Bool "=/=Bool" Bool     [function, functional, klabel(_=/=Bool_), symbol, left, smt-hook(distinct), hook(BOOL.ne)]
 
   rule notBool true => false
   rule notBool false => true
@@ -372,31 +372,31 @@ endmodule
 module INT-COMMON
   imports INT-SYNTAX
   imports BOOL
-  syntax Int ::= "~Int" Int                     [function, functional, latex(\mathop{\sim_{\scriptstyle\it Int}}{#1}), hook(INT.not)]
+  syntax Int ::= "~Int" Int                     [function, klabel(~Int_), symbol, functional, latex(\mathop{\sim_{\scriptstyle\it Int}}{#1}), hook(INT.not)]
                > left:
-                 Int "^Int" Int                 [function, left, smt-hook(^), latex({#1}\mathrel{{\char`\^}_{\!\scriptstyle\it Int}}{#2}), hook(INT.pow)]
-               | Int "^%Int" Int Int            [function, left, smt-hook((mod (^ #1 #2) #3)), hook(INT.powmod)]
+                 Int "^Int" Int                 [function, klabel(_^Int_), symbol, left, smt-hook(^), latex({#1}\mathrel{{\char`\^}_{\!\scriptstyle\it Int}}{#2}), hook(INT.pow)]
+               | Int "^%Int" Int Int            [function, klabel(_^%Int__), symbol, left, smt-hook((mod (^ #1 #2) #3)), hook(INT.powmod)]
                > left:
-                 Int "*Int" Int                 [function, functional, left, smt-hook(*), latex({#1}\mathrel{\ast_{\scriptstyle\it Int}}{#2}), hook(INT.mul)]
+                 Int "*Int" Int                 [function, functional, klabel(_*Int_), symbol, left, smt-hook(*), latex({#1}\mathrel{\ast_{\scriptstyle\it Int}}{#2}), hook(INT.mul)]
                /* FIXME: translate /Int and %Int into smtlib */
                /* /Int and %Int implement t-division */
-               | Int "/Int" Int                 [function, left, smt-hook(div), latex({#1}\mathrel{\div_{\scriptstyle\it Int}}{#2}), hook(INT.tdiv)]
-               | Int "%Int" Int                 [function, left, smt-hook(mod), latex({#1}\mathrel{\%_{\scriptstyle\it Int}}{#2}), hook(INT.tmod)]
+               | Int "/Int" Int                 [function, klabel(_/Int_), symbol, left, smt-hook(div), latex({#1}\mathrel{\div_{\scriptstyle\it Int}}{#2}), hook(INT.tdiv)]
+               | Int "%Int" Int                 [function, klabel(_%Int_), symbol, left, smt-hook(mod), latex({#1}\mathrel{\%_{\scriptstyle\it Int}}{#2}), hook(INT.tmod)]
                /* divInt and modInt implement e-division */
-               | Int "divInt" Int               [function, left, smt-hook(div), hook(INT.ediv)]
-               | Int "modInt" Int               [function, left, smt-hook(mod), hook(INT.emod)]
+               | Int "divInt" Int               [function, klabel(_divInt_), symbol, left, smt-hook(div), hook(INT.ediv)]
+               | Int "modInt" Int               [function, klabel(_modInt_), symbol, left, smt-hook(mod), hook(INT.emod)]
                > left:
-                 Int "+Int" Int                 [function, functional, left, smt-hook(+), latex({#1}\mathrel{+_{\scriptstyle\it Int}}{#2}), hook(INT.add), klabel(_+Int_), symbol]
-               | Int "-Int" Int                 [function, functional, left, smt-hook(-), latex({#1}\mathrel{-_{\scriptstyle\it Int}}{#2}), hook(INT.sub)]
+                 Int "+Int" Int                 [function, functional, klabel(_+Int_), symbol, left, smt-hook(+), latex({#1}\mathrel{+_{\scriptstyle\it Int}}{#2}), hook(INT.add)]
+               | Int "-Int" Int                 [function, functional, klabel(_-Int_), symbol, left, smt-hook(-), latex({#1}\mathrel{-_{\scriptstyle\it Int}}{#2}), hook(INT.sub)]
                > left:
-                 Int ">>Int" Int                [function, left, latex({#1}\mathrel{\gg_{\scriptstyle\it Int}}{#2}), hook(INT.shr)]
-               | Int "<<Int" Int                [function, left, latex({#1}\mathrel{\ll_{\scriptstyle\it Int}}{#2}), hook(INT.shl)]
+                 Int ">>Int" Int                [function, klabel(_>>Int_), symbol, left, latex({#1}\mathrel{\gg_{\scriptstyle\it Int}}{#2}), hook(INT.shr)]
+               | Int "<<Int" Int                [function, klabel(_<<Int_), symbol, left, latex({#1}\mathrel{\ll_{\scriptstyle\it Int}}{#2}), hook(INT.shl)]
                > left:
-                 Int "&Int" Int                 [function, functional, left, latex({#1}\mathrel{\&_{\scriptstyle\it Int}}{#2}), hook(INT.and)]
+                 Int "&Int" Int                 [function, functional, klabel(_&Int_), symbol, left, latex({#1}\mathrel{\&_{\scriptstyle\it Int}}{#2}), hook(INT.and)]
                > left:
-                 Int "xorInt" Int               [function, functional, left, latex({#1}\mathrel{\oplus_{\scriptstyle\it Int}}{#2}), hook(INT.xor)]
+                 Int "xorInt" Int               [function, functional, klabel(_xorInt_), symbol, left, latex({#1}\mathrel{\oplus_{\scriptstyle\it Int}}{#2}), hook(INT.xor)]
                > left:
-                 Int "|Int" Int                 [function, functional, left, latex({#1}\mathrel{|_{\scriptstyle\it Int}}{#2}), hook(INT.or)]
+                 Int "|Int" Int                 [function, functional, klabel(_|Int_), symbol, left, latex({#1}\mathrel{|_{\scriptstyle\it Int}}{#2}), hook(INT.or)]
 
   syntax Int ::= "minInt" "(" Int "," Int ")"   [function, functional, smtlib(int_min), hook(INT.min)]
                | "maxInt" "(" Int "," Int ")"   [function, functional, smtlib(int_max), hook(INT.max)]
@@ -406,12 +406,12 @@ module INT-COMMON
   syntax Int ::= bitRangeInt           ( Int, indexInt: Int, lengthInt: Int ) [function, hook(INT.bitRange)]
   syntax Int ::= signExtendBitRangeInt ( Int, indexInt: Int, lengthInt: Int ) [function, hook(INT.signExtendBitRange)]
 
-  syntax Bool ::= Int "<=Int" Int         [function, functional, left, smt-hook(<=), latex({#1}\mathrel{\leq_{\scriptstyle\it Int}}{#2}), hook(INT.le)]
-                | Int "<Int" Int          [function, functional, left, smt-hook(<), latex({#1}\mathrel{<_{\scriptstyle\it Int}}{#2}), hook(INT.lt)]
-                | Int ">=Int" Int         [function, functional, left, smt-hook(>=), latex({#1}\mathrel{\geq_{\scriptstyle\it Int}}{#2}), hook(INT.ge)]
-                | Int ">Int" Int          [function, functional, left, smt-hook(>), latex({#1}\mathrel{>_{\scriptstyle\it Int}}{#2}), hook(INT.gt)]
-                | Int "==Int" Int         [function, functional, left, smt-hook(=), latex({#1}\mathrel{{=}{=}_{\scriptstyle\it Int}}{#2}), hook(INT.eq), klabel(_==Int_)]
-                | Int "=/=Int" Int        [function, functional, left, smt-hook(distinct), latex({#1}\mathrel{{=}{/}{=}_{\scriptstyle\it Int}}{#2}), hook(INT.ne)]
+  syntax Bool ::= Int "<=Int" Int         [function, functional, klabel(_<=Int_), symbol, left, smt-hook(<=), latex({#1}\mathrel{\leq_{\scriptstyle\it Int}}{#2}), hook(INT.le)]
+                | Int "<Int" Int          [function, functional, klabel(_<Int_), symbol, left, smt-hook(<), latex({#1}\mathrel{<_{\scriptstyle\it Int}}{#2}), hook(INT.lt)]
+                | Int ">=Int" Int         [function, functional, klabel(_>=Int_), symbol, left, smt-hook(>=), latex({#1}\mathrel{\geq_{\scriptstyle\it Int}}{#2}), hook(INT.ge)]
+                | Int ">Int" Int          [function, functional, klabel(_>Int_), symbol, left, smt-hook(>), latex({#1}\mathrel{>_{\scriptstyle\it Int}}{#2}), hook(INT.gt)]
+                | Int "==Int" Int         [function, functional, klabel(_==Int_), symbol, left, smt-hook(=), latex({#1}\mathrel{{=}{=}_{\scriptstyle\it Int}}{#2}), hook(INT.eq)]
+                | Int "=/=Int" Int        [function, functional, klabel(_=/=Int_), symbol, left, smt-hook(distinct), latex({#1}\mathrel{{=}{/}{=}_{\scriptstyle\it Int}}{#2}), hook(INT.ne)]
                 | Int "dividesInt" Int    [function]
 endmodule
 
