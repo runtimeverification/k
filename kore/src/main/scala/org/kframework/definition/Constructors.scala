@@ -61,8 +61,4 @@ object Constructors {
     definition.Bubble(sentenceType, content, att)
 
   def Associativity = definition.Associativity;
-
-  // EXTRA
-
-  def Configuration(body: K, ensures: K, att: attributes.Att) = definition.Configuration(body, ensures, att)
 }
