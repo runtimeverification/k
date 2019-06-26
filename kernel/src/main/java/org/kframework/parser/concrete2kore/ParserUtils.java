@@ -4,7 +4,6 @@ package org.kframework.parser.concrete2kore;
 import org.apache.commons.io.FileUtils;
 import org.kframework.attributes.Att;
 import org.kframework.attributes.Source;
-import org.kframework.definition.FlatModule;
 import org.kframework.definition.Module;
 import org.kframework.kil.Definition;
 import org.kframework.kil.DefinitionItem;
@@ -30,8 +29,6 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import scala.collection.JavaConverters;
 
 import static org.kframework.Collections.*;
 import static org.kframework.kore.KORE.*;
@@ -198,9 +195,6 @@ public class ParserUtils {
         HashMap<String, Module> koreModules = new HashMap<>();
         koreModules.putAll(previousModules.stream().collect(Collectors.toMap(Module::name, m -> m)));
         HashSet<org.kframework.kil.Module> kilModulesSet = new HashSet<>(kilModules);
-
-//        Set<FlatModule> flatModulesSet = kilModulesSet.stream().map(m -> kilToKore.toFlatModule(m)).collect(Collectors.toSet());
-//        return flatModulesSet.stream().map(m -> Module.apply(m, immutable(flatModulesSet), JavaConverters.mapAsScalaMapConverter(koreModules).asScala(), Seq())).flatMap(m -> Stream.concat(Stream.of(m), Stream.of(koreModules.get(m.name() + "$SYNTAX")))).collect(Collectors.toSet());
 
         return kilModules.stream().map(m -> kilToKore.apply(m, kilModulesSet, koreModules)).flatMap(m -> Stream.concat(Stream.of(m), Stream.of(koreModules.get(m.name() + "$SYNTAX")))).collect(Collectors.toSet());
     }

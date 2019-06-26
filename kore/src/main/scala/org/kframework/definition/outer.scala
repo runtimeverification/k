@@ -100,13 +100,14 @@ object Module {
       var modOption = allModules.find(m => m.name.equals(baseName))
       if (modOption.nonEmpty) {
         var mod = modOption.get
-        var tryResult = koreModules.get(mod.name)
-        if (tryResult.isEmpty) {
-          var result = apply(mod, allModules, koreModules, mainMod +: visitedModules)
-          if (Import.isSyntax(importName))
-            result = koreModules.get(importName).get
-          result
-        } else tryResult.get
+        var result = koreModules.get(mod.name)
+        if (result.isEmpty) {
+          result = Some(apply(mod, allModules, koreModules, mainMod +: visitedModules))
+        }
+        if (Import.isSyntax(importName)) {
+          result = Some(koreModules.get(importName).get)
+        }
+          result.get
       } else if (koreModules.contains(importName))
           koreModules.get(importName).get
         else
@@ -119,10 +120,9 @@ object Module {
     var newSyntaxModule = new Module(Import.asSyntax(mainMod.name), importedSyntaxModules, syntaxItems, att)
 
     var importedModules = importedModuleNames.map(resolveImport) ++ Set(newSyntaxModule)
+
     var nonSyntaxItems = items.filter(s => s.isNonSyntax)
     var newModule = new Module(mainMod.name, importedModules, nonSyntaxItems, att)
-
-    newModule.imports.map(m => System.out.println(m.name));
 
     newSyntaxModule.checkSorts()
     newModule.checkSorts()
@@ -385,7 +385,7 @@ case class FlatModule(name: String, imports: Set[String], localSentences: Set[Se
 object Import {
   val syntaxString = "$SYNTAX"
 
-  def isSyntax(name: String): Boolean = name.containsSlice(syntaxString)
+  def isSyntax(name: String): Boolean = name.contains("$SYNTAX")
 
   def asSyntax(name: String): String =
     if (isSyntax(name))
