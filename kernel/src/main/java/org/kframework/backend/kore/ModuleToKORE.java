@@ -1327,8 +1327,13 @@ public class ModuleToKORE {
 
             @Override
             public void apply(KVariable k) {
+                boolean setVar = k.name().startsWith("@");
+                if (setVar) {
+                    sb.append('@');
+                }
                 sb.append("Var");
-                convert(k.name());
+                String name = setVar ? k.name().substring(1) : k.name();
+                convert(name);
                 sb.append(":");
                 convert(k.att().getOptional(Sort.class).orElse(Sorts.K()), false);
             }
