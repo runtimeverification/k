@@ -21,3 +21,4 @@ k-distribution/.project
 junit-reports
 target/
 kore/doc
+__pycache__

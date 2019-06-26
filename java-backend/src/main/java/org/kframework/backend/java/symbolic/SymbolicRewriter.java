@@ -30,7 +30,6 @@ import org.kframework.backend.java.util.FormulaContext;
 import org.kframework.backend.java.util.RuleSourceUtil;
 import org.kframework.backend.java.util.StateLog;
 import org.kframework.backend.java.util.TimeMemoryEntry;
-import org.kframework.backend.java.utils.BitSet;
 import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Rules;
 import org.kframework.kore.FindK;
@@ -71,16 +70,13 @@ public class SymbolicRewriter {
     private final Set<ConstrainedTerm> newSuperheated = Sets.newHashSet();
     private final FastRuleMatcher theFastMatcher;
     private final Definition definition;
-    private final BitSet allRuleBits;
 
     public SymbolicRewriter(GlobalContext global, List<String> transitions,
                             KOREtoBackendKIL constructor) {
         this.constructor = constructor;
         this.definition = global.getDefinition();
-        this.allRuleBits = BitSet.apply(definition.ruleTable.size());
-        this.allRuleBits.makeOnes(definition.ruleTable.size());
         this.transitions = transitions;
-        this.theFastMatcher = new FastRuleMatcher(global, definition.ruleTable.size());
+        this.theFastMatcher = new FastRuleMatcher(global);
         this.transition = true;
         this.global = global;
         parseLogCells();
@@ -91,8 +87,13 @@ public class SymbolicRewriter {
     }
 
     public RewriterResult rewrite(ConstrainedTerm constrainedTerm, int bound) {
-        stopwatch.start();
         ConstrainedTerm initTerm = constrainedTerm;
+        if (prettyInitTerm != null) {
+            System.err.println("\nInitial term\n=====================\n");
+            printTermAndConstraint(initTerm, prettyInitTerm, initTerm);
+        }
+
+        stopwatch.start();
         int step = 0;
         prevStats = new TimeMemoryEntry(false);
 
@@ -173,11 +174,12 @@ public class SymbolicRewriter {
         global.stateLog.log(StateLog.LogEvent.NODE, subject.term(), subject.constraint());
         List<ConstrainedTerm> results = new ArrayList<>();
         if (definition.mainAutomaton() == null) {
+            //If there are no regular rules, do nothing.
             return results;
         }
+
         List<FastRuleMatcher.RuleMatchResult> matches = theFastMatcher.matchRulePattern(
                 subject,
-                allRuleBits,
                 narrowing,
                 computeOne,
                 transitions,
@@ -628,7 +630,8 @@ public class SymbolicRewriter {
     public List<ConstrainedTerm> proveRule(
             Rule rule, ConstrainedTerm initialTerm,
             ConstrainedTerm targetTerm,
-            List<Rule> specRules, KExceptionManager kem, @Nullable Rule boundaryPattern) {
+            KExceptionManager kem,
+            @Nullable Rule boundaryPattern) {
         List<ConstrainedTerm> proofResults = new ArrayList<>();
         List<ConstrainedTerm> successResults = new ArrayList<>();
         int successPaths = 0;
@@ -712,7 +715,7 @@ public class SymbolicRewriter {
 
                     //Attempt to apply a spec rule, except on first step.
                     if (step > 1) {
-                        ConstrainedTerm result = applySpecRules(term, specRules);
+                        ConstrainedTerm result = applySpecRules(term, step);
                         if (result != null) {
                             nextStepLogEnabled = true;
                             logStep(step, v, term, true, alreadyLogged, initialTerm);
@@ -1094,12 +1097,23 @@ public class SymbolicRewriter {
     /**
      * Applies the first applicable specification rule and returns the result.
      */
-    private ConstrainedTerm applySpecRules(ConstrainedTerm constrainedTerm, List<Rule> specRules) {
+    private ConstrainedTerm applySpecRules(ConstrainedTerm constrainedTerm, int step) {
         if (global.javaExecutionOptions.logRulesPublic) {
-            System.err.println("\nSpec rule application phase\n" +
-                    "==========================================\n");
+            System.err.format("\nSpec rule application phase, step %d\n" +
+                    "==========================================\n", step);
         }
-        for (Rule specRule : specRules) {
+        //Work in progress: spec rules automaton. Use in for loop below.
+        /*List<Pair<Rule, Integer>> automatonMatchedRules =
+                theFastMatcher.matchWithAutomaton(constrainedTerm, definition.specAutomaton());
+
+        if (global.javaExecutionOptions.logRulesPublic && !automatonMatchedRules.isEmpty()) {
+            System.err.format("\nSpec rule application, rules matched by automaton: %d\n" +
+                    "------------------------------------------\n", automatonMatchedRules.size());
+        }*/
+
+        //for (Pair<Rule, Integer> match : automatonMatchedRules) {
+        for (Rule specRule : definition.specRulesPublic) {
+            //Rule specRule = match.getLeft();
             ConstrainedTerm pattern = specRule.createLhsPattern(constrainedTerm.termContext());
             ConjunctiveFormula constraint = constrainedTerm.matchImplies(pattern, true, false,
                     new FormulaContext(FormulaContext.Kind.SpecRule, specRule, global), specRule.matchingSymbols());

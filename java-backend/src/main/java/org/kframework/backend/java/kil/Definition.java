@@ -27,6 +27,7 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import scala.collection.JavaConversions;
 import scala.collection.JavaConverters;
 
+import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -38,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 import static org.kframework.Collections.*;
@@ -78,6 +80,10 @@ public class Definition extends JavaSymbolicObject {
 
     private final List<Rule> rules = Lists.newArrayList();
     private final List<Rule> macros = Lists.newArrayList();
+    private final List<Rule> specRules = new ArrayList<>();
+
+    @SuppressWarnings("unused") //for debug
+    public final List<Rule> specRulesPublic = Collections.unmodifiableList(specRules);
     private final Multimap<KLabelConstant, Rule> functionRules = ArrayListMultimap.create();
     private final Multimap<KLabelConstant, Rule> sortPredicateRules = HashMultimap.create();
     private final Multimap<KLabelConstant, Rule> anywhereRules = ArrayListMultimap.create();
@@ -187,32 +193,44 @@ public class Definition extends JavaSymbolicObject {
     }
 
     private static final Set<String> automatonAttributes
-            = Sets.newHashSet(JavaBackend.MAIN_AUTOMATON);
+            = Sets.newHashSet(JavaBackend.MAIN_AUTOMATON, JavaBackend.SPEC_AUTOMATON);
 
     /**
      * Converts the org.kframework.Rules to backend Rules, also plugging in the automaton rule
      */
     public void addKoreRules(Module module, GlobalContext global) {
-        KOREtoBackendKIL transformer = new KOREtoBackendKIL(module, this, global, true);
+        KOREtoBackendKIL converter = new KOREtoBackendKIL(module, this, global, true);
+        addKoreRules(module, converter, null, null);
+    }
 
+    public List<Rule> addKoreRules(Module module, KOREtoBackendKIL converter, @Nullable String filterAttribute,
+                                   @Nullable UnaryOperator<Rule> rulePostProcessor) {
         //Add regular rules from all modules
-        JavaConversions.setAsJavaSet(module.rules()).stream()
+        List<Rule> result = stream(module.rules())
                 .filter(rule -> !containsAnyAttribute(rule, automatonAttributes))
+                .filter(rule -> filterAttribute == null || rule.att().contains(filterAttribute))
                 //Ensures that rule order in all collections remains the same across across different executions.
                 .sorted(Comparator.comparingInt(rule -> rule.body().hashCode()))
-                .forEach(rule -> addKoreRule(rule, transformer, module));
+                .map(rule -> addKoreRule(rule, converter, module, rulePostProcessor))
+                .collect(Collectors.toList());
 
         //Add automaton from this module only
-        JavaConversions.setAsJavaSet(module.localRules()).stream()
+        stream(module.localRules())
                 .filter(rule -> containsAnyAttribute(rule, automatonAttributes))
-                .forEach(rule -> addKoreAutomaton(rule, transformer, module));
+                .forEach(rule -> addKoreAutomaton(rule, converter, module));
+        return result;
     }
 
     /**
      * @return the converted rule
      */
-    public Rule addKoreRule(org.kframework.definition.Rule rule, KOREtoBackendKIL transformer, Module module) {
-        Rule convertedRule = transformer.convert(module, rule);
+    public Rule addKoreRule(org.kframework.definition.Rule rule, KOREtoBackendKIL converter, Module module,
+                            @Nullable UnaryOperator<Rule> rulePostProcessor) {
+        Rule convertedRule = converter.convert(module, rule);
+        if (rulePostProcessor != null) {
+            convertedRule = rulePostProcessor.apply(convertedRule);
+        }
+
         addRule(convertedRule);
         if (rule.att().contains(Att.topRule()) || rule.att().contains(Att.specification())) {
             reverseRuleTable.put(rule.hashCode(), reverseRuleTable.size());
@@ -280,6 +298,9 @@ public class Definition extends JavaSymbolicObject {
             anywhereRules.put(rule.anywhereKLabel(), rule);
         } else {
             rules.add(rule);
+            if (rule.att().contains(Att.specification())) {
+                specRules.add(rule);
+            }
         }
     }
 
@@ -405,5 +426,9 @@ public class Definition extends JavaSymbolicObject {
 
     public Rule mainAutomaton() {
         return automatons.get(JavaBackend.MAIN_AUTOMATON);
+    }
+
+    public Rule specAutomaton() {
+        return automatons.get(JavaBackend.SPEC_AUTOMATON);
     }
 }
