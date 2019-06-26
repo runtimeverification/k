@@ -1,0 +1,1 @@
+{"format":"KAST","version":1,"term":{"node":"KApply","label":"_andBool_","variable":false,"arity":2,"args":[{"node":"KApply","label":"_==Int_","variable":false,"arity":2,"args":[{"node":"KToken","sort":"Int","token":"3"},{"node":"KToken","sort":"Int","token":"4"}]},{"node":"KToken","sort":"Bool","token":"true"}]}}

@@ -7,15 +7,18 @@ import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.Multisets;
 import com.google.common.collect.Sets;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.kframework.attributes.Att;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.compile.KOREtoBackendKIL;
+import org.kframework.backend.java.kil.Bottom;
 import org.kframework.backend.java.kil.BuiltinList;
 import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.BuiltinSet;
 import org.kframework.backend.java.kil.ConstrainedTerm;
+import org.kframework.backend.java.kil.Definition;
 import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.kil.InnerRHSRewrite;
 import org.kframework.backend.java.kil.KItem;
@@ -38,7 +41,6 @@ import org.kframework.utils.errorsystem.KEMException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Formatter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -59,8 +61,10 @@ import static org.kframework.Collections.*;
  */
 public class FastRuleMatcher {
 
+    private final Definition definition;
     private ConjunctiveFormula[] constraints;
     private final int ruleCount;
+    private BitSet ruleMask;
 
     private BitSet empty;
 
@@ -82,10 +86,26 @@ public class FastRuleMatcher {
         return new FastRuleMatcher(context.global(), 1).matchSinglePattern(subject, pattern, context);
     }
 
+    public FastRuleMatcher(GlobalContext global) {
+        this(global, global.getDefinition().ruleTable.size());
+    }
+
     public FastRuleMatcher(GlobalContext global, int ruleCount) {
+        this(global, ruleCount, global.getDefinition());
+    }
+
+    public FastRuleMatcher(GlobalContext global, int ruleCount, Definition definition) {
         this.global = global;
         this.ruleCount = ruleCount;
+        this.definition = definition;
         constraints = new ConjunctiveFormula[this.ruleCount];
+        ruleMask = makeAllRuleBits(ruleCount);
+    }
+
+    static BitSet makeAllRuleBits(int size) {
+        BitSet result = BitSet.apply(size);
+        result.makeOnes(size);
+        return result;
     }
 
     /**
@@ -96,31 +116,27 @@ public class FastRuleMatcher {
      */
     public List<RuleMatchResult> matchRulePattern(
             ConstrainedTerm subject,
-            BitSet ruleMask,
             boolean narrowing,
             boolean computeOne,
             List<String> transitions,
             boolean proveFlag,
             TermContext context, int step) {
-
-        ruleMask.stream().forEach(i -> constraints[i] = ConjunctiveFormula.of(context.global()));
-        empty = BitSet.apply(ruleCount);
-
         if (global.javaExecutionOptions.logRulesPublic) {
             System.err.format("\nRegular rule automaton phase, step %d\n" +
                     "==========================================\n", step);
         }
-        Term automatonLHS = global.getDefinition().mainAutomaton().leftHandSide();
-        BitSet theMatchingRules = matchAndLog(subject.term(), automatonLHS, ruleMask, List(), false);
+        Rule automaton = definition.mainAutomaton();
+        List<Pair<Rule, Integer>> automatonMatchedRules = matchWithAutomaton(subject, automaton);
 
         if (global.javaExecutionOptions.logRulesPublic) {
-            System.err.format("\nRegular rule attempting to match phase, step %d\n" +
-                    "==========================================\n", step);
+            System.err.format("\nRegular rule application, rules matched by automaton: %d\n" +
+                    "------------------------------------------\n", automatonMatchedRules.size());
         }
         List<RuleMatchResult> structuralResults = new ArrayList<>();
         List<RuleMatchResult> transitionResults = new ArrayList<>();
-        for (int i = theMatchingRules.nextSetBit(0); i >= 0; i = theMatchingRules.nextSetBit(i + 1)) {
-            Rule rule = global.getDefinition().ruleTable.get(i);
+        for (Pair<Rule, Integer> match : automatonMatchedRules) {
+            Rule rule = match.getLeft();
+            int i = match.getRight();
             // skip over IO rules when in prove rules
             if (proveFlag && rule.att().contains("stream")) {
                 continue;
@@ -145,7 +161,7 @@ public class FastRuleMatcher {
                     constraints[i],
                     subject.constraint(),
                     patternConstraint,
-                    Sets.union(getLeftHandSide(automatonLHS, i).variableSet(), patternConstraint.variableSet()).stream()
+                    Sets.union(getLeftHandSide(automaton.leftHandSide(), i).variableSet(), patternConstraint.variableSet()).stream()
                             .filter(v -> !v.name().equals(KOREtoBackendKIL.THE_VARIABLE))
                             .collect(Collectors.toSet()),
                     context, formulaContext);
@@ -174,6 +190,22 @@ public class FastRuleMatcher {
         } else {
             return transitionResults;
         }
+    }
+
+    /**
+     * @return rules matching the subject
+     */
+    public List<Pair<Rule, Integer>> matchWithAutomaton(ConstrainedTerm subject, Rule automaton) {
+        ruleMask.stream().forEach(i -> constraints[i] = ConjunctiveFormula.of(subject.termContext().global()));
+        empty = BitSet.apply(ruleCount);
+        BitSet matchingRuleBits =
+                matchAndLog(subject.term(), automaton.leftHandSide(), ruleMask, List(), false);
+
+        List<Pair<Rule, Integer>> result = new ArrayList<>();
+        for (int i = matchingRuleBits.nextSetBit(0); i >= 0; i = matchingRuleBits.nextSetBit(i + 1)) {
+            result.add(new ImmutablePair<>(definition.ruleTable.get(i), i));
+        }
+        return result;
     }
 
     public static class RuleMatchResult {
@@ -342,8 +374,14 @@ public class FastRuleMatcher {
             BitSet theNewMask = matchAndLog(subject, (Term) rw.klist().items().get(0), ruleMask, path, logFailures);
 
             for (int i = theNewMask.nextSetBit(0); i >= 0; i = theNewMask.nextSetBit(i + 1)) {
-                if (innerRHSRewrite.theRHS[i] != null) {
-                    constraints[i] = constraints[i].add(new LocalRewriteTerm(path.reverse(), innerRHSRewrite.theRHS[i]), BoolToken.TRUE);
+                if (i < innerRHSRewrite.theRHS.length) {
+                    if (innerRHSRewrite.theRHS[i] != null) {
+                        constraints[i] = constraints[i]
+                                .add(new LocalRewriteTerm(path.reverse(), innerRHSRewrite.theRHS[i]), BoolToken.TRUE);
+                    }
+                } else {
+                    //rule index i is not handled by this automaton.
+                    theNewMask.clear(i);
                 }
             }
             return theNewMask;
@@ -562,7 +600,7 @@ public class FastRuleMatcher {
             return ruleMask;
         }
 
-        if (!global.getDefinition().subsorts().isSubsortedEq(variable.sort(), term.sort())) {
+        if (!definition.subsorts().isSubsortedEq(variable.sort(), term.sort())) {
             return empty;
         }
 
@@ -612,7 +650,8 @@ public class FastRuleMatcher {
                 return (Term) ruleAutomatonDisjunction.disjunctions().stream()
                         .filter(p -> p.getRight().get(i))
                         .map(Pair::getLeft)
-                        .findAny().get()
+                        //If automaton doesn't include this rule, return BOTTOM, that will remove this rule from BitSet.
+                        .findAny().orElse(Bottom.BOTTOM)
                         .accept(this);
             }
 
@@ -635,7 +674,8 @@ public class FastRuleMatcher {
                 return (Term) ruleAutomatonDisjunction.disjunctions().stream()
                         .filter(p -> p.getRight().get(i))
                         .map(Pair::getLeft)
-                        .findAny().get()
+                        //If automaton doesn't include this rule, return BOTTOM, that will remove this rule from BitSet.
+                        .findAny().orElse(Bottom.BOTTOM)
                         .accept(this);
             }
 
@@ -672,7 +712,7 @@ public class FastRuleMatcher {
         queue.add(map);
         while (!queue.isEmpty()) {
             BuiltinMap candidate = queue.remove();
-            for (Rule rule : global.getDefinition().patternFoldingRules()) {
+            for (Rule rule : definition.patternFoldingRules()) {
                 for (Substitution<Variable, Term> substitution : PatternMatcher.match(candidate, rule, context,
                         "unifyMap", 1)) {
                     BuiltinMap result = (BuiltinMap) rule.rightHandSide().substituteAndEvaluate(substitution, context);
