@@ -46,7 +46,12 @@ public class Definition extends ASTNode {
 
     @Override
     public String toString() {
-        String content = "";
+        StringBuilder sb = new StringBuilder("DEF: ")
+          .append(mainFile)
+          .append(" -> ")
+          .append(mainModule)
+          .append('\n');
+
         List<DefinitionItem> sortedItems = new ArrayList<>(items);
         sortedItems.sort(new Comparator<DefinitionItem>() {
             @Override
@@ -55,9 +60,10 @@ public class Definition extends ASTNode {
             }
         });
         for (DefinitionItem di : sortedItems)
-            content += di + " \n";
+            sb.append(di)
+              .append(" \n");
 
-        return "DEF: " + mainFile + " -> " + mainModule + "\n" + content;
+        return sb.toString();
     }
 
     public void setItems(List<DefinitionItem> items) {
