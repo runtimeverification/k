@@ -56,7 +56,10 @@ public class Module extends DefinitionItem {
 
     @Override
     public String toString() {
-        String content = "";
+        StringBuilder sb = new StringBuilder("module ")
+          .append(name)
+          .append("\n");
+
         List<ModuleItem> sortedItems = new ArrayList<ModuleItem>(items);
 
         sortedItems.sort(new Comparator<ModuleItem>() {
@@ -67,9 +70,9 @@ public class Module extends DefinitionItem {
         });
 
         for (ModuleItem i : sortedItems)
-            content += i + " \n";
+            sb.append(i).append("\n");
 
-        return "module " + name + "\n" + content + "\nendmodule";
+        return sb.append("\nendmodule").toString();
     }
 
 
