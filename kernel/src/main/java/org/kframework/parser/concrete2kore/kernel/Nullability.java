@@ -87,11 +87,15 @@ public class Nullability {
     private void markNullable(State state, SetMultimap<NonTerminal, NonTerminalState> nonTerminalCallers) {
         if (!entryNullable.contains(state)) {
             entryNullable.add(state);
-            if (state instanceof NextableState) {
-                if (isNullable(state))
-                    for (State s : ((NextableState) state).next)
-                        markNullable(s, nonTerminalCallers);
-            } else {
+
+            try { // state instanceof NextableState
+              NextableState ns = (NextableState) state;
+              if (isNullable(ns))
+                 for (State s : ns.next)
+                     markNullable(s, nonTerminalCallers);
+            } catch ( ClassCastException e ) {
+                // state not instanceof NextableState
+
                 assert state instanceof ExitState: "Expected element of type ExitState: " + state;
                 // previous calls to childNullable would have returned False
                 // so now we restart those recursions
@@ -109,17 +113,21 @@ public class Nullability {
     private void markFirst(boolean[] firstStatesForNt, State state) {
         if (!firstStatesForNt[state.unique]) {
             firstStatesForNt[state.unique] = true;
-            if (state instanceof RegExState) {
+
+            try { // state instaneof RegExState
                 stateToToken[state.unique] = ((RegExState) state).kind;
-            }
-            if (state instanceof NextableState) {
+            } catch(ClassCastException e) { }
+
+            try { // state instanceof NextableState
                 if (isNullable(state))
                     for (State s : ((NextableState)state).next)
                         markFirst(firstStatesForNt, s);
-                if (state instanceof NonTerminalState) {
+
+                try { // state instanceof NonTerminalState
                     markFirst(firstStatesForNt, ((NonTerminalState) state).child.entryState);
-                }
-            }
+                } catch(ClassCastException e) { }
+
+            } catch (ClassCastException e) { }
         }
     }
 
@@ -129,11 +137,23 @@ public class Nullability {
      * @return true if the state can parse without consuming characters and false otherwise
      */
     public boolean isNullable(State state) {
-        return (state instanceof EntryState) ||
-                (state instanceof ExitState) ||
-                (state instanceof RuleState) ||
-               ((state instanceof PrimitiveState) && ((PrimitiveState)state).isNullable()) ||
-               ((state instanceof NonTerminalState) && isNullable(((NonTerminalState) state).child));
+        if ( state instanceof EntryState
+             || state instanceof ExitState
+             || state instanceof RuleState ) {
+          return true;
+        }
+
+        try {
+           return ((PrimitiveState) state).isNullable();
+        }
+        catch ( ClassCastException e ) { }
+
+        try {
+           return isNullable( ((NonTerminalState) state).child );
+        }
+        catch ( ClassCastException e ) { }
+
+        return false;
     }
 
     public boolean isNullable(NonTerminal nt) { return entryNullable.contains(nt.exitState); }
