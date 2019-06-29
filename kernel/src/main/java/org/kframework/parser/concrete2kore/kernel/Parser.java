@@ -144,7 +144,8 @@ public class Parser {
             @Override
             public boolean equals(final Object o) {
                 if (this == o) return true;
-                if (o == null || getClass() != o.getClass()) return false;
+                if (o == null) return false;
+                if (getClass() != o.getClass()) return false;
 
                 final Key key = (Key) o;
 
@@ -210,8 +211,8 @@ public class Parser {
             //  - state.
             // NOTE: these last two comparisons are just so we don't conflate distinct values
 
-            int[] v1 = orderingInfo;
-            int[] v2 = that.orderingInfo;
+            final int[] v1 = orderingInfo;
+            final int[] v2 = that.orderingInfo;
 
             int k = 1;
             int c1 = v2[0];
@@ -235,27 +236,30 @@ public class Parser {
             public final StateCall stateCall;
             /** The end position of the parse */
             public final int stateEnd;
+            /** Cache the hash code here. **/
             private final int hashCode;
-            public Key(StateCall stateCall, int stateEnd) {
+
+            public Key(final StateCall stateCall, final int stateEnd) {
+                // TODO remove assertsion.
                 assert stateCall != null;
                 //***************************** Start Boilerplate *****************************
                 this.stateCall = stateCall; this.stateEnd = stateEnd;
-                this.hashCode = computeHash();
+
+                this.hashCode = 31 * stateCall.key.hashCode() + stateEnd;
             }
 
             public StateReturn create() { return new StateReturn(this); }
 
             @Override
-            public boolean equals(Object o) {
+            public boolean equals(final Object o) {
                 if (this == o) return true;
-                if (o == null || getClass() != o.getClass()) return false;
+                if (o == null) return false;
+                if (getClass() != o.getClass()) return false;
 
-                Key key = (Key) o;
+                final Key key = (Key) o;
 
-                if (stateEnd != key.stateEnd) return false;
-                if (!stateCall.equals(key.stateCall)) return false;
-
-                return true;
+                return this.stateEnd == key.stateEnd
+                  && stateCall.equals(key.stateCall);
             }
 
             @Override
@@ -263,20 +267,19 @@ public class Parser {
                 return hashCode;
             }
 
-            public int computeHash() {
-                int result = stateCall.key.hashCode();
-                result = 31 * result + stateEnd;
-                return result;
-            }
-
             @Override
             public String toString() {
-                return stateCall.key.toString() + "-" + stateEnd;
+                return new StringBuilder()
+                  .append(stateCall.key.toString())
+                  .append('-')
+                  .append(stateEnd)
+                  .toString();
             }
         }
 
         public final Key key;
-        StateReturn(Key key) {
+
+        StateReturn(final Key key) {
             this.key = key;
             this.orderingInfo[0] = this.key.stateCall.key.ntCall.key.ntBegin;
             this.orderingInfo[1] = this.key.stateEnd;
@@ -285,29 +288,26 @@ public class Parser {
             this.orderingInfo[4] = this.key.stateCall.key.state.unique;
             //// NON-BOILERPLATE CODE: ////
             // update the NonTerminalCalls set of ExitStateReturns
-            if (this.key.stateCall.key.state instanceof ExitState) {
+            if ( this.key.stateCall.key.state.getClass() == ExitState.class ) {
                 this.key.stateCall.key.ntCall.exitStateReturns.add(this);
             }
         }
+
         @Override
         public int hashCode() {
             return key.hashCode;
         }
+
         @Override
-        public boolean equals(Object obj) {
-            if (this == obj)
-                return true;
-            if (obj == null)
-                return false;
-            if (getClass() != obj.getClass())
-                return false;
-            StateReturn other = (StateReturn) obj;
-            if (key == null) {
-                if (other.key != null)
-                    return false;
-            } else if (!key.equals(other.key))
-                return false;
-            return true;
+        public boolean equals(final Object obj) {
+            if (this == obj) return true;
+            if (obj == null) return false;
+            if (getClass() != obj.getClass()) return false;
+
+            final StateReturn other = (StateReturn) obj;
+
+            return this.key == null && other.key == null
+              || this.key.equals(other.key);
         }
 
         //***************************** End Boilerplate *****************************
@@ -342,28 +342,30 @@ public class Parser {
             public final NonTerminal nt;
             /** The start position for parsing the {@link NonTerminal} */
             public final int ntBegin;
+            /** Cache the hash code here. */
             private final int hashCode;
             //***************************** Start Boilerplate *****************************
-            public Key(NonTerminal nt, int ntBegin) {
+            public Key(final NonTerminal nt, final int ntBegin) {
+                // TODO remove assertion.
                 assert nt != null;
                 // assert ntBegin == c.stateBegin for c in callers
-                this.nt = nt; this.ntBegin = ntBegin;
-                this.hashCode = computeHash();
+                this.nt = nt;
+                this.ntBegin = ntBegin;
+                this.hashCode = 31 * nt.hashCode() + ntBegin;
             }
 
             public NonTerminalCall create() { return new NonTerminalCall(this); }
 
             @Override
-            public boolean equals(Object o) {
+            public boolean equals(final Object o) {
                 if (this == o) return true;
-                if (o == null || getClass() != o.getClass()) return false;
+                if (o == null) return false;
+                if (getClass() != o.getClass()) return false;
 
-                Key key = (Key) o;
+                final Key key = (Key) o;
 
-                if (ntBegin != key.ntBegin) return false;
-                if (!nt.equals(key.nt)) return false;
-
-                return true;
+                return this.ntBegin == key.ntBegin
+                  && nt.equals(key.nt);
             }
 
             @Override
@@ -371,19 +373,17 @@ public class Parser {
                 return hashCode;
             }
 
-            public int computeHash() {
-                int result = nt.hashCode();
-                result = 31 * result + ntBegin;
-                return result;
-            }
-
             @Override
             public String toString() {
-                return nt.name + " @ " + ntBegin;
+                return new StringBuilder()
+                  .append(nt.name)
+                  .append(" @ ")
+                  .append(ntBegin)
+                  .toString();
             }
         }
         final Key key;
-        NonTerminalCall(Key key) { assert key != null; this.key = key; }
+        NonTerminalCall(final Key key) { assert key != null; this.key = key; }
 
         public int hashCode() {
             return this.key.hashCode();
@@ -396,7 +396,7 @@ public class Parser {
     private static class StateReturnWorkList {
         private final HashSet<StateReturn> contains = new HashSet<>();
         private final TreeSet<StateReturn> ordering = new TreeSet<>();
-        public void enqueue(StateReturn stateReturn) {
+        public void enqueue(final StateReturn stateReturn) {
             if (!contains.add(stateReturn)) return;
             ordering.add(stateReturn);
         }
@@ -487,7 +487,7 @@ public class Parser {
     ////////////////
 
     /**
-     * A Function represents an ASTs.
+     * A Function represents an AST.
      */
     private static class Function {
         /**
