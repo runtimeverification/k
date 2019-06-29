@@ -342,7 +342,7 @@ public class Grammar implements Serializable {
      * The final state of a NonTerminal. Note that an ExitState has no successors and there is only
      * one per NonTerminal.
      */
-    public final class ExitState extends State {
+    public class ExitState extends State {
         ExitState(String name, NonTerminal nt) { super(name, nt); }
     }
 
@@ -369,7 +369,7 @@ public class Grammar implements Serializable {
     /**
      * The first state of a NonTerminal. Only one per NonTerminal.
      */
-    public final class EntryState extends NextableState {
+    public class EntryState extends NextableState {
         EntryState(String name, NonTerminal nt) { super(name, nt, false); }
     }
 
@@ -378,7 +378,7 @@ public class Grammar implements Serializable {
      * parsing from a particular spot. This is specific to the non-terminals in the right hand side
      * of BNF productions.
      */
-    public final class NonTerminalState extends NextableState {
+    public class NonTerminalState extends NextableState {
         /** The NonTerminal referenced by this NonTerminalState */
         public final NonTerminal child;
 
@@ -395,7 +395,7 @@ public class Grammar implements Serializable {
     /**
      * A RuleState takes a Rule and applies an action to the term parsed up to that point.
      */
-    public final class RuleState extends NextableState {
+    public class RuleState extends NextableState {
         /** The rule to be applied. */
         public final Rule rule;
         public RuleState(String name, NonTerminal nt, Rule rule) {
@@ -436,7 +436,7 @@ public class Grammar implements Serializable {
      * Uses java regular expression (@link Matcher} class to consume characters in the
      * char sequence.
      */
-    public final class RegExState extends PrimitiveState {
+    public class RegExState extends PrimitiveState {
         /** The java regular expression pattern. */
         public final int kind;
 

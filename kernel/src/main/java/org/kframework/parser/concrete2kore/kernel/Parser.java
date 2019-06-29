@@ -640,7 +640,7 @@ public class Parser {
         current = Math.max(current, s.maxPosition);
         Set<Pair<Production, RegExState>> tokens = new HashSet<>();
         for (StateCall.Key key : s.stateCalls.keySet()) {
-            if (key.state.getClass() == RegExState.class && key.stateBegin == s.maxPosition) {
+            if (key.state instanceof RegExState && key.stateBegin == s.maxPosition) {
                 tokens.add(new ImmutablePair<>(
                     null, ((RegExState) key.state)));
             }
@@ -691,13 +691,13 @@ public class Parser {
     private void workListStep(StateReturn stateReturn) {
         if (finishStateReturn(stateReturn)) {
             State state = stateReturn.key.stateCall.key.state;
-            if ( state.getClass() == ExitState.class ) {
+            if (state instanceof ExitState) {
                 for (StateCall stateCall : stateReturn.key.stateCall.key.ntCall.callers) {
                     s.stateReturnWorkList.enqueue(
                         s.stateReturns.computeIfAbsent(
                                 new StateReturn.Key(stateCall, stateReturn.key.stateEnd), StateReturn.Key::create));
                 }
-            } else if ( state.getClass() == NextableState.class ) {
+            } else if (state instanceof NextableState) {
                 for (State nextState : ((NextableState) state).next) {
                     activateStateCall(s.stateCalls.computeIfAbsent(new StateCall.Key(
                         stateReturn.key.stateCall.key.ntCall, stateReturn.key.stateEnd, nextState), StateCall.Key::create),
@@ -710,13 +710,13 @@ public class Parser {
     // compute the Function for a state return based on the Function for the state call associated
     // with the state return, and the type of the state
     private boolean finishStateReturn(StateReturn stateReturn) {
-        if ( stateReturn.key.stateCall.key.state.getClass() == EntryState.class ) {
+        if (stateReturn.key.stateCall.key.state instanceof EntryState) {
             return stateReturn.function.add(stateReturn.key.stateCall.function);
-        } else if ( stateReturn.key.stateCall.key.state.getClass() == ExitState.class ) {
+        } else if (stateReturn.key.stateCall.key.state instanceof ExitState) {
             return stateReturn.function.add(stateReturn.key.stateCall.function);
-        } else if ( stateReturn.key.stateCall.key.state instanceof PrimitiveState ) {
+        } else if (stateReturn.key.stateCall.key.state instanceof PrimitiveState) {
             return stateReturn.function.add(stateReturn.key.stateCall.function);
-        } else if ( stateReturn.key.stateCall.key.state.getClass() == RuleState.class ) {
+        } else if (stateReturn.key.stateCall.key.state instanceof RuleState) {
             int startPosition, endPosition;
             if (stateReturn.key.stateCall.key.ntCall.key.ntBegin == s.input.length) {
                 startPosition = s.input[s.input.length - 1].endLoc;
@@ -734,7 +734,7 @@ public class Parser {
                     new Rule.MetaData.Location(startPosition, s.lines[startPosition], s.columns[startPosition]),
                     new Rule.MetaData.Location(endPosition, s.lines[endPosition], s.columns[endPosition]),
                     s.originalInput));
-        } else if ( stateReturn.key.stateCall.key.state.getClass() == NonTerminalState.class ) {
+        } else if (stateReturn.key.stateCall.key.state instanceof NonTerminalState) {
             return stateReturn.function.addNTCall(
                 stateReturn.key.stateCall.function,
                 s.stateReturns.computeIfAbsent(new StateReturn.Key(
@@ -754,9 +754,9 @@ public class Parser {
         if (!stateCall.function.add(function)) { return; }
         State nextState = stateCall.key.state;
         // These types of states
-        if ( nextState.getClass() == EntryState.class
-             || nextState.getClass() == ExitState.class
-             || nextState.getClass() == RuleState.class ) {
+        if (nextState instanceof EntryState ||
+            nextState instanceof ExitState ||
+            nextState instanceof RuleState) {
             s.stateReturnWorkList.enqueue(
                 s.stateReturns.computeIfAbsent(
                     new StateReturn.Key(stateCall, stateCall.key.stateBegin), StateReturn.Key::create));
@@ -767,7 +767,7 @@ public class Parser {
                             new StateReturn.Key(stateCall, stateCall.key.stateBegin + 1), StateReturn.Key::create));
             }
         // not instanceof SimpleState
-        } else if (nextState.getClass() == NonTerminalState.class) {
+        } else if (nextState instanceof NonTerminalState) {
             // add to the ntCall
             NonTerminal nt = ((NonTerminalState)nextState).child;
             if (nt.nullable() || (stateCall.key.stateBegin < s.input.length && nt.lookahead(s.input[stateCall.key.stateBegin].kind))) {
