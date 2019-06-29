@@ -103,6 +103,8 @@ public class Parser {
         /** The {@link Function} storing the AST parsed so far */
         final Function function = Function.empty();
 
+        public final Key key;
+
         public static class Key {
             /** The {@link NonTerminalCall} containing this StateCall */
             final NonTerminalCall ntCall;
@@ -111,50 +113,71 @@ public class Parser {
             /** The {@link State} that this StateCall is for */
             public final State state;
 
+            // Caching the hashCode here upon object construction.
             private final int hashCode;
 
             //***************************** Start Boilerplate *****************************
-            public Key(NonTerminalCall ntCall, int stateBegin, State state) {
-                assert ntCall != null; assert state != null;
-                this.ntCall = ntCall; this.stateBegin = stateBegin; this.state = state;
-                this.hashCode = computeHash();
+            public Key ( final NonTerminalCall ntCall,
+                         final int stateBegin,
+                         final State state ) {
+
+                // TODO remove assertions.
+                assert ntCall != null;
+                assert state != null;
+
+                this.ntCall = ntCall;
+                this.stateBegin = stateBegin;
+                this.state = state;
+
+                // Pre-compute the hash code.
+                int tmp = ntCall.key.hashCode();
+                tmp *= 31;
+                tmp += stateBegin;
+                tmp *= 31;
+                tmp += state.hashCode();
+
+                this.hashCode = tmp;
             }
 
             public StateCall create() { return new StateCall(this); }
 
             @Override
-            public boolean equals(Object o) {
+            public boolean equals(final Object o) {
                 if (this == o) return true;
                 if (o == null || getClass() != o.getClass()) return false;
 
-                Key key = (Key) o;
+                final Key key = (Key) o;
 
-                if (stateBegin != key.stateBegin) return false;
-                if (!ntCall.equals(key.ntCall)) return false;
-                if (!state.equals(key.state)) return false;
-
-                return true;
+                return this.stateBegin == key.stateBegin
+                  && ntCall.equals(key.ntCall)
+                  && state.equals(key.state);
             }
 
             @Override
             public int hashCode() {
                 return hashCode;
             }
-            public int computeHash() {
-                int result = ntCall.key.hashCode();
-                result = 31 * result + stateBegin;
-                result = 31 * result + state.hashCode();
-                return result;
-            }
 
             @Override
             public String toString() {
-                return ntCall.key.nt.name + "." + state.name + " @ "+ stateBegin;
+                return new StringBuilder()
+                  .append(ntCall.key.nt.name)
+                  .append('.')
+                  .append(" @ ")
+                  .append(stateBegin)
+                  .toString();
             }
-        }
-        public final Key key;
-        StateCall(Key key) { assert key != null; this.key = key; }
+        } // end class Key.
 
+        // Back to class StateCall.
+
+        StateCall(final Key key) {
+          // TODO remove assertion.
+          assert key != null;
+          this.key = key;
+        }
+
+        @Override
         public int hashCode() {
             return this.key.hashCode();
         }
@@ -175,7 +198,8 @@ public class Parser {
 
         private final int[] orderingInfo = new int[5];
 
-        public int compareTo(StateReturn that) {
+        @Override
+        public int compareTo(final StateReturn that) {
             // The following idiom is a short-circuiting, integer "and
             // that does a lexicographic ordering over:
             //  - ntBegin (contravariently),
@@ -186,8 +210,8 @@ public class Parser {
             //  - state.
             // NOTE: these last two comparisons are just so we don't conflate distinct values
 
-            int v1[] = orderingInfo;
-            int v2[] = that.orderingInfo;
+            int[] v1 = orderingInfo;
+            int[] v2 = that.orderingInfo;
 
             int k = 1;
             int c1 = v2[0];
