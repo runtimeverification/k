@@ -85,8 +85,8 @@ public class Nullability {
      * states that should be entryNullable as a result.
      */
     private void markNullable(State state, SetMultimap<NonTerminal, NonTerminalState> nonTerminalCallers) {
-        if (!entryNullable.contains(state)) {
-            entryNullable.add(state);
+        // If not already in `entryNullable`.
+        if ( entryNullable.add(state) ) {
 
             try { // state instanceof NextableState
               NextableState ns = (NextableState) state;
