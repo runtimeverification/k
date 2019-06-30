@@ -21,7 +21,8 @@ public class KBMCOptions {
     @ParametersDelegate
     public DefinitionLoadingOptions definitionLoading = new DefinitionLoadingOptions();
 
-    @Parameter(names={"--spec-file"}, description="Path to the specification file.")
+    @Parameter(names={"--raw-spec"}, description="Path to a file containing the patterns to model-check." +
+            "These patterns will be executed as-is without inserting any initial configuration.")
     public String filePath;
 
     private File specFile;

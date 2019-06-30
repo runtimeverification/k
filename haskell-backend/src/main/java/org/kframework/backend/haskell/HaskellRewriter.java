@@ -269,6 +269,10 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                         "--prove", specPath,
                         "--spec-module", specModuleName,
                         "--output", outPath));
+                if (smtOptions.smtPrelude != null) {
+                    args.add("--smt-prelude");
+                    args.add(smtOptions.smtPrelude);
+                }
                 return args;
             }
 
@@ -292,10 +296,6 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                 if (kProveOptions.depth != null) {
                     args.addAll(Arrays.asList(
                         "--depth", kProveOptions.depth.toString()));
-                }
-                if (smtOptions.smtPrelude != null) {
-                    args.add("--smt-prelude");
-                    args.add(smtOptions.smtPrelude);
                 }
                 if (haskellKRunOptions.allPathReachability) {
                     args.add("--all-path-reachability");
@@ -344,11 +344,16 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
 
                 List<String> args = buildCommonProvingCommand(defPath, specPath, koreOutputFile.getAbsolutePath(),
                         defModuleName, specModuleName);
-                args.add("--bmc");
+
+                if (kbmcOptions.depth != null) {
+                    args.addAll(Arrays.asList(
+                            "--depth", kbmcOptions.depth.toString()));
+                }
                 if (kbmcOptions.graphSearch != null) {
                     args.addAll(Arrays.asList(
                             "--graph-search", kbmcOptions.graphSearch.toString()));
                 }
+                args.add("--bmc");
 
                 String[] koreCommand = args.toArray(new String[args.size()]);
                 if (haskellKRunOptions.dryRun) {
