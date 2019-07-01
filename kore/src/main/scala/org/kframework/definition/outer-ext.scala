@@ -70,9 +70,12 @@ case class FlatModule(name: String, imports: Set[String], localSentences: Set[Se
     var importedModuleNames = this.imports
     var importedSyntax = importedModuleNames.map(m => Import.asSyntax(m))
 
-    if (visitedModules.contains(this))
-      throw KEMException.compilerError("Found circularity in module imports")
-    // TODO: Implement CheckListDecl.check
+    if (visitedModules.contains(this)) {
+      var msg = "Found circularity in module imports: "
+      visitedModules.foreach(m => msg += m.name + " < ")
+      msg += visitedModules.head.name
+      throw KEMException.compilerError(msg)
+    }
 
     def resolveImport(importName: String): Module = {
       var baseName = Import.noSyntax(importName)

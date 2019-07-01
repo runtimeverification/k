@@ -327,7 +327,7 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
 object Import {
   val syntaxString = "$SYNTAX"
 
-  def isSyntax(name: String): Boolean = name.endsWith("$SYNTAX")
+  def isSyntax(name: String): Boolean = name.endsWith(syntaxString)
 
   def asSyntax(name: String): String =
     if (isSyntax(name))
