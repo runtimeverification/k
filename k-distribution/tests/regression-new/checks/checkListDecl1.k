@@ -4,7 +4,7 @@ module CHECKLISTDECL1-SYNTAX
     syntax Pgm
 endmodule
 
-module CHECKLISTDECL1 
+module CHECKLISTDECL1
     imports CHECKLISTDECL1-SYNTAX
 
 configuration <T> <k> $PGM:Pgm </k> </T>
