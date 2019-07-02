@@ -22,4 +22,4 @@ junit-reports
 target/
 kore/doc
 __pycache__
-rustc-1.34.0-src
+rustc-*-src
