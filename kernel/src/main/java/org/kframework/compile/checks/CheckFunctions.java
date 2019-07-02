@@ -65,8 +65,8 @@ public class CheckFunctions {
                 }
                 Att attributes = m.attributesFor().apply(k.klabel());
                 String hook = attributes.getOptional("hook").orElse("");
-                if (!isSymbolic && attributes.contains("function") 
-                    && isLHS() 
+                if (!isSymbolic && attributes.contains("function")
+                    && isLHS()
                     && !atTop
                     && !(hook.equals("SET.element") || hook.equals("SET.concat")
                       || hook.equals("SET.unit") || hook.equals("LIST.element")
