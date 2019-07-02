@@ -8,6 +8,8 @@ KRUN=$(abspath $(MAKEFILE_PATH)/../bin/krun)
 KDEP=$(abspath $(MAKEFILE_PATH)/../bin/kdep)
 # and kprove
 KPROVE=$(abspath $(MAKEFILE_PATH)/../bin/kprove)
+# and kbmc
+KBMC=$(abspath $(MAKEFILE_PATH)/../bin/kbmc)
 # and kast
 KAST=$(abspath $(MAKEFILE_PATH)/../bin/kast)
 # and keq
@@ -27,6 +29,7 @@ RESULTDIR?=$(TESTDIR)
 # all tests in test directory with matching file extension
 TESTS?=$(wildcard $(TESTDIR)/*.$(EXT))
 PROOF_TESTS?=$(wildcard $(TESTDIR)/*-spec.k)
+BMC_TESTS?=$(wildcard $(TESTDIR)/*-spec-bmc.k)
 SEARCH_TESTS?=$(wildcard $(TESTDIR)/*.$(EXT).search)
 STRAT_TESTS?=$(wildcard $(TESTDIR)/*.strat)
 KAST_TESTS?=$(wildcard $(TESTDIR)/*.kast)
@@ -35,10 +38,10 @@ KOMPILE_BACKEND?=ocaml
 
 CHECK=| diff -
 
-.PHONY: kompile krun all clean update-results proofs
+.PHONY: kompile krun all clean update-results proofs bmc
 
 # run all tests
-all: kompile krun proofs searches strat kast
+all: kompile krun proofs bmc searches strat kast
 
 # run only kompile
 kompile: $(DEFDIR)/$(DEF)-kompiled/timestamp
@@ -49,6 +52,8 @@ $(DEFDIR)/%-kompiled/timestamp: %.k
 krun: $(TESTS)
 
 proofs: $(PROOF_TESTS)
+
+bmc: $(BMC_TESTS)
 
 searches: $(SEARCH_TESTS)
 
@@ -75,6 +80,13 @@ ifeq ($(TESTDIR),$(RESULTDIR))
 	$(KPROVE) $@ $(KPROVE_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $@.out
 else
 	$(KPROVE) $@ $(KPROVE_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $(RESULTDIR)/$(notdir $@).out
+endif
+
+%-spec-bmc.k: kompile
+ifeq ($(TESTDIR),$(RESULTDIR))
+	$(KBMC) --raw-spec $@ $(KBMC_FLAGS) $(DEBUG) -d $(DEFDIR) --depth 20 $(CHECK) $@.out
+else
+	$(KBMC) --raw-spec $@ $(KBMC_FLAGS) $(DEBUG) -d $(DEFDIR) --depth 20 $(CHECK) $(RESULTDIR)/$(notdir $@).out
 endif
 
 %.search: kompile

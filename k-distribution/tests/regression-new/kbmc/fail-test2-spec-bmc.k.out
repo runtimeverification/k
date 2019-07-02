@@ -1,0 +1,14 @@
+  <T>
+    <k>
+      #execute
+    </k>
+    <state>
+      "x" |-> X +Int 1
+    </state>
+  </T>
+#And
+  {
+    X <Int 0
+  #Equals
+    true
+  }
