@@ -1,3 +1,5 @@
+// Copyright (c) 2014-2019 K Team. All Rights Reserved.
+
 module BMC-SYNTAX
   imports DOMAINS-SYNTAX
 

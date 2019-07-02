@@ -1,3 +1,4 @@
+// Copyright (c) 2019 K Team. All Rights Reserved.
 package org.kframework.kbmc;
 
 import com.google.inject.AbstractModule;

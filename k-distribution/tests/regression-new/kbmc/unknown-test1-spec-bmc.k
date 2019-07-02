@@ -1,5 +1,4 @@
-/*
-*/
+// Copyright (c) 2019 K Team. All Rights Reserved.
 
 module VERIFICATION
   imports BMC

@@ -1,3 +1,4 @@
+// Copyright (c) 2014-2019 K Team. All Rights Reserved.
 package org.kframework.kbmc;
 
 import org.kframework.RewriterResult;
@@ -5,7 +6,6 @@ import org.kframework.compile.Backend;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.kompile.CompiledDefinition;
-import org.kframework.kore.KApply;
 import org.kframework.kprove.KProve;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.unparser.KPrint;
