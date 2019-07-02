@@ -118,7 +118,7 @@ public class LLVMRewriter implements Function<Definition, Rewriter> {
             }
 
             @Override
-            public K bmc(Module rules) {
+            public RewriterResult bmc(Module rules) {
                 throw new UnsupportedOperationException();
             }
 

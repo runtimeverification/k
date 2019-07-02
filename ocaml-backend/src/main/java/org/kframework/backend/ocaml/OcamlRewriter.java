@@ -123,7 +123,7 @@ public class OcamlRewriter implements Function<Definition, Rewriter> {
             }
 
             @Override
-            public K bmc(Module rules) {
+            public RewriterResult bmc(Module rules) {
                 throw new UnsupportedOperationException();
             }
 

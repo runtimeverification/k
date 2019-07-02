@@ -273,7 +273,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
         }
 
         @Override
-        public K bmc(Module mod) {
+        public RewriterResult bmc(Module mod) {
             throw new UnsupportedOperationException();
         }
 

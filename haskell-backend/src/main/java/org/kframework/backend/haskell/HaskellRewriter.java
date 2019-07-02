@@ -276,6 +276,28 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                 return args;
             }
 
+            private RewriterResult executeKoreCommands(Module rules, String[] koreCommand,
+                                                       String koreDirectory, File koreOutputFile) {
+                int exit;
+                try {
+                    File korePath = koreDirectory == null ? null : new File(koreDirectory);
+                    exit = executeCommandBasic(korePath, koreCommand);
+                } catch (IOException e) {
+                    throw KEMException.criticalError("I/O Error while executing", e);
+                } catch (InterruptedException e) {
+                    throw KEMException.criticalError("Interrupted while executing", e);
+                }
+                K outputK;
+                try {
+                    outputK = new KoreParser(files.resolveKoreToKLabelsFile(), rules.sortAttributesFor())
+                            .parseFile(koreOutputFile);
+                } catch (ParseError parseError) {
+                    kem.registerCriticalWarning("Error parsing haskell backend output", parseError);
+                    outputK = KORE.KApply(KLabels.ML_FALSE);
+                }
+                return new RewriterResult(Optional.empty(), Optional.of(exit), outputK);
+            }
+
             @Override
             public RewriterResult prove(Module rules, Rule boundaryPattern) {
                 Module kompiledModule = KoreBackend.getKompiledModule(module);
@@ -310,26 +332,12 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                 if (globalOptions.verbose) {
                     System.err.println("Executing " + args);
                 }
-                int exit;
-                try {
-                    File korePath = koreDirectory == null ? null : new File(koreDirectory);
-                    exit = executeCommandBasic(korePath, koreCommand);
-                } catch (IOException e) {
-                    throw KEMException.criticalError("I/O Error while executing", e);
-                } catch (InterruptedException e) {
-                    throw KEMException.criticalError("Interrupted while executing", e);
-                }
-                K outputK;
-                try {
-                    outputK = new KoreParser(files.resolveKoreToKLabelsFile(), rules.sortAttributesFor()).parseFile(koreOutputFile);
-                } catch (ParseError parseError) {
-                    kem.registerCriticalWarning("Error parsing haskell backend output", parseError);
-                    outputK = KORE.KApply(KLabels.ML_FALSE);
-                }
-                return new RewriterResult(Optional.empty(), Optional.of(exit), outputK);
+
+                RewriterResult result = executeKoreCommands(rules, koreCommand, koreDirectory, koreOutputFile);
+                return result;
             }
 
-            public K bmc (Module rules) {
+            public RewriterResult bmc (Module rules) {
                 Module kompiledModule = KoreBackend.getKompiledModule(module);
                 ModuleToKORE converter = new ModuleToKORE(kompiledModule, files, def.topCellInitializer, kompileOptions);
                 String defPath = saveKoreDefinitionToTemp(converter);
@@ -357,27 +365,17 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
 
                 String[] koreCommand = args.toArray(new String[args.size()]);
                 if (haskellKRunOptions.dryRun) {
+                    globalOptions.debugWarnings = true; // sets this so the kprove directory is not removed.
                     System.out.println(String.join(" ", koreCommand));
                     kprint.options.output = OutputModes.NONE;
-                    return KORE.KApply(KLabels.ML_FALSE);
+                    return new RewriterResult(Optional.empty(), Optional.of(0),KORE.KApply(KLabels.ML_FALSE));
                 }
                 if (globalOptions.verbose) {
                     System.err.println("Executing " + args);
                 }
-                try {
-                    File korePath = koreDirectory == null ? null : new File(koreDirectory);
-                    if (executeCommandBasic(korePath, koreCommand) != 0) {
-                        kem.registerCriticalWarning("Haskell backend returned non-zero exit code");
-                    }
-                    K outputK = new KoreParser(files.resolveKoreToKLabelsFile(), rules.sortAttributesFor()).parseFile(koreOutputFile);
-                    return outputK;
-                } catch (IOException e) {
-                    throw KEMException.criticalError("I/O Error while executing", e);
-                } catch (InterruptedException e) {
-                    throw KEMException.criticalError("Interrupted while executing", e);
-                } catch (ParseError parseError) {
-                    throw KEMException.criticalError("Error parsing haskell backend output", parseError);
-                }
+
+                RewriterResult result = executeKoreCommands(rules, koreCommand, koreDirectory, koreOutputFile);
+                return result;
             }
 
             @Override
