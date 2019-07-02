@@ -7,6 +7,7 @@ import org.kframework.definition.Bubble;
 import org.kframework.definition.Context;
 import org.kframework.definition.Configuration;
 import org.kframework.definition.Definition;
+import org.kframework.definition.FlatModule;
 import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Module;
 import org.kframework.definition.ModuleComment;
@@ -39,19 +40,25 @@ import java.io.StringReader;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
+import javax.json.JsonString;
 import javax.json.JsonStructure;
+
 
 import scala.Option;
 import scala.collection.JavaConverters;
 import scala.collection.Seq;
 import scala.collection.IndexedSeq;
+
+import static org.kframework.Collections.*;
 
 /**
  * Parses a Json term into the KORE data structures.
@@ -121,52 +128,42 @@ public class JsonParser {
         if (! data.getString("node").equals(KDEFINITION))
             throw KEMException.criticalError("Unexpected node found in KAST Json term: " + data.getString("node"));
 
-        /* First pass of parsing modules: Get the modules without their imports */
         String mainModuleName = data.getString("mainModule");
         JsonArray mods = data.getJsonArray("entryModules");
-        Module[] modArray = toMods(mods.size(), mods);
-        scala.collection.Set<Module> entryModules = JavaConverters.asScalaSet(new HashSet<>(Arrays.asList(modArray)));
+        FlatModule[] modArray = toMods(mods.size(), mods);
+        Set<FlatModule> entryModules = new HashSet<>(Arrays.asList(modArray));
+        Map<String,Module> koreModules = new HashMap<>();
 
-        /* Second pass: Add in the imports for each Module */
-        Set<Module> modulesWithImports = new HashSet<>();
-        for (int i = 0; i < mods.size(); i++) {
-            JsonObject modJson = mods.getValuesAs(JsonObject.class).get(i);
-            String modName = modJson.getString("name");
-            Module mod = Module.withName(modName, entryModules).get();
-            JsonArray modImportStrings = modJson.getJsonArray("imports");
-            for (int j = 0; j < modImportStrings.size(); j++) {
-                String importName = modImportStrings.getString(j);
-                mod = mod.addImport( Module.withName(importName, entryModules).get() );
-            }
-            modulesWithImports.add(mod);
-        }
+        FlatModule mainFlatMod = entryModules.stream().filter(mod -> mod.hasName(mainModuleName)).findFirst().get();
+        Module mainMod = mainFlatMod.toModule(immutable(entryModules), JavaConverters.mapAsScalaMapConverter(koreModules).asScala(), Seq());
 
-        scala.collection.Set<Module> finalModules = JavaConverters.asScalaSet(modulesWithImports);
-        Option<Module> maybeMainModule = Module.withName(mainModuleName, finalModules);
-        Module mainModule = maybeMainModule.get();
-
-        return new Definition(mainModule, finalModules, toAtt(data.getJsonObject("att")));
+        return new Definition(mainMod, immutable(new HashSet<>(koreModules.values())), toAtt(data.getJsonObject("att")));
     }
 
 /////////////////////////
 // Parsing Module Json //
 /////////////////////////
 
-    public static Module toMod(JsonObject data) throws IOException {
+    public static FlatModule toMod(JsonObject data) throws IOException {
         if (! data.getString("node").equals(KMODULE))
             throw KEMException.criticalError("Unexpected node found in KAST Json term: " + data.getString("node"));
 
         String name = data.getString("name");
 
         JsonArray sens = data.getJsonArray("localSentences");
+        JsonArray jsonimports = data.getJsonArray("imports");
+        Set<String> imports = new HashSet<>();
+        for (JsonString imp : jsonimports.getValuesAs(JsonString.class)) {
+            imports.add(imp.getString());
+        }
         Sentence[] senArray = toSens(sens.size(), sens);
         Set<Sentence> localSentences = new HashSet<>(Arrays.asList(senArray));
 
-        return Module.apply(name, JavaConverters.asScalaSet(localSentences), toAtt(data.getJsonObject("att")));
+        return new FlatModule(name, immutable(imports), immutable(localSentences), toAtt(data.getJsonObject("att")));
     }
 
-    private static Module[] toMods(int arity, JsonArray data) throws IOException {
-        Module[] items = new Module[arity];
+    private static FlatModule[] toMods(int arity, JsonArray data) throws IOException {
+        FlatModule[] items = new FlatModule[arity];
         for (int i = 0; i < arity; i++) {
             items[i] = toMod(data.getValuesAs(JsonObject.class).get(i));
         }
