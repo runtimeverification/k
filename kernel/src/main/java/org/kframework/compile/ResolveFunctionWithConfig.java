@@ -233,7 +233,7 @@ public class ResolveFunctionWithConfig {
     }
 
     public Sentence resolve(Module m, Sentence s) {
-        if (s.att().contains(Attribute.MACRO_KEY) || s.att().contains(Attribute.ALIAS_KEY)) {
+        if (ExpandMacros.isMacro(s)) {
             return s;
         }
         if (s instanceof Rule) {

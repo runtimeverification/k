@@ -108,7 +108,7 @@ public class ExpandMacros {
     }
 
     private boolean isMacro(Att att, boolean reverse) {
-        return att.contains("alias") || (!reverse && att.contains("macro"));
+        return att.contains(Attribute.ALIAS_KEY) || (!reverse && (att.contains(Attribute.MACRO_KEY) || att.contains("macro-rec")));
     }
 
     private Set<KVariable> vars = new HashSet<>();
@@ -321,8 +321,12 @@ public class ExpandMacros {
         throw KEMException.compilerError("Cannot compute macros with terms that are not KApply, KToken, or KVariable.", r);
     }
 
+    public static boolean isMacro(Sentence s) {
+      return s.att().contains(Attribute.MACRO_KEY) || s.att().contains("macro-rec") || s.att().contains(Attribute.ALIAS_KEY);
+    }
+
     public Sentence expand(Sentence s) {
-        if (s instanceof Rule && !s.att().contains("macro") && !s.att().contains("alias")) {
+        if (s instanceof Rule && !isMacro(s))
             return transformer.resolve(mod, expand((Rule) s));
         } else if (s instanceof Context) {
             return transformer.resolve(mod, expand((Context) s));

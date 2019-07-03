@@ -52,7 +52,7 @@ public class GenerateCoverage implements AutoCloseable {
         allRulesFile.print(id);
         allRulesFile.print(" ");
         allRulesFile.println(loc);
-        if (r.att().contains("macro") || r.att().contains("alias")) {
+        if (ExpandMacros.isMacro(r)) {
             //handled by macro expander
             return body;
         }

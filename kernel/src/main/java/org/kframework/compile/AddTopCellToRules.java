@@ -136,7 +136,7 @@ public class AddTopCellToRules {
     }
 
     private boolean skipSentence(Sentence s) {
-        return s.att().contains(Attribute.MACRO_KEY) || s.att().contains(Attribute.ALIAS_KEY)
+        return ExpandMacros.isMacro(s)
                 || s.att().contains(Attribute.ANYWHERE_KEY);
     }
 }
