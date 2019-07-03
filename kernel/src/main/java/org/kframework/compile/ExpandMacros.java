@@ -175,6 +175,8 @@ public class ExpandMacros {
         }
         try {
             K result = new TransformK() {
+                private Set<Rule> appliedRules = new HashSet<>();
+
                 @Override
                 public K apply(KApply k) {
                     List<Rule> rules = macros.get(k.klabel());
@@ -197,12 +199,15 @@ public class ExpandMacros {
                             right = tmp;
                         }
                         final Map<KVariable, K> subst = new HashMap<>();
-                        if (match(subst, left, applied, r)) {
+                        if (match(subst, left, applied, r) && (r.att().contains("macro-rec") || !appliedRules.contains(r))) {
                             if (cover) {
                                 if (!r.att().contains("UNIQUE_ID")) System.out.println(r.toString());
                                 coverage.println(r.att().get("UNIQUE_ID"));
                             }
-                            return apply(new TransformK() {
+                            Set<Rule> oldAppliedRules = appliedRules;
+                            appliedRules = new HashSet<>(appliedRules);
+                            appliedRules.add(r);
+                            K result = apply(new TransformK() {
                                 @Override
                                 public K apply(KVariable k) {
                                     K result = subst.get(k);
@@ -213,6 +218,8 @@ public class ExpandMacros {
                                     return result;
                                 }
                             }.apply(right));
+                            appliedRules = oldAppliedRules;
+                            return result;
                         }
                     }
                     return applied;
