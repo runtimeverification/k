@@ -9,6 +9,7 @@ import org.kframework.backend.Backends;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.*;
 import org.kframework.compile.checks.CheckConfigurationCells;
+import org.kframework.compile.checks.CheckFunctions;
 import org.kframework.compile.checks.CheckHOLE;
 import org.kframework.compile.checks.CheckImports;
 import org.kframework.compile.checks.CheckKLabels;
@@ -118,7 +119,7 @@ public class Kompile {
         sw.printIntermediate("Parse definition [" + definitionParsing.parsedBubbles.get() + "/" + (definitionParsing.parsedBubbles.get() + definitionParsing.cachedBubbles.get()) + " rules]");
 
         files.saveToKompiled("parsed.txt", parsedDef.toString());
-        checkDefinition(parsedDef);
+        checkDefinition(parsedDef, excludedModuleTags);
 
         Definition kompiledDefinition = pipeline.apply(parsedDef);
 
@@ -232,7 +233,7 @@ public class Kompile {
         return definitionParsing.parseRule(compiledDef, contents, source);
     }
 
-    private void checkDefinition(Definition parsedDef) {
+    private void checkDefinition(Definition parsedDef, Set<String> excludedModuleTags) {
         CheckRHSVariables checkRHSVariables = new CheckRHSVariables(errors);
         stream(parsedDef.modules()).forEach(m -> stream(m.localSentences()).forEach(checkRHSVariables::check));
 
@@ -247,6 +248,8 @@ public class Kompile {
         stream(parsedDef.modules()).forEach(new CheckImports(parsedDef.mainModule(), kem)::check);
 
         stream(parsedDef.modules()).forEach(m -> stream(m.localSentences()).forEach(new CheckHOLE(errors, m)::check));
+
+        stream(parsedDef.modules()).forEach(m -> stream(m.localSentences()).forEach(new CheckFunctions(errors, m, excludedModuleTags.contains("concrete"))::check));
 
         Set<String> moduleNames = new HashSet<>();
         stream(parsedDef.modules()).forEach(m -> {
