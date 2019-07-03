@@ -14,6 +14,7 @@ import com.google.inject.spi.Message;
 import com.martiansoftware.nailgun.NGContext;
 import org.fusesource.jansi.AnsiConsole;
 import org.kframework.kast.KastFrontEnd;
+import org.kframework.kbmc.KBMCFrontEnd;
 import org.kframework.kdep.KDepFrontEnd;
 import org.kframework.kdoc.KDocFrontEnd;
 import org.kframework.keq.KEqFrontEnd;
@@ -192,6 +193,15 @@ public class Main {
                     break;
                 case "-kprove":
                     modules.addAll(KProveFrontEnd.getModules());
+                    for (KModule kModule : kModules) {
+                        List<Module> ms = kModule.getKProveModules();
+                        if (ms != null) {
+                            modules.addAll(ms);
+                        }
+                    }
+                    break;
+                case "-kbmc":
+                    modules.addAll(KBMCFrontEnd.getModules());
                     for (KModule kModule : kModules) {
                         List<Module> ms = kModule.getKProveModules();
                         if (ms != null) {
