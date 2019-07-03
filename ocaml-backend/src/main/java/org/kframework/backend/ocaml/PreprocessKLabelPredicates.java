@@ -2,6 +2,7 @@
 package org.kframework.backend.ocaml;
 
 import org.kframework.builtin.BooleanUtils;
+import org.kframework.compile.ExpandMacros;
 import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;

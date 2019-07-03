@@ -14,6 +14,7 @@ import org.kframework.builtin.Sorts;
 import org.kframework.compile.AddSortInjections;
 import org.kframework.compile.ComputeTransitiveFunctionDependencies;
 import org.kframework.compile.ConfigurationInfoFromModule;
+import org.kframework.compile.ExpandMacros;
 import org.kframework.compile.RefreshRules;
 import org.kframework.compile.RewriteToTop;
 import org.kframework.definition.Module;

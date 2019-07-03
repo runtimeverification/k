@@ -315,7 +315,11 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
 
 // hooked but different from core, Import is a sentence here
 
-trait Sentence extends HasLocation {
+trait HasAtt {
+  val att: Att
+}
+
+trait Sentence extends HasLocation with HasAtt {
   // marker
   val isSyntax: Boolean
   val isNonSyntax: Boolean

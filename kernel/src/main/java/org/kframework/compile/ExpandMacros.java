@@ -7,6 +7,7 @@ import org.kframework.attributes.Source;
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Context;
+import org.kframework.definition.HasAtt;
 import org.kframework.definition.Module;
 import org.kframework.definition.Production;
 import org.kframework.definition.Rule;
@@ -112,7 +113,7 @@ public class ExpandMacros {
     }
 
     private boolean isMacro(Att att, boolean reverse) {
-        return att.contains(Attribute.ALIAS_KEY) || (!reverse && (att.contains(Attribute.MACRO_KEY) || att.contains("macro-rec")));
+        return att.contains(Attribute.ALIAS_REC_KEY) || att.contains(Attribute.ALIAS_KEY) || (!reverse && (att.contains(Attribute.MACRO_KEY) || att.contains(Attribute.MACRO_REC_KEY)));
     }
 
     private Set<KVariable> vars = new HashSet<>();
@@ -199,7 +200,7 @@ public class ExpandMacros {
                             right = tmp;
                         }
                         final Map<KVariable, K> subst = new HashMap<>();
-                        if (match(subst, left, applied, r) && (r.att().contains("macro-rec") || !appliedRules.contains(r))) {
+                        if (match(subst, left, applied, r) && (r.att().contains(Attribute.MACRO_REC_KEY) || r.att().contains(Attribute.ALIAS_REC_KEY) || !appliedRules.contains(r))) {
                             if (cover) {
                                 if (!r.att().contains("UNIQUE_ID")) System.out.println(r.toString());
                                 coverage.println(r.att().get("UNIQUE_ID"));
@@ -343,12 +344,12 @@ public class ExpandMacros {
         throw KEMException.compilerError("Cannot compute macros with terms that are not KApply, KToken, or KVariable.", r);
     }
 
-    public static boolean isMacro(Sentence s) {
-      return s.att().contains(Attribute.MACRO_KEY) || s.att().contains("macro-rec") || s.att().contains(Attribute.ALIAS_KEY);
+    public static boolean isMacro(HasAtt s) {
+      return s.att().contains(Attribute.MACRO_KEY) || s.att().contains(Attribute.MACRO_REC_KEY) || s.att().contains(Attribute.ALIAS_REC_KEY) || s.att().contains(Attribute.ALIAS_KEY);
     }
 
     public Sentence expand(Sentence s) {
-        if (s instanceof Rule && !isMacro(s))
+        if (s instanceof Rule && !isMacro(s)) {
             return transformer.resolve(mod, expand((Rule) s));
         } else if (s instanceof Context) {
             return transformer.resolve(mod, expand((Context) s));

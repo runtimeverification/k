@@ -18,6 +18,7 @@ import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Subsorts;
 import org.kframework.builtin.Sorts;
+import org.kframework.compile.ExpandMacros;
 import org.kframework.definition.Module;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.loader.Context;
