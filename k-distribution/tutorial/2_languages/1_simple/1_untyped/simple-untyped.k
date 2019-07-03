@@ -233,7 +233,7 @@ straightforward. */
   rule if (E) S => if (E) S else {}                                 [macro]
   rule for(Start Cond; Step) {S} => {Start while (Cond) {S Step;}}  [macro]
   rule for(Start Cond; Step) {} => {Start while (Cond) {Step;}}     [macro]
-  rule var E1:Exp, E2:Exp, Es:Exps; => var E1; var E2, Es;          [macro]
+  rule var E1:Exp, E2:Exp, Es:Exps; => var E1; var E2, Es;          [macro-rec]
   rule var X:Id = E; => var X; X = E;                               [macro]
 
 /*@ For the semantics, we can therefore assume from now on that each
