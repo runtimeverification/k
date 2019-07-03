@@ -1,0 +1,3 @@
+[Error] Compiler: KItem can not be extended to be a list sort.
+	Source(checkListDecl1.k)
+	Location(12,18,12,29)

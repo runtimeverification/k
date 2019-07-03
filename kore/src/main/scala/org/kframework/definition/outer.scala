@@ -311,6 +311,35 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
   override def equals(that: Any) = that match {
     case m: Module => m.name == name && m.sentences == sentences
   }
+
+  def toFlatModules() : (String, Set[FlatModule]) = {
+    var flatSelf = new FlatModule(name, importedModuleNames, sentences, att)
+    var flatModules = Set(flatSelf) ++
+      (imports.size match {
+        case 0 => Set()
+        case _ => imports.map(m => m.toFlatModules._2).flatten
+      })
+    (name, flatModules)
+  }
+
+}
+
+object Import {
+  val syntaxString = "$SYNTAX"
+
+  def isSyntax(name: String): Boolean = name.endsWith(syntaxString)
+
+  def asSyntax(name: String): String =
+    if (isSyntax(name))
+      name
+    else
+      name ++ syntaxString
+
+  def noSyntax(name: String): String =
+    if (isSyntax(name))
+      name.dropRight(syntaxString.length)
+    else
+      name
 }
 
 // hooked but different from core, Import is a sentence here
