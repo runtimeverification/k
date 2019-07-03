@@ -46,6 +46,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.kframework.Collections.*;
@@ -60,6 +61,7 @@ import static org.kframework.definition.Constructors.*;
 public class ExpandMacros {
 
     private final Map<KLabel, List<Rule>> macros;
+    private final Map<Sort, List<Rule>> macrosBySort;
     private final Module mod;
     private final boolean cover;
     private final PrintWriter coverage;
@@ -84,7 +86,9 @@ public class ExpandMacros {
         this.reverse = reverse;
         this.cover = kompileOptions.coverage;
         files.resolveKompiled(".").mkdirs();
-        macros = stream(mod.rules()).filter(r -> isMacro(r.att(), reverse)).sorted(Comparator.comparing(r -> r.att().contains("owise"))).collect(Collectors.groupingBy(r -> ((KApply)getLeft(r, reverse)).klabel()));
+        List<Rule> allMacros = stream(mod.rules()).filter(r -> isMacro(r.att(), reverse)).sorted(Comparator.comparing(r -> r.att().contains("owise"))).collect(Collectors.toList());
+        macros = allMacros.stream().filter(r -> getLeft(r, reverse) instanceof KApply).collect(Collectors.groupingBy(r -> ((KApply)getLeft(r, reverse)).klabel()));
+        macrosBySort = stream(mod.definedSorts()).collect(Collectors.toMap(s -> s, s -> allMacros.stream().filter(r -> sort(getLeft(r, reverse), r).contains(s)).collect(Collectors.toList())));
         this.transformer = transformer;
         if (cover) {
             try {
@@ -159,7 +163,7 @@ public class ExpandMacros {
     }
 
     public K expand(K term) {
-        if (macros.size() == 0)
+        if (macros.size() == 0 && macrosBySort.size() == 0)
             return term;
         FileLock lock = null;
         if (cover) {
@@ -174,9 +178,13 @@ public class ExpandMacros {
                 @Override
                 public K apply(KApply k) {
                     List<Rule> rules = macros.get(k.klabel());
+                    return applyMacros(k, rules, super::apply);
+                }
+
+                private <T extends K> K applyMacros(T k, List<Rule> rules, Function<T, K> superApply) {
                     if (rules == null)
-                        return super.apply(k);
-                    K applied = super.apply(k);
+                        return superApply.apply(k);
+                    K applied = superApply.apply(k);
                     for (Rule r : rules) {
                         if (!r.requires().equals(BooleanUtils.TRUE)) {
                             throw KEMException.compilerError("Cannot compute macros with side conditions.", r);
@@ -209,6 +217,13 @@ public class ExpandMacros {
                     }
                     return applied;
                 }
+
+                @Override
+                public K apply(KToken k) {
+                    List<Rule> rules = macrosBySort.get(k.sort());
+                    return applyMacros(k, rules, super::apply);
+                }
+
             }.apply(term);
            return result;
         } finally {
