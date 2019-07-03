@@ -1,0 +1,3 @@
+[Error] Compiler: Inline list declarations are not allowed.
+	Source(checkListDecl3.k)
+	Location(12,26,12,37)
