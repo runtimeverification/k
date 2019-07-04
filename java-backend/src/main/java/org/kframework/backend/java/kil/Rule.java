@@ -15,6 +15,7 @@ import org.kframework.backend.java.symbolic.Equality;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Constants;
+import org.kframework.definition.HasAtt;
 import org.kframework.kil.Attribute;
 
 import java.util.ArrayList;
@@ -31,7 +32,7 @@ import static org.kframework.kore.KORE.KRewrite;
  *
  * @author AndreiS
  */
-public class Rule extends JavaSymbolicObject<Rule> {
+public class Rule extends JavaSymbolicObject<Rule> implements HasAtt {
 
     private final String label;
     private final Term leftHandSide;

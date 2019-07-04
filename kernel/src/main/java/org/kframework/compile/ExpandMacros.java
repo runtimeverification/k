@@ -7,6 +7,7 @@ import org.kframework.attributes.Source;
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Context;
+import org.kframework.definition.HasAtt;
 import org.kframework.definition.Module;
 import org.kframework.definition.Production;
 import org.kframework.definition.Rule;
@@ -46,6 +47,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.kframework.Collections.*;
@@ -60,6 +62,7 @@ import static org.kframework.definition.Constructors.*;
 public class ExpandMacros {
 
     private final Map<KLabel, List<Rule>> macros;
+    private final Map<Sort, List<Rule>> macrosBySort;
     private final Module mod;
     private final boolean cover;
     private final PrintWriter coverage;
@@ -84,7 +87,9 @@ public class ExpandMacros {
         this.reverse = reverse;
         this.cover = kompileOptions.coverage;
         files.resolveKompiled(".").mkdirs();
-        macros = stream(mod.rules()).filter(r -> isMacro(r.att(), reverse)).sorted(Comparator.comparing(r -> r.att().contains("owise"))).collect(Collectors.groupingBy(r -> ((KApply)getLeft(r, reverse)).klabel()));
+        List<Rule> allMacros = stream(mod.rules()).filter(r -> isMacro(r.att(), reverse)).sorted(Comparator.comparing(r -> r.att().contains("owise"))).collect(Collectors.toList());
+        macros = allMacros.stream().filter(r -> getLeft(r, reverse) instanceof KApply).collect(Collectors.groupingBy(r -> ((KApply)getLeft(r, reverse)).klabel()));
+        macrosBySort = stream(mod.definedSorts()).collect(Collectors.toMap(s -> s, s -> allMacros.stream().filter(r -> sort(getLeft(r, reverse), r).contains(s)).collect(Collectors.toList())));
         this.transformer = transformer;
         if (cover) {
             try {
@@ -108,7 +113,7 @@ public class ExpandMacros {
     }
 
     private boolean isMacro(Att att, boolean reverse) {
-        return att.contains("alias") || (!reverse && att.contains("macro"));
+        return att.contains(Attribute.ALIAS_REC_KEY) || att.contains(Attribute.ALIAS_KEY) || (!reverse && (att.contains(Attribute.MACRO_KEY) || att.contains(Attribute.MACRO_REC_KEY)));
     }
 
     private Set<KVariable> vars = new HashSet<>();
@@ -159,7 +164,7 @@ public class ExpandMacros {
     }
 
     public K expand(K term) {
-        if (macros.size() == 0)
+        if (macros.size() == 0 && macrosBySort.size() == 0)
             return term;
         FileLock lock = null;
         if (cover) {
@@ -171,12 +176,18 @@ public class ExpandMacros {
         }
         try {
             K result = new TransformK() {
+                private Set<Rule> appliedRules = new HashSet<>();
+
                 @Override
                 public K apply(KApply k) {
                     List<Rule> rules = macros.get(k.klabel());
+                    return applyMacros(k, rules, super::apply);
+                }
+
+                private <T extends K> K applyMacros(T k, List<Rule> rules, Function<T, K> superApply) {
                     if (rules == null)
-                        return super.apply(k);
-                    K applied = super.apply(k);
+                        return superApply.apply(k);
+                    K applied = superApply.apply(k);
                     for (Rule r : rules) {
                         if (!r.requires().equals(BooleanUtils.TRUE)) {
                             throw KEMException.compilerError("Cannot compute macros with side conditions.", r);
@@ -189,12 +200,15 @@ public class ExpandMacros {
                             right = tmp;
                         }
                         final Map<KVariable, K> subst = new HashMap<>();
-                        if (match(subst, left, applied, r)) {
+                        if (match(subst, left, applied, r) && (r.att().contains(Attribute.MACRO_REC_KEY) || r.att().contains(Attribute.ALIAS_REC_KEY) || !appliedRules.contains(r))) {
                             if (cover) {
                                 if (!r.att().contains("UNIQUE_ID")) System.out.println(r.toString());
                                 coverage.println(r.att().get("UNIQUE_ID"));
                             }
-                            return apply(new TransformK() {
+                            Set<Rule> oldAppliedRules = appliedRules;
+                            appliedRules = new HashSet<>(appliedRules);
+                            appliedRules.add(r);
+                            K result = apply(new TransformK() {
                                 @Override
                                 public K apply(KVariable k) {
                                     K result = subst.get(k);
@@ -205,10 +219,19 @@ public class ExpandMacros {
                                     return result;
                                 }
                             }.apply(right));
+                            appliedRules = oldAppliedRules;
+                            return result;
                         }
                     }
                     return applied;
                 }
+
+                @Override
+                public K apply(KToken k) {
+                    List<Rule> rules = macrosBySort.get(k.sort());
+                    return applyMacros(k, rules, super::apply);
+                }
+
             }.apply(term);
            return result;
         } finally {
@@ -321,8 +344,12 @@ public class ExpandMacros {
         throw KEMException.compilerError("Cannot compute macros with terms that are not KApply, KToken, or KVariable.", r);
     }
 
+    public static boolean isMacro(HasAtt s) {
+      return s.att().contains(Attribute.MACRO_KEY) || s.att().contains(Attribute.MACRO_REC_KEY) || s.att().contains(Attribute.ALIAS_REC_KEY) || s.att().contains(Attribute.ALIAS_KEY);
+    }
+
     public Sentence expand(Sentence s) {
-        if (s instanceof Rule && !s.att().contains("macro") && !s.att().contains("alias")) {
+        if (s instanceof Rule && !isMacro(s)) {
             return transformer.resolve(mod, expand((Rule) s));
         } else if (s instanceof Context) {
             return transformer.resolve(mod, expand((Context) s));

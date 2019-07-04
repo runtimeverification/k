@@ -63,7 +63,7 @@ class Strategy(heatCool: Boolean) {
 
           import rich._
           
-          if (!defn.mainModule.importedModuleNames.contains("STRATEGY$SYNTAX") || r.att.contains("anywhere") || r.att.contains("macro")) {
+          if (!defn.mainModule.importedModuleNames.contains("STRATEGY$SYNTAX") || r.att.contains("anywhere") || r.att.contains("macro") || r.att.contains("alias") || r.att.contains("macro-rec") || r.att.contains("alias-rec")) {
             r
           } else
             r match {

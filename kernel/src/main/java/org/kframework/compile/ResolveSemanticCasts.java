@@ -53,7 +53,7 @@ public class ResolveSemanticCasts {
         gatherCasts(rule.ensures());
         return new Rule(
                 transform(rule.body()),
-                addSideCondition(transform(rule.requires()), rule.att().contains("macro") || rule.att().contains("alias")),
+                addSideCondition(transform(rule.requires()), ExpandMacros.isMacro(rule)),
                 transform(rule.ensures()),
                 rule.att());
     }

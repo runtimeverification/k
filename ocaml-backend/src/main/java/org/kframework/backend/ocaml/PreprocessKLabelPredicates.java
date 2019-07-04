@@ -2,6 +2,7 @@
 package org.kframework.backend.ocaml;
 
 import org.kframework.builtin.BooleanUtils;
+import org.kframework.compile.ExpandMacros;
 import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
@@ -34,7 +35,7 @@ public class PreprocessKLabelPredicates {
     }
 
     public Sentence convert(Sentence s) {
-        if (s.att().contains(Attribute.MACRO_KEY) || s.att().contains(Attribute.ALIAS_KEY)) {
+        if (ExpandMacros.isMacro(s)) {
             return s;
         }
         if (s instanceof Rule) {

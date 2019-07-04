@@ -32,7 +32,7 @@ public class ComputeTransitiveFunctionDependencies {
         dependencies = new DirectedSparseGraph<>();
 
         Set<KLabel> anywhereKLabels = new HashSet<>();
-        stream(module.rules()).filter(r -> !r.att().contains(Attribute.MACRO_KEY) && !r.att().contains(Attribute.ALIAS_KEY)).forEach(r -> {
+        stream(module.rules()).filter(r -> !ExpandMacros.isMacro(r)).forEach(r -> {
             K left = RewriteToTop.toLeft(r.body());
             if (left instanceof KApply) {
                 KApply kapp = (KApply) left;

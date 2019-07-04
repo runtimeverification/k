@@ -143,7 +143,7 @@ rule <generatedTop>... <k> something ...</k> ...</generatedTop> #as Configuratio
 
 ## Macros and Aliases
 
-A rule can be tagged with the `macro` or `alias` attribute. In both cases, what this signifies is that this is a macro rule. Macro rules are applied statically during compilation on all terms that they match, and statically before program execution on the initial configuration. Currently, macros are required to not have side conditions, although they can contain sort checks. When a rule is tagged with the `alias` attribute, it is also applied statically in reverse prior to unparsing on the final configuration. Note that a macro can have unbound variables in the right hand side. When such a macro exists, it should be used only on the left hand side of rules, unless the user is performing symbolic execution and expects to introduce symbolic terms into the subject being rewritten. However, when used on the left hand side of a rule, it functions similarly to a pattern alias, and allows the user to concisely express a reusable pattern that they wish to match on in multiple places.
+A rule can be tagged with the `macro`, `alias`, `macro-rec`, or `alias-rec` attributes. In all cases, what this signifies is that this is a macro rule. Macro rules are applied statically during compilation on all terms that they match, and statically before program execution on the initial configuration. Currently, macros are required to not have side conditions, although they can contain sort checks. When a rule is tagged with the `alias` attribute, it is also applied statically in reverse prior to unparsing on the final configuration. Note that a macro can have unbound variables in the right hand side. When such a macro exists, it should be used only on the left hand side of rules, unless the user is performing symbolic execution and expects to introduce symbolic terms into the subject being rewritten. However, when used on the left hand side of a rule, it functions similarly to a pattern alias, and allows the user to concisely express a reusable pattern that they wish to match on in multiple places.
 
 For example, consider the following semantics:
 
@@ -156,6 +156,21 @@ rule bar(I) => I
 ```
 
 This will rewrite `baz(0, foo)` to `foo`. First `baz(0, foo)` will be rewritten statically to `baz(0, foobar)`. Then the non-`macro` rule will apply (because the rule will have been rewritten to `rule baz(_, I) => I`). Then `foobar` will be rewritten statically after rewriting finishes to `foo` via the reverse form of the alias.
+
+Note that macros do not apply recursively within their own expansion. This is done so as to ensure that macro expansion will always terminate. If the user genuinely desires a recursive macro, the `macro-rec` and `alias-rec` attributes can be used to provide this behavior.
+
+For example, consider the following semantics:
+
+```
+syntax Exp ::= "int" Exps ";" | Exp Exp | Id
+syntax Exps ::= List{Exp,","}
+
+rule int X:Id, X':Id, Xs:Exps ; => int X ; int X', Xs ; [macro]
+```
+
+This will expand `int x, y, z;` to `int x; int y, z;` because the macro does not apply the second time after applying the substitution of the first application. However, if the `macro` attribute were changed to the `macro-rec` attribute, it would instead expand (as the user likely intended) to `int x; int y; int z;`.
+
+The `alias-rec` attribute behaves with respect to the `alias` attribute the same way the `macro-rec` attribute behaves with respect to `macro`.
 
 ## Collection patterns
 

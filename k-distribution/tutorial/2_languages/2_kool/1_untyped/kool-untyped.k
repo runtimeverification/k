@@ -231,7 +231,7 @@ for the KOOL object-oriented constructs.
 
   rule if (E) S => if (E) S else {}                                 [macro]
   rule for(Start Cond; Step) {S} => {Start while (Cond) {S Step;}}  [macro]
-  rule var E1::Exp, E2::Exp, Es::Exps; => var E1; var E2, Es;       [macro]
+  rule var E1::Exp, E2::Exp, Es::Exps; => var E1; var E2, Es;       [macro-rec]
   rule var X::Id = E; => var X; X = E;                              [macro]
 
 //@ New desugaring rule

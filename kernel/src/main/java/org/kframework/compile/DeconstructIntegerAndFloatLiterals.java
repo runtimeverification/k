@@ -48,7 +48,7 @@ public class DeconstructIntegerAndFloatLiterals {
     }
 
     public Sentence convert(Sentence s) {
-        if (s.att().contains(Attribute.MACRO_KEY) || s.att().contains(Attribute.ALIAS_KEY)) {
+        if (ExpandMacros.isMacro(s)) {
             return s;
         }
         if (s instanceof Rule) {
