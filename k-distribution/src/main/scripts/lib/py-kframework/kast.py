@@ -59,7 +59,7 @@ def isKDefinition(k):
     return k["node"] == "KDefinition"
 
 def isCellKLabel(label):
-    return label[0] == "<" and label[-1] == ">"
+    return len(label) > 1 and label[0] == "<" and label[-1] == ">"
 
 def addAttributes(kast, atts):
     if isKRule(kast):
@@ -145,7 +145,7 @@ INT_expressions = { "_+Int_"   : paren(binOpStr("+Int"))
 
 MAP_expressions = { "Map:update"  : paren(underbarUnparsing("_[_<-_]"))
                   , "Map:lookup"  : paren(underbarUnparsing("_[_]"))
-                  , "_Map_"       : paren(underbarUnparsing("__"))
+                  , "_Map_"       : underbarUnparsing("_\n_")
                   , "_|->_"       : paren(underbarUnparsing("_|->_"))
                   , "_[_<-undef]" : paren(underbarUnparsing("_[_ <- undef ]"))
                   , ".Map"        : constLabel(".Map")
