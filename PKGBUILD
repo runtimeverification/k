@@ -25,16 +25,12 @@ md5sums=()
 validpgpkeys=()
 
 prepare() {
-	true
+	git submodule update --init --recursive
 }
 
 build() {
 	cd ..
 	mvn package -DskipTests
-}
-
-check() {
-	true
 }
 
 package() {
