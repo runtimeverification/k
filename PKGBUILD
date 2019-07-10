@@ -27,14 +27,16 @@ validpgpkeys=()
 prepare() {
     cd ..
     git submodule update --init --recursive
-    # TODO: This step affects ~/.cargo and ~/.rustup, not pure at all.
+    export CARGO_HOME=$(pwd)/.cargo
+    export RUSTUP_HOME=$(pwd)/.rustup
     ./llvm-backend/src/main/native/llvm-backend/install-rust
 }
 
 build() {
     cd ..
-    # TODO: This shouldn't be necessary if cargo and rustup were installed locally.
-    export PATH=$HOME/.local/bin:$HOME/.cargo/bin:$PATH
+    export CARGO_HOME=$(pwd)/.cargo
+    export RUSTUP_HOME=$(pwd)/.rustup
+    export PATH=$CARGO_HOME/bin:$PATH
     mvn package -DskipTests
 }
 
