@@ -26,20 +26,20 @@ validpgpkeys=()
 
 prepare() {
     cd ..
-	git submodule update --init --recursive
-	# TODO: This step affects ~/.cargo and ~/.rustup, not pure at all.
-	./llvm-backend/src/main/native/llvm-backend/install-rust
+    git submodule update --init --recursive
+    # TODO: This step affects ~/.cargo and ~/.rustup, not pure at all.
+    ./llvm-backend/src/main/native/llvm-backend/install-rust
 }
 
 build() {
-	cd ..
-	# TODO: This shouldn't be necessary if cargo and rustup were installed locally.
-	export PATH=$HOME/.local/bin:$HOME/.cargo/bin:$PATH
-	mvn package -DskipTests
+    cd ..
+    # TODO: This shouldn't be necessary if cargo and rustup were installed locally.
+    export PATH=$HOME/.local/bin:$HOME/.cargo/bin:$PATH
+    mvn package -DskipTests
 }
 
 package() {
-	cd ..
-	DESTDIR="$pkgdir/usr/" src/main/scripts/package
-	install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+    cd ..
+    DESTDIR="$pkgdir/usr/" src/main/scripts/package
+    install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
 }
