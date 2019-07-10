@@ -9,7 +9,7 @@ url="https://github.com/kframework/k"
 license=('custom')
 groups=()
 depends=('java-runtime' 'flex' 'gcc' 'gmp' 'mpfr' 'z3' 'clang' 'libyaml' 'jemalloc' 'opam' 'gawk' 'make' 'diffutils' 'patch' 'tar' 'grep' 'llvm' 'lld')
-makedepends=('maven' 'jdk8-openjdk' 'cmake' 'boost' 'zlib' 'stack')
+makedepends=('maven' 'jdk8-openjdk' 'cmake' 'boost' 'zlib' 'stack' 'pkg-config' 'bison' 'python')
 checkdepends=()
 optdepends=()
 provides=()
@@ -25,11 +25,16 @@ md5sums=()
 validpgpkeys=()
 
 prepare() {
+    cd ..
 	git submodule update --init --recursive
+	# TODO: This step affects ~/.cargo and ~/.rustup, not pure at all.
+	./llvm-backend/src/main/native/llvm-backend/install-rust
 }
 
 build() {
 	cd ..
+	# TODO: This shouldn't be necessary if cargo and rustup were installed locally.
+	export PATH=$HOME/.local/bin:$HOME/.cargo/bin:$PATH
 	mvn package -DskipTests
 }
 
