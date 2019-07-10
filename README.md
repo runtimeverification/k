@@ -11,7 +11,7 @@ On Ubuntu:
 
 ```
 git submodule update --init --recursive
-sudo apt-get install build-essential m4 openjdk-8-jdk libgmp-dev libmpfr-dev pkg-config flex z3 libz3-dev maven opam python3 cmake gcc clang-6.0 clang++-6.0 lld-6.0 llvm-6.0 llvm-6.0-tools zlib1g-dev bison libboost-test-dev libyaml-dev libjemalloc-dev
+sudo apt-get install build-essential m4 openjdk-8-jdk libgmp-dev libmpfr-dev pkg-config flex z3 libz3-dev maven opam python3 cmake gcc clang-8 lld-8 llvm-8-tools zlib1g-dev bison libboost-test-dev libyaml-dev libjemalloc-dev
 llvm-backend/src/main/native/llvm-backend/install-rust
 curl -sSL https://get.haskellstack.org/ | sh
 ```
@@ -71,9 +71,9 @@ llvm-backend/src/main/native/llvm-backend/install-rust
 If you already have rustup installed, you can build rustc 1.33 from source (https://static.rust-lang.org/dist/rustc-1.33.0-src.tar.gz) and install it via:
 
 ```
-./configure --llvm-root=/usr/lib/llvm-6.0 --enable-llvm-link-shared
+./configure --llvm-root=/usr/lib/llvm-8 --enable-llvm-link-shared
 ./x.py build
-rustup toolchain link rust-1.33.0-llvm-6.0 build/x86_64-*/stage2
+rustup toolchain link rust-1.33.0-llvm-8 build/x86_64-*/stage2
 ```
 
 We do not currently support any of the default rustup toolchains. Note that you will need at least cargo 0.32.0 (which comes with rust 1.31.0) as your default toolchain to build our rust code.
