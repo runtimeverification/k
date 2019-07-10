@@ -58,7 +58,7 @@ public class CheckFunctions {
                   super.apply(k);
                   return;
                 }
-                if (CheckKLabels.isInternalKLabel(k.klabel().name(), m) ) {
+                if (k.klabel() instanceof KVariable || CheckKLabels.isInternalKLabel(k.klabel().name(), m) ) {
                   atTop  = false;
                   super.apply(k);
                   return;

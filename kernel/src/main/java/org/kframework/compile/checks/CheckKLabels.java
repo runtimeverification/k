@@ -84,6 +84,11 @@ public class CheckKLabels {
     private static final ImmutableSet<String> internalNames = ImmutableSet.of("#cells", "#dots", "#noDots", "#Or", "#fun2", "#fun3", "#withConfig", "<generatedTop>");
 
     public static boolean isInternalKLabel(String name, Module m) {
+      try {
         return name.startsWith("#SemanticCastTo") || internalNames.contains(name) || (name.startsWith("is") && m.definedSorts().apply(Outer.parseSort(name.substring(2)))) || (name.startsWith("project:") && m.definedSorts().apply(Outer.parseSort(name.substring(8))));
+      } catch (KEMException e) {
+        // parse error
+        return false;
+      }
     }
 }
