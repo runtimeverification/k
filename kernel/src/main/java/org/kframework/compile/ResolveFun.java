@@ -12,6 +12,7 @@ import org.kframework.definition.Production;
 import org.kframework.definition.ProductionItem;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
+import org.kframework.kompile.Kompile;
 import org.kframework.kore.InjectedKLabel;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -112,14 +113,16 @@ public class ResolveFun {
                         nameHint2 = ((KApply) body).klabel().name();
                     }
                     KLabel fun = getUniqueLambdaLabel(nameHint1, nameHint2);
+                    Sort lhsSort = sort(RewriteToTop.toLeft(body));
                     Sort argSort = sort(arg);
+                    Sort lubSort = AddSortInjections.lubSort(lhsSort, argSort, null, body, module);
                     if (lbl.name().equals("#fun3") || lbl.name().equals("#fun2")) {
-                        funProds.add(funProd(fun, body, argSort));
+                        funProds.add(funProd(fun, body, lubSort));
                         funRules.add(funRule(fun, body, k.att()));
                     } else {
-                        funProds.add(predProd(fun, body, argSort));
+                        funProds.add(predProd(fun, body, lubSort));
                         funRules.add(predRule(fun, body, k.att()));
-                        funRules.add(owiseRule(fun, body, argSort, k.att()));
+                        funRules.add(owiseRule(fun, body, lubSort, k.att()));
                     }
                     List<K> klist = new ArrayList<>();
                     klist.add(apply(arg));
@@ -238,7 +241,7 @@ public class ResolveFun {
     }
 
     public Module resolve(Module m) {
-        module = m;
+        module = Kompile.subsortKItem(m);
         funProds.clear();
         funRules.clear();
         Set<Sentence> newSentences = stream(m.localSentences()).map(this::resolve).collect(Collectors.toSet());

@@ -186,7 +186,7 @@ public class AddSortInjections {
                         List<Sort> polySorts = positions.stream()
                                 .map(p -> sort(kapp.items().get(p - 1), freshSortParam))
                                 .collect(Collectors.toList());
-                        expectedSort = lub(polySorts, null, kapp);
+                        expectedSort = lub(polySorts, null, kapp, mod);
                     }
                     for (Integer p : positions) {
                         expectedSorts.put(p - 1, expectedSort);
@@ -259,7 +259,7 @@ public class AddSortInjections {
                         if (children.size() == 0) {
                             return expectedSort;
                         }
-                        return lub(children, expectedSort, term);
+                        return lub(children, expectedSort, term, mod);
                     }
                 }
             }
@@ -268,7 +268,7 @@ public class AddSortInjections {
             KRewrite rew = (KRewrite)term;
             Sort leftSort = sort(rew.left(), expectedSort);
             Sort rightSort = sort(rew.right(), expectedSort);
-            return lubSort(leftSort, rightSort, expectedSort, term);
+            return lubSort(leftSort, rightSort, expectedSort, term, mod);
        } else if (term instanceof KToken) {
             return ((KToken) term).sort();
         } else if (term instanceof KVariable) {
@@ -281,13 +281,13 @@ public class AddSortInjections {
             KAs as = (KAs) term;
             Sort patternSort = sort(as.pattern(), expectedSort);
             Sort rightSort = sort(as.alias(), expectedSort);
-            return lubSort(patternSort, rightSort, expectedSort, term);
+            return lubSort(patternSort, rightSort, expectedSort, term, mod);
         } else {
             throw KEMException.internalError("Invalid category of k found.", term);
         }
     }
 
-    private Sort lubSort(Sort leftSort, Sort rightSort, Sort expectedSort, HasLocation loc) {
+    public static Sort lubSort(Sort leftSort, Sort rightSort, Sort expectedSort, HasLocation loc, Module mod) {
         if (leftSort == null && rightSort == null) {
             return expectedSort;
         } else if (leftSort == null) {
@@ -295,7 +295,7 @@ public class AddSortInjections {
         } else if (rightSort == null) {
             return leftSort;
         }
-        return lub(Arrays.asList(leftSort, rightSort), expectedSort, loc);
+        return lub(Arrays.asList(leftSort, rightSort), expectedSort, loc, mod);
     }
 
     private Production production(KApply term) {
@@ -309,14 +309,14 @@ public class AddSortInjections {
         return prods.head();
     }
 
-    private Sort lub(Collection<Sort> entries, Sort expectedSort, HasLocation loc) {
+    private static Sort lub(Collection<Sort> entries, Sort expectedSort, HasLocation loc, Module mod) {
         assert !entries.isEmpty();
         entries = new HashSet<>(entries);
         Collection<Sort> filteredEntries = entries.stream().filter(s -> !s.name().equals(SORTPARAM_NAME)).collect(Collectors.toList());
         if (filteredEntries.isEmpty()) { // if all sorts are parameters, take the first
             return entries.iterator().next();
         }
-        Set<Sort> bounds = upperBounds(filteredEntries);
+        Set<Sort> bounds = upperBounds(filteredEntries, mod);
         if (expectedSort != null && !expectedSort.name().equals(SORTPARAM_NAME) && !expectedSort.equals(Sorts.KItem()) && !expectedSort.equals(Sorts.K())) {
             bounds.removeIf(s -> !mod.subsorts().lessThanEq(s, expectedSort));
         }
@@ -327,7 +327,7 @@ public class AddSortInjections {
         return lub.iterator().next();
     }
 
-    private Set<Sort> upperBounds(Collection<Sort> bounds) {
+    private static Set<Sort> upperBounds(Collection<Sort> bounds, Module mod) {
         Set<Sort> maxs = new HashSet<>();
     nextsort:
         for (Sort sort : iterable(mod.definedSorts())) { // for every declared sort
