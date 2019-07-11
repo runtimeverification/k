@@ -14,16 +14,15 @@ import scala.collection.JavaConverters._
  * https://github.com/kframework/k/wiki/KORE-data-structures-guide
  */
 
+trait HasCachedHashCode {
+  lazy val cachedHashCode = computeHashCode
+  override def hashCode = cachedHashCode
+  def computeHashCode: Int
+}
+
 trait K extends Serializable with HasLocation {
   def att: Att
   override def toString = ToKast.apply(this)
-
-  lazy val cachedHashCode = computeHashCode
-
-  override def hashCode = cachedHashCode
-
-  def computeHashCode: Int
-
   def location: Optional[Location] = att.getOptional(classOf[Location])
   def source: Optional[Source] = att.getOptional(classOf[Source])
 }
@@ -61,14 +60,14 @@ object K {
 
 trait KItem extends K
 
-trait KLabel {
+trait KLabel extends HasCachedHashCode {
   def name: String
   def params: Seq[Sort]
   override def equals(other: Any) = other match {
     case l: KLabel => name == l.name && params == l.params
     case _ => false
   }
-  override def hashCode = name.hashCode * 29 + params.hashCode
+  override def computeHashCode = name.hashCode * 29 + params.hashCode
 
   def apply(ks: K*) = KApply(this, KList(ks.toList))   
 }
@@ -87,17 +86,17 @@ trait KToken extends KItem {
     case other: KToken => sort == other.sort && s == other.s
     case _ => false
   }
-  def computeHashCode = sort.hashCode() * 13 + s.hashCode
+  override def computeHashCode = sort.hashCode() * 13 + s.hashCode
 }
 
-trait Sort extends Ordered[Sort] {
+trait Sort extends Ordered[Sort] with HasCachedHashCode {
   def name: String
   def params: Seq[Sort]
   override def equals(other: Any) = other match {
     case other: Sort => name == other.name && params == other.params
     case _ => false
   }
-  override def hashCode = name.hashCode * 23 + params.hashCode
+  override def computeHashCode = name.hashCode * 23 + params.hashCode
     
   def compare(that: Sort): Int = {
     import scala.math.Ordering.Implicits._
@@ -105,7 +104,7 @@ trait Sort extends Ordered[Sort] {
   }
 }
 
-trait KCollection {
+trait KCollection extends HasCachedHashCode {
   def items: java.util.List[K]
   def size: Int
   def asIterable: java.lang.Iterable[_ <: K]
@@ -118,7 +117,7 @@ trait KCollection {
       case _ => false
     })
 
-  def computeHashCode = items.hashCode
+  override def computeHashCode = items.hashCode
 }
 
 trait KList extends KCollection {
@@ -144,7 +143,7 @@ trait KSequence extends KCollection with K
 trait KVariable extends KItem with KLabel {
   def name: String
 
-  def computeHashCode = name.hashCode
+  override def computeHashCode = name.hashCode
 }
 
 trait KAs extends K {
@@ -158,7 +157,7 @@ trait KAs extends K {
       case _ => false
     })
 
-  def computeHashCode = pattern.hashCode * 19 + alias.hashCode
+  override def computeHashCode = pattern.hashCode * 19 + alias.hashCode
 }
 
 trait KRewrite extends K {
@@ -172,7 +171,7 @@ trait KRewrite extends K {
       case _ => false
     })
 
-  def computeHashCode = left.hashCode * 19 + right.hashCode
+  override def computeHashCode = left.hashCode * 19 + right.hashCode
 }
 
 trait InjectedKLabel extends KItem {
@@ -185,5 +184,5 @@ trait InjectedKLabel extends KItem {
       case _ => false
     })
 
-  def computeHashCode = klabel.hashCode
+  override def computeHashCode = klabel.hashCode
 }
