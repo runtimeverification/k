@@ -5,6 +5,7 @@ import java.util.Optional
 import org.kframework.attributes._
 import org.kframework.kore.ADT.{KApply, KList}
 import org.kframework.unparser.ToKast
+import org.kframework.HasCachedHashCode
 
 import scala.collection.JavaConverters._
 
@@ -14,13 +15,7 @@ import scala.collection.JavaConverters._
  * https://github.com/kframework/k/wiki/KORE-data-structures-guide
  */
 
-trait HasCachedHashCode {
-  lazy val cachedHashCode = computeHashCode
-  override def hashCode = cachedHashCode
-  def computeHashCode: Int
-}
-
-trait K extends Serializable with HasLocation {
+trait K extends Serializable with HasLocation with HasCachedHashCode {
   def att: Att
   override def toString = ToKast.apply(this)
   def location: Optional[Location] = att.getOptional(classOf[Location])
@@ -140,10 +135,13 @@ trait KApply extends KItem with KCollection {
 
 trait KSequence extends KCollection with K
 
-trait KVariable extends KItem with KLabel {
+trait KVariable extends KItem with KLabel with org.kframework.Equals[KVariable] {
   def name: String
 
   override def computeHashCode = name.hashCode
+
+  override def typedEquals(other : KVariable) =
+    name == other.name
 }
 
 trait KAs extends K {
@@ -160,16 +158,15 @@ trait KAs extends K {
   override def computeHashCode = pattern.hashCode * 19 + alias.hashCode
 }
 
-trait KRewrite extends K {
+trait KRewrite extends K with org.kframework.Equals[KRewrite] {
   def left: K
   def right: K
 
   override def equals(that: Any): Boolean =
-    hashCode == that.hashCode && (that match {
-      case that: AnyRef if that.asInstanceOf[AnyRef] eq this => true
-      case that: KRewrite => this.left == that.left && this.right == that.right
-      case _ => false
-    })
+    hashCode == that.hashCode && super.equals(that)
+
+  override def typedEquals(that : KRewrite) = 
+    left == that.left && right == that.right
 
   override def computeHashCode = left.hashCode * 19 + right.hashCode
 }

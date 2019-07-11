@@ -32,19 +32,4 @@ public class KVariable implements org.kframework.kore.KVariable {
     public Att att() {
         return Att.empty();
     }
-
-    @Override
-    public int computeHashCode() {
-      return name.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        KVariable kVariable = (KVariable) o;
-
-        return name.equals(kVariable.name);
-    }
 }

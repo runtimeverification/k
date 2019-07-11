@@ -17,11 +17,6 @@ public class KRewrite implements org.kframework.kore.KRewrite {
     }
 
     @Override
-    public int cachedHashCode() {
-        return hashCode();
-    }
-
-    @Override
     public K left() {
         return left;
     }
@@ -34,29 +29,5 @@ public class KRewrite implements org.kframework.kore.KRewrite {
     @Override
     public Att att() {
         return Att.empty();
-    }
-
-    @Override
-    public int computeHashCode() {
-        return hashCode();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        KRewrite kRewrite = (KRewrite) o;
-
-        if (!left.equals(kRewrite.left)) return false;
-        return right.equals(kRewrite.right);
-
-    }
-
-    @Override
-    public int hashCode() {
-        int result = left.hashCode();
-        result = 31 * result + right.hashCode();
-        return result;
     }
 }
