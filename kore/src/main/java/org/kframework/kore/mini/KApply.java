@@ -53,10 +53,6 @@ public abstract class KApply extends AbstractList implements org.kframework.kore
         }
     }
 
-    @Override
-    public int cachedHashCode() {
-        return hashCode();
-    }
 
     @Override
     public KLabel klabel() {
@@ -85,7 +81,9 @@ public abstract class KApply extends AbstractList implements org.kframework.kore
 
     @Override
     public int computeHashCode() {
-        return hashCode();
+        int result = super.hashCode();
+        result = 31 * result + klabel.hashCode();
+        return result;
     }
 
     @Override
@@ -97,13 +95,6 @@ public abstract class KApply extends AbstractList implements org.kframework.kore
 
         return klabel.equals(kApply.klabel);
 
-    }
-
-    @Override
-    public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + klabel.hashCode();
-        return result;
     }
 
     @Override
@@ -174,7 +165,7 @@ class KApply1 extends KApply {
     }
 
     @Override
-    public int hashCode() {
+    public int computeHashCode() {
         int result = super.hashCode();
         result = 31 * result + _0.hashCode();
         return result;
@@ -227,7 +218,7 @@ class KApply2 extends KApply {
     }
 
     @Override
-    public int hashCode() {
+    public int computeHashCode() {
         int result = super.hashCode();
         result = 31 * result + _0.hashCode();
         result = 31 * result + _1.hashCode();
@@ -285,7 +276,7 @@ class KApply3 extends KApply {
     }
 
     @Override
-    public int hashCode() {
+    public int computeHashCode() {
         int result = super.hashCode();
         result = 31 * result + _0.hashCode();
         result = 31 * result + _1.hashCode();
@@ -348,7 +339,7 @@ class KApply4 extends KApply {
     }
 
     @Override
-    public int hashCode() {
+    public int computeHashCode() {
         int result = super.hashCode();
         result = 31 * result + _0.hashCode();
         result = 31 * result + _1.hashCode();
@@ -416,7 +407,7 @@ class KApply5 extends KApply {
     }
 
     @Override
-    public int hashCode() {
+    public int computeHashCode() {
         int result = super.hashCode();
         result = 31 * result + _0.hashCode();
         result = 31 * result + _1.hashCode();
@@ -489,7 +480,7 @@ class KApply6 extends KApply {
     }
 
     @Override
-    public int hashCode() {
+    public int computeHashCode() {
         int result = super.hashCode();
         result = 31 * result + _0.hashCode();
         result = 31 * result + _1.hashCode();
@@ -567,7 +558,7 @@ class KApply7 extends KApply {
     }
 
     @Override
-    public int hashCode() {
+    public int computeHashCode() {
         int result = super.hashCode();
         result = 31 * result + _0.hashCode();
         result = 31 * result + _1.hashCode();
@@ -650,7 +641,7 @@ class KApply8 extends KApply {
     }
 
     @Override
-    public int hashCode() {
+    public int computeHashCode() {
         int result = super.hashCode();
         result = 31 * result + _0.hashCode();
         result = 31 * result + _1.hashCode();
@@ -738,7 +729,7 @@ class KApply9 extends KApply {
     }
 
     @Override
-    public int hashCode() {
+    public int computeHashCode() {
         int result = super.hashCode();
         result = 31 * result + _0.hashCode();
         result = 31 * result + _1.hashCode();
@@ -831,7 +822,7 @@ class KApply10 extends KApply {
     }
 
     @Override
-    public int hashCode() {
+    public int computeHashCode() {
         int result = super.hashCode();
         result = 31 * result + _0.hashCode();
         result = 31 * result + _1.hashCode();
@@ -881,11 +872,10 @@ class KApplyGreaterThan10 extends KApply {
 
         // Probably incorrect - comparing Object[] arrays with Arrays.equals
         return Arrays.equals(items, that.items);
-
     }
 
     @Override
-    public int hashCode() {
+    public int computeHashCode() {
         int result = super.hashCode();
         result = 31 * result + Arrays.hashCode(items);
         return result;
