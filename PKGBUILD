@@ -1,5 +1,5 @@
 # Maintainer: Dwight Guth <dwight.guth@runtimeverification.com>
-pkgname=kframework
+pkgname=kframework-git
 pkgver=5.0.0
 pkgrel=1
 epoch=
@@ -17,7 +17,7 @@ conflicts=()
 replaces=()
 backup=()
 options=(!strip)
-install=kframework.install
+install=kframework-git.install
 changelog=
 source=('git+https://github.com/kframework/k#commit=63fa1f6e7')
 noextract=()
