@@ -7,7 +7,7 @@ import org.kframework.kore.K;
 /**
  * Created by dwightguth on 1/11/16.
  */
-public class KRewrite implements org.kframework.kore.KRewrite {
+public class KRewrite extends org.kframework.kore.KRewrite_JavaWrapper {
 
     private K left, right;
 

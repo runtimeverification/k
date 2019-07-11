@@ -10,7 +10,7 @@ import static org.kframework.Collections.Seq;
 /**
  * Created by dwightguth on 1/11/16.
  */
-public class KVariable implements org.kframework.kore.KVariable {
+public class KVariable extends org.kframework.kore.KVariable_JavaWrapper {
 
     private final String name;
 
