@@ -19,11 +19,6 @@ public class KVariable implements org.kframework.kore.KVariable {
     }
 
     @Override
-    public int cachedHashCode() {
-        return hashCode();
-    }
-
-    @Override
     public String name() {
         return name;
     }
@@ -40,7 +35,7 @@ public class KVariable implements org.kframework.kore.KVariable {
 
     @Override
     public int computeHashCode() {
-        return hashCode();
+      return name.hashCode();
     }
 
     @Override
@@ -51,11 +46,5 @@ public class KVariable implements org.kframework.kore.KVariable {
         KVariable kVariable = (KVariable) o;
 
         return name.equals(kVariable.name);
-
-    }
-
-    @Override
-    public int hashCode() {
-        return name.hashCode();
     }
 }
