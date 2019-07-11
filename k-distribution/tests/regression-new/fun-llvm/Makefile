@@ -1,4 +1,4 @@
-DEF=../fun-ocaml/fun-test
+DEF=fun-test
 EXT=test
 TESTDIR=../fun-ocaml
 KOMPILE_BACKEND=llvm
