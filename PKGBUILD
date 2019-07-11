@@ -3,9 +3,9 @@ pkgname=kframework
 pkgver=5.0.0
 pkgrel=1
 epoch=
-pkgdesc="K framework toolchain. Includes K Framework compiler for K language definitions, and K interpreter and prover for programs written in languages defined in K."
+pkgdesc='K framework toolchain. Includes K Framework compiler for K language definitions, and K interpreter and prover for programs written in languages defined in K.'
 arch=('x86_64')
-url="https://github.com/kframework/k"
+url='https://github.com/kframework/k'
 license=('custom')
 groups=()
 depends=('java-runtime' 'flex' 'gcc' 'gmp' 'mpfr' 'z3' 'clang' 'libyaml' 'jemalloc' 'opam' 'gawk' 'make' 'diffutils' 'patch' 'tar' 'grep' 'llvm' 'lld')
@@ -19,29 +19,29 @@ backup=()
 options=(!strip)
 install=kframework.install
 changelog=
-source=()
+source=('git+https://github.com/kframework/k#commit=63fa1f6e7')
 noextract=()
-md5sums=()
+md5sums=('SKIP')
 validpgpkeys=()
 
 prepare() {
-    cd ..
+    cd "$srcdir/k"
     git submodule update --init --recursive
-    export CARGO_HOME=$(pwd)/.cargo
-    export RUSTUP_HOME=$(pwd)/.rustup
+    export CARGO_HOME="$srcdir/k/.cargo"
+    export RUSTUP_HOME="$srcdir/k/.rustup"
     ./llvm-backend/src/main/native/llvm-backend/install-rust
 }
 
 build() {
-    cd ..
-    export CARGO_HOME=$(pwd)/.cargo
-    export RUSTUP_HOME=$(pwd)/.rustup
-    export PATH=$CARGO_HOME/bin:$PATH
+    cd "$srcdir/k"
+    export CARGO_HOME="$srcdir/k/.cargo"
+    export RUSTUP_HOME="$srcdir/k/.rustup"
+    export PATH="$CARGO_HOME/bin:$PATH"
     mvn package -DskipTests
 }
 
 package() {
-    cd ..
+    cd "$srcdir/k"
     DESTDIR="$pkgdir/usr/" src/main/scripts/package
     install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
 }
