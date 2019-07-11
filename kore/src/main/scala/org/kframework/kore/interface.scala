@@ -74,23 +74,23 @@ object KLabelOrdering extends Ordering[KLabel] {
   }
 }
 
-trait KToken extends KItem {
+trait KToken extends KItem with org.kframework.Equals[KToken] {
   def sort: Sort
   def s: String
-  override def equals(other: Any) = other match {
-    case other: KToken => sort == other.sort && s == other.s
-    case _ => false
-  }
+
+  override def typedEquals(other : KToken) =
+    sort == other.sort && s == other.s
+
   override def computeHashCode = sort.hashCode() * 13 + s.hashCode
 }
 
-trait Sort extends Ordered[Sort] with HasCachedHashCode {
+trait Sort extends Ordered[Sort] with HasCachedHashCode with org.kframework.Equals[Sort] {
   def name: String
   def params: Seq[Sort]
-  override def equals(other: Any) = other match {
-    case other: Sort => name == other.name && params == other.params
-    case _ => false
-  }
+
+  override def typedEquals(other : Sort) =
+    name == other.name && params == other.params
+
   override def computeHashCode = name.hashCode * 23 + params.hashCode
     
   def compare(that: Sort): Int = {
@@ -99,36 +99,35 @@ trait Sort extends Ordered[Sort] with HasCachedHashCode {
   }
 }
 
-trait KCollection extends HasCachedHashCode {
+trait KCollection extends HasCachedHashCode with org.kframework.Equals[KCollection] {
   def items: java.util.List[K]
   def size: Int
   def asIterable: java.lang.Iterable[_ <: K]
   def stream: java.util.stream.Stream[K] = items.stream()
 
-  override def equals(that: Any): Boolean =
-    hashCode == that.hashCode && (that match {
-      case that: AnyRef if that.asInstanceOf[AnyRef] eq this => true
-      case that: KCollection => this.items == that.items
-      case _ => false
-    })
+  override def equals(other : Any) =
+    hashCode == other.hashCode && super.equals(other)
+
+  override def typedEquals(other : KCollection) =
+    items == other.items
 
   override def computeHashCode = items.hashCode
 }
 
-trait KList extends KCollection {
-}
+trait KList extends KCollection
 
 trait KApply extends KItem with KCollection {
   def klabel: KLabel
   def klist: KList
 
-  override def equals(that: Any): Boolean =
-    hashCode == that.hashCode && (that match {
-      case that: AnyRef if that.asInstanceOf[AnyRef] eq this => true
-      case that: KApply =>
-        that.klabel == klabel && this.klist == that.klist
-      case _ => false
-    })
+  override def typedEquals(arg : KCollection) =
+    super.typedEquals(arg) && {
+      val other = arg.asInstanceOf[KApply]
+      klabel == other.klabel && klist == other.klist
+    }
+
+  override def equals(that : Any) =
+    hashCode == that.hashCode && super.equals(that)
 
   override def computeHashCode = klabel.hashCode * 17 + klist.hashCode
 }
@@ -144,42 +143,42 @@ trait KVariable extends KItem with KLabel with org.kframework.Equals[KVariable] 
     name == other.name
 }
 
-trait KAs extends K {
+trait KAs extends K with org.kframework.Equals[KAs] {
   def pattern: K
   def alias: K
 
-  override def equals(that: Any): Boolean =
-    hashCode == that.hashCode && (that match {
-      case that: AnyRef if that.asInstanceOf[AnyRef] eq this => true
-      case that: KAs => this.pattern == that.pattern && this.alias == that.alias
-      case _ => false
-    })
+  override def equals(other : Any) =
+    hashCode == other.hashCode && super.equals(other)
 
-  override def computeHashCode = pattern.hashCode * 19 + alias.hashCode
+  override def typedEquals(other : KAs) =
+    pattern == other.pattern && alias == other.alias
+
+  override def computeHashCode =
+    pattern.hashCode * 19 + alias.hashCode
 }
 
 trait KRewrite extends K with org.kframework.Equals[KRewrite] {
   def left: K
   def right: K
 
-  override def equals(that: Any): Boolean =
-    hashCode == that.hashCode && super.equals(that)
+  override def equals(other : Any): Boolean =
+    hashCode == other.hashCode && super.equals(other)
 
-  override def typedEquals(that : KRewrite) = 
-    left == that.left && right == that.right
+  override def typedEquals(other : KRewrite) = 
+    left == other.left && right == other.right
 
-  override def computeHashCode = left.hashCode * 19 + right.hashCode
+  override def computeHashCode =
+    left.hashCode * 19 + right.hashCode
 }
 
-trait InjectedKLabel extends KItem {
+trait InjectedKLabel extends KItem with org.kframework.Equals[InjectedKLabel] {
   def klabel: KLabel
 
-  override def equals(that: Any): Boolean =
-    hashCode == that.hashCode && (that match {
-      case that: AnyRef if that.asInstanceOf[AnyRef] eq this => true
-      case that: InjectedKLabel => this.klabel == that.klabel
-      case _ => false
-    })
+  override def equals(other : Any) =
+    hashCode == other.hashCode && super.equals(other)
+
+  override def typedEquals(other : InjectedKLabel) =
+    klabel == other.klabel
 
   override def computeHashCode = klabel.hashCode
 }
