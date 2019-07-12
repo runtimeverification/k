@@ -3,7 +3,6 @@ package org.kframework.kore
 import java.util.Optional
 
 import org.kframework.attributes._
-import org.kframework.kore.ADT.{KApply, KList}
 import org.kframework.unparser.ToKast
 import org.kframework.HasCachedHashCode
 import org.kframework.EqualsCheckHashCode
@@ -65,6 +64,7 @@ trait KLabel extends HasCachedHashCode {
   }
   override def computeHashCode = name.hashCode * 29 + params.hashCode
 
+  import org.kframework.kore.ADT.{KApply, KList}
   def apply(ks: K*) = KApply(this, KList(ks.toList))   
 }
 
@@ -102,7 +102,7 @@ trait Sort extends Ordered[Sort] with HasCachedHashCode with org.kframework.Equa
 
 trait KCollection extends HasCachedHashCode with EqualsCheckHashCode[KCollection] {
   def items: java.util.List[K]
-  def size: Int
+  def size: Int = items.size
   def asIterable: java.lang.Iterable[_ <: K]
   def stream: java.util.stream.Stream[K] = items.stream()
 
