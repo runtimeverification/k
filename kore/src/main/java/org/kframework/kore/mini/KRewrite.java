@@ -9,25 +9,7 @@ import org.kframework.kore.K;
  */
 public class KRewrite extends org.kframework.kore.KRewrite_JavaWrapper {
 
-    private K left, right;
-
-    public KRewrite(K left, K right) {
-        this.left = left;
-        this.right = right;
-    }
-
-    @Override
-    public K left() {
-        return left;
-    }
-
-    @Override
-    public K right() {
-        return right;
-    }
-
-    @Override
-    public Att att() {
-        return Att.empty();
+    public KRewrite(final K left, final K right) {
+        super(left, right);
     }
 }

@@ -168,7 +168,3 @@ trait InjectedKLabel extends KItem with EqualsCheckHashCode[InjectedKLabel] {
 
   override def computeHashCode = klabel.hashCode
 }
-
-// Java Wrappers.
-abstract class KRewrite_JavaWrapper extends KRewrite
-abstract class KVariable_JavaWrapper extends KVariable
