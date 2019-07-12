@@ -14,3 +14,8 @@ trait Equals[T] extends HasTypedEquals[T] {
       case _ => false
     }
 }
+
+trait EqualsCheckHashCode[T] extends Equals[T] {
+  override def equals(other : Any) =
+    hashCode == other.hashCode && super.equals(other)
+}
