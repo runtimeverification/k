@@ -102,7 +102,7 @@ trait Sort extends Ordered[Sort] with HasCachedHashCode with org.kframework.Equa
 
 trait KCollection extends HasCachedHashCode with EqualsCheckHashCode[KCollection] {
   def items: java.util.List[K]
-  def size: Int = items.size
+  def size: Int
   def asIterable: java.lang.Iterable[_ <: K]
   def stream: java.util.stream.Stream[K] = items.stream()
 
