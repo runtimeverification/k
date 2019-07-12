@@ -55,7 +55,7 @@ abstract class FoldK[T] extends KTransformer[T] {
   def apply(k: KSequence): T = k.items.asScala.map(apply).fold(unit)(merge)
 
   def apply(k: InjectedKLabel): T = k.klabel match {
-    case v: KVariable => apply(v.asInstanceOf[KVariable])
+    case v: KVariable => apply(v)
     case _ => unit
   }
 
@@ -111,7 +111,7 @@ class KVisitor extends java.util.function.Consumer[K] {
   }
 
   def apply(k: InjectedKLabel): Unit = k.klabel match {
-    case v: KVariable => apply(v.asInstanceOf[KVariable])
+    case v: KVariable => apply(v)
     case _ =>
   }
 }
