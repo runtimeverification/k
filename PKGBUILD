@@ -19,7 +19,7 @@ backup=()
 options=(!strip)
 install=kframework-git.install
 changelog=
-source=('git+https://github.com/kframework/k#commit=63fa1f6e7')
+source=('git+https://github.com/kframework/k#branch=master')
 noextract=()
 md5sums=('SKIP')
 validpgpkeys=()
