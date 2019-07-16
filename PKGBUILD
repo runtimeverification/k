@@ -25,17 +25,13 @@ md5sums=('SKIP')
 validpgpkeys=()
 
 prepare() {
-    export CARGO_HOME="$srcdir/k/.cargo"
-    export RUSTUP_HOME="$srcdir/k/.rustup"
     cd "$srcdir/k"
     git submodule update --init --recursive
     ./llvm-backend/src/main/native/llvm-backend/install-rust
 }
 
 build() {
-    export CARGO_HOME="$srcdir/k/.cargo"
-    export RUSTUP_HOME="$srcdir/k/.rustup"
-    export PATH="$CARGO_HOME/bin:$PATH"
+    export PATH="${CARGO_HOME:-$HOME/.cargo}/bin:$PATH"
     cd "$srcdir/k"
     mvn package -DskipTests
 }
