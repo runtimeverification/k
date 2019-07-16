@@ -1,49 +1,78 @@
-Installation
-============
+Installating Release Builds
+===========================
 
-These instructions explain both (1) how to build the packages for K, and (2) how to install them.
+These instructions explain how to download, install, and build the K packages.
+Current supported systems are:
 
-Packaging
----------
+-   Arch Linux
+-   Ubuntu Bionic (18.04)
+-   Ubuntu Xenial (16.04)
+-   Debian Stretch
+
+Downloading Packages
+--------------------
+
+We release our packages on GitHub, visit the [Releases](https://github.com/kframework/k/releases) page to see available versions.
+Releases are generated as often as possible from the `master` branch of the repository.
+
+Installing Packages
+-------------------
+
+### Ubuntu/Debian
+
+Install the package with (`X.Y.Z` is version number, `ID` is platform identifier):
+
+```sh
+sudo apt install ./kframework_X.Y.Z_amd64_ID.deb
+```
+
+On Debian Stretch, you also must first enable stretch-backports by running:
+
+```sh
+sudo echo "deb http://ftp.debian.org/debian stretch-backports main" > /etc/apt/sources.list.d/stretch-backports.list
+sudo apt-get update.
+```
+
+### Arch
+
+Install the package with (`X.Y.Z-V` is version number):
+
+```sh
+sudo pacman -U ./kframework-git-X.Y.Z-V-x86_64.pkg.tar.xz
+```
+
+### Windows
+
+On Windows, start by installing Windows Subsystem for Linux with Ubuntu (or an Ubuntu VM), after which you can install like Ubuntu.
+K requires gcc and other Linux libraries to run, and building on native Windows, Cygwin, or MINGW is not supported
+
+### Other
+
+If your OS is not supported, you can download and extract the "Platform-Independent K binary", and follow the instructions in INSTALL.md within the target directory.
+Note however that this will not support the Haskell or LLVM Backends.
+
+Building Packages
+-----------------
 
 Update `stack` with `sudo stack upgrade` or `curl -sSL https://get.haskellstack.org/ | sh` to make sure you have the newest version (> 2.0).
 
-### Debian
+### Ubuntu/Debian
 
-```
+Build the package in by running:
+
+```sh
 dpkg-buildpackage --no-sign
 ```
 
-It will throw an error for any build dependencies you're missing, install them with `sudo apt install ...`.
+This will throw an error for any build dependencies you're missing, install them with `sudo apt install ...`.
+The `.deb` package will be placed one directory up from the repository root.
 
 ### Arch
 
-The `PKGBUILD` has enough already.
+Build the package with:
 
-Installing
-----------
-
-### Debian
-
-The above step places `kframework_X.Y.Z_amd64.deb` in the directory above the K repo.
-Call:
-
-```
-sudo dpkg -i kframework_X.Y.Z_amd64.deb
+```sh
+makepkg -s
 ```
 
-It will fail with some errors because of missing runtime dependencies, do:
-
-```
-sudo apt install -f
-```
-
-which will install the extra runtime dependencies.
-
-### Arch
-
-Run:
-
-```
-makepkg -si
-```
+This will put `kframework-git-X.Y.Z-V-x86_64.pkg.tar.xz` in the current directory.
