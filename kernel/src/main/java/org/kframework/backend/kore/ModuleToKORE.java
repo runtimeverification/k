@@ -25,7 +25,6 @@ import org.kframework.definition.ProductionItem;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kil.Attribute;
-import org.kframework.kil.Attributes;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.InjectedKLabel;
@@ -49,7 +48,6 @@ import scala.Tuple2;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -65,6 +63,7 @@ import static org.kframework.kore.KORE.*;
 public class ModuleToKORE {
     public static final String ONE_PATH_OP = "weakExistsFinally";
     public static final String ALL_PATH_OP = "weakAlwaysFinally";
+    public static final String HAS_DOMAIN_VALUES = "hasDomainValues";
     private final Module module;
     private final BiMap<String, String> kToKoreLabelMap = HashBiMap.create();
     private final FileUtil files;
@@ -93,12 +92,19 @@ public class ModuleToKORE {
         sb.append(prelude);
         Map<String, Boolean> attributes = new HashMap<>();
         sb.append("\n");
+        Set<Sort> tokenSorts = new HashSet<>();
         for (Sort sort : iterable(module.definedSorts())) {
             Att att = module.sortAttributesFor().get(sort).getOrElse(() -> KORE.Att());
+            if (att.contains("token")) {
+                tokenSorts.add(sort);
+            }
             collectAttributes(attributes, att);
         }
         for (Production prod : iterable(module.sortedProductions())) {
             Att att = prod.att();
+            if (att.contains("token")) {
+                tokenSorts.add(prod.sort());
+            }
             collectAttributes(attributes, att);
         }
         for (Rule r : iterable(module.sortedRules())) {
@@ -114,6 +120,10 @@ public class ModuleToKORE {
         collectionSorts.add("MAP.Map");
         collectionSorts.add("LIST.List");
         collectionSorts.add("ARRAY.Array");
+        if (attributes.containsKey("token")) {
+            assert(!attributes.containsKey(HAS_DOMAIN_VALUES));
+            attributes.put(HAS_DOMAIN_VALUES, false);
+        }
         for (Sort sort : iterable(module.definedSorts())) {
             if (sort.equals(Sorts.K()) || sort.equals(Sorts.KItem())) {
                 continue;
@@ -136,6 +146,9 @@ public class ModuleToKORE {
                 } else {
                     sb.append("hooked-");
                 }
+            }
+            if (tokenSorts.contains(sort)) {
+                att = att.add(HAS_DOMAIN_VALUES, "");
             }
             sb.append("sort ");
             convert(sort, false);
