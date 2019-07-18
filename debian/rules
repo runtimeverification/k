@@ -13,6 +13,9 @@
 # package maintainers to append LDFLAGS
 #export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed
 
+CARGO_HOME?=$(HOME)/.cargo
+export CARGO_HOME
+
 %:
 	dh $@
 
