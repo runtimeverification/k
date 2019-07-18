@@ -1,5 +1,5 @@
-Installating Release Builds
-===========================
+Installing Release Builds
+=========================
 
 These instructions explain how to download, install, and build the K packages.
 Current supported systems are:
@@ -54,7 +54,7 @@ Note however that this will not support the Haskell or LLVM Backends.
 Building Packages
 -----------------
 
-Update `stack` with `sudo stack upgrade` or `curl -sSL https://get.haskellstack.org/ | sh` to make sure you have the newest version (> 2.0).
+Update `stack` with `sudo stack upgrade` or `curl -sSL https://get.haskellstack.org/ | sh -s - -f` to make sure you have the newest version (> 2.0).
 
 ### Ubuntu/Debian
 
@@ -65,7 +65,7 @@ dpkg-buildpackage --no-sign
 ```
 
 This will throw an error for any build dependencies you're missing, install them with `sudo apt install ...`.
-The `.deb` package will be placed one directory up from the repository root.
+The `kframework_X.Y.Z_amd64_ID.deb` package will be placed one directory up from the repository root.
 
 ### Arch
 
