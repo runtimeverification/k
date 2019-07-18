@@ -1,6 +1,6 @@
 #!/bin/bash
-mkdir -p $DESTDIR/usr/bin
-mkdir -p $DESTDIR/usr/lib/kframework
-cp -R k-distribution/target/release/k/* $DESTDIR/usr/lib/kframework
-cp k-distribution/src/main/scripts/distro-bin/* $DESTDIR/usr/bin
+mkdir -p $DESTDIR/bin
+mkdir -p $DESTDIR/lib/kframework
+cp -R k-distribution/target/release/k/* $DESTDIR/lib/kframework
+cp k-distribution/src/main/scripts/distro-bin/* $DESTDIR/bin
 
