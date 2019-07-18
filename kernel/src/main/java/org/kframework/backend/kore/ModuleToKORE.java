@@ -120,8 +120,8 @@ public class ModuleToKORE {
         collectionSorts.add("MAP.Map");
         collectionSorts.add("LIST.List");
         collectionSorts.add("ARRAY.Array");
+        attributes.remove(HAS_DOMAIN_VALUES);
         if (attributes.containsKey("token")) {
-            assert(!attributes.containsKey(HAS_DOMAIN_VALUES));
             attributes.put(HAS_DOMAIN_VALUES, false);
         }
         for (Sort sort : iterable(module.definedSorts())) {
@@ -147,8 +147,9 @@ public class ModuleToKORE {
                     sb.append("hooked-");
                 }
             }
+            att = att.remove(HAS_DOMAIN_VALUES);
             if (tokenSorts.contains(sort)) {
-                att = att.add(HAS_DOMAIN_VALUES, "");
+                att = att.add(HAS_DOMAIN_VALUES);
             }
             sb.append("sort ");
             convert(sort, false);
