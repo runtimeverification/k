@@ -229,16 +229,17 @@ def writeKDefinition(fileName, kDef, symbolTable):
         return
     fatal("Could not write spec file: " + fileName)
 
-def proveSpec(fileName, kproveArgs = []):
-    notif("Attempting to prove spec: " + fileName)
-    proveCommand = ["kprove", fileName] + kproveArgs
-    print("Command: " + str(proveCommand))
-    sys.stdout.flush()
-    kproveProc = subprocess.run(proveCommand)
-    if kproveProc.returncode == 0:
-        notif("Proof success!!")
-        return True
-    else:
-        notif("Proof failure!!")
-        return False
+def runK(command, definitionDir, fileName, kArgs):
+    kCommand = [command, "--directory", definitionDir, fileName] + kArgs
+    notif("Running: " + str(kCommand))
+    kProc = subprocess.run(kCommand)
+    return kProc.returncode == 0
 
+def kast(definitionDir, fileName, kastArgs = []):
+    return runK("kast", definitionDir, fileName, kastArgs)
+
+def krun(definitionDir, fileName, krunArgs = []):
+    return runK("krun", definitionDir, fileName, krunArgs)
+
+def kprove(definitionDir, fileName, kproveArgs = []):
+    return runK("kprove", definitionDir, fileName, kproveArgs)
