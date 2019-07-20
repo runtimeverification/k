@@ -5,9 +5,9 @@ import sys
 from functools import reduce
 
 # From K's pyk-library
-from util import *
-from kast import *
-from pyk  import *
+from util      import *
+from kast      import *
+from kastManip import *
 
 IMP_symbols = { 'int_;_'       : (lambda ds, ss : 'int ' + ds + ';\n' + ss)
               , '_,_'          : assocWithUnit(' , ', '.Ids')
