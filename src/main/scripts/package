@@ -1,6 +1,12 @@
 #!/bin/bash
-mkdir -p $DESTDIR/bin
-mkdir -p $DESTDIR/lib/kframework
-cp -R k-distribution/target/release/k/* $DESTDIR/lib/kframework
+mkdir -p $DESTDIR$PREFIX/bin
+mkdir -p $DESTDIR$PREFIX/lib/kframework
+cp -R k-distribution/target/release/k/* $DESTDIR$PREFIX/lib/kframework
+for tool in k-bin-to-text kast kbmc kcovr kdep keq kompile kprove krun kserver stop-kserver; do
+  path=$DESTDIR$PREFIX/bin/$tool
+  echo "#!/bin/sh" > "$path"
+  echo "$PREFIX/lib/kframework/bin/$tool \"\$@\"" > "$path"
+  chmod a+x "$path"
+done
 cp k-distribution/src/main/scripts/distro-bin/* $DESTDIR/bin
 
