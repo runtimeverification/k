@@ -24,4 +24,10 @@ public class LLVMKompileOptions {
 
     @Parameter(names="--heuristic", description="A string of single characters representing a sequence of heuristics to use during pattern matching compilation. Valid choices are f, d, b, a, l, r, n, p, q, _, N, L, R.")
     public String heuristic = "qbaL";
+
+    @Parameter(names="--iterated", description="Generate iterated pattern matching optimization; time-consuming but significantly reduces matching time.")
+    public boolean iterated = false;
+
+    @Parameter(names="--iterated-threshold", description="Threshold heuristic to use when choosing which axioms to optimize. A value of 0 turns the optimization off; a value of 1 turns the optimization on for every axiom. Values in between (expressed as a fraction of two integers, e.g. 1/2), control the aggressiveness of the optimization. Higher values increase compilation times extremely, but also increase the effectiveness of the optimization. Consider decreasing this threshold if compilation is too slow.")
+    public String iteratedThreshold = "1/2";
 }
