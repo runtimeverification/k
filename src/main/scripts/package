@@ -8,5 +8,3 @@ for tool in k-bin-to-text kast kbmc kcovr kdep keq kompile kprove krun kserver s
   echo "$PREFIX/lib/kframework/bin/$tool \"\$@\"" > "$path"
   chmod a+x "$path"
 done
-cp k-distribution/src/main/scripts/distro-bin/* $DESTDIR/bin
-
