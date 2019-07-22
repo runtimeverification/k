@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 public class LLVMBackend extends KoreBackend {
@@ -36,7 +37,7 @@ public class LLVMBackend extends KoreBackend {
     public void accept(CompiledDefinition def) {
         String kore = getKompiledString(def);
         files.saveToKompiled("definition.kore", kore);
-        Matching.writeDecisionTreeToFile(files.resolveKompiled("definition.kore"), options.heuristic, files.resolveKompiled("dt"));
+        Matching.writeDecisionTreeToFile(files.resolveKompiled("definition.kore"), options.heuristic, files.resolveKompiled("dt"), Optional.empty());
         ProcessBuilder pb = files.getProcessBuilder();
         List<String> args = new ArrayList<>();
         args.add("llvm-kompile");
