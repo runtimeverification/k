@@ -37,7 +37,7 @@ public class LLVMBackend extends KoreBackend {
     public void accept(CompiledDefinition def) {
         String kore = getKompiledString(def);
         files.saveToKompiled("definition.kore", kore);
-        Matching.writeDecisionTreeToFile(files.resolveKompiled("definition.kore"), options.heuristic, files.resolveKompiled("dt"), Optional.empty());
+        Matching.writeDecisionTreeToFile(files.resolveKompiled("definition.kore"), options.heuristic, files.resolveKompiled("dt"), Matching.getThreshold(getThreshold(options)));
         ProcessBuilder pb = files.getProcessBuilder();
         List<String> args = new ArrayList<>();
         args.add("llvm-kompile");
@@ -56,6 +56,13 @@ public class LLVMBackend extends KoreBackend {
         } catch (IOException | InterruptedException e) {
             throw KEMException.criticalError("Error with I/O while executing llvm-kompile", e);
         }
+    }
+
+    private static String getThreshold(LLVMKompileOptions options) {
+        if (!options.iterated) {
+            return "0";
+        }
+        return options.iteratedThreshold;
     }
 
     @Override
