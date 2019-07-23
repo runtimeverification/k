@@ -992,7 +992,7 @@ module K-IO
   // executes the given command line with `sh -c cmd:String` on unix or
   // `cmd /c cmd:String` on windows and returns #systemResult
   syntax KItem ::= #system ( String ) [function, hook(IO.system), impure]
-                 | "#systemResult" "(" Int /* exit code */ "," String /* stdout */ "," String /* stderr */ ")"
+                 | "#systemResult" "(" Int /* exit code */ "," String /* stdout */ "," String /* stderr */ ")" [klabel(#systemResult), symbol]
 
   syntax K ::= #logToFile(String, String) [function, functional, hook(IO.log), impure, returnsUnit]
   // #make safe temp ( prefix:String, suffix:String):IOFile - creates a temporary file in the default system location
