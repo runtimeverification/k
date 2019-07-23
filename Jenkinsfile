@@ -94,68 +94,6 @@ pipeline {
                 }
               }
             }
-            stage('Build and Package on Ubuntu Xenial') {
-              when {
-                anyOf {
-                  not { changeRequest() }
-                  changelog '.*^\\[build-system\\] .+$'
-                  changeset 'Jenkinsfile'
-                  changeset 'Dockerfile'
-                }
-              }
-              stages {
-                stage('Build on Ubuntu Xenial') {
-                  agent {
-                    dockerfile {
-                      filename 'Dockerfile.debian'
-                      additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=ubuntu:xenial'
-                      reuseNode true
-                    }
-                  }
-                  stages {
-                    stage('Build Debian Package') {
-                      steps {
-                        dir('kframework-5.0.0') {
-                          checkout scm
-                          sh '''
-                            . $HOME/.cargo/env
-                            dpkg-buildpackage
-                          '''
-                        }
-                        stash name: "xenial", includes: "kframework_5.0.0_amd64.deb"
-                      }
-                    }
-                  }
-                }
-                stage('Test Debian Package') {
-                  agent {
-                    docker {
-                      image 'ubuntu:xenial'
-                      args '-u 0'
-                      reuseNode true
-                    }
-                  }
-                  options { skipDefaultCheckout() }
-                  steps {
-                    unstash "xenial"
-                    sh 'src/main/scripts/test-in-container-debian'
-                  }
-                  post {
-                    always {
-                      sh 'stop-kserver || true'
-                      archiveArtifacts 'kserver.log,k-distribution/target/kserver.log'
-                    }
-                  }
-                }
-              }
-              post {
-                failure {
-                  slackSend color: '#cb2431'                                            \
-                          , channel: '#k'                                               \
-                          , message: "Ubuntu Xenial Packaging Failed: ${env.BUILD_URL}"
-                }
-              }
-            }
             stage('Build and Package on Debian Stretch') {
               when {
                 anyOf {
@@ -354,9 +292,6 @@ pipeline {
         dir("bionic") {
           unstash "bionic"
         }
-        dir("xenial") {
-          unstash "xenial"
-        }
         dir("stretch") {
           unstash "stretch"
         }
@@ -376,7 +311,6 @@ pipeline {
           ID=`echo "$RESPONSE" | grep '"id": [0-9]*,' -o | head -1 | grep '[0-9]*' -o`
           curl --data-binary @k-distribution/target/k-nightly.tar.gz -H "Authorization: token $GITHUB_TOKEN" -H "Content-Type: application/gzip" https://uploads.github.com/repos/kframework/k/releases/$ID/assets?'name=nightly.tar.gz&label=Platform-Indepdendent+K+binary'
           curl --data-binary @bionic/kframework_5.0.0_amd64.deb -H "Authorization: token $GITHUB_TOKEN" -H "Content-Type: application/vnd.debian.binary-package" https://uploads.github.com/repos/kframework/k/releases/$ID/assets?'name=kframework_5.0.0_amd64_bionic.deb&label=Ubuntu+Bionic+Debian+Package'
-          curl --data-binary @xenial/kframework_5.0.0_amd64.deb -H "Authorization: token $GITHUB_TOKEN" -H "Content-Type: application/vnd.debian.binary-package" https://uploads.github.com/repos/kframework/k/releases/$ID/assets?'name=kframework_5.0.0_amd64_xenial.deb&label=Ubuntu+Xenial+Debian+Package'
           curl --data-binary @stretch/kframework_5.0.0_amd64.deb -H "Authorization: token $GITHUB_TOKEN" -H "Content-Type: application/vnd.debian.binary-package" https://uploads.github.com/repos/kframework/k/releases/$ID/assets?'name=kframework_5.0.0_amd64_stretch.deb&label=Debian+Stretch+Debian+Package'
           curl --data-binary @arch/kframework-5.0.0-1-x86_64.pkg.tar.xz -H "Authorization: token $GITHUB_TOKEN" -H "Content-Type: application/x-xz" https://uploads.github.com/repos/kframework/k/releases/$ID/assets?'name=kframework-5.0.0-1-x86_64.pkg.tar.xz&label=Arch+Linux+Pacman+Package'
           curl -X PATCH --data '{"draft": false}' https://api.github.com/repos/kframework/k/releases/$ID?access_token=$GITHUB_TOKEN
