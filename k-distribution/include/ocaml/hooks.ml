@@ -381,6 +381,15 @@ struct
   let hook_string2bytes c _ _ _ _ = match c with
       [String s] -> [Bytes (Bytes.of_string s)]
     | _ -> raise Not_implemented
+  let hook_get c _ _ _ _ = match c with
+      [Bytes b], [Int off] ->
+      [Int (Z.of_int (Char.code (Bytes.get b (Z.to_int off))))]
+    | _ -> raise Not_implemented
+  let hook_update c _ _ _ _ = match c with
+      [Bytes b], [Int off], [Int v] ->
+      Bytes.set b (Z.to_int off) (Char.chr (Z.to_int v));
+      [Bytes b]
+    | _ -> raise Not_implemented
   let hook_substr c _ _ _ _ = match c with
       [Bytes b], [Int off1], [Int off2] ->
       [Bytes (Bytes.sub b (Z.to_int off1) (Z.to_int (Z.sub off2 off1)))]

@@ -679,6 +679,8 @@ module BYTES-HOOKED [concrete]
   syntax String ::= Bytes2String(Bytes) [function, functional, hook(BYTES.bytes2string)]
   syntax Bytes ::= String2Bytes(String) [function, functional, hook(BYTES.string2bytes)]
 
+  syntax Bytes ::= Bytes "[" Int "<-" Int "]" [function, hook(BYTES.update)]
+  syntax Int ::= Bytes "[" Int "]" [function, hook(BYTES.get)]
   syntax Bytes ::= substrBytes(Bytes, Int, Int) [function, hook(BYTES.substr)]
   syntax Bytes ::= replaceAtBytes(Bytes, Int, Bytes) [function, hook(BYTES.replaceAt)]
   syntax Bytes ::= padRightBytes(Bytes, Int, Int) [function, hook(BYTES.padRight)]
@@ -730,6 +732,13 @@ module BYTES-IN-K [symbolic]
   syntax Bytes ::= String2Bytes(String) [function, functional]
   rule String2Bytes(S) => ordChar(substrString(S, 0, 1)) : String2Bytes(substrString(S, 1, lengthString(S))) requires lengthString(S) >=Int 1
   rule String2Bytes("") => nilBytes
+
+  syntax Bytes ::= Bytes "[" Int "<-" Int "]" [function]
+  rule BS [ N <- M ] => substrBytes(BS, 0, N) +Bytes M : substrBytes(N +Int 1, lengthBytes(BS))
+
+  syntax Int ::= Bytes "[" Int "]" [function]
+  rule (B : BS) [ 0 ] => B
+  rule (_ : BS) [ I ] => BS [ I -Int 1] [owise]
 
   syntax Bytes ::= substrBytes(Bytes, Int, Int) [function]
   rule substrBytes(BS, 0, 0) => nilBytes
