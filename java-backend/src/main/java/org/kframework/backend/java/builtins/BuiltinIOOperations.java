@@ -128,7 +128,7 @@ public class BuiltinIOOperations {
         args[2] = term.stringValue();
         ProcessOutput output = RunProcess.execute(environment, termContext.global().files.getProcessBuilder(), args);
 
-        KLabelConstant klabel = KLabelConstant.of(KORE.KLabel("#systemResult(_,_,_)_K-IO"), termContext.definition());
+        KLabelConstant klabel = KLabelConstant.of(KORE.KLabel("#systemResult"), termContext.definition());
         String stdout = output.stdout != null ? new String(output.stdout) : "";
         String stderr = output.stderr != null ? new String(output.stderr) : "";
         return KItem.of(klabel, KList.concatenate(IntToken.of(output.exitCode),

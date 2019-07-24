@@ -10,8 +10,6 @@ case $ID in
 	ubuntu)
 		CODENAME=$UBUNTU_CODENAME
 		case $CODENAME in
-			xenial)
-				;;
 			bionic)
 				;;
 			*)
