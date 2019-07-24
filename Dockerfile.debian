@@ -2,9 +2,8 @@ ARG BASE_IMAGE=ubuntu:bionic
 FROM ${BASE_IMAGE}
 ARG BASE_IMAGE
 
-RUN if [ "$BASE_IMAGE" = "debian:stretch" ]; then echo "Enabling backports..."; echo "deb http://ftp.debian.org/debian stretch-backports main" > /etc/apt/sources.list.d/stretch-backports.list; fi
 RUN apt-get update && \
-    apt-get install -y git debhelper maven openjdk-8-jdk cmake libboost-test-dev libyaml-dev libjemalloc-dev flex bison clang-8 llvm-8-tools lld-8 zlib1g-dev libgmp-dev libmpfr-dev gcc z3 libz3-dev opam pkg-config curl python3
+    apt-get install -y git debhelper maven openjdk-8-jdk cmake libboost-test-dev libyaml-dev libjemalloc-dev flex bison `if [ "$BASE_IMAGE" = "debian:buster" ]; then echo clang-7 llvm-7-tools lld-7 else echo clang-8 llvm-8-tools fi` lld-8 zlib1g-dev libgmp-dev libmpfr-dev gcc z3 libz3-dev opam pkg-config curl python3
 RUN update-alternatives --set java /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java
 ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
 RUN curl -sSL https://get.haskellstack.org/ | sh      
