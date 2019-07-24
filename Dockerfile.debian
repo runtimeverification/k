@@ -3,8 +3,8 @@ FROM ${BASE_IMAGE}
 ARG BASE_IMAGE
 
 RUN apt-get update && \
-    apt-get install -y git debhelper maven openjdk-8-jdk cmake libboost-test-dev libyaml-dev libjemalloc-dev flex bison `if [ "$BASE_IMAGE" = "debian:buster" ]; then echo clang-7 llvm-7-tools lld-7; else echo clang-8 llvm-8-tools; fi` lld-8 zlib1g-dev libgmp-dev libmpfr-dev gcc z3 libz3-dev opam pkg-config curl python3
-RUN update-alternatives --set java /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java
+    apt-get install -y git debhelper maven cmake libboost-test-dev libyaml-dev libjemalloc-dev flex bison `if [ "$BASE_IMAGE" = "debian:buster" ]; then echo clang-7 llvm-7-tools lld-7openjdk-11-jdk; else echo clang-8 llvm-8-tools lld-8 openjdk-8-jdk; fi` zlib1g-dev libgmp-dev libmpfr-dev gcc z3 libz3-dev opam pkg-config curl python3
+RUN if [ "$BASE_IMAGE" != "debian:buster" ]; then update-alternatives --set java /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java; fi
 ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
 RUN curl -sSL https://get.haskellstack.org/ | sh      
 
