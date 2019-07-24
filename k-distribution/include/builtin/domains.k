@@ -738,7 +738,7 @@ module BYTES-IN-K [symbolic]
 
   syntax Int ::= Bytes "[" Int "]" [function]
   rule (B : BS) [ 0 ] => B
-  rule (_ : BS) [ I ] => BS [ I -Int 1] [owise]
+  rule (_ : BS) [ I ] => BS [ I -Int 1] requires I >Int 0
 
   syntax Bytes ::= substrBytes(Bytes, Int, Int) [function]
   rule substrBytes(BS, 0, 0) => nilBytes
