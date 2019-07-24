@@ -1,5 +1,5 @@
 #!/bin/sh
 
-opam init -y $INIT_ARGS
+INIT_ARGS=-y
 . "$(dirname "$0")/k-configure-opam-common"
 opam install -y mlgmp zarith uuidm
