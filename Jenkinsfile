@@ -58,6 +58,7 @@ pipeline {
                           checkout scm
                           sh '''
                             . $HOME/.cargo/env
+                            mv debian/control.debian debian/control
                             dpkg-buildpackage
                           '''
                         }
@@ -119,6 +120,7 @@ pipeline {
                           checkout scm
                           sh '''
                             . $HOME/.cargo/env
+                            mv debian/control.ubuntu debian/control
                             dpkg-buildpackage
                           '''
                         }
