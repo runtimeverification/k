@@ -5,6 +5,8 @@ import subprocess
 import sys
 import tempfile
 
+from .kastManip import *
+
 def _teeProcessStdout(args, tee = True, buffer_size = 80):
         process = subprocess.Popen(args, stdout = subprocess.PIPE, stderr = subprocess.PIPE, universal_newlines = True)
         capture = ""

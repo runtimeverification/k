@@ -3,7 +3,7 @@
 import sys
 import subprocess
 
-from kast import *
+from .kast import *
 
 def match(pattern, kast):
     subst = {}
