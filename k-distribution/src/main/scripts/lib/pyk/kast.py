@@ -35,7 +35,7 @@ def isKVariable(k):
     return k["node"] == "KVariable"
 
 def KToken(token, sort):
-    return { "node" : "KToken", "token": token, "sort": sort}
+    return { "node" : "KToken", "sort": sort, "token": token}
 
 def isKToken(k):
     return k["node"] == "KToken"
