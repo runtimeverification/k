@@ -18,9 +18,10 @@ def _teeProcessStdout(args, tee = True, buffer_size = 80):
             capture += s
             s = process.stdout.read(buffer_size)
         if tee:
-            sys.stderr.write(stderr)
+            sys.stderr.write(process.stderr.read())
             sys.stderr.flush()
-        return (process.returncode, capture, stderr)
+        process.wait()
+        return (process.returncode, capture, process.stderr.read())
 
 def _notif(msg):
     print()
@@ -35,10 +36,23 @@ def _fatal(msg, code = 1):
     _notif('[FATAL] ' + msg)
     sys.exit(code)
 
+def _runK(command, definition, inputFile, kArgs = [], teeOutput = True):
+    kCommand = [ command , '--directory' , definition , inputFile ] + kArgs
+    _notif('Running: ' + str(kCommand))
+    return _teeProcessStdout(kCommand, tee = teeOutput)
+
+def kast(definition, inputFile, kastArgs = [], teeOutput = True):
+    return _runK('kast', definition, inputFile, kArgs = kastArgs, teeOutput = teeOutput)
+
+def krun(definition, inputFile, krunArgs = [], teeOutput = True):
+    return _runK('krun', definition, inputFile, kArgs = krunArgs, teeOutput = teeOutput)
+
+def kprove(definition, inputFile, kproveArgs = [], teeOutput = True):
+    return _runK('kprove', definition, inputFile, kArgs = kproveArgs, teeOutput = teeOutput)
+
 pykArgs = argparse.ArgumentParser()
 
 pykArgs.add_argument('command' , choices = ['parse', 'run', 'prove'])
-_kexec = { 'parse' : 'kast' , 'run' : 'krun' , 'prove' : 'kprove' }
 
 pykArgs.add_argument('-d', '--definition')
 
@@ -58,11 +72,13 @@ def __main__(args):
             tempf.write(args['input'].read())
             inputFile = tempf.name
 
-    kCommand = [ _kexec[args['command']] , '--directory' , args['definition'] , inputFile
-               , '--input'  , args['from'] , '--output' , args['to']
-               ] + args['kArgs']
-    _notif('Running: ' + str(kCommand))
-    (returncode, stdout, stderr) = _teeProcessStdout(kCommand, tee = teeOutput)
+    definition = args['definition']
+    if args['command'] == 'parse':
+        (returncode, stdout, stderr) = kast(definition, inputFile, kArgs = ['--input', args['from'], '--output', args['to']] + args['kArgs'])
+    elif args['command'] == 'run':
+        (returncode, stdout, stderr) = krun(definition, inputFile, kArgs = ['--input', args['from'], '--output', args['to']] + args['kArgs'])
+    elif args['command'] == 'prove':
+        (returncode, stdout, stderr) = kprove(definition, inputFile, kArgs = ['--input', args['from'], '--output', args['to']] + args['kArgs'])
 
     args['output'].write(stdout)
 
