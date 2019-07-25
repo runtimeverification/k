@@ -18,7 +18,7 @@ RUN cd /home/user/ && ./install-rust
 ADD k-distribution/src/main/scripts/bin/k-configure-opam-dev k-distribution/src/main/scripts/bin/k-configure-opam-common /home/user/.tmp-opam/bin/
 ADD k-distribution/src/main/scripts/lib/opam  /home/user/.tmp-opam/lib/opam/
 RUN    cd /home/user \
-    && INIT_ARGS=--disable-sandboxing ./.tmp-opam/bin/k-configure-opam-dev
+    && ./.tmp-opam/bin/k-configure-opam-dev
 
 ENV LC_ALL=C.UTF-8
 ADD --chown=user:user haskell-backend/src/main/native/haskell-backend/stack.yaml /home/user/.tmp-haskell/

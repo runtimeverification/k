@@ -1,6 +1,6 @@
 post_install() {
 	export OPAMROOT=/usr/lib/kframework/lib/opamroot
-	INIT_ARGS=--disable-sandboxing /usr/lib/kframework/bin/k-configure-opam
+	/usr/lib/kframework/bin/k-configure-opam
 }
 
 pre_remove() {
