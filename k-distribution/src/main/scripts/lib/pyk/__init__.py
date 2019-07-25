@@ -36,19 +36,21 @@ def _fatal(msg, code = 1):
     _notif('[FATAL] ' + msg)
     sys.exit(code)
 
-def _runK(command, definition, inputFile, kArgs = [], teeOutput = True):
+def _runK(command, definition, inputFile, kArgs = [], teeOutput = True, kRelease = None):
+    if kRelease is not None:
+        command = kRelease + '/bin/' + command
     kCommand = [ command , '--directory' , definition , inputFile ] + kArgs
     _notif('Running: ' + str(kCommand))
     return _teeProcessStdout(kCommand, tee = teeOutput)
 
-def kast(definition, inputFile, kastArgs = [], teeOutput = True):
-    return _runK('kast', definition, inputFile, kArgs = kastArgs, teeOutput = teeOutput)
+def kast(definition, inputFile, kastArgs = [], teeOutput = True, kRelease = None):
+    return _runK('kast', definition, inputFile, kArgs = kastArgs, teeOutput = teeOutput, kRelease = kRelease)
 
-def krun(definition, inputFile, krunArgs = [], teeOutput = True):
-    return _runK('krun', definition, inputFile, kArgs = krunArgs, teeOutput = teeOutput)
+def krun(definition, inputFile, krunArgs = [], teeOutput = True, kRelease = None):
+    return _runK('krun', definition, inputFile, kArgs = krunArgs, teeOutput = teeOutput, kRelease = kRelease)
 
-def kprove(definition, inputFile, kproveArgs = [], teeOutput = True):
-    return _runK('kprove', definition, inputFile, kArgs = kproveArgs, teeOutput = teeOutput)
+def kprove(definition, inputFile, kproveArgs = [], teeOutput = True, kRelease = None):
+    return _runK('kprove', definition, inputFile, kArgs = kproveArgs, teeOutput = teeOutput, kRelease = kRelease)
 
 pykArgs = argparse.ArgumentParser()
 
