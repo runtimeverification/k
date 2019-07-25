@@ -734,7 +734,7 @@ module BYTES-IN-K [symbolic]
   rule String2Bytes("") => nilBytes
 
   syntax Bytes ::= Bytes "[" Int "<-" Int "]" [function]
-  rule BS [ N <- M ] => substrBytes(BS, 0, N) +Bytes M : substrBytes(N +Int 1, lengthBytes(BS))
+  rule BS [ N <- M ] => substrBytes(BS, 0, N) +Bytes M : substrBytes(BS, N +Int 1, lengthBytes(BS))
 
   syntax Int ::= Bytes "[" Int "]" [function]
   rule (B : BS) [ 0 ] => B
