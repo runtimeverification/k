@@ -40,7 +40,7 @@ def _runK(command, definition, inputFile, kArgs = [], teeOutput = True, kRelease
     if kRelease is not None:
         command = kRelease + '/bin/' + command
     kCommand = [ command , '--directory' , definition , inputFile ] + kArgs
-    _notif('Running: ' + str(kCommand))
+    _notif('Running: ' + ' '.join(kCommand))
     return _teeProcessStdout(kCommand, tee = teeOutput)
 
 def kast(definition, inputFile, kastArgs = [], teeOutput = True, kRelease = None):
