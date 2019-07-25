@@ -56,7 +56,6 @@ public class LLVMRewriter implements Function<Definition, Rewriter> {
         this.options = options;
         this.kompileOptions = kompileOptions;
         this.idsToLabels = init.serialized;
-
     }
 
     @Override
@@ -140,6 +139,9 @@ public class LLVMRewriter implements Function<Definition, Rewriter> {
      */
     private int executeCommandBasic(File workingDir, List<String> command) throws IOException, InterruptedException {
         int exit;
+        if (kompileOptions.global.verbose) {
+            System.err.println("Executing command: " + String.join(" ", command));
+        }
         ProcessBuilder pb = files.getProcessBuilder()
                 .command(command);
         if (workingDir != null) {
