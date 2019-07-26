@@ -24,10 +24,10 @@ def _teeProcessStdout(args, tee = True, buffer_size = 80):
         return (process.returncode, capture, process.stderr.read())
 
 def _notif(msg):
-    print()
-    print(msg)
-    print(''.join(['=' for c in msg]))
-    sys.stdout.flush()
+    sys.stderr.write('\n')
+    sys.stderr.write(msg + '\n')
+    sys.stderr.write(''.join(['=' for c in msg]) + '\n')
+    sys.stderr.flush()
 
 def _warning(msg):
     _notif('[WARNING] ' + msg)
