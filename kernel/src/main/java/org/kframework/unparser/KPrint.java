@@ -92,6 +92,7 @@ public class KPrint {
         if (options.outputFile == null) {
             try {
                 out.write(output);
+                out.flush();
             } catch (IOException e) {
                 throw KEMException.internalError(e.getMessage(), e);
             }
