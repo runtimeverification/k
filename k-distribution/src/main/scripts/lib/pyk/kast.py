@@ -28,6 +28,18 @@ def KApply(label, args):
 def isKApply(k):
     return k["node"] == "KApply"
 
+def KConstant(label):
+    return KApply(label, [])
+
+def isKConstant(k):
+    return isKApply(k) and len(k['args']) == 0
+
+def KSequence(items):
+    return { "node": "KSequence", "arity": len(items), "items": items }
+
+def isKSequence(k):
+    return k["node"] == "KSequence"
+
 def KVariable(name):
     return { "node" : "KVariable", "name": name, "originalName": name }
 
