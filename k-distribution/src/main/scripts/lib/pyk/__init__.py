@@ -5,6 +5,7 @@ import subprocess
 import sys
 import tempfile
 
+from .kast      import _notif, _warning, _fatal
 from .kastManip import *
 
 def _teeProcessStdout(args, tee = True, buffer_size = 80):
@@ -22,19 +23,6 @@ def _teeProcessStdout(args, tee = True, buffer_size = 80):
             sys.stderr.flush()
         process.wait()
         return (process.returncode, capture, process.stderr.read())
-
-def _notif(msg):
-    sys.stderr.write('\n')
-    sys.stderr.write(msg + '\n')
-    sys.stderr.write(''.join(['=' for c in msg]) + '\n')
-    sys.stderr.flush()
-
-def _warning(msg):
-    _notif('[WARNING] ' + msg)
-
-def _fatal(msg, code = 1):
-    _notif('[FATAL] ' + msg)
-    sys.exit(code)
 
 def _runK(command, definition, inputFile, kArgs = [], teeOutput = True, kRelease = None):
     if kRelease is not None:
