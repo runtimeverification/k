@@ -6,8 +6,7 @@ Current supported systems are:
 
 -   Arch Linux
 -   Ubuntu Bionic (18.04)
--   Ubuntu Xenial (16.04)
--   Debian Stretch
+-   Debian Buster
 
 Downloading Packages
 --------------------
@@ -24,13 +23,6 @@ Install the package with (`X.Y.Z` is version number, `ID` is platform identifier
 
 ```sh
 sudo apt install ./kframework_X.Y.Z_amd64_ID.deb
-```
-
-On Debian Stretch, you also must first enable stretch-backports by running:
-
-```sh
-sudo echo "deb http://ftp.debian.org/debian stretch-backports main" > /etc/apt/sources.list.d/stretch-backports.list
-sudo apt-get update.
 ```
 
 ### Arch
