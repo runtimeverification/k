@@ -1,4 +1,94 @@
   #Not ( ( #Not ( {
+          B
+        #Equals
+          A
+        } )
+      #And
+        #Not ( {
+          true
+        #Equals
+          A >=Int B
+        } )
+      #And
+        {
+          false
+        #Equals
+          A >=Int B
+        }
+    #Or
+        #Not ( {
+          B
+        #Equals
+          A
+        } )
+      #And
+        {
+          true
+        #Equals
+          A >=Int B
+        } )
+  #And
+    ( #Not ( {
+          true
+        #Equals
+          A >=Int A
+        } )
+      #And
+        {
+          B
+        #Equals
+          A
+        }
+    #Implies
+      {
+        true
+      #Equals
+        A >=Int B
+      } )
+  #And
+    #Not ( #Not ( {
+        B
+      #Equals
+        A
+      } )
+    #And
+      #Not ( {
+        true
+      #Equals
+        A >=Int B
+      } )
+    #And
+      {
+        false
+      #Equals
+        A >=Int B
+      } )
+  #And
+    #Not ( #Not ( {
+        B
+      #Equals
+        A
+      } )
+    #And
+      {
+        true
+      #Equals
+        A >=Int B
+      } )
+  #And
+    #Not ( {
+      false
+    #Equals
+      A <=Int B
+    } )
+  #And
+    {
+      true
+    #Equals
+      A <=Int B
+    } )
+#And
+  #Not ( ( #Not ( {
         true
       #Equals
         B >=Int B
