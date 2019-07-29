@@ -188,10 +188,10 @@ INT_expressions = { "_+Int_"   : paren(binOpStr("+Int"))
 
 MAP_expressions = { "Map:update"  : paren(underbarUnparsing("_[_<-_]"))
                   , "Map:lookup"  : paren(underbarUnparsing("_[_]"))
-                  , "_Map_"       : lambda m1, m2: m1 + "\n" + m2
+                  , "_Map_"       : lambda m1, m2: m1 + "\n" + m2 if m2 != ".Map" else m1
                   , "_|->_"       : underbarUnparsing("_|->_")
                   , "_[_<-undef]" : paren(underbarUnparsing("_[_ <- undef ]"))
-                  , ".Map"        : constLabel("")
+                  , ".Map"        : constLabel(".Map")
                   }
 
 LIST_expressions = { "_List_"   : (lambda a1, a2: a1 + " " + a2)
