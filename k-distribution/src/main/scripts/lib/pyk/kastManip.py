@@ -228,18 +228,3 @@ def writeKDefinition(fileName, kDef, symbolTable):
         sys.stdout.flush()
         return
     fatal("Could not write spec file: " + fileName)
-
-def runK(command, definitionDir, fileName, kArgs):
-    kCommand = [command, "--directory", definitionDir, fileName] + kArgs
-    notif("Running: " + str(kCommand))
-    kProc = subprocess.run(kCommand)
-    return kProc.returncode == 0
-
-def kast(definitionDir, fileName, kastArgs = []):
-    return runK("kast", definitionDir, fileName, kastArgs)
-
-def krun(definitionDir, fileName, krunArgs = []):
-    return runK("krun", definitionDir, fileName, krunArgs)
-
-def kprove(definitionDir, fileName, kproveArgs = []):
-    return runK("kprove", definitionDir, fileName, kproveArgs)
