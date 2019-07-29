@@ -27,11 +27,9 @@ validpgpkeys=()
 prepare() {
     cd "$srcdir/k"
     git submodule update --init --recursive
-    ./llvm-backend/src/main/native/llvm-backend/install-rust
 }
 
 build() {
-    export PATH="${CARGO_HOME:-$HOME/.cargo}/bin:$PATH"
     cd "$srcdir/k"
     mvn package -DskipTests
 }

@@ -13,15 +13,11 @@
 # package maintainers to append LDFLAGS
 #export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed
 
-CARGO_HOME?=$(HOME)/.cargo
-export CARGO_HOME
-
 %:
 	dh $@
 
 override_dh_auto_build:
 	git submodule update --init --recursive
-	./llvm-backend/src/main/native/llvm-backend/install-rust
 	mvn package -DskipTests
 
 override_dh_auto_install:
