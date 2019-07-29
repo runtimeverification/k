@@ -3,7 +3,7 @@
 import sys
 import subprocess
 
-from kast import *
+from .kast import *
 
 def match(pattern, kast):
     subst = {}
@@ -228,17 +228,3 @@ def writeKDefinition(fileName, kDef, symbolTable):
         sys.stdout.flush()
         return
     fatal("Could not write spec file: " + fileName)
-
-def proveSpec(fileName, kproveArgs = []):
-    notif("Attempting to prove spec: " + fileName)
-    proveCommand = ["kprove", fileName] + kproveArgs
-    print("Command: " + str(proveCommand))
-    sys.stdout.flush()
-    kproveProc = subprocess.run(proveCommand)
-    if kproveProc.returncode == 0:
-        notif("Proof success!!")
-        return True
-    else:
-        notif("Proof failure!!")
-        return False
-

@@ -2,13 +2,56 @@
 
 import sys
 import json
-from util import *
+
+def _notif(msg):
+    sys.stderr.write('\n')
+    sys.stderr.write(msg + '\n')
+    sys.stderr.write(''.join(['=' for c in msg]) + '\n')
+    sys.stderr.flush()
+
+def _warning(msg):
+    _notif('[WARNING] ' + msg)
+
+def _fatal(msg, code = 1):
+    _notif('[FATAL] ' + msg)
+    sys.exit(code)
+
+def combineDicts(*dicts):
+    if len(dicts) == 0:
+        return {}
+    if len(dicts) == 1:
+        return dicts[0]
+    dict1 = dicts[0]
+    dict2 = dicts[1]
+    restDicts = dicts[2:]
+    if dict1 is None or dict2 is None:
+        return None
+    intersecting_keys = set(dict1.keys()).intersection(set(dict2.keys()))
+    for key in intersecting_keys:
+        if dict1[key] != dict2[key]:
+            return None
+    newDict = { key : dict1[key] for key in dict1 }
+    for key in dict2.keys():
+        newDict[key] = dict2[key]
+    return combineDicts(newDict, *restDicts)
 
 def KApply(label, args):
     return { "node": "KApply", "label": label, "variable": False, "arity": len(args), "args": args }
 
 def isKApply(k):
     return k["node"] == "KApply"
+
+def KConstant(label):
+    return KApply(label, [])
+
+def isKConstant(k):
+    return isKApply(k) and len(k['args']) == 0
+
+def KSequence(items):
+    return { "node": "KSequence", "arity": len(items), "items": items }
+
+def isKSequence(k):
+    return k["node"] == "KSequence"
 
 def KVariable(name):
     return { "node" : "KVariable", "name": name, "originalName": name }
@@ -17,7 +60,7 @@ def isKVariable(k):
     return k["node"] == "KVariable"
 
 def KToken(token, sort):
-    return { "node" : "KToken", "token": token, "sort": sort}
+    return { "node" : "KToken", "sort": sort, "token": token}
 
 def isKToken(k):
     return k["node"] == "KToken"
@@ -87,7 +130,7 @@ def binOpStr(symbol):
     return (lambda a1, a2: a1 + " " + symbol + " " + a2)
 
 def appliedLabelStr(symbol):
-    return (lambda *args: symbol + "( " + " , ".join(args) + " )")
+    return (lambda *args: symbol + " ( " + " , ".join(args) + " )")
 
 def constLabel(symbol):
     return (lambda: symbol)
@@ -145,8 +188,8 @@ INT_expressions = { "_+Int_"   : paren(binOpStr("+Int"))
 
 MAP_expressions = { "Map:update"  : paren(underbarUnparsing("_[_<-_]"))
                   , "Map:lookup"  : paren(underbarUnparsing("_[_]"))
-                  , "_Map_"       : underbarUnparsing("_\n_")
-                  , "_|->_"       : paren(underbarUnparsing("_|->_"))
+                  , "_Map_"       : lambda m1, m2: m1 + "\n" + m2 if m2 != ".Map" else m1
+                  , "_|->_"       : underbarUnparsing("_|->_")
                   , "_[_<-undef]" : paren(underbarUnparsing("_[_ <- undef ]"))
                   , ".Map"        : constLabel(".Map")
                   }
@@ -172,17 +215,19 @@ def prettyPrintKast(kast, symbolTable):
     if isKApply(kast):
         label = kast["label"]
         args  = kast["args"]
+        unparsedArgs = [ prettyPrintKast(arg, symbolTable) for arg in args ]
         if isCellKLabel(label):
-            cellLines = "\n".join([ prettyPrintKast(arg, symbolTable) for arg in args ]).split("\n")
-            cellStr   = "\n  ".join(cellLines)
-            if len(cellLines) == 1:
-                cellStr = label + " "    + cellStr + " </"  + label[1:]
-            else:
-                cellStr = label + "\n  " + cellStr + "\n</" + label[1:]
-            return cellStr
-        if label in symbolTable:
-            newArgs = [prettyPrintKast(arg, symbolTable) for arg in args]
-            return symbolTable[kast["label"]](*newArgs)
+            cellLines = "\n".join(unparsedArgs).rstrip().split("\n")
+            cellStr   = label + "\n  " + "\n  ".join(cellLines) + "\n</" + label[1:]
+            return cellStr.rstrip()
+        unparser = appliedLabelStr(label) if label not in symbolTable else symbolTable[label]
+        return unparser(*unparsedArgs)
+    if isKSequence(kast):
+        unparsedItems = [ prettyPrintKast(item, symbolTable) for item in kast['items'] ]
+        unparsedKSequence = "\n~> ".join(unparsedItems)
+        if len(unparsedItems) > 1:
+            unparsedKSequence = "    " + unparsedKSequence
+        return unparsedKSequence
     if isKRule(kast):
         body     = "\n     ".join(prettyPrintKast(kast["rule"], symbolTable).split("\n"))
         ruleStr = "rule " + body
@@ -224,7 +269,7 @@ def prettyPrintKast(kast, symbolTable):
         return requires + "\n\n" + modules
 
     print()
-    warning("Error turning to kast!")
+    _warning("Error unparsing kast!")
     print(kast)
-    fatal("Error unparsing!")
+    _fatal("Error unparsing!")
 

@@ -2,7 +2,6 @@
 package org.kframework.backend.llvm;
 
 import com.google.inject.Inject;
-import org.kframework.RewriterResult;
 import org.kframework.backend.kore.ModuleToKORE;
 import org.kframework.compile.AddSortInjections;
 import org.kframework.compile.ExpandMacros;
@@ -14,9 +13,11 @@ import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.RunProcess;
+import org.kframework.main.GlobalOptions;
 import org.kframework.main.Main;
 import org.kframework.parser.KoreParser;
 import org.kframework.parser.kore.parser.ParseError;
+import org.kframework.RewriterResult;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.rewriter.SearchType;
 import org.kframework.utils.errorsystem.KEMException;
@@ -38,25 +39,27 @@ import java.util.function.Function;
 @RequestScoped
 public class LLVMRewriter implements Function<Definition, Rewriter> {
 
+    private final GlobalOptions globalOptions;
     private final FileUtil files;
     private final CompiledDefinition def;
-    private final KRunOptions options;
+    private final KRunOptions krunOptions;
     private final KompileOptions kompileOptions;
     private final Properties idsToLabels;
 
     @Inject
     public LLVMRewriter(
+            GlobalOptions globalOptions,
             FileUtil files,
             CompiledDefinition def,
-            KRunOptions options,
+            KRunOptions krunOptions,
             KompileOptions kompileOptions,
             InitializeDefinition init) {
+        this.globalOptions = globalOptions;
         this.files = files;
         this.def = def;
-        this.options = options;
+        this.krunOptions = krunOptions;
         this.kompileOptions = kompileOptions;
         this.idsToLabels = init.serialized;
-
     }
 
     @Override
@@ -140,6 +143,9 @@ public class LLVMRewriter implements Function<Definition, Rewriter> {
      */
     private int executeCommandBasic(File workingDir, List<String> command) throws IOException, InterruptedException {
         int exit;
+        if (globalOptions.verbose) {
+            System.err.println("Executing command: " + String.join(" ", command));
+        }
         ProcessBuilder pb = files.getProcessBuilder()
                 .command(command);
         if (workingDir != null) {
