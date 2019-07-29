@@ -8,7 +8,7 @@ KPROVE  = $(K_BIN)/kprove
 
 KOMPILE_BACKEND?=java
 
-PYTHONPATH := $(K_LIB)/pyk
+PYTHONPATH := $(K_LIB)
 export PYTHONPATH
 
 .PHONY: all clean pyk test-kast test-prove
