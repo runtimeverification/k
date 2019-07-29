@@ -96,7 +96,8 @@ class KoreToK (headToLabel_ : java.util.Properties, sortAtt : Map[k.Sort, Att], 
     case kore.Mem(s, rs, p, q) =>
       throw new TranslationError("Mem patterns currently unsupported")
     case kore.DomainValue(s, str) =>
-      KORE.KToken(if (sortAtt.get(apply(s)).getOrElse(KORE.Att).getOptional("hook").orElse("") == "STRING.String") enquote(str) else str, apply(s))
+      val hookAtt = sortAtt.get(apply(s)).getOrElse(KORE.Att).getOptional("hook").orElse("")
+      KORE.KToken(if (hookAtt == "STRING.String") enquote(str) else if (hookAtt == "BYTES.Bytes") "b" + enquote(str) else str, apply(s))
     case kore.StringLiteral(str) =>
       KORE.KToken(str, Sorts.KString)
   }
