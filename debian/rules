@@ -17,7 +17,6 @@
 	dh $@
 
 override_dh_auto_build:
-	git submodule update --init --recursive
 	mvn package -DskipTests
 
 override_dh_auto_install:

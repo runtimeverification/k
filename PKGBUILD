@@ -24,11 +24,6 @@ noextract=()
 md5sums=('SKIP')
 validpgpkeys=()
 
-prepare() {
-    cd "$srcdir/k"
-    git submodule update --init --recursive
-}
-
 build() {
     cd "$srcdir/k"
     mvn package -DskipTests
