@@ -3,8 +3,8 @@ FROM ${BASE_IMAGE}
 ARG BASE_IMAGE
 
 RUN apt-get update && \
-    apt-get install -y git debhelper maven openjdk-11-jdk cmake libboost-test-dev libyaml-dev libjemalloc-dev flex bison `if [ "$BASE_IMAGE" = "debian:buster" ]; then echo clang-7 llvm-7-tools lld-7; else echo clang-8 llvm-8-tools lld-8; fi` zlib1g-dev libgmp-dev libmpfr-dev gcc z3 libz3-dev opam pkg-config curl python3
-RUN curl -sSL https://get.haskellstack.org/ | sh      
+    apt-get install -y git debhelper maven openjdk-11-jdk cmake libboost-test-dev libyaml-dev libjemalloc-dev flex bison `if [ "$BASE_IMAGE" = "debian:buster" ]; then echo clang-7 llvm-7-tools lld-7; else echo clang-8 llvm-8-tools lld-8; fi` zlib1g-dev libgmp-dev libmpfr-dev gcc z3 libz3-dev opam pkg-config curl python3 haskell-stack
+RUN curl -sSL https://get.haskellstack.org/ | sh -s - -f
 
 ARG USER_ID=1000
 ARG GROUP_ID=1000
