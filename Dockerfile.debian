@@ -1,6 +1,10 @@
-ARG BASE_IMAGE=ubuntu:bionic
-FROM ${BASE_IMAGE}
-ARG BASE_IMAGE
+ARG OS=ubuntu
+ARG FLAVOR=bionic
+
+FROM ${OS}:${FLAVOR}
+
+ARG OS=ubuntu
+ARG FLAVOR=bionic
 
 RUN apt-get update && \
     apt-get install -y git debhelper maven openjdk-11-jdk cmake libboost-test-dev libyaml-dev libjemalloc-dev flex bison `if [ "$BASE_IMAGE" = "debian:buster" ]; then echo clang-7 llvm-7-tools lld-7; else echo clang-8 llvm-8-tools lld-8; fi` zlib1g-dev libgmp-dev libmpfr-dev gcc z3 libz3-dev opam pkg-config curl python3
