@@ -24,8 +24,8 @@ pipeline {
                 stage('Build on Ubuntu Bionic') {
                   agent {
                     dockerfile {
-                      filename 'Dockerfile.debian'
-                      additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=ubuntu:bionic'
+                      filename 'debian.Dockerfile'
+                      additionalBuildArgs '--pull --build-arg OS=ubuntu --build-arg FLAVOR=bionic'
                       reuseNode true
                     }
                   }
@@ -108,8 +108,8 @@ pipeline {
                 stage('Build on Debian Buster') {
                   agent {
                     dockerfile {
-                      filename 'Dockerfile.debian'
-                      additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=debian:buster'
+                      filename 'debian.Dockerfile'
+                      additionalBuildArgs '--pull --build-arg OS=debian --build-arg FLAVOR=buster'
                       reuseNode true
                     }
                   }
@@ -173,7 +173,7 @@ pipeline {
                 stage('Build on Arch Linux') {
                   agent {
                     dockerfile {
-                      filename 'Dockerfile.arch'
+                      filename 'arch.Dockerfile'
                       additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
                       reuseNode true
                     }
@@ -273,8 +273,8 @@ pipeline {
     stage('Deploy') {
       agent {
         dockerfile {
-          filename 'Dockerfile.debian'
-          additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=ubuntu:bionic'
+          filename 'debian.Dockerfile'
+          additionalBuildArgs '--pull --build-arg OS=ubuntu --build-arg FLAVOR=bionic'
           reuseNode true
         }
       }
