@@ -264,8 +264,8 @@ pipeline {
                   }
                   steps {
                     unstash "src"
-                    git url: 'git@github.com:kframework/homebrew-k.git'
                     dir('homebrew-k') {
+                      git url: 'git@github.com:kframework/homebrew-k.git'
                       sh '''
                         ${WORKSPACE}/src/main/scripts/brew-update-to-local
                         brew tap kframework/k "file://$(pwd)"
