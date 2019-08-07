@@ -284,8 +284,8 @@ pipeline {
                   }
                   steps {
                     unstash "mojave"
-                    git url: 'git@github.com:kframework/homebrew-k.git', branch: 'brew-release'
                     dir('homebrew-k') {
+                      git url: 'git@github.com:kframework/homebrew-k.git', branch: 'brew-release'
                       sh '''
                         brew tap kframework/k "file:///$(pwd)"
                         brew install kframework-5.0.0.mojave.bottle*.tar.gz
@@ -364,7 +364,9 @@ pipeline {
           unstash "mojave"
         }
         unstash "src"
-        git url: 'git@github.com:kframework/homebrew-k.git', branch: 'brew-release'
+        dir("homebrew-k") {
+          git url: 'git@github.com:kframework/homebrew-k.git', branch: 'brew-release'
+        }
         sh '''
           echo 'Setting up environment...'
           eval `opam config env`
