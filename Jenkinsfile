@@ -267,10 +267,10 @@ pipeline {
                     git url: 'git@github.com:kframework/homebrew-k.git'
                     dir('homebrew-k') {
                       sh '''
-                        ../src/main/scripts/brew-update-to-local
+                        ${WORKSPACE}/src/main/scripts/brew-update-to-local
                         brew tap kframework/k "file://$(pwd)"
                         brew install kframework --build-bottle
-                        ../src/main/scripts/brew-update-to-local-bottle
+                        ${WORKSPACE}/src/main/scripts/brew-update-to-local-bottle
                         git checkout -b brew-release
                         git push origin brew-release
                       '''
@@ -307,7 +307,7 @@ pipeline {
                     '''
                     dir('homebrew-k') {
                       sh '''
-                        ../src/main/scripts/brew-update-to-final
+                        ${WORKSPACE}/src/main/scripts/brew-update-to-final
                         git push origin brew-release
                       '''
                     }
