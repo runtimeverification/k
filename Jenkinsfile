@@ -264,7 +264,7 @@ pipeline {
                   }
                   steps {
                     unstash "src"
-                    git url: 'git@github.com:kframework/homebrew-k.git'
+                    git url: 'git@github.com:kframework/homebrew-k.git', credentialsId: "rv-jenkins"
                     dir('homebrew-k') {
                       sh '''
                         ../src/main/scripts/brew-update-to-local
