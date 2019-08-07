@@ -269,7 +269,7 @@ pipeline {
                       sh '''
                         ${WORKSPACE}/src/main/scripts/brew-update-to-local
                         brew tap kframework/k "file://$(pwd)"
-                        brew install kframework --build-bottle
+                        brew install kframework --build-bottle -v
                         ${WORKSPACE}/src/main/scripts/brew-update-to-local-bottle
                         git checkout -b brew-release
                         git push origin brew-release
