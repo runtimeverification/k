@@ -1,0 +1,6 @@
+#!/bin/sh -ex
+REV=$(cd .. && git rev-parse HEAD)
+brew bottle --json kframework --root-url="https://github.com/kframework/k/releases/download/nightly-$REV/" > bottle.json
+brew bottle --merge --write --no-commit bottle.json
+cp $(brew formula kframework) Formula/kframework.rb
+git commit Formula/kframework.rb -m "Update kframeork to $REV: part 2"

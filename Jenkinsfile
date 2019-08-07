@@ -14,6 +14,26 @@ pipeline {
         }
       }
     }
+    stage("Create source tarball") {
+      agent {
+        dockerfile {
+          filename 'Dockerfile.debian'
+          additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=ubuntu:bionic'
+          reuseNode true
+        }
+      }
+      steps {
+        dir("kframework-5.0.0") {
+          checkout scm
+          sh '''
+            find . -name .git | xargs rm -r
+            cd ..
+            tar czvf kframework-5.0.0.tar.gz kframework-5.0.0
+          '''
+        }
+        stash name: "src", includes: "kframework-5.0.0.tar.gz"
+      }
+    }
     stage('Build and Package K') {
       failFast true
       parallel {
@@ -226,30 +246,70 @@ pipeline {
           }
         }
         stage('Build and Package on Mac OS') {
-          when {
+ /*         when {
             anyOf {
               not { changeRequest() }
               changelog '.*^\\[build-system\\] .+$'
               changeset 'Jenkinsfile'
               changeset 'Dockerfile'
             }
-          }
+          }*/
           stages {
             stage('Build on Mac OS') {
-              agent {
-                label 'anka'
-              }
               stages {
-                stage('Build and Test on Mac OS') {
+                stage('Build Homebrew Bottle') {
+                  agent {
+                    label 'anka'
+                  }
                   steps {
+                    unstash "src"
+                    git url: 'git@github.com:kframework/homebrew-k.git'
+                    dir('homebrew-k') {
+                      sh '''
+                        ../src/main/scripts/brew-update-to-local
+                        brew tap kframework/k "file://$(pwd)"
+                        brew install kframework --build-bottle
+                        ../src/main/scripts/brew-update-to-local-bottle
+                        git checkout -b brew-release
+                        git push origin brew-release
+                      '''
+                      stash name: "mojave", includes: "kframework-5.0.0.mojave.bottle*.tar.gz"
+                    }
+                  }
+                }
+                stage("Test Homebrew Bottle") {
+                  agent {
+                    label 'anka'
+                  }
+                  steps {
+                    unstash "mojave"
+                    git url: 'git@github.com:kframework/homebrew-k.git', branch: 'brew-release'
+                    dir('homebrew-k') {
+                      sh '''
+                        brew tap kframework/k "file:///$(pwd)"
+                        brew install kframework-5.0.0.mojave.bottle*.tar.gz
+                      '''
+                    }
                     sh '''
-                      echo 'Setting up environment...'
-                      ./src/main/scripts/brew-install-deps
-                      eval `opam config env`
-                      . $HOME/.cargo/env
-                      echo 'Building K...'
-                      mvn verify -U
+                      cp -R /usr/local/lib/kframework/tutorial ~
+                      WD=`pwd`
+                      cd
+                      echo 'Starting kserver...'
+                      /usr/local/lib/kframework/bin/spawn-kserver $WD/kserver.log
+                      cd tutorial
+                      echo 'Testing tutorial in user environment...'
+                      make -j`nproc`
+                      cd ~
+                      echo "module TEST imports BOOL endmodule" > test.k
+                      kompile test.k --backend llvm
+                      kompile test.k --backend haskell
                     '''
+                    dir('homebrew-k') {
+                      sh '''
+                        ../src/main/scripts/brew-update-to-final
+                        git push origin brew-release
+                      '''
+                    }
                   }
                 }
               }
@@ -299,14 +359,11 @@ pipeline {
         dir("arch") {
           unstash "arch"
         }
-        dir("kframework-5.0.0") {
-          checkout scm
-          sh '''
-            find . -name .git | xargs rm -r
-            cd ..
-            tar czvf kframework-5.0.0.tar.gz kframework-5.0.0
-          '''
+        dir("mojave") {
+          unstash "mojave"
         }
+        unstash "src"
+        git url: 'git@github.com:kframework/homebrew-k.git', branch: 'brew-release'
         sh '''
           echo 'Setting up environment...'
           eval `opam config env`
@@ -318,13 +375,20 @@ pipeline {
           DESCRIPTION='This is the nightly release of the K framework. To install, download the appropriate binary package and install using your package manager. You can install a debian package via `sudo apt-get install ./kframework_5.0.0_amd64_$ID.deb` for the appropriate version codename $ID. You can install on Arch Linux using `sudo pacman -S ./kframework-5.0.0-1-x86_64.pkg.tar.xz`. If your OS is not supported, you can download and extract the \\"Platform-Independent K binary\\", and follow the instructions in INSTALL.md within the target directory. Note however that this will not support the Haskell or LLVM Backends. On Windows, start by installing [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10) with Ubuntu (or an Ubuntu VM), after which you can install like Ubuntu. K requires gcc and other Linux libraries to run, and building on native Windows, Cygwin, or MINGW is not supported.'
           RESPONSE=`curl --data '{"tag_name": "nightly-'$COMMIT'","name": "Nightly build of K framework at commit '$COMMIT'","body": "'"$DESCRIPTION"'", "draft": true,"prerelease": true}' https://api.github.com/repos/kframework/k/releases?access_token=$GITHUB_TOKEN`
           ID=`echo "$RESPONSE" | grep '"id": [0-9]*,' -o | head -1 | grep '[0-9]*' -o`
+          BOTTLE_NAME=`echo mojave/kframework-5.0.0.mojave.bottle*.tar.gz`
           curl --data-binary @kframework-5.0.0.tar.gz -H "Authorization: token $GITHUB_TOKEN" -H "Content-Type: application/gzip" https://uploads.github.com/repos/kframework/k/releases/$ID/assets?'name=kframework-5.0.0.tar.gz&label=Source+tar.gz'
           curl --data-binary @k-distribution/target/k-nightly.tar.gz -H "Authorization: token $GITHUB_TOKEN" -H "Content-Type: application/gzip" https://uploads.github.com/repos/kframework/k/releases/$ID/assets?'name=nightly.tar.gz&label=Platform-Indepdendent+K+binary'
           curl --data-binary @bionic/kframework_5.0.0_amd64.deb -H "Authorization: token $GITHUB_TOKEN" -H "Content-Type: application/vnd.debian.binary-package" https://uploads.github.com/repos/kframework/k/releases/$ID/assets?'name=kframework_5.0.0_amd64_bionic.deb&label=Ubuntu+Bionic+Debian+Package'
           curl --data-binary @buster/kframework_5.0.0_amd64.deb -H "Authorization: token $GITHUB_TOKEN" -H "Content-Type: application/vnd.debian.binary-package" https://uploads.github.com/repos/kframework/k/releases/$ID/assets?'name=kframework_5.0.0_amd64_buster.deb&label=Debian+Buster+Debian+Package'
           curl --data-binary @arch/kframework-5.0.0-1-x86_64.pkg.tar.xz -H "Authorization: token $GITHUB_TOKEN" -H "Content-Type: application/x-xz" https://uploads.github.com/repos/kframework/k/releases/$ID/assets?'name=kframework-5.0.0-1-x86_64.pkg.tar.xz&label=Arch+Linux+Pacman+Package'
+          curl --data-binary @$BOTTLE_NAME -H "Authorization: token $GITHUB_TOKEN" -H "Content-Type: application/gzip" https://uploads.github.com/repos/kframework/k/releases/$ID/assets?'name='$BOTTLE_NAME'&label=Mac OS X Mojave Homebrew Bottle'
           curl -X PATCH --data '{"draft": false}' https://api.github.com/repos/kframework/k/releases/$ID?access_token=$GITHUB_TOKEN
           curl --data '{"state": "success","target_url": "'$BUILD_URL'","description": "Build succeeded."}' https://api.github.com/repos/kframework/k/statuses/$(git rev-parse origin/master)?access_token=$GITHUB_TOKEN
+          cd homebrew-k
+          git checkout master
+          git merge brew-release
+          git push origin master
+          git push origin -d brew-release
         '''
       }
       post {
