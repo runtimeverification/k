@@ -1,6 +1,6 @@
 #!/bin/sh -ex
 REV=$(cd .. && git rev-parse HEAD)
-sed -i -e 's!^  url ".*"$!  url"https://github.com/kframework/k/releases/download/nightly-'$REV'/kframework-5.0.0.tar.gz!"' \
+sed -i -e 's!^  url ".*"$!  url"https://github.com/kframework/k/releases/download/nightly-'$REV'/kframework-5.0.0.tar.gz"!' \
     Formula/kframework.rb
 git commit Formula/kframework.rb -m "Update kframework to $REV: part 3"
 cat Formula/kframework.rb
