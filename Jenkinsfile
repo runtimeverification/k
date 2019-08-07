@@ -30,6 +30,7 @@ pipeline {
             cd ..
             tar czvf kframework-5.0.0.tar.gz kframework-5.0.0
           '''
+          deleteDir
         }
         stash name: "src", includes: "kframework-5.0.0.tar.gz"
       }
