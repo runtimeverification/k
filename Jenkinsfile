@@ -29,7 +29,6 @@ pipeline {
             find . -name .git | xargs rm -r
             cd ..
             tar czvf kframework-5.0.0.tar.gz kframework-5.0.0
-            rm -rf kframework-5.0.0
           '''
         }
         stash name: "src", includes: "kframework-5.0.0.tar.gz"
