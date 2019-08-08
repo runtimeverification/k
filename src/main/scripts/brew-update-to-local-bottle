@@ -1,8 +1,8 @@
 #!/bin/sh -ex
 REV=$(cd .. && git rev-parse HEAD)
 brew bottle --json kframework --root-url="https://github.com/kframework/k/releases/download/nightly-$REV/"
-filename=$(cat *.bottle.json | jq -r '.kframework.bottle.tags.mojave.filename')
-localfilename=$(cat *.bottle.json | jq -r '.kframework.bottle.tags.mojave.local_filename')
+filename=$(cat *.bottle.json | jq -r '."kframework/k/kframework".bottle.tags.mojave.filename')
+localfilename=$(cat *.bottle.json | jq -r '."kframework/k/kframework".bottle.tags.mojave.local_filename')
 cat *.bottle.json
 brew bottle --merge --write --no-commit *.bottle.json
 mv $localfilename $filename
