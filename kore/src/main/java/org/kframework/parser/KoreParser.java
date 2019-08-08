@@ -39,7 +39,7 @@ public class KoreParser {
             Pattern kore = textToKore.parsePattern(koreString);
             return koreToK.apply(kore);
         } catch (ParseError parseError) {
-            throw KEMException.criticalError("Parse error" );
+            throw KEMException.criticalError("Parse error.\n" + parseError.msg() );
         }
     }
 
