@@ -134,6 +134,8 @@ object Variable {
   def unapply(arg: Variable): Option[(String, Sort)] = Some(arg.name, arg.sort)
 }
 
+trait SetVariable extends Variable {}
+
 trait Application extends Pattern {
   def head: SymbolOrAlias
 
@@ -495,6 +497,8 @@ trait Builders {
   def Attributes(att: Seq[Pattern]): Attributes
 
   def Variable(name: String, sort: Sort): Variable
+
+  def SetVariable(name: String, sort: Sort): SetVariable
 
   def Application(head: SymbolOrAlias, args: Seq[Pattern]): Pattern
 

@@ -519,6 +519,15 @@ class TextToKore(b: Builders = DefaultBuilders) {
               "\\equals", "\\mem")
             throw error(known.mkString(","), "'\\" + err1 + err2 + "'")
         }
+      case '@' => // set variable
+        val id = parseId()
+        scanner.nextWithSkippingWhitespaces() match {
+          case ':' => // set variable
+            val sort = parseSort(parsingLevel = previousParsingLevel)
+            b.SetVariable("@" + id, sort)
+          case err =>
+            throw error("':'", err)
+        }
       case c => // variable or application
         scanner.putback(c)
         val id = parseId() // previousParsingLevel is set here
