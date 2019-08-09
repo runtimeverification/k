@@ -963,6 +963,7 @@ module K-IO
                | "#open" "(" String "," String ")" [function, hook(IO.open), impure]
                | "#tell" "(" Int ")" [function, hook(IO.tell), impure]
                | "#getc" "(" Int ")"             [function, hook(IO.getc), impure]
+               | "#accept" "(" Int ")" [function, hook(IO.accept), impure]
   syntax IOString ::= "#read" "(" Int "," Int ")"    [function, hook(IO.read), impure]
 
   syntax K ::= "#close" "(" Int ")" [function, hook(IO.close), impure]
@@ -972,6 +973,7 @@ module K-IO
              | "#write" "(" Int "," String ")" [function, hook(IO.write), impure]
              | "#lock" "(" Int "," Int ")" [function, hook(IO.lock), impure]
              | "#unlock" "(" Int "," Int ")" [function, hook(IO.unlock), impure]
+             | "#shutdownWrite" "(" Int ")" [function, hook(IO.shutdownWrite), impure]
 
   syntax KItem ::= "#stat" "(" String ")" [function, hook(IO.stat), impure]
                  | "#lstat" "(" String ")" [function, hook(IO.lstat), impure]
