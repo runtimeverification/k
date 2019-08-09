@@ -1,6 +1,11 @@
 module FUN-TEST
   imports INT
   imports STRING
+  imports MAP
+
+  configuration
+    <k> $PGM:KItem </k>
+    <cell> .Map </cell>
 
 syntax KItem ::= nestedFun( Int )
 rule nestedFun(A) => #fun(B => #fun(C => 100 *Int A +Int 10 *Int B +Int C)(2 *Int B))(2 *Int A)
@@ -37,5 +42,19 @@ rule useNestedBarInt()
      => #fun(FOO
           => #fun( F2 => getBarInt() )(0)
         )(0)
+
+  syntax KItem ::= nestedFun3Levels()
+  rule nestedFun3Levels()
+       => #fun(V1
+       => #fun(V2
+       => #fun(V3
+       => requiresConfig()
+          )(V1 *Int 0)
+          )(0)
+          )(0)
+
+  syntax Int ::= requiresConfig() [function]
+  rule [[ requiresConfig() => 0 ]]
+    <cell> M </cell>
 
 endmodule

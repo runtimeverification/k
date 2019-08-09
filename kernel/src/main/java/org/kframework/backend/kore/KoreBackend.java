@@ -138,8 +138,8 @@ public class KoreBackend implements Backend {
         Function1<Definition, Definition> resolveIO = (d -> Kompile.resolveIOStreams(kem, d));
 
         return def -> resolveIO
-                .andThen(resolveFunctionWithConfig)
                 .andThen(resolveFun)
+                .andThen(resolveFunctionWithConfig)
                 .andThen(resolveStrict)
                 .andThen(resolveAnonVars)
                 .andThen(d -> new ResolveContexts(kompileOptions).resolve(d))

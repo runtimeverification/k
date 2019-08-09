@@ -1,3 +1,8 @@
-<k>
-  #bar
-</k>
+<generatedTop>
+  <k>
+    #bar
+  </k>
+  <cell>
+    .Map
+  </cell>
+</generatedTop>
