@@ -272,6 +272,7 @@ pipeline {
                         brew install kframework --build-bottle -v
                         brew install jq
                         ${WORKSPACE}/src/main/scripts/brew-update-to-local-bottle
+                        git push -d origin brew-release
                         git checkout -b brew-release
                         git push origin brew-release
                       '''
