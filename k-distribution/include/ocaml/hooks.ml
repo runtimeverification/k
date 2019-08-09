@@ -278,6 +278,8 @@ struct
   let flush_logs () =
     Hashtbl.iter flush_log log_files
 
+  let hook_accept _ _ _ _ _ = raise Not_implemented
+  let hook_shutdownWrite _ _ _ _ _ = raise Not_implemented
   let hook_stat _ _ _ _ _ = raise Not_implemented
   let hook_lstat _ _ _ _ _ = raise Not_implemented
   let hook_opendir _ _ _ _ _ = raise Not_implemented
