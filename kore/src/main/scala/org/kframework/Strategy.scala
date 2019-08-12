@@ -13,9 +13,6 @@ import org.kframework.kore.Sort
 import org.kframework.kore.Unapply.{KApply, KLabel}
 
 object Strategy {
-  val strategyCellName = "<s>"
-  val strategyCellLabel = KORE.KLabel(strategyCellName)
-
   def addStrategyRuleToMainModule(mainModuleName: String) = {
     DefinitionTransformer(
       module =>
@@ -23,7 +20,7 @@ object Strategy {
           module
         } else {
           Module(module.name, module.imports, module.localSentences + Rule(
-            KORE.KApply(strategyCellLabel,
+            KORE.KApply(KLabels.STRATEGY_CELL,
               KORE.KApply(KLabels.NO_DOTS),
               KORE.KRewrite(
                 KORE.KVariable("S", Att.empty.add(classOf[Sort], Sorts.KItem)),
@@ -49,7 +46,7 @@ object Strategy {
 
 class ContainsSCell extends ExistsK {
   override def apply(k: KApply): java.lang.Boolean = {
-    k.klabel.name == "<s>" || super.apply(k)
+    k.klabel == KLabels.STRATEGY_CELL || super.apply(k)
   }
 }
 
@@ -99,7 +96,7 @@ class Strategy(heatCool: Boolean) {
                       }
 
                     KORE.KApply(KLabels.CELLS, r.body,
-                      KORE.KApply(strategyCellLabel,
+                      KORE.KApply(KLabels.STRATEGY_CELL,
                         KORE.KApply(KLabels.NO_DOTS),
                         strategy,
                         KORE.KApply(KLabels.NO_DOTS)
