@@ -286,8 +286,8 @@ pipeline {
                   }
                   steps {
                     dir('homebrew-k') {
-                      unstash "mojave"
                       git url: 'git@github.com:kframework/homebrew-k.git', branch: 'brew-release'
+                      unstash "mojave"
                       sh '''
                         brew tap kframework/k "file:///$(pwd)"
                         brew install kframework--5.0.0.mojave.bottle*.tar.gz
