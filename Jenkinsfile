@@ -301,7 +301,7 @@ pipeline {
                       /usr/local/lib/kframework/bin/spawn-kserver $WD/kserver.log
                       cd tutorial
                       echo 'Testing tutorial in user environment...'
-                      make -j`nproc`
+                      make -j`sysctl -n hw.npcu`
                       cd ~
                       echo "module TEST imports BOOL endmodule" > test.k
                       kompile test.k --backend llvm
