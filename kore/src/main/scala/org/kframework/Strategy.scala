@@ -49,7 +49,7 @@ object Strategy {
 
 class ContainsSCell extends ExistsK {
   override def apply(k: KApply): java.lang.Boolean = {
-    k.klabel.name == "<s>"
+    k.klabel.name == "<s>" || super.apply(k)
   }
 }
 
