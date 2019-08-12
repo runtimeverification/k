@@ -6,6 +6,8 @@ import org.kframework.builtin.KLabels
 import org.kframework.builtin.Sorts
 import org.kframework.compile.RewriteToTop
 import org.kframework.definition.{DefinitionTransformer, ModuleTransformer, Module, Rule, Definition}
+import org.kframework.kore.ExistsK
+import org.kframework.kore.KApply
 import org.kframework.kore.KORE
 import org.kframework.kore.Sort
 import org.kframework.kore.Unapply.{KApply, KLabel}
@@ -45,6 +47,12 @@ object Strategy {
   }
 }
 
+class ContainsSCell extends ExistsK {
+  override def apply(k: KApply): java.lang.Boolean = {
+    k.klabel.name == "<s>"
+  }
+}
+
 class Strategy(heatCool: Boolean) {
   import Strategy._
 
@@ -67,7 +75,7 @@ class Strategy(heatCool: Boolean) {
             r
           } else
             r match {
-              case r: Rule if !r.body.contains({ case k: kore.KApply => k.klabel.name.contains("<s>") }) =>
+              case r: Rule if !new ContainsSCell().apply(r.body) =>
                 val newBody = RewriteToTop.toLeft(r.body) match {
                   case KApply(klabel, _) if !isFunctionRhs(r.body) && (!defn.mainModule.attributesFor.contains(klabel) || !defn.mainModule.attributesFor(klabel).contains(Att.Function)) =>
                     // todo: "!module.attributesFor.contains(klabel) ||" when #1723 is fixed
