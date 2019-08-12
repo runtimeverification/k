@@ -127,7 +127,7 @@ public class SymbolicRewriter {
      */
     private Optional<ConstrainedTerm> addStuckFlagIfNotThere(ConstrainedTerm subject) {
         Optional<K> theStrategy = ((KApply) subject.term()).klist().stream()
-                .filter(t -> t instanceof KApply && ((KApply) t).klabel().name().equals(KLabels.STRATEGY_CELL_NAME))
+                .filter(t -> t instanceof KApply && ((KApply) t).klabel().equals(KLabels.STRATEGY_CELL))
                 .findFirst();
 
         if (!theStrategy.isPresent())
@@ -158,7 +158,7 @@ public class SymbolicRewriter {
         K s = constructor.KApply1(((KApply) theStrategy.get()).klabel(), constructor.KList(Collections.singletonList(sContent)), emptyAtt);
         Term entireConf = constructor.KApply1(((KApply) subject.term()).klabel(),
                 constructor.KList(((KApply) subject.term()).klist().stream().map(k ->
-                        k instanceof KApply && ((KApply) k).klabel().name().equals(KLabels.STRATEGY_CELL_NAME) ? s : k).collect(Collectors.toList())), emptyAtt);
+                        k instanceof KApply && ((KApply) k).klabel().equals(KLabels.STRATEGY_CELL) ? s : k).collect(Collectors.toList())), emptyAtt);
         ConstrainedTerm stuckTerm = new ConstrainedTerm(entireConf, subject.constraint(), subject.termContext());
         global.stateLog.log(StateLog.LogEvent.RULE, Rules.STUCK_RULE, subject.term(), subject.constraint(), stuckTerm.term(), stuckTerm.constraint());
         return Optional.of(stuckTerm);
@@ -285,7 +285,7 @@ public class SymbolicRewriter {
         if (rule.att().contains(Att.refers_RESTORE_CONFIGURATION())) {
             K strategyCell = new FindK() {
                 public scala.collection.Set<K> apply(KApply k) {
-                    if (k.klabel().name().equals(KLabels.STRATEGY_CELL_NAME))
+                    if (k.klabel().equals(KLabels.STRATEGY_CELL))
                         return org.kframework.Collections.Set(k);
                     else
                         return super.apply(k);
@@ -324,7 +324,7 @@ public class SymbolicRewriter {
             @Override
             public JavaSymbolicObject transform(KItem kItem) {
 
-                if (kItem.kLabel() instanceof KLabelConstant && ((KLabelConstant) kItem.kLabel()).name().equals(KLabels.STRATEGY_CELL_NAME)) {
+                if (kItem.kLabel() instanceof KLabelConstant && ((KLabelConstant) kItem.kLabel()).equals(KLabels.STRATEGY_CELL)) {
                     return strategyCellPlaceholder;
                 } else {
                     return super.transform(kItem);
