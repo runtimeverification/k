@@ -285,8 +285,8 @@ pipeline {
                     label 'anka'
                   }
                   steps {
-                    unstash "mojave"
                     dir('homebrew-k') {
+                      unstash "mojave"
                       git url: 'git@github.com:kframework/homebrew-k.git', branch: 'brew-release'
                       sh '''
                         brew tap kframework/k "file:///$(pwd)"
