@@ -249,6 +249,23 @@ the expression `#Ceil((A:Int /Int B:Int) / C:Int)` to
 
 See [kframework/kore#729](https://github.com/kframework/kore/issues/729) for more details.
 
+## SMT Translation
+
+K makes queries to an SMT solver (Z3) to discharge proof obligations when doing symbolic execution.
+You can control how these queries are made using the attributes `smtlib` and `smt-hook` on declared productions.
+
+`smt-hook(...)` allows you to specify a term in SMTLIB2 format which should be used to encode that production, and assumes that all symbols appearing in the term are already declared by the SMT solver.
+`smtlib(...)` allows you to declare a new SMT symbol to be used when that production is sent to Z3, and gives it _uninterpreted function_ semantics.
+
+```k
+syntax Int ::= "~Int" Int          [function, klabel(~Int_), symbol, smtlib(notInt)]
+             | Int "^%Int" Int Int [function, klabel(_^%Int__), symbol, smt-hook((mod (^ #1 #2) #3))]
+```
+
+In the example above, we declare two productions `~Int_` and `_^%Int__`, and tell the SMT solver to:
+
+-   use uninterpreted function semantics for `~Int_` via SMTLIB2 symbol `notInt`, and
+-   use the SMTLIB2 term `(mod (^ #1 #2) #3)` (where `#N` marks the `N`th production non-terminal argument positions) for `_^%Int__`, where `mod` and `^` already are declared by the SMT solver.
 
 ### Caution
 
