@@ -3,6 +3,9 @@ ARG FLAVOR=bionic
 
 FROM runtimeverificationinc/kframework:${OS}-${FLAVOR}
 
+RUN    apt-get update -q \
+    && apt-get install -y z3 libz3-dev
+
 USER user:user
 
 # Copy rust's .cargo, .rustup, and build-in-source directories.
