@@ -62,4 +62,4 @@ ADD java-backend/pom.xml /home/user/.tmp-maven/java-backend/
 ADD k-distribution/pom.xml /home/user/.tmp-maven/k-distribution/
 ADD kore/pom.xml /home/user/.tmp-maven/kore/
 RUN    cd /home/user/.tmp-maven \
-    && mvn dependency:go-offline 
+    && mvn dependency:go-offline
