@@ -1,34 +1,51 @@
 ARG OS=ubuntu
 ARG FLAVOR=bionic
 
-FROM runtimeverificationinc/${OS}:${FLAVOR}
-
-ARG OS=ubuntu
-ARG FLAVOR=bionic
-
-RUN apt-get update && \
-    apt-get install -y \
-      git debhelper maven openjdk-11-jdk cmake libboost-test-dev \
-      libyaml-dev libjemalloc-dev flex bison \
-      `[ "$OS:$FLAVOR" = "debian:buster" ] && echo clang-7 llvm-7-tools lld-7 || echo clang-8 llvm-8-tools lld-8` \
-      zlib1g-dev libgmp-dev libmpfr-dev gcc z3 libz3-dev opam pkg-config curl python3
-
-RUN curl -sSL https://get.haskellstack.org/ | sh
+FROM runtimeverificationinc/kframework:${OS}-${FLAVOR}
 
 USER user:user
 
-ADD llvm-backend/src/main/native/llvm-backend/install-rust llvm-backend/src/main/native/llvm-backend/rust-checksum /home/user/
-RUN cd /home/user/ && ./install-rust
+# Copy rust's .cargo, .rustup, and build-in-source directories.
+COPY --chown=user:user \
+     --from=runtimeverificationinc/rust:1.34.0-llvm-8-ubuntu-bionic \
+     /root/.cargo \
+     /home/user/.cargo
 
-ADD k-distribution/src/main/scripts/bin/k-configure-opam-dev k-distribution/src/main/scripts/bin/k-configure-opam-common /home/user/.tmp-opam/bin/
-ADD k-distribution/src/main/scripts/lib/opam  /home/user/.tmp-opam/lib/opam/
-RUN    cd /home/user \
-    && ./.tmp-opam/bin/k-configure-opam-dev
+COPY --chown=user:user \
+     --from=runtimeverificationinc/rust:1.34.0-llvm-8-ubuntu-bionic \
+     /root/.rustup \
+     /home/user/.rustup
 
-ADD --chown=user:user haskell-backend/src/main/native/haskell-backend/stack.yaml /home/user/.tmp-haskell/
-ADD --chown=user:user haskell-backend/src/main/native/haskell-backend/kore/package.yaml /home/user/.tmp-haskell/kore/
-RUN    cd /home/user/.tmp-haskell \
-    && stack build --only-snapshot
+COPY --chown=user:user \
+     --from=runtimeverificationinc/rust:1.34.0-llvm-8-ubuntu-bionic \
+     /rustc-1.34.0-src \
+     /home/user/rustc-1.34.0-src
+
+# Use rustup.
+RUN    cd /home/user/rustc-1.34.0-src \
+    && /home/user/.cargo/bin/rustup \
+         toolchain \
+         link \
+         rust-1.34.0-llvm-8 \
+         build/x86_64-unknown-linux-gnu/stage2
+
+
+# Copy OCaml.
+COPY --chown=user:user \
+     --from=runtimeverificationinc/ocaml:ubuntu-bionic \
+     /home/user/.opam \
+     /home/user/.opam
+
+# Copy haskell.
+COPY --from=runtimeverificationinc/haskell:ubuntu-bionic \
+     --chown=user:user \
+     /home/user/.stack \
+     /home/user/.stack
+
+COPY --from=runtimeverificationinc/haskell:ubuntu-bionic \
+     --chown=user:user \
+     /usr/local/bin/stack \
+     /usr/local/bin/stack
 
 ADD pom.xml /home/user/.tmp-maven/
 ADD ktree/pom.xml /home/user/.tmp-maven/ktree/
