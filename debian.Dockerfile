@@ -50,6 +50,7 @@ COPY --from=runtimeverificationinc/haskell:ubuntu-bionic \
      /usr/local/bin/stack \
      /usr/local/bin/stack
 
+# K submodules and other dependencies.
 ADD pom.xml /home/user/.tmp-maven/
 ADD ktree/pom.xml /home/user/.tmp-maven/ktree/
 ADD llvm-backend/pom.xml /home/user/.tmp-maven/llvm-backend/
