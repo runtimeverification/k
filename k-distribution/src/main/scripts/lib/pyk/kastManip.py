@@ -4,6 +4,7 @@ import sys
 import subprocess
 
 from .kast import *
+from .kast import _notif, _warning, _fatal
 
 def match(pattern, kast):
     subst = {}
@@ -217,14 +218,14 @@ def readKastTerm(termPath):
 
 def writeKDefinition(fileName, kDef, symbolTable):
     if not isKDefinition(kDef):
-        notif("Not a K Definition!")
+        _notif("Not a K Definition!")
         print(kDef)
         sys.exit(1)
     specText = prettyPrintKast(kDef, symbolTable)
     with open(fileName, "w") as sfile:
         sfile.write(specText)
-        notif("Wrote spec file: " + fileName)
+        _notif("Wrote spec file: " + fileName)
         print(specText)
         sys.stdout.flush()
         return
-    fatal("Could not write spec file: " + fileName)
+    _fatal("Could not write spec file: " + fileName)
