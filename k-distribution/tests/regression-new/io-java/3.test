@@ -1,1 +1,1 @@
-mkstemp("XXXXXX")
+mkstemp("test-XXXXXX-foo")
