@@ -1004,7 +1004,7 @@ module K-IO
   syntax IOFile ::= #mkstemp(String) [function, hook(IO.mkstemp), impure]
   syntax IOFile ::= IOError
                     // #tempFile(path: String, fd: Int)
-                  | "#tempFile" "(" String "," Int ")" [klabel(#tempFile)]
+                  | "#tempFile" "(" String "," Int ")" [klabel(#tempFile), symbol]
   // Remove a file or empty directory from the disk. Returns .K on success or an IOError on failure.
   syntax K ::= #remove(String) [function, functional, hook(IO.remove), impure]
 
