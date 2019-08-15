@@ -314,6 +314,12 @@ pipeline {
                       '''
                     }
                   }
+                  post {
+                    always {
+                      sh 'stop-kserver || true'
+                      archiveArtifacts 'kserver.log,k-distribution/target/kserver.log'
+                    }
+                  }
                 }
               }
               post {
