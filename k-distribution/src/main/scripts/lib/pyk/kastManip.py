@@ -78,14 +78,21 @@ def rewriteWith(rule, pattern):
 def rewriteAnywhereWith(rule, pattern):
     return traverseBottomUp(pattern, lambda p: rewriteWith(rule, p))
 
-def normalizeKLabels(k):
-    newK = replaceKLabels(k, { "#And" : "_andBool_" , "#Or" : "_orBool_" })
+def mlPredToBool(k):
+    newK = replaceKLabels(k, { "#And" : "_andBool_" , "#Or" : "_orBool_" , "#Equals" : '_==K_' })
+    klabelMap = { "#And" : "_andBool_"
+                , "#Or"  : "_orBool_"
+                , "#Not" : "notBool_"
+                , "#Equals" : '_==K_'
+                }
     simplifyRules = [ (KApply("_==K_", [KVariable("#LHS"), KToken("true", "Bool")]),  KVariable("#LHS"))
                     , (KApply("_==K_", [KVariable("#LHS"), KToken("false", "Bool")]), KApply("notBool_", [KVariable("#LHS")]))
                     , (KApply("_andBool_", [KToken("true", "Bool"), KVariable("#REST")]), KVariable("#REST"))
                     , (KApply("_andBool_", [KVariable("#REST"), KToken("true", "Bool")]), KVariable("#REST"))
                     , (KApply("#True", []), KToken("true", "Bool"))
                     ]
+
+    newK = replaceKLabels(k, klabelMap)
     for rule in simplifyRules:
         newK = rewriteAnywhereWith(rule, newK)
     return newK
@@ -201,7 +208,7 @@ def minimizeRule(rule):
             ruleRequires = KApply("_andBool_", [ruleRequires, constraint])
 
         ruleBody = substitute(ruleBody, substitutions)
-        ruleRequires = normalizeKLabels(ruleRequires)
+        ruleRequires = mlPredToBool(ruleRequires)
 
     ruleBody = inlineCellMaps(ruleBody)
     ruleBody = uselessVarsToDots(ruleBody, requires = ruleRequires, ensures = ruleEnsures)
@@ -214,7 +221,7 @@ def minimizeRule(rule):
 
 def readKastTerm(termPath):
     with open(termPath, "r") as termFile:
-        return normalizeKLabels(json.loads(termFile.read())['term'])
+        return json.loads(termFile.read())['term']
 
 def writeKDefinition(fileName, kDef, symbolTable):
     if not isKDefinition(kDef):
