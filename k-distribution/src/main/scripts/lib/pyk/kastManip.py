@@ -116,9 +116,10 @@ def collapseDots(kast):
         if isKApply(_kast):
             label = _kast["label"]
             args  = _kast["args"]
-            if isCellKLabel(label):
-                if len(args) == 1 and args[0] == ktokenDots:
-                    return ktokenDots
+            if isCellKLabel(label) and len(args) == 1 and args[0] == ktokenDots:
+                return ktokenDots
+            if label == klabelRewrite and args[0] == ktokenDots:
+                return ktokenDots
             newArgs = [ arg for arg in args if arg != ktokenDots ]
             if isCellKLabel(label) and len(newArgs) == 0:
                 return ktokenDots
@@ -186,8 +187,6 @@ def minimizeRule(rule):
     ruleRequires = rule["requires"]
     ruleEnsures  = rule["ensures"]
     ruleAtts     = rule["atts"]
-
-    ruleBody = pushDownRewrites(ruleBody)
 
     if ruleRequires is not None:
         constraints = flattenLabel("_andBool_", ruleRequires)
