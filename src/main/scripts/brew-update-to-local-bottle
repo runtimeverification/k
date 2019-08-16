@@ -1,5 +1,5 @@
 #!/bin/sh -ex
-REV=$(cd .. && git rev-parse HEAD)
+REV=$(cd .. && git rev-parse --short HEAD)
 brew bottle --json kframework --root-url="https://github.com/kframework/k/releases/download/nightly-$REV/"
 cat *.bottle.json
 brew bottle --merge --write --no-commit *.bottle.json
