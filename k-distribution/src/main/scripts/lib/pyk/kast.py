@@ -156,6 +156,9 @@ def underbarUnparsing(symbol):
         return " ".join(result)
     return _underbarUnparsing
 
+def indent(input):
+    return "\n".join(["  " + l for l in input.split("\n")])
+
 K_builtin_labels = { klabelRewrite : binOpStr("=>")
                    , klabelCells   : (lambda *args: "\n".join(args))
                    , klabelEmptyK  : (lambda : ".")
@@ -217,8 +220,8 @@ def prettyPrintKast(kast, symbolTable):
         args  = kast["args"]
         unparsedArgs = [ prettyPrintKast(arg, symbolTable) for arg in args ]
         if isCellKLabel(label):
-            cellLines = "\n".join(unparsedArgs).rstrip().split("\n")
-            cellStr   = label + "\n  " + "\n  ".join(cellLines) + "\n</" + label[1:]
+            cellContents = "\n".join(unparsedArgs).rstrip()
+            cellStr   = label + "\n" + indent(cellContents) + "\n</" + label[1:]
             return cellStr.rstrip()
         unparser = appliedLabelStr(label) if label not in symbolTable else symbolTable[label]
         return unparser(*unparsedArgs)
