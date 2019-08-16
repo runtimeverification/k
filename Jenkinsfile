@@ -247,14 +247,14 @@ pipeline {
           }
         }
         stage('Build and Package on Mac OS') {
- /*         when {
+*         when {
             anyOf {
               not { changeRequest() }
               changelog '.*^\\[build-system\\] .+$'
               changeset 'Jenkinsfile'
               changeset 'Dockerfile'
             }
-          }*/
+          }
           stages {
             stage('Build on Mac OS') {
               stages {
