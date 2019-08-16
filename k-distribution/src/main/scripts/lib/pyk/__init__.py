@@ -50,8 +50,7 @@ def krunJSON(definition, inputJSON, krunArgs = [], teeOutput = True, kRelease = 
         json.dump(inputJSON, tempf)
         tempf.flush()
         (rC, out, err) = krun(definition, tempf.name, krunArgs = krunArgs + ['--output', 'json'], teeOutput = teeOutput, kRelease = kRelease)
-        if out != '':
-            out = json.loads(out)['term']
+        out = None if out == '' else json.loads(out)['term']
         return (rC, out, err)
 
 def kproveJSON(definition, inputJSON, symbolTable, kproveArgs = [], teeOutput = True, kRelease = None):
@@ -62,8 +61,7 @@ def kproveJSON(definition, inputJSON, symbolTable, kproveArgs = [], teeOutput = 
         tempf.write(prettyPrintKast(inputJSON, symbolTable))
         tempf.flush()
         (rC, out, err) = kprove(definition, tempf.name, kproveArgs = kproveArgs + ['--output', 'json'], teeOutput = teeOutput, kRelease = kRelease)
-        if out != '':
-            out = json.loads(out)['term']
+        out = None if out == '' else json.loads(out)['term']
         return (rC, out, err)
 
 pykArgs = argparse.ArgumentParser()
