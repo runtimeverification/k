@@ -247,7 +247,7 @@ pipeline {
           }
         }
         stage('Build and Package on Mac OS') {
-*         when {
+          when {
             anyOf {
               not { changeRequest() }
               changelog '.*^\\[build-system\\] .+$'
