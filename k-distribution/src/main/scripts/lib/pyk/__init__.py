@@ -25,9 +25,8 @@ def _teeProcessStdout(args, tee = True, buffer_size = 80):
         return (process.returncode, capture, process.stderr.read())
 
 def _runK(command, definition, inputFile, kArgs = [], teeOutput = True, kRelease = None):
-    if kRelease is not None:
-        command = kRelease + '/bin/' + command
-    kCommand = [ command , '--directory' , definition , inputFile ] + kArgs
+    kCommand = [ command ] if kRelease is None else [ kRelease + '/bin/' + command ]
+    kCommand = kCommand + [ '--directory' , definition , inputFile ] + kArgs
     _notif('Running: ' + ' '.join(kCommand))
     return _teeProcessStdout(kCommand, tee = teeOutput)
 
@@ -39,6 +38,33 @@ def krun(definition, inputFile, krunArgs = [], teeOutput = True, kRelease = None
 
 def kprove(definition, inputFile, kproveArgs = [], teeOutput = True, kRelease = None):
     return _runK('kprove', definition, inputFile, kArgs = kproveArgs, teeOutput = teeOutput, kRelease = kRelease)
+
+def kastJSON(definition, inputJSON, kastArgs = [], teeOutput = True, kRelease = None):
+    with tempfile.NamedTemporaryFile(mode = 'w') as tempf:
+        json.dump(inputJSON, tempf)
+        tempf.flush()
+        return kast(definition, tempf.name, kastArgs = kastArgs, teeOutput = teeOutput, kRelease = kRelease)
+
+def krunJSON(definition, inputJSON, krunArgs = [], teeOutput = True, kRelease = None):
+    with tempfile.NamedTemporaryFile(mode = 'w') as tempf:
+        json.dump(inputJSON, tempf)
+        tempf.flush()
+        (rC, out, err) = krun(definition, tempf.name, krunArgs = krunArgs + ['--output', 'json'], teeOutput = teeOutput, kRelease = kRelease)
+        if out != '':
+            out = json.loads(out)['term']
+        return (rC, out, err)
+
+def kproveJSON(definition, inputJSON, symbolTable, kproveArgs = [], teeOutput = True, kRelease = None):
+    if not isKDefinition(inputJSON):
+        sys.stderr.write(inputJSON)
+        _fatal("Not a K Definition!")
+    with tempfile.NamedTemporaryFile(mode = 'w') as tempf:
+        tempf.write(prettyPrintKast(inputJSON, symbolTable))
+        tempf.flush()
+        (rC, out, err) = kprove(definition, tempf.name, kproveArgs = kproveArgs + ['--output', 'json'], teeOutput = teeOutput, kRelease = kRelease)
+        if out != '':
+            out = json.loads(out)['term']
+        return (rC, out, err)
 
 pykArgs = argparse.ArgumentParser()
 
