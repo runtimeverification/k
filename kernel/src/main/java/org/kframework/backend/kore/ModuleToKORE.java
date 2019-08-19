@@ -111,39 +111,7 @@ public class ModuleToKORE {
         if (attributes.containsKey("token")) {
             attributes.put(HAS_DOMAIN_VALUES, false);
         }
-        for (Sort sort : iterable(module.definedSorts())) {
-            if (sort.equals(Sorts.K()) || sort.equals(Sorts.KItem())) {
-                continue;
-            }
-            sb.append("  ");
-            Att att = module.sortAttributesFor().get(sort).getOrElse(() -> KORE.Att());
-            if (att.contains(Attribute.HOOK_KEY)) {
-                if (collectionSorts.contains(att.get(Attribute.HOOK_KEY))) {
-                    if (att.get(Attribute.HOOK_KEY).equals("ARRAY.Array")) {
-                        att = att.remove("element");
-                        att = att.remove("unit");
-                        att = att.remove(Attribute.HOOK_KEY);
-                    } else {
-                        Production concatProd = stream(module.productionsForSort().apply(sort)).filter(p -> p.att().contains("element")).findAny().get();
-                        att = att.add("element", K.class, KApply(KLabel(concatProd.att().get("element"))));
-                        att = att.add("concat", K.class, KApply(concatProd.klabel().get()));
-                        att = att.add("unit", K.class, KApply(KLabel(concatProd.att().get("unit"))));
-                        sb.append("hooked-");
-                    }
-                } else {
-                    sb.append("hooked-");
-                }
-            }
-            att = att.remove(HAS_DOMAIN_VALUES);
-            if (tokenSorts.contains(sort)) {
-                att = att.add(HAS_DOMAIN_VALUES);
-            }
-            sb.append("sort ");
-            convert(sort, false);
-            sb.append(" ");
-            convert(attributes, att);
-            sb.append("\n");
-        }
+        translateSorts(tokenSorts, attributes, collectionSorts);
 
         SetMultimap<KLabel, Rule> functionRules = HashMultimap.create();
         for (Rule rule : iterable(module.sortedRules())) {
@@ -565,6 +533,42 @@ public class ModuleToKORE {
         for (Rule r : iterable(module.sortedRules())) {
             Att att = r.att();
             collectAttributes(attributes, att);
+        }
+    }
+
+    private void translateSorts(Set<Sort> tokenSorts, Map<String, Boolean> attributes, Set<String> collectionSorts) {
+        for (Sort sort : iterable(module.definedSorts())) {
+            if (sort.equals(Sorts.K()) || sort.equals(Sorts.KItem())) {
+                continue;
+            }
+            sb.append("  ");
+            Att att = module.sortAttributesFor().get(sort).getOrElse(() -> KORE.Att());
+            if (att.contains(Attribute.HOOK_KEY)) {
+                if (collectionSorts.contains(att.get(Attribute.HOOK_KEY))) {
+                    if (att.get(Attribute.HOOK_KEY).equals("ARRAY.Array")) {
+                        att = att.remove("element");
+                        att = att.remove("unit");
+                        att = att.remove(Attribute.HOOK_KEY);
+                    } else {
+                        Production concatProd = stream(module.productionsForSort().apply(sort)).filter(p -> p.att().contains("element")).findAny().get();
+                        att = att.add("element", K.class, KApply(KLabel(concatProd.att().get("element"))));
+                        att = att.add("concat", K.class, KApply(concatProd.klabel().get()));
+                        att = att.add("unit", K.class, KApply(KLabel(concatProd.att().get("unit"))));
+                        sb.append("hooked-");
+                    }
+                } else {
+                    sb.append("hooked-");
+                }
+            }
+            att = att.remove(HAS_DOMAIN_VALUES);
+            if (tokenSorts.contains(sort)) {
+                att = att.add(HAS_DOMAIN_VALUES);
+            }
+            sb.append("sort ");
+            convert(sort, false);
+            sb.append(" ");
+            convert(attributes, att);
+            sb.append("\n");
         }
     }
 
