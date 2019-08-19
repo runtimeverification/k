@@ -90,31 +90,17 @@ public class ModuleToKORE {
         convert(topCellInitializer, false);
         sb.append("())]\n\n");
         sb.append(prelude);
-        Map<String, Boolean> attributes = new HashMap<>();
         sb.append("\n");
-        Set<Sort> tokenSorts = new HashSet<>();
-        for (Sort sort : iterable(module.definedSorts())) {
-            Att att = module.sortAttributesFor().get(sort).getOrElse(() -> KORE.Att());
-            if (att.contains("token")) {
-                tokenSorts.add(sort);
-            }
-            collectAttributes(attributes, att);
-        }
-        for (Production prod : iterable(module.sortedProductions())) {
-            Att att = prod.att();
-            if (att.contains("token")) {
-                tokenSorts.add(prod.sort());
-            }
-            collectAttributes(attributes, att);
-        }
-        for (Rule r : iterable(module.sortedRules())) {
-            Att att = r.att();
-            collectAttributes(attributes, att);
-        }
+
         sb.append("module ");
         convert(module.name());
         sb.append("\n\n// imports\n");
         sb.append("  import K []\n\n// sorts\n");
+
+        Set<Sort> tokenSorts = new HashSet<>();
+        // Map attribute name to whether the attribute has a value
+        Map<String, Boolean> attributes = new HashMap<>();
+        collectTokenSortsAndAttributes(tokenSorts, attributes);
         Set<String> collectionSorts = new HashSet<>();
         collectionSorts.add("SET.Set");
         collectionSorts.add("MAP.Map");
@@ -558,6 +544,27 @@ public class ModuleToKORE {
         convert(attributes, module.att());
         sb.append("\n");
         return sb.toString();
+    }
+
+    private void collectTokenSortsAndAttributes(Set<Sort> tokenSorts, Map<String, Boolean> attributes) {
+        for (Sort sort : iterable(module.definedSorts())) {
+            Att att = module.sortAttributesFor().get(sort).getOrElse(() -> KORE.Att());
+            if (att.contains("token")) {
+                tokenSorts.add(sort);
+            }
+            collectAttributes(attributes, att);
+        }
+        for (Production prod : iterable(module.sortedProductions())) {
+            Att att = prod.att();
+            if (att.contains("token")) {
+                tokenSorts.add(prod.sort());
+            }
+            collectAttributes(attributes, att);
+        }
+        for (Rule r : iterable(module.sortedRules())) {
+            Att att = r.att();
+            collectAttributes(attributes, att);
+        }
     }
 
     private boolean isRealHook(Att att) {
