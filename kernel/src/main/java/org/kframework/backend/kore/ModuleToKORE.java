@@ -48,6 +48,7 @@ import scala.Tuple2;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -180,8 +181,10 @@ public class ModuleToKORE {
             }
         }
         sb.append("\n// rules\n");
+        int ruleIndex = 0;
         for (Rule rule : iterable(module.sortedRules())) {
-            convertRule(rule, heatCoolEq, topCell, attributes, functionRules, false, false);
+            convertRule(rule, ruleIndex, heatCoolEq, topCell, attributes, functionRules, false, false);
+            ruleIndex++;
         }
         sb.append("endmodule ");
         convert(attributes, module.att());
@@ -647,7 +650,8 @@ public class ModuleToKORE {
             assert sentence instanceof Rule || sentence instanceof ModuleComment
                 : "Unexpected non-rule claim " + sentence.toString();
             if (sentence instanceof Rule) {
-                convertRule((Rule) sentence, false, topCell, new HashMap<>(), HashMultimap.create(), true, allPathReachability);
+                convertRule((Rule) sentence, 0, false, topCell,
+                        new HashMap<>(), HashMultimap.create(), true, allPathReachability);
             }
         }
         sb.append("endmodule ");
@@ -656,7 +660,9 @@ public class ModuleToKORE {
         return sb.toString();
     }
 
-    private void convertRule(Rule rule, boolean heatCoolEq, Sort topCellSort, Map<String, Boolean> consideredAttributes, SetMultimap<KLabel, Rule> functionRules, boolean rulesAsClaims, boolean allPathReachability) {
+    private void convertRule(Rule rule, int ruleIndex, boolean heatCoolEq, Sort topCellSort,
+                             Map<String, Boolean> consideredAttributes, SetMultimap<KLabel, Rule> functionRules,
+                             boolean rulesAsClaims, boolean allPathReachability) {
         // injections should already be present, but this is an ugly hack to get around the
         // cache persistence issue that means that Sort attributes on k terms might not be present.
         rule = new AddSortInjections(module).addInjections(rule);
@@ -670,6 +676,9 @@ public class ModuleToKORE {
         KLabel productionLabel = null;
         List<K> leftChildren = null;
         K left = RewriteToTop.toLeft(rule.body());
+        K requires = rule.requires();
+        K right =  RewriteToTop.toRight(rule.body());
+        K ensures = rule.ensures();
         boolean constructorBased = constructorChecks.isConstructorBased(left);
         if (left instanceof KApply) {
             production = production((KApply) left, true);
@@ -708,14 +717,16 @@ public class ModuleToKORE {
             }
             sb.append("} ");
             if (owise) {
-                Set<String> varNames = vars(rule).stream().map(KVariable::name).collect(Collectors.toSet());
+                Set<String> varNames = collectFreeVariablesAssumeNoQuantifiers(requires, left).stream().map(KVariable::name).collect(Collectors.toSet());
                 sb.append("\\implies{R} (\n    \\and{R} (\n      \\not{R} (\n        ");
                 for (Rule notMatching : RefreshRules.refresh(functionRules.get(productionLabel), varNames)) {
                     if (notMatching.att().contains("owise")) {
                         continue;
                     }
                     sb.append("\\or{R} (\n");
-                    Set<KVariable> vars = vars(notMatching);
+                    K notMatchingRequires = notMatching.requires();
+                    K notMatchingLeft = RewriteToTop.toLeft(notMatching.body());
+                    Set<KVariable> vars = collectFreeVariablesAssumeNoQuantifiers(notMatchingRequires, notMatchingLeft);
                     for (KVariable var : vars) {
                         sb.append("          \\exists{R} (");
                         convert(var);
@@ -723,10 +734,9 @@ public class ModuleToKORE {
                     }
                     sb.append("  \\and{R} (");
                     sb.append("\n              ");
-                    convertSideCondition(notMatching.requires());
+                    convertSideCondition(notMatchingRequires);
                     sb.append(",\n              ");
 
-                    K notMatchingLeft = RewriteToTop.toLeft(notMatching.body());
                     assert notMatchingLeft instanceof KApply : "expecting KApply but got " + notMatchingLeft.getClass();
                     List<K> notMatchingChildren = ((KApply) notMatchingLeft).items();
                     assert notMatchingChildren.size() == leftChildren.size() : "assuming function with fixed arity";
@@ -766,31 +776,29 @@ public class ModuleToKORE {
                     sb.append(")");
                 }
                 sb.append("\n      ),\n      ");
-                convertSideCondition(rule.requires());
+                convertSideCondition(requires);
                 sb.append("\n    ),\n    \\and{R} (\n      \\equals{");
                 convert(productionSort, false);
                 sb.append(",R} (\n        ");
-                K right = RewriteToTop.toRight(rule.body());
                 convert(left);
                 sb.append(",\n        ");
                 convert(right);
                 sb.append("),\n      ");
-                convertSideCondition(rule.ensures());
+                convertSideCondition(ensures);
                 sb.append("))\n  ");
                 convert(consideredAttributes, rule.att());
                 sb.append("\n\n");
             } else {
                 sb.append("\\implies{R} (\n    ");
-                convertSideCondition(rule.requires());
+                convertSideCondition(requires);
                 sb.append(",\n    \\and{R} (\n      \\equals{");
                 convert(productionSort, false);
                 sb.append(",R} (\n        ");
-                K right = RewriteToTop.toRight(rule.body());
                 convert(left);
                 sb.append(",\n        ");
                 convert(right);
                 sb.append("),\n      ");
-                convertSideCondition(rule.ensures());
+                convertSideCondition(ensures);
                 sb.append("))\n  ");
                 convert(consideredAttributes, rule.att());
                 sb.append("\n\n");
@@ -806,34 +814,50 @@ public class ModuleToKORE {
             convert(consideredAttributes, rule.att());
             sb.append("\n\n");
         } else if (!ExpandMacros.isMacro(rule)) {
-            if (rulesAsClaims) {
-                sb.append("  claim{} ");
-            } else {
+            // generate rule LHS
+            if (!rulesAsClaims && !owise) {
+                String ruleAliasName = String.format("rule%dLHS", ruleIndex);
+                List<KVariable> freeVars = new ArrayList<>(collectFreeVariablesAssumeNoQuantifiers(requires, left));
+                Comparator<KVariable> compareByName = (KVariable v1, KVariable v2) -> v1.name().compareTo(v2.name());
+                java.util.Collections.sort(freeVars, compareByName);
+                genAliasForSemanticsRuleLHS(requires, left, freeVars, ruleAliasName, topCellSort);
                 sb.append("  axiom{} ");
-            }
-            if (owise) {
-                // hack to deal with the strategy axiom for now
-                sb.append("\\implies{");
-                convert(topCellSort, false);
-                sb.append("}(\\bottom{");
-                convert(topCellSort, false);
-                sb.append("}(),");
-            }
-            K right = RewriteToTop.toRight(rule.body());
-            if (rulesAsClaims) {
-                sb.append("\\implies{");
-            } else {
                 sb.append("\\rewrites{");
+                convert(topCellSort, false);
+                sb.append("} (\n      ");
+                genSemanticsRuleLHSWithAlias(freeVars, ruleAliasName);
+                sb.append(",\n      ");
+            } else {
+                if(rulesAsClaims) {
+                    sb.append("  claim{} ");
+                } else {
+                    sb.append("  axiom{} ");
+                }
+                if (owise) {
+                    // hack to deal with the strategy axiom for now
+                    sb.append("\\implies{");
+                    convert(topCellSort, false);
+                    sb.append("}(\\bottom{");
+                    convert(topCellSort, false);
+                    sb.append("}(),");
+                }
+                if (rulesAsClaims) {
+                    sb.append("\\implies{");
+                } else {
+                    sb.append("\\rewrites{");
+                }
+                convert(topCellSort, false);
+                sb.append("} (\n    ");
+                sb.append("  \\and{");
+                convert(topCellSort, false);
+                sb.append("} (\n      ");
+                convertSideCondition(rule.requires(), topCellSort);
+                sb.append(", ");
+                convert(left);
+                sb.append("), ");
             }
-            convert(topCellSort, false);
-            sb.append("} (\n    ");
-            sb.append("  \\and{");
-            convert(topCellSort, false);
-            sb.append("} (\n      ");
-            convertSideCondition(rule.requires(), topCellSort);
-            sb.append(", ");
-            convert(left);
-            sb.append("), ");
+
+            // generate rule RHS
             if (rulesAsClaims) {
                 if (allPathReachability) {
                     sb.append(ALL_PATH_OP + "{");
@@ -860,6 +884,51 @@ public class ModuleToKORE {
             convert(consideredAttributes, rule.att());
             sb.append("\n\n");
         }
+    }
+
+    private void genAliasForSemanticsRuleLHS(K requires, K left, List<KVariable> freeVars,
+                                             String ruleAliasName, Sort topCellSort) {
+        sb.append("  alias ");
+        sb.append(ruleAliasName);
+        // We assume no sort variables.
+        sb.append("{}(");
+        String conn = "";
+        for(KVariable var: freeVars) {
+            sb.append(conn);
+            convert(var.att().getOptional(Sort.class).orElse(Sorts.K()), false);
+            conn = ",";
+        }
+        sb.append(") : ");
+        convert(topCellSort, false);
+        sb.append("\n  where ");
+        sb.append(ruleAliasName);
+        sb.append("{}(");
+        conn = "";
+        for(KVariable var: freeVars) {
+            sb.append(conn);
+            convert(var);
+            conn = ",";
+        }
+        sb.append(") :=\n");
+        sb.append("  \\and{");
+        convert(topCellSort, false);
+        sb.append("} (\n      ");
+        convertSideCondition(requires, topCellSort);
+        sb.append(", ");
+        convert(left);
+        sb.append(")\n");
+    }
+
+    private void genSemanticsRuleLHSWithAlias(List<KVariable> freeVars, String ruleAliasName) {
+        sb.append(ruleAliasName);
+        sb.append("(");
+        String conn = "";
+        for(KVariable var: freeVars) {
+            sb.append(conn);
+            convert(var);
+            conn = ",";
+        }
+        sb.append(")");
     }
 
     private void functionalPattern(Production prod, Runnable functionPattern) {
@@ -986,7 +1055,7 @@ public class ModuleToKORE {
         return true;
     }
 
-    private Set<KVariable> vars(Rule rule) {
+    private Set<KVariable> collectFreeVariablesAssumeNoQuantifiers(K requires, K left) {
         Set<KVariable> res = new HashSet<>();
         VisitK visitor = new VisitK() {
             @Override
@@ -994,8 +1063,8 @@ public class ModuleToKORE {
                 res.add(k);
             }
         };
-        visitor.apply(rule.requires());
-        visitor.apply(RewriteToTop.toLeft(rule.body()));
+        visitor.apply(requires);
+        visitor.apply(left);
         return res;
     }
 
@@ -1041,7 +1110,7 @@ public class ModuleToKORE {
         Sort returnSort = prod.sort();
         for (int i = 0; i < poly.size(); i++) {
             Set<Integer> positions = poly.get(i);
-            Sort sort = Sort("S" + i);
+            Sort sort = Sort("S" + Integer.toString(i));
             if (k != null) {
                 int firstPos = positions.iterator().next();
                 if (firstPos == 0) {
@@ -1195,7 +1264,7 @@ public class ModuleToKORE {
         convert(sort, prod.klabel().isDefined() && prod.klabel().get().params().contains(sort));
     }
 
-    private void convert(Sort sort, boolean var) {
+    private void convert(Sort sort, boolean isSortVariable) {
         if (sort.name().equals(AddSortInjections.SORTPARAM_NAME)) {
             String sortVar = sort.params().headOption().get().name();
             sb.append(sortVar);
@@ -1203,7 +1272,7 @@ public class ModuleToKORE {
         }
         sb.append("Sort");
         convert(sort.name());
-        if (!var) {
+        if (!isSortVariable) {
             sb.append("{");
             String conn = "";
             for (Sort param : iterable(sort.params())) {
@@ -1285,7 +1354,7 @@ public class ModuleToKORE {
     public String toString() { return sb.toString(); }
 
     public Set<K> collectAnonymousVariables(K k){
-        Set <K> anonymousVariables = new HashSet<>();
+        Set<K> anonymousVariables = new HashSet<>();
         new VisitK() {
             @Override
             public void apply(KApply k) {
