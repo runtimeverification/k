@@ -145,21 +145,7 @@ public class ModuleToKORE {
             }
             prod = computePolyProd(prod);
             if (prod.isSubsort()) {
-                Production finalProd = prod;
-                functionalPattern(prod, () -> {
-                    sb.append("inj{");
-                    convert(finalProd.getSubsortSort(), finalProd);
-                    sb.append(", ");
-                    convert(finalProd.sort(), finalProd);
-                    sb.append("} (From:");
-                    convert(finalProd.getSubsortSort(), finalProd);
-                    sb.append(")");
-                });
-                sb.append(" [subsort{");
-                convert(prod.getSubsortSort(), prod);
-                sb.append(", ");
-                convert(prod.sort(), prod);
-                sb.append("}()] // subsort\n");
+                genSubsortAxiom(prod);
                 continue;
             }
             if (prod.klabel().isEmpty()) {
@@ -576,6 +562,24 @@ public class ModuleToKORE {
             convert(attributes, addKoreAttributes(prod, functionRules, impurities, overloads));
             sb.append("\n");
         }
+    }
+
+    private void genSubsortAxiom(Production prod) {
+        Production finalProd = prod;
+        functionalPattern(prod, () -> {
+            sb.append("inj{");
+            convert(finalProd.getSubsortSort(), finalProd);
+            sb.append(", ");
+            convert(finalProd.sort(), finalProd);
+            sb.append("} (From:");
+            convert(finalProd.getSubsortSort(), finalProd);
+            sb.append(")");
+        });
+        sb.append(" [subsort{");
+        convert(prod.getSubsortSort(), prod);
+        sb.append(", ");
+        convert(prod.sort(), prod);
+        sb.append("}()] // subsort\n");
     }
 
     private boolean isRealHook(Att att) {
