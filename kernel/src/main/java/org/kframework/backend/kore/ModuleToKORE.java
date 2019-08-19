@@ -170,90 +170,11 @@ public class ModuleToKORE {
                 genNoConfusionAxioms(prod, noConfusion, functionRules, impurities);
             }
         }
+
         for (Sort sort : iterable(module.definedSorts())) {
-            sb.append("  axiom{} ");
-            boolean hasToken = false;
-            int numTerms = 0;
-            for (Production prod : iterable(mutable(module.productionsForSort()).getOrDefault(sort, Set()).toSeq().sorted(Production.ord()))) {
-                prod = computePolyProd(prod);
-                if (isFunction(prod) || prod.isSubsort() || isBuiltinProduction(prod)) {
-                    continue;
-                }
-                if (prod.klabel().isEmpty() && !((prod.att().contains("token") && !hasToken) || prod.isSubsort())) {
-                    continue;
-                }
-                numTerms++;
-                sb.append("\\or{");
-                convert(sort, false);
-                sb.append("} (");
-                if (prod.att().contains("token") && !hasToken) {
-                    convertTokenProd(sort);
-                    hasToken = true;
-                } else if (prod.klabel().isDefined()) {
-                    for (int i = 0; i < prod.arity(); i++) {
-                        sb.append("\\exists{");
-                        convert(sort, false);
-                        sb.append("} (X").append(i).append(":");
-                        convert(prod.nonterminal(i).sort(), prod);
-                        sb.append(", ");
-                    }
-                    convert(prod.klabel().get(), prod);
-                    sb.append("(");
-                    String conn = "";
-                    for (int i = 0; i < prod.arity(); i++) {
-                        sb.append(conn).append("X").append(i).append(":");
-                        convert(prod.nonterminal(i).sort(), prod);
-                        conn = ", ";
-                    }
-                    sb.append(")");
-                    for (int i = 0; i < prod.arity(); i++) {
-                        sb.append(")");
-                    }
-                }
-                sb.append(", ");
-            }
-            for (Sort s : iterable(module.definedSorts())) {
-                if (module.subsorts().lessThan(s, sort)) {
-                    numTerms++;
-                    sb.append("\\or{");
-                    convert(sort, false);
-                    sb.append("} (");
-                    sb.append("\\exists{");
-                    convert(sort, false);
-                    sb.append("} (Val:");
-                    convert(s, false);
-                    sb.append(", inj{");
-                    convert(s, false);
-                    sb.append(", ");
-                    convert(sort, false);
-                    sb.append("} (Val:");
-                    convert(s, false);
-                    sb.append("))");
-                    sb.append(", ");
-                }
-            }
-            Att sortAtt = module.sortAttributesFor().get(sort).getOrElse(() -> KORE.Att());
-            if (!hasToken && sortAtt.contains("token")) {
-                numTerms++;
-                sb.append("\\or{");
-                convert(sort, false);
-                sb.append("} (");
-                convertTokenProd(sort);
-                sb.append(", ");
-                hasToken = true;
-            }
-            sb.append("\\bottom{");
-            convert(sort, false);
-            sb.append("}()");
-            for (int i = 0; i < numTerms; i++) {
-                sb.append(")");
-            }
-            sb.append(" [constructor{}()] // no junk");
-            if (hasToken && !METAVAR) {
-                sb.append(" (TODO: fix bug with \\dv)");
-            }
-            sb.append("\n");
+            genNoJunkAxiom(sort);
         }
+
         for (Production lesser : iterable(module.overloads().elements())) {
             for (Production greater : iterable(module.overloads().relations().get(lesser).getOrElse(() -> Collections.<Production>Set()))) {
                 sb.append("  axiom{R} \\equals{");
@@ -605,6 +526,91 @@ public class ModuleToKORE {
             applyPattern(prod2, "Y");
             sb.append(")) [constructor{}()] // no confusion different constructors\n");
         }
+    }
+
+    private void genNoJunkAxiom(Sort sort) {
+        sb.append("  axiom{} ");
+        boolean hasToken = false;
+        int numTerms = 0;
+        for (Production prod : iterable(mutable(module.productionsForSort()).getOrDefault(sort, Set()).toSeq().sorted(Production.ord()))) {
+            prod = computePolyProd(prod);
+            if (isFunction(prod) || prod.isSubsort() || isBuiltinProduction(prod)) {
+                continue;
+            }
+            if (prod.klabel().isEmpty() && !((prod.att().contains("token") && !hasToken) || prod.isSubsort())) {
+                continue;
+            }
+            numTerms++;
+            sb.append("\\or{");
+            convert(sort, false);
+            sb.append("} (");
+            if (prod.att().contains("token") && !hasToken) {
+                convertTokenProd(sort);
+                hasToken = true;
+            } else if (prod.klabel().isDefined()) {
+                for (int i = 0; i < prod.arity(); i++) {
+                    sb.append("\\exists{");
+                    convert(sort, false);
+                    sb.append("} (X").append(i).append(":");
+                    convert(prod.nonterminal(i).sort(), prod);
+                    sb.append(", ");
+                }
+                convert(prod.klabel().get(), prod);
+                sb.append("(");
+                String conn = "";
+                for (int i = 0; i < prod.arity(); i++) {
+                    sb.append(conn).append("X").append(i).append(":");
+                    convert(prod.nonterminal(i).sort(), prod);
+                    conn = ", ";
+                }
+                sb.append(")");
+                for (int i = 0; i < prod.arity(); i++) {
+                    sb.append(")");
+                }
+            }
+            sb.append(", ");
+        }
+        for (Sort s : iterable(module.definedSorts())) {
+            if (module.subsorts().lessThan(s, sort)) {
+                numTerms++;
+                sb.append("\\or{");
+                convert(sort, false);
+                sb.append("} (");
+                sb.append("\\exists{");
+                convert(sort, false);
+                sb.append("} (Val:");
+                convert(s, false);
+                sb.append(", inj{");
+                convert(s, false);
+                sb.append(", ");
+                convert(sort, false);
+                sb.append("} (Val:");
+                convert(s, false);
+                sb.append("))");
+                sb.append(", ");
+            }
+        }
+        Att sortAtt = module.sortAttributesFor().get(sort).getOrElse(() -> KORE.Att());
+        if (!hasToken && sortAtt.contains("token")) {
+            numTerms++;
+            sb.append("\\or{");
+            convert(sort, false);
+            sb.append("} (");
+            convertTokenProd(sort);
+            sb.append(", ");
+            hasToken = true;
+        }
+        sb.append("\\bottom{");
+        convert(sort, false);
+        sb.append("}()");
+        for (int i = 0; i < numTerms; i++) {
+            sb.append(")");
+        }
+        sb.append(" [constructor{}()] // no junk");
+        if (hasToken && !METAVAR) {
+            sb.append(" (TODO: fix bug with \\dv)");
+        }
+        sb.append("\n");
     }
 
     private boolean isRealHook(Att att) {
