@@ -177,47 +177,7 @@ public class ModuleToKORE {
 
         for (Production lesser : iterable(module.overloads().elements())) {
             for (Production greater : iterable(module.overloads().relations().get(lesser).getOrElse(() -> Collections.<Production>Set()))) {
-                sb.append("  axiom{R} \\equals{");
-                convert(greater.sort(), greater);
-                sb.append(", R} (");
-                convert(greater.klabel().get(), greater);
-                sb.append("(");
-                String conn = "";
-                for (int i = 0; i < greater.nonterminals().size(); i++) {
-                    sb.append(conn);
-                    if (greater.nonterminal(i).sort().equals(lesser.nonterminal(i).sort())) {
-                        sb.append("K").append(i).append(":");
-                        convert(greater.nonterminal(i).sort(), greater);
-                    } else {
-                        sb.append("inj{");
-                        convert(lesser.nonterminal(i).sort(), lesser);
-                        sb.append(", ");
-                        convert(greater.nonterminal(i).sort(), greater);
-                        sb.append("} (K").append(i).append(":");
-                        convert(lesser.nonterminal(i).sort(), lesser);
-                        sb.append(")");
-                    }
-                    conn = ",";
-                }
-                sb.append("), inj{");
-                convert(lesser.sort(), lesser);
-                sb.append(", ");
-                convert(greater.sort(), greater);
-                sb.append("} (");
-                convert(lesser.klabel().get(), lesser);
-                sb.append("(");
-                conn = "";
-                for (int i = 0; i < lesser.nonterminals().size(); i++) {
-                    sb.append(conn);
-                    sb.append("K").append(i).append(":");
-                    convert(lesser.nonterminal(i).sort(), lesser);
-                    conn = ",";
-                }
-                sb.append("))) [overload{}(");
-                convert(greater.klabel().get(), greater);
-                sb.append("(), ");
-                convert(lesser.klabel().get(), lesser);
-                sb.append("())] // overloaded production\n");
+                genOverloadedAxiom(lesser, greater);
             }
         }
         sb.append("\n// rules\n");
@@ -611,6 +571,50 @@ public class ModuleToKORE {
             sb.append(" (TODO: fix bug with \\dv)");
         }
         sb.append("\n");
+    }
+
+    private void genOverloadedAxiom(Production lesser, Production greater) {
+        sb.append("  axiom{R} \\equals{");
+        convert(greater.sort(), greater);
+        sb.append(", R} (");
+        convert(greater.klabel().get(), greater);
+        sb.append("(");
+        String conn = "";
+        for (int i = 0; i < greater.nonterminals().size(); i++) {
+            sb.append(conn);
+            if (greater.nonterminal(i).sort().equals(lesser.nonterminal(i).sort())) {
+                sb.append("K").append(i).append(":");
+                convert(greater.nonterminal(i).sort(), greater);
+            } else {
+                sb.append("inj{");
+                convert(lesser.nonterminal(i).sort(), lesser);
+                sb.append(", ");
+                convert(greater.nonterminal(i).sort(), greater);
+                sb.append("} (K").append(i).append(":");
+                convert(lesser.nonterminal(i).sort(), lesser);
+                sb.append(")");
+            }
+            conn = ",";
+        }
+        sb.append("), inj{");
+        convert(lesser.sort(), lesser);
+        sb.append(", ");
+        convert(greater.sort(), greater);
+        sb.append("} (");
+        convert(lesser.klabel().get(), lesser);
+        sb.append("(");
+        conn = "";
+        for (int i = 0; i < lesser.nonterminals().size(); i++) {
+            sb.append(conn);
+            sb.append("K").append(i).append(":");
+            convert(lesser.nonterminal(i).sort(), lesser);
+            conn = ",";
+        }
+        sb.append("))) [overload{}(");
+        convert(greater.klabel().get(), greater);
+        sb.append("(), ");
+        convert(lesser.klabel().get(), lesser);
+        sb.append("())] // overloaded production\n");
     }
 
     private boolean isRealHook(Att att) {
