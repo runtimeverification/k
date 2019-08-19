@@ -134,38 +134,8 @@ public class ModuleToKORE {
                 overloads.add(greater);
             }
         }
-        for (Production prod : iterable(module.sortedProductions())) {
-            if (isBuiltinProduction(prod)) {
-                continue;
-            }
-            prod = computePolyProd(prod);
-            if (prod.klabel().isEmpty()) {
-                continue;
-            }
-            if (impurities.contains(prod.klabel().get())) {
-                impureFunctions.add(prod.klabel().get().name());
-            }
-            sb.append("  ");
-            if (isFunction(prod) && prod.att().contains(Attribute.HOOK_KEY) && isRealHook(prod.att())) {
-                sb.append("hooked-");
-            }
-            sb.append("symbol ");
-            convert(prod.klabel().get(), true);
-            String conn;
-            sb.append("(");
-            conn = "";
-            for (NonTerminal nt : iterable(prod.nonterminals())) {
-                Sort sort = nt.sort();
-                sb.append(conn);
-                convert(sort, prod);
-                conn = ", ";
-            }
-            sb.append(") : ");
-            convert(prod.sort(), prod);
-            sb.append(" ");
-            convert(attributes, addKoreAttributes(prod, functionRules, impurities, overloads));
-            sb.append("\n");
-        }
+        translateSymbols(attributes, functionRules, impurities, overloads);
+
         sb.append("\n// generated axioms\n");
         Set<Tuple2<Production, Production>> noConfusion = new HashSet<>();
         for (Production prod : iterable(module.sortedProductions())) {
@@ -567,6 +537,42 @@ public class ModuleToKORE {
             convert(sort, false);
             sb.append(" ");
             convert(attributes, att);
+            sb.append("\n");
+        }
+    }
+
+    private void translateSymbols(Map<String, Boolean> attributes, SetMultimap<KLabel, Rule> functionRules,
+                                  Set<KLabel> impurities, Set<Production> overloads) {
+        for (Production prod : iterable(module.sortedProductions())) {
+            if (isBuiltinProduction(prod)) {
+                continue;
+            }
+            prod = computePolyProd(prod);
+            if (prod.klabel().isEmpty()) {
+                continue;
+            }
+            if (impurities.contains(prod.klabel().get())) {
+                impureFunctions.add(prod.klabel().get().name());
+            }
+            sb.append("  ");
+            if (isFunction(prod) && prod.att().contains(Attribute.HOOK_KEY) && isRealHook(prod.att())) {
+                sb.append("hooked-");
+            }
+            sb.append("symbol ");
+            convert(prod.klabel().get(), true);
+            String conn;
+            sb.append("(");
+            conn = "";
+            for (NonTerminal nt : iterable(prod.nonterminals())) {
+                Sort sort = nt.sort();
+                sb.append(conn);
+                convert(sort, prod);
+                conn = ", ";
+            }
+            sb.append(") : ");
+            convert(prod.sort(), prod);
+            sb.append(" ");
+            convert(attributes, addKoreAttributes(prod, functionRules, impurities, overloads));
             sb.append("\n");
         }
     }
