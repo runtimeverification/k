@@ -1,5 +1,5 @@
-DEF=intExp
-EXT=iexp
+DEF=llvm-int
+EXT=llvmint
 TESTDIR=.
 KOMPILE_BACKEND=llvm
 

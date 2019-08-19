@@ -1,4 +1,4 @@
-module INTEXP
+module LLVM-INT
     imports INT
 
     configuration <k> $PGM:Pgm </k>
