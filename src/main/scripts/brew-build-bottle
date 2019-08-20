@@ -1,0 +1,8 @@
+#!/bin/sh -ex
+${WORKSPACE}/src/main/scripts/brew-update-to-local
+brew tap kframework/k "file://$(pwd)"
+brew install $PACKAGE --build-bottle -v
+${WORKSPACE}/src/main/scripts/brew-update-to-local-bottle
+git push -d origin brew-release-$PACKAGE
+git checkout -b brew-release-$PACKAGE
+git push origin brew-release-$PACKAGE
