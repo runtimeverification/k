@@ -1,4 +1,4 @@
 <k>
-  removeResult ( ( X |-> 1
-  MAP ) [ Y <- undef ] [ Z ] )
+  removeResult ( ( MAP
+  X |-> 1 ) [ Y <- undef ] [ Z ] )
 </k>
