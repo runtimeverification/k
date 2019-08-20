@@ -916,12 +916,12 @@ public class ModuleToKORE {
         convertSideCondition(requires, topCellSort);
         sb.append(", ");
         convert(left);
-        sb.append(")\n");
+        sb.append(") []\n");
     }
 
     private void genSemanticsRuleLHSWithAlias(List<KVariable> freeVars, String ruleAliasName) {
         sb.append(ruleAliasName);
-        sb.append("(");
+        sb.append("{}(");
         String conn = "";
         for(KVariable var: freeVars) {
             sb.append(conn);
