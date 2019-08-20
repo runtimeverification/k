@@ -1,4 +1,4 @@
 <k>
-  assignmentResult ( ( Y |-> 2
-  MAP ) [ Z <- 3 ] )
+  assignmentResult ( ( MAP
+  Y |-> 2 ) [ Z <- 3 ] )
 </k>

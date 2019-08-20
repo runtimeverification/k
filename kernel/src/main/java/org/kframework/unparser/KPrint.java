@@ -207,10 +207,11 @@ public class KPrint {
     }
 
     public K abstractTerm(Module mod, K term) {
-        K collectionsSorted = options.noSortCollections    ? term              : sortCollections(mod, term);
+        K origNames         = options.restoreOriginalNames ? restoreOriginalNameIfPresent(term) : term;
+        K collectionsSorted = options.noSortCollections    ? origNames : sortCollections(mod, origNames);
+        //non-determinism is still possible if associative/commutative collection terms start with anonymous vars
         K alphaRenamed      = options.noAlphaRenaming      ? collectionsSorted : alphaRename(collectionsSorted);
-        K origNames         = options.restoreOriginalNames ? restoreOriginalNameIfPresent(alphaRenamed) : alphaRenamed;
-        K squashedTerm      = squashTerms(mod, origNames);
+        K squashedTerm      = squashTerms(mod, alphaRenamed);
         K flattenedTerm     = flattenTerms(mod, squashedTerm);
 
         return flattenedTerm;
