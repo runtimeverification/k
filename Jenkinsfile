@@ -284,7 +284,7 @@ pipeline {
                   }
                   steps {
                     dir('homebrew-k') {
-                      git url: 'git@github.com:kframework/homebrew-k.git', branch: 'brew-release-${PACKAGE}'
+                      git url: 'git@github.com:kframework/homebrew-k.git', branch: 'brew-release-kframework'
                       unstash "mojave"
                       sh '''
                         ${WORKSPACE}/src/main/scripts/brew-install-bottle
@@ -369,7 +369,7 @@ pipeline {
         }
         unstash "src"
         dir("homebrew-k") {
-          git url: 'git@github.com:kframework/homebrew-k.git', branch: 'brew-release-${PACKAGE}'
+          git url: 'git@github.com:kframework/homebrew-k.git', branch: 'brew-release-kframework'
         }
         sh '''
           echo 'Setting up environment...'
