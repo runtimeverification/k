@@ -102,6 +102,9 @@ public class KompileOptions implements Serializable {
         }
     }
 
+    @Parameter(names="--emit-json", description="Emit JSON serialized version of parsed and kompiled definitions.")
+    public boolean emitJson = false;
+
     public static final class Experimental implements Serializable {
 
         // Experimental options
