@@ -320,7 +320,7 @@ pipeline {
               }
               post {
                 always {
-                  archiveArtifacts 'kserver.log,k-distribution/target/kserver.log'
+                  archiveArtifacts artifacts: 'kserver.log,k-distribution/target/kserver.log', allowEmptyArchive: true
                 }
               }
             }
