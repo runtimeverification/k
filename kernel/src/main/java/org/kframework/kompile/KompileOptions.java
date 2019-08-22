@@ -4,12 +4,15 @@ package org.kframework.kompile;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate;
 import org.apache.commons.io.FilenameUtils;
+
 import org.kframework.backend.Backends;
 import org.kframework.main.GlobalOptions;
+import org.kframework.unparser.OutputModes;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.OuterParsingOptions;
 import org.kframework.utils.options.SMTOptions;
+import org.kframework.utils.options.BaseEnumConverter;
 import org.kframework.utils.options.StringListConverter;
 
 import java.io.Serializable;
@@ -81,6 +84,22 @@ public class KompileOptions implements Serializable {
 
     public boolean isKore() {
         return backend.equals("kore") || backend.equals("haskell") || backend.equals("llvm");
+    }
+
+    @Parameter(names={"--input", "-i"}, converter=OutputModeConverter.class,
+            description="Format to read definition in. <mode> is either [pretty|json].")
+    public OutputModes input = OutputModes.PRETTY;
+
+    public static class OutputModeConverter extends BaseEnumConverter<OutputModes> {
+
+        public OutputModeConverter(String optionName) {
+            super(optionName);
+        }
+
+        @Override
+        public Class<OutputModes> enumClass() {
+            return OutputModes.class;
+        }
     }
 
     public static final class Experimental implements Serializable {

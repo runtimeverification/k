@@ -23,6 +23,8 @@ import org.kframework.definition.Module;
 import org.kframework.kore.Sort;
 import org.kframework.parser.concrete2kore.ParserUtils;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
+import org.kframework.parser.json.JsonParser;
+import org.kframework.unparser.OutputModes;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -132,6 +134,9 @@ public class Kompile {
     }
 
     public Definition parseDefinition(File definitionFile, String mainModuleName, String mainProgramsModule, Set<String> excludedModuleTags) {
+        if (kompileOptions.input == OutputModes.JSON) {
+            return JsonParser.parseDef(files.load(definitionFile));
+        }
         return definitionParsing.parseDefinitionAndResolveBubbles(definitionFile, mainModuleName, mainProgramsModule, excludedModuleTags);
     }
 
