@@ -1,4 +1,4 @@
-#!/bin/sh -ex
+#!/bin/sh -exu
 REV=$(cd .. && git rev-parse --short HEAD)
 sed -i "" -e 's!^  url ".*"$!  url "'$ROOT_URL-$REV/$PACKAGE-$VERSION-src'.tar.gz"!' \
     Formula/$PACKAGE.rb

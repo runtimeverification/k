@@ -1,4 +1,4 @@
-#!/bin/sh -ex
+#!/bin/sh -exu
 REV=$(cd .. && git rev-parse --short HEAD)
 brew bottle --json $PACKAGE --root-url="$ROOT_URL-$REV/"
 cat *.bottle.json
