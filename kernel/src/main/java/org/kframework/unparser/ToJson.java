@@ -271,37 +271,39 @@ public class ToJson {
             jpro.add("klabel", klabel.get().name());
         }
 
-        Seq<ProductionItem> items = pro.items();
         JsonArrayBuilder productionItems = Json.createArrayBuilder();
-        for (ProductionItem p : JavaConverters.seqAsJavaList(items)) {
-            JsonObjectBuilder obj = Json.createObjectBuilder();
-
-            if (p instanceof NonTerminal) {
-                NonTerminal t = (NonTerminal) p;
-                obj.add("node", JsonParser.KNONTERMINAL);
-                obj.add("sort", toJson(t.sort()));
-                Option<String> name = t.name();
-                if (! name.isEmpty())
-                    obj.add("name", name.get());
-            } else if (p instanceof RegexTerminal) {
-                RegexTerminal t = (RegexTerminal) p;
-                obj.add("node", JsonParser.KREGEXTERMINAL);
-                obj.add("precedeRegex", t.precedeRegex());
-                obj.add("regex", t.regex());
-                obj.add("followRegex", t.followRegex());
-            } else if (p instanceof Terminal) {
-                Terminal t = (Terminal) p;
-                obj.add("node", JsonParser.KTERMINAL);
-                obj.add("value", t.value());
-            }
-
-            productionItems.add(obj.build());
-        }
+        JavaConverters.seqAsJavaList(pro.items()).forEach(p -> productionItems.add(toJson(p)));
+        jpro.add("productionItems", productionItems.build());
 
         jpro.add("sort", toJson(pro.sort()));
         jpro.add("att", toJson(pro.att()));
 
         return jpro.build();
+    }
+
+    public static JsonObject toJson(ProductionItem prod) {
+        JsonObjectBuilder jsonProduction = Json.createObjectBuilder();
+
+        if (prod instanceof NonTerminal) {
+            NonTerminal t = (NonTerminal) prod;
+            jsonProduction.add("node", JsonParser.KNONTERMINAL);
+            jsonProduction.add("sort", toJson(t.sort()));
+            Option<String> name = t.name();
+            if (! name.isEmpty())
+                jsonProduction.add("name", name.get());
+        } else if (prod instanceof RegexTerminal) {
+            RegexTerminal t = (RegexTerminal) prod;
+            jsonProduction.add("node", JsonParser.KREGEXTERMINAL);
+            jsonProduction.add("precedeRegex", t.precedeRegex());
+            jsonProduction.add("regex", t.regex());
+            jsonProduction.add("followRegex", t.followRegex());
+        } else if (prod instanceof Terminal) {
+            Terminal t = (Terminal) prod;
+            jsonProduction.add("node", JsonParser.KTERMINAL);
+            jsonProduction.add("value", t.value());
+        }
+
+        return jsonProduction.build();
     }
 
     public static JsonStructure toJson(Sort sort) {
