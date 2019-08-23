@@ -75,6 +75,7 @@ public class JsonParser {
                              , KDEFINITION          = "KDefinition"
                              , KNONTERMINAL         = "KNonTerminal"
                              , KMODULE              = "KModule"
+                             , KFLATMODULE          = "KFlatModule"
                              , KMODULECOMMENT       = "KModuleComment"
                              , KPRODUCTION          = "KProduction"
                              , KREGEXTERMINAL       = "KRegexTerminal"
@@ -144,8 +145,8 @@ public class JsonParser {
 // Parsing Module Json //
 /////////////////////////
 
-    public static FlatModule toMod(JsonObject data) throws IOException {
-        if (! data.getString("node").equals(KMODULE))
+    public static FlatModule toFlatModule(JsonObject data) throws IOException {
+        if (! data.getString("node").equals(KFLATMODULE))
             throw KEMException.criticalError("Unexpected node found in KAST Json term: " + data.getString("node"));
 
         String name = data.getString("name");
@@ -165,7 +166,7 @@ public class JsonParser {
     private static FlatModule[] toMods(int arity, JsonArray data) throws IOException {
         FlatModule[] items = new FlatModule[arity];
         for (int i = 0; i < arity; i++) {
-            items[i] = toMod(data.getValuesAs(JsonObject.class).get(i));
+            items[i] = toFlatModule(data.getValuesAs(JsonObject.class).get(i));
         }
         return items;
     }
@@ -200,7 +201,7 @@ public class JsonParser {
                 return new SyntaxPriority(toPriorities(priorities.size(), priorities), att);
             }
             case KSYNTAXASSOCIATIVITY: {
-                
+
             }
             case KCONFIGURATION: {
 

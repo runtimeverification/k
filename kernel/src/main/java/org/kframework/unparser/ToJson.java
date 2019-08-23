@@ -127,7 +127,7 @@ public class ToJson {
     public static JsonStructure toJson(FlatModule mod) {
         JsonObjectBuilder jmod = Json.createObjectBuilder();
 
-        jmod.add("node", JsonParser.KMODULE);
+        jmod.add("node", JsonParser.KFLATMODULE);
 
         JsonArrayBuilder imports = Json.createArrayBuilder();
         mod.imports().foreach(i -> imports.add(i));
