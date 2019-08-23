@@ -201,13 +201,10 @@ public class ToJson {
 
         jsyn.add("node", JsonParser.KSYNTAXPRIORITY);
 
-        Seq<Set<Tag>> priSeq = syn.priorities();
         JsonArrayBuilder priArray = Json.createArrayBuilder();
-        for (Set<Tag> pri : JavaConverters.seqAsJavaList(priSeq)) {
+        for (Set<Tag> pri : JavaConverters.seqAsJavaList(syn.priorities())) {
             JsonArrayBuilder tagArray = Json.createArrayBuilder();
-            for (Tag t : JavaConverters.setAsJavaSet(pri)) {
-                tagArray.add(t.name());
-            }
+            pri.foreach(t -> tagArray.add(t.name()));
             priArray.add(tagArray);
         }
         jsyn.add("priorities", priArray);
@@ -224,9 +221,7 @@ public class ToJson {
         jsyn.add("assoc", syn.assoc().toString());
 
         JsonArrayBuilder tagArray = Json.createArrayBuilder();
-        for (Tag t : JavaConverters.setAsJavaSet(syn.tags())) {
-            tagArray.add(t.name());
-        }
+        syn.tags().foreach(t -> tagArray.add(t.name()));
         jsyn.add("tags", tagArray);
 
         jsyn.add("att", toJson(syn.att()));
