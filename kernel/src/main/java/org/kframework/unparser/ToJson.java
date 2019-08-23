@@ -9,6 +9,7 @@ import org.kframework.definition.Configuration;
 import org.kframework.definition.Definition;
 import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Module;
+import org.kframework.definition.FlatModule;
 import org.kframework.definition.ModuleComment;
 import org.kframework.definition.Production;
 import org.kframework.definition.ProductionItem;
@@ -120,19 +121,19 @@ public class ToJson {
 ///////////////////////////
 
     public static JsonStructure toJson(Module mod) {
+        return toJson(mod.flattened());
+    }
+
+    public static JsonStructure toJson(FlatModule mod) {
         JsonObjectBuilder jmod = Json.createObjectBuilder();
 
         jmod.add("node", JsonParser.KMODULE);
 
         JsonArrayBuilder imports = Json.createArrayBuilder();
-        for (String s: JavaConverters.setAsJavaSet(mod.importedModuleNames())) {
-            imports.add(s);
-        }
+        mod.imports().foreach(i -> imports.add(i));
 
         JsonArrayBuilder sentences = Json.createArrayBuilder();
-        for (Sentence s: JavaConverters.setAsJavaSet(mod.localSentences())) {
-            sentences.add(toJson(s));
-        }
+        mod.localSentences().foreach(s -> sentences.add(toJson(s)));
 
         jmod.add("name", mod.name());
         jmod.add("imports", imports);
