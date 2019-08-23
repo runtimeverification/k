@@ -54,7 +54,6 @@ import javax.json.JsonReader;
 import javax.json.JsonString;
 import javax.json.JsonStructure;
 
-
 import scala.Option;
 import scala.collection.JavaConverters;
 import scala.collection.Seq;
@@ -227,7 +226,15 @@ public class JsonParser {
                 return new Bubble(sentenceType, contents, att);
             }
             case KPRODUCTION: {
-                return new ModuleComment("Dummy comment", Att.empty());
+                Option<KLabel> klabel = Option.apply(data.containsKey("klabel") ? KLabel(data.getString("klabel")) : null);
+                Sort sort             = toSort(data.getJsonObject("sort"));
+                Att att               = toAtt(data.getJsonObject("att"));
+
+                List<ProductionItem> pItems = new ArrayList<>();
+                for (JsonObject pi: data.getJsonArray("productionItems").getValuesAs(JsonObject.class)) {
+                    pItems.add(toProductionItem(pi));
+                }
+                return new Production(klabel, sort, JavaConverters.asScalaIteratorConverter(pItems.iterator()).asScala().toSeq(), att);
             }
             default:
                 throw KEMException.criticalError("Unexpected node found in KAST Json term: " + data.getString("node"));
@@ -244,6 +251,28 @@ public class JsonParser {
         if (! data.getString("node").equals(KSORT))
             throw KEMException.criticalError("Unexpected node found in KAST Json term: " + data.getString("node"));
         return KORE.Sort(data.getString("name"));
+    }
+
+    private static ProductionItem toProductionItem(JsonObject data) {
+        switch(data.getString("node")) {
+            case KNONTERMINAL: {
+                Sort sort           = toSort(data.getJsonObject("sort"));
+                Option<String> name = Option.apply(data.containsKey("name") ? data.getString("name") : null);
+                return new NonTerminal(sort, name);
+            }
+            case KREGEXTERMINAL: {
+                String precedeRegex = data.getString("precedeRegex");
+                String regex        = data.getString("regex");
+                String followRegex  = data.getString("followRegex");
+                return new RegexTerminal(precedeRegex, regex, followRegex);
+            }
+            case KTERMINAL: {
+                String value = data.getString("value");
+                return new Terminal(value);
+            }
+            default:
+                throw KEMException.criticalError("Unexpected node found in ProductionItem Json term: " + data.getString("node"));
+        }
     }
 
 //////////////////////
