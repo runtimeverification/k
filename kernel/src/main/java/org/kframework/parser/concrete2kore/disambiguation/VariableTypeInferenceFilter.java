@@ -370,6 +370,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
         }
     }
 
+    // TODO: handle the case when tc contains meaningful ambiguities more intelligently.
     public static boolean isFunctionRule(TermCons tc, boolean isAnywhere) {
         if ((tc.production().sort().name().equals("#RuleContent") || tc.production().sort().name().equals("#RuleBody")) && !(tc.get(0) instanceof TermCons && isFunctionRule((TermCons)tc.get(0), isAnywhere))) {
             if (tc.get(0) instanceof Ambiguity) {
