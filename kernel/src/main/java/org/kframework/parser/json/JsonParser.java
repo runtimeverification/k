@@ -134,7 +134,7 @@ public class JsonParser {
         Set<FlatModule> entryModules = new HashSet<>(Arrays.asList(modArray));
         Map<String,Module> koreModules = new HashMap<>();
 
-        FlatModule mainFlatMod = entryModules.stream().filter(mod -> mod.hasName(mainModuleName)).findFirst().get();
+        FlatModule mainFlatMod = entryModules.stream().filter(mod -> mod.name().equals(mainModuleName)).findFirst().get();
         Module mainMod = mainFlatMod.toModule(immutable(entryModules), JavaConverters.mapAsScalaMapConverter(koreModules).asScala(), Seq());
 
         return new Definition(mainMod, immutable(new HashSet<>(koreModules.values())), toAtt(data.getJsonObject("att")));

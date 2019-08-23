@@ -114,6 +114,4 @@ case class FlatModule(name: String, imports: Set[String], localSentences: Set[Se
 
     newModule
   }
-
-  def hasName(name: String) : Boolean = this.name == name
 }
