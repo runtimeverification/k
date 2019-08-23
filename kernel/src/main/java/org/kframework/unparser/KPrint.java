@@ -19,28 +19,27 @@ import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
 import org.kframework.kore.TransformK;
 import org.kframework.main.GlobalOptions;
-import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
-import org.kframework.parser.concrete2kore.ParseInModule;
 import org.kframework.parser.ProductionReference;
+import org.kframework.parser.concrete2kore.ParseInModule;
+import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.TTYInfo;
+import scala.Option;
 import scala.Tuple2;
 
 import java.io.IOException;
 import java.io.OutputStream;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-
-import scala.Option;
 
 import static org.kframework.kore.KORE.*;
 
@@ -225,7 +224,13 @@ public class KPrint {
                 if (k.klabel() instanceof KVariable) {
                     return super.apply(k);
                 }
-                Att att = unparsingModule.attributesFor().apply(KLabel(k.klabel().name()));
+                Att att;
+                try {
+                    att = unparsingModule.attributesFor().apply(KLabel(k.klabel().name()));
+                } catch (NoSuchElementException e) {
+                    throw KEMException.criticalError(
+                            e.getMessage() + "\nAvailable keys: " + unparsingModule.attributesFor().keys(), e);
+                }
                 if (att.contains("comm") && att.contains("assoc") && att.contains("unit")) {
                     List<K> items = new ArrayList<>(Assoc.flatten(k.klabel(), k.klist().items(), KLabel(att.get("unit"))));
                     List<Tuple2<String, K>> printed = new ArrayList<>();
