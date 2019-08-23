@@ -1,0 +1,3 @@
+#!/bin/sh -ex
+brew tap kframework/k "file:///$(pwd)"
+brew install $PACKAGE--$VERSION.*.bottle*.tar.gz -v
