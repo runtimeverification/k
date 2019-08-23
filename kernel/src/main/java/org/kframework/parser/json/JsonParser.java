@@ -35,15 +35,16 @@ import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KEMException;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.io.StringReader;
-import java.util.Arrays;
-import java.util.List;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -119,22 +120,24 @@ public class JsonParser {
             if (data.getInt("version") != 1) {
                 throw KEMException.criticalError("Only can deserialize KAST version '1'! Found: " + data.getInt("version"));
             }
-            return toDef(data.getJsonObject("term"));
+            return toDefinition(data.getJsonObject("term"));
         } catch (IOException e) {
             throw KEMException.criticalError("Could not read Definition term from json", e);
         }
     }
 
-    public static Definition toDef(JsonObject data) throws IOException {
+    public static Definition toDefinition(JsonObject data) throws IOException {
         if (! data.getString("node").equals(KDEFINITION))
             throw KEMException.criticalError("Unexpected node found in KAST Json term: " + data.getString("node"));
 
         String mainModuleName = data.getString("mainModule");
         JsonArray mods = data.getJsonArray("entryModules");
-        FlatModule[] modArray = toMods(mods.size(), mods);
-        Set<FlatModule> entryModules = new HashSet<>(Arrays.asList(modArray));
-        Map<String,Module> koreModules = new HashMap<>();
+        Set<FlatModule> entryModules = new HashSet<>();
+        for (JsonObject m: mods.getValuesAs(JsonObject.class)) {
+            entryModules.add(toFlatModule(m));
+        }
 
+        Map<String,Module> koreModules = new HashMap<>();
         FlatModule mainFlatMod = entryModules.stream().filter(mod -> mod.name().equals(mainModuleName)).findFirst().get();
         Module mainMod = mainFlatMod.toModule(immutable(entryModules), JavaConverters.mapAsScalaMapConverter(koreModules).asScala(), Seq());
 
@@ -151,31 +154,24 @@ public class JsonParser {
 
         String name = data.getString("name");
 
-        JsonArray sens = data.getJsonArray("localSentences");
         JsonArray jsonimports = data.getJsonArray("imports");
         Set<String> imports = new HashSet<>();
-        for (JsonString imp : jsonimports.getValuesAs(JsonString.class)) {
-            imports.add(imp.getString());
+        jsonimports.getValuesAs(JsonString.class).forEach(i -> imports.add(i.getString()));
+
+        JsonArray sentences = data.getJsonArray("localSentences");
+        Set<Sentence> localSentences = new HashSet<>();
+        for (JsonObject j: sentences.getValuesAs(JsonObject.class)) {
+            localSentences.add(toSentence(j));
         }
-        Sentence[] senArray = toSens(sens.size(), sens);
-        Set<Sentence> localSentences = new HashSet<>(Arrays.asList(senArray));
 
         return new FlatModule(name, immutable(imports), immutable(localSentences), toAtt(data.getJsonObject("att")));
-    }
-
-    private static FlatModule[] toMods(int arity, JsonArray data) throws IOException {
-        FlatModule[] items = new FlatModule[arity];
-        for (int i = 0; i < arity; i++) {
-            items[i] = toFlatModule(data.getValuesAs(JsonObject.class).get(i));
-        }
-        return items;
     }
 
 ///////////////////////////
 // Parsing Sentence Json //
 ///////////////////////////
 
-    public static Sentence toSen(JsonObject data) throws IOException {
+    public static Sentence toSentence(JsonObject data) throws IOException {
         switch(data.getString("node")) {
             case KCONTEXT: {
                 K body = toK(data.getJsonObject("body"));
@@ -198,7 +194,9 @@ public class JsonParser {
             case KSYNTAXPRIORITY: {
                 JsonArray priorities = data.getJsonArray("priorities");
                 Att att = toAtt(data.getJsonObject("att"));
-                return new SyntaxPriority(toPriorities(priorities.size(), priorities), att);
+                List<scala.collection.Set<Tag>> syntaxPriorities = new ArrayList<>();
+                priorities.getValuesAs(JsonArray.class).forEach(tags -> syntaxPriorities.add(toTags(tags)));
+                return new SyntaxPriority(JavaConverters.iterableAsScalaIterableConverter(syntaxPriorities).asScala().toSeq(), att);
             }
             case KSYNTAXASSOCIATIVITY: {
 
@@ -220,34 +218,10 @@ public class JsonParser {
         }
     }
 
-    private static Sentence[] toSens(int arity, JsonArray data) throws IOException {
-        Sentence[] items = new Sentence[arity];
-        for (int i = 0; i < arity; i++) {
-            items[i] = toSen(data.getValuesAs(JsonObject.class).get(i));
-        }
-        return items;
-    }
-
-    private static scala.collection.Set<Tag> toTags(int arity, JsonArray data) {
+    private static scala.collection.Set<Tag> toTags(JsonArray data) {
         Set<Tag> tags = new HashSet<>();
-        for (int i = 0; i < arity; i++) {
-            String tagString = data.getString(i);
-            Tag tag = new Tag(tagString);
-            tags.add(tag);
-        }
+        data.getValuesAs(JsonString.class).forEach(s -> tags.add(new Tag(s.getString())));
         return JavaConverters.asScalaSet(tags);
-    }
-
-    /* Used only for parsing KSYNTAXPRIORITY */
-    private static Seq<scala.collection.Set<Tag>> toPriorities(int arity, JsonArray data) {
-        List<scala.collection.Set<Tag>> priorities = new ArrayList<>();
-
-        for (int i = 0; i < arity; i++) {
-            JsonArray tags = data.getValuesAs(JsonArray.class).get(i);
-            priorities.add(toTags(tags.size(), tags));
-        }
-
-        return JavaConverters.iterableAsScalaIterableConverter(priorities).asScala().toSeq();
     }
 
 //////////////////////
