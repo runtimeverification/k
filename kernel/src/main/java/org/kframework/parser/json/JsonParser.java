@@ -199,7 +199,14 @@ public class JsonParser {
                 return new SyntaxPriority(JavaConverters.iterableAsScalaIterableConverter(syntaxPriorities).asScala().toSeq(), att);
             }
             case KSYNTAXASSOCIATIVITY: {
-
+                String assocString = data.getString("assoc");
+                scala.Enumeration.Value assoc = assocString == "Left"     ? Associativity.Left()
+                                              : assocString == "Right"    ? Associativity.Right()
+                                              : assocString == "NonAssoc" ? Associativity.NonAssoc()
+                                              : Associativity.Unspecified();
+                scala.collection.Set<Tag> tags = toTags(data.getJsonArray("tags"));
+                Att att = toAtt(data.getJsonObject("att"));
+                return new SyntaxAssociativity(assoc, tags, att);
             }
             case KCONFIGURATION: {
 
