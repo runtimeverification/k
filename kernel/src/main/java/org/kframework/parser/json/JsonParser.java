@@ -31,6 +31,7 @@ import org.kframework.kore.mini.KRewrite;
 import org.kframework.kore.mini.KSequence;
 import org.kframework.kore.mini.KToken;
 import org.kframework.kore.mini.KVariable;
+import org.kframework.kore.Sort;
 import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KEMException;
 
@@ -174,21 +175,21 @@ public class JsonParser {
     public static Sentence toSentence(JsonObject data) throws IOException {
         switch(data.getString("node")) {
             case KCONTEXT: {
-                K body = toK(data.getJsonObject("body"));
+                K body     = toK(data.getJsonObject("body"));
                 K requires = toK(data.getJsonObject("requires"));
-                Att att = toAtt(data.getJsonObject("att"));
+                Att att    = toAtt(data.getJsonObject("att"));
                 return new Context(body, requires, att);
             }
             case KRULE: {
-                K body = toK(data.getJsonObject("body"));
+                K body     = toK(data.getJsonObject("body"));
                 K requires = toK(data.getJsonObject("requires"));
-                K ensures = toK(data.getJsonObject("ensures"));
-                Att att = toAtt(data.getJsonObject("att"));
+                K ensures  = toK(data.getJsonObject("ensures"));
+                Att att    = toAtt(data.getJsonObject("att"));
                 return new Rule(body, requires, ensures, att);
             }
             case KMODULECOMMENT:{
                 String comment = data.getString("comment");
-                Att att = toAtt(data.getJsonObject("att"));
+                Att att        = toAtt(data.getJsonObject("att"));
                 return new ModuleComment(comment, att);
             }
             case KSYNTAXPRIORITY: {
@@ -209,13 +210,21 @@ public class JsonParser {
                 return new SyntaxAssociativity(assoc, tags, att);
             }
             case KCONFIGURATION: {
-
+                K body    = toK(data.getJsonObject("body"));
+                K ensures = toK(data.getJsonObject("ensures"));
+                Att att   = toAtt(data.getJsonObject("att"));
+                return new Configuration(body, ensures, att);
             }
             case KSYNTAXSORT: {
-
+                Sort sort = toSort(data.getJsonObject("sort"));
+                Att att   = toAtt(data.getJsonObject("att"));
+                return new SyntaxSort(sort, att);
             }
             case KBUBBLE: {
-
+                String sentenceType = data.getString("sentenceType");
+                String contents     = data.getString("contents");
+                Att att             = toAtt(data.getJsonObject("att"));
+                return new Bubble(sentenceType, contents, att);
             }
             case KPRODUCTION: {
                 return new ModuleComment("Dummy comment", Att.empty());
@@ -229,6 +238,12 @@ public class JsonParser {
         Set<Tag> tags = new HashSet<>();
         data.getValuesAs(JsonString.class).forEach(s -> tags.add(new Tag(s.getString())));
         return JavaConverters.asScalaSet(tags);
+    }
+
+    private static Sort toSort(JsonObject data) {
+        if (! data.getString("node").equals(KSORT))
+            throw KEMException.criticalError("Unexpected node found in KAST Json term: " + data.getString("node"));
+        return KORE.Sort(data.getString("name"));
     }
 
 //////////////////////
