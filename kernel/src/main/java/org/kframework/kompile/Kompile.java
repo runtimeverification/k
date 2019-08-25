@@ -145,10 +145,14 @@ public class Kompile {
     }
 
     public Definition parseDefinition(File definitionFile, String mainModuleName, String mainProgramsModule, Set<String> excludedModuleTags) {
-        if (kompileOptions.input == OutputModes.JSON) {
-            return JsonParser.parseDef(files.load(definitionFile));
+        switch (kompileOptions.input) {
+            case JSON:
+                return JsonParser.parseDef(files.load(definitionFile));
+            case PRETTY:
+                return definitionParsing.parseDefinitionAndResolveBubbles(definitionFile, mainModuleName, mainProgramsModule, excludedModuleTags);
+            default:
+                throw KEMException.criticalError("Unsupported input mode for definition parsing: " + kompileOptions.input);
         }
-        return definitionParsing.parseDefinitionAndResolveBubbles(definitionFile, mainModuleName, mainProgramsModule, excludedModuleTags);
     }
 
     private static Module filterStreamModules(Module input) {
