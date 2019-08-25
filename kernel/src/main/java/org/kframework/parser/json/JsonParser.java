@@ -96,15 +96,15 @@ public class JsonParser {
 // Parsing Definition Json //
 /////////////////////////////
 
-    public static Definition parseDef(byte[] data) {
+    public static Definition parseDefinition(byte[] data) {
         try {
-            return parseDef(new String(data, "UTF-8"));
+            return parseDefinition(new String(data, "UTF-8"));
         } catch (UnsupportedEncodingException e) {
             throw new AssertionError("UTF-8 encoding not supported");
         }
     }
 
-    public static Definition parseDef(String data) {
+    public static Definition parseDefinition(String data) {
         JsonReader reader = Json.createReader(new StringReader(data));
         return parseJsonDef(reader.readObject());
     }
