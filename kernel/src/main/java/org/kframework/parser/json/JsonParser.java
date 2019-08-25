@@ -131,7 +131,7 @@ public class JsonParser {
             throw KEMException.criticalError("Unexpected node found in KAST Json term: " + data.getString("node"));
 
         String mainModuleName = data.getString("mainModule");
-        JsonArray mods = data.getJsonArray("entryModules");
+        JsonArray mods = data.getJsonArray("modules");
         Set<FlatModule> entryModules = new HashSet<>();
         for (JsonObject m: mods.getValuesAs(JsonObject.class)) {
             entryModules.add(toFlatModule(m));

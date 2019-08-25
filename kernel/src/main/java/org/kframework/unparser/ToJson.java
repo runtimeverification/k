@@ -102,7 +102,7 @@ public class ToJson {
 
         jdef.add("node", JsonParser.KDEFINITION);
         jdef.add("mainModule", def.mainModule().name());
-        jdef.add("entryModules", mods);
+        jdef.add("modules", mods);
         jdef.add("att", toJson(def.att()));
 
         return jdef.build();
