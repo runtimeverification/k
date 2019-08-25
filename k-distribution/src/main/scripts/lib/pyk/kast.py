@@ -83,11 +83,11 @@ def KImport(kimport):
 def isKImport(k):
     return k["node"] == "KImport"
 
-def KModule(name, imports, rules):
-    return { "node": "KModule", "name": name, "imports": imports, "rules": rules }
+def KFlatModule(name, imports, localSentences, atts = None):
+    return { "node": "KFlatModule", "name": name, "imports": imports, "localSentences": localSentences, "atts": atts }
 
-def isKModule(k):
-    return k["node"] == "KModule"
+def isKFlatModule(k):
+    return k["node"] == "KFlatModule"
 
 def KRequire(krequire):
     return { "node": "KRequire", "require": krequire }
@@ -95,8 +95,8 @@ def KRequire(krequire):
 def isKRequire(k):
     return k["node"] == "KRequire"
 
-def KDefinition(name, requires, modules):
-    return { "node": "KDefinition", "name": name, "requires": requires, "modules": modules }
+def KDefinition(mainModule, modules, requires = None, atts = None):
+    return { "node": "KDefinition", "mainModule": mainModule, "modules": modules, "requires": requires, "atts": atts }
 
 def isKDefinition(k):
     return k["node"] == "KDefinition"
@@ -255,20 +255,19 @@ def prettyPrintKast(kast, symbolTable):
             return kastStr + "(" + str(kast["value"]) + ")"
     if isKImport(kast):
         return "imports " + kast["import"]
-    if isKModule(kast):
+    if isKFlatModule(kast):
         name = kast["name"]
         imports = "\n".join([prettyPrintKast(kimport, symbolTable) for kimport in kast["imports"]])
-        rules = "\n\n".join([prettyPrintKast(rule, symbolTable) for rule in kast["rules"]])
-        contents = imports + "\n\n" + rules
+        localSentences = "\n\n".join([prettyPrintKast(sent, symbolTable) for sent in kast["localSentences"]])
+        contents = imports + "\n\n" + sent
         return "module " + name                    + "\n    " \
              + "\n    ".join(contents.split("\n")) + "\n" \
              + "endmodule"
     if isKRequire(kast):
         return "requires \"" + kast["require"] + ".k\""
     if isKDefinition(kast):
-        name = kast["name"]
-        requires = "\n".join([prettyPrintKast(require, symbolTable) for require in kast["requires"]])
-        modules = "\n\n".join([prettyPrintKast(module, symbolTable) for module in kast["modules"]])
+        requires = "" if kast["requires"] is None else "\n".join([prettyPrintKast(require, symbolTable) for require in kast["requires"]])
+        modules  = "\n\n".join([prettyPrintKast(module, symbolTable) for module in kast["modules"]])
         return requires + "\n\n" + modules
 
     print()
