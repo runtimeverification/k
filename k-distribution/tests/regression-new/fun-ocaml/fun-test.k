@@ -57,4 +57,13 @@ rule useNestedBarInt()
   rule [[ requiresConfig() => 0 ]]
     <cell> M </cell>
 
+  syntax IntList ::= List{Int, ""}
+
+  syntax KItem ::= callFunIntListAndConfig()
+  rule callFunIntListAndConfig() => funIntListAndConfig()
+
+  syntax Int ::= funIntListAndConfig()     [function]
+  rule [[ funIntListAndConfig() => #fun(V1 => 0)(.IntList) ]]
+    <cell> M </cell>
+
 endmodule

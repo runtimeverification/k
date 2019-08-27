@@ -103,6 +103,19 @@ Note the last case, in which two different polymorphic sorts are specified toget
 
 A single configuration cell containing an integer may have the "exit" attribute. This integer will then be used as the return value on the console when executing the program.
 
+## Klabel and symbol attributes
+
+By default K generates for each syntax definition a long and obfuscated klabel string, which serves as internal identifier and also is used in kast format of that syntax. If we need to reference a certain syntax production externally, we have to manually define the klabels. For example:
+
+```
+syntax Foo ::= #Foo( Int, Int ) [klabel(#Foo), symbol]
+```
+                                                                           
+Now a kast term for `Foo` will look like `#Foo(1,  1)`. Without `symbol`, the klabel defined for this syntax will still be a long obfuscated string. `[symbol]` also ensures that this attribute is unique to the definition. Uniqueness is not enforced by default for backwards compatibility. In some circumstances in Java and Ocaml backend we need multiple syntax definition with the same klabel. 
+Otherwise it is recommended to use `klabel` and `symbol` together. 
+One application is loading a config through JSON backend.
+KLabels are also used when terms are logged in Java Backend, when using logging/debugging options, or in error messages.  
+
 ## Pattern Matching operator
 
 Sometimes when you want to express a side condition, you want to say that a rule matches if a particular term matches a particular pattern, or if it instead does /not/ match a particular pattern. The syntax in K for this is :=K and :/=K. It has similar meaning to ==K and =/=K, except that where ==K and =/=K express equality, :=K and =/=K express model membership. That is to say, whether or not the rhs is a member of the set of terms expressed by the lhs pattern. Because the lhs of these operators is a pattern, the user can use variables in the lhs of the operator. However, due to current limitations, these variables are *NOT* bound in the rest of the term. The user is thus encouraged to use anonymous variables only, although this is not required. This is compiled by the K frontend down to an efficient pattern matching on a fresh function symbol.
