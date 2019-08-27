@@ -32,7 +32,7 @@ rule
     } else {
       n = n + 1;
     }
-  => 
+  =>
     _
   </ak>
   <astate> n |-> N1:Int _ => _ </astate>
@@ -45,7 +45,7 @@ rule
       n = n + 1;
       n = n + 1;
     }
-  => 
+  =>
     _
   </bk>
   <bstate> n |-> N2:Int _ => _ </bstate>

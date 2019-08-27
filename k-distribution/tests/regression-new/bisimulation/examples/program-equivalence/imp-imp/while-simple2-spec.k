@@ -41,7 +41,7 @@ rule
     while (n <= sum) {
       n = n + 1;
     }
-  => 
+  =>
     _
   </ak>
   <astate> n |-> N1:Int sum |-> S1:Int _ => _ </astate>
@@ -51,7 +51,7 @@ rule
     while (n <= sum) {
       n = n + 1;
     }
-  => 
+  =>
     _
   </bk>
   <bstate> n |-> N2:Int sum |-> S2:Int _ => _ </bstate>

@@ -42,7 +42,7 @@ rule
     while (!(10 <= n)) { // n < 10
       n = n + 2;
     }
-  => 
+  =>
     _
   </ak>
   <astate> n |-> N1:Int _ => _ </astate>
@@ -52,7 +52,7 @@ rule
     while (!(10 <= n)) { // n < 10
       n = n + 1;
     }
-  => 
+  =>
     _
   </bk>
   <bstate> n |-> N2:Int _ => _ </bstate>
