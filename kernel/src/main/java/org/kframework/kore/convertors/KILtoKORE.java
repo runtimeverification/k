@@ -61,8 +61,7 @@ public class KILtoKORE extends KILTransformation<Object> {
 
     public FlatModule toFlatModule(Module m) {
         CheckListDecl.check(m);
-        String name = m.getName();
-        moduleName = name;
+        moduleName = m.getName();
 
         Set<org.kframework.definition.Sentence> items = m.getItems().stream()
                 .filter(j -> !(j instanceof org.kframework.kil.Import))
@@ -75,7 +74,7 @@ public class KILtoKORE extends KILTransformation<Object> {
 
         Att att = convertAttributes(m);
 
-        return new FlatModule(name, immutable(importedModuleNames), immutable(items), att);
+        return new FlatModule(moduleName, immutable(importedModuleNames), immutable(items), att);
     }
 
     public org.kframework.definition.Definition apply(Definition d) {
