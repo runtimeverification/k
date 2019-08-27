@@ -272,6 +272,8 @@ pipeline {
                     dir('homebrew-k') {
                       git url: 'git@github.com:kframework/homebrew-k.git'
                       sh '''
+                        git config --global user.email "admin@runtimeverification.com"
+                        git config --global user.name  "RV Jenkins"
                         ${WORKSPACE}/src/main/scripts/brew-build-bottle
                       '''
                       stash name: "mojave", includes: "kframework--5.0.0.mojave.bottle*.tar.gz"
@@ -395,6 +397,8 @@ pipeline {
             curl -X PATCH --data '{"draft": false}' https://api.github.com/repos/kframework/k/releases/$ID?access_token=$GITHUB_TOKEN
             curl --data '{"state": "success","target_url": "'$BUILD_URL'","description": "Build succeeded."}' https://api.github.com/repos/kframework/k/statuses/$(git rev-parse origin/master)?access_token=$GITHUB_TOKEN
             cd homebrew-k
+            git config --global user.email "admin@runtimeverification.com"
+            git config --global user.name  "RV Jenkins"
             git checkout master
             git merge brew-release-$PACKAGE
             git push origin master
