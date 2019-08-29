@@ -239,7 +239,7 @@ public class ResolveFreshConstants {
         counterSentences.add(Production(KLabel("getGeneratedCounterCell"), Sorts.GeneratedCounterCell(), Seq(Terminal("getGeneratedCounterCell"), Terminal("("), NonTerminal(Sorts.GeneratedTopCell()), Terminal(")")), Att.empty().add("function")));
         counterSentences.add(Rule(KRewrite(KApply(KLabel("getGeneratedCounterCell"), IncompleteCellUtils.make(KLabels.GENERATED_TOP_CELL, true, KVariable("Cell", Att.empty().add(Sort.class, Sorts.GeneratedCounterCell())), true)), KVariable("Cell", Att.empty().add(Sort.class, Sorts.GeneratedCounterCell()))), BooleanUtils.TRUE, BooleanUtils.TRUE));
 
-        if (m.equals(def.mainModule()) && kore) {
+        if (m.name().equals(def.mainModule().name()) && kore) {
             if (!m.definedKLabels().contains(KLabels.GENERATED_TOP_CELL)) {
                 RuleGrammarGenerator gen = new RuleGrammarGenerator(def);
                 ParseInModule mod = RuleGrammarGenerator.getCombinedGrammar(gen.getConfigGrammar(m), true);
