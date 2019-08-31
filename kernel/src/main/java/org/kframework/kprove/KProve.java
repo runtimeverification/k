@@ -28,7 +28,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-
 /**
  * Class that implements the "--prove" option.
  */
@@ -93,8 +92,8 @@ public class KProve {
         specModule = backend.specificationSteps(compiledDefinition.kompiledDefinition).apply(specModule);
 
         if (defModuleName == null) {
-            if (specModule.imports().size() == 1) {
-                defModuleName = specModule.imports().iterator().next().name();
+            if (specModule.userImportedModuleNames().size() == 1) {
+                defModuleName = specModule.userImportedModuleNames().iterator().next();
             } else {
                 throw KEMException.criticalError("Definition module must either be specified as --def-module or as the singular import of the specification module.");
             }
