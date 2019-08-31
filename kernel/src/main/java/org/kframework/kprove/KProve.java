@@ -81,18 +81,27 @@ public class KProve {
 
     public static Tuple2<Definition, Module> getProofDefinition(File proofFile, String defModuleName, String specModuleName, CompiledDefinition compiledDefinition, Backend backend, FileUtil files, KExceptionManager kem, Stopwatch sw) {
         Kompile kompile = new Kompile(compiledDefinition.kompileOptions, files, kem, sw, true);
-        if (defModuleName == null) {
-            defModuleName = compiledDefinition.kompiledDefinition.mainModule().name();
-        }
         if (specModuleName == null) {
             specModuleName = FilenameUtils.getBaseName(proofFile.getName()).toUpperCase();
         }
-        java.util.Set<Module> modules = kompile.parseModules(compiledDefinition, defModuleName, files.resolveWorkingDirectory(proofFile).getAbsoluteFile());
+
+        java.util.Set<Module> modules = kompile.parseModules(compiledDefinition, specModuleName, files.resolveWorkingDirectory(proofFile).getAbsoluteFile());
         Map<String, Module> modulesMap = new HashMap<>();
         modules.forEach(m -> modulesMap.put(m.name(), m));
-        Module defModule = getModule(defModuleName, modulesMap, compiledDefinition.getParsedDefinition());
+
         Module specModule = getModule(specModuleName, modulesMap, compiledDefinition.getParsedDefinition());
         specModule = backend.specificationSteps(compiledDefinition.kompiledDefinition).apply(specModule);
+
+        if (defModuleName == null) {
+            if (specModule.imports().size() == 1) {
+                defModuleName = specModule.imports().iterator().next().name();
+            } else {
+                throw KEMException.criticalError("Definition module must either be specified as --def-module or as the singular import of the specification module.");
+            }
+            defModuleName = compiledDefinition.kompiledDefinition.mainModule().name();
+        }
+        Module defModule = getModule(defModuleName, modulesMap, compiledDefinition.getParsedDefinition());
+
         Definition combinedDef = Definition.apply(defModule, compiledDefinition.getParsedDefinition().entryModules(), compiledDefinition.getParsedDefinition().att());
         combinedDef = Kompile.excludeModulesByTag(backend.excludedModuleTags()).apply(combinedDef);
         Definition compiled = compileDefinition(backend, combinedDef);
