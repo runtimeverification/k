@@ -1,9 +1,3 @@
-module VERIFICATION
-
-imports MAIN
-
-endmodule
-
 module SYNC-POINT-CANDIDATES
 
 imports MAIN
@@ -27,7 +21,6 @@ endmodule
 
 module SUM-CONCRETE-SPEC
 
-imports VERIFICATION
 imports SYNC-POINT-CANDIDATES
 
 rule

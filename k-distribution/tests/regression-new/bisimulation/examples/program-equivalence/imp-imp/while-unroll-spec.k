@@ -30,7 +30,6 @@ endmodule
 
 module WHILE-UNROLL-SPEC
 
-imports MAIN
 imports SYNC-POINT-CANDIDATES
 
 // loop unrolling

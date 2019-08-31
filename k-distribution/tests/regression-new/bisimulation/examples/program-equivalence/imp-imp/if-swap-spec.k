@@ -16,7 +16,6 @@ endmodule
 
 module IF-SWAP-SPEC
 
-imports MAIN
 imports SYNC-POINT-CANDIDATES
 
 syntax Id ::= "n" [token]

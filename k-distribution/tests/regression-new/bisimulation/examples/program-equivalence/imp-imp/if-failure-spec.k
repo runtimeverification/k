@@ -16,7 +16,6 @@ endmodule
 
 module IF-FAILURE-SPEC
 
-imports MAIN
 imports SYNC-POINT-CANDIDATES
 
 syntax Id ::= "n" [token]

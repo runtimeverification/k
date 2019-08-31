@@ -30,7 +30,6 @@ endmodule
 
 module WHILE-FAILURE-SPEC
 
-imports MAIN
 imports SYNC-POINT-CANDIDATES
 
 // wrong loop unrolling (`<` should have been used instead of `<=`)

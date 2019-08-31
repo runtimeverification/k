@@ -18,7 +18,7 @@ endmodule
 
 module SYNC-POINT-CANDIDATES
 
-imports MAIN
+imports VERIFICATION
 
 syntax Id ::= "n"   [token]
             | "sum" [token]
@@ -50,7 +50,6 @@ endmodule
 
 module SUM-SYMBOLIC-SPEC
 
-imports VERIFICATION
 imports SYNC-POINT-CANDIDATES
 
 rule

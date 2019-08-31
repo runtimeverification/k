@@ -26,7 +26,6 @@ endmodule
 
 module WHILE-SIMPLE2-SPEC
 
-imports MAIN
 imports SYNC-POINT-CANDIDATES
 
 syntax Id ::= "n" [token]
