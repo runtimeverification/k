@@ -3,11 +3,12 @@
 import argparse
 import tempfile
 
-from . import *
+from .         import *
+from .graphviz import *
 
 pykArgs = argparse.ArgumentParser()
 
-pykArgs.add_argument('command' , choices = ['parse', 'run', 'prove'])
+pykArgs.add_argument('command' , choices = ['parse', 'run', 'prove', 'graph-imports'])
 
 pykArgs.add_argument('-d', '--definition')
 
@@ -36,6 +37,9 @@ elif args['command'] == 'run':
     (returncode, stdout, stderr) = krun(definition, inputFile, kArgs = ['--input', args['from'], '--output', args['to']] + args['kArgs'])
 elif args['command'] == 'prove':
     (returncode, stdout, stderr) = kprove(definition, inputFile, kArgs = ['--input', args['from'], '--output', args['to']] + args['kArgs'])
+elif args['command'] == 'graph-imports':
+    returncode = 0 if graphvizImports(definition + '/parsed') and graphvizImports(definition + '/compiled') else 1
+    stdout = ''
 
 args['output'].write(stdout)
 
