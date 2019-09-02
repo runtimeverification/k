@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import argparse
 import subprocess
 import sys
 import tempfile
@@ -63,41 +62,3 @@ def kproveJSON(definition, inputJSON, symbolTable, kproveArgs = [], teeOutput = 
         (rC, out, err) = kprove(definition, tempf.name, kproveArgs = kproveArgs + ['--output', 'json'], teeOutput = teeOutput, kRelease = kRelease)
         out = None if out == '' else json.loads(out)['term']
         return (rC, out, err)
-
-pykArgs = argparse.ArgumentParser()
-
-pykArgs.add_argument('command' , choices = ['parse', 'run', 'prove'])
-
-pykArgs.add_argument('-d', '--definition')
-
-pykArgs.add_argument('-i', '--input',  type = argparse.FileType('r'), default = '-')
-pykArgs.add_argument('-o', '--output', type = argparse.FileType('w'), default = '-')
-
-pykArgs.add_argument('-f', '--from', default = 'pretty', choices = ['pretty', 'json', 'kast', 'binary', 'kore'])
-pykArgs.add_argument('-t', '--to',   default = 'pretty', choices = ['pretty', 'json', 'kast', 'binary', 'kore'])
-
-pykArgs.add_argument('kArgs', nargs='*', help = 'Arguments to pass through to K invocation.')
-
-def __main__(args):
-
-    inputFile = args['input'].name
-    if inputFile == '-':
-        with tempfile.NamedTemporaryFile(mode = 'w') as tempf:
-            tempf.write(args['input'].read())
-            inputFile = tempf.name
-
-    definition = args['definition']
-    if args['command'] == 'parse':
-        (returncode, stdout, stderr) = kast(definition, inputFile, kArgs = ['--input', args['from'], '--output', args['to']] + args['kArgs'])
-    elif args['command'] == 'run':
-        (returncode, stdout, stderr) = krun(definition, inputFile, kArgs = ['--input', args['from'], '--output', args['to']] + args['kArgs'])
-    elif args['command'] == 'prove':
-        (returncode, stdout, stderr) = kprove(definition, inputFile, kArgs = ['--input', args['from'], '--output', args['to']] + args['kArgs'])
-
-    args['output'].write(stdout)
-
-    if returnCode != 0:
-        _fatal('Non-zero exit code (' + str(returnCode) + ': ' + str(kCommand), code = returnCode)
-
-if __name__ == '__main__':
-    __main__(pykArgs.parse_args())
