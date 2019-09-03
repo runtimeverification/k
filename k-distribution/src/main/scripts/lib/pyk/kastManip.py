@@ -78,14 +78,30 @@ def rewriteWith(rule, pattern):
 def rewriteAnywhereWith(rule, pattern):
     return traverseBottomUp(pattern, lambda p: rewriteWith(rule, p))
 
-def normalizeKLabels(k):
-    newK = replaceKLabels(k, { "#And" : "_andBool_" , "#Or" : "_orBool_" })
+def mlPredToBool(k):
+    klabelMap = { "#And"    : "_andBool_"
+                , "#Or"     : "_orBool_"
+                , "#Not"    : "notBool_"
+                , "#Equals" : '_==K_'
+                }
+    return replaceKLabels(k, klabelMap)
+
+def simplifyBool(k):
     simplifyRules = [ (KApply("_==K_", [KVariable("#LHS"), KToken("true", "Bool")]),  KVariable("#LHS"))
                     , (KApply("_==K_", [KVariable("#LHS"), KToken("false", "Bool")]), KApply("notBool_", [KVariable("#LHS")]))
                     , (KApply("_andBool_", [KToken("true", "Bool"), KVariable("#REST")]), KVariable("#REST"))
                     , (KApply("_andBool_", [KVariable("#REST"), KToken("true", "Bool")]), KVariable("#REST"))
+                    , (KApply("_andBool_", [KToken("false", "Bool"), KVariable("#REST")]), KToken("false", "Bool"))
+                    , (KApply("_andBool_", [KVariable("#REST"), KToken("false", "Bool")]), KToken("false", "Bool"))
+                    , (KApply("_orBool_", [KToken("false", "Bool"), KVariable("#REST")]), KVariable("#REST"))
+                    , (KApply("_orBool_", [KVariable("#REST"), KToken("false", "Bool")]), KVariable("#REST"))
+                    , (KApply("_orBool_", [KToken("true", "Bool"), KVariable("#REST")]), KToken("true", "Bool"))
+                    , (KApply("_orBool_", [KVariable("#REST"), KToken("true", "Bool")]), KToken("true", "Bool"))
+                    , (KApply("notBool_", [KToken("false", "Bool")]), KToken("true", "Bool"))
+                    , (KApply("notBool_", [KToken("true", "Bool") ]), KToken("false", "Bool"))
                     , (KApply("#True", []), KToken("true", "Bool"))
                     ]
+    newK = k
     for rule in simplifyRules:
         newK = rewriteAnywhereWith(rule, newK)
     return newK
@@ -109,9 +125,10 @@ def collapseDots(kast):
         if isKApply(_kast):
             label = _kast["label"]
             args  = _kast["args"]
-            if isCellKLabel(label):
-                if len(args) == 1 and args[0] == ktokenDots:
-                    return ktokenDots
+            if isCellKLabel(label) and len(args) == 1 and args[0] == ktokenDots:
+                return ktokenDots
+            if label == klabelRewrite and args[0] == ktokenDots:
+                return ktokenDots
             newArgs = [ arg for arg in args if arg != ktokenDots ]
             if isCellKLabel(label) and len(newArgs) == 0:
                 return ktokenDots
@@ -180,8 +197,6 @@ def minimizeRule(rule):
     ruleEnsures  = rule["ensures"]
     ruleAtts     = rule["atts"]
 
-    ruleBody = pushDownRewrites(ruleBody)
-
     if ruleRequires is not None:
         constraints = flattenLabel("_andBool_", ruleRequires)
         ruleRequires = KToken("true", "Bool")
@@ -201,7 +216,7 @@ def minimizeRule(rule):
             ruleRequires = KApply("_andBool_", [ruleRequires, constraint])
 
         ruleBody = substitute(ruleBody, substitutions)
-        ruleRequires = normalizeKLabels(ruleRequires)
+        ruleRequires = simplifyBool(mlPredToBool(ruleRequires))
 
     ruleBody = inlineCellMaps(ruleBody)
     ruleBody = uselessVarsToDots(ruleBody, requires = ruleRequires, ensures = ruleEnsures)
@@ -214,7 +229,7 @@ def minimizeRule(rule):
 
 def readKastTerm(termPath):
     with open(termPath, "r") as termFile:
-        return normalizeKLabels(json.loads(termFile.read())['term'])
+        return json.loads(termFile.read())['term']
 
 def writeKDefinition(fileName, kDef, symbolTable):
     if not isKDefinition(kDef):
