@@ -91,6 +91,14 @@ def simplifyBool(k):
                     , (KApply("_==K_", [KVariable("#LHS"), KToken("false", "Bool")]), KApply("notBool_", [KVariable("#LHS")]))
                     , (KApply("_andBool_", [KToken("true", "Bool"), KVariable("#REST")]), KVariable("#REST"))
                     , (KApply("_andBool_", [KVariable("#REST"), KToken("true", "Bool")]), KVariable("#REST"))
+                    , (KApply("_andBool_", [KToken("false", "Bool"), KVariable("#REST")]), KToken("false", "Bool"))
+                    , (KApply("_andBool_", [KVariable("#REST"), KToken("false", "Bool")]), KToken("false", "Bool"))
+                    , (KApply("_orBool_", [KToken("false", "Bool"), KVariable("#REST")]), KVariable("#REST"))
+                    , (KApply("_orBool_", [KVariable("#REST"), KToken("false", "Bool")]), KVariable("#REST"))
+                    , (KApply("_orBool_", [KToken("true", "Bool"), KVariable("#REST")]), KToken("true", "Bool"))
+                    , (KApply("_orBool_", [KVariable("#REST"), KToken("true", "Bool")]), KToken("true", "Bool"))
+                    , (KApply("notBool_", [KToken("false", "Bool")]), KToken("true", "Bool"))
+                    , (KApply("notBool_", [KToken("true", "Bool") ]), KToken("false", "Bool"))
                     , (KApply("#True", []), KToken("true", "Bool"))
                     ]
     newK = k
