@@ -14,7 +14,6 @@ import org.kframework.kompile.KompileOptions;
 import org.kframework.krun.KRunOptions.ConfigurationCreationOptions;
 import org.kframework.krun.api.io.FileSystem;
 import org.kframework.krun.ioserver.filesystem.portable.PortableFileSystem;
-import org.kframework.krun.modes.DebugMode.DebugExecutionMode;
 import org.kframework.krun.modes.ExecutionMode;
 import org.kframework.krun.modes.KRunExecutionMode;
 import org.kframework.main.FrontEnd;
