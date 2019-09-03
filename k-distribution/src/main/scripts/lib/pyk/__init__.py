@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import os
 import subprocess
 import sys
 import tempfile
@@ -24,6 +25,10 @@ def _teeProcessStdout(args, tee = True, buffer_size = 80):
         return (process.returncode, capture, process.stderr.read())
 
 def _runK(command, definition, inputFile, kArgs = [], teeOutput = True, kRelease = None):
+    if kRelease is not None:
+        command = kRelease + '/bin/' + command
+    elif 'K_RELEASE' in os.environ:
+        command = os.environ['K_RELEASE'] + '/bin/' + command
     kCommand = [ command ] if kRelease is None else [ kRelease + '/bin/' + command ]
     kCommand = kCommand + [ '--directory' , definition , inputFile ] + kArgs
     _notif('Running: ' + ' '.join(kCommand))
