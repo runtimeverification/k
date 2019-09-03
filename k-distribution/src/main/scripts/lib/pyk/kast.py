@@ -259,7 +259,7 @@ def prettyPrintKast(kast, symbolTable):
         name = kast["name"]
         imports = "\n".join([prettyPrintKast(kimport, symbolTable) for kimport in kast["imports"]])
         localSentences = "\n\n".join([prettyPrintKast(sent, symbolTable) for sent in kast["localSentences"]])
-        contents = imports + "\n\n" + sent
+        contents = imports + "\n\n" + localSentences
         return "module " + name                    + "\n    " \
              + "\n    ".join(contents.split("\n")) + "\n" \
              + "endmodule"
