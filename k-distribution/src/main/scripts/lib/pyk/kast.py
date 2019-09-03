@@ -83,11 +83,11 @@ def KImport(kimport):
 def isKImport(k):
     return k["node"] == "KImport"
 
-def KModule(name, imports, rules):
-    return { "node": "KModule", "name": name, "imports": imports, "rules": rules }
+def KFlatModule(name, imports, localSentences, atts = None):
+    return { "node": "KFlatModule", "name": name, "imports": imports, "localSentences": localSentences, "atts": atts }
 
-def isKModule(k):
-    return k["node"] == "KModule"
+def isKFlatModule(k):
+    return k["node"] == "KFlatModule"
 
 def KRequire(krequire):
     return { "node": "KRequire", "require": krequire }
@@ -95,8 +95,8 @@ def KRequire(krequire):
 def isKRequire(k):
     return k["node"] == "KRequire"
 
-def KDefinition(name, requires, modules):
-    return { "node": "KDefinition", "name": name, "requires": requires, "modules": modules }
+def KDefinition(mainModule, modules, requires = None, atts = None):
+    return { "node": "KDefinition", "mainModule": mainModule, "modules": modules, "requires": requires, "atts": atts }
 
 def isKDefinition(k):
     return k["node"] == "KDefinition"
@@ -155,6 +155,9 @@ def underbarUnparsing(symbol):
                 i += 1
         return " ".join(result)
     return _underbarUnparsing
+
+def indent(input):
+    return "\n".join(["  " + l for l in input.split("\n")])
 
 K_builtin_labels = { klabelRewrite : binOpStr("=>")
                    , klabelCells   : (lambda *args: "\n".join(args))
@@ -217,8 +220,8 @@ def prettyPrintKast(kast, symbolTable):
         args  = kast["args"]
         unparsedArgs = [ prettyPrintKast(arg, symbolTable) for arg in args ]
         if isCellKLabel(label):
-            cellLines = "\n".join(unparsedArgs).rstrip().split("\n")
-            cellStr   = label + "\n  " + "\n  ".join(cellLines) + "\n</" + label[1:]
+            cellContents = "\n".join(unparsedArgs).rstrip()
+            cellStr   = label + "\n" + indent(cellContents) + "\n</" + label[1:]
             return cellStr.rstrip()
         unparser = appliedLabelStr(label) if label not in symbolTable else symbolTable[label]
         return unparser(*unparsedArgs)
@@ -252,20 +255,19 @@ def prettyPrintKast(kast, symbolTable):
             return kastStr + "(" + str(kast["value"]) + ")"
     if isKImport(kast):
         return "imports " + kast["import"]
-    if isKModule(kast):
+    if isKFlatModule(kast):
         name = kast["name"]
         imports = "\n".join([prettyPrintKast(kimport, symbolTable) for kimport in kast["imports"]])
-        rules = "\n\n".join([prettyPrintKast(rule, symbolTable) for rule in kast["rules"]])
-        contents = imports + "\n\n" + rules
+        localSentences = "\n\n".join([prettyPrintKast(sent, symbolTable) for sent in kast["localSentences"]])
+        contents = imports + "\n\n" + localSentences
         return "module " + name                    + "\n    " \
              + "\n    ".join(contents.split("\n")) + "\n" \
              + "endmodule"
     if isKRequire(kast):
         return "requires \"" + kast["require"] + ".k\""
     if isKDefinition(kast):
-        name = kast["name"]
-        requires = "\n".join([prettyPrintKast(require, symbolTable) for require in kast["requires"]])
-        modules = "\n\n".join([prettyPrintKast(module, symbolTable) for module in kast["modules"]])
+        requires = "" if kast["requires"] is None else "\n".join([prettyPrintKast(require, symbolTable) for require in kast["requires"]])
+        modules  = "\n\n".join([prettyPrintKast(module, symbolTable) for module in kast["modules"]])
         return requires + "\n\n" + modules
 
     print()

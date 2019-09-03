@@ -19,10 +19,12 @@ ALL_symbols = combineDicts(K_symbols, IMP_symbols)
 
 kast_term = readKastTerm(sys.argv[1])
 
-if (isKRule(kast_term)):
+if isKRule(kast_term):
     kast_term = minimizeRule(kast_term)
     defn_name = sys.argv[1][:-5].split("/")[1]
-    mod = KModule(defn_name.upper(), [KImport("IMP")], [kast_term])
-    kast_term = KDefinition(defn_name, [KRequire("imp")], [mod])
+    mod = KFlatModule(defn_name.upper(), [KImport("IMP")], [kast_term])
+    kast_term = KDefinition(defn_name, [mod], requires = [KRequire("imp")])
+elif isKApply(kast_term):
+    kast_term = simplifyBool(kast_term)
 
 print(prettyPrintKast(kast_term, ALL_symbols))
