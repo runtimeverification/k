@@ -5,6 +5,4 @@ brew install maven cmake boost libyaml jemalloc llvm gmp mpfr z3 opam pkg-config
 
 curl -sSL https://get.haskellstack.org/ | sh
 
-llvm-backend/src/main/native/llvm-backend/install-rust
-
 k-distribution/src/main/scripts/bin/k-configure-opam-dev
