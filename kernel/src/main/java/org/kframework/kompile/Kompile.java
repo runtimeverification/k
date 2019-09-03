@@ -175,7 +175,7 @@ public class Kompile {
           return DefinitionTransformer.fromSentenceTransformer((m, s) -> new ExpandMacros(transformer, m, files, kompileOptions, false).expand(s), "expand macros").apply(d);
         };
         GenerateCoverage cov = new GenerateCoverage(kompileOptions.coverage, files);
-        DefinitionTransformer genCoverage = DefinitionTransformer.fromRuleBodyTransformerWithRule(cov::gen, "generate coverage instrumentation");
+        Function1<Definition, Definition> genCoverage = d -> DefinitionTransformer.fromRuleBodyTransformerWithRule((r, body) -> cov.gen(r, body, d.mainModule()), "generate coverage instrumentation").apply(d);
         DefinitionTransformer numberSentences = DefinitionTransformer.fromSentenceTransformer(new NumberSentences()::number, "number sentences uniquely");
         Function1<Definition, Definition> resolveConfigVar = d -> DefinitionTransformer.fromSentenceTransformer(new ResolveFunctionWithConfig(d, false)::resolveConfigVar, "Adding configuration variable to lhs").apply(d);
         Function1<Definition, Definition> resolveIO = (d -> Kompile.resolveIOStreams(kem, d));

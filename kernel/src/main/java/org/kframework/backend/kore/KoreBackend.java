@@ -12,6 +12,7 @@ import org.kframework.compile.ConcretizeCells;
 import org.kframework.compile.ConfigurationInfoFromModule;
 import org.kframework.compile.ExpandMacros;
 import org.kframework.compile.GeneratedTopFormat;
+import org.kframework.compile.GenerateCoverage;
 import org.kframework.compile.GenerateSortPredicateRules;
 import org.kframework.compile.GenerateSortPredicateSyntax;
 import org.kframework.compile.GenerateSortProjections;
@@ -19,6 +20,7 @@ import org.kframework.compile.GuardOrPatterns;
 import org.kframework.compile.LabelInfo;
 import org.kframework.compile.LabelInfoFromModule;
 import org.kframework.compile.MinimizeTermConstruction;
+import org.kframework.compile.NumberSentences;
 import org.kframework.compile.ResolveAnonVar;
 import org.kframework.compile.ResolveContexts;
 import org.kframework.compile.ResolveFreshConstants;
@@ -134,6 +136,9 @@ public class KoreBackend implements Backend {
           return DefinitionTransformer.fromSentenceTransformer((m, s) -> new ExpandMacros(transformer, m, files, kompileOptions, false).expand(s), "expand macros").apply(d);
         };
         Function1<Definition, Definition> resolveFreshConstants = d -> DefinitionTransformer.from(m -> GeneratedTopFormat.resolve(new ResolveFreshConstants(d, true).resolve(m)), "resolving !Var variables").apply(d);
+        GenerateCoverage cov = new GenerateCoverage(kompileOptions.coverage, files);
+        Function1<Definition, Definition> genCoverage = d -> DefinitionTransformer.fromRuleBodyTransformerWithRule((r, body) -> cov.gen(r, body, d.mainModule()), "generate coverage instrumentation").apply(d);
+        DefinitionTransformer numberSentences = DefinitionTransformer.fromSentenceTransformer(new NumberSentences()::number, "number sentences uniquely");
         Function1<Definition, Definition> resolveConfigVar = d -> DefinitionTransformer.fromSentenceTransformer(new ResolveFunctionWithConfig(d, true)::resolveConfigVar, "Adding configuration variable to lhs").apply(d);
         Function1<Definition, Definition> resolveIO = (d -> Kompile.resolveIOStreams(kem, d));
 
@@ -143,6 +148,7 @@ public class KoreBackend implements Backend {
                 .andThen(resolveStrict)
                 .andThen(resolveAnonVars)
                 .andThen(d -> new ResolveContexts(kompileOptions).resolve(d))
+                .andThen(numberSentences)
                 .andThen(resolveHeatCoolAttribute)
                 .andThen(resolveSemanticCasts)
                 .andThen(subsortKItem)
@@ -152,9 +158,12 @@ public class KoreBackend implements Backend {
                 .andThen(generateSortProjections)
                 .andThen(AddImplicitComputationCell::transformDefinition)
                 .andThen(resolveFreshConstants)
+                .andThen(generateSortProjections)
                 .andThen(d -> new Strategy(kompileOptions.experimental.heatCoolStrategies).addStrategyCellToRulesTransformer(d).apply(d))
                 .andThen(d -> Strategy.addStrategyRuleToMainModule(def.mainModule().name()).apply(d))
                 .andThen(ConcretizeCells::transformDefinition)
+                .andThen(genCoverage)
+                .andThen(d -> { cov.close(); return d; })
                 .andThen(Kompile::addSemanticsModule)
                 .andThen(resolveConfigVar)
                 .andThen(addCoolLikeAtt)
