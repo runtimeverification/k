@@ -79,20 +79,21 @@ def rewriteAnywhereWith(rule, pattern):
     return traverseBottomUp(pattern, lambda p: rewriteWith(rule, p))
 
 def mlPredToBool(k):
-    newK = replaceKLabels(k, { "#And" : "_andBool_" , "#Or" : "_orBool_" , "#Equals" : '_==K_' })
-    klabelMap = { "#And" : "_andBool_"
-                , "#Or"  : "_orBool_"
-                , "#Not" : "notBool_"
+    klabelMap = { "#And"    : "_andBool_"
+                , "#Or"     : "_orBool_"
+                , "#Not"    : "notBool_"
                 , "#Equals" : '_==K_'
                 }
+    return replaceKLabels(k, klabelMap)
+
+def simplifyBool(k):
     simplifyRules = [ (KApply("_==K_", [KVariable("#LHS"), KToken("true", "Bool")]),  KVariable("#LHS"))
                     , (KApply("_==K_", [KVariable("#LHS"), KToken("false", "Bool")]), KApply("notBool_", [KVariable("#LHS")]))
                     , (KApply("_andBool_", [KToken("true", "Bool"), KVariable("#REST")]), KVariable("#REST"))
                     , (KApply("_andBool_", [KVariable("#REST"), KToken("true", "Bool")]), KVariable("#REST"))
                     , (KApply("#True", []), KToken("true", "Bool"))
                     ]
-
-    newK = replaceKLabels(k, klabelMap)
+    newK = k
     for rule in simplifyRules:
         newK = rewriteAnywhereWith(rule, newK)
     return newK
@@ -207,7 +208,7 @@ def minimizeRule(rule):
             ruleRequires = KApply("_andBool_", [ruleRequires, constraint])
 
         ruleBody = substitute(ruleBody, substitutions)
-        ruleRequires = mlPredToBool(ruleRequires)
+        ruleRequires = simplifyBool(mlPredToBool(ruleRequires))
 
     ruleBody = inlineCellMaps(ruleBody)
     ruleBody = uselessVarsToDots(ruleBody, requires = ruleRequires, ensures = ruleEnsures)
