@@ -68,7 +68,6 @@ pipeline {
                         sh '''
                           echo 'Setting up environment...'
                           eval `opam config env`
-                          . $HOME/.cargo/env
                           echo 'Building K...'
                           mvn verify -U
                           echo 'Starting kserver...'
@@ -83,7 +82,6 @@ pipeline {
                         dir('kframework-5.0.0') {
                           checkout scm
                           sh '''
-                            . $HOME/.cargo/env
                             mv debian/control.ubuntu debian/control
                             dpkg-buildpackage
                           '''
@@ -145,7 +143,6 @@ pipeline {
                         dir('kframework-5.0.0') {
                           checkout scm
                           sh '''
-                            . $HOME/.cargo/env
                             mv debian/control.debian debian/control
                             dpkg-buildpackage
                           '''
@@ -378,7 +375,6 @@ pipeline {
           sh '''
             echo 'Setting up environment...'
             eval `opam config env`
-            . $HOME/.cargo/env
             echo 'Deploying K...'
             mvn clean
             mvn install -DskipKTest -Dcheckstyle.skip
