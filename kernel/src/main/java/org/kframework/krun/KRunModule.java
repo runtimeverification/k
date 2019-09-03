@@ -78,9 +78,6 @@ public class KRunModule extends AbstractModule {
             //bind backend implementations of tools to their interfaces
             MapBinder<ToolActivation, ExecutionMode> executionBinder = MapBinder.newMapBinder(binder(),
                     ToolActivation.class, ExecutionMode.class);
-
-            executionBinder.addBinding(new ToolActivation.OptionActivation("--debugger")).to(DebugExecutionMode.class);
-
         }
 
         @Provides
