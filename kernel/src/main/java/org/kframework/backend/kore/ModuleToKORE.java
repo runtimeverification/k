@@ -90,9 +90,107 @@ public class ModuleToKORE {
         convert(topCellInitializer, false);
         sb.append("())]\n\n");
         sb.append(prelude);
-        Map<String, Boolean> attributes = new HashMap<>();
         sb.append("\n");
+
+        sb.append("module ");
+        convert(module.name());
+        sb.append("\n\n// imports\n");
+        sb.append("  import K []\n\n// sorts\n");
+
         Set<Sort> tokenSorts = new HashSet<>();
+        // Map attribute name to whether the attribute has a value
+        Map<String, Boolean> attributes = new HashMap<>();
+        collectTokenSortsAndAttributes(tokenSorts, attributes);
+
+        Set<String> collectionSorts = new HashSet<>();
+        collectionSorts.add("SET.Set");
+        collectionSorts.add("MAP.Map");
+        collectionSorts.add("LIST.List");
+        collectionSorts.add("ARRAY.Array");
+        attributes.remove(HAS_DOMAIN_VALUES);
+        if (attributes.containsKey("token")) {
+            attributes.put(HAS_DOMAIN_VALUES, false);
+        }
+        translateSorts(tokenSorts, attributes, collectionSorts);
+
+        SetMultimap<KLabel, Rule> functionRules = HashMultimap.create();
+        for (Rule rule : iterable(module.sortedRules())) {
+            K left = RewriteToTop.toLeft(rule.body());
+            if (left instanceof KApply) {
+                KApply kapp = (KApply) left;
+                Production prod = production(kapp);
+                if (prod.att().contains(Attribute.FUNCTION_KEY) || rule.att().contains(Attribute.ANYWHERE_KEY) || ExpandMacros.isMacro(rule)) {
+                    functionRules.put(kapp.klabel(), rule);
+                }
+            }
+        }
+        ComputeTransitiveFunctionDependencies deps = new ComputeTransitiveFunctionDependencies(module);
+        Set<KLabel> impurities = functionRules.keySet().stream().filter(lbl -> module.attributesFor().get(lbl).getOrElse(() -> Att()).contains(Attribute.IMPURE_KEY)).collect(Collectors.toSet());
+        impurities.addAll(deps.ancestors(impurities));
+
+        sb.append("\n// symbols\n");
+        Set<Production> overloads = new HashSet<>();
+        for (Production lesser : iterable(module.overloads().elements())) {
+            for (Production greater : iterable(module.overloads().relations().get(lesser).getOrElse(() -> Collections.<Production>Set()))) {
+                overloads.add(greater);
+            }
+        }
+        translateSymbols(attributes, functionRules, impurities, overloads);
+
+        sb.append("\n// generated axioms\n");
+        Set<Tuple2<Production, Production>> noConfusion = new HashSet<>();
+        for (Production prod : iterable(module.sortedProductions())) {
+            if (isBuiltinProduction(prod)) {
+                continue;
+            }
+            prod = computePolyProd(prod);
+            if (prod.isSubsort()) {
+                genSubsortAxiom(prod);
+                continue;
+            }
+            if (prod.klabel().isEmpty()) {
+                continue;
+            }
+            if (prod.att().contains(Attribute.ASSOCIATIVE_KEY)) {
+                genAssocAxiom(prod);
+            }
+            if (prod.att().contains(Attribute.COMMUTATIVE_KEY)) {
+                genCommAxiom(prod);
+            }
+            if (prod.att().contains(Attribute.IDEMPOTENT_KEY)) {
+                genIdemAxiom(prod);
+            }
+            if (isFunction(prod) && prod.att().contains(Attribute.UNIT_KEY)) {
+                genUnitAxiom(prod);
+            }
+            if (isFunctional(prod, functionRules, impurities)) {
+                genFunctionalAxiom(prod);
+            }
+            if (isConstructor(prod, functionRules, impurities)) {
+                genNoConfusionAxioms(prod, noConfusion, functionRules, impurities);
+            }
+        }
+
+        for (Sort sort : iterable(module.definedSorts())) {
+            genNoJunkAxiom(sort);
+        }
+
+        for (Production lesser : iterable(module.overloads().elements())) {
+            for (Production greater : iterable(module.overloads().relations().get(lesser).getOrElse(() -> Collections.<Production>Set()))) {
+                genOverloadedAxiom(lesser, greater);
+            }
+        }
+        sb.append("\n// rules\n");
+        for (Rule rule : iterable(module.sortedRules())) {
+            convertRule(rule, heatCoolEq, topCell, attributes, functionRules, false, false);
+        }
+        sb.append("endmodule ");
+        convert(attributes, module.att());
+        sb.append("\n");
+        return sb.toString();
+    }
+
+    private void collectTokenSortsAndAttributes(Set<Sort> tokenSorts, Map<String, Boolean> attributes) {
         for (Sort sort : iterable(module.definedSorts())) {
             Att att = module.sortAttributesFor().get(sort).getOrElse(() -> KORE.Att());
             if (att.contains("token")) {
@@ -111,19 +209,9 @@ public class ModuleToKORE {
             Att att = r.att();
             collectAttributes(attributes, att);
         }
-        sb.append("module ");
-        convert(module.name());
-        sb.append("\n\n// imports\n");
-        sb.append("  import K []\n\n// sorts\n");
-        Set<String> collectionSorts = new HashSet<>();
-        collectionSorts.add("SET.Set");
-        collectionSorts.add("MAP.Map");
-        collectionSorts.add("LIST.List");
-        collectionSorts.add("ARRAY.Array");
-        attributes.remove(HAS_DOMAIN_VALUES);
-        if (attributes.containsKey("token")) {
-            attributes.put(HAS_DOMAIN_VALUES, false);
-        }
+    }
+
+    private void translateSorts(Set<Sort> tokenSorts, Map<String, Boolean> attributes, Set<String> collectionSorts) {
         for (Sort sort : iterable(module.definedSorts())) {
             if (sort.equals(Sorts.K()) || sort.equals(Sorts.KItem())) {
                 continue;
@@ -157,29 +245,10 @@ public class ModuleToKORE {
             convert(attributes, att);
             sb.append("\n");
         }
+    }
 
-        SetMultimap<KLabel, Rule> functionRules = HashMultimap.create();
-        for (Rule rule : iterable(module.sortedRules())) {
-            K left = RewriteToTop.toLeft(rule.body());
-            if (left instanceof KApply) {
-                KApply kapp = (KApply) left;
-                Production prod = production(kapp);
-                if (prod.att().contains(Attribute.FUNCTION_KEY) || rule.att().contains(Attribute.ANYWHERE_KEY) || ExpandMacros.isMacro(rule)) {
-                    functionRules.put(kapp.klabel(), rule);
-                }
-            }
-        }
-        ComputeTransitiveFunctionDependencies deps = new ComputeTransitiveFunctionDependencies(module);
-        Set<KLabel> impurities = functionRules.keySet().stream().filter(lbl -> module.attributesFor().get(lbl).getOrElse(() -> Att()).contains(Attribute.IMPURE_KEY)).collect(Collectors.toSet());
-        impurities.addAll(deps.ancestors(impurities));
-
-        sb.append("\n// symbols\n");
-        Set<Production> overloads = new HashSet<>();
-        for (Production lesser : iterable(module.overloads().elements())) {
-            for (Production greater : iterable(module.overloads().relations().get(lesser).getOrElse(() -> Collections.<Production>Set()))) {
-                overloads.add(greater);
-            }
-        }
+    private void translateSymbols(Map<String, Boolean> attributes, SetMultimap<KLabel, Rule> functionRules,
+                                  Set<KLabel> impurities, Set<Production> overloads) {
         for (Production prod : iterable(module.sortedProductions())) {
             if (isBuiltinProduction(prod)) {
                 continue;
@@ -212,352 +281,340 @@ public class ModuleToKORE {
             convert(attributes, addKoreAttributes(prod, functionRules, impurities, overloads));
             sb.append("\n");
         }
-        sb.append("\n// generated axioms\n");
-        Set<Tuple2<Production, Production>> noConfusion = new HashSet<>();
-        for (Production prod : iterable(module.sortedProductions())) {
-            if (isBuiltinProduction(prod)) {
-                continue;
-            }
-            prod = computePolyProd(prod);
-            if (prod.isSubsort()) {
-                Production finalProd = prod;
-                functionalPattern(prod, () -> {
-                    sb.append("inj{");
-                    convert(finalProd.getSubsortSort(), finalProd);
-                    sb.append(", ");
-                    convert(finalProd.sort(), finalProd);
-                    sb.append("} (From:");
-                    convert(finalProd.getSubsortSort(), finalProd);
-                    sb.append(")");
-                });
-                sb.append(" [subsort{");
-                convert(prod.getSubsortSort(), prod);
-                sb.append(", ");
-                convert(prod.sort(), prod);
-                sb.append("}()] // subsort\n");
-                continue;
-            }
-            if (prod.klabel().isEmpty()) {
-                continue;
-            }
-            if (prod.att().contains(Attribute.ASSOCIATIVE_KEY)) {
-                // s(s(K1,K2),K3) = s(K1,s(K2,K3))
-                if (prod.arity() != 2) {
-                    throw KEMException.compilerError("Found a non-binary production with the assoc attribute", prod);
-                }
-                if (!(prod.sort().equals(prod.nonterminal(0).sort()) && prod.sort().equals(prod.nonterminal(1).sort()))) {
-                    throw KEMException.compilerError("Found an associative production with ill formed sorts", prod);
-                }
-                sb.append("  axiom");
-                convertParams(prod.klabel(), true);
-                sb.append(" \\equals{");
-                convert(prod.sort(), prod);
-                sb.append(", R} (");
-                convert(prod.klabel().get(), prod);
-                sb.append("(");
-                convert(prod.klabel().get(), prod);
-                sb.append("(K1:");
-                convert(prod.sort(), prod);
-                sb.append(",K2:");
-                convert(prod.sort(), prod);
-                sb.append("),K3:");
-                convert(prod.sort(), prod);
-                sb.append("),");
-                convert(prod.klabel().get(), prod);
-                sb.append("(K1:");
-                convert(prod.sort(), prod);
-                sb.append(",");
-                convert(prod.klabel().get(), prod);
-                sb.append("(K2:");
-                convert(prod.sort(), prod);
-                sb.append(",K3:");
-                convert(prod.sort(), prod);
-                sb.append("))) [assoc{}()] // associativity\n");
-            }
-            if (prod.att().contains(Attribute.COMMUTATIVE_KEY)) {
-                // s(K1, K2) = s(K2, K1)
-                if (prod.arity() != 2) {
-                    throw KEMException.compilerError("Found a non-binary production with the comm attribute", prod);
-                }
-                if (!(prod.nonterminal(0).sort().equals(prod.nonterminal(1).sort()))) {
-                    throw KEMException.compilerError("Found a commutative production with ill formed sorts", prod);
-                }
-                Sort childSort = prod.nonterminal(0).sort();
-                sb.append("  axiom");
-                convertParams(prod.klabel(), true);
-                sb.append(" \\equals{");
-                convert(prod.sort(), prod);
-                sb.append(", R} (");
-                convert(prod.klabel().get(), prod);
-                sb.append("(K1:");
-                convert(childSort, prod);
-                sb.append(",K2:");
-                convert(childSort, prod);
-                sb.append("),");
-                convert(prod.klabel().get(), prod);
-                sb.append("(K2:");
-                convert(childSort, prod);
-                sb.append(",K1:");
-                convert(childSort, prod);
-                sb.append(")) [comm{}()] // commutativity\n");
-            }
-            if (prod.att().contains(Attribute.IDEMPOTENT_KEY)) {
-                // s(K, K) = K
-                if (prod.arity() != 2) {
-                    throw KEMException.compilerError("Found a non-binary production with the assoc attribute", prod);
-                }
-                if (!(prod.sort().equals(prod.nonterminal(0).sort()) && prod.sort().equals(prod.nonterminal(1).sort()))) {
-                    throw KEMException.compilerError("Found an associative production with ill formed sorts", prod);
-                }
-                sb.append("  axiom");
-                convertParams(prod.klabel(), true);
-                sb.append(" \\equals{");
-                convert(prod.sort(), prod);
-                sb.append(", R} (");
-                convert(prod.klabel().get(), prod);
-                sb.append("(K:");
-                convert(prod.sort(), prod);
-                sb.append(",K:");
-                convert(prod.sort(), prod);
-                sb.append("),K:");
-                convert(prod.sort(), prod);
-                sb.append(") [idem{}()] // idempotency\n");
-            }
-            if (isFunction(prod) && prod.att().contains(Attribute.UNIT_KEY)) {
-                // s(K, unit) = K
-                // s(unit, K) = K
-                if (prod.arity() != 2) {
-                    throw KEMException.compilerError("Found a non-binary production with the assoc attribute", prod);
-                }
-                if (!(prod.sort().equals(prod.nonterminal(0).sort()) && prod.sort().equals(prod.nonterminal(1).sort()))) {
-                    throw KEMException.compilerError("Found an associative production with ill formed sorts", prod);
-                }
-                KLabel unit = KLabel(prod.att().get(Attribute.UNIT_KEY));
-                sb.append("  axiom");
-                convertParams(prod.klabel(), true);
-                sb.append("\\equals{");
-                convert(prod.sort(), prod);
-                sb.append(", R} (");
-                convert(prod.klabel().get(), prod);
-                sb.append("(K:");
-                convert(prod.sort(), prod);
-                sb.append(",");
-                convert(unit, false);
-                sb.append("()),K:");
-                convert(prod.sort(), prod);
-                sb.append(") [unit{}()] // right unit\n");
+    }
 
-                sb.append("  axiom");
-                convertParams(prod.klabel(), true);
-                sb.append("\\equals{");
-                convert(prod.sort(), prod);
-                sb.append(", R} (");
-                convert(prod.klabel().get(), prod);
-                sb.append("(");
-                convert(unit, false);
-                sb.append("(),K:");
-                convert(prod.sort(), prod);
-                sb.append("),K:");
-                convert(prod.sort(), prod);
-                sb.append(") [unit{}()] // left unit\n");
-            }
-            if (isFunctional(prod, functionRules, impurities)) {
-                // exists y . f(...) = y
-                Production finalProd = prod;
-                functionalPattern(prod, () -> applyPattern(finalProd, "K"));
-                sb.append(" [functional{}()] // functional\n");
-            }
-            if (isConstructor(prod, functionRules, impurities)) {
-                // c(x1,x2,...) /\ c(y1,y2,...) -> c(x1/\y2,x2/\y2,...)
-                if (prod.arity() > 0) {
-                    sb.append("  axiom");
-                    convertParams(prod.klabel(), false);
-                    sb.append("\\implies{");
-                    convert(prod.sort(), prod);
-                    sb.append("} (\\and{");
-                    convert(prod.sort(), prod);
-                    sb.append("} (");
-                    applyPattern(prod, "X");
-                    sb.append(", ");
-                    applyPattern(prod, "Y");
-                    sb.append("), ");
-                    convert(prod.klabel().get(), prod);
-                    sb.append("(");
-                    String conn = "";
-                    for (int i = 0; i < prod.arity(); i++) {
-                        sb.append(conn);
-                        sb.append("\\and{");
-                        convert(prod.nonterminal(i).sort(), prod);
-                        sb.append("} (X").append(i).append(":");
-                        convert(prod.nonterminal(i).sort(), prod);
-                        sb.append(", Y").append(i).append(":");
-                        convert(prod.nonterminal(i).sort(), prod);
-                        sb.append(")");
-                        conn = ", ";
-                    }
-                    sb.append(")) [constructor{}()] // no confusion same constructor\n");
-                }
-                for (Production prod2 : iterable(module.productionsForSort().apply(prod.sort()).toSeq().sorted(Production.ord()))) {
-                    // !(cx(x1,x2,...) /\ cy(y1,y2,...))
-                    prod2 = computePolyProd(prod2);
-                    if (prod2.klabel().isEmpty() || noConfusion.contains(Tuple2.apply(prod, prod2)) || prod.equals(prod2) || !isConstructor(prod2, functionRules, impurities) || isBuiltinProduction(prod2)) {
-                        // TODO (traiansf): add no confusion axioms for constructor vs inj.
-                        continue;
-                    }
-                    noConfusion.add(Tuple2.apply(prod, prod2));
-                    noConfusion.add(Tuple2.apply(prod2, prod));
-                    sb.append("  axiom");
-                    convertParams(prod.klabel(), false);
-                    sb.append("\\not{");
-                    convert(prod.sort(), prod);
-                    sb.append("} (\\and{");
-                    convert(prod.sort(), prod);
-                    sb.append("} (");
-                    applyPattern(prod, "X");
-                    sb.append(", ");
-                    applyPattern(prod2, "Y");
-                    sb.append(")) [constructor{}()] // no confusion different constructors\n");
+    private void genSubsortAxiom(Production prod) {
+        Production finalProd = prod;
+        functionalPattern(prod, () -> {
+            sb.append("inj{");
+            convert(finalProd.getSubsortSort(), finalProd);
+            sb.append(", ");
+            convert(finalProd.sort(), finalProd);
+            sb.append("} (From:");
+            convert(finalProd.getSubsortSort(), finalProd);
+            sb.append(")");
+        });
+        sb.append(" [subsort{");
+        convert(prod.getSubsortSort(), prod);
+        sb.append(", ");
+        convert(prod.sort(), prod);
+        sb.append("}()] // subsort\n");
+    }
 
-                }
-            }
+    private void genAssocAxiom(Production prod) {
+        // s(s(K1,K2),K3) = s(K1,s(K2,K3))
+        if (prod.arity() != 2) {
+            throw KEMException.compilerError("Found a non-binary production with the assoc attribute", prod);
         }
-        for (Sort sort : iterable(module.definedSorts())) {
-            sb.append("  axiom{} ");
-            boolean hasToken = false;
-            int numTerms = 0;
-            for (Production prod : iterable(mutable(module.productionsForSort()).getOrDefault(sort, Set()).toSeq().sorted(Production.ord()))) {
-                prod = computePolyProd(prod);
-                if (isFunction(prod) || prod.isSubsort() || isBuiltinProduction(prod)) {
-                    continue;
-                }
-                if (prod.klabel().isEmpty() && !((prod.att().contains("token") && !hasToken) || prod.isSubsort())) {
-                    continue;
-                }
-                numTerms++;
-                sb.append("\\or{");
-                convert(sort, false);
-                sb.append("} (");
-                if (prod.att().contains("token") && !hasToken) {
-                    convertTokenProd(sort);
-                    hasToken = true;
-                } else if (prod.klabel().isDefined()) {
-                    for (int i = 0; i < prod.arity(); i++) {
-                        sb.append("\\exists{");
-                        convert(sort, false);
-                        sb.append("} (X").append(i).append(":");
-                        convert(prod.nonterminal(i).sort(), prod);
-                        sb.append(", ");
-                    }
-                    convert(prod.klabel().get(), prod);
-                    sb.append("(");
-                    String conn = "";
-                    for (int i = 0; i < prod.arity(); i++) {
-                        sb.append(conn).append("X").append(i).append(":");
-                        convert(prod.nonterminal(i).sort(), prod);
-                        conn = ", ";
-                    }
-                    sb.append(")");
-                    for (int i = 0; i < prod.arity(); i++) {
-                        sb.append(")");
-                    }
-                }
-                sb.append(", ");
+        if (!(prod.sort().equals(prod.nonterminal(0).sort()) && prod.sort().equals(prod.nonterminal(1).sort()))) {
+            throw KEMException.compilerError("Found an associative production with ill formed sorts", prod);
+        }
+        sb.append("  axiom");
+        convertParams(prod.klabel(), true);
+        sb.append(" \\equals{");
+        convert(prod.sort(), prod);
+        sb.append(", R} (");
+        convert(prod.klabel().get(), prod);
+        sb.append("(");
+        convert(prod.klabel().get(), prod);
+        sb.append("(K1:");
+        convert(prod.sort(), prod);
+        sb.append(",K2:");
+        convert(prod.sort(), prod);
+        sb.append("),K3:");
+        convert(prod.sort(), prod);
+        sb.append("),");
+        convert(prod.klabel().get(), prod);
+        sb.append("(K1:");
+        convert(prod.sort(), prod);
+        sb.append(",");
+        convert(prod.klabel().get(), prod);
+        sb.append("(K2:");
+        convert(prod.sort(), prod);
+        sb.append(",K3:");
+        convert(prod.sort(), prod);
+        sb.append("))) [assoc{}()] // associativity\n");
+    }
+
+    private void genCommAxiom(Production prod) {
+        // s(K1, K2) = s(K2, K1)
+        if (prod.arity() != 2) {
+            throw KEMException.compilerError("Found a non-binary production with the comm attribute", prod);
+        }
+        if (!(prod.nonterminal(0).sort().equals(prod.nonterminal(1).sort()))) {
+            throw KEMException.compilerError("Found a commutative production with ill formed sorts", prod);
+        }
+        Sort childSort = prod.nonterminal(0).sort();
+        sb.append("  axiom");
+        convertParams(prod.klabel(), true);
+        sb.append(" \\equals{");
+        convert(prod.sort(), prod);
+        sb.append(", R} (");
+        convert(prod.klabel().get(), prod);
+        sb.append("(K1:");
+        convert(childSort, prod);
+        sb.append(",K2:");
+        convert(childSort, prod);
+        sb.append("),");
+        convert(prod.klabel().get(), prod);
+        sb.append("(K2:");
+        convert(childSort, prod);
+        sb.append(",K1:");
+        convert(childSort, prod);
+        sb.append(")) [comm{}()] // commutativity\n");
+    }
+
+    private void genIdemAxiom(Production prod) {
+        // s(K, K) = K
+        if (prod.arity() != 2) {
+            throw KEMException.compilerError("Found a non-binary production with the assoc attribute", prod);
+        }
+        if (!(prod.sort().equals(prod.nonterminal(0).sort()) && prod.sort().equals(prod.nonterminal(1).sort()))) {
+            throw KEMException.compilerError("Found an associative production with ill formed sorts", prod);
+        }
+        sb.append("  axiom");
+        convertParams(prod.klabel(), true);
+        sb.append(" \\equals{");
+        convert(prod.sort(), prod);
+        sb.append(", R} (");
+        convert(prod.klabel().get(), prod);
+        sb.append("(K:");
+        convert(prod.sort(), prod);
+        sb.append(",K:");
+        convert(prod.sort(), prod);
+        sb.append("),K:");
+        convert(prod.sort(), prod);
+        sb.append(") [idem{}()] // idempotency\n");
+    }
+
+    private void genUnitAxiom(Production prod) {
+        // s(K, unit) = K
+        // s(unit, K) = K
+        if (prod.arity() != 2) {
+            throw KEMException.compilerError("Found a non-binary production with the assoc attribute", prod);
+        }
+        if (!(prod.sort().equals(prod.nonterminal(0).sort()) && prod.sort().equals(prod.nonterminal(1).sort()))) {
+            throw KEMException.compilerError("Found an associative production with ill formed sorts", prod);
+        }
+        KLabel unit = KLabel(prod.att().get(Attribute.UNIT_KEY));
+        sb.append("  axiom");
+        convertParams(prod.klabel(), true);
+        sb.append("\\equals{");
+        convert(prod.sort(), prod);
+        sb.append(", R} (");
+        convert(prod.klabel().get(), prod);
+        sb.append("(K:");
+        convert(prod.sort(), prod);
+        sb.append(",");
+        convert(unit, false);
+        sb.append("()),K:");
+        convert(prod.sort(), prod);
+        sb.append(") [unit{}()] // right unit\n");
+
+        sb.append("  axiom");
+        convertParams(prod.klabel(), true);
+        sb.append("\\equals{");
+        convert(prod.sort(), prod);
+        sb.append(", R} (");
+        convert(prod.klabel().get(), prod);
+        sb.append("(");
+        convert(unit, false);
+        sb.append("(),K:");
+        convert(prod.sort(), prod);
+        sb.append("),K:");
+        convert(prod.sort(), prod);
+        sb.append(") [unit{}()] // left unit\n");
+    }
+
+    private void genFunctionalAxiom(Production prod) {
+        // exists y . f(...) = y
+        Production finalProd = prod;
+        functionalPattern(prod, () -> applyPattern(finalProd, "K"));
+        sb.append(" [functional{}()] // functional\n");
+    }
+
+    private void genNoConfusionAxioms(Production prod, Set<Tuple2<Production, Production>> noConfusion,
+                                      SetMultimap<KLabel, Rule> functionRulesMap, Set<KLabel> impurities) {
+        // c(x1,x2,...) /\ c(y1,y2,...) -> c(x1/\y2,x2/\y2,...)
+        if (prod.arity() > 0) {
+            sb.append("  axiom");
+            convertParams(prod.klabel(), false);
+            sb.append("\\implies{");
+            convert(prod.sort(), prod);
+            sb.append("} (\\and{");
+            convert(prod.sort(), prod);
+            sb.append("} (");
+            applyPattern(prod, "X");
+            sb.append(", ");
+            applyPattern(prod, "Y");
+            sb.append("), ");
+            convert(prod.klabel().get(), prod);
+            sb.append("(");
+            String conn = "";
+            for (int i = 0; i < prod.arity(); i++) {
+                sb.append(conn);
+                sb.append("\\and{");
+                convert(prod.nonterminal(i).sort(), prod);
+                sb.append("} (X").append(i).append(":");
+                convert(prod.nonterminal(i).sort(), prod);
+                sb.append(", Y").append(i).append(":");
+                convert(prod.nonterminal(i).sort(), prod);
+                sb.append(")");
+                conn = ", ";
             }
-            for (Sort s : iterable(module.definedSorts())) {
-                if (module.subsorts().lessThan(s, sort)) {
-                    numTerms++;
-                    sb.append("\\or{");
-                    convert(sort, false);
-                    sb.append("} (");
+            sb.append(")) [constructor{}()] // no confusion same constructor\n");
+        }
+        for (Production prod2 : iterable(module.productionsForSort().apply(prod.sort()).toSeq().sorted(Production.ord()))) {
+            // !(cx(x1,x2,...) /\ cy(y1,y2,...))
+            prod2 = computePolyProd(prod2);
+            if (prod2.klabel().isEmpty() || noConfusion.contains(Tuple2.apply(prod, prod2)) || prod.equals(prod2)
+                    || !isConstructor(prod2, functionRulesMap, impurities) || isBuiltinProduction(prod2)) {
+                // TODO (traiansf): add no confusion axioms for constructor vs inj.
+                continue;
+            }
+            noConfusion.add(Tuple2.apply(prod, prod2));
+            noConfusion.add(Tuple2.apply(prod2, prod));
+            sb.append("  axiom");
+            convertParams(prod.klabel(), false);
+            sb.append("\\not{");
+            convert(prod.sort(), prod);
+            sb.append("} (\\and{");
+            convert(prod.sort(), prod);
+            sb.append("} (");
+            applyPattern(prod, "X");
+            sb.append(", ");
+            applyPattern(prod2, "Y");
+            sb.append(")) [constructor{}()] // no confusion different constructors\n");
+        }
+    }
+
+    private void genNoJunkAxiom(Sort sort) {
+        sb.append("  axiom{} ");
+        boolean hasToken = false;
+        int numTerms = 0;
+        for (Production prod : iterable(mutable(module.productionsForSort()).getOrDefault(sort, Set()).toSeq().sorted(Production.ord()))) {
+            prod = computePolyProd(prod);
+            if (isFunction(prod) || prod.isSubsort() || isBuiltinProduction(prod)) {
+                continue;
+            }
+            if (prod.klabel().isEmpty() && !((prod.att().contains("token") && !hasToken) || prod.isSubsort())) {
+                continue;
+            }
+            numTerms++;
+            sb.append("\\or{");
+            convert(sort, false);
+            sb.append("} (");
+            if (prod.att().contains("token") && !hasToken) {
+                convertTokenProd(sort);
+                hasToken = true;
+            } else if (prod.klabel().isDefined()) {
+                for (int i = 0; i < prod.arity(); i++) {
                     sb.append("\\exists{");
                     convert(sort, false);
-                    sb.append("} (Val:");
-                    convert(s, false);
-                    sb.append(", inj{");
-                    convert(s, false);
-                    sb.append(", ");
-                    convert(sort, false);
-                    sb.append("} (Val:");
-                    convert(s, false);
-                    sb.append("))");
+                    sb.append("} (X").append(i).append(":");
+                    convert(prod.nonterminal(i).sort(), prod);
                     sb.append(", ");
                 }
+                convert(prod.klabel().get(), prod);
+                sb.append("(");
+                String conn = "";
+                for (int i = 0; i < prod.arity(); i++) {
+                    sb.append(conn).append("X").append(i).append(":");
+                    convert(prod.nonterminal(i).sort(), prod);
+                    conn = ", ";
+                }
+                sb.append(")");
+                for (int i = 0; i < prod.arity(); i++) {
+                    sb.append(")");
+                }
             }
-            Att sortAtt = module.sortAttributesFor().get(sort).getOrElse(() -> KORE.Att());
-            if (!hasToken && sortAtt.contains("token")) {
+            sb.append(", ");
+        }
+        for (Sort s : iterable(module.definedSorts())) {
+            if (module.subsorts().lessThan(s, sort)) {
                 numTerms++;
                 sb.append("\\or{");
                 convert(sort, false);
                 sb.append("} (");
-                convertTokenProd(sort);
+                sb.append("\\exists{");
+                convert(sort, false);
+                sb.append("} (Val:");
+                convert(s, false);
+                sb.append(", inj{");
+                convert(s, false);
                 sb.append(", ");
-                hasToken = true;
+                convert(sort, false);
+                sb.append("} (Val:");
+                convert(s, false);
+                sb.append("))");
+                sb.append(", ");
             }
-            sb.append("\\bottom{");
+        }
+        Att sortAtt = module.sortAttributesFor().get(sort).getOrElse(() -> KORE.Att());
+        if (!hasToken && sortAtt.contains("token")) {
+            numTerms++;
+            sb.append("\\or{");
             convert(sort, false);
-            sb.append("}()");
-            for (int i = 0; i < numTerms; i++) {
+            sb.append("} (");
+            convertTokenProd(sort);
+            sb.append(", ");
+            hasToken = true;
+        }
+        sb.append("\\bottom{");
+        convert(sort, false);
+        sb.append("}()");
+        for (int i = 0; i < numTerms; i++) {
+            sb.append(")");
+        }
+        sb.append(" [constructor{}()] // no junk");
+        if (hasToken && !METAVAR) {
+            sb.append(" (TODO: fix bug with \\dv)");
+        }
+        sb.append("\n");
+    }
+
+    private void genOverloadedAxiom(Production lesser, Production greater) {
+        sb.append("  axiom{R} \\equals{");
+        convert(greater.sort(), greater);
+        sb.append(", R} (");
+        convert(greater.klabel().get(), greater);
+        sb.append("(");
+        String conn = "";
+        for (int i = 0; i < greater.nonterminals().size(); i++) {
+            sb.append(conn);
+            if (greater.nonterminal(i).sort().equals(lesser.nonterminal(i).sort())) {
+                sb.append("K").append(i).append(":");
+                convert(greater.nonterminal(i).sort(), greater);
+            } else {
+                sb.append("inj{");
+                convert(lesser.nonterminal(i).sort(), lesser);
+                sb.append(", ");
+                convert(greater.nonterminal(i).sort(), greater);
+                sb.append("} (K").append(i).append(":");
+                convert(lesser.nonterminal(i).sort(), lesser);
                 sb.append(")");
             }
-            sb.append(" [constructor{}()] // no junk");
-            if (hasToken && !METAVAR) {
-                sb.append(" (TODO: fix bug with \\dv)");
-            }
-            sb.append("\n");
+            conn = ",";
         }
-        for (Production lesser : iterable(module.overloads().elements())) {
-            for (Production greater : iterable(module.overloads().relations().get(lesser).getOrElse(() -> Collections.<Production>Set()))) {
-                sb.append("  axiom{R} \\equals{");
-                convert(greater.sort(), greater);
-                sb.append(", R} (");
-                convert(greater.klabel().get(), greater);
-                sb.append("(");
-                String conn = "";
-                for (int i = 0; i < greater.nonterminals().size(); i++) {
-                    sb.append(conn);
-                    if (greater.nonterminal(i).sort().equals(lesser.nonterminal(i).sort())) {
-                        sb.append("K").append(i).append(":");
-                        convert(greater.nonterminal(i).sort(), greater);
-                    } else {
-                        sb.append("inj{");
-                        convert(lesser.nonterminal(i).sort(), lesser);
-                        sb.append(", ");
-                        convert(greater.nonterminal(i).sort(), greater);
-                        sb.append("} (K").append(i).append(":");
-                        convert(lesser.nonterminal(i).sort(), lesser);
-                        sb.append(")");
-                    }
-                    conn = ",";
-                }
-                sb.append("), inj{");
-                convert(lesser.sort(), lesser);
-                sb.append(", ");
-                convert(greater.sort(), greater);
-                sb.append("} (");
-                convert(lesser.klabel().get(), lesser);
-                sb.append("(");
-                conn = "";
-                for (int i = 0; i < lesser.nonterminals().size(); i++) {
-                    sb.append(conn);
-                    sb.append("K").append(i).append(":");
-                    convert(lesser.nonterminal(i).sort(), lesser);
-                    conn = ",";
-                }
-                sb.append("))) [overload{}(");
-                convert(greater.klabel().get(), greater);
-                sb.append("(), ");
-                convert(lesser.klabel().get(), lesser);
-                sb.append("())] // overloaded production\n");
-            }
+        sb.append("), inj{");
+        convert(lesser.sort(), lesser);
+        sb.append(", ");
+        convert(greater.sort(), greater);
+        sb.append("} (");
+        convert(lesser.klabel().get(), lesser);
+        sb.append("(");
+        conn = "";
+        for (int i = 0; i < lesser.nonterminals().size(); i++) {
+            sb.append(conn);
+            sb.append("K").append(i).append(":");
+            convert(lesser.nonterminal(i).sort(), lesser);
+            conn = ",";
         }
-        sb.append("\n// rules\n");
-        for (Rule rule : iterable(module.sortedRules())) {
-            convertRule(rule, heatCoolEq, topCell, attributes, functionRules, false, false);
-        }
-        sb.append("endmodule ");
-        convert(attributes, module.att());
-        sb.append("\n");
-        return sb.toString();
+        sb.append("))) [overload{}(");
+        convert(greater.klabel().get(), greater);
+        sb.append("(), ");
+        convert(lesser.klabel().get(), lesser);
+        sb.append("())] // overloaded production\n");
     }
 
     private boolean isRealHook(Att att) {
