@@ -999,7 +999,7 @@ module K-IO
   syntax KItem ::= #system ( String ) [function, hook(IO.system), impure]
                  | "#systemResult" "(" Int /* exit code */ "," String /* stdout */ "," String /* stderr */ ")" [klabel(#systemResult), symbol]
 
-  syntax K ::= #logToFile(String, String) [function, functional, hook(IO.log), impure, returnsUnit]
+  syntax K ::= #logToFile(String, String) [function, functional, hook(IO.log), impure, returnsUnit, symbol]
   // #make safe temp ( prefix:String, suffix:String):IOFile - creates a temporary file in the default system location
   syntax IOFile ::= #mkstemp(String, String) [function, hook(IO.mkstemp), impure]
   syntax IOFile ::= IOError
