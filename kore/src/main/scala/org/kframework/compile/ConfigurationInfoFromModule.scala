@@ -20,13 +20,28 @@ object ConfigurationInfoFromModule
 
 class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
 
-  private val cellProductions: Map[Sort,Production] =
-    m.productions.filter(_.att.contains("cell")).map(p => (p.sort, p)).toMap
-  private val cellBagProductions: Map[Sort,Production] =
-    m.productions.filter(_.att.contains("cellCollection")).map(p => (p.sort, p)).toMap
+  private val cellProductionsSet:    Set[(Sort, Production)] = m.productions.filter(_.att.contains("cell"))          .map(p => (p.sort, p))
+  private val cellBagProductionsSet: Set[(Sort, Production)] = m.productions.filter(_.att.contains("cellCollection")).map(p => (p.sort, p))
+
+  private val cellSorts:    Set[Sort] = cellProductionsSet   .map({sp => sp._1})
+  private val cellBagSorts: Set[Sort] = cellBagProductionsSet.map({sp => sp._1})
+
+  private def buildCellProductionMap(cells: Set[(Sort, Production)]): Map[Sort, Production] = {
+    def buildCellProductionMap(_cells: Set[(Sort, Production)], _cellMap: Map[Sort, Production]): Map[Sort, Production] = {
+      if (_cells.size == 0)
+        return _cellMap
+      val (s, p) = _cells.head
+      if (_cellMap.contains(s))
+        throw KEMException.compilerError("Too many productions for cell sort: " + s)
+      buildCellProductionMap(_cells.tail, _cellMap + (s -> p))
+    }
+    buildCellProductionMap(cells, Map())
+  }
+
+  private val cellProductions:    Map[Sort,Production] = buildCellProductionMap(cellProductionsSet)
+  private val cellBagProductions: Map[Sort,Production] = buildCellProductionMap(cellBagProductionsSet)
+
   private val cellBagSubsorts: Map[Sort, Set[Sort]] = cellBagProductions.values.map(p => (p.sort, getCellSortsOfCellBag(p.sort))).toMap
-  private val cellSorts: Set[Sort] = cellProductions.keySet
-  private val cellBagSorts: Set[Sort] = cellBagProductions.keySet
   private val cellLabels: Map[Sort, KLabel] = cellProductions.mapValues(_.klabel.get)
   private val cellLabelsToSorts: Map[KLabel, Sort] = cellLabels.map(_.swap)
 
