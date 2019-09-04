@@ -86,8 +86,9 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
     throw KEMException.compilerError("Too many top cells:" + topCells)
 
   val topCell: Sort = topCells.head
-  private val sortedSorts: Seq[Sort] = tsort(edges).toSeq
-  val levels: Map[Sort, Int] = edges.toList.sortWith((l, r) => sortedSorts.indexOf(l._1) < sortedSorts.indexOf(r._1)).foldLeft(Map(topCell -> 0)) {
+  private val sortedSorts: Seq[Sort]         = tsort(edges).toSeq
+  private val sortedEdges: Seq[(Sort, Sort)] = edges.toList.sortWith((l, r) => sortedSorts.indexOf(l._1) < sortedSorts.indexOf(r._1))
+  val levels: Map[Sort, Int] = sortedEdges.foldLeft(Map(topCell -> 0)) {
     case (m: Map[Sort, Int], (from: Sort, to: Sort)) =>
       m + (to -> (m(from) + 1))
   }
