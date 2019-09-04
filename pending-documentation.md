@@ -179,6 +179,14 @@ However, if the `macro` attribute were changed to the `macro-rec` attribute, it 
 
 The `alias-rec` attribute behaves with respect to the `alias` attribute the same way the `macro-rec` attribute behaves with respect to `macro`.
 
+### `smt-lemma`, `lemma`, and `trusted` attributes
+
+These attributes guide the prover when it tries to apply rules to discharge a proof obligation.
+
+-   `smt-lemma` can be applied to a rule _without_ side-conditions to encode that rule as an equality when sending queries to Z3.
+-   `lemma` distinguishes normal rules from lemma rules in the semantics, but has no affect.
+-   `trusted` instructs the prover that it should not attempt proving a given proof obligation, instead trusting that it is true.
+
 Pattern Matching
 ----------------
 
