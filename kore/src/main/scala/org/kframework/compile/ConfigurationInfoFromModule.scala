@@ -74,21 +74,14 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
 
   private val edgesPoset: POSet[Sort] = POSet(edges)
 
-  private val topCellsIncludingStrategyCell = cellSorts.diff(edges.map(_._2))
-
-  private lazy val topCells =
-    if (topCellsIncludingStrategyCell.size > 1)
-      topCellsIncludingStrategyCell.filterNot(s => s == KORE.Sort("SCell") || s == KORE.Sort("KCell"))
-    else
-      topCellsIncludingStrategyCell
+  private lazy val topCells = cellSorts.diff(edges.map(_._2))
 
   if (topCells.size > 1)
     throw KEMException.compilerError("Too many top cells:" + topCells)
 
-  val topCell: Sort = topCells.head
   private val sortedSorts: Seq[Sort]         = tsort(edges).toSeq
   private val sortedEdges: Seq[(Sort, Sort)] = edges.toList.sortWith((l, r) => sortedSorts.indexOf(l._1) < sortedSorts.indexOf(r._1))
-  val levels: Map[Sort, Int] = sortedEdges.foldLeft(Map(topCell -> 0)) {
+  val levels: Map[Sort, Int] = sortedEdges.foldLeft(topCells.map((_, 0)).toMap) {
     case (m: Map[Sort, Int], (from: Sort, to: Sort)) =>
       m + (to -> (m(from) + 1))
   }
