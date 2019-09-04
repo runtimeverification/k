@@ -76,9 +76,6 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
 
   private lazy val topCells = cellSorts.diff(edges.map(_._2))
 
-  if (topCells.size > 1)
-    throw KEMException.compilerError("Too many top cells:" + topCells)
-
   private val sortedSorts: Seq[Sort]         = tsort(edges).toSeq
   private val sortedEdges: Seq[(Sort, Sort)] = edges.toList.sortWith((l, r) => sortedSorts.indexOf(l._1) < sortedSorts.indexOf(r._1))
   val levels: Map[Sort, Int] = sortedEdges.foldLeft(topCells.map((_, 0)).toMap) {
@@ -133,7 +130,12 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
   override def getCellFragmentLabel(k : Sort): KLabel = cellFragmentLabel(k)
   override def getCellAbsentLabel(k: Sort): KLabel = cellAbsentLabel(k)
 
-  override def getRootCell: Sort = topCell
+  override def getRootCell: Sort = {
+    if (topCells.size > 1)
+      throw KEMException.compilerError("Too many top cells for module " + m.name + ": " + topCells)
+    topCells.head
+  }
+
   override def getComputationCell: Sort = mainCell
   override def getCellSorts: util.Set[Sort] = cellSorts.asJava
 
