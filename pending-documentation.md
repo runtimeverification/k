@@ -308,15 +308,6 @@ endmodule
 
 You should compile this definition with `--backend llvm -ccopt -g` and without `-ccopt -O2` in order to use the debugger most effectively.
 
-### Stepping through execution
-
-You can step through execution a step at a time and view the configuration by setting a breakpoint on the `step` function:
-
-```
-(gdb) break definition.kore:step
-(gdb) run
-
-
 ## Other
 
 Backend features not yet given documentation:
