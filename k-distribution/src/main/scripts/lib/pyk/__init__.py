@@ -29,7 +29,8 @@ def _runK(command, definition, inputFile, kArgs = [], teeOutput = True, kRelease
         command = kRelease + '/bin/' + command
     elif 'K_RELEASE' in os.environ:
         command = os.environ['K_RELEASE'] + '/bin/' + command
-    kCommand = [ command ] if kRelease is None else [ kRelease + '/bin/' + command ]
+    # Messes up with BC scripts: https://github.com/runtimeverification/beacon-chain-spec/blob/master/buildConfig.py#L71
+    kCommand = [ command ] # if kRelease is None else [ kRelease + '/bin/' + command ]
     kCommand = kCommand + [ '--directory' , definition , inputFile ] + kArgs
     _notif('Running: ' + ' '.join(kCommand))
     return _teeProcessStdout(kCommand, tee = teeOutput)
