@@ -62,7 +62,7 @@ public class ResolveFunctionWithConfig {
         topCell = Sorts.GeneratedTopCell();
         topCellLabel = KLabels.GENERATED_TOP_CELL;
       } else {
-        topCell = info.topCell();
+        topCell = info.getRootCell();
         topCellLabel = info.getCellLabel(topCell);
       }
       CONFIG_VAR = KVariable("_Configuration", Att().add(Sort.class, topCell).add("withConfig"));
