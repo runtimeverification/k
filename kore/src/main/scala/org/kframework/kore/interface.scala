@@ -4,6 +4,7 @@ import java.util.Optional
 
 import org.kframework.attributes._
 import org.kframework.unparser.ToKast
+import org.kframework.utils.errorsystem.KEMException
 
 import scala.collection.JavaConverters._
 
@@ -53,6 +54,7 @@ object K {
         case (_, _:KRewrite) => -1
         case (_:InjectedKLabel, _) => 1
         case (_, _:InjectedKLabel) => -1
+        case (_, _) => throw KEMException.criticalError("Cannot order these terms:\n" + a.toString() + "\n" + b.toString())
       }
     }
   }
