@@ -3,7 +3,6 @@ package org.kframework.kore
 import java.util.Optional
 
 import org.kframework.attributes._
-import org.kframework.kore.ADT.{KApply, KList}
 import org.kframework.unparser.ToKast
 
 import scala.collection.JavaConverters._
@@ -70,7 +69,7 @@ trait KLabel {
   }
   override def hashCode = name.hashCode * 29 + params.hashCode
 
-  def apply(ks: K*) = KApply(this, KList(ks.toList))   
+  def apply(ks: K*) = ADT.KApply(this, ADT.KList(ks.toList))
 }
 
 object KLabelOrdering extends Ordering[KLabel] {
