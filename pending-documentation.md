@@ -375,7 +375,8 @@ In the example above, we declare two productions `~Int_` and `_^%Int__`, and tel
 Set variables are currently only supported by the Haskell backend.
 The use of rules with set variables should be sound for all other backends which just execute by rewriting, however it might not be safe for backends which want to guarantee coverage.
 
-## Debugging
+Debugging
+---------
 
 The LLVM Backend has support for integration with GDB. You can run the debugger on a particular program by passing the `--debugger` flag to krun, or by invoking the llvm backend interpreter directly. Below we provide a simple tutorial to explain some of the basic commands supported by the LLVM backend.
 
