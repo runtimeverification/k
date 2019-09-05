@@ -510,7 +510,7 @@ Breakpoint 1, Lblfoo'LParUndsRParUnds'TEST'UndsUnds'Int (_1=#token("1", "Int")) 
 (gdb)
 ```
 
-In this case, the variables have numbers instead of names because the names of arguments in functions in K come from rules, and we are stopped before any specific rule has applied. For example, _1 is the first argument to the function.
+In this case, the variables have numbers instead of names because the names of arguments in functions in K come from rules, and we are stopped before any specific rule has applied. For example, `_1` is the first argument to the function.
 
 You can also set a breakpoint in this location by setting it on the line associated with its production:
 
