@@ -83,6 +83,10 @@ public class LLVMRewriter implements Function<Definition, Rewriter> {
                 String pgmPath = files.resolveTemp("pgm.kore").getAbsolutePath();
                 File koreOutputFile = files.resolveTemp("result.kore");
                 List<String> args = new ArrayList<String>();
+                if (krunOptions.experimental.debugger) {
+                  args.add("gdb");
+                  args.add("--args");
+                }
                 args.add(files.resolveKompiled("interpreter").getAbsolutePath());
                 args.add(pgmPath);
                 args.add(Integer.toString(depth.orElse(-1)));
