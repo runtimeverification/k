@@ -388,7 +388,7 @@ Here is a sample K definition we will use to demonstrate debugging capabilities:
 module TEST
   imports INT
 
-  rule I:Int => I +Int 1 requires I <Int 10
+  rule [test]: I:Int => I +Int 1 requires I <Int 10
 
   syntax Int ::= foo(Int) [function]
   rule foo(I) => 0 -Int I
@@ -397,6 +397,145 @@ endmodule
 ```
 
 You should compile this definition with `--backend llvm -ccopt -g` and without `-ccopt -O2` in order to use the debugger most effectively.
+
+### Stepping
+
+You can break before every step of execution is taken by setting a breakpoint on the `step` function:
+
+```
+(gdb) break definition.kore:step
+Breakpoint 1 at 0x25e340 
+(gdb) run
+Breakpoint 1, 0x000000000025e340 in step (subject=`<generatedTop>{}`(`<k>{}`(`kseq{}`(`inj{Int{}, KItem{}}`(#token("0", "Int")),dotk{}(.KList))),`<generatedCounter>{}`(#token("0", "Int"))))
+(gdb) continue
+Continuing.
+
+Breakpoint 1, 0x000000000025e340 in step (subject=`<generatedTop>{}`(`<k>{}`(`kseq{}`(`inj{Int{}, KItem{}}`(#token("1", "Int")),dotk{}(.KList))),`<generatedCounter>{}`(#token("0", "Int"))))
+(gdb) continue 2
+Will ignore next crossing of breakpoint 1.  Continuing.
+
+Breakpoint 1, 0x000000000025e340 in step (subject=`<generatedTop>{}`(`<k>{}`(`kseq{}`(`inj{Int{}, KItem{}}`(#token("3", "Int")),dotk{}(.KList))),`<generatedCounter>{}`(#token("0", "Int"))))
+(gdb)
+```
+
+### Breaking on a specific rule
+
+You can break when a rule is applied by giving the rule a rule label. If the module name is TEST and the rule label is test, you can break when the rule applies by setting a breakpoint on the `TEST.test.rhs` function:
+
+```
+(gdb) break TEST.test.rhs
+Breakpoint 1 at 0x25e250: file /home/dwightguth/test/./test.k, line 4.
+(gdb) run
+Breakpoint 1, TEST.test.rhs (VarDotVar0=`<generatedCounter>{}`(#token("0", "Int")), VarDotVar1=dotk{}(.KList), VarI=#token("0", "Int")) at /home/dwightguth/test/./test.k:4
+4         rule [test]: I:Int => I +Int 1 requires I <Int 10
+(gdb)
+```
+
+Note that the substitution associated with that rule is visible in the description of the frame.
+
+You can also break when a side condition is applied using the `TEST.test.sc` function:
+
+```
+(gdb) break TEST.test.sc
+Breakpoint 1 at 0x25e230: file /home/dwightguth/test/./test.k, line 4.
+(gdb) run
+Breakpoint 1, TEST.test.sc (VarI=#token("0", "Int")) at /home/dwightguth/test/./test.k:4
+4         rule [test]: I:Int => I +Int 1 requires I <Int 10
+(gdb)
+```
+
+Note that every variable used in the side condition can have its value inspected when stopped at this breakpoint, but other variables are not visible.
+
+You can also break on a rule by its location:
+
+```
+(gdb) break test.k:4
+Breakpoint 1 at 0x25e230: test.k:4. (2 locations)
+(gdb) run
+Breakpoint 1, TEST.test.sc (VarI=#token("0", "Int")) at /home/dwightguth/test/./test.k:4
+4         rule [test]: I:Int => I +Int 1 requires I <Int 10
+(gdb) continue
+Continuing.
+
+Breakpoint 1, TEST.test.rhs (VarDotVar0=`<generatedCounter>{}`(#token("0", "Int")), VarDotVar1=dotk{}(.KList), VarI=#token("0", "Int")) at /home/dwightguth/test/./test.k:4
+4         rule [test]: I:Int => I +Int 1 requires I <Int 10
+(gdb) continue
+Continuing.
+
+Breakpoint 1, TEST.test.sc (VarI=#token("1", "Int")) at /home/dwightguth/test/./test.k:4
+4         rule [test]: I:Int => I +Int 1 requires I <Int 10
+(gdb)
+```
+
+Note that this sets a breakpoint at two locations: one on the side condition and one on the right hand side. If the rule had no side condition, the first would not be set. You can also view the locations of the breakpoints and disable them individually:
+
+```
+(gdb) info breakpoint
+Num     Type           Disp Enb Address            What
+1       breakpoint     keep y   <MULTIPLE>
+        breakpoint already hit 3 times
+1.1                         y     0x000000000025e230 in TEST.test.sc at /home/dwightguth/test/./test.k:4
+1.2                         y     0x000000000025e250 in TEST.test.rhs at /home/dwightguth/test/./test.k:4
+(gdb) disable 1.1
+(gdb) continue
+Continuing.
+
+Breakpoint 1, TEST.test.rhs (VarDotVar0=`<generatedCounter>{}`(#token("0", "Int")), VarDotVar1=dotk{}(.KList), VarI=#token("1", "Int")) at /home/dwightguth/test/./test.k:4
+4         rule [test]: I:Int => I +Int 1 requires I <Int 10
+(gdb) continue
+Continuing.
+
+Breakpoint 1, TEST.test.rhs (VarDotVar0=`<generatedCounter>{}`(#token("0", "Int")), VarDotVar1=dotk{}(.KList), VarI=#token("2", "Int")) at /home/dwightguth/test/./test.k:4
+4         rule [test]: I:Int => I +Int 1 requires I <Int 10
+(gdb)
+```
+
+Now only the breakpoint when the rule applies is enabled.
+
+### Breaking on a function
+
+You can also break when a particular function in your semantics is invoked:
+
+```
+(gdb) info functions foo
+All functions matching regular expression "foo":
+
+File /home/dwightguth/test/./test.k:
+struct __mpz_struct *Lblfoo'LParUndsRParUnds'TEST'UndsUnds'Int(struct __mpz_struct *);
+(gdb) break Lblfoo'LParUndsRParUnds'TEST'UndsUnds'Int
+Breakpoint 1 at 0x25e640: file /home/dwightguth/test/./test.k, line 6.
+(gdb) run
+Breakpoint 1, Lblfoo'LParUndsRParUnds'TEST'UndsUnds'Int (_1=#token("1", "Int")) at /home/dwightguth/test/./test.k:6
+6         syntax Int ::= foo(Int) [function]
+(gdb)
+```
+
+In this case, the variables have numbers instead of names because the names of arguments in functions in K come from rules, and we are stopped before any specific rule has applied. For example, `_1` is the first argument to the function.
+
+You can also set a breakpoint in this location by setting it on the line associated with its production:
+
+```
+(gdb) break test.k:6
+Breakpoint 1 at 0x25e640: file /home/dwightguth/test/./test.k, line 6.
+(gdb) run
+Breakpoint 1, Lblfoo'LParUndsRParUnds'TEST'UndsUnds'Int (_1=#token("1", "Int")) at /home/dwightguth/test/./test.k:6
+6         syntax Int ::= foo(Int) [function]
+```
+
+These two syntaxes are equivalent; use whichever is easier for you.
+
+You can also view the stack of function applications:
+
+```
+(gdb) bt
+#0  Lblfoo'LParUndsRParUnds'TEST'UndsUnds'Int (_1=#token("1", "Int")) at /home/dwightguth/test/./test.k:6
+#1  0x000000000025e5f8 in apply_rule_111 (VarDotVar0=`<generatedCounter>{}`(#token("0", "Int")), VarDotVar1=dotk{}(.KList)) at /home/dwightguth/test/./test.k:9
+#2  0x0000000000268a52 in take_steps ()
+#3  0x000000000026b7b4 in main ()
+(gdb)
+```
+
+Here we see that `foo` was invoked while applying the rule on line 9 of test.k, and we also can see the substitution of that rule. If foo was evaluated while evaluating another function, we would also be able to see the arguments of that function as well, unless the function was tail recursive, in which case no stack frame would exist once the tail call was performed.
 
 Undocumented
 ------------
