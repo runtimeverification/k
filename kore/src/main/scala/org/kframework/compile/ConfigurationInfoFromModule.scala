@@ -20,13 +20,28 @@ object ConfigurationInfoFromModule
 
 class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
 
-  private val cellProductions: Map[Sort,Production] =
-    m.productions.filter(_.att.contains("cell")).map(p => (p.sort, p)).toMap
-  private val cellBagProductions: Map[Sort,Production] =
-    m.productions.filter(_.att.contains("cellCollection")).map(p => (p.sort, p)).toMap
+  private val cellProductionsSet:    Set[(Sort, Production)] = m.productions.filter(_.att.contains("cell"))          .map(p => (p.sort, p))
+  private val cellBagProductionsSet: Set[(Sort, Production)] = m.productions.filter(_.att.contains("cellCollection")).map(p => (p.sort, p))
+
+  private val cellSorts:    Set[Sort] = cellProductionsSet   .map({sp => sp._1})
+  private val cellBagSorts: Set[Sort] = cellBagProductionsSet.map({sp => sp._1})
+
+  private def buildCellProductionMap(cells: Set[(Sort, Production)]): Map[Sort, Production] = {
+    def buildCellProductionMap(_cells: Set[(Sort, Production)], _cellMap: Map[Sort, Production]): Map[Sort, Production] = {
+      if (_cells.size == 0)
+        return _cellMap
+      val (s, p) = _cells.head
+      if (_cellMap.contains(s))
+        throw KEMException.compilerError("Too many productions for cell sort: " + s)
+      buildCellProductionMap(_cells.tail, _cellMap + (s -> p))
+    }
+    buildCellProductionMap(cells, Map())
+  }
+
+  private val cellProductions:    Map[Sort,Production] = buildCellProductionMap(cellProductionsSet)
+  private val cellBagProductions: Map[Sort,Production] = buildCellProductionMap(cellBagProductionsSet)
+
   private val cellBagSubsorts: Map[Sort, Set[Sort]] = cellBagProductions.values.map(p => (p.sort, getCellSortsOfCellBag(p.sort))).toMap
-  private val cellSorts: Set[Sort] = cellProductions.keySet
-  private val cellBagSorts: Set[Sort] = cellBagProductions.keySet
   private val cellLabels: Map[Sort, KLabel] = cellProductions.mapValues(_.klabel.get)
   private val cellLabelsToSorts: Map[KLabel, Sort] = cellLabels.map(_.swap)
 
@@ -59,20 +74,11 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
 
   private val edgesPoset: POSet[Sort] = POSet(edges)
 
-  private val topCellsIncludingStrategyCell = cellSorts.diff(edges.map(_._2))
+  private lazy val topCells = cellSorts.diff(edges.map(_._2))
 
-  private lazy val topCells =
-    if (topCellsIncludingStrategyCell.size > 1)
-      topCellsIncludingStrategyCell.filterNot(s => s == KORE.Sort("SCell") || s == KORE.Sort("KCell"))
-    else
-      topCellsIncludingStrategyCell
-
-  if (topCells.size > 1)
-    throw KEMException.compilerError("Too many top cells:" + topCells)
-
-  val topCell: Sort = topCells.head
-  private val sortedSorts: Seq[Sort] = tsort(edges).toSeq
-  val levels: Map[Sort, Int] = edges.toList.sortWith((l, r) => sortedSorts.indexOf(l._1) < sortedSorts.indexOf(r._1)).foldLeft(Map(topCell -> 0)) {
+  private val sortedSorts: Seq[Sort]         = tsort(edges).toSeq
+  private val sortedEdges: Seq[(Sort, Sort)] = edges.toList.sortWith((l, r) => sortedSorts.indexOf(l._1) < sortedSorts.indexOf(r._1))
+  val levels: Map[Sort, Int] = sortedEdges.foldLeft(topCells.map((_, 0)).toMap) {
     case (m: Map[Sort, Int], (from: Sort, to: Sort)) =>
       m + (to -> (m(from) + 1))
   }
@@ -124,7 +130,12 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
   override def getCellFragmentLabel(k : Sort): KLabel = cellFragmentLabel(k)
   override def getCellAbsentLabel(k: Sort): KLabel = cellAbsentLabel(k)
 
-  override def getRootCell: Sort = topCell
+  override def getRootCell: Sort = {
+    if (topCells.size > 1)
+      throw KEMException.compilerError("Too many top cells for module " + m.name + ": " + topCells)
+    topCells.head
+  }
+
   override def getComputationCell: Sort = mainCell
   override def getCellSorts: util.Set[Sort] = cellSorts.asJava
 
