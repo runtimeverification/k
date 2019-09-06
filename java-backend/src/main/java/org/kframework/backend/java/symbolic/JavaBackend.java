@@ -156,7 +156,7 @@ public class JavaBackend implements Backend {
             if (r.body() instanceof KApply) {
                 KLabel klabel = ((KApply) r.body()).klabel();
                 if (d.mainModule().sortFor().contains(klabel) //is false for rules in specification modules not part of semantics
-                        && d.mainModule().sortFor().apply(klabel).equals(configInfo.topCell())) {
+                        && d.mainModule().sortFor().apply(klabel).equals(configInfo.getRootCell())) {
                     return Rule.apply(r.body(), r.requires(), r.ensures(), r.att().add(att));
                 }
             }
