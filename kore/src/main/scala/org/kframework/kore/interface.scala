@@ -54,7 +54,7 @@ object K {
         case (_, _:KRewrite) => -1
         case (_:InjectedKLabel, _) => 1
         case (_, _:InjectedKLabel) => -1
-        case (_, _) => throw KEMException.criticalError("Cannot order these terms:\n" + a.toString() + "\n" + b.toString())
+        case (_, _) => throw KEMException.internalError("Cannot order these terms:\n" + a.toString() + "\n" + b.toString())
       }
     }
   }
