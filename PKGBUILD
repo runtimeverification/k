@@ -30,7 +30,7 @@ prepare() {
 
 build() {
 	cd ..
-	mvn package -DskipTests
+	mvn package -DskipTests -Dllvm.backend.prefix=/usr/lib/kframework -Dllvm.backend.destdir="$srcdir"
 }
 
 check() {
