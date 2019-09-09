@@ -244,7 +244,7 @@ public class ResolveFreshConstants {
                 RuleGrammarGenerator gen = new RuleGrammarGenerator(def);
                 ParseInModule mod = RuleGrammarGenerator.getCombinedGrammar(gen.getConfigGrammar(m), true);
                 ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(m);
-                Sort topCellSort = configInfo.topCell();
+                Sort topCellSort = configInfo.getRootCell();
                 KLabel topCellLabel = configInfo.getCellLabel(topCellSort);
                 Production prod = m.productionsFor().apply(topCellLabel).head();
                 KToken cellName = KToken(prod.att().get("cellName"), Sort("#CellName"));
