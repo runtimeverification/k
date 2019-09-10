@@ -279,7 +279,6 @@ public class Kompile {
         Module languageParsingModule = Constructors.Module("LANGUAGE-PARSING",
                 Set(d.mainModule(),
                         d.getModule(d.att().get(Att.syntaxModule())).get(),
-                        d.getModule("K-TERM").get(),
                         d.getModule(RuleGrammarGenerator.ID_PROGRAM_PARSING).get()), Set(), Att());
         allModules.add(languageParsingModule);
         return Constructors.Definition(d.mainModule(), immutable(allModules), d.att());
