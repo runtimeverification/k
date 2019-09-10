@@ -1,5 +1,3 @@
-SHELL=/bin/bash -o pipefail
-
 # path to the current makefile
 MAKEFILE_PATH := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 # path to the kompile binary of this distribuition
