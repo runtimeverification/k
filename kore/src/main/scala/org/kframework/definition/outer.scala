@@ -102,7 +102,8 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
     _.importedModules
   })
 
-  def addImport(m : Module) : Module = new Module(name, imports + m, localSentences, att)
+  def addImport(m : Module)        : Module = new Module(name, imports + m, localSentences, att)
+  def changeName(newName : String) : Module = new Module(newName, imports, localSentences, att)
 
   lazy val importedModuleNames: Set[String] = importedModules.map(_.name)
 
