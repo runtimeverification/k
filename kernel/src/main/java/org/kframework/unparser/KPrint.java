@@ -122,7 +122,24 @@ public class KPrint {
     }
 
     public byte[] prettyPrint(CompiledDefinition def, Module module, K orig, ColorSetting colorize, OutputModes outputMode) {
-        return prettyPrint(def.kompiledDefinition, module, orig, colorize, outputMode);
+        switch (outputMode) {
+            case KAST:
+            case NONE:
+            case BINARY:
+            case JSON:
+            case PRETTY:
+            case KORE:
+                return prettyPrint(def.kompiledDefinition, module, orig, colorize, outputMode);
+            case PROGRAM: {
+                K result = abstractTerm(module, orig);
+                RuleGrammarGenerator gen = new RuleGrammarGenerator(def.kompiledDefinition);
+                Module programParsingMod = def.programParsingModuleFor(module.name(), kem).get();
+                Module unparsingModule = RuleGrammarGenerator.getCombinedGrammar(gen.getProgramsGrammar(programParsingMod), false).getParsingModule();
+                return (unparseTerm(result, unparsingModule, colorize) + "\n").getBytes();
+            }
+            default:
+                throw KEMException.criticalError("Unsupported output mode: " + outputMode);
+        }
     }
 
     public byte[] prettyPrint(Definition def, Module module, K orig, ColorSetting colorize, OutputModes outputMode) {
@@ -133,12 +150,6 @@ public class KPrint {
             case JSON:
             case PRETTY:
                 return prettyPrint(module, orig, colorize, outputMode);
-            case PROGRAM: {
-                K result = abstractTerm(module, orig);
-                RuleGrammarGenerator gen = new RuleGrammarGenerator(def);
-                Module unparsingModule = RuleGrammarGenerator.getCombinedGrammar(gen.getProgramsGrammar(module), false).getParsingModule();
-                return (unparseTerm(result, unparsingModule, colorize) + "\n").getBytes();
-            }
             case KORE:
                 if (!compiledDefinition.isPresent()) {
                     throw KEMException.criticalError("KORE output requires a compiled definition.");

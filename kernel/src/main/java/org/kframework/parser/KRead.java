@@ -50,7 +50,8 @@ public class KRead {
             case KORE:
                 return new KoreParser(files.resolveKoreToKLabelsFile(), mod.sortAttributesFor()).parseString(stringToParse);
             case PROGRAM:
-                return def.getParser(mod, sort, kem).apply(stringToParse, source);
+                Module programParsingMod = def.programParsingModuleFor(mod.name(), kem).get();
+                return def.getParser(programParsingMod, sort, kem).apply(stringToParse, source);
             case KAST:
                 return KastParser.parse(stringToParse, source);
             case BINARY:
