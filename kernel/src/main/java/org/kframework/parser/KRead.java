@@ -47,30 +47,31 @@ public class KRead {
         switch (inputMode) {
             case BINARY:
             case JSON:
-                return deserialize(stringToParse, inputMode);
+            case KAST:
+                return deserialize(stringToParse, inputMode, source);
             case KORE:
                 return new KoreParser(files.resolveKoreToKLabelsFile(), mod.sortAttributesFor()).parseString(stringToParse);
             case PROGRAM:
                 return def.getParser(mod, sort, kem).apply(stringToParse, source);
-            case KAST:
-                return KastParser.parse(stringToParse, source);
             default:
                 throw KEMException.criticalError("Unsupported input mode: " + inputMode);
         }
     }
 
-    public K deserialize(String stringToParse) {
-        return deserialize(stringToParse, this.input);
+    public K deserialize(String stringToParse, Source source) {
+        return deserialize(stringToParse, this.input, source);
     }
 
-    public static K deserialize(String stringToParse, InputModes inputMode) {
+    public static K deserialize(String stringToParse, InputModes inputMode, Source source) {
         switch (inputMode) {
             case BINARY:
                 return BinaryParser.parse(stringToParse.getBytes());
             case JSON:
                 return JsonParser.parse(stringToParse);
+            case KAST:
+                return KastParser.parse(stringToParse, source);
             default:
-                throw KEMException.criticalError("Unsupported input mode: " + inputMode);
+                throw KEMException.criticalError("Unsupported input mode for deserialization: " + inputMode);
         }
     }
 
