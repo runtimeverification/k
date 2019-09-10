@@ -144,21 +144,24 @@ public class KPrint {
     }
 
     public byte[] prettyPrint(Definition def, Module module, K orig, ColorSetting colorize, OutputModes outputMode) {
-        K result = abstractTerm(module, orig);
+        K result;
         switch (outputMode) {
             case KAST:
             case NONE:
             case BINARY:
             case JSON:
             case LATEX:
+                result = abstractTerm(module, orig);
                 return serialize(result, outputMode);
             case PRETTY: {
                 Module kTermMod = def.getModule("K-TERM").get();
                 Module prettyParsingMod = module.wrappingModule(module.name() + "$PRETTY").addImport(kTermMod);
                 Module unparsingModule = RuleGrammarGenerator.getCombinedGrammar(prettyParsingMod, false).getExtensionModule();
+                result = abstractTerm(unparsingModule, orig);
                 return (unparseTerm(result, unparsingModule, colorize) + "\n").getBytes();
             }
             case KORE:
+                result = abstractTerm(module, orig);
                 if (!compiledDefinition.isPresent()) {
                     throw KEMException.criticalError("KORE output requires a compiled definition.");
                 }
