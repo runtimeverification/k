@@ -128,6 +128,7 @@ public class KPrint {
             case BINARY:
             case JSON:
             case PRETTY:
+            case LATEX:
             case KORE:
                 return prettyPrint(def.kompiledDefinition, module, orig, colorize, outputMode);
             case PROGRAM: {
@@ -143,16 +144,18 @@ public class KPrint {
     }
 
     public byte[] prettyPrint(Definition def, Module module, K orig, ColorSetting colorize, OutputModes outputMode) {
+        K result = abstractTerm(module, orig);
         switch (outputMode) {
             case KAST:
             case NONE:
             case BINARY:
+            case LATEX:
             case JSON:
+                return serialize(result, outputMode);
             case PRETTY: {
                 Module kTermMod = def.getModule("K-TERM").get();
                 Module prettyParsingMod = module.wrappingModule(module.name() + "$PRETTY").addImport(kTermMod);
                 Module unparsingModule = RuleGrammarGenerator.getCombinedGrammar(prettyParsingMod, false).getExtensionModule();
-                K result = abstractTerm(module, orig);
                 return (unparseTerm(result, unparsingModule, colorize) + "\n").getBytes();
             }
             case KORE:
@@ -161,26 +164,12 @@ public class KPrint {
                 }
                 CompiledDefinition cdef = compiledDefinition.get();
                 ModuleToKORE converter = new ModuleToKORE(module, files, cdef.topCellInitializer, kompileOptions);
-                K result = ExpandMacros.forNonSentences(module, files, kompileOptions, false).expand(orig);
+                result = ExpandMacros.forNonSentences(module, files, kompileOptions, false).expand(result);
                 result = new AddSortInjections(module).addInjections(result);
                 converter.convert(result);
                 return converter.toString().getBytes();
             default:
                 throw KEMException.criticalError("Unsupported output mode without a CompiledDefinition: " + outputMode);
-        }
-    }
-
-    public byte[] prettyPrint(Module module, K orig, ColorSetting colorize, OutputModes outputMode) {
-        K result = abstractTerm(module, orig);
-        switch (outputMode) {
-            case KAST:
-            case NONE:
-            case BINARY:
-            case JSON:
-            case LATEX:
-                return serialize(result, outputMode);
-            default:
-                throw KEMException.criticalError("Unsupported output mode without a Definition: " + outputMode);
         }
     }
 
