@@ -105,6 +105,7 @@ public class KastFrontEnd extends FrontEnd {
                     sort = def.programStartSymbol;
                 }
             }
+
             Module unparsingMod;
             if (options.module == null) {
                 options.module = def.mainSyntaxModuleName();
@@ -118,7 +119,8 @@ public class KastFrontEnd extends FrontEnd {
             } else {
                 unparsingMod = def.kompiledDefinition.getModule(options.module).get();
             }
-            Option<Module> maybeMod = def.programParsingModuleFor(options.module, kem);
+
+            Option<Module> maybeMod = def.kompiledDefinition.getModule(options.module);
             if (maybeMod.isEmpty()) {
                 throw KEMException.innerParserError("Module " + options.module + " not found. Specify a module with -m.");
             }
