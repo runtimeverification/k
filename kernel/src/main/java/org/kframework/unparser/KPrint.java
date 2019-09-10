@@ -150,7 +150,7 @@ public class KPrint {
             case JSON:
             case PRETTY: {
                 Module kTermMod = def.getModule("K-TERM").get();
-                Module prettyParsingMod = module.addImport(kTermMod).changeName(module.name() + "$PRETTY");
+                Module prettyParsingMod = module.wrappingModule(module.name() + "$PRETTY").addImport(kTermMod);
                 Module unparsingModule = RuleGrammarGenerator.getCombinedGrammar(prettyParsingMod, false).getExtensionModule();
                 K result = abstractTerm(module, orig);
                 return (unparseTerm(result, unparsingModule, colorize) + "\n").getBytes();
