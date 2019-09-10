@@ -54,6 +54,10 @@ public class KRead {
             case PROGRAM:
                 Module programParsingMod = def.programParsingModuleFor(mod.name(), kem).get();
                 return def.getParser(programParsingMod, sort, kem).apply(stringToParse, source);
+            case PRETTY:
+                Module kTermMod = def.kompiledDefinition.getModule("K-TERM").get();
+                Module prettyParsingMod = mod.addImport(kTermMod).changeName(mod.name() + "$PRETTY");
+                return def.getParser(prettyParsingMod, sort, kem).apply(stringToParse, source);
             default:
                 throw KEMException.criticalError("Unsupported input mode: " + inputMode);
         }

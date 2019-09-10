@@ -148,8 +148,13 @@ public class KPrint {
             case NONE:
             case BINARY:
             case JSON:
-            case PRETTY:
-                return prettyPrint(module, orig, colorize, outputMode);
+            case PRETTY: {
+                Module kTermMod = def.getModule("K-TERM").get();
+                Module prettyParsingMod = module.addImport(kTermMod).changeName(module.name() + "$PRETTY");
+                Module unparsingModule = RuleGrammarGenerator.getCombinedGrammar(prettyParsingMod, false).getExtensionModule();
+                K result = abstractTerm(module, orig);
+                return (unparseTerm(result, unparsingModule, colorize) + "\n").getBytes();
+            }
             case KORE:
                 if (!compiledDefinition.isPresent()) {
                     throw KEMException.criticalError("KORE output requires a compiled definition.");
@@ -174,10 +179,7 @@ public class KPrint {
             case JSON:
             case LATEX:
                 return serialize(result, outputMode);
-            case PRETTY: {
-                Module unparsingModule = RuleGrammarGenerator.getCombinedGrammar(module, false).getExtensionModule();
-                return (unparseTerm(result, unparsingModule, colorize) + "\n").getBytes();
-            } default:
+            default:
                 throw KEMException.criticalError("Unsupported output mode without a Definition: " + outputMode);
         }
     }
