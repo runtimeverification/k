@@ -45,6 +45,7 @@ public class KRead {
 
     public K prettyRead(Module mod, Sort sort, CompiledDefinition def, Source source, String stringToParse, InputModes inputMode) {
         switch (inputMode) {
+            case BINARY:
             case JSON:
                 return deserialize(stringToParse, inputMode);
             case KORE:
@@ -54,8 +55,6 @@ public class KRead {
                 return def.getParser(programParsingMod, sort, kem).apply(stringToParse, source);
             case KAST:
                 return KastParser.parse(stringToParse, source);
-            case BINARY:
-                return BinaryParser.parse(stringToParse.getBytes());
             default:
                 throw KEMException.criticalError("Unsupported input mode: " + inputMode);
         }
@@ -67,6 +66,8 @@ public class KRead {
 
     public static K deserialize(String stringToParse, InputModes inputMode) {
         switch (inputMode) {
+            case BINARY:
+                return BinaryParser.parse(stringToParse.getBytes());
             case JSON:
                 return JsonParser.parse(stringToParse);
             default:
