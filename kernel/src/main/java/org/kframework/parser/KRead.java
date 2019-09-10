@@ -27,13 +27,20 @@ public class KRead {
 
     private final KExceptionManager kem;
     private final FileUtil files;
+    private final InputModes input;
 
     public KRead(
             KExceptionManager kem,
-            FileUtil files
+            FileUtil files,
+            InputModes input
     ) {
         this.kem = kem;
         this.files = files;
+        this.input = input;
+    }
+
+    public K prettyRead(Module mod, Sort sort, CompiledDefinition def, Source source, String stringToParse) {
+        return prettyRead(mod, sort, def, source, stringToParse, this.input);
     }
 
     public K prettyRead(Module mod, Sort sort, CompiledDefinition def, Source source, String stringToParse, InputModes inputMode) {
@@ -51,6 +58,10 @@ public class KRead {
             default:
                 throw KEMException.criticalError("Unsupported input mode: " + inputMode);
         }
+    }
+
+    public K deserialize(String stringToParse) {
+        return deserialize(stringToParse, this.input);
     }
 
     public static K deserialize(String stringToParse, InputModes inputMode) {
