@@ -105,32 +105,32 @@ public class KastFrontEnd extends FrontEnd {
                     sort = def.programStartSymbol;
                 }
             }
-            Module compiledMod;
+            Module unparsingMod;
             if (options.module == null) {
                 options.module = def.mainSyntaxModuleName();
                 switch (options.input) {
-                case KORE:
-                    compiledMod = def.languageParsingModule();
-                    break;
-                default:
-                    compiledMod = def.kompiledDefinition.getModule(def.mainSyntaxModuleName()).get();
+                    case KORE:
+                        unparsingMod = def.languageParsingModule();
+                        break;
+                    default:
+                        unparsingMod = def.kompiledDefinition.getModule(def.mainSyntaxModuleName()).get();
                 }
             } else {
-                compiledMod = def.kompiledDefinition.getModule(options.module).get();
+                unparsingMod = def.kompiledDefinition.getModule(options.module).get();
             }
             Option<Module> maybeMod = def.programParsingModuleFor(options.module, kem);
             if (maybeMod.isEmpty()) {
                 throw KEMException.innerParserError("Module " + options.module + " not found. Specify a module with -m.");
             }
-            Module mod = maybeMod.get();
+            Module parsingMod = maybeMod.get();
 
-            K parsed = kread.prettyRead(mod, sort, def, source, FileUtil.read(stringToParse));
+            K parsed = kread.prettyRead(parsingMod, sort, def, source, FileUtil.read(stringToParse));
 
             if (options.expandMacros) {
-                parsed = ExpandMacros.forNonSentences(compiledMod, files.get(), def.kompileOptions, false).expand(parsed);
+                parsed = ExpandMacros.forNonSentences(unparsingMod, files.get(), def.kompileOptions, false).expand(parsed);
             }
 
-            System.out.println(new String(kprint.prettyPrint(def, compiledMod, parsed), StandardCharsets.UTF_8));
+            System.out.println(new String(kprint.prettyPrint(def, unparsingMod, parsed), StandardCharsets.UTF_8));
             sw.printTotal("Total");
             return 0;
         } finally {
