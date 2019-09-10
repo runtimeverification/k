@@ -149,8 +149,8 @@ public class KPrint {
             case KAST:
             case NONE:
             case BINARY:
-            case LATEX:
             case JSON:
+            case LATEX:
                 return serialize(result, outputMode);
             case PRETTY: {
                 Module kTermMod = def.getModule("K-TERM").get();
