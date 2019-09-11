@@ -52,7 +52,7 @@ def krunJSON(definition, inputJSON, krunArgs = [], teeOutput = True, kRelease = 
     with tempfile.NamedTemporaryFile(mode = 'w') as tempf:
         json.dump(inputJSON, tempf)
         tempf.flush()
-        (rC, out, err) = krun(definition, tempf.name, krunArgs = krunArgs + ['--output', 'json'], teeOutput = teeOutput, kRelease = kRelease)
+        (rC, out, err) = krun(definition, tempf.name, krunArgs = krunArgs + ['--output', 'json', '--parser', 'cat'], teeOutput = teeOutput, kRelease = kRelease)
         out = None if out == '' else json.loads(out)['term']
         return (rC, out, err)
 

@@ -126,35 +126,6 @@ public class KPrint {
     }
 
     public byte[] prettyPrint(Definition def, Module module, K orig, ColorSetting colorize, OutputModes outputMode) {
-        switch (outputMode) {
-            case KAST:
-            case NONE:
-            case BINARY:
-            case JSON:
-            case PRETTY:
-                return prettyPrint(module, orig, colorize, outputMode);
-            case PROGRAM: {
-                K result = abstractTerm(module, orig);
-                RuleGrammarGenerator gen = new RuleGrammarGenerator(def);
-                Module unparsingModule = RuleGrammarGenerator.getCombinedGrammar(gen.getProgramsGrammar(module), false).getParsingModule();
-                return (unparseTerm(result, unparsingModule, colorize) + "\n").getBytes();
-            }
-            case KORE:
-                if (!compiledDefinition.isPresent()) {
-                    throw KEMException.criticalError("KORE output requires a compiled definition.");
-                }
-                CompiledDefinition cdef = compiledDefinition.get();
-                ModuleToKORE converter = new ModuleToKORE(module, files, cdef.topCellInitializer, kompileOptions);
-                K result = ExpandMacros.forNonSentences(module, files, kompileOptions, false).expand(orig);
-                result = new AddSortInjections(module).addInjections(result);
-                converter.convert(result);
-                return converter.toString().getBytes();
-            default:
-                throw KEMException.criticalError("Unsupported output mode without a CompiledDefinition: " + outputMode);
-        }
-    }
-
-    public byte[] prettyPrint(Module module, K orig, ColorSetting colorize, OutputModes outputMode) {
         K result = abstractTerm(module, orig);
         switch (outputMode) {
             case KAST:
@@ -163,11 +134,26 @@ public class KPrint {
             case JSON:
             case LATEX:
                 return serialize(result, outputMode);
-            case PRETTY: {
-                Module unparsingModule = RuleGrammarGenerator.getCombinedGrammar(module, false).getExtensionModule();
-                return (unparseTerm(result, unparsingModule, colorize) + "\n").getBytes();
-            } default:
-                throw KEMException.criticalError("Unsupported output mode without a Definition: " + outputMode);
+            case PRETTY:
+                Module prettyUnparsingModule = RuleGrammarGenerator.getCombinedGrammar(module, false).getExtensionModule();
+                return (unparseTerm(result, prettyUnparsingModule, colorize) + "\n").getBytes();
+            case PROGRAM: {
+                RuleGrammarGenerator gen = new RuleGrammarGenerator(def);
+                Module programUnparsingModule = RuleGrammarGenerator.getCombinedGrammar(gen.getProgramsGrammar(module), false).getParsingModule();
+                return (unparseTerm(result, programUnparsingModule, colorize) + "\n").getBytes();
+            }
+            case KORE:
+                if (!compiledDefinition.isPresent()) {
+                    throw KEMException.criticalError("KORE output requires a compiled definition.");
+                }
+                CompiledDefinition cdef = compiledDefinition.get();
+                ModuleToKORE converter = new ModuleToKORE(module, files, cdef.topCellInitializer, kompileOptions);
+                result = ExpandMacros.forNonSentences(module, files, kompileOptions, false).expand(result);
+                result = new AddSortInjections(module).addInjections(result);
+                converter.convert(result);
+                return converter.toString().getBytes();
+            default:
+                throw KEMException.criticalError("Unsupported output mode without a CompiledDefinition: " + outputMode);
         }
     }
 
