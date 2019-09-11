@@ -440,6 +440,18 @@ module INT-SYMBOLIC [symbolic, kore]
   =>
     {(@I2 =/=Int 0) #Equals true} #And #Ceil(@I1) #And #Ceil(@I2)
   [anywhere]
+
+  rule
+    #Ceil(@I1:Int >>Int @I2:Int)
+  =>
+    {(@I2 >=Int 0) #Equals true} #And #Ceil(@I1) #And #Ceil(@I2)
+  [anywhere]
+
+  rule
+    #Ceil(@I1:Int <<Int @I2:Int)
+  =>
+    {(@I2 >=Int 0) #Equals true} #And #Ceil(@I1) #And #Ceil(@I2)
+  [anywhere]
 endmodule
 
 module INT
