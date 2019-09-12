@@ -198,6 +198,8 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
     case Unapply.KRewrite(_, r) => optionSortFor(r)
     case Unapply.KToken(_, sort) => Some(sort)
     case Unapply.KSequence(s) => optionSortFor(s.last)
+    case Unapply.KVariable(_) => k.att.getOption(classOf[Sort])
+    case _ => None
   }
 
   def isSort(klabel: KLabel, s: Sort) = subsorts.<(sortFor(klabel), s)

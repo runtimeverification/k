@@ -13,6 +13,7 @@ import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
+import scala.Option;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -58,10 +59,22 @@ public class GenerateCoverage implements AutoCloseable {
             //handled by macro expander
             return body;
         }
-        Sort s = mod.optionSortFor(right).get();
-        return KRewrite(left, KApply(KLabel("project:" + s.toString()), KSequence(KApply(KLabel("#logToFile"),
+
+        Option<Sort> s = mod.optionSortFor(right);
+
+        if (s.isEmpty()) {
+            return body;
+        }
+
+        K k = KSequence(KApply(KLabel("#logToFile"),
             KToken(StringUtil.enquoteKString(files.resolveKompiled("coverage.txt").getAbsolutePath()), Sorts.String()),
-            KToken(StringUtil.enquoteKString(id + '\n'), Sorts.String())), right)));
+            KToken(StringUtil.enquoteKString(id + '\n'), Sorts.String())), right);
+
+        if (!s.get().equals(Sorts.K())) {
+            k = KApply(KLabel("project:" + s.get().toString()), k);
+        }
+
+        return KRewrite(left, k);
     }
 
     @Override
