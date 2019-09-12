@@ -105,17 +105,17 @@ public class KastFrontEnd extends FrontEnd {
                     sort = def.programStartSymbol;
                 }
             }
-            Module unparsingMod;
+
             if (options.module == null) {
                 options.module = def.languageParsingModule().name();
-                unparsingMod = def.languageParsingModule();
-            } else {
-                Option<Module> maybeUnparsingMod = def.kompiledDefinition.getModule(options.module);
-                if (maybeUnparsingMod.isEmpty()) {
-                    throw KEMException.innerParserError("Module " + options.module + " not found.");
-                }
-                unparsingMod = maybeUnparsingMod.get();
             }
+
+            Option<Module> maybeUnparsingMod = def.kompiledDefinition.getModule(options.module);
+            if (maybeUnparsingMod.isEmpty()) {
+                throw KEMException.innerParserError("Module " + options.module + " not found.");
+            }
+            Module unparsingMod = maybeUnparsingMod.get();
+
             Option<Module> maybeMod = def.programParsingModuleFor(options.module, kem);
             if (maybeMod.isEmpty()) {
                 throw KEMException.innerParserError("Module " + options.module + " not found. Specify a module with -m.");
