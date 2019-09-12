@@ -34,12 +34,6 @@ module IMP
 
   syntax KResult ::= Int | Bool
 
-/*@ \subsection{Configuration}
-The configuration of IMP is trivial: it only contains two cells, one
-for the computation and another for the state.  For good encapsulation
-and clarity, we place the two cells inside another cell, the ``top'' cell
-which is labeled \textsf{T}. */
-
   configuration <T color="yellow">
                   <k color="green"> $PGM:Pgm </k>
                   <state color="red"> .Map </state>
