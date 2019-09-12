@@ -30,4 +30,7 @@ public class LLVMKompileOptions {
 
     @Parameter(names="--iterated-threshold", description="Threshold heuristic to use when choosing which axioms to optimize. A value of 0 turns the optimization off; a value of 1 turns the optimization on for every axiom. Values in between (expressed as a fraction of two integers, e.g. 1/2), control the aggressiveness of the optimization. Higher values increase compilation times extremely, but also increase the effectiveness of the optimization. Consider decreasing this threshold if compilation is too slow.")
     public String iteratedThreshold = "1/2";
+
+    @Parameter(names="--no-llvm-kompile", description="Do not invoke llvm-kompile. Useful if you want to do it yourself when building with the LLVM backend.")
+    public boolean noLLVMKompile;
 }
