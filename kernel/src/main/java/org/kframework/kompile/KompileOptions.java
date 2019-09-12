@@ -86,10 +86,6 @@ public class KompileOptions implements Serializable {
         return backend.equals("kore") || backend.equals("haskell") || backend.equals("llvm");
     }
 
-    @Parameter(names={"--input", "-i"}, converter=OutputModeConverter.class,
-            description="Format to read definition in. <mode> is either [pretty|json].")
-    public OutputModes input = OutputModes.PRETTY;
-
     public static class OutputModeConverter extends BaseEnumConverter<OutputModes> {
 
         public OutputModeConverter(String optionName) {

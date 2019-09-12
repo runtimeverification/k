@@ -23,8 +23,6 @@ import org.kframework.definition.Module;
 import org.kframework.kore.Sort;
 import org.kframework.parser.concrete2kore.ParserUtils;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
-import org.kframework.parser.json.JsonParser;
-import org.kframework.unparser.OutputModes;
 import org.kframework.unparser.ToJson;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;
@@ -145,14 +143,7 @@ public class Kompile {
     }
 
     public Definition parseDefinition(File definitionFile, String mainModuleName, String mainProgramsModule, Set<String> excludedModuleTags) {
-        switch (kompileOptions.input) {
-            case JSON:
-                return JsonParser.parseDefinition(files.load(definitionFile));
-            case PRETTY:
-                return definitionParsing.parseDefinitionAndResolveBubbles(definitionFile, mainModuleName, mainProgramsModule, excludedModuleTags);
-            default:
-                throw KEMException.criticalError("Unsupported input mode for definition parsing: " + kompileOptions.input);
-        }
+        return definitionParsing.parseDefinitionAndResolveBubbles(definitionFile, mainModuleName, mainProgramsModule, excludedModuleTags);
     }
 
     private static Module filterStreamModules(Module input) {
