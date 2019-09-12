@@ -107,14 +107,8 @@ public class KastFrontEnd extends FrontEnd {
             }
             Module unparsingMod;
             if (options.module == null) {
-                options.module = def.mainSyntaxModuleName();
-                switch (options.input) {
-                    case KORE:
-                        unparsingMod = def.languageParsingModule();
-                        break;
-                    default:
-                        unparsingMod = def.kompiledDefinition.getModule(def.mainSyntaxModuleName()).get();
-                }
+                options.module = def.languageParsingModule().name();
+                unparsingMod = def.languageParsingModule();
             } else {
                 Option<Module> maybeUnparsingMod = def.kompiledDefinition.getModule(options.module);
                 if (maybeUnparsingMod.isEmpty()) {
