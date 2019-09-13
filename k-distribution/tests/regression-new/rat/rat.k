@@ -70,12 +70,14 @@ module RAT
   rule gcd(A, 0) => 0 -Int A requires A <Int 0
   rule gcd(A, B) => gcd(B, A %Int B) requires B =/=Int 0 // since |A %Int B| = |A| %Int |B|
 
-  // equalities and inequalities
+  // equalities
+  // NOTE: the two rules below may not work correctly in the java backend
 
-  rule < I , I' >Rat ==Rat < J , J' >Rat => I *Int J' ==Int I' *Int J
-  rule I:Int         ==Rat < J , J' >Rat => I *Int J' ==Int J
-  rule < J , J' >Rat ==Rat I:Int         => I ==Rat < J , J' >Rat
-  rule I:Int         ==Rat J:Int         => I ==Int J
+  rule R ==Rat S => R ==K S
+
+  rule R =/=Rat S => R =/=K S
+
+  // inequalities
 
   rule R >Rat S => R -Rat S >Rat 0 requires S =/=Rat 0
 
@@ -83,8 +85,6 @@ module RAT
   rule I:Int        >Rat 0 => I >Int 0
 
   // derived
-
-  rule R =/=Rat S => notBool R ==Rat S
 
   rule R >=Rat S => notBool R <Rat S
 
