@@ -92,7 +92,7 @@ public class GenerateSortProjections {
       i = 0;
       for (NonTerminal nt : iterable(prod.nonterminals())) {
         if (nt.name().isDefined()) {
-          KLabel lbl = getProjectLbl(prod.klabelAtt().getOrElse(() -> prod.klabel().get().name()), nt.name().get());
+          KLabel lbl = getProjectLbl(prod.klabel().get().name(), nt.name().get());
           if (mod.definedKLabels().contains(lbl)) {
               return Stream.empty();
           }
