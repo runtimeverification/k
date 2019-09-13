@@ -53,15 +53,15 @@ module RAT
   // normalize
 
   syntax Rat ::= makeRat(Int, Int)      [function]
-               | makeRatAux(Int, Int, Int) [function]
+               | makeRat(Int, Int, Int) [function]
 
   rule makeRat(0, J) => 0 requires J =/=Int 0
 
-  rule makeRat(I, J) => makeRatAux(I, J, gcd(I,J)) requires I =/=Int 0 andBool J =/=Int 0
+  rule makeRat(I, J) => makeRat(I, J, gcd(I,J)) requires I =/=Int 0 andBool J =/=Int 0
 
-  rule makeRatAux(I, 1, _) => I
-  rule makeRatAux(I, J, D) => < I /Int D , J /Int D >Rat        requires J >Int 1
-  rule makeRatAux(I, J, D) => makeRatAux(0 -Int I, 0 -Int J, D) requires J <Int 0
+  rule makeRat(I, 1, _) => I
+  rule makeRat(I, J, D) => < I /Int D , J /Int D >Rat     requires J >Int 1
+  rule makeRat(I, J, D) => makeRat(0 -Int I, 0 -Int J, D) requires J <Int 0
 
   // gcd(a,b) computes the gcd of |a| and |b|, which is positive.
   syntax Int ::= gcd(Int, Int) [function]
