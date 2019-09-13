@@ -307,6 +307,7 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
     case _ =>
   }
 
+  lazy val recordProjections = productions.flatMap(p => p.nonterminals.filter(_.name.isDefined).map(nt => "project:" + p.klabelAtt.getOrElse(p.klabel.get) + ":" + nt.name.get))
   lazy val semanticCasts = definedSorts.map("#SemanticCastTo" + _)
   lazy val sortProjections = definedSorts.map("project:" + _)
   lazy val sortPredicates = definedSorts.map("is" + _)
