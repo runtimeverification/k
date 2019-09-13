@@ -259,6 +259,44 @@ proof obligation.
 -   `trusted` instructs the prover that it should not attempt proving a given
     proof obligation, instead trusting that it is true.
 
+### Projection and Predicate functions
+
+K automatically generates certain predicate and projection functions from the
+syntax you declare. For example, if you write:
+
+```
+syntax Foo ::= foo(bar: Bar)
+```
+
+It will automatically generate the following K code:
+
+```
+syntax Bool ::= isFoo(K) [function]
+syntax Foo ::= "{" K "}" ":>Foo" [function]
+syntax Bar ::= bar(Foo) [function]
+
+rule isFoo(F:Foo) => true
+rule isFoo(_) => false [owise]
+
+rule { F:Foo }:>Foo => F
+rule bar(foo(B:Bar)) => B
+```
+
+The first two types of functions are generated automatically for every sort in
+your K definition, and the third type of function is generated automatically
+for each named nonterminal in your definition. Essentially, `isFoo` for some
+sort `Foo` will tell you whether a particular term of sort `K` is a `Foo`,
+`{F}:>Foo` will cast `F` to sort `Foo` if `F` is of sort `Foo` and will be
+undefined (i.e., theoretically defined as `#False`, the bottom symbol in
+matching logic) otherwise. Finally, `bar` will project out the child of a `foo`
+named `bar` in its production declaration.
+
+Note that if another term of equal or smaller sort to `Foo` exists and has a
+child named `bar` of equal or smaller sort to `Bar`, this will generate an
+ambiguity during parsing, so care should be taken to ensure that named
+nonterminals are sufficiently unique from one another to prevent such
+ambiguities. Of course, the compiler will generate a warning in this case.
+
 
 Pattern Matching
 ----------------
