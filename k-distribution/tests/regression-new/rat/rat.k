@@ -4,7 +4,7 @@ module RAT-SYNTAX
 
   syntax Rat [hook(RAT.Rat)]
 
-  syntax Rat ::= "<" Int "," Int ">" // [format(%2 / %4)]
+  syntax Rat ::= "<" Int "," Int ">Rat" [format(%2 /Rat %4)]
                | Int
 
   syntax Rat ::= left:
@@ -30,25 +30,25 @@ module RAT
 
   // arithmetic
 
-  rule <I , I'> +Rat <J , J'> => ((I *Int J') +Int (I' *Int J)) /Rat (I' *Int J')
-  rule I:Int    +Rat <J , J'> => ((I *Int J') +Int J) /Rat J'
-  rule <J , J'> +Rat I:Int    => I +Rat <J , J'>
-  rule I:Int    +Rat J:Int    => I +Int J
+  rule < I , I' >Rat +Rat < J , J' >Rat => ((I *Int J') +Int (I' *Int J)) /Rat (I' *Int J')
+  rule I:Int         +Rat < J , J' >Rat => ((I *Int J') +Int J) /Rat J'
+  rule < J , J' >Rat +Rat I:Int         => I +Rat < J , J' >Rat
+  rule I:Int         +Rat J:Int         => I +Int J
 
-  rule <I , I'> *Rat <J , J'> => (I *Int J) /Rat (I' *Int J')
-  rule I:Int    *Rat <J , J'> => (I *Int J) /Rat J'
-  rule <J , J'> *Rat I:Int    => I *Rat <J , J'>
-  rule I:Int    *Rat J:Int    => I *Int J
+  rule < I , I' >Rat *Rat < J , J' >Rat => (I *Int J) /Rat (I' *Int J')
+  rule I:Int         *Rat < J , J' >Rat => (I *Int J) /Rat J'
+  rule < J , J' >Rat *Rat I:Int         => I *Rat < J , J' >Rat
+  rule I:Int         *Rat J:Int         => I *Int J
 
-  rule <I , I'> -Rat <J , J'> => ((I *Int J') -Int (I' *Int J)) /Rat (I' *Int J')
-  rule I:Int    -Rat <J , J'> => ((I *Int J') -Int J) /Rat J'
-  rule <I , I'> -Rat J:Int    => (I -Int (I' *Int J)) /Rat I'
-  rule I:Int    -Rat J:Int    => I -Int J
+  rule < I , I' >Rat -Rat < J , J' >Rat => ((I *Int J') -Int (I' *Int J)) /Rat (I' *Int J')
+  rule I:Int         -Rat < J , J' >Rat => ((I *Int J') -Int J) /Rat J'
+  rule < I , I' >Rat -Rat J:Int         => (I -Int (I' *Int J)) /Rat I'
+  rule I:Int         -Rat J:Int         => I -Int J
 
-  rule <I , I'> /Rat <J , J'> => (I *Int J') /Rat (I' *Int J)
-  rule I:Int    /Rat <J , J'> => (I *Int J') /Rat J
-  rule <I , I'> /Rat J:Int    => I /Rat (I' *Int J) requires J =/=Int 0
-  rule I:Int    /Rat J:Int    => makeRat(I, J)      requires J =/=Int 0
+  rule < I , I' >Rat /Rat < J , J' >Rat => (I *Int J') /Rat (I' *Int J)
+  rule I:Int         /Rat < J , J' >Rat => (I *Int J') /Rat J
+  rule < I , I' >Rat /Rat J:Int         => I /Rat (I' *Int J) requires J =/=Int 0
+  rule I:Int         /Rat J:Int         => makeRat(I, J)      requires J =/=Int 0
 
   // normalize
 
@@ -60,7 +60,7 @@ module RAT
   rule makeRat(I, J) => makeRatAux(I, J, gcd(I,J)) requires I =/=Int 0 andBool J =/=Int 0
 
   rule makeRatAux(I, 1, _) => I
-  rule makeRatAux(I, J, D) => <I /Int D, J /Int D>              requires J >Int 1
+  rule makeRatAux(I, J, D) => < I /Int D , J /Int D >Rat        requires J >Int 1
   rule makeRatAux(I, J, D) => makeRatAux(0 -Int I, 0 -Int J, D) requires J <Int 0
 
   // gcd(a,b) computes the gcd of |a| and |b|, which is positive.
@@ -72,15 +72,15 @@ module RAT
 
   // equalities and inequalities
 
-  rule <I , I'> ==Rat <J , J'> => I *Int J' ==Int I' *Int J
-  rule I:Int    ==Rat <J , J'> => I *Int J' ==Int J
-  rule <J , J'> ==Rat I:Int    => I ==Rat <J, J'>
-  rule I:Int    ==Rat J:Int    => I ==Int J
+  rule < I , I' >Rat ==Rat < J , J' >Rat => I *Int J' ==Int I' *Int J
+  rule I:Int         ==Rat < J , J' >Rat => I *Int J' ==Int J
+  rule < J , J' >Rat ==Rat I:Int         => I ==Rat < J , J' >Rat
+  rule I:Int         ==Rat J:Int         => I ==Int J
 
   rule R >Rat S => R -Rat S >Rat 0 requires S =/=Rat 0
 
-  rule <I , _> >Rat 0 => I >Int 0
-  rule I:Int   >Rat 0 => I >Int 0
+  rule < I , _ >Rat >Rat 0 => I >Int 0
+  rule I:Int        >Rat 0 => I >Int 0
 
   // derived
 
