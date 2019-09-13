@@ -318,16 +318,8 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
     case m: Module => m.name == name && m.sentences == sentences
   }
 
-  def toFlatModules() : (String, Set[FlatModule]) = {
-    var flatSelf = new FlatModule(name, importedModuleNames, sentences, att)
-    var flatModules = Set(flatSelf) ++
-      (imports.size match {
-        case 0 => Set()
-        case _ => imports.map(m => m.toFlatModules._2).flatten
-      })
-    (name, flatModules)
-  }
-
+  def flattened()   : FlatModule                = new FlatModule(name, imports.map(m => m.name), sentences, att)
+  def flatModules() : (String, Set[FlatModule]) = (name, Set(flattened) ++ imports.map(m => m.flatModules._2).flatten)
 }
 
 object Import {
