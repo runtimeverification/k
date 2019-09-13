@@ -121,6 +121,14 @@ def flattenLabel(label, kast):
     return [kast]
 
 def splitConfigFrom(configuration):
+    """Split the substitution from a given configuration.
+
+    Given an input configuration `config`, will return a tuple `(symbolic_config, subst)`, where:
+
+        1.  `config == substitute(symbolic_config, subst)`
+        2.  `symbolic_config` is the same configuration structure, but where the contents of leaf cells is replaced with a fresh KVariable.
+        3.  `subst` is the substitution for the generated KVariables back to the original configuration contents.
+    """
     initial_substitution = {}
     _mkCellVar = lambda label: label.replace('-', '_').replace('<', '').replace('>', '').upper() + '_CELL'
     def _replaceWithVar(k):
