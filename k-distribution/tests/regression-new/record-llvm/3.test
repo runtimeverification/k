@@ -1,1 +1,1 @@
-project:test:foo(test(10, 15))
+foo(test(10, 15))
