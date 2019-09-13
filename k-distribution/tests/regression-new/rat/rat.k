@@ -86,7 +86,7 @@ module RAT
 
   rule R =/=Rat S => notBool R ==Rat S
 
-  rule R >=Rat S => R >Rat S orBool R ==Rat S
+  rule R >=Rat S => notBool R <Rat S
 
   rule R <Rat S => S >Rat R
 
