@@ -38,6 +38,12 @@ public class GenerateSortProjections {
 
     private Module mod;
 
+    public GenerateSortProjections() {}
+
+    public GenerateSortProjections(Module mod) {
+      this.mod = mod;
+    }
+
     public Module gen(Module mod) {
         this.mod = mod;
         return Module(mod.name(), mod.imports(), (Set<Sentence>) mod.localSentences().$bar(
