@@ -44,13 +44,13 @@ def kprove(definition, inputFile, kproveArgs = [], teeOutput = True, kRelease = 
 
 def kastJSON(definition, inputJSON, kastArgs = [], teeOutput = True, kRelease = None):
     with tempfile.NamedTemporaryFile(mode = 'w') as tempf:
-        json.dump(inputJSON, tempf)
+        tempf.write(json.dumps(inputJSON))
         tempf.flush()
         return kast(definition, tempf.name, kastArgs = kastArgs, teeOutput = teeOutput, kRelease = kRelease)
 
 def krunJSON(definition, inputJSON, krunArgs = [], teeOutput = True, kRelease = None):
     with tempfile.NamedTemporaryFile(mode = 'w') as tempf:
-        json.dump(inputJSON, tempf)
+        tempf.write(json.dumps(inputJSON))
         tempf.flush()
         (rC, out, err) = krun(definition, tempf.name, krunArgs = krunArgs + ['--output', 'json', '--parser', 'cat'], teeOutput = teeOutput, kRelease = kRelease)
         out = None if out == '' else json.loads(out)['term']
