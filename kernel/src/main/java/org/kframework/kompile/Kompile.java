@@ -128,7 +128,7 @@ public class Kompile {
         files.saveToKompiled("compiled.txt", kompiledDefinition.toString());
         sw.printIntermediate("Apply compile pipeline");
 
-        if (kompileOptions.emitJson) {
+        if (kompileOptions.experimental.emitJson) {
             try {
                 files.saveToKompiled("parsed.json",   new String(ToJson.apply(parsedDef),          "UTF-8"));
                 files.saveToKompiled("compiled.json", new String(ToJson.apply(kompiledDefinition), "UTF-8"));

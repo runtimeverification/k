@@ -98,9 +98,6 @@ public class KompileOptions implements Serializable {
         }
     }
 
-    @Parameter(names="--emit-json", description="Emit JSON serialized version of parsed and kompiled definitions.")
-    public boolean emitJson = false;
-
     public static final class Experimental implements Serializable {
 
         // Experimental options
@@ -130,5 +127,8 @@ public class KompileOptions implements Serializable {
 
         @Parameter(names="--cache-file", description="Location of parse cache file. Default is $KOMPILED_DIR/cache.bin.")
         public String cacheFile;
+
+        @Parameter(names="--emit-json", description="Emit JSON serialized version of parsed and kompiled definitions.")
+        public boolean emitJson = false;
     }
 }
