@@ -74,6 +74,10 @@
       <outputDirectory>/include</outputDirectory>
     </fileSet>
     <fileSet>
+      <directory>${project.basedir}/../llvm-backend/src/main/native/llvm-backend/cmake</directory>
+      <outputDirectory>/cmake</outputDirectory>
+    </fileSet>
+    <fileSet>
       <directory>${project.basedir}/../haskell-backend/src/main/native/haskell-backend/src/main/kore</directory>
       <outputDirectory>/include/kore</outputDirectory>
     </fileSet>
