@@ -195,6 +195,8 @@ public class Kompile {
                 .andThen(generateSortPredicateSyntax)
                 .andThen(generateSortProjections)
                 .andThen(Kompile::resolveFreshConstants)
+                .andThen(generateSortPredicateSyntax)
+                .andThen(generateSortProjections)
                 .andThen(AddImplicitComputationCell::transformDefinition)
                 .andThen(d -> new Strategy(kompileOptions.experimental.heatCoolStrategies).addStrategyCellToRulesTransformer(d).apply(d))
                 .andThen(ConcretizeCells::transformDefinition)
