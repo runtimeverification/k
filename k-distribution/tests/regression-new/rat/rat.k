@@ -1,0 +1,95 @@
+module RAT-SYNTAX
+  imports INT-SYNTAX
+  imports BOOL
+
+  syntax Rat [hook(RAT.Rat)]
+
+  syntax Rat ::= "<" Int "," Int ">" // [format(%2 / %4)]
+               | Int
+
+  syntax Rat ::= left:
+                 Rat "*Rat" Rat [function, functional, klabel(_*Rat_), symbol, left, smtlib(ratmul), hook(RAT.mul)]
+               | Rat "/Rat" Rat [function, functional, klabel(_/Rat_), symbol, left, smtlib(ratdiv), hook(RAT.div)]
+               > left:
+                 Rat "+Rat" Rat [function, functional, klabel(_+Rat_), symbol, left, smtlib(ratadd), hook(RAT.add)]
+               | Rat "-Rat" Rat [function, functional, klabel(_-Rat_), symbol, left, smtlib(ratsub), hook(RAT.sub)]
+
+  syntax Rat ::= "(" Rat ")" [bracket]
+
+  syntax Bool ::= Rat  "==Rat" Rat [function, functional, klabel(_==Rat_),  symbol, left, smtlib(rateq), hook(RAT.eq)]
+                | Rat "=/=Rat" Rat [function, functional, klabel(_=/=Rat_), symbol, left, smtlib(ratne), hook(RAT.ne)]
+                | Rat   ">Rat" Rat [function, functional, klabel(_>Rat_),   symbol, left, smtlib(ratgt), hook(RAT.gt)]
+                | Rat  ">=Rat" Rat [function, functional, klabel(_>=Rat_),  symbol, left, smtlib(ratge), hook(RAT.ge)]
+                | Rat   "<Rat" Rat [function, functional, klabel(_<Rat_),   symbol, left, smtlib(ratlt), hook(RAT.lt)]
+                | Rat  "<=Rat" Rat [function, functional, klabel(_<=Rat_),  symbol, left, smtlib(ratle), hook(RAT.le)]
+endmodule
+
+module RAT
+  imports RAT-SYNTAX
+  imports INT
+
+  // arithmetic
+
+  rule <I , I'> +Rat <J , J'> => ((I *Int J') +Int (I' *Int J)) /Rat (I' *Int J')
+  rule I:Int    +Rat <J , J'> => ((I *Int J') +Int J) /Rat J'
+  rule <J , J'> +Rat I:Int    => I +Rat <J , J'>
+  rule I:Int    +Rat J:Int    => I +Int J
+
+  rule <I , I'> *Rat <J , J'> => (I *Int J) /Rat (I' *Int J')
+  rule I:Int    *Rat <J , J'> => (I *Int J) /Rat J'
+  rule <J , J'> *Rat I:Int    => I *Rat <J , J'>
+  rule I:Int    *Rat J:Int    => I *Int J
+
+  rule <I , I'> -Rat <J , J'> => ((I *Int J') -Int (I' *Int J)) /Rat (I' *Int J')
+  rule I:Int    -Rat <J , J'> => ((I *Int J') -Int J) /Rat J'
+  rule <I , I'> -Rat J:Int    => (I -Int (I' *Int J)) /Rat I'
+  rule I:Int    -Rat J:Int    => I -Int J
+
+  rule <I , I'> /Rat <J , J'> => (I *Int J') /Rat (I' *Int J)
+  rule I:Int    /Rat <J , J'> => (I *Int J') /Rat J
+  rule <I , I'> /Rat J:Int    => I /Rat (I' *Int J) requires J =/=Int 0
+  rule I:Int    /Rat J:Int    => makeRat(I, J)      requires J =/=Int 0
+
+  // normalize
+
+  syntax Rat ::= makeRat(Int, Int)      [function]
+               | makeRatAux(Int, Int, Int) [function]
+
+  rule makeRat(0, J) => 0 requires J =/=Int 0
+
+  rule makeRat(I, J) => makeRatAux(I, J, gcd(I,J)) requires I =/=Int 0 andBool J =/=Int 0
+
+  rule makeRatAux(I, 1, _) => I
+  rule makeRatAux(I, J, D) => <I /Int D, J /Int D>              requires J >Int 1
+  rule makeRatAux(I, J, D) => makeRatAux(0 -Int I, 0 -Int J, D) requires J <Int 0
+
+  // gcd(a,b) computes the gcd of |a| and |b|, which is positive.
+  syntax Int ::= gcd(Int, Int) [function]
+
+  rule gcd(A, 0) => A        requires A >Int 0
+  rule gcd(A, 0) => 0 -Int A requires A <Int 0
+  rule gcd(A, B) => gcd(B, A %Int B) requires B =/=Int 0 // since |A %Int B| = |A| %Int |B|
+
+  // equalities and inequalities
+
+  rule <I , I'> ==Rat <J , J'> => I *Int J' ==Int I' *Int J
+  rule I:Int    ==Rat <J , J'> => I *Int J' ==Int J
+  rule <J , J'> ==Rat I:Int    => I ==Rat <J, J'>
+  rule I:Int    ==Rat J:Int    => I ==Int J
+
+  rule R >Rat S => R -Rat S >Rat 0 requires S =/=Rat 0
+
+  rule <I , _> >Rat 0 => I >Int 0
+  rule I:Int   >Rat 0 => I >Int 0
+
+  // derived
+
+  rule R =/=Rat S => notBool R ==Rat S
+
+  rule R >=Rat S => R >Rat S orBool R ==Rat S
+
+  rule R <Rat S => notBool R >=Rat S
+
+  rule R <=Rat S => notBool R >Rat S
+
+endmodule
