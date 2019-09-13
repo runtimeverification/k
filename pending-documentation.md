@@ -402,7 +402,7 @@ rule something => foo(0)
 
 This is completely desugared by the K frontend and does not require any special
 support in the backend. It is an error to have a rewrite inside function
-context, as we do not currently support propogating such changes back into the
+context, as we do not currently support propagating such changes back into the
 global configuration. It is also an error if the context is not at the top
 level of a rule body.
 
