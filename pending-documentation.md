@@ -320,6 +320,8 @@ This code can also be used outside of any rewrite, in which case matching
 occurs as if it appeared on the left hand side, and the right hand side becomes
 a variable corresponding to the alias.
 
+It is an error to use an as pattern on the right hand side of a rule.
+
 ### Record-like KApply Patterns
 
 We have added a syntax for matching on KApply terms which mimics the record
