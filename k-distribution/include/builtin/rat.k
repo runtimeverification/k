@@ -40,7 +40,7 @@ module RAT-KORE [kore]
    * equalities
    */
 
-  // NOTE: the two rules below may not work correctly in the java backend
+  // NOTE: the two rules below may not work correctly in non-kore backends
 
   rule R ==Rat S => R ==K S
 
