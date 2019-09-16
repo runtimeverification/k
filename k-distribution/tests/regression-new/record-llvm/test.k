@@ -1,7 +1,7 @@
 module TEST
   imports INT
 
-  syntax Foo ::= test(foo: Int, bar: Int)
+  syntax Foo ::= test(Int, foo: Int, bar: Int)
 
   syntax Foo ::= incrementFoo(Foo) [function]
   syntax Foo ::= incrementBar(Foo) [function]

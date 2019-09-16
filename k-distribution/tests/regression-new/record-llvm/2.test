@@ -1,1 +1,1 @@
-incrementBar(test(1, 0))
+incrementBar(test(2, 1, 0))
