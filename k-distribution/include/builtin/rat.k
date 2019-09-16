@@ -34,9 +34,25 @@ module RAT-SYMBOLIC [symbolic, kore]
   [anywhere]
 endmodule
 
+module RAT-KORE [kore]
+  imports RAT-SYNTAX
+  imports K-EQUAL
+
+  /*
+   * equalities
+   */
+
+  // NOTE: the two rules below may not work correctly in the java backend
+
+  rule R ==Rat S => R ==K S
+
+  rule R =/=Rat S => R =/=K S
+endmodule
+
 module RAT
   imports RAT-SYNTAX
   imports RAT-SYMBOLIC
+  imports RAT-KORE
   imports INT
 
   syntax Rat ::= "<" Int "," Int ">Rat" [format(%2 /Rat %4)]
@@ -83,16 +99,6 @@ module RAT
   rule gcdInt(A, 0) => A        requires A >Int 0
   rule gcdInt(A, 0) => 0 -Int A requires A <Int 0
   rule gcdInt(A, B) => gcdInt(B, A %Int B) requires B =/=Int 0 // since |A %Int B| = |A| %Int |B|
-
-  /*
-   * equalities
-   */
-
-  // NOTE: the two rules below may not work correctly in the java backend
-
-  rule R ==Rat S => R ==K S
-
-  rule R =/=Rat S => R =/=K S
 
   /*
    * inequalities
