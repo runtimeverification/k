@@ -2,7 +2,7 @@ module RAT-SYNTAX
   imports INT-SYNTAX
   imports BOOL
 
-  syntax Rat [hook(RAT.Rat)]
+  syntax Rat
 
   syntax Rat ::= "<" Int "," Int ">Rat" [format(%2 /Rat %4)]
                | Int
