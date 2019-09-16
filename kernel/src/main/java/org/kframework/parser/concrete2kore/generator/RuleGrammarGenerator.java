@@ -6,6 +6,8 @@ import org.kframework.attributes.Att;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.ConfigurationInfo;
 import org.kframework.compile.ConfigurationInfoFromModule;
+import org.kframework.compile.GenerateSortPredicateSyntax;
+import org.kframework.compile.GenerateSortProjections;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.definition.ModuleTransformer;
@@ -220,7 +222,13 @@ public class RuleGrammarGenerator {
             }
         }
 
+        for (Sort s : iterable(mod.definedSorts())) {
+            prods.addAll(new GenerateSortPredicateSyntax().gen(mod, s));
+            prods.addAll(new GenerateSortProjections(mod).gen(s).collect(Collectors.toSet()));
+        }
+
         for (Production p : iterable(mod.productions())) {
+            prods.addAll(new GenerateSortProjections(mod).gen(p).collect(Collectors.toSet()));
             if (p.att().contains("poly")) {
                 List<Set<Integer>> positions = computePositions(p);
                 if (!p.isSyntacticSubsort()) {
