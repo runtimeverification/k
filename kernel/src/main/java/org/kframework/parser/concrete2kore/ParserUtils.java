@@ -174,6 +174,7 @@ public class ParserUtils {
 
     public Set<Module> loadModules(
             Set<Module> previousModules,
+            Context context,
             String definitionText,
             Source source,
             File currentDirectory,
@@ -187,7 +188,6 @@ public class ParserUtils {
         Definition def = new Definition();
         def.setItems((List<DefinitionItem>) (Object) kilModules);
 
-        Context context = new Context();
         new CollectProductionsVisitor(kore, context).visit(def);
 
         KILtoKORE kilToKore = new KILtoKORE(context, false, kore);
@@ -207,7 +207,7 @@ public class ParserUtils {
             File currentDirectory,
             List<File> lookupDirectories,
             boolean kore) {
-        Set<Module> modules = loadModules(previousModules, definitionText, source, currentDirectory, lookupDirectories, new HashSet<>(), kore);
+        Set<Module> modules = loadModules(previousModules, new Context(), definitionText, source, currentDirectory, lookupDirectories, new HashSet<>(), kore);
         Set<Module> allModules = new HashSet<>(modules);
         allModules.addAll(previousModules);
         Module mainModule = getMainModule(mainModuleName, allModules);
@@ -239,9 +239,10 @@ public class ParserUtils {
             boolean kore) {
         Set<Module> previousModules = new HashSet<>();
         Set<File> requiredFiles = new HashSet<>();
+        Context context = new Context();
         if (autoImportDomains)
-            previousModules.addAll(loadModules(new HashSet<>(), Kompile.REQUIRE_PRELUDE_K, source, currentDirectory, lookupDirectories, requiredFiles, kore));
-        Set<Module> modules = loadModules(previousModules, definitionText, source, currentDirectory, lookupDirectories, requiredFiles, kore);
+            previousModules.addAll(loadModules(new HashSet<>(), context, Kompile.REQUIRE_PRELUDE_K, source, currentDirectory, lookupDirectories, requiredFiles, kore));
+        Set<Module> modules = loadModules(previousModules, context, definitionText, source, currentDirectory, lookupDirectories, requiredFiles, kore);
         modules.addAll(previousModules); // add the previous modules, since load modules is not additive
         Module mainModule = getMainModule(mainModuleName, modules);
         Optional<Module> opt;
