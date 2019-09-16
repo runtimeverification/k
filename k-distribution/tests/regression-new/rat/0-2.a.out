@@ -1,5 +1,1 @@
-<T>
-  <k>
-    0 ;  .Pgm
-  </k>
-</T>
+initGeneratedTopCell ( $PGM |-> -1 /Rat 0 ;  .Pgm )

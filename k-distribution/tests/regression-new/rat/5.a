@@ -1,3 +1,5 @@
+// equality with normalization
+
  4 /Rat  6  ==Rat  2 /Rat 3 ;
 -4 /Rat  6  ==Rat -2 /Rat 3 ;
  4 /Rat -6  ==Rat -2 /Rat 3 ;

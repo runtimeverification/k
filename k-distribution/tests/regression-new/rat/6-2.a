@@ -1,1 +1,3 @@
-1 /Rat 0 ==Rat 2 /Rat 0 ;
+// equality with division-by-zero
+
+1 /Rat 0 ==Rat 2 /Rat 0 ;  // should NOT be false
