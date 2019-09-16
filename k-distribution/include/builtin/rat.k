@@ -71,18 +71,18 @@ module RAT
 
   rule makeRat(0, J) => 0 requires J =/=Int 0
 
-  rule makeRat(I, J) => makeRat(I, J, gcd(I,J)) requires I =/=Int 0 andBool J =/=Int 0
+  rule makeRat(I, J) => makeRat(I, J, gcdInt(I,J)) requires I =/=Int 0 andBool J =/=Int 0
 
   rule makeRat(I, 1, _) => I
   rule makeRat(I, J, D) => < I /Int D , J /Int D >Rat     requires J >Int 1
   rule makeRat(I, J, D) => makeRat(0 -Int I, 0 -Int J, D) requires J <Int 0
 
-  // gcd(a,b) computes the gcd of |a| and |b|, which is positive.
-  syntax Int ::= gcd(Int, Int) [function]
+  // gcdInt(a,b) computes the gcd of |a| and |b|, which is positive.
+  syntax Int ::= gcdInt(Int, Int) [function]
 
-  rule gcd(A, 0) => A        requires A >Int 0
-  rule gcd(A, 0) => 0 -Int A requires A <Int 0
-  rule gcd(A, B) => gcd(B, A %Int B) requires B =/=Int 0 // since |A %Int B| = |A| %Int |B|
+  rule gcdInt(A, 0) => A        requires A >Int 0
+  rule gcdInt(A, 0) => 0 -Int A requires A <Int 0
+  rule gcdInt(A, B) => gcdInt(B, A %Int B) requires B =/=Int 0 // since |A %Int B| = |A| %Int |B|
 
   /*
    * equalities
