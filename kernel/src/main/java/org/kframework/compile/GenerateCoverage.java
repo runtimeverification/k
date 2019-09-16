@@ -60,18 +60,16 @@ public class GenerateCoverage implements AutoCloseable {
             return body;
         }
 
-        Option<Sort> s = mod.optionSortFor(right);
+        AddSortInjections inj = new AddSortInjections(mod);
 
-        if (s.isEmpty()) {
-            return body;
-        }
+        Sort s = inj.sort(right, Sorts.K());
 
         K k = KSequence(KApply(KLabel("#logToFile"),
             KToken(StringUtil.enquoteKString(files.resolveKompiled("coverage.txt").getAbsolutePath()), Sorts.String()),
             KToken(StringUtil.enquoteKString(id + '\n'), Sorts.String())), right);
 
-        if (!s.get().equals(Sorts.K())) {
-            k = KApply(KLabel("project:" + s.get().toString()), k);
+        if (!s.equals(Sorts.K())) {
+            k = KApply(KLabel("project:" + s.toString()), k);
         }
 
         return KRewrite(left, k);
