@@ -24,8 +24,20 @@ module RAT-SYNTAX
                 | Rat  "<=Rat" Rat [function, functional, klabel(_<=Rat_),  symbol, left, smtlib(ratle), hook(RAT.le)]
 endmodule
 
+module RAT-SYMBOLIC [symbolic, kore]
+  imports RAT-SYNTAX
+  imports ML-SYNTAX
+
+  rule
+    #Ceil(@R1:Rat /Rat @R2:Rat)
+  =>
+    {(@R2 =/=Rat 0) #Equals true} #And #Ceil(@R1) #And #Ceil(@R2)
+  [anywhere]
+endmodule
+
 module RAT
   imports RAT-SYNTAX
+  imports RAT-SYMBOLIC
   imports INT
 
   /*
