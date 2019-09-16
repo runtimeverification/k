@@ -1,0 +1,14 @@
+// denominator < 0
+ 3 /Rat -2 ;
+-3 /Rat -2 ;
+ 0 /Rat -2 ;
+
+// denominator = 1
+ 3 /Rat 1 ;
+-3 /Rat 1 ;
+ 0 /Rat 1 ;
+
+// denominator > 1
+ 3 /Rat 2 ;
+-3 /Rat 2 ;
+ 0 /Rat 2 ;
