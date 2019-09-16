@@ -158,6 +158,7 @@ public class KoreBackend implements Backend {
                 .andThen(generateSortProjections)
                 .andThen(AddImplicitComputationCell::transformDefinition)
                 .andThen(resolveFreshConstants)
+                .andThen(generateSortPredicateSyntax)
                 .andThen(generateSortProjections)
                 .andThen(d -> new Strategy(kompileOptions.experimental.heatCoolStrategies).addStrategyCellToRulesTransformer(d).apply(d))
                 .andThen(d -> Strategy.addStrategyRuleToMainModule(def.mainModule().name()).apply(d))

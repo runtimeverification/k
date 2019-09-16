@@ -307,6 +307,11 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
     case _ =>
   }
 
+  lazy val recordProjections = productions.flatMap(p => p.nonterminals.filter(_.name.isDefined).map(nt => "project:" ++ p.klabel.get.name ++ ":" ++ nt.name.get))
+  lazy val semanticCasts = definedSorts.map("#SemanticCastTo" + _)
+  lazy val sortProjections = definedSorts.map("project:" + _)
+  lazy val sortPredicates = definedSorts.map("is" + _)
+
   override lazy val hashCode: Int = name.hashCode
 
   override def equals(that: Any) = that match {
