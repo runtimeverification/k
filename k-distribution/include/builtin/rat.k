@@ -118,3 +118,18 @@ module RAT
   rule R <=Rat S => S >=Rat R
 
 endmodule
+
+module RAT-NON-KORE
+  imports RAT
+
+  /*
+   * equalities for non-kore backends such as the java backend
+   */
+
+  rule < I , I' >Rat ==Rat < J , J' >Rat => I ==Int J andBool I' ==Int J'
+  rule _:Int         ==Rat < _ , _  >Rat => false
+  rule < _ , _  >Rat ==Rat _:Int         => false
+  rule I:Int         ==Rat J:Int         => I ==Int J
+
+  rule R =/=Rat S => notBool (R ==Rat S)
+endmodule
