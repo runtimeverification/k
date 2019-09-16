@@ -4,8 +4,7 @@ module RAT-SYNTAX
 
   syntax Rat
 
-  syntax Rat ::= "<" Int "," Int ">Rat" [format(%2 /Rat %4)]
-               | Int
+  syntax Rat ::= Int
 
   syntax Rat ::= left:
                  Rat "*Rat" Rat [function, functional, klabel(_*Rat_), symbol, left, smtlib(ratmul), hook(RAT.mul)]
@@ -39,6 +38,8 @@ module RAT
   imports RAT-SYNTAX
   imports RAT-SYMBOLIC
   imports INT
+
+  syntax Rat ::= "<" Int "," Int ">Rat" [format(%2 /Rat %4)]
 
   /*
    * arithmetic
