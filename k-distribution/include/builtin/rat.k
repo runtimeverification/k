@@ -9,7 +9,7 @@ module RAT-SYNTAX
 
   syntax Rat ::= left:
                  Rat "*Rat" Rat [function, functional, klabel(_*Rat_), symbol, left, smtlib(ratmul), hook(RAT.mul)]
-               | Rat "/Rat" Rat [function, functional, klabel(_/Rat_), symbol, left, smtlib(ratdiv), hook(RAT.div)]
+               | Rat "/Rat" Rat [function,             klabel(_/Rat_), symbol, left, smtlib(ratdiv), hook(RAT.div)]
                > left:
                  Rat "+Rat" Rat [function, functional, klabel(_+Rat_), symbol, left, smtlib(ratadd), hook(RAT.add)]
                | Rat "-Rat" Rat [function, functional, klabel(_-Rat_), symbol, left, smtlib(ratsub), hook(RAT.sub)]
