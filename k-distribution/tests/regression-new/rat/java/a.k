@@ -13,6 +13,7 @@ syntax Cmd ::= Rat ";"
              | Bool ";"
 syntax Pgm ::= List{Cmd,""}
 
+syntax Rat ::= "(" Rat ")" [bracket]
 
 syntax Rat ::= "<" Int "," Int ">"
 

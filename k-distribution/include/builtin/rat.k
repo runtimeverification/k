@@ -13,8 +13,6 @@ module RAT-SYNTAX
                  Rat "+Rat" Rat [function, functional, klabel(_+Rat_), symbol, left, smtlib(ratadd), hook(RAT.add)]
                | Rat "-Rat" Rat [function, functional, klabel(_-Rat_), symbol, left, smtlib(ratsub), hook(RAT.sub)]
 
-  syntax Rat ::= "(" Rat ")" [bracket]
-
   syntax Bool ::= Rat  "==Rat" Rat [function, functional, klabel(_==Rat_),  symbol, left, smtlib(rateq), hook(RAT.eq)]
                 | Rat "=/=Rat" Rat [function, functional, klabel(_=/=Rat_), symbol, left, smtlib(ratne), hook(RAT.ne)]
                 | Rat   ">Rat" Rat [function, functional, klabel(_>Rat_),   symbol, left, smtlib(ratgt), hook(RAT.gt)]
