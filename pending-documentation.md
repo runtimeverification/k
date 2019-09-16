@@ -603,6 +603,10 @@ You should compile this definition with `--backend llvm -ccopt -g` and without
 
 ### Stepping
 
+**Important:** When you first run `krun` with option `--debugger`, read carefully
+the generated log. There might be warnings suggesting to edit some
+configuration files. 
+
 You can break before every step of execution is taken by setting a breakpoint
 on the `step` function:
 
