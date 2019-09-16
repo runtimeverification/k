@@ -308,6 +308,17 @@ public class RuleGrammarGenerator {
             }).collect(Collectors.toSet());
         } else if (addConfigCells) {
             // remove cells from parsing config cells so they don't conflict with the production in kast.k
+            // also add all matching terminals to the #CellName sort
+            for (Production prod : iterable(mod.productions())) {
+              for (ProductionItem pi : iterable(prod.items())) {
+                if (pi instanceof Terminal) {
+                  Terminal t = (Terminal)pi;
+                  if (t.value().matches("[A-Za-z][A-Za-z0-9\\-]*")) {
+                    prods.add(Production(Sorts.CellName(), Seq(t), Att().add("token")));
+                  }
+                }
+              }
+            }
             parseProds = Stream.concat(prods.stream(), stream(mod.sentences()).filter(s -> !s.att().contains("cell"))).collect(Collectors.toSet());
         } else
             parseProds = Stream.concat(prods.stream(), stream(mod.sentences())).collect(Collectors.toSet());
