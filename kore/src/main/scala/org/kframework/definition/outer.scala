@@ -193,13 +193,6 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
 
   @transient lazy val sortFor: Map[KLabel, Sort] = productionsFor mapValues {_.head.sort}
 
-  def optionSortFor(k: K): Option[Sort] = k match {
-    case Unapply.KApply(l, _) => sortFor.get(l)
-    case Unapply.KRewrite(_, r) => optionSortFor(r)
-    case Unapply.KToken(_, sort) => Some(sort)
-    case Unapply.KSequence(s) => optionSortFor(s.last)
-  }
-
   def isSort(klabel: KLabel, s: Sort) = subsorts.<(sortFor(klabel), s)
 
   lazy val rules: Set[Rule] = sentences collect { case r: Rule => r }
