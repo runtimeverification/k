@@ -13,7 +13,6 @@ import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
-import scala.Option;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
