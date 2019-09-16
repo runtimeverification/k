@@ -34,6 +34,7 @@ import org.kframework.definition.Production;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kil.Attribute;
+import org.kframework.kil.loader.Context;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.Kompile;
 import org.kframework.kompile.KompileOptions;
@@ -1093,6 +1094,7 @@ public class DefinitionToOcaml implements Serializable {
         lookupDirectories.add(Kompile.BUILTIN_DIRECTORY);
         java.util.Set<Module> mods = new ParserUtils(files::resolveWorkingDirectory, kem, globalOptions).loadModules(
                 new HashSet<>(),
+                new Context(),
                 "require " + StringUtil.enquoteCString(definitionFile.getPath()),
                 Source.apply(definitionFile.getAbsolutePath()),
                 definitionFile.getParentFile(),
