@@ -112,6 +112,9 @@ for id, loc in ruleMap.items():
 classes = []
 
 for filename in sources:
+  if not filename in ruleMapByFile:
+    continue
+
   relativeFile = os.path.relpath(filename, source)
   allLines = set()
 
