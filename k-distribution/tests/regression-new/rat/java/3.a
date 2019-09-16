@@ -1,0 +1,31 @@
+// (in)equalities
+
+1 /Rat 2 ==Rat 1 /Rat 2 ;
+1        ==Rat 1 /Rat 2 ;
+1 /Rat 2 ==Rat 1        ;
+1        ==Rat 1        ;
+
+1 /Rat 2 =/=Rat 1 /Rat 2 ;
+1        =/=Rat 1 /Rat 2 ;
+1 /Rat 2 =/=Rat 1        ;
+1        =/=Rat 1        ;
+
+1 /Rat 2 >Rat 1 /Rat 2 ;
+1        >Rat 1 /Rat 2 ;
+1 /Rat 2 >Rat 1        ;
+1        >Rat 1        ;
+
+1 /Rat 2 >=Rat 1 /Rat 2 ;
+1        >=Rat 1 /Rat 2 ;
+1 /Rat 2 >=Rat 1        ;
+1        >=Rat 1        ;
+
+1 /Rat 2 <Rat 1 /Rat 2 ;
+1        <Rat 1 /Rat 2 ;
+1 /Rat 2 <Rat 1        ;
+1        <Rat 1        ;
+
+1 /Rat 2 <=Rat 1 /Rat 2 ;
+1        <=Rat 1 /Rat 2 ;
+1 /Rat 2 <=Rat 1        ;
+1        <=Rat 1        ;
