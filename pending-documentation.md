@@ -603,6 +603,12 @@ You should compile this definition with `--backend llvm -ccopt -g` and without
 
 ### Stepping
 
+**Important:** When you first run `krun` with option `--debugger`, GDB will
+instruct you on how to modify ~/.gdbinit to enable printing abstract syntax
+of K terms in the debugger. If you do not perform this step, you can still
+use all the other features, but K terms will be printed as their raw address
+in memory.
+
 You can break before every step of execution is taken by setting a breakpoint
 on the `step` function:
 
