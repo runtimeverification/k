@@ -29,6 +29,7 @@
         <include>README*</include>
       </includes>
       <excludes>
+        <exclude>include/kore/**</exclude>
         <exclude>**/.*/**</exclude>
         <exclude>**/*-kompiled/**</exclude>
       </excludes>
@@ -71,6 +72,14 @@
     <fileSet>
       <directory>${project.basedir}/../llvm-backend/target/build/install/include</directory>
       <outputDirectory>/include</outputDirectory>
+    </fileSet>
+    <fileSet>
+      <directory>${project.basedir}/../llvm-backend/src/main/native/llvm-backend/cmake</directory>
+      <outputDirectory>/cmake</outputDirectory>
+    </fileSet>
+    <fileSet>
+      <directory>${project.basedir}/../haskell-backend/src/main/native/haskell-backend/src/main/kore</directory>
+      <outputDirectory>/include/kore</outputDirectory>
     </fileSet>
     <fileSet>
       <directory>${project.basedir}/../haskell-backend/target/stack-install</directory>

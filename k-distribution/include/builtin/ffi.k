@@ -2,6 +2,7 @@
 require "domains.k"
 
 module FFI-SYNTAX
+  imports LIST
   syntax FFIType ::= "#void" [klabel(#void), symbol]
                   | "#uint8" [klabel(#uint8), symbol]
                   | "#sint8" [klabel(#sint8), symbol]
@@ -22,18 +23,24 @@ module FFI-SYNTAX
                   | "#ulong" [klabel(#ulong), symbol]
                   | "#slong" [klabel(#slong), symbol]
                   | "#longdouble" [klabel(#longdouble), symbol]
-
+                  | "#struct" "(" List ")" [klabel(#struct), symbol]
 endmodule
 
 module FFI
   imports FFI-SYNTAX
   imports BYTES
-  imports LIST
   imports STRING
 
   /*@ The FFI call takes an int for the symbol to call, a list of bytes, a list of types, and a return type. */
-  syntax Bytes ::= "#ffiCall" "(" Int "," List "," List "," FFIType ")" [function, hook(FFI.call), impure]
+  syntax Bytes ::= "#ffiCall" "(" Int "," List "," List "," FFIType ")" [function, hook(FFI.call)]
+  /*@ The variadic FFI call takes an int for the symbol to call, a list of bytes, a list of fixed types, a list of variadic types and a return type. */
+                 | "#ffiCall" "(" Int "," List "," List "," List "," FFIType ")" [function, hook(FFI.call_variadic)]
+  /*@ The FFI call takes a boolean isVariadic, an int for the symbol to call, a list of bytes, a list of types and a return type. */
+                 | "#ffiCall" "(" Bool "," Int "," List "," List "," Int "," FFIType ")" [function]
 
   /*@ Given a function symbol, return its address as an Int */
   syntax Int ::= "#functionAddress" "(" String ")" [function, hook(FFI.address)]
+
+  rule #ffiCall(false, Addr::Int, Args::List, Types::List, _, Ret::FFIType) => #ffiCall(Addr, Args, Types, Ret)
+  rule #ffiCall(true, Addr::Int, Args::List, Types::List, NFixed::Int, Ret::FFIType) => #ffiCall(Addr, Args, range(Types, 0, size(Types) -Int NFixed), range(Types, NFixed, 0), Ret)
 endmodule

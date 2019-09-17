@@ -28,6 +28,8 @@ object implementation {
 
     case class Variable(name: String, sort: i.Sort) extends i.Variable
 
+    case class SetVariable(name: String, sort: i.Sort) extends i.SetVariable
+
     case class Application(head: i.SymbolOrAlias, args: Seq[i.Pattern]) extends i.Application
 
     case class Top(s: i.Sort) extends i.Top
@@ -111,6 +113,8 @@ object implementation {
     def Attributes(patterns: Seq[Pattern]): i.Attributes = d.Attributes(patterns)
 
     def Variable(name: String, sort: i.Sort): i.Variable = d.Variable(name, sort)
+
+    def SetVariable(name: String, sort: i.Sort): i.SetVariable = d.SetVariable(name, sort)
 
     def Application(head: i.SymbolOrAlias, args: Seq[i.Pattern]): i.Pattern = d.Application(head, args)
 

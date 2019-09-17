@@ -10,8 +10,6 @@ case $ID in
 	ubuntu)
 		CODENAME=$UBUNTU_CODENAME
 		case $CODENAME in
-			xenial)
-				;;
 			bionic)
 				;;
 			*)
@@ -22,8 +20,8 @@ case $ID in
 		;;
 	debian)
 		case $VERSION_ID in
-			9)
-				CODENAME=stretch
+			10)
+				CODENAME=buster
 				;;
 			*)
 				echo "Unsupported Debian version, try building from source."

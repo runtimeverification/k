@@ -2,6 +2,7 @@
 package org.kframework.compile;
 
 import org.kframework.definition.Context;
+import org.kframework.definition.ContextAlias;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.*;
@@ -20,6 +21,7 @@ public class ResolveAnonVar {
 
     void resetVars() {
         vars.clear();
+        counter = 0;
     }
 
     private Rule resolve(Rule rule) {
@@ -44,6 +46,16 @@ public class ResolveAnonVar {
                 context.att());
     }
 
+    private ContextAlias resolve(ContextAlias context) {
+        resetVars();
+        gatherVars(context.body());
+        gatherVars(context.requires());
+        return new ContextAlias(
+                transform(context.body()),
+                transform(context.requires()),
+                context.att());
+    }
+
     public K resolveK(K k) {
         resetVars();;
         gatherVars(k);
@@ -55,6 +67,8 @@ public class ResolveAnonVar {
             return resolve((Rule) s);
         } else if (s instanceof Context) {
             return resolve((Context) s);
+        } else if (s instanceof ContextAlias) {
+            return resolve((ContextAlias) s);
         } else {
             return s;
         }

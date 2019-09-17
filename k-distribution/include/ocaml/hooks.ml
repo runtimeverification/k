@@ -160,7 +160,7 @@ struct
     | _ -> raise Not_implemented
 
   let hook_ctor c _ sort _ _ = match c with
-      _, [Int len] -> [Array (sort,interned_bottom,(Dynarray.make (Z.to_int len) interned_bottom))]
+      _, [Int len], d -> [Array (sort,d,(Dynarray.make (Z.to_int len) d))]
     | _ -> raise Not_implemented
 end
 
@@ -190,6 +190,10 @@ struct
     | _ -> raise Not_implemented
   let hook_argv c _ _ _ _ = match c with
       () -> [List (SortList, Lbl_List_,(Array.fold_right (fun arg res -> [String arg] :: res) !CONFIG.sys_argv []))]
+  let hook_parseKAST c _ _ _ _ = match c with
+    | [String s] -> (try Lexer.parse_k s with
+      | e -> [KApply1(parse_klabel("#noParse"), [String (Printexc.to_string e)])])
+    | _ -> raise Not_implemented
 end
 
 module KEQUAL =
@@ -223,7 +227,7 @@ struct
     | _ -> raise Not_implemented
   let hook_read c _ _ _ _ = match c with
       [Int fd], [Int len] -> unix_error (fun () -> let l = (Z.to_int len) in
-        let b = Bytes.create l in let _ = Unix.read (Hashtbl.find file_descriptors fd) b 0 l in [String (Bytes.to_string b)])
+        let b = Bytes.create l in let bread = Unix.read (Hashtbl.find file_descriptors fd) b 0 l in [String (Bytes.sub_string b 0 bread)])
     | _ -> raise Not_implemented
   let hook_seek c _ _ _ _ = match c with
       [Int fd], [Int off] -> unix_error (fun () -> let o = (Z.to_int off) in let _ = Unix.lseek (Hashtbl.find file_descriptors fd) o Unix.SEEK_SET in [])
@@ -274,6 +278,8 @@ struct
   let flush_logs () =
     Hashtbl.iter flush_log log_files
 
+  let hook_accept _ _ _ _ _ = raise Not_implemented
+  let hook_shutdownWrite _ _ _ _ _ = raise Not_implemented
   let hook_stat _ _ _ _ _ = raise Not_implemented
   let hook_lstat _ _ _ _ _ = raise Not_implemented
   let hook_opendir _ _ _ _ _ = raise Not_implemented
@@ -295,7 +301,8 @@ struct
         | Unix.WSIGNALED n -> (128 + n)
         | Unix.WSTOPPED n -> (128 + n)
       in
-      [KApply3((parse_klabel "#systemResult(_,_,_)_K-IO"), [Int (Z.of_int exit_code)], [String (Buffer.contents buf_out)], [String (Buffer.contents buf_err)])]
+      [KApply3((parse_klabel "#systemResult"), [Int (Z.of_int exit_code)], [String (Buffer.contents buf_out)], [String (Buffer.contents buf_err)])]
+    | _ -> raise Not_implemented
   let hook_mkstemp c _ _ _ _ = match c with
     | [String prefix], [String suffix] -> unix_error (fun () ->
             unix_error (fun () -> let path, outChannel = Filename.open_temp_file prefix suffix in
@@ -375,6 +382,15 @@ struct
     | _ -> raise Not_implemented
   let hook_string2bytes c _ _ _ _ = match c with
       [String s] -> [Bytes (Bytes.of_string s)]
+    | _ -> raise Not_implemented
+  let hook_get c _ _ _ _ = match c with
+      [Bytes b], [Int off] ->
+      [Int (Z.of_int (Char.code (Bytes.get b (Z.to_int off))))]
+    | _ -> raise Not_implemented
+  let hook_update c _ _ _ _ = match c with
+      [Bytes b], [Int off], [Int v] ->
+      Bytes.set b (Z.to_int off) (Char.chr (Z.to_int v));
+      [Bytes b]
     | _ -> raise Not_implemented
   let hook_substr c _ _ _ _ = match c with
       [Bytes b], [Int off1], [Int off2] ->
@@ -708,11 +724,4 @@ struct
   let hook_exponent c _ _ _ _ = match c with
       [Float (f,e,p)] -> (match deconstruct_float f e p with (_, exp, _) -> [Int (Z.of_int exp)])
     | _ -> raise Not_implemented
-end
-open Lexer
-
-module META =
-struct
-  let hook_parseKAST c _ _ _ _ = match c with
-    | [String s] -> Lexer.parse_k s
 end

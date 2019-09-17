@@ -2,7 +2,6 @@
 package org.kframework.backend.llvm;
 
 import com.google.inject.Inject;
-import org.kframework.RewriterResult;
 import org.kframework.backend.kore.ModuleToKORE;
 import org.kframework.compile.AddSortInjections;
 import org.kframework.compile.ExpandMacros;
@@ -14,26 +13,23 @@ import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
 import org.kframework.krun.KRunOptions;
 import org.kframework.krun.RunProcess;
+import org.kframework.main.GlobalOptions;
 import org.kframework.main.Main;
-import org.kframework.parser.kore.Pattern;
-import org.kframework.parser.kore.parser.KoreToK;
+import org.kframework.parser.KoreParser;
 import org.kframework.parser.kore.parser.ParseError;
-import org.kframework.parser.kore.parser.TextToKore;
+import org.kframework.RewriterResult;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.rewriter.SearchType;
-import org.kframework.unparser.OutputModes;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.DefinitionScoped;
 import org.kframework.utils.inject.RequestScoped;
-import org.kframework.utils.StringUtil;
 import scala.Tuple2;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
@@ -43,25 +39,27 @@ import java.util.function.Function;
 @RequestScoped
 public class LLVMRewriter implements Function<Definition, Rewriter> {
 
+    private final GlobalOptions globalOptions;
     private final FileUtil files;
     private final CompiledDefinition def;
-    private final KRunOptions options;
+    private final KRunOptions krunOptions;
     private final KompileOptions kompileOptions;
     private final Properties idsToLabels;
 
     @Inject
     public LLVMRewriter(
+            GlobalOptions globalOptions,
             FileUtil files,
             CompiledDefinition def,
-            KRunOptions options,
+            KRunOptions krunOptions,
             KompileOptions kompileOptions,
             InitializeDefinition init) {
+        this.globalOptions = globalOptions;
         this.files = files;
         this.def = def;
-        this.options = options;
+        this.krunOptions = krunOptions;
         this.kompileOptions = kompileOptions;
         this.idsToLabels = init.serialized;
-
     }
 
     @Override
@@ -75,28 +73,27 @@ public class LLVMRewriter implements Function<Definition, Rewriter> {
             @Override
             public RewriterResult execute(K k, Optional<Integer> depth) {
                 Module mod = def.executionModule();
-                ExpandMacros macroExpander = new ExpandMacros(mod, files, kompileOptions, false);
-                ModuleToKORE converter = new ModuleToKORE(mod, files, def.topCellInitializer);
+                ExpandMacros macroExpander = ExpandMacros.forNonSentences(mod, files, kompileOptions, false);
+                ModuleToKORE converter = new ModuleToKORE(mod, files, def.topCellInitializer, kompileOptions);
                 K withMacros = macroExpander.expand(k);
                 K kWithInjections = new AddSortInjections(mod).addInjections(withMacros);
                 converter.convert(kWithInjections);
                 String koreOutput = "[initial-configuration{}(" + converter.toString() + ")]\n\nmodule TMP\nendmodule []\n";
-                String defPath = files.resolveKompiled("definition.kore").getAbsolutePath();
-                String moduleName = mod.name();
                 files.saveToTemp("pgm.kore", koreOutput);
                 String pgmPath = files.resolveTemp("pgm.kore").getAbsolutePath();
                 File koreOutputFile = files.resolveTemp("result.kore");
                 List<String> args = new ArrayList<String>();
+                if (krunOptions.experimental.debugger) {
+                  args.add("gdb");
+                  args.add("--args");
+                }
                 args.add(files.resolveKompiled("interpreter").getAbsolutePath());
                 args.add(pgmPath);
                 args.add(Integer.toString(depth.orElse(-1)));
                 args.add(koreOutputFile.getAbsolutePath());
                 try {
                     int exit = executeCommandBasic(files.resolveWorkingDirectory("."), args);
-                    TextToKore textToKore = new TextToKore();
-                    Pattern kore = textToKore.parsePattern(koreOutputFile);
-                    KoreToK koreToK = new KoreToK(idsToLabels, mod.sortAttributesFor(), StringUtil::enquoteKString);
-                    K outputK = koreToK.apply(kore);
+                    K outputK = new KoreParser(files.resolveKoreToKLabelsFile(), mod.sortAttributesFor()).parseFile(koreOutputFile);
                     return new RewriterResult(Optional.empty(), Optional.of(exit), outputK);
                 } catch (IOException e) {
                     throw KEMException.criticalError("I/O Error while executing", e);
@@ -123,7 +120,12 @@ public class LLVMRewriter implements Function<Definition, Rewriter> {
             }
 
             @Override
-            public K prove(Module rules, Rule boundaryPattern) {
+            public RewriterResult prove(Module rules, Rule boundaryPattern) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public RewriterResult bmc(Module rules) {
                 throw new UnsupportedOperationException();
             }
 
@@ -145,6 +147,9 @@ public class LLVMRewriter implements Function<Definition, Rewriter> {
      */
     private int executeCommandBasic(File workingDir, List<String> command) throws IOException, InterruptedException {
         int exit;
+        if (globalOptions.verbose) {
+            System.err.println("Executing command: " + String.join(" ", command));
+        }
         ProcessBuilder pb = files.getProcessBuilder()
                 .command(command);
         if (workingDir != null) {
@@ -195,7 +200,7 @@ public class LLVMRewriter implements Function<Definition, Rewriter> {
         @Inject
         public InitializeDefinition(FileUtil files) {
             try {
-                FileInputStream input = new FileInputStream(files.resolveKompiled("kore_to_k_labels.properties"));
+                FileInputStream input = new FileInputStream(files.resolveKoreToKLabelsFile());
                 serialized = new Properties();
                 serialized.load(input);
             } catch (IOException e) {

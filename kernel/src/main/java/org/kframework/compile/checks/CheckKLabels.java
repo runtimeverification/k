@@ -81,9 +81,9 @@ public class CheckKLabels {
         }
     }
 
-    private final ImmutableSet<String> internalNames = ImmutableSet.of("#cells", "#dots", "#noDots", "#Or", "#fun2", "#fun3", "#withConfig", "<generatedTop>");
+    private static final ImmutableSet<String> internalNames = ImmutableSet.of("#cells", "#dots", "#noDots", "#Or", "#fun2", "#fun3", "#withConfig", "<generatedTop>", "#SemanticCastToBag");
 
-    private boolean isInternalKLabel(String name, Module m) {
-        return name.startsWith("#SemanticCastTo") || internalNames.contains(name) || (name.startsWith("is") && m.definedSorts().apply(Outer.parseSort(name.substring(2)))) || (name.startsWith("project:") && m.definedSorts().apply(Outer.parseSort(name.substring(8))));
+    public static boolean isInternalKLabel(String name, Module m) {
+        return m.semanticCasts().apply(name) || internalNames.contains(name)|| m.recordProjections().apply(name) || m.sortPredicates().apply(name) || m.sortProjections().apply(name);
     }
 }

@@ -8,6 +8,8 @@ import org.kframework.kore.KORE.Sort
 object Sorts {
   val Layout = Sort("#Layout")
 
+  val RuleTag = Sort("#RuleTag")
+
   val KString = Sort("KString")
   val KBool = Sort("KBool")
 
@@ -34,6 +36,7 @@ object Sorts {
 
   val Bag = Sort("Bag")
   val Cell = Sort("Cell")
+  val CellName = Sort("#CellName");
 
   val GeneratedTopCell = Sort("GeneratedTopCell")
   val GeneratedCounterCell = Sort("GeneratedCounterCell")

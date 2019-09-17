@@ -182,13 +182,14 @@ public class Variable extends Term implements org.kframework.kore.KVariable {
         }
 
         Variable variable = (Variable) object;
-        return name.equals(variable.name);
+        return name.equals(variable.name) && sort.equals(variable.sort);
     }
 
     @Override
     protected final int computeHash() {
         int hashCode = 1;
         hashCode = hashCode * Constants.HASH_PRIME + name.hashCode();
+        hashCode = hashCode * Constants.HASH_PRIME + sort.hashCode();
         return hashCode;
     }
 

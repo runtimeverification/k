@@ -62,7 +62,6 @@ module KSEQ
   syntax K     ::= "(" K ")"    [bracket, poly(0, 1)]
 endmodule
 
-
 module ML-SYNTAX
   imports SORT-K
 
@@ -77,8 +76,11 @@ module ML-SYNTAX
              > K "#And" K [klabel(#And), symbol, assoc, left, comm, unit(#True), mlOp, poly(0, 1, 2), format(%i%1%d%n%2%n%i%3%d)]
              > K "#Or" K [klabel(#Or), symbol, assoc, left, comm, unit(#False), mlOp, poly(0, 1, 2), format(%i%1%d%n%2%n%i%3%d)]
              > K "#Implies" K [klabel(#Implies), symbol, mlOp, poly(0, 1, 2), format(%i%1%d%n%2%n%i%3%d)]
-             > "#Exists" #KVariable "." K [klabel(#Exists), symbol, mlOp, poly(0, 2)]
-             | "#Forall" #KVariable "." K [klabel(#Forall), symbol, mlOp, poly(0, 2)]
+             > "#Exists" K "." K [klabel(#Exists), symbol, mlOp, poly(1; 0, 2), mlBinder]
+             | "#Forall" K "." K [klabel(#Forall), symbol, mlOp, poly(1; 0, 2), mlBinder]
+             | "#AG" "(" K ")" [klabel(#AG), symbol, mlOp, poly(0, 1)]
+             | "#wEF" "(" K ")" [klabel(weakExistsFinally), symbol, mlOp, poly(0, 1)]
+
 endmodule
 
 // To be used when parsing/pretty-printing symbolic configurations
@@ -86,9 +88,9 @@ module KSEQ-SYMBOLIC
   imports KSEQ
   imports ML-SYNTAX
 
-  syntax #KVariable ::= r"(?<![A-Za-z0-9_\\$!\\?])(\\!|\\?)?([A-Z][A-Za-z0-9'_]*|_)"   [token, prec(1), autoReject]
-                      | #UpperId                                                       [token, autoReject]
-  syntax KConfigVar ::= r"(?<![A-Za-z0-9_\\$!\\?])(\\$)([A-Z][A-Za-z0-9'_]*)"          [token, autoReject]
+  syntax #KVariable ::= r"(?<![A-Za-z0-9_\\$!\\?@])(\\!|\\?|@)?([A-Z][A-Za-z0-9'_]*|_)"   [token, prec(1), autoReject]
+                      | #UpperId                                                          [token, autoReject]
+  syntax KConfigVar ::= r"(?<![A-Za-z0-9_\\$!\\?@])(\\$)([A-Z][A-Za-z0-9'_]*)"            [token, autoReject]
   syntax KBott      ::= #KVariable
   syntax KBott      ::= KConfigVar
   syntax KLabel     ::= #KVariable

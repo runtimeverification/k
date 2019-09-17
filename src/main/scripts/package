@@ -1,0 +1,11 @@
+#!/bin/bash
+mkdir -p $DESTDIR$PREFIX/bin
+mkdir -p $DESTDIR$PREFIX/lib/kframework
+cp -R k-distribution/target/release/k/* $DESTDIR$PREFIX/lib/kframework
+( cd llvm-backend/target/build && make install )
+for tool in k-bin-to-text kast kbmc kcovr kdep keq kompile kprove krun kserver stop-kserver; do
+  path=$DESTDIR$PREFIX/bin/$tool
+  echo "#!/bin/sh" > "$path"
+  echo "$PREFIX/lib/kframework/bin/$tool \"\$@\"" >> "$path"
+  chmod a+x "$path"
+done

@@ -312,4 +312,8 @@ public class FileUtil {
             throw KEMException.criticalError("Could not read from file " + f.getAbsolutePath(), e);
         }
     }
+
+    public File resolveKoreToKLabelsFile() {
+        return resolveKompiled("kore_to_k_labels.properties");
+    }
 }

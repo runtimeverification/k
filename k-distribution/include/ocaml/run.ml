@@ -1,7 +1,6 @@
 open Constants
 open Constants.K
 open Prelude
-open Hooks
 
 let split_config (config: k) : k * k list =
   let module Def = (val Plugin.get () : Plugin.Definition) in

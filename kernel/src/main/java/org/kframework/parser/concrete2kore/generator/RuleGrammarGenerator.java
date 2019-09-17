@@ -6,6 +6,8 @@ import org.kframework.attributes.Att;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.ConfigurationInfo;
 import org.kframework.compile.ConfigurationInfoFromModule;
+import org.kframework.compile.GenerateSortPredicateSyntax;
+import org.kframework.compile.GenerateSortProjections;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.definition.ModuleTransformer;
@@ -20,6 +22,7 @@ import org.kframework.kil.loader.Constants;
 import org.kframework.kore.Sort;
 import org.kframework.parser.concrete2kore.ParseInModule;
 import org.kframework.utils.file.FileUtil;
+import org.kframework.utils.StringUtil;
 import scala.collection.Seq;
 import scala.Option;
 
@@ -200,7 +203,7 @@ public class RuleGrammarGenerator {
         if (mod.importedModuleNames().contains(AUTO_CASTS)) { // create the diamond
             Set<Sentence> temp;
             for (Sort srt : iterable(mod.definedSorts())) {
-                if (!isParserSort(srt)) {
+                if (!isParserSort(srt) || mod.subsorts().directlyLessThan(Sorts.KVariable(), srt)) {
                     // K ::= K "::Sort" | K ":Sort" | K "<:Sort" | K ":>Sort"
                     prods.addAll(makeCasts(Sorts.KBott(), Sorts.K(), srt));
                 }
@@ -219,7 +222,13 @@ public class RuleGrammarGenerator {
             }
         }
 
+        for (Sort s : iterable(mod.definedSorts())) {
+            prods.addAll(new GenerateSortPredicateSyntax().gen(mod, s));
+            prods.addAll(new GenerateSortProjections(mod).gen(s).collect(Collectors.toSet()));
+        }
+
         for (Production p : iterable(mod.productions())) {
+            prods.addAll(new GenerateSortProjections(mod).gen(p).collect(Collectors.toSet()));
             if (p.att().contains("poly")) {
                 List<Set<Integer>> positions = computePositions(p);
                 if (!p.isSyntacticSubsort()) {
@@ -250,7 +259,9 @@ public class RuleGrammarGenerator {
                             }
                         }
                     }
-                    prods.add(Production(p.klabel(), returnSort, immutable(pis), p.att().add(Constants.ORIGINAL_PRD, Production.class, p)));
+                    if (!(pis.size() == 1 && pis.get(0) instanceof NonTerminal && ((NonTerminal)pis.get(0)).sort().equals(returnSort))) {
+                        prods.add(Production(p.klabel(), returnSort, immutable(pis), p.att().add(Constants.ORIGINAL_PRD, Production.class, p)));
+                    }
                 }
             }
         }
@@ -297,6 +308,17 @@ public class RuleGrammarGenerator {
             }).collect(Collectors.toSet());
         } else if (addConfigCells) {
             // remove cells from parsing config cells so they don't conflict with the production in kast.k
+            // also add all matching terminals to the #CellName sort
+            for (Production prod : iterable(mod.productions())) {
+              for (ProductionItem pi : iterable(prod.items())) {
+                if (pi instanceof Terminal) {
+                  Terminal t = (Terminal)pi;
+                  if (t.value().matches("[A-Za-z][A-Za-z0-9\\-]*")) {
+                    prods.add(Production(Sorts.CellName(), Seq(t), Att().add("token")));
+                  }
+                }
+              }
+            }
             parseProds = Stream.concat(prods.stream(), stream(mod.sentences()).filter(s -> !s.att().contains("cell"))).collect(Collectors.toSet());
         } else
             parseProds = Stream.concat(prods.stream(), stream(mod.sentences())).collect(Collectors.toSet());
@@ -391,14 +413,16 @@ public class RuleGrammarGenerator {
     }
 
     public static List<Set<Integer>> computePositions(Production p) {
-        return (List<Set<Integer>>) Arrays.asList(p.att().get("poly").split(";"))
-                            .stream().map(l -> Arrays.asList(l.split(",")).stream()
-                                    .map(s -> Integer.valueOf(s.trim())).collect(Collectors.toSet())).collect(Collectors.toList());
+        return StringUtil.computePoly(p.att().get("poly"));
+    }
+
+    public static List<Set<Integer>> computePositions(String p) {
+        return StringUtil.computePoly(p);
     }
 
     private static List<List<Sort>> makeAllSortTuples(int size, Module mod) {
         List<List<Sort>> res = new ArrayList<>();
-        List<Sort> allSorts = stream(mod.definedSorts()).filter(s -> !isParserSort(s)).collect(Collectors.toList());
+        List<Sort> allSorts = stream(mod.definedSorts()).filter(s -> !isParserSort(s) || s.equals(Sorts.KItem())).collect(Collectors.toList());
         makeAllSortTuples(size, size, allSorts, res, new int[size]);
         return res;
     }

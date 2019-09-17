@@ -85,7 +85,7 @@ public class GuardOrPatterns {
                   AddSortInjections inj = new AddSortInjections(m);
                   return KAs(k, newDotVariable(inj.sort(k, Sorts.K())));
                 } else {
-                  return KAs(k, newDotVariable(k.att().get(Production.class).sort()));
+                  return KAs(k, newDotVariable(k.items().get(1).att().get(Production.class).sort()));
                 }
               }
               return super.apply(k);

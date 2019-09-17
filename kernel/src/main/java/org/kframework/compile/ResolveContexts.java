@@ -12,12 +12,14 @@ import org.kframework.definition.ProductionItem;
 import org.kframework.definition.Sentence;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.FindK;
+import org.kframework.kore.FoldK;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.KRewrite;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.VisitK;
+import org.kframework.kore.TransformK;
 import org.kframework.utils.errorsystem.KEMException;
 
 import java.util.ArrayList;
@@ -82,11 +84,33 @@ public class ResolveContexts {
 
         int currentHolePosition[] = new int[] { 0 };
         int finalHolePosition[] = new int[] { 0 };
+        // does this context have a main cell?
+        boolean hasMainCell = new FoldK<Boolean>() {
+            @Override
+            public Boolean apply(KApply k) {
+                if (input.attributesFor().getOrElse(k.klabel(), () -> Att()).contains("maincell")) {
+                    return true;
+                }
+                return super.apply(k);
+            }
+
+            @Override
+            public Boolean unit() {
+                return false;
+            }
+
+            @Override
+            public Boolean merge(Boolean a, Boolean b) {
+                return a || b;
+            }
+        }.apply(body);
+
         // Find a heated hole
         // e.g., context ++(HOLE => lvalue(HOLE))
         K heated = new VisitK() {
             K heated;
             KVariable holeVar;
+            boolean inMainCell = false;
 
             public K process(K k) {
                 apply(k);
@@ -104,25 +128,50 @@ public class ResolveContexts {
 
             @Override
             public void apply(KVariable k) {
-                if (!k.name().equals("HOLE")) {
-                    vars.put(k, k);
-                    finalHolePosition[0] = currentHolePosition[0];
-                } else {
-                    holeVar = k;
-                    currentHolePosition[0]++;
+                if (inMainCell || !hasMainCell) {
+                    if (!k.name().equals("HOLE")) {
+                        vars.put(k, k);
+                        finalHolePosition[0] = currentHolePosition[0];
+                    } else {
+                        holeVar = k;
+                        currentHolePosition[0]++;
+                    }
                 }
                 super.apply(k);
             }
 
             @Override
             public void apply(KApply k) {
-                if (k.klabel() instanceof KVariable)
+                if (input.attributesFor().getOrElse(k.klabel(), () -> Att()).contains("maincell")) {
+                    inMainCell = true;
+                }
+                if (k.klabel() instanceof KVariable && (inMainCell || !hasMainCell))
                     vars.put((KVariable) k.klabel(), InjectedKLabel(k.klabel()));
                 super.apply(k);
+                if (input.attributesFor().getOrElse(k.klabel(), () -> Att()).contains("maincell")) {
+                    inMainCell = false;
+                }
             }
         }.process(body);
+        K cooled = new VisitK() {
+            K cooled;
+            public K process(K k) {
+                apply(k);
+                if (cooled != null)
+                    return cooled;
+                else
+                    return k;
+            }
 
-        K cooled = RewriteToTop.toLeft(body);
+            @Override
+            public void apply(KApply k) {
+                if (input.attributesFor().getOrElse(k.klabel(), () -> Att()).contains("maincell")) {
+                  cooled = k.items().get(1);
+                }
+                super.apply(k);
+            }
+        }.process(RewriteToTop.toLeft(body));
+
         // TODO(dwightguth): generate freezers better for pretty-printing purposes
         List<ProductionItem> items = new ArrayList<>();
         KLabel freezerLabel;
@@ -144,8 +193,30 @@ public class ResolveContexts {
         Production freezer = Production(freezerLabel, Sorts.KItem(), immutable(items), Att());
         K frozen = KApply(freezerLabel, vars.values().stream().collect(Collections.toList()));
         return Stream.of(freezer,
-                Rule(KRewrite(cooled, KSequence(heated, frozen)), requiresHeat, BooleanUtils.TRUE, context.att().add("heat")),
-                Rule(KRewrite(KSequence(heated, frozen), cooled), requiresCool, BooleanUtils.TRUE, context.att().add("cool")));
+                Rule(insert(body, KRewrite(cooled, KSequence(heated, frozen)), input), requiresHeat, BooleanUtils.TRUE, context.att().add("heat")),
+                Rule(insert(body, KRewrite(KSequence(heated, frozen), cooled), input), requiresCool, BooleanUtils.TRUE, context.att().add("cool")));
+    }
+
+    private K insert(K body, K rewrite, Module mod) {
+      class Holder {
+          boolean found = false;
+      }
+      Holder h = new Holder();
+      K inserted = new TransformK() {
+          @Override
+          public K apply(KApply k) {
+              if (mod.attributesFor().getOrElse(k.klabel(), () -> Att()).contains("maincell")) {
+                  h.found = true;
+                  return KApply(k.klabel(), k.items().get(0), rewrite, k.items().get(2));
+              }
+              return super.apply(k);
+          }
+      }.apply(body);
+      if (h.found) {
+          return inserted;
+      } else {
+          return rewrite;
+      }
     }
 
     /**

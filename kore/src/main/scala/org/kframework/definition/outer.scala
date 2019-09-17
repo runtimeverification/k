@@ -95,16 +95,21 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
 
   lazy val sentences: Set[Sentence] = localSentences | importedSentences
 
+  lazy val labeled: Map[String, Set[Sentence]] = sentences.filter(_.label.isPresent).groupBy(_.label.get)
+
   /** All the imported modules, calculated recursively. */
   lazy val importedModules: Set[Module] = imports | (imports flatMap {
     _.importedModules
   })
 
   def addImport(m : Module) : Module = new Module(name, imports + m, localSentences, att)
+  def wrappingModule(newName : String) : Module = new Module(newName, Set(this), Set(), Att.empty)
 
   lazy val importedModuleNames: Set[String] = importedModules.map(_.name)
 
   lazy val productions: Set[Production] = sentences collect { case p: Production => p }
+
+  lazy val sortedProductions: Seq[Production] = productions.toSeq.sorted
 
   lazy val localProductions: Set[Production] = localSentences collect { case p: Production => p }
 
@@ -188,17 +193,21 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
 
   @transient lazy val sortFor: Map[KLabel, Sort] = productionsFor mapValues {_.head.sort}
 
-  def optionSortFor(k: K): Option[Sort] = k match {
-    case Unapply.KApply(l, _) => sortFor.get(l)
-    case Unapply.KRewrite(_, r) => optionSortFor(r)
-    case Unapply.KToken(_, sort) => Some(sort)
-    case Unapply.KSequence(s) => optionSortFor(s.last)
-  }
-
   def isSort(klabel: KLabel, s: Sort) = subsorts.<(sortFor(klabel), s)
 
   lazy val rules: Set[Rule] = sentences collect { case r: Rule => r }
+  lazy val rulesFor: Map[KLabel, Set[Rule]] = rules.groupBy(r => {
+    r.body match {
+      case Unapply.KApply(Unapply.KLabel("#withConfig"), Unapply.KApply(s, _) :: _) => s
+      case Unapply.KApply(Unapply.KLabel("#withConfig"), Unapply.KRewrite(Unapply.KApply(s, _), _) :: _) => s
+      case Unapply.KApply(s, _) => s
+      case Unapply.KRewrite(Unapply.KApply(s, _), _) => s
+      case _ => KORE.KLabel("")
+    }
+  })
   lazy val contexts: Set[Context] = sentences collect { case r: Context => r }
+
+  lazy val sortedRules: Seq[Rule] = rules.toSeq.sorted
 
   lazy val localRules: Set[Rule] = localSentences collect { case r: Rule => r }
 
@@ -291,16 +300,46 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
     case _ =>
   }
 
+  lazy val recordProjections = productions.flatMap(p => p.nonterminals.filter(_.name.isDefined).map(nt => "project:" ++ p.klabel.get.name ++ ":" ++ nt.name.get))
+  lazy val semanticCasts = definedSorts.map("#SemanticCastTo" + _)
+  lazy val sortProjections = definedSorts.map("project:" + _)
+  lazy val sortPredicates = definedSorts.map("is" + _)
+
   override lazy val hashCode: Int = name.hashCode
 
   override def equals(that: Any) = that match {
     case m: Module => m.name == name && m.sentences == sentences
   }
+
+  def flattened()   : FlatModule                = new FlatModule(name, imports.map(m => m.name), sentences, att)
+  def flatModules() : (String, Set[FlatModule]) = (name, Set(flattened) ++ imports.map(m => m.flatModules._2).flatten)
+}
+
+object Import {
+  val syntaxString = "$SYNTAX"
+
+  def isSyntax(name: String): Boolean = name.endsWith(syntaxString)
+
+  def asSyntax(name: String): String =
+    if (isSyntax(name))
+      name
+    else
+      name ++ syntaxString
+
+  def noSyntax(name: String): String =
+    if (isSyntax(name))
+      name.dropRight(syntaxString.length)
+    else
+      name
 }
 
 // hooked but different from core, Import is a sentence here
 
-trait Sentence extends HasLocation {
+trait HasAtt {
+  val att: Att
+}
+
+trait Sentence extends HasLocation with HasAtt {
   // marker
   val isSyntax: Boolean
   val isNonSyntax: Boolean
@@ -318,10 +357,33 @@ case class Context(body: K, requires: K, att: Att = Att.empty) extends Sentence 
   override def withAtt(att: Att) = Context(body, requires, att)
 }
 
+case class ContextAlias(body: K, requires: K, att: Att = Att.empty) extends Sentence with OuterKORE with ContextAliasToString {
+  override val isSyntax = true
+  override val isNonSyntax = false
+  override def withAtt(att: Att) = ContextAlias(body, requires, att)
+}
+
+
 case class Rule(body: K, requires: K, ensures: K, att: Att = Att.empty) extends Sentence with RuleToString with OuterKORE {
   override val isSyntax = false
   override val isNonSyntax = true
   override def withAtt(att: Att) = Rule(body, requires, ensures, att)
+}
+
+object Rule {
+  implicit val ord: Ordering[Rule] = new Ordering[Rule] {
+    def compare(a: Rule, b: Rule): Int = {
+      val c1 = Ordering[K].compare(a.body, b.body)
+      if (c1 == 0) {
+        val c2 = Ordering[K].compare(a.requires, b.requires)
+        if (c2 == 0) {
+          Ordering[K].compare(a.ensures, b.ensures)
+        }
+        c2
+      }
+      c1
+    }
+  }
 }
 
 case class ModuleComment(comment: String, att: Att = Att.empty) extends Sentence with OuterKORE {
@@ -381,7 +443,11 @@ case class Production(klabel: Option[KLabel], sort: Sort, items: Seq[ProductionI
   lazy val klabelAtt: Option[String] = att.getOption("klabel").orElse(klabel.map(_.name))
 
   override def equals(that: Any) = that match {
-    case p@Production(`klabel`, `sort`, `items`, _) => this.klabelAtt == p.klabelAtt && this.att.getOption("poly") == p.att.getOption("poly") && this.att.getOption("function") == p.att.getOption("function")
+    case p@Production(`klabel`, `sort`, `items`, _) => ( this.klabelAtt == p.klabelAtt
+                                                      && this.att.getOption("poly") == p.att.getOption("poly")
+                                                      && this.att.getOption("function") == p.att.getOption("function")
+                                                      && this.att.getOption("symbol") == p.att.getOption("symbol")
+                                                       )
     case _ => false
   }
 
@@ -465,6 +531,12 @@ case class Production(klabel: Option[KLabel], sort: Sort, items: Seq[ProductionI
 }
 
 object Production {
+  implicit val ord = new Ordering[Production] {
+    def compare(a: Production, b: Production): Int = {
+      Ordering[Option[String]].compare(a.klabel.map(_.name), b.klabel.map(_.name))
+    }
+  }
+
   def apply(klabel: KLabel, sort: Sort, items: Seq[ProductionItem], att: Att = Att.empty): Production = {
     Production(Some(klabel), sort, items, att)
   }

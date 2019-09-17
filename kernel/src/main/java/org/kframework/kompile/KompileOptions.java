@@ -4,12 +4,15 @@ package org.kframework.kompile;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate;
 import org.apache.commons.io.FilenameUtils;
+
 import org.kframework.backend.Backends;
 import org.kframework.main.GlobalOptions;
+import org.kframework.unparser.OutputModes;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.OuterParsingOptions;
 import org.kframework.utils.options.SMTOptions;
+import org.kframework.utils.options.BaseEnumConverter;
 import org.kframework.utils.options.StringListConverter;
 
 import java.io.Serializable;
@@ -73,11 +76,26 @@ public class KompileOptions implements Serializable {
     @Parameter(names="--profile-rule-parsing", description="Generate time in seconds to parse each rule in the semantics. Found in -kompiled directory under timing.log.")
     public boolean profileRules;
 
+    @Parameter(names="--hook-namespaces", listConverter=StringListConverter.class, description="<string> is a whitespace-separated list of namespaces to include in the hooks defined in the definition")
+    public List<String> hookNamespaces = Collections.emptyList();
+
     @ParametersDelegate
     public Experimental experimental = new Experimental();
 
     public boolean isKore() {
         return backend.equals("kore") || backend.equals("haskell") || backend.equals("llvm");
+    }
+
+    public static class OutputModeConverter extends BaseEnumConverter<OutputModes> {
+
+        public OutputModeConverter(String optionName) {
+            super(optionName);
+        }
+
+        @Override
+        public Class<OutputModes> enumClass() {
+            return OutputModes.class;
+        }
     }
 
     public static final class Experimental implements Serializable {
@@ -109,5 +127,8 @@ public class KompileOptions implements Serializable {
 
         @Parameter(names="--cache-file", description="Location of parse cache file. Default is $KOMPILED_DIR/cache.bin.")
         public String cacheFile;
+
+        @Parameter(names="--emit-json", description="Emit JSON serialized version of parsed and kompiled definitions.")
+        public boolean emitJson = false;
     }
 }

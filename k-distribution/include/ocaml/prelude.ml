@@ -62,14 +62,15 @@ let k_of_set lbl s = if (KSet.cardinal s) = 0 then denormalize (KApply((unit_for
   let hd = KSet.choose s in KSet.fold (fun el set -> denormalize (KApply(lbl, [set] :: [denormalize (KApply((el_for lbl),[el]))] :: []))) (KSet.remove hd s) (denormalize (KApply((el_for lbl),[hd])))
 let k_of_map lbl m = if (KMap.cardinal m) = 0 then denormalize (KApply((unit_for lbl),[])) else
   let (k,v) = KMap.choose m in KMap.fold (fun k v map -> denormalize (KApply(lbl, [map] :: [denormalize (val_for lbl k v)] :: []))) (KMap.remove k m) (denormalize (val_for lbl k v))
-let k_of_array sort a = let uuid = Uuidm.create `V4 in
-  fst (Dynarray.fold_left (fun (res,i) elt -> match elt with [Bottom] -> res,(Z.add i Z.one) | _ -> (denormalize(KApply((el_for_array sort),[[res]; [Int i]; elt]))),(Z.add i Z.one)) ((denormalize(KApply((unit_for_array sort), [[String (Uuidm.to_string uuid)]; [Int (Z.of_int (Dynarray.length a))]]))),Z.zero) a)
+let k_of_array sort a default = let uuid = Uuidm.create `V4 in
+fst (Dynarray.fold_left (fun (res,i) elt -> match elt with [Bottom] -> res,(Z.add i Z.one) | _ when compare elt default = 0 -> res,(Z.add i Z.one) | _ -> (denormalize(KApply((el_for_array sort),[[res]; [Int i]; elt]))),(Z.add i Z.one)) ((denormalize(KApply((unit_for_array sort), [[String (Uuidm.to_string uuid)]; [Int (Z.of_int (Dynarray.length a))]; default]))),Z.zero) a)
 let k_char_escape (buf: Buffer.t) (c: char) : unit = match c with
 | '"' -> Buffer.add_string buf "\\\""
 | '\\' -> Buffer.add_string buf "\\\\"
 | '\n' -> Buffer.add_string buf "\\n"
 | '\t' -> Buffer.add_string buf "\\t"
 | '\r' -> Buffer.add_string buf "\\r"
+| '\x0c' -> Buffer.add_string buf "\\f"
 | _ when let code = Char.code c in code >= 32 && code < 127 -> Buffer.add_char buf c
 | _ -> Buffer.add_string buf (Printf.sprintf "\\x%02x" (Char.code c))
 let k_string_escape str =
@@ -135,7 +136,7 @@ let print_k_binary (c: k) : string =  let buf = Buffer.create 16 in
   | KItem (List(sort,lbl,l)) -> print_kitem(normalize (k_of_list lbl l), [List(sort,lbl,l)])
   | KItem (Set(sort,lbl,s)) -> print_kitem(normalize (k_of_set lbl s), [Set(sort,lbl,s)])
   | KItem (Map(sort,lbl,m)) -> print_kitem(normalize (k_of_map lbl m), [Map(sort,lbl,m)])
-  | KItem (Array(sort,d,a)) -> print_kitem(normalize (k_of_array sort a), [Array(sort,d,a)])
+  | KItem (Array(sort,d,a)) -> print_kitem(normalize (k_of_array sort a d), [Array(sort,d,a)])
   | KItem (ThreadLocal) -> print_kitem(KApply(Lbl'Hash'ThreadLocal, []), [ThreadLocal])
   | KItem (Thread(k1,k2,k3,k4)) -> print_kitem(KApply(Lbl'Hash'Thread, [k1; k2; k3; k4]), [Thread(k1,k2,k3,k4)])
   | KItem _ -> invalid_arg "print_kitem"
@@ -166,7 +167,7 @@ let print_k (c: k) : string = let buf = Buffer.create 16 in
   | KItem (List(_,lbl,l)) -> print_kitem(normalize (k_of_list lbl l))
   | KItem (Set(_,lbl,s)) -> print_kitem(normalize (k_of_set lbl s))
   | KItem (Map(_,lbl,m)) -> print_kitem(normalize (k_of_map lbl m))
-  | KItem (Array(sort,_,a)) -> print_kitem(normalize (k_of_array sort a))
+  | KItem (Array(sort,d,a)) -> print_kitem(normalize (k_of_array sort a d))
   | KItem (ThreadLocal) -> print_kitem(KApply(Lbl'Hash'ThreadLocal, []))
   | KItem (Thread(k1, k2, k3, k4)) -> print_kitem(KApply(Lbl'Hash'Thread, [k1; k2; k3; k4]))
   | KItem _ -> invalid_arg "non-normal kitem"

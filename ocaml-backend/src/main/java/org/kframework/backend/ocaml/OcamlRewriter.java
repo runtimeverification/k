@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2018 Runtime Verification, Inc. (RV-Match team). All Rights Reserved.
+// Copyright (c) 2015-2019 Runtime Verification, Inc. (RV-Match team). All Rights Reserved.
 package org.kframework.backend.ocaml;
 
 import com.google.inject.Inject;
@@ -118,7 +118,12 @@ public class OcamlRewriter implements Function<Definition, Rewriter> {
             }
 
             @Override
-            public K prove(Module rules, Rule boundaryPattern) {
+            public RewriterResult prove(Module rules, Rule boundaryPattern) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public RewriterResult bmc(Module rules) {
                 throw new UnsupportedOperationException();
             }
 

@@ -6,7 +6,12 @@ import org.kframework.parser.kore.implementation.DefaultBuilders
 import org.kframework.utils.StringUtil
 
 /** Parsing error exception. */
-case class ParseError(msg: String) extends Exception(msg) // ParseError.msg eq Exception.detailMessage, i.e., msg() == getMessage()
+case class ParseError(msg: String) extends Exception(msg) { // ParseError.msg eq Exception.detailMessage, i.e., msg() == getMessage()
+  def this(message: String, cause: Throwable) {
+    this(message)
+    initCause(cause)
+  }
+}
 
 /** A parser for [[kore.Pattern]].
   *
@@ -47,10 +52,16 @@ class TextToKore(b: Builders = DefaultBuilders) {
     parse(io.Source.fromFile(file))
   }
 
-  /** Parses the file and returns [[kore.Definition]]. */
+  /** Parses the file and returns [[kore.Pattern]]. */
   @throws(classOf[ParseError])
   def parsePattern(file: java.io.File): Pattern = {
     parsePattern(io.Source.fromFile(file))
+  }
+
+  /** Parses the file and returns [[kore.Pattern]]. */
+  @throws(classOf[ParseError])
+  def parsePattern(str: String): Pattern = {
+    parsePattern(io.Source.fromString(str))
   }
 
   /** Parses from the stream and returns [[kore.Definition]]. */
@@ -60,9 +71,9 @@ class TextToKore(b: Builders = DefaultBuilders) {
       scanner.init(src)
       parseDefinition()
     } catch {
-      case _: java.io.EOFException => throw ParseError("ERROR: Unexpected end of file while parsing")
+      case e: java.io.EOFException => throw new ParseError("ERROR: Unexpected end of file while parsing", e)
       case exc: ParseError => throw exc
-      case exc: Throwable => throw ParseError("ERROR: Unexpected error while parsing: " + exc.getMessage) // shouldn't be reachable
+      case exc: Throwable => throw new ParseError("ERROR: Unexpected error while parsing: " + exc.getMessage, exc) // shouldn't be reachable
     } finally {
       scanner.close()
     }
@@ -75,9 +86,9 @@ class TextToKore(b: Builders = DefaultBuilders) {
       scanner.init(src)
       parsePattern()
     } catch {
-      case _: java.io.EOFException => throw ParseError("ERROR: Unexpected end of file while parsing")
+      case e: java.io.EOFException => throw new ParseError("ERROR: Unexpected end of file while parsing", e)
       case exc: ParseError => throw exc
-      case exc: Throwable => throw ParseError("ERROR: Unexpected error while parsing: " + exc.getMessage) // shouldn't be reachable
+      case exc: Throwable => throw new ParseError("ERROR: Unexpected error while parsing: " + exc.getMessage, exc) // shouldn't be reachable
     } finally {
       scanner.close()
     }
@@ -507,6 +518,15 @@ class TextToKore(b: Builders = DefaultBuilders) {
               "\\iff", "\\exists", "\\forall", "\\ceil", "\\floor",
               "\\equals", "\\mem")
             throw error(known.mkString(","), "'\\" + err1 + err2 + "'")
+        }
+      case '@' => // set variable
+        val id = parseId()
+        scanner.nextWithSkippingWhitespaces() match {
+          case ':' => // set variable
+            val sort = parseSort(parsingLevel = previousParsingLevel)
+            b.SetVariable("@" + id, sort)
+          case err =>
+            throw error("':'", err)
         }
       case c => // variable or application
         scanner.putback(c)

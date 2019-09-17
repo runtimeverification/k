@@ -4,6 +4,7 @@ import org.kframework.builtin.{KLabels, Sorts}
 import org.kframework.kore.KORE
 import org.kframework.attributes.Att
 import org.kframework.parser.kore
+import org.kframework.utils.StringUtil
 import org.kframework.{kore => k}
 
 import scala.collection.Map
@@ -21,7 +22,7 @@ class KoreToK (headToLabel_ : java.util.Properties, sortAtt : Map[k.Sort, Att], 
   /** Returns a [[k.Sort]] from [[kore.Sort]]. */
   def apply(s: kore.Sort): k.Sort = s match {
       case kore.SortVariable(name) =>
-        throw new TranslationError("Unexpected Sort Variable")
+        Sorts.K
       case kore.CompoundSort(ctr, params) =>
         if (params.length != 0) {
           throw new TranslationError("Parameterized sorts currently unsupported")
@@ -46,9 +47,9 @@ class KoreToK (headToLabel_ : java.util.Properties, sortAtt : Map[k.Sort, Att], 
 
   private def extractVarName(name: String): String = {
     if (name.startsWith("Var")) {
-      name.substring(3)
+      StringUtil.decodeKoreString(name.substring(3))
     } else {
-      name
+      StringUtil.decodeKoreString(name)
     }
   }
 
@@ -67,35 +68,36 @@ class KoreToK (headToLabel_ : java.util.Properties, sortAtt : Map[k.Sort, Att], 
         KORE.KApply(apply(head), args.map((k) => apply(k)))
     }
     case kore.Top(s) =>
-      KORE.KApply(KLabels.ML_TRUE)
+      KORE.KApply(KORE.KLabel(KLabels.ML_TRUE.name, apply(s)))
     case kore.Bottom(s) =>
-      KORE.KApply(KLabels.ML_FALSE)
+      KORE.KApply(KORE.KLabel(KLabels.ML_FALSE.name, apply(s)))
     case kore.And(s, p, q) =>
-      KORE.KApply(KLabels.ML_AND, apply(p), apply(q))
+      KORE.KApply(KORE.KLabel(KLabels.ML_AND.name, apply(s)), apply(p), apply(q))
     case kore.Or(s, p, q) =>
-      KORE.KApply(KLabels.ML_OR, apply(p), apply(q))
+      KORE.KApply(KORE.KLabel(KLabels.ML_OR.name, apply(s)), apply(p), apply(q))
     case kore.Not(s, p) =>
-      KORE.KApply(KLabels.ML_NOT, apply(p))
+      KORE.KApply(KORE.KLabel(KLabels.ML_NOT.name, apply(s)), apply(p))
     case kore.Implies(s, p, q) =>
-      KORE.KApply(KLabels.ML_IMPLIES, apply(p), apply(q))
+      KORE.KApply(KORE.KLabel(KLabels.ML_IMPLIES.name, apply(s)), apply(p), apply(q))
     case kore.Iff(s, p, q) =>
       throw new TranslationError("Iff patterns currently unsupported")
     case kore.Exists(s, v, p) =>
-      KORE.KApply(KLabels.ML_EXISTS, apply(v), apply(p))
+      KORE.KApply(KORE.KLabel(KLabels.ML_EXISTS.name, apply(v.sort), apply(s)), apply(v), apply(p))
     case kore.Forall(s, v, p) =>
-      KORE.KApply(KLabels.ML_FORALL, apply(v), apply(p))
+      KORE.KApply(KORE.KLabel(KLabels.ML_FORALL.name, apply(v.sort), apply(s)), apply(v), apply(p))
     case kore.Rewrites(s, p, q) =>
       KORE.KRewrite(apply(p), apply(q))
     case kore.Ceil(s, rs, p) =>
-      KORE.KApply(KLabels.ML_CEIL, apply(p))
+      KORE.KApply(KORE.KLabel(KLabels.ML_CEIL.name, apply(s), apply(rs)), apply(p))
     case kore.Floor(s, rs, p) =>
-      throw new TranslationError("Floor patterns currently unsupported")
+      KORE.KApply(KORE.KLabel(KLabels.ML_FLOOR.name, apply(s), apply(rs)), apply(p))
     case kore.Equals(s1, s2, p, q) =>
-      KORE.KApply(KLabels.ML_EQUALS, apply(p), apply(q))
+      KORE.KApply(KORE.KLabel(KLabels.ML_EQUALS.name, apply(s1), apply(s2)), apply(p), apply(q))
     case kore.Mem(s, rs, p, q) =>
       throw new TranslationError("Mem patterns currently unsupported")
     case kore.DomainValue(s, str) =>
-      KORE.KToken(if (sortAtt.get(apply(s)).getOrElse(KORE.Att).getOptional("hook").orElse("") == "STRING.String") enquote(str) else str, apply(s))
+      val hookAtt = sortAtt.get(apply(s)).getOrElse(KORE.Att).getOptional("hook").orElse("")
+      KORE.KToken(if (hookAtt == "STRING.String") enquote(str) else if (hookAtt == "BYTES.Bytes") "b" + enquote(str) else str, apply(s))
     case kore.StringLiteral(str) =>
       KORE.KToken(str, Sorts.KString)
   }

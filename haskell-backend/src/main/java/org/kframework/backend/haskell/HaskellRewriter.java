@@ -2,16 +2,17 @@
 package org.kframework.backend.haskell;
 
 import com.google.inject.Inject;
-import org.kframework.RewriterResult;
 import org.kframework.attributes.Att;
 import org.kframework.backend.kore.KoreBackend;
 import org.kframework.backend.kore.ModuleToKORE;
+import org.kframework.builtin.KLabels;
 import org.kframework.compile.AddSortInjections;
 import org.kframework.compile.ExpandMacros;
 import org.kframework.compile.RewriteToTop;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
+import org.kframework.kbmc.KBMCOptions;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
@@ -19,22 +20,23 @@ import org.kframework.kore.KORE;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
 import org.kframework.kprove.KProveOptions;
-import org.kframework.krun.KRunOptions;
 import org.kframework.krun.RunProcess;
+import org.kframework.main.GlobalOptions;
 import org.kframework.main.Main;
-import org.kframework.parser.kore.Pattern;
-import org.kframework.parser.kore.parser.KoreToK;
+import org.kframework.parser.KoreParser;
 import org.kframework.parser.kore.parser.ParseError;
-import org.kframework.parser.kore.parser.TextToKore;
+import org.kframework.RewriterResult;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.rewriter.SearchType;
+import org.kframework.unparser.KPrint;
 import org.kframework.unparser.OutputModes;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.DefinitionScoped;
 import org.kframework.utils.inject.RequestScoped;
-import org.kframework.utils.StringUtil;
+import org.kframework.utils.options.SMTOptions;
+
 import scala.Tuple2;
 
 import java.io.File;
@@ -49,39 +51,46 @@ import java.util.function.Function;
 
 import static org.kframework.builtin.BooleanUtils.*;
 
-
 @RequestScoped
 public class HaskellRewriter implements Function<Definition, Rewriter> {
 
+    private final GlobalOptions globalOptions;
+    private final SMTOptions smtOptions;
+    private final KompileOptions kompileOptions;
+    private final KProveOptions kProveOptions;
+    private final KBMCOptions kbmcOptions;
+    private final HaskellKRunOptions haskellKRunOptions;
     private final FileUtil files;
     private final CompiledDefinition def;
-    private final KRunOptions options;
-    private final KompileOptions kompileOptions;
     private final KExceptionManager kem;
-    private final HaskellKRunOptions haskellKRunOptions;
-    private final KProveOptions kProveOptions;
+    private final KPrint kprint;
     private final Properties idsToLabels;
 
     @Inject
     public HaskellRewriter(
-            FileUtil files,
-            CompiledDefinition def,
-            KRunOptions kRunOptions,
+            GlobalOptions globalOptions,
+            SMTOptions smtOptions,
             KompileOptions kompileOptions,
             KProveOptions kProveOptions,
+            KBMCOptions kbmcOptions,
             InitializeDefinition init,
+            HaskellKRunOptions haskellKRunOptions,
+            FileUtil files,
+            CompiledDefinition def,
             KExceptionManager kem,
-            HaskellKRunOptions haskellKRunOptions
+            KPrint kprint
             ) {
+        this.globalOptions = globalOptions;
+        this.smtOptions = smtOptions;
+        this.haskellKRunOptions = haskellKRunOptions;
+        this.kompileOptions = kompileOptions;
+        this.kProveOptions = kProveOptions;
+        this.kbmcOptions = kbmcOptions;
         this.files = files;
         this.def = def;
         this.kem = kem;
-        this.haskellKRunOptions = haskellKRunOptions;
-        this.options = kRunOptions;
-        this.kompileOptions = kompileOptions;
-        this.kProveOptions = kProveOptions;
-        this.idsToLabels = init.serialized;
-
+        this.kprint = kprint;
+        this.idsToLabels = init.getKoreToKLabels();
     }
 
     @Override
@@ -95,7 +104,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
             @Override
             public RewriterResult execute(K k, Optional<Integer> depth) {
                 Module mod = def.executionModule();
-                ModuleToKORE converter = new ModuleToKORE(mod, files, def.topCellInitializer);
+                ModuleToKORE converter = new ModuleToKORE(mod, files, def.topCellInitializer, kompileOptions);
                 String koreOutput = getKoreString(k, mod, converter);
                 String defPath = files.resolveKompiled("definition.kore").getAbsolutePath();
                 String moduleName = mod.name();
@@ -112,30 +121,25 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                         "--module", moduleName,
                         "--pattern", pgmPath,
                         "--output", koreOutputFile.getAbsolutePath()));
-                if (options.depth != null) {
+                if (depth.isPresent()) {
                     args.add("--depth");
-                    args.add(options.depth.toString());
+                    args.add(Integer.toString(depth.get()));
                 }
-                if (options.experimental.smt.smtPrelude != null) {
+                if (smtOptions.smtPrelude != null) {
                     args.add("--smt-prelude");
-                    args.add(options.experimental.smt.smtPrelude);
+                    args.add(smtOptions.smtPrelude);
                 }
                 koreCommand = args.toArray(koreCommand);
                 if (haskellKRunOptions.dryRun) {
                     System.out.println(String.join(" ", koreCommand));
-                    options.print.output = OutputModes.NONE;
+                    kprint.options.output = OutputModes.NONE;
                     return new RewriterResult(Optional.empty(), Optional.empty(), k);
                 }
                 try {
                     File korePath = koreDirectory == null ? null : new File(koreDirectory);
-                    if (executeCommandBasic(korePath, koreCommand) != 0) {
-                        throw KEMException.criticalError("Haskell backend returned non-zero exit code");
-                    }
-                    TextToKore textToKore = new TextToKore();
-                    Pattern kore = textToKore.parsePattern(koreOutputFile);
-                    KoreToK koreToK = new KoreToK(idsToLabels, mod.sortAttributesFor(), StringUtil::enquoteKString);
-                    K outputK = koreToK.apply(kore);
-                    return new RewriterResult(Optional.empty(), Optional.empty(), outputK);
+                    int execStatus = executeCommandBasic(korePath, koreCommand);
+                    K outputK = new KoreParser(files.resolveKoreToKLabelsFile(), mod.sortAttributesFor()).parseFile(koreOutputFile);
+                    return new RewriterResult(Optional.empty(), Optional.of(execStatus), outputK);
                 } catch (IOException e) {
                     throw KEMException.criticalError("I/O Error while executing", e);
                 } catch (InterruptedException e) {
@@ -159,21 +163,21 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
             @Override
             public K search(K initialConfiguration, Optional<Integer> depth, Optional<Integer> bound, Rule pattern, SearchType searchType) {
                 Module mod = def.executionModule();
-                String koreOutput = getKoreString(initialConfiguration, mod, new ModuleToKORE(mod, files, def.topCellInitializer));
+                String koreOutput = getKoreString(initialConfiguration, mod, new ModuleToKORE(mod, files, def.topCellInitializer, kompileOptions));
                 Sort initializerSort = mod.productionsFor().get(def.topCellInitializer).get().head().sort();
                 K patternTerm = RewriteToTop.toLeft(pattern.body());
                 if (patternTerm instanceof  KVariable) {
                     patternTerm = KORE.KVariable(((KVariable) patternTerm).name(), Att.empty().add(Sort.class, initializerSort));
                 }
                 K patternCondition = pattern.requires();
-                String patternTermKore = getKoreString(patternTerm, mod, new ModuleToKORE(mod, files, def.topCellInitializer));
+                String patternTermKore = getKoreString(patternTerm, mod, new ModuleToKORE(mod, files, def.topCellInitializer, kompileOptions));
                 String patternConditionKore;
                 if (patternCondition.equals(TRUE)) {
                     patternConditionKore = "\\top{Sort" + initializerSort.name() + "{}}()";
                 } else {
                     patternConditionKore =
                             "\\equals{SortBool{},Sort" + initializerSort.name() + "{}}("
-                            + getKoreString(patternCondition, mod, new ModuleToKORE(mod, files, def.topCellInitializer))
+                            + getKoreString(patternCondition, mod, new ModuleToKORE(mod, files, def.topCellInitializer, kompileOptions))
                             + ", \\dv{SortBool{}}(\"true\")"
                             + ")";
                 }
@@ -211,14 +215,14 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                     args.add("--bound");
                     args.add(bound.get().toString());
                 }
-                if (options.experimental.smt.smtPrelude != null) {
+                if (smtOptions.smtPrelude != null) {
                     args.add("--smt-prelude");
-                    args.add(options.experimental.smt.smtPrelude);
+                    args.add(smtOptions.smtPrelude);
                 }
                 koreCommand = args.toArray(koreCommand);
                 if (haskellKRunOptions.dryRun) {
                     System.out.println(String.join(" ", koreCommand));
-                    options.print.output = OutputModes.NONE;
+                    kprint.options.output = OutputModes.NONE;
                     return initialConfiguration;
                 }
                 try {
@@ -226,10 +230,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                     if (executeCommandBasic(korePath, koreCommand) != 0) {
                         throw KEMException.criticalError("Haskell backend returned non-zero exit code");
                     }
-                    TextToKore textToKore = new TextToKore();
-                    Pattern kore = textToKore.parsePattern(koreOutputFile);
-                    KoreToK koreToK = new KoreToK(idsToLabels, mod.sortAttributesFor(), StringUtil::enquoteKString);
-                    K outputK = koreToK.apply(kore);
+                    K outputK = new KoreParser(files.resolveKoreToKLabelsFile(), mod.sortAttributesFor()).parseFile(koreOutputFile);
                     return outputK;
                 } catch (IOException e) {
                     throw KEMException.criticalError("I/O Error while executing", e);
@@ -240,67 +241,141 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                 }
             }
 
-            @Override
-            public K prove(Module rules, Rule boundaryPattern) {
-                String kompiledModule = KoreBackend.getKompiledString(module, def.topCellInitializer, files, false);
-                files.saveToTemp("vdefinition.kore", kompiledModule);
 
-                ModuleToKORE rulesConverter = new ModuleToKORE(rules, files, def.topCellInitializer);
-                String koreOutput = rulesConverter.convertSpecificationModule(module, rules,
+            private String saveKoreDefinitionToTemp(ModuleToKORE converter) {
+                String kompiledString = KoreBackend.getKompiledString(converter, files, false);
+                files.saveToTemp("vdefinition.kore", kompiledString);
+                String defPath = files.resolveTemp("vdefinition.kore").getAbsolutePath();
+                return defPath;
+            }
+
+            private String saveKoreSpecToTemp(ModuleToKORE converter, Module rules) {
+                String koreOutput = converter.convertSpecificationModule(module, rules,
                         haskellKRunOptions.allPathReachability);
                 files.saveToTemp("spec.kore", koreOutput);
-                String defPath = files.resolveTemp("vdefinition.kore").getAbsolutePath();
                 String specPath = files.resolveTemp("spec.kore").getAbsolutePath();
-                String[] koreCommand = haskellKRunOptions.haskellBackendCommand.split("\\s+");
-                String koreDirectory = haskellKRunOptions.haskellBackendHome;
-                File koreOutputFile = files.resolveTemp("result.kore");
-                List<String> args = new ArrayList<>();
-                String defModuleName =
-                        kProveOptions.defModule == null ? def.executionModule().name() : kProveOptions.defModule;
-                String specModuleName = kProveOptions.specModule == null ? rules.name() : kProveOptions.specModule;
+                return specPath;
+            }
 
+            private List<String> buildCommonProvingCommand(String defPath, String specPath, String outPath,
+                                                           String defModuleName, String specModuleName){
+                String[] koreCommand = haskellKRunOptions.haskellBackendCommand.split("\\s+");
+
+                List<String> args = new ArrayList<>();
                 args.addAll(Arrays.asList(koreCommand));
                 args.addAll(Arrays.asList(
                         defPath,
                         "--module", defModuleName,
                         "--prove", specPath,
                         "--spec-module", specModuleName,
-                        "--output", koreOutputFile.getAbsolutePath()));
-                if (kProveOptions.depth != null) {
-                    args.addAll(Arrays.asList(
-                        "--depth", kProveOptions.depth.toString()));
-                }
-                if (options.experimental.smt.smtPrelude != null) {
+                        "--output", outPath));
+                if (smtOptions.smtPrelude != null) {
                     args.add("--smt-prelude");
-                    args.add(options.experimental.smt.smtPrelude);
+                    args.add(smtOptions.smtPrelude);
                 }
-                if (haskellKRunOptions.allPathReachability) {
-                    args.add("--all-path-reachability");
-                }
-                koreCommand = args.toArray(koreCommand);
-                if (haskellKRunOptions.dryRun) {
-                    System.out.println(String.join(" ", koreCommand));
-                    options.print.output = OutputModes.NONE;
-                    return boundaryPattern.body();
-                }
-                System.out.println("Executing " + args);
+                return args;
+            }
+
+            private RewriterResult executeKoreCommands(Module rules, String[] koreCommand,
+                                                       String koreDirectory, File koreOutputFile) {
+                int exit;
                 try {
                     File korePath = koreDirectory == null ? null : new File(koreDirectory);
-                    if (executeCommandBasic(korePath, koreCommand) != 0) {
-                        kem.registerCriticalWarning("Haskell backend returned non-zero exit code");
-                    }
-                    TextToKore textToKore = new TextToKore();
-                    Pattern kore = textToKore.parsePattern(koreOutputFile);
-                    KoreToK koreToK = new KoreToK(idsToLabels, rules.sortAttributesFor(), StringUtil::enquoteKString);
-                    K outputK = koreToK.apply(kore);
-                    return outputK;
+                    exit = executeCommandBasic(korePath, koreCommand);
                 } catch (IOException e) {
                     throw KEMException.criticalError("I/O Error while executing", e);
                 } catch (InterruptedException e) {
                     throw KEMException.criticalError("Interrupted while executing", e);
-                } catch (ParseError parseError) {
-                    throw KEMException.criticalError("Error parsing haskell backend output", parseError);
                 }
+                K outputK;
+                try {
+                    outputK = new KoreParser(files.resolveKoreToKLabelsFile(), rules.sortAttributesFor())
+                            .parseFile(koreOutputFile);
+                } catch (ParseError parseError) {
+                    kem.registerCriticalWarning("Error parsing haskell backend output", parseError);
+                    outputK = KORE.KApply(KLabels.ML_FALSE);
+                }
+                return new RewriterResult(Optional.empty(), Optional.of(exit), outputK);
+            }
+
+            @Override
+            public RewriterResult prove(Module rules, Rule boundaryPattern) {
+                Module kompiledModule = KoreBackend.getKompiledModule(module);
+                ModuleToKORE converter = new ModuleToKORE(kompiledModule, files, def.topCellInitializer, kompileOptions);
+                String defPath = saveKoreDefinitionToTemp(converter);
+                String specPath = saveKoreSpecToTemp(converter, rules);
+                File koreOutputFile = files.resolveTemp("result.kore");
+
+                String koreDirectory = haskellKRunOptions.haskellBackendHome;
+
+                String defModuleName =
+                        kProveOptions.defModule == null ? def.executionModule().name() : kProveOptions.defModule;
+                String specModuleName = kProveOptions.specModule == null ? rules.name() : kProveOptions.specModule;
+
+                List<String> args = buildCommonProvingCommand(defPath, specPath, koreOutputFile.getAbsolutePath(),
+                        defModuleName, specModuleName);
+
+                if (kProveOptions.depth != null) {
+                    args.addAll(Arrays.asList(
+                        "--depth", kProveOptions.depth.toString()));
+                }
+                if (haskellKRunOptions.allPathReachability) {
+                    args.add("--all-path-reachability");
+                }
+                String[] koreCommand = args.toArray(new String[args.size()]);
+                if (haskellKRunOptions.dryRun) {
+                    globalOptions.debugWarnings = true; // sets this so the kprove directory is not removed.
+                    System.out.println(String.join(" ", koreCommand));
+                    kprint.options.output = OutputModes.NONE;
+                    return new RewriterResult(Optional.empty(), Optional.of(0),KORE.KApply(KLabels.ML_FALSE));
+                }
+                if (globalOptions.verbose) {
+                    System.err.println("Executing " + args);
+                }
+
+                RewriterResult result = executeKoreCommands(rules, koreCommand, koreDirectory, koreOutputFile);
+                return result;
+            }
+
+            public RewriterResult bmc (Module rules) {
+                Module kompiledModule = KoreBackend.getKompiledModule(module);
+                ModuleToKORE converter = new ModuleToKORE(kompiledModule, files, def.topCellInitializer, kompileOptions);
+                String defPath = saveKoreDefinitionToTemp(converter);
+                String specPath = saveKoreSpecToTemp(converter, rules);
+                File koreOutputFile = files.resolveTemp("result.kore");
+
+                String koreDirectory = haskellKRunOptions.haskellBackendHome;
+
+                String defModuleName =
+                        kbmcOptions.defModule == null ? def.executionModule().name() : kbmcOptions.defModule;
+                String specModuleName = kbmcOptions.specModule == null ? rules.name() : kbmcOptions.specModule;
+
+                List<String> args = buildCommonProvingCommand(defPath, specPath, koreOutputFile.getAbsolutePath(),
+                        defModuleName, specModuleName);
+
+                if (kbmcOptions.depth != null) {
+                    args.addAll(Arrays.asList(
+                            "--depth", kbmcOptions.depth.toString()));
+                }
+                if (kbmcOptions.graphSearch != null) {
+                    args.addAll(Arrays.asList(
+                            "--graph-search", kbmcOptions.graphSearch.toString()));
+                }
+                args.add("--bmc");
+
+                String[] koreCommand = args.toArray(new String[args.size()]);
+                if (haskellKRunOptions.dryRun) {
+                    globalOptions.debugWarnings = true; // sets this so the kprove directory is not removed.
+                    System.out.println(String.join(" ", koreCommand));
+                    kprint.options.output = OutputModes.NONE;
+                    return new RewriterResult(Optional.empty(), Optional.of(0),KORE.KApply(KLabels.ML_FALSE));
+                }
+                if (globalOptions.verbose) {
+                    System.err.println("Executing " + args);
+                }
+
+                RewriterResult result = executeKoreCommands(rules, koreCommand, koreDirectory, koreOutputFile);
+                return result;
             }
 
             @Override
@@ -311,7 +386,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
     }
 
     private String getKoreString(K initialConfiguration, Module mod, ModuleToKORE converter) {
-        ExpandMacros macroExpander = new ExpandMacros(mod, files, kompileOptions, false);
+        ExpandMacros macroExpander = ExpandMacros.forNonSentences(mod, files, kompileOptions, false);
         K withMacros = macroExpander.expand(initialConfiguration);
         K kWithInjections = new AddSortInjections(mod).addInjections(withMacros);
         converter.convert(kWithInjections);
@@ -328,7 +403,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
      * @throws InterruptedException
      */
     private int executeCommandBasic(File workingDir, String... command) throws IOException, InterruptedException {
-        if (options.global.debug()) {
+        if (globalOptions.verbose) {
             System.err.println("Executing command: " + String.join(" ", Arrays.asList(command)));
         }
         int exit;
@@ -377,19 +452,22 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
 
     @DefinitionScoped
     public static class InitializeDefinition {
-        final Properties serialized;
+        public Properties getKoreToKLabels() {
+            return koreToKLabels;
+        }
+
+        final private Properties koreToKLabels;
 
         @Inject
         public InitializeDefinition(FileUtil files) {
             try {
-                FileInputStream input = new FileInputStream(files.resolveKompiled("kore_to_k_labels.properties"));
-                serialized = new Properties();
-                serialized.load(input);
+                FileInputStream input = new FileInputStream(files.resolveKoreToKLabelsFile());
+                koreToKLabels = new Properties();
+                koreToKLabels.load(input);
             } catch (IOException e) {
                 throw KEMException.criticalError("Error while loading Kore to K label map", e);
             }
         }
     }
-
 }
 

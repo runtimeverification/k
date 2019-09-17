@@ -34,6 +34,7 @@ import org.kframework.definition.Production;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kil.Attribute;
+import org.kframework.kil.loader.Context;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.Kompile;
 import org.kframework.kompile.KompileOptions;
@@ -130,7 +131,7 @@ public class DefinitionToOcaml implements Serializable {
     static {
         ImmutableSet.Builder<String> builder = ImmutableSet.builder();
         builder.add("BOOL").add("FLOAT").add("INT").add("IO").add("K").add("KEQUAL").add("KREFLECTION").add("LIST");
-        builder.add("MAP").add("SET").add("STRING").add("ARRAY").add("BUFFER").add("BYTES").add("META");
+        builder.add("MAP").add("SET").add("STRING").add("ARRAY").add("BUFFER").add("BYTES");
         hookNamespaces = builder.build();
     }
 
@@ -218,7 +219,7 @@ public class DefinitionToOcaml implements Serializable {
         constants = serialized.constants;
         realStepFunctions = serialized.realStepFunctions;
         if (serialized.expandMacros == null) {
-            serialized.expandMacros = new ExpandMacros(def.executionModule(), files, kompileOptions, false);
+            serialized.expandMacros = ExpandMacros.fromMainModule(def.executionModule(), files, kompileOptions, false);
         }
         if (serialized.convertDataStructure == null) {
             serialized.convertDataStructure = new ConvertDataStructureToLookup(def.executionModule(), true);
@@ -243,7 +244,7 @@ public class DefinitionToOcaml implements Serializable {
         this.convertDataStructure = new ConvertDataStructureToLookup(def.executionModule(), true);
         ModuleTransformer convertLookups = ModuleTransformer.fromSentenceTransformer(convertDataStructure::convert, "convert data structures to lookups");
         ModuleTransformer liftToKSequence = ModuleTransformer.fromSentenceTransformer(new LiftToKSequence()::lift, "lift K into KSequence");
-        this.expandMacros = new ExpandMacros(def.executionModule(), files, kompileOptions, false);
+        this.expandMacros = ExpandMacros.fromMainModule(def.executionModule(), files, kompileOptions, false);
         ModuleTransformer expandMacros = ModuleTransformer.fromSentenceTransformer(this.expandMacros::expand, "expand macro rules");
         ModuleTransformer deconstructInts = ModuleTransformer.fromSentenceTransformer(new DeconstructIntegerAndFloatLiterals()::convert, "remove matches on integer literals in left hand side");
         this.threadCellExists = containsThreadCell(def);
@@ -528,7 +529,7 @@ public class DefinitionToOcaml implements Serializable {
             sb.append("external load_plugin_path : unit -> string = \"load_plugin_path\"\n");
             sb.append("let () = Plugin.load (load_plugin_path ())");
         }
-        sb.append("\nopen Prelude\nopen Constants\nopen Constants.K\nopen Hooks\nopen Run\nlet () = Sys.catch_break true\n");
+        sb.append("\nopen Prelude\nopen Constants\nopen Constants.K\nopen Run\nlet () = Sys.catch_break true\n");
         sb.append("let () = Gc.set { (Gc.get()) with Gc.minor_heap_size = 33554432 }");
     }
 
@@ -1093,6 +1094,7 @@ public class DefinitionToOcaml implements Serializable {
         lookupDirectories.add(Kompile.BUILTIN_DIRECTORY);
         java.util.Set<Module> mods = new ParserUtils(files::resolveWorkingDirectory, kem, globalOptions).loadModules(
                 new HashSet<>(),
+                new Context(),
                 "require " + StringUtil.enquoteCString(definitionFile.getPath()),
                 Source.apply(definitionFile.getAbsolutePath()),
                 definitionFile.getParentFile(),
@@ -1180,7 +1182,7 @@ public class DefinitionToOcaml implements Serializable {
         SetMultimap<KLabel, Rule> functionRules = HashMultimap.create();
         ListMultimap<KLabel, Rule> anywhereRules = ArrayListMultimap.create();
         anywhereKLabels = new HashSet<>();
-        stream(mainModule.rules()).filter(r -> !r.att().contains(Attribute.MACRO_KEY) && !r.att().contains(Attribute.ALIAS_KEY)).forEach(r -> {
+        stream(mainModule.rules()).filter(r -> !ExpandMacros.isMacro(r)).forEach(r -> {
             K left = RewriteToTop.toLeft(r.body());
             if (left instanceof KSequence) {
                 KSequence kseq = (KSequence) left;
@@ -1286,7 +1288,7 @@ public class DefinitionToOcaml implements Serializable {
                     sb.append("match c with \n");
                     String namespace = hook.substring(0, hook.indexOf('.'));
                     String function = hook.substring(namespace.length() + 1);
-                    if (hookNamespaces.contains(namespace) || options.hookNamespaces.contains(namespace)) {
+                    if (hookNamespaces.contains(namespace) || kompileOptions.hookNamespaces.contains(namespace)) {
                         sb.append("| _ -> try ").append(namespace).append(".hook_").append(function).append(" c lbl sort config freshFunction");
                         if (mainModule.attributesFor().apply(functionLabel).contains("canTakeSteps")) {
                             sb.append(" eval");
@@ -1370,7 +1372,7 @@ public class DefinitionToOcaml implements Serializable {
         }
         List<Rule> sortedRules = unsortedRules.stream()
                 .sorted(this::sortRules)
-                .filter(r -> !functionRules.values().contains(r) && !r.att().contains(Attribute.MACRO_KEY) && !r.att().contains(Attribute.ALIAS_KEY) && !r.att().contains(Attribute.ANYWHERE_KEY))
+                .filter(r -> !functionRules.values().contains(r) && !ExpandMacros.isMacro(r) && !r.att().contains(Attribute.ANYWHERE_KEY))
                 .collect(Collectors.toList());
         sb.append("let rec get_next_op_from_exp(c: kitem) : (k -> k * (step_function)) = ");
         Set<KLabel> allStepFunctions = Sets.difference(mutable(mainModule.definedKLabels()), functions);

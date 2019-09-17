@@ -1,6 +1,4 @@
 #!/bin/sh -ex
-apt-get update
-apt-get install -y ./kframework_5.0.0_amd64.deb
 cp -R /usr/lib/kframework/tutorial ~
 WD=`pwd`
 cd

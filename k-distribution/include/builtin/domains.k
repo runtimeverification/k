@@ -43,7 +43,7 @@ module ARRAY-CONCRETE [concrete, kast]
   imports STRING-SYNTAX
 
   syntax Array ::= makeEmptyArray(Int) [function, hook(ARRAY.makeEmpty), impure]
-                 | arrayCtor(String, Int) [function, hook(ARRAY.ctor), symbol]
+                 | arrayCtor(String, Int, KItem) [function, hook(ARRAY.ctor), symbol]
                  | makeArray(Int, KItem) [function, hook(ARRAY.make), impure, klabel(makeArrayOcaml)]
 endmodule
 
@@ -119,7 +119,7 @@ module MAP
   syntax KItem ::= Map "[" KItem "]" "orDefault" KItem      [function, functional, hook(MAP.lookupOrDefault), klabel(Map:lookupOrDefault)]
 
   /*@ Update a Map in form of  of keys and values: */
-  syntax Map ::= Map "[" KItem "<-" KItem "]"           [function, functional, hook(MAP.update), prefer]
+  syntax Map ::= Map "[" KItem "<-" KItem "]"           [function, functional, klabel(Map:update), symbol, hook(MAP.update), prefer]
 
   /*@ Remove key/value pair associated with the key from map? */
   syntax Map ::= Map "[" KItem "<-" "undef" "]"     [function, functional, hook(MAP.remove), klabel(_[_<-undef]), symbol]
@@ -313,14 +313,14 @@ module BOOL
   imports BOOL-SYNTAX
   syntax Bool ::= "notBool" Bool          [function, functional, klabel(notBool_), symbol, smt-hook(not), boolOperation, latex(\neg_{\scriptstyle\it Bool}{#1}), hook(BOOL.not)]
                 > Bool "andBool" Bool     [function, functional, klabel(_andBool_), symbol, left, smt-hook(and), boolOperation, latex({#1}\wedge_{\scriptstyle\it Bool}{#2}), hook(BOOL.and)]
-                | Bool "andThenBool" Bool [function, functional, left, smt-hook(and), boolOperation, hook(BOOL.andThen)]
-                | Bool "xorBool" Bool     [function, functional, left, smt-hook(xor), boolOperation, hook(BOOL.xor)]
-                | Bool "orBool" Bool      [function, functional, left, smt-hook(or), boolOperation, latex({#1}\vee_{\scriptstyle\it Bool}{#2}), hook(BOOL.or)]
-                | Bool "orElseBool" Bool  [function, functional, left, smt-hook(or), boolOperation, hook(BOOL.orElse)]
-                | Bool "impliesBool" Bool [function, functional, left, smt-hook(=>), boolOperation, hook(BOOL.implies)]
+                | Bool "andThenBool" Bool [function, functional, klabel(_andThenBool_), symbol, left, smt-hook(and), boolOperation, hook(BOOL.andThen)]
+                | Bool "xorBool" Bool     [function, functional, klabel(_xorBool_), symbol, left, smt-hook(xor), boolOperation, hook(BOOL.xor)]
+                | Bool "orBool" Bool      [function, functional, klabel(_orBool_), left, smt-hook(or), boolOperation, latex({#1}\vee_{\scriptstyle\it Bool}{#2}), hook(BOOL.or)]
+                | Bool "orElseBool" Bool  [function, functional, klabel(_orElseBool_), symbol, left, smt-hook(or), boolOperation, hook(BOOL.orElse)]
+                | Bool "impliesBool" Bool [function, functional, klabel(_impliesBool_), symbol, left, smt-hook(=>), boolOperation, hook(BOOL.implies)]
                 > left:
-                  Bool "==Bool" Bool      [function, functional, left, smt-hook(=), hook(BOOL.eq)]
-                | Bool "=/=Bool" Bool     [function, functional, left, smt-hook(distinct), hook(BOOL.ne)]
+                  Bool "==Bool" Bool      [function, functional, klabel(_==Bool_), symbol, left, smt-hook(=), hook(BOOL.eq)]
+                | Bool "=/=Bool" Bool     [function, functional, klabel(_=/=Bool_), symbol, left, smt-hook(distinct), hook(BOOL.ne)]
 
   rule notBool true => false
   rule notBool false => true
@@ -372,31 +372,31 @@ endmodule
 module INT-COMMON
   imports INT-SYNTAX
   imports BOOL
-  syntax Int ::= "~Int" Int                     [function, functional, latex(\mathop{\sim_{\scriptstyle\it Int}}{#1}), hook(INT.not)]
+  syntax Int ::= "~Int" Int                     [function, klabel(~Int_), symbol, functional, latex(\mathop{\sim_{\scriptstyle\it Int}}{#1}), hook(INT.not), smtlib(notInt)]
                > left:
-                 Int "^Int" Int                 [function, left, smt-hook(^), latex({#1}\mathrel{{\char`\^}_{\!\scriptstyle\it Int}}{#2}), hook(INT.pow)]
-               | Int "^%Int" Int Int            [function, left, smt-hook((mod (^ #1 #2) #3)), hook(INT.powmod)]
+                 Int "^Int" Int                 [function, klabel(_^Int_), symbol, left, smt-hook(^), latex({#1}\mathrel{{\char`\^}_{\!\scriptstyle\it Int}}{#2}), hook(INT.pow)]
+               | Int "^%Int" Int Int            [function, klabel(_^%Int__), symbol, left, smt-hook((mod (^ #1 #2) #3)), hook(INT.powmod)]
                > left:
-                 Int "*Int" Int                 [function, functional, left, smt-hook(*), latex({#1}\mathrel{\ast_{\scriptstyle\it Int}}{#2}), hook(INT.mul)]
+                 Int "*Int" Int                 [function, functional, klabel(_*Int_), symbol, left, smt-hook(*), latex({#1}\mathrel{\ast_{\scriptstyle\it Int}}{#2}), hook(INT.mul)]
                /* FIXME: translate /Int and %Int into smtlib */
                /* /Int and %Int implement t-division */
-               | Int "/Int" Int                 [function, left, smt-hook(div), latex({#1}\mathrel{\div_{\scriptstyle\it Int}}{#2}), hook(INT.tdiv)]
-               | Int "%Int" Int                 [function, left, smt-hook(mod), latex({#1}\mathrel{\%_{\scriptstyle\it Int}}{#2}), hook(INT.tmod)]
+               | Int "/Int" Int                 [function, klabel(_/Int_), symbol, left, smt-hook(div), latex({#1}\mathrel{\div_{\scriptstyle\it Int}}{#2}), hook(INT.tdiv)]
+               | Int "%Int" Int                 [function, klabel(_%Int_), symbol, left, smt-hook(mod), latex({#1}\mathrel{\%_{\scriptstyle\it Int}}{#2}), hook(INT.tmod)]
                /* divInt and modInt implement e-division */
-               | Int "divInt" Int               [function, left, smt-hook(div), hook(INT.ediv)]
-               | Int "modInt" Int               [function, left, smt-hook(mod), hook(INT.emod)]
+               | Int "divInt" Int               [function, klabel(_divInt_), symbol, left, smt-hook(div), hook(INT.ediv)]
+               | Int "modInt" Int               [function, klabel(_modInt_), symbol, left, smt-hook(mod), hook(INT.emod)]
                > left:
-                 Int "+Int" Int                 [function, functional, left, smt-hook(+), latex({#1}\mathrel{+_{\scriptstyle\it Int}}{#2}), hook(INT.add), klabel(_+Int_), symbol]
-               | Int "-Int" Int                 [function, functional, left, smt-hook(-), latex({#1}\mathrel{-_{\scriptstyle\it Int}}{#2}), hook(INT.sub)]
+                 Int "+Int" Int                 [function, functional, klabel(_+Int_), symbol, left, smt-hook(+), latex({#1}\mathrel{+_{\scriptstyle\it Int}}{#2}), hook(INT.add)]
+               | Int "-Int" Int                 [function, functional, klabel(_-Int_), symbol, left, smt-hook(-), latex({#1}\mathrel{-_{\scriptstyle\it Int}}{#2}), hook(INT.sub)]
                > left:
-                 Int ">>Int" Int                [function, left, latex({#1}\mathrel{\gg_{\scriptstyle\it Int}}{#2}), hook(INT.shr)]
-               | Int "<<Int" Int                [function, left, latex({#1}\mathrel{\ll_{\scriptstyle\it Int}}{#2}), hook(INT.shl)]
+                 Int ">>Int" Int                [function, klabel(_>>Int_), symbol, left, latex({#1}\mathrel{\gg_{\scriptstyle\it Int}}{#2}), hook(INT.shr), smtlib(shrInt)]
+               | Int "<<Int" Int                [function, klabel(_<<Int_), symbol, left, latex({#1}\mathrel{\ll_{\scriptstyle\it Int}}{#2}), hook(INT.shl), smtlib(shlInt)]
                > left:
-                 Int "&Int" Int                 [function, functional, left, latex({#1}\mathrel{\&_{\scriptstyle\it Int}}{#2}), hook(INT.and)]
+                 Int "&Int" Int                 [function, functional, klabel(_&Int_), symbol, left, latex({#1}\mathrel{\&_{\scriptstyle\it Int}}{#2}), hook(INT.and), smtlib(andInt)]
                > left:
-                 Int "xorInt" Int               [function, functional, left, latex({#1}\mathrel{\oplus_{\scriptstyle\it Int}}{#2}), hook(INT.xor)]
+                 Int "xorInt" Int               [function, functional, klabel(_xorInt_), symbol, left, latex({#1}\mathrel{\oplus_{\scriptstyle\it Int}}{#2}), hook(INT.xor), smtlib(xorInt)]
                > left:
-                 Int "|Int" Int                 [function, functional, left, latex({#1}\mathrel{|_{\scriptstyle\it Int}}{#2}), hook(INT.or)]
+                 Int "|Int" Int                 [function, functional, klabel(_|Int_), symbol, left, latex({#1}\mathrel{|_{\scriptstyle\it Int}}{#2}), hook(INT.or), smtlib(orInt)]
 
   syntax Int ::= "minInt" "(" Int "," Int ")"   [function, functional, smtlib(int_min), hook(INT.min)]
                | "maxInt" "(" Int "," Int ")"   [function, functional, smtlib(int_max), hook(INT.max)]
@@ -406,12 +406,12 @@ module INT-COMMON
   syntax Int ::= bitRangeInt           ( Int, indexInt: Int, lengthInt: Int ) [function, hook(INT.bitRange)]
   syntax Int ::= signExtendBitRangeInt ( Int, indexInt: Int, lengthInt: Int ) [function, hook(INT.signExtendBitRange)]
 
-  syntax Bool ::= Int "<=Int" Int         [function, functional, left, smt-hook(<=), latex({#1}\mathrel{\leq_{\scriptstyle\it Int}}{#2}), hook(INT.le)]
-                | Int "<Int" Int          [function, functional, left, smt-hook(<), latex({#1}\mathrel{<_{\scriptstyle\it Int}}{#2}), hook(INT.lt)]
-                | Int ">=Int" Int         [function, functional, left, smt-hook(>=), latex({#1}\mathrel{\geq_{\scriptstyle\it Int}}{#2}), hook(INT.ge)]
-                | Int ">Int" Int          [function, functional, left, smt-hook(>), latex({#1}\mathrel{>_{\scriptstyle\it Int}}{#2}), hook(INT.gt)]
-                | Int "==Int" Int         [function, functional, left, smt-hook(=), latex({#1}\mathrel{{=}{=}_{\scriptstyle\it Int}}{#2}), hook(INT.eq), klabel(_==Int_)]
-                | Int "=/=Int" Int        [function, functional, left, smt-hook(distinct), latex({#1}\mathrel{{=}{/}{=}_{\scriptstyle\it Int}}{#2}), hook(INT.ne)]
+  syntax Bool ::= Int "<=Int" Int         [function, functional, klabel(_<=Int_), symbol, left, smt-hook(<=), latex({#1}\mathrel{\leq_{\scriptstyle\it Int}}{#2}), hook(INT.le)]
+                | Int "<Int" Int          [function, functional, klabel(_<Int_), symbol, left, smt-hook(<), latex({#1}\mathrel{<_{\scriptstyle\it Int}}{#2}), hook(INT.lt)]
+                | Int ">=Int" Int         [function, functional, klabel(_>=Int_), symbol, left, smt-hook(>=), latex({#1}\mathrel{\geq_{\scriptstyle\it Int}}{#2}), hook(INT.ge)]
+                | Int ">Int" Int          [function, functional, klabel(_>Int_), symbol, left, smt-hook(>), latex({#1}\mathrel{>_{\scriptstyle\it Int}}{#2}), hook(INT.gt)]
+                | Int "==Int" Int         [function, functional, klabel(_==Int_), symbol, left, smt-hook(=), latex({#1}\mathrel{{=}{=}_{\scriptstyle\it Int}}{#2}), hook(INT.eq)]
+                | Int "=/=Int" Int        [function, functional, klabel(_=/=Int_), symbol, left, smt-hook(distinct), latex({#1}\mathrel{{=}{/}{=}_{\scriptstyle\it Int}}{#2}), hook(INT.ne)]
                 | Int "dividesInt" Int    [function]
 endmodule
 
@@ -420,11 +420,38 @@ module INT-SYMBOLIC [symbolic, kore]
   imports ML-SYNTAX
 
   /**
-   * Definability conditions for _/Int_ and _%Int_
+   * Definability conditions
    */
 
-  rule #Ceil(I1:Int /Int I2:Int) => {(I2 =/=Int 0) #Equals true} [anywhere]
-  rule #Ceil(I1:Int %Int I2:Int) => {(I2 =/=Int 0) #Equals true} [anywhere]
+  rule
+    #Ceil(@I1:Int /Int @I2:Int)
+  =>
+    {(@I2 =/=Int 0) #Equals true} #And #Ceil(@I1) #And #Ceil(@I2)
+  [anywhere]
+
+  rule
+    #Ceil(@I1:Int %Int @I2:Int)
+  =>
+    {(@I2 =/=Int 0) #Equals true} #And #Ceil(@I1) #And #Ceil(@I2)
+  [anywhere]
+
+  rule
+    #Ceil(@I1:Int modInt @I2:Int)
+  =>
+    {(@I2 =/=Int 0) #Equals true} #And #Ceil(@I1) #And #Ceil(@I2)
+  [anywhere]
+
+  rule
+    #Ceil(@I1:Int >>Int @I2:Int)
+  =>
+    {(@I2 >=Int 0) #Equals true} #And #Ceil(@I1) #And #Ceil(@I2)
+  [anywhere]
+
+  rule
+    #Ceil(@I1:Int <<Int @I2:Int)
+  =>
+    {(@I2 >=Int 0) #Equals true} #And #Ceil(@I1) #And #Ceil(@I2)
+  [anywhere]
 endmodule
 
 module INT
@@ -665,6 +692,8 @@ module BYTES-HOOKED [concrete]
   syntax String ::= Bytes2String(Bytes) [function, functional, hook(BYTES.bytes2string)]
   syntax Bytes ::= String2Bytes(String) [function, functional, hook(BYTES.string2bytes)]
 
+  syntax Bytes ::= Bytes "[" Int "<-" Int "]" [function, hook(BYTES.update)]
+  syntax Int ::= Bytes "[" Int "]" [function, hook(BYTES.get)]
   syntax Bytes ::= substrBytes(Bytes, Int, Int) [function, hook(BYTES.substr)]
   syntax Bytes ::= replaceAtBytes(Bytes, Int, Bytes) [function, hook(BYTES.replaceAt)]
   syntax Bytes ::= padRightBytes(Bytes, Int, Int) [function, hook(BYTES.padRight)]
@@ -716,6 +745,13 @@ module BYTES-IN-K [symbolic]
   syntax Bytes ::= String2Bytes(String) [function, functional]
   rule String2Bytes(S) => ordChar(substrString(S, 0, 1)) : String2Bytes(substrString(S, 1, lengthString(S))) requires lengthString(S) >=Int 1
   rule String2Bytes("") => nilBytes
+
+  syntax Bytes ::= Bytes "[" Int "<-" Int "]" [function]
+  rule BS [ N <- M ] => substrBytes(BS, 0, N) +Bytes M : substrBytes(BS, N +Int 1, lengthBytes(BS))
+
+  syntax Int ::= Bytes "[" Int "]" [function]
+  rule (B : BS) [ 0 ] => B
+  rule (_ : BS) [ I ] => BS [ I -Int 1] requires I >Int 0
 
   syntax Bytes ::= substrBytes(Bytes, Int, Int) [function]
   rule substrBytes(BS, 0, 0) => nilBytes
@@ -846,6 +882,10 @@ module K-REFLECTION
   // undefined
   syntax List ::= #argv() [function, hook(KREFLECTION.argv)]
 
+  // Takes as input a string and returns a K term
+  syntax KItem ::= #parseKAST(String) [function, hook(KREFLECTION.parseKAST), poly(0)]
+  syntax IOError ::= "#noParse" "(" String ")" [klabel(#noParse), symbol]
+
 endmodule
 
 module K-REFLECTION-SYMBOLIC [symbolic]
@@ -860,18 +900,12 @@ module K-REFLECTION-SYMBOLIC [symbolic]
   syntax Bool ::= #isVariable(K) [function, hook(KREFLECTION.isVariable)]
 endmodule
 
-module META
-  imports STRING-SYNTAX
-  // Takes as input a string and returns a K term
-  syntax KItem ::= #parseKAST(String) [function, hook(META.parseKAST), poly(0)]
-endmodule
-
 module K-IO
   imports LIST
   imports STRING
-  imports META
+  imports K-REFLECTION
 
-  syntax IOError ::= "#EOF" [klabel(#EOF), symbol] | "#noparse" [klabel(#noparse), symbol] | #unknownIOError(Int) [symbol]
+  syntax IOError ::= "#EOF" [klabel(#EOF), symbol] | #unknownIOError(Int) [symbol]
                    | "#E2BIG" [klabel(#E2BIG), symbol]
                    | "#EACCES" [klabel(#EACCES), symbol]
                    | "#EAGAIN" [klabel(#EAGAIN), symbol]
@@ -948,6 +982,7 @@ module K-IO
                | "#open" "(" String "," String ")" [function, hook(IO.open), impure]
                | "#tell" "(" Int ")" [function, hook(IO.tell), impure]
                | "#getc" "(" Int ")"             [function, hook(IO.getc), impure]
+               | "#accept" "(" Int ")" [function, hook(IO.accept), impure]
   syntax IOString ::= "#read" "(" Int "," Int ")"    [function, hook(IO.read), impure]
 
   syntax K ::= "#close" "(" Int ")" [function, hook(IO.close), impure]
@@ -957,6 +992,7 @@ module K-IO
              | "#write" "(" Int "," String ")" [function, hook(IO.write), impure]
              | "#lock" "(" Int "," Int ")" [function, hook(IO.lock), impure]
              | "#unlock" "(" Int "," Int ")" [function, hook(IO.unlock), impure]
+             | "#shutdownWrite" "(" Int ")" [function, hook(IO.shutdownWrite), impure]
 
   syntax KItem ::= "#stat" "(" String ")" [function, hook(IO.stat), impure]
                  | "#lstat" "(" String ")" [function, hook(IO.lstat), impure]
@@ -980,9 +1016,9 @@ module K-IO
   // executes the given command line with `sh -c cmd:String` on unix or
   // `cmd /c cmd:String` on windows and returns #systemResult
   syntax KItem ::= #system ( String ) [function, hook(IO.system), impure]
-                 | "#systemResult" "(" Int /* exit code */ "," String /* stdout */ "," String /* stderr */ ")"
+                 | "#systemResult" "(" Int /* exit code */ "," String /* stdout */ "," String /* stderr */ ")" [klabel(#systemResult), symbol]
 
-  syntax K ::= #logToFile(String, String) [function, functional, hook(IO.log), impure, returnsUnit]
+  syntax K ::= #logToFile(String, String) [function, functional, hook(IO.log), impure, returnsUnit, symbol]
   // #make safe temp ( prefix:String, suffix:String):IOFile - creates a temporary file in the default system location
   syntax IOFile ::= #mkstemp(String, String) [function, hook(IO.mkstemp), impure]
   syntax IOFile ::= IOError
@@ -1006,7 +1042,7 @@ endmodule
 
 module STDIN-STREAM
   imports K-IO
-  imports META
+  imports K-REFLECTION
 
   syntax Stream ::= #istream(Int)
   syntax Stream ::= #parseInput(String, String)
@@ -1369,9 +1405,11 @@ module CONFIGURATION-PRIMITIVES
 endmodule
 
 module STRATEGY
-    syntax #RuleTag
+    imports ML-SYNTAX
 
-    syntax Strategy ::= #STUCK()     [symbol]
+    syntax #RuleTag ::= #KVariable
+
+    syntax Strategy ::= #STUCK()    [symbol]
                       | "^" #RuleTag [symbol, klabel(#applyRule)]
                       | "~" #RuleTag [symbol, klabel(#appliedRule)]
 
@@ -1382,7 +1420,6 @@ module RULE-TAG-SYNTAX
     imports BUILTIN-ID-TOKENS
 
     syntax #RuleTag ::= #LowerId [token]
-                      | #UpperId [token]
 endmodule
 
 module DEFAULT-STRATEGY-CONCRETE [concrete]
@@ -1408,36 +1445,29 @@ endmodule
 module STRATEGY-ABSTRACT
     imports STRATEGY
 
-    syntax AtomicStrategy ::= #RuleTag
- // ----------------------------------
-    rule <s> #appliedRule(_) => . ... </s>
+    syntax #RuleTag ::= "(" #RuleTag ")" [bracket]
+ // ----------------------------------------------
 
     syntax Strategy ::= ".Strategy"
-                      | "^" AtomicStrategy [klabel(#applyAtomicStrategy)]
                       | "(" Strategy ")" [bracket]
  // ----------------------------------------------
     rule <s> .Strategy => . ... </s>
-    rule <s> #applyAtomicStrategy(RT) => #applyRule(RT) ... </s>
 
-    syntax KItem ::= #catchSTUCK       ( Strategy )            [function]
-                   | #catchSTUCKorElse ( Strategy , Strategy )
- // ----------------------------------------------------------
-    rule #catchSTUCK(S) => #catchSTUCKorElse(S, .Strategy)
-
+    syntax KItem ::= #catchSTUCK ( Strategy )
+ // -----------------------------------------
+    rule <s> #catchSTUCK(_) => . ... </s>
     rule <s> #STUCK() ~> (S:Strategy => .) ... </s>
-
-    rule <s> #catchSTUCKorElse(_, S') => S' ... </s>
-    rule <s> #STUCK() ~> #catchSTUCKorElse(S, _) => S ... </s>
+    rule <s> #STUCK() ~> #catchSTUCK(S) => S ... </s>
 
     syntax Strategy ::= Strategy ";" Strategy [left]
  // ------------------------------------------------
     rule <s> S:Strategy ; S':Strategy => S ~> S' ... </s>
 
-    syntax AtomicStrategy ::= AtomicStrategy "|" AtomicStrategy [left, klabel(#alternateRule)]
- // ------------------------------------------------------------------------------------------
-    rule <s> ^ (AS | AS') => ^ AS ~> #catchSTUCK(^ AS') ... </s>
+    syntax #RuleTag ::= #RuleTag "|" #RuleTag [left, klabel(#alternateRule)]
+ // ------------------------------------------------------------------------
+    rule <s> ^ RT:#RuleTag | RT':#RuleTag => ^ RT ~> #catchSTUCK(^ RT') ... </s>
 
-    syntax AtomicStrategy ::= AtomicStrategy "*" [klabel(#repeatRule)]
- // ------------------------------------------------------------------
-    rule <s> ^ (AS *) => ^ AS ~> #catchSTUCKorElse(.Strategy, ^ (AS *)) ... </s>
+    syntax #RuleTag ::= #RuleTag "*" [klabel(#repeatRule)]
+ // ------------------------------------------------------
+    rule <s> ^ RT:#RuleTag * => ^ RT ~> ^ RT * ~> #catchSTUCK(.Strategy) ... </s>
 endmodule

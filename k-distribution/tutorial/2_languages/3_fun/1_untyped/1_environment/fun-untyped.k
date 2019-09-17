@@ -378,12 +378,12 @@ so we can easily recognize them when we debug or trace the semantics. */
 
 //@ Multiple-head list patterns desugar into successive one-head patterns:
 
-  rule [E1,E2,Es:Exps|T] => [E1|[E2,Es|T]]                   [macro]
+  rule [E1,E2,Es:Exps|T] => [E1|[E2,Es|T]]                   [macro-rec]
 
 //@ Uncurrying of multiple arguments in functions and binders:
 
-  rule P1 P2 -> E => P1 -> fun P2 -> E                       [macro]
-  rule F P = E => F = fun P -> E                             [macro]
+  rule P1 P2 -> E => P1 -> fun P2 -> E                       [macro-rec]
+  rule F P = E => F = fun P -> E                             [macro-rec]
 
 /*@ We desugar the \texttt{try-catch} construct into callcc: */
 
@@ -393,7 +393,7 @@ so we can easily recognize them when we debug or trace the semantics. */
 
 //@ For uniformity, we reduce all types to their general form:
 //  rule TypeName(Tn:TypeName) => (.TypeVars) Tn               [macro]
-  rule Type-TypeName(T:Type, Tn:TypeName) => (T) Tn          [macro]
+  rule `Type-TypeName`(T:Type, Tn:TypeName) => (T) Tn          [macro]
 
 //@ The dynamic semantics ignores all the type declarations:
 

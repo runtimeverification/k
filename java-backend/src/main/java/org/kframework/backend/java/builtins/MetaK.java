@@ -5,6 +5,7 @@ import org.kframework.backend.java.kil.BuiltinMap;
 import org.kframework.backend.java.kil.BuiltinSet;
 import org.kframework.backend.java.kil.JavaSymbolicObject;
 import org.kframework.backend.java.kil.KItem;
+import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.KLabelInjection;
 import org.kframework.backend.java.kil.KList;
 import org.kframework.backend.java.kil.MetaVariable;
@@ -13,9 +14,13 @@ import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.backend.java.symbolic.ConjunctiveFormula;
 import org.kframework.backend.java.symbolic.CopyOnWriteTransformer;
+import org.kframework.backend.java.symbolic.JavaBackend;
 import org.kframework.backend.java.symbolic.PatternMatcher;
+import org.kframework.kore.K;
+import org.kframework.kore.KORE;
 import org.kframework.kore.KVariable;
-import org.kframework.parser.kore.KoreParser;
+import org.kframework.parser.kast.KastParser;
+import org.kframework.utils.errorsystem.KEMException;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -207,7 +212,12 @@ public class MetaK {
      * @return backend AST
      */
     public static Term parseKAST(StringToken kast, TermContext termContext) {
-        return termContext.getKOREtoBackendKILConverter().convert(KoreParser.parse(kast.stringValue(), kast.getSource()));
+        try {
+            return termContext.getKOREtoBackendKILConverter().convert(JavaBackend.convertKSeqToKApply(KastParser.parse(kast.stringValue(), kast.getSource())));
+        } catch (KEMException e) {
+            KLabelConstant klabel = KLabelConstant.of(KORE.KLabel("#noParse"), termContext.definition());
+            return KItem.of(klabel, StringToken.of(e.getMessage()), termContext.global());
+        }
     }
 
     public static StringToken getKLabelString(Term term, TermContext context) {

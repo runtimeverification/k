@@ -10,12 +10,15 @@ import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.SetMultimap;
+import com.google.common.collect.Sets;
 import org.kframework.attributes.Att;
 import org.kframework.backend.java.compile.KOREtoBackendKIL;
+import org.kframework.backend.java.symbolic.JavaBackend;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Subsorts;
 import org.kframework.builtin.Sorts;
+import org.kframework.compile.ExpandMacros;
 import org.kframework.definition.Module;
 import org.kframework.kil.Attribute;
 import org.kframework.kil.loader.Context;
@@ -25,18 +28,19 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import scala.collection.JavaConversions;
 import scala.collection.JavaConverters;
 
+import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 import static org.kframework.Collections.*;
@@ -47,9 +51,6 @@ import static org.kframework.Collections.*;
  * @author AndreiS
  */
 public class Definition extends JavaSymbolicObject {
-
-    public static final String AUTOMATON = "automaton";
-
 
     private static class DefinitionData implements Serializable {
         public final Subsorts subsorts;
@@ -80,24 +81,28 @@ public class Definition extends JavaSymbolicObject {
 
     private final List<Rule> rules = Lists.newArrayList();
     private final List<Rule> macros = Lists.newArrayList();
+    private final List<Rule> specRules = new ArrayList<>();
+
+    @SuppressWarnings("unused") //for debug
+    public final List<Rule> specRulesPublic = Collections.unmodifiableList(specRules);
     private final Multimap<KLabelConstant, Rule> functionRules = ArrayListMultimap.create();
     private final Multimap<KLabelConstant, Rule> sortPredicateRules = HashMultimap.create();
     private final Multimap<KLabelConstant, Rule> anywhereRules = ArrayListMultimap.create();
     private final Multimap<KLabelConstant, Rule> patternRules = ArrayListMultimap.create();
     private final List<Rule> patternFoldingRules = new ArrayList<>();
 
-    private Set<KLabelConstant> kLabels;
+    private final Set<KLabelConstant> kLabels = new LinkedHashSet<>();
+    private final Set<KLabelConstant> kLabelsPublic = Collections.unmodifiableSet(kLabels);
 
     private DefinitionData definitionData;
     private transient Context context;
 
     private transient KExceptionManager kem;
 
-    // new indexing data
     /**
-     * the automaton rule used by {@link org.kframework.backend.java.symbolic.FastRuleMatcher}
+     * the automaton rules used by {@link org.kframework.backend.java.symbolic.FastRuleMatcher}
      */
-    public Rule automaton = null;
+    public Map<String, Rule> automatons = new HashMap<>();
     /**
      * all the rules indexed with the ordinal used by {@link org.kframework.backend.java.symbolic.FastRuleMatcher}
      */
@@ -108,7 +113,6 @@ public class Definition extends JavaSymbolicObject {
     private final Map<KItem.CacheTableColKey, KItem.CacheTableValue> sortCacheTable = new HashMap<>();
 
     public Definition(org.kframework.definition.Module module, KExceptionManager kem) {
-        kLabels = new LinkedHashSet<>();
         this.kem = kem;
 
         Module moduleWithPolyProds = RuleGrammarGenerator.getCombinedGrammar(module, false).getExtensionModule();
@@ -189,51 +193,74 @@ public class Definition extends JavaSymbolicObject {
         return builder.build();
     }
 
+    private static final Set<String> automatonAttributes
+            = Sets.newHashSet(JavaBackend.MAIN_AUTOMATON, JavaBackend.SPEC_AUTOMATON);
+
     /**
      * Converts the org.kframework.Rules to backend Rules, also plugging in the automaton rule
      */
     public void addKoreRules(Module module, GlobalContext global) {
-        KOREtoBackendKIL transformer = new KOREtoBackendKIL(module, this, global, true);
-
-
-        List<org.kframework.definition.Rule> koreRules = JavaConversions.setAsJavaSet(module.rules()).stream()
-                .filter(r -> !r.att().contains(AUTOMATON))
-                .collect(Collectors.toList());
-
-        //Ensures that rule order in all collections remains the same across across different executions.
-        koreRules.sort(Comparator.comparingInt(rule -> rule.body().hashCode()));
-
-        koreRules.forEach(r -> {
-            if (r.att().contains(Att.topRule())) {
-                reverseRuleTable.put(r.hashCode(), reverseRuleTable.size());
-            }
-        });
-
-        koreRules.forEach(r -> {
-            Rule convertedRule = transformer.convert(Optional.of(module), r);
-            addRule(convertedRule);
-            if (r.att().contains(Att.topRule())) {
-                ruleTable.put(reverseRuleTable.get(r.hashCode()), convertedRule);
-            }
-        });
-
-
-        Optional<org.kframework.definition.Rule> koreAutomaton = JavaConversions.setAsJavaSet(module.localRules()).stream()
-                .filter(r -> r.att().contains(AUTOMATON))
-                .collect(Collectors.collectingAndThen(
-                        Collectors.toList(),
-                        list -> list.size() == 1 ? Optional.of(list.get(0)) : Optional.empty()
-                ));
-        if (koreAutomaton.isPresent()) {
-            automaton = transformer.convert(Optional.of(module), koreAutomaton.get());
-        }
+        KOREtoBackendKIL converter = new KOREtoBackendKIL(module, this, global, true);
+        addKoreRules(module, converter, null, null);
     }
 
-    public Definition(DefinitionData definitionData, KExceptionManager kem, Map<Integer, Rule> ruleTable, Rule automaton) {
-        kLabels = new HashSet<>();
+    public List<Rule> addKoreRules(Module module, KOREtoBackendKIL converter, @Nullable String filterAttribute,
+                                   @Nullable UnaryOperator<Rule> rulePostProcessor) {
+        //Add regular rules from all modules
+        List<Rule> result = stream(module.rules())
+                .filter(rule -> !containsAnyAttribute(rule, automatonAttributes))
+                .filter(rule -> filterAttribute == null || rule.att().contains(filterAttribute))
+                //Ensures that rule order in all collections remains the same across across different executions.
+                .sorted(Comparator.comparingInt(rule -> rule.body().hashCode()))
+                .map(rule -> addKoreRule(rule, converter, module, rulePostProcessor))
+                .collect(Collectors.toList());
+
+        //Add automaton from this module only
+        stream(module.localRules())
+                .filter(rule -> containsAnyAttribute(rule, automatonAttributes))
+                .forEach(rule -> addKoreAutomaton(rule, converter, module));
+        return result;
+    }
+
+    /**
+     * @return the converted rule
+     */
+    public Rule addKoreRule(org.kframework.definition.Rule rule, KOREtoBackendKIL converter, Module module,
+                            @Nullable UnaryOperator<Rule> rulePostProcessor) {
+        Rule convertedRule = converter.convert(module, rule);
+        if (rulePostProcessor != null) {
+            convertedRule = rulePostProcessor.apply(convertedRule);
+        }
+
+        addRule(convertedRule);
+        if (rule.att().contains(Att.topRule()) || rule.att().contains(Att.specification())) {
+            reverseRuleTable.put(rule.hashCode(), reverseRuleTable.size());
+            ruleTable.put(reverseRuleTable.get(rule.hashCode()), convertedRule);
+        }
+        return convertedRule;
+    }
+
+    /**
+     * Automaton must be added after regular rules that it includes.
+     */
+    public void addKoreAutomaton(org.kframework.definition.Rule rule, KOREtoBackendKIL transformer, Module module) {
+        Rule convertedRule = transformer.convert(module, rule);
+        automatons.put(getFirstContainedAttribute(convertedRule, automatonAttributes), convertedRule);
+    }
+
+    public boolean containsAnyAttribute(org.kframework.definition.Rule rule, Set<String> attributeNames) {
+        return attributeNames.stream().anyMatch(name -> rule.att().contains(name));
+    }
+
+    public String getFirstContainedAttribute(Rule rule, Set<String> attributeNames) {
+        return attributeNames.stream().filter(name -> rule.att().contains(name)).findFirst().orElse(null);
+    }
+
+    public Definition(DefinitionData definitionData, KExceptionManager kem, Map<Integer, Rule> ruleTable,
+                      Map<String, Rule> automatons) {
         this.kem = kem;
         this.ruleTable = ruleTable;
-        this.automaton = automaton;
+        this.automatons = automatons;
 
         this.definitionData = definitionData;
         this.context = null;
@@ -245,7 +272,7 @@ public class Definition extends JavaSymbolicObject {
 
     public void addKLabelCollection(Collection<KLabelConstant> kLabels) {
         for (KLabelConstant kLabel : kLabels) {
-            this.kLabels.add(kLabel);
+            addKLabel(kLabel);
         }
     }
 
@@ -259,7 +286,7 @@ public class Definition extends JavaSymbolicObject {
             patternRules.put(rule.definedKLabel(), rule);
         } else if (rule.att().contains(Attribute.PATTERN_FOLDING_KEY)) {
             patternFoldingRules.add(rule);
-        } else if (rule.att().contains(Attribute.MACRO_KEY) || rule.att().contains(Attribute.ALIAS_KEY)) {
+        } else if (ExpandMacros.isMacro(rule)) {
             macros.add(rule);
         } else if (rule.att().contains(Attribute.ANYWHERE_KEY)) {
             if (!(rule.leftHandSide() instanceof KItem)) {
@@ -272,6 +299,9 @@ public class Definition extends JavaSymbolicObject {
             anywhereRules.put(rule.anywhereKLabel(), rule);
         } else {
             rules.add(rule);
+            if (rule.att().contains(Att.specification())) {
+                specRules.add(rule);
+            }
         }
     }
 
@@ -325,7 +355,7 @@ public class Definition extends JavaSymbolicObject {
     }
 
     public Set<KLabelConstant> kLabels() {
-        return Collections.unmodifiableSet(kLabels);
+        return kLabelsPublic;
     }
 
     public List<Rule> macros() {
@@ -395,4 +425,11 @@ public class Definition extends JavaSymbolicObject {
         return definitionData;
     }
 
+    public Rule mainAutomaton() {
+        return automatons.get(JavaBackend.MAIN_AUTOMATON);
+    }
+
+    public Rule specAutomaton() {
+        return automatons.get(JavaBackend.SPEC_AUTOMATON);
+    }
 }

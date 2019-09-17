@@ -7,6 +7,8 @@ import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Context;
+import org.kframework.definition.ContextAlias;
+import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.definition.Production;
 import org.kframework.definition.ProductionItem;
@@ -42,6 +44,56 @@ import static org.kframework.kore.KORE.*;
 
 public class ResolveFunctionWithConfig {
 
+    private final Set<KLabel> withConfigFunctions = new HashSet<>();
+    private final Sort topCell;
+    private final KLabel topCellLabel;
+
+    public ResolveFunctionWithConfig(Definition d, boolean kore) {
+      this(d.mainModule(), kore);
+    }
+
+    public ResolveFunctionWithConfig(Module mod, boolean kore) {
+      ComputeTransitiveFunctionDependencies deps = new ComputeTransitiveFunctionDependencies(mod);
+      Set<KLabel> functions = stream(mod.productions()).filter(p -> p.att().contains(Attribute.FUNCTION_KEY)).map(p -> p.klabel().get()).collect(Collectors.toSet());
+      withConfigFunctions.addAll(functions.stream().filter(f -> stream(mod.rulesFor().getOrElse(f, () -> Collections.<Rule>Set())).anyMatch(r -> ruleNeedsConfig(r))).collect(Collectors.toSet()));
+      withConfigFunctions.addAll(deps.ancestors(withConfigFunctions));
+      ConfigurationInfoFromModule info = new ConfigurationInfoFromModule(mod);
+      if (kore) {
+        topCell = Sorts.GeneratedTopCell();
+        topCellLabel = KLabels.GENERATED_TOP_CELL;
+      } else {
+        topCell = info.getRootCell();
+        topCellLabel = info.getCellLabel(topCell);
+      }
+      CONFIG_VAR = KVariable("_Configuration", Att().add(Sort.class, topCell).add("withConfig"));
+    }
+
+    private boolean ruleNeedsConfig(Rule r) {
+        if (r.body() instanceof KApply && ((KApply)r.body()).klabel().name().equals("#withConfig")) {
+            return true;
+        }
+        FoldK<Boolean> hasVarNeedsConfig = new FoldK<Boolean>() {
+            @Override
+            public Boolean unit() {
+                return false;
+            }
+
+            @Override
+            public Boolean merge(Boolean a, Boolean b) {
+                return a || b;
+            }
+
+            @Override
+            public Boolean apply(KVariable k) {
+                return k.name().startsWith("!") || k.name().equals("_Configuration");
+            }
+        };
+        if (hasVarNeedsConfig.apply(RewriteToTop.toRight(r.body())) || hasVarNeedsConfig.apply(r.requires()) || hasVarNeedsConfig.apply(r.ensures())) {
+            return true;
+        }
+        return false;
+    }
+
     private Rule resolve(Rule rule, Module m) {
         return new Rule(
                 transform(resolve(rule.body(), m), m),
@@ -57,7 +109,14 @@ public class ResolveFunctionWithConfig {
                 context.att());
     }
 
-    public static final KVariable CONFIG_VAR = KVariable("_Configuration", Att().add(Sort.class, Sorts.GeneratedTopCell()));
+    private ContextAlias resolve(ContextAlias context, Module m) {
+        return new ContextAlias(
+                transform(context.body(), m),
+                transform(context.requires(), m),
+                context.att());
+    }
+
+    public final KVariable CONFIG_VAR;
 
     private K transform(K term, Module module) {
       return new TransformK() {
@@ -66,7 +125,7 @@ public class ResolveFunctionWithConfig {
           if (!kapp.items().isEmpty() && kapp.items().get(kapp.items().size() - 1).att().contains("withConfig")) {
             return super.apply(kapp);
           }
-          if (module.attributesFor().get(kapp.klabel()).getOrElse(() -> Att()).contains("withConfig")) {
+          if (withConfigFunctions.contains(kapp.klabel())) {
             return KApply(kapp.klabel(), KList(Stream.concat(kapp.items().stream().map(this::apply), Stream.of(CONFIG_VAR)).collect(Collections.toList())), kapp.att());
           }
           return super.apply(kapp);
@@ -99,10 +158,10 @@ public class ResolveFunctionWithConfig {
           }
           KApply cellKApp = (KApply)cell;
           K secondChild;
-          if (cellKApp.klabel().equals(KLabels.GENERATED_TOP_CELL)) {
+          if (cellKApp.klabel().equals(topCellLabel)) {
             secondChild = cell;
           } else {
-            secondChild = IncompleteCellUtils.make(KLabels.GENERATED_TOP_CELL, true, cell, true);
+            secondChild = IncompleteCellUtils.make(topCellLabel, true, cell, true);
           }
           List<K> items = Stream.concat(funKApp.items().stream(), Stream.of(KAs(secondChild, CONFIG_VAR, Att().add("withConfig")))).collect(Collections.toList());
           K result = KApply(funKApp.klabel(), KList(items), funKApp.att());
@@ -117,8 +176,8 @@ public class ResolveFunctionWithConfig {
     }
 
     private Production resolve(Production prod) {
-        if (prod.att().contains("withConfig")) {
-            List<ProductionItem> pis = Stream.concat(stream(prod.items()), Stream.of(NonTerminal(Sorts.GeneratedTopCell()))).collect(Collections.toList());
+        if (prod.klabel().isDefined() && withConfigFunctions.contains(prod.klabel().get())) {
+            List<ProductionItem> pis = Stream.concat(stream(prod.items()), Stream.of(NonTerminal(topCell))).collect(Collections.toList());
             return Production(prod.klabel(), prod.sort(), pis, prod.att());
         }
         return prod;
@@ -158,7 +217,7 @@ public class ResolveFunctionWithConfig {
             }
         }.apply(body) && (hasConfig.apply(body) || hasConfig.apply(requires) || hasConfig.apply(ensures))) {
             K left = RewriteToTop.toLeft(body);
-            if (left instanceof KApply && ((KApply)left).klabel().equals(KLabels.GENERATED_TOP_CELL)) {
+            if (left instanceof KApply && ((KApply)left).klabel().equals(topCellLabel)) {
                 body = KRewrite(KAs(RewriteToTop.toLeft(body), CONFIG_VAR), RewriteToTop.toRight(body));
             }
         }
@@ -174,10 +233,15 @@ public class ResolveFunctionWithConfig {
     }
 
     public Sentence resolve(Module m, Sentence s) {
+        if (ExpandMacros.isMacro(s)) {
+            return s;
+        }
         if (s instanceof Rule) {
             return resolve((Rule) s, m);
         } else if (s instanceof Context) {
             return resolve((Context) s, m);
+        } else if (s instanceof ContextAlias) {
+            return resolve((ContextAlias) s, m);
         } else if (s instanceof Production) {
             return resolve((Production) s);
         } else {

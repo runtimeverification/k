@@ -6,11 +6,13 @@ import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Context;
+import org.kframework.definition.ContextAlias;
 import org.kframework.definition.Module;
 import org.kframework.definition.Production;
 import org.kframework.definition.ProductionItem;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
+import org.kframework.kompile.Kompile;
 import org.kframework.kore.InjectedKLabel;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -54,6 +56,11 @@ import static org.kframework.kore.KORE.*;
  */
 public class ResolveFun {
 
+    public ResolveFun(boolean kore) {
+      this.kore = kore;
+    }
+
+    private final boolean kore;
     private final Set<Production> funProds = new HashSet<>();
     private final Set<Rule> funRules = new HashSet<>();
     private Module module;
@@ -106,14 +113,16 @@ public class ResolveFun {
                         nameHint2 = ((KApply) body).klabel().name();
                     }
                     KLabel fun = getUniqueLambdaLabel(nameHint1, nameHint2);
+                    Sort lhsSort = sort(RewriteToTop.toLeft(body));
                     Sort argSort = sort(arg);
+                    Sort lubSort = AddSortInjections.lubSort(lhsSort, argSort, null, body, module);
                     if (lbl.name().equals("#fun3") || lbl.name().equals("#fun2")) {
-                        funProds.add(funProd(fun, body, argSort));
+                        funProds.add(funProd(fun, body, lubSort));
                         funRules.add(funRule(fun, body, k.att()));
                     } else {
-                        funProds.add(predProd(fun, body, argSort));
+                        funProds.add(predProd(fun, body, lubSort));
                         funRules.add(predRule(fun, body, k.att()));
-                        funRules.add(owiseRule(fun, body, argSort, k.att()));
+                        funRules.add(owiseRule(fun, body, lubSort, k.att()));
                     }
                     List<K> klist = new ArrayList<>();
                     klist.add(apply(arg));
@@ -192,8 +201,14 @@ public class ResolveFun {
             return Sorts.KItem();
         if (k instanceof KToken)
             return ((KToken) k).sort();
-        if (k instanceof KApply)
-            return k.att().get(Production.class).sort();
+        if (k instanceof KApply) {
+            if (kore) {
+                AddSortInjections inj = new AddSortInjections(module);
+                return inj.sort(k, Sorts.K());
+            } else {
+                return k.att().get(Production.class).sort();
+            }
+        }
         if (k instanceof KVariable)
             return Sorts.K();
         throw KEMException.compilerError("Could not compute sort of term", k);
@@ -206,18 +221,27 @@ public class ResolveFun {
                 context.att());
     }
 
+    private ContextAlias resolve(ContextAlias context) {
+        return new ContextAlias(
+                transform(context.body()),
+                transform(context.requires()),
+                context.att());
+    }
+
     public Sentence resolve(Sentence s) {
         if (s instanceof Rule) {
             return resolve((Rule) s);
         } else if (s instanceof Context) {
             return resolve((Context) s);
+        } else if (s instanceof ContextAlias) {
+            return resolve((ContextAlias) s);
         } else {
             return s;
         }
     }
 
     public Module resolve(Module m) {
-        module = m;
+        module = Kompile.subsortKItem(m);
         funProds.clear();
         funRules.clear();
         Set<Sentence> newSentences = stream(m.localSentences()).map(this::resolve).collect(Collectors.toSet());

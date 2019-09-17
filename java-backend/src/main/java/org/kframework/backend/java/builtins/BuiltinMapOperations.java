@@ -156,6 +156,12 @@ public class BuiltinMapOperations {
                 .filter(element -> builder.remove(element) == null)
                 .collect(Collectors.toSet());
 
+        // If a non-concrete term cannot be removed, it might be removed later after further evaluation.
+        // Leave this map unevaluated.
+        if (pendingRemoveSet.stream().anyMatch(elem -> !elem.isConcrete())) {
+            return null;
+        }
+
         if (!builtinMap.isConcreteCollection() && !pendingRemoveSet.isEmpty()) {
             return DataStructures.mapRemoveAll(builder.build(), pendingRemoveSet, context);
         } else {

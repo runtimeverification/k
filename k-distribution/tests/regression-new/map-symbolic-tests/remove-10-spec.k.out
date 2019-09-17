@@ -1,0 +1,4 @@
+<k>
+  removeResult ( ( MAP
+  Z |-> 1 ) [ Y <- undef ] [ Z ] )
+</k>

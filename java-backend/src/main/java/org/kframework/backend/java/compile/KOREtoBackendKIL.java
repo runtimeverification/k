@@ -23,6 +23,7 @@ import org.kframework.kore.KRewrite;
 import org.kframework.kore.KToken;
 import org.kframework.kore.KVariable;
 
+import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -296,27 +297,34 @@ public class KOREtoBackendKIL {
             return (Term) k;
         else if (k instanceof org.kframework.kore.KToken)
             return KToken(((org.kframework.kore.KToken) k).s(), ((org.kframework.kore.KToken) k).sort(), k.att());
-        else if (k instanceof org.kframework.kore.KApply) {
+        else if (k instanceof org.kframework.kore.KApply)
             return KApply1(((KApply) k).klabel(), ((KApply) k).klist(), k.att());
-        } else if (k instanceof org.kframework.kore.KSequence)
+        else if (k instanceof org.kframework.kore.KSequence)
             return KSequence(((org.kframework.kore.KSequence) k).items(), k.att());
-        else if (k instanceof org.kframework.kore.KVariable)
-            return KVariable(((org.kframework.kore.KVariable) k).name(), k.att());
-        else if (k instanceof org.kframework.kore.InjectedKLabel)
+        else if (k instanceof org.kframework.kore.KVariable) {
+            KVariable variable = (KVariable) k;
+            if (variable.name().startsWith("@"))
+                throw new AssertionError("Set variables not supported in the Java backend!\n" + k.toString());
+            return KVariable(variable.name(), k.att());
+        } else if (k instanceof org.kframework.kore.InjectedKLabel)
             return InjectedKLabel(((org.kframework.kore.InjectedKLabel) k).klabel(), k.att());
-        else if (k instanceof org.kframework.kore.KRewrite) {
+        else if (k instanceof org.kframework.kore.KRewrite)
             return KItem.of(KLabelConstant.of(KLabels.KREWRITE, definition), KList.concatenate(convert(((KRewrite) k).left()), convert(((KRewrite) k).right())), global);
-        } else
-            throw new AssertionError("BUM!");
+        else if (k instanceof org.kframework.kore.KAs)
+            throw new AssertionError("Conversion of KAs unsupported on Java backend!\n" + k.toString());
+        else
+            throw new AssertionError("Do not know how to convert term to KIL!\n" + k.toString());
     }
 
-
-    public Rule convert(Optional<Module> module, org.kframework.definition.Rule rule) {
+    /**
+     * @param module Required to know if it's a function rule.
+     */
+    public Rule convert(@Nullable Module module, org.kframework.definition.Rule rule) {
         K leftHandSide = RewriteToTop.toLeft(rule.body());
         Att att = rule.att();
 
-        if (module.isPresent()) {
-            if (leftHandSide instanceof KApply && module.get().attributesFor().apply(((KApply) leftHandSide).klabel()).contains(Attribute.FUNCTION_KEY)) {
+        if (module != null) {
+            if (leftHandSide instanceof KApply && module.attributesFor().apply(((KApply) leftHandSide).klabel()).contains(Attribute.FUNCTION_KEY)) {
                 att = att.add(Attribute.FUNCTION_KEY);
             }
         }

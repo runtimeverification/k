@@ -8,6 +8,7 @@ import org.kframework.builtin.Sorts
 import org.kframework.definition._
 import org.kframework.kore.{KApply, KToken, KVariable, _}
 import org.kframework.parser.{KList => _, _}
+import org.kframework.utils.StringUtil
 import org.pcollections.ConsPStack
 
 import collection._
@@ -17,8 +18,25 @@ object KOREToTreeNodes {
 
   import org.kframework.kore.KORE._
 
-  def wellTyped(p: Production, children: Iterable[Term], subsorts: POSet[Sort]): Boolean = {
-    return p.nonterminals.zip(children).forall(p => !p._2.isInstanceOf[ProductionReference] || subsorts.lessThanEq(p._2.asInstanceOf[ProductionReference].production.sort, p._1.sort))
+  def wellTyped(params: Seq[Sort], p: Production, children: Iterable[Term], subsorts: POSet[Sort]): Boolean = {
+    val wrongPoly = p.att.getOption("poly") match {
+      case None => false
+      case Some(s) => {
+        val poly = StringUtil.computePoly(s)
+        var i = 0
+        var wrong = false
+        for (set <- poly.asScala) {
+          val pos = set.iterator.next
+          val sort = if (pos == 0) p.sort else p.nonterminals(pos - 1).sort
+          if (i < params.size && sort != params(i)) {
+            wrong = true
+          }
+          i+=1
+        }
+        wrong
+      }
+    }
+    return !wrongPoly && p.nonterminals.zip(children).forall(p => !p._2.isInstanceOf[ProductionReference] || subsorts.lessThanEq(p._2.asInstanceOf[ProductionReference].production.sort, p._1.sort))
   }
 
   def apply(t: K, mod: Module): Term = t match {
@@ -27,7 +45,7 @@ object KOREToTreeNodes {
       val scalaChildren = a.klist.items.asScala map { i: K => apply(i, mod).asInstanceOf[Term] }
       val children = ConsPStack.from(scalaChildren.reverse asJava)
       val allProds: Set[Production] = mod.productionsFor(KLabel(a.klabel.name)).filter(p => p.nonterminals.lengthCompare(children.size) == 0 && !p.att.contains("unparseAvoid"))
-      val typedProds: Set[Production] = allProds.filter(p => wellTyped(p, scalaChildren, mod.subsorts))
+      val typedProds: Set[Production] = allProds.filter(p => wellTyped(a.klabel.params, p, scalaChildren, mod.subsorts))
       // if no productions are left, then the term is ill-sorted, but don't return the empty ambiguity because we want to fail gracefully.
       val minProds: Set[Production] = mod.overloads.minimal(if (typedProds.size == 0) allProds else typedProds)
       val loc = t.att.getOptional(classOf[Location])

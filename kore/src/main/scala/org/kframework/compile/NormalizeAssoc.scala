@@ -2,7 +2,6 @@ package org.kframework.compile
 
 import org.kframework.Collections._
 import org.kframework.attributes.Att
-import org.kframework.compile.RewriteToTop
 import org.kframework.definition.{Module, Rule, Sentence}
 import org.kframework.kore._
 

@@ -13,6 +13,8 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
  * @author dwightguth
  */
 public class KEMException extends RuntimeException {
+    public static final int TERMINATED_WITH_ERRORS_EXIT_CODE = 113;
+
     public final KException exception;
 
     KEMException(KException e) {

@@ -10,6 +10,7 @@ import org.kframework.attributes.Source;
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.definition.Bubble;
 import org.kframework.definition.Context;
+import org.kframework.definition.ContextAlias;
 import org.kframework.definition.Definition;
 import org.kframework.definition.DefinitionTransformer;
 import org.kframework.definition.Module;
@@ -296,12 +297,21 @@ public class DefinitionParsing {
                     .map(this::upContext)
                 .collect(Collections.toSet());
 
+            Set<Sentence> aliasSet = stream(module.localSentences())
+                    .parallel()
+                    .filter(s -> s instanceof Bubble)
+                    .map(b -> (Bubble) b)
+                    .filter(b -> b.sentenceType().equals("alias"))
+                    .flatMap(b -> performParse(cache.getCache(), parser, realScanner, b))
+                    .map(this::upAlias)
+                .collect(Collections.toSet());
+
             if (needNewScanner) {
                 realScanner.close();//required for Windows.
             }
 
             return Module(module.name(), module.imports(),
-                    stream((Set<Sentence>) module.localSentences().$bar(ruleSet).$bar(contextSet)).filter(b -> !(b instanceof Bubble)).collect(Collections.toSet()), module.att());
+                    stream((Set<Sentence>) module.localSentences().$bar(ruleSet).$bar(contextSet).$bar(aliasSet)).filter(b -> !(b instanceof Bubble)).collect(Collections.toSet()), module.att());
         }
     }
 
@@ -351,6 +361,19 @@ public class DefinitionParsing {
         }
     }
 
+    private ContextAlias upAlias(K contents) {
+        KApply ruleContents = (KApply) contents;
+        List<K> items = ruleContents.klist().items();
+        switch (ruleContents.klabel().name()) {
+        case "#ruleNoConditions":
+            return ContextAlias(items.get(0), BooleanUtils.TRUE, ruleContents.att());
+        case "#ruleRequires":
+            return ContextAlias(items.get(0), items.get(1), ruleContents.att());
+        default:
+            throw KEMException.criticalError("Illegal context alias with ensures clause detected.", contents);
+        }
+    }
+
     private ParseCache loadCache(Module parser) {
         ParseCache cachedParser = caches.get(parser.name());
         if (cachedParser == null || !equalsSyntax(cachedParser.getModule(), parser) || cachedParser.isStrict() != isStrict) {
@@ -396,7 +419,7 @@ public class DefinitionParsing {
                 return Stream.of(parse.getParse());
             }
         }
-        result = parser.parseString(b.contents(), START_SYMBOL, scanner, source, startLine, startColumn, !b.att().contains("macro") && !b.att().contains("alias"));
+        result = parser.parseString(b.contents(), START_SYMBOL, scanner, source, startLine, startColumn, true, b.att().contains("anywhere"));
         parsedBubbles.getAndIncrement();
         if (kem.options.warnings2errors && !result._2().isEmpty()) {
           for (KEMException err : result._2()) {

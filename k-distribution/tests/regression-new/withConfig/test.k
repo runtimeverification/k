@@ -3,11 +3,11 @@ module TEST
   imports BOOL
   imports MAP
 
-syntax KItem ::= foo(Int) [withConfig, function]
-               | baz(Int) [withConfig, function]
-syntax Bool ::= isZero() [withConfig, function]
+syntax KItem ::= foo(Int) [function]
+               | baz(Int) [function]
+syntax Bool ::= isZero() [function]
 
-configuration <k> $PGM:K </k> <bar> 0 </bar>
+configuration <k> $PGM:K </k> <stuff> <bar> 0 </bar> </stuff>
 
 rule [[ foo(I:Int) => baz(I) ]]
      <bar> I </bar>
@@ -26,5 +26,15 @@ rule [[ isZero() => X ==Int 0 ]]
 
 rule 2 => 3
   requires isZero()
+
+rule 4 => ancestor()
+
+syntax KItem ::= ancestor() [function]
+rule ancestor() => foo(0)
+
+syntax KItem ::= macro()
+rule macro() => ancestor() [macro]
+
+rule 5 => macro()
 
 endmodule

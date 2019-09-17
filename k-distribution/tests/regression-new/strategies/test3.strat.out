@@ -1,0 +1,13 @@
+<wrapper>
+  <k>
+    a
+  </k>
+  <trace>
+    ListItem ( ~ regular )
+    ListItem ( ~ a2c )
+    ListItem ( ~ c2a )
+  </trace>
+  <s>
+    #STUCK ( )
+  </s>
+</wrapper>
