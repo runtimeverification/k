@@ -36,6 +36,7 @@ object Sorts {
 
   val Bag = Sort("Bag")
   val Cell = Sort("Cell")
+  val CellName = Sort("#CellName");
 
   val GeneratedTopCell = Sort("GeneratedTopCell")
   val GeneratedCounterCell = Sort("GeneratedCounterCell")
