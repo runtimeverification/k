@@ -309,12 +309,14 @@ public class RuleGrammarGenerator {
         } else if (addConfigCells) {
             // remove cells from parsing config cells so they don't conflict with the production in kast.k
             // also add all matching terminals to the #CellName sort
-            for (Production prod : iterable(mod.productions())) {
-              for (ProductionItem pi : iterable(prod.items())) {
-                if (pi instanceof Terminal) {
-                  Terminal t = (Terminal)pi;
-                  if (t.value().matches("[A-Za-z][A-Za-z0-9\\-]*")) {
-                    prods.add(Production(Sorts.CellName(), Seq(t), Att().add("token")));
+            for (Sentence prod : extensionProds) {
+              if (prod instanceof Production) {
+                for (ProductionItem pi : iterable(((Production)prod).items())) {
+                  if (pi instanceof Terminal) {
+                    Terminal t = (Terminal)pi;
+                    if (t.value().matches("[A-Za-z][A-Za-z0-9\\-]*")) {
+                      prods.add(Production(Sorts.CellName(), Seq(t), Att().add("token")));
+                    }
                   }
                 }
               }
