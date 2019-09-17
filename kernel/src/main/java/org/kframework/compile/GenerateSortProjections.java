@@ -97,8 +97,9 @@ public class GenerateSortProjections {
               return Stream.empty();
           }
           sentences.add(Production(lbl, nt.sort(), Seq(Terminal(nt.name().get()), Terminal("("), NonTerminal(prod.sort()), Terminal(")")), Att().add("function")));
-          sentences.add(Rule(KRewrite(KApply(lbl, KApply(prod.klabel().get(), KList(vars))), vars.get(i++)), BooleanUtils.TRUE, BooleanUtils.TRUE));
+          sentences.add(Rule(KRewrite(KApply(lbl, KApply(prod.klabel().get(), KList(vars))), vars.get(i)), BooleanUtils.TRUE, BooleanUtils.TRUE));
         }
+        i++;
       }
       return sentences.stream();
     }
