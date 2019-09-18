@@ -178,9 +178,10 @@ public class ResolveContexts {
         if (cooled instanceof KApply) {
             KApply kApply = (KApply)cooled;
             String name = kApply.klabel().name();
-            K firstArg = kApply.klist().items().get(0);
-            if (name.equals("#SemanticCastToK") && firstArg instanceof KApply) {
-                name = ((KApply)firstArg).klabel().name();
+            if (name.equals("#SemanticCastToK")) {
+                K firstArg = kApply.klist().items().get(0);
+                if (firstArg instanceof KApply)
+                    name = ((KApply)firstArg).klabel().name();
             }
             freezerLabel = getUniqueFreezerLabel(input, name + finalHolePosition[0]);
         } else {
