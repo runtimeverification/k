@@ -175,7 +175,6 @@ public class ResolveContexts {
         // TODO(dwightguth): generate freezers better for pretty-printing purposes
         List<ProductionItem> items = new ArrayList<>();
         KLabel freezerLabel;
-        System.out.println("Cooled: " + cooled.toString());
         if (cooled instanceof KApply) {
             KApply kApply = (KApply)cooled;
             String name = kApply.klabel().name();
