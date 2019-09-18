@@ -175,8 +175,15 @@ public class ResolveContexts {
         // TODO(dwightguth): generate freezers better for pretty-printing purposes
         List<ProductionItem> items = new ArrayList<>();
         KLabel freezerLabel;
+        System.out.println("Cooled: " + cooled.toString());
         if (cooled instanceof KApply) {
-            freezerLabel = getUniqueFreezerLabel(input, ((KApply)cooled).klabel().name() + finalHolePosition[0]);
+            KApply kApply = (KApply)cooled;
+            String name = kApply.klabel().name();
+            K firstArg = kApply.klist().items().get(0);
+            if (name.equals("#SemanticCastToK") && firstArg instanceof KApply) {
+                name = ((KApply)firstArg).klabel().name();
+            }
+            freezerLabel = getUniqueFreezerLabel(input, name + finalHolePosition[0]);
         } else {
             freezerLabel = getUniqueFreezerLabel(input, "");
         }
