@@ -23,8 +23,15 @@ module RAT-SYNTAX
                 | Rat  "<=Rat" Rat [function, functional, klabel(_<=Rat_),  symbol, left, smtlib(ratle), hook(RAT.le)]
 endmodule
 
-module RAT-SYMBOLIC [symbolic, kore]
+module RAT-COMMON
   imports RAT-SYNTAX
+
+  // invariant of < I , J >Rat : I =/= 0, J >= 2, and I and J are coprime
+  syntax Rat ::= "<" Int "," Int ">Rat" [format(%2 /Rat %4)]
+endmodule
+
+module RAT-SYMBOLIC [symbolic, kore]
+  imports RAT-COMMON
   imports ML-SYNTAX
 
   rule
@@ -35,7 +42,7 @@ module RAT-SYMBOLIC [symbolic, kore]
 endmodule
 
 module RAT-KORE [kore]
-  imports RAT-SYNTAX
+  imports RAT-COMMON
   imports K-EQUAL
 
   /*
@@ -49,14 +56,28 @@ module RAT-KORE [kore]
   rule R =/=Rat S => R =/=K S
 endmodule
 
-module RAT
-  imports RAT-SYNTAX
-  imports RAT-SYMBOLIC
-  imports RAT-KORE
+module RAT-KAST [kast]
+  imports RAT-COMMON
   imports INT
 
-  // invariant of < I , J >Rat : I =/= 0, J >= 2, and I and J are coprime
-  syntax Rat ::= "<" Int "," Int ">Rat" [format(%2 /Rat %4)]
+  /*
+   * equalities for non-kore backends such as the java backend
+   */
+
+  rule < I , I' >Rat ==Rat < J , J' >Rat => I ==Int J andBool I' ==Int J'
+  rule _:Int         ==Rat < _ , _  >Rat => false
+  rule < _ , _  >Rat ==Rat _:Int         => false
+  rule I:Int         ==Rat J:Int         => I ==Int J
+
+  rule R =/=Rat S => notBool (R ==Rat S)
+endmodule
+
+module RAT
+  imports RAT-COMMON
+  imports RAT-SYMBOLIC
+  imports RAT-KORE
+  imports RAT-KAST
+  imports INT
 
   /*
    * arithmetic
@@ -140,19 +161,4 @@ module RAT
 
   rule R <=Rat S => S >=Rat R
 
-endmodule
-
-module RAT-NON-KORE
-  imports RAT
-
-  /*
-   * equalities for non-kore backends such as the java backend
-   */
-
-  rule < I , I' >Rat ==Rat < J , J' >Rat => I ==Int J andBool I' ==Int J'
-  rule _:Int         ==Rat < _ , _  >Rat => false
-  rule < _ , _  >Rat ==Rat _:Int         => false
-  rule I:Int         ==Rat J:Int         => I ==Int J
-
-  rule R =/=Rat S => notBool (R ==Rat S)
 endmodule
