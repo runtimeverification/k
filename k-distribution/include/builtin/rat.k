@@ -53,6 +53,7 @@ module RAT
   imports RAT-KORE
   imports INT
 
+  // invariant of < I , J >Rat : I =/= 0, J >= 2, and J does not devide I
   syntax Rat ::= "<" Int "," Int ">Rat" [format(%2 /Rat %4)]
 
   /*
@@ -87,8 +88,9 @@ module RAT
 
   rule makeRat(I, J) => makeRat(I, J, gcdInt(I,J)) requires I =/=Int 0 andBool J =/=Int 0
 
-  rule makeRat(I, 1, _) => I
-  rule makeRat(I, J, D) => < I /Int D , J /Int D >Rat     requires J >Int 1
+  // makeRat(I, J, D) is defined when I =/= 0, J =/= 0, D > 0, and D = gcd(I,J)
+  rule makeRat(I, J, D) => I /Int D                       requires J ==Int D // implies J > 0 since D > 0
+  rule makeRat(I, J, D) => < I /Int D , J /Int D >Rat     requires J >Int 0 andBool J =/=Int D
   rule makeRat(I, J, D) => makeRat(0 -Int I, 0 -Int J, D) requires J <Int 0
 
   // gcdInt(a,b) computes the gcd of |a| and |b|, which is positive.
