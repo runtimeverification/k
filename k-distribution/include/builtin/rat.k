@@ -55,7 +55,7 @@ module RAT
   imports RAT-KORE
   imports INT
 
-  // invariant of < I , J >Rat : I =/= 0, J >= 2, and J does not devide I
+  // invariant of < I , J >Rat : I =/= 0, J >= 2, and I and J are coprime
   syntax Rat ::= "<" Int "," Int ">Rat" [format(%2 /Rat %4)]
 
   /*
