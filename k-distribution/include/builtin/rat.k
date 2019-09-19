@@ -7,6 +7,8 @@ module RAT-SYNTAX
   syntax Rat ::= Int
 
   syntax Rat ::= left:
+                 Rat "^Rat" Int [function, functional, klabel(_^Rat_), symbol, left, smtlib(ratpow), hook(RAT.pow)]
+               > left:
                  Rat "*Rat" Rat [function, functional, klabel(_*Rat_), symbol, left, smtlib(ratmul), hook(RAT.mul)]
                | Rat "/Rat" Rat [function,             klabel(_/Rat_), symbol, left, smtlib(ratdiv), hook(RAT.div)]
                > left:
@@ -99,6 +101,27 @@ module RAT
   rule gcdInt(A, 0) => A        requires A >Int 0
   rule gcdInt(A, 0) => 0 -Int A requires A <Int 0
   rule gcdInt(A, B) => gcdInt(B, A %Int B) requires B =/=Int 0 // since |A %Int B| = |A| %Int |B|
+
+  /*
+   * exponentiation
+   */
+
+  rule X ^Rat 0 => 1
+  rule 0 ^Rat N => 0 requires N =/=Int 0
+
+  rule < I , J >Rat ^Rat N => powRat(< I , J >Rat, N) requires N >Int 0
+  rule X:Int        ^Rat N => X ^Int N                requires N >Int 0
+
+  rule X ^Rat N => (1 /Rat X) ^Rat (0 -Int N) requires X =/=Rat 0 andBool N <Int 0
+
+  // exponentiation by squaring
+
+  syntax Rat ::= powRat(Rat, Int) [function]
+
+  // powRat(X, N) is defined when X =/= 0 and N > 0
+  rule powRat(X, 1) => X
+  rule powRat(X, N) => powRat(X *Rat X, N /Int 2) requires N >Int 1 andBool N %Int 2  ==Int 0
+  rule powRat(X, N) => powRat(X, N -Int 1) *Rat X requires N >Int 1 andBool N %Int 2 =/=Int 0
 
   /*
    * inequalities
