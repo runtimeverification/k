@@ -1,9 +1,8 @@
 DEF=a
 EXT=a
-TESTDIR=.
-RESULTDIR=.
+TESTDIR=../tests
 KOMPILE_BACKEND=llvm
 KOMPILE_FLAGS=--syntax-module A
 KPROVE_FLAGS=
 
-include ../../../../include/ktest.mak
+include ../../../../../include/ktest.mak

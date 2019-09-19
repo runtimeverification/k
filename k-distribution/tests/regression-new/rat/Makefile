@@ -1,2 +1,2 @@
-SUBDIRS=haskell llvm java
+SUBDIRS=defined undefined
 include ../../../include/ktest-group.mak
