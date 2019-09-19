@@ -1,4 +1,4 @@
-requires "../haskell/a.k"
+requires "a.k"
 
 module B
 

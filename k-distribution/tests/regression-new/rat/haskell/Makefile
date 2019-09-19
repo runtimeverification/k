@@ -1,6 +1,6 @@
 DEF=a
 EXT=a
-TESTDIR=../tests
+TESTDIR=.
 RESULTDIR=.
 KOMPILE_BACKEND=haskell
 KOMPILE_FLAGS=--syntax-module A

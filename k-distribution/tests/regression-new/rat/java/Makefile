@@ -1,6 +1,6 @@
 DEF=b
 EXT=a
-TESTDIR=../tests
+TESTDIR=.
 RESULTDIR=.
 KOMPILE_BACKEND=java
 KOMPILE_FLAGS=--syntax-module B
