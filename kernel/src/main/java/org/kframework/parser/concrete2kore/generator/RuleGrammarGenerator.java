@@ -16,6 +16,7 @@ import org.kframework.definition.Production;
 import org.kframework.definition.ProductionItem;
 import org.kframework.definition.RegexTerminal;
 import org.kframework.definition.Sentence;
+import org.kframework.definition.SortSynonym;
 import org.kframework.definition.Terminal;
 import org.kframework.definition.UserList;
 import org.kframework.kil.loader.Constants;
@@ -205,13 +206,16 @@ public class RuleGrammarGenerator {
             for (Sort srt : iterable(mod.definedSorts())) {
                 if (!isParserSort(srt) || mod.subsorts().directlyLessThan(Sorts.KVariable(), srt)) {
                     // K ::= K "::Sort" | K ":Sort" | K "<:Sort" | K ":>Sort"
-                    prods.addAll(makeCasts(Sorts.KBott(), Sorts.K(), srt));
+                    prods.addAll(makeCasts(Sorts.KBott(), Sorts.K(), srt, srt));
                 }
             }
-            prods.addAll(makeCasts(Sorts.KLabel(), Sorts.KLabel(), Sorts.KLabel()));
-            prods.addAll(makeCasts(Sorts.KList(), Sorts.KList(), Sorts.KList()));
-            prods.addAll(makeCasts(Sorts.KBott(), Sorts.K(), Sorts.KItem()));
-            prods.addAll(makeCasts(Sorts.KBott(), Sorts.K(), Sorts.K()));
+            prods.addAll(makeCasts(Sorts.KLabel(), Sorts.KLabel(), Sorts.KLabel(), Sorts.KLabel()));
+            prods.addAll(makeCasts(Sorts.KList(), Sorts.KList(), Sorts.KList(), Sorts.KList()));
+            prods.addAll(makeCasts(Sorts.KBott(), Sorts.K(), Sorts.KItem(), Sorts.KItem()));
+            prods.addAll(makeCasts(Sorts.KBott(), Sorts.K(), Sorts.K(), Sorts.K()));
+            for (SortSynonym syn : iterable(mod.sortSynonyms())) {
+                prods.addAll(makeCasts(Sorts.KBott(), Sorts.K(), syn.newSort(), syn.oldSort()));
+            }
         }
 
         if (mod.importedModuleNames().contains(RECORD_PRODS)) {
@@ -444,13 +448,13 @@ public class RuleGrammarGenerator {
         }
     }
 
-    private static Set<Sentence> makeCasts(Sort outerSort, Sort innerSort, Sort castSort) {
+    private static Set<Sentence> makeCasts(Sort outerSort, Sort innerSort, Sort castSort, Sort labelSort) {
         Set<Sentence> prods = new HashSet<>();
         Att attrs1 = Att().add(Sort.class, castSort);
-        prods.add(Production(KLabel("#SyntacticCast"), castSort, Seq(NonTerminal(castSort), Terminal("::" + castSort.toString())), attrs1));
-        prods.add(Production(KLabel("#SemanticCastTo" + castSort.toString()),  castSort, Seq(NonTerminal(castSort), Terminal(":"  + castSort.toString())), attrs1));
-        prods.add(Production(KLabel("#InnerCast"),     outerSort, Seq(Terminal("{"), NonTerminal(castSort), Terminal("}"), Terminal("<:" + castSort.toString())), attrs1));
-        prods.add(Production(KLabel("#OuterCast"),     castSort, Seq(Terminal("{"), NonTerminal(innerSort), Terminal("}"), Terminal(":>" + castSort.toString())), attrs1));
+        prods.add(Production(KLabel("#SyntacticCast"), castSort, Seq(NonTerminal(labelSort), Terminal("::" + castSort.toString())), attrs1));
+        prods.add(Production(KLabel("#SemanticCastTo" + labelSort.toString()),  labelSort, Seq(NonTerminal(labelSort), Terminal(":"  + castSort.toString())), attrs1));
+        prods.add(Production(KLabel("#InnerCast"),     outerSort, Seq(Terminal("{"), NonTerminal(labelSort), Terminal("}"), Terminal("<:" + castSort.toString())), attrs1));
+        prods.add(Production(KLabel("#OuterCast"),     labelSort, Seq(Terminal("{"), NonTerminal(innerSort), Terminal("}"), Terminal(":>" + castSort.toString())), attrs1));
         return prods;
     }
 }
