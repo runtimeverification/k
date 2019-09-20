@@ -1,6 +1,6 @@
 requires "rat.k"
 
-module TEST 
+module TEST
   imports RAT
 
   syntax Wad = Rat
