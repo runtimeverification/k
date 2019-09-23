@@ -16,6 +16,7 @@ import org.kframework.definition.ProductionItem;
 import org.kframework.definition.RegexTerminal;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
+import org.kframework.definition.SortSynonym;
 import org.kframework.definition.SyntaxAssociativity;
 import org.kframework.definition.SyntaxPriority;
 import org.kframework.definition.SyntaxSort;
@@ -84,6 +85,7 @@ public class JsonParser {
                              , KRULE                = "KRule"
                              , KSEQUENCE            = "KSequence"
                              , KSORT                = "KSort"
+                             , KSORTSYNONYM         = "KSortSynonym"
                              , KSYNTAXASSOCIATIVITY = "KSyntaxAssociativity"
                              , KSYNTAXPRIORITY      = "KSyntaxPriority"
                              , KSYNTAXSORT          = "KSyntaxSort"
@@ -218,6 +220,12 @@ public class JsonParser {
                 Sort sort = toSort(data.getJsonObject("sort"));
                 Att att   = toAtt(data.getJsonObject("att"));
                 return new SyntaxSort(sort, att);
+            }
+            case KSORTSYNONYM: {
+                Sort newSort = toSort(data.getJsonObject("newSort"));
+                Sort oldSort = toSort(data.getJsonObject("oldSort"));
+                Att att   = toAtt(data.getJsonObject("att"));
+                return new SortSynonym(newSort, oldSort, att);
             }
             case KBUBBLE: {
                 String sentenceType = data.getString("sentenceType");

@@ -122,6 +122,10 @@ public class KILtoKORE extends KILTransformation<Object> {
         }
     }
 
+    public org.kframework.definition.Sentence apply(SortSynonym synonym) {
+      return new org.kframework.definition.SortSynonym(synonym.newSort, synonym.oldSort, convertAttributes(synonym));
+    }
+
     public org.kframework.definition.Bubble apply(StringSentence sentence) {
         org.kframework.attributes.Att attrs =
             convertAttributes(sentence)
