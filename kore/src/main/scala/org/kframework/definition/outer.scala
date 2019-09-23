@@ -297,7 +297,7 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
   // check that non-terminals have a defined sort
   def checkSorts () = sentences foreach {
     case p@Production(_, _, items, _) =>
-      val res = items collect { case nt: NonTerminal if !definedSorts.contains(nt.sort) && !usedCellSorts.contains(nt.sort) => nt }
+      val res = items collect { case nt: NonTerminal if !definedSorts.contains(nt.sort) && !usedCellSorts.contains(nt.sort) && !sortSynonymMap.contains(nt.sort) => nt }
       if (res.nonEmpty)
         throw KEMException.compilerError("Could not find sorts: " + res.asJava, p)
     case _ =>
