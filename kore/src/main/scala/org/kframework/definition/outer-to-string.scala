@@ -37,6 +37,11 @@ trait SyntaxSortToString {
   override def toString() = "syntax " + sort + att.postfixString
 }
 
+trait SortSynonymToString {
+  self: SortSynonym =>
+  override def toString() = "syntax" + newSort + " = " + oldSort + att.postfixString
+}
+
 trait TerminalToString {
   self: Terminal =>
   override def toString = StringUtil.enquoteKString(value)
