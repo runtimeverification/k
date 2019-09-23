@@ -176,7 +176,14 @@ public class ResolveContexts {
         List<ProductionItem> items = new ArrayList<>();
         KLabel freezerLabel;
         if (cooled instanceof KApply) {
-            freezerLabel = getUniqueFreezerLabel(input, ((KApply)cooled).klabel().name() + finalHolePosition[0]);
+            KApply kApply = (KApply)cooled;
+            String name = kApply.klabel().name();
+            if (name.equals("#SemanticCastToK")) {
+                K firstArg = kApply.klist().items().get(0);
+                if (firstArg instanceof KApply)
+                    name = ((KApply)firstArg).klabel().name();
+            }
+            freezerLabel = getUniqueFreezerLabel(input, name + finalHolePosition[0]);
         } else {
             freezerLabel = getUniqueFreezerLabel(input, "");
         }
