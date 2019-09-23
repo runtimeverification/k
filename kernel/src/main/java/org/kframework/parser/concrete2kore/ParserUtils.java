@@ -5,6 +5,7 @@ import org.apache.commons.io.FileUtils;
 import org.kframework.attributes.Att;
 import org.kframework.attributes.Source;
 import org.kframework.definition.Module;
+import org.kframework.definition.ModuleTransformer;
 import org.kframework.kil.Definition;
 import org.kframework.kil.DefinitionItem;
 import org.kframework.kil.Require;
@@ -196,7 +197,13 @@ public class ParserUtils {
         koreModules.putAll(previousModules.stream().collect(Collectors.toMap(Module::name, m -> m)));
         HashSet<org.kframework.kil.Module> kilModulesSet = new HashSet<>(kilModules);
 
-        return kilModules.stream().map(m -> kilToKore.apply(m, kilModulesSet, koreModules)).flatMap(m -> Stream.concat(Stream.of(m), Stream.of(koreModules.get(m.name() + "$SYNTAX")))).collect(Collectors.toSet());
+        Set<Module> finalModules = kilModules.stream().map(m -> kilToKore.apply(m, kilModulesSet, koreModules)).flatMap(m -> Stream.concat(Stream.of(m), Stream.of(koreModules.get(m.name() + "$SYNTAX")))).collect(Collectors.toSet());
+        Set<Module> result = new HashSet<>();
+        ModuleTransformer applySynonyms = ModuleTransformer.fromSentenceTransformer(new ApplySynonyms()::apply, "Apply sort synonyms");
+        for (Module mod : finalModules) {
+            result.add(applySynonyms.apply(mod));
+        }
+        return result;
     }
 
     public org.kframework.definition.Definition loadDefinition(
