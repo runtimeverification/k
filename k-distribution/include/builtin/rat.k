@@ -15,12 +15,15 @@ module RAT-SYNTAX
                  Rat "+Rat" Rat [function, functional, klabel(_+Rat_), symbol, left, smtlib(ratadd), hook(RAT.add)]
                | Rat "-Rat" Rat [function, functional, klabel(_-Rat_), symbol, left, smtlib(ratsub), hook(RAT.sub)]
 
-  syntax Bool ::= Rat  "==Rat" Rat [function, functional, klabel(_==Rat_),  symbol, left, smtlib(rateq), hook(RAT.eq)]
-                | Rat "=/=Rat" Rat [function, functional, klabel(_=/=Rat_), symbol, left, smtlib(ratne), hook(RAT.ne)]
-                | Rat   ">Rat" Rat [function, functional, klabel(_>Rat_),   symbol, left, smtlib(ratgt), hook(RAT.gt)]
-                | Rat  ">=Rat" Rat [function, functional, klabel(_>=Rat_),  symbol, left, smtlib(ratge), hook(RAT.ge)]
-                | Rat   "<Rat" Rat [function, functional, klabel(_<Rat_),   symbol, left, smtlib(ratlt), hook(RAT.lt)]
-                | Rat  "<=Rat" Rat [function, functional, klabel(_<=Rat_),  symbol, left, smtlib(ratle), hook(RAT.le)]
+  syntax Bool ::= Rat  "==Rat" Rat [function, functional, klabel(_==Rat_),  symbol, smtlib(rateq), hook(RAT.eq)]
+                | Rat "=/=Rat" Rat [function, functional, klabel(_=/=Rat_), symbol, smtlib(ratne), hook(RAT.ne)]
+                | Rat   ">Rat" Rat [function, functional, klabel(_>Rat_),   symbol, smtlib(ratgt), hook(RAT.gt)]
+                | Rat  ">=Rat" Rat [function, functional, klabel(_>=Rat_),  symbol, smtlib(ratge), hook(RAT.ge)]
+                | Rat   "<Rat" Rat [function, functional, klabel(_<Rat_),   symbol, smtlib(ratlt), hook(RAT.lt)]
+                | Rat  "<=Rat" Rat [function, functional, klabel(_<=Rat_),  symbol, smtlib(ratle), hook(RAT.le)]
+
+  syntax Rat ::= minRat(Rat, Rat) [function, functional, klabel(minRat), symbol, smtlib(ratmin), hook(RAT.min)]
+               | maxRat(Rat, Rat) [function, functional, klabel(maxRat), symbol, smtlib(ratmax), hook(RAT.max)]
 endmodule
 
 module RAT-COMMON
@@ -160,5 +163,11 @@ module RAT
   rule R <Rat S => S >Rat R
 
   rule R <=Rat S => S >=Rat R
+
+  rule minRat(R, S) => R requires R <=Rat S
+  rule minRat(R, S) => S requires S <=Rat R
+
+  rule maxRat(R, S) => R requires R >=Rat S
+  rule maxRat(R, S) => S requires S >=Rat R
 
 endmodule
