@@ -130,7 +130,7 @@ public class Production extends ASTNode {
                 sorts.add(sort.name());
             }
         }
-        return label + "_" + ownerModuleName + (kore ? "_" + sorts.stream().reduce("", (s1, s2) -> s1 + "_" + s2) : "");
+        return label + "_" + ownerModuleName + (kore ? "_" + sorts.stream().reduce(sort.name(), (s1, s2) -> s1 + "_" + s2) : "");
     }
 
     public java.util.List<ProductionItem> getItems() {
