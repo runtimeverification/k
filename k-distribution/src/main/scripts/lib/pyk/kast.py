@@ -65,6 +65,12 @@ def KToken(token, sort):
 def isKToken(k):
     return k["node"] == "KToken"
 
+def KRewrite(lhs, rhs, att = None):
+    return { "node": "KRewrite", "lhs": lhs, "rhs": rhs, "att": att }
+
+def isKRewrite(k):
+    return k["node"] == "KRewrite"
+
 def KAtt(key, value):
     return {"node": "KAtt", "key": key, "value": value}
 
@@ -117,7 +123,6 @@ def addAttributes(kast, att):
         print(kast)
         sys.exit(1)
 
-klabelRewrite = "#KRewrite"
 klabelCells   = "#KCells"
 klabelEmptyK  = "#EmptyK"
 
@@ -159,8 +164,7 @@ def underbarUnparsing(symbol):
 def indent(input):
     return "\n".join(["  " + l for l in input.split("\n")])
 
-K_builtin_labels = { klabelRewrite : binOpStr("=>")
-                   , klabelCells   : (lambda *args: "\n".join(args))
+K_builtin_labels = { klabelCells   : (lambda *args: "\n".join(args))
                    , klabelEmptyK  : (lambda : ".")
                    }
 
@@ -225,6 +229,10 @@ def prettyPrintKast(kast, symbolTable):
             return cellStr.rstrip()
         unparser = appliedLabelStr(label) if label not in symbolTable else symbolTable[label]
         return unparser(*unparsedArgs)
+    if isKRewrite(kast):
+        lhsStr = prettyPrintKast(kast["lhs"], symbolTable)
+        rhsStr = prettyPrintKast(kast["rhs"], symbolTable)
+        return lhsStr + " => " + rhsStr
     if isKSequence(kast):
         unparsedItems = [ prettyPrintKast(item, symbolTable) for item in kast['items'] ]
         unparsedKSequence = "\n~> ".join(unparsedItems)

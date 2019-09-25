@@ -148,27 +148,28 @@ def collapseDots(kast):
             args  = _kast["args"]
             if isCellKLabel(label) and len(args) == 1 and args[0] == ktokenDots:
                 return ktokenDots
-            if label == klabelRewrite and args[0] == ktokenDots:
-                return ktokenDots
             newArgs = [ arg for arg in args if arg != ktokenDots ]
             if isCellKLabel(label) and len(newArgs) == 0:
                 return ktokenDots
             if len(newArgs) < len(args):
                 newArgs.append(ktokenDots)
             return KApply(label, newArgs)
+        elif isKRewrite(_kast):
+            if _kast["lhs"] == ktokenDots:
+                return ktokenDots
         return _kast
     return traverseBottomUp(kast, _collapseDots)
 
 def pushDownRewrites(kast):
     def _pushDownRewrites(_kast):
-        if isKApply(_kast) and _kast["label"] == klabelRewrite:
-            lhs = _kast["args"][0]
-            rhs = _kast["args"][1]
+        if isKRewrite(_kast):
+            lhs = _kast["lhs"]
+            rhs = _kast["rhs"]
             if lhs == rhs:
                 return lhs
             if  isKApply(lhs) and isKApply(rhs) and lhs["label"] == rhs["label"] and isCellKLabel(lhs["label"]) \
             and len(lhs["args"]) == len(rhs["args"]):
-                    newArgs = [ KApply(klabelRewrite, [lArg, rArg]) for (lArg, rArg) in zip(lhs["args"], rhs["args"]) ]
+                    newArgs = [ KRewrite(lArg, rArg) for (lArg, rArg) in zip(lhs["args"], rhs["args"]) ]
                     return KApply(lhs["label"], newArgs)
         return _kast
     return traverseTopDown(kast, _pushDownRewrites)
