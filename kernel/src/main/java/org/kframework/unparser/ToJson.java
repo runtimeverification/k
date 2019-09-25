@@ -116,7 +116,7 @@ public class ToJson {
 
         JsonObjectBuilder jattKeys = Json.createObjectBuilder();
         for (Tuple2<String,String> key: JavaConverters.seqAsJavaList(att.att().keys().toSeq())) {
-            jattKeys.add(key._1(), att.get(key._1()));
+            jattKeys.add(key._1(), att.att().get(key).get().toString());
         }
         jatt.add("att", jattKeys.build());
 
