@@ -72,7 +72,7 @@ def isKAtt(k):
     return k["node"] == "KAtt"
 
 def KRule(rule, requires = None, ensures = None, atts = None):
-    return { "node": "KRule", "rule": rule, "requires": requires, "ensures": ensures, "atts": atts }
+    return { "node": "KRule", "body": rule, "requires": requires, "ensures": ensures, "atts": atts }
 
 def isKRule(k):
     return k["node"] == "KRule"
