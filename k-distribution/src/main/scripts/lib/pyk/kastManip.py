@@ -213,10 +213,10 @@ def uselessVarsToDots(kast, requires = None, ensures = None):
     return traverseBottomUp(kast, _collapseUselessVars)
 
 def minimizeRule(rule):
-    ruleBody     = rule["rule"]
+    ruleBody     = rule["body"]
     ruleRequires = rule["requires"]
     ruleEnsures  = rule["ensures"]
-    ruleAtts     = rule["atts"]
+    ruleAtts     = rule["att"]
 
     if ruleRequires is not None:
         constraints = flattenLabel("_andBool_", ruleRequires)
@@ -246,7 +246,7 @@ def minimizeRule(rule):
     if (ruleRequires == KToken("true", "Bool")):
         ruleRequires = None
 
-    return KRule(ruleBody, requires = ruleRequires, ensures = ruleEnsures, atts = ruleAtts)
+    return KRule(ruleBody, requires = ruleRequires, ensures = ruleEnsures, att = ruleAtts)
 
 def readKastTerm(termPath):
     with open(termPath, "r") as termFile:

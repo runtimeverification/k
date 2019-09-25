@@ -71,8 +71,8 @@ def KAtt(key, value):
 def isKAtt(k):
     return k["node"] == "KAtt"
 
-def KRule(rule, requires = None, ensures = None, atts = None):
-    return { "node": "KRule", "body": rule, "requires": requires, "ensures": ensures, "atts": atts }
+def KRule(rule, requires = None, ensures = None, att = None):
+    return { "node": "KRule", "body": rule, "requires": requires, "ensures": ensures, "att": att }
 
 def isKRule(k):
     return k["node"] == "KRule"
@@ -83,8 +83,8 @@ def KImport(kimport):
 def isKImport(k):
     return k["node"] == "KImport"
 
-def KFlatModule(name, imports, localSentences, atts = None):
-    return { "node": "KFlatModule", "name": name, "imports": imports, "localSentences": localSentences, "atts": atts }
+def KFlatModule(name, imports, localSentences, att = None):
+    return { "node": "KFlatModule", "name": name, "imports": imports, "localSentences": localSentences, "att": att }
 
 def isKFlatModule(k):
     return k["node"] == "KFlatModule"
@@ -95,8 +95,8 @@ def KRequire(krequire):
 def isKRequire(k):
     return k["node"] == "KRequire"
 
-def KDefinition(mainModule, modules, requires = None, atts = None):
-    return { "node": "KDefinition", "mainModule": mainModule, "modules": modules, "requires": requires, "atts": atts }
+def KDefinition(mainModule, modules, requires = None, att = None):
+    return { "node": "KDefinition", "mainModule": mainModule, "modules": modules, "requires": requires, "att": att }
 
 def isKDefinition(k):
     return k["node"] == "KDefinition"
@@ -104,14 +104,14 @@ def isKDefinition(k):
 def isCellKLabel(label):
     return len(label) > 1 and label[0] == "<" and label[-1] == ">"
 
-def addAttributes(kast, atts):
+def addAttributes(kast, att):
     if isKRule(kast):
         newAtts = []
-        if kast["atts"] is None:
-            newAtts = atts
+        if kast["att"] is None:
+            newAtts = att
         else:
-            newAtts.extend(kast["atts"])
-        return KRule(kast["rule"], requires = kast["requires"], ensures = kast["ensures"], atts = newAtts)
+            newAtts.extend(kast["att"])
+        return KRule(kast["body"], requires = kast["requires"], ensures = kast["ensures"], att = newAtts)
     else:
         notif("Don't know how to add attributes to KAST!")
         print(kast)
@@ -232,7 +232,7 @@ def prettyPrintKast(kast, symbolTable):
             unparsedKSequence = "    " + unparsedKSequence
         return unparsedKSequence
     if isKRule(kast):
-        body     = "\n     ".join(prettyPrintKast(kast["rule"], symbolTable).split("\n"))
+        body     = "\n     ".join(prettyPrintKast(kast["body"], symbolTable).split("\n"))
         ruleStr = "rule " + body
         requiresStr = ""
         ensuresStr  = ""
@@ -243,8 +243,8 @@ def prettyPrintKast(kast, symbolTable):
         if kast["ensures"] is not None:
             ensuresStr = prettyPrintKast(kast["ensures"], symbolTable)
             ensuresStr = "\n  ensures " + "\n  ".join(ensuresStr.split("\n"))
-        if kast["atts"] is not None:
-            attsStr = ", ".join([prettyPrintKast(att, symbolTable) for att in kast["atts"]])
+        if kast["att"] is not None:
+            attsStr = ", ".join([prettyPrintKast(att, symbolTable) for att in kast["att"]])
             attsStr = "\n  [" + attsStr + "]"
         return ruleStr + requiresStr + ensuresStr + attsStr
     if isKAtt(kast):
