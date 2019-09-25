@@ -55,6 +55,7 @@ import javax.json.JsonStructure;
 
 import scala.Enumeration;
 import scala.Option;
+import scala.Tuple2;
 import scala.collection.JavaConverters;
 import scala.collection.Seq;
 import scala.collection.Set;
@@ -112,7 +113,12 @@ public class ToJson {
     public static JsonStructure toJson(Att att) {
         JsonObjectBuilder jatt = Json.createObjectBuilder();
         jatt.add("node", JsonParser.KATT);
-        jatt.add("att", att.toString());
+
+        JsonObjectBuilder jattKeys = Json.createObjectBuilder();
+        for (Tuple2<String,String> key: JavaConverters.seqAsJavaList(att.att().keys().toSeq())) {
+            jattKeys.add(key._1(), att.get(key._1()));
+        }
+        jatt.add("att", jattKeys.build());
 
         return jatt.build();
     }
