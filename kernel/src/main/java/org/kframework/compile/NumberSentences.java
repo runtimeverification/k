@@ -11,6 +11,8 @@ import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
 
+import java.util.Optional;
+
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -33,9 +35,15 @@ public class NumberSentences implements AutoCloseable {
 
     public Sentence number(Sentence s) {
         String id = ruleHash(s.withAtt(Att.empty()));
-        String file = s.att().get(Source.class).source();
-        int line = s.att().get(Location.class).startLine();
-        int col = s.att().get(Location.class).startColumn();
+        Optional<Source> optFile = s.att().getOptional(Source.class);
+        Optional<Location> optLine = s.att().getOptional(Location.class);
+        Optional<Location> optCol = s.att().getOptional(Location.class);
+        if (! (optFile.isPresent() && optLine.isPresent() && optCol.isPresent())) {
+            return s;
+        }
+        String file = optFile.get().source();
+        int line = optLine.get().startLine();
+        int col = optCol.get().startColumn();
         String loc = file + ":" + line + ":" + col;
         allRulesFile.print(id);
         allRulesFile.print(" ");
