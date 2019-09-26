@@ -83,11 +83,65 @@ def KRule(rule, requires = None, ensures = None, att = None):
 def isKRule(k):
     return k["node"] == "KRule"
 
-def KImport(kimport):
-    return { "node": "KImport", "import": kimport }
+def KBubble(sentenceType, contents, att = None):
+    return { "node": "KBubble", "sentenceType": sentenceType, "contents": contents, "att": att }
 
-def isKImport(k):
-    return k["node"] == "KImport"
+def isKBubble(k):
+    return k['node'] == 'KBubble'
+
+def KModuleComment(comment, att = None):
+    return { "node": "KModuleComment", "commonte": comment, "att": att }
+
+def isKModuleComment(k):
+    return k['node'] == 'KModuleComment'
+
+def KProduction(productionItems, sort, att = None):
+    return { "node": "KProduction", "productionItems": productionItems, "sort": sort, "att": att }
+
+def isKProduction(k):
+    return k['node'] == 'KProduction'
+
+def KNonTerminal(sort):
+    return { "node": "KNonTerminal", "sort": sort }
+
+def isKNonTerminal(k):
+    return k['node'] == 'KNonTerminal'
+
+def KTerminal(value):
+    return { "node": "KTerminal", "value": value}
+
+def isKTerminal(k):
+    return k['node'] == 'KTerminal'
+
+def KRegexTerminal(regex, precedeRegex = None, followRegex = None):
+    return { "node": "KRegexTerminal", "regex": regex, "precedeRegex": precedeRegex, "followRegex": followRegex }
+
+def isKRegexTerminal(k):
+    return k['node'] == 'KRegexTerminal'
+
+def KSort(name):
+    return { "node": "KSort", "name": name }
+
+def isKSort(k):
+    return k['node'] == 'KSort'
+
+def KSyntaxAssociativity(assoc, tags = [], att = None):
+    return { "node": "KSyntaxAssociativity", "assoc": assoc, "tags": tags, "att": att }
+
+def isKSyntaxAssociativity(k):
+    return k['node'] == 'KSyntaxAssociativity'
+
+def KSyntaxPriority(priorities = [], att = None):
+    return { "node": "KSyntaxPriority", "priorities": priorities, "att": att }
+
+def isKSyntaxPriority(k):
+    return k['node'] == 'KSyntaxPriority'
+
+def KSyntaxSort(sort, att = None):
+    return { "node": "KSyntaxSort", "sort": sort, "att": att }
+
+def isKSyntaxSort(k):
+    return k['node'] == 'KSyntaxSort'
 
 def KFlatModule(name, imports, localSentences, att = None):
     return { "node": "KFlatModule", "name": name, "imports": imports, "localSentences": localSentences, "att": att }
@@ -241,8 +295,6 @@ def prettyPrintKast(kast, symbolTable):
         for att in kast['att'].keys():
             attStr += att + '(' + kast['att'][att] + ')'
         return '[' + attStr + ']'
-    if isKImport(kast):
-        return "imports " + kast["import"]
     if isKFlatModule(kast):
         name = kast["name"]
         imports = "\n".join([prettyPrintKast(kimport, symbolTable) for kimport in kast["imports"]])
