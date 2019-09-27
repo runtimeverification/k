@@ -22,6 +22,7 @@ import java.util.Set;
 public class LLVMBackend extends KoreBackend {
 
     private final LLVMKompileOptions options;
+    private final KExceptionManager kem;
 
     @Inject
     public LLVMBackend(
@@ -31,6 +32,7 @@ public class LLVMBackend extends KoreBackend {
             LLVMKompileOptions options) {
         super(kompileOptions, files, kem);
         this.options = options;
+        this.kem = kem;
     }
 
 
@@ -39,7 +41,10 @@ public class LLVMBackend extends KoreBackend {
         String kore = getKompiledString(def);
         files.saveToKompiled("definition.kore", kore);
         FileUtils.deleteQuietly(files.resolveKompiled("dt"));
-        Matching.writeDecisionTreeToFile(files.resolveKompiled("definition.kore"), options.heuristic, files.resolveKompiled("dt"), Matching.getThreshold(getThreshold(options)));
+        Matching.writeDecisionTreeToFile(files.resolveKompiled("definition.kore"), options.heuristic, files.resolveKompiled("dt"), Matching.getThreshold(getThreshold(options)), ex -> {
+          kem.addKException(ex);
+          return null;
+        });
         if (options.noLLVMKompile) {
             return;
         }
