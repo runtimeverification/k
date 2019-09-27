@@ -31,7 +31,7 @@ public class KoreParser {
             throw KEMException.criticalError("Error while loading Kore to K label map", e);
         }
         textToKore = new TextToKore();
-        koreToK = new org.kframework.parser.kore.parser.KoreToK(idsToLabels, sortAttMap, StringUtil::enquoteKString);
+        koreToK = new org.kframework.parser.kore.parser.KoreToK(idsToLabels, sortAttMap);
     }
 
     public K parseString(String koreString) {

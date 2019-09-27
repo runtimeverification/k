@@ -15,7 +15,7 @@ case class TranslationError(msg: String) extends RuntimeException(msg)
 
 /** Conversion function from Kore to K. */
 
-class KoreToK (headToLabel_ : java.util.Properties, sortAtt : Map[k.Sort, Att], enquote: String => String) {
+class KoreToK (headToLabel_ : java.util.Properties, sortAtt : Map[k.Sort, Att]) {
 
   val koreToKLabel = headToLabel_.asScala.toMap;
 
@@ -97,7 +97,7 @@ class KoreToK (headToLabel_ : java.util.Properties, sortAtt : Map[k.Sort, Att], 
       throw new TranslationError("Mem patterns currently unsupported")
     case kore.DomainValue(s, str) =>
       val hookAtt = sortAtt.get(apply(s)).getOrElse(KORE.Att).getOptional("hook").orElse("")
-      KORE.KToken(if (hookAtt == "STRING.String") enquote(str) else if (hookAtt == "BYTES.Bytes") "b" + enquote(str) else str, apply(s))
+      KORE.KToken(if (hookAtt == "STRING.String") StringUtil.enquoteKString(str) else if (hookAtt == "BYTES.Bytes") "b" + StringUtil.enquoteKString(str) else str, apply(s))
     case kore.StringLiteral(str) =>
       KORE.KToken(str, Sorts.KString)
   }
