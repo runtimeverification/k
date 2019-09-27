@@ -213,16 +213,13 @@ def prettyPrintKast(kast, symbolTable):
         ruleStr = "rule " + body
         requiresStr = ""
         ensuresStr  = ""
-        attsStr     = ""
+        attsStr     = prettyPrintKast(kast['att'], symbolTable)
         if kast["requires"] is not None:
             requiresStr = prettyPrintKast(kast["requires"], symbolTable)
             requiresStr = "\n  requires " + "\n   ".join(requiresStr.split("\n"))
         if kast["ensures"] is not None:
             ensuresStr = prettyPrintKast(kast["ensures"], symbolTable)
             ensuresStr = "\n  ensures " + "\n  ".join(ensuresStr.split("\n"))
-        if kast["atts"] is not None:
-            attsStr = ", ".join([prettyPrintKast(att, symbolTable) for att in kast["atts"]])
-            attsStr = "\n  [" + attsStr + "]"
         return ruleStr + requiresStr + ensuresStr + attsStr
     if isKAtt(kast):
         if len(kast['att']) == 0:
