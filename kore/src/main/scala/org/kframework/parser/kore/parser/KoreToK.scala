@@ -15,9 +15,51 @@ case class TranslationError(msg: String) extends RuntimeException(msg)
 
 /** Conversion function from Kore to K. */
 
-class KoreToK (headToLabel_ : java.util.Properties, sortAtt : Map[k.Sort, Att]) {
+class KoreToK (sortAtt : Map[k.Sort, Att]) {
 
-  val koreToKLabel = headToLabel_.asScala.toMap;
+  val codes = Map(
+    "Spce" -> " ",
+    "Bang" -> "|",
+    "Quot" -> "\"",
+    "Hash" -> "#",
+    "Dolr" -> "$",
+    "Perc" -> "%",
+    "And-" -> "&",
+    "Apos" -> "'",
+    "LPar" -> "(",
+    "RPar" -> ")",
+    "Star" -> "*",
+    "Plus" -> "+",
+    "Comm" -> ",",
+    "Hyph" -> "-",
+    "Stop" -> ".",
+    "Slsh" -> "/",
+    "Coln" -> ":",
+    "SCln" -> ";",
+    "-LT-" -> "<",
+    "Eqls" -> "=",
+    "-GT-" -> ">",
+    "Ques" -> "?",
+    "-AT-" -> "@",
+    "LSqB" -> "[",
+    "RSqB" -> "]",
+    "Bash" -> "\\",
+    "Xor-" -> "^",
+    "Unds" -> "_",
+    "BQuo" -> "`",
+    "LBra" -> "{",
+    "Pipe" -> "|",
+    "RBra" -> "}",
+    "Tild" -> "~")
+
+  def mapCode(code: String): String = {
+    try {
+      val i = Integer.parseInt(code, 16)
+      "\\u" + code
+    } catch {
+      case _: NumberFormatException => codes(code)
+    }
+  }
 
   /** Returns a [[k.Sort]] from [[kore.Sort]]. */
   def apply(s: kore.Sort): k.Sort = s match {
@@ -41,7 +83,23 @@ class KoreToK (headToLabel_ : java.util.Properties, sortAtt : Map[k.Sort, Att]) 
     if (head.startsWith("Lbl")) {
       extractKLabel(head.substring(3))
     } else {
-      koreToKLabel.applyOrElse(head, Function.const(head))
+      var literal = true
+      var result = new StringBuilder()
+      var i = 0
+      while (i < head.length) {
+        if (head(i) == '\'') {
+          literal = !literal
+          i += 1
+        } else if (literal) {
+          result.append(head(i))
+          i += 1
+        } else {
+          val code = head.substring(i, i+4)
+          result.append(mapCode(code))
+          i += 4
+        }
+      }
+      result.toString
     }
   }
 

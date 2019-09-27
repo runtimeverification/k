@@ -19,19 +19,9 @@ public class KoreParser {
     private final TextToKore textToKore;
     private final org.kframework.parser.kore.parser.KoreToK koreToK;
 
-    public KoreParser(File koreIdsToKLabelsFile, Map<Sort, Att> sortAttMap) {
-        Properties idsToLabels;
-        try {
-            idsToLabels = new Properties();
-            if (koreIdsToKLabelsFile != null) {
-                FileInputStream input = new FileInputStream(koreIdsToKLabelsFile);
-                idsToLabels.load(input);
-            }
-        } catch (IOException e) {
-            throw KEMException.criticalError("Error while loading Kore to K label map", e);
-        }
+    public KoreParser(Map<Sort, Att> sortAttMap) {
         textToKore = new TextToKore();
-        koreToK = new org.kframework.parser.kore.parser.KoreToK(idsToLabels, sortAttMap);
+        koreToK = new org.kframework.parser.kore.parser.KoreToK(sortAttMap);
     }
 
     public K parseString(String koreString) {
