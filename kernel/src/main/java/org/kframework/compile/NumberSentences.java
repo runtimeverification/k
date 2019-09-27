@@ -7,6 +7,7 @@ import org.kframework.attributes.Att;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 import org.kframework.definition.Sentence;
+import org.kframework.definition.Rule;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
@@ -34,6 +35,9 @@ public class NumberSentences implements AutoCloseable {
     }
 
     public Sentence number(Sentence s) {
+        if (!(s instanceof Rule)) {
+            return s;
+        }
         String id = ruleHash(s.withAtt(Att.empty()));
         Optional<Source> optFile = s.att().getOptional(Source.class);
         Optional<Location> optLine = s.att().getOptional(Location.class);
