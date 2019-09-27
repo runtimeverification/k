@@ -1,6 +1,7 @@
 package org.kframework.parser.kore.parser
 
 import org.kframework.builtin.{KLabels, Sorts}
+import org.kframework.kore.KVariable
 import org.kframework.kore.KORE
 import org.kframework.attributes.Att
 import org.kframework.parser.kore
@@ -117,7 +118,12 @@ class KoreToK (sortAtt : Map[k.Sort, Att]) {
       KORE.KVariable(extractVarName(name), KORE.Att.add(classOf[k.Sort].toString, apply(sort).toString()))
     case kore.Application(head, args) => head.ctr match {
       case "inj" =>
-        apply(args.head)
+        val body = apply(args.head)
+        if (body.isInstanceOf[KVariable]) {
+          KORE.KApply(KORE.KLabel("#SemanticCastTo" + apply(head.params(0)).toString), body)
+        } else {
+          body
+        }
       case "kseq" =>
         KORE.KSequence(args.map(apply(_)): _*)
       case "dotk" =>
