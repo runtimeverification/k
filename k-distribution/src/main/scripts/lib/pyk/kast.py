@@ -308,11 +308,12 @@ def prettyPrintKast(kast, symbolTable):
             attsStr = "\n  [" + attsStr + "]"
         return ruleStr + requiresStr + ensuresStr + attsStr
     if isKAtt(kast):
-        kastStr = kast["key"]
-        if kast["value"] == True:
-            return kastStr
-        else:
-            return kastStr + "(" + str(kast["value"]) + ")"
+        if len(kast['att']) == 0:
+            return ''
+        attStr = ''
+        for att in kast['att'].keys():
+            attStr += att + '(' + kast['att'][att] + ')'
+        return '[' + attStr + ']'
     if isKFlatModule(kast):
         name = kast["name"]
         imports = "\n".join(['import ' + kimport for kimport in kast["imports"]])
