@@ -159,54 +159,31 @@ def underbarUnparsing(symbol):
 def indent(input):
     return "\n".join(["  " + l for l in input.split("\n")])
 
-K_builtin_labels = { klabelRewrite : binOpStr("=>")
-                   , klabelCells   : (lambda *args: "\n".join(args))
-                   , klabelEmptyK  : (lambda : ".")
-                   }
+# Build the symbol table of a given definition
+def buildSymbolTable(definition):
+    if not isKDefinition(definition):
+        _fatal('Must supply a KDefinition!')
 
-BOOL_expressions = { "_andBool_" : binOpStr("\nandBool")
-                   , "_orBool_"  : paren(binOpStr("orBool"))
-                   , "notBool_"  : (lambda a: "notBool " + a)
-                   , "_==K_"     : binOpStr("==K")
-                   }
+    def _unparserFromProductionItems(prodItems):
+        unparseString = ""
+        for prodItem in prodItems:
+            if isKTerminal(prodItem):
+                unparseString += prodItem['value']
+            elif isKNonTerminal(prodItem):
+                unparseString += '_'
+        return underbarUnparsing(unparseString)
 
-INT_predicates = { "_<Int_"   : binOpStr("<Int")
-                 , "_>Int_"   : binOpStr(">Int")
-                 , "_<=Int_"  : binOpStr("<=Int")
-                 , "_>=Int_"  : binOpStr(">=Int")
-                 , "_==Int_"  : binOpStr("==Int")
-                 , "_=/=Int_" : binOpStr("=/=Int")
-                 }
+    symbolTable = { }
+    for module in definition['modules']:
+        for sent in module['localSentences']:
+            if isKProduction(sent) and 'klabel' in sent:
+                label = sent['klabel']
+                if 'symbol' in sent['att']['att'] and 'klabel' in sent['att']['att']:
+                    label = sent['att']['att']['klabel']
+                unparser = _unparserFromProductionItems(sent['productionItems'])
+                symbolTable[label] = unparser
 
-INT_expressions = { "_+Int_"   : paren(binOpStr("+Int"))
-                  , "_-Int_"   : paren(binOpStr("-Int"))
-                  , "_*Int_"   : paren(binOpStr("*Int"))
-                  , "_/Int_"   : paren(binOpStr("-Int"))
-                  , "_modInt_" : paren(binOpStr("modInt"))
-                  , "_&Int_"   : paren(binOpStr("&Int"))
-                  , "_|Int_"   : paren(binOpStr("|Int"))
-                  , "_xorInt_" : paren(binOpStr("xorInt"))
-                  , "_>>Int_"  : paren(binOpStr(">>Int"))
-                  }
-
-MAP_expressions = { "Map:update"  : paren(underbarUnparsing("_[_<-_]"))
-                  , "Map:lookup"  : paren(underbarUnparsing("_[_]"))
-                  , "_Map_"       : lambda m1, m2: m1 + "\n" + m2 if m2 != ".Map" else m1
-                  , "_|->_"       : underbarUnparsing("_|->_")
-                  , "_[_<-undef]" : paren(underbarUnparsing("_[_ <- undef ]"))
-                  , ".Map"        : constLabel(".Map")
-                  }
-
-LIST_expressions = { "_List_"   : (lambda a1, a2: a1 + " " + a2)
-                   , "ListItem" : appliedLabelStr("ListItem")
-                   }
-
-SET_expressions = { "Set:in"  : binOpStr("in")
-                  , "_Set_"   : (lambda a1, a2: a1 + " " + a2)
-                  , "SetItem" : appliedLabelStr("SetItem")
-                  }
-
-K_symbols = combineDicts(K_builtin_labels, BOOL_expressions, INT_predicates, INT_expressions, MAP_expressions, LIST_expressions, SET_expressions)
+    return symbolTable
 
 def prettyPrintKast(kast, symbolTable):
     if kast is None or kast == {}:
