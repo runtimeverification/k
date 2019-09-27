@@ -840,19 +840,6 @@ module K-EQUAL
                   K "==K" K           [function, functional, smt-hook(=), hook(KEQUAL.eq), klabel(_==K_), symbol, latex({#1}\mathrel{=_K}{#2}), equalEqualK]
                 | K "=/=K" K          [function, functional, smt-hook(distinct), hook(KEQUAL.ne), klabel(_=/=K_), symbol, latex({#1}\mathrel{\neq_K}{#2}), notEqualEqualK]
 
-  /*@ Set membership over terms. In addition to equality over
-      concrete patterns, K also supports computing equality
-      between a concrete pattern and a symbolic pattern.
-      This is compiled efficiently down to pattern matching,
-      and can be used by putting a term with unbound variables
-      in the left child of :=K or =/=K. Note that this does not
-      bind variables used on the lhs however (although this may
-      change in the future).*/
-
-  syntax Bool ::= left:
-                  K ":=K" K           [function, functional, klabel(_:=K_), symbol, equalEqualK]
-                | K ":/=K" K          [function, functional, klabel(_:/=K_), symbol, notEqualEqualK]
-
   syntax priorities equalEqualK notEqualEqualK > boolOperation mlOp
   rule K1:K =/=K K2:K => notBool (K1 ==K K2)
 
