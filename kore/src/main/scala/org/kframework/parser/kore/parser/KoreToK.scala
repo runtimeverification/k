@@ -16,7 +16,8 @@ case class TranslationError(msg: String) extends RuntimeException(msg)
 
 /** Conversion function from Kore to K. */
 
-class KoreToK (sortAtt : Map[k.Sort, Att]) {
+// sortAtt is a map from sort names to their hook attribute, if any
+class KoreToK (sortAtt : Map[String, String]) {
 
   val codes = Map(
     "Spce" -> " ",
@@ -160,7 +161,7 @@ class KoreToK (sortAtt : Map[k.Sort, Att]) {
     case kore.Mem(s, rs, p, q) =>
       throw new TranslationError("Mem patterns currently unsupported")
     case kore.DomainValue(s, str) =>
-      val hookAtt = sortAtt.get(apply(s)).getOrElse(KORE.Att).getOptional("hook").orElse("")
+      val hookAtt = sortAtt.get(apply(s).name).getOrElse("")
       KORE.KToken(if (hookAtt == "STRING.String") StringUtil.enquoteKString(str) else if (hookAtt == "BYTES.Bytes") "b" + StringUtil.enquoteKString(str) else str, apply(s))
     case kore.StringLiteral(str) =>
       KORE.KToken(str, Sorts.KString)
