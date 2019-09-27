@@ -1012,12 +1012,6 @@ module K-IO
                   | "#tempFile" "(" String "," Int ")"
   // Remove a file or empty directory from the disk. Returns .K on success or an IOError on failure.
   syntax K ::= #remove(String) [function, functional, hook(IO.remove), impure]
-
-
-  syntax String ::= #projectString(IOString) [function]
-  rule #projectString(S:String) => S
-  syntax Int ::= #projectInt(IOInt) [function]
-  rule #projectInt(I:Int) => I
 endmodule
 
 // NOTE: DO NOT DIRECTLY IMPORT *-STREAM MODULES
