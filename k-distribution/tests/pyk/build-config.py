@@ -5,17 +5,14 @@ import sys
 from functools import reduce
 
 # From K's pyk-library
-from pyk.kast      import *
-from pyk.kastManip import *
+from pyk import *
 
-IMP_symbols = { 'int_;_'       : (lambda ds, ss : 'int ' + ds + ';\n' + ss)
-              , '_,_'          : assocWithUnit(' , ', '.Ids')
-              , '.List{"_,_"}' : constLabel('.Ids')
-              , '{}'           : constLabel('{ }')
-              , '_+_'          : binOpStr('+')
-              }
+IMP_definition = readKastTerm('imp-kompiled/compiled.json')
 
-ALL_symbols = combineDicts(K_symbols, IMP_symbols)
+IMP_symbols = buildSymbolTable(IMP_definition)
+
+IMP_symbols['_,_']          = assocWithUnit(' , ', '')
+IMP_symbols['.List{"_,_"}'] = constLabel('')
 
 kast_term = readKastTerm(sys.argv[1])
 
@@ -27,4 +24,4 @@ if isKRule(kast_term):
 elif isKApply(kast_term):
     kast_term = simplifyBool(kast_term)
 
-print(prettyPrintKast(kast_term, ALL_symbols))
+print(prettyPrintKast(kast_term, IMP_symbols))

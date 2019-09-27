@@ -21,7 +21,7 @@ clean:
 imp_kompiled:=imp-kompiled/compiled.txt
 
 $(imp_kompiled): imp.k $(KOMPILE)
-	$(KOMPILE) --backend $(KOMPILE_BACKEND) -I . $<
+	$(KOMPILE) --backend $(KOMPILE_BACKEND) -I . $< --emit-json
 
 kast-tests/%.gen: build-config.py kast-tests/%.json
 	python3 $^ > $@
