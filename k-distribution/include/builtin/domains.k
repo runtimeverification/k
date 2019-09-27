@@ -338,7 +338,6 @@ module BOOL
   rule false xorBool B:Bool => B:Bool
   rule B:Bool xorBool false => B:Bool
   rule B:Bool xorBool B:Bool => false
-  rule B1:Bool xorBool B2:Bool => notBool (B1 ==Bool B2)
 
   rule true orBool _:Bool => true
   rule _:Bool orBool true => true
