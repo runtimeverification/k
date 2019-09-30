@@ -286,7 +286,7 @@ def prettyPrintKast(kast, symbolTable):
     if isKRewrite(kast):
         lhsStr = prettyPrintKast(kast["lhs"], symbolTable)
         rhsStr = prettyPrintKast(kast["rhs"], symbolTable)
-        return lhsStr + " => " + rhsStr
+        return "( " + lhsStr + " => " + rhsStr + " )"
     if isKSequence(kast):
         unparsedItems = [ prettyPrintKast(item, symbolTable) for item in kast['items'] ]
         unparsedKSequence = "\n~> ".join(unparsedItems)
