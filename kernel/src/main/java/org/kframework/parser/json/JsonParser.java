@@ -288,10 +288,14 @@ public class JsonParser {
 //////////////////////
 
     public static Att toAtt(JsonObject data) throws IOException {
-        if (! data.getString("node").equals(KATT))
-            throw KEMException.criticalError("Unexpected node found in KAST Json term: " + data.getString("node"));
-
-        return Att.empty();
+        if (! (data.getString("node").equals(KATT) && data.containsKey("att")))
+            throw KEMException.criticalError("Unexpected node found in KAST Json term when unparsing KATT: " + data.getString("node"));
+        JsonObject attMap = data.getJsonObject("att");
+        Att newAtt = Att.empty();
+        for (String key: attMap.keySet()) {
+            newAtt = newAtt.add(key, attMap.getString(key));
+        }
+        return newAtt;
     }
 
 ////////////////////
