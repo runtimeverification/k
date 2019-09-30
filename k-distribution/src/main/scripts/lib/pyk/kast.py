@@ -161,6 +161,11 @@ def indent(input):
 
 # Build the symbol table of a given definition
 def buildSymbolTable(definition):
+    """Build the unparsing symbol table given a JSON encoded definition.
+
+    -   Input: JSON encoded K definition.
+    -   Return: Python dictionary mapping klabels to automatically generated unparsers.
+    """
     if not isKDefinition(definition):
         _fatal('Must supply a KDefinition!')
 
