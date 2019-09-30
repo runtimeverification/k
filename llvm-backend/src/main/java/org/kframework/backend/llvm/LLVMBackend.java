@@ -3,6 +3,7 @@ package org.kframework.backend.llvm;
 
 import com.google.inject.Inject;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.kframework.backend.llvm.matching.Matching;
 import org.kframework.backend.kore.KoreBackend;
 import org.kframework.kompile.CompiledDefinition;
@@ -41,10 +42,15 @@ public class LLVMBackend extends KoreBackend {
         String kore = getKompiledString(def);
         files.saveToKompiled("definition.kore", kore);
         FileUtils.deleteQuietly(files.resolveKompiled("dt"));
+        MutableInt warnings = new MutableInt();
         Matching.writeDecisionTreeToFile(files.resolveKompiled("definition.kore"), options.heuristic, files.resolveKompiled("dt"), Matching.getThreshold(getThreshold(options)), ex -> {
           kem.addKException(ex);
+          warnings.increment();
           return null;
         });
+        if (warnings.intValue() > 0 && kem.options.warnings2errors) {
+          throw KEMException.compilerError("Had " + warnings.intValue() + " pattern matching errors.");
+        }
         if (options.noLLVMKompile) {
             return;
         }
