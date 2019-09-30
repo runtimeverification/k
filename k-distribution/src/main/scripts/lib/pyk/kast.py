@@ -200,6 +200,8 @@ def prettyPrintKast(kast, symbolTable):
             cellContents = "\n".join(unparsedArgs).rstrip()
             cellStr   = label + "\n" + indent(cellContents) + "\n</" + label[1:]
             return cellStr.rstrip()
+        if label == klabelRewrite:
+            return '( ' + kast['args'][0] + ' => ' + kast['args'][1] + ' )'
         unparser = appliedLabelStr(label) if label not in symbolTable else symbolTable[label]
         return unparser(*unparsedArgs)
     if isKSequence(kast):
