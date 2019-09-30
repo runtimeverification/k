@@ -50,7 +50,7 @@ public class KRead {
             case KAST:
                 return deserialize(stringToParse, inputMode, source);
             case KORE:
-                return new KoreParser(files.resolveKoreToKLabelsFile(), mod.sortAttributesFor()).parseString(stringToParse);
+                return new KoreParser(mod.sortAttributesFor()).parseString(stringToParse);
             case PROGRAM:
                 return def.getParser(mod, sort, kem).apply(stringToParse, source);
             default:

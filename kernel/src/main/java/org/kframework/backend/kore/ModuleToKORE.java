@@ -1246,6 +1246,7 @@ public class ModuleToKORE {
 
     private static String[] asciiReadableEncodingKoreCalc() {
         String[] koreEncoder = Arrays.copyOf(StringUtil.asciiReadableEncodingDefault, StringUtil.asciiReadableEncodingDefault.length);
+        koreEncoder[0x26] = "And-";
         koreEncoder[0x2d] = "-";
         koreEncoder[0x3c] = "-LT-";
         koreEncoder[0x3e] = "-GT-";

@@ -138,7 +138,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                 try {
                     File korePath = koreDirectory == null ? null : new File(koreDirectory);
                     int execStatus = executeCommandBasic(korePath, koreCommand);
-                    K outputK = new KoreParser(files.resolveKoreToKLabelsFile(), mod.sortAttributesFor()).parseFile(koreOutputFile);
+                    K outputK = new KoreParser(mod.sortAttributesFor()).parseFile(koreOutputFile);
                     return new RewriterResult(Optional.empty(), Optional.of(execStatus), outputK);
                 } catch (IOException e) {
                     throw KEMException.criticalError("I/O Error while executing", e);
@@ -230,7 +230,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                     if (executeCommandBasic(korePath, koreCommand) != 0) {
                         throw KEMException.criticalError("Haskell backend returned non-zero exit code");
                     }
-                    K outputK = new KoreParser(files.resolveKoreToKLabelsFile(), mod.sortAttributesFor()).parseFile(koreOutputFile);
+                    K outputK = new KoreParser(mod.sortAttributesFor()).parseFile(koreOutputFile);
                     return outputK;
                 } catch (IOException e) {
                     throw KEMException.criticalError("I/O Error while executing", e);
@@ -289,7 +289,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                 }
                 K outputK;
                 try {
-                    outputK = new KoreParser(files.resolveKoreToKLabelsFile(), rules.sortAttributesFor())
+                    outputK = new KoreParser(rules.sortAttributesFor())
                             .parseFile(koreOutputFile);
                 } catch (ParseError parseError) {
                     kem.registerCriticalWarning("Error parsing haskell backend output", parseError);

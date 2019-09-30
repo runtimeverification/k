@@ -12,6 +12,7 @@ import java.util.function.BiConsumer
 import java.util.function.BinaryOperator
 import java.util.function.Supplier
 import scala.collection.mutable.SetBuilder
+import scala.collection.mutable.MapBuilder
 import collection._
 
 object Collections {
@@ -53,6 +54,8 @@ object Collections {
   def toSet[T]: Collector[T, Set[T]] =
     Collector(() => new CombinerFromBuilder(new SetBuilder(Set())))
 
+  def toMap[K, V]: Collector[(K, V), Map[K, V]] =
+    Collector(() => new CombinerFromBuilder(new MapBuilder(Map())))
 }
 
 class CombinerFromBuilder[T, R <: {def iterator : Iterator[T]}](protected[this] val b: Builder[T, R]) extends

@@ -93,7 +93,7 @@ public class LLVMRewriter implements Function<Definition, Rewriter> {
                 args.add(koreOutputFile.getAbsolutePath());
                 try {
                     int exit = executeCommandBasic(files.resolveWorkingDirectory("."), args);
-                    K outputK = new KoreParser(files.resolveKoreToKLabelsFile(), mod.sortAttributesFor()).parseFile(koreOutputFile);
+                    K outputK = new KoreParser(mod.sortAttributesFor()).parseFile(koreOutputFile);
                     return new RewriterResult(Optional.empty(), Optional.of(exit), outputK);
                 } catch (IOException e) {
                     throw KEMException.criticalError("I/O Error while executing", e);

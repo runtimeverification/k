@@ -1,5 +1,6 @@
 package org.kframework.parser;
 
+import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.kore.K;
 import org.kframework.kore.Sort;
@@ -9,29 +10,22 @@ import org.kframework.parser.kore.parser.TextToKore;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
 import scala.collection.Map;
+import scala.Tuple2;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
 
+import static org.kframework.Collections.*;
+
 public class KoreParser {
     private final TextToKore textToKore;
     private final org.kframework.parser.kore.parser.KoreToK koreToK;
 
-    public KoreParser(File koreIdsToKLabelsFile, Map<Sort, Att> sortAttMap) {
-        Properties idsToLabels;
-        try {
-            idsToLabels = new Properties();
-            if (koreIdsToKLabelsFile != null) {
-                FileInputStream input = new FileInputStream(koreIdsToKLabelsFile);
-                idsToLabels.load(input);
-            }
-        } catch (IOException e) {
-            throw KEMException.criticalError("Error while loading Kore to K label map", e);
-        }
+    public KoreParser(Map<Sort, Att> sortAttMap) {
         textToKore = new TextToKore();
-        koreToK = new org.kframework.parser.kore.parser.KoreToK(idsToLabels, sortAttMap, StringUtil::enquoteKString);
+        koreToK = new org.kframework.parser.kore.parser.KoreToK(stream(sortAttMap).map(t -> Tuple2.apply(t._1().name(), t._2().getOptional("hook").orElse(""))).collect(Collections.toMap()));
     }
 
     public K parseString(String koreString) {
