@@ -132,13 +132,13 @@ def splitConfigFrom(configuration):
     initial_substitution = {}
     _mkCellVar = lambda label: label.replace('-', '_').replace('<', '').replace('>', '').upper() + '_CELL'
     def _replaceWithVar(k):
-        if pyk.isKApply(k) and pyk.isCellKLabel(k['label']):
-            if len(k['args']) == 1 and not (pyk.isKApply(k['args'][0]) and pyk.isCellKLabel(k['args'][0]['label'])):
+        if isKApply(k) and isCellKLabel(k['label']):
+            if len(k['args']) == 1 and not (isKApply(k['args'][0]) and isCellKLabel(k['args'][0]['label'])):
                 config_var = _mkCellVar(k['label'])
                 initial_substitution[config_var] = k['args'][0]
                 return KApply(k['label'], [KVariable(config_var)])
         return k
-    symbolic_config = pyk.traverseBottomUp(configuration, _replaceWithVar)
+    symbolic_config = traverseBottomUp(configuration, _replaceWithVar)
     return (symbolic_config, initial_substitution)
 
 def collapseDots(kast):
