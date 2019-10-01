@@ -90,7 +90,7 @@ def isKBubble(k):
     return k['node'] == 'KBubble'
 
 def KModuleComment(comment, att = None):
-    return { "node": "KModuleComment", "commonte": comment, "att": att }
+    return { "node": "KModuleComment", "comment": comment, "att": att }
 
 def isKModuleComment(k):
     return k['node'] == 'KModuleComment'
