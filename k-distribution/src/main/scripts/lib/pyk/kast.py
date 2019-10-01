@@ -71,8 +71,8 @@ def KRewrite(lhs, rhs, att = None):
 def isKRewrite(k):
     return k["node"] == "KRewrite"
 
-def KAtt(key, value):
-    return {"node": "KAtt", "key": key, "value": value}
+def KAtt(atts = {}):
+    return {"node": "KAtt", "att": atts}
 
 def isKAtt(k):
     return k["node"] == "KAtt"
@@ -165,16 +165,14 @@ def isCellKLabel(label):
     return len(label) > 1 and label[0] == "<" and label[-1] == ">"
 
 def addAttributes(kast, att):
+    if isKAtt(kast):
+        return KAtt(combineDicts(att, kast['att']))
     if isKRule(kast):
-        newAtts = []
-        if kast["att"] is None:
-            newAtts = att
-        else:
-            newAtts.extend(kast["att"])
-        return KRule(kast["body"], requires = kast["requires"], ensures = kast["ensures"], att = newAtts)
+        return KRule(kast['body'], requires = kast['requires'], ensures = kast['ensures'], att = addAttributes(kast['att'], att))
     else:
-        notif("Don't know how to add attributes to KAST!")
-        print(kast)
+        notif('Do not know how to add attributes to KAST!')
+        sys.stderr.write(kast)
+        sys.stderr.flush()
         sys.exit(1)
 
 klabelCells   = "#KCells"
