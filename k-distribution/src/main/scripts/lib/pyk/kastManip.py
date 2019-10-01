@@ -194,6 +194,18 @@ def inlineCellMaps(kast):
         return _kast
     return traverseBottomUp(kast, _inlineCellMaps)
 
+def removeSemanticCasts(kast):
+    """Remove injected `#SemanticCast*` nodes in AST.
+
+    -   Input: kast (possibly) containing automatically injected `#SemanticCast*` KApply nodes.
+    -   Output: kast without the `#SemanticCast*` nodes.
+    """
+    def _removeSemanticCasts(_kast):
+        if isKApply(_kast) and len(_kast['args']) == 1 and _kast['label'].startswith('#SemanticCast'):
+            return _kast['args'][0]
+        return _kast
+    return traverseBottomUp(kast, _removeSemanticCasts)
+
 def uselessVarsToDots(kast, requires = None, ensures = None):
 
     numOccurances = {}
@@ -252,6 +264,7 @@ def minimizeRule(rule):
         ruleRequires = simplifyBool(mlPredToBool(ruleRequires))
 
     ruleBody = inlineCellMaps(ruleBody)
+    ruleBody = removeSemanticCasts(ruleBody)
     ruleBody = uselessVarsToDots(ruleBody, requires = ruleRequires, ensures = ruleEnsures)
     ruleBody = collapseDots(ruleBody)
 
