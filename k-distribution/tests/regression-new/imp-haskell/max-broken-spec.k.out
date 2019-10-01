@@ -76,6 +76,14 @@
   </T>
 #And
   {
+    DotVar0
+  #Equals
+    <generatedCounter>
+      DotVar00
+    </generatedCounter>
+  }
+#And
+  {
     true
   #Equals
     A <=Int B
