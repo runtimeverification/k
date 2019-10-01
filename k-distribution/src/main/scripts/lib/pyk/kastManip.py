@@ -21,6 +21,10 @@ def match(pattern, kast):
             if subst is None:
                 return None
         return subst
+    if isKRewrite(pattern) and isKRewrite(kast):
+        lhsSubst = match(pattern['lhs'], kast['lhs'])
+        rhsSubst = match(pattern['rhs'], kast['rhs'])
+        return combineDicts(lhsSubst, rhsSubst)
     return None
 
 def collectBottomUp(kast, callback):
