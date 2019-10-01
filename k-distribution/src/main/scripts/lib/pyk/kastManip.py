@@ -175,6 +175,13 @@ def pushDownRewrites(kast):
             and len(lhs["args"]) == len(rhs["args"]):
                     newArgs = [ KRewrite(lArg, rArg) for (lArg, rArg) in zip(lhs["args"], rhs["args"]) ]
                     return KApply(lhs["label"], newArgs)
+            if isKSequence(lhs) and isKSequence(rhs) and len(lhs['items']) > 0 and len(rhs['items']) > 0:
+                if lhs['items'][0] == rhs['items'][0]:
+                    lowerRewrite = KRewrite(KSequence(lhs['items'][1:]), KSequence(rhs['items'][1:]))
+                    return KSequence([lhs['items'][0], lowerRewrite])
+                if lhs['items'][-1] == rhs['items'][-1]:
+                    lowerRewrite = KRewrite(KSequence(lhs['items'][0:-1]), KSequence(rhs['items'][0:-1]))
+                    return KSequence([lowerRewrite, lhs['items'][-1]])
         return _kast
     return traverseTopDown(kast, _pushDownRewrites)
 
