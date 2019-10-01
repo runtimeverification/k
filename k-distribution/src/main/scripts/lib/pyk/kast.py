@@ -247,6 +247,11 @@ def buildSymbolTable(definition):
     return symbolTable
 
 def prettyPrintKast(kast, symbolTable):
+    """Print out KAST terms/outer syntax.
+
+    -   Input: KAST term.
+    -   Output: Best-effort string representation of KAST term.
+    """
     if kast is None or kast == {}:
         return ""
     if isKVariable(kast):
@@ -272,6 +277,8 @@ def prettyPrintKast(kast, symbolTable):
         unparsedKSequence = "\n~> ".join(unparsedItems)
         if len(unparsedItems) > 1:
             unparsedKSequence = "    " + unparsedKSequence
+        else:
+            unparsedKSequence = '.'
         return unparsedKSequence
     if isKRule(kast):
         body     = "\n     ".join(prettyPrintKast(kast["body"], symbolTable).split("\n"))
