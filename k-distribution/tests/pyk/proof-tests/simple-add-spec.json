@@ -3,55 +3,35 @@
   "version": 1,
   "term": {
     "node": "KRule",
-    "rule":
-      {
+    "body": {
+      "node": "KRewrite",
+      "lhs": {
         "node": "KApply",
-        "label": "#KRewrite",
+        "label": "<T>",
         "variable": false,
         "arity": 2,
         "args": [
           {
             "node": "KApply",
-            "label": "<T>",
+            "label": "<k>",
             "variable": false,
-            "arity": 2,
+            "arity": 1,
             "args": [
               {
                 "node": "KApply",
-                "label": "<k>",
+                "label": "_+_",
                 "variable": false,
-                "arity": 1,
-                "args": [
-                  {
-                    "node": "KApply",
-                    "label": "_+_",
-                    "variable": false,
-                    "arity": 2,
-                    "args": [
-                      {
-                        "node": "KVariable",
-                        "name": "X:Int",
-                        "originalName": "X:Int"
-                      },
-                      {
-                        "node": "KVariable",
-                        "name": "Y:Int",
-                        "originalName": "Y:Int"
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "node": "KApply",
-                "label": "<state>",
-                "variable": false,
-                "arity": 1,
+                "arity": 2,
                 "args": [
                   {
                     "node": "KVariable",
-                    "name": "STATE:Map",
-                    "originalName": "STATE:Map"
+                    "name": "X:Int",
+                    "originalName": "X:Int"
+                  },
+                  {
+                    "node": "KVariable",
+                    "name": "Y:Int",
+                    "originalName": "Y:Int"
                   }
                 ]
               }
@@ -59,73 +39,86 @@
           },
           {
             "node": "KApply",
-            "label": "<T>",
+            "label": "<state>",
             "variable": false,
-            "arity": 2,
+            "arity": 1,
             "args": [
               {
-                "node": "KApply",
-                "label": "<k>",
-                "variable": false,
-                "arity": 1,
-                "args": [
-                  {
-                    "node": "KApply",
-                    "label": "_+Int_",
-                    "variable": false,
-                    "arity": 2,
-                    "args": [
-                      {
-                        "node": "KVariable",
-                        "name": "X:Int",
-                        "originalName": "X:Int"
-                      },
-                      {
-                        "node": "KVariable",
-                        "name": "Y:Int",
-                        "originalName": "Y:Int"
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "node": "KApply",
-                "label": "<state>",
-                "variable": false,
-                "arity": 1,
-                "args": [
-                  {
-                    "node": "KVariable",
-                    "name": "STATE:Map",
-                    "originalName": "STATE:Map"
-                  }
-                ]
+                "node": "KVariable",
+                "name": "STATE:Map",
+                "originalName": "STATE:Map"
               }
             ]
           }
         ]
       },
-    "requires":
-      {
+      "rhs": {
         "node": "KApply",
-        "label": "_andBool_",
+        "label": "<T>",
         "variable": false,
         "arity": 2,
         "args": [
           {
-            "node": "KToken",
-            "sort": "Bool",
-            "token": "true"
+            "node": "KApply",
+            "label": "<k>",
+            "variable": false,
+            "arity": 1,
+            "args": [
+              {
+                "node": "KApply",
+                "label": "_+Int_",
+                "variable": false,
+                "arity": 2,
+                "args": [
+                  {
+                    "node": "KVariable",
+                    "name": "X:Int",
+                    "originalName": "X:Int"
+                  },
+                  {
+                    "node": "KVariable",
+                    "name": "Y:Int",
+                    "originalName": "Y:Int"
+                  }
+                ]
+              }
+            ]
           },
           {
-            "node": "KToken",
-            "sort": "Bool",
-            "token": "true"
+            "node": "KApply",
+            "label": "<state>",
+            "variable": false,
+            "arity": 1,
+            "args": [
+              {
+                "node": "KVariable",
+                "name": "STATE:Map",
+                "originalName": "STATE:Map"
+              }
+            ]
           }
         ]
-      },
+      }
+    },
+    "requires": {
+      "node": "KApply",
+      "label": "_andBool_",
+      "variable": false,
+      "arity": 2,
+      "args": [
+        {
+          "node": "KToken",
+          "sort": "Bool",
+          "token": "true"
+        },
+        {
+          "node": "KToken",
+          "sort": "Bool",
+          "token": "true"
+        }
+      ]
+    },
     "ensures": null,
-    "atts": null
+    "att": null
   }
 }
