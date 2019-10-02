@@ -34,7 +34,7 @@ syntax Int ::= foo4(Bytes) [function]
 rule foo4(BAR) => 0
 rule foo4(BAZ) => 0
 
-syntax Int ::= foo5(List) [function] 
+syntax Int ::= foo5(List) [function]
 rule foo5(ListItem(X)) => 0
 rule foo5(ListItem(Y) L) => 0
 

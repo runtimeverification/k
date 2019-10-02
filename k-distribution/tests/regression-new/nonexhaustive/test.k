@@ -40,7 +40,7 @@ rule foo3("2") => 0
 
 syntax Int ::= foo4(Bytes) [function, functional]
 
-syntax Int ::= foo5(List) [function, functional] 
+syntax Int ::= foo5(List) [function, functional]
 rule foo5(.List) => 0
 rule foo5(ListItem(X)) => 0
 rule foo5(ListItem(X) ListItem(Y) ListItem(Z) L) => 0
