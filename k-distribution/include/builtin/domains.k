@@ -1033,7 +1033,7 @@ module STDIN-STREAM
   rule [stdinGetc]:
        <stdin>
        ListItem(#parseInput(_:String, Delimiters:String))
-       ListItem(#buffer(S:String => S +String chrChar(#projectInt(#getc(N)))))
+       ListItem(#buffer(S:String => S +String chrChar({#getc(N)}:>Int)))
        ListItem("on")
        ListItem(#istream(N:Int))
        </stdin>
