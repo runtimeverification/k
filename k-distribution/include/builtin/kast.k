@@ -54,8 +54,8 @@ endmodule
 module KSEQ
   imports KAST
   imports K-TOP-SORT
-  syntax K ::= ".K"      [klabel(#EmptyK), unparseAvoid]
-             | "."       [klabel(#EmptyK), symbol]
+  syntax K ::= ".K"      [klabel(#EmptyK), symbol, unparseAvoid]
+             | "."       [klabel(#EmptyK)]
              | ".::K"    [klabel(#EmptyK), unparseAvoid]
   syntax K ::= K "~>" K  [klabel(#KSequence), left, assoc, unit(#EmptyK), symbol]
   syntax left #KSequence
