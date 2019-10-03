@@ -26,7 +26,7 @@ $(imp_kompiled): imp.k $(KOMPILE)
 kast-tests/%.gen: build-config.py kast-tests/%.json $(imp_kompiled)
 	python3 $^ > $@
 
-proof-tests/%-spec.k: build-config.py proof-tests/%-spec.json
+proof-tests/%-spec.k: build-config.py proof-tests/%-spec.json $(imp_kompiled)
 	python3 $^ > $@
 
 pyk_kast_tests = $(wildcard kast-tests/*.json)
