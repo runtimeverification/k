@@ -26,7 +26,7 @@ class TreeNodesToKORE(parseSort: java.util.function.Function[String, Sort], stri
 
   def anonVar(sort: Sort): K = {
     val lbl = KLabel("#SemanticCastTo" + sort.toString())
-    if (strict) KApply(lbl, KList(KToken("_", Sorts.KVariable)), Att.add(classOf[Production], Production(lbl, sort, Seq(NonTerminal(sort, None))))) else KToken("_", Sorts.KVariable)
+    if (strict) KApply(lbl, KList(KToken("_", Sorts.KVariable)), Att.add(classOf[Production], Production(lbl, Seq(), sort, Seq(NonTerminal(sort, None))))) else KToken("_", Sorts.KVariable)
   }
 
   def termConsToKApply(t: TermCons, items: PStack[Term], p: Production): KApply = {
