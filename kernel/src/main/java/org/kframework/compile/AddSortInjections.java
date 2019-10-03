@@ -244,6 +244,12 @@ public class AddSortInjections {
             if (kapp.klabel().name().equals("#fun3")) {
                 return sort(kapp.items().get(1), expectedSort);
             }
+            if (kapp.klabel().name().equals("_:=K_")) {
+                return Sorts.Bool();
+            }
+            if (kapp.klabel().name().equals("_:/=K_")) {
+                return Sorts.Bool();
+            }
             Production prod = production(kapp);
             if (prod.att().contains("poly")) {
                 List<Set<Integer>> poly = RuleGrammarGenerator.computePositions(prod);
