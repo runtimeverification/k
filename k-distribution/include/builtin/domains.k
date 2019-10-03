@@ -338,7 +338,6 @@ module BOOL
   rule false xorBool B:Bool => B:Bool
   rule B:Bool xorBool false => B:Bool
   rule B:Bool xorBool B:Bool => false
-  rule B1:Bool xorBool B2:Bool => notBool (B1 ==Bool B2)
 
   rule true orBool _:Bool => true
   rule _:Bool orBool true => true
@@ -841,19 +840,6 @@ module K-EQUAL
                   K "==K" K           [function, functional, smt-hook(=), hook(KEQUAL.eq), klabel(_==K_), symbol, latex({#1}\mathrel{=_K}{#2}), equalEqualK]
                 | K "=/=K" K          [function, functional, smt-hook(distinct), hook(KEQUAL.ne), klabel(_=/=K_), symbol, latex({#1}\mathrel{\neq_K}{#2}), notEqualEqualK]
 
-  /*@ Set membership over terms. In addition to equality over
-      concrete patterns, K also supports computing equality
-      between a concrete pattern and a symbolic pattern.
-      This is compiled efficiently down to pattern matching,
-      and can be used by putting a term with unbound variables
-      in the left child of :=K or =/=K. Note that this does not
-      bind variables used on the lhs however (although this may
-      change in the future).*/
-
-  syntax Bool ::= left:
-                  K ":=K" K           [function, functional, klabel(_:=K_), symbol, equalEqualK]
-                | K ":/=K" K          [function, functional, klabel(_:/=K_), symbol, notEqualEqualK]
-
   syntax priorities equalEqualK notEqualEqualK > boolOperation mlOp
   rule K1:K =/=K K2:K => notBool (K1 ==K K2)
 
@@ -1026,12 +1012,6 @@ module K-IO
                   | "#tempFile" "(" String "," Int ")"
   // Remove a file or empty directory from the disk. Returns .K on success or an IOError on failure.
   syntax K ::= #remove(String) [function, functional, hook(IO.remove), impure]
-
-
-  syntax String ::= #projectString(IOString) [function]
-  rule #projectString(S:String) => S
-  syntax Int ::= #projectInt(IOInt) [function]
-  rule #projectInt(I:Int) => I
 endmodule
 
 // NOTE: DO NOT DIRECTLY IMPORT *-STREAM MODULES
@@ -1053,7 +1033,7 @@ module STDIN-STREAM
   rule [stdinGetc]:
        <stdin>
        ListItem(#parseInput(_:String, Delimiters:String))
-       ListItem(#buffer(S:String => S +String chrChar(#projectInt(#getc(N)))))
+       ListItem(#buffer(S:String => S +String chrChar({#getc(N)}:>Int)))
        ListItem("on")
        ListItem(#istream(N:Int))
        </stdin>

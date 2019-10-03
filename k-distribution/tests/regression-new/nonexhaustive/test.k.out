@@ -1,0 +1,34 @@
+[Error] Compiler: Had 15 pattern matching errors.
+[Error] Compiler: Non exhaustive match detected:
+`foo(_)_TEST_Int_Int`(#token("3","Int"))
+[Error] Compiler: Non exhaustive match detected:
+`foo10(_)_TEST_Int_Float`(#token("3.0","Float"))
+[Error] Compiler: Non exhaustive match detected:
+`foo10a(_)_TEST_Int_Float`(#token("0.0","Float"))
+[Error] Compiler: Non exhaustive match detected:
+`foo11(_)_TEST_Int_Bool`(#token("false","Bool"))
+[Error] Compiler: Non exhaustive match detected:
+`foo11a(_)_TEST_Int_Bool`(#token("true","Bool"))
+[Error] Compiler: Non exhaustive match detected:
+`foo12(_)_TEST_Int_KVar`(#token("_3","KVar"))
+[Error] Compiler: Non exhaustive match detected:
+`foo13(_)_TEST_Int_StringBuffer`(_)
+[Error] Compiler: Non exhaustive match detected:
+`foo2(_)_TEST_Int_Foo`(`baz()_TEST_Foo`(.KList))
+[Error] Compiler: Non exhaustive match detected:
+`foo2a(_)_TEST_Int_Bar`(`stuff(_)_TEST_Bar_Foo`(`baz()_TEST_Foo`(.KList)))
+[Error] Compiler: Non exhaustive match detected:
+`foo3(_)_TEST_Int_String`(#token("\"3\"","String"))
+[Error] Compiler: Non exhaustive match detected: `foo4(_)_TEST_Int_Bytes`(_)
+[Error] Compiler: Potentially useless rule detected.
+	Source(test.k)
+	Location(61,6,61,27)
+[Error] Compiler: Potentially useless rule detected.
+	Source(test.k)
+	Location(81,6,81,30)
+[Error] Compiler: Potentially useless rule detected.
+	Source(test.k)
+	Location(93,6,93,22)
+[Error] Compiler: Potentially useless rule detected.
+	Source(test.k)
+	Location(94,6,94,22)
