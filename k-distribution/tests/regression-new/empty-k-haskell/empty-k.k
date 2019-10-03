@@ -2,6 +2,7 @@
 
 module EMPTY-K
     imports K-TERM
+    imports BOOL
 
     configuration <k> $PGM:Pgm </k>
 
