@@ -45,7 +45,7 @@ module KAST
 
   syntax KList ::= K
                  | ".KList"          [klabel(#EmptyKList), symbol]
-                 | ".::KList"        [klabel(#EmptyKList), symbol]
+                 | ".::KList"        [klabel(#EmptyKList), unparseAvoid]
                  | KList "," KList   [klabel(#KList), left, assoc, unit(#EmptyKList), symbol, prefer]
 endmodule
 
@@ -54,9 +54,9 @@ endmodule
 module KSEQ
   imports KAST
   imports K-TOP-SORT
-  syntax K ::= ".K"      [klabel(#EmptyK), symbol, unparseAvoid]
+  syntax K ::= ".K"      [klabel(#EmptyK), unparseAvoid]
              | "."       [klabel(#EmptyK), symbol]
-             | ".::K"    [klabel(#EmptyK), symbol, unparseAvoid]
+             | ".::K"    [klabel(#EmptyK), unparseAvoid]
   syntax K ::= K "~>" K  [klabel(#KSequence), left, assoc, unit(#EmptyK), symbol]
   syntax left #KSequence
   syntax K     ::= "(" K ")"    [bracket, poly(0, 1)]
