@@ -143,7 +143,6 @@ public class ModuleToKORE {
             if (isBuiltinProduction(prod)) {
                 continue;
             }
-            prod = computePolyProd(prod);
             if (prod.isSubsort() && !prod.sort().equals(Sorts.K())) {
                 genSubsortAxiom(prod);
                 continue;
@@ -253,7 +252,6 @@ public class ModuleToKORE {
             if (isBuiltinProduction(prod)) {
                 continue;
             }
-            prod = computePolyProd(prod);
             if (prod.klabel().isEmpty()) {
                 continue;
             }
@@ -466,7 +464,6 @@ public class ModuleToKORE {
         }
         for (Production prod2 : iterable(module.productionsForSort().apply(prod.sort()).toSeq().sorted(Production.ord()))) {
             // !(cx(x1,x2,...) /\ cy(y1,y2,...))
-            prod2 = computePolyProd(prod2);
             if (prod2.klabel().isEmpty() || noConfusion.contains(Tuple2.apply(prod, prod2)) || prod.equals(prod2)
                     || !isConstructor(prod2, functionRulesMap, impurities) || isBuiltinProduction(prod2)) {
                 // TODO (traiansf): add no confusion axioms for constructor vs inj.
@@ -493,7 +490,6 @@ public class ModuleToKORE {
         boolean hasToken = false;
         int numTerms = 0;
         for (Production prod : iterable(mutable(module.productionsForSort()).getOrDefault(sort, Set()).toSeq().sorted(Production.ord()))) {
-            prod = computePolyProd(prod);
             if (isFunction(prod) || prod.isSubsort() || isBuiltinProduction(prod)) {
                 continue;
             }
@@ -1026,56 +1022,6 @@ public class ModuleToKORE {
         }
     }
 
-    private Production computePolyProd(Production prod) {
-        return computePolyProd(prod, null);
-    }
-
-    private Production computePolyProd(Production prod, KApply k) {
-        if (prod.klabel().isEmpty() || !prod.att().contains("poly"))
-            return prod.withAtt(prod.att().add(Constants.ORIGINAL_PRD, Production.class, prod));
-        List<Set<Integer>> poly = RuleGrammarGenerator.computePositions(prod);
-        String labelName = prod.klabel().get().name();
-        if (prod.att().contains(Attribute.ML_BINDER_KEY)) {
-            mlBinders.add(labelName);
-        }
-        polyKLabels.put(labelName, poly);
-        List<Sort> params = new ArrayList<>();
-        List<NonTerminal> children = new ArrayList<>(mutable(prod.nonterminals()));
-        Sort returnSort = prod.sort();
-        for (int i = 0; i < poly.size(); i++) {
-            Set<Integer> positions = poly.get(i);
-            Sort sort = Sort("S" + i);
-            if (k != null) {
-                int firstPos = positions.iterator().next();
-                if (firstPos == 0) {
-                    sort = k.att().get(Sort.class);
-                } else {
-                    sort = k.klist().items().get(firstPos - 1).att().get(Sort.class);
-                }
-            }
-            params.add(sort);
-            for (int j : positions) {
-                if (j == 0) {
-                    returnSort = sort;
-                } else {
-                    children.set(j - 1, NonTerminal(sort));
-                }
-            }
-        }
-        List<ProductionItem> items = new ArrayList<>();
-        int i = 0;
-        for (ProductionItem item : iterable(prod.items())) {
-            if (item instanceof NonTerminal) {
-                items.add(children.get(i));
-                i++;
-            } else {
-                items.add(item);
-            }
-        }
-        return Production(KLabel(labelName, immutable(params)), returnSort, immutable(items),
-                prod.att().add(Constants.ORIGINAL_PRD, Production.class, prod));
-    }
-
     private KLabel computePolyKLabel(KApply k) {
         String labelName = k.klabel().name();
         List<Set<Integer>> poly = new ArrayList<>(polyKLabels.get(labelName));
@@ -1112,7 +1058,7 @@ public class ModuleToKORE {
         }
     }
 
-    private static final Production INJ_PROD = Production(KLabel(KLabels.INJ), Sort("K"), Seq(NonTerminal(Sort("K"))), Att().add("poly", "1; 0"));
+    private static final Production INJ_PROD = Production(KLabel(KLabels.INJ, Sort("S1"), Sort("S2")), Sort("S2"), Seq(NonTerminal(Sort("S1"))), Att());
 
 
     private Production production(KApply term) {
@@ -1122,11 +1068,11 @@ public class ModuleToKORE {
     private Production production(KApply term, boolean instantiatePolySorts) {
         KLabel klabel = term.klabel();
         if (klabel.name().equals(KLabels.INJ))
-            return computePolyProd(INJ_PROD, instantiatePolySorts ? term : null);
+            return instantiatePolySorts ? INJ_PROD.substitute(term.klabel().params()) : INJ_PROD;
         Option<scala.collection.Set<Production>> prods = module.productionsFor().get(klabel);
         assert(prods.nonEmpty());
         assert(prods.get().size() == 1);
-        return computePolyProd(prods.get().head(), instantiatePolySorts ? term : null);
+        return instantiatePolySorts ? prods.get().head().substitute(term.klabel().params()) : prods.get().head();
     }
 
     private String convertBuiltinLabel(String klabel) {
