@@ -180,6 +180,32 @@ rule <k> REST && true  => REST  ... </k>
 rule <k> _    && false => false ... </k>
 ```
 
+### `function` and `functional` attributes
+
+Many times it becomes easier to write a semantics if you have "helper" functions
+written which can be used in the RHS of rules. The `function` attribute tells K
+that a given symbol should be simplified immediately when it appears anywhere in
+the configuration. Semantically, it means that evaluation of that symbol will
+result in at most one return value (that is, the symbol is a *partial function*).
+
+The `functional` attribute indicates to the symbolic reasoning engine that a
+given symbol is a *total function*, that is it has *exactly* one return value
+for every possible input.
+
+For example, here we define the `_+Word_` total function and the `_/Word_`
+partial function, which can be used to do addition/division modulo  `2 ^Int 256`.
+These functions can be used anywhere in the semantics where integers should not
+grow larger than `2 ^Int 256`. Notice how `_/Word_` is *not* defined when the
+denominator is `0`.
+
+```k
+syntax Int ::= Int "+Word" Int [function, functional]
+             | Int "/Word" Int [function]
+
+rule I1 +Word I2 => (I1 +Int I2) modInt (2 ^Int 256)
+rule I1 /Word I2 => (I1 /Int I2) modInt (2 ^Int 256) requires I2 =/=Int 0
+```
+
 Configuration Declaration
 -------------------------
 
