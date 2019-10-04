@@ -37,6 +37,7 @@ import scala.util.Right;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.kframework.Collections.*;
 import static org.kframework.kore.KORE.*;
@@ -444,8 +445,11 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                         j++;
                     } else {
                         Term t = tc.get(j);
-                        Set<VarInfo> vars = new CollectVariables2(((NonTerminal) tc.production().items().apply(i)).sort(), VarType.CONTEXT).apply(t)._2();
-                        collector.addAll(vars);
+                        Sort s = ((NonTerminal) tc.production().items().apply(i)).sort();
+                        if (!tc.production().params().contains(s)) {
+                            Set<VarInfo> vars = new CollectVariables2(((NonTerminal) tc.production().items().apply(i)).sort(), VarType.CONTEXT).apply(t)._2();
+                            collector.addAll(vars);
+                        }
                         j++;
                     }
                 }
@@ -502,10 +506,12 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                     } else {
                         Term t = tc.get(j);
                         Sort s = ((NonTerminal) tc.production().items().apply(i)).sort();
-                        Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheck2(s, false, false, inferSortChecks).apply(t);
-                        if (rez.isLeft())
-                            return rez;
-                        tc = tc.with(j, rez.right().get());
+                        if (!tc.production().params().contains(s)) {
+                            Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheck2(s, false, false, inferSortChecks).apply(t);
+                            if (rez.isLeft())
+                                return rez;
+                            tc = tc.with(j, rez.right().get());
+                        }
                         j++;
                     }
                 }
@@ -571,22 +577,21 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
     }
 
     static boolean hasPolySort(TermCons tc) {
-        if (!tc.production().att().contains("poly"))
+        if (tc.production().params().isEmpty())
             return false;
-        List<Set<Integer>> positions = RuleGrammarGenerator.computePositions(tc.production());
-        return positions.stream().anyMatch(s -> s.contains(0));
+        return tc.production().params().contains(tc.production().sort());
     }
 
     static Tuple2<Either<Set<ParseFailedException>, Term>, Set<VarInfo>> visitPolyChildrenSets(TermCons tc, Function<Term, Tuple2<Either<Set<ParseFailedException>, Term>, Set<VarInfo>>> apply) {
         Set<ParseFailedException> errors = new HashSet<>();
         Set<VarInfo> info = new HashSet<>();
         for (int i : getPolyChildren(tc)) {
-            Tuple2<Either<Set<ParseFailedException>, Term>, Set<VarInfo>> res = apply.apply(tc.get(i - 1));
+            Tuple2<Either<Set<ParseFailedException>, Term>, Set<VarInfo>> res = apply.apply(tc.get(i));
             info.addAll(res._2());
             if (res._1().isLeft())
                 errors.addAll(res._1().left().get());
             else
-                tc = tc.with(i - 1, res._1.right().get());
+                tc = tc.with(i, res._1.right().get());
         }
         if (errors.isEmpty())
             return Tuple2.apply(Right.apply(tc), info);
@@ -596,7 +601,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
 
     static Term visitPolyChildrenSafe(TermCons tc, Function<Term, Term> apply) {
         for (int i : getPolyChildren(tc)) {
-            apply.apply(tc.get(i - 1));
+            apply.apply(tc.get(i));
 
         }
         return tc;
@@ -605,11 +610,11 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
     static Either<Set<ParseFailedException>,Term> visitPolyChildren(TermCons tc, Function<Term, Either<Set<ParseFailedException>, Term>> apply) {
         Set<ParseFailedException> errors = new HashSet<>();
         for (int i : getPolyChildren(tc)) {
-            Either<Set<ParseFailedException>, Term> res = apply.apply(tc.get(i - 1));
+            Either<Set<ParseFailedException>, Term> res = apply.apply(tc.get(i));
             if (res.isLeft()) {
                 errors.addAll(res.left().get());
             } else {
-              tc = tc.with(i - 1, res.right().get());
+              tc = tc.with(i, res.right().get());
             }
         }
         if (errors.isEmpty())
@@ -619,8 +624,9 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
     }
 
     private static List<Integer> getPolyChildren(TermCons tc) {
-        return RuleGrammarGenerator.computePositions(tc.production()).stream().filter(s -> s.contains(0)).findAny()
-                .orElse(Collections.emptySet()).stream().filter(j -> j != 0).collect(Collectors.toList());
+        return stream(tc.production().params()).filter(param -> param.equals(tc.production().sort())).findAny()
+                .map(param -> IntStream.range(0, tc.production().nonterminals().size()).mapToObj(i -> Tuple2.apply(tc.production().nonterminals().apply(i), i)).filter(nt -> nt._1().sort().equals(param)).map(nt -> nt._2)
+                    .collect(Collectors.toList())).orElse(Collections.emptyList());
     }
 
     public class CollectExpectedVariablesVisitor extends SafeTransformer {
@@ -670,7 +676,10 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                         j++;
                     } else {
                         Term t = tc.get(j);
-                        new CollectUndeclaredVariables2(((NonTerminal) tc.production().items().apply(i)).sort()).apply(t);
+                        Sort s = ((NonTerminal) tc.production().items().apply(i)).sort();
+                        if (!tc.production().params().contains(s)) {
+                            new CollectUndeclaredVariables2(s).apply(t);
+                        }
                         j++;
                     }
                 }

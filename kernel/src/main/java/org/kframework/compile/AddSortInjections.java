@@ -35,6 +35,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+import scala.Tuple2;
 
 import static org.kframework.Collections.*;
 import static org.kframework.kore.KORE.*;
@@ -175,21 +178,25 @@ public class AddSortInjections {
             Production prod = production(kapp);
             List<K> children = new ArrayList<>();
             Map<Integer,Sort> expectedSorts = new HashMap<>();
-            if (prod.att().contains("poly")) {
-                List<Set<Integer>> poly = RuleGrammarGenerator.computePositions(prod);
-                for (Set<Integer> positions : poly) {
+            if (prod.params().nonEmpty()) {
+                for (Sort param : iterable(prod.params())) {
                     Sort expectedSort;
-                    if (positions.contains(0)) {
+                    Set<Integer> positions = IntStream.range(0, prod.nonterminals().size())
+                                .mapToObj(i -> Tuple2.apply(prod.nonterminals().apply(i), i))
+                                .filter(t -> t._1().sort().equals(param))
+                                .map(t -> t._2())
+                                .collect(Collectors.toSet());
+                    if (prod.sort().equals(param)) {
                         expectedSort = actualSort;
                     } else {
                         final Sort freshSortParam = freshSortParam();
                         List<Sort> polySorts = positions.stream()
-                                .map(p -> sort(kapp.items().get(p - 1), freshSortParam))
+                                .map(p -> sort(kapp.items().get(p), freshSortParam))
                                 .collect(Collectors.toList());
                         expectedSort = lub(polySorts, null, kapp, mod);
                     }
                     for (Integer p : positions) {
-                        expectedSorts.put(p - 1, expectedSort);
+                        expectedSorts.put(p, expectedSort);
                     }
                 }
             }
@@ -251,15 +258,17 @@ public class AddSortInjections {
                 return Sorts.Bool();
             }
             Production prod = production(kapp);
-            if (prod.att().contains("poly")) {
-                List<Set<Integer>> poly = RuleGrammarGenerator.computePositions(prod);
-                for (Set<Integer> positions : poly) {
-                    if (positions.contains(0)) {
-                        Set<Integer> otherPositions = new HashSet<>(positions);
-                        otherPositions.remove(0);
+            if (prod.params().nonEmpty()) {
+                for (Sort param : iterable(prod.params())) {
+                    if (prod.sort().equals(param)) {
+                        Set<Integer> positions = IntStream.range(0, prod.nonterminals().size())
+                                    .mapToObj(i -> Tuple2.apply(prod.nonterminals().apply(i), i))
+                                    .filter(t -> t._1().sort().equals(param))
+                                    .map(t -> t._2())
+                                    .collect(Collectors.toSet());
                         Set<Sort> children = new HashSet<>();
-                        for (int position : otherPositions) {
-                            children.add(sort(kapp.items().get(position-1), expectedSort));
+                        for (int position : positions) {
+                            children.add(sort(kapp.items().get(position), expectedSort));
                         }
                         children.remove(null);
                         if (children.size() == 0) {

@@ -29,8 +29,10 @@ import scala.Option;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -233,39 +235,44 @@ public class RuleGrammarGenerator {
 
         for (Production p : iterable(mod.productions())) {
             prods.addAll(new GenerateSortProjections(mod).gen(p).collect(Collectors.toSet()));
-            if (p.att().contains("poly")) {
-                List<Set<Integer>> positions = computePositions(p);
-                if (!p.isSyntacticSubsort()) {
-                    // we don't actually need to do anything except in this case because the type checker will never
-                    // actually reject a parse because the sorts in the arguments don't match; it will simply infer
-                    // sort K for those arguments.
-                    positions = positions.stream().filter(s -> s.contains(0)).collect(Collectors.toList());
+            if (p.params().nonEmpty()) {
+                Sort param = null;
+                if (p.isSyntacticSubsort() && p.params().size() == 1) {
+                    param = p.params().apply(0);
+                } else {
+                    // we don't actually need to emit a parameter except in the case of the return sort
+                    // because the type checker will never actually reject a parse because the sorts in
+                    // the arguments don't match; it will simply infer sort K for those arguments.
+                    param = p.params().contains(p.sort()) ? p.sort() : null;
                 }
-                List<List<Sort>> sortTuples = makeAllSortTuples(positions.size(), mod);
+                List<List<Sort>> sortTuples = makeAllSortTuples(param == null ? 0 : 1, mod);
                 for (List<Sort> tuple : sortTuples) {
+                    assert(tuple.size() < 2);
                     Sort returnSort = p.sort();
+                    if (returnSort.equals(param)) {
+                        returnSort = tuple.get(0);
+                    }
                     List<ProductionItem> pis = new ArrayList<>();
                     pis.addAll(mutable(p.items()));
-                    for (int i = 0; i < positions.size(); i++) {
-                        Set<Integer> parameter = positions.get(i);
-                        Sort srt = tuple.get(i);
-                        if (parameter.contains(0)) {
-                            returnSort = srt;
-                        }
-                        int idx = 1;
-                        for (int j = 0; j < pis.size(); j++) {
-                            ProductionItem pi = pis.get(j);
-                            if (pi instanceof NonTerminal) {
-                                if (parameter.contains(idx)) {
-                                    pis.set(j, NonTerminal(srt, ((NonTerminal) pi).name()));
-                                }
-                                idx++;
+                    Map<Sort, Sort> subst;
+                    if (param == null) {
+                        subst = Collections.emptyMap();
+                    } else {
+                        subst = Collections.singletonMap(param, tuple.get(0));
+                    }
+                    for (int i = 0; i < pis.size(); i++) {
+                        ProductionItem pi = pis.get(i);
+                        if (pi instanceof NonTerminal) {
+                            Sort s = ((NonTerminal)pi).sort();
+                            if (p.params().contains(s)) {
+                              pis.set(i, NonTerminal(subst.getOrDefault(s, Sorts.K()), ((NonTerminal)pi).name()));
                             }
                         }
                     }
-                    if (!(pis.size() == 1 && pis.get(0) instanceof NonTerminal && ((NonTerminal)pis.get(0)).sort().equals(returnSort))) {
-                        prods.add(Production(p.klabel(), returnSort, immutable(pis), p.att().add(Constants.ORIGINAL_PRD, Production.class, p)));
+                    if (p.isSyntacticSubsort() && mod.subsorts().lessThanEq(returnSort, ((NonTerminal)pis.get(0)).sort())) {
+                        continue;
                     }
+                    prods.add(Production(p.klabel().map(lbl -> KLabel(lbl.name())), Seq(), returnSort, immutable(pis), p.att().add(Constants.ORIGINAL_PRD, Production.class, p)));
                 }
             }
         }
@@ -418,17 +425,9 @@ public class RuleGrammarGenerator {
         return new ParseInModule(mod, extensionM, disambM, parseM, strict, timing, files);
     }
 
-    public static List<Set<Integer>> computePositions(Production p) {
-        return StringUtil.computePoly(p.att().get("poly"));
-    }
-
-    public static List<Set<Integer>> computePositions(String p) {
-        return StringUtil.computePoly(p);
-    }
-
     private static List<List<Sort>> makeAllSortTuples(int size, Module mod) {
         List<List<Sort>> res = new ArrayList<>();
-        List<Sort> allSorts = stream(mod.definedSorts()).filter(s -> !isParserSort(s) || s.equals(Sorts.KItem())).collect(Collectors.toList());
+        List<Sort> allSorts = stream(mod.definedSorts()).filter(s -> !isParserSort(s) || s.equals(Sorts.KItem()) || s.equals(Sorts.K())).collect(Collectors.toList());
         makeAllSortTuples(size, size, allSorts, res, new int[size]);
         return res;
     }
