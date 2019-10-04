@@ -178,6 +178,7 @@ public class AddSortInjections {
             Production prod = production(kapp);
             List<K> children = new ArrayList<>();
             Map<Integer,Sort> expectedSorts = new HashMap<>();
+            List<Sort> args = new ArrayList<>();
             if (prod.params().nonEmpty()) {
                 for (Sort param : iterable(prod.params())) {
                     Sort expectedSort;
@@ -195,6 +196,7 @@ public class AddSortInjections {
                                 .collect(Collectors.toList());
                         expectedSort = lub(polySorts, null, kapp, mod);
                     }
+                    args.add(expectedSort);
                     for (Integer p : positions) {
                         expectedSorts.put(p, expectedSort);
                     }
@@ -205,7 +207,7 @@ public class AddSortInjections {
                 K child = kapp.items().get(i);
                 children.add(internalAddSortInjections(child, expectedSort));
             }
-            return KApply(kapp.klabel(), KList(children), att);
+            return KApply(KLabel(kapp.klabel().name(), immutable(args)), KList(children), att);
         } else if (term instanceof KRewrite) {
             KRewrite rew = (KRewrite) term;
             return KRewrite(internalAddSortInjections(rew.left(), actualSort), internalAddSortInjections(rew.right(), actualSort), att);
