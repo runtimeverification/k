@@ -94,6 +94,10 @@ public class Kompile {
                 lookupDirectories, kompileOptions.strict(), kompileOptions.profileRules, kem, files,
                 parser, cacheParses, cacheFile, !kompileOptions.outerParsing.noPrelude, kompileOptions.isKore());
         this.sw = sw;
+
+        if (kompileOptions.backend.equals("ocaml")) {
+            kem.registerCriticalWarning("The OCaml backend is in the process of being deprecated (final date January 15, 2020). Please switch to the LLVM backend.");
+        }
     }
 
     public CompiledDefinition run(File definitionFile, String mainModuleName, String mainProgramsModuleName) {
