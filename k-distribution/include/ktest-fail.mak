@@ -9,7 +9,7 @@ DEFDIR?=.
 # all tests in test directory with matching file extension
 TESTS?=$(wildcard $(DEFDIR)/*.k)
 # default KOMPILE_BACKEND
-KOMPILE_BACKEND?=ocaml
+KOMPILE_BACKEND?=llvm
 
 CHECK=| diff -
 
