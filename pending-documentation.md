@@ -320,6 +320,24 @@ attribute, it would instead expand (as the user likely intended) to
 The `alias-rec` attribute behaves with respect to the `alias` attribute the
 same way the `macro-rec` attribute behaves with respect to `macro`.
 
+### `anywhere` rules
+
+Some rules are not functional, but you want them to apply anywhere in the
+configuration (similar to functional rules). You can use the `anywhere`
+attribute on a rule to instruct the backends to make sure they apply anywhere
+they match in the entire configuration.
+
+For example, if you want to make sure that some associative operator is always
+right-associated anywhere in the configuration, you can do:
+
+```k
+syntax Stmt ::= Stmt ";" Stmt
+
+rule (S1 ; S2) ; S3 => S1 ; (S2 ; S3) [anywhere]
+```
+
+Then after every step, all occurances of `_;_` will be re-associated.
+
 ### `smt-lemma`, `lemma`, and `trusted` attributes
 
 These attributes guide the prover when it tries to apply rules to discharge a
