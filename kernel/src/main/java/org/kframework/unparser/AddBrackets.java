@@ -80,7 +80,7 @@ public class AddBrackets {
                     }
                 }
             }
-            return TermCons.apply(ConsPStack.singleton(inner), Production(Sorts.KBott(), Seq(NonTerminal(Sorts.K()))));
+            return TermCons.apply(ConsPStack.singleton(inner), Production(Seq(), Sorts.KBott(), Seq(NonTerminal(Sorts.K()))));
         }
         return inner;
     }

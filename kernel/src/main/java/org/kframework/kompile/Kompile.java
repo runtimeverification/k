@@ -224,7 +224,7 @@ public class Kompile {
         for (Sort srt : iterable(module.definedSorts())) {
             if (!RuleGrammarGenerator.isParserSort(srt)) {
                 // KItem ::= Sort
-                Production prod = Production(Sorts.KItem(), Seq(NonTerminal(srt)), Att());
+                Production prod = Production(Seq(), Sorts.KItem(), Seq(NonTerminal(srt)), Att());
                 if (!module.sentences().contains(prod)) {
                     prods.add(prod);
                 }
