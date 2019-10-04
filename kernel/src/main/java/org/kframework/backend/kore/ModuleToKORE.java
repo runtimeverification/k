@@ -171,7 +171,7 @@ public class ModuleToKORE {
             }
         }
 
-        for (Sort sort : iterable(module.definedSorts())) {
+        for (Sort sort : iterable(module.sortedSorts())) {
             genNoJunkAxiom(sort);
         }
 
@@ -212,7 +212,7 @@ public class ModuleToKORE {
     }
 
     private void translateSorts(Set<Sort> tokenSorts, Map<String, Boolean> attributes, Set<String> collectionSorts) {
-        for (Sort sort : iterable(module.definedSorts())) {
+        for (Sort sort : iterable(module.sortedSorts())) {
             if (sort.equals(Sorts.K()) || sort.equals(Sorts.KItem())) {
                 continue;
             }
@@ -530,7 +530,7 @@ public class ModuleToKORE {
             }
             sb.append(", ");
         }
-        for (Sort s : iterable(module.definedSorts())) {
+        for (Sort s : iterable(module.sortedSorts())) {
             if (module.subsorts().lessThan(s, sort) && !sort.equals(Sorts.K())) {
                 numTerms++;
                 sb.append("\\or{");
@@ -976,7 +976,7 @@ public class ModuleToKORE {
         if (isMacro) {
             att = att.add("macro");
         }
-        return att;
+        return att.remove(Constants.ORIGINAL_PRD, Production.class).remove("productionID");
     }
 
     private boolean isFunction(Production prod) {
