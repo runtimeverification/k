@@ -247,7 +247,7 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
     Att(union.filter { key => attMap(key._1._1).size == 1 }.toMap)
   }
 
-  lazy val definedSorts: Set[Sort] = (productions map {_.sort}) ++ (sortDeclarations map {_.sort})
+  lazy val definedSorts: Set[Sort] = (productions filter {p => !p.params.contains(p.sort)} map {_.sort}) ++ (sortDeclarations map {_.sort})
   lazy val sortedSorts: Seq[Sort] = definedSorts.toSeq.sorted
   lazy val usedCellSorts: Set[Sort] = productions.flatMap { p => p.items.collect { case NonTerminal(s, _) => s }
     .filter(s => s.name.endsWith("Cell") || s.name.endsWith("CellFragment"))
