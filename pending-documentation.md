@@ -121,8 +121,8 @@ syntax AExp ::= Int
               | AExp "+" AExp [strict]
 ```
 
-This generates two heating rules (where the hole syntax `[]` is automatically
-added to create an evaluation context):
+This generates two heating rules (where the hole syntaxes `"[]" "+" AExp` and
+`AExp "+" "[]"` is automatically added to create an evaluation context):
 
 ```k
 rule <k> AE1:AExp + AE2:AExp => AE1 ~> [] + AE2 ... </k> requires notBool isKResult(AE1)
@@ -180,6 +180,18 @@ rule <k> REST && true  => REST  ... </k>
 rule <k> _    && false => false ... </k>
 ```
 
+This will generate rules like this in the case of `_||_` (note that `BE1` will
+not be heated unless `isKResult(BE2)` is true, meaning that `BE2` must be
+evaluated first):
+
+```k
+rule <k> BE1:BExp || BE2:KResult => BE1 ~> [] || BE2 ... </k> requires notBool isKResult(BE1)
+rule <k> BE1:BExp || BE2:BExp    => BE2 ~> BE1 || [] ... </k> requires notBool isKResult(BE2)
+
+rule <k> BE1:KResult ~> [] || BE2 => BE1 || BE2 ... </k>
+rule <k> BE2:KResult ~> BE1 || [] => BE1 || BE2 ... </k>
+```
+
 ### `function` and `functional` attributes
 
 Many times it becomes easier to write a semantics if you have "helper" functions
@@ -210,8 +222,8 @@ rule I1 /Word I2 => (I1 /Int I2) modInt (2 ^Int 256) requires I2 =/=Int 0
 
 In K, you can access "fresh" values in a given domain using the syntax
 `!VARNAME:VarSort` (with the `!`-prefixed variable name). This is supported for
-builtin sort `Int` already. For example, you can generate fresh memory locations
-for declared identifiers as such:
+builtin sorts `Int` and `Id` already. For example, you can generate fresh memory
+locations for declared identifiers as such:
 
 ```k
 rule <k> new var x ; => . ... </k>
@@ -400,7 +412,9 @@ syntax Stmt ::= Stmt ";" Stmt
 rule (S1 ; S2) ; S3 => S1 ; (S2 ; S3) [anywhere]
 ```
 
-Then after every step, all occurances of `_;_` will be re-associated.
+Then after every step, all occurances of `_;_` will be re-associated. Note that
+this allows the symbol `_;_` to still be a constructor, even though it is
+simplified similarly to a `function`.
 
 ### `smt-lemma`, `lemma`, and `trusted` attributes
 
