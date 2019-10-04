@@ -92,18 +92,6 @@ public class KompileOptions implements Serializable {
         return backend.equals("kore") || backend.equals("haskell") || backend.equals("llvm");
     }
 
-    public static class OutputModeConverter extends BaseEnumConverter<OutputModes> {
-
-        public OutputModeConverter(String optionName) {
-            super(optionName);
-        }
-
-        @Override
-        public Class<OutputModes> enumClass() {
-            return OutputModes.class;
-        }
-    }
-
     public static final class Experimental implements Serializable {
 
         // Experimental options
