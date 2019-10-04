@@ -82,7 +82,7 @@ public class ConvertDataStructureToLookup {
     public static Map<KLabel, KLabel> collectionFor(Module m) {
         return stream(m.productions()).filter(p -> p.att().contains(Attribute.ASSOCIATIVE_KEY)).flatMap(p -> {
             Set<Tuple2<KLabel, KLabel>> set = new HashSet<>();
-            set.add(Tuple2.apply(p.klabel().get(), p.klabel().get()));
+            set.add(Tuple2.apply(p.klabel().get().head(), p.klabel().get()));
             if (p.att().contains(Attribute.UNIT_KEY)) {
                 set.add(Tuple2.apply(KLabel(p.att().<String>get(Attribute.UNIT_KEY)), p.klabel().get()));
             }

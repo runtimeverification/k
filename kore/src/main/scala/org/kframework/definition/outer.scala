@@ -116,7 +116,7 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
   lazy val productionsFor: Map[KLabel, Set[Production]] =
     productions
       .collect({ case p if p.klabel != None => p })
-      .groupBy(_.klabel.get)
+      .groupBy(_.klabel.get.head)
       .map { case (l, ps) => (l, ps) }
 
   lazy val localProductionsFor: Map[KLabel, Set[Production]] =
@@ -143,7 +143,7 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
 
   @transient
   lazy val definedKLabels: Set[KLabel] =
-    (productionsFor.keys.toSet).filter(!_.isInstanceOf[KVariable])
+    (productionsFor.keys.toSet).filter(!_.isInstanceOf[KVariable]).map(_.head)
 
   @transient
   lazy val localKLabels: Set[KLabel] =

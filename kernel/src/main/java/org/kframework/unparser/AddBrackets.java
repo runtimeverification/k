@@ -92,7 +92,7 @@ public class AddBrackets {
         EnumSet<Fixity> innerFixity = getFixity(inner);
         if (inner.production().klabel().equals(outer.production().klabel()) &&
             inner.production().klabel().isDefined() &&
-            m.attributesFor().apply(inner.production().klabel().get()).contains(Attribute.ASSOCIATIVE_KEY))
+            m.attributesFor().apply(inner.production().klabel().get().head()).contains(Attribute.ASSOCIATIVE_KEY))
             return false;
         if (inner instanceof Constant)
             return false;

@@ -1068,7 +1068,7 @@ public class ModuleToKORE {
         KLabel klabel = term.klabel();
         if (klabel.name().equals(KLabels.INJ))
             return instantiatePolySorts ? INJ_PROD.substitute(term.klabel().params()) : INJ_PROD;
-        Option<scala.collection.Set<Production>> prods = module.productionsFor().get(klabel);
+        Option<scala.collection.Set<Production>> prods = module.productionsFor().get(klabel.head());
         assert(prods.nonEmpty());
         assert(prods.get().size() == 1);
         return instantiatePolySorts ? prods.get().head().substitute(term.klabel().params()) : prods.get().head();

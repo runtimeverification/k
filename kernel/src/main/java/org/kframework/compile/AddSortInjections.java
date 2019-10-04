@@ -317,7 +317,7 @@ public class AddSortInjections {
         if (term.klabel() instanceof KVariable) {
           throw KEMException.internalError("KORE does not yet support KLabel variables.", term);
         }
-        scala.collection.Set<Production> prods = mod.productionsFor().apply(((KApply) term).klabel());
+        scala.collection.Set<Production> prods = mod.productionsFor().apply(((KApply) term).klabel().head());
         if (prods.size() != 1) {
           throw KEMException.compilerError("Could not find production for KApply with label " + term.klabel(), term);
         }

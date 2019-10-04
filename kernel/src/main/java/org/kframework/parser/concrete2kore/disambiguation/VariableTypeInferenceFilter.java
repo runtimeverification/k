@@ -387,7 +387,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                 }
                 child = (ProductionReference)((TermCons)child).get(0);
             }
-            if (child.production().klabel().isDefined() && child.production().klabel().get().equals(KLabels.KREWRITE)) {
+            if (child.production().klabel().isDefined() && child.production().klabel().get().head().equals(KLabels.KREWRITE)) {
                 if (((TermCons)child).get(0) instanceof Ambiguity) {
                   return false;
                 }
@@ -409,7 +409,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
             if (child.production().klabel().isDefined() && child.production().klabel().get().name().equals("#withConfig")) {
                 child = (ProductionReference)((TermCons)child).get(0);
             }
-            if (child.production().klabel().isDefined() && child.production().klabel().get().equals(KLabels.KREWRITE)) {
+            if (child.production().klabel().isDefined() && child.production().klabel().get().head().equals(KLabels.KREWRITE)) {
                 child = (ProductionReference)((TermCons)child).get(0);
             }
             return child.production().sort();
