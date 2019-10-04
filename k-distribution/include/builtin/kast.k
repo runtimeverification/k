@@ -249,6 +249,19 @@ module K
   syntax K ::= "#fun" "(" K ")" "(" K ")" [klabel(#fun2), symbol, poly(0, 1, 2), prefer]
   // functions that do not preserve sort and therefore cannot have inner rewrites
   syntax K ::= "#fun" "(" K "=>" K ")" "(" K ")" [klabel(#fun3), symbol, poly(0, 2; 1, 3)]
+
+  /*@ Set membership over terms. In addition to equality over
+      concrete patterns, K also supports computing equality
+      between a concrete pattern and a symbolic pattern.
+      This is compiled efficiently down to pattern matching,
+      and can be used by putting a term with unbound variables
+      in the left child of :=K or =/=K. Note that this does not
+      bind variables used on the lhs however (although this may
+      change in the future).*/
+
+  syntax Bool ::= left:
+                  K ":=K" K           [function, functional, klabel(_:=K_), symbol, equalEqualK]
+                | K ":/=K" K          [function, functional, klabel(_:/=K_), symbol, notEqualEqualK]
 endmodule
 
 // To be used to parse terms in full K

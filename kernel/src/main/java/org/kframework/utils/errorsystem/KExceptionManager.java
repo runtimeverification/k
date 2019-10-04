@@ -46,8 +46,8 @@ public class KExceptionManager {
         }
     }
 
-    public void addKException(KException kex) {
-        exceptions.add(kex);
+    public void addKException(KException e) {
+        registerInternal(e, false);
     }
 
     public void addAllKException(Collection<KException> kex) {
@@ -109,6 +109,8 @@ public class KExceptionManager {
             return;
         if (_throw && (exception.type == ExceptionType.ERROR || options.warnings2errors)) {
             throw new KEMException(exception, ExceptionType.ERROR);
+        } else if (options.warnings2errors) {
+          exceptions.add(new KException(ExceptionType.ERROR, exception.exceptionGroup, exception.getMessage(), exception.getSource(), exception.getLocation(), exception.getException()));
         } else {
           exceptions.add(exception);
         }

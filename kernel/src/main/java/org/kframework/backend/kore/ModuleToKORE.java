@@ -144,7 +144,7 @@ public class ModuleToKORE {
                 continue;
             }
             prod = computePolyProd(prod);
-            if (prod.isSubsort()) {
+            if (prod.isSubsort() && !prod.sort().equals(Sorts.K())) {
                 genSubsortAxiom(prod);
                 continue;
             }
@@ -531,7 +531,7 @@ public class ModuleToKORE {
             sb.append(", ");
         }
         for (Sort s : iterable(module.definedSorts())) {
-            if (module.subsorts().lessThan(s, sort)) {
+            if (module.subsorts().lessThan(s, sort) && !sort.equals(Sorts.K())) {
                 numTerms++;
                 sb.append("\\or{");
                 convert(sort, false);

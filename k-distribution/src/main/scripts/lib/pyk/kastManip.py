@@ -21,6 +21,10 @@ def match(pattern, kast):
             if subst is None:
                 return None
         return subst
+    if isKRewrite(pattern) and isKRewrite(kast):
+        lhsSubst = match(pattern['lhs'], kast['lhs'])
+        rhsSubst = match(pattern['rhs'], kast['rhs'])
+        return combineDicts(lhsSubst, rhsSubst)
     return None
 
 def collectBottomUp(kast, callback):
@@ -171,6 +175,13 @@ def pushDownRewrites(kast):
             and len(lhs["args"]) == len(rhs["args"]):
                     newArgs = [ KRewrite(lArg, rArg) for (lArg, rArg) in zip(lhs["args"], rhs["args"]) ]
                     return KApply(lhs["label"], newArgs)
+            if isKSequence(lhs) and isKSequence(rhs) and len(lhs['items']) > 0 and len(rhs['items']) > 0:
+                if lhs['items'][0] == rhs['items'][0]:
+                    lowerRewrite = KRewrite(KSequence(lhs['items'][1:]), KSequence(rhs['items'][1:]))
+                    return KSequence([lhs['items'][0], lowerRewrite])
+                if lhs['items'][-1] == rhs['items'][-1]:
+                    lowerRewrite = KRewrite(KSequence(lhs['items'][0:-1]), KSequence(rhs['items'][0:-1]))
+                    return KSequence([lowerRewrite, lhs['items'][-1]])
         return _kast
     return traverseTopDown(kast, _pushDownRewrites)
 
@@ -182,6 +193,18 @@ def inlineCellMaps(kast):
                 return _kast["args"][1]
         return _kast
     return traverseBottomUp(kast, _inlineCellMaps)
+
+def removeSemanticCasts(kast):
+    """Remove injected `#SemanticCast*` nodes in AST.
+
+    -   Input: kast (possibly) containing automatically injected `#SemanticCast*` KApply nodes.
+    -   Output: kast without the `#SemanticCast*` nodes.
+    """
+    def _removeSemanticCasts(_kast):
+        if isKApply(_kast) and len(_kast['args']) == 1 and _kast['label'].startswith('#SemanticCast'):
+            return _kast['args'][0]
+        return _kast
+    return traverseBottomUp(kast, _removeSemanticCasts)
 
 def uselessVarsToDots(kast, requires = None, ensures = None):
 
@@ -241,6 +264,7 @@ def minimizeRule(rule):
         ruleRequires = simplifyBool(mlPredToBool(ruleRequires))
 
     ruleBody = inlineCellMaps(ruleBody)
+    ruleBody = removeSemanticCasts(ruleBody)
     ruleBody = uselessVarsToDots(ruleBody, requires = ruleRequires, ensures = ruleEnsures)
     ruleBody = collapseDots(ruleBody)
 
