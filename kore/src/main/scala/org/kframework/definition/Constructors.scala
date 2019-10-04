@@ -32,8 +32,8 @@ object Constructors {
 
   def Production(params: Seq[Sort], sort: Sort, items: Seq[ProductionItem]) = definition.Production(params, sort, items, Att.empty)
   def Production(params: Seq[Sort], sort: Sort, items: Seq[ProductionItem], att: attributes.Att) = definition.Production(params, sort, items, att)
-  def Production(klabel: KLabel, params: Seq[Sort], sort: Sort, items: Seq[ProductionItem]) = definition.Production(klabel, params, sort, items)
-  def Production(klabel: KLabel, params: Seq[Sort], sort: Sort, items: Seq[ProductionItem], att: attributes.Att) = definition.Production(klabel, params, sort, items, att)
+  def Production(klabel: KLabel, sort: Sort, items: Seq[ProductionItem]) = definition.Production(klabel, klabel.params, sort, items)
+  def Production(klabel: KLabel, sort: Sort, items: Seq[ProductionItem], att: attributes.Att) = definition.Production(klabel, klabel.params, sort, items, att)
   def Production(klabel: Option[KLabel], params: Seq[Sort], sort: Sort, items: Seq[ProductionItem]) = definition.Production(klabel, params, sort, items, Att.empty)
   def Production(klabel: Option[KLabel], params: Seq[Sort], sort: Sort, items: Seq[ProductionItem], att: attributes.Att) = definition.Production(klabel, params, sort, items, att)
 
