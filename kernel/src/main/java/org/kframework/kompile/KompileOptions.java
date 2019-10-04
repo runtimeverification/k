@@ -8,6 +8,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.kframework.backend.Backends;
 import org.kframework.main.GlobalOptions;
 import org.kframework.unparser.OutputModes;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.OuterParsingOptions;
@@ -69,8 +70,8 @@ public class KompileOptions implements Serializable {
     private boolean nonStrict;
 
     public boolean strict() {
-        if (! backend.equals("ocaml")) {
-            return true;
+        if (nonStrict && ! backend.equals("ocaml")) {
+            throw KEMException.criticalError("Option `--non-strict` only makes sense for `--backend ocaml`.");
         }
         return !nonStrict;
     }
