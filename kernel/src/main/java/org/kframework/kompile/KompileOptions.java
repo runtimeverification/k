@@ -35,8 +35,8 @@ public class KompileOptions implements Serializable {
     public OuterParsingOptions outerParsing = new OuterParsingOptions();
 
     // Common options
-    @Parameter(names="--backend", description="Choose a backend. <backend> is one of [ocaml|java|llvm|kore|haskell]. Each creates the kompiled K definition.")
-    public String backend = Backends.OCAML;
+    @Parameter(names="--backend", description="Choose a backend. <backend> is one of [llvm|haskell|kore|java|ocaml]. Each creates the kompiled K definition.")
+    public String backend = Backends.LLVM;
 
     private boolean kore;
 
