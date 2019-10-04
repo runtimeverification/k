@@ -206,6 +206,44 @@ rule I1 +Word I2 => (I1 +Int I2) modInt (2 ^Int 256)
 rule I1 /Word I2 => (I1 /Int I2) modInt (2 ^Int 256) requires I2 =/=Int 0
 ```
 
+### `freshGenerator` attribute
+
+In K, you can access "fresh" values in a given domain using the syntax
+`!VARNAME:VarSort` (with the `!`-prefixed variable name). This is supported for
+builtin sort `Int` already. For example, you can generate fresh memory locations
+for declared identifiers as such:
+
+```k
+rule <k> new var x ; => . ... </k>
+     <env> ENV => ENV [ x <- !I:Int ] </env>
+     <mem> MEM => MEM [ !I <- 0     ] </mem>
+```
+
+Each time a `!`-prefixed variable is encountered, a new integer will be used, so
+each variable declared with `new var _ ;` will get a unique position in the `<mem>`.
+
+Sometimes you want to have generation of fresh constants in a user-defined sort.
+For this, K will still generate a fresh `Int`, but can use a converter function you
+supply to turn it into the correct sort. For example, here we can generate fresh
+`Foo`s using the `freshFoo(_)` function annotated with `freshGenerator`.
+
+```k
+syntax Foo ::= "a" | "b" | "c" | d ( Int )
+
+syntax Foo ::= freshFoo ( Int ) [freshGenerator, function, functional]
+
+rule freshFoo(0) => a
+rule freshFoo(1) => b
+rule freshFoo(2) => c
+rule freshFoo(I) => d(I) [owise]
+
+rule <k> new var x ; => . ... </k>
+     <env> ENV => ENV [ x <- !I:Int  ] </env>
+     <mem> MEM => MEM [ !I <- !F:Foo ] </mem>
+```
+
+Now each newly allocated memory slot will have a fresh `Foo` placed in it.
+
 Configuration Declaration
 -------------------------
 
