@@ -976,7 +976,7 @@ public class ModuleToKORE {
         if (isMacro) {
             att = att.add("macro");
         }
-        return att.remove(Constants.ORIGINAL_PRD, Production.class).remove("productionID");
+        return att.remove(Constants.ORIGINAL_PRD, Production.class);
     }
 
     private boolean isFunction(Production prod) {
