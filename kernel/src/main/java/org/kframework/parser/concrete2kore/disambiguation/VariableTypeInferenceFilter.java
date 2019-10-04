@@ -200,6 +200,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
 
             Set<Multimap<VarKey, Sort>> solutions = new HashSet<>();
             VarKey fails = null;
+            Collection<Sort> constraint = null;
             for (Multimap<VarKey, Sort> variant : vars2.vars) {
                 // take each solution and do GLB on every variable
                 Multimap<VarKey, Sort> solution = HashMultimap.create();
@@ -208,6 +209,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                     Set<Sort> mins = lowerBounds(values);
                     if (mins.size() == 0) {
                         fails = key;
+                        constraint = values;
                         solution.clear();
                         break;
                     } else {
@@ -220,8 +222,8 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
             }
             if (!vars2.vars.isEmpty()) {
                 if (solutions.size() == 0) {
-                    assert fails != null;
-                    String msg = "Could not infer a sort for variable " + fails + " to match every location.";
+                    assert fails != null && constraint != null;
+                    String msg = "Could not infer a sort for variable " + fails + " to match every location. Expected sorts: " + constraint;
                     KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.CRITICAL, msg, loc.source().orElse(null), loc.location().orElse(null));
                     return simpleError(Sets.newHashSet(new VariableTypeClashException(kex)));
                 }
