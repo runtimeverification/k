@@ -65,10 +65,15 @@ public class KompileOptions implements Serializable {
 
     public static final String DEFAULT_TRANSITION = "transition";
 
-    @Parameter(names="--non-strict", description="Do not add runtime sort checks for every variable's inferred sort.")
+    @Parameter(names="--non-strict", description="Do not add runtime sort checks for every variable's inferred sort. Only has an effect with `--backend ocaml`.")
     private boolean nonStrict;
 
-    public boolean strict() { return !nonStrict; }
+    public boolean strict() {
+        if (! backend.equals("ocaml")) {
+            return true;
+        }
+        return !nonStrict;
+    }
 
     @Parameter(names="--coverage", description="Generate coverage data when executing semantics.")
     public boolean coverage;
