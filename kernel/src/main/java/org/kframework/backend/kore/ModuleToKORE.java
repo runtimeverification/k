@@ -978,8 +978,7 @@ public class ModuleToKORE {
     }
 
     private boolean isFunction(Production prod) {
-        Production realProd = prod.att().get(Constants.ORIGINAL_PRD, Production.class);
-        if (!realProd.att().contains(Attribute.FUNCTION_KEY)) {
+        if (!prod.att().contains(Attribute.FUNCTION_KEY)) {
             return false;
         }
         return true;
@@ -1141,7 +1140,7 @@ public class ModuleToKORE {
     }
 
     private void convert(Sort sort, Production prod) {
-        convert(sort, prod.klabel().isDefined() && prod.klabel().get().params().contains(sort));
+        convert(sort, prod.klabel().isDefined() && prod.params().contains(sort));
     }
 
     private void convert(Sort sort, boolean var) {
