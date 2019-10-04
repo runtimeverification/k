@@ -4,7 +4,7 @@ K Manual
 **Under Construction**
 
 This document contains documentation that has been written up to some extent
-but still needs to be ultimately included in the K manual which has not been 
+but still needs to be ultimately included in the K manual which has not been
 written yet. New features of K that affect the surface language should be added
 to this document.
 
@@ -57,7 +57,7 @@ Some syntax productions, like the rewrite operator, the bracket operator, and
 the #if #then #else #fi operator, cannot have their precise type system
 expressed using only concrete sorts.
 
-Prior versions of K solved this issue by using the K sort in this case, but 
+Prior versions of K solved this issue by using the K sort in this case, but
 this introduces inexactness in which poorly typed terms can be created even
 without having a cast operator present in the syntax, which is a design
 consideration we would prefer to avoid.
@@ -106,6 +106,79 @@ actually reject any parse, because it can always infer that the sort of the
 argument and parameter are K, and it has no effect on the resulting sort of
 the term. However, it will nevertheless affect the kore generated from the term
 by introducing an additional parameter to the symbol generated for the term.
+
+### `strict` and `seqstrict` attributes
+
+The strictness attributes allow defining evaluation strategies without having to
+explicitely make rules which implement them. This is done by injecting *heating*
+and *cooling* rules for the subterms. For this to work, you need to define what
+a *result* is for K, by extending the  `KResult` sort.
+
+For example:
+
+```k
+syntax AExp ::= Int
+              | AExp "+" AExp [strict]
+```
+
+This generates two heating rules (where the hole syntax `[]` is automatically
+added to create an evaluation context):
+
+```k
+rule <k> AE1:AExp + AE2:AExp => AE1 ~> [] + AE2 ... </k> requires notBool isKResult(AE1)
+rule <k> AE1:AExp + AE2:AExp => AE2 ~> AE1 + [] ... </k> requires notBool isKResult(AE2)
+```
+
+And two corresponding cooling rules:
+
+```k
+rule <k> AE1:KResult ~> [] + AE2 => AE1 + AE2 ... </k>
+rule <k> AE2:KResult ~> AE1 + [] => AE1 + AE2 ... </k>
+```
+
+Note that these rules depend on the definition of `KResult`, so you need to
+define this for K. For instance, we tell K that a term is fully evaluated once it
+becomes an `Int` here:
+
+```k
+syntax KResult ::= Int
+```
+
+Note that you can also say that a given expression is only strict only in
+specific argument positions. Here we use this to define "short-circuiting"
+boolean operators.
+
+```k
+syntax KResult ::= Bool
+
+syntax BExp ::= Bool
+              | BExp "||" BExp [strict(1)]
+              | BExp "&&" BExp [strict(1)]
+
+rule <k> true  || _    => true ... </k>
+rule <k> false || REST => REST ... </k>
+
+rule <k> true  && REST => REST  ... </k>
+rule <k> false && _    => false ... </k>
+```
+
+If you want to force a specific evaluation order of the arguments, you can use
+the variant `seqstrict` to do so. For example, this would make the boolean
+operators short-circuit in their _second_ argument first:
+
+```k
+syntax KResult ::= Bool
+
+syntax BExp ::= Bool
+              | BExp "||" BExp [seqstrict(2,1)]
+              | BExp "&&" BExp [seqstrict(2,1)]
+
+rule <k> _    || true  => true ... </k>
+rule <k> REST || false => REST ... </k>
+
+rule <k> REST && true  => REST  ... </k>
+rule <k> _    && false => false ... </k>
+```
 
 Configuration Declaration
 -------------------------
@@ -341,8 +414,8 @@ A prefix production is considered by the implementation to be any production
 whose production items match the following regular expression:
 
 ```
-(Terminal(_)*) Terminal("(") 
-(NonTerminal (Terminal(",") NonTerminal)* )? 
+(Terminal(_)*) Terminal("(")
+(NonTerminal (Terminal(",") NonTerminal)* )?
 Terminal(")")
 ```
 
@@ -411,12 +484,12 @@ Desugared code:
 ```
 syntax Int ::= foo(Int, GeneratedTopCell) [function]
 
-rule foo(0, <generatedTop>... 
-              <bar> I </bar> 
+rule foo(0, <generatedTop>...
+              <bar> I </bar>
             ...</generatedTop> #as Configuration) => I
 rule <generatedTop>...
-       <k> something ...</k> 
-     ...</generatedTop> #as Configuration 
+       <k> something ...</k>
+     ...</generatedTop> #as Configuration
   => <generatedTop>...
        <k> foo(0, Configuration> ...</k>
      ...</generatedTop>
@@ -433,14 +506,14 @@ operations.
 The following forms are allowed:
 
 ```
-// 0 or more elements followed by 0 or 1 variables of sort List followed by 
+// 0 or more elements followed by 0 or 1 variables of sort List followed by
 // 0 or more elements
 ListItem(E1) ListItem(E2) L:List ListItem(E3) ListItem(E4)
 
 // the empty list
 .List
 
-// 0 or more elements in any order plus 0 or 1 variables of sort Set 
+// 0 or more elements in any order plus 0 or 1 variables of sort Set
 // in any order
 SetItem(K1) SetItem(K2) S::Set SetItem(K3) SetItem(K4)
 
@@ -470,11 +543,11 @@ though E3 is itself unbound.
 In the above examples, E1, E2, E3, and E4 can be any pattern that is normally
 allowed on the lhs of a rule.
 
-When a map or set key contains function symbols, we know that the variables in 
+When a map or set key contains function symbols, we know that the variables in
 that key are bound (because of the above restriction), so it is possible to
 evaluate the function to a concrete term prior to performing the lookup.
 
-Indeed, this is the precise semantics which occurs; the function is evaluated 
+Indeed, this is the precise semantics which occurs; the function is evaluated
 and the result is looked up in the collection.
 
 For example:
@@ -540,7 +613,7 @@ more details.
 
 #### SMT Translation
 
-K makes queries to an SMT solver (Z3) to discharge proof obligations when doing 
+K makes queries to an SMT solver (Z3) to discharge proof obligations when doing
 symbolic execution. You can control how these queries are made using the
 attributes `smtlib` and `smt-hook` on declared productions.
 
@@ -614,7 +687,7 @@ on the `step` function:
 
 ```
 (gdb) break definition.kore:step
-Breakpoint 1 at 0x25e340 
+Breakpoint 1 at 0x25e340
 (gdb) run
 Breakpoint 1, 0x000000000025e340 in step (subject=`<generatedTop>{}`(`<k>{}`(`kseq{}`(`inj{Int{}, KItem{}}`(#token("0", "Int")),dotk{}(.KList))),`<generatedCounter>{}`(#token("0", "Int"))))
 (gdb) continue
