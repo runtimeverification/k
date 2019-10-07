@@ -223,7 +223,8 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
   @transient lazy val signatureFor: Map[KLabel, Set[(Seq[Sort], Sort)]] =
     productionsFor mapValues {
       ps: Set[Production] =>
-        ps.map {
+        ps.filter { p: Production => p.params.isEmpty }
+        .map {
           p: Production =>
             val params: Seq[Sort] = p.items collect { case NonTerminal(sort, _) => sort }
             (params, p.sort)

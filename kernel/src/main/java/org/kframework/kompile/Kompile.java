@@ -21,6 +21,7 @@ import org.kframework.compile.checks.CheckStreams;
 import org.kframework.definition.*;
 import org.kframework.definition.Module;
 import org.kframework.kore.Sort;
+import org.kframework.kore.KLabel;
 import org.kframework.parser.concrete2kore.ParserUtils;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.unparser.ToJson;
@@ -217,6 +218,17 @@ public class Kompile {
                 .andThen(Kompile::addSemanticsModule)
                 .andThen(resolveConfigVar)
                 .apply(def);
+    }
+
+    public static Sentence removePolyKLabels(Sentence s) {
+      if (s instanceof Production) {
+        Production p = (Production)s;
+        if (!p.isSyntacticSubsort() && p.params().nonEmpty()) {
+            p = p.substitute(immutable(Collections.nCopies(p.params().size(), Sorts.K())));
+            return Production(p.klabel().map(KLabel::head), Seq(), p.sort(), p.items(), p.att());
+        }
+      }
+      return s;
     }
 
     public static Module subsortKItem(Module module) {
