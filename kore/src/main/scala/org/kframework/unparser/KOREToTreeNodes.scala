@@ -19,8 +19,10 @@ object KOREToTreeNodes {
   import org.kframework.kore.KORE._
 
   def wellTyped(args: Seq[Sort], p: Production, children: Iterable[Term], subsorts: POSet[Sort]): Boolean = {
-    val wrongPoly = p.klabel.get.params == args
-    return !wrongPoly && p.nonterminals.zip(children).forall(p => !p._2.isInstanceOf[ProductionReference] || subsorts.lessThanEq(p._2.asInstanceOf[ProductionReference].production.sort, p._1.sort))
+    val origP = p.att.getOptional("originalPrd", classOf[Production]).orElse(p)
+    val subst = origP.substitute(args)
+    val rightPoly = (args.isEmpty && origP.params.nonEmpty) || (p.sort == subst.sort && p.items == subst.items)
+    return rightPoly && p.nonterminals.zip(children).forall(p => !p._2.isInstanceOf[ProductionReference] || subsorts.lessThanEq(p._2.asInstanceOf[ProductionReference].production.sort, p._1.sort))
   }
 
   def apply(t: K, mod: Module): Term = t match {
