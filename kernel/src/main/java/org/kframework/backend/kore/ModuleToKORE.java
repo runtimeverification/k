@@ -69,7 +69,6 @@ public class ModuleToKORE {
     private final FileUtil files;
     private final StringBuilder sb = new StringBuilder();
     private final Set<String> impureFunctions = new HashSet<>();
-    private final Map<String, List<Set<Integer>>> polyKLabels = new HashMap<>();
     private final KLabel topCellInitializer;
     private final Set<String> mlBinders = new HashSet<>();
     private final KompileOptions options;
@@ -201,6 +200,9 @@ public class ModuleToKORE {
             Att att = prod.att();
             if (att.contains("token")) {
                 tokenSorts.add(prod.sort());
+            }
+            if (att.contains("mlBinder")) {
+                mlBinders.add(prod.klabel().get().name());
             }
             collectAttributes(attributes, att);
         }
@@ -1023,22 +1025,13 @@ public class ModuleToKORE {
 
     private KLabel computePolyKLabel(KApply k) {
         String labelName = k.klabel().name();
-        List<Set<Integer>> poly = new ArrayList<>(polyKLabels.get(labelName));
         if (mlBinders.contains(labelName)) { // ML binders are not parametric in the variable so we remove it
-            poly.remove(0);
+            List<Sort> params = mutable(k.klabel().params());
+            params.remove(0);
+            return KLabel(labelName, immutable(params));
+        } else {
+            return k.klabel();
         }
-        List<Sort> params = new ArrayList<>();
-        for (Set<Integer> positions : poly) {
-            int pos = positions.iterator().next();
-            Sort sort;
-            if (pos == 0) {
-                sort = k.att().get(Sort.class);
-            } else {
-                sort = k.items().get(pos-1).att().get(Sort.class);
-            }
-            params.add(sort);
-        }
-        return KLabel(labelName, immutable(params));
     }
 
 
@@ -1264,10 +1257,7 @@ public class ModuleToKORE {
                 if (impureFunctions.contains(k.klabel().name())) {
                     throw KEMException.internalError("Cannot yet translate impure function to kore: " + k.klabel().name(), k);
                 }
-                KLabel label = k.klabel();
-                if (polyKLabels.containsKey(k.klabel().name())) {
-                    label = computePolyKLabel(k);
-                }
+                KLabel label = computePolyKLabel(k);
                 String conn = "";
                 if (mlBinders.contains(k.klabel().name()) && k.items().get(0).att().contains("anonymous")){
                     // Handle #Forall _ / #Exists _
