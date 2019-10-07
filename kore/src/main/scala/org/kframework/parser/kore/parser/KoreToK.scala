@@ -21,7 +21,7 @@ class KoreToK (sortAtt : Map[String, String]) {
 
   val codes = Map(
     "Spce" -> " ",
-    "Bang" -> "|",
+    "Bang" -> "!",
     "Quot" -> "\"",
     "Hash" -> "#",
     "Dolr" -> "$",
