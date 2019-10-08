@@ -174,12 +174,15 @@ rule <k> new var x ; => . ... </k>
 
 Now each newly allocated memory slot will have a fresh `Foo` placed in it.
 
+Evaluation Strategy
+-------------------
+
 ### `strict` and `seqstrict` attributes
 
-The strictness attributes allow defining evaluation strategies without having to
-explicitely make rules which implement them. This is done by injecting *heating*
-and *cooling* rules for the subterms. For this to work, you need to define what
-a *result* is for K, by extending the  `KResult` sort.
+The strictness attributes allow defining evaluation strategies without having
+to explicitely make rules which implement them. This is done by injecting
+*heating* and *cooling* rules for the subterms. For this to work, you need to
+define what a *result* is for K, by extending the  `KResult` sort.
 
 For example:
 
@@ -192,20 +195,37 @@ This generates two heating rules (where the hole syntaxes `"[]" "+" AExp` and
 `AExp "+" "[]"` is automatically added to create an evaluation context):
 
 ```k
-rule <k> AE1:AExp + AE2:AExp => AE1 ~> [] + AE2 ... </k> requires notBool isKResult(AE1)
-rule <k> AE1:AExp + AE2:AExp => AE2 ~> AE1 + [] ... </k> requires notBool isKResult(AE2)
+rule <k> HOLE:AExp +  AE2:AExp => HOLE ~>  [] + AE2 ... </k> [heat]
+rule <k>  AE1:AExp + HOLE:AExp => HOLE ~> AE1 +  [] ... </k> [heat]
 ```
 
 And two corresponding cooling rules:
 
 ```k
-rule <k> AE1:KResult ~> [] + AE2 => AE1 + AE2 ... </k>
-rule <k> AE2:KResult ~> AE1 + [] => AE1 + AE2 ... </k>
+rule <k> HOLE:AExp ~>  [] + AE2 => HOLE +  AE2 ... </k> [cool]
+rule <k> HOLE:AExp ~> AE1 +  [] =>  AE1 + HOLE ... </k> [cool]
 ```
 
-Note that these rules depend on the definition of `KResult`, so you need to
-define this for K. For instance, we tell K that a term is fully evaluated once it
-becomes an `Int` here:
+You will note that these rules can apply one after another infinitely. In
+practice, the `KResult` sort is used to break this cycle by ensuring that only
+terms that are not part of the `KResult` sort will be heated. In the theory of
+K, these rules represent equalities between structurally distinct states rather
+than transitions in the transition system. The `heat` and `cool` attributes
+are used to tell the compiler that these are heating and cooling rules and
+should be handled in the manner just described. Nothing stops the user from
+writing such heating and cooling rules directly if they wish, although we
+describe other more convenient syntax for most of the advanced cases below.
+
+One other thing to note is that in the above sentences, `HOLE` is just a
+variable, but it has special meaning in the context of sentences with the
+`heat` or `cool` attribute. In heating or cooling rules, the variable named
+`HOLE` is considered to be the term being heated or cooled and the compiler
+will generate `isKResult(HOLE)` and `notBool isKResult(HOLE)` side conditions
+appropriately to ensure that the backend does not loop infinitely.
+
+In order for this functionality to work, you need to define the `KResult` sort.
+For instance, we tell K that a term is fully evaluated once it becomes an `Int`
+here:
 
 ```k
 syntax KResult ::= Int
@@ -252,11 +272,171 @@ not be heated unless `isKResult(BE2)` is true, meaning that `BE2` must be
 evaluated first):
 
 ```k
-rule <k> BE1:BExp || BE2:KResult => BE1 ~> [] || BE2 ... </k> requires notBool isKResult(BE1)
-rule <k> BE1:BExp || BE2:BExp    => BE2 ~> BE1 || [] ... </k> requires notBool isKResult(BE2)
+rule <k>  BE1:BExp || HOLE:BExp => HOLE ~> BE1 ||  [] ... </k> [heat]
+rule <k> HOLE:BExp ||  BE2:BExp => HOLE ~>  [] || BE2 ... </k> requires isKResult(BE2) [heat]
 
-rule <k> BE1:KResult ~> [] || BE2 => BE1 || BE2 ... </k>
-rule <k> BE2:KResult ~> BE1 || [] => BE1 || BE2 ... </k>
+rule <k> HOLE:BExp ~>  [] || BE2 => HOLE ||  BE2 ... </k> [cool]
+rule <k> HOLE:BExp ~> BE1 ||  [] =>  BE1 || HOLE ... </k> [cool]
+```
+
+### Context Declaration
+
+Sometimes more advanced evaluation strategies are needed. By default, the
+`strict` and `seqstrict` attributes are limited in that they cannot describe
+the _context_ in which heating or cooling should occur. When this type of
+control over the evaluation strategy is required, `context` sentences can be
+used to simplify the process of declaring heating and cooling when it would be
+unnecessarily verbose to write heating and cooling rules directly.
+
+For example, if the user wants to heat a term if it exists under a `foo`
+constructor if the term to be heated is of sort `bar`, one might write the
+following context:
+
+```k
+context foo(HOLE:Bar)
+```
+
+Once again, note that `HOLE` is just a variable, but one that has special
+meaning to the compiler indicating the position in the context that should
+be heated or cooled.
+
+This will automatically generate the following sentences:
+
+```k
+rule <k> foo(HOLE:Bar) => HOLE ~> foo([]) ... </k> [heat]
+rule <k> HOLE:Bar ~> foo([]) => foo(HOLE) ... </k> [cool]
+```
+
+The user may also write the K cell explicitly in the context declaration
+if they want to match on another cell as well, for example:
+
+```k
+context <k> foo(HOLE:Bar) ... </kl> <state> .Map </state>
+```
+
+This context will now only heat or cool if the `state` cell is empty.
+
+### Side conditions in context declarations
+
+The user is allowed to write a side condition in a context declaration, like
+so:
+
+```k
+context foo(HOLE:Bar) requires baz(HOLE)
+```
+
+This side condition will be appended verbatim to the heating rule that is
+generated, however, it will not affect the cooling rule that is generated:
+
+```k
+rule <k> foo(HOLE:Bar) => HOLE ~> foo([]) ... </k> requirese baz(HOLE) [heat]
+rule <k> HOLE:Bar ~> foo([]) => foo(HOLE) ... </k> [cool]
+```
+
+### Rewrites in context declarations
+
+The user can also include exactly one rewrite operation in a context
+declaration if that rule rewrites the variable `HOLE` on the left hand side
+to a term containing `HOLE` on the right hand side. For exampl;e:
+
+```k
+context foo(HOLE:Bar => bar(HOLE))
+```
+
+In this case, the code generated will be as follows:
+
+```k
+rule <k> foo(HOLE:Bar) => bar(HOLE) ~> foo([]) ... </k> [heat]
+rule <k> bar(HOLE:Bar) ~> foo([]) => foo(HOLE) ... </k> [cool]
+```
+
+This can be useful if the user wishes to evaluate a term using a different
+set of rules than normal. For example, if the user wants to evaluate a term
+to an rvalue instead of an lvalue.
+
+### `result` attribute
+
+Sometimes it is necessary to be able to evaluate a term to a different sort
+than `KResult`. This is done by means of adding the `result` attribute to
+a strict production, a context, or an explicit heating or cooling rule:
+
+```k
+syntax BExp ::= Bool
+              | BExp "||" BExp [seqstrict(2,1), result(Bool)]
+```
+
+In this case, the sort check used by `seqstrict` and by the `heat` and `cool`
+attributes will be `isBool` instead of `isKResult`. This particular example
+does not really require use of the `result` attribute, but if the user wishes
+to evaluate a term of sort KResult further, the result attribute would be
+required.
+
+### `hybrid` attribute
+
+In certain situations, it is desirable to treat a particular production which
+has the `strict` attribute as a result if the term has had its arguments fully
+evaluated. This can be accomplished by means of the `hybrid` attribute:
+
+```k
+syntax KResult ::= Bool
+
+syntax BExp ::= Bool
+              | BExp "||" BExp [strict(1), hybrid]
+```
+
+This attribute is equivalent in this case to the following additional axiom
+being added to the definition of `isKResult`:
+
+```k
+rule isKResult(BE1:BExp || BE2:BExp) => true requires isKResult(BE1)
+```
+
+### Context aliases
+
+Sometimes it is necessary to define a fairly complicated evaluation strategy
+for a lot of different operators. In this case, the user _could_ simply write
+a number of complex `context` declarations, however, this quickly becomes
+tedious. For this purpose, K has a concept called a _context alias_. A context
+alias is a bit like a template for describing contexts. The template can then
+be instantiated against particular productions using the `strict` and
+`seqstrict` attributes.
+
+Here is a (simplified) example taken from the K semantics of C++:
+
+```k
+context alias [c]: <k> HERE:K ... </k> <evaluate> false </evaluate>
+context alias [c]: <k> HERE:K ... </k> <evaluate> true </evaluate> [result(ExecResult)]
+
+syntax Expr ::= Expr "=" Init [strict(c; 1)]
+```
+
+This defines the evaluation strategy during the translation phase of a C++
+program for the assignment operator. It is equivalent to writing the following
+context declarations:
+
+```k
+context <k> HOLE:Expr = I:Init => HOLE ~> [] = I ... </k> <evaluate> false </evaluate>
+context <k> HOLE:Expr = I:Init => HOLE ~> [] = I ... </k> <evaluate> true </evaluate> [result(ExecResult)]
+```
+
+What this is saying is, if the `evaluate` cell is false, evaluate the term
+like normal to a `KResult`. But if the `evaluate` cell is true, instead
+evaluate it to the `ExecResult` sort.
+
+Essentially, we have given a name to this evaluation strategy in the form of
+the rule label on the context alias sentences (in this case, `c`). We can
+then say that we want to use this evaluation strategy to evaluate particular
+arguments of particular productions by referring to it by name in a `strict`
+attribute. For example, `strict(c)` will instantiate these contexts once for
+each argument of the production, whereas `strict(c; 1)` will instantiate it
+only for the first argument. The special variable `HERE` is used to tell the
+compiler where you want to place the production that is to be heated or cooled.
+
+A `strict` attribute with no rule label associated with it is equivalent to
+a `strict` attribute given with the following context alias:
+
+```k
+context alias [default]: <k> HERE:K ...</k>
 ```
 
 Configuration Declaration
