@@ -107,6 +107,73 @@ argument and parameter are K, and it has no effect on the resulting sort of
 the term. However, it will nevertheless affect the kore generated from the term
 by introducing an additional parameter to the symbol generated for the term.
 
+### `function` and `functional` attributes
+
+Many times it becomes easier to write a semantics if you have "helper"
+functions written which can be used in the RHS of rules. The `function`
+attribute tells K that a given symbol should be simplified immediately when it
+appears anywhere in the configuration. Semantically, it means that evaluation
+of that symbol will result in at most one return value (that is, the symbol is
+a *partial function*).
+
+The `functional` attribute indicates to the symbolic reasoning engine that a
+given symbol is a *total function*, that is it has *exactly* one return value
+for every possible input.
+
+For example, here we define the `_+Word_` total function and the `_/Word_`
+partial function, which can be used to do addition/division modulo
+`2 ^Int 256`. These functions can be used anywhere in the semantics where
+integers should not grow larger than `2 ^Int 256`. Notice how `_/Word_` is
+*not* defined when the denominator is `0`.
+
+```k
+syntax Int ::= Int "+Word" Int [function, functional]
+             | Int "/Word" Int [function]
+
+rule I1 +Word I2 => (I1 +Int I2) modInt (2 ^Int 256)
+rule I1 /Word I2 => (I1 /Int I2) modInt (2 ^Int 256) requires I2 =/=Int 0
+```
+
+### `freshGenerator` attribute
+
+In K, you can access "fresh" values in a given domain using the syntax
+`!VARNAME:VarSort` (with the `!`-prefixed variable name). This is supported for
+builtin sorts `Int` and `Id` already. For example, you can generate fresh
+memory locations for declared identifiers as such:
+
+```k
+rule <k> new var x ; => . ... </k>
+     <env> ENV => ENV [ x <- !I:Int ] </env>
+     <mem> MEM => MEM [ !I <- 0     ] </mem>
+```
+
+Each time a `!`-prefixed variable is encountered, a new integer will be used,
+so each variable declared with `new var _ ;` will get a unique position in the
+`<mem>`.
+
+Sometimes you want to have generation of fresh constants in a user-defined
+sort. For this, K will still generate a fresh `Int`, but can use a converter
+function you supply to turn it into the correct sort. For example, here we can
+generate fresh `Foo`s using the `freshFoo(_)` function annotated with
+`freshGenerator`.
+
+```k
+syntax Foo ::= "a" | "b" | "c" | d ( Int )
+
+syntax Foo ::= freshFoo ( Int ) [freshGenerator, function, functional]
+
+rule freshFoo(0) => a
+rule freshFoo(1) => b
+rule freshFoo(2) => c
+rule freshFoo(I) => d(I) [owise]
+
+rule <k> new var x ; => . ... </k>
+     <env> ENV => ENV [ x <- !I:Int  ] </env>
+     <mem> MEM => MEM [ !I <- !F:Foo ] </mem>
+```
+
+Now each newly allocated memory slot will have a fresh `Foo` placed in it.
+
 ### `strict` and `seqstrict` attributes
 
 The strictness attributes allow defining evaluation strategies without having to
@@ -191,70 +258,6 @@ rule <k> BE1:BExp || BE2:BExp    => BE2 ~> BE1 || [] ... </k> requires notBool i
 rule <k> BE1:KResult ~> [] || BE2 => BE1 || BE2 ... </k>
 rule <k> BE2:KResult ~> BE1 || [] => BE1 || BE2 ... </k>
 ```
-
-### `function` and `functional` attributes
-
-Many times it becomes easier to write a semantics if you have "helper" functions
-written which can be used in the RHS of rules. The `function` attribute tells K
-that a given symbol should be simplified immediately when it appears anywhere in
-the configuration. Semantically, it means that evaluation of that symbol will
-result in at most one return value (that is, the symbol is a *partial function*).
-
-The `functional` attribute indicates to the symbolic reasoning engine that a
-given symbol is a *total function*, that is it has *exactly* one return value
-for every possible input.
-
-For example, here we define the `_+Word_` total function and the `_/Word_`
-partial function, which can be used to do addition/division modulo  `2 ^Int 256`.
-These functions can be used anywhere in the semantics where integers should not
-grow larger than `2 ^Int 256`. Notice how `_/Word_` is *not* defined when the
-denominator is `0`.
-
-```k
-syntax Int ::= Int "+Word" Int [function, functional]
-             | Int "/Word" Int [function]
-
-rule I1 +Word I2 => (I1 +Int I2) modInt (2 ^Int 256)
-rule I1 /Word I2 => (I1 /Int I2) modInt (2 ^Int 256) requires I2 =/=Int 0
-```
-
-### `freshGenerator` attribute
-
-In K, you can access "fresh" values in a given domain using the syntax
-`!VARNAME:VarSort` (with the `!`-prefixed variable name). This is supported for
-builtin sorts `Int` and `Id` already. For example, you can generate fresh memory
-locations for declared identifiers as such:
-
-```k
-rule <k> new var x ; => . ... </k>
-     <env> ENV => ENV [ x <- !I:Int ] </env>
-     <mem> MEM => MEM [ !I <- 0     ] </mem>
-```
-
-Each time a `!`-prefixed variable is encountered, a new integer will be used, so
-each variable declared with `new var _ ;` will get a unique position in the `<mem>`.
-
-Sometimes you want to have generation of fresh constants in a user-defined sort.
-For this, K will still generate a fresh `Int`, but can use a converter function you
-supply to turn it into the correct sort. For example, here we can generate fresh
-`Foo`s using the `freshFoo(_)` function annotated with `freshGenerator`.
-
-```k
-syntax Foo ::= "a" | "b" | "c" | d ( Int )
-
-syntax Foo ::= freshFoo ( Int ) [freshGenerator, function, functional]
-
-rule freshFoo(0) => a
-rule freshFoo(1) => b
-rule freshFoo(2) => c
-rule freshFoo(I) => d(I) [owise]
-
-rule <k> new var x ; => . ... </k>
-     <env> ENV => ENV [ x <- !I:Int  ] </env>
-     <mem> MEM => MEM [ !I <- !F:Foo ] </mem>
-```
-
-Now each newly allocated memory slot will have a fresh `Foo` placed in it.
 
 Configuration Declaration
 -------------------------
