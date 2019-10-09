@@ -350,8 +350,7 @@ rule <k> bar(HOLE:Bar) ~> foo([]) => foo(HOLE) ... </k> [cool]
 ```
 
 This can be useful if the user wishes to evaluate a term using a different
-set of rules than normal. For example, if the user wants to evaluate a term
-to an rvalue instead of an lvalue.
+set of rules than normal.
 
 ### `result` attribute
 
