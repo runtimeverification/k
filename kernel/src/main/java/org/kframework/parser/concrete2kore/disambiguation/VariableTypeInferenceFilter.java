@@ -393,6 +393,9 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                 }
                 child = (ProductionReference)((TermCons)child).get(0);
             }
+            if (child.production().params().contains(child.production().sort())) {
+                return false;
+            }
             return child.production().att().contains(Attribute.FUNCTION_KEY) || isAnywhere;
         }
         return false;
