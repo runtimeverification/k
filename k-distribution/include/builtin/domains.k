@@ -870,6 +870,7 @@ module K-REFLECTION
 
   // Takes as input a string and returns a K term
   syntax KItem ::= #parseKAST(String) [function, hook(KREFLECTION.parseKAST), poly(0)]
+  syntax KItem ::= #parseKORE(String) [function, hook(KREFLECTION.parseKORE), poly(0)]
   syntax IOError ::= "#noParse" "(" String ")" [klabel(#noParse), symbol]
 
 endmodule
