@@ -202,6 +202,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
             VarKey fails = null;
             Collection<Sort> constraint = null;
             for (Multimap<VarKey, Sort> variant : vars2.vars) {
+                boolean success = true;
                 // take each solution and do GLB on every variable
                 Multimap<VarKey, Sort> solution = HashMultimap.create();
                 for (VarKey key : variant.keySet()) {
@@ -210,14 +211,14 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                     if (mins.size() == 0) {
                         fails = key;
                         constraint = values;
-                        solution.clear();
+                        success = false;
                         break;
                     } else {
                         solution.putAll(key, subsorts.maximal(mins));
                     }
                 }
                 // I found a solution that fits everywhere, then store it for disambiguation
-                if (!solution.isEmpty())
+                if (success)
                     solutions.add(solution);
             }
             if (!vars2.vars.isEmpty()) {
@@ -628,6 +629,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
 
         public CollectExpectedVariablesVisitor(Set<VarKey> declaredNames) {
             this.declaredNames = declaredNames;
+            vars.add(HashMultimap.create());
         }
 
         @Override
@@ -644,14 +646,10 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                         clone.putAll(elem2);
                         newVars.add(clone);
                     }
-                    if (viz.vars.size() == 0)
-                        newVars.addAll(vars);
                 }
-                if (vars.size() == 0)
-                    newVars.addAll(viz.vars);
             }
-            if (!newVars.isEmpty())
-                vars = newVars;
+            vars.clear();
+            vars.addAll(newVars);
             return node;
         }
 
