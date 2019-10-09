@@ -128,7 +128,7 @@ public class KastFrontEnd extends FrontEnd {
             }
             Module parsingMod = maybeMod.get();
 
-            K parsed = kread.prettyRead(parsingMod, sort, def, source, FileUtil.read(stringToParse));
+            K parsed = kread.prettyRead(parsingMod, sort, def, source, FileUtil.read(stringToParse), options.keepAmb);
 
             if (options.expandMacros) {
                 parsed = ExpandMacros.forNonSentences(unparsingMod, files.get(), def.kompileOptions, false).expand(parsed);

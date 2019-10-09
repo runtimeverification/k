@@ -39,11 +39,11 @@ public class KRead {
         this.input = input;
     }
 
-    public K prettyRead(Module mod, Sort sort, CompiledDefinition def, Source source, String stringToParse) {
-        return prettyRead(mod, sort, def, source, stringToParse, this.input);
+    public K prettyRead(Module mod, Sort sort, CompiledDefinition def, Source source, String stringToParse, boolean keepAmb) {
+        return prettyRead(mod, sort, def, source, stringToParse, this.input, keepAmb);
     }
 
-    public K prettyRead(Module mod, Sort sort, CompiledDefinition def, Source source, String stringToParse, InputModes inputMode) {
+    public K prettyRead(Module mod, Sort sort, CompiledDefinition def, Source source, String stringToParse, InputModes inputMode, boolean keepAmb) {
         switch (inputMode) {
             case BINARY:
             case JSON:
@@ -52,7 +52,7 @@ public class KRead {
             case KORE:
                 return new KoreParser(mod.sortAttributesFor()).parseString(stringToParse);
             case PROGRAM:
-                return def.getParser(mod, sort, kem).apply(stringToParse, source);
+                return def.getParser(mod, sort, kem, keepAmb).apply(stringToParse, source);
             default:
                 throw KEMException.criticalError("Unsupported input mode: " + inputMode);
         }

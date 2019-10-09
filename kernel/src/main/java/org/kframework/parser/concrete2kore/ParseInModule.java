@@ -116,7 +116,14 @@ public class ParseInModule implements Serializable, AutoCloseable {
     public Tuple2<Either<Set<ParseFailedException>, K>, Set<ParseFailedException>>
             parseString(String input, Sort startSymbol, Source source) {
         try (Scanner scanner = getScanner()) {
-            return parseString(input, startSymbol, scanner, source, 1, 1, true, false);
+            return parseString(input, startSymbol, scanner, source, 1, 1, true, false, false);
+        }
+    }
+
+    public Tuple2<Either<Set<ParseFailedException>, K>, Set<ParseFailedException>>
+    parseStringKeepAmb(String input, Sort startSymbol, Source source) {
+        try (Scanner scanner = getScanner()) {
+            return parseString(input, startSymbol, scanner, source, 1, 1, true, false, true);
         }
     }
 
@@ -139,9 +146,9 @@ public class ParseInModule implements Serializable, AutoCloseable {
     }
 
     public Tuple2<Either<Set<ParseFailedException>, K>, Set<ParseFailedException>>
-        parseString(String input, Sort startSymbol, Scanner scanner, Source source, int startLine, int startColumn, boolean inferSortChecks, boolean isAnywhere) {
+        parseString(String input, Sort startSymbol, Scanner scanner, Source source, int startLine, int startColumn, boolean inferSortChecks, boolean isAnywhere, boolean keepAmb) {
         final Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> result
-                = parseStringTerm(input, startSymbol, scanner, source, startLine, startColumn, inferSortChecks, isAnywhere);
+                = parseStringTerm(input, startSymbol, scanner, source, startLine, startColumn, inferSortChecks, isAnywhere, keepAmb);
         Either<Set<ParseFailedException>, K> parseInfo;
         if (result._1().isLeft()) {
             parseInfo = Left.apply(result._1().left().get());
@@ -168,7 +175,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
      * @return
      */
     private Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>>
-            parseStringTerm(String input, Sort startSymbol, Scanner scanner, Source source, int startLine, int startColumn, boolean inferSortChecks, boolean isAnywhere) {
+            parseStringTerm(String input, Sort startSymbol, Scanner scanner, Source source, int startLine, int startColumn, boolean inferSortChecks, boolean isAnywhere, boolean keepAmb) {
         scanner = getGrammar(scanner);
 
         long start = 0;
@@ -221,13 +228,16 @@ public class ParseInModule implements Serializable, AutoCloseable {
             if (rez.isLeft())
                 return new Tuple2<>(rez, warn);
             rez3 = new PushAmbiguitiesDownAndPreferAvoid(disambModule.overloads()).apply(rez.right().get());
-            rez2 = new AmbFilter(strict && inferSortChecks).apply(rez3);
-            warn = Sets.union(rez2._2(), warn);
-            rez2 = new AddEmptyLists(disambModule).apply(rez2._1().right().get());
-            warn = Sets.union(rez2._2(), warn);
-            if (rez2._1().isLeft())
-                return rez2;
-            rez3 = new RemoveBracketVisitor().apply(rez2._1().right().get());
+            if (!keepAmb) {
+                rez = new AmbFilterError(strict && inferSortChecks).apply(rez3);
+                if (rez.isLeft())
+                    return new Tuple2<>(rez, warn);
+                rez2 = new AddEmptyLists(disambModule).apply(rez.right().get());
+                warn = Sets.union(rez2._2(), warn);
+                if (rez2._1().isLeft())
+                    return rez2;
+                rez3 = new RemoveBracketVisitor().apply(rez2._1().right().get());
+            }
 
             return new Tuple2<>(Right.apply(rez3), warn);
         } finally {

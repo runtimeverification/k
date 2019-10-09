@@ -122,13 +122,6 @@ public class CompiledDefinition implements Serializable {
     }
 
     /**
-     * A function that takes a string and the source of that string and parses it as a program into KAST.
-     */
-    public BiFunction<String, Source, K> getProgramParser(KExceptionManager kem) {
-        return getParser(programParsingModuleFor(mainSyntaxModuleName(), kem).get(), programStartSymbol, kem);
-    }
-
-    /**
      * The parsed but uncompiled definition
      */
     public Definition getParsedDefinition() {
@@ -177,11 +170,15 @@ public class CompiledDefinition implements Serializable {
      * @return a function taking a String to be parsed, a Source, and returning the parsed string as K.
      */
 
-    public BiFunction<String, Source, K> getParser(Module module, Sort programStartSymbol, KExceptionManager kem) {
+    public BiFunction<String, Source, K> getParser(Module module, Sort programStartSymbol, KExceptionManager kem, boolean keepAmb) {
         ParseInModule parseInModule = RuleGrammarGenerator.getCombinedGrammar(module, kompileOptions.strict());
 
         return (BiFunction<String, Source, K> & Serializable) (s, source) -> {
-            Tuple2<Either<Set<ParseFailedException>, K>, Set<ParseFailedException>> res = parseInModule.parseString(s, programStartSymbol, source);
+            Tuple2<Either<Set<ParseFailedException>, K>, Set<ParseFailedException>> res;
+            if (keepAmb)
+                res = parseInModule.parseStringKeepAmb(s, programStartSymbol, source);
+            else
+                res = parseInModule.parseString(s, programStartSymbol, source);
             kem.addAllKException(res._2().stream().map(e -> e.getKException()).collect(Collectors.toSet()));
             if (res._1().isLeft()) {
                 throw res._1().left().get().iterator().next();

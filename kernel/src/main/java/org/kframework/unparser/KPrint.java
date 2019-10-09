@@ -211,17 +211,19 @@ public class KPrint {
                 if (k.klabel() instanceof KVariable) {
                     return super.apply(k);
                 }
-                Att att = unparsingModule.attributesFor().apply(KLabel(k.klabel().name()));
-                if (att.contains("comm") && att.contains("assoc") && att.contains("unit")) {
-                    List<K> items = new ArrayList<>(Assoc.flatten(k.klabel(), k.klist().items(), KLabel(att.get("unit"))));
-                    List<Tuple2<String, K>> printed = new ArrayList<>();
-                    for (K item : items) {
-                        String s = unparseInternal(unparsingModule, apply(item), ColorSetting.OFF);
-                        printed.add(Tuple2.apply(s, item));
+                if (!k.klabel().name().equals("amb")) {
+                    Att att = unparsingModule.attributesFor().apply(KLabel(k.klabel().name()));
+                    if (att.contains("comm") && att.contains("assoc") && att.contains("unit")) {
+                        List<K> items = new ArrayList<>(Assoc.flatten(k.klabel(), k.klist().items(), KLabel(att.get("unit"))));
+                        List<Tuple2<String, K>> printed = new ArrayList<>();
+                        for (K item : items) {
+                            String s = unparseInternal(unparsingModule, apply(item), ColorSetting.OFF);
+                            printed.add(Tuple2.apply(s, item));
+                        }
+                        printed.sort(Comparator.comparing(Tuple2::_1, new AlphanumComparator()));
+                        items = printed.stream().map(Tuple2::_2).map(this::apply).collect(Collectors.toList());
+                        return items.stream().reduce((k1, k2) -> KApply(k.klabel(), k1, k2)).orElse(KApply(KLabel(att.get("unit"))));
                     }
-                    printed.sort(Comparator.comparing(Tuple2::_1, new AlphanumComparator()));
-                    items = printed.stream().map(Tuple2::_2).map(this::apply).collect(Collectors.toList());
-                    return items.stream().reduce((k1, k2) -> KApply(k.klabel(), k1, k2)).orElse(KApply(KLabel(att.get("unit"))));
                 }
                 return super.apply(k);
             }
