@@ -586,7 +586,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
             if (res._1().isLeft())
                 errors.addAll(res._1().left().get());
             else
-                tc = tc.with(i, res._1.right().get());
+                tc = tc.with(i - 1, res._1.right().get());
         }
         if (errors.isEmpty())
             return Tuple2.apply(Right.apply(tc), info);
@@ -609,7 +609,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
             if (res.isLeft()) {
                 errors.addAll(res.left().get());
             } else {
-              tc = tc.with(i, res.right().get());
+              tc = tc.with(i - 1, res.right().get());
             }
         }
         if (errors.isEmpty())
