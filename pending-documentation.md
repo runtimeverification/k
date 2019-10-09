@@ -435,7 +435,7 @@ A `strict` attribute with no rule label associated with it is equivalent to
 a `strict` attribute given with the following context alias:
 
 ```k
-context alias [default]: <k> HERE:K ...</k>
+context alias [default]: <k> HERE:K ... </k>
 ```
 
 Configuration Declaration
@@ -762,15 +762,18 @@ Desugared code:
 ```
 syntax Int ::= foo(Int, GeneratedTopCell) [function]
 
-rule foo(0, <generatedTop>...
+rule foo(0, <generatedTop>
               <bar> I </bar>
-            ...</generatedTop> #as Configuration) => I
-rule <generatedTop>...
-       <k> something ...</k>
-     ...</generatedTop> #as Configuration
-  => <generatedTop>...
-       <k> foo(0, Configuration> ...</k>
-     ...</generatedTop>
+              ...
+            </generatedTop> #as Configuration) => I
+rule <generatedTop>
+       <k> something ... </k>
+       ...
+     </generatedTop> #as Configuration
+  => <generatedTop>
+       <k> foo(0, Configuration> ... </k>
+       ...
+     </generatedTop>
 ```
 
 ### Collection patterns
@@ -833,7 +836,7 @@ For example:
 ```
 syntax Int ::= f(Int) [function]
 rule f(I:Int) => I +Int 1
-rule <k> I:Int => . ...</k> <state>... SetItem(f(I)) ...</state>
+rule <k> I:Int => . ... </k> <state> ... SetItem(f(I)) ... </state>
 ```
 
 This will rewrite `I` to `.` if and only if the state cell contains
