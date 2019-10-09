@@ -208,13 +208,12 @@ rule <k> HOLE:AExp ~> AE1 +  [] =>  AE1 + HOLE ... </k> [cool]
 
 You will note that these rules can apply one after another infinitely. In
 practice, the `KResult` sort is used to break this cycle by ensuring that only
-terms that are not part of the `KResult` sort will be heated. In the theory of
-K, these rules represent equalities between structurally distinct states rather
-than transitions in the transition system. The `heat` and `cool` attributes
-are used to tell the compiler that these are heating and cooling rules and
-should be handled in the manner just described. Nothing stops the user from
-writing such heating and cooling rules directly if they wish, although we
-describe other more convenient syntax for most of the advanced cases below.
+terms that are not part of the `KResult` sort will be heated. The `heat` and 
+`cool` attributes are used to tell the compiler that these are heating and
+cooling rules and should be handled in the manner just described. Nothing stops
+the user from writing such heating and cooling rules directly if they wish,
+although we describe other more convenient syntax for most of the advanced
+cases below.
 
 One other thing to note is that in the above sentences, `HOLE` is just a
 variable, but it has special meaning in the context of sentences with the
