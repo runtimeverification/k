@@ -976,6 +976,8 @@ public class ModuleToKORE {
         if (isMacro) {
             att = att.add("macro");
         }
+        // This attribute is a frontend attribute only and is removed from the kore
+        // Since it has no meaning outside the frontend
         return att.remove(Constants.ORIGINAL_PRD, Production.class);
     }
 
