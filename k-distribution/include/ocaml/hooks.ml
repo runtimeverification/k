@@ -194,6 +194,7 @@ struct
     | [String s] -> (try Lexer.parse_k s with
       | e -> [KApply1(parse_klabel("#noParse"), [String (Printexc.to_string e)])])
     | _ -> raise Not_implemented
+  let hook_parseKORE c _ _ _ _ = raise Not_implemented
 end
 
 module KEQUAL =
