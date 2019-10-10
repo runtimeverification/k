@@ -191,7 +191,7 @@ public class ModuleToKORE {
     }
 
     private void collectTokenSortsAndAttributes(Set<Sort> tokenSorts, Map<String, Boolean> attributes) {
-        for (Sort sort : iterable(module.definedSorts())) {
+        for (Sort sort : iterable(module.sortedSorts())) {
             Att att = module.sortAttributesFor().get(sort).getOrElse(() -> KORE.Att());
             if (att.contains("token")) {
                 tokenSorts.add(sort);
