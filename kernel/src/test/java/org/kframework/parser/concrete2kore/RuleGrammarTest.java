@@ -175,7 +175,7 @@ public class RuleGrammarTest {
         parseRule("1+2+3", def, 0, true);
     }
 
-    // test AmbFilter which should report ambiguities and return a clean term
+    // test AmbFilter which should report ambiguities as errors
     @Test
     public void test6() {
         String def = "" +

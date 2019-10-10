@@ -828,8 +828,8 @@ endmodule
 
 module ID-SYMBOLIC [symbolic, kast]
   imports ID-SYNTAX
-  syntax KItem  ::= "#parseToken"  "(" String "," String ")"  [function, hook(STRING.parseToken)]
-  rule String2Id(S:String) => {#parseToken("Id", S)}:>Id
+  syntax KItem  ::= "#parseIdToken"  "(" String "," String ")"  [function, hook(STRING.parseToken)]
+  rule String2Id(S:String) => {#parseIdToken("Id", S)}:>Id
 endmodule
 
 module K-EQUAL
