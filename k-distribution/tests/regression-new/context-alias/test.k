@@ -10,12 +10,12 @@ context alias [heatable]: <k> HERE ...</k> <stuff> true </stuff>
 
 context alias [heatable2]: <k> HERE ...</k> <shouldHeat> B </shouldHeat> requires B
 
-syntax Expr ::= Expr "+" Expr [strict(heatable)]
-              | Id "=" Expr [strict(heatable; 2)]
-              | Id ":=" Expr [strict(2)]
-              | Expr ":+" Expr [strict]
-              | Expr "->+" Expr [seqstrict(heatable)]
-              | Expr "-" Expr [seqstrict(heatable2)]
+syntax Expr ::= Expr "+" Expr [strict(heatable), left]
+              > Id "=" Expr [strict(heatable; 2)]
+              > Id ":=" Expr [strict(2)]
+              > Expr ":+" Expr [strict, left]
+              > Expr "->+" Expr [seqstrict(heatable), left]
+              > Expr "-" Expr [seqstrict(heatable2), left]
               | Int
 
 syntax KResult ::= Int
