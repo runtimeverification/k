@@ -251,7 +251,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
 
             private String saveKoreSpecToTemp(ModuleToKORE converter, Module rules) {
                 String koreOutput = converter.convertSpecificationModule(module, rules,
-                        haskellKRunOptions.allPathReachability);
+                        haskellKRunOptions.defaultClaimType);
                 files.saveToTemp("spec.kore", koreOutput);
                 String specPath = files.resolveTemp("spec.kore").getAbsolutePath();
                 return specPath;
@@ -318,9 +318,6 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                 if (kProveOptions.depth != null) {
                     args.addAll(Arrays.asList(
                         "--depth", kProveOptions.depth.toString()));
-                }
-                if (haskellKRunOptions.allPathReachability) {
-                    args.add("--all-path-reachability");
                 }
                 String[] koreCommand = args.toArray(new String[args.size()]);
                 if (haskellKRunOptions.dryRun) {

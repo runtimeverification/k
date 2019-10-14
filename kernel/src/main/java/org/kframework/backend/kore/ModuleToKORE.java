@@ -61,6 +61,12 @@ import static org.kframework.definition.Constructors.*;
 import static org.kframework.kore.KORE.*;
 
 public class ModuleToKORE {
+    public enum SentenceType {
+        REWRITE_RULE,
+        ONE_PATH_CLAIM,
+        ALL_PATH_CLAIM
+    }
+
     public static final String ONE_PATH_OP = "weakExistsFinally";
     public static final String ALL_PATH_OP = "weakAlwaysFinally";
     public static final String HAS_DOMAIN_VALUES = "hasDomainValues";
@@ -92,6 +98,7 @@ public class ModuleToKORE {
         sb.append(prelude);
         sb.append("\n");
 
+        SentenceType sentenceType = getSentenceType(SentenceType.REWRITE_RULE, module.att());
         sb.append("module ");
         convert(module.name());
         sb.append("\n\n// imports\n");
@@ -182,7 +189,7 @@ public class ModuleToKORE {
         }
         sb.append("\n// rules\n");
         for (Rule rule : iterable(module.sortedRules())) {
-            convertRule(rule, heatCoolEq, topCell, attributes, functionRules, false, false);
+            convertRule(rule, heatCoolEq, topCell, attributes, functionRules, sentenceType);
         }
         sb.append("endmodule ");
         convert(attributes, module.att());
@@ -632,7 +639,8 @@ public class ModuleToKORE {
         return prod.klabel().nonEmpty() && ConstructorChecks.isBuiltinLabel(prod.klabel().get());
     }
 
-    public String convertSpecificationModule(Module definition, Module spec, boolean allPathReachability) {
+    public String convertSpecificationModule(Module definition, Module spec, SentenceType defaultSentenceType) {
+        defaultSentenceType = getSentenceType(defaultSentenceType, spec.att());
         sb.setLength(0); // reset string writer
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(definition);
         Sort topCell = configInfo.getRootCell();
@@ -648,7 +656,7 @@ public class ModuleToKORE {
             assert sentence instanceof Rule || sentence instanceof ModuleComment
                 : "Unexpected non-rule claim " + sentence.toString();
             if (sentence instanceof Rule) {
-                convertRule((Rule) sentence, false, topCell, new HashMap<>(), HashMultimap.create(), true, allPathReachability);
+                convertRule((Rule) sentence, false, topCell, new HashMap<>(), HashMultimap.create(), defaultSentenceType);
             }
         }
         sb.append("endmodule ");
@@ -657,7 +665,17 @@ public class ModuleToKORE {
         return sb.toString();
     }
 
-    private void convertRule(Rule rule, boolean heatCoolEq, Sort topCellSort, Map<String, Boolean> consideredAttributes, SetMultimap<KLabel, Rule> functionRules, boolean rulesAsClaims, boolean allPathReachability) {
+    private SentenceType getSentenceType(SentenceType defaultSentenceType, Att att) {
+        if (att.contains(Attribute.ONE_PATH_KEY)) {
+            defaultSentenceType = SentenceType.ONE_PATH_CLAIM;
+        } else if (att.contains(Attribute.ALL_PATH_KEY)) {
+            defaultSentenceType = SentenceType.ALL_PATH_CLAIM;
+        }
+        return defaultSentenceType;
+    }
+
+    private void convertRule(Rule rule, boolean heatCoolEq, Sort topCellSort, Map<String, Boolean> consideredAttributes, SetMultimap<KLabel, Rule> functionRules, SentenceType defaultSentenceType) {
+        defaultSentenceType = getSentenceType(defaultSentenceType, rule.att());
         // injections should already be present, but this is an ugly hack to get around the
         // cache persistence issue that means that Sort attributes on k terms might not be present.
         rule = new AddSortInjections(module).addInjections(rule);
@@ -797,7 +815,7 @@ public class ModuleToKORE {
                 sb.append("\n\n");
             }
         } else if (kore) {
-            if (rulesAsClaims) {
+            if (isClaim(defaultSentenceType)) {
                 sb.append("  claim{} ");
             } else {
                 sb.append("  axiom{} ");
@@ -807,7 +825,7 @@ public class ModuleToKORE {
             convert(consideredAttributes, rule.att());
             sb.append("\n\n");
         } else if (!ExpandMacros.isMacro(rule)) {
-            if (rulesAsClaims) {
+            if (isClaim(defaultSentenceType)) {
                 sb.append("  claim{} ");
             } else {
                 sb.append("  axiom{} ");
@@ -821,7 +839,7 @@ public class ModuleToKORE {
                 sb.append("}(),");
             }
             K right = RewriteToTop.toRight(rule.body());
-            if (rulesAsClaims) {
+            if (isClaim(defaultSentenceType)) {
                 sb.append("\\implies{");
             } else {
                 sb.append("\\rewrites{");
@@ -835,12 +853,12 @@ public class ModuleToKORE {
             sb.append(", ");
             convert(left);
             sb.append("), ");
-            if (rulesAsClaims) {
-                if (allPathReachability) {
-                    sb.append(ALL_PATH_OP + "{");
-                } else {
-                    sb.append(ONE_PATH_OP + "{");
-                }
+            if (defaultSentenceType == SentenceType.ALL_PATH_CLAIM) {
+                sb.append(ALL_PATH_OP + "{");
+                convert(topCellSort, false);
+                sb.append("} (\n      ");
+            } else if (defaultSentenceType == SentenceType.ONE_PATH_CLAIM) {
+                sb.append(ONE_PATH_OP + "{");
                 convert(topCellSort, false);
                 sb.append("} (\n      ");
             }
@@ -851,7 +869,7 @@ public class ModuleToKORE {
             sb.append(", ");
             convert(right);
             sb.append("))");
-            if (rulesAsClaims) {
+            if (defaultSentenceType == SentenceType.ALL_PATH_CLAIM || defaultSentenceType == SentenceType.ONE_PATH_CLAIM) {
                 sb.append(')');
             }
             if (owise) {
@@ -861,6 +879,10 @@ public class ModuleToKORE {
             convert(consideredAttributes, rule.att());
             sb.append("\n\n");
         }
+    }
+
+    private boolean isClaim(SentenceType sentenceType) {
+        return sentenceType == SentenceType.ONE_PATH_CLAIM || sentenceType == SentenceType.ALL_PATH_CLAIM;
     }
 
     private void functionalPattern(Production prod, Runnable functionPattern) {
