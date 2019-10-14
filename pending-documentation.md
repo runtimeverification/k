@@ -4,7 +4,7 @@ K Manual
 **Under Construction**
 
 This document contains documentation that has been written up to some extent
-but still needs to be ultimately included in the K manual which has not been 
+but still needs to be ultimately included in the K manual which has not been
 written yet. New features of K that affect the surface language should be added
 to this document.
 
@@ -57,7 +57,7 @@ Some syntax productions, like the rewrite operator, the bracket operator, and
 the #if #then #else #fi operator, cannot have their precise type system
 expressed using only concrete sorts.
 
-Prior versions of K solved this issue by using the K sort in this case, but 
+Prior versions of K solved this issue by using the K sort in this case, but
 this introduces inexactness in which poorly typed terms can be created even
 without having a cast operator present in the syntax, which is a design
 consideration we would prefer to avoid.
@@ -106,6 +106,336 @@ actually reject any parse, because it can always infer that the sort of the
 argument and parameter are K, and it has no effect on the resulting sort of
 the term. However, it will nevertheless affect the kore generated from the term
 by introducing an additional parameter to the symbol generated for the term.
+
+### `function` and `functional` attributes
+
+Many times it becomes easier to write a semantics if you have "helper"
+functions written which can be used in the RHS of rules. The `function`
+attribute tells K that a given symbol should be simplified immediately when it
+appears anywhere in the configuration. Semantically, it means that evaluation
+of that symbol will result in at most one return value (that is, the symbol is
+a *partial function*).
+
+The `functional` attribute indicates to the symbolic reasoning engine that a
+given symbol is a *total function*, that is it has *exactly* one return value
+for every possible input.
+
+For example, here we define the `_+Word_` total function and the `_/Word_`
+partial function, which can be used to do addition/division modulo
+`2 ^Int 256`. These functions can be used anywhere in the semantics where
+integers should not grow larger than `2 ^Int 256`. Notice how `_/Word_` is
+*not* defined when the denominator is `0`.
+
+```k
+syntax Int ::= Int "+Word" Int [function, functional]
+             | Int "/Word" Int [function]
+
+rule I1 +Word I2 => (I1 +Int I2) modInt (2 ^Int 256)
+rule I1 /Word I2 => (I1 /Int I2) modInt (2 ^Int 256) requires I2 =/=Int 0
+```
+
+### `freshGenerator` attribute
+
+In K, you can access "fresh" values in a given domain using the syntax
+`!VARNAME:VarSort` (with the `!`-prefixed variable name). This is supported for
+builtin sorts `Int` and `Id` already. For example, you can generate fresh
+memory locations for declared identifiers as such:
+
+```k
+rule <k> new var x ; => . ... </k>
+     <env> ENV => ENV [ x <- !I:Int ] </env>
+     <mem> MEM => MEM [ !I <- 0     ] </mem>
+```
+
+Each time a `!`-prefixed variable is encountered, a new integer will be used,
+so each variable declared with `new var _ ;` will get a unique position in the
+`<mem>`.
+
+Sometimes you want to have generation of fresh constants in a user-defined
+sort. For this, K will still generate a fresh `Int`, but can use a converter
+function you supply to turn it into the correct sort. For example, here we can
+generate fresh `Foo`s using the `freshFoo(_)` function annotated with
+`freshGenerator`.
+
+```k
+syntax Foo ::= "a" | "b" | "c" | d ( Int )
+
+syntax Foo ::= freshFoo ( Int ) [freshGenerator, function, functional]
+
+rule freshFoo(0) => a
+rule freshFoo(1) => b
+rule freshFoo(2) => c
+rule freshFoo(I) => d(I) [owise]
+
+rule <k> new var x ; => . ... </k>
+     <env> ENV => ENV [ x <- !I:Int  ] </env>
+     <mem> MEM => MEM [ !I <- !F:Foo ] </mem>
+```
+
+Now each newly allocated memory slot will have a fresh `Foo` placed in it.
+
+Evaluation Strategy
+-------------------
+
+### `strict` and `seqstrict` attributes
+
+The strictness attributes allow defining evaluation strategies without having
+to explicitely make rules which implement them. This is done by injecting
+*heating* and *cooling* rules for the subterms. For this to work, you need to
+define what a *result* is for K, by extending the  `KResult` sort.
+
+For example:
+
+```k
+syntax AExp ::= Int
+              | AExp "+" AExp [strict]
+```
+
+This generates two heating rules (where the hole syntaxes `"[]" "+" AExp` and
+`AExp "+" "[]"` is automatically added to create an evaluation context):
+
+```k
+rule <k> HOLE:AExp +  AE2:AExp => HOLE ~>  [] + AE2 ... </k> [heat]
+rule <k>  AE1:AExp + HOLE:AExp => HOLE ~> AE1 +  [] ... </k> [heat]
+```
+
+And two corresponding cooling rules:
+
+```k
+rule <k> HOLE:AExp ~>  [] + AE2 => HOLE +  AE2 ... </k> [cool]
+rule <k> HOLE:AExp ~> AE1 +  [] =>  AE1 + HOLE ... </k> [cool]
+```
+
+You will note that these rules can apply one after another infinitely. In
+practice, the `KResult` sort is used to break this cycle by ensuring that only
+terms that are not part of the `KResult` sort will be heated. The `heat` and 
+`cool` attributes are used to tell the compiler that these are heating and
+cooling rules and should be handled in the manner just described. Nothing stops
+the user from writing such heating and cooling rules directly if they wish,
+although we describe other more convenient syntax for most of the advanced
+cases below.
+
+One other thing to note is that in the above sentences, `HOLE` is just a
+variable, but it has special meaning in the context of sentences with the
+`heat` or `cool` attribute. In heating or cooling rules, the variable named
+`HOLE` is considered to be the term being heated or cooled and the compiler
+will generate `isKResult(HOLE)` and `notBool isKResult(HOLE)` side conditions
+appropriately to ensure that the backend does not loop infinitely.
+
+In order for this functionality to work, you need to define the `KResult` sort.
+For instance, we tell K that a term is fully evaluated once it becomes an `Int`
+here:
+
+```k
+syntax KResult ::= Int
+```
+
+Note that you can also say that a given expression is only strict only in
+specific argument positions. Here we use this to define "short-circuiting"
+boolean operators.
+
+```k
+syntax KResult ::= Bool
+
+syntax BExp ::= Bool
+              | BExp "||" BExp [strict(1)]
+              | BExp "&&" BExp [strict(1)]
+
+rule <k> true  || _    => true ... </k>
+rule <k> false || REST => REST ... </k>
+
+rule <k> true  && REST => REST  ... </k>
+rule <k> false && _    => false ... </k>
+```
+
+If you want to force a specific evaluation order of the arguments, you can use
+the variant `seqstrict` to do so. For example, this would make the boolean
+operators short-circuit in their _second_ argument first:
+
+```k
+syntax KResult ::= Bool
+
+syntax BExp ::= Bool
+              | BExp "||" BExp [seqstrict(2,1)]
+              | BExp "&&" BExp [seqstrict(2,1)]
+
+rule <k> _    || true  => true ... </k>
+rule <k> REST || false => REST ... </k>
+
+rule <k> REST && true  => REST  ... </k>
+rule <k> _    && false => false ... </k>
+```
+
+This will generate rules like this in the case of `_||_` (note that `BE1` will
+not be heated unless `isKResult(BE2)` is true, meaning that `BE2` must be
+evaluated first):
+
+```k
+rule <k>  BE1:BExp || HOLE:BExp => HOLE ~> BE1 ||  [] ... </k> [heat]
+rule <k> HOLE:BExp ||  BE2:BExp => HOLE ~>  [] || BE2 ... </k> requires isKResult(BE2) [heat]
+
+rule <k> HOLE:BExp ~>  [] || BE2 => HOLE ||  BE2 ... </k> [cool]
+rule <k> HOLE:BExp ~> BE1 ||  [] =>  BE1 || HOLE ... </k> [cool]
+```
+
+### Context Declaration
+
+Sometimes more advanced evaluation strategies are needed. By default, the
+`strict` and `seqstrict` attributes are limited in that they cannot describe
+the _context_ in which heating or cooling should occur. When this type of
+control over the evaluation strategy is required, `context` sentences can be
+used to simplify the process of declaring heating and cooling when it would be
+unnecessarily verbose to write heating and cooling rules directly.
+
+For example, if the user wants to heat a term if it exists under a `foo`
+constructor if the term to be heated is of sort `bar`, one might write the
+following context:
+
+```k
+context foo(HOLE:Bar)
+```
+
+Once again, note that `HOLE` is just a variable, but one that has special
+meaning to the compiler indicating the position in the context that should
+be heated or cooled.
+
+This will automatically generate the following sentences:
+
+```k
+rule <k> foo(HOLE:Bar) => HOLE ~> foo([]) ... </k> [heat]
+rule <k> HOLE:Bar ~> foo([]) => foo(HOLE) ... </k> [cool]
+```
+
+The user may also write the K cell explicitly in the context declaration
+if they want to match on another cell as well, for example:
+
+```k
+context <k> foo(HOLE:Bar) ... </kl> <state> .Map </state>
+```
+
+This context will now only heat or cool if the `state` cell is empty.
+
+### Side conditions in context declarations
+
+The user is allowed to write a side condition in a context declaration, like
+so:
+
+```k
+context foo(HOLE:Bar) requires baz(HOLE)
+```
+
+This side condition will be appended verbatim to the heating rule that is
+generated, however, it will not affect the cooling rule that is generated:
+
+```k
+rule <k> foo(HOLE:Bar) => HOLE ~> foo([]) ... </k> requirese baz(HOLE) [heat]
+rule <k> HOLE:Bar ~> foo([]) => foo(HOLE) ... </k> [cool]
+```
+
+### Rewrites in context declarations
+
+The user can also include exactly one rewrite operation in a context
+declaration if that rule rewrites the variable `HOLE` on the left hand side
+to a term containing `HOLE` on the right hand side. For exampl;e:
+
+```k
+context foo(HOLE:Bar => bar(HOLE))
+```
+
+In this case, the code generated will be as follows:
+
+```k
+rule <k> foo(HOLE:Bar) => bar(HOLE) ~> foo([]) ... </k> [heat]
+rule <k> bar(HOLE:Bar) ~> foo([]) => foo(HOLE) ... </k> [cool]
+```
+
+This can be useful if the user wishes to evaluate a term using a different
+set of rules than normal.
+
+### `result` attribute
+
+Sometimes it is necessary to be able to evaluate a term to a different sort
+than `KResult`. This is done by means of adding the `result` attribute to
+a strict production, a context, or an explicit heating or cooling rule:
+
+```k
+syntax BExp ::= Bool
+              | BExp "||" BExp [seqstrict(2,1), result(Bool)]
+```
+
+In this case, the sort check used by `seqstrict` and by the `heat` and `cool`
+attributes will be `isBool` instead of `isKResult`. This particular example
+does not really require use of the `result` attribute, but if the user wishes
+to evaluate a term of sort KResult further, the result attribute would be
+required.
+
+### `hybrid` attribute
+
+In certain situations, it is desirable to treat a particular production which
+has the `strict` attribute as a result if the term has had its arguments fully
+evaluated. This can be accomplished by means of the `hybrid` attribute:
+
+```k
+syntax KResult ::= Bool
+
+syntax BExp ::= Bool
+              | BExp "||" BExp [strict(1), hybrid]
+```
+
+This attribute is equivalent in this case to the following additional axiom
+being added to the definition of `isKResult`:
+
+```k
+rule isKResult(BE1:BExp || BE2:BExp) => true requires isKResult(BE1)
+```
+
+### Context aliases
+
+Sometimes it is necessary to define a fairly complicated evaluation strategy
+for a lot of different operators. In this case, the user _could_ simply write
+a number of complex `context` declarations, however, this quickly becomes
+tedious. For this purpose, K has a concept called a _context alias_. A context
+alias is a bit like a template for describing contexts. The template can then
+be instantiated against particular productions using the `strict` and
+`seqstrict` attributes.
+
+Here is a (simplified) example taken from the K semantics of C++:
+
+```k
+context alias [c]: <k> HERE:K ... </k> <evaluate> false </evaluate>
+context alias [c]: <k> HERE:K ... </k> <evaluate> true </evaluate> [result(ExecResult)]
+
+syntax Expr ::= Expr "=" Init [strict(c; 1)]
+```
+
+This defines the evaluation strategy during the translation phase of a C++
+program for the assignment operator. It is equivalent to writing the following
+context declarations:
+
+```k
+context <k> HOLE:Expr = I:Init => HOLE ~> [] = I ... </k> <evaluate> false </evaluate>
+context <k> HOLE:Expr = I:Init => HOLE ~> [] = I ... </k> <evaluate> true </evaluate> [result(ExecResult)]
+```
+
+What this is saying is, if the `evaluate` cell is false, evaluate the term
+like normal to a `KResult`. But if the `evaluate` cell is true, instead
+evaluate it to the `ExecResult` sort.
+
+Essentially, we have given a name to this evaluation strategy in the form of
+the rule label on the context alias sentences (in this case, `c`). We can
+then say that we want to use this evaluation strategy to evaluate particular
+arguments of particular productions by referring to it by name in a `strict`
+attribute. For example, `strict(c)` will instantiate these contexts once for
+each argument of the production, whereas `strict(c; 1)` will instantiate it
+only for the first argument. The special variable `HERE` is used to tell the
+compiler where you want to place the production that is to be heated or cooled.
+
+A `strict` attribute with no rule label associated with it is equivalent to
+a `strict` attribute given with the following context alias:
+
+```k
+context alias [default]: <k> HERE:K ... </k>
+```
 
 Configuration Declaration
 -------------------------
@@ -247,6 +577,26 @@ attribute, it would instead expand (as the user likely intended) to
 The `alias-rec` attribute behaves with respect to the `alias` attribute the
 same way the `macro-rec` attribute behaves with respect to `macro`.
 
+### `anywhere` rules
+
+Some rules are not functional, but you want them to apply anywhere in the
+configuration (similar to functional rules). You can use the `anywhere`
+attribute on a rule to instruct the backends to make sure they apply anywhere
+they match in the entire configuration.
+
+For example, if you want to make sure that some associative operator is always
+right-associated anywhere in the configuration, you can do:
+
+```k
+syntax Stmt ::= Stmt ";" Stmt
+
+rule (S1 ; S2) ; S3 => S1 ; (S2 ; S3) [anywhere]
+```
+
+Then after every step, all occurances of `_;_` will be re-associated. Note that
+this allows the symbol `_;_` to still be a constructor, even though it is
+simplified similarly to a `function`.
+
 ### `smt-lemma`, `lemma`, and `trusted` attributes
 
 These attributes guide the prover when it tries to apply rules to discharge a
@@ -341,8 +691,8 @@ A prefix production is considered by the implementation to be any production
 whose production items match the following regular expression:
 
 ```
-(Terminal(_)*) Terminal("(") 
-(NonTerminal (Terminal(",") NonTerminal)* )? 
+(Terminal(_)*) Terminal("(")
+(NonTerminal (Terminal(",") NonTerminal)* )?
 Terminal(")")
 ```
 
@@ -411,15 +761,18 @@ Desugared code:
 ```
 syntax Int ::= foo(Int, GeneratedTopCell) [function]
 
-rule foo(0, <generatedTop>... 
-              <bar> I </bar> 
-            ...</generatedTop> #as Configuration) => I
-rule <generatedTop>...
-       <k> something ...</k> 
-     ...</generatedTop> #as Configuration 
-  => <generatedTop>...
-       <k> foo(0, Configuration> ...</k>
-     ...</generatedTop>
+rule foo(0, <generatedTop>
+              <bar> I </bar>
+              ...
+            </generatedTop> #as Configuration) => I
+rule <generatedTop>
+       <k> something ... </k>
+       ...
+     </generatedTop> #as Configuration
+  => <generatedTop>
+       <k> foo(0, Configuration> ... </k>
+       ...
+     </generatedTop>
 ```
 
 ### Collection patterns
@@ -433,14 +786,14 @@ operations.
 The following forms are allowed:
 
 ```
-// 0 or more elements followed by 0 or 1 variables of sort List followed by 
+// 0 or more elements followed by 0 or 1 variables of sort List followed by
 // 0 or more elements
 ListItem(E1) ListItem(E2) L:List ListItem(E3) ListItem(E4)
 
 // the empty list
 .List
 
-// 0 or more elements in any order plus 0 or 1 variables of sort Set 
+// 0 or more elements in any order plus 0 or 1 variables of sort Set
 // in any order
 SetItem(K1) SetItem(K2) S::Set SetItem(K3) SetItem(K4)
 
@@ -470,11 +823,11 @@ though E3 is itself unbound.
 In the above examples, E1, E2, E3, and E4 can be any pattern that is normally
 allowed on the lhs of a rule.
 
-When a map or set key contains function symbols, we know that the variables in 
+When a map or set key contains function symbols, we know that the variables in
 that key are bound (because of the above restriction), so it is possible to
 evaluate the function to a concrete term prior to performing the lookup.
 
-Indeed, this is the precise semantics which occurs; the function is evaluated 
+Indeed, this is the precise semantics which occurs; the function is evaluated
 and the result is looked up in the collection.
 
 For example:
@@ -482,7 +835,7 @@ For example:
 ```
 syntax Int ::= f(Int) [function]
 rule f(I:Int) => I +Int 1
-rule <k> I:Int => . ...</k> <state>... SetItem(f(I)) ...</state>
+rule <k> I:Int => . ... </k> <state> ... SetItem(f(I)) ... </state>
 ```
 
 This will rewrite `I` to `.` if and only if the state cell contains
@@ -556,7 +909,7 @@ more details.
 
 #### SMT Translation
 
-K makes queries to an SMT solver (Z3) to discharge proof obligations when doing 
+K makes queries to an SMT solver (Z3) to discharge proof obligations when doing
 symbolic execution. You can control how these queries are made using the
 attributes `smtlib` and `smt-hook` on declared productions.
 
@@ -630,7 +983,7 @@ on the `step` function:
 
 ```
 (gdb) break definition.kore:step
-Breakpoint 1 at 0x25e340 
+Breakpoint 1 at 0x25e340
 (gdb) run
 Breakpoint 1, 0x000000000025e340 in step (subject=`<generatedTop>{}`(`<k>{}`(`kseq{}`(`inj{Int{}, KItem{}}`(#token("0", "Int")),dotk{}(.KList))),`<generatedCounter>{}`(#token("0", "Int"))))
 (gdb) continue
