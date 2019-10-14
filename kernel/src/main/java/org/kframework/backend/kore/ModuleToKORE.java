@@ -63,8 +63,8 @@ import static org.kframework.kore.KORE.*;
 public class ModuleToKORE {
     public enum SentenceType {
         REWRITE_RULE,
-        ONE_PATH_CLAIM,
-        ALL_PATH_CLAIM
+        ONE_PATH,
+        ALL_PATH
     }
 
     public static final String ONE_PATH_OP = "weakExistsFinally";
@@ -667,9 +667,9 @@ public class ModuleToKORE {
 
     private SentenceType getSentenceType(SentenceType defaultSentenceType, Att att) {
         if (att.contains(Attribute.ONE_PATH_KEY)) {
-            defaultSentenceType = SentenceType.ONE_PATH_CLAIM;
+            defaultSentenceType = SentenceType.ONE_PATH;
         } else if (att.contains(Attribute.ALL_PATH_KEY)) {
-            defaultSentenceType = SentenceType.ALL_PATH_CLAIM;
+            defaultSentenceType = SentenceType.ALL_PATH;
         }
         return defaultSentenceType;
     }
@@ -853,11 +853,11 @@ public class ModuleToKORE {
             sb.append(", ");
             convert(left);
             sb.append("), ");
-            if (defaultSentenceType == SentenceType.ALL_PATH_CLAIM) {
+            if (defaultSentenceType == SentenceType.ALL_PATH) {
                 sb.append(ALL_PATH_OP + "{");
                 convert(topCellSort, false);
                 sb.append("} (\n      ");
-            } else if (defaultSentenceType == SentenceType.ONE_PATH_CLAIM) {
+            } else if (defaultSentenceType == SentenceType.ONE_PATH) {
                 sb.append(ONE_PATH_OP + "{");
                 convert(topCellSort, false);
                 sb.append("} (\n      ");
@@ -869,7 +869,7 @@ public class ModuleToKORE {
             sb.append(", ");
             convert(right);
             sb.append("))");
-            if (defaultSentenceType == SentenceType.ALL_PATH_CLAIM || defaultSentenceType == SentenceType.ONE_PATH_CLAIM) {
+            if (defaultSentenceType == SentenceType.ALL_PATH || defaultSentenceType == SentenceType.ONE_PATH) {
                 sb.append(')');
             }
             if (owise) {
@@ -882,7 +882,7 @@ public class ModuleToKORE {
     }
 
     private boolean isClaim(SentenceType sentenceType) {
-        return sentenceType == SentenceType.ONE_PATH_CLAIM || sentenceType == SentenceType.ALL_PATH_CLAIM;
+        return sentenceType == SentenceType.ONE_PATH || sentenceType == SentenceType.ALL_PATH;
     }
 
     private void functionalPattern(Production prod, Runnable functionPattern) {

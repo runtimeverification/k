@@ -858,7 +858,7 @@ in that module.
 
 Additionally, the Haskell backend introduces an extra command line option
 for the K frontend, `--default-claim-type`, with possible values
-`all-path-claim` and `one-path-claim` to allow choosing a default type for all
+`all-path` and `one-path` to allow choosing a default type for all
 claims.
 
 ### Set Variables
