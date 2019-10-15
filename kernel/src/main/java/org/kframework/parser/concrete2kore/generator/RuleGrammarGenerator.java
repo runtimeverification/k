@@ -236,43 +236,46 @@ public class RuleGrammarGenerator {
         for (Production p : iterable(mod.productions())) {
             prods.addAll(new GenerateSortProjections(mod).gen(p).collect(Collectors.toSet()));
             if (p.params().nonEmpty()) {
-                Sort param = null;
-                if (p.isSyntacticSubsort() && p.params().size() == 1) {
-                    param = p.params().apply(0);
-                } else {
-                    // we don't actually need to emit a parameter except in the case of the return sort
-                    // because the type checker will never actually reject a parse because the sorts in
-                    // the arguments don't match; it will simply infer sort K for those arguments.
-                    param = p.isSortVariable(p.sort()) ? p.sort() : null;
-                }
-                List<List<Sort>> sortTuples = makeAllSortTuples(param == null ? 0 : 1, mod);
+                List<List<Sort>> sortTuples = makeAllSortTuples(p.params().size(), mod);
                 for (List<Sort> tuple : sortTuples) {
-                    assert(tuple.size() < 2);
-                    Sort returnSort = p.sort();
-                    if (returnSort.equals(param)) {
-                        returnSort = tuple.get(0);
-                    }
-                    List<ProductionItem> pis = new ArrayList<>();
-                    pis.addAll(mutable(p.items()));
-                    Map<Sort, Sort> subst;
-                    if (param == null) {
-                        subst = Collections.emptyMap();
-                    } else {
-                        subst = Collections.singletonMap(param, tuple.get(0));
-                    }
-                    for (int i = 0; i < pis.size(); i++) {
-                        ProductionItem pi = pis.get(i);
-                        if (pi instanceof NonTerminal) {
-                            Sort s = ((NonTerminal)pi).sort();
-                            if (p.isSortVariable(s)) {
-                              pis.set(i, NonTerminal(subst.getOrDefault(s, Sorts.K()), ((NonTerminal)pi).name()));
+                    for (int i = 0; i < tuple.size(); i++) {
+                        if (p.params().apply(i).equals(p.sort()) || p.sort().params().contains(p.params().apply(i))) {
+                            continue;
+                        }
+                        if (p.isSyntacticSubsort()) {
+                            continue;
+                        }
+                        boolean skip = false;
+                        for (NonTerminal nt : iterable(p.nonterminals())) {
+                            if (nt.sort().params().contains(p.params().apply(i))) {
+                              skip = true;
+                              break;
                             }
                         }
+                        if (!skip) {
+                          tuple.set(i, Sorts.K());
+                        }
                     }
-                    if (p.isSyntacticSubsort() && mod.subsorts().lessThanEq(returnSort, ((NonTerminal)pis.get(0)).sort())) {
+                    Production subst = p.substitute(immutable(tuple));
+                    if (p.isSyntacticSubsort() && mod.subsorts().lessThanEq(subst.sort(), subst.getSubsortSort())) {
                         continue;
                     }
-                    prods.add(Production(p.klabel().map(lbl -> KLabel(lbl.name())), Seq(), returnSort, immutable(pis), p.att().add(Constants.ORIGINAL_PRD, Production.class, p)));
+                    Set<Sort> sorts = stream(subst.nonterminals()).map(nt -> nt.sort()).collect(Collectors.toSet());
+                    sorts.add(subst.sort());
+                    boolean skip = false;
+                    for (Sort s : sorts) {
+                        if (s.isNat()) {
+                            skip = true;
+                            break;
+                        }
+                        if (mod.definedInstantiations().contains(s.head()) && !mod.definedInstantiations().apply(s.head()).contains(s)) {
+                            skip = true;
+                            break;
+                        }
+                    }
+                    if (!skip) {
+                        prods.add(Production(subst.klabel().map(lbl -> KLabel(lbl.name())), Seq(), subst.sort(), subst.items(), subst.att().add(Constants.ORIGINAL_PRD, Production.class, p)));
+                    }
                 }
             }
         }
