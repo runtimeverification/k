@@ -106,6 +106,15 @@ trait Sort extends Ordered[Sort] {
     import scala.math.Ordering.Implicits._
     Ordering.Tuple2(Ordering[String], seqDerivedOrdering[Seq, Sort](Ordering.ordered(identity))).compare((this.name, this.params), (this.name, this.params))
   }
+
+  def isNat: Boolean = {
+    try {
+      name.toInt
+      true
+    } catch {
+      case _:NumberFormatException => false
+    }
+  }
 }
 
 trait KCollection {

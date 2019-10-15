@@ -181,7 +181,7 @@ public class RuleGrammarGenerator {
     }
 
     public static boolean isParserSort(Sort s) {
-        return kSorts.contains(s) || s.name().startsWith("#");
+        return kSorts.contains(s) || s.name().startsWith("#") || s.isNat();
     }
 
     /* use this overload if you don't need to profile rule parse times. */
@@ -427,7 +427,7 @@ public class RuleGrammarGenerator {
 
     private static List<List<Sort>> makeAllSortTuples(int size, Module mod) {
         List<List<Sort>> res = new ArrayList<>();
-        List<Sort> allSorts = stream(mod.definedSorts()).filter(s -> !isParserSort(s) || s.equals(Sorts.KItem()) || s.equals(Sorts.K())).collect(Collectors.toList());
+        List<Sort> allSorts = stream(mod.definedSorts()).filter(s -> !isParserSort(s) || s.equals(Sorts.KItem()) || s.equals(Sorts.K()) || s.isNat()).collect(Collectors.toList());
         makeAllSortTuples(size, size, allSorts, res, new int[size]);
         return res;
     }

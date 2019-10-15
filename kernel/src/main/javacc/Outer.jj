@@ -501,6 +501,7 @@ PARSER_END(Outer)
 
 | <UPPER_ID: ("#")?["A"-"Z"](["a"-"z", "A"-"Z", "0"-"9"])*>
 | <LOWER_ID: ("#")?["a"-"z"](["a"-"z", "A"-"Z", "0"-"9"])*>
+| <NAT: (["0"-"9"])+>
 }
 
 /** Parses an UPPER_ID token, but also allows List, NeList, Lexer, and
@@ -546,6 +547,7 @@ Sort SimpleSort() : { String str; Sort sort; List<Sort> params = new ArrayList<S
     "}"
   )?
   { return Sort(str, params); }
+| <NAT> { str = image(); return Sort(str, params); }
 }
 
 /** Parses and returns a NonTerminal but not a List, NeList, Lexer, or Token */
