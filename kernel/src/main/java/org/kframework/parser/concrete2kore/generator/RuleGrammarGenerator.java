@@ -397,8 +397,8 @@ public class RuleGrammarGenerator {
                 res.add(prod2);
                 res.add(prod3);
                 res.add(prod4);
-                res.add(SyntaxSort(Sort(ul.sort.name() + "#Terminator", ul.sort.params())));
-                res.add(SyntaxSort(Sort("Ne#" + ul.sort.name(), ul.sort.params())));
+                res.add(SyntaxSort(Seq(), Sort(ul.sort.name() + "#Terminator", ul.sort.params())));
+                res.add(SyntaxSort(Seq(), Sort("Ne#" + ul.sort.name(), ul.sort.params())));
                 if (!ul.nonEmpty) {
                     res.add(prod5);
                 }

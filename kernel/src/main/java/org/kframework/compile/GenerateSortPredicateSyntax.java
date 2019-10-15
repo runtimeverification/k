@@ -27,7 +27,7 @@ public class GenerateSortPredicateSyntax {
             res.addAll(gen(mod, sort));
         }
         if (!res.isEmpty()) {
-            res.add(SyntaxSort(Sorts.K()));
+            res.add(SyntaxSort(Seq(), Sorts.K()));
         }
         return Module(mod.name(), mod.imports(), (scala.collection.Set<Sentence>) mod.localSentences().$bar(immutable(res)), mod.att());
     }

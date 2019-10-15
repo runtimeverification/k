@@ -434,13 +434,13 @@ case class Tag(name: String) extends TagToString with OuterKORE
 //    att.get(Production.kLabelAttribute).headOption map { case KList(KToken(s, _, _)) => s } map { KLabel(_) }
 //}
 
-case class SyntaxSort(sort: Sort, att: Att = Att.empty) extends Sentence
+case class SyntaxSort(params: Seq[Sort], sort: Sort, att: Att = Att.empty) extends Sentence
   with SyntaxSortToString with OuterKORE {
   def items = Seq()
 
   override val isSyntax = true
   override val isNonSyntax = false
-  override def withAtt(att: Att) = SyntaxSort(sort, att)
+  override def withAtt(att: Att) = SyntaxSort(params, sort, att)
 }
 case class SortSynonym(newSort: Sort, oldSort: Sort, att: Att = Att.empty) extends Sentence
   with SortSynonymToString with OuterKORE {

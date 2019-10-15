@@ -55,7 +55,7 @@ public class ResolveContexts {
                 .map(s -> (Context) s)
                 .flatMap(c -> this.resolve(c, input)).collect(Collectors.toCollection(HashSet::new));
         if (!rulesToAdd.isEmpty()) {
-            rulesToAdd.add(SyntaxSort(Sorts.K()));
+            rulesToAdd.add(SyntaxSort(Seq(), Sorts.K()));
         }
         return Module(input.name(), input.imports(), (scala.collection.Set<Sentence>) stream(input.localSentences()).filter(s -> !(s instanceof Context)).collect(Collections.toSet()).$bar(immutable(rulesToAdd)), input.att());
     }
