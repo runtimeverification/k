@@ -107,6 +107,12 @@ trait Sort extends Ordered[Sort] {
     Ordering.Tuple2(Ordering[String], seqDerivedOrdering[Seq, Sort](Ordering.ordered(identity))).compare((this.name, this.params), (this.name, this.params))
   }
 
+  def head: Sort = ADT.Sort(name)
+
+  def substitute(subst: Map[Sort, Sort]): Sort = {
+    ADT.Sort(name, params.map(p => subst.getOrElse(p, p.substitute(subst))):_*)
+  }
+
   def isNat: Boolean = {
     try {
       name.toInt

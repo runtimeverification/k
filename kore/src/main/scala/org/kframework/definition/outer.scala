@@ -482,8 +482,8 @@ case class Production(klabel: Option[KLabel], params: Seq[Sort], sort: Sort, ite
 
   def substitute(args: Seq[Sort]): Production = {
     val subst = (params zip args).toMap
-    Production(klabel.map(l => ADT.KLabel(l.name, args:_*)), Seq(), subst.getOrElse(sort, sort), items.map({
-      case NonTerminal(sort, name) => NonTerminal(subst.getOrElse(sort, sort), name)
+    Production(klabel.map(l => ADT.KLabel(l.name, args:_*)), Seq(), subst.getOrElse(sort, sort.substitute(subst)), items.map({
+      case NonTerminal(sort, name) => NonTerminal(subst.getOrElse(sort, sort.substitute(subst)), name)
       case i => i
     }), att)
   }
