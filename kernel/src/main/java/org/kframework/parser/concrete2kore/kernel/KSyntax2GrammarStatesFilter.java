@@ -43,7 +43,7 @@ public class KSyntax2GrammarStatesFilter {
     public static Grammar getGrammar(Module module, Scanner scanner) {
         Automaton.setMinimization(Automaton.MINIMIZE_BRZOZOWSKI);
         Grammar grammar = new Grammar();
-        Set<Sort> sorts = Stream.concat(stream(module.definedSorts()), stream(module.usedCellSorts())).collect(Collectors.toSet());
+        Set<Sort> sorts = Stream.concat(stream(module.allSorts()), stream(module.usedCellSorts())).collect(Collectors.toSet());
         // create a NonTerminal for every declared sort
         for (Sort sort : sorts) {
             grammar.add(grammar.new NonTerminal(sort.toString()));

@@ -205,7 +205,7 @@ public class RuleGrammarGenerator {
 
         if (mod.importedModuleNames().contains(AUTO_CASTS)) { // create the diamond
             Set<Sentence> temp;
-            for (Sort srt : iterable(mod.definedSorts())) {
+            for (Sort srt : iterable(mod.allSorts())) {
                 if (!isParserSort(srt) || mod.subsorts().directlyLessThan(Sorts.KVariable(), srt)) {
                     // K ::= K "::Sort" | K ":Sort" | K "<:Sort" | K ":>Sort"
                     prods.addAll(makeCasts(Sorts.KBott(), Sorts.K(), srt, srt));
@@ -228,7 +228,7 @@ public class RuleGrammarGenerator {
             }
         }
 
-        for (Sort s : iterable(mod.definedSorts())) {
+        for (Sort s : iterable(mod.allSorts())) {
             prods.addAll(new GenerateSortPredicateSyntax().gen(mod, s));
             prods.addAll(new GenerateSortProjections(mod).gen(s).collect(Collectors.toSet()));
         }
@@ -364,7 +364,7 @@ public class RuleGrammarGenerator {
         if (mod.importedModuleNames().contains(PROGRAM_LISTS)) {
             Set<Sentence> prods3 = new HashSet<>();
             // if no start symbol has been defined in the configuration, then use K
-            for (Sort srt : iterable(mod.definedSorts())) {
+            for (Sort srt : iterable(mod.allSorts())) {
                 if (!isParserSort(srt) && !mod.listSorts().contains(srt)) {
                     // K ::= Sort
                     prods3.add(Production(Seq(), Sorts.K(), Seq(NonTerminal(srt)), Att()));
@@ -427,7 +427,7 @@ public class RuleGrammarGenerator {
 
     private static List<List<Sort>> makeAllSortTuples(int size, Module mod) {
         List<List<Sort>> res = new ArrayList<>();
-        List<Sort> allSorts = stream(mod.definedSorts()).filter(s -> !isParserSort(s) || s.equals(Sorts.KItem()) || s.equals(Sorts.K()) || s.isNat()).collect(Collectors.toList());
+        List<Sort> allSorts = stream(mod.allSorts()).filter(s -> !isParserSort(s) || s.equals(Sorts.KItem()) || s.equals(Sorts.K()) || s.isNat()).collect(Collectors.toList());
         makeAllSortTuples(size, size, allSorts, res, new int[size]);
         return res;
     }
