@@ -1,0 +1,14 @@
+<generatedTop>
+  <k>
+    .
+  </k>
+  <shouldHeat>
+    true
+  </shouldHeat>
+  <state>
+    x |-> 1
+  </state>
+  <stuff>
+    false
+  </stuff>
+</generatedTop>
