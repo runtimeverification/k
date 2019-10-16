@@ -52,6 +52,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -98,7 +99,7 @@ public class ModuleToKORE {
         sb.append(prelude);
         sb.append("\n");
 
-        SentenceType sentenceType = getSentenceType(SentenceType.REWRITE_RULE, module.att());
+        SentenceType sentenceType = getSentenceType(module.att()).orElse(SentenceType.REWRITE_RULE);
         sb.append("module ");
         convert(module.name());
         sb.append("\n\n// imports\n");
@@ -640,7 +641,7 @@ public class ModuleToKORE {
     }
 
     public String convertSpecificationModule(Module definition, Module spec, SentenceType defaultSentenceType) {
-        defaultSentenceType = getSentenceType(defaultSentenceType, spec.att());
+        SentenceType sentenceType = getSentenceType(spec.att()).orElse(defaultSentenceType);
         sb.setLength(0); // reset string writer
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(definition);
         Sort topCell = configInfo.getRootCell();
@@ -656,7 +657,7 @@ public class ModuleToKORE {
             assert sentence instanceof Rule || sentence instanceof ModuleComment
                 : "Unexpected non-rule claim " + sentence.toString();
             if (sentence instanceof Rule) {
-                convertRule((Rule) sentence, false, topCell, new HashMap<>(), HashMultimap.create(), defaultSentenceType);
+                convertRule((Rule) sentence, false, topCell, new HashMap<>(), HashMultimap.create(), sentenceType);
             }
         }
         sb.append("endmodule ");
@@ -665,17 +666,17 @@ public class ModuleToKORE {
         return sb.toString();
     }
 
-    private SentenceType getSentenceType(SentenceType defaultSentenceType, Att att) {
+    private Optional<SentenceType> getSentenceType(Att att) {
         if (att.contains(Attribute.ONE_PATH_KEY)) {
-            defaultSentenceType = SentenceType.ONE_PATH;
+            return Optional.of(SentenceType.ONE_PATH);
         } else if (att.contains(Attribute.ALL_PATH_KEY)) {
-            defaultSentenceType = SentenceType.ALL_PATH;
+            return Optional.of(SentenceType.ALL_PATH);
         }
-        return defaultSentenceType;
+        return Optional.empty();
     }
 
     private void convertRule(Rule rule, boolean heatCoolEq, Sort topCellSort, Map<String, Boolean> consideredAttributes, SetMultimap<KLabel, Rule> functionRules, SentenceType defaultSentenceType) {
-        defaultSentenceType = getSentenceType(defaultSentenceType, rule.att());
+        SentenceType sentenceType = getSentenceType(rule.att()).orElse(defaultSentenceType);
         // injections should already be present, but this is an ugly hack to get around the
         // cache persistence issue that means that Sort attributes on k terms might not be present.
         rule = new AddSortInjections(module).addInjections(rule);
@@ -815,7 +816,7 @@ public class ModuleToKORE {
                 sb.append("\n\n");
             }
         } else if (kore) {
-            if (isClaim(defaultSentenceType)) {
+            if (isClaim(sentenceType)) {
                 sb.append("  claim{} ");
             } else {
                 sb.append("  axiom{} ");
@@ -825,7 +826,7 @@ public class ModuleToKORE {
             convert(consideredAttributes, rule.att());
             sb.append("\n\n");
         } else if (!ExpandMacros.isMacro(rule)) {
-            if (isClaim(defaultSentenceType)) {
+            if (isClaim(sentenceType)) {
                 sb.append("  claim{} ");
             } else {
                 sb.append("  axiom{} ");
@@ -839,7 +840,7 @@ public class ModuleToKORE {
                 sb.append("}(),");
             }
             K right = RewriteToTop.toRight(rule.body());
-            if (isClaim(defaultSentenceType)) {
+            if (isClaim(sentenceType)) {
                 sb.append("\\implies{");
             } else {
                 sb.append("\\rewrites{");
@@ -853,11 +854,11 @@ public class ModuleToKORE {
             sb.append(", ");
             convert(left);
             sb.append("), ");
-            if (defaultSentenceType == SentenceType.ALL_PATH) {
+            if (sentenceType == SentenceType.ALL_PATH) {
                 sb.append(ALL_PATH_OP + "{");
                 convert(topCellSort, false);
                 sb.append("} (\n      ");
-            } else if (defaultSentenceType == SentenceType.ONE_PATH) {
+            } else if (sentenceType == SentenceType.ONE_PATH) {
                 sb.append(ONE_PATH_OP + "{");
                 convert(topCellSort, false);
                 sb.append("} (\n      ");
@@ -869,7 +870,7 @@ public class ModuleToKORE {
             sb.append(", ");
             convert(right);
             sb.append("))");
-            if (defaultSentenceType == SentenceType.ALL_PATH || defaultSentenceType == SentenceType.ONE_PATH) {
+            if (sentenceType == SentenceType.ALL_PATH || sentenceType == SentenceType.ONE_PATH) {
                 sb.append(')');
             }
             if (owise) {
