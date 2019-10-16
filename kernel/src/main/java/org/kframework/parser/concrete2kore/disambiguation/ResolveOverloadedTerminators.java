@@ -43,7 +43,7 @@ public class ResolveOverloadedTerminators extends SetsTransformerWithErrors<Pars
                 return Left.apply(Sets.newHashSet(new ParseFailedException(ex)));
             }
             Production prod = candidates.iterator().next();
-            prod = Production(prod.klabel(), prod.sort(), prod.items(), prod.att()
+            prod = prod.withAtt(prod.att()
                     .add(Constants.ORIGINAL_PRD, Production.class, tc.production()));
             return super.apply(TermCons.apply(tc.items(), prod, tc.location(), tc.source()));
         }
