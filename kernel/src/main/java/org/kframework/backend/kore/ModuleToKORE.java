@@ -179,7 +179,7 @@ public class ModuleToKORE {
             }
         }
 
-        for (Sort sort : iterable(module.definedSorts())) {
+        for (Sort sort : iterable(module.sortedSorts())) {
             genNoJunkAxiom(sort);
         }
 
@@ -199,7 +199,7 @@ public class ModuleToKORE {
     }
 
     private void collectTokenSortsAndAttributes(Set<Sort> tokenSorts, Map<String, Boolean> attributes) {
-        for (Sort sort : iterable(module.definedSorts())) {
+        for (Sort sort : iterable(module.sortedSorts())) {
             Att att = module.sortAttributesFor().get(sort).getOrElse(() -> KORE.Att());
             if (att.contains("token")) {
                 tokenSorts.add(sort);
@@ -220,7 +220,7 @@ public class ModuleToKORE {
     }
 
     private void translateSorts(Set<Sort> tokenSorts, Map<String, Boolean> attributes, Set<String> collectionSorts) {
-        for (Sort sort : iterable(module.definedSorts())) {
+        for (Sort sort : iterable(module.sortedSorts())) {
             if (sort.equals(Sorts.K()) || sort.equals(Sorts.KItem())) {
                 continue;
             }
@@ -538,7 +538,7 @@ public class ModuleToKORE {
             }
             sb.append(", ");
         }
-        for (Sort s : iterable(module.definedSorts())) {
+        for (Sort s : iterable(module.sortedSorts())) {
             if (module.subsorts().lessThan(s, sort) && !sort.equals(Sorts.K())) {
                 numTerms++;
                 sb.append("\\or{");
@@ -999,7 +999,9 @@ public class ModuleToKORE {
         if (isMacro) {
             att = att.add("macro");
         }
-        return att;
+        // This attribute is a frontend attribute only and is removed from the kore
+        // Since it has no meaning outside the frontend
+        return att.remove(Constants.ORIGINAL_PRD, Production.class);
     }
 
     private boolean isFunction(Production prod) {

@@ -362,7 +362,7 @@
         <native.exe.type>uexe</native.exe.type>
         <native.exe.extension />
 	<native.script.extension />
-	<prefix.path>/usr/local/opt/llvm/;/usr/local/opt/bison;/usr/local/opt/flex;/usr/local/opt/libffi</prefix.path>
+	<prefix.path>/usr/local/opt/llvm/;/usr/local/opt/flex;/usr/local/opt/libffi</prefix.path>
       </properties>
     </profile>
     <profile>
