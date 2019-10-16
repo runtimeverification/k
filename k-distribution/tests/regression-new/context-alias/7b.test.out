@@ -1,0 +1,14 @@
+<generatedTop>
+  <k>
+    x = ( 2 ->+ x = 3 ) ~> #freezer_;_TEST0_ ( )
+  </k>
+  <shouldHeat>
+    false
+  </shouldHeat>
+  <state>
+    .Map
+  </state>
+  <stuff>
+    false
+  </stuff>
+</generatedTop>
