@@ -250,8 +250,9 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
             }
 
             private String saveKoreSpecToTemp(ModuleToKORE converter, Module rules) {
+                StringBuilder sb = new StringBuilder();
                 String koreOutput = converter.convertSpecificationModule(module, rules,
-                        haskellKRunOptions.allPathReachability);
+                        haskellKRunOptions.allPathReachability, sb);
                 files.saveToTemp("spec.kore", koreOutput);
                 String specPath = files.resolveTemp("spec.kore").getAbsolutePath();
                 return specPath;
@@ -389,8 +390,9 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
         ExpandMacros macroExpander = ExpandMacros.forNonSentences(mod, files, kompileOptions, false);
         K withMacros = macroExpander.expand(initialConfiguration);
         K kWithInjections = new AddSortInjections(mod).addInjections(withMacros);
-        converter.convert(kWithInjections);
-        return converter.toString();
+        StringBuilder sb = new StringBuilder();
+        converter.convert(kWithInjections, sb);
+        return sb.toString();
     }
 
 
