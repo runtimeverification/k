@@ -184,8 +184,6 @@ public class KILtoKORE extends KILTransformation<Object> {
         }).collect(Collectors.toSet()));
     }
 
-    public static final String PRODUCTION_ID = "productionID";
-
     public Set<org.kframework.definition.Sentence> apply(Syntax s) {
         Set<org.kframework.definition.Sentence> res = new HashSet<>();
 
@@ -251,15 +249,13 @@ public class KILtoKORE extends KILTransformation<Object> {
                         prod = Production(
                                 sort,
                                 immutable(items),
-                                attrs.add(PRODUCTION_ID,
-                                        "" + System.identityHashCode(p)));
+                                attrs);
                     else
                         prod = Production(
                                 KLabel(p.getKLabel(kore)),
                                 sort,
                                 immutable(items),
-                                attrs.add(PRODUCTION_ID,
-                                        "" + System.identityHashCode(p)));
+                                attrs);
 
                     res.add(prod);
                     // handle associativity for the production
@@ -312,18 +308,17 @@ public class KILtoKORE extends KILTransformation<Object> {
 
         org.kframework.attributes.Att attrs = convertAttributes(p).add(Att.userList(), userList.getListType());
         String kilProductionId = "" + System.identityHashCode(p);
-        Att attrsWithKilProductionId = attrs.add(PRODUCTION_ID, kilProductionId);
         org.kframework.definition.Production prod1, prod3;
 
         // Es ::= E "," Es
         prod1 = Production(KLabel(p.getKLabel(kore)), sort,
                 Seq(NonTerminal(elementSort), Terminal(userList.getSeparator()), NonTerminal(sort)),
-                attrsWithKilProductionId.add("right"));
+                attrs.add("right"));
 
 
         // Es ::= ".Es"
         prod3 = Production(KLabel(p.getTerminatorKLabel(kore)), sort, Seq(Terminal("." + sort.toString())),
-                attrsWithKilProductionId.remove("format").remove("strict").add("klabel", p.getTerminatorKLabel(false)));
+                attrs.remove("format").remove("strict").add("klabel", p.getTerminatorKLabel(false)));
 
         res.add(prod1);
         res.add(prod3);

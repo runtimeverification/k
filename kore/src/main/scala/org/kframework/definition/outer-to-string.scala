@@ -29,7 +29,7 @@ trait RuleToString {
 
 trait ProductionToString {
   self: Production =>
-  override def toString = "syntax " + sort + " ::= " + items.mkString(" ") + att.remove(classOf[Source]).remove(classOf[Location]).remove("productionID").postfixString
+  override def toString = "syntax " + sort + " ::= " + items.mkString(" ") + att.remove(classOf[Source]).remove(classOf[Location]).postfixString
 }
 
 trait SyntaxSortToString {

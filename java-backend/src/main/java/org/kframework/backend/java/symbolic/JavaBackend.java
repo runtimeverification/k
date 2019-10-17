@@ -64,7 +64,7 @@ public class JavaBackend implements Backend {
         }
         Production prod = (Production)sentence;
         if (prod.klabel().isDefined() && KLabels.ListItem.equals(prod.klabel().get())) {
-            return Production(prod.sort(), prod.items(), prod.att().remove("function"));
+            return prod.withAtt(prod.att().remove("function"));
         }
         return prod;
     }
