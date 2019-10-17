@@ -182,11 +182,7 @@ public class AddSortInjections {
             if (prod.params().nonEmpty()) {
                 for (Sort param : iterable(prod.params())) {
                     Sort expectedSort;
-                    Set<Integer> positions = IntStream.range(0, prod.nonterminals().size())
-                                .mapToObj(i -> Tuple2.apply(prod.nonterminals().apply(i), i))
-                                .filter(t -> t._1().sort().equals(param))
-                                .map(t -> t._2())
-                                .collect(Collectors.toSet());
+                    Set<Integer> positions = getPositions(param, prod);
                     if (prod.sort().equals(param)) {
                         expectedSort = actualSort;
                     } else {
@@ -238,6 +234,14 @@ public class AddSortInjections {
         }
     }
 
+    private Set<Integer> getPositions(Sort param, Production prod) {
+        return IntStream.range(0, prod.nonterminals().size())
+                        .mapToObj(i -> Tuple2.apply(prod.nonterminals().apply(i), i))
+                        .filter(t -> t._1().sort().equals(param))
+                        .map(t -> t._2())
+                        .collect(Collectors.toSet());
+    }
+
     public Sort sort(K term, Sort expectedSort) {
         if (term instanceof KApply) {
             KApply kapp = (KApply)term;
@@ -263,11 +267,7 @@ public class AddSortInjections {
             if (prod.params().nonEmpty()) {
                 for (Sort param : iterable(prod.params())) {
                     if (prod.sort().equals(param)) {
-                        Set<Integer> positions = IntStream.range(0, prod.nonterminals().size())
-                                    .mapToObj(i -> Tuple2.apply(prod.nonterminals().apply(i), i))
-                                    .filter(t -> t._1().sort().equals(param))
-                                    .map(t -> t._2())
-                                    .collect(Collectors.toSet());
+                        Set<Integer> positions = getPositions(param, prod);
                         Set<Sort> children = new HashSet<>();
                         for (int position : positions) {
                             children.add(sort(kapp.items().get(position), expectedSort));
