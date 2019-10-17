@@ -1133,7 +1133,7 @@ public class ModuleToKORE {
     }
 
     private void convert(Sort sort, Production prod) {
-        convert(sort, prod.klabel().isDefined() && prod.params().contains(sort));
+        convert(sort, prod.klabel().isDefined() && prod.isSortVariable(sort));
     }
 
     private void convert(Sort sort, boolean var) {

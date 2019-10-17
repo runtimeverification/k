@@ -393,7 +393,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                 }
                 child = (ProductionReference)((TermCons)child).get(0);
             }
-            if (child.production().params().contains(child.production().sort())) {
+            if (child.production().isSortVariable(child.production().sort())) {
                 return false;
             }
             return child.production().att().contains(Attribute.FUNCTION_KEY) || isAnywhere;
@@ -449,7 +449,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                     } else {
                         Term t = tc.get(j);
                         Sort s = ((NonTerminal) tc.production().items().apply(i)).sort();
-                        if (!tc.production().params().contains(s)) {
+                        if (!tc.production().isSortVariable(s)) {
                             Set<VarInfo> vars = new CollectVariables2(((NonTerminal) tc.production().items().apply(i)).sort(), VarType.CONTEXT).apply(t)._2();
                             collector.addAll(vars);
                         }
@@ -509,7 +509,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                     } else {
                         Term t = tc.get(j);
                         Sort s = ((NonTerminal) tc.production().items().apply(i)).sort();
-                        if (!tc.production().params().contains(s)) {
+                        if (!tc.production().isSortVariable(s)) {
                             Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheck2(s, false, false, inferSortChecks).apply(t);
                             if (rez.isLeft())
                                 return rez;
@@ -582,7 +582,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
     static boolean hasPolySort(TermCons tc) {
         if (tc.production().params().isEmpty())
             return false;
-        return tc.production().params().contains(tc.production().sort());
+        return tc.production().isSortVariable(tc.production().sort());
     }
 
     static Tuple2<Either<Set<ParseFailedException>, Term>, Set<VarInfo>> visitPolyChildrenSets(TermCons tc, Function<Term, Tuple2<Either<Set<ParseFailedException>, Term>, Set<VarInfo>>> apply) {
@@ -680,7 +680,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                     } else {
                         Term t = tc.get(j);
                         Sort s = ((NonTerminal) tc.production().items().apply(i)).sort();
-                        if (!tc.production().params().contains(s)) {
+                        if (!tc.production().isSortVariable(s)) {
                             new CollectUndeclaredVariables2(s).apply(t);
                         }
                         j++;

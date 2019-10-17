@@ -243,7 +243,7 @@ public class RuleGrammarGenerator {
                     // we don't actually need to emit a parameter except in the case of the return sort
                     // because the type checker will never actually reject a parse because the sorts in
                     // the arguments don't match; it will simply infer sort K for those arguments.
-                    param = p.params().contains(p.sort()) ? p.sort() : null;
+                    param = p.isSortVariable(p.sort()) ? p.sort() : null;
                 }
                 List<List<Sort>> sortTuples = makeAllSortTuples(param == null ? 0 : 1, mod);
                 for (List<Sort> tuple : sortTuples) {
@@ -264,7 +264,7 @@ public class RuleGrammarGenerator {
                         ProductionItem pi = pis.get(i);
                         if (pi instanceof NonTerminal) {
                             Sort s = ((NonTerminal)pi).sort();
-                            if (p.params().contains(s)) {
+                            if (p.isSortVariable(s)) {
                               pis.set(i, NonTerminal(subst.getOrDefault(s, Sorts.K()), ((NonTerminal)pi).name()));
                             }
                         }

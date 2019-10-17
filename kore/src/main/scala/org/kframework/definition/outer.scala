@@ -248,7 +248,7 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
     Att(union.filter { key => attMap(key._1._1).size == 1 }.toMap)
   }
 
-  lazy val definedSorts: Set[Sort] = (productions filter {p => !p.params.contains(p.sort)} map {_.sort}) ++ (sortDeclarations map {_.sort})
+  lazy val definedSorts: Set[Sort] = (productions filter {p => !p.isSortVariable(p.sort)} map {_.sort}) ++ (sortDeclarations map {_.sort})
   lazy val sortedSorts: Seq[Sort] = definedSorts.toSeq.sorted
   lazy val usedCellSorts: Set[Sort] = productions.flatMap { p => p.items.collect { case NonTerminal(s, _) => s }
     .filter(s => s.name.endsWith("Cell") || s.name.endsWith("CellFragment"))
@@ -298,8 +298,8 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
 
   // check that non-terminals have a defined sort
   def checkSorts () = sentences foreach {
-    case p@Production(_, params, _, items, _) =>
-      val res = items collect { case nt: NonTerminal if !params.contains(nt.sort) && !definedSorts.contains(nt.sort) && !usedCellSorts.contains(nt.sort) && !sortSynonymMap.contains(nt.sort) => nt }
+    case p@Production(_, _, _, items, _) =>
+      val res = items collect { case nt: NonTerminal if !p.isSortVariable(nt.sort) && !definedSorts.contains(nt.sort) && !usedCellSorts.contains(nt.sort) && !sortSynonymMap.contains(nt.sort) => nt }
       if (res.nonEmpty)
         throw KEMException.compilerError("Could not find sorts: " + res.asJava, p)
     case _ =>
@@ -485,6 +485,10 @@ case class Production(klabel: Option[KLabel], params: Seq[Sort], sort: Sort, ite
       case NonTerminal(sort, name) => NonTerminal(subst.getOrElse(sort, sort), name)
       case i => i
     }), att)
+  }
+
+  def isSortVariable(s: Sort): Boolean = {
+    params.contains(s)
   }
 
   private def computePrefixProduction: Boolean = {
