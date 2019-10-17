@@ -35,30 +35,30 @@ public class ApplyTypeCheckVisitor extends SetsTransformerWithErrors<ParseFailed
     }
 
     public Either<java.util.Set<ParseFailedException>, Term> apply(TermCons tc) {
-        if (tc.production().params().isEmpty()) {
-            for (int i = 0, j = 0; i < tc.production().items().size(); i++) {
-                if (tc.production().items().apply(i) instanceof NonTerminal) {
-                    if (tc.production().klabel().isDefined()
-                            && (tc.production().klabel().get().name().equals("#SyntacticCast")
-                            || tc.production().klabel().get().name().startsWith("#SemanticCastTo")
-                            || tc.production().klabel().get().name().equals("#InnerCast"))
-                            || (VariableTypeInferenceFilter.isFunctionRule(tc, isAnywhere) && j == 0)) {
-                        Term t = tc.get(0);
-                        boolean strict = tc.production().klabel().get().name().equals("#SyntacticCast") || tc.production().klabel().get().name().equals("#InnerCast");
-                        Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheck2(VariableTypeInferenceFilter.getSortOfCast(tc), strict).apply(t);
-                        if (rez.isLeft())
-                            return rez;
-                        tc = tc.with(0, rez.right().get());
-                        j++;
-                    } else {
-                        Term t = tc.get(j);
-                        Sort s = ((NonTerminal) tc.production().items().apply(i)).sort();
+        for (int i = 0, j = 0; i < tc.production().items().size(); i++) {
+            if (tc.production().items().apply(i) instanceof NonTerminal) {
+                if (tc.production().klabel().isDefined()
+                        && (tc.production().klabel().get().name().equals("#SyntacticCast")
+                        || tc.production().klabel().get().name().startsWith("#SemanticCastTo")
+                        || tc.production().klabel().get().name().equals("#InnerCast"))
+                        || (VariableTypeInferenceFilter.isFunctionRule(tc, isAnywhere) && j == 0)) {
+                    Term t = tc.get(0);
+                    boolean strict = tc.production().klabel().get().name().equals("#SyntacticCast") || tc.production().klabel().get().name().equals("#InnerCast");
+                    Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheck2(VariableTypeInferenceFilter.getSortOfCast(tc), strict).apply(t);
+                    if (rez.isLeft())
+                        return rez;
+                    tc = tc.with(0, rez.right().get());
+                    j++;
+                } else {
+                    Term t = tc.get(j);
+                    Sort s = ((NonTerminal) tc.production().items().apply(i)).sort();
+                    if (!tc.production().params().contains(s)) {
                         Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheck2(s).apply(t);
                         if (rez.isLeft())
                             return rez;
                         tc = tc.with(j, rez.right().get());
-                        j++;
                     }
+                    j++;
                 }
             }
         }
