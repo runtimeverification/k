@@ -18,7 +18,7 @@ public class HaskellKRunOptions {
     @Parameter(names="--haskell-backend-home", description="Directory where the Haskel backend source installation resides.")
     public String haskellBackendHome = System.getenv("KORE_HOME");
 
-    @Parameter(names="--default-claim-type", converter = SentenceTypeConverter.class, description="Default type for claims. Values: [all-path|one-path")
+    @Parameter(names="--default-claim-type", converter = SentenceTypeConverter.class, description="Default type for claims. Values: [all-path|one-path].")
     public ModuleToKORE.SentenceType defaultClaimType = ModuleToKORE.SentenceType.ONE_PATH;
 
     public static class SentenceTypeConverter extends BaseEnumConverter<ModuleToKORE.SentenceType> {
