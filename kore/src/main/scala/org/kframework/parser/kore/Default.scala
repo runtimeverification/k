@@ -24,6 +24,8 @@ object implementation {
 
     case class AxiomDeclaration(params: Seq[i.SortVariable], pattern: i.Pattern, att: i.Attributes) extends i.AxiomDeclaration
 
+    case class ClaimDeclaration(params: Seq[i.SortVariable], pattern: i.Pattern, att: i.Attributes) extends i.ClaimDeclaration
+
     case class Attributes(patterns: Seq[i.Pattern]) extends i.Attributes
 
     case class Variable(name: String, sort: i.Sort) extends i.Variable
@@ -109,6 +111,8 @@ object implementation {
     def AliasDeclaration(alias: i.Alias, argSorts: Seq[i.Sort], returnSort: i.Sort, leftPattern: i.Pattern, rightPattern: i.Pattern, att: i.Attributes): i.Declaration = d.AliasDeclaration(alias, argSorts, returnSort, leftPattern, rightPattern, att)
 
     def AxiomDeclaration(params: Seq[i.SortVariable], _1: i.Pattern, att: i.Attributes): i.Declaration = d.AxiomDeclaration(params, _1, att)
+
+    def ClaimDeclaration(params: Seq[i.SortVariable], _1: i.Pattern, att: i.Attributes): i.Declaration = d.ClaimDeclaration(params, _1, att)
 
     def Attributes(patterns: Seq[Pattern]): i.Attributes = d.Attributes(patterns)
 

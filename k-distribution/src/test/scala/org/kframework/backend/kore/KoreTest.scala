@@ -50,6 +50,16 @@ class KoreTest {
 
   def axioms(k: String): Seq[AxiomDeclaration] = axioms(kompile(k))
 
+  def claims(defn: Definition): Seq[ClaimDeclaration] = {
+    defn.modules.flatMap(_.decls.filter(_.isInstanceOf[ClaimDeclaration]).map(_.asInstanceOf[ClaimDeclaration]))
+  }
+
+  def claims(k: String): Seq[ClaimDeclaration] = claims(kompile(k))
+
+  def hasAttribute(attributes: Attributes, name : String) : Boolean = {
+    attributes.patterns.exists { case p: Application => p.head.ctr == name }
+  }
+
   def getRewrite(axiom: AxiomDeclaration): Option[GeneralizedRewrite] = {
     def go(pattern: Pattern): Option[GeneralizedRewrite] = {
       pattern match {

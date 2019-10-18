@@ -10,7 +10,7 @@ module VERIFICATION
 endmodule
 
 
-module MAX-SPEC
+module MAX-SPEC [one-path]
   imports VERIFICATION
   imports IMP
 

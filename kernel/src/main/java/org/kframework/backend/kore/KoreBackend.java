@@ -97,7 +97,8 @@ public class KoreBackend implements Backend {
     }
 
     public static String getKompiledString(ModuleToKORE converter, FileUtil files, boolean heatCoolEquations) {
-        String kompiledString = converter.convert(heatCoolEquations);
+        StringBuilder sb = new StringBuilder();
+        String kompiledString = converter.convert(heatCoolEquations, sb);
         Properties koreToKLabels = new Properties();
         koreToKLabels.putAll(converter.getKToKoreLabelMap().inverse());
         try {

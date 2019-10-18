@@ -77,8 +77,9 @@ public class LLVMRewriter implements Function<Definition, Rewriter> {
                 ModuleToKORE converter = new ModuleToKORE(mod, files, def.topCellInitializer, kompileOptions);
                 K withMacros = macroExpander.expand(k);
                 K kWithInjections = new AddSortInjections(mod).addInjections(withMacros);
-                converter.convert(kWithInjections);
-                String koreOutput = converter.toString();
+                StringBuilder sb = new StringBuilder();
+                converter.convert(kWithInjections, sb);
+                String koreOutput = sb.toString();
                 files.saveToTemp("pgm.kore", koreOutput);
                 String pgmPath = files.resolveTemp("pgm.kore").getAbsolutePath();
                 File koreOutputFile = files.resolveTemp("result.kore");

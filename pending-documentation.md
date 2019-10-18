@@ -845,6 +845,22 @@ Note that in the case of Set and Map, one guarantee is that K1, K2, K3, and K4
 represent /distinct/ elements. Pattern matching fails if the correct number of
 distinct elements cannot be found.
 
+### `all-path` and `one-path` attributes to distinguish reachability claims
+
+As the Haskell backend can handle both one-path and all-path reachability
+claims, but both these are encoded as rewrite rules in K, these attributes can
+be used to clarify what kind of claim a rule is.
+
+In addition of being able to annotate a rule with one of them
+(if annotating with more at the same time, only one of them would be chosen),
+one can also annotate whole modules, to give a default claim type for all rules
+in that module.
+
+Additionally, the Haskell backend introduces an extra command line option
+for the K frontend, `--default-claim-type`, with possible values
+`all-path` and `one-path` to allow choosing a default type for all
+claims.
+
 ### Set Variables
 
 #### Motivation
