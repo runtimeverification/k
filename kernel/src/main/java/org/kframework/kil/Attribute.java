@@ -47,6 +47,9 @@ public class Attribute<T> extends ASTNode {
     public static final String SMTLIB_KEY = "smtlib";
     public static final String SMT_LEMMA_KEY = "smt-lemma";
     public static final String SMT_PRELUDE_KEY = "smt-prelude";
+
+    public static final String ONE_PATH_KEY = "one-path";
+    public static final String ALL_PATH_KEY = "all-path";
     // Used to direct configuration abstraction,
     // generated when translating configuration declaration to productions.
     public static final String CELL_KEY = "cell";
