@@ -285,7 +285,16 @@ class TextToKore(b: Builders = DefaultBuilders) {
           val att = parseAttributes()
           val decl = b.AxiomDeclaration(params, pattern, att)
           parseDeclarations(decl +: decls)
-        case (e1, e2) =>
+        case  ('c', 'l') => // claim declaration
+          consume("aim")
+          consumeWithLeadingWhitespaces("{")
+          val params = parseList(() => parseSortVariable(parsingLevel = both), ',', '}')
+          consumeWithLeadingWhitespaces("}")
+          val pattern = parsePattern()
+          val att = parseAttributes()
+          val decl = b.ClaimDeclaration(params, pattern, att)
+          parseDeclarations(decl +: decls)
+         case (e1, e2) =>
           throw error("sort, symbol, alias, axiom", e1)
       }
     }
