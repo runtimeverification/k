@@ -150,8 +150,9 @@ public class KPrint {
                 ModuleToKORE converter = new ModuleToKORE(module, files, cdef.topCellInitializer, kompileOptions);
                 result = ExpandMacros.forNonSentences(module, files, kompileOptions, false).expand(result);
                 result = new AddSortInjections(module).addInjections(result);
-                converter.convert(result);
-                return converter.toString().getBytes();
+                StringBuilder sb = new StringBuilder();
+                converter.convert(result, sb);
+                return sb.toString().getBytes();
             default:
                 throw KEMException.criticalError("Unsupported output mode without a CompiledDefinition: " + outputMode);
         }
