@@ -29,11 +29,11 @@ public class TreeCleanerVisitorTest {
 
 
     TreeCleanerVisitor treeCleanerVisitor = new TreeCleanerVisitor();
-    org.kframework.definition.Production fooProduction = Production(Sort("Foo"), Seq(RegexTerminal("foo|bar")));
+    org.kframework.definition.Production fooProduction = Production(Seq(), Sort("Foo"), Seq(RegexTerminal("foo|bar")));
     Constant foo = Constant.apply("foo", fooProduction);
     Constant bar = Constant.apply("bar", fooProduction);
 
-    org.kframework.definition.Production noKLabelProduction = Production(Sort("NoKLabelProd"), Seq(NonTerminal(Sort("Foo")), NonTerminal(Sort("Foo"))));
+    org.kframework.definition.Production noKLabelProduction = Production(Seq(), Sort("NoKLabelProd"), Seq(NonTerminal(Sort("Foo")), NonTerminal(Sort("Foo"))));
 
     @Test
     public void testConstant() throws Exception {

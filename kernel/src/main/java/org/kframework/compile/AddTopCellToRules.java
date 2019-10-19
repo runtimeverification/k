@@ -5,6 +5,7 @@ import org.kframework.backend.kore.ConstructorChecks;
 import org.kframework.compile.ConfigurationInfo;
 import org.kframework.compile.LabelInfo;
 import org.kframework.definition.Context;
+import org.kframework.definition.Production;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kil.Attribute;
@@ -13,12 +14,14 @@ import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.KList;
 import org.kframework.kore.KRewrite;
+import org.kframework.kore.Sort;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import static org.kframework.Collections.*;
 import static org.kframework.kore.KORE.*;
 
 /**
@@ -54,18 +57,16 @@ public class AddTopCellToRules {
             KLabel kLabel = ((KApply) term).klabel();
             if (ConstructorChecks.isBuiltinLabel(kLabel)) {
                 // builtin-labels (ML connectives)
-                String polyStr = labelInfo.getPolyInfo(kLabel);
-                if(polyStr != null) {
-                    // connectives that have poly attribute
-                    List<Set<Integer>> polyPositions = RuleGrammarGenerator.computePositions(polyStr);
-                    for (Set<Integer> pos: polyPositions) {
-                        if (pos.contains(0)) {
-                            if (pos.size() > 1) {
+                Production prod = labelInfo.getProduction(kLabel.name());
+                if(prod.params().nonEmpty()) {
+                    for (Sort param : iterable(prod.params())) {
+                        if (prod.sort().equals(param)) {
+                            if (stream(prod.nonterminals()).anyMatch(nt -> nt.sort().equals(param))) {
                                 // recursively call addRoot on the children whose type is the same as the return type
                                 List<K> oldChildren = ((KApply) term).klist().items();
                                 List<K> newChildren = new ArrayList<>();
                                 for (int i = 0; i < oldChildren.size(); i++) {
-                                    if (pos.contains(i + 1)) {
+                                    if (prod.nonterminals().apply(i).sort().equals(param)) {
                                         newChildren.add(addRootCell(oldChildren.get(i)));
                                     } else {
                                         newChildren.add(oldChildren.get(i));

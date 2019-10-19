@@ -20,6 +20,7 @@ public class Production extends ASTNode {
      */
     protected List<ProductionItem> items;
     protected Sort sort;
+    protected List<Sort> params;
     protected String ownerModuleName;
     private Multimap<Integer, Integer> binderMap;
 
@@ -164,6 +165,14 @@ public class Production extends ASTNode {
 
     public void setSort(Sort sort) {
         this.sort = sort;
+    }
+
+    public List<Sort> getParams() {
+        return params;
+    }
+
+    public void setParams(List<Sort> params) {
+        this.params = params;
     }
 
     public ASTNode getChildNode(int idx) {

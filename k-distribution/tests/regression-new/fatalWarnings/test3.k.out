@@ -1,14 +1,14 @@
 [Error] Compiler: Had 1 parsing errors.
 [Error] Inner Parser: Parsing ambiguity. Arbitrarily choosing the first.
-1: syntax Bool ::= Bool "orBool" Bool [boolOperation() function() functional()
-hook(BOOL.or) klabel(_orBool_) latex({#1}\vee_{\scriptstyle\it Bool}{#2})
-left() smt-hook(or)]
-   
-`_orBool_`(`_andBool_`(`foo_TEST3`(.KList),`_orBool_`(`foo_TEST3`(.KList),`foo_TEST3`(.KList))),`foo_TEST3`(.KList))
-2: syntax Bool ::= Bool "andBool" Bool [boolOperation() function() functional()
+1: syntax Bool ::= Bool "andBool" Bool [boolOperation() function() functional()
 hook(BOOL.and) klabel(_andBool_) latex({#1}\wedge_{\scriptstyle\it Bool}{#2})
 left() smt-hook(and) symbol()]
    
 `_andBool_`(`foo_TEST3`(.KList),`_orBool_`(`_orBool_`(`foo_TEST3`(.KList),`foo_TEST3`(.KList)),`foo_TEST3`(.KList)))
+2: syntax Bool ::= Bool "orBool" Bool [boolOperation() function() functional()
+hook(BOOL.or) klabel(_orBool_) latex({#1}\vee_{\scriptstyle\it Bool}{#2})
+left() smt-hook(or)]
+   
+`_orBool_`(`_andBool_`(`foo_TEST3`(.KList),`_orBool_`(`foo_TEST3`(.KList),`foo_TEST3`(.KList))),`foo_TEST3`(.KList))
 	Source(test3.k)
 	Location(12,15,12,54)

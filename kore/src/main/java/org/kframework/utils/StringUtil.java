@@ -822,10 +822,4 @@ public class StringUtil {
         }
         return encoded;
     }
-
-    public static List<Set<Integer>> computePoly(String poly) {
-      return Arrays.asList(poly.split(";"))
-        .stream().map(l -> Arrays.asList(l.split(",")).stream()
-        .map(s -> Integer.valueOf(s.trim())).collect(Collectors.toSet())).collect(Collectors.toList());
-    }
 }

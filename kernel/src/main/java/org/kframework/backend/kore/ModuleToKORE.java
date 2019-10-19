@@ -75,7 +75,6 @@ public class ModuleToKORE {
     private final BiMap<String, String> kToKoreLabelMap = HashBiMap.create();
     private final FileUtil files;
     private final Set<String> impureFunctions = new HashSet<>();
-    private final Map<String, List<Set<Integer>>> polyKLabels = new HashMap<>();
     private final KLabel topCellInitializer;
     private final Set<String> mlBinders = new HashSet<>();
     private final KompileOptions options;
@@ -150,7 +149,6 @@ public class ModuleToKORE {
             if (isBuiltinProduction(prod)) {
                 continue;
             }
-            prod = computePolyProd(prod);
             if (prod.isSubsort() && !prod.sort().equals(Sorts.K())) {
                 genSubsortAxiom(prod, sb);
                 continue;
@@ -210,6 +208,9 @@ public class ModuleToKORE {
             if (att.contains("token")) {
                 tokenSorts.add(prod.sort());
             }
+            if (att.contains("mlBinder")) {
+                mlBinders.add(prod.klabel().get().name());
+            }
             collectAttributes(attributes, att);
         }
         for (Rule r : iterable(module.sortedRules())) {
@@ -261,7 +262,6 @@ public class ModuleToKORE {
             if (isBuiltinProduction(prod)) {
                 continue;
             }
-            prod = computePolyProd(prod);
             if (prod.klabel().isEmpty()) {
                 continue;
             }
@@ -475,7 +475,6 @@ public class ModuleToKORE {
         }
         for (Production prod2 : iterable(module.productionsForSort().apply(prod.sort()).toSeq().sorted(Production.ord()))) {
             // !(cx(x1,x2,...) /\ cy(y1,y2,...))
-            prod2 = computePolyProd(prod2);
             if (prod2.klabel().isEmpty() || noConfusion.contains(Tuple2.apply(prod, prod2)) || prod.equals(prod2)
                     || !isConstructor(prod2, functionRulesMap, impurities) || isBuiltinProduction(prod2)) {
                 // TODO (traiansf): add no confusion axioms for constructor vs inj.
@@ -502,7 +501,6 @@ public class ModuleToKORE {
         boolean hasToken = false;
         int numTerms = 0;
         for (Production prod : iterable(mutable(module.productionsForSort()).getOrDefault(sort, Set()).toSeq().sorted(Production.ord()))) {
-            prod = computePolyProd(prod);
             if (isFunction(prod) || prod.isSubsort() || isBuiltinProduction(prod)) {
                 continue;
             }
@@ -1007,8 +1005,7 @@ public class ModuleToKORE {
     }
 
     private boolean isFunction(Production prod) {
-        Production realProd = prod.att().get(Constants.ORIGINAL_PRD, Production.class);
-        if (!realProd.att().contains(Attribute.FUNCTION_KEY)) {
+        if (!prod.att().contains(Attribute.FUNCTION_KEY)) {
             return false;
         }
         return true;
@@ -1051,74 +1048,15 @@ public class ModuleToKORE {
         }
     }
 
-    private Production computePolyProd(Production prod) {
-        return computePolyProd(prod, null);
-    }
-
-    private Production computePolyProd(Production prod, KApply k) {
-        if (prod.klabel().isEmpty() || !prod.att().contains("poly"))
-            return prod.withAtt(prod.att().add(Constants.ORIGINAL_PRD, Production.class, prod));
-        List<Set<Integer>> poly = RuleGrammarGenerator.computePositions(prod);
-        String labelName = prod.klabel().get().name();
-        if (prod.att().contains(Attribute.ML_BINDER_KEY)) {
-            mlBinders.add(labelName);
-        }
-        polyKLabels.put(labelName, poly);
-        List<Sort> params = new ArrayList<>();
-        List<NonTerminal> children = new ArrayList<>(mutable(prod.nonterminals()));
-        Sort returnSort = prod.sort();
-        for (int i = 0; i < poly.size(); i++) {
-            Set<Integer> positions = poly.get(i);
-            Sort sort = Sort("S" + i);
-            if (k != null) {
-                int firstPos = positions.iterator().next();
-                if (firstPos == 0) {
-                    sort = k.att().get(Sort.class);
-                } else {
-                    sort = k.klist().items().get(firstPos - 1).att().get(Sort.class);
-                }
-            }
-            params.add(sort);
-            for (int j : positions) {
-                if (j == 0) {
-                    returnSort = sort;
-                } else {
-                    children.set(j - 1, NonTerminal(sort));
-                }
-            }
-        }
-        List<ProductionItem> items = new ArrayList<>();
-        int i = 0;
-        for (ProductionItem item : iterable(prod.items())) {
-            if (item instanceof NonTerminal) {
-                items.add(children.get(i));
-                i++;
-            } else {
-                items.add(item);
-            }
-        }
-        return Production(KLabel(labelName, immutable(params)), returnSort, immutable(items),
-                prod.att().add(Constants.ORIGINAL_PRD, Production.class, prod));
-    }
-
     private KLabel computePolyKLabel(KApply k) {
         String labelName = k.klabel().name();
-        List<Set<Integer>> poly = new ArrayList<>(polyKLabels.get(labelName));
         if (mlBinders.contains(labelName)) { // ML binders are not parametric in the variable so we remove it
-            poly.remove(0);
+            List<Sort> params = mutable(k.klabel().params());
+            params.remove(0);
+            return KLabel(labelName, immutable(params));
+        } else {
+            return k.klabel();
         }
-        List<Sort> params = new ArrayList<>();
-        for (Set<Integer> positions : poly) {
-            int pos = positions.iterator().next();
-            Sort sort;
-            if (pos == 0) {
-                sort = k.att().get(Sort.class);
-            } else {
-                sort = k.items().get(pos-1).att().get(Sort.class);
-            }
-            params.add(sort);
-        }
-        return KLabel(labelName, immutable(params));
     }
 
 
@@ -1137,7 +1075,7 @@ public class ModuleToKORE {
         }
     }
 
-    private static final Production INJ_PROD = Production(KLabel(KLabels.INJ), Sort("K"), Seq(NonTerminal(Sort("K"))), Att().add("poly", "1; 0"));
+    private static final Production INJ_PROD = Production(KLabel(KLabels.INJ, Sort("S1"), Sort("S2")), Sort("S2"), Seq(NonTerminal(Sort("S1"))), Att());
 
 
     private Production production(KApply term) {
@@ -1147,11 +1085,11 @@ public class ModuleToKORE {
     private Production production(KApply term, boolean instantiatePolySorts) {
         KLabel klabel = term.klabel();
         if (klabel.name().equals(KLabels.INJ))
-            return computePolyProd(INJ_PROD, instantiatePolySorts ? term : null);
-        Option<scala.collection.Set<Production>> prods = module.productionsFor().get(klabel);
+            return instantiatePolySorts ? INJ_PROD.substitute(term.klabel().params()) : INJ_PROD;
+        Option<scala.collection.Set<Production>> prods = module.productionsFor().get(klabel.head());
         assert(prods.nonEmpty());
         assert(prods.get().size() == 1);
-        return computePolyProd(prods.get().head(), instantiatePolySorts ? term : null);
+        return instantiatePolySorts ? prods.get().head().substitute(term.klabel().params()) : prods.get().head();
     }
 
     private String convertBuiltinLabel(String klabel) {
@@ -1220,7 +1158,7 @@ public class ModuleToKORE {
     }
 
     private void convert(Sort sort, Production prod, StringBuilder sb) {
-        convert(sort, prod.klabel().isDefined() && prod.klabel().get().params().contains(sort), sb);
+        convert(sort, prod.klabel().isDefined() && prod.isSortVariable(sort), sb);
     }
 
     private void convert(Sort sort, boolean var, StringBuilder sb) {
@@ -1341,10 +1279,7 @@ public class ModuleToKORE {
                 if (impureFunctions.contains(k.klabel().name())) {
                     throw KEMException.internalError("Cannot yet translate impure function to kore: " + k.klabel().name(), k);
                 }
-                KLabel label = k.klabel();
-                if (polyKLabels.containsKey(k.klabel().name())) {
-                    label = computePolyKLabel(k);
-                }
+                KLabel label = computePolyKLabel(k);
                 String conn = "";
                 if (mlBinders.contains(k.klabel().name()) && k.items().get(0).att().contains("anonymous")){
                     // Handle #Forall _ / #Exists _
