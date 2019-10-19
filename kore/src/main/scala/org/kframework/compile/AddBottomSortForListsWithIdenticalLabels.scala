@@ -20,9 +20,9 @@ object AddBottomSortForListsWithIdenticalLabels extends Function[Module, Module]
             val newBottomSort = Sort("GeneratedListBottom{" + klabel + "}")
 
             Set[Sentence]()
-              .|(minimalSorts.map(s => Production(s, Seq(NonTerminal(newBottomSort, None)), Att.empty)))
+              .|(minimalSorts.map(s => Production(Seq(), s, Seq(NonTerminal(newBottomSort, None)), Att.empty)))
               .+(SyntaxSort(newBottomSort, Att.empty))
-              .+(Production(userListInfo.head.pTerminator.klabel.get, newBottomSort,
+              .+(Production(userListInfo.head.pTerminator.klabel.get, Seq(), newBottomSort,
                 Seq(Terminal(".GeneratedListBottom")),
                 Att.empty.add("unparseAvoid")))
           } else {

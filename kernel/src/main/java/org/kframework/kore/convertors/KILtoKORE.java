@@ -247,12 +247,13 @@ public class KILtoKORE extends KILTransformation<Object> {
                     org.kframework.definition.Production prod;
                     if (p.getKLabel(kore) == null)
                         prod = Production(
+                                immutable(p.getParams()),
                                 sort,
                                 immutable(items),
                                 attrs);
                     else
                         prod = Production(
-                                KLabel(p.getKLabel(kore)),
+                                KLabel(p.getKLabel(kore), immutable(p.getParams())),
                                 sort,
                                 immutable(items),
                                 attrs);
@@ -311,13 +312,13 @@ public class KILtoKORE extends KILTransformation<Object> {
         org.kframework.definition.Production prod1, prod3;
 
         // Es ::= E "," Es
-        prod1 = Production(KLabel(p.getKLabel(kore)), sort,
+        prod1 = Production(KLabel(p.getKLabel(kore), immutable(p.getParams())), sort,
                 Seq(NonTerminal(elementSort), Terminal(userList.getSeparator()), NonTerminal(sort)),
                 attrs.add("right"));
 
 
         // Es ::= ".Es"
-        prod3 = Production(KLabel(p.getTerminatorKLabel(kore)), sort, Seq(Terminal("." + sort.toString())),
+        prod3 = Production(KLabel(p.getTerminatorKLabel(kore), immutable(p.getParams())), sort, Seq(Terminal("." + sort.toString())),
                 attrs.remove("format").remove("strict").add("klabel", p.getTerminatorKLabel(false)));
 
         res.add(prod1);

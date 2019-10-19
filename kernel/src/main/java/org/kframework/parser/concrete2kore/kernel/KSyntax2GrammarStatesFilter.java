@@ -51,7 +51,7 @@ public class KSyntax2GrammarStatesFilter {
         }
 
         stream(module.productions()).forEach(p -> collectRejects(p, rejects));
-        stream(module.productions()).collect(Collectors.groupingBy(p -> p.sort())).entrySet().stream().sorted(Comparator.comparing(e2 -> e2.getKey().toString())).forEach(e -> processProductions(e.getKey(), e.getValue(), grammar, rejects, scanner));
+        stream(module.productions()).filter(p -> p.params().isEmpty()).collect(Collectors.groupingBy(p -> p.sort())).entrySet().stream().sorted(Comparator.comparing(e2 -> e2.getKey().toString())).forEach(e -> processProductions(e.getKey(), e.getValue(), grammar, rejects, scanner));
         grammar.compile(scanner);
         return grammar;
     }

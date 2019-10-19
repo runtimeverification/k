@@ -374,7 +374,7 @@ public class GenerateSentencesFromConfigDecl {
                     Sort childOptSort = Sort(childSort.name()+"Opt", childSort.params());
                     fragmentItems.add(NonTerminal(childOptSort));
 
-                    sentences.add(Production(childOptSort, List(NonTerminal(childSort))));
+                    sentences.add(Production(Seq(), childOptSort, List(NonTerminal(childSort))));
                     if (!m.definedKLabels().contains(KLabel("no"+childSort.toString()))) {
                         sentences.add(Production(KLabel("no"+childSort.toString()), childOptSort, List(Terminal("no"+childSort.toString())),
                                 Att().add(Attribute.CELL_OPT_ABSENT_KEY,Sort.class,childSort)));
@@ -437,7 +437,7 @@ public class GenerateSentencesFromConfigDecl {
                         + ". Should be one of: Set, Bag, List, Map");
             }
             SyntaxSort sortDecl = SyntaxSort(bagSort, Att().add("hook", type.toUpperCase() + '.' + type));
-            Sentence bagSubsort = Production(bagSort, Seq(NonTerminal(sort)));
+            Sentence bagSubsort = Production(Seq(), bagSort, Seq(NonTerminal(sort)));
             Sentence bagElement;
             if (type.equals("Map")) {
                 bagElement = Production(KLabel(bagSort.name() + "Item"), bagSort, Seq(

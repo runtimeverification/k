@@ -11,9 +11,9 @@ module UNIFICATION
 
   syntax KItem ::= #variablesMap(K) [function, hook(UNIFICATION.variablesMap), impure]
 
-  syntax K ::= #renameMetaKVariables(K, Set)    [function, hook(UNIFICATION.rename), impure, poly(0, 1)]
+  syntax {Sort} Sort ::= #renameMetaKVariables(Sort, Set)    [function, hook(UNIFICATION.rename), impure]
 
-  syntax K ::= #freezeKVariables(K, K) [function, hook(UNIFICATION.freezeVariables), impure, poly(0, 1)]
+  syntax {Sort} Sort ::= #freezeKVariables(Sort, K) [function, hook(UNIFICATION.freezeVariables), impure]
 
   syntax Bool ::= #unifiable(K,K) [function, hook(UNIFICATION.unifiable), impure]
 
