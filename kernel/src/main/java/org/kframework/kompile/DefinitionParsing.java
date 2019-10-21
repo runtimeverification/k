@@ -8,6 +8,7 @@ import org.kframework.Collections;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 import org.kframework.builtin.BooleanUtils;
+import org.kframework.builtin.Sorts;
 import org.kframework.definition.Bubble;
 import org.kframework.definition.Context;
 import org.kframework.definition.ContextAlias;
@@ -63,7 +64,7 @@ import static org.kframework.kore.KORE.*;
  * @cos refactored this code out of Kompile but none (or close to none) of it was originally written by him.
  */
 public class DefinitionParsing {
-    public static final Sort START_SYMBOL = Sort("#RuleContent");
+    public static final Sort START_SYMBOL = Sorts.RuleContent();
     private final File cacheFile;
     private boolean autoImportDomains;
     private boolean kore;

@@ -12,6 +12,7 @@ object Sorts {
 
   val KString = Sort("KString")
   val KBool = Sort("KBool")
+  val RuleContent = Sort("#RuleContent")
 
   val Bool = Sort("Bool")
   val Int = Sort("Int")
