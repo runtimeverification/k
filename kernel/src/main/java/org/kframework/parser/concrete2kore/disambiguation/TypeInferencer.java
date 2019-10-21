@@ -81,7 +81,7 @@ public class TypeInferencer implements AutoCloseable {
   }
 
   public boolean isRealSort(Sort s) {
-    return !RuleGrammarGenerator.isParserSort(s) || s.equals(Sorts.K()) || s.equals(Sorts.KItem());
+    return !RuleGrammarGenerator.isParserSort(s) || s.equals(Sorts.K()) || s.equals(Sorts.KItem()) || s.equals(Sorts.KLabel());
   }
 
   public Module module() {
@@ -295,7 +295,7 @@ public class TypeInferencer implements AutoCloseable {
           pushConstraint(name);
         }
       }
-      if (pr instanceof Constant && pr.production().sort().equals(Sorts.KVariable()) && !expectedSort.equals(Sorts.KLabel())) {
+      if (pr instanceof Constant && pr.production().sort().equals(Sorts.KVariable())) {
         nextId++;
         variablesById.add(new ArrayList<>());
         pr.setId(Optional.of(id));
