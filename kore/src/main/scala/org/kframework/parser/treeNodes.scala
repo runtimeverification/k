@@ -16,6 +16,10 @@ import scala.collection.mutable;
 trait Term extends HasLocation {
   var location: Optional[Location] = Optional.empty()
   var source: Optional[Source] = Optional.empty()
+  var id: Optional[Integer] = Optional.empty()
+  def setId(id: Optional[Integer]) {
+    this.id = id
+  }
 }
 
 trait ProductionReference extends Term {
