@@ -133,10 +133,15 @@ public class TypeInferenceVisitor extends SetsTransformerWithErrors<ParseFailedE
                             substituted.klabel().get().name().equals("#InnerCast"))) {
               hasCastAlready = true;
               hasCheckAlready = false;
+            } else {
+              hasCastAlready = false;
+              hasCheckAlready = false;
             }
             Term t = tc.get(j);
+            Sort oldExpected = expectedSort;
             expectedSort = ((NonTerminal) substituted.items().apply(i)).sort();
             Either<Set<ParseFailedException>, Term> rez = apply(t);
+            expectedSort = oldExpected;
             hasCastAlready = wasCast;
             hasCheckAlready = wasCheck;
             if (rez.isLeft())
