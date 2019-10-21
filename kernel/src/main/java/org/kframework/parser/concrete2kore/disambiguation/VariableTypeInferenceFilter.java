@@ -572,7 +572,7 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                 if (cast == null) {
                     return Right.apply(c);
                 } else {
-                    return Right.apply(TermCons.apply(ConsPStack.singleton(c), cast, c.location(), c.source()));
+                    return Right.apply(TermCons.apply(ConsPStack.singleton(c), cast, c.location(), c.source(), Optional.empty()));
                 }
             }
 
