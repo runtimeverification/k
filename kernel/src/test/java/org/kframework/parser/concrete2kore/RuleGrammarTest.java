@@ -247,7 +247,7 @@ public class RuleGrammarTest {
                 "| r\"[0-9]+\" [token] " +
                 "syntax K " +
                 "endmodule";
-        parseConfig("<T multiplicity=\"*\"> <k> 1+2*3 </k> (<state> A => .::K </state> => .::Bag) </T>", def, 1, false);
+        parseConfig("<T multiplicity=\"*\"> <k> 1+2*3 </k> (<state> A => .::K </state> => .::Bag) </T>", def, 0, false);
     }
 
     // test variable disambiguation when all variables are being inferred
@@ -286,9 +286,9 @@ public class RuleGrammarTest {
         parseRule("A::K ==K A", def, 0, false);
         parseRule("A::K == K A", def, 0, true);
         parseRule("A:K", def, 0, false);
-        parseRule("A: K", def, 2, false);
-        parseRule("A:Stmt ?F : Stmt", def, 2, false);
-        parseRule("A:Stmt ? F : Stmt", def, 2, false);
+        parseRule("A: K", def, 0, false);
+        parseRule("A:Stmt ?F : Stmt", def, 0, false);
+        parseRule("A:Stmt ? F : Stmt", def, 0, false);
     }
 
     // test whitespace
