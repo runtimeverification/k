@@ -145,43 +145,43 @@ public class TypeInferencer implements AutoCloseable {
         return;
     }
     for (String var : variables) {
-      println("(declare-const " + var + " Sort)");
+      println("(declare-const |" + var + "| Sort)");
     }
     print("(define-fun constraints (");
     for (String var : variables) {
-      print("(" + var + "_ Sort) ");
+      print("(|" + var + "_| Sort) ");
     }
     println(") Bool (and ");
     for (String var : variables) {
-      println("(isValid " + var + "_)");
+      println("(isValid |" + var + "_|)");
     }
     println(viz.toString());
     println("))");
     print("(define-fun maximal (");
     for (String var : variables) {
-      print("(" + var + "_ Sort) ");
+      print("(|" + var + "_| Sort) ");
     }
     print(") Bool (not (exists (");
     for (String var : variables) {
-      print("(" + var + "__ Sort) ");
+      print("(|" + var + "__| Sort) ");
     }
     print(") (and (constraints ");
     for (String var : variables) {
-      print(var + "__ ");
+      print("|" + var + "__| ");
     }
     print(") (or ");
     for (String var : variables) {
-      print("(<Sort " + var + "_ " + var + "__) ");
+      print("(<Sort |" + var + "_| |" + var + "__|) ");
     }
     println(")))))");
     print("(assert (constraints ");
     for (String var : variables) {
-      print(var + " ");
+      print("|" + var + "| ");
     }
     println("))");
     print("(assert (maximal ");
     for (String var : variables) {
-      print(var + " ");
+      print("|" + var + "| ");
     }
     println("))");
   }
@@ -325,7 +325,7 @@ public class TypeInferencer implements AutoCloseable {
       } else {
         sb.append("(<=Sort ");
       }
-      sb.append(name).append("_ ");
+      sb.append("|").append(name).append("_| ");
       if (mod.subsorts().lessThan(Sorts.K(), expectedSort)) {
           expectedSort = Sorts.K();
       }
@@ -351,7 +351,7 @@ public class TypeInferencer implements AutoCloseable {
 
     private void printSort(Sort s, Map<Sort, String> params) {
       if (params.containsKey(s)) {
-        sb.append(params.get(s)).append("_");
+        sb.append("|").append(params.get(s)).append("_|");
         return;
       }
       if (s.params().isEmpty()) {
@@ -438,19 +438,19 @@ public class TypeInferencer implements AutoCloseable {
     }
     print("(assert (exists (");
     for (String var : variables) {
-      print("(" + var + "_ Sort) ");
+      print("(|" + var + "_| Sort) ");
     }
     print(") (and (constraints ");
     for (String var : variables) {
-      print(var + "_ ");
+      print("|" + var + "_| ");
     }
     print(") (maximal ");
     for (String var : variables) {
-      print(var + "_ ");
+      print("|" + var + "_| ");
     }
     print(") (or ");
     for (String var : variables) {
-      print("(distinct " + var + " " + var + "_) ");
+      print("(distinct |" + var + "| |" + var + "_|) ");
     }
     println("))))");
     status = null;
@@ -501,7 +501,7 @@ public class TypeInferencer implements AutoCloseable {
 
   private Sort computeValue(String name) {
     ensureHeads();
-    println("(get-value (" + name + "))");
+    println("(get-value (|" + name + "|))");
     if (DEBUG) {
       System.err.print(sb.toString());
     }
