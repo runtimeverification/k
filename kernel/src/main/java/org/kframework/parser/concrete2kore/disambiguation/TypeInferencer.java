@@ -2,6 +2,7 @@
 package org.kframework.parser.concrete2kore.disambiguation;
 
 import org.kframework.Collections;
+import org.kframework.attributes.Location;
 import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.ResolveAnonVar;
@@ -300,7 +301,8 @@ public class TypeInferencer implements AutoCloseable {
         pr.setId(Optional.of(id));
         String name;
         if (isAnonVar((Constant)pr)) {
-          name = "FreshVar" + ((Constant)pr).value() + (nextVarId++);
+          Location loc = pr.location().get();
+          name = "FreshVar" + ((Constant)pr).value() + "_" + loc.startLine() + "_" + loc.startColumn() + "_" + loc.endLine() + "_" + loc.endColumn();
         } else {
           name = "Var" + ((Constant)pr).value();
         }
