@@ -1,0 +1,40 @@
+options {
+  STATIC = false;
+}
+PARSER_BEGIN(SmtSortParser)
+package org.kframework.parser.concrete2kore.disambiguation;
+
+import org.kframework.kore.Sort;
+import org.kframework.kore.KORE;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import static org.kframework.kore.KORE.*;
+import static org.kframework.Collections.*;
+
+public class SmtSortParser {
+}
+
+PARSER_END(SmtSortParser)
+
+SKIP:  { " " | "\t" | "\n" | "\r"                    }
+TOKEN: { "(" | ")" | "mkSort" | "cons" | "nil" | <NUM: (["0"-"9"])+> }
+
+Sort Sort(Map<Integer, String> heads): {
+  String name;
+  Token head;
+  List<Sort> params = new ArrayList<Sort>();
+} {
+  "(" "mkSort" head=<NUM> { name = heads.get(Integer.parseInt(head.image)); } Params(params, heads) ")" {
+    return KORE.Sort(name, immutable(params));
+  }
+}
+
+void Params(List<Sort> params, Map<Integer, String> heads): {
+Sort s;
+} {
+  "nil"
+| "(" "cons" s=Sort(heads) { params.add(s); } Params(params, heads) ")"
+}
