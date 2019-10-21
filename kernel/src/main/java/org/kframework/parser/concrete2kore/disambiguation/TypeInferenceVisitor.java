@@ -51,6 +51,7 @@ public class TypeInferenceVisitor extends SetsTransformerWithErrors<ParseFailedE
       loc = ((Ambiguity)loc).items().iterator().next();
     }
     inferencer.push(t, topSort, isAnywhere);
+    Either<Set<ParseFailedException>, Term> typed;
     try {
       if (inferencer.hasNoVariables()) {
         return Right.apply(t);
@@ -64,7 +65,12 @@ public class TypeInferenceVisitor extends SetsTransformerWithErrors<ParseFailedE
         KException kex = new KException(ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, inferencer.errorMessage(), loc.source().orElse(null), loc.location().orElse(null));
         return Left.apply(Collections.singleton(new ParseFailedException(kex)));
       }
-      inferencer.pushNotModel();
+      inferencer.computeModel();
+      typed = new TypeCheckVisitor(topSort).apply(t);
+      if (typed.isLeft()) {
+        return typed;
+      }
+      inferencer.pushNotModel(typed.right().get());
       TypeInferencer.Status status = inferencer.status();
       switch(status) {
       case SATISFIABLE:
@@ -73,7 +79,7 @@ public class TypeInferenceVisitor extends SetsTransformerWithErrors<ParseFailedE
       case UNKNOWN:
         throw KEMException.internalError("Could not solve sort constraints.", t);
       case UNSATISFIABLE:
-        return new TypeCheckVisitor(topSort).apply(t);
+        return typed;
       }
       throw new AssertionError();
     } finally {

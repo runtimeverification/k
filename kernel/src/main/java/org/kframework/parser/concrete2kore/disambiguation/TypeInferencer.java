@@ -32,6 +32,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -424,28 +425,53 @@ public class TypeInferencer implements AutoCloseable {
     return "Type inference failed.";
   }
 
-  public void pushNotModel() {
+  public void computeModel() {
     for (String var : variables) {
       model.put(var, computeValue(var));
     }
-    print("(assert (exists (");
+  }
+
+  public void pushNotModel(Term typed) {
+    new PrintNotModel().apply(typed);
+    print("(assert (not (or (and ");
     for (String var : variables) {
-      print("(|" + var + "_| Sort) ");
+      print("(= |" + var + "| ");
+      printSort(model.get(var));
+      print(") ");
     }
-    print(") (and (constraints ");
+    print(") ");
     for (String var : variables) {
-      print("|" + var + "_| ");
+      print("(");
+      if (model.get(var).equals(Sorts.KLabel())) {
+        print("distinct");
+      } else {
+        print("=");
+      }
+      print(" |" + var + "| ");
+      printSort(Sorts.KLabel());
+      print(") ");
     }
-    print(") (maximal ");
-    for (String var : variables) {
-      print("|" + var + "_| ");
-    }
-    print(") (or ");
-    for (String var : variables) {
-      print("(distinct |" + var + "| |" + var + "_|) ");
-    }
-    println("))))");
+    println(")))");
     status = null;
+  }
+
+  public class PrintNotModel extends SafeTransformer {
+    private java.util.Set<String> variables = new HashSet<>();
+
+    @Override
+    public Term apply(Term term) {
+      if (term instanceof Ambiguity) {
+        Ambiguity amb = (Ambiguity)term;
+        return super.apply(amb);
+      }
+      ProductionReference pr = (ProductionReference)term;
+      if (pr.id().isPresent()) {
+        for (String name : variablesById.get(pr.id().get())) {
+          variables.add(name);
+        }
+      }
+      return super.apply(pr);
+    }
   }
 
   public Seq<Sort> getArgs(ProductionReference pr) {
