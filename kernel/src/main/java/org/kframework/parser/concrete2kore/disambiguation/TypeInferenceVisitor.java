@@ -101,7 +101,12 @@ public class TypeInferenceVisitor extends SetsTransformerWithErrors<ParseFailedE
     }
 
     @Override
-    public Either<Set<ParseFailedException>, Term> apply(ProductionReference pr) {
+    public Either<Set<ParseFailedException>, Term> apply(Term term) {
+      if (term instanceof Ambiguity) {
+        Ambiguity amb = (Ambiguity)term;
+        return super.apply(amb);
+      }
+      ProductionReference pr = (ProductionReference)term;
       if (pr instanceof Constant && pr.production().sort().equals(Sorts.KVariable())) {
         Sort inferred;
         if (expectedSort.equals(Sorts.KLabel())) {
