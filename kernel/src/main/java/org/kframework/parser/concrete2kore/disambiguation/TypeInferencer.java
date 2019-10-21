@@ -395,17 +395,9 @@ public class TypeInferencer implements AutoCloseable {
 
   private Status computeStatus() {
     println("(check-sat)");
-    if (DEBUG) {
-      System.err.print(sb.toString());
-    }
     try {
       String result = output.readLine();
       StringBuilder old = null;
-      if (DEBUG) {
-        old = sb;
-        sb = new StringBuilder();
-        System.err.println(result);
-      }
       if (result.equals("sat")) {
         return Status.SATISFIABLE;
       } else if (result.equals("unsat")) {
@@ -474,15 +466,8 @@ public class TypeInferencer implements AutoCloseable {
     heads = new HashMap<>();
     for (Sort s : sorts) {
       println("(get-value (Sort" + s.name() + "))");
-      if (DEBUG) {
-        System.err.print(sb.toString());
-      }
       try {
         String result = output.readLine();
-        if (DEBUG) {
-          sb = new StringBuilder();
-          System.err.println(result);
-        }
         int startIdx = result.indexOf(' ') + 1;
         int endIdx = result.indexOf(')');
         int value = Integer.parseInt(result.substring(startIdx, endIdx));
@@ -502,15 +487,8 @@ public class TypeInferencer implements AutoCloseable {
   private Sort computeValue(String name) {
     ensureHeads();
     println("(get-value (|" + name + "|))");
-    if (DEBUG) {
-      System.err.print(sb.toString());
-    }
     try {
       String result = output.readLine();
-      if (DEBUG) {
-        sb = new StringBuilder();
-        System.err.println(result);
-      }
       int startIdx = result.indexOf(' ');
       int endIdx = result.length() - 2;
       return new SmtSortParser(new StringReader(result.substring(startIdx, endIdx))).Sort(heads);
@@ -534,6 +512,10 @@ public class TypeInferencer implements AutoCloseable {
   private void reset() {
     if (level > 0)
       return;
+    if (DEBUG) {
+      System.err.print(sb.toString());
+      sb = new StringBuilder();
+    }
     status = null;
     heads = null;
     model.clear();
