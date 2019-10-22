@@ -509,49 +509,49 @@ public class TypeInferencer implements AutoCloseable {
       sb = new StringBuilder();
     }
 
-    private String printSort(Sort s, Optional<ProductionReference> t, boolean isIncremental) {
-      Map<Sort, String> params = new HashMap<>();
-      if (t.isPresent()) {
-        if (t.get().production().params().nonEmpty()) {
-          int id = t.get().id().get();
-          List<String> names = variablesById.get(id);
-          Seq<Sort> formalParams = t.get().production().params();
-          assert(names.size() == formalParams.size());
-          for (int i = 0; i < names.size(); i++) {
-            params.put(formalParams.apply(i), names.get(i));
-          }
-        }
-      }
-      return printSort(s, params, isIncremental);
-    }
-
-    private String printSort(Sort s, Map<Sort, String> params, boolean isIncremental) {
-      StringBuilder sb = new StringBuilder();
-      if (params.containsKey(s)) {
-        sb.append("|").append(params.get(s));
-        if (!isIncremental) {
-          sb.append("_");
-        }
-        sb.append("|");
-        return sb.toString();
-      }
-      if (s.params().isEmpty()) {
-        sb.append("|Sort" + s.name() + "|");
-        return sb.toString();
-      }
-      sb.append("(|Sort" + s.name() + "|");
-      for (Sort param : iterable(s.params())) {
-        sb.append(" ");
-        sb.append(printSort(param, params, isIncremental));
-      }
-      sb.append(")");
-      return sb.toString();
-    }
-    
     @Override
     public String toString() {
       return sb.toString();
     }
+  }
+
+  private String printSort(Sort s, Optional<ProductionReference> t, boolean isIncremental) {
+    Map<Sort, String> params = new HashMap<>();
+    if (t.isPresent()) {
+      if (t.get().production().params().nonEmpty()) {
+        int id = t.get().id().get();
+        List<String> names = variablesById.get(id);
+        Seq<Sort> formalParams = t.get().production().params();
+        assert(names.size() == formalParams.size());
+        for (int i = 0; i < names.size(); i++) {
+          params.put(formalParams.apply(i), names.get(i));
+        }
+      }
+    }
+    return printSort(s, params, isIncremental);
+  }
+
+  private String printSort(Sort s, Map<Sort, String> params, boolean isIncremental) {
+    StringBuilder sb = new StringBuilder();
+    if (params.containsKey(s)) {
+      sb.append("|").append(params.get(s));
+      if (!isIncremental) {
+        sb.append("_");
+      }
+      sb.append("|");
+      return sb.toString();
+    }
+    if (s.params().isEmpty()) {
+      sb.append("|Sort" + s.name() + "|");
+      return sb.toString();
+    }
+    sb.append("(|Sort" + s.name() + "|");
+    for (Sort param : iterable(s.params())) {
+      sb.append(" ");
+      sb.append(printSort(param, params, isIncremental));
+    }
+    sb.append(")");
+    return sb.toString();
   }
 
   private void printSort(Sort s) {
