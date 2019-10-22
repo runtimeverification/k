@@ -91,7 +91,7 @@ public class TypeInferencer implements AutoCloseable {
   public void push(Module mod) {
     print("(declare-datatypes () ((Sort ");
     for (Sort s : sorts) {
-      println("Sort" + s.name() + " ");
+      println("|Sort" + s.name() + "| ");
     }
     println(")))");
     println("(define-fun <Sort ((s1 Sort) (s2 Sort)) Bool");
@@ -401,10 +401,10 @@ public class TypeInferencer implements AutoCloseable {
         return sb.toString();
       }
       if (s.params().isEmpty()) {
-        sb.append("Sort" + s.name());
+        sb.append("|Sort" + s.name() + "|");
         return sb.toString();
       }
-      sb.append("(Sort" + s.name());
+      sb.append("(|Sort" + s.name() + "|");
       for (Sort param : iterable(s.params())) {
         sb.append(" ");
         sb.append(printSort(param, params));
@@ -421,9 +421,9 @@ public class TypeInferencer implements AutoCloseable {
 
   private void printSort(Sort s) {
     if (s.params().isEmpty()) {
-      print("Sort" + s.name());
+      print("|Sort" + s.name() + "|");
     } else {
-      print("(Sort" + s.name());
+      print("(|Sort" + s.name() + "|");
       for (Sort param : iterable(s.params())) {
         print(" ");
         printSort(param);
