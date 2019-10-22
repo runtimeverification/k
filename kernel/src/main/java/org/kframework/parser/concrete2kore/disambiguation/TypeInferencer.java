@@ -355,13 +355,12 @@ public class TypeInferencer implements AutoCloseable {
       } else {
         sb.append("(<=Sort ");
       }
-      sb.append("|").append(name).append("_| ");
-      printSort(actualSort, actualParams);
+      sb.append(printSort(actualSort, actualParams));
       sb.append(" ");
       if (mod.subsorts().lessThan(Sorts.K(), expectedSort)) {
         expectedSort = Sorts.K();
       }
-      printSort(expectedSort, expectedParams);
+      sb.append(printSort(expectedSort, expectedParams));
       sb.append(") ");
     }
 
@@ -375,7 +374,7 @@ public class TypeInferencer implements AutoCloseable {
       if (mod.subsorts().lessThan(Sorts.K(), expectedSort)) {
           expectedSort = Sorts.K();
       }
-      printSort(expectedSort, expectedParams);
+      sb.append(printSort(expectedSort, expectedParams));
       sb.append(") ");
     }
 
@@ -392,24 +391,26 @@ public class TypeInferencer implements AutoCloseable {
           }
         }
       }
-      printSort(s, params);
+      return printSort(s, params);
     }
 
     private void printSort(Sort s, Map<Sort, String> params) {
+      StringBuilder sb = new StringBuilder();
       if (params.containsKey(s)) {
         sb.append("|").append(params.get(s)).append("_|");
-        return;
+        return sb.toString();
       }
       if (s.params().isEmpty()) {
         sb.append("Sort" + s.name());
-        return;
+        return sb.toString();
       }
       sb.append("(Sort" + s.name());
       for (Sort param : iterable(s.params())) {
         sb.append(" ");
-        printSort(param, params);
+        sb.append(printSort(param, params));
       }
       sb.append(")");
+      return sb.toString();
     }
     
     @Override
