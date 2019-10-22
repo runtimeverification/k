@@ -58,14 +58,13 @@ public class TypeInferencer implements AutoCloseable {
   private final java.util.Set<Sort> sorts;
 
   private static final String PRELUDE1 = 
-    "(set-option :timeout 5000)\n" +
-    "(define-sort Head () Int)\n" +
-    "(declare-datatypes () ((Lst nil (cons (hd Sort) (tl Lst)))\n" +
-    "                       (Sort (mkSort (head Head) (params Lst)))))\n" +
-    "(define-fun s ((h Head)) Sort (mkSort h nil))\n";
+    "(set-option :timeout 5000)\n";
 
   private static final String PRELUDE2 =
-    "(define-fun <=Sort ((s1 Sort) (s2 Sort)) Bool (or (<Sort s1 s2) (= s1 s2)))\n";
+    "(define-fun <=Sort ((s1 Sort) (s2 Sort)) Bool (or (<Sort s1 s2) (= s1 s2)))\n" +
+    "(assert (forall ((s1 Sort) (s2 Sort) (s3 Sort)) (implies (and (<=Sort s1 s2) (<=Sort s2 s3)) (<=Sort s1 s3))))\n" +
+    "(assert (forall ((s1 Sort)) (<=Sort s1 s1)))\n" +
+    "(assert (forall ((s1 Sort) (s2 Sort)) (implies (and (<=Sort s1 s2) (<=Sort s2 s1)) (= s1 s2))))\n";
 
   public TypeInferencer(Module mod) {
     try {
@@ -90,14 +89,11 @@ public class TypeInferencer implements AutoCloseable {
   }
 
   public void push(Module mod) {
+    print("(declare-datatypes () ((Sort ");
     for (Sort s : sorts) {
-      println("(declare-const Sort" + s.name() + " Head)");
+      println("Sort" + s.name() + " ");
     }
-    print("(assert (distinct ");
-    for (Sort s : sorts) {
-      print("Sort" + s.name() + " ");
-    }
-    println("))");
+    println(")))");
     println("(define-fun <Sort ((s1 Sort) (s2 Sort)) Bool");
     int parens = 0;
     for (Tuple2<Sort, Set<Sort>> relation : iterable(mod.subsorts().relations())) {
@@ -122,13 +118,6 @@ public class TypeInferencer implements AutoCloseable {
       print(")");
     }
     println(")");
-    print("(define-fun isValid ((sort Sort)) Bool (or ");
-    for (Sort s : sorts) {
-      print("(= sort ");
-      printSort(s);
-      print(")");
-    }
-    println("))");
     println(PRELUDE2);
   }
 
@@ -153,9 +142,6 @@ public class TypeInferencer implements AutoCloseable {
       print("(|" + var + "_| Sort) ");
     }
     println(") Bool (and ");
-    for (String var : variables) {
-      println("(isValid |" + var + "_|)");
-    }
     println(viz.toString());
     println("))");
     print("(define-fun maximal (");
@@ -356,17 +342,13 @@ public class TypeInferencer implements AutoCloseable {
         return;
       }
       if (s.params().isEmpty()) {
-        sb.append("(s Sort" + s.name() + ")");
+        sb.append("Sort" + s.name());
         return;
       }
-      sb.append("(mkSort Sort" + s.name() + " ");
+      sb.append("(Sort" + s.name());
       for (Sort param : iterable(s.params())) {
-        sb.append("(cons ");
+        sb.append(" ");
         printSort(param, params);
-      }
-      sb.append(" nil");
-      for (Sort ignored : iterable(s.params())) {
-        sb.append(")");
       }
       sb.append(")");
     }
@@ -379,16 +361,12 @@ public class TypeInferencer implements AutoCloseable {
 
   private void printSort(Sort s) {
     if (s.params().isEmpty()) {
-      print("(s Sort" + s.name() + ")");
+      print("Sort" + s.name());
     } else {
-      print("(mkSort Sort" + s.name() + " ");
+      print("(Sort" + s.name());
       for (Sort param : iterable(s.params())) {
-        print("(cons ");
+        print(" ");
         printSort(param);
-      }
-      print(" nil");
-      for (Sort ignored : iterable(s.params())) {
-        print(")");
       }
       print(")");
     }
@@ -484,26 +462,6 @@ public class TypeInferencer implements AutoCloseable {
     }
   }
 
-  private Map<Integer, String> heads;
-
-  private void ensureHeads() {
-    if (heads != null)
-      return;
-    heads = new HashMap<>();
-    for (Sort s : sorts) {
-      println("(get-value (Sort" + s.name() + "))");
-      try {
-        String result = output.readLine();
-        int startIdx = result.indexOf(' ') + 1;
-        int endIdx = result.indexOf(')');
-        int value = Integer.parseInt(result.substring(startIdx, endIdx));
-        heads.put(value, s.name());
-      } catch (IOException e) {
-        throw KEMException.internalError("Could not read from z3 process", e);
-      }
-    }
-  }
-
   private final Map<String, Sort> model = new HashMap<>();
 
   private Sort getValue(String name) {
@@ -511,7 +469,6 @@ public class TypeInferencer implements AutoCloseable {
   }
 
   private Sort computeValue(String name) {
-    ensureHeads();
     println("(get-value (|" + name + "|))");
     try {
       String result = output.readLine();
@@ -543,7 +500,6 @@ public class TypeInferencer implements AutoCloseable {
       sb = new StringBuilder();
     }
     status = null;
-    heads = null;
     model.clear();
     variables.clear();
     variablesById.clear();
