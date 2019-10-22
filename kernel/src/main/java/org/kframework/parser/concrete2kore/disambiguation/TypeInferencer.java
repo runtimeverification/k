@@ -122,9 +122,10 @@ public class TypeInferencer implements AutoCloseable {
   }
 
   private final List<String> variables = new ArrayList<>();
+  private final List<String> variableNames = new ArrayList<>();
+  private final List<List<String>> variablesById = new ArrayList<>();
   private int nextId = 0;
   private int nextVarId = 0;
-  private final List<List<String>> variablesById = new ArrayList<>();
   private Term currentTerm;
   private Sort currentTopSort;
   private boolean isAnywhere;
@@ -265,15 +266,21 @@ public class TypeInferencer implements AutoCloseable {
  
       boolean isTopSort = expectedSort.equals(Sorts.RuleContent()) || expectedSort.name().equals("#RuleBody");
       int id = nextId;
-      if (pr.production().params().nonEmpty()) {
-        nextId++;
-        variablesById.add(new ArrayList<>());
-        pr.setId(Optional.of(id));
-      }
-      for (Sort param : iterable(pr.production().params())) {
-        String name = "FreshVar" + param.name() + (nextVarId++);
-        variables.add(name);
-        variablesById.get(id).add(name);
+      boolean shared = pr.id().isPresent() && variablesById.size() > pr.id().get();
+      if (!shared) {
+        if (pr.production().params().nonEmpty()) {
+          nextId++;
+          variablesById.add(new ArrayList<>());
+          pr.setId(Optional.of(id));
+        }
+        for (Sort param : iterable(pr.production().params())) {
+          String name = "FreshVar" + param.name() + (nextVarId++);
+          variables.add(name);
+          variableNames.add(param.name() + " in production " + pr.production().toString());
+          variablesById.get(id).add(name);
+        }
+      } else {
+        id = pr.id().get();
       }
       if (pr instanceof TermCons) {
         boolean wasStrict = isStrictEquality;
@@ -307,27 +314,30 @@ public class TypeInferencer implements AutoCloseable {
         expectedSort = oldExpectedSort;
         expectedParams = oldExpectedParams;
       }
-      if (pr.production().params().nonEmpty()) {
-        for (String name : variablesById.get(id)) {
-          pushConstraint(name);
-        }
-      }
       if (pr instanceof Constant && pr.production().sort().equals(Sorts.KVariable())) {
-        nextId++;
-        variablesById.add(new ArrayList<>());
-        pr.setId(Optional.of(id));
+        Constant c = (Constant)pr;
         String name;
-        if (isAnonVar((Constant)pr)) {
-          Location loc = pr.location().get();
-          name = "FreshVar" + ((Constant)pr).value() + "_" + loc.startLine() + "_" + loc.startColumn() + "_" + loc.endLine() + "_" + loc.endColumn();
+        if (!shared) {
+          nextId++;
+          variablesById.add(new ArrayList<>());
+          pr.setId(Optional.of(id));
+          if (isAnonVar(c)) {
+            name = "Var" + c.value() + (nextVarId++);
+          } else {
+            name = "Var" + c.value();
+          }
+          if (!variables.contains(name)) {
+            variables.add(name);
+            variableNames.add(c.value());
+          }
+          variablesById.get(id).add(name);
         } else {
-          name = "Var" + ((Constant)pr).value();
+          name = variablesById.get(id).get(0);
         }
-        if (!variables.contains(name)) {
-          variables.add(name);
-        }
-        variablesById.get(id).add(name);
-        pushConstraint(name);
+        Sort actualSort = null;
+        pushConstraint(name, c);
+      } else if (isRealSort(pr.production().sort())) {
+        pushConstraint(pr.production().sort(), Optional.of(pr));
       }
       return pr;
     }
@@ -336,7 +346,23 @@ public class TypeInferencer implements AutoCloseable {
       return var.value().equals(ResolveAnonVar.ANON_VAR.name()) || var.value().equals(ResolveAnonVar.FRESH_ANON_VAR.name());
     }
 
-    private void pushConstraint(String name) {
+    private void pushConstraint(Sort actualSort, Optional<ProductionReference> actualParams) {
+      if (isStrictEquality) {
+        sb.append("(= ");
+      } else {
+        sb.append("(<=Sort ");
+      }
+      sb.append("|").append(name).append("_| ");
+      printSort(actualSort, actualParams);
+      sb.append(" ");
+      if (mod.subsorts().lessThan(Sorts.K(), expectedSort)) {
+        expectedSort = Sorts.K();
+      }
+      printSort(expectedSort, expectedParams);
+      sb.append(") ");
+    }
+
+    private void pushConstraint(String name, Constant loc) {
       if (isStrictEquality) {
         sb.append("(= ");
       } else {
@@ -532,6 +558,7 @@ public class TypeInferencer implements AutoCloseable {
     status = null;
     model.clear();
     variables.clear();
+    variableNames.clear();
     variablesById.clear();
     nextId = 0;
     nextVarId = 0;
