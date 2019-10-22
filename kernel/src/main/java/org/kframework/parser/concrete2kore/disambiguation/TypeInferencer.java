@@ -162,9 +162,17 @@ public class TypeInferencer implements AutoCloseable {
     for (String var : variables) {
       print("|" + var + "__| ");
     }
-    print(") (or ");
+    print(") ");
     for (String var : variables) {
-      print("(<Sort |" + var + "_| |" + var + "__|) ");
+      if (var.startsWith("Var")) {
+        print("(<=Sort |" + var + "_| |" + var + "__|) ");
+      }
+    }
+    print("(or false ");
+    for (String var : variables) {
+      if (var.startsWith("Var")) {
+        print("(<Sort |" + var + "_| |" + var + "__|) ");
+      }
     }
     println(")))))");
     print("(assert (constraints ");
