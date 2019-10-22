@@ -518,13 +518,27 @@ public class TypeInferencer implements AutoCloseable {
     return model.get(name);
   }
 
+  private Sort eval(Sort s, Optional<ProductionReference> params) {
+    print("(eval ");
+    print(printSort(s, params, true));
+    println(")");
+    return readSort(false);
+  }
+
   private Sort computeValue(String name) {
     println("(get-value (|" + name + "|))");
+    return readSort(true);
+  }
+
+  private Sort readSort(boolean trim) {
     try {
       String result = output.readLine();
-      int startIdx = result.indexOf(' ');
-      int endIdx = result.length() - 2;
-      return new SmtSortParser(new StringReader(result.substring(startIdx, endIdx))).Sort(heads);
+      if (trim) {
+        int startIdx = result.indexOf(' ');
+        int endIdx = result.length() - 2;
+        result = result.substring(startIdx, endIdx);
+      }
+      return new SmtSortParser(new StringReader(result)).Sort();
     } catch (IOException e) {
       throw KEMException.internalError("Could not read from z3 process", e);
     } catch (ParseException e) {
