@@ -125,8 +125,14 @@ public class TypeInferencer implements AutoCloseable {
   private int nextId = 0;
   private int nextVarId = 0;
   private final List<List<String>> variablesById = new ArrayList<>();
+  private Term currentTerm;
+  private Sort currentTopSort;
+  private boolean isAnywhere;
 
   public void push(Term t, Sort topSort, boolean isAnywhere) {
+    currentTerm = t;
+    currentTopSort = topSort;
+    this.isAnywhere = isAnywhere;
     level++;
     println("(push)");
     ExpectedSortsVisitor viz = new ExpectedSortsVisitor(topSort, isAnywhere);
