@@ -96,7 +96,7 @@ public class TypeInferencer implements AutoCloseable {
     println(")))");
     println("(define-fun <Sort ((s1 Sort) (s2 Sort)) Bool");
     int parens = 0;
-    for (Tuple2<Sort, Set<Sort>> relation : iterable(mod.subsorts().relations())) {
+    for (Tuple2<Sort, Set<Sort>> relation : iterable(mod.syntacticSubsorts().relations())) {
       if (!isRealSort(relation._1())) {
         continue;
       }

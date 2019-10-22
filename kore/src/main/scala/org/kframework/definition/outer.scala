@@ -56,9 +56,9 @@ case class Definition(
 }
 
 trait Sorting {
-  def computeSubsortPOSet(sentences: Set[Sentence]) = {
+  def computeSubsortPOSet(sentences: Set[Sentence], syntactic: Boolean) = {
     val subsortRelations: Set[(Sort, Sort)] = sentences collect {
-      case Production(klabel, Seq(), endSort, Seq(NonTerminal(startSort, _)), att) if klabel.isEmpty => (startSort, endSort)
+      case Production(klabel, Seq(), endSort, Seq(NonTerminal(startSort, _)), att) if klabel.isEmpty || syntactic => (startSort, endSort)
     }
 
     POSet(subsortRelations)
@@ -258,7 +258,8 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
     srt
   })
 
-  lazy val subsorts: POSet[Sort] = computeSubsortPOSet(sentences)
+  lazy val subsorts: POSet[Sort] = computeSubsortPOSet(sentences, false)
+  lazy val syntacticSubsorts: POSet[Sort] = computeSubsortPOSet(sentences, true)
   lazy val overloads: POSet[Production] = computeOverloadPOSet(subsorts, productions)
 
   private lazy val expressedPriorities: Set[(Tag, Tag)] =
