@@ -81,7 +81,7 @@ public class TypeInferencer implements AutoCloseable {
   }
 
   public boolean isRealSort(Sort s) {
-    return !RuleGrammarGenerator.isParserSort(s) || s.equals(Sorts.K()) || s.equals(Sorts.KItem()) || s.equals(Sorts.KLabel());
+    return !RuleGrammarGenerator.isParserSort(s) || s.equals(Sorts.K()) || s.equals(Sorts.KItem()) || s.equals(Sorts.KLabel()) || s.equals(Sorts.RuleTag());
   }
 
   public Module module() {
