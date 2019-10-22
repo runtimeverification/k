@@ -384,6 +384,9 @@ public class TypeInferencer implements AutoCloseable {
           variables.add(name);
           variableNames.add(param.name() + " in production " + pr.production().toString());
           variablesById.get(id).add(name);
+          if (sorts.contains(Sorts.KLabel())) {
+            sb.append("(distinct ").append(name).append(" ").append(printSort(Sorts.KLabel(), Optional.empty(), isIncremental)).append(") ");
+          }
         }
       } else {
         id = pr.id().get();
