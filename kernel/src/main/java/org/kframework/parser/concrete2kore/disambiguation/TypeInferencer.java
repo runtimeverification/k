@@ -3,6 +3,7 @@ package org.kframework.parser.concrete2kore.disambiguation;
 
 import org.kframework.Collections;
 import org.kframework.attributes.Location;
+import org.kframework.attributes.HasLocation;
 import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.ResolveAnonVar;
@@ -18,6 +19,9 @@ import org.kframework.parser.Term;
 import org.kframework.parser.TermCons;
 import org.kframework.parser.SafeTransformer;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
+import org.kframework.utils.errorsystem.KException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
+import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.errorsystem.KEMException;
 
 import scala.collection.Seq;
@@ -31,6 +35,7 @@ import java.io.PrintStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -130,13 +135,75 @@ public class TypeInferencer implements AutoCloseable {
   private Sort currentTopSort;
   private boolean isAnywhere;
 
+  private static class LocalizedError extends RuntimeException {
+    private final Term loc;
+    public LocalizedError(String message, Term loc) {
+      super(message);
+      this.loc = loc;
+    }
+
+    public Term getLocation() {
+      return loc;
+    }
+  }
+
+  private void replayConstraints(List<Constraint> constraints) {
+    for (Constraint constraint : constraints) {
+      println("(push)");
+      print("(assert (and ");
+      print(constraint.smt);
+      println("))");
+      status = null;
+      Status status = status();
+      switch(status) {
+      case SATISFIABLE:
+        println("(pop)");
+        print("(assert (and ");
+        print(constraint.smt);
+        println("))");
+        break;
+      case UNKNOWN:
+        throw KEMException.internalError("Could not solve sort constraints.", currentTerm);
+      case UNSATISFIABLE:
+        println("(pop)");
+        computeStatus();
+        if (constraint.isVar()) {
+          Sort actualSort = computeValue(constraint.name);
+          Sort expectedSort = eval(constraint.expectedSort, constraint.expectedParams);
+          throw new LocalizedError("Unexpected sort " + actualSort + " for variable " + constraint.loc.value() + ". Expected: " + expectedSort, constraint.loc);
+        } else {
+          Sort actualSort = eval(constraint.actualSort, constraint.actualParams);
+          Sort expectedSort = eval(constraint.expectedSort, constraint.expectedParams);
+          throw new LocalizedError("Unexpected sort " + actualSort + " for term parsed as production " + constraint.actualParams.get().production() + ". Expected: " + expectedSort, constraint.actualParams.get());
+        }
+      }
+    }
+  }
+
+  private KException push() {
+    level++;
+    println("(push)");
+    ExpectedSortsVisitor viz = new ExpectedSortsVisitor(currentTopSort, isAnywhere, true);
+    viz.apply(currentTerm);
+    for (String var : variables) {
+      println("(declare-const " + var + " Sort)");
+    }
+    try {
+      java.util.Collections.sort(viz.constraints, Comparator.comparing(c -> !c.isVar()));
+      replayConstraints(viz.constraints);
+      throw KEMException.internalError("Unknown sort inference error.", currentTerm);
+    } catch (LocalizedError e) {
+      return new KException(ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, e.getMessage(), e.getLocation().source().orElse(null), e.getLocation().location().orElse(null));
+    }
+  }
+
   public void push(Term t, Sort topSort, boolean isAnywhere) {
     currentTerm = t;
     currentTopSort = topSort;
     this.isAnywhere = isAnywhere;
     level++;
     println("(push)");
-    ExpectedSortsVisitor viz = new ExpectedSortsVisitor(topSort, isAnywhere);
+    ExpectedSortsVisitor viz = new ExpectedSortsVisitor(topSort, isAnywhere, false);
     viz.apply(t);
     if (variables.isEmpty()) {
         return;
@@ -237,22 +304,61 @@ public class TypeInferencer implements AutoCloseable {
     }
   }
 
+  public static class Constraint {
+    public final String smt;
+    public final String name;
+    public final Constant loc;
+    public final Sort expectedSort;
+    public final Optional<ProductionReference> expectedParams;
+    public final Sort actualSort;
+    public final Optional<ProductionReference> actualParams;
+
+    public Constraint(String smt, String name, Constant loc, Sort expectedSort, Optional<ProductionReference> expectedParams) {
+      this.smt = smt;
+      this.name = name;
+      this.loc = loc;
+      this.expectedSort = expectedSort;
+      this.expectedParams = expectedParams;
+      this.actualSort = null;
+      this.actualParams = null;
+    }
+
+    public Constraint(String smt, Sort actualSort, Optional<ProductionReference> actualParams, Sort expectedSort, Optional<ProductionReference> expectedParams) {
+      this.smt = smt;
+      this.name = null;
+      this.loc = null;
+      this.actualSort = actualSort;
+      this.actualParams = actualParams;
+      this.expectedSort = expectedSort;
+      this.expectedParams = expectedParams;
+    }
+
+    public boolean isVar() {
+      return name != null || actualParams.get().production().params().contains(actualSort);
+    }
+  }
+
   public class ExpectedSortsVisitor extends SafeTransformer {
     private Sort expectedSort;
     private Optional<ProductionReference> expectedParams = Optional.empty();
     private boolean isStrictEquality = false;
-    private final StringBuilder sb = new StringBuilder();
+    private StringBuilder sb = new StringBuilder();
     private final boolean isAnywhere;
+    private final boolean isIncremental;
 
-    public ExpectedSortsVisitor(Sort topSort, boolean isAnywhere) {
+    public ExpectedSortsVisitor(Sort topSort, boolean isAnywhere, boolean isIncremental) {
       this.expectedSort = topSort;
       this.isAnywhere = isAnywhere;
+      this.isIncremental = isIncremental;
     }
 
     @Override
     public Term apply(Term t) {
       if (t instanceof Ambiguity) {
         Ambiguity amb = (Ambiguity)t;
+        if (isIncremental) {
+          return apply(amb.items().iterator().next());
+        }
         sb.append("(or ");
         for (Term i : amb.items()) {
             sb.append("(and true ");
@@ -355,13 +461,16 @@ public class TypeInferencer implements AutoCloseable {
       } else {
         sb.append("(<=Sort ");
       }
-      sb.append(printSort(actualSort, actualParams));
+      sb.append(printSort(actualSort, actualParams, isIncremental));
       sb.append(" ");
       if (mod.subsorts().lessThan(Sorts.K(), expectedSort)) {
         expectedSort = Sorts.K();
       }
-      sb.append(printSort(expectedSort, expectedParams));
+      sb.append(printSort(expectedSort, expectedParams, isIncremental));
       sb.append(") ");
+      if (isIncremental) {
+        saveConstraint(actualSort, actualParams);
+      }
     }
 
     private void pushConstraint(String name, Constant loc) {
@@ -370,15 +479,34 @@ public class TypeInferencer implements AutoCloseable {
       } else {
         sb.append("(<=Sort ");
       }
-      sb.append("|").append(name).append("_| ");
+      sb.append("|").append(name);
+      if (!isIncremental) {
+        sb.append("_");
+      }
+      sb.append("| ");
       if (mod.subsorts().lessThan(Sorts.K(), expectedSort)) {
           expectedSort = Sorts.K();
       }
-      sb.append(printSort(expectedSort, expectedParams));
+      sb.append(printSort(expectedSort, expectedParams, isIncremental));
       sb.append(") ");
+      if (isIncremental) {
+        saveConstraint(name, loc);
+      }
     }
 
-    private void printSort(Sort s, Optional<ProductionReference> t) {
+    List<Constraint> constraints = new ArrayList<>();
+
+    private void saveConstraint(String name, Constant loc) {
+      constraints.add(new Constraint(sb.toString(), name, loc, expectedSort, expectedParams));
+      sb = new StringBuilder();
+    }
+
+    private void saveConstraint(Sort actualSort, Optional<ProductionReference> actualParams) {
+      constraints.add(new Constraint(sb.toString(), actualSort, actualParams, expectedSort, expectedParams));
+      sb = new StringBuilder();
+    }
+
+    private String printSort(Sort s, Optional<ProductionReference> t, boolean isIncremental) {
       Map<Sort, String> params = new HashMap<>();
       if (t.isPresent()) {
         if (t.get().production().params().nonEmpty()) {
@@ -391,13 +519,17 @@ public class TypeInferencer implements AutoCloseable {
           }
         }
       }
-      return printSort(s, params);
+      return printSort(s, params, isIncremental);
     }
 
-    private void printSort(Sort s, Map<Sort, String> params) {
+    private String printSort(Sort s, Map<Sort, String> params, boolean isIncremental) {
       StringBuilder sb = new StringBuilder();
       if (params.containsKey(s)) {
-        sb.append("|").append(params.get(s)).append("_|");
+        sb.append("|").append(params.get(s));
+        if (!isIncremental) {
+          sb.append("_");
+        }
+        sb.append("|");
         return sb.toString();
       }
       if (s.params().isEmpty()) {
@@ -407,7 +539,7 @@ public class TypeInferencer implements AutoCloseable {
       sb.append("(|Sort" + s.name() + "|");
       for (Sort param : iterable(s.params())) {
         sb.append(" ");
-        sb.append(printSort(param, params));
+        sb.append(printSort(param, params, isIncremental));
       }
       sb.append(")");
       return sb.toString();
@@ -458,9 +590,21 @@ public class TypeInferencer implements AutoCloseable {
     return status;
   }
 
-  public String errorMessage() {
-    //TODO: get from Z3
-    return "Type inference failed.";
+  public KException error() {
+    if (status() == Status.SATISFIABLE) {
+      int i = 0;
+      for (String var : variables) {
+        Sort newSort = computeValue(var);
+        if (!newSort.equals(model.get(var))) {
+          return new KException(ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, "Could not infer a unique sort for variable " + variableNames.get(i) + ". Possible sorts include " + newSort + " and " + model.get(var), currentTerm.source().orElse(null), currentTerm.location().orElse(null));
+        }
+        i++;
+      }
+      throw KEMException.internalError("Unknown sort inference error.", currentTerm);
+    } else {
+      pop();
+      return push();
+    }
   }
 
   public void computeModel() {
