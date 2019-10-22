@@ -347,6 +347,9 @@ public class TypeInferencer implements AutoCloseable {
     }
 
     private void pushConstraint(Sort actualSort, Optional<ProductionReference> actualParams) {
+      if (mod.subsorts().lessThanEq(actualSort, Sorts.KBott()) || mod.subsorts().lessThan(Sorts.K(), actualSort)) {
+        return;
+      }
       if (isStrictEquality) {
         sb.append("(= ");
       } else {
