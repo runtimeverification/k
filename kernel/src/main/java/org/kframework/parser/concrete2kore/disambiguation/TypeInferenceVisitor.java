@@ -115,7 +115,7 @@ public class TypeInferenceVisitor extends SetsTransformerWithErrors<ParseFailedE
       ProductionReference pr = (ProductionReference)term;
       if (pr instanceof Constant && pr.production().sort().equals(Sorts.KVariable())) {
         Sort inferred = inferencer.getArgs(pr).apply(0);
-        if (!inferencer.module().subsorts().lessThanEq(inferred, expectedSort)) {
+        if (!inferencer.module().subsorts().lessThanEq(inferred, expectedSort) && !expectedSort.equals(Sorts.KVariable())) {
           return typeError(pr, expectedSort, inferred);
         }
         return wrapTermWithCast((Constant)pr, inferred);
