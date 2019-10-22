@@ -471,25 +471,15 @@ public class TypeInferencer implements AutoCloseable {
 
   public void pushNotModel(Term typed) {
     new PrintNotModel().apply(typed);
-    print("(assert (not (or (and ");
+    print("(assert (not (and true");
     for (String var : variables) {
-      print("(= |" + var + "| ");
-      printSort(model.get(var));
-      print(") ");
-    }
-    print(") ");
-    for (String var : variables) {
-      print("(");
-      if (model.get(var).equals(Sorts.KLabel())) {
-        print("distinct");
-      } else {
-        print("=");
+      if (var.startsWith("Var")) {
+        print("(= |" + var + "| ");
+        printSort(model.get(var));
+        print(") ");
       }
-      print(" |" + var + "| ");
-      printSort(Sorts.KLabel());
-      print(") ");
     }
-    println(")))");
+    print(")))");
     status = null;
   }
 
