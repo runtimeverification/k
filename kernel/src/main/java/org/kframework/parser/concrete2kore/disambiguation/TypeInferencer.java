@@ -221,6 +221,21 @@ public class TypeInferencer implements AutoCloseable {
     return getFunction(t).get().production().sort();
   }
 
+  private static Sort getSortOfCast(TermCons tc) {
+    switch (tc.production().klabel().get().name()) {
+    case "#SyntacticCast":
+    case "#OuterCast":
+      return tc.production().sort();
+    case "#InnerCast":
+      return ((NonTerminal)tc.production().items().apply(1)).sort();
+    default:
+      if (tc.production().klabel().get().name().startsWith("#SemanticCastTo")) {
+        return tc.production().sort();
+      }
+      throw new AssertionError("Unexpected cast type");
+    }
+  }
+
   public class ExpectedSortsVisitor extends SafeTransformer {
     private Sort expectedSort;
     private Optional<ProductionReference> expectedParams = Optional.empty();
@@ -268,13 +283,13 @@ public class TypeInferencer implements AutoCloseable {
         for (int i = 0, j = 0; i < tc.production().items().size(); i++) {
           if (tc.production().items().apply(i) instanceof NonTerminal) {
             NonTerminal nt = (NonTerminal)tc.production().items().apply(i);
-            expectedSort = nt.sort();
             expectedParams = Optional.of(tc);
             isStrictEquality = false;
             if (tc.production().klabel().isDefined()
                   && (tc.production().klabel().get().name().equals("#SyntacticCast")
                   || tc.production().klabel().get().name().startsWith("#SemanticCastTo")
                   || tc.production().klabel().get().name().equals("#InnerCast"))) {
+              expectedSort = getSortOfCast(tc);
               isStrictEquality = true;
               apply(tc.get(j));
             } else if (isTopSort && j == 0 && isFunction(tc.get(j), isAnywhere)) {
@@ -282,6 +297,7 @@ public class TypeInferencer implements AutoCloseable {
               expectedParams = Optional.of(getFunction(tc.get(j)).get());
               apply(tc.get(j));
             } else {
+              expectedSort = nt.sort();
               apply(tc.get(j));
             }
             j++;
