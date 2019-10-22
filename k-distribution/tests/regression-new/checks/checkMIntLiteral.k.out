@@ -1,0 +1,4 @@
+[Error] Compiler: Had 1 parsing errors.
+[Error] Critical: Unexpected sort MInt{32} for term 0p32. Expected MInt{6}.
+	Source(checkMIntLiteral.k)
+	Location(12,12,12,16)
