@@ -89,7 +89,8 @@ public class ModuleToKORE {
 
     public String convert(boolean heatCoolEq, StringBuilder sb) {
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(module);
-        Sort topCell = configInfo.getRootCell();
+        Sort topCellSort = configInfo.getRootCell();
+        String topCellSortStr = getSortStr(topCellSort, false);
         String prelude = files.loadFromKBase("include/kore/prelude.kore");
         sb.append("[topCellInitializer{}(");
         convert(topCellInitializer, false, sb);
@@ -187,7 +188,7 @@ public class ModuleToKORE {
         }
         sb.append("\n// rules\n");
         for (Rule rule : iterable(module.sortedRules())) {
-            convertRule(rule, heatCoolEq, topCell, attributes, functionRules, sentenceType,sb);
+            convertRule(rule, heatCoolEq, topCellSortStr, attributes, functionRules, sentenceType,sb);
         }
         sb.append("endmodule ");
         convert(attributes, module.att(), sb);
@@ -643,7 +644,8 @@ public class ModuleToKORE {
         SentenceType sentenceType = getSentenceType(spec.att()).orElse(defaultSentenceType);
         sb.setLength(0); // reset string writer
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(definition);
-        Sort topCell = configInfo.getRootCell();
+        Sort topCellSort = configInfo.getRootCell();
+        String topCellSortStr = getSortStr(topCellSort, false);
         sb.append("[]\n");
         sb.append("module ");
         convert(spec.name(), sb);
@@ -656,7 +658,8 @@ public class ModuleToKORE {
             assert sentence instanceof Rule || sentence instanceof ModuleComment
                 : "Unexpected non-rule claim " + sentence.toString();
             if (sentence instanceof Rule) {
-                convertRule((Rule) sentence, false, topCell, new HashMap<>(), HashMultimap.create(), sentenceType, sb);
+                convertRule((Rule) sentence, false, topCellSortStr,
+                        new HashMap<>(), HashMultimap.create(), sentenceType, sb);
             }
         }
         sb.append("endmodule ");
@@ -674,7 +677,9 @@ public class ModuleToKORE {
         return Optional.empty();
     }
 
-    private void convertRule(Rule rule, boolean heatCoolEq, Sort topCellSort, Map<String, Boolean> consideredAttributes, SetMultimap<KLabel, Rule> functionRules, SentenceType defaultSentenceType, StringBuilder sb) {
+    private void convertRule(Rule rule, boolean heatCoolEq, String topCellSortStr,
+                             Map<String, Boolean> consideredAttributes, SetMultimap<KLabel, Rule> functionRules,
+                             SentenceType defaultSentenceType, StringBuilder sb) {
         SentenceType sentenceType = getSentenceType(rule.att()).orElse(defaultSentenceType);
         // injections should already be present, but this is an ugly hack to get around the
         // cache persistence issue that means that Sort attributes on k terms might not be present.
@@ -685,6 +690,7 @@ public class ModuleToKORE {
         boolean kore = rule.att().contains(Attribute.KORE_KEY);
         Production production = null;
         Sort productionSort = null;
+        String productionSortStr = null;
         List<Sort> productionSorts = null;
         KLabel productionLabel = null;
         List<K> leftChildren = null;
@@ -693,6 +699,7 @@ public class ModuleToKORE {
         if (left instanceof KApply) {
             production = production((KApply) left, true);
             productionSort = production.sort();
+            productionSortStr = getSortStr(productionSort, false);
             productionSorts = stream(production.items())
                     .filter(i -> i instanceof NonTerminal)
                     .map(i -> (NonTerminal) i)
@@ -703,7 +710,7 @@ public class ModuleToKORE {
                 equation = true;
             } else if ((rule.att().contains("heat") || rule.att().contains("cool")) && heatCoolEq) {
                 equation = true;
-                productionSort = topCellSort;
+                productionSortStr = topCellSortStr;
             }
             owise = rule.att().contains("owise");
         }
@@ -787,7 +794,7 @@ public class ModuleToKORE {
                 sb.append("\n      ),\n      ");
                 convertSideCondition(rule.requires(), sb);
                 sb.append("\n    ),\n    \\and{R} (\n      \\equals{");
-                convert(productionSort, false, sb);
+                sb.append(productionSortStr);
                 sb.append(",R} (\n        ");
                 K right = RewriteToTop.toRight(rule.body());
                 convert(left, sb);
@@ -802,7 +809,7 @@ public class ModuleToKORE {
                 sb.append("\\implies{R} (\n    ");
                 convertSideCondition(rule.requires(), sb);
                 sb.append(",\n    \\and{R} (\n      \\equals{");
-                convert(productionSort, false, sb);
+                sb.append(productionSortStr);
                 sb.append(",R} (\n        ");
                 K right = RewriteToTop.toRight(rule.body());
                 convert(left, sb);
@@ -832,40 +839,28 @@ public class ModuleToKORE {
             }
             if (owise) {
                 // hack to deal with the strategy axiom for now
-                sb.append("\\implies{");
-                convert(topCellSort, false, sb);
-                sb.append("}(\\bottom{");
-                convert(topCellSort, false, sb);
-                sb.append("}(),");
+                sb.append(String.format("\\implies{%s}(\\bottom{%s}(),",
+                        topCellSortStr, topCellSortStr));
             }
             K right = RewriteToTop.toRight(rule.body());
             if (isClaim(sentenceType)) {
-                sb.append("\\implies{");
+                sb.append("\\implies");
             } else {
-                sb.append("\\rewrites{");
+                sb.append("\\rewrites");
             }
-            convert(topCellSort, false, sb);
-            sb.append("} (\n    ");
-            sb.append("  \\and{");
-            convert(topCellSort, false, sb);
-            sb.append("} (\n      ");
-            convertSideCondition(rule.requires(), topCellSort, sb);
+            sb.append(String.format("{%s} (\n    ", topCellSortStr));
+            sb.append(String.format("  \\and{%s} (\n      ", topCellSortStr));
+            convertSideCondition(rule.requires(), topCellSortStr, sb);
             sb.append(", ");
             convert(left, sb);
             sb.append("), ");
             if (sentenceType == SentenceType.ALL_PATH) {
-                sb.append(ALL_PATH_OP + "{");
-                convert(topCellSort, false, sb);
-                sb.append("} (\n      ");
+                sb.append(String.format("%s{%s} (\n      ", ALL_PATH_OP, topCellSortStr));
             } else if (sentenceType == SentenceType.ONE_PATH) {
-                sb.append(ONE_PATH_OP + "{");
-                convert(topCellSort, false, sb);
-                sb.append("} (\n      ");
+                sb.append(String.format("%s{%s} (\n      ", ONE_PATH_OP, topCellSortStr));
             }
-            sb.append("\\and{");
-            convert(topCellSort, false, sb);
-            sb.append("} (\n      ");
-            convertSideCondition(rule.ensures(), topCellSort, sb);
+            sb.append(String.format("\\and{%s} (\n      ", topCellSortStr));
+            convertSideCondition(rule.ensures(), topCellSortStr, sb);
             sb.append(", ");
             convert(right, sb);
             sb.append("))");
@@ -1034,15 +1029,11 @@ public class ModuleToKORE {
         }
     }
 
-    private void convertSideCondition(K k, Sort result, StringBuilder sb) {
+    private void convertSideCondition(K k, String resultSortStr, StringBuilder sb) {
         if (k.equals(BooleanUtils.TRUE)) {
-            sb.append("\\top{");
-            convert(result, false, sb);
-            sb.append("}()");
+            sb.append(String.format("\\top{%s}()", resultSortStr));
         } else {
-            sb.append("\\equals{SortBool{},");
-            convert(result, false, sb);
-            sb.append("}(\n        ");
+            sb.append(String.format("\\equals{SortBool{},%s}(\n        ", resultSortStr));
             convert(k, sb);
             sb.append(",\n        \\dv{SortBool{}}(\"true\"))");
         }
@@ -1179,6 +1170,12 @@ public class ModuleToKORE {
             }
             sb.append("}");
         }
+    }
+
+    private String getSortStr(Sort sort, boolean isSortVariable) {
+        StringBuilder strBuilder = new StringBuilder();
+        convert(sort, isSortVariable, strBuilder);
+        return strBuilder.toString();
     }
 
     private void convert(Map<String, Boolean> attributes, Att att, StringBuilder sb) {

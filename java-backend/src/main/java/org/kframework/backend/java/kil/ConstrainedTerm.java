@@ -143,17 +143,20 @@ public class ConstrainedTerm extends JavaSymbolicObject {
                     Sets.union(variableSet(), termContext().getInitialLhsVariables()));
             constraint = constraint.simplifyBeforePatternFolding(context, matchRHSOnlyVars, logFailures);
             if (constraint.isFalseExtended()) {
+                formulaContext.printImplicationExitPoint(constraint, 1);
                 return null;
             }
 
             constraint = constraint.applyProjectionLemma();
             if (constraint.isFalse()) {
+                formulaContext.printImplicationExitPoint(constraint, 2);
                 return null;
             }
 
             if (matchingSymbols != null) {
                 constraint = constraint.resolveMatchingSymbols(matchingSymbols);
                 if (constraint.isFalse()) {
+                    formulaContext.printImplicationExitPoint(constraint, 3);
                     return null;
                 }
             }
@@ -161,6 +164,7 @@ public class ConstrainedTerm extends JavaSymbolicObject {
             /* apply pattern folding */
             constraint = constraint.simplifyModuloPatternFolding(context, matchRHSOnlyVars);
             if (constraint.isFalse()) {
+                formulaContext.printImplicationExitPoint(constraint, 4);
                 return null;
             }
 
