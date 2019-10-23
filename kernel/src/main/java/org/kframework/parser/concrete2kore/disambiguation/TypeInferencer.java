@@ -128,6 +128,7 @@ public class TypeInferencer implements AutoCloseable {
 
   private final List<String> variables = new ArrayList<>();
   private final List<String> variableNames = new ArrayList<>();
+  private final List<String> parameters = new ArrayList<>();
   private final List<List<String>> variablesById = new ArrayList<>();
   private int nextId = 0;
   private int nextVarId = 0;
@@ -180,6 +181,16 @@ public class TypeInferencer implements AutoCloseable {
     }
   }
 
+  private void assertNotKLabel() {
+    if (!sorts.contains(Sorts.KLabel()))
+      return;
+    for (String param : parameters) {
+      print("(distinct |" + param + "| ");
+      printSort(Sorts.KLabel());
+      print(") ");
+    }
+  }
+
   private KException push() {
     level++;
     println("(push)");
@@ -188,6 +199,9 @@ public class TypeInferencer implements AutoCloseable {
     for (String var : variables) {
       println("(declare-const " + var + " Sort)");
     }
+    print("(assert (and true ");
+    assertNotKLabel();
+    println("))");
     try {
       java.util.Collections.sort(viz.constraints, Comparator.comparing(c -> !c.isVar()));
       replayConstraints(viz.constraints);
@@ -215,7 +229,8 @@ public class TypeInferencer implements AutoCloseable {
     for (String var : variables) {
       print("(|" + var + "_| Sort) ");
     }
-    println(") Bool (and ");
+    println(") Bool (and true ");
+    assertNotKLabel();
     println(viz.toString());
     println("))");
     print("(define-fun maximal (");
@@ -384,9 +399,7 @@ public class TypeInferencer implements AutoCloseable {
           variables.add(name);
           variableNames.add(param.name() + " in production " + pr.production().toString());
           variablesById.get(id).add(name);
-          if (sorts.contains(Sorts.KLabel())) {
-            sb.append("(distinct ").append(name).append(" ").append(printSort(Sorts.KLabel(), Optional.empty(), isIncremental)).append(") ");
-          }
+          parameters.add(name);
         }
       } else {
         id = pr.id().get();
@@ -714,6 +727,7 @@ public class TypeInferencer implements AutoCloseable {
     model.clear();
     variables.clear();
     variableNames.clear();
+    parameters.clear();
     variablesById.clear();
     nextId = 0;
     nextVarId = 0;
