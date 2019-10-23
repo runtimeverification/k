@@ -55,7 +55,7 @@ public class AddCoolLikeAtt {
                 if (mod.attributesFor().get(k.klabel()).getOrElse(() -> Att.empty()).contains("maincell")) {
                     if (k.items().get(0) instanceof KSequence) {
                         KSequence seq = (KSequence) k.items().get(0);
-                        if (seq.items().get(0) instanceof KVariable) {
+                        if (seq.items().size() > 0 && seq.items().get(0) instanceof KVariable) {
                             return true;
                         }
                     }
