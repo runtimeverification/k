@@ -31,7 +31,7 @@ public class PushTopAmbiguityUp extends SafeTransformer {
     private class PushTopAmbiguityUp2 extends SafeTransformer {
         @Override
         public Term apply(TermCons tc) {
-            if (tc.production().klabel().isDefined() && tc.production().klabel().get().equals(KLabels.KREWRITE)) {
+            if (tc.production().klabel().isDefined() && tc.production().klabel().get().head().equals(KLabels.KREWRITE)) {
                 Term t = tc.get(0);
                 if (t instanceof Ambiguity) {
                     Ambiguity old = (Ambiguity)t;

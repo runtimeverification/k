@@ -52,6 +52,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -61,6 +62,12 @@ import static org.kframework.definition.Constructors.*;
 import static org.kframework.kore.KORE.*;
 
 public class ModuleToKORE {
+    public enum SentenceType {
+        REWRITE_RULE,
+        ONE_PATH,
+        ALL_PATH
+    }
+
     public static final String ONE_PATH_OP = "weakExistsFinally";
     public static final String ALL_PATH_OP = "weakAlwaysFinally";
     public static final String HAS_DOMAIN_VALUES = "hasDomainValues";
@@ -68,7 +75,6 @@ public class ModuleToKORE {
     private final BiMap<String, String> kToKoreLabelMap = HashBiMap.create();
     private final FileUtil files;
     private final Set<String> impureFunctions = new HashSet<>();
-    private final Map<String, List<Set<Integer>>> polyKLabels = new HashMap<>();
     private final KLabel topCellInitializer;
     private final Set<String> mlBinders = new HashSet<>();
     private final KompileOptions options;
@@ -83,7 +89,8 @@ public class ModuleToKORE {
 
     public String convert(boolean heatCoolEq, StringBuilder sb) {
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(module);
-        Sort topCell = configInfo.getRootCell();
+        Sort topCellSort = configInfo.getRootCell();
+        String topCellSortStr = getSortStr(topCellSort, false);
         String prelude = files.loadFromKBase("include/kore/prelude.kore");
         sb.append("[topCellInitializer{}(");
         convert(topCellInitializer, false, sb);
@@ -91,6 +98,7 @@ public class ModuleToKORE {
         sb.append(prelude);
         sb.append("\n");
 
+        SentenceType sentenceType = getSentenceType(module.att()).orElse(SentenceType.REWRITE_RULE);
         sb.append("module ");
         convert(module.name(), sb);
         sb.append("\n\n// imports\n");
@@ -142,7 +150,6 @@ public class ModuleToKORE {
             if (isBuiltinProduction(prod)) {
                 continue;
             }
-            prod = computePolyProd(prod);
             if (prod.isSubsort() && !prod.sort().equals(Sorts.K())) {
                 genSubsortAxiom(prod, sb);
                 continue;
@@ -181,8 +188,7 @@ public class ModuleToKORE {
         }
         sb.append("\n// rules\n");
         for (Rule rule : iterable(module.sortedRules())) {
-            convertRule(rule, heatCoolEq, topCell, attributes, functionRules,
-                    false, false, sb);
+            convertRule(rule, heatCoolEq, topCellSortStr, attributes, functionRules, sentenceType,sb);
         }
         sb.append("endmodule ");
         convert(attributes, module.att(), sb);
@@ -202,6 +208,9 @@ public class ModuleToKORE {
             Att att = prod.att();
             if (att.contains("token")) {
                 tokenSorts.add(prod.sort());
+            }
+            if (att.contains("mlBinder")) {
+                mlBinders.add(prod.klabel().get().name());
             }
             collectAttributes(attributes, att);
         }
@@ -254,7 +263,6 @@ public class ModuleToKORE {
             if (isBuiltinProduction(prod)) {
                 continue;
             }
-            prod = computePolyProd(prod);
             if (prod.klabel().isEmpty()) {
                 continue;
             }
@@ -468,7 +476,6 @@ public class ModuleToKORE {
         }
         for (Production prod2 : iterable(module.productionsForSort().apply(prod.sort()).toSeq().sorted(Production.ord()))) {
             // !(cx(x1,x2,...) /\ cy(y1,y2,...))
-            prod2 = computePolyProd(prod2);
             if (prod2.klabel().isEmpty() || noConfusion.contains(Tuple2.apply(prod, prod2)) || prod.equals(prod2)
                     || !isConstructor(prod2, functionRulesMap, impurities) || isBuiltinProduction(prod2)) {
                 // TODO (traiansf): add no confusion axioms for constructor vs inj.
@@ -495,7 +502,6 @@ public class ModuleToKORE {
         boolean hasToken = false;
         int numTerms = 0;
         for (Production prod : iterable(mutable(module.productionsForSort()).getOrDefault(sort, Set()).toSeq().sorted(Production.ord()))) {
-            prod = computePolyProd(prod);
             if (isFunction(prod) || prod.isSubsort() || isBuiltinProduction(prod)) {
                 continue;
             }
@@ -634,11 +640,12 @@ public class ModuleToKORE {
         return prod.klabel().nonEmpty() && ConstructorChecks.isBuiltinLabel(prod.klabel().get());
     }
 
-    public String convertSpecificationModule(Module definition, Module spec,
-                                             boolean allPathReachability, StringBuilder sb) {
+    public String convertSpecificationModule(Module definition, Module spec, SentenceType defaultSentenceType, StringBuilder sb) {
+        SentenceType sentenceType = getSentenceType(spec.att()).orElse(defaultSentenceType);
         sb.setLength(0); // reset string writer
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(definition);
-        Sort topCell = configInfo.getRootCell();
+        Sort topCellSort = configInfo.getRootCell();
+        String topCellSortStr = getSortStr(topCellSort, false);
         sb.append("[]\n");
         sb.append("module ");
         convert(spec.name(), sb);
@@ -651,8 +658,8 @@ public class ModuleToKORE {
             assert sentence instanceof Rule || sentence instanceof ModuleComment
                 : "Unexpected non-rule claim " + sentence.toString();
             if (sentence instanceof Rule) {
-                convertRule((Rule) sentence, false, topCell, new HashMap<>(), HashMultimap.create(),
-                        true, allPathReachability, sb);
+                convertRule((Rule) sentence, false, topCellSortStr,
+                        new HashMap<>(), HashMultimap.create(), sentenceType, sb);
             }
         }
         sb.append("endmodule ");
@@ -661,9 +668,19 @@ public class ModuleToKORE {
         return sb.toString();
     }
 
-    private void convertRule(Rule rule, boolean heatCoolEq, Sort topCellSort, Map<String, Boolean> consideredAttributes,
-                             SetMultimap<KLabel, Rule> functionRules, boolean rulesAsClaims,
-                             boolean allPathReachability, StringBuilder sb) {
+    private Optional<SentenceType> getSentenceType(Att att) {
+        if (att.contains(Attribute.ONE_PATH_KEY)) {
+            return Optional.of(SentenceType.ONE_PATH);
+        } else if (att.contains(Attribute.ALL_PATH_KEY)) {
+            return Optional.of(SentenceType.ALL_PATH);
+        }
+        return Optional.empty();
+    }
+
+    private void convertRule(Rule rule, boolean heatCoolEq, String topCellSortStr,
+                             Map<String, Boolean> consideredAttributes, SetMultimap<KLabel, Rule> functionRules,
+                             SentenceType defaultSentenceType, StringBuilder sb) {
+        SentenceType sentenceType = getSentenceType(rule.att()).orElse(defaultSentenceType);
         // injections should already be present, but this is an ugly hack to get around the
         // cache persistence issue that means that Sort attributes on k terms might not be present.
         rule = new AddSortInjections(module).addInjections(rule);
@@ -673,6 +690,7 @@ public class ModuleToKORE {
         boolean kore = rule.att().contains(Attribute.KORE_KEY);
         Production production = null;
         Sort productionSort = null;
+        String productionSortStr = null;
         List<Sort> productionSorts = null;
         KLabel productionLabel = null;
         List<K> leftChildren = null;
@@ -681,6 +699,7 @@ public class ModuleToKORE {
         if (left instanceof KApply) {
             production = production((KApply) left, true);
             productionSort = production.sort();
+            productionSortStr = getSortStr(productionSort, false);
             productionSorts = stream(production.items())
                     .filter(i -> i instanceof NonTerminal)
                     .map(i -> (NonTerminal) i)
@@ -691,7 +710,7 @@ public class ModuleToKORE {
                 equation = true;
             } else if ((rule.att().contains("heat") || rule.att().contains("cool")) && heatCoolEq) {
                 equation = true;
-                productionSort = topCellSort;
+                productionSortStr = topCellSortStr;
             }
             owise = rule.att().contains("owise");
         }
@@ -775,7 +794,7 @@ public class ModuleToKORE {
                 sb.append("\n      ),\n      ");
                 convertSideCondition(rule.requires(), sb);
                 sb.append("\n    ),\n    \\and{R} (\n      \\equals{");
-                convert(productionSort, false, sb);
+                sb.append(productionSortStr);
                 sb.append(",R} (\n        ");
                 K right = RewriteToTop.toRight(rule.body());
                 convert(left, sb);
@@ -790,7 +809,7 @@ public class ModuleToKORE {
                 sb.append("\\implies{R} (\n    ");
                 convertSideCondition(rule.requires(), sb);
                 sb.append(",\n    \\and{R} (\n      \\equals{");
-                convert(productionSort, false, sb);
+                sb.append(productionSortStr);
                 sb.append(",R} (\n        ");
                 K right = RewriteToTop.toRight(rule.body());
                 convert(left, sb);
@@ -803,7 +822,7 @@ public class ModuleToKORE {
                 sb.append("\n\n");
             }
         } else if (kore) {
-            if (rulesAsClaims) {
+            if (isClaim(sentenceType)) {
                 sb.append("  claim{} ");
             } else {
                 sb.append("  axiom{} ");
@@ -813,51 +832,39 @@ public class ModuleToKORE {
             convert(consideredAttributes, rule.att(), sb);
             sb.append("\n\n");
         } else if (!ExpandMacros.isMacro(rule)) {
-            if (rulesAsClaims) {
+            if (isClaim(sentenceType)) {
                 sb.append("  claim{} ");
             } else {
                 sb.append("  axiom{} ");
             }
             if (owise) {
                 // hack to deal with the strategy axiom for now
-                sb.append("\\implies{");
-                convert(topCellSort, false, sb);
-                sb.append("}(\\bottom{");
-                convert(topCellSort, false, sb);
-                sb.append("}(),");
+                sb.append(String.format("\\implies{%s}(\\bottom{%s}(),",
+                        topCellSortStr, topCellSortStr));
             }
             K right = RewriteToTop.toRight(rule.body());
-            if (rulesAsClaims) {
-                sb.append("\\implies{");
+            if (isClaim(sentenceType)) {
+                sb.append("\\implies");
             } else {
-                sb.append("\\rewrites{");
+                sb.append("\\rewrites");
             }
-            convert(topCellSort, false, sb);
-            sb.append("} (\n    ");
-            sb.append("  \\and{");
-            convert(topCellSort, false, sb);
-            sb.append("} (\n      ");
-            convertSideCondition(rule.requires(), topCellSort, sb);
+            sb.append(String.format("{%s} (\n    ", topCellSortStr));
+            sb.append(String.format("  \\and{%s} (\n      ", topCellSortStr));
+            convertSideCondition(rule.requires(), topCellSortStr, sb);
             sb.append(", ");
             convert(left, sb);
             sb.append("), ");
-            if (rulesAsClaims) {
-                if (allPathReachability) {
-                    sb.append(ALL_PATH_OP + "{");
-                } else {
-                    sb.append(ONE_PATH_OP + "{");
-                }
-                convert(topCellSort, false, sb);
-                sb.append("} (\n      ");
+            if (sentenceType == SentenceType.ALL_PATH) {
+                sb.append(String.format("%s{%s} (\n      ", ALL_PATH_OP, topCellSortStr));
+            } else if (sentenceType == SentenceType.ONE_PATH) {
+                sb.append(String.format("%s{%s} (\n      ", ONE_PATH_OP, topCellSortStr));
             }
-            sb.append("\\and{");
-            convert(topCellSort, false, sb);
-            sb.append("} (\n      ");
-            convertSideCondition(rule.ensures(), topCellSort, sb);
+            sb.append(String.format("\\and{%s} (\n      ", topCellSortStr));
+            convertSideCondition(rule.ensures(), topCellSortStr, sb);
             sb.append(", ");
             convert(right, sb);
             sb.append("))");
-            if (rulesAsClaims) {
+            if (sentenceType == SentenceType.ALL_PATH || sentenceType == SentenceType.ONE_PATH) {
                 sb.append(')');
             }
             if (owise) {
@@ -867,6 +874,10 @@ public class ModuleToKORE {
             convert(consideredAttributes, rule.att(), sb);
             sb.append("\n\n");
         }
+    }
+
+    private boolean isClaim(SentenceType sentenceType) {
+        return sentenceType == SentenceType.ONE_PATH || sentenceType == SentenceType.ALL_PATH;
     }
 
     private void functionalPattern(Production prod, Runnable functionPattern, StringBuilder sb) {
@@ -989,8 +1000,7 @@ public class ModuleToKORE {
     }
 
     private boolean isFunction(Production prod) {
-        Production realProd = prod.att().get(Constants.ORIGINAL_PRD, Production.class);
-        if (!realProd.att().contains(Attribute.FUNCTION_KEY)) {
+        if (!prod.att().contains(Attribute.FUNCTION_KEY)) {
             return false;
         }
         return true;
@@ -1019,88 +1029,25 @@ public class ModuleToKORE {
         }
     }
 
-    private void convertSideCondition(K k, Sort result, StringBuilder sb) {
+    private void convertSideCondition(K k, String resultSortStr, StringBuilder sb) {
         if (k.equals(BooleanUtils.TRUE)) {
-            sb.append("\\top{");
-            convert(result, false, sb);
-            sb.append("}()");
+            sb.append(String.format("\\top{%s}()", resultSortStr));
         } else {
-            sb.append("\\equals{SortBool{},");
-            convert(result, false, sb);
-            sb.append("}(\n        ");
+            sb.append(String.format("\\equals{SortBool{},%s}(\n        ", resultSortStr));
             convert(k, sb);
             sb.append(",\n        \\dv{SortBool{}}(\"true\"))");
         }
     }
 
-    private Production computePolyProd(Production prod) {
-        return computePolyProd(prod, null);
-    }
-
-    private Production computePolyProd(Production prod, KApply k) {
-        if (prod.klabel().isEmpty() || !prod.att().contains("poly"))
-            return prod.withAtt(prod.att().add(Constants.ORIGINAL_PRD, Production.class, prod));
-        List<Set<Integer>> poly = RuleGrammarGenerator.computePositions(prod);
-        String labelName = prod.klabel().get().name();
-        if (prod.att().contains(Attribute.ML_BINDER_KEY)) {
-            mlBinders.add(labelName);
-        }
-        polyKLabels.put(labelName, poly);
-        List<Sort> params = new ArrayList<>();
-        List<NonTerminal> children = new ArrayList<>(mutable(prod.nonterminals()));
-        Sort returnSort = prod.sort();
-        for (int i = 0; i < poly.size(); i++) {
-            Set<Integer> positions = poly.get(i);
-            Sort sort = Sort("S" + i);
-            if (k != null) {
-                int firstPos = positions.iterator().next();
-                if (firstPos == 0) {
-                    sort = k.att().get(Sort.class);
-                } else {
-                    sort = k.klist().items().get(firstPos - 1).att().get(Sort.class);
-                }
-            }
-            params.add(sort);
-            for (int j : positions) {
-                if (j == 0) {
-                    returnSort = sort;
-                } else {
-                    children.set(j - 1, NonTerminal(sort));
-                }
-            }
-        }
-        List<ProductionItem> items = new ArrayList<>();
-        int i = 0;
-        for (ProductionItem item : iterable(prod.items())) {
-            if (item instanceof NonTerminal) {
-                items.add(children.get(i));
-                i++;
-            } else {
-                items.add(item);
-            }
-        }
-        return Production(KLabel(labelName, immutable(params)), returnSort, immutable(items),
-                prod.att().add(Constants.ORIGINAL_PRD, Production.class, prod));
-    }
-
     private KLabel computePolyKLabel(KApply k) {
         String labelName = k.klabel().name();
-        List<Set<Integer>> poly = new ArrayList<>(polyKLabels.get(labelName));
         if (mlBinders.contains(labelName)) { // ML binders are not parametric in the variable so we remove it
-            poly.remove(0);
+            List<Sort> params = mutable(k.klabel().params());
+            params.remove(0);
+            return KLabel(labelName, immutable(params));
+        } else {
+            return k.klabel();
         }
-        List<Sort> params = new ArrayList<>();
-        for (Set<Integer> positions : poly) {
-            int pos = positions.iterator().next();
-            Sort sort;
-            if (pos == 0) {
-                sort = k.att().get(Sort.class);
-            } else {
-                sort = k.items().get(pos-1).att().get(Sort.class);
-            }
-            params.add(sort);
-        }
-        return KLabel(labelName, immutable(params));
     }
 
 
@@ -1119,7 +1066,7 @@ public class ModuleToKORE {
         }
     }
 
-    private static final Production INJ_PROD = Production(KLabel(KLabels.INJ), Sort("K"), Seq(NonTerminal(Sort("K"))), Att().add("poly", "1; 0"));
+    private static final Production INJ_PROD = Production(KLabel(KLabels.INJ, Sort("S1"), Sort("S2")), Sort("S2"), Seq(NonTerminal(Sort("S1"))), Att());
 
 
     private Production production(KApply term) {
@@ -1129,11 +1076,11 @@ public class ModuleToKORE {
     private Production production(KApply term, boolean instantiatePolySorts) {
         KLabel klabel = term.klabel();
         if (klabel.name().equals(KLabels.INJ))
-            return computePolyProd(INJ_PROD, instantiatePolySorts ? term : null);
-        Option<scala.collection.Set<Production>> prods = module.productionsFor().get(klabel);
+            return instantiatePolySorts ? INJ_PROD.substitute(term.klabel().params()) : INJ_PROD;
+        Option<scala.collection.Set<Production>> prods = module.productionsFor().get(klabel.head());
         assert(prods.nonEmpty());
         assert(prods.get().size() == 1);
-        return computePolyProd(prods.get().head(), instantiatePolySorts ? term : null);
+        return instantiatePolySorts ? prods.get().head().substitute(term.klabel().params()) : prods.get().head();
     }
 
     private String convertBuiltinLabel(String klabel) {
@@ -1202,7 +1149,7 @@ public class ModuleToKORE {
     }
 
     private void convert(Sort sort, Production prod, StringBuilder sb) {
-        convert(sort, prod.klabel().isDefined() && prod.klabel().get().params().contains(sort), sb);
+        convert(sort, prod.klabel().isDefined() && prod.isSortVariable(sort), sb);
     }
 
     private void convert(Sort sort, boolean var, StringBuilder sb) {
@@ -1223,6 +1170,12 @@ public class ModuleToKORE {
             }
             sb.append("}");
         }
+    }
+
+    private String getSortStr(Sort sort, boolean isSortVariable) {
+        StringBuilder strBuilder = new StringBuilder();
+        convert(sort, isSortVariable, strBuilder);
+        return strBuilder.toString();
     }
 
     private void convert(Map<String, Boolean> attributes, Att att, StringBuilder sb) {
@@ -1323,10 +1276,7 @@ public class ModuleToKORE {
                 if (impureFunctions.contains(k.klabel().name())) {
                     throw KEMException.internalError("Cannot yet translate impure function to kore: " + k.klabel().name(), k);
                 }
-                KLabel label = k.klabel();
-                if (polyKLabels.containsKey(k.klabel().name())) {
-                    label = computePolyKLabel(k);
-                }
+                KLabel label = computePolyKLabel(k);
                 String conn = "";
                 if (mlBinders.contains(k.klabel().name()) && k.items().get(0).att().contains("anonymous")){
                     // Handle #Forall _ / #Exists _

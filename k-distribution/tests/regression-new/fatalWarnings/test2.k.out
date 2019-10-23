@@ -1,8 +1,8 @@
 [Error] Compiler: Had 1 parsing errors.
 [Error] Inner Parser: Parsing ambiguity. Arbitrarily choosing the first.
-1: syntax Bar ::= "foo" [klabel(bar) symbol()]
-    bar(.KList)
-2: syntax Foo ::= "foo" [klabel(foo) symbol()]
+1: syntax Foo ::= "foo" [klabel(foo) symbol()]
     foo(.KList)
+2: syntax Bar ::= "foo" [klabel(bar) symbol()]
+    bar(.KList)
 	Source(test2.k)
 	Location(11,8,11,11)

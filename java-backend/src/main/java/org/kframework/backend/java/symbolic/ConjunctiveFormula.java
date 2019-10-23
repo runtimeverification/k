@@ -912,8 +912,11 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
             right = left.simplifyConstraint(right);
             right = right.orientSubstitution(existentialQuantVars);
             if (right.isTrue() || (right.equalities().isEmpty() && existentialQuantVars.containsAll(right.substitution().keySet()))) {
-                if (global.javaExecutionOptions.debugFormulas) {
-                    global.log().format("Implication proved by simplification\n");
+                if (global.javaExecutionOptions.debugFormulas
+                        || (global.javaExecutionOptions.logImplications && formulaContext.kind == FormulaContext.Kind.SpecRule)
+                        || (global.javaExecutionOptions.logBasic &&
+                        formulaContext.kind == FormulaContext.Kind.FinalImplication)) {
+                    global.log().format("Implication (%s) proved by simplification\n", formulaContext.kind.label);
                 }
                 continue;
             }
@@ -924,8 +927,11 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 KItem ite = ifThenElseFinder.result.get(0);
                 // TODO (AndreiS): handle KList variables
                 Term condition = ((KList) ite.kList()).get(0);
-                if (global.javaExecutionOptions.debugFormulas) {
-                    global.log().format("Split on %s\n", condition);
+                if (global.javaExecutionOptions.debugFormulas
+                        || (global.javaExecutionOptions.logImplications && formulaContext.kind == FormulaContext.Kind.SpecRule)
+                        || (global.javaExecutionOptions.logBasic &&
+                        formulaContext.kind == FormulaContext.Kind.FinalImplication)) {
+                    global.log().format("Implication (%s) split on %s\n", formulaContext.kind.label, condition);
                 }
                 TermContext context = TermContext.builder(global).build();
                 implications.add(Pair.of(left.add(condition, BoolToken.TRUE).simplify(context), right));

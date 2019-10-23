@@ -7,6 +7,6 @@ class LabelInfoFromModule(module: Module) extends LabelInfo {
     case (label, prods) =>
       def att(key : String) = prods.exists(_.att.contains(key))
       addLabel(prods.head.sort, label.toString, att("assoc"), att("comm"),
-        att("function") || att("pattern"), module.attributesFor(label).getOptional("poly"))
+        att("function") || att("pattern"), prods.head)
   })
 }

@@ -97,10 +97,6 @@ object AliasDeclaration {
   = Some(arg.alias, arg.argSorts, arg.returnSort, arg.leftPattern, arg.rightPattern, arg.att)
 }
 
-
-
-
-
 trait AxiomDeclaration extends Declaration {
   def params: Seq[SortVariable]
 
@@ -108,6 +104,8 @@ trait AxiomDeclaration extends Declaration {
 
   def att: Attributes
 }
+
+trait ClaimDeclaration extends  AxiomDeclaration {}
 
 object AxiomDeclaration {
   def unapply(arg: AxiomDeclaration): Option[(Seq[SortVariable], Pattern, Attributes)]
@@ -491,6 +489,10 @@ trait Builders {
                        att: Attributes): Declaration
 
   def AxiomDeclaration(params: Seq[SortVariable],
+                       pattern: Pattern,
+                       att: Attributes): Declaration
+
+  def ClaimDeclaration(params: Seq[SortVariable],
                        pattern: Pattern,
                        att: Attributes): Declaration
 

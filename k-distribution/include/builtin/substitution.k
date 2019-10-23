@@ -33,6 +33,6 @@ module SUBSTITUTION
   imports MAP
   imports KVAR
 
-  syntax K ::= K "[" KItem "/" KItem "]"  [function, hook(SUBSTITUTION.substOne), impure, poly(0, 1)]
-  syntax K ::= K "[" Map "]"      [function, hook(SUBSTITUTION.substMany), impure, poly(0, 1)]
+  syntax {Sort} Sort ::= Sort "[" KItem "/" KItem "]"  [function, hook(SUBSTITUTION.substOne), impure]
+  syntax {Sort} Sort ::= Sort "[" Map "]"      [function, hook(SUBSTITUTION.substMany), impure]
 endmodule

@@ -105,6 +105,10 @@ public final class JavaExecutionOptions {
             "don't have all their side conditions satisfied and are not applied.")
     public boolean logRules = false;
 
+    @Parameter(names = "--log-impl", description = "Log all conjunctive formulas generated during " +
+            "spec rule application or final implications. Verbose.")
+    public boolean logImplications = false;
+
     @Parameter(names = "--log-func-eval", description = "Log results of function evaluation for every KItem." +
             " Will log initial item and either evaluation result or message \"no rule applicable\"")
     public boolean logFunctionEval = false;

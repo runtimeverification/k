@@ -72,6 +72,8 @@ trait KLabel {
   override def hashCode = name.hashCode * 29 + params.hashCode
 
   def apply(ks: K*) = ADT.KApply(this, ADT.KList(ks.toList))
+
+  def head: KLabel = ADT.KLabel(name)
 }
 
 object KLabelOrdering extends Ordering[KLabel] {

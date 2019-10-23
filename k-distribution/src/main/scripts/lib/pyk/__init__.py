@@ -42,25 +42,25 @@ def krun(definition, inputFile, krunArgs = [], teeOutput = True, kRelease = None
 def kprove(definition, inputFile, kproveArgs = [], teeOutput = True, kRelease = None):
     return _runK('kprove', definition, inputFile, kArgs = kproveArgs, teeOutput = teeOutput, kRelease = kRelease)
 
-def kastJSON(definition, inputJSON, kastArgs = [], teeOutput = True, kRelease = None):
-    with tempfile.NamedTemporaryFile(mode = 'w') as tempf:
+def kastJSON(definition, inputJSON, kastArgs = [], teeOutput = True, kRelease = None, keepTemp = False):
+    with tempfile.NamedTemporaryFile(mode = 'w', delete = not keepTemp) as tempf:
         tempf.write(json.dumps(inputJSON))
         tempf.flush()
         return kast(definition, tempf.name, kastArgs = kastArgs, teeOutput = teeOutput, kRelease = kRelease)
 
-def krunJSON(definition, inputJSON, krunArgs = [], teeOutput = True, kRelease = None):
-    with tempfile.NamedTemporaryFile(mode = 'w') as tempf:
+def krunJSON(definition, inputJSON, krunArgs = [], teeOutput = True, kRelease = None, keepTemp = False):
+    with tempfile.NamedTemporaryFile(mode = 'w', delete = not keepTemp) as tempf:
         tempf.write(json.dumps(inputJSON))
         tempf.flush()
         (rC, out, err) = krun(definition, tempf.name, krunArgs = krunArgs + ['--output', 'json', '--parser', 'cat'], teeOutput = teeOutput, kRelease = kRelease)
         out = None if out == '' else json.loads(out)['term']
         return (rC, out, err)
 
-def kproveJSON(definition, inputJSON, symbolTable, kproveArgs = [], teeOutput = True, kRelease = None):
+def kproveJSON(definition, inputJSON, symbolTable, kproveArgs = [], teeOutput = True, kRelease = None, keepTemp = False):
     if not isKDefinition(inputJSON):
         sys.stderr.write(inputJSON)
         _fatal("Not a K Definition!")
-    with tempfile.NamedTemporaryFile(mode = 'w') as tempf:
+    with tempfile.NamedTemporaryFile(mode = 'w', delete = not keepTemp) as tempf:
         tempf.write(prettyPrintKast(inputJSON, symbolTable))
         tempf.flush()
         (rC, out, err) = kprove(definition, tempf.name, kproveArgs = kproveArgs + ['--output', 'json'], teeOutput = teeOutput, kRelease = kRelease)

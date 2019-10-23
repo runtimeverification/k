@@ -4,11 +4,11 @@
 hook(BOOL.or) klabel(_orBool_) latex({#1}\vee_{\scriptstyle\it Bool}{#2})
 left() smt-hook(or)]
    
-`_orBool__BOOL_Bool_Bool_Bool`(`_andBool_`(`foo_TEST3_Bool`(.KList),`_orBool__BOOL_Bool_Bool_Bool`(`foo_TEST3_Bool`(.KList),`foo_TEST3_Bool`(.KList))),`foo_TEST3_Bool`(.KList))
+`_orBool_`(`_andBool_`(`foo_TEST3`(.KList),`_orBool_`(`foo_TEST3`(.KList),`foo_TEST3`(.KList))),`foo_TEST3`(.KList))
 2: syntax Bool ::= Bool "andBool" Bool [boolOperation() function() functional()
 hook(BOOL.and) klabel(_andBool_) latex({#1}\wedge_{\scriptstyle\it Bool}{#2})
 left() smt-hook(and) symbol()]
    
-`_andBool_`(`foo_TEST3_Bool`(.KList),`_orBool__BOOL_Bool_Bool_Bool`(`_orBool__BOOL_Bool_Bool_Bool`(`foo_TEST3_Bool`(.KList),`foo_TEST3_Bool`(.KList)),`foo_TEST3_Bool`(.KList)))
+`_andBool_`(`foo_TEST3`(.KList),`_orBool_`(`_orBool_`(`foo_TEST3`(.KList),`foo_TEST3`(.KList)),`foo_TEST3`(.KList)))
 	Source(test3.k)
 	Location(12,15,12,54)
