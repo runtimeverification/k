@@ -275,7 +275,7 @@ def prettyPrintKast(kast, symbolTable):
     if isKSequence(kast):
         unparsedItems = [ prettyPrintKast(item, symbolTable) for item in kast['items'] ]
         unparsedKSequence = "\n~> ".join(unparsedItems)
-        if len(unparsedItems) > 1:
+        if len(unparsedItems) > 0:
             unparsedKSequence = "    " + unparsedKSequence
         else:
             unparsedKSequence = '.'
