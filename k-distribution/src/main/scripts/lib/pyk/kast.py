@@ -288,11 +288,11 @@ def prettyPrintKast(kast, symbolTable):
         attsStr     = prettyPrintKast(kast['att'], symbolTable)
         if kast["requires"] is not None:
             requiresStr = prettyPrintKast(kast["requires"], symbolTable)
-            requiresStr = "\n  requires " + "\n   ".join(requiresStr.split("\n"))
+            requiresStr = "requires " + "\n   ".join(requiresStr.split("\n"))
         if kast["ensures"] is not None:
             ensuresStr = prettyPrintKast(kast["ensures"], symbolTable)
-            ensuresStr = "\n  ensures " + "\n  ".join(ensuresStr.split("\n"))
-        return ruleStr + requiresStr + ensuresStr + attsStr
+            ensuresStr = "ensures " + "\n  ".join(ensuresStr.split("\n"))
+        return ruleStr + "\n  " + requiresStr + "\n  " + ensuresStr + "\n  " + attsStr
     if isKAtt(kast):
         if len(kast['att']) == 0:
             return ''
