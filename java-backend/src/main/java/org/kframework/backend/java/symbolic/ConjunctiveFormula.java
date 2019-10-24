@@ -271,7 +271,8 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
         } else if (previousTerm.equals(term)) {
             return this;
         } else {
-            return falsify(substitution, equalities, disjunctions, new Equality(previousTerm, term, global));
+            Equality debugEquality = new Equality(previousTerm, term, global);
+            return falsify(substitution, equalities, disjunctions, debugEquality, debugEquality, false);
         }
     }
 
@@ -386,7 +387,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
     }
 
     public ConjunctiveFormula simplify() {
-        return simplify(false, true, TermContext.builder(global).build(), Collections.emptySet(), false);
+        return simplify(false, true, TermContext.builder(global).build(), Collections.emptySet(), false, false);
     }
 
     /**
@@ -394,7 +395,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
      * Decomposes equalities by using unification.
      */
     public ConjunctiveFormula simplify(TermContext context) {
-        return simplify(false, true, context, Collections.emptySet(), false);
+        return simplify(false, true, context, Collections.emptySet(), false, false);
     }
 
     /**
@@ -404,11 +405,13 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
      */
     public ConjunctiveFormula simplifyBeforePatternFolding(TermContext context, Set<Variable> rhsOnlyVariables,
                                                            boolean logFailures) {
-        return simplify(false, false, context, rhsOnlyVariables, logFailures);
+        return simplify(false, false, context, rhsOnlyVariables, logFailures,
+                logFailures || global.javaExecutionOptions.logImplications);
     }
 
     public ConjunctiveFormula simplifyModuloPatternFolding(TermContext context, Set<Variable> rhsOnlyVariables) {
-        return simplify(true, true, context, rhsOnlyVariables, false);
+        return simplify(true, true, context, rhsOnlyVariables, false,
+                global.javaExecutionOptions.logImplications);
     }
 
     /**
@@ -421,10 +424,12 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
      * @param rhsOnlyVariables      When generating substitutions, substitutions for these vars will be preferred. A
      *                              wrong/empty set here won't affect soundness but will affect completeness.
      * @param logFailures
+     * @param logFormulaFalsify
      * @return
      */
     private ConjunctiveFormula simplify(boolean patternFolding, boolean partialSimplification,
-                                        TermContext context, Set<Variable> rhsOnlyVariables, boolean logFailures) {
+                                        TermContext context, Set<Variable> rhsOnlyVariables, boolean logFailures,
+                                        boolean logFormulaFalsify) {
         ConjunctiveFormula cachedResult = global.formulaCache
                 .cacheGet(this, patternFolding, partialSimplification, rhsOnlyVariables, context);
         if (cachedResult != null) {
@@ -432,13 +437,14 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
         }
 
         ConjunctiveFormula result = simplifyImpl(patternFolding, partialSimplification, context, rhsOnlyVariables,
-                logFailures);
+                logFailures, logFormulaFalsify);
         global.formulaCache.cachePut(this, patternFolding, partialSimplification, context, rhsOnlyVariables, result);
         return result;
     }
 
     private ConjunctiveFormula simplifyImpl(boolean patternFolding, boolean partialSimplification, TermContext context,
-                                            Set<Variable> rhsOnlyVariables, boolean logFailures) {
+                                            Set<Variable> rhsOnlyVariables, boolean logFailures,
+                                            boolean logFormulaFalsify) {
         assert !isFalse();
         ConjunctiveFormula originalTopConstraint = context.getTopConstraint();
         Substitution<Variable, Term> substitution = this.substitution;
@@ -459,15 +465,16 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                     //loss can happen. Details: https://github.com/kframework/k-legacy/pull/2399#issuecomment-360680618
                     context.setTopConstraint(minus(originalTopConstraint, equality));
 
-                    Term leftHandSide = equality.leftHandSide().substituteAndEvaluate(substitution, context);
-                    Term rightHandSide = equality.rightHandSide().substituteAndEvaluate(substitution, context);
+                    Equality oldEquality = equality; //for debug
+                    Term leftHandSide = oldEquality.leftHandSide().substituteAndEvaluate(substitution, context);
+                    Term rightHandSide = oldEquality.rightHandSide().substituteAndEvaluate(substitution, context);
                     equality = new Equality(leftHandSide, rightHandSide, global);
                     //noinspection StatementWithEmptyBody
                     if (equality.isTrue()) {
                         // delete
                     } else if (equality.truthValue() == TruthValue.FALSE) {
                         // conflict
-                        return falsify(substitution, equalities, disjunctions, equality);
+                        return falsify(substitution, equalities, disjunctions, equality, oldEquality, logFormulaFalsify);
                     } else if (equality.isSimplifiableByCurrentAlgorithm()) {
                         // (decompose + conflict)*
                         FastRuleMatcher unifier = new FastRuleMatcher(global, 1);
@@ -479,7 +486,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                                     new Equality(
                                             unifier.unificationFailureLeftHandSide(),
                                             unifier.unificationFailureRightHandSide(),
-                                            global));
+                                            global), equality, logFormulaFalsify);
                         }
 
                         // TODO(AndreiS): fix this in a general way
@@ -494,7 +501,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
 
                     } else if (varToNormalTermNonSubstitutable(leftHandSide, rightHandSide)
                             || varToNormalTermNonSubstitutable(rightHandSide, leftHandSide)) {
-                        return falsify(substitution, equalities, disjunctions, equality);
+                        return falsify(substitution, equalities, disjunctions, equality, oldEquality, logFormulaFalsify);
                     } else { //Attempt to replace equality by substitution, RHS to LHS only
                         ImmutableMapSubstitution<Variable, Term> newVarSubstitution =
                                 getSubstitutionIfPossibleUnoriented(leftHandSide, rightHandSide, rhsOnlyVariables);
@@ -504,7 +511,8 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                                     context);
                             change = true;
                             if (substitution.isFalse(global)) {
-                                return falsify(substitution, equalities, disjunctions, equality);
+                                return falsify(substitution, equalities, disjunctions, equality, null,
+                                        logFormulaFalsify);
                             }
                         } else {
                             pendingEqualities = pendingEqualities.plus(equality);
@@ -537,7 +545,8 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                                     context);
                             change = true;
                             if (substitution.isFalse(global)) {
-                                return falsify(substitution, equalities, disjunctions, equality);
+                                return falsify(substitution, equalities, disjunctions, equality, null,
+                                        logFormulaFalsify);
                             }
                         } else {
                             pendingEqualities = pendingEqualities.plus(equality);
@@ -557,12 +566,8 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
             Substitution<Variable, Term> substitution,
             PersistentUniqueList<Equality> equalities,
             PersistentUniqueList<DisjunctiveFormula> disjunctions,
-            Equality equality) {
-        if ((RuleAuditing.isAuditBegun() || global.javaExecutionOptions.debugZ3)
-                && !(equality.leftHandSide() instanceof BoolToken && equality.rightHandSide() instanceof BoolToken)) {
-            global.log().format("Unification failure: %s does not unify with %s\n",
-                    equality.leftHandSide(), equality.rightHandSide());
-        }
+            Equality equality, Equality oldEquality, boolean logFormulaFalsify) {
+        logFalsify(substitution, equalities, disjunctions, equality, oldEquality, logFormulaFalsify);
         return new ConjunctiveFormula(
                 substitution,
                 equalities,
@@ -570,6 +575,20 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                 TruthValue.FALSE,
                 equality,
                 global);
+    }
+
+    private void logFalsify(Substitution<Variable, Term> substitution, PersistentUniqueList<Equality> equalities,
+                            PersistentUniqueList<DisjunctiveFormula> disjunctions,
+                            Equality equality, Equality oldEquality, boolean logFormulaFalsify) {
+        if (logFormulaFalsify || RuleAuditing.isAuditBegun()) {
+            Substitution<Variable, Term> debugSubstitution = oldEquality != null
+                                                             ? substitution.retainAll(
+                    Sets.union(oldEquality.leftHandSide().variableSet(),
+                            oldEquality.rightHandSide().variableSet()))
+                                                             : substitution;
+            global.log().format("Unification failure: %s\nOld Equality: %s\nRelevant substitution: %s\n",
+                    equality, oldEquality, debugSubstitution);
+        }
     }
 
     /**
