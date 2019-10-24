@@ -58,7 +58,7 @@ case class Definition(
 trait Sorting {
   def computeSubsortPOSet(sentences: Set[Sentence]) = {
     val subsortRelations: Set[(Sort, Sort)] = sentences collect {
-      case Production(klabel, Seq(), endSort, Seq(NonTerminal(startSort, _)), att) if klabel.isEmpty => (startSort, endSort)
+      case Production(klabel, endSort, Seq(NonTerminal(startSort, _)), att) if klabel.isEmpty => (startSort, endSort)
     }
 
     POSet(subsortRelations)
@@ -116,7 +116,7 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
   lazy val productionsFor: Map[KLabel, Set[Production]] =
     productions
       .collect({ case p if p.klabel != None => p })
-      .groupBy(_.klabel.get.head)
+      .groupBy(_.klabel.get)
       .map { case (l, ps) => (l, ps) }
 
   lazy val localProductionsFor: Map[KLabel, Set[Production]] =
@@ -135,7 +135,7 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
       .get(Sorts.Layout)
       .getOrElse(Set[Production]())
       .collect({
-          case Production(_, _, _, Seq(RegexTerminal(_, terminalRegex, _)), _) => terminalRegex
+          case Production(_, _, Seq(RegexTerminal(_, terminalRegex, _)), _) => terminalRegex
           case p => throw KEMException.compilerError("Productions of sort `Layout` must be exactly one `RegexTerminal`.\nProduction: " + p.toString())
       })
 
@@ -143,7 +143,7 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
 
   @transient
   lazy val definedKLabels: Set[KLabel] =
-    (productionsFor.keys.toSet).filter(!_.isInstanceOf[KVariable]).map(_.head)
+    (productionsFor.keys.toSet).filter(!_.isInstanceOf[KVariable])
 
   @transient
   lazy val localKLabels: Set[KLabel] =
@@ -176,7 +176,7 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
     if (tokenProductionsFor.contains(s))
       tokenProductionsFor.apply(s).head
     else
-      Production(None, Seq(), s, Seq(), Att.empty.add("token"))
+      Production(None, s, Seq(), Att.empty.add("token"))
   }
 
   lazy val allModulesNames : Set[String] = (imports map  {_.name}) + name
@@ -223,8 +223,7 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
   @transient lazy val signatureFor: Map[KLabel, Set[(Seq[Sort], Sort)]] =
     productionsFor mapValues {
       ps: Set[Production] =>
-        ps.filter { p: Production => p.params.isEmpty }
-        .map {
+        ps.map {
           p: Production =>
             val params: Seq[Sort] = p.items collect { case NonTerminal(sort, _) => sort }
             (params, p.sort)
@@ -248,13 +247,13 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
     Att(union.filter { key => attMap(key._1._1).size == 1 }.toMap)
   }
 
-  lazy val definedSorts: Set[Sort] = (productions filter {p => !p.isSortVariable(p.sort)} map {_.sort}) ++ (sortDeclarations map {_.sort})
+  lazy val definedSorts: Set[Sort] = (productions map {_.sort}) ++ (sortDeclarations map {_.sort})
   lazy val sortedSorts: Seq[Sort] = definedSorts.toSeq.sorted
   lazy val usedCellSorts: Set[Sort] = productions.flatMap { p => p.items.collect { case NonTerminal(s, _) => s }
     .filter(s => s.name.endsWith("Cell") || s.name.endsWith("CellFragment"))
   }
 
-  lazy val listSorts: Set[Sort] = sentences.collect({ case Production(_, _, srt, _, att1) if att1.contains("userList") =>
+  lazy val listSorts: Set[Sort] = sentences.collect({ case Production(_, srt, _, att1) if att1.contains("userList") =>
     srt
   })
 
@@ -298,8 +297,8 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
 
   // check that non-terminals have a defined sort
   def checkSorts () = sentences foreach {
-    case p@Production(_, _, _, items, _) =>
-      val res = items collect { case nt: NonTerminal if !p.isSortVariable(nt.sort) && !definedSorts.contains(nt.sort) && !usedCellSorts.contains(nt.sort) && !sortSynonymMap.contains(nt.sort) => nt }
+    case p@Production(_, _, items, _) =>
+      val res = items collect { case nt: NonTerminal if !definedSorts.contains(nt.sort) && !usedCellSorts.contains(nt.sort) && !sortSynonymMap.contains(nt.sort) => nt }
       if (res.nonEmpty)
         throw KEMException.compilerError("Could not find sorts: " + res.asJava, p)
     case _ =>
@@ -449,20 +448,21 @@ case class SortSynonym(newSort: Sort, oldSort: Sort, att: Att = Att.empty) exten
   override def withAtt(att: Att) = SortSynonym(newSort, oldSort, att)
 }
 
-case class Production(klabel: Option[KLabel], params: Seq[Sort], sort: Sort, items: Seq[ProductionItem], att: Att)
+case class Production(klabel: Option[KLabel], sort: Sort, items: Seq[ProductionItem], att: Att)
   extends Sentence with ProductionToString {
 
   lazy val klabelAtt: Option[String] = att.getOption("klabel").orElse(klabel.map(_.name))
 
   override def equals(that: Any) = that match {
-    case p@Production(`klabel`, `params`, `sort`, `items`, _) => ( this.klabelAtt == p.klabelAtt
+    case p@Production(`klabel`, `sort`, `items`, _) => ( this.klabelAtt == p.klabelAtt
+                                                      && this.att.getOption("poly") == p.att.getOption("poly")
                                                       && this.att.getOption("function") == p.att.getOption("function")
                                                       && this.att.getOption("symbol") == p.att.getOption("symbol")
                                                        )
     case _ => false
   }
 
-  override lazy val hashCode: Int = ((sort.hashCode() * 31 + items.hashCode()) * 31 + klabel.hashCode() * 31) + params.hashCode()
+  override lazy val hashCode: Int = ((sort.hashCode() * 31 + items.hashCode()) * 31 + klabel.hashCode()) * 31 + att.getOption("poly").hashCode()
 
   lazy val isSyntacticSubsort: Boolean =
     items.size == 1 && items.head.isInstanceOf[NonTerminal]
@@ -478,18 +478,6 @@ case class Production(klabel: Option[KLabel], params: Seq[Sort], sort: Sort, ite
   lazy val arity: Int = nonterminals.size
 
   def nonterminal(i: Int): NonTerminal = nonterminals(i)
-
-  def substitute(args: Seq[Sort]): Production = {
-    val subst = (params zip args).toMap
-    Production(klabel.map(l => ADT.KLabel(l.name, args:_*)), Seq(), subst.getOrElse(sort, sort), items.map({
-      case NonTerminal(sort, name) => NonTerminal(subst.getOrElse(sort, sort), name)
-      case i => i
-    }), att)
-  }
-
-  def isSortVariable(s: Sort): Boolean = {
-    params.contains(s)
-  }
 
   private def computePrefixProduction: Boolean = {
     var state = 0
@@ -535,10 +523,10 @@ case class Production(klabel: Option[KLabel], params: Seq[Sort], sort: Sort, ite
     val suffix = items.last
     val newAtt = att.add("recordPrd", classOf[Production], this).add("unparseAvoid")
     if (terminals.isEmpty)
-      Production(klabel, params, sort, prefix :+ suffix, newAtt)
+      Production(klabel, sort, prefix :+ suffix, newAtt)
     else {
       val middle = terminals.tail.foldLeft(Seq(Terminal(terminals.head.name.get), Terminal(":"), terminals.head)){ (l, nt) => l ++ Seq(Terminal(","), Terminal(nt.name.get), Terminal(":"), nt) }
-      Production(klabel, params, sort, prefix ++ middle :+ suffix, newAtt)
+      Production(klabel, sort, prefix ++ middle :+ suffix, newAtt)
     }
   }
 
@@ -550,7 +538,7 @@ case class Production(klabel: Option[KLabel], params: Seq[Sort], sort: Sort, ite
   }
   override val isSyntax = true
   override val isNonSyntax = false
-  override def withAtt(att: Att) = Production(klabel, params, sort, items, att)
+  override def withAtt(att: Att) = Production(klabel, sort, items, att)
 }
 
 object Production {
@@ -560,14 +548,14 @@ object Production {
     }
   }
 
-  def apply(klabel: KLabel, params: Seq[Sort], sort: Sort, items: Seq[ProductionItem], att: Att = Att.empty): Production = {
-    Production(Some(klabel), params, sort, items, att)
+  def apply(klabel: KLabel, sort: Sort, items: Seq[ProductionItem], att: Att = Att.empty): Production = {
+    Production(Some(klabel), sort, items, att)
   }
-  def apply(params: Seq[Sort], sort: Sort, items: Seq[ProductionItem], att: Att): Production = {
+  def apply(sort: Sort, items: Seq[ProductionItem], att: Att): Production = {
     if (att.contains(kLabelAttribute)) {
-      Production(Some(KORE.KLabel(att.get(kLabelAttribute))), params, sort, items, att)
+      Production(Some(KORE.KLabel(att.get(kLabelAttribute))), sort, items, att)
     } else {
-      Production(None, params, sort, items, att)
+      Production(None, sort, items, att)
     }
   }
 

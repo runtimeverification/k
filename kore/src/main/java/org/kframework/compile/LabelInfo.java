@@ -3,8 +3,8 @@ package org.kframework.compile;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
-import org.kframework.definition.Production;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
@@ -12,7 +12,6 @@ import org.kframework.kore.KRewrite;
 import org.kframework.kore.Sort;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
@@ -26,11 +25,11 @@ import static org.kframework.kore.KORE.*;
 public class LabelInfo {
     private final Multimap<KLabel, Sort> codomain = HashMultimap.create();
 
-    private final Map<KLabel, AssocInfo> assocInfo = new HashMap<>();
+    private final Map<KLabel, AssocInfo> assocInfo = Maps.newHashMap();
 
     private final Set<KLabel> functionLabels = new HashSet<>();
 
-    private final Map<String, Production> productions = new HashMap<>();
+    private final Map<KLabel, String> polyInfo = Maps.newHashMap();
 
     protected void addLabel(Sort result, String label) {
         addLabel(result, label, false);
@@ -41,10 +40,10 @@ public class LabelInfo {
     }
 
     protected void addLabel(Sort result, String label, boolean isAssoc, boolean isComm, boolean isFunction) {
-        addLabel(result, label, isAssoc, isComm, isFunction, null);
+        addLabel(result, label, isAssoc, isComm, isFunction, Optional.empty());
     }
 
-    protected void addLabel(Sort result, String label, boolean isAssoc, boolean isComm, boolean isFunction, Production prod) {
+    protected void addLabel(Sort result, String label, boolean isAssoc, boolean isComm, boolean isFunction, Optional<String> polyLabel) {
         KLabel kLabel = KLabel(label);
         codomain.put(kLabel, result);
         AssocInfo info = new AssocInfo(isAssoc, isComm);
@@ -56,7 +55,13 @@ public class LabelInfo {
         if (isFunction) {
             functionLabels.add(kLabel);
         }
-        productions.put(label, prod);
+        if (polyLabel.isPresent()) {
+            if (polyInfo.containsKey(kLabel)){
+                assert polyInfo.get(kLabel).equals(polyLabel.get());
+            } else {
+                polyInfo.put(kLabel, polyLabel.get());
+            }
+        }
     }
 
     public LabelInfo() {
@@ -110,7 +115,10 @@ public class LabelInfo {
         }
     }
 
-    public Production getProduction(String label) {
-      return productions.get(label);
+    /**
+     * Get the poly attribute for the KLabel.
+     */
+    public String getPolyInfo(KLabel l) {
+        return polyInfo.get(l);
     }
 }

@@ -52,12 +52,10 @@ public class ApplyTypeCheckVisitor extends SetsTransformerWithErrors<ParseFailed
                 } else {
                     Term t = tc.get(j);
                     Sort s = ((NonTerminal) tc.production().items().apply(i)).sort();
-                    if (!tc.production().isSortVariable(s)) {
-                        Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheck2(s).apply(t);
-                        if (rez.isLeft())
-                            return rez;
-                        tc = tc.with(j, rez.right().get());
-                    }
+                    Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheck2(s).apply(t);
+                    if (rez.isLeft())
+                        return rez;
+                    tc = tc.with(j, rez.right().get());
                     j++;
                 }
             }

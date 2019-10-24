@@ -59,7 +59,7 @@ module KSEQ
              | ".::K"    [klabel(#EmptyK), symbol, unparseAvoid]
   syntax K ::= K "~>" K  [klabel(#KSequence), left, assoc, unit(#EmptyK), symbol]
   syntax left #KSequence
-  syntax {Sort} Sort     ::= "(" Sort ")"    [bracket]
+  syntax K     ::= "(" K ")"    [bracket, poly(0, 1)]
 endmodule
 
 module ML-SYNTAX
@@ -67,27 +67,20 @@ module ML-SYNTAX
 
   syntax #KVariable
 
-  syntax {Sort} Sort ::= "#True" [klabel(#True), symbol, mlUnary]
-                       | "#False" [klabel(#False), symbol, mlUnary]
-                       | "#Not" "(" Sort ")" [klabel(#Not), symbol, mlOp, mlUnary]
+  syntax K ::= "#True" [klabel(#True), symbol, poly(0)]
+             | "#False" [klabel(#False), symbol, poly(0)]
+             | "#Not" "(" K ")" [klabel(#Not), symbol, mlOp, poly(0, 1)]
+             | "#Ceil" "(" K ")" [klabel(#Ceil), symbol, mlOp, poly(1; 0)]
+             | "#Floor" "(" K ")" [klabel(#Floor), symbol, mlOp, poly(1; 0)]
+             > "{" K "#Equals" K "}" [klabel(#Equals), symbol, mlOp, format(%1%i%n%2%d%n%3%i%n%4%d%n%5), poly(1, 2; 0)]
+             > K "#And" K [klabel(#And), symbol, assoc, left, comm, unit(#True), mlOp, poly(0, 1, 2), format(%i%1%d%n%2%n%i%3%d)]
+             > K "#Or" K [klabel(#Or), symbol, assoc, left, comm, unit(#False), mlOp, poly(0, 1, 2), format(%i%1%d%n%2%n%i%3%d)]
+             > K "#Implies" K [klabel(#Implies), symbol, mlOp, poly(0, 1, 2), format(%i%1%d%n%2%n%i%3%d)]
+             > "#Exists" K "." K [klabel(#Exists), symbol, mlOp, poly(1; 0, 2), mlBinder]
+             | "#Forall" K "." K [klabel(#Forall), symbol, mlOp, poly(1; 0, 2), mlBinder]
+             | "#AG" "(" K ")" [klabel(#AG), symbol, mlOp, poly(0, 1)]
+             | "#wEF" "(" K ")" [klabel(weakExistsFinally), symbol, mlOp, poly(0, 1)]
 
-  syntax {Sort1, Sort2} Sort2 ::= "#Ceil" "(" Sort1 ")" [klabel(#Ceil), symbol, mlOp, mlUnary]
-                                | "#Floor" "(" Sort1 ")" [klabel(#Floor), symbol, mlOp, mlUnary]
-                                | "{" Sort1 "#Equals" Sort1 "}" [klabel(#Equals), symbol, mlOp, mlEquals, format(%1%i%n%2%d%n%3%i%n%4%d%n%5)]
-
-  syntax priorities mlUnary > mlEquals > mlAnd
-
-  syntax {Sort} Sort ::= Sort "#And" Sort [klabel(#And), symbol, assoc, left, comm, unit(#True), mlOp, mlAnd, format(%i%1%d%n%2%n%i%3%d)]
-                       > Sort "#Or" Sort [klabel(#Or), symbol, assoc, left, comm, unit(#False), mlOp, format(%i%1%d%n%2%n%i%3%d)]
-                       > Sort "#Implies" Sort [klabel(#Implies), symbol, mlOp, mlImplies, format(%i%1%d%n%2%n%i%3%d)]
-
-  syntax priorities mlImplies > mlQuantifier
-
-  syntax {Sort1, Sort2} Sort2 ::= "#Exists" Sort1 "." Sort2 [klabel(#Exists), symbol, mlOp, mlBinder, mlQuantifier]
-                                | "#Forall" Sort1 "." Sort2 [klabel(#Forall), symbol, mlOp, mlBinder, mlQuantifier]
-
-  syntax {Sort} Sort ::= "#AG" "(" Sort ")" [klabel(#AG), symbol, mlOp, mlQuantifier]
-                       | "#wEF" "(" Sort ")" [klabel(weakExistsFinally), symbol, mlOp, mlQuantifier]
 endmodule
 
 // To be used when parsing/pretty-printing symbolic configurations
@@ -162,14 +155,12 @@ endmodule
 
 module K-TOP-SORT
   imports SORT-KBOTT
-  syntax KItem ::= KBott
-  syntax {Sort} KItem ::= Sort
+  syntax KItem ::= KBott [poly(1)]
 endmodule
 
 module K-BOTTOM-SORT
   imports SORT-KBOTT
-  syntax KItem ::= KBott
-  syntax {Sort} Sort ::= KBott
+  syntax KItem ::= KBott [poly(0)]
 endmodule
 
 module K-SORT-LATTICE
@@ -249,15 +240,15 @@ module K
   imports AUTO-CASTS
   imports AUTO-FOLLOW
 
-  syntax {Sort} Sort ::= Sort "=>" Sort [klabel(#KRewrite), symbol]
+  syntax K ::= K "=>" K [klabel(#KRewrite), symbol, poly(0, 1, 2)]
   syntax non-assoc #KRewrite
   syntax priority #KRewrite > #withConfig
 
-  syntax {Sort} Sort ::= Sort "#as" Sort [klabel(#KAs), symbol]
+  syntax K ::= K "#as" K [klabel(#KAs), symbol, poly(0, 1, 2)]
   // functions that preserve sorts and can therefore have inner rewrites
-  syntax {Sort} Sort ::= "#fun" "(" Sort ")" "(" Sort ")" [klabel(#fun2), symbol, prefer]
+  syntax K ::= "#fun" "(" K ")" "(" K ")" [klabel(#fun2), symbol, poly(0, 1, 2), prefer]
   // functions that do not preserve sort and therefore cannot have inner rewrites
-  syntax {Sort1, Sort2} Sort1 ::= "#fun" "(" Sort2 "=>" Sort1 ")" "(" Sort2 ")" [klabel(#fun3), symbol]
+  syntax K ::= "#fun" "(" K "=>" K ")" "(" K ")" [klabel(#fun3), symbol, poly(0, 2; 1, 3)]
 
   /*@ Set membership over terms. In addition to equality over
       concrete patterns, K also supports computing equality

@@ -27,7 +27,7 @@ public class ApplySynonyms {
             pis.add(pi);
           }
       }
-      return Production(p.klabel(), p.params(), returnSort, immutable(pis), p.att());
+      return Production(p.klabel(), returnSort, immutable(pis), p.att());
     }
 
     public Sentence apply(Module m, Sentence s) {

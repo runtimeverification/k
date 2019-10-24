@@ -242,11 +242,7 @@ public class JsonParser {
                 for (JsonObject pi: data.getJsonArray("productionItems").getValuesAs(JsonObject.class)) {
                     pItems.add(toProductionItem(pi));
                 }
-                List<Sort> params = new ArrayList<>();
-                for (JsonObject s : data.getJsonArray("params").getValuesAs(JsonObject.class)) {
-                    params.add(toSort(s));
-                }
-                return new Production(klabel, JavaConverters.asScalaIteratorConverter(params.iterator()).asScala().toSeq(), sort, JavaConverters.asScalaIteratorConverter(pItems.iterator()).asScala().toSeq(), att);
+                return new Production(klabel, sort, JavaConverters.asScalaIteratorConverter(pItems.iterator()).asScala().toSeq(), att);
             }
             default:
                 throw KEMException.criticalError("Unexpected node found in KAST Json term: " + data.getString("node"));

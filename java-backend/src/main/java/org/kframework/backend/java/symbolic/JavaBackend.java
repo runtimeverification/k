@@ -118,8 +118,7 @@ public class JavaBackend implements Backend {
         ModuleTransformer convertDataStructureToLookup = ModuleTransformer.fromSentenceTransformer((m, s) -> new ConvertDataStructureToLookup(m, false).convert(s), "convert data structures to lookups");
 
         //Commented steps are (possibly) required for spec automaton generation.
-        return m -> ModuleTransformer.fromSentenceTransformer(Kompile::removePolyKLabels, "remove poly klabels")
-                .andThen(ModuleTransformer.fromSentenceTransformer(new ResolveAnonVar()::resolve, "resolve anonymous varaibles"))
+        return m -> ModuleTransformer.fromSentenceTransformer(new ResolveAnonVar()::resolve, "resolve anonymous varaibles")
                 .andThen(ModuleTransformer.fromSentenceTransformer(s -> new ResolveSemanticCasts(kompileOptions.backend.equals(Backends.JAVA)).resolve(s), "resolve semantic casts"))
                 .andThen(AddImplicitComputationCell::transformModule)
                 .andThen(ConcretizeCells::transformModule)

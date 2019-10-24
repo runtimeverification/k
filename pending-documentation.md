@@ -51,7 +51,7 @@ JSON backend.
 KLabels are also used when terms are logged in Java Backend, when using
 logging/debugging options, or in error messages.
 
-### Parametric productions and `bracket` attributes
+### `poly` and `bracket` attributes
 
 Some syntax productions, like the rewrite operator, the bracket operator, and
 the #if #then #else #fi operator, cannot have their precise type system
@@ -66,20 +66,19 @@ It also introduces cases where terms cannot be placed in positions where they
 ought to be well sorted unless their return sort is made to be KBott, which in
 turn vastly complicates the grammar and makes parsing much slower.
 
-In order to introduce this, we provide a new syntax for parametric productions
-in K. This allows you to express syntax that has a sort signature based on
-parametric polymorphism. We do this by means of an optional curly-brace-
-enclosed list of parameters prior to the return sort of a production.
+In order to introduce this, we introduce a new attribute, poly, which indicates
+which fields of a production are polymorphic (ie, can refer to any Sort but
+must refer to the same sort as each other).
 
 Some examples:
 
 ```
-syntax {Sort} Sort ::= "(" Sort ")" [bracket]
-syntax {Sort} KItem ::= Sort
-syntax {Sort} Sort ::= KBott
-syntax {Sort} Sort ::= Sort "=>" Sort
-syntax {Sort} Sort ::= "#if" Bool "#then" Sort "#else" Sort "#fi"
-syntax {Sort1, Sort2} Sort1 ::= "#fun" "(" Sort2 "=>" Sort1 ")" "(" Sort2 ")"
+syntax K ::= "(" K ")" [bracket, poly(0, 1)]
+syntax KItem ::= KBott [poly(1)]
+syntax KItem ::= KBott [poly(0)]
+syntax K ::= K "=>" K [poly(0, 1, 2)]
+syntax K ::= "#if" Bool "#then" K "#else" K "#fi" [poly(0, 2, 3)]
+syntax K ::= "#fun" "(" K "=>" K ")" "(" K ")" [poly(0, 2; 1, 3)]
 ```
 
 Here we have:
@@ -96,13 +95,13 @@ Here we have:
    sort, and the return value of the application must be the same sort as the
    return value of the function.
 
-Note the last case, in which two different parameters are specified separated
-by a comma. This indicates that we have multiple independent parameters which
-must be the same each place they occur, but not the same as the other
-parameters.
+Note the last case, in which two different polymorphic sorts are specified
+together with the semicolon operator. This indicates that we have multiple sets
+of indices which must be the same as each other within each set, but not
+between sets.
 
-In practice, because every sort is a subsort of K, the `Sort2`
-parameter in #6 above does nothing during parsing. It cannot
+In practice, because every sort is a KItem and a KItem is a K, the (1, 3)
+polymorphic attribute in #6 above does nothing during parsing. It cannot
 actually reject any parse, because it can always infer that the sort of the
 argument and parameter are K, and it has no effect on the resulting sort of
 the term. However, it will nevertheless affect the kore generated from the term

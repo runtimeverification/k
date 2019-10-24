@@ -178,7 +178,7 @@ public class ResolveFunctionWithConfig {
     private Production resolve(Production prod) {
         if (prod.klabel().isDefined() && withConfigFunctions.contains(prod.klabel().get())) {
             List<ProductionItem> pis = Stream.concat(stream(prod.items()), Stream.of(NonTerminal(topCell))).collect(Collections.toList());
-            return Production(prod.klabel(), prod.params(), prod.sort(), pis, prod.att());
+            return Production(prod.klabel(), prod.sort(), pis, prod.att());
         }
         return prod;
     }

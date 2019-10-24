@@ -247,11 +247,12 @@ public class ExpandMacros {
     }
 
     private boolean hasPolyAtt(Production prod, int idx) {
-      if (prod.params().isEmpty()) {
+      if (!prod.att().contains("poly")) {
         return false;
       }
-      for (Sort param : iterable(prod.params())) {
-        if (prod.sort().equals(param) && prod.nonterminals().apply(idx).sort().equals(param)) {
+      List<Set<Integer>> poly = RuleGrammarGenerator.computePositions(prod);
+      for (Set<Integer> positions : poly) {
+        if (positions.contains(0) && positions.contains(idx)) {
           return true;
         }
       }

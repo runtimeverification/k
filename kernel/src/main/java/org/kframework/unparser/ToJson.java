@@ -294,10 +294,6 @@ public class ToJson {
         JavaConverters.seqAsJavaList(pro.items()).forEach(p -> productionItems.add(toJson(p)));
         jpro.add("productionItems", productionItems.build());
 
-        JsonArrayBuilder params = Json.createArrayBuilder();
-        JavaConverters.seqAsJavaList(pro.params()).forEach(p -> params.add(toJson(p)));
-        jpro.add("params", params.build());
-
         jpro.add("sort", toJson(pro.sort()));
         jpro.add("att", toJson(pro.att()));
 

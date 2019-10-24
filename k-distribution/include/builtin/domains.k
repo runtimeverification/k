@@ -845,7 +845,7 @@ module K-EQUAL
 
   rule K1:Bool ==Bool K2:Bool => K1 ==K K2
 
-  syntax {Sort} Sort ::= "#if" Bool "#then" Sort "#else" Sort "#fi"   [function, functional, smt-hook(ite), hook(KEQUAL.ite)]
+  syntax K ::= "#if" Bool "#then" K "#else" K "#fi"   [function, functional, smt-hook(ite), hook(KEQUAL.ite), poly(0, 2, 3)]
 
   rule #if C:Bool #then B1::K #else _ #fi => B1 requires C
   rule #if C:Bool #then _ #else B2::K #fi => B2 requires notBool C
@@ -869,8 +869,8 @@ module K-REFLECTION
   syntax List ::= #argv() [function, hook(KREFLECTION.argv)]
 
   // Takes as input a string and returns a K term
-  syntax {Sort} Sort ::= #parseKORE(String) [function, hook(KREFLECTION.parseKORE)]
-  syntax {Sort} Sort ::= #parseKAST(String) [function, hook(KREFLECTION.parseKAST)]
+  syntax KItem ::= #parseKAST(String) [function, hook(KREFLECTION.parseKAST), poly(0)]
+  syntax KItem ::= #parseKORE(String) [function, hook(KREFLECTION.parseKORE), poly(0)]
   syntax IOError ::= "#noParse" "(" String ")" [klabel(#noParse), symbol]
 
 endmodule
