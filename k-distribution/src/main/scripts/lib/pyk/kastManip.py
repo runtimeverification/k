@@ -33,22 +33,19 @@ def collectBottomUp(kast, callback):
             collectBottomUp(arg, callback)
     callback(kast)
 
-def traverseBottomUp(kast, effect):
+def onChildren(kast, effect):
     if isKApply(kast):
-        newArgs = []
-        for arg in kast["args"]:
-            newArgs.append(traverseBottomUp(arg, effect))
+        newArgs = [ effect(arg) for arg in kast['args'] ]
         kast = KApply(kast["label"], newArgs)
-    return effect(kast)
+    return kast
+
+def traverseBottomUp(kast, effect):
+    newKast = onChildren(kast, lambda _kast: traverseBottomUp(_kast, effect))
+    return effect(newKast)
 
 def traverseTopDown(kast, effect):
     newKast = effect(kast)
-    if isKApply(newKast):
-        newArgs = []
-        for arg in newKast["args"]:
-            newArgs.append(traverseTopDown(arg, effect))
-        newKast = KApply(newKast["label"], newArgs)
-    return newKast
+    return onChildren(newKast, lambda _kast: traverseTopDown(_kast, effect))
 
 def collectFreeVars(kast):
     freeVars = set([])
