@@ -103,7 +103,7 @@ public class DefinitionParsing {
         this.profileRules = profileRules;
     }
 
-    public java.util.Set<Module> parseModules(CompiledDefinition definition, String mainModule, File definitionFile) {
+    public java.util.Set<Module> parseModules(CompiledDefinition definition, String mainModule, File definitionFile, java.util.Set<String> excludeModules) {
         Definition def = parser.loadDefinition(
                 mainModule,
                 mutable(definition.getParsedDefinition().modules()),
@@ -113,6 +113,8 @@ public class DefinitionParsing {
                 ListUtils.union(lookupDirectories,
                         Lists.newArrayList(Kompile.BUILTIN_DIRECTORY)),
                 kore);
+
+        def = Kompile.excludeModulesByTag(excludeModules).apply(def);
 
         errors = java.util.Collections.synchronizedSet(Sets.newHashSet());
         caches = new HashMap<>();
