@@ -37,6 +37,13 @@ def onChildren(kast, effect):
     if isKApply(kast):
         newArgs = [ effect(arg) for arg in kast['args'] ]
         kast = KApply(kast["label"], newArgs)
+    if isKRewrite(kast):
+        lhs = effect(kast['lhs'])
+        rhs = effect(kast['rhs'])
+        kast = KRewrite(lhs, rhs, kast['att'])
+    if isKSequence(kast):
+        newItems = [ effect(item) for item in kast['items'] ]
+        kast = KSequence(newItems)
     return kast
 
 def traverseBottomUp(kast, effect):
