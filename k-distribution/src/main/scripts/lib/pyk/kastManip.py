@@ -35,24 +35,18 @@ def collectBottomUp(kast, callback):
 
 def onChildren(kast, effect):
     if isKApply(kast):
-        newArgs = [ effect(arg) for arg in kast['args'] ]
-        kast = KApply(kast["label"], newArgs)
-    if isKRewrite(kast):
-        lhs = effect(kast['lhs'])
-        rhs = effect(kast['rhs'])
-        kast = KRewrite(lhs, rhs, kast['att'])
-    if isKSequence(kast):
-        newItems = [ effect(item) for item in kast['items'] ]
-        kast = KSequence(newItems)
+        return KApply(kast["label"], [ effect(arg) for arg in kast['args'] ])
+    elif isKRewrite(kast):
+        return KRewrite(effect(kast['lhs']), effect(kast['rhs']), kast['att'])
+    elif isKSequence(kast):
+        return KSequence([ effect(item) for item in kast['items'] ])
     return kast
 
 def traverseBottomUp(kast, effect):
-    newKast = onChildren(kast, lambda _kast: traverseBottomUp(_kast, effect))
-    return effect(newKast)
+    return effect(onChildren(kast, lambda _kast: traverseBottomUp(_kast, effect)))
 
 def traverseTopDown(kast, effect):
-    newKast = effect(kast)
-    return onChildren(newKast, lambda _kast: traverseTopDown(_kast, effect))
+    return onChildren(effect(kast), lambda _kast: traverseTopDown(_kast, effect))
 
 def collectFreeVars(kast):
     freeVars = set([])
