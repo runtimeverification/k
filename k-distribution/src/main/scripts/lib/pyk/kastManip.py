@@ -27,12 +27,6 @@ def match(pattern, kast):
         return combineDicts(lhsSubst, rhsSubst)
     return None
 
-def collectBottomUp(kast, callback):
-    if isKApply(kast):
-        for arg in kast["args"]:
-            collectBottomUp(arg, callback)
-    callback(kast)
-
 def onChildren(kast, effect):
     if isKApply(kast):
         return KApply(kast["label"], [ effect(arg) for arg in kast['args'] ])
@@ -47,6 +41,9 @@ def traverseBottomUp(kast, effect):
 
 def traverseTopDown(kast, effect):
     return onChildren(effect(kast), lambda _kast: traverseTopDown(_kast, effect))
+
+def collectBottomUp(kast, callback):
+    callback(onChildren(kast, lambda _kast: collectBottomUp(_kast, callback)))
 
 def collectFreeVars(kast):
     freeVars = set([])
