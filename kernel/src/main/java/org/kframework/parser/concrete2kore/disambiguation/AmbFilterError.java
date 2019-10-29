@@ -5,7 +5,6 @@ import com.google.common.collect.Sets;
 import org.kframework.kore.K;
 import org.kframework.parser.Ambiguity;
 import org.kframework.parser.ProductionReference;
-import org.kframework.parser.SetsGeneralTransformer;
 import org.kframework.parser.SetsTransformerWithErrors;
 import org.kframework.parser.Term;
 import org.kframework.parser.TreeNodesToKORE;
@@ -14,15 +13,13 @@ import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.errorsystem.ParseFailedException;
-import scala.Tuple2;
 import scala.util.Either;
 import scala.util.Left;
-import scala.util.Right;
 
 import java.util.Set;
 
 /**
- * Eliminate remaining ambiguities by choosing one of them.
+ * Report remaining ambiguities as errors.
  */
 public class AmbFilterError extends SetsTransformerWithErrors<ParseFailedException> {
 
@@ -53,7 +50,7 @@ public class AmbFilterError extends SetsTransformerWithErrors<ParseFailedExcepti
             return candidate;
         }
 
-        String msg = "Parsing ambiguity. Arbitrarily choosing the first.";
+        String msg = "Parsing ambiguity.";
 
         for (int i = 0; i < amb.items().size(); i++) {
             msg += "\n" + (i + 1) + ": ";
@@ -67,9 +64,9 @@ public class AmbFilterError extends SetsTransformerWithErrors<ParseFailedExcepti
             //msg += "\n   " + unparser.print(elem).replace("\n", "\n   ");
             msg += "\n    " + new RemoveBracketVisitor().apply(elem);
         }
-        // TODO: add location information
+
         ParseFailedException e = new ParseFailedException(
-                new KException(ExceptionType.WARNING, KExceptionGroup.INNER_PARSER, msg, amb.items().iterator().next().source().get(), amb.items().iterator().next().location().get()));
+                new KException(ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, msg, amb.items().iterator().next().source().get(), amb.items().iterator().next().location().get()));
 
         return Left.apply(Sets.newHashSet(e));
     }
