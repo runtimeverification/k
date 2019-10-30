@@ -1,0 +1,3 @@
+[Error] Compiler: Variable 'A' was not declared. Assuming sort Foo.
+	Source(test2.k)
+	Location(10,6,10,20)
