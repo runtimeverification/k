@@ -116,6 +116,9 @@ public final class KastOptions {
     @Parameter(names="--expand-macros", description="Also expand macros in the parsed string.")
     public boolean expandMacros = false;
 
+    @Parameter(names="--keep-amb", description="When parsing programs, keep ambiguities and print them.")
+    public boolean keepAmb = false;
+
     @Parameter(names={"--input", "-i"}, converter=InputModeConverter.class,
             description="How to read kast input in. <mode> is either [program|binary|kast|json|kore].")
     public InputModes input = InputModes.PROGRAM;
