@@ -30,6 +30,7 @@ import org.kframework.parser.outer.Outer;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -417,7 +418,14 @@ public class DefinitionParsing {
             //The content will have wrong Source attribute and must be invalidated.
             if (cacheSource.isPresent() && cacheSource.get().equals(source)) {
                 cachedBubbles.getAndIncrement();
-                kem.addAllKException(parse.getWarnings().stream().map(e -> e.getKException()).collect(Collectors.toList()));
+                if (kem.options.warnings2errors) {
+                    for (KEMException err : parse.getWarnings().stream().map(e -> (KEMException) e).collect(Collectors.toList())) {
+                        if (kem.options.warnings.includesExceptionType(err.exception.getType())) {
+                            errors.add(KEMException.asError(err));
+                        }
+                    }
+                } else
+                    kem.addAllKException(parse.getWarnings().stream().map(e -> e.getKException()).collect(Collectors.toList()));
                 return Stream.of(parse.getParse());
             }
         }
