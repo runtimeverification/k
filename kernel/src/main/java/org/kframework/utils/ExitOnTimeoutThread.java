@@ -19,7 +19,7 @@ public class ExitOnTimeoutThread extends Thread {
         try {
             Thread.sleep(timeoutMillis);
             System.err.println("K process timeout...");
-            System.exit(1240); //bash timeout exit code is 124
+            System.exit(124); //bash timeout exit code is 124
         } catch (InterruptedException e) {
             //normal termination, ignoring
         }
