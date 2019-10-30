@@ -15,8 +15,8 @@ public class DurationConverter implements IStringConverter<Duration> {
 
     @Override
     public Duration convert(String value) {
-        Integer num = null;
-        String unit = null;
+        int num;
+        String unit;
         try {
             //kudos to https://stackoverflow.com/a/3552805/4182868
             String numPart = value.split("[a-z]")[0];
