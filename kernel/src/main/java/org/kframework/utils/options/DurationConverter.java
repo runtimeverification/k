@@ -22,7 +22,7 @@ public class DurationConverter implements IStringConverter<Duration> {
             String numPart = value.split("[a-z]")[0];
             num = Integer.parseInt(numPart);
             unit = value.substring(numPart.length());
-        } catch (Exception e) {
+        } catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
             throw durationException(value);
         }
         switch (unit) {
