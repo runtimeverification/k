@@ -648,6 +648,36 @@ ambiguity during parsing, so care should be taken to ensure that named
 nonterminals are sufficiently unique from one another to prevent such
 ambiguities. Of course, the compiler will generate a warning in this case.
 
+### `concrete` attribute, `#isConcrete` and `#isVariable` function
+
+Sometimes you only want a given function to simplify if all (or some) of the
+arguments are concrete (non-symbolic). To do so, you can use either the
+`concrete` attribute (if you want it to only apply when all arguments are
+concrete), or the `#isConcrete(_)` side-condition (when you only want it to
+apply if some arguments are concrete). Conversly, the function `#isVariable(_)`
+will only return true when the argument is a variable.
+
+For example, the following will only re-associate terms when all arguments
+are concrete:
+
+```k
+rule X +Int (Y +Int Z) => (X +Int Y) +Int Z [concrete]
+```
+
+And the following rules will only re-associate terms when it will end up
+grouping concrete sub-terms:
+
+```k
+rule X +Int (Y +Int Z) => (X +Int Y) +Int Z
+  requires #isConcrete(X)
+   andBool #isConcrete(Y)
+   andBool #isVariable(Z)
+
+rule X +Int (Y +Int Z) => (X +Int Z) +Int Y
+  requires #isConcrete(X)
+   andBool #isConcrete(Z)
+   andBool #isVariable(Y)
+```
 
 Pattern Matching
 ----------------
