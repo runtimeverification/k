@@ -5,13 +5,13 @@ import com.google.inject.Inject;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.inject.RequestScoped;
+import org.nustaq.serialization.FSTObjectInput;
+import org.nustaq.serialization.FSTObjectOutput;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.ObjectStreamException;
 import java.nio.channels.OverlappingFileLockException;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -53,7 +53,7 @@ public class BinaryLoader {
         try {
             //To protect from concurrent access to same file from another process
             out.getChannel().lock(); //Lock is released automatically when serializer is closed.
-            try (ObjectOutputStream serializer = new ObjectOutputStream(out)) { //already buffered
+            try (FSTObjectOutput serializer = new FSTObjectOutput(out)) { //already buffered
                 serializer.writeObject(o);
             }
         } finally {
@@ -73,7 +73,7 @@ public class BinaryLoader {
             } catch (OverlappingFileLockException e) {
                 //We are in Nailgun mode. File lock is not needed.
             }
-            try (ObjectInputStream deserializer = new ObjectInputStream(in)) { //already buffered
+            try (FSTObjectInput deserializer = new FSTObjectInput(in)) { //already buffered
                 Object obj = deserializer.readObject();
                 return obj;
             }
