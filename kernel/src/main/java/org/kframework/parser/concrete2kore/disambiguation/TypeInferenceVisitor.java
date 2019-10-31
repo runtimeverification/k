@@ -62,8 +62,8 @@ public class TypeInferenceVisitor extends SetsTransformerWithErrors<ParseFailedE
       case UNKNOWN:
         throw KEMException.internalError("Could not solve sort constraints.", t);
       case UNSATISFIABLE:
-        KException kex = inferencer.error();
-        return Left.apply(Collections.singleton(new ParseFailedException(kex)));
+        Set<ParseFailedException> kex = inferencer.error();
+        return Left.apply(kex);
       }
       inferencer.computeModel();
       typed = new TypeCheckVisitor(topSort).apply(t);
@@ -74,8 +74,8 @@ public class TypeInferenceVisitor extends SetsTransformerWithErrors<ParseFailedE
       TypeInferencer.Status status = inferencer.status();
       switch(status) {
       case SATISFIABLE:
-        KException kex = inferencer.error();
-        return Left.apply(Collections.singleton(new ParseFailedException(kex)));
+        Set<ParseFailedException> kex = inferencer.error();
+        return Left.apply(kex);
       case UNKNOWN:
         throw KEMException.internalError("Could not solve sort constraints.", t);
       case UNSATISFIABLE:

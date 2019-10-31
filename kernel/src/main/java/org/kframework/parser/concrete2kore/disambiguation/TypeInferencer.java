@@ -23,6 +23,7 @@ import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.ParseFailedException;
 
 import scala.collection.Seq;
 import scala.collection.Set;
@@ -247,15 +248,11 @@ public class TypeInferencer implements AutoCloseable {
     }
     print(") ");
     for (String var : variables) {
-      if (var.startsWith("Var")) {
-        print("(<=Sort |" + var + "_| |" + var + "__|) ");
-      }
+      print("(<=Sort |" + var + "_| |" + var + "__|) ");
     }
     print("(or false ");
     for (String var : variables) {
-      if (var.startsWith("Var")) {
-        print("(<Sort |" + var + "_| |" + var + "__|) ");
-      }
+      print("(<Sort |" + var + "_| |" + var + "__|) ");
     }
     println(")))))");
     print("(assert (constraints ");
@@ -395,11 +392,13 @@ public class TypeInferencer implements AutoCloseable {
           pr.setId(Optional.of(id));
         }
         for (Sort param : iterable(pr.production().params())) {
-          String name = "FreshVar" + param.name() + (nextVarId++);
-          variables.add(name);
-          variableNames.add(param.name() + " in production " + pr.production().toString());
+          String name = "FreshVar" + param.name() + locStr(pr);
+          if (!variables.contains(name)) {
+            variables.add(name);
+            variableNames.add(param.name() + " in production " + pr.production().toString());
+            parameters.add(name);
+          }
           variablesById.get(id).add(name);
-          parameters.add(name);
         }
       } else {
         id = pr.id().get();
@@ -444,7 +443,7 @@ public class TypeInferencer implements AutoCloseable {
           variablesById.add(new ArrayList<>());
           pr.setId(Optional.of(id));
           if (isAnonVar(c)) {
-            name = "Var" + c.value() + (nextVarId++);
+            name = "FreshVar" + c.value() + locStr(pr);
           } else {
             name = "Var" + c.value();
           }
@@ -606,20 +605,24 @@ public class TypeInferencer implements AutoCloseable {
     return status;
   }
 
-  public KException error() {
+  public java.util.Set<ParseFailedException> error() {
     if (status() == Status.SATISFIABLE) {
+      java.util.Set<ParseFailedException> result = new HashSet<>();
       int i = 0;
       for (String var : variables) {
         Sort newSort = computeValue(var);
         if (!newSort.equals(model.get(var))) {
-          return new KException(ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, "Could not infer a unique sort for variable " + variableNames.get(i) + ". Possible sorts include " + newSort + " and " + model.get(var), currentTerm.source().orElse(null), currentTerm.location().orElse(null));
+          result.add(new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, "Could not infer a unique sort for variable " + variableNames.get(i) + ". Possible sorts include " + newSort + " and " + model.get(var), currentTerm.source().orElse(null), currentTerm.location().orElse(null))));
         }
         i++;
+      }
+      if(!result.isEmpty()) {
+        return result;
       }
       throw KEMException.internalError("Unknown sort inference error.", currentTerm);
     } else {
       pop();
-      return push();
+      return java.util.Collections.singleton(new ParseFailedException(push()));
     }
   }
 
@@ -630,14 +633,13 @@ public class TypeInferencer implements AutoCloseable {
   }
 
   public void pushNotModel(Term typed) {
-    new PrintNotModel().apply(typed);
+    PrintNotModel viz = new PrintNotModel();
+    viz.apply(typed);
     print("(assert (not (and true");
-    for (String var : variables) {
-      if (var.startsWith("Var")) {
-        print("(= |" + var + "| ");
-        printSort(model.get(var));
-        print(") ");
-      }
+    for (String var : viz.variables) {
+      print("(= |" + var + "| ");
+      printSort(model.get(var));
+      print(") ");
     }
     print(")))");
     status = null;
@@ -731,6 +733,18 @@ public class TypeInferencer implements AutoCloseable {
     variablesById.clear();
     nextId = 0;
     nextVarId = 0;
+  }
+
+  private static final String locStr(ProductionReference pr) {
+    String suffix = "";
+    if (pr.production().klabel().isDefined()) {
+      suffix = "_" + pr.production().klabel().get().name();
+    }
+    if (pr.location().isPresent()) {
+      Location l = pr.location().get();
+      return "_" + l.startLine() + "_" + l.startColumn() + "_" + l.endLine() + "_" + l.endColumn() + suffix;
+    }
+    return Integer.toString(pr.id().get()) + suffix;
   }
 
   static final boolean DEBUG = false;
