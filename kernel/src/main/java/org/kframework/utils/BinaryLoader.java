@@ -1,13 +1,12 @@
 // Copyright (c) 2013-2019 K Team. All Rights Reserved.
 package org.kframework.utils;
 
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.io.Input;
-import com.esotericsoftware.kryo.io.Output;
 import com.google.inject.Inject;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.inject.RequestScoped;
+import org.nustaq.serialization.FSTObjectInput;
+import org.nustaq.serialization.FSTObjectOutput;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -24,13 +23,10 @@ public class BinaryLoader {
     private static ReadWriteLock lock = new ReentrantReadWriteLock();
 
     private final KExceptionManager kem;
-    private final Kryo kryo;
 
     @Inject
     public BinaryLoader(KExceptionManager kem) {
         this.kem = kem;
-        kryo = new Kryo();
-        kryo.setRegistrationRequired(false);
     }
 
     public void saveOrDie(File fileName, Object o) {
@@ -57,8 +53,8 @@ public class BinaryLoader {
         try {
             //To protect from concurrent access to same file from another process
             out.getChannel().lock(); //Lock is released automatically when serializer is closed.
-            try (Output serializer = new Output(out)) { //already buffered
-                kryo.writeClassAndObject(serializer, o);
+            try (FSTObjectOutput serializer = new FSTObjectOutput(out)) { //already buffered
+                serializer.writeObject(o);
             }
         } finally {
             lock.writeLock().unlock();
@@ -77,9 +73,9 @@ public class BinaryLoader {
             } catch (OverlappingFileLockException e) {
                 //We are in Nailgun mode. File lock is not needed.
             }
-            try (Input deserializer = new Input(in)) { //already buffered
+            try (FSTObjectInput deserializer = new FSTObjectInput(in)) { //already buffered
                 //todo use readClass if we stick with Kryo. Probably minimal impact.
-                Object obj = kryo.readClassAndObject(deserializer);
+                Object obj = deserializer.readObject();
                 return obj;
             }
         } finally {
