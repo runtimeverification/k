@@ -687,7 +687,8 @@ rule X +Int (Y +Int Z) => (X +Int Z) +Int Y
 The simplification attribute identifies axioms that are useful for simplifying
 configurations, without being part of the main semantics. When a function rule
 is tagged as `simplification`, the Haskell backend will only apply that rule if
-the side condition has no remainder (that is, it's always true/valid).
+the side condition has no remainder given the current top-level predicate (that
+is, the current top-level predicate _implies_ the side condition of the rule).
 
 For example, for the following definition:
 
