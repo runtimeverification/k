@@ -650,6 +650,9 @@ ambiguities. Of course, the compiler will generate a warning in this case.
 
 ### `concrete` attribute, `#isConcrete` and `#isVariable` function
 
+**NOTE**: `#isConcrete` and `#isVariable` are _not_ supported by the Haskell
+backend.
+
 Sometimes you only want a given function to simplify if all (or some) of the
 arguments are concrete (non-symbolic). To do so, you can use either the
 `concrete` attribute (if you want it to only apply when all arguments are
