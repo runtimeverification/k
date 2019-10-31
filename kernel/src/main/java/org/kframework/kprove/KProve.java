@@ -12,6 +12,7 @@ import org.kframework.definition.Rule;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.Kompile;
 import org.kframework.krun.KRun;
+import org.kframework.main.StartTimeHolder;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.unparser.KPrint;
 import org.kframework.utils.Stopwatch;
@@ -23,10 +24,11 @@ import scala.Tuple2;
 
 import java.io.File;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 
 /**
@@ -79,7 +81,11 @@ public class KProve {
         }
     });
 
-    public static Tuple2<Definition, Module> getProofDefinition(File proofFile, String defModuleName, String specModuleName, CompiledDefinition compiledDefinition, Backend backend, FileUtil files, KExceptionManager kem, Stopwatch sw) {
+    public static Tuple2<Definition, Module> getProofDefinition(File proofFile, String defModuleName,
+                                                                String specModuleName,
+                                                                CompiledDefinition compiledDefinition, Backend backend,
+                                                                FileUtil files, KExceptionManager kem, Stopwatch sw) {
+        StartTimeHolder.log("getProofDefinition start");
         Kompile kompile = new Kompile(compiledDefinition.kompileOptions, files, kem, sw, true);
         if (defModuleName == null) {
             defModuleName = compiledDefinition.kompiledDefinition.mainModule().name();
@@ -87,15 +93,19 @@ public class KProve {
         if (specModuleName == null) {
             specModuleName = FilenameUtils.getBaseName(proofFile.getName()).toUpperCase();
         }
-        java.util.Set<Module> modules = kompile.parseModules(compiledDefinition, defModuleName, files.resolveWorkingDirectory(proofFile).getAbsoluteFile());
-        Map<String, Module> modulesMap = new HashMap<>();
-        modules.forEach(m -> modulesMap.put(m.name(), m));
+        File proofFileAbsolute = files.resolveWorkingDirectory(proofFile).getAbsoluteFile();
+        Set<Module> modules = kompile.parseModules(compiledDefinition, defModuleName, proofFileAbsolute);
+        Map<String, Module> modulesMap = modules.stream().collect(Collectors.toMap(Module::name, m -> m));
         Module defModule = getModule(defModuleName, modulesMap, compiledDefinition.getParsedDefinition());
         Module specModule = getModule(specModuleName, modulesMap, compiledDefinition.getParsedDefinition());
+        StartTimeHolder.log("getProofDefinition: before specificationSteps");
         specModule = backend.specificationSteps(compiledDefinition.kompiledDefinition).apply(specModule);
+        StartTimeHolder.log("getProofDefinition: after specificationSteps");
         Definition combinedDef = Definition.apply(defModule, compiledDefinition.getParsedDefinition().entryModules(), compiledDefinition.getParsedDefinition().att());
         combinedDef = Kompile.excludeModulesByTag(backend.excludedModuleTags()).apply(combinedDef);
+        StartTimeHolder.log("getProofDefinition: before compileDefinition");
         Definition compiled = compileDefinition(backend, combinedDef);
+        StartTimeHolder.log("getProofDefinition end");
         return Tuple2.apply(compiled, specModule);
     }
 
@@ -116,7 +126,7 @@ public class KProve {
      * @return the rule corresponding to boundary pattern, or null if no boundary cells were set.
      */
     public Rule buildBoundaryPattern(CompiledDefinition compiledDefinition) {
-        if (kproveOptions.boundaryCells.isEmpty()) {
+        if (kproveOptions == null || kproveOptions.boundaryCells.isEmpty()) {
             return null;
         }
         StringBuilder patternStr = new StringBuilder();

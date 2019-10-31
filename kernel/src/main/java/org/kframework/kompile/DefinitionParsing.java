@@ -19,6 +19,7 @@ import org.kframework.definition.Sentence;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.Sort;
+import org.kframework.main.StartTimeHolder;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.concrete2kore.ParseCache;
 import org.kframework.parser.concrete2kore.ParseCache.ParsedSentence;
@@ -103,28 +104,31 @@ public class DefinitionParsing {
         this.profileRules = profileRules;
     }
 
-    public java.util.Set<Module> parseModules(CompiledDefinition definition, String mainModule, File definitionFile) {
+    public java.util.Set<Module> parseModules(CompiledDefinition definition, String extraModule, File extraDefinitionFile) {
         Definition def = parser.loadDefinition(
-                mainModule,
+                extraModule,
                 mutable(definition.getParsedDefinition().modules()),
-                "require " + StringUtil.enquoteCString(definitionFile.getPath()),
-                Source.apply(definitionFile.getAbsolutePath()),
-                definitionFile.getParentFile(),
+                "require " + StringUtil.enquoteCString(extraDefinitionFile.getPath()),
+                Source.apply(extraDefinitionFile.getAbsolutePath()),
+                extraDefinitionFile.getParentFile(),
                 ListUtils.union(lookupDirectories,
                         Lists.newArrayList(Kompile.BUILTIN_DIRECTORY)),
                 kore);
+        StartTimeHolder.log("parseModules: after loadDefinition");
 
         errors = java.util.Collections.synchronizedSet(Sets.newHashSet());
         caches = new HashMap<>();
 
         if (cacheParses) {
             try {
+                StartTimeHolder.log("parseModules: before loading caches from file");
                 caches = loader.load(Map.class, cacheFile);
             } catch (FileNotFoundException e) {
             } catch (IOException | ClassNotFoundException e) {
                 kem.registerInternalHiddenWarning("Invalidating serialized cache due to corruption.", e);
             }
         }
+        StartTimeHolder.log("parseModules: after loading caches from file");
 
         Module modWithConfig;
         ResolveConfig resolveConfig = new ResolveConfig(definition.getParsedDefinition(), isStrict, kore, this::parseBubble, this::getParser);
@@ -132,14 +136,18 @@ public class DefinitionParsing {
 
         try {
             def = DefinitionTransformer.from(resolveConfig::apply, "parse config bubbles").apply(def);
+            StartTimeHolder.log("parseModules: after DefinitionTransformer.apply(def)");
         } catch (KEMException e) {
             errors.add(e);
             throwExceptionIfThereAreErrors();
             throw new AssertionError("should not reach this statement");
         }
 
+        StartTimeHolder.log("parseModules: before resolveNonConfigBubbles");
         def = resolveNonConfigBubbles(def, gen);
+        StartTimeHolder.log("parseModules: after resolveNonConfigBubbles");
         saveCachesAndReportParsingErrors();
+        StartTimeHolder.log("parseModules: after saveCachesAndReportParsingErrors");
         return mutable(def.entryModules());
     }
 

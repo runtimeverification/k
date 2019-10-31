@@ -7,7 +7,28 @@ import org.kframework.attributes.Att;
 import org.kframework.attributes.Source;
 import org.kframework.backend.Backends;
 import org.kframework.builtin.Sorts;
-import org.kframework.compile.*;
+import org.kframework.compile.AddImplicitComputationCell;
+import org.kframework.compile.ConcretizeCells;
+import org.kframework.compile.ConfigurationInfoFromModule;
+import org.kframework.compile.ExpandMacros;
+import org.kframework.compile.GenerateCoverage;
+import org.kframework.compile.GenerateSortPredicateSyntax;
+import org.kframework.compile.GenerateSortProjections;
+import org.kframework.compile.GeneratedTopFormat;
+import org.kframework.compile.GuardOrPatterns;
+import org.kframework.compile.LabelInfo;
+import org.kframework.compile.LabelInfoFromModule;
+import org.kframework.compile.NumberSentences;
+import org.kframework.compile.ResolveAnonVar;
+import org.kframework.compile.ResolveContexts;
+import org.kframework.compile.ResolveFreshConstants;
+import org.kframework.compile.ResolveFun;
+import org.kframework.compile.ResolveFunctionWithConfig;
+import org.kframework.compile.ResolveHeatCoolAttribute;
+import org.kframework.compile.ResolveIOStreams;
+import org.kframework.compile.ResolveSemanticCasts;
+import org.kframework.compile.ResolveStrict;
+import org.kframework.compile.SortInfo;
 import org.kframework.compile.checks.CheckConfigurationCells;
 import org.kframework.compile.checks.CheckFunctions;
 import org.kframework.compile.checks.CheckHOLE;
@@ -18,10 +39,16 @@ import org.kframework.compile.checks.CheckRHSVariables;
 import org.kframework.compile.checks.CheckRewrite;
 import org.kframework.compile.checks.CheckSortTopUniqueness;
 import org.kframework.compile.checks.CheckStreams;
-import org.kframework.definition.*;
+import org.kframework.definition.Constructors;
+import org.kframework.definition.Definition;
+import org.kframework.definition.DefinitionTransformer;
 import org.kframework.definition.Module;
-import org.kframework.kore.Sort;
+import org.kframework.definition.Production;
+import org.kframework.definition.Rule;
+import org.kframework.definition.Sentence;
 import org.kframework.kore.KLabel;
+import org.kframework.kore.Sort;
+import org.kframework.main.StartTimeHolder;
 import org.kframework.parser.concrete2kore.ParserUtils;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.unparser.ToJson;
@@ -47,9 +74,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.kframework.Collections.*;
+import static org.kframework.compile.ResolveHeatCoolAttribute.Mode.*;
+import static org.kframework.definition.Constructors.Module;
 import static org.kframework.definition.Constructors.*;
 import static org.kframework.kore.KORE.*;
-import static org.kframework.compile.ResolveHeatCoolAttribute.Mode.*;
 
 /**
  * The new compilation pipeline. Everything is just wired together and will need clean-up once we deside on design.
@@ -324,10 +352,12 @@ public class Kompile {
                 .apply(parsedRule);
     }
 
-    public Set<Module> parseModules(CompiledDefinition definition, String mainModule, File definitionFile) {
-        Set<Module> modules = definitionParsing.parseModules(definition, mainModule, definitionFile);
+    public Set<Module> parseModules(CompiledDefinition definition, String extraModule, File extraDefinitionFile) {
+        StartTimeHolder.log("parseModules start");
+        Set<Module> modules = definitionParsing.parseModules(definition, extraModule, extraDefinitionFile);
         int totalBubbles = definitionParsing.parsedBubbles.get() + definitionParsing.cachedBubbles.get();
         sw.printIntermediate("Parse spec modules [" + definitionParsing.parsedBubbles.get() + "/" + totalBubbles + " rules]");
+        StartTimeHolder.log("parseModules end");
         return modules;
     }
 

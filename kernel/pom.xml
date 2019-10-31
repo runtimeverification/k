@@ -191,6 +191,12 @@
       <classifier>windows</classifier>
       <type>exe</type>
     </dependency>
+    <dependency>
+      <groupId>com.esotericsoftware</groupId>
+      <artifactId>kryo</artifactId>  <!--Serialized classes need default constructor.-->
+      <!--<version>5.0.0-RC4</version> - Crashes when serializing Att-->
+      <version>4.0.2</version>
+    </dependency>
   </dependencies>
 
   <build>
