@@ -65,8 +65,8 @@ def KToken(token, sort):
 def isKToken(k):
     return k["node"] == "KToken"
 
-def KRewrite(lhs, rhs, att = None):
-    return { "node": "KRewrite", "lhs": lhs, "rhs": rhs, "att": att }
+def KRewrite(lhs, rhs):
+    return { "node": "KRewrite", "lhs": lhs, "rhs": rhs }
 
 def isKRewrite(k):
     return k["node"] == "KRewrite"

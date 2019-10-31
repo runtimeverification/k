@@ -31,7 +31,7 @@ def onChildren(kast, effect):
     if isKApply(kast):
         return KApply(kast["label"], [ effect(arg) for arg in kast['args'] ])
     elif isKRewrite(kast):
-        return KRewrite(effect(kast['lhs']), effect(kast['rhs']), kast['att'])
+        return KRewrite(effect(kast['lhs']), effect(kast['rhs']))
     elif isKSequence(kast):
         return KSequence([ effect(item) for item in kast['items'] ])
     return kast
