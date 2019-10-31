@@ -8,6 +8,8 @@ import org.kframework.kore.Sort;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.loader.Context;
 
+import java.util.List;
+
 public class CollectProductionsVisitor {
     private final Context context;
     private final boolean kore;
@@ -18,6 +20,7 @@ public class CollectProductionsVisitor {
 
     private String moduleName;
     private Sort sort;
+    private List<Sort> params;
 
     public void visit(Module mod) {
         this.moduleName = mod.getName();
@@ -26,12 +29,14 @@ public class CollectProductionsVisitor {
 
     public void visit(Syntax syntax) {
         this.sort = syntax.getDeclaredSort().getRealSort();
+        this.params = syntax.getParams();
         syntax.getPriorityBlocks().forEach(pb -> pb.getProductions().forEach(this::visit));
     }
 
     public void visit(Production node) {
         node.setSort(sort);
         node.setOwnerModuleName(moduleName);
+        node.setParams(params);
         context.addProduction(node, kore);
     }
 

@@ -14,12 +14,13 @@ import scala.Tuple2;
 import java.util.Set;
 
 import static org.kframework.kore.KORE.*;
+import static org.kframework.definition.Constructors.*;
 import static org.kframework.Collections.*;
 
 public class ParserTest {
     private static final Sort xSort = Sort("X");
     Module m = Module.apply("TEST", Set(
-            Production.apply(KLabel("x"), xSort, Seq(Terminal.apply("x")), Att())
+            Production(KLabel("x"), xSort, Seq(Terminal.apply("x")), Att())
     ));
 
     @Test

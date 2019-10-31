@@ -82,7 +82,7 @@ public class GenerateSentencesFromConfigDeclTest {
                 Production(KLabel(".ThreadCellBag"), Sort("ThreadCellBag"),
                         Seq(Terminal(".ThreadCellBag")),
                         Att().add("function").add("hook","BAG.unit")),
-                Production(Sort("ThreadCellBag"),
+                Production(Seq(), Sort("ThreadCellBag"),
                         Seq(NonTerminal(Sort("ThreadCell")))),
                 Production(KLabel("ThreadCellBagItem"), Sort("ThreadCellBag"),
                         Seq(Terminal("ThreadCellBagItem"), Terminal("("), NonTerminal(Sort("ThreadCell")), Terminal(")")),
@@ -133,9 +133,9 @@ public class GenerateSentencesFromConfigDeclTest {
                 Production(KLabel("<thread>-fragment"), Sort("ThreadCellFragment"),
                         Seq(Terminal("<thread>-fragment"),NonTerminal(Sort("KCellOpt")),NonTerminal(Sort("OptCellOpt")),Terminal("</thread>-fragment")),
                         Att().add(Attribute.CELL_FRAGMENT_KEY,Sort.class,Sort("ThreadCell"))),
-                Production(Sort("OptCellOpt"), Seq(NonTerminal(Sort("OptCell")))),
+                Production(Seq(), Sort("OptCellOpt"), Seq(NonTerminal(Sort("OptCell")))),
                 Production(KLabel("noOptCell"), Sort("OptCellOpt"), Seq(Terminal("noOptCell")),Att().add(Attribute.CELL_OPT_ABSENT_KEY, Sort.class, Sort("OptCell"))),
-                Production(Sort("KCellOpt"), Seq(NonTerminal(Sort("KCell")))),
+                Production(Seq(), Sort("KCellOpt"), Seq(NonTerminal(Sort("KCell")))),
                 Production(KLabel("noKCell"), Sort("KCellOpt"), Seq(Terminal("noKCell")),Att().add(Attribute.CELL_OPT_ABSENT_KEY, Sort.class, Sort("KCell")))
             );
 

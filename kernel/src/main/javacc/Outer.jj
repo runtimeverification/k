@@ -849,6 +849,7 @@ void Sentence(Module module) :
   StringBuilder sb = new StringBuilder();
   NonTerminal nonTerminal, oldSort;
   StringSentence ss;
+  Sort param;
   List<Tag> list; }
 {
   ("rule" | LOOKAHEAD("context" <ALIAS>) "context" <ALIAS> | "configuration" | "context")
@@ -857,8 +858,8 @@ void Sentence(Module module) :
     if (type.equals("configuration")) { type = "config"; } }
   ss = Bubble(type) { module.appendModuleItem(markLoc(loc, ss)); }
 
-| "syntax"
-  ( nonTerminal = SortID() { ModuleItem syn = new Syntax(nonTerminal); }
+| "syntax" 
+  ( { List<Sort> params = new ArrayList<Sort>(); } ( "{" param = SimpleSort() { params.add(param); } ( "," param = SimpleSort() { params.add(param); })* "}" )? nonTerminal = SortID() {ModuleItem syn = new Syntax(nonTerminal, params); }
     ( "::=" { List<PriorityBlock> pblocks = new ArrayList<PriorityBlock>(); }
       PriorityBlock(pblocks) (">" PriorityBlock(pblocks))*
       { ((Syntax)syn).setPriorityBlocks(pblocks); }
