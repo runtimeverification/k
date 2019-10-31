@@ -122,7 +122,7 @@ pipeline {
             stage('Build and Package on Debian Buster') {
               when {
                 anyOf {
-                  not { changeRequest() }
+                  branch 'master'
                   changelog '.*^\\[build-system\\] .+$'
                   changeset 'Jenkinsfile'
                   changeset 'Dockerfile'
@@ -186,7 +186,7 @@ pipeline {
             stage('Build and Package on Arch Linux') {
               when {
                 anyOf {
-                  not { changeRequest() }
+                  branch 'master'
                   changelog '.*^\\[build-system\\] .+$'
                   changeset 'Jenkinsfile'
                   changeset 'Dockerfile'
@@ -251,7 +251,7 @@ pipeline {
         stage('Build and Package on Mac OS') {
           when {
             anyOf {
-              not { changeRequest() }
+              branch 'master'
               changelog '.*^\\[build-system\\] .+$'
               changeset 'Jenkinsfile'
               changeset 'Dockerfile'
@@ -343,7 +343,6 @@ pipeline {
         }
       }
       when {
-        not { changeRequest() }
         branch 'master'
         beforeAgent true
       }
