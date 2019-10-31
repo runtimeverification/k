@@ -679,6 +679,38 @@ rule X +Int (Y +Int Z) => (X +Int Z) +Int Y
    andBool #isVariable(Y)
 ```
 
+### `simplification` attribute
+
+The simplification attribute identifies axioms that are useful for simplifying
+configurations, without being part of the main semantics. When a function rule
+is tagged as `simplification`, the Haskell backend will only apply that rule if
+the side condition has no remainder (that is, it's always true/valid).
+
+For example, for the following definition:
+
+```k
+    syntax WordStack ::= Int ":" WordStack | ".WordStack"
+    syntax Int ::= sizeWordStack    ( WordStack       ) [function]
+                 | sizeWordStackAux ( WordStack , Int ) [function]
+ // --------------------------------------------------------------
+    rule sizeWordStack(WS) => sizeWordStackAux(WS, 0)
+
+    rule sizeWordStackAux(.WordStack, N) => N
+    rule sizeWordStackAux(W : WS    , N) => sizeWordStackAux(WS, N +Int 1)
+```
+
+We might add the following simplification lemma:
+
+```k
+    rule sizeWordStackAux(WS, N) => N +Int sizeWordStackAux(WS, 0)
+      requires N =/=Int 0
+      [simplification]
+```
+
+Then this simplification rule will only apply if the Haskell backend can prove
+that `notBool N =/=Int 0` is unsatisfiable. This avoids an infinite cycle of
+applying this simplification lemma.
+
 Pattern Matching
 ----------------
 
