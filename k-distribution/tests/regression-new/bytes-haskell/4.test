@@ -1,1 +1,0 @@
-Bytes2Int(String2Bytes("\xff"), BE, Unsigned)
