@@ -68,7 +68,7 @@ module V
 
     syntax Bool ::= const(Int) [function, smtlib(con)]
 
-    syntax Int ::= k(Int) [smtlib(k)]
+    syntax Int ::= k(Int) [function, functional, injective, smtlib(k)]
 
     rule (k(N) +Int 1) -Int 1 => k(N)
 endmodule

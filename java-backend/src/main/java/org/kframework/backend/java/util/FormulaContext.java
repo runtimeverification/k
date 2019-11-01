@@ -122,4 +122,23 @@ public class FormulaContext {
             log.format("-------------\n");
         }
     }
+
+    public void printImplicationExitPoint(ConjunctiveFormula formula, int exitPoint) {
+        if (formula.globalContext().javaExecutionOptions.logImplications
+                || (formula.globalContext().javaExecutionOptions.logBasic && kind == Kind.FinalImplication)) {
+            IndentingFormatter log = formula.globalContext().log();
+
+            //Removing anonymous vars before printing. They take most of the space but don't influence
+            //implication result.
+            ConjunctiveFormula formulaToPrint = formula.removeAnonymousSubstitutions();
+
+            log.format("\nImplication (%s) false at exit point %d:\n%s\n", kind.label, exitPoint,
+                    formulaToPrint.toStringMultiline());
+            if (rule != null) {
+                log.format("\nRule for formula above:\n");
+                RuleSourceUtil.appendRuleAndSource(rule, log);
+            }
+            log.format("-------------\n");
+        }
+    }
 }
