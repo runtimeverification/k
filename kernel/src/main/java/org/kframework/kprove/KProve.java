@@ -87,14 +87,13 @@ public class KProve {
         if (specModuleName == null) {
             specModuleName = FilenameUtils.getBaseName(proofFile.getName()).toUpperCase();
         }
-        java.util.Set<Module> modules = kompile.parseModules(compiledDefinition, defModuleName, files.resolveWorkingDirectory(proofFile).getAbsoluteFile());
+        java.util.Set<Module> modules = kompile.parseModules(compiledDefinition, defModuleName, files.resolveWorkingDirectory(proofFile).getAbsoluteFile(), backend.excludedModuleTags());
         Map<String, Module> modulesMap = new HashMap<>();
         modules.forEach(m -> modulesMap.put(m.name(), m));
         Module defModule = getModule(defModuleName, modulesMap, compiledDefinition.getParsedDefinition());
         Module specModule = getModule(specModuleName, modulesMap, compiledDefinition.getParsedDefinition());
         specModule = backend.specificationSteps(compiledDefinition.kompiledDefinition).apply(specModule);
         Definition combinedDef = Definition.apply(defModule, compiledDefinition.getParsedDefinition().entryModules(), compiledDefinition.getParsedDefinition().att());
-        combinedDef = Kompile.excludeModulesByTag(backend.excludedModuleTags()).apply(combinedDef);
         Definition compiled = compileDefinition(backend, combinedDef);
         return Tuple2.apply(compiled, specModule);
     }
