@@ -209,7 +209,7 @@ rule <k> HOLE:AExp ~> AE1 +  [] =>  AE1 + HOLE ... </k> [cool]
 
 You will note that these rules can apply one after another infinitely. In
 practice, the `KResult` sort is used to break this cycle by ensuring that only
-terms that are not part of the `KResult` sort will be heated. The `heat` and 
+terms that are not part of the `KResult` sort will be heated. The `heat` and
 `cool` attributes are used to tell the compiler that these are heating and
 cooling rules and should be handled in the manner just described. Nothing stops
 the user from writing such heating and cooling rules directly if they wish,
@@ -648,6 +648,79 @@ ambiguity during parsing, so care should be taken to ensure that named
 nonterminals are sufficiently unique from one another to prevent such
 ambiguities. Of course, the compiler will generate a warning in this case.
 
+### `concrete` attribute, `#isConcrete` and `#isVariable` function
+
+**NOTE**: The Haskell backend _does not_ and _will not_ support the
+meta-functions `#isConcrete` and `#isVariable`.
+
+Sometimes you only want a given function to simplify if all (or some) of the
+arguments are concrete (non-symbolic). To do so, you can use either the
+`concrete` attribute (if you want it to only apply when all arguments are
+concrete), or the `#isConcrete(_)` side-condition (when you only want it to
+apply if some arguments are concrete). Conversly, the function `#isVariable(_)`
+will only return true when the argument is a variable.
+
+For example, the following will only re-associate terms when all arguments
+are concrete:
+
+```k
+rule X +Int (Y +Int Z) => (X +Int Y) +Int Z [concrete]
+```
+
+And the following rules will only re-associate terms when it will end up
+grouping concrete sub-terms:
+
+```k
+rule X +Int (Y +Int Z) => (X +Int Y) +Int Z
+  requires #isConcrete(X)
+   andBool #isConcrete(Y)
+   andBool #isVariable(Z)
+
+rule X +Int (Y +Int Z) => (X +Int Z) +Int Y
+  requires #isConcrete(X)
+   andBool #isConcrete(Z)
+   andBool #isVariable(Y)
+```
+
+### `simplification` attribute (Haskell backend)
+
+The simplification attribute identifies axioms that are useful for simplifying
+configurations, without being part of the main semantics. When a rule is tagged
+as `simplification`, the Haskell backend will only apply that rule if:
+
+-   the rule lhs _matches_ the subterm of interest, and
+-   the side condition has no remainder given the current top-level predicate
+    (that is, the current top-level predicate _implies_ the side condition of
+    the rule).
+
+Note that the `simplification` attribute can be applied to _any_ rule, not just
+function rules, and that `simplification` rules are tried _before_ rules from
+the semantic definition.
+
+For example, for the following definition:
+
+```k
+    syntax WordStack ::= Int ":" WordStack | ".WordStack"
+    syntax Int ::= sizeWordStack    ( WordStack       ) [function]
+                 | sizeWordStackAux ( WordStack , Int ) [function]
+ // --------------------------------------------------------------
+    rule sizeWordStack(WS) => sizeWordStackAux(WS, 0)
+
+    rule sizeWordStackAux(.WordStack, N) => N
+    rule sizeWordStackAux(W : WS    , N) => sizeWordStackAux(WS, N +Int 1)
+```
+
+We might add the following simplification lemma:
+
+```k
+    rule sizeWordStackAux(WS, N) => N +Int sizeWordStackAux(WS, 0)
+      requires N =/=Int 0
+      [simplification]
+```
+
+Then this simplification rule will only apply if the Haskell backend can prove
+that `notBool N =/=Int 0` is unsatisfiable. This avoids an infinite cycle of
+applying this simplification lemma.
 
 Pattern Matching
 ----------------
