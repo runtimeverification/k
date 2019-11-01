@@ -209,7 +209,7 @@ rule <k> HOLE:AExp ~> AE1 +  [] =>  AE1 + HOLE ... </k> [cool]
 
 You will note that these rules can apply one after another infinitely. In
 practice, the `KResult` sort is used to break this cycle by ensuring that only
-terms that are not part of the `KResult` sort will be heated. The `heat` and 
+terms that are not part of the `KResult` sort will be heated. The `heat` and
 `cool` attributes are used to tell the compiler that these are heating and
 cooling rules and should be handled in the manner just described. Nothing stops
 the user from writing such heating and cooling rules directly if they wish,
@@ -650,8 +650,8 @@ ambiguities. Of course, the compiler will generate a warning in this case.
 
 ### `concrete` attribute, `#isConcrete` and `#isVariable` function
 
-**NOTE**: `#isConcrete` and `#isVariable` are _not_ supported by the Haskell
-backend.
+**NOTE**: The Haskell backend _does not_ and _will not_ support the
+meta-functions `#isConcrete` and `#isVariable`.
 
 Sometimes you only want a given function to simplify if all (or some) of the
 arguments are concrete (non-symbolic). To do so, you can use either the
