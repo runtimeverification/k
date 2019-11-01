@@ -702,6 +702,8 @@ module BYTES-HOOKED [concrete]
   syntax Int ::= lengthBytes(Bytes) [function, functional, hook(BYTES.length), smtlib(lengthBytes)]
 
   syntax Bytes ::= Bytes "+Bytes" Bytes [function, functional, hook(BYTES.concat), right]
+
+  rule .Bytes => String2Bytes("")
 endmodule
 
 module BYTES-IN-K [symbolic]
