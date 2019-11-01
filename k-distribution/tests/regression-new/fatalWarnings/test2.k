@@ -3,10 +3,10 @@ module TEST2-SYNTAX
 endmodule
 
 module TEST2
-  imports TEST2-SYNTAX
+imports TEST2-SYNTAX
 
-  syntax Foo ::= "foo" [klabel(foo), symbol]
-  syntax Bar ::= "foo" [klabel(bar), symbol]
+syntax Foo ::= "foo" "(" Foo ")"
 
-  rule foo => 0
+rule foo ( A ) => A
+
 endmodule
