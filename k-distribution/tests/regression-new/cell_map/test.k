@@ -14,7 +14,7 @@ module TEST
                 | insert(Int, Int)
                 | remove(Int)
                 | update(Int, Int)
-                | Stmt ";" Stmt
+                | Stmt ";" Stmt [left]
   rule
     <k> get(Key) => Value ...</k>
     <key> Key </key>
