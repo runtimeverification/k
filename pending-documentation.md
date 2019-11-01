@@ -682,13 +682,20 @@ rule X +Int (Y +Int Z) => (X +Int Z) +Int Y
    andBool #isVariable(Y)
 ```
 
-### `simplification` attribute
+### `simplification` attribute (Haskell backend)
 
 The simplification attribute identifies axioms that are useful for simplifying
-configurations, without being part of the main semantics. When a function rule
-is tagged as `simplification`, the Haskell backend will only apply that rule if
-the side condition has no remainder given the current top-level predicate (that
-is, the current top-level predicate _implies_ the side condition of the rule).
+configurations, without being part of the main semantics. When a rule is tagged
+as `simplification`, the Haskell backend will only apply that rule if:
+
+-   the rule lhs _matches_ the subterm of interest, and
+-   the side condition has no remainder given the current top-level predicate
+    (that is, the current top-level predicate _implies_ the side condition of
+    the rule).
+
+Note that the `simplification` attribute can be applied to _any_ rule, not just
+function rules, and that `simplification` rules are tried _before_ rules from
+the semantic definition.
 
 For example, for the following definition:
 
