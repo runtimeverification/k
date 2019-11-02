@@ -70,7 +70,8 @@ public class BinaryLoader {
         if (!dir.exists() && !dir.mkdirs()) {
             throw KEMException.criticalError("Could not create directory " + dir);
         }
-        try (FileOutputStream out = new FileOutputStream(file)) {
+        try {
+            FileOutputStream out = new FileOutputStream(file); //todo not closing here, for debug. Should be closed in saveSynchronized()
             saveSynchronized(out, o);
         } catch (IOException e) {
             throw KEMException.criticalError("Could not write to " + file.getAbsolutePath(), e);
