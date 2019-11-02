@@ -221,9 +221,10 @@ public class ParseInModule implements Serializable, AutoCloseable {
             if (rez.isLeft())
                 return new Tuple2<>(rez, warn);
             rez3 = new PushAmbiguitiesDownAndPreferAvoid(disambModule.overloads()).apply(rez.right().get());
-            rez2 = new AmbFilter(strict && inferSortChecks).apply(rez3);
-            warn = Sets.union(rez2._2(), warn);
-            rez2 = new AddEmptyLists(disambModule).apply(rez2._1().right().get());
+            rez = new AmbFilterError(strict && inferSortChecks).apply(rez3);
+            if (rez.isLeft())
+                return new Tuple2<>(rez, warn);
+            rez2 = new AddEmptyLists(disambModule).apply(rez.right().get());
             warn = Sets.union(rez2._2(), warn);
             if (rez2._1().isLeft())
                 return rez2;
