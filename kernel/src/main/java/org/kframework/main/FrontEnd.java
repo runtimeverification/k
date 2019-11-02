@@ -1,6 +1,9 @@
 // Copyright (c) 2014-2019 K Team. All Rights Reserved.
 package org.kframework.main;
 
+import com.beust.jcommander.ParameterException;
+import com.google.inject.Provider;
+import org.kframework.utils.ExitOnTimeoutThread;
 import org.kframework.utils.InterrupterRunnable;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
@@ -8,9 +11,6 @@ import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
-
-import com.google.inject.Provider;
-import com.beust.jcommander.ParameterException;
 
 public abstract class FrontEnd {
 
@@ -50,10 +50,13 @@ public abstract class FrontEnd {
                 jarInfo.printVersionMessage();
                 retval = 0;
             } else {
-                if (globalOptions.shutdownWaitTime > 0 && ! Main.isNailgun()) {
+                if (globalOptions.timeout != null) {
+                    new ExitOnTimeoutThread(globalOptions.timeout.toMillis()).start();
+                }
+                if (globalOptions.shutdownWaitTime != null && !Main.isNailgun()) {
                     //Will interrupt the thread on Ctrl+C and allow the backend to terminate gracefully.
-                    Runtime.getRuntime().addShutdownHook(new Thread(
-                            new InterrupterRunnable(Thread.currentThread(), globalOptions.shutdownWaitTime)));
+                    Runtime.getRuntime().addShutdownHook(new Thread(new InterrupterRunnable(Thread.currentThread(),
+                                    globalOptions.shutdownWaitTime.toMillis())));
                 }
                 try {
                     retval = run();

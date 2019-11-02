@@ -40,6 +40,13 @@ pipeline {
         stash name: "src", includes: "kframework-5.0.0-src.tar.gz"
       }
     }
+    stage('Update Submodules (non-release)') {
+      when { branch 'master' }
+      steps {
+        build job: 'rv-devops/master', parameters: [string(name: 'PR_REVIEWER', value: 'ehildenb'), booleanParam(name: 'UPDATE_DEPS_KWASM' , value: true)], propagate: false, wait: false
+        build job: 'rv-devops/master', parameters: [string(name: 'PR_REVIEWER', value: 'malturki'), booleanParam(name: 'UPDATE_DEPS_BEACON', value: true)], propagate: false, wait: false
+      }
+    }
     stage('Build and Package K') {
       failFast true
       parallel {
@@ -122,7 +129,7 @@ pipeline {
             stage('Build and Package on Debian Buster') {
               when {
                 anyOf {
-                  not { changeRequest() }
+                  branch 'master'
                   changelog '.*^\\[build-system\\] .+$'
                   changeset 'Jenkinsfile'
                   changeset 'Dockerfile'
@@ -186,7 +193,7 @@ pipeline {
             stage('Build and Package on Arch Linux') {
               when {
                 anyOf {
-                  not { changeRequest() }
+                  branch 'master'
                   changelog '.*^\\[build-system\\] .+$'
                   changeset 'Jenkinsfile'
                   changeset 'Dockerfile'
@@ -251,7 +258,7 @@ pipeline {
         stage('Build and Package on Mac OS') {
           when {
             anyOf {
-              not { changeRequest() }
+              branch 'master'
               changelog '.*^\\[build-system\\] .+$'
               changeset 'Jenkinsfile'
               changeset 'Dockerfile'
@@ -343,7 +350,6 @@ pipeline {
         }
       }
       when {
-        not { changeRequest() }
         branch 'master'
         beforeAgent true
       }
@@ -408,6 +414,13 @@ pipeline {
                   , channel: '#k'                                    \
                   , message: "Deploy Phase Failed: ${env.BUILD_URL}"
         }
+      }
+    }
+    stage('Update Submodules (release)') {
+      when { branch 'master' }
+      steps {
+        build job: 'rv-devops/master', parameters: [string(name: 'PR_REVIEWER', value: 'ehildenb'), booleanParam(name: 'UPDATE_DEPS_KEVM'   , value: true)], propagate: false, wait: false
+        build job: 'rv-devops/master', parameters: [string(name: 'PR_REVIEWER', value: 'ttuegel') , booleanParam(name: 'UPDATE_DEPS_HASKELL', value: true)], propagate: false, wait: false
       }
     }
   }

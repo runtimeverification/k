@@ -10,18 +10,18 @@ package org.kframework.utils;
 public class InterrupterRunnable implements Runnable {
 
     private final Thread thread;
-    private final int waitTime;
+    private final long waitTimeMillis;
 
-    public InterrupterRunnable(Thread thread, int waitTime) {
+    public InterrupterRunnable(Thread thread, long waitTimeMillis) {
         this.thread = thread;
-        this.waitTime = waitTime;
+        this.waitTimeMillis = waitTimeMillis;
     }
 
     @Override
     public void run() {
         thread.interrupt();
         try {
-            thread.join(waitTime);
+            thread.join(waitTimeMillis);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
