@@ -65,8 +65,8 @@ def KToken(token, sort):
 def isKToken(k):
     return k["node"] == "KToken"
 
-def KRewrite(lhs, rhs, att = None):
-    return { "node": "KRewrite", "lhs": lhs, "rhs": rhs, "att": att }
+def KRewrite(lhs, rhs):
+    return { "node": "KRewrite", "lhs": lhs, "rhs": rhs }
 
 def isKRewrite(k):
     return k["node"] == "KRewrite"
@@ -275,7 +275,7 @@ def prettyPrintKast(kast, symbolTable):
     if isKSequence(kast):
         unparsedItems = [ prettyPrintKast(item, symbolTable) for item in kast['items'] ]
         unparsedKSequence = "\n~> ".join(unparsedItems)
-        if len(unparsedItems) > 1:
+        if len(unparsedItems) > 0:
             unparsedKSequence = "    " + unparsedKSequence
         else:
             unparsedKSequence = '.'
@@ -288,11 +288,11 @@ def prettyPrintKast(kast, symbolTable):
         attsStr     = prettyPrintKast(kast['att'], symbolTable)
         if kast["requires"] is not None:
             requiresStr = prettyPrintKast(kast["requires"], symbolTable)
-            requiresStr = "\n  requires " + "\n   ".join(requiresStr.split("\n"))
+            requiresStr = "requires " + "\n   ".join(requiresStr.split("\n"))
         if kast["ensures"] is not None:
             ensuresStr = prettyPrintKast(kast["ensures"], symbolTable)
-            ensuresStr = "\n  ensures " + "\n  ".join(ensuresStr.split("\n"))
-        return ruleStr + requiresStr + ensuresStr + attsStr
+            ensuresStr = "ensures " + "\n  ".join(ensuresStr.split("\n"))
+        return ruleStr + "\n  " + requiresStr + "\n  " + ensuresStr + "\n  " + attsStr
     if isKAtt(kast):
         if len(kast['att']) == 0:
             return ''
