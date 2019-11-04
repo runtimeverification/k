@@ -677,7 +677,7 @@ module STRING-BUFFER
   imports STRING-BUFFER-IN-K
 endmodule
 
-module BYTES-HOOKED [concrete]
+module BYTES-HOOKED
   syntax Bytes [hook(BYTES.Bytes)]
 
   syntax Bytes ::= ".Bytes" [function, functional, hook(BYTES.empty), impure]
@@ -706,7 +706,7 @@ module BYTES-HOOKED [concrete]
   rule .Bytes => String2Bytes("")
 endmodule
 
-module BYTES-IN-K [symbolic]
+module BYTES-IN-K
   imports INT
   imports K-EQUAL
   imports STRING
@@ -787,9 +787,22 @@ module BYTES-IN-K [symbolic]
   rule (B : BS) +Bytes B2 => B : (BS +Bytes B2)
 endmodule
 
-module BYTES
+module BYTES-CONCRETE [concrete]
   imports BYTES-HOOKED
+endmodule
+
+module BYTES-KORE [kore]
+  imports BYTES-HOOKED
+endmodule
+
+module BYTES-SYMBOLIC [symbolic, kast]
   imports BYTES-IN-K
+endmodule
+
+module BYTES
+  imports BYTES-CONCRETE
+  imports BYTES-KORE
+  imports BYTES-SYMBOLIC
   imports INT
 
   rule Int2Bytes(I::Int, E::Endianness, Unsigned) => Int2Bytes((log2Int(I) +Int 8) /Int 8, I, E)
