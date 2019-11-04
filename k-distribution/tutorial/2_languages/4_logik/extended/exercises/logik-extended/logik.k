@@ -45,13 +45,13 @@ module LOGIK-SYNTAX
   imports LOGIK-COMMON
   imports BUILTIN-ID-TOKENS
 
-  syntax #KVariable ::= r"[A-Z_][A-Za-z0-9_]*"   [token, prec(2), autoReject]
-                      | #UpperId                 [token, autoReject]
+  syntax #KVariable ::= r"[A-Z_][A-Za-z0-9_]*"   [token, prec(2)]
+                      | #UpperId                 [token]
   syntax Term ::= #KVariable [klabel(#SemanticCastToTerm)]
-  syntax OperationName ::= r"[a-z][a-zA-Z0-9_]*"                 [autoReject, token]
-                         | #LowerId                              [autoReject, token]
-  syntax PredicateName ::= r"[a-z][a-zA-Z0-9_]*"                 [autoReject, token]
-                         | #LowerId                              [autoReject, token]
+  syntax OperationName ::= r"[a-z][a-zA-Z0-9_]*"                 [token]
+                         | #LowerId                              [token]
+  syntax PredicateName ::= r"[a-z][a-zA-Z0-9_]*"                 [token]
+                         | #LowerId                              [token]
 
 endmodule
 
