@@ -2,6 +2,7 @@
 package org.kframework.utils;
 
 import com.google.inject.Inject;
+import jline.internal.Nullable;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.inject.RequestScoped;
@@ -10,6 +11,7 @@ import org.nustaq.serialization.FSTObjectOutput;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectStreamException;
@@ -63,18 +65,47 @@ public class BinaryLoader {
         this.kem = kem;
     }
 
-    public void saveOrDie(File fileName, Object o) {
-        File dir = fileName.getAbsoluteFile().getParentFile();
+    public void saveOrDie(File file, Object o) {
+        File dir = file.getAbsoluteFile().getParentFile();
         if (!dir.exists() && !dir.mkdirs()) {
             throw KEMException.criticalError("Could not create directory " + dir);
         }
-        try (FileOutputStream out = new FileOutputStream(fileName)) {
+        try (FileOutputStream out = new FileOutputStream(file)) {
             saveSynchronized(out, o);
         } catch (IOException e) {
-            throw KEMException.criticalError("Could not write to " + fileName.getAbsolutePath(), e);
+            throw KEMException.criticalError("Could not write to " + file.getAbsolutePath(), e);
         } catch (InterruptedException e) {
-            throw KEMException.criticalError("Interrupted while locking to write " + fileName, e);
+            throw KEMException.criticalError("Interrupted while locking to write " + file, e);
         }
+    }
+
+    public <T> T loadOrDie(Class<T> cls, File file) {
+        try (FileInputStream in = new FileInputStream(file)) {
+            return cls.cast(loadSynchronized(in));
+        } catch (ClassNotFoundException e) {
+            throw new AssertionError("Something wrong with deserialization", e);
+        } catch (ObjectStreamException e) {
+            throw KEMException.criticalError("Kompiled definition is out of date with "
+                    + "the latest version of the K tool. Please re-run kompile and try again.", e);
+        } catch (IOException e) {
+            throw KEMException.criticalError("Could not read from " + file.getAbsolutePath(), e);
+        } catch (InterruptedException e) {
+            throw KEMException.criticalError("Interrupted while locking to read " + file.getAbsolutePath(), e);
+        }
+    }
+
+    @Nullable
+    public <T> T loadCache(Class<T> cls, File file) {
+        try (FileInputStream in = new FileInputStream(file)) {
+            return cls.cast(loadSynchronized(in));
+        } catch (FileNotFoundException e) {
+            //ignored
+        } catch (IOException | ClassNotFoundException e) {
+            kem.registerInternalHiddenWarning("Invalidating serialized cache due to corruption.", e);
+        } catch (InterruptedException e) {
+            throw KEMException.criticalError("Interrupted while locking to read " + file.getAbsolutePath(), e);
+        }
+        return null;
     }
 
     /**
@@ -109,52 +140,13 @@ public class BinaryLoader {
             }
             try (FSTObjectInput deserializer = new FSTObjectInput(in)) { //already buffered
                 Object obj = deserializer.readObject();
+                // FST bug workaround: FSTObjectInput.close() doesn't close underlying FileInputStream.
+                // This may cause OverlappingFileLockException in saveSynchronized(), in Nailgun mode.
+                in.close();
                 return obj;
             }
         } finally {
             lock.readLock().unlock();
-        }
-    }
-
-    public <T> T load(Class<T> cls, File fileName) throws IOException, ClassNotFoundException {
-        try {
-            return cls.cast(load(fileName));
-        } catch (InterruptedException e) {
-            throw KEMException.criticalError("Interrupted while locking to read " + fileName, e);
-        }
-    }
-
-    public <T> T load(Class<T> cls, FileInputStream in)
-            throws IOException, ClassNotFoundException, InterruptedException {
-        return cls.cast(loadSynchronized(in));
-    }
-
-    public <T> T loadOrDie(Class<T> cls, File fileName) {
-        try (FileInputStream in = new FileInputStream(fileName)) {
-            return loadOrDie(cls, in, fileName.getAbsolutePath());
-        } catch (IOException e) {
-            throw KEMException.criticalError("Could not read from " + fileName, e);
-        }
-    }
-
-    public Object load(File fileName) throws IOException, ClassNotFoundException, InterruptedException {
-        try (FileInputStream in = new FileInputStream(fileName)) {
-            return loadSynchronized(in);
-        }
-    }
-
-    public <T> T loadOrDie(Class<T> cls, FileInputStream in, String fileName) {
-        try {
-            return load(cls, in);
-        } catch (ClassNotFoundException e) {
-            throw new AssertionError("Something wrong with deserialization", e);
-        } catch (ObjectStreamException e) {
-            throw KEMException.criticalError("Kompiled definition is out of date with "
-                    + "the latest version of the K tool. Please re-run kompile and try again.", e);
-        } catch (IOException e) {
-            throw KEMException.criticalError("Could not read from " + fileName, e);
-        } catch (InterruptedException e) {
-            throw KEMException.criticalError("Interrupted while locking to read " + fileName, e);
         }
     }
 }
