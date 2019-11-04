@@ -66,4 +66,11 @@ rule useNestedBarInt()
   rule [[ funIntListAndConfig() => #fun(V1 => 0)(.IntList) ]]
     <cell> M </cell>
 
+  syntax KItem ::= Int
+  syntax Int ::= funSortTest(Int) [function]
+  rule funSortTest(I)
+    => #fun(BALANCE
+    => #fun(ROOT
+    => BALANCE +Int ROOT)(I))(I)
+
 endmodule
