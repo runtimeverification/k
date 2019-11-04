@@ -70,7 +70,7 @@ public class AddBracketsTest {
                 "  syntax Exp ::= Val\n" +
                 "               | Exp Exp      [left]\n" +
                 "               | \"(\" Exp \")\"  [bracket]\n" +
-                "  syntax Id ::= r\"(?<![A-Za-z0-9\\\\_])[A-Za-z\\\\_][A-Za-z0-9\\\\_]*\"     [notInRules, token, autoreject]\n" +
+                "  syntax Id ::= r\"(?<![A-Za-z0-9\\\\_])[A-Za-z\\\\_][A-Za-z0-9\\\\_]*\"     [token, autoreject]\n" +
                 "endmodule\n";
         unparserTest(def, "( lambda z . ( z z ) ) lambda x . lambda y . ( x y )");
         unparserTest(def, "a ( ( lambda x . lambda y . x ) y z )");

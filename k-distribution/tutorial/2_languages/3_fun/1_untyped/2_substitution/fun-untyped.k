@@ -158,11 +158,11 @@ module FUN-UNTYPED-SYNTAX
   imports FUN-UNTYPED-COMMON
   imports BUILTIN-ID-TOKENS
 
-  syntax Name ::= r"[a-z][_a-zA-Z0-9]*"            [autoReject, token, prec(2)]
-                | #LowerId                         [autoReject, token]
-  syntax ConstructorName ::= #UpperId              [autoReject, token]
-  syntax TypeVar  ::= r"['][a-z][_a-zA-Z0-9]*"     [autoReject, token]
-  syntax TypeName ::= Name                         [autoReject, token]
+  syntax Name ::= r"[a-z][_a-zA-Z0-9]*"            [token, prec(2)]
+                | #LowerId                         [token]
+  syntax ConstructorName ::= #UpperId              [token]
+  syntax TypeVar  ::= r"['][a-z][_a-zA-Z0-9]*"     [token]
+  syntax TypeName ::= Name                         [token]
 endmodule
 
 
