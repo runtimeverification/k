@@ -501,7 +501,8 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                             || (isFunctionRule(tc, isAnywhere)) && j == 0)) {
                         Term t = tc.get(0);
                         boolean strictSortEquality = tc.production().klabel().get().name().equals("#SyntacticCast") || tc.production().klabel().get().name().equals("#InnerCast");
-                        Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheck2(getSortOfCast(tc), true, strictSortEquality, strictSortEquality && inferSortChecks).apply(t);
+                        boolean hasCast = tc.production().klabel().get().name().startsWith("#SemanticCastTo");
+                        Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheck2(getSortOfCast(tc), true, strictSortEquality, !hasCast && inferSortChecks).apply(t);
                         if (rez.isLeft())
                             return rez;
                         tc = tc.with(0, rez.right().get());

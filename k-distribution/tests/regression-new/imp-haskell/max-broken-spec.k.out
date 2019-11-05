@@ -23,9 +23,9 @@
     } )
 #And
   #Not ( ( {
-        B
-      #Equals
         A
+      #Equals
+        B
       }
     #Implies
       {
@@ -35,15 +35,15 @@
       } )
   #And
     #Not ( #Not ( {
-      B
-    #Equals
       A
+    #Equals
+      B
     } ) )
   #And
     #Not ( {
-      B
-    #Equals
       A
+    #Equals
+      B
     } )
   #And
     #Not ( {
