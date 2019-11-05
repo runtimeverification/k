@@ -25,6 +25,9 @@ import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.ParseFailedException;
 
+import com.google.common.collect.SetMultimap;
+import com.google.common.collect.HashMultimap;
+
 import scala.collection.Seq;
 import scala.collection.Set;
 import scala.Tuple2;
@@ -605,25 +608,30 @@ public class TypeInferencer implements AutoCloseable {
     return status;
   }
 
-  public java.util.Set<ParseFailedException> error() {
-    if (status() == Status.SATISFIABLE) {
-      java.util.Set<ParseFailedException> result = new HashSet<>();
-      int i = 0;
-      for (String var : variables) {
-        Sort newSort = computeValue(var);
-        if (!newSort.equals(model.get(var))) {
-          result.add(new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, "Could not infer a unique sort for variable " + variableNames.get(i) + ". Possible sorts include " + newSort + " and " + model.get(var), currentTerm.source().orElse(null), currentTerm.location().orElse(null))));
-        }
-        i++;
+  public java.util.Set<ParseFailedException> error(List<Map<String, Sort>> models) {
+    SetMultimap<String, Sort> grouped = HashMultimap.create();
+    for (Map<String, Sort> model : models) {
+      for (Map.Entry<String, Sort> entry : model.entrySet()) {
+        grouped.put(entry.getKey(), entry.getValue());
       }
-      if(!result.isEmpty()) {
-        return result;
-      }
-      throw KEMException.internalError("Unknown sort inference error.", currentTerm);
-    } else {
-      pop();
-      return java.util.Collections.singleton(new ParseFailedException(push()));
     }
+    java.util.Set<ParseFailedException> result = new HashSet<>();
+    int i = 0;
+    for (String var : variables) {
+      if (grouped.get(var).size() > 1) {
+        result.add(new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, "Could not infer a unique sort for variable " + variableNames.get(i) + ". Possible sorts: " + grouped.get(var), currentTerm.source().orElse(null), currentTerm.location().orElse(null))));
+      }
+      i++;
+    }
+    if(!result.isEmpty()) {
+      return result;
+    }
+    throw KEMException.internalError("Unknown sort inference error.", currentTerm);
+  }
+
+  public java.util.Set<ParseFailedException> error() {
+    pop();
+    return java.util.Collections.singleton(new ParseFailedException(push()));
   }
 
   public void computeModel() {
@@ -632,36 +640,24 @@ public class TypeInferencer implements AutoCloseable {
     }
   }
 
-  public void pushNotModel(Term typed) {
-    PrintNotModel viz = new PrintNotModel();
-    viz.apply(typed);
+  public void selectModel(Map<String, Sort> model) {
+    this.model.clear();
+    this.model.putAll(model);
+  }
+
+  public Map<String, Sort> getModel() {
+    return new HashMap<>(model);
+  }
+
+  public void pushNotModel() {
     print("(assert (not (and true");
-    for (String var : viz.variables) {
+    for (String var : variables) {
       print("(= |" + var + "| ");
       printSort(model.get(var));
       print(") ");
     }
     print(")))");
     status = null;
-  }
-
-  public class PrintNotModel extends SafeTransformer {
-    private java.util.Set<String> variables = new HashSet<>();
-
-    @Override
-    public Term apply(Term term) {
-      if (term instanceof Ambiguity) {
-        Ambiguity amb = (Ambiguity)term;
-        return super.apply(amb);
-      }
-      ProductionReference pr = (ProductionReference)term;
-      if (pr.id().isPresent()) {
-        for (String name : variablesById.get(pr.id().get())) {
-          variables.add(name);
-        }
-      }
-      return super.apply(pr);
-    }
   }
 
   public Seq<Sort> getArgs(ProductionReference pr) {

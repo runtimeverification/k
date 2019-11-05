@@ -25,6 +25,9 @@ import scala.util.Left;
 import scala.util.Right;
 
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.kframework.Collections.*;
@@ -65,23 +68,41 @@ public class TypeInferenceVisitor extends SetsTransformerWithErrors<ParseFailedE
         Set<ParseFailedException> kex = inferencer.error();
         return Left.apply(kex);
       }
-      inferencer.computeModel();
-      typed = new TypeCheckVisitor(topSort).apply(t);
-      if (typed.isLeft()) {
-        return typed;
+      boolean hasAnotherSolution = true;
+      Set<Map<String, Sort>> models = new HashSet<>();
+      do {
+        inferencer.computeModel();
+        models.add(inferencer.getModel());
+        inferencer.pushNotModel();
+        switch(inferencer.status()) {
+        case SATISFIABLE:
+          hasAnotherSolution = true;
+          break;
+        case UNKNOWN:
+          throw KEMException.internalError("Could not solve sort constraints.", t);
+        case UNSATISFIABLE:
+          hasAnotherSolution = false;
+          break;
+        }
+      } while (hasAnotherSolution);
+      Set<Term> candidates = new HashSet<>();
+      Set<ParseFailedException> exceptions = new HashSet<>();
+      for (Map<String, Sort> model : models) {
+        inferencer.selectModel(model);
+        Either<Set<ParseFailedException>, Term> result = new TypeCheckVisitor(topSort).apply(t);
+        if (result.isLeft()) {
+          exceptions.addAll(result.left().get());
+        } else {
+          candidates.add(result.right().get());
+        }
       }
-      inferencer.pushNotModel(typed.right().get());
-      TypeInferencer.Status status = inferencer.status();
-      switch(status) {
-      case SATISFIABLE:
-        Set<ParseFailedException> kex = inferencer.error();
-        return Left.apply(kex);
-      case UNKNOWN:
-        throw KEMException.internalError("Could not solve sort constraints.", t);
-      case UNSATISFIABLE:
-        return typed;
+      if (candidates.isEmpty()) {
+        return Left.apply(exceptions);
+      } else if (candidates.size() == 1) {
+        return Right.apply(candidates.iterator().next());
+      } else {
+        return Right.apply(Ambiguity.apply(candidates));
       }
-      throw new AssertionError();
     } finally {
       inferencer.pop();
     }
