@@ -66,7 +66,7 @@ public class TypeInferencer implements AutoCloseable {
   private final Module mod;
   private final java.util.Set<Sort> sorts;
 
-  private static final String PRELUDE1 = 
+  private static final String PRELUDE1 =
     "(set-option :timeout 30000)\n";
 
   public TypeInferencer(Module mod) {
@@ -431,7 +431,7 @@ public class TypeInferencer implements AutoCloseable {
         return amb;
       }
       ProductionReference pr = (ProductionReference)t;
- 
+
       boolean isTopSort = expectedSort.equals(Sorts.RuleContent()) || expectedSort.name().equals("#RuleBody");
       int id = nextId;
       boolean shared = pr.id().isPresent() && variablesById.size() > pr.id().get();
@@ -648,7 +648,7 @@ public class TypeInferencer implements AutoCloseable {
 
   public Status status() {
     if (status == null) {
-     status = computeStatus(); 
+     status = computeStatus();
     }
     return status;
   }
