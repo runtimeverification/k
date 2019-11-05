@@ -25,7 +25,7 @@ concrete identifiers that play a special role in the semantics, like
 \texttt{main} below. */
 
   syntax Id ::= Token{"main"}
-  syntax Id ::= Token{[a-zA-Z]*[\_][a-zA-Z0-9\_]*} [notInRules]
+  syntax Id ::= Token{[a-zA-Z]*[\_][a-zA-Z0-9\_]*}
 
 /*@ \subsection{Declarations}
 There are two types of declarations: for variables (including arrays) and

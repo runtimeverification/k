@@ -96,10 +96,10 @@ Then the Phase 1 parser skips everything inside such "string" tokens.
 That means that the Phase 1 parser probably cannot be scannerless.
 
 Possible solution 2: we can make the Phase 1 parser be aware of ALL the
-user-defined tokens except for those tagged as [notInRules] (or [onlyLabel],
-or whatever other name we may come up with).  Then, as part of its Phase 1
-parsing, it first computes the user-defined tokens and puts them into "bubbles",
-and then it excludes those from its K syntax parsing/scanning/tokenizer.
+user-defined tokens except for those tagged as [onlyLabel]. Then, as part of
+its Phase 1 parsing, it first computes the user-defined tokens and puts them
+into "bubbles", and then it excludes those from its K syntax
+parsing/scanning/tokenizer.
 
 =============
 === REQ 5 ===
@@ -140,7 +140,7 @@ so hard to get to.  For example, we want to write
   rule <k> print(I,Xs => Xs) ...</k> <out>... .=>I </out>
 
 insted of
-  
+
   rule <k> (X=V => V) ...</k>  <state>...X|->(_=>V)...</state>
   rule <k> print((I,Xs => Xs)) ...</k> <out>... .=>I </out>
 
