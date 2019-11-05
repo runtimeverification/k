@@ -69,11 +69,6 @@ public class TypeInferencer implements AutoCloseable {
   private static final String PRELUDE1 = 
     "(set-option :timeout 5000)\n";
 
-  private static final String PRELUDE2 =
-    "(assert (forall ((s1 Sort) (s2 Sort) (s3 Sort)) (implies (and (<=Sort s1 s2) (<=Sort s2 s3)) (<=Sort s1 s3))))\n" +
-    "(assert (forall ((s1 Sort)) (<=Sort s1 s1)))\n" +
-    "(assert (forall ((s1 Sort) (s2 Sort)) (implies (and (<=Sort s1 s2) (<=Sort s2 s1)) (= s1 s2))))\n";
-
   public TypeInferencer(Module mod) {
     try {
       process = new ProcessBuilder().command("z3", "-in").redirectError(ProcessBuilder.Redirect.INHERIT).start();
@@ -137,7 +132,31 @@ public class TypeInferencer implements AutoCloseable {
       print(")");
     }
     println(")");
-    println(PRELUDE2);
+    for (Tuple2<Sort, Set<Sort>> relation : iterable(mod.syntacticSubsorts().relations())) {
+      if (!isRealSort(relation._1())) {
+        continue;
+      }
+      for (Sort s2 : iterable(relation._2())) {
+        if (!isRealSort(s2)) {
+          continue;
+        }
+        print("(assert (<=Sort ");
+        printSort(relation._1());
+        print(" ");
+        printSort(s2);
+        println("))");
+      }
+    }
+    for (Sort s : iterable(mod.definedSorts())) {
+      if (!isRealSort(s)) {
+        continue;
+      }
+      print("(assert (<=Sort ");
+      printSort(s);
+      print(" ");
+      printSort(s);
+      println("))");
+    }
   }
 
   private final List<String> variables = new ArrayList<>();
