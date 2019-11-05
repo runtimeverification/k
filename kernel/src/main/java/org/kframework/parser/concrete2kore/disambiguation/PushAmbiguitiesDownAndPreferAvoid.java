@@ -42,7 +42,7 @@ public class PushAmbiguitiesDownAndPreferAvoid extends SafeTransformer {
             if (prefer.size() == 1) {
                 result = prefer.get(0);
             } else {
-                amb.replaceChildren(prefer);
+                result = amb.replaceChildren(prefer);
             }
         } else if (!avoid.isEmpty()) {
             if (avoid.size() < amb.items().size()) {
