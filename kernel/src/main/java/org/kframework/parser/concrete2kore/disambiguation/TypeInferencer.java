@@ -436,13 +436,11 @@ public class TypeInferencer implements AutoCloseable {
       int id = nextId;
       boolean shared = pr.id().isPresent() && variablesById.size() > pr.id().get();
       if (!shared) {
-        if (pr.production().params().nonEmpty()) {
-          nextId++;
-          variablesById.add(new ArrayList<>());
-          pr.setId(Optional.of(id));
-        }
+        nextId++;
+        variablesById.add(new ArrayList<>());
+        pr.setId(Optional.of(id));
         for (Sort param : iterable(pr.production().params())) {
-          String name = "FreshVar" + param.name() + locStr(pr);
+          String name = "FreshVar" + param.name() + (nextVarId++);
           if (!variables.contains(name)) {
             variables.add(name);
             variableNames.add(param.name() + " in production " + pr.production().toString());
@@ -493,7 +491,7 @@ public class TypeInferencer implements AutoCloseable {
           variablesById.add(new ArrayList<>());
           pr.setId(Optional.of(id));
           if (isAnonVar(c)) {
-            name = "FreshVar" + c.value() + locStr(pr);
+            name = "FreshVar" + c.value() + (nextVarId++);
           } else {
             name = "Var" + c.value();
           }
