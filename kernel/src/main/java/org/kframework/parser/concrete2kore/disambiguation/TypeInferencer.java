@@ -483,7 +483,7 @@ public class TypeInferencer implements AutoCloseable {
         expectedSort = oldExpectedSort;
         expectedParams = oldExpectedParams;
       }
-      if (pr instanceof Constant && pr.production().sort().equals(Sorts.KVariable())) {
+      if (pr instanceof Constant && (pr.production().sort().equals(Sorts.KVariable()) || pr.production().sort().equals(Sorts.KConfigVar()))) {
         Constant c = (Constant)pr;
         String name;
         if (!shared) {
