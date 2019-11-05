@@ -201,7 +201,7 @@ public class TypeInferencer implements AutoCloseable {
     ExpectedSortsVisitor viz = new ExpectedSortsVisitor(currentTopSort, isAnywhere, true);
     viz.apply(currentTerm);
     for (String var : variables) {
-      println("(declare-const " + var + " Sort)");
+      println("(declare-const |" + var + "| Sort)");
     }
     print("(assert (and true ");
     assertNotKLabel();
@@ -752,7 +752,7 @@ public class TypeInferencer implements AutoCloseable {
   private static final String locStr(ProductionReference pr) {
     String suffix = "";
     if (pr.production().klabel().isDefined()) {
-      suffix = "_" + pr.production().klabel().get().name();
+      suffix = "_" + pr.production().klabel().get().name().replace("|","");
     }
     if (pr.location().isPresent()) {
       Location l = pr.location().get();
