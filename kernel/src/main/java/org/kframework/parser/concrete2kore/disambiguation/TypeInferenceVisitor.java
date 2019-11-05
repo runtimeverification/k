@@ -143,7 +143,8 @@ public class TypeInferenceVisitor extends SetsTransformerWithErrors<ParseFailedE
       }
       Production substituted = pr.production().substitute(inferencer.getArgs(pr));
       Sort actualSort = substituted.sort();
-      if ((hasCastAlready && !actualSort.equals(expectedSort)) || (!hasCastAlready && !inferencer.module().subsorts().lessThanEq(actualSort, expectedSort))) {
+      boolean isExactSort = hasCastAlready && !hasCheckAlready;
+      if ((isExactSort && !actualSort.equals(expectedSort)) || (!isExactSort && !inferencer.module().subsorts().lessThanEq(actualSort, expectedSort))) {
         return typeError(pr, expectedSort, actualSort);
       }
       if (pr instanceof TermCons) {

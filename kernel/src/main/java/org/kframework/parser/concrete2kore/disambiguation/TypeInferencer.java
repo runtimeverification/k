@@ -466,7 +466,8 @@ public class TypeInferencer implements AutoCloseable {
                   || tc.production().klabel().get().name().startsWith("#SemanticCastTo")
                   || tc.production().klabel().get().name().equals("#InnerCast"))) {
               expectedSort = getSortOfCast(tc);
-              isStrictEquality = true;
+              isStrictEquality = tc.production().klabel().get().name().equals("#SyntacticCast")
+                  || tc.production().klabel().get().name().equals("#InnerCast");
               apply(tc.get(j));
             } else if (isTopSort && j == 0 && isFunction(tc.get(j), isAnywhere)) {
               expectedSort = getFunctionSort(tc.get(j));
