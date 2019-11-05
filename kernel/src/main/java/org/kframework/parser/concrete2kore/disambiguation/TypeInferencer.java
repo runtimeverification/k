@@ -70,7 +70,6 @@ public class TypeInferencer implements AutoCloseable {
     "(set-option :timeout 5000)\n";
 
   private static final String PRELUDE2 =
-    "(define-fun <=Sort ((s1 Sort) (s2 Sort)) Bool (or (<Sort s1 s2) (= s1 s2)))\n" +
     "(assert (forall ((s1 Sort) (s2 Sort) (s3 Sort)) (implies (and (<=Sort s1 s2) (<=Sort s2 s3)) (<=Sort s1 s3))))\n" +
     "(assert (forall ((s1 Sort)) (<=Sort s1 s1)))\n" +
     "(assert (forall ((s1 Sort) (s2 Sort)) (implies (and (<=Sort s1 s2) (<=Sort s2 s1)) (= s1 s2))))\n";
@@ -103,7 +102,7 @@ public class TypeInferencer implements AutoCloseable {
       println("|Sort" + s.name() + "| ");
     }
     println(")))");
-    println("(define-fun <Sort ((s1 Sort) (s2 Sort)) Bool");
+    println("(define-fun <=Sort ((s1 Sort) (s2 Sort)) Bool");
     int parens = 0;
     for (Tuple2<Sort, Set<Sort>> relation : iterable(mod.syntacticSubsorts().relations())) {
       if (!isRealSort(relation._1())) {
@@ -120,6 +119,17 @@ public class TypeInferencer implements AutoCloseable {
         println(")) true");
         parens++;
       }
+    }
+    for (Sort s : iterable(mod.definedSorts())) {
+      if (!isRealSort(s)) {
+        continue;
+      }
+      print("  (ite (and (= s1 ");
+      printSort(s);
+      print(") (= s2 ");
+      printSort(s);
+      println(")) true");
+      parens++;
     }
     println("  false");
     print("  ");
