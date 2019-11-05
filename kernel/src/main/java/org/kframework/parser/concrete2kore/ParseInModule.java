@@ -134,7 +134,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
     }
 
     private Scanner scanner;
-    private static ThreadLocal<Map<ParseInModule, TypeInferencer>> inferencer = new ThreadLocal<>();
+    private ThreadLocal<TypeInferencer> inferencer = new ThreadLocal<>();
     private Set<TypeInferencer> inferencers = new HashSet<>();
 
     public Scanner getScanner() {
@@ -218,13 +218,10 @@ public class ParseInModule implements Serializable, AutoCloseable {
 
             TypeInferencer currentInferencer;
             synchronized(inferencer) {
-                if (inferencer.get() == null) {
-                    inferencer.set(new HashMap<>());
-                }
-                currentInferencer = inferencer.get().get(this);
+                currentInferencer = inferencer.get();
                 if (currentInferencer == null) {
                     currentInferencer = new TypeInferencer(disambModule);
-                    inferencer.get().put(this, currentInferencer);
+                    inferencer.set(currentInferencer);
                     inferencers.add(currentInferencer);
                 }
             }
@@ -276,6 +273,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
         for (TypeInferencer inferencer : inferencers) {
             inferencer.close();
         }
+        inferencers.clear();
         Writer t = timing;
         if (t != null) {
             synchronized(t) {
@@ -292,7 +290,9 @@ public class ParseInModule implements Serializable, AutoCloseable {
         Term rez3 = new PushTopAmbiguityUp().apply(ambiguity);
         Either<Set<ParseFailedException>, Term> rez;
         Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rez2;
-        rez = new TypeInferenceVisitor(new TypeInferencer(mod), Sorts.K(), false, false, false).apply(rez3);
+        try (TypeInferencer inferencer = new TypeInferencer(mod)) {
+            rez = new TypeInferenceVisitor(inferencer, Sorts.K(), false, false, false).apply(rez3);
+        }
         if (rez.isLeft()) {
             rez2 = new AmbFilter(false).apply(rez3);
             return rez2._1().right().get();
