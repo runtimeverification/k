@@ -67,7 +67,7 @@ public class TypeInferencer implements AutoCloseable {
   private final java.util.Set<Sort> sorts;
 
   private static final String PRELUDE1 = 
-    "(set-option :timeout 5000)\n";
+    "(set-option :timeout 30000)\n";
 
   public TypeInferencer(Module mod) {
     try {
