@@ -88,7 +88,7 @@ public class KProveFrontEnd extends FrontEnd {
                 throw KEMException.criticalError("Definition file doesn't exist: " +
                         kproveOptions.specFile(files.get()).getAbsolutePath());
             }
-            KPrint kprint = new KPrint(kem, files.get(), tty, kproveOptions.print, compiledDef.get());
+            KPrint kprint = new KPrint(kem, files.get(), tty, kproveOptions.print, compiledDef.get(), compiledDef.get().kompileOptions);
             return new KProve(kem, sw, files.get(), kprint, kproveOptions).run(kproveOptions, compiledDef.get(), backend.get(), initializeRewriter.get());
         } finally {
             scope.exit();
