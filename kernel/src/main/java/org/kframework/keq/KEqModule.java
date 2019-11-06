@@ -19,7 +19,12 @@ import org.kframework.rewriter.Rewriter;
 import org.kframework.unparser.PrintOptions;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.file.DefinitionDir;
+import org.kframework.utils.file.Environment;
 import org.kframework.utils.file.FileUtil;
+import org.kframework.utils.file.KompiledDir;
+import org.kframework.utils.file.TempDir;
+import org.kframework.utils.file.WorkingDir;
 import org.kframework.utils.inject.Annotations;
 import org.kframework.utils.inject.Main;
 import org.kframework.utils.inject.Options;
@@ -29,6 +34,8 @@ import org.kframework.utils.inject.Spec2;
 import org.kframework.utils.options.DefinitionLoadingOptions;
 import org.kframework.utils.options.SMTOptions;
 
+import javax.annotation.Nullable;
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -40,7 +47,6 @@ public class KEqModule extends AbstractModule {
             //bind backend implementations of tools to their interfaces
             install(new BackendModule());
 
-            bind(FileUtil.class);
             bind(FileSystem.class).to(PortableFileSystem.class);
         }
 
@@ -52,6 +58,17 @@ public class KEqModule extends AbstractModule {
                         + map.keySet());
             }
             return provider.get();
+        }
+
+        //Making it non-RequestScoped
+        @Provides
+        FileUtil fileUtil(@TempDir File tempDir,
+                          @DefinitionDir @Nullable File definitionDir,
+                          @WorkingDir File workingDir,
+                          @KompiledDir @Nullable File kompiledDir,
+                          GlobalOptions options,
+                          @Environment Map<String, String> env) {
+            return new FileUtil(tempDir, definitionDir, workingDir, kompiledDir, options, env);
         }
     }
 
