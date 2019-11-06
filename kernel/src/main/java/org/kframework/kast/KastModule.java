@@ -8,6 +8,7 @@ import org.kframework.main.Tool;
 import org.kframework.utils.inject.DefinitionLoadingModule;
 import org.kframework.utils.inject.Main;
 import org.kframework.utils.inject.Options;
+import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.DefinitionLoadingOptions;
 
 import com.google.inject.AbstractModule;
@@ -32,7 +33,7 @@ public class KastModule extends AbstractModule {
         experimentalOptionsBinder.addBinding().toInstance(KastOptions.Experimental.class);
     }
 
-    @Provides
+    @Provides @RequestScoped
     GlobalOptions globalOptions(KastOptions options) {
         return options.global;
     }

@@ -11,6 +11,7 @@ import org.kframework.main.GlobalOptions;
 import org.kframework.main.Tool;
 import org.kframework.utils.inject.Options;
 import org.kframework.utils.inject.OuterParsingModule;
+import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.OuterParsingOptions;
 
 /**
@@ -31,7 +32,7 @@ public class KDepModule extends AbstractModule {
         Multibinder<Class<?>> experimentalOptionsBinder = Multibinder.newSetBinder(binder(), new TypeLiteral<Class<?>>() {}, Options.class);
     }
 
-    @Provides
+    @Provides @RequestScoped
     GlobalOptions globalOptions(KDepOptions options) {
         return options.global;
     }
