@@ -16,6 +16,9 @@ public final class GlobalOptions {
     public GlobalOptions() {}
 
     //TODO(dwightguth): remove in Guice 4.0
+    /**
+     * Prevents instantiation by Guice when not explicitly configured in a Module.
+     */
     @Inject
     public GlobalOptions(Void v) {}
 
