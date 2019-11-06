@@ -45,3 +45,6 @@ proof-tests/%-spec.json.prove: proof-tests/%-spec.k $(imp_kompiled)
 	$(KPROVE) $< -m IMP
 
 test-prove: $(pyk_prove_tests:=.prove)
+
+update-results:
+kompile:
