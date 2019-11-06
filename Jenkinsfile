@@ -190,69 +190,69 @@ pipeline {
                 }
               }
             }
-            stage('Build and Package on Arch Linux') {
-              when {
-                anyOf {
-                  branch 'master'
-                  changelog '.*^\\[build-system\\] .+$'
-                  changeset 'Jenkinsfile'
-                  changeset 'Dockerfile'
-                }
-              }
-              stages {
-                stage('Build on Arch Linux') {
-                  agent {
-                    dockerfile {
-                      filename 'Dockerfile.arch'
-                      additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
-                      reuseNode true
-                    }
-                  }
-                  stages {
-                    stage('Build Pacman Package') {
-                      steps {
-                        checkout scm
-                        sh '''
-                          makepkg
-                        '''
-                        stash name: "arch", includes: "kframework-5.0.0-1-x86_64.pkg.tar.xz"
-                      }
-                    }
-                  }
-                }
-                stage('Test Arch Package') {
-                  agent {
-                    docker {
-                      image 'archlinux/base'
-                      args '-u 0'
-                      reuseNode true
-                    }
-                  }
-                  options { skipDefaultCheckout() }
-                  steps {
-                    unstash "arch"
-                    sh '''
-                      pacman -Syyu --noconfirm
-                      pacman -U --noconfirm kframework-5.0.0-1-x86_64.pkg.tar.xz
-                      src/main/scripts/test-in-container
-                    '''
-                  }
-                  post {
-                    always {
-                      sh 'stop-kserver || true'
-                      archiveArtifacts 'kserver.log,k-distribution/target/kserver.log'
-                    }
-                  }
-                }
-              }
-              post {
-                failure {
-                  slackSend color: '#cb2431'                                         \
-                          , channel: '#k'                                            \
-                          , message: "Arch Linux Packaging Failed: ${env.BUILD_URL}"
-                }
-              }
-            }
+            //stage('Build and Package on Arch Linux') {
+            //  when {
+            //    anyOf {
+            //      branch 'master'
+            //      changelog '.*^\\[build-system\\] .+$'
+            //      changeset 'Jenkinsfile'
+            //      changeset 'Dockerfile'
+            //    }
+            //  }
+            //  stages {
+            //    stage('Build on Arch Linux') {
+            //      agent {
+            //        dockerfile {
+            //          filename 'Dockerfile.arch'
+            //          additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
+            //          reuseNode true
+            //        }
+            //      }
+            //      stages {
+            //        stage('Build Pacman Package') {
+            //          steps {
+            //            checkout scm
+            //            sh '''
+            //              makepkg
+            //            '''
+            //            stash name: "arch", includes: "kframework-5.0.0-1-x86_64.pkg.tar.xz"
+            //          }
+            //        }
+            //      }
+            //    }
+            //    stage('Test Arch Package') {
+            //      agent {
+            //        docker {
+            //          image 'archlinux/base'
+            //          args '-u 0'
+            //          reuseNode true
+            //        }
+            //      }
+            //      options { skipDefaultCheckout() }
+            //      steps {
+            //        unstash "arch"
+            //        sh '''
+            //          pacman -Syyu --noconfirm
+            //          pacman -U --noconfirm kframework-5.0.0-1-x86_64.pkg.tar.xz
+            //          src/main/scripts/test-in-container
+            //        '''
+            //      }
+            //      post {
+            //        always {
+            //          sh 'stop-kserver || true'
+            //          archiveArtifacts 'kserver.log,k-distribution/target/kserver.log'
+            //        }
+            //      }
+            //    }
+            //  }
+            //  post {
+            //    failure {
+            //      slackSend color: '#cb2431'                                         \
+            //              , channel: '#k'                                            \
+            //              , message: "Arch Linux Packaging Failed: ${env.BUILD_URL}"
+            //    }
+            //  }
+            //}
           }
         }
         stage('Build and Package on Mac OS') {
@@ -367,9 +367,9 @@ pipeline {
         dir("buster") {
           unstash "buster"
         }
-        dir("arch") {
-          unstash "arch"
-        }
+        //dir("arch") {
+        //  unstash "arch"
+        //}
         dir("mojave") {
           unstash "mojave"
         }
@@ -394,7 +394,7 @@ pipeline {
             curl --data-binary @k-distribution/target/k-nightly.tar.gz -H "Authorization: token $GITHUB_TOKEN" -H "Content-Type: application/gzip" https://uploads.github.com/repos/kframework/k/releases/$ID/assets?'name=nightly.tar.gz&label=Platform-Indepdendent+K+binary'
             curl --data-binary @bionic/kframework_5.0.0_amd64.deb -H "Authorization: token $GITHUB_TOKEN" -H "Content-Type: application/vnd.debian.binary-package" https://uploads.github.com/repos/kframework/k/releases/$ID/assets?'name=kframework_5.0.0_amd64_bionic.deb&label=Ubuntu+Bionic+Debian+Package'
             curl --data-binary @buster/kframework_5.0.0_amd64.deb -H "Authorization: token $GITHUB_TOKEN" -H "Content-Type: application/vnd.debian.binary-package" https://uploads.github.com/repos/kframework/k/releases/$ID/assets?'name=kframework_5.0.0_amd64_buster.deb&label=Debian+Buster+Debian+Package'
-            curl --data-binary @arch/kframework-5.0.0-1-x86_64.pkg.tar.xz -H "Authorization: token $GITHUB_TOKEN" -H "Content-Type: application/x-xz" https://uploads.github.com/repos/kframework/k/releases/$ID/assets?'name=kframework-5.0.0-1-x86_64.pkg.tar.xz&label=Arch+Linux+Pacman+Package'
+            # curl --data-binary @arch/kframework-5.0.0-1-x86_64.pkg.tar.xz -H "Authorization: token $GITHUB_TOKEN" -H "Content-Type: application/x-xz" https://uploads.github.com/repos/kframework/k/releases/$ID/assets?'name=kframework-5.0.0-1-x86_64.pkg.tar.xz&label=Arch+Linux+Pacman+Package'
             curl --data-binary @$LOCAL_BOTTLE_NAME -H "Authorization: token $GITHUB_TOKEN" -H "Content-Type: application/gzip" https://uploads.github.com/repos/kframework/k/releases/$ID/assets?'name='$BOTTLE_NAME'&label=Mac+OS+X+Mojave+Homebrew+Bottle'
             curl -X PATCH --data '{"draft": false}' https://api.github.com/repos/kframework/k/releases/$ID?access_token=$GITHUB_TOKEN
             curl --data '{"state": "success","target_url": "'$BUILD_URL'","description": "Build succeeded."}' https://api.github.com/repos/kframework/k/statuses/$(git rev-parse origin/master)?access_token=$GITHUB_TOKEN

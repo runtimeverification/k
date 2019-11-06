@@ -5,7 +5,6 @@ We currently strive to provide packages for the following platforms:
 
 -   Ubuntu Bionic (18.04)
 -   Debian Buster
--   Arch Linux
 -   MacOS X Mojave
 -   Platform Independent K Binary
 
@@ -31,12 +30,6 @@ instructions tell you how to install on each system.
 
 ```sh
 sudo apt install ./kframework_X.Y.Z_amd64_DISTRO.deb
-```
-
-### Arch Linux
-
-```sh
-sudo pacman -U kframework-X.Y.Z-ID-x86_64.pkg.tar.xz
 ```
 
 ### MacOS X Mojave
