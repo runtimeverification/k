@@ -23,6 +23,7 @@ import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.Annotations;
 import org.kframework.utils.inject.Main;
 import org.kframework.utils.inject.Options;
+import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.inject.Spec1;
 import org.kframework.utils.inject.Spec2;
 import org.kframework.utils.options.DefinitionLoadingOptions;
@@ -64,7 +65,7 @@ public class KEqModule extends AbstractModule {
         Multibinder<Class<?>> experimentalOptionsBinder = Multibinder.newSetBinder(binder(), new TypeLiteral<Class<?>>() {}, Options.class);
     }
 
-    @Provides
+    @Provides @RequestScoped
     GlobalOptions globalOptions(KEqOptions options) {
         return options.global;
     }
