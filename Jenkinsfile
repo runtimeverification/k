@@ -385,7 +385,7 @@ pipeline {
             mvn --batch-mode clean
             mvn --batch-mode install -DskipKTest -Dcheckstyle.skip
             COMMIT=$(git rev-parse --short HEAD)
-            DESCRIPTION='This is the nightly release of the K framework. To install, download the appropriate binary package and install using your package manager. You can install a debian package via `sudo apt-get install ./kframework_5.0.0_amd64_$ID.deb` for the appropriate version codename $ID. You can install on Arch Linux using `sudo pacman -S ./kframework-5.0.0-1-x86_64.pkg.tar.xz`. If your OS is not supported, you can download and extract the \\"Platform-Independent K binary\\", and follow the instructions in INSTALL.md within the target directory. Note however that this will not support the Haskell or LLVM Backends. On Windows, start by installing [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10) with Ubuntu (or an Ubuntu VM), after which you can install like Ubuntu. K requires gcc and other Linux libraries to run, and building on native Windows, Cygwin, or MINGW is not supported.'
+            DESCRIPTION="$(cat k-distribution/INSTALL.md)"
             RESPONSE=`curl --data '{"tag_name": "nightly-'$COMMIT'","name": "Nightly build of K framework at commit '$COMMIT'","body": "'"$DESCRIPTION"'", "draft": true,"prerelease": true}' https://api.github.com/repos/kframework/k/releases?access_token=$GITHUB_TOKEN`
             ID=`echo "$RESPONSE" | grep '"id": [0-9]*,' -o | head -1 | grep '[0-9]*' -o`
             BOTTLE_NAME=`cd mojave && echo kframework--5.0.0.mojave.bottle*.tar.gz | sed 's!kframework--!kframework-!'`
