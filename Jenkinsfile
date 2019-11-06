@@ -354,13 +354,14 @@ pipeline {
         beforeAgent true
       }
       environment {
-        AWS_ACCESS_KEY_ID = credentials('aws-access-key-id')
+        AWS_ACCESS_KEY_ID     = credentials('aws-access-key-id')
         AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')
-        AWS_REGION='us-east-2'
-        GITHUB_TOKEN = credentials('rv-jenkins')
-        GIT_SSH_COMMAND = 'ssh -o StrictHostKeyChecking=accept-new'
+        AWS_REGION            = 'us-east-2'
+        GITHUB_TOKEN          = credentials('rv-jenkins')
+        GIT_SSH_COMMAND       = 'ssh -o StrictHostKeyChecking=accept-new'
       }
       steps {
+        unstash "src"
         dir("bionic") {
           unstash "bionic"
         }
@@ -372,10 +373,6 @@ pipeline {
         //}
         dir("mojave") {
           unstash "mojave"
-        }
-        unstash "src"
-        dir("homebrew-k") {
-          git url: 'git@github.com:kframework/homebrew-k.git', branch: 'brew-release-kframework'
         }
         sshagent(['2b3d8d6b-0855-4b59-864a-6b3ddf9c9d1a']) {
           sh '''
@@ -398,14 +395,20 @@ pipeline {
             curl --data-binary @$LOCAL_BOTTLE_NAME -H "Authorization: token $GITHUB_TOKEN" -H "Content-Type: application/gzip" https://uploads.github.com/repos/kframework/k/releases/$ID/assets?'name='$BOTTLE_NAME'&label=Mac+OS+X+Mojave+Homebrew+Bottle'
             curl -X PATCH --data '{"draft": false}' https://api.github.com/repos/kframework/k/releases/$ID?access_token=$GITHUB_TOKEN
             curl --data '{"state": "success","target_url": "'$BUILD_URL'","description": "Build succeeded."}' https://api.github.com/repos/kframework/k/statuses/$(git rev-parse origin/master)?access_token=$GITHUB_TOKEN
-            cd homebrew-k
-            git config --global user.email "admin@runtimeverification.com"
-            git config --global user.name  "RV Jenkins"
-            git checkout master
-            git merge brew-release-$PACKAGE
-            git push origin master
-            git push origin -d brew-release-$PACKAGE
           '''
+        }
+        dir("homebrew-k") {
+          git url: 'git@github.com:kframework/homebrew-k.git', branch: 'brew-release-kframework'
+          sshagent(['2b3d8d6b-0855-4b59-864a-6b3ddf9c9d1a']) {
+            sh '''
+              git config --global user.email "admin@runtimeverification.com"
+              git config --global user.name  "RV Jenkins"
+              git checkout master
+              git merge brew-release-$PACKAGE
+              git push origin master
+              git push origin -d brew-release-$PACKAGE
+            '''
+          }
         }
       }
       post {
