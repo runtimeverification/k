@@ -34,7 +34,7 @@ public class KBMCModule extends AbstractModule {
     @Provides @RequestScoped
     GlobalOptions globalOptions(KBMCOptions options) { return options.global; }
 
-    @Provides
+    @Provides @RequestScoped
     PrintOptions printOptions(KBMCOptions options) {
         return options.print;
     }

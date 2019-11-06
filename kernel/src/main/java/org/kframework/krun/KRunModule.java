@@ -59,7 +59,7 @@ public class KRunModule extends AbstractModule {
         return options.global;
     }
 
-    @Provides
+    @Provides @RequestScoped
     PrintOptions printOptions(KRunOptions options) {
         return options.print;
     }

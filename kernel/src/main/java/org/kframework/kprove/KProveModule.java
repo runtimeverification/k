@@ -35,7 +35,7 @@ public class KProveModule extends AbstractModule {
         return options.global;
     }
 
-    @Provides
+    @Provides @RequestScoped
     PrintOptions printOptions(KProveOptions options) {
         return options.print;
     }

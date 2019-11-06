@@ -73,7 +73,7 @@ public class KEqModule extends AbstractModule {
     @Provides
     SMTOptions smtOptions(KEqOptions options) { return options.smt; }
 
-    @Provides
+    @Provides @RequestScoped
     PrintOptions printOptions(KEqOptions options) {
         return options.print;
     }
