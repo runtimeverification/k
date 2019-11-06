@@ -94,7 +94,7 @@ contributors.
 4. Test:
 
    Go to one of the examples (say `k/tutorial/2_languages/1_simple/1_untyped/`).
-   Assuming k/bin is in your $PATH, you can compile and test a definition by
+   Assuming `k/bin` is in your `$PATH`, you can compile and test a definition by
    running the `make` command. To execute a program you can use e.g.
    `krun tests/diverse/factorial.simple`. K supports both the LLVM/OCaml
    backends for concrete execution and the Haskell/Java backend for symbolic
