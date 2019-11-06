@@ -4,8 +4,6 @@ package org.kframework.kast;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import org.kframework.attributes.Source;
-import org.kframework.backend.kore.ModuleToKORE;
-import org.kframework.compile.AddSortInjections;
 import org.kframework.compile.ExpandMacros;
 import org.kframework.definition.Module;
 import org.kframework.kompile.CompiledDefinition;
@@ -94,7 +92,7 @@ public class KastFrontEnd extends FrontEnd {
             Source source = options.source();
 
             CompiledDefinition def = compiledDef.get();
-            KPrint kprint = new KPrint(kem, files.get(), ttyInfo, options.print, compiledDef.get());
+            KPrint kprint = new KPrint(kem, files.get(), ttyInfo, options.print, compiledDef.get(), compiledDef.get().kompileOptions);
             KRead kread = new KRead(kem, files.get(), options.input);
 
             org.kframework.kore.Sort sort = options.sort;

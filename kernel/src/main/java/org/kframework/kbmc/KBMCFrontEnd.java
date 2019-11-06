@@ -88,7 +88,7 @@ public class KBMCFrontEnd extends FrontEnd {
                 throw KEMException.criticalError("Definition file doesn't exist: " +
                         kbmcOptions.specFile(files.get()).getAbsolutePath());
             }
-            KPrint kprint = new KPrint(kem, files.get(), tty, kbmcOptions.print, compiledDef.get());
+            KPrint kprint = new KPrint(kem, files.get(), tty, kbmcOptions.print, compiledDef.get(), compiledDef.get().kompileOptions);
             return new KBMC(kem, sw, files.get(), kprint).run(kbmcOptions, compiledDef.get(), backend.get(),
                     initializeRewriter.get());
         } finally {
