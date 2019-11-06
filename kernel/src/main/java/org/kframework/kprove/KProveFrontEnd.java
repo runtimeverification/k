@@ -18,7 +18,6 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
 import org.kframework.utils.file.KompiledDir;
-import org.kframework.utils.file.TTYInfo;
 import org.kframework.utils.inject.CommonModule;
 import org.kframework.utils.inject.DefinitionLoadingModule;
 import org.kframework.utils.inject.DefinitionScope;
@@ -32,7 +31,7 @@ public class KProveFrontEnd extends FrontEnd {
 
 
     public static List<Module> getModules() {
-        return ImmutableList.<Module>of(
+        return ImmutableList.of(
                 new KProveModule(),
                 new CommonModule(),
                 new JCommanderModule(),
@@ -46,9 +45,9 @@ public class KProveFrontEnd extends FrontEnd {
     private final KProveOptions kproveOptions;
     private final Provider<FileUtil> files;
     private final Provider<CompiledDefinition> compiledDef;
+    private final Provider<KPrint> kprint;
     private final Provider<Backend> backend;
     private final Provider<Function<Definition, Rewriter>> initializeRewriter;
-    private final TTYInfo tty;
     private final Stopwatch sw;
 
     @Inject
@@ -63,9 +62,9 @@ public class KProveFrontEnd extends FrontEnd {
             KProveOptions kproveOptions,
             Provider<FileUtil> files,
             Provider<CompiledDefinition> compiledDef,
+            Provider<KPrint> kprint,
             Provider<Backend> backend,
             Provider<Function<Definition, Rewriter>> initializeRewriter,
-            TTYInfo tty,
             Stopwatch sw) {
         super(kem, options, usage, experimentalUsage, jarInfo, files);
         this.scope = scope;
@@ -74,9 +73,9 @@ public class KProveFrontEnd extends FrontEnd {
         this.kproveOptions = kproveOptions;
         this.files = files;
         this.compiledDef = compiledDef;
+        this.kprint = kprint;
         this.backend = backend;
         this.initializeRewriter = initializeRewriter;
-        this.tty = tty;
         this.sw = sw;
     }
 
@@ -88,8 +87,7 @@ public class KProveFrontEnd extends FrontEnd {
                 throw KEMException.criticalError("Definition file doesn't exist: " +
                         kproveOptions.specFile(files.get()).getAbsolutePath());
             }
-            KPrint kprint = new KPrint(kem, files.get(), tty, kproveOptions.print, compiledDef.get(), compiledDef.get().kompileOptions);
-            return new KProve(kem, sw, files.get(), kprint, kproveOptions).run(kproveOptions, compiledDef.get(), backend.get(), initializeRewriter.get());
+            return new KProve(kem, sw, files.get(), kprint.get(), kproveOptions).run(kproveOptions, compiledDef.get(), backend.get(), initializeRewriter.get());
         } finally {
             scope.exit();
         }

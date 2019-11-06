@@ -2,9 +2,11 @@
 package org.kframework.kast;
 
 import org.kframework.kil.loader.Context;
+import org.kframework.krun.KRunOptions;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
 import org.kframework.main.Tool;
+import org.kframework.unparser.PrintOptions;
 import org.kframework.utils.inject.DefinitionLoadingModule;
 import org.kframework.utils.inject.Main;
 import org.kframework.utils.inject.Options;
@@ -36,6 +38,11 @@ public class KastModule extends AbstractModule {
     @Provides @RequestScoped
     GlobalOptions globalOptions(KastOptions options) {
         return options.global;
+    }
+
+    @Provides @RequestScoped
+    PrintOptions printOptions(KastOptions options) {
+        return options.print;
     }
 
     @Provides
