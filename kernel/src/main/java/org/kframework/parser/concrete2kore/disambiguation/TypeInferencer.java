@@ -132,31 +132,6 @@ public class TypeInferencer implements AutoCloseable {
       print(")");
     }
     println(")");
-    for (Tuple2<Sort, Set<Sort>> relation : iterable(mod.syntacticSubsorts().relations())) {
-      if (!isRealSort(relation._1())) {
-        continue;
-      }
-      for (Sort s2 : iterable(relation._2())) {
-        if (!isRealSort(s2)) {
-          continue;
-        }
-        print("(assert (<=Sort ");
-        printSort(relation._1());
-        print(" ");
-        printSort(s2);
-        println("))");
-      }
-    }
-    for (Sort s : iterable(mod.definedSorts())) {
-      if (!isRealSort(s)) {
-        continue;
-      }
-      print("(assert (<=Sort ");
-      printSort(s);
-      print(" ");
-      printSort(s);
-      println("))");
-    }
   }
 
   private final List<String> variables = new ArrayList<>();
