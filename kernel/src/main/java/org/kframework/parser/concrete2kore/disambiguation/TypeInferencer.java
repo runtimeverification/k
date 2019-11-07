@@ -157,6 +157,7 @@ public class TypeInferencer implements AutoCloseable {
   private final List<String> variableNames = new ArrayList<>();
   private final List<String> parameters = new ArrayList<>();
   private final List<List<String>> variablesById = new ArrayList<>();
+  private final List<java.util.Set<String>> cacheById = new ArrayList<>();
   private int nextId = 0;
   private int nextVarId = 0;
   private Term currentTerm;
@@ -387,6 +388,7 @@ public class TypeInferencer implements AutoCloseable {
       if (!shared) {
         nextId++;
         variablesById.add(new ArrayList<>());
+        cacheById.add(new HashSet<>());
         pr.setId(Optional.of(id));
         for (Sort param : iterable(pr.production().params())) {
           String name = "FreshVar" + param.name() + (nextVarId++);
@@ -433,16 +435,19 @@ public class TypeInferencer implements AutoCloseable {
         expectedSort = oldExpectedSort;
         expectedParams = oldExpectedParams;
       }
-      if (!isIncremental && !shared) {
-        sb.append("(define-fun constraint").append(id).append(" () Bool (and true ");
+      String expected = printSort(expectedSort, expectedParams, false).replace("|", "");
+      boolean cached = !cacheById.get(id).add(expected);
+      if (!isIncremental && (!shared || !cached)) {
+        sb.append("(define-fun |constraint").append(id).append("_").append(expected).append("| () Bool (and true ");
       }
-      if (isIncremental || !shared) {
+      if (isIncremental || !shared || !cached) {
         if (pr instanceof Constant && (pr.production().sort().equals(Sorts.KVariable()) || pr.production().sort().equals(Sorts.KConfigVar()))) {
           Constant c = (Constant) pr;
           String name;
           if (!shared) {
             nextId++;
             variablesById.add(new ArrayList<>());
+            cacheById.add(new HashSet<>());
             pr.setId(Optional.of(id));
             if (isAnonVar(c)) {
               name = "FreshVar" + c.value() + (nextVarId++);
@@ -463,13 +468,13 @@ public class TypeInferencer implements AutoCloseable {
           pushConstraint(pr.production().sort(), Optional.of(pr));
         }
       }
-      if (!isIncremental && !shared) {
+      if (!isIncremental && (!shared ||  !cached)) {
         for (String i : ids) {
           sb.append(i).append(" ");
         }
         sb.append("))\n");
       }
-      return "constraint" + id;
+      return "|constraint" + id + "_" + expected + "|";
     }
 
     public boolean isAnonVar(Constant var) {
@@ -728,6 +733,7 @@ public class TypeInferencer implements AutoCloseable {
     variableNames.clear();
     parameters.clear();
     variablesById.clear();
+    cacheById.clear();
     nextId = 0;
     nextVarId = 0;
   }
