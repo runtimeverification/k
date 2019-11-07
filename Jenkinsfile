@@ -382,7 +382,7 @@ pipeline {
             mvn --batch-mode clean
             mvn --batch-mode install -DskipKTest -Dcheckstyle.skip
             COMMIT=$(git rev-parse --short HEAD)
-            DESCRIPTION="$(cat k-distribution/INSTALL.md)"
+            DESCRIPTION="$(cat k-distribution/INSTALL.md | sed ':a;$!{N;ba}; s/\n/\\n/g')"
             RESPONSE=`curl --data '{"tag_name": "nightly-'$COMMIT'","name": "Nightly build of K framework at commit '$COMMIT'","body": "'"$DESCRIPTION"'", "draft": true,"prerelease": true}' https://api.github.com/repos/kframework/k/releases?access_token=$GITHUB_TOKEN`
             ID=`echo "$RESPONSE" | grep '"id": [0-9]*,' -o | head -1 | grep '[0-9]*' -o`
             BOTTLE_NAME=`cd mojave && echo kframework--5.0.0.mojave.bottle*.tar.gz | sed 's!kframework--!kframework-!'`
