@@ -252,14 +252,11 @@ public class TypeInferencer implements AutoCloseable {
     for (String var : variables) {
       println("(declare-const |" + var + "| Sort)");
     }
-    print("(define-fun constraints (");
-    for (String var : variables) {
-      print("(|" + var + "_| Sort) ");
-    }
-    println(") Bool (and true ");
+    print("(assert (and true ");
     assertNotKLabel();
-    println(viz.toString());
     println("))");
+    println(viz.toString());
+    println("(assert constraint0)");
     for (String var : variables) {
       println("(maximize (ordinal |" + var + "|))");
     }
@@ -348,7 +345,7 @@ public class TypeInferencer implements AutoCloseable {
     }
   }
 
-  public class ExpectedSortsVisitor extends SafeTransformer {
+  public class ExpectedSortsVisitor {
     private Sort expectedSort;
     private Optional<ProductionReference> expectedParams = Optional.empty();
     private boolean isStrictEquality = false;
@@ -356,30 +353,34 @@ public class TypeInferencer implements AutoCloseable {
     private final boolean isAnywhere;
     private final boolean isIncremental;
 
+    private int ambId = 0;
+
     public ExpectedSortsVisitor(Sort topSort, boolean isAnywhere, boolean isIncremental) {
       this.expectedSort = topSort;
       this.isAnywhere = isAnywhere;
       this.isIncremental = isIncremental;
     }
 
-    @Override
-    public Term apply(Term t) {
+    public String apply(Term t) {
       if (t instanceof Ambiguity) {
         Ambiguity amb = (Ambiguity)t;
         if (isIncremental) {
           return apply(amb.items().iterator().next());
         }
-        sb.append("(or ");
+        int id = ambId++;
+        List<String> ids = new ArrayList<>();
         for (Term i : amb.items()) {
-            sb.append("(and true ");
-            apply(i);
-            sb.append(") ");
+            ids.add(apply(i));
         }
-        sb.append(") ");
-        return amb;
+        sb.append("(define-fun amb").append(id).append(" () Bool (or ");
+        for (String i : ids) {
+          sb.append(i).append(" ");
+        }
+        sb.append("))\n");
+        return "amb" + id;
       }
       ProductionReference pr = (ProductionReference)t;
-
+      List<String> ids = new ArrayList<>();
       boolean isTopSort = expectedSort.equals(Sorts.RuleContent()) || expectedSort.name().equals("#RuleBody");
       int id = nextId;
       boolean shared = pr.id().isPresent() && variablesById.size() > pr.id().get();
@@ -416,14 +417,14 @@ public class TypeInferencer implements AutoCloseable {
               expectedSort = getSortOfCast(tc);
               isStrictEquality = tc.production().klabel().get().name().equals("#SyntacticCast")
                   || tc.production().klabel().get().name().equals("#InnerCast");
-              apply(tc.get(j));
+              ids.add(apply(tc.get(j)));
             } else if (isTopSort && j == 0 && isFunction(tc.get(j), isAnywhere)) {
               expectedSort = getFunctionSort(tc.get(j));
               expectedParams = Optional.of(getFunction(tc.get(j)).get());
-              apply(tc.get(j));
+              ids.add(apply(tc.get(j)));
             } else {
               expectedSort = nt.sort();
-              apply(tc.get(j));
+              ids.add(apply(tc.get(j)));
             }
             j++;
           }
@@ -432,32 +433,43 @@ public class TypeInferencer implements AutoCloseable {
         expectedSort = oldExpectedSort;
         expectedParams = oldExpectedParams;
       }
-      if (pr instanceof Constant && (pr.production().sort().equals(Sorts.KVariable()) || pr.production().sort().equals(Sorts.KConfigVar()))) {
-        Constant c = (Constant)pr;
-        String name;
-        if (!shared) {
-          nextId++;
-          variablesById.add(new ArrayList<>());
-          pr.setId(Optional.of(id));
-          if (isAnonVar(c)) {
-            name = "FreshVar" + c.value() + (nextVarId++);
-          } else {
-            name = "Var" + c.value();
-          }
-          if (!variables.contains(name)) {
-            variables.add(name);
-            variableNames.add(c.value());
-          }
-          variablesById.get(id).add(name);
-        } else {
-          name = variablesById.get(id).get(0);
-        }
-        Sort actualSort = null;
-        pushConstraint(name, c);
-      } else if (isRealSort(pr.production().sort())) {
-        pushConstraint(pr.production().sort(), Optional.of(pr));
+      if (!isIncremental && !shared) {
+        sb.append("(define-fun constraint").append(id).append(" () Bool (and true ");
       }
-      return pr;
+      if (isIncremental || !shared) {
+        if (pr instanceof Constant && (pr.production().sort().equals(Sorts.KVariable()) || pr.production().sort().equals(Sorts.KConfigVar()))) {
+          Constant c = (Constant) pr;
+          String name;
+          if (!shared) {
+            nextId++;
+            variablesById.add(new ArrayList<>());
+            pr.setId(Optional.of(id));
+            if (isAnonVar(c)) {
+              name = "FreshVar" + c.value() + (nextVarId++);
+            } else {
+              name = "Var" + c.value();
+            }
+            if (!variables.contains(name)) {
+              variables.add(name);
+              variableNames.add(c.value());
+            }
+            variablesById.get(id).add(name);
+          } else {
+            name = variablesById.get(id).get(0);
+          }
+          Sort actualSort = null;
+          pushConstraint(name, c);
+        } else if (isRealSort(pr.production().sort())) {
+          pushConstraint(pr.production().sort(), Optional.of(pr));
+        }
+      }
+      if (!isIncremental && !shared) {
+        for (String i : ids) {
+          sb.append(i).append(" ");
+        }
+        sb.append("))\n");
+      }
+      return "constraint" + id;
     }
 
     public boolean isAnonVar(Constant var) {
@@ -491,11 +503,7 @@ public class TypeInferencer implements AutoCloseable {
       } else {
         sb.append("(<=Sort ");
       }
-      sb.append("|").append(name);
-      if (!isIncremental) {
-        sb.append("_");
-      }
-      sb.append("| ");
+      sb.append("|").append(name).append("| ");
       if (mod.subsorts().lessThan(Sorts.K(), expectedSort)) {
           expectedSort = Sorts.K();
       }
@@ -543,11 +551,7 @@ public class TypeInferencer implements AutoCloseable {
   private String printSort(Sort s, Map<Sort, String> params, boolean isIncremental) {
     StringBuilder sb = new StringBuilder();
     if (params.containsKey(s)) {
-      sb.append("|").append(params.get(s));
-      if (!isIncremental) {
-        sb.append("_");
-      }
-      sb.append("|");
+      sb.append("|").append(params.get(s)).append("|");
       return sb.toString();
     }
     if (s.params().isEmpty()) {
