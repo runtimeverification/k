@@ -2,6 +2,7 @@
 package org.kframework.parser.concrete2kore.disambiguation;
 
 import org.kframework.Collections;
+import org.kframework.TopologicalSort;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.HasLocation;
 import org.kframework.builtin.KLabels;
@@ -129,6 +130,24 @@ public class TypeInferencer implements AutoCloseable {
     println("  false");
     print("  ");
     for (int i = 0; i < parens; i++) {
+      print(")");
+    }
+    println(")");
+    println("(define-fun ordinal ((s Sort)) Int");
+    int i = 0;
+    parens = 0;
+    for (Sort s : iterable(TopologicalSort.tsort(mod.subsorts().directRelations()))) {
+      if (!isRealSort(s)) {
+        continue;
+      }
+      print("  (ite (= s ");
+      printSort(s);
+      println(") " + (i++));
+      parens++;
+    }
+    println("  -1");
+    print("  ");
+    for (i = 0; i < parens; i++) {
       print(")");
     }
     println(")");
