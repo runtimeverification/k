@@ -140,10 +140,11 @@ public class BinaryLoader {
             }
             try (FSTObjectInput deserializer = new FSTObjectInput(in)) { //already buffered
                 Object obj = deserializer.readObject();
+                return obj;
+            } finally {
                 // FST bug workaround: FSTObjectInput.close() doesn't close underlying FileInputStream.
                 // This may cause OverlappingFileLockException in saveSynchronized(), in Nailgun mode.
                 in.close();
-                return obj;
             }
         } finally {
             lock.readLock().unlock();
