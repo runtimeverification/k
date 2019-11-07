@@ -2,11 +2,11 @@ ARG BASE_IMAGE=ubuntu:bionic
 FROM ${BASE_IMAGE}
 ARG BASE_IMAGE
 
-ENV LLVM_VERSION=`if [ "$BASE_IMAGE" = "debian:buster" ]; then echo 7; else echo 8; fi`
+ARG LLVM_VERSION=8
 
 RUN    apt-get update            \
     && apt-get install --yes     \
-        clang-$LLVM_VERRSION     \
+        clang-$LLVM_VERSION      \
         cmake                    \
         curl                     \
         debhelper                \
@@ -60,4 +60,4 @@ ADD java-backend/pom.xml /home/user/.tmp-maven/java-backend/
 ADD k-distribution/pom.xml /home/user/.tmp-maven/k-distribution/
 ADD kore/pom.xml /home/user/.tmp-maven/kore/
 RUN    cd /home/user/.tmp-maven \
-    && mvn --batch-mode dependency:go-offline 
+    && mvn --batch-mode dependency:go-offline
