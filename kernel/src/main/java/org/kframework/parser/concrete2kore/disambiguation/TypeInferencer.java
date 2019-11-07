@@ -455,7 +455,7 @@ public class TypeInferencer implements AutoCloseable {
             cacheById.add(new HashSet<>());
             pr.setId(Optional.of(id));
             if (isAnonVar(c)) {
-              name = "FreshVar" + c.value() + (nextVarId++);
+              name = "Var" + c.value() + (nextVarId++);
             } else {
               name = "Var" + c.value();
             }

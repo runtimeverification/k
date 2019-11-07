@@ -24,7 +24,9 @@ import scala.util.Either;
 import scala.util.Left;
 import scala.util.Right;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -85,9 +87,10 @@ public class TypeInferenceVisitor extends SetsTransformerWithErrors<ParseFailedE
           break;
         }
       } while (hasAnotherSolution);
+      List<Map<String, Sort>> maximalModels = removeNonMaximal(models);
       Set<Term> candidates = new HashSet<>();
       Set<ParseFailedException> exceptions = new HashSet<>();
-      for (Map<String, Sort> model : models) {
+      for (Map<String, Sort> model : maximalModels) {
         inferencer.selectModel(model);
         Either<Set<ParseFailedException>, Term> result = new TypeCheckVisitor(topSort).apply(t);
         if (result.isLeft()) {
@@ -106,6 +109,36 @@ public class TypeInferenceVisitor extends SetsTransformerWithErrors<ParseFailedE
     } finally {
       inferencer.pop();
     }
+  }
+
+  public boolean lessThanEq(Map<String, Sort> model1, Map<String, Sort> model2) {
+    for (Map.Entry<String, Sort> model1Entry : model1.entrySet()) {
+      if (model1Entry.getKey().startsWith("Var")) {
+        Sort model1Sort = model1Entry.getValue();
+        Sort model2Sort = model2.get(model1Entry.getKey());
+        if (!inferencer.module().syntacticSubsorts().lessThanEq(model1Sort, model2Sort)) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  public List<Map<String, Sort>> removeNonMaximal(Set<Map<String, Sort>> models) {
+    List<Map<String, Sort>> maximals = new ArrayList<>();
+    outer:
+    for (Map<String, Sort> candidate : models) {
+      for (Map<String, Sort> maximal : maximals) {
+        if (lessThanEq(candidate, maximal)) {
+          continue outer;
+        } else if (lessThanEq(maximal, candidate)) {
+          maximal.clear();
+          maximal.putAll(candidate);
+        }
+      }
+      maximals.add(new HashMap<>(candidate));
+    }
+    return maximals;
   }
 
   public class TypeCheckVisitor extends SetsTransformerWithErrors<ParseFailedException> {
