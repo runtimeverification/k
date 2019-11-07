@@ -31,8 +31,8 @@ public class KBMC {
     }
 
     public int run(KBMCOptions options, CompiledDefinition compiledDefinition, Backend backend, Function<Definition, Rewriter> rewriterGenerator) {
-        Tuple2<Definition, Module> compiled = ProofDefinitionBuilder.build(options.specFile(files),
-                options.defModule, options.specModule, compiledDefinition, backend, files, kem, sw);
+        Tuple2<Definition, Module> compiled = new ProofDefinitionBuilder(compiledDefinition, backend, files, kem, sw)
+                .build(options.specFile(files), options.defModule, options.specModule);
         Rewriter rewriter = rewriterGenerator.apply(compiled._1());
         Module specModule = compiled._2();
 

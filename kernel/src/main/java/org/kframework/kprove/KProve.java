@@ -31,25 +31,23 @@ public class KProve {
     public static final String BOUNDARY_CELL_PREFIX = "BOUND_";
 
     private final KExceptionManager kem;
-    private final Stopwatch sw;
     private final FileUtil files;
     private final KPrint kprint;
     private final KProveOptions kproveOptions;
     private final CompiledDefinition compiledDefinition;
-    private final Backend backend;
+    private final ProofDefinitionBuilder proofDefinitionBuilder;
     private final Function<Definition, Rewriter> rewriterGenerator;
 
     @Inject
-    public KProve(KExceptionManager kem, Stopwatch sw, FileUtil files, KPrint kprint, KProveOptions kproveOptions,
-                  CompiledDefinition compiledDefinition, Backend backend,
+    public KProve(KExceptionManager kem, FileUtil files, KPrint kprint, KProveOptions kproveOptions,
+                  CompiledDefinition compiledDefinition, ProofDefinitionBuilder proofDefinitionBuilder,
                   Function<Definition, Rewriter> rewriterGenerator) {
         this.kem = kem;
-        this.sw = sw;
         this.files = files;
         this.kprint = kprint;
         this.kproveOptions = kproveOptions;
         this.compiledDefinition = compiledDefinition;
-        this.backend = backend;
+        this.proofDefinitionBuilder = proofDefinitionBuilder;
         this.rewriterGenerator = rewriterGenerator;
     }
 
@@ -59,9 +57,8 @@ public class KProve {
                     kproveOptions.specFile(files).getAbsolutePath());
         }
 
-        Tuple2<Definition, Module> compiled = ProofDefinitionBuilder
-                .build(kproveOptions.specFile(files), kproveOptions.defModule, kproveOptions.specModule,
-                        compiledDefinition, backend, files, kem, sw);
+        Tuple2<Definition, Module> compiled = proofDefinitionBuilder
+                .build(kproveOptions.specFile(files), kproveOptions.defModule, kproveOptions.specModule);
         Rewriter rewriter = rewriterGenerator.apply(compiled._1());
         Module specModule = compiled._2();
         Rule boundaryPattern = buildBoundaryPattern(compiledDefinition);
