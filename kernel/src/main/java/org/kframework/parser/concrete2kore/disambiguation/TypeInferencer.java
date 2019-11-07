@@ -257,7 +257,11 @@ public class TypeInferencer implements AutoCloseable {
     assertNotKLabel();
     println("))");
     println(viz.toString());
-    println("(assert constraint0)");
+    if (t instanceof Ambiguity) {
+      println("(assert amb0)");
+    } else {
+      println("(assert |constraint0_" + printSort(topSort, Optional.empty(), false).replace("|", "") + "|)");
+    }
     for (String var : variables) {
       println("(maximize (ordinal |" + var + "|))");
     }
