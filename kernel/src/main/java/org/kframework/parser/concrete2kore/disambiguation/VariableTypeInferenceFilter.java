@@ -510,7 +510,10 @@ public class VariableTypeInferenceFilter extends SetsGeneralTransformer<ParseFai
                     } else {
                         Term t = tc.get(j);
                         Sort s = ((NonTerminal) tc.production().items().apply(i)).sort();
-                        if (!tc.production().isSortVariable(s)) {
+                        if (!tc.production().isSortVariable(s) || !s.equals(tc.production().sort())) {
+                            if (tc.production().isSortVariable(s)) {
+                              s = Sorts.K();
+                            }
                             Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheck2(s, false, false, inferSortChecks).apply(t);
                             if (rez.isLeft())
                                 return rez;
