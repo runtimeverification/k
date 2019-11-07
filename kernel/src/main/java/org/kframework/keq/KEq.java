@@ -5,7 +5,7 @@ import org.kframework.compile.Backend;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.kompile.CompiledDefinition;
-import org.kframework.kprove.KProve;
+import org.kframework.kprove.ProofDefinitionBuilder;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -36,11 +36,13 @@ public class KEq {
             Function<Definition, Rewriter> gen2) {
         Rewriter commonRewriter = commonGen.apply(commonDef.kompiledDefinition);
 
-        Tuple2<Definition, Module> compiled1 = KProve.getProofDefinition(files.resolveWorkingDirectory(keqOptions.spec1), keqOptions.defModule1, keqOptions.specModule1, def1, backend, files, kem, sw);
+        Tuple2<Definition, Module> compiled1 = ProofDefinitionBuilder
+                .build(files.resolveWorkingDirectory(keqOptions.spec1), keqOptions.defModule1, keqOptions.specModule1, def1, backend, files, kem, sw);
         Rewriter rewriter1 = gen1.apply(compiled1._1());
         Module spec1 = compiled1._2();
 
-        Tuple2<Definition, Module> compiled2 = KProve.getProofDefinition(files.resolveWorkingDirectory(keqOptions.spec2), keqOptions.defModule2, keqOptions.specModule2, def2, backend, files, kem, sw);
+        Tuple2<Definition, Module> compiled2 = ProofDefinitionBuilder
+                .build(files.resolveWorkingDirectory(keqOptions.spec2), keqOptions.defModule2, keqOptions.specModule2, def2, backend, files, kem, sw);
         Rewriter rewriter2 = gen2.apply(compiled2._1());
         Module spec2 = compiled2._2();
 

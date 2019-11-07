@@ -6,7 +6,7 @@ import org.kframework.compile.Backend;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.kompile.CompiledDefinition;
-import org.kframework.kprove.KProve;
+import org.kframework.kprove.ProofDefinitionBuilder;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.unparser.KPrint;
 import org.kframework.utils.Stopwatch;
@@ -31,7 +31,7 @@ public class KBMC {
     }
 
     public int run(KBMCOptions options, CompiledDefinition compiledDefinition, Backend backend, Function<Definition, Rewriter> rewriterGenerator) {
-        Tuple2<Definition, Module> compiled = KProve.getProofDefinition(options.specFile(files),
+        Tuple2<Definition, Module> compiled = ProofDefinitionBuilder.build(options.specFile(files),
                 options.defModule, options.specModule, compiledDefinition, backend, files, kem, sw);
         Rewriter rewriter = rewriterGenerator.apply(compiled._1());
         Module specModule = compiled._2();

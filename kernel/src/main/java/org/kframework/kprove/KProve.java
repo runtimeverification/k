@@ -2,7 +2,6 @@
 package org.kframework.kprove;
 
 import com.google.inject.Inject;
-import org.apache.commons.io.FilenameUtils;
 import org.kframework.RewriterResult;
 import org.kframework.attributes.Source;
 import org.kframework.compile.Backend;
@@ -10,7 +9,6 @@ import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
 import org.kframework.kompile.CompiledDefinition;
-import org.kframework.kompile.Kompile;
 import org.kframework.krun.KRun;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.unparser.KPrint;
@@ -18,21 +16,16 @@ import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
-import scala.Option;
+import org.kframework.utils.inject.RequestScoped;
 import scala.Tuple2;
 
-import java.io.File;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 
 /**
  * Class that implements the "--prove" option.
  */
+@RequestScoped
 public class KProve {
 
     public static final String BOUNDARY_CELL_PREFIX = "BOUND_";
@@ -42,85 +35,41 @@ public class KProve {
     private final FileUtil files;
     private final KPrint kprint;
     private final KProveOptions kproveOptions;
+    private final CompiledDefinition compiledDefinition;
+    private final Backend backend;
+    private final Function<Definition, Rewriter> rewriterGenerator;
 
     @Inject
-    public KProve(KExceptionManager kem, Stopwatch sw, FileUtil files, KPrint kprint, KProveOptions kproveOptions) {
-        this.kem    = kem;
-        this.sw     = sw;
-        this.files  = files;
+    public KProve(KExceptionManager kem, Stopwatch sw, FileUtil files, KPrint kprint, KProveOptions kproveOptions,
+                  CompiledDefinition compiledDefinition, Backend backend,
+                  Function<Definition, Rewriter> rewriterGenerator) {
+        this.kem = kem;
+        this.sw = sw;
+        this.files = files;
         this.kprint = kprint;
         this.kproveOptions = kproveOptions;
+        this.compiledDefinition = compiledDefinition;
+        this.backend = backend;
+        this.rewriterGenerator = rewriterGenerator;
     }
 
-    public int run(KProveOptions options, CompiledDefinition compiledDefinition, Backend backend, Function<Definition, Rewriter> rewriterGenerator) {
-        Tuple2<Definition, Module> compiled = getProofDefinition(options.specFile(files), options.defModule, options.specModule, compiledDefinition, backend, files, kem, sw);
+    public int run() {
+        if (!kproveOptions.specFile(files).exists()) {
+            throw KEMException.criticalError("Definition file doesn't exist: " +
+                    kproveOptions.specFile(files).getAbsolutePath());
+        }
+
+        Tuple2<Definition, Module> compiled = ProofDefinitionBuilder
+                .build(kproveOptions.specFile(files), kproveOptions.defModule, kproveOptions.specModule,
+                        compiledDefinition, backend, files, kem, sw);
         Rewriter rewriter = rewriterGenerator.apply(compiled._1());
         Module specModule = compiled._2();
         Rule boundaryPattern = buildBoundaryPattern(compiledDefinition);
 
         RewriterResult results = rewriter.prove(specModule, boundaryPattern);
-        kprint.prettyPrint(compiled._1(), compiled._1().getModule("LANGUAGE-PARSING").get(), s -> kprint.outputFile(s), results.k());
+        kprint.prettyPrint(compiled._1(), compiled._1().getModule("LANGUAGE-PARSING").get(), kprint::outputFile,
+                results.k());
         return results.exitCode().orElse(KEMException.TERMINATED_WITH_ERRORS_EXIT_CODE);
-    }
-
-    private static Module getModule(String defModule, Map<String, Module> modules, Definition oldDef) {
-        if (modules.containsKey(defModule))
-            return modules.get(defModule);
-        Option<Module> mod = oldDef.getModule(defModule);
-        if (mod.isDefined()) {
-            return mod.get();
-        }
-        throw KEMException.criticalError("Module " + defModule + " does not exist.");
-    }
-
-    public static Map<Definition, Definition> cache = Collections.synchronizedMap(new LinkedHashMap<Definition, Definition>() {
-        @Override
-        protected boolean removeEldestEntry(Map.Entry entry) {
-            return size() > 10;
-        }
-    });
-
-    /**
-     * @param specFile           File containing specification rules to prove. Not part of definition.
-     * @param defModuleName      Name of main module of extended definition - that is compiled definition + extra
-     *                           modules required by proofs, usually abstractions for symbolic execution and lemmas.
-     * @param specModuleName     Module containing specifications to prove
-     * @param compiledDefinition Definition generated by kompile
-     */
-    public static Tuple2<Definition, Module> getProofDefinition(File specFile, String defModuleName,
-                                                                String specModuleName,
-                                                                CompiledDefinition compiledDefinition, Backend backend,
-                                                                FileUtil files, KExceptionManager kem, Stopwatch sw) {
-        if (defModuleName == null) {
-            defModuleName = compiledDefinition.kompiledDefinition.mainModule().name();
-        }
-        if (specModuleName == null) {
-            specModuleName = FilenameUtils.getBaseName(specFile.getName()).toUpperCase();
-        }
-        File absSpecFile = files.resolveWorkingDirectory(specFile).getAbsoluteFile();
-
-        Kompile kompile = new Kompile(compiledDefinition.kompileOptions, files, kem, sw, true);
-        Set<Module> modules = kompile.parseModules(compiledDefinition, defModuleName, absSpecFile,
-                backend.excludedModuleTags());
-        Map<String, Module> modulesMap = modules.stream().collect(Collectors.toMap(Module::name, m -> m));
-        Module defModule = getModule(defModuleName, modulesMap, compiledDefinition.getParsedDefinition());
-        Definition rawExtendedDef = Definition.apply(defModule, compiledDefinition.getParsedDefinition().entryModules(),
-                compiledDefinition.getParsedDefinition().att());
-        Definition compiledExtendedDef = compileDefinition(backend, rawExtendedDef); //also resolves imports
-
-        Module specModule = getModule(specModuleName, modulesMap, compiledDefinition.getParsedDefinition());
-        specModule = backend.specificationSteps(compiledDefinition.kompiledDefinition).apply(specModule);
-
-        return Tuple2.apply(compiledExtendedDef, specModule);
-    }
-
-    private static Definition compileDefinition(Backend backend, Definition combinedDef) {
-        Definition compiled = cache.get(combinedDef);
-        if (compiled == null) {
-            compiled = backend.steps().apply(combinedDef);
-            cache.put(combinedDef, compiled);
-        }
-        return compiled;
     }
 
     /**
