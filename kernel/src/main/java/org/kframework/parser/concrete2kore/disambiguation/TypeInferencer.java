@@ -260,55 +260,14 @@ public class TypeInferencer implements AutoCloseable {
     assertNotKLabel();
     println(viz.toString());
     println("))");
-    defineMaximalFunction("maximal", variables);
-    List<String> realVariables = new ArrayList<>(variables);
-    realVariables.removeAll(parameters);
-    if (!realVariables.isEmpty()) {
-      defineMaximalFunction("maximalVars", realVariables);
-    }
     print("(assert (constraints ");
     for (String var : variables) {
       print("|" + var + "| ");
     }
     println("))");
-    print("(assert (maximal ");
     for (String var : variables) {
-      print("|" + var + "| ");
+      println("(maximize (ordinal |" + var + "|))");
     }
-    println("))");
-    if (!realVariables.isEmpty()) {
-      print("(assert (maximalVars ");
-      for (String var : realVariables) {
-        print("|" + var + "| ");
-      }
-      println("))");
-    }
-  }
-
-  private void defineMaximalFunction(String name, List<String> variables) {
-    print("(define-fun ");
-    print(name);
-    print(" (");
-    for (String var : variables) {
-      print("(|" + var + "_| Sort) ");
-    }
-    print(") Bool (forall (");
-    for (String var : this.variables) {
-      print("(|" + var + "__| Sort) ");
-    }
-    print(") (implies (and (constraints ");
-    for (String var : this.variables) {
-      print("|" + var + "__| ");
-    }
-    print(") ");
-    for (String var : variables) {
-      print("(<=Sort |" + var + "_| |" + var + "__|) ");
-    }
-    print(") (and ");
-    for (String var : variables) {
-      print("(= |" + var + "_| |" + var + "__|) ");
-    }
-    println("))))");
   }
 
   private static Optional<ProductionReference> getFunction(Term t) {
