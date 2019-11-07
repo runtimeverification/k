@@ -260,11 +260,6 @@ public class TypeInferencer implements AutoCloseable {
     assertNotKLabel();
     println(viz.toString());
     println("))");
-    print("(assert (constraints ");
-    for (String var : variables) {
-      print("|" + var + "| ");
-    }
-    println("))");
     for (String var : variables) {
       println("(maximize (ordinal |" + var + "|))");
     }
