@@ -101,7 +101,7 @@ public class TypeInferencer implements AutoCloseable {
       }
       ordinals.put(s, i++);
     }
- 
+
     print("(declare-datatypes () ((Sort ");
     for (Sort s : sorts) {
       println("|Sort" + s.name() + "| ");
