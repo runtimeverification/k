@@ -34,9 +34,9 @@ public class KompileFrontEnd extends FrontEnd {
     private final KompileOptions options;
     private final Provider<Backend> koreBackend;
     private final Stopwatch sw;
-    private final KExceptionManager kem;
     private final BinaryLoader loader;
     private final Provider<FileUtil> files;
+    private final Provider<Kompile> kompile;
 
     @Inject
     KompileFrontEnd(
@@ -48,14 +48,15 @@ public class KompileFrontEnd extends FrontEnd {
             KExceptionManager kem,
             BinaryLoader loader,
             JarInfo jarInfo,
-            Provider<FileUtil> files) {
+            Provider<FileUtil> files,
+            Provider<Kompile> kompile) {
         super(kem, options.global, usage, experimentalUsage, jarInfo, files);
         this.options = options;
         this.koreBackend = koreBackend;
         this.sw = sw;
-        this.kem = kem;
         this.loader = loader;
         this.files = files;
+        this.kompile = kompile;
     }
 
     @Override
@@ -65,9 +66,8 @@ public class KompileFrontEnd extends FrontEnd {
                     options.outerParsing.mainDefinitionFile(files.get()).getAbsolutePath());
         }
 
-        Kompile kompile = new Kompile(options, files.get(), kem, sw, !options.profileRules);
         Backend backend = koreBackend.get();
-        CompiledDefinition def = kompile.run(options.outerParsing.mainDefinitionFile(files.get()), options.mainModule(files.get()), options.syntaxModule(files.get()), backend.steps(), backend.excludedModuleTags());
+        CompiledDefinition def = kompile.get().run(options.outerParsing.mainDefinitionFile(files.get()), options.mainModule(files.get()), options.syntaxModule(files.get()), backend.steps(), backend.excludedModuleTags());
         sw.printIntermediate("Kompile to kore");
         loader.saveOrDie(files.get().resolveKompiled("compiled.bin"), def);
         sw.printIntermediate("Save to disk");

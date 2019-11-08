@@ -5,10 +5,12 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provider;
 import com.google.inject.Provides;
 import org.kframework.kompile.CompiledDefinition;
+import org.kframework.kompile.KompileModule;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.file.CacheFile;
 import org.kframework.utils.file.DefinitionDir;
 import org.kframework.utils.file.Environment;
 import org.kframework.utils.file.FileUtil;
@@ -31,6 +33,10 @@ public class DefinitionLoadingModule extends AbstractModule {
         return loader.loadOrDie(CompiledDefinition.class, files.resolveKompiled("compiled.bin"));
     }
 
+    @Provides @DefinitionScoped @CacheFile
+    File cacheFile(KompileOptions kompileOptions, FileUtil files) {
+        return KompileModule.getCacheFileImpl(kompileOptions, files);
+    }
 
     @Provides @RequestScoped
     KompileOptions kompileOptions(Provider<CompiledDefinition> compiledDef) {

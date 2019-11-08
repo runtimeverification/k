@@ -56,10 +56,12 @@ import org.kframework.unparser.ToJson;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.file.CacheFile;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
 import scala.Function1;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.util.Collections;
@@ -96,20 +98,13 @@ public class Kompile {
     private final DefinitionParsing definitionParsing;
     java.util.Set<KEMException> errors;
 
-    public Kompile(KompileOptions kompileOptions, FileUtil files, KExceptionManager kem, boolean cacheParses) {
-        this(kompileOptions, files, kem, new Stopwatch(kompileOptions.global), cacheParses);
-    }
-
     public Kompile(KompileOptions kompileOptions, FileUtil files, KExceptionManager kem) {
-        this(kompileOptions, files, kem, true);
+        this(kompileOptions, files, kem, new Stopwatch(kompileOptions.global), null);
     }
 
     @Inject
-    public Kompile(KompileOptions kompileOptions, FileUtil files, KExceptionManager kem, Stopwatch sw) {
-        this(kompileOptions, files, kem, sw, true);
-    }
-
-    public Kompile(KompileOptions kompileOptions, FileUtil files, KExceptionManager kem, Stopwatch sw, boolean cacheParses) {
+    public Kompile(KompileOptions kompileOptions, FileUtil files, KExceptionManager kem, Stopwatch sw,
+                   @Nullable @CacheFile File cacheFile) {
         this.kompileOptions = kompileOptions;
         this.files = files;
         this.kem = kem;
@@ -118,10 +113,6 @@ public class Kompile {
         List<File> lookupDirectories = kompileOptions.outerParsing.includes.stream().map(files::resolveWorkingDirectory).collect(Collectors.toList());
         // these directories should be relative to the current working directory if we refer to them later after the WD has changed.
         kompileOptions.outerParsing.includes = lookupDirectories.stream().map(File::getAbsolutePath).collect(Collectors.toList());
-        File cacheFile = cacheParses ? kompileOptions.experimental.cacheFile != null
-                                       ? files.resolveWorkingDirectory(kompileOptions.experimental.cacheFile)
-                                       : files.resolveKompiled("cache.bin")
-                                     : null;
         this.definitionParsing = new DefinitionParsing(
                 lookupDirectories, kompileOptions, kem, files,
                 parser, cacheFile);

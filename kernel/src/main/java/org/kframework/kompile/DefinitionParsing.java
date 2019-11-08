@@ -76,6 +76,7 @@ public class DefinitionParsing {
     private final boolean isStrict;
     private final boolean profileRules;
     private final List<File> lookupDirectories;
+    private final Map<String, ParseCache> caches;
 
     public DefinitionParsing(
             List<File> lookupDirectories,
@@ -95,6 +96,7 @@ public class DefinitionParsing {
         this.loader = new BinaryLoader(this.kem);
         this.isStrict = options.strict();
         this.profileRules = options.profileRules;
+        this.caches = loadCaches(cacheFile, loader);
     }
 
     public java.util.Set<Module> parseModules(CompiledDefinition definition, String mainModule, File definitionFile, java.util.Set<String> excludeModules) {
@@ -111,7 +113,6 @@ public class DefinitionParsing {
         def = Kompile.excludeModulesByTag(excludeModules).apply(def);
 
         errors = java.util.Collections.synchronizedSet(Sets.newHashSet());
-        caches = loadCaches();
 
         ResolveConfig resolveConfig = new ResolveConfig(definition.getParsedDefinition(), isStrict, kore, this::parseBubble, this::getParser);
         gen = new RuleGrammarGenerator(definition.getParsedDefinition());
@@ -129,7 +130,7 @@ public class DefinitionParsing {
         return mutable(def.entryModules());
     }
 
-    public Map<String, ParseCache> loadCaches() {
+    public static Map<String, ParseCache> loadCaches(File cacheFile, BinaryLoader loader) {
         Map<String, ParseCache> result;
         //noinspection unchecked
         result = cacheFile != null ? loader.loadCache(Map.class, cacheFile) : null;
@@ -217,7 +218,6 @@ public class DefinitionParsing {
         }
 
         errors = java.util.Collections.synchronizedSet(Sets.newHashSet());
-        caches = loadCaches();
 
         ResolveConfig resolveConfig = new ResolveConfig(definitionWithConfigBubble, isStrict, kore, this::parseBubble, this::getParser);
         gen = new RuleGrammarGenerator(definitionWithConfigBubble);
@@ -235,7 +235,6 @@ public class DefinitionParsing {
         return result;
     }
 
-    Map<String, ParseCache> caches;
     private java.util.Set<KEMException> errors;
     RuleGrammarGenerator gen;
 
