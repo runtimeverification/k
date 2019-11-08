@@ -45,6 +45,7 @@ pipeline {
       steps {
         build job: 'rv-devops/master', parameters: [string(name: 'PR_REVIEWER', value: 'ehildenb'), booleanParam(name: 'UPDATE_DEPS_KWASM' , value: true)], propagate: false, wait: false
         build job: 'rv-devops/master', parameters: [string(name: 'PR_REVIEWER', value: 'malturki'), booleanParam(name: 'UPDATE_DEPS_BEACON', value: true)], propagate: false, wait: false
+        build job: 'rv-devops/master', parameters: [string(name: 'PR_REVIEWER', value: 'ehildenb'), booleanParam(name: 'UPDATE_DEPS_MCD'   , value: true)], propagate: false, wait: false
       }
     }
     stage('Build and Package K') {
