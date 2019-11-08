@@ -229,7 +229,7 @@ public class TypeInferencer implements AutoCloseable {
     level++;
     println("(push)");
     ExpectedSortsVisitor viz = new ExpectedSortsVisitor(topSort, isAnywhere, false);
-    viz.apply(t);
+    String id = viz.apply(t);
     if (variables.isEmpty()) {
         return;
     }
@@ -240,10 +240,7 @@ public class TypeInferencer implements AutoCloseable {
     assertNotKLabel();
     println("))");
     println(viz.toString());
-    if (t instanceof Ambiguity) {
-      println("(assert amb0)");
-    } else {
-      println("(assert |constraint0_" + printSort(topSort, Optional.empty(), false).replace("|", "") + "|)");
+    println("(assert " + id + ")");
     }
   }
 
