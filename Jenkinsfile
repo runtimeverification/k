@@ -70,20 +70,20 @@ pipeline {
                         }
                       }
                     }
-                    //stage('Build and Test K') {
-                    //  steps {
-                    //    sh '''
-                    //      echo 'Setting up environment...'
-                    //      eval `opam config env`
-                    //      echo 'Building K...'
-                    //      mvn --batch-mode verify -U
-                    //      echo 'Starting kserver...'
-                    //      k-distribution/target/release/k/bin/spawn-kserver kserver.log
-                    //      cd k-exercises/tutorial
-                    //      make -j`nproc`
-                    //    '''
-                    //  }
-                    //}
+                    stage('Build and Test K') {
+                      steps {
+                        sh '''
+                          echo 'Setting up environment...'
+                          eval `opam config env`
+                          echo 'Building K...'
+                          mvn --batch-mode verify -U
+                          echo 'Starting kserver...'
+                          k-distribution/target/release/k/bin/spawn-kserver kserver.log
+                          cd k-exercises/tutorial
+                          make -j`nproc`
+                        '''
+                      }
+                    }
                     stage('Build Debian Package') {
                       steps {
                         dir('kframework-5.0.0') {
@@ -97,44 +97,44 @@ pipeline {
                       }
                     }
                   }
-                  //post {
-                  //  always {
-                  //    sh 'k-distribution/target/release/k/bin/stop-kserver || true'
-                  //    archiveArtifacts 'kserver.log,k-distribution/target/kserver.log'
-                  //  }
-                  //}
+                  post {
+                    always {
+                      sh 'k-distribution/target/release/k/bin/stop-kserver || true'
+                      archiveArtifacts 'kserver.log,k-distribution/target/kserver.log'
+                    }
+                  }
                 }
-                //stage('Test Debian Package') {
-                //  agent {
-                //    docker {
-                //      image 'ubuntu:bionic'
-                //      args '-u 0'
-                //      reuseNode true
-                //    }
-                //  }
-                //  options { skipDefaultCheckout() }
-                //  steps {
-                //    unstash "bionic"
-                //    sh 'src/main/scripts/test-in-container-debian'
-                //  }
-                //  post {
-                //    always {
-                //      sh 'stop-kserver || true'
-                //      archiveArtifacts 'kserver.log,k-distribution/target/kserver.log'
-                //    }
-                //  }
-                //}
+                stage('Test Debian Package') {
+                  agent {
+                    docker {
+                      image 'ubuntu:bionic'
+                      args '-u 0'
+                      reuseNode true
+                    }
+                  }
+                  options { skipDefaultCheckout() }
+                  steps {
+                    unstash "bionic"
+                    sh 'src/main/scripts/test-in-container-debian'
+                  }
+                  post {
+                    always {
+                      sh 'stop-kserver || true'
+                      archiveArtifacts 'kserver.log,k-distribution/target/kserver.log'
+                    }
+                  }
+                }
               }
             }
             stage('Build and Package on Debian Buster') {
-              //when {
-              //  anyOf {
-              //    branch 'master'
-              //    changelog '.*^\\[build-system\\] .+$'
-              //    changeset 'Jenkinsfile'
-              //    changeset 'Dockerfile'
-              //  }
-              //}
+              when {
+                anyOf {
+                  branch 'master'
+                  changelog '.*^\\[build-system\\] .+$'
+                  changeset 'Jenkinsfile'
+                  changeset 'Dockerfile'
+                }
+              }
               stages {
                 stage('Build on Debian Buster') {
                   agent {
@@ -159,28 +159,28 @@ pipeline {
                     }
                   }
                 }
-                //stage('Test Debian Package') {
-                //  agent {
-                //    docker {
-                //      image 'debian:buster'
-                //      args '-u 0'
-                //      reuseNode true
-                //    }
-                //  }
-                //  options { skipDefaultCheckout() }
-                //  steps {
-                //    unstash "buster"
-                //    sh '''
-                //      src/main/scripts/test-in-container-debian
-                //    '''
-                //  }
-                //  post {
-                //    always {
-                //      sh 'stop-kserver || true'
-                //      archiveArtifacts 'kserver.log,k-distribution/target/kserver.log'
-                //    }
-                //  }
-                //}
+                stage('Test Debian Package') {
+                  agent {
+                    docker {
+                      image 'debian:buster'
+                      args '-u 0'
+                      reuseNode true
+                    }
+                  }
+                  options { skipDefaultCheckout() }
+                  steps {
+                    unstash "buster"
+                    sh '''
+                      src/main/scripts/test-in-container-debian
+                    '''
+                  }
+                  post {
+                    always {
+                      sh 'stop-kserver || true'
+                      archiveArtifacts 'kserver.log,k-distribution/target/kserver.log'
+                    }
+                  }
+                }
               }
               post {
                 failure {
@@ -256,14 +256,14 @@ pipeline {
           }
         }
         stage('Build and Package on Mac OS') {
-          //when {
-          //  anyOf {
-          //    branch 'master'
-          //    changelog '.*^\\[build-system\\] .+$'
-          //    changeset 'Jenkinsfile'
-          //    changeset 'Dockerfile'
-          //  }
-          //}
+          when {
+            anyOf {
+              branch 'master'
+              changelog '.*^\\[build-system\\] .+$'
+              changeset 'Jenkinsfile'
+              changeset 'Dockerfile'
+            }
+          }
           stages {
             stage('Build on Mac OS') {
               stages {
@@ -284,51 +284,51 @@ pipeline {
                     }
                   }
                 }
-                //stage("Test Homebrew Bottle") {
-                //  agent {
-                //    label 'anka'
-                //  }
-                //  steps {
-                //    dir('homebrew-k') {
-                //      git url: 'git@github.com:kframework/homebrew-k.git', branch: 'brew-release-kframework'
-                //      unstash "mojave"
-                //      sh '''
-                //        ${WORKSPACE}/src/main/scripts/brew-install-bottle
-                //      '''
-                //    }
-                //    sh '''
-                //      cp -R /usr/local/lib/kframework/tutorial ~
-                //      WD=`pwd`
-                //      cd
-                //      echo 'Starting kserver...'
-                //      /usr/local/lib/kframework/bin/spawn-kserver $WD/kserver.log
-                //      cd tutorial
-                //      echo 'Testing tutorial in user environment...'
-                //      make -j`sysctl -n hw.ncpu`
-                //      cd ~
-                //      echo "module TEST imports BOOL endmodule" > test.k
-                //      kompile test.k --backend llvm
-                //      kompile test.k --backend haskell
-                //    '''
-                //    dir('homebrew-k') {
-                //      sh '''
-                //        ${WORKSPACE}/src/main/scripts/brew-update-to-final
-                //      '''
-                //    }
-                //  }
-                //  post {
-                //    always {
-                //      sh 'stop-kserver || true'
-                //      archiveArtifacts 'kserver.log,k-distribution/target/kserver.log'
-                //    }
-                //  }
-                //}
+                stage("Test Homebrew Bottle") {
+                  agent {
+                    label 'anka'
+                  }
+                  steps {
+                    dir('homebrew-k') {
+                      git url: 'git@github.com:kframework/homebrew-k.git', branch: 'brew-release-kframework'
+                      unstash "mojave"
+                      sh '''
+                        ${WORKSPACE}/src/main/scripts/brew-install-bottle
+                      '''
+                    }
+                    sh '''
+                      cp -R /usr/local/lib/kframework/tutorial ~
+                      WD=`pwd`
+                      cd
+                      echo 'Starting kserver...'
+                      /usr/local/lib/kframework/bin/spawn-kserver $WD/kserver.log
+                      cd tutorial
+                      echo 'Testing tutorial in user environment...'
+                      make -j`sysctl -n hw.ncpu`
+                      cd ~
+                      echo "module TEST imports BOOL endmodule" > test.k
+                      kompile test.k --backend llvm
+                      kompile test.k --backend haskell
+                    '''
+                    dir('homebrew-k') {
+                      sh '''
+                        ${WORKSPACE}/src/main/scripts/brew-update-to-final
+                      '''
+                    }
+                  }
+                  post {
+                    always {
+                      sh 'stop-kserver || true'
+                      archiveArtifacts 'kserver.log,k-distribution/target/kserver.log'
+                    }
+                  }
+                }
               }
-              //post {
-              //  always {
-              //    archiveArtifacts artifacts: 'kserver.log,k-distribution/target/kserver.log', allowEmptyArchive: true
-              //  }
-              //}
+              post {
+                always {
+                  archiveArtifacts artifacts: 'kserver.log,k-distribution/target/kserver.log', allowEmptyArchive: true
+                }
+              }
             }
           }
           post {
@@ -349,10 +349,10 @@ pipeline {
           reuseNode true
         }
       }
-      //when {
-      //  branch 'master'
-      //  beforeAgent true
-      //}
+      when {
+        branch 'master'
+        beforeAgent true
+      }
       environment {
         AWS_ACCESS_KEY_ID     = credentials('aws-access-key-id')
         AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')
