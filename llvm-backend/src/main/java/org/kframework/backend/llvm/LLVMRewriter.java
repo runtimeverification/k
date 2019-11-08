@@ -20,6 +20,7 @@ import org.kframework.parser.kore.parser.ParseError;
 import org.kframework.RewriterResult;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.rewriter.SearchType;
+import org.kframework.utils.OS;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.DefinitionScoped;
@@ -85,8 +86,13 @@ public class LLVMRewriter implements Function<Definition, Rewriter> {
                 File koreOutputFile = files.resolveTemp("result.kore");
                 List<String> args = new ArrayList<String>();
                 if (krunOptions.experimental.debugger) {
-                  args.add("gdb");
-                  args.add("--args");
+                  if (OS.current() == OS.OSX) {
+                    args.add("lldb");
+                    args.add("--");
+                  } else {
+                    args.add("gdb");
+                    args.add("--args");
+                  }
                 }
                 args.add(files.resolveKompiled("interpreter").getAbsolutePath());
                 args.add(pgmPath);
