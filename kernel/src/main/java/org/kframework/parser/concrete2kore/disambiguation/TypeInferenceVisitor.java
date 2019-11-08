@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -128,12 +129,12 @@ public class TypeInferenceVisitor extends SetsTransformerWithErrors<ParseFailedE
     List<Map<String, Sort>> maximals = new ArrayList<>();
     outer:
     for (Map<String, Sort> candidate : models) {
-      for (Map<String, Sort> maximal : maximals) {
+      for (Iterator<Map<String, Sort>> it = maximals.iterator(); it.hasNext();) {
+        Map<String, Sort> maximal = it.next();
         if (lessThanEq(candidate, maximal)) {
           continue outer;
         } else if (lessThanEq(maximal, candidate)) {
-          maximal.clear();
-          maximal.putAll(candidate);
+          it.remove();
         }
       }
       maximals.add(new HashMap<>(candidate));
