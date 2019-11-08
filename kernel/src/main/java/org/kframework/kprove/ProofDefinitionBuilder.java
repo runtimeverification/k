@@ -7,9 +7,7 @@ import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.Kompile;
-import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;
-import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import scala.Option;
 import scala.Tuple2;
@@ -38,25 +36,23 @@ public class ProofDefinitionBuilder {
 
     private final CompiledDefinition compiledDefinition;
     private final Backend backend;
+    private final Kompile kompile;
     private final FileUtil files;
-    private final KExceptionManager kem;
-    private final Stopwatch sw;
 
     @Inject
-    public ProofDefinitionBuilder(CompiledDefinition compiledDefinition, Backend backend,
-                                  FileUtil files, KExceptionManager kem, Stopwatch sw) {
+    public ProofDefinitionBuilder(CompiledDefinition compiledDefinition, Backend backend, Kompile kompile,
+                                  FileUtil files) {
         this.compiledDefinition = compiledDefinition;
         this.backend = backend;
+        this.kompile = kompile;
         this.files = files;
-        this.kem = kem;
-        this.sw = sw;
     }
 
     /**
-     * @param specFile           File containing specification rules to prove. Not part of definition.
-     * @param defModuleName      Name of main module of extended definition - that is compiled definition + extra
-     *                           modules required by proofs, usually abstractions for symbolic execution and lemmas.
-     * @param specModuleName     Module containing specifications to prove
+     * @param specFile       File containing specification rules to prove. Not part of definition.
+     * @param defModuleName  Name of main module of extended definition - that is compiled definition + extra
+     *                       modules required by proofs, usually abstractions for symbolic execution and lemmas.
+     * @param specModuleName Module containing specifications to prove
      */
     public Tuple2<Definition, Module> build(File specFile, String defModuleName, String specModuleName) {
         String defModuleNameUpdated =
@@ -65,7 +61,6 @@ public class ProofDefinitionBuilder {
                 specModuleName == null ? FilenameUtils.getBaseName(specFile.getName()).toUpperCase() : specModuleName;
         File absSpecFile = files.resolveWorkingDirectory(specFile).getAbsoluteFile();
 
-        Kompile kompile = new Kompile(compiledDefinition.kompileOptions, files, kem, sw, true);
         Set<Module> modules = kompile.parseModules(compiledDefinition, defModuleNameUpdated, absSpecFile,
                 backend.excludedModuleTags());
         Map<String, Module> modulesMap = modules.stream().collect(Collectors.toMap(Module::name, m -> m));
