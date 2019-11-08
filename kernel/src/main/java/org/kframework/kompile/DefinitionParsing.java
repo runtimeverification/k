@@ -38,6 +38,7 @@ import scala.Tuple2;
 import scala.collection.Set;
 import scala.util.Either;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -68,7 +69,6 @@ public class DefinitionParsing {
     private final KExceptionManager kem;
     private final FileUtil files;
     private final ParserUtils parser;
-    private final boolean cacheParses;
     private final BinaryLoader loader;
 
     public final AtomicInteger parsedBubbles = new AtomicInteger(0);
@@ -83,14 +83,12 @@ public class DefinitionParsing {
             KExceptionManager kem,
             FileUtil files,
             ParserUtils parser,
-            boolean cacheParses,
-            File cacheFile) {
+            @Nullable File cacheFile) {
         this.lookupDirectories = lookupDirectories;
         this.options = options;
         this.kem = kem;
         this.files = files;
         this.parser = parser;
-        this.cacheParses = cacheParses;
         this.cacheFile = cacheFile;
         this.autoImportDomains = !options.outerParsing.noPrelude;
         this.kore = options.isKore();
@@ -134,7 +132,7 @@ public class DefinitionParsing {
     public Map<String, ParseCache> loadCaches() {
         Map<String, ParseCache> result;
         //noinspection unchecked
-        result = cacheParses ? loader.loadCache(Map.class, cacheFile) : null;
+        result = cacheFile != null ? loader.loadCache(Map.class, cacheFile) : null;
         if (result == null) {
             result = new HashMap<>();
         }
@@ -147,7 +145,7 @@ public class DefinitionParsing {
     }
 
     private void saveCaches() {
-        if (cacheParses) {
+        if (cacheFile != null) {
             loader.saveOrDie(cacheFile, caches);
         }
     }
