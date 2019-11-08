@@ -134,24 +134,6 @@ public class TypeInferencer implements AutoCloseable {
       print(")");
     }
     println(")");
-    println("(define-fun ordinal ((s Sort)) Int");
-    int i = 0;
-    parens = 0;
-    for (Sort s : iterable(TopologicalSort.tsort(mod.subsorts().directRelations()))) {
-      if (!isRealSort(s)) {
-        continue;
-      }
-      print("  (ite (= s ");
-      printSort(s);
-      println(") " + (i++));
-      parens++;
-    }
-    println("  -1");
-    print("  ");
-    for (i = 0; i < parens; i++) {
-      print(")");
-    }
-    println(")");
   }
 
   private final List<String> variables = new ArrayList<>();
@@ -262,9 +244,6 @@ public class TypeInferencer implements AutoCloseable {
       println("(assert amb0)");
     } else {
       println("(assert |constraint0_" + printSort(topSort, Optional.empty(), false).replace("|", "") + "|)");
-    }
-    for (String var : variables) {
-      println("(maximize (ordinal |" + var + "|))");
     }
   }
 
@@ -662,7 +641,9 @@ public class TypeInferencer implements AutoCloseable {
 
   public void pushNotModel() {
     print("(assert (not (and true");
-    for (String var : variables) {
+    java.util.Set<String> realVariables = new HashSet<>(variables);
+    realVariables.removeAll(parameters);
+    for (String var : realVariables) {
       print("(<=Sort   |" + var + "| ");
       printSort(model.get(var));
       print(") ");
