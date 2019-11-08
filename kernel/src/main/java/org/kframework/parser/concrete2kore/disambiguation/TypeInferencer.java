@@ -226,7 +226,7 @@ public class TypeInferencer implements AutoCloseable {
     currentTerm = t;
     currentTopSort = topSort;
     this.isAnywhere = isAnywhere;
-    level++;
+    level+=2;
     println("(push)");
     ExpectedSortsVisitor viz = new ExpectedSortsVisitor(topSort, isAnywhere, false);
     String id = viz.apply(t);
@@ -241,6 +241,11 @@ public class TypeInferencer implements AutoCloseable {
     println("))");
     println(viz.toString());
     println("(assert " + id + ")");
+    println("(push)");
+    if (mod.definedSorts().contains(Sorts.K()))
+    for (String var : variables) {
+      println("(assert-soft (<=Sort SortKItem |" + var + "|))");
+      println("(assert-soft (<=Sort SortBag |" + var + "|))");
     }
   }
 

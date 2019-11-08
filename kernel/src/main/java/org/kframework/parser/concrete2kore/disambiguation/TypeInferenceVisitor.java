@@ -64,17 +64,25 @@ public class TypeInferenceVisitor extends SetsTransformerWithErrors<ParseFailedE
       }
       switch(inferencer.status()) {
       case SATISFIABLE:
+        inferencer.computeModel();
+        inferencer.pop();
         break;
       case UNKNOWN:
+        inferencer.pop();
         throw KEMException.internalError("Could not solve sort constraints.", t);
       case UNSATISFIABLE:
+        inferencer.pop();
         Set<ParseFailedException> kex = inferencer.error();
         return Left.apply(kex);
       }
       boolean hasAnotherSolution = true;
       Set<Map<String, Sort>> models = new HashSet<>();
+      boolean once = true;
       do {
-        inferencer.computeModel();
+        if (!once) {
+          inferencer.computeModel();
+        }
+        once = false;
         models.add(inferencer.getModel());
         inferencer.pushNotModel();
         switch(inferencer.status()) {
