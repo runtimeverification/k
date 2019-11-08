@@ -7,7 +7,28 @@ import org.kframework.attributes.Att;
 import org.kframework.attributes.Source;
 import org.kframework.backend.Backends;
 import org.kframework.builtin.Sorts;
-import org.kframework.compile.*;
+import org.kframework.compile.AddImplicitComputationCell;
+import org.kframework.compile.ConcretizeCells;
+import org.kframework.compile.ConfigurationInfoFromModule;
+import org.kframework.compile.ExpandMacros;
+import org.kframework.compile.GenerateCoverage;
+import org.kframework.compile.GenerateSortPredicateSyntax;
+import org.kframework.compile.GenerateSortProjections;
+import org.kframework.compile.GeneratedTopFormat;
+import org.kframework.compile.GuardOrPatterns;
+import org.kframework.compile.LabelInfo;
+import org.kframework.compile.LabelInfoFromModule;
+import org.kframework.compile.NumberSentences;
+import org.kframework.compile.ResolveAnonVar;
+import org.kframework.compile.ResolveContexts;
+import org.kframework.compile.ResolveFreshConstants;
+import org.kframework.compile.ResolveFun;
+import org.kframework.compile.ResolveFunctionWithConfig;
+import org.kframework.compile.ResolveHeatCoolAttribute;
+import org.kframework.compile.ResolveIOStreams;
+import org.kframework.compile.ResolveSemanticCasts;
+import org.kframework.compile.ResolveStrict;
+import org.kframework.compile.SortInfo;
 import org.kframework.compile.checks.CheckConfigurationCells;
 import org.kframework.compile.checks.CheckFunctions;
 import org.kframework.compile.checks.CheckHOLE;
@@ -18,7 +39,9 @@ import org.kframework.compile.checks.CheckRHSVariables;
 import org.kframework.compile.checks.CheckRewrite;
 import org.kframework.compile.checks.CheckSortTopUniqueness;
 import org.kframework.compile.checks.CheckStreams;
-import org.kframework.definition.*;
+import org.kframework.definition.Constructors;
+import org.kframework.definition.Definition;
+import org.kframework.definition.DefinitionTransformer;
 import org.kframework.definition.Module;
 import org.kframework.definition.Production;
 import org.kframework.definition.Rule;
@@ -55,9 +78,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.kframework.Collections.*;
+import static org.kframework.compile.ResolveHeatCoolAttribute.Mode.*;
+import static org.kframework.definition.Constructors.Module;
 import static org.kframework.definition.Constructors.*;
 import static org.kframework.kore.KORE.*;
-import static org.kframework.compile.ResolveHeatCoolAttribute.Mode.*;
 
 /**
  * The new compilation pipeline. Everything is just wired together and will need clean-up once we deside on design.
@@ -97,11 +121,13 @@ public class Kompile {
         List<File> lookupDirectories = kompileOptions.outerParsing.includes.stream().map(files::resolveWorkingDirectory).collect(Collectors.toList());
         // these directories should be relative to the current working directory if we refer to them later after the WD has changed.
         kompileOptions.outerParsing.includes = lookupDirectories.stream().map(File::getAbsolutePath).collect(Collectors.toList());
-        File cacheFile = kompileOptions.experimental.cacheFile != null
-                ? files.resolveWorkingDirectory(kompileOptions.experimental.cacheFile) : files.resolveKompiled("cache.bin");
+        File cacheFile = cacheParses ? kompileOptions.experimental.cacheFile != null
+                                       ? files.resolveWorkingDirectory(kompileOptions.experimental.cacheFile)
+                                       : files.resolveKompiled("cache.bin")
+                                     : null;
         this.definitionParsing = new DefinitionParsing(
                 lookupDirectories, kompileOptions, kem, files,
-                parser, cacheParses, cacheFile);
+                parser, cacheFile);
         this.sw = sw;
 
         if (kompileOptions.backend.equals("ocaml")) {
