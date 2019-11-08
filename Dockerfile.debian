@@ -2,9 +2,34 @@ ARG BASE_IMAGE=ubuntu:bionic
 FROM ${BASE_IMAGE}
 ARG BASE_IMAGE
 
-RUN apt-get update && \
-    apt-get install -y git debhelper maven openjdk-11-jdk cmake libboost-test-dev libyaml-dev libjemalloc-dev flex `if [ "$BASE_IMAGE" = "debian:buster" ]; then echo clang-7 llvm-7-tools lld-7; else echo clang-8 llvm-8-tools lld-8; fi` zlib1g-dev libgmp-dev libmpfr-dev gcc z3 libz3-dev opam pkg-config curl python3
-RUN curl -sSL https://get.haskellstack.org/ | sh      
+ARG LLVM_VERSION=8
+
+RUN    apt-get update            \
+    && apt-get install --yes     \
+        clang-$LLVM_VERSION      \
+        cmake                    \
+        curl                     \
+        debhelper                \
+        flex                     \
+        gcc                      \
+        git                      \
+        libboost-test-dev        \
+        libgmp-dev               \
+        libjemalloc-dev          \
+        libmpfr-dev              \
+        libyaml-dev              \
+        libz3-dev                \
+        lld-$LLVM_VERSION        \
+        llvm-$LLVM_VERSION-tools \
+        maven                    \
+        opam                     \
+        openjdk-11-jdk           \
+        pkg-config               \
+        python3                  \
+        z3                       \
+        zlib1g-dev
+
+RUN curl -sSL https://get.haskellstack.org/ | sh
 
 ARG USER_ID=1000
 ARG GROUP_ID=1000
@@ -35,4 +60,4 @@ ADD java-backend/pom.xml /home/user/.tmp-maven/java-backend/
 ADD k-distribution/pom.xml /home/user/.tmp-maven/k-distribution/
 ADD kore/pom.xml /home/user/.tmp-maven/kore/
 RUN    cd /home/user/.tmp-maven \
-    && mvn --batch-mode dependency:go-offline 
+    && mvn --batch-mode dependency:go-offline
