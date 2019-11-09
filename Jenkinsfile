@@ -9,6 +9,7 @@ pipeline {
     PACKAGE = 'kframework'
     VERSION = '5.0.0'
     ROOT_URL = 'https://github.com/kframework/k/releases/download/nightly'
+    KRUN_FLAGS = '--debug'
   }
   stages {
     stage("Init title") {
@@ -114,7 +115,7 @@ pipeline {
                           echo 'Starting kserver...'
                           k-distribution/target/release/k/bin/spawn-kserver kserver.log
                           cd k-exercises/tutorial
-                          make -j`nproc`
+                          make -j16
                         '''
                       }
                     }
