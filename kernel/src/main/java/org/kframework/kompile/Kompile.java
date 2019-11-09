@@ -51,6 +51,7 @@ import org.kframework.kore.KLabel;
 import org.kframework.kore.Sort;
 import org.kframework.parser.InputModes;
 import org.kframework.parser.KRead;
+import org.kframework.parser.concrete2kore.ParseCache;
 import org.kframework.parser.concrete2kore.ParserUtils;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.unparser.ToJson;
@@ -58,19 +59,19 @@ import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
-import org.kframework.utils.file.CacheFile;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
 import scala.Function1;
 import scala.Option;
 
-import javax.annotation.Nullable;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -102,12 +103,12 @@ public class Kompile {
     java.util.Set<KEMException> errors;
 
     public Kompile(KompileOptions kompileOptions, FileUtil files, KExceptionManager kem) {
-        this(kompileOptions, files, kem, new Stopwatch(kompileOptions.global), null);
+        this(kompileOptions, files, kem, new Stopwatch(kompileOptions.global), new HashMap<>());
     }
 
     @Inject
     public Kompile(KompileOptions kompileOptions, FileUtil files, KExceptionManager kem, Stopwatch sw,
-                   @Nullable @CacheFile File cacheFile) {
+                   Map<String, ParseCache> caches) {
         this.kompileOptions = kompileOptions;
         this.files = files;
         this.kem = kem;
@@ -118,7 +119,7 @@ public class Kompile {
         kompileOptions.outerParsing.includes = lookupDirectories.stream().map(File::getAbsolutePath).collect(Collectors.toList());
         this.definitionParsing = new DefinitionParsing(
                 lookupDirectories, kompileOptions, kem, files,
-                parser, cacheFile);
+                parser, caches);
         this.sw = sw;
 
         if (kompileOptions.backend.equals("ocaml")) {

@@ -28,7 +28,6 @@ import org.kframework.parser.concrete2kore.ParserUtils;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.parser.concrete2kore.kernel.Scanner;
 import org.kframework.parser.outer.Outer;
-import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -38,7 +37,6 @@ import scala.Tuple2;
 import scala.collection.Set;
 import scala.util.Either;
 
-import javax.annotation.Nullable;
 import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -61,7 +59,6 @@ import static org.kframework.kore.KORE.*;
  */
 public class DefinitionParsing {
     public static final Sort START_SYMBOL = Sorts.RuleContent();
-    private final File cacheFile;
     private boolean autoImportDomains;
     private boolean kore;
     private final KompileOptions options;
@@ -69,7 +66,6 @@ public class DefinitionParsing {
     private final KExceptionManager kem;
     private final FileUtil files;
     private final ParserUtils parser;
-    private final BinaryLoader loader;
 
     public final AtomicInteger parsedBubbles = new AtomicInteger(0);
     public final AtomicInteger cachedBubbles = new AtomicInteger(0);
@@ -84,19 +80,17 @@ public class DefinitionParsing {
             KExceptionManager kem,
             FileUtil files,
             ParserUtils parser,
-            @Nullable File cacheFile) {
+            Map<String, ParseCache> caches) {
         this.lookupDirectories = lookupDirectories;
         this.options = options;
         this.kem = kem;
         this.files = files;
         this.parser = parser;
-        this.cacheFile = cacheFile;
         this.autoImportDomains = !options.outerParsing.noPrelude;
         this.kore = options.isKore();
-        this.loader = new BinaryLoader(this.kem);
         this.isStrict = options.strict();
         this.profileRules = options.profileRules;
-        this.caches = loadCaches(cacheFile, loader);
+        this.caches = caches;
     }
 
     public java.util.Set<Module> parseModules(CompiledDefinition definition, String mainModule, File definitionFile, java.util.Set<String> excludeModules) {
@@ -126,29 +120,8 @@ public class DefinitionParsing {
         }
 
         def = resolveNonConfigBubbles(def, gen);
-        saveCachesAndReportParsingErrors();
-        return mutable(def.entryModules());
-    }
-
-    public static Map<String, ParseCache> loadCaches(File cacheFile, BinaryLoader loader) {
-        Map<String, ParseCache> result;
-        //noinspection unchecked
-        result = cacheFile != null ? loader.loadCache(Map.class, cacheFile) : null;
-        if (result == null) {
-            result = new HashMap<>();
-        }
-        return result;
-    }
-
-    private void saveCachesAndReportParsingErrors() {
-        saveCaches();
         throwExceptionIfThereAreErrors();
-    }
-
-    private void saveCaches() {
-        if (cacheFile != null) {
-            loader.saveOrDie(cacheFile, caches);
-        }
+        return mutable(def.entryModules());
     }
 
     public Definition parseDefinitionAndResolveBubbles(File definitionFile, String mainModuleName, String mainProgramsModule, java.util.Set<String> excludedModuleTags) {
@@ -171,7 +144,7 @@ public class DefinitionParsing {
         Definition afterResolvingConfigBubbles = resolveConfigBubbles(trimmed, parsedDefinition.getModule("DEFAULT-CONFIGURATION").get());
         RuleGrammarGenerator gen = new RuleGrammarGenerator(afterResolvingConfigBubbles);
         Definition afterResolvingAllOtherBubbles = resolveNonConfigBubbles(afterResolvingConfigBubbles, gen);
-        saveCachesAndReportParsingErrors();
+        throwExceptionIfThereAreErrors();
         return afterResolvingAllOtherBubbles;
     }
 

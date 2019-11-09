@@ -24,15 +24,12 @@ public class KompileFrontEndTest extends IOTestCase {
     @Mock
     FileUtil files;
 
-    @Mock
-    Kompile kompile;
-
     KompileOptions options = new KompileOptions();
 
     @Test
     public void testHelp() throws IOException {
         options.global.help = true;
-        new KompileFrontEnd(options, "foo", "", Providers.of(koreBackend), sw, kem, loader, jarInfo, Providers.of(files), Providers.of(kompile)).main();
+        new KompileFrontEnd(options, "foo", "", Providers.of(koreBackend), sw, kem, loader, jarInfo, Providers.of(files), Providers.of(null)).main();
         assertEquals("foo", stdout.toString());
     }
 
@@ -40,14 +37,14 @@ public class KompileFrontEndTest extends IOTestCase {
     @Test
     public void testExperimentalHelp() throws IOException {
         options.global.helpExperimental = true;
-        new KompileFrontEnd(options, "", "foo", Providers.of(koreBackend), sw, kem, loader, jarInfo, Providers.of(files), Providers.of(kompile)).main();
+        new KompileFrontEnd(options, "", "foo", Providers.of(koreBackend), sw, kem, loader, jarInfo, Providers.of(files), Providers.of(null)).main();
         assertEquals("foo", stdout.toString());
     }
 
     @Test
     public void testVersion() {
         options.global.version = true;
-        new KompileFrontEnd(options, "", "foo", Providers.of(koreBackend), sw, kem, loader, jarInfo, Providers.of(files), Providers.of(kompile)).main();
+        new KompileFrontEnd(options, "", "foo", Providers.of(koreBackend), sw, kem, loader, jarInfo, Providers.of(files), Providers.of(null)).main();
         verify(jarInfo).printVersionMessage();
     }
 }

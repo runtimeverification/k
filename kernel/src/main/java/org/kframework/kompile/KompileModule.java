@@ -8,16 +8,11 @@ import com.google.inject.multibindings.Multibinder;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
 import org.kframework.main.Tool;
-import org.kframework.utils.file.CacheFile;
-import org.kframework.utils.file.FileUtil;
-import org.kframework.utils.inject.DefinitionScoped;
 import org.kframework.utils.inject.Options;
 import org.kframework.utils.inject.OuterParsingModule;
 import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.OuterParsingOptions;
 import org.kframework.utils.options.SMTOptions;
-
-import java.io.File;
 
 public class KompileModule extends AbstractModule {
 
@@ -51,15 +46,4 @@ public class KompileModule extends AbstractModule {
 
     @Provides
     OuterParsingOptions outerParsingOptions(KompileOptions options) { return options.outerParsing; }
-
-    @Provides @RequestScoped @CacheFile
-    File cacheFile(KompileOptions options, FileUtil files) {
-        return !options.profileRules ? KompileModule.getCacheFileImpl(options, files) : null;
-    }
-
-    public static File getCacheFileImpl(KompileOptions kompileOptions, FileUtil files) {
-        return kompileOptions.experimental.cacheFile != null
-               ? files.resolveWorkingDirectory(kompileOptions.experimental.cacheFile)
-               : files.resolveKompiled("cache.bin");
-    }
 }
