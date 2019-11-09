@@ -9,6 +9,7 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.Multibinder;
 import org.kframework.definition.Definition;
 import org.kframework.kompile.BackendModule;
+import org.kframework.kompile.DefinitionStorage;
 import org.kframework.kompile.Kompile;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kprove.ProofDefinitionBuilder;
@@ -44,6 +45,7 @@ public class KEqModule extends AbstractModule {
             install(new BackendModule());
 
             bind(FileUtil.class).in(Scopes.NO_SCOPE);
+            bind(DefinitionStorage.class).in(Scopes.NO_SCOPE);
             bind(ProofDefinitionBuilder.class).in(Scopes.NO_SCOPE);
             bind(Kompile.class).in(Scopes.NO_SCOPE);
             bind(FileSystem.class).to(PortableFileSystem.class);

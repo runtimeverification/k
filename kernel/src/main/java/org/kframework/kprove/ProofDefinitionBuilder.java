@@ -6,6 +6,8 @@ import org.kframework.compile.Backend;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.kompile.CompiledDefinition;
+import org.kframework.kompile.DefinitionAndCache;
+import org.kframework.kompile.DefinitionStorage;
 import org.kframework.kompile.Kompile;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
@@ -38,14 +40,19 @@ public class ProofDefinitionBuilder {
     private final Backend backend;
     private final Kompile kompile;
     private final FileUtil files;
+    private final DefinitionStorage definitionStorage;
+    private final DefinitionAndCache definitionAndCache;
 
     @Inject
-    public ProofDefinitionBuilder(CompiledDefinition compiledDefinition, Backend backend, Kompile kompile,
-                                  FileUtil files) {
-        this.compiledDefinition = compiledDefinition;
+    public ProofDefinitionBuilder(Backend backend, Kompile kompile,
+                                  FileUtil files, DefinitionStorage definitionStorage,
+                                  DefinitionAndCache definitionAndCache) {
+        this.compiledDefinition = definitionAndCache.compiledDefinition;
         this.backend = backend;
         this.kompile = kompile;
         this.files = files;
+        this.definitionStorage = definitionStorage;
+        this.definitionAndCache = definitionAndCache;
     }
 
     /**
@@ -63,6 +70,8 @@ public class ProofDefinitionBuilder {
 
         Set<Module> modules = kompile.parseModules(compiledDefinition, defModuleNameUpdated, absSpecFile,
                 backend.excludedModuleTags());
+        definitionStorage.save(definitionAndCache);
+
         Map<String, Module> modulesMap = modules.stream().collect(Collectors.toMap(Module::name, m -> m));
         Definition parsedDefinition = compiledDefinition.getParsedDefinition();
         Module defModule = getModule(defModuleNameUpdated, modulesMap, parsedDefinition);
