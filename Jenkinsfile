@@ -114,7 +114,7 @@ pipeline {
                           echo 'Starting kserver...'
                           k-distribution/target/release/k/bin/spawn-kserver kserver.log
                           cd k-exercises/tutorial
-                          make -j16
+                          make -j1
                         '''
                       }
                     }
@@ -338,7 +338,7 @@ pipeline {
                       /usr/local/lib/kframework/bin/spawn-kserver $WD/kserver.log
                       cd tutorial
                       echo 'Testing tutorial in user environment...'
-                      make -j`sysctl -n hw.ncpu`
+                      make -j1
                       cd ~
                       echo "module TEST imports BOOL endmodule" > test.k
                       kompile test.k --backend llvm
