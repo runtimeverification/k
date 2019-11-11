@@ -411,16 +411,16 @@ pipeline {
         }
         sshagent(['2b3d8d6b-0855-4b59-864a-6b3ddf9c9d1a']) {
           sh '''
-            echo 'Deploying K...'
             release_tag="v${VERSION}-$(git rev-parse --short HEAD)"
             mv bionic/kframework_${VERSION}_amd64.deb bionic/kframework_${VERSION}_amd64_bionic.deb
             mv buster/kframework_${VERSION}_amd64.deb buster/kframework_${VERSION}_amd64_buster.deb
-            hub release create                                                                          \
-                --attach kframework-${VERSION}-src.tar.gz"#Source tar.gz"                               \
-                --attach bionic/kframework_${VERSION}_amd64_bionic.deb"#Ubuntu Bionic (18.04) Package"  \
-                --attach buster/kframework_${VERSION}_amd64_buster.deb"#Debian Buster (10) Package"     \
-                --attach mojave/kframework--${VERSION}.mojave.bottle*.tar.gz"#Mac OS X Homebrew Bottle" \
-                --attach k-nightly.tar.gz"#Platform Indepdendent K Binary"                              \
+            LOCAL_BOTTLE_NAME=$(echo mojave/kframework--${VERSION}.mojave.bottle*.tar.gz)
+            hub release create                                                                         \
+                --attach kframework-${VERSION}-src.tar.gz"#Source tar.gz"                              \
+                --attach bionic/kframework_${VERSION}_amd64_bionic.deb"#Ubuntu Bionic (18.04) Package" \
+                --attach buster/kframework_${VERSION}_amd64_buster.deb"#Debian Buster (10) Package"    \
+                --attach $LOCAL_BOTTLE_NAME"#Mac OS X Homebrew Bottle"                                 \
+                --attach k-nightly.tar.gz"#Platform Indepdendent K Binary"                             \
                 --file "k-distribution/INSTALL.md" "${release_tag}"
                 # --attach arch/kframework-${VERSION}/package/kframework-git-${VERSION}-1-x86_64.pkg.tar.xz"#Arch Package" \
           '''
