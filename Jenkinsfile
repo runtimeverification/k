@@ -53,6 +53,39 @@ pipeline {
       parallel {
         stage('Build and Package K on Linux') {
           stages {
+            stage('Build Platform Independent K Binary') {
+              when {
+                anyOf {
+                  branch 'master'
+                  changelog '.*^\\[build-system\\] .+$'
+                  changeset 'Jenkinsfile'
+                  changeset 'Dockerfile'
+                }
+              }
+              agent {
+                dockerfile {
+                  filename 'Dockerfile.debian'
+                  additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=ubuntu:bionic'
+                  reuseNode true
+                }
+              }
+              steps {
+                sh '''
+                  eval `opam config env`
+                  mvn --batch-mode clean
+                  mvn --batch-mode install -DskipKTest -Dcheckstyle.skip
+                  mv k-distribution/target/k-nightly.tar.gz ./
+                '''
+                stash name: "binary", includes: "k-nightly.tar.gz"
+              }
+              post {
+                failure {
+                  slackSend color: '#cb2431'                                                  \
+                          , channel: '#k'                                                     \
+                          , message: "Platform Independent K Binary Failed: ${env.BUILD_URL}"
+                }
+              }
+            }
             stage('Build and Package on Ubuntu Bionic') {
               stages {
                 stage('Build on Ubuntu Bionic') {
@@ -363,6 +396,7 @@ pipeline {
       }
       steps {
         unstash "src"
+        unstash "binary"
         dir("bionic") {
           unstash "bionic"
         }
@@ -377,20 +411,16 @@ pipeline {
         }
         sshagent(['2b3d8d6b-0855-4b59-864a-6b3ddf9c9d1a']) {
           sh '''
-            echo 'Setting up environment...'
-            eval `opam config env`
             echo 'Deploying K...'
-            mvn --batch-mode clean
-            mvn --batch-mode install -DskipKTest -Dcheckstyle.skip
             release_tag="v${VERSION}-$(git rev-parse --short HEAD)"
             mv bionic/kframework_${VERSION}_amd64.deb bionic/kframework_${VERSION}_amd64_bionic.deb
             mv buster/kframework_${VERSION}_amd64.deb buster/kframework_${VERSION}_amd64_buster.deb
-            hub release create                                                                                           \
-                --attach kframework-${VERSION}-src.tar.gz"#Source tar.gz"                                                \
-                --attach bionic/kframework_${VERSION}_amd64_bionic.deb"#Ubuntu Bionic (18.04) Package"                   \
-                --attach buster/kframework_${VERSION}_amd64_buster.deb"#Debian Buster (10) Package"                      \
-                --attach mojave/kframework--${VERSION}.mojave.bottle*.tar.gz"#Mac OS X Homebrew Bottle"                  \
-                --attach k-distribution/target/k-nightly.tar.gz"#Platform Indepdendent K Binary"                         \
+            hub release create                                                                          \
+                --attach kframework-${VERSION}-src.tar.gz"#Source tar.gz"                               \
+                --attach bionic/kframework_${VERSION}_amd64_bionic.deb"#Ubuntu Bionic (18.04) Package"  \
+                --attach buster/kframework_${VERSION}_amd64_buster.deb"#Debian Buster (10) Package"     \
+                --attach mojave/kframework--${VERSION}.mojave.bottle*.tar.gz"#Mac OS X Homebrew Bottle" \
+                --attach k-nightly.tar.gz"#Platform Indepdendent K Binary"                              \
                 --file "k-distribution/INSTALL.md" "${release_tag}"
                 # --attach arch/kframework-${VERSION}/package/kframework-git-${VERSION}-1-x86_64.pkg.tar.xz"#Arch Package" \
           '''
