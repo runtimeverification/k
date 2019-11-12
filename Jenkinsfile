@@ -45,6 +45,7 @@ pipeline {
       steps {
         build job: 'rv-devops/master', parameters: [string(name: 'PR_REVIEWER', value: 'ehildenb'), booleanParam(name: 'UPDATE_DEPS_KWASM' , value: true)], propagate: false, wait: false
         build job: 'rv-devops/master', parameters: [string(name: 'PR_REVIEWER', value: 'malturki'), booleanParam(name: 'UPDATE_DEPS_BEACON', value: true)], propagate: false, wait: false
+        build job: 'rv-devops/master', parameters: [string(name: 'PR_REVIEWER', value: 'ehildenb'), booleanParam(name: 'UPDATE_DEPS_MCD'   , value: true)], propagate: false, wait: false
       }
     }
     stage('Build and Package K') {
@@ -52,6 +53,39 @@ pipeline {
       parallel {
         stage('Build and Package K on Linux') {
           stages {
+            stage('Build Platform Independent K Binary') {
+              when {
+                anyOf {
+                  branch 'master'
+                  changelog '.*^\\[build-system\\] .+$'
+                  changeset 'Jenkinsfile'
+                  changeset 'Dockerfile'
+                }
+              }
+              agent {
+                dockerfile {
+                  filename 'Dockerfile.debian'
+                  additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=ubuntu:bionic'
+                  reuseNode true
+                }
+              }
+              steps {
+                sh '''
+                  eval `opam config env`
+                  mvn --batch-mode clean
+                  mvn --batch-mode install -DskipKTest -Dcheckstyle.skip
+                  mv k-distribution/target/k-nightly.tar.gz ./
+                '''
+                stash name: "binary", includes: "k-nightly.tar.gz"
+              }
+              post {
+                failure {
+                  slackSend color: '#cb2431'                                                  \
+                          , channel: '#k'                                                     \
+                          , message: "Platform Independent K Binary Failed: ${env.BUILD_URL}"
+                }
+              }
+            }
             stage('Build and Package on Ubuntu Bionic') {
               stages {
                 stage('Build on Ubuntu Bionic') {
@@ -344,8 +378,8 @@ pipeline {
     stage('Deploy') {
       agent {
         dockerfile {
-          filename 'Dockerfile.debian'
-          additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=ubuntu:bionic'
+          filename 'Dockerfile.arch'
+          additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
           reuseNode true
         }
       }
@@ -362,6 +396,7 @@ pipeline {
       }
       steps {
         unstash "src"
+        unstash "binary"
         dir("bionic") {
           unstash "bionic"
         }
@@ -376,25 +411,21 @@ pipeline {
         }
         sshagent(['2b3d8d6b-0855-4b59-864a-6b3ddf9c9d1a']) {
           sh '''
-            echo 'Setting up environment...'
-            eval `opam config env`
-            echo 'Deploying K...'
-            mvn --batch-mode clean
-            mvn --batch-mode install -DskipKTest -Dcheckstyle.skip
-            COMMIT=$(git rev-parse --short HEAD)
-            DESCRIPTION="$(cat k-distribution/INSTALL.md | ./src/main/scripts/prepare-release-notes)"
-            RESPONSE=`curl --data '{"tag_name": "nightly-'$COMMIT'","name": "Nightly build of K framework at commit '$COMMIT'","body": "'"$DESCRIPTION"'", "draft": true,"prerelease": true}' https://api.github.com/repos/kframework/k/releases?access_token=$GITHUB_TOKEN`
-            ID=`echo "$RESPONSE" | grep '"id": [0-9]*,' -o | head -1 | grep '[0-9]*' -o`
-            BOTTLE_NAME=`cd mojave && echo kframework--5.0.0.mojave.bottle*.tar.gz | sed 's!kframework--!kframework-!'`
-            LOCAL_BOTTLE_NAME=`echo mojave/kframework--5.0.0.mojave.bottle*.tar.gz`
-            curl --data-binary @kframework-5.0.0-src.tar.gz -H "Authorization: token $GITHUB_TOKEN" -H "Content-Type: application/gzip" https://uploads.github.com/repos/kframework/k/releases/$ID/assets?'name=kframework-5.0.0-src.tar.gz&label=Source+tar.gz'
-            curl --data-binary @k-distribution/target/k-nightly.tar.gz -H "Authorization: token $GITHUB_TOKEN" -H "Content-Type: application/gzip" https://uploads.github.com/repos/kframework/k/releases/$ID/assets?'name=nightly.tar.gz&label=Platform-Indepdendent+K+binary'
-            curl --data-binary @bionic/kframework_5.0.0_amd64.deb -H "Authorization: token $GITHUB_TOKEN" -H "Content-Type: application/vnd.debian.binary-package" https://uploads.github.com/repos/kframework/k/releases/$ID/assets?'name=kframework_5.0.0_amd64_bionic.deb&label=Ubuntu+Bionic+Debian+Package'
-            curl --data-binary @buster/kframework_5.0.0_amd64.deb -H "Authorization: token $GITHUB_TOKEN" -H "Content-Type: application/vnd.debian.binary-package" https://uploads.github.com/repos/kframework/k/releases/$ID/assets?'name=kframework_5.0.0_amd64_buster.deb&label=Debian+Buster+Debian+Package'
-            # curl --data-binary @arch/kframework-5.0.0-1-x86_64.pkg.tar.xz -H "Authorization: token $GITHUB_TOKEN" -H "Content-Type: application/x-xz" https://uploads.github.com/repos/kframework/k/releases/$ID/assets?'name=kframework-5.0.0-1-x86_64.pkg.tar.xz&label=Arch+Linux+Pacman+Package'
-            curl --data-binary @$LOCAL_BOTTLE_NAME -H "Authorization: token $GITHUB_TOKEN" -H "Content-Type: application/gzip" https://uploads.github.com/repos/kframework/k/releases/$ID/assets?'name='$BOTTLE_NAME'&label=Mac+OS+X+Mojave+Homebrew+Bottle'
-            curl -X PATCH --data '{"draft": false}' https://api.github.com/repos/kframework/k/releases/$ID?access_token=$GITHUB_TOKEN
-            curl --data '{"state": "success","target_url": "'$BUILD_URL'","description": "Build succeeded."}' https://api.github.com/repos/kframework/k/statuses/$(git rev-parse origin/master)?access_token=$GITHUB_TOKEN
+            release_tag="v${VERSION}-$(git rev-parse --short HEAD)"
+            mv bionic/kframework_${VERSION}_amd64.deb bionic/kframework_${VERSION}_amd64_bionic.deb
+            mv buster/kframework_${VERSION}_amd64.deb buster/kframework_${VERSION}_amd64_buster.deb
+            LOCAL_BOTTLE_NAME=$(echo mojave/kframework--${VERSION}.mojave.bottle*.tar.gz)
+            echo "K Framework Release $release_tag"  > release.md
+            echo ""                                 >> release.md
+            cat k-distribution/INSTALL.md           >> release.md
+            hub release create                                                                         \
+                --attach kframework-${VERSION}-src.tar.gz"#Source tar.gz"                              \
+                --attach bionic/kframework_${VERSION}_amd64_bionic.deb"#Ubuntu Bionic (18.04) Package" \
+                --attach buster/kframework_${VERSION}_amd64_buster.deb"#Debian Buster (10) Package"    \
+                --attach $LOCAL_BOTTLE_NAME"#Mac OS X Homebrew Bottle"                                 \
+                --attach k-nightly.tar.gz"#Platform Indepdendent K Binary"                             \
+                --file release.md "${release_tag}"
+                # --attach arch/kframework-${VERSION}/package/kframework-git-${VERSION}-1-x86_64.pkg.tar.xz"#Arch Package" \
           '''
         }
         dir("homebrew-k") {
