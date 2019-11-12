@@ -54,14 +54,14 @@ pipeline {
         stage('Build and Package K on Linux') {
           stages {
             stage('Build Platform Independent K Binary') {
-              //when {
-              //  anyOf {
-              //    branch 'master'
-              //    changelog '.*^\\[build-system\\] .+$'
-              //    changeset 'Jenkinsfile'
-              //    changeset 'Dockerfile'
-              //  }
-              //}
+              when {
+                anyOf {
+                  branch 'master'
+                  changelog '.*^\\[build-system\\] .+$'
+                  changeset 'Jenkinsfile'
+                  changeset 'Dockerfile'
+                }
+              }
               agent {
                 dockerfile {
                   filename 'Dockerfile.debian'
