@@ -389,7 +389,7 @@ public class TypeInferencer implements AutoCloseable {
         cacheById.add(new HashSet<>());
         pr.setId(Optional.of(id));
         for (Sort param : iterable(pr.production().params())) {
-          String name = "FreshVar" + param.name() + (nextVarId++);
+          String name = "FreshVar" + param.name() + locStr(pr);
           if (!variables.contains(name)) {
             variables.add(name);
             variableNames.add(param.name() + " in production " + pr.production().toString());
@@ -448,7 +448,7 @@ public class TypeInferencer implements AutoCloseable {
             cacheById.add(new HashSet<>());
             pr.setId(Optional.of(id));
             if (isAnonVar(c)) {
-              name = "Var" + c.value() + (nextVarId++);
+              name = "Var" + c.value() + locStr(c);
             } else {
               name = "Var" + c.value();
             }
