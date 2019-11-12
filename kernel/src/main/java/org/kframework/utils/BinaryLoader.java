@@ -6,6 +6,7 @@ import jline.internal.Nullable;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.inject.RequestScoped;
+import org.nustaq.serialization.FSTConfiguration;
 import org.nustaq.serialization.FSTObjectInput;
 import org.nustaq.serialization.FSTObjectOutput;
 
@@ -55,6 +56,10 @@ public class BinaryLoader {
             //Exception here caused by reflexion will just re-enable the warning.
         }
     }
+
+    //FSTConfiguration, although claims to be thread-safe, apparently contains race conditions. Has to be thread-local.
+    private static ThreadLocal<FSTConfiguration> fstConfig =
+            ThreadLocal.withInitial(FSTConfiguration::createDefaultConfiguration);
 
     private static ReadWriteLock lock = new ReentrantReadWriteLock();
 
@@ -118,8 +123,12 @@ public class BinaryLoader {
         try {
             //To protect from concurrent access to same file from another process
             out.getChannel().lock(); //Lock is released automatically when serializer is closed.
-            try (FSTObjectOutput serializer = new FSTObjectOutput(out)) { //already buffered
+            try {
+                FSTObjectOutput serializer = fstConfig.get().getObjectOutput(out);
                 serializer.writeObject(o);
+                serializer.flush();
+            } finally {
+                out.close();
             }
         } finally {
             lock.writeLock().unlock();
@@ -138,7 +147,8 @@ public class BinaryLoader {
             } catch (OverlappingFileLockException e) {
                 //We are in Nailgun mode. File lock is not needed.
             }
-            try (FSTObjectInput deserializer = new FSTObjectInput(in)) { //already buffered
+            try {
+                FSTObjectInput deserializer = fstConfig.get().getObjectInput(in);
                 Object obj = deserializer.readObject();
                 return obj;
             } finally {
