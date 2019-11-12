@@ -43,6 +43,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -351,6 +352,8 @@ public class TypeInferencer implements AutoCloseable {
 
     private int ambId = 0;
 
+    private Map<Ambiguity, Map<String, Integer>> ambCache = new IdentityHashMap<>();
+
     public ExpectedSortsVisitor(Sort topSort, boolean isAnywhere, boolean isIncremental) {
       this.expectedSort = topSort;
       this.isAnywhere = isAnywhere;
@@ -363,16 +366,22 @@ public class TypeInferencer implements AutoCloseable {
         if (isIncremental) {
           return apply(amb.items().iterator().next());
         }
-        int id = ambId++;
-        List<String> ids = new ArrayList<>();
-        for (Term i : amb.items()) {
+        String expected = printSort(expectedSort, expectedParams, false).replace("|", "");
+        Map<String, Integer> contexts = ambCache.computeIfAbsent(amb, amb2 -> new HashMap<>());
+        int id = contexts.computeIfAbsent(expected, expected2 -> ambId);
+        boolean cached = id != ambId;
+        if (!cached) {
+          ambId++;
+          List<String> ids = new ArrayList<>();
+          for (Term i : amb.items()) {
             ids.add(apply(i));
+          }
+          sb.append("(define-fun amb").append(id).append(" () Bool (or ");
+          for (String i : ids) {
+            sb.append(i).append(" ");
+          }
+          sb.append("))\n");
         }
-        sb.append("(define-fun amb").append(id).append(" () Bool (or ");
-        for (String i : ids) {
-          sb.append(i).append(" ");
-        }
-        sb.append("))\n");
         return "amb" + id;
       }
       ProductionReference pr = (ProductionReference)t;
