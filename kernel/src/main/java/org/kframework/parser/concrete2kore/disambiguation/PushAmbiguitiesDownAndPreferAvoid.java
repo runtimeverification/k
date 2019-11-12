@@ -18,10 +18,17 @@ import java.util.stream.Collectors;
  */
 public class PushAmbiguitiesDownAndPreferAvoid extends SafeTransformer {
 
-    private POSet<Production> overloads;
+    private final POSet<Production> overloads;
+    private final boolean justPush;
+
+    public PushAmbiguitiesDownAndPreferAvoid() {
+        this.overloads = null;
+        this.justPush = true;
+    }
 
     public PushAmbiguitiesDownAndPreferAvoid(POSet<Production> overloads) {
         this.overloads = overloads;
+        this.justPush = false;
     }
 
     public Term preferAvoid(Ambiguity amb) {
@@ -62,15 +69,17 @@ public class PushAmbiguitiesDownAndPreferAvoid extends SafeTransformer {
         Production prod = null;
         int arity = 0;
 
-        Term withoutOverloads = new RemoveOverloads(overloads).apply(a);
-        if (!(withoutOverloads instanceof Ambiguity)) {
-            return super.apply(withoutOverloads);
+        if (!justPush) {
+            Term withoutOverloads = new RemoveOverloads(overloads).apply(a);
+            if (!(withoutOverloads instanceof Ambiguity)) {
+                return super.apply(withoutOverloads);
+            }
+            Term preferred = preferAvoid((Ambiguity)withoutOverloads);
+            if (!(preferred instanceof Ambiguity)) {
+                return super.apply(preferred);
+            }
+            a = (Ambiguity)preferred;
         }
-        Term preferred = preferAvoid((Ambiguity)withoutOverloads);
-        if (!(preferred instanceof Ambiguity)) {
-            return super.apply(preferred);
-        }
-        a = (Ambiguity)preferred;
 
         a = (Ambiguity)super.apply(a);
         for (Term t : a.items()) {

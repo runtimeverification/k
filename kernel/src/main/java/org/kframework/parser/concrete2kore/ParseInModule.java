@@ -214,7 +214,8 @@ public class ParseInModule implements Serializable, AutoCloseable {
             rez = new PriorityVisitor(disambModule.priorities(), disambModule.leftAssoc(), disambModule.rightAssoc()).apply(rez.right().get());
             if (rez.isLeft())
                 return new Tuple2<>(rez, warn);
-            Term rez3 = new PushTopAmbiguityUp().apply(rez.right().get());
+            Term rez3 = new PushAmbiguitiesDownAndPreferAvoid().apply(rez.right().get());
+            rez3 = new PushTopAmbiguityUp().apply(rez3);
 
             TypeInferencer currentInferencer;
             synchronized(inferencer) {
