@@ -244,10 +244,12 @@ public class TypeInferencer implements AutoCloseable {
     println("(assert " + id + ")");
     println("(push)");
     for (String var : variables) {
+      if (mod.definedSorts().contains(Sorts.K()))
+        println("(assert-soft (= SortK |" + var + "|) :weight 2 :id A)");
       if (mod.definedSorts().contains(Sorts.KItem()))
-        println("(assert-soft ( <=Sort SortKItem |" + var + "|) :id A)");
+        println("(assert-soft (= SortKItem |" + var + "|) :weight 1 :id A)");
       if (mod.definedSorts().contains(Sorts.Bag()))
-        println("(assert-soft (<=Sort SortBag |" + var + "|) :id A)");
+        println("(assert-soft (<=Sort SortBag |" + var + "|) :weight 1 :id A)");
     }
   }
 
