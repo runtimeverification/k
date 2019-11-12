@@ -73,7 +73,7 @@ public class TypeInferencer implements AutoCloseable {
 
   public TypeInferencer(Module mod) {
     try {
-      process = new ProcessBuilder().command("z3", "-in").redirectError(ProcessBuilder.Redirect.INHERIT).start();
+      process = new ProcessBuilder().command("z3", "-in").start();
     } catch (IOException e) {
       throw KEMException.criticalError("Could not start z3 process", e);
     }
