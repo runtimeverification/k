@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-
-sed ':a;$!{N;ba}; s/\n/\\n/g' | sed 's/"/\\"/g'
