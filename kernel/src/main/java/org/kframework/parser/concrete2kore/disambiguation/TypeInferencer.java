@@ -107,8 +107,7 @@ public class TypeInferencer implements AutoCloseable {
       println("|Sort" + s.name() + "| ");
     }
     println(")))");
-    println("(define-fun <=Sort ((s1 Sort) (s2 Sort)) Bool");
-    int parens = 0;
+    println("(define-fun <=Sort ((s1 Sort) (s2 Sort)) Bool (or");
     for (Tuple2<Sort, Set<Sort>> relation : stream(mod.syntacticSubsorts().relations()).sorted(Comparator.comparing(t -> -ordinals.getOrDefault(t._1(), 0))).collect(Collectors.toList())) {
       if (!isRealSort(relation._1())) {
         continue;
@@ -117,31 +116,24 @@ public class TypeInferencer implements AutoCloseable {
         if (!isRealSort(s2)) {
           continue;
         }
-        print("  (ite (and (= s1 ");
+        print("  (and (= s1 ");
         printSort(relation._1());
         print(") (= s2 ");
         printSort(s2);
-        println(")) true");
-        parens++;
+        println("))");
       }
     }
     for (Sort s : iterable(mod.definedSorts())) {
       if (!isRealSort(s)) {
         continue;
       }
-      print("  (ite (and (= s1 ");
+      print("  (and (= s1 ");
       printSort(s);
       print(") (= s2 ");
       printSort(s);
-      println(")) true");
-      parens++;
+      println("))");
     }
-    println("  false");
-    print("  ");
-    for (i = 0; i < parens; i++) {
-      print(")");
-    }
-    println(")");
+    println("))");
   }
 
   private final Map<Sort, Integer> ordinals = new HashMap<>();
