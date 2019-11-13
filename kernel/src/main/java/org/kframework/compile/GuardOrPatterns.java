@@ -80,7 +80,7 @@ public class GuardOrPatterns {
         return new TransformK() {
             @Override
             public K apply(KApply k) {
-              if (k.klabel().equals(KLabels.ML_OR)) {
+              if (k.klabel().head().equals(KLabels.ML_OR)) {
                 if (kore) {
                   AddSortInjections inj = new AddSortInjections(m);
                   return KAs(k, newDotVariable(inj.sort(k, Sorts.K())));
