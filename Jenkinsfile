@@ -53,39 +53,6 @@ pipeline {
       parallel {
         stage('Build and Package K on Linux') {
           stages {
-            stage('Build Platform Independent K Binary') {
-              when {
-                anyOf {
-                  branch 'master'
-                  changelog '.*^\\[build-system\\] .+$'
-                  changeset 'Jenkinsfile'
-                  changeset 'Dockerfile'
-                }
-              }
-              agent {
-                dockerfile {
-                  filename 'Dockerfile.debian'
-                  additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=ubuntu:bionic'
-                  reuseNode true
-                }
-              }
-              steps {
-                sh '''
-                  eval `opam config env`
-                  mvn --batch-mode clean
-                  mvn --batch-mode install -DskipKTest -Dcheckstyle.skip
-                  mv k-distribution/target/k-nightly.tar.gz ./
-                '''
-                stash name: "binary", includes: "k-nightly.tar.gz"
-              }
-              post {
-                failure {
-                  slackSend color: '#cb2431'                                                  \
-                          , channel: '#k'                                                     \
-                          , message: "Platform Independent K Binary Failed: ${env.BUILD_URL}"
-                }
-              }
-            }
             stage('Build and Package on Ubuntu Bionic') {
               stages {
                 stage('Build on Ubuntu Bionic') {
@@ -164,7 +131,8 @@ pipeline {
               when {
                 anyOf {
                   branch 'master'
-                  changelog '.*^\\[build-system\\] .+$'
+                  changelog '.*^\\[BUILD\\] .+$'
+                  changelog '.*^\\[DEPLOY\\] .+$'
                   changeset 'Jenkinsfile'
                   changeset 'Dockerfile'
                 }
@@ -224,76 +192,112 @@ pipeline {
                 }
               }
             }
-            //stage('Build and Package on Arch Linux') {
-            //  when {
-            //    anyOf {
-            //      branch 'master'
-            //      changelog '.*^\\[build-system\\] .+$'
-            //      changeset 'Jenkinsfile'
-            //      changeset 'Dockerfile'
-            //    }
-            //  }
-            //  stages {
-            //    stage('Build on Arch Linux') {
-            //      agent {
-            //        dockerfile {
-            //          filename 'Dockerfile.arch'
-            //          additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
-            //          reuseNode true
-            //        }
-            //      }
-            //      stages {
-            //        stage('Build Pacman Package') {
-            //          steps {
-            //            checkout scm
-            //            sh '''
-            //              makepkg
-            //            '''
-            //            stash name: "arch", includes: "kframework-5.0.0-1-x86_64.pkg.tar.xz"
-            //          }
-            //        }
-            //      }
-            //    }
-            //    stage('Test Arch Package') {
-            //      agent {
-            //        docker {
-            //          image 'archlinux/base'
-            //          args '-u 0'
-            //          reuseNode true
-            //        }
-            //      }
-            //      options { skipDefaultCheckout() }
-            //      steps {
-            //        unstash "arch"
-            //        sh '''
-            //          pacman -Syyu --noconfirm
-            //          pacman -U --noconfirm kframework-5.0.0-1-x86_64.pkg.tar.xz
-            //          src/main/scripts/test-in-container
-            //        '''
-            //      }
-            //      post {
-            //        always {
-            //          sh 'stop-kserver || true'
-            //          archiveArtifacts 'kserver.log,k-distribution/target/kserver.log'
-            //        }
-            //      }
-            //    }
-            //  }
-            //  post {
-            //    failure {
-            //      slackSend color: '#cb2431'                                         \
-            //              , channel: '#k'                                            \
-            //              , message: "Arch Linux Packaging Failed: ${env.BUILD_URL}"
-            //    }
-            //  }
-            //}
+            stage('Build and Package on Arch Linux') {
+              when {
+                anyOf {
+                  branch 'master'
+                  changelog '.*^\\[BUILD\\] .+$'
+                  changelog '.*^\\[DEPLOY\\] .+$'
+                  changeset 'Jenkinsfile'
+                  changeset 'Dockerfile'
+                }
+              }
+              stages {
+                stage('Build on Arch Linux') {
+                  agent {
+                    dockerfile {
+                      filename 'Dockerfile.arch'
+                      additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
+                      reuseNode true
+                    }
+                  }
+                  stages {
+                    stage('Build Pacman Package') {
+                      steps {
+                        checkout scm
+                        sh '''
+                          makepkg
+                        '''
+                        stash name: "arch", includes: "kframework-5.0.0-1-x86_64.pkg.tar.xz"
+                      }
+                    }
+                  }
+                }
+                stage('Test Arch Package') {
+                  agent {
+                    docker {
+                      image 'archlinux/base'
+                      args '-u 0'
+                      reuseNode true
+                    }
+                  }
+                  options { skipDefaultCheckout() }
+                  steps {
+                    unstash "arch"
+                    sh '''
+                      pacman -Syyu --noconfirm
+                      pacman -U --noconfirm kframework-5.0.0-1-x86_64.pkg.tar.xz
+                      src/main/scripts/test-in-container
+                    '''
+                  }
+                  post {
+                    always {
+                      sh 'stop-kserver || true'
+                      archiveArtifacts 'kserver.log,k-distribution/target/kserver.log'
+                    }
+                  }
+                }
+              }
+              post {
+                failure {
+                  slackSend color: '#cb2431'                                         \
+                          , channel: '#k'                                            \
+                          , message: "Arch Linux Packaging Failed: ${env.BUILD_URL}"
+                }
+              }
+            }
+            stage('Build Platform Independent K Binary') {
+              when {
+                anyOf {
+                  branch 'master'
+                  changelog '.*^\\[BUILD\\] .+$'
+                  changelog '.*^\\[DEPLOY\\] .+$'
+                  changeset 'Jenkinsfile'
+                  changeset 'Dockerfile'
+                }
+              }
+              agent {
+                dockerfile {
+                  filename 'Dockerfile.debian'
+                  additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=ubuntu:bionic'
+                  reuseNode true
+                }
+              }
+              steps {
+                sh '''
+                  eval `opam config env`
+                  mvn --batch-mode clean
+                  mvn --batch-mode install -DskipKTest -Dcheckstyle.skip
+                  mv k-distribution/target/k-nightly.tar.gz ./
+                '''
+                stash name: "binary", includes: "k-nightly.tar.gz"
+              }
+              post {
+                failure {
+                  slackSend color: '#cb2431'                                                  \
+                          , channel: '#k'                                                     \
+                          , message: "Platform Independent K Binary Failed: ${env.BUILD_URL}"
+                }
+              }
+            }
           }
         }
         stage('Build and Package on Mac OS') {
           when {
             anyOf {
               branch 'master'
-              changelog '.*^\\[build-system\\] .+$'
+              changelog '.*^\\[BUILD\\] .+$'
+              changelog '.*^\\[DEPLOY\\] .+$'
               changeset 'Jenkinsfile'
               changeset 'Dockerfile'
             }
@@ -385,6 +389,7 @@ pipeline {
       }
       when {
         branch 'master'
+        changelog '.*^\\[DEPLOY\\] .+$'
         beforeAgent true
       }
       environment {
@@ -403,9 +408,9 @@ pipeline {
         dir("buster") {
           unstash "buster"
         }
-        //dir("arch") {
-        //  unstash "arch"
-        //}
+        dir("arch") {
+          unstash "arch"
+        }
         dir("mojave") {
           unstash "mojave"
         }
@@ -418,14 +423,14 @@ pipeline {
             echo "K Framework Release $release_tag"  > release.md
             echo ""                                 >> release.md
             cat k-distribution/INSTALL.md           >> release.md
-            hub release create                                                                         \
-                --attach kframework-${VERSION}-src.tar.gz"#Source tar.gz"                              \
-                --attach bionic/kframework_${VERSION}_amd64_bionic.deb"#Ubuntu Bionic (18.04) Package" \
-                --attach buster/kframework_${VERSION}_amd64_buster.deb"#Debian Buster (10) Package"    \
-                --attach $LOCAL_BOTTLE_NAME"#Mac OS X Homebrew Bottle"                                 \
-                --attach k-nightly.tar.gz"#Platform Indepdendent K Binary"                             \
+            hub release create                                                                                           \
+                --attach kframework-${VERSION}-src.tar.gz"#Source tar.gz"                                                \
+                --attach bionic/kframework_${VERSION}_amd64_bionic.deb"#Ubuntu Bionic (18.04) Package"                   \
+                --attach buster/kframework_${VERSION}_amd64_buster.deb"#Debian Buster (10) Package"                      \
+                --attach arch/kframework-${VERSION}/package/kframework-git-${VERSION}-1-x86_64.pkg.tar.xz"#Arch Package" \
+                --attach $LOCAL_BOTTLE_NAME"#Mac OS X Homebrew Bottle"                                                   \
+                --attach k-nightly.tar.gz"#Platform Indepdendent K Binary"                                               \
                 --file release.md "${release_tag}"
-                # --attach arch/kframework-${VERSION}/package/kframework-git-${VERSION}-1-x86_64.pkg.tar.xz"#Arch Package" \
           '''
         }
         dir("homebrew-k") {
