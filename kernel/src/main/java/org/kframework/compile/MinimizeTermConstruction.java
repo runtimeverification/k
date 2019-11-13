@@ -101,7 +101,7 @@ public class MinimizeTermConstruction {
 
             @Override
             public void apply(KApply k) {
-                if (k.klabel().equals(KLabels.ML_OR)) {
+                if (k.klabel().head().equals(KLabels.ML_OR)) {
                   return;
                 }
                 String hook = module.attributesFor().get(k.klabel()).getOrElse(() -> Att.empty()).getOptional("hook").orElse("");
@@ -157,7 +157,7 @@ public class MinimizeTermConstruction {
             @Override
             public K apply(KApply k) {
                 boolean stack = inBad;
-                if (k.klabel().equals(KLabels.ML_OR)) {
+                if (k.klabel().head().equals(KLabels.ML_OR)) {
                     inBad = true;
                 }
                 String hook = module.attributesFor().get(k.klabel()).getOrElse(() -> Att.empty()).getOptional("hook").orElse("");
