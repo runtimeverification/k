@@ -20,6 +20,7 @@ import org.kframework.parser.Term;
 import org.kframework.parser.TermCons;
 import org.kframework.parser.SafeTransformer;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
+import org.kframework.utils.OS;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
@@ -34,6 +35,7 @@ import scala.collection.Set;
 import scala.Tuple2;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -73,7 +75,8 @@ public class TypeInferencer implements AutoCloseable {
 
   public TypeInferencer(Module mod) {
     try {
-      process = new ProcessBuilder().command("z3", "-in").redirectError(ProcessBuilder.Redirect.INHERIT).start();
+      File NULL = new File(OS.current() == OS.WINDOWS ? "NUL" : "/dev/null");
+      process = new ProcessBuilder().command("z3", "-in").redirectError(NULL).start();
     } catch (IOException e) {
       throw KEMException.criticalError("Could not start z3 process", e);
     }
