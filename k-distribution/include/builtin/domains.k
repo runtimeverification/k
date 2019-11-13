@@ -678,6 +678,8 @@ module STRING-BUFFER
 endmodule
 
 module BYTES-HOOKED
+  imports STRING-SYNTAX
+
   syntax Bytes [hook(BYTES.Bytes)]
 
   syntax Bytes ::= ".Bytes" [function, functional, hook(BYTES.empty), impure]
