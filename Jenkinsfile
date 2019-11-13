@@ -57,8 +57,8 @@ pipeline {
               when {
                 anyOf {
                   branch 'master'
-                  changelog '.*^\\[build-system\\] .+$'
-                  changelog '.*^\\[deploy-system\\] .+$'
+                  changelog '.*^\\[BUILD\\] .+$'
+                  changelog '.*^\\[DEPLOY\\] .+$'
                   changeset 'Jenkinsfile'
                   changeset 'Dockerfile'
                 }
@@ -165,8 +165,8 @@ pipeline {
               when {
                 anyOf {
                   branch 'master'
-                  changelog '.*^\\[build-system\\] .+$'
-                  changelog '.*^\\[deploy-system\\] .+$'
+                  changelog '.*^\\[BUILD\\] .+$'
+                  changelog '.*^\\[DEPLOY\\] .+$'
                   changeset 'Jenkinsfile'
                   changeset 'Dockerfile'
                 }
@@ -230,8 +230,8 @@ pipeline {
               when {
                 anyOf {
                   branch 'master'
-                  changelog '.*^\\[build-system\\] .+$'
-                  changelog '.*^\\[deploy-system\\] .+$'
+                  changelog '.*^\\[BUILD\\] .+$'
+                  changelog '.*^\\[DEPLOY\\] .+$'
                   changeset 'Jenkinsfile'
                   changeset 'Dockerfile'
                 }
@@ -296,8 +296,8 @@ pipeline {
           when {
             anyOf {
               branch 'master'
-              changelog '.*^\\[build-system\\] .+$'
-              changelog '.*^\\[deploy-system\\] .+$'
+              changelog '.*^\\[BUILD\\] .+$'
+              changelog '.*^\\[DEPLOY\\] .+$'
               changeset 'Jenkinsfile'
               changeset 'Dockerfile'
             }
@@ -389,7 +389,7 @@ pipeline {
       }
       when {
         branch 'master'
-        changelog '.*^\\[deploy-system\\] .+$'
+        changelog '.*^\\[DEPLOY\\] .+$'
         beforeAgent true
       }
       environment {
