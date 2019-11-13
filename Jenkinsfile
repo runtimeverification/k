@@ -53,40 +53,6 @@ pipeline {
       parallel {
         stage('Build and Package K on Linux') {
           stages {
-            stage('Build Platform Independent K Binary') {
-              when {
-                anyOf {
-                  branch 'master'
-                  changelog '.*^\\[BUILD\\] .+$'
-                  changelog '.*^\\[DEPLOY\\] .+$'
-                  changeset 'Jenkinsfile'
-                  changeset 'Dockerfile'
-                }
-              }
-              agent {
-                dockerfile {
-                  filename 'Dockerfile.debian'
-                  additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=ubuntu:bionic'
-                  reuseNode true
-                }
-              }
-              steps {
-                sh '''
-                  eval `opam config env`
-                  mvn --batch-mode clean
-                  mvn --batch-mode install -DskipKTest -Dcheckstyle.skip
-                  mv k-distribution/target/k-nightly.tar.gz ./
-                '''
-                stash name: "binary", includes: "k-nightly.tar.gz"
-              }
-              post {
-                failure {
-                  slackSend color: '#cb2431'                                                  \
-                          , channel: '#k'                                                     \
-                          , message: "Platform Independent K Binary Failed: ${env.BUILD_URL}"
-                }
-              }
-            }
             stage('Build and Package on Ubuntu Bionic') {
               stages {
                 stage('Build on Ubuntu Bionic') {
@@ -287,6 +253,40 @@ pipeline {
                   slackSend color: '#cb2431'                                         \
                           , channel: '#k'                                            \
                           , message: "Arch Linux Packaging Failed: ${env.BUILD_URL}"
+                }
+              }
+            }
+            stage('Build Platform Independent K Binary') {
+              when {
+                anyOf {
+                  branch 'master'
+                  changelog '.*^\\[BUILD\\] .+$'
+                  changelog '.*^\\[DEPLOY\\] .+$'
+                  changeset 'Jenkinsfile'
+                  changeset 'Dockerfile'
+                }
+              }
+              agent {
+                dockerfile {
+                  filename 'Dockerfile.debian'
+                  additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=ubuntu:bionic'
+                  reuseNode true
+                }
+              }
+              steps {
+                sh '''
+                  eval `opam config env`
+                  mvn --batch-mode clean
+                  mvn --batch-mode install -DskipKTest -Dcheckstyle.skip
+                  mv k-distribution/target/k-nightly.tar.gz ./
+                '''
+                stash name: "binary", includes: "k-nightly.tar.gz"
+              }
+              post {
+                failure {
+                  slackSend color: '#cb2431'                                                  \
+                          , channel: '#k'                                                     \
+                          , message: "Platform Independent K Binary Failed: ${env.BUILD_URL}"
                 }
               }
             }
