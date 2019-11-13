@@ -682,7 +682,7 @@ module BYTES-HOOKED
 
   syntax Bytes [hook(BYTES.Bytes)]
 
-  syntax Bytes ::= ".Bytes" [function, functional, hook(BYTES.empty), impure]
+  syntax Bytes ::= ".Bytes" [function, functional, hook(BYTES.empty)]
   syntax Endianness ::= "LE" [klabel(littleEndianBytes), symbol]
                       | "BE" [klabel(bigEndianBytes), symbol]
   syntax Signedness ::= "Signed" [klabel(signedBytes), symbol]
