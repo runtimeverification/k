@@ -175,6 +175,15 @@ rule <k> new var x ; => . ... </k>
 
 Now each newly allocated memory slot will have a fresh `Foo` placed in it.
 
+### `token` attribute
+
+The `token` attribute signals to the Kore generator that the associated sort
+will be inhabited by domain values.
+
+```k
+syntax Bytes [hook(BYTES.Bytes), token]
+```
+
 Evaluation Strategy
 -------------------
 
