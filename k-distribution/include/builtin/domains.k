@@ -680,7 +680,7 @@ endmodule
 module BYTES-HOOKED
   imports STRING-SYNTAX
 
-  syntax Bytes [hook(BYTES.Bytes)]
+  syntax Bytes [hook(BYTES.Bytes), token]
 
   syntax Bytes ::= ".Bytes" [function, functional, hook(BYTES.empty)]
   syntax Endianness ::= "LE" [klabel(littleEndianBytes), symbol]
@@ -819,9 +819,9 @@ endmodule
 
 module ID-PROGRAM-PARSING
   imports BUILTIN-ID-TOKENS
-  syntax Id ::= r"(?<![A-Za-z0-9\\_])[A-Za-z\\_][A-Za-z0-9\\_]*"     [prec(1), notInRules, token, autoReject]
-              | #LowerId                                             [notInRules, token, autoReject]
-              | #UpperId                                             [notInRules, token, autoReject]
+  syntax Id ::= r"(?<![A-Za-z0-9\\_])[A-Za-z\\_][A-Za-z0-9\\_]*"     [prec(1), token]
+              | #LowerId                                             [token]
+              | #UpperId                                             [token]
 endmodule
 
 module ID-SYNTAX
