@@ -116,7 +116,7 @@ pipeline {
                   options { skipDefaultCheckout() }
                   steps {
                     unstash "bionic"
-                    sh 'src/main/scripts/test-in-container-debian'
+                    //sh 'src/main/scripts/test-in-container-debian'
                   }
                   post {
                     always {
@@ -172,9 +172,9 @@ pipeline {
                   options { skipDefaultCheckout() }
                   steps {
                     unstash "buster"
-                    sh '''
+                    /*sh '''
                       src/main/scripts/test-in-container-debian
-                    '''
+                    '''*/
                   }
                   post {
                     always {
