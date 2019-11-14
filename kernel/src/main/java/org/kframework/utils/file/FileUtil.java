@@ -11,6 +11,7 @@ import org.kframework.attributes.Location;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.inject.RequestScoped;
 
 import javax.annotation.Nullable;
 import java.io.BufferedReader;
@@ -34,6 +35,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@RequestScoped
 public class FileUtil {
 
     private final File tempDir;

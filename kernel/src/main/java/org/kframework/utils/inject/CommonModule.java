@@ -43,7 +43,7 @@ public class CommonModule extends AbstractModule {
         return new FileUtil(null, null, workingDir, null, null, env).getProcessBuilder();
     }
 
-    @Provides
+    @Provides @RequestScoped
     TTYInfo ttyInfo(@Environment Map<String, String> env) {
         boolean stdin, stdout, stderr;
         if (env.containsKey("NAILGUN_TTY_0")) {
