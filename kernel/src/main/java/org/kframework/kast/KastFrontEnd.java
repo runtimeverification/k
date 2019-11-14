@@ -4,8 +4,6 @@ package org.kframework.kast;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import org.kframework.attributes.Source;
-import org.kframework.backend.kore.ModuleToKORE;
-import org.kframework.compile.AddSortInjections;
 import org.kframework.compile.ExpandMacros;
 import org.kframework.definition.Module;
 import org.kframework.kompile.CompiledDefinition;
@@ -20,7 +18,6 @@ import org.kframework.utils.file.Environment;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
 import org.kframework.utils.file.KompiledDir;
-import org.kframework.utils.file.TTYInfo;
 import org.kframework.utils.inject.CommonModule;
 import org.kframework.utils.inject.DefinitionScope;
 import org.kframework.utils.inject.JCommanderModule;
@@ -53,8 +50,8 @@ public class KastFrontEnd extends FrontEnd {
     private final Map<String, String> env;
     private final Provider<File> kompiledDir;
     private final Provider<CompiledDefinition> compiledDef;
+    private final Provider<KPrint> kprint;
     private final DefinitionScope scope;
-    private final TTYInfo ttyInfo;
 
     @Inject
     KastFrontEnd(
@@ -68,8 +65,8 @@ public class KastFrontEnd extends FrontEnd {
             Provider<FileUtil> files,
             @KompiledDir Provider<File> kompiledDir,
             Provider<CompiledDefinition> compiledDef,
-            DefinitionScope scope,
-            TTYInfo ttyInfo) {
+            Provider<KPrint> kprint,
+            DefinitionScope scope) {
         super(kem, options.global, usage, experimentalUsage, jarInfo, files);
         this.options = options;
         this.sw = sw;
@@ -78,8 +75,8 @@ public class KastFrontEnd extends FrontEnd {
         this.env = env;
         this.kompiledDir = kompiledDir;
         this.compiledDef = compiledDef;
+        this.kprint = kprint;
         this.scope = scope;
-        this.ttyInfo = ttyInfo;
     }
 
     /**
@@ -94,7 +91,6 @@ public class KastFrontEnd extends FrontEnd {
             Source source = options.source();
 
             CompiledDefinition def = compiledDef.get();
-            KPrint kprint = new KPrint(kem, files.get(), ttyInfo, options.print, compiledDef.get());
             KRead kread = new KRead(kem, files.get(), options.input);
 
             org.kframework.kore.Sort sort = options.sort;
@@ -134,7 +130,7 @@ public class KastFrontEnd extends FrontEnd {
                 parsed = ExpandMacros.forNonSentences(unparsingMod, files.get(), def.kompileOptions, false).expand(parsed);
             }
 
-            System.out.println(new String(kprint.prettyPrint(def, unparsingMod, parsed), StandardCharsets.UTF_8));
+            System.out.println(new String(kprint.get().prettyPrint(def, unparsingMod, parsed), StandardCharsets.UTF_8));
             sw.printTotal("Total");
             return 0;
         } finally {
