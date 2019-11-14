@@ -330,7 +330,7 @@ pipeline {
                         ${WORKSPACE}/src/main/scripts/brew-install-bottle
                       '''
                     }
-                    sh '''
+                    /*sh '''
                       cp -R /usr/local/lib/kframework/tutorial ~
                       WD=`pwd`
                       cd
@@ -343,7 +343,7 @@ pipeline {
                       echo "module TEST imports BOOL endmodule" > test.k
                       kompile test.k --backend llvm
                       kompile test.k --backend haskell
-                    '''
+                    '''*/
                     dir('homebrew-k') {
                       sh '''
                         ${WORKSPACE}/src/main/scripts/brew-update-to-final
