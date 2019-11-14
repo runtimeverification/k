@@ -292,6 +292,7 @@ pipeline {
             }
           }
         }
+        /*
         stage('Build and Package on Mac OS') {
           when {
             anyOf {
@@ -357,7 +358,7 @@ pipeline {
                   post {
                     always {
                       sh 'stop-kserver || true'
-                      archiveArtifacts 'kserver.log,k-distribution/target/kserver.log'
+                      //archiveArtifacts 'kserver.log,k-distribution/target/kserver.log'
                     }
                   }
                 }
@@ -377,6 +378,7 @@ pipeline {
             }
           }
         }
+        */
       }
     }
     stage('Deploy') {
