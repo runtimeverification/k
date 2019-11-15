@@ -678,7 +678,7 @@ module STRING-BUFFER
 endmodule
 
 module BYTES-HOOKED [concrete]
-  syntax Bytes [hook(BYTES.Bytes)]
+  syntax Bytes [hook(BYTES.Bytes), token]
 
   syntax Bytes ::= ".Bytes" [function, functional, hook(BYTES.empty), impure]
   syntax Endianness ::= "LE" [klabel(littleEndianBytes), symbol]
