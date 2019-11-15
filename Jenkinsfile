@@ -6,9 +6,9 @@ pipeline {
     ansiColor('xterm')
   }
   environment {
-    PACKAGE = 'kframework'
-    VERSION = '5.0.0'
-    ROOT_URL = 'https://github.com/kframework/k/releases/download/nightly'
+    PACKAGE  = 'kframework'
+    VERSION  = '5.0.0'
+    ROOT_URL = 'https://github.com/kframework/k/releases/download'
   }
   stages {
     stage("Init title") {
