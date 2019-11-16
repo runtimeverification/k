@@ -28,16 +28,16 @@ pipeline {
         }
       }
       steps {
-        dir("kframework-5.0.0") {
+        dir("kframework-${env.VERSION}") {
           checkout scm
           sh '''
             find . -name .git | xargs rm -r
             cd ..
-            tar czvf kframework-5.0.0-src.tar.gz kframework-5.0.0
+            tar czvf kframework-${VERSION}-src.tar.gz kframework-${VERSION}
           '''
           deleteDir()
         }
-        stash name: "src", includes: "kframework-5.0.0-src.tar.gz"
+        stash name: "src", includes: "kframework-${env.VERSION}-src.tar.gz"
       }
     }
     stage('Update Submodules (non-release)') {
@@ -87,14 +87,14 @@ pipeline {
                     }
                     stage('Build Debian Package') {
                       steps {
-                        dir('kframework-5.0.0') {
+                        dir('kframework-${env.VERSION}') {
                           checkout scm
                           sh '''
                             mv debian/control.ubuntu debian/control
                             dpkg-buildpackage
                           '''
                         }
-                        stash name: "bionic", includes: "kframework_5.0.0_amd64.deb"
+                        stash name: "bionic", includes: "kframework_${env.VERSION}_amd64.deb"
                       }
                     }
                   }
@@ -149,14 +149,14 @@ pipeline {
                   stages {
                     stage('Build Debian Package') {
                       steps {
-                        dir('kframework-5.0.0') {
+                        dir('kframework-${env.VERSION}') {
                           checkout scm
                           sh '''
                             mv debian/control.debian debian/control
                             dpkg-buildpackage
                           '''
                         }
-                        stash name: "buster", includes: "kframework_5.0.0_amd64.deb"
+                        stash name: "buster", includes: "kframework_${env.VERSION}_amd64.deb"
                       }
                     }
                   }
@@ -218,7 +218,7 @@ pipeline {
                         sh '''
                           makepkg
                         '''
-                        stash name: "arch", includes: "kframework-5.0.0-1-x86_64.pkg.tar.xz"
+                        stash name: "arch", includes: "kframework-${env.VERSION}-1-x86_64.pkg.tar.xz"
                       }
                     }
                   }
@@ -236,7 +236,7 @@ pipeline {
                     unstash "arch"
                     sh '''
                       pacman -Syyu --noconfirm
-                      pacman -U --noconfirm kframework-5.0.0-1-x86_64.pkg.tar.xz
+                      pacman -U --noconfirm kframework-${VERSION}-1-x86_64.pkg.tar.xz
                       src/main/scripts/test-in-container
                     '''
                   }
@@ -318,7 +318,7 @@ pipeline {
                         git config --global user.name  "RV Jenkins"
                         ${WORKSPACE}/src/main/scripts/brew-build-bottle
                       '''
-                      stash name: "mojave", includes: "kframework--5.0.0.mojave.bottle*.tar.gz"
+                      stash name: "mojave", includes: "kframework--${env.VERSION}.mojave.bottle*.tar.gz"
                     }
                   }
                 }
