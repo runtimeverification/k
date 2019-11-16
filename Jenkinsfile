@@ -218,7 +218,7 @@ pipeline {
                         sh '''
                           makepkg
                         '''
-                        stash name: "arch", includes: "kframework-${env.VERSION}-1-x86_64.pkg.tar.xz"
+                        stash name: "arch", includes: "kframework-git-${env.VERSION}-1-x86_64.pkg.tar.xz"
                       }
                     }
                   }
@@ -236,7 +236,7 @@ pipeline {
                     unstash "arch"
                     sh '''
                       pacman -Syyu --noconfirm
-                      pacman -U --noconfirm kframework-${VERSION}-1-x86_64.pkg.tar.xz
+                      pacman -U --noconfirm kframework-git-${VERSION}-1-x86_64.pkg.tar.xz
                       src/main/scripts/test-in-container
                     '''
                   }
@@ -388,11 +388,8 @@ pipeline {
         }
       }
       when {
-        anyOf {
-          branch 'master'
-          changelog '.*^\\[DEPLOY\\] .+$'
-        }
-        beforeAgent true
+        branch 'master'
+        beforeAgent 'true'
       }
       environment {
         AWS_ACCESS_KEY_ID     = credentials('aws-access-key-id')
