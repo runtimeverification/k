@@ -87,7 +87,7 @@ pipeline {
                     }
                     stage('Build Debian Package') {
                       steps {
-                        dir('kframework-${env.VERSION}') {
+                        dir("kframework-${env.VERSION}") {
                           checkout scm
                           sh '''
                             mv debian/control.ubuntu debian/control
@@ -149,7 +149,7 @@ pipeline {
                   stages {
                     stage('Build Debian Package') {
                       steps {
-                        dir('kframework-${env.VERSION}') {
+                        dir("kframework-${env.VERSION}") {
                           checkout scm
                           sh '''
                             mv debian/control.debian debian/control
