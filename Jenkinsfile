@@ -425,13 +425,13 @@ pipeline {
             echo "K Framework Release $release_tag"  > release.md
             echo ""                                 >> release.md
             cat k-distribution/INSTALL.md           >> release.md
-            hub release create                                                                                           \
-                --attach kframework-${VERSION}-src.tar.gz"#Source tar.gz"                                                \
-                --attach bionic/kframework_${VERSION}_amd64_bionic.deb"#Ubuntu Bionic (18.04) Package"                   \
-                --attach buster/kframework_${VERSION}_amd64_buster.deb"#Debian Buster (10) Package"                      \
-                --attach arch/kframework-${VERSION}/package/kframework-git-${VERSION}-1-x86_64.pkg.tar.xz"#Arch Package" \
-                --attach $LOCAL_BOTTLE_NAME"#Mac OS X Homebrew Bottle"                                                   \
-                --attach k-nightly.tar.gz"#Platform Indepdendent K Binary"                                               \
+            hub release create                                                                         \
+                --attach kframework-${VERSION}-src.tar.gz"#Source tar.gz"                              \
+                --attach bionic/kframework_${VERSION}_amd64_bionic.deb"#Ubuntu Bionic (18.04) Package" \
+                --attach buster/kframework_${VERSION}_amd64_buster.deb"#Debian Buster (10) Package"    \
+                --attach arch/kframework-git-${VERSION}-1-x86_64.pkg.tar.xz"#Arch Package"             \
+                --attach $LOCAL_BOTTLE_NAME"#Mac OS X Homebrew Bottle"                                 \
+                --attach k-nightly.tar.gz"#Platform Indepdendent K Binary"                             \
                 --file release.md "${release_tag}"
           '''
         }
