@@ -15,6 +15,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.ObjectStreamException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -124,9 +126,10 @@ public class BinaryLoader {
             //To protect from concurrent access to same file from another process
             out.getChannel().lock(); //Lock is released automatically when serializer is closed.
             try {
-                FSTObjectOutput serializer = fstConfig.get().getObjectOutput(out);
+                ObjectOutputStream serializer = new ObjectOutputStream(out);
                 serializer.writeObject(o);
                 serializer.flush();
+                serializer.close();
             } finally {
                 out.close();
             }
@@ -148,8 +151,9 @@ public class BinaryLoader {
                 //We are in Nailgun mode. File lock is not needed.
             }
             try {
-                FSTObjectInput deserializer = fstConfig.get().getObjectInput(in);
+                ObjectInputStream deserializer = new ObjectInputStream(in);
                 Object obj = deserializer.readObject();
+                deserializer.close();
                 return obj;
             } catch (IOException e) {
                 e.printStackTrace();
