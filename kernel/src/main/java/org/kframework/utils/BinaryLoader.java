@@ -86,7 +86,7 @@ public class BinaryLoader {
 
     public <T> T loadOrDie(Class<T> cls, File file) {
         try (FileInputStream in = new FileInputStream(file)) {
-            return cls.cast(loadSynchronized(in));
+            return cls.cast(loadSynchronized(in, file));
         } catch (ClassNotFoundException e) {
             throw new AssertionError("Something wrong with deserialization", e);
         } catch (ObjectStreamException e) {
@@ -102,7 +102,7 @@ public class BinaryLoader {
     @Nullable
     public <T> T loadCache(Class<T> cls, File file) {
         try (FileInputStream in = new FileInputStream(file)) {
-            return cls.cast(loadSynchronized(in));
+            return cls.cast(loadSynchronized(in, file));
         } catch (FileNotFoundException e) {
             //ignored
         } catch (IOException | ClassNotFoundException e) {
@@ -135,13 +135,13 @@ public class BinaryLoader {
         }
     }
 
-    public Object loadSynchronized(FileInputStream in)
+    public Object loadSynchronized(FileInputStream in, File file)
             throws IOException, ClassNotFoundException, InterruptedException {
         //To protect from concurrent access from another thread
         lock.readLock().lockInterruptibly();
         //Hack to allow acquiring exclusive lock on this file.
         //noinspection unused
-        try (FileOutputStream outForSameFile = new FileOutputStream(in.getFD())) {
+        try (FileOutputStream outForSameFile = new FileOutputStream(file)) {
             //To protect from concurrent access to same file from another process
             //Lock is released automatically when serializer is closed.
             try {
