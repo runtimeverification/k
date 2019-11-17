@@ -139,7 +139,9 @@ public class BinaryLoader {
             throws IOException, ClassNotFoundException, InterruptedException {
         //To protect from concurrent access from another thread
         lock.readLock().lockInterruptibly();
-        try {
+        //Hack to allow acquiring exclusive lock on this file.
+        //noinspection unused
+        try (FileOutputStream outForSameFile = new FileOutputStream(in.getFD())) {
             //To protect from concurrent access to same file from another process
             //Lock is released automatically when serializer is closed.
             try {
