@@ -388,8 +388,10 @@ pipeline {
         }
       }
       when {
-        branch 'master'
-        changelog '.*^\\[DEPLOY\\] .+$'
+        anyOf {
+          branch 'master'
+          changelog '.*^\\[DEPLOY\\] .+$'
+        }
         beforeAgent true
       }
       environment {
