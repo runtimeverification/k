@@ -121,7 +121,7 @@
             <configuration>
               <target>
                 <exec dir="${ktestDir}" executable="make" failonerror="true">
-                  <arg value="-j1" />
+                  <arg value="-j12" />
                 </exec>
               </target>
               <skip>${skipKTest}</skip>
