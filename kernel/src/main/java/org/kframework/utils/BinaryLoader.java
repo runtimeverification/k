@@ -147,7 +147,9 @@ public class BinaryLoader {
             try {
                 //JDK bug: apparently it just ignores shared locks on Linux. So we need an exclusive lock.
                 //Related problem, but not the same: https://stackoverflow.com/q/2479222/4182868
-                in.getChannel().lock(0L, Long.MAX_VALUE, false);
+                outForSameFile.getChannel().lock(0L, Long.MAX_VALUE, false);
+                //expected correct:
+                //in.getChannel().lock(0L, Long.MAX_VALUE, true);
             } catch (OverlappingFileLockException e) {
                 //We are in Nailgun mode. File lock is not needed.
             }
