@@ -106,7 +106,7 @@ public class BinaryLoader {
         } catch (FileNotFoundException e) {
             //ignored
         } catch (IOException | ClassNotFoundException e) {
-            kem.registerInternalHiddenWarning("Invalidating serialized cache due to corruption.", e);
+            kem.registerInternalWarning("Invalidating serialized cache due to corruption.", e);
         } catch (InterruptedException e) {
             throw KEMException.criticalError("Interrupted while locking to read " + file.getAbsolutePath(), e);
         }
@@ -143,7 +143,9 @@ public class BinaryLoader {
             //To protect from concurrent access to same file from another process
             //Lock is released automatically when serializer is closed.
             try {
-                in.getChannel().lock(0L, Long.MAX_VALUE, true);
+                //JDK bug: apparently it just ignores shared locks on Linux. So we need an exclusive lock.
+                //Related problem, but not the same: https://stackoverflow.com/q/2479222/4182868
+                in.getChannel().lock(0L, Long.MAX_VALUE, false);
             } catch (OverlappingFileLockException e) {
                 //We are in Nailgun mode. File lock is not needed.
             }
