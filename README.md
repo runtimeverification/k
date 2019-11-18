@@ -206,3 +206,4 @@ of artifacts, you can run `mvn dependency:purge-local-repository`.
 If tests fail but you want to run the build anyway to see what happens, you can use `mvn package -DskipTests`.
 
 If you still cannot build, please contact a K developer.
+
