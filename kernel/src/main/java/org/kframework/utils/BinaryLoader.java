@@ -70,8 +70,8 @@ public class BinaryLoader {
         if (!dir.exists() && !dir.mkdirs()) {
             throw KEMException.criticalError("Could not create directory " + dir);
         }
-        try (FileOutputStream out = new FileOutputStream(file)) {
-            saveSynchronized(out, o);
+        try {
+            saveSynchronized(file, o);
         } catch (IOException e) {
             throw KEMException.criticalError("Could not write to " + file.getAbsolutePath(), e);
         } catch (InterruptedException e) {
@@ -80,8 +80,8 @@ public class BinaryLoader {
     }
 
     public <T> T loadOrDie(Class<T> cls, File file) {
-        try (FileInputStream in = new FileInputStream(file)) {
-            return cls.cast(loadSynchronized(in));
+        try {
+            return cls.cast(loadSynchronized(file));
         } catch (ClassNotFoundException e) {
             throw new AssertionError("Something wrong with deserialization", e);
         } catch (ObjectStreamException e) {
@@ -96,12 +96,12 @@ public class BinaryLoader {
 
     @Nullable
     public <T> T loadCache(Class<T> cls, File file) {
-        try (FileInputStream in = new FileInputStream(file)) {
-            return cls.cast(loadSynchronized(in));
+        try {
+            return cls.cast(loadSynchronized(file));
         } catch (FileNotFoundException e) {
             //ignored
         } catch (IOException | ClassNotFoundException e) {
-            kem.registerInternalHiddenWarning("Invalidating serialized cache due to corruption.", e);
+            kem.registerInternalWarning("Invalidating serialized cache due to corruption.", e);
         } catch (InterruptedException e) {
             throw KEMException.criticalError("Interrupted while locking to read " + file.getAbsolutePath(), e);
         }
@@ -112,13 +112,16 @@ public class BinaryLoader {
      * Locks the file before writing, so that it cannot be read by another instance of K. If the file is currently in
      * use, this method will block until lock can be acquired.
      */
-    public void saveSynchronized(FileOutputStream out, Object o) throws IOException, InterruptedException {
+    public void saveSynchronized(File file, Object o) throws IOException, InterruptedException {
         //To protect from concurrent access from another thread
         lock.writeLock().lockInterruptibly();
-        try {
+        //JDK API limitation: there's no API to atomically open a file for writing and lock it.
+        //Consequently, if another thread reads a file between the moments this thread opens a stream and acquires a
+        // lock, it will see an empty file. We use lockStream open for appending as workaround.
+        try (FileOutputStream lockStream = new FileOutputStream(file, true)) {
             //To protect from concurrent access to same file from another process
-            out.getChannel().lock(); //Lock is released automatically when serializer is closed.
-            try (FSTObjectOutput serializer = new FSTObjectOutput(out)) { //already buffered
+            lockStream.getChannel().lock(); //Lock is released automatically when lockStream is closed.
+            try (FSTObjectOutput serializer = new FSTObjectOutput(new FileOutputStream(file))) { //already buffered
                 serializer.writeObject(o);
             }
         } finally {
@@ -126,13 +129,13 @@ public class BinaryLoader {
         }
     }
 
-    public Object loadSynchronized(FileInputStream in)
-            throws IOException, ClassNotFoundException, InterruptedException {
+    public Object loadSynchronized(File file) throws IOException, ClassNotFoundException, InterruptedException {
         //To protect from concurrent access from another thread
         lock.readLock().lockInterruptibly();
-        try {
+        //There's no issue if input stream is opened before lock is acquired
+        try (FileInputStream in = new FileInputStream(file)) {
             //To protect from concurrent access to same file from another process
-            //Lock is released automatically when serializer is closed.
+            //Lock is released automatically when stream is closed.
             try {
                 in.getChannel().lock(0L, Long.MAX_VALUE, true);
             } catch (OverlappingFileLockException e) {
@@ -145,7 +148,7 @@ public class BinaryLoader {
                 e.printStackTrace();
                 throw e;
             } finally {
-                // FST bug workaround: FSTObjectInput.close() doesn't close underlying FileInputStream.
+                // Former FST bug workaround: FSTObjectInput.close() doesn't close underlying FileInputStream.
                 // This may cause OverlappingFileLockException in saveSynchronized(), in Nailgun mode.
                 in.close();
             }
