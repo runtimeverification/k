@@ -388,8 +388,11 @@ pipeline {
         }
       }
       when {
-        branch 'master'
-        beforeAgent 'true'
+        anyOf {
+          branch 'master'
+          changelog '.*^\\[DEPLOY\\] .+$'
+        }
+        beforeAgent true
       }
       environment {
         AWS_ACCESS_KEY_ID     = credentials('aws-access-key-id')
