@@ -128,13 +128,7 @@ pipeline {
               }
             }
             stage('Build and Package on Debian Buster') {
-              when {
-                anyOf {
-                  branch 'master'
-                  changeset 'Jenkinsfile'
-                  changeset 'Dockerfile'
-                }
-              }
+              when { branch 'master' }
               stages {
                 stage('Build on Debian Buster') {
                   agent {
@@ -191,13 +185,7 @@ pipeline {
               }
             }
             stage('Build and Package on Arch Linux') {
-              when {
-                anyOf {
-                  branch 'master'
-                  changeset 'Jenkinsfile'
-                  changeset 'Dockerfile'
-                }
-              }
+              when { branch 'master' }
               stages {
                 stage('Build on Arch Linux') {
                   agent {
@@ -253,13 +241,7 @@ pipeline {
               }
             }
             stage('Build Platform Independent K Binary') {
-              when {
-                anyOf {
-                  branch 'master'
-                  changeset 'Jenkinsfile'
-                  changeset 'Dockerfile'
-                }
-              }
+              when { branch 'master' }
               agent {
                 dockerfile {
                   filename 'Dockerfile.debian'
@@ -287,13 +269,7 @@ pipeline {
           }
         }
         stage('Build and Package on Mac OS') {
-          when {
-            anyOf {
-              branch 'master'
-              changeset 'Jenkinsfile'
-              changeset 'Dockerfile'
-            }
-          }
+          when { branch 'master' }
           stages {
             stage('Build on Mac OS') {
               stages {
