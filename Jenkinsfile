@@ -41,7 +41,7 @@ pipeline {
       }
     }
     stage('Update Submodules (non-release)') {
-      // when { branch 'master' }
+      when { branch 'master' }
       steps {
         build job: 'rv-devops/master', parameters: [string(name: 'PR_REVIEWER', value: 'ehildenb'), booleanParam(name: 'UPDATE_DEPS_KWASM' , value: true)], propagate: false, wait: false
         build job: 'rv-devops/master', parameters: [string(name: 'PR_REVIEWER', value: 'malturki'), booleanParam(name: 'UPDATE_DEPS_BEACON', value: true)], propagate: false, wait: false
@@ -128,7 +128,7 @@ pipeline {
               }
             }
             stage('Build and Package on Debian Buster') {
-              // when { branch 'master' }
+              when { branch 'master' }
               stages {
                 stage('Build on Debian Buster') {
                   agent {
@@ -185,7 +185,7 @@ pipeline {
               }
             }
             stage('Build and Package on Arch Linux') {
-              // when { branch 'master' }
+              when { branch 'master' }
               stages {
                 stage('Build on Arch Linux') {
                   agent {
@@ -241,7 +241,7 @@ pipeline {
               }
             }
             stage('Build Platform Independent K Binary') {
-              // when { branch 'master' }
+              when { branch 'master' }
               agent {
                 dockerfile {
                   filename 'Dockerfile.debian'
@@ -269,7 +269,7 @@ pipeline {
           }
         }
         stage('Build and Package on Mac OS') {
-          // when { branch 'master' }
+          when { branch 'master' }
           stages {
             stage('Build on Mac OS') {
               stages {
@@ -355,10 +355,10 @@ pipeline {
           reuseNode true
         }
       }
-      // when {
-      //   branch 'master'
-      //   beforeAgent true
-      // }
+      when {
+        branch 'master'
+        beforeAgent true
+      }
       environment {
         AWS_ACCESS_KEY_ID     = credentials('aws-access-key-id')
         AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')
@@ -423,7 +423,7 @@ pipeline {
       }
     }
     stage('Update Submodules (release)') {
-      // when { branch 'master' }
+      when { branch 'master' }
       steps {
         build job: 'rv-devops/master', parameters: [string(name: 'PR_REVIEWER', value: 'ehildenb'), booleanParam(name: 'UPDATE_DEPS_KEVM'   , value: true)], propagate: false, wait: false
         build job: 'rv-devops/master', parameters: [string(name: 'PR_REVIEWER', value: 'ttuegel') , booleanParam(name: 'UPDATE_DEPS_HASKELL', value: true)], propagate: false, wait: false
