@@ -26,7 +26,7 @@ module IMP-SYNTAX
   syntax Ids ::= List{Id,","} [format(%1%2 %3)]
 endmodule
 
-module IMP
+module IMP-BASIC
   imports IMP-SYNTAX
   imports DOMAINS
 
@@ -36,8 +36,6 @@ module IMP
                   <k color="green"> $PGM:Pgm </k>
                   <state color="red"> .Map </state>
                 </T>
-
-  rule <k> X:Id => I ...</k> <state>... X |-> I ...</state>
 
   rule I1 / I2 => I1 /Int I2  requires I2 =/=Int 0
   rule I1 + I2 => I1 +Int I2
@@ -51,8 +49,6 @@ module IMP
   rule {} => .   [structural]
   rule {S} => S  [structural]
 
-  rule <k> X = I:Int; => . ...</k> <state>... X |-> (_ => I) ...</state>
-
   rule S1:Stmt S2:Stmt => S1 ~> S2  [structural]
 
   rule if (true)  S else _ => S
@@ -60,7 +56,24 @@ module IMP
 
   rule while (B) S => if (B) {S while (B) S} else {}  [structural]
 
+  rule int .Ids; S => S  [structural]
+endmodule
+
+module IMP-SEMANTICS
+  imports IMP-SYNTAX
+  imports DOMAINS
+  imports IMP-BASIC
+
+  rule <k> X:Id => I ...</k> <state>... X |-> I ...</state>
+
+
+  rule <k> X = I:Int; => . ...</k> <state>... X |-> (_ => I) ...</state>
+
+
   rule <k> int (X,Xs => Xs);_ </k> <state> Rho:Map (.Map => X|->0) </state>
     requires notBool (X in keys(Rho))
-  rule int .Ids; S => S  [structural]
+endmodule
+
+module IMP
+    imports IMP-SEMANTICS
 endmodule

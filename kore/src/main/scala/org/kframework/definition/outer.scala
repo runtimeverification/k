@@ -179,10 +179,10 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
       Production(None, Seq(), s, Seq(), Att.empty.add("token"))
   }
 
-  lazy val allModulesNames : Set[String] = (imports map  {_.name}) + name
+  lazy val allModuleNames : Set[String] = importedModuleNames + name
 
   def importedSentencesExcept(m: Module): Set[Sentence] =
-    imports flatMap { i => if (m.allModulesNames contains i.name) Set.empty[Sentence] else i.localSentences }
+    importedModules flatMap { i => if (m.allModuleNames contains i.name) Set.empty[Sentence] else i.localSentences }
   def sentencesExcept(m: Module): Set[Sentence] = importedSentencesExcept(m) | localSentences
 
   lazy val bracketProductionsFor: Map[Sort, List[Production]] =
