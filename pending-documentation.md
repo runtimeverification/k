@@ -503,19 +503,25 @@ you can with a regular klabel for a function. You also cannot express multiple
 rules or multiple parameters, or side conditions. All of these are extensions
 we would like to support in the future, however.
 
-In the following, we use three examples to illustrate more formally the behavior of `#fun` by showing how they can be translated to matching logic patterns (in Kore).
+In the following, we use three examples to illustrate more formally the
+behavior of `#fun` by showing how they can be translated to matching logic
+patterns (in Kore).
 
 *Example 1 (A Simple Self-Explained Example).*
 
 ```
 #fun(V:Val => isFoo(V) andBool isBar(V))(someFunctionReturningVal())
 ```
+
 The following is our Kore definition:
+
 ```
 \exists(V:Val, \and(\equals(V:Val, someFunctionReturningVal()),
   isFoo(V) andBool isBar(V)))
 ```
-Here, we use `\exists` and `\equals` to enforce the two `V` in `isFoo(V)` and `isBar(V)` must be `someFunctionReturningVal()`. 
+
+Here, we use `\exists` and `\equals` to enforce the two `V` in `isFoo(V)` and
+`isBar(V)` must be `someFunctionReturningVal()`.
 
 *Example 2 (Nested #fun).*
 
@@ -528,8 +534,11 @@ Here, we use `\exists` and `\equals` to enforce the two `V` in `isFoo(V)` and `i
   )(foo3(0))
   )(foo4(1))
 ```
- This example is from the `beacon` semantics:https://github.com/runtimeverification/beacon-chain-spec/blob/master/beacon-chain.k at line 302, with some modification for simplicity.
-We define it as the following Kore pattern: 
+
+This example is from the `beacon`
+semantics:https://github.com/runtimeverification/beacon-chain-spec/blob/master/b
+eacon-chain.k at line 302, with some modification for simplicity. We define it
+as the following Kore pattern:
 
 ```
 \exists(C, \and(\equals(C, foo4(1)),
@@ -541,18 +550,27 @@ We define it as the following Kore pattern:
 *Example 3 (Matching a structure).*
 
 ```
-rule foo(K, RECORD) => 
+rule foo(K, RECORD) =>
   #fun(record(... field: _ => K))(RECORD)
 ```
-Unlike previous examples, the "left-hand side" of `#fun` is no longer a variable, but a structure.
-We define the `#fun` expression as the following Kore pattern, where we write `DotVar` for the `...` and `X` for the `_`: 
+
+Unlike previous examples, the "left-hand side" of `#fun` is no longer a
+variable, but a structure. We define the `#fun` expression as the following
+Kore pattern, where we write `DotVar` for the `...` and `X` for the `_`:
 
 ```
 \exists(X, \and(\equals( record( DotVar, field: X) , RECORD ),
   record( DotVar, field: K)))
 ```
-The above axiom is defined in the same spirit as the first two examples. However, unlike the other two examples, here we match the argument RECORD with not a standalone variable, but a structure `record( DotVar, field: X)`. And later in the body of `\exists`, we need to duplicate this structure again and only substitute `X` for `K`.
-To avoid duplication, we can define an alias specifically for this `#fun` expression and use the alias to simplify our definition:
+
+The above axiom is defined in the same spirit as the first two examples.
+However, unlike the other two examples, here we match the argument RECORD with
+not a standalone variable, but a structure `record( DotVar, field: X)`. And
+later in the body of `\exists`, we need to duplicate this structure again and
+only substitute `X` for `K`. To avoid duplication, we can define an alias
+specifically for this `#fun` expression and use the alias to simplify our
+definition:
+
 ```
 alias #foo-aux(DotVar, X) := record( DotVar, field: X)
 axiom \exists(X, \and(\equals( #foo-aux(X) , RECORD ),
