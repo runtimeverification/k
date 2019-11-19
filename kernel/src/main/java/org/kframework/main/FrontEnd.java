@@ -51,7 +51,8 @@ public abstract class FrontEnd {
                 retval = 0;
             } else {
                 if (globalOptions.timeout != null) {
-                    new ExitOnTimeoutThread(globalOptions.timeout.toMillis()).start();
+                    new ExitOnTimeoutThread(Main.isNailgun() ? Thread.currentThread() : null,
+                            globalOptions.timeout.toMillis()).start();
                 }
                 if (globalOptions.shutdownWaitTime != null && !Main.isNailgun()) {
                     //Will interrupt the thread on Ctrl+C and allow the backend to terminate gracefully.
