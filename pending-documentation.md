@@ -793,7 +793,7 @@ the first `+` or the second. In the first case, the maximal solution chosen is
 (Exp, Int). In the second, it is (Int, Exp). Neither of these solutions is
 greater than the other, so both are allowed by K. As a result, this program
 will emit an error because the parse is ambiguous. To pick one solution over
-the other, a cast or a `prefer` or `avoid` attribute is required.
+the other, a cast or a `prefer` or `avoid` attribute can be used.
 
 ### Casting
 
@@ -802,11 +802,11 @@ and the projection cast.
 
 ### Semantic casts
 
-For every sort `Sort` declared in your grammar, K will define the following
+For every sort `S` declared in your grammar, K will define the following
 production for you for use in rules:
 
 ```k
-    syntax Sort ::= Sort ":Sort"
+    syntax S ::= S ":S"
 ```
 
 The meaning of this cast is that the term inside the cast must be less than
@@ -820,7 +820,7 @@ matches on an injection into `Sort`.
 K also introduces the strict cast:
 
 ```k
-    syntax Sort ::= Sort "::Sort"
+    syntax S ::= S "::S"
 ```
 
 The meaning at runtime is exactly the same as the semantic cast (except in the
@@ -837,7 +837,7 @@ execution.
 K also introduces the projection cast:
 
 ```k
-    syntax {S} Sort ::= "{" S "}" ":>Sort"
+    syntax {S2} S ::= "{" S2 "}" ":>S"
 ```
 
 The meaning of this cast at runtime is that if the term inside is of sort
