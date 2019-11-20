@@ -27,7 +27,7 @@ public class ExitOnTimeoutThread extends Thread {
             if (thread != null) {
                 thread.join(timeoutMillis);
                 System.err.println("K thread timeout...");
-                thread.interrupt();
+                System.exit(124);
             } else {
                 Thread.sleep(timeoutMillis);
                 System.err.println("K process timeout...");
