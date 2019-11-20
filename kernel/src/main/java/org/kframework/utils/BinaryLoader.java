@@ -17,9 +17,7 @@ import java.io.IOException;
 import java.io.ObjectStreamException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.nio.channels.FileChannel;
 import java.nio.channels.OverlappingFileLockException;
-import java.nio.file.StandardOpenOption;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -119,10 +117,11 @@ public class BinaryLoader {
         lock.writeLock().lockInterruptibly();
         //JDK API limitation: there's no API to atomically open a file for writing and lock it.
         //Consequently, if another process reads a file between the moments this thread opens a stream and acquires a
-        // lock, it will see an empty file. To prevent this we acquire file lock before opening the stream.
-        try (FileChannel channel = FileChannel.open(file.toPath(), StandardOpenOption.APPEND)) {
+        // lock, it will see an empty file.
+        // To prevent this we acquire file lock before opening the stream, using another stream.
+        try (FileOutputStream lockStream = new FileOutputStream(file, true)) {
             //To protect from concurrent access to same file from another process, in standalone mode
-            channel.lock(); //Lock is released automatically when lockStream is closed.
+            lockStream.getChannel().lock(); //Lock is released automatically when lockStream is closed.
             try (FSTObjectOutput serializer = new FSTObjectOutput(new FileOutputStream(file))) { //already buffered
                 serializer.writeObject(o);
             }
