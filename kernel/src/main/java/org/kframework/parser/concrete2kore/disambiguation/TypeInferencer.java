@@ -4,13 +4,11 @@ package org.kframework.parser.concrete2kore.disambiguation;
 import org.kframework.Collections;
 import org.kframework.TopologicalSort;
 import org.kframework.attributes.Location;
-import org.kframework.attributes.HasLocation;
 import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.ResolveAnonVar;
 import org.kframework.definition.Module;
 import org.kframework.definition.NonTerminal;
-import org.kframework.definition.Production;
 import org.kframework.kil.Attribute;
 import org.kframework.kore.Sort;
 import org.kframework.parser.Ambiguity;
@@ -18,7 +16,6 @@ import org.kframework.parser.Constant;
 import org.kframework.parser.ProductionReference;
 import org.kframework.parser.Term;
 import org.kframework.parser.TermCons;
-import org.kframework.parser.SafeTransformer;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.utils.OS;
 import org.kframework.utils.errorsystem.KException;
@@ -26,9 +23,6 @@ import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.ParseFailedException;
-
-import com.google.common.collect.SetMultimap;
-import com.google.common.collect.HashMultimap;
 
 import scala.collection.Seq;
 import scala.collection.Set;
@@ -39,7 +33,6 @@ import java.io.File;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -62,7 +55,7 @@ import static org.kframework.Collections.*;
  */
 public class TypeInferencer implements AutoCloseable {
 
-  public static enum Status {
+  public enum Status {
     SATISFIABLE,
     UNSATISFIABLE,
     UNKNOWN
@@ -101,7 +94,7 @@ public class TypeInferencer implements AutoCloseable {
   }
 
   // returns whether a particular sort should be written to z3 and thus be a possible sort for variables.
-  public boolean isRealSort(Sort s) {
+  private boolean isRealSort(Sort s) {
     return !RuleGrammarGenerator.isParserSort(s) || s.equals(Sorts.K()) || s.equals(Sorts.KItem()) || s.equals(Sorts.KLabel()) || s.equals(Sorts.RuleTag());
   }
 
@@ -113,7 +106,7 @@ public class TypeInferencer implements AutoCloseable {
    * Writes the prelude for a particular module.
    * @param mod
    */
-  public void push(Module mod) {
+  private void push(Module mod) {
     int i = 0;
     for (Sort s : iterable(TopologicalSort.tsort(mod.syntacticSubsorts().directRelations()))) {
       if (!isRealSort(s)) {
@@ -165,7 +158,6 @@ public class TypeInferencer implements AutoCloseable {
 
   // list of names for variables and sort parameters in z3
   private final List<String> variables = new ArrayList<>();
-  private final List<String> variableNames = new ArrayList<>();
   // list of names for sort parameters only in z3
   private final List<String> parameters = new ArrayList<>();
   // array mapping from integer id of terms to the list of names of their variable or sort parameters in z3
@@ -173,14 +165,13 @@ public class TypeInferencer implements AutoCloseable {
   // array mapping from integer id of terms to the expected sorts they have appeared under so far
   private final List<java.util.Set<String>> cacheById = new ArrayList<>();
   private int nextId = 0;
-  private int nextVarId = 0;
   private Term currentTerm;
   private Sort currentTopSort;
   private boolean isAnywhere;
 
   private static class LocalizedError extends RuntimeException {
     private final Term loc;
-    public LocalizedError(String message, Term loc) {
+    LocalizedError(String message, Term loc) {
       super(message);
       this.loc = loc;
     }
@@ -389,9 +380,9 @@ public class TypeInferencer implements AutoCloseable {
     public final String name;
     public final Constant loc;
     public final Sort expectedSort;
-    public final Optional<ProductionReference> expectedParams;
-    public final Sort actualSort;
-    public final Optional<ProductionReference> actualParams;
+    final Optional<ProductionReference> expectedParams;
+    final Sort actualSort;
+    final Optional<ProductionReference> actualParams;
 
     /**
      * Creates an upper bound constraint on a variable.
@@ -461,7 +452,7 @@ public class TypeInferencer implements AutoCloseable {
      * @param isAnywhere true if the term is an anywhere rule.
      * @param isIncremental true if we should compute the constraints as a list of {@link Constraint}
      */
-    public ExpectedSortsVisitor(Sort topSort, boolean isAnywhere, boolean isIncremental) {
+    ExpectedSortsVisitor(Sort topSort, boolean isAnywhere, boolean isIncremental) {
       this.expectedSort = topSort;
       this.isAnywhere = isAnywhere;
       this.isIncremental = isIncremental;
@@ -520,7 +511,6 @@ public class TypeInferencer implements AutoCloseable {
           String name = "FreshVar" + param.name() + locStr(pr);
           if (!variables.contains(name)) {
             variables.add(name);
-            variableNames.add(param.name() + " in production " + pr.production().toString());
             parameters.add(name);
           }
           variablesById.get(id).add(name);
@@ -548,16 +538,14 @@ public class TypeInferencer implements AutoCloseable {
               expectedSort = getSortOfCast(tc);
               isStrictEquality = tc.production().klabel().get().name().equals("#SyntacticCast")
                   || tc.production().klabel().get().name().equals("#InnerCast");
-              ids.add(apply(tc.get(j)));
             } else if (isTopSort && j == 0 && isFunction(tc.get(j), isAnywhere)) {
               expectedSort = getFunctionSort(tc.get(j));
               expectedParams = Optional.of(getFunction(tc.get(j)).get());
-              ids.add(apply(tc.get(j)));
             } else {
               expectedSort = nt.sort();
-              ids.add(apply(tc.get(j)));
             }
             // recurse and add name of function generated by child to the current children of this constraint.
+            ids.add(apply(tc.get(j)));
             j++;
           }
         }
@@ -592,13 +580,11 @@ public class TypeInferencer implements AutoCloseable {
             }
             if (!variables.contains(name)) {
               variables.add(name);
-              variableNames.add(c.value());
             }
             variablesById.get(id).add(name);
           } else {
             name = variablesById.get(id).get(0);
           }
-          Sort actualSort = null;
           pushConstraint(name, c);
         } else if (isRealSort(pr.production().sort())) {
           pushConstraint(pr.production().sort(), Optional.of(pr));
@@ -614,7 +600,7 @@ public class TypeInferencer implements AutoCloseable {
       return "|constraint" + id + "_" + expected + "|";
     }
 
-    public boolean isAnonVar(Constant var) {
+    boolean isAnonVar(Constant var) {
       return var.value().equals(ResolveAnonVar.ANON_VAR.name()) || var.value().equals(ResolveAnonVar.FRESH_ANON_VAR.name());
     }
 
@@ -707,10 +693,10 @@ public class TypeInferencer implements AutoCloseable {
       return sb.toString();
     }
     if (s.params().isEmpty()) {
-      sb.append("|Sort" + s.name() + "|");
+      sb.append("|Sort").append(s.name()).append("|");
       return sb.toString();
     }
-    sb.append("(|Sort" + s.name() + "|");
+    sb.append("(|Sort").append(s.name()).append("|");
     for (Sort param : iterable(s.params())) {
       sb.append(" ");
       sb.append(printSort(param, params, isIncremental));
@@ -744,13 +730,14 @@ public class TypeInferencer implements AutoCloseable {
         result = output.readLine();
       } while (!result.equals("sat") && !result.equals("unsat") && !result.equals("unknown") && !result.startsWith("(error"));
       StringBuilder old = null;
-      if (result.equals("sat")) {
+      switch (result) {
+      case "sat":
         return Status.SATISFIABLE;
-      } else if (result.equals("unsat")) {
+      case "unsat":
         return Status.UNSATISFIABLE;
-      } else if (result.equals("unknown")) {
-        return status.UNKNOWN;
-      } else {
+      case "unknown":
+        return Status.UNKNOWN;
+      default:
         throw KEMException.internalError("Unexpected result from z3: " + result);
       }
     } catch (IOException e) {
@@ -769,39 +756,18 @@ public class TypeInferencer implements AutoCloseable {
     return status;
   }
 
-  public java.util.Set<ParseFailedException> error(List<Map<String, Sort>> models) {
-    SetMultimap<String, Sort> grouped = HashMultimap.create();
-    for (Map<String, Sort> model : models) {
-      for (Map.Entry<String, Sort> entry : model.entrySet()) {
-        grouped.put(entry.getKey(), entry.getValue());
-      }
-    }
-    java.util.Set<ParseFailedException> result = new HashSet<>();
-    int i = 0;
-    for (String var : variables) {
-      if (grouped.get(var).size() > 1) {
-        result.add(new ParseFailedException(new KException(ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, "Could not infer a unique sort for variable " + variableNames.get(i) + ". Possible sorts: " + grouped.get(var), currentTerm.source().orElse(null), currentTerm.location().orElse(null))));
-      }
-      i++;
-    }
-    if(!result.isEmpty()) {
-      return result;
-    }
-    throw KEMException.internalError("Unknown sort inference error.", currentTerm);
-  }
-
   public java.util.Set<ParseFailedException> error() {
     pop();
     return java.util.Collections.singleton(new ParseFailedException(push()));
   }
 
-  public void computeModel() {
+  void computeModel() {
     for (String var : variables) {
       model.put(var, computeValue(var));
     }
   }
 
-  public void selectModel(Map<String, Sort> model) {
+  void selectModel(Map<String, Sort> model) {
     this.model.clear();
     this.model.putAll(model);
   }
@@ -810,7 +776,7 @@ public class TypeInferencer implements AutoCloseable {
     return new HashMap<>(model);
   }
 
-  public void pushNotModel() {
+  void pushNotModel() {
     print("(assert (not (and true");
     java.util.Set<String> realVariables = new HashSet<>(variables);
     realVariables.removeAll(parameters);
@@ -867,7 +833,7 @@ public class TypeInferencer implements AutoCloseable {
     }
   }
 
-  public boolean hasNoVariables() {
+  boolean hasNoVariables() {
     return variables.isEmpty();
   }
 
@@ -887,16 +853,14 @@ public class TypeInferencer implements AutoCloseable {
     status = null;
     model.clear();
     variables.clear();
-    variableNames.clear();
     parameters.clear();
     variablesById.clear();
     cacheById.clear();
     ordinals.clear();
     nextId = 0;
-    nextVarId = 0;
   }
 
-  private static final String locStr(ProductionReference pr) {
+  private static String locStr(ProductionReference pr) {
     String suffix = "";
     if (pr.production().klabel().isDefined()) {
       suffix = "_" + pr.production().klabel().get().name().replace("|","");
@@ -905,10 +869,10 @@ public class TypeInferencer implements AutoCloseable {
       Location l = pr.location().get();
       return "_" + l.startLine() + "_" + l.startColumn() + "_" + l.endLine() + "_" + l.endColumn() + suffix;
     }
-    return Integer.toString(pr.id().get()) + suffix;
+    return pr.id().get() + suffix;
   }
 
-  static final boolean DEBUG = false;
+  private static final boolean DEBUG = false;
 
   private StringBuilder sb = new StringBuilder();
 
@@ -927,7 +891,7 @@ public class TypeInferencer implements AutoCloseable {
     z3.print(s);
   }
 
-  int level = 0;
+  private int level = 0;
 
   public void pop() {
     println("(pop)");
