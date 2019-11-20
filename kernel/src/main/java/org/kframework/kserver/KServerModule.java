@@ -14,6 +14,7 @@ import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.util.Providers;
+import org.kframework.utils.inject.RequestScoped;
 
 public class KServerModule extends AbstractModule {
 
@@ -30,7 +31,7 @@ public class KServerModule extends AbstractModule {
         bind(File.class).annotatedWith(KompiledDir.class).toProvider(Providers.of(null));
     }
 
-    @Provides
+    @Provides @RequestScoped
     GlobalOptions globalOptions(KServerOptions options) {
         return options.global;
     }

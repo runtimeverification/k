@@ -4,6 +4,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.Provides;
+import com.google.inject.Scopes;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.Multibinder;
 import org.kframework.definition.Definition;
@@ -23,6 +24,7 @@ import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.Annotations;
 import org.kframework.utils.inject.Main;
 import org.kframework.utils.inject.Options;
+import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.inject.Spec1;
 import org.kframework.utils.inject.Spec2;
 import org.kframework.utils.options.DefinitionLoadingOptions;
@@ -39,7 +41,7 @@ public class KEqModule extends AbstractModule {
             //bind backend implementations of tools to their interfaces
             install(new BackendModule());
 
-            bind(FileUtil.class);
+            bind(FileUtil.class).in(Scopes.NO_SCOPE);
             bind(FileSystem.class).to(PortableFileSystem.class);
         }
 
@@ -64,7 +66,7 @@ public class KEqModule extends AbstractModule {
         Multibinder<Class<?>> experimentalOptionsBinder = Multibinder.newSetBinder(binder(), new TypeLiteral<Class<?>>() {}, Options.class);
     }
 
-    @Provides
+    @Provides @RequestScoped
     GlobalOptions globalOptions(KEqOptions options) {
         return options.global;
     }
@@ -72,7 +74,7 @@ public class KEqModule extends AbstractModule {
     @Provides
     SMTOptions smtOptions(KEqOptions options) { return options.smt; }
 
-    @Provides
+    @Provides @RequestScoped
     PrintOptions printOptions(KEqOptions options) {
         return options.print;
     }
