@@ -506,6 +506,11 @@ we would like to support in the future, however.
 In the following, we use three examples to illustrate more formally the
 behavior of `#fun` by showing how they can be translated to matching logic
 patterns (in Kore).
+We point out that the Kore translation part is mainly a proposal for now, and
+has not been implemented. Instead, the support for `#fun` is provided by
+the frontend, not the backends. 
+Given that said, the three examples are real examples borrowed or modified
+from existing language semantics.
 
 *Example 1 (A Simple Self-Explained Example).*
 
