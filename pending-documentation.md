@@ -754,14 +754,14 @@ Here `+Int` is defined in the INT module with the following signature:
     syntax Int ::= Int "+Int" Int [function]
 ```
 
-In the rule above, the sort of I1 and I2 is inferred as `Int`. This is because
+In the rule above, the sort of both `I1` and `I2` is inferred as `Int`. This is because
 a variable must have the same sort every place it appears within the same rule.
 While a variable appearing only on the left-hand-side of the rule could have
 sort `Exp` instead, the same variable appears as a child of `+Int`, which
-constriants the sorts of I1 and I2 more tightly. Since the sort must be a
+constriants the sorts of `I1` and `I2` more tightly. Since the sort must be a
 subsort of `Int` or equal to `Int`, and `Int` has no subsorts, we infer `Int`
- as the sorts of I1 and I2. This means that the above rule will not match
-until I1 and I2 become integers (i.e., have already been evaluated).
+ as the sorts of `I1` and `I2`. This means that the above rule will not match
+until `I1` and `I2` become integers (i.e., have already been evaluated).
 
 More complex examples are possible, however:
 
@@ -772,14 +772,14 @@ More complex examples are possible, however:
 
 Here we have two anonymous variables. They do not refer to the same variable
 as one another, so they can have different sorts. The right side is constrained
-by `+` to be of sort Int, but the left side could be either `Exp` or `Int`.
+by `+` to be of sort `Int`, but the left side could be either `Exp` or `Int`.
 When this occurs, we have multiple solutions to the sorts of the variables in
 the rule. K will only choose solutions which are **maximal**, however. To be
 precise, if two different solutions exist, but the sorts of one solution are
 all greater than or equal to the sorts of the other solution, K will discard
 the smaller solution. Thus, in the case above, the variable on the left side
-of the `+` is inferred of sort `Exp`, because the solution (Exp, Int) is
-strictly greater than the solution (Int, Int).
+of the `+` is inferred of sort `Exp`, because the solution (`Exp`, `Int`) is
+strictly greater than the solution (`Int`, `Int`).
 
 It is possible, however, for terms to have multiple maximal solutions:
 
@@ -790,7 +790,7 @@ It is possible, however, for terms to have multiple maximal solutions:
 
 In this example, there is an ambiguous parse. This could parse as either
 the first `+` or the second. In the first case, the maximal solution chosen is
-(Exp, Int). In the second, it is (Int, Exp). Neither of these solutions is
+(`Exp`, `Int`). In the second, it is (`Int`, `Exp`). Neither of these solutions is
 greater than the other, so both are allowed by K. As a result, this program
 will emit an error because the parse is ambiguous. To pick one solution over
 the other, a cast or a `prefer` or `avoid` attribute can be used.
