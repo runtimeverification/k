@@ -216,6 +216,9 @@ def underbarUnparsing(symbol):
 def indent(input):
     return "\n".join(["  " + l for l in input.split("\n")])
 
+def newLines(input):
+    return '\n'.join(input)
+
 def buildSymbolTable(definition):
     """Build the unparsing symbol table given a JSON encoded definition.
 
