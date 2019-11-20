@@ -137,7 +137,7 @@ def splitConfigFrom(configuration):
                 initial_substitution[config_var] = k['args'][0]
                 return KApply(k['label'], [KVariable(config_var)])
         return k
-    symbolic_config = traverseBottomUp(configuration, _replaceWithVar)
+    symbolic_config = traverseTopDown(configuration, _replaceWithVar)
     return (symbolic_config, initial_substitution)
 
 def collapseDots(kast):
