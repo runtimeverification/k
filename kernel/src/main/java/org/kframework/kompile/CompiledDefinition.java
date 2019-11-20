@@ -164,13 +164,12 @@ public class CompiledDefinition implements Serializable {
     public Module languageParsingModule() { return languageParsingModule; }
 
     /**
-     * Creates a parser for a module.
-     * Will probably want to move the method out of this class here eventually.
+     * Creates a parser for a module and use it to parse a term.
      *
-     * @return a function taking a String to be parsed, a Source, and returning the parsed string as K.
+     * @return the parsed term.
      */
 
-    public K parse(Module module, Sort programStartSymbol, KExceptionManager kem, String s, Source source) {
+    public K parseSingleTerm(Module module, Sort programStartSymbol, KExceptionManager kem, String s, Source source) {
         try (ParseInModule parseInModule = RuleGrammarGenerator.getCombinedGrammar(module, kompileOptions.strict())) {
             Tuple2<Either<Set<ParseFailedException>, K>, Set<ParseFailedException>> res = parseInModule.parseString(s, programStartSymbol, source);
             kem.addAllKException(res._2().stream().map(e -> e.getKException()).collect(Collectors.toSet()));

@@ -52,7 +52,7 @@ public class KRead {
             case KORE:
                 return new KoreParser(mod.sortAttributesFor()).parseString(stringToParse);
             case PROGRAM:
-                return def.parse(mod, sort, kem, stringToParse, source);
+                return def.parseSingleTerm(mod, sort, kem, stringToParse, source);
             default:
                 throw KEMException.criticalError("Unsupported input mode: " + inputMode);
         }
