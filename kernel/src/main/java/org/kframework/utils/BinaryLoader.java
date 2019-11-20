@@ -17,7 +17,9 @@ import java.io.IOException;
 import java.io.ObjectStreamException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.nio.channels.FileChannel;
 import java.nio.channels.OverlappingFileLockException;
+import java.nio.file.StandardOpenOption;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -113,14 +115,14 @@ public class BinaryLoader {
      * use, this method will block until lock can be acquired.
      */
     public void saveSynchronized(File file, Object o) throws IOException, InterruptedException {
-        //To protect from concurrent access from another thread
+        //To protect from concurrent access from another thread, in kserver mode
         lock.writeLock().lockInterruptibly();
         //JDK API limitation: there's no API to atomically open a file for writing and lock it.
-        //Consequently, if another thread reads a file between the moments this thread opens a stream and acquires a
-        // lock, it will see an empty file. We use lockStream open for appending as workaround.
-        try (FileOutputStream lockStream = new FileOutputStream(file, true)) {
-            //To protect from concurrent access to same file from another process
-            lockStream.getChannel().lock(); //Lock is released automatically when lockStream is closed.
+        //Consequently, if another process reads a file between the moments this thread opens a stream and acquires a
+        // lock, it will see an empty file. To prevent this we acquire file lock before opening the stream.
+        try (FileChannel channel = FileChannel.open(file.toPath(), StandardOpenOption.APPEND)) {
+            //To protect from concurrent access to same file from another process, in standalone mode
+            channel.lock(); //Lock is released automatically when lockStream is closed.
             try (FSTObjectOutput serializer = new FSTObjectOutput(new FileOutputStream(file))) { //already buffered
                 serializer.writeObject(o);
             }
