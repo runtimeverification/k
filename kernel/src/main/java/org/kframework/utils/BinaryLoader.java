@@ -103,7 +103,7 @@ public class BinaryLoader {
         } catch (FileNotFoundException e) {
             //ignored
         } catch (IOException | ClassNotFoundException e) {
-            kem.registerInternalWarning("Invalidating serialized cache due to corruption.", e);
+            kem.registerInternalHiddenWarning("Invalidating serialized cache due to corruption.", e);
         } catch (InterruptedException e) {
             throw KEMException.criticalError("Interrupted while locking to read " + file.getAbsolutePath(), e);
         }
