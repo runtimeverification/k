@@ -121,7 +121,7 @@ public class TypeInferencer implements AutoCloseable {
       println("|Sort" + s.name() + "| ");
     }
     println(")))");
-    // provide fixewd interpretation of subsort relation
+    // provide fixed interpretation of subsort relation
     println("(define-fun <=Sort ((s1 Sort) (s2 Sort)) Bool (or");
     for (Tuple2<Sort, Set<Sort>> relation : stream(mod.syntacticSubsorts().relations()).sorted(Comparator.comparing(t -> -ordinals.getOrDefault(t._1(), 0))).collect(Collectors.toList())) {
       if (!isRealSort(relation._1())) {
@@ -563,7 +563,7 @@ public class TypeInferencer implements AutoCloseable {
         sb.append("(define-fun |constraint").append(id).append("_").append(expected).append("| () Bool (and true ");
       }
       if (isIncremental || !shared || !cached) {
-        // if we are in incremental mode or this is the first time raeeching this term under this expected sort,
+        // if we are in incremental mode or this is the first time reaching this term under this expected sort,
         // compute the local constraints of this term and add them to the current constraint.
         if (pr instanceof Constant && (pr.production().sort().equals(Sorts.KVariable()) || pr.production().sort().equals(Sorts.KConfigVar()))) {
           Constant c = (Constant) pr;
