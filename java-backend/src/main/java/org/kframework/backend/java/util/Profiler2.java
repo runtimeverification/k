@@ -130,11 +130,12 @@ public class Profiler2 {
         String postGcPrefix = ",\t\t post-gc mem: ";
         TimeMemoryEntry[] intermediateForTotal = afterExecution ? getIntermediateStats(parsingStats, initStats)
                                                                 : getIntermediateStats(parsingStats);
-        System.err.format("\nTotal                 : %s%s", currentStats.logString(startStats, intermediateForTotal),
+        String totalCaption = afterExecution ? "Total                 " : "Total init            ";
+        System.err.format("\n" + totalCaption + ": %s%s", currentStats.logString(startStats, intermediateForTotal),
                 currentStats.postGCLogString(postGcPrefix, intermediateForTotal));
         System.err.format("\n  Parsing             : %s%s", parsingStats.logString(startStats),
                 parsingStats.postGCLogString(postGcPrefix));
-        System.err.format("\n  Init                : %s%s", initStats.logString(parsingStats),
+        System.err.format("\n  Rewriter init       : %s%s", initStats.logString(parsingStats),
                 initStats.postGCLogString(postGcPrefix));
         if (afterExecution) {
             System.err.format("\n  Execution           : %s%s",
