@@ -729,7 +729,6 @@ public class TypeInferencer implements AutoCloseable {
       do {
         result = output.readLine();
       } while (!result.equals("sat") && !result.equals("unsat") && !result.equals("unknown") && !result.startsWith("(error"));
-      StringBuilder old = null;
       switch (result) {
       case "sat":
         return Status.SATISFIABLE;
