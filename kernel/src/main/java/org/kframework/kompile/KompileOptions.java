@@ -79,6 +79,9 @@ public class KompileOptions implements Serializable {
     @Parameter(names="--hook-namespaces", listConverter=StringListConverter.class, description="<string> is a whitespace-separated list of namespaces to include in the hooks defined in the definition")
     public List<String> hookNamespaces = Collections.emptyList();
 
+    @Parameter(names="-O1", description="Optimize in ways that improve performance and code size, but interfere with debugging and increase compilation time slightly.")
+    public boolean optimize1;
+
     @Parameter(names="-O2", description="Optimize further in ways that improve performance and code size, but interfere with debugging more and increase compilation time somewhat.")
     public boolean optimize2;
 

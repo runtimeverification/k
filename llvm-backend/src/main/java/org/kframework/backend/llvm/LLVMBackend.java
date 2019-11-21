@@ -64,6 +64,9 @@ public class LLVMBackend extends KoreBackend {
         args.add("main");
         args.add("-o");
         args.add("interpreter");
+        if (kompileOptions.optimize1) args.add("-O1");
+        if (kompileOptions.optimize2) args.add("-O2");
+        if (kompileOptions.optimize3) args.add("-O2"); // clang -O3 does not make the llvm backend any faster
         args.addAll(options.ccopts);
         try {
             Process p = pb.command(args).directory(files.resolveKompiled(".")).inheritIO().start();
