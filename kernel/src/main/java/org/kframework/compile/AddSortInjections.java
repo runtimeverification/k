@@ -347,7 +347,7 @@ public class AddSortInjections {
     private static Set<Sort> upperBounds(Collection<Sort> bounds, Module mod) {
         Set<Sort> maxs = new HashSet<>();
     nextsort:
-        for (Sort sort : iterable(mod.definedSorts())) { // for every declared sort
+        for (Sort sort : iterable(mod.allSorts())) { // for every declared sort
             // Sorts at or below KBott, or above K, are assumed to be
             // sorts from kast.k representing meta-syntax that is not a real sort.
             // This is done to prevent variables from being inferred as KBott or

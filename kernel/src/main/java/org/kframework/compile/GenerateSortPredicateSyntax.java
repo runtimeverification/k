@@ -23,7 +23,7 @@ public class GenerateSortPredicateSyntax {
 
     public Module gen(Module mod) {
         Set<Sentence> res = new HashSet<>();
-        for (Sort sort : iterable(mod.definedSorts())) {
+        for (Sort sort : iterable(mod.allSorts())) {
             res.addAll(gen(mod, sort));
         }
         if (!res.isEmpty()) {

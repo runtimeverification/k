@@ -591,7 +591,7 @@ public class DefinitionToOcaml implements Serializable {
     public String constants() {
         StringBuilder sb = new StringBuilder();
         sb.append("type sort = \n");
-        Set<Sort> sorts = mutable(mainModule.definedSorts());
+        Set<Sort> sorts = mutable(mainModule.allSorts());
         sorts.add(Sorts.Bool());
         sorts.add(Sorts.Int());
         sorts.add(Sorts.String());
@@ -1302,7 +1302,7 @@ public class DefinitionToOcaml implements Serializable {
 
                     if (mainModule.attributesFor().apply(functionLabel).contains(Attribute.PREDICATE_KEY, Sort.class)) {
                         Sort predicateSort = (mainModule.attributesFor().apply(functionLabel).get(Attribute.PREDICATE_KEY, Sort.class));
-                        stream(mainModule.definedSorts()).filter(s -> mainModule.subsorts().greaterThanEq(predicateSort, s)).distinct()
+                        stream(mainModule.allSorts()).filter(s -> mainModule.subsorts().greaterThanEq(predicateSort, s)).distinct()
                                 .filter(sort -> mainModule.sortAttributesFor().contains(sort)).forEach(sort -> {
                             String sortHook = mainModule.sortAttributesFor().apply(sort).<String>getOptional("hook").orElse("");
                             if (predicateRules.containsKey(sortHook)) {

@@ -65,11 +65,11 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
     }}.toSet
 
   private def getCellSortsOfCellBag(n: Sort): Set[Sort] = {
-    m.definedSorts.filter(m.subsorts.directlyGreaterThan(n, _))
+    m.allSorts.filter(m.subsorts.directlyGreaterThan(n, _))
   }
 
   override def getCellBagSortsOfCell(n: Sort): Set[Sort] = {
-    m.definedSorts.filter(m.subsorts.directlyLessThan(n, _)).intersect(cellBagSorts)
+    m.allSorts.filter(m.subsorts.directlyLessThan(n, _)).intersect(cellBagSorts)
   }
 
   private val edgesPoset: POSet[Sort] = POSet(edges)

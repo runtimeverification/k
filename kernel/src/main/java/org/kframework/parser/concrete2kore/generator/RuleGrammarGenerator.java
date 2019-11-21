@@ -172,7 +172,7 @@ public class RuleGrammarGenerator {
             modules.add(baseK.getModule(PROGRAM_LISTS).get());
 
             // check if `#Layout` has been declared, import `DEFAULT-LAYOUT` if not
-            if (! mod.definedSorts().contains(Sorts.Layout())) {
+            if (! mod.allSorts().contains(Sorts.Layout())) {
                 modules.add(baseK.getModule(DEFAULT_LAYOUT).get());
             }
 

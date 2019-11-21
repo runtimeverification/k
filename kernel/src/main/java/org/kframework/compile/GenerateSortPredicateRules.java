@@ -55,7 +55,7 @@ public class GenerateSortPredicateRules {
     public Module gen(Module mod) {
         this.mod = mod;
         predicateRules = stream(mod.rules()).filter(this::isPredicate).collect(Collectors.toSet());
-        return Module(mod.name(), mod.imports(), (Set<Sentence>) mod.localSentences().$bar(stream(mod.definedSorts())
+        return Module(mod.name(), mod.imports(), (Set<Sentence>) mod.localSentences().$bar(stream(mod.allSorts())
                 .flatMap(this::gen).collect(Collections.toSet())), mod.att());
     }
 
@@ -75,9 +75,9 @@ public class GenerateSortPredicateRules {
         nonProtectingSubsorts.add(sort);
         // we compute the set of subsorts which protect the parent sort (ie do not add terms to it)
         // in order to optimize away some cases from being checked during sort computation at runtime
-        stream(mod.definedSorts()).filter(s -> mod.subsorts().lessThanEq(s, sort)).forEach(subsort -> {
+        stream(mod.allSorts()).filter(s -> mod.subsorts().lessThanEq(s, sort)).forEach(subsort -> {
             MutableBoolean isProtecting = new MutableBoolean(true);
-            stream(mod.definedSorts()).filter(s -> mod.subsorts().lessThanEq(s, subsort)).forEach(candidateSort -> {
+            stream(mod.allSorts()).filter(s -> mod.subsorts().lessThanEq(s, subsort)).forEach(candidateSort -> {
                 if (predicateRules.stream().filter(r -> isPredicateFor(r, candidateSort)).findAny().isPresent()) {
                     // the subsort has subsorts with predicate rules, so it may have introduced arbitrary terms into the membership
                     isProtecting.setFalse();
@@ -127,7 +127,7 @@ public class GenerateSortPredicateRules {
                 res.add(r);
             }
         });
-        stream(mod.definedSorts()).filter(s -> mod.subsorts().lessThanEq(s, sort)).distinct().forEach(s -> {
+        stream(mod.allSorts()).filter(s -> mod.subsorts().lessThanEq(s, sort)).distinct().forEach(s -> {
             res.add(Rule(KRewrite(KApply(KLabel("is" + sort.toString()), KApply(KLabel("#KToken"), KToken(s.toString(), Sorts.KString()), KVariable("_"))), BooleanUtils.TRUE),
                     BooleanUtils.TRUE,
                     BooleanUtils.TRUE));
