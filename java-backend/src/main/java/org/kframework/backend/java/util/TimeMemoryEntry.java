@@ -74,6 +74,11 @@ public class TimeMemoryEntry {
         return String.format("%8.3f s,\t%5d MB, gc: %6.3f %%", time, memory, gcRate);
     }
 
+    public String logTimeString(TimeMemoryEntry init, TimeMemoryEntry... intermediateStats) {
+        double time = timeDiff(init, intermediateStats);
+        return String.format("%8.3f s", time);
+    }
+
     /**
      * @return string representing post-gc memory stats - post-gc memory and explicit gc time.
      * If there is no post-GC entry, return empty string.
