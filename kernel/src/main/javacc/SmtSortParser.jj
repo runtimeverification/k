@@ -42,6 +42,6 @@ Sort Sort(): {
 void Params(List<Sort> params): {
 Sort s;
 } {
-  {}
-| s=Sort() { params.add(s); } Params(params)
+s=Sort() { params.add(s); } Params(params)
+| {}
 }
