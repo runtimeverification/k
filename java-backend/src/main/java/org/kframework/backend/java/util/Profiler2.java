@@ -5,8 +5,8 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.symbolic.JavaExecutionOptions;
-import org.kframework.main.StartTimeHolder;
 import org.kframework.utils.inject.RequestScoped;
+import org.kframework.utils.inject.StartTime;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -66,9 +66,9 @@ public class Profiler2 {
     }
 
     @Inject
-    public Profiler2(JavaExecutionOptions javaExecutionOptions, StartTimeHolder startTimeHolder) {
+    public Profiler2(JavaExecutionOptions javaExecutionOptions, @StartTime Long startTimeNano) {
         this.javaExecutionOptions = javaExecutionOptions;
-        this.startStats = new TimeMemoryEntry(startTimeHolder.getStartTimeNano());
+        this.startStats = new TimeMemoryEntry(startTimeNano);
     }
 
     public void printResult(boolean afterExecution, GlobalContext context) {
