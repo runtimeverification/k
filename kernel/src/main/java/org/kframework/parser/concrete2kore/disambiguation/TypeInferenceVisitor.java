@@ -97,6 +97,7 @@ public class TypeInferenceVisitor extends SetsTransformerWithErrors<ParseFailedE
     try {
       if (inferencer.hasNoVariables()) {
         // skip the rest as there is nothing to infer
+        inferencer.pop();
         return Right.apply(t);
       }
       switch(inferencer.status()) {
