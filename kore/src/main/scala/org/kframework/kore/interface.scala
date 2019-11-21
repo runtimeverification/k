@@ -107,7 +107,7 @@ trait Sort extends Ordered[Sort] {
     Ordering.Tuple2(Ordering[String], seqDerivedOrdering[Seq, Sort](Ordering.ordered(identity))).compare((this.name, this.params), (this.name, this.params))
   }
 
-  def head: Sort = ADT.Sort(name)
+  def head: SortHead = ADT.SortHead(name, params.size)
 
   def substitute(subst: Map[Sort, Sort]): Sort = {
     ADT.Sort(name, params.map(p => subst.getOrElse(p, p.substitute(subst))):_*)
@@ -121,6 +121,16 @@ trait Sort extends Ordered[Sort] {
       case _:NumberFormatException => false
     }
   }
+}
+
+trait SortHead {
+  def name: String
+  def params: Int
+  override def equals(other: Any) = other match {
+    case other: SortHead => name == other.name && params == other.params
+    case _ => false
+  }
+  override def hashCode = name.hashCode * 23 + params.hashCode
 }
 
 trait KCollection {
