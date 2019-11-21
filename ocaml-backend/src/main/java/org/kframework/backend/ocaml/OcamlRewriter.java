@@ -338,7 +338,7 @@ public class OcamlRewriter implements Function<Definition, Rewriter> {
         args.addAll(options.experimental.nativeLibraries.stream().flatMap(lib -> Stream.of("-cclib", lib)).collect(Collectors.toList()));
         args.addAll(Arrays.asList(objectFiles));
         String ocamlfind = OcamlBackend.getOcamlFind(files);
-        if (converter.options.ocamlopt()) {
+        if (converter.kompileOptions.optimize2 || converter.kompileOptions.optimize3) {
             args.add(0, ocamlfind);
             args.add(1, "ocamlopt");
             if (!converter.options.noLinkPrelude) {

@@ -35,12 +35,6 @@ public class OcamlOptions implements Serializable {
     @Parameter(names="--ocaml-serialize-config", listConverter=StringListConverter.class, description="<string> is a whitespace-separated list of configuration variables to precompute the value of")
     public List<String> serializeConfig = Collections.emptyList();
 
-    @Parameter(names="-O2", description="Optimize in ways that improve performance, but intere with debugging and increase compilation time and code size slightly.")
-    public boolean optimize2;
-
-    @Parameter(names="-O3", description="Optimize aggressively in ways that significantly improve performance, but also increase compilation time and code size.")
-    public boolean optimize3;
-
     @Parameter(names="-Og", description="Optimize as much as possible without interfering with debugging experience.")
     public boolean optimizeG;
 
@@ -49,7 +43,4 @@ public class OcamlOptions implements Serializable {
 
     @Parameter(names="--check-races", description="Checks for races among regular rules.")
     public boolean checkRaces;
-
-    public boolean ocamlopt() { return optimize2 || optimize3; }
-    public boolean optimizeStep() { return optimize3 || optimizeG; }
 }
