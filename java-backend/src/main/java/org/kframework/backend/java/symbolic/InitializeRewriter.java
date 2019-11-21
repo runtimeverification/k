@@ -54,6 +54,8 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static org.kframework.kore.KORE.*;
+
 /**
  * Created by dwightguth on 5/6/15.
  */
