@@ -985,6 +985,8 @@ module K-IO
                  | "#lstat" "(" String ")" [function, hook(IO.lstat), impure]
                  | "#opendir" "(" String ")" [function, hook(IO.opendir), impure]
 
+  syntax Int ::= "#time" "(" ")" [function, hook(IO.time), impure]
+
   rule #open(S:String) => #open(S:String, "r+")
 
   syntax Int ::= "#stdin"   [function, functional]
