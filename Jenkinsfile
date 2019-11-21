@@ -28,16 +28,16 @@ pipeline {
         }
       }
       steps {
-        dir("kframework-5.0.0") {
+        dir("kframework-${env.VERSION}") {
           checkout scm
           sh '''
             find . -name .git | xargs rm -r
             cd ..
-            tar czvf kframework-5.0.0-src.tar.gz kframework-5.0.0
+            tar czvf kframework-${VERSION}-src.tar.gz kframework-${VERSION}
           '''
           deleteDir()
         }
-        stash name: "src", includes: "kframework-5.0.0-src.tar.gz"
+        stash name: "src", includes: "kframework-${env.VERSION}-src.tar.gz"
       }
     }
     stage('Update Submodules (non-release)') {
@@ -87,14 +87,14 @@ pipeline {
                     }
                     stage('Build Debian Package') {
                       steps {
-                        dir('kframework-5.0.0') {
+                        dir("kframework-${env.VERSION}") {
                           checkout scm
                           sh '''
                             mv debian/control.ubuntu debian/control
                             dpkg-buildpackage
                           '''
                         }
-                        stash name: "bionic", includes: "kframework_5.0.0_amd64.deb"
+                        stash name: "bionic", includes: "kframework_${env.VERSION}_amd64.deb"
                       }
                     }
                   }
@@ -128,15 +128,7 @@ pipeline {
               }
             }
             stage('Build and Package on Debian Buster') {
-              when {
-                anyOf {
-                  branch 'master'
-                  changelog '.*^\\[BUILD\\] .+$'
-                  changelog '.*^\\[DEPLOY\\] .+$'
-                  changeset 'Jenkinsfile'
-                  changeset 'Dockerfile'
-                }
-              }
+              when { branch 'master' }
               stages {
                 stage('Build on Debian Buster') {
                   agent {
@@ -149,14 +141,14 @@ pipeline {
                   stages {
                     stage('Build Debian Package') {
                       steps {
-                        dir('kframework-5.0.0') {
+                        dir("kframework-${env.VERSION}") {
                           checkout scm
                           sh '''
                             mv debian/control.debian debian/control
                             dpkg-buildpackage
                           '''
                         }
-                        stash name: "buster", includes: "kframework_5.0.0_amd64.deb"
+                        stash name: "buster", includes: "kframework_${env.VERSION}_amd64.deb"
                       }
                     }
                   }
@@ -193,15 +185,7 @@ pipeline {
               }
             }
             stage('Build and Package on Arch Linux') {
-              when {
-                anyOf {
-                  branch 'master'
-                  changelog '.*^\\[BUILD\\] .+$'
-                  changelog '.*^\\[DEPLOY\\] .+$'
-                  changeset 'Jenkinsfile'
-                  changeset 'Dockerfile'
-                }
-              }
+              when { branch 'master' }
               stages {
                 stage('Build on Arch Linux') {
                   agent {
@@ -218,7 +202,7 @@ pipeline {
                         sh '''
                           makepkg
                         '''
-                        stash name: "arch", includes: "kframework-5.0.0-1-x86_64.pkg.tar.xz"
+                        stash name: "arch", includes: "kframework-git-${env.VERSION}-1-x86_64.pkg.tar.xz"
                       }
                     }
                   }
@@ -236,7 +220,7 @@ pipeline {
                     unstash "arch"
                     sh '''
                       pacman -Syyu --noconfirm
-                      pacman -U --noconfirm kframework-5.0.0-1-x86_64.pkg.tar.xz
+                      pacman -U --noconfirm kframework-git-${VERSION}-1-x86_64.pkg.tar.xz
                       src/main/scripts/test-in-container
                     '''
                   }
@@ -257,15 +241,7 @@ pipeline {
               }
             }
             stage('Build Platform Independent K Binary') {
-              when {
-                anyOf {
-                  branch 'master'
-                  changelog '.*^\\[BUILD\\] .+$'
-                  changelog '.*^\\[DEPLOY\\] .+$'
-                  changeset 'Jenkinsfile'
-                  changeset 'Dockerfile'
-                }
-              }
+              when { branch 'master' }
               agent {
                 dockerfile {
                   filename 'Dockerfile.debian'
@@ -293,15 +269,7 @@ pipeline {
           }
         }
         stage('Build and Package on Mac OS') {
-          when {
-            anyOf {
-              branch 'master'
-              changelog '.*^\\[BUILD\\] .+$'
-              changelog '.*^\\[DEPLOY\\] .+$'
-              changeset 'Jenkinsfile'
-              changeset 'Dockerfile'
-            }
-          }
+          when { branch 'master' }
           stages {
             stage('Build on Mac OS') {
               stages {
@@ -318,7 +286,7 @@ pipeline {
                         git config --global user.name  "RV Jenkins"
                         ${WORKSPACE}/src/main/scripts/brew-build-bottle
                       '''
-                      stash name: "mojave", includes: "kframework--5.0.0.mojave.bottle*.tar.gz"
+                      stash name: "mojave", includes: "kframework--${env.VERSION}.mojave.bottle*.tar.gz"
                     }
                   }
                 }
@@ -388,10 +356,7 @@ pipeline {
         }
       }
       when {
-        anyOf {
-          branch 'master'
-          changelog '.*^\\[DEPLOY\\] .+$'
-        }
+        branch 'master'
         beforeAgent true
       }
       environment {
@@ -422,16 +387,18 @@ pipeline {
             mv bionic/kframework_${VERSION}_amd64.deb bionic/kframework_${VERSION}_amd64_bionic.deb
             mv buster/kframework_${VERSION}_amd64.deb buster/kframework_${VERSION}_amd64_buster.deb
             LOCAL_BOTTLE_NAME=$(echo mojave/kframework--${VERSION}.mojave.bottle*.tar.gz)
+            BOTTLE_NAME=`cd mojave && echo kframework--${VERSION}.mojave.bottle*.tar.gz | sed 's!kframework--!kframework-!'`
+            mv $LOCAL_BOTTLE_NAME mojave/$BOTTLE_NAME
             echo "K Framework Release $release_tag"  > release.md
             echo ""                                 >> release.md
             cat k-distribution/INSTALL.md           >> release.md
-            hub release create                                                                                           \
-                --attach kframework-${VERSION}-src.tar.gz"#Source tar.gz"                                                \
-                --attach bionic/kframework_${VERSION}_amd64_bionic.deb"#Ubuntu Bionic (18.04) Package"                   \
-                --attach buster/kframework_${VERSION}_amd64_buster.deb"#Debian Buster (10) Package"                      \
-                --attach arch/kframework-${VERSION}/package/kframework-git-${VERSION}-1-x86_64.pkg.tar.xz"#Arch Package" \
-                --attach $LOCAL_BOTTLE_NAME"#Mac OS X Homebrew Bottle"                                                   \
-                --attach k-nightly.tar.gz"#Platform Indepdendent K Binary"                                               \
+            hub release create                                                                         \
+                --attach kframework-${VERSION}-src.tar.gz"#Source tar.gz"                              \
+                --attach bionic/kframework_${VERSION}_amd64_bionic.deb"#Ubuntu Bionic (18.04) Package" \
+                --attach buster/kframework_${VERSION}_amd64_buster.deb"#Debian Buster (10) Package"    \
+                --attach arch/kframework-git-${VERSION}-1-x86_64.pkg.tar.xz"#Arch Package"             \
+                --attach mojave/$BOTTLE_NAME"#Mac OS X Homebrew Bottle"                                \
+                --attach k-nightly.tar.gz"#Platform Indepdendent K Binary"                             \
                 --file release.md "${release_tag}"
           '''
         }
