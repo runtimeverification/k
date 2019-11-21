@@ -74,7 +74,19 @@ public class Profiler2 {
         this.startStats = new TimeMemoryEntry(startTimeNano);
         this.jvmInitStats = Main.isNailgun()
                             ? startStats
-                            : new TimeMemoryEntry(ManagementFactory.getRuntimeMXBean().getStartTime() * 1000000L);
+                            : new TimeMemoryEntry(millisToNanos(ManagementFactory.getRuntimeMXBean().getStartTime()));
+    }
+
+    /**
+     * Millis start from beginning of epoch while nanos start from arbitrary offset, fixed for JVM. They need
+     * conversion.
+     */
+    public long millisToNanos(long millis) {
+        long currNanos = System.nanoTime();
+        long currMillis = System.currentTimeMillis();
+        long oneMil = 1000000L;
+        long epochToNanoOffset = currNanos - currMillis * oneMil;
+        return millis * oneMil + epochToNanoOffset;
     }
 
     public void printResult(boolean afterExecution, GlobalContext context) {
