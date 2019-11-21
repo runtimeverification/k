@@ -26,7 +26,14 @@ $(imp_kompiled): imp.k $(KOMPILE)
 
 # Tests
 
-test: test-defn
+test: test-unit test-defn
+
+## Unit Tests
+
+test-unit:
+	python3 unit-test.py
+
+## Full Definition Tests
 
 test-defn: test-defn-kast test-defn-prove
 
