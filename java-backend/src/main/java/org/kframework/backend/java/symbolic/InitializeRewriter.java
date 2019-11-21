@@ -36,11 +36,9 @@ import org.kframework.main.GlobalOptions;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.rewriter.SearchType;
 import org.kframework.unparser.KPrint;
-import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
-import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.SMTOptions;
 import scala.Function1;
 import scala.Tuple2;
@@ -56,12 +54,9 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static org.kframework.kore.KORE.*;
-
 /**
  * Created by dwightguth on 5/6/15.
  */
-@RequestScoped
 public class InitializeRewriter implements Function<org.kframework.definition.Definition, Rewriter> {
 
     private final FileSystem fs;

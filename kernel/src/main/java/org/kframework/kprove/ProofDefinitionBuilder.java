@@ -11,7 +11,6 @@ import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
-import org.kframework.utils.inject.RequestScoped;
 import scala.Option;
 import scala.Tuple2;
 
@@ -26,7 +25,6 @@ import java.util.stream.Collectors;
  * @author Denis Bogdanas
  * Created on 07-Nov-19.
  */
-@RequestScoped
 public class ProofDefinitionBuilder {
 
     private static Map<Definition, Definition>
