@@ -104,6 +104,6 @@ public abstract class BaseTestCase {
         scope.enter();
         DefinitionScope definitionScope = injector.getInstance(DefinitionScope.class);
         definitionScope.enter(new File("."));
-        Main.seedInjector(scope, tool, args, new File("."), System.getenv());
+        Main.seedInjector(scope, tool, args, new File("."), System.getenv(), System.nanoTime());
     }
 }
