@@ -9,7 +9,6 @@ import com.martiansoftware.nailgun.NGContext;
 import com.martiansoftware.nailgun.NGListeningAddress;
 import com.martiansoftware.nailgun.NGServer;
 import com.martiansoftware.nailgun.ThreadLocalPrintStream;
-import org.fusesource.jansi.AnsiConsole;
 import org.fusesource.jansi.AnsiOutputStream;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.Main;
@@ -132,7 +131,7 @@ public class KServerFrontEnd extends FrontEnd {
         return instance;
     }
 
-    public int run(String tool, String[] args, File workingDir, Map<String, String> env) {
+    public int run(String tool, String[] args, File workingDir, Map<String, String> env, long startTime) {
         ThreadLocalPrintStream system_out = (ThreadLocalPrintStream) System.out;
         ThreadLocalPrintStream system_err = (ThreadLocalPrintStream) System.err;
 
@@ -149,7 +148,7 @@ public class KServerFrontEnd extends FrontEnd {
         SimpleScope requestScope = launcher.getRequestScope();
         try {
             requestScope.enter();
-            Main.seedInjector(requestScope, tool, args, workingDir, env);
+            Main.seedInjector(requestScope, tool, args, workingDir, env, startTime);
             TTYInfo tty = injector.getInstance(TTYInfo.class);
             if (!tty.stdout) {
                 system_out.init(new PrintStream(new AnsiOutputStream(system_out.getPrintStream())));

@@ -5,9 +5,11 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import org.kframework.backend.java.kil.GlobalContext;
 import org.kframework.backend.java.symbolic.JavaExecutionOptions;
-import org.kframework.main.StartTimeHolder;
+import org.kframework.main.Main;
 import org.kframework.utils.inject.RequestScoped;
+import org.kframework.utils.inject.StartTime;
 
+import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -27,6 +29,7 @@ import java.util.stream.Collectors;
 public class Profiler2 {
 
     private final JavaExecutionOptions javaExecutionOptions;
+    private final TimeMemoryEntry jvmInitStats;
     private final TimeMemoryEntry startStats;
 
     private TimeMemoryEntry parsingStats;
@@ -66,9 +69,24 @@ public class Profiler2 {
     }
 
     @Inject
-    public Profiler2(JavaExecutionOptions javaExecutionOptions, StartTimeHolder startTimeHolder) {
+    public Profiler2(JavaExecutionOptions javaExecutionOptions, @StartTime Long startTimeNano) {
         this.javaExecutionOptions = javaExecutionOptions;
-        this.startStats = new TimeMemoryEntry(startTimeHolder.getStartTimeNano());
+        this.startStats = new TimeMemoryEntry(startTimeNano);
+        this.jvmInitStats = Main.isNailgun()
+                            ? startStats
+                            : new TimeMemoryEntry(millisToNanos(ManagementFactory.getRuntimeMXBean().getStartTime()));
+    }
+
+    /**
+     * Millis start from beginning of epoch while nanos start from arbitrary offset, fixed for JVM. They need
+     * conversion.
+     */
+    public long millisToNanos(long millis) {
+        long currNanos = System.nanoTime();
+        long currMillis = System.currentTimeMillis();
+        long oneMil = 1000000L;
+        long epochToNanoOffset = currNanos - currMillis * oneMil;
+        return millis * oneMil + epochToNanoOffset;
     }
 
     public void printResult(boolean afterExecution, GlobalContext context) {
@@ -130,11 +148,15 @@ public class Profiler2 {
         String postGcPrefix = ",\t\t post-gc mem: ";
         TimeMemoryEntry[] intermediateForTotal = afterExecution ? getIntermediateStats(parsingStats, initStats)
                                                                 : getIntermediateStats(parsingStats);
-        System.err.format("\nTotal                 : %s%s", currentStats.logString(startStats, intermediateForTotal),
+        String totalCaption = afterExecution ? "Total                 " : "Total init            ";
+        System.err.format("\n" + totalCaption + ": %s%s", currentStats.logString(jvmInitStats, intermediateForTotal),
                 currentStats.postGCLogString(postGcPrefix, intermediateForTotal));
+        if (jvmInitStats != startStats) {
+            System.err.format("\n  JVM init            : %s", startStats.logTimeString(jvmInitStats));
+        }
         System.err.format("\n  Parsing             : %s%s", parsingStats.logString(startStats),
                 parsingStats.postGCLogString(postGcPrefix));
-        System.err.format("\n  Init                : %s%s", initStats.logString(parsingStats),
+        System.err.format("\n  Rewriter init       : %s%s", initStats.logString(parsingStats),
                 initStats.postGCLogString(postGcPrefix));
         if (afterExecution) {
             System.err.format("\n  Execution           : %s%s",

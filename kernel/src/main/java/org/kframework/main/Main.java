@@ -28,6 +28,7 @@ import org.kframework.utils.file.Environment;
 import org.kframework.utils.file.WorkingDir;
 import org.kframework.utils.inject.Options;
 import org.kframework.utils.inject.SimpleScope;
+import org.kframework.utils.inject.StartTime;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,12 +47,13 @@ public class Main {
      */
     public static void main(String[] args) {
         isNailgun = false;
+        long startTime = System.nanoTime();
         AnsiConsole.systemInstall();
         if (args.length >= 1) {
 
             String[] args2 = Arrays.copyOfRange(args, 1, args.length);
             Injector injector = getInjector(args[0]);
-            int result = injector.getInstance(Main.class).runApplication(args[0], args2, new File("."), System.getenv());
+            int result = injector.getInstance(Main.class).runApplication(args[0], args2, new File("."), System.getenv(), startTime);
             AnsiConsole.systemUninstall();
             System.exit(result);
         }
@@ -66,6 +68,7 @@ public class Main {
     }
 
     public static void nailMain(NGContext context) {
+        long startTime = System.nanoTime();
         KServerFrontEnd kserver = KServerFrontEnd.instance();
         if (!kserver.isLocal()) {
             context.assertLoopbackClient();
@@ -73,7 +76,7 @@ public class Main {
         isNailgun = true;
         if (context.getArgs().length >= 1) {
             String[] args2 = Arrays.copyOfRange(context.getArgs(), 1, context.getArgs().length);
-            int result = kserver.run(context.getArgs()[0], args2, new File(context.getWorkingDirectory()), (Map) context.getEnv());
+            int result = kserver.run(context.getArgs()[0], args2, new File(context.getWorkingDirectory()), (Map) context.getEnv(), startTime);
             System.exit(result);
             return;
         }
@@ -82,29 +85,26 @@ public class Main {
 
     private final Provider<KExceptionManager> kem;
     private final Provider<FrontEnd> frontEnd;
-    private final Provider<StartTimeHolder> startTimeProvider;
     private final SimpleScope requestScope;
 
     @Inject
     public Main(
             Provider<KExceptionManager> kem,
             Provider<FrontEnd> frontEnd,
-            Provider<StartTimeHolder> startTimeProvider,
             @Named("requestScope") SimpleScope requestScope) {
         this.kem = kem;
         this.frontEnd = frontEnd;
         this.requestScope = requestScope;
-        this.startTimeProvider = startTimeProvider;
     }
 
     public SimpleScope getRequestScope() {
         return requestScope;
     }
 
-    public int runApplication(String tool, String[] args, File workingDir, Map<String, String> env) {
+    public int runApplication(String tool, String[] args, File workingDir, Map<String, String> env, long startTime) {
         try {
             requestScope.enter();
-            seedInjector(requestScope, tool, args, workingDir, env);
+            seedInjector(requestScope, tool, args, workingDir, env, startTime);
             return runApplication();
         } finally {
             requestScope.exit();
@@ -112,7 +112,6 @@ public class Main {
     }
 
     public int runApplication() {
-        startTimeProvider.get();//to trigger initialization
         KExceptionManager kem = this.kem.get();
         kem.installForUncaughtExceptions();
         try {
@@ -133,10 +132,11 @@ public class Main {
     }
 
     public static void seedInjector(SimpleScope scope, String tool, String[] args, File workingDir,
-            Map<String, String> env) {
+                                    Map<String, String> env, long startTime) {
         scope.seed(Key.get(File.class, WorkingDir.class), workingDir);
         scope.seed(Key.get(new TypeLiteral<Map<String, String>>() {}, Environment.class), env);
         scope.seed(Key.get(String[].class, Options.class), args);
+        scope.seed(Key.get(Long.class, StartTime.class), startTime);
     }
 
     public static Injector getInjector(String tool) {
