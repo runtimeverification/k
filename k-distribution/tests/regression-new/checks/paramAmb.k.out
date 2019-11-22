@@ -1,0 +1,15 @@
+[Error] Compiler: Had 1 parsing errors.
+[Error] Inner Parser: Parsing ambiguity.
+1: syntax {Sort} Sort ::= Sort "=>" Sort [klabel(#KRewrite) symbol()]
+   
+#KRewrite(#SemanticCastToB(#token("X","#KVariable")),label(#SemanticCastToB(#token("X","#KVariable")),`wrap__PARAMAMB`(#SemanticCastToB(#token("X","#KVariable")))))
+2: syntax {Sort} Sort ::= Sort "=>" Sort [klabel(#KRewrite) symbol()]
+   
+#KRewrite(#SemanticCastToX(#token("X","#KVariable")),label(#SemanticCastToX(#token("X","#KVariable")),`wrap__PARAMAMB`(#SemanticCastToX(#token("X","#KVariable")))))
+3: syntax {Sort} Sort ::= Sort "=>" Sort [klabel(#KRewrite) symbol()]
+   
+#KRewrite(#SemanticCastToA(#token("X","#KVariable")),label(#SemanticCastToA(#token("X","#KVariable")),`wrap__PARAMAMB`(#SemanticCastToA(#token("X","#KVariable")))))
+	Source(paramAmb.k)
+	Location(11,8,11,29)
+[Warning] Compiler: Could not find main syntax module with name PARAMAMB-SYNTAX
+in definition.  Use --syntax-module to specify one. Using PARAMAMB as default.
