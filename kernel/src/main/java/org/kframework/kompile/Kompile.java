@@ -97,7 +97,7 @@ public class Kompile {
         this.sw = sw;
 
         if (kompileOptions.backend.equals("ocaml")) {
-            kem.registerCriticalWarning("The OCaml backend is in the process of being deprecated (final date January 15, 2020). Please switch to the LLVM backend.");
+            kem.registerCriticalWarning("The OCaml backend is in the process of being deprecated (final date May 31, 2020). Please switch to the LLVM backend.");
         }
     }
 
