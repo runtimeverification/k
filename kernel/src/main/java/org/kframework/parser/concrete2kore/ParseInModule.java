@@ -3,6 +3,7 @@ package org.kframework.parser.concrete2kore;
 
 import com.google.common.collect.Sets;
 import org.kframework.attributes.Source;
+import org.kframework.builtin.Sorts;
 import org.kframework.definition.Module;
 import org.kframework.kore.K;
 import org.kframework.kore.Sort;
@@ -29,6 +30,9 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.io.Writer;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -130,6 +134,8 @@ public class ParseInModule implements Serializable, AutoCloseable {
     }
 
     private Scanner scanner;
+    private ThreadLocal<TypeInferencer> inferencer = new ThreadLocal<>();
+    private Set<TypeInferencer> inferencers = new HashSet<>();
 
     public Scanner getScanner() {
         if (scanner == null) {
@@ -208,23 +214,31 @@ public class ParseInModule implements Serializable, AutoCloseable {
             rez = new PriorityVisitor(disambModule.priorities(), disambModule.leftAssoc(), disambModule.rightAssoc()).apply(rez.right().get());
             if (rez.isLeft())
                 return new Tuple2<>(rez, warn);
-            Term rez3 = new PushTopAmbiguityUp().apply(rez.right().get());
-            rez = new ApplyTypeCheckVisitor(disambModule.subsorts(), isAnywhere).apply(rez3);
+            Term rez3 = new PushAmbiguitiesDownAndPreferAvoid().apply(rez.right().get());
+            rez3 = new PushTopAmbiguityUp().apply(rez3);
+
+            TypeInferencer currentInferencer;
+            synchronized(inferencer) {
+                currentInferencer = inferencer.get();
+                if (currentInferencer == null) {
+                    currentInferencer = new TypeInferencer(disambModule);
+                    inferencer.set(currentInferencer);
+                    inferencers.add(currentInferencer);
+                }
+            }
+
+            rez = new TypeInferenceVisitor(currentInferencer, startSymbol, strict && inferSortChecks, true, isAnywhere).apply(rez3);
             if (rez.isLeft())
                 return new Tuple2<>(rez, warn);
-            Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rez2 = new VariableTypeInferenceFilter(disambModule.subsorts(), disambModule.definedSorts(), disambModule.productionsFor(), strict && inferSortChecks, true, isAnywhere).apply(rez.right().get());
-            if (rez2._1().isLeft())
-                return rez2;
-            warn = rez2._2();
 
-            rez = new ResolveOverloadedTerminators(disambModule.overloads()).apply(rez2._1().right().get());
+            rez = new ResolveOverloadedTerminators(disambModule.overloads()).apply(rez.right().get());
             if (rez.isLeft())
                 return new Tuple2<>(rez, warn);
             rez3 = new PushAmbiguitiesDownAndPreferAvoid(disambModule.overloads()).apply(rez.right().get());
             rez = new AmbFilterError(strict && inferSortChecks).apply(rez3);
             if (rez.isLeft())
                 return new Tuple2<>(rez, warn);
-            rez2 = new AddEmptyLists(disambModule).apply(rez.right().get());
+            Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rez2 = new AddEmptyLists(disambModule).apply(rez.right().get());
             warn = Sets.union(rez2._2(), warn);
             if (rez2._1().isLeft())
                 return rez2;
@@ -257,6 +271,10 @@ public class ParseInModule implements Serializable, AutoCloseable {
         if (scanner != null) {
             scanner.close();
         }
+        for (TypeInferencer inferencer : inferencers) {
+            inferencer.close();
+        }
+        inferencers.clear();
         Writer t = timing;
         if (t != null) {
             synchronized(t) {
@@ -271,18 +289,16 @@ public class ParseInModule implements Serializable, AutoCloseable {
 
     public static Term disambiguateForUnparse(Module mod, Term ambiguity) {
         Term rez3 = new PushTopAmbiguityUp().apply(ambiguity);
-        Either<Set<ParseFailedException>, Term> rez = new ApplyTypeCheckVisitor(mod.subsorts(), false).apply(rez3);
+        Either<Set<ParseFailedException>, Term> rez;
         Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rez2;
+        try (TypeInferencer inferencer = new TypeInferencer(mod)) {
+            rez = new TypeInferenceVisitor(inferencer, Sorts.K(), false, false, false).apply(rez3);
+        }
         if (rez.isLeft()) {
             rez2 = new AmbFilter(false).apply(rez3);
             return rez2._1().right().get();
         }
-        rez2 = new VariableTypeInferenceFilter(mod.subsorts(), mod.definedSorts(), mod.productionsFor(), false, false, false).apply(rez.right().get());
-        if (rez2._1().isLeft()) {
-            rez2 = new AmbFilter(false).apply(rez.right().get());
-            return rez2._1().right().get();
-        }
-        rez3 = new PushAmbiguitiesDownAndPreferAvoid(mod.overloads()).apply(rez2._1().right().get());
+        rez3 = new PushAmbiguitiesDownAndPreferAvoid(mod.overloads()).apply(rez.right().get());
         rez2 = new AmbFilter(false).apply(rez3);
         return rez2._1().right().get();
     }

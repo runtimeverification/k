@@ -112,7 +112,7 @@ module KCELLS
                | ".::Bag" [klabel(#cells), symbol]
                | Cell
   syntax Bag ::= "(" Bag ")" [bracket]
-  syntax K ::= Bag
+  syntax KItem ::= Bag
   syntax #RuleBody ::= "[" "[" K "]" "]" Bag    [klabel(#withConfig), symbol, avoid]
   syntax non-assoc #withConfig
   syntax Bag ::= KBott
