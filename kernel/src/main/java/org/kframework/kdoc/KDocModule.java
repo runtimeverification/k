@@ -14,6 +14,7 @@ import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.inject.Options;
 import org.kframework.utils.inject.OuterParsingModule;
+import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.OuterParsingOptions;
 
 import java.util.Map;
@@ -35,7 +36,7 @@ public class KDocModule extends AbstractModule {
                 binder(), String.class, PosterBackend.class);
     }
 
-    @Provides
+    @Provides @RequestScoped
     GlobalOptions globalOptions(KDocOptions options) {
         return options.global;
     }

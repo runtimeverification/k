@@ -70,7 +70,7 @@ public class KoreBackend implements Backend {
             KompileOptions kompileOptions,
             FileUtil files,
             KExceptionManager kem) {
-        this(kompileOptions, files, kem, EnumSet.of(HEAT_RESULT), false);
+        this(kompileOptions, files, kem, kompileOptions.optimize2 || kompileOptions.optimize3 ? EnumSet.of(HEAT_RESULT) : EnumSet.of(HEAT_RESULT, COOL_RESULT_CONDITION), false);
     }
 
     public KoreBackend(KompileOptions kompileOptions, FileUtil files, KExceptionManager kem, EnumSet<ResolveHeatCoolAttribute.Mode> heatCoolConditions, boolean heatCoolEquations) {

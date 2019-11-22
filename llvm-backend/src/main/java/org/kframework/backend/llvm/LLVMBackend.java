@@ -24,6 +24,7 @@ public class LLVMBackend extends KoreBackend {
 
     private final LLVMKompileOptions options;
     private final KExceptionManager kem;
+    private final KompileOptions kompileOptions;
 
     @Inject
     public LLVMBackend(
@@ -33,6 +34,7 @@ public class LLVMBackend extends KoreBackend {
             LLVMKompileOptions options) {
         super(kompileOptions, files, kem);
         this.options = options;
+        this.kompileOptions = kompileOptions;
         this.kem = kem;
     }
 
@@ -43,7 +45,7 @@ public class LLVMBackend extends KoreBackend {
         files.saveToKompiled("definition.kore", kore);
         FileUtils.deleteQuietly(files.resolveKompiled("dt"));
         MutableInt warnings = new MutableInt();
-        Matching.writeDecisionTreeToFile(files.resolveKompiled("definition.kore"), options.heuristic, files.resolveKompiled("dt"), Matching.getThreshold(getThreshold(options)), options.warnUseless, ex -> {
+        Matching.writeDecisionTreeToFile(files.resolveKompiled("definition.kore"), options.heuristic, files.resolveKompiled("dt"), Matching.getThreshold(getThreshold()), options.warnUseless, ex -> {
           kem.addKException(ex);
           warnings.increment();
           return null;
@@ -62,6 +64,9 @@ public class LLVMBackend extends KoreBackend {
         args.add("main");
         args.add("-o");
         args.add("interpreter");
+        if (kompileOptions.optimize1) args.add("-O1");
+        if (kompileOptions.optimize2) args.add("-O2");
+        if (kompileOptions.optimize3) args.add("-O2"); // clang -O3 does not make the llvm backend any faster
         args.addAll(options.ccopts);
         try {
             Process p = pb.command(args).directory(files.resolveKompiled(".")).inheritIO().start();
@@ -74,8 +79,8 @@ public class LLVMBackend extends KoreBackend {
         }
     }
 
-    private static String getThreshold(LLVMKompileOptions options) {
-        if (!options.iterated) {
+    private String getThreshold() {
+        if (!options.iterated && !kompileOptions.optimize3) {
             return "0";
         }
         return options.iteratedThreshold;

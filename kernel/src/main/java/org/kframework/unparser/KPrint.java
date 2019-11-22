@@ -3,6 +3,7 @@ package org.kframework.unparser;
 
 import com.davekoelle.AlphanumComparator;
 import com.google.inject.Inject;
+import jline.internal.Nullable;
 import org.kframework.attributes.Att;
 import org.kframework.backend.kore.ModuleToKORE;
 import org.kframework.builtin.Sorts;
@@ -19,34 +20,33 @@ import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
 import org.kframework.kore.TransformK;
 import org.kframework.main.GlobalOptions;
-import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
-import org.kframework.parser.concrete2kore.ParseInModule;
 import org.kframework.parser.ProductionReference;
+import org.kframework.parser.concrete2kore.ParseInModule;
+import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.TTYInfo;
+import org.kframework.utils.inject.RequestScoped;
+import scala.Option;
 import scala.Tuple2;
 
 import java.io.IOException;
 import java.io.OutputStream;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-
-import scala.Option;
 
 import static org.kframework.kore.KORE.*;
 
 /**
  * Class for printing information and outputting to files using various serializers.
  */
+@RequestScoped
 public class KPrint {
 
     private final KExceptionManager kem;
@@ -55,26 +55,28 @@ public class KPrint {
     private final KompileOptions    kompileOptions;
 
     public final PrintOptions options;
-    private final Optional<CompiledDefinition> compiledDefinition;
+
+    @Nullable
+    private final CompiledDefinition compiledDefinition;
 
     public KPrint() {
-        this(new KExceptionManager(new GlobalOptions()), FileUtil.testFileUtil(), new TTYInfo(false, false, false), new PrintOptions(), Optional.empty(), new KompileOptions());
+        this(new KExceptionManager(new GlobalOptions()), FileUtil.testFileUtil(), new TTYInfo(false, false, false),
+                new PrintOptions(), null, new KompileOptions());
     }
 
     public KPrint(CompiledDefinition compiledDefinition) {
-        this(new KExceptionManager(compiledDefinition.kompileOptions.global), FileUtil.testFileUtil(), new TTYInfo(false, false, false), new PrintOptions(), compiledDefinition);
+        this(new KExceptionManager(compiledDefinition.kompileOptions.global), FileUtil.testFileUtil(),
+                new TTYInfo(false, false, false), new PrintOptions(), compiledDefinition,
+                compiledDefinition.kompileOptions);
     }
 
     @Inject
-    public KPrint(KExceptionManager kem, FileUtil files, TTYInfo tty, PrintOptions options, CompiledDefinition compiledDefinition) {
-        this(kem, files, tty, options, Optional.of(compiledDefinition), compiledDefinition.kompileOptions);
-    }
-
-    public KPrint(KExceptionManager kem, FileUtil files, TTYInfo tty, PrintOptions options, Optional<CompiledDefinition> compiledDefinition, KompileOptions kompileOptions) {
-        this.kem            = kem;
-        this.files          = files;
-        this.tty            = tty;
-        this.options        = options;
+    public KPrint(KExceptionManager kem, FileUtil files, TTYInfo tty, PrintOptions options,
+                  CompiledDefinition compiledDefinition, KompileOptions kompileOptions) {
+        this.kem = kem;
+        this.files = files;
+        this.tty = tty;
+        this.options = options;
         this.compiledDefinition = compiledDefinition;
         this.kompileOptions = kompileOptions;
     }
@@ -143,11 +145,10 @@ public class KPrint {
                 return (unparseTerm(result, programUnparsingModule, colorize) + "\n").getBytes();
             }
             case KORE:
-                if (!compiledDefinition.isPresent()) {
+                if (compiledDefinition == null) {
                     throw KEMException.criticalError("KORE output requires a compiled definition.");
                 }
-                CompiledDefinition cdef = compiledDefinition.get();
-                ModuleToKORE converter = new ModuleToKORE(module, files, cdef.topCellInitializer, kompileOptions);
+                ModuleToKORE converter = new ModuleToKORE(module, files, compiledDefinition.topCellInitializer, kompileOptions);
                 result = ExpandMacros.forNonSentences(module, files, kompileOptions, false).expand(result);
                 result = new AddSortInjections(module).addInjections(result);
                 StringBuilder sb = new StringBuilder();

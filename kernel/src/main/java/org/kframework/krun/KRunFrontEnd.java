@@ -31,7 +31,7 @@ import java.util.function.Function;
 public class KRunFrontEnd extends FrontEnd {
 
     public static List<Module> getModules() {
-        return ImmutableList.<Module>of(
+        return ImmutableList.of(
                 new KRunModule(),
                 new CommonModule(),
                 new JCommanderModule(),
@@ -46,6 +46,7 @@ public class KRunFrontEnd extends FrontEnd {
     private final KRunOptions krunOptions;
     private final Provider<FileUtil> files;
     private final Provider<CompiledDefinition> compiledDef;
+    private final Provider<KPrint> kprint;
     private final Provider<Function<Definition, Rewriter>> initializeRewriter;
     private final Provider<ExecutionMode> executionMode;
     private final TTYInfo tty;
@@ -62,6 +63,7 @@ public class KRunFrontEnd extends FrontEnd {
             KRunOptions krunOptions,
             Provider<FileUtil> files,
             Provider<CompiledDefinition> compiledDef,
+            Provider<KPrint> kprint,
             Provider<Function<Definition, Rewriter>> initializeRewriter,
             Provider<ExecutionMode> executionMode,
             TTYInfo tty) {
@@ -72,6 +74,7 @@ public class KRunFrontEnd extends FrontEnd {
         this.krunOptions = krunOptions;
         this.files = files;
         this.compiledDef = compiledDef;
+        this.kprint = kprint;
         this.initializeRewriter = initializeRewriter;
         this.executionMode = executionMode;
         this.tty = tty;
@@ -83,14 +86,13 @@ public class KRunFrontEnd extends FrontEnd {
     public int run() {
         scope.enter(kompiledDir.get());
         try {
-            KPrint kprint = new KPrint(kem, files.get(), tty, krunOptions.print, compiledDef.get());
             for (int i = 0; i < krunOptions.experimental.profile - 1; i++) {
-                new KRun(kem, files.get(), tty, kprint).run(compiledDef.get(),
+                new KRun(kem, files.get(), tty, kprint.get()).run(compiledDef.get(),
                         krunOptions,
                         initializeRewriter.get(),
                         executionMode.get());
             }
-            return new KRun(kem, files.get(), tty, kprint).run(compiledDef.get(),
+            return new KRun(kem, files.get(), tty, kprint.get()).run(compiledDef.get(),
                     krunOptions,
                     initializeRewriter.get(),
                     executionMode.get());

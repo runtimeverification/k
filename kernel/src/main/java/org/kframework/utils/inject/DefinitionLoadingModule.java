@@ -32,7 +32,7 @@ public class DefinitionLoadingModule extends AbstractModule {
     }
 
 
-    @Provides
+    @Provides @RequestScoped
     KompileOptions kompileOptions(Provider<CompiledDefinition> compiledDef) {
         // a hack, but it's good enough for what we need from it, which is a temporary solution
         KompileOptions res = compiledDef.get().kompileOptions;

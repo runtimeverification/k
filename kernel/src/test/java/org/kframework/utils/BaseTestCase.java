@@ -8,6 +8,7 @@ import com.google.inject.Provides;
 import com.google.inject.name.Names;
 import org.junit.Before;
 import org.junit.runner.RunWith;
+import org.kframework.kast.KastOptions;
 import org.kframework.kdoc.KDocOptions;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
@@ -93,6 +94,7 @@ public abstract class BaseTestCase {
             bind(RunProcess.class).toInstance(rp);
             bind(KDocOptions.class).toInstance(new KDocOptions());
             bind(KRunOptions.class).toInstance(new KRunOptions());
+            bind(KastOptions.class).toInstance(new KastOptions());
         }
 
     }
@@ -102,6 +104,6 @@ public abstract class BaseTestCase {
         scope.enter();
         DefinitionScope definitionScope = injector.getInstance(DefinitionScope.class);
         definitionScope.enter(new File("."));
-        Main.seedInjector(scope, tool, args, new File("."), System.getenv());
+        Main.seedInjector(scope, tool, args, new File("."), System.getenv(), System.nanoTime());
     }
 }

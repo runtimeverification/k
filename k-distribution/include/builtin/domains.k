@@ -678,7 +678,7 @@ module STRING-BUFFER
 endmodule
 
 module BYTES-HOOKED [concrete]
-  syntax Bytes [hook(BYTES.Bytes)]
+  syntax Bytes [hook(BYTES.Bytes), token]
 
   syntax Bytes ::= ".Bytes" [function, functional, hook(BYTES.empty), impure]
   syntax Endianness ::= "LE" [klabel(littleEndianBytes), symbol]
@@ -984,6 +984,8 @@ module K-IO
   syntax KItem ::= "#stat" "(" String ")" [function, hook(IO.stat), impure]
                  | "#lstat" "(" String ")" [function, hook(IO.lstat), impure]
                  | "#opendir" "(" String ")" [function, hook(IO.opendir), impure]
+
+  syntax Int ::= "#time" "(" ")" [function, hook(IO.time), impure]
 
   rule #open(S:String) => #open(S:String, "r+")
 

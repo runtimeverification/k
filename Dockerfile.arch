@@ -1,7 +1,29 @@
 FROM archlinux/base
 
-RUN pacman -Syyu --noconfirm && \
-    pacman -S --noconfirm git maven jdk-openjdk cmake boost libyaml jemalloc clang llvm lld zlib gmp mpfr z3 opam curl stack base-devel base python
+RUN    pacman -Syyu --noconfirm \
+    && pacman -S --noconfirm    \
+                    base        \
+                    base-devel  \
+                    boost       \
+                    clang       \
+                    cmake       \
+                    curl        \
+                    git         \
+                    gmp         \
+                    hub         \
+                    jdk-openjdk \
+                    jemalloc    \
+                    libyaml     \
+                    lld         \
+                    llvm        \
+                    maven       \
+                    mpfr        \
+                    opam        \
+                    openssh     \
+                    python      \
+                    stack       \
+                    z3          \
+                    zlib
 
 ARG USER_ID=1000
 ARG GROUP_ID=1000
