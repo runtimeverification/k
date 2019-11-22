@@ -1,6 +1,6 @@
 package org.kframework.main;
 
-import com.martiansoftware.nailgun.NGContext;
+import com.facebook.nailgun.NGContext;
 import org.kframework.kore.K;
 import org.kframework.parser.binary.BinaryParser;
 import org.kframework.unparser.ToKast;

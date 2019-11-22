@@ -11,7 +11,7 @@ import com.google.inject.ProvisionException;
 import com.google.inject.TypeLiteral;
 import com.google.inject.name.Named;
 import com.google.inject.spi.Message;
-import com.martiansoftware.nailgun.NGContext;
+import com.facebook.nailgun.NGContext;
 import org.fusesource.jansi.AnsiConsole;
 import org.kframework.kast.KastFrontEnd;
 import org.kframework.kbmc.KBMCFrontEnd;
@@ -76,7 +76,13 @@ public class Main {
         isNailgun = true;
         if (context.getArgs().length >= 1) {
             String[] args2 = Arrays.copyOfRange(context.getArgs(), 1, context.getArgs().length);
-            int result = kserver.run(context.getArgs()[0], args2, new File(context.getWorkingDirectory()), (Map) context.getEnv(), startTime);
+            int result = kserver.run(
+                context.getArgs()[0],
+                args2,
+                new File(context.getWorkingDirectory()),
+                (Map) context.getEnv(),
+                context,
+                startTime);
             System.exit(result);
             return;
         }

@@ -5,10 +5,9 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.Provider;
-import com.martiansoftware.nailgun.NGContext;
-import com.martiansoftware.nailgun.NGListeningAddress;
-import com.martiansoftware.nailgun.NGServer;
-import com.martiansoftware.nailgun.ThreadLocalPrintStream;
+import com.facebook.nailgun.NGContext;
+import com.facebook.nailgun.NGListeningAddress;
+import com.facebook.nailgun.NGServer;
 import org.fusesource.jansi.AnsiOutputStream;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.Main;
@@ -32,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.Consumer;
 
 
 public class KServerFrontEnd extends FrontEnd {
@@ -131,10 +131,7 @@ public class KServerFrontEnd extends FrontEnd {
         return instance;
     }
 
-    public int run(String tool, String[] args, File workingDir, Map<String, String> env, long startTime) {
-        ThreadLocalPrintStream system_out = (ThreadLocalPrintStream) System.out;
-        ThreadLocalPrintStream system_err = (ThreadLocalPrintStream) System.err;
-
+    public int run(String tool, String[] args, File workingDir, Map<String, String> env, NGContext context, long startTime) {
         Injector injector;
 
         lock.readLock().lock();
@@ -151,10 +148,10 @@ public class KServerFrontEnd extends FrontEnd {
             Main.seedInjector(requestScope, tool, args, workingDir, env, startTime);
             TTYInfo tty = injector.getInstance(TTYInfo.class);
             if (!tty.stdout) {
-                system_out.init(new PrintStream(new AnsiOutputStream(system_out.getPrintStream())));
+                context.setOut(new PrintStream(new AnsiOutputStream(context.err)));
             }
             if (!tty.stderr) {
-                system_err.init(new PrintStream(new AnsiOutputStream(system_err.getPrintStream())));
+                context.setErr(new PrintStream(new AnsiOutputStream(context.out)));
             }
 
             int result = launcher.runApplication();
@@ -173,7 +170,7 @@ public class KServerFrontEnd extends FrontEnd {
         }
         if (context.getArgs()[0].equals("shutdown")) {
             System.setSecurityManager(null);
-            context.getNGServer().shutdown(true);
+            context.getNGServer().shutdown();
         } else if (context.getArgs()[0].equals("reset")) {
             kserver.lock.writeLock().lock();
             try {

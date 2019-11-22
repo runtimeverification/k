@@ -5,16 +5,6 @@
   xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0 http://maven.apache.org/xsd/assembly-1.1.0.xsd">
   <id>bin</id>
   <baseDirectory>k</baseDirectory>
-    <dependencySets>
-      <dependencySet>
-        <outputDirectory>/bin</outputDirectory>
-        <includes>
-          <include>*:uexe:${native.os.classifier}:*</include>
-        </includes>
-        <outputFileNameMapping>${artifact.artifactId}</outputFileNameMapping>
-        <fileMode>775</fileMode>
-      </dependencySet>
-    </dependencySets>
   <fileSets>
     <fileSet>
       <directory>${project.basedir}</directory>
@@ -46,6 +36,15 @@
       <directory>${project.build.scriptSourceDirectory}/bin</directory>
       <outputDirectory>/bin</outputDirectory>
       <filtered>true</filtered>
+      <fileMode>775</fileMode>
+      <directoryMode>775</directoryMode>
+    </fileSet>
+    <fileSet>
+      <directory>${project.basedir}/src/main/nailgun/nailgun-client/target</directory>
+      <outputDirectory>/bin</outputDirectory>
+      <includes>
+        <include>ng</include>
+      </includes>
       <fileMode>775</fileMode>
       <directoryMode>775</directoryMode>
     </fileSet>
