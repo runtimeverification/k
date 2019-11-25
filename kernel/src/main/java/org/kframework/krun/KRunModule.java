@@ -14,7 +14,6 @@ import org.kframework.kompile.KompileOptions;
 import org.kframework.krun.KRunOptions.ConfigurationCreationOptions;
 import org.kframework.krun.api.io.FileSystem;
 import org.kframework.krun.ioserver.filesystem.portable.PortableFileSystem;
-import org.kframework.krun.modes.DebugMode.DebugExecutionMode;
 import org.kframework.krun.modes.ExecutionMode;
 import org.kframework.krun.modes.KRunExecutionMode;
 import org.kframework.main.FrontEnd;
@@ -27,6 +26,7 @@ import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.Options;
+import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.DefinitionLoadingOptions;
 import org.kframework.utils.options.SMTOptions;
 
@@ -54,12 +54,12 @@ public class KRunModule extends AbstractModule {
         return options.experimental.smt;
     }
 
-    @Provides
+    @Provides @RequestScoped
     GlobalOptions globalOptions(KRunOptions options) {
         return options.global;
     }
 
-    @Provides
+    @Provides @RequestScoped
     PrintOptions printOptions(KRunOptions options) {
         return options.print;
     }
@@ -78,9 +78,6 @@ public class KRunModule extends AbstractModule {
             //bind backend implementations of tools to their interfaces
             MapBinder<ToolActivation, ExecutionMode> executionBinder = MapBinder.newMapBinder(binder(),
                     ToolActivation.class, ExecutionMode.class);
-
-            executionBinder.addBinding(new ToolActivation.OptionActivation("--debugger")).to(DebugExecutionMode.class);
-
         }
 
         @Provides

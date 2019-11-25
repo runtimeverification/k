@@ -216,11 +216,11 @@ module LOGIK-SYNTAX
   /*@ Variables and literals are defined as tokens following the conventions
   used in Prolog (variables start with \_ or capital letter, while literals
   start with lower case letters): */
-  syntax #KVariable ::= r"[A-Z_][A-Za-z0-9_]*"   [token, prec(2), autoReject]
-                      | #UpperId                 [token, autoReject]
+  syntax #KVariable ::= r"[A-Z_][A-Za-z0-9_]*"   [token, prec(2)]
+                      | #UpperId                 [token]
   syntax Term ::= #KVariable [klabel(#SemanticCastToTerm)]
-  syntax Literal ::= r"[a-z][a-zA-Z0-9_]*"                 [autoReject, token]
-                   | #LowerId                              [autoReject, token]
+  syntax Literal ::= r"[a-z][a-zA-Z0-9_]*"                 [token]
+                   | #LowerId                              [token]
 endmodule
 
 module LOGIK

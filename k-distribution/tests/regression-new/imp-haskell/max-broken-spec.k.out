@@ -23,9 +23,9 @@
     } )
 #And
   #Not ( ( {
-        B
-      #Equals
         A
+      #Equals
+        B
       }
     #Implies
       {
@@ -35,15 +35,15 @@
       } )
   #And
     #Not ( #Not ( {
-      B
-    #Equals
       A
+    #Equals
+      B
     } ) )
   #And
     #Not ( {
-      B
-    #Equals
       A
+    #Equals
+      B
     } )
   #And
     #Not ( {
@@ -69,9 +69,9 @@
       .
     </k>
     <state>
-      a |-> A
-      b |-> B
-      max |-> B
+      a |-> A:Int
+      b |-> B:Int
+      max |-> B:Int
     </state>
   </T>
 #And

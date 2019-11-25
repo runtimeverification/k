@@ -225,7 +225,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>3.0.0</version>
+        <version>3.1.0</version>
         <executions>
           <execution>
             <id>checkstyle-copyright</id>
@@ -253,7 +253,9 @@
             <configuration>
               <sourceDirectories>
                 <sourceDirectory>${project.basedir}</sourceDirectory>
-              </sourceDirectories>
+	      </sourceDirectories>
+	      <includeResources>false</includeResources>
+	      <includeTestResources>false</includeTestResources>
               <includes>**/*.k</includes>
               <excludes>haskell-backend/src/main/native/**,llvm-backend/src/main/native/**</excludes>
               <configLocation>src/main/config/checkstyle-k.xml</configLocation>
@@ -360,7 +362,7 @@
         <native.exe.type>uexe</native.exe.type>
         <native.exe.extension />
 	<native.script.extension />
-	<prefix.path>/usr/local/opt/llvm/;/usr/local/opt/bison;/usr/local/opt/flex;/usr/local/opt/libffi</prefix.path>
+	<prefix.path>/usr/local/opt/llvm/;/usr/local/opt/flex;/usr/local/opt/libffi</prefix.path>
       </properties>
     </profile>
     <profile>

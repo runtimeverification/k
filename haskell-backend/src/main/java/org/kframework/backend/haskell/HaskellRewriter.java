@@ -138,7 +138,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                 try {
                     File korePath = koreDirectory == null ? null : new File(koreDirectory);
                     int execStatus = executeCommandBasic(korePath, koreCommand);
-                    K outputK = new KoreParser(files.resolveKoreToKLabelsFile(), mod.sortAttributesFor()).parseFile(koreOutputFile);
+                    K outputK = new KoreParser(mod.sortAttributesFor()).parseFile(koreOutputFile);
                     return new RewriterResult(Optional.empty(), Optional.of(execStatus), outputK);
                 } catch (IOException e) {
                     throw KEMException.criticalError("I/O Error while executing", e);
@@ -230,7 +230,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                     if (executeCommandBasic(korePath, koreCommand) != 0) {
                         throw KEMException.criticalError("Haskell backend returned non-zero exit code");
                     }
-                    K outputK = new KoreParser(files.resolveKoreToKLabelsFile(), mod.sortAttributesFor()).parseFile(koreOutputFile);
+                    K outputK = new KoreParser(mod.sortAttributesFor()).parseFile(koreOutputFile);
                     return outputK;
                 } catch (IOException e) {
                     throw KEMException.criticalError("I/O Error while executing", e);
@@ -250,8 +250,9 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
             }
 
             private String saveKoreSpecToTemp(ModuleToKORE converter, Module rules) {
+                StringBuilder sb = new StringBuilder();
                 String koreOutput = converter.convertSpecificationModule(module, rules,
-                        haskellKRunOptions.allPathReachability);
+                        haskellKRunOptions.defaultClaimType, sb);
                 files.saveToTemp("spec.kore", koreOutput);
                 String specPath = files.resolveTemp("spec.kore").getAbsolutePath();
                 return specPath;
@@ -289,7 +290,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                 }
                 K outputK;
                 try {
-                    outputK = new KoreParser(files.resolveKoreToKLabelsFile(), rules.sortAttributesFor())
+                    outputK = new KoreParser(rules.sortAttributesFor())
                             .parseFile(koreOutputFile);
                 } catch (ParseError parseError) {
                     kem.registerCriticalWarning("Error parsing haskell backend output", parseError);
@@ -318,9 +319,6 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                 if (kProveOptions.depth != null) {
                     args.addAll(Arrays.asList(
                         "--depth", kProveOptions.depth.toString()));
-                }
-                if (haskellKRunOptions.allPathReachability) {
-                    args.add("--all-path-reachability");
                 }
                 String[] koreCommand = args.toArray(new String[args.size()]);
                 if (haskellKRunOptions.dryRun) {
@@ -389,8 +387,9 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
         ExpandMacros macroExpander = ExpandMacros.forNonSentences(mod, files, kompileOptions, false);
         K withMacros = macroExpander.expand(initialConfiguration);
         K kWithInjections = new AddSortInjections(mod).addInjections(withMacros);
-        converter.convert(kWithInjections);
-        return converter.toString();
+        StringBuilder sb = new StringBuilder();
+        converter.convert(kWithInjections, sb);
+        return sb.toString();
     }
 
 

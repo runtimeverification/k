@@ -29,12 +29,17 @@ trait RuleToString {
 
 trait ProductionToString {
   self: Production =>
-  override def toString = "syntax " + sort + " ::= " + items.mkString(" ") + att.remove(classOf[Source]).remove(classOf[Location]).remove("productionID").postfixString
+  override def toString = "syntax " + (if (params.nonEmpty) { "{" + params.mkString(", ") + "} " } else "") + sort + " ::= " + items.mkString(" ") + att.remove(classOf[Source]).remove(classOf[Location]).postfixString
 }
 
 trait SyntaxSortToString {
   self: SyntaxSort =>
   override def toString() = "syntax " + sort + att.postfixString
+}
+
+trait SortSynonymToString {
+  self: SortSynonym =>
+  override def toString() = "syntax" + newSort + " = " + oldSort + att.postfixString
 }
 
 trait TerminalToString {

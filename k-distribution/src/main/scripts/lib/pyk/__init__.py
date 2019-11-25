@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import argparse
+import os
 import subprocess
 import sys
 import tempfile
@@ -27,6 +27,8 @@ def _teeProcessStdout(args, tee = True, buffer_size = 80):
 def _runK(command, definition, inputFile, kArgs = [], teeOutput = True, kRelease = None):
     if kRelease is not None:
         command = kRelease + '/bin/' + command
+    elif 'K_RELEASE' in os.environ:
+        command = os.environ['K_RELEASE'] + '/bin/' + command
     kCommand = [ command , '--directory' , definition , inputFile ] + kArgs
     _notif('Running: ' + ' '.join(kCommand))
     return _teeProcessStdout(kCommand, tee = teeOutput)
@@ -40,40 +42,27 @@ def krun(definition, inputFile, krunArgs = [], teeOutput = True, kRelease = None
 def kprove(definition, inputFile, kproveArgs = [], teeOutput = True, kRelease = None):
     return _runK('kprove', definition, inputFile, kArgs = kproveArgs, teeOutput = teeOutput, kRelease = kRelease)
 
-pykArgs = argparse.ArgumentParser()
+def kastJSON(definition, inputJSON, kastArgs = [], teeOutput = True, kRelease = None, keepTemp = False):
+    with tempfile.NamedTemporaryFile(mode = 'w', delete = not keepTemp) as tempf:
+        tempf.write(json.dumps(inputJSON))
+        tempf.flush()
+        return kast(definition, tempf.name, kastArgs = kastArgs, teeOutput = teeOutput, kRelease = kRelease)
 
-pykArgs.add_argument('command' , choices = ['parse', 'run', 'prove'])
+def krunJSON(definition, inputJSON, krunArgs = [], teeOutput = True, kRelease = None, keepTemp = False):
+    with tempfile.NamedTemporaryFile(mode = 'w', delete = not keepTemp) as tempf:
+        tempf.write(json.dumps(inputJSON))
+        tempf.flush()
+        (rC, out, err) = krun(definition, tempf.name, krunArgs = krunArgs + ['--output', 'json', '--parser', 'cat'], teeOutput = teeOutput, kRelease = kRelease)
+        out = None if out == '' else json.loads(out)['term']
+        return (rC, out, err)
 
-pykArgs.add_argument('-d', '--definition')
-
-pykArgs.add_argument('-i', '--input',  type = argparse.FileType('r'), default = '-')
-pykArgs.add_argument('-o', '--output', type = argparse.FileType('w'), default = '-')
-
-pykArgs.add_argument('-f', '--from', default = 'pretty', choices = ['pretty', 'json', 'kast', 'binary', 'kore'])
-pykArgs.add_argument('-t', '--to',   default = 'pretty', choices = ['pretty', 'json', 'kast', 'binary', 'kore'])
-
-pykArgs.add_argument('kArgs', nargs='*', help = 'Arguments to pass through to K invocation.')
-
-def __main__(args):
-
-    inputFile = args['input'].name
-    if inputFile == '-':
-        with tempfile.NamedTemporaryFile(mode = 'w') as tempf:
-            tempf.write(args['input'].read())
-            inputFile = tempf.name
-
-    definition = args['definition']
-    if args['command'] == 'parse':
-        (returncode, stdout, stderr) = kast(definition, inputFile, kArgs = ['--input', args['from'], '--output', args['to']] + args['kArgs'])
-    elif args['command'] == 'run':
-        (returncode, stdout, stderr) = krun(definition, inputFile, kArgs = ['--input', args['from'], '--output', args['to']] + args['kArgs'])
-    elif args['command'] == 'prove':
-        (returncode, stdout, stderr) = kprove(definition, inputFile, kArgs = ['--input', args['from'], '--output', args['to']] + args['kArgs'])
-
-    args['output'].write(stdout)
-
-    if returnCode != 0:
-        _fatal('Non-zero exit code (' + str(returnCode) + ': ' + str(kCommand), code = returnCode)
-
-if __name__ == '__main__':
-    __main__(pykArgs.parse_args())
+def kproveJSON(definition, inputJSON, symbolTable, kproveArgs = [], teeOutput = True, kRelease = None, keepTemp = False):
+    if not isKDefinition(inputJSON):
+        sys.stderr.write(inputJSON)
+        _fatal("Not a K Definition!")
+    with tempfile.NamedTemporaryFile(mode = 'w', delete = not keepTemp) as tempf:
+        tempf.write(prettyPrintKast(inputJSON, symbolTable))
+        tempf.flush()
+        (rC, out, err) = kprove(definition, tempf.name, kproveArgs = kproveArgs + ['--output', 'json'], teeOutput = teeOutput, kRelease = kRelease)
+        out = None if out == '' else json.loads(out)['term']
+        return (rC, out, err)

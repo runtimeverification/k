@@ -1,4 +1,4 @@
 <k>
-  lookupResult ( X |-> 1
-  MAP [ Z ] )
+  lookupResult ( MAP
+  ( X |-> 1 ) [ Z ] )
 </k>

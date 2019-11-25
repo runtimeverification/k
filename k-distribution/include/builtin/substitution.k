@@ -3,10 +3,10 @@
 module KVAR-PROGRAM-PARSING
   imports BUILTIN-ID-TOKENS
 
-  syntax KVar ::= r"(?<![A-Za-z0-9\\_])[A-Za-z\\_][A-Za-z0-9\\_]*"     [prec(1), notInRules, token, autoReject]
+  syntax KVar ::= r"(?<![A-Za-z0-9\\_])[A-Za-z\\_][A-Za-z0-9\\_]*"     [prec(1), token]
 
-              | #LowerId                                             [notInRules, token, autoReject]
-              | #UpperId                                             [notInRules, token, autoReject]
+              | #LowerId                                             [token]
+              | #UpperId                                             [token]
 endmodule
 
 module KVAR-SYNTAX
@@ -33,6 +33,6 @@ module SUBSTITUTION
   imports MAP
   imports KVAR
 
-  syntax K ::= K "[" KItem "/" KItem "]"  [function, hook(SUBSTITUTION.substOne), impure, poly(0, 1)]
-  syntax K ::= K "[" Map "]"      [function, hook(SUBSTITUTION.substMany), impure, poly(0, 1)]
+  syntax {Sort} Sort ::= Sort "[" KItem "/" KItem "]"  [function, hook(SUBSTITUTION.substOne), impure]
+  syntax {Sort} Sort ::= Sort "[" Map "]"      [function, hook(SUBSTITUTION.substMany), impure]
 endmodule

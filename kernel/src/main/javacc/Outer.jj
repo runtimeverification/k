@@ -172,6 +172,7 @@ import org.kframework.kil.Production;
 import org.kframework.kil.ProductionItem;
 import org.kframework.kil.Require;
 import org.kframework.kil.NonTerminal;
+import org.kframework.kil.SortSynonym;
 import org.kframework.kil.StringSentence;
 import org.kframework.kil.Syntax;
 import org.kframework.kil.Terminal;
@@ -846,8 +847,9 @@ void Sentence(Module module) :
 { Location loc = startLoc();
   String type, str;
   StringBuilder sb = new StringBuilder();
-  NonTerminal nonTerminal;
+  NonTerminal nonTerminal, oldSort;
   StringSentence ss;
+  Sort param;
   List<Tag> list; }
 {
   ("rule" | LOOKAHEAD("context" <ALIAS>) "context" <ALIAS> | "configuration" | "context")
@@ -856,14 +858,15 @@ void Sentence(Module module) :
     if (type.equals("configuration")) { type = "config"; } }
   ss = Bubble(type) { module.appendModuleItem(markLoc(loc, ss)); }
 
-| "syntax"
-  ( nonTerminal = SortID() { Syntax syn = new Syntax(nonTerminal); }
+| "syntax" 
+  ( { List<Sort> params = new ArrayList<Sort>(); } ( "{" param = SimpleSort() { params.add(param); } ( "," param = SimpleSort() { params.add(param); })* "}" )? nonTerminal = SortID() {ModuleItem syn = new Syntax(nonTerminal, params); }
     ( "::=" { List<PriorityBlock> pblocks = new ArrayList<PriorityBlock>(); }
       PriorityBlock(pblocks) (">" PriorityBlock(pblocks))*
-      { syn.setPriorityBlocks(pblocks); }
-    | Attributes(syn) )?
+      { ((Syntax)syn).setPriorityBlocks(pblocks); }
+    | Attributes(syn)
+    | "=" (oldSort = SortID()) { syn = new SortSynonym(nonTerminal, oldSort); }
+      (Attributes(syn))?)?
     { module.appendModuleItem(markLoc(loc, syn)); }
-
   | ("priority" | "priorities")
       { List<PriorityBlockExtended> pblocks =
           new ArrayList<PriorityBlockExtended>(); }

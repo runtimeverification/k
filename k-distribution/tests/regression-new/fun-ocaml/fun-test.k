@@ -57,4 +57,48 @@ rule useNestedBarInt()
   rule [[ requiresConfig() => 0 ]]
     <cell> M </cell>
 
+  syntax IntList ::= List{Int, ""}
+
+  syntax KItem ::= callFunIntListAndConfig()
+  rule callFunIntListAndConfig() => funIntListAndConfig()
+
+  syntax Int ::= funIntListAndConfig()     [function]
+  rule [[ funIntListAndConfig() => #fun(V1 => 0)(.IntList) ]]
+    <cell> M </cell>
+
+  syntax KItem ::= Int
+  syntax Int ::= funSortTest(Int) [function]
+  rule funSortTest(I)
+    => #fun(BALANCE
+    => #fun(ROOT
+    => BALANCE +Int ROOT)(I))(I)
+
+  syntax KItem ::= Hash
+  syntax Hash ::= funSortTest2() [function]
+  rule funSortTest2()
+    => #fun(EPOCH
+    => #fun(CommitteesPerSlot
+    => #fun(OFFSET
+    => #fun(SHARD
+    => #fun(FirstCommittee
+    => #fun(MaxRandomByte
+    => #fun(SEED
+    => #fun(I
+    => funSortTest2Aux(EPOCH, CommitteesPerSlot, OFFSET, SHARD, FirstCommittee, MaxRandomByte, SEED, I)
+       )(0)
+       )(get_seed(EPOCH))
+       )(0)
+       )(0)
+       )(0)
+       )(0)
+       )(0)
+       )(0)
+
+  syntax Hash ::= funSortTest2Aux(Int, Int, Int, Int, Int, Int, h: Hash, Int) [function]
+  rule funSortTest2Aux(... h: H) => H
+
+  syntax Hash ::= "foo"
+  syntax Hash ::= "get_seed" "(" Int ")" [function]
+  rule get_seed(_) => foo
+
 endmodule

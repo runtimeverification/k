@@ -126,7 +126,7 @@ public class RuleGrammarTest {
                 "| r\"[0-9]+\" [token] " +
                 "syntax left 'Plus " +
                 "endmodule";
-        parseRule("1+2=>A:Exp~>{B}:>Exp", def, 1, false);
+        parseRule("1+2=>A:Exp~>{B}:>Exp", def, 0, false);
     }
 
     // test variable disambiguation when a variable is declared by the user
@@ -138,12 +138,12 @@ public class RuleGrammarTest {
                 "| Exp " +
                 "syntax Exp ::= Id " +
                 "syntax Stmt ::= \"val\" Exps \";\" Stmt [klabel('Decl)] " +
-                "syntax KBott ::= \"(\" K \")\" [bracket, klabel('bracket)] " +
-                "| (Id, Stmt) [klabel('tuple)] " +
+                "syntax {Sort} Sort ::= \"(\" Sort \")\" [bracket] " +
+                "syntax KItem ::= (Id, Stmt) [klabel('tuple)] " +
                 "syntax Id " +
                 "syntax K " +
                 "endmodule";
-        parseRule("val X ; S:Stmt => (X, S)", def, 1, false);
+        parseRule("val X ; S:Stmt => (X, S)", def, 0, false);
     }
 
     // test variable disambiguation when all variables are being inferred
@@ -155,12 +155,12 @@ public class RuleGrammarTest {
                 "| Exp " +
                 "syntax Exp ::= Id " +
                 "syntax Stmt ::= \"val\" Exps \";\" Stmt [klabel('Decl)] " +
-                "syntax KBott ::= \"(\" K \")\" [bracket, klabel('bracket)] " +
-                "| (Id, Stmt) [klabel('tuple)] " +
+                "syntax {Sort} Sort ::= \"(\" Sort \")\" [bracket] " +
+                "syntax KItem ::= (Id, Stmt) [klabel('tuple)] " +
                 "syntax Id " +
                 "syntax K " +
                 "endmodule";
-        parseRule("val X ; S => (X, S)", def, 2, false);
+        parseRule("val X ; S => (X, S)", def, 0, false);
     }
 
     // test error reporting when + is non-associative
@@ -175,7 +175,7 @@ public class RuleGrammarTest {
         parseRule("1+2+3", def, 0, true);
     }
 
-    // test AmbFilter which should report ambiguities and return a clean term
+    // test AmbFilter which should report ambiguities as errors
     @Test
     public void test6() {
         String def = "" +
@@ -183,7 +183,7 @@ public class RuleGrammarTest {
                 "syntax Exp ::= Exp \"+\" Exp [klabel('Plus)] " +
                 "| r\"[0-9]+\" [token] " +
                 "endmodule";
-        parseRule("1+2+3", def, 1, false);
+        parseRule("1+2+3", def, 0, true);
     }
 
     // test error reporting when rewrite priority is not met
@@ -222,7 +222,7 @@ public class RuleGrammarTest {
                 "syntax KCell ::= \"<k>\" K \"</k>\" [klabel(<k>), cell] " +
                 "syntax StateCell ::= \"<state>\" K \"</state>\" [klabel(<state>), cell] " +
                 "endmodule";
-        parseRule("<T> <k>...1+2*3...</k> (<state> A => .::K ...</state> => .::Bag) ...</T>", def, 1, false);
+        parseRule("<T> <k>...1+2*3...</k> (<state> A => .::K ...</state> => .::Bag) ...</T>", def, 0, false);
     }
 
     // test rule cells
@@ -247,7 +247,7 @@ public class RuleGrammarTest {
                 "| r\"[0-9]+\" [token] " +
                 "syntax K " +
                 "endmodule";
-        parseConfig("<T multiplicity=\"*\"> <k> 1+2*3 </k> (<state> A => .::K </state> => .::Bag) </T>", def, 1, false);
+        parseConfig("<T multiplicity=\"*\"> <k> 1+2*3 </k> (<state> A => .::K </state> => .::Bag) </T>", def, 0, false);
     }
 
     // test variable disambiguation when all variables are being inferred
@@ -286,9 +286,9 @@ public class RuleGrammarTest {
         parseRule("A::K ==K A", def, 0, false);
         parseRule("A::K == K A", def, 0, true);
         parseRule("A:K", def, 0, false);
-        parseRule("A: K", def, 2, false);
-        parseRule("A:Stmt ?F : Stmt", def, 2, false);
-        parseRule("A:Stmt ? F : Stmt", def, 2, false);
+        parseRule("A: K", def, 0, false);
+        parseRule("A:Stmt ?F : Stmt", def, 0, false);
+        parseRule("A:Stmt ? F : Stmt", def, 0, false);
     }
 
     // test whitespace
@@ -378,7 +378,7 @@ public class RuleGrammarTest {
                 "syntax TA ::= TB | t(A) [klabel(t)] " +
                 "syntax TB ::= t(B) [klabel(t)] " +
                 "endmodule";
-        parseRule("t(Y) => .K", def, 1, false);
+        parseRule("t(Y) => .K", def, 0, false);
         parseRule("t(_) => .K", def, 0, false);
     }
 

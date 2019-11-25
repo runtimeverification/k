@@ -20,6 +20,7 @@ import org.kframework.parser.kore.parser.ParseError;
 import org.kframework.RewriterResult;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.rewriter.SearchType;
+import org.kframework.utils.OS;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.DefinitionScoped;
@@ -77,19 +78,29 @@ public class LLVMRewriter implements Function<Definition, Rewriter> {
                 ModuleToKORE converter = new ModuleToKORE(mod, files, def.topCellInitializer, kompileOptions);
                 K withMacros = macroExpander.expand(k);
                 K kWithInjections = new AddSortInjections(mod).addInjections(withMacros);
-                converter.convert(kWithInjections);
-                String koreOutput = "[initial-configuration{}(" + converter.toString() + ")]\n\nmodule TMP\nendmodule []\n";
+                StringBuilder sb = new StringBuilder();
+                converter.convert(kWithInjections, sb);
+                String koreOutput = sb.toString();
                 files.saveToTemp("pgm.kore", koreOutput);
                 String pgmPath = files.resolveTemp("pgm.kore").getAbsolutePath();
                 File koreOutputFile = files.resolveTemp("result.kore");
                 List<String> args = new ArrayList<String>();
+                if (krunOptions.experimental.debugger) {
+                  if (OS.current() == OS.OSX) {
+                    args.add("lldb");
+                    args.add("--");
+                  } else {
+                    args.add("gdb");
+                    args.add("--args");
+                  }
+                }
                 args.add(files.resolveKompiled("interpreter").getAbsolutePath());
                 args.add(pgmPath);
                 args.add(Integer.toString(depth.orElse(-1)));
                 args.add(koreOutputFile.getAbsolutePath());
                 try {
                     int exit = executeCommandBasic(files.resolveWorkingDirectory("."), args);
-                    K outputK = new KoreParser(files.resolveKoreToKLabelsFile(), mod.sortAttributesFor()).parseFile(koreOutputFile);
+                    K outputK = new KoreParser(mod.sortAttributesFor()).parseFile(koreOutputFile);
                     return new RewriterResult(Optional.empty(), Optional.of(exit), outputK);
                 } catch (IOException e) {
                     throw KEMException.criticalError("I/O Error while executing", e);

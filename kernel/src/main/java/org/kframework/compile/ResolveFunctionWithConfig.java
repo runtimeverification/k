@@ -62,7 +62,7 @@ public class ResolveFunctionWithConfig {
         topCell = Sorts.GeneratedTopCell();
         topCellLabel = KLabels.GENERATED_TOP_CELL;
       } else {
-        topCell = info.topCell();
+        topCell = info.getRootCell();
         topCellLabel = info.getCellLabel(topCell);
       }
       CONFIG_VAR = KVariable("_Configuration", Att().add(Sort.class, topCell).add("withConfig"));
@@ -178,7 +178,7 @@ public class ResolveFunctionWithConfig {
     private Production resolve(Production prod) {
         if (prod.klabel().isDefined() && withConfigFunctions.contains(prod.klabel().get())) {
             List<ProductionItem> pis = Stream.concat(stream(prod.items()), Stream.of(NonTerminal(topCell))).collect(Collections.toList());
-            return Production(prod.klabel(), prod.sort(), pis, prod.att());
+            return Production(prod.klabel(), prod.params(), prod.sort(), pis, prod.att());
         }
         return prod;
     }

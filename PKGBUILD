@@ -1,5 +1,5 @@
 # Maintainer: Dwight Guth <dwight.guth@runtimeverification.com>
-pkgname=kframework
+pkgname=kframework-git
 pkgver=5.0.0
 pkgrel=1
 epoch=
@@ -30,7 +30,7 @@ prepare() {
 
 build() {
 	cd ..
-	mvn package -DskipTests
+	mvn --batch-mode package -DskipTests -Dllvm.backend.prefix=/usr/lib/kframework -Dllvm.backend.destdir="$srcdir"
 }
 
 check() {

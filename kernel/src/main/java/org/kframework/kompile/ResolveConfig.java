@@ -53,35 +53,36 @@ class ResolveConfig {
 
         Set<Sentence> importedConfigurationSortsSubsortedToCell = stream(inputModule.productions())
                 .filter(p -> p.att().contains("cell"))
-                .map(p -> Production(Sorts.Cell(), Seq(NonTerminal(p.sort())))).collect(Collections.toSet());
+                .map(p -> Production(Seq(), Sorts.Cell(), Seq(NonTerminal(p.sort())))).collect(Collections.toSet());
 
         Module module = Module(inputModule.name(), (Set<Module>) inputModule.imports(),
                 (Set<Sentence>) inputModule.localSentences().$bar(importedConfigurationSortsSubsortedToCell),
                 inputModule.att());
 
-        ParseInModule parser = getParser.apply(module);
-
-        Set<Sentence> configDeclProductions = stream(module.localSentences())
-                .parallel()
-                .filter(s -> s instanceof Bubble)
-                .map(b -> (Bubble) b)
-                .filter(b -> b.sentenceType().equals("config"))
-                .flatMap(b -> parseBubble.apply(module, b))
-                .map(contents -> {
-                    KApply configContents = (KApply) contents;
-                    List<K> items = configContents.klist().items();
-                    switch (configContents.klabel().name()) {
-                    case "#ruleNoConditions":
-                        return Configuration(items.get(0), BooleanUtils.TRUE, configContents.att());
-                    case "#ruleEnsures":
-                        return Configuration(items.get(0), items.get(1), configContents.att());
-                    default:
-                        throw KEMException.compilerError("Illegal configuration with requires clause detected.", configContents);
-                    }
-                })
-                .flatMap(
-                        configDecl -> stream(GenerateSentencesFromConfigDecl.gen(configDecl.body(), configDecl.ensures(), configDecl.att(), parser.getExtensionModule(), kore)))
-                .collect(Collections.toSet());
+        Set<Sentence> configDeclProductions;
+        try (ParseInModule parser = getParser.apply(module)) {
+             configDeclProductions = stream(module.localSentences())
+                    .parallel()
+                    .filter(s -> s instanceof Bubble)
+                    .map(b -> (Bubble) b)
+                    .filter(b -> b.sentenceType().equals("config"))
+                    .flatMap(b -> parseBubble.apply(module, b))
+                    .map(contents -> {
+                        KApply configContents = (KApply) contents;
+                        List<K> items = configContents.klist().items();
+                        switch (configContents.klabel().name()) {
+                        case "#ruleNoConditions":
+                            return Configuration(items.get(0), BooleanUtils.TRUE, configContents.att());
+                        case "#ruleEnsures":
+                            return Configuration(items.get(0), items.get(1), configContents.att());
+                        default:
+                            throw KEMException.compilerError("Illegal configuration with requires clause detected.", configContents);
+                        }
+                    })
+                    .flatMap(
+                            configDecl -> stream(GenerateSentencesFromConfigDecl.gen(configDecl.body(), configDecl.ensures(), configDecl.att(), parser.getExtensionModule(), kore)))
+                    .collect(Collections.toSet());
+        }
 
         Set<Sentence> configDeclSyntax = stream(configDeclProductions).filter(Sentence::isSyntax).collect(Collections.toSet());
         Set<Sentence> configDeclRules = stream(configDeclProductions).filter(Sentence::isNonSyntax).collect(Collections.toSet());

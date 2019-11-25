@@ -140,12 +140,8 @@ public final class KRunOptions {
         if (io != null && io == true && experimental.ltlmc()) {
             throw KEMException.criticalError("You cannot specify both --io on and --ltlmc");
         }
-        if (io != null && io == true && experimental.debugger()) {
-            throw KEMException.criticalError("You cannot specify both --io on and --debugger");
-        }
         if (search()
-                || experimental.ltlmc()
-                || experimental.debugger()) {
+                || experimental.ltlmc()) {
             return false;
         }
         if (io == null) {
@@ -229,14 +225,7 @@ public final class KRunOptions {
         public boolean statistics = false;
 
         @Parameter(names="--debugger", description="Run an execution in debug mode.")
-        private boolean debugger = false;
-
-        public boolean debugger() {
-            if (debugger && search()) {
-                throw new ParameterException("Cannot specify --search with --debug. In order to search inside the debugger, use the step-all command.");
-            }
-            return debugger;
-        }
+        public boolean debugger = false;
 
         @Parameter(names="--ltlmc", description="Specify the formula for model checking at the commandline.")
         public String ltlmc;

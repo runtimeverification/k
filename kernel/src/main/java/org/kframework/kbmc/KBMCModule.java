@@ -12,6 +12,7 @@ import org.kframework.main.GlobalOptions;
 import org.kframework.main.Tool;
 import org.kframework.unparser.PrintOptions;
 import org.kframework.utils.inject.Options;
+import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.DefinitionLoadingOptions;
 import org.kframework.utils.options.SMTOptions;
 
@@ -30,10 +31,10 @@ public class KBMCModule extends AbstractModule {
 
     }
 
-    @Provides
+    @Provides @RequestScoped
     GlobalOptions globalOptions(KBMCOptions options) { return options.global; }
 
-    @Provides
+    @Provides @RequestScoped
     PrintOptions printOptions(KBMCOptions options) {
         return options.print;
     }

@@ -4,12 +4,15 @@ package org.kframework.kompile;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate;
 import org.apache.commons.io.FilenameUtils;
+
 import org.kframework.backend.Backends;
 import org.kframework.main.GlobalOptions;
+import org.kframework.unparser.OutputModes;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.OuterParsingOptions;
 import org.kframework.utils.options.SMTOptions;
+import org.kframework.utils.options.BaseEnumConverter;
 import org.kframework.utils.options.StringListConverter;
 
 import java.io.Serializable;
@@ -76,11 +79,32 @@ public class KompileOptions implements Serializable {
     @Parameter(names="--hook-namespaces", listConverter=StringListConverter.class, description="<string> is a whitespace-separated list of namespaces to include in the hooks defined in the definition")
     public List<String> hookNamespaces = Collections.emptyList();
 
+    @Parameter(names="-O1", description="Optimize in ways that improve performance and code size, but interfere with debugging and increase compilation time slightly.")
+    public boolean optimize1;
+
+    @Parameter(names="-O2", description="Optimize further in ways that improve performance and code size, but interfere with debugging more and increase compilation time somewhat.")
+    public boolean optimize2;
+
+    @Parameter(names="-O3", description="Optimize aggressively in ways that significantly improve performance, but interfere with debugging significantly and also increase compilation time and code size substantially.")
+    public boolean optimize3;
+
     @ParametersDelegate
     public Experimental experimental = new Experimental();
 
     public boolean isKore() {
         return backend.equals("kore") || backend.equals("haskell") || backend.equals("llvm");
+    }
+
+    public static class OutputModeConverter extends BaseEnumConverter<OutputModes> {
+
+        public OutputModeConverter(String optionName) {
+            super(optionName);
+        }
+
+        @Override
+        public Class<OutputModes> enumClass() {
+            return OutputModes.class;
+        }
     }
 
     public static final class Experimental implements Serializable {
@@ -112,5 +136,8 @@ public class KompileOptions implements Serializable {
 
         @Parameter(names="--cache-file", description="Location of parse cache file. Default is $KOMPILED_DIR/cache.bin.")
         public String cacheFile;
+
+        @Parameter(names="--emit-json", description="Emit JSON serialized version of parsed and kompiled definitions.")
+        public boolean emitJson = false;
     }
 }

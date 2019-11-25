@@ -35,6 +35,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+import scala.Tuple2;
 
 import static org.kframework.Collections.*;
 import static org.kframework.kore.KORE.*;
@@ -175,21 +178,23 @@ public class AddSortInjections {
             Production prod = production(kapp);
             List<K> children = new ArrayList<>();
             Map<Integer,Sort> expectedSorts = new HashMap<>();
-            if (prod.att().contains("poly")) {
-                List<Set<Integer>> poly = RuleGrammarGenerator.computePositions(prod);
-                for (Set<Integer> positions : poly) {
+            List<Sort> args = new ArrayList<>();
+            if (prod.params().nonEmpty()) {
+                for (Sort param : iterable(prod.params())) {
                     Sort expectedSort;
-                    if (positions.contains(0)) {
+                    Set<Integer> positions = getPositions(param, prod);
+                    if (prod.sort().equals(param)) {
                         expectedSort = actualSort;
                     } else {
                         final Sort freshSortParam = freshSortParam();
                         List<Sort> polySorts = positions.stream()
-                                .map(p -> sort(kapp.items().get(p - 1), freshSortParam))
+                                .map(p -> sort(kapp.items().get(p), freshSortParam))
                                 .collect(Collectors.toList());
                         expectedSort = lub(polySorts, null, kapp, mod);
                     }
+                    args.add(expectedSort);
                     for (Integer p : positions) {
-                        expectedSorts.put(p - 1, expectedSort);
+                        expectedSorts.put(p, expectedSort);
                     }
                 }
             }
@@ -198,7 +203,7 @@ public class AddSortInjections {
                 K child = kapp.items().get(i);
                 children.add(internalAddSortInjections(child, expectedSort));
             }
-            return KApply(kapp.klabel(), KList(children), att);
+            return KApply(KLabel(kapp.klabel().name(), immutable(args)), KList(children), att);
         } else if (term instanceof KRewrite) {
             KRewrite rew = (KRewrite) term;
             return KRewrite(internalAddSortInjections(rew.left(), actualSort), internalAddSortInjections(rew.right(), actualSort), att);
@@ -229,6 +234,14 @@ public class AddSortInjections {
         }
     }
 
+    private Set<Integer> getPositions(Sort param, Production prod) {
+        return IntStream.range(0, prod.nonterminals().size())
+                        .mapToObj(i -> Tuple2.apply(prod.nonterminals().apply(i), i))
+                        .filter(t -> t._1().sort().equals(param))
+                        .map(t -> t._2())
+                        .collect(Collectors.toSet());
+    }
+
     public Sort sort(K term, Sort expectedSort) {
         if (term instanceof KApply) {
             KApply kapp = (KApply)term;
@@ -244,16 +257,20 @@ public class AddSortInjections {
             if (kapp.klabel().name().equals("#fun3")) {
                 return sort(kapp.items().get(1), expectedSort);
             }
+            if (kapp.klabel().name().equals("_:=K_")) {
+                return Sorts.Bool();
+            }
+            if (kapp.klabel().name().equals("_:/=K_")) {
+                return Sorts.Bool();
+            }
             Production prod = production(kapp);
-            if (prod.att().contains("poly")) {
-                List<Set<Integer>> poly = RuleGrammarGenerator.computePositions(prod);
-                for (Set<Integer> positions : poly) {
-                    if (positions.contains(0)) {
-                        Set<Integer> otherPositions = new HashSet<>(positions);
-                        otherPositions.remove(0);
+            if (prod.params().nonEmpty()) {
+                for (Sort param : iterable(prod.params())) {
+                    if (prod.sort().equals(param)) {
+                        Set<Integer> positions = getPositions(param, prod);
                         Set<Sort> children = new HashSet<>();
-                        for (int position : otherPositions) {
-                            children.add(sort(kapp.items().get(position-1), expectedSort));
+                        for (int position : positions) {
+                            children.add(sort(kapp.items().get(position), expectedSort));
                         }
                         children.remove(null);
                         if (children.size() == 0) {
@@ -302,7 +319,7 @@ public class AddSortInjections {
         if (term.klabel() instanceof KVariable) {
           throw KEMException.internalError("KORE does not yet support KLabel variables.", term);
         }
-        scala.collection.Set<Production> prods = mod.productionsFor().apply(((KApply) term).klabel());
+        scala.collection.Set<Production> prods = mod.productionsFor().apply(((KApply) term).klabel().head());
         if (prods.size() != 1) {
           throw KEMException.compilerError("Could not find production for KApply with label " + term.klabel(), term);
         }

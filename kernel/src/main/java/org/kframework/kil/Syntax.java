@@ -3,6 +3,8 @@ package org.kframework.kil;
 
 import com.beust.jcommander.internal.Lists;
 
+import org.kframework.kore.Sort;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -15,20 +17,18 @@ import java.util.List;
 public class Syntax extends ModuleItem {
     /** The sort being declared. */
     NonTerminal sort;
+    java.util.List<Sort> params;
     java.util.List<PriorityBlock> priorityBlocks;
 
-    public Syntax(NonTerminal sort, java.util.List<PriorityBlock> priorities) {
+    public Syntax(NonTerminal sort, List<Sort> params, List<PriorityBlock> priorities) {
         super();
         this.sort = sort;
+        this.params = params;
         this.priorityBlocks = priorities;
     }
 
-    public Syntax(NonTerminal sort, PriorityBlock... priorities) {
-        this(sort, Lists.newArrayList(priorities));
-    }
-
-    public Syntax(NonTerminal sort) {
-        this(sort, new ArrayList<PriorityBlock>());
+    public Syntax(NonTerminal sort, List<Sort> params) {
+        this(sort, params, new ArrayList<PriorityBlock>());
     }
 
     /**
@@ -36,6 +36,10 @@ public class Syntax extends ModuleItem {
      */
     public NonTerminal getDeclaredSort() {
         return sort;
+    }
+
+    public List<Sort> getParams() {
+        return params;
     }
 
     public void setSort(NonTerminal sort) {

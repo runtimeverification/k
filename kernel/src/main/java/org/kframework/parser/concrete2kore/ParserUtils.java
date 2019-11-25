@@ -5,6 +5,7 @@ import org.apache.commons.io.FileUtils;
 import org.kframework.attributes.Att;
 import org.kframework.attributes.Source;
 import org.kframework.definition.Module;
+import org.kframework.definition.ModuleTransformer;
 import org.kframework.kil.Definition;
 import org.kframework.kil.DefinitionItem;
 import org.kframework.kil.Require;
@@ -174,6 +175,7 @@ public class ParserUtils {
 
     public Set<Module> loadModules(
             Set<Module> previousModules,
+            Context context,
             String definitionText,
             Source source,
             File currentDirectory,
@@ -187,7 +189,6 @@ public class ParserUtils {
         Definition def = new Definition();
         def.setItems((List<DefinitionItem>) (Object) kilModules);
 
-        Context context = new Context();
         new CollectProductionsVisitor(kore, context).visit(def);
 
         KILtoKORE kilToKore = new KILtoKORE(context, false, kore);
@@ -196,7 +197,13 @@ public class ParserUtils {
         koreModules.putAll(previousModules.stream().collect(Collectors.toMap(Module::name, m -> m)));
         HashSet<org.kframework.kil.Module> kilModulesSet = new HashSet<>(kilModules);
 
-        return kilModules.stream().map(m -> kilToKore.apply(m, kilModulesSet, koreModules)).flatMap(m -> Stream.concat(Stream.of(m), Stream.of(koreModules.get(m.name() + "$SYNTAX")))).collect(Collectors.toSet());
+        Set<Module> finalModules = kilModules.stream().map(m -> kilToKore.apply(m, kilModulesSet, koreModules)).flatMap(m -> Stream.concat(Stream.of(m), Stream.of(koreModules.get(m.name() + "$SYNTAX")))).collect(Collectors.toSet());
+        Set<Module> result = new HashSet<>();
+        ModuleTransformer applySynonyms = ModuleTransformer.fromSentenceTransformer(new ApplySynonyms()::apply, "Apply sort synonyms");
+        for (Module mod : finalModules) {
+            result.add(applySynonyms.apply(mod));
+        }
+        return result;
     }
 
     public org.kframework.definition.Definition loadDefinition(
@@ -207,7 +214,7 @@ public class ParserUtils {
             File currentDirectory,
             List<File> lookupDirectories,
             boolean kore) {
-        Set<Module> modules = loadModules(previousModules, definitionText, source, currentDirectory, lookupDirectories, new HashSet<>(), kore);
+        Set<Module> modules = loadModules(previousModules, new Context(), definitionText, source, currentDirectory, lookupDirectories, new HashSet<>(), kore);
         Set<Module> allModules = new HashSet<>(modules);
         allModules.addAll(previousModules);
         Module mainModule = getMainModule(mainModuleName, allModules);
@@ -239,9 +246,10 @@ public class ParserUtils {
             boolean kore) {
         Set<Module> previousModules = new HashSet<>();
         Set<File> requiredFiles = new HashSet<>();
+        Context context = new Context();
         if (autoImportDomains)
-            previousModules.addAll(loadModules(new HashSet<>(), Kompile.REQUIRE_PRELUDE_K, source, currentDirectory, lookupDirectories, requiredFiles, kore));
-        Set<Module> modules = loadModules(previousModules, definitionText, source, currentDirectory, lookupDirectories, requiredFiles, kore);
+            previousModules.addAll(loadModules(new HashSet<>(), context, Kompile.REQUIRE_PRELUDE_K, source, currentDirectory, lookupDirectories, requiredFiles, kore));
+        Set<Module> modules = loadModules(previousModules, context, definitionText, source, currentDirectory, lookupDirectories, requiredFiles, kore);
         modules.addAll(previousModules); // add the previous modules, since load modules is not additive
         Module mainModule = getMainModule(mainModuleName, modules);
         Optional<Module> opt;

@@ -1,0 +1,26 @@
+<c>
+  <k>
+    check
+  </k>
+  <s>
+    #STUCK ( ) ~> ^ a ~> V0
+  </s>
+  <aT>
+    <ak>
+      .
+    </ak>
+    <astate>
+      V1
+      n |-> V2 +Int 1 +Int 1
+    </astate>
+  </aT>
+  <bT>
+    <bk>
+      .
+    </bk>
+    <bstate>
+      V3
+      n |-> V2 +Int 1
+    </bstate>
+  </bT>
+</c>

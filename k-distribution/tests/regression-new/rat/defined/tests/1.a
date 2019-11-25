@@ -1,0 +1,46 @@
+// normalization
+
+ 1 /Rat  2;
+-1 /Rat  2;
+ 1 /Rat -2;
+-1 /Rat -2;
+
+ 2 /Rat  1;
+-2 /Rat  1;
+ 2 /Rat -1;
+-2 /Rat -1;
+
+ 4 /Rat  2;
+-4 /Rat  2;
+ 4 /Rat -2;
+-4 /Rat -2;
+
+ 4 /Rat  6;
+-4 /Rat  6;
+ 4 /Rat -6;
+-4 /Rat -6;
+
+ 6 /Rat  4;
+-6 /Rat  4;
+ 6 /Rat -4;
+-6 /Rat -4;
+
+ 5 /Rat  3;
+-5 /Rat  3;
+ 5 /Rat -3;
+-5 /Rat -3;
+
+ 3 /Rat  5;
+-3 /Rat  5;
+ 3 /Rat -5;
+-3 /Rat -5;
+
+ 1071 /Rat  462;
+ 1071 /Rat -462;
+-1071 /Rat  462;
+-1071 /Rat -462;
+
+ 462 /Rat  1071;
+-462 /Rat  1071;
+ 462 /Rat -1071;
+-462 /Rat -1071;

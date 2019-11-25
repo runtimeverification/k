@@ -27,12 +27,15 @@ object Constructors {
   def SyntaxSort(sort: Sort) = definition.SyntaxSort(sort)
   def SyntaxSort(sort: Sort, att: attributes.Att) = definition.SyntaxSort(sort, att)
 
-  def Production(sort: Sort, items: Seq[ProductionItem]) = definition.Production(sort, items, Att.empty)
-  def Production(sort: Sort, items: Seq[ProductionItem], att: attributes.Att) = definition.Production(sort, items, att)
-  def Production(klabel: KLabel, sort: Sort, items: Seq[ProductionItem]) = definition.Production(klabel, sort, items)
-  def Production(klabel: KLabel, sort: Sort, items: Seq[ProductionItem], att: attributes.Att) = definition.Production(klabel, sort, items, att)
-  def Production(klabel: Option[KLabel], sort: Sort, items: Seq[ProductionItem]) = definition.Production(klabel, sort, items, Att.empty)
-  def Production(klabel: Option[KLabel], sort: Sort, items: Seq[ProductionItem], att: attributes.Att) = definition.Production(klabel, sort, items, att)
+  def SortSynonym(newSort: Sort, oldSort: Sort) = definition.SortSynonym(newSort, oldSort)
+  def SortSynonym(newSort: Sort, oldSort: Sort, att: attributes.Att) = definition.SortSynonym(newSort, oldSort, att)
+
+  def Production(params: Seq[Sort], sort: Sort, items: Seq[ProductionItem]) = definition.Production(params, sort, items, Att.empty)
+  def Production(params: Seq[Sort], sort: Sort, items: Seq[ProductionItem], att: attributes.Att) = definition.Production(params, sort, items, att)
+  def Production(klabel: KLabel, sort: Sort, items: Seq[ProductionItem]) = definition.Production(klabel, klabel.params, sort, items)
+  def Production(klabel: KLabel, sort: Sort, items: Seq[ProductionItem], att: attributes.Att) = definition.Production(klabel, klabel.params, sort, items, att)
+  def Production(klabel: Option[KLabel], params: Seq[Sort], sort: Sort, items: Seq[ProductionItem]) = definition.Production(klabel, params, sort, items, Att.empty)
+  def Production(klabel: Option[KLabel], params: Seq[Sort], sort: Sort, items: Seq[ProductionItem], att: attributes.Att) = definition.Production(klabel, params, sort, items, att)
 
   def Terminal(s: String) = definition.Terminal(s)
   def NonTerminal(sort: Sort) = definition.NonTerminal(sort, None)

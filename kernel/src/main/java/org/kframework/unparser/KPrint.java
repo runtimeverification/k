@@ -3,6 +3,7 @@ package org.kframework.unparser;
 
 import com.davekoelle.AlphanumComparator;
 import com.google.inject.Inject;
+import jline.internal.Nullable;
 import org.kframework.attributes.Att;
 import org.kframework.backend.kore.ModuleToKORE;
 import org.kframework.builtin.Sorts;
@@ -19,34 +20,33 @@ import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
 import org.kframework.kore.TransformK;
 import org.kframework.main.GlobalOptions;
-import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
-import org.kframework.parser.concrete2kore.ParseInModule;
 import org.kframework.parser.ProductionReference;
+import org.kframework.parser.concrete2kore.ParseInModule;
+import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.TTYInfo;
+import org.kframework.utils.inject.RequestScoped;
+import scala.Option;
 import scala.Tuple2;
 
 import java.io.IOException;
 import java.io.OutputStream;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-
-import scala.Option;
 
 import static org.kframework.kore.KORE.*;
 
 /**
  * Class for printing information and outputting to files using various serializers.
  */
+@RequestScoped
 public class KPrint {
 
     private final KExceptionManager kem;
@@ -55,26 +55,28 @@ public class KPrint {
     private final KompileOptions    kompileOptions;
 
     public final PrintOptions options;
-    private final Optional<CompiledDefinition> compiledDefinition;
+
+    @Nullable
+    private final CompiledDefinition compiledDefinition;
 
     public KPrint() {
-        this(new KExceptionManager(new GlobalOptions()), FileUtil.testFileUtil(), new TTYInfo(false, false, false), new PrintOptions(), Optional.empty(), new KompileOptions());
+        this(new KExceptionManager(new GlobalOptions()), FileUtil.testFileUtil(), new TTYInfo(false, false, false),
+                new PrintOptions(), null, new KompileOptions());
     }
 
     public KPrint(CompiledDefinition compiledDefinition) {
-        this(new KExceptionManager(compiledDefinition.kompileOptions.global), FileUtil.testFileUtil(), new TTYInfo(false, false, false), new PrintOptions(), compiledDefinition);
+        this(new KExceptionManager(compiledDefinition.kompileOptions.global), FileUtil.testFileUtil(),
+                new TTYInfo(false, false, false), new PrintOptions(), compiledDefinition,
+                compiledDefinition.kompileOptions);
     }
 
     @Inject
-    public KPrint(KExceptionManager kem, FileUtil files, TTYInfo tty, PrintOptions options, CompiledDefinition compiledDefinition) {
-        this(kem, files, tty, options, Optional.of(compiledDefinition), compiledDefinition.kompileOptions);
-    }
-
-    public KPrint(KExceptionManager kem, FileUtil files, TTYInfo tty, PrintOptions options, Optional<CompiledDefinition> compiledDefinition, KompileOptions kompileOptions) {
-        this.kem            = kem;
-        this.files          = files;
-        this.tty            = tty;
-        this.options        = options;
+    public KPrint(KExceptionManager kem, FileUtil files, TTYInfo tty, PrintOptions options,
+                  CompiledDefinition compiledDefinition, KompileOptions kompileOptions) {
+        this.kem = kem;
+        this.files = files;
+        this.tty = tty;
+        this.options = options;
         this.compiledDefinition = compiledDefinition;
         this.kompileOptions = kompileOptions;
     }
@@ -126,35 +128,6 @@ public class KPrint {
     }
 
     public byte[] prettyPrint(Definition def, Module module, K orig, ColorSetting colorize, OutputModes outputMode) {
-        switch (outputMode) {
-            case KAST:
-            case NONE:
-            case BINARY:
-            case JSON:
-            case PRETTY:
-                return prettyPrint(module, orig, colorize, outputMode);
-            case PROGRAM: {
-                K result = abstractTerm(module, orig);
-                RuleGrammarGenerator gen = new RuleGrammarGenerator(def);
-                Module unparsingModule = RuleGrammarGenerator.getCombinedGrammar(gen.getProgramsGrammar(module), false).getParsingModule();
-                return (unparseTerm(result, unparsingModule, colorize) + "\n").getBytes();
-            }
-            case KORE:
-                if (!compiledDefinition.isPresent()) {
-                    throw KEMException.criticalError("KORE output requires a compiled definition.");
-                }
-                CompiledDefinition cdef = compiledDefinition.get();
-                ModuleToKORE converter = new ModuleToKORE(module, files, cdef.topCellInitializer, kompileOptions);
-                K result = ExpandMacros.forNonSentences(module, files, kompileOptions, false).expand(orig);
-                result = new AddSortInjections(module).addInjections(result);
-                converter.convert(result);
-                return converter.toString().getBytes();
-            default:
-                throw KEMException.criticalError("Unsupported output mode without a CompiledDefinition: " + outputMode);
-        }
-    }
-
-    public byte[] prettyPrint(Module module, K orig, ColorSetting colorize, OutputModes outputMode) {
         K result = abstractTerm(module, orig);
         switch (outputMode) {
             case KAST:
@@ -163,11 +136,26 @@ public class KPrint {
             case JSON:
             case LATEX:
                 return serialize(result, outputMode);
-            case PRETTY: {
-                Module unparsingModule = RuleGrammarGenerator.getCombinedGrammar(module, false).getExtensionModule();
-                return (unparseTerm(result, unparsingModule, colorize) + "\n").getBytes();
-            } default:
-                throw KEMException.criticalError("Unsupported output mode without a Definition: " + outputMode);
+            case PRETTY:
+                Module prettyUnparsingModule = RuleGrammarGenerator.getCombinedGrammar(module, false).getExtensionModule();
+                return (unparseTerm(result, prettyUnparsingModule, colorize) + "\n").getBytes();
+            case PROGRAM: {
+                RuleGrammarGenerator gen = new RuleGrammarGenerator(def);
+                Module programUnparsingModule = RuleGrammarGenerator.getCombinedGrammar(gen.getProgramsGrammar(module), false).getParsingModule();
+                return (unparseTerm(result, programUnparsingModule, colorize) + "\n").getBytes();
+            }
+            case KORE:
+                if (compiledDefinition == null) {
+                    throw KEMException.criticalError("KORE output requires a compiled definition.");
+                }
+                ModuleToKORE converter = new ModuleToKORE(module, files, compiledDefinition.topCellInitializer, kompileOptions);
+                result = ExpandMacros.forNonSentences(module, files, kompileOptions, false).expand(result);
+                result = new AddSortInjections(module).addInjections(result);
+                StringBuilder sb = new StringBuilder();
+                converter.convert(result, sb);
+                return sb.toString().getBytes();
+            default:
+                throw KEMException.criticalError("Unsupported output mode without a CompiledDefinition: " + outputMode);
         }
     }
 
@@ -207,10 +195,11 @@ public class KPrint {
     }
 
     public K abstractTerm(Module mod, K term) {
-        K collectionsSorted = options.noSortCollections    ? term              : sortCollections(mod, term);
+        K origNames         = options.restoreOriginalNames ? restoreOriginalNameIfPresent(term) : term;
+        K collectionsSorted = options.noSortCollections    ? origNames : sortCollections(mod, origNames);
+        //non-determinism is still possible if associative/commutative collection terms start with anonymous vars
         K alphaRenamed      = options.noAlphaRenaming      ? collectionsSorted : alphaRename(collectionsSorted);
-        K origNames         = options.restoreOriginalNames ? restoreOriginalNameIfPresent(alphaRenamed) : alphaRenamed;
-        K squashedTerm      = squashTerms(mod, origNames);
+        K squashedTerm      = squashTerms(mod, alphaRenamed);
         K flattenedTerm     = flattenTerms(mod, squashedTerm);
 
         return flattenedTerm;

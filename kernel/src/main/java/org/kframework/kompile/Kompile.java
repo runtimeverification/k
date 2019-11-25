@@ -21,8 +21,10 @@ import org.kframework.compile.checks.CheckStreams;
 import org.kframework.definition.*;
 import org.kframework.definition.Module;
 import org.kframework.kore.Sort;
+import org.kframework.kore.KLabel;
 import org.kframework.parser.concrete2kore.ParserUtils;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
+import org.kframework.unparser.ToJson;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -31,6 +33,7 @@ import org.kframework.utils.file.JarInfo;
 import scala.Function1;
 
 import java.io.File;
+import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
@@ -126,9 +129,18 @@ public class Kompile {
         files.saveToKompiled("compiled.txt", kompiledDefinition.toString());
         sw.printIntermediate("Apply compile pipeline");
 
+        if (kompileOptions.experimental.emitJson) {
+            try {
+                files.saveToKompiled("parsed.json",   new String(ToJson.apply(parsedDef),          "UTF-8"));
+                files.saveToKompiled("compiled.json", new String(ToJson.apply(kompiledDefinition), "UTF-8"));
+            } catch (UnsupportedEncodingException e) {
+                throw KEMException.criticalError("Unsupported encoding `UTF-8` when saving JSON definition.");
+            }
+        }
+
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(kompiledDefinition.mainModule());
 
-        return new CompiledDefinition(kompileOptions, parsedDef, kompiledDefinition, files, kem, configInfo.getDefaultCell(configInfo.topCell()).klabel());
+        return new CompiledDefinition(kompileOptions, parsedDef, kompiledDefinition, files, kem, configInfo.getDefaultCell(configInfo.getRootCell()).klabel());
     }
 
     public Definition parseDefinition(File definitionFile, String mainModuleName, String mainProgramsModule, Set<String> excludedModuleTags) {
@@ -175,8 +187,9 @@ public class Kompile {
           return DefinitionTransformer.fromSentenceTransformer((m, s) -> new ExpandMacros(transformer, m, files, kompileOptions, false).expand(s), "expand macros").apply(d);
         };
         GenerateCoverage cov = new GenerateCoverage(kompileOptions.coverage, files);
-        DefinitionTransformer genCoverage = DefinitionTransformer.fromRuleBodyTransformerWithRule(cov::gen, "generate coverage instrumentation");
-        DefinitionTransformer numberSentences = DefinitionTransformer.fromSentenceTransformer(new NumberSentences()::number, "number sentences uniquely");
+        Function1<Definition, Definition> genCoverage = d -> DefinitionTransformer.fromRuleBodyTransformerWithRule((r, body) -> cov.gen(r, body, d.mainModule()), "generate coverage instrumentation").apply(d);
+        NumberSentences numSents = new NumberSentences(files);
+        DefinitionTransformer numberSentences = DefinitionTransformer.fromSentenceTransformer(numSents::number, "number sentences uniquely");
         Function1<Definition, Definition> resolveConfigVar = d -> DefinitionTransformer.fromSentenceTransformer(new ResolveFunctionWithConfig(d, false)::resolveConfigVar, "Adding configuration variable to lhs").apply(d);
         Function1<Definition, Definition> resolveIO = (d -> Kompile.resolveIOStreams(kem, d));
 
@@ -187,6 +200,7 @@ public class Kompile {
                 .andThen(resolveAnonVars)
                 .andThen(d -> new ResolveContexts(kompileOptions).resolve(d))
                 .andThen(numberSentences)
+                .andThen(d -> { numSents.close(); return d; })
                 .andThen(resolveHeatCoolAttribute)
                 .andThen(resolveSemanticCasts)
                 .andThen(subsortKItem)
@@ -195,14 +209,26 @@ public class Kompile {
                 .andThen(generateSortPredicateSyntax)
                 .andThen(generateSortProjections)
                 .andThen(Kompile::resolveFreshConstants)
+                .andThen(generateSortPredicateSyntax)
+                .andThen(generateSortProjections)
                 .andThen(AddImplicitComputationCell::transformDefinition)
                 .andThen(d -> new Strategy(kompileOptions.experimental.heatCoolStrategies).addStrategyCellToRulesTransformer(d).apply(d))
                 .andThen(ConcretizeCells::transformDefinition)
                 .andThen(genCoverage)
-                .andThen(d -> { cov.close(); return d; })
                 .andThen(Kompile::addSemanticsModule)
                 .andThen(resolveConfigVar)
                 .apply(def);
+    }
+
+    public static Sentence removePolyKLabels(Sentence s) {
+      if (s instanceof Production) {
+        Production p = (Production)s;
+        if (!p.isSyntacticSubsort() && p.params().nonEmpty()) {
+            p = p.substitute(immutable(Collections.nCopies(p.params().size(), Sorts.K())));
+            return Production(p.klabel().map(KLabel::head), Seq(), p.sort(), p.items(), p.att());
+        }
+      }
+      return s;
     }
 
     public static Module subsortKItem(Module module) {
@@ -210,7 +236,7 @@ public class Kompile {
         for (Sort srt : iterable(module.definedSorts())) {
             if (!RuleGrammarGenerator.isParserSort(srt)) {
                 // KItem ::= Sort
-                Production prod = Production(Sorts.KItem(), Seq(NonTerminal(srt)), Att());
+                Production prod = Production(Seq(), Sorts.KItem(), Seq(NonTerminal(srt)), Att());
                 if (!module.sentences().contains(prod)) {
                     prods.add(prod);
                 }
@@ -298,8 +324,8 @@ public class Kompile {
                 .apply(parsedRule);
     }
 
-    public Set<Module> parseModules(CompiledDefinition definition, String mainModule, File definitionFile) {
-        Set<Module> modules = definitionParsing.parseModules(definition, mainModule, definitionFile);
+    public Set<Module> parseModules(CompiledDefinition definition, String mainModule, File definitionFile, Set<String> excludeModules) {
+        Set<Module> modules = definitionParsing.parseModules(definition, mainModule, definitionFile, excludeModules);
         int totalBubbles = definitionParsing.parsedBubbles.get() + definitionParsing.cachedBubbles.get();
         sw.printIntermediate("Parse spec modules [" + definitionParsing.parsedBubbles.get() + "/" + totalBubbles + " rules]");
         return modules;

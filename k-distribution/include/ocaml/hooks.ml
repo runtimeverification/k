@@ -194,6 +194,7 @@ struct
     | [String s] -> (try Lexer.parse_k s with
       | e -> [KApply1(parse_klabel("#noParse"), [String (Printexc.to_string e)])])
     | _ -> raise Not_implemented
+  let hook_parseKORE _ _ _ _ _ = raise Not_implemented
 end
 
 module KEQUAL =
@@ -247,6 +248,8 @@ struct
   let hook_unlock c _ _ _ _ = match c with
       [Int fd], [Int len] -> unix_error (fun () -> Unix.lockf (Hashtbl.find file_descriptors fd) Unix.F_ULOCK (Z.to_int len); [])
     | _ -> raise Not_implemented
+  let hook_time () _ _ _ _ =
+      [Int (Z.of_float (Unix.time ()))]
 
   let log_files = Hashtbl.create 2
 

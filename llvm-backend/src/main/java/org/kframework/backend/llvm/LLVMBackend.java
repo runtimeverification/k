@@ -3,6 +3,7 @@ package org.kframework.backend.llvm;
 
 import com.google.inject.Inject;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.kframework.backend.llvm.matching.Matching;
 import org.kframework.backend.kore.KoreBackend;
 import org.kframework.kompile.CompiledDefinition;
@@ -22,6 +23,8 @@ import java.util.Set;
 public class LLVMBackend extends KoreBackend {
 
     private final LLVMKompileOptions options;
+    private final KExceptionManager kem;
+    private final KompileOptions kompileOptions;
 
     @Inject
     public LLVMBackend(
@@ -31,6 +34,8 @@ public class LLVMBackend extends KoreBackend {
             LLVMKompileOptions options) {
         super(kompileOptions, files, kem);
         this.options = options;
+        this.kompileOptions = kompileOptions;
+        this.kem = kem;
     }
 
 
@@ -39,7 +44,18 @@ public class LLVMBackend extends KoreBackend {
         String kore = getKompiledString(def);
         files.saveToKompiled("definition.kore", kore);
         FileUtils.deleteQuietly(files.resolveKompiled("dt"));
-        Matching.writeDecisionTreeToFile(files.resolveKompiled("definition.kore"), options.heuristic, files.resolveKompiled("dt"), Matching.getThreshold(getThreshold(options)));
+        MutableInt warnings = new MutableInt();
+        Matching.writeDecisionTreeToFile(files.resolveKompiled("definition.kore"), options.heuristic, files.resolveKompiled("dt"), Matching.getThreshold(getThreshold()), options.warnUseless, ex -> {
+          kem.addKException(ex);
+          warnings.increment();
+          return null;
+        });
+        if (warnings.intValue() > 0 && kem.options.warnings2errors) {
+          throw KEMException.compilerError("Had " + warnings.intValue() + " pattern matching errors.");
+        }
+        if (options.noLLVMKompile) {
+            return;
+        }
         ProcessBuilder pb = files.getProcessBuilder();
         List<String> args = new ArrayList<>();
         args.add("llvm-kompile");
@@ -48,6 +64,9 @@ public class LLVMBackend extends KoreBackend {
         args.add("main");
         args.add("-o");
         args.add("interpreter");
+        if (kompileOptions.optimize1) args.add("-O1");
+        if (kompileOptions.optimize2) args.add("-O2");
+        if (kompileOptions.optimize3) args.add("-O2"); // clang -O3 does not make the llvm backend any faster
         args.addAll(options.ccopts);
         try {
             Process p = pb.command(args).directory(files.resolveKompiled(".")).inheritIO().start();
@@ -60,8 +79,8 @@ public class LLVMBackend extends KoreBackend {
         }
     }
 
-    private static String getThreshold(LLVMKompileOptions options) {
-        if (!options.iterated) {
+    private String getThreshold() {
+        if (!options.iterated && !kompileOptions.optimize3) {
             return "0";
         }
         return options.iteratedThreshold;

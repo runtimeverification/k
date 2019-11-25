@@ -2,6 +2,7 @@
 package org.kframework.parser.concrete2kore.disambiguation;
 
 import org.kframework.builtin.KLabels;
+import org.kframework.builtin.Sorts;
 import org.kframework.parser.Ambiguity;
 import org.kframework.parser.SafeTransformer;
 import org.kframework.parser.Term;
@@ -13,7 +14,7 @@ import java.util.Set;
 public class PushTopAmbiguityUp extends SafeTransformer {
     @Override
     public Term apply(TermCons tc) {
-        if (tc.production().sort().name().equals("#RuleContent")) {
+        if (tc.production().sort().equals(Sorts.RuleContent())) {
             Term t = new PushTopAmbiguityUp2().apply(tc.get(0));
             if (t instanceof Ambiguity) {
                 Ambiguity old = (Ambiguity)t;
@@ -31,7 +32,7 @@ public class PushTopAmbiguityUp extends SafeTransformer {
     private class PushTopAmbiguityUp2 extends SafeTransformer {
         @Override
         public Term apply(TermCons tc) {
-            if (tc.production().klabel().isDefined() && tc.production().klabel().get().equals(KLabels.KREWRITE)) {
+            if (tc.production().klabel().isDefined() && tc.production().klabel().get().head().equals(KLabels.KREWRITE)) {
                 Term t = tc.get(0);
                 if (t instanceof Ambiguity) {
                     Ambiguity old = (Ambiguity)t;

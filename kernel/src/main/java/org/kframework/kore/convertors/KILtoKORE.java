@@ -61,7 +61,7 @@ public class KILtoKORE extends KILTransformation<Object> {
 
     public FlatModule toFlatModule(Module m) {
         CheckListDecl.check(m);
-        String name = m.getName();
+        moduleName = m.getName();
 
         Set<org.kframework.definition.Sentence> items = m.getItems().stream()
                 .filter(j -> !(j instanceof org.kframework.kil.Import))
@@ -74,7 +74,7 @@ public class KILtoKORE extends KILTransformation<Object> {
 
         Att att = convertAttributes(m);
 
-        return new FlatModule(name, immutable(importedModuleNames), immutable(items), att);
+        return new FlatModule(moduleName, immutable(importedModuleNames), immutable(items), att);
     }
 
     public org.kframework.definition.Definition apply(Definition d) {
@@ -120,6 +120,10 @@ public class KILtoKORE extends KILTransformation<Object> {
         } else {
             return Sets.newHashSet((org.kframework.definition.Sentence) apply((ASTNode) i));
         }
+    }
+
+    public org.kframework.definition.Sentence apply(SortSynonym synonym) {
+      return new org.kframework.definition.SortSynonym(synonym.newSort, synonym.oldSort, convertAttributes(synonym));
     }
 
     public org.kframework.definition.Bubble apply(StringSentence sentence) {
@@ -179,8 +183,6 @@ public class KILtoKORE extends KILTransformation<Object> {
             return productions.stream().map(p -> Tag(p.getKLabel(kore)));
         }).collect(Collectors.toSet()));
     }
-
-    public static final String PRODUCTION_ID = "productionID";
 
     public Set<org.kframework.definition.Sentence> apply(Syntax s) {
         Set<org.kframework.definition.Sentence> res = new HashSet<>();
@@ -245,17 +247,16 @@ public class KILtoKORE extends KILTransformation<Object> {
                     org.kframework.definition.Production prod;
                     if (p.getKLabel(kore) == null)
                         prod = Production(
+                                immutable(p.getParams()),
                                 sort,
                                 immutable(items),
-                                attrs.add(PRODUCTION_ID,
-                                        "" + System.identityHashCode(p)));
+                                attrs);
                     else
                         prod = Production(
-                                KLabel(p.getKLabel(kore)),
+                                KLabel(p.getKLabel(kore), immutable(p.getParams())),
                                 sort,
                                 immutable(items),
-                                attrs.add(PRODUCTION_ID,
-                                        "" + System.identityHashCode(p)));
+                                attrs);
 
                     res.add(prod);
                     // handle associativity for the production
@@ -308,18 +309,17 @@ public class KILtoKORE extends KILTransformation<Object> {
 
         org.kframework.attributes.Att attrs = convertAttributes(p).add(Att.userList(), userList.getListType());
         String kilProductionId = "" + System.identityHashCode(p);
-        Att attrsWithKilProductionId = attrs.add(PRODUCTION_ID, kilProductionId);
         org.kframework.definition.Production prod1, prod3;
 
         // Es ::= E "," Es
-        prod1 = Production(KLabel(p.getKLabel(kore)), sort,
+        prod1 = Production(KLabel(p.getKLabel(kore), immutable(p.getParams())), sort,
                 Seq(NonTerminal(elementSort), Terminal(userList.getSeparator()), NonTerminal(sort)),
-                attrsWithKilProductionId.add("right"));
+                attrs.add("right"));
 
 
         // Es ::= ".Es"
-        prod3 = Production(KLabel(p.getTerminatorKLabel(kore)), sort, Seq(Terminal("." + sort.toString())),
-                attrsWithKilProductionId.remove("format").remove("strict").add("klabel", p.getTerminatorKLabel(false)));
+        prod3 = Production(KLabel(p.getTerminatorKLabel(kore), immutable(p.getParams())), sort, Seq(Terminal("." + sort.toString())),
+                attrs.remove("format").remove("strict").add("klabel", p.getTerminatorKLabel(false)));
 
         res.add(prod1);
         res.add(prod3);

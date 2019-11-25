@@ -18,7 +18,6 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
 import org.kframework.utils.file.KompiledDir;
-import org.kframework.utils.file.TTYInfo;
 import org.kframework.utils.inject.CommonModule;
 import org.kframework.utils.inject.DefinitionLoadingModule;
 import org.kframework.utils.inject.DefinitionScope;
@@ -32,7 +31,7 @@ public class KBMCFrontEnd extends FrontEnd {
 
 
     public static List<Module> getModules() {
-        return ImmutableList.<Module>of(
+        return ImmutableList.of(
                 new KBMCModule(),
                 new CommonModule(),
                 new JCommanderModule(),
@@ -46,9 +45,9 @@ public class KBMCFrontEnd extends FrontEnd {
     private final KBMCOptions kbmcOptions;
     private final Provider<FileUtil> files;
     private final Provider<CompiledDefinition> compiledDef;
+    private final Provider<KPrint> kprint;
     private final Provider<Backend> backend;
     private final Provider<Function<Definition, Rewriter>> initializeRewriter;
-    private final TTYInfo tty;
     private final Stopwatch sw;
 
     @Inject
@@ -63,9 +62,9 @@ public class KBMCFrontEnd extends FrontEnd {
             KBMCOptions kbmcOptions,
             Provider<FileUtil> files,
             Provider<CompiledDefinition> compiledDef,
+            Provider<KPrint> kprint,
             Provider<Backend> backend,
             Provider<Function<Definition, Rewriter>> initializeRewriter,
-            TTYInfo tty,
             Stopwatch sw) {
         super(kem, options, usage, experimentalUsage, jarInfo, files);
         this.scope = scope;
@@ -74,9 +73,9 @@ public class KBMCFrontEnd extends FrontEnd {
         this.kbmcOptions = kbmcOptions;
         this.files = files;
         this.compiledDef = compiledDef;
+        this.kprint = kprint;
         this.backend = backend;
         this.initializeRewriter = initializeRewriter;
-        this.tty = tty;
         this.sw = sw;
     }
 
@@ -88,8 +87,7 @@ public class KBMCFrontEnd extends FrontEnd {
                 throw KEMException.criticalError("Definition file doesn't exist: " +
                         kbmcOptions.specFile(files.get()).getAbsolutePath());
             }
-            KPrint kprint = new KPrint(kem, files.get(), tty, kbmcOptions.print, compiledDef.get());
-            return new KBMC(kem, sw, files.get(), kprint).run(kbmcOptions, compiledDef.get(), backend.get(),
+            return new KBMC(kem, sw, files.get(), kprint.get()).run(kbmcOptions, compiledDef.get(), backend.get(),
                     initializeRewriter.get());
         } finally {
             scope.exit();

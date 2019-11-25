@@ -44,7 +44,7 @@ public class GeneratedTopFormat {
                 }
                 format.append("%d%n%").append(cellPositions.get(j - 1) + 1);
             }
-            return Production(prod.klabel(), prod.sort(), prod.items(), prod.att().add("format", format.toString()));
+            return prod.withAtt(prod.att().add("format", format.toString()));
         }
         return prod;
     }

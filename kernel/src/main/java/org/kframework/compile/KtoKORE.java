@@ -15,7 +15,7 @@ import static org.kframework.kore.KORE.*;
 public class KtoKORE extends TransformK {
     @Override
     public K apply(KApply k) {
-        if (KLabels.KREWRITE.equals(k.klabel())) {
+        if (KLabels.KREWRITE.equals(k.klabel().head())) {
             return KRewrite(apply(k.klist().items().get(0)), apply(k.klist().items().get(1)), k.att());
         } else {
             k = (KApply) super.apply(k);

@@ -1,0 +1,47 @@
+// Copyright (c) 2019 K Team. All Rights Reserved.
+options {
+  STATIC = false;
+}
+PARSER_BEGIN(SmtSortParser)
+package org.kframework.parser.concrete2kore.disambiguation;
+
+import org.kframework.kore.Sort;
+import org.kframework.kore.KORE;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.kframework.kore.KORE.*;
+import static org.kframework.Collections.*;
+
+public class SmtSortParser {
+}
+
+PARSER_END(SmtSortParser)
+
+SKIP:  { " " | "\t" | "\n" | "\r"                    }
+TOKEN: { "(" | ")" | <HEAD: ["A"-"Z"](["a"-"z", "A"-"Z", "0"-"9"])*> | <QUOTEDHEAD: ["|"](~["|"])*["|"]> }
+
+String Head(): {
+  Token head;
+} {
+  head=<HEAD> { return head.image.substring(4); }
+| head=<QUOTEDHEAD> { return head.image.substring(5, head.image.length()-1); }
+}
+
+Sort Sort(): {
+  String name;
+  List<Sort> params = new ArrayList<Sort>();
+} {
+  "(" name=Head() Params(params) ")" {
+    return KORE.Sort(name, immutable(params));
+  }
+| name=Head() { return KORE.Sort(name); }
+}
+
+void Params(List<Sort> params): {
+Sort s;
+} {
+s=Sort() { params.add(s); } Params(params)
+| {}
+}

@@ -1,20 +1,24 @@
 // Copyright (c) 2014-2019 K Team. All Rights Reserved.
 package org.kframework.main;
 
-import java.util.EnumSet;
-import java.util.Set;
-
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.options.BaseEnumConverter;
-
 import com.beust.jcommander.Parameter;
 import com.google.inject.Inject;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
+import org.kframework.utils.options.BaseEnumConverter;
+import org.kframework.utils.options.DurationConverter;
+
+import java.time.Duration;
+import java.util.EnumSet;
+import java.util.Set;
 
 public final class GlobalOptions {
 
     public GlobalOptions() {}
 
     //TODO(dwightguth): remove in Guice 4.0
+    /**
+     * Prevents instantiation by Guice when not explicitly configured in a Module.
+     */
     @Inject
     public GlobalOptions(Void v) {}
 
@@ -93,12 +97,20 @@ public final class GlobalOptions {
     @Parameter(names={"--warnings-to-errors", "-w2e"}, description="Convert warnings to errors.")
     public boolean warnings2errors = false;
 
-    @Parameter(names={"--shutdown-wait-time"}, description="If the option is set, a shutdown hook will be registered " +
-            "that, once invoked, interrupts the main thread and waits its termination. The wait time is the argument " +
-            "of this option, in ms. Useful if K is interrupted by Ctrl+C, because it allows the backend to detect " +
-            "interruption and print diagnostics information. Currently interruption detection is implemented in " +
-            "Java Backend. If K is invoked from KServer (e.g. Nailgun), the option is ignored.")
-    public int shutdownWaitTime = 0;
+    @Parameter(names = {"--shutdown-wait-time"}, converter = DurationConverter.class,
+            description = "If option is set, a shutdown hook will be registered " +
+                    "that, once invoked, interrupts the main thread and waits its termination. " +
+                    "The wait time is the argument of this option, in format like 10ms/10s/10m/10h. " +
+                    "Useful if K is interrupted by Ctrl+C, because it allows the backend to detect " +
+                    "interruption and print diagnostics information. Currently interruption detection is implemented " +
+                    "in Java Backend. If K is invoked from KServer (e.g. Nailgun), the option is ignored.")
+    public Duration shutdownWaitTime;
+
+    @Parameter(names = {"--timeout"}, converter = DurationConverter.class,
+            description = "If option is set, timeout for this process, in format like 10ms/10s/10m/10h. " +
+                    "Using this option is preferred compared to bash timeout command, which has known limitations " +
+                    "when invoked from scripts.")
+    public Duration timeout;
 
     @Parameter(names={"--no-exc-wrap"}, description="Do not wrap exception messages to 80 chars. Keep long lines.")
     public boolean noExcWrap = false;

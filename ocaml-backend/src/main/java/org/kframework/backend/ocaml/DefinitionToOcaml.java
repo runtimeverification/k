@@ -34,6 +34,7 @@ import org.kframework.definition.Production;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kil.Attribute;
+import org.kframework.kil.loader.Context;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.Kompile;
 import org.kframework.kompile.KompileOptions;
@@ -98,7 +99,7 @@ public class DefinitionToOcaml implements Serializable {
     private transient final KExceptionManager kem;
     private transient final FileUtil files;
     private transient final GlobalOptions globalOptions;
-    private transient final KompileOptions kompileOptions;
+    public transient final KompileOptions kompileOptions;
     private transient ExpandMacros expandMacros;
     private transient ConvertDataStructureToLookup convertDataStructure;
     private boolean threadCellExists;
@@ -252,6 +253,7 @@ public class DefinitionToOcaml implements Serializable {
                                             ModuleTransformer.fromSentenceTransformer(new SplitThreadsCell(def.executionModule())::convert, "split threads cell into thread local and global") :
                                             ModuleTransformer.fromSentenceTransformer(s -> s, "identity function -- no transformation");
         ModuleTransformer preprocessKLabelPredicates = ModuleTransformer.fromSentenceTransformer(new PreprocessKLabelPredicates(def.executionModule())::convert, "preprocess klabel predicates");
+        ModuleTransformer removePolyKLabels = ModuleTransformer.fromSentenceTransformer(Kompile::removePolyKLabels, "remove poly klabels");
         Sentence thread = Production(KLabel("#Thread"), Sorts.KItem(), Seq(
                 Terminal("#Thread"), Terminal("("),
                 NonTerminal(Sorts.K()), Terminal(","),
@@ -260,7 +262,8 @@ public class DefinitionToOcaml implements Serializable {
                 NonTerminal(Sorts.K()), Terminal(")")));
         Sentence bottom = Production(KLabel("#Bottom"), Sorts.KItem(), Seq(Terminal("#Bottom")));
         Sentence threadLocal = Production(KLabel("#ThreadLocal"), Sorts.KItem(), Seq(Terminal("#ThreadLocal")));
-        Function1<Module, Module> pipeline = preprocessKLabelPredicates
+        Function1<Module, Module> pipeline = removePolyKLabels
+                .andThen(preprocessKLabelPredicates)
                 .andThen(splitThreadCell)
                 .andThen(mod -> Module(mod.name(), mod.imports(),
                         Stream.concat(stream(mod.localSentences()),
@@ -524,7 +527,7 @@ public class DefinitionToOcaml implements Serializable {
     private void ocamlProgramHeader(StringBuilder sb, boolean forcePlugin) {
         if (forcePlugin) {
             sb.append("let () = Plugin.load Sys.argv.(1)");
-        } else if (options.ocamlopt()) {
+        } else if (kompileOptions.optimize2 || kompileOptions.optimize3) {
             sb.append("external load_plugin_path : unit -> string = \"load_plugin_path\"\n");
             sb.append("let () = Plugin.load (load_plugin_path ())");
         }
@@ -1093,6 +1096,7 @@ public class DefinitionToOcaml implements Serializable {
         lookupDirectories.add(Kompile.BUILTIN_DIRECTORY);
         java.util.Set<Module> mods = new ParserUtils(files::resolveWorkingDirectory, kem, globalOptions).loadModules(
                 new HashSet<>(),
+                new Context(),
                 "require " + StringUtil.enquoteCString(definitionFile.getPath()),
                 Source.apply(definitionFile.getAbsolutePath()),
                 definitionFile.getParentFile(),
@@ -1376,7 +1380,7 @@ public class DefinitionToOcaml implements Serializable {
         Set<KLabel> allStepFunctions = Sets.difference(mutable(mainModule.definedKLabels()), functions);
         Map<Optional<KLabel>, List<Rule>> groupedByStepFunction = sortedRules.stream().collect(
                 Collectors.groupingBy(r -> getNextOperation(RewriteToTop.toLeft(r.body()), false)));
-        if (options.optimizeStep()) {
+        if (kompileOptions.optimize3 || options.optimizeG) {
             sb.append("match c with KApply1(_,hd :: tl) -> (\n");
             sb.append("match (normalize hd) with KApply(lbl,_) -> (match lbl with \n");
             for (KLabel lbl : allStepFunctions) {
@@ -1405,7 +1409,7 @@ public class DefinitionToOcaml implements Serializable {
             Collections.sort(rulesForStepFunc, this::sortRules);
             ruleNum = writeStepFunction(sb, rulesForStepFunc, "step" + encodeStringToIdentifier(lbl), ruleNum);
         }
-        if (options.optimizeStep()) {
+        if (kompileOptions.optimize3 || options.optimizeG) {
             ruleNum = writeStepFunction(sb, groupedByStepFunction.getOrDefault(Optional.<KLabel>empty(), Collections.emptyList()), "stepNone", ruleNum);
         }
 
@@ -2070,7 +2074,7 @@ public class DefinitionToOcaml implements Serializable {
     }
 
     private Optional<KApply> hasKCellContents(K body) {
-        if (!options.optimizeStep()) return Optional.empty();
+        if (!kompileOptions.optimize3 && !options.optimizeG) return Optional.empty();
         List<KApply> kCells = new ArrayList<>();
         new VisitK() {
             @Override
@@ -2191,7 +2195,7 @@ public class DefinitionToOcaml implements Serializable {
     }
 
     private Optional<KLabel> getNextOperation(K side, boolean rhs) {
-        if (!options.optimizeStep()) return Optional.empty();
+        if (!kompileOptions.optimize3 && !options.optimizeG) return Optional.empty();
         final List<KLabel> nextOps = new ArrayList<>();
         MutableBoolean hasProblem = new MutableBoolean(false);
         new VisitK() {

@@ -3,7 +3,7 @@
 module KOREBRKT-SYNTAX
   imports INT
 
-  syntax K ::= "[" K "]" [bracket, poly(0, 1)]
+  syntax {Sort} Sort ::= "[" Sort "]" [bracket]
 endmodule
 
 module KOREBRKT

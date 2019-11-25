@@ -43,15 +43,13 @@ public class KSyntax2GrammarStatesFilter {
     public static Grammar getGrammar(Module module, Scanner scanner) {
         Automaton.setMinimization(Automaton.MINIMIZE_BRZOZOWSKI);
         Grammar grammar = new Grammar();
-        Set<String> rejects = new HashSet<>();
         Set<Sort> sorts = Stream.concat(stream(module.definedSorts()), stream(module.usedCellSorts())).collect(Collectors.toSet());
         // create a NonTerminal for every declared sort
         for (Sort sort : sorts) {
             grammar.add(grammar.new NonTerminal(sort.toString()));
         }
 
-        stream(module.productions()).forEach(p -> collectRejects(p, rejects));
-        stream(module.productions()).collect(Collectors.groupingBy(p -> p.sort())).entrySet().stream().sorted(Comparator.comparing(e2 -> e2.getKey().toString())).forEach(e -> processProductions(e.getKey(), e.getValue(), grammar, rejects, scanner));
+        stream(module.productions()).filter(p -> p.params().isEmpty()).collect(Collectors.groupingBy(p -> p.sort())).entrySet().stream().sorted(Comparator.comparing(e2 -> e2.getKey().toString())).forEach(e -> processProductions(e.getKey(), e.getValue(), grammar, scanner));
         grammar.compile(scanner);
         return grammar;
     }
@@ -107,22 +105,10 @@ public class KSyntax2GrammarStatesFilter {
         return s.toString();
     }
 
-    private static void collectRejects(Production prd, Set<String> rejects) {
-        for (ProductionItem prdItem : iterable(prd.items())) {
-            String pattern = "";
-            if (prdItem instanceof Terminal) {
-                if (!((Terminal) prdItem).value().equals("")) {
-                    rejects.add(((Terminal) prdItem).value());
-                }
-            }
-        }
-    }
-
     public static void processProductions(
             Sort sort,
             List<Production> prods,
             Grammar grammar,
-            Set<String> autoRejects,
             Scanner scanner) {
         NonTerminal nt = grammar.get(sort.toString());
         assert nt != null : "Could not find in the grammar the required sort: " + sort;

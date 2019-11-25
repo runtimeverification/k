@@ -26,7 +26,7 @@ class TreeNodesToKORE(parseSort: java.util.function.Function[String, Sort], stri
 
   def anonVar(sort: Sort): K = {
     val lbl = KLabel("#SemanticCastTo" + sort.toString())
-    if (strict) KApply(lbl, KList(KToken("_", Sorts.KVariable)), Att.add(classOf[Production], Production(lbl, sort, Seq(NonTerminal(sort, None))))) else KToken("_", Sorts.KVariable)
+    if (strict) KApply(lbl, KList(KToken("_", Sorts.KVariable)), Att.add(classOf[Production], Production(lbl, Seq(), sort, Seq(NonTerminal(sort, None))))) else KToken("_", Sorts.KVariable)
   }
 
   def termConsToKApply(t: TermCons, items: PStack[Term], p: Production): KApply = {
@@ -37,13 +37,13 @@ class TreeNodesToKORE(parseSort: java.util.function.Function[String, Sort], stri
         case NonTerminal(sort, None) => anonVar(sort)
         case NonTerminal(sort, Some(x)) => map.getOrElse(x, anonVar(sort))
       }
-      KApply(p.klabel.get, KList(realItems.asJava), locationToAtt(t.location, t.source).add(classOf[Production], realProd))
+      KApply(p.klabel.get.head, KList(realItems.asJava), locationToAtt(t.location, t.source).add(classOf[Production], realProd))
     } else {
       val realProd = if (p.att.contains("originalPrd", classOf[Production])) p.att.get("originalPrd", classOf[Production]) else p
       if (p.klabel.isEmpty)
         throw KEMException.internalError("Missing klabel in production: " + p, t)
       val klabel = if (p.klabel.get.name == "#OuterCast") KLabel("project:" ++ p.sort.toString) else p.klabel.get
-      KApply(klabel, KList(new util.ArrayList(items).asScala.reverse map apply asJava), locationToAtt(t.location, t.source).add(classOf[Production], realProd))
+      KApply(klabel.head, KList(new util.ArrayList(items).asScala.reverse map apply asJava), locationToAtt(t.location, t.source).add(classOf[Production], realProd))
     }
   }
 

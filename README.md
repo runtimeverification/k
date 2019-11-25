@@ -11,8 +11,7 @@ On Ubuntu:
 
 ```
 git submodule update --init --recursive
-sudo apt-get install build-essential m4 openjdk-8-jdk libgmp-dev libmpfr-dev pkg-config flex z3 libz3-dev maven opam python3 cmake gcc clang-8 lld-8 llvm-8-tools zlib1g-dev bison libboost-test-dev libyaml-dev libjemalloc-dev
-llvm-backend/src/main/native/llvm-backend/install-rust
+sudo apt-get install build-essential m4 openjdk-8-jdk libgmp-dev libmpfr-dev pkg-config flex z3 libz3-dev maven opam python3 cmake gcc clang-8 lld-8 llvm-8-tools zlib1g-dev libboost-test-dev libyaml-dev libjemalloc-dev
 curl -sSL https://get.haskellstack.org/ | sh
 ```
 
@@ -20,9 +19,8 @@ On Arch (from source):
 
 ```
 git submodule update --init --recursive
-sudo pacman -S git maven jdk-openjdk cmake boost libyaml jemalloc clang llvm lld zlib gmp mpfr z3 opam curl stack rustup base-devel base python
+sudo pacman -S git maven jdk-openjdk cmake boost libyaml jemalloc clang llvm lld zlib gmp mpfr z3 opam curl stack base-devel base python
 export PATH=$PATH:/usr/bin/core_perl
-llvm-backend/src/main/native/llvm-backend/install-rust
 makepkg
 sudo pacman -U kframework-5.0.0-1-x86_64.pkg.tar.xz
 ```
@@ -60,23 +58,6 @@ to the installation directory of the JDK (not to be mistaken with JRE).
 You can test if it works by calling `mvn -version` in a Terminal.
 This will provide the information about the JDK Maven is using, in case
 it is the wrong one.
-
-## Rust 1.33 (and Cargo)
-
-To install if you don't already have rustup installed, run:
-```
-llvm-backend/src/main/native/llvm-backend/install-rust
-```
-
-If you already have rustup installed, you can build rustc 1.33 from source (https://static.rust-lang.org/dist/rustc-1.33.0-src.tar.gz) and install it via:
-
-```
-./configure --llvm-root=/usr/lib/llvm-8 --enable-llvm-link-shared
-./x.py build
-rustup toolchain link rust-1.33.0-llvm-8 build/x86_64-*/stage2
-```
-
-We do not currently support any of the default rustup toolchains. Note that you will need at least cargo 0.32.0 (which comes with rust 1.31.0) as your default toolchain to build our rust code.
 
 ## Haskell Stack
 

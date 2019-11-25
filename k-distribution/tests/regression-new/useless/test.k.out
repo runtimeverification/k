@@ -1,0 +1,64 @@
+[Error] Compiler: Had 21 pattern matching errors.
+[Error] Compiler: Potentially useless rule detected.
+	Source(test.k)
+	Location(20,6,20,17)
+[Error] Compiler: Potentially useless rule detected.
+	Source(test.k)
+	Location(21,6,21,17)
+[Error] Compiler: Potentially useless rule detected.
+	Source(test.k)
+	Location(26,6,26,22)
+[Error] Compiler: Potentially useless rule detected.
+	Source(test.k)
+	Location(30,6,30,19)
+[Error] Compiler: Potentially useless rule detected.
+	Source(test.k)
+	Location(34,6,34,20)
+[Error] Compiler: Potentially useless rule detected.
+	Source(test.k)
+	Location(35,6,35,20)
+[Error] Compiler: Potentially useless rule detected.
+	Source(test.k)
+	Location(38,6,38,28)
+[Error] Compiler: Potentially useless rule detected.
+	Source(test.k)
+	Location(46,6,46,24)
+[Error] Compiler: Potentially useless rule detected.
+	Source(test.k)
+	Location(50,6,50,27)
+[Error] Compiler: Potentially useless rule detected.
+	Source(test.k)
+	Location(51,6,51,27)
+[Error] Compiler: Potentially useless rule detected.
+	Source(test.k)
+	Location(59,6,59,27)
+[Error] Compiler: Potentially useless rule detected.
+	Source(test.k)
+	Location(63,6,63,30)
+[Error] Compiler: Potentially useless rule detected.
+	Source(test.k)
+	Location(64,6,64,30)
+[Error] Compiler: Potentially useless rule detected.
+	Source(test.k)
+	Location(69,6,69,22)
+[Error] Compiler: Potentially useless rule detected.
+	Source(test.k)
+	Location(70,6,70,22)
+[Error] Compiler: Potentially useless rule detected.
+	Source(test.k)
+	Location(73,6,73,22)
+[Error] Compiler: Potentially useless rule detected.
+	Source(test.k)
+	Location(75,6,75,28)
+[Error] Compiler: Potentially useless rule detected.
+	Source(test.k)
+	Location(78,6,78,22)
+[Error] Compiler: Potentially useless rule detected.
+	Source(test.k)
+	Location(83,6,83,19)
+[Error] Compiler: Potentially useless rule detected.
+	Source(test.k)
+	Location(87,6,87,21)
+[Error] Compiler: Potentially useless rule detected.
+	Source(test.k)
+	Location(88,6,88,21)

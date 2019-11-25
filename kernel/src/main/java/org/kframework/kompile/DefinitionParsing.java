@@ -8,6 +8,7 @@ import org.kframework.Collections;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 import org.kframework.builtin.BooleanUtils;
+import org.kframework.builtin.Sorts;
 import org.kframework.definition.Bubble;
 import org.kframework.definition.Context;
 import org.kframework.definition.ContextAlias;
@@ -32,7 +33,6 @@ import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.ParseFailedException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.file.FileUtil;
 import scala.Option;
 import scala.Tuple2;
@@ -40,19 +40,17 @@ import scala.collection.Set;
 import scala.util.Either;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.kframework.Collections.*;
+import static org.kframework.definition.Constructors.Module;
 import static org.kframework.definition.Constructors.*;
 import static org.kframework.kore.KORE.*;
 
@@ -62,7 +60,7 @@ import static org.kframework.kore.KORE.*;
  * @cos refactored this code out of Kompile but none (or close to none) of it was originally written by him.
  */
 public class DefinitionParsing {
-    public static final Sort START_SYMBOL = Sort("#RuleContent");
+    public static final Sort START_SYMBOL = Sorts.RuleContent();
     private final File cacheFile;
     private boolean autoImportDomains;
     private boolean kore;
@@ -103,7 +101,7 @@ public class DefinitionParsing {
         this.profileRules = profileRules;
     }
 
-    public java.util.Set<Module> parseModules(CompiledDefinition definition, String mainModule, File definitionFile) {
+    public java.util.Set<Module> parseModules(CompiledDefinition definition, String mainModule, File definitionFile, java.util.Set<String> excludeModules) {
         Definition def = parser.loadDefinition(
                 mainModule,
                 mutable(definition.getParsedDefinition().modules()),
@@ -114,19 +112,11 @@ public class DefinitionParsing {
                         Lists.newArrayList(Kompile.BUILTIN_DIRECTORY)),
                 kore);
 
+        def = Kompile.excludeModulesByTag(excludeModules).apply(def);
+
         errors = java.util.Collections.synchronizedSet(Sets.newHashSet());
-        caches = new HashMap<>();
+        caches = loadCaches();
 
-        if (cacheParses) {
-            try {
-                caches = loader.load(Map.class, cacheFile);
-            } catch (FileNotFoundException e) {
-            } catch (IOException | ClassNotFoundException e) {
-                kem.registerInternalHiddenWarning("Invalidating serialized cache due to corruption.", e);
-            }
-        }
-
-        Module modWithConfig;
         ResolveConfig resolveConfig = new ResolveConfig(definition.getParsedDefinition(), isStrict, kore, this::parseBubble, this::getParser);
         gen = new RuleGrammarGenerator(definition.getParsedDefinition());
 
@@ -141,6 +131,16 @@ public class DefinitionParsing {
         def = resolveNonConfigBubbles(def, gen);
         saveCachesAndReportParsingErrors();
         return mutable(def.entryModules());
+    }
+
+    public Map<String, ParseCache> loadCaches() {
+        Map<String, ParseCache> result;
+        //noinspection unchecked
+        result = cacheParses ? loader.loadCache(Map.class, cacheFile) : null;
+        if (result == null) {
+            result = new HashMap<>();
+        }
+        return result;
     }
 
     private void saveCachesAndReportParsingErrors() {
@@ -220,16 +220,7 @@ public class DefinitionParsing {
         }
 
         errors = java.util.Collections.synchronizedSet(Sets.newHashSet());
-        caches = new HashMap<>();
-
-        if (cacheParses) {
-            try {
-                caches = loader.load(Map.class, cacheFile);
-            } catch (FileNotFoundException e) {
-            } catch (IOException | ClassNotFoundException e) {
-                kem.registerInternalHiddenWarning("Invalidating serialized cache due to corruption.", e);
-            }
-        }
+        caches = loadCaches();
 
         ResolveConfig resolveConfig = new ResolveConfig(definitionWithConfigBubble, isStrict, kore, this::parseBubble, this::getParser);
         gen = new RuleGrammarGenerator(definitionWithConfigBubble);
@@ -415,7 +406,14 @@ public class DefinitionParsing {
             //The content will have wrong Source attribute and must be invalidated.
             if (cacheSource.isPresent() && cacheSource.get().equals(source)) {
                 cachedBubbles.getAndIncrement();
-                kem.addAllKException(parse.getWarnings().stream().map(e -> e.getKException()).collect(Collectors.toList()));
+                if (kem.options.warnings2errors) {
+                    for (KEMException err : parse.getWarnings().stream().map(e -> (KEMException) e).collect(Collectors.toList())) {
+                        if (kem.options.warnings.includesExceptionType(err.exception.getType())) {
+                            errors.add(KEMException.asError(err));
+                        }
+                    }
+                } else
+                    kem.addAllKException(parse.getWarnings().stream().map(e -> e.getKException()).collect(Collectors.toList()));
                 return Stream.of(parse.getParse());
             }
         }

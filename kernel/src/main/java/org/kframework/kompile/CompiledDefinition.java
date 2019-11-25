@@ -122,13 +122,6 @@ public class CompiledDefinition implements Serializable {
     }
 
     /**
-     * A function that takes a string and the source of that string and parses it as a program into KAST.
-     */
-    public BiFunction<String, Source, K> getProgramParser(KExceptionManager kem) {
-        return getParser(programParsingModuleFor(mainSyntaxModuleName(), kem).get(), programStartSymbol, kem);
-    }
-
-    /**
      * The parsed but uncompiled definition
      */
     public Definition getParsedDefinition() {
@@ -171,23 +164,20 @@ public class CompiledDefinition implements Serializable {
     public Module languageParsingModule() { return languageParsingModule; }
 
     /**
-     * Creates a parser for a module.
-     * Will probably want to move the method out of this class here eventually.
+     * Creates a parser for a module and use it to parse a term.
      *
-     * @return a function taking a String to be parsed, a Source, and returning the parsed string as K.
+     * @return the parsed term.
      */
 
-    public BiFunction<String, Source, K> getParser(Module module, Sort programStartSymbol, KExceptionManager kem) {
-        ParseInModule parseInModule = RuleGrammarGenerator.getCombinedGrammar(module, kompileOptions.strict());
-
-        return (BiFunction<String, Source, K> & Serializable) (s, source) -> {
+    public K parseSingleTerm(Module module, Sort programStartSymbol, KExceptionManager kem, String s, Source source) {
+        try (ParseInModule parseInModule = RuleGrammarGenerator.getCombinedGrammar(module, kompileOptions.strict())) {
             Tuple2<Either<Set<ParseFailedException>, K>, Set<ParseFailedException>> res = parseInModule.parseString(s, programStartSymbol, source);
             kem.addAllKException(res._2().stream().map(e -> e.getKException()).collect(Collectors.toSet()));
             if (res._1().isLeft()) {
                 throw res._1().left().get().iterator().next();
             }
             return new TreeNodesToKORE(Outer::parseSort, kompileOptions.strict()).down(res._1().right().get());
-        };
+        }
     }
 
     public Module getExtensionModule(Module module) {
