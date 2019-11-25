@@ -4,6 +4,7 @@ package org.kframework.parser.concrete2kore.kernel;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 import org.kframework.definition.Production;
+import org.kframework.kil.Attribute;
 import org.kframework.parser.Constant;
 import org.kframework.parser.KList;
 import org.kframework.parser.Term;
@@ -13,6 +14,9 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+
+import static org.kframework.Collections.Seq;
+import static org.kframework.kore.KORE.Sort;
 
 /**
  * An action that transforms an AST into another AST
@@ -83,7 +87,17 @@ public abstract class Rule implements Serializable {
             Source source = metaData.source;
             if (isToken) {
                 String value = metaData.input.subSequence(metaData.start.position, metaData.end.position).toString();
-                term = Constant.apply(value, label, Optional.of(loc), Optional.of(source));
+                Production newLabel = label;
+                if (label.att().getOptional(Attribute.HOOK_KEY).orElse("").equals("MINT.literal")) {
+                    int index = value.indexOf('p');
+                    if (index == -1) {
+                      index = value.indexOf('P');
+                    }
+                    assert index != -1;
+                    String param = value.substring(index+1);
+                    newLabel = label.substitute(Seq(Sort(param)));
+                }
+                term = Constant.apply(value, newLabel, Optional.of(loc), Optional.of(source));
             } else if (needsLabel) {
                 term = TermCons.apply(klist.items(), label, loc, source);
             } else {

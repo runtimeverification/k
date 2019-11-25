@@ -215,7 +215,7 @@ public class TypeInferencer implements AutoCloseable {
       case UNSATISFIABLE:
         println("(pop)");
         computeStatus();
-        if (constraint.isVar()) {
+        if (constraint.name != null) {
           Sort actualSort = computeValue(constraint.name);
           Sort expectedSort = eval(constraint.expectedSort, constraint.expectedParams);
           throw new LocalizedError("Unexpected sort " + actualSort + " for variable " + constraint.loc.value() + ". Expected: " + expectedSort, constraint.loc);
@@ -622,18 +622,22 @@ public class TypeInferencer implements AutoCloseable {
       if (mod.subsorts().lessThanEq(actualSort, Sorts.KBott()) || mod.subsorts().lessThan(Sorts.K(), actualSort)) {
         return;
       }
-      if (isStrictEquality) {
-        sb.append("(= ");
+      if (isBadNatSort(actualSort)) {
+        sb.append("false ");
       } else {
-        sb.append("(<=Sort ");
+        if (isStrictEquality) {
+          sb.append("(= ");
+        } else {
+          sb.append("(<=Sort ");
+        }
+        sb.append(printSort(actualSort, actualParams, isIncremental));
+        sb.append(" ");
+        if (mod.subsorts().lessThan(Sorts.K(), expectedSort)) {
+          expectedSort = Sorts.K();
+        }
+        sb.append(printSort(expectedSort, expectedParams, isIncremental));
+        sb.append(") ");
       }
-      sb.append(printSort(actualSort, actualParams, isIncremental));
-      sb.append(" ");
-      if (mod.subsorts().lessThan(Sorts.K(), expectedSort)) {
-        expectedSort = Sorts.K();
-      }
-      sb.append(printSort(expectedSort, expectedParams, isIncremental));
-      sb.append(") ");
       if (isIncremental) {
         saveConstraint(actualSort, actualParams);
       }
@@ -679,6 +683,10 @@ public class TypeInferencer implements AutoCloseable {
     }
   }
 
+  private boolean isBadNatSort(Sort actualSort) {
+    if (actualSort.isNat() && !mod.definedSorts().contains(actualSort.head())) return true;
+    return stream(actualSort.params()).anyMatch(this::isBadNatSort);
+  }
   private String printSort(Sort s, Optional<ProductionReference> t, boolean isIncremental) {
     Map<Sort, String> params = new HashMap<>();
     if (t.isPresent()) {
@@ -814,6 +822,7 @@ public class TypeInferencer implements AutoCloseable {
   }
 
   private Sort eval(Sort s, Optional<ProductionReference> params) {
+    if (isBadNatSort(s)) return s;
     print("(eval ");
     print(printSort(s, params, true));
     println(")");
