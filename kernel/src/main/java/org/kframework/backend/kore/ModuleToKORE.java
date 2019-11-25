@@ -110,6 +110,7 @@ public class ModuleToKORE {
         Set<SortHead> tokenSorts = new HashSet<>();
         // Map attribute name to whether the attribute has a value
         Map<String, Boolean> attributes = new HashMap<>();
+        attributes.put("nat", true);
         collectTokenSortsAndAttributes(tokenSorts, attributes);
 
         Set<String> collectionSorts = new HashSet<>();
@@ -251,6 +252,9 @@ public class ModuleToKORE {
             att = att.remove(HAS_DOMAIN_VALUES);
             if (tokenSorts.contains(sort)) {
                 att = att.add(HAS_DOMAIN_VALUES);
+            }
+            if (sort.params() == 0 && Sort(sort).isNat()) {
+              att = att.add("nat", sort.name());
             }
             sb.append("sort ");
             convert(sort, sb);
