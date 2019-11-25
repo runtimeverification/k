@@ -138,11 +138,11 @@ public class BuiltinIOOperations {
     public static Term mkstemp(StringToken template, TermContext termContext) throws IOException {
         FileSystem fs = termContext.fileSystem();
         try {
-            String[] split = template.stringValue().split("XXXXXX");
+            String[] split = template.stringValue().split("XXXXXX", -1);
             String prefix = split[0];
             String suffix = split[1];
             File f = File.createTempFile("tmp" + prefix, suffix);
-            KLabelConstant klabel = KLabelConstant.of(KORE.KLabel("#tempFile(_,_)_K-IO"), termContext.definition());
+            KLabelConstant klabel = KLabelConstant.of(KORE.KLabel("#tempFile"), termContext.definition());
             return KItem.of(klabel, KList.concatenate(StringToken.of(f.getAbsolutePath()),
                     IntToken.of(fs.open(f, "w"))), termContext.global());
         } catch (IOException e) {
