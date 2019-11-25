@@ -20,6 +20,10 @@ trait Term extends HasLocation {
 
 trait ProductionReference extends Term {
   val production: Production
+  var id: Optional[Integer] = Optional.empty()
+  def setId(id: Optional[Integer]) {
+    this.id = id
+  }
 }
 
 trait HasChildren {
@@ -36,9 +40,9 @@ case class Constant private(value: String, production: Production) extends Produ
 case class TermCons private(items: PStack[Term], production: Production)
   extends ProductionReference with HasChildren {
   def get(i: Int) = items.get(items.size() - 1 - i)
-  def `with`(i: Int, e: Term) = TermCons(items.`with`(items.size() - 1 - i, e), production, location, source)
+  def `with`(i: Int, e: Term) = TermCons(items.`with`(items.size() - 1 - i, e), production, location, source, id)
 
-  def replaceChildren(newChildren: Collection[Term]) = TermCons(ConsPStack.from(newChildren), production, location, source)
+  def replaceChildren(newChildren: Collection[Term]) = TermCons(ConsPStack.from(newChildren), production, location, source, id)
   override def toString() = new TreeNodesToKORE(s => Sort(s), false).apply(this).toString()
 
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(TermCons.this);
@@ -81,14 +85,19 @@ object Constant {
 }
 
 object TermCons {
-  def apply(items: PStack[Term], production: Production, location: Optional[Location], source: Optional[Source]):TermCons = {
+  def apply(items: PStack[Term], production: Production, location: Optional[Location], source: Optional[Source], id: Optional[Integer]):TermCons = {
     val res = TermCons(items, production)
     res.location = location
     res.source = source
+    res.id = id
     res
   }
 
-  def apply(items: PStack[Term], production: Production, location: Location, source: Source):TermCons = TermCons(items, production, Optional.of(location), Optional.of(source))
+  def apply(items: PStack[Term], production: Production, location: Optional[Location], source: Optional[Source]):TermCons = {
+    TermCons(items, production, location, source, Optional.empty())
+  }
+
+  def apply(items: PStack[Term], production: Production, location: Location, source: Source):TermCons = TermCons(items, production, Optional.of(location), Optional.of(source), Optional.empty())
 }
 
 object KList {

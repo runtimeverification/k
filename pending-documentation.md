@@ -732,6 +732,132 @@ Then this simplification rule will only apply if the Haskell backend can prove
 that `notBool N =/=Int 0` is unsatisfiable. This avoids an infinite cycle of
 applying this simplification lemma.
 
+### Variable Sort Inference
+
+In K, it is not required that users declare the sorts of variables in rules or
+in the initial configuration. If the user does not explicitly declare the sort
+of a variable somewhere via a cast (see below), the sort of the variable is
+inferred from context based on the sort signature of every place the variable
+appears in the rule.
+
+As an example, consider the rule for addition in IMP:
+
+```k
+    syntax Exp ::= Exp "+" Exp | Int
+
+    rule I1 + I2 => I1 +Int I2
+```
+
+Here `+Int` is defined in the INT module with the following signature:
+
+```k
+    syntax Int ::= Int "+Int" Int [function]
+```
+
+In the rule above, the sort of both `I1` and `I2` is inferred as `Int`. This is because
+a variable must have the same sort every place it appears within the same rule.
+While a variable appearing only on the left-hand-side of the rule could have
+sort `Exp` instead, the same variable appears as a child of `+Int`, which
+constriants the sorts of `I1` and `I2` more tightly. Since the sort must be a
+subsort of `Int` or equal to `Int`, and `Int` has no subsorts, we infer `Int`
+ as the sorts of `I1` and `I2`. This means that the above rule will not match
+until `I1` and `I2` become integers (i.e., have already been evaluated).
+
+More complex examples are possible, however:
+
+```k
+    syntax Exp ::= Exp "+" Int | Int
+    rule _ + _ => 0
+```
+
+Here we have two anonymous variables. They do not refer to the same variable
+as one another, so they can have different sorts. The right side is constrained
+by `+` to be of sort `Int`, but the left side could be either `Exp` or `Int`.
+When this occurs, we have multiple solutions to the sorts of the variables in
+the rule. K will only choose solutions which are **maximal**, however. To be
+precise, if two different solutions exist, but the sorts of one solution are
+all greater than or equal to the sorts of the other solution, K will discard
+the smaller solution. Thus, in the case above, the variable on the left side
+of the `+` is inferred of sort `Exp`, because the solution (`Exp`, `Int`) is
+strictly greater than the solution (`Int`, `Int`).
+
+It is possible, however, for terms to have multiple maximal solutions:
+
+```k
+    syntax Exp ::= Exp "+" Int | Int "+" Exp | Int
+    rule I1 + I2 => 0
+```
+
+In this example, there is an ambiguous parse. This could parse as either
+the first `+` or the second. In the first case, the maximal solution chosen is
+(`Exp`, `Int`). In the second, it is (`Int`, `Exp`). Neither of these solutions is
+greater than the other, so both are allowed by K. As a result, this program
+will emit an error because the parse is ambiguous. To pick one solution over
+the other, a cast or a `prefer` or `avoid` attribute can be used.
+
+### Casting
+
+There are three main types of casts in K: the semantic cast, the strict cast,
+and the projection cast.
+
+### Semantic casts
+
+For every sort `S` declared in your grammar, K will define the following
+production for you for use in rules:
+
+```k
+    syntax S ::= S ":S"
+```
+
+The meaning of this cast is that the term inside the cast must be less than
+or equal to `Sort`. This can be used to resolve ambiguities, but its principle
+purpose is to guide execution by telling K what sort variables must match in
+order for the rule to apply. When compiled, it will generate a pattern that
+matches on an injection into `Sort`.
+
+### Strict casts
+
+K also introduces the strict cast:
+
+```k
+    syntax S ::= S "::S"
+```
+
+The meaning at runtime is exactly the same as the semantic cast (except in the
+ocaml backend, where it will match a term of any sort at runtime); however,
+it restricts the sort of the term inside the cast to **exactly** `Sort`. That
+is to say, if you use it on something that is a strictly smaller sort, it will
+generate a type error. This is useful in certain circumstances to help
+disambiguate terms, when a semantic cast would not have resolved the ambiguity.
+As such, it is primarily used to solve ambiguities rather than to guide
+execution.
+
+### Projection casts
+
+K also introduces the projection cast:
+
+```k
+    syntax {S2} S ::= "{" S2 "}" ":>S"
+```
+
+The meaning of this cast at runtime is that if the term inside is of sort
+`Sort`, it should have it injection stripped away and the value inside is
+returned as a term of static sort `Sort`. However, if the term is of a
+different sort, it is an error and execution will get stuck. Thus the primary
+usefulness of this cast is to cast the return value of a function with a 
+greater sort down to a strictly smaller sort that you expect the return value
+of the function to have. For example:
+
+```
+    syntax Exp ::= foo(Exp) [function] | bar(Int) | Int
+    rule foo(I:Int) => I
+    rule bar(I) => bar({foo(I +Int 1)}:>Int)
+```
+
+Here we know that `foo(I +Int 1)` will return an Int, but the return sort of
+`foo` is `Exp`. So we project the result into the `Int` sort so that it can
+be placed as the child of a `bar`.
+
 Pattern Matching
 ----------------
 

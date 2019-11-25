@@ -59,3 +59,6 @@ $(defn_tests)/kast-tests/%.out: $(defn_tests)/kast-tests/%.gen $(imp_kompiled)
 
 $(defn_tests)/proof-tests/%-spec.json.prove: $(defn_tests)/proof-tests/%-spec.k $(imp_kompiled)
 	$(KPROVE) $< -m IMP
+
+update-results:
+kompile:

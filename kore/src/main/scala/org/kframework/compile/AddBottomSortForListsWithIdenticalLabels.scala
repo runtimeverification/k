@@ -17,7 +17,7 @@ object AddBottomSortForListsWithIdenticalLabels extends Function[Module, Module]
         case (klabel, userListInfo) =>
           val minimalSorts = m.subsorts.minimal(userListInfo map { li => li.sort })
           if (minimalSorts.size > 1) {
-            val newBottomSort = Sort("GeneratedListBottom{" + klabel + "}")
+            val newBottomSort = Sort("GeneratedListBottom{" + klabel.name.replace("|","") + "}")
 
             Set[Sentence]()
               .|(minimalSorts.map(s => Production(Seq(), s, Seq(NonTerminal(newBottomSort, None)), Att.empty)))

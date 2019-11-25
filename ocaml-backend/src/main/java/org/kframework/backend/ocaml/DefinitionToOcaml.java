@@ -99,7 +99,7 @@ public class DefinitionToOcaml implements Serializable {
     private transient final KExceptionManager kem;
     private transient final FileUtil files;
     private transient final GlobalOptions globalOptions;
-    private transient final KompileOptions kompileOptions;
+    public transient final KompileOptions kompileOptions;
     private transient ExpandMacros expandMacros;
     private transient ConvertDataStructureToLookup convertDataStructure;
     private boolean threadCellExists;
@@ -527,7 +527,7 @@ public class DefinitionToOcaml implements Serializable {
     private void ocamlProgramHeader(StringBuilder sb, boolean forcePlugin) {
         if (forcePlugin) {
             sb.append("let () = Plugin.load Sys.argv.(1)");
-        } else if (options.ocamlopt()) {
+        } else if (kompileOptions.optimize2 || kompileOptions.optimize3) {
             sb.append("external load_plugin_path : unit -> string = \"load_plugin_path\"\n");
             sb.append("let () = Plugin.load (load_plugin_path ())");
         }
@@ -1380,7 +1380,7 @@ public class DefinitionToOcaml implements Serializable {
         Set<KLabel> allStepFunctions = Sets.difference(mutable(mainModule.definedKLabels()), functions);
         Map<Optional<KLabel>, List<Rule>> groupedByStepFunction = sortedRules.stream().collect(
                 Collectors.groupingBy(r -> getNextOperation(RewriteToTop.toLeft(r.body()), false)));
-        if (options.optimizeStep()) {
+        if (kompileOptions.optimize3 || options.optimizeG) {
             sb.append("match c with KApply1(_,hd :: tl) -> (\n");
             sb.append("match (normalize hd) with KApply(lbl,_) -> (match lbl with \n");
             for (KLabel lbl : allStepFunctions) {
@@ -1409,7 +1409,7 @@ public class DefinitionToOcaml implements Serializable {
             Collections.sort(rulesForStepFunc, this::sortRules);
             ruleNum = writeStepFunction(sb, rulesForStepFunc, "step" + encodeStringToIdentifier(lbl), ruleNum);
         }
-        if (options.optimizeStep()) {
+        if (kompileOptions.optimize3 || options.optimizeG) {
             ruleNum = writeStepFunction(sb, groupedByStepFunction.getOrDefault(Optional.<KLabel>empty(), Collections.emptyList()), "stepNone", ruleNum);
         }
 
@@ -2074,7 +2074,7 @@ public class DefinitionToOcaml implements Serializable {
     }
 
     private Optional<KApply> hasKCellContents(K body) {
-        if (!options.optimizeStep()) return Optional.empty();
+        if (!kompileOptions.optimize3 && !options.optimizeG) return Optional.empty();
         List<KApply> kCells = new ArrayList<>();
         new VisitK() {
             @Override
@@ -2195,7 +2195,7 @@ public class DefinitionToOcaml implements Serializable {
     }
 
     private Optional<KLabel> getNextOperation(K side, boolean rhs) {
-        if (!options.optimizeStep()) return Optional.empty();
+        if (!kompileOptions.optimize3 && !options.optimizeG) return Optional.empty();
         final List<KLabel> nextOps = new ArrayList<>();
         MutableBoolean hasProblem = new MutableBoolean(false);
         new VisitK() {
