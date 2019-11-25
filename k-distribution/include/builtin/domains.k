@@ -1193,7 +1193,7 @@ module MINT-SYNTAX
   /*@\section{Description} The MInt implements machine integers of arbitrary
    * bit width represented in 2's complement. */
   syntax {Width} MInt{Width} [hook(MINT.MInt)]
-  
+
   /*@ Machine integer of bit width and value. */
   syntax {Width} MInt{Width} ::= r"[\\+-]?[0-9]+[pP][0-9]+" [token, prec(2), hook(MINT.literal)]
 endmodule
