@@ -284,23 +284,27 @@ public class AddSortInjections {
                 return Sorts.Bool();
             }
             Production prod = production(kapp);
-            if (prod.params().nonEmpty()) {
-                for (Sort param : iterable(prod.params())) {
-                    if (prod.sort().equals(param)) {
-                        Set<Integer> positions = getPositions(param, prod);
-                        Set<Sort> children = new HashSet<>();
-                        for (int position : positions) {
-                            children.add(sort(kapp.items().get(position), expectedSort));
-                        }
-                        children.remove(null);
-                        if (children.size() == 0) {
-                            return expectedSort;
-                        }
-                        return lub(children, expectedSort, term, mod);
-                    }
-                }
+            Production substituted = prod;
+            List<Sort> args = new ArrayList<>();
+            List<Sort> fresh = new ArrayList<>();
+            for (int i = 0; i < prod.params().size(); i++) {
+                fresh.add(freshSortParam());
             }
-            return production((KApply)term).sort();
+            Production substitutedFresh = prod.substitute(immutable(fresh));
+            if (prod.params().nonEmpty()) {
+                Map<Sort, List<Sort>> subst = new HashMap<>();
+                for (int i = 0; i < prod.nonterminals().size(); i++) {
+                    Sort declaredSort = prod.nonterminals().apply(i).sort();
+                    Sort actual = sort(kapp.items().get(i), substitutedFresh.nonterminals().apply(i).sort());
+                    match(prod, declaredSort, actual, subst);
+                }
+                match(prod, prod.sort(), expectedSort, subst);
+                for (Sort param : iterable(prod.params())) {
+                    args.add(lub(subst.get(param), null, kapp, mod));
+                }
+                substituted = prod.substitute(immutable(args));
+            }
+            return substituted.sort();
         } else if (term instanceof KRewrite) {
             KRewrite rew = (KRewrite)term;
             Sort leftSort = sort(rew.left(), expectedSort);
@@ -349,7 +353,7 @@ public class AddSortInjections {
     private static Sort lub(Collection<Sort> entries, Sort expectedSort, HasLocation loc, Module mod) {
         assert !entries.isEmpty();
         entries = new HashSet<>(entries);
-        Collection<Sort> filteredEntries = entries.stream().filter(s -> !s.name().equals(SORTPARAM_NAME)).collect(Collectors.toList());
+        Collection<Sort> filteredEntries = entries.stream().filter(s -> s != null && !s.name().equals(SORTPARAM_NAME)).collect(Collectors.toList());
         if (filteredEntries.isEmpty()) { // if all sorts are parameters, take the first
             return entries.iterator().next();
         }
