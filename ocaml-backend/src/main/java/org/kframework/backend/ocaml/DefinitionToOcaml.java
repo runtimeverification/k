@@ -686,13 +686,13 @@ public class DefinitionToOcaml implements Serializable {
         }
         sb.append("| _ -> invalid_arg \"el_for\"\n");
         sb.append("let unit_for_array (c: sort) : klabel = match c with \n");
-        Set<Sort> arraySorts = sorts.stream().filter(s -> mainModule.sortAttributesFor().get(s).getOrElse(() -> Att()).<String>getOptional("hook")
+        Set<Sort> arraySorts = sorts.stream().filter(s -> mainModule.sortAttributesFor().get(s.head()).getOrElse(() -> Att()).<String>getOptional("hook")
                 .orElse(".").equals("ARRAY.Array")).collect(Collectors.toSet());
         for (Sort sort : arraySorts) {
             sb.append("|");
             encodeStringToIdentifier(sb, sort);
             sb.append(" -> ");
-            encodeStringToIdentifier(sb, KLabel(mainModule.sortAttributesFor().apply(sort).get("unit")));
+            encodeStringToIdentifier(sb, KLabel(mainModule.sortAttributesFor().apply(sort.head()).get("unit")));
             sb.append("\n");
         }
         sb.append("| _ -> invalid_arg \"unit_for_array\"\n");
@@ -701,7 +701,7 @@ public class DefinitionToOcaml implements Serializable {
             sb.append("|");
             encodeStringToIdentifier(sb, sort);
             sb.append(" -> ");
-            encodeStringToIdentifier(sb, KLabel(mainModule.sortAttributesFor().apply(sort).get("element")));
+            encodeStringToIdentifier(sb, KLabel(mainModule.sortAttributesFor().apply(sort.head()).get("element")));
             sb.append("\n");
         }
         sb.append("| _ -> invalid_arg \"el_for_array\"\n");
@@ -1303,8 +1303,8 @@ public class DefinitionToOcaml implements Serializable {
                     if (mainModule.attributesFor().apply(functionLabel).contains(Attribute.PREDICATE_KEY, Sort.class)) {
                         Sort predicateSort = (mainModule.attributesFor().apply(functionLabel).get(Attribute.PREDICATE_KEY, Sort.class));
                         stream(mainModule.allSorts()).filter(s -> mainModule.subsorts().greaterThanEq(predicateSort, s)).distinct()
-                                .filter(sort -> mainModule.sortAttributesFor().contains(sort)).forEach(sort -> {
-                            String sortHook = mainModule.sortAttributesFor().apply(sort).<String>getOptional("hook").orElse("");
+                                .filter(sort -> mainModule.sortAttributesFor().contains(sort.head())).forEach(sort -> {
+                            String sortHook = mainModule.sortAttributesFor().apply(sort.head()).<String>getOptional("hook").orElse("");
                             if (predicateRules.containsKey(sortHook)) {
                                 sb.append("| ");
                                 sb.append(predicateRules.get(sortHook).apply(sort));
@@ -2114,8 +2114,8 @@ public class DefinitionToOcaml implements Serializable {
                                 }
                                 if (head instanceof KVariable) {
                                     Sort s = head.att().getOptional(Sort.class).orElse(Sort(""));
-                                    if (mainModule.sortAttributesFor().contains(s)) {
-                                        String hook = mainModule.sortAttributesFor().apply(s).<String>getOptional("hook").orElse("");
+                                    if (mainModule.sortAttributesFor().contains(s.head())) {
+                                        String hook = mainModule.sortAttributesFor().apply(s.head()).<String>getOptional("hook").orElse("");
                                         if (!sortVarHooks.containsKey(hook)) {
                                             h.b = true;
                                         }
@@ -2575,8 +2575,8 @@ public class DefinitionToOcaml implements Serializable {
         }
         vars.vars.put(k, varName);
         Sort s = k.att().getOptional(Sort.class).orElse(Sort(""));
-        if (mainModule.sortAttributesFor().contains(s)) {
-            String hook = mainModule.sortAttributesFor().apply(s).<String>getOptional("hook").orElse("");
+        if (mainModule.sortAttributesFor().contains(s.head())) {
+            String hook = mainModule.sortAttributesFor().apply(s.head()).<String>getOptional("hook").orElse("");
             if (sortVarHooks.containsKey(hook)) {
                 sb.append("(");
                 sb.append(sortVarHooks.get(hook).apply(s));
@@ -2823,8 +2823,8 @@ public class DefinitionToOcaml implements Serializable {
                         apply(BooleanUtils.TRUE);
                         return;
                     }
-                    if (mainModule.sortAttributesFor().contains(s)) {
-                        String hook2 = mainModule.sortAttributesFor().apply(s).<String>getOptional("hook").orElse("");
+                    if (mainModule.sortAttributesFor().contains(s.head())) {
+                        String hook2 = mainModule.sortAttributesFor().apply(s.head()).<String>getOptional("hook").orElse("");
                         if (sortVarHooks.containsKey(hook2)) {
                             if (k.klist().items().size() == 1) {
                                 KSequence item = (KSequence) k.klist().items().get(0);
@@ -2893,8 +2893,8 @@ public class DefinitionToOcaml implements Serializable {
                 sb.append(k.s());
                 return;
             }
-            if (mainModule.sortAttributesFor().contains(k.sort())) {
-                String hook = mainModule.sortAttributesFor().apply(k.sort()).<String>getOptional("hook").orElse("");
+            if (mainModule.sortAttributesFor().contains(k.sort().head())) {
+                String hook = mainModule.sortAttributesFor().apply(k.sort().head()).<String>getOptional("hook").orElse("");
                 if (sortHooks.containsKey(hook)) {
                     sb.append(sortHooks.get(hook).apply(k.s()));
                     return;

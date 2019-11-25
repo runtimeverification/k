@@ -112,7 +112,7 @@ public class GenerateSortPredicateRules {
                 for (NonTerminal nt : nts) {
                     KVariable v = KVariable("K" + i++, Att().add(Sort.class, nt.sort()));
                     klist.add(v);
-                    if (!mutable(mod.sortAttributesFor()).getOrDefault(sort, Att()).contains("flatPredicate")) {
+                    if (!mutable(mod.sortAttributesFor()).getOrDefault(sort.head(), Att()).contains("flatPredicate")) {
                         side.add(KApply(KLabel("is" + nt.sort().toString()), v));
                     }
                 }

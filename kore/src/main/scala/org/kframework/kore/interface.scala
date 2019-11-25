@@ -123,7 +123,7 @@ trait Sort extends Ordered[Sort] {
   }
 }
 
-trait SortHead {
+trait SortHead extends Ordered[SortHead] {
   def name: String
   def params: Int
   override def equals(other: Any) = other match {
@@ -131,6 +131,12 @@ trait SortHead {
     case _ => false
   }
   override def hashCode = name.hashCode * 23 + params.hashCode
+
+  def compare(that: SortHead): Int = {
+    Ordering.Tuple2(Ordering[String], Ordering[Int]).compare((this.name, this.params), (this.name, this.params))
+  }
+
+
 }
 
 trait KCollection {
