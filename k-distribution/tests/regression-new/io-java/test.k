@@ -6,7 +6,7 @@ module TEST
 
 syntax KItem ::= open(String, String) | tell(Int) | getc(Int) | read(Int, Int)
 syntax KItem ::= close(Int) | seek(Int, KItem) [strict(2)] | putc(Int, Int) | write(Int, String)
-syntax KItem ::= system(String) | mkstemp(String, String) | remove(String)
+syntax KItem ::= system(String) | mkstemp(String) | remove(String)
 
 syntax KItem ::= assertEqual(K, K)
 
@@ -30,7 +30,7 @@ rule system(S:String) => #system(S)
 
 // 3
 rule remove(S:String) => #remove(S)
-rule mkstemp(Prefix:String, Suffix:String) => #mkstemp(Prefix, Suffix)
+rule mkstemp(Template:String) => #mkstemp(Template)
 rule #tempFile(Path:String, Fd:Int) => #write(Fd, "abc") ~> close(Fd) ~> open(Path, "r") ~> remove(Path)
 rule Fd:Int ~> remove(Path) => #read(Fd, 3) ~> Fd ~> remove(Path)
 rule "abc" ~> Fd:Int ~> remove(Path) => #close(Fd) ~> remove(Path)
