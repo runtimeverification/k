@@ -8,6 +8,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.kframework.backend.Backends;
 import org.kframework.main.GlobalOptions;
 import org.kframework.unparser.OutputModes;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.OuterParsingOptions;
@@ -35,8 +36,8 @@ public class KompileOptions implements Serializable {
     public OuterParsingOptions outerParsing = new OuterParsingOptions();
 
     // Common options
-    @Parameter(names="--backend", description="Choose a backend. <backend> is one of [ocaml|java|llvm|kore|haskell]. Each creates the kompiled K definition.")
-    public String backend = Backends.OCAML;
+    @Parameter(names="--backend", description="Choose a backend. <backend> is one of [llvm|haskell|kore|java|ocaml]. Each creates the kompiled K definition.")
+    public String backend = Backends.LLVM;
 
     private boolean kore;
 
@@ -65,10 +66,15 @@ public class KompileOptions implements Serializable {
 
     public static final String DEFAULT_TRANSITION = "transition";
 
-    @Parameter(names="--non-strict", description="Do not add runtime sort checks for every variable's inferred sort.")
+    @Parameter(names="--non-strict", description="Do not add runtime sort checks for every variable's inferred sort. Only has an effect with `--backend ocaml`.")
     private boolean nonStrict;
 
-    public boolean strict() { return !nonStrict; }
+    public boolean strict() {
+        if (nonStrict && ! backend.equals("ocaml")) {
+            throw KEMException.criticalError("Option `--non-strict` only makes sense for `--backend ocaml`.");
+        }
+        return !nonStrict;
+    }
 
     @Parameter(names="--coverage", description="Generate coverage data when executing semantics.")
     public boolean coverage;
@@ -93,18 +99,6 @@ public class KompileOptions implements Serializable {
 
     public boolean isKore() {
         return backend.equals("kore") || backend.equals("haskell") || backend.equals("llvm");
-    }
-
-    public static class OutputModeConverter extends BaseEnumConverter<OutputModes> {
-
-        public OutputModeConverter(String optionName) {
-            super(optionName);
-        }
-
-        @Override
-        public Class<OutputModes> enumClass() {
-            return OutputModes.class;
-        }
     }
 
     public static final class Experimental implements Serializable {
