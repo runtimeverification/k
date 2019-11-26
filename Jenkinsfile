@@ -43,9 +43,24 @@ pipeline {
     stage('Update Submodules (non-release)') {
       when { branch 'master' }
       steps {
-        build job: 'rv-devops/master', parameters: [string(name: 'PR_REVIEWER', value: 'ehildenb'), booleanParam(name: 'UPDATE_DEPS_KWASM' , value: true)], propagate: false, wait: false
-        build job: 'rv-devops/master', parameters: [string(name: 'PR_REVIEWER', value: 'malturki'), booleanParam(name: 'UPDATE_DEPS_BEACON', value: true)], propagate: false, wait: false
-        build job: 'rv-devops/master', parameters: [string(name: 'PR_REVIEWER', value: 'ehildenb'), booleanParam(name: 'UPDATE_DEPS_MCD'   , value: true)], propagate: false, wait: false
+        build job: 'rv-devops/master', propagate: false, wait: false                                   \
+            , parameters: [ booleanParam(name: 'UPDATE_DEPS_SUBMODULE', value: true)                   \
+                          , string(name: 'PR_REVIEWER', value: 'ehildenb')                             \
+                          , string(name: 'UPDATE_DEPS_REPOSITORY', value: 'kframework/wasm-semantics') \
+                          , string(name: 'UPDATE_DEPS_SUBMODULE_DIR', value: 'deps/k')                 \
+                          ]
+        build job: 'rv-devops/master', propagate: false, wait: false                                               \
+            , parameters: [ booleanParam(name: 'UPDATE_DEPS_SUBMODULE', value: true)                               \
+                          , string(name: 'PR_REVIEWER', value: 'malturki')                                         \
+                          , string(name: 'UPDATE_DEPS_REPOSITORY', value: 'runtimeverification/beacon-chain-spec') \
+                          , string(name: 'UPDATE_DEPS_SUBMODULE_DIR', value: 'deps/k')                             \
+                          ]
+        build job: 'rv-devops/master', propagate: false, wait: false                                          \
+            , parameters: [ booleanParam(name: 'UPDATE_DEPS_SUBMODULE', value: true)                          \
+                          , string(name: 'PR_REVIEWER', value: 'ehildenb')                                    \
+                          , string(name: 'UPDATE_DEPS_REPOSITORY', value: 'runtimeverification/mkr-mcd-spec') \
+                          , string(name: 'UPDATE_DEPS_SUBMODULE_DIR', value: 'deps/k')                        \
+                          ]
       }
     }
     stage('Build and Package K') {
@@ -427,8 +442,18 @@ pipeline {
     stage('Update Submodules (release)') {
       when { branch 'master' }
       steps {
-        build job: 'rv-devops/master', parameters: [string(name: 'PR_REVIEWER', value: 'ehildenb'), booleanParam(name: 'UPDATE_DEPS_KEVM'   , value: true)], propagate: false, wait: false
-        build job: 'rv-devops/master', parameters: [string(name: 'PR_REVIEWER', value: 'ttuegel') , booleanParam(name: 'UPDATE_DEPS_HASKELL', value: true)], propagate: false, wait: false
+        build job: 'rv-devops/master', propagate: false, wait: false                                  \
+            , parameters: [ booleanParam(name: 'UPDATE_DEPS_SUBMODULE', value: true)                  \
+                          , string(name: 'PR_REVIEWER', value: 'ehildenb')                            \
+                          , string(name: 'UPDATE_DEPS_REPOSITORY', value: 'kframework/evm-semantics') \
+                          , string(name: 'UPDATE_DEPS_SUBMODULE_DIR', value: 'deps/k')                \
+                          ]
+        build job: 'rv-devops/master', propagate: false, wait: false                          \
+            , parameters: [ booleanParam(name: 'UPDATE_DEPS_RELEASE_URL', value: true)        \
+                          , string(name: 'PR_REVIEWER', value: 'ttuegel')                     \
+                          , string(name: 'UPDATE_DEPS_REPOSITORY', value: 'kframework/kore')  \
+                          , string(name: 'UPDATE_DEPS_RELEASE_FILE', value: 'deps/k_release') \
+                          ]
       }
     }
   }
