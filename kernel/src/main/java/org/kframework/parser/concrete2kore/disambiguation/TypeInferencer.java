@@ -206,7 +206,7 @@ public class TypeInferencer implements AutoCloseable {
       case UNSATISFIABLE:
         println("(pop)");
         computeStatus();
-        if (constraint.isVar()) {
+        if (constraint.name != null) {
           Sort actualSort = computeValue(constraint.name);
           Sort expectedSort = eval(constraint.expectedSort, constraint.expectedParams);
           throw new LocalizedError("Unexpected sort " + actualSort + " for variable " + constraint.loc.value() + ". Expected: " + expectedSort, constraint.loc);
