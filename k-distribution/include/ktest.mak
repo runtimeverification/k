@@ -34,7 +34,7 @@ SEARCH_TESTS?=$(wildcard $(TESTDIR)/*.$(EXT).search)
 STRAT_TESTS?=$(wildcard $(TESTDIR)/*.strat)
 KAST_TESTS?=$(wildcard $(TESTDIR)/*.kast)
 # default KOMPILE_BACKEND
-KOMPILE_BACKEND?=ocaml
+KOMPILE_BACKEND?=llvm
 
 CHECK=| diff -
 
