@@ -8,4 +8,5 @@ public class Backends {
     public static final String JAVA = "java";
     public static final String OCAML = "ocaml";
     public static final String HASKELL = "haskell";
+    public static final String LLVM = "llvm";
 }
