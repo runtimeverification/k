@@ -83,7 +83,7 @@ public class GuardOrPatterns {
               if (k.klabel().head().equals(KLabels.ML_OR)) {
                 if (kore) {
                   AddSortInjections inj = new AddSortInjections(m);
-                  return KAs(k, newDotVariable(inj.sort(k, Sorts.K())));
+                  return KAs(k, newDotVariable(inj.sort(k, null)));
                 } else {
                   return KAs(k, newDotVariable(k.items().get(1).att().get(Production.class).sort()));
                 }
@@ -105,6 +105,9 @@ public class GuardOrPatterns {
 
     private int counter = 0;
     KVariable newDotVariable(Sort s) {
+        if (s == null) {
+            s = Sorts.K();
+        }
         KVariable newLabel;
         do {
             newLabel = KVariable("_" + (counter++), Att().add("anonymous").add(Sort.class, s));
