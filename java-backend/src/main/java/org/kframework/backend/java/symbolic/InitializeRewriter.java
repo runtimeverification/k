@@ -36,7 +36,6 @@ import org.kframework.main.GlobalOptions;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.rewriter.SearchType;
 import org.kframework.unparser.KPrint;
-import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
@@ -63,7 +62,6 @@ import static org.kframework.kore.KORE.*;
 public class InitializeRewriter implements Function<org.kframework.definition.Definition, Rewriter> {
 
     private final FileSystem fs;
-    private final Stopwatch sw;
     private final GlobalOptions globalOptions;
     private final KExceptionManager kem;
     private final SMTOptions smtOptions;
@@ -91,11 +89,9 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
             JavaExecutionOptions javaExecutionOptions,
             FileUtil files,
             InitializeDefinition initializeDefinition,
-            Stopwatch sw,
             KPrint kprint,
             Profiler2 profiler) {
         this.fs = fs;
-        this.sw = sw;
         this.globalOptions = globalOptions;
         this.kem = kem;
         this.smtOptions = smtOptions;
