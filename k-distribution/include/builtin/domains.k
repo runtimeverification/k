@@ -1281,9 +1281,9 @@ module MINT
    * lshr       logical shift: filling with zeros
    */
                                > left:
-                                 MInt{Width} "<<MInt" Int [function, hook(MINT.shl), smt-hook(bvshl)]
-                               | MInt{Width} ">>aMInt" Int [function, hook(MINT.ashr), smt-hook(bvashr)]
-                               | MInt{Width} ">>lMInt" Int [function, hook(MINT.lshr), smt-hook(bvlshr)]
+                                 MInt{Width} "<<MInt" MInt{Width} [function, hook(MINT.shl), smt-hook(bvshl)]
+                               | MInt{Width} ">>aMInt" MInt{Width} [function, hook(MINT.ashr), smt-hook(bvashr)]
+                               | MInt{Width} ">>lMInt" MInt{Width} [function, hook(MINT.lshr), smt-hook(bvlshr)]
 
   /*@
    * Bitwise operations
