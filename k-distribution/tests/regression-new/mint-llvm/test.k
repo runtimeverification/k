@@ -37,8 +37,8 @@ module TEST
   rule I % J => I %sMInt J
   rule I + J => I +MInt J
   rule I - J => I -MInt J
-  rule I >> J => I >>aMInt (MInt2Unsigned(J))
-  rule I << J => I <<MInt (MInt2Unsigned(J))
+  rule I >> J => I >>aMInt J
+  rule I << J => I <<MInt J
   rule I & J => I &MInt J
   rule I ^ J => I xorMInt J
   rule I | J => I |MInt J
