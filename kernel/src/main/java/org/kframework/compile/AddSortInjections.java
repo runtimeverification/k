@@ -114,8 +114,7 @@ public class AddSortInjections {
         }.apply(body)) {
             body = KRewrite(RewriteToTop.toLeft(body), RewriteToTop.toRight(body));
         }
-        Sort sort = sort(body, null);
-        if (sort == null) sort = freshSortParam();
+        Sort sort = sort(body, freshSortParam());
         return internalAddSortInjections(body, sort);
     }
 
@@ -298,9 +297,15 @@ public class AddSortInjections {
                     Sort actual = sort(kapp.items().get(i), substitutedFresh.nonterminals().apply(i).sort());
                     match(prod, declaredSort, actual, subst);
                 }
+                int i = 0;
                 match(prod, prod.sort(), expectedSort, subst);
                 for (Sort param : iterable(prod.params())) {
-                    args.add(lub(subst.get(param), null, kapp, mod));
+                    if (subst.get(param) == null) {
+                        args.add(fresh.get(i));
+                    } else {
+                        args.add(lub(subst.get(param), null, kapp, mod));
+                    }
+                    i++;
                 }
                 substituted = prod.substitute(immutable(args));
             }
@@ -381,8 +386,19 @@ public class AddSortInjections {
             if (mod.subsorts().greaterThan(sort, Sorts.K()))
                 continue;
             for (Sort bound : bounds)
-                if (!mod.subsorts().lessThanEq(bound, sort))
-                    continue nextsort;
+                if (bound.params().isEmpty()) {
+                    if (!mod.subsorts().lessThanEq(bound, sort))
+                        continue nextsort;
+                } else {
+                    boolean any = false;
+                    for (Sort instantiation : iterable(mod.definedInstantiations().apply(bound.head()))) {
+                        if (mod.subsorts().lessThanEq(instantiation, sort)) {
+                            any = true;
+                        }
+                    }
+                    if (!any)
+                        continue nextsort;
+                }
             maxs.add(sort);
         }
         return maxs;
