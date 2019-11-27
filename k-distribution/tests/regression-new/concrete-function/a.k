@@ -26,4 +26,18 @@ rule inc(I) => I +Int 1 [concrete]
 syntax Int ::= foo(Int) [function]
 rule foo(I) => I
 
+// for testing `--concrete-rules` option
+
+syntax Pgm ::= begin(Int) | end(Int)
+
+rule begin(X) => end(X)
+
+syntax Int ::= bar1(Int) [function, smtlib(bar1)]
+             | bar2(Int) [function, smtlib(bar2)]
+             | bar3(Int) [function, smtlib(bar3)]
+
+rule [f1]: bar1(X) => bar2(X) requires X >Int 0
+
+rule [f2]: bar1(X) => bar3(X) requires X <Int 0
+
 endmodule

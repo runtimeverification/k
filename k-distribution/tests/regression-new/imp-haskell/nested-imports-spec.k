@@ -2,7 +2,7 @@
 */
 
 module MODULE
-    imports IMP-SEMANTICS
+    imports IMP
 endmodule
 
 module VERIFICATION
@@ -15,7 +15,7 @@ endmodule
 
 
 module NESTED-IMPORTS-SPEC [one-path]
-  imports IMP-SEMANTICS
+  imports IMP
   imports VERIFICATION
 
   rule

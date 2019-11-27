@@ -307,10 +307,10 @@ struct
       [KApply3((parse_klabel "#systemResult"), [Int (Z.of_int exit_code)], [String (Buffer.contents buf_out)], [String (Buffer.contents buf_err)])]
     | _ -> raise Not_implemented
   let hook_mkstemp c _ _ _ _ = match c with
-    | [String prefix], [String suffix] -> unix_error (fun () ->
-            unix_error (fun () -> let path, outChannel = Filename.open_temp_file prefix suffix in
+    | [String template] ->
+            unix_error (fun () -> let path, outChannel = Filename.open_temp_file (String.sub template 0 ((String.length template) - 6)) "" in
               let fd_int = !curr_fd in Hashtbl.add file_descriptors fd_int (Unix.descr_of_out_channel outChannel); curr_fd := (Z.add fd_int Z.one);
-              [KApply2((parse_klabel "#tempFile(_,_)_K-IO"), [String path], [Int fd_int])]))
+              [KApply2((parse_klabel "#tempFile"), [String path], [Int fd_int])])
     | _ -> raise Not_implemented
   let hook_remove c _ _ _ _ = match c with
     | [String fname] -> unix_error (fun () -> Unix.unlink fname ; [])
