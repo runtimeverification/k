@@ -30,16 +30,23 @@ object KOREToTreeNodes {
     case a: KApply =>
       val scalaChildren = a.klist.items.asScala map { i: K => apply(i, mod).asInstanceOf[Term] }
       val children = ConsPStack.from(scalaChildren.reverse asJava)
-      val allProds: Set[Production] = mod.productionsFor(KLabel(a.klabel.name)).filter(p => p.nonterminals.lengthCompare(children.size) == 0 && !p.att.contains("unparseAvoid"))
-      val typedProds: Set[Production] = allProds.filter(p => wellTyped(a.klabel.params, p, scalaChildren, mod.subsorts))
-      // if no productions are left, then the term is ill-sorted, but don't return the empty ambiguity because we want to fail gracefully.
-      val minProds: Set[Production] = mod.overloads.minimal(if (typedProds.size == 0) allProds else typedProds)
       val loc = t.att.getOptional(classOf[Location])
       val source = t.att.getOptional(classOf[Source])
-      if (minProds.size == 1) {
-        TermCons(children, minProds.head, loc, source)
+      if (a.klabel.params.isEmpty) {
+        val allProds: Set[Production] = mod.productionsFor(KLabel(a.klabel.name)).filter(p => p.nonterminals.lengthCompare(children.size) == 0 && !p.att.contains("unparseAvoid"))
+        val typedProds: Set[Production] = allProds.filter(p => wellTyped(a.klabel.params, p, scalaChildren, mod.subsorts))
+        // if no productions are left, then the term is ill-sorted, but don't return the empty ambiguity because we want to fail gracefully.
+        val minProds: Set[Production] = mod.overloads.minimal(if (typedProds.size == 0) allProds else typedProds)
+        if (minProds.size == 1) {
+          TermCons(children, minProds.head, loc, source)
+        } else {
+          Ambiguity(new util.HashSet(minProds.map(p => TermCons(children, p, loc, source).asInstanceOf[Term]).asJava))
+        }
       } else {
-        Ambiguity(new util.HashSet(minProds.map(p => TermCons(children, p, loc, source).asInstanceOf[Term]).asJava))
+        val p = mod.productionsFor(KLabel(a.klabel.name)).head
+        val origP = p.att.getOptional("originalPrd", classOf[Production]).orElse(p)
+        val subst = origP.substitute(a.klabel.params)
+        TermCons(children, subst, loc, source)
       }
   }
 
