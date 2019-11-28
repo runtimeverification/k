@@ -2,30 +2,20 @@
 package org.kframework.kprove;
 
 import com.google.inject.Inject;
-import org.apache.commons.io.FilenameUtils;
 import org.kframework.RewriterResult;
 import org.kframework.attributes.Source;
-import org.kframework.compile.Backend;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
 import org.kframework.kompile.CompiledDefinition;
-import org.kframework.kompile.Kompile;
 import org.kframework.krun.KRun;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.unparser.KPrint;
-import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
-import scala.Option;
 import scala.Tuple2;
 
-import java.io.File;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.function.Function;
 
 
@@ -37,74 +27,42 @@ public class KProve {
     public static final String BOUNDARY_CELL_PREFIX = "BOUND_";
 
     private final KExceptionManager kem;
-    private final Stopwatch sw;
     private final FileUtil files;
     private final KPrint kprint;
     private final KProveOptions kproveOptions;
+    private final CompiledDefinition compiledDefinition;
+    private final ProofDefinitionBuilder proofDefinitionBuilder;
+    private final Function<Definition, Rewriter> rewriterGenerator;
 
     @Inject
-    public KProve(KExceptionManager kem, Stopwatch sw, FileUtil files, KPrint kprint, KProveOptions kproveOptions) {
-        this.kem    = kem;
-        this.sw     = sw;
-        this.files  = files;
+    public KProve(KExceptionManager kem, FileUtil files, KPrint kprint, KProveOptions kproveOptions,
+                  CompiledDefinition compiledDefinition, ProofDefinitionBuilder proofDefinitionBuilder,
+                  Function<Definition, Rewriter> rewriterGenerator) {
+        this.kem = kem;
+        this.files = files;
         this.kprint = kprint;
         this.kproveOptions = kproveOptions;
+        this.compiledDefinition = compiledDefinition;
+        this.proofDefinitionBuilder = proofDefinitionBuilder;
+        this.rewriterGenerator = rewriterGenerator;
     }
 
-    public int run(KProveOptions options, CompiledDefinition compiledDefinition, Backend backend, Function<Definition, Rewriter> rewriterGenerator) {
-        Tuple2<Definition, Module> compiled = getProofDefinition(options.specFile(files), options.defModule, options.specModule, compiledDefinition, backend, files, kem, sw);
+    public int run() {
+        if (!kproveOptions.specFile(files).exists()) {
+            throw KEMException.criticalError("Definition file doesn't exist: " +
+                    kproveOptions.specFile(files).getAbsolutePath());
+        }
+
+        Tuple2<Definition, Module> compiled = proofDefinitionBuilder
+                .build(kproveOptions.specFile(files), kproveOptions.defModule, kproveOptions.specModule);
         Rewriter rewriter = rewriterGenerator.apply(compiled._1());
         Module specModule = compiled._2();
         Rule boundaryPattern = buildBoundaryPattern(compiledDefinition);
 
         RewriterResult results = rewriter.prove(specModule, boundaryPattern);
-        kprint.prettyPrint(compiled._1(), compiled._1().getModule("LANGUAGE-PARSING").get(), s -> kprint.outputFile(s), results.k());
+        kprint.prettyPrint(compiled._1(), compiled._1().getModule("LANGUAGE-PARSING").get(), kprint::outputFile,
+                results.k());
         return results.exitCode().orElse(KEMException.TERMINATED_WITH_ERRORS_EXIT_CODE);
-    }
-
-    private static Module getModule(String defModule, Map<String, Module> modules, Definition oldDef) {
-        if (modules.containsKey(defModule))
-            return modules.get(defModule);
-        Option<Module> mod = oldDef.getModule(defModule);
-        if (mod.isDefined()) {
-            return mod.get();
-        }
-        throw KEMException.criticalError("Module " + defModule + " does not exist.");
-    }
-
-    public static Map<Definition, Definition> cache = Collections.synchronizedMap(new LinkedHashMap<Definition, Definition>() {
-        @Override
-        protected boolean removeEldestEntry(Map.Entry entry) {
-            return size() > 10;
-        }
-    });
-
-    public static Tuple2<Definition, Module> getProofDefinition(File proofFile, String defModuleName, String specModuleName, CompiledDefinition compiledDefinition, Backend backend, FileUtil files, KExceptionManager kem, Stopwatch sw) {
-        Kompile kompile = new Kompile(compiledDefinition.kompileOptions, files, kem, sw, true);
-        if (defModuleName == null) {
-            defModuleName = compiledDefinition.kompiledDefinition.mainModule().name();
-        }
-        if (specModuleName == null) {
-            specModuleName = FilenameUtils.getBaseName(proofFile.getName()).toUpperCase();
-        }
-        java.util.Set<Module> modules = kompile.parseModules(compiledDefinition, defModuleName, files.resolveWorkingDirectory(proofFile).getAbsoluteFile(), backend.excludedModuleTags());
-        Map<String, Module> modulesMap = new HashMap<>();
-        modules.forEach(m -> modulesMap.put(m.name(), m));
-        Module defModule = getModule(defModuleName, modulesMap, compiledDefinition.getParsedDefinition());
-        Module specModule = getModule(specModuleName, modulesMap, compiledDefinition.getParsedDefinition());
-        specModule = backend.specificationSteps(compiledDefinition.kompiledDefinition).apply(specModule);
-        Definition combinedDef = Definition.apply(defModule, compiledDefinition.getParsedDefinition().entryModules(), compiledDefinition.getParsedDefinition().att());
-        Definition compiled = compileDefinition(backend, combinedDef);
-        return Tuple2.apply(compiled, specModule);
-    }
-
-    private static Definition compileDefinition(Backend backend, Definition combinedDef) {
-        Definition compiled = cache.get(combinedDef);
-        if (compiled == null) {
-            compiled = backend.steps().apply(combinedDef);
-            cache.put(combinedDef, compiled);
-        }
-        return compiled;
     }
 
     /**
