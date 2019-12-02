@@ -188,7 +188,7 @@ public class AddEmptyListsTest {
     @Test
     public void testArgumentInferredListVar() {
         // 1 warning from inference
-        parseTerm("f(V)", "K", KApply(F, KApply(CAST_AS, KVariable("V"))), 1);
+        parseTerm("f(V)", "K", KApply(F, KApply(CAST_AS, KVariable("V"))));
     }
 
     @Test
@@ -206,7 +206,7 @@ public class AddEmptyListsTest {
         // 1 warning from inference
         parseTerm("f(V)~>g(V)", "K",
                 KSequence(KApply(F, KApply(CONS, KApply(CAST_A, KVariable("V")), NIL)),
-                        KApply(G, KApply(CAST_A, KVariable("V")))), 1);
+                        KApply(G, KApply(CAST_A, KVariable("V")))));
     }
 
     @Test
