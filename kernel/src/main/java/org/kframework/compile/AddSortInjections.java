@@ -180,7 +180,11 @@ public class AddSortInjections {
             List<Sort> args = new ArrayList<>();
             List<Sort> fresh = new ArrayList<>();
             for (int i = 0; i < prod.params().size(); i++) {
-                fresh.add(freshSortParam());
+                if (prod.params().apply(i).equals(prod.sort())) {
+                  fresh.add(expectedSort);
+                } else {
+                  fresh.add(freshSortParam());
+                }
             }
             Production substitutedFresh = prod.substitute(immutable(fresh));
             if (prod.params().nonEmpty()) {
@@ -190,9 +194,15 @@ public class AddSortInjections {
                     Sort actual = sort(kapp.items().get(i), substitutedFresh.nonterminals().apply(i).sort());
                     match(prod, declaredSort, actual, subst);
                 }
+                int i = 0;
                 match(prod, prod.sort(), expectedSort, subst);
                 for (Sort param : iterable(prod.params())) {
-                    args.add(lub(subst.get(param), null, kapp, mod));
+                    if (subst.get(param) == null) {
+                        args.add(fresh.get(i));
+                    } else {
+                        args.add(lub(subst.get(param), null, kapp, mod));
+                    }
+                    i++;
                 }
                 substituted = prod.substitute(immutable(args));
             }
@@ -287,7 +297,11 @@ public class AddSortInjections {
             List<Sort> args = new ArrayList<>();
             List<Sort> fresh = new ArrayList<>();
             for (int i = 0; i < prod.params().size(); i++) {
-                fresh.add(freshSortParam());
+                if (prod.params().apply(i).equals(prod.sort())) {
+                  fresh.add(expectedSort);
+                } else {
+                  fresh.add(freshSortParam());
+                }
             }
             Production substitutedFresh = prod.substitute(immutable(fresh));
             if (prod.params().nonEmpty()) {
