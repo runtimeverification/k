@@ -88,7 +88,7 @@ public class OcamlBackend implements Backend {
                 String sharedLibExt;
                 String flag;
                 String ext;
-                if (options.ocamlopt()) {
+                if (kompileOptions.optimize2 || kompileOptions.optimize3) {
                     args.add(0, ocamlfind);
                     args.add(1, "ocamlopt");
                     args.add("-inline");
@@ -121,7 +121,7 @@ public class OcamlBackend implements Backend {
                 args.addAll(Arrays.asList("-g", flag, "-o", "realdef." + sharedLibExt, "realdef." + ext));
                 args.addAll(3, options.packages.stream().flatMap(pkg -> Stream.of("-package", pkg)).collect(Collectors.toList()));
                 args.add(0, ocamlfind);
-                if (options.ocamlopt()) {
+                if (kompileOptions.optimize2 || kompileOptions.optimize3) {
                     args.add(1, "ocamlopt");
                 } else {
                     args.add(1, "ocamlc");

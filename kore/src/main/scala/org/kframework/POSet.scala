@@ -10,7 +10,7 @@ case class CircularityException[T](cycle: Seq[T]) extends Exception(cycle.mkStri
 /**
  * A partially ordered set based on an initial set of direct relations.
  */
-class POSet[T](directRelations: Set[(T, T)]) extends Serializable {
+class POSet[T](val directRelations: Set[(T, T)]) extends Serializable {
 
   // convert the input set of relations to Map form for performance
   private val directRelationsMap: Map[T, Set[T]] = directRelations groupBy { _._1 } mapValues { _ map { _._2 } toSet } map identity

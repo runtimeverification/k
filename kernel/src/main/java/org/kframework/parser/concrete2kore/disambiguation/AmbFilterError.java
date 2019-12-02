@@ -36,6 +36,9 @@ public class AmbFilterError extends SetsTransformerWithErrors<ParseFailedExcepti
         Either<Set<ParseFailedException>, Term> candidate = null;
         for (Term t : amb.items()) {
             candidate = this.apply(t);
+            if (candidate.isLeft()) {
+              return candidate;
+            }
             K next = new TreeNodesToKORE(Outer::parseSort, strict).apply(new RemoveBracketVisitor().apply(candidate.right().get()));
             if (last != null) {
                 if (!last.equals(next)) {

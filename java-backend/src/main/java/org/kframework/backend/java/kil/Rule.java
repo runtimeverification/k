@@ -216,8 +216,9 @@ public class Rule extends JavaSymbolicObject<Rule> implements HasAtt {
                && !att().contains(Attribute.PATTERN_FOLDING_KEY);
     }
 
-    public boolean isConcrete() {
-        return att().contains(Attribute.CONCRETE_FUNCTION_KEY);
+    public boolean isConcreteRule(ImmutableSet<String> extraConcreteRuleLabels) {
+        return att().contains(Attribute.CONCRETE_FUNCTION_KEY) ||
+                (att().contains(Attribute.LABEL_KEY) && extraConcreteRuleLabels.contains(att().get(Attribute.LABEL_KEY)));
     }
 
     public boolean isAnywhere() {

@@ -5,15 +5,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Module;
 import com.google.inject.Provider;
-import org.kframework.compile.Backend;
-import org.kframework.definition.Definition;
-import org.kframework.kompile.CompiledDefinition;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
-import org.kframework.rewriter.Rewriter;
-import org.kframework.unparser.KPrint;
-import org.kframework.utils.Stopwatch;
-import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
@@ -25,7 +18,6 @@ import org.kframework.utils.inject.JCommanderModule;
 
 import java.io.File;
 import java.util.List;
-import java.util.function.Function;
 
 public class KProveFrontEnd extends FrontEnd {
 
@@ -41,14 +33,7 @@ public class KProveFrontEnd extends FrontEnd {
 
     private final DefinitionScope scope;
     private final Provider<File> kompiledDir;
-    private final KExceptionManager kem;
-    private final KProveOptions kproveOptions;
-    private final Provider<FileUtil> files;
-    private final Provider<CompiledDefinition> compiledDef;
-    private final Provider<KPrint> kprint;
-    private final Provider<Backend> backend;
-    private final Provider<Function<Definition, Rewriter>> initializeRewriter;
-    private final Stopwatch sw;
+    private final Provider<KProve> kprove;
 
     @Inject
     KProveFrontEnd(
@@ -59,35 +44,19 @@ public class KProveFrontEnd extends FrontEnd {
             DefinitionScope scope,
             @KompiledDir Provider<File> kompiledDir,
             KExceptionManager kem,
-            KProveOptions kproveOptions,
             Provider<FileUtil> files,
-            Provider<CompiledDefinition> compiledDef,
-            Provider<KPrint> kprint,
-            Provider<Backend> backend,
-            Provider<Function<Definition, Rewriter>> initializeRewriter,
-            Stopwatch sw) {
+            Provider<KProve> kprove) {
         super(kem, options, usage, experimentalUsage, jarInfo, files);
         this.scope = scope;
         this.kompiledDir = kompiledDir;
-        this.kem = kem;
-        this.kproveOptions = kproveOptions;
-        this.files = files;
-        this.compiledDef = compiledDef;
-        this.kprint = kprint;
-        this.backend = backend;
-        this.initializeRewriter = initializeRewriter;
-        this.sw = sw;
+        this.kprove = kprove;
     }
 
     @Override
     protected int run() {
         scope.enter(kompiledDir.get());
         try {
-            if (!kproveOptions.specFile(files.get()).exists()) {
-                throw KEMException.criticalError("Definition file doesn't exist: " +
-                        kproveOptions.specFile(files.get()).getAbsolutePath());
-            }
-            return new KProve(kem, sw, files.get(), kprint.get(), kproveOptions).run(kproveOptions, compiledDef.get(), backend.get(), initializeRewriter.get());
+            return kprove.get().run();
         } finally {
             scope.exit();
         }

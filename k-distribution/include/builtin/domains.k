@@ -1025,11 +1025,11 @@ module K-IO
                  | "#systemResult" "(" Int /* exit code */ "," String /* stdout */ "," String /* stderr */ ")" [klabel(#systemResult), symbol]
 
   syntax K ::= #logToFile(String, String) [function, functional, hook(IO.log), impure, returnsUnit, symbol]
-  // #make safe temp ( prefix:String, suffix:String):IOFile - creates a temporary file in the default system location
-  syntax IOFile ::= #mkstemp(String, String) [function, hook(IO.mkstemp), impure]
+  // #make safe temp ( template: String):IOFile - creates a temporary file in the default system location
+  syntax IOFile ::= #mkstemp(String) [function, hook(IO.mkstemp), impure]
   syntax IOFile ::= IOError
                     // #tempFile(path: String, fd: Int)
-                  | "#tempFile" "(" String "," Int ")"
+                  | "#tempFile" "(" String "," Int ")" [klabel(#tempFile), symbol]
   // Remove a file or empty directory from the disk. Returns .K on success or an IOError on failure.
   syntax K ::= #remove(String) [function, functional, hook(IO.remove), impure]
 endmodule
@@ -1406,6 +1406,7 @@ endmodule
 
 module STRATEGY
     imports ML-SYNTAX
+    imports K-EQUAL
 
     syntax #RuleTag ::= #KVariable
 
