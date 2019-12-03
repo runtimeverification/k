@@ -68,12 +68,8 @@ class KoreToK (sortAtt : Map[String, String]) {
       case kore.SortVariable(name) =>
         Sorts.K
       case kore.CompoundSort(ctr, params) =>
-        if (params.length != 0) {
-          throw new TranslationError("Parameterized sorts currently unsupported")
-        } else {
-          assert(ctr.startsWith("Sort"))
-          KORE.Sort(ctr.substring( 4));
-        }
+        assert(ctr.startsWith("Sort"))
+        KORE.Sort(ctr.substring( 4), params.map(apply): _*);
   }
 
   /** Returns a [[k.KLabel]] from [[kore.SymbolOrAlias]] */

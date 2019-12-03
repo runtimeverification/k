@@ -76,6 +76,15 @@ object ADT {
     }
   }
 
+  case class SortHead(name: String, params: Int) extends kore.SortHead {
+    override def toString = {
+      if (params == 0) {
+        name
+      } else {
+        name + "{" + (0 until params).map("S" + _.toString).reduce((s1, s2) => s1 + "," + s2) + "}"
+      }
+    }
+  }
   case class KToken(s: String, sort: kore.Sort, att: Att = Att.empty) extends kore.KToken
 
   case class KList(elements: List[K]) extends kore.KList {

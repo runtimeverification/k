@@ -106,6 +106,37 @@ trait Sort extends Ordered[Sort] {
     import scala.math.Ordering.Implicits._
     Ordering.Tuple2(Ordering[String], seqDerivedOrdering[Seq, Sort](Ordering.ordered(identity))).compare((this.name, this.params), (this.name, this.params))
   }
+
+  def head: SortHead = ADT.SortHead(name, params.size)
+
+  def substitute(subst: Map[Sort, Sort]): Sort = {
+    ADT.Sort(name, params.map(p => subst.getOrElse(p, p.substitute(subst))):_*)
+  }
+
+  def isNat: Boolean = {
+    try {
+      name.toInt
+      true
+    } catch {
+      case _:NumberFormatException => false
+    }
+  }
+}
+
+trait SortHead extends Ordered[SortHead] {
+  def name: String
+  def params: Int
+  override def equals(other: Any) = other match {
+    case other: SortHead => name == other.name && params == other.params
+    case _ => false
+  }
+  override def hashCode = name.hashCode * 23 + params.hashCode
+
+  def compare(that: SortHead): Int = {
+    Ordering.Tuple2(Ordering[String], Ordering[Int]).compare((this.name, this.params), (this.name, this.params))
+  }
+
+
 }
 
 trait KCollection {

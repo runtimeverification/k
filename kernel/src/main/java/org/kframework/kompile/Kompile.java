@@ -237,7 +237,7 @@ public class Kompile {
 
     public static Module subsortKItem(Module module) {
         java.util.Set<Sentence> prods = new HashSet<>();
-        for (Sort srt : iterable(module.definedSorts())) {
+        for (Sort srt : iterable(module.allSorts())) {
             if (!RuleGrammarGenerator.isParserSort(srt)) {
                 // KItem ::= Sort
                 Production prod = Production(Seq(), Sorts.KItem(), Seq(NonTerminal(srt)), Att());

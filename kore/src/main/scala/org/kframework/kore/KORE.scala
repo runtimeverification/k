@@ -56,7 +56,14 @@ object KORE extends Constructors with ScalaSugared {
 
   @annotation.varargs override def Sort(name: String, params: Sort*): Sort = ADT.Sort(name, params:_*)
 
+  def Sort(name: SortHead): Sort = {
+    assert(name.params == 0)
+    ADT.Sort(name.name)
+  }
+
   def Sort(name: String, params: java.util.List[Sort]): Sort = ADT.Sort(name, params.asScala:_*)
+
+  def SortHead(name: String, params: Int): SortHead = ADT.SortHead(name, params)
 
   override def KToken(s: String, sort: Sort, att: Att): KToken = ADT.KToken(s, sort, att)
 

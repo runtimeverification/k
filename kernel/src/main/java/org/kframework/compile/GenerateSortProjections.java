@@ -47,7 +47,7 @@ public class GenerateSortProjections {
     public Module gen(Module mod) {
         this.mod = mod;
         return Module(mod.name(), mod.imports(), (Set<Sentence>) mod.localSentences().$bar(
-              Stream.concat(stream(mod.definedSorts()).flatMap(this::gen),
+              Stream.concat(stream(mod.allSorts()).flatMap(this::gen),
                 stream(mod.localProductions()).flatMap(this::gen)).collect(Collections.toSet())), mod.att());
     }
 

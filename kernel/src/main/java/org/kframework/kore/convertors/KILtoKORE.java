@@ -191,7 +191,7 @@ public class KILtoKORE extends KILTransformation<Object> {
 
         // just a sort declaration
         if (s.getPriorityBlocks().size() == 0) {
-            res.add(SyntaxSort(sort, convertAttributes(s)));
+            res.add(SyntaxSort(immutable(s.getParams()), sort, convertAttributes(s)));
             return res;
         }
 
