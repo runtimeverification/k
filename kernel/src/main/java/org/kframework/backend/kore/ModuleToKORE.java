@@ -684,6 +684,7 @@ public class ModuleToKORE {
         // injections should already be present, but this is an ugly hack to get around the
         // cache persistence issue that means that Sort attributes on k terms might not be present.
         rule = new AddSortInjections(module).addInjections(rule);
+        Set<KVariable> existentials = getExistentials(rule);
         ConstructorChecks constructorChecks = new ConstructorChecks(module);
         boolean equation = false;
         boolean owise = false;
@@ -718,6 +719,7 @@ public class ModuleToKORE {
         sb.append(rule.toString());
         sb.append("\n");
         if (equation) {
+            assertNoExistentials(rule, existentials);
             if (!constructorBased) {
                 if (!consideredAttributes.containsKey(Attribute.SIMPLIFICATION_KEY)) {
                     consideredAttributes.put(Attribute.SIMPLIFICATION_KEY, false);
@@ -733,6 +735,7 @@ public class ModuleToKORE {
                     sb.append("," + sortParamName);
             }
             sb.append("} ");
+            K right = RewriteToTop.toRight(rule.body());
             if (owise) {
                 Set<String> varNames = vars(rule).stream().map(KVariable::name).collect(Collectors.toSet());
                 sb.append("\\implies{R} (\n    \\and{R} (\n      \\not{R} (\n        ");
@@ -796,7 +799,6 @@ public class ModuleToKORE {
                 sb.append("\n    ),\n    \\and{R} (\n      \\equals{");
                 sb.append(productionSortStr);
                 sb.append(",R} (\n        ");
-                K right = RewriteToTop.toRight(rule.body());
                 convert(left, sb);
                 sb.append(",\n        ");
                 convert(right, sb);
@@ -811,7 +813,6 @@ public class ModuleToKORE {
                 sb.append(",\n    \\and{R} (\n      \\equals{");
                 sb.append(productionSortStr);
                 sb.append(",R} (\n        ");
-                K right = RewriteToTop.toRight(rule.body());
                 convert(left, sb);
                 sb.append(",\n        ");
                 convert(right, sb);
@@ -822,6 +823,7 @@ public class ModuleToKORE {
                 sb.append("\n\n");
             }
         } else if (kore) {
+            assertNoExistentials(rule, existentials);
             if (isClaim(sentenceType)) {
                 sb.append("  claim{} ");
             } else {
@@ -859,14 +861,26 @@ public class ModuleToKORE {
             } else if (sentenceType == SentenceType.ONE_PATH) {
                 sb.append(String.format("%s{%s} (\n      ", ONE_PATH_OP, topCellSortStr));
             }
+            if (!existentials.isEmpty()) {
+                for (KVariable exists : existentials) {
+                    sb.append(String.format(" \\exists{%s} (", topCellSortStr));
+                    convert(exists, sb);
+                    sb.append(", ");
+                }
+                sb.append("\n      ");
+            }
             sb.append(String.format("\\and{%s} (\n      ", topCellSortStr));
             convertSideCondition(rule.ensures(), topCellSortStr, sb);
             sb.append(", ");
             convert(right, sb);
-            sb.append("))");
+            sb.append(')');
+            for (KVariable exists : existentials) {
+                sb.append(')');
+            }
             if (sentenceType == SentenceType.ALL_PATH || sentenceType == SentenceType.ONE_PATH) {
                 sb.append(')');
             }
+            sb.append(')');
             if (owise) {
                 sb.append(')');
             }
@@ -874,6 +888,29 @@ public class ModuleToKORE {
             convert(consideredAttributes, rule.att(), sb);
             sb.append("\n\n");
         }
+    }
+
+    private void assertNoExistentials(Rule rule, Set<KVariable> existentials) {
+        if (!existentials.isEmpty()) {
+            throw KEMException.compilerError("Cannot encode equations with existential variables to KORE." +
+                    "\n If this is desired, please use #Exists with regular variables." +
+                    "\n Offending variables: " + existentials +
+                    "\n context: " + rule);
+        }
+    }
+
+    private Set<KVariable> getExistentials(Rule rule) {
+        Set<KVariable> res = new HashSet<>();
+        VisitK visitor = new VisitK() {
+            @Override
+            public void apply(KVariable k) {
+                if (k.name().startsWith("?"))
+                    res.add(k);
+            }
+        };
+        visitor.apply(rule.ensures());
+        visitor.apply(RewriteToTop.toRight(rule.body()));
+        return res;
     }
 
     private boolean isClaim(SentenceType sentenceType) {
