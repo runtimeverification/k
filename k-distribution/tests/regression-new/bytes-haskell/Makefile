@@ -1,6 +1,6 @@
 DEF=test
 EXT=test
-TESTDIR=.
+TESTDIR=../bytes
 KOMPILE_BACKEND?=haskell
 
 include ../../../include/ktest.mak

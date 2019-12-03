@@ -1,1 +1,0 @@
-Bytes2String(replaceAtBytes(String2Bytes("1234"), 0, String2Bytes("23")))
