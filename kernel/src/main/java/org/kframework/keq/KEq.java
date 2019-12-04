@@ -8,12 +8,10 @@ import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kprove.ProofDefinitionBuilder;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.utils.file.FileUtil;
-import org.kframework.utils.inject.RequestScoped;
 import scala.Tuple2;
 
 import java.util.function.Function;
 
-@RequestScoped
 public class KEq {
     private final KEqOptions keqOptions;
 

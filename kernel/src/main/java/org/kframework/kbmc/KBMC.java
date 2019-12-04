@@ -9,13 +9,11 @@ import org.kframework.rewriter.Rewriter;
 import org.kframework.unparser.KPrint;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
-import org.kframework.utils.inject.RequestScoped;
 import scala.Tuple2;
 
 import javax.inject.Inject;
 import java.util.function.Function;
 
-@RequestScoped
 public class KBMC {
     private final ProofDefinitionBuilder proofDefinitionBuilder;
     private final FileUtil files;
