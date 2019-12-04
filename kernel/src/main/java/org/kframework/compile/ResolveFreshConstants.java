@@ -91,7 +91,7 @@ public class ResolveFreshConstants {
             K left = RewriteToTop.toLeft(rule.body());
             if (left instanceof KApply) {
                 KApply kapp = (KApply)left;
-                if (kapp.klabel().equals("#withConfig")) {
+                if (kapp.klabel().name().equals("#withConfig")) {
                     left = kapp.items().get(0);
                 }
                 if (left instanceof KApply) {

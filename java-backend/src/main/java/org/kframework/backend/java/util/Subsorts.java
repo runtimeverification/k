@@ -34,13 +34,13 @@ public class Subsorts implements Serializable {
     private final Table<Sort, Sort, Boolean> subsort;
 
     public Subsorts(Module module) {
-        sorts = JavaConversions.asJavaCollection(module.definedSorts()).stream()
+        sorts = JavaConversions.asJavaCollection(module.allSorts()).stream()
                 .map(Sort::of)
                 .collect(Collectors.toSet());
 
         this.subsort = ArrayTable.create(sorts, sorts);
-        for (org.kframework.kore.Sort sort1 : Collections.iterable(module.definedSorts())) {
-            for (org.kframework.kore.Sort sort2 : Collections.iterable(module.definedSorts())) {
+        for (org.kframework.kore.Sort sort1 : Collections.iterable(module.allSorts())) {
+            for (org.kframework.kore.Sort sort2 : Collections.iterable(module.allSorts())) {
                 subsort.put(
                         Sort.of(sort1),
                         Sort.of(sort2),

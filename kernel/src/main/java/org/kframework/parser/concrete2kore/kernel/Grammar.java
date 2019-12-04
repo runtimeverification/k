@@ -386,7 +386,7 @@ public class Grammar implements Serializable {
                 String name, NonTerminal nt,
                 NonTerminal child) {
             super(name, nt, true);
-            assert child != null;
+            assert child != null : name;
             nt.intermediaryStates.add(this);
             this.child = child;
         }
