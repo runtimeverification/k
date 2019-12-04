@@ -125,14 +125,14 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
       .groupBy(_.klabel.get)
       .map { case (l, ps) => (l, ps) }
 
-  lazy val productionsForSort: Map[Sort, Set[Production]] =
+  lazy val productionsForSort: Map[SortHead, Set[Production]] =
     productions
-      .groupBy(_.sort)
+      .groupBy(_.sort.head)
       .map { case (l, ps) => (l, ps) }
 
   lazy val layouts: Set[String] =
     productionsForSort
-      .get(Sorts.Layout)
+      .get(Sorts.Layout.head)
       .getOrElse(Set[Production]())
       .collect({
           case Production(_, _, _, Seq(RegexTerminal(_, terminalRegex, _)), _) => terminalRegex
@@ -236,11 +236,11 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
 
   lazy val sortSynonymMap: Map[Sort, Sort] = sortSynonyms.map(s => (s.newSort, s.oldSort)).toMap
 
-  lazy val sortDeclarationsFor: Map[Sort, Set[SyntaxSort]] =
+  lazy val sortDeclarationsFor: Map[SortHead, Set[SyntaxSort]] =
     sortDeclarations
-      .groupBy(_.sort)
+      .groupBy(_.sort.head)
 
-  @transient lazy val sortAttributesFor: Map[Sort, Att] = sortDeclarationsFor mapValues {mergeAttributes(_)}
+  @transient lazy val sortAttributesFor: Map[SortHead, Att] = sortDeclarationsFor mapValues {mergeAttributes(_)}
 
   private def mergeAttributes[T <: Sentence](p: Set[T]) = {
     val union = p.flatMap(_.att.att)
@@ -248,8 +248,14 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
     Att(union.filter { key => attMap(key._1._1).size == 1 }.toMap)
   }
 
-  lazy val definedSorts: Set[Sort] = (productions filter {p => !p.isSortVariable(p.sort)} map {_.sort}) ++ (sortDeclarations map {_.sort})
-  lazy val sortedSorts: Seq[Sort] = definedSorts.toSeq.sorted
+  lazy val definedSorts: Set[SortHead] = (productions filter {p => !p.isSortVariable(p.sort)} map {_.sort.head}) ++ (sortDeclarations filter { s => s.params.isEmpty } map {_.sort.head}) ++ definedInstantiations.values.flatten.flatMap(_.params).filter(_.isNat).map(_.head)
+  lazy val definedInstantiations: Map[SortHead, Set[Sort]] = {
+    val nonempty = ((productions filter {p => p.sort.params.nonEmpty && !p.params.contains(p.sort) && (p.sort.params.toSet & p.params.toSet).isEmpty} map {_.sort}) ++ (sortDeclarations filter { s => s.params.isEmpty && s.sort.params.nonEmpty} map {_.sort})) groupBy {_.head}
+    ((productions filter {p => p.sort.params.nonEmpty} map {_.sort.head}) ++ (sortDeclarations filter { s => s.sort.params.nonEmpty} map { _.sort.head})).map(s => s -> nonempty.getOrElse(s, Set())).toMap
+  }
+  lazy val allSorts: Set[Sort] = (definedSorts -- definedInstantiations.keys).map(Sort(_)) ++ definedInstantiations.values.flatten
+  lazy val sortedDefinedSorts: Seq[SortHead] = definedSorts.toSeq.sorted
+  lazy val sortedAllSorts: Seq[Sort] = allSorts.toSeq.sorted
   lazy val usedCellSorts: Set[Sort] = productions.flatMap { p => p.items.collect { case NonTerminal(s, _) => s }
     .filter(s => s.name.endsWith("Cell") || s.name.endsWith("CellFragment"))
   }
@@ -299,17 +305,20 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
 
   // check that non-terminals have a defined sort
   def checkSorts () = sentences foreach {
-    case p@Production(_, _, _, items, _) =>
-      val res = items collect { case nt: NonTerminal if !p.isSortVariable(nt.sort) && !definedSorts.contains(nt.sort) && !usedCellSorts.contains(nt.sort) && !sortSynonymMap.contains(nt.sort) => nt }
+    case p@Production(_, params, _, items, _) =>
+      val res = items collect 
+      { case nt: NonTerminal if !p.isSortVariable(nt.sort) && !definedSorts.contains(nt.sort.head) && !usedCellSorts.contains(nt.sort) && !sortSynonymMap.contains(nt.sort) => nt 
+        case nt: NonTerminal if nt.sort.params.nonEmpty && (nt.sort.params.toSet & params.toSet).isEmpty && !definedInstantiations.getOrElse(nt.sort.head, Set()).contains(nt.sort) => nt
+      }
       if (res.nonEmpty)
         throw KEMException.compilerError("Could not find sorts: " + res.asJava, p)
     case _ =>
   }
 
   lazy val recordProjections = productions.flatMap(p => p.nonterminals.filter(_.name.isDefined).map(nt => "project:" ++ p.klabel.get.name ++ ":" ++ nt.name.get))
-  lazy val semanticCasts = definedSorts.map("#SemanticCastTo" + _)
-  lazy val sortProjections = definedSorts.map("project:" + _)
-  lazy val sortPredicates = definedSorts.map("is" + _)
+  lazy val semanticCasts = allSorts.map("#SemanticCastTo" + _)
+  lazy val sortProjections = allSorts.map("project:" + _)
+  lazy val sortPredicates = allSorts.map("is" + _)
 
   override lazy val hashCode: Int = name.hashCode
 
@@ -434,13 +443,13 @@ case class Tag(name: String) extends TagToString with OuterKORE
 //    att.get(Production.kLabelAttribute).headOption map { case KList(KToken(s, _, _)) => s } map { KLabel(_) }
 //}
 
-case class SyntaxSort(sort: Sort, att: Att = Att.empty) extends Sentence
+case class SyntaxSort(params: Seq[Sort], sort: Sort, att: Att = Att.empty) extends Sentence
   with SyntaxSortToString with OuterKORE {
   def items = Seq()
 
   override val isSyntax = true
   override val isNonSyntax = false
-  override def withAtt(att: Att) = SyntaxSort(sort, att)
+  override def withAtt(att: Att) = SyntaxSort(params, sort, att)
 }
 case class SortSynonym(newSort: Sort, oldSort: Sort, att: Att = Att.empty) extends Sentence
   with SortSynonymToString with OuterKORE {
@@ -482,8 +491,8 @@ case class Production(klabel: Option[KLabel], params: Seq[Sort], sort: Sort, ite
 
   def substitute(args: Seq[Sort]): Production = {
     val subst = (params zip args).toMap
-    Production(klabel.map(l => ADT.KLabel(l.name, args:_*)), Seq(), subst.getOrElse(sort, sort), items.map({
-      case NonTerminal(sort, name) => NonTerminal(subst.getOrElse(sort, sort), name)
+    Production(klabel.map(l => ADT.KLabel(l.name, args:_*)), Seq(), subst.getOrElse(sort, sort.substitute(subst)), items.map({
+      case NonTerminal(sort, name) => NonTerminal(subst.getOrElse(sort, sort.substitute(subst)), name)
       case i => i
     }), att)
   }

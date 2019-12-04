@@ -219,7 +219,11 @@ public class JsonParser {
             case KSYNTAXSORT: {
                 Sort sort = toSort(data.getJsonObject("sort"));
                 Att att   = toAtt(data.getJsonObject("att"));
-                return new SyntaxSort(sort, att);
+                List<Sort> params = new ArrayList<>();
+                for (JsonObject s : data.getJsonArray("params").getValuesAs(JsonObject.class)) {
+                    params.add(toSort(s));
+                }
+                return new SyntaxSort(JavaConverters.asScalaIteratorConverter(params.iterator()).asScala().toSeq(), sort, att);
             }
             case KSORTSYNONYM: {
                 Sort newSort = toSort(data.getJsonObject("newSort"));

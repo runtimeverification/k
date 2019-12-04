@@ -163,7 +163,7 @@ public class KRun {
             K configVar = externalParse(parser, value, sort, Source.apply("<command line: -c" + name + ">"), compiledDef);
             output.put(KToken(configVarName, Sorts.KConfigVar()), configVar);
         }
-        if (compiledDef.kompiledDefinition.mainModule().definedSorts().contains(Sorts.String())) {
+        if (compiledDef.kompiledDefinition.mainModule().allSorts().contains(Sorts.String())) {
             if (options.io()) {
                 output.put(KToken("$STDIN", Sorts.KConfigVar()), KToken("\"\"", Sorts.String()));
                 output.put(KToken("$IO", Sorts.KConfigVar()), KToken("\"on\"", Sorts.String()));
