@@ -65,8 +65,6 @@ endmodule
 module ML-SYNTAX
   imports SORT-K
 
-  syntax #KVariable
-
   syntax {Sort} Sort ::= "#True" [klabel(#True), symbol, mlUnary]
                        | "#False" [klabel(#False), symbol, mlUnary]
                        | "#Not" "(" Sort ")" [klabel(#Not), symbol, mlOp, mlUnary]
@@ -90,10 +88,15 @@ module ML-SYNTAX
                        | "#wEF" "(" Sort ")" [klabel(weakExistsFinally), symbol, mlOp, mlQuantifier]
 endmodule
 
+module KVARIABLE-SYNTAX
+  syntax #KVariable
+endmodule
+
 // To be used when parsing/pretty-printing symbolic configurations
 module KSEQ-SYMBOLIC
   imports KSEQ
   imports ML-SYNTAX
+  imports KVARIABLE-SYNTAX
 
   syntax #KVariable ::= r"(?<![A-Za-z0-9_\\$!\\?@])(\\!|\\?|@)?([A-Z][A-Za-z0-9'_]*|_)"   [token, prec(1)]
                       | #UpperId                                                          [token]
