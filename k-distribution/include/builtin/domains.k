@@ -1342,6 +1342,7 @@ endmodule
 
 module STRATEGY
     imports ML-SYNTAX
+    imports KVARIABLE-SYNTAX
     imports K-EQUAL
 
     syntax #RuleTag ::= #KVariable
