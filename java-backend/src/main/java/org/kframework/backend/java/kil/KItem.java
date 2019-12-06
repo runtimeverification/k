@@ -437,7 +437,7 @@ public class KItem extends Term implements KItemRepresentation {
             KLabelConstant kLabelConstant = (KLabelConstant) kItem.kLabel;
             Profiler.startTimer(Profiler.getTimerForFunction(kLabelConstant));
             int nestingLevel = kItem.profiler.evaluateFunctionNanoTimer.getLevel();
-            kItem.global.newLogIndent(KItemLog.indent(nestingLevel - 1));
+            kItem.global.newLogIndent(nestingLevel - 1);
 
             try {
                 KList kList = (KList) kItem.kList;
