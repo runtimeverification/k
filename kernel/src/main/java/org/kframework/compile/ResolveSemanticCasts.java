@@ -1,21 +1,15 @@
 // Copyright (c) 2015-2019 K Team. All Rights Reserved.
 package org.kframework.compile;
 
-import org.kframework.attributes.Att;
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.definition.Context;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
-import org.kframework.kore.InjectedKLabel;
 import org.kframework.kore.K;
-import org.kframework.kore.KAs;
 import org.kframework.kore.KApply;
-import org.kframework.kore.KAs;
-import org.kframework.kore.KRewrite;
-import org.kframework.kore.KSequence;
-import org.kframework.kore.KToken;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
+import org.kframework.kore.AddAtt;
 import org.kframework.kore.TransformK;
 import org.kframework.kore.VisitK;
 import org.kframework.parser.outer.Outer;
@@ -25,7 +19,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.UnaryOperator;
 
 import static org.kframework.kore.KORE.*;
 
@@ -147,43 +140,6 @@ public class ResolveSemanticCasts {
                 return applied;
             }
         }.apply(term);
-    }
-
-    public static class AddAtt extends TransformK {
-        private final UnaryOperator<Att> f;
-
-        public AddAtt(UnaryOperator<Att> f) {
-            this.f = f;
-        }
-
-        @Override
-        public K apply(KApply kapp) {
-            return KApply(kapp.klabel(), kapp.klist(), f.apply(kapp.att()));
-        }
-        @Override
-        public K apply(KRewrite rew) {
-            return KRewrite(rew.left(), rew.right(), f.apply(rew.att()));
-        }
-        @Override
-        public K apply(KToken tok) {
-            return KToken(tok.s(), tok.sort(), f.apply(tok.att()));
-        }
-        @Override
-        public K apply(KVariable var) {
-            return KVariable(var.name(), f.apply(var.att()));
-        }
-        @Override
-        public K apply(KSequence kseq) {
-            return KSequence(kseq.items(), f.apply(kseq.att()));
-        }
-        @Override
-        public K apply(InjectedKLabel lbl) {
-            return InjectedKLabel(lbl.klabel(), f.apply(lbl.att()));
-        }
-        @Override
-        public K apply(KAs kas) {
-            return KAs(kas.pattern(), kas.alias(), f.apply(kas.att()));
-        }
     }
 
     public synchronized Sentence resolve(Sentence s) {
