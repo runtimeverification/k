@@ -1,12 +1,19 @@
 // Copyright (c) 2015-2019 K Team. All Rights Reserved.
 package org.kframework.compile;
 
+import org.kframework.attributes.Att;
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.definition.Context;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
+import org.kframework.kore.InjectedKLabel;
 import org.kframework.kore.K;
+import org.kframework.kore.KAs;
 import org.kframework.kore.KApply;
+import org.kframework.kore.KAs;
+import org.kframework.kore.KRewrite;
+import org.kframework.kore.KSequence;
+import org.kframework.kore.KToken;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
 import org.kframework.kore.TransformK;
@@ -18,6 +25,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.UnaryOperator;
 
 import static org.kframework.kore.KORE.*;
 
@@ -116,24 +124,67 @@ public class ResolveSemanticCasts {
 
     K transform(K term) {
         return new TransformK() {
-            @Override
-            public K apply(KApply k) {
-                if (casts.contains(k)) {
-                    return super.apply(k.klist().items().get(0));
-                }
-                return super.apply(k);
-            }
+            private Sort sort;
 
             @Override
-            public K apply(KVariable k) {
-                if (varToTypedVar.containsKey(k)) {
-                    return varToTypedVar.get(k);
+            public K apply(K k) {
+                final Sort oldSort = sort;
+                K applied;
+                if (casts.contains(k)) {
+                    KApply kapp = (KApply)k;
+                    sort = Outer.parseSort(getSortNameOfCast(kapp));
+                    applied = apply(kapp.items().get(0));
+                } else {
+                    sort = null;
+                    applied = super.apply(k);
                 }
-                return super.apply(k);
+                if (oldSort != null) {
+                  return new AddAtt(a -> a.add(Sort.class, oldSort)).apply(applied);
+                }
+                if (varToTypedVar.containsKey(applied)) {
+                  return varToTypedVar.get(applied);
+                }
+                return applied;
             }
         }.apply(term);
     }
 
+    public static class AddAtt extends TransformK {
+        private final UnaryOperator<Att> f;
+
+        public AddAtt(UnaryOperator<Att> f) {
+            this.f = f;
+        }
+
+        @Override
+        public K apply(KApply kapp) {
+            return KApply(kapp.klabel(), kapp.klist(), f.apply(kapp.att()));
+        }
+        @Override
+        public K apply(KRewrite rew) {
+            return KRewrite(rew.left(), rew.right(), f.apply(rew.att()));
+        }
+        @Override
+        public K apply(KToken tok) {
+            return KToken(tok.s(), tok.sort(), f.apply(tok.att()));
+        }
+        @Override
+        public K apply(KVariable var) {
+            return KVariable(var.name(), f.apply(var.att()));
+        }
+        @Override
+        public K apply(KSequence kseq) {
+            return KSequence(kseq.items(), f.apply(kseq.att()));
+        }
+        @Override
+        public K apply(InjectedKLabel lbl) {
+            return InjectedKLabel(lbl.klabel(), f.apply(lbl.att()));
+        }
+        @Override
+        public K apply(KAs kas) {
+            return KAs(kas.pattern(), kas.alias(), f.apply(kas.att()));
+        }
+    }
 
     public synchronized Sentence resolve(Sentence s) {
         if (s instanceof Rule) {
