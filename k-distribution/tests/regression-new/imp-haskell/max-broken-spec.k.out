@@ -1,39 +1,3 @@
-  #Not ( ( {
-        A
-      #Equals
-        B
-      }
-    #Implies
-      {
-        true
-      #Equals
-        B >=Int B
-      } )
-  #And
-    #Not ( #Not ( {
-      B
-    #Equals
-      A
-    } ) )
-  #And
-    #Not ( {
-      B
-    #Equals
-      A
-    } ) )
-#And
-  #Not ( {
-      A
-    #Equals
-      B
-    }
-  #And
-    {
-      true
-    #Equals
-      B >=Int B
-    } )
-#And
   #Not ( {
     false
   #Equals
