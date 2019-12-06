@@ -210,6 +210,9 @@ public class AddSortInjections {
                 substituted = prod.substitute(immutable(args));
             }
             for (int i = 0; i < kapp.items().size(); i++) {
+                if (kapp.items().size() != substituted.nonterminals().size()) {
+                    throw KEMException.internalError("Invalid initial configuration with wrong number of children for term with label " + kapp.klabel(), kapp);
+                }
                 Sort expectedSortOfChild = substituted.nonterminal(i).sort();
                 K child = kapp.items().get(i);
                 children.add(internalAddSortInjections(child, expectedSortOfChild));

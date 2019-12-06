@@ -221,6 +221,9 @@ public class KRun {
     }
 
     public KApply plugConfigVars(CompiledDefinition compiledDef, Map<KToken, K> output) {
+        if (compiledDef.kompiledDefinition.mainModule().productionsFor().apply(compiledDef.topCellInitializer).head().nonterminals().isEmpty()) {
+            return KApply(compiledDef.topCellInitializer);
+        }
         return KApply(compiledDef.topCellInitializer, output.entrySet().stream().map(e -> KApply(KLabel("_|->_"), e.getKey(), e.getValue())).reduce(KApply(KLabel(".Map")), (a, b) -> KApply(KLabel("_Map_"), a, b)));
     }
 

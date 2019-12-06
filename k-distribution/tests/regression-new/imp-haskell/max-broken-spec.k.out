@@ -1,27 +1,3 @@
-  #Not ( #Not ( {
-      false
-    #Equals
-      B <=Int B
-    } )
-  #And
-    {
-      A
-    #Equals
-      B
-    }
-  #And
-    {
-      true
-    #Equals
-      B <=Int B
-    }
-  #And
-    {
-      true
-    #Equals
-      B >=Int B
-    } )
-#And
   #Not ( ( {
         A
       #Equals
@@ -31,31 +7,31 @@
       {
         true
       #Equals
-        A >=Int B
+        B >=Int B
       } )
   #And
     #Not ( #Not ( {
-      A
-    #Equals
       B
+    #Equals
+      A
     } ) )
   #And
     #Not ( {
+      B
+    #Equals
+      A
+    } ) )
+#And
+  #Not ( {
       A
     #Equals
       B
-    } )
-  #And
-    #Not ( {
-      false
-    #Equals
-      A <=Int B
-    } )
+    }
   #And
     {
       true
     #Equals
-      A <=Int B
+      B >=Int B
     } )
 #And
   #Not ( {
