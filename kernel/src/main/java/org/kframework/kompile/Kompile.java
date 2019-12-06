@@ -95,6 +95,10 @@ public class Kompile {
                 lookupDirectories, kompileOptions.strict(), kompileOptions.profileRules, kem, files,
                 parser, cacheParses, cacheFile, !kompileOptions.outerParsing.noPrelude, kompileOptions.isKore());
         this.sw = sw;
+
+        if (kompileOptions.backend.equals("ocaml")) {
+            kem.registerCriticalWarning("The OCaml backend is in the process of being deprecated (final date May 31, 2020). Please switch to the LLVM backend.");
+        }
     }
 
     public CompiledDefinition run(File definitionFile, String mainModuleName, String mainProgramsModuleName) {
@@ -233,7 +237,7 @@ public class Kompile {
 
     public static Module subsortKItem(Module module) {
         java.util.Set<Sentence> prods = new HashSet<>();
-        for (Sort srt : iterable(module.definedSorts())) {
+        for (Sort srt : iterable(module.allSorts())) {
             if (!RuleGrammarGenerator.isParserSort(srt)) {
                 // KItem ::= Sort
                 Production prod = Production(Seq(), Sorts.KItem(), Seq(NonTerminal(srt)), Att());

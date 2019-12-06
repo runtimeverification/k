@@ -83,7 +83,7 @@ public class Scanner implements AutoCloseable {
                     "char *buffer;\n" +
                     "%}\n\n" +
                     "%%\n\n");
-            if (this.module.definedSorts().contains(Sorts.Layout())) {
+            if (this.module.allSorts().contains(Sorts.Layout())) {
                 flex.append(this.module.layout() + " ;\n");
             }
             List<TerminalLike> ordered = tokens.keySet().stream().sorted((t1, t2) -> tokens.get(t2)._2() - tokens.get(t1)._2()).collect(Collectors.toList());

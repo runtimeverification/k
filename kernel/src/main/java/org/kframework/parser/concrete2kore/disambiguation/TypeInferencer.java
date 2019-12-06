@@ -11,6 +11,7 @@ import org.kframework.definition.Module;
 import org.kframework.definition.NonTerminal;
 import org.kframework.kil.Attribute;
 import org.kframework.kore.Sort;
+import org.kframework.kore.SortHead;
 import org.kframework.parser.Ambiguity;
 import org.kframework.parser.Constant;
 import org.kframework.parser.ProductionReference;
@@ -67,7 +68,7 @@ public class TypeInferencer implements AutoCloseable {
   private final PrintStream z3;
   private final BufferedReader output;
   private final Module mod;
-  private final java.util.Set<Sort> sorts;
+  private final java.util.Set<SortHead> sorts;
 
   // logic QF_DT is best if it exists as it will be faster than ALL. However, some z3 versions do not have this logic.
   // Fortunately, z3 ignores unknown logics.
@@ -94,8 +95,12 @@ public class TypeInferencer implements AutoCloseable {
   }
 
   // returns whether a particular sort should be written to z3 and thus be a possible sort for variables.
-  private boolean isRealSort(Sort s) {
-    return !RuleGrammarGenerator.isParserSort(s) || s.equals(Sorts.K()) || s.equals(Sorts.KItem()) || s.equals(Sorts.KLabel()) || s.equals(Sorts.RuleTag());
+  private boolean isRealSort(SortHead head) {
+    if (head.params() > 0) {
+      return true;
+    }
+    Sort s = Sort(head);
+    return !RuleGrammarGenerator.isParserSort(s) || s.equals(Sorts.K()) || s.equals(Sorts.KItem()) || s.equals(Sorts.KLabel()) || s.equals(Sorts.RuleTag()) || s.isNat();
   }
 
   public Module module() {
@@ -109,26 +114,30 @@ public class TypeInferencer implements AutoCloseable {
   private void push(Module mod) {
     int i = 0;
     for (Sort s : iterable(TopologicalSort.tsort(mod.syntacticSubsorts().directRelations()))) {
-      if (!isRealSort(s)) {
+      if (!isRealSort(s.head())) {
         continue;
       }
-      ordinals.put(s, i++);
+      ordinals.put(s.head(), i++);
     }
 
     // declare Sort datatype
     print("(declare-datatypes () ((Sort ");
-    for (Sort s : sorts) {
-      println("|Sort" + s.name() + "| ");
+    for (SortHead s : sorts) {
+      print("(|Sort" + s.name() + "| ");
+      for (i = 0; i < s.params(); i++) {
+        print("(|Sort" + s.name() + "_" + i++ + "| Sort) ");
+      }
+      println(")");
     }
     println(")))");
     // provide fixed interpretation of subsort relation
     println("(define-fun <=Sort ((s1 Sort) (s2 Sort)) Bool (or");
-    for (Tuple2<Sort, Set<Sort>> relation : stream(mod.syntacticSubsorts().relations()).sorted(Comparator.comparing(t -> -ordinals.getOrDefault(t._1(), 0))).collect(Collectors.toList())) {
-      if (!isRealSort(relation._1())) {
+    for (Tuple2<Sort, Set<Sort>> relation : stream(mod.syntacticSubsorts().relations()).sorted(Comparator.comparing(t -> -ordinals.getOrDefault(t._1().head(), 0))).collect(Collectors.toList())) {
+      if (!isRealSort(relation._1().head())) {
         continue;
       }
       for (Sort s2 : iterable(relation._2())) {
-        if (!isRealSort(s2)) {
+        if (!isRealSort(s2.head())) {
           continue;
         }
         print("  (and (= s1 ");
@@ -139,8 +148,8 @@ public class TypeInferencer implements AutoCloseable {
       }
     }
     // reflexive relations
-    for (Sort s : iterable(mod.definedSorts())) {
-      if (!isRealSort(s)) {
+    for (Sort s : iterable(mod.allSorts())) {
+      if (!isRealSort(s.head())) {
         continue;
       }
       print("  (and (= s1 ");
@@ -154,7 +163,7 @@ public class TypeInferencer implements AutoCloseable {
 
   // map from each sort to an integer representing the topological sorting of the sorts. higher numbers mean greater
   // sorts
-  private final Map<Sort, Integer> ordinals = new HashMap<>();
+  private final Map<SortHead, Integer> ordinals = new HashMap<>();
 
   // list of names for variables and sort parameters in z3
   private final List<String> variables = new ArrayList<>();
@@ -206,7 +215,7 @@ public class TypeInferencer implements AutoCloseable {
       case UNSATISFIABLE:
         println("(pop)");
         computeStatus();
-        if (constraint.isVar()) {
+        if (constraint.name != null) {
           Sort actualSort = computeValue(constraint.name);
           Sort expectedSort = eval(constraint.expectedSort, constraint.expectedParams);
           throw new LocalizedError("Unexpected sort " + actualSort + " for variable " + constraint.loc.value() + ". Expected: " + expectedSort, constraint.loc);
@@ -223,7 +232,7 @@ public class TypeInferencer implements AutoCloseable {
    * Asserts that none of the sort parameters are of the KLabel sort.
    */
   private void assertNotKLabel() {
-    if (!sorts.contains(Sorts.KLabel()))
+    if (!sorts.contains(Sorts.KLabel().head()))
       return;
     for (String param : parameters) {
       print("(distinct |" + param + "| ");
@@ -295,9 +304,9 @@ public class TypeInferencer implements AutoCloseable {
     println("(push)");
     // soft assertions to cut down search space
     for (String var : variables) {
-      if (mod.definedSorts().contains(Sorts.KItem()))
+      if (mod.allSorts().contains(Sorts.KItem()))
         println("(assert-soft ( <=Sort SortKItem |" + var + "|) :id A)");
-      if (mod.definedSorts().contains(Sorts.Bag()))
+      if (mod.allSorts().contains(Sorts.Bag()))
         println("(assert-soft (<=Sort SortBag |" + var + "|) :id A)");
     }
   }
@@ -586,7 +595,7 @@ public class TypeInferencer implements AutoCloseable {
             name = variablesById.get(id).get(0);
           }
           pushConstraint(name, c);
-        } else if (isRealSort(pr.production().sort())) {
+        } else if (isRealSort(pr.production().sort().head())) {
           pushConstraint(pr.production().sort(), Optional.of(pr));
         }
       }
@@ -613,18 +622,22 @@ public class TypeInferencer implements AutoCloseable {
       if (mod.subsorts().lessThanEq(actualSort, Sorts.KBott()) || mod.subsorts().lessThan(Sorts.K(), actualSort)) {
         return;
       }
-      if (isStrictEquality) {
-        sb.append("(= ");
+      if (isBadNatSort(actualSort)) {
+        sb.append("false ");
       } else {
-        sb.append("(<=Sort ");
+        if (isStrictEquality) {
+          sb.append("(= ");
+        } else {
+          sb.append("(<=Sort ");
+        }
+        sb.append(printSort(actualSort, actualParams, isIncremental));
+        sb.append(" ");
+        if (mod.subsorts().lessThan(Sorts.K(), expectedSort)) {
+          expectedSort = Sorts.K();
+        }
+        sb.append(printSort(expectedSort, expectedParams, isIncremental));
+        sb.append(") ");
       }
-      sb.append(printSort(actualSort, actualParams, isIncremental));
-      sb.append(" ");
-      if (mod.subsorts().lessThan(Sorts.K(), expectedSort)) {
-        expectedSort = Sorts.K();
-      }
-      sb.append(printSort(expectedSort, expectedParams, isIncremental));
-      sb.append(") ");
       if (isIncremental) {
         saveConstraint(actualSort, actualParams);
       }
@@ -670,6 +683,10 @@ public class TypeInferencer implements AutoCloseable {
     }
   }
 
+  private boolean isBadNatSort(Sort actualSort) {
+    if (actualSort.isNat() && !mod.definedSorts().contains(actualSort.head())) return true;
+    return stream(actualSort.params()).anyMatch(this::isBadNatSort);
+  }
   private String printSort(Sort s, Optional<ProductionReference> t, boolean isIncremental) {
     Map<Sort, String> params = new HashMap<>();
     if (t.isPresent()) {
@@ -805,6 +822,7 @@ public class TypeInferencer implements AutoCloseable {
   }
 
   private Sort eval(Sort s, Optional<ProductionReference> params) {
+    if (isBadNatSort(s)) return s;
     print("(eval ");
     print(printSort(s, params, true));
     println(")");

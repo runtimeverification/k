@@ -503,31 +503,50 @@ you can with a regular klabel for a function. You also cannot express multiple
 rules or multiple parameters, or side conditions. All of these are extensions
 we would like to support in the future, however.
 
-Some examples of how you can use these lambdas are:
+In the following, we use three examples to illustrate the behavior of `#fun`.
+We point out that the support for `#fun` is provided by the frontend, 
+not the backends. 
+
+The three examples are real examples borrowed or modified from existing language
+semantics.
+
+*Example 1 (A Simple Self-Explained Example).*
 
 ```
-foo(K, Record) => #fun(record(... field: _ => K))(Record)
+#fun(V:Val => isFoo(V) andBool isBar(V))(someFunctionReturningVal())
 ```
 
-```
-#fun(V::Val => isFoo(V) andBool isBar(V))(someFunctionReturningVal())
-```
-
-Desugared code:
+*Example 2 (Nested #fun).*
 
 ```
-foo(K, Record) => lambda(Record, K)
-rule lambda(record(... field: _), K) => record(... Field: K)
+   #fun(C
+=> #fun(R
+=> #fun(E
+=> foo1(E, R, C)
+  )(foo2(C))
+  )(foo3(0))
+  )(foo4(1))
 ```
 
+This example is from the `beacon`
+semantics:https://github.com/runtimeverification/beacon-chain-spec/blob/master/b
+eacon-chain.k at line 302, with some modification for simplicity. Note how
+variables `C, R, E` are bound in the nested `#fun`. 
+
+*Example 3 (Matching a structure).*
+
 ```
-lambda(someFunctionReturningVal())
-rule lambda(V::Val) => isFoo(V) andBool isBar(V)
+rule foo(K, RECORD) =>
+  #fun(record(... field: _ => K))(RECORD)
 ```
 
-Note in the first case that we introduce implicitly a closure here. K is bound
-from outside the anonymous function and gets implicitly passed as a second
-argument to the anonymous function.
+Unlike previous examples, the LHS of `#fun` in this example is no longer a
+variable, but a structure. It has the same spirit as the first two examples,
+but we match the `RECORD` with a structure `record( DotVar, field: X)`, instead
+of a standalone variable. We also use K's local rewrite syntax (i.e., the
+rewriting symbol `=>` does not occur at the top-level) to prevent writing
+duplicate expressions on the LHS and RHS of the rewriting.
+
 
 ### Macros and Aliases
 

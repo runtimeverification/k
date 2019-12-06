@@ -24,8 +24,8 @@ object Constructors {
   def Module(name: String, imports: Set[Module], sentences: Set[Sentence], att: attributes.Att) =
     definition.Module(name, imports, sentences, att)
 
-  def SyntaxSort(sort: Sort) = definition.SyntaxSort(sort)
-  def SyntaxSort(sort: Sort, att: attributes.Att) = definition.SyntaxSort(sort, att)
+  def SyntaxSort(params: Seq[Sort], sort: Sort) = definition.SyntaxSort(params, sort)
+  def SyntaxSort(params: Seq[Sort], sort: Sort, att: attributes.Att) = definition.SyntaxSort(params, sort, att)
 
   def SortSynonym(newSort: Sort, oldSort: Sort) = definition.SortSynonym(newSort, oldSort)
   def SortSynonym(newSort: Sort, oldSort: Sort, att: attributes.Att) = definition.SortSynonym(newSort, oldSort, att)
