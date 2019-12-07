@@ -138,6 +138,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                 try {
                     File korePath = koreDirectory == null ? null : new File(koreDirectory);
                     int execStatus = executeCommandBasic(korePath, koreCommand);
+                    checkOutput(koreOutputFile, execStatus);
                     K outputK = new KoreParser(mod.sortAttributesFor()).parseFile(koreOutputFile);
                     return new RewriterResult(Optional.empty(), Optional.of(execStatus), outputK);
                 } catch (IOException e) {
@@ -283,6 +284,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                 try {
                     File korePath = koreDirectory == null ? null : new File(koreDirectory);
                     exit = executeCommandBasic(korePath, koreCommand);
+                    checkOutput(koreOutputFile, exit);
                 } catch (IOException e) {
                     throw KEMException.criticalError("I/O Error while executing", e);
                 } catch (InterruptedException e) {
@@ -381,6 +383,15 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                 throw new UnsupportedOperationException();
             }
         };
+    }
+
+    private void checkOutput(File koreOutputFile, int execStatus) {
+        if (execStatus != 0) {
+            if (!koreOutputFile.isFile()) {
+                throw KEMException.criticalError("Haskell Backend execution failed with code " + execStatus
+                        + " and produced no output.");
+            }
+        }
     }
 
     private String getKoreString(K initialConfiguration, Module mod, ModuleToKORE converter) {
