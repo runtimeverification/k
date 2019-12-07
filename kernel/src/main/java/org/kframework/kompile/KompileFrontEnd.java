@@ -72,7 +72,7 @@ public class KompileFrontEnd extends FrontEnd {
 
         Backend backend = koreBackend.get();
         DefinitionStorage definitionStorage = this.definitionStorage.get();
-        Map<String, ParseCache> caches = definitionStorage.loadParseCaches();
+        Map<String, ParseCache> caches = definitionStorage.loadParseCaches(options);
         Kompile kompile = new Kompile(options, files.get(), kem, sw, caches);
         CompiledDefinition def = kompile
                 .run(options.outerParsing.mainDefinitionFile(files.get()), options.mainModule(files.get()), options.syntaxModule(files.get()), backend.steps(), backend.excludedModuleTags());

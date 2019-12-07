@@ -30,7 +30,7 @@ public class DefinitionStorage {
     }
 
     public void save(DefinitionAndCache definitionAndCache) {
-        if (definitionAndCache.compiledDefinition.kompileOptions.profileRules) {
+        if (!cacheParses(definitionAndCache.compiledDefinition.kompileOptions)) {
             definitionAndCache.parseCaches.clear();
         }
         loader.saveOrDie(getCacheFile(), definitionAndCache);
@@ -40,9 +40,17 @@ public class DefinitionStorage {
         return loader.loadOrDie(DefinitionAndCache.class, getCacheFile());
     }
 
-    public Map<String, ParseCache> loadParseCaches() {
-        DefinitionAndCache definitionAndCache = loader.loadCache(DefinitionAndCache.class, getCacheFile());
-        return definitionAndCache != null ? definitionAndCache.parseCaches
-                                          : Collections.synchronizedMap(new HashMap<>());
+    public Map<String, ParseCache> loadParseCaches(KompileOptions kompileOptions) {
+        if (cacheParses(kompileOptions)) {
+            DefinitionAndCache definitionAndCache = loader.loadCache(DefinitionAndCache.class, getCacheFile());
+            return definitionAndCache != null ? definitionAndCache.parseCaches
+                                              : Collections.synchronizedMap(new HashMap<>());
+        } else {
+            return Collections.synchronizedMap(new HashMap<>());
+        }
+    }
+
+    private boolean cacheParses(KompileOptions kompileOptions) {
+        return !kompileOptions.profileRules;
     }
 }
