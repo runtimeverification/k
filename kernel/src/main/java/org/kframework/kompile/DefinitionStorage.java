@@ -1,11 +1,14 @@
 // Copyright (c) 2019 K Team. All Rights Reserved.
 package org.kframework.kompile;
 
+import org.kframework.parser.concrete2kore.ParseCache;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.file.FileUtil;
 
 import javax.inject.Inject;
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Denis Bogdanas
@@ -34,5 +37,10 @@ public class DefinitionStorage {
 
     public DefinitionAndCache load() {
         return loader.loadOrDie(DefinitionAndCache.class, getCacheFile());
+    }
+
+    public Map<String, ParseCache> loadParseCaches() {
+        DefinitionAndCache definitionAndCache = loader.loadCache(DefinitionAndCache.class, getCacheFile());
+        return definitionAndCache != null ? definitionAndCache.parseCaches : new HashMap<>();
     }
 }
