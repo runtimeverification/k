@@ -7,6 +7,7 @@ import org.kframework.utils.file.FileUtil;
 
 import javax.inject.Inject;
 import java.io.File;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,6 +42,7 @@ public class DefinitionStorage {
 
     public Map<String, ParseCache> loadParseCaches() {
         DefinitionAndCache definitionAndCache = loader.loadCache(DefinitionAndCache.class, getCacheFile());
-        return definitionAndCache != null ? definitionAndCache.parseCaches : new HashMap<>();
+        return definitionAndCache != null ? definitionAndCache.parseCaches
+                                          : Collections.synchronizedMap(new HashMap<>());
     }
 }
