@@ -9,6 +9,7 @@ import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
+import org.kframework.kore.AddAtt;
 import org.kframework.kore.TransformK;
 import org.kframework.kore.VisitK;
 import org.kframework.parser.outer.Outer;
@@ -116,24 +117,30 @@ public class ResolveSemanticCasts {
 
     K transform(K term) {
         return new TransformK() {
-            @Override
-            public K apply(KApply k) {
-                if (casts.contains(k)) {
-                    return super.apply(k.klist().items().get(0));
-                }
-                return super.apply(k);
-            }
+            private Sort sort;
 
             @Override
-            public K apply(KVariable k) {
-                if (varToTypedVar.containsKey(k)) {
-                    return varToTypedVar.get(k);
+            public K apply(K k) {
+                final Sort oldSort = sort;
+                K applied;
+                if (casts.contains(k)) {
+                    KApply kapp = (KApply)k;
+                    sort = Outer.parseSort(getSortNameOfCast(kapp));
+                    applied = apply(kapp.items().get(0));
+                } else {
+                    sort = null;
+                    applied = super.apply(k);
                 }
-                return super.apply(k);
+                if (oldSort != null) {
+                  return new AddAtt(a -> a.add(Sort.class, oldSort)).apply(applied);
+                }
+                if (varToTypedVar.containsKey(applied)) {
+                  return varToTypedVar.get(applied);
+                }
+                return applied;
             }
         }.apply(term);
     }
-
 
     public synchronized Sentence resolve(Sentence s) {
         if (s instanceof Rule) {

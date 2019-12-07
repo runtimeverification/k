@@ -264,6 +264,11 @@ public class ToJson {
 
         jsyn.add("node", JsonParser.KSYNTAXSORT);
         jsyn.add("sort", toJson(syn.sort()));
+
+        JsonArrayBuilder params = Json.createArrayBuilder();
+        JavaConverters.seqAsJavaList(syn.params()).forEach(p -> params.add(toJson(p)));
+        jsyn.add("params", params.build());
+
         jsyn.add("att", toJson(syn.att()));
 
         return jsyn.build();

@@ -163,7 +163,7 @@ public class KRun {
             K configVar = externalParse(parser, value, sort, Source.apply("<command line: -c" + name + ">"), compiledDef);
             output.put(KToken(configVarName, Sorts.KConfigVar()), configVar);
         }
-        if (compiledDef.kompiledDefinition.mainModule().definedSorts().contains(Sorts.String())) {
+        if (compiledDef.kompiledDefinition.mainModule().allSorts().contains(Sorts.String())) {
             if (options.io()) {
                 output.put(KToken("$STDIN", Sorts.KConfigVar()), KToken("\"\"", Sorts.String()));
                 output.put(KToken("$IO", Sorts.KConfigVar()), KToken("\"on\"", Sorts.String()));
@@ -221,6 +221,9 @@ public class KRun {
     }
 
     public KApply plugConfigVars(CompiledDefinition compiledDef, Map<KToken, K> output) {
+        if (compiledDef.kompiledDefinition.mainModule().productionsFor().apply(compiledDef.topCellInitializer).head().nonterminals().isEmpty()) {
+            return KApply(compiledDef.topCellInitializer);
+        }
         return KApply(compiledDef.topCellInitializer, output.entrySet().stream().map(e -> KApply(KLabel("_|->_"), e.getKey(), e.getValue())).reduce(KApply(KLabel(".Map")), (a, b) -> KApply(KLabel("_Map_"), a, b)));
     }
 

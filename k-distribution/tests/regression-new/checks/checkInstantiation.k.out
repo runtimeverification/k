@@ -1,0 +1,3 @@
+[Error] Compiler: Could not find sorts: [MInt{6}]
+	Source(checkInstantiation.k)
+	Location(9,20,9,31)

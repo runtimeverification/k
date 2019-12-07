@@ -172,7 +172,7 @@ public class RuleGrammarGenerator {
             modules.add(baseK.getModule(PROGRAM_LISTS).get());
 
             // check if `#Layout` has been declared, import `DEFAULT-LAYOUT` if not
-            if (! mod.definedSorts().contains(Sorts.Layout())) {
+            if (! mod.allSorts().contains(Sorts.Layout())) {
                 modules.add(baseK.getModule(DEFAULT_LAYOUT).get());
             }
 
@@ -181,7 +181,7 @@ public class RuleGrammarGenerator {
     }
 
     public static boolean isParserSort(Sort s) {
-        return kSorts.contains(s) || s.name().startsWith("#");
+        return kSorts.contains(s) || s.name().startsWith("#") || s.isNat();
     }
 
     /* use this overload if you don't need to profile rule parse times. */
@@ -205,7 +205,7 @@ public class RuleGrammarGenerator {
 
         if (mod.importedModuleNames().contains(AUTO_CASTS)) { // create the diamond
             Set<Sentence> temp;
-            for (Sort srt : iterable(mod.definedSorts())) {
+            for (Sort srt : iterable(mod.allSorts())) {
                 if (!isParserSort(srt) || mod.subsorts().directlyLessThan(Sorts.KVariable(), srt)) {
                     // K ::= K "::Sort" | K ":Sort" | K "<:Sort" | K ":>Sort"
                     prods.addAll(makeCasts(Sorts.KBott(), Sorts.K(), srt, srt));
@@ -228,7 +228,7 @@ public class RuleGrammarGenerator {
             }
         }
 
-        for (Sort s : iterable(mod.definedSorts())) {
+        for (Sort s : iterable(mod.allSorts())) {
             prods.addAll(new GenerateSortPredicateSyntax().gen(mod, s));
             prods.addAll(new GenerateSortProjections(mod).gen(s).collect(Collectors.toSet()));
         }
@@ -236,43 +236,46 @@ public class RuleGrammarGenerator {
         for (Production p : iterable(mod.productions())) {
             prods.addAll(new GenerateSortProjections(mod).gen(p).collect(Collectors.toSet()));
             if (p.params().nonEmpty()) {
-                Sort param = null;
-                if (p.isSyntacticSubsort() && p.params().size() == 1) {
-                    param = p.params().apply(0);
-                } else {
-                    // we don't actually need to emit a parameter except in the case of the return sort
-                    // because the type checker will never actually reject a parse because the sorts in
-                    // the arguments don't match; it will simply infer sort K for those arguments.
-                    param = p.isSortVariable(p.sort()) ? p.sort() : null;
-                }
-                List<List<Sort>> sortTuples = makeAllSortTuples(param == null ? 0 : 1, mod);
+                List<List<Sort>> sortTuples = makeAllSortTuples(p.params().size(), mod);
                 for (List<Sort> tuple : sortTuples) {
-                    assert(tuple.size() < 2);
-                    Sort returnSort = p.sort();
-                    if (returnSort.equals(param)) {
-                        returnSort = tuple.get(0);
-                    }
-                    List<ProductionItem> pis = new ArrayList<>();
-                    pis.addAll(mutable(p.items()));
-                    Map<Sort, Sort> subst;
-                    if (param == null) {
-                        subst = Collections.emptyMap();
-                    } else {
-                        subst = Collections.singletonMap(param, tuple.get(0));
-                    }
-                    for (int i = 0; i < pis.size(); i++) {
-                        ProductionItem pi = pis.get(i);
-                        if (pi instanceof NonTerminal) {
-                            Sort s = ((NonTerminal)pi).sort();
-                            if (p.isSortVariable(s)) {
-                              pis.set(i, NonTerminal(subst.getOrDefault(s, Sorts.K()), ((NonTerminal)pi).name()));
+                    for (int i = 0; i < tuple.size(); i++) {
+                        if (p.params().apply(i).equals(p.sort()) || p.sort().params().contains(p.params().apply(i))) {
+                            continue;
+                        }
+                        if (p.isSyntacticSubsort()) {
+                            continue;
+                        }
+                        boolean skip = false;
+                        for (NonTerminal nt : iterable(p.nonterminals())) {
+                            if (nt.sort().params().contains(p.params().apply(i))) {
+                              skip = true;
+                              break;
                             }
                         }
+                        if (!skip) {
+                          tuple.set(i, Sorts.K());
+                        }
                     }
-                    if (p.isSyntacticSubsort() && mod.subsorts().lessThanEq(returnSort, ((NonTerminal)pis.get(0)).sort())) {
+                    Production subst = p.substitute(immutable(tuple));
+                    if (p.isSyntacticSubsort() && mod.subsorts().lessThanEq(subst.sort(), subst.getSubsortSort())) {
                         continue;
                     }
-                    prods.add(Production(p.klabel().map(lbl -> KLabel(lbl.name())), Seq(), returnSort, immutable(pis), p.att().add(Constants.ORIGINAL_PRD, Production.class, p)));
+                    Set<Sort> sorts = stream(subst.nonterminals()).map(nt -> nt.sort()).collect(Collectors.toSet());
+                    sorts.add(subst.sort());
+                    boolean skip = false;
+                    for (Sort s : sorts) {
+                        if (s.isNat()) {
+                            skip = true;
+                            break;
+                        }
+                        if (mod.definedInstantiations().contains(s.head()) && !mod.definedInstantiations().apply(s.head()).contains(s)) {
+                            skip = true;
+                            break;
+                        }
+                    }
+                    if (!skip) {
+                        prods.add(Production(subst.klabel().map(lbl -> KLabel(lbl.name())), Seq(), subst.sort(), subst.items(), subst.att().add(Constants.ORIGINAL_PRD, Production.class, p)));
+                    }
                 }
             }
         }
@@ -364,7 +367,7 @@ public class RuleGrammarGenerator {
         if (mod.importedModuleNames().contains(PROGRAM_LISTS)) {
             Set<Sentence> prods3 = new HashSet<>();
             // if no start symbol has been defined in the configuration, then use K
-            for (Sort srt : iterable(mod.definedSorts())) {
+            for (Sort srt : iterable(mod.allSorts())) {
                 if (!isParserSort(srt) && !mod.listSorts().contains(srt)) {
                     // K ::= Sort
                     prods3.add(Production(Seq(), Sorts.K(), Seq(NonTerminal(srt)), Att()));
@@ -397,8 +400,8 @@ public class RuleGrammarGenerator {
                 res.add(prod2);
                 res.add(prod3);
                 res.add(prod4);
-                res.add(SyntaxSort(Sort(ul.sort.name() + "#Terminator", ul.sort.params())));
-                res.add(SyntaxSort(Sort("Ne#" + ul.sort.name(), ul.sort.params())));
+                res.add(SyntaxSort(Seq(), Sort(ul.sort.name() + "#Terminator", ul.sort.params())));
+                res.add(SyntaxSort(Seq(), Sort("Ne#" + ul.sort.name(), ul.sort.params())));
                 if (!ul.nonEmpty) {
                     res.add(prod5);
                 }
@@ -427,7 +430,7 @@ public class RuleGrammarGenerator {
 
     private static List<List<Sort>> makeAllSortTuples(int size, Module mod) {
         List<List<Sort>> res = new ArrayList<>();
-        List<Sort> allSorts = stream(mod.definedSorts()).filter(s -> !isParserSort(s) || s.equals(Sorts.KItem()) || s.equals(Sorts.K())).collect(Collectors.toList());
+        List<Sort> allSorts = stream(mod.allSorts()).filter(s -> !isParserSort(s) || s.equals(Sorts.KItem()) || s.equals(Sorts.K()) || s.isNat()).collect(Collectors.toList());
         makeAllSortTuples(size, size, allSorts, res, new int[size]);
         return res;
     }
@@ -451,7 +454,7 @@ public class RuleGrammarGenerator {
         Set<Sentence> prods = new HashSet<>();
         Att attrs1 = Att().add(Sort.class, castSort);
         prods.add(Production(KLabel("#SyntacticCast"), castSort, Seq(NonTerminal(labelSort), Terminal("::" + castSort.toString())), attrs1.add("format", "%1%2")));
-        prods.add(Production(KLabel("#SemanticCastTo" + labelSort.name(), labelSort.params()), labelSort, Seq(NonTerminal(labelSort), Terminal(":"  + castSort.toString())), attrs1.add("format", "%1%2")));
+        prods.add(Production(KLabel("#SemanticCastTo" + labelSort.toString()), labelSort, Seq(NonTerminal(labelSort), Terminal(":"  + castSort.toString())), attrs1.add("format", "%1%2")));
         prods.add(Production(KLabel("#InnerCast"), outerSort, Seq(Terminal("{"), NonTerminal(labelSort), Terminal("}"), Terminal("<:" + castSort.toString())), attrs1.add("format", "%1 %2 %3%4")));
         prods.add(Production(KLabel("#OuterCast"), labelSort, Seq(Terminal("{"), NonTerminal(innerSort), Terminal("}"), Terminal(":>" + castSort.toString())), attrs1.add("format", "%1 %2 %3%4")));
         return prods;
