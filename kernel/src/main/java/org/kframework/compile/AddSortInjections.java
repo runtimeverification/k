@@ -174,6 +174,9 @@ public class AddSortInjections {
             if (kapp.klabel().name().equals("inj")) {
                 return term;
             }
+            if (kapp.att().contains(Sort.class)) {
+                expectedSort = kapp.att().get(Sort.class);
+            }
             Production prod = production(kapp);
             List<K> children = new ArrayList<>();
             Production substituted = prod;
