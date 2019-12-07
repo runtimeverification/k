@@ -19,8 +19,8 @@ import org.kframework.utils.inject.JCommanderModule.ExperimentalUsage;
 import org.kframework.utils.inject.JCommanderModule.Usage;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class KompileFrontEnd extends FrontEnd {
 
@@ -71,12 +71,13 @@ public class KompileFrontEnd extends FrontEnd {
         }
 
         Backend backend = koreBackend.get();
-        HashMap<String, ParseCache> caches = new HashMap<>();
+        DefinitionStorage definitionStorage = this.definitionStorage.get();
+        Map<String, ParseCache> caches = definitionStorage.loadParseCaches();
         Kompile kompile = new Kompile(options, files.get(), kem, sw, caches);
         CompiledDefinition def = kompile
                 .run(options.outerParsing.mainDefinitionFile(files.get()), options.mainModule(files.get()), options.syntaxModule(files.get()), backend.steps(), backend.excludedModuleTags());
         sw.printIntermediate("Kompile to kore");
-        definitionStorage.get().save(new DefinitionAndCache(def, caches));
+        definitionStorage.save(new DefinitionAndCache(def, caches));
         sw.printIntermediate("Save to disk");
         backend.accept(def);
         sw.printIntermediate("Backend");
