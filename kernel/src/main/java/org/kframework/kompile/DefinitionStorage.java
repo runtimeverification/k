@@ -3,7 +3,6 @@ package org.kframework.kompile;
 
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.file.FileUtil;
-import org.kframework.utils.inject.RequestScoped;
 
 import javax.inject.Inject;
 import java.io.File;
@@ -12,7 +11,6 @@ import java.io.File;
  * @author Denis Bogdanas
  * Created on 09-Nov-19.
  */
-@RequestScoped
 public class DefinitionStorage {
     private final BinaryLoader loader;
     private final FileUtil files;
