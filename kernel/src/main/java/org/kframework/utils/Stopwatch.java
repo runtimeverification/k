@@ -30,15 +30,14 @@ public class Stopwatch {
 
     public void printIntermediate(String message) {
         long current = System.currentTimeMillis();
-        if (options.verbose)
-            f.format("%-60s = %s%n", message, milisecondsToTime(lastIntermediate - start));
+        if (options.verbose) {
+            f.format("%-60s = %s%n", message, milisecondsToTime(current - start));
+        }
         lastIntermediate = current;
     }
 
     public void printTotal(String message) {
-        printIntermediate("Cleanup");
-        if (options.verbose)
-            f.format("%-60s = %s%n", message, milisecondsToTime(lastIntermediate - start));
+        printIntermediate(message);
     }
 
     private static String milisecondsToTime(long miliseconds) {
