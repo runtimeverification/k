@@ -3,6 +3,11 @@
 import json
 import sys
 
+from .kast      import *
+from .kastManip import *
+
+from .kast import _fatal, _notif, _warning
+
 def getRuleById(definition, rule_id):
     """Get a rule from the definition by coverage rule id.
 
@@ -16,7 +21,7 @@ def getRuleById(definition, rule_id):
 
     for module in definition['modules']:
         for sentence in module['localSentences']:
-            if pyk.isKRule(sentence) and 'att' in sentence:
+            if isKRule(sentence) and 'att' in sentence:
                 atts = sentence['att']['att']
                 if 'UNIQUE_ID' in atts and atts['UNIQUE_ID'] == rule_id:
                     return sentence
@@ -53,14 +58,14 @@ def translateCoverage(src_all_rules, dst_all_rules, dst_definition, src_rules_li
 
     # Filter out non-functional rules from rule map (determining if they are functional via the top symbol in the rule being `<generatedTop>`)
     dst_non_function_rules = []
-    dst_kompiled = pyk.readKastTerm(dst_kompiled_dir + '/compiled.json')
+    dst_kompiled = readKastTerm(dst_kompiled_dir + '/compiled.json')
     for module in dst_kompiled['modules']:
         for sentence in module['localSentences']:
-            if pyk.isKRule(sentence):
+            if isKRule(sentence):
                 ruleBody = sentence['body']
                 ruleAtt  = sentence['att']['att']
-                if    (pyk.isKApply(ruleBody)                                     and ruleBody['label']        == '<generatedTop>') \
-                   or (pyk.isKRewrite(ruleBody) and pyk.isKApply(ruleBody['lhs']) and ruleBody['lhs']['label'] == '<generatedTop>'):
+                if    (isKApply(ruleBody)                                 and ruleBody['label']        == '<generatedTop>') \
+                   or (isKRewrite(ruleBody) and isKApply(ruleBody['lhs']) and ruleBody['lhs']['label'] == '<generatedTop>'):
                     if 'UNIQUE_ID' in ruleAtt:
                         dst_non_function_rules.append(ruleAtt['UNIQUE_ID'])
 
@@ -101,7 +106,7 @@ def translateCoverageFromPaths(src_komplied_dir, dst_kompiled_dir, src_rules_fil
     with open(dst_kompiled_dir + '/allRules.txt', 'r') as dst_all_rules_file:
         dst_all_rules = [ line.strip() for line in dst_all_rules_file ]
 
-    dst_definition = pyk.readKastTerm(dst_kompiled_dir + '/compiled.json')
+    dst_definition = readKastTerm(dst_kompiled_dir + '/compiled.json')
 
     src_rules_list = []
     with open(src_rules_file, 'r') as src_rules:
