@@ -32,6 +32,7 @@ if inputFile == '-':
         tempf.write(args['input'].read())
         inputFile = tempf.name
 
+returnCode = 0
 definition = args['definition']
 if args['command'] == 'parse':
     (returncode, stdout, stderr) = kast(definition, inputFile, kArgs = ['--input', args['from'], '--output', args['to']] + args['kArgs'])
@@ -53,6 +54,7 @@ elif args['command'] == 'coverage-log':
         args['output'].write(prettyPrintKast(rule, symbolTable))
 
 args['output'].write(stdout)
+args['output'].flush()
 
 if returncode != 0:
     _fatal('Non-zero exit code (' + str(returncode) + ': ' + str(kCommand), code = returncode)
