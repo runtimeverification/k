@@ -8,7 +8,7 @@ from .graphviz import *
 
 pykArgs = argparse.ArgumentParser()
 
-pykArgs.add_argument('command' , choices = ['parse', 'run', 'prove', 'graph-imports'])
+pykArgs.add_argument('command' , choices = ['parse', 'run', 'prove', 'graph-imports', 'coverage-log'])
 
 pykArgs.add_argument('-d', '--definition')
 
@@ -19,6 +19,8 @@ pykArgs.add_argument('-f', '--from', default = 'pretty', choices = ['pretty', 'j
 pykArgs.add_argument('-t', '--to',   default = 'pretty', choices = ['pretty', 'json', 'kast', 'binary', 'kore'])
 
 pykArgs.add_argument('kArgs', nargs='*', help = 'Arguments to pass through to K invocation.')
+
+pykArgs.add_argument('-cf', '--coverage-file', type = argparse.FileType('r'))
 
 args = vars(pykArgs.parse_args())
 
@@ -40,6 +42,14 @@ elif args['command'] == 'prove':
 elif args['command'] == 'graph-imports':
     returncode = 0 if graphvizImports(definition + '/parsed') and graphvizImports(definition + '/compiled') else 1
     stdout = ''
+elif args['command'] == 'coverage-log':
+    json_definition = readKastTerm(definition)
+    symbolTable = buildSymbolTable(json_definition)
+    for rid in args['coverage-file']:
+        rule = getRuleById(definition, rid)
+        args['output'].write('Rule: ' + rid)
+        args['output'].write('Unparsed:')
+        args['output'].write(prettyPrintKast(rule, symbolTable))
 
 args['output'].write(stdout)
 
