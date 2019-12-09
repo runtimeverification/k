@@ -306,23 +306,34 @@ def prettyPrintKast(kast, symbolTable):
             unparsedKSequence = '.'
         return unparsedKSequence
     if isKRule(kast):
-        body     = "\n     ".join(prettyPrintKast(kast["body"], symbolTable).split("\n"))
+        body     = indent(prettyPrintKast(kast["body"], symbolTable))
         ruleStr = "rule " + body
         requiresStr = ""
         ensuresStr  = ""
         attsStr     = prettyPrintKast(kast['att'], symbolTable)
         if kast["requires"] is not None:
             requiresStr = prettyPrintKast(kast["requires"], symbolTable)
-            requiresStr = "requires " + "\n   ".join(requiresStr.split("\n"))
+            requiresStr = "requires " + indent(requiresStr)
         if kast["ensures"] is not None:
             ensuresStr = prettyPrintKast(kast["ensures"], symbolTable)
-            ensuresStr = "ensures " + "\n  ".join(ensuresStr.split("\n"))
+            ensuresStr = "ensures " + indent(ensuresStr)
         return ruleStr + "\n  " + requiresStr + "\n  " + ensuresStr + "\n  " + attsStr
+    if isKContext(kast):
+        body        = indent(prettyPrintKast(kast["body"], symbolTable))
+        contexStr   = "context alias " + body
+        requiresStr = ""
+        attsStr     = prettyPrintKast(kast['att'], symbolTable)
+        if kast['requires'] is not None:
+            requiresStr = prettyPrintKast(kast['requires'], symbolTable)
+            requiresStr = 'requires ' + indent(requiresStr)
+        return contextStr + "\n  " + requiresStr + "\n  " + attStr
     if isKAtt(kast):
         if len(kast['att']) == 0:
             return ''
         attStrs = [ att + '(' + kast['att'][att] + ')' for att in kast['att'].keys() ]
         return '[ ' + ' '.join(attStrs) + ' ]'
+    if isKSortSynonym(kast):
+        return 'sort ' + kast['newSort'] + ' = ' + kast['oldSort'] + ' ' + prettyPrintKast(kast['att'])
     if isKFlatModule(kast):
         name = kast["name"]
         imports = "\n".join(['import ' + kimport for kimport in kast["imports"]])
