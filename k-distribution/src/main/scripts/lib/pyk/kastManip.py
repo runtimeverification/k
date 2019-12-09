@@ -231,6 +231,36 @@ def uselessVarsToDots(kast, requires = None, ensures = None):
 
     return traverseBottomUp(kast, _collapseUselessVars)
 
+def onAttributes(kast, effect):
+    if isKAs(kast):
+        return KAs(kast['pattern'], kast['alias'], att = effect(kast['att']))
+    elif isKRule(kast):
+        return KRule(kast['body'], requires = kast['requires'], ensures = kast['ensures'], att = effect(kast['att']))
+    elif isKContext(kast):
+        return KContext(kast['body'], requires = kast['requires'], att = effect(kast['att']))
+    elif isKBubble(kast):
+        return KBubble(kast['sentenceType'], kast['contents'], att = effect(kast['att']))
+    elif isKModuleComment(kast):
+        return KModuleComment(kast['comment'], att = effect(kast['att']))
+    elif isKProduction(kast):
+        return KProduction(kast['productionItems'], kast['sort'], att = effect(kast['att']))
+    elif isKSyntaxAssociativity(kast):
+        return KSyntaxAssociativity(kast['assoc'], tags = kast['tags'], att = effect(kast['att']))
+    elif isKSyntaxPriority(kast):
+        return KSyntaxPriority(priorities = kast['priorities'], att = effect(kast['att']))
+    elif isKSyntaxSort(kast):
+        return KSyntaxSort(kast['sort'], att = effect(kast['att']))
+    elif isKSortSynonym(kast):
+        return KSortSynonym(kast['newSort'], kast['oldSort'], att = effect(kast['att']))
+    elif isKFlatModule(kast):
+        localSentences = [ onAttributes(sent, effect) for sent in kast['localSentences'] ]
+        return KFlatModule(kast['name'], kast['imports'], localSentences, att = effect(kast['att']))
+    elif isKDefinition(kast):
+        modules = [ onAttributes(mod, effect) for mod in kast['modules'] ]
+        requires = None if 'requires' not in kast else kast['requires']
+        return KDefinition(kast['mainModule'], modules, requires = requires, att = effect(kast['att']))
+    _fatal('No attributes for: ' + kast['node'] + '.')
+
 def minimizeRule(rule):
     ruleBody     = rule["body"]
     ruleRequires = rule["requires"]
@@ -267,6 +297,17 @@ def minimizeRule(rule):
         ruleRequires = None
 
     return KRule(ruleBody, requires = ruleRequires, ensures = ruleEnsures, att = ruleAtts)
+
+def removeSourceMap(k):
+    def _removeSourceMap(att):
+        if isKAtt(att):
+            atts = att['att']
+            newAtts = { }
+            for attKey in atts.keys():
+                if attKey != 'org.kframework.attributes.Source' and attKey != 'org.kframework.attributes.Location':
+                    newAtts[attKey] = atts[attKey]
+            return KAtt(atts = newAtts)
+    return onAttributes(k, _removeSourceMap)
 
 def readKastTerm(termPath):
     with open(termPath, "r") as termFile:
