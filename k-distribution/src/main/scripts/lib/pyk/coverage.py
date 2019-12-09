@@ -27,6 +27,21 @@ def getRuleById(definition, rule_id):
                     return sentence
     _fatal('Could not find rule with ID: ' + rule_id)
 
+def stripCoverageLogger(rule):
+    ruleBody     = rule["body"]
+    ruleRequires = rule["requires"]
+    ruleEnsures  = rule["ensures"]
+    ruleAtts     = rule["att"]
+
+    if isKRewrite(ruleBody):
+        ruleLHS = ruleBody['lhs']
+        ruleRHS = ruleBody['rhs']
+        if isKApply(ruleRHS) and ruleRHS['label'].startswith('project:'):
+            ruleRHSseq = ruleRHS['args'][0]
+            if isKSequence(ruleRHSseq) and len(ruleRHSseq['items']) == 2:
+                ruleBody = KRewrite(ruleLHS, ruleRHSseq['items'][1])
+    return KRule(ruleBody, requires = ruleRequires, ensures = ruleEnsures, att = ruleAtts)
+
 def translateCoverage(src_all_rules, dst_all_rules, dst_definition, src_rules_list):
     """Translate the coverage data from one kompiled definition to another.
 

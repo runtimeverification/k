@@ -20,7 +20,7 @@ pykArgs.add_argument('-t', '--to',   default = 'pretty', choices = ['pretty', 'j
 
 pykArgs.add_argument('kArgs', nargs='*', help = 'Arguments to pass through to K invocation.')
 
-pykArgs.add_argument('-cf', '--coverage-file', type = argparse.FileType('r'))
+pykArgs.add_argument('--coverage-file', type = argparse.FileType('r'))
 
 args = vars(pykArgs.parse_args())
 
@@ -43,12 +43,13 @@ elif args['command'] == 'graph-imports':
     returncode = 0 if graphvizImports(definition + '/parsed') and graphvizImports(definition + '/compiled') else 1
     stdout = ''
 elif args['command'] == 'coverage-log':
-    json_definition = readKastTerm(definition)
+    json_definition = readKastTerm(definition + '/compiled.json')
     symbolTable = buildSymbolTable(json_definition)
-    for rid in args['coverage-file']:
-        rule = getRuleById(definition, rid)
-        args['output'].write('Rule: ' + rid)
-        args['output'].write('Unparsed:')
+    for rid in args['coverage_file']:
+        rule = minimizeRule(stripCoverageLogger(getRuleById(json_definition, rid.strip())))
+        args['output'].write('\n\n')
+        args['output'].write('Rule: ' + rid.strip())
+        args['output'].write('\nUnparsed:\n')
         args['output'].write(prettyPrintKast(rule, symbolTable))
 
 args['output'].write(stdout)
