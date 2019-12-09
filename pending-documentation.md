@@ -1368,13 +1368,14 @@ function as well, unless the function was tail recursive, in which case no
 stack frame would exist once the tail call was performed.
 
 ### Breaking on a set of rules or functions
+
 Using `rbreak <regex>` you can set breakpoints on multiple functions.
 
-`rbreak Lbl` - sets a breakpoint on all non hooked `function`s
+-   `rbreak Lbl` - sets a breakpoint on all non hooked `function`s
 
-`rbreak Lbl.*TEST` - sets a breakpoint on all `function`s from module `TEST`
+-   `rbreak Lbl.*TEST` - sets a breakpoint on all `function`s from module `TEST`
 
-`rbreak hook_INT` - sets a breakpoint on all hooks from module `INT`
+-   `rbreak hook_INT` - sets a breakpoint on all hooks from module `INT`
 
 Undocumented
 ------------
