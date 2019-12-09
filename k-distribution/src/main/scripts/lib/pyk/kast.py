@@ -83,11 +83,17 @@ def KAtt(atts = {}):
 def isKAtt(k):
     return k["node"] == "KAtt"
 
-def KRule(rule, requires = None, ensures = None, att = None):
-    return { "node": "KRule", "body": rule, "requires": requires, "ensures": ensures, "att": att }
+def KRule(body, requires = None, ensures = None, att = None):
+    return { "node": "KRule", "body": body, "requires": requires, "ensures": ensures, "att": att }
 
 def isKRule(k):
     return k["node"] == "KRule"
+
+def KContext(body, requires = None, ensures = None, att = None):
+    return { "node": "KContext", "body": body, "requires": requires, "att": att }
+
+def isKContext(k):
+    return k["node"] == "KContext"
 
 def KBubble(sentenceType, contents, att = None):
     return { "node": "KBubble", "sentenceType": sentenceType, "contents": contents, "att": att }
@@ -148,6 +154,12 @@ def KSyntaxSort(sort, att = None):
 
 def isKSyntaxSort(k):
     return k['node'] == 'KSyntaxSort'
+
+def KSortSynonym(newSort, oldSort, att = None):
+    return { "node": "KSortSynonym", "newSort": newSort, "oldSort": oldSort, "att": att }
+
+def isKSortSynonym(k):
+    return k['node'] == 'KSortSynonym'
 
 def KFlatModule(name, imports, localSentences, att = None):
     return { "node": "KFlatModule", "name": name, "imports": imports, "localSentences": localSentences, "att": att }
@@ -309,10 +321,8 @@ def prettyPrintKast(kast, symbolTable):
     if isKAtt(kast):
         if len(kast['att']) == 0:
             return ''
-        attStr = ''
-        for att in kast['att'].keys():
-            attStr += att + '(' + kast['att'][att] + ')'
-        return '[' + attStr + ']'
+        attStrs = [ att + '(' + kast['att'][att] + ')' for att in kast['att'].keys() ]
+        return '[ ' + ' '.join(attStrs) + ' ]'
     if isKFlatModule(kast):
         name = kast["name"]
         imports = "\n".join(['import ' + kimport for kimport in kast["imports"]])
