@@ -44,7 +44,7 @@ elif args['command'] == 'graph-imports':
     returncode = 0 if graphvizImports(definition + '/parsed') and graphvizImports(definition + '/compiled') else 1
     stdout = ''
 elif args['command'] == 'coverage-log':
-    json_definition = readKastTerm(definition + '/compiled.json')
+    json_definition = removeSourceMap(readKastTerm(definition + '/compiled.json'))
     symbolTable = buildSymbolTable(json_definition)
     for rid in args['coverage_file']:
         rule = minimizeRule(stripCoverageLogger(getRuleById(json_definition, rid.strip())))
