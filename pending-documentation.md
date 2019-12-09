@@ -1179,6 +1179,10 @@ on a particular program by passing the `--debugger` flag to krun, or by
 invoking the llvm backend interpreter directly. Below we provide a simple
 tutorial to explain some of the basic commands supported by the LLVM backend.
 
+Before that make sure to build K with the option `-Dproject.build.type=Debug`.
+Or modify `<kdir>/llvm-backend/pom.xml` and make sure `<project.build.type>` 
+is set to `Debug`.
+
 ### The K Definition
 
 Here is a sample K definition we will use to demonstrate debugging
@@ -1188,6 +1192,7 @@ capabilities:
 module TEST
   imports INT
 
+  configuration <k> foo(5) </k>
   rule [test]: I:Int => I +Int 1 requires I <Int 10
 
   syntax Int ::= foo(Int) [function]
@@ -1197,7 +1202,8 @@ endmodule
 ```
 
 You should compile this definition with `--backend llvm -ccopt -g` and without
-`-ccopt -O2` in order to use the debugger most effectively.
+`-ccopt -O2` in order to use the debugger most effectively. If you still get 
+fields with `<optimized out>` try sending `-ccopt -O0` or `-ccopt -O1`.
 
 ### Stepping
 
@@ -1360,6 +1366,15 @@ and we also can see the substitution of that rule. If foo was evaluated while
 evaluating another function, we would also be able to see the arguments of that
 function as well, unless the function was tail recursive, in which case no
 stack frame would exist once the tail call was performed.
+
+### Breaking on a set of rules or functions
+Using `rbreak <regex>` you can set breakpoints on multiple functions.
+
+`rbreak Lbl` - sets a breakpoint on all non hooked `function`s
+
+`rbreak Lbl.*TEST` - sets a breakpoint on all `function`s from module `TEST`
+
+`rbreak hook_INT` - sets a breakpoint on all hooks from module `INT`
 
 Undocumented
 ------------
