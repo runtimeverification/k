@@ -41,6 +41,12 @@ def KApply(label, args):
 def isKApply(k):
     return k["node"] == "KApply"
 
+def KAs(pattern, alias, att = None):
+    return { "node": "KAs", "pattern": pattern, "alias": alias, "att": att }
+
+def isKAs(k):
+    return k["node"] == "KAs"
+
 def KConstant(label):
     return KApply(label, [])
 
@@ -271,6 +277,10 @@ def prettyPrintKast(kast, symbolTable):
             return cellStr.rstrip()
         unparser = appliedLabelStr(label) if label not in symbolTable else symbolTable[label]
         return unparser(*unparsedArgs)
+    if isKAs(kast):
+        pattern = prettyPrintKast(kast["pattern"], symbolTable)
+        alias   = prettyPrintKast(kast["alias"], symbolTable)
+        return "( " + pattern + " #as " + alias + ")"
     if isKRewrite(kast):
         lhsStr = prettyPrintKast(kast["lhs"], symbolTable)
         rhsStr = prettyPrintKast(kast["rhs"], symbolTable)
