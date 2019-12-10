@@ -131,6 +131,13 @@ public class GlobalContext implements Serializable {
         return log;
     }
 
+    public void newLogIndent(int indentLevel) {
+        if (!javaExecutionOptions.logRulesPublic) {
+            return;
+        }
+        newLogIndent(KItemLog.indent(indentLevel));
+    }
+
     public void newLogIndent(String indent) {
         if (!javaExecutionOptions.logRulesPublic) {
             return;

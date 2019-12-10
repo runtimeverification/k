@@ -3,7 +3,7 @@ package org.kframework.parser;
 import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.kore.K;
-import org.kframework.kore.Sort;
+import org.kframework.kore.SortHead;
 import org.kframework.parser.kore.Pattern;
 import org.kframework.parser.kore.parser.ParseError;
 import org.kframework.parser.kore.parser.TextToKore;
@@ -23,7 +23,7 @@ public class KoreParser {
     private final TextToKore textToKore;
     private final org.kframework.parser.kore.parser.KoreToK koreToK;
 
-    public KoreParser(Map<Sort, Att> sortAttMap) {
+    public KoreParser(Map<SortHead, Att> sortAttMap) {
         textToKore = new TextToKore();
         koreToK = new org.kframework.parser.kore.parser.KoreToK(stream(sortAttMap).map(t -> Tuple2.apply(t._1().name(), t._2().getOptional("hook").orElse(""))).collect(Collections.toMap()));
     }

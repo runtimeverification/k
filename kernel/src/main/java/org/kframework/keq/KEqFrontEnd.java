@@ -4,13 +4,12 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Module;
 import com.google.inject.Provider;
-import org.kframework.compile.Backend;
 import org.kframework.definition.Definition;
 import org.kframework.kompile.CompiledDefinition;
+import org.kframework.kprove.ProofDefinitionBuilder;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
 import org.kframework.rewriter.Rewriter;
-import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
@@ -32,17 +31,14 @@ public class KEqFrontEnd extends FrontEnd {
     private final Provider<File> kompiledDir;
     private final Provider<File> kompiledDir1;
     private final Provider<File> kompiledDir2;
-    private final KExceptionManager kem;
-    private final KEqOptions keqOptions;
     private final Provider<FileUtil> files;
-    private final Stopwatch sw;
-    private final Provider<Backend> backend;
     private final Provider<CompiledDefinition> compiledDef;
-    private final Provider<CompiledDefinition> compiledDef1;
-    private final Provider<CompiledDefinition> compiledDef2;
     private final Provider<Function<Definition, Rewriter>> initializeRewriter;
     private final Provider<Function<Definition, Rewriter>> initializeRewriter1;
     private final Provider<Function<Definition, Rewriter>> initializeRewriter2;
+    private final Provider<ProofDefinitionBuilder> pdb1Provider;
+    private final Provider<ProofDefinitionBuilder> pdb2Provider;
+    private final Provider<KEq> keq;
 
     @Inject
     public KEqFrontEnd(
@@ -55,65 +51,56 @@ public class KEqFrontEnd extends FrontEnd {
             @Spec1(KompiledDir.class) Provider<File> kompiledDir1,
             @Spec2(KompiledDir.class) Provider<File> kompiledDir2,
             KExceptionManager kem,
-            KEqOptions keqOptions,
             @Main Provider<FileUtil> files,
-            Stopwatch sw,
-            @Main Provider<Backend> backend,
             @Main Provider<CompiledDefinition> compiledDef,
-            @Spec1 Provider<CompiledDefinition> compiledDef1,
-            @Spec2 Provider<CompiledDefinition> compiledDef2,
             @Main Provider<Function<Definition, Rewriter>> initializeRewriter,
             @Spec1 Provider<Function<Definition, Rewriter>> initializeRewriter1,
-            @Spec2 Provider<Function<Definition, Rewriter>> initializeRewriter2) {
+            @Spec2 Provider<Function<Definition, Rewriter>> initializeRewriter2,
+            @Spec1 Provider<ProofDefinitionBuilder> pdb1Provider,
+            @Spec2 Provider<ProofDefinitionBuilder> pdb2Provider,
+            Provider<KEq> keq) {
         super(kem, globalOptions, usage, experimentalUsage, jarInfo, files);
         this.scope = scope;
         this.kompiledDir = kompiledDir;
         this.kompiledDir1 = kompiledDir1;
         this.kompiledDir2 = kompiledDir2;
-        this.kem = kem;
-        this.keqOptions = keqOptions;
         this.files = files;
-        this.sw = sw;
-        this.backend = backend;
         this.compiledDef = compiledDef;
-        this.compiledDef1 = compiledDef1;
-        this.compiledDef2 = compiledDef2;
         this.initializeRewriter = initializeRewriter;
         this.initializeRewriter1 = initializeRewriter1;
         this.initializeRewriter2 = initializeRewriter2;
+        this.pdb1Provider = pdb1Provider;
+        this.pdb2Provider = pdb2Provider;
+        this.keq = keq;
     }
 
     @Override
     protected int run() {
-        CompiledDefinition commonDef, def1, def2;
-        Function<Definition, Rewriter> commonRewriter, rewriter1, rewriter2;
-        Backend backend;
+        CompiledDefinition commonDef;
+        ProofDefinitionBuilder pdb1, pdb2;
+        Function<Definition, Rewriter> commonGen, gen1, gen2;
         scope.enter(kompiledDir.get());
         try {
             commonDef = compiledDef.get();
-            commonRewriter = initializeRewriter.get();
-            backend = this.backend.get();
+            commonGen = initializeRewriter.get();
         } finally {
             scope.exit();
         }
         scope.enter(kompiledDir1.get());
         try {
-            def1 = compiledDef1.get();
-            rewriter1 = initializeRewriter1.get();
+            pdb1 = pdb1Provider.get();
+            gen1 = initializeRewriter1.get();
         } finally {
             scope.exit();
         }
         scope.enter(kompiledDir2.get());
         try {
-            def2 = compiledDef2.get();
-            rewriter2 = initializeRewriter2.get();
+            pdb2 = pdb2Provider.get();
+            gen2 = initializeRewriter2.get();
         } finally {
             scope.exit();
         }
-        return new KEq(kem, files.get(), sw).run(commonDef, def1, def2,
-                keqOptions,
-                backend,
-                commonRewriter, rewriter1, rewriter2);
+        return keq.get().run(commonDef, commonGen, gen1, gen2, pdb1, pdb2, files.get());
     }
 
     public static List<Module> getDefinitionSpecificModules() {
