@@ -299,6 +299,9 @@ public class AddSortInjections {
             if (kapp.klabel().name().equals("_:/=K_")) {
                 return Sorts.Bool();
             }
+            if (kapp.att().contains(Sort.class)) {
+                expectedSort = kapp.att().get(Sort.class);
+            }
             Production prod = production(kapp);
             Production substituted = prod;
             List<Sort> args = new ArrayList<>();
