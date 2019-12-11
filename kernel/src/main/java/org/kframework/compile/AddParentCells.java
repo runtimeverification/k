@@ -292,7 +292,7 @@ public class AddParentCells {
         if (term instanceof KApply) {
             KApply app = (KApply) term;
             KApply newTerm = KApply(app.klabel(), KList(app.klist().stream()
-                    .map(this::concretize).collect(Collectors.toList())));
+                    .map(this::concretize).collect(Collectors.toList())), app.att());
             if (cfg.isParentCell(newTerm.klabel())) {
                 return concretizeCell(newTerm);
             } else {

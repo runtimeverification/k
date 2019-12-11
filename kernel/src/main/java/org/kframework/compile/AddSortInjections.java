@@ -6,6 +6,7 @@ import org.kframework.attributes.HasLocation;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Context;
 import org.kframework.definition.Module;
+import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
@@ -198,7 +199,7 @@ public class AddSortInjections {
                     match(prod, declaredSort, actual, subst);
                 }
                 int i = 0;
-                match(prod, prod.sort(), expectedSort, subst);
+                matchExpected(prod, expectedSort, subst);
                 for (Sort param : iterable(prod.params())) {
                     if (subst.get(param) == null) {
                         args.add(fresh.get(i));
@@ -298,6 +299,9 @@ public class AddSortInjections {
             if (kapp.klabel().name().equals("_:/=K_")) {
                 return Sorts.Bool();
             }
+            if (kapp.att().contains(Sort.class)) {
+                expectedSort = kapp.att().get(Sort.class);
+            }
             Production prod = production(kapp);
             Production substituted = prod;
             List<Sort> args = new ArrayList<>();
@@ -318,7 +322,7 @@ public class AddSortInjections {
                     match(prod, declaredSort, actual, subst);
                 }
                 int i = 0;
-                match(prod, prod.sort(), expectedSort, subst);
+                matchExpected(prod, expectedSort, subst);
                 for (Sort param : iterable(prod.params())) {
                     if (subst.get(param) == null) {
                         args.add(fresh.get(i));
@@ -350,6 +354,25 @@ public class AddSortInjections {
             return lubSort(patternSort, rightSort, expectedSort, term, mod);
         } else {
             throw KEMException.internalError("Invalid category of k found.", term);
+        }
+    }
+
+    private void matchExpected(Production prod, Sort expectedSort, Map<Sort, List<Sort>> subst) {
+        boolean found = false;
+        outer:
+        for (Sort param : iterable(prod.params())) {
+            if (!prod.sort().contains(param)) {
+                continue;
+            }
+            for (NonTerminal nt : iterable(prod.nonterminals())) {
+                if (nt.sort().contains(param)) {
+                    continue outer;
+                }
+            }
+            found = true;
+        }
+        if (found) {
+            match(prod, prod.sort(), expectedSort, subst);
         }
     }
 

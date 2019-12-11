@@ -113,6 +113,10 @@ trait Sort extends Ordered[Sort] {
     ADT.Sort(name, params.map(p => subst.getOrElse(p, p.substitute(subst))):_*)
   }
 
+  def contains(sort: Sort): Boolean = {
+    this == sort || params.exists(_.contains(sort))
+  }
+
   def isNat: Boolean = {
     try {
       name.toInt
