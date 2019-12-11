@@ -48,7 +48,6 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
             Sort.INT,
             Sort.BIT_VECTOR,
             Sort.of(Sorts.Float()),
-            Sort.of(Sorts.String()),
             Sort.of(KORE.Sort("IntSet")),
             Sort.of(KORE.Sort("MIntSet")),
             Sort.of(KORE.Sort("FloatSet")),
