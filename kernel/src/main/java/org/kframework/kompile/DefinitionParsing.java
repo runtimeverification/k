@@ -64,6 +64,7 @@ public class DefinitionParsing {
     private final File cacheFile;
     private boolean autoImportDomains;
     private boolean kore;
+    private final KompileOptions options;
 
     private final KExceptionManager kem;
     private final FileUtil files;
@@ -79,26 +80,24 @@ public class DefinitionParsing {
 
     public DefinitionParsing(
             List<File> lookupDirectories,
-            boolean isStrict,
-            boolean profileRules,
+            KompileOptions options,
             KExceptionManager kem,
             FileUtil files,
             ParserUtils parser,
             boolean cacheParses,
-            File cacheFile,
-            boolean autoImportDomains,
-            boolean kore) {
+            File cacheFile) {
         this.lookupDirectories = lookupDirectories;
+        this.options = options;
         this.kem = kem;
         this.files = files;
         this.parser = parser;
         this.cacheParses = cacheParses;
         this.cacheFile = cacheFile;
-        this.autoImportDomains = autoImportDomains;
-        this.kore = kore;
+        this.autoImportDomains = !options.outerParsing.noPrelude;
+        this.kore = options.isKore();
         this.loader = new BinaryLoader(this.kem);
-        this.isStrict = isStrict;
-        this.profileRules = profileRules;
+        this.isStrict = options.strict();
+        this.profileRules = options.profileRules;
     }
 
     public java.util.Set<Module> parseModules(CompiledDefinition definition, String mainModule, File definitionFile, java.util.Set<String> excludeModules) {
