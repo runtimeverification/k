@@ -194,7 +194,8 @@ public class DefinitionParsing {
                         Lists.newArrayList(Kompile.BUILTIN_DIRECTORY)),
                 autoImportDomains,
                 kore);
-        return definition;
+        Module m = definition.mainModule();
+        return options.coverage ? Definition(Module(m.name(), (Set<Module>)m.imports().$bar(Set(definition.getModule("K-IO").get())), m.localSentences(), m.att()), definition.entryModules(), definition.att()) : definition;
     }
 
     protected Definition resolveConfigBubbles(Definition definition, Module defaultConfiguration) {
