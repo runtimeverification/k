@@ -32,7 +32,7 @@ if inputFile == '-':
         tempf.write(args['input'].read())
         inputFile = tempf.name
 
-returnCode = 0
+returncode = 0
 definition = args['definition']
 if args['command'] == 'parse':
     (returncode, stdout, stderr) = kast(definition, inputFile, kArgs = ['--input', args['from'], '--output', args['to']] + args['kArgs'])
