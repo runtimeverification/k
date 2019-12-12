@@ -1179,10 +1179,6 @@ on a particular program by passing the `--debugger` flag to krun, or by
 invoking the llvm backend interpreter directly. Below we provide a simple
 tutorial to explain some of the basic commands supported by the LLVM backend.
 
-Before that make sure to build K with the option `-Dproject.build.type=Debug`.
-Or modify `<kdir>/llvm-backend/pom.xml` and make sure `<project.build.type>` 
-is set to `Debug`.
-
 ### The K Definition
 
 Here is a sample K definition we will use to demonstrate debugging
@@ -1202,8 +1198,7 @@ endmodule
 ```
 
 You should compile this definition with `--backend llvm -ccopt -g` and without
-`-ccopt -O2` in order to use the debugger most effectively. If you still get 
-fields with `<optimized out>` try sending `-ccopt -O0` or `-ccopt -O1`.
+`-ccopt -O2` in order to use the debugger most effectively.
 
 ### Stepping
 
@@ -1376,6 +1371,17 @@ Using `rbreak <regex>` you can set breakpoints on multiple functions.
 -   `rbreak Lbl.*TEST` - sets a breakpoint on all `function`s from module `TEST`
 
 -   `rbreak hook_INT` - sets a breakpoint on all hooks from module `INT`
+
+### Other debugger issues
+
+-   `Python Exception <class 'gdb.error'> No type named string`
+instead of pretty printed terms, make sure to build K with the option
+`-Dproject.build.type=Debug`. Or modify `<kdir>/llvm-backend/pom.xml` and make
+sure `<project.build.type>` is set to `Debug`.
+-   `<optimized out>` try kompiling with `-ccopt -O0` or `-ccopt -O1`.
+-   `(gdb) break definition.kore:break -> No source file named definition.kore.`
+send `-ccopt -g` to kompile in order to generate debug info symbols.
+
 
 Undocumented
 ------------
