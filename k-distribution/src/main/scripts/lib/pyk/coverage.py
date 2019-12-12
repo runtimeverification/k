@@ -73,8 +73,7 @@ def translateCoverage(src_all_rules, dst_all_rules, dst_definition, src_rules_li
 
     # Filter out non-functional rules from rule map (determining if they are functional via the top symbol in the rule being `<generatedTop>`)
     dst_non_function_rules = []
-    dst_kompiled = readKastTerm(dst_kompiled_dir + '/compiled.json')
-    for module in dst_kompiled['modules']:
+    for module in dst_definition['modules']:
         for sentence in module['localSentences']:
             if isKRule(sentence):
                 ruleBody = sentence['body']
@@ -102,7 +101,7 @@ def translateCoverage(src_all_rules, dst_all_rules, dst_definition, src_rules_li
 
     return dst_rule_list
 
-def translateCoverageFromPaths(src_komplied_dir, dst_kompiled_dir, src_rules_file):
+def translateCoverageFromPaths(src_kompiled_dir, dst_kompiled_dir, src_rules_file):
     """Translate coverage information given paths to needed files.
 
     Input:
