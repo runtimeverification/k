@@ -4,9 +4,11 @@ K_LIB     := $(K_RELEASE)/lib
 
 KOMPILE = $(K_BIN)/kompile
 KAST    = $(K_BIN)/kast
+KRUN    = $(K_BIN)/krun
 KPROVE  = $(K_BIN)/kprove
+KPYK    = $(K_BIN)/kpyk
 
-KOMPILE_BACKEND?=java
+KOMPILE_BACKEND ?= llvm
 
 PYTHONPATH := $(K_LIB)
 export PYTHONPATH
@@ -22,7 +24,10 @@ clean:
 imp_kompiled:=imp-kompiled/compiled.txt
 
 $(imp_kompiled): imp.k $(KOMPILE)
-	$(KOMPILE) --backend $(KOMPILE_BACKEND) -I . $< --emit-json
+	$(KOMPILE) --backend $(KOMPILE_BACKEND) -I . $< --emit-json --coverage
+
+update-results:
+kompile:
 
 # Tests
 
@@ -60,5 +65,11 @@ $(defn_tests)/kast-tests/%.out: $(defn_tests)/kast-tests/%.gen $(imp_kompiled)
 $(defn_tests)/proof-tests/%-spec.json.prove: $(defn_tests)/proof-tests/%-spec.k $(imp_kompiled)
 	$(KPROVE) $< -m IMP
 
-update-results:
-kompile:
+## kpyk runner tests
+
+test-kpyk: test-kpyk-coverage-log
+
+test-kpyk-coverage-log: $(imp_kompiled)
+	rm -rf imp-kompiled/*_coverage.txt
+	$(KRUN) kpyk-tests/sum-to-n.imp
+	$(KPYK) coverage-log --coverage-file imp-kompiled/*_coverage.txt --definition imp-kompiled
