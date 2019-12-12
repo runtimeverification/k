@@ -1,0 +1,12 @@
+[Error] Compiler: Had 2 structural errors.
+[Error] Compiler: Symbol #KToken is not unique. Previously defined as: syntax
+KBott ::= "#token" "(" KString "," KString ")" [klabel(#KToken) symbol()]
+	Source(invalidSymbol.k)
+	Location(3,16,3,46)
+[Error] Compiler: Symbol foo is not unique. Previously defined as: syntax Baz
+::= "baz" "(" ")" [klabel(foo) symbol()]
+	Source(invalidSymbol.k)
+	Location(5,16,5,42)
+[Warning] Compiler: Could not find main syntax module with name
+INVALIDSYMBOL-SYNTAX in definition.  Use --syntax-module to specify one. Using
+INVALIDSYMBOL as default.
