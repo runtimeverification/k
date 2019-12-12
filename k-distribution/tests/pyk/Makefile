@@ -17,7 +17,7 @@ export PYTHONPATH
 all: test
 
 clean:
-	rm -rf *-kompiled
+	rm -rf $(llvm_dir) $(haskell_dir)
 
 llvm_dir          := llvm
 llvm_imp          := $(llvm_dir)/imp.k
@@ -35,7 +35,7 @@ $(llvm_imp_kompiled): $(llvm_imp) $(KOMPILE)
 	$(KOMPILE) --directory $(llvm_dir) --backend llvm -I $(llvm_dir) $< --emit-json --coverage
 
 $(haskell_imp_kompiled): $(haskell_imp) $(KOMPILE)
-	$(KOMPILE) --directory $(haskell_dir) --backend haskell -I $(haskell_dir) $< --emit-json --coverage
+	$(KOMPILE) --directory $(haskell_dir) --backend haskell -I $(haskell_dir) $< --emit-json
 
 update-results:
 kompile: $(llvm_imp_kompiled) $(haskell_imp_kompiled)
@@ -64,7 +64,7 @@ test-defn-prove: $(pyk_prove_tests:=.prove)
 $(defn_tests)/kast-tests/%.gen: $(defn_tests)/build-config.py $(llvm_imp_kompiled) $(defn_tests)/kast-tests/%.json
 	python3 $^ > $@
 
-$(defn_tests)/proof-tests/%-spec.k: $(defn_tests)/build-config.py $(llvm_imp_kompiled) $(defn_tests)/proof-tests/%-spec.json
+$(defn_tests)/proof-tests/%-spec.k: $(defn_tests)/build-config.py $(haskell_imp_kompiled) $(defn_tests)/proof-tests/%-spec.json
 	python3 $^ > $@
 
 $(defn_tests)/kast-tests/%.json.kast: $(defn_tests)/kast-tests/%.out

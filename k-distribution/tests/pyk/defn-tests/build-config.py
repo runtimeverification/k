@@ -19,7 +19,7 @@ kast_term = readKastTerm(sys.argv[2])
 
 if isKRule(kast_term):
     kast_term = minimizeRule(kast_term)
-    defn_name = sys.argv[3][:-5].split("/")[2]
+    defn_name = sys.argv[2][:-5].split("/")[2]
     mod = KFlatModule(defn_name.upper(), ["IMP"], [kast_term])
     kast_term = KDefinition(defn_name, [mod], requires = [KRequire("imp")])
 elif isKApply(kast_term):
