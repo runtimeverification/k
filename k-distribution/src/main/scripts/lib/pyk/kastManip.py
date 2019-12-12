@@ -299,6 +299,11 @@ def minimizeRule(rule):
     return KRule(ruleBody, requires = ruleRequires, ensures = ruleEnsures, att = ruleAtts)
 
 def removeSourceMap(k):
+    """Remove source map information from a given definition.
+
+    Input: A JSON encoded K object.
+    Output: The same JSON encoded object, with all source information stripped.
+    """
     def _removeSourceMap(att):
         if isKAtt(att):
             atts = att['att']
