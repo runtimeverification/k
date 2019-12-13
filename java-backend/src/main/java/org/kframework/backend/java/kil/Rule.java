@@ -7,6 +7,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import org.apache.commons.collections15.list.UnmodifiableList;
 import org.kframework.attributes.Att;
+import org.kframework.attributes.Location;
+import org.kframework.attributes.Source;
 import org.kframework.backend.java.builtins.BoolToken;
 import org.kframework.backend.java.rewritemachine.GenerateRHSInstructions;
 import org.kframework.backend.java.rewritemachine.RHSInstruction;
@@ -350,5 +352,23 @@ public class Rule extends JavaSymbolicObject<Rule> implements HasAtt {
     @Override
     public void accept(Visitor visitor) {
         visitor.visit(this);
+    }
+
+    public int compareTo(Rule anotherRule) {
+        Location loc1 = this.getLocation();
+        Location loc2 = anotherRule.getLocation();
+        String src1 = this.source().toString();
+        String src2 = anotherRule.source().toString();
+        int cmp = src1.compareTo(src2);
+        if (cmp == 0) {
+            if (loc1 != null && loc2 != null) {
+                cmp = loc1.startLine() - loc2.startLine();
+            } else if (loc1 != null) {
+                cmp = -1;
+            } else if (loc2 != null) {
+                cmp = 1;
+            }
+        }
+        return cmp;
     }
 }

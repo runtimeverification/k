@@ -34,6 +34,7 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -494,9 +495,12 @@ public class KItem extends Term implements KItemRepresentation {
                     Rule appliedRule = null;
                     KItemLog.logStartingEval(kLabelConstant, nestingLevel, kItem.global, context);
 
+                    List<Rule> sortedRulesForKLabel = new ArrayList<>(rulesForKLabel);
+                    sortedRulesForKLabel.sort(Rule::compareTo);
+
                     // an argument is concrete if it doesn't contain variables or unresolved functions
                     boolean isConcrete = kList.getContents().stream().filter(elem -> !elem.isGround() || !elem.isNormal()).collect(Collectors.toList()).isEmpty();
-                    for (Rule rule : rulesForKLabel) {
+                    for (Rule rule : sortedRulesForKLabel) {
                         try {
                             if (rule == RuleAuditing.getAuditingRule()) {
                                 RuleAuditing.beginAudit();
