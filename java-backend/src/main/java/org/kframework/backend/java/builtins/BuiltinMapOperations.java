@@ -185,12 +185,8 @@ public class BuiltinMapOperations {
         return (BuiltinSet) builder.build();
     }
 
-    public static BuiltinList keysList(BuiltinMap map, TermContext context) {
-        Term list = BuiltinSetOperations.set2list(keys(map, context), context);
-        if (! (list instanceof BuiltinList)) {
-            return null;
-        }
-        return (BuiltinList) list;
+    public static Term keysList(BuiltinMap map, TermContext context) {
+        return BuiltinSetOperations.set2list(keys(map, context), context);
     }
 
     public static BoolToken in_keys(Term key, BuiltinMap map, TermContext context) {
