@@ -6,6 +6,7 @@ import com.google.common.collect.MapDifference.ValueDifference;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multisets;
 
+import org.kframework.backend.java.builtins.BuiltinSetOperations;
 import org.kframework.backend.java.kil.*;
 import org.kframework.builtin.KLabels;
 
@@ -182,6 +183,10 @@ public class BuiltinMapOperations {
                     context.global()));
         }
         return (BuiltinSet) builder.build();
+    }
+
+    public static Term keysList(BuiltinMap map, TermContext context) {
+        return BuiltinSetOperations.set2list(keys(map, context), context);
     }
 
     public static BoolToken in_keys(Term key, BuiltinMap map, TermContext context) {

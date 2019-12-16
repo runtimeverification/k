@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+export PYTHONPATH="$(dirname "$0")/../lib:$PYTHONPATH"
+python3 -m pyk "$@"

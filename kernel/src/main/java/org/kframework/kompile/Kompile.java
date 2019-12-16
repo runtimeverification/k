@@ -92,8 +92,8 @@ public class Kompile {
         File cacheFile = kompileOptions.experimental.cacheFile != null
                 ? files.resolveWorkingDirectory(kompileOptions.experimental.cacheFile) : files.resolveKompiled("cache.bin");
         this.definitionParsing = new DefinitionParsing(
-                lookupDirectories, kompileOptions.strict(), kompileOptions.profileRules, kem, files,
-                parser, cacheParses, cacheFile, !kompileOptions.outerParsing.noPrelude, kompileOptions.isKore());
+                lookupDirectories, kompileOptions, kem, files,
+                parser, cacheParses, cacheFile);
         this.sw = sw;
 
         if (kompileOptions.backend.equals("ocaml")) {

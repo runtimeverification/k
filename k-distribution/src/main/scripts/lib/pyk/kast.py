@@ -41,6 +41,12 @@ def KApply(label, args):
 def isKApply(k):
     return k["node"] == "KApply"
 
+def KAs(pattern, alias, att = None):
+    return { "node": "KAs", "pattern": pattern, "alias": alias, "att": att }
+
+def isKAs(k):
+    return k["node"] == "KAs"
+
 def KConstant(label):
     return KApply(label, [])
 
@@ -77,11 +83,17 @@ def KAtt(atts = {}):
 def isKAtt(k):
     return k["node"] == "KAtt"
 
-def KRule(rule, requires = None, ensures = None, att = None):
-    return { "node": "KRule", "body": rule, "requires": requires, "ensures": ensures, "att": att }
+def KRule(body, requires = None, ensures = None, att = None):
+    return { "node": "KRule", "body": body, "requires": requires, "ensures": ensures, "att": att }
 
 def isKRule(k):
     return k["node"] == "KRule"
+
+def KContext(body, requires = None, ensures = None, att = None):
+    return { "node": "KContext", "body": body, "requires": requires, "att": att }
+
+def isKContext(k):
+    return k["node"] == "KContext"
 
 def KBubble(sentenceType, contents, att = None):
     return { "node": "KBubble", "sentenceType": sentenceType, "contents": contents, "att": att }
@@ -142,6 +154,12 @@ def KSyntaxSort(sort, att = None):
 
 def isKSyntaxSort(k):
     return k['node'] == 'KSyntaxSort'
+
+def KSortSynonym(newSort, oldSort, att = None):
+    return { "node": "KSortSynonym", "newSort": newSort, "oldSort": oldSort, "att": att }
+
+def isKSortSynonym(k):
+    return k['node'] == 'KSortSynonym'
 
 def KFlatModule(name, imports, localSentences, att = None):
     return { "node": "KFlatModule", "name": name, "imports": imports, "localSentences": localSentences, "att": att }
@@ -271,6 +289,10 @@ def prettyPrintKast(kast, symbolTable):
             return cellStr.rstrip()
         unparser = appliedLabelStr(label) if label not in symbolTable else symbolTable[label]
         return unparser(*unparsedArgs)
+    if isKAs(kast):
+        pattern = prettyPrintKast(kast["pattern"], symbolTable)
+        alias   = prettyPrintKast(kast["alias"], symbolTable)
+        return "( " + pattern + " #as " + alias + ")"
     if isKRewrite(kast):
         lhsStr = prettyPrintKast(kast["lhs"], symbolTable)
         rhsStr = prettyPrintKast(kast["rhs"], symbolTable)
@@ -284,25 +306,34 @@ def prettyPrintKast(kast, symbolTable):
             unparsedKSequence = '.'
         return unparsedKSequence
     if isKRule(kast):
-        body     = "\n     ".join(prettyPrintKast(kast["body"], symbolTable).split("\n"))
+        body     = indent(prettyPrintKast(kast["body"], symbolTable))
         ruleStr = "rule " + body
         requiresStr = ""
         ensuresStr  = ""
         attsStr     = prettyPrintKast(kast['att'], symbolTable)
         if kast["requires"] is not None:
             requiresStr = prettyPrintKast(kast["requires"], symbolTable)
-            requiresStr = "requires " + "\n   ".join(requiresStr.split("\n"))
+            requiresStr = "requires " + indent(requiresStr)
         if kast["ensures"] is not None:
             ensuresStr = prettyPrintKast(kast["ensures"], symbolTable)
-            ensuresStr = "ensures " + "\n  ".join(ensuresStr.split("\n"))
+            ensuresStr = "ensures " + indent(ensuresStr)
         return ruleStr + "\n  " + requiresStr + "\n  " + ensuresStr + "\n  " + attsStr
+    if isKContext(kast):
+        body        = indent(prettyPrintKast(kast["body"], symbolTable))
+        contexStr   = "context alias " + body
+        requiresStr = ""
+        attsStr     = prettyPrintKast(kast['att'], symbolTable)
+        if kast['requires'] is not None:
+            requiresStr = prettyPrintKast(kast['requires'], symbolTable)
+            requiresStr = 'requires ' + indent(requiresStr)
+        return contextStr + "\n  " + requiresStr + "\n  " + attStr
     if isKAtt(kast):
         if len(kast['att']) == 0:
             return ''
-        attStr = ''
-        for att in kast['att'].keys():
-            attStr += att + '(' + kast['att'][att] + ')'
-        return '[' + attStr + ']'
+        attStrs = [ att + '(' + kast['att'][att] + ')' for att in kast['att'].keys() ]
+        return '[ ' + ' '.join(attStrs) + ' ]'
+    if isKSortSynonym(kast):
+        return 'sort ' + kast['newSort'] + ' = ' + kast['oldSort'] + ' ' + prettyPrintKast(kast['att'])
     if isKFlatModule(kast):
         name = kast["name"]
         imports = "\n".join(['import ' + kimport for kimport in kast["imports"]])
