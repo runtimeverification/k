@@ -117,7 +117,7 @@ trait Sort extends Ordered[Sort] {
     this == sort || params.exists(_.contains(sort))
   }
 
-  def isNat: Boolean = {
+  lazy val isNat: Boolean = {
     try {
       name.toInt
       true
