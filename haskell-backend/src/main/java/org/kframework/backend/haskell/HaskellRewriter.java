@@ -96,14 +96,10 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
     @Override
     public Rewriter apply(Definition definition) {
         Module module = definition.mainModule();
-        if (!module.equals(def.executionModule()) && kProveOptions.specModule != null) {
-            throw KEMException.criticalError("Invalid module specified for rewriting. Haskell backend only supports rewriting over" +
-                    " the definition's main module.");
-        }
         return new Rewriter() {
             @Override
             public RewriterResult execute(K k, Optional<Integer> depth) {
-                Module mod = def.executionModule();
+                Module mod = getExecutionModule(module);
                 ModuleToKORE converter = new ModuleToKORE(mod, files, def.topCellInitializer, kompileOptions);
                 String koreOutput = getKoreString(k, mod, converter);
                 String defPath = files.resolveKompiled("definition.kore").getAbsolutePath();
@@ -163,7 +159,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
 
             @Override
             public K search(K initialConfiguration, Optional<Integer> depth, Optional<Integer> bound, Rule pattern, SearchType searchType) {
-                Module mod = def.executionModule();
+                Module mod = getExecutionModule(module);
                 String koreOutput = getKoreString(initialConfiguration, mod, new ModuleToKORE(mod, files, def.topCellInitializer, kompileOptions));
                 Sort initializerSort = mod.productionsFor().get(def.topCellInitializer).get().head().sort();
                 K patternTerm = RewriteToTop.toLeft(pattern.body());
@@ -240,6 +236,15 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                 } catch (ParseError parseError) {
                     throw KEMException.criticalError("Error parsing haskell backend output", parseError);
                 }
+            }
+
+            private Module getExecutionModule(Module module) {
+                Module mod = def.executionModule();
+                if (!module.equals(mod)) {
+                    throw KEMException.criticalError("Invalid module specified for rewriting. Haskell backend only supports rewriting over" +
+                            " the definition's main module.");
+                }
+                return mod;
             }
 
 
