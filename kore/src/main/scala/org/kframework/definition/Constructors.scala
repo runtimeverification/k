@@ -48,8 +48,8 @@ object Constructors {
   def SyntaxPriority(priorities: Seq[Set[Tag]]) = definition.SyntaxPriority(priorities)
   def SyntaxPriority(priorities: Seq[Set[Tag]], att: attributes.Att) = definition.SyntaxPriority(priorities, att)
 
-  def SyntaxAssociativity(assoc: definition.Associativity.Value, tags: Set[Tag]) = definition.SyntaxAssociativity(assoc, tags)
-  def SyntaxAssociativity(assoc: definition.Associativity.Value, tags: Set[Tag], att: attributes.Att) = definition.SyntaxAssociativity(assoc, tags, att)
+  def SyntaxAssociativity(assoc: definition.Associativity, tags: Set[Tag]) = definition.SyntaxAssociativity(assoc, tags)
+  def SyntaxAssociativity(assoc: definition.Associativity, tags: Set[Tag], att: attributes.Att) = definition.SyntaxAssociativity(assoc, tags, att)
 
   def Context(content: K, requires: K) = definition.Context(content, requires)
   def Context(content: K, requires: K, att: attributes.Att) = definition.Context(content, requires, att)
@@ -62,8 +62,6 @@ object Constructors {
 
   def Bubble(sentenceType: String, content: String, att: attributes.Att) =
     definition.Bubble(sentenceType, content, att)
-
-  def Associativity = definition.Associativity;
 
   // EXTRA
 

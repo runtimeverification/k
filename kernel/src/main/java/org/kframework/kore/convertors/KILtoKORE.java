@@ -20,7 +20,6 @@ import org.kframework.kil.NonTerminal;
 import org.kframework.kil.Production;
 import org.kframework.kil.Terminal;
 import org.kframework.utils.errorsystem.KEMException;
-import scala.Enumeration.Value;
 import scala.Tuple2;
 import scala.collection.JavaConverters;
 import scala.collection.Seq;
@@ -149,19 +148,19 @@ public class KILtoKORE extends KILTransformation<Object> {
     public org.kframework.definition.SyntaxAssociativity apply(PriorityExtendedAssoc ii) {
         scala.collection.Set<Tag> tags = toTags(ii.getTags(), ii);
         String assocOrig = ii.getAssoc();
-        Value assoc = applyAssoc(assocOrig);
+        Associativity assoc = applyAssoc(assocOrig);
         return SyntaxAssociativity(assoc, tags);
     }
 
-    public Value applyAssoc(String assocOrig) {
+    public Associativity applyAssoc(String assocOrig) {
         // "left", "right", "non-assoc"
         switch (assocOrig) {
         case "left":
-            return Associativity.Left();
+            return Associativity.Left;
         case "right":
-            return Associativity.Right();
+            return Associativity.Right;
         case "non-assoc":
-            return Associativity.NonAssoc();
+            return Associativity.NonAssoc;
         default:
             throw new AssertionError("Incorrect assoc string: " + assocOrig);
         }
@@ -207,7 +206,7 @@ public class KILtoKORE extends KILTransformation<Object> {
         // there are some productions
         for (PriorityBlock b : s.getPriorityBlocks()) {
             if (!b.getAssoc().equals("")) {
-                Value assoc = applyAssoc(b.getAssoc());
+                Associativity assoc = applyAssoc(b.getAssoc());
                 res.add(SyntaxAssociativity(assoc, applyToTags.apply(b)));
             }
 
