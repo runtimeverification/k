@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Semaphore;
 import java.util.stream.Collectors;
 
@@ -52,9 +53,42 @@ public class Scanner implements AutoCloseable {
         return module;
     }
 
+    public Set<Integer> kinds() {
+        return tokens.values().stream().map(v -> v._1()).collect(Collectors.toSet());
+    }
+
     // debugging method
     private TerminalLike getTokenByKind(int kind) {
         return tokens.entrySet().stream().filter(e -> e.getValue()._1() == kind).findAny().get().getKey();
+    }
+
+    public void getStandaloneScanner(File path) {
+        StringBuilder flex  = new StringBuilder();
+        flex.append("%{\n" +
+            "#include \"node.h\"\n" +
+            "#include \"parser.tab.h\"\n" +
+            "%}\n\n" +
+            "%option noyywrap\n" +
+            "%%\n\n");
+        if (this.module.allSorts().contains(Sorts.Layout())) {
+            flex.append(this.module.layout() + " ;\n");
+        }
+        List<TerminalLike> ordered = tokens.keySet().stream().sorted((t1, t2) -> tokens.get(t2)._2() - tokens.get(t1)._2()).collect(Collectors.toList());
+        for (TerminalLike key : ordered) {
+            if (key instanceof Terminal) {
+                Terminal t = (Terminal) key;
+                flex.append(StringUtil.enquoteCString(t.value()));
+            } else {
+                RegexTerminal t = (RegexTerminal) key;
+                flex.append(t.regex());
+            }
+            writeStandaloneAction(flex, key);
+        }
+        try {
+            FileUtils.write(path, flex);
+        } catch (IOException e) {
+            throw KEMException.internalError("Failed to write file for scanner", e);
+        }
     }
 
     public File getScanner() {
@@ -172,6 +206,15 @@ public class Scanner implements AutoCloseable {
                 "   fwrite(&len, sizeof(len), 1, stdout);\n" +
                 "   fwrite(yytext, 1, len, stdout);\n" +
                 " }\n");
+    }
+
+    private void writeStandaloneAction(StringBuilder flex, TerminalLike key) {
+        flex.append(" {\n" +
+            "  int kind = ").append(tokens.get(key)._1()).append(";\n" +
+            "  *((char **)&yylval) = malloc(strlen(yytext) + 1);\n" +
+            "  strcpy(*((char **)&yylval), yytext);\n" +
+            "  return kind;\n" +
+            " }\n");
     }
 
     private int maxToken = -1;
