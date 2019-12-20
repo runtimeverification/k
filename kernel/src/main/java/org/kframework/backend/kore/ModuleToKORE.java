@@ -75,7 +75,7 @@ public class ModuleToKORE {
     public static final String ALL_PATH_OP = "weakAlwaysFinally";
     public static final String HAS_DOMAIN_VALUES = "hasDomainValues";
     private final Module module;
-    private final BiMap<String, String> kToKoreLabelMap = HashBiMap.create();
+    private static final BiMap<String, String> kToKoreLabelMap = HashBiMap.create();
     private final FileUtil files;
     private final Set<String> impureFunctions = new HashSet<>();
     private final KLabel topCellInitializer;
@@ -1127,7 +1127,7 @@ public class ModuleToKORE {
         return instantiatePolySorts ? prods.get().head().substitute(term.klabel().params()) : prods.get().head();
     }
 
-    private String convertBuiltinLabel(String klabel) {
+    private static String convertBuiltinLabel(String klabel) {
       switch(klabel) {
       case "#False":
         return "\\bottom";
@@ -1156,7 +1156,7 @@ public class ModuleToKORE {
       }
     }
 
-    private void convert(KLabel klabel, StringBuilder sb) {
+    public static void convert(KLabel klabel, StringBuilder sb) {
         convert(klabel, java.util.Collections.emptySet(), sb);
     }
 
@@ -1164,7 +1164,7 @@ public class ModuleToKORE {
         convert(klabel, mutable(params), sb);
     }
 
-    private void convert(KLabel klabel, Collection<Sort> params, StringBuilder sb) {
+    private static void convert(KLabel klabel, Collection<Sort> params, StringBuilder sb) {
         if (klabel.name().equals(KLabels.INJ)) {
             sb.append(klabel.name());
         } else if (ConstructorChecks.isBuiltinLabel(klabel)) {
@@ -1204,7 +1204,7 @@ public class ModuleToKORE {
         convert(sort, prod.params(), sb);
     }
 
-    private void convert(Sort sort, StringBuilder sb) {
+    public static void convert(Sort sort, StringBuilder sb) {
         convert(sort, java.util.Collections.emptySet(), sb);
     }
 
@@ -1220,7 +1220,7 @@ public class ModuleToKORE {
         convert(sort, mutable(params), sb);
     }
 
-    private void convert(Sort sort, Collection<Sort> params, StringBuilder sb) {
+    private static void convert(Sort sort, Collection<Sort> params, StringBuilder sb) {
         if (sort.name().equals(AddSortInjections.SORTPARAM_NAME)) {
             String sortVar = sort.params().headOption().get().name();
             sb.append(sortVar);
@@ -1288,7 +1288,7 @@ public class ModuleToKORE {
     private static final Pattern identChar = Pattern.compile("[A-Za-z0-9\\-]");
     public static String[] asciiReadableEncodingKore = asciiReadableEncodingKoreCalc();
 
-    private void convert(String name, StringBuilder sb) {
+    private static void convert(String name, StringBuilder sb) {
         if (kToKoreLabelMap.containsKey(name)) {
             sb.append(kToKoreLabelMap.get(name));
             return;
