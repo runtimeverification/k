@@ -92,6 +92,14 @@ public final class KastOptions {
     @ParametersDelegate
     public PrintOptions print = new PrintOptions(OutputModes.KAST);
 
+    @Parameter(names={"--gen-parser"}, description="Generate a Bison/Flex parser for the specified module and sort.")
+    public boolean genParser;
+
+    public File outputFile() {
+        checkSingleFile();
+        return files.get().resolveWorkingDirectory(parameters.get(0));
+    }
+
     @Parameter(names={"--expression", "-e"}, description="An expression to parse passed on the command " +
     "line. It is an error to provide both this option and a file to parse.")
     private String expression;
