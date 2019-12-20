@@ -1,0 +1,9 @@
+Tests that need to pass if :=K, :/=K would be implemented without [owise]:
+    1. :=K wrapped in a function in definition module, over symbolic argument.
+    2. :/=K wrapped in a function in definition module, over symbolic argument.
+
+Tests expected to fail because :=K, :/=K operators are not supported outside extended definition module:
+    3. :=K straight in side condition of spec rule, over concrete arg.
+    4. :/=K straight in side condition of spec rule, over concrete arg.
+    5. :=K straight in side condition of spec rule, over symbolic arg.
+    6. :/=K straight in side condition of spec rule, over symbolic arg.
