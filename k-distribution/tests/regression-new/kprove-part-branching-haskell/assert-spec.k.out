@@ -1,0 +1,11 @@
+  #Not ( {
+    A
+  #Equals
+    0
+  } )
+#And
+  <T>
+    <k>
+      assert false
+    </k>
+  </T>
