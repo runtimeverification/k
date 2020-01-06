@@ -160,10 +160,10 @@ public class KastFrontEnd extends FrontEnd {
                             throw KEMException.internalError("bison returned nonzero exit code: " + exit + "\n");
                         }
                         exit = files.getProcessBuilder()
-                          .command("gcc", 
-                              files.resolveKBase("include/cparser/main.c").getAbsolutePath(), 
-                              files.resolveTemp("lex.yy.c").getAbsolutePath(), 
-                              files.resolveTemp("parser.tab.c").getAbsolutePath(), 
+                          .command("gcc",
+                              files.resolveKBase("include/cparser/main.c").getAbsolutePath(),
+                              files.resolveTemp("lex.yy.c").getAbsolutePath(),
+                              files.resolveTemp("parser.tab.c").getAbsolutePath(),
                               "-iquote", files.resolveTemp(".").getAbsolutePath(),
                               "-iquote", files.resolveKBase("include/cparser").getAbsolutePath(),
                               "-o", outputFile.getAbsolutePath())

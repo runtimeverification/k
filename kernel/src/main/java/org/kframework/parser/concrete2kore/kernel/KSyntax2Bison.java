@@ -69,7 +69,7 @@ public class KSyntax2Bison {
     items.set(idx, NonTerminal(Sort(nt.sort().name() + "#" + ordinal, nt.sort().params()), nt.name()));
     nts.add(Tuple2.apply(nt.sort(), prods));
   }
-   
+
   public static Module transformByPriorityAndAssociativity(Module module) {
     Map<Set<Tag>, Integer> ordinals = new HashMap<>();
     MutableInt nextOrdinal = new MutableInt(0);
@@ -165,7 +165,7 @@ public class KSyntax2Bison {
   }
 
   private static final Pattern identChar = Pattern.compile("[A-Za-z0-9]");
-  
+
   private static void encode(Sort sort, StringBuilder sb) {
     sb.append("Sort");
     StringUtil.encodeStringToAlphanumeric(sb, sort.name(), StringUtil.asciiReadableEncodingDefault, identChar, "_");
