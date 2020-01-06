@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -154,7 +155,7 @@ public class KSyntax2Bison {
       encode(sort, bison);
       bison.append(":\n");
       String conn = "";
-      for (Production prod : prods.get(sort)) {
+      for (Production prod : Optional.ofNullable(prods.get(sort)).orElse(java.util.Collections.emptyList())) {
         bison.append("  " + conn);
         processProduction(prod, module, scanner, bison);
         conn = "|";
