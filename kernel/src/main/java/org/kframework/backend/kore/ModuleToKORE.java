@@ -704,8 +704,12 @@ public class ModuleToKORE {
         List<K> leftChildren = null;
         K left = RewriteToTop.toLeft(rule.body());
         boolean constructorBased = constructorChecks.isConstructorBased(left);
-        if (left instanceof KApply) {
-            production = production((KApply) left, true);
+        K leftPattern = left;
+        while (leftPattern instanceof KAs) {
+            leftPattern = ((KAs)leftPattern).pattern();
+        }
+        if (leftPattern instanceof KApply) {
+            production = production((KApply) leftPattern, true);
             productionSort = production.sort();
             productionSortStr = getSortStr(productionSort);
             productionSorts = stream(production.items())
@@ -714,7 +718,7 @@ public class ModuleToKORE {
                     .map(NonTerminal::sort).collect(Collectors.toList());
             productionLabel = production.klabel().get();
             if (isFunction(production) || rule.att().contains(Attribute.ANYWHERE_KEY) && !kore) {
-                leftChildren = ((KApply) left).items();
+                leftChildren = ((KApply) leftPattern).items();
                 equation = true;
             } else if ((rule.att().contains("heat") || rule.att().contains("cool")) && heatCoolEq) {
                 equation = true;
