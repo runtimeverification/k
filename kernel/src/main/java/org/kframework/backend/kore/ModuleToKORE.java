@@ -1139,6 +1139,8 @@ public class ModuleToKORE {
         return "\\and";
       case "#Not":
         return "\\not";
+      case "#Floor":
+        return "\\floor";
       case "#Ceil":
         return "\\ceil";
       case "#Equals":
@@ -1151,6 +1153,8 @@ public class ModuleToKORE {
         return "\\forall";
       case "#AG":
         return "allPathGlobally";
+      case "weakExistsFinally":
+        return "weakExistsFinally";
       default:
         throw KEMException.compilerError("Unsuppored kore connective in rule: " + klabel);
       }
