@@ -81,8 +81,8 @@ public class KSyntax2Bison {
     for (Sentence s : iterable(module.sentences())) {
       if (s instanceof Production) {
         Production prod = (Production)s;
-        if (prod.klabel().isDefined()) {
-          List<ProductionItem> items = mutable(prod.items());
+        if (prod.klabel().isDefined() && prod.params().isEmpty()) {
+          List<ProductionItem> items = new ArrayList<>(mutable(prod.items()));
           if (items.get(0) instanceof NonTerminal) {
             computeSide(0, prod, items, module, module.rightAssoc(), ordinals, nts, nextOrdinal);
           }
