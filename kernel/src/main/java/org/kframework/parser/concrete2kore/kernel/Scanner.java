@@ -58,7 +58,7 @@ public class Scanner implements AutoCloseable {
     }
 
     // debugging method
-    private TerminalLike getTokenByKind(int kind) {
+    public TerminalLike getTokenByKind(int kind) {
         return tokens.entrySet().stream().filter(e -> e.getValue()._1() == kind).findAny().get().getKey();
     }
 

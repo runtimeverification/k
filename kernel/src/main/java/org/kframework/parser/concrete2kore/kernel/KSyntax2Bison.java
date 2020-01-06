@@ -12,6 +12,7 @@ import org.kframework.definition.Module;
 import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
 import org.kframework.definition.ProductionItem;
+import org.kframework.definition.RegexTerminal;
 import org.kframework.definition.Sentence;
 import org.kframework.definition.SyntaxAssociativity;
 import org.kframework.definition.Tag;
@@ -128,7 +129,14 @@ public class KSyntax2Bison {
         "%}\n\n");
     bison.append("%define api.value.type union\n");
     for (int kind : scanner.kinds()) {
-      bison.append("%token <char *> TOK_" + kind + " " + kind + "\n");
+      TerminalLike tok = scanner.getTokenByKind(kind);
+      String val;
+      if (tok instanceof Terminal) {
+        val = ((Terminal)tok).value();
+      } else {
+        val = ((RegexTerminal)tok).regex();
+      }
+      bison.append("%token <char *> TOK_" + kind + " " + kind + " " + StringUtil.enquoteCString(val) + "\n");
     }
     for (Sort sort : iterable(module.allSorts())) {
       bison.append("%nterm <node *> ");
