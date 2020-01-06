@@ -5,6 +5,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.kframework.Collections;
 import org.kframework.TopologicalSort;
+import org.kframework.attributes.Att;
 import org.kframework.backend.kore.ModuleToKORE;
 import org.kframework.definition.Associativity;
 import org.kframework.definition.Module;
@@ -147,7 +148,7 @@ public class KSyntax2Bison {
       String conn = "";
       for (Production prod : prods.get(sort)) {
         bison.append("  " + conn);
-        processProduction(prod, scanner, bison);
+        processProduction(prod, module, scanner, bison);
         conn = "|";
       }
       bison.append(";\n");
@@ -179,7 +180,7 @@ public class KSyntax2Bison {
     sb.append("_");
   }
 
-  private static void processProduction(Production prod, Scanner scanner, StringBuilder bison) {
+  private static void processProduction(Production prod, Module module, Scanner scanner, StringBuilder bison) {
     int i = 1;
     List<Integer> nts = new ArrayList<>();
     for (ProductionItem item : iterable(prod.items())) {
@@ -202,7 +203,16 @@ public class KSyntax2Bison {
     if (prod.att().contains("token") && !prod.isSubsort()) {
       bison.append("{\n" +
           "  node *n = malloc(sizeof(node));\n" +
-          "  n->symbol = enquote($1);\n" +
+          "  n->symbol = ");
+      boolean isString = module.sortAttributesFor().get(prod.sort().head()).getOrElse(() -> Att.empty()).getOptional("hook").orElse("").equals("STRING.String");
+      if (!isString) {
+        bison.append("enquote(");
+      }
+      bison.append("$1");
+      if (!isString) {
+        bison.append(")");
+      }
+      bison.append(";\n" +
           "  n->str = true;\n" +
           "  n->nchildren = 0;\n" +
           "  node *n2 = malloc(sizeof(node) + sizeof(node *));\n" +
