@@ -90,6 +90,8 @@ module ARRAY
 endmodule
 
 module MAP
+  imports BOOL-SYNTAX
+  imports INT-SYNTAX
   imports LIST
   imports SET
 
