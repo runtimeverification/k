@@ -129,6 +129,7 @@ public class KSyntax2Bison {
         "node *result;\n" +
         "%}\n\n");
     bison.append("%define api.value.type union\n");
+    bison.append("%define parse.error verbose\n");
     for (int kind : scanner.kinds()) {
       TerminalLike tok = scanner.getTokenByKind(kind);
       String val;
