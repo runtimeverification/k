@@ -145,7 +145,8 @@ public class KastFrontEnd extends FrontEnd {
                         KSyntax2Bison.getParser(parseInModule.getParsingModule(), scanner, sort, parserFile);
                         int exit = files.getProcessBuilder()
                           .directory(files.resolveTemp("."))
-                          .command("flex", scannerFile.getAbsolutePath())
+                          .command("flex", "-w", scannerFile.getAbsolutePath())
+                          .inheritIO()
                           .start()
                           .waitFor();
                         if (exit != 0) {
@@ -153,7 +154,8 @@ public class KastFrontEnd extends FrontEnd {
                         }
                         exit = files.getProcessBuilder()
                           .directory(files.resolveTemp("."))
-                          .command("bison", "-d", parserFile.getAbsolutePath())
+                          .command("bison", "-d", "-Wno-other", "-Wno-conflicts-sr", "-Wno-conflicts-rr", parserFile.getAbsolutePath())
+                          .inheritIO()
                           .start()
                           .waitFor();
                         if (exit != 0) {
