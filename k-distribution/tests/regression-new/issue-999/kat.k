@@ -85,7 +85,7 @@ module KAT
      rule ZERO Kat; _:Kat => ZERO
      rule _:Kat Kat; ZERO => ZERO
 
-     // general sequential operation; why shouldn't this be used? 
+     // general sequential operation; why shouldn't this be used?
      // rule A:Kat Kat; B:Kat => A ~> B
 
 
@@ -94,7 +94,7 @@ module KAT
      rule ZERO Kat| B:Kat => B
      rule B:Kat Kat| ZERO => B
 
-    // Kleene-Star Operator: 
+    // Kleene-Star Operator:
 
      rule B:Kat Kat* => .Kat              [klabel(_KLE_0)]
      rule B:Kat Kat* => B                 [klabel(_KLE_1)]
