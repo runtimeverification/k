@@ -1,10 +1,7 @@
 // Copyright (c) 2018-2019 K Team. All Rights Reserved.
 package org.kframework.backend.kore;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Maps;
 import com.google.common.collect.SetMultimap;
 import org.kframework.Collections;
 import org.kframework.attributes.Att;
@@ -76,7 +73,6 @@ public class ModuleToKORE {
     public static final String ALL_PATH_OP = "weakAlwaysFinally";
     public static final String HAS_DOMAIN_VALUES = "hasDomainValues";
     private final Module module;
-    private static final BiMap<String, String> kToKoreLabelMap = Maps.synchronizedBiMap(HashBiMap.create());
     private final FileUtil files;
     private final Set<String> impureFunctions = new HashSet<>();
     private final KLabel topCellInitializer;
@@ -1298,10 +1294,6 @@ public class ModuleToKORE {
     public static String[] asciiReadableEncodingKore = asciiReadableEncodingKoreCalc();
 
     private static void convert(String name, StringBuilder sb) {
-        if (kToKoreLabelMap.containsKey(name)) {
-            sb.append(kToKoreLabelMap.get(name));
-            return;
-        }
         switch(name) {
         case "module":
         case "endmodule":
@@ -1312,14 +1304,12 @@ public class ModuleToKORE {
         case "alias":
         case "axiom":
             sb.append(name).append("'Kywd'");
-            kToKoreLabelMap.put(name, name + "'Kywd'");
             return;
         default: break;
         }
         StringBuilder buffer = new StringBuilder();
         StringUtil.encodeStringToAlphanumeric(buffer, name, asciiReadableEncodingKore, identChar, "'");
         sb.append(buffer);
-        kToKoreLabelMap.put(name, buffer.toString());
     }
 
     public Set<K> collectAnonymousVariables(K k){
@@ -1472,9 +1462,5 @@ public class ModuleToKORE {
                 throw KEMException.internalError("Cannot yet translate #klabel to kore", k);
             }
         }.apply(k);
-    }
-
-    public BiMap<String, String> getKToKoreLabelMap() {
-        return kToKoreLabelMap;
     }
 }
