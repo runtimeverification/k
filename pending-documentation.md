@@ -1374,10 +1374,6 @@ Using `rbreak <regex>` you can set breakpoints on multiple functions.
 
 ### Other debugger issues
 
--   `Python Exception <class 'gdb.error'> No type named string`
-instead of pretty printed terms, make sure to build K with the option
-`-Dproject.build.type=Debug`. Or modify `<kdir>/llvm-backend/pom.xml` and make
-sure `<project.build.type>` is set to `Debug`.
 -   `<optimized out>` try kompiling with `-ccopt -O0` or `-ccopt -O1`.
 -   `(gdb) break definition.kore:break -> No source file named definition.kore.`
 send `-ccopt -g` to kompile in order to generate debug info symbols.
