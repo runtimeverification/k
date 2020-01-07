@@ -19,6 +19,8 @@ import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.JarInfo;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -81,7 +83,11 @@ public class CheckKLabels {
                 if (klabels.containsKey(klabel) && !m.equals(klabels.get(klabel)) && !kore) {
                     errors.add(KEMException.compilerError("KLabel " + klabel.name() + " defined in multiple modules: " + klabels.get(klabel).name() + " and " + m.name() + ".", prod));
                 }
-                if (klabelProds.containsKey(klabel.name()) && kore && !prod.att().get(Source.class).source().equals(JarInfo.getKBase() + "/include/builtin/kast.k")) {
+                File kast_k = JarInfo.getKIncludeDir().resolve("builtin").resolve("kast.k").toFile();
+                try {
+                    kast_k = kast_k.getCanonicalFile();
+                } catch (IOException e) {}
+                if (klabelProds.containsKey(klabel.name()) && kore && !prod.att().get(Source.class).source().equals(kast_k.getAbsolutePath())) {
                     errors.add(KEMException.compilerError("Symbol " + klabel.name() + " is not unique. Previously defined as: " + klabelProds.get(klabel.name()), prod));
                 }
                 klabels.put(klabel, m);
