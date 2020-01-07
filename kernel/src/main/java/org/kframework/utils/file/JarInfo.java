@@ -50,7 +50,17 @@ public class JarInfo {
      * @return
      */
     public static Path getKIncludeDir() {
-        return Paths.get(getKBase(), "include");
+        Path path;
+        try {
+            path = Paths.get(JarInfo.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+        } catch (URISyntaxException e) {
+            return null;
+        }
+        if (!path.toFile().getAbsolutePath().endsWith(".jar") || path.getParent().getFileName().toString().equals("target")) {
+            return path.getParent().resolve("../../k-distribution/include");
+        } else {
+            return path.getParent().resolve("../../include");
+        }
     }
 
     private final KExceptionManager kem;
