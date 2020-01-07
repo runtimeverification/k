@@ -84,6 +84,7 @@ public class RuleGrammarGenerator {
 
     public static final String POSTFIX = "-PROGRAM-PARSING";
 
+    public static final String NOT_INJECTION = "notInjection";
     public static final String ID = "ID";
     public static final String ID_PROGRAM_PARSING = ID + POSTFIX;
     private static final String ID_SYNTAX = "ID$SYNTAX";
@@ -392,9 +393,9 @@ public class RuleGrammarGenerator {
                         Seq(NonTerminal(ul.childSort), Terminal(""), NonTerminal(Sort(ul.sort.name() + "#Terminator", ul.sort.params()))),
                         newAtts.add(Constants.ORIGINAL_PRD, Production.class, ul.pList));
                 // Es ::= Ne#Es
-                prod4 = Production(Seq(), ul.sort, Seq(NonTerminal(Sort("Ne#" + ul.sort.name(), ul.sort.params()))), Att().add("notInjection"));
+                prod4 = Production(Seq(), ul.sort, Seq(NonTerminal(Sort("Ne#" + ul.sort.name(), ul.sort.params()))), Att().add(NOT_INJECTION));
                 // Es ::= Es#Terminator // if the list is *
-                prod5 = Production(Seq(), ul.sort, Seq(NonTerminal(Sort(ul.sort.name() + "#Terminator", ul.sort.params()))), Att().add("notInjection"));
+                prod5 = Production(Seq(), ul.sort, Seq(NonTerminal(Sort(ul.sort.name() + "#Terminator", ul.sort.params()))), Att().add(NOT_INJECTION));
 
                 res.add(prod1);
                 res.add(prod2);

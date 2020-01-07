@@ -21,6 +21,7 @@ import org.kframework.definition.TerminalLike;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.Sort;
+import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
 
@@ -234,7 +235,7 @@ public class KSyntax2Bison {
           "  n2->children[0] = n;\n" +
           "  $$ = n2;\n" +
           "}\n");
-    } else if (!prod.att().contains("token") && prod.isSubsort() && !prod.att().contains("notInjection")) {
+    } else if (!prod.att().contains("token") && prod.isSubsort() && !prod.att().contains(RuleGrammarGenerator.NOT_INJECTION)) {
       bison.append("{\n" +
           "  node *n = malloc(sizeof(node) + sizeof(node *));\n" +
           "  n->symbol = \"inj{");
