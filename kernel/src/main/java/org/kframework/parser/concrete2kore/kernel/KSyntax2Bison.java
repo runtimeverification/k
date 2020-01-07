@@ -117,7 +117,7 @@ public class KSyntax2Bison {
     return Module(module.name(), module.imports(), immutable(sentences), module.att());
   }
 
-  public static void getParser(Module module, Scanner scanner, Sort start, File path) {
+  public static void writeParser(Module module, Scanner scanner, Sort start, File path) {
     module = transformByPriorityAndAssociativity(module);
     StringBuilder bison = new StringBuilder();
     bison.append("%{\n" +

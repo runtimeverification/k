@@ -62,7 +62,7 @@ public class Scanner implements AutoCloseable {
         return tokens.entrySet().stream().filter(e -> e.getValue()._1() == kind).findAny().get().getKey();
     }
 
-    public void getStandaloneScanner(File path) {
+    public void writeStandaloneScanner(File path) {
         StringBuilder flex  = new StringBuilder();
         flex.append("%{\n" +
             "#include \"node.h\"\n" +

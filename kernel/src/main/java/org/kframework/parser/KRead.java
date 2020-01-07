@@ -68,8 +68,8 @@ public class KRead {
             try (Scanner scanner = parseInModule.getScanner()) {
                 File scannerFile = files.resolveTemp("scanner.l");
                 File parserFile = files.resolveTemp("parser.y");
-                scanner.getStandaloneScanner(scannerFile);
-                KSyntax2Bison.getParser(parseInModule.getParsingModule(), scanner, sort, parserFile);
+                scanner.writeStandaloneScanner(scannerFile);
+                KSyntax2Bison.writeParser(parseInModule.getParsingModule(), scanner, sort, parserFile);
                 int exit = files.getProcessBuilder()
                   .directory(files.resolveTemp("."))
                   .command("flex", "-w", scannerFile.getAbsolutePath())
