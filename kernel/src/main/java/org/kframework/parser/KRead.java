@@ -7,6 +7,10 @@ import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kore.K;
 import org.kframework.kore.Sort;
 import org.kframework.parser.binary.BinaryParser;
+import org.kframework.parser.concrete2kore.ParseInModule;
+import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
+import org.kframework.parser.concrete2kore.kernel.KSyntax2Bison;
+import org.kframework.parser.concrete2kore.kernel.Scanner;
 import org.kframework.parser.json.JsonParser;
 import org.kframework.parser.kast.KastParser;
 import org.kframework.utils.errorsystem.KEMException;
@@ -14,6 +18,7 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.Character;
@@ -55,6 +60,51 @@ public class KRead {
                 return def.parseSingleTerm(mod, sort, kem, stringToParse, source);
             default:
                 throw KEMException.criticalError("Unsupported input mode: " + inputMode);
+        }
+    }
+
+    public void createBisonParser(Module mod, Sort sort, File outputFile) {
+        try (ParseInModule parseInModule = RuleGrammarGenerator.getCombinedGrammar(mod, true)) {
+            try (Scanner scanner = parseInModule.getScanner()) {
+                File scannerFile = files.resolveTemp("scanner.l");
+                File parserFile = files.resolveTemp("parser.y");
+                scanner.getStandaloneScanner(scannerFile);
+                KSyntax2Bison.getParser(parseInModule.getParsingModule(), scanner, sort, parserFile);
+                int exit = files.getProcessBuilder()
+                  .directory(files.resolveTemp("."))
+                  .command("flex", "-w", scannerFile.getAbsolutePath())
+                  .inheritIO()
+                  .start()
+                  .waitFor();
+                if (exit != 0) {
+                    throw KEMException.internalError("flex returned nonzero exit code: " + exit + "\n");
+                }
+                exit = files.getProcessBuilder()
+                  .directory(files.resolveTemp("."))
+                  .command("bison", "-d", "-Wno-other", "-Wno-conflicts-sr", "-Wno-conflicts-rr", parserFile.getAbsolutePath())
+                  .inheritIO()
+                  .start()
+                  .waitFor();
+                if (exit != 0) {
+                    throw KEMException.internalError("bison returned nonzero exit code: " + exit + "\n");
+                }
+                exit = files.getProcessBuilder()
+                  .command("gcc",
+                      files.resolveKBase("include/cparser/main.c").getAbsolutePath(),
+                      files.resolveTemp("lex.yy.c").getAbsolutePath(),
+                      files.resolveTemp("parser.tab.c").getAbsolutePath(),
+                      "-iquote", files.resolveTemp(".").getAbsolutePath(),
+                      "-iquote", files.resolveKBase("include/cparser").getAbsolutePath(),
+                      "-o", outputFile.getAbsolutePath())
+                  .inheritIO()
+                  .start()
+                  .waitFor();
+                if (exit != 0) {
+                    throw KEMException.internalError("gcc returned nonzero exit code: " + exit + "\n");
+                }
+            } catch(IOException | InterruptedException e) {
+              throw KEMException.internalError("Failed to execute process.", e);
+            }
         }
     }
 

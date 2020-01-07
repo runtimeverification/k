@@ -10,7 +10,6 @@ import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kore.K;
 import org.kframework.main.FrontEnd;
 import org.kframework.parser.KRead;
-import org.kframework.parser.concrete2kore.ParseInModule;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.parser.concrete2kore.kernel.Scanner;
 import org.kframework.parser.concrete2kore.kernel.KSyntax2Bison;
@@ -136,49 +135,7 @@ public class KastFrontEnd extends FrontEnd {
             Module parsingMod = maybeMod.get();
 
             if (options.genParser) {
-                try (ParseInModule parseInModule = RuleGrammarGenerator.getCombinedGrammar(parsingMod, true)) {
-                    try (Scanner scanner = parseInModule.getScanner()) {
-                        FileUtil files = this.files.get();
-                        File scannerFile = files.resolveTemp("scanner.l");
-                        File parserFile = files.resolveTemp("parser.y");
-                        scanner.getStandaloneScanner(scannerFile);
-                        KSyntax2Bison.getParser(parseInModule.getParsingModule(), scanner, sort, parserFile);
-                        int exit = files.getProcessBuilder()
-                          .directory(files.resolveTemp("."))
-                          .command("flex", "-w", scannerFile.getAbsolutePath())
-                          .inheritIO()
-                          .start()
-                          .waitFor();
-                        if (exit != 0) {
-                            throw KEMException.internalError("flex returned nonzero exit code: " + exit + "\n");
-                        }
-                        exit = files.getProcessBuilder()
-                          .directory(files.resolveTemp("."))
-                          .command("bison", "-d", "-Wno-other", "-Wno-conflicts-sr", "-Wno-conflicts-rr", parserFile.getAbsolutePath())
-                          .inheritIO()
-                          .start()
-                          .waitFor();
-                        if (exit != 0) {
-                            throw KEMException.internalError("bison returned nonzero exit code: " + exit + "\n");
-                        }
-                        exit = files.getProcessBuilder()
-                          .command("gcc",
-                              files.resolveKBase("include/cparser/main.c").getAbsolutePath(),
-                              files.resolveTemp("lex.yy.c").getAbsolutePath(),
-                              files.resolveTemp("parser.tab.c").getAbsolutePath(),
-                              "-iquote", files.resolveTemp(".").getAbsolutePath(),
-                              "-iquote", files.resolveKBase("include/cparser").getAbsolutePath(),
-                              "-o", outputFile.getAbsolutePath())
-                          .inheritIO()
-                          .start()
-                          .waitFor();
-                        if (exit != 0) {
-                            throw KEMException.internalError("gcc returned nonzero exit code: " + exit + "\n");
-                        }
-                    } catch(IOException | InterruptedException e) {
-                      throw KEMException.internalError("Failed to execute process.", e);
-                    }
-                }
+              kread.createBisonParser(parsingMod, sort, outputFile);
             } else {
               K parsed = kread.prettyRead(parsingMod, sort, def, source, FileUtil.read(stringToParse));
 
