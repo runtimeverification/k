@@ -1,0 +1,6 @@
+#!/bin/bash
+in=$(mktemp)
+out=$(mktemp)
+"$(dirname "$0")"/imp-kompiled/parser_PGM "$1" > "$in"
+llvm-krun -d "$(dirname "$0")/imp-kompiled" -c PGM "$in" Pgm korefile -o "$out"
+kast --input kore --output pretty "$out"
