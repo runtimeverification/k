@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Semaphore;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 /**
@@ -62,14 +63,7 @@ public class Scanner implements AutoCloseable {
         return tokens.entrySet().stream().filter(e -> e.getValue()._1() == kind).findAny().get().getKey();
     }
 
-    public void writeStandaloneScanner(File path) {
-        StringBuilder flex  = new StringBuilder();
-        flex.append("%{\n" +
-            "#include \"node.h\"\n" +
-            "#include \"parser.tab.h\"\n" +
-            "%}\n\n" +
-            "%option noyywrap\n" +
-            "%%\n\n");
+    public void appendScanner(StringBuilder flex, BiConsumer<StringBuilder, TerminalLike> writeAction) {
         if (this.module.allSorts().contains(Sorts.Layout())) {
             flex.append(this.module.layout() + " ;\n");
         }
@@ -82,8 +76,19 @@ public class Scanner implements AutoCloseable {
                 RegexTerminal t = (RegexTerminal) key;
                 flex.append(t.regex());
             }
-            writeStandaloneAction(flex, key);
+            writeAction.accept(flex, key);
         }
+    }
+
+    public void writeStandaloneScanner(File path) {
+        StringBuilder flex  = new StringBuilder();
+        flex.append("%{\n" +
+            "#include \"node.h\"\n" +
+            "#include \"parser.tab.h\"\n" +
+            "%}\n\n" +
+            "%option noyywrap\n" +
+            "%%\n\n");
+        appendScanner(flex, this::writeStandaloneAction);
         try {
             FileUtils.write(path, flex);
         } catch (IOException e) {
@@ -117,20 +122,7 @@ public class Scanner implements AutoCloseable {
                     "char *buffer;\n" +
                     "%}\n\n" +
                     "%%\n\n");
-            if (this.module.allSorts().contains(Sorts.Layout())) {
-                flex.append(this.module.layout() + " ;\n");
-            }
-            List<TerminalLike> ordered = tokens.keySet().stream().sorted((t1, t2) -> tokens.get(t2)._2() - tokens.get(t1)._2()).collect(Collectors.toList());
-            for (TerminalLike key : ordered) {
-                if (key instanceof Terminal) {
-                    Terminal t = (Terminal) key;
-                    flex.append(StringUtil.enquoteCString(t.value()));
-                } else {
-                    RegexTerminal t = (RegexTerminal) key;
-                    flex.append(t.regex());
-                }
-                writeAction(flex, key);
-            }
+            appendScanner(flex, this::writeAction);
             //WIN32 fix for line terminator issue: https://sourceforge.net/p/mingw/mailman/message/11374534/
             flex.append("\n\n%%\n\n" +
                     "int main(int argc, char **argv) {\n" +
