@@ -4,6 +4,7 @@ package org.kframework.backend.kore;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Maps;
 import com.google.common.collect.SetMultimap;
 import org.kframework.Collections;
 import org.kframework.attributes.Att;
@@ -75,7 +76,7 @@ public class ModuleToKORE {
     public static final String ALL_PATH_OP = "weakAlwaysFinally";
     public static final String HAS_DOMAIN_VALUES = "hasDomainValues";
     private final Module module;
-    private static final BiMap<String, String> kToKoreLabelMap = HashBiMap.create();
+    private static final BiMap<String, String> kToKoreLabelMap = Maps.synchronizedBiMap(HashBiMap.create());
     private final FileUtil files;
     private final Set<String> impureFunctions = new HashSet<>();
     private final KLabel topCellInitializer;
