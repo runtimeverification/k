@@ -25,11 +25,11 @@ import org.kframework.kore.KVariable;
 import org.kframework.kore.SortedADT;
 import org.kframework.backend.java.compile.ConvertDataStructureToLookup;
 import org.kframework.kore.TransformK;
+import org.kframework.kprove.KProveOptions;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 
-import static org.kframework.definition.Constructors.*;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -38,7 +38,7 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-public class JavaBackend implements Backend {
+public class JavaBackend extends AbstractBackend {
 
     public static final String MAIN_AUTOMATON = "mainAutomaton";
     public static final String SPEC_AUTOMATON = "specAutomaton";
@@ -75,7 +75,9 @@ public class JavaBackend implements Backend {
     }
 
     @Inject
-    public JavaBackend(KExceptionManager kem, FileUtil files, GlobalOptions globalOptions, KompileOptions kompileOptions) {
+    public JavaBackend(KExceptionManager kem, FileUtil files, GlobalOptions globalOptions,
+                       KompileOptions kompileOptions, KProveOptions kproveOptions) {
+        super(kproveOptions);
         this.kem = kem;
         this.files = files;
         this.globalOptions = globalOptions;
@@ -104,6 +106,7 @@ public class JavaBackend implements Backend {
                 .andThen(DefinitionTransformer.fromRuleBodyTransformer(JavaBackend::convertKSeqToKApply, "kseq to kapply"))
                 .andThen(DefinitionTransformer.fromRuleBodyTransformer(NormalizeKSeq.self()::apply, "normalize kseq"))
                 .andThen(JavaBackend::markRegularRules)
+                .andThen(this::markExtraConcreteRules)
                 .andThen(DefinitionTransformer.fromSentenceTransformer(new AddConfigurationRecoveryFlags(), "add refers_THIS_CONFIGURATION_marker"))
                 .andThen(DefinitionTransformer.fromSentenceTransformer(JavaBackend::markSingleVariables, "mark single variables"))
                 .andThen(DefinitionTransformer.from(new AssocCommToAssoc(), "convert AC matching to A matching"))

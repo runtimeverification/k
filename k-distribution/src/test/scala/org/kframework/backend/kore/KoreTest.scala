@@ -10,9 +10,10 @@ import org.kframework.utils.options.OuterParsingOptions
 import org.kframework.parser.kore._
 import org.kframework.parser.kore.implementation.{DefaultBuilders => B}
 import org.kframework.parser.kore.parser.TextToKore
-
 import java.io.File
 import java.nio.file.Files
+
+import org.kframework.kprove.KProveOptions
 
 class KoreTest {
 
@@ -37,7 +38,7 @@ class KoreTest {
 
   def kompile(k: String): Definition = {
     val compiler = new Kompile(options, files, kem, false)
-    val backend = new KoreBackend(options, files, kem)
+    val backend = new KoreBackend(options, new KProveOptions, files, kem)
     files.saveToDefinitionDirectory("test.k", k)
     val defn = compiler.run(files.resolveDefinitionDirectory("test.k"), "TEST", "TEST", backend.steps, backend.excludedModuleTags)
     backend.accept(defn)

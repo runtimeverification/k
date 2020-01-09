@@ -8,6 +8,7 @@ import org.kframework.backend.llvm.matching.Matching;
 import org.kframework.backend.kore.KoreBackend;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.KompileOptions;
+import org.kframework.kprove.KProveOptions;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
@@ -17,7 +18,6 @@ import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 public class LLVMBackend extends KoreBackend {
@@ -29,10 +29,11 @@ public class LLVMBackend extends KoreBackend {
     @Inject
     public LLVMBackend(
             KompileOptions kompileOptions,
+            KProveOptions kproveOptions,
             FileUtil files,
             KExceptionManager kem,
             LLVMKompileOptions options) {
-        super(kompileOptions, files, kem);
+        super(kompileOptions, kproveOptions, files, kem);
         this.options = options;
         this.kompileOptions = kompileOptions;
         this.kem = kem;
