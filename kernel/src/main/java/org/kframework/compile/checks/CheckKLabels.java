@@ -2,6 +2,7 @@
 package org.kframework.compile.checks;
 
 import com.google.common.collect.ImmutableSet;
+import org.kframework.attributes.Source;
 import org.kframework.definition.Context;
 import org.kframework.definition.Module;
 import org.kframework.definition.Production;
@@ -16,7 +17,10 @@ import org.kframework.kore.KVariable;
 import org.kframework.kore.VisitK;
 import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.file.JarInfo;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -31,12 +35,15 @@ import static org.kframework.kore.KORE.*;
  */
 public class CheckKLabels {
     private final Set<KEMException> errors;
+    private final boolean kore;
 
-    public CheckKLabels(Set<KEMException> errors) {
+    public CheckKLabels(Set<KEMException> errors, boolean kore) {
         this.errors = errors;
+        this.kore = kore;
     }
 
     private final Map<KLabel, Module> klabels = new HashMap<>();
+    private final Map<String, Production> klabelProds = new HashMap<>();
 
     public void check(Sentence sentence, Module m) {
         VisitK checkKLabels = new VisitK() {
@@ -73,10 +80,18 @@ public class CheckKLabels {
             Production prod = (Production) sentence;
             if (prod.klabel().isDefined()) {
                 KLabel klabel = prod.klabel().get();
-                if (klabels.containsKey(klabel) && !m.equals(klabels.get(klabel))) {
+                if (klabels.containsKey(klabel) && !m.equals(klabels.get(klabel)) && !kore) {
                     errors.add(KEMException.compilerError("KLabel " + klabel.name() + " defined in multiple modules: " + klabels.get(klabel).name() + " and " + m.name() + ".", prod));
                 }
+                File kast_k = JarInfo.getKIncludeDir().resolve("builtin").resolve("kast.k").toFile();
+                try {
+                    kast_k = kast_k.getCanonicalFile();
+                } catch (IOException e) {}
+                if (klabelProds.containsKey(klabel.name()) && kore && !prod.att().get(Source.class).source().equals(kast_k.getAbsolutePath())) {
+                    errors.add(KEMException.compilerError("Symbol " + klabel.name() + " is not unique. Previously defined as: " + klabelProds.get(klabel.name()), prod));
+                }
                 klabels.put(klabel, m);
+                klabelProds.put(klabel.name(), prod);
             }
         }
     }
