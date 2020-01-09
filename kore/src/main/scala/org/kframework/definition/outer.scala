@@ -284,7 +284,7 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
   lazy val leftAssoc = buildAssoc(Associativity.Left)
   lazy val rightAssoc = buildAssoc(Associativity.Right)
 
-  private def buildAssoc(side: Associativity.Value): Set[(Tag, Tag)] = {
+  private def buildAssoc(side: Associativity): Set[(Tag, Tag)] = {
     sentences
       .collect({ case SyntaxAssociativity(`side` | Associativity.NonAssoc, ps, _) => ps })
       .map { ps: Set[Tag] =>
@@ -418,13 +418,8 @@ case class SyntaxPriority(priorities: Seq[Set[Tag]], att: Att = Att.empty)
   override def withAtt(att: Att) = SyntaxPriority(priorities, att)
 }
 
-object Associativity extends Enumeration {
-  type Value1 = Value
-  val Left, Right, NonAssoc, Unspecified = Value
-}
-
 case class SyntaxAssociativity(
-                                assoc: Associativity.Value,
+                                assoc: Associativity,
                                 tags: Set[Tag],
                                 att: Att = Att.empty)
   extends Sentence with SyntaxAssociativityToString with OuterKORE {
