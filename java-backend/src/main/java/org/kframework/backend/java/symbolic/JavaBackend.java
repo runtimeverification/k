@@ -10,6 +10,7 @@ import org.kframework.builtin.Sorts;
 import org.kframework.compile.*;
 import org.kframework.definition.*;
 import org.kframework.definition.Module;
+import org.kframework.kil.Attribute;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.Kompile;
 import org.kframework.kompile.KompileOptions;
@@ -229,6 +230,6 @@ public class JavaBackend implements Backend {
 
     @Override
     public Set<String> excludedModuleTags() {
-        return new HashSet<>(Arrays.asList("concrete", "kore"));
+        return new HashSet<>(Arrays.asList(Attribute.CONCRETE_KEY, "kore"));
     }
 }

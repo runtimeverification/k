@@ -20,8 +20,12 @@ import org.kframework.compile.checks.CheckSortTopUniqueness;
 import org.kframework.compile.checks.CheckStreams;
 import org.kframework.definition.*;
 import org.kframework.definition.Module;
-import org.kframework.kore.Sort;
+import org.kframework.definition.Production;
+import org.kframework.definition.Rule;
+import org.kframework.definition.Sentence;
+import org.kframework.kil.Attribute;
 import org.kframework.kore.KLabel;
+import org.kframework.kore.Sort;
 import org.kframework.parser.InputModes;
 import org.kframework.parser.KRead;
 import org.kframework.parser.concrete2kore.ParserUtils;
@@ -287,7 +291,8 @@ public class Kompile {
 
         stream(parsedDef.modules()).forEach(m -> stream(m.localSentences()).forEach(new CheckHOLE(errors, m)::check));
 
-        stream(parsedDef.modules()).forEach(m -> stream(m.localSentences()).forEach(new CheckFunctions(errors, m, excludedModuleTags.contains("concrete"))::check));
+        stream(parsedDef.modules()).forEach(m -> stream(m.localSentences()).forEach(
+                new CheckFunctions(errors, m, excludedModuleTags.contains(Attribute.CONCRETE_KEY))::check));
 
         Set<String> moduleNames = new HashSet<>();
         stream(parsedDef.modules()).forEach(m -> {

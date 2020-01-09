@@ -217,7 +217,7 @@ public class Rule extends JavaSymbolicObject<Rule> implements HasAtt {
     }
 
     public boolean isConcreteRule(ImmutableSet<String> extraConcreteRuleLabels) {
-        return att().contains(Attribute.CONCRETE_FUNCTION_KEY) ||
+        return att().contains(Attribute.CONCRETE_KEY) ||
                 (att().contains(Attribute.LABEL_KEY) && extraConcreteRuleLabels.contains(att().get(Attribute.LABEL_KEY)));
     }
 
