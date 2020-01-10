@@ -64,7 +64,6 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
     private final CompiledDefinition def;
     private final KExceptionManager kem;
     private final KPrint kprint;
-    private final Properties idsToLabels;
 
     @Inject
     public HaskellRewriter(
@@ -73,7 +72,6 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
             KompileOptions kompileOptions,
             KProveOptions kProveOptions,
             KBMCOptions kbmcOptions,
-            InitializeDefinition init,
             HaskellKRunOptions haskellKRunOptions,
             FileUtil files,
             CompiledDefinition def,
@@ -90,7 +88,6 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
         this.def = def;
         this.kem = kem;
         this.kprint = kprint;
-        this.idsToLabels = init.getKoreToKLabels();
     }
 
     @Override
@@ -462,26 +459,6 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
             // if we're not nailgun, we can't do the above because System.in won't be interruptible,
             // and we don't really want or need to anyway.
             return pb.inheritIO().start().waitFor();
-        }
-    }
-
-    @DefinitionScoped
-    public static class InitializeDefinition {
-        public Properties getKoreToKLabels() {
-            return koreToKLabels;
-        }
-
-        final private Properties koreToKLabels;
-
-        @Inject
-        public InitializeDefinition(FileUtil files) {
-            try {
-                FileInputStream input = new FileInputStream(files.resolveKoreToKLabelsFile());
-                koreToKLabels = new Properties();
-                koreToKLabels.load(input);
-            } catch (IOException e) {
-                throw KEMException.criticalError("Error while loading Kore to K label map", e);
-            }
         }
     }
 }

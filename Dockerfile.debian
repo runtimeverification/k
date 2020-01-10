@@ -6,6 +6,7 @@ ARG LLVM_VERSION=8
 
 RUN    apt-get update            \
     && apt-get install --yes     \
+        bison                    \
         clang-$LLVM_VERSION      \
         cmake                    \
         curl                     \
