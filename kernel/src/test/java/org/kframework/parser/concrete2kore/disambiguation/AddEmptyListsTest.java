@@ -177,7 +177,7 @@ public class AddEmptyListsTest {
     @Test
     public void testArgumentLabeledConsSub2() {
         // gets a warning because the argument of sort As does not fit.n
-        parseTerm("h(`_,__TEST`(a,.As))", "K", KApply(H, KApply(CONS, A, NIL)), 1);
+        parseTerm("h(`_,__TEST`(a,.As))", "K", KApply(H, KApply(CONS, A, NIL)));
     }
 
     @Test
