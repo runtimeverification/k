@@ -4,6 +4,7 @@ package org.kframework.utils.errorsystem;
 import org.kframework.attributes.HasLocation;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
+import org.kframework.parser.Term;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 
@@ -86,6 +87,10 @@ public class KEMException extends RuntimeException {
 
     public static KEMException innerParserError(String message, Source source, Location location) {
         return create(ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, message, null, location, source);
+    }
+
+    public static KEMException innerParserError(String message, Term t) {
+        return create(ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, message, null, t.location().orElse(null), t.source().orElse(null));
     }
 
     public static KEMException innerParserError(String message, Throwable e, Source source, Location location) {
