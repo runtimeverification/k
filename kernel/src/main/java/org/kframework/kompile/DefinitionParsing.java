@@ -32,7 +32,6 @@ import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
-import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.file.FileUtil;
 import scala.Option;
 import scala.Tuple2;
@@ -401,7 +400,7 @@ public class DefinitionParsing {
         int startLine = b.att().get("contentStartLine", Integer.class);
         int startColumn = b.att().get("contentStartColumn", Integer.class);
         Source source = b.att().get(Source.class);
-        Tuple2<Either<java.util.Set<ParseFailedException>, K>, java.util.Set<ParseFailedException>> result;
+        Tuple2<Either<java.util.Set<KEMException>, K>, java.util.Set<KEMException>> result;
         if (cache.containsKey(b.contents())) {
             ParsedSentence parse = cache.get(b.contents());
             Optional<Source> cacheSource = parse.getParse().source();

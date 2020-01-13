@@ -19,10 +19,7 @@ import org.kframework.parser.concrete2kore.kernel.Grammar.PrimitiveState;
 import org.kframework.parser.concrete2kore.kernel.Grammar.RegExState;
 import org.kframework.parser.concrete2kore.kernel.Grammar.RuleState;
 import org.kframework.parser.concrete2kore.kernel.Grammar.State;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
-import org.kframework.utils.errorsystem.ParseFailedException;
+import org.kframework.utils.errorsystem.KEMException;
 import org.pcollections.ConsPStack;
 
 import java.util.HashMap;
@@ -594,8 +591,7 @@ public class Parser {
             Location loc = new Location(perror.startLine, perror.startColumn,
                     perror.endLine, perror.endColumn);
             Source source = perror.source;
-            throw new ParseFailedException(new KException(
-                    ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, msg, source, loc));
+            throw KEMException.innerParserError(msg, source, loc);
         }
 
         return result;

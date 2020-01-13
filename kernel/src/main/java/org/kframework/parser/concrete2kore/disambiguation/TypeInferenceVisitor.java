@@ -12,11 +12,6 @@ import org.kframework.parser.Term;
 import org.kframework.parser.TermCons;
 import org.kframework.parser.SetsTransformerWithErrors;
 import org.kframework.utils.errorsystem.KEMException;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
-import org.kframework.utils.errorsystem.ParseFailedException;
-import org.kframework.utils.errorsystem.VariableTypeClashException;
 
 import org.pcollections.ConsPStack;
 
@@ -62,7 +57,7 @@ import static org.kframework.kore.KORE.*;
  * 10. Disjunct the substituted solutions together and return them.
  *
  */
-public class TypeInferenceVisitor extends SetsTransformerWithErrors<ParseFailedException> {
+public class TypeInferenceVisitor extends SetsTransformerWithErrors<KEMException> {
   private final TypeInferencer inferencer;
   private final boolean inferSortChecks;
   private final boolean inferCasts;
@@ -86,14 +81,14 @@ public class TypeInferenceVisitor extends SetsTransformerWithErrors<ParseFailedE
   }
 
   @Override
-  public Either<Set<ParseFailedException>, Term> apply(Term t) {
+  public Either<Set<KEMException>, Term> apply(Term t) {
     Term loc = t;
     if (loc instanceof Ambiguity) {
       loc = ((Ambiguity)loc).items().iterator().next();
     }
     // add constraints to inferencer
     inferencer.push(t, topSort, isAnywhere);
-    Either<Set<ParseFailedException>, Term> typed;
+    Either<Set<KEMException>, Term> typed;
     try {
       if (inferencer.hasNoVariables()) {
         // skip the rest as there is nothing to infer
@@ -112,7 +107,7 @@ public class TypeInferenceVisitor extends SetsTransformerWithErrors<ParseFailedE
       case UNSATISFIABLE:
         // no solutions exist. This is a type error, so ask the inferencer for an error message and return
         inferencer.pop();
-        Set<ParseFailedException> kex = inferencer.error();
+        Set<KEMException> kex = inferencer.error();
         return Left.apply(kex);
       }
       boolean hasAnotherSolution = true;
@@ -144,11 +139,11 @@ public class TypeInferenceVisitor extends SetsTransformerWithErrors<ParseFailedE
       // remove all models that are not maximal
       List<Map<String, Sort>> maximalModels = removeNonMaximal(models);
       Set<Term> candidates = new HashSet<>();
-      Set<ParseFailedException> exceptions = new HashSet<>();
+      Set<KEMException> exceptions = new HashSet<>();
       for (Map<String, Sort> model : maximalModels) {
         // for each model, apply it to the term
         inferencer.selectModel(model);
-        Either<Set<ParseFailedException>, Term> result = new TypeCheckVisitor(topSort).apply(t);
+        Either<Set<KEMException>, Term> result = new TypeCheckVisitor(topSort).apply(t);
         if (result.isLeft()) {
           exceptions.addAll(result.left().get());
         } else {
@@ -216,7 +211,7 @@ public class TypeInferenceVisitor extends SetsTransformerWithErrors<ParseFailedE
    * it to the expected sort. If it is not well typed, we remove that branch of the parse forest entirely. We also,
    * depending on the flags passed to the parent class, might add casts to the term around variables.
    */
-  public class TypeCheckVisitor extends SetsTransformerWithErrors<ParseFailedException> {
+  public class TypeCheckVisitor extends SetsTransformerWithErrors<KEMException> {
 
     private Sort expectedSort;
     private boolean hasCastAlready = false, hasCheckAlready = false;
@@ -224,19 +219,18 @@ public class TypeInferenceVisitor extends SetsTransformerWithErrors<ParseFailedE
       this.expectedSort = topSort;
     }
 
-    private Either<Set<ParseFailedException>, Term> typeError(ProductionReference pr, Sort expectedSort, Sort actualSort) {
+    private Either<Set<KEMException>, Term> typeError(ProductionReference pr, Sort expectedSort, Sort actualSort) {
       String msg;
       if (pr instanceof Constant) {
         msg = "Unexpected sort " + actualSort + " for term " + ((Constant)pr).value() + ". Expected " + expectedSort + ".";
       } else {
         msg = "Unexpected sort " + actualSort + " for term parsed as production " + pr.production() + ". Expected " + expectedSort + ".";
       }
-      KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg, pr.source().orElse(null), pr.location().orElse(null));
-      return Left.apply(Collections.singleton(new VariableTypeClashException(kex)));
+      return Left.apply(Collections.singleton(KEMException.innerParserError(msg, pr)));
     }
 
     @Override
-    public Either<Set<ParseFailedException>, Term> apply(Term term) {
+    public Either<Set<KEMException>, Term> apply(Term term) {
       if (term instanceof Ambiguity) {
         Ambiguity amb = (Ambiguity)term;
         return super.apply(amb);
@@ -287,7 +281,7 @@ public class TypeInferenceVisitor extends SetsTransformerWithErrors<ParseFailedE
             // compute expected sort of child
             expectedSort = ((NonTerminal) substituted.items().apply(i)).sort();
             // recurse
-            Either<Set<ParseFailedException>, Term> rez = apply(t);
+            Either<Set<KEMException>, Term> rez = apply(t);
             // restore values
             expectedSort = oldExpected;
             hasCastAlready = wasCast;
@@ -304,7 +298,7 @@ public class TypeInferenceVisitor extends SetsTransformerWithErrors<ParseFailedE
       return Right.apply(pr);
     }
 
-    private Either<Set<ParseFailedException>, Term> wrapTermWithCast(Constant c, Sort declared) {
+    private Either<Set<KEMException>, Term> wrapTermWithCast(Constant c, Sort declared) {
       Production cast;
       if (inferSortChecks && !hasCheckAlready) {
         // strictly typing variables and one does not already exist, so add :Sort

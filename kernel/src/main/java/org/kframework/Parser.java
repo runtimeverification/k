@@ -2,19 +2,16 @@
 package org.kframework;
 
 import org.kframework.attributes.Source;
-import org.kframework.definition.*;
 import org.kframework.definition.Module;
 import org.kframework.kore.K;
 import org.kframework.kore.Sort;
 import org.kframework.parser.concrete2kore.ParseInModule;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
-import org.kframework.utils.errorsystem.ParseFailedException;
+import org.kframework.utils.errorsystem.KEMException;
 import scala.Option;
 import scala.Tuple2;
 import scala.util.Either;
-import scala.util.control.Exception;
 
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -46,7 +43,7 @@ public class Parser {
      */
     @SuppressWarnings("unchecked")
     public Tuple2<Option<K>, Set<Warning>> apply(Sort startSymbol, String toParse, Source fromSource) {
-        Tuple2<Either<Set<ParseFailedException>, K>, Set<ParseFailedException>> res = parseInModule.parseString(toParse, startSymbol, fromSource);
+        Tuple2<Either<Set<KEMException>, K>, Set<KEMException>> res = parseInModule.parseString(toParse, startSymbol, fromSource);
 
         Set<Warning> problemSet = new HashSet<>();
         problemSet.addAll((Set<Warning>) (Object) res._2());

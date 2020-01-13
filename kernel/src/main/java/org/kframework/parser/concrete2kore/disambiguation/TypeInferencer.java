@@ -19,11 +19,7 @@ import org.kframework.parser.Term;
 import org.kframework.parser.TermCons;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.utils.OS;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 import org.kframework.utils.errorsystem.KEMException;
-import org.kframework.utils.errorsystem.ParseFailedException;
 
 import scala.collection.Seq;
 import scala.collection.Set;
@@ -245,7 +241,7 @@ public class TypeInferencer implements AutoCloseable {
    * Uses z3 to compute the error message associated with a badly typed term.
    * @return
    */
-  private KException push() {
+  private KEMException push() {
     level++;
     println("(push)");
     // compute constraints in incremental mode
@@ -266,7 +262,7 @@ public class TypeInferencer implements AutoCloseable {
       // should not reach here.
       throw KEMException.internalError("Unknown sort inference error.", currentTerm);
     } catch (LocalizedError e) {
-      return new KException(ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, e.getMessage(), e.getLocation().source().orElse(null), e.getLocation().location().orElse(null));
+      return KEMException.innerParserError(e.getMessage(), e.getLocation());
     }
   }
 
@@ -772,9 +768,9 @@ public class TypeInferencer implements AutoCloseable {
     return status;
   }
 
-  public java.util.Set<ParseFailedException> error() {
+  public java.util.Set<KEMException> error() {
     pop();
-    return java.util.Collections.singleton(new ParseFailedException(push()));
+    return java.util.Collections.singleton(push());
   }
 
   void computeModel() {
