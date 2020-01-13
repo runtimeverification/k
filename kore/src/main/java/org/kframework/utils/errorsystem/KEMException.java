@@ -8,6 +8,8 @@ import org.kframework.parser.Term;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 
+import java.util.Objects;
+
 /**
  * Thrown to indicate that the K Exception manager has terminated the application due to an error.
  *
@@ -117,5 +119,22 @@ public class KEMException extends RuntimeException {
     private static KEMException create(ExceptionType type, KExceptionGroup group, String message,
                                        Throwable e, Location location, Source source) {
         return new KEMException(new KException(type, group, message, source, location, e));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        KEMException that = (KEMException) o;
+        return Objects.equals(exception, that.exception);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(exception);
+    }
+
+    public KException getKException() {
+        return exception;
     }
 }
