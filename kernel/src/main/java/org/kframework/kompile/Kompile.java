@@ -22,6 +22,8 @@ import org.kframework.definition.*;
 import org.kframework.definition.Module;
 import org.kframework.kore.Sort;
 import org.kframework.kore.KLabel;
+import org.kframework.parser.InputModes;
+import org.kframework.parser.KRead;
 import org.kframework.parser.concrete2kore.ParserUtils;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.unparser.ToJson;
@@ -144,7 +146,13 @@ public class Kompile {
 
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(kompiledDefinition.mainModule());
 
-        return new CompiledDefinition(kompileOptions, parsedDef, kompiledDefinition, files, kem, configInfo.getDefaultCell(configInfo.getRootCell()).klabel());
+        CompiledDefinition def = new CompiledDefinition(kompileOptions, parsedDef, kompiledDefinition, files, kem, configInfo.getDefaultCell(configInfo.getRootCell()).klabel());
+
+        if (kompileOptions.experimental.genBisonParser) {
+            new KRead(kem, files, InputModes.PROGRAM).createBisonParser(def.programParsingModuleFor(def.mainSyntaxModuleName(), kem).get(), def.programStartSymbol, files.resolveKompiled("parser_PGM"));
+        }
+
+        return def;
     }
 
     public Definition parseDefinition(File definitionFile, String mainModuleName, String mainProgramsModule, Set<String> excludedModuleTags) {
@@ -289,10 +297,18 @@ public class Kompile {
             moduleNames.add(m.name());
         });
 
-        CheckKLabels checkKLabels = new CheckKLabels(errors);
+        CheckKLabels checkKLabels = new CheckKLabels(errors, kompileOptions.isKore());
+        Set<String> checkedModules = new HashSet<>();
         // only check imported modules because otherwise we might have false positives
-        Consumer<Module> checkModuleKLabels = m -> stream(m.localSentences()).forEach(s -> checkKLabels.check(s, m));
-        stream(parsedDef.mainModule().importedModules()).forEach(checkModuleKLabels);
+        Consumer<Module> checkModuleKLabels = m -> {
+            if (!checkedModules.contains(m.name())) {
+                stream(m.localSentences()).forEach(s -> checkKLabels.check(s, m));
+            }
+            checkedModules.add(m.name());
+        };
+        stream(parsedDef.getModule("K").get().importedModuleNames()).map(name -> parsedDef.getModule(name).get()).forEach(checkModuleKLabels);
+        checkModuleKLabels.accept(parsedDef.getModule("K").get());
+        stream(parsedDef.mainModule().importedModuleNames()).map(name -> parsedDef.getModule(name).get()).forEach(checkModuleKLabels);
         checkModuleKLabels.accept(parsedDef.mainModule());
 
         stream(parsedDef.modules()).forEach(m -> stream(m.localSentences()).forEach(new CheckLabels(errors)::check));

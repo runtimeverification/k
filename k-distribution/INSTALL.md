@@ -60,7 +60,7 @@ contributors.
 
     ```sh
     sudo apt-get update
-    sudo apt-get install build-essential m4 openjdk-8-jre libgmp-dev libmpfr-dev pkg-config flex z3 libz3-dev unzip python3
+    sudo apt-get install build-essential m4 openjdk-8-jre libgmp-dev libmpfr-dev pkg-config flex bison z3 libz3-dev unzip python3
     ```
 
 2.  Unpack the binary (will place in subdirectory `k`), move to preferred install location:

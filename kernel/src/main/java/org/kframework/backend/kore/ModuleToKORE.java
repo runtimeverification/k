@@ -1,8 +1,6 @@
 // Copyright (c) 2018-2019 K Team. All Rights Reserved.
 package org.kframework.backend.kore;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 import org.kframework.Collections;
@@ -75,7 +73,6 @@ public class ModuleToKORE {
     public static final String ALL_PATH_OP = "weakAlwaysFinally";
     public static final String HAS_DOMAIN_VALUES = "hasDomainValues";
     private final Module module;
-    private final BiMap<String, String> kToKoreLabelMap = HashBiMap.create();
     private final FileUtil files;
     private final Set<String> impureFunctions = new HashSet<>();
     private final KLabel topCellInitializer;
@@ -704,8 +701,12 @@ public class ModuleToKORE {
         List<K> leftChildren = null;
         K left = RewriteToTop.toLeft(rule.body());
         boolean constructorBased = constructorChecks.isConstructorBased(left);
-        if (left instanceof KApply) {
-            production = production((KApply) left, true);
+        K leftPattern = left;
+        while (leftPattern instanceof KAs) {
+            leftPattern = ((KAs)leftPattern).pattern();
+        }
+        if (leftPattern instanceof KApply) {
+            production = production((KApply) leftPattern, true);
             productionSort = production.sort();
             productionSortStr = getSortStr(productionSort);
             productionSorts = stream(production.items())
@@ -714,7 +715,7 @@ public class ModuleToKORE {
                     .map(NonTerminal::sort).collect(Collectors.toList());
             productionLabel = production.klabel().get();
             if (isFunction(production) || rule.att().contains(Attribute.ANYWHERE_KEY) && !kore) {
-                leftChildren = ((KApply) left).items();
+                leftChildren = ((KApply) leftPattern).items();
                 equation = true;
             } else if ((rule.att().contains("heat") || rule.att().contains("cool")) && heatCoolEq) {
                 equation = true;
@@ -1127,7 +1128,7 @@ public class ModuleToKORE {
         return instantiatePolySorts ? prods.get().head().substitute(term.klabel().params()) : prods.get().head();
     }
 
-    private String convertBuiltinLabel(String klabel) {
+    private static String convertBuiltinLabel(String klabel) {
       switch(klabel) {
       case "#False":
         return "\\bottom";
@@ -1139,6 +1140,8 @@ public class ModuleToKORE {
         return "\\and";
       case "#Not":
         return "\\not";
+      case "#Floor":
+        return "\\floor";
       case "#Ceil":
         return "\\ceil";
       case "#Equals":
@@ -1151,12 +1154,14 @@ public class ModuleToKORE {
         return "\\forall";
       case "#AG":
         return "allPathGlobally";
+      case "weakExistsFinally":
+        return "weakExistsFinally";
       default:
         throw KEMException.compilerError("Unsuppored kore connective in rule: " + klabel);
       }
     }
 
-    private void convert(KLabel klabel, StringBuilder sb) {
+    public static void convert(KLabel klabel, StringBuilder sb) {
         convert(klabel, java.util.Collections.emptySet(), sb);
     }
 
@@ -1164,7 +1169,7 @@ public class ModuleToKORE {
         convert(klabel, mutable(params), sb);
     }
 
-    private void convert(KLabel klabel, Collection<Sort> params, StringBuilder sb) {
+    private static void convert(KLabel klabel, Collection<Sort> params, StringBuilder sb) {
         if (klabel.name().equals(KLabels.INJ)) {
             sb.append(klabel.name());
         } else if (ConstructorChecks.isBuiltinLabel(klabel)) {
@@ -1204,7 +1209,7 @@ public class ModuleToKORE {
         convert(sort, prod.params(), sb);
     }
 
-    private void convert(Sort sort, StringBuilder sb) {
+    public static void convert(Sort sort, StringBuilder sb) {
         convert(sort, java.util.Collections.emptySet(), sb);
     }
 
@@ -1220,7 +1225,7 @@ public class ModuleToKORE {
         convert(sort, mutable(params), sb);
     }
 
-    private void convert(Sort sort, Collection<Sort> params, StringBuilder sb) {
+    private static void convert(Sort sort, Collection<Sort> params, StringBuilder sb) {
         if (sort.name().equals(AddSortInjections.SORTPARAM_NAME)) {
             String sortVar = sort.params().headOption().get().name();
             sb.append(sortVar);
@@ -1288,11 +1293,7 @@ public class ModuleToKORE {
     private static final Pattern identChar = Pattern.compile("[A-Za-z0-9\\-]");
     public static String[] asciiReadableEncodingKore = asciiReadableEncodingKoreCalc();
 
-    private void convert(String name, StringBuilder sb) {
-        if (kToKoreLabelMap.containsKey(name)) {
-            sb.append(kToKoreLabelMap.get(name));
-            return;
-        }
+    private static void convert(String name, StringBuilder sb) {
         switch(name) {
         case "module":
         case "endmodule":
@@ -1303,14 +1304,12 @@ public class ModuleToKORE {
         case "alias":
         case "axiom":
             sb.append(name).append("'Kywd'");
-            kToKoreLabelMap.put(name, name + "'Kywd'");
             return;
         default: break;
         }
         StringBuilder buffer = new StringBuilder();
         StringUtil.encodeStringToAlphanumeric(buffer, name, asciiReadableEncodingKore, identChar, "'");
         sb.append(buffer);
-        kToKoreLabelMap.put(name, buffer.toString());
     }
 
     public Set<K> collectAnonymousVariables(K k){
@@ -1463,9 +1462,5 @@ public class ModuleToKORE {
                 throw KEMException.internalError("Cannot yet translate #klabel to kore", k);
             }
         }.apply(k);
-    }
-
-    public BiMap<String, String> getKToKoreLabelMap() {
-        return kToKoreLabelMap;
     }
 }

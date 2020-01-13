@@ -468,7 +468,7 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                     Equality oldEquality = equality; //for debug
                     Term leftHandSide = oldEquality.leftHandSide().substituteAndEvaluate(substitution, context);
                     Term rightHandSide = oldEquality.rightHandSide().substituteAndEvaluate(substitution, context);
-                    equality = new Equality(leftHandSide, rightHandSide, global);
+                    equality = new Equality(leftHandSide, rightHandSide, global).simplify();
                     //noinspection StatementWithEmptyBody
                     if (equality.isTrue()) {
                         // delete
