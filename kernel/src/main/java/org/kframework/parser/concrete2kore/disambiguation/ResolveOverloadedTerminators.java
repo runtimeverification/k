@@ -3,29 +3,22 @@ package org.kframework.parser.concrete2kore.disambiguation;
 
 import com.google.common.collect.Sets;
 import org.kframework.POSet;
-import org.kframework.builtin.KLabels;
 import org.kframework.definition.Production;
 import org.kframework.kil.loader.Constants;
-import org.kframework.kore.KLabel;
-import org.kframework.parser.SafeTransformer;
 import org.kframework.parser.SetsTransformerWithErrors;
 import org.kframework.parser.Term;
 import org.kframework.parser.TermCons;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.ParseFailedException;
+import org.kframework.utils.errorsystem.KEMException;
 
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import scala.util.Either;
 import scala.util.Left;
 
-import static org.kframework.definition.Constructors.*;
 import static org.kframework.Collections.*;
 
-public class ResolveOverloadedTerminators extends SetsTransformerWithErrors<ParseFailedException> {
+public class ResolveOverloadedTerminators extends SetsTransformerWithErrors<KEMException> {
 
     private final POSet<Production> overloads;
 
@@ -34,13 +27,13 @@ public class ResolveOverloadedTerminators extends SetsTransformerWithErrors<Pars
     }
 
     @Override
-    public Either<Set<ParseFailedException>, Term> apply(TermCons tc) {
+    public Either<Set<KEMException>, Term> apply(TermCons tc) {
         if (overloads.elements().contains(tc.production()) && tc.items().isEmpty()) {
             Set<Production> candidates = stream(overloads.elements()).filter(p -> p.klabel().isDefined() && p.klabelAtt().equals(tc.production().klabelAtt()) && overloads.lessThanEq(p, tc.production())).collect(Collectors.toSet());
             candidates = overloads.minimal(candidates);
             if (candidates.size() != 1) {
-                KException ex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.INNER_PARSER, "Overloaded term does not have a least sort. Possible sorts: " + candidates, tc.source().orElse(null), tc.location().orElse(null));
-                return Left.apply(Sets.newHashSet(new ParseFailedException(ex)));
+                String msg = "Overloaded term does not have a least sort. Possible sorts: " + candidates;
+                return Left.apply(Sets.newHashSet(KEMException.innerParserError(msg, tc)));
             }
             Production prod = candidates.iterator().next();
             prod = prod.withAtt(prod.att()

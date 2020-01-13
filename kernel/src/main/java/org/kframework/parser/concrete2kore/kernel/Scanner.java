@@ -16,8 +16,6 @@ import org.kframework.parser.concrete2kore.ParseInModule;
 import org.kframework.utils.OS;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.ParseFailedException;
 import scala.Tuple2;
 
 import java.io.File;
@@ -335,8 +333,7 @@ public class Scanner implements AutoCloseable {
                     String msg = "Scanner error: unexpected character sequence '" + value + "'.";
                     Location loc = new Location(lines[t.startLoc], columns[t.startLoc],
                             lines[t.endLoc], columns[t.endLoc]);
-                    throw new ParseFailedException(new KException(
-                            KException.ExceptionType.ERROR, KException.KExceptionGroup.INNER_PARSER, msg, source, loc));
+                    throw KEMException.innerParserError(msg, source, loc);
                 }
                 result.add(t);
             }

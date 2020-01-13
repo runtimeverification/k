@@ -8,9 +8,7 @@ import org.kframework.parser.Ambiguity;
 import org.kframework.parser.SetsTransformerWithErrors;
 import org.kframework.parser.Term;
 import org.kframework.parser.TermCons;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.ParseFailedException;
-import org.kframework.utils.errorsystem.PriorityException;
+import org.kframework.utils.errorsystem.KEMException;
 import scala.util.Either;
 import scala.util.Left;
 import scala.util.Right;
@@ -23,7 +21,7 @@ import static org.kframework.Collections.*;
 /**
  * Make sure that KSequence binds greedy (has least priority after rewrite).
  */
-public class CorrectKSeqPriorityVisitor extends SetsTransformerWithErrors<ParseFailedException> {
+public class CorrectKSeqPriorityVisitor extends SetsTransformerWithErrors<KEMException> {
 
     private final static Set<String> exceptions;
 
@@ -38,7 +36,7 @@ public class CorrectKSeqPriorityVisitor extends SetsTransformerWithErrors<ParseF
     }
 
     @Override
-    public Either<java.util.Set<ParseFailedException>, Term> apply(Ambiguity amb) {
+    public Either<java.util.Set<KEMException>, Term> apply(Ambiguity amb) {
         // if the ambiguity has KSeq at the top, prefer them, and eliminate the rest
         scala.collection.Set<Term> rewrites = amb.items().stream().filter(o ->
                 o instanceof TermCons &&
@@ -52,13 +50,13 @@ public class CorrectKSeqPriorityVisitor extends SetsTransformerWithErrors<ParseF
     }
 
     @Override
-    public Either<java.util.Set<ParseFailedException>, Term> apply(TermCons tc) {
+    public Either<java.util.Set<KEMException>, Term> apply(TermCons tc) {
         assert tc.production() != null : this.getClass() + ":" + " production not found." + tc;
         if (!tc.production().isSyntacticSubsort() && tc.production().klabel().isDefined()
                 && !exceptions.contains(tc.production().klabel().get().name())) {
             // match only on the outermost elements
             if (tc.production().items().apply(0) instanceof NonTerminal) {
-                Either<java.util.Set<ParseFailedException>, Term> rez =
+                Either<java.util.Set<KEMException>, Term> rez =
                         new PriorityVisitor2(tc).apply(tc.get(0));
                 if (rez.isLeft())
                     return rez;
@@ -66,7 +64,7 @@ public class CorrectKSeqPriorityVisitor extends SetsTransformerWithErrors<ParseF
             }
             if (tc.production().items().apply(tc.production().items().size() - 1) instanceof NonTerminal) {
                 int last = tc.items().size() - 1;
-                Either<java.util.Set<ParseFailedException>, Term> rez =
+                Either<java.util.Set<KEMException>, Term> rez =
                         new PriorityVisitor2(tc).apply(tc.get(last));
                 if (rez.isLeft())
                     return rez;
@@ -76,19 +74,18 @@ public class CorrectKSeqPriorityVisitor extends SetsTransformerWithErrors<ParseF
         return super.apply(tc);
     }
 
-    private static class PriorityVisitor2 extends SetsTransformerWithErrors<ParseFailedException> {
+    private static class PriorityVisitor2 extends SetsTransformerWithErrors<KEMException> {
         private final TermCons parent;
 
         public PriorityVisitor2(TermCons parent) {
             this.parent = parent;
         }
 
-        public Either<java.util.Set<ParseFailedException>, Term> apply(TermCons tc) {
+        public Either<java.util.Set<KEMException>, Term> apply(TermCons tc) {
             if (tc.production().klabel().isDefined() && tc.production().klabel().get().name().equals("#KSequence")) {
                 String msg = "~> is not allowed to be an immediate child of " + parent.production().klabel().get() +
                         "    Use parentheses: (x)~>(y) to set the proper scope of the operations.";
-                KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg, tc.source().get(), tc.location().get());
-                return Left.apply(Sets.newHashSet(new PriorityException(kex)));
+                return Left.apply(Sets.newHashSet(KEMException.innerParserError(msg, tc)));
             }
             return Right.apply(tc);
         }
