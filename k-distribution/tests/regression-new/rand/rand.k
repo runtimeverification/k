@@ -3,7 +3,7 @@
 module RAND-SYNTAX
   imports DOMAINS-SYNTAX
 
-  syntax Pgm ::= ".Pgm" | Int ";" Pgm | seedRand ( Int ) | runRand ( )
+  syntax Pgm ::= ".Pgm" | Int ";" Pgm | runRand ( )
 endmodule
 
 
