@@ -1374,7 +1374,7 @@ Using `rbreak <regex>` you can set breakpoints on multiple functions.
 
 ### Other debugger issues
 
--   `<optimized out>` try kompiling with `-ccopt -O0` or `-ccopt -O1`.
+-   `<optimized out>` try kompiling without `-O1`, `-O2`, or `-O3`.
 -   `(gdb) break definition.kore:break -> No source file named definition.kore.`
 send `-ccopt -g` to kompile in order to generate debug info symbols.
 
