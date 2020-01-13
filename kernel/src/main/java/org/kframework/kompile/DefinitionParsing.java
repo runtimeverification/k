@@ -225,14 +225,17 @@ public class DefinitionParsing {
         ResolveConfig resolveConfig = new ResolveConfig(definitionWithConfigBubble, isStrict, kore, this::parseBubble, this::getParser);
         gen = new RuleGrammarGenerator(definitionWithConfigBubble);
 
+        Definition result;
         try {
             Definition defWithConfig = DefinitionTransformer.from(resolveConfig::apply, "parsing configurations").apply(definitionWithConfigBubble);
-            return defWithConfig;
+            result = defWithConfig;
         } catch (KEMException e) {
             errors.add(e);
             throwExceptionIfThereAreErrors();
             throw new AssertionError("should not reach this statement");
         }
+        throwExceptionIfThereAreErrors();
+        return result;
     }
 
     Map<String, ParseCache> caches;
