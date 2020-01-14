@@ -19,7 +19,7 @@ pipeline {
         }
       }
     }
-    stage("Create source tarball") {
+    /*stage("Create source tarball") {
       agent {
         dockerfile {
           filename 'Dockerfile.debian'
@@ -39,7 +39,7 @@ pipeline {
         }
         stash name: "src", includes: "kframework-${env.VERSION}-src.tar.gz"
       }
-    }
+    }*/
     stage('Update Submodules (non-release)') {
       when { branch 'master' }
       steps {
@@ -86,7 +86,7 @@ pipeline {
                         }
                       }
                     }
-                    stage('Build and Test K') {
+                    stage('Build and Test K 1') {
                       steps {
                         sh '''
                           echo 'Setting up environment...'
@@ -100,6 +100,63 @@ pipeline {
                         '''
                       }
                     }
+                    stage('Build and Test K 2') {
+                      steps {
+                        sh '''
+                          echo 'Setting up environment...'
+                          eval `opam config env`
+                          echo 'Building K...'
+                          mvn --batch-mode verify -U
+                          echo 'Starting kserver...'
+                          k-distribution/target/release/k/bin/spawn-kserver kserver.log
+                          cd k-exercises/tutorial
+                          make -j`nproc`
+                        '''
+                      }
+                    }
+                    stage('Build and Test K 3') {
+                      steps {
+                        sh '''
+                          echo 'Setting up environment...'
+                          eval `opam config env`
+                          echo 'Building K...'
+                          mvn --batch-mode verify -U
+                          echo 'Starting kserver...'
+                          k-distribution/target/release/k/bin/spawn-kserver kserver.log
+                          cd k-exercises/tutorial
+                          make -j`nproc`
+                        '''
+                      }
+                    }
+                    stage('Build and Test K 4') {
+                      steps {
+                        sh '''
+                          echo 'Setting up environment...'
+                          eval `opam config env`
+                          echo 'Building K...'
+                          mvn --batch-mode verify -U
+                          echo 'Starting kserver...'
+                          k-distribution/target/release/k/bin/spawn-kserver kserver.log
+                          cd k-exercises/tutorial
+                          make -j`nproc`
+                        '''
+                      }
+                    }
+                    stage('Build and Test K 5') {
+                      steps {
+                        sh '''
+                          echo 'Setting up environment...'
+                          eval `opam config env`
+                          echo 'Building K...'
+                          mvn --batch-mode verify -U
+                          echo 'Starting kserver...'
+                          k-distribution/target/release/k/bin/spawn-kserver kserver.log
+                          cd k-exercises/tutorial
+                          make -j`nproc`
+                        '''
+                      }
+                    }
+                    /*
                     stage('Build Debian Package') {
                       steps {
                         dir("kframework-${env.VERSION}") {
@@ -111,7 +168,7 @@ pipeline {
                         }
                         stash name: "bionic", includes: "kframework_${env.VERSION}_amd64.deb"
                       }
-                    }
+                    }*/
                   }
                   post {
                     always {
@@ -120,7 +177,7 @@ pipeline {
                     }
                   }
                 }
-                stage('Test Debian Package') {
+                /*stage('Test Debian Package') {
                   agent {
                     docker {
                       image 'ubuntu:bionic'
@@ -139,9 +196,10 @@ pipeline {
                       archiveArtifacts 'kserver.log,k-distribution/target/kserver.log'
                     }
                   }
-                }
+                }*/
               }
             }
+            /*
             stage('Build and Package on Debian Buster') {
               when { branch 'master' }
               stages {
@@ -280,10 +338,10 @@ pipeline {
                           , message: "Platform Independent K Binary Failed: ${env.BUILD_URL}"
                 }
               }
-            }
+            }*/
           }
         }
-        stage('Build and Package on Mac OS') {
+        /*stage('Build and Package on Mac OS') {
           when { branch 'master' }
           stages {
             stage('Build on Mac OS') {
@@ -359,7 +417,7 @@ pipeline {
                       , message: "MacOS Packaging Failed: ${env.BUILD_URL}"
             }
           }
-        }
+        }*/
       }
     }
     stage('Deploy') {
