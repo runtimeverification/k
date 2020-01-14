@@ -17,8 +17,8 @@ import org.kframework.parser.SetsGeneralTransformer;
 import org.kframework.parser.Term;
 import org.kframework.parser.TermCons;
 import org.kframework.definition.UserList;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.ParseFailedException;
 import org.pcollections.ConsPStack;
 import scala.Tuple2;
 import scala.util.Either;
@@ -44,7 +44,7 @@ import static org.kframework.Collections.*;
 /**
  * Transformer class adding the implicit terminator (.List{"<klabel>"}) to user defined lists.
  */
-public class AddEmptyLists extends SetsGeneralTransformer<ParseFailedException, ParseFailedException> {
+public class AddEmptyLists extends SetsGeneralTransformer<KEMException, KEMException> {
 
     private final Module m;
     private final POSet<Sort> subsorts;
@@ -59,9 +59,9 @@ public class AddEmptyLists extends SetsGeneralTransformer<ParseFailedException, 
     }
 
     @Override
-    public Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> apply(TermCons tc) {
+    public Tuple2<Either<Set<KEMException>, Term>, Set<KEMException>> apply(TermCons tc) {
         Production p = tc.production();
-        java.util.Set<ParseFailedException> warnings = new HashSet<>();
+        java.util.Set<KEMException> warnings = new HashSet<>();
 
         List<Term> reversed = tc.items().stream().collect(Collectors.toList());
         Collections.reverse(reversed); // TermCons with PStack requires the elements to be in the reverse order
@@ -94,21 +94,18 @@ public class AddEmptyLists extends SetsGeneralTransformer<ParseFailedException, 
                         && child.production().klabel().get().name().equals("#KRewrite"))) {
                     newItems.add(child);
                 } else if (childSort.equals(Sorts.K()) || !subsorts.lessThan(childSort, expectedSort)) {
-                    String msg = "Found sort '" + childSort + "' where list sort '" + expectedSort + "' was expected. Moving on.";
-                    warnings.add(new ParseFailedException(
-                            new KException(KException.ExceptionType.HIDDENWARNING, KException.KExceptionGroup.LISTS, msg, child.source().get(), child.location().get())));
                     newItems.add(child);
                 } else {
                     Set<Sort> least = subsorts.minimal(stream(listSorts).filter(s -> subsorts.greaterThanEq(lists.get(s).get(0).childSort, childSort) && subsorts.lessThanEq(s, expectedSort)).collect(Collectors.toList()));
                     if (least.size() != 1) {
-                        KException ex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.INNER_PARSER, "Overloaded term does not have a least sort. Possible sorts: " + least, tc.source().orElse(null), tc.location().orElse(null));
-                        return new Tuple2<>(Left.apply(Sets.newHashSet(new ParseFailedException(ex))), warnings);
+                        String msg = "Overloaded term does not have a least sort. Possible sorts: " + least;
+                        return new Tuple2<>(Left.apply(Sets.newHashSet(KEMException.innerParserError(msg, tc))), warnings);
                     }
                     UserList ul = lists.get(least.iterator().next()).get(0);
                     Set<Sort> leastTerm = subsorts.minimal(stream(listSorts).filter(s -> subsorts.lessThanEq(s, expectedSort)).collect(Collectors.toList()));
                     if (leastTerm.size() != 1) {
-                        KException ex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.INNER_PARSER, "List terminator for overloaded term does not have a least sort. Possible sorts: " + leastTerm, tc.source().orElse(null), tc.location().orElse(null));
-                        return new Tuple2<>(Left.apply(Sets.newHashSet(new ParseFailedException(ex))), warnings);
+                        String msg = "List terminator for overloaded term does not have a least sort. Possible sorts: " + leastTerm;
+                        return new Tuple2<>(Left.apply(Sets.newHashSet(KEMException.innerParserError(msg, tc))), warnings);
                     }
                     UserList ulTerm = lists.get(leastTerm.iterator().next()).get(0);
                     TermCons terminator = TermCons.apply(ConsPStack.empty(), ulTerm.pTerminator, child.location(), child.source());
@@ -127,7 +124,7 @@ public class AddEmptyLists extends SetsGeneralTransformer<ParseFailedException, 
             tc = TermCons.apply(ConsPStack.from(newItems), tc.production(), tc.location(), tc.source());
         }
         if (!warnings.isEmpty()) {
-            Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rez = super.apply(tc);
+            Tuple2<Either<Set<KEMException>, Term>, Set<KEMException>> rez = super.apply(tc);
             return new Tuple2<>(Right.apply(rez._1().right().get()), Sets.union(warnings, rez._2()));
         } else {
             return super.apply(tc);

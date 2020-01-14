@@ -3,7 +3,7 @@ package org.kframework.parser.concrete2kore;
 
 import org.kframework.definition.Module;
 import org.kframework.kore.K;
-import org.kframework.utils.errorsystem.ParseFailedException;
+import org.kframework.utils.errorsystem.KEMException;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -37,9 +37,9 @@ public class ParseCache implements Serializable {
 
     public static class ParsedSentence implements Serializable {
         private K parse;
-        private final Set<ParseFailedException> warnings;
+        private final Set<KEMException> warnings;
 
-        public ParsedSentence(K parse, Set<ParseFailedException> warnings) {
+        public ParsedSentence(K parse, Set<KEMException> warnings) {
             this.parse = parse;
             this.warnings = warnings;
         }
@@ -48,7 +48,7 @@ public class ParseCache implements Serializable {
             return parse;
         }
 
-        public Set<ParseFailedException> getWarnings() {
+        public Set<KEMException> getWarnings() {
             return warnings;
         }
     }

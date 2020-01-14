@@ -9,10 +9,7 @@ import org.kframework.parser.SetsTransformerWithErrors;
 import org.kframework.parser.Term;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.outer.Outer;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
-import org.kframework.utils.errorsystem.ParseFailedException;
+import org.kframework.utils.errorsystem.KEMException;
 import scala.util.Either;
 import scala.util.Left;
 
@@ -21,7 +18,7 @@ import java.util.Set;
 /**
  * Report remaining ambiguities as errors.
  */
-public class AmbFilterError extends SetsTransformerWithErrors<ParseFailedException> {
+public class AmbFilterError extends SetsTransformerWithErrors<KEMException> {
 
     private final boolean strict;
 
@@ -30,10 +27,10 @@ public class AmbFilterError extends SetsTransformerWithErrors<ParseFailedExcepti
     }
 
     @Override
-    public Either<Set<ParseFailedException>, Term> apply(Ambiguity amb) {
+    public Either<Set<KEMException>, Term> apply(Ambiguity amb) {
         K last = null;
         boolean equal = true;
-        Either<Set<ParseFailedException>, Term> candidate = null;
+        Either<Set<KEMException>, Term> candidate = null;
         for (Term t : amb.items()) {
             candidate = this.apply(t);
             if (candidate.isLeft()) {
@@ -68,8 +65,7 @@ public class AmbFilterError extends SetsTransformerWithErrors<ParseFailedExcepti
             msg += "\n    " + new RemoveBracketVisitor().apply(elem);
         }
 
-        ParseFailedException e = new ParseFailedException(
-                new KException(ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, msg, amb.items().iterator().next().source().get(), amb.items().iterator().next().location().get()));
+        KEMException e = KEMException.innerParserError(msg, amb.items().iterator().next());
 
         return Left.apply(Sets.newHashSet(e));
     }

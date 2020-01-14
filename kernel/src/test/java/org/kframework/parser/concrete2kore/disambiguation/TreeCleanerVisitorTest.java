@@ -10,7 +10,7 @@ import org.kframework.parser.Constant;
 import org.kframework.parser.KList;
 import org.kframework.parser.Term;
 import org.kframework.parser.TermCons;
-import org.kframework.utils.errorsystem.ParseFailedException;
+import org.kframework.utils.errorsystem.KEMException;
 import org.pcollections.ConsPStack;
 import scala.util.Either;
 
@@ -51,7 +51,7 @@ public class TreeCleanerVisitorTest {
         assertCleanup(two, two);
     }
 
-    @Test(expected = ParseFailedException.class)
+    @Test(expected = KEMException.class)
     public void testNoKLabel() throws Exception {
         throwFirstLeftException(TermCons.apply(ConsPStack.from(Arrays.asList(bar, foo)), noKLabelProduction, new Location(0, 0, 0, 0), new Source("")));
     }
@@ -69,7 +69,7 @@ public class TreeCleanerVisitorTest {
     }
 
     public void throwFirstLeftException(Term input) {
-        Either<Set<ParseFailedException>, Term> result = treeCleanerVisitor.apply(input);
+        Either<Set<KEMException>, Term> result = treeCleanerVisitor.apply(input);
         if (result.isRight()) {
             fail("Expected an exception but got:" + result.right().get());
         } else {
