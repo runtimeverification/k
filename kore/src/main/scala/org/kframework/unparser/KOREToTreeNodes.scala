@@ -25,14 +25,14 @@ object KOREToTreeNodes {
     return rightPoly && p.nonterminals.zip(children).forall(p => !p._2.isInstanceOf[ProductionReference] || subsorts.lessThanEq(p._2.asInstanceOf[ProductionReference].production.sort, p._1.sort))
   }
 
-  def apply(t: K, mod: Module): Term = t match {
+  def apply(t: K, mod: Module, fromKore: Boolean): Term = t match {
     case t: KToken => Constant(t.s, mod.tokenProductionFor(t.sort), t.att.getOptional(classOf[Location]), t.att.getOptional(classOf[Source]))
     case a: KApply =>
-      val scalaChildren = a.klist.items.asScala map { i: K => apply(i, mod).asInstanceOf[Term] }
+      val scalaChildren = a.klist.items.asScala map { i: K => apply(i, mod, fromKore).asInstanceOf[Term] }
       val children = ConsPStack.from(scalaChildren.reverse asJava)
       val loc = t.att.getOptional(classOf[Location])
       val source = t.att.getOptional(classOf[Source])
-      if (a.klabel.params.isEmpty) {
+      if (!fromKore) {
         val allProds: Set[Production] = mod.productionsFor(KLabel(a.klabel.name)).filter(p => p.nonterminals.lengthCompare(children.size) == 0 && !p.att.contains("unparseAvoid"))
         val typedProds: Set[Production] = allProds.filter(p => wellTyped(a.klabel.params, p, scalaChildren, mod.subsorts))
         // if no productions are left, then the term is ill-sorted, but don't return the empty ambiguity because we want to fail gracefully.
@@ -43,7 +43,7 @@ object KOREToTreeNodes {
           Ambiguity(new util.HashSet(minProds.map(p => TermCons(children, p, loc, source).asInstanceOf[Term]).asJava))
         }
       } else {
-        val p = mod.productionsFor(KLabel(a.klabel.name)).head
+        val p = mod.productionsFor(KLabel(a.klabel.name)).filter(!_.att.contains("unparseAvoid")).head
         val origP = p.att.getOptional("originalPrd", classOf[Production]).orElse(p)
         val subst = origP.substitute(a.klabel.params)
         TermCons(children, subst, loc, source)

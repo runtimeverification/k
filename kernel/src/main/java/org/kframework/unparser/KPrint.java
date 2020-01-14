@@ -21,6 +21,7 @@ import org.kframework.kore.Sort;
 import org.kframework.kore.TransformK;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.ProductionReference;
+import org.kframework.parser.Term;
 import org.kframework.parser.concrete2kore.ParseInModule;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.utils.errorsystem.KEMException;
@@ -188,10 +189,18 @@ public class KPrint {
         return unparseInternal(test, input, colorize);
     }
 
+    private Term disambiguateForUnparse(Module mod, Term t) {
+        if (kompileOptions.isKore()) {
+            return t;
+        } else {
+            return ParseInModule.disambiguateForUnparse(mod, t);
+        }
+    }
+
     private String unparseInternal(Module mod, K input, ColorSetting colorize) {
         ExpandMacros expandMacros = ExpandMacros.forNonSentences(mod, files, kompileOptions, true);
         return Formatter.format(
-                new AddBrackets(mod).addBrackets((ProductionReference) ParseInModule.disambiguateForUnparse(mod, KOREToTreeNodes.apply(KOREToTreeNodes.up(mod, expandMacros.expand(input)), mod))), options.color(tty.stdout, files.getEnv()));
+                new AddBrackets(mod).addBrackets((ProductionReference) disambiguateForUnparse(mod, KOREToTreeNodes.apply(KOREToTreeNodes.up(mod, expandMacros.expand(input)), mod, kompileOptions.isKore()))), options.color(tty.stdout, files.getEnv()));
     }
 
     public K abstractTerm(Module mod, K term) {
