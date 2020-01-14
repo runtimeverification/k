@@ -45,7 +45,6 @@ public class LLVMRewriter implements Function<Definition, Rewriter> {
     private final CompiledDefinition def;
     private final KRunOptions krunOptions;
     private final KompileOptions kompileOptions;
-    private final Properties idsToLabels;
 
     @Inject
     public LLVMRewriter(
@@ -53,14 +52,12 @@ public class LLVMRewriter implements Function<Definition, Rewriter> {
             FileUtil files,
             CompiledDefinition def,
             KRunOptions krunOptions,
-            KompileOptions kompileOptions,
-            InitializeDefinition init) {
+            KompileOptions kompileOptions) {
         this.globalOptions = globalOptions;
         this.files = files;
         this.def = def;
         this.krunOptions = krunOptions;
         this.kompileOptions = kompileOptions;
-        this.idsToLabels = init.serialized;
     }
 
     @Override
@@ -199,22 +196,5 @@ public class LLVMRewriter implements Function<Definition, Rewriter> {
             return pb.inheritIO().start().waitFor();
         }
     }
-
-    @DefinitionScoped
-    public static class InitializeDefinition {
-        final Properties serialized;
-
-        @Inject
-        public InitializeDefinition(FileUtil files) {
-            try {
-                FileInputStream input = new FileInputStream(files.resolveKoreToKLabelsFile());
-                serialized = new Properties();
-                serialized.load(input);
-            } catch (IOException e) {
-                throw KEMException.criticalError("Error while loading Kore to K label map", e);
-            }
-        }
-    }
-
 }
 

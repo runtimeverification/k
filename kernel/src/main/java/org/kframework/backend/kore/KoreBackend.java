@@ -99,15 +99,6 @@ public class KoreBackend implements Backend {
     public static String getKompiledString(ModuleToKORE converter, FileUtil files, boolean heatCoolEquations) {
         StringBuilder sb = new StringBuilder();
         String kompiledString = converter.convert(heatCoolEquations, sb);
-        Properties koreToKLabels = new Properties();
-        koreToKLabels.putAll(converter.getKToKoreLabelMap().inverse());
-        try {
-            FileOutputStream output = new FileOutputStream(files.resolveKoreToKLabelsFile());
-            koreToKLabels.store(output, "Properties file containing the mapping from kore to k labels");
-
-        } catch (IOException e) {
-            throw KEMException.criticalError("Error while saving kore to K labels map", e);
-        }
         return kompiledString;
     }
 

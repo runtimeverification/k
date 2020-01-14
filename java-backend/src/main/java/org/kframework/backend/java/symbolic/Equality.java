@@ -2,15 +2,28 @@
 
 package org.kframework.backend.java.symbolic;
 
+import com.google.inject.Provider;
+import org.kframework.backend.java.builtins.BoolToken;
+import org.kframework.backend.java.kil.Bottom;
+import org.kframework.backend.java.kil.BuiltinList;
+import org.kframework.backend.java.kil.BuiltinMap;
+import org.kframework.backend.java.kil.BuiltinSet;
+import org.kframework.backend.java.kil.Collection;
+import org.kframework.backend.java.kil.Definition;
+import org.kframework.backend.java.kil.GlobalContext;
+import org.kframework.backend.java.kil.KCollection;
+import org.kframework.backend.java.kil.KItem;
+import org.kframework.backend.java.kil.KLabelConstant;
+import org.kframework.backend.java.kil.KList;
+import org.kframework.backend.java.kil.Kind;
+import org.kframework.backend.java.kil.Sort;
+import org.kframework.backend.java.kil.Term;
+import org.kframework.backend.java.kil.Variable;
+import org.kframework.backend.java.util.Constants;
+import org.kframework.builtin.KLabels;
+
 import java.io.Serializable;
 import java.util.stream.IntStream;
-
-import org.kframework.backend.java.builtins.BoolToken;
-import org.kframework.backend.java.kil.*;
-import org.kframework.backend.java.util.Constants;
-
-import com.google.inject.Provider;
-import org.kframework.builtin.KLabels;
 
 /**
  * An equality between two canonicalized terms.
@@ -26,19 +39,29 @@ public class Equality implements Serializable {
     private TruthValue truthValue = null;
 
     public Equality(Term leftHandSide, Term rightHandSide, GlobalContext global) {
+        this.leftHandSide = leftHandSide;
+        this.rightHandSide = rightHandSide;
+        this.global = global;
+    }
+
+    public Equality simplify() {
+        Term newLeftHandSide, newRightHandSide;
         // TODO(YilongL): this seems a little bit ad-hoc...
         if (isTermEquality(leftHandSide) && rightHandSide == BoolToken.TRUE) {
             KList kList = (KList) (((KItem) leftHandSide).kList());
-            leftHandSide = kList.get(0);
-            rightHandSide = kList.get(1);
+            newLeftHandSide = kList.get(0);
+            newRightHandSide = kList.get(1);
         } else if (isTermEquality(rightHandSide) && leftHandSide == BoolToken.TRUE) {
             KList kList = (KList) (((KItem) rightHandSide).kList());
-            leftHandSide = kList.get(0);
-            rightHandSide = kList.get(1);
+            newLeftHandSide = kList.get(0);
+            newRightHandSide = kList.get(1);
+        } else {
+            newLeftHandSide = leftHandSide;
+            newRightHandSide = rightHandSide;
         }
 
-        leftHandSide = canonicalize(leftHandSide);
-        rightHandSide = canonicalize(rightHandSide);
+        newLeftHandSide = canonicalize(newLeftHandSide);
+        newRightHandSide = canonicalize(newRightHandSide);
         // TODO(YilongL): unable to do the following because the order of lhs
         // and rhs matters when checking implication
 //        /* arrange the leftHandSide and rightHandSide according to the natural
@@ -48,10 +71,9 @@ public class Equality implements Serializable {
 //            leftHandSide = rightHandSide;
 //            rightHandSide = term;
 //        }
-
-        this.leftHandSide = leftHandSide;
-        this.rightHandSide = rightHandSide;
-        this.global = global;
+        return newLeftHandSide == leftHandSide && newRightHandSide == rightHandSide
+               ? this
+               : new Equality(newLeftHandSide, newRightHandSide, global);
     }
 
     public Term leftHandSide() {

@@ -8,6 +8,7 @@ import java.io.Serializable;
 import java.util.Formatter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class KException implements Serializable {
     protected final ExceptionType type;
@@ -66,6 +67,25 @@ public class KException implements Serializable {
         this.source = source;
         this.location = location;
         this.exception = exception;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        KException that = (KException) o;
+        return type == that.type &&
+                exceptionGroup == that.exceptionGroup &&
+                Objects.equals(source, that.source) &&
+                Objects.equals(location, that.location) &&
+                Objects.equals(message, that.message) &&
+                Objects.equals(exception, that.exception) &&
+                Objects.equals(trace.toString(), that.trace.toString());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(type, exceptionGroup, source, location, message, exception, trace.toString());
     }
 
     public enum KExceptionGroup {
