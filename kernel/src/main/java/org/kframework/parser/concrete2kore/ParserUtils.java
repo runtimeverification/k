@@ -191,7 +191,7 @@ public class ParserUtils {
         def.setItems((List<DefinitionItem>) (Object) kilModules);
 
         new CollectProductionsVisitor(kore, context).visit(def);
-        
+
         Map<String, List<org.kframework.kil.Module>> groupedModules = kilModules.stream()
           .collect(Collectors.groupingBy(org.kframework.kil.Module::getName));
 
