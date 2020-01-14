@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -190,6 +191,28 @@ public class ParserUtils {
         def.setItems((List<DefinitionItem>) (Object) kilModules);
 
         new CollectProductionsVisitor(kore, context).visit(def);
+        
+        Map<String, List<org.kframework.kil.Module>> groupedModules = kilModules.stream()
+          .collect(Collectors.groupingBy(org.kframework.kil.Module::getName));
+
+        List<String> duplicateModules = groupedModules
+          .entrySet().stream()
+          .filter(e -> e.getValue().size() > 1)
+          .map(Map.Entry::getKey)
+          .collect(Collectors.toList());
+
+        int errors = 0;
+        for (String moduleName : duplicateModules) {
+          org.kframework.kil.Module firstMod = groupedModules.get(moduleName).get(0);
+          org.kframework.kil.Module secondMod = groupedModules.get(moduleName).get(1);
+          KEMException ex = KEMException.outerParserError("Module " + moduleName + " previously declared at " + firstMod.getSource() + " and " + firstMod.getLocation(), secondMod.getSource(), secondMod.getLocation());
+          errors++;
+          kem.addKException(ex.getKException());
+        }
+
+        if (errors > 0) {
+          throw KEMException.outerParserError("Had " + errors + " outer parsing errors.");
+        }
 
         KILtoKORE kilToKore = new KILtoKORE(context, false, kore);
 

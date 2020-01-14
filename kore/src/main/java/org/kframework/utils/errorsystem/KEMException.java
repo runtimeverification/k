@@ -99,6 +99,10 @@ public class KEMException extends RuntimeException {
         return create(ExceptionType.ERROR, KExceptionGroup.INNER_PARSER, message, e, location, source);
     }
 
+    public static KEMException outerParserError(String message) {
+        return create(ExceptionType.ERROR, KExceptionGroup.OUTER_PARSER, message, null, null, null);
+    }
+
     public static KEMException outerParserError(String message, Source source, Location location) {
         return create(ExceptionType.ERROR, KExceptionGroup.OUTER_PARSER, message, null, location, source);
     }
