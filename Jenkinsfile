@@ -96,7 +96,7 @@ pipeline {
                           echo 'Starting kserver...'
                           k-distribution/target/release/k/bin/spawn-kserver kserver.log
                           cd k-exercises/tutorial
-                          make -j`nproc`
+                          make -j`nproc` DEBUG=--debug
                         '''
                       }
                     }
@@ -110,7 +110,7 @@ pipeline {
                           echo 'Starting kserver...'
                           k-distribution/target/release/k/bin/spawn-kserver kserver.log
                           cd k-exercises/tutorial
-                          make -j`nproc`
+                          make -j`nproc` DEBUG=--debug
                         '''
                       }
                     }
@@ -124,7 +124,7 @@ pipeline {
                           echo 'Starting kserver...'
                           k-distribution/target/release/k/bin/spawn-kserver kserver.log
                           cd k-exercises/tutorial
-                          make -j`nproc`
+                          make -j`nproc` DEBUG=--debug
                         '''
                       }
                     }
@@ -138,7 +138,7 @@ pipeline {
                           echo 'Starting kserver...'
                           k-distribution/target/release/k/bin/spawn-kserver kserver.log
                           cd k-exercises/tutorial
-                          make -j`nproc`
+                          make -j`nproc` DEBUG=--debug
                         '''
                       }
                     }
@@ -152,7 +152,7 @@ pipeline {
                           echo 'Starting kserver...'
                           k-distribution/target/release/k/bin/spawn-kserver kserver.log
                           cd k-exercises/tutorial
-                          make -j`nproc`
+                          make -j`nproc` DEBUG=--debug
                         '''
                       }
                     }
