@@ -15,9 +15,7 @@ import org.kframework.parser.concrete2kore.kernel.KSyntax2GrammarStatesFilter;
 import org.kframework.parser.concrete2kore.kernel.Parser;
 import org.kframework.parser.concrete2kore.kernel.Scanner;
 import org.kframework.parser.outer.Outer;
-import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KEMException;
-import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.file.FileUtil;
 import scala.Tuple2;
 import scala.util.Either;
@@ -30,9 +28,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.io.Writer;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -117,7 +113,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
      * @param startSymbol    the start symbol from which to parse.
      * @return the Term representation of the parsed input.
      */
-    public Tuple2<Either<Set<ParseFailedException>, K>, Set<ParseFailedException>>
+    public Tuple2<Either<Set<KEMException>, K>, Set<KEMException>>
             parseString(String input, Sort startSymbol, Source source) {
         try (Scanner scanner = getScanner()) {
             return parseString(input, startSymbol, scanner, source, 1, 1, true, false);
@@ -144,11 +140,11 @@ public class ParseInModule implements Serializable, AutoCloseable {
         return scanner;
     }
 
-    public Tuple2<Either<Set<ParseFailedException>, K>, Set<ParseFailedException>>
+    public Tuple2<Either<Set<KEMException>, K>, Set<KEMException>>
         parseString(String input, Sort startSymbol, Scanner scanner, Source source, int startLine, int startColumn, boolean inferSortChecks, boolean isAnywhere) {
-        final Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> result
+        final Tuple2<Either<Set<KEMException>, Term>, Set<KEMException>> result
                 = parseStringTerm(input, startSymbol, scanner, source, startLine, startColumn, inferSortChecks, isAnywhere);
-        Either<Set<ParseFailedException>, K> parseInfo;
+        Either<Set<KEMException>, K> parseInfo;
         if (result._1().isLeft()) {
             parseInfo = Left.apply(result._1().left().get());
         } else {
@@ -173,7 +169,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
      * @param startColumn
      * @return
      */
-    private Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>>
+    private Tuple2<Either<Set<KEMException>, Term>, Set<KEMException>>
             parseStringTerm(String input, Sort startSymbol, Scanner scanner, Source source, int startLine, int startColumn, boolean inferSortChecks, boolean isAnywhere) {
         scanner = getGrammar(scanner);
 
@@ -184,22 +180,21 @@ public class ParseInModule implements Serializable, AutoCloseable {
 
         try {
             Grammar.NonTerminal startSymbolNT = grammar.get(startSymbol.toString());
-            Set<ParseFailedException> warn = Sets.newHashSet();
+            Set<KEMException> warn = Sets.newHashSet();
             if (startSymbolNT == null) {
                 String msg = "Could not find start symbol: " + startSymbol;
-                KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg);
-                return new Tuple2<>(Left.apply(Sets.newHashSet(new ParseFailedException(kex))), warn);
+                return new Tuple2<>(Left.apply(Sets.newHashSet(KEMException.criticalError(msg))), warn);
             }
 
             Term parsed;
             try {
                 Parser parser = new Parser(input, scanner, source, startLine, startColumn);
                 parsed = parser.parse(startSymbolNT, 0);
-            } catch (ParseFailedException e) {
+            } catch (KEMException e) {
                 return Tuple2.apply(Left.apply(Collections.singleton(e)), Collections.emptySet());
             }
 
-            Either<Set<ParseFailedException>, Term> rez = new TreeCleanerVisitor().apply(parsed);
+            Either<Set<KEMException>, Term> rez = new TreeCleanerVisitor().apply(parsed);
             if (rez.isLeft())
                 return new Tuple2<>(rez, warn);
             rez = new CorrectRewritePriorityVisitor().apply(rez.right().get());
@@ -238,7 +233,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
             rez = new AmbFilterError(strict && inferSortChecks).apply(rez3);
             if (rez.isLeft())
                 return new Tuple2<>(rez, warn);
-            Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rez2 = new AddEmptyLists(disambModule).apply(rez.right().get());
+            Tuple2<Either<Set<KEMException>, Term>, Set<KEMException>> rez2 = new AddEmptyLists(disambModule).apply(rez.right().get());
             warn = Sets.union(rez2._2(), warn);
             if (rez2._1().isLeft())
                 return rez2;
@@ -289,8 +284,8 @@ public class ParseInModule implements Serializable, AutoCloseable {
 
     public static Term disambiguateForUnparse(Module mod, Term ambiguity) {
         Term rez3 = new PushTopAmbiguityUp().apply(ambiguity);
-        Either<Set<ParseFailedException>, Term> rez;
-        Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rez2;
+        Either<Set<KEMException>, Term> rez;
+        Tuple2<Either<Set<KEMException>, Term>, Set<KEMException>> rez2;
         try (TypeInferencer inferencer = new TypeInferencer(mod)) {
             rez = new TypeInferenceVisitor(inferencer, Sorts.K(), false, false, false).apply(rez3);
         }

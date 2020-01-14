@@ -21,8 +21,8 @@ import org.kframework.parser.concrete2kore.ParseInModule;
 import org.kframework.parser.concrete2kore.ParserUtils;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.parser.outer.Outer;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
-import org.kframework.utils.errorsystem.ParseFailedException;
 import org.kframework.utils.file.FileUtil;
 import scala.Tuple2;
 import scala.util.Either;
@@ -71,7 +71,7 @@ public class AddEmptyListsTest {
 
     private void parseTerm(String term, String sort, K expected, int expectWarnings) {
         String source = "AddEmpytListsTest." + testName.getMethodName();
-        final Tuple2<Either<Set<ParseFailedException>, K>, Set<ParseFailedException>> parseResult
+        final Tuple2<Either<Set<KEMException>, K>, Set<KEMException>> parseResult
                 = parser.parseString(term, Sort(sort), new Source(source));
         if (parseResult._1().isLeft()) {
             Assert.assertTrue("Unexpected parse errors" + parseResult._1().left().get(), false);
@@ -177,7 +177,7 @@ public class AddEmptyListsTest {
     @Test
     public void testArgumentLabeledConsSub2() {
         // gets a warning because the argument of sort As does not fit.n
-        parseTerm("h(`_,__TEST`(a,.As))", "K", KApply(H, KApply(CONS, A, NIL)), 1);
+        parseTerm("h(`_,__TEST`(a,.As))", "K", KApply(H, KApply(CONS, A, NIL)));
     }
 
     @Test
