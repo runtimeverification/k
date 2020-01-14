@@ -9,10 +9,7 @@ import org.kframework.parser.SetsGeneralTransformer;
 import org.kframework.parser.Term;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.outer.Outer;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.KException.ExceptionType;
-import org.kframework.utils.errorsystem.KException.KExceptionGroup;
-import org.kframework.utils.errorsystem.ParseFailedException;
+import org.kframework.utils.errorsystem.KEMException;
 import scala.Tuple2;
 import scala.util.Either;
 import scala.util.Right;
@@ -22,7 +19,7 @@ import java.util.Set;
 /**
  * Eliminate remaining ambiguities by choosing one of them.
  */
-public class AmbFilter extends SetsGeneralTransformer<ParseFailedException, ParseFailedException> {
+public class AmbFilter extends SetsGeneralTransformer<KEMException, KEMException> {
 
     private final boolean strict;
 
@@ -31,10 +28,10 @@ public class AmbFilter extends SetsGeneralTransformer<ParseFailedException, Pars
     }
 
     @Override
-    public Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> apply(Ambiguity amb) {
+    public Tuple2<Either<Set<KEMException>, Term>, Set<KEMException>> apply(Ambiguity amb) {
         K last = null;
         boolean equal = true;
-        Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> candidate = null;
+        Tuple2<Either<Set<KEMException>, Term>, Set<KEMException>> candidate = null;
         for (Term t : amb.items()) {
             candidate = this.apply(t);
             K next = new TreeNodesToKORE(Outer::parseSort, strict).apply(new RemoveBracketVisitor().apply(candidate._1().right().get()));
@@ -66,10 +63,7 @@ public class AmbFilter extends SetsGeneralTransformer<ParseFailedException, Pars
             msg += "\n    " + new RemoveBracketVisitor().apply(elem);
         }
         // TODO: add location information
-        ParseFailedException w = new ParseFailedException(
-                new KException(ExceptionType.WARNING, KExceptionGroup.INNER_PARSER, msg, amb.items().iterator().next().source().get(), amb.items().iterator().next().location().get()));
-
-        Tuple2<Either<Set<ParseFailedException>, Term>, Set<ParseFailedException>> rez = this.apply(amb.items().iterator().next());
-        return new Tuple2<>(Right.apply(rez._1().right().get()), Sets.union(Sets.newHashSet(w), rez._2()));
+        Tuple2<Either<Set<KEMException>, Term>, Set<KEMException>> rez = this.apply(amb.items().iterator().next());
+        return new Tuple2<>(Right.apply(rez._1().right().get()), rez._2());
     }
 }

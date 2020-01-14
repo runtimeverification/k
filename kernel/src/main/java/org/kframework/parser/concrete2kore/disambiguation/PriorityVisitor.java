@@ -8,9 +8,7 @@ import org.kframework.definition.Tag;
 import org.kframework.parser.SetsTransformerWithErrors;
 import org.kframework.parser.Term;
 import org.kframework.parser.TermCons;
-import org.kframework.utils.errorsystem.KException;
-import org.kframework.utils.errorsystem.ParseFailedException;
-import org.kframework.utils.errorsystem.PriorityException;
+import org.kframework.utils.errorsystem.KEMException;
 import scala.Tuple2;
 import scala.collection.Set;
 import scala.util.Either;
@@ -21,7 +19,7 @@ import scala.util.Right;
 /**
  * Apply the priority and associativity filters.
  */
-public class PriorityVisitor extends SetsTransformerWithErrors<ParseFailedException> {
+public class PriorityVisitor extends SetsTransformerWithErrors<KEMException> {
 
     private final POSet<Tag> priorities;
     private final Set<Tuple2<Tag, Tag>> leftAssoc;
@@ -34,12 +32,12 @@ public class PriorityVisitor extends SetsTransformerWithErrors<ParseFailedExcept
     }
 
     @Override
-    public Either<java.util.Set<ParseFailedException>, Term> apply(TermCons tc) {
+    public Either<java.util.Set<KEMException>, Term> apply(TermCons tc) {
         assert tc.production() != null : this.getClass() + ":" + " production not found." + tc;
         if (!tc.production().isSyntacticSubsort() && !tc.production().att().contains("bracket")) {
             // match only on the outermost elements
             if (tc.production().items().apply(0) instanceof NonTerminal) {
-                Either<java.util.Set<ParseFailedException>, Term> rez =
+                Either<java.util.Set<KEMException>, Term> rez =
                         new PriorityVisitor2(tc, PriorityVisitor2.Side.LEFT, priorities, leftAssoc, rightAssoc).apply(tc.get(0));
                 if (rez.isLeft())
                     return rez;
@@ -47,7 +45,7 @@ public class PriorityVisitor extends SetsTransformerWithErrors<ParseFailedExcept
             }
             if (tc.production().items().apply(tc.production().items().size() - 1) instanceof NonTerminal) {
                 int last = tc.items().size() - 1;
-                Either<java.util.Set<ParseFailedException>, Term> rez =
+                Either<java.util.Set<KEMException>, Term> rez =
                         new PriorityVisitor2(tc, PriorityVisitor2.Side.RIGHT, priorities, leftAssoc, rightAssoc).apply(tc.get(last));
                 if (rez.isLeft())
                     return rez;
@@ -57,7 +55,7 @@ public class PriorityVisitor extends SetsTransformerWithErrors<ParseFailedExcept
         return super.apply(tc);
     }
 
-    private static class PriorityVisitor2 extends SetsTransformerWithErrors<ParseFailedException> {
+    private static class PriorityVisitor2 extends SetsTransformerWithErrors<KEMException> {
         /**
          * Specifies whether the current node is the left most or the right most child of the parent.
          * This is useful because associativity can be checked at the same time with priorities.
@@ -77,7 +75,7 @@ public class PriorityVisitor extends SetsTransformerWithErrors<ParseFailedExcept
             this.rigthAssoc = rightAssoc;
         }
 
-        public Either<java.util.Set<ParseFailedException>, Term> apply(TermCons tc) {
+        public Either<java.util.Set<KEMException>, Term> apply(TermCons tc) {
             if (tc.production().att().contains("bracket")) return Right.apply(tc);
             //if (Side.RIGHT  == side && !(tc.production().items().apply(0) instanceof NonTerminal)) return Right.apply(tc);
             //if (Side.LEFT == side && !(tc.production().items().apply(tc.production().items().size() - 1) instanceof NonTerminal)) return Right.apply(tc);
@@ -85,18 +83,15 @@ public class PriorityVisitor extends SetsTransformerWithErrors<ParseFailedExcept
             Tag localLabel = new Tag(tc.production().klabel().get().name());
             if (priorities.lessThan(parentLabel, localLabel)) {
                 String msg = "Priority filter exception. Cannot use " + localLabel + " as a child of " + parentLabel;
-                KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg, tc.source().get(), tc.location().get());
-                return Left.apply(Sets.newHashSet(new PriorityException(kex)));
+                return Left.apply(Sets.newHashSet(KEMException.innerParserError(msg, tc)));
             }
             if (leftAssoc.contains(new Tuple2<>(parentLabel, localLabel)) && Side.RIGHT == side) {
                 String msg = "Associativity filter exception. Cannot use " + localLabel + " as a right child of " + parentLabel;
-                KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg, tc.source().get(), tc.location().get());
-                return Left.apply(Sets.newHashSet(new PriorityException(kex)));
+                return Left.apply(Sets.newHashSet(KEMException.innerParserError(msg, tc)));
             }
             if (rigthAssoc.contains(new Tuple2<>(parentLabel, localLabel)) && Side.LEFT == side) {
                 String msg = "Associativity filter exception. Cannot use " + localLabel + " as a left child of " + parentLabel;
-                KException kex = new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.CRITICAL, msg, tc.source().get(), tc.location().get());
-                return Left.apply(Sets.newHashSet(new PriorityException(kex)));
+                return Left.apply(Sets.newHashSet(KEMException.innerParserError(msg, tc)));
             }
 
             return Right.apply(tc);
