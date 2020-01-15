@@ -132,7 +132,10 @@ public class BinaryLoader {
 
     public Object loadSynchronized(File file) throws IOException, ClassNotFoundException, InterruptedException {
         //To protect from concurrent access from another thread
-        lock.readLock().lockInterruptibly();
+        //lock.readLock().lockInterruptibly(); FST 2.56 bug: concurrency issues make it safer to run fully synchronized.
+        //Enabling ParallelGC alone doesn't help.
+        //https://github.com/RuedigerMoeller/fast-serialization/issues/274
+        lock.writeLock().lockInterruptibly();
         //There's no issue if input stream is opened before lock is acquired
         try (FileInputStream in = new FileInputStream(file)) {
             //To protect from concurrent access to same file from another process
@@ -151,7 +154,8 @@ public class BinaryLoader {
                 in.close();
             }
         } finally {
-            lock.readLock().unlock();
+            //lock.readLock().unlock();
+            lock.writeLock().unlock();
         }
     }
 }
