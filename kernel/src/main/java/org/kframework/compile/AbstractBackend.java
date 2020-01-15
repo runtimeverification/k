@@ -9,7 +9,9 @@ import org.kframework.kil.Attribute;
 import scala.Function1;
 
 import javax.annotation.Nullable;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
 
 /**
@@ -27,16 +29,19 @@ public abstract class AbstractBackend implements Backend {
     }
 
     protected Definition markExtraConcreteRules(Definition def, @Nullable List<String> extraConcreteRuleLabels) {
-        return extraConcreteRuleLabels != null
-               ? DefinitionTransformer.fromSentenceTransformer(
-                (mod, s) -> markExtraConcreteRules(s, extraConcreteRuleLabels), "mark extra concrete rules").apply(def)
-               : def;
+        if (extraConcreteRuleLabels == null) {
+            return def;
+        }
+        HashSet<String> concreteLabelsSet = new HashSet<>(extraConcreteRuleLabels);
+        return DefinitionTransformer.fromSentenceTransformer(
+                (mod, s) -> markExtraConcreteRules(s, concreteLabelsSet), "mark extra concrete rules")
+                .apply(def);
     }
 
     /**
      * Mark with [concrete] rules with labels enumerated in `--concrete-rules`.
      */
-    private Sentence markExtraConcreteRules(Sentence s, List<String> extraConcreteRuleLabels) {
+    private Sentence markExtraConcreteRules(Sentence s, Set<String> extraConcreteRuleLabels) {
         if (s instanceof org.kframework.definition.Rule) {
             org.kframework.definition.Rule r = (org.kframework.definition.Rule) s;
             String label = r.att().getOption(Attribute.LABEL_KEY).getOrElse(() -> null);
