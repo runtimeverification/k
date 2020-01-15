@@ -1188,6 +1188,7 @@ capabilities:
 module TEST
   imports INT
 
+  configuration <k> foo(5) </k>
   rule [test]: I:Int => I +Int 1 requires I <Int 10
 
   syntax Int ::= foo(Int) [function]
@@ -1360,6 +1361,23 @@ and we also can see the substitution of that rule. If foo was evaluated while
 evaluating another function, we would also be able to see the arguments of that
 function as well, unless the function was tail recursive, in which case no
 stack frame would exist once the tail call was performed.
+
+### Breaking on a set of rules or functions
+
+Using `rbreak <regex>` you can set breakpoints on multiple functions.
+
+-   `rbreak Lbl` - sets a breakpoint on all non hooked `function`s
+
+-   `rbreak Lbl.*TEST` - sets a breakpoint on all `function`s from module `TEST`
+
+-   `rbreak hook_INT` - sets a breakpoint on all hooks from module `INT`
+
+### Other debugger issues
+
+-   `<optimized out>` try kompiling without `-O1`, `-O2`, or `-O3`.
+-   `(gdb) break definition.kore:break -> No source file named definition.kore.`
+send `-ccopt -g` to kompile in order to generate debug info symbols.
+
 
 Undocumented
 ------------
