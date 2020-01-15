@@ -25,7 +25,6 @@ import org.kframework.kore.KVariable;
 import org.kframework.kore.SortedADT;
 import org.kframework.backend.java.compile.ConvertDataStructureToLookup;
 import org.kframework.kore.TransformK;
-import org.kframework.kprove.KProveOptions;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
@@ -75,9 +74,7 @@ public class JavaBackend extends AbstractBackend {
     }
 
     @Inject
-    public JavaBackend(KExceptionManager kem, FileUtil files, GlobalOptions globalOptions,
-                       KompileOptions kompileOptions, KProveOptions kproveOptions) {
-        super(kproveOptions);
+    public JavaBackend(KExceptionManager kem, FileUtil files, GlobalOptions globalOptions, KompileOptions kompileOptions) {
         this.kem = kem;
         this.files = files;
         this.globalOptions = globalOptions;
@@ -106,7 +103,6 @@ public class JavaBackend extends AbstractBackend {
                 .andThen(DefinitionTransformer.fromRuleBodyTransformer(JavaBackend::convertKSeqToKApply, "kseq to kapply"))
                 .andThen(DefinitionTransformer.fromRuleBodyTransformer(NormalizeKSeq.self()::apply, "normalize kseq"))
                 .andThen(JavaBackend::markRegularRules)
-                .andThen(this::markExtraConcreteRules)
                 .andThen(DefinitionTransformer.fromSentenceTransformer(new AddConfigurationRecoveryFlags(), "add refers_THIS_CONFIGURATION_marker"))
                 .andThen(DefinitionTransformer.fromSentenceTransformer(JavaBackend::markSingleVariables, "mark single variables"))
                 .andThen(DefinitionTransformer.from(new AssocCommToAssoc(), "convert AC matching to A matching"))

@@ -6,14 +6,13 @@ import org.kframework.backend.kore.KoreBackend;
 import org.kframework.kil.Attribute;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.KompileOptions;
-import org.kframework.kprove.KProveOptions;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 
 import java.util.Arrays;
+import java.util.Set;
 import java.util.EnumSet;
 import java.util.HashSet;
-import java.util.Set;
 
 import static org.kframework.compile.ResolveHeatCoolAttribute.Mode.*;
 
@@ -22,10 +21,9 @@ public class HaskellBackend extends KoreBackend {
     @Inject
     public HaskellBackend(
             KompileOptions kompileOptions,
-            KProveOptions kproveOptions,
             FileUtil files,
             KExceptionManager kem) {
-        super(kompileOptions, kproveOptions, files, kem, EnumSet.of(HEAT_RESULT, COOL_RESULT_CONDITION), false);
+        super(kompileOptions, files, kem, EnumSet.of(HEAT_RESULT, COOL_RESULT_CONDITION), false);
     }
 
 

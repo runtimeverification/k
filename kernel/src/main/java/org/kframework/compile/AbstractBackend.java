@@ -1,42 +1,42 @@
 // Copyright (c) 2020 K Team. All Rights Reserved.
 package org.kframework.compile;
 
-import com.google.common.collect.Sets;
 import org.kframework.definition.Definition;
 import org.kframework.definition.DefinitionTransformer;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kil.Attribute;
-import org.kframework.kprove.KProveOptions;
+import scala.Function1;
 
-import java.util.Set;
+import javax.annotation.Nullable;
+import java.util.List;
+import java.util.function.Function;
 
 /**
  * @author Denis Bogdanas
  * Created on 09-Jan-20.
  */
 public abstract class AbstractBackend implements Backend {
-    /**
-     * Will be the default KProveOptions object if not in kprove mode.
-     */
-    protected final KProveOptions kproveOptions;
-    private final Set<String> extraConcreteRuleLabels;
 
-    public AbstractBackend(KProveOptions kproveOptions) {
-        this.kproveOptions = kproveOptions;
-        this.extraConcreteRuleLabels = Sets.newHashSet(kproveOptions.extraConcreteRuleLabels);
+    @Override
+    public Function<Definition, Definition> proofDefinitionNonCachedSteps(
+            @Nullable List<String> extraConcreteRuleLabels) {
+        Function1<Definition, Definition> markExtraConcrete =
+                def -> markExtraConcreteRules(def, extraConcreteRuleLabels);
+        return markExtraConcrete::apply;
+    }
+
+    protected Definition markExtraConcreteRules(Definition def, @Nullable List<String> extraConcreteRuleLabels) {
+        return extraConcreteRuleLabels != null
+               ? DefinitionTransformer.fromSentenceTransformer(
+                (mod, s) -> markExtraConcreteRules(s, extraConcreteRuleLabels), "mark extra concrete rules").apply(def)
+               : def;
     }
 
     /**
      * Mark with [concrete] rules with labels enumerated in `--concrete-rules`.
      */
-    protected Definition markExtraConcreteRules(Definition d) {
-        ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(d.mainModule());
-        return DefinitionTransformer.fromSentenceTransformer(
-                (mod, s) -> markExtraConcreteRules(d, configInfo, s), "mark extra concrete rules").apply(d);
-    }
-
-    private Sentence markExtraConcreteRules(Definition d, ConfigurationInfoFromModule configInfo, Sentence s) {
+    private Sentence markExtraConcreteRules(Sentence s, List<String> extraConcreteRuleLabels) {
         if (s instanceof org.kframework.definition.Rule) {
             org.kframework.definition.Rule r = (org.kframework.definition.Rule) s;
             String label = r.att().getOption(Attribute.LABEL_KEY).getOrElse(() -> null);

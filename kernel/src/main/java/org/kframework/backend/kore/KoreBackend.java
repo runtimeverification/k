@@ -37,20 +37,15 @@ import org.kframework.definition.ModuleTransformer;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.Kompile;
 import org.kframework.kompile.KompileOptions;
-import org.kframework.kprove.KProveOptions;
-import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 
 import scala.Function1;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
-import java.util.Properties;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -67,16 +62,12 @@ public class KoreBackend extends AbstractBackend {
     @Inject
     public KoreBackend(
             KompileOptions kompileOptions,
-            KProveOptions kproveOptions,
             FileUtil files,
             KExceptionManager kem) {
-        this(kompileOptions, kproveOptions, files, kem, kompileOptions.optimize2 || kompileOptions.optimize3 ? EnumSet.of(HEAT_RESULT) : EnumSet.of(HEAT_RESULT, COOL_RESULT_CONDITION), false);
+        this(kompileOptions, files, kem, kompileOptions.optimize2 || kompileOptions.optimize3 ? EnumSet.of(HEAT_RESULT) : EnumSet.of(HEAT_RESULT, COOL_RESULT_CONDITION), false);
     }
 
-    public KoreBackend(KompileOptions kompileOptions, KProveOptions kproveOptions, FileUtil files,
-                       KExceptionManager kem, EnumSet<ResolveHeatCoolAttribute.Mode> heatCoolConditions,
-                       boolean heatCoolEquations) {
-        super(kproveOptions);
+    public KoreBackend(KompileOptions kompileOptions, FileUtil files, KExceptionManager kem, EnumSet<ResolveHeatCoolAttribute.Mode> heatCoolConditions, boolean heatCoolEquations) {
         this.kompileOptions = kompileOptions;
         this.files = files;
         this.kem = kem;
@@ -164,7 +155,6 @@ public class KoreBackend extends AbstractBackend {
                 .andThen(Kompile::addSemanticsModule)
                 .andThen(resolveConfigVar)
                 .andThen(addCoolLikeAtt)
-                .andThen(this::markExtraConcreteRules)
                 .apply(def);
     }
 
