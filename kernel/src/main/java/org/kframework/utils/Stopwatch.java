@@ -31,7 +31,7 @@ public class Stopwatch {
     public void printIntermediate(String message) {
         long current = System.currentTimeMillis();
         if (options.verbose)
-            f.format("%-60s = %s%n", message, milisecondsToTime(lastIntermediate - start));
+            f.format("%-60s = %s%n", message, milisecondsToTime(current - lastIntermediate));
         lastIntermediate = current;
     }
 
@@ -48,7 +48,7 @@ public class Stopwatch {
         if (h > 0)
             return String.format("%dh %02dm %02ds", h, m, (long) s);
         if (m > 0)
-            return String.format("%dm %02ds", m, (long) s);
+            return String.format("%02dm %02ds", m, (long) s);
         return String.format("%6.3fs", s);
     }
 
