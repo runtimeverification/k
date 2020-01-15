@@ -131,7 +131,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
 
     private Scanner scanner;
     private ThreadLocal<TypeInferencer> inferencer = new ThreadLocal<>();
-    private Set<TypeInferencer> inferencers = new HashSet<>();
+    private Set<TypeInferencer> inferencers = Collections.synchronizedSet(new HashSet<>());
 
     public Scanner getScanner() {
         if (scanner == null) {
@@ -212,14 +212,11 @@ public class ParseInModule implements Serializable, AutoCloseable {
             Term rez3 = new PushAmbiguitiesDownAndPreferAvoid().apply(rez.right().get());
             rez3 = new PushTopAmbiguityUp().apply(rez3);
 
-            TypeInferencer currentInferencer;
-            synchronized(inferencer) {
-                currentInferencer = inferencer.get();
-                if (currentInferencer == null) {
-                    currentInferencer = new TypeInferencer(disambModule);
-                    inferencer.set(currentInferencer);
-                    inferencers.add(currentInferencer);
-                }
+            TypeInferencer currentInferencer = inferencer.get();
+            if (currentInferencer == null) {
+                currentInferencer = new TypeInferencer(disambModule);
+                inferencer.set(currentInferencer);
+                inferencers.add(currentInferencer);
             }
 
             rez = new TypeInferenceVisitor(currentInferencer, startSymbol, strict && inferSortChecks, true, isAnywhere).apply(rez3);
