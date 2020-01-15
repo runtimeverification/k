@@ -3,6 +3,6 @@ EXT=korebrkt
 TESTDIR=.
 KOMPILE_BACKEND=kore
 export KOMPILE_BACKEND
-KOMPILE_FLAGS=--debug
+DEBUG=--debug
 
 include ../../../include/ktest.mak
