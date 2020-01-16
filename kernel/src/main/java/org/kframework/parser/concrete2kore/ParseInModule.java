@@ -29,7 +29,9 @@ import java.io.Serializable;
 import java.io.Writer;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * A wrapper that takes a module and one can call the parser
@@ -131,7 +133,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
 
     private Scanner scanner;
     private ThreadLocal<TypeInferencer> inferencer = new ThreadLocal<>();
-    private Set<TypeInferencer> inferencers = Collections.synchronizedSet(new HashSet<>());
+    private Queue<TypeInferencer> inferencers = new ConcurrentLinkedQueue<>();
 
     public Scanner getScanner() {
         if (scanner == null) {
