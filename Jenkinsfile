@@ -9,6 +9,7 @@ pipeline {
     PACKAGE  = 'kframework'
     VERSION  = '5.0.0'
     ROOT_URL = 'https://github.com/kframework/k/releases/download'
+    MAKE_EXTRA_ARGS = '' // Example: 'DEBUG=--debug' to see stack traces
   }
   stages {
     stage("Init title") {
@@ -96,7 +97,7 @@ pipeline {
                           echo 'Starting kserver...'
                           k-distribution/target/release/k/bin/spawn-kserver kserver.log
                           cd k-exercises/tutorial
-                          make -j`nproc`
+                          make -j`nproc` ${env.MAKE_EXTRA_ARGS}
                         '''
                       }
                     }
@@ -325,7 +326,7 @@ pipeline {
                       /usr/local/lib/kframework/bin/spawn-kserver $WD/kserver.log
                       cd tutorial
                       echo 'Testing tutorial in user environment...'
-                      make -j`sysctl -n hw.ncpu`
+                      make -j`sysctl -n hw.ncpu` ${env.MAKE_EXTRA_ARGS}
                       cd ~
                       echo "module TEST imports BOOL endmodule" > test.k
                       kompile test.k --backend llvm
