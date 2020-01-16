@@ -6,8 +6,14 @@ import jline.internal.Nullable;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.inject.RequestScoped;
+import org.nustaq.serialization.FSTClazzNameRegistry;
+import org.nustaq.serialization.FSTConfiguration;
+import org.nustaq.serialization.FSTDecoder;
+import org.nustaq.serialization.FSTEncoder;
 import org.nustaq.serialization.FSTObjectInput;
 import org.nustaq.serialization.FSTObjectOutput;
+import org.nustaq.serialization.coders.FSTStreamDecoder;
+import org.nustaq.serialization.coders.FSTStreamEncoder;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -122,7 +128,7 @@ public class BinaryLoader {
         try (FileOutputStream lockStream = new FileOutputStream(file, true)) {
             //To protect from concurrent access to same file from another process, in standalone mode
             lockStream.getChannel().lock(); //Lock is released automatically when lockStream is closed.
-            try (FSTObjectOutput serializer = new FSTObjectOutput(new FileOutputStream(file))) { //already buffered
+            try (FSTObjectOutput serializer = createObjectOutput(new FileOutputStream(file))) { //already buffered
                 serializer.writeObject(o);
             }
         } finally {
@@ -142,7 +148,7 @@ public class BinaryLoader {
             } catch (OverlappingFileLockException e) {
                 //We are in Nailgun mode. File lock is not needed.
             }
-            try (FSTObjectInput deserializer = new FSTObjectInput(in)) { //already buffered
+            try (FSTObjectInput deserializer = createObjectInput(in)) { //already buffered
                 Object obj = deserializer.readObject();
                 return obj;
             } finally {
@@ -153,5 +159,46 @@ public class BinaryLoader {
         } finally {
             lock.readLock().unlock();
         }
+    }
+
+    //Hack due to concurrency issues in FST 2.57
+    //https://github.com/RuedigerMoeller/fast-serialization/issues/235#issuecomment-393027650
+    public FSTObjectOutput createObjectOutput(FileOutputStream out) {
+        //return new FSTObjectOutput(out); Proper version.
+
+        Field clnamesField;
+        try {
+            clnamesField = FSTStreamEncoder.class.getDeclaredField("clnames");
+        } catch (NoSuchFieldException e) {
+            throw KEMException.criticalError(e.getMessage(), e);
+        }
+        clnamesField.setAccessible(true);
+        return new FSTObjectOutput(out) {
+            @Override
+            protected void setCodec(FSTEncoder codec) {
+                FSTConfiguration conf = FSTConfiguration.getDefaultConfiguration();
+                if (conf.getCachedObject(FSTClazzNameRegistry.class) != null) {
+                    try {
+                        clnamesField.set(codec, new FSTClazzNameRegistry(conf.getClassRegistry()));
+                    } catch (IllegalAccessException e) {
+                        throw KEMException.criticalError(e.getMessage(), e);
+                    }
+                }
+                super.setCodec(codec);
+            }
+        };
+    }
+
+    public FSTObjectInput createObjectInput(FileInputStream in) throws IOException {
+        return new FSTObjectInput(in) {
+            @Override
+            protected void setCodec(FSTDecoder codec) {
+                FSTConfiguration conf = FSTConfiguration.getDefaultConfiguration();
+                if (conf.getCachedObject(FSTClazzNameRegistry.class) != null) {
+                    ((FSTStreamDecoder) codec).clnames = new FSTClazzNameRegistry(conf.getClassRegistry());
+                }
+                super.setCodec(codec);
+            }
+        };
     }
 }
