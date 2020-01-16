@@ -4,6 +4,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.Multibinder;
+import com.google.inject.name.Named;
 import org.kframework.kompile.BackendModule;
 import org.kframework.krun.RewriterModule;
 import org.kframework.main.FrontEnd;
@@ -14,6 +15,8 @@ import org.kframework.utils.inject.Options;
 import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.DefinitionLoadingOptions;
 import org.kframework.utils.options.SMTOptions;
+
+import java.util.List;
 
 public class KProveModule extends AbstractModule {
     @Override
@@ -48,5 +51,11 @@ public class KProveModule extends AbstractModule {
     @Provides
     SMTOptions smtOptions(KProveOptions options) {
         return options.smt;
+    }
+
+    @Provides
+    @Named("extraConcreteRuleLabels")
+    List<String> extraConcreteRuleLabels(KProveOptions options) {
+        return options.extraConcreteRuleLabels;
     }
 }

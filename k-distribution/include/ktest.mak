@@ -24,6 +24,8 @@ KAST=$(abspath $(MAKEFILE_PATH)/../bin/kast)
 TESTDIR?=tests
 # path to put -kompiled directory in
 DEFDIR?=.
+# path to kompile output directory
+KOMPILED_DIR=$(DEFDIR)/$(notdir $(DEF))-kompiled
 # path relative to current definition of output/input files
 RESULTDIR?=$(TESTDIR)
 # all tests in test directory with matching file extension
@@ -44,9 +46,9 @@ CHECK=| diff -
 all: kompile krun proofs bmc searches strat kast
 
 # run only kompile
-kompile: $(DEFDIR)/$(DEF)-kompiled/timestamp
+kompile: $(KOMPILED_DIR)/timestamp
 
-$(DEFDIR)/%-kompiled/timestamp: %.k
+$(KOMPILED_DIR)/timestamp: $(DEF).k
 	$(KOMPILE) $(KOMPILE_FLAGS) --backend $(KOMPILE_BACKEND) $(DEBUG) $< -d $(DEFDIR)
 
 krun: $(TESTS)
@@ -111,7 +113,7 @@ else
 endif
 
 clean:
-	rm -rf $(DEFDIR)/$(DEF)-kompiled
+	rm -rf $(KOMPILED_DIR)
 
 .depend:
 	@$(KDEP) $(DEF).k > .depend-tmp
