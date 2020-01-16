@@ -17,6 +17,7 @@ source "$K_LIB_DIR/checkJava" # sets ARCH and JAVA
 
 if [ `uname` = 'Darwin' ]; then
   export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:"$K_LIB_DIR/native/osx"
+  export PATH="/usr/local/opt/bison/bin:$PATH"
 elif [[ `uname` == *MINGW* || `uname` == *MSYS* || `uname` == *CYGWIN* ]]; then
   export PATH="$K_LIB_DIR/native/windows$ARCH":"$K_LIB_DIR/native/$ARCH":$PATH
 else
