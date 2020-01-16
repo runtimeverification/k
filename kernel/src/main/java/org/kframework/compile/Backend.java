@@ -6,6 +6,8 @@ import org.kframework.definition.Module;
 import org.kframework.definition.ModuleTransformer;
 import org.kframework.kompile.CompiledDefinition;
 
+import javax.annotation.Nullable;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -17,6 +19,8 @@ public interface Backend {
     void accept(CompiledDefinition def);
 
     Function<Definition, Definition> steps();
+
+    Function<Definition, Definition> proofDefinitionNonCachedSteps(@Nullable List<String> extraConcreteRuleLabels);
 
     Function<Module, Module> specificationSteps(Definition def);
 

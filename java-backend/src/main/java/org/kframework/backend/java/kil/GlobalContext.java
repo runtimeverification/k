@@ -86,7 +86,7 @@ public class GlobalContext implements Serializable {
         this.constraintOps = new SMTOperations(() -> def, smtOptions,
                 new Z3Wrapper(smtOptions, kem, javaExecutionOptions, files, stateLog, this), kem, javaExecutionOptions);
         this.kItemOps = new KItemOperations(stage, javaExecutionOptions.deterministicFunctions,
-                javaExecutionOptions.getExtraConcreteRuleLabels(), kem, this::builtins, globalOptions);
+                kem, this::builtins, globalOptions);
         this.stage = stage;
         this.profiler = profiler;
 

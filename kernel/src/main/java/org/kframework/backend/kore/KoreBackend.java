@@ -4,10 +4,10 @@ package org.kframework.backend.kore;
 import com.google.inject.Inject;
 import org.apache.commons.io.FilenameUtils;
 import org.kframework.Strategy;
+import org.kframework.compile.AbstractBackend;
 import org.kframework.compile.AddCoolLikeAtt;
 import org.kframework.compile.AddImplicitComputationCell;
 import org.kframework.compile.AddSortInjections;
-import org.kframework.compile.Backend;
 import org.kframework.compile.ConcretizeCells;
 import org.kframework.compile.ConfigurationInfoFromModule;
 import org.kframework.compile.ExpandMacros;
@@ -37,27 +37,21 @@ import org.kframework.definition.ModuleTransformer;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.Kompile;
 import org.kframework.kompile.KompileOptions;
-import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 
-import org.kframework.utils.inject.DefinitionScoped;
 import scala.Function1;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
-import java.util.Properties;
 import java.util.Set;
 import java.util.function.Function;
 
 import static org.kframework.compile.ResolveHeatCoolAttribute.Mode.*;
 
-public class KoreBackend implements Backend {
+public class KoreBackend extends AbstractBackend {
 
     private final KompileOptions kompileOptions;
     protected final FileUtil files;

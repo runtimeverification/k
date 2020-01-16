@@ -10,6 +10,7 @@ import org.kframework.builtin.Sorts;
 import org.kframework.compile.*;
 import org.kframework.definition.*;
 import org.kframework.definition.Module;
+import org.kframework.kil.Attribute;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.Kompile;
 import org.kframework.kompile.KompileOptions;
@@ -28,7 +29,6 @@ import org.kframework.main.GlobalOptions;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 
-import static org.kframework.definition.Constructors.*;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -37,7 +37,7 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-public class JavaBackend implements Backend {
+public class JavaBackend extends AbstractBackend {
 
     public static final String MAIN_AUTOMATON = "mainAutomaton";
     public static final String SPEC_AUTOMATON = "specAutomaton";
@@ -229,6 +229,6 @@ public class JavaBackend implements Backend {
 
     @Override
     public Set<String> excludedModuleTags() {
-        return new HashSet<>(Arrays.asList("concrete", "kore"));
+        return new HashSet<>(Arrays.asList(Attribute.CONCRETE_KEY, "kore"));
     }
 }
