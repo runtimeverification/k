@@ -6,6 +6,7 @@ import jline.internal.Nullable;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.inject.RequestScoped;
+import org.nustaq.serialization.FSTConfiguration;
 import org.nustaq.serialization.FSTObjectInput;
 import org.nustaq.serialization.FSTObjectOutput;
 
@@ -122,7 +123,9 @@ public class BinaryLoader {
         try (FileOutputStream lockStream = new FileOutputStream(file, true)) {
             //To protect from concurrent access to same file from another process, in standalone mode
             lockStream.getChannel().lock(); //Lock is released automatically when lockStream is closed.
-            try (FSTObjectOutput serializer = new FSTObjectOutput(new FileOutputStream(file))) { //already buffered
+            //try (FSTObjectOutput serializer = new FSTObjectOutput(new FileOutputStream(file))) { //already buffered
+            try (FSTObjectOutput serializer = new FSTObjectOutput(new FileOutputStream(file),
+                    FSTConfiguration.createDefaultConfiguration())) { //todo for test, slow
                 serializer.writeObject(o);
             }
         } finally {
@@ -142,7 +145,8 @@ public class BinaryLoader {
             } catch (OverlappingFileLockException e) {
                 //We are in Nailgun mode. File lock is not needed.
             }
-            try (FSTObjectInput deserializer = new FSTObjectInput(in)) { //already buffered
+            //try (FSTObjectInput deserializer = new FSTObjectInput(in)) { //already buffered
+            try (FSTObjectInput deserializer = new FSTObjectInput(in, FSTConfiguration.createDefaultConfiguration())) { //todo for test, slow
                 Object obj = deserializer.readObject();
                 return obj;
             } finally {
