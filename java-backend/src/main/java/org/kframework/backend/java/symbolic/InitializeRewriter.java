@@ -173,7 +173,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
             SymbolicRewriter rewriter = new SymbolicRewriter(rewritingContext, transitions, converter);
             if (javaExecutionOptions.skipInvokingBackend) {
                 System.err.println("Skipping invoking the backend!");
-                return new RewriterResult(Optional.empty(), Optional.of(0), null);
+                return new RewriterResult(Optional.empty(), Optional.of(0), KORE.KApply(KLabels.ML_TRUE));
             }
             RewriterResult result = rewriter.rewrite(new ConstrainedTerm(backendKil, termContext), depth.orElse(-1));
             rewritingContext.stateLog.close();
@@ -200,7 +200,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
             SymbolicRewriter rewriter = new SymbolicRewriter(rewritingContext, transitions, converter);
             if (javaExecutionOptions.skipInvokingBackend) {
                 System.err.println("Skipping invoking the backend!");
-                return initialConfiguration;
+                return KORE.KApply(KLabels.ML_TRUE);
             }
             K result = rewriter.search(javaTerm, javaPattern, bound.orElse(NEGATIVE_VALUE), depth.orElse(NEGATIVE_VALUE), searchType, termContext);
             rewritingContext.stateLog.log(StateLog.LogEvent.SEARCHREACH, result);
@@ -233,7 +233,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
 
             if (javaExecutionOptions.skipInvokingBackend) {
                 System.err.println("Skipping invoking the backend!");
-                return new RewriterResult(Optional.empty(), Optional.of(0), null);
+                return new RewriterResult(Optional.empty(), Optional.of(0), KORE.KApply(KLabels.ML_TRUE));
             }
 
             rewritingContext.setExecutionPhase(true);
