@@ -10,6 +10,7 @@ import org.kframework.kore.Sort;
 import org.kframework.parser.Term;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.concrete2kore.disambiguation.*;
+import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.parser.concrete2kore.kernel.Grammar;
 import org.kframework.parser.concrete2kore.kernel.KSyntax2GrammarStatesFilter;
 import org.kframework.parser.concrete2kore.kernel.Parser;
@@ -18,6 +19,7 @@ import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
 import scala.Tuple2;
+import scala.Tuple3;
 import scala.util.Either;
 import scala.util.Left;
 import scala.util.Right;
@@ -29,7 +31,9 @@ import java.io.Serializable;
 import java.io.Writer;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * A wrapper that takes a module and one can call the parser
@@ -38,26 +42,30 @@ import java.util.Set;
  */
 public class ParseInModule implements Serializable, AutoCloseable {
     private final Module seedModule;
-    private final Module extensionModule;
+    private Module extensionModule;
     /**
      * The module in which parsing will be done.
      * Note that this module will be used for disambiguation, and the parsing module can be different.
      * This allows for grammar rewriting and more flexibility in the implementation.
      */
-    private final Module disambModule;
+    private Module disambModule;
     /**
      * The exact module used for parsing. This can contain productions and sorts that are not
      * necessarily representable in KORE (sorts like Ne#Ids, to avoid name collisions).
      * In this case the modified production will be annotated with the information from the
      * original production, so disambiguation can be done safely.
      */
-    private final Module parsingModule;
+    private volatile Module parsingModule;
     private volatile Grammar grammar = null;
     private final boolean strict;
     private final boolean profileRules;
     private final FileUtil files;
     public ParseInModule(Module seedModule) {
         this(seedModule, seedModule, seedModule, seedModule, true, false, null);
+    }
+
+    public ParseInModule(Module seedModule, boolean strict, boolean profileRules, FileUtil files) {
+        this(seedModule, null, null, null, strict, profileRules, files);
     }
 
     public ParseInModule(Module seedModule, Module extensionModule, Module disambModule, Module parsingModule, boolean strict, boolean profileRules, FileUtil files) {
@@ -92,19 +100,51 @@ public class ParseInModule implements Serializable, AutoCloseable {
      * @return Module with extra productions defined during parser generator.
      */
     public Module getExtensionModule() {
-        return extensionModule;
+        Module extM = extensionModule;
+        if (extM == null) {
+            Tuple3<Module, Module, Module> mods = RuleGrammarGenerator.getCombinedGrammarImpl(seedModule);
+            extM = mods._1();
+            disambModule = mods._2();
+            parsingModule = mods._3();
+            extensionModule = extM;
+        }
+        return extM;
     }
 
-    public Module getParsingModule() { return parsingModule; }
+    public Module getParsingModule() {
+        Module parseM = parsingModule;
+        if (parseM == null) {
+            Tuple3<Module, Module, Module> mods = RuleGrammarGenerator.getCombinedGrammarImpl(seedModule);
+            extensionModule = mods._1();
+            disambModule = mods._2();
+            parseM = mods._3();
+            parsingModule = parseM;
+        }
+        return parseM;
+    }
+
+    public Module getDisambiguationModule() {
+        Module disambM = disambModule;
+        if (disambM == null) {
+            Tuple3<Module, Module, Module> mods = RuleGrammarGenerator.getCombinedGrammarImpl(seedModule);
+            extensionModule = mods._1();
+            disambM = mods._2();
+            parsingModule = mods._3();
+            disambModule = disambM;
+        }
+        return disambM;
+    }
+
 
     public void initialize() {
-       disambModule.definedSorts();
-       disambModule.subsorts();
-       disambModule.priorities();
-       disambModule.leftAssoc();
-       disambModule.rightAssoc();
-       disambModule.productionsFor();
-       disambModule.overloads();
+       Module m = getDisambiguationModule();
+       m.definedSorts();
+       m.subsorts();
+       m.priorities();
+       m.leftAssoc();
+       m.rightAssoc();
+       m.productionsFor();
+       m.overloads();
     }
 
     /**
@@ -123,7 +163,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
     private Scanner getGrammar(Scanner scanner) {
         Grammar g = grammar;
         if (g == null) {
-            g = KSyntax2GrammarStatesFilter.getGrammar(this.parsingModule, scanner);
+            g = KSyntax2GrammarStatesFilter.getGrammar(getParsingModule(), scanner);
             grammar = g;
         }
         return scanner;
@@ -131,7 +171,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
 
     private Scanner scanner;
     private ThreadLocal<TypeInferencer> inferencer = new ThreadLocal<>();
-    private Set<TypeInferencer> inferencers = new HashSet<>();
+    private Queue<TypeInferencer> inferencers = new ConcurrentLinkedQueue<>();
 
     public Scanner getScanner() {
         if (scanner == null) {
@@ -212,14 +252,11 @@ public class ParseInModule implements Serializable, AutoCloseable {
             Term rez3 = new PushAmbiguitiesDownAndPreferAvoid().apply(rez.right().get());
             rez3 = new PushTopAmbiguityUp().apply(rez3);
 
-            TypeInferencer currentInferencer;
-            synchronized(inferencer) {
-                currentInferencer = inferencer.get();
-                if (currentInferencer == null) {
-                    currentInferencer = new TypeInferencer(disambModule);
-                    inferencer.set(currentInferencer);
-                    inferencers.add(currentInferencer);
-                }
+            TypeInferencer currentInferencer = inferencer.get();
+            if (currentInferencer == null) {
+                currentInferencer = new TypeInferencer(disambModule);
+                inferencer.set(currentInferencer);
+                inferencers.add(currentInferencer);
             }
 
             rez = new TypeInferenceVisitor(currentInferencer, startSymbol, strict && inferSortChecks, true, isAnywhere).apply(rez3);
