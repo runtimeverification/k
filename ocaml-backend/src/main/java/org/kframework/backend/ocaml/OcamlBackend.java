@@ -3,7 +3,7 @@ package org.kframework.backend.ocaml;
 
 import com.google.inject.Inject;
 import org.apache.commons.io.FileUtils;
-import org.kframework.compile.Backend;
+import org.kframework.compile.AbstractBackend;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.kompile.CompiledDefinition;
@@ -20,7 +20,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -31,7 +30,7 @@ import java.util.stream.Stream;
 /**
  * Created by dwightguth on 5/27/15.
  */
-public class OcamlBackend implements Backend {
+public class OcamlBackend extends AbstractBackend {
 
     private final KExceptionManager kem;
     private final FileUtil files;

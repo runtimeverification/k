@@ -2,7 +2,6 @@
 package org.kframework.backend.java.symbolic;
 
 import com.beust.jcommander.Parameter;
-import com.google.common.collect.ImmutableSet;
 import org.kframework.backend.java.util.StateLog;
 import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.BaseEnumConverter;
@@ -13,13 +12,6 @@ import java.util.List;
 
 @RequestScoped
 public final class JavaExecutionOptions {
-
-    @Parameter(names="--concrete-rules", description="List of rule labels to be considered concrete, in addition to rules marked with `[concrete]` attribute")
-    private String extraConcreteRuleLabels;
-
-    public ImmutableSet<String> getExtraConcreteRuleLabels() {
-        return extraConcreteRuleLabels != null ? ImmutableSet.copyOf(extraConcreteRuleLabels.split(",")) : ImmutableSet.of();
-    }
 
     @Parameter(names="--deterministic-functions", description="Throw assertion failure during "
         + "execution in the java backend if function definitions are not deterministic.")

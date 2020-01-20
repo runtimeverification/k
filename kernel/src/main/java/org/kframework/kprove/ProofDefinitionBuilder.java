@@ -1,6 +1,7 @@
 package org.kframework.kprove;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import org.apache.commons.io.FilenameUtils;
 import org.kframework.compile.Backend;
 import org.kframework.definition.Definition;
@@ -15,6 +16,7 @@ import scala.Tuple2;
 import java.io.File;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -38,6 +40,9 @@ public class ProofDefinitionBuilder {
     private final Backend backend;
     private final Kompile kompile;
     private final FileUtil files;
+    @Inject(optional = true)
+    @Named("extraConcreteRuleLabels")
+    private List<String> extraConcreteRuleLabels = null;
 
     @Inject
     public ProofDefinitionBuilder(CompiledDefinition compiledDefinition, Backend backend, Kompile kompile,
@@ -69,6 +74,7 @@ public class ProofDefinitionBuilder {
         Definition rawExtendedDef = Definition.apply(defModule, parsedDefinition.entryModules(),
                 parsedDefinition.att());
         Definition compiledExtendedDef = compileDefinition(backend, rawExtendedDef); //also resolves imports
+        compiledExtendedDef = backend.proofDefinitionNonCachedSteps(extraConcreteRuleLabels).apply(compiledExtendedDef);
 
         Module specModule = getModule(specModuleNameUpdated, modulesMap, parsedDefinition);
         specModule = backend.specificationSteps(compiledDefinition.kompiledDefinition).apply(specModule);

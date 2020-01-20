@@ -344,18 +344,15 @@ public class KItem extends Term implements KItemRepresentation {
         private final KExceptionManager kem;
         private final Provider<BuiltinFunction> builtins;
         private final GlobalOptions options;
-        private final ImmutableSet<String> extraConcreteRuleLabels;
 
         public KItemOperations(
                 Stage stage,
                 boolean deterministicFunctions,
-                ImmutableSet<String> extraConcreteRuleLabels,
                 KExceptionManager kem,
                 Provider<BuiltinFunction> builtins,
                 GlobalOptions options) {
             this.stage = stage;
             this.deterministicFunctions = deterministicFunctions;
-            this.extraConcreteRuleLabels = extraConcreteRuleLabels;
             this.kem = kem;
             this.builtins = builtins;
             this.options = options;
@@ -505,7 +502,7 @@ public class KItem extends Term implements KItemRepresentation {
                             }
 
                             // a concrete rule is skipped if some argument is not concrete
-                            if (rule.isConcreteRule(extraConcreteRuleLabels) && !isConcrete) {
+                            if (rule.isConcreteRule() && !isConcrete) {
                                 continue;
                             }
 
