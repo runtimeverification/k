@@ -26,6 +26,7 @@ import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.StringUtil;
 import scala.collection.Seq;
 import scala.Option;
+import scala.Tuple3;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -200,6 +201,10 @@ public class RuleGrammarGenerator {
      * @return parser which applies disambiguation filters by default.
      */
     public static ParseInModule getCombinedGrammar(Module mod, boolean strict, boolean timing, FileUtil files) {
+        return new ParseInModule(mod, strict, timing, files);
+    }
+
+    public static Tuple3<Module, Module, Module> getCombinedGrammarImpl(Module mod) {
         Set<Sentence> prods = new HashSet<>();
         Set<Sentence> extensionProds = new HashSet<>();
         Set<Sentence> disambProds;
@@ -426,7 +431,7 @@ public class RuleGrammarGenerator {
         Module extensionM = new Module(mod.name() + "-EXTENSION", Set(mod), immutable(extensionProds), mod.att());
         Module disambM = new Module(mod.name() + "-DISAMB", Set(), immutable(disambProds), mod.att());
         Module parseM = new Module(mod.name() + "-PARSER", Set(), immutable(parseProds), mod.att());
-        return new ParseInModule(mod, extensionM, disambM, parseM, strict, timing, files);
+        return Tuple3.apply(extensionM, disambM, parseM);
     }
 
     private static List<List<Sort>> makeAllSortTuples(int size, Module mod) {
