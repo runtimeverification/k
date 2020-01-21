@@ -264,7 +264,7 @@ public class DefinitionParsing {
 
         ParseCache cache = loadCache(ruleParserModule);
         try (ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), isStrict, profileRules, files)) {
-            if (stream(module.localSentences()).filter(s -> s instanceof Bubble).findAny().isPresent()) {
+            if (stream(module.localSentences()).filter(s -> s instanceof Bubble).filter(s -> !cache.getCache().containsKey(((Bubble)s).contents())).findAny().isPresent()) {
                 parser.initialize();
             }
 

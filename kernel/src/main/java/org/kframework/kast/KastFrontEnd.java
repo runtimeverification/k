@@ -144,6 +144,7 @@ public class KastFrontEnd extends FrontEnd {
               }
 
               System.out.print(new String(kprint.get().prettyPrint(def, unparsingMod, parsed), StandardCharsets.UTF_8));
+              System.out.flush();
             }
             sw.printTotal("Total");
             return 0;
