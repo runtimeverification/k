@@ -1,7 +1,5 @@
 module DEMO
 
-  imports DOMAINS
-
   syntax S ::= "a" | f(S)
   syntax Bool ::= S "lt" S [function]
   rule a lt f(X) => true
