@@ -243,9 +243,6 @@ public final class KRunOptions {
         @Parameter(names="--trace", description="Print a trace of every rule applied.")
         public boolean trace = false;
 
-        @Parameter(names="--coverage-file", description="Record a trace of locations of all rules and terms applied.")
-        public File coverage = null;
-
         @Parameter(names="--native-libraries", description="Flags to pass to linker. Useful in defining rewriter plugins.",
                 listConverter=StringListConverter.class)
         public List<String> nativeLibraries = Collections.emptyList();
