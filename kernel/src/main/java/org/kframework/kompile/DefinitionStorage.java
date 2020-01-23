@@ -29,8 +29,8 @@ public class DefinitionStorage {
         return files.resolveKompiled("definitionAndCache.bin");
     }
 
-    public void save(DefinitionAndCache definitionAndCache) {
-        if (!cacheParses(definitionAndCache.compiledDefinition.kompileOptions)) {
+    public void save(DefinitionAndCache definitionAndCache, KompileOptions kompileOptions) {
+        if (!cacheParses(kompileOptions)) {
             definitionAndCache.parseCaches.clear();
         }
         loader.saveOrDie(getCacheFile(), definitionAndCache);

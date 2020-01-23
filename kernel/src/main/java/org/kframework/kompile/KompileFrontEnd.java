@@ -74,11 +74,16 @@ public class KompileFrontEnd extends FrontEnd {
         DefinitionStorage definitionStorage = this.definitionStorage.get();
         Map<String, ParseCache> caches = definitionStorage.loadParseCaches(options);
         Kompile kompile = new Kompile(options, files.get(), kem, sw, caches);
-        CompiledDefinition def = kompile
-                .run(options.outerParsing.mainDefinitionFile(files.get()), options.mainModule(files.get()), options.syntaxModule(files.get()), backend.steps(), backend.excludedModuleTags());
-        sw.printIntermediate("Kompile to kore");
-        definitionStorage.save(new DefinitionAndCache(def, caches));
-        sw.printIntermediate("Save to disk");
+        CompiledDefinition def = null;
+        try {
+            def = kompile
+                    .run(options.outerParsing.mainDefinitionFile(files.get()), options.mainModule(files.get()), options.syntaxModule(files.get()), backend.steps(), backend.excludedModuleTags());
+        } finally {
+            sw.printIntermediate("Kompile to kore");
+            final DefinitionAndCache definitionAndCache = new DefinitionAndCache(def, caches);
+            definitionStorage.save(definitionAndCache, options);
+            sw.printIntermediate("Save to disk");
+        }
         backend.accept(def);
         sw.printIntermediate("Backend");
         loader.saveOrDie(files.get().resolveKompiled("timestamp"), "");

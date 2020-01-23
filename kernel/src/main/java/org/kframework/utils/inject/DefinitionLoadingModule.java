@@ -17,6 +17,7 @@ import org.kframework.utils.file.KompiledDir;
 import org.kframework.utils.file.WorkingDir;
 import org.kframework.utils.options.DefinitionLoadingOptions;
 
+import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.Map;
@@ -32,9 +33,13 @@ public class DefinitionLoadingModule extends AbstractModule {
         return definitionStorage.load();
     }
 
-    @Provides @DefinitionScoped
+    @Provides @DefinitionScoped @Nonnull
     CompiledDefinition koreDefinition(DefinitionAndCache definitionAndCache) {
-        return definitionAndCache.compiledDefinition;
+        if (definitionAndCache.compiledDefinition != null) {
+            return definitionAndCache.compiledDefinition;
+        } else {
+            throw KEMException.criticalError("Last run of `kompile` did not complete successfully");
+        }
     }
 
     @Provides @DefinitionScoped

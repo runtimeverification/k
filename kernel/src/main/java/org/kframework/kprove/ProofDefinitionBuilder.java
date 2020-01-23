@@ -71,7 +71,8 @@ public class ProofDefinitionBuilder {
 
         Set<Module> modules = kompile.parseModules(compiledDefinition, defModuleNameUpdated, absSpecFile,
                 backend.excludedModuleTags());
-        definitionStorage.save(definitionAndCache);
+        assert definitionAndCache.compiledDefinition != null;
+        definitionStorage.save(definitionAndCache, definitionAndCache.compiledDefinition.kompileOptions);
 
         Map<String, Module> modulesMap = modules.stream().collect(Collectors.toMap(Module::name, m -> m));
         Definition parsedDefinition = compiledDefinition.getParsedDefinition();
