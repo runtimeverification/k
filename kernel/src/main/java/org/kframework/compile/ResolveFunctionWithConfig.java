@@ -233,9 +233,6 @@ public class ResolveFunctionWithConfig {
     }
 
     public Sentence resolve(Module m, Sentence s) {
-        if (ExpandMacros.isMacro(s)) {
-            return s;
-        }
         if (s instanceof Rule) {
             return resolve((Rule) s, m);
         } else if (s instanceof Context) {
