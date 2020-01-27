@@ -1,4 +1,0 @@
-(\y. \z. send z to y)
-          (newAgent((\y. sendSynch me to y) (receiveFrom parent) ; 
-                    spawn haltAgent ; print receive))
-          (newAgent((\z. send 17 to z ; print 1) receive))

@@ -1,9 +1,0 @@
-[Warning] Parser: Parsing ambiguity. Arbitrarily choosing the first.
-1: B ::= "a" 
-   a
-2: A ::= "a" 
-   a
-	File: tests/regression/negative-test/programs/test.issue
-	Location: (1,1,1,2)
-	Compilation Phase: Ambiguity filter
-

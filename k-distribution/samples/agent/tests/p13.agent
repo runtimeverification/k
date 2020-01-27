@@ -1,6 +1,0 @@
-//Using Call/CC to implement return
-((\f.callcc (f -5))(\x.\return.(\x.0/0) (
-          if 0 <= x
-          then return 0
-          else return 1
-        ))) + 6

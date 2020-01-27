@@ -1,1 +1,0 @@
-(mu f.\x.\y.if x<=0 then halt(y) else f (x + -1) (y * x)) 5 1
