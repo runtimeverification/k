@@ -1,2 +1,0 @@
-uvalueMInt(concatenateMInt(extractMInt(mi(31, 10), 27, 30), extractMInt(mi(31, 10), 28, 31)))
-

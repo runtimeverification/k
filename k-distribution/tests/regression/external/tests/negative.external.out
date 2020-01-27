@@ -1,3 +1,0 @@
-<k>
-    pperror ( "cat: tests/b.txt: No such file or directory" )
-</k>

@@ -1,5 +1,0 @@
-(\x.\y.
-           spawn *x:=0;
-           while 1<=(*x) do *y:=(*y) + 1 ;
-           print (*y)
-           ) (ref 1) (ref 0)

@@ -1,8 +1,0 @@
-float n,sum;
-n = 10.0;
-sum=0.0;
-while (n > 0.0) {
-  sum = sum + n;
-  n = n - 1.0;
-}
-

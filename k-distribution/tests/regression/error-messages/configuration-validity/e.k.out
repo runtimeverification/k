@@ -1,5 +1,0 @@
-[Error] Critical: All cells on the left and right of a rewrite must have the
-same parent:
-=>(<a5>(#noDots(),#token("1",Int),#noDots()),<b5>(#noDots(),#token("2",Int),#noDots()))
-  while executing phase "concretizing configuration" on sentence at
-	Location(26,6,26,34)

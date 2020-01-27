@@ -1,2 +1,0 @@
-svalueMInt(mIntOfDigits(digitsOfMInt(mi(32, -1), 8, 4)))
-

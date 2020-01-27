@@ -1,1 +1,0 @@
-assertEqual(getc(3), #EBADF) ~> assertEqual(open("files/file", "r"), 3) ~> assertEqual(putc(3, 55), #EBADF) ~> assertEqual(open("files/file3", "rw"), 4) ~> putc(4, 55) ~> seek(4, tell(4) - 1) ~> assertEqual(getc(4), 55) ~> #putc(0, 0)

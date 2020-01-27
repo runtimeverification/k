@@ -1,3 +1,0 @@
-<k>
-    "" ~> "foo" ~> "abcdefghi" ~> "\x00a\x7f\xff\uffff\U0010ffff"
-</k>
