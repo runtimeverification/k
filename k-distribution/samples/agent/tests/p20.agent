@@ -1,7 +1,0 @@
-(\x. 
-                spawn (acquire x ; *x := (*x) + 1 ; release x ; rendezvous 1 );
-                acquire x ;
-                *x := (*x) + 1 ;
-                release x ;
-                rendezvous 1 ;
-                print *x) (ref 1)

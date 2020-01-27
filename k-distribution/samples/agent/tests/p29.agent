@@ -1,7 +1,0 @@
-   (\cube. print (cube 5) ; print (cube 10))
-   (\x. eval ((mu genpow. \n. 
-              if n <= 0
-              then (quote 1)
-              else (quote (x * (unquote (genpow (n + -1)))))
-            ) 3)
-   )
