@@ -38,7 +38,7 @@ KAST_TESTS?=$(wildcard $(TESTDIR)/*.kast)
 # default KOMPILE_BACKEND
 KOMPILE_BACKEND?=llvm
 
-CHECK=| diff -
+CHECK?=| diff -
 
 .PHONY: kompile krun all clean update-results proofs bmc
 

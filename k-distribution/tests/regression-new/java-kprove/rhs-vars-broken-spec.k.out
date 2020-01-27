@@ -1,0 +1,9 @@
+#True
+[Error] Compiler: Found variable A on right hand side of rule, not bound on
+left hand side. Did you mean "?A"?
+	Source(/home/traian/Documents/k/k-distribution/tests/regression-new/java-kprove/rhs-vars-broken-spec.k)
+	Location(12,20,12,21)
+[Error] Compiler: Found variable _ on right hand side of rule, not bound on
+left hand side. Did you mean "?_"?
+	Source(/home/traian/Documents/k/k-distribution/tests/regression-new/java-kprove/rhs-vars-broken-spec.k)
+	Location(12,20,12,21)
