@@ -27,6 +27,7 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.Options;
 import org.kframework.utils.inject.RequestScoped;
+import org.kframework.utils.options.BackendOptions;
 import org.kframework.utils.options.DefinitionLoadingOptions;
 import org.kframework.utils.options.SMTOptions;
 
@@ -52,6 +53,11 @@ public class KRunModule extends AbstractModule {
     @Provides
     SMTOptions smtOptions(KRunOptions options) {
         return options.experimental.smt;
+    }
+
+    @Provides
+    BackendOptions backendOptions(KRunOptions options) {
+        return options.backend;
     }
 
     @Provides @RequestScoped

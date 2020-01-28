@@ -20,6 +20,8 @@ import org.kframework.parser.kore.parser.ParseError;
 import org.kframework.RewriterResult;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.rewriter.SearchType;
+import org.kframework.unparser.KPrint;
+import org.kframework.unparser.OutputModes;
 import org.kframework.utils.OS;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
@@ -45,6 +47,7 @@ public class LLVMRewriter implements Function<Definition, Rewriter> {
     private final CompiledDefinition def;
     private final KRunOptions krunOptions;
     private final KompileOptions kompileOptions;
+    private final KPrint kprint;
 
     @Inject
     public LLVMRewriter(
@@ -52,12 +55,14 @@ public class LLVMRewriter implements Function<Definition, Rewriter> {
             FileUtil files,
             CompiledDefinition def,
             KRunOptions krunOptions,
-            KompileOptions kompileOptions) {
+            KompileOptions kompileOptions,
+            KPrint kprint) {
         this.globalOptions = globalOptions;
         this.files = files;
         this.def = def;
         this.krunOptions = krunOptions;
         this.kompileOptions = kompileOptions;
+        this.kprint = kprint;
     }
 
     @Override
@@ -95,6 +100,12 @@ public class LLVMRewriter implements Function<Definition, Rewriter> {
                 args.add(pgmPath);
                 args.add(Integer.toString(depth.orElse(-1)));
                 args.add(koreOutputFile.getAbsolutePath());
+                String[] command = new String[args.size()];
+                if (krunOptions.backend.dryRun) {
+                    System.out.println(String.join(" ", args.toArray(command)));
+                    kprint.options.output = OutputModes.NONE;
+                    return new RewriterResult(Optional.empty(), Optional.empty(), k);
+                }
                 try {
                     int exit = executeCommandBasic(files.resolveWorkingDirectory("."), args);
                     K outputK = new KoreParser(mod.sortAttributesFor()).parseFile(koreOutputFile);

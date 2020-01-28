@@ -13,6 +13,7 @@ import org.kframework.main.Tool;
 import org.kframework.unparser.PrintOptions;
 import org.kframework.utils.inject.Options;
 import org.kframework.utils.inject.RequestScoped;
+import org.kframework.utils.options.BackendOptions;
 import org.kframework.utils.options.DefinitionLoadingOptions;
 import org.kframework.utils.options.SMTOptions;
 
@@ -46,6 +47,11 @@ public class KProveModule extends AbstractModule {
     @Provides
     DefinitionLoadingOptions loadingOptions(KProveOptions options) {
         return options.definitionLoading;
+    }
+
+    @Provides
+    BackendOptions backendOptions(KProveOptions options) {
+        return options.backend;
     }
 
     @Provides

@@ -15,6 +15,7 @@ import org.kframework.utils.OS;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.RequestScoped;
+import org.kframework.utils.options.BackendOptions;
 import org.kframework.utils.options.BaseEnumConverter;
 import org.kframework.utils.options.DefinitionLoadingOptions;
 import org.kframework.utils.options.OnOffConverter;
@@ -35,6 +36,9 @@ public final class KRunOptions {
 
     @ParametersDelegate
     public ConfigurationCreationOptions configurationCreation = new ConfigurationCreationOptions();
+
+    @ParametersDelegate
+    public BackendOptions backend = new BackendOptions();
 
     public static final class ConfigurationCreationOptions {
 

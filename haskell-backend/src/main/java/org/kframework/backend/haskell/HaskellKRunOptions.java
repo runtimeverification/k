@@ -9,9 +9,6 @@ import org.kframework.utils.options.BaseEnumConverter;
 @RequestScoped
 public class HaskellKRunOptions {
 
-    @Parameter(names="--dry-run", description="Compile program into KORE format but do not run. Only used in Haskell backend.")
-    public boolean dryRun = false;
-
     @Parameter(names="--haskell-backend-command", description="Command to run the Haskell backend execution engine.")
     public String haskellBackendCommand = "kore-exec";
 
