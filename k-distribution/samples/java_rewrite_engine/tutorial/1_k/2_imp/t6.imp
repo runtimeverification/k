@@ -1,4 +1,0 @@
-<k>
-int .Ids;
-MyVar1:Id = MyInt1:Id + MyInt2:Id;
-</k>

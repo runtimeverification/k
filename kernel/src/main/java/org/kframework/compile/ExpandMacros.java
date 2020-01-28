@@ -220,6 +220,9 @@ public class ExpandMacros {
                                 public K apply(KVariable k) {
                                     K result = subst.get(k);
                                     if (result == null) {
+                                      if (k.name().equals("_Configuration")) {
+                                        return k;
+                                      }
                                       result = newDotVariable(k.att());
                                       subst.put(k, result);
                                     }

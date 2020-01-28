@@ -1,2 +1,0 @@
-(\x.
-   print(eval(quote(1 + 2 + (unquote x) + 4 + 5)))) (quote 2) 

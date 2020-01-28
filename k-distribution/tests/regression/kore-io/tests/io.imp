@@ -1,5 +1,0 @@
-int x,y;
-print("Input two numbers: ");
-x = read();
-y = read();
-print("Their sum is: "); print(x+y); print("\n");
