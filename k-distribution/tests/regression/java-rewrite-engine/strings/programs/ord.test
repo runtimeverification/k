@@ -1,1 +1,0 @@
-ordChar("") ~> ordChar("foo") ~> ordChar("\x00") ~> ordChar("\x01") ~> ordChar("a") ~> ordChar("\xff") ~> ordChar("\uffff") ~> ordChar("\U0010ffff")

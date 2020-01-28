@@ -1,3 +1,0 @@
-[Error] Compiler: Had 1 structural errors.
-[Error] Compiler: Multiple top sorts found for C: KList and Bag.
-	Location(14,14,14,16)

@@ -1,1 +1,0 @@
-(((((((((((("" ==String "") ~> "" ==String "foo") ~> "" =/=String "") ~> "" =/=String "foo") ~> "" <String "foo") ~> "" <String "") ~> "foo" >String "") ~> "foo" >String "foo") ~> "foo" <=String "bar") ~> "foo" <=String "foo") ~> "bar" >=String "foo") ~> "bar" >=String "bar")

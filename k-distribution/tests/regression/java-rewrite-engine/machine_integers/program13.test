@@ -1,2 +1,0 @@
-svalueMInt(andMInt(lshrMInt(mi(32, -1), 29), shlMInt(mi(32, 3), 1)))
-
