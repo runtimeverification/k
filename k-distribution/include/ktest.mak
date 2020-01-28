@@ -39,6 +39,8 @@ KAST_TESTS?=$(wildcard $(TESTDIR)/*.kast)
 KOMPILE_BACKEND?=llvm
 
 CHECK?=| diff -
+REMOVE_PATHS=sed 's!'`pwd`'/\(\./\)\{0,1\}!!g'
+CHECK_ERRORS=2>&1 | $(REMOVE_PATHS) | diff -
 
 .PHONY: kompile krun all clean update-results proofs bmc
 
