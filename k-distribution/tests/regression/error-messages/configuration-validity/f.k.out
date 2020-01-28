@@ -1,4 +1,0 @@
-[Error] Critical: No operator registered for closing cells of sort Int when
-closing cell <a5>(#noDots(),=>(#token("1",Int),#token("2",Int)),#dots())
-  while executing phase "concretizing configuration" on sentence at
-	Location(26,6,26,27)

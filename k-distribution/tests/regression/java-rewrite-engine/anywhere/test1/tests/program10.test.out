@@ -1,6 +1,0 @@
-<k>
-    .K
-</k>
-<env>
-    "a" |-> dataList ( ListItem ( piece ( 7 , 3 ) ) )
-</env>
