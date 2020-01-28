@@ -27,7 +27,9 @@ endmodule
 
 module IMP
   imports IMP-SYNTAX
-  imports DOMAINS
+  imports BOOL
+  imports INT
+  imports MAP
   syntax KResult ::= Int | Bool
 
   configuration <T color="yellow">
