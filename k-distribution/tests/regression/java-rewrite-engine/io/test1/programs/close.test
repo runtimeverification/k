@@ -1,1 +1,0 @@
-assertEqual(close(3), #EBADF) ~> assertEqual(open("files/file", "r"), 3) ~> close(3)

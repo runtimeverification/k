@@ -1,3 +1,0 @@
-ListItem(uvalueMInt(miMInt(usubMInt(mi(31, 0), mi(31, -1)))))
-ListItem(overflowMInt(usubMInt(mi(31, 0), mi(31, -1))))
-

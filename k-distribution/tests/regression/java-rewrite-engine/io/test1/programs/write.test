@@ -1,1 +1,0 @@
-assertEqual(write(3, "123"), #EBADF) ~> assertEqual(open("files/file", "r"), 3) ~> assertEqual(write(3, "123"), #EBADF) ~> assertEqual(open("files/file2", "rw"), 4) ~> write(4, "123") ~> seek(4, tell(4) - 3) ~> assertEqual(read(4, 3), "123") ~> #write(0, "")

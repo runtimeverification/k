@@ -1,6 +1,0 @@
-   (\n.\c.\i.\x.
-   while *i <= n do (
-     *c := (quote((unquote(*c)) + x)) ;
-     *i := *i + 1
-   ) ;
-   print(eval(*c))) 5 (ref (quote 1)) (ref 1) 10
