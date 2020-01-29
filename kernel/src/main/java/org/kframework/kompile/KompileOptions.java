@@ -61,11 +61,6 @@ public class KompileOptions implements Serializable {
         return syntaxModule;
     }
 
-    @Parameter(names="--transition", listConverter=StringListConverter.class, description="<string> is a whitespace-separated list of tags designating rules to become transitions.")
-    public List<String> transition = Collections.singletonList(DEFAULT_TRANSITION);
-
-    public static final String DEFAULT_TRANSITION = "transition";
-
     @Parameter(names="--non-strict", description="Do not add runtime sort checks for every variable's inferred sort. Only has an effect with `--backend ocaml`.")
     private boolean nonStrict;
 
@@ -136,5 +131,10 @@ public class KompileOptions implements Serializable {
 
         @Parameter(names="--gen-bison-parser", description="Emit bison parser for the PGM configuration variable within the syntax module of your definition into the kompiled definition.")
         public boolean genBisonParser;
+
+        @Parameter(names="--transition", listConverter=StringListConverter.class, description="<string> is a whitespace-separated list of tags designating rules to become transitions.")
+        public List<String> transition = Collections.singletonList(DEFAULT_TRANSITION);
+
+        public static final String DEFAULT_TRANSITION = "transition";
     }
 }
