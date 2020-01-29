@@ -64,7 +64,7 @@ public class KoreBackend extends AbstractBackend {
             KompileOptions kompileOptions,
             FileUtil files,
             KExceptionManager kem) {
-        this(kompileOptions, files, kem, kompileOptions.optimize2 || kompileOptions.optimize3 ? EnumSet.of(HEAT_RESULT) : EnumSet.of(HEAT_RESULT, COOL_RESULT_CONDITION), false);
+        this(kompileOptions, files, kem, kompileOptions.optimize2 || kompileOptions.optimize3 || kompileOptions.superstrict ? EnumSet.of(HEAT_RESULT) : EnumSet.of(HEAT_RESULT, COOL_RESULT_CONDITION), false);
     }
 
     public KoreBackend(KompileOptions kompileOptions, FileUtil files, KExceptionManager kem, EnumSet<ResolveHeatCoolAttribute.Mode> heatCoolConditions, boolean heatCoolEquations) {

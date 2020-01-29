@@ -23,7 +23,7 @@ public class HaskellBackend extends KoreBackend {
             KompileOptions kompileOptions,
             FileUtil files,
             KExceptionManager kem) {
-        super(kompileOptions, files, kem, EnumSet.of(HEAT_RESULT, COOL_RESULT_CONDITION), false);
+        super(kompileOptions, files, kem);
     }
 
 
