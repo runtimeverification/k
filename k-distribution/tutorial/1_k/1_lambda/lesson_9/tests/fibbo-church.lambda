@@ -1,0 +1,1 @@
+((lambda n . (n (lambda f . lambda a . lambda b . (f b ((lambda m . lambda n . lambda f . lambda x . (n f (m f x))) a b))) (lambda x . lambda y . x) (lambda f . lambda x . x) (lambda f . lambda x . (f x)))) (lambda f . lambda x . (f (f (f (f (f (f (f x))))))))) (lambda x . (x + 1)) 0

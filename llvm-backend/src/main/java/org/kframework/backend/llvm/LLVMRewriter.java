@@ -108,6 +108,9 @@ public class LLVMRewriter implements Function<Definition, Rewriter> {
                 }
                 try {
                     int exit = executeCommandBasic(files.resolveWorkingDirectory("."), args);
+                    if (!koreOutputFile.exists()) {
+                      throw KEMException.criticalError("LLVM Backend crashed during rewriting.");
+                    }
                     K outputK = new KoreParser(mod.sortAttributesFor()).parseFile(koreOutputFile);
                     return new RewriterResult(Optional.empty(), Optional.of(exit), outputK);
                 } catch (IOException e) {
