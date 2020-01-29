@@ -27,7 +27,7 @@ public class GeneratedTopFormat {
             for (ProductionItem p: JavaConverters.seqAsJavaList(prod.items())) {
                 if (p instanceof NonTerminal) {
                     NonTerminal nt = (NonTerminal) p;
-                    if (! nt.sort().equals(Sorts.GeneratedCounterCell()) && 
+                    if (! nt.sort().equals(Sorts.GeneratedCounterCell()) &&
                         ! nt.sort().equals(Sorts.GeneratedProgressCell())) {
                         cellPositions.add(i);
                     }
