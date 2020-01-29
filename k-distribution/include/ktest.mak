@@ -38,9 +38,9 @@ KAST_TESTS?=$(wildcard $(TESTDIR)/*.kast)
 # default KOMPILE_BACKEND
 KOMPILE_BACKEND?=llvm
 
-CHECK?=| diff -
-REMOVE_PATHS=sed 's!'`pwd`'/\(\./\)\{0,1\}!!g'
-CHECK_ERRORS=2>&1 | $(REMOVE_PATHS) | diff -
+CHECK=| diff -
+REMOVE_PATHS=| sed 's!'`pwd`'/\(\./\)\{0,1\}!!g'
+CONSIDER_ERRORS=2>&1
 
 .PHONY: kompile krun all clean update-results proofs bmc
 
@@ -84,6 +84,13 @@ ifeq ($(TESTDIR),$(RESULTDIR))
 	$(KPROVE) $@ $(KPROVE_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $@.out
 else
 	$(KPROVE) $@ $(KPROVE_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $(RESULTDIR)/$(notdir $@).out
+endif
+
+%-broken-spec.k: kompile
+ifeq ($(TESTDIR),$(RESULTDIR))
+	$(KPROVE) $@ $(KPROVE_FLAGS) $(DEBUG) -d $(DEFDIR) $(CONSIDER_ERRORS) $(REMOVE_PATHS) $(CHECK) $@.out
+else
+	$(KPROVE) $@ $(KPROVE_FLAGS) $(DEBUG) -d $(DEFDIR) $(CONSIDER_ERRORS) $(REMOVE_PATHS) $(CHECK) $(RESULTDIR)/$(notdir $@).out
 endif
 
 %-spec-bmc.k: kompile

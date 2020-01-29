@@ -1,9 +1,11 @@
 #True
-[Error] Compiler: Found variable A on right hand side of rule, not bound on
+[Warning] Critical: Found variable A on right hand side of rule, not bound on
 left hand side. Did you mean "?A"?
+Note: this warning will become an error in subsequent releases.
 	Source(rhs-vars-broken-spec.k)
 	Location(12,20,12,21)
-[Error] Compiler: Found variable _ on right hand side of rule, not bound on
+[Warning] Critical: Found variable _ on right hand side of rule, not bound on
 left hand side. Did you mean "?_"?
+Note: this warning will become an error in subsequent releases.
 	Source(rhs-vars-broken-spec.k)
 	Location(10,20,10,21)

@@ -33,6 +33,7 @@ import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.unparser.ToJson;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
@@ -330,9 +331,15 @@ public class Kompile {
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckLabels(errors)::check));
 
         if (!errors.isEmpty()) {
-            kem.addAllKException(errors.stream().map(e -> e.exception).collect(Collectors.toList()));
             if (_throw) {
+                kem.addAllKException(errors.stream().map(e -> e.exception).collect(Collectors.toList()));
                 throw KEMException.compilerError("Had " + errors.size() + " structural errors.");
+            } else {
+                for (KEMException error : errors) {
+                    kem.registerCriticalWarning(error.exception.getMessage() +
+                            "\nNote: this warning will become an error in subsequent releases.",
+                            error.exception);
+                }
             }
         }
     }
