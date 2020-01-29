@@ -5,9 +5,10 @@ import org.kframework.builtin.BooleanUtils
 import org.kframework.builtin.KLabels
 import org.kframework.builtin.Sorts
 import org.kframework.compile.RewriteToTop
-import org.kframework.definition.{DefinitionTransformer, ModuleTransformer, Module, Rule, Definition}
+import org.kframework.definition.{DefinitionTransformer, ModuleTransformer, Module, Sentence, Rule, Definition}
 import org.kframework.kore.ExistsK
 import org.kframework.kore.KApply
+import org.kframework.kore.KLabel
 import org.kframework.kore.KORE
 import org.kframework.kore.Sort
 import org.kframework.kore.Unapply.{KApply, KLabel}
@@ -53,31 +54,79 @@ class ContainsSCell extends ExistsK {
   }
 }
 
-class Strategy(heatCool: Boolean) {
+class Strategy(heatCool: Boolean, superstrict: Boolean) {
   import Strategy._
 
+  private def isFunctionRhs(body: kore.K, module: Module): Boolean = {
+    RewriteToTop.toRight(body) match {
+      case KApply(klabel, _) if module.attributesFor.contains(klabel) && module.attributesFor(klabel).contains(Att.Function) => true
+      case _ => false
+    }
+  }
+
+  private def isBadRule(r: Sentence) =
+    r.att.contains("anywhere") || r.att.contains("macro") || r.att.contains("alias") || r.att.contains("macro-rec") || r.att.contains("alias-rec")
+
+  private def isGoodLHS(r: Rule, module: Module, klabel: KLabel, defn: Definition) =
+    !isFunctionRhs(r.body, module) && (!defn.mainModule.attributesFor.contains(klabel) || !defn.mainModule.attributesFor(klabel).contains(Att.Function))
+
+  def addProgressCellToRulesTransformer(defn: Definition) =
+    DefinitionTransformer(
+      ModuleTransformer.fromSentenceTransformer({
+        (module, r) =>
+          val rich = kore.Rich(module)
+
+          import rich._
+
+          if (!superstrict || isBadRule(r)) {
+            r
+          } else {
+            r match {
+              case r: Rule =>
+                def makeRewrite(att: Att) = {
+                  if (att.contains("heat")) {
+                    KORE.KRewrite(KORE.KVariable("_Progress", Att.empty.add(classOf[Sort], Sorts.Bool)), KORE.KToken("false", Sorts.Bool))
+                  } else if (att.contains("cool")) {
+                    KORE.KToken("true", Sorts.Bool)
+                  } else {
+                    KORE.KRewrite(KORE.KVariable("_Progress", Att.empty.add(classOf[Sort], Sorts.Bool)), KORE.KToken("true", Sorts.Bool))
+                  }
+                }
+    
+                val newBody = RewriteToTop.toLeft(r.body) match {
+                  case KApply(klabel, _) if isGoodLHS(r, module, klabel, defn) =>
+                        KORE.KApply(KLabels.CELLS, r.body,
+                          KORE.KApply(KLabels.GENERATED_PROGRESS_CELL,
+                            KORE.KApply(KLabels.NO_DOTS),
+                            makeRewrite(r.att),
+                            KORE.KApply(KLabels.NO_DOTS)
+                          ))
+                  case _ => r.body
+                }
+                Rule(newBody, r.requires, r.ensures, r.att)
+              case _ => r
+            }
+          }
+      }, "add strategy cell to rules"))
+
+
+
+          
   def addStrategyCellToRulesTransformer(defn: Definition) =
     DefinitionTransformer(
       ModuleTransformer.fromSentenceTransformer({
         (module, r) =>
           val rich = kore.Rich(module)
 
-          def isFunctionRhs(body: kore.K): Boolean = {
-            RewriteToTop.toRight(body) match {
-              case KApply(klabel, _) if module.attributesFor.contains(klabel) && module.attributesFor(klabel).contains(Att.Function) => true
-              case _ => false
-            }
-          }
-
           import rich._
           
-          if (!defn.mainModule.importedModuleNames.contains("STRATEGY$SYNTAX") || r.att.contains("anywhere") || r.att.contains("macro") || r.att.contains("alias") || r.att.contains("macro-rec") || r.att.contains("alias-rec")) {
+          if (!defn.mainModule.importedModuleNames.contains("STRATEGY$SYNTAX") || isBadRule(r)) {
             r
           } else
             r match {
               case r: Rule if !new ContainsSCell().apply(r.body) =>
                 val newBody = RewriteToTop.toLeft(r.body) match {
-                  case KApply(klabel, _) if !isFunctionRhs(r.body) && (!defn.mainModule.attributesFor.contains(klabel) || !defn.mainModule.attributesFor(klabel).contains(Att.Function)) =>
+                  case KApply(klabel, _) if isGoodLHS(r, module, klabel, defn) =>
                     // todo: "!module.attributesFor.contains(klabel) ||" when #1723 is fixed
 
                     def makeRewrite(tag: String) =

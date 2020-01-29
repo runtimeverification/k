@@ -228,7 +228,7 @@ public class Kompile {
                 .andThen(generateSortPredicateSyntax)
                 .andThen(generateSortProjections)
                 .andThen(AddImplicitComputationCell::transformDefinition)
-                .andThen(d -> new Strategy(kompileOptions.experimental.heatCoolStrategies).addStrategyCellToRulesTransformer(d).apply(d))
+                .andThen(d -> new Strategy(kompileOptions.experimental.heatCoolStrategies, false).addStrategyCellToRulesTransformer(d).apply(d))
                 .andThen(ConcretizeCells::transformDefinition)
                 .andThen(genCoverage)
                 .andThen(Kompile::addSemanticsModule)

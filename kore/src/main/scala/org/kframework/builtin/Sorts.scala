@@ -41,6 +41,7 @@ object Sorts {
 
   val GeneratedTopCell = Sort("GeneratedTopCell")
   val GeneratedCounterCell = Sort("GeneratedCounterCell")
+  val GeneratedProgressCell = Sort("GeneratedProgressCell")
 
   val Id = Sort("Id")
 

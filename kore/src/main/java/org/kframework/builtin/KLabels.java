@@ -23,8 +23,10 @@ public class KLabels {
     public static final String GENERATED_TOP_CELL_NAME = "generatedTop";
     public static final KLabel GENERATED_TOP_CELL = KLabel("<generatedTop>");
     public static final KLabel GENERATED_COUNTER_CELL = KLabel("<generatedCounter>");
+    public static final KLabel GENERATED_PROGRESS_CELL = KLabel("<generatedProgress>");
     public static final KLabel INIT_GENERATED_TOP_CELL = KLabel("initGeneratedTopCell");
     public static final KLabel INIT_GENERATED_COUNTER_CELL = KLabel("initGeneratedCounterCell");
+    public static final KLabel INIT_GENERATED_PROGRESS_CELL = KLabel("initGeneratedProgressCell");
     public static final String THIS_CONFIGURATION = "THIS_CONFIGURATION";
 
     public static final String STRATEGY_CELL_NAME = "s";
