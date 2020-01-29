@@ -69,6 +69,7 @@ public class ExpandMacros {
     private final FileChannel channel;
     private final boolean reverse;
     private final ResolveFunctionWithConfig transformer;
+    private final KompileOptions kompileOptions;
 
     public static ExpandMacros fromMainModule(Module mod, FileUtil files, KompileOptions kompileOptions, boolean reverse) {
         return new ExpandMacros(mod, files, kompileOptions, reverse, true);
@@ -86,6 +87,7 @@ public class ExpandMacros {
         this.mod = mod;
         this.reverse = reverse;
         this.cover = kompileOptions.coverage;
+        this.kompileOptions = kompileOptions;
         files.resolveKompiled(".").mkdirs();
         List<Rule> allMacros = stream(mod.rules()).filter(r -> isMacro(r.att(), reverse)).sorted(Comparator.comparing(r -> r.att().contains("owise"))).collect(Collectors.toList());
         macros = allMacros.stream().filter(r -> getLeft(r, reverse) instanceof KApply).collect(Collectors.groupingBy(r -> ((KApply)getLeft(r, reverse)).klabel()));
@@ -330,7 +332,9 @@ public class ExpandMacros {
                throw KEMException.compilerError("Cannot compute macros with klabel variables.", r);
            }
            if (!p.klabel().name().equals(s.klabel().name())) {
+             if (!kompileOptions.isKore() || !mod.overloads().greaterThan(mod.productionsFor().apply(p.klabel()).head(), mod.productionsFor().apply(s.klabel()).head())) {
                return false;
+             }
            }
            if (p.klist().size() != s.klist().size()) {
                return false;
