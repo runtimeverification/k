@@ -2,7 +2,7 @@ MAKEFILE_PATH := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 SUBMAKES=$(MAKEFILE_PATH)/Makefile.det $(MAKEFILE_PATH)/Makefile.nondet
 SUBCLEAN=$(addsuffix .clean,$(SUBMAKES))
 SUBUPDATE=$(addsuffix .update,$(SUBMAKES))
-SUBKOMPILE=$(addsuffix .kompile,$(SUBDIRS))
+SUBKOMPILE=$(addsuffix .kompile,$(SUBMAKES))
 
 .PHONY: all update-results clean $(SUBMAKES) $(SUBCLEAN) $(SUBUPDATE) $(SUBKOMPILE)
 
@@ -21,4 +21,4 @@ $(SUBUPDATE): %.update:
 	$(MAKE) -e -f $* update-results
 
 $(SUBKOMPILE): %.kompile:
-	$(MAKE) -C $* kompile
+	$(MAKE) -e -f $* kompile
