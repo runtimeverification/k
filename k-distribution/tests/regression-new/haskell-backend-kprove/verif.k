@@ -15,7 +15,7 @@ module VERIF
 
     configuration <k> $PGM:Pgm </k> <counter> 1 </counter> <sum> 0 </sum>
 
-    rule addCounter(0) => .
+    rule <k> addCounter(0) => . ... </k>
     rule  <k> addCounter(Times:Int => Times -Int 1) ...</k>
           <counter> C:Int => C +Int 1 </counter>
           <sum> S:Int => S +Int C </sum>
