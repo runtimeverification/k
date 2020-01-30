@@ -1171,6 +1171,308 @@ The use of rules with set variables should be sound for all other backends
 which just execute by rewriting, however it might not be safe for backends
 which want to guarantee coverage.
 
+### Variables occurring only in the RHS of a rule
+
+This section presents possible scenarios requiring variables to only appear in
+the RHS of a rule.
+
+#### Summary
+Except for `?` variables and `!` (fresh) variables, which are
+__required__ to only appear in the RHS of a rule, all other variables __must__
+also appear in the LHS of a rule.  This restriction also applies to anonymous
+variables; in particular, for claims, `?_` (not `_`) should be used in the RHS
+to indicate that something changes but we don't care to what value.
+
+To support specifying random-like behavior, the above restriction
+can be relaxed by annotating a rule with the `random` attribute whenever
+the rule intentionally contains regular variables only occurring in the RHS.
+
+#### Introduction
+
+K uses question mark variables of the form `?X` to refer to
+existential variables, and uses `ensures` to specify logical constraints on
+those variables.
+These variables are only allowed to appear in the RHS of a K rule.
+
+If the rules represent rewrite (semantic) steps or verification claims,
+then the `?` variables are existentially quantified at the top of the RHS;
+otherwise, if they represent equations, the `?` variables are quantified at the
+top of the entire rule.
+
+Note that when both `?`-variables and regular variables are present,
+regular variables are (implicitly) universally quantified on top of the rule
+(already containing the existential quantifications).
+This essentially makes all `?` variables depend on all regular variables.
+
+All examples below are intended more for program verification /
+symbolic execution, and thus concrete implementations might choose to ignore
+them altogether or to provide ad-hoc implementations for them.
+
+#### Example: Verification claims
+
+Consider the following definition of a (transition) system:
+
+```
+module A
+  rule foo => true
+  rule bar => true
+  rule bar => false
+endmodule
+```
+
+Consider also, the following specification of claims about the definition above:
+```
+module A-SPEC
+  rule [s1]: foo => ?X:Bool
+  rule [s2]: foo =>  X:Bool  [random]
+  rule [s3]: bar => ?X:Bool
+  rule [s4]: bar =>  X:Bool  [random]
+endmodule
+```
+
+##### One-path interpretation
+
+- (s1) says that there exists a path from `foo` to some boolean, which is
+  satisfied easily using the `foo => true` rule
+- (s3) says the same thing about `bar` and can be satisfied by either of
+  `bar => true` and `bar => false` rules
+- (s2) and (s4) can be better understood by replacing them with instances for
+  __each__ element of type `Bool`, which can be interpreted that
+  both `true` and `false` are reachable from `foo` for (s2), or `bar` for (s4),
+  respectively.
+  + (s2) cannot be verified as we cannot find a path from `foo` to `false`.
+  + (s4) can be verified by using `bar => true` to show `true` is reachable and
+    `bar => false` to achieve the same thing for `false`
+
+##### All-path interpretation
+
+- (s1) says that all paths from `foo` will reach some boolean, which is
+  satisfied by the `foo => true` rule and the lack of other rules for `foo`
+- (s3) says the same thing about `bar` and can be satisfied by checking that
+   both `bar => true` and `bar => false` end in a boolean, and there are no
+   other rules for `bar`
+- (s2) and (s4) can be better understood by replacing them with instances for
+  __each__ element of type `Bool`, which can be interpreted that
+  both `true` and `false` are reachable __in all paths__ originating in
+  `foo` for (s2), or `bar` for (s4), respectively.
+  This is a very strong claim, requiring that all paths originating in
+  `foo` (`bar`) pass through __both__ `true` and `false`,
+  so neither (s2) nor (s4) can be verified.
+
+  Interestingly enough, adding a rule like `false => true` would make both
+  (s2) and (s4) hold.
+
+#### Example: Random Number Construct `rand()`
+
+The random number construct `rand()` is a language construct which could be
+easily conceived to be part of the syntax of a programming language:
+
+```
+Exp ::= "rand" "(" ")"
+```
+
+The intended semantics of `rand()` is that it can rewrite to any integer in
+a single step. This could be expressed as the following following infinitely
+many rules.
+
+```
+rule  rand() => 0
+rule  rand() => 1
+rule  rand() => 2
+  ...    ...
+rule rand() => (-1)
+rule rand() => (-2)
+  ...    ...
+```
+
+Since we need an instance of the rule for __every__ integer, one could summarize
+the above infinitely many rules with the rule
+
+```
+rule rand() => I:Int [random]
+```
+
+Note that `I` occurs only in the RHS in the rule above, and thus the rule
+needs the `random` attribute to signal that this is intentionally.
+
+One can define variants of `rand()` by further constraining the output variable
+as a precondition to the rule.
+
+##### Rand-like examples
+
+1. `randBounded(M,N)` can rewrite to any integer between `M` and `N`
+
+    ```
+    syntax Exp ::= randBounded(Int, Int)
+    rule randBounded(M, N) => I
+      requires M <=Int I andBool I <=Int N
+    ```
+
+1. `randInList(Is)` takes a list `Is` of items
+   and can rewrite in one step to any item in `Is`.
+
+    ```
+    syntax Exp ::= randInList (List)
+    rule randInList(Is) => I
+      requires I inList Is
+    ```
+
+1. `randNotInList(Is)` takes a list `Is` of items
+   and can rewrite in one step to any item _not_ in `Is`.
+
+    ```
+    syntax Exp ::= randNotInList (List)
+    rule randNotInList(Is) => I
+      requires notBool(I inList Is)
+    ```
+
+1. `randPrime()`, can rewrite to any _prime number_.
+
+    ```
+    syntax Exp ::= randPrime ()
+    rule randPrime() => X:Int
+      requires isPrime(X)
+    ```
+
+   where `isPrime(_)` is a predicate that can be defined in the usual way.
+
+Note 1: all above are not function symbols, but language constructs.
+
+Note 2: Currently the frontend does not allow rules with universally quantified
+variables in the RHS which are not bound in the LHS.
+
+Note 3. Allowing these rules in a concrete execution engine would require an
+algorithm for generating concrete instances for such variables, satisfying the
+given constraints; thus the `random` attribute serves two purposes: to allow
+such rules to pass the variable checks, and to signal (concrete execution)
+backends that specialized algorithm would be needed to instantiate these
+variables.
+
+#### Example: Fresh Integer Construct `fresh(Is)`
+
+The fresh integer construct `fresh(Is)` is a language construct.
+
+```
+Exp ::= ... | "fresh" "(" List{Int} ")"
+```
+
+The intended semantics of `fresh(Is)` is that it can always rewrite to an
+integer that in not in `Is`.
+
+Note that `fresh(Is)` and `randNotInList(Is)` are different; the former
+does not _need_ to be able to rewrite to every integers not in `Is`,
+while the latter requires so.
+
+For example, it is _correct_ to implement `fresh(Is)` so it always returns the
+smallest positive integer that is not in `Is`, but same implementation for
+`randNotInList(Is)` might be considered _inadequate_.
+In other words, there exist multiple correct implementations of `fresh(Is)`,
+some of which may be deterministic, but there only exists a unique
+implementation of `randNotInList(Is)`.
+Finally, note that `randNotInList(Is)` is a _correct_ implementation
+for `fresh(Is)`; Hence, concrete execution engines can choose to handle
+such rules accordingly.
+
+We use the following K syntax to define `fresh(Is)`
+
+```
+syntax Exp ::= fresh (List{Int})
+rule fresh(Is:List{Int}) => ?I:Int
+  ensures notBool (?I inList{Int} Is)
+```
+
+A variant of this would be a `choiceInList(Is)` language construct which would
+choose some number from a list:
+
+```
+syntax Exp ::= choiceInList (List{Int})
+rule choiceInList(Is:List{Int}) => ?I:Int
+  ensures ?I inList{Int} Is
+```
+
+Note: This definition is different from one using a `!` variable to indicate
+freshness because using `!` is just syntactic sugar for generating globally
+unique instances and relies on a special configuration cell, and cannot be
+constrained, while the `fresh` described here is local and can be constrained.
+While the first is more appropriate for concrete execution, this might be
+better for symbolic execution / program verification.
+
+#### Example: Arbitrary Number (Unspecific Function) `arb()`
+
+The function `arb()` is not a PL construct, but a mathematical function.
+Therefore, its definition should not be interpreted as an execution step, but
+rather as an equality.
+
+The intended semantics of `arb()` is that it is an unspecified nullary function.
+The exact return value of `arb()` is unspecified in the semantics but up to the
+implementations.
+However, being a mathematical function, `arb()` must return the same value in
+any one implementation.
+
+We do not need special frontend syntax to define `arb()`.
+We only need to define it in the usual way as a function
+(instead of a language construct), and provide no axioms for it.
+The `functional` attribute ensures that the function is total, i.e.,
+that it evaluates to precisely one value for each input.
+
+##### Variants
+
+There are many variants of `arb()`. For example, `arbInList(Is)` is
+an unspecified function whose return value must be an element from `Is`.
+
+Note that `arbInList(Is)` is different from `choiceInList(Is)`, because
+`choiceInList(Is)` _transitions_ to an integer in `Is` (could be a different one
+each time it is used), while `arbInList(Is)` _is equal to_ a (fixed)
+integer not in `Is`.
+
+W.r.t. the `arb` variants, we can use `?` variables and the `function`
+annotation to signal that we're defining a function and the value of the
+function is fixed, but non-determinate.
+
+```
+syntax Int ::= arbInList(List{Int}) [function]
+rule arbInList(Is:List{Int}) => ?I:Int
+  ensures ?I inList{Int} Is
+```
+
+If elimination of existentials in equatoinal rules is needed, one possible
+approach would be through [Skolemization](https://en.wikipedia.org/wiki/Skolem_normal_form),
+i.e., replacing the `?` variable with a new uninterpreted function depending
+on the regular variables present in the function.
+
+#### Example: Interval (Non-function Symbols) `interval()`
+
+The symbol `interval(M,N)` is not a PL construct, nor a function in the
+first-order sense, but a proper matching-logic symbol, whose interpretation is
+in the powerset of its domain.
+Its axioms will not use rewrites but equalities.
+
+The intended semantics of `interval(M,N)` is that it equals the _set_ of
+integers that are larger than or equal to `M` and smaller than or equal to `N`.
+
+Since expressing the axiom for `interval` requires an an existential
+quantification on the right-hand-side, thus making it a non-functional symbol
+defined through an equation, using `?` variables might be confusing since their
+usage would be different from that presented in the previous sections.
+
+Hence, the proposal to support this would be to write this as a proper ML rule.
+A possible syntax for this purpose would be:
+
+```
+eq  interval(M,N)
+    ==
+    #Exists X:Int .
+        (X:Int #And { X >=Int M #Equals true } #And { X <=Int N #Equals true })
+```
+
+Additionally, the symbol declaration would require a special attribute to
+signal the fact that it is not a constructor but a _defined_ symbol.
+
+Since this feature is not clearly needed by K users at the moment, it is only
+presented here as an example; its implementation will be postponed for such time
+when its usefulness becomes apparent.
+
+
 Debugging
 ---------
 
