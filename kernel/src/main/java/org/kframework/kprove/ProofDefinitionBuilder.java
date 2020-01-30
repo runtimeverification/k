@@ -14,11 +14,7 @@ import scala.Option;
 import scala.Tuple2;
 
 import java.io.File;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -70,13 +66,15 @@ public class ProofDefinitionBuilder {
                 backend.excludedModuleTags());
         Map<String, Module> modulesMap = modules.stream().collect(Collectors.toMap(Module::name, m -> m));
         Definition parsedDefinition = compiledDefinition.getParsedDefinition();
+        Module specModule = getModule(specModuleNameUpdated, modulesMap, parsedDefinition);
+        kompile.structuralChecks(scala.collection.JavaConverters.asScalaSet(modules),
+                specModule, scala.Option.empty(), backend.excludedModuleTags(), false);
         Module defModule = getModule(defModuleNameUpdated, modulesMap, parsedDefinition);
         Definition rawExtendedDef = Definition.apply(defModule, parsedDefinition.entryModules(),
                 parsedDefinition.att());
         Definition compiledExtendedDef = compileDefinition(backend, rawExtendedDef); //also resolves imports
         compiledExtendedDef = backend.proofDefinitionNonCachedSteps(extraConcreteRuleLabels).apply(compiledExtendedDef);
 
-        Module specModule = getModule(specModuleNameUpdated, modulesMap, parsedDefinition);
         specModule = backend.specificationSteps(compiledDefinition.kompiledDefinition).apply(specModule);
 
         return Tuple2.apply(compiledExtendedDef, specModule);
