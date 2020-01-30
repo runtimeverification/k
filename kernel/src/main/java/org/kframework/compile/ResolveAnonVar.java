@@ -1,6 +1,7 @@
 // Copyright (c) 2015-2019 K Team. All Rights Reserved.
 package org.kframework.compile;
 
+import org.kframework.attributes.Att;
 import org.kframework.definition.Context;
 import org.kframework.definition.ContextAlias;
 import org.kframework.definition.Rule;
@@ -88,8 +89,11 @@ public class ResolveAnonVar {
         return new TransformK() {
             @Override
             public K apply(KVariable k) {
-                if (ANON_VAR.equals(k) || FRESH_ANON_VAR.equals(k)) {
-                    return newDotVariable();
+                if (ANON_VAR.equals(k)) {
+                    return newDotVariable(false);
+                }
+                if (FRESH_ANON_VAR.equals(k)) {
+                    return newDotVariable(true);
                 }
                 return super.apply(k);
             }
@@ -97,10 +101,14 @@ public class ResolveAnonVar {
     }
 
     private int counter = 0;
-    KVariable newDotVariable() {
+    KVariable newDotVariable(boolean isFresh) {
         KVariable newLabel;
+        Att att = Att().add("anonymous");
+        if (isFresh) {
+            att = att.add("fresh");
+        }
         do {
-            newLabel = KVariable("_" + (counter++), Att().add("anonymous"));
+            newLabel = KVariable("_" + (counter++), att);
         } while (vars.contains(newLabel));
         vars.add(newLabel);
         return newLabel;
