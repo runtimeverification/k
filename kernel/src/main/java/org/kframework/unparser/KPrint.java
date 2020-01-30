@@ -14,6 +14,7 @@ import org.kframework.compile.AddSortInjections;
 import org.kframework.compile.ExpandMacros;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
+import org.kframework.kil.Attribute;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.Assoc;
@@ -212,7 +213,7 @@ public class KPrint {
     }
 
     public K abstractTerm(Module mod, K term) {
-        K filteredSubst     = options.noFilterSubstitution || !kompileOptions.isKore() ? term : filterSubst(term);
+        K filteredSubst     = options.noFilterSubstitution || !kompileOptions.isKore() ? term : filterSubst(term, mod);
         K origNames         = options.restoreOriginalNames ? restoreOriginalNameIfPresent(filteredSubst) : filteredSubst;
         K collectionsSorted = options.noSortCollections    ? origNames : sortCollections(mod, origNames);
         //non-determinism is still possible if associative/commutative collection terms start with anonymous vars
@@ -223,11 +224,11 @@ public class KPrint {
         return flattenedTerm;
     }
 
-    public Set<KVariable> vars(K term) {
+    private Set<KVariable> vars(K term) {
       return new HashSet<>(multivars(term));
     }
 
-    public Multiset<KVariable> multivars(K term) {
+    private Multiset<KVariable> multivars(K term) {
       Multiset<KVariable> vars = HashMultiset.create();
       new VisitK() {
         @Override
@@ -238,30 +239,30 @@ public class KPrint {
       return vars;
     }
 
-    public K filterSubst(K term) {
+    private K filterSubst(K term, Module mod) {
       if (!(term instanceof KApply)) {
         return term;
       }
       KApply kapp = (KApply)term;
       if (kapp.klabel().head().equals(KLabels.ML_AND)) {
-        return filterConjunction(kapp);
+        return filterConjunction(kapp, mod);
       } else if (kapp.klabel().head().equals(KLabels.ML_OR)) {
         KLabel unit = KLabel(KLabels.ML_FALSE.name(), kapp.klabel().params().apply(0));
         List<K> disjuncts = Assoc.flatten(kapp.klabel(), kapp.items(), unit);
         return disjuncts.stream()
-                .map(this::filterConjunction)
+                .map(d -> filterConjunction(d, mod))
                 .distinct()
                 .reduce((k1, k2) -> KApply(kapp.klabel(), k1, k2))
                 .orElse(KApply(unit));
       } else if (kapp.klabel().head().equals(KLabels.ML_EQUALS)) {
         KLabel unit = KLabel(KLabels.ML_TRUE.name(), kapp.klabel().params().apply(0));
-        return filterEquality(kapp, multivars(kapp)).orElse(KApply(unit));
+        return filterEquality(kapp, multivars(kapp), mod).orElse(KApply(unit));
       } else {
         return term;
       }
     }
 
-    public K filterConjunction(K term) {
+    private K filterConjunction(K term, Module mod) {
       if (!(term instanceof KApply)) {
         return term;
       }
@@ -270,25 +271,30 @@ public class KPrint {
         KLabel unit = KLabel(KLabels.ML_TRUE.name(), kapp.klabel().params().apply(0));
         List<K> conjuncts = Assoc.flatten(kapp.klabel(), kapp.items(), unit);
         return conjuncts.stream()
-                .map(d -> filterEquality(d, multivars(kapp)))
+                .map(d -> filterEquality(d, multivars(kapp), mod))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .reduce((k1, k2) -> KApply(kapp.klabel(), k1, k2))
                 .orElse(KApply(unit));
       } else if (kapp.klabel().head().equals(KLabels.ML_EQUALS)) {
         KLabel unit = KLabel(KLabels.ML_TRUE.name(), kapp.klabel().params().apply(0));
-        return filterEquality(kapp, multivars(kapp)).orElse(KApply(unit));
+        return filterEquality(kapp, multivars(kapp), mod).orElse(KApply(unit));
       } else {
         return term;
       }
     }
 
-    public Optional<K> filterEquality(K term, Multiset<KVariable> vars) {
+    public Optional<K> filterEquality(K term, Multiset<KVariable> vars, Module mod) {
       if (!(term instanceof KApply)) {
         return Optional.of(term);
       }
       KApply kapp = (KApply)term;
       if (kapp.klabel().head().equals(KLabels.ML_EQUALS)) {
+        if (!(kapp.items().get(0) instanceof KVariable) &&
+            (!(kapp.items().get(0) instanceof KApply) || 
+             !mod.attributesFor().apply(((KApply)kapp.items().get(0)).klabel()).contains(Attribute.FUNCTION_KEY))) {
+          return Optional.of(term);
+        }
         Set<KVariable> leftVars = vars(kapp.items().get(0));
         if (leftVars.stream().filter(v -> !v.att().contains("anonymous")).findAny().isPresent()) {
           return Optional.of(term);
