@@ -33,10 +33,12 @@ import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.unparser.ToJson;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
 import scala.Function1;
+import scala.Option;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
@@ -276,26 +278,33 @@ public class Kompile {
     }
 
     private void checkDefinition(Definition parsedDef, Set<String> excludedModuleTags) {
+        scala.collection.Set<Module> modules = parsedDef.modules();
+        Module mainModule = parsedDef.mainModule();
+        Option<Module> kModule = parsedDef.getModule("K");
+        structuralChecks(modules, mainModule, kModule, excludedModuleTags, true);
+    }
+
+    public void structuralChecks(scala.collection.Set<Module> modules, Module mainModule, Option<Module> kModule, Set<String> excludedModuleTags, boolean _throw) {
         CheckRHSVariables checkRHSVariables = new CheckRHSVariables(errors);
-        stream(parsedDef.modules()).forEach(m -> stream(m.localSentences()).forEach(checkRHSVariables::check));
+        stream(modules).forEach(m -> stream(m.localSentences()).forEach(checkRHSVariables::check));
 
-        stream(parsedDef.modules()).forEach(m -> stream(m.localSentences()).forEach(new CheckConfigurationCells(errors, m)::check));
+        stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckConfigurationCells(errors, m)::check));
 
-        stream(parsedDef.modules()).forEach(m -> stream(m.localSentences()).forEach(new CheckSortTopUniqueness(errors, m)::check));
+        stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckSortTopUniqueness(errors, m)::check));
 
-        stream(parsedDef.modules()).forEach(m -> stream(m.localSentences()).forEach(new CheckStreams(errors, m)::check));
+        stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckStreams(errors, m)::check));
 
-        stream(parsedDef.modules()).forEach(m -> stream(m.localSentences()).forEach(new CheckRewrite(errors, m)::check));
+        stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckRewrite(errors, m)::check));
 
-        stream(parsedDef.modules()).forEach(new CheckImports(parsedDef.mainModule(), kem)::check);
+        stream(modules).forEach(new CheckImports(mainModule, kem)::check);
 
-        stream(parsedDef.modules()).forEach(m -> stream(m.localSentences()).forEach(new CheckHOLE(errors, m)::check));
+        stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckHOLE(errors, m)::check));
 
-        stream(parsedDef.modules()).forEach(m -> stream(m.localSentences()).forEach(
+        stream(modules).forEach(m -> stream(m.localSentences()).forEach(
                 new CheckFunctions(errors, m, excludedModuleTags.contains(Attribute.CONCRETE_KEY))::check));
 
         Set<String> moduleNames = new HashSet<>();
-        stream(parsedDef.modules()).forEach(m -> {
+        stream(modules).forEach(m -> {
             if (moduleNames.contains(m.name())) {
                 errors.add(KEMException.compilerError("Found multiple modules with name: " + m.name()));
             }
@@ -311,16 +320,27 @@ public class Kompile {
             }
             checkedModules.add(m.name());
         };
-        stream(parsedDef.getModule("K").get().importedModuleNames()).map(name -> parsedDef.getModule(name).get()).forEach(checkModuleKLabels);
-        checkModuleKLabels.accept(parsedDef.getModule("K").get());
-        stream(parsedDef.mainModule().importedModuleNames()).map(name -> parsedDef.getModule(name).get()).forEach(checkModuleKLabels);
-        checkModuleKLabels.accept(parsedDef.mainModule());
 
-        stream(parsedDef.modules()).forEach(m -> stream(m.localSentences()).forEach(new CheckLabels(errors)::check));
+        if (kModule.nonEmpty()) {
+            stream(kModule.get().importedModules()).forEach(checkModuleKLabels);
+            checkModuleKLabels.accept(kModule.get());
+        }
+        stream(mainModule.importedModules()).forEach(checkModuleKLabels);
+        checkModuleKLabels.accept(mainModule);
+
+        stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckLabels(errors)::check));
 
         if (!errors.isEmpty()) {
-            kem.addAllKException(errors.stream().map(e -> e.exception).collect(Collectors.toList()));
-            throw KEMException.compilerError("Had " + errors.size() + " structural errors.");
+            if (_throw) {
+                kem.addAllKException(errors.stream().map(e -> e.exception).collect(Collectors.toList()));
+                throw KEMException.compilerError("Had " + errors.size() + " structural errors.");
+            } else {
+                for (KEMException error : errors) {
+                    kem.registerCriticalWarning(error.exception.getMessage() +
+                            "\nNote: this warning will become an error in subsequent releases.",
+                            error.exception);
+                }
+            }
         }
     }
 
