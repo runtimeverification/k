@@ -882,7 +882,7 @@ public class ModuleToKORE {
             sb.append(", ");
             convert(right, sb);
             sb.append(')');
-            for (KVariable exists : existentials) {
+            for (KVariable ignored : existentials) {
                 sb.append(')');
             }
             if (sentenceType == SentenceType.ALL_PATH || sentenceType == SentenceType.ONE_PATH) {
@@ -912,7 +912,7 @@ public class ModuleToKORE {
         VisitK visitor = new VisitK() {
             @Override
             public void apply(KVariable k) {
-                if (k.name().startsWith("?"))
+                if (k.name().startsWith("?") || k.att().contains("fresh"))
                     res.add(k);
             }
         };
