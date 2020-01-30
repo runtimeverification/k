@@ -291,7 +291,7 @@ public class KPrint {
       KApply kapp = (KApply)term;
       if (kapp.klabel().head().equals(KLabels.ML_EQUALS)) {
         if (!(kapp.items().get(0) instanceof KVariable) &&
-            (!(kapp.items().get(0) instanceof KApply) || 
+            (!(kapp.items().get(0) instanceof KApply) ||
              !mod.attributesFor().apply(((KApply)kapp.items().get(0)).klabel()).contains(Attribute.FUNCTION_KEY))) {
           return Optional.of(term);
         }
