@@ -149,6 +149,9 @@ public final class JavaExecutionOptions {
                     "WARNING: Execution time with this option is longer because System.gc() is invoked in 3 places.")
     public boolean profileMemAdv = false;
 
+    @Parameter(names="--skip-invoking-backend", description="Skip invoking the Java Backend.")
+    public boolean skipInvokingBackend = false;
+
     public static class LogEventConverter extends BaseEnumConverter<StateLog.LogEvent> {
 
         public LogEventConverter(String optionName) {
