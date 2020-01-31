@@ -62,6 +62,12 @@ pipeline {
                           , string(name: 'UPDATE_DEPS_REPOSITORY', value: 'runtimeverification/mkr-mcd-spec') \
                           , string(name: 'UPDATE_DEPS_SUBMODULE_DIR', value: 'deps/k')                        \
                           ]
+        build job: 'rv-devops/master', propagate: false, wait: false                                                       \
+            , parameters: [ booleanParam(name: 'UPDATE_DEPS_SUBMODULE', value: true)                                       \
+                          , string(name: 'PR_REVIEWER', value: 'daejunpark')                                               \
+                          , string(name: 'UPDATE_DEPS_REPOSITORY', value: 'runtimeverification/beacon-chain-verification') \
+                          , string(name: 'UPDATE_DEPS_SUBMODULE_DIR', value: 'deps/k')                                     \
+                          ]
       }
     }
     stage('Build and Package K') {
