@@ -1183,9 +1183,9 @@ also appear in the LHS of a rule.  This restriction also applies to anonymous
 variables; in particular, for claims, `?_` (not `_`) should be used in the RHS
 to indicate that something changes but we don't care to what value.
 
-To support specifying random-like behavior, the above restriction
-can be relaxed by annotating a rule with the `random` attribute whenever
-the rule intentionally contains regular variables only occurring in the RHS.
+To support specifying random-like behavior, the above restriction can be relaxed
+by annotating a rule with the `unboundVariables` attribute whenever the rule
+intentionally contains regular variables only occurring in the RHS.
 
 #### Introduction
 
@@ -1224,9 +1224,9 @@ Consider also, the following specification of claims about the definition above:
 ```
 module A-SPEC
   rule [s1]: foo => ?X:Bool
-  rule [s2]: foo =>  X:Bool  [random]
+  rule [s2]: foo =>  X:Bool  [unboundVariables(X)]
   rule [s3]: bar => ?X:Bool
-  rule [s4]: bar =>  X:Bool  [random]
+  rule [s4]: bar =>  X:Bool  [unboundVariables(X)]
 endmodule
 ```
 
@@ -1289,11 +1289,11 @@ Since we need an instance of the rule for __every__ integer, one could summarize
 the above infinitely many rules with the rule
 
 ```
-rule rand() => I:Int [random]
+rule rand() => I:Int [unboundVariables(I)]
 ```
 
 Note that `I` occurs only in the RHS in the rule above, and thus the rule
-needs the `random` attribute to signal that this is intentionally.
+needs the `unboundVariables(I)` attribute to signal that this is intentionally.
 
 One can define variants of `rand()` by further constraining the output variable
 as a precondition to the rule.
@@ -1306,6 +1306,7 @@ as a precondition to the rule.
     syntax Exp ::= randBounded(Int, Int)
     rule randBounded(M, N) => I
       requires M <=Int I andBool I <=Int N
+      [unboundVariables(I)]
     ```
 
 1. `randInList(Is)` takes a list `Is` of items
@@ -1315,6 +1316,7 @@ as a precondition to the rule.
     syntax Exp ::= randInList (List)
     rule randInList(Is) => I
       requires I inList Is
+      [unboundVariables(I)]
     ```
 
 1. `randNotInList(Is)` takes a list `Is` of items
@@ -1324,6 +1326,7 @@ as a precondition to the rule.
     syntax Exp ::= randNotInList (List)
     rule randNotInList(Is) => I
       requires notBool(I inList Is)
+      [unboundVariables(I)]
     ```
 
 1. `randPrime()`, can rewrite to any _prime number_.
@@ -1332,6 +1335,7 @@ as a precondition to the rule.
     syntax Exp ::= randPrime ()
     rule randPrime() => X:Int
       requires isPrime(X)
+      [unboundVariables(X)]
     ```
 
    where `isPrime(_)` is a predicate that can be defined in the usual way.
@@ -1343,10 +1347,10 @@ variables in the RHS which are not bound in the LHS.
 
 Note 3. Allowing these rules in a concrete execution engine would require an
 algorithm for generating concrete instances for such variables, satisfying the
-given constraints; thus the `random` attribute serves two purposes: to allow
-such rules to pass the variable checks, and to signal (concrete execution)
-backends that specialized algorithm would be needed to instantiate these
-variables.
+given constraints; thus the `unboundVariables` attribute serves two purposes:
+- to allow such rules to pass the variable checks, and
+- to signal (concrete execution) backends that specialized algorithm would be
+needed to instantiate these variables.
 
 #### Example: Fresh Integer Construct `fresh(Is)`
 
@@ -1435,7 +1439,7 @@ rule arbInList(Is:List{Int}) => ?I:Int
   ensures ?I inList{Int} Is
 ```
 
-If elimination of existentials in equatoinal rules is needed, one possible
+If elimination of existentials in equational rules is needed, one possible
 approach would be through [Skolemization](https://en.wikipedia.org/wiki/Skolem_normal_form),
 i.e., replacing the `?` variable with a new uninterpreted function depending
 on the regular variables present in the function.
