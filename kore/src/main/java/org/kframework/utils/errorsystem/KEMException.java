@@ -9,6 +9,7 @@ import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KException.KExceptionGroup;
 
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Thrown to indicate that the K Exception manager has terminated the application due to an error.
@@ -141,4 +142,5 @@ public class KEMException extends RuntimeException {
     public KException getKException() {
         return exception;
     }
+
 }

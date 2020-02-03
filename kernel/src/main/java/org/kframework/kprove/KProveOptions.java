@@ -9,6 +9,7 @@ import org.kframework.main.GlobalOptions;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.RequestScoped;
+import org.kframework.utils.options.BackendOptions;
 import org.kframework.utils.options.DefinitionLoadingOptions;
 import org.kframework.utils.options.SMTOptions;
 
@@ -39,6 +40,9 @@ public class KProveOptions {
         }
         return specFile;
     }
+
+    @ParametersDelegate
+    public BackendOptions backend = new BackendOptions();
 
     @ParametersDelegate
     public SMTOptions smt = new SMTOptions();
