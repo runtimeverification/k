@@ -512,11 +512,17 @@ rule <k> introduce-set(I:Int) => . ... </k>
 rule <k> eliminate-set => I ... </k>
      <sets> <set> I </set> => .Bag </sets>
 
-rule <k> introduce-list(I:Int) => . ... </k>
+rule <k> introduce-list-start(I:Int) => . ... </k>
+     <lists> (.Bag => <list> I </list>) ... </lists>
+
+rule <k> introduce-list-end(I:Int) => . ... </k>
      <lists> ... (.Bag => <list> I </list>) </lists>
 
-rule <k> eliminate-list => I ... </k>
+rule <k> eliminate-list-start => I ... </k>
      <lists> (<list> I </list> => .Bag) ... </lists>
+
+rule <k> eliminate-list-end => I ... </k>
+     <lists> ... (<list> I </list> => .Bag) </lists>
 ```
 
 Notice that for `multiplicity="?"`, we only admit a single `<set>` instance at
