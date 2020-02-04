@@ -519,7 +519,7 @@ rule <k> eliminate-list => I ... </k>
      <lists> (<list> I </list> => .Bag) ... </lists>
 ```
 
-Notice that for `multiplicity="?"`, we only admin a single `<set>` instance at
+Notice that for `multiplicity="?"`, we only admit a single `<set>` instance at
 a time. For the `type=List` cell, we can add/eliminate cells from the from or
 back of the `<lists>` cell. Also note that we use `.Bag` to indicate the empty
 cell collection in all cases.
