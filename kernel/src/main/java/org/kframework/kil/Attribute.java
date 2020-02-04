@@ -61,6 +61,7 @@ public class Attribute<T> extends ASTNode {
     public static final String SEQSTRICT_KEY = "seqstrict";
     public static final String CONCRETE_KEY = "concrete";
     public static final String LABEL_KEY = "label";
+    public static final String UNBOUND_VARIABLES_KEY = "unboundVariables";
 
     public static final Attribute<String> PATTERN = Attribute.of(PATTERN_KEY, "");
 

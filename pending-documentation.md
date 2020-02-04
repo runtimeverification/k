@@ -751,6 +751,30 @@ Then this simplification rule will only apply if the Haskell backend can prove
 that `notBool N =/=Int 0` is unsatisfiable. This avoids an infinite cycle of
 applying this simplification lemma.
 
+### The `unboundVariables` attribute
+
+Normally, K rules are not allowed to contain regular (i.e., not fresh, not
+existential) variables in the RHS / `requires` / `ensures` clauses which are not
+bound in the LHS.
+
+However, in certain cases this behavior might be desired, like, for example,
+when specifying a macro rule which is to be used in the LHS of other rules.
+To allow for such cases, but still be useful and perform the unboundness checks
+in regular cases, the `unboundVariables` attributes allows the user to specify
+a comma-separated list of names of variables which can be unbound in the rule.
+
+For example, in the macro declaration
+```
+  rule cppEnumType => bar(_, scopedEnum() #Or unscopedEnum() ) [macro, unboundVariables(_)]
+```
+the declaration `unboundVariables(_)` allows the rule to pass the unbound
+variable checks, and this in turn allows for `cppEnumType` to be used in
+the LHS of a rule to mean the pattern above:
+```
+  rule inverseConvertType(cppEnumType, foo((cppEnumType #as T::CPPType => underlyingType(T))))
+```
+
+
 ### Variable Sort Inference
 
 In K, it is not required that users declare the sorts of variables in rules or
