@@ -457,6 +457,19 @@ A single configuration cell containing an integer may have the "exit"
 attribute. This integer will then be used as the return value on the console
 when executing the program.
 
+For example:
+
+```k
+configuration <k> $PGM:Pgm </k>
+              <status-code exit=""> 1 </status-code>
+```
+
+declares that the cell `status-code` should be used as the exit-code for
+invocations of `krun`. Additionally, we state that the default exit-code is `1`
+(an error state). One use of this is for writing testing harnesses which assume
+that the test fails until proven otherwise and only set the `<status-code>` cell
+to `0` if the test succeeds.
+
 Rule Declaration
 ----------------
 
