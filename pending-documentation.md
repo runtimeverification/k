@@ -499,8 +499,8 @@ configuration <k> $PGM:Pgm </k>
               </maps>
 ```
 
-Declaring `type="Set"` indicates that duplicate occurances of the cell should be
-de-duplicated, and accesses to instances of the cell will be nondeterministic
+Declaring `type="Set"` indicates that duplicate occurrences of the cell should
+be de-duplicated, and accesses to instances of the cell will be nondeterministic
 choices (constrained by any other parts of the match and side-conditions).
 Similarly, declaring `type="List"` means that new instances of the cell can be
 added at the front or back, and elements can be accessed from the front or back,
