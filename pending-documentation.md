@@ -470,6 +470,81 @@ invocations of `krun`. Additionally, we state that the default exit-code is `1`
 that the test fails until proven otherwise and only set the `<status-code>` cell
 to `0` if the test succeeds.
 
+### Collection Cells: `multiplicity` and `type` attributes
+
+Sometimes a semantics needs to allow multiple copies of the same cell, for
+example if you are making a concurrent multi-threading programming language.
+For this purpose, K supports the `multiplicity` and `type` attributes on cells
+declared in the configuration.
+
+`multiplicity` can take on values `*` and `?`. Declaring `multiplicity="*"`
+indicates that the cell may appear any number of times in a runtime
+configuration. Setting `multiplicity="?"` indicates that the cell may only
+appear exactly 0 or 1 times in a runtime configuration.
+
+`type` can take on values `Set`, `List`, and `Map`. For example, here we declare
+several collecion cells:
+
+```k
+configuration <k> $PGM:Pgm </k>
+              <sets>  <set  multiplicity="?" type="Set">  0:Int </set>  </sets>
+              <lists> <list multiplicity="*" type="List"> 0:Int </list> </lists>
+              <maps>
+                <map multiplicity="*" type="Map">
+                  <map-key> 0:Int </map-key>
+                  <map-value> "":String </map-value>
+                </map>
+              </maps>
+```
+
+Declaring `type="Set"` indicates that duplicate occurances of the cell should be
+de-duplicated, and accesses to instances of the cell will be nondeterministic
+choices (constrained by any other parts of the match and side-conditions).
+Similarly, declaring `type="List"` means that new instances of the cell can be
+added at the front or back, and elements can be accessed from the front or back,
+and the order of the cells will be maintained. The following are examples of
+introduction and elimination rules for these collections:
+
+```k
+rule <k> introduce-set(I:Int) => . ... </k>
+     <sets> .Bag => <set> I </set> </sets>
+
+rule <k> eliminate-set => I ... </k>
+     <sets> <set> I </set> => .Bag </sets>
+
+rule <k> introduce-list(I:Int) => . ... </k>
+     <lists> ... (.Bag => <list> I </list>) </lists>
+
+rule <k> eliminate-list => I ... </k>
+     <lists> (<list> I </list> => .Bag) ... </lists>
+```
+
+Notice that for `multiplicity="?"`, we only admin a single `<set>` instance at
+a time. For the `type=List` cell, we can add/eliminate cells from the from or
+back of the `<lists>` cell. Also note that we use `.Bag` to indicate the empty
+cell collection in all cases.
+
+Declaring `type="Map"` indicates that the first sub-cell will be used as a
+cell-key. This means that matching on those cells will be done as a map-lookup
+operation, so rules which match on the subcells _must_ mention the cell-key.
+
+For example, the following rules introduce, retrieve from, and eliminate
+`type="Map"` cells:
+
+```k
+rule <k> introduce-map(I:Int) => . ... </k>
+     <maps> ... (.Bag => <map> <map-key> I </map-key> ... </map>) ... </maps>
+
+rule <k> retrieve-map(I:Int) => S ... </k>
+     <map> <map-key> I </map-key> <map-value> S </map-value> </map>
+
+rule <k> eliminate-map(I:Int) => . ... </k>
+     <maps> ... (<map> <map-key> I </map-key> ... </map> => .Bag) ... </maps>
+```
+
+Note how each rule makes sure that `<map-key>` cell is mentioned, and we
+continue to use `.Bag` to indicate the empty collection.
+
 Rule Declaration
 ----------------
 
