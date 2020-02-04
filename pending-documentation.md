@@ -480,7 +480,8 @@ declared in the configuration.
 `multiplicity` can take on values `*` and `?`. Declaring `multiplicity="*"`
 indicates that the cell may appear any number of times in a runtime
 configuration. Setting `multiplicity="?"` indicates that the cell may only
-appear exactly 0 or 1 times in a runtime configuration.
+appear exactly 0 or 1 times in a runtime configuration. In both cases, the
+initial configuration will start with 0 instances of the cell collection.
 
 `type` can take on values `Set`, `List`, and `Map`. For example, here we declare
 several collecion cells:
