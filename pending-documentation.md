@@ -480,8 +480,11 @@ declared in the configuration.
 `multiplicity` can take on values `*` and `?`. Declaring `multiplicity="*"`
 indicates that the cell may appear any number of times in a runtime
 configuration. Setting `multiplicity="?"` indicates that the cell may only
-appear exactly 0 or 1 times in a runtime configuration. In both cases, the
-initial configuration will start with 0 instances of the cell collection.
+appear exactly 0 or 1 times in a runtime configuration. If there are no
+configuration variables present in the cell collection, the initial
+configuration will start with exactly 0 instances of the cell collection. If
+there are configuration variables present in the cell collection, the initial
+configuration will start with exactly 1 instance of the cell collection.
 
 `type` can take on values `Set`, `List`, and `Map`. For example, here we declare
 several collecion cells:
@@ -534,13 +537,14 @@ cell collection in all cases.
 
 Declaring `type="Map"` indicates that the first sub-cell will be used as a
 cell-key. This means that matching on those cells will be done as a map-lookup
-operation, so rules which match on the subcells _must_ mention the cell-key.
-Note that there is no special meaning to the name of the cells (in this case
-`<map>`, `<map-key>`, `<map-value-1>`, and `<map-value-2>`). Additionally, any
-number of sub-cells are allowed, and the _entire_ instance of the cell
-collection is considered part of the cell-value, including the cell-key
-(`<map-key>` in this case) and the surrounding collection cell (`<map>` in this
-case).
+operation if the cell-key is mentioned in the rule (for performance). If the
+cell-key is not mentioned, it will fallback to normal nondeterministic
+constrained by other parts of the match and any side-conditions. Note that there
+is no special meaning to the name of the cells (in this case `<map>`,
+`<map-key>`, `<map-value-1>`, and `<map-value-2>`). Additionally, any number of
+sub-cells are allowed, and the _entire_ instance of the cell collection is
+considered part of the cell-value, including the cell-key (`<map-key>` in this
+case) and the surrounding collection cell (`<map>` in this case).
 
 For example, the following rules introduce, set, retrieve from, and eliminate
 `type="Map"` cells:
@@ -568,7 +572,8 @@ rule <k> eliminate-map(I:Int) => . ... </k>
 Note how each rule makes sure that `<map-key>` cell is mentioned, and we
 continue to use `.Bag` to indicate the empty collection. Also note that
 when introducing new map elements, you may omit any of the sub-cells which are
-not the cell-key. In case you do omit sub-cells, they will recieve the default
+not the cell-key. In case you do omit sub-cells, you must use structural
+framing `...` to indicate the missing cells, they will receive the default
 value given in the `configuration ...` declaration.
 
 Rule Declaration
@@ -618,8 +623,8 @@ rules or multiple parameters, or side conditions. All of these are extensions
 we would like to support in the future, however.
 
 In the following, we use three examples to illustrate the behavior of `#fun`.
-We point out that the support for `#fun` is provided by the frontend, 
-not the backends. 
+We point out that the support for `#fun` is provided by the frontend, not the
+backends.
 
 The three examples are real examples borrowed or modified from existing language
 semantics.
@@ -645,7 +650,7 @@ semantics.
 This example is from the `beacon`
 semantics:https://github.com/runtimeverification/beacon-chain-spec/blob/master/b
 eacon-chain.k at line 302, with some modification for simplicity. Note how
-variables `C, R, E` are bound in the nested `#fun`. 
+variables `C, R, E` are bound in the nested `#fun`.
 
 *Example 3 (Matching a structure).*
 
@@ -1001,7 +1006,7 @@ The meaning of this cast at runtime is that if the term inside is of sort
 `Sort`, it should have it injection stripped away and the value inside is
 returned as a term of static sort `Sort`. However, if the term is of a
 different sort, it is an error and execution will get stuck. Thus the primary
-usefulness of this cast is to cast the return value of a function with a 
+usefulness of this cast is to cast the return value of a function with a
 greater sort down to a strictly smaller sort that you expect the return value
 of the function to have. For example:
 
