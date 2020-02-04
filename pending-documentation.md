@@ -492,7 +492,8 @@ configuration <k> $PGM:Pgm </k>
               <maps>
                 <map multiplicity="*" type="Map">
                   <map-key> 0:Int </map-key>
-                  <map-value> "":String </map-value>
+                  <map-value-1> "":String </map-value-1>
+                  <map-value-2> 0:Int     </map-value-2>
                 </map>
               </maps>
 ```
@@ -533,23 +534,41 @@ cell collection in all cases.
 Declaring `type="Map"` indicates that the first sub-cell will be used as a
 cell-key. This means that matching on those cells will be done as a map-lookup
 operation, so rules which match on the subcells _must_ mention the cell-key.
+Note that there is no special meaning to the name of the cells (in this case
+`<map>`, `<map-key>`, `<map-value-1>`, and `<map-value-2>`). Additionally, any
+number of sub-cells are allowed, and the _entire_ instance of the cell
+collection is considered part of the cell-value, including the cell-key
+(`<map-key>` in this case) and the surrounding collection cell (`<map>` in this
+case).
 
-For example, the following rules introduce, retrieve from, and eliminate
+For example, the following rules introduce, set, retrieve from, and eliminate
 `type="Map"` cells:
 
 ```k
 rule <k> introduce-map(I:Int) => . ... </k>
      <maps> ... (.Bag => <map> <map-key> I </map-key> ... </map>) ... </maps>
 
-rule <k> retrieve-map(I:Int) => S ... </k>
-     <map> <map-key> I </map-key> <map-value> S </map-value> </map>
+rule <k> set-map-value-1(I:Int, S:String) => . ... </k>
+     <map> <map-key> I </map-key> <map-value-1> _ => S </map-value-1> ... </map>
+
+rule <k> set-map-value-2(I:Int, V:Int) => . ... </k>
+     <map> <map-key> I </map-key> <map-value-2> _ => V </map-value-2> ... </map>
+
+rule <k> retrieve-map-value-1(I:Int) => S ... </k>
+     <map> <map-key> I </map-key> <map-value-1> S </map-value-1> ... </map>
+
+rule <k> retrieve-map-value-2(I:Int) => V ... </k>
+     <map> <map-key> I </map-key> <map-value-2> V </map-value-2> ... </map>
 
 rule <k> eliminate-map(I:Int) => . ... </k>
      <maps> ... (<map> <map-key> I </map-key> ... </map> => .Bag) ... </maps>
 ```
 
 Note how each rule makes sure that `<map-key>` cell is mentioned, and we
-continue to use `.Bag` to indicate the empty collection.
+continue to use `.Bag` to indicate the empty collection. Also note that
+when introducing new map elements, you may omit any of the sub-cells which are
+not the cell-key. In case you do omit sub-cells, they will recieve the default
+value given in the `configuration ...` declaration.
 
 Rule Declaration
 ----------------
