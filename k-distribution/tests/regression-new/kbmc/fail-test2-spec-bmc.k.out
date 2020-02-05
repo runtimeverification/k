@@ -8,7 +8,13 @@
   </T>
 #And
   {
-    X <Int 0
+    X >=Int 0
+  #Equals
+    true
+  }
+#And
+  {
+    X >Int 5
   #Equals
     true
   }
