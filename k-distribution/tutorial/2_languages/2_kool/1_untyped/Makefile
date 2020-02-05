@@ -3,5 +3,8 @@ DEF=kool-untyped
 EXT=kool
 KRUN_FLAGS=--output none
 
+%/threads.kool: kompile
+	true
+
 include $(MAKEFILE_PATH)/../../../find-k.mak
 include ${K_HOME}/include/ktest.mak
