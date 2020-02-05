@@ -182,6 +182,13 @@ def isKDefinition(k):
 def isCellKLabel(label):
     return len(label) > 1 and label[0] == "<" and label[-1] == ">"
 
+def getAttribute(k, key):
+    if 'att' in k.keys() and isKAtt(k['att']):
+        katts = k['att']['att']
+        if key in katts.keys():
+            return katts[key]
+        return None
+
 def addAttributes(kast, att):
     if isKAtt(kast):
         return KAtt(combineDicts(att, kast['att']))
