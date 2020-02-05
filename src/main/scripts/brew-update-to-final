@@ -1,5 +1,5 @@
 #!/bin/sh -exu
-REV=$(cd .. && git rev-parse --short HEAD)
+REV=$(cd .. && git rev-parse --short=7 HEAD)
 sed -i "" -e 's!^  url ".*"$!  url "'$ROOT_URL/v$VERSION-$REV/$PACKAGE-$VERSION-src'.tar.gz"!' \
     Formula/$PACKAGE.rb
 git commit Formula/$PACKAGE.rb -m "Update $PACKAGE to $REV: part 3"
