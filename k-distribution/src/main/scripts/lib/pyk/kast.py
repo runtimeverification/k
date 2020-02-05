@@ -194,9 +194,11 @@ def addAttributes(kast, att):
         return KAtt(combineDicts(att, kast['att']))
     if isKRule(kast):
         return KRule(kast['body'], requires = kast['requires'], ensures = kast['ensures'], att = addAttributes(kast['att'], att))
+    if isKProduction(kast):
+        return KProduction(kast['productionItems'], kast['sort'], att = addAttributes(kast['att'], att))
     else:
-        notif('Do not know how to add attributes to KAST!')
-        sys.stderr.write(kast)
+        _notif('Do not know how to add attributes to KAST!')
+        sys.stderr.write(str(kast))
         sys.stderr.flush()
         sys.exit(1)
 
