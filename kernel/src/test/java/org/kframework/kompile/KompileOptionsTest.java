@@ -69,8 +69,8 @@ public class KompileOptionsTest {
     @Test
     public void testTransitionSpaceSeparator() {
         parse("--transition", "foo bar", "foo.k");
-        assertEquals(2, options.transition.size());
-        assertTrue(options.transition.contains("foo"));
-        assertTrue(options.transition.contains("bar"));
+        assertEquals(2, options.experimental.transition.size());
+        assertTrue(options.experimental.transition.contains("foo"));
+        assertTrue(options.experimental.transition.contains("bar"));
     }
 }
