@@ -5,10 +5,10 @@ Statistics
 ==========
 
 Objects created:
-   C |-> 1
    Main |-> 1
+   C |-> 1
 
 Methods invoked:
+   Main.Main |-> 1
    C.C |-> 1
    C.g |-> 1
-   Main.Main |-> 1

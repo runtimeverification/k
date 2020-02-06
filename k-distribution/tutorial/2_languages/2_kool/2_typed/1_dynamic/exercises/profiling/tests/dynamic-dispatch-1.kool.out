@@ -5,14 +5,14 @@ Statistics
 ==========
 
 Objects created:
-   C1 |-> 1
-   C2 |-> 1
    Main |-> 1
+   C2 |-> 1
+   C1 |-> 1
 
 Methods invoked:
-   C1.C1 |-> 1
    C1.m1 |-> 2
+   C1.C1 |-> 1
    C1.m2 |-> 2
-   C2.C2 |-> 1
    C2.m1 |-> 2
    Main.Main |-> 1
+   C2.C2 |-> 1
