@@ -1,6 +1,6 @@
 module TEST
   imports STRING
-  
+
   syntax KItem ::= foo(X)
 
   syntax X ::= String [klabel(bar)]
