@@ -96,8 +96,11 @@ public class PrintOptions {
     @Parameter(names={"--output-tokast"}, listConverter=StringListConverter.class, description="KLabels to output as KAST tokens.")
     public List<String> tokastKLabels = new ArrayList<String>();
 
-    @Parameter(names={"--no-alpha-renaming"}, listConverter=StringListConverter.class, description="KLabels to output as KAST tokens.")
+    @Parameter(names={"--no-alpha-renaming"}, listConverter=StringListConverter.class, description="Do not alpha rename anonymous variables in output.")
     public boolean noAlphaRenaming = false;
+
+    @Parameter(names={"--no-substitution-filtering"}, listConverter=StringListConverter.class, description="Do not remove conjuncts of anonymous variables from substitution in output.")
+    public boolean noFilterSubstitution = false;
 
     @Parameter(names={"--restore-original-names"}, listConverter=StringListConverter.class, description="Restore original variable names when provided by attributes.")
     public boolean restoreOriginalNames = false;
