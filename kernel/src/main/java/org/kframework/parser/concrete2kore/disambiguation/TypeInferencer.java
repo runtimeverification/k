@@ -747,13 +747,14 @@ public class TypeInferencer implements AutoCloseable {
       String result;
       do {
         result = output.readLine();
-      } while (!result.equals("sat") && !result.equals("unsat") && !result.equals("unknown") && !result.startsWith("(error"));
+      } while (!result.equals("sat") && !result.equals("unsat") && !result.equals("unknown") && !result.equals("timeout") && !result.startsWith("(error"));
       switch (result) {
       case "sat":
         return Status.SATISFIABLE;
       case "unsat":
         return Status.UNSATISFIABLE;
       case "unknown":
+      case "timeout":
         return Status.UNKNOWN;
       default:
         throw KEMException.internalError("Unexpected result from z3: " + result);
