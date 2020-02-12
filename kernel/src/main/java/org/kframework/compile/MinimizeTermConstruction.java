@@ -93,10 +93,21 @@ public class MinimizeTermConstruction {
         new RewriteAwareVisitor(body, new HashSet<>()) {
             @Override
             public void apply(K k) {
-                if (isLHS() && !isRHS() && !(k instanceof KVariable)) {
+                if (isLHS() && !isRHS() && !(k instanceof KVariable) && !atTop) {
                     cache.put(k, newDotVariable(sorts.sort(k, Sorts.K())));
                 }
+                atTop = false;
                 super.apply(k);
+            }
+
+            boolean atTop = false;
+
+            @Override
+            public void apply(KRewrite rew) {
+              if (rew == term) {
+                atTop = true;
+              }
+              super.apply(rew);
             }
 
             @Override
