@@ -543,6 +543,12 @@ public class TypeInferencer implements AutoCloseable {
               expectedSort = getSortOfCast(tc);
               isStrictEquality = tc.production().klabel().get().name().equals("#SyntacticCast")
                   || tc.production().klabel().get().name().equals("#InnerCast");
+              if (tc.get(0) instanceof Constant) {
+                Constant child = (Constant)tc.get(0);
+                if (child.production().sort().equals(Sorts.KVariable()) || child.production().sort().equals(Sorts.KConfigVar())) {
+                  isStrictEquality = true;
+                }
+              }
             } else if (isTopSort && j == 0 && isFunction(tc.get(j), isAnywhere)) {
               expectedSort = getFunctionSort(tc.get(j));
               expectedParams = Optional.of(getFunction(tc.get(j)).get());
