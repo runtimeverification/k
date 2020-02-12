@@ -17,6 +17,7 @@ import org.kframework.definition.DefinitionTransformer;
 import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
+import org.kframework.kil.Import;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.Sort;
@@ -29,6 +30,7 @@ import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.parser.concrete2kore.kernel.Scanner;
 import org.kframework.parser.outer.Outer;
 import org.kframework.utils.BinaryLoader;
+import org.kframework.utils.Stopwatch;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -68,6 +70,7 @@ public class DefinitionParsing {
     private final KExceptionManager kem;
     private final FileUtil files;
     private final ParserUtils parser;
+    private final Stopwatch sw;
     private final boolean cacheParses;
     private final BinaryLoader loader;
 
@@ -83,6 +86,7 @@ public class DefinitionParsing {
             KExceptionManager kem,
             FileUtil files,
             ParserUtils parser,
+            Stopwatch sw,
             boolean cacheParses,
             File cacheFile) {
         this.lookupDirectories = lookupDirectories;
@@ -90,6 +94,7 @@ public class DefinitionParsing {
         this.kem = kem;
         this.files = files;
         this.parser = parser;
+        this.sw = sw;
         this.cacheParses = cacheParses;
         this.cacheFile = cacheFile;
         this.autoImportDomains = !options.outerParsing.noPrelude;
@@ -170,6 +175,9 @@ public class DefinitionParsing {
                 parsedDefinition.att());
         trimmed = Kompile.excludeModulesByTag(excludedModuleTags).apply(trimmed);
         Definition afterResolvingConfigBubbles = resolveConfigBubbles(trimmed, parsedDefinition.getModule("DEFAULT-CONFIGURATION").get());
+        sw.printIntermediate("Parse configurations [" + parsedBubbles.get() + "/" + (parsedBubbles.get() + cachedBubbles.get()) + " rules]");
+        parsedBubbles.set(0);
+        cachedBubbles.set(0);
         RuleGrammarGenerator gen = new RuleGrammarGenerator(afterResolvingConfigBubbles);
         Definition afterResolvingAllOtherBubbles = resolveNonConfigBubbles(afterResolvingConfigBubbles, gen);
         saveCachesAndReportParsingErrors();
@@ -257,8 +265,12 @@ public class DefinitionParsing {
         if (stream(module.localSentences())
                 .filter(s -> s instanceof Bubble)
                 .map(b -> (Bubble) b)
-                .filter(b -> !b.sentenceType().equals("config")).count() == 0)
+                .filter(b -> !b.sentenceType().equals("config")).count() == 0) {
+            if (!module.name().endsWith(Import.IMPORTS_SYNTAX_SUFFIX)) {
+                sw.printIntermediate("Parse " + module.name() + " [0/0 rules]");
+            }
             return module;
+        }
 
         Module ruleParserModule = gen.getRuleGrammar(module);
 
@@ -303,8 +315,12 @@ public class DefinitionParsing {
                 realScanner.close();//required for Windows.
             }
 
-            return Module(module.name(), module.imports(),
+            Module result = Module(module.name(), module.imports(),
                     stream((Set<Sentence>) module.localSentences().$bar(ruleSet).$bar(contextSet).$bar(aliasSet)).filter(b -> !(b instanceof Bubble)).collect(Collections.toSet()), module.att());
+            sw.printIntermediate("Parse " + module.name() + " [" + parsedBubbles.get() + "/" + (parsedBubbles.get() + cachedBubbles.get()) + " rules]");
+            parsedBubbles.set(0);
+            cachedBubbles.set(0);
+            return result;
         }
     }
 
