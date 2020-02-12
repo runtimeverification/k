@@ -161,7 +161,7 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
 
       def merge(map1: Map[KLabel, Int], map2: Map[KLabel, Int]) = mergeMultiset(map1, map2)
     }
-    rules.map(r => {
+    localRules.map(r => {
       mergeMultiset(transformer.apply(r.body), mergeMultiset(transformer.apply(r.requires), transformer.apply(r.ensures)))
     }).fold(Map())(mergeMultiset)
   }

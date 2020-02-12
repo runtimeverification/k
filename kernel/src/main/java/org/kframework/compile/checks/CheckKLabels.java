@@ -45,6 +45,26 @@ public class CheckKLabels {
     private final Map<KLabel, Module> klabels = new HashMap<>();
     private final Map<String, Production> klabelProds = new HashMap<>();
 
+    private static final File _KAST_K = JarInfo.getKIncludeDir().resolve("builtin").resolve("kast.k").toFile();
+    private static final File _DOMAINS_K = JarInfo.getKIncludeDir().resolve("builtin").resolve("domains.k").toFile();
+    public static final File KAST_K, DOMAINS_K;
+    static {
+        File kast, domains;
+        try {
+            kast = _KAST_K.getCanonicalFile();
+        } catch (IOException e) {
+            kast = _KAST_K;
+        }
+        KAST_K = kast;
+        try {
+            domains = _DOMAINS_K.getCanonicalFile();
+        } catch (IOException e) {
+            domains = _DOMAINS_K;
+        }
+        DOMAINS_K = domains;
+    }
+
+
     public void check(Sentence sentence, Module m) {
         VisitK checkKLabels = new VisitK() {
             @Override
@@ -83,11 +103,7 @@ public class CheckKLabels {
                 if (klabels.containsKey(klabel) && !m.equals(klabels.get(klabel)) && !kore) {
                     errors.add(KEMException.compilerError("KLabel " + klabel.name() + " defined in multiple modules: " + klabels.get(klabel).name() + " and " + m.name() + ".", prod));
                 }
-                File kast_k = JarInfo.getKIncludeDir().resolve("builtin").resolve("kast.k").toFile();
-                try {
-                    kast_k = kast_k.getCanonicalFile();
-                } catch (IOException e) {}
-                if (klabelProds.containsKey(klabel.name()) && kore && !prod.att().get(Source.class).source().equals(kast_k.getAbsolutePath())) {
+                if (klabelProds.containsKey(klabel.name()) && kore && !prod.att().get(Source.class).source().equals(KAST_K.getAbsolutePath())) {
                     errors.add(KEMException.compilerError("Symbol " + klabel.name() + " is not unique. Previously defined as: " + klabelProds.get(klabel.name()), prod));
                 }
                 klabels.put(klabel, m);
