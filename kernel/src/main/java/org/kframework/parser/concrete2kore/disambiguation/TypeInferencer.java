@@ -300,6 +300,8 @@ public class TypeInferencer implements AutoCloseable {
     println("(push)");
     // soft assertions to cut down search space
     for (String var : variables) {
+      if (mod.allSorts().contains(Sorts.K()))
+        println("(assert-soft ( <=Sort SortK |" + var + "|) :id A)");
       if (mod.allSorts().contains(Sorts.KItem()))
         println("(assert-soft ( <=Sort SortKItem |" + var + "|) :id A)");
       if (mod.allSorts().contains(Sorts.Bag()))
@@ -543,6 +545,12 @@ public class TypeInferencer implements AutoCloseable {
               expectedSort = getSortOfCast(tc);
               isStrictEquality = tc.production().klabel().get().name().equals("#SyntacticCast")
                   || tc.production().klabel().get().name().equals("#InnerCast");
+              if (tc.get(0) instanceof Constant) {
+                Constant child = (Constant)tc.get(0);
+                if (child.production().sort().equals(Sorts.KVariable()) || child.production().sort().equals(Sorts.KConfigVar())) {
+                  isStrictEquality = true;
+                }
+              }
             } else if (isTopSort && j == 0 && isFunction(tc.get(j), isAnywhere)) {
               expectedSort = getFunctionSort(tc.get(j));
               expectedParams = Optional.of(getFunction(tc.get(j)).get());
@@ -741,13 +749,14 @@ public class TypeInferencer implements AutoCloseable {
       String result;
       do {
         result = output.readLine();
-      } while (!result.equals("sat") && !result.equals("unsat") && !result.equals("unknown") && !result.startsWith("(error"));
+      } while (!result.equals("sat") && !result.equals("unsat") && !result.equals("unknown") && !result.equals("timeout") && !result.startsWith("(error"));
       switch (result) {
       case "sat":
         return Status.SATISFIABLE;
       case "unsat":
         return Status.UNSATISFIABLE;
       case "unknown":
+      case "timeout":
         return Status.UNKNOWN;
       default:
         throw KEMException.internalError("Unexpected result from z3: " + result);
