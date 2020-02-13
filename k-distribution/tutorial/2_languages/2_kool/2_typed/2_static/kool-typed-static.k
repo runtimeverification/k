@@ -377,6 +377,7 @@ typed SIMPLE, so we do not discuss them much here. */
   syntax LValue ::= Id
                   | FieldReference
                   | ArrayReference
+  syntax Exp ::= LValue
 
   syntax Exp ::= ltype(Exp)
 // We would like to say:
