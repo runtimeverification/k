@@ -52,14 +52,15 @@ public class AddEmptyLists extends SetsGeneralTransformer<KEMException, KEMExcep
     private final scala.collection.Set<Sort> listSorts;
     private final Map<Sort, List<UserList>> lists;
     private final AddSortInjections inj;
-    private Sort expectedSort = Sorts.RuleContent();
+    private Sort expectedSort;
 
-    public AddEmptyLists(Module m) {
+    public AddEmptyLists(Module m, Sort expectedSort) {
         this.m = m;
         subsorts = m.subsorts();
         listSorts = m.listSorts();
         lists = UserList.getLists(mutable(m.sentences())).stream().collect(Collectors.groupingBy(p -> p.sort));
         inj = new AddSortInjections(m);
+        this.expectedSort = expectedSort;
     }
 
     @Override
