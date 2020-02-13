@@ -89,6 +89,9 @@ public class KompileOptions implements Serializable {
     @Parameter(names="-O3", description="Optimize aggressively in ways that significantly improve performance, but interfere with debugging significantly and also increase compilation time and code size substantially.")
     public boolean optimize3;
 
+    @Parameter(names="-j", description="Parse modules in parallel. This can cause rules to be parsed multiple times, so it is sometimes slower on definitions with relatively few modules, but can be dramatically faster on definitions with lots of modules each containing few rules.")
+    public boolean parallelModules;
+
     @ParametersDelegate
     public Experimental experimental = new Experimental();
 

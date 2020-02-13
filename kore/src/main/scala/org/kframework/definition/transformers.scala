@@ -78,6 +78,18 @@ class ModuleTransformer(f: Module => Module, name: String) extends (Module => Mo
   }
 }
 
+class ParModuleTransformer(f: Module => Module, name: String) extends ModuleTransformer(f, name) {
+  override def apply(input: Module): Module = {
+    memoization.getOrElseUpdate(input, {
+      var newImports = input.imports.par map this
+      if (newImports != input.imports)
+        f(Module(input.name, newImports.seq, input.localSentences, input.att))
+      else
+        f(input)
+    })
+  }
+}
+
 object DefinitionTransformer {
   def fromSentenceTransformer(f: java.util.function.UnaryOperator[Sentence], name: String): DefinitionTransformer =
     DefinitionTransformer(ModuleTransformer.fromSentenceTransformer(f, name))
@@ -99,6 +111,8 @@ object DefinitionTransformer {
 
   def from(f: Module => Module, name: String): DefinitionTransformer = DefinitionTransformer(f, name)
 
+  def parFrom(f: Module => Module, name: String): ParDefinitionTransformer = new ParDefinitionTransformer(new ParModuleTransformer(f, name))
+
   def apply(f: Module => Module): DefinitionTransformer = new DefinitionTransformer(f)
 
   def apply(f: Module => Module, name: String): DefinitionTransformer = new DefinitionTransformer(ModuleTransformer(f, name))
@@ -112,5 +126,15 @@ class DefinitionTransformer(moduleTransformer: Module => Module) extends (Defini
       d.att)
   }
 }
+
+class ParDefinitionTransformer(moduleTransformer: Module => Module) extends (Definition => Definition) {
+  override def apply(d: Definition): Definition = {
+    definition.Definition(
+      moduleTransformer(d.mainModule),
+      d.entryModules.par map moduleTransformer seq,
+      d.att)
+  }
+}
+
 
 
