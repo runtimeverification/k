@@ -20,7 +20,7 @@ class TreeNodesToKORE(parseSort: java.util.function.Function[String, Sort], stri
 
   def apply(t: Term): K = t match {
     case c@Constant(s, p) => KToken(s, p.sort, locationToAtt(c.location, c.source))
-    case t@TermCons(items, p) => termConsToKApply(t, items, p)
+    case t@TermCons(_, _) => termConsToKApply(t)
     case Ambiguity(items) => KApply(KLabel("amb"), KList(items.asScala.toList map apply asJava), Att)
   }
 
@@ -29,21 +29,23 @@ class TreeNodesToKORE(parseSort: java.util.function.Function[String, Sort], stri
     if (strict) KApply(lbl, KList(KToken("_", Sorts.KVariable)), Att.add(classOf[Production], Production(lbl, Seq(), sort, Seq(NonTerminal(sort, None))))) else KToken("_", Sorts.KVariable)
   }
 
-  def termConsToKApply(t: TermCons, items: PStack[Term], p: Production): KApply = {
-    if (p.att.contains("recordPrd", classOf[Production])) {
-      val realProd = p.att.get("recordPrd", classOf[Production])
-      val map = new util.ArrayList(items).asScala.reverse.zipWithIndex.map { case (item, idx) => (p.nonterminal(idx).name.get, apply(item))} toMap
+  def termConsToKApply(t: TermCons): K = {
+    if (t.production.att.contains("recordPrd", classOf[Production])) {
+      val realProd = t.production.att.get("recordPrd", classOf[Production])
+      val map = t.items.asScala.reverse.zipWithIndex.map { case (item, idx) => (t.production.nonterminal(idx).name.get, apply(item))} toMap
       val realItems = realProd.nonterminals.map {
         case NonTerminal(sort, None) => anonVar(sort)
         case NonTerminal(sort, Some(x)) => map.getOrElse(x, anonVar(sort))
       }
-      KApply(p.klabel.get.head, KList(realItems.asJava), locationToAtt(t.location, t.source).add(classOf[Production], realProd))
+      KApply(t.production.klabel.get.head, KList(realItems.asJava), locationToAtt(t.location, t.source).add(classOf[Production], realProd))
     } else {
-      val realProd = if (p.att.contains("originalPrd", classOf[Production])) p.att.get("originalPrd", classOf[Production]) else p
-      if (p.klabel.isEmpty)
-        throw KEMException.internalError("Missing klabel in production: " + p, t)
-      val klabel = if (p.klabel.get.name == "#OuterCast") KLabel("project:" ++ p.sort.toString) else p.klabel.get
-      KApply(klabel.head, KList(new util.ArrayList(items).asScala.reverse map apply asJava), locationToAtt(t.location, t.source).add(classOf[Production], realProd))
+      val realProd = if (t.production.att.contains("originalPrd", classOf[Production])) t.production.att.get("originalPrd", classOf[Production]) else t.production
+      if (t.production.att.contains("bracket"))
+        return apply(t.items.get(0))
+      if (t.production.klabel.isEmpty)
+        throw KEMException.internalError("Missing klabel in production: " + t.production, t)
+      val klabel = if (t.production.klabel.get.name == "#OuterCast") KLabel("project:" ++ t.production.sort.toString) else t.production.klabel.get
+      KApply(klabel.head, KList(t.items.asScala.reverse map apply asJava), locationToAtt(t.location, t.source).add(classOf[Production], realProd))
     }
   }
 
