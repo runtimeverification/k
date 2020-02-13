@@ -118,12 +118,12 @@ public class ModuleToKORE {
         priorities.add(200);
         collectTokenSortsAndAttributes(tokenSorts, attributes, priorities);
         Map<Integer, String> priorityToPreviousGroup = new HashMap<>();
-        List<Integer> prioritiesList = new ArrayList<>(priorities);
-        java.util.Collections.sort(prioritiesList);
-        priorityToPreviousGroup.put(prioritiesList.get(0), "");
-        for (int i = 1; i < prioritiesList.size(); i++) {
-            Integer previous = prioritiesList.get(i - 1);
-            Integer current = prioritiesList.get(i);
+        List<Integer> priorityList = new ArrayList<>(priorities);
+        java.util.Collections.sort(priorityList);
+        priorityToPreviousGroup.put(priorityList.get(0), "");
+        for (int i = 1; i < priorityList.size(); i++) {
+            Integer previous = priorityList.get(i - 1);
+            Integer current = priorityList.get(i);
             priorityToPreviousGroup.put(current, String.format("priorityLE%d", previous));
         }
 
@@ -215,7 +215,7 @@ public class ModuleToKORE {
         }
 
         sb.append("\n// priority groups\n");
-        genPriorityGroups(prioritiesList, priorityToPreviousGroup, priorityToAlias, topCellSortStr, sb);
+        genPriorityGroups(priorityList, priorityToPreviousGroup, priorityToAlias, topCellSortStr, sb);
         sb.append("endmodule ");
         convert(attributes, module.att(), sb);
         sb.append("\n");
@@ -1048,11 +1048,9 @@ public class ModuleToKORE {
                                    Map<Integer, String> priorityToPreviousGroup,
                                    ListMultimap<Integer, String> priorityToAlias,
                                    String topCellSortStr, StringBuilder sb) {
-        for (Integer priority : priorityList) {
-            // no need to generate alias for priorityLE200, since it is the last group.
-            if (priority == 200) {
-                continue;
-            }
+        // skip generating alias for the last priority group
+        for (int index = 0; index < priorityList.size()-1; index++) {
+            Integer priority = priorityList.get(index);
             String priorityGroupName = String.format("priorityLE%d", priority);
             sb.append(String.format("  alias %s{}() : %s", priorityGroupName, topCellSortStr));
             sb.append(String.format("\n  where %s{}() := ", priorityGroupName));
