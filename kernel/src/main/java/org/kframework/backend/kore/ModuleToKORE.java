@@ -1049,6 +1049,10 @@ public class ModuleToKORE {
                                    ListMultimap<Integer, String> priorityToAlias,
                                    String topCellSortStr, StringBuilder sb) {
         for (Integer priority : priorityList) {
+            // no need to generate alias for priorityLE200, since it is the last group.
+            if (priority == 200) {
+                continue;
+            }
             String priorityGroupName = String.format("priorityLE%d", priority);
             sb.append(String.format("  alias %s{}() : %s", priorityGroupName, topCellSortStr));
             sb.append(String.format("\n  where %s{}() := ", priorityGroupName));
