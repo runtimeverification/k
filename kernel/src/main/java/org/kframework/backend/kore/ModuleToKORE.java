@@ -881,10 +881,15 @@ public class ModuleToKORE {
         } else if (!ExpandMacros.isMacro(rule)) {
             Boolean isRuleClaim = isClaim(sentenceType);
             // generate rule LHS
-            if (!isRuleClaim && !owise) {
+            if (!isRuleClaim) {
+                // LHS for semantics rules
                 String ruleAliasName = String.format("rule%dLHS", ruleIndex);
                 // default priority for semantics rules is 50
                 Integer priority = Integer.valueOf(rule.att().getOptional("priority").orElse("50"));
+                // priority for owise rule is 200
+                if(owise) {
+                    priority = 200;
+                }
                 List<KVariable> freeVars = new ArrayList<>(collectLHSFreeVariables(requires, left));
                 Comparator<KVariable> compareByName = (KVariable v1, KVariable v2) -> v1.name().compareTo(v2.name());
                 java.util.Collections.sort(freeVars, compareByName);
@@ -897,25 +902,9 @@ public class ModuleToKORE {
                         priorityToPreviousGroup.get(priority), sb);
                 sb.append(",\n    ");
             } else {
-                if (isRuleClaim) {
-                    sb.append("  claim{} ");
-                } else {
-                    sb.append("  axiom{} ");
-                }
-
-                if (owise) {
-                    // hack to deal with the strategy axiom for now
-                    sb.append(String.format("\\implies{%s}(\\bottom{%s}(),",
-                            topCellSortStr, topCellSortStr));
-                }
-
-                if (isRuleClaim) {
-                    sb.append("\\implies");
-                } else {
-                    sb.append("\\rewrites");
-                }
-
-                sb.append(String.format("{%s} (\n    ", topCellSortStr));
+                // LHS for claims
+                sb.append("  claim{} ");
+                sb.append(String.format("\\implies{%s} (\n    ", topCellSortStr));
                 sb.append(String.format("  \\and{%s} (\n      ", topCellSortStr));
                 convertSideCondition(requires, topCellSortStr, sb);
                 sb.append(", ");
@@ -949,9 +938,6 @@ public class ModuleToKORE {
                 sb.append(')');
             }
             sb.append(')');
-            if (owise) {
-                sb.append(')');
-            }
             sb.append("\n  ");
             convert(consideredAttributes, rule.att(), sb);
             sb.append("\n\n");
