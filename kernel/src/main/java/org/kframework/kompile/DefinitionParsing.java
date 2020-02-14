@@ -249,11 +249,8 @@ public class DefinitionParsing {
         Module ruleParserModule = gen.getRuleGrammar(defWithConfig.mainModule());
         ParseCache cache = loadCache(ruleParserModule);
         try (ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), isStrict, profileRules, files)) {
-            if (options.parallelModules) {
-                return DefinitionTransformer.parFrom(m -> this.resolveNonConfigBubbles(m, parser.getScanner(), gen), "parsing rules").apply(defWithConfig);
-            } else {
-                return DefinitionTransformer.from(m -> this.resolveNonConfigBubbles(m, parser.getScanner(), gen), "parsing rules").apply(defWithConfig);
-            }
+            Map<String, Module> parsed = defWithConfig.parMap(m -> this.resolveNonConfigBubbles(m, parser.getScanner(), gen));
+            return DefinitionTransformer.from(m -> Module(m.name(), m.imports(), parsed.get(m.name()).localSentences(), m.att()), "parsing rules").apply(defWithConfig);
         }
     }
 
