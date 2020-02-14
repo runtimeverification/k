@@ -139,6 +139,9 @@ public class AddEmptyLists extends SetsGeneralTransformer<KEMException, KEMExcep
     }
 
     private Sort getSort(ProductionReference child, Sort expectedSort) {
+        if (m.syntacticSubsorts().greaterThan(expectedSort, Sorts.K())) {
+            expectedSort = Sorts.K();
+        }
         return inj.substituteProd(child.production(), expectedSort, (i, fresh) -> getSort((ProductionReference)((TermCons)child).get(i), fresh.nonterminals().apply(i).sort()), child).sort();
     }
 
