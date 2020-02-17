@@ -221,6 +221,14 @@ public class AddSortInjections {
         }
     }
 
+    /**
+     * Generate the substituted production with its sort parameters added for a parametric production.
+     * @param prod The production to add sort parameters to.
+     * @param expectedSort the sort context where the term with the specified production appears.
+     * @param getSort a function taking the 0-based index of the child of this production and the substitutedFresh production and returning the sort of the child.
+     * @param loc The location to report upon an error.
+     * @return The production substituted with the least upper bounds of its sort parameters based on its children's sorts.
+     */
     public Production substituteProd(Production prod, Sort expectedSort, BiFunction<Integer, Production, Sort> getSort, HasLocation loc) {
         Production substituted = prod;
         List<Sort> args = new ArrayList<>();
