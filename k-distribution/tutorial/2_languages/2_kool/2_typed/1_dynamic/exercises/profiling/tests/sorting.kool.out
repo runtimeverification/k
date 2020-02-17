@@ -26,11 +26,11 @@ Objects created:
 
 Methods invoked:
    Main.Main |-> 1
-   Main.map |-> 1
    Sorting.Sorting |-> 1
-   Sorting.bubbleSort |-> 1
-   Sorting.heapSort |-> 1
-   Sorting.insertionSort |-> 1
-   Sorting.printArray |-> 5
-   Sorting.reverse |-> 3
+   Main.map |-> 1
    Sorting.siftDown |-> 5
+   Sorting.bubbleSort |-> 1
+   Sorting.insertionSort |-> 1
+   Sorting.reverse |-> 3
+   Sorting.printArray |-> 5
+   Sorting.heapSort |-> 1
