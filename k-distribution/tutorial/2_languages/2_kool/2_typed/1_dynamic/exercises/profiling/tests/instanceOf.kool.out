@@ -8,16 +8,16 @@ Statistics
 ==========
 
 Objects created:
-   C |-> 1
-   C1 |-> 1
-   C2 |-> 1
-   C3 |-> 1
    Main |-> 1
+   C3 |-> 1
+   C |-> 1
+   C2 |-> 1
+   C1 |-> 1
 
 Methods invoked:
    C.C |-> 1
-   C.test |-> 4
    C1.C1 |-> 1
-   C2.C2 |-> 1
+   C.test |-> 4
    C3.C3 |-> 1
    Main.Main |-> 1
+   C2.C2 |-> 1

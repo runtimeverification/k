@@ -1052,7 +1052,7 @@ module STDIN-STREAM
        ListItem(#istream(N:Int))
        </stdin>
     requires findChar(S, Delimiters, 0) ==Int -1 // [stdin]
-       [stream]
+       [stream, priority(200)]
 
   // when we reach whitespace, if it parses create a ListItem
   rule [stdinParseString]:
@@ -1147,7 +1147,7 @@ module STDOUT-STREAM
        _:List
        </stdout>
        // [stdout, stderr]
-       [stream]
+       [stream, priority(25)]
   rule [stdoutBufferInt]:
        <stdout>
        ListItem(#ostream(_))
@@ -1157,7 +1157,7 @@ module STDOUT-STREAM
        _:List
        </stdout>
        // [stdout, stderr]
-       [stream]
+       [stream, priority(25)]
   rule [stdoutBufferString]:
        <stdout>
        ListItem(#ostream(_))
@@ -1167,7 +1167,7 @@ module STDOUT-STREAM
        _:List
        </stdout>
        // [stdout, stderr]
-       [stream]
+       [stream, priority(25)]
 
   // Send first char from the buffer to the server
   rule [stdoutWrite]:
@@ -1178,7 +1178,7 @@ module STDOUT-STREAM
        _:List
        </stdout>
     requires S =/=String "" // [stdout, stderr]
-       [stream]
+       [stream, priority(30)]
 
   /*
   syntax Stream ::= "#noIO"
