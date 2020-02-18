@@ -893,6 +893,52 @@ the LHS of a rule to mean the pattern above:
   rule inverseConvertType(cppEnumType, foo((cppEnumType #as T::CPPType => underlyingType(T))))
 ```
 
+### The `memo` attribute
+
+The `memo` attribute is a hint from the user to the backend to memoize a
+function. Not all backends support memoization, but when the attribute is used
+and the definition is compiled for a `memo`-supporting backend, then calls to
+the function may be cached. At the time of writing, the Haskell and OCaml
+backends support memoization.
+
+#### Limitations of memoization with the Haskell backend
+
+The Haskell backend will only cache a function call if all arguments are concrete.
+
+It is recommended not to memoize recursive functions, as each recursive call
+will be stored in the cache, but only the first iteration will be retrieved from
+the cache; that is, the cache will be filled with many unreachable
+entries. Instead, we recommend to perform a worker-wrapper transformation on
+recursive functions, and apply the `memo` attribute to the wrapper.
+
+**Warning:** A function declared with the `memo` attribute must not use
+uninterpreted functions in the side-condition of any rule. Memoizing such an
+impure function is unsound. To see why, consider the following rules:
+
+```
+syntax Bool ::= impure( Int ) [function]
+
+syntax Int ::= unsound( Int ) [function, memo]
+rule unsound(X:Int) => X +Int 1 requires impure(X)
+rule unsound(X:Int) => X        requires notBool impure(X)
+```
+
+Because the function `impure` is not given rules to cover all inputs, `unsound`
+can be memoized incoherently. For example,
+
+```
+{unsound(0) #And {impure(0) #Equals true}} #Equals 1
+```
+
+but
+
+```
+{unsound(0) #And {impure(0) #Equals false}} #Equals 0
+```
+
+The memoized value of `unsound(0)` would be incoherently determined by which
+pattern the backend encounters first.
+
 
 ### Variable Sort Inference
 
