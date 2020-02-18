@@ -5,16 +5,16 @@ Statistics
 ==========
 
 Objects created:
-   C2 |-> 1
    Main |-> 1
+   C2 |-> 1
 
 Methods invoked:
+   C2.sety2 |-> 1
    C1.getx1 |-> 1
    C1.gety1 |-> 1
-   C1.setx1 |-> 1
    C1.sety1 |-> 1
-   C2.C2 |-> 1
    C2.getx2 |-> 1
    C2.gety2 |-> 1
-   C2.sety2 |-> 1
+   C1.setx1 |-> 1
    Main.Main |-> 1
+   C2.C2 |-> 1
