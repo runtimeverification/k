@@ -4,21 +4,21 @@ package org.kframework.parser.concrete2kore.disambiguation;
 import com.google.common.collect.Sets;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Module;
-import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
-import org.kframework.definition.ProductionItem;
 import org.kframework.parser.Ambiguity;
 import org.kframework.parser.Constant;
 import org.kframework.parser.SetsTransformerWithErrors;
 import org.kframework.parser.Term;
 import org.kframework.parser.TermCons;
+import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
 import org.pcollections.ConsPStack;
 import org.pcollections.PStack;
-import scala.collection.Seq;
+import scala.collection.immutable.Set$;
 import scala.util.Either;
 import scala.util.Left;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -29,8 +29,8 @@ import static org.kframework.kore.KORE.*;
 
 /**
  * Transform the KApps found in a term into the corresponding TermCons so type checking and
- * variable type inference takes place correctly. Must be applied after priority filter but
- * before type inference.
+ * variable type inference takes place correctly. Must be applied between type inference and
+ * priority filter.
  */
 public class KAppToTermConsVisitor extends SetsTransformerWithErrors<KEMException> {
 
@@ -44,28 +44,28 @@ public class KAppToTermConsVisitor extends SetsTransformerWithErrors<KEMExceptio
     public Either<java.util.Set<KEMException>, Term> apply(TermCons tc) {
         assert tc.production() != null : this.getClass() + ":" + " production not found." + tc;
         if (tc.production().klabel().isDefined() && tc.production().klabel().get().name().equals("#KApply")) {
+            if (!(tc.items().get(1) instanceof Constant) || !((Constant) tc.items().get(1)).production().sort().equals(Sorts.KLabel()))
+                // TODO: maybe return a hidden warning?
+                return super.apply(tc); // don't do anything if the label is not a token KLabel (in case of variable or casted variable)
             Constant kl = (Constant) tc.items().get(1);
-            if (!kl.production().sort().equals(Sorts.KLabel())) {
-                String msg = "Expected klabel constant in KApp.";
-                return Left.apply(Sets.newHashSet(KEMException.innerParserError(msg, kl)));
-            }
-            // check if the label is defined and signature is unique
-            if (mod.productionsFor().get(KLabel(kl.value())).isEmpty()) {
-                String msg = "Could not find production for label " + kl.value();
-                return Left.apply(Sets.newHashSet(KEMException.innerParserError(msg, kl)));
-            } else if (mod.productionsFor().get(KLabel(kl.value())).get().size() > 1
-                    // only interested in the signatures to match
-                    && !isSignatureEqual(mutable(mod.productionsFor().get(KLabel(kl.value())).get()))) {
-                String msg = "Found multiple productions for label " + kl.value();
-                return Left.apply(Sets.newHashSet(KEMException.innerParserError(msg, kl)));
-            }
-            Production prd = mod.productionsFor().get(KLabel(kl.value())).get().head();
             PStack<Term> items = flattenKList(tc.items().get(0));
-            if (items.size() != prd.arity()) {
-                String msg = "Expected arity " + prd.arity() + " but found " + items.size() + " for label " + kl.value();
-                return Left.apply(Sets.newHashSet(KEMException.innerParserError(msg, tc)));
+            String klvalue = kl.value();
+            try { klvalue = StringUtil.unescapeKoreKLabel(kl.value()); } catch (IllegalArgumentException e) { /* ignore */ } // if possible, unescape
+            Set<Production> prods = mutable(mod.productionsFor().get(KLabel(klvalue))
+                    .getOrElse(Set$.MODULE$::emptyInstance)
+                    .filter(x -> ((Production) x).arity() == items.size()).toSet());
+            if (prods.size() == 0) {
+                String msg = "Could not find any production with arity " + items.size() + " for label " + kl.value();
+                return Left.apply(Sets.newHashSet(KEMException.innerParserError(msg, kl)));
+            } else if (prods.size() == 1)
+                return super.apply(TermCons.apply(items, prods.iterator().next(), tc.location(), tc.source()));
+            else {
+                // instantiate all labels found and let the type checker filter them out
+                Set<Term> tcs = new HashSet<>();
+                for (Production prd : prods)
+                    tcs.add(TermCons.apply(items, prd, tc.location(), tc.source()));
+                return super.apply(Ambiguity.apply(tcs, tc.location(), tc.source()));
             }
-            return super.apply(TermCons.apply(items, prd, tc.location(), tc.source()));
         }
         return super.apply(tc);
     }
@@ -95,18 +95,5 @@ public class KAppToTermConsVisitor extends SetsTransformerWithErrors<KEMExceptio
                 return ConsPStack.empty();
         }
         return ConsPStack.singleton(t);
-    }
-
-    /** Check if the signature of all the productions from the set are the same */
-    private static boolean isSignatureEqual(Set<Production> prods) {
-        Production head = prods.iterator().next();
-        Seq<ProductionItem> items = (Seq<ProductionItem>) head.items().filter(x -> x instanceof NonTerminal);
-        for (Production p : prods) {
-            if (!head.params().sameElements(p.params())) return false;
-            if (!head.sort().equals(p.sort())) return false;
-            if (head.arity() != p.arity()) return false;
-            if (items.sameElements((Seq<ProductionItem>) p.items().filter(x -> x instanceof NonTerminal))) return false;
-        }
-        return true;
     }
 }
