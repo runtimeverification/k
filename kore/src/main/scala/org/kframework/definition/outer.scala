@@ -53,6 +53,10 @@ case class Definition(
     case Definition(`mainModule`, `entryModules`, _) => true
     case _ => false
   }
+
+  def parMap(f: Module => Module): java.util.Map[String, Module] = {
+    (entryModules | entryModules.flatMap(_.importedModules)).par.map(f).seq.map(m => m.name -> m).toMap.asJava
+  }
 }
 
 trait Sorting {

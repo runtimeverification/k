@@ -100,9 +100,9 @@ untyped KOOL.  */
                > "spawn" Block
                > Exp "=" Exp             [strict(2), right]
 
-  syntax Exps ::= List{Exp,","}          [strict]
+  syntax Exps ::= List{Exp,","}          [strict, klabel(exps)]
   syntax Val
-  syntax Vals ::= List{Val,","}
+  syntax Vals ::= List{Val,","}          [klabel(exps)]
 
 //@ \subsection{Statements}
 
