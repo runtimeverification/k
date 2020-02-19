@@ -111,7 +111,7 @@ public class KException implements Serializable, HasLocation {
 
     public String toString(boolean verbose) {
         return "[" + types.get(type) + "] " + labels.get(exceptionGroup) + ": " + message
-                + (exception == null ? "" : " (" + exception.getMessage() + ")")
+                + (exception == null ? "" : " (" + exception.getClass().getSimpleName() + ": " + exception.getMessage() + ")")
                 + trace.toString() + traceTail()
                 + (source == null ? "" : "\n\t" + source)
                 + (location == null ? "" : "\n\t" + location);
