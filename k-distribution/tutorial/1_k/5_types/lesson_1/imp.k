@@ -96,6 +96,6 @@ module IMP
   rule join int; => stmt
 
 // Stmts
-  rule .Stmts => stmt
+  rule .Stmts => stmt:KItem
   rule _:BlockOrStmtType Ss => Ss
 endmodule
