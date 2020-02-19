@@ -89,7 +89,7 @@ pipeline {
                     stage('Checkout code') {
                       steps {
                         dir('k-exercises') {
-                          git url: 'git@github.com:kframework/k-exercises.git', branch: 'emptylists'
+                          git url: 'git@github.com:kframework/k-exercises.git'
                         }
                       }
                     }
