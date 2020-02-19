@@ -5,13 +5,13 @@ Statistics
 ==========
 
 Objects created:
-   A |-> 14
-   B |-> 8
-   C |-> 10
    Main |-> 1
+   B |-> 8
+   A |-> 14
+   C |-> 10
 
 Methods invoked:
-   A.A |-> 14
-   B.B |-> 8
-   C.C |-> 10
    Main.Main |-> 1
+   C.C |-> 10
+   B.B |-> 8
+   A.A |-> 14
