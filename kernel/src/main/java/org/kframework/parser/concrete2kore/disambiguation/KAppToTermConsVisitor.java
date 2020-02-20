@@ -44,11 +44,11 @@ public class KAppToTermConsVisitor extends SetsTransformerWithErrors<KEMExceptio
     public Either<java.util.Set<KEMException>, Term> apply(TermCons tc) {
         assert tc.production() != null : this.getClass() + ":" + " production not found." + tc;
         if (tc.production().klabel().isDefined() && tc.production().klabel().get().name().equals("#KApply")) {
-            if (!(tc.items().get(1) instanceof Constant) || !((Constant) tc.items().get(1)).production().sort().equals(Sorts.KLabel()))
+            if (!(tc.get(0) instanceof Constant) || !((Constant) tc.get(0)).production().sort().equals(Sorts.KLabel()))
                 // TODO: maybe return a hidden warning?
                 return super.apply(tc); // don't do anything if the label is not a token KLabel (in case of variable or casted variable)
-            Constant kl = (Constant) tc.items().get(1);
-            PStack<Term> items = flattenKList(tc.items().get(0));
+            Constant kl = (Constant) tc.get(0);
+            PStack<Term> items = flattenKList(tc.get(1));
             String klvalue = kl.value();
             try { klvalue = StringUtil.unescapeKoreKLabel(kl.value()); } catch (IllegalArgumentException e) { /* ignore */ } // if possible, unescape
             Set<Production> prods = mutable(mod.productionsFor().get(KLabel(klvalue))
@@ -90,7 +90,7 @@ public class KAppToTermConsVisitor extends SetsTransformerWithErrors<KEMExceptio
         } else if (t instanceof TermCons) {
             TermCons tc = (TermCons) t;
             if (tc.production().klabel().isDefined() && tc.production().klabel().get().name().equals("#KList"))
-                return flattenKList(tc.items().get(1)).plusAll(flattenKList(tc.items().get(0)));
+                return flattenKList(tc.get(0)).plusAll(flattenKList(tc.get(1)));
             else if (tc.production().klabel().isDefined() && tc.production().klabel().get().name().equals("#EmptyKList"))
                 return ConsPStack.empty();
         }
