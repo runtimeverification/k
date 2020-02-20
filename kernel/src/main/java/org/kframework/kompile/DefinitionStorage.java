@@ -7,9 +7,8 @@ import org.kframework.utils.file.FileUtil;
 
 import javax.inject.Inject;
 import java.io.File;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author Denis Bogdanas
@@ -43,10 +42,9 @@ public class DefinitionStorage {
     public Map<String, ParseCache> loadParseCaches(KompileOptions kompileOptions) {
         if (cacheParses(kompileOptions)) {
             DefinitionAndCache definitionAndCache = loader.loadCache(DefinitionAndCache.class, getCacheFile());
-            return definitionAndCache != null ? definitionAndCache.parseCaches
-                                              : Collections.synchronizedMap(new HashMap<>());
+            return definitionAndCache != null ? definitionAndCache.parseCaches : new ConcurrentHashMap<>();
         } else {
-            return Collections.synchronizedMap(new HashMap<>());
+            return new ConcurrentHashMap<>();
         }
     }
 

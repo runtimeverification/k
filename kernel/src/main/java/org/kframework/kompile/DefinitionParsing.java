@@ -43,6 +43,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -341,7 +342,7 @@ public class DefinitionParsing {
     private ParseCache loadCache(Module parser) {
         ParseCache cachedParser = caches.get(parser.name());
         if (cachedParser == null || !equalsSyntax(cachedParser.getModule(), parser) || cachedParser.isStrict() != isStrict) {
-            cachedParser = new ParseCache(parser, isStrict, java.util.Collections.synchronizedMap(new HashMap<>()));
+            cachedParser = new ParseCache(parser, isStrict, new ConcurrentHashMap<>());
             caches.put(parser.name(), cachedParser);
         }
         return cachedParser;
