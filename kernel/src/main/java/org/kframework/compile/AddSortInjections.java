@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -180,36 +181,7 @@ public class AddSortInjections {
             }
             Production prod = production(kapp);
             List<K> children = new ArrayList<>();
-            Production substituted = prod;
-            List<Sort> args = new ArrayList<>();
-            List<Sort> fresh = new ArrayList<>();
-            for (int i = 0; i < prod.params().size(); i++) {
-                if (prod.params().apply(i).equals(prod.sort())) {
-                  fresh.add(expectedSort);
-                } else {
-                  fresh.add(freshSortParam());
-                }
-            }
-            Production substitutedFresh = prod.substitute(immutable(fresh));
-            if (prod.params().nonEmpty()) {
-                Map<Sort, List<Sort>> subst = new HashMap<>();
-                for (int i = 0; i < prod.nonterminals().size(); i++) {
-                    Sort declaredSort = prod.nonterminals().apply(i).sort();
-                    Sort actual = sort(kapp.items().get(i), substitutedFresh.nonterminals().apply(i).sort());
-                    match(prod, declaredSort, actual, subst);
-                }
-                int i = 0;
-                matchExpected(prod, expectedSort, subst);
-                for (Sort param : iterable(prod.params())) {
-                    if (subst.get(param) == null) {
-                        args.add(fresh.get(i));
-                    } else {
-                        args.add(lub(subst.get(param), null, kapp, mod));
-                    }
-                    i++;
-                }
-                substituted = prod.substitute(immutable(args));
-            }
+            Production substituted = substituteProd(prod, expectedSort, (i, fresh) -> sort(kapp.items().get(i), fresh.nonterminals().apply(i).sort()), kapp);
             for (int i = 0; i < kapp.items().size(); i++) {
                 if (kapp.items().size() != substituted.nonterminals().size()) {
                     throw KEMException.internalError("Invalid initial configuration with wrong number of children for term with label " + kapp.klabel(), kapp);
@@ -247,6 +219,48 @@ public class AddSortInjections {
         } else {
             throw KEMException.internalError("Invalid category of k found.", term);
         }
+    }
+
+    /**
+     * Generate the substituted production with its sort parameters added for a parametric production.
+     * @param prod The production to add sort parameters to.
+     * @param expectedSort the sort context where the term with the specified production appears.
+     * @param getSort a function taking the 0-based index of the child of this production and the substitutedFresh production and returning the sort of the child.
+     * @param loc The location to report upon an error.
+     * @return The production substituted with the least upper bounds of its sort parameters based on its children's sorts.
+     */
+    public Production substituteProd(Production prod, Sort expectedSort, BiFunction<Integer, Production, Sort> getSort, HasLocation loc) {
+        Production substituted = prod;
+        List<Sort> args = new ArrayList<>();
+        List<Sort> fresh = new ArrayList<>();
+        for (int i = 0; i < prod.params().size(); i++) {
+            if (prod.params().apply(i).equals(prod.sort())) {
+              fresh.add(expectedSort);
+            } else {
+              fresh.add(freshSortParam());
+            }
+        }
+        Production substitutedFresh = prod.substitute(immutable(fresh));
+        if (prod.params().nonEmpty()) {
+            Map<Sort, List<Sort>> subst = new HashMap<>();
+            for (int i = 0; i < prod.nonterminals().size(); i++) {
+                Sort declaredSort = prod.nonterminals().apply(i).sort();
+                Sort actual = getSort.apply(i, substitutedFresh);
+                match(prod, declaredSort, actual, subst);
+            }
+            int i = 0;
+            matchExpected(prod, expectedSort, subst);
+            for (Sort param : iterable(prod.params())) {
+                if (subst.get(param) == null) {
+                    args.add(fresh.get(i));
+                } else {
+                    args.add(lub(subst.get(param), null, loc, mod));
+                }
+                i++;
+            }
+            substituted = prod.substitute(immutable(args));
+        }
+        return substituted;
     }
 
     private void match(Production prod, Sort declaredSort, Sort actualSort, Map<Sort, List<Sort>> subst) {

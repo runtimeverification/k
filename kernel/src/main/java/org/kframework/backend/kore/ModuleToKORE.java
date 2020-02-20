@@ -1,7 +1,9 @@
 // Copyright (c) 2018-2019 K Team. All Rights Reserved.
 package org.kframework.backend.kore;
 
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ListMultimap;
 import com.google.common.collect.SetMultimap;
 import org.kframework.Collections;
 import org.kframework.attributes.Att;
@@ -109,7 +111,21 @@ public class ModuleToKORE {
         // Map attribute name to whether the attribute has a value
         Map<String, Boolean> attributes = new HashMap<>();
         attributes.put("nat", true);
-        collectTokenSortsAndAttributes(tokenSorts, attributes);
+        Set<Integer> priorities = new HashSet<>();
+        // default priority for semantics rules is 50
+        priorities.add(50);
+        // priority for owise rule is 200
+        priorities.add(200);
+        collectTokenSortsAndAttributes(tokenSorts, attributes, priorities);
+        Map<Integer, String> priorityToPreviousGroup = new HashMap<>();
+        List<Integer> priorityList = new ArrayList<>(priorities);
+        java.util.Collections.sort(priorityList);
+        priorityToPreviousGroup.put(priorityList.get(0), "");
+        for (int i = 1; i < priorityList.size(); i++) {
+            Integer previous = priorityList.get(i - 1);
+            Integer current = priorityList.get(i);
+            priorityToPreviousGroup.put(current, String.format("priorityLE%d", previous));
+        }
 
         Set<String> collectionSorts = new HashSet<>();
         collectionSorts.add("SET.Set");
@@ -188,19 +204,26 @@ public class ModuleToKORE {
                 genOverloadedAxiom(lesser, greater, sb);
             }
         }
+
         sb.append("\n// rules\n");
         int ruleIndex = 0;
+        ListMultimap<Integer, String> priorityToAlias = ArrayListMultimap.create();
         for (Rule rule : iterable(module.sortedRules())) {
-            convertRule(rule, ruleIndex, heatCoolEq, topCellSortStr, attributes, functionRules, sentenceType,sb);
+            convertRule(rule, ruleIndex, heatCoolEq, topCellSortStr, attributes, functionRules,
+                    priorityToPreviousGroup, priorityToAlias, sentenceType, sb);
             ruleIndex++;
         }
+
+        sb.append("\n// priority groups\n");
+        genPriorityGroups(priorityList, priorityToPreviousGroup, priorityToAlias, topCellSortStr, sb);
         sb.append("endmodule ");
         convert(attributes, module.att(), sb);
         sb.append("\n");
         return sb.toString();
     }
 
-    private void collectTokenSortsAndAttributes(Set<SortHead> tokenSorts, Map<String, Boolean> attributes) {
+    private void collectTokenSortsAndAttributes(Set<SortHead> tokenSorts, Map<String, Boolean> attributes,
+                                                Set<Integer> priorities) {
         for (SortHead sort : iterable(module.sortedDefinedSorts())) {
             Att att = module.sortAttributesFor().get(sort).getOrElse(() -> KORE.Att());
             if (att.contains("token")) {
@@ -221,6 +244,10 @@ public class ModuleToKORE {
         for (Rule r : iterable(module.sortedRules())) {
             Att att = r.att();
             collectAttributes(attributes, att);
+            Optional<String> priority = att.getOptional("priority");
+            if (priority.isPresent()) {
+                priorities.add(Integer.valueOf(priority.get()));
+            }
         }
     }
 
@@ -666,7 +693,8 @@ public class ModuleToKORE {
                 : "Unexpected non-rule claim " + sentence.toString();
             if (sentence instanceof Rule) {
                 convertRule((Rule) sentence, 0, false, topCellSortStr,
-                        new HashMap<>(), HashMultimap.create(), sentenceType, sb);
+                        new HashMap<>(), HashMultimap.create(), new HashMap<>(), ArrayListMultimap.create(),
+                        sentenceType, sb);
             }
         }
         sb.append("endmodule ");
@@ -686,6 +714,8 @@ public class ModuleToKORE {
 
     private void convertRule(Rule rule, int ruleIndex, boolean heatCoolEq, String topCellSortStr,
                              Map<String, Boolean> consideredAttributes, SetMultimap<KLabel, Rule> functionRules,
+                             Map<Integer, String> priorityToPreviousGroup,
+                             ListMultimap<Integer, String> priorityToAlias,
                              SentenceType defaultSentenceType, StringBuilder sb) {
         SentenceType sentenceType = getSentenceType(rule.att()).orElse(defaultSentenceType);
         // injections should already be present, but this is an ugly hack to get around the
@@ -851,37 +881,30 @@ public class ModuleToKORE {
         } else if (!ExpandMacros.isMacro(rule)) {
             Boolean isRuleClaim = isClaim(sentenceType);
             // generate rule LHS
-            if (!isRuleClaim && !owise) {
+            if (!isRuleClaim) {
+                // LHS for semantics rules
                 String ruleAliasName = String.format("rule%dLHS", ruleIndex);
+                // default priority for semantics rules is 50
+                Integer priority = Integer.valueOf(rule.att().getOptional("priority").orElse("50"));
+                // priority for owise rule is 200
+                if(owise) {
+                    priority = 200;
+                }
                 List<KVariable> freeVars = new ArrayList<>(collectLHSFreeVariables(requires, left));
                 Comparator<KVariable> compareByName = (KVariable v1, KVariable v2) -> v1.name().compareTo(v2.name());
                 java.util.Collections.sort(freeVars, compareByName);
-                genAliasForSemanticsRuleLHS(requires, left, ruleAliasName, freeVars, topCellSortStr, sb);
+                genAliasForSemanticsRuleLHS(requires, left, ruleAliasName, freeVars, topCellSortStr,
+                        priority, priorityToAlias, sb);
                 sb.append("\n");
                 sb.append("  axiom{} ");
                 sb.append(String.format("\\rewrites{%s} (\n    ", topCellSortStr));
-                genSemanticsRuleLHSWithAlias(ruleAliasName, freeVars, sb);
+                genSemanticsRuleLHSWithAlias(ruleAliasName, freeVars, topCellSortStr,
+                        priorityToPreviousGroup.get(priority), sb);
                 sb.append(",\n    ");
             } else {
-                if (isRuleClaim) {
-                    sb.append("  claim{} ");
-                } else {
-                    sb.append("  axiom{} ");
-                }
-
-                if (owise) {
-                    // hack to deal with the strategy axiom for now
-                    sb.append(String.format("\\implies{%s}(\\bottom{%s}(),",
-                            topCellSortStr, topCellSortStr));
-                }
-
-                if (isRuleClaim) {
-                    sb.append("\\implies");
-                } else {
-                    sb.append("\\rewrites");
-                }
-
-                sb.append(String.format("{%s} (\n    ", topCellSortStr));
+                // LHS for claims
+                sb.append("  claim{} ");
+                sb.append(String.format("\\implies{%s} (\n    ", topCellSortStr));
                 sb.append(String.format("  \\and{%s} (\n      ", topCellSortStr));
                 convertSideCondition(requires, topCellSortStr, sb);
                 sb.append(", ");
@@ -915,9 +938,6 @@ public class ModuleToKORE {
                 sb.append(')');
             }
             sb.append(')');
-            if (owise) {
-                sb.append(')');
-            }
             sb.append("\n  ");
             convert(consideredAttributes, rule.att(), sb);
             sb.append("\n\n");
@@ -953,13 +973,14 @@ public class ModuleToKORE {
 
     private void genAliasForSemanticsRuleLHS(K requires, K left,
                                              String ruleAliasName, List<KVariable> freeVars, String topCellSortStr,
+                                             Integer priority, ListMultimap<Integer, String> priorityToAlias,
                                              StringBuilder sb) {
         sb.append("  alias ");
         sb.append(ruleAliasName);
         // We assume no sort variables.
         sb.append("{}(");
         String conn = "";
-        for(KVariable var: freeVars) {
+        for (KVariable var: freeVars) {
             sb.append(conn);
             convert(var.att().getOptional(Sort.class).orElse(Sorts.K()), sb);
             conn = ",";
@@ -967,32 +988,96 @@ public class ModuleToKORE {
         sb.append(") : ");
         sb.append(topCellSortStr);
         sb.append("\n  where ");
-        sb.append(ruleAliasName);
-        sb.append("{}(");
-        conn = "";
-        for(KVariable var: freeVars) {
-            sb.append(conn);
-            convert((K)var, sb);
-            conn = ",";
-        }
+        genAliasDeclHead(ruleAliasName, freeVars, sb);
         sb.append(") :=\n");
         sb.append(String.format("    \\and{%s} (\n      ", topCellSortStr));
         convertSideCondition(requires, topCellSortStr, sb);
         sb.append(", ");
         convert(left, sb);
         sb.append(") []\n");
+
+        // build existential quantified pattern for alias
+        StringBuilder extStrBuilder = new StringBuilder();
+        for (KVariable var: freeVars) {
+            extStrBuilder.append(String.format("\\exists{%s}(", topCellSortStr));
+            convert((K)var, extStrBuilder);
+            extStrBuilder.append(",");
+        }
+        genAliasDeclHead(ruleAliasName, freeVars, extStrBuilder);
+        extStrBuilder.append(")");
+        for (int i = 0; i < freeVars.size(); i++) {
+            extStrBuilder.append(")");
+        }
+        priorityToAlias.put(priority, extStrBuilder.toString());
     }
 
-    private void genSemanticsRuleLHSWithAlias(String ruleAliasName, List<KVariable> freeVars, StringBuilder sb) {
+    private void genAliasDeclHead(String aliasName, List<KVariable> freeVars, StringBuilder sb) {
+        sb.append(aliasName);
+        sb.append("{}(");
+        String conn = "";
+        for (KVariable var: freeVars) {
+            sb.append(conn);
+            convert((K)var, sb);
+            conn = ",";
+        }
+    }
+
+    private void genSemanticsRuleLHSWithAlias(String ruleAliasName, List<KVariable> freeVars, String topCellSortStr,
+                                              String previousGroupName, StringBuilder sb) {
+        if (!previousGroupName.equals("")) {
+            sb.append(String.format("\\and{%s}(\n      ", topCellSortStr));
+            sb.append(String.format("\\not{%s}(", topCellSortStr));
+            sb.append(previousGroupName);
+            sb.append("{}()),\n      ");
+        }
         sb.append(ruleAliasName);
         sb.append("{}(");
         String conn = "";
-        for(KVariable var: freeVars) {
+        for (KVariable var: freeVars) {
             sb.append(conn);
             convert((K)var, sb);
             conn = ",";
         }
         sb.append(")");
+        if (!previousGroupName.equals("")) {
+            sb.append(")");
+        }
+    }
+
+    private void genPriorityGroups(List<Integer> priorityList,
+                                   Map<Integer, String> priorityToPreviousGroup,
+                                   ListMultimap<Integer, String> priorityToAlias,
+                                   String topCellSortStr, StringBuilder sb) {
+        // skip generating alias for the last priority group
+        for (int index = 0; index < priorityList.size()-1; index++) {
+            Integer priority = priorityList.get(index);
+            String priorityGroupName = String.format("priorityLE%d", priority);
+            sb.append(String.format("  alias %s{}() : %s", priorityGroupName, topCellSortStr));
+            sb.append(String.format("\n  where %s{}() := ", priorityGroupName));
+            String previousGroupName = priorityToPreviousGroup.get(priority);
+            if (!previousGroupName.equals("")) {
+                sb.append(String.format("\\or{%s}(\n    ", topCellSortStr));
+                sb.append(previousGroupName);
+                sb.append("{}(), ");
+            }
+            // generate priority group body
+            List<String> aliases = priorityToAlias.get(priority);
+            for (String ruleLHSAlias : aliases) {
+                sb.append(String.format("\\or{%s}(\n    ", topCellSortStr));
+                sb.append(ruleLHSAlias);
+                sb.append(", ");
+            }
+            // bottom is the unit of "or"
+            sb.append(String.format("\\bottom{%s}()", topCellSortStr));
+            // complete parenthesis
+            for (int i = 0; i < aliases.size(); i++) {
+                sb.append(")");
+            }
+            if (!previousGroupName.equals("")) {
+                sb.append(")");
+            }
+            sb.append(" []\n\n");
+        }
     }
 
     private void functionalPattern(Production prod, Runnable functionPattern, StringBuilder sb) {

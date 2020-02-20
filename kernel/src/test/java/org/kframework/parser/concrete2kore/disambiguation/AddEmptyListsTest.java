@@ -161,28 +161,22 @@ public class AddEmptyListsTest {
 
     @Test
     public void testArgumentLabeledCons() {
-        parseTerm("f(`_,__TEST`(a,.As))", "K", KApply(F, KApply(CONS, A, NIL)));
+        parseTerm("f(a,.As)", "K", KApply(F, KApply(CONS, A, NIL)));
     }
 
     @Test
     public void testArgumentLabeledNil() {
-        parseTerm("f(`.List{\"_,__TEST\"}`(.KList))", "K", KApply(F, NIL));
+        parseTerm("f(.As)", "K", KApply(F, NIL));
     }
 
     @Test
     public void testArgumentLabeledConsSub1() {
-        parseTerm("h(`_,__TEST`(b,.Bs))", "K", KApply(H, KApply(CONS, B, NIL)));
-    }
-
-    @Test
-    public void testArgumentLabeledConsSub2() {
-        // gets a warning because the argument of sort As does not fit.n
-        parseTerm("h(`_,__TEST`(a,.As))", "K", KApply(H, KApply(CONS, A, NIL)));
+        parseTerm("h(b,.Bs)", "K", KApply(H, KApply(CONS, B, NIL)));
     }
 
     @Test
     public void testArgumentLabeledNilSub1() {
-        parseTerm("h(`.List{\"_,__TEST\"}`(.KList))", "K", KApply(H, NIL));
+        parseTerm("h(.Bs)", "K", KApply(H, NIL));
     }
 
     @Test

@@ -343,7 +343,7 @@ another clause can be chosen using the rule above):  */
   rule <k> L:Term => . ...</k>
        <fresh>  L:Term . => . </fresh>
 
-  rule <k> L:Term => Ls ...</k>
+  rule <k> L:Term :KItem => Ls ...</k>
        <fresh>  L:Term :- Ls:Terms. => . </fresh>
 
 /*@ Note that there is no problem if a clause is chosen whose
