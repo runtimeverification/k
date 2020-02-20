@@ -86,7 +86,9 @@ public final class KRunOptions {
                 "should be parsed with the command \"kast\".")
         private Map<String, String> configVarParsers = new HashMap<>();
 
-        @DynamicParameter(names={"--config-var", "-c"}, description="Specify values for variables in the configuration.")
+        @DynamicParameter(names={"--config-var", "-c"}, description="Specify values for variables in the configuration. " +
+                "To read value from file, you can use `-pVAR=cat -cVAR=file` if value is already parsed. " +
+                "Otherwise use something like `-pVAR=\"kast -s SORT\" -cVAR=file`. See `kast --help` for more details.")
         private Map<String, String> configVars = new HashMap<>();
 
         public Map<String, Pair<String, String>> configVars(String mainModuleName, FileUtil files) {
