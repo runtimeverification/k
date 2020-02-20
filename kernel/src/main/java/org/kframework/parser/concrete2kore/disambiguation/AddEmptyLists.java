@@ -5,6 +5,7 @@ package org.kframework.parser.concrete2kore.disambiguation;
 import com.google.common.collect.Sets;
 import org.kframework.POSet;
 import org.kframework.builtin.Sorts;
+import org.kframework.compile.AddSortInjections;
 import org.kframework.definition.Module;
 import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
@@ -50,17 +51,22 @@ public class AddEmptyLists extends SetsGeneralTransformer<KEMException, KEMExcep
     private final POSet<Sort> subsorts;
     private final scala.collection.Set<Sort> listSorts;
     private final Map<Sort, List<UserList>> lists;
+    private final AddSortInjections inj;
+    private Sort expectedSort;
 
-    public AddEmptyLists(Module m) {
+    public AddEmptyLists(Module m, Sort expectedSort) {
         this.m = m;
         subsorts = m.subsorts();
         listSorts = m.listSorts();
         lists = UserList.getLists(mutable(m.sentences())).stream().collect(Collectors.groupingBy(p -> p.sort));
+        inj = new AddSortInjections(m);
+        this.expectedSort = expectedSort;
     }
 
     @Override
     public Tuple2<Either<Set<KEMException>, Term>, Set<KEMException>> apply(TermCons tc) {
-        Production p = tc.production();
+        TermCons orig = tc;
+        Production p = inj.substituteProd(orig.production(), expectedSort, (i, fresh) -> getSort((ProductionReference)orig.get(i), fresh.nonterminals().apply(i).sort()), orig);
         java.util.Set<KEMException> warnings = new HashSet<>();
 
         List<Term> reversed = tc.items().stream().collect(Collectors.toList());
@@ -82,10 +88,10 @@ public class AddEmptyLists extends SetsGeneralTransformer<KEMException, KEMExcep
         for (ProductionItem pi : mutable(p.items())) {
             if (!(pi instanceof NonTerminal))
                 continue;
-
-            Sort expectedSort = ((NonTerminal) pi).sort();
+            Sort oldExpectedSort = expectedSort;
+            expectedSort = ((NonTerminal)pi).sort();
             ProductionReference child = (ProductionReference) items.next();
-            Sort childSort = getSort(child);
+            Sort childSort = getSort(child, expectedSort);
             if (listSorts.contains(expectedSort) &&
                     !(subsorts.lessThanEq(childSort, expectedSort) && listSorts.contains(childSort))) {
                 final boolean isBracket = child.production().att().contains("bracket");
@@ -117,6 +123,7 @@ public class AddEmptyLists extends SetsGeneralTransformer<KEMException, KEMExcep
             } else {
                 newItems.add(child);
             }
+            expectedSort = oldExpectedSort;
         }
 
         if (changed) {
@@ -131,58 +138,11 @@ public class AddEmptyLists extends SetsGeneralTransformer<KEMException, KEMExcep
         }
     }
 
-    private Sort getSort(ProductionReference child) {
-        if ((child instanceof TermCons) &&
-                child.production().klabel().isDefined()) {
-            KLabel label = child.production().klabel().get();
-            if (label.name().equals("#KApply")) {
-                Term labelTerm = ((TermCons) child).get(0);
-                Optional<KLabel> optLabel = klabelFromTerm(labelTerm);
-                if (optLabel.isPresent() && m.productionsFor().contains(optLabel.get())) {
-                    Collection<Production> productions = mutable(m.productionsFor().get(optLabel.get()).get());
-                    List<Term> rawArgs = lowerKList(((TermCons) child).get(1));
-                    assert rawArgs.stream().allMatch(ProductionReference.class::isInstance);
-                    @SuppressWarnings("unchecked") List<ProductionReference> args = (List<ProductionReference>) (List) rawArgs;
-                    List<Sort> childSorts = args.stream().map(this::getSort).collect(Collectors.toList());
-                    if (!childSorts.contains(Sorts.KList())) { // try to exclude non-concrete lists
-                        List<Production> validProductions = new ArrayList<>();
-                    nextprod:
-                        for (Production prod : productions) {
-                            Iterator<Sort> sortIter = childSorts.iterator();
-                            for (ProductionItem item : iterable(prod.items())) {
-                                if (!(item instanceof NonTerminal))
-                                    continue;
-                                if (!sortIter.hasNext()) {
-                                    // production arity too high
-                                    continue nextprod;
-                                }
-                                if (!subsorts.lessThanEq(sortIter.next(), ((NonTerminal) item).sort())) {
-                                    // production can't accept this argument
-                                    continue nextprod;
-                                }
-                            }
-                            if (sortIter.hasNext()) {
-                                // production arity too low
-                                continue;
-                            }
-                            validProductions.add(prod);
-                        }
-                        productions = validProductions;
-                        Optional<Sort> leastSort = least(productions.stream().map(Production::sort).collect(Collectors.toList()));
-                        if (leastSort.isPresent()) {
-                            return leastSort.get();
-                        }
-                    } else {
-                        Optional<Sort> greatestSort = greatest(productions.stream().map(Production::sort).collect(Collectors.toList()));
-                        if (greatestSort.isPresent()) {
-                            return greatestSort.get();
-
-                        }
-                    }
-                }
-            }
+    private Sort getSort(ProductionReference child, Sort expectedSort) {
+        if (m.syntacticSubsorts().greaterThan(expectedSort, Sorts.K())) {
+            expectedSort = Sorts.K();
         }
-        return child.production().sort();
+        return inj.substituteProd(child.production(), expectedSort, (i, fresh) -> getSort((ProductionReference)((TermCons)child).get(i), fresh.nonterminals().apply(i).sort()), child).sort();
     }
 
     /**
