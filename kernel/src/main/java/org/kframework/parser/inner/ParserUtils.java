@@ -118,6 +118,8 @@ public class ParserUtils {
             File currentDirectory,
             List<File> lookupDirectories,
             Set<File> requiredFiles) {
+        if (source.source().endsWith(".md"))
+            definitionText = ExtractFencedKCodeFromMarkdown.extract(definitionText);
         List<DefinitionItem> items = Outer.parse(source, definitionText, null);
         if (options.verbose) {
             System.out.println("Importing: " + source);
@@ -283,7 +285,7 @@ public class ParserUtils {
         Set<File> requiredFiles = new HashSet<>();
         Context context = new Context();
         if (autoImportDomains)
-            previousModules.addAll(loadModules(new HashSet<>(), context, Kompile.REQUIRE_PRELUDE_K, source, currentDirectory, lookupDirectories, requiredFiles, kore, preprocess, leftAssoc));
+            previousModules.addAll(loadModules(new HashSet<>(), context, Kompile.REQUIRE_PRELUDE_K, Source.apply("auto imported prelude"), currentDirectory, lookupDirectories, requiredFiles, kore, preprocess, leftAssoc));
         Set<Module> modules = loadModules(previousModules, context, definitionText, source, currentDirectory, lookupDirectories, requiredFiles, kore, preprocess, leftAssoc);
         if (preprocess) {
           System.exit(0);

@@ -204,6 +204,11 @@
       <artifactId>fst</artifactId>
       <version>2.56</version>
     </dependency>
+    <dependency>
+      <groupId>com.vladsch.flexmark</groupId>
+      <artifactId>flexmark-all</artifactId>
+      <version>0.60.2</version>
+    </dependency>
   </dependencies>
 
   <build>
