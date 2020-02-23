@@ -501,6 +501,8 @@ public class RuleGrammarTest {
                                         KApply(KLabel("#SemanticCastToLst2"), KToken("L",Sort("#KVariable"))))),
                         KApply(KLabel("#SemanticCastToLst2"), KToken("L",Sort("#KVariable")))
                 )));
-        parseRule("constr(a, a, a) => .K", def, 0, true);
+        parseRule("constr(A, B, C) => .K", def, 0, false); // 3 amb at top 8 amb final
+        parseRule("constr(A, B, C, D) => .K", def, 0, false); // 17 amb at top 16 final
+        parseRule("constr(a, a, a) => .K", def, 0, true); // 'a' is not subsorted to the list
     }
 }

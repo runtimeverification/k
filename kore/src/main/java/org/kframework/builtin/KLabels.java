@@ -19,6 +19,9 @@ public class KLabels {
     public static final KLabel NO_DOTS = KLabel("#noDots");
 
     public static final KLabel KREWRITE = KLabel("#KRewrite");
+    public static final KLabel KLIST = KLabel("#KList");
+    public static final KLabel EMPTYKLIST = KLabel("#EmptyKList");
+    public static final KLabel KAPP = KLabel("#KApply");
 
     public static final String GENERATED_TOP_CELL_NAME = "generatedTop";
     public static final KLabel GENERATED_TOP_CELL = KLabel("<generatedTop>");
