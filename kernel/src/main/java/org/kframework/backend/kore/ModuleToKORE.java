@@ -688,12 +688,15 @@ public class ModuleToKORE {
         convert(definition.name(), sb);
         sb.append(" []\n");
         sb.append("\n\n// claims\n");
+        HashMap<String, Boolean> consideredAttributes = new HashMap<>();
+        consideredAttributes.put("priority", true);
+
         for (Sentence sentence : iterable(spec.sentencesExcept(definition))) {
             assert sentence instanceof Rule || sentence instanceof ModuleComment
                 : "Unexpected non-rule claim " + sentence.toString();
             if (sentence instanceof Rule) {
                 convertRule((Rule) sentence, 0, false, topCellSortStr,
-                        new HashMap<>(), HashMultimap.create(), new HashMap<>(), ArrayListMultimap.create(),
+                        consideredAttributes, HashMultimap.create(), new HashMap<>(), ArrayListMultimap.create(),
                         sentenceType, sb);
             }
         }
