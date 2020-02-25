@@ -63,6 +63,24 @@ public class AddEmptyLists extends SetsGeneralTransformer<KEMException, KEMExcep
         this.expectedSort = expectedSort;
     }
 
+    private Tuple2<Either<Set<KEMException>, Term>, Set<KEMException>> superApply(TermCons tc) {
+        Set<KEMException> warns = new HashSet<>();
+        TermCons orig = tc;
+        Production p = inj.substituteProd(orig.production(), expectedSort, (i, fresh) -> getSort((ProductionReference)orig.get(i), fresh.nonterminals().apply(i).sort()), orig);
+        for (int i = 0; i < tc.items().size(); i++) {
+            Sort oldExpectedSort = expectedSort;
+            expectedSort = p.nonterminals().apply(i).sort();
+            Tuple2<Either<Set<KEMException>, Term>, Set<KEMException>> rez = apply(tc.get(i));
+            warns.addAll(rez._2());
+            if (rez._1().isLeft()) {
+                return Tuple2.apply(rez._1(), warns);
+            }
+            tc = tc.with(i, rez._1().right().get());
+            expectedSort = oldExpectedSort;
+        }
+        return Tuple2.apply(Right.apply(tc), warns);
+    }
+
     @Override
     public Tuple2<Either<Set<KEMException>, Term>, Set<KEMException>> apply(TermCons tc) {
         TermCons orig = tc;
@@ -81,7 +99,7 @@ public class AddEmptyLists extends SetsGeneralTransformer<KEMException, KEMExcep
             if (tcLabelName.equals("#SyntacticCast")
                     || tcLabelName.startsWith("#SemanticCastTo")
                     || tcLabelName.equals("#InnerCast")) {
-                return super.apply(tc);
+                return superApply(tc);
             }
         }
 
@@ -131,10 +149,10 @@ public class AddEmptyLists extends SetsGeneralTransformer<KEMException, KEMExcep
             tc = TermCons.apply(ConsPStack.from(newItems), tc.production(), tc.location(), tc.source());
         }
         if (!warnings.isEmpty()) {
-            Tuple2<Either<Set<KEMException>, Term>, Set<KEMException>> rez = super.apply(tc);
+            Tuple2<Either<Set<KEMException>, Term>, Set<KEMException>> rez = superApply(tc);
             return new Tuple2<>(Right.apply(rez._1().right().get()), Sets.union(warnings, rez._2()));
         } else {
-            return super.apply(tc);
+            return superApply(tc);
         }
     }
 

@@ -254,7 +254,7 @@ public class AddSortInjections {
                 if (subst.get(param) == null) {
                     args.add(fresh.get(i));
                 } else {
-                    args.add(lub(subst.get(param), null, loc, mod));
+                    args.add(lub(subst.get(param), fresh.get(i), loc, mod));
                 }
                 i++;
             }
@@ -341,7 +341,7 @@ public class AddSortInjections {
                     if (subst.get(param) == null) {
                         args.add(fresh.get(i));
                     } else {
-                        args.add(lub(subst.get(param), null, kapp, mod));
+                        args.add(lub(subst.get(param), fresh.get(i), kapp, mod));
                     }
                     i++;
                 }
@@ -420,7 +420,7 @@ public class AddSortInjections {
             return entries.iterator().next();
         }
         Set<Sort> bounds = upperBounds(filteredEntries, mod);
-        if (expectedSort != null && !expectedSort.name().equals(SORTPARAM_NAME) && !expectedSort.equals(Sorts.KItem()) && !expectedSort.equals(Sorts.K())) {
+        if (expectedSort != null && !expectedSort.name().equals(SORTPARAM_NAME)) {
             bounds.removeIf(s -> !mod.subsorts().lessThanEq(s, expectedSort));
         }
         Set<Sort> lub = mod.subsorts().minimal(bounds);
