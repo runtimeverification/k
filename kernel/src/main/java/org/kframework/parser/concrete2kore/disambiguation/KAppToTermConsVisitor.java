@@ -90,7 +90,7 @@ public class KAppToTermConsVisitor extends SetsTransformerWithErrors<KEMExceptio
         } else if (t instanceof TermCons) {
             TermCons tc = (TermCons) t;
             if (tc.production().klabel().isDefined() && tc.production().klabel().get().equals(KLabels.KLIST))
-                return flattenKList(tc.get(0)).plusAll(flattenKList(tc.get(1)));
+                return flattenKList(tc.get(0)).plusAll(Lists.reverse(Lists.newArrayList(flattenKList(tc.get(1)))));
             else if (tc.production().klabel().isDefined() && tc.production().klabel().get().equals(KLabels.EMPTYKLIST))
                 return ConsPStack.empty();
         }

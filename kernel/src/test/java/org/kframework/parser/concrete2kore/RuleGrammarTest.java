@@ -484,6 +484,7 @@ public class RuleGrammarTest {
                 "  syntax Lst ::= E \",\" Lst [klabel(constr), symbol]\n" +
                 "  syntax Lst2 ::= E \",\" Lst2 [klabel(constr), symbol]\n" +
                 "                | Lst \n" +
+                "  syntax S ::= tuple(E, E, S) [klabel(tuplee), symbol]\n" +
                 "endmodule";
         parseRule("constr(I, L) => L", def, 0,
                 KApply(KLabel("#ruleNoConditions"),KApply(KLabel("#KRewrite"),
@@ -500,6 +501,14 @@ public class RuleGrammarTest {
                                         KApply(KLabel("elma")),
                                         KApply(KLabel("#SemanticCastToLst2"), KToken("L",Sort("#KVariable"))))),
                         KApply(KLabel("#SemanticCastToLst2"), KToken("L",Sort("#KVariable")))
+                )));
+        parseRule("tuplee(A, B, C) => C", def, 0,
+                KApply(KLabel("#ruleNoConditions"),KApply(KLabel("#KRewrite"),
+                        KApply(KLabel("tuplee"),
+                                KApply(KLabel("#SemanticCastToE"), KToken("A",Sort("#KVariable"))),
+                                KApply(KLabel("#SemanticCastToE"), KToken("B",Sort("#KVariable"))),
+                                KApply(KLabel("#SemanticCastToS"), KToken("C",Sort("#KVariable")))),
+                        KApply(KLabel("#SemanticCastToS"), KToken("C",Sort("#KVariable")))
                 )));
         parseRule("constr(A, B, C) => .K", def, 0, false); // 3 amb at top 8 amb final
         parseRule("constr(A, B, C, D) => .K", def, 0, false); // 17 amb at top 16 final
