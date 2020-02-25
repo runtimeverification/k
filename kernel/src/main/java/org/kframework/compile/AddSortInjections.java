@@ -209,7 +209,7 @@ public class AddSortInjections {
             List<K> children = new ArrayList<>();
             for (int i = 0; i < kseq.size(); i++) {
                 K child = kseq.items().get(i);
-                Sort childSort = sort(child, Sorts.KItem());
+                Sort childSort = sort(child, isLHS ? Sorts.KItem() : Sorts.K());
                 if (childSort.equals(Sorts.K())) {
                     children.add(internalAddSortInjections(child, Sorts.K()));
                 } else {
