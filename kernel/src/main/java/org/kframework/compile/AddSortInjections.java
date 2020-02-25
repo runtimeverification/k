@@ -52,6 +52,7 @@ public class AddSortInjections {
     private int freshSortParamCounter = 0;
     private Set<String> sortParams = new HashSet<>();
     public static final String SORTPARAM_NAME = "#SortParam";
+    private boolean isLHS = false;
 
     public AddSortInjections(Module mod) {
         this.mod = mod;
@@ -193,7 +194,10 @@ public class AddSortInjections {
             return KApply(substituted.klabel().get(), KList(children), att);
         } else if (term instanceof KRewrite) {
             KRewrite rew = (KRewrite) term;
-            return KRewrite(internalAddSortInjections(rew.left(), actualSort), internalAddSortInjections(rew.right(), actualSort), att);
+            isLHS = true;
+            K lhs = internalAddSortInjections(rew.left(), actualSort);
+            isLHS = false;
+            return KRewrite(lhs, internalAddSortInjections(rew.right(), actualSort), att);
         } else if (term instanceof KVariable) {
             return KVariable(((KVariable) term).name(), att);
         } else if (term instanceof KToken) {
