@@ -17,6 +17,7 @@ rule isContinuation(#addl1(_) ~> _:Map ~> _:K) => true
 endmodule
 
 module SYNC-POINT-CANDIDATES
+imports VERIFICATION
 
 imports MAIN
 
