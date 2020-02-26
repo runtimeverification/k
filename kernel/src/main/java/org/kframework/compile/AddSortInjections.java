@@ -52,6 +52,7 @@ public class AddSortInjections {
     private int freshSortParamCounter = 0;
     private Set<String> sortParams = new HashSet<>();
     public static final String SORTPARAM_NAME = "#SortParam";
+    private boolean isLHS = false;
 
     public AddSortInjections(Module mod) {
         this.mod = mod;
@@ -193,7 +194,10 @@ public class AddSortInjections {
             return KApply(substituted.klabel().get(), KList(children), att);
         } else if (term instanceof KRewrite) {
             KRewrite rew = (KRewrite) term;
-            return KRewrite(internalAddSortInjections(rew.left(), actualSort), internalAddSortInjections(rew.right(), actualSort), att);
+            isLHS = true;
+            K lhs = internalAddSortInjections(rew.left(), actualSort);
+            isLHS = false;
+            return KRewrite(lhs, internalAddSortInjections(rew.right(), actualSort), att);
         } else if (term instanceof KVariable) {
             return KVariable(((KVariable) term).name(), att);
         } else if (term instanceof KToken) {
@@ -205,7 +209,7 @@ public class AddSortInjections {
             List<K> children = new ArrayList<>();
             for (int i = 0; i < kseq.size(); i++) {
                 K child = kseq.items().get(i);
-                Sort childSort = sort(child, Sorts.KItem());
+                Sort childSort = sort(child, isLHS ? Sorts.KItem() : Sorts.K());
                 if (childSort.equals(Sorts.K())) {
                     children.add(internalAddSortInjections(child, Sorts.K()));
                 } else {
@@ -254,7 +258,7 @@ public class AddSortInjections {
                 if (subst.get(param) == null) {
                     args.add(fresh.get(i));
                 } else {
-                    args.add(lub(subst.get(param), null, loc, mod));
+                    args.add(lub(subst.get(param), fresh.get(i), loc, mod));
                 }
                 i++;
             }
@@ -341,7 +345,7 @@ public class AddSortInjections {
                     if (subst.get(param) == null) {
                         args.add(fresh.get(i));
                     } else {
-                        args.add(lub(subst.get(param), null, kapp, mod));
+                        args.add(lub(subst.get(param), fresh.get(i), kapp, mod));
                     }
                     i++;
                 }
@@ -420,7 +424,7 @@ public class AddSortInjections {
             return entries.iterator().next();
         }
         Set<Sort> bounds = upperBounds(filteredEntries, mod);
-        if (expectedSort != null && !expectedSort.name().equals(SORTPARAM_NAME) && !expectedSort.equals(Sorts.KItem()) && !expectedSort.equals(Sorts.K())) {
+        if (expectedSort != null && !expectedSort.name().equals(SORTPARAM_NAME)) {
             bounds.removeIf(s -> !mod.subsorts().lessThanEq(s, expectedSort));
         }
         Set<Sort> lub = mod.subsorts().minimal(bounds);
