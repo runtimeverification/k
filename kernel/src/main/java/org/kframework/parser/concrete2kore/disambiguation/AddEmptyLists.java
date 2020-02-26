@@ -63,6 +63,10 @@ public class AddEmptyLists extends SetsGeneralTransformer<KEMException, KEMExcep
         this.expectedSort = expectedSort;
     }
 
+    // instead of calling super.apply in the apply function below, we should
+    // call this function, because super.apply does not correctly set the
+    // expected sort before recursing, which means that we end up with
+    // the wrong sort computations otherwise
     private Tuple2<Either<Set<KEMException>, Term>, Set<KEMException>> superApply(TermCons tc) {
         Set<KEMException> warns = new HashSet<>();
         TermCons orig = tc;
