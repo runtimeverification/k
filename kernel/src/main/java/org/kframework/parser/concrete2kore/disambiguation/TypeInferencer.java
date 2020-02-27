@@ -60,9 +60,9 @@ public class TypeInferencer implements AutoCloseable {
 
   private Status status = null;
 
-  private final Process process;
-  private final PrintStream z3;
-  private final BufferedReader output;
+  private Process process;
+  private PrintStream z3;
+  private BufferedReader output;
   private final Module mod;
   private final java.util.Set<SortHead> sorts;
 
@@ -71,11 +71,9 @@ public class TypeInferencer implements AutoCloseable {
   private static final String PRELUDE1 =
     "(set-logic QF_DT)\n";
 
-  /**
-   * Create a new z3 process and write the sorts and subsort relation to it.
-   * @param mod the module to create an inferencer for.
-   */
-  public TypeInferencer(Module mod) {
+  private final boolean destroyOnReset;
+
+  private void initProcess() {
     try {
       File NULL = new File(OS.current() == OS.WINDOWS ? "NUL" : "/dev/null");
       process = new ProcessBuilder().command("z3", "-in").redirectError(NULL).start();
@@ -84,6 +82,30 @@ public class TypeInferencer implements AutoCloseable {
     }
     z3 = new PrintStream(process.getOutputStream());
     output = new BufferedReader(new InputStreamReader(process.getInputStream()));
+  }
+
+  /**
+   * Create a new z3 process and write the sorts and subsort relation to it.
+   * @param mod the module to create an inferencer for.
+   */
+  public TypeInferencer(Module mod) {
+    initProcess();
+    println("(get-info :version)");
+    try {
+        String version = output.readLine();
+        version = version.substring("(:version \"".length());
+        version = version.substring(0, version.indexOf('"'));
+        String[] parts = version.split("\\.");
+        int major = Integer.valueOf(parts[0]);
+        int minor = Integer.valueOf(parts[1]);
+        if (major < 4 || (major == 4 && minor < 6)) {
+          destroyOnReset = true;
+        } else {
+          destroyOnReset = false;
+        }
+    } catch (IOException e) {
+      throw KEMException.internalError("Could not read from z3 process", e);
+    }
     println(PRELUDE1);
     this.mod = mod;
     this.sorts = stream(mod.definedSorts()).filter(this::isRealSort).collect(Collectors.toSet());
@@ -155,7 +177,12 @@ public class TypeInferencer implements AutoCloseable {
       println("))");
     }
     println("))");
+    if (DEBUG) {
+      debugPrelude = sb.toString();
+    }
   }
+
+  private String debugPrelude;
 
   // map from each sort to an integer representing the topological sorting of the sorts. higher numbers mean greater
   // sorts
@@ -749,6 +776,9 @@ public class TypeInferencer implements AutoCloseable {
       String result;
       do {
         result = output.readLine();
+        if (result == null) {
+            throw KEMException.internalError("Unexpected EOF reached while waiting for response from z3.", currentTerm);
+        }
       } while (!result.equals("sat") && !result.equals("unsat") && !result.equals("unknown") && !result.equals("timeout") && !result.startsWith("(error"));
       switch (result) {
       case "sat":
@@ -880,6 +910,13 @@ public class TypeInferencer implements AutoCloseable {
     cacheById.clear();
     ordinals.clear();
     nextId = 0;
+    if (destroyOnReset) {
+      z3.close();
+      process.destroy();
+      initProcess();
+      println(PRELUDE1);
+      push(mod);
+    }
   }
 
   private static String locStr(ProductionReference pr) {
