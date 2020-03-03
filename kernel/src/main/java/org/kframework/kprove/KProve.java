@@ -8,14 +8,19 @@ import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
 import org.kframework.kompile.CompiledDefinition;
+import org.kframework.kompile.KompileOptions;
 import org.kframework.krun.KRun;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.unparser.KPrint;
+import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import scala.Tuple2;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.function.Function;
 
 
@@ -31,18 +36,20 @@ public class KProve {
     private final KPrint kprint;
     private final KProveOptions kproveOptions;
     private final CompiledDefinition compiledDefinition;
+    private final BinaryLoader loader;
     private final ProofDefinitionBuilder proofDefinitionBuilder;
     private final Function<Definition, Rewriter> rewriterGenerator;
 
     @Inject
     public KProve(KExceptionManager kem, FileUtil files, KPrint kprint, KProveOptions kproveOptions,
-                  CompiledDefinition compiledDefinition, ProofDefinitionBuilder proofDefinitionBuilder,
-                  Function<Definition, Rewriter> rewriterGenerator) {
+                  CompiledDefinition compiledDefinition, BinaryLoader loader,
+                  ProofDefinitionBuilder proofDefinitionBuilder, Function<Definition, Rewriter> rewriterGenerator) {
         this.kem = kem;
         this.files = files;
         this.kprint = kprint;
         this.kproveOptions = kproveOptions;
         this.compiledDefinition = compiledDefinition;
+        this.loader = loader;
         this.proofDefinitionBuilder = proofDefinitionBuilder;
         this.rewriterGenerator = rewriterGenerator;
     }
@@ -55,6 +62,19 @@ public class KProve {
 
         Tuple2<Definition, Module> compiled = proofDefinitionBuilder
                 .build(kproveOptions.specFile(files), kproveOptions.defModule, kproveOptions.specModule);
+
+        // Saving compiled definition to disk to be usable by other tools (e.g., kast)
+        CompiledDefinition compiledDefinition = new CompiledDefinition(
+                new KompileOptions(), compiled._1(), compiled._1(), files, kem, null);
+        Path proveKompiledDir = files.resolveTemp("prove-spec-kompiled").toPath();
+        try {
+            Files.createDirectory(proveKompiledDir);
+            loader.saveOrDie(proveKompiledDir.resolve("compiled.bin").toFile(), compiledDefinition);
+        } catch (IOException e) {
+            kem.registerCriticalWarning(
+                    "Could not create prove-spec-kompiled directory. Definition will not be saved.", e);
+        }
+
         Rewriter rewriter = rewriterGenerator.apply(compiled._1());
         Module specModule = compiled._2();
         Rule boundaryPattern = buildBoundaryPattern(compiledDefinition);

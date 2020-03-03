@@ -1,0 +1,9 @@
+  <k>
+    X:S ~> DotVar1
+  </k>
+#And
+  {
+    isA ( X )
+  #Equals
+    true
+  }
