@@ -135,11 +135,7 @@ public class ModuleToKORE {
         Map<String, Boolean> attributes = new HashMap<>();
         attributes.put("nat", true);
         Set<Integer> priorities = new HashSet<>();
-        // default priority for semantics rules is 50
-        priorities.add(50);
-        // priority for owise rule is 200
-        priorities.add(200);
-        collectTokenSortsAndAttributes(tokenSorts, attributes, priorities);
+        collectTokenSortsAndAttributes(tokenSorts, attributes, priorities, heatCoolEq, topCellSortStr);
         Map<Integer, String> priorityToPreviousGroup = new HashMap<>();
         List<Integer> priorityList = new ArrayList<>(priorities);
         java.util.Collections.sort(priorityList);
@@ -246,7 +242,7 @@ public class ModuleToKORE {
     }
 
     private void collectTokenSortsAndAttributes(Set<SortHead> tokenSorts, Map<String, Boolean> attributes,
-                                                Set<Integer> priorities) {
+                                                Set<Integer> priorities, boolean heatCoolEq, String topCellSortStr) {
         for (SortHead sort : iterable(module.sortedDefinedSorts())) {
             Att att = module.sortAttributesFor().get(sort).getOrElse(() -> KORE.Att());
             if (att.contains("token")) {
@@ -267,9 +263,21 @@ public class ModuleToKORE {
         for (Rule r : iterable(module.sortedRules())) {
             Att att = r.att();
             collectAttributes(attributes, att);
-            Optional<String> priority = att.getOptional("priority");
-            if (priority.isPresent()) {
-                priorities.add(Integer.valueOf(priority.get()));
+            RuleInfo ruleInfo = getRuleInfo(r, heatCoolEq, topCellSortStr);
+            // only collect priorities of semantics rules
+            if (!ruleInfo.isEquation && !ruleInfo.isKore && !ExpandMacros.isMacro(r)) {
+                if(ruleInfo.isOwise) {
+                    // priority for owise rule is 200
+                    priorities.add(200);
+                } else {
+                    Optional<String> priority = att.getOptional("priority");
+                    if (priority.isPresent()) {
+                        priorities.add(Integer.valueOf(priority.get()));
+                    } else {
+                        // default priority for semantics rules is 50
+                        priorities.add(50);
+                    }
+                }
             }
         }
     }
