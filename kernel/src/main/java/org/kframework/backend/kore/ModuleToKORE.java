@@ -139,7 +139,9 @@ public class ModuleToKORE {
         Map<Integer, String> priorityToPreviousGroup = new HashMap<>();
         List<Integer> priorityList = new ArrayList<>(priorities);
         java.util.Collections.sort(priorityList);
-        priorityToPreviousGroup.put(priorityList.get(0), "");
+        if (priorityList.size() > 0 ) {
+            priorityToPreviousGroup.put(priorityList.get(0), "");
+        }
         for (int i = 1; i < priorityList.size(); i++) {
             Integer previous = priorityList.get(i - 1);
             Integer current = priorityList.get(i);
