@@ -65,6 +65,29 @@ import static org.kframework.Collections.*;
 import static org.kframework.definition.Constructors.*;
 import static org.kframework.kore.KORE.*;
 
+class RuleInfo {
+    boolean isEquation;
+    boolean isOwise;
+    boolean isKore;
+    Production production;
+    String productionSortStr;
+    List<Sort> prodChildrenSorts;
+    KLabel productionLabel;
+    List<K> leftChildren;
+
+    public RuleInfo(boolean equation, boolean owise, boolean kore, Production production,
+                    String prodSortStr, List<Sort> prodChildrenSorts, KLabel prodLabel, List<K> leftChildren) {
+        this.isEquation = equation;
+        this.isOwise = owise;
+        this.isKore = kore;
+        this.production = production;
+        this.productionSortStr = prodSortStr;
+        this.prodChildrenSorts = prodChildrenSorts;
+        this.productionLabel = prodLabel;
+        this.leftChildren = leftChildren;
+    }
+}
+
 public class ModuleToKORE {
     public enum SentenceType {
         REWRITE_RULE,
@@ -112,15 +135,13 @@ public class ModuleToKORE {
         Map<String, Boolean> attributes = new HashMap<>();
         attributes.put("nat", true);
         Set<Integer> priorities = new HashSet<>();
-        // default priority for semantics rules is 50
-        priorities.add(50);
-        // priority for owise rule is 200
-        priorities.add(200);
-        collectTokenSortsAndAttributes(tokenSorts, attributes, priorities);
+        collectTokenSortsAndAttributes(tokenSorts, attributes, priorities, heatCoolEq, topCellSortStr);
         Map<Integer, String> priorityToPreviousGroup = new HashMap<>();
         List<Integer> priorityList = new ArrayList<>(priorities);
         java.util.Collections.sort(priorityList);
-        priorityToPreviousGroup.put(priorityList.get(0), "");
+        if (priorityList.size() > 0 ) {
+            priorityToPreviousGroup.put(priorityList.get(0), "");
+        }
         for (int i = 1; i < priorityList.size(); i++) {
             Integer previous = priorityList.get(i - 1);
             Integer current = priorityList.get(i);
@@ -223,7 +244,7 @@ public class ModuleToKORE {
     }
 
     private void collectTokenSortsAndAttributes(Set<SortHead> tokenSorts, Map<String, Boolean> attributes,
-                                                Set<Integer> priorities) {
+                                                Set<Integer> priorities, boolean heatCoolEq, String topCellSortStr) {
         for (SortHead sort : iterable(module.sortedDefinedSorts())) {
             Att att = module.sortAttributesFor().get(sort).getOrElse(() -> KORE.Att());
             if (att.contains("token")) {
@@ -244,9 +265,21 @@ public class ModuleToKORE {
         for (Rule r : iterable(module.sortedRules())) {
             Att att = r.att();
             collectAttributes(attributes, att);
-            Optional<String> priority = att.getOptional("priority");
-            if (priority.isPresent()) {
-                priorities.add(Integer.valueOf(priority.get()));
+            RuleInfo ruleInfo = getRuleInfo(r, heatCoolEq, topCellSortStr);
+            // only collect priorities of semantics rules
+            if (!ruleInfo.isEquation && !ruleInfo.isKore && !ExpandMacros.isMacro(r)) {
+                if(ruleInfo.isOwise) {
+                    // priority for owise rule is 200
+                    priorities.add(200);
+                } else {
+                    Optional<String> priority = att.getOptional("priority");
+                    if (priority.isPresent()) {
+                        priorities.add(Integer.valueOf(priority.get()));
+                    } else {
+                        // default priority for semantics rules is 50
+                        priorities.add(50);
+                    }
+                }
             }
         }
     }
@@ -715,17 +748,7 @@ public class ModuleToKORE {
         return Optional.empty();
     }
 
-    private void convertRule(Rule rule, int ruleIndex, boolean heatCoolEq, String topCellSortStr,
-                             Map<String, Boolean> consideredAttributes, SetMultimap<KLabel, Rule> functionRules,
-                             Map<Integer, String> priorityToPreviousGroup,
-                             ListMultimap<Integer, String> priorityToAlias,
-                             SentenceType defaultSentenceType, StringBuilder sb) {
-        SentenceType sentenceType = getSentenceType(rule.att()).orElse(defaultSentenceType);
-        // injections should already be present, but this is an ugly hack to get around the
-        // cache persistence issue that means that Sort attributes on k terms might not be present.
-        rule = new AddSortInjections(module).addInjections(rule);
-        Set<KVariable> existentials = getExistentials(rule);
-        ConstructorChecks constructorChecks = new ConstructorChecks(module);
+    private RuleInfo getRuleInfo(Rule rule, boolean heatCoolEq, String topCellSortStr) {
         boolean equation = false;
         boolean owise = false;
         boolean kore = rule.att().contains(Attribute.KORE_KEY);
@@ -735,11 +758,8 @@ public class ModuleToKORE {
         List<Sort> productionSorts = null;
         KLabel productionLabel = null;
         List<K> leftChildren = null;
+
         K left = RewriteToTop.toLeft(rule.body());
-        K requires = rule.requires();
-        K right =  RewriteToTop.toRight(rule.body());
-        K ensures = rule.ensures();
-        boolean constructorBased = constructorChecks.isConstructorBased(left);
         K leftPattern = left;
         while (leftPattern instanceof KAs) {
             leftPattern = ((KAs)leftPattern).pattern();
@@ -762,10 +782,32 @@ public class ModuleToKORE {
             }
             owise = rule.att().contains("owise");
         }
+
+        return new RuleInfo(equation, owise, kore, production,
+                productionSortStr, productionSorts, productionLabel, leftChildren);
+    }
+
+    private void convertRule(Rule rule, int ruleIndex, boolean heatCoolEq, String topCellSortStr,
+                             Map<String, Boolean> consideredAttributes, SetMultimap<KLabel, Rule> functionRules,
+                             Map<Integer, String> priorityToPreviousGroup,
+                             ListMultimap<Integer, String> priorityToAlias,
+                             SentenceType defaultSentenceType, StringBuilder sb) {
+        SentenceType sentenceType = getSentenceType(rule.att()).orElse(defaultSentenceType);
+        // injections should already be present, but this is an ugly hack to get around the
+        // cache persistence issue that means that Sort attributes on k terms might not be present.
+        rule = new AddSortInjections(module).addInjections(rule);
+        Set<KVariable> existentials = getExistentials(rule);
+        ConstructorChecks constructorChecks = new ConstructorChecks(module);
+        K left = RewriteToTop.toLeft(rule.body());
+        K requires = rule.requires();
+        K right =  RewriteToTop.toRight(rule.body());
+        K ensures = rule.ensures();
+        boolean constructorBased = constructorChecks.isConstructorBased(left);
+        RuleInfo ruleInfo = getRuleInfo(rule, heatCoolEq, topCellSortStr);
         sb.append("// ");
         sb.append(rule.toString());
         sb.append("\n");
-        if (equation) {
+        if (ruleInfo.isEquation) {
             assertNoExistentials(rule, existentials);
             if (!constructorBased) {
                 if (!consideredAttributes.containsKey(Attribute.SIMPLIFICATION_KEY)) {
@@ -782,11 +824,11 @@ public class ModuleToKORE {
                     sb.append("," + sortParamName);
             }
             sb.append("} ");
-            if (owise) {
+            if (ruleInfo.isOwise) {
                 Set<String> varNames = collectLHSFreeVariables(requires, left)
                         .stream().map(KVariable::name).collect(Collectors.toSet());
                 sb.append("\\implies{R} (\n    \\and{R} (\n      \\not{R} (\n        ");
-                for (Rule notMatching : RefreshRules.refresh(functionRules.get(productionLabel), varNames)) {
+                for (Rule notMatching : RefreshRules.refresh(functionRules.get(ruleInfo.productionLabel), varNames)) {
                     if (notMatching.att().contains("owise")) {
                         continue;
                     }
@@ -806,26 +848,26 @@ public class ModuleToKORE {
 
                     assert notMatchingLeft instanceof KApply : "expecting KApply but got " + notMatchingLeft.getClass();
                     List<K> notMatchingChildren = ((KApply) notMatchingLeft).items();
-                    assert notMatchingChildren.size() == leftChildren.size() : "assuming function with fixed arity";
-                    for (int childIdx = 0; childIdx < leftChildren.size(); childIdx++) {
+                    assert notMatchingChildren.size() == ruleInfo.leftChildren.size() : "assuming function with fixed arity";
+                    for (int childIdx = 0; childIdx < ruleInfo.leftChildren.size(); childIdx++) {
                         sb.append("\\and{R} (");
                         sb.append("\n                ");
                         sb.append("\\ceil{");
-                        Sort childSort = productionSorts.get(childIdx);
-                        convert(childSort, production.params(), sb);
+                        Sort childSort = ruleInfo.prodChildrenSorts.get(childIdx);
+                        convert(childSort, ruleInfo.production.params(), sb);
                         sb.append(", R} (");
                         sb.append("\n                  ");
                         sb.append("\\and{");
-                        convert(childSort, production.params(), sb);
+                        convert(childSort, ruleInfo.production.params(), sb);
                         sb.append("} (\n                    ");
-                        convert(leftChildren.get(childIdx), sb);
+                        convert(ruleInfo.leftChildren.get(childIdx), sb);
                         sb.append(",\n                    ");
                         convert(notMatchingChildren.get(childIdx), sb);
                         sb.append("\n                )),");
                     }
                     sb.append("\n                \\top{R} ()");
                     sb.append("\n              ");
-                    for (int childIdx = 0; childIdx < leftChildren.size(); childIdx++) {
+                    for (int childIdx = 0; childIdx < ruleInfo.leftChildren.size(); childIdx++) {
                         sb.append(')');
                     }
                     sb.append("\n          )");
@@ -836,7 +878,7 @@ public class ModuleToKORE {
                 }
                 sb.append("\\bottom{R}()");
                 sb.append("\n        ");
-                for (Rule notMatching : functionRules.get(productionLabel)) {
+                for (Rule notMatching : functionRules.get(ruleInfo.productionLabel)) {
                     if (notMatching.att().contains("owise")) {
                         continue;
                     }
@@ -845,7 +887,7 @@ public class ModuleToKORE {
                 sb.append("\n      ),\n      ");
                 convertSideCondition(requires, sb);
                 sb.append("\n    ),\n    \\and{R} (\n      \\equals{");
-                sb.append(productionSortStr);
+                sb.append(ruleInfo.productionSortStr);
                 sb.append(",R} (\n        ");
                 convert(left, sb);
                 sb.append(",\n        ");
@@ -859,7 +901,7 @@ public class ModuleToKORE {
                 sb.append("\\implies{R} (\n    ");
                 convertSideCondition(requires, sb);
                 sb.append(",\n    \\and{R} (\n      \\equals{");
-                sb.append(productionSortStr);
+                sb.append(ruleInfo.productionSortStr);
                 sb.append(",R} (\n        ");
                 convert(left, sb);
                 sb.append(",\n        ");
@@ -870,7 +912,7 @@ public class ModuleToKORE {
                 convert(consideredAttributes, rule.att(), sb);
                 sb.append("\n\n");
             }
-        } else if (kore) {
+        } else if (ruleInfo.isKore) {
             assertNoExistentials(rule, existentials);
             if (isClaim(sentenceType)) {
                 sb.append("  claim{} ");
@@ -890,7 +932,7 @@ public class ModuleToKORE {
                 // default priority for semantics rules is 50
                 Integer priority = Integer.valueOf(rule.att().getOptional("priority").orElse("50"));
                 // priority for owise rule is 200
-                if(owise) {
+                if(ruleInfo.isOwise) {
                     priority = 200;
                 }
                 List<KVariable> freeVars = new ArrayList<>(collectLHSFreeVariables(requires, left));
