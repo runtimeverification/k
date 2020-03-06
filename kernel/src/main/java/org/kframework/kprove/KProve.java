@@ -21,6 +21,7 @@ import scala.Tuple2;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.function.Function;
 
 
@@ -63,16 +64,8 @@ public class KProve {
         Tuple2<Definition, Module> compiled = proofDefinitionBuilder
                 .build(kproveOptions.specFile(files), kproveOptions.defModule, kproveOptions.specModule);
 
-        // Saving compiled definition to disk to be usable by other tools (e.g., kast)
-        CompiledDefinition compiledDefinition = new CompiledDefinition(
-                new KompileOptions(), compiled._1(), compiled._1(), files, kem, null);
-        Path proveKompiledDir = files.resolveTemp("prove-spec-kompiled").toPath();
-        try {
-            Files.createDirectory(proveKompiledDir);
-            loader.saveOrDie(proveKompiledDir.resolve("compiled.bin").toFile(), compiledDefinition);
-        } catch (IOException e) {
-            kem.registerCriticalWarning(
-                    "Could not create prove-spec-kompiled directory. Definition will not be saved.", e);
+        if (kproveOptions.saveProofDefinitionTo != null) {
+            saveFullDefinition(compiled._1());
         }
 
         Rewriter rewriter = rewriterGenerator.apply(compiled._1());
@@ -83,6 +76,24 @@ public class KProve {
         kprint.prettyPrint(compiled._1(), compiled._1().getModule("LANGUAGE-PARSING").get(), kprint::outputFile,
                 results.k());
         return results.exitCode().orElse(KEMException.TERMINATED_WITH_ERRORS_EXIT_CODE);
+    }
+
+    // Saving combined verification definition to disk to be usable by other tools (e.g., kast)
+    private void saveFullDefinition(Definition fullDefinition) {
+        CompiledDefinition fullCompiledDefinition = new CompiledDefinition(
+                compiledDefinition.kompileOptions,
+                fullDefinition, fullDefinition,
+                files, kem, compiledDefinition.topCellInitializer);
+        Path proveKompiledDir = Paths.get(kproveOptions.saveProofDefinitionTo).resolve("prove-spec-kompiled");
+        try {
+            Files.createDirectory(proveKompiledDir);
+            loader.saveOrDie(proveKompiledDir.resolve("compiled.bin").toFile(), fullCompiledDefinition);
+        } catch (IOException e) {
+            throw KEMException.criticalError(
+                    "Could not create prove-spec-kompiled directory in\n\t" +
+                            proveKompiledDir +
+                            "\nDefinition will not be saved.", e);
+        }
     }
 
     /**
