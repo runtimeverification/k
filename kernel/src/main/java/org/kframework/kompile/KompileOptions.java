@@ -123,9 +123,6 @@ public class KompileOptions implements Serializable {
         @Parameter(names="--kore-prove", description="Compile with the KORE pipeline for proving.")
         public boolean koreProve = false;
 
-        @Parameter(names="--cache-file", description="Location of parse cache file. Default is $KOMPILED_DIR/cache.bin.")
-        public String cacheFile;
-
         @Parameter(names="--emit-json", description="Emit JSON serialized version of parsed and kompiled definitions.")
         public boolean emitJson = false;
 
