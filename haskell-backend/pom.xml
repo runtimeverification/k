@@ -28,6 +28,19 @@
     </dependency>
   </dependencies>
 
+  <properties>
+    <haskell.backend.release.flag>release</haskell.backend.release.flag>
+  </properties>
+
+  <profiles>
+    <profile>
+      <id>haskell.backend.debug</id>
+      <properties>
+        <haskell.backend.release.flag>-release</haskell.backend.release.flag>
+      </properties>
+    </profile>
+  </profiles>
+
   <build>
     <plugins>
       <plugin>
@@ -50,6 +63,8 @@
                   <arg value="--ghc-options=-j" />
                   <arg value="--local-bin-path" />
                   <arg value="${project.build.directory}/stack-install" />
+                  <arg value="--flag" />
+                  <arg value="kore:${haskell.backend.release.flag}" />
                 </exec>
               </target>
             </configuration>
