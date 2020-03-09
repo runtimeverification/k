@@ -86,13 +86,11 @@ public class KProve {
                 files, kem, compiledDefinition.topCellInitializer);
         Path proveKompiledDir = Paths.get(kproveOptions.saveProofDefinitionTo).resolve("prove-spec-kompiled");
         try {
-            Files.createDirectory(proveKompiledDir);
+            Files.createDirectories(proveKompiledDir);
             loader.saveOrDie(proveKompiledDir.resolve("compiled.bin").toFile(), fullCompiledDefinition);
         } catch (IOException e) {
             throw KEMException.criticalError(
-                    "Could not create prove-spec-kompiled directory in\n\t" +
-                            proveKompiledDir +
-                            "\nDefinition will not be saved.", e);
+                    "Could not create proof output directory " + proveKompiledDir.toAbsolutePath(), e);
         }
     }
 
