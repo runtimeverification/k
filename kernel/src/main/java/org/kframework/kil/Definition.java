@@ -1,15 +1,12 @@
 // Copyright (c) 2012-2019 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import org.kframework.utils.errorsystem.KExceptionManager;
-
 import com.google.inject.Inject;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -34,15 +31,6 @@ public class Definition extends ASTNode {
 
     @Inject
     public Definition(Void v) {}
-
-    public Definition(Definition d) {
-        super(d);
-        this.mainFile = d.mainFile;
-        this.mainModule = d.mainModule;
-        this.mainSyntaxModule = d.mainSyntaxModule;
-        this.items = d.items;
-        this.locations = d.locations;
-    }
 
     @Override
     public String toString() {
@@ -78,11 +66,6 @@ public class Definition extends ASTNode {
 
     public void setMainSyntaxModule(String mainSyntaxModule) {
         this.mainSyntaxModule = mainSyntaxModule;
-    }
-
-    @Override
-    public Definition shallowCopy() {
-        return new Definition(this);
     }
 
 }

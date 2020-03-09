@@ -16,13 +16,6 @@ public class Module extends DefinitionItem {
     // lazily computed set of sorts.
     private Set<Sort> sorts;
 
-    public Module(Module m) {
-        super(m);
-        this.name = m.name;
-        this.items = m.items;
-        this.sorts = m.sorts;
-    }
-
     public Module() {
         super();
     }
@@ -72,10 +65,5 @@ public class Module extends DefinitionItem {
         return "module " + name + "\n" + content + "\nendmodule";
     }
 
-
-    @Override
-    public Module shallowCopy() {
-        return new Module(this);
-    }
 
 }

@@ -10,11 +10,6 @@ public abstract class DefinitionItem extends ASTNode {
         super();
     }
 
-    public DefinitionItem(DefinitionItem di) {
-        super(di);
-        this.predefined = di.predefined;
-    }
-
     public void setPredefined(boolean predefined) {
         this.predefined = predefined;
     }
