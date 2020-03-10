@@ -1,9 +1,3 @@
-  #Not ( {
-    A <=Int B
-  #Equals
-    false
-  } )
-#And
   <T>
     <k>
       .
