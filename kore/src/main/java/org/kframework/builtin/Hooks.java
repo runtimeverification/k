@@ -25,7 +25,6 @@ public class Hooks {
     public static final String STRING = "STRING";
     public static final String SUBSTITUTION = "SUBSTITUTION";
     public static final String UNIFICATION = "UNIFICATION";
-    public static final String JSON = "JSON";
 
-    public static final Set<String> namespaces = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(ARRAY, BOOL, BUFFER, BYTES, FFI, FLOAT, INT, IO, KEQUAL, KREFLECTION, LIST, MAP, MINT, SET, STRING, SUBSTITUTION, UNIFICATION, JSON)));
+    public static final Set<String> namespaces = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(ARRAY, BOOL, BUFFER, BYTES, FFI, FLOAT, INT, IO, KEQUAL, KREFLECTION, LIST, MAP, MINT, SET, STRING, SUBSTITUTION, UNIFICATION)));
 }
