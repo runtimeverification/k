@@ -27,13 +27,6 @@ public class UserList extends ProductionItem {
         this.listType = listType;
     }
 
-    public UserList(UserList userList) {
-        super(userList);
-        sort = userList.sort;
-        separator = userList.separator.trim();
-        listType = userList.listType;
-    }
-
     @Override
     public String toString() {
         if (listType.equals(ZERO_OR_MORE))
@@ -79,11 +72,6 @@ public class UserList extends ProductionItem {
     @Override
     public int hashCode() {
         return this.separator.hashCode() + this.sort.hashCode();
-    }
-
-    @Override
-    public UserList shallowCopy() {
-        return new UserList(this);
     }
 
     public String getListType() {

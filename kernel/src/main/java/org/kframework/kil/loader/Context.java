@@ -4,14 +4,16 @@ package org.kframework.kil.loader;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 import com.google.inject.Inject;
-import org.kframework.kil.Attribute;
 import org.kframework.kil.Production;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.krun.KRunOptions;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.inject.RequestScoped;
+import scala.Tuple2;
 
 import java.io.Serializable;
+
+import static org.kframework.Collections.*;
 
 @RequestScoped
 public class Context implements Serializable {
@@ -32,8 +34,8 @@ public class Context implements Serializable {
         if (p.getKLabel(false) != null) {
             tags.put(p.getKLabel(false), p);
         }
-        for (Attribute<?> a : p.getAttributes().values()) {
-            tags.put(a.getKey().toString(), p);
+        for (Tuple2<String, String> a : iterable(p.getAttributes().att().keys())) {
+            tags.put(a._1, p);
         }
     }
 }

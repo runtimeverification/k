@@ -13,12 +13,6 @@ public class Lexical extends ProductionItem {
         this.follow = follow;
     }
 
-    public Lexical(Lexical terminal) {
-        super(terminal);
-        this.lexicalRule = terminal.lexicalRule;
-        this.follow = terminal.follow;
-    }
-
     @Override
     public String toString() {
         return "Lexical{" + lexicalRule + "}";
@@ -43,11 +37,6 @@ public class Lexical extends ProductionItem {
     @Override
     public int hashCode() {
         return this.lexicalRule.hashCode();
-    }
-
-    @Override
-    public Lexical shallowCopy() {
-        return new Lexical(this);
     }
 
     public void setFollow(String follow) {
