@@ -44,8 +44,12 @@ object KOREToTreeNodes {
         }
       } else {
         val p = mod.productionsFor(KLabel(a.klabel.name)).filter(!_.att.contains("unparseAvoid")).head
-        val origP = p.att.getOptional("originalPrd", classOf[Production]).orElse(p)
-        val subst = origP.substitute(a.klabel.params)
+        val subst = if (a.klabel.params.nonEmpty) {
+          val origP = p.att.getOptional("originalPrd", classOf[Production]).orElse(p)
+          origP.substitute(a.klabel.params)
+        } else {
+          p
+        }
         TermCons(children, subst, loc, source)
       }
   }
