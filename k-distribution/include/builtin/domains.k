@@ -963,7 +963,6 @@ endmodule
 module K-IO
   imports LIST
   imports STRING
-  imports K-REFLECTION
 
   syntax IOError ::= "#EOF" [klabel(#EOF), symbol] | #unknownIOError(errno: Int) [symbol]
                    | "#E2BIG" [klabel(#E2BIG), symbol]
