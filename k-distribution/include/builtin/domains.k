@@ -392,9 +392,9 @@ module INT-COMMON
                > left:
                  Int "|Int" Int                 [function, functional, klabel(_|Int_), symbol, left, latex({#1}\mathrel{|_{\scriptstyle\it Int}}{#2}), hook(INT.or), smtlib(orInt)]
 
-  syntax Int ::= "minInt" "(" Int "," Int ")"   [function, functional, smtlib(int_min), hook(INT.min)]
-               | "maxInt" "(" Int "," Int ")"   [function, functional, smtlib(int_max), hook(INT.max)]
-               | absInt ( Int )                 [function, functional, smtlib(int_abs), hook(INT.abs)]
+  syntax Int ::= "minInt" "(" Int "," Int ")"   [function, functional, smt-hook((ite (< #1 #2) #1 #2)), hook(INT.min)]
+               | "maxInt" "(" Int "," Int ")"   [function, functional, smt-hook((ite (< #1 #2) #2 #1)), hook(INT.max)]
+               | absInt ( Int )                 [function, functional, smt-hook((ite (< #1 0) (- 0 #1) #1)), hook(INT.abs)]
                | log2Int ( Int )                [function, hook(INT.log2)]
 
   syntax Int ::= bitRangeInt           ( Int, index: Int, length: Int ) [function, hook(INT.bitRange)]
