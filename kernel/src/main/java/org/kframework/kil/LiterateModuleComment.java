@@ -6,12 +6,6 @@ public class LiterateModuleComment extends ModuleItem implements LiterateComment
     private String value;
     private LiterateCommentType lcType;
 
-    public LiterateModuleComment(LiterateModuleComment literateModuleComment) {
-        super(literateModuleComment);
-        value = literateModuleComment.value;
-        lcType = literateModuleComment.lcType;
-    }
-
     public LiterateModuleComment(String value, LiterateCommentType lcType) {
         this.value = value;
         this.lcType = lcType;
@@ -35,11 +29,6 @@ public class LiterateModuleComment extends ModuleItem implements LiterateComment
 
     public String getValue() {
         return value;
-    }
-
-    @Override
-    public LiterateModuleComment shallowCopy() {
-        return new LiterateModuleComment(this);
     }
 
     @Override

@@ -47,12 +47,6 @@ public class PriorityBlock extends ASTNode {
         this(assoc, Lists.newArrayList(productions));
     }
 
-    public PriorityBlock(PriorityBlock node) {
-        super(node);
-        this.assoc = node.assoc;
-        this.productions.addAll(node.productions);
-    }
-
     @Override
     public String toString() {
         String content = "";
@@ -98,11 +92,6 @@ public class PriorityBlock extends ASTNode {
         for (Production prd : productions)
             hash += prd.hashCode();
         return hash;
-    }
-
-    @Override
-    public PriorityBlock shallowCopy() {
-        return new PriorityBlock(this);
     }
 
 }

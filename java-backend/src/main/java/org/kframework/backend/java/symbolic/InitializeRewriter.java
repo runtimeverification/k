@@ -458,7 +458,6 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
                 startEnsures.add(startRule.getEnsures(processProofRules.termContext.global()));
                 targetEnsures.add(targetRule.getEnsures(processProofRules.termContext.global()));
 
-                // assert rule1.containsAttribute(Attribute.TRUSTED_KEY) == rule2.containsAttribute(Attribute.TRUSTED_KEY);
                 trusted.add(startRule.att().contains(Attribute.TRUSTED_KEY));
             }
         }

@@ -17,11 +17,6 @@ public class PriorityExtended extends ModuleItem {
         return priorityBlocks;
     }
 
-    public PriorityExtended(PriorityExtended node) {
-        super(node);
-        this.priorityBlocks = node.priorityBlocks;
-    }
-
     @Override
     public String toString() {
         String blocks = "";
@@ -65,8 +60,4 @@ public class PriorityExtended extends ModuleItem {
         return hash;
     }
 
-    @Override
-    public PriorityExtended shallowCopy() {
-        return new PriorityExtended(this);
-    }
 }
