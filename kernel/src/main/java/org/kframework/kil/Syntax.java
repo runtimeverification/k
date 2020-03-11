@@ -1,12 +1,9 @@
 // Copyright (c) 2012-2019 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import com.beust.jcommander.internal.Lists;
-
 import org.kframework.kore.Sort;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -52,12 +49,6 @@ public class Syntax extends ModuleItem {
 
     public void setPriorityBlocks(java.util.List<PriorityBlock> priorityBlocks) {
         this.priorityBlocks = priorityBlocks;
-    }
-
-    public Syntax(Syntax node) {
-        super(node);
-        this.sort = node.sort;
-        this.priorityBlocks = node.priorityBlocks;
     }
 
     @Override
@@ -106,8 +97,4 @@ public class Syntax extends ModuleItem {
         return hash;
     }
 
-    @Override
-    public Syntax shallowCopy() {
-        return new Syntax(this);
-    }
 }

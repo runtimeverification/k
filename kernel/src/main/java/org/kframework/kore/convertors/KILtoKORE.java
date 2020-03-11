@@ -325,23 +325,9 @@ public class KILtoKORE extends KILTransformation<Object> {
     }
 
     public static org.kframework.attributes.Att convertAttributes(ASTNode t) {
-        Attributes attributes = t.getAttributes();
+        Att attributes = t.getAttributes();
 
-        Map<String, String> attributesSet = attributes
-                .keySet()
-                .stream()
-                .map(key -> {
-                    String keyString = key.toString();
-                    String valueString = attributes.get(key).getValue().toString();
-                    if (keyString.equals("klabel")) {
-                        return Tuple2.apply("klabel", valueString);
-                    } else {
-                        return Tuple2.apply(keyString, valueString);
-                    }
-
-                }).collect(Collectors.toMap(Tuple2::_1, Tuple2::_2));
-
-        return Att.from(attributesSet)
+        return attributes
                 .addAll(attributesFromLocation(t.getLocation()))
                 .addAll(attributesFromSource(t.getSource()));
     }

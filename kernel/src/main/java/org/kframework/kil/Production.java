@@ -80,13 +80,6 @@ public class Production extends ASTNode {
         return items.size() == 1 && items.get(0) instanceof Terminal;
     }
 
-    public Production(Production node) {
-        super(node);
-        this.items = node.items;
-        this.sort = node.sort;
-        this.ownerModuleName = node.ownerModuleName;
-    }
-
     public Production(NonTerminal sort, java.util.List<ProductionItem> items) {
         super();
         this.items = items;
@@ -244,11 +237,6 @@ public class Production extends ASTNode {
             content += i + " ";
 
         return content;
-    }
-
-    @Override
-    public Production shallowCopy() {
-        return new Production(this);
     }
 
     public void setOwnerModuleName(String ownerModuleName) {

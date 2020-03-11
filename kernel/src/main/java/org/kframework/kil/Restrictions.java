@@ -23,13 +23,6 @@ public class Restrictions extends ModuleItem {
         this.pattern = pattern;
     }
 
-    public Restrictions(Restrictions node) {
-        super(node);
-        this.sort = node.sort;
-        this.terminal = node.terminal;
-        this.pattern = node.pattern;
-    }
-
     @Override
     public String toString() {
         return "  syntax " + (sort != null ? sort : terminal) + " -/- " + pattern + "\n";
@@ -57,11 +50,6 @@ public class Restrictions extends ModuleItem {
         int hash = pattern.hashCode();
         hash += sort != null ? sort.hashCode() : terminal.hashCode();
         return hash;
-    }
-
-    @Override
-    public Restrictions shallowCopy() {
-        return new Restrictions(this);
     }
 
     public Terminal getTerminal() {
