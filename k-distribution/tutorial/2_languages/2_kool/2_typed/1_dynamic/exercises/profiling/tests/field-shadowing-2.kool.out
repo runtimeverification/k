@@ -5,13 +5,13 @@ Statistics
 ==========
 
 Objects created:
+   G |-> 1
    Main |-> 1
    C |-> 1
-   G |-> 1
 
 Methods invoked:
-   Main.Main |-> 1
-   C.C |-> 1
-   C.get |-> 1
    G.d |-> 1
    G.G |-> 1
+   Main.Main |-> 1
+   C.get |-> 1
+   C.C |-> 1

@@ -22,14 +22,14 @@ Statistics
 ==========
 
 Objects created:
-   Main |-> 1
    Matrix |-> 3
+   Main |-> 1
 
 Methods invoked:
-   Matrix.copy |-> 2
-   Main.Main |-> 1
-   Matrix.multiply |-> 2
-   Matrix.printMatrix |-> 5
-   Matrix.readMatrix |-> 1
    Matrix.Matrix |-> 3
+   Matrix.copy |-> 2
+   Matrix.readMatrix |-> 1
    Matrix.transpose |-> 1
+   Matrix.multiply |-> 2
+   Main.Main |-> 1
+   Matrix.printMatrix |-> 5
