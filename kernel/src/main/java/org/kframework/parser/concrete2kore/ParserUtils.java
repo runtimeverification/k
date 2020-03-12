@@ -286,7 +286,7 @@ public class ParserUtils {
             syntaxModule = opt.get();
         }
 
-        return org.kframework.definition.Definition.apply(mainModule, immutable(modules), Att().add(Att.syntaxModule(), syntaxModule.name()));
+        return org.kframework.definition.Definition.apply(mainModule, immutable(modules), Att().add(Att.SYNTAX_MODULE(), syntaxModule.name()));
     }
 
     private Module getMainModule(String mainModuleName, Set<Module> modules) {

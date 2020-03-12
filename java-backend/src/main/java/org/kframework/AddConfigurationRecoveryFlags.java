@@ -33,8 +33,8 @@ public class AddConfigurationRecoveryFlags implements UnaryOperator<Sentence> {
                 }
             }.apply(r.body());
 
-            Att newAtt = has_THIS_CONFIGURATION ? r.att().add(Att.refers_THIS_CONFIGURATION()) : r.att();
-            newAtt = has_RESTORE_CONFIGURATION ? newAtt.add(Att.refers_RESTORE_CONFIGURATION()) : newAtt;
+            Att newAtt = has_THIS_CONFIGURATION ? r.att().add(Att.REFERS_THIS_CONFIGURATION()) : r.att();
+            newAtt = has_RESTORE_CONFIGURATION ? newAtt.add(Att.REFERS_RESTORE_CONFIGURATION()) : newAtt;
 
             return Rule.apply(r.body(), r.requires(), r.ensures(), newAtt);
         } else

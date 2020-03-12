@@ -15,7 +15,6 @@ import org.kframework.definition.ProductionItem;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.definition.SyntaxSort;
-import org.kframework.kil.Attribute;
 import org.kframework.kil.loader.Constants;
 import org.kframework.kore.*;
 import org.kframework.utils.StringUtil;
@@ -377,14 +376,14 @@ public class GenerateSentencesFromConfigDecl {
                     sentences.add(Production(Seq(), childOptSort, List(NonTerminal(childSort))));
                     if (!m.definedKLabels().contains(KLabel("no"+childSort.toString()))) {
                         sentences.add(Production(KLabel("no"+childSort.toString()), childOptSort, List(Terminal("no"+childSort.toString())),
-                                Att().add(Attribute.CELL_OPT_ABSENT_KEY,Sort.class,childSort)));
+                                Att().add(Att.CELL_OPT_ABSENT(),Sort.class,childSort)));
                     }
                 }
             }
             fragmentItems.add(Terminal("</"+cellName+">-fragment"));
             if (!m.definedKLabels().contains(KLabel("<" + cellName + ">-fragment"))) {
                 sentences.add(Production(KLabel("<" + cellName + ">-fragment"), fragmentSort, immutable(fragmentItems),
-                        Att().add(Attribute.CELL_FRAGMENT_KEY, Sort.class, Sort(sortName))));
+                        Att().add(Att.CELL_FRAGMENT(), Sort.class, Sort(sortName))));
             }
         }
 
@@ -411,24 +410,24 @@ public class GenerateSentencesFromConfigDecl {
             String type = cellProperties.<String>getOptional("type").orElse("Bag");
             Sort bagSort = Sort(sortName + type);
             Att bagAtt = Att()
-                    .add(Attribute.ASSOCIATIVE_KEY, "")
+                    .add(Att.ASSOC(), "")
                     .add("cellCollection")
                     .add("element", bagSort.name() + "Item")
                     .add("wrapElement", "<" + cellName + ">")
-                    .add(Attribute.UNIT_KEY, "." + bagSort.name())
-                    .add(Attribute.HOOK_KEY, type.toUpperCase() + ".concat")
+                    .add(Att.UNIT(), "." + bagSort.name())
+                    .add(Att.HOOK(), type.toUpperCase() + ".concat")
                     .add("avoid") // needed to ensure cell collections are parsed as Bag instead of CellBag
-                    .add(Attribute.FUNCTION_KEY);
+                    .add(Att.FUNCTION());
             String unitHook = type.toUpperCase() + ".unit", elementHook = type.toUpperCase() + ".element";
             switch(type) {
             case "Set":
-                bagAtt = bagAtt.add(Attribute.IDEMPOTENT_KEY, "");
+                bagAtt = bagAtt.add(Att.IDEM(), "");
                 // fall through
             case "Map":
-                bagAtt = bagAtt.add(Attribute.COMMUTATIVE_KEY, "");
+                bagAtt = bagAtt.add(Att.COMM(), "");
                 break;
             case "Bag":
-                bagAtt = bagAtt.add(Attribute.COMMUTATIVE_KEY, "").add(Att.bag() + "");
+                bagAtt = bagAtt.add(Att.COMM(), "").add(Att.BAG() + "");
                 break;
             case "List":
                 break;
@@ -446,15 +445,15 @@ public class GenerateSentencesFromConfigDecl {
                         NonTerminal(childSorts.get(0)),
                         Terminal(","),
                         NonTerminal(sort),
-                        Terminal(")")), Att().add(Attribute.HOOK_KEY, elementHook).add(Attribute.FUNCTION_KEY).add("format", "%5"));
+                        Terminal(")")), Att().add(Att.HOOK(), elementHook).add(Att.FUNCTION()).add("format", "%5"));
             } else {
                 bagElement = Production(KLabel(bagSort.name() + "Item"), bagSort, Seq(
                         Terminal(bagSort.name() + "Item"),
                         Terminal("("),
                         NonTerminal(sort),
-                        Terminal(")")), Att().add(Attribute.HOOK_KEY, elementHook).add(Attribute.FUNCTION_KEY).add("format", "%3"));
+                        Terminal(")")), Att().add(Att.HOOK(), elementHook).add(Att.FUNCTION()).add("format", "%3"));
             }
-            Sentence bagUnit = Production(KLabel("." + bagSort.name()), bagSort, Seq(Terminal("." + bagSort.name())), Att().add(Attribute.HOOK_KEY, unitHook).add(Attribute.FUNCTION_KEY));
+            Sentence bagUnit = Production(KLabel("." + bagSort.name()), bagSort, Seq(Terminal("." + bagSort.name())), Att().add(Att.HOOK(), unitHook).add(Att.FUNCTION()));
             Sentence bag = Production(KLabel("_" + bagSort + "_"), bagSort, Seq(NonTerminal(bagSort), NonTerminal(bagSort)),
                     bagAtt);
             sentences.add(sortDecl);
@@ -471,9 +470,9 @@ public class GenerateSentencesFromConfigDecl {
             // syntax Cell ::= ".Cell"
             Production cellUnit = Production(KLabel("." + sortName), sort, Seq(Terminal("." + sortName)));
             sentences.add(cellUnit);
-            // add UNIT_KEY attribute to cell production.
+            // add UNIT attribute to cell production.
             if(!m.definedKLabels().contains(KLabel(klabel))) {
-                Production cellProduction = Production(KLabel(klabel), sort, immutable(items), att.add(Attribute.UNIT_KEY, cellUnit.klabel().get().name()));
+                Production cellProduction = Production(KLabel(klabel), sort, immutable(items), att.add(Att.UNIT(), cellUnit.klabel().get().name()));
                 sentences.add(cellProduction);
             }
             // rule initCell => .CellBag

@@ -12,9 +12,6 @@ public class Constants {
     public static final String K = "K";
     public static final String HOLE = "hole";
     // Attributes constants
-    public static final String LOC_loc_ATTR = "loc";
-    public static final String ANYWHERE = "anywhere";
-    public static final String SOURCE_ATTR = "source";
     public static final String ORIGINAL_PRD = "originalPrd";
     public static final String RECORD_PRD = "recordPrd";
 

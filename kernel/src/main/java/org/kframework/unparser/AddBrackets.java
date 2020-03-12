@@ -1,13 +1,13 @@
 // Copyright (c) 2013-2019 K Team. All Rights Reserved.
 package org.kframework.unparser;
 
+import org.kframework.attributes.Att;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Module;
 import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
 import org.kframework.definition.Tag;
 import org.kframework.definition.TerminalLike;
-import org.kframework.kil.Attribute;
 import org.kframework.kore.Sort;
 import org.kframework.parser.Constant;
 import org.kframework.parser.ProductionReference;
@@ -92,7 +92,7 @@ public class AddBrackets {
         EnumSet<Fixity> innerFixity = getFixity(inner);
         if (inner.production().klabel().equals(outer.production().klabel()) &&
             inner.production().klabel().isDefined() &&
-            m.attributesFor().apply(inner.production().klabel().get().head()).contains(Attribute.ASSOCIATIVE_KEY))
+            m.attributesFor().apply(inner.production().klabel().get().head()).contains(Att.ASSOC()))
             return false;
         if (inner instanceof Constant)
             return false;

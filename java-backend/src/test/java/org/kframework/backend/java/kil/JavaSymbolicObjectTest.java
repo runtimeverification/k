@@ -5,7 +5,6 @@ import com.google.common.collect.Sets;
 import org.junit.Before;
 import org.junit.Test;
 import org.kframework.attributes.Att;
-import org.kframework.kil.Attribute;
 import org.kframework.kore.KORE;
 import org.kframework.utils.BaseTestCase;
 import org.mockito.Mock;
@@ -30,7 +29,7 @@ public class JavaSymbolicObjectTest extends BaseTestCase {
         when(definition.signaturesOf("foo")).thenReturn(Collections.emptySet());
         when(definition.allSorts()).thenReturn(Collections.singleton(Sort.of(KORE.Sort("Foo@FOO"))));
         when(definition.kLabelAttributesOf(foo)).thenReturn(Att.empty()   );
-        when(definition.kLabelAttributesOf(isFoo)).thenReturn(Att.empty().add(Attribute.PREDICATE_KEY, org.kframework.kore.Sort.class, KORE.Sort("Foo@FOO")));
+        when(definition.kLabelAttributesOf(isFoo)).thenReturn(Att.empty().add(Att.PREDICATE(), org.kframework.kore.Sort.class, KORE.Sort("Foo@FOO")));
     }
 
     @Test

@@ -412,7 +412,7 @@ public class RuleGrammarGenerator {
                     res.add(prod5);
                 }
             }
-            res.addAll(prods3.stream().filter(p -> !(p instanceof Production && (p.att().contains(Att.generatedByListSubsorting()) || p.att().contains(Att.userList())))).collect(Collectors.toSet()));
+            res.addAll(prods3.stream().filter(p -> !(p instanceof Production && (p.att().contains(Att.GENERATED_BY_LIST_SUBSORTING()) || p.att().contains(Att.USER_LIST())))).collect(Collectors.toSet()));
             parseProds = res;
         }
 

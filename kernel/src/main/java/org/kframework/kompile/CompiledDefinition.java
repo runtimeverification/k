@@ -133,7 +133,7 @@ public class CompiledDefinition implements Serializable {
         return kompiledDefinition.mainModule();
     }
 
-    public String mainSyntaxModuleName() { return parsedDefinition.att().<String>getOptional(Att.syntaxModule()).get(); }
+    public String mainSyntaxModuleName() { return parsedDefinition.att().<String>getOptional(Att.SYNTAX_MODULE()).get(); }
 
     /**
      * @return the module used for generating the program (i.e. ground) parser for the module named moduleName

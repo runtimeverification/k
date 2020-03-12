@@ -10,7 +10,6 @@ import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Constants;
-import org.kframework.kil.Attribute;
 import org.kframework.utils.errorsystem.KEMException;
 
 import java.math.BigInteger;
@@ -210,7 +209,7 @@ public abstract class BitVector<T extends Number> extends Token {
     }
 
     public static Integer getBitwidth(Att t) {
-        String bitwidth = t.getOptional(Attribute.BITWIDTH_KEY).orElse(null);
+        String bitwidth = t.getOptional(Att.BITWIDTH()).orElse(null);
         if (bitwidth == null) {
             return null;
         }
