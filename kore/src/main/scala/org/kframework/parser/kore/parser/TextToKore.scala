@@ -54,21 +54,21 @@ class TextToKore(b: Builders = DefaultBuilders) {
 
   /** Parses the file and returns [[kore.Pattern]]. */
   @throws(classOf[ParseError])
-  def parsePattern(file: java.io.File): Pattern = {
-    parsePattern(io.Source.fromFile(file))
+  def parsePattern(file: java.io.File, line: Integer): Pattern = {
+    parsePattern(io.Source.fromFile(file), line)
   }
 
   /** Parses the file and returns [[kore.Pattern]]. */
   @throws(classOf[ParseError])
   def parsePattern(str: String): Pattern = {
-    parsePattern(io.Source.fromString(str))
+    parsePattern(io.Source.fromString(str), 0)
   }
 
   /** Parses from the stream and returns [[kore.Definition]]. */
   @throws(classOf[ParseError])
   def parse(src: io.Source): Definition = {
     try {
-      scanner.init(src)
+      scanner.init(src, 0)
       parseDefinition()
     } catch {
       case e: java.io.EOFException => throw new ParseError("ERROR: Unexpected end of file while parsing", e)
@@ -81,9 +81,9 @@ class TextToKore(b: Builders = DefaultBuilders) {
 
   /** Parses from the stream and returns [[kore.Definition]]. */
   @throws(classOf[ParseError])
-  def parsePattern(src: io.Source): Pattern = {
+  def parsePattern(src: io.Source, line: Integer): Pattern = {
     try {
-      scanner.init(src)
+      scanner.init(src, line)
       parsePattern()
     } catch {
       case e: java.io.EOFException => throw new ParseError("ERROR: Unexpected end of file while parsing", e)
@@ -121,7 +121,7 @@ class TextToKore(b: Builders = DefaultBuilders) {
       }
     }
     try {
-      scanner.init(src)
+      scanner.init(src, 0)
       loop(new StringBuilder(""))
     }
     catch {
