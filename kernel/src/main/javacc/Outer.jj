@@ -150,11 +150,10 @@ package org.kframework.parser.outer;
 
 import org.kframework.definition.Tag;
 import org.kframework.kore.Sort;
+import org.kframework.attributes.Att;
 import org.kframework.attributes.Source;
 
 import org.kframework.kil.ASTNode;
-import org.kframework.kil.Attribute;
-import org.kframework.kil.Attributes;
 import org.kframework.kil.DefinitionItem;
 import org.kframework.kil.Import;
 import org.kframework.kil.Lexical;
@@ -265,7 +264,7 @@ public class Outer {
   /** Parses a given string that was read from 'source' as a list of
   attributes.  Note that the source position in the returned result is
   relative to the String. */
-  public static Attributes parseAttributes(String string, Source source) throws ParseException {
+  public static Att parseAttributes(String string, Source source) throws ParseException {
     Outer parser = new Outer(new StringReader(string));
     parser.source = source;
     parser.module = null;
@@ -790,7 +789,7 @@ void Tag(ASTNode node) :
     ( val = String() ")"
     | TagContent(sb) ")" { val = sb.toString() + special(); } )
     { SwitchTo(ATTR_STATE); })?
-  { node.addAttribute(markLoc(loc, Attribute.of(key, val))); }
+  { node.addAttribute(key, val); }
 }
 
 /** Parses the value of an attribute and appends it to 'sb' */

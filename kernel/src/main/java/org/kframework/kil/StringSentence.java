@@ -22,11 +22,6 @@ public class StringSentence extends ModuleItem {
         this.label = label;
     }
 
-    public StringSentence(StringSentence node) {
-        super(node);
-        this.content = node.content;
-    }
-
     public String toString() {
         return type+"["+label+"]:"+content;
     }
@@ -37,11 +32,6 @@ public class StringSentence extends ModuleItem {
 
     public void setContent(String content) {
         this.content = content;
-    }
-
-    @Override
-    public StringSentence shallowCopy() {
-        return new StringSentence(this);
     }
 
     public void setType(String type) {
