@@ -23,7 +23,6 @@ import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
-import org.kframework.kil.loader.Constants;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.InjectedKLabel;
 import org.kframework.kore.K;
@@ -1238,7 +1237,7 @@ public class ModuleToKORE {
         }
         // This attribute is a frontend attribute only and is removed from the kore
         // Since it has no meaning outside the frontend
-        return att.remove(Constants.ORIGINAL_PRD, Production.class);
+        return att.remove(Att.ORIGINAL_PRD(), Production.class);
     }
 
     private boolean isFunction(Production prod) {

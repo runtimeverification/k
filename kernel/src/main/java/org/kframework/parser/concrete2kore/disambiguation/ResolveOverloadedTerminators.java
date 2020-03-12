@@ -3,8 +3,8 @@ package org.kframework.parser.concrete2kore.disambiguation;
 
 import com.google.common.collect.Sets;
 import org.kframework.POSet;
+import org.kframework.attributes.Att;
 import org.kframework.definition.Production;
-import org.kframework.kil.loader.Constants;
 import org.kframework.parser.SetsTransformerWithErrors;
 import org.kframework.parser.Term;
 import org.kframework.parser.TermCons;
@@ -37,7 +37,7 @@ public class ResolveOverloadedTerminators extends SetsTransformerWithErrors<KEME
             }
             Production prod = candidates.iterator().next();
             prod = prod.withAtt(prod.att()
-                    .add(Constants.ORIGINAL_PRD, Production.class, tc.production()));
+                    .add(Att.ORIGINAL_PRD(), Production.class, tc.production()));
             return super.apply(TermCons.apply(tc.items(), prod, tc.location(), tc.source()));
         }
         return super.apply(tc);

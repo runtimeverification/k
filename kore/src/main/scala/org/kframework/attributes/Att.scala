@@ -96,6 +96,8 @@ object Att {
   val REFERS_THIS_CONFIGURATION = "refers_THIS_CONFIGURATION";
   val REFERS_RESTORE_CONFIGURATION = "refers_RESTORE_CONFIGURATION";
   val TOP_RULE = "topRule";
+  val ORIGINAL_PRD = "originalPrd"
+  val RECORD_PRD = "recordPrd"
 
   private val stringClassName = classOf[String].getName
 

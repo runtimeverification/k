@@ -15,7 +15,6 @@ import org.kframework.definition.ProductionItem;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.definition.SyntaxSort;
-import org.kframework.kil.loader.Constants;
 import org.kframework.kore.*;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
@@ -120,7 +119,7 @@ public class GenerateSentencesFromConfigDecl {
                             Option<Set<Production>> initializerProduction = m.productionsFor().get(KLabel(getInitLabel(sort)));
                             if (initializerProduction.isDefined()) {
                                 Set<Production> realProds = stream(initializerProduction.get())
-                                        .filter(p -> !p.att().contains(Constants.RECORD_PRD, Production.class))
+                                        .filter(p -> !p.att().contains(Att.RECORD_PRD(), Production.class))
                                         .collect(Collections.toSet());
                                 if (realProds.size() == 1) { // should be only a single initializer
                                     if (realProds.head().items().size() == 1) {
