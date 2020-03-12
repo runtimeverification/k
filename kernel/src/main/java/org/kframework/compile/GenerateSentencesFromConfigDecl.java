@@ -462,6 +462,9 @@ public class GenerateSentencesFromConfigDecl {
             sentences.add(bagElement);
             sentences.add(bagUnit);
             sentences.add(bag);
+            if (type.equals("Map")) {
+                sentences.add(Production(KLabel(bagSort.name() + ":in_keys"), Sorts.Bool(), Seq(NonTerminal(sort), Terminal("in_keys"), Terminal("("), NonTerminal(bagSort), Terminal(")")), Att().add(Attribute.HOOK_KEY, "MAP.in_keys").add(Attribute.FUNCTION_KEY).add("functional")));
+            }
             // rule initCell => .CellBag
             // -or-
             // rule initCell(Init) => <cell> Context[$var] </cell>
