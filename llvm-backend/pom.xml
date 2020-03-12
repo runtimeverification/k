@@ -34,7 +34,6 @@
   </dependencies>
 
   <properties>
-    <project.build.type>Release</project.build.type>
     <llvm.backend.gc.interval>2000</llvm.backend.gc.interval>
     <llvm.backend.prefix>${project.build.directory}/../target/build/install</llvm.backend.prefix>
     <llvm.backend.destdir></llvm.backend.destdir>
