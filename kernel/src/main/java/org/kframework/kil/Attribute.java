@@ -60,6 +60,7 @@ public class Attribute {
     public static final String STRICT_KEY = "strict";
     public static final String SEQSTRICT_KEY = "seqstrict";
     public static final String CONCRETE_KEY = "concrete";
+    public static final String SYMBOLIC_KEY = "symbolic";
     public static final String LABEL_KEY = "label";
     public static final String UNBOUND_VARIABLES_KEY = "unboundVariables";
 }
