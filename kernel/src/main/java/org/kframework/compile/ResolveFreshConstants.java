@@ -1,7 +1,6 @@
 // Copyright (c) 2015-2019 K Team. All Rights Reserved.
 package org.kframework.compile;
 
-import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.KLabels;
@@ -14,8 +13,6 @@ import org.kframework.definition.Production;
 import org.kframework.definition.ProductionItem;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
-import org.kframework.kil.Attribute;
-import org.kframework.kore.FoldK;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
@@ -96,7 +93,7 @@ public class ResolveFreshConstants {
                 }
                 if (left instanceof KApply) {
                     kapp = (KApply)left;
-                    if (m.attributesFor().get(kapp.klabel()).getOrElse(() -> Att()).contains(Attribute.FUNCTION_KEY)) {
+                    if (m.attributesFor().get(kapp.klabel()).getOrElse(() -> Att()).contains(Att.FUNCTION())) {
                         return rule;
                     }
                 }

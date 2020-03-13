@@ -18,7 +18,6 @@ import org.kframework.definition.SyntaxAssociativity;
 import org.kframework.definition.Tag;
 import org.kframework.definition.Terminal;
 import org.kframework.definition.TerminalLike;
-import org.kframework.kil.loader.Constants;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.Sort;
 import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
@@ -90,9 +89,9 @@ public class KSyntax2Bison {
           if (items.size() > 1 && items.get(items.size() - 1) instanceof NonTerminal) {
             computeSide(items.size()-1, prod, items, module, module.leftAssoc(), ordinals, nts, nextOrdinal);
           }
-          sentences.add(Production(prod.klabel(), prod.params(), prod.sort(), immutable(items), prod.att().add(Constants.ORIGINAL_PRD, Production.class, prod)));
+          sentences.add(Production(prod.klabel(), prod.params(), prod.sort(), immutable(items), prod.att().add(Att.ORIGINAL_PRD(), Production.class, prod)));
         } else {
-          sentences.add(prod.withAtt(prod.att().add(Constants.ORIGINAL_PRD, Production.class, prod)));
+          sentences.add(prod.withAtt(prod.att().add(Att.ORIGINAL_PRD(), Production.class, prod)));
         }
       } else {
         sentences.add(s);
@@ -210,7 +209,7 @@ public class KSyntax2Bison {
       }
       i++;
     }
-    prod = prod.att().getOptional(Constants.ORIGINAL_PRD, Production.class).orElse(prod);
+    prod = prod.att().getOptional(Att.ORIGINAL_PRD(), Production.class).orElse(prod);
     if (prod.att().contains("token") && !prod.isSubsort()) {
       bison.append("{\n" +
           "  node *n = malloc(sizeof(node));\n" +

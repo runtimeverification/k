@@ -63,7 +63,7 @@ class AssocCommToAssoc extends Function[Module, Module] {
 
   private def isAssocComm(label: KLabel)(implicit m: Module): Boolean = {
     val att: Att = m.attributesFor.getOrElse(label, Att.empty)
-    att.contains(Att.assoc) && att.contains(Att.comm)
+    att.contains(Att.ASSOC) && att.contains(Att.COMM)
   }
 
   private def convert(label: KLabel, children: List[K])(implicit m: Module): List[K] = {

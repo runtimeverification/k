@@ -6,7 +6,6 @@ import org.kframework.compile.ExpandMacros;
 import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
-import org.kframework.kil.Attribute;
 import org.kframework.kore.Assoc;
 import org.kframework.kore.InjectedKLabel;
 import org.kframework.kore.K;
