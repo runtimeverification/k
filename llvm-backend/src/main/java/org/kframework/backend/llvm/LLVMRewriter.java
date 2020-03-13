@@ -29,8 +29,10 @@ import org.kframework.utils.inject.DefinitionScoped;
 import org.kframework.utils.inject.RequestScoped;
 import scala.Tuple2;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -100,6 +102,9 @@ public class LLVMRewriter implements Function<Definition, Rewriter> {
                 args.add(pgmPath);
                 args.add(Integer.toString(depth.orElse(-1)));
                 args.add(koreOutputFile.getAbsolutePath());
+                if (krunOptions.experimental.statistics) {
+                  args.add("--statistics");
+                }
                 String[] command = new String[args.size()];
                 if (krunOptions.backend.dryRun) {
                     System.out.println(String.join(" ", args.toArray(command)));
@@ -111,7 +116,14 @@ public class LLVMRewriter implements Function<Definition, Rewriter> {
                     if (!koreOutputFile.exists()) {
                       throw KEMException.criticalError("LLVM Backend crashed during rewriting.");
                     }
-                    K outputK = new KoreParser(mod.sortAttributesFor()).parseFile(koreOutputFile);
+                    int line = 0;
+                    if (krunOptions.experimental.statistics) {
+                      line = 1;
+                      BufferedReader br = new BufferedReader(new FileReader(koreOutputFile));
+                      long steps = Long.parseLong(br.readLine());
+                      System.err.println("[" + steps + " steps]");
+                    }
+                    K outputK = new KoreParser(mod.sortAttributesFor()).parseFile(koreOutputFile, line);
                     return new RewriterResult(Optional.empty(), Optional.of(exit), outputK);
                 } catch (IOException e) {
                     throw KEMException.criticalError("I/O Error while executing", e);
