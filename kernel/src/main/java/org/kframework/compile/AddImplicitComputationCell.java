@@ -1,13 +1,11 @@
 // Copyright (c) 2015-2019 K Team. All Rights Reserved.
 package org.kframework.compile;
 
-import org.kframework.compile.ConfigurationInfo;
+import org.kframework.attributes.Att;
 import org.kframework.compile.ConfigurationInfoFromModule;
-import org.kframework.compile.LabelInfo;
 import org.kframework.compile.LabelInfoFromModule;
 import org.kframework.definition.*;
 import org.kframework.definition.Module;
-import org.kframework.kil.Attribute;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
@@ -65,7 +63,7 @@ public class AddImplicitComputationCell implements UnaryOperator<Sentence> {
 
     private boolean skipSentence(Sentence s) {
         return ExpandMacros.isMacro(s)
-                || s.att().contains(Attribute.ANYWHERE_KEY) || s.att().contains(Attribute.KORE_KEY);
+                || s.att().contains(Att.ANYWHERE()) || s.att().contains(Att.KORE());
     }
 
     private K apply(K term) {

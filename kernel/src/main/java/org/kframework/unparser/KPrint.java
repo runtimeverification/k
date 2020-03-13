@@ -14,7 +14,6 @@ import org.kframework.compile.AddSortInjections;
 import org.kframework.compile.ExpandMacros;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
-import org.kframework.kil.Attribute;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.Assoc;
@@ -292,7 +291,7 @@ public class KPrint {
       if (kapp.klabel().head().equals(KLabels.ML_EQUALS)) {
         if (!(kapp.items().get(0) instanceof KVariable) &&
             (!(kapp.items().get(0) instanceof KApply) ||
-             !mod.attributesFor().apply(((KApply)kapp.items().get(0)).klabel()).contains(Attribute.FUNCTION_KEY))) {
+             !mod.attributesFor().apply(((KApply)kapp.items().get(0)).klabel()).contains(Att.FUNCTION()))) {
           return Optional.of(term);
         }
         Set<KVariable> leftVars = vars(kapp.items().get(0));

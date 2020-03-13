@@ -23,7 +23,6 @@ import org.kframework.definition.Module;
 import org.kframework.definition.Production;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
-import org.kframework.kil.Attribute;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.Sort;
 import org.kframework.parser.InputModes;
@@ -33,7 +32,6 @@ import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.unparser.ToJson;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;
-import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
@@ -301,7 +299,7 @@ public class Kompile {
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckHOLE(errors, m)::check));
 
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(
-                new CheckFunctions(errors, m, excludedModuleTags.contains(Attribute.CONCRETE_KEY))::check));
+                new CheckFunctions(errors, m, excludedModuleTags.contains(Att.CONCRETE()))::check));
 
         Set<String> moduleNames = new HashSet<>();
         stream(modules).forEach(m -> {
@@ -349,7 +347,7 @@ public class Kompile {
 
         Module languageParsingModule = Constructors.Module("LANGUAGE-PARSING",
                 Set(d.mainModule(),
-                        d.getModule(d.att().get(Att.syntaxModule())).get(),
+                        d.getModule(d.att().get(Att.SYNTAX_MODULE())).get(),
                         d.getModule("K-TERM").get(),
                         d.getModule(RuleGrammarGenerator.ID_PROGRAM_PARSING).get()), Set(), Att());
         allModules.add(languageParsingModule);
