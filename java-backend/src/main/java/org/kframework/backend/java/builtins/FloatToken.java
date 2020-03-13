@@ -9,7 +9,6 @@ import org.kframework.backend.java.kil.Token;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.compile.FloatBuiltin;
-import org.kframework.kil.Attribute;
 import org.kframework.mpfr.BigFloat;
 import org.kframework.utils.errorsystem.KEMException;
 
@@ -114,8 +113,8 @@ public class FloatToken extends Token {
     }
 
     public static Pair<Integer, Integer> getExponentAndSignificand(Att t) {
-        String exponent = t.getOptional(Attribute.EXPONENT_KEY).orElse(null);
-        String significand = t.getOptional(Attribute.SIGNIFICAND_KEY).orElse(null);
+        String exponent = t.getOptional(Att.EXPONENT()).orElse(null);
+        String significand = t.getOptional(Att.SIGNIFICAND()).orElse(null);
         if (exponent == null || significand == null) {
             return null;
         }
@@ -123,7 +122,7 @@ public class FloatToken extends Token {
             return Pair.of(Integer.parseInt(exponent), Integer.parseInt(significand));
         } catch (NumberFormatException e) {
             throw KEMException.criticalError("Expected variable attributes 'exponent' and 'significand' to " +
-                    "be integers, found: " + t.getOptional(Attribute.EXPONENT_KEY).orElse(null) + " " + t.getOptional(Attribute.SIGNIFICAND_KEY).orElse(null), e);
+                    "be integers, found: " + t.getOptional(Att.EXPONENT()).orElse(null) + " " + t.getOptional(Att.SIGNIFICAND()).orElse(null), e);
         }
     }
 

@@ -27,7 +27,6 @@ import org.kframework.backend.java.kil.SortSignature;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.Variable;
 import org.kframework.builtin.Sorts;
-import org.kframework.kil.Attribute;
 import org.kframework.kore.KORE;
 import org.kframework.krun.KRunOptions;
 import org.kframework.utils.errorsystem.KEMException;
@@ -283,8 +282,8 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
         Set<Sort> sorts = new LinkedHashSet<>();
         List<KLabelConstant> functions = new ArrayList<>();
         for (KLabelConstant kLabel : definition.kLabels()) {
-            String smtlib = kLabel.getAttr(Attribute.SMTLIB_KEY);
-            Boolean inSmtPrelude = kLabel.getAttr(Attribute.SMT_PRELUDE_KEY) != null;
+            String smtlib = kLabel.getAttr(Att.SMTLIB());
+            Boolean inSmtPrelude = kLabel.getAttr(Att.SMT_PRELUDE()) != null;
             if (smtlib != null && !inSmtPrelude && !SMTLIB_BUILTIN_FUNCTIONS.contains(smtlib) && !smtlib.startsWith("(")) {
                 functions.add(kLabel);
                 assert kLabel.signatures().size() == 1;
@@ -311,7 +310,7 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
 
         for (KLabelConstant kLabel : functions) {
             sb.append("(declare-fun ");
-            sb.append(kLabel.getAttr(Attribute.SMTLIB_KEY));
+            sb.append(kLabel.getAttr(Att.SMTLIB()));
             sb.append(" (");
             List<String> childrenSorts = new ArrayList<>();
             for (Sort sort : kLabel.signatures().iterator().next().parameters()) {
@@ -328,7 +327,7 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
 
     private CharSequence appendAxioms(StringBuilder sb) {
         for (Rule rule : definition.functionRules().values()) {
-            if (rule.att().contains(Attribute.SMT_LEMMA_KEY)) {
+            if (rule.att().contains(Att.SMT_LEMMA())) {
                 try {
                     KILtoSMTLib kil2SMT = new KILtoSMTLib(false, globalContext);
                     CharSequence leftExpression = kil2SMT.translate(rule.leftHandSide()).expression();

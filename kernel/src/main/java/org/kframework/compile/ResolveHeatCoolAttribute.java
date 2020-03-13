@@ -73,7 +73,7 @@ public class ResolveHeatCoolAttribute {
         } else if (att.contains("cool")) {
             if (transitions.stream().anyMatch(att::contains)) {
                 // if the cooling rule is a super strict, then tag the isKResult predicate and drop it during search
-                predicate = KApply(predicate.klabel(), predicate.klist(), predicate.att().add(Att.transition()));
+                predicate = KApply(predicate.klabel(), predicate.klist(), predicate.att().add(Att.TRANSITION()));
             }
             return BooleanUtils.and(requires, predicate);
         }

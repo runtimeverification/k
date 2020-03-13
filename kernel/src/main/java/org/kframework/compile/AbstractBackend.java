@@ -1,11 +1,11 @@
 // Copyright (c) 2020 K Team. All Rights Reserved.
 package org.kframework.compile;
 
+import org.kframework.attributes.Att;
 import org.kframework.definition.Definition;
 import org.kframework.definition.DefinitionTransformer;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
-import org.kframework.kil.Attribute;
 import scala.Function1;
 
 import javax.annotation.Nullable;
@@ -44,9 +44,9 @@ public abstract class AbstractBackend implements Backend {
     private Sentence markExtraConcreteRules(Sentence s, Set<String> extraConcreteRuleLabels) {
         if (s instanceof org.kframework.definition.Rule) {
             org.kframework.definition.Rule r = (org.kframework.definition.Rule) s;
-            String label = r.att().getOption(Attribute.LABEL_KEY).getOrElse(() -> null);
+            String label = r.att().getOption(Att.LABEL()).getOrElse(() -> null);
             if (label != null && extraConcreteRuleLabels.contains(label)) {
-                return Rule.apply(r.body(), r.requires(), r.ensures(), r.att().add(Attribute.CONCRETE_KEY));
+                return Rule.apply(r.body(), r.requires(), r.ensures(), r.att().add(Att.CONCRETE()));
             }
         }
         return s;
