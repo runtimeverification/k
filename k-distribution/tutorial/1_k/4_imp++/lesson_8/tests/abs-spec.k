@@ -6,7 +6,7 @@ module ABS-SPEC
 rule
   <threads><thread>...
     <k>
-      if (a > 0) {
+      if (0 <= a) {
         b = a;
       } else {
         b = 0 - a;

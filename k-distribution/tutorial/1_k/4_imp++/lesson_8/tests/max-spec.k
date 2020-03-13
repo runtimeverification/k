@@ -6,7 +6,7 @@ module MAX-SPEC
 rule
   <threads><thread>...
     <k>
-      if (a > b) {
+      if (b <= a) {
         c = a;
       } else {
         c = b;

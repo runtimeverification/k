@@ -6,7 +6,7 @@ module MIN-SPEC
 rule
   <threads><thread>...
     <k>
-      if (a < b) {
+      if (a <= b) {
         c = a;
       } else {
         c = b;
