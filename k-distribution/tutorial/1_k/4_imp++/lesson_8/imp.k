@@ -117,7 +117,7 @@ of statements surrounded by curly brackets.  */
   syntax AExp  ::= Int | String | Id
                  | "++" Id
                  | "read" "(" ")"
-                 | "-" Int
+                 | "-" AExp                   [strict]
                  > AExp "/" AExp              [left, strict, division]
                  > AExp "+" AExp              [left, strict]
                  > "spawn" Block

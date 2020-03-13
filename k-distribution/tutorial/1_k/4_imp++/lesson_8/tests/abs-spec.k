@@ -9,7 +9,7 @@ rule
       if (0 <= a) {
         b = a;
       } else {
-        b = 0 - a;
+        b = 0 + -a;
       }
     =>
       .K
