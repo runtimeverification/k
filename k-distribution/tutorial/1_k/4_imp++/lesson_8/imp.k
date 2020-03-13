@@ -518,6 +518,9 @@ This rule acts like a ``tail recursion'' optimization, but for blocks. */
 // verification ids
   syntax Id ::= "n"     [token]
               | "sum"   [token]
+              | "a"     [token]
+              | "b"     [token]
+              | "c"     [token]
 endmodule
 
 /*@ \section{On Kompilation Options}
