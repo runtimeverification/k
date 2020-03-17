@@ -1,13 +1,13 @@
 // Copyright (c) 2015-2019 K Team. All Rights Reserved.
 package org.kframework.compile.checks;
 
+import org.kframework.attributes.Att;
 import org.kframework.compile.ConfigurationInfoFromModule;
 import org.kframework.definition.Module;
 import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
 import org.kframework.definition.ProductionItem;
 import org.kframework.definition.Sentence;
-import org.kframework.kil.Attribute;
 import org.kframework.kore.Sort;
 import org.kframework.utils.errorsystem.KEMException;
 
@@ -38,7 +38,7 @@ public class CheckConfigurationCells {
     private Set<Sort> cells = new HashSet<>();
 
     private void check(Production p) {
-        if (p.att().contains(Attribute.CELL_KEY)) {
+        if (p.att().contains(Att.CELL())) {
             for (ProductionItem i : mutable(p.items())) {
                 if (i instanceof NonTerminal) {
                     Sort sort = ((NonTerminal) i).sort();

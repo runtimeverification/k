@@ -6,11 +6,6 @@ public class Require extends DefinitionItem {
     /** The string argument to {@code require}, as written in the input file. */
     private String value;
 
-    public Require(Require require) {
-        super(require);
-        value = require.value;
-    }
-
     public Require(String value) {
         super();
         this.value = value;
@@ -22,11 +17,6 @@ public class Require extends DefinitionItem {
 
     public String getValue() {
         return value;
-    }
-
-    @Override
-    public Require shallowCopy() {
-        return new Require(this);
     }
 
     @Override

@@ -21,12 +21,6 @@ public class Terminal extends ProductionItem {
         this.terminal = terminal;
     }
 
-    public Terminal(Terminal terminal) {
-        super(terminal);
-        this.terminal = terminal.terminal;
-        this.caseInsensitive = terminal.caseInsensitive;
-    }
-
     public void setTerminal(String terminal) {
         this.terminal = terminal;
     }
@@ -59,11 +53,6 @@ public class Terminal extends ProductionItem {
     @Override
     public int hashCode() {
         return this.terminal.hashCode();
-    }
-
-    @Override
-    public Terminal shallowCopy() {
-        return new Terminal(this);
     }
 
     public boolean isCaseInsensitive() {

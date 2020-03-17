@@ -6,7 +6,6 @@ import org.kframework.builtin.Sorts;
 import org.kframework.definition.Context;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
-import org.kframework.kil.Attribute;
 import org.kframework.kore.*;
 
 import java.util.HashSet;

@@ -23,9 +23,12 @@ class Scanner {
     *
     * @param src The stream to associate with this scanner.
     */
-  def init(src: io.Source): Unit = {
+  def init(src: io.Source, firstLine: Integer): Unit = {
     stream = src
     lines = stream.getLines()
+    for (i <- 0 until firstLine) {
+      lines.next()
+    }
     line = ""
     lineNum = 0
     columnNum = 0

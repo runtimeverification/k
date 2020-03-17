@@ -10,12 +10,6 @@ public class LiterateDefinitionComment extends DefinitionItem implements Literat
         this.lcType = lcType;
     }
 
-    public LiterateDefinitionComment(LiterateDefinitionComment literateDefinitionComment) {
-        super(literateDefinitionComment);
-        value = literateDefinitionComment.value;
-        lcType = literateDefinitionComment.lcType;
-    }
-
     public void setValue(String value) {
         this.value = value;
     }
@@ -27,11 +21,6 @@ public class LiterateDefinitionComment extends DefinitionItem implements Literat
     @Override
     public LiterateCommentType getType() {
         return lcType;
-    }
-
-    @Override
-    public LiterateDefinitionComment shallowCopy() {
-        return new LiterateDefinitionComment(this);
     }
 
     @Override

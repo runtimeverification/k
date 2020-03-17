@@ -7,14 +7,6 @@ import org.kframework.attributes.Source;
 import org.w3c.dom.Element;
 
 public abstract class ModuleItem extends ASTNode {
-    public ModuleItem(ModuleItem s) {
-        super(s);
-    }
-
-    public ModuleItem(Element elem) {
-        super(elem);
-    }
-
     public ModuleItem() {
         super();
     }

@@ -16,11 +16,6 @@ public class Import extends ModuleItem {
         name = importName;
     }
 
-    public Import(Import import1) {
-        super(import1);
-        this.name = import1.name;
-    }
-
     public Import(String importName, Location loc, Source source) {
         super(loc, source);
         this.name = importName;
@@ -41,11 +36,6 @@ public class Import extends ModuleItem {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    @Override
-    public Import shallowCopy() {
-        return new Import(this);
     }
 
     public boolean isImportSyntax() {

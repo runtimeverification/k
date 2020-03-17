@@ -34,12 +34,6 @@ public class PriorityExtendedAssoc extends ModuleItem {
         this.assoc = assoc;
     }
 
-    public PriorityExtendedAssoc(PriorityExtendedAssoc node) {
-        super(node);
-        this.assoc = node.assoc;
-        this.tags = node.tags;
-    }
-
     @Override
     public String toString() {
         String blocks = "";
@@ -83,8 +77,4 @@ public class PriorityExtendedAssoc extends ModuleItem {
         return hash;
     }
 
-    @Override
-    public PriorityExtendedAssoc shallowCopy() {
-        return new PriorityExtendedAssoc(this);
-    }
 }

@@ -448,9 +448,27 @@ module INT-SYMBOLIC [symbolic, kore]
   [anywhere]
 endmodule
 
+module INT-KAST [kast]
+  imports K-EQUAL
+  imports INT-COMMON
+
+  rule I1:Int ==Int I2:Int => I1 ==K I2
+
+endmodule
+
+module INT-KORE [kore]
+  imports K-EQUAL
+  imports INT-COMMON
+
+  rule I1:Int ==K I2:Int => I1 ==Int I2
+
+endmodule
+
 module INT
   imports INT-COMMON
   imports INT-SYMBOLIC
+  imports INT-KAST
+  imports INT-KORE
   imports K-EQUAL
 
   rule bitRangeInt(I::Int, IDX::Int, LEN::Int) => (I >>Int IDX) modInt (1 <<Int LEN)
@@ -468,7 +486,6 @@ module INT
   rule minInt(I1:Int, I2:Int) => I1 requires I1 <=Int I2
   rule minInt(I1:Int, I2:Int) => I2 requires I1 >=Int I2
 
-  rule I1:Int ==Int I2:Int => I1 ==K I2
   rule I1:Int =/=Int I2:Int => notBool (I1 ==Int I2)
   rule (I1:Int dividesInt I2:Int) => (I2 %Int I1) ==Int 0
 
@@ -565,7 +582,7 @@ module STRING-SYNTAX
   syntax String ::= r"[\\\"](([^\\\"\\n\\r\\\\])|([\\\\][nrtf\\\"\\\\])|([\\\\][x][0-9a-fA-F]{2})|([\\\\][u][0-9a-fA-F]{4})|([\\\\][U][0-9a-fA-F]{8}))*[\\\"]"      [token]
 endmodule
 
-module STRING
+module STRING-COMMON
   imports STRING-SYNTAX
   imports INT
   imports FLOAT-SYNTAX
@@ -601,7 +618,6 @@ module STRING
 
   syntax Bool ::= String "=/=String" String      [function, functional, left, hook(STRING.ne)]
   rule S1:String =/=String S2:String => notBool (S1 ==String S2)
-  rule S1:String ==String S2:String => S1 ==K S2
 
   syntax Bool ::= String  "<String" String [function, functional, hook(STRING.lt)]
                 | String "<=String" String [function, functional, hook(STRING.le)]
@@ -641,6 +657,28 @@ module STRING
   rule replace(Source:String, _, _, 0) => Source
   rule replaceAll(Source:String, ToReplace:String, Replacement:String) => replace(Source, ToReplace, Replacement, countAllOccurrences(Source, ToReplace))
 
+endmodule
+
+module STRING-KAST [kast]
+  imports K-EQUAL
+  imports STRING-COMMON
+
+  rule S1:String ==String S2:String => S1 ==K S2
+
+endmodule
+
+module STRING-KORE [kore]
+  imports K-EQUAL
+  imports STRING-COMMON
+
+  rule S1:String ==K S2:String => S1 ==String S2
+
+endmodule
+
+module STRING
+  imports STRING-COMMON
+  imports STRING-KAST
+  imports STRING-KORE
 endmodule
 
 module STRING-BUFFER-IN-K [symbolic]
@@ -844,7 +882,7 @@ module ID-SYMBOLIC [symbolic, kast]
   rule String2Id(S:String) => {#parseIdToken("Id", S)}:>Id
 endmodule
 
-module K-EQUAL
+module K-EQUAL-SYNTAX
   imports BOOL
   imports BASIC-K
 
@@ -853,11 +891,34 @@ module K-EQUAL
                 | K "=/=K" K          [function, functional, smt-hook(distinct), hook(KEQUAL.ne), klabel(_=/=K_), symbol, latex({#1}\mathrel{\neq_K}{#2}), notEqualEqualK]
 
   syntax priorities equalEqualK notEqualEqualK > boolOperation mlOp
-  rule K1:K =/=K K2:K => notBool (K1 ==K K2)
+
+  syntax {Sort} Sort ::= "#if" Bool "#then" Sort "#else" Sort "#fi"   [function, functional, smt-hook(ite), hook(KEQUAL.ite)]
+
+endmodule
+
+module K-EQUAL-KORE [kore]
+  import BOOL
+  import K-EQUAL-SYNTAX
+
+  rule K1:Bool ==K K2:Bool => K1 ==Bool K2
+
+endmodule
+
+module K-EQUAL-KAST [kast]
+  import BOOL
+  import K-EQUAL-SYNTAX
 
   rule K1:Bool ==Bool K2:Bool => K1 ==K K2
 
-  syntax {Sort} Sort ::= "#if" Bool "#then" Sort "#else" Sort "#fi"   [function, functional, smt-hook(ite), hook(KEQUAL.ite)]
+endmodule
+
+module K-EQUAL
+  import BOOL
+  import K-EQUAL-SYNTAX
+  import K-EQUAL-KAST
+  import K-EQUAL-KORE
+
+  rule K1:K =/=K K2:K => notBool (K1 ==K K2)
 
   rule #if C:Bool #then B1::K #else _ #fi => B1 requires C
   rule #if C:Bool #then _ #else B2::K #fi => B2 requires notBool C

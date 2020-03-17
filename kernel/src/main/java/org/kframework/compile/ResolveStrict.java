@@ -8,11 +8,9 @@ import org.kframework.definition.Context;
 import org.kframework.definition.ContextAlias;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
-import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
-import org.kframework.kil.Attribute;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -52,10 +50,10 @@ public class ResolveStrict {
             if (!prod.klabel().isDefined()) {
                 throw KEMException.compilerError("Only productions with a KLabel can be strict.", prod);
             }
-            if (prod.att().contains(Attribute.STRICT_KEY)) {
+            if (prod.att().contains(Att.STRICT())) {
                 sentences.addAll(resolve(prod, false));
             }
-            if (prod.att().contains(Attribute.SEQSTRICT_KEY)) {
+            if (prod.att().contains(Att.SEQSTRICT())) {
                 sentences.addAll(resolve(prod, true));
             }
         }
@@ -115,9 +113,9 @@ public class ResolveStrict {
         Set<ContextAlias> aliases = new HashSet<>();
         String attribute;
         if (sequential) {
-            attribute = production.att().get(Attribute.SEQSTRICT_KEY);
+            attribute = production.att().get(Att.SEQSTRICT());
         } else {
-            attribute = production.att().get(Attribute.STRICT_KEY);
+            attribute = production.att().get(Att.STRICT());
         }
         if (attribute.isEmpty()) {
             for (int i = 1; i <= arity; i++) {

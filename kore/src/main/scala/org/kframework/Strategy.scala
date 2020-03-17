@@ -40,7 +40,7 @@ object Strategy {
               KORE.KApply(KORE.KLabel("#STUCK")),
             ),
             BooleanUtils.TRUE,
-            Att.empty.add("owise")
+            Att.empty.add(Att.OWISE)
           ), module.att)
         }
     )
@@ -64,20 +64,20 @@ class Strategy(heatCool: Boolean) {
 
           def isFunctionRhs(body: kore.K): Boolean = {
             RewriteToTop.toRight(body) match {
-              case KApply(klabel, _) if module.attributesFor.contains(klabel) && module.attributesFor(klabel).contains(Att.Function) => true
+              case KApply(klabel, _) if module.attributesFor.contains(klabel) && module.attributesFor(klabel).contains(Att.FUNCTION) => true
               case _ => false
             }
           }
 
           import rich._
           
-          if (!defn.mainModule.importedModuleNames.contains("STRATEGY$SYNTAX") || r.att.contains("anywhere") || r.att.contains("macro") || r.att.contains("alias") || r.att.contains("macro-rec") || r.att.contains("alias-rec")) {
+          if (!defn.mainModule.importedModuleNames.contains("STRATEGY$SYNTAX") || r.att.contains(Att.ANYWHERE) || r.att.contains(Att.MACRO) || r.att.contains(Att.ALIAS) || r.att.contains(Att.MACRO_REC) || r.att.contains(Att.ALIAS_REC)) {
             r
           } else
             r match {
               case r: Rule if !new ContainsSCell().apply(r.body) =>
                 val newBody = RewriteToTop.toLeft(r.body) match {
-                  case KApply(klabel, _) if !isFunctionRhs(r.body) && (!defn.mainModule.attributesFor.contains(klabel) || !defn.mainModule.attributesFor(klabel).contains(Att.Function)) =>
+                  case KApply(klabel, _) if !isFunctionRhs(r.body) && (!defn.mainModule.attributesFor.contains(klabel) || !defn.mainModule.attributesFor(klabel).contains(Att.FUNCTION)) =>
                     // todo: "!module.attributesFor.contains(klabel) ||" when #1723 is fixed
 
                     def makeRewrite(tag: String) =
@@ -88,11 +88,11 @@ class Strategy(heatCool: Boolean) {
                         KORE.KVariable("SREST"))
 
                     val strategy =
-                      if (r.att.contains("tag")) {
-                        makeRewrite(r.att.get("tag"))
-                      } else if (heatCool && r.att.contains(Att.heat)) {
+                      if (r.att.contains(Att.TAG)) {
+                        makeRewrite(r.att.get(Att.TAG))
+                      } else if (heatCool && r.att.contains(Att.HEAT)) {
                         makeRewrite("heat")
-                      } else if (heatCool && r.att.contains(Att.cool)) {
+                      } else if (heatCool && r.att.contains(Att.COOL)) {
                         makeRewrite("cool")
                       } else {
                         makeRewrite("regular")
