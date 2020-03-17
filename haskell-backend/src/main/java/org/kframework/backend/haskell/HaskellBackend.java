@@ -2,8 +2,8 @@
 package org.kframework.backend.haskell;
 
 import com.google.inject.Inject;
+import org.kframework.attributes.Att;
 import org.kframework.backend.kore.KoreBackend;
-import org.kframework.kil.Attribute;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -35,6 +35,6 @@ public class HaskellBackend extends KoreBackend {
 
     @Override
     public Set<String> excludedModuleTags() {
-        return new HashSet<>(Arrays.asList(Attribute.CONCRETE_KEY, "kast"));
+        return new HashSet<>(Arrays.asList(Att.CONCRETE(), "kast"));
     }
 }
