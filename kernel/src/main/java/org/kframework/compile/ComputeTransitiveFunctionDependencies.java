@@ -4,9 +4,7 @@ package org.kframework.compile;
 import org.kframework.attributes.Att;
 import org.kframework.builtin.KLabels;
 import org.kframework.definition.Module;
-import org.kframework.definition.Production;
 import org.kframework.definition.Rule;
-import org.kframework.kil.Attribute;
 import org.kframework.kore.K;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.KApply;
@@ -21,7 +19,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
-import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
@@ -36,7 +33,7 @@ public class ComputeTransitiveFunctionDependencies {
             K left = RewriteToTop.toLeft(r.body());
             if (left instanceof KApply) {
                 KApply kapp = (KApply) left;
-                if (r.att().contains(Attribute.ANYWHERE_KEY)) {
+                if (r.att().contains(Att.ANYWHERE())) {
                     if (kapp.klabel().name().equals(KLabels.INJ)) {
                         K k = kapp.items().get(0);
                         if (k instanceof KApply) {
@@ -62,7 +59,7 @@ public class ComputeTransitiveFunctionDependencies {
                     super.apply(k);
                     return;
                 }
-                if (module.attributesFor().getOrElse(k.klabel(), () -> Att.empty()).contains(Attribute.FUNCTION_KEY) || anywhereKLabels.contains(k.klabel())) {
+                if (module.attributesFor().getOrElse(k.klabel(), () -> Att.empty()).contains(Att.FUNCTION()) || anywhereKLabels.contains(k.klabel())) {
                     dependencies.addEdge(new Object(), current, k.klabel());
                 }
                 super.apply(k);
@@ -71,7 +68,7 @@ public class ComputeTransitiveFunctionDependencies {
 
         for (Tuple2<KLabel, scala.collection.Set<Rule>> entry : iterable(module.rulesFor())) {
             for (Rule rule : iterable(entry._2())) {
-                if (module.attributesFor().getOrElse(entry._1(), () -> Att.empty()).contains(Attribute.FUNCTION_KEY)) {
+                if (module.attributesFor().getOrElse(entry._1(), () -> Att.empty()).contains(Att.FUNCTION())) {
                     GetPredecessors visitor = new GetPredecessors(entry._1());
                     visitor.apply(rule.body());
                     visitor.apply(rule.requires());

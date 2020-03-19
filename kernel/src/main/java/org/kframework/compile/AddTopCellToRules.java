@@ -1,25 +1,20 @@
 // Copyright (c) 2015-2019 K Team. All Rights Reserved.
 package org.kframework.compile;
 
+import org.kframework.attributes.Att;
 import org.kframework.backend.kore.ConstructorChecks;
-import org.kframework.compile.ConfigurationInfo;
-import org.kframework.compile.LabelInfo;
 import org.kframework.definition.Context;
 import org.kframework.definition.Production;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
-import org.kframework.kil.Attribute;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
-import org.kframework.kore.KList;
 import org.kframework.kore.KRewrite;
 import org.kframework.kore.Sort;
-import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import static org.kframework.Collections.*;
 import static org.kframework.kore.KORE.*;
@@ -138,6 +133,6 @@ public class AddTopCellToRules {
 
     private boolean skipSentence(Sentence s) {
         return ExpandMacros.isMacro(s)
-                || s.att().contains(Attribute.ANYWHERE_KEY);
+                || s.att().contains(Att.ANYWHERE());
     }
 }

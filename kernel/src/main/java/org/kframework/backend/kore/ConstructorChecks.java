@@ -73,7 +73,7 @@ public class ConstructorChecks {
         Set<Production> productionSet = module.productionsFor().apply(klabel.head());
         assert productionSet.size() == 1 : "Should not have more than one production";
         Production production = productionSet.head();
-        return !production.att().contains(Att.Function());
+        return !production.att().contains(Att.FUNCTION());
     }
 
     public static boolean isBuiltinLabel(KLabel label) {

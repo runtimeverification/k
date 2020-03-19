@@ -72,7 +72,7 @@ class MergeRules(val automatonAttribute: String, filterAttribute: String) extend
         case (klabel: KLabel, ks: Set[(KApply, K)]) =>
           val klistPredicatePairs: Set[(Seq[K], K)] = ks map { case (kapply, ruleP) => (kapply.klist.items.asScala.toSeq, ruleP) }
           val normalizedItemsPredicatePairs = if (isEffectiveAssoc(klabel, m) || klabel == KLabels.KSEQ) {
-            val unitKLabel: KLabel = if (klabel != KLabels.KSEQ) KLabel(m.attributesFor(klabel).get(Att.unit)) else KLabels.DOTK
+            val unitKLabel: KLabel = if (klabel != KLabels.KSEQ) KLabel(m.attributesFor(klabel).get(Att.UNIT)) else KLabels.DOTK
             val unitK: K = KApply(unitKLabel)
             val flatItemsPredicatePairs: Set[(Seq[K], K)] = klistPredicatePairs map { case (items, ruleP) => (Assoc.flatten(klabel, items, unitKLabel), ruleP) }
             val maxLength: Int = (flatItemsPredicatePairs map { _._1.size }).max
@@ -113,7 +113,7 @@ class MergeRules(val automatonAttribute: String, filterAttribute: String) extend
   }
 
   private def isEffectiveAssoc(kLabel: KLabel, module: Module) : Boolean = {
-    module.attributesFor.getOrElse(kLabel, Att.empty).contains(Att.assoc) && (!module.attributesFor.getOrElse(kLabel, Att.empty).contains(Att.comm)) || module.attributesFor.getOrElse(kLabel, Att.empty).contains(Att.bag)
+    module.attributesFor.getOrElse(kLabel, Att.empty).contains(Att.ASSOC) && (!module.attributesFor.getOrElse(kLabel, Att.empty).contains(Att.COMM)) || module.attributesFor.getOrElse(kLabel, Att.empty).contains(Att.BAG)
   }
 
 }

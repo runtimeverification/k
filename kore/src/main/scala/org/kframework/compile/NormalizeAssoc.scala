@@ -21,9 +21,9 @@ class NormalizeAssoc(c: Constructors) extends ((Module, Sentence )=> Sentence) {
 
   def apply(k: K)(implicit m: Module): K = k match {
     case kApply: KApply =>
-      if (m.attributesFor.getOrElse(kApply.klabel, Att.empty).contains(Att.assoc)) {
+      if (m.attributesFor.getOrElse(kApply.klabel, Att.empty).contains(Att.ASSOC)) {
         val opKLabel: KLabel = kApply.klabel
-        val unitKLabel: KLabel = KLabel(m.attributesFor(opKLabel).get(Att.unit))
+        val unitKLabel: KLabel = KLabel(m.attributesFor(opKLabel).get(Att.UNIT))
         val flattenChildren = flatten(kApply, opKLabel, unitKLabel)
         if (flattenChildren exists {_.isInstanceOf[KRewrite]}) {
           KRewrite(
