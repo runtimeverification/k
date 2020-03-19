@@ -9,7 +9,7 @@ Objects created:
    Main |-> 1
 
 Methods invoked:
-   Main.Main |-> 1
    OddEven.even |-> 9
+   Main.Main |-> 1
    OddEven.OddEven |-> 1
    OddEven.odd |-> 9
