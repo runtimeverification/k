@@ -6,11 +6,11 @@ Statistics
 ==========
 
 Objects created:
-   Main |-> 1
    Exception |-> 1
+   Main |-> 1
 
 Methods invoked:
-   Main.Main |-> 1
    Exception.Exception |-> 1
-   Main.foo |-> 1
+   Main.Main |-> 1
    Exception.get |-> 1
+   Main.foo |-> 1

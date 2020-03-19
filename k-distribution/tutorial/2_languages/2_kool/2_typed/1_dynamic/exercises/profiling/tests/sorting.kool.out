@@ -21,16 +21,16 @@ Statistics
 ==========
 
 Objects created:
-   Main |-> 1
    Sorting |-> 1
+   Main |-> 1
 
 Methods invoked:
-   Main.Main |-> 1
-   Sorting.Sorting |-> 1
    Main.map |-> 1
+   Sorting.reverse |-> 3
+   Main.Main |-> 1
    Sorting.siftDown |-> 5
+   Sorting.Sorting |-> 1
    Sorting.bubbleSort |-> 1
    Sorting.insertionSort |-> 1
-   Sorting.reverse |-> 3
    Sorting.printArray |-> 5
    Sorting.heapSort |-> 1
