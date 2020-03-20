@@ -13,7 +13,7 @@ Objects created:
 
 Methods invoked:
    Main.Main |-> 1
-   B.B |-> 1
-   A.A |-> 1
    B.getB |-> 1
    A.getA |-> 1
+   B.B |-> 1
+   A.A |-> 1

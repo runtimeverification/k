@@ -11,6 +11,6 @@ Objects created:
 
 Methods invoked:
    Main.Main |-> 1
-   C.print2 |-> 2
    C.C |-> 1
    C.add |-> 1
+   C.print2 |-> 2
