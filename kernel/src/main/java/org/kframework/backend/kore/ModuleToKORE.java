@@ -723,6 +723,7 @@ public class ModuleToKORE {
         sb.append("\n\n// claims\n");
         HashMap<String, Boolean> consideredAttributes = new HashMap<>();
         consideredAttributes.put("priority", true);
+        consideredAttributes.put("label", true);
 
         for (Sentence sentence : iterable(spec.sentencesExcept(definition))) {
             assert sentence instanceof Rule || sentence instanceof ModuleComment

@@ -2,6 +2,6 @@ DEF=a
 EXT=a
 KOMPILE_BACKEND=haskell
 TESTDIR=.
-KPROVE_FLAGS=--concrete-rules "A.f1"
+KPROVE_FLAGS=-m A-LEMMAS
 
 include ../../../include/ktest.mak
