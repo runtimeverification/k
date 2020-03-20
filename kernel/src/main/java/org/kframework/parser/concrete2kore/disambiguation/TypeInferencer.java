@@ -1,6 +1,7 @@
 // Copyright (c) 2019 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore.disambiguation;
 
+import org.kframework.attributes.Att;
 import org.kframework.Collections;
 import org.kframework.TopologicalSort;
 import org.kframework.attributes.Location;
@@ -9,7 +10,6 @@ import org.kframework.builtin.Sorts;
 import org.kframework.compile.ResolveAnonVar;
 import org.kframework.definition.Module;
 import org.kframework.definition.NonTerminal;
-import org.kframework.kil.Attribute;
 import org.kframework.kore.Sort;
 import org.kframework.kore.SortHead;
 import org.kframework.parser.Ambiguity;
@@ -374,7 +374,7 @@ public class TypeInferencer implements AutoCloseable {
    * @return
    */
   private static boolean isFunction(Term t, boolean isAnywhere) {
-    return getFunction(t).map(pr -> pr.production().att()).orElse(Att()).contains(Attribute.FUNCTION_KEY) || isAnywhere;
+    return getFunction(t).map(pr -> pr.production().att()).orElse(Att()).contains(Att.FUNCTION()) || isAnywhere;
   }
 
   /**

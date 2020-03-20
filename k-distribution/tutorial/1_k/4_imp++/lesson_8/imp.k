@@ -117,7 +117,7 @@ of statements surrounded by curly brackets.  */
   syntax AExp  ::= Int | String | Id
                  | "++" Id
                  | "read" "(" ")"
-                 | "-" Int
+                 | "-" AExp                   [strict]
                  > AExp "/" AExp              [left, strict, division]
                  > AExp "+" AExp              [left, strict]
                  > "spawn" Block
@@ -518,6 +518,9 @@ This rule acts like a ``tail recursion'' optimization, but for blocks. */
 // verification ids
   syntax Id ::= "n"     [token]
               | "sum"   [token]
+              | "a"     [token]
+              | "b"     [token]
+              | "c"     [token]
 endmodule
 
 /*@ \section{On Kompilation Options}

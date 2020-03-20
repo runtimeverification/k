@@ -24,7 +24,6 @@ import org.kframework.compile.ExpandMacros;
 import org.kframework.compile.ResolveSemanticCasts;
 import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
-import org.kframework.kil.Attribute;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -238,7 +237,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
 
             rewritingContext.setExecutionPhase(true);
             List<ConstrainedTerm> proofResults = proofObligationRules.stream()
-                    .filter(r -> !r.att().contains(Attribute.TRUSTED_KEY))
+                    .filter(r -> !r.att().contains(Att.TRUSTED()))
                     .map(r -> {
                         //Build LHS with fully evaluated constraint. Then expand patterns.
                         ConjunctiveFormula constraint = processProofRules.getEvaluatedConstraint(r);
@@ -363,7 +362,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
                 converter = new KOREtoBackendKIL(module, definition, rewritingContext, false);
                 termContext = TermContext.builder(rewritingContext).freshCounter(initCounterValue).build();
                 termContext.setKOREtoBackendKILConverter(converter);
-                specRules = definition.addKoreRules(specModule, converter, Att.specification(), this::evaluateRule);
+                specRules = definition.addKoreRules(specModule, converter, Att.SPECIFICATION(), this::evaluateRule);
             }
 
             private org.kframework.backend.java.kil.Rule evaluateRule(org.kframework.backend.java.kil.Rule rule) {
@@ -458,7 +457,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
                 startEnsures.add(startRule.getEnsures(processProofRules.termContext.global()));
                 targetEnsures.add(targetRule.getEnsures(processProofRules.termContext.global()));
 
-                trusted.add(startRule.att().contains(Attribute.TRUSTED_KEY));
+                trusted.add(startRule.att().contains(Att.TRUSTED()));
             }
         }
     }

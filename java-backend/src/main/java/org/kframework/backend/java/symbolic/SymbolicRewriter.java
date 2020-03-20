@@ -198,7 +198,7 @@ public class SymbolicRewriter {
             }
 
             Substitution<Variable, Term> substitution =
-                    rule.att().contains(Att.refers_THIS_CONFIGURATION()) ?
+                    rule.att().contains(Att.REFERS_THIS_CONFIGURATION()) ?
                             matchResult.constraint.substitution().plus(new Variable(KLabels.THIS_CONFIGURATION, Sort.KSEQUENCE), filterOurStrategyCell(subject.term())) :
                             matchResult.constraint.substitution();
             // start the optimized substitution
@@ -257,9 +257,9 @@ public class SymbolicRewriter {
             }
 
             /* TODO(AndreiS): remove this hack for super strictness after strategies work */
-            if (rule.att().contains(Att.heat()) && transitions.stream().anyMatch(rule.att()::contains)) {
+            if (rule.att().contains(Att.HEAT()) && transitions.stream().anyMatch(rule.att()::contains)) {
                 newSuperheated.add(result);
-            } else if (rule.att().contains(Att.cool()) && transitions.stream().anyMatch(rule.att()::contains) && superheated.contains(subject)) {
+            } else if (rule.att().contains(Att.COOL()) && transitions.stream().anyMatch(rule.att()::contains) && superheated.contains(subject)) {
                 if (global.javaExecutionOptions.debugZ3) {
                     System.err.println("Execution path aborted, superheating logic");
                 }
@@ -282,7 +282,7 @@ public class SymbolicRewriter {
     }
 
     private Term restoreConfigurationIfNecessary(ConstrainedTerm subject, Rule rule, Term theNew) {
-        if (rule.att().contains(Att.refers_RESTORE_CONFIGURATION())) {
+        if (rule.att().contains(Att.REFERS_RESTORE_CONFIGURATION())) {
             K strategyCell = new FindK() {
                 public scala.collection.Set<K> apply(KApply k) {
                     if (k.klabel().name().equals(Strategy.strategyCellName()))

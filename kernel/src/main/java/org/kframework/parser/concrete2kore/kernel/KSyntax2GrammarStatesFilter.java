@@ -4,12 +4,12 @@ package org.kframework.parser.concrete2kore.kernel;
 import dk.brics.automaton.Automaton;
 import dk.brics.automaton.RegExp;
 import org.apache.commons.lang3.tuple.Pair;
+import org.kframework.attributes.Att;
 import org.kframework.definition.Module;
 import org.kframework.definition.Production;
 import org.kframework.definition.ProductionItem;
 import org.kframework.definition.Terminal;
 import org.kframework.definition.TerminalLike;
-import org.kframework.kil.loader.Constants;
 import org.kframework.kore.Sort;
 import org.kframework.parser.concrete2kore.kernel.Grammar.NextableState;
 import org.kframework.parser.concrete2kore.kernel.Grammar.NonTerminal;
@@ -164,7 +164,7 @@ public class KSyntax2GrammarStatesFilter {
                 Production prd = iter.next();
                 NextableState previous = productionsRemaining.get(prd);
                 if (prd.items().size() == h.i) {
-                    Optional<Production> original = prd.att().getOptional(Constants.ORIGINAL_PRD, Production.class);
+                    Optional<Production> original = prd.att().getOptional(Att.ORIGINAL_PRD(), Production.class);
                     if (original.isPresent())
                         prd = original.get();
                     RuleState labelRule = grammar.new RuleState("AddLabelRS", nt, new WrapLabelRule(prd));

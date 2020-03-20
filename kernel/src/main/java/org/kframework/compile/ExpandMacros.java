@@ -2,8 +2,6 @@
 package org.kframework.compile;
 
 import org.kframework.attributes.Att;
-import org.kframework.attributes.Location;
-import org.kframework.attributes.Source;
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Context;
@@ -12,7 +10,6 @@ import org.kframework.definition.Module;
 import org.kframework.definition.Production;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
-import org.kframework.kil.Attribute;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -24,10 +21,7 @@ import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
 import org.kframework.kore.TransformK;
 import org.kframework.kore.VisitK;
-import org.kframework.main.GlobalOptions;
-import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.utils.errorsystem.KEMException;
-import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 
 import java.io.BufferedWriter;
@@ -39,7 +33,6 @@ import java.io.PrintWriter;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -122,7 +115,7 @@ public class ExpandMacros {
     }
 
     private boolean isMacro(Att att, boolean reverse) {
-        return att.contains(Attribute.ALIAS_REC_KEY) || att.contains(Attribute.ALIAS_KEY) || (!reverse && (att.contains(Attribute.MACRO_KEY) || att.contains(Attribute.MACRO_REC_KEY)));
+        return att.contains(Att.ALIAS_REC()) || att.contains(Att.ALIAS()) || (!reverse && (att.contains(Att.MACRO()) || att.contains(Att.MACRO_REC())));
     }
 
     private Set<KVariable> vars = new HashSet<>();
@@ -209,7 +202,7 @@ public class ExpandMacros {
                             right = tmp;
                         }
                         final Map<KVariable, K> subst = new HashMap<>();
-                        if (match(subst, left, applied, r) && (r.att().contains(Attribute.MACRO_REC_KEY) || r.att().contains(Attribute.ALIAS_REC_KEY) || !appliedRules.contains(r))) {
+                        if (match(subst, left, applied, r) && (r.att().contains(Att.MACRO_REC()) || r.att().contains(Att.ALIAS_REC()) || !appliedRules.contains(r))) {
                             if (cover) {
                                 if (!r.att().contains("UNIQUE_ID")) System.out.println(r.toString());
                                 coverage.println(r.att().get("UNIQUE_ID"));
@@ -358,7 +351,7 @@ public class ExpandMacros {
     }
 
     public static boolean isMacro(HasAtt s) {
-      return s.att().contains(Attribute.MACRO_KEY) || s.att().contains(Attribute.MACRO_REC_KEY) || s.att().contains(Attribute.ALIAS_REC_KEY) || s.att().contains(Attribute.ALIAS_KEY);
+      return s.att().contains(Att.MACRO()) || s.att().contains(Att.MACRO_REC()) || s.att().contains(Att.ALIAS_REC()) || s.att().contains(Att.ALIAS());
     }
 
     public Sentence expand(Sentence s) {

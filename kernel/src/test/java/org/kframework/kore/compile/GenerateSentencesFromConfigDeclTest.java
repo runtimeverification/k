@@ -12,7 +12,6 @@ import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.definition.Production;
 import org.kframework.definition.Sentence;
-import org.kframework.kil.Attribute;
 import org.kframework.kompile.Kompile;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -129,14 +128,14 @@ public class GenerateSentencesFromConfigDeclTest {
                         BooleanUtils.TRUE, BooleanUtils.TRUE, initializerAtts),
                 Production(KLabel("<threads>-fragment"), Sort("ThreadsCellFragment"),
                         Seq(Terminal("<threads>-fragment"),NonTerminal(Sort("ThreadCellBag")),Terminal("</threads>-fragment")),
-                        Att().add(Attribute.CELL_FRAGMENT_KEY,Sort.class,Sort("ThreadsCell"))),
+                        Att().add(Att.CELL_FRAGMENT(),Sort.class,Sort("ThreadsCell"))),
                 Production(KLabel("<thread>-fragment"), Sort("ThreadCellFragment"),
                         Seq(Terminal("<thread>-fragment"),NonTerminal(Sort("KCellOpt")),NonTerminal(Sort("OptCellOpt")),Terminal("</thread>-fragment")),
-                        Att().add(Attribute.CELL_FRAGMENT_KEY,Sort.class,Sort("ThreadCell"))),
+                        Att().add(Att.CELL_FRAGMENT(),Sort.class,Sort("ThreadCell"))),
                 Production(Seq(), Sort("OptCellOpt"), Seq(NonTerminal(Sort("OptCell")))),
-                Production(KLabel("noOptCell"), Sort("OptCellOpt"), Seq(Terminal("noOptCell")),Att().add(Attribute.CELL_OPT_ABSENT_KEY, Sort.class, Sort("OptCell"))),
+                Production(KLabel("noOptCell"), Sort("OptCellOpt"), Seq(Terminal("noOptCell")),Att().add(Att.CELL_OPT_ABSENT(), Sort.class, Sort("OptCell"))),
                 Production(Seq(), Sort("KCellOpt"), Seq(NonTerminal(Sort("KCell")))),
-                Production(KLabel("noKCell"), Sort("KCellOpt"), Seq(Terminal("noKCell")),Att().add(Attribute.CELL_OPT_ABSENT_KEY, Sort.class, Sort("KCell")))
+                Production(KLabel("noKCell"), Sort("KCellOpt"), Seq(Terminal("noKCell")),Att().add(Att.CELL_OPT_ABSENT(), Sort.class, Sort("KCell")))
             );
 
         assertEquals("Produced unexpected productions", Set(), gen.$amp$tilde(reference));

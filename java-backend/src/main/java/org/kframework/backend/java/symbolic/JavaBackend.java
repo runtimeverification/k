@@ -10,7 +10,6 @@ import org.kframework.builtin.Sorts;
 import org.kframework.compile.*;
 import org.kframework.definition.*;
 import org.kframework.definition.Module;
-import org.kframework.kil.Attribute;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.Kompile;
 import org.kframework.kompile.KompileOptions;
@@ -106,7 +105,7 @@ public class JavaBackend extends AbstractBackend {
                 .andThen(DefinitionTransformer.fromSentenceTransformer(new AddConfigurationRecoveryFlags(), "add refers_THIS_CONFIGURATION_marker"))
                 .andThen(DefinitionTransformer.fromSentenceTransformer(JavaBackend::markSingleVariables, "mark single variables"))
                 .andThen(DefinitionTransformer.from(new AssocCommToAssoc(), "convert AC matching to A matching"))
-                .andThen(DefinitionTransformer.from(new MergeRules(MAIN_AUTOMATON, Att.topRule()), "merge regular rules into one rule with or clauses"))
+                .andThen(DefinitionTransformer.from(new MergeRules(MAIN_AUTOMATON, Att.TOP_RULE()), "merge regular rules into one rule with or clauses"))
                 .apply(Kompile.defaultSteps(kompileOptions, kem, files).apply(d));
              // .andThen(KoreToMiniToKore::apply) // for serialization/deserialization test
     }
@@ -147,7 +146,7 @@ public class JavaBackend extends AbstractBackend {
                 //.andThen(ModuleTransformer.fromSentenceTransformer(JavaBackend::markSingleVariables, "mark single variables"))
                 //.andThen(ModuleTransformer.from(new AssocCommToAssoc()::apply, "convert AC matching to A matching"))
                 .andThen(restoreDefinitionModulesTransformer(def))
-                //.andThen(ModuleTransformer.from(new MergeRules(SPEC_AUTOMATON, Att.specification())::apply, "merge spec rules into one rule with or clauses"))
+                //.andThen(ModuleTransformer.from(new MergeRules(SPEC_AUTOMATON, Att.SPECIFICATION())::apply, "merge spec rules into one rule with or clauses"))
                 .apply(m);
     }
 
@@ -167,7 +166,7 @@ public class JavaBackend extends AbstractBackend {
 
     private static Module markSpecRules(Definition d, Module mod) {
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(d.mainModule());
-        return ModuleTransformer.fromSentenceTransformer(s -> markRegularRules(d, configInfo, s, Att.specification()), "mark specification rules").apply(mod);
+        return ModuleTransformer.fromSentenceTransformer(s -> markRegularRules(d, configInfo, s, Att.SPECIFICATION()), "mark specification rules").apply(mod);
     }
 
         /**
@@ -175,7 +174,7 @@ public class JavaBackend extends AbstractBackend {
          */
     private static Definition markRegularRules(Definition d) {
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(d.mainModule());
-        return DefinitionTransformer.fromSentenceTransformer((mod, s) -> markRegularRules(d, configInfo, s, Att.topRule()), "mark regular rules").apply(d);
+        return DefinitionTransformer.fromSentenceTransformer((mod, s) -> markRegularRules(d, configInfo, s, Att.TOP_RULE()), "mark regular rules").apply(d);
     }
 
     /**
@@ -197,7 +196,7 @@ public class JavaBackend extends AbstractBackend {
         if (s instanceof Rule) {
             Rule r = (Rule) s;
 
-            if (!r.att().contains(Att.topRule()))
+            if (!r.att().contains(Att.TOP_RULE()))
                 return r;
 
             Map<KVariable, Integer> varCount = new HashMap<>();
@@ -229,6 +228,6 @@ public class JavaBackend extends AbstractBackend {
 
     @Override
     public Set<String> excludedModuleTags() {
-        return new HashSet<>(Arrays.asList(Attribute.CONCRETE_KEY, "kore"));
+        return new HashSet<>(Arrays.asList(Att.CONCRETE(), "kore"));
     }
 }

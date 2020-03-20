@@ -24,8 +24,6 @@ import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
-import org.kframework.kil.Attribute;
-import org.kframework.kil.loader.Constants;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.InjectedKLabel;
 import org.kframework.kore.K;
@@ -165,13 +163,13 @@ public class ModuleToKORE {
             if (left instanceof KApply) {
                 KApply kapp = (KApply) left;
                 Production prod = production(kapp);
-                if (prod.att().contains(Attribute.FUNCTION_KEY) || rule.att().contains(Attribute.ANYWHERE_KEY) || ExpandMacros.isMacro(rule)) {
+                if (prod.att().contains(Att.FUNCTION()) || rule.att().contains(Att.ANYWHERE()) || ExpandMacros.isMacro(rule)) {
                     functionRules.put(kapp.klabel(), rule);
                 }
             }
         }
         ComputeTransitiveFunctionDependencies deps = new ComputeTransitiveFunctionDependencies(module);
-        Set<KLabel> impurities = functionRules.keySet().stream().filter(lbl -> module.attributesFor().get(lbl).getOrElse(() -> Att()).contains(Attribute.IMPURE_KEY)).collect(Collectors.toSet());
+        Set<KLabel> impurities = functionRules.keySet().stream().filter(lbl -> module.attributesFor().get(lbl).getOrElse(() -> Att()).contains(Att.IMPURE())).collect(Collectors.toSet());
         impurities.addAll(deps.ancestors(impurities));
 
         sb.append("\n// symbols\n");
@@ -196,16 +194,16 @@ public class ModuleToKORE {
             if (prod.klabel().isEmpty()) {
                 continue;
             }
-            if (prod.att().contains(Attribute.ASSOCIATIVE_KEY)) {
+            if (prod.att().contains(Att.ASSOC())) {
                 genAssocAxiom(prod, sb);
             }
-            if (prod.att().contains(Attribute.COMMUTATIVE_KEY)) {
+            if (prod.att().contains(Att.COMM())) {
                 genCommAxiom(prod, sb);
             }
-            if (prod.att().contains(Attribute.IDEMPOTENT_KEY)) {
+            if (prod.att().contains(Att.IDEM())) {
                 genIdemAxiom(prod, sb);
             }
-            if (isFunction(prod) && prod.att().contains(Attribute.UNIT_KEY)) {
+            if (isFunction(prod) && prod.att().contains(Att.UNIT())) {
                 genUnitAxiom(prod, sb);
             }
             if (isFunctional(prod, functionRules, impurities)) {
@@ -292,12 +290,12 @@ public class ModuleToKORE {
             }
             sb.append("  ");
             Att att = module.sortAttributesFor().get(sort).getOrElse(() -> KORE.Att());
-            if (att.contains(Attribute.HOOK_KEY)) {
-                if (collectionSorts.contains(att.get(Attribute.HOOK_KEY))) {
-                    if (att.get(Attribute.HOOK_KEY).equals("ARRAY.Array")) {
+            if (att.contains(Att.HOOK())) {
+                if (collectionSorts.contains(att.get(Att.HOOK()))) {
+                    if (att.get(Att.HOOK()).equals("ARRAY.Array")) {
                         att = att.remove("element");
                         att = att.remove("unit");
-                        att = att.remove(Attribute.HOOK_KEY);
+                        att = att.remove(Att.HOOK());
                     } else {
                         Production concatProd = stream(module.productionsForSort().apply(sort)).filter(p -> p.att().contains("element")).findAny().get();
                         att = att.add("element", K.class, KApply(KLabel(concatProd.att().get("element"))));
@@ -337,7 +335,7 @@ public class ModuleToKORE {
                 impureFunctions.add(prod.klabel().get().name());
             }
             sb.append("  ");
-            if (isFunction(prod) && prod.att().contains(Attribute.HOOK_KEY) && isRealHook(prod.att())) {
+            if (isFunction(prod) && prod.att().contains(Att.HOOK()) && isRealHook(prod.att())) {
                 sb.append("hooked-");
             }
             sb.append("symbol ");
@@ -472,7 +470,7 @@ public class ModuleToKORE {
         if (!(prod.sort().equals(prod.nonterminal(0).sort()) && prod.sort().equals(prod.nonterminal(1).sort()))) {
             throw KEMException.compilerError("Found an associative production with ill formed sorts", prod);
         }
-        KLabel unit = KLabel(prod.att().get(Attribute.UNIT_KEY));
+        KLabel unit = KLabel(prod.att().get(Att.UNIT()));
         sb.append("  axiom");
         convertParams(prod.klabel(), true, sb);
         sb.append("\\equals{");
@@ -693,7 +691,7 @@ public class ModuleToKORE {
     }
 
     private boolean isRealHook(Att att) {
-      String hook = att.get(Attribute.HOOK_KEY);
+      String hook = att.get(Att.HOOK());
       if (hook.startsWith("ARRAY.")) {
         return false;
       }
@@ -723,7 +721,7 @@ public class ModuleToKORE {
         sb.append("\n\n// claims\n");
         HashMap<String, Boolean> consideredAttributes = new HashMap<>();
         consideredAttributes.put("priority", true);
-        consideredAttributes.put("label", true);
+        consideredAttributes.put(Att.LABEL(), true);
 
         for (Sentence sentence : iterable(spec.sentencesExcept(definition))) {
             assert sentence instanceof Rule || sentence instanceof ModuleComment
@@ -741,9 +739,9 @@ public class ModuleToKORE {
     }
 
     private Optional<SentenceType> getSentenceType(Att att) {
-        if (att.contains(Attribute.ONE_PATH_KEY)) {
+        if (att.contains(Att.ONE_PATH())) {
             return Optional.of(SentenceType.ONE_PATH);
-        } else if (att.contains(Attribute.ALL_PATH_KEY)) {
+        } else if (att.contains(Att.ALL_PATH())) {
             return Optional.of(SentenceType.ALL_PATH);
         }
         return Optional.empty();
@@ -752,7 +750,7 @@ public class ModuleToKORE {
     private RuleInfo getRuleInfo(Rule rule, boolean heatCoolEq, String topCellSortStr) {
         boolean equation = false;
         boolean owise = false;
-        boolean kore = rule.att().contains(Attribute.KORE_KEY);
+        boolean kore = rule.att().contains(Att.KORE());
         Production production = null;
         Sort productionSort = null;
         String productionSortStr = null;
@@ -774,7 +772,7 @@ public class ModuleToKORE {
                     .map(i -> (NonTerminal) i)
                     .map(NonTerminal::sort).collect(Collectors.toList());
             productionLabel = production.klabel().get();
-            if (isFunction(production) || rule.att().contains(Attribute.ANYWHERE_KEY) && !kore) {
+            if (isFunction(production) || rule.att().contains(Att.ANYWHERE()) && !kore) {
                 leftChildren = ((KApply) leftPattern).items();
                 equation = true;
             } else if ((rule.att().contains("heat") || rule.att().contains("cool")) && heatCoolEq) {
@@ -814,11 +812,11 @@ public class ModuleToKORE {
         if (ruleInfo.isEquation) {
             assertNoExistentials(rule, existentials);
             if (!constructorBased) {
-                if (!consideredAttributes.containsKey(Attribute.SIMPLIFICATION_KEY)) {
-                    consideredAttributes.put(Attribute.SIMPLIFICATION_KEY, false);
+                if (!consideredAttributes.containsKey(Att.SIMPLIFICATION())) {
+                    consideredAttributes.put(Att.SIMPLIFICATION(), false);
                 }
-                if (!rule.att().contains(Attribute.SIMPLIFICATION_KEY)) {
-                    rule = rule.withAtt(rule.att().add(Attribute.SIMPLIFICATION_KEY));
+                if (!rule.att().contains(Att.SIMPLIFICATION())) {
+                    rule = rule.withAtt(rule.att().add(Att.SIMPLIFICATION()));
                 }
             }
             sb.append("  axiom{R");
@@ -1204,10 +1202,10 @@ public class ModuleToKORE {
                                   Set<Production> overloads) {
         boolean isFunctional = !isFunction(prod);
         boolean isConstructor = !isFunction(prod);
-        isConstructor &= !prod.att().contains(Attribute.ASSOCIATIVE_KEY);
-        isConstructor &= !prod.att().contains(Attribute.COMMUTATIVE_KEY);
-        isConstructor &= !prod.att().contains(Attribute.IDEMPOTENT_KEY);
-        isConstructor &= !(prod.att().contains(Attribute.FUNCTION_KEY) && prod.att().contains(Attribute.UNIT_KEY));
+        isConstructor &= !prod.att().contains(Att.ASSOC());
+        isConstructor &= !prod.att().contains(Att.COMM());
+        isConstructor &= !prod.att().contains(Att.IDEM());
+        isConstructor &= !(prod.att().contains(Att.FUNCTION()) && prod.att().contains(Att.UNIT()));
 
         // Later we might set !isConstructor because there are anywhere rules,
         // but if a symbol is a constructor at this point, then it is still
@@ -1219,13 +1217,13 @@ public class ModuleToKORE {
         isAnywhere |= overloads.contains(prod);
         for (Rule r : functionRules.get(prod.klabel().get())) {
             isMacro |= ExpandMacros.isMacro(r);
-            isAnywhere |= r.att().contains(Attribute.ANYWHERE_KEY);
+            isAnywhere |= r.att().contains(Att.ANYWHERE());
         }
         isConstructor &= !isMacro;
         isConstructor &= !isAnywhere;
 
         Att att = prod.att().remove("constructor");
-        if (att.contains(Attribute.HOOK_KEY) && !isRealHook(att)) {
+        if (att.contains(Att.HOOK()) && !isRealHook(att)) {
             att = att.remove("hook");
         }
         if (isConstructor) {
@@ -1245,11 +1243,11 @@ public class ModuleToKORE {
         }
         // This attribute is a frontend attribute only and is removed from the kore
         // Since it has no meaning outside the frontend
-        return att.remove(Constants.ORIGINAL_PRD, Production.class);
+        return att.remove(Att.ORIGINAL_PRD(), Production.class);
     }
 
     private boolean isFunction(Production prod) {
-        if (!prod.att().contains(Attribute.FUNCTION_KEY)) {
+        if (!prod.att().contains(Att.FUNCTION())) {
             return false;
         }
         return true;
@@ -1504,7 +1502,7 @@ public class ModuleToKORE {
     }
 
     private boolean isListOfVarsAttribute(String name) {
-        return name.equals(Attribute.CONCRETE_KEY) || name.equals(Attribute.SYMBOLIC_KEY);
+        return name.equals(Att.CONCRETE()) || name.equals(Att.SYMBOLIC());
     }
 
     private static String[] asciiReadableEncodingKoreCalc() {
