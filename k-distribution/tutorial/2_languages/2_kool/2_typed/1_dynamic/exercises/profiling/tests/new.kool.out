@@ -1,14 +1,15 @@
 a = 5
-
-==========
-Statistics
-==========
-
-Objects created:
-   Main |-> 1
-   C |-> 1
-
-Methods invoked:
-   C.g |-> 1
-   Main.Main |-> 1
-   C.C |-> 1
+<generatedTop>
+  .TCell
+  <statistics>
+    <object-count>
+      C |-> 1
+      Main |-> 1
+    </object-count>
+    <method-count>
+      C . C |-> 1
+      C . g |-> 1
+      Main . Main |-> 1
+    </method-count>
+  </statistics>
+</generatedTop>

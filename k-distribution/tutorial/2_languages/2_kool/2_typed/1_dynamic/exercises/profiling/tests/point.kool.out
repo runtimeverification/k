@@ -1,20 +1,21 @@
 x = 4, y = 6
 x = 17, y = 28
 color = 87
-
-==========
-Statistics
-==========
-
-Objects created:
-   Main |-> 1
-   ColorPoint |-> 1
-   Point |-> 1
-
-Methods invoked:
-   ColorPoint.ColorPoint |-> 1
-   Point.move |-> 2
-   Main.Main |-> 1
-   Point.Point |-> 2
-   Point.printLocation |-> 2
-   ColorPoint.printColor |-> 1
+<generatedTop>
+  .TCell
+  <statistics>
+    <object-count>
+      ColorPoint |-> 1
+      Main |-> 1
+      Point |-> 1
+    </object-count>
+    <method-count>
+      ColorPoint . ColorPoint |-> 1
+      ColorPoint . printColor |-> 1
+      Main . Main |-> 1
+      Point . Point |-> 2
+      Point . move |-> 2
+      Point . printLocation |-> 2
+    </method-count>
+  </statistics>
+</generatedTop>
