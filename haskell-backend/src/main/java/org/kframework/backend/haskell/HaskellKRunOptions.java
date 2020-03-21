@@ -9,9 +9,6 @@ import org.kframework.utils.options.BaseEnumConverter;
 @RequestScoped
 public class HaskellKRunOptions {
 
-    @Parameter(names="--dry-run", description="Compile program into KORE format but do not run. Only used in Haskell backend.")
-    public boolean dryRun = false;
-
     @Parameter(names="--haskell-backend-command", description="Command to run the Haskell backend execution engine.")
     public String haskellBackendCommand = "kore-exec";
 
@@ -19,7 +16,7 @@ public class HaskellKRunOptions {
     public String haskellBackendHome = System.getenv("KORE_HOME");
 
     @Parameter(names="--default-claim-type", converter = SentenceTypeConverter.class, description="Default type for claims. Values: [all-path|one-path].")
-    public ModuleToKORE.SentenceType defaultClaimType = ModuleToKORE.SentenceType.ONE_PATH;
+    public ModuleToKORE.SentenceType defaultClaimType = ModuleToKORE.SentenceType.ALL_PATH;
 
     public static class SentenceTypeConverter extends BaseEnumConverter<ModuleToKORE.SentenceType> {
 

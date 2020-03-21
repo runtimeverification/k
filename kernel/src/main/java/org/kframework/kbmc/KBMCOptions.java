@@ -8,6 +8,7 @@ import org.kframework.unparser.PrintOptions;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.RequestScoped;
+import org.kframework.utils.options.BackendOptions;
 import org.kframework.utils.options.DefinitionLoadingOptions;
 import org.kframework.utils.options.SMTOptions;
 
@@ -21,6 +22,9 @@ public class KBMCOptions {
 
     @ParametersDelegate
     public DefinitionLoadingOptions definitionLoading = new DefinitionLoadingOptions();
+
+    @ParametersDelegate
+    public BackendOptions backend = new BackendOptions();
 
     @Parameter(names={"--raw-spec"}, description="Path to a file containing the patterns to model-check." +
             "These patterns will be executed as-is without inserting any initial configuration.")

@@ -1,9 +1,3 @@
-  #Not ( {
-    false
-  #Equals
-    A <=Int B
-  } )
-#And
   <T>
     <k>
       .
@@ -16,7 +10,7 @@
   </T>
 #And
   {
-    true
-  #Equals
     A <=Int B
+  #Equals
+    true
   }

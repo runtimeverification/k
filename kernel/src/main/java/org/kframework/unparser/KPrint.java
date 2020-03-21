@@ -3,9 +3,12 @@ package org.kframework.unparser;
 
 import com.davekoelle.AlphanumComparator;
 import com.google.inject.Inject;
+import com.google.common.collect.Multiset;
+import com.google.common.collect.HashMultiset;
 import jline.internal.Nullable;
 import org.kframework.attributes.Att;
 import org.kframework.backend.kore.ModuleToKORE;
+import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.AddSortInjections;
 import org.kframework.compile.ExpandMacros;
@@ -16,9 +19,11 @@ import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.Assoc;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
+import org.kframework.kore.KLabel;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
 import org.kframework.kore.TransformK;
+import org.kframework.kore.VisitK;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.ProductionReference;
 import org.kframework.parser.Term;
@@ -37,8 +42,11 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -204,7 +212,8 @@ public class KPrint {
     }
 
     public K abstractTerm(Module mod, K term) {
-        K origNames         = options.restoreOriginalNames ? restoreOriginalNameIfPresent(term) : term;
+        K filteredSubst     = options.noFilterSubstitution || !kompileOptions.isKore() ? term : filterSubst(term, mod);
+        K origNames         = options.restoreOriginalNames ? restoreOriginalNameIfPresent(filteredSubst) : filteredSubst;
         K collectionsSorted = options.noSortCollections    ? origNames : sortCollections(mod, origNames);
         //non-determinism is still possible if associative/commutative collection terms start with anonymous vars
         K alphaRenamed      = options.noAlphaRenaming      ? collectionsSorted : alphaRename(collectionsSorted);
@@ -212,6 +221,92 @@ public class KPrint {
         K flattenedTerm     = flattenTerms(mod, squashedTerm);
 
         return flattenedTerm;
+    }
+
+    private Set<KVariable> vars(K term) {
+      return new HashSet<>(multivars(term));
+    }
+
+    private Multiset<KVariable> multivars(K term) {
+      Multiset<KVariable> vars = HashMultiset.create();
+      new VisitK() {
+        @Override
+        public void apply(KVariable var) {
+          vars.add(var);
+        }
+      }.apply(term);
+      return vars;
+    }
+
+    private K filterSubst(K term, Module mod) {
+      if (!(term instanceof KApply)) {
+        return term;
+      }
+      KApply kapp = (KApply)term;
+      if (kapp.klabel().head().equals(KLabels.ML_AND)) {
+        return filterConjunction(kapp, mod);
+      } else if (kapp.klabel().head().equals(KLabels.ML_OR)) {
+        KLabel unit = KLabel(KLabels.ML_FALSE.name(), kapp.klabel().params().apply(0));
+        List<K> disjuncts = Assoc.flatten(kapp.klabel(), kapp.items(), unit);
+        return disjuncts.stream()
+                .map(d -> filterConjunction(d, mod))
+                .distinct()
+                .reduce((k1, k2) -> KApply(kapp.klabel(), k1, k2))
+                .orElse(KApply(unit));
+      } else if (kapp.klabel().head().equals(KLabels.ML_EQUALS)) {
+        KLabel unit = KLabel(KLabels.ML_TRUE.name(), kapp.klabel().params().apply(0));
+        return filterEquality(kapp, multivars(kapp), mod).orElse(KApply(unit));
+      } else {
+        return term;
+      }
+    }
+
+    private K filterConjunction(K term, Module mod) {
+      if (!(term instanceof KApply)) {
+        return term;
+      }
+      KApply kapp = (KApply)term;
+      if (kapp.klabel().head().equals(KLabels.ML_AND)) {
+        KLabel unit = KLabel(KLabels.ML_TRUE.name(), kapp.klabel().params().apply(0));
+        List<K> conjuncts = Assoc.flatten(kapp.klabel(), kapp.items(), unit);
+        return conjuncts.stream()
+                .map(d -> filterEquality(d, multivars(kapp), mod))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .reduce((k1, k2) -> KApply(kapp.klabel(), k1, k2))
+                .orElse(KApply(unit));
+      } else if (kapp.klabel().head().equals(KLabels.ML_EQUALS)) {
+        KLabel unit = KLabel(KLabels.ML_TRUE.name(), kapp.klabel().params().apply(0));
+        return filterEquality(kapp, multivars(kapp), mod).orElse(KApply(unit));
+      } else {
+        return term;
+      }
+    }
+
+    public Optional<K> filterEquality(K term, Multiset<KVariable> vars, Module mod) {
+      if (!(term instanceof KApply)) {
+        return Optional.of(term);
+      }
+      KApply kapp = (KApply)term;
+      if (kapp.klabel().head().equals(KLabels.ML_EQUALS)) {
+        if (!(kapp.items().get(0) instanceof KVariable) &&
+            (!(kapp.items().get(0) instanceof KApply) ||
+             !mod.attributesFor().apply(((KApply)kapp.items().get(0)).klabel()).contains(Att.FUNCTION()))) {
+          return Optional.of(term);
+        }
+        Set<KVariable> leftVars = vars(kapp.items().get(0));
+        if (leftVars.stream().filter(v -> !v.att().contains("anonymous")).findAny().isPresent()) {
+          return Optional.of(term);
+        }
+        for (KVariable var : leftVars) {
+          if (vars.count(var) != 1) {
+            return Optional.of(term);
+          }
+        }
+        return Optional.empty();
+      } else {
+        return Optional.of(term);
+      }
     }
 
     private K sortCollections(Module mod, K input) {

@@ -150,8 +150,8 @@ public class FastRuleMatcher {
             // ConstrainedTerm doesn't hold a TermContext anymore
             /* TODO(AndreiS): remove this hack for super strictness after strategies work */
             ConjunctiveFormula patternConstraint = ConjunctiveFormula.of(rule.lookups());
-            if (!computeOne && rule.att().contains(Att.cool()) && transitions.stream().anyMatch(rule.att()::contains)) {
-                patternConstraint = patternConstraint.addAll(rule.requires().stream().filter(t -> !t.att().contains(Att.transition())).collect(Collectors.toList()));
+            if (!computeOne && rule.att().contains(Att.COOL()) && transitions.stream().anyMatch(rule.att()::contains)) {
+                patternConstraint = patternConstraint.addAll(rule.requires().stream().filter(t -> !t.att().contains(Att.TRANSITION())).collect(Collectors.toList()));
             } else {
                 patternConstraint = patternConstraint.addAll(rule.requires());
             }

@@ -7,7 +7,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.attributes.Att;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
-import org.kframework.kil.Attribute;
 import org.kframework.utils.errorsystem.KEMException;
 import scala.collection.Seq;
 
@@ -95,25 +94,25 @@ public class KLabelConstant extends KLabel implements org.kframework.kore.KLabel
         String smtlib = null;
         List<Integer>  projectionAtt = null;
         // there are labels which are just predicates, but are not obligated to be sort membership predicates
-        if (!productionAttributes.contains(Attribute.PREDICATE_KEY, org.kframework.kore.Sort.class)) {
+        if (!productionAttributes.contains(Att.PREDICATE(), org.kframework.kore.Sort.class)) {
             predicateSort = null;
-            isFunction = productionAttributes.contains(Attribute.FUNCTION_KEY);
-            isPattern = productionAttributes.contains(Attribute.PATTERN_KEY);
-            smtlib = productionAttributes.getOptional(Attribute.SMTLIB_KEY)
-                    .orElse(productionAttributes.getOptional(Attribute.SMTHOOK_KEY)
+            isFunction = productionAttributes.contains(Att.FUNCTION());
+            isPattern = productionAttributes.contains(Att.PATTERN());
+            smtlib = productionAttributes.getOptional(Att.SMTLIB())
+                    .orElse(productionAttributes.getOptional(Att.SMT_HOOK())
                             .orElse(null));
             projectionAtt = getProjectionAtt(productionAttributes);
         } else {
             /* a KLabel beginning with "is" represents a sort membership predicate */
             isFunction = true;
-            predicateSort = Sort.of(productionAttributes.get(Attribute.PREDICATE_KEY, org.kframework.kore.Sort.class));
+            predicateSort = Sort.of(productionAttributes.get(Att.PREDICATE(), org.kframework.kore.Sort.class));
         }
         this.isSortPredicate = predicateSort != null;
         this.isFunction = isFunction;
         this.projectionAtt = projectionAtt;
         this.isPattern = isPattern;
         this.smtlib = smtlib;
-        this.isImpure = productionAttributes.contains(Attribute.IMPURE_KEY);
+        this.isImpure = productionAttributes.contains(Att.IMPURE());
     }
 
     /**
@@ -140,7 +139,7 @@ public class KLabelConstant extends KLabel implements org.kframework.kore.KLabel
      * [proj]         =>  (0,1,2)  // by default
      */
     private List<Integer> getProjectionAtt(Att productionAttributes) {
-        Optional<String> proj = productionAttributes.getOptional(Attribute.PROJECTION_KEY);
+        Optional<String> proj = productionAttributes.getOptional(Att.PROJ());
         if (proj.isPresent()) {
             String projAtt = proj.get();
             if (projAtt.isEmpty()) {

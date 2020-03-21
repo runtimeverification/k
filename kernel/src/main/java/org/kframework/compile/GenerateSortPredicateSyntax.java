@@ -1,11 +1,11 @@
 // Copyright (c) 2015-2019 K Team. All Rights Reserved.
 package org.kframework.compile;
 
+import org.kframework.attributes.Att;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Module;
 import org.kframework.definition.Production;
 import org.kframework.definition.Sentence;
-import org.kframework.kil.Attribute;
 import org.kframework.kore.Sort;
 
 import java.util.Collections;
@@ -35,7 +35,7 @@ public class GenerateSortPredicateSyntax {
     public Set<Sentence> gen(Module mod, Sort sort) {
         Production prod = Production(KLabel("is" + sort.toString()), Sorts.Bool(),
                 Seq(Terminal("is" + sort.toString()), Terminal("("), NonTerminal(Sorts.K()), Terminal(")")),
-                Att().add(Attribute.FUNCTION_KEY).add(Attribute.PREDICATE_KEY, Sort.class, sort));
+                Att().add(Att.FUNCTION()).add(Att.PREDICATE(), Sort.class, sort));
         if (!mod.productions().contains(prod))
             return Collections.singleton(prod);
         return Collections.emptySet();

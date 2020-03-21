@@ -20,6 +20,8 @@ import org.kframework.parser.kore.parser.ParseError;
 import org.kframework.RewriterResult;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.rewriter.SearchType;
+import org.kframework.unparser.KPrint;
+import org.kframework.unparser.OutputModes;
 import org.kframework.utils.OS;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
@@ -27,8 +29,10 @@ import org.kframework.utils.inject.DefinitionScoped;
 import org.kframework.utils.inject.RequestScoped;
 import scala.Tuple2;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +49,7 @@ public class LLVMRewriter implements Function<Definition, Rewriter> {
     private final CompiledDefinition def;
     private final KRunOptions krunOptions;
     private final KompileOptions kompileOptions;
+    private final KPrint kprint;
 
     @Inject
     public LLVMRewriter(
@@ -52,12 +57,14 @@ public class LLVMRewriter implements Function<Definition, Rewriter> {
             FileUtil files,
             CompiledDefinition def,
             KRunOptions krunOptions,
-            KompileOptions kompileOptions) {
+            KompileOptions kompileOptions,
+            KPrint kprint) {
         this.globalOptions = globalOptions;
         this.files = files;
         this.def = def;
         this.krunOptions = krunOptions;
         this.kompileOptions = kompileOptions;
+        this.kprint = kprint;
     }
 
     @Override
@@ -95,9 +102,28 @@ public class LLVMRewriter implements Function<Definition, Rewriter> {
                 args.add(pgmPath);
                 args.add(Integer.toString(depth.orElse(-1)));
                 args.add(koreOutputFile.getAbsolutePath());
+                if (krunOptions.experimental.statistics) {
+                  args.add("--statistics");
+                }
+                String[] command = new String[args.size()];
+                if (krunOptions.backend.dryRun) {
+                    System.out.println(String.join(" ", args.toArray(command)));
+                    kprint.options.output = OutputModes.NONE;
+                    return new RewriterResult(Optional.empty(), Optional.empty(), k);
+                }
                 try {
                     int exit = executeCommandBasic(files.resolveWorkingDirectory("."), args);
-                    K outputK = new KoreParser(mod.sortAttributesFor()).parseFile(koreOutputFile);
+                    if (!koreOutputFile.exists()) {
+                      throw KEMException.criticalError("LLVM Backend crashed during rewriting.");
+                    }
+                    int line = 0;
+                    if (krunOptions.experimental.statistics) {
+                      line = 1;
+                      BufferedReader br = new BufferedReader(new FileReader(koreOutputFile));
+                      long steps = Long.parseLong(br.readLine());
+                      System.err.println("[" + steps + " steps]");
+                    }
+                    K outputK = new KoreParser(mod.sortAttributesFor()).parseFile(koreOutputFile, line);
                     return new RewriterResult(Optional.empty(), Optional.of(exit), outputK);
                 } catch (IOException e) {
                     throw KEMException.criticalError("I/O Error while executing", e);

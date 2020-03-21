@@ -31,7 +31,7 @@ module NTH1-SPEC
 
     rule
     <g> nth(1, B1, B2) => B1 <~* B2 </g>
-    <p> .Map => _ </p>
+    <p> .Map => ?_ </p>
     <k> apply("nth.e")
      ~> store2("p1", "p2")
      ~> load("p1")

@@ -1,10 +1,10 @@
 // Copyright (c) 2014-2019 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore.kernel;
 
+import org.kframework.attributes.Att;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 import org.kframework.definition.Production;
-import org.kframework.kil.Attribute;
 import org.kframework.parser.Constant;
 import org.kframework.parser.KList;
 import org.kframework.parser.Term;
@@ -88,7 +88,7 @@ public abstract class Rule implements Serializable {
             if (isToken) {
                 String value = metaData.input.subSequence(metaData.start.position, metaData.end.position).toString();
                 Production newLabel = label;
-                if (label.att().getOptional(Attribute.HOOK_KEY).orElse("").equals("MINT.literal")) {
+                if (label.att().getOptional(Att.HOOK()).orElse("").equals("MINT.literal")) {
                     int index = value.indexOf('p');
                     if (index == -1) {
                       index = value.indexOf('P');

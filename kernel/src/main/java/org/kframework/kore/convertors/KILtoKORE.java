@@ -306,7 +306,7 @@ public class KILtoKORE extends KILTransformation<Object> {
         // Transform list declarations of the form Es ::= List{E, ","} into something representable in kore
         org.kframework.kore.Sort elementSort = userList.getSort();
 
-        org.kframework.attributes.Att attrs = convertAttributes(p).add(Att.userList(), userList.getListType());
+        org.kframework.attributes.Att attrs = convertAttributes(p).add(Att.USER_LIST(), userList.getListType());
         String kilProductionId = "" + System.identityHashCode(p);
         org.kframework.definition.Production prod1, prod3;
 
@@ -325,23 +325,9 @@ public class KILtoKORE extends KILTransformation<Object> {
     }
 
     public static org.kframework.attributes.Att convertAttributes(ASTNode t) {
-        Attributes attributes = t.getAttributes();
+        Att attributes = t.getAttributes();
 
-        Map<String, String> attributesSet = attributes
-                .keySet()
-                .stream()
-                .map(key -> {
-                    String keyString = key.toString();
-                    String valueString = attributes.get(key).getValue().toString();
-                    if (keyString.equals("klabel")) {
-                        return Tuple2.apply("klabel", valueString);
-                    } else {
-                        return Tuple2.apply(keyString, valueString);
-                    }
-
-                }).collect(Collectors.toMap(Tuple2::_1, Tuple2::_2));
-
-        return Att.from(attributesSet)
+        return attributes
                 .addAll(attributesFromLocation(t.getLocation()))
                 .addAll(attributesFromSource(t.getSource()));
     }

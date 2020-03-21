@@ -19,6 +19,8 @@ import org.kframework.kore.K;
 import org.kframework.kore.KORE;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
+import org.kframework.kore.TransformK;
+import org.kframework.kore.VisitK;
 import org.kframework.kprove.KProveOptions;
 import org.kframework.krun.RunProcess;
 import org.kframework.main.GlobalOptions;
@@ -35,6 +37,7 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.DefinitionScoped;
 import org.kframework.utils.inject.RequestScoped;
+import org.kframework.utils.options.BackendOptions;
 import org.kframework.utils.options.SMTOptions;
 
 import scala.Tuple2;
@@ -44,7 +47,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.function.Function;
@@ -60,6 +65,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
     private final KProveOptions kProveOptions;
     private final KBMCOptions kbmcOptions;
     private final HaskellKRunOptions haskellKRunOptions;
+    private final BackendOptions backendOptions;
     private final FileUtil files;
     private final CompiledDefinition def;
     private final KExceptionManager kem;
@@ -73,6 +79,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
             KProveOptions kProveOptions,
             KBMCOptions kbmcOptions,
             HaskellKRunOptions haskellKRunOptions,
+            BackendOptions backendOptions,
             FileUtil files,
             CompiledDefinition def,
             KExceptionManager kem,
@@ -81,6 +88,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
         this.globalOptions = globalOptions;
         this.smtOptions = smtOptions;
         this.haskellKRunOptions = haskellKRunOptions;
+        this.backendOptions = backendOptions;
         this.kompileOptions = kompileOptions;
         this.kProveOptions = kProveOptions;
         this.kbmcOptions = kbmcOptions;
@@ -123,7 +131,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                     args.add(smtOptions.smtPrelude);
                 }
                 koreCommand = args.toArray(koreCommand);
-                if (haskellKRunOptions.dryRun) {
+                if (backendOptions.dryRun) {
                     System.out.println(String.join(" ", koreCommand));
                     kprint.options.output = OutputModes.NONE;
                     return new RewriterResult(Optional.empty(), Optional.empty(), k);
@@ -214,7 +222,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                     args.add(smtOptions.smtPrelude);
                 }
                 koreCommand = args.toArray(koreCommand);
-                if (haskellKRunOptions.dryRun) {
+                if (backendOptions.dryRun) {
                     System.out.println(String.join(" ", koreCommand));
                     kprint.options.output = OutputModes.NONE;
                     return initialConfiguration;
@@ -225,6 +233,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                         throw KEMException.criticalError("Haskell backend returned non-zero exit code");
                     }
                     K outputK = new KoreParser(mod.sortAttributesFor()).parseFile(koreOutputFile);
+                    outputK = addAnonymousAttributes(outputK, pattern);
                     return outputK;
                 } catch (IOException e) {
                     throw KEMException.criticalError("I/O Error while executing", e);
@@ -233,6 +242,25 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                 } catch (ParseError parseError) {
                     throw KEMException.criticalError("Error parsing haskell backend output", parseError);
                 }
+            }
+
+            private K addAnonymousAttributes(K input, Rule pattern) {
+              Map<KVariable, KVariable> anonVars = new HashMap<>();
+              VisitK visitor = new VisitK() {
+                @Override
+                public void apply(KVariable var) {
+                  anonVars.put(var, var);
+                }
+              };
+              visitor.apply(pattern.body());
+              visitor.apply(pattern.requires());
+              visitor.apply(pattern.ensures());
+              return new TransformK() {
+                @Override
+                public K apply(KVariable var) {
+                  return anonVars.getOrDefault(var, var);
+                }
+              }.apply(input);
             }
 
             private Module getExecutionModule(Module module) {
@@ -325,7 +353,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                         "--depth", kProveOptions.depth.toString()));
                 }
                 String[] koreCommand = args.toArray(new String[args.size()]);
-                if (haskellKRunOptions.dryRun) {
+                if (backendOptions.dryRun) {
                     globalOptions.debugWarnings = true; // sets this so the kprove directory is not removed.
                     System.out.println(String.join(" ", koreCommand));
                     kprint.options.output = OutputModes.NONE;
@@ -366,7 +394,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                 args.add("--bmc");
 
                 String[] koreCommand = args.toArray(new String[args.size()]);
-                if (haskellKRunOptions.dryRun) {
+                if (backendOptions.dryRun) {
                     globalOptions.debugWarnings = true; // sets this so the kprove directory is not removed.
                     System.out.println(String.join(" ", koreCommand));
                     kprint.options.output = OutputModes.NONE;

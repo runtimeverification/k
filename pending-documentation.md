@@ -457,6 +457,125 @@ A single configuration cell containing an integer may have the "exit"
 attribute. This integer will then be used as the return value on the console
 when executing the program.
 
+For example:
+
+```k
+configuration <k> $PGM:Pgm </k>
+              <status-code exit=""> 1 </status-code>
+```
+
+declares that the cell `status-code` should be used as the exit-code for
+invocations of `krun`. Additionally, we state that the default exit-code is `1`
+(an error state). One use of this is for writing testing harnesses which assume
+that the test fails until proven otherwise and only set the `<status-code>` cell
+to `0` if the test succeeds.
+
+### Collection Cells: `multiplicity` and `type` attributes
+
+Sometimes a semantics needs to allow multiple copies of the same cell, for
+example if you are making a concurrent multi-threading programming language.
+For this purpose, K supports the `multiplicity` and `type` attributes on cells
+declared in the configuration.
+
+`multiplicity` can take on values `*` and `?`. Declaring `multiplicity="*"`
+indicates that the cell may appear any number of times in a runtime
+configuration. Setting `multiplicity="?"` indicates that the cell may only
+appear exactly 0 or 1 times in a runtime configuration. If there are no
+configuration variables present in the cell collection, the initial
+configuration will start with exactly 0 instances of the cell collection. If
+there are configuration variables present in the cell collection, the initial
+configuration will start with exactly 1 instance of the cell collection.
+
+`type` can take on values `Set`, `List`, and `Map`. For example, here we declare
+several collecion cells:
+
+```k
+configuration <k> $PGM:Pgm </k>
+              <sets>  <set  multiplicity="?" type="Set">  0:Int </set>  </sets>
+              <lists> <list multiplicity="*" type="List"> 0:Int </list> </lists>
+              <maps>
+                <map multiplicity="*" type="Map">
+                  <map-key> 0:Int </map-key>
+                  <map-value-1> "":String </map-value-1>
+                  <map-value-2> 0:Int     </map-value-2>
+                </map>
+              </maps>
+```
+
+Declaring `type="Set"` indicates that duplicate occurrences of the cell should
+be de-duplicated, and accesses to instances of the cell will be nondeterministic
+choices (constrained by any other parts of the match and side-conditions).
+Similarly, declaring `type="List"` means that new instances of the cell can be
+added at the front or back, and elements can be accessed from the front or back,
+and the order of the cells will be maintained. The following are examples of
+introduction and elimination rules for these collections:
+
+```k
+rule <k> introduce-set(I:Int) => . ... </k>
+     <sets> .Bag => <set> I </set> </sets>
+
+rule <k> eliminate-set => I ... </k>
+     <sets> <set> I </set> => .Bag </sets>
+
+rule <k> introduce-list-start(I:Int) => . ... </k>
+     <lists> (.Bag => <list> I </list>) ... </lists>
+
+rule <k> introduce-list-end(I:Int) => . ... </k>
+     <lists> ... (.Bag => <list> I </list>) </lists>
+
+rule <k> eliminate-list-start => I ... </k>
+     <lists> (<list> I </list> => .Bag) ... </lists>
+
+rule <k> eliminate-list-end => I ... </k>
+     <lists> ... (<list> I </list> => .Bag) </lists>
+```
+
+Notice that for `multiplicity="?"`, we only admit a single `<set>` instance at
+a time. For the `type=List` cell, we can add/eliminate cells from the from or
+back of the `<lists>` cell. Also note that we use `.Bag` to indicate the empty
+cell collection in all cases.
+
+Declaring `type="Map"` indicates that the first sub-cell will be used as a
+cell-key. This means that matching on those cells will be done as a map-lookup
+operation if the cell-key is mentioned in the rule (for performance). If the
+cell-key is not mentioned, it will fallback to normal nondeterministic
+constrained by other parts of the match and any side-conditions. Note that there
+is no special meaning to the name of the cells (in this case `<map>`,
+`<map-key>`, `<map-value-1>`, and `<map-value-2>`). Additionally, any number of
+sub-cells are allowed, and the _entire_ instance of the cell collection is
+considered part of the cell-value, including the cell-key (`<map-key>` in this
+case) and the surrounding collection cell (`<map>` in this case).
+
+For example, the following rules introduce, set, retrieve from, and eliminate
+`type="Map"` cells:
+
+```k
+rule <k> introduce-map(I:Int) => . ... </k>
+     <maps> ... (.Bag => <map> <map-key> I </map-key> ... </map>) ... </maps>
+
+rule <k> set-map-value-1(I:Int, S:String) => . ... </k>
+     <map> <map-key> I </map-key> <map-value-1> _ => S </map-value-1> ... </map>
+
+rule <k> set-map-value-2(I:Int, V:Int) => . ... </k>
+     <map> <map-key> I </map-key> <map-value-2> _ => V </map-value-2> ... </map>
+
+rule <k> retrieve-map-value-1(I:Int) => S ... </k>
+     <map> <map-key> I </map-key> <map-value-1> S </map-value-1> ... </map>
+
+rule <k> retrieve-map-value-2(I:Int) => V ... </k>
+     <map> <map-key> I </map-key> <map-value-2> V </map-value-2> ... </map>
+
+rule <k> eliminate-map(I:Int) => . ... </k>
+     <maps> ... (<map> <map-key> I </map-key> ... </map> => .Bag) ... </maps>
+```
+
+Note how each rule makes sure that `<map-key>` cell is mentioned, and we
+continue to use `.Bag` to indicate the empty collection. Also note that
+when introducing new map elements, you may omit any of the sub-cells which are
+not the cell-key. In case you do omit sub-cells, you must use structural
+framing `...` to indicate the missing cells, they will receive the default
+value given in the `configuration ...` declaration.
+
 Rule Declaration
 ----------------
 
@@ -504,8 +623,8 @@ rules or multiple parameters, or side conditions. All of these are extensions
 we would like to support in the future, however.
 
 In the following, we use three examples to illustrate the behavior of `#fun`.
-We point out that the support for `#fun` is provided by the frontend, 
-not the backends. 
+We point out that the support for `#fun` is provided by the frontend, not the
+backends.
 
 The three examples are real examples borrowed or modified from existing language
 semantics.
@@ -531,7 +650,7 @@ semantics.
 This example is from the `beacon`
 semantics:https://github.com/runtimeverification/beacon-chain-spec/blob/master/b
 eacon-chain.k at line 302, with some modification for simplicity. Note how
-variables `C, R, E` are bound in the nested `#fun`. 
+variables `C, R, E` are bound in the nested `#fun`.
 
 *Example 3 (Matching a structure).*
 
@@ -751,6 +870,76 @@ Then this simplification rule will only apply if the Haskell backend can prove
 that `notBool N =/=Int 0` is unsatisfiable. This avoids an infinite cycle of
 applying this simplification lemma.
 
+### The `unboundVariables` attribute
+
+Normally, K rules are not allowed to contain regular (i.e., not fresh, not
+existential) variables in the RHS / `requires` / `ensures` clauses which are not
+bound in the LHS.
+
+However, in certain cases this behavior might be desired, like, for example,
+when specifying a macro rule which is to be used in the LHS of other rules.
+To allow for such cases, but still be useful and perform the unboundness checks
+in regular cases, the `unboundVariables` attributes allows the user to specify
+a comma-separated list of names of variables which can be unbound in the rule.
+
+For example, in the macro declaration
+```
+  rule cppEnumType => bar(_, scopedEnum() #Or unscopedEnum() ) [macro, unboundVariables(_)]
+```
+the declaration `unboundVariables(_)` allows the rule to pass the unbound
+variable checks, and this in turn allows for `cppEnumType` to be used in
+the LHS of a rule to mean the pattern above:
+```
+  rule inverseConvertType(cppEnumType, foo((cppEnumType #as T::CPPType => underlyingType(T))))
+```
+
+### The `memo` attribute
+
+The `memo` attribute is a hint from the user to the backend to memoize a
+function. Not all backends support memoization, but when the attribute is used
+and the definition is compiled for a `memo`-supporting backend, then calls to
+the function may be cached. At the time of writing, the Haskell and OCaml
+backends support memoization.
+
+#### Limitations of memoization with the Haskell backend
+
+The Haskell backend will only cache a function call if all arguments are concrete.
+
+It is recommended not to memoize recursive functions, as each recursive call
+will be stored in the cache, but only the first iteration will be retrieved from
+the cache; that is, the cache will be filled with many unreachable
+entries. Instead, we recommend to perform a worker-wrapper transformation on
+recursive functions, and apply the `memo` attribute to the wrapper.
+
+**Warning:** A function declared with the `memo` attribute must not use
+uninterpreted functions in the side-condition of any rule. Memoizing such an
+impure function is unsound. To see why, consider the following rules:
+
+```
+syntax Bool ::= impure( Int ) [function]
+
+syntax Int ::= unsound( Int ) [function, memo]
+rule unsound(X:Int) => X +Int 1 requires impure(X)
+rule unsound(X:Int) => X        requires notBool impure(X)
+```
+
+Because the function `impure` is not given rules to cover all inputs, `unsound`
+can be memoized incoherently. For example,
+
+```
+{unsound(0) #And {impure(0) #Equals true}} #Equals 1
+```
+
+but
+
+```
+{unsound(0) #And {impure(0) #Equals false}} #Equals 0
+```
+
+The memoized value of `unsound(0)` would be incoherently determined by which
+pattern the backend encounters first.
+
+
 ### Variable Sort Inference
 
 In K, it is not required that users declare the sorts of variables in rules or
@@ -863,7 +1052,7 @@ The meaning of this cast at runtime is that if the term inside is of sort
 `Sort`, it should have it injection stripped away and the value inside is
 returned as a term of static sort `Sort`. However, if the term is of a
 different sort, it is an error and execution will get stuck. Thus the primary
-usefulness of this cast is to cast the return value of a function with a 
+usefulness of this cast is to cast the return value of a function with a
 greater sort down to a strictly smaller sort that you expect the return value
 of the function to have. For example:
 
@@ -1170,6 +1359,312 @@ Set variables are currently only supported by the Haskell backend.
 The use of rules with set variables should be sound for all other backends
 which just execute by rewriting, however it might not be safe for backends
 which want to guarantee coverage.
+
+### Variables occurring only in the RHS of a rule
+
+This section presents possible scenarios requiring variables to only appear in
+the RHS of a rule.
+
+#### Summary
+Except for `?` variables and `!` (fresh) variables, which are
+__required__ to only appear in the RHS of a rule, all other variables __must__
+also appear in the LHS of a rule.  This restriction also applies to anonymous
+variables; in particular, for claims, `?_` (not `_`) should be used in the RHS
+to indicate that something changes but we don't care to what value.
+
+To support specifying random-like behavior, the above restriction can be relaxed
+by annotating a rule with the `unboundVariables` attribute whenever the rule
+intentionally contains regular variables only occurring in the RHS.
+
+#### Introduction
+
+K uses question mark variables of the form `?X` to refer to
+existential variables, and uses `ensures` to specify logical constraints on
+those variables.
+These variables are only allowed to appear in the RHS of a K rule.
+
+If the rules represent rewrite (semantic) steps or verification claims,
+then the `?` variables are existentially quantified at the top of the RHS;
+otherwise, if they represent equations, the `?` variables are quantified at the
+top of the entire rule.
+
+Note that when both `?`-variables and regular variables are present,
+regular variables are (implicitly) universally quantified on top of the rule
+(already containing the existential quantifications).
+This essentially makes all `?` variables depend on all regular variables.
+
+All examples below are intended more for program verification /
+symbolic execution, and thus concrete implementations might choose to ignore
+them altogether or to provide ad-hoc implementations for them.
+
+#### Example: Verification claims
+
+Consider the following definition of a (transition) system:
+
+```
+module A
+  rule foo => true
+  rule bar => true
+  rule bar => false
+endmodule
+```
+
+Consider also, the following specification of claims about the definition above:
+```
+module A-SPEC
+  rule [s1]: foo => ?X:Bool
+  rule [s2]: foo =>  X:Bool  [unboundVariables(X)]
+  rule [s3]: bar => ?X:Bool
+  rule [s4]: bar =>  X:Bool  [unboundVariables(X)]
+endmodule
+```
+
+##### One-path interpretation
+
+- (s1) says that there exists a path from `foo` to some boolean, which is
+  satisfied easily using the `foo => true` rule
+- (s3) says the same thing about `bar` and can be satisfied by either of
+  `bar => true` and `bar => false` rules
+- (s2) and (s4) can be better understood by replacing them with instances for
+  __each__ element of type `Bool`, which can be interpreted that
+  both `true` and `false` are reachable from `foo` for (s2), or `bar` for (s4),
+  respectively.
+  + (s2) cannot be verified as we cannot find a path from `foo` to `false`.
+  + (s4) can be verified by using `bar => true` to show `true` is reachable and
+    `bar => false` to achieve the same thing for `false`
+
+##### All-path interpretation
+
+- (s1) says that all paths from `foo` will reach some boolean, which is
+  satisfied by the `foo => true` rule and the lack of other rules for `foo`
+- (s3) says the same thing about `bar` and can be satisfied by checking that
+   both `bar => true` and `bar => false` end in a boolean, and there are no
+   other rules for `bar`
+- (s2) and (s4) can be better understood by replacing them with instances for
+  __each__ element of type `Bool`, which can be interpreted that
+  both `true` and `false` are reachable __in all paths__ originating in
+  `foo` for (s2), or `bar` for (s4), respectively.
+  This is a very strong claim, requiring that all paths originating in
+  `foo` (`bar`) pass through __both__ `true` and `false`,
+  so neither (s2) nor (s4) can be verified.
+
+  Interestingly enough, adding a rule like `false => true` would make both
+  (s2) and (s4) hold.
+
+#### Example: Random Number Construct `rand()`
+
+The random number construct `rand()` is a language construct which could be
+easily conceived to be part of the syntax of a programming language:
+
+```
+Exp ::= "rand" "(" ")"
+```
+
+The intended semantics of `rand()` is that it can rewrite to any integer in
+a single step. This could be expressed as the following following infinitely
+many rules.
+
+```
+rule  rand() => 0
+rule  rand() => 1
+rule  rand() => 2
+  ...    ...
+rule rand() => (-1)
+rule rand() => (-2)
+  ...    ...
+```
+
+Since we need an instance of the rule for __every__ integer, one could summarize
+the above infinitely many rules with the rule
+
+```
+rule rand() => I:Int [unboundVariables(I)]
+```
+
+Note that `I` occurs only in the RHS in the rule above, and thus the rule
+needs the `unboundVariables(I)` attribute to signal that this is intentionally.
+
+One can define variants of `rand()` by further constraining the output variable
+as a precondition to the rule.
+
+##### Rand-like examples
+
+1. `randBounded(M,N)` can rewrite to any integer between `M` and `N`
+
+    ```
+    syntax Exp ::= randBounded(Int, Int)
+    rule randBounded(M, N) => I
+      requires M <=Int I andBool I <=Int N
+      [unboundVariables(I)]
+    ```
+
+1. `randInList(Is)` takes a list `Is` of items
+   and can rewrite in one step to any item in `Is`.
+
+    ```
+    syntax Exp ::= randInList (List)
+    rule randInList(Is) => I
+      requires I inList Is
+      [unboundVariables(I)]
+    ```
+
+1. `randNotInList(Is)` takes a list `Is` of items
+   and can rewrite in one step to any item _not_ in `Is`.
+
+    ```
+    syntax Exp ::= randNotInList (List)
+    rule randNotInList(Is) => I
+      requires notBool(I inList Is)
+      [unboundVariables(I)]
+    ```
+
+1. `randPrime()`, can rewrite to any _prime number_.
+
+    ```
+    syntax Exp ::= randPrime ()
+    rule randPrime() => X:Int
+      requires isPrime(X)
+      [unboundVariables(X)]
+    ```
+
+   where `isPrime(_)` is a predicate that can be defined in the usual way.
+
+Note 1: all above are not function symbols, but language constructs.
+
+Note 2: Currently the frontend does not allow rules with universally quantified
+variables in the RHS which are not bound in the LHS.
+
+Note 3. Allowing these rules in a concrete execution engine would require an
+algorithm for generating concrete instances for such variables, satisfying the
+given constraints; thus the `unboundVariables` attribute serves two purposes:
+- to allow such rules to pass the variable checks, and
+- to signal (concrete execution) backends that specialized algorithm would be
+needed to instantiate these variables.
+
+#### Example: Fresh Integer Construct `fresh(Is)`
+
+The fresh integer construct `fresh(Is)` is a language construct.
+
+```
+Exp ::= ... | "fresh" "(" List{Int} ")"
+```
+
+The intended semantics of `fresh(Is)` is that it can always rewrite to an
+integer that in not in `Is`.
+
+Note that `fresh(Is)` and `randNotInList(Is)` are different; the former
+does not _need_ to be able to rewrite to every integers not in `Is`,
+while the latter requires so.
+
+For example, it is _correct_ to implement `fresh(Is)` so it always returns the
+smallest positive integer that is not in `Is`, but same implementation for
+`randNotInList(Is)` might be considered _inadequate_.
+In other words, there exist multiple correct implementations of `fresh(Is)`,
+some of which may be deterministic, but there only exists a unique
+implementation of `randNotInList(Is)`.
+Finally, note that `randNotInList(Is)` is a _correct_ implementation
+for `fresh(Is)`; Hence, concrete execution engines can choose to handle
+such rules accordingly.
+
+We use the following K syntax to define `fresh(Is)`
+
+```
+syntax Exp ::= fresh (List{Int})
+rule fresh(Is:List{Int}) => ?I:Int
+  ensures notBool (?I inList{Int} Is)
+```
+
+A variant of this would be a `choiceInList(Is)` language construct which would
+choose some number from a list:
+
+```
+syntax Exp ::= choiceInList (List{Int})
+rule choiceInList(Is:List{Int}) => ?I:Int
+  ensures ?I inList{Int} Is
+```
+
+Note: This definition is different from one using a `!` variable to indicate
+freshness because using `!` is just syntactic sugar for generating globally
+unique instances and relies on a special configuration cell, and cannot be
+constrained, while the `fresh` described here is local and can be constrained.
+While the first is more appropriate for concrete execution, this might be
+better for symbolic execution / program verification.
+
+#### Example: Arbitrary Number (Unspecific Function) `arb()`
+
+The function `arb()` is not a PL construct, but a mathematical function.
+Therefore, its definition should not be interpreted as an execution step, but
+rather as an equality.
+
+The intended semantics of `arb()` is that it is an unspecified nullary function.
+The exact return value of `arb()` is unspecified in the semantics but up to the
+implementations.
+However, being a mathematical function, `arb()` must return the same value in
+any one implementation.
+
+We do not need special frontend syntax to define `arb()`.
+We only need to define it in the usual way as a function
+(instead of a language construct), and provide no axioms for it.
+The `functional` attribute ensures that the function is total, i.e.,
+that it evaluates to precisely one value for each input.
+
+##### Variants
+
+There are many variants of `arb()`. For example, `arbInList(Is)` is
+an unspecified function whose return value must be an element from `Is`.
+
+Note that `arbInList(Is)` is different from `choiceInList(Is)`, because
+`choiceInList(Is)` _transitions_ to an integer in `Is` (could be a different one
+each time it is used), while `arbInList(Is)` _is equal to_ a (fixed)
+integer not in `Is`.
+
+W.r.t. the `arb` variants, we can use `?` variables and the `function`
+annotation to signal that we're defining a function and the value of the
+function is fixed, but non-determinate.
+
+```
+syntax Int ::= arbInList(List{Int}) [function]
+rule arbInList(Is:List{Int}) => ?I:Int
+  ensures ?I inList{Int} Is
+```
+
+If elimination of existentials in equational rules is needed, one possible
+approach would be through [Skolemization](https://en.wikipedia.org/wiki/Skolem_normal_form),
+i.e., replacing the `?` variable with a new uninterpreted function depending
+on the regular variables present in the function.
+
+#### Example: Interval (Non-function Symbols) `interval()`
+
+The symbol `interval(M,N)` is not a PL construct, nor a function in the
+first-order sense, but a proper matching-logic symbol, whose interpretation is
+in the powerset of its domain.
+Its axioms will not use rewrites but equalities.
+
+The intended semantics of `interval(M,N)` is that it equals the _set_ of
+integers that are larger than or equal to `M` and smaller than or equal to `N`.
+
+Since expressing the axiom for `interval` requires an an existential
+quantification on the right-hand-side, thus making it a non-functional symbol
+defined through an equation, using `?` variables might be confusing since their
+usage would be different from that presented in the previous sections.
+
+Hence, the proposal to support this would be to write this as a proper ML rule.
+A possible syntax for this purpose would be:
+
+```
+eq  interval(M,N)
+    ==
+    #Exists X:Int .
+        (X:Int #And { X >=Int M #Equals true } #And { X <=Int N #Equals true })
+```
+
+Additionally, the symbol declaration would require a special attribute to
+signal the fact that it is not a constructor but a _defined_ symbol.
+
+Since this feature is not clearly needed by K users at the moment, it is only
+presented here as an example; its implementation will be postponed for such time
+when its usefulness becomes apparent.
+
 
 Debugging
 ---------

@@ -344,7 +344,10 @@ public class RuleGrammarTest {
     @Test
     public void test19() {
         String def = "" +
-                "module TEST " +
+                "module TEST \n" +
+                "  syntax K \n" +
+                "  syntax KItem ::= foo(K) [klabel(foo)]\n" +
+                "  syntax Bar ::= bar() [klabel(bar)]\n" +
                 "endmodule";
         parseRule("`foo`(`bar`(.KList) ~> .K , .KList)", def, 0, false);
         parseRule("`foo`(`bar`(.KList) => .K , .KList)", def, 0, false);
@@ -422,8 +425,7 @@ public class RuleGrammarTest {
                 "endmodule";
         parseRule("l(_) => .K", def, 0,
                 KApply(KLabel("#ruleNoConditions"),KApply(KLabel("#KRewrite"),
-                        KApply(KLabel("#KApply"),
-                            KToken("l",Sort("KLabel")), KApply(KLabel("#SemanticCastToK"), KToken("_",Sort("#KVariable")))),
+                        KApply(KLabel("l"), KApply(KLabel("#SemanticCastToA"), KToken("_",Sort("#KVariable")))),
                 KApply(KLabel("#EmptyK"))
                 )));
     }
@@ -471,5 +473,45 @@ public class RuleGrammarTest {
         parseProgram("0 + 3 (; some text ;)", customLayout, "Int", 0, false);
         parseProgram("0 (; some text ;) + 3", customLayout, "Int", 0, false);
         parseProgram("0 + 3 // some text"   , customLayout, "Int", 0, true);
+    }
+
+    // test KAppToTermConsVisitor for issue #985
+    @Test
+    public void test25() {
+        String def = "" +
+                "module TEST\n" +
+                "  syntax E ::= \"a\"         [klabel(elma), symbol]\n" +
+                "  syntax Lst ::= E \",\" Lst [klabel(constr), symbol]\n" +
+                "  syntax Lst2 ::= E \",\" Lst2 [klabel(constr), symbol]\n" +
+                "                | Lst \n" +
+                "  syntax S ::= tuple(E, E, S) [klabel(tuplee), symbol]\n" +
+                "endmodule";
+        parseRule("constr(I, L) => L", def, 0,
+                KApply(KLabel("#ruleNoConditions"),KApply(KLabel("#KRewrite"),
+                        KApply(KLabel("constr"),
+                                KApply(KLabel("#SemanticCastToE"), KToken("I",Sort("#KVariable"))),
+                                KApply(KLabel("#SemanticCastToLst2"), KToken("L",Sort("#KVariable")))),
+                        KApply(KLabel("#SemanticCastToLst2"), KToken("L",Sort("#KVariable")))
+                )));
+        parseRule("`constr`(I, (a, L)) => L", def, 0,
+                KApply(KLabel("#ruleNoConditions"),KApply(KLabel("#KRewrite"),
+                        KApply(KLabel("constr"),
+                                KApply(KLabel("#SemanticCastToE"), KToken("I",Sort("#KVariable"))),
+                                KApply(KLabel("constr"),
+                                        KApply(KLabel("elma")),
+                                        KApply(KLabel("#SemanticCastToLst2"), KToken("L",Sort("#KVariable"))))),
+                        KApply(KLabel("#SemanticCastToLst2"), KToken("L",Sort("#KVariable")))
+                )));
+        parseRule("tuplee(A, B, C) => C", def, 0,
+                KApply(KLabel("#ruleNoConditions"),KApply(KLabel("#KRewrite"),
+                        KApply(KLabel("tuplee"),
+                                KApply(KLabel("#SemanticCastToE"), KToken("A",Sort("#KVariable"))),
+                                KApply(KLabel("#SemanticCastToE"), KToken("B",Sort("#KVariable"))),
+                                KApply(KLabel("#SemanticCastToS"), KToken("C",Sort("#KVariable")))),
+                        KApply(KLabel("#SemanticCastToS"), KToken("C",Sort("#KVariable")))
+                )));
+        parseRule("constr(A, B, C) => .K", def, 0, false); // 3 amb at top 8 amb final
+        parseRule("constr(A, B, C, D) => .K", def, 0, false); // 17 amb at top 16 final
+        parseRule("constr(a, a, a) => .K", def, 0, true); // 'a' is not subsorted to the list
     }
 }

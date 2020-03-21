@@ -1,1 +1,3 @@
-V ==K ( ( div 3 0 ) ~> #freezer___LAMBDA-SYNTAX0_ ( cond false ) ~> #freezer___LAMBDA-SYNTAX1_ ( 10 ) )
+<k>
+  div 3 0 ~> #freezer___LAMBDA-SYNTAX_Exp_Exp_Exp0_ ( cond false ) ~> #freezer___LAMBDA-SYNTAX_Exp_Exp_Exp1_ ( 10 )
+</k>

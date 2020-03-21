@@ -249,6 +249,9 @@ public class ParseInModule implements Serializable, AutoCloseable {
             rez = new PriorityVisitor(disambModule.priorities(), disambModule.leftAssoc(), disambModule.rightAssoc()).apply(rez.right().get());
             if (rez.isLeft())
                 return new Tuple2<>(rez, warn);
+            rez = new KAppToTermConsVisitor(disambModule).apply(rez.right().get());
+            if (rez.isLeft())
+                return new Tuple2<>(rez, warn);
             Term rez3 = new PushAmbiguitiesDownAndPreferAvoid().apply(rez.right().get());
             rez3 = new PushTopAmbiguityUp().apply(rez3);
 
@@ -270,7 +273,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
             rez = new AmbFilterError(strict && inferSortChecks).apply(rez3);
             if (rez.isLeft())
                 return new Tuple2<>(rez, warn);
-            Tuple2<Either<Set<KEMException>, Term>, Set<KEMException>> rez2 = new AddEmptyLists(disambModule).apply(rez.right().get());
+            Tuple2<Either<Set<KEMException>, Term>, Set<KEMException>> rez2 = new AddEmptyLists(disambModule, startSymbol).apply(rez.right().get());
             warn = Sets.union(rez2._2(), warn);
             if (rez2._1().isLeft())
                 return rez2;

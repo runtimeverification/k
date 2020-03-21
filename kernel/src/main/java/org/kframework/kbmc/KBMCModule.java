@@ -13,6 +13,7 @@ import org.kframework.main.Tool;
 import org.kframework.unparser.PrintOptions;
 import org.kframework.utils.inject.Options;
 import org.kframework.utils.inject.RequestScoped;
+import org.kframework.utils.options.BackendOptions;
 import org.kframework.utils.options.DefinitionLoadingOptions;
 import org.kframework.utils.options.SMTOptions;
 
@@ -47,6 +48,11 @@ public class KBMCModule extends AbstractModule {
     @Provides
     SMTOptions smtOptions(KBMCOptions options) {
         return options.smt;
+    }
+
+    @Provides
+    BackendOptions backendOptions(KBMCOptions options) {
+        return options.backend;
     }
 }
 

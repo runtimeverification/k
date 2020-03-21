@@ -62,6 +62,12 @@ pipeline {
                           , string(name: 'UPDATE_DEPS_REPOSITORY', value: 'runtimeverification/mkr-mcd-spec') \
                           , string(name: 'UPDATE_DEPS_SUBMODULE_DIR', value: 'deps/k')                        \
                           ]
+        build job: 'rv-devops/master', propagate: false, wait: false                                                       \
+            , parameters: [ booleanParam(name: 'UPDATE_DEPS_SUBMODULE', value: true)                                       \
+                          , string(name: 'PR_REVIEWER', value: 'daejunpark')                                               \
+                          , string(name: 'UPDATE_DEPS_REPOSITORY', value: 'runtimeverification/beacon-chain-verification') \
+                          , string(name: 'UPDATE_DEPS_SUBMODULE_DIR', value: 'deps/k')                                     \
+                          ]
       }
     }
     stage('Build and Package K') {
@@ -95,6 +101,7 @@ pipeline {
                           echo 'Building K...'
                           mvn --batch-mode verify -U
                           echo 'Starting kserver...'
+                          export K_OPTS="-Xmx8G"
                           k-distribution/target/release/k/bin/spawn-kserver kserver.log
                           cd k-exercises/tutorial
                           make -j`nproc` ${MAKE_EXTRA_ARGS}
@@ -399,7 +406,7 @@ pipeline {
         }
         sshagent(['2b3d8d6b-0855-4b59-864a-6b3ddf9c9d1a']) {
           sh '''
-            release_tag="v${VERSION}-$(git rev-parse --short HEAD)"
+            release_tag="v${VERSION}-$(git rev-parse --short=7 HEAD)"
             mv bionic/kframework_${VERSION}_amd64.deb bionic/kframework_${VERSION}_amd64_bionic.deb
             mv buster/kframework_${VERSION}_amd64.deb buster/kframework_${VERSION}_amd64_buster.deb
             LOCAL_BOTTLE_NAME=$(echo mojave/kframework--${VERSION}.mojave.bottle*.tar.gz)

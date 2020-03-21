@@ -26,12 +26,12 @@ module ARRAY-SYNTAX
   syntax Array [hook(ARRAY.Array), unit(arrayCtor), element(_[_<-_])]
 
   syntax KItem ::= Array "[" Int "]" [function, hook(ARRAY.lookup)]
-  syntax Array ::= Array "[" Int "<-" KItem "]" [function, hook(ARRAY.update), klabel(_[_<-_]), symbol]
+  syntax Array ::= Array "[" key: Int "<-" value: KItem "]" [function, hook(ARRAY.update), klabel(_[_<-_]), symbol]
   syntax Array ::= Array "[" Int "<-" "undef" "]" [function, hook(ARRAY.remove)]
   syntax Array ::= updateArray(Array, Int, List) [function, hook(ARRAY.updateAll)]
   /*@ Sets a range of indices (given by an index into the array and the number
    of indices to set) to the same value. */
-  syntax Array ::= fillArray(Array, Int, Int, KItem) [function, hook(ARRAY.fill)]
+  syntax Array ::= fillArray(Array, index: Int, length: Int, value: KItem) [function, hook(ARRAY.fill)]
 
   syntax Bool ::= Int "in_keys" "(" Array ")" [function, functional, hook(ARRAY.in_keys)]
 endmodule
@@ -120,7 +120,7 @@ module MAP
   syntax KItem ::= Map "[" KItem "]" "orDefault" KItem      [function, functional, hook(MAP.lookupOrDefault), klabel(Map:lookupOrDefault)]
 
   /*@ Update a Map in form of  of keys and values: */
-  syntax Map ::= Map "[" KItem "<-" KItem "]"           [function, functional, klabel(Map:update), symbol, hook(MAP.update), prefer]
+  syntax Map ::= Map "[" key: KItem "<-" value: KItem "]"           [function, functional, klabel(Map:update), symbol, hook(MAP.update), prefer]
 
   /*@ Remove key/value pair associated with the key from map? */
   syntax Map ::= Map "[" KItem "<-" "undef" "]"     [function, functional, hook(MAP.remove), klabel(_[_<-undef]), symbol]
@@ -204,7 +204,7 @@ module SET
   /*@ Get the intersection of two sets ($A \cap B$) */
   syntax Set ::= intersectSet(Set, Set)   [function, functional, hook(SET.intersection)]
 
-  /*@ Get the difference of two sets ($A \setminus B$)*/
+  /*@ Get the relative complement of two asets ($A \setminus B$)*/
   syntax Set ::= Set "-Set" Set           [function, functional, hook(SET.difference), latex({#1}-_{\it Set}{#2}), klabel(Set:difference), symbol]
 
   /*@ Check element membership in a set ($a \in A$) */
@@ -218,12 +218,6 @@ module SET
 
   /*@ Get an arbitrarily chosen element of the Set */
   syntax KItem ::= choice(Set)                [function, hook(SET.choice), klabel(Set:choice)]
-
-  /* set difference axioms */
-  // TODO(AndreiS): remove this if not used
-  //rule S1:Set -Set (SetItem(K:K) S2:Set) => S1 -Set S2
-  //requires notBool(K in S1)
-  //rule S:Set -Set .Set => S
 endmodule
 
 module LIST
@@ -275,16 +269,16 @@ module LIST
    (-1 is the last element). */
   syntax KItem ::= List "[" Int "]"           [function, hook(LIST.get), klabel(List:get), symbol]
 
-  syntax List ::= List "[" Int "<-" KItem "]" [function, hook(LIST.update), klabel(List:set)]
+  syntax List ::= List "[" index: Int "<-" value: KItem "]" [function, hook(LIST.update), klabel(List:set)]
 
-  syntax List ::= makeList(Int, KItem) [function, hook(LIST.make)]
+  syntax List ::= makeList(length: Int, value: KItem) [function, hook(LIST.make)]
 
-  syntax List ::= updateList(List, Int, List) [function, hook(LIST.updateAll)]
+  syntax List ::= updateList(dest: List, index: Int, src: List) [function, hook(LIST.updateAll)]
 
-  syntax List ::= fillList(List, Int, Int, KItem) [function, hook(LIST.fill)]
+  syntax List ::= fillList(List, index: Int, length: Int, value: KItem) [function, hook(LIST.fill)]
 
   /*@ Remove elements from the beginning and the end of the List. */
-  syntax List ::= range(List, Int, Int)   [function, hook(LIST.range), klabel(List:range), symbol]
+  syntax List ::= range(List, fromFront: Int, fromBack: Int)   [function, hook(LIST.range), klabel(List:range), symbol]
 
   /*@ Check element membership in the given list */
   syntax Bool ::= KItem "in" List             [function, functional, hook(LIST.in), klabel(_inList_)]
@@ -298,7 +292,7 @@ module COLLECTIONS
   imports SET
   imports MAP
 
-  syntax List ::= Set2List(Set) [function, hook(SET.set2list)]
+  syntax List ::= Set2List(Set) [function, functional, hook(SET.set2list)]
   syntax Set ::= List2Set(List) [function, functional, hook(SET.list2set)]
 
 endmodule
@@ -398,13 +392,13 @@ module INT-COMMON
                > left:
                  Int "|Int" Int                 [function, functional, klabel(_|Int_), symbol, left, latex({#1}\mathrel{|_{\scriptstyle\it Int}}{#2}), hook(INT.or), smtlib(orInt)]
 
-  syntax Int ::= "minInt" "(" Int "," Int ")"   [function, functional, smtlib(int_min), hook(INT.min)]
-               | "maxInt" "(" Int "," Int ")"   [function, functional, smtlib(int_max), hook(INT.max)]
-               | absInt ( Int )                 [function, functional, smtlib(int_abs), hook(INT.abs)]
+  syntax Int ::= "minInt" "(" Int "," Int ")"   [function, functional, smt-hook((ite (< #1 #2) #1 #2)), hook(INT.min)]
+               | "maxInt" "(" Int "," Int ")"   [function, functional, smt-hook((ite (< #1 #2) #2 #1)), hook(INT.max)]
+               | absInt ( Int )                 [function, functional, smt-hook((ite (< #1 0) (- 0 #1) #1)), hook(INT.abs)]
                | log2Int ( Int )                [function, hook(INT.log2)]
 
-  syntax Int ::= bitRangeInt           ( Int, indexInt: Int, lengthInt: Int ) [function, hook(INT.bitRange)]
-  syntax Int ::= signExtendBitRangeInt ( Int, indexInt: Int, lengthInt: Int ) [function, hook(INT.signExtendBitRange)]
+  syntax Int ::= bitRangeInt           ( Int, index: Int, length: Int ) [function, hook(INT.bitRange)]
+  syntax Int ::= signExtendBitRangeInt ( Int, index: Int, length: Int ) [function, hook(INT.signExtendBitRange)]
 
   syntax Bool ::= Int "<=Int" Int         [function, functional, klabel(_<=Int_), symbol, left, smt-hook(<=), latex({#1}\mathrel{\leq_{\scriptstyle\it Int}}{#2}), hook(INT.le)]
                 | Int "<Int" Int          [function, functional, klabel(_<Int_), symbol, left, smt-hook(<), latex({#1}\mathrel{<_{\scriptstyle\it Int}}{#2}), hook(INT.lt)]
@@ -454,9 +448,27 @@ module INT-SYMBOLIC [symbolic, kore]
   [anywhere]
 endmodule
 
+module INT-KAST [kast]
+  imports K-EQUAL
+  imports INT-COMMON
+
+  rule I1:Int ==Int I2:Int => I1 ==K I2
+
+endmodule
+
+module INT-KORE [kore]
+  imports K-EQUAL
+  imports INT-COMMON
+
+  rule I1:Int ==K I2:Int => I1 ==Int I2
+
+endmodule
+
 module INT
   imports INT-COMMON
   imports INT-SYMBOLIC
+  imports INT-KAST
+  imports INT-KORE
   imports K-EQUAL
 
   rule bitRangeInt(I::Int, IDX::Int, LEN::Int) => (I >>Int IDX) modInt (1 <<Int LEN)
@@ -474,7 +486,6 @@ module INT
   rule minInt(I1:Int, I2:Int) => I1 requires I1 <=Int I2
   rule minInt(I1:Int, I2:Int) => I2 requires I1 >=Int I2
 
-  rule I1:Int ==Int I2:Int => I1 ==K I2
   rule I1:Int =/=Int I2:Int => notBool (I1 ==Int I2)
   rule (I1:Int dividesInt I2:Int) => (I2 %Int I1) ==Int 0
 
@@ -521,7 +532,7 @@ module FLOAT
 
   syntax Float ::= rootFloat(Float, Int)        [function, hook(FLOAT.root)]
                  | absFloat(Float)              [function, functional, smt-hook(fp.abs), hook(FLOAT.abs)]
-                 | roundFloat(Float, Int, Int)  [function, hook(FLOAT.round)]
+                 | roundFloat(Float, precision: Int, exponentBits: Int)  [function, hook(FLOAT.round)]
                  | floorFloat(Float)            [function, functional, hook(FLOAT.floor)]
                  | ceilFloat(Float)             [function, functional, hook(FLOAT.ceil)]
                  | expFloat(Float)              [function, functional, hook(FLOAT.exp)]
@@ -536,8 +547,8 @@ module FLOAT
                  | maxFloat(Float, Float)       [function, smt-hook(fp.max), hook(FLOAT.max)]
                  | minFloat(Float, Float)       [function, smt-hook(fp.min), hook(FLOAT.min)]
                  | sqrtFloat(Float)             [function]
-                 | maxValueFloat(Int, Int)      [function, hook(FLOAT.maxValue)]
-                 | minValueFloat(Int, Int)      [function, hook(FLOAT.minValue)]
+                 | maxValueFloat(precision: Int, exponentBits: Int)      [function, hook(FLOAT.maxValue)]
+                 | minValueFloat(precision: Int, exponentBits: Int)      [function, hook(FLOAT.minValue)]
 
   syntax Bool ::= Float "<=Float" Float       [function, left, smt-hook(fp.leq), latex({#1}\mathrel{\leq_{\scriptstyle\it Float}}{#2}), hook(FLOAT.le)]
                 | Float "<Float" Float        [function, left, smt-hook(fp.lt), latex({#1}\mathrel{<_{\scriptstyle\it Float}}{#2}), hook(FLOAT.lt)]
@@ -549,7 +560,7 @@ module FLOAT
 
   rule F1:Float =/=Float F2:Float => notBool (F1 ==Float F2)
 
-  syntax Float ::= Int2Float(Int, Int, Int)    [function, latex({\\it{}Int2Float}), hook(FLOAT.int2float)]
+  syntax Float ::= Int2Float(Int, precision: Int, exponentBits: Int)    [function, latex({\\it{}Int2Float}), hook(FLOAT.int2float)]
   syntax Int ::= Float2Int(Float)    [function, functional, latex({\\it{}Float2Int}), hook(FLOAT.float2int)]
 
   rule sqrtFloat(F:Float) => rootFloat(F, 2)
@@ -571,7 +582,7 @@ module STRING-SYNTAX
   syntax String ::= r"[\\\"](([^\\\"\\n\\r\\\\])|([\\\\][nrtf\\\"\\\\])|([\\\\][x][0-9a-fA-F]{2})|([\\\\][u][0-9a-fA-F]{4})|([\\\\][U][0-9a-fA-F]{8}))*[\\\"]"      [token]
 endmodule
 
-module STRING
+module STRING-COMMON
   imports STRING-SYNTAX
   imports INT
   imports FLOAT-SYNTAX
@@ -585,29 +596,28 @@ module STRING
   syntax String ::= chrChar ( Int )      [function, hook(STRING.chr)]
   syntax Int ::= ordChar ( String )      [function, hook(STRING.ord)]
 
-  syntax String ::= substrString ( String , Int , Int ) [function, functional, hook(STRING.substr)]
-  syntax Int ::= findString ( String , String , Int )   [function, hook(STRING.find)]
-  syntax Int ::= rfindString ( String , String , Int )  [function, hook(STRING.rfind)]
-  syntax Int ::= findChar ( String , String , Int )     [function, hook(STRING.findChar)]
-  syntax Int ::= rfindChar ( String , String , Int )    [function, hook(STRING.rfindChar)]
+  syntax String ::= substrString ( String , startIndex: Int , endIndex: Int ) [function, functional, hook(STRING.substr)]
+  syntax Int ::= findString ( haystack: String , needle: String , index: Int )   [function, hook(STRING.find)]
+  syntax Int ::= rfindString ( haystack: String , needle: String , index: Int )  [function, hook(STRING.rfind)]
+  syntax Int ::= findChar ( haystack: String , needles: String , index: Int )     [function, hook(STRING.findChar)]
+  syntax Int ::= rfindChar ( haystack: String , needles: String , index: Int )    [function, hook(STRING.rfindChar)]
 
   syntax String ::= Float2String ( Float )              [function, functional, hook(STRING.float2string)]
-  syntax String ::= Float2String ( Float , String )     [function, klabel(FloatFormat), hook(STRING.floatFormat)]
+  syntax String ::= Float2String ( Float , format: String )     [function, klabel(FloatFormat), hook(STRING.floatFormat)]
   syntax Float  ::= String2Float ( String )             [function, hook(STRING.string2float)]
   syntax Int    ::= String2Int   ( String )             [function, hook(STRING.string2int)]
   syntax String ::= Int2String   ( Int )                [function, functional, hook(STRING.int2string)]
-  syntax String ::= Base2String  ( Int , Int )          [function, hook(STRING.base2string)]
-  syntax Int    ::= String2Base  ( String , Int )       [function, hook(STRING.string2base)]
+  syntax String ::= Base2String  ( Int , base: Int )          [function, hook(STRING.base2string)]
+  syntax Int    ::= String2Base  ( String , base: Int )       [function, hook(STRING.string2base)]
 
 
-  syntax String ::= "replaceAll" "(" String "," String "," String ")"      [function, functional, hook(STRING.replaceAll)]
-  syntax String ::= "replace" "(" String "," String "," String "," Int ")" [function, hook(STRING.replace)]
-  syntax String ::= "replaceFirst" "(" String "," String "," String ")"    [function, functional, hook(STRING.replaceFirst)]
-  syntax Int ::= "countAllOccurrences" "(" String "," String ")"            [function, functional, hook(STRING.countAllOccurrences)]
+  syntax String ::= "replaceAll" "(" haystack: String "," needle: String "," replacement: String ")"      [function, functional, hook(STRING.replaceAll)]
+  syntax String ::= "replace" "(" haystack: String "," needle: String "," replacement: String "," times: Int ")" [function, hook(STRING.replace)]
+  syntax String ::= "replaceFirst" "(" haystack: String "," needle: String "," replacement: String ")"    [function, functional, hook(STRING.replaceFirst)]
+  syntax Int ::= "countAllOccurrences" "(" haystack: String "," needle: String ")"            [function, functional, hook(STRING.countAllOccurrences)]
 
   syntax Bool ::= String "=/=String" String      [function, functional, left, hook(STRING.ne)]
   rule S1:String =/=String S2:String => notBool (S1 ==String S2)
-  rule S1:String ==String S2:String => S1 ==K S2
 
   syntax Bool ::= String  "<String" String [function, functional, hook(STRING.lt)]
                 | String "<=String" String [function, functional, hook(STRING.le)]
@@ -647,6 +657,28 @@ module STRING
   rule replace(Source:String, _, _, 0) => Source
   rule replaceAll(Source:String, ToReplace:String, Replacement:String) => replace(Source, ToReplace, Replacement, countAllOccurrences(Source, ToReplace))
 
+endmodule
+
+module STRING-KAST [kast]
+  imports K-EQUAL
+  imports STRING-COMMON
+
+  rule S1:String ==String S2:String => S1 ==K S2
+
+endmodule
+
+module STRING-KORE [kore]
+  imports K-EQUAL
+  imports STRING-COMMON
+
+  rule S1:String ==K S2:String => S1 ==String S2
+
+endmodule
+
+module STRING
+  imports STRING-COMMON
+  imports STRING-KAST
+  imports STRING-KORE
 endmodule
 
 module STRING-BUFFER-IN-K [symbolic]
@@ -689,17 +721,17 @@ module BYTES-HOOKED
   syntax Signedness ::= "Signed" [klabel(signedBytes), symbol]
                       | "Unsigned" [klabel(unsignedBytes), symbol]
   syntax Int ::= Bytes2Int(Bytes, Endianness, Signedness) [function, functional, hook(BYTES.bytes2int)]
-  syntax Bytes ::= Int2Bytes(Int, Int, Endianness) [function, functional, hook(BYTES.int2bytes)]
+  syntax Bytes ::= Int2Bytes(length: Int, Int, Endianness) [function, functional, hook(BYTES.int2bytes)]
                  | Int2Bytes(Int, Endianness, Signedness) [function, functional, klabel(Int2BytesNoLen)]
   syntax String ::= Bytes2String(Bytes) [function, functional, hook(BYTES.bytes2string)]
   syntax Bytes ::= String2Bytes(String) [function, functional, hook(BYTES.string2bytes)]
 
-  syntax Bytes ::= Bytes "[" Int "<-" Int "]" [function, hook(BYTES.update)]
+  syntax Bytes ::= Bytes "[" index: Int "<-" value: Int "]" [function, hook(BYTES.update)]
   syntax Int ::= Bytes "[" Int "]" [function, hook(BYTES.get)]
-  syntax Bytes ::= substrBytes(Bytes, Int, Int) [function, hook(BYTES.substr)]
-  syntax Bytes ::= replaceAtBytes(Bytes, Int, Bytes) [function, hook(BYTES.replaceAt)]
-  syntax Bytes ::= padRightBytes(Bytes, Int, Int) [function, hook(BYTES.padRight)]
-                 | padLeftBytes(Bytes, Int, Int) [function, hook(BYTES.padLeft)]
+  syntax Bytes ::= substrBytes(Bytes, startIndex: Int, endIndex: Int) [function, hook(BYTES.substr)]
+  syntax Bytes ::= replaceAtBytes(dest: Bytes, index: Int, src: Bytes) [function, hook(BYTES.replaceAt)]
+  syntax Bytes ::= padRightBytes(Bytes, length: Int, value: Int) [function, hook(BYTES.padRight)]
+                 | padLeftBytes(Bytes, length: Int, value: Int) [function, hook(BYTES.padLeft)]
   syntax Bytes ::= reverseBytes(Bytes) [function, functional, hook(BYTES.reverse)]
 
   syntax Int ::= lengthBytes(Bytes) [function, functional, hook(BYTES.length), smtlib(lengthBytes)]
@@ -850,7 +882,7 @@ module ID-SYMBOLIC [symbolic, kast]
   rule String2Id(S:String) => {#parseIdToken("Id", S)}:>Id
 endmodule
 
-module K-EQUAL
+module K-EQUAL-SYNTAX
   imports BOOL
   imports BASIC-K
 
@@ -859,11 +891,34 @@ module K-EQUAL
                 | K "=/=K" K          [function, functional, smt-hook(distinct), hook(KEQUAL.ne), klabel(_=/=K_), symbol, latex({#1}\mathrel{\neq_K}{#2}), notEqualEqualK]
 
   syntax priorities equalEqualK notEqualEqualK > boolOperation mlOp
-  rule K1:K =/=K K2:K => notBool (K1 ==K K2)
+
+  syntax {Sort} Sort ::= "#if" Bool "#then" Sort "#else" Sort "#fi"   [function, functional, smt-hook(ite), hook(KEQUAL.ite)]
+
+endmodule
+
+module K-EQUAL-KORE [kore]
+  import BOOL
+  import K-EQUAL-SYNTAX
+
+  rule K1:Bool ==K K2:Bool => K1 ==Bool K2
+
+endmodule
+
+module K-EQUAL-KAST [kast]
+  import BOOL
+  import K-EQUAL-SYNTAX
 
   rule K1:Bool ==Bool K2:Bool => K1 ==K K2
 
-  syntax {Sort} Sort ::= "#if" Bool "#then" Sort "#else" Sort "#fi"   [function, functional, smt-hook(ite), hook(KEQUAL.ite)]
+endmodule
+
+module K-EQUAL
+  import BOOL
+  import K-EQUAL-SYNTAX
+  import K-EQUAL-KAST
+  import K-EQUAL-KORE
+
+  rule K1:K =/=K K2:K => notBool (K1 ==K K2)
 
   rule #if C:Bool #then B1::K #else _ #fi => B1 requires C
   rule #if C:Bool #then _ #else B2::K #fi => B2 requires notBool C
@@ -908,9 +963,8 @@ endmodule
 module K-IO
   imports LIST
   imports STRING
-  imports K-REFLECTION
 
-  syntax IOError ::= "#EOF" [klabel(#EOF), symbol] | #unknownIOError(Int) [symbol]
+  syntax IOError ::= "#EOF" [klabel(#EOF), symbol] | #unknownIOError(errno: Int) [symbol]
                    | "#E2BIG" [klabel(#E2BIG), symbol]
                    | "#EACCES" [klabel(#EACCES), symbol]
                    | "#EAGAIN" [klabel(#EAGAIN), symbol]
@@ -983,21 +1037,21 @@ module K-IO
   syntax IOInt ::= Int | IOError
   syntax IOString ::= String | IOError
 
-  syntax IOInt ::= "#open" "(" String ")" [function]
-               | "#open" "(" String "," String ")" [function, hook(IO.open), impure]
-               | "#tell" "(" Int ")" [function, hook(IO.tell), impure]
-               | "#getc" "(" Int ")"             [function, hook(IO.getc), impure]
-               | "#accept" "(" Int ")" [function, hook(IO.accept), impure]
-  syntax IOString ::= "#read" "(" Int "," Int ")"    [function, hook(IO.read), impure]
+  syntax IOInt ::= "#open" "(" path: String ")" [function]
+               | "#open" "(" path: String "," mode: String ")" [function, hook(IO.open), impure]
+               | "#tell" "(" fd: Int ")" [function, hook(IO.tell), impure]
+               | "#getc" "(" fd: Int ")"             [function, hook(IO.getc), impure]
+               | "#accept" "(" fd: Int ")" [function, hook(IO.accept), impure]
+  syntax IOString ::= "#read" "(" fd: Int "," length: Int ")"    [function, hook(IO.read), impure]
 
-  syntax K ::= "#close" "(" Int ")" [function, hook(IO.close), impure]
-             | "#seek" "(" Int "," Int ")" [function, hook(IO.seek), impure]
-             | "#seekEnd" "(" Int "," Int ")" [function, hook(IO.seekEnd), impure]
-             | "#putc" "(" Int "," Int ")"      [function, hook(IO.putc), impure]
-             | "#write" "(" Int "," String ")" [function, hook(IO.write), impure]
-             | "#lock" "(" Int "," Int ")" [function, hook(IO.lock), impure]
-             | "#unlock" "(" Int "," Int ")" [function, hook(IO.unlock), impure]
-             | "#shutdownWrite" "(" Int ")" [function, hook(IO.shutdownWrite), impure]
+  syntax K ::= "#close" "(" fd: Int ")" [function, hook(IO.close), impure]
+             | "#seek" "(" fd: Int "," index: Int ")" [function, hook(IO.seek), impure]
+             | "#seekEnd" "(" fd: Int "," fromEnd: Int ")" [function, hook(IO.seekEnd), impure]
+             | "#putc" "(" fd: Int "," value: Int ")"      [function, hook(IO.putc), impure]
+             | "#write" "(" fd: Int "," value: String ")" [function, hook(IO.write), impure]
+             | "#lock" "(" fd: Int "," endIndex: Int ")" [function, hook(IO.lock), impure]
+             | "#unlock" "(" fd: Int "," endIndex: Int ")" [function, hook(IO.unlock), impure]
+             | "#shutdownWrite" "(" fd: Int ")" [function, hook(IO.shutdownWrite), impure]
 
   syntax KItem ::= "#stat" "(" String ")" [function, hook(IO.stat), impure]
                  | "#lstat" "(" String ")" [function, hook(IO.lstat), impure]
@@ -1025,14 +1079,13 @@ module K-IO
   syntax KItem ::= #system ( String ) [function, hook(IO.system), impure]
                  | "#systemResult" "(" Int /* exit code */ "," String /* stdout */ "," String /* stderr */ ")" [klabel(#systemResult), symbol]
 
-  syntax K ::= #logToFile(String, String) [function, functional, hook(IO.log), impure, returnsUnit, symbol]
-  // #make safe temp ( template: String):IOFile - creates a temporary file in the default system location
-  syntax IOFile ::= #mkstemp(String) [function, hook(IO.mkstemp), impure]
+  syntax K ::= #logToFile(name: String, value: String) [function, functional, hook(IO.log), impure, returnsUnit, symbol]
+  // creates a temporary file in the default system location
+  syntax IOFile ::= #mkstemp(template: String) [function, hook(IO.mkstemp), impure]
   syntax IOFile ::= IOError
-                    // #tempFile(path: String, fd: Int)
-                  | "#tempFile" "(" String "," Int ")" [klabel(#tempFile), symbol]
+                  | "#tempFile" "(" path: String "," fd: Int ")" [klabel(#tempFile), symbol]
   // Remove a file or empty directory from the disk. Returns .K on success or an IOError on failure.
-  syntax K ::= #remove(String) [function, functional, hook(IO.remove), impure]
+  syntax K ::= #remove(path: String) [function, functional, hook(IO.remove), impure]
 endmodule
 
 // NOTE: DO NOT DIRECTLY IMPORT *-STREAM MODULES
@@ -1059,7 +1112,7 @@ module STDIN-STREAM
        ListItem(#istream(N:Int))
        </stdin>
     requires findChar(S, Delimiters, 0) ==Int -1 // [stdin]
-       [stream]
+       [stream, priority(200)]
 
   // when we reach whitespace, if it parses create a ListItem
   rule [stdinParseString]:
@@ -1154,7 +1207,7 @@ module STDOUT-STREAM
        _:List
        </stdout>
        // [stdout, stderr]
-       [stream]
+       [stream, priority(25)]
   rule [stdoutBufferInt]:
        <stdout>
        ListItem(#ostream(_))
@@ -1164,7 +1217,7 @@ module STDOUT-STREAM
        _:List
        </stdout>
        // [stdout, stderr]
-       [stream]
+       [stream, priority(25)]
   rule [stdoutBufferString]:
        <stdout>
        ListItem(#ostream(_))
@@ -1174,7 +1227,7 @@ module STDOUT-STREAM
        _:List
        </stdout>
        // [stdout, stderr]
-       [stream]
+       [stream, priority(25)]
 
   // Send first char from the buffer to the server
   rule [stdoutWrite]:
@@ -1185,7 +1238,7 @@ module STDOUT-STREAM
        _:List
        </stdout>
     requires S =/=String "" // [stdout, stderr]
-       [stream]
+       [stream, priority(30)]
 
   /*
   syntax Stream ::= "#noIO"

@@ -1,1 +1,3 @@
-V ==K lambda y . ( ( lambda x . lambda y . ( x y ) ) y )
+<k>
+  lambda y . ( ( lambda x . lambda y0 . ( x y0 ) ) y )
+</k>

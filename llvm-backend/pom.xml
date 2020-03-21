@@ -34,9 +34,8 @@
   </dependencies>
 
   <properties>
-    <project.build.type>Release</project.build.type>
     <llvm.backend.gc.interval>2000</llvm.backend.gc.interval>
-    <llvm.backend.prefix>${project.build.directory}/../../k-distribution/target/release/k</llvm.backend.prefix>
+    <llvm.backend.prefix>${project.build.directory}/../target/build/install</llvm.backend.prefix>
     <llvm.backend.destdir></llvm.backend.destdir>
   </properties>
 
@@ -53,11 +52,11 @@
               <skip>${llvm.backend.skip}</skip>
               <target>
                 <mkdir dir="${project.build.directory}/build" />
-		<exec executable="cmake" dir="${project.build.directory}/build" failonerror="true">
+                <exec executable="cmake" dir="${project.build.directory}/build" failonerror="true">
                   <arg value="-DCMAKE_PREFIX_PATH=${prefix.path}" />
-		  <arg value="-DCMAKE_BUILD_TYPE=${project.build.type}" />
-		  <arg value="-DCMAKE_INSTALL_PREFIX=${llvm.backend.prefix}" />
-		  <arg value="-DGC_INTERVAL=${llvm.backend.gc.interval}" />
+                  <arg value="-DCMAKE_BUILD_TYPE=${project.build.type}" />
+                  <arg value="-DCMAKE_INSTALL_PREFIX=${llvm.backend.prefix}" />
+                  <arg value="-DGC_INTERVAL=${llvm.backend.gc.interval}" />
                   <arg value="${project.basedir}/src/main/native/llvm-backend" />
                 </exec>
                 <property environment="env"/>

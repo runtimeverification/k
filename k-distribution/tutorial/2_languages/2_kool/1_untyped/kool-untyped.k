@@ -199,9 +199,9 @@ for the KOOL object-oriented constructs.
 
   syntax Ids  ::= List{Id,","}
 
-  syntax Exps ::= List{Exp,","}          [strict]
+  syntax Exps ::= List{Exp,","}          [strict, klabel(exps)]
   syntax Val
-  syntax Vals ::= List{Val,","}
+  syntax Vals ::= List{Val,","}          [klabel(exps)]
 
   syntax Block ::= "{" "}"
                 | "{" Stmts "}"

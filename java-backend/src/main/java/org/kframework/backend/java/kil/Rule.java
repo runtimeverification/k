@@ -16,7 +16,6 @@ import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Constants;
 import org.kframework.definition.HasAtt;
-import org.kframework.kil.Attribute;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -80,7 +79,7 @@ public class Rule extends JavaSymbolicObject<Rule> implements HasAtt {
         this.freshConstants = ImmutableSet.copyOf(freshConstants);
         this.freshVariables = ImmutableSet.copyOf(freshVariables);
         this.lookups = lookups;
-        this.matchingSymbols = att.contains(Attribute.MATCHING_KEY) ? ImmutableSet.copyOf(att.get(Attribute.MATCHING_KEY).split(",")) : ImmutableSet.of();
+        this.matchingSymbols = att.contains(Att.MATCHING()) ? ImmutableSet.copyOf(att.get(Att.MATCHING()).split(",")) : ImmutableSet.of();
 
         isSortPredicate = isFunction() && definedKLabel().isSortPredicate();
         if (isSortPredicate) {
@@ -212,24 +211,24 @@ public class Rule extends JavaSymbolicObject<Rule> implements HasAtt {
     }
 
     public boolean isFunction() {
-        return att().contains(Attribute.FUNCTION_KEY)
-               && !att().contains(Attribute.PATTERN_FOLDING_KEY);
+        return att().contains(Att.FUNCTION())
+               && !att().contains(Att.PATTERN_FOLDING());
     }
 
     public boolean isConcreteRule() {
-        return att().contains(Attribute.CONCRETE_KEY);
+        return att().contains(Att.CONCRETE());
     }
 
     public boolean isAnywhere() {
-        return att().contains(Attribute.ANYWHERE_KEY);
+        return att().contains(Att.ANYWHERE());
     }
 
     public boolean isPattern() {
-        return att().contains(Attribute.PATTERN_KEY);
+        return att().contains(Att.PATTERN());
     }
 
     public boolean isLemma() {
-        return att().contains(Attribute.LEMMA_KEY);
+        return att().contains(Att.LEMMA());
     }
 
     /**

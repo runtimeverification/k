@@ -7,8 +7,6 @@ import org.kframework.backend.java.kil.KLabelConstant;
 import org.kframework.backend.java.kil.Term;
 import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.util.ImpureFunctionException;
-import org.kframework.kil.Attribute;
-import org.kframework.kore.KLabel;
 import org.kframework.kore.KORE;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -55,7 +53,7 @@ public class BuiltinFunction {
             throw KEMException.internalError("Failed to load partial evaluation hook implementation", e);
         }
         for (Map.Entry<String, Att> entry : definition.kLabelAttributes().entrySet()) {
-            String hookAttribute = entry.getValue().getOptional(Attribute.HOOK_KEY).orElse(null);
+            String hookAttribute = entry.getValue().getOptional(Att.HOOK()).orElse(null);
             if (hookAttribute != null) {
                 /*
                  * exclude hook from evaluation during compilation if the hook is dynamic
@@ -63,7 +61,7 @@ public class BuiltinFunction {
                  * */
                 // TODO(KORE): removed check to allow the rewrite engine to execute impure functions when the Stage flag is incorrectly set.
                 // this allows impure function to execute statically so we need to figure out an alternate solution soon.
-//                if (stage == Stage.INITIALIZING && entry.getValue().getAttr(Attribute.IMPURE_KEY) != null) {
+//                if (stage == Stage.INITIALIZING && entry.getValue().getAttr(Att.IMPURE()) != null) {
 //                    table.put(KLabelConstant.of(entry.getKey(), definition), throwImpureExceptionHandle);
 //                    continue;
 //                }

@@ -1,7 +1,9 @@
 // Copyright (c) 2018-2019 K Team. All Rights Reserved.
 package org.kframework.backend.kore;
 
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ListMultimap;
 import com.google.common.collect.SetMultimap;
 import org.kframework.Collections;
 import org.kframework.attributes.Att;
@@ -19,11 +21,8 @@ import org.kframework.definition.Module;
 import org.kframework.definition.ModuleComment;
 import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
-import org.kframework.definition.ProductionItem;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
-import org.kframework.kil.Attribute;
-import org.kframework.kil.loader.Constants;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.InjectedKLabel;
 import org.kframework.kore.K;
@@ -38,7 +37,6 @@ import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
 import org.kframework.kore.SortHead;
 import org.kframework.kore.VisitK;
-import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
@@ -49,6 +47,7 @@ import scala.collection.Seq;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -61,6 +60,29 @@ import java.util.stream.Collectors;
 import static org.kframework.Collections.*;
 import static org.kframework.definition.Constructors.*;
 import static org.kframework.kore.KORE.*;
+
+class RuleInfo {
+    boolean isEquation;
+    boolean isOwise;
+    boolean isKore;
+    Production production;
+    String productionSortStr;
+    List<Sort> prodChildrenSorts;
+    KLabel productionLabel;
+    List<K> leftChildren;
+
+    public RuleInfo(boolean equation, boolean owise, boolean kore, Production production,
+                    String prodSortStr, List<Sort> prodChildrenSorts, KLabel prodLabel, List<K> leftChildren) {
+        this.isEquation = equation;
+        this.isOwise = owise;
+        this.isKore = kore;
+        this.production = production;
+        this.productionSortStr = prodSortStr;
+        this.prodChildrenSorts = prodChildrenSorts;
+        this.productionLabel = prodLabel;
+        this.leftChildren = leftChildren;
+    }
+}
 
 public class ModuleToKORE {
     public enum SentenceType {
@@ -108,7 +130,19 @@ public class ModuleToKORE {
         // Map attribute name to whether the attribute has a value
         Map<String, Boolean> attributes = new HashMap<>();
         attributes.put("nat", true);
-        collectTokenSortsAndAttributes(tokenSorts, attributes);
+        Set<Integer> priorities = new HashSet<>();
+        collectTokenSortsAndAttributes(tokenSorts, attributes, priorities, heatCoolEq, topCellSortStr);
+        Map<Integer, String> priorityToPreviousGroup = new HashMap<>();
+        List<Integer> priorityList = new ArrayList<>(priorities);
+        java.util.Collections.sort(priorityList);
+        if (priorityList.size() > 0 ) {
+            priorityToPreviousGroup.put(priorityList.get(0), "");
+        }
+        for (int i = 1; i < priorityList.size(); i++) {
+            Integer previous = priorityList.get(i - 1);
+            Integer current = priorityList.get(i);
+            priorityToPreviousGroup.put(current, String.format("priorityLE%d", previous));
+        }
 
         Set<String> collectionSorts = new HashSet<>();
         collectionSorts.add("SET.Set");
@@ -127,13 +161,13 @@ public class ModuleToKORE {
             if (left instanceof KApply) {
                 KApply kapp = (KApply) left;
                 Production prod = production(kapp);
-                if (prod.att().contains(Attribute.FUNCTION_KEY) || rule.att().contains(Attribute.ANYWHERE_KEY) || ExpandMacros.isMacro(rule)) {
+                if (prod.att().contains(Att.FUNCTION()) || rule.att().contains(Att.ANYWHERE()) || ExpandMacros.isMacro(rule)) {
                     functionRules.put(kapp.klabel(), rule);
                 }
             }
         }
         ComputeTransitiveFunctionDependencies deps = new ComputeTransitiveFunctionDependencies(module);
-        Set<KLabel> impurities = functionRules.keySet().stream().filter(lbl -> module.attributesFor().get(lbl).getOrElse(() -> Att()).contains(Attribute.IMPURE_KEY)).collect(Collectors.toSet());
+        Set<KLabel> impurities = functionRules.keySet().stream().filter(lbl -> module.attributesFor().get(lbl).getOrElse(() -> Att()).contains(Att.IMPURE())).collect(Collectors.toSet());
         impurities.addAll(deps.ancestors(impurities));
 
         sb.append("\n// symbols\n");
@@ -158,16 +192,16 @@ public class ModuleToKORE {
             if (prod.klabel().isEmpty()) {
                 continue;
             }
-            if (prod.att().contains(Attribute.ASSOCIATIVE_KEY)) {
+            if (prod.att().contains(Att.ASSOC())) {
                 genAssocAxiom(prod, sb);
             }
-            if (prod.att().contains(Attribute.COMMUTATIVE_KEY)) {
+            if (prod.att().contains(Att.COMM())) {
                 genCommAxiom(prod, sb);
             }
-            if (prod.att().contains(Attribute.IDEMPOTENT_KEY)) {
+            if (prod.att().contains(Att.IDEM())) {
                 genIdemAxiom(prod, sb);
             }
-            if (isFunction(prod) && prod.att().contains(Attribute.UNIT_KEY)) {
+            if (isFunction(prod) && prod.att().contains(Att.UNIT())) {
                 genUnitAxiom(prod, sb);
             }
             if (isFunctional(prod, functionRules, impurities)) {
@@ -187,17 +221,26 @@ public class ModuleToKORE {
                 genOverloadedAxiom(lesser, greater, sb);
             }
         }
+
         sb.append("\n// rules\n");
+        int ruleIndex = 0;
+        ListMultimap<Integer, String> priorityToAlias = ArrayListMultimap.create();
         for (Rule rule : iterable(module.sortedRules())) {
-            convertRule(rule, heatCoolEq, topCellSortStr, attributes, functionRules, sentenceType,sb);
+            convertRule(rule, ruleIndex, heatCoolEq, topCellSortStr, attributes, functionRules,
+                    priorityToPreviousGroup, priorityToAlias, sentenceType, sb);
+            ruleIndex++;
         }
+
+        sb.append("\n// priority groups\n");
+        genPriorityGroups(priorityList, priorityToPreviousGroup, priorityToAlias, topCellSortStr, sb);
         sb.append("endmodule ");
         convert(attributes, module.att(), sb);
         sb.append("\n");
         return sb.toString();
     }
 
-    private void collectTokenSortsAndAttributes(Set<SortHead> tokenSorts, Map<String, Boolean> attributes) {
+    private void collectTokenSortsAndAttributes(Set<SortHead> tokenSorts, Map<String, Boolean> attributes,
+                                                Set<Integer> priorities, boolean heatCoolEq, String topCellSortStr) {
         for (SortHead sort : iterable(module.sortedDefinedSorts())) {
             Att att = module.sortAttributesFor().get(sort).getOrElse(() -> KORE.Att());
             if (att.contains("token")) {
@@ -218,6 +261,22 @@ public class ModuleToKORE {
         for (Rule r : iterable(module.sortedRules())) {
             Att att = r.att();
             collectAttributes(attributes, att);
+            RuleInfo ruleInfo = getRuleInfo(r, heatCoolEq, topCellSortStr);
+            // only collect priorities of semantics rules
+            if (!ruleInfo.isEquation && !ruleInfo.isKore && !ExpandMacros.isMacro(r)) {
+                if(ruleInfo.isOwise) {
+                    // priority for owise rule is 200
+                    priorities.add(200);
+                } else {
+                    Optional<String> priority = att.getOptional("priority");
+                    if (priority.isPresent()) {
+                        priorities.add(Integer.valueOf(priority.get()));
+                    } else {
+                        // default priority for semantics rules is 50
+                        priorities.add(50);
+                    }
+                }
+            }
         }
     }
 
@@ -229,12 +288,12 @@ public class ModuleToKORE {
             }
             sb.append("  ");
             Att att = module.sortAttributesFor().get(sort).getOrElse(() -> KORE.Att());
-            if (att.contains(Attribute.HOOK_KEY)) {
-                if (collectionSorts.contains(att.get(Attribute.HOOK_KEY))) {
-                    if (att.get(Attribute.HOOK_KEY).equals("ARRAY.Array")) {
+            if (att.contains(Att.HOOK())) {
+                if (collectionSorts.contains(att.get(Att.HOOK()))) {
+                    if (att.get(Att.HOOK()).equals("ARRAY.Array")) {
                         att = att.remove("element");
                         att = att.remove("unit");
-                        att = att.remove(Attribute.HOOK_KEY);
+                        att = att.remove(Att.HOOK());
                     } else {
                         Production concatProd = stream(module.productionsForSort().apply(sort)).filter(p -> p.att().contains("element")).findAny().get();
                         att = att.add("element", K.class, KApply(KLabel(concatProd.att().get("element"))));
@@ -274,7 +333,7 @@ public class ModuleToKORE {
                 impureFunctions.add(prod.klabel().get().name());
             }
             sb.append("  ");
-            if (isFunction(prod) && prod.att().contains(Attribute.HOOK_KEY) && isRealHook(prod.att())) {
+            if (isFunction(prod) && prod.att().contains(Att.HOOK()) && isRealHook(prod.att())) {
                 sb.append("hooked-");
             }
             sb.append("symbol ");
@@ -409,7 +468,7 @@ public class ModuleToKORE {
         if (!(prod.sort().equals(prod.nonterminal(0).sort()) && prod.sort().equals(prod.nonterminal(1).sort()))) {
             throw KEMException.compilerError("Found an associative production with ill formed sorts", prod);
         }
-        KLabel unit = KLabel(prod.att().get(Attribute.UNIT_KEY));
+        KLabel unit = KLabel(prod.att().get(Att.UNIT()));
         sb.append("  axiom");
         convertParams(prod.klabel(), true, sb);
         sb.append("\\equals{");
@@ -630,7 +689,7 @@ public class ModuleToKORE {
     }
 
     private boolean isRealHook(Att att) {
-      String hook = att.get(Attribute.HOOK_KEY);
+      String hook = att.get(Att.HOOK());
       if (hook.startsWith("ARRAY.")) {
         return false;
       }
@@ -658,12 +717,16 @@ public class ModuleToKORE {
         convert(definition.name(), sb);
         sb.append(" []\n");
         sb.append("\n\n// claims\n");
+        HashMap<String, Boolean> consideredAttributes = new HashMap<>();
+        consideredAttributes.put("priority", true);
+
         for (Sentence sentence : iterable(spec.sentencesExcept(definition))) {
             assert sentence instanceof Rule || sentence instanceof ModuleComment
                 : "Unexpected non-rule claim " + sentence.toString();
             if (sentence instanceof Rule) {
-                convertRule((Rule) sentence, false, topCellSortStr,
-                        new HashMap<>(), HashMultimap.create(), sentenceType, sb);
+                convertRule((Rule) sentence, 0, false, topCellSortStr,
+                        consideredAttributes, HashMultimap.create(), new HashMap<>(), ArrayListMultimap.create(),
+                        sentenceType, sb);
             }
         }
         sb.append("endmodule ");
@@ -673,34 +736,26 @@ public class ModuleToKORE {
     }
 
     private Optional<SentenceType> getSentenceType(Att att) {
-        if (att.contains(Attribute.ONE_PATH_KEY)) {
+        if (att.contains(Att.ONE_PATH())) {
             return Optional.of(SentenceType.ONE_PATH);
-        } else if (att.contains(Attribute.ALL_PATH_KEY)) {
+        } else if (att.contains(Att.ALL_PATH())) {
             return Optional.of(SentenceType.ALL_PATH);
         }
         return Optional.empty();
     }
 
-    private void convertRule(Rule rule, boolean heatCoolEq, String topCellSortStr,
-                             Map<String, Boolean> consideredAttributes, SetMultimap<KLabel, Rule> functionRules,
-                             SentenceType defaultSentenceType, StringBuilder sb) {
-        SentenceType sentenceType = getSentenceType(rule.att()).orElse(defaultSentenceType);
-        // injections should already be present, but this is an ugly hack to get around the
-        // cache persistence issue that means that Sort attributes on k terms might not be present.
-        rule = new AddSortInjections(module).addInjections(rule);
-        Set<KVariable> existentials = getExistentials(rule);
-        ConstructorChecks constructorChecks = new ConstructorChecks(module);
+    private RuleInfo getRuleInfo(Rule rule, boolean heatCoolEq, String topCellSortStr) {
         boolean equation = false;
         boolean owise = false;
-        boolean kore = rule.att().contains(Attribute.KORE_KEY);
+        boolean kore = rule.att().contains(Att.KORE());
         Production production = null;
         Sort productionSort = null;
         String productionSortStr = null;
         List<Sort> productionSorts = null;
         KLabel productionLabel = null;
         List<K> leftChildren = null;
+
         K left = RewriteToTop.toLeft(rule.body());
-        boolean constructorBased = constructorChecks.isConstructorBased(left);
         K leftPattern = left;
         while (leftPattern instanceof KAs) {
             leftPattern = ((KAs)leftPattern).pattern();
@@ -714,7 +769,7 @@ public class ModuleToKORE {
                     .map(i -> (NonTerminal) i)
                     .map(NonTerminal::sort).collect(Collectors.toList());
             productionLabel = production.klabel().get();
-            if (isFunction(production) || rule.att().contains(Attribute.ANYWHERE_KEY) && !kore) {
+            if (isFunction(production) || rule.att().contains(Att.ANYWHERE()) && !kore) {
                 leftChildren = ((KApply) leftPattern).items();
                 equation = true;
             } else if ((rule.att().contains("heat") || rule.att().contains("cool")) && heatCoolEq) {
@@ -723,17 +778,39 @@ public class ModuleToKORE {
             }
             owise = rule.att().contains("owise");
         }
+
+        return new RuleInfo(equation, owise, kore, production,
+                productionSortStr, productionSorts, productionLabel, leftChildren);
+    }
+
+    private void convertRule(Rule rule, int ruleIndex, boolean heatCoolEq, String topCellSortStr,
+                             Map<String, Boolean> consideredAttributes, SetMultimap<KLabel, Rule> functionRules,
+                             Map<Integer, String> priorityToPreviousGroup,
+                             ListMultimap<Integer, String> priorityToAlias,
+                             SentenceType defaultSentenceType, StringBuilder sb) {
+        SentenceType sentenceType = getSentenceType(rule.att()).orElse(defaultSentenceType);
+        // injections should already be present, but this is an ugly hack to get around the
+        // cache persistence issue that means that Sort attributes on k terms might not be present.
+        rule = new AddSortInjections(module).addInjections(rule);
+        Set<KVariable> existentials = getExistentials(rule);
+        ConstructorChecks constructorChecks = new ConstructorChecks(module);
+        K left = RewriteToTop.toLeft(rule.body());
+        K requires = rule.requires();
+        K right =  RewriteToTop.toRight(rule.body());
+        K ensures = rule.ensures();
+        boolean constructorBased = constructorChecks.isConstructorBased(left);
+        RuleInfo ruleInfo = getRuleInfo(rule, heatCoolEq, topCellSortStr);
         sb.append("// ");
         sb.append(rule.toString());
         sb.append("\n");
-        if (equation) {
+        if (ruleInfo.isEquation) {
             assertNoExistentials(rule, existentials);
             if (!constructorBased) {
-                if (!consideredAttributes.containsKey(Attribute.SIMPLIFICATION_KEY)) {
-                    consideredAttributes.put(Attribute.SIMPLIFICATION_KEY, false);
+                if (!consideredAttributes.containsKey(Att.SIMPLIFICATION())) {
+                    consideredAttributes.put(Att.SIMPLIFICATION(), false);
                 }
-                if (!rule.att().contains(Attribute.SIMPLIFICATION_KEY)) {
-                    rule = rule.withAtt(rule.att().add(Attribute.SIMPLIFICATION_KEY));
+                if (!rule.att().contains(Att.SIMPLIFICATION())) {
+                    rule = rule.withAtt(rule.att().add(Att.SIMPLIFICATION()));
                 }
             }
             sb.append("  axiom{R");
@@ -743,16 +820,18 @@ public class ModuleToKORE {
                     sb.append("," + sortParamName);
             }
             sb.append("} ");
-            K right = RewriteToTop.toRight(rule.body());
-            if (owise) {
-                Set<String> varNames = vars(rule).stream().map(KVariable::name).collect(Collectors.toSet());
+            if (ruleInfo.isOwise) {
+                Set<String> varNames = collectLHSFreeVariables(requires, left)
+                        .stream().map(KVariable::name).collect(Collectors.toSet());
                 sb.append("\\implies{R} (\n    \\and{R} (\n      \\not{R} (\n        ");
-                for (Rule notMatching : RefreshRules.refresh(functionRules.get(productionLabel), varNames)) {
+                for (Rule notMatching : RefreshRules.refresh(functionRules.get(ruleInfo.productionLabel), varNames)) {
                     if (notMatching.att().contains("owise")) {
                         continue;
                     }
                     sb.append("\\or{R} (\n");
-                    Set<KVariable> vars = vars(notMatching);
+                    K notMatchingRequires = notMatching.requires();
+                    K notMatchingLeft = RewriteToTop.toLeft(notMatching.body());
+                    Set<KVariable> vars = collectLHSFreeVariables(notMatchingRequires, notMatchingLeft);
                     for (KVariable var : vars) {
                         sb.append("          \\exists{R} (");
                         convert((K)var, sb);
@@ -760,32 +839,31 @@ public class ModuleToKORE {
                     }
                     sb.append("  \\and{R} (");
                     sb.append("\n              ");
-                    convertSideCondition(notMatching.requires(), sb);
+                    convertSideCondition(notMatchingRequires, sb);
                     sb.append(",\n              ");
 
-                    K notMatchingLeft = RewriteToTop.toLeft(notMatching.body());
                     assert notMatchingLeft instanceof KApply : "expecting KApply but got " + notMatchingLeft.getClass();
                     List<K> notMatchingChildren = ((KApply) notMatchingLeft).items();
-                    assert notMatchingChildren.size() == leftChildren.size() : "assuming function with fixed arity";
-                    for (int childIdx = 0; childIdx < leftChildren.size(); childIdx++) {
+                    assert notMatchingChildren.size() == ruleInfo.leftChildren.size() : "assuming function with fixed arity";
+                    for (int childIdx = 0; childIdx < ruleInfo.leftChildren.size(); childIdx++) {
                         sb.append("\\and{R} (");
                         sb.append("\n                ");
                         sb.append("\\ceil{");
-                        Sort childSort = productionSorts.get(childIdx);
-                        convert(childSort, production.params(), sb);
+                        Sort childSort = ruleInfo.prodChildrenSorts.get(childIdx);
+                        convert(childSort, ruleInfo.production.params(), sb);
                         sb.append(", R} (");
                         sb.append("\n                  ");
                         sb.append("\\and{");
-                        convert(childSort, production.params(), sb);
+                        convert(childSort, ruleInfo.production.params(), sb);
                         sb.append("} (\n                    ");
-                        convert(leftChildren.get(childIdx), sb);
+                        convert(ruleInfo.leftChildren.get(childIdx), sb);
                         sb.append(",\n                    ");
                         convert(notMatchingChildren.get(childIdx), sb);
                         sb.append("\n                )),");
                     }
                     sb.append("\n                \\top{R} ()");
                     sb.append("\n              ");
-                    for (int childIdx = 0; childIdx < leftChildren.size(); childIdx++) {
+                    for (int childIdx = 0; childIdx < ruleInfo.leftChildren.size(); childIdx++) {
                         sb.append(')');
                     }
                     sb.append("\n          )");
@@ -796,41 +874,41 @@ public class ModuleToKORE {
                 }
                 sb.append("\\bottom{R}()");
                 sb.append("\n        ");
-                for (Rule notMatching : functionRules.get(productionLabel)) {
+                for (Rule notMatching : functionRules.get(ruleInfo.productionLabel)) {
                     if (notMatching.att().contains("owise")) {
                         continue;
                     }
                     sb.append(")");
                 }
                 sb.append("\n      ),\n      ");
-                convertSideCondition(rule.requires(), sb);
+                convertSideCondition(requires, sb);
                 sb.append("\n    ),\n    \\and{R} (\n      \\equals{");
-                sb.append(productionSortStr);
+                sb.append(ruleInfo.productionSortStr);
                 sb.append(",R} (\n        ");
                 convert(left, sb);
                 sb.append(",\n        ");
                 convert(right, sb);
                 sb.append("),\n      ");
-                convertSideCondition(rule.ensures(), sb);
+                convertSideCondition(ensures, sb);
                 sb.append("))\n  ");
                 convert(consideredAttributes, rule.att(), sb);
                 sb.append("\n\n");
             } else {
                 sb.append("\\implies{R} (\n    ");
-                convertSideCondition(rule.requires(), sb);
+                convertSideCondition(requires, sb);
                 sb.append(",\n    \\and{R} (\n      \\equals{");
-                sb.append(productionSortStr);
+                sb.append(ruleInfo.productionSortStr);
                 sb.append(",R} (\n        ");
                 convert(left, sb);
                 sb.append(",\n        ");
                 convert(right, sb);
                 sb.append("),\n      ");
-                convertSideCondition(rule.ensures(), sb);
+                convertSideCondition(ensures, sb);
                 sb.append("))\n  ");
                 convert(consideredAttributes, rule.att(), sb);
                 sb.append("\n\n");
             }
-        } else if (kore) {
+        } else if (ruleInfo.isKore) {
             assertNoExistentials(rule, existentials);
             if (isClaim(sentenceType)) {
                 sb.append("  claim{} ");
@@ -842,28 +920,40 @@ public class ModuleToKORE {
             convert(consideredAttributes, rule.att(), sb);
             sb.append("\n\n");
         } else if (!ExpandMacros.isMacro(rule)) {
-            if (isClaim(sentenceType)) {
-                sb.append("  claim{} ");
-            } else {
+            Boolean isRuleClaim = isClaim(sentenceType);
+            // generate rule LHS
+            if (!isRuleClaim) {
+                // LHS for semantics rules
+                String ruleAliasName = String.format("rule%dLHS", ruleIndex);
+                // default priority for semantics rules is 50
+                Integer priority = Integer.valueOf(rule.att().getOptional("priority").orElse("50"));
+                // priority for owise rule is 200
+                if(ruleInfo.isOwise) {
+                    priority = 200;
+                }
+                List<KVariable> freeVars = new ArrayList<>(collectLHSFreeVariables(requires, left));
+                Comparator<KVariable> compareByName = (KVariable v1, KVariable v2) -> v1.name().compareTo(v2.name());
+                java.util.Collections.sort(freeVars, compareByName);
+                genAliasForSemanticsRuleLHS(requires, left, ruleAliasName, freeVars, topCellSortStr,
+                        priority, priorityToAlias, sb);
+                sb.append("\n");
                 sb.append("  axiom{} ");
-            }
-            if (owise) {
-                // hack to deal with the strategy axiom for now
-                sb.append(String.format("\\implies{%s}(\\bottom{%s}(),",
-                        topCellSortStr, topCellSortStr));
-            }
-            K right = RewriteToTop.toRight(rule.body());
-            if (isClaim(sentenceType)) {
-                sb.append("\\implies");
+                sb.append(String.format("\\rewrites{%s} (\n    ", topCellSortStr));
+                genSemanticsRuleLHSWithAlias(ruleAliasName, freeVars, topCellSortStr,
+                        priorityToPreviousGroup.get(priority), sb);
+                sb.append(",\n    ");
             } else {
-                sb.append("\\rewrites");
+                // LHS for claims
+                sb.append("  claim{} ");
+                sb.append(String.format("\\implies{%s} (\n    ", topCellSortStr));
+                sb.append(String.format("  \\and{%s} (\n      ", topCellSortStr));
+                convertSideCondition(requires, topCellSortStr, sb);
+                sb.append(", ");
+                convert(left, sb);
+                sb.append("), ");
             }
-            sb.append(String.format("{%s} (\n    ", topCellSortStr));
-            sb.append(String.format("  \\and{%s} (\n      ", topCellSortStr));
-            convertSideCondition(rule.requires(), topCellSortStr, sb);
-            sb.append(", ");
-            convert(left, sb);
-            sb.append("), ");
+
+            // generate rule RHS
             if (sentenceType == SentenceType.ALL_PATH) {
                 sb.append(String.format("%s{%s} (\n      ", ALL_PATH_OP, topCellSortStr));
             } else if (sentenceType == SentenceType.ONE_PATH) {
@@ -878,20 +968,17 @@ public class ModuleToKORE {
                 sb.append("\n      ");
             }
             sb.append(String.format("\\and{%s} (\n      ", topCellSortStr));
-            convertSideCondition(rule.ensures(), topCellSortStr, sb);
+            convertSideCondition(ensures, topCellSortStr, sb);
             sb.append(", ");
             convert(right, sb);
             sb.append(')');
-            for (KVariable exists : existentials) {
+            for (KVariable ignored : existentials) {
                 sb.append(')');
             }
-            if (sentenceType == SentenceType.ALL_PATH || sentenceType == SentenceType.ONE_PATH) {
+            if (isClaim(sentenceType)) {
                 sb.append(')');
             }
             sb.append(')');
-            if (owise) {
-                sb.append(')');
-            }
             sb.append("\n  ");
             convert(consideredAttributes, rule.att(), sb);
             sb.append("\n\n");
@@ -912,7 +999,7 @@ public class ModuleToKORE {
         VisitK visitor = new VisitK() {
             @Override
             public void apply(KVariable k) {
-                if (k.name().startsWith("?"))
+                if (k.name().startsWith("?") || k.att().contains("fresh"))
                     res.add(k);
             }
         };
@@ -923,6 +1010,115 @@ public class ModuleToKORE {
 
     private boolean isClaim(SentenceType sentenceType) {
         return sentenceType == SentenceType.ONE_PATH || sentenceType == SentenceType.ALL_PATH;
+    }
+
+    private void genAliasForSemanticsRuleLHS(K requires, K left,
+                                             String ruleAliasName, List<KVariable> freeVars, String topCellSortStr,
+                                             Integer priority, ListMultimap<Integer, String> priorityToAlias,
+                                             StringBuilder sb) {
+        sb.append("  alias ");
+        sb.append(ruleAliasName);
+        // We assume no sort variables.
+        sb.append("{}(");
+        String conn = "";
+        for (KVariable var: freeVars) {
+            sb.append(conn);
+            convert(var.att().getOptional(Sort.class).orElse(Sorts.K()), sb);
+            conn = ",";
+        }
+        sb.append(") : ");
+        sb.append(topCellSortStr);
+        sb.append("\n  where ");
+        genAliasDeclHead(ruleAliasName, freeVars, sb);
+        sb.append(") :=\n");
+        sb.append(String.format("    \\and{%s} (\n      ", topCellSortStr));
+        convertSideCondition(requires, topCellSortStr, sb);
+        sb.append(", ");
+        convert(left, sb);
+        sb.append(") []\n");
+
+        // build existential quantified pattern for alias
+        StringBuilder extStrBuilder = new StringBuilder();
+        for (KVariable var: freeVars) {
+            extStrBuilder.append(String.format("\\exists{%s}(", topCellSortStr));
+            convert((K)var, extStrBuilder);
+            extStrBuilder.append(",");
+        }
+        genAliasDeclHead(ruleAliasName, freeVars, extStrBuilder);
+        extStrBuilder.append(")");
+        for (int i = 0; i < freeVars.size(); i++) {
+            extStrBuilder.append(")");
+        }
+        priorityToAlias.put(priority, extStrBuilder.toString());
+    }
+
+    private void genAliasDeclHead(String aliasName, List<KVariable> freeVars, StringBuilder sb) {
+        sb.append(aliasName);
+        sb.append("{}(");
+        String conn = "";
+        for (KVariable var: freeVars) {
+            sb.append(conn);
+            convert((K)var, sb);
+            conn = ",";
+        }
+    }
+
+    private void genSemanticsRuleLHSWithAlias(String ruleAliasName, List<KVariable> freeVars, String topCellSortStr,
+                                              String previousGroupName, StringBuilder sb) {
+        if (!previousGroupName.equals("")) {
+            sb.append(String.format("\\and{%s}(\n      ", topCellSortStr));
+            sb.append(String.format("\\not{%s}(", topCellSortStr));
+            sb.append(previousGroupName);
+            sb.append("{}()),\n      ");
+        }
+        sb.append(ruleAliasName);
+        sb.append("{}(");
+        String conn = "";
+        for (KVariable var: freeVars) {
+            sb.append(conn);
+            convert((K)var, sb);
+            conn = ",";
+        }
+        sb.append(")");
+        if (!previousGroupName.equals("")) {
+            sb.append(")");
+        }
+    }
+
+    private void genPriorityGroups(List<Integer> priorityList,
+                                   Map<Integer, String> priorityToPreviousGroup,
+                                   ListMultimap<Integer, String> priorityToAlias,
+                                   String topCellSortStr, StringBuilder sb) {
+        // skip generating alias for the last priority group
+        for (int index = 0; index < priorityList.size()-1; index++) {
+            Integer priority = priorityList.get(index);
+            String priorityGroupName = String.format("priorityLE%d", priority);
+            sb.append(String.format("  alias %s{}() : %s", priorityGroupName, topCellSortStr));
+            sb.append(String.format("\n  where %s{}() := ", priorityGroupName));
+            String previousGroupName = priorityToPreviousGroup.get(priority);
+            if (!previousGroupName.equals("")) {
+                sb.append(String.format("\\or{%s}(\n    ", topCellSortStr));
+                sb.append(previousGroupName);
+                sb.append("{}(), ");
+            }
+            // generate priority group body
+            List<String> aliases = priorityToAlias.get(priority);
+            for (String ruleLHSAlias : aliases) {
+                sb.append(String.format("\\or{%s}(\n    ", topCellSortStr));
+                sb.append(ruleLHSAlias);
+                sb.append(", ");
+            }
+            // bottom is the unit of "or"
+            sb.append(String.format("\\bottom{%s}()", topCellSortStr));
+            // complete parenthesis
+            for (int i = 0; i < aliases.size(); i++) {
+                sb.append(")");
+            }
+            if (!previousGroupName.equals("")) {
+                sb.append(")");
+            }
+            sb.append(" []\n\n");
+        }
     }
 
     private void functionalPattern(Production prod, Runnable functionPattern, StringBuilder sb) {
@@ -1000,10 +1196,10 @@ public class ModuleToKORE {
                                   Set<Production> overloads) {
         boolean isFunctional = !isFunction(prod);
         boolean isConstructor = !isFunction(prod);
-        isConstructor &= !prod.att().contains(Attribute.ASSOCIATIVE_KEY);
-        isConstructor &= !prod.att().contains(Attribute.COMMUTATIVE_KEY);
-        isConstructor &= !prod.att().contains(Attribute.IDEMPOTENT_KEY);
-        isConstructor &= !(prod.att().contains(Attribute.FUNCTION_KEY) && prod.att().contains(Attribute.UNIT_KEY));
+        isConstructor &= !prod.att().contains(Att.ASSOC());
+        isConstructor &= !prod.att().contains(Att.COMM());
+        isConstructor &= !prod.att().contains(Att.IDEM());
+        isConstructor &= !(prod.att().contains(Att.FUNCTION()) && prod.att().contains(Att.UNIT()));
 
         // Later we might set !isConstructor because there are anywhere rules,
         // but if a symbol is a constructor at this point, then it is still
@@ -1015,13 +1211,13 @@ public class ModuleToKORE {
         isAnywhere |= overloads.contains(prod);
         for (Rule r : functionRules.get(prod.klabel().get())) {
             isMacro |= ExpandMacros.isMacro(r);
-            isAnywhere |= r.att().contains(Attribute.ANYWHERE_KEY);
+            isAnywhere |= r.att().contains(Att.ANYWHERE());
         }
         isConstructor &= !isMacro;
         isConstructor &= !isAnywhere;
 
         Att att = prod.att().remove("constructor");
-        if (att.contains(Attribute.HOOK_KEY) && !isRealHook(att)) {
+        if (att.contains(Att.HOOK()) && !isRealHook(att)) {
             att = att.remove("hook");
         }
         if (isConstructor) {
@@ -1041,17 +1237,18 @@ public class ModuleToKORE {
         }
         // This attribute is a frontend attribute only and is removed from the kore
         // Since it has no meaning outside the frontend
-        return att.remove(Constants.ORIGINAL_PRD, Production.class);
+        return att.remove(Att.ORIGINAL_PRD(), Production.class);
     }
 
     private boolean isFunction(Production prod) {
-        if (!prod.att().contains(Attribute.FUNCTION_KEY)) {
+        if (!prod.att().contains(Att.FUNCTION())) {
             return false;
         }
         return true;
     }
 
-    private Set<KVariable> vars(Rule rule) {
+    // Assume that there is no quantifiers
+    private Set<KVariable> collectLHSFreeVariables(K requires, K left) {
         Set<KVariable> res = new HashSet<>();
         VisitK visitor = new VisitK() {
             @Override
@@ -1059,8 +1256,8 @@ public class ModuleToKORE {
                 res.add(k);
             }
         };
-        visitor.apply(rule.requires());
-        visitor.apply(RewriteToTop.toLeft(rule.body()));
+        visitor.apply(requires);
+        visitor.apply(left);
         return res;
     }
 
@@ -1313,7 +1510,7 @@ public class ModuleToKORE {
     }
 
     public Set<K> collectAnonymousVariables(K k){
-        Set <K> anonymousVariables = new HashSet<>();
+        Set<K> anonymousVariables = new HashSet<>();
         new VisitK() {
             @Override
             public void apply(KApply k) {

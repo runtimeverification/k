@@ -564,6 +564,7 @@ simplicity---expectation that the caller functions would catch those
 exceptions). */
 
   rule try block catch(int X:Id) {S} => {int X; S}  [structural]
+  rule try block catch(int X:Id) {} => {int X;}  [structural]
   rule throw int; => stmt
 
 /*@ \subsection{Concurrency}

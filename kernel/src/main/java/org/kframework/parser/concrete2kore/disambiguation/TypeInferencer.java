@@ -1,6 +1,7 @@
 // Copyright (c) 2019 K Team. All Rights Reserved.
 package org.kframework.parser.concrete2kore.disambiguation;
 
+import org.kframework.attributes.Att;
 import org.kframework.Collections;
 import org.kframework.TopologicalSort;
 import org.kframework.attributes.Location;
@@ -9,7 +10,6 @@ import org.kframework.builtin.Sorts;
 import org.kframework.compile.ResolveAnonVar;
 import org.kframework.definition.Module;
 import org.kframework.definition.NonTerminal;
-import org.kframework.kil.Attribute;
 import org.kframework.kore.Sort;
 import org.kframework.kore.SortHead;
 import org.kframework.parser.Ambiguity;
@@ -60,9 +60,9 @@ public class TypeInferencer implements AutoCloseable {
 
   private Status status = null;
 
-  private final Process process;
-  private final PrintStream z3;
-  private final BufferedReader output;
+  private Process process;
+  private PrintStream z3;
+  private BufferedReader output;
   private final Module mod;
   private final java.util.Set<SortHead> sorts;
 
@@ -71,11 +71,9 @@ public class TypeInferencer implements AutoCloseable {
   private static final String PRELUDE1 =
     "(set-logic QF_DT)\n";
 
-  /**
-   * Create a new z3 process and write the sorts and subsort relation to it.
-   * @param mod the module to create an inferencer for.
-   */
-  public TypeInferencer(Module mod) {
+  private final boolean destroyOnReset;
+
+  private void initProcess() {
     try {
       File NULL = new File(OS.current() == OS.WINDOWS ? "NUL" : "/dev/null");
       process = new ProcessBuilder().command("z3", "-in").redirectError(NULL).start();
@@ -84,6 +82,30 @@ public class TypeInferencer implements AutoCloseable {
     }
     z3 = new PrintStream(process.getOutputStream());
     output = new BufferedReader(new InputStreamReader(process.getInputStream()));
+  }
+
+  /**
+   * Create a new z3 process and write the sorts and subsort relation to it.
+   * @param mod the module to create an inferencer for.
+   */
+  public TypeInferencer(Module mod) {
+    initProcess();
+    println("(get-info :version)");
+    try {
+        String version = output.readLine();
+        version = version.substring("(:version \"".length());
+        version = version.substring(0, version.indexOf('"'));
+        String[] parts = version.split("\\.");
+        int major = Integer.valueOf(parts[0]);
+        int minor = Integer.valueOf(parts[1]);
+        if (major < 4 || (major == 4 && minor < 6)) {
+          destroyOnReset = true;
+        } else {
+          destroyOnReset = false;
+        }
+    } catch (IOException e) {
+      throw KEMException.internalError("Could not read from z3 process", e);
+    }
     println(PRELUDE1);
     this.mod = mod;
     this.sorts = stream(mod.definedSorts()).filter(this::isRealSort).collect(Collectors.toSet());
@@ -155,7 +177,12 @@ public class TypeInferencer implements AutoCloseable {
       println("))");
     }
     println("))");
+    if (DEBUG) {
+      debugPrelude = sb.toString();
+    }
   }
+
+  private String debugPrelude;
 
   // map from each sort to an integer representing the topological sorting of the sorts. higher numbers mean greater
   // sorts
@@ -300,6 +327,8 @@ public class TypeInferencer implements AutoCloseable {
     println("(push)");
     // soft assertions to cut down search space
     for (String var : variables) {
+      if (mod.allSorts().contains(Sorts.K()))
+        println("(assert-soft ( <=Sort SortK |" + var + "|) :id A)");
       if (mod.allSorts().contains(Sorts.KItem()))
         println("(assert-soft ( <=Sort SortKItem |" + var + "|) :id A)");
       if (mod.allSorts().contains(Sorts.Bag()))
@@ -345,7 +374,7 @@ public class TypeInferencer implements AutoCloseable {
    * @return
    */
   private static boolean isFunction(Term t, boolean isAnywhere) {
-    return getFunction(t).map(pr -> pr.production().att()).orElse(Att()).contains(Attribute.FUNCTION_KEY) || isAnywhere;
+    return getFunction(t).map(pr -> pr.production().att()).orElse(Att()).contains(Att.FUNCTION()) || isAnywhere;
   }
 
   /**
@@ -543,6 +572,12 @@ public class TypeInferencer implements AutoCloseable {
               expectedSort = getSortOfCast(tc);
               isStrictEquality = tc.production().klabel().get().name().equals("#SyntacticCast")
                   || tc.production().klabel().get().name().equals("#InnerCast");
+              if (tc.get(0) instanceof Constant) {
+                Constant child = (Constant)tc.get(0);
+                if (child.production().sort().equals(Sorts.KVariable()) || child.production().sort().equals(Sorts.KConfigVar())) {
+                  isStrictEquality = true;
+                }
+              }
             } else if (isTopSort && j == 0 && isFunction(tc.get(j), isAnywhere)) {
               expectedSort = getFunctionSort(tc.get(j));
               expectedParams = Optional.of(getFunction(tc.get(j)).get());
@@ -741,13 +776,17 @@ public class TypeInferencer implements AutoCloseable {
       String result;
       do {
         result = output.readLine();
-      } while (!result.equals("sat") && !result.equals("unsat") && !result.equals("unknown") && !result.startsWith("(error"));
+        if (result == null) {
+            throw KEMException.internalError("Unexpected EOF reached while waiting for response from z3.", currentTerm);
+        }
+      } while (!result.equals("sat") && !result.equals("unsat") && !result.equals("unknown") && !result.equals("timeout") && !result.startsWith("(error"));
       switch (result) {
       case "sat":
         return Status.SATISFIABLE;
       case "unsat":
         return Status.UNSATISFIABLE;
       case "unknown":
+      case "timeout":
         return Status.UNKNOWN;
       default:
         throw KEMException.internalError("Unexpected result from z3: " + result);
@@ -871,6 +910,13 @@ public class TypeInferencer implements AutoCloseable {
     cacheById.clear();
     ordinals.clear();
     nextId = 0;
+    if (destroyOnReset) {
+      z3.close();
+      process.destroy();
+      initProcess();
+      println(PRELUDE1);
+      push(mod);
+    }
   }
 
   private static String locStr(ProductionReference pr) {
