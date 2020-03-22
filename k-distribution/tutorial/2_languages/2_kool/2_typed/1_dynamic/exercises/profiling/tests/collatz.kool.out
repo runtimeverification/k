@@ -9,14 +9,15 @@ Testing Collatz' conjecture for n = 8 ... Done! It took 3 steps.
 Testing Collatz' conjecture for n = 9 ... Done! It took 19 steps.
 Testing Collatz' conjecture for n = 10 ... Done! It took 6 steps.
 Done.  It appears to hold.
-
-==========
-Statistics
-==========
-
-Objects created:
-   Main |-> 1
-
-Methods invoked:
-   Main.Main |-> 1
-   Main.collatz |-> 10
+<generatedTop>
+  .TCell
+  <statistics>
+    <object-count>
+      Main |-> 1
+    </object-count>
+    <method-count>
+      Main . Main |-> 1
+      Main . collatz |-> 10
+    </method-count>
+  </statistics>
+</generatedTop>
