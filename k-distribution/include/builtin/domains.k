@@ -2,7 +2,7 @@
 require "kast.k"
 
 module DOMAINS-SYNTAX
-  imports ID
+  imports ID-SYNTAX
   imports UNSIGNED-INT-SYNTAX
   imports BOOL-SYNTAX
   imports STRING-SYNTAX
@@ -18,6 +18,7 @@ module DOMAINS
   imports K-IO
   imports MAP
   imports SET
+  imports ID
 endmodule
 
 module ARRAY-SYNTAX
@@ -850,7 +851,7 @@ module BYTES
   rule Int2Bytes(-1, E::Endianness, Signed) => Int2Bytes(1, -1, E)
 endmodule
 
-module ID-PROGRAM-PARSING
+module ID-SYNTAX-PROGRAM-PARSING
   imports BUILTIN-ID-TOKENS
   syntax Id ::= r"(?<![A-Za-z0-9\\_])[A-Za-z\\_][A-Za-z0-9\\_]*"     [prec(1), token]
               | #LowerId                                             [token]
@@ -858,14 +859,7 @@ module ID-PROGRAM-PARSING
 endmodule
 
 module ID-SYNTAX
-  imports INT-SYNTAX
-  imports STRING-SYNTAX
-
   syntax Id [token]
-
-  syntax String ::= Id2String ( Id )    [function, functional, hook(STRING.token2string)]
-  syntax Id ::= String2Id (String) [function, functional, hook(STRING.string2token)]
-  syntax Id ::= freshId(Int)    [freshGenerator, function, functional]
 endmodule
 
 module ID
@@ -873,11 +867,17 @@ module ID
   imports ID-SYMBOLIC
   imports STRING
 
+  syntax String ::= Id2String ( Id )    [function, functional, hook(STRING.token2string)]
+  syntax Id ::= String2Id (String) [function, functional, hook(STRING.string2token)]
+  syntax Id ::= freshId(Int)    [freshGenerator, function, functional]
+
   rule freshId(I:Int) => String2Id("_" +String Int2String(I))
 endmodule
 
 module ID-SYMBOLIC [symbolic, kast]
   imports ID-SYNTAX
+  imports STRING
+
   syntax KItem  ::= "#parseIdToken"  "(" String "," String ")"  [function, hook(STRING.parseToken)]
   rule String2Id(S:String) => {#parseIdToken("Id", S)}:>Id
 endmodule
