@@ -81,6 +81,7 @@ object Att {
   val STRICT = "strict"
   val SEQSTRICT = "seqstrict"
   val CONCRETE = "concrete"
+  val SYMBOLIC = "symbolic"
   val LABEL = "label"
   val UNBOUND_VARIABLES = "unboundVariables"
   val BAG = "bag"
