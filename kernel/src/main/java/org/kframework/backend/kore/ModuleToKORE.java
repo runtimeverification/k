@@ -7,6 +7,7 @@ import com.google.common.collect.ListMultimap;
 import com.google.common.collect.SetMultimap;
 import org.kframework.Collections;
 import org.kframework.attributes.Att;
+import org.kframework.attributes.HasLocation;
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.Hooks;
 import org.kframework.builtin.KLabels;
@@ -53,6 +54,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -234,7 +236,7 @@ public class ModuleToKORE {
         sb.append("\n// priority groups\n");
         genPriorityGroups(priorityList, priorityToPreviousGroup, priorityToAlias, topCellSortStr, sb);
         sb.append("endmodule ");
-        convert(attributes, module.att(), sb);
+        convert(attributes, module.att(), sb, null, null);
         sb.append("\n");
         return sb.toString();
     }
@@ -315,7 +317,7 @@ public class ModuleToKORE {
             sb.append("sort ");
             convert(sort, sb);
             sb.append(" ");
-            convert(attributes, att, sb);
+            convert(attributes, att, sb, null, null);
             sb.append("\n");
         }
     }
@@ -350,7 +352,7 @@ public class ModuleToKORE {
             sb.append(") : ");
             convert(prod.sort(), prod, sb);
             sb.append(" ");
-            convert(attributes, addKoreAttributes(prod, functionRules, impurities, overloads), sb);
+            convert(attributes, addKoreAttributes(prod, functionRules, impurities, overloads), sb, null, null);
             sb.append("\n");
         }
     }
@@ -719,6 +721,7 @@ public class ModuleToKORE {
         sb.append("\n\n// claims\n");
         HashMap<String, Boolean> consideredAttributes = new HashMap<>();
         consideredAttributes.put("priority", true);
+        consideredAttributes.put(Att.LABEL(), true);
 
         for (Sentence sentence : iterable(spec.sentencesExcept(definition))) {
             assert sentence instanceof Rule || sentence instanceof ModuleComment
@@ -730,7 +733,7 @@ public class ModuleToKORE {
             }
         }
         sb.append("endmodule ");
-        convert(new HashMap<>(), spec.att(), sb);
+        convert(new HashMap<>(), spec.att(), sb, null, null);
         sb.append("\n");
         return sb.toString();
     }
@@ -803,6 +806,9 @@ public class ModuleToKORE {
         sb.append("// ");
         sb.append(rule.toString());
         sb.append("\n");
+        Set<KVariable> freeVariables = collectLHSFreeVariables(requires, left);
+        Map<String,KVariable> freeVarsMap = freeVariables
+                .stream().collect(Collectors.toMap(KVariable::name, Function.identity()));
         if (ruleInfo.isEquation) {
             assertNoExistentials(rule, existentials);
             if (!constructorBased) {
@@ -821,7 +827,7 @@ public class ModuleToKORE {
             }
             sb.append("} ");
             if (ruleInfo.isOwise) {
-                Set<String> varNames = collectLHSFreeVariables(requires, left)
+                Set<String> varNames = freeVariables
                         .stream().map(KVariable::name).collect(Collectors.toSet());
                 sb.append("\\implies{R} (\n    \\and{R} (\n      \\not{R} (\n        ");
                 for (Rule notMatching : RefreshRules.refresh(functionRules.get(ruleInfo.productionLabel), varNames)) {
@@ -891,7 +897,7 @@ public class ModuleToKORE {
                 sb.append("),\n      ");
                 convertSideCondition(ensures, sb);
                 sb.append("))\n  ");
-                convert(consideredAttributes, rule.att(), sb);
+                convert(consideredAttributes, rule.att(), sb, freeVarsMap, rule);
                 sb.append("\n\n");
             } else {
                 sb.append("\\implies{R} (\n    ");
@@ -905,7 +911,7 @@ public class ModuleToKORE {
                 sb.append("),\n      ");
                 convertSideCondition(ensures, sb);
                 sb.append("))\n  ");
-                convert(consideredAttributes, rule.att(), sb);
+                convert(consideredAttributes, rule.att(), sb, freeVarsMap, rule);
                 sb.append("\n\n");
             }
         } else if (ruleInfo.isKore) {
@@ -917,7 +923,7 @@ public class ModuleToKORE {
             }
             convert(left, sb);
             sb.append("\n  ");
-            convert(consideredAttributes, rule.att(), sb);
+            convert(consideredAttributes, rule.att(), sb, freeVarsMap, rule);
             sb.append("\n\n");
         } else if (!ExpandMacros.isMacro(rule)) {
             Boolean isRuleClaim = isClaim(sentenceType);
@@ -931,7 +937,7 @@ public class ModuleToKORE {
                 if(ruleInfo.isOwise) {
                     priority = 200;
                 }
-                List<KVariable> freeVars = new ArrayList<>(collectLHSFreeVariables(requires, left));
+                List<KVariable> freeVars = new ArrayList<>(freeVariables);
                 Comparator<KVariable> compareByName = (KVariable v1, KVariable v2) -> v1.name().compareTo(v2.name());
                 java.util.Collections.sort(freeVars, compareByName);
                 genAliasForSemanticsRuleLHS(requires, left, ruleAliasName, freeVars, topCellSortStr,
@@ -980,7 +986,7 @@ public class ModuleToKORE {
             }
             sb.append(')');
             sb.append("\n  ");
-            convert(consideredAttributes, rule.att(), sb);
+            convert(consideredAttributes, rule.att(), sb, freeVarsMap, rule);
             sb.append("\n\n");
         }
     }
@@ -1448,7 +1454,7 @@ public class ModuleToKORE {
         return strBuilder.toString();
     }
 
-    private void convert(Map<String, Boolean> attributes, Att att, StringBuilder sb) {
+    private void convert(Map<String, Boolean> attributes, Att att, StringBuilder sb, Map<String, KVariable> freeVarsMap, HasLocation location) {
         sb.append("[");
         String conn = "";
         for (Tuple2<Tuple2<String, String>, ?> attribute : iterable(att.att())) {
@@ -1465,7 +1471,11 @@ public class ModuleToKORE {
             } else if (attributes.get(name) != null && attributes.get(name)) {
                 convert(name, sb);
                 sb.append("{}(");
-                sb.append(StringUtil.enquoteKString(strVal));
+                if (isListOfVarsAttribute(name)) {
+                    convertStringVarList(location, freeVarsMap, strVal, sb);
+                } else {
+                    sb.append(StringUtil.enquoteKString(strVal));
+                }
                 sb.append(")");
             } else {
                 convert(name, sb);
@@ -1474,6 +1484,25 @@ public class ModuleToKORE {
             conn = ", ";
         }
         sb.append("]");
+    }
+
+    private void convertStringVarList(HasLocation location, Map<String, KVariable> freeVarsMap, String strVal, StringBuilder sb) {
+        if (strVal.trim().isEmpty()) return;
+        Collection<KVariable> variables = Arrays.stream(strVal.split(",")).map(String::trim)
+                .map(s -> {
+                    if (freeVarsMap.containsKey(s)) return freeVarsMap.get(s);
+                    else throw KEMException.criticalError("No free variable found for " + s, location);
+                }).collect(Collectors.toList());
+        String conn = "";
+        for (KVariable var : variables) {
+            sb.append(conn);
+            convert((K) var, sb);
+            conn = ",";
+        }
+    }
+
+    private boolean isListOfVarsAttribute(String name) {
+        return name.equals(Att.CONCRETE()) || name.equals(Att.SYMBOLIC());
     }
 
     private static String[] asciiReadableEncodingKoreCalc() {
