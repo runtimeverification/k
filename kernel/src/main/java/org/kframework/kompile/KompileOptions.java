@@ -89,6 +89,9 @@ public class KompileOptions implements Serializable {
     @Parameter(names="-O3", description="Optimize aggressively in ways that significantly improve performance, but interfere with debugging significantly and also increase compilation time and code size substantially.")
     public boolean optimize3;
 
+    @Parameter(names="-E", description="Perform outer parsing and then stop and pretty print the definition to standard output. Useful for converting a K definition into a completely self-contained file when reporting a bug.")
+    public boolean preprocess;
+
     @ParametersDelegate
     public Experimental experimental = new Experimental();
 
