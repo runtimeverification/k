@@ -61,8 +61,8 @@ import static org.kframework.kore.KORE.*;
 public class DefinitionParsing {
     public static final Sort START_SYMBOL = Sorts.RuleContent();
     private final File cacheFile;
-    private boolean autoImportDomains;
-    private boolean kore;
+    private final boolean autoImportDomains;
+    private final boolean kore;
     private final KompileOptions options;
 
     private final KExceptionManager kem;
