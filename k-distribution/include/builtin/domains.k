@@ -2,6 +2,7 @@
 require "kast.k"
 
 module DOMAINS-SYNTAX
+  imports SORT-K
   imports ID-SYNTAX
   imports UNSIGNED-INT-SYNTAX
   imports BOOL-SYNTAX
