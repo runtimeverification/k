@@ -890,7 +890,6 @@ void ProductionItem(List<ProductionItem> items) :
   StringBuilder follow = new StringBuilder(); boolean isToken = false; }
 {
   str = String()                { items.add(tokenLoc(new Terminal(str))); }
-| str = StringCaseInsensitive() { items.add(tokenLoc(new Terminal(str, true))); }
 | str = StringRegex()           { items.add(tokenLoc(new Lexical(str, ""))); }
 | LOOKAHEAD("List" "{") "List"
   ( "{" UpperId() { str = image(); } "," sep = String() "}"

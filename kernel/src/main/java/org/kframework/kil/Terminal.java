@@ -8,14 +8,6 @@ public class Terminal extends ProductionItem {
 
     private String terminal;
 
-    private boolean caseInsensitive = false;
-
-    public Terminal(String terminal, boolean caseInsensitive) {
-        super();
-        this.terminal = terminal;
-        this.caseInsensitive = caseInsensitive;
-    }
-
     public Terminal(String terminal) {
         super();
         this.terminal = terminal;
@@ -53,13 +45,5 @@ public class Terminal extends ProductionItem {
     @Override
     public int hashCode() {
         return this.terminal.hashCode();
-    }
-
-    public boolean isCaseInsensitive() {
-        return caseInsensitive;
-    }
-
-    public void setCaseInsensitive(boolean caseInsensitive) {
-        this.caseInsensitive = caseInsensitive;
     }
 }

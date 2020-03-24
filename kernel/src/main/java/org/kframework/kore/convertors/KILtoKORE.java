@@ -111,8 +111,6 @@ public class KILtoKORE extends KILTransformation<Object> {
     public Set<org.kframework.definition.Sentence> apply(ModuleItem i) {
         if (i instanceof Syntax || i instanceof PriorityExtended) {
             return (Set<org.kframework.definition.Sentence>) apply((ASTNode) i);
-        } else if (i instanceof Restrictions) {
-            return Sets.newHashSet();
         } else {
             return Sets.newHashSet((org.kframework.definition.Sentence) apply((ASTNode) i));
         }
