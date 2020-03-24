@@ -18,16 +18,16 @@ public class PriorityExtended extends ModuleItem {
     }
 
     @Override
-    public String toString() {
-        String blocks = "";
-
+    public void toString(StringBuilder sb) {
+        sb.append("  syntax priorities ");
+        String conn = "";
         for (PriorityBlockExtended pb : priorityBlocks) {
-            blocks += pb + "\n> ";
+            sb.append(conn);
+            pb.toString(sb);
+            conn = " > ";
         }
-        if (blocks.length() > 2)
-            blocks = blocks.substring(0, blocks.length() - 3);
-
-        return "  syntax priorities" + blocks + "\n";
+        sb.append(" ");
+        sb.append(getAttributes());
     }
 
     @Override

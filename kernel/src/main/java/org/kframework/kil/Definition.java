@@ -33,19 +33,11 @@ public class Definition extends ASTNode {
     public Definition(Void v) {}
 
     @Override
-    public String toString() {
-        String content = "";
-        List<DefinitionItem> sortedItems = new ArrayList<>(items);
-        sortedItems.sort(new Comparator<DefinitionItem>() {
-            @Override
-            public int compare(DefinitionItem o1, DefinitionItem o2) {
-                return o1.toString().compareTo(o2.toString());
-            }
-        });
-        for (DefinitionItem di : sortedItems)
-            content += di + " \n";
-
-        return "DEF: " + mainFile + " -> " + mainModule + "\n" + content;
+    public void toString(StringBuilder sb) {
+        for (DefinitionItem di : items) {
+            di.toString(sb);
+            sb.append("\n\n");
+        }
     }
 
     public void setItems(List<DefinitionItem> items) {

@@ -28,11 +28,12 @@ public class UserList extends ProductionItem {
     }
 
     @Override
-    public String toString() {
-        if (listType.equals(ZERO_OR_MORE))
-            return "List{" + sort + "," + StringUtil.enquoteCString(separator) + "} ";
-        else
-            return "NeList{" + sort + "," + StringUtil.enquoteCString(separator) + "} ";
+    public void toString(StringBuilder sb) {
+        if (listType.equals(ZERO_OR_MORE)) {
+            sb.append("List{").append(sort).append(",").append(StringUtil.enquoteCString(separator)).append("}");
+        } else {
+            sb.append("NeList{").append(sort).append(",").append(StringUtil.enquoteCString(separator)).append("}");
+        }
     }
 
     public Sort getSort() {

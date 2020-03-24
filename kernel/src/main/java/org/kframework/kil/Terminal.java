@@ -30,8 +30,8 @@ public class Terminal extends ProductionItem {
     }
 
     @Override
-    public String toString() {
-        return StringUtil.enquoteCString(terminal, caseInsensitive ? '\'' : '"');
+    public void toString(StringBuilder sb) {
+        sb.append(StringUtil.enquoteCString(terminal));
     }
 
     @Override

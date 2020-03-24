@@ -48,21 +48,13 @@ public class Module extends DefinitionItem {
     }
 
     @Override
-    public String toString() {
-        String content = "";
-        List<ModuleItem> sortedItems = new ArrayList<ModuleItem>(items);
-
-        sortedItems.sort(new Comparator<ModuleItem>() {
-            @Override
-            public int compare(ModuleItem o1, ModuleItem o2) {
-                return o1.toString().compareTo(o2.toString());
-            }
-        });
-
-        for (ModuleItem i : sortedItems)
-            content += i + " \n";
-
-        return "module " + name + "\n" + content + "\nendmodule";
+    public void toString(StringBuilder sb) {
+        sb.append("module ").append(name).append(" ").append(getAttributes()).append("\n");
+        for (ModuleItem i : items) {
+            i.toString(sb);
+            sb.append("\n");
+        }
+        sb.append("endmodule");
     }
 
 

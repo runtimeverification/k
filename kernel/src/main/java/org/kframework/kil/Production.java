@@ -231,12 +231,13 @@ public class Production extends ASTNode {
         return result;
     }
 
-    public String toString() {
-        String content = "";
-        for (ProductionItem i : items)
-            content += i + " ";
-
-        return content;
+    @Override
+    public void toString(StringBuilder sb) {
+        for (ProductionItem i : items) {
+            i.toString(sb);
+            sb.append(" ");
+        }
+        sb.append(getAttributes());
     }
 
     public void setOwnerModuleName(String ownerModuleName) {
