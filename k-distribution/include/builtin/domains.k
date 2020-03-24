@@ -862,20 +862,24 @@ module ID-SYNTAX
   syntax Id [token]
 endmodule
 
-module ID
+module ID-COMMON
   imports ID-SYNTAX
-  imports ID-SYMBOLIC
   imports STRING
 
   syntax String ::= Id2String ( Id )    [function, functional, hook(STRING.token2string)]
   syntax Id ::= String2Id (String) [function, functional, hook(STRING.string2token)]
   syntax Id ::= freshId(Int)    [freshGenerator, function, functional]
+endmodule
+
+module ID
+  imports ID-COMMON
+  imports ID-SYMBOLIC
 
   rule freshId(I:Int) => String2Id("_" +String Int2String(I))
 endmodule
 
 module ID-SYMBOLIC [symbolic, kast]
-  imports ID-SYNTAX
+  imports ID-COMMON
   imports STRING
 
   syntax KItem  ::= "#parseIdToken"  "(" String "," String ")"  [function, hook(STRING.parseToken)]
