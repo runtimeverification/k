@@ -73,17 +73,6 @@ pass in the 'makeStringSentence' method we have to store an offset to
 the source locations that is used in the second pass of parsing.
 These offsets are stored in 'beginLine', 'beginColumn'.
 
-COMMENTS
-
-Comments are handled by calling the 'comment()' function.  If we are
-not in the process of parsing a 'Module' then the 'module' field will
-be 'null' and the comment will be added to the 'List<DefinitionItem>'
-that is stored in the 'items' field.  On the other hand, if we are in
-the process of parsing a 'Module' then the 'module' field will not be
-'null' and the comment will be added to the current 'module'.  Note
-that the 'Module' production has to be careful to set the 'module'
-field correctly.
-
 */
 
 
@@ -157,9 +146,6 @@ import org.kframework.kil.ASTNode;
 import org.kframework.kil.DefinitionItem;
 import org.kframework.kil.Import;
 import org.kframework.kil.Lexical;
-import org.kframework.kil.LiterateComment.LiterateCommentType;
-import org.kframework.kil.LiterateDefinitionComment;
-import org.kframework.kil.LiterateModuleComment;
 import org.kframework.attributes.Location;
 import org.kframework.kil.Module;
 import org.kframework.kil.ModuleItem;
@@ -341,33 +327,6 @@ public class Outer {
     token_source.SwitchTo(state);
   }
 
-  /** Adds a comment to the current module or definition list */
-  void comment(Token token) {
-    String str = token.image;
-    if (str.startsWith("//"))
-      str = str.substring(2, str.length() - 1); // remove // and \n from beginning and end
-    else
-      str = str.substring(2, str.length() - 2); // remove /* and */ from beginning and end
-
-    LiterateCommentType lcType = LiterateCommentType.COMMON;
-
-    if (str.startsWith("@")) {
-      lcType = LiterateCommentType.LATEX;
-      str = str.substring(1);
-    } else if (str.startsWith("!")) {
-      lcType = LiterateCommentType.PREAMBLE;
-      str = str.substring(1);
-    }
-
-    Location loc = new Location(token.beginLine, token.beginColumn,
-                                token.endLine, token.endColumn);
-    if (module == null) {
-      items.add(markLocExplicit(loc, new LiterateDefinitionComment(str, lcType)));
-    } else {
-      module.appendModuleItem(markLocExplicit(loc, new LiterateModuleComment(str, lcType)));
-    }
-  }
-
   static final private Pattern pattern = Pattern.compile(
     "(?s)\\s*\\[\\s*([^\\[\\]\\_\\ \\n\\r\\t]+)\\s*\\]\\s*:\\s*(.*)");
 
@@ -444,7 +403,7 @@ PARSER_END(Outer)
 <DEFAULT> SPECIAL_TOKEN :
 {
   <COMMENT: ( "//" (~["\n", "\r"])* ("\n" | "\r")
-            | "/*" (~["*"] | ("*")+ ~["/","*"])* ("*")+ "/")> { parser.comment(matchedToken); }
+            | "/*" (~["*"] | ("*")+ ~["/","*"])* ("*")+ "/")> {}
 }
 
 <DEFAULT> SKIP : { " " | "\t" | "\r" | "\n" }
@@ -567,7 +526,8 @@ NonTerminal SortID() : { NonTerminal nonTerminal; }
 ///////
 
 <MODNAME_STATE> SPECIAL_TOKEN: {
-  <MODNAME_COMMENT: <COMMENT>> { parser.comment(matchedToken); } }
+  <MODNAME_COMMENT: <COMMENT>> {}
+}
 <MODNAME_STATE> SKIP: { " " | "\t" | "\r" | "\n" }
 <MODNAME_STATE> TOKEN:
 {
@@ -581,7 +541,7 @@ NonTerminal SortID() : { NonTerminal nonTerminal; }
 <BUBBLE_STATE, CONTEXT_STATE> SPECIAL_TOKEN:
 {
   <([" ", "\t", "\r", "\n"])+>
-| <BUBBLE_COMMENT: <COMMENT>> { parser.comment(matchedToken); }
+| <BUBBLE_COMMENT: <COMMENT>> {}
 }
 
 <CONTEXT_STATE> TOKEN:
@@ -621,7 +581,8 @@ StringSentence Bubble(String type) :
 /**** KLabels ****/
 
 <KLABEL_STATE> SPECIAL_TOKEN: {
-  <KLABEL_COMMENT: <COMMENT>> { parser.comment(matchedToken); } }
+  <KLABEL_COMMENT: <COMMENT>> {}
+}
 <KLABEL_STATE> SKIP: { " " | "\t" | "\r" | "\n" }
 
 <KLABEL_STATE> TOKEN:
@@ -651,7 +612,7 @@ List<Tag> KLabels() :
 
 <REGEX_STATE> SPECIAL_TOKEN: {
   <([" ", "\t", "\r", "\n"])+>
-| <REGEX_COMMENT: <COMMENT>> { parser.comment(matchedToken); }
+| <REGEX_COMMENT: <COMMENT>> {}
 }
 
 <REGEX_STATE> TOKEN:
@@ -741,7 +702,7 @@ void Group(StringBuilder sb, int state) : {}
 <ATTR_STATE> SPECIAL_TOKEN:
 {
   "\n" | "\r" | " " | "\t"
-| <ATTR_COMMENT: <COMMENT>> { parser.comment(matchedToken); }
+| <ATTR_COMMENT: <COMMENT>> {}
 }
 
 <ATTR_STATE> TOKEN:

@@ -10,7 +10,6 @@ import org.kframework.definition.Definition;
 import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Module;
 import org.kframework.definition.FlatModule;
-import org.kframework.definition.ModuleComment;
 import org.kframework.definition.Production;
 import org.kframework.definition.ProductionItem;
 import org.kframework.definition.RegexTerminal;
@@ -157,7 +156,6 @@ public class ToJson {
     public static JsonStructure toJson(Sentence sen) {
         if (sen instanceof Context)             return toJson((Context) sen);
         if (sen instanceof Rule)                return toJson((Rule) sen);
-        if (sen instanceof ModuleComment)       return toJson((ModuleComment) sen);
         if (sen instanceof SyntaxPriority)      return toJson((SyntaxPriority) sen);
         if (sen instanceof SyntaxAssociativity) return toJson((SyntaxAssociativity) sen);
         if (sen instanceof Configuration)       return toJson((Configuration) sen);
@@ -192,16 +190,6 @@ public class ToJson {
         jrule.add("att", toJson(rule.att()));
 
         return jrule.build();
-    }
-
-    public static JsonStructure toJson(ModuleComment mcom) {
-        JsonObjectBuilder jmcom = Json.createObjectBuilder();
-
-        jmcom.add("node", JsonParser.KMODULECOMMENT);
-        jmcom.add("comment", mcom.comment());
-        jmcom.add("att", toJson(mcom.att()));
-
-        return jmcom.build();
     }
 
     public static JsonStructure toJson(SyntaxPriority syn) {

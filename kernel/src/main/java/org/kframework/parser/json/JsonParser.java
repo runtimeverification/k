@@ -10,7 +10,6 @@ import org.kframework.definition.Definition;
 import org.kframework.definition.FlatModule;
 import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Module;
-import org.kframework.definition.ModuleComment;
 import org.kframework.definition.Production;
 import org.kframework.definition.ProductionItem;
 import org.kframework.definition.RegexTerminal;
@@ -78,7 +77,6 @@ public class JsonParser {
                              , KNONTERMINAL         = "KNonTerminal"
                              , KMODULE              = "KModule"
                              , KFLATMODULE          = "KFlatModule"
-                             , KMODULECOMMENT       = "KModuleComment"
                              , KPRODUCTION          = "KProduction"
                              , KREGEXTERMINAL       = "KRegexTerminal"
                              , KREWRITE             = "KRewrite"
@@ -187,11 +185,6 @@ public class JsonParser {
                 K ensures  = toK(data.getJsonObject("ensures"));
                 Att att    = toAtt(data.getJsonObject("att"));
                 return new Rule(body, requires, ensures, att);
-            }
-            case KMODULECOMMENT:{
-                String comment = data.getString("comment");
-                Att att        = toAtt(data.getJsonObject("att"));
-                return new ModuleComment(comment, att);
             }
             case KSYNTAXPRIORITY: {
                 JsonArray priorities = data.getJsonArray("priorities");

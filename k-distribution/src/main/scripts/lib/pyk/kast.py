@@ -101,12 +101,6 @@ def KBubble(sentenceType, contents, att = None):
 def isKBubble(k):
     return k['node'] == 'KBubble'
 
-def KModuleComment(comment, att = None):
-    return { "node": "KModuleComment", "comment": comment, "att": att }
-
-def isKModuleComment(k):
-    return k['node'] == 'KModuleComment'
-
 def KProduction(productionItems, sort, att = None):
     return { "node": "KProduction", "productionItems": productionItems, "sort": sort, "att": att }
 
