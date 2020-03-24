@@ -1,26 +1,23 @@
 // Copyright (c) 2019 K Team. All Rights Reserved.
-package org.kframework.parser.concrete2kore.kernel;
+package org.kframework.parser.inner.kernel;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.kframework.Collections;
-import org.kframework.TopologicalSort;
 import org.kframework.attributes.Att;
 import org.kframework.backend.kore.ModuleToKORE;
-import org.kframework.definition.Associativity;
 import org.kframework.definition.Module;
 import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
 import org.kframework.definition.ProductionItem;
 import org.kframework.definition.RegexTerminal;
 import org.kframework.definition.Sentence;
-import org.kframework.definition.SyntaxAssociativity;
 import org.kframework.definition.Tag;
 import org.kframework.definition.Terminal;
 import org.kframework.definition.TerminalLike;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.Sort;
-import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
+import org.kframework.parser.inner.generator.RuleGrammarGenerator;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
 

@@ -1,5 +1,5 @@
 // Copyright (c) 2015-2019 K Team. All Rights Reserved.
-package org.kframework.parser.concrete2kore.disambiguation;
+package org.kframework.parser.inner.disambiguation;
 
 import com.google.common.collect.Lists;
 import org.junit.Assert;
@@ -17,9 +17,9 @@ import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.TreeNodesToKORE;
-import org.kframework.parser.concrete2kore.ParseInModule;
-import org.kframework.parser.concrete2kore.ParserUtils;
-import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
+import org.kframework.parser.inner.ParseInModule;
+import org.kframework.parser.inner.ParserUtils;
+import org.kframework.parser.inner.generator.RuleGrammarGenerator;
 import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;

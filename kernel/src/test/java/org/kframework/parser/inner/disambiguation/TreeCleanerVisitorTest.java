@@ -1,6 +1,6 @@
 // Copyright (c) 2015-2019 K Team. All Rights Reserved.
 
-package org.kframework.parser.concrete2kore.disambiguation;
+package org.kframework.parser.inner.disambiguation;
 
 import org.junit.Test;
 import org.kframework.attributes.Location;

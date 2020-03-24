@@ -1,14 +1,12 @@
 // Copyright (c) 2018-2019 K Team. All Rights Reserved.
-package org.kframework.parser.concrete2kore.disambiguation;
+package org.kframework.parser.inner.disambiguation;
 
 import org.kframework.POSet;
 import org.kframework.definition.Production;
 import org.kframework.parser.Ambiguity;
 import org.kframework.parser.ProductionReference;
-import org.kframework.parser.SafeTransformer;
 import org.kframework.parser.Term;
 import org.kframework.parser.TermCons;
-import org.pcollections.PStack;
 
 import java.util.HashSet;
 import java.util.Set;

@@ -7,10 +7,10 @@ import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kore.K;
 import org.kframework.kore.Sort;
 import org.kframework.parser.binary.BinaryParser;
-import org.kframework.parser.concrete2kore.ParseInModule;
-import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
-import org.kframework.parser.concrete2kore.kernel.KSyntax2Bison;
-import org.kframework.parser.concrete2kore.kernel.Scanner;
+import org.kframework.parser.inner.ParseInModule;
+import org.kframework.parser.inner.generator.RuleGrammarGenerator;
+import org.kframework.parser.inner.kernel.KSyntax2Bison;
+import org.kframework.parser.inner.kernel.Scanner;
 import org.kframework.parser.json.JsonParser;
 import org.kframework.parser.kast.KastParser;
 import org.kframework.utils.errorsystem.KEMException;
@@ -24,7 +24,6 @@ import java.io.InputStream;
 import java.lang.Character;
 
 import javax.json.Json;
-import javax.json.JsonException;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 

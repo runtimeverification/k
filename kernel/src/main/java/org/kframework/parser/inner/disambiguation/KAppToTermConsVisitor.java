@@ -1,5 +1,5 @@
 // Copyright (c) 2015-2019 K Team. All Rights Reserved.
-package org.kframework.parser.concrete2kore.disambiguation;
+package org.kframework.parser.inner.disambiguation;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -21,8 +21,6 @@ import scala.collection.immutable.Set$;
 import scala.util.Either;
 import scala.util.Left;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;

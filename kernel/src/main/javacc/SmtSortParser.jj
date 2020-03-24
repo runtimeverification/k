@@ -3,7 +3,7 @@ options {
   STATIC = false;
 }
 PARSER_BEGIN(SmtSortParser)
-package org.kframework.parser.concrete2kore.disambiguation;
+package org.kframework.parser.inner.disambiguation;
 
 import org.kframework.kore.Sort;
 import org.kframework.kore.KORE;

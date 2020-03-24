@@ -1,5 +1,5 @@
 // Copyright (c) 2012-2019 K Team. All Rights Reserved.
-package org.kframework.parser.concrete2kore.disambiguation;
+package org.kframework.parser.inner.disambiguation;
 
 
 import com.google.common.collect.Sets;
@@ -19,7 +19,6 @@ import org.kframework.parser.Term;
 import org.kframework.parser.TermCons;
 import org.kframework.definition.UserList;
 import org.kframework.utils.errorsystem.KEMException;
-import org.kframework.utils.errorsystem.KException;
 import org.pcollections.ConsPStack;
 import scala.Tuple2;
 import scala.util.Either;
@@ -28,7 +27,6 @@ import scala.util.Right;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;

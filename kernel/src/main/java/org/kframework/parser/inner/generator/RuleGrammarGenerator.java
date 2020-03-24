@@ -1,5 +1,5 @@
 // Copyright (c) 2015-2019 K Team. All Rights Reserved.
-package org.kframework.parser.concrete2kore.generator;
+package org.kframework.parser.inner.generator;
 
 import org.apache.commons.collections4.trie.PatriciaTrie;
 import org.kframework.attributes.Att;
@@ -20,19 +20,15 @@ import org.kframework.definition.SortSynonym;
 import org.kframework.definition.Terminal;
 import org.kframework.definition.UserList;
 import org.kframework.kore.Sort;
-import org.kframework.parser.concrete2kore.ParseInModule;
+import org.kframework.parser.inner.ParseInModule;
 import org.kframework.utils.file.FileUtil;
-import org.kframework.utils.StringUtil;
 import scala.collection.Seq;
 import scala.Option;
 import scala.Tuple3;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;

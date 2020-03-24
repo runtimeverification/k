@@ -1,5 +1,5 @@
 // Copyright (c) 2014-2019 K Team. All Rights Reserved.
-package org.kframework.parser.concrete2kore.kernel;
+package org.kframework.parser.inner.kernel;
 
 import org.apache.commons.codec.binary.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -10,15 +10,15 @@ import org.kframework.definition.Production;
 import org.kframework.parser.Ambiguity;
 import org.kframework.parser.KList;
 import org.kframework.parser.Term;
-import org.kframework.parser.concrete2kore.kernel.Grammar.EntryState;
-import org.kframework.parser.concrete2kore.kernel.Grammar.ExitState;
-import org.kframework.parser.concrete2kore.kernel.Grammar.NextableState;
-import org.kframework.parser.concrete2kore.kernel.Grammar.NonTerminal;
-import org.kframework.parser.concrete2kore.kernel.Grammar.NonTerminalState;
-import org.kframework.parser.concrete2kore.kernel.Grammar.PrimitiveState;
-import org.kframework.parser.concrete2kore.kernel.Grammar.RegExState;
-import org.kframework.parser.concrete2kore.kernel.Grammar.RuleState;
-import org.kframework.parser.concrete2kore.kernel.Grammar.State;
+import org.kframework.parser.inner.kernel.Grammar.EntryState;
+import org.kframework.parser.inner.kernel.Grammar.ExitState;
+import org.kframework.parser.inner.kernel.Grammar.NextableState;
+import org.kframework.parser.inner.kernel.Grammar.NonTerminal;
+import org.kframework.parser.inner.kernel.Grammar.NonTerminalState;
+import org.kframework.parser.inner.kernel.Grammar.PrimitiveState;
+import org.kframework.parser.inner.kernel.Grammar.RegExState;
+import org.kframework.parser.inner.kernel.Grammar.RuleState;
+import org.kframework.parser.inner.kernel.Grammar.State;
 import org.kframework.utils.errorsystem.KEMException;
 import org.pcollections.ConsPStack;
 

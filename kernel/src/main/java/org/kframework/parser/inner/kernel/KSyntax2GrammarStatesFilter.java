@@ -1,5 +1,5 @@
 // Copyright (c) 2014-2019 K Team. All Rights Reserved.
-package org.kframework.parser.concrete2kore.kernel;
+package org.kframework.parser.inner.kernel;
 
 import dk.brics.automaton.Automaton;
 import dk.brics.automaton.RegExp;
@@ -11,17 +11,16 @@ import org.kframework.definition.ProductionItem;
 import org.kframework.definition.Terminal;
 import org.kframework.definition.TerminalLike;
 import org.kframework.kore.Sort;
-import org.kframework.parser.concrete2kore.kernel.Grammar.NextableState;
-import org.kframework.parser.concrete2kore.kernel.Grammar.NonTerminal;
-import org.kframework.parser.concrete2kore.kernel.Grammar.RuleState;
-import org.kframework.parser.concrete2kore.kernel.Rule.WrapLabelRule;
+import org.kframework.parser.inner.kernel.Grammar.NextableState;
+import org.kframework.parser.inner.kernel.Grammar.NonTerminal;
+import org.kframework.parser.inner.kernel.Grammar.RuleState;
+import org.kframework.parser.inner.kernel.Rule.WrapLabelRule;
 import org.kframework.utils.errorsystem.KEMException;
 import scala.Tuple2;
 
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;

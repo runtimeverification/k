@@ -1,5 +1,5 @@
 // Copyright (c) 2015-2019 K Team. All Rights Reserved.
-package org.kframework.parser.concrete2kore;
+package org.kframework.parser.inner;
 
 import org.apache.commons.io.FileUtils;
 import org.kframework.attributes.Att;

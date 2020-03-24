@@ -1,5 +1,5 @@
 // Copyright (c) 2016-2019 K Team. All Rights Reserved.
-package org.kframework.parser.concrete2kore.kernel;
+package org.kframework.parser.inner.kernel;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
@@ -12,7 +12,7 @@ import org.kframework.definition.Module;
 import org.kframework.definition.RegexTerminal;
 import org.kframework.definition.Terminal;
 import org.kframework.definition.TerminalLike;
-import org.kframework.parser.concrete2kore.ParseInModule;
+import org.kframework.parser.inner.ParseInModule;
 import org.kframework.utils.OS;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;

@@ -1,5 +1,5 @@
 // Copyright (c) 2014-2019 K Team. All Rights Reserved.
-package org.kframework.parser.concrete2kore.kernel;
+package org.kframework.parser.inner.kernel;
 
 import org.kframework.attributes.Att;
 import org.kframework.attributes.Location;

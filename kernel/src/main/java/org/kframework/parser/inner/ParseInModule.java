@@ -1,5 +1,5 @@
 // Copyright (c) 2015-2019 K Team. All Rights Reserved.
-package org.kframework.parser.concrete2kore;
+package org.kframework.parser.inner;
 
 import com.google.common.collect.Sets;
 import org.kframework.attributes.Source;
@@ -9,12 +9,12 @@ import org.kframework.kore.K;
 import org.kframework.kore.Sort;
 import org.kframework.parser.Term;
 import org.kframework.parser.TreeNodesToKORE;
-import org.kframework.parser.concrete2kore.disambiguation.*;
-import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
-import org.kframework.parser.concrete2kore.kernel.Grammar;
-import org.kframework.parser.concrete2kore.kernel.KSyntax2GrammarStatesFilter;
-import org.kframework.parser.concrete2kore.kernel.Parser;
-import org.kframework.parser.concrete2kore.kernel.Scanner;
+import org.kframework.parser.inner.disambiguation.*;
+import org.kframework.parser.inner.generator.RuleGrammarGenerator;
+import org.kframework.parser.inner.kernel.Grammar;
+import org.kframework.parser.inner.kernel.KSyntax2GrammarStatesFilter;
+import org.kframework.parser.inner.kernel.Parser;
+import org.kframework.parser.inner.kernel.Scanner;
 import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
@@ -30,7 +30,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.io.Writer;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;

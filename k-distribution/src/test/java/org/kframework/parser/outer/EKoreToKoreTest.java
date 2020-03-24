@@ -8,7 +8,7 @@ import org.junit.Test;
 import org.kframework.kore.K;
 import org.kframework.kore.KORE;
 import org.kframework.kore.Sort;
-import org.kframework.parser.concrete2kore.ParserUtils;
+import org.kframework.parser.inner.ParserUtils;
 
 import java.io.File;
 import java.net.URISyntaxException;
