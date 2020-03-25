@@ -32,7 +32,7 @@ builtin_module_names = [ 'ARRAY' , 'ARRAY-CONCRETE' , 'ARRAY-IN-K' , 'ARRAY-KORE
                        ]
 
 def keepDefinitionModulesOnly(kOuter):
-    if pyk.isKDefinition(kOuter):
+    if isKDefinition(kOuter):
         newModules = []
         modules = { mod['name']: mod for mod in kOuter['modules'] }
         for module in modules.keys():
@@ -42,50 +42,50 @@ def keepDefinitionModulesOnly(kOuter):
                     newSentences = modules[syntaxModule]['localSentences'] + modules[module]['localSentences']
                     att = None if 'att' not in modules[module] else modules[module]['att']
                     newImports = [ i for i in modules[module]['imports'] if not (i == syntaxModule or i.endswith('$SYNTAX')) ]
-                    newModule = pyk.KFlatModule(module, newImports, newSentences, att = att)
+                    newModule = KFlatModule(module, newImports, newSentences, att = att)
                     newModules.append(newModule)
                 else:
                     newModules.append(modules[module])
         requires = None if 'requires' not in kOuter else kOuter['requires']
-        return pyk.KDefinition(kOuter['mainModule'], newModules, requires = requires, att = att)
+        return KDefinition(kOuter['mainModule'], newModules, requires = requires, att = att)
     return kOuter
 
 def ruleHasId(sentence, ruleIds):
-    if pyk.isKRule(sentence):
-        ruleId = pyk.getAttribute(sentence, 'UNIQUE_ID')
+    if isKRule(sentence):
+        ruleId = getAttribute(sentence, 'UNIQUE_ID')
         return ruleId is not None and ruleId in ruleIds
     return True
 
 def syntaxHasKLabel(sentence, klabels):
-    if pyk.isKProduction(sentence) and 'klabel' in sentence:
+    if isKProduction(sentence) and 'klabel' in sentence:
         return sentence['klabel'] in klabels
     return True
 
 def keepSentences(kOuter, filter):
     att = None if 'att' not in kOuter else kOuter['att']
-    if pyk.isKDefinition(kOuter):
+    if isKDefinition(kOuter):
         newModules = [ keepSentences(mod, filter) for mod in kOuter['modules'] ]
         requires = None if 'requires' not in kOuter else kOuter['requires']
-        return pyk.KDefinition(kOuter['mainModule'], newModules, requires = requires, att = att)
-    elif pyk.isKFlatModule(kOuter):
+        return KDefinition(kOuter['mainModule'], newModules, requires = requires, att = att)
+    elif isKFlatModule(kOuter):
         newSentences = [ sent for sent in kOuter['localSentences'] if filter(sent) ]
-        return pyk.KFlatModule(kOuter['name'], kOuter['imports'], newSentences, att = att)
+        return KFlatModule(kOuter['name'], kOuter['imports'], newSentences, att = att)
     else:
         return kOuter
 
 def collectKLabels(kast):
     labels = []
     def _collectKLabels(_kast):
-        if pyk.isKApply(_kast):
+        if isKApply(_kast):
             labels.append(_kast['label'])
-    pyk.collectBottomUp(kast, _collectKLabels)
+    collectBottomUp(kast, _collectKLabels)
     return labels
 
 def collectKLabelsFromRules(definition):
     used_labels = []
     for module in definition['modules']:
         for sentence in module['localSentences']:
-            if pyk.isKRule(sentence):
+            if isKRule(sentence):
                 used_labels += collectKLabels(sentence['body'])
     return used_labels
 
@@ -103,17 +103,37 @@ def singleModule(defn):
             if i not in moduleNames and i not in newImports:
                 newImports.append(i)
     newModuleAtt = None if 'att' not in modules[mainModule] else modules[mainModule]['att']
-    newModule = pyk.KFlatModule(mainModule, newImports, newSentences, att = newModuleAtt)
+    newModule = KFlatModule(mainModule, newImports, newSentences, att = newModuleAtt)
     newAtt      = None if 'att'      not in defn else defn['att']
     newRequires = None if 'requires' not in defn else defn['requires']
-    return pyk.KDefinition(mainModule, [ newModule ], requires = newRequires, att = newAtt)
+    return KDefinition(mainModule, [ newModule ], requires = newRequires, att = newAtt)
+
+def onSentences(k, f):
+    if isKDefinition(k):
+        return KDefinition(k['mainModule'], [onSentences(m, f) for m in k['modules']], requires = k['requires'], att = k['att'])
+    if isKFlatModule(k):
+        return KFlatModule(k['name'], k['imports'], [f(s) for s in k['localSentences']], att = k['att'])
+    return k
+
+def removeLog(rule):
+    if not isKRule(rule):
+        return rule
+    logPattern = KRewrite(KVariable('LHS'), KApply('project:GeneratedTopCell', [KSequence([KApply('#logToFile', [KVariable('_1'), KVariable('_2')]), KVariable('RHS')])]))
+    logMatch = match(logPattern, rule['body'])
+    if logMatch is None:
+        return rule
+    newRuleBody = KRewrite(logMatch['LHS'], logMatch['RHS'])
+    return KRule(newRuleBody, requires = rule['requires'], ensures = rule['ensures'], att = rule['att'])
 
 def minimizeDefinition(definition, rulesList):
     new_definition = keepDefinitionModulesOnly(definition)
-    new_definition = keepSentences(new_definition, lambda sent: not pyk.isKModuleComment(sent))
-    new_definition = keepSentences(new_definition, lambda sent: not pyk.isKBubble(sent))
-    new_definition = keepSentences(new_definition, lambda sent: ruleHasId(sent, ruleList))
+    new_definition = keepSentences(new_definition, lambda sent: not isKModuleComment(sent))
+    new_definition = keepSentences(new_definition, lambda sent: not isKBubble(sent))
+    new_definition = keepSentences(new_definition, lambda sent: not isKContext(sent))
+    new_definition = keepSentences(new_definition, lambda sent: ruleHasId(sent, rulesList))
     used_labels = collectKLabelsFromRules(new_definition)
     new_definition = keepSentences(new_definition, lambda sent: syntaxHasKLabel(sent, used_labels))
     new_definition = singleModule(new_definition)
+    new_definition = onSentences(new_definition, removeLog)
+    new_definition = onSentences(new_definition, minimizeRule)
     return new_definition

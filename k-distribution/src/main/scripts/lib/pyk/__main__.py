@@ -85,7 +85,7 @@ if __name__ == '__main__':
         old_definition = readKastTerm(kompiled_dir + '/compiled.json')
         symbol_table   = buildSymbolTable(old_definition)
         new_definition = minimizeDefinition(old_definition, rule_list)
-        arg['output'].write(prettyPrintKast(new_definition, symbol_table))
+        args['output'].write(prettyPrintKast(new_definition, symbol_table))
 
     args['output'].flush()
 

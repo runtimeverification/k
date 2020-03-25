@@ -366,13 +366,13 @@ def prettyPrintKast(kast, symbolTable):
         return ruleStr + "\n  " + requiresStr + "\n  " + ensuresStr + "\n  " + attsStr
     if isKContext(kast):
         body        = indent(prettyPrintKast(kast["body"], symbolTable))
-        contexStr   = "context alias " + body
+        contextStr  = "context alias " + body
         requiresStr = ""
         attsStr     = prettyPrintKast(kast['att'], symbolTable)
         if kast['requires'] is not None:
             requiresStr = prettyPrintKast(kast['requires'], symbolTable)
             requiresStr = 'requires ' + indent(requiresStr)
-        return contextStr + "\n  " + requiresStr + "\n  " + attStr
+        return contextStr + "\n  " + requiresStr + "\n  " + attsStr
     if isKAtt(kast):
         if len(kast['att']) == 0:
             return ''
