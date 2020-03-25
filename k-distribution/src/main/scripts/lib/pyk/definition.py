@@ -135,5 +135,6 @@ def minimizeDefinition(definition, rulesList):
     new_definition = keepSentences(new_definition, lambda sent: syntaxHasKLabel(sent, used_labels))
     new_definition = singleModule(new_definition)
     new_definition = onSentences(new_definition, removeLog)
+    new_definition = onSentences(new_definition, pushDownRewritesRule)
     new_definition = onSentences(new_definition, minimizeRule)
     return new_definition

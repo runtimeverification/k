@@ -302,10 +302,17 @@ def minimizeRule(rule):
     ruleBody = uselessVarsToDots(ruleBody, requires = ruleRequires, ensures = ruleEnsures)
     ruleBody = collapseDots(ruleBody)
 
-    if (ruleRequires == KToken("true", "Bool")):
+    if ruleRequires == KToken("true", "Bool"):
         ruleRequires = None
 
     return KRule(ruleBody, requires = ruleRequires, ensures = ruleEnsures, att = ruleAtts)
+
+def pushDownRewritesRule(rule):
+    if not isKRule(rule):
+        return rule
+
+    newRuleBody = pushDownRewrites(rule['body'])
+    return KRule(newRuleBody, requires = rule['requires'], ensures = rule['ensures'], att = rule['att'])
 
 def removeSourceMap(k):
     """Remove source map information from a given definition.
