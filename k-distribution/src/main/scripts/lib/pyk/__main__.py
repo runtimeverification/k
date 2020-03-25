@@ -34,11 +34,13 @@ kproveArgs.add_argument('kArgs', nargs='*', help = 'Arguments to pass through to
 
 graphImportsArgs = pykCommandParsers.add_parser('graph-imports', help = 'Graph the imports of a given definition.')
 
-coverageImportsArgs = pykCommandParsers.add_parser('coverage', help = 'Convert coverage file to human readable log.')
-coverageImportsArgs.add_argument('coverage-file', type = argparse.FileType('r'), help = 'Coverage file to build log for.')
+coverageArgs = pykCommandParsers.add_parser('coverage', help = 'Convert coverage file to human readable log.')
+coverageArgs.add_argument('coverage-file', type = argparse.FileType('r'), help = 'Coverage file to build log for.')
+coverageArgs.add_argument('-o', '--output', type = argparse.FileType('w'), default = '-')
 
 minimizerArgs = pykCommandParsers.add_parser('minimize', help = 'Minimize a definition.')
 minimizerArgs.add_argument('coverage-file', type = argparse.FileType('r'), help = 'Coverage file with rule list to keep.')
+minimizerArgs.add_argument('-o', '--output', type = argparse.FileType('w'), default = '-')
 
 def definitionDir(kompiledDir):
     return path.dirname(path.abspath(kompiledDir))
@@ -68,10 +70,10 @@ if __name__ == '__main__':
     elif args['command'] == 'graph-imports':
         returncode = 0 if graphvizImports(kompiled_dir + '/parsed') and graphvizImports(kompiled_dir + '/compiled') else 1
 
-    elif args['command'] == 'coverage-log':
+    elif args['command'] == 'coverage':
         json_definition = removeSourceMap(readKastTerm(kompiled_dir + '/compiled.json'))
         symbolTable = buildSymbolTable(json_definition)
-        for rid in args['coverage_file']:
+        for rid in args['coverage-file']:
             rule = minimizeRule(stripCoverageLogger(getRuleById(json_definition, rid.strip())))
             args['output'].write('\n\n')
             args['output'].write('Rule: ' + rid.strip())
