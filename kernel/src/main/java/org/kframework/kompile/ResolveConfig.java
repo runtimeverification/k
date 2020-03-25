@@ -12,14 +12,13 @@ import org.kframework.definition.Sentence;
 import org.kframework.kil.Import;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
-import org.kframework.parser.concrete2kore.ParseInModule;
+import org.kframework.parser.inner.ParseInModule;
 import org.kframework.utils.errorsystem.KEMException;
 import scala.collection.Set;
 
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 import static org.kframework.Collections.*;

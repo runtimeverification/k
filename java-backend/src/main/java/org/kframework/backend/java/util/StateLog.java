@@ -2,10 +2,7 @@
 package org.kframework.backend.java.util;
 
 import org.kframework.backend.java.symbolic.JavaExecutionOptions;
-import org.kframework.definition.Module;
 import org.kframework.kore.K;
-import org.kframework.krun.KRun;
-import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.unparser.KPrint;
 import org.kframework.unparser.OutputModes;
 import org.kframework.utils.file.FileUtil;
@@ -13,10 +10,8 @@ import org.kframework.utils.file.FileUtil;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
-import java.io.OutputStream;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import org.apache.commons.io.output.WriterOutputStream;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -25,10 +20,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.lang.Math;
 
 public class StateLog {
 
