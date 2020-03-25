@@ -10,9 +10,6 @@ import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kore.K;
 import org.kframework.main.FrontEnd;
 import org.kframework.parser.KRead;
-import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
-import org.kframework.parser.concrete2kore.kernel.Scanner;
-import org.kframework.parser.concrete2kore.kernel.KSyntax2Bison;
 import org.kframework.parser.outer.Outer;
 import org.kframework.unparser.KPrint;
 import org.kframework.utils.errorsystem.KEMException;
@@ -30,7 +27,6 @@ import org.kframework.utils.Stopwatch;
 import scala.Option;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
