@@ -241,7 +241,7 @@ public class ParserUtils {
         Set<Module> allModules = new HashSet<>(modules);
         allModules.addAll(previousModules);
         Module mainModule = getMainModule(mainModuleName, allModules);
-        return org.kframework.definition.Definition.apply(mainModule, immutable(modules), Att.empty());
+        return org.kframework.definition.Definition.apply(mainModule, immutable(allModules), Att.empty());
     }
 
     public org.kframework.definition.Definition loadDefinition(
