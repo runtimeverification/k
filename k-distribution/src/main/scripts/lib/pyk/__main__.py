@@ -38,10 +38,6 @@ coverageArgs = pykCommandParsers.add_parser('coverage', help = 'Convert coverage
 coverageArgs.add_argument('coverage-file', type = argparse.FileType('r'), help = 'Coverage file to build log for.')
 coverageArgs.add_argument('-o', '--output', type = argparse.FileType('w'), default = '-')
 
-minimizerArgs = pykCommandParsers.add_parser('minimize', help = 'Minimize a definition.')
-minimizerArgs.add_argument('coverage-file', type = argparse.FileType('r'), help = 'Coverage file with rule list to keep.')
-minimizerArgs.add_argument('-o', '--output', type = argparse.FileType('w'), default = '-')
-
 def definitionDir(kompiledDir):
     return path.dirname(path.abspath(kompiledDir))
 
@@ -79,13 +75,6 @@ if __name__ == '__main__':
             args['output'].write('Rule: ' + rid.strip())
             args['output'].write('\nUnparsed:\n')
             args['output'].write(prettyPrintKast(rule, symbolTable))
-
-    elif args['command'] == 'minimize':
-        rule_list = [ line.strip() for line in args['coverage-file'].read().strip().split('\n') ]
-        old_definition = readKastTerm(kompiled_dir + '/compiled.json')
-        symbol_table   = buildSymbolTable(old_definition)
-        new_definition = minimizeDefinition(old_definition, rule_list)
-        args['output'].write(prettyPrintKast(new_definition, symbol_table))
 
     args['output'].flush()
 

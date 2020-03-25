@@ -11,9 +11,9 @@ KPYK    = $(K_BIN)/kpyk
 PYTHONPATH := $(K_LIB)
 export PYTHONPATH
 
-.PHONY: all clean pyk                                                  \
-        test test-defn test-defn-kast test-defn-prove                  \
-        test-kpyk test-kpyk-coverage-log test-kpyk-definition-minimize
+.PHONY: all clean pyk                                 \
+        test test-defn test-defn-kast test-defn-prove \
+        test-kpyk test-kpyk-coverage-log
 
 all: test
 
@@ -81,7 +81,7 @@ $(defn_tests)/proof-tests/%-spec.json.prove: $(defn_tests)/proof-tests/%-spec.k 
 
 sum_to_n_coverage := kpyk-tests/sum-to-n.imp.coverage
 
-test-kpyk: test-kpyk-coverage-log test-kpyk-definition-minimize
+test-kpyk: test-kpyk-coverage-log
 
 $(sum_to_n_coverage): $(llvm_imp_kompiled) kpyk-tests/sum-to-n.imp
 	rm -rf $(llvm_dir)/imp-kompiled/*_coverage.txt
@@ -90,6 +90,3 @@ $(sum_to_n_coverage): $(llvm_imp_kompiled) kpyk-tests/sum-to-n.imp
 
 test-kpyk-coverage-log: $(sum_to_n_coverage)
 	$(KPYK) $(llvm_dir)/imp-kompiled coverage $(sum_to_n_coverage)
-
-test-kpyk-definition-minimize: $(sum_to_n_coverage)
-	$(KPYK) $(llvm_dir)/imp-kompiled minimize $(sum_to_n_coverage) > blah
