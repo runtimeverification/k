@@ -1,3 +1,15 @@
+  #Not ( {
+      true
+    #Equals
+      A >=Int B
+    }
+  #And
+    {
+      true
+    #Equals
+      B ==Int A
+    } )
+#And
   <T>
     <k>
       .

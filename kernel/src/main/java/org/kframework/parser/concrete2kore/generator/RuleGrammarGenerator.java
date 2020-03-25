@@ -86,9 +86,8 @@ public class RuleGrammarGenerator {
 
     public static final String NOT_INJECTION = "notInjection";
     public static final String ID = "ID";
-    public static final String ID_PROGRAM_PARSING = ID + POSTFIX;
-    private static final String ID_SYNTAX = "ID$SYNTAX";
-    private static final String ID_PROGRAM_PARSING_SYNTAX = "ID-PROGRAM-PARSING$SYNTAX";
+    private static final String ID_SYNTAX = "ID-SYNTAX";
+    public static final String ID_PROGRAM_PARSING = ID_SYNTAX + POSTFIX;
 
     /**
      * Initialize a grammar generator.
