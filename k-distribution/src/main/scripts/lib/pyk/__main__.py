@@ -2,60 +2,81 @@
 
 import argparse
 import tempfile
+import os.path as path
 
 from .         import *
 from .graphviz import *
 
 pykArgs = argparse.ArgumentParser()
+pykArgs.add_argument('kompiled-dir', type = str, help = 'Kompiled directory for definition.')
 
-pykArgs.add_argument('command' , choices = ['parse', 'run', 'prove', 'graph-imports', 'coverage-log'])
+pykCommandParsers = pykArgs.add_subparsers(dest = 'command')
 
-pykArgs.add_argument('-d', '--definition')
+kastArgs = pykCommandParsers.add_parser('parse', help = 'Parse an input program.')
+kastArgs.add_argument('-i', '--input',  type = argparse.FileType('r'), default = '-')
+kastArgs.add_argument('-o', '--output', type = argparse.FileType('w'), default = '-')
+kastArgs.add_argument('-f', '--from', default = 'pretty', choices = ['pretty', 'json', 'kast', 'binary', 'kore'])
+kastArgs.add_argument('-t', '--to',   default = 'pretty', choices = ['pretty', 'json', 'kast', 'binary', 'kore'])
+kastArgs.add_argument('kArgs', nargs='*', help = 'Arguments to pass through to K invocation.')
 
-pykArgs.add_argument('-i', '--input',  type = argparse.FileType('r'), default = '-')
-pykArgs.add_argument('-o', '--output', type = argparse.FileType('w'), default = '-')
+krunArgs = pykCommandParsers.add_parser('run', help = 'Run an input program.')
+krunArgs.add_argument('-i', '--input',  type = argparse.FileType('r'), default = '-')
+krunArgs.add_argument('-o', '--output', type = argparse.FileType('w'), default = '-')
+krunArgs.add_argument('-f', '--from', default = 'pretty', choices = ['pretty', 'json', 'kast', 'binary', 'kore'])
+krunArgs.add_argument('-t', '--to',   default = 'pretty', choices = ['pretty', 'json', 'kast', 'binary', 'kore'])
+krunArgs.add_argument('kArgs', nargs='*', help = 'Arguments to pass through to K invocation.')
 
-pykArgs.add_argument('-f', '--from', default = 'pretty', choices = ['pretty', 'json', 'kast', 'binary', 'kore'])
-pykArgs.add_argument('-t', '--to',   default = 'pretty', choices = ['pretty', 'json', 'kast', 'binary', 'kore'])
+kproveArgs = pykCommandParsers.add_parser('prove', help = 'Prove an input specification.')
+kproveArgs.add_argument('-i', '--input',  type = argparse.FileType('r'), default = '-')
+kproveArgs.add_argument('-o', '--output', type = argparse.FileType('w'), default = '-')
+kproveArgs.add_argument('-t', '--to',   default = 'pretty', choices = ['pretty', 'json', 'kast', 'binary', 'kore'])
+kproveArgs.add_argument('kArgs', nargs='*', help = 'Arguments to pass through to K invocation.')
 
-pykArgs.add_argument('kArgs', nargs='*', help = 'Arguments to pass through to K invocation.')
+graphImportsArgs = pykCommandParsers.add_parser('graph-imports', help = 'Graph the imports of a given definition.')
 
-pykArgs.add_argument('--coverage-file', type = argparse.FileType('r'))
+coverageArgs = pykCommandParsers.add_parser('coverage', help = 'Convert coverage file to human readable log.')
+coverageArgs.add_argument('coverage-file', type = argparse.FileType('r'), help = 'Coverage file to build log for.')
+coverageArgs.add_argument('-o', '--output', type = argparse.FileType('w'), default = '-')
 
-args = vars(pykArgs.parse_args())
+def definitionDir(kompiledDir):
+    return path.dirname(path.abspath(kompiledDir))
 
-print(args)
+if __name__ == '__main__':
+    returncode = 0
+    args = vars(pykArgs.parse_args())
+    kompiled_dir = args['kompiled-dir']
 
-inputFile = args['input'].name
-if inputFile == '-':
-    with tempfile.NamedTemporaryFile(mode = 'w') as tempf:
-        tempf.write(args['input'].read())
-        inputFile = tempf.name
+    if args['command'] in [ 'parse' , 'run' , 'prove' ]:
+        inputFile = args['input'].name
+        if inputFile == '<stdin>':
+            with tempfile.NamedTemporaryFile(mode = 'w') as tempf:
+                tempf.write(args['input'].read())
+                inputFile = tempf.name
+        definition_dir = definitionDir(kompiled_dir)
+        if args['command'] == 'parse':
+            (returncode, stdout, stderr) = kast(definition_dir, inputFile, kArgs = ['--input', args['from'], '--output', args['to']] + args['kArgs'])
+            args['output'].write(stdout)
+        elif args['command'] == 'run':
+            (returncode, stdout, stderr) = krun(definition_dir, inputFile, kArgs = ['--input', args['from'], '--output', args['to']] + args['kArgs'])
+            args['output'].write(stdout)
+        elif args['command'] == 'prove':
+            (returncode, stdout, stderr) = kprove(definition_dir, inputFile, kArgs = ['--input', args['from'], '--output', args['to']] + args['kArgs'])
+            args['output'].write(stdout)
 
-returncode = 0
-definition = args['definition']
-if args['command'] == 'parse':
-    (returncode, stdout, stderr) = kast(definition, inputFile, kArgs = ['--input', args['from'], '--output', args['to']] + args['kArgs'])
-    args['output'].write(stdout)
-elif args['command'] == 'run':
-    (returncode, stdout, stderr) = krun(definition, inputFile, kArgs = ['--input', args['from'], '--output', args['to']] + args['kArgs'])
-    args['output'].write(stdout)
-elif args['command'] == 'prove':
-    (returncode, stdout, stderr) = kprove(definition, inputFile, kArgs = ['--input', args['from'], '--output', args['to']] + args['kArgs'])
-    args['output'].write(stdout)
-elif args['command'] == 'graph-imports':
-    returncode = 0 if graphvizImports(definition + '/parsed') and graphvizImports(definition + '/compiled') else 1
-elif args['command'] == 'coverage-log':
-    json_definition = removeSourceMap(readKastTerm(definition + '/compiled.json'))
-    symbolTable = buildSymbolTable(json_definition)
-    for rid in args['coverage_file']:
-        rule = minimizeRule(stripCoverageLogger(getRuleById(json_definition, rid.strip())))
-        args['output'].write('\n\n')
-        args['output'].write('Rule: ' + rid.strip())
-        args['output'].write('\nUnparsed:\n')
-        args['output'].write(prettyPrintKast(rule, symbolTable))
+    elif args['command'] == 'graph-imports':
+        returncode = 0 if graphvizImports(kompiled_dir + '/parsed') and graphvizImports(kompiled_dir + '/compiled') else 1
 
-args['output'].flush()
+    elif args['command'] == 'coverage':
+        json_definition = removeSourceMap(readKastTerm(kompiled_dir + '/compiled.json'))
+        symbolTable = buildSymbolTable(json_definition)
+        for rid in args['coverage-file']:
+            rule = minimizeRule(stripCoverageLogger(getRuleById(json_definition, rid.strip())))
+            args['output'].write('\n\n')
+            args['output'].write('Rule: ' + rid.strip())
+            args['output'].write('\nUnparsed:\n')
+            args['output'].write(prettyPrintKast(rule, symbolTable))
 
-if returncode != 0:
-    _fatal('Non-zero exit code (' + str(returncode) + ': ' + str(kCommand), code = returncode)
+    args['output'].flush()
+
+    if returncode != 0:
+        _fatal('Non-zero exit code (' + str(returncode) + '): ' + str(kCommand), code = returncode)
