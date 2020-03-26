@@ -2,3 +2,4 @@
 /kast-tests/*.gen
 /llvm
 /haskell
+/kpyk-tests/*.coverage
