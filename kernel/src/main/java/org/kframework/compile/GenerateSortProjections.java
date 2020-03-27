@@ -54,7 +54,7 @@ public class GenerateSortProjections {
     }
 
     public Stream<? extends Sentence> gen(Sort sort) {
-        if (RuleGrammarGenerator.isParserSort(sort) && !sort.equals(Sorts.KItem())) {
+        if (RuleGrammarGenerator.isParserSort(sort) && !sort.equals(Sorts.KItem()) && !sort.equals(Sorts.K())) {
             return Stream.empty();
         }
         KLabel lbl = getProjectLbl(sort, mod);
