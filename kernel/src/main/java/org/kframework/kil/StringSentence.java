@@ -22,8 +22,23 @@ public class StringSentence extends ModuleItem {
         this.label = label;
     }
 
-    public String toString() {
-        return type+"["+label+"]:"+content;
+    @Override
+    public void toString(StringBuilder sb) {
+        switch(type) {
+        case "config":
+          sb.append("  configuration ");
+          break;
+        case "alias":
+          sb.append("  context alias ");
+          break;
+        default:
+          sb.append("  ").append(type).append(" ");
+          break;
+        }
+        if (!label.equals("")) {
+          sb.append("[").append(label).append("]: ");
+        }
+        sb.append(content).append(" ").append(getAttributes());
     }
 
     public String getContent() {

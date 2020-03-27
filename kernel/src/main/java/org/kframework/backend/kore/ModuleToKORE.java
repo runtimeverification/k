@@ -19,7 +19,6 @@ import org.kframework.compile.ExpandMacros;
 import org.kframework.compile.RefreshRules;
 import org.kframework.compile.RewriteToTop;
 import org.kframework.definition.Module;
-import org.kframework.definition.ModuleComment;
 import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
 import org.kframework.definition.Rule;
@@ -724,7 +723,7 @@ public class ModuleToKORE {
         consideredAttributes.put(Att.LABEL(), true);
 
         for (Sentence sentence : iterable(spec.sentencesExcept(definition))) {
-            assert sentence instanceof Rule || sentence instanceof ModuleComment
+            assert sentence instanceof Rule
                 : "Unexpected non-rule claim " + sentence.toString();
             if (sentence instanceof Rule) {
                 convertRule((Rule) sentence, 0, false, topCellSortStr,

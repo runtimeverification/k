@@ -25,15 +25,11 @@ public class PriorityBlockExtended extends ASTNode {
     }
 
     @Override
-    public String toString() {
-        String content = "";
-        for (Tag production : productions)
-            content += production + " ";
-
-        if (content.length() > 2)
-            content = content.substring(0, content.length() - 1);
-
-        return content;
+    public void toString(StringBuilder sb) {
+        for (Tag production : productions) {
+            sb.append(production);
+            sb.append(" ");
+        }
     }
 
     @Override

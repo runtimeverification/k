@@ -35,16 +35,12 @@ public class PriorityExtendedAssoc extends ModuleItem {
     }
 
     @Override
-    public String toString() {
-        String blocks = "";
-
+    public void toString(StringBuilder sb) {
+        sb.append("  syntax ").append(assoc).append(" ");
         for (Tag pb : tags) {
-            blocks += pb + " ";
+            sb.append(pb).append(" ");
         }
-        if (blocks.length() > 2)
-            blocks = blocks.substring(0, blocks.length() - 1);
-
-        return "  syntax " + assoc + " " + blocks + "\n";
+        sb.append(getAttributes());
     }
 
     @Override

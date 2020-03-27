@@ -52,16 +52,28 @@ public class Syntax extends ModuleItem {
     }
 
     @Override
-    public String toString() {
-        String blocks = "";
-
-        for (PriorityBlock pb : priorityBlocks) {
-            blocks += pb + "\n> ";
+    public void toString(StringBuilder sb) {
+        sb.append("  syntax ");
+        if(!params.isEmpty()) {
+            sb.append("{");
+            String conn = "";
+            for (Sort param : params) {
+                sb.append(conn);
+                sb.append(param);
+                conn = ", ";
+            }
+            sb.append("} ");
         }
-        if (blocks.length() > 2)
-            blocks = blocks.substring(0, blocks.length() - 3);
-
-        return "  syntax " + sort + " ::= " + blocks + "\n";
+        sb.append(sort).append(" ").append(getAttributes());
+        if (!priorityBlocks.isEmpty()) {
+            sb.append(" ::=\n    ");
+            String conn = "";
+            for (PriorityBlock pb : priorityBlocks) {
+                sb.append(conn);
+                pb.toString(sb);
+                conn = "\n  > ";
+            }
+        }
     }
 
     @Override

@@ -1,6 +1,8 @@
 // Copyright (c) 2013-2019 K Team. All Rights Reserved.
 package org.kframework.kil;
 
+import org.kframework.utils.StringUtil;
+
 /** A terminal in a {@link Production}. */
 public class Lexical extends ProductionItem {
 
@@ -14,8 +16,9 @@ public class Lexical extends ProductionItem {
     }
 
     @Override
-    public String toString() {
-        return "Lexical{" + lexicalRule + "}";
+    public void toString(StringBuilder sb) {
+        sb.append("r");
+        sb.append(StringUtil.enquoteCString(lexicalRule));
     }
 
     @Override

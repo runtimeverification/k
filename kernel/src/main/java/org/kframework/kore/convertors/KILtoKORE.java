@@ -9,7 +9,6 @@ import org.kframework.attributes.Source;
 import org.kframework.compile.checks.CheckListDecl;
 import org.kframework.definition.Associativity;
 import org.kframework.definition.FlatModule;
-import org.kframework.definition.ModuleComment;
 import org.kframework.definition.ProductionItem;
 import org.kframework.definition.RegexTerminal;
 import org.kframework.definition.Tag;
@@ -95,8 +94,6 @@ public class KILtoKORE extends KILTransformation<Object> {
         // apply((Module) i))
         // .collect(Collectors.toSet());
 
-        // TODO: handle LiterateDefinitionComments
-
         return Definition(
                 koreModules.get(mainModule.getName()),
                 immutable(new HashSet<>(koreModules.values())), Att());
@@ -114,8 +111,6 @@ public class KILtoKORE extends KILTransformation<Object> {
     public Set<org.kframework.definition.Sentence> apply(ModuleItem i) {
         if (i instanceof Syntax || i instanceof PriorityExtended) {
             return (Set<org.kframework.definition.Sentence>) apply((ASTNode) i);
-        } else if (i instanceof Restrictions) {
-            return Sets.newHashSet();
         } else {
             return Sets.newHashSet((org.kframework.definition.Sentence) apply((ASTNode) i));
         }
@@ -137,12 +132,6 @@ public class KILtoKORE extends KILTransformation<Object> {
         }
 
         return Bubble(sentence.getType(), sentence.getContent(), attrs);
-    }
-
-
-    public ModuleComment apply(LiterateModuleComment m) {
-        return new org.kframework.definition.ModuleComment(m.getValue(),
-                convertAttributes(m));
     }
 
     public org.kframework.definition.SyntaxAssociativity apply(PriorityExtendedAssoc ii) {

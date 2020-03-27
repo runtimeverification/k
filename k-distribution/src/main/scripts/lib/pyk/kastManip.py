@@ -246,8 +246,6 @@ def onAttributes(kast, effect):
         return KContext(kast['body'], requires = kast['requires'], att = effect(kast['att']))
     elif isKBubble(kast):
         return KBubble(kast['sentenceType'], kast['contents'], att = effect(kast['att']))
-    elif isKModuleComment(kast):
-        return KModuleComment(kast['comment'], att = effect(kast['att']))
     elif isKProduction(kast):
         return KProduction(kast['productionItems'], kast['sort'], att = effect(kast['att']))
     elif isKSyntaxAssociativity(kast):

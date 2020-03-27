@@ -61,8 +61,8 @@ import static org.kframework.kore.KORE.*;
 public class DefinitionParsing {
     public static final Sort START_SYMBOL = Sorts.RuleContent();
     private final File cacheFile;
-    private boolean autoImportDomains;
-    private boolean kore;
+    private final boolean autoImportDomains;
+    private final boolean kore;
     private final KompileOptions options;
 
     private final KExceptionManager kem;
@@ -108,7 +108,8 @@ public class DefinitionParsing {
                 definitionFile.getParentFile(),
                 ListUtils.union(lookupDirectories,
                         Lists.newArrayList(Kompile.BUILTIN_DIRECTORY)),
-                kore);
+                kore,
+                options.preprocess);
 
         def = Kompile.excludeModulesByTag(excludeModules).apply(def);
 
@@ -192,7 +193,8 @@ public class DefinitionParsing {
                 ListUtils.union(lookupDirectories,
                         Lists.newArrayList(Kompile.BUILTIN_DIRECTORY)),
                 autoImportDomains,
-                kore);
+                kore,
+                options.preprocess);
         Module m = definition.mainModule();
         return options.coverage ? Definition(Module(m.name(), (Set<Module>)m.imports().$bar(Set(definition.getModule("K-IO").get())), m.localSentences(), m.att()), definition.entryModules(), definition.att()) : definition;
     }

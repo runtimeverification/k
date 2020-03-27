@@ -405,12 +405,6 @@ object Rule {
   }
 }
 
-case class ModuleComment(comment: String, att: Att = Att.empty) extends Sentence with OuterKORE {
-  override val isSyntax = false
-  override val isNonSyntax = true
-  override def withAtt(att: Att) = ModuleComment(comment, att)
-}
-
 // hooked
 
 // syntax declarations

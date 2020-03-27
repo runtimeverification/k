@@ -101,12 +101,6 @@ def KBubble(sentenceType, contents, att = None):
 def isKBubble(k):
     return k['node'] == 'KBubble'
 
-def KModuleComment(comment, att = None):
-    return { "node": "KModuleComment", "comment": comment, "att": att }
-
-def isKModuleComment(k):
-    return k['node'] == 'KModuleComment'
-
 def KProduction(productionItems, sort, att = None):
     return { "node": "KProduction", "productionItems": productionItems, "sort": sort, "att": att }
 
@@ -348,9 +342,9 @@ def prettyPrintKast(kast, symbolTable):
         attStr        = prettyPrintKast(kast['att'], symbolTable)
         return 'syntax priority ' + prioritiesStr + ' ' + attStr
     if isKBubble(kast):
-        bubbleStr = prettyPrintKast(KModuleComment('KBubble(' + kast['sentenceType'] + ', ' + kast['contents'] + ')'), symbolTable)
+        body = '// KBubble(' + kast['sentenceType'] + ', ' + kast['contents'] + ')'
         attStr    = prettyPrintKast(kast['att'], symbolTable)
-        return bubbleStr
+        return body + " " + attStr
     if isKRule(kast):
         body     = "\n     ".join(prettyPrintKast(kast["body"], symbolTable).split("\n"))
         ruleStr = "rule " + body
@@ -380,8 +374,6 @@ def prettyPrintKast(kast, symbolTable):
         return '[' + ', '.join(attStrs) + ']'
     if isKSortSynonym(kast):
         return 'sort ' + kast['newSort'] + ' = ' + kast['oldSort'] + ' ' + prettyPrintKast(kast['att'], symbolTable)
-    if isKModuleComment(kast):
-        return '// ' + kast['comment']
     if isKFlatModule(kast):
         name = kast["name"]
         imports = "\n".join(['import ' + kimport for kimport in kast["imports"]])

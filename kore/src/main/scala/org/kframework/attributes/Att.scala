@@ -109,13 +109,23 @@ object Att {
 trait AttributesToString {
   self: Att =>
 
-  override def toString: String = "[" + toStrings.sorted.mkString(" ") + "]"
+  override def toString: String = {
+    if (att.isEmpty) {
+      ""
+    } else {
+      "[" + toStrings.sorted.mkString(", ") + "]"
+    }
+  }
 
   def postfixString: String = {
     if (toStrings.isEmpty) "" else " " + toString()
   }
 
-  lazy val toStrings: List[String] =
+
+  lazy val toStrings: List[String] = {
+    val stringClassName = classOf[String].getName
     att filter { case (("productionId", _), _) => false; case _ => true } map
-      { case ((key, _), value) => key + "(" + value + ")" } toList
+      { case ((key, `stringClassName`), "") => key
+        case ((key, _), value) => key + "(" + value + ")" } toList
+  }
 }
