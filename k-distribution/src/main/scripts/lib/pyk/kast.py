@@ -342,7 +342,7 @@ def prettyPrintKast(kast, symbolTable):
         attStr        = prettyPrintKast(kast['att'], symbolTable)
         return 'syntax priority ' + prioritiesStr + ' ' + attStr
     if isKBubble(kast):
-        body = '// KBubble(' + kast['sentenceType'] + ', ' + kast['contents'] + ')'), symbolTable)
+        body = '// KBubble(' + kast['sentenceType'] + ', ' + kast['contents'] + ')'
         attStr    = prettyPrintKast(kast['att'], symbolTable)
         return body + " " + attStr
     if isKRule(kast):
