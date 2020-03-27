@@ -13,8 +13,7 @@ def match(pattern, kast):
     if isKToken(pattern) and isKToken(kast):
         return {} if pattern["token"] == kast["token"] else None
     if  isKApply(pattern) and isKApply(kast) \
-    and pattern["label"] == kast["label"] and pattern["arity"] == kast["arity"]:
-        subst = {}
+    and pattern["label"] == kast["label"] and len(pattern["args"]) == len(kast["args"]):
         for (patternArg, kastArg) in zip(pattern["args"], kast["args"]):
             argSubst = match(patternArg, kastArg)
             subst = combineDicts(subst, argSubst)
@@ -25,6 +24,13 @@ def match(pattern, kast):
         lhsSubst = match(pattern['lhs'], kast['lhs'])
         rhsSubst = match(pattern['rhs'], kast['rhs'])
         return combineDicts(lhsSubst, rhsSubst)
+    if isKSequence(pattern) and isKSequence(kast) and len(pattern['items']) == len(kast['items']):
+        for (patternItem, substItem) in zip(pattern['items'], kast['items']):
+            itemSubst = match(patternItem, substItem)
+            subst = combineDicts(subst, itemSubst)
+            if subst is None:
+                return None
+        return subst
     return None
 
 def onChildren(kast, effect):
@@ -260,6 +266,9 @@ def onAttributes(kast, effect):
     _fatal('No attributes for: ' + kast['node'] + '.')
 
 def minimizeRule(rule):
+    if not isKRule(rule):
+        return rule
+
     ruleBody     = rule["body"]
     ruleRequires = rule["requires"]
     ruleEnsures  = rule["ensures"]
@@ -291,10 +300,17 @@ def minimizeRule(rule):
     ruleBody = uselessVarsToDots(ruleBody, requires = ruleRequires, ensures = ruleEnsures)
     ruleBody = collapseDots(ruleBody)
 
-    if (ruleRequires == KToken("true", "Bool")):
+    if ruleRequires == KToken("true", "Bool"):
         ruleRequires = None
 
     return KRule(ruleBody, requires = ruleRequires, ensures = ruleEnsures, att = ruleAtts)
+
+def pushDownRewritesRule(rule):
+    if not isKRule(rule):
+        return rule
+
+    newRuleBody = pushDownRewrites(rule['body'])
+    return KRule(newRuleBody, requires = rule['requires'], ensures = rule['ensures'], att = rule['att'])
 
 def removeSourceMap(k):
     """Remove source map information from a given definition.

@@ -77,7 +77,7 @@
     <skipCheckstyleOnWindows>true</skipCheckstyleOnWindows>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <scala.version>2.12.4</scala.version>
-    <project.build.type>Release</project.build.type>
+    <project.build.type>FastBuild</project.build.type>
   </properties>
 
   <dependencies>

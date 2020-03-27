@@ -330,7 +330,7 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
     case m: Module => m.name == name && m.sentences == sentences
   }
 
-  def flattened()   : FlatModule                = new FlatModule(name, imports.map(m => m.name), sentences, att)
+  def flattened()   : FlatModule                = new FlatModule(name, imports.map(m => m.name), localSentences, att)
   def flatModules() : (String, Set[FlatModule]) = (name, Set(flattened) ++ imports.map(m => m.flatModules._2).flatten)
 }
 

@@ -830,15 +830,16 @@ public class ModuleToKORE {
                         .stream().map(KVariable::name).collect(Collectors.toSet());
                 sb.append("\\implies{R} (\n    \\and{R} (\n      \\not{R} (\n        ");
                 for (Rule notMatching : RefreshRules.refresh(functionRules.get(ruleInfo.productionLabel), varNames)) {
-                    if (notMatching.att().contains("owise")) {
+                    if (ignoreOwise(notMatching)) {
                         continue;
                     }
                     sb.append("\\or{R} (\n");
                     K notMatchingRequires = notMatching.requires();
                     K notMatchingLeft = RewriteToTop.toLeft(notMatching.body());
                     Set<KVariable> vars = collectLHSFreeVariables(notMatchingRequires, notMatchingLeft);
+                    sb.append("          ");
                     for (KVariable var : vars) {
-                        sb.append("          \\exists{R} (");
+                        sb.append("\\exists{R} (");
                         convert((K)var, sb);
                         sb.append(",\n          ");
                     }
@@ -880,7 +881,7 @@ public class ModuleToKORE {
                 sb.append("\\bottom{R}()");
                 sb.append("\n        ");
                 for (Rule notMatching : functionRules.get(ruleInfo.productionLabel)) {
-                    if (notMatching.att().contains("owise")) {
+                    if (ignoreOwise(notMatching)) {
                         continue;
                     }
                     sb.append(")");
@@ -988,6 +989,10 @@ public class ModuleToKORE {
             convert(consideredAttributes, rule.att(), sb, freeVarsMap, rule);
             sb.append("\n\n");
         }
+    }
+
+    private boolean ignoreOwise(Rule notMatching) {
+        return notMatching.att().contains(Att.OWISE()) || notMatching.att().contains(Att.SIMPLIFICATION());
     }
 
     private void assertNoExistentials(Rule rule, Set<KVariable> existentials) {
