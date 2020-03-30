@@ -123,4 +123,12 @@ public abstract class ASTNode implements Serializable, HasLocation {
         return att;
     }
 
+    public abstract void toString(StringBuilder sb);
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        toString(sb);
+        return sb.toString();
+    }
 }

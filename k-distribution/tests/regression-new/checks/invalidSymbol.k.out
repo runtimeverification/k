@@ -1,10 +1,10 @@
 [Error] Compiler: Had 2 structural errors.
 [Error] Compiler: Symbol #KToken is not unique. Previously defined as: syntax
-KBott ::= "#token" "(" KString "," KString ")" [klabel(#KToken) symbol()]
+KBott ::= "#token" "(" KString "," KString ")" [klabel(#KToken), symbol]
 	Source(invalidSymbol.k)
 	Location(3,16,3,46)
 [Error] Compiler: Symbol foo is not unique. Previously defined as: syntax Bar
-::= "bar" "(" ")" [klabel(foo) symbol()]
+::= "bar" "(" ")" [klabel(foo), symbol]
 	Source(invalidSymbol.k)
 	Location(6,16,6,42)
 [Warning] Compiler: Could not find main syntax module with name

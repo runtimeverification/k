@@ -48,17 +48,16 @@ public class PriorityBlock extends ASTNode {
     }
 
     @Override
-    public String toString() {
-        String content = "";
-        for (Production production : productions)
-            content += production + "\n| ";
-
-        if (content.length() > 2)
-            content = content.substring(0, content.length() - 3);
-
-        if (assoc == null || assoc.equals(""))
-            return content;
-        return assoc + ": " + content;
+    public void toString(StringBuilder sb) {
+        if (!assoc.equals("")) {
+            sb.append(assoc).append(": \n    ");
+        }
+        String conn = "";
+        for (Production production : productions) {
+            sb.append(conn);
+            production.toString(sb);
+            conn = "\n  | ";
+        }
     }
 
     @Override

@@ -39,8 +39,11 @@ public class NonTerminal extends ProductionItem {
     }
 
     @Override
-    public String toString() {
-        return sort.toString();
+    public void toString(StringBuilder sb) {
+        if (name.isPresent()) {
+          sb.append(name.get()).append(": ");
+        }
+        sb.append(sort);
     }
 
     @Override

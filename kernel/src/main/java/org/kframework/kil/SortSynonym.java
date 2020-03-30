@@ -39,4 +39,9 @@ public class SortSynonym extends ModuleItem {
         return result;
     }
 
+    @Override
+    public void toString(StringBuilder sb) {
+      sb.append("  syntax ").append(newSort).append(" = ").append(oldSort).append(" ").append(getAttributes());
+    }
+
 }

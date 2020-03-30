@@ -1,6 +1,8 @@
 // Copyright (c) 2012-2019 K Team. All Rights Reserved.
 package org.kframework.kil;
 
+import org.kframework.utils.StringUtil;
+
 /** A require directive */
 public class Require extends DefinitionItem {
     /** The string argument to {@code require}, as written in the input file. */
@@ -20,7 +22,8 @@ public class Require extends DefinitionItem {
     }
 
     @Override
-        public String toString() {
-          return "require \""+value+"\"";
-        }
+    public void toString(StringBuilder sb) {
+        sb.append("require ");
+        sb.append(StringUtil.enquoteCString(value));
+    }
 }

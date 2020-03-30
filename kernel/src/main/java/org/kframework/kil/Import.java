@@ -26,8 +26,14 @@ public class Import extends ModuleItem {
     }
 
     @Override
-    public String toString() {
-        return "  imports " + name;
+    public void toString(StringBuilder sb) {
+        sb.append("  imports ");
+        if (name.endsWith(IMPORTS_SYNTAX_SUFFIX)) {
+          sb.append("syntax ");
+          sb.append(name.substring(0, name.length()-IMPORTS_SYNTAX_SUFFIX.length()));
+        } else {
+          sb.append(name);
+        }
     }
 
     public String getName() {
