@@ -917,11 +917,20 @@ module K-EQUAL-KAST [kast]
 
 endmodule
 
+module K-EQUAL-SYMBOLIC [symbolic, kore]
+  import K-EQUAL-SYNTAX
+
+  rule K1:K ==K K2:K => true requires true #And { K1 #Equals K2 }
+  rule K1:K ==K K2:K => false [owise]
+
+endmodule
+
 module K-EQUAL
   import BOOL
   import K-EQUAL-SYNTAX
   import K-EQUAL-KAST
   import K-EQUAL-KORE
+  import K-EQUAL-SYMBOLIC
 
   rule K1:K =/=K K2:K => notBool (K1 ==K K2)
 
