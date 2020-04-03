@@ -43,7 +43,7 @@ module TEST
   rule
     <k> present(I) => . ... </k>
     <map> MAP </map>
-    <vals> ... (.List => ListItem(<entry> <key> I </key> <value> 0 </value> </entry> in_keys(MAP))) </vals>
+    <vals> ... (.List => ListItem(<key> I </key> in_keys(MAP))) </vals>
 
   rule <k> S1; S2 => S1 ~> S2 ... </k>
 endmodule
