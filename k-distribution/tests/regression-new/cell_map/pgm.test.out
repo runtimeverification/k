@@ -1,11 +1,12 @@
 <generatedTop>
   <k>
-    0
+    .
   </k>
+  <vals>
+    ListItem(true) ListItem(false) ListItem(0)
+  </vals>
   <map>
-    <key>
-      0
-    </key> |-> <entry>
+    <entry>
       <key>
         0
       </key>
@@ -14,5 +15,4 @@
       </value>
     </entry>
   </map>
-  <vals> ListItem(true) ListItem(false) ListItem(1) </vals>
 </generatedTop>
