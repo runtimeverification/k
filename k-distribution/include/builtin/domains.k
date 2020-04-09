@@ -161,6 +161,7 @@ endmodule
 module MAP-SYMBOLIC [symbolic]
   imports MAP
   imports K-EQUAL
+  imports ML-SYNTAX
   rule .Map [ K1 <- V1 ] => K1 |-> V1
 
   rule ((K1 |-> V1) MAP) [ K2 ] => V1         requires K1  ==K K2
@@ -177,11 +178,20 @@ module MAP-SYMBOLIC [symbolic]
   // potential infinite loop
   // rule (MAP:Map [ K1 <- V1 ]) [ K2 <- V2 ] => MAP [ K2 <- V2 ] [ K1 <- V1 ] requires K1 =/=K K2
 
-  rule K1 in_keys(M K2 |-> _) => true          requires K1  ==K K2 orBool K1 in_keys(M)
-  rule K1 in_keys(M K2 |-> _) => K1 in_keys(M) requires K1 =/=K K2
+  rule K in_keys(M K |-> _) => true
+  rule K in_keys(_) => false [owise]
 
-  rule K1 in_keys(M [ K2 <- _ ]) => true          requires K1  ==K K2 orBool K1 in_keys(M)
-  rule K1 in_keys(M [ K2 <- _ ]) => K1 in_keys(M) requires K1 =/=K K2
+  rule K1 in_keys(M K2 |-> _) => true          requires K1  ==K K2 orBool K1 in_keys(M) [simplification]
+  rule K1 in_keys(M K2 |-> _) => K1 in_keys(M) requires K1 =/=K K2 [simplification]
+
+  rule K1 in_keys(M [ K2 <- _ ]) => true          requires K1  ==K K2 orBool K1 in_keys(M) [simplification]
+  rule K1 in_keys(M [ K2 <- _ ]) => K1 in_keys(M) requires K1 =/=K K2 [simplification]
+
+  rule
+    #Ceil(@M:Map @K:K |-> @V:K)
+  =>
+    {(@K in_keys(@M)) #Equals true} #And #Ceil(@M) #And #Ceil(@K) #And #Ceil(@V)
+  [anywhere, simplification]
 endmodule
 
 module SET
