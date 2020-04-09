@@ -19,12 +19,12 @@ module TEST
                   <k color="green"> $PGM:Pgm </k>
                   <functions color="blue">
                     <nextFunction> 0:Int </nextFunction> // It works again if we move this outside of <functions>
-                    <function multiplicity = "*">
+                    <function multiplicity = "*" type="Map">
                       <fId> 0:Int </fId>
                     </function>
                   </functions>
                   <contracts color="orange">
-                    <contract multiplicity = "*">
+                    <contract multiplicity = "*" type="Map">
                       <cName> . </cName>
                       <cFunctions> .Map </cFunctions>
                     </contract>
