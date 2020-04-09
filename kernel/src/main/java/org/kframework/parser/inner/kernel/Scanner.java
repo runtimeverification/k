@@ -200,7 +200,7 @@ public class Scanner implements AutoCloseable {
 
     private void writeStandaloneAction(StringBuilder flex, TerminalLike key) {
         flex.append(" {\n" +
-            "  int kind = ").append(tokens.get(key)._1()).append(";\n" +
+            "  int kind = ").append(tokens.get(key)._1()+1).append(";\n" +
             "  *((char **)&yylval) = malloc(strlen(yytext) + 1);\n" +
             "  strcpy(*((char **)&yylval), yytext);\n" +
             "  return kind;\n" +
