@@ -23,6 +23,7 @@ import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
+import org.kframework.definition.Terminal;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.InjectedKLabel;
 import org.kframework.kore.K;
@@ -37,6 +38,7 @@ import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
 import org.kframework.kore.SortHead;
 import org.kframework.kore.VisitK;
+import org.kframework.unparser.Formatter;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
@@ -101,6 +103,11 @@ public class ModuleToKORE {
     private final KLabel topCellInitializer;
     private final Set<String> mlBinders = new HashSet<>();
     private final KompileOptions options;
+    private final StringBuilder formats = new StringBuilder();
+    private final StringBuilder colors = new StringBuilder();
+    private final StringBuilder hooks = new StringBuilder();
+    private final StringBuilder assocs = new StringBuilder();
+    private final StringBuilder comms = new StringBuilder();
 
     public ModuleToKORE(Module module, FileUtil files, KLabel topCellInitializer, KompileOptions options) {
         this.module = module;
@@ -237,6 +244,11 @@ public class ModuleToKORE {
         sb.append("endmodule ");
         convert(attributes, module.att(), sb, null, null);
         sb.append("\n");
+        files.saveToKompiled("format-att.txt", formats.toString());
+        files.saveToKompiled("color-att.txt", colors.toString());
+        files.saveToKompiled("hook-att.txt", hooks.toString());
+        files.saveToKompiled("assoc-att.txt", assocs.toString());
+        files.saveToKompiled("comm-att.txt", comms.toString());
         return sb.toString();
     }
 
@@ -317,6 +329,13 @@ public class ModuleToKORE {
             convert(sort, sb);
             sb.append(" ");
             convert(attributes, att, sb, null, null);
+            if (att.contains("hook")) {
+              hooks.append("Lbl");
+              convert(sort.name(), hooks);
+              hooks.append('\n');
+              hooks.append(att.get("hook"));
+              hooks.append('\n');
+            }
             sb.append("\n");
         }
     }
@@ -351,7 +370,47 @@ public class ModuleToKORE {
             sb.append(") : ");
             convert(prod.sort(), prod, sb);
             sb.append(" ");
-            convert(attributes, addKoreAttributes(prod, functionRules, impurities, overloads), sb, null, null);
+            Att koreAtt = addKoreAttributes(prod, functionRules, impurities, overloads);
+            convert(attributes, koreAtt, sb, null, null);
+            if (koreAtt.contains("format")) {
+              formats.append("Lbl");
+              convert(prod.klabel().get().name(), formats);
+              formats.append('\n');
+              formats.append(koreAtt.get("format"));
+              formats.append('\n');
+            }
+            if (koreAtt.contains("color")) {
+              colors.append("Lbl");
+              convert(prod.klabel().get().name(), colors);
+              colors.append('\n');
+              for (int i = 0; i < prod.items().size(); i++) {
+                if (prod.items().apply(i) instanceof Terminal) {
+                  colors.append(koreAtt.get("color"));
+                  colors.append('\n');
+                }
+              }
+              colors.append('\n');
+            } else if (koreAtt.contains("colors")) {
+              String[] data = koreAtt.get("colors").split(",");
+              colors.append("Lbl");
+              convert(prod.klabel().get().name(), colors);
+              colors.append('\n');
+              for (int i = 0; i < data.length; i++) {
+                colors.append(data[i].trim());
+                colors.append('\n');
+              }
+              colors.append('\n');
+            }
+            if (koreAtt.contains("assoc")) {
+              assocs.append("Lbl");
+              convert(prod.klabel().get().name(), assocs);
+              assocs.append('\n');
+            }
+            if (koreAtt.contains("comm")) {
+              comms.append("Lbl");
+              convert(prod.klabel().get().name(), comms);
+              comms.append('\n');
+            }
             sb.append("\n");
         }
     }
@@ -1244,6 +1303,23 @@ public class ModuleToKORE {
         }
         if (isMacro) {
             att = att.add("macro");
+        }
+        String format = att.getOptional("format").orElse(Formatter.defaultFormat(prod.items().size()));
+        int nt = 1;
+        boolean hasFormat = true;
+        for (int i = 0; i < prod.items().size(); i++) {
+          if (prod.items().apply(i) instanceof NonTerminal) {
+            format = format.replace("%" + (i+1), "%" + (nt++));
+          } else if (prod.items().apply(i) instanceof Terminal) {
+            format = format.replace("%" + (i+1), "%c" + ((Terminal)prod.items().apply(i)).value() + "%r");
+          } else {
+            hasFormat = false;
+          }
+        }
+        if (hasFormat) {
+          att = att.add("format", format);
+        } else {
+          att = att.remove("format");
         }
         // This attribute is a frontend attribute only and is removed from the kore
         // Since it has no meaning outside the frontend
