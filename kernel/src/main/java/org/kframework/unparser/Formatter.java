@@ -132,7 +132,7 @@ public class Formatter {
         }
     }
 
-    private static String defaultFormat(int size) {
+    public static String defaultFormat(int size) {
         StringBuilder sb = new StringBuilder();
         for (int i = 1; i <= size; i++) {
             sb.append("%").append(i).append(" ");
