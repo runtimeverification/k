@@ -4,6 +4,10 @@ MAKEFILE_PATH := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 KOMPILE=$(abspath $(MAKEFILE_PATH)/../bin/kompile)
 # ditto for krun
 KRUN=$(abspath $(MAKEFILE_PATH)/../bin/krun)
+# ditto for kore-exec
+KORE_EXEC=$(abspath $(MAKEFILE_PATH)/../bin/kore-exec)
+# ditto for kore-repl
+KORE_REPL=$(abspath $(MAKEFILE_PATH)/../bin/kore-repl)
 # and kdep
 KDEP=$(abspath $(MAKEFILE_PATH)/../bin/kdep)
 # and kprove
