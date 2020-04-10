@@ -158,6 +158,17 @@ module MAP
   syntax KItem ::= choice(Map)                      [function, hook(MAP.choice), klabel(Map:choice)]
 endmodule
 
+module MAP-KORE-SYMBOLIC [kore,symbolic]
+  rule K:KItem in_keys(M:Map K |-> _) => true
+  rule K:KItem in_keys(_:Map) => false [owise]
+
+  rule
+    #Ceil(@M:Map (@K:KItem |-> @V:KItem))
+  =>
+    {(@K in_keys(@M)) #Equals true} #And #Ceil(@M) #And #Ceil(@K) #And #Ceil(@V)
+  [anywhere, simplification]
+endmodule
+
 module MAP-SYMBOLIC [symbolic]
   imports MAP
   imports K-EQUAL
@@ -178,20 +189,11 @@ module MAP-SYMBOLIC [symbolic]
   // potential infinite loop
   // rule (MAP:Map [ K1 <- V1 ]) [ K2 <- V2 ] => MAP [ K2 <- V2 ] [ K1 <- V1 ] requires K1 =/=K K2
 
-  rule K in_keys(M K |-> _) => true
-  rule K in_keys(_) => false [owise]
-
   rule K1 in_keys(M K2 |-> _) => true          requires K1  ==K K2 orBool K1 in_keys(M) [simplification]
   rule K1 in_keys(M K2 |-> _) => K1 in_keys(M) requires K1 =/=K K2 [simplification]
 
   rule K1 in_keys(M [ K2 <- _ ]) => true          requires K1  ==K K2 orBool K1 in_keys(M) [simplification]
   rule K1 in_keys(M [ K2 <- _ ]) => K1 in_keys(M) requires K1 =/=K K2 [simplification]
-
-  rule
-    #Ceil(@M:Map @K:K |-> @V:K)
-  =>
-    {(@K in_keys(@M)) #Equals true} #And #Ceil(@M) #And #Ceil(@K) #And #Ceil(@V)
-  [anywhere, simplification]
 endmodule
 
 module SET
