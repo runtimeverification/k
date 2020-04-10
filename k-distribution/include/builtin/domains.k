@@ -165,7 +165,19 @@ module MAP-KORE-SYMBOLIC [kore,symbolic]
   rule
     #Ceil(@M:Map (@K:KItem |-> @V:KItem))
   =>
-    {(@K in_keys(@M)) #Equals true} #And #Ceil(@M) #And #Ceil(@K) #And #Ceil(@V)
+    {(@K in_keys(@M)) #Equals false} #And #Ceil(@M) #And #Ceil(@K) #And #Ceil(@V)
+  [anywhere, simplification]
+
+   rule
+     #Ceil(@M:Map [@K:KItem])
+   =>
+     {(@K in_keys(@M)) #Equals true} #And #Ceil(@M) #And #Ceil(@K)
+   [anywhere, simplification]
+
+  rule
+    #Ceil(@M:Map [@K:KItem <- @V:KItem])
+  =>
+    #Ceil(@M) #And #Ceil(@K) #And #Ceil(@V)
   [anywhere, simplification]
 endmodule
 
