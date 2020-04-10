@@ -159,6 +159,8 @@ module MAP
 endmodule
 
 module MAP-KORE-SYMBOLIC [kore,symbolic]
+  imports MAP
+
   rule K:KItem in_keys(M:Map K |-> _) => true
   rule K:KItem in_keys(_:Map) => false [owise]
 
@@ -181,10 +183,9 @@ module MAP-KORE-SYMBOLIC [kore,symbolic]
   [anywhere, simplification]
 endmodule
 
-module MAP-SYMBOLIC [symbolic]
+module MAP-JAVA-SYMBOLIC [kast, symbolic]
   imports MAP
   imports K-EQUAL
-  imports ML-SYNTAX
   rule .Map [ K1 <- V1 ] => K1 |-> V1
 
   rule ((K1 |-> V1) MAP) [ K2 ] => V1         requires K1  ==K K2
@@ -206,6 +207,11 @@ module MAP-SYMBOLIC [symbolic]
 
   rule K1 in_keys(M [ K2 <- _ ]) => true          requires K1  ==K K2 orBool K1 in_keys(M) [simplification]
   rule K1 in_keys(M [ K2 <- _ ]) => K1 in_keys(M) requires K1 =/=K K2 [simplification]
+endmodule
+
+module MAP-SYMBOLIC
+  imports MAP-JAVA-SYMBOLIC
+  imports MAP-KORE-SYMBOLIC
 endmodule
 
 module SET

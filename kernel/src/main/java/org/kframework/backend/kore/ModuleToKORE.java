@@ -509,15 +509,15 @@ public class ModuleToKORE {
         K restMap = KVariable("Rest", Att.empty().add(Sort.class, mapSort));
         K restMapSet = KVariable("@Rest", Att.empty().add(Sort.class, mapSort));
         Sort sortParam = Sort(AddSortInjections.SORTPARAM_NAME, Sort("Q"));
-        KLabel ceilMapLabel = KLabel("#Ceil", mapSort, sortParam);
-        KLabel andLabel = KLabel("#And", sortParam);
+        KLabel ceilMapLabel = KLabel(KLabels.ML_CEIL.name(), mapSort, sortParam);
+        KLabel andLabel = KLabel(KLabels.ML_AND.name(), sortParam);
         K setArgsCeil = KApply(ceilMapLabel, restMapSet);
         for (int i = 0; i< nonterminals.length(); i++) {
             Sort sort = nonterminals.apply(i).sort();
             args.add(KVariable("K" + i, Att.empty().add(Sort.class, sort)));
             KVariable setVar = KVariable("@K" + i, Att.empty().add(Sort.class, sort));
             setArgs.add(setVar);
-            KLabel ceilVarLabel = KLabel("#Ceil", sort, sortParam);
+            KLabel ceilVarLabel = KLabel(KLabels.ML_CEIL.name(), sort, sortParam);
             setArgsCeil = KApply(andLabel, setArgsCeil, KApply(ceilVarLabel, setVar));
         }
         Seq<K> argsSeq = JavaConverters.iterableAsScalaIterable(args).toSeq();
