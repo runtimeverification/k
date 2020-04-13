@@ -46,6 +46,7 @@ object Att {
   val empty: Att = Att(Map.empty)
 
   val FUNCTION = "function"
+  val FUNCTIONAL = "functional"
   val SIMPLIFICATION = "simplification"
   val ASSOC = "assoc"
   val COMM = "comm"
