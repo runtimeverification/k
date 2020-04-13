@@ -42,8 +42,10 @@ import org.kframework.unparser.Formatter;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
+import scala.Int;
 import scala.Option;
 import scala.Tuple2;
+import scala.collection.JavaConverters;
 import scala.collection.Seq;
 
 import java.util.ArrayList;
@@ -163,8 +165,17 @@ public class ModuleToKORE {
         }
         translateSorts(tokenSorts, attributes, collectionSorts, sb);
 
+        List<Rule> sortedRules = new ArrayList<>(JavaConverters.seqAsJavaList(module.sortedRules()));
+        if (options.backend.equals("haskell")) {
+            module.sortedProductions().toStream().filter(this::isGeneratedInKeysOp).foreach(
+                    prod -> {
+                        genMapCeilAxioms(prod, sortedRules);
+                        return prod;
+                    }
+            );
+        }
         SetMultimap<KLabel, Rule> functionRules = HashMultimap.create();
-        for (Rule rule : iterable(module.sortedRules())) {
+        for (Rule rule : sortedRules) {
             K left = RewriteToTop.toLeft(rule.body());
             if (left instanceof KApply) {
                 KApply kapp = (KApply) left;
@@ -181,7 +192,7 @@ public class ModuleToKORE {
         sb.append("\n// symbols\n");
         Set<Production> overloads = new HashSet<>();
         for (Production lesser : iterable(module.overloads().elements())) {
-            for (Production greater : iterable(module.overloads().relations().get(lesser).getOrElse(() -> Collections.<Production>Set()))) {
+            for (Production greater : iterable(module.overloads().relations().get(lesser).getOrElse(Collections::<Production>Set))) {
                 overloads.add(greater);
             }
         }
@@ -233,7 +244,7 @@ public class ModuleToKORE {
         sb.append("\n// rules\n");
         int ruleIndex = 0;
         ListMultimap<Integer, String> priorityToAlias = ArrayListMultimap.create();
-        for (Rule rule : iterable(module.sortedRules())) {
+        for (Rule rule : sortedRules) {
             convertRule(rule, ruleIndex, heatCoolEq, topCellSortStr, attributes, functionRules,
                     priorityToPreviousGroup, priorityToAlias, sentenceType, sb);
             ruleIndex++;
@@ -556,6 +567,113 @@ public class ModuleToKORE {
         sb.append("),K:");
         convert(prod.sort(), prod, sb);
         sb.append(") [unit{}()] // left unit\n");
+    }
+
+    private void genMapCeilAxioms(Production prod, Collection<Rule> rules) {
+        Sort mapSort = prod.nonterminal(1).sort();
+        scala.collection.Set<Production> mapProds = module.productionsForSort().apply(mapSort.head());
+        Production concatProd = mapProds.find(p -> hasHookValue(p.att(), "MAP.concat")).get();
+        Production elementProd = mapProds.find(p -> hasHookValue(p.att(), "MAP.element")).get();
+        Seq<NonTerminal> nonterminals = elementProd.nonterminals();
+        Sort sortParam = Sort(AddSortInjections.SORTPARAM_NAME, Sort("Q"));
+
+        List<K> args = new ArrayList<>();
+        for (int i = 0; i< nonterminals.length(); i++) {
+            Sort sort = nonterminals.apply(i).sort();
+            args.add(KVariable("K" + i, Att.empty().add(Sort.class, sort)));
+        } // variable arguments for MapItem (K1 is the key)
+        Seq<K> argsSeq = JavaConverters.iterableAsScalaIterable(args).toSeq();
+        K restMap = KVariable("Rest", Att.empty().add(Sort.class, mapSort));
+
+        // rule K1:KItem in_keys(MapItem(K1, K2, .., Kn) Rest:Map) => true
+        Rule inKeysRule1 = Rule(
+                KRewrite(
+                        KApply(prod.klabel().get(),
+                                args.get(0),
+                                KApply(concatProd.klabel().get(),
+                                        KApply(elementProd.klabel().get(),
+                                                argsSeq,
+                                                Att.empty()
+                                        ),
+                                        restMap
+                                )
+                        ),
+                        BooleanUtils.TRUE
+                ),
+                BooleanUtils.TRUE,
+                BooleanUtils.TRUE
+        );
+        rules.add(inKeysRule1);
+
+        // rule K1:KItem in_keys(Rest:Map) => false [owise]
+        Rule inKeysRule2 = Rule(
+                KRewrite(
+                        KApply(prod.klabel().get(),
+                                args.get(0),
+                                restMap
+                        ),
+                        BooleanUtils.FALSE
+                ),
+                BooleanUtils.TRUE,
+                BooleanUtils.TRUE,
+                Att.empty().add("owise")
+        );
+        rules.add(inKeysRule2);
+
+        K restMapSet = KVariable("@Rest", Att.empty().add(Sort.class, mapSort));
+        KLabel ceilMapLabel = KLabel(KLabels.ML_CEIL.name(), mapSort, sortParam);
+        KLabel andLabel = KLabel(KLabels.ML_AND.name(), sortParam);
+        K setArgsCeil = KApply(ceilMapLabel, restMapSet); //ceil constraints
+        List<K> setArgs = new ArrayList<>();
+        for (int i = 0; i< nonterminals.length(); i++) {
+            Sort sort = nonterminals.apply(i).sort();
+            KVariable setVar = KVariable("@K" + i, Att.empty().add(Sort.class, sort));
+            setArgs.add(setVar);
+            KLabel ceilVarLabel = KLabel(KLabels.ML_CEIL.name(), sort, sortParam);
+            setArgsCeil = KApply(andLabel, setArgsCeil, KApply(ceilVarLabel, setVar));
+        } // set variable arguments for MapItem (@K1 is the key) and ceil constraints for them
+        Seq<K> setArgsSeq = JavaConverters.iterableAsScalaIterable(setArgs).toSeq();
+
+        // rule
+        //   #Ceil(MapItem(K1, K2, .., Kn) Rest:Map)
+        // =>
+        //  {(@K1 in_keys(@Rest)) #Equals false} #And #Ceil(@Rest) #And #Ceil(@K1) #And ... #And #Ceil(@Kn)
+        // [anywhere, simplification]
+        KLabel equalsLabel = KLabel("#Equals", Sorts.Bool(), sortParam);
+        Rule ceilMapRule =
+                Rule(
+                        KRewrite(
+                                KApply(ceilMapLabel,
+                                        KApply(concatProd.klabel().get(),
+                                                KApply(elementProd.klabel().get(),
+                                                        setArgsSeq,
+                                                        Att.empty()
+                                                ),
+                                                restMapSet
+                                        )
+                                )
+                                ,
+                                KApply(andLabel,
+                                        KApply(equalsLabel,
+                                                KApply(prod.klabel().get(),
+                                                        setArgs.get(0),
+                                                        restMapSet
+                                                ),
+                                                BooleanUtils.FALSE
+                                        ),
+                                        setArgsCeil
+                                )
+                        )
+                        , BooleanUtils.TRUE
+                        , BooleanUtils.TRUE
+                        , Att.empty().add("anywhere").add("simplification")
+                );
+        rules.add(ceilMapRule);
+    }
+
+    static boolean hasHookValue(Att atts, String value) {
+        return atts.contains(Att.HOOK()) &&
+                atts.get(Att.HOOK()).equals(value);
     }
 
     private void genFunctionalAxiom(Production prod, StringBuilder sb) {
@@ -1258,7 +1376,14 @@ public class ModuleToKORE {
 
     private boolean isFunctional(Production prod, SetMultimap<KLabel, Rule> functionRules, Set<KLabel> impurities) {
         Att att = addKoreAttributes(prod, functionRules, impurities, java.util.Collections.emptySet());
-        return att.contains("functional");
+        return att.contains(Att.FUNCTIONAL());
+    }
+
+    private boolean isGeneratedInKeysOp(Production prod) {
+        Option<String> hook = prod.att().getOption(Att.HOOK());
+        if (hook.isEmpty()) return false;
+        if (!hook.get().equals("MAP.in_keys")) return false;
+        return (!prod.klabel().isEmpty());
     }
 
     private Att addKoreAttributes(Production prod, SetMultimap<KLabel, Rule> functionRules, Set<KLabel> impurities,
@@ -1276,8 +1401,7 @@ public class ModuleToKORE {
         boolean isInjective = isConstructor;
 
         boolean isMacro = false;
-        boolean isAnywhere = false;
-        isAnywhere |= overloads.contains(prod);
+        boolean isAnywhere = overloads.contains(prod);
         for (Rule r : functionRules.get(prod.klabel().get())) {
             isMacro |= ExpandMacros.isMacro(r);
             isAnywhere |= r.att().contains(Att.ANYWHERE());
@@ -1293,7 +1417,7 @@ public class ModuleToKORE {
             att = att.add("constructor");
         }
         if (isFunctional) {
-            att = att.add("functional");
+            att = att.add(Att.FUNCTIONAL());
         }
         if (isAnywhere) {
             att = att.add("anywhere");
