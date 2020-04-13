@@ -2,26 +2,36 @@
   <k>
     "done"
   </k>
+  <nextFunction>
+    3
+  </nextFunction>
   <functions>
-    <nextFunction>
-      3
-    </nextFunction>
-    <function>
+    <fId>
+      0
+    </fId> |-> <function>
       <fId>
         0
       </fId>
-    </function> <function>
+    </function>
+    <fId>
+      1
+    </fId> |-> <function>
       <fId>
         1
       </fId>
-    </function> <function>
+    </function>
+    <fId>
+      2
+    </fId> |-> <function>
       <fId>
         2
       </fId>
     </function>
   </functions>
   <contracts>
-    <contract>
+    <cName>
+      foo
+    </cName> |-> <contract>
       <cName>
         foo
       </cName>
