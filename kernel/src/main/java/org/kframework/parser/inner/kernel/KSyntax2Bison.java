@@ -135,7 +135,7 @@ public class KSyntax2Bison {
       } else {
         val = ((RegexTerminal)tok).regex();
       }
-      bison.append("%token <char *> TOK_" + kind + " " + kind + " " + StringUtil.enquoteCString(val) + "\n");
+      bison.append("%token <char *> TOK_" + kind + " " + (kind+1) + " " + StringUtil.enquoteCString(val) + "\n");
     }
     for (Sort sort : iterable(module.allSorts())) {
       bison.append("%nterm <node *> ");
