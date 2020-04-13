@@ -84,8 +84,9 @@ module ML-SYNTAX
   syntax {Sort1, Sort2} Sort2 ::= "#Exists" Sort1 "." Sort2 [klabel(#Exists), symbol, mlOp, mlBinder, mlQuantifier]
                                 | "#Forall" Sort1 "." Sort2 [klabel(#Forall), symbol, mlOp, mlBinder, mlQuantifier]
 
-  syntax {Sort} Sort ::= "#AG" "(" Sort ")" [klabel(#AG), symbol, mlOp, mlQuantifier]
-                       | "#wEF" "(" Sort ")" [klabel(weakExistsFinally), symbol, mlOp, mlQuantifier]
+  syntax {Sort} Sort ::= "#AG" "(" Sort ")" [klabel(#AG), symbol, mlOp]
+                       | "#wEF" "(" Sort ")" [klabel(weakExistsFinally), symbol, mlOp]
+                       | "#wAF" "(" Sort ")" [klabel(weakAlwaysFinally), symbol, mlOp]
 endmodule
 
 module KVARIABLE-SYNTAX
