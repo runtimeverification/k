@@ -5,9 +5,11 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import org.kframework.attributes.Source;
 import org.kframework.compile.ExpandMacros;
+import org.kframework.definition.Constructors;
 import org.kframework.definition.Module;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kore.K;
+import org.kframework.kore.KORE;
 import org.kframework.main.FrontEnd;
 import org.kframework.parser.KRead;
 import org.kframework.parser.outer.Outer;
@@ -32,6 +34,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static org.kframework.Collections.Set;
 
 public class KastFrontEnd extends FrontEnd {
 
@@ -112,7 +116,10 @@ public class KastFrontEnd extends FrontEnd {
                 options.module = def.mainSyntaxModuleName();
                 switch (options.input) {
                     case KORE:
-                        unparsingMod = def.languageParsingModule();
+                        Module languageParsingModule = def.languageParsingModule();
+                        Module k = def.kompiledDefinition.getModule("K").get();
+                        unparsingMod = Constructors.Module("K-LANGUAGE-PARSING",
+                                Set(languageParsingModule, k) , Set(), KORE.Att());
                         break;
                     default:
                         unparsingMod = def.kompiledDefinition.getModule(def.mainSyntaxModuleName()).get();
