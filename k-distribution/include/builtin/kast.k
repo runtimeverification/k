@@ -244,6 +244,13 @@ module RECORD-PRODUCTIONS
   // to their nonterminal's names
 endmodule
 
+module KREWRITE
+  syntax {Sort} Sort ::= Sort "=>" Sort [klabel(#KRewrite), symbol]
+  syntax non-assoc #KRewrite
+  syntax priority #KRewrite > #withConfig
+endmodule
+
+
 // To be used to parse semantic rules
 module K
   imports KSEQ-SYMBOLIC
@@ -252,10 +259,7 @@ module K
   imports K-SORT-LATTICE
   imports AUTO-CASTS
   imports AUTO-FOLLOW
-
-  syntax {Sort} Sort ::= Sort "=>" Sort [klabel(#KRewrite), symbol]
-  syntax non-assoc #KRewrite
-  syntax priority #KRewrite > #withConfig
+  imports KREWRITE
 
   syntax {Sort} Sort ::= Sort "#as" Sort [klabel(#KAs), symbol]
   // functions that preserve sorts and can therefore have inner rewrites
@@ -284,4 +288,5 @@ module K-TERM
   imports K-SORT-LATTICE
   imports AUTO-CASTS
   imports AUTO-FOLLOW
+  imports KREWRITE
 endmodule

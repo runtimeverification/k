@@ -116,10 +116,7 @@ public class KastFrontEnd extends FrontEnd {
                 options.module = def.mainSyntaxModuleName();
                 switch (options.input) {
                     case KORE:
-                        Module languageParsingModule = def.languageParsingModule();
-                        Module k = def.kompiledDefinition.getModule("K").get();
-                        unparsingMod = Constructors.Module("K-LANGUAGE-PARSING",
-                                Set(languageParsingModule, k) , Set(), KORE.Att());
+                        unparsingMod = def.languageParsingModule();
                         break;
                     default:
                         unparsingMod = def.kompiledDefinition.getModule(def.mainSyntaxModuleName()).get();
