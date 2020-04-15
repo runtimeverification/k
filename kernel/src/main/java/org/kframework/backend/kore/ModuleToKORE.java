@@ -340,14 +340,18 @@ public class ModuleToKORE {
             convert(sort, sb);
             sb.append(" ");
             convert(attributes, att, sb, null, null);
-            if (att.contains("hook")) {
-              hooks.append("Lbl");
-              convert(sort.name(), hooks);
-              hooks.append('\n');
-              hooks.append(att.get("hook"));
-              hooks.append('\n');
-            }
+            writeUnparsingDataForSort(sort, att);
             sb.append("\n");
+        }
+    }
+
+    private void writeUnparsingDataForSort(SortHead sort, Att att) {
+        if (att.contains("hook")) {
+            hooks.append("Lbl");
+            convert(sort.name(), hooks);
+            hooks.append('\n');
+            hooks.append(att.get("hook"));
+            hooks.append('\n');
         }
     }
 
@@ -383,46 +387,50 @@ public class ModuleToKORE {
             sb.append(" ");
             Att koreAtt = addKoreAttributes(prod, functionRules, impurities, overloads);
             convert(attributes, koreAtt, sb, null, null);
-            if (koreAtt.contains("format")) {
-              formats.append("Lbl");
-              convert(prod.klabel().get().name(), formats);
-              formats.append('\n');
-              formats.append(koreAtt.get("format"));
-              formats.append('\n');
-            }
-            if (koreAtt.contains("color")) {
-              colors.append("Lbl");
-              convert(prod.klabel().get().name(), colors);
-              colors.append('\n');
-              for (int i = 0; i < prod.items().size(); i++) {
+            writeUnparsingDataForSymbol(prod, koreAtt);
+            sb.append("\n");
+        }
+    }
+
+    private void writeUnparsingDataForSymbol(Production prod, Att koreAtt) {
+        if (koreAtt.contains("format")) {
+            formats.append("Lbl");
+            convert(prod.klabel().get().name(), formats);
+            formats.append('\n');
+            formats.append(koreAtt.get("format"));
+            formats.append('\n');
+        }
+        if (koreAtt.contains("color")) {
+            colors.append("Lbl");
+            convert(prod.klabel().get().name(), colors);
+            colors.append('\n');
+            for (int i = 0; i < prod.items().size(); i++) {
                 if (prod.items().apply(i) instanceof Terminal) {
-                  colors.append(koreAtt.get("color"));
-                  colors.append('\n');
+                    colors.append(koreAtt.get("color"));
+                    colors.append('\n');
                 }
-              }
-              colors.append('\n');
-            } else if (koreAtt.contains("colors")) {
-              String[] data = koreAtt.get("colors").split(",");
-              colors.append("Lbl");
-              convert(prod.klabel().get().name(), colors);
-              colors.append('\n');
-              for (int i = 0; i < data.length; i++) {
+            }
+            colors.append('\n');
+        } else if (koreAtt.contains("colors")) {
+            String[] data = koreAtt.get("colors").split(",");
+            colors.append("Lbl");
+            convert(prod.klabel().get().name(), colors);
+            colors.append('\n');
+            for (int i = 0; i < data.length; i++) {
                 colors.append(data[i].trim());
                 colors.append('\n');
-              }
-              colors.append('\n');
             }
-            if (koreAtt.contains("assoc")) {
-              assocs.append("Lbl");
-              convert(prod.klabel().get().name(), assocs);
-              assocs.append('\n');
-            }
-            if (koreAtt.contains("comm")) {
-              comms.append("Lbl");
-              convert(prod.klabel().get().name(), comms);
-              comms.append('\n');
-            }
-            sb.append("\n");
+            colors.append('\n');
+        }
+        if (koreAtt.contains("assoc")) {
+            assocs.append("Lbl");
+            convert(prod.klabel().get().name(), assocs);
+            assocs.append('\n');
+        }
+        if (koreAtt.contains("comm")) {
+            comms.append("Lbl");
+            convert(prod.klabel().get().name(), comms);
+            comms.append('\n');
         }
     }
 
@@ -1428,6 +1436,7 @@ public class ModuleToKORE {
         if (isMacro) {
             att = att.add("macro");
         }
+        // update format attribute with structure expected by backend
         String format = att.getOptional("format").orElse(Formatter.defaultFormat(prod.items().size()));
         int nt = 1;
         boolean hasFormat = true;
