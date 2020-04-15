@@ -410,6 +410,21 @@ public class ModuleToKORE {
                     colors.append('\n');
                 }
             }
+            if (koreAtt.contains("format")) {
+              String format = koreAtt.get("format");
+              boolean escape = false;
+              for (int i = 0; i < format.length(); i++) {
+                if (escape && format.charAt(i) == 'c') {
+                  colors.append(koreAtt.get("color"));
+                  colors.append('\n');
+                }
+                if (format.charAt(i) == '%') {
+                  escape = true;
+                } else {
+                  escape = false;
+                }
+              }
+            }
             colors.append('\n');
         } else if (koreAtt.contains("colors")) {
             String[] data = koreAtt.get("colors").split(",");
