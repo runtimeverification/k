@@ -382,6 +382,13 @@ public final class ColorUtil {
         }
     }
 
+    public static void main(String[] args) {
+      for (String name : colors.keySet()) {
+        System.out.println(name);
+        System.out.println(RgbToAnsi(name, ColorSetting.EXTENDED));
+      }
+    }
+
     private static String getClosestTerminalCode(Color rgb, Map<Color, String> codesMap) {
         if (rgb == null)
             return "";

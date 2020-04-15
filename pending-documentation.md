@@ -1665,6 +1665,160 @@ Since this feature is not clearly needed by K users at the moment, it is only
 presented here as an example; its implementation will be postponed for such time
 when its usefulness becomes apparent.
 
+Unparsing
+---------
+
+A number of factors go into how terms are unparsed in K. Here we describe some
+of the features the user can use to control how unparsing happens.
+
+### Brackets
+
+One of the phases that the unparser goes through is to insert productions
+tagged with the `bracket` attribute where it believes this is necessary
+in order to create a correct string that will be parsed back into the original
+AST. The most common case of this is in expression grammars. For example,
+consider the following grammar:
+
+```
+syntax Exp ::= Int
+             | Exp "*" Exp
+             > Exp "+" Exp
+```
+
+Here we have declared that expressions can contain integer addition and
+multiplication, and that multiplication binds tighter than addition. As a
+result, when writing a program, if we want to write an expression that first
+applies addition, then multiplication, we must use brackets: `(1 + 2) * 3`.
+Similarly, if we have such an AST, we must **insert** brackets into the AST
+in order to faithfully unparse the term in a manner that will be parsed back
+into the same ast, because if we do not, we end up unparsing the term as 
+`1 + 2 * 3`, which will be parsed back as `1 + (2 * 3)` because of the priority
+declaration in the grammar.
+
+You can control how the unparser will insert such brackets by adding a
+production with the `bracket` attribute and the correct sort. For example, if,
+instead of parentheses, you want to use curly braces, you could write:
+
+```
+syntax Exp ::= "{" Exp "}" [bracket]
+```
+
+This would signal to the unparser how brackets should look for terms of sort
+`Exp`, and it will use this syntax when unparsing terms of sort `Exp`.
+
+### Commutative collections
+
+One thing that K will do (unless you pass the `--no-sort-collections` flag to
+krun) is to sort associative, commutative collections (such as `Set` and `Map`)
+alphanumerically. For example, if I have a collection whose keys are sort `Id`
+and they have the values a, b, c, and d, then unparsing will always print
+first the key a, then b, then c, then d, because this is the alphabetic order
+of these keys when unparsed.
+
+Furthermore, K will sort numeric keys numerically. For example, if I have a
+collection whose keys are `1, 2, 5, 10, 30`, it will first display 1, then 2,
+then 5, then 10, then 30, because it will sort these keys numerically. Note
+that this is different than an alphabetic sort, which would sort them as
+`1, 10, 2, 30, 5`. We believe the former is more intuitive to users.
+
+### Substitution filtering
+
+K will remove substitution terms corresponding to anonymous variables when
+using the `--pattern` flag if those anonymous variables provide no information
+about the named variables in your serach pattern. You can disable this behavior
+by passing `--no-substitution-filtering` to krun. When this flag is not passed,
+and you are using the Haskell backend, any equality in a substitution (ie, an
+`#Equals` under an `#And` under an `#Or`), will be hidden from the user if the
+left hand side is a variable that was anonymous in the `--pattern` passed by
+the user, unless that variable appears elsewhere in the substitution. If you
+want to see that variable in the substitution, you can either disable this
+filtering, or give that variable a name in the original search pattern.
+
+### Variable alpha renaming
+
+K will automatically rename variables that appear in the output configuration.
+Similar to commutative collections, this is done to **normalize** the resulting
+configuration so that equivalent configurations will be printed identically
+regardless of how they happen to be reached. This pass can be disabled by
+passing `--no-alpha-renaming` to krun.
+
+### Macro expansion
+
+K will apply macros in reverse on the output configuration if the macro was
+created with the `alias` or `alias-rec` attribute. See the section on macro
+expansion for more details.
+
+### Formatting
+
+#### `format` attribute
+
+K allows you to control how terms are unparsed using the `format` attribute.
+By default, a domain value is unparsed by printing its string value verbatim,
+and an application pattern is unparsed by printing its terminals and children
+in the sequence implied by its concrete syntax, separated by spaces. However,
+K gives you complete control over how you want to unparse the symbol.
+
+A format attribute is a string containing zero or more escape sequences that
+tell K how to unparse the symbol. Escape sequences begin with a '%' and are
+followed by either an integer, or a single non-digit character. Below is a
+list of escape sequences recognized by the formatter:
+
+| Escape Sequence | Meaning                                                   |
+| --------------- | --------------------------------------------------------- |
+| n               | Insert '\n' followed by the current indentation level     | 
+| i               | Increase the current indentation level by 1               |
+| d               | Decrease the current indentation level by 1               |
+| c               | Move to the next color in the list of colors for this
+                    production                                                |
+| r               | Reset color to the default foreground color for the 
+                    terminal                                                  |
+| an integer      | Print a terminal or nonterminal from the production.
+                    The integer is treated as a 1-based index into the
+                    terminals and nonterminals of the production.
+
+                    If the offset refers to a terminal, move to the next color
+                    in the list of colors for this production, print the value
+                    of that terminal, then reset the color to the default
+                    foreground color for the terminal.
+
+                    If the offset refers to a regular expression terminal, it
+                    is an error.
+
+                    If the offset refers to a nonterminal, print the unparsed
+                    representation of the corresponding child of the current
+                    term.                                                     |
+| any other char  | Print that character verbatim                             |
+
+For more information on how colors work, see below.
+
+#### `color` and `colors` attributes
+
+K allows you to take advantage of ANSI terminal codes for foreground color
+in order to colorize output pretty-printed by the unparser. This is controlled
+via the `color` and `colors` attributes of productions. These attributes
+combine with the `format` attribute to control how a term is colorized.
+
+The first thing to understand about how colorization works is that the `color`
+and `colors` attributes are used to construct a **list** of colors associated
+with each production, and the format attribute then uses that list to choose
+the color for each part of the production. For more information on how the
+format attribute chooses a color from the list, see above, but essentially,
+each terminal or `%c` in the format attribute advances the pointer in the list
+by one element, and terminals and `%r` reset the current color to the default
+foreground color of the terminal afterwards.
+
+There are two ways you can construct a list of colors associated with a
+production:P
+
+* The `color` attribute creates the entire list all with the same color, as
+specified by the value of the attribute. When combined with the default format
+attribute, this will color all the terminals in that production that color, but
+more advanced techniques can be used as well.
+
+* The `colors` attribute creates the list from a manual, comma-separated list
+of colors. The attribute is invalid if the length of the list is not equal to
+the number of terminals in the production plus the number of `%c` substrings in
+the `format` attribute.
 
 Debugging
 ---------
