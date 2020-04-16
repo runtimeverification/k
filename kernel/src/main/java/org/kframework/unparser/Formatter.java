@@ -32,6 +32,7 @@ public class Formatter {
 
     public static void format(Term term, Indenter indenter, ColorSetting colorize) {
         int indent = 0;
+        int localColor = 0;
         if (term instanceof Constant) {
             Constant c = (Constant) term;
             color(indenter, c.production(), 0, colorize);
@@ -78,12 +79,7 @@ public class Formatter {
                         }
                         ProductionItem item = tc.production().items().apply(idx - 1);
                         if (item instanceof Terminal) {
-                            int terminal = 0;
-                            for (ProductionItem pi : iterable(tc.production().items())) {
-                                if (pi == item) break;
-                                if (pi instanceof Terminal) terminal++;
-                            }
-                            color(indenter, tc.production(), terminal, colorize);
+                            color(indenter, tc.production(), localColor++, colorize);
                             indenter.append(((Terminal) item).value());
                             resetColor(indenter, tc.production(), colorize);
                         } else if (item instanceof NonTerminal) {
@@ -132,7 +128,7 @@ public class Formatter {
         }
     }
 
-    private static String defaultFormat(int size) {
+    public static String defaultFormat(int size) {
         StringBuilder sb = new StringBuilder();
         for (int i = 1; i <= size; i++) {
             sb.append("%").append(i).append(" ");
