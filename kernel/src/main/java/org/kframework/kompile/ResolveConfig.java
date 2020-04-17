@@ -60,6 +60,7 @@ class ResolveConfig {
 
         Set<Sentence> configDeclProductions;
         try (ParseInModule parser = getParser.apply(module)) {
+             parser.getScanner();
              configDeclProductions = stream(module.localSentences())
                     .parallel()
                     .filter(s -> s instanceof Bubble)
