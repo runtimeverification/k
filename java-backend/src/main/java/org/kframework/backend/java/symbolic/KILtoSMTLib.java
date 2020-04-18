@@ -332,12 +332,25 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
                     KILtoSMTLib kil2SMT = new KILtoSMTLib(false, globalContext);
                     CharSequence leftExpression = kil2SMT.translate(rule.leftHandSide()).expression();
                     CharSequence rightExpression = kil2SMT.translate(rule.rightHandSide()).expression();
+                    List<CharSequence> requiresExpressions = new ArrayList<>();
+                    for (Term term : rule.requires()) {
+                        requiresExpressions.add(kil2SMT.translate(term).expression());
+                    }
                     sb.append("(assert ");
                     if (!kil2SMT.variables().isEmpty()) {
                         sb.append("(forall (");
                         kil2SMT.appendQuantifiedVariables(sb, kil2SMT.variables());
                         sb.append(") ");
                         //sb.append(") (! ");
+                    }
+                    if (!requiresExpressions.isEmpty()) {
+                        sb.append("(=> ");
+                        sb.append("(and");
+                        for (CharSequence cs : requiresExpressions) {
+                            sb.append(" ");
+                            sb.append(cs);
+                        }
+                        sb.append(") ");
                     }
                     sb.append("(= ");
                     sb.append(leftExpression);
@@ -347,6 +360,9 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
                     //sb.append(" :pattern(");
                     //sb.append(leftExpression);
                     //sb.append(")");
+                    if (!requiresExpressions.isEmpty()) {
+                        sb.append(")");
+                    }
                     if (!kil2SMT.variables().isEmpty()) {
                         sb.append(")");
                     }
