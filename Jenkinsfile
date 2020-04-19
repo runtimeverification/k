@@ -94,7 +94,7 @@ pipeline {
                       }
                     }
                     stage('Build and Test K') {
-                      options { timeout(time: 40, unit: 'MINUTES') }
+                      options { timeout(time: 45, unit: 'MINUTES') }
                       steps {
                         sh '''
                           echo 'Setting up environment...'
