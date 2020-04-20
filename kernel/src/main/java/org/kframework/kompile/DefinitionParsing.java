@@ -265,8 +265,7 @@ public class DefinitionParsing {
     }
 
     private Definition resolveConfigBubbles(Definition def, RuleGrammarGenerator gen) {
-      Map<String, Module> parsed = def.parMap(m -> this.resolveConfigBubbles(def, m, gen));
-      return DefinitionTransformer.from(m -> Module(m.name(), m.imports(), parsed.get(m.name()).localSentences(), m.att()), "parsing configs").apply(def);
+      return DefinitionTransformer.from(m -> resolveConfigBubbles(def, m, gen), "parsing configs").apply(def);
     }
 
     private Module resolveConfigBubbles(Definition def, Module inputModule, RuleGrammarGenerator gen) {
@@ -287,7 +286,7 @@ public class DefinitionParsing {
 
         Set<Sentence> configDeclProductions;
         ParseCache cache = loadCache(gen.getConfigGrammar(module));
-        try (ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), isStrict)) {
+        try (ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), isStrict, profileRules, files)) {
              parser.getScanner();
              configDeclProductions = stream(module.localSentences())
                     .parallel()
