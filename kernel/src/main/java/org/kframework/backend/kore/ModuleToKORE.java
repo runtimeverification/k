@@ -598,25 +598,32 @@ public class ModuleToKORE {
         Seq<NonTerminal> nonterminals = elementProd.nonterminals();
         Sort sortParam = Sort(AddSortInjections.SORTPARAM_NAME, Sort("Q"));
 
+        // rule
+        //   #Ceil(MapItem(K1, K2, ..., Kn) Rest:Map)
+        // =>
+        //  {(@K1 in_keys(@Rest)) #Equals false} #And ... #And #Ceil(@Kn)
+        // Note: The {_ in_Keys(_) #Equals false} condition implies
+        // #Ceil(@K1) and #Ceil(@Rest).
+        // [anywhere, simplification]
+
         K restMapSet = KVariable("@Rest", Att.empty().add(Sort.class, mapSort));
         KLabel ceilMapLabel = KLabel(KLabels.ML_CEIL.name(), mapSort, sortParam);
         KLabel andLabel = KLabel(KLabels.ML_AND.name(), sortParam);
-        K setArgsCeil = KApply(ceilMapLabel, restMapSet); //ceil constraints
+
+        // arguments of MapItem and their #Ceils
         List<K> setArgs = new ArrayList<>();
-        for (int i = 0; i< nonterminals.length(); i++) {
+        K setArgsCeil = KApply(KLabel(KLabels.ML_TRUE.name(), sortParam));
+        for (int i = 0; i < nonterminals.length(); i++) {
             Sort sort = nonterminals.apply(i).sort();
             KVariable setVar = KVariable("@K" + i, Att.empty().add(Sort.class, sort));
             setArgs.add(setVar);
-            KLabel ceilVarLabel = KLabel(KLabels.ML_CEIL.name(), sort, sortParam);
-            setArgsCeil = KApply(andLabel, setArgsCeil, KApply(ceilVarLabel, setVar));
-        } // set variable arguments for MapItem (@K1 is the key) and ceil constraints for them
+            if (i > 0) {
+                KLabel ceil = KLabel(KLabels.ML_CEIL.name(), sort, sortParam);
+                setArgsCeil = KApply(andLabel, setArgsCeil, KApply(ceil, setVar));
+            }
+        }
         Seq<K> setArgsSeq = JavaConverters.iterableAsScalaIterable(setArgs).toSeq();
 
-        // rule
-        //   #Ceil(MapItem(K1, K2, .., Kn) Rest:Map)
-        // =>
-        //  {(@K1 in_keys(@Rest)) #Equals false} #And #Ceil(@Rest) #And #Ceil(@K1) #And ... #And #Ceil(@Kn)
-        // [anywhere, simplification]
         KLabel equalsLabel = KLabel("#Equals", Sorts.Bool(), sortParam);
         Rule ceilMapRule =
                 Rule(
