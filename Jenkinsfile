@@ -68,6 +68,12 @@ pipeline {
                           , string(name: 'UPDATE_DEPS_REPOSITORY', value: 'runtimeverification/beacon-chain-verification') \
                           , string(name: 'UPDATE_DEPS_SUBMODULE_DIR', value: 'deps/k')                                     \
                           ]
+        build job: 'rv-devops/master', propagate: false, wait: false                                                 \
+            , parameters: [ booleanParam(name: 'UPDATE_DEPS_SUBMODULE', value: true)                                 \
+                          , string(name: 'PR_REVIEWER', value: 'sskeirik')                                           \
+                          , string(name: 'UPDATE_DEPS_REPOSITORY', value: 'runtimeverification/michelson-semantics') \
+                          , string(name: 'UPDATE_DEPS_SUBMODULE_DIR', value: 'ext/k')                                \
+                          ]
       }
     }
     stage('Build and Package K') {
@@ -94,6 +100,7 @@ pipeline {
                       }
                     }
                     stage('Build and Test K') {
+                      options { timeout(time: 45, unit: 'MINUTES') }
                       steps {
                         sh '''
                           echo 'Setting up environment...'
