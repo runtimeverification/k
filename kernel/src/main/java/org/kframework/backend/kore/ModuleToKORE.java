@@ -171,7 +171,8 @@ public class ModuleToKORE {
                     genMapCeilAxioms(prod, sortedRules);
                     return prod;
                 }
-        );        SetMultimap<KLabel, Rule> functionRules = HashMultimap.create();
+        );
+        SetMultimap<KLabel, Rule> functionRules = HashMultimap.create();
         for (Rule rule : sortedRules) {
             K left = RewriteToTop.toLeft(rule.body());
             if (left instanceof KApply) {
