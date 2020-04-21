@@ -598,49 +598,6 @@ public class ModuleToKORE {
         Seq<NonTerminal> nonterminals = elementProd.nonterminals();
         Sort sortParam = Sort(AddSortInjections.SORTPARAM_NAME, Sort("Q"));
 
-        List<K> args = new ArrayList<>();
-        for (int i = 0; i< nonterminals.length(); i++) {
-            Sort sort = nonterminals.apply(i).sort();
-            args.add(KVariable("K" + i, Att.empty().add(Sort.class, sort)));
-        } // variable arguments for MapItem (K1 is the key)
-        Seq<K> argsSeq = JavaConverters.iterableAsScalaIterable(args).toSeq();
-        K restMap = KVariable("Rest", Att.empty().add(Sort.class, mapSort));
-
-        // rule K1:KItem in_keys(MapItem(K1, K2, .., Kn) Rest:Map) => true
-        Rule inKeysRule1 = Rule(
-                KRewrite(
-                        KApply(prod.klabel().get(),
-                                args.get(0),
-                                KApply(concatProd.klabel().get(),
-                                        KApply(elementProd.klabel().get(),
-                                                argsSeq,
-                                                Att.empty()
-                                        ),
-                                        restMap
-                                )
-                        ),
-                        BooleanUtils.TRUE
-                ),
-                BooleanUtils.TRUE,
-                BooleanUtils.TRUE
-        );
-        rules.add(inKeysRule1);
-
-        // rule K1:KItem in_keys(Rest:Map) => false [owise]
-        Rule inKeysRule2 = Rule(
-                KRewrite(
-                        KApply(prod.klabel().get(),
-                                args.get(0),
-                                restMap
-                        ),
-                        BooleanUtils.FALSE
-                ),
-                BooleanUtils.TRUE,
-                BooleanUtils.TRUE,
-                Att.empty().add("owise")
-        );
-        rules.add(inKeysRule2);
-
         K restMapSet = KVariable("@Rest", Att.empty().add(Sort.class, mapSort));
         KLabel ceilMapLabel = KLabel(KLabels.ML_CEIL.name(), mapSort, sortParam);
         KLabel andLabel = KLabel(KLabels.ML_AND.name(), sortParam);
