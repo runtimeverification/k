@@ -113,6 +113,12 @@ public class DefinitionParsing {
                 kore,
                 options.preprocess);
 
+        if (!def.getModule(mainModule).isDefined()) {
+          throw KEMException.criticalError("Module " + mainModule + " does not exist.");
+        }
+        if (!def.getModule(entryPointModule).isDefined()) {
+          throw KEMException.criticalError("Module " + entryPointModule + " does not exist.");
+        }
         Stream<Module> modules = Stream.of(def.getModule(mainModule).get());
         modules = Stream.concat(modules, stream(def.getModule(mainModule).get().importedModules()));
         modules = Stream.concat(modules, Stream.of(def.getModule(entryPointModule).get()));
