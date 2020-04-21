@@ -624,7 +624,7 @@ public class ModuleToKORE {
         }
         Seq<K> setArgsSeq = JavaConverters.iterableAsScalaIterable(setArgs).toSeq();
 
-        KLabel equalsLabel = KLabel("#Equals", Sorts.Bool(), sortParam);
+        KLabel equalsLabel = KLabel(KLabels.ML_EQUALS.name(), Sorts.Bool(), sortParam);
         Rule ceilMapRule =
                 Rule(
                         KRewrite(
