@@ -2,10 +2,10 @@
   <k>
     "done"
   </k>
-  <nextFunction>
-    3
-  </nextFunction>
   <functions>
+    <nextFunction>
+      3
+    </nextFunction>
     <function>
       <fId>
         0

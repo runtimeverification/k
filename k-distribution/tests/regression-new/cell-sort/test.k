@@ -17,8 +17,8 @@ module TEST
 
   configuration <T color="yellow">
                   <k color="green"> $PGM:Pgm </k>
-                  <nextFunction> 0:Int </nextFunction>
                   <functions color="blue">
+                    <nextFunction> 0:Int </nextFunction> // It works again if we move this outside of <functions>
                     <function multiplicity = "*">
                       <fId> 0:Int </fId>
                     </function>
@@ -53,8 +53,8 @@ rule
       </contract>
       ...
     </contracts>
-    <nextFunction> N => N +Int 1 </nextFunction>
     <functions>
+      <nextFunction> N => N +Int 1 </nextFunction>
       (.Bag => <function> <fId> N </fId> </function>)
       ...
     </functions>
