@@ -166,15 +166,12 @@ public class ModuleToKORE {
         translateSorts(tokenSorts, attributes, collectionSorts, sb);
 
         List<Rule> sortedRules = new ArrayList<>(JavaConverters.seqAsJavaList(module.sortedRules()));
-        if (options.backend.equals("haskell")) {
-            module.sortedProductions().toStream().filter(this::isGeneratedInKeysOp).foreach(
-                    prod -> {
-                        genMapCeilAxioms(prod, sortedRules);
-                        return prod;
-                    }
-            );
-        }
-        SetMultimap<KLabel, Rule> functionRules = HashMultimap.create();
+        module.sortedProductions().toStream().filter(this::isGeneratedInKeysOp).foreach(
+                prod -> {
+                    genMapCeilAxioms(prod, sortedRules);
+                    return prod;
+                }
+        );        SetMultimap<KLabel, Rule> functionRules = HashMultimap.create();
         for (Rule rule : sortedRules) {
             K left = RewriteToTop.toLeft(rule.body());
             if (left instanceof KApply) {
