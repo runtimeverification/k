@@ -1,10 +1,6 @@
 pipeline {
-  agent {
-    label 'docker'
-  }
-  options {
-    ansiColor('xterm')
-  }
+  agent { label 'docker' }
+  options { ansiColor('xterm') }
   environment {
     PACKAGE  = 'kframework'
     VERSION  = '5.0.0'
@@ -12,13 +8,9 @@ pipeline {
     MAKE_EXTRA_ARGS = '' // Example: 'DEBUG=--debug' to see stack traces
   }
   stages {
-    stage("Init title") {
+    stage('Init title') {
       when { changeRequest() }
-      steps {
-        script {
-          currentBuild.displayName = "PR ${env.CHANGE_ID}: ${env.CHANGE_TITLE}"
-        }
-      }
+      steps { script { currentBuild.displayName = "PR ${env.CHANGE_ID}: ${env.CHANGE_TITLE}" } }
     }
     stage("Create source tarball") {
       agent {
@@ -68,6 +60,12 @@ pipeline {
                           , string(name: 'UPDATE_DEPS_REPOSITORY', value: 'runtimeverification/beacon-chain-verification') \
                           , string(name: 'UPDATE_DEPS_SUBMODULE_DIR', value: 'deps/k')                                     \
                           ]
+        build job: 'rv-devops/master', propagate: false, wait: false                                                 \
+            , parameters: [ booleanParam(name: 'UPDATE_DEPS_SUBMODULE', value: true)                                 \
+                          , string(name: 'PR_REVIEWER', value: 'sskeirik')                                           \
+                          , string(name: 'UPDATE_DEPS_REPOSITORY', value: 'runtimeverification/michelson-semantics') \
+                          , string(name: 'UPDATE_DEPS_SUBMODULE_DIR', value: 'ext/k')                                \
+                          ]
       }
     }
     stage('Build and Package K') {
@@ -86,14 +84,10 @@ pipeline {
                     }
                   }
                   stages {
-                    stage('Checkout code') {
-                      steps {
-                        dir('k-exercises') {
-                          git url: 'git@github.com:kframework/k-exercises.git'
-                        }
-                      }
+                    stage('Checkout code') { steps { dir('k-exercises') { git url: 'git@github.com:kframework/k-exercises.git' } }
                     }
                     stage('Build and Test K') {
+                      options { timeout(time: 45, unit: 'MINUTES') }
                       steps {
                         sh '''
                           echo 'Setting up environment...'
@@ -187,9 +181,7 @@ pipeline {
                   options { skipDefaultCheckout() }
                   steps {
                     unstash "buster"
-                    sh '''
-                      src/main/scripts/test-in-container-debian
-                    '''
+                    sh 'src/main/scripts/test-in-container-debian'
                   }
                   post {
                     always {
@@ -222,9 +214,7 @@ pipeline {
                     stage('Build Pacman Package') {
                       steps {
                         checkout scm
-                        sh '''
-                          makepkg
-                        '''
+                        sh 'makepkg'
                         stash name: "arch", includes: "kframework-git-${env.VERSION}-1-x86_64.pkg.tar.xz"
                       }
                     }
@@ -240,7 +230,7 @@ pipeline {
                   }
                   options { skipDefaultCheckout() }
                   steps {
-                    unstash "arch"
+                    unstash 'arch'
                     sh '''
                       pacman -Syyu --noconfirm
                       pacman -U --noconfirm kframework-git-${VERSION}-1-x86_64.pkg.tar.xz
@@ -297,11 +287,9 @@ pipeline {
             stage('Build on Mac OS') {
               stages {
                 stage('Build Homebrew Bottle') {
-                  agent {
-                    label 'anka'
-                  }
+                  agent { label 'anka' }
                   steps {
-                    unstash "src"
+                    unstash 'src'
                     dir('homebrew-k') {
                       git url: 'git@github.com:kframework/homebrew-k.git'
                       sh '''
@@ -314,16 +302,12 @@ pipeline {
                   }
                 }
                 stage("Test Homebrew Bottle") {
-                  agent {
-                    label 'anka'
-                  }
+                  agent { label 'anka' }
                   steps {
                     dir('homebrew-k') {
                       git url: 'git@github.com:kframework/homebrew-k.git', branch: 'brew-release-kframework'
                       unstash "mojave"
-                      sh '''
-                        ${WORKSPACE}/src/main/scripts/brew-install-bottle
-                      '''
+                      sh '${WORKSPACE}/src/main/scripts/brew-install-bottle'
                     }
                     sh '''
                       cp -R /usr/local/lib/kframework/tutorial ~
@@ -339,11 +323,7 @@ pipeline {
                       kompile test.k --backend llvm
                       kompile test.k --backend haskell
                     '''
-                    dir('homebrew-k') {
-                      sh '''
-                        ${WORKSPACE}/src/main/scripts/brew-update-to-final
-                      '''
-                    }
+                    dir('homebrew-k') { sh '${WORKSPACE}/src/main/scripts/brew-update-to-final' }
                   }
                   post {
                     always {
@@ -353,11 +333,7 @@ pipeline {
                   }
                 }
               }
-              post {
-                always {
-                  archiveArtifacts artifacts: 'kserver.log,k-distribution/target/kserver.log', allowEmptyArchive: true
-                }
-              }
+              post { always { archiveArtifacts artifacts: 'kserver.log,k-distribution/target/kserver.log', allowEmptyArchive: true } }
             }
           }
           post {
@@ -392,18 +368,10 @@ pipeline {
       steps {
         unstash "src"
         unstash "binary"
-        dir("bionic") {
-          unstash "bionic"
-        }
-        dir("buster") {
-          unstash "buster"
-        }
-        dir("arch") {
-          unstash "arch"
-        }
-        dir("mojave") {
-          unstash "mojave"
-        }
+        dir('bionic') { unstash 'bionic' }
+        dir('buster') { unstash 'buster' }
+        dir('arch')   { unstash 'arch'   }
+        dir('mojave') { unstash 'mojave' }
         sshagent(['2b3d8d6b-0855-4b59-864a-6b3ddf9c9d1a']) {
           sh '''
             release_tag="v${VERSION}-$(git rev-parse --short=7 HEAD)"
