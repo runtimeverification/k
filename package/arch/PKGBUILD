@@ -39,6 +39,6 @@ check() {
 
 package() {
 	cd ..
-	DESTDIR="$pkgdir" PREFIX="/usr" src/main/scripts/package
+	DESTDIR="$pkgdir" PREFIX="/usr" package/package
 	install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
 }
