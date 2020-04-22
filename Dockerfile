@@ -1,34 +1,30 @@
-ARG BASE_IMAGE=ubuntu:bionic
-FROM ${BASE_IMAGE}
-ARG BASE_IMAGE
+FROM ubuntu:bionic
 
-ARG LLVM_VERSION=8
-
-RUN    apt-get update            \
-    && apt-get install --yes     \
-        bison                    \
-        clang-$LLVM_VERSION      \
-        cmake                    \
-        curl                     \
-        debhelper                \
-        flex                     \
-        gcc                      \
-        git                      \
-        libboost-test-dev        \
-        libgmp-dev               \
-        libjemalloc-dev          \
-        libmpfr-dev              \
-        libyaml-dev              \
-        libz3-dev                \
-        lld-$LLVM_VERSION        \
-        llvm-$LLVM_VERSION-tools \
-        maven                    \
-        opam                     \
-        openjdk-11-jdk           \
-        pkg-config               \
-        python3                  \
-        python3-graphviz         \
-        z3                       \
+RUN    apt-get update        \
+    && apt-get install --yes \
+        bison                \
+        clang-8              \
+        cmake                \
+        curl                 \
+        debhelper            \
+        flex                 \
+        gcc                  \
+        git                  \
+        libboost-test-dev    \
+        libgmp-dev           \
+        libjemalloc-dev      \
+        libmpfr-dev          \
+        libyaml-dev          \
+        libz3-dev            \
+        lld-8                \
+        llvm-8-tools         \
+        maven                \
+        opam                 \
+        openjdk-11-jdk       \
+        pkg-config           \
+        python3              \
+        python3-graphviz     \
+        z3                   \
         zlib1g-dev
 
 RUN curl -sSL https://get.haskellstack.org/ | sh
