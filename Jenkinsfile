@@ -432,6 +432,26 @@ pipeline {
         }
       }
     }
+    stage('DockerHub Images') {
+      when { branch 'master' }
+      agent {
+        dockerfile {
+          additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) -v /var/run/docker.sock:/var/run/docker.sock'
+          reuseNode true
+        }
+      }
+      steps {
+        dir('bionic') { unstash 'bionic' }
+        sh '''
+            git_revision="$(git rev-parse --short=7 HEAD)"
+
+            bionic_tag="runtimeverification/ubuntu/bionic/kframework/k:${git_revision}"
+            mv bionic/kframework_${VERSION}_amd64.deb kframework_amd64_bionic.deb
+            sudo docker image build . --file package/docker/Dockerfile.ubuntu-bionic --tag "${bionic_tag}"
+            sudo docker image push "${bionic_tag}"
+        '''
+      }
+    }
     stage('Update Submodules (release)') {
       when { branch 'master' }
       steps {

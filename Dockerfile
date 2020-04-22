@@ -7,6 +7,7 @@ RUN    apt-get update        \
         cmake                \
         curl                 \
         debhelper            \
+        docker.io            \
         flex                 \
         gcc                  \
         git                  \
