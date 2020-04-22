@@ -63,3 +63,9 @@ ADD k-distribution/pom.xml                                     /home/user/.tmp-m
 ADD kore/pom.xml                                               /home/user/.tmp-maven/kore/
 RUN    cd /home/user/.tmp-maven               \
     && mvn --batch-mode dependency:go-offline
+
+RUN curl -L https://github.com/github/hub/releases/download/v2.14.0/hub-linux-amd64-2.14.0.tgz -o /home/user/hub.tgz
+RUN cd /home/user && tar xzf hub.tgz
+
+ENV LD_LIBRARY_PATH=/usr/local/lib
+ENV PATH=/home/user/hub-linux-amd64-2.14.0/bin:$PATH
