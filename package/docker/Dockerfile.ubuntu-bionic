@@ -16,6 +16,6 @@ USER user:user
 WORKDIR /home/user
 
 COPY --chown=user:user kframework_amd64_bionic.deb kframework_amd64_bionic.deb
-RUN    sudo apt-get update                                    \
-    && sudo apt-get upgrade --yes                             \
-    && sudo apt-get install --yes kframework_amd64_bionic.deb
+RUN    sudo apt-get update                                      \
+    && sudo apt-get upgrade --yes                               \
+    && sudo apt-get install --yes ./kframework_amd64_bionic.deb
