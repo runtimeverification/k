@@ -364,64 +364,14 @@ pipeline {
       }
     }
     stage('Deploy') {
-      agent {
-        dockerfile {
-          additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
-          reuseNode true
-        }
-      }
       when {
         branch 'master'
         beforeAgent true
       }
-      environment {
-        AWS_ACCESS_KEY_ID     = credentials('aws-access-key-id')
-        AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')
-        AWS_REGION            = 'us-east-2'
-        GITHUB_TOKEN          = credentials('rv-jenkins')
-        GIT_SSH_COMMAND       = 'ssh -o StrictHostKeyChecking=accept-new'
-      }
-      steps {
-        unstash "src"
-        unstash "binary"
-        dir('bionic') { unstash 'bionic' }
-        dir('buster') { unstash 'buster' }
-        dir('arch')   { unstash 'arch'   }
-        dir('mojave') { unstash 'mojave' }
-        sshagent(['2b3d8d6b-0855-4b59-864a-6b3ddf9c9d1a']) {
-          sh '''
-            git remote add release 'ssh://github.com/kframework/k.git'
-            git tag "${K_RELEASE_TAG}" "${SHORT_REV}"
-            git push release "${K_RELEASE_TAG}"
-
-            mv bionic/kframework_${VERSION}_amd64.deb bionic/kframework_${VERSION}_amd64_bionic.deb
-            mv buster/kframework_${VERSION}_amd64.deb buster/kframework_${VERSION}_amd64_buster.deb
-            LOCAL_BOTTLE_NAME=$(echo mojave/kframework--${VERSION}.mojave.bottle*.tar.gz)
-            BOTTLE_NAME=`cd mojave && echo kframework--${VERSION}.mojave.bottle*.tar.gz | sed 's!kframework--!kframework-!'`
-            mv $LOCAL_BOTTLE_NAME mojave/$BOTTLE_NAME
-            echo "K Framework Release ${K_RELEASE_TAG}"  > release.md
-            echo ""                                     >> release.md
-            cat k-distribution/INSTALL.md               >> release.md
-            hub release create                                                                         \
-                --attach kframework-${VERSION}-src.tar.gz"#Source tar.gz"                              \
-                --attach bionic/kframework_${VERSION}_amd64_bionic.deb"#Ubuntu Bionic (18.04) Package" \
-                --attach buster/kframework_${VERSION}_amd64_buster.deb"#Debian Buster (10) Package"    \
-                --attach arch/kframework-git-${VERSION}-1-x86_64.pkg.tar.xz"#Arch Package"             \
-                --attach mojave/$BOTTLE_NAME"#Mac OS X Homebrew Bottle"                                \
-                --attach k-nightly.tar.gz"#Platform Indepdendent K Binary"                             \
-                --file release.md "${K_RELEASE_TAG}"
-          '''
-        }
-        dir("homebrew-k") {
-          git url: 'git@github.com:kframework/homebrew-k.git', branch: 'brew-release-kframework'
-          sshagent(['2b3d8d6b-0855-4b59-864a-6b3ddf9c9d1a']) {
-            sh '''
-              git checkout master
-              git merge brew-release-$PACKAGE
-              git push origin master
-              git push origin -d brew-release-$PACKAGE
-            '''
-          }
+      agent {
+        dockerfile {
+          additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
+          reuseNode true
         }
       }
       post {
@@ -431,25 +381,72 @@ pipeline {
                   , message: "Deploy Phase Failed: ${env.BUILD_URL}"
         }
       }
-    }
-    stage('DockerHub Images') {
-      when { branch 'master' }
-      agent {
-        dockerfile {
-          additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) -v /var/run/docker.sock:/var/run/docker.sock'
-          reuseNode true
-        }
+      environment {
+        AWS_ACCESS_KEY_ID     = credentials('aws-access-key-id')
+        AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')
+        AWS_REGION            = 'us-east-2'
+        GITHUB_TOKEN          = credentials('rv-jenkins')
+        GIT_SSH_COMMAND       = 'ssh -o StrictHostKeyChecking=accept-new'
       }
-      steps {
-        dir('bionic') { unstash 'bionic' }
-        sh '''
-            git_revision="$(git rev-parse --short=7 HEAD)"
+      stages {
+        stage('GitHub Release') {
+        steps {
+          unstash 'src'
+          unstash 'binary'
+          dir('bionic') { unstash 'bionic' }
+          dir('buster') { unstash 'buster' }
+          dir('arch')   { unstash 'arch'   }
+          dir('mojave') { unstash 'mojave' }
+          sshagent(['2b3d8d6b-0855-4b59-864a-6b3ddf9c9d1a']) {
+            sh '''
+              git remote add release 'ssh://github.com/kframework/k.git'
+              git tag "${K_RELEASE_TAG}" "${SHORT_REV}"
+              git push release "${K_RELEASE_TAG}"
+  
+              mv bionic/kframework_${VERSION}_amd64.deb bionic/kframework_${VERSION}_amd64_bionic.deb
+              mv buster/kframework_${VERSION}_amd64.deb buster/kframework_${VERSION}_amd64_buster.deb
+              LOCAL_BOTTLE_NAME=$(echo mojave/kframework--${VERSION}.mojave.bottle*.tar.gz)
+              BOTTLE_NAME=`cd mojave && echo kframework--${VERSION}.mojave.bottle*.tar.gz | sed 's!kframework--!kframework-!'`
+              mv $LOCAL_BOTTLE_NAME mojave/$BOTTLE_NAME
+              echo "K Framework Release ${K_RELEASE_TAG}"  > release.md
+              echo ""                                     >> release.md
+              cat k-distribution/INSTALL.md               >> release.md
+              hub release create                                                                         \
+                  --attach kframework-${VERSION}-src.tar.gz"#Source tar.gz"                              \
+                  --attach bionic/kframework_${VERSION}_amd64_bionic.deb"#Ubuntu Bionic (18.04) Package" \
+                  --attach buster/kframework_${VERSION}_amd64_buster.deb"#Debian Buster (10) Package"    \
+                  --attach arch/kframework-git-${VERSION}-1-x86_64.pkg.tar.xz"#Arch Package"             \
+                  --attach mojave/$BOTTLE_NAME"#Mac OS X Homebrew Bottle"                                \
+                  --attach k-nightly.tar.gz"#Platform Indepdendent K Binary"                             \
+                  --file release.md "${K_RELEASE_TAG}"
+            '''
+            }
+            dir('homebrew-k') {
+              git url: 'git@github.com:kframework/homebrew-k.git', branch: 'brew-release-kframework'
+              sshagent(['2b3d8d6b-0855-4b59-864a-6b3ddf9c9d1a']) {
+                sh '''
+                  git checkout master
+                  git merge brew-release-$PACKAGE
+                  git push origin master
+                  git push origin -d brew-release-$PACKAGE
+                '''
+              }
+            }
+          }
+        }
+        stage('DockerHub Images') {
+          steps {
+            dir('bionic') { unstash 'bionic' }
+            sh '''
+                git_revision="$(git rev-parse --short=7 HEAD)"
 
-            bionic_tag="runtimeverification/ubuntu/bionic/kframework/k:${git_revision}"
-            mv bionic/kframework_${VERSION}_amd64.deb kframework_amd64_bionic.deb
-            sudo docker image build . --file package/docker/Dockerfile.ubuntu-bionic --tag "${bionic_tag}"
-            sudo docker image push "${bionic_tag}"
-        '''
+                bionic_tag="runtimeverification/ubuntu/bionic/kframework/k:${git_revision}"
+                mv bionic/kframework_${VERSION}_amd64.deb kframework_amd64_bionic.deb
+                sudo docker image build . --file package/docker/Dockerfile.ubuntu-bionic --tag "${bionic_tag}"
+                sudo docker image push "${bionic_tag}"
+            '''
+          }
+        }
       }
     }
     stage('Update Submodules (release)') {
