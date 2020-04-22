@@ -16,7 +16,6 @@ pipeline {
     stage("Create source tarball") {
       agent {
         dockerfile {
-          filename 'Dockerfile.debian'
           additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=ubuntu:bionic'
           reuseNode true
         }
@@ -257,7 +256,6 @@ pipeline {
               when { branch 'master' }
               agent {
                 dockerfile {
-                  filename 'Dockerfile.debian'
                   additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=ubuntu:bionic'
                   reuseNode true
                 }
@@ -367,7 +365,6 @@ pipeline {
     stage('Deploy') {
       agent {
         dockerfile {
-          filename 'Dockerfile.debian'
           additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
           reuseNode true
         }
