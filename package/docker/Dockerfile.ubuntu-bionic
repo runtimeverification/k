@@ -1,6 +1,5 @@
 FROM ubuntu:bionic
 
-ARG K_VERSION
 ARG USER_ID=1000
 ARG GROUP_ID=1000
 
