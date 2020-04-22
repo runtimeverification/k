@@ -601,8 +601,8 @@ public class ModuleToKORE {
         // rule
         //   #Ceil(MapItem(K1, K2, ..., Kn) Rest:Map)
         // =>
-        //  {(@K1 in_keys(@Rest)) #Equals false} #And ... #And #Ceil(@Kn)
-        // Note: The {_ in_Keys(_) #Equals false} condition implies
+        //  {(@K1 in_keys(@Rest)) #Equals false} #And #Ceil(@K2) #And ... #And #Ceil(@Kn)
+        // Note: The {_ in_keys(_) #Equals false} condition implies
         // #Ceil(@K1) and #Ceil(@Rest).
         // [anywhere, simplification]
 
