@@ -371,6 +371,7 @@ pipeline {
       agent {
         dockerfile {
           additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
+          args '-v /var/run/docker.sock:/var/run/docker.sock'
           reuseNode true
         }
       }
