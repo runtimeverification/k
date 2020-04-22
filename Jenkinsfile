@@ -14,7 +14,7 @@ pipeline {
       when { changeRequest() }
       steps { script { currentBuild.displayName = "PR ${env.CHANGE_ID}: ${env.CHANGE_TITLE}" } }
     }
-    stage("Create source tarball") {
+    stage('Create source tarball') {
       agent {
         dockerfile {
           additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
@@ -312,7 +312,7 @@ pipeline {
                     }
                   }
                 }
-                stage("Test Homebrew Bottle") {
+                stage('Test Homebrew Bottle') {
                   agent { label 'anka' }
                   steps {
                     dir('homebrew-k') {
@@ -382,8 +382,8 @@ pipeline {
         GIT_SSH_COMMAND       = 'ssh -o StrictHostKeyChecking=accept-new'
       }
       steps {
-        unstash "src"
-        unstash "binary"
+        unstash 'src'
+        unstash 'binary'
         dir('bionic') { unstash 'bionic' }
         dir('buster') { unstash 'buster' }
         dir('arch')   { unstash 'arch'   }
