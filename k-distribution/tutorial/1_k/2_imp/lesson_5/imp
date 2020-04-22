@@ -2,4 +2,4 @@
 export PATH=$PATH:"$(dirname "$0")"/../../../../bin
 pgm=$1
 shift
-llvm-krun -d "$(dirname "$0")/imp-kompiled" -c PGM "$pgm" Pgm prettyfile -p "$@"
+llvm-krun -c PGM "$pgm" Pgm prettyfile -p "$@" -d "$(dirname "$0")/imp-kompiled"
