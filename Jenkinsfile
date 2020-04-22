@@ -412,8 +412,6 @@ pipeline {
           git url: 'git@github.com:kframework/homebrew-k.git', branch: 'brew-release-kframework'
           sshagent(['2b3d8d6b-0855-4b59-864a-6b3ddf9c9d1a']) {
             sh '''
-              git config --global user.email "admin@runtimeverification.com"
-              git config --global user.name  "RV Jenkins"
               git checkout master
               git merge brew-release-$PACKAGE
               git push origin master
