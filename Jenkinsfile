@@ -394,6 +394,10 @@ pipeline {
         dir('mojave') { unstash 'mojave' }
         sshagent(['2b3d8d6b-0855-4b59-864a-6b3ddf9c9d1a']) {
           sh '''
+            git remote add release 'ssh://github.com/kframework/k.git'
+            git tag "${K_RELEASE_TAG}" "${SHORT_REV}"
+            git push release "${K_RELEASE_TAG}"
+
             mv bionic/kframework_${VERSION}_amd64.deb bionic/kframework_${VERSION}_amd64_bionic.deb
             mv buster/kframework_${VERSION}_amd64.deb buster/kframework_${VERSION}_amd64_buster.deb
             LOCAL_BOTTLE_NAME=$(echo mojave/kframework--${VERSION}.mojave.bottle*.tar.gz)
