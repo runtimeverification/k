@@ -79,7 +79,7 @@ pipeline {
                 stage('Build on Ubuntu Bionic') {
                   agent {
                     dockerfile {
-                      filename 'Dockerfile.debian'
+                      filename 'package/debian/Dockerfile'
                       additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=ubuntu:bionic'
                       reuseNode true
                     }
@@ -150,7 +150,7 @@ pipeline {
                 stage('Build on Debian Buster') {
                   agent {
                     dockerfile {
-                      filename 'Dockerfile.debian'
+                      filename 'package/debian/Dockerfile'
                       additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=debian:buster --build-arg LLVM_VERSION=7'
                       reuseNode true
                     }
