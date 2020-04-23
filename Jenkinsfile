@@ -298,7 +298,7 @@ pipeline {
                         git config --global user.name  "RV Jenkins"
                         git remote add k-repo 'https://github.com/kframework/k.git'
                         git fetch --all
-                        brew_base_branch=$(git log -n1 --format=%s k-repo/master | sed -n 's/.*\[brew-staging: \(.*\)\].*/\1/p')
+                        brew_base_branch=$(git log -n1 --format=%s k-repo/master | sed -n 's!.*\[brew-staging: \(.*\)\].*!\1!p')
                         [ "$brew_base_branch" != '' ] || brew_base_branch=master
                         git show-ref --verify refs/remotes/origin/$brew_base_branch
                         git push -d origin brew-release-$PACKAGE || true
