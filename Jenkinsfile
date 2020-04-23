@@ -296,6 +296,8 @@ pipeline {
                       sh '''
                         git config --global user.email "admin@runtimeverification.com"
                         git config --global user.name  "RV Jenkins"
+                        ${WORKSPACE}/src/main/scripts/brew-update-to-local ${SHORT_REV}
+                        git commit Formula/$PACKAGE.rb -m "Update $PACKAGE to ${SHORT_REV}: part 1"
                         ${WORKSPACE}/src/main/scripts/brew-build-bottle ${SHORT_REV}
                         git commit Formula/$PACKAGE.rb -m "Update $PACKAGE to ${SHORT_REV}: part 2"
                         git push -d origin brew-release-$PACKAGE || true

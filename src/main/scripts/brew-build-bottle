@@ -1,7 +1,5 @@
 #!/bin/sh -exu
 REV=$1
-"$(dirname "$0")"/brew-update-to-local $REV
-git commit Formula/$PACKAGE.rb -m "Update $PACKAGE to $REV: part 1"
 brew tap kframework/k "file://$(pwd)"
 brew install $PACKAGE --build-bottle -v
 "$(dirname "$0")"/brew-update-to-local-bottle $REV
