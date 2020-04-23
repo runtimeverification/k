@@ -1,5 +1,3 @@
 #!/bin/sh -exu
-REV=$1
 brew tap kframework/k "file://$(pwd)"
 brew install $PACKAGE --build-bottle -v
-"$(dirname "$0")"/brew-update-to-local-bottle $REV
