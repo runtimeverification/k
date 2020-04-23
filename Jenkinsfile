@@ -295,7 +295,7 @@ pipeline {
                       sh '''
                         git config --global user.email "admin@runtimeverification.com"
                         git config --global user.name  "RV Jenkins"
-                        ${WORKSPACE}/src/main/scripts/brew-build-bottle
+                        ${WORKSPACE}/src/main/scripts/brew-build-bottle $(git rev-parse --short=7 HEAD)
                       '''
                       stash name: "mojave", includes: "kframework--${env.VERSION}.mojave.bottle*.tar.gz"
                     }
@@ -323,7 +323,7 @@ pipeline {
                       kompile test.k --backend llvm
                       kompile test.k --backend haskell
                     '''
-                    dir('homebrew-k') { sh '${WORKSPACE}/src/main/scripts/brew-update-to-final' }
+                    dir('homebrew-k') { sh '${WORKSPACE}/src/main/scripts/brew-update-to-final $(git rev-parse --short=7 HEAD)' }
                   }
                   post {
                     always {

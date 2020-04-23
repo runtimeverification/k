@@ -1,8 +1,9 @@
 #!/bin/sh -exu
-"$(dirname "$0")"/brew-update-to-local
+REV=$1
+"$(dirname "$0")"/brew-update-to-local $REV
 brew tap kframework/k "file://$(pwd)"
 brew install $PACKAGE --build-bottle -v
-"$(dirname "$0")"/brew-update-to-local-bottle
+"$(dirname "$0")"/brew-update-to-local-bottle $REV
 git push -d origin brew-release-$PACKAGE || true
 git checkout -b brew-release-$PACKAGE
 git push origin brew-release-$PACKAGE

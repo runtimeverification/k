@@ -1,5 +1,5 @@
 #!/bin/sh -exu
-REV=$(cd .. && git rev-parse --short=7 HEAD)
+REV=$1
 brew bottle --json $PACKAGE --root-url="$ROOT_URL/v$VERSION-$REV/"
 cat *.bottle.json
 brew bottle --merge --write --no-commit *.bottle.json
