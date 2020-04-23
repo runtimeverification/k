@@ -2,10 +2,10 @@ pipeline {
   agent { label 'docker' }
   options { ansiColor('xterm') }
   environment {
-    PACKAGE   = 'kframework'
-    VERSION   = '5.0.0'
-    ROOT_URL  = 'https://github.com/kframework/k/releases/download'
-    SHORT_REV = """${sh(returnStdout: true, script: 'git rev-parse --short=7 HEAD')}"""
+    PACKAGE         = 'kframework'
+    VERSION         = '5.0.0'
+    ROOT_URL        = 'https://github.com/kframework/k/releases/download'
+    SHORT_REV       = """${sh(returnStdout: true, script: 'git rev-parse --short=7 HEAD')}"""
     MAKE_EXTRA_ARGS = '' // Example: 'DEBUG=--debug' to see stack traces
   }
   stages {
