@@ -2,11 +2,12 @@ pipeline {
   agent { label 'docker' }
   options { ansiColor('xterm') }
   environment {
-    PACKAGE         = 'kframework'
-    VERSION         = '5.0.0'
-    ROOT_URL        = 'https://github.com/kframework/k/releases/download'
-    SHORT_REV       = """${sh(returnStdout: true, script: 'git rev-parse --short=7 HEAD')}"""
-    MAKE_EXTRA_ARGS = '' // Example: 'DEBUG=--debug' to see stack traces
+    PACKAGE             = 'kframework'
+    VERSION             = '5.0.0'
+    ROOT_URL            = 'https://github.com/kframework/k/releases/download'
+    SHORT_REV           = """${sh(returnStdout: true, script: 'git rev-parse --short=7 HEAD')}"""
+    MAKE_EXTRA_ARGS     = '' // Example: 'DEBUG=--debug' to see stack traces
+    BREW_STAGING_BRANCH = ''
   }
   stages {
     stage('Init title') {
@@ -297,7 +298,11 @@ pipeline {
                         git config --global user.email "admin@runtimeverification.com"
                         git config --global user.name  "RV Jenkins"
                         git push -d origin brew-release-$PACKAGE || true
-                        git checkout -b brew-release-$PACKAGE
+                        git fetch --all
+                        brew_branch='master'
+                        [ "$BREW_STAGING_BRANCH" = '' ] || brew_branch="$BREW_STAGING_BRANCH"
+                        git show-ref --verify refs/remotes/origin/$brew_branch
+                        git checkout -b brew-release-$PACKAGE "origin/$brew_branch"
                         ${WORKSPACE}/src/main/scripts/brew-update-to-local
                         git commit Formula/$PACKAGE.rb -m "Update $PACKAGE to ${SHORT_REV}: part 1"
                         ${WORKSPACE}/src/main/scripts/brew-build-and-update-to-local-bottle ${SHORT_REV}
