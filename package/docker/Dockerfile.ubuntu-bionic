@@ -6,9 +6,11 @@ ARG GROUP_ID=1000
 ENV TZ=America/Chicago
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-RUN    apt update             \
-    && apt upgrade --yes      \
-    && apt install --yes sudo
+RUN    apt update        \
+    && apt upgrade --yes \
+    && apt install --yes \
+                    git  \
+                    sudo
 
 RUN    git clone 'https://github.com/z3prover/z3' --branch=z3-4.8.6 \
     && cd z3                                                        \
