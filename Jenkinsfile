@@ -293,7 +293,7 @@ pipeline {
                     unstash 'src'
                     dir('homebrew-k') {
                       git url: 'git@github.com:kframework/homebrew-k.git'
-                      sh '''
+                      sh """
                         git config --global user.email "admin@runtimeverification.com"
                         git config --global user.name  "RV Jenkins"
                         git remote add k-repo 'https://github.com/kframework/k.git'
@@ -308,7 +308,7 @@ pipeline {
                         ${WORKSPACE}/src/main/scripts/brew-build-and-update-to-local-bottle ${SHORT_REV}
                         git commit Formula/$PACKAGE.rb -m "Update $PACKAGE to ${SHORT_REV}: part 2"
                         git push origin brew-release-$PACKAGE
-                      '''
+                      """
                       stash name: "mojave", includes: "kframework--${env.VERSION}.mojave.bottle*.tar.gz"
                     }
                   }
