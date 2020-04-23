@@ -298,8 +298,7 @@ pipeline {
                         git config --global user.name  "RV Jenkins"
                         ${WORKSPACE}/src/main/scripts/brew-update-to-local
                         git commit Formula/$PACKAGE.rb -m "Update $PACKAGE to ${SHORT_REV}: part 1"
-                        ${WORKSPACE}/src/main/scripts/brew-build-bottle
-                        ${WORKSPACE}/src/main/scripts/brew-update-to-local-bottle ${SHORT_REV}
+                        ${WORKSPACE}/src/main/scripts/brew-build-and-update-to-local-bottle ${SHORT_REV}
                         git commit Formula/$PACKAGE.rb -m "Update $PACKAGE to ${SHORT_REV}: part 2"
                         git push -d origin brew-release-$PACKAGE || true
                         git checkout -b brew-release-$PACKAGE

@@ -1,5 +1,7 @@
 #!/bin/sh -exu
 REV=$1
+brew tap kframework/k "file://$(pwd)"
+brew install $PACKAGE --build-bottle -v
 brew bottle --json $PACKAGE --root-url="$ROOT_URL/v$VERSION-$REV/"
 cat *.bottle.json
 brew bottle --merge --write --no-commit *.bottle.json
