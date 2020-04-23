@@ -436,10 +436,12 @@ pipeline {
           }
         }
         stage('DockerHub Images') {
+          environment { DOCKERHUB_TOKEN = credentials('rvdockerhub') }
           steps {
             dir('bionic') { unstash 'bionic' }
             sh '''
                 git_revision="$(git rev-parse --short=7 HEAD)"
+                docker login --username rvdockerhub --password "${DOCKERHUB_TOKEN}"
 
                 bionic_tag="runtimeverification/ubuntu/bionic/kframework/k:${git_revision}"
                 mv bionic/kframework_${VERSION}_amd64.deb kframework_amd64_bionic.deb
