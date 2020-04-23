@@ -2,9 +2,10 @@ pipeline {
   agent { label 'docker' }
   options { ansiColor('xterm') }
   environment {
-    PACKAGE  = 'kframework'
-    VERSION  = '5.0.0'
-    ROOT_URL = 'https://github.com/kframework/k/releases/download'
+    PACKAGE         = 'kframework'
+    VERSION         = '5.0.0'
+    ROOT_URL        = 'https://github.com/kframework/k/releases/download'
+    SHORT_REV       = """${sh(returnStdout: true, script: 'git rev-parse --short=7 HEAD').trim()}"""
     MAKE_EXTRA_ARGS = '' // Example: 'DEBUG=--debug' to see stack traces
   }
   stages {
@@ -295,7 +296,19 @@ pipeline {
                       sh '''
                         git config --global user.email "admin@runtimeverification.com"
                         git config --global user.name  "RV Jenkins"
-                        ${WORKSPACE}/src/main/scripts/brew-build-bottle
+                        git remote add k-repo 'https://github.com/kframework/k.git'
+                        git fetch --all
+                        # Note: double-backslash in sed-command is for Jenkins benefit.
+                        brew_base_branch=$(git log -n1 --format=%s k-repo/master | sed -n 's!.*\\[brew-staging: \\(.*\\)\\].*!\\1!p')
+                        [ "$brew_base_branch" != '' ] || brew_base_branch=master
+                        git show-ref --verify refs/remotes/origin/$brew_base_branch
+                        git push -d origin brew-release-$PACKAGE || true
+                        git checkout -b brew-release-$PACKAGE "origin/$brew_base_branch"
+                        ${WORKSPACE}/src/main/scripts/brew-update-to-local
+                        git commit Formula/$PACKAGE.rb -m "Update $PACKAGE to ${SHORT_REV}: part 1"
+                        ${WORKSPACE}/src/main/scripts/brew-build-and-update-to-local-bottle ${SHORT_REV}
+                        git commit Formula/$PACKAGE.rb -m "Update $PACKAGE to ${SHORT_REV}: part 2"
+                        git push origin brew-release-$PACKAGE
                       '''
                       stash name: "mojave", includes: "kframework--${env.VERSION}.mojave.bottle*.tar.gz"
                     }
@@ -323,7 +336,13 @@ pipeline {
                       kompile test.k --backend llvm
                       kompile test.k --backend haskell
                     '''
-                    dir('homebrew-k') { sh '${WORKSPACE}/src/main/scripts/brew-update-to-final' }
+                    dir('homebrew-k') {
+                      sh '''
+                        ${WORKSPACE}/src/main/scripts/brew-update-to-final ${SHORT_REV}
+                        git commit Formula/$PACKAGE.rb -m "Update $PACKAGE to ${SHORT_REV}: part 3"
+                        git push origin brew-release-$PACKAGE
+                      '''
+                    }
                   }
                   post {
                     always {
@@ -374,7 +393,7 @@ pipeline {
         dir('mojave') { unstash 'mojave' }
         sshagent(['2b3d8d6b-0855-4b59-864a-6b3ddf9c9d1a']) {
           sh '''
-            release_tag="v${VERSION}-$(git rev-parse --short=7 HEAD)"
+            release_tag="v${VERSION}-${SHORT_REV}"
             mv bionic/kframework_${VERSION}_amd64.deb bionic/kframework_${VERSION}_amd64_bionic.deb
             mv buster/kframework_${VERSION}_amd64.deb buster/kframework_${VERSION}_amd64_buster.deb
             LOCAL_BOTTLE_NAME=$(echo mojave/kframework--${VERSION}.mojave.bottle*.tar.gz)
