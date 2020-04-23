@@ -296,12 +296,12 @@ pipeline {
                       sh '''
                         git config --global user.email "admin@runtimeverification.com"
                         git config --global user.name  "RV Jenkins"
+                        git push -d origin brew-release-$PACKAGE || true
+                        git checkout -b brew-release-$PACKAGE
                         ${WORKSPACE}/src/main/scripts/brew-update-to-local
                         git commit Formula/$PACKAGE.rb -m "Update $PACKAGE to ${SHORT_REV}: part 1"
                         ${WORKSPACE}/src/main/scripts/brew-build-and-update-to-local-bottle ${SHORT_REV}
                         git commit Formula/$PACKAGE.rb -m "Update $PACKAGE to ${SHORT_REV}: part 2"
-                        git push -d origin brew-release-$PACKAGE || true
-                        git checkout -b brew-release-$PACKAGE
                         git push origin brew-release-$PACKAGE
                       '''
                       stash name: "mojave", includes: "kframework--${env.VERSION}.mojave.bottle*.tar.gz"
