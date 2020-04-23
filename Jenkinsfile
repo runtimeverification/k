@@ -5,7 +5,7 @@ pipeline {
     PACKAGE         = 'kframework'
     VERSION         = '5.0.0'
     ROOT_URL        = 'https://github.com/kframework/k/releases/download'
-    SHORT_REV       = """${sh(returnStdout: true, script: 'git rev-parse --short=7 HEAD')}"""
+    SHORT_REV       = """${sh(returnStdout: true, script: 'git rev-parse --short=7 HEAD').trim()}"""
     MAKE_EXTRA_ARGS = '' // Example: 'DEBUG=--debug' to see stack traces
   }
   stages {
