@@ -3,4 +3,3 @@ REV=$1
 sed -i "" -e '/install-rust/d' -e 's!^  url ".*"$!  url "file:///'$(pwd)/../$PACKAGE-$VERSION'-src.tar.gz"!' \
        -e 's!^  sha256 ".*"$!  sha256 "'$(shasum -a 256 ../$PACKAGE-$VERSION-src.tar.gz | awk '{print $1}')'"!' \
     Formula/$PACKAGE.rb
-git commit Formula/$PACKAGE.rb -m "Update $PACKAGE to $REV: part 1"
