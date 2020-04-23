@@ -444,9 +444,10 @@ pipeline {
                 sudo docker login --username ehildenb --password "${DOCKERHUB_TOKEN}"
 
                 bionic_tag="ubuntu-bionic-${git_revision}"
+                bionic_image_id="runtimeverificationinc/kframework-k:${bionic_tag}"
                 mv bionic/kframework_${VERSION}_amd64.deb kframework_amd64_bionic.deb
-                sudo docker image build . --file package/docker/Dockerfile.ubuntu-bionic --tag "${bionic_tag}"
-                sudo docker image push "runtimeverificationinc/kframework-k:${bionic_tag}"
+                sudo docker image build . --file package/docker/Dockerfile.ubuntu-bionic --tag "${bionic_image_id}"
+                sudo docker image push "${bionic_image_id}"
             '''
           }
         }
