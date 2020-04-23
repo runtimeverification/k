@@ -443,7 +443,7 @@ pipeline {
                 git_revision="$(git rev-parse --short=7 HEAD)"
                 sudo docker login --username ehildenb --password "${DOCKERHUB_TOKEN}"
 
-                bionic_tag="runtimeverification/ubuntu/bionic/kframework/k:${git_revision}"
+                bionic_tag="runtimeverificationinc/ubuntu/bionic/kframework/k:${git_revision}"
                 mv bionic/kframework_${VERSION}_amd64.deb kframework_amd64_bionic.deb
                 sudo docker image build . --file package/docker/Dockerfile.ubuntu-bionic --tag "${bionic_tag}"
                 sudo docker image push "${bionic_tag}"
