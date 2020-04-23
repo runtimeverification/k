@@ -296,6 +296,11 @@ pipeline {
                         git config --global user.email "admin@runtimeverification.com"
                         git config --global user.name  "RV Jenkins"
                         ${WORKSPACE}/src/main/scripts/brew-build-bottle $(git rev-parse --short=7 HEAD)
+                        REV=$(git rev-parse --short=7 HEAD)
+                        git commit Formula/$PACKAGE.rb -m "Update $PACKAGE to $REV: part 2"
+                        git push -d origin brew-release-$PACKAGE || true
+                        git checkout -b brew-release-$PACKAGE
+                        git push origin brew-release-$PACKAGE
                       '''
                       stash name: "mojave", includes: "kframework--${env.VERSION}.mojave.bottle*.tar.gz"
                     }
@@ -323,7 +328,14 @@ pipeline {
                       kompile test.k --backend llvm
                       kompile test.k --backend haskell
                     '''
-                    dir('homebrew-k') { sh '${WORKSPACE}/src/main/scripts/brew-update-to-final $(git rev-parse --short=7 HEAD)' }
+                    dir('homebrew-k') {
+                      sh '''
+                        ${WORKSPACE}/src/main/scripts/brew-update-to-final $(git rev-parse --short=7 HEAD)
+                        REV=$(git rev-parse --short=7 HEAD)
+                        git commit Formula/$PACKAGE.rb -m "Update $PACKAGE to $REV: part 3"
+                        git push origin brew-release-$PACKAGE
+                      '''
+                    }
                   }
                   post {
                     always {
