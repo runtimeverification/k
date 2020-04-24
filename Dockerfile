@@ -34,7 +34,7 @@ ARG GROUP_ID=1000
 RUN    groupadd -g $GROUP_ID user                     \
     && useradd -m -u $USER_ID -s /bin/sh -g user user
 
-USER $USER_ID:$GROUP_ID
+USER user:user
 
 ADD k-distribution/src/main/scripts/bin/k-configure-opam-dev k-distribution/src/main/scripts/bin/k-configure-opam-common /home/user/.tmp-opam/bin/
 ADD k-distribution/src/main/scripts/lib/opam                                                                             /home/user/.tmp-opam/lib/opam/
