@@ -36,6 +36,18 @@ RUN    groupadd -g $GROUP_ID user                     \
 
 USER user:user
 
+ENV LD_LIBRARY_PATH=/usr/local/lib
+ENV PATH=/home/user/hub-linux-amd64-2.14.0/bin:$PATH
+
+RUN mkdir -p /home/user/.ssh
+ADD --chown=user:user package/ssh/config /home/user/.ssh/
+RUN    chmod go-rwx -R /home/user/.ssh                                \
+    && git config --global user.email "admin@runtimeverification.com" \
+    && git config --global user.name  "RV Jenkins"
+
+RUN curl -L https://github.com/github/hub/releases/download/v2.14.0/hub-linux-amd64-2.14.0.tgz -o /home/user/hub.tgz
+RUN cd /home/user && tar xzf hub.tgz
+
 ADD k-distribution/src/main/scripts/bin/k-configure-opam-dev k-distribution/src/main/scripts/bin/k-configure-opam-common /home/user/.tmp-opam/bin/
 ADD k-distribution/src/main/scripts/lib/opam                                                                             /home/user/.tmp-opam/lib/opam/
 RUN    cd /home/user                        \
@@ -59,15 +71,3 @@ ADD k-distribution/pom.xml                                     /home/user/.tmp-m
 ADD kore/pom.xml                                               /home/user/.tmp-maven/kore/
 RUN    cd /home/user/.tmp-maven               \
     && mvn --batch-mode dependency:go-offline
-
-RUN curl -L https://github.com/github/hub/releases/download/v2.14.0/hub-linux-amd64-2.14.0.tgz -o /home/user/hub.tgz
-RUN cd /home/user && tar xzf hub.tgz
-
-ENV LD_LIBRARY_PATH=/usr/local/lib
-ENV PATH=/home/user/hub-linux-amd64-2.14.0/bin:$PATH
-
-RUN mkdir -p /home/user/.ssh
-ADD --chown=user:user package/ssh/config /home/user/.ssh/
-RUN    chmod go-rwx -R /home/user/.ssh                                \
-    && git config --global user.email "admin@runtimeverification.com" \
-    && git config --global user.name  "RV Jenkins"
