@@ -204,7 +204,7 @@ pipeline {
                 stage('Build on Arch Linux') {
                   agent {
                     dockerfile {
-                      filename 'Dockerfile.arch'
+                      filename 'package/arch/Dockerfile'
                       additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
                       reuseNode true
                     }
