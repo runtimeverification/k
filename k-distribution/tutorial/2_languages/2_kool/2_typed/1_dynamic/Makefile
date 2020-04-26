@@ -4,6 +4,7 @@ EXT=kool
 KRUN_FLAGS=--output none
 TESTDIR?=../programs
 RESULTDIR=tests
+KOMPILE_BACKEND=haskell
 
 %/cycle.kool: kompile
 	true
