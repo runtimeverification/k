@@ -6,6 +6,7 @@ pipeline {
     VERSION         = '5.0.0'
     ROOT_URL        = 'https://github.com/kframework/k/releases/download'
     SHORT_REV       = """${sh(returnStdout: true, script: 'git rev-parse --short=7 HEAD').trim()}"""
+    K_RELEASE_TAGE  = "v${VERSION}-${SHORT_REV}"
     MAKE_EXTRA_ARGS = '' // Example: 'DEBUG=--debug' to see stack traces
   }
   stages {
@@ -393,15 +394,14 @@ pipeline {
         dir('mojave') { unstash 'mojave' }
         sshagent(['2b3d8d6b-0855-4b59-864a-6b3ddf9c9d1a']) {
           sh '''
-            release_tag="v${VERSION}-${SHORT_REV}"
             mv bionic/kframework_${VERSION}_amd64.deb bionic/kframework_${VERSION}_amd64_bionic.deb
             mv buster/kframework_${VERSION}_amd64.deb buster/kframework_${VERSION}_amd64_buster.deb
             LOCAL_BOTTLE_NAME=$(echo mojave/kframework--${VERSION}.mojave.bottle*.tar.gz)
             BOTTLE_NAME=`cd mojave && echo kframework--${VERSION}.mojave.bottle*.tar.gz | sed 's!kframework--!kframework-!'`
             mv $LOCAL_BOTTLE_NAME mojave/$BOTTLE_NAME
-            echo "K Framework Release $release_tag"  > release.md
-            echo ""                                 >> release.md
-            cat k-distribution/INSTALL.md           >> release.md
+            echo "K Framework Release $K_RELEASE_TAG"  > release.md
+            echo ""                                   >> release.md
+            cat k-distribution/INSTALL.md             >> release.md
             hub release create                                                                         \
                 --attach kframework-${VERSION}-src.tar.gz"#Source tar.gz"                              \
                 --attach bionic/kframework_${VERSION}_amd64_bionic.deb"#Ubuntu Bionic (18.04) Package" \
@@ -409,7 +409,7 @@ pipeline {
                 --attach arch/kframework-git-${VERSION}-1-x86_64.pkg.tar.xz"#Arch Package"             \
                 --attach mojave/$BOTTLE_NAME"#Mac OS X Homebrew Bottle"                                \
                 --attach k-nightly.tar.gz"#Platform Indepdendent K Binary"                             \
-                --file release.md "${release_tag}"
+                --file release.md "${K_RELEASE_TAG}"
           '''
         }
         dir("homebrew-k") {
@@ -443,11 +443,12 @@ pipeline {
                           , string(name: 'UPDATE_DEPS_REPOSITORY', value: 'kframework/evm-semantics') \
                           , string(name: 'UPDATE_DEPS_SUBMODULE_DIR', value: 'deps/k')                \
                           ]
-        build job: 'rv-devops/master', propagate: false, wait: false                          \
-            , parameters: [ booleanParam(name: 'UPDATE_DEPS_RELEASE_URL', value: true)        \
-                          , string(name: 'PR_REVIEWER', value: 'ttuegel')                     \
-                          , string(name: 'UPDATE_DEPS_REPOSITORY', value: 'kframework/kore')  \
-                          , string(name: 'UPDATE_DEPS_RELEASE_FILE', value: 'deps/k_release') \
+        build job: 'rv-devops/master', propagate: false, wait: false                                    \
+            , parameters: [ booleanParam(name: 'UPDATE_DEPS_RELEASE_TAG', value: true)                  \
+                          , string(name: 'PR_REVIEWER', value: 'ttuegel')                               \
+                          , string(name: 'UPDATE_DEPS_REPOSITORY', value: 'kframework/kore')            \
+                          , string(name: 'UPDATE_DEPS_RELEASE_FILE', value: 'deps/k_release')           \
+                          , string(name: 'UPDATE_DEPS_RELEASE_TAG_SPEC', value: "${env.K_RELEASE_TAG}") \
                           ]
       }
     }
