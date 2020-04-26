@@ -177,7 +177,8 @@ the expected type. */
 
   configuration <T color="red">
                   <threads color="orange">
-                    <thread multiplicity="*" type="Set" color="yellow">
+                    <thread multiplicity="*" type="Map" color="yellow">
+                      <id color="pink"> 0 </id>
                       <k color="green"> ($PGM:Stmts ~> execute) </k>
                     //<br/> // TODO(KORE): support latex annotations #1799
                       <control color="cyan">
@@ -194,7 +195,6 @@ the expected type. */
                     //<br/> // TODO(KORE): support latex annotations #1799
                       <env color="violet"> .Map </env>
                       <holds color="black"> .Map </holds>
-                      <id color="pink"> 0 </id>
                     </thread>
                   </threads>
                 //<br/> // TODO(KORE): support latex annotations #1799
