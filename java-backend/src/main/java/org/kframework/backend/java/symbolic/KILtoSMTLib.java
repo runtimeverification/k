@@ -39,6 +39,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.Stack;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 public class    KILtoSMTLib extends CopyOnWriteTransformer {
@@ -511,6 +513,17 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
         return variable.longName();
     }
 
+    private boolean recordBinders(String smtlib, KList args) {
+        // if `smtlib` is in the form of `(forall|exists ((#N <sort>)) <term>)`, put `args[N-1]` in `binders`.
+        boolean hasBinder = false;
+        Matcher matcher = Pattern.compile("^\\((forall|exists) \\(\\(#([0-9]+) [^)]+\\)\\)").matcher(smtlib);
+        if (matcher.find()) {
+            hasBinder = true;
+            binders.push(args.get(Integer.parseInt(matcher.group(2)) - 1));
+        }
+        return hasBinder;
+    }
+
     @Override
     public SMTLibTerm transform(KItem kItem) {
         if (!(kItem.kLabel() instanceof KLabelConstant)) {
@@ -572,16 +585,14 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
         }
 
         if (label.startsWith("(")) {
-            if (label.startsWith("(forall")) {
-                binders.push(kList.get(0));
-            }
             // smtlib expression instead of operator
             String expression = label;
+            boolean hasBinder = recordBinders(label, kList);
             for (int i = 0; i < kList.getContents().size(); i++) {
                 expression = expression.replaceAll("#" + (i + 1) + "(?![0-9])",
                         translate(kList.get(i)).expression().toString());
             }
-            if (label.startsWith("(forall")) {
+            if (hasBinder) {
                 binders.pop();
             }
             return new SMTLibTerm(expression);
