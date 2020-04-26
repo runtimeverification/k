@@ -253,7 +253,8 @@ KOOL).  */
   context _:Type _::Exp[HOLE::Exps];
 
 
-  syntax Id ::= "$1" | "$2"
+  syntax Id ::= "$1" [token]
+              | "$2" [token]
   rule T:Type X:Id[N1:Int, N2:Int, Vs:Vals];
     => T[]<Vs> X[N1];
        {
