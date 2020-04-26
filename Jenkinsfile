@@ -6,7 +6,7 @@ pipeline {
     VERSION         = '5.0.0'
     ROOT_URL        = 'https://github.com/kframework/k/releases/download'
     SHORT_REV       = """${sh(returnStdout: true, script: 'git rev-parse --short=7 HEAD').trim()}"""
-    K_RELEASE_TAGE  = "v${VERSION}-${SHORT_REV}"
+    K_RELEASE_TAG   = "v${VERSION}-${SHORT_REV}"
     MAKE_EXTRA_ARGS = '' // Example: 'DEBUG=--debug' to see stack traces
   }
   stages {
@@ -403,9 +403,9 @@ pipeline {
             LOCAL_BOTTLE_NAME=$(echo mojave/kframework--${VERSION}.mojave.bottle*.tar.gz)
             BOTTLE_NAME=`cd mojave && echo kframework--${VERSION}.mojave.bottle*.tar.gz | sed 's!kframework--!kframework-!'`
             mv $LOCAL_BOTTLE_NAME mojave/$BOTTLE_NAME
-            echo "K Framework Release $K_RELEASE_TAG"  > release.md
-            echo ""                                   >> release.md
-            cat k-distribution/INSTALL.md             >> release.md
+            echo "K Framework Release ${K_RELEASE_TAG}"  > release.md
+            echo ""                                     >> release.md
+            cat k-distribution/INSTALL.md               >> release.md
             hub release create                                                                         \
                 --attach kframework-${VERSION}-src.tar.gz"#Source tar.gz"                              \
                 --attach bionic/kframework_${VERSION}_amd64_bionic.deb"#Ubuntu Bionic (18.04) Package" \
