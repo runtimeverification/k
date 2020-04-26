@@ -201,8 +201,8 @@ the expected type. */
                   <store color="white"> .Map </store>
                   <busy color="cyan">.Set </busy>
                   <terminated color="red"> .Set </terminated>
-                  <input color="magenta" stream="stdin"> .List </input>
-                  <output color="brown" stream="stdout"> .List </output>
+                  <input color="magenta" /* stream="stdin" */> .List </input> // Disable for Haskell backend
+                  <output color="brown"  /* stream="stdout" */> .List </output>
                   <nextLoc color="gray"> 0 </nextLoc>
                 //<br/> // TODO(KORE): support latex annotations #1799
                   <classes color="Fuchsia">        // KOOL
