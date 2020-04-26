@@ -23,7 +23,10 @@ the discussion in the preamble of the static semantics of typed KOOL
 before proceeding. */
 
 module KOOL-TYPED-DYNAMIC-SYNTAX
-  imports DOMAINS-SYNTAX
+  imports ID-SYNTAX
+  imports BOOL-SYNTAX
+  imports INT-SYNTAX
+  imports STRING-SYNTAX
 
 /*@ \section{Syntax}
 
@@ -147,8 +150,12 @@ whose semantics had to change, and finally the semantics of the
 KOOL-specific constructs.  */
 
 module KOOL-TYPED-DYNAMIC
+  imports BOOL
+  imports INT
+  imports MAP
+  imports STRING
+
   imports KOOL-TYPED-DYNAMIC-SYNTAX
-  imports DOMAINS
 
 /*@ \subsection{Configuration}
 The configuration of dynamically typed KOOL is almost identical to
