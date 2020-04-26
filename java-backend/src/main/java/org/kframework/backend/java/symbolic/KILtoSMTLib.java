@@ -38,6 +38,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Stack;
 
 
 public class    KILtoSMTLib extends CopyOnWriteTransformer {
@@ -243,6 +244,7 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
     private final LinkedHashSet<Variable> variables;
     private final LinkedHashMap<Term, Variable> termAbstractionMap;
     private final LinkedHashMap<UninterpretedToken, Integer> tokenEncoding;
+    private final Stack<Term> binders;
 
     private KILtoSMTLib(boolean allowNewVars, GlobalContext global) {
         this(allowNewVars, global.getDefinition(), global.krunOptions, global, new LinkedHashMap<>());
@@ -267,6 +269,7 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
         this.termAbstractionMap = termAbstractionMap;
         variables = new LinkedHashSet<>();
         tokenEncoding = new LinkedHashMap<>();
+        binders = new Stack<>();
     }
 
     private SMTLibTerm translate(JavaSymbolicObject object) {
@@ -569,11 +572,17 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
         }
 
         if (label.startsWith("(")) {
+            if (label.startsWith("(forall")) {
+                binders.push(kList.get(0));
+            }
             // smtlib expression instead of operator
             String expression = label;
             for (int i = 0; i < kList.getContents().size(); i++) {
                 expression = expression.replaceAll("#" + (i + 1) + "(?![0-9])",
                         translate(kList.get(i)).expression().toString());
+            }
+            if (label.startsWith("(forall")) {
+                binders.pop();
             }
             return new SMTLibTerm(expression);
         }
@@ -656,6 +665,13 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
 
     @Override
     public SMTLibTerm transform(UninterpretedToken uninterpretedToken) {
+        if (uninterpretedToken.sort() == Sort.KVARIABLE) {
+            if (binders.search(uninterpretedToken) != -1) {
+                return new SMTLibTerm(uninterpretedToken.javaBackendValue());
+            } else {
+                throw new SMTTranslationFailure("unbounded K variable: " + uninterpretedToken);
+            }
+        }
         if (tokenEncoding.get(uninterpretedToken) == null) {
             tokenEncoding.put(uninterpretedToken, tokenEncoding.size());
         }
