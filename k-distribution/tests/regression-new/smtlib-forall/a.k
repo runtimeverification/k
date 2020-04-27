@@ -16,6 +16,10 @@ syntax Bool ::= Int "inI" IntList [function, smtlib(inI)]
 syntax KItem ::= foo(IntList)
 rule foo(L) => 0
 
+syntax KItem ::= bar(IntList, IntList)
+rule bar(L1, L2) => 0
+
 syntax KVar ::= "x" [token]
+              | "y" [token]
 
 endmodule
