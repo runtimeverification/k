@@ -17,8 +17,7 @@ pipeline {
     stage("Create source tarball") {
       agent {
         dockerfile {
-          filename 'Dockerfile.debian'
-          additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=ubuntu:bionic'
+          additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
           reuseNode true
         }
       }
@@ -80,14 +79,13 @@ pipeline {
                 stage('Build on Ubuntu Bionic') {
                   agent {
                     dockerfile {
-                      filename 'Dockerfile.debian'
+                      filename 'package/debian/Dockerfile'
                       additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=ubuntu:bionic'
                       reuseNode true
                     }
                   }
                   stages {
-                    stage('Checkout code') { steps { dir('k-exercises') { git url: 'git@github.com:kframework/k-exercises.git' } }
-                    }
+                    stage('Checkout code') { steps { dir('k-exercises') { git url: 'git@github.com:kframework/k-exercises.git' } } }
                     stage('Build and Test K') {
                       options { timeout(time: 45, unit: 'MINUTES') }
                       steps {
@@ -152,7 +150,7 @@ pipeline {
                 stage('Build on Debian Buster') {
                   agent {
                     dockerfile {
-                      filename 'Dockerfile.debian'
+                      filename 'package/debian/Dockerfile'
                       additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=debian:buster --build-arg LLVM_VERSION=7'
                       reuseNode true
                     }
@@ -207,7 +205,7 @@ pipeline {
                 stage('Build on Arch Linux') {
                   agent {
                     dockerfile {
-                      filename 'Dockerfile.arch'
+                      filename 'package/arch/Dockerfile'
                       additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
                       reuseNode true
                     }
@@ -259,8 +257,7 @@ pipeline {
               when { branch 'master' }
               agent {
                 dockerfile {
-                  filename 'Dockerfile.debian'
-                  additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=ubuntu:bionic'
+                  additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
                   reuseNode true
                 }
               }
@@ -369,7 +366,6 @@ pipeline {
     stage('Deploy') {
       agent {
         dockerfile {
-          filename 'Dockerfile.arch'
           additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
           reuseNode true
         }
@@ -420,8 +416,6 @@ pipeline {
           git url: 'git@github.com:kframework/homebrew-k.git', branch: 'brew-release-kframework'
           sshagent(['2b3d8d6b-0855-4b59-864a-6b3ddf9c9d1a']) {
             sh '''
-              git config --global user.email "admin@runtimeverification.com"
-              git config --global user.name  "RV Jenkins"
               git checkout master
               git merge brew-release-$PACKAGE
               git push origin master
