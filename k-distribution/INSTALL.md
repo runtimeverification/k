@@ -56,6 +56,8 @@ Docker images with K pre-installed are available at the
 
 Each release at `COMMIT_ID` has an image associated with it at
 `runtimeverificationinc/kframework-k:ubuntu-bionic-COMMIT_ID`.
+The latest `master` build Docker image can be accessed with `COMMIT_ID` set to
+`master`.
 
 To run the image directly:
 
@@ -63,7 +65,8 @@ To run the image directly:
 docker run -it runtimeverificationinc/kframework-k:ubuntu-bionic-COMMIT_ID
 ```
 
-and to make a Docker Image based on it, use the following line in your `Dockerfile`:
+and to make a Docker Image based on it, use the following line in your
+`Dockerfile`:
 
 ```Dockerfile
 FROM runtimeverificationinc/kframework-k:ubuntu-bionic-COMMIT_ID
