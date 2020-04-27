@@ -7,6 +7,7 @@ We currently strive to provide packages for the following platforms:
 -   Debian Buster
 -   Arch Linux
 -   MacOS X Mojave
+-   Docker Images
 -   Platform Independent K Binary
 
 **NOTE**: We do not currently support running K on native Windows. To use K on
@@ -46,6 +47,26 @@ Tap the `kframework/k` bottle then install (with build number `BN`):
 ```sh
 brew tap kframework/k "file:///$(pwd)"
 brew install kframework--X.Y.Z.ID.bottle.BN.tar.gz -v
+```
+
+### Docker Images
+
+Docker images with K pre-installed are available at the
+[runtimeverification/kframework-k Docker Hub repository](https://hub.docker.com/repository/docker/runtimeverificationinc/kframework-k).
+
+Each release at `COMMIT_ID` has an image associated with it at
+`runtimeverificationinc/kframework-k:ubuntu-bionic-COMMIT_ID`.
+
+To run the image directly:
+
+```sh
+docker run -it runtimeverificationinc/kframework-k:ubuntu-bionic-COMMIT_ID
+```
+
+and to make a Docker Image based on it, use the following line in your `Dockerfile`:
+
+```Dockerfile
+FROM runtimeverificationinc/kframework-k:ubuntu-bionic-COMMIT_ID
 ```
 
 ### Platform Independent K Binary
