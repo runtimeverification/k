@@ -246,7 +246,7 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
     private final LinkedHashSet<Variable> variables;
     private final LinkedHashMap<Term, Variable> termAbstractionMap;
     private final LinkedHashMap<UninterpretedToken, Integer> tokenEncoding;
-    private final Stack<Term> binders;
+    private final Stack<Term> smtlibForallOrExistsBinders;
 
     private KILtoSMTLib(boolean allowNewVars, GlobalContext global) {
         this(allowNewVars, global.getDefinition(), global.krunOptions, global, new LinkedHashMap<>());
@@ -271,7 +271,7 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
         this.termAbstractionMap = termAbstractionMap;
         variables = new LinkedHashSet<>();
         tokenEncoding = new LinkedHashMap<>();
-        binders = new Stack<>();
+        smtlibForallOrExistsBinders = new Stack<>();
     }
 
     private SMTLibTerm translate(JavaSymbolicObject object) {
@@ -514,12 +514,14 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
     }
 
     private boolean recordBinders(String smtlib, KList args) {
-        // if `smtlib` is in the form of `(forall|exists ((#N <sort>)) <term>)`, put `args[N-1]` in `binders`.
+        // if `smtlib` is in the form of `(forall|exists ((#N <sort>)) <term>)`, put `args[N-1]` in `smtlibForallOrExistsBinders`.
         boolean hasBinder = false;
         Matcher matcher = Pattern.compile("^\\((forall|exists) \\(\\(#([0-9]+) [^)]+\\)\\)").matcher(smtlib);
         if (matcher.find()) {
             hasBinder = true;
-            binders.push(args.get(Integer.parseInt(matcher.group(2)) - 1));
+            smtlibForallOrExistsBinders.push(args.get(Integer.parseInt(matcher.group(2)) - 1));
+            globalContext.kem.registerInternalWarning("The experimental SMTLIB translation of user-defined quantifiers has been used to generate SMT queries." +
+                    " Please double-check the generated SMT queries by providing the --debug-z3-queries option.");
         }
         return hasBinder;
     }
@@ -593,7 +595,7 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
                         translate(kList.get(i)).expression().toString());
             }
             if (hasBinder) {
-                binders.pop();
+                smtlibForallOrExistsBinders.pop();
             }
             return new SMTLibTerm(expression);
         }
@@ -677,7 +679,7 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
     @Override
     public SMTLibTerm transform(UninterpretedToken uninterpretedToken) {
         if (uninterpretedToken.sort() == Sort.KVARIABLE) {
-            if (binders.search(uninterpretedToken) != -1) {
+            if (smtlibForallOrExistsBinders.contains(uninterpretedToken)) {
                 return new SMTLibTerm(uninterpretedToken.javaBackendValue());
             } else {
                 throw new SMTTranslationFailure("unbounded K variable: " + uninterpretedToken);
