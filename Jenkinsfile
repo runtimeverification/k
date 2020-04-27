@@ -6,6 +6,7 @@ pipeline {
     VERSION         = '5.0.0'
     ROOT_URL        = 'https://github.com/kframework/k/releases/download'
     SHORT_REV       = """${sh(returnStdout: true, script: 'git rev-parse --short=7 HEAD').trim()}"""
+    K_RELEASE_TAG   = "v${env.VERSION}-${env.SHORT_REV}"
     MAKE_EXTRA_ARGS = '' // Example: 'DEBUG=--debug' to see stack traces
   }
   stages {
@@ -16,8 +17,7 @@ pipeline {
     stage("Create source tarball") {
       agent {
         dockerfile {
-          filename 'Dockerfile.debian'
-          additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=ubuntu:bionic'
+          additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
           reuseNode true
         }
       }
@@ -79,14 +79,13 @@ pipeline {
                 stage('Build on Ubuntu Bionic') {
                   agent {
                     dockerfile {
-                      filename 'Dockerfile.debian'
+                      filename 'package/debian/Dockerfile'
                       additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=ubuntu:bionic'
                       reuseNode true
                     }
                   }
                   stages {
-                    stage('Checkout code') { steps { dir('k-exercises') { git url: 'git@github.com:kframework/k-exercises.git' } }
-                    }
+                    stage('Checkout code') { steps { dir('k-exercises') { git url: 'git@github.com:kframework/k-exercises.git' } } }
                     stage('Build and Test K') {
                       options { timeout(time: 45, unit: 'MINUTES') }
                       steps {
@@ -151,7 +150,7 @@ pipeline {
                 stage('Build on Debian Buster') {
                   agent {
                     dockerfile {
-                      filename 'Dockerfile.debian'
+                      filename 'package/debian/Dockerfile'
                       additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=debian:buster --build-arg LLVM_VERSION=7'
                       reuseNode true
                     }
@@ -206,7 +205,7 @@ pipeline {
                 stage('Build on Arch Linux') {
                   agent {
                     dockerfile {
-                      filename 'Dockerfile.arch'
+                      filename 'package/arch/Dockerfile'
                       additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
                       reuseNode true
                     }
@@ -258,8 +257,7 @@ pipeline {
               when { branch 'master' }
               agent {
                 dockerfile {
-                  filename 'Dockerfile.debian'
-                  additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=ubuntu:bionic'
+                  additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
                   reuseNode true
                 }
               }
@@ -368,7 +366,6 @@ pipeline {
     stage('Deploy') {
       agent {
         dockerfile {
-          filename 'Dockerfile.arch'
           additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
           reuseNode true
         }
@@ -393,15 +390,18 @@ pipeline {
         dir('mojave') { unstash 'mojave' }
         sshagent(['2b3d8d6b-0855-4b59-864a-6b3ddf9c9d1a']) {
           sh '''
-            release_tag="v${VERSION}-${SHORT_REV}"
+            git remote add release 'ssh://github.com/kframework/k.git'
+            git tag "${K_RELEASE_TAG}" "${SHORT_REV}"
+            git push release "${K_RELEASE_TAG}"
+
             mv bionic/kframework_${VERSION}_amd64.deb bionic/kframework_${VERSION}_amd64_bionic.deb
             mv buster/kframework_${VERSION}_amd64.deb buster/kframework_${VERSION}_amd64_buster.deb
             LOCAL_BOTTLE_NAME=$(echo mojave/kframework--${VERSION}.mojave.bottle*.tar.gz)
             BOTTLE_NAME=`cd mojave && echo kframework--${VERSION}.mojave.bottle*.tar.gz | sed 's!kframework--!kframework-!'`
             mv $LOCAL_BOTTLE_NAME mojave/$BOTTLE_NAME
-            echo "K Framework Release $release_tag"  > release.md
-            echo ""                                 >> release.md
-            cat k-distribution/INSTALL.md           >> release.md
+            echo "K Framework Release ${K_RELEASE_TAG}"  > release.md
+            echo ""                                     >> release.md
+            cat k-distribution/INSTALL.md               >> release.md
             hub release create                                                                         \
                 --attach kframework-${VERSION}-src.tar.gz"#Source tar.gz"                              \
                 --attach bionic/kframework_${VERSION}_amd64_bionic.deb"#Ubuntu Bionic (18.04) Package" \
@@ -409,15 +409,13 @@ pipeline {
                 --attach arch/kframework-git-${VERSION}-1-x86_64.pkg.tar.xz"#Arch Package"             \
                 --attach mojave/$BOTTLE_NAME"#Mac OS X Homebrew Bottle"                                \
                 --attach k-nightly.tar.gz"#Platform Indepdendent K Binary"                             \
-                --file release.md "${release_tag}"
+                --file release.md "${K_RELEASE_TAG}"
           '''
         }
         dir("homebrew-k") {
           git url: 'git@github.com:kframework/homebrew-k.git', branch: 'brew-release-kframework'
           sshagent(['2b3d8d6b-0855-4b59-864a-6b3ddf9c9d1a']) {
             sh '''
-              git config --global user.email "admin@runtimeverification.com"
-              git config --global user.name  "RV Jenkins"
               git checkout master
               git merge brew-release-$PACKAGE
               git push origin master
@@ -443,11 +441,12 @@ pipeline {
                           , string(name: 'UPDATE_DEPS_REPOSITORY', value: 'kframework/evm-semantics') \
                           , string(name: 'UPDATE_DEPS_SUBMODULE_DIR', value: 'deps/k')                \
                           ]
-        build job: 'rv-devops/master', propagate: false, wait: false                          \
-            , parameters: [ booleanParam(name: 'UPDATE_DEPS_RELEASE_URL', value: true)        \
-                          , string(name: 'PR_REVIEWER', value: 'ttuegel')                     \
-                          , string(name: 'UPDATE_DEPS_REPOSITORY', value: 'kframework/kore')  \
-                          , string(name: 'UPDATE_DEPS_RELEASE_FILE', value: 'deps/k_release') \
+        build job: 'rv-devops/master', propagate: false, wait: false                                    \
+            , parameters: [ booleanParam(name: 'UPDATE_DEPS_RELEASE_TAG', value: true)                  \
+                          , string(name: 'PR_REVIEWER', value: 'ttuegel')                               \
+                          , string(name: 'UPDATE_DEPS_REPOSITORY', value: 'kframework/kore')            \
+                          , string(name: 'UPDATE_DEPS_RELEASE_FILE', value: 'deps/k_release')           \
+                          , string(name: 'UPDATE_DEPS_RELEASE_TAG_SPEC', value: "${env.K_RELEASE_TAG}") \
                           ]
       }
     }
