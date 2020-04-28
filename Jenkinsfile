@@ -107,6 +107,7 @@ pipeline {
                         dir("kframework-${env.VERSION}") {
                           checkout scm
                           sh '''
+                            mv package/debian ./debian
                             mv debian/control.ubuntu debian/control
                             dpkg-buildpackage
                           '''
@@ -161,6 +162,7 @@ pipeline {
                         dir("kframework-${env.VERSION}") {
                           checkout scm
                           sh '''
+                            mv package/debian ./debian
                             mv debian/control.debian debian/control
                             dpkg-buildpackage
                           '''
