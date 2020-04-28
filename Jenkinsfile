@@ -364,7 +364,10 @@ pipeline {
       }
     }
     stage('Deploy') {
-      when { branch 'master' }
+      when {
+        beforeAgent true
+        branch 'master'
+      }
       agent {
         dockerfile {
           additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
