@@ -395,16 +395,16 @@ pipeline {
           steps {
             dir('bionic') { unstash 'bionic' }
             sh '''
-                sudo docker login --username ehildenb --password "${DOCKERHUB_TOKEN}"
+                docker login --username ehildenb --password "${DOCKERHUB_TOKEN}"
 
                 bionic_commit_tag="ubuntu-bionic-${SHORT_REV}"
                 kframework_k_docker_repo="runtimeverificationinc/kframework-k"
                 mv bionic/kframework_${VERSION}_amd64.deb kframework_amd64_bionic.deb
-                sudo docker image build . --file package/docker/Dockerfile.ubuntu-bionic --tag "${kframework_k_docker_repo}:${bionic_commit_tag}"
-                sudo docker image push "${kframework_k_docker_repo}:${bionic_commit_tag}"
+                docker image build . --file package/docker/Dockerfile.ubuntu-bionic --tag "${kframework_k_docker_repo}:${bionic_commit_tag}"
+                docker image push "${kframework_k_docker_repo}:${bionic_commit_tag}"
                 if [ "${BRANCH_NAME}" = 'master' ]; then
-                  sudo docker tag "${kframework_k_docker_repo}:${bionic_commit_tag}" "${kframework_k_docker_repo}:ubuntu-bionic-master"
-                  sudo docker push "${kframework_k_docker_repo}:ubuntu-bionic-master"
+                  docker tag "${kframework_k_docker_repo}:${bionic_commit_tag}" "${kframework_k_docker_repo}:ubuntu-bionic-master"
+                  docker push "${kframework_k_docker_repo}:ubuntu-bionic-master"
                 fi
             '''
           }

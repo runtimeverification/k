@@ -23,7 +23,6 @@ RUN    apt-get update        \
         lld-8                \
         llvm-8-tools         \
         maven                \
-        sudo                 \
         opam                 \
         openjdk-11-jdk       \
         pkg-config           \
@@ -34,10 +33,8 @@ RUN    apt-get update        \
 
 RUN curl -sSL https://get.haskellstack.org/ | sh
 
-RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
-
-RUN    groupadd -g $GROUP_ID user                             \
-    && useradd -m -u $USER_ID -s /bin/sh -g user -G sudo user
+RUN    groupadd -g $GROUP_ID user                               \
+    && useradd -m -u $USER_ID -s /bin/sh -g user -G docker user
 
 USER user:user
 
