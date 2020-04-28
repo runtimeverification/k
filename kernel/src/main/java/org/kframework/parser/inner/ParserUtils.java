@@ -16,8 +16,11 @@ import org.kframework.kore.Sort;
 import org.kframework.kore.convertors.KILtoKORE;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.outer.Outer;
+import org.kframework.parser.tagSelector.ASTExpressionStart;
+import org.kframework.parser.tagSelector.TagSelector;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.options.OuterParsingOptions;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,15 +46,21 @@ public class ParserUtils {
     private final KExceptionManager kem;
     private final GlobalOptions options;
     private Function<File, File> makeAbsolute;
+    private final ASTExpressionStart mdSelectorAST;
 
     public ParserUtils(Function<File, File> makeAbsolute, KExceptionManager kem) {
-        this(makeAbsolute, kem, new GlobalOptions());
+        this(makeAbsolute, kem, new GlobalOptions(), new OuterParsingOptions());
     }
 
-    public ParserUtils(Function<File, File> makeAbsolute, KExceptionManager kem, GlobalOptions options) {
+    /**
+     * @throws org.kframework.parser.tagSelector.ParseException
+     */
+    public ParserUtils(Function<File, File> makeAbsolute, KExceptionManager kem, GlobalOptions options, OuterParsingOptions outerParsingOptions) {
         this.makeAbsolute = makeAbsolute;
         this.kem = kem;
         this.options = options;
+        // parse once and throw any exception
+        mdSelectorAST = TagSelector.parseSelectorExp(outerParsingOptions.mdSelector);
     }
 
     public static K parseWithFile(String theTextToParse,
@@ -119,7 +128,7 @@ public class ParserUtils {
             List<File> lookupDirectories,
             Set<File> requiredFiles) {
         if (source.source().endsWith(".md"))
-            definitionText = ExtractFencedKCodeFromMarkdown.extract(definitionText);
+            definitionText = ExtractFencedKCodeFromMarkdown.extract(definitionText, mdSelectorAST);
         List<DefinitionItem> items = Outer.parse(source, definitionText, null);
         if (options.verbose) {
             System.out.println("Importing: " + source);

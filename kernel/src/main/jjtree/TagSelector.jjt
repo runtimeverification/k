@@ -1,0 +1,158 @@
+// Copyright (c) 2013-2020 K Team. All Rights Reserved.
+options {
+  MULTI=true;
+  KEEP_LINE_COLUMN = false;
+  STATIC = false;
+}
+PARSER_BEGIN(TagSelector)
+package org.kframework.parser.tagSelector;
+
+import java.lang.String;
+import java.io.StringReader;
+import java.util.Set;
+import java.util.HashSet;
+import org.kframework.utils.errorsystem.KEMException;
+
+/**
+ * An Arithmetic Grammar.
+ */
+public class TagSelector {
+
+  /** Main entry point. */
+  public static void main(String args[]) {
+    System.out.println("Reading from standard input...");
+    TagSelector t = new TagSelector(new StringReader("a|!b&"));
+    try {
+      ASTTagListStart result = t.TagListStart();
+      result.dump("");
+      System.out.println("Thank you.");
+    } catch (Exception e) {
+      System.out.println("Oops.");
+      System.out.println(e.getMessage());
+      e.printStackTrace();
+    }
+  }
+
+  public static Set<String> parseTags(String input) {
+    TagSelector t = new TagSelector(new StringReader(input));
+    Set<String> tags = new HashSet<String>();
+    try {
+      ASTTagListStart result = t.TagListStart();
+      for (Node n : result.children)
+        if (n instanceof SimpleNode)
+          tags.add(((SimpleNode) n).value.toString());
+    } catch (Exception e) {
+      // ignore: e.printStackTrace();
+    }
+    return tags;
+  }
+
+  public static ASTExpressionStart parseSelectorExp(String input) {
+    TagSelector t = new TagSelector(new StringReader(input));
+    try {
+      ASTExpressionStart result = t.ExpressionStart();
+      return result;
+    } catch (ParseException e) {
+      throw KEMException.compilerError("Could not parse " + input + " as a selector expression.", e);
+    } catch (TokenMgrError e) {
+      throw KEMException.compilerError("Could not parse " + input + " as a selector expression.", e);
+    }
+  }
+
+  public static boolean eval(Node exp, Set<String> tagList) {
+      if (exp instanceof ASTExpressionStart)
+          return eval(exp.jjtGetChild(0), tagList);
+      else if (exp instanceof ASTOr)
+          return eval(exp.jjtGetChild(0), tagList) || eval(exp.jjtGetChild(1), tagList);
+      else if (exp instanceof ASTAnd)
+          return eval(exp.jjtGetChild(0), tagList) && eval(exp.jjtGetChild(1), tagList);
+      else if (exp instanceof ASTNot)
+          return !eval(exp.jjtGetChild(0), tagList);
+      else if (exp instanceof ASTIdentifier || exp instanceof ASTInteger)
+          return tagList.contains(((SimpleNode) exp).value.toString());
+      throw KEMException.compilerError("Unknown ASTNode type: " + exp.getClass() + " when evaluating selector tags.");
+  }
+}
+PARSER_END(TagSelector)
+
+
+SKIP :
+{
+  " "
+| "\t"
+| "\n"
+| "\r"
+| <"/*" (~["*"])* "*" (~["/"] (~["*"])* "*")* "/">
+}
+
+TOKEN : /* LITERALS */
+{
+  < INTEGER_LITERAL:
+        <DECIMAL_LITERAL> (["l","L"])?
+      | <HEX_LITERAL> (["l","L"])?
+      | <OCTAL_LITERAL> (["l","L"])?
+  >
+|  < #DECIMAL_LITERAL: ["1"-"9"] (["0"-"9"])* >
+|  < #HEX_LITERAL: "0" ["x","X"] (["0"-"9","a"-"f","A"-"F"])+ >
+|  < #OCTAL_LITERAL: "0" (["0"-"7"])* >
+}
+
+TOKEN : /* IDENTIFIERS */
+{
+  < IDENTIFIER: <LETTER> (<LETTER>|<DIGIT>)* >
+|  < #LETTER: ["_","a"-"z","A"-"Z"] >
+|  < #DIGIT: ["0"-"9"] >
+}
+
+/** Main tag list production. */
+ASTTagListStart TagListStart() : {}
+{
+  ("{" ( Identifier() | Integer() )+ "}" | Identifier())
+  { return jjtThis; }
+}
+
+/** Main Expression production. */
+ASTExpressionStart ExpressionStart() : {}
+{
+  Expression()
+  { return jjtThis; }
+}
+
+void Expression() #void : {}
+{
+  OrExpression()
+}
+
+void OrExpression() #void : {}
+{
+  ( AndExpression() ("|" OrExpression())? ) #Or(>1) // if it has two elements create an #Or node, otherwise omit it from the ast
+}
+
+void AndExpression() #void : {}
+{
+  ( NotExpression() ("&" AndExpression())? ) #And(>1)
+}
+
+void NotExpression() #void : {}
+{
+  ( "!" UnaryExpression() ) #Not | UnaryExpression()
+}
+
+void UnaryExpression() #void : {}
+{
+  "(" Expression() ")" | Identifier() | Integer()
+}
+
+void Identifier() :
+{ Token t; }
+{
+  t=<IDENTIFIER>
+  { jjtThis.jjtSetValue(t.image); }
+}
+
+void Integer() :
+{ Token t; }
+{
+  t=<INTEGER_LITERAL>
+  { jjtThis.jjtSetValue(t.image); }
+}

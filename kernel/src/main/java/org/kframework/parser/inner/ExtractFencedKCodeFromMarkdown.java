@@ -8,26 +8,37 @@ import com.vladsch.flexmark.util.ast.NodeVisitor;
 import com.vladsch.flexmark.util.ast.VisitHandler;
 import com.vladsch.flexmark.util.data.MutableDataSet;
 import org.jetbrains.annotations.NotNull;
+import org.kframework.parser.tagSelector.ASTExpressionStart;
+import org.kframework.parser.tagSelector.TagSelector;
+
+import java.util.Set;
 
 public class ExtractFencedKCodeFromMarkdown {
 
-    public static String extract(String mdText) {
-        KCodeExtractor extractor = new KCodeExtractor();
-        return extractor.getKCode(mdText);
+    public static String extract(String mdText, ASTExpressionStart mdSelector) {
+        KCodeExtractor extractor = new KCodeExtractor(mdText, mdSelector);
+        return extractor.getKCode();
     }
 
     private static class KCodeExtractor {
+        private final ASTExpressionStart mdSelector;
+        private final String mdText;
         int lastOffset;
         StringBuilder sb;
-        String mdText;
+        public KCodeExtractor(String mdText, ASTExpressionStart mdSelector) {
+            this.mdText = mdText;
+            this.mdSelector = mdSelector;
+        }
 
         NodeVisitor visitor = new NodeVisitor(
                 new VisitHandler<>(FencedCodeBlock.class, this::visit)
         );
 
         public void visit(FencedCodeBlock block) {
-            if (block.getInfo().toString().equals("k")) {
-                // interested only in code blocks marked as `k`
+            String cbStr = block.getInfo().toString();
+            Set<String> tags = TagSelector.parseTags(cbStr);
+            // interested only in code blocks marked as valid by the mdSelector expression
+            if (TagSelector.eval(mdSelector, tags)) {
                 // navigate from previous offset to the current one and
                 // mark make every character as whitespace to preserve location info
                 while (lastOffset < block.getContentChars().getStartOffset()) {
@@ -45,12 +56,11 @@ public class ExtractFencedKCodeFromMarkdown {
             visitor.visitChildren(block);
         }
 
-        String getKCode(String mdText) {
+        String getKCode() {
             MutableDataSet options = new MutableDataSet();
             Parser parser = Parser.builder(options).build();
             @NotNull Document doc = parser.parse(mdText);
             lastOffset = 0;
-            this.mdText = mdText;
             sb = new StringBuilder();
             visitor.visit(doc);
             return sb.toString();

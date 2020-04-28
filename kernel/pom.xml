@@ -224,6 +224,12 @@
         <version>2.6</version>
         <executions>
           <execution>
+            <id>jjtree-javacc</id>
+            <goals>
+              <goal>jjtree-javacc</goal>
+            </goals>
+          </execution>
+          <execution>
             <id>javacc</id>
             <goals>
               <goal>javacc</goal>

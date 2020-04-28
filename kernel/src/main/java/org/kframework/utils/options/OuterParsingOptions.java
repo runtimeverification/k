@@ -51,5 +51,6 @@ public class OuterParsingOptions implements Serializable {
     @Parameter(names="--no-prelude", description="Do not implicitly require prelude.k.")
     public boolean noPrelude = false;
 
-
+    @Parameter(names="--md-selector", description="Preprocessor: for .md files, select only the md code blocks that match the CSS Selector expression.")
+    public String mdSelector = "k";
 }
