@@ -214,7 +214,10 @@ pipeline {
                     stage('Build Pacman Package') {
                       steps {
                         checkout scm
-                        sh 'makepkg'
+                        sh '''
+                          mv package/arch/* ./
+                          makepkg
+                        '''
                         stash name: "arch", includes: "kframework-git-${env.VERSION}-1-x86_64.pkg.tar.xz"
                       }
                     }
