@@ -390,11 +390,11 @@ pipeline {
       }
       stages {
         stage('DockerHub Images') {
-          environment { DOCKERHUB_TOKEN = credentials('dockerhub-ehildenb') }
+          environment { DOCKERHUB_TOKEN = credentials('rvdockerhub') }
           steps {
             dir('bionic') { unstash 'bionic' }
             sh '''
-                sudo docker login --username ehildenb --password "${DOCKERHUB_TOKEN}"
+                sudo docker login --username rvdockerhub --password "${DOCKERHUB_TOKEN}"
 
                 bionic_commit_tag="ubuntu-bionic-${SHORT_REV}"
                 kframework_k_docker_repo="runtimeverificationinc/kframework-k"
