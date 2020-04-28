@@ -15,6 +15,7 @@ pipeline {
       steps { script { currentBuild.displayName = "PR ${env.CHANGE_ID}: ${env.CHANGE_TITLE}" } }
     }
     stage('Create source tarball') {
+      when { branch 'master' }
       agent {
         dockerfile {
           additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
@@ -87,6 +88,7 @@ pipeline {
                   stages {
                     stage('Checkout code') { steps { dir('k-exercises') { git url: 'git@github.com:kframework/k-exercises.git' } } }
                     stage('Build and Test K') {
+                      when { branch 'master' }
                       options { timeout(time: 45, unit: 'MINUTES') }
                       steps {
                         sh '''
@@ -115,14 +117,15 @@ pipeline {
                       }
                     }
                   }
-                  post {
-                    always {
-                      sh 'k-distribution/target/release/k/bin/stop-kserver || true'
-                      archiveArtifacts 'kserver.log,k-distribution/target/kserver.log'
-                    }
-                  }
+                  // post {
+                  //   always {
+                  //     sh 'k-distribution/target/release/k/bin/stop-kserver || true'
+                  //     archiveArtifacts 'kserver.log,k-distribution/target/kserver.log'
+                  //   }
+                  // }
                 }
                 stage('Test Debian Package') {
+                  when { branch 'master' }
                   agent {
                     docker {
                       image 'ubuntu:bionic'
@@ -364,10 +367,6 @@ pipeline {
       }
     }
     stage('Deploy') {
-      when {
-        beforeAgent true
-        branch 'master'
-      }
       agent {
         dockerfile {
           additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
@@ -410,6 +409,10 @@ pipeline {
           }
         }
         stage('GitHub Release') {
+          when {
+            beforeAgent true
+            branch 'master'
+          }
           steps {
             unstash 'src'
             unstash 'binary'
