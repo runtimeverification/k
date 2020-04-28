@@ -394,7 +394,7 @@ pipeline {
           steps {
             dir('bionic') { unstash 'bionic' }
             sh '''
-                sudo docker login --username rvdockerhub --password "${DOCKERHUB_TOKEN}"
+                sudo docker login --username "${DOCKERHUB_TOKEN_USR}" --password "${DOCKERHUB_TOKEN_PSW}"
 
                 bionic_commit_tag="ubuntu-bionic-${SHORT_REV}"
                 kframework_k_docker_repo="runtimeverificationinc/kframework-k"
