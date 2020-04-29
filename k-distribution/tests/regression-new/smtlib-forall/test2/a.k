@@ -1,4 +1,4 @@
-require "substitution.k" 
+require "substitution.k"
 
 module A
 
