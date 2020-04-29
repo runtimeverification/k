@@ -3,8 +3,7 @@
 #include <string.h>
 #include "node.h"
 #include "parser.tab.h"
-
-extern FILE *yyin;
+#include "scanner.h"
 
 static void append(char *buf, size_t *bufidx, char *str, size_t len) {
   memcpy(buf+*bufidx, str, len);
@@ -54,8 +53,11 @@ void print(node *current) {
 extern node *result;
 
 int main(int argc, char **argv) {
-  yyin = fopen(argv[1], "r");
-  yyparse();
+  yyscan_t scanner;
+  yylex_init(&scanner); 
+  yyset_in(fopen(argv[1], "r"), scanner);
+  yyparse(scanner);
   print(result);
   printf("\n");
+  yylex_destroy(scanner);
 }

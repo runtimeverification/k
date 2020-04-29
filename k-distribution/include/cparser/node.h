@@ -10,4 +10,9 @@ typedef struct node {
   struct node * children[];
 } node;
 
+typedef union value_type {
+  char *token;
+  node *nterm;
+} value_type;
+
 #endif

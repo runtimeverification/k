@@ -83,8 +83,14 @@ public class Scanner implements AutoCloseable {
         flex.append("%{\n" +
             "#include \"node.h\"\n" +
             "#include \"parser.tab.h\"\n" +
+            "#define YY_USER_ACTION yylloc->first_line = yylloc->last_line = yylineno; \\\n" +
+            "    yylloc->first_column = yycolumn; yylloc->last_column = yycolumn + yyleng - 1; \\\n" +
+            "   yycolumn += yyleng;\n" +
             "%}\n\n" +
+            "%option reentrant bison-bridge\n" +
+            "%option bison-locations\n" +
             "%option noyywrap\n" +
+            "%option yylineno\n" +
             "%%\n\n");
         appendScanner(flex, this::writeStandaloneAction);
         try {
@@ -201,8 +207,8 @@ public class Scanner implements AutoCloseable {
     private void writeStandaloneAction(StringBuilder flex, TerminalLike key) {
         flex.append(" {\n" +
             "  int kind = ").append(tokens.get(key)._1()+1).append(";\n" +
-            "  *((char **)&yylval) = malloc(strlen(yytext) + 1);\n" +
-            "  strcpy(*((char **)&yylval), yytext);\n" +
+            "  *((char **)yylval  ) = malloc(strlen(yytext) + 1);\n" +
+            "  strcpy(*((char **)yylval), yytext);\n" +
             "  return kind;\n" +
             " }\n");
     }
