@@ -163,6 +163,7 @@ public class KSyntax2Bison {
       bison.append(":\n");
       String conn = "";
       for (Production prod : Optional.ofNullable(prods.get(sort)).orElse(java.util.Collections.emptyList())) {
+        if (prod.att().contains("projection")) continue;
         bison.append("  " + conn);
         processProduction(prod, module, scanner, bison, glr);
         conn = "|";
