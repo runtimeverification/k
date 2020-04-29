@@ -44,17 +44,20 @@ public class KILtoKORE extends KILTransformation<Object> {
     private final boolean syntactic;
     private final boolean kore;
     private String moduleName;
+    private final boolean bisonLists;
 
-    public KILtoKORE(org.kframework.kil.loader.Context context, boolean syntactic, boolean kore) {
+    public KILtoKORE(org.kframework.kil.loader.Context context, boolean syntactic, boolean kore, boolean bisonLists) {
         this.context = context;
         this.syntactic = syntactic;
         this.kore = kore;
+        this.bisonLists = bisonLists;
     }
 
     public KILtoKORE(org.kframework.kil.loader.Context context) {
         this.context = context;
         this.syntactic = false;
         kore = false;
+        bisonLists = false;
     }
 
     public FlatModule toFlatModule(Module m) {
@@ -300,9 +303,15 @@ public class KILtoKORE extends KILTransformation<Object> {
         org.kframework.definition.Production prod1, prod3;
 
         // Es ::= E "," Es
-        prod1 = Production(KLabel(p.getKLabel(kore), immutable(p.getParams())), sort,
-                Seq(NonTerminal(elementSort), Terminal(userList.getSeparator()), NonTerminal(sort)),
-                attrs.add("right"));
+        if (bisonLists) {
+          prod1 = Production(KLabel(p.getKLabel(kore), immutable(p.getParams())), sort,
+                  Seq(NonTerminal(sort), Terminal(userList.getSeparator()), NonTerminal(elementSort)),
+                  attrs.add("right"));
+        } else {
+          prod1 = Production(KLabel(p.getKLabel(kore), immutable(p.getParams())), sort,
+                  Seq(NonTerminal(elementSort), Terminal(userList.getSeparator()), NonTerminal(sort)),
+                  attrs.add("right"));
+        }
 
 
         // Es ::= ".Es"

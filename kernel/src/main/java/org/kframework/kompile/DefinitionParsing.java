@@ -111,7 +111,8 @@ public class DefinitionParsing {
                 ListUtils.union(lookupDirectories,
                         Lists.newArrayList(Kompile.BUILTIN_DIRECTORY)),
                 kore,
-                options.preprocess);
+                options.preprocess,
+                options.bisonLists);
 
         if (!def.getModule(mainModule).isDefined()) {
           throw KEMException.criticalError("Module " + mainModule + " does not exist.");
@@ -209,7 +210,8 @@ public class DefinitionParsing {
                         Lists.newArrayList(Kompile.BUILTIN_DIRECTORY)),
                 autoImportDomains,
                 kore,
-                options.preprocess);
+                options.preprocess,
+                options.bisonLists);
         Module m = definition.mainModule();
         return options.coverage ? Definition(Module(m.name(), (Set<Module>)m.imports().$bar(Set(definition.getModule("K-IO").get())), m.localSentences(), m.att()), definition.entryModules(), definition.att()) : definition;
     }
