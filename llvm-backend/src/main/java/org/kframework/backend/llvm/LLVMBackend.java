@@ -45,7 +45,8 @@ public class LLVMBackend extends KoreBackend {
         files.saveToKompiled("definition.kore", kore);
         FileUtils.deleteQuietly(files.resolveKompiled("dt"));
         MutableInt warnings = new MutableInt();
-        Matching.writeDecisionTreeToFile(files.resolveKompiled("definition.kore"), options.heuristic, files.resolveKompiled("dt"), Matching.getThreshold(getThreshold()), options.warnUseless, ex -> {
+        boolean optimize = kompileOptions.optimize1 || kompileOptions.optimize2 || kompileOptions.optimize3;
+        Matching.writeDecisionTreeToFile(files.resolveKompiled("definition.kore"), options.heuristic, files.resolveKompiled("dt"), Matching.getThreshold(getThreshold()), !optimize, options.warnUseless, ex -> {
           kem.addKException(ex);
           warnings.increment();
           return null;

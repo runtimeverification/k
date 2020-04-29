@@ -1,0 +1,5 @@
+host github.com
+    hostname github.com
+    user git
+    identityagent SSH_AUTH_SOCK
+    stricthostkeychecking accept-new
