@@ -1,0 +1,31 @@
+.TranslationUnit
+.DeclSpecifiers  typedef  int .InitDecls , * T ;
+amb ( .DeclSpecifiers  typedef  int  AA ; , .DeclSpecifiers  typedef  int .InitDecls , AA ; )
+.DeclSpecifiers  int main ( ) {
+  .BlockItems
+  amb ( T ( x ) ; , .DeclSpecifiers  T .InitDecls , x ; )
+  amb ( S ( x ) ; , .DeclSpecifiers  S .InitDecls , x ; )
+  amb ( .DeclSpecifiers  T .InitDecls , * y ; , T * y ; )
+  .DeclSpecifiers  int .InitDecls , U , z ;
+  amb ( .DeclSpecifiers  U .InitDecls , * z ; , U * z ; )
+  func ( amb ( ( .SpecifierQuals  T ) * x , T * x ) ) ;
+  func ( amb ( ( .SpecifierQuals  U ) * z , U * z ) ) ;
+  amb ( .DeclSpecifiers  int  AA ; , .DeclSpecifiers  int .InitDecls , AA ; )
+  .DeclSpecifiers  int .InitDecls , BB = AA * 2 ;
+  amb ( .DeclSpecifiers  typedef  int  CC ; , .DeclSpecifiers  typedef  int .InitDecls , CC ; )
+}
+.DeclSpecifiers  void foo ( ) {
+  .BlockItems
+  amb ( .DeclSpecifiers  AA  bb ; , .DeclSpecifiers  AA .InitDecls , bb ; )
+  amb ( .DeclSpecifiers  float  AA ; , .DeclSpecifiers  float .InitDecls , AA ; )
+}
+.DeclSpecifiers  void bar ( ) {
+  .BlockItems
+  amb ( .DeclSpecifiers  AA  AA ; , .DeclSpecifiers  AA .InitDecls , AA ; )
+  .DeclSpecifiers  int .InitDecls , BB = AA * 2 ;
+}
+amb ( .DeclSpecifiers  typedef  char  C ; , .DeclSpecifiers  typedef  char .InitDecls , C ; )
+.DeclSpecifiers  void baz ( ) {
+  .BlockItems
+  .DeclSpecifiers  int .InitDecls , aa = amb ( sizeof ( .SpecifierQuals  C ) , sizeof C ) , C , bb = amb ( sizeof ( .SpecifierQuals  C ) , sizeof C ) ;
+}
