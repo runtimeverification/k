@@ -62,14 +62,14 @@ public class KRead {
         }
     }
 
-    public void createBisonParser(Module mod, Sort sort, File outputFile) {
+    public void createBisonParser(Module mod, Sort sort, File outputFile, boolean glr) {
         try (ParseInModule parseInModule = RuleGrammarGenerator.getCombinedGrammar(mod, true)) {
             try (Scanner scanner = parseInModule.getScanner()) {
                 File scannerFile = files.resolveTemp("scanner.l");
                 File scanHdr = files.resolveTemp("scanner.h");
                 File parserFile = files.resolveTemp("parser.y");
                 scanner.writeStandaloneScanner(scannerFile);
-                KSyntax2Bison.writeParser(parseInModule.getParsingModule(), scanner, sort, parserFile);
+                KSyntax2Bison.writeParser(parseInModule.getParsingModule(), scanner, sort, parserFile, glr);
                 int exit = files.getProcessBuilder()
                   .directory(files.resolveTemp("."))
                   .command("flex", "--header-file=" + scanHdr.getAbsolutePath(), "-w", scannerFile.getAbsolutePath())

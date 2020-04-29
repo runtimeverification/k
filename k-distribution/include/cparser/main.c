@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -35,6 +36,49 @@ char *enquote(char *str) {
   }
   append(res, &bufidx, "\"", 2);
   return res;
+}
+
+bool equalsNode(node *x0, node *x1) {
+  if (x0->str != x1->str) {
+    return false;
+  }
+  if (x0->str) {
+    return strcmp(x0->symbol, x1->symbol) == 0;
+  } else {
+    if (!(strcmp(x0->symbol, x1->symbol) == 0 && x0->nchildren == x1->nchildren)) {
+      return false;
+    }
+    for (size_t i = 0; i < x0->nchildren; i++) {
+      if (!equalsNode(x0->children[i], x1->children[i])) {
+        return false;
+      }
+    }
+    return true;
+  }
+}
+
+YYSTYPE mergeAmb(YYSTYPE x0, YYSTYPE x1) {
+  if (equalsNode(x0.nterm, x1.nterm)) {
+    return x0;
+  }
+  node *n = malloc(sizeof(node) + sizeof(node *) * 2);
+  node *x0n = x0.nterm;
+  node *x1n = x1.nterm;
+  char *prefix = "Lblamb{";
+  char *suffix = "}";
+  size_t len = strlen(prefix) + strlen(suffix) + strlen(x0n->sort) + 1;
+  char *symbol = malloc(len);
+  strcpy(symbol, prefix);
+  strcat(symbol, x0n->sort);
+  strcat(symbol, suffix);
+  n->symbol = symbol;
+  n->sort = x0n->sort;
+  n->str = false;
+  n->nchildren = 2;
+  n->children[0] = x0n;
+  n->children[1] = x1n;
+  YYSTYPE result = {.nterm = n};
+  return result;
 }
 	
 void print(node *current) {

@@ -5,6 +5,7 @@
 
 typedef struct node {
   char *symbol;
+  char *sort;
   bool str;
   size_t nchildren;
   struct node * children[];
