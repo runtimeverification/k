@@ -101,6 +101,12 @@ pipeline {
                           make -j`nproc` ${MAKE_EXTRA_ARGS}
                         '''
                       }
+                      post {
+                        always {
+                          sh 'k-distribution/target/release/k/bin/stop-kserver || true'
+                          archiveArtifacts 'kserver.log,k-distribution/target/kserver.log'
+                        }
+                      }
                     }
                     stage('Build Debian Package') {
                       steps {
@@ -114,12 +120,6 @@ pipeline {
                         }
                         stash name: "bionic", includes: "kframework_${env.VERSION}_amd64.deb"
                       }
-                    }
-                  }
-                  post {
-                    always {
-                      sh 'k-distribution/target/release/k/bin/stop-kserver || true'
-                      archiveArtifacts 'kserver.log,k-distribution/target/kserver.log'
                     }
                   }
                 }
