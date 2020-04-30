@@ -31,7 +31,7 @@ pipeline {
           '''
           deleteDir()
         }
-        stash name: "src", includes: "kframework-${env.VERSION}-src.tar.gz"
+        stash name: 'src', includes: "kframework-${env.VERSION}-src.tar.gz"
       }
     }
     stage('Update Submodules (non-release)') {
@@ -95,7 +95,7 @@ pipeline {
                           echo 'Building K...'
                           mvn --batch-mode verify -U
                           echo 'Starting kserver...'
-                          export K_OPTS="-Xmx8G"
+                          export K_OPTS='-Xmx8G'
                           k-distribution/target/release/k/bin/spawn-kserver kserver.log
                           cd k-exercises/tutorial
                           make -j`nproc` ${MAKE_EXTRA_ARGS}
@@ -112,7 +112,7 @@ pipeline {
                             dpkg-buildpackage
                           '''
                         }
-                        stash name: "bionic", includes: "kframework_${env.VERSION}_amd64.deb"
+                        stash name: 'bionic', includes: "kframework_${env.VERSION}_amd64.deb"
                       }
                     }
                   }
@@ -133,7 +133,7 @@ pipeline {
                   }
                   options { skipDefaultCheckout() }
                   steps {
-                    unstash "bionic"
+                    unstash 'bionic'
                     sh 'src/main/scripts/test-in-container-debian'
                   }
                   post {
@@ -167,7 +167,7 @@ pipeline {
                             dpkg-buildpackage
                           '''
                         }
-                        stash name: "buster", includes: "kframework_${env.VERSION}_amd64.deb"
+                        stash name: 'buster', includes: "kframework_${env.VERSION}_amd64.deb"
                       }
                     }
                   }
@@ -182,7 +182,7 @@ pipeline {
                   }
                   options { skipDefaultCheckout() }
                   steps {
-                    unstash "buster"
+                    unstash 'buster'
                     sh 'src/main/scripts/test-in-container-debian'
                   }
                   post {
@@ -221,7 +221,7 @@ pipeline {
                             mv package/arch/* ./
                             makepkg
                           '''
-                          stash name: "arch", includes: "kframework-git-${env.VERSION}-1-x86_64.pkg.tar.xz"
+                          stash name: 'arch', includes: "kframework-git-${env.VERSION}-1-x86_64.pkg.tar.xz"
                         }
                       }
                     }
@@ -275,7 +275,7 @@ pipeline {
                   mvn --batch-mode install -DskipKTest -Dcheckstyle.skip
                   mv k-distribution/target/k-nightly.tar.gz ./
                 '''
-                stash name: "binary", includes: "k-nightly.tar.gz"
+                stash name: 'binary', includes: 'k-nightly.tar.gz'
               }
               post {
                 failure {
@@ -299,8 +299,8 @@ pipeline {
                     dir('homebrew-k') {
                       git url: 'git@github.com:kframework/homebrew-k.git'
                       sh '''
-                        git config --global user.email "admin@runtimeverification.com"
-                        git config --global user.name  "RV Jenkins"
+                        git config --global user.email 'admin@runtimeverification.com'
+                        git config --global user.name  'RV Jenkins'
                         git remote add k-repo 'https://github.com/kframework/k.git'
                         git fetch --all
                         # Note: double-backslash in sed-command is for Jenkins benefit.
@@ -316,7 +316,7 @@ pipeline {
                         git commit Formula/$PACKAGE.rb -m "Update $PACKAGE to ${SHORT_REV}: part 2"
                         git push origin brew-release-$PACKAGE
                       '''
-                      stash name: "mojave", includes: "kframework--${env.VERSION}.mojave.bottle*.tar.gz"
+                      stash name: 'mojave', includes: "kframework--${env.VERSION}.mojave.bottle*.tar.gz"
                     }
                   }
                 }
@@ -325,7 +325,7 @@ pipeline {
                   steps {
                     dir('homebrew-k') {
                       git url: 'git@github.com:kframework/homebrew-k.git', branch: 'brew-release-kframework'
-                      unstash "mojave"
+                      unstash 'mojave'
                       sh '${WORKSPACE}/package/macos/brew-install-bottle'
                     }
                     sh '''
@@ -338,7 +338,7 @@ pipeline {
                       echo 'Testing tutorial in user environment...'
                       make -j`sysctl -n hw.ncpu` ${MAKE_EXTRA_ARGS}
                       cd ~
-                      echo "module TEST imports BOOL endmodule" > test.k
+                      echo 'module TEST imports BOOL endmodule' > test.k
                       kompile test.k --backend llvm
                       kompile test.k --backend haskell
                     '''
@@ -408,19 +408,19 @@ pipeline {
             BOTTLE_NAME=`cd mojave && echo kframework--${VERSION}.mojave.bottle*.tar.gz | sed 's!kframework--!kframework-!'`
             mv $LOCAL_BOTTLE_NAME mojave/$BOTTLE_NAME
             echo "K Framework Release ${K_RELEASE_TAG}"  > release.md
-            echo ""                                     >> release.md
+            echo ''                                     >> release.md
             cat k-distribution/INSTALL.md               >> release.md
             hub release create                                                                         \
-                --attach kframework-${VERSION}-src.tar.gz"#Source tar.gz"                              \
-                --attach bionic/kframework_${VERSION}_amd64_bionic.deb"#Ubuntu Bionic (18.04) Package" \
-                --attach buster/kframework_${VERSION}_amd64_buster.deb"#Debian Buster (10) Package"    \
-                --attach arch/kframework-git-${VERSION}-1-x86_64.pkg.tar.xz"#Arch Package"             \
-                --attach mojave/$BOTTLE_NAME"#Mac OS X Homebrew Bottle"                                \
-                --attach k-nightly.tar.gz"#Platform Indepdendent K Binary"                             \
+                --attach kframework-${VERSION}-src.tar.gz'#Source tar.gz'                              \
+                --attach bionic/kframework_${VERSION}_amd64_bionic.deb'#Ubuntu Bionic (18.04) Package' \
+                --attach buster/kframework_${VERSION}_amd64_buster.deb'#Debian Buster (10) Package'    \
+                --attach arch/kframework-git-${VERSION}-1-x86_64.pkg.tar.xz'#Arch Package'             \
+                --attach mojave/$BOTTLE_NAME'#Mac OS X Homebrew Bottle'                                \
+                --attach k-nightly.tar.gz'#Platform Indepdendent K Binary'                             \
                 --file release.md "${K_RELEASE_TAG}"
           '''
         }
-        dir("homebrew-k") {
+        dir('homebrew-k') {
           git url: 'git@github.com:kframework/homebrew-k.git', branch: 'brew-release-kframework'
           sshagent(['2b3d8d6b-0855-4b59-864a-6b3ddf9c9d1a']) {
             sh '''
