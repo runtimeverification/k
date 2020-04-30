@@ -368,13 +368,6 @@ pipeline {
         beforeAgent true
         branch 'master'
       }
-      agent {
-        dockerfile {
-          additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
-          args '-v /var/run/docker.sock:/var/run/docker.sock'
-          reuseNode true
-        }
-      }
       post {
         failure {
           slackSend color: '#cb2431'                                 \
@@ -391,6 +384,13 @@ pipeline {
       }
       stages {
         stage('DockerHub Images') {
+          agent {
+            dockerfile {
+              additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
+              args '-v /var/run/docker.sock:/var/run/docker.sock'
+              reuseNode true
+            }
+          }
           environment { DOCKERHUB_TOKEN = credentials('rvdockerhub') }
           steps {
             dir('bionic') { unstash 'bionic' }
@@ -408,6 +408,12 @@ pipeline {
           }
         }
         stage('GitHub Release') {
+          agent {
+            dockerfile {
+              additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
+              reuseNode true
+            }
+          }
           steps {
             unstash 'src'
             unstash 'binary'
