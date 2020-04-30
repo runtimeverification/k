@@ -146,6 +146,7 @@ pipeline {
               }
             }
             stage('Build and Package on Debian Buster') {
+              when { branch 'master' }
               stages {
                 stage('Build on Debian Buster') {
                   agent {
@@ -201,6 +202,7 @@ pipeline {
               }
             }
             stage('Build and Package on Arch Linux') {
+              when { branch 'master' }
               stages {
                 stage('Build on Arch Linux') {
                   agent {
@@ -259,6 +261,7 @@ pipeline {
               }
             }
             stage('Build Platform Independent K Binary') {
+              when { branch 'master' }
               agent {
                 dockerfile {
                   additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
