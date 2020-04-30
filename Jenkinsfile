@@ -14,7 +14,7 @@ pipeline {
       when { changeRequest() }
       steps { script { currentBuild.displayName = "PR ${env.CHANGE_ID}: ${env.CHANGE_TITLE}" } }
     }
-    stage("Create source tarball") {
+    stage('Create source tarball') {
       agent {
         dockerfile {
           additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
@@ -107,6 +107,7 @@ pipeline {
                         dir("kframework-${env.VERSION}") {
                           checkout scm
                           sh '''
+                            mv package/debian ./debian
                             mv debian/control.ubuntu debian/control
                             dpkg-buildpackage
                           '''
@@ -161,6 +162,7 @@ pipeline {
                         dir("kframework-${env.VERSION}") {
                           checkout scm
                           sh '''
+                            mv package/debian ./debian
                             mv debian/control.debian debian/control
                             dpkg-buildpackage
                           '''
@@ -213,9 +215,14 @@ pipeline {
                   stages {
                     stage('Build Pacman Package') {
                       steps {
-                        checkout scm
-                        sh 'makepkg'
-                        stash name: "arch", includes: "kframework-git-${env.VERSION}-1-x86_64.pkg.tar.xz"
+                        dir("kframework-arch-${env.VERSION}") {
+                          checkout scm
+                          sh '''
+                            mv package/arch/* ./
+                            makepkg
+                          '''
+                          stash name: "arch", includes: "kframework-git-${env.VERSION}-1-x86_64.pkg.tar.xz"
+                        }
                       }
                     }
                   }
@@ -302,9 +309,10 @@ pipeline {
                         git show-ref --verify refs/remotes/origin/$brew_base_branch
                         git push -d origin brew-release-$PACKAGE || true
                         git checkout -b brew-release-$PACKAGE "origin/$brew_base_branch"
-                        ${WORKSPACE}/src/main/scripts/brew-update-to-local
+                        git merge origin/master
+                        ${WORKSPACE}/package/macos/brew-update-to-local
                         git commit Formula/$PACKAGE.rb -m "Update $PACKAGE to ${SHORT_REV}: part 1"
-                        ${WORKSPACE}/src/main/scripts/brew-build-and-update-to-local-bottle ${SHORT_REV}
+                        ${WORKSPACE}/package/macos/brew-build-and-update-to-local-bottle ${SHORT_REV}
                         git commit Formula/$PACKAGE.rb -m "Update $PACKAGE to ${SHORT_REV}: part 2"
                         git push origin brew-release-$PACKAGE
                       '''
@@ -312,13 +320,13 @@ pipeline {
                     }
                   }
                 }
-                stage("Test Homebrew Bottle") {
+                stage('Test Homebrew Bottle') {
                   agent { label 'anka' }
                   steps {
                     dir('homebrew-k') {
                       git url: 'git@github.com:kframework/homebrew-k.git', branch: 'brew-release-kframework'
                       unstash "mojave"
-                      sh '${WORKSPACE}/src/main/scripts/brew-install-bottle'
+                      sh '${WORKSPACE}/package/macos/brew-install-bottle'
                     }
                     sh '''
                       cp -R /usr/local/lib/kframework/tutorial ~
@@ -336,7 +344,7 @@ pipeline {
                     '''
                     dir('homebrew-k') {
                       sh '''
-                        ${WORKSPACE}/src/main/scripts/brew-update-to-final ${SHORT_REV}
+                        ${WORKSPACE}/package/macos/brew-update-to-final ${SHORT_REV}
                         git commit Formula/$PACKAGE.rb -m "Update $PACKAGE to ${SHORT_REV}: part 3"
                         git push origin brew-release-$PACKAGE
                       '''
@@ -382,8 +390,8 @@ pipeline {
         GIT_SSH_COMMAND       = 'ssh -o StrictHostKeyChecking=accept-new'
       }
       steps {
-        unstash "src"
-        unstash "binary"
+        unstash 'src'
+        unstash 'binary'
         dir('bionic') { unstash 'bionic' }
         dir('buster') { unstash 'buster' }
         dir('arch')   { unstash 'arch'   }
