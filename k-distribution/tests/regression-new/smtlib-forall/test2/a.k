@@ -10,7 +10,7 @@ syntax Int  ::= IMap "[" Int "]"          [function, klabel(selectI), smtlib(sel
 rule ( M:IMap [ K1 <- V ] ) [ K2 ] => V        requires K1  ==Int K2
 rule ( M:IMap [ K1 <- V ] ) [ K2 ] => M [ K2 ] requires K1 =/=Int K2
 
-syntax Bool ::= forall(KVar, Int, Int, Bool) [binder, function, smtlib((forall ((#1 Int)) (=> (and (>= #1 #2) (< #1 #3)) #4)))]
+syntax Bool ::= forall(KVar, Int, Int, Bool) [binder, function, smt-hook((forall ((#1 Int)) (=> (and (>= #1 #2) (< #1 #3)) #4)))]
 rule forall(X, LB, UB, E) => E[LB / X] andBool forall(X, LB +Int 1, UB, E) requires LB  <Int UB
 rule forall(_, LB, UB, _) => true                                          requires LB >=Int UB
 
