@@ -33,9 +33,9 @@ RUN curl -sSL https://get.haskellstack.org/ | sh
 ARG USER_ID=1000
 ARG GROUP_ID=1000
 ARG DOCKERISH_GROUP_ID
-RUN    groupadd -g $GROUP_ID user                                          \
-    && groupadd -g $DOCKERISH_GROUP_ID docker-ish                          \
-    && useradd -m -u $USER_ID -s /bin/sh -g user -G docker,docker-ish user
+RUN    groupadd -g $GROUP_ID user                                         \
+    && groupadd -g $DOCKERISH_GROUP_ID dockerish                          \
+    && useradd -m -u $USER_ID -s /bin/sh -g user -G docker,dockerish user
 
 USER user:user
 
