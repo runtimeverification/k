@@ -21,7 +21,7 @@ override_dh_auto_build:
 	mvn --batch-mode package -DskipTests -Dllvm.backend.prefix=/usr/lib/kframework -Dllvm.backend.destdir=$(shell pwd)/debian/kframework
 
 override_dh_auto_install:
-	DESTDIR=$(shell pwd)/debian/kframework PREFIX=/usr src/main/scripts/package
+	DESTDIR=$(shell pwd)/debian/kframework PREFIX=/usr package/package
 
 override_dh_strip:
 	dh_strip -Xliballoc.a -Xlibarithmetic.a -XlibAST.a -Xlibconfigurationparser.a -XlibParser.a -Xlibstrings.a -Xlibmeta.a -Xlibio.a
