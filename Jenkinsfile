@@ -15,6 +15,7 @@ pipeline {
       steps { script { currentBuild.displayName = "PR ${env.CHANGE_ID}: ${env.CHANGE_TITLE}" } }
     }
     stage('Create source tarball') {
+      when { branch 'master' }
       agent {
         dockerfile {
           additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
@@ -87,6 +88,7 @@ pipeline {
                   stages {
                     stage('Checkout code') { steps { dir('k-exercises') { git url: 'git@github.com:kframework/k-exercises.git' } } }
                     stage('Build and Test K') {
+                      when { branch 'master' }
                       options { timeout(time: 45, unit: 'MINUTES') }
                       steps {
                         sh '''
@@ -124,6 +126,7 @@ pipeline {
                   }
                 }
                 stage('Test Debian Package') {
+                  when { branch 'master' }
                   agent {
                     docker {
                       image 'ubuntu:bionic'
@@ -372,10 +375,6 @@ pipeline {
       }
     }
     stage('Deploy') {
-      when {
-        branch 'master'
-        beforeAgent true
-      }
       post {
         failure {
           slackSend color: '#cb2431'                                 \
@@ -416,6 +415,10 @@ pipeline {
           }
         }
         stage('GitHub Release') {
+          when {
+            branch 'master'
+            beforeAgent true
+          }
           agent {
             dockerfile {
               additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
