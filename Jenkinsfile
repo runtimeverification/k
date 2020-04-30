@@ -386,7 +386,7 @@ pipeline {
         stage('DockerHub Images') {
           agent {
             dockerfile {
-              additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
+              additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg DOCKERISH_GROUP_ID=$(stat -c %g /var/run/docker.sock)'
               args '-v /var/run/docker.sock:/var/run/docker.sock'
               reuseNode true
             }
@@ -395,15 +395,15 @@ pipeline {
           steps {
             dir('bionic') { unstash 'bionic' }
             sh '''
-                sudo docker login --username "${DOCKERHUB_TOKEN_USR}" --password "${DOCKERHUB_TOKEN_PSW}"
+                docker login --username "${DOCKERHUB_TOKEN_USR}" --password "${DOCKERHUB_TOKEN_PSW}"
 
                 bionic_commit_tag="ubuntu-bionic-${SHORT_REV}"
                 kframework_k_docker_repo="runtimeverificationinc/kframework-k"
                 mv bionic/kframework_${VERSION}_amd64.deb kframework_amd64_bionic.deb
-                sudo docker image build . --file package/docker/Dockerfile.ubuntu-bionic --tag "${kframework_k_docker_repo}:${bionic_commit_tag}"
-                sudo docker image push "${kframework_k_docker_repo}:${bionic_commit_tag}"
-                sudo docker tag "${kframework_k_docker_repo}:${bionic_commit_tag}" "${kframework_k_docker_repo}:ubuntu-bionic-${BRANCH_NAME}"
-                sudo docker push "${kframework_k_docker_repo}:ubuntu-bionic-${BRANCH_NAME}"
+                docker image build . --file package/docker/Dockerfile.ubuntu-bionic --tag "${kframework_k_docker_repo}:${bionic_commit_tag}"
+                docker image push "${kframework_k_docker_repo}:${bionic_commit_tag}"
+                docker tag "${kframework_k_docker_repo}:${bionic_commit_tag}" "${kframework_k_docker_repo}:ubuntu-bionic-${BRANCH_NAME}"
+                docker push "${kframework_k_docker_repo}:ubuntu-bionic-${BRANCH_NAME}"
             '''
           }
         }
