@@ -291,7 +291,7 @@ public class KSyntax2Bison {
           "  $$ = result;\n" +
           "}\n");
       }
- 
+
     } else if (prod.att().contains("token") && prod.isSubsort()) {
       bison.append("{\n" +
           "  node *n = malloc(sizeof(node) + sizeof(node *));\n" +
