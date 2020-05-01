@@ -101,6 +101,12 @@ pipeline {
                           make -j`nproc` ${MAKE_EXTRA_ARGS}
                         '''
                       }
+                      post {
+                        always {
+                          sh 'k-distribution/target/release/k/bin/stop-kserver || true'
+                          archiveArtifacts 'kserver.log,k-distribution/target/kserver.log'
+                        }
+                      }
                     }
                     stage('Build Debian Package') {
                       steps {
@@ -114,12 +120,6 @@ pipeline {
                         }
                         stash name: 'bionic', includes: "kframework_${env.VERSION}_amd64.deb"
                       }
-                    }
-                  }
-                  post {
-                    always {
-                      sh 'k-distribution/target/release/k/bin/stop-kserver || true'
-                      archiveArtifacts 'kserver.log,k-distribution/target/kserver.log'
                     }
                   }
                 }
@@ -141,6 +141,51 @@ pipeline {
                       sh 'stop-kserver || true'
                       archiveArtifacts 'kserver.log,k-distribution/target/kserver.log'
                     }
+                  }
+                }
+              }
+            }
+            stage('DockerHub') {
+              when {
+                branch 'master'
+                beforeAgent true
+              }
+              environment {
+                DOCKERHUB_TOKEN   = credentials('rvdockerhub')
+                BIONIC_COMMIT_TAG = "ubuntu-bionic-${env.SHORT_REV}"
+                BIONIC_BRANCH_TAG = "ubuntu-bionic-${env.BRANCH_NAME}"
+                DOCKERHUB_REPO    = "runtimeverificationinc/kframework-k"
+              }
+              stages {
+                stage('Build Image') {
+                  agent { label 'docker' }
+                  steps {
+                    dir('bionic') { unstash 'bionic' }
+                    sh '''
+                        mv bionic/kframework_${VERSION}_amd64.deb kframework_amd64_bionic.deb
+                        docker login --username "${DOCKERHUB_TOKEN_USR}" --password "${DOCKERHUB_TOKEN_PSW}"
+                        docker image build . --file package/docker/Dockerfile.ubuntu-bionic --tag "${DOCKERHUB_REPO}:${BIONIC_COMMIT_TAG}"
+                        docker image push "${DOCKERHUB_REPO}:${BIONIC_COMMIT_TAG}"
+                        docker tag "${DOCKERHUB_REPO}:${BIONIC_COMMIT_TAG}" "${DOCKERHUB_REPO}:${BIONIC_BRANCH_TAG}"
+                        docker push "${DOCKERHUB_REPO}:${BIONIC_BRANCH_TAG}"
+                    '''
+                  }
+                }
+                stage('Test Image') {
+                  agent {
+                    docker {
+                      image "${DOCKERHUB_REPO}:${BIONIC_COMMIT_TAG}"
+                      args '-u 0'
+                      reuseNode true
+                    }
+                  }
+                  steps {
+                    sh '''
+                      cd ~
+                      echo 'module TEST imports BOOL endmodule' > test.k
+                      kompile test.k --backend llvm
+                      kompile test.k --backend haskell
+                    '''
                   }
                 }
               }
@@ -372,15 +417,22 @@ pipeline {
       }
     }
     stage('Deploy') {
+      when {
+        branch 'master'
+        beforeAgent true
+      }
       agent {
         dockerfile {
           additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
           reuseNode true
         }
       }
-      when {
-        branch 'master'
-        beforeAgent true
+      post {
+        failure {
+          slackSend color: '#cb2431'                                 \
+                  , channel: '#k'                                    \
+                  , message: "Deploy Phase Failed: ${env.BUILD_URL}"
+        }
       }
       environment {
         AWS_ACCESS_KEY_ID     = credentials('aws-access-key-id')
@@ -430,13 +482,6 @@ pipeline {
               git push origin -d brew-release-$PACKAGE
             '''
           }
-        }
-      }
-      post {
-        failure {
-          slackSend color: '#cb2431'                                 \
-                  , channel: '#k'                                    \
-                  , message: "Deploy Phase Failed: ${env.BUILD_URL}"
         }
       }
     }
