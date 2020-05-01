@@ -1,5 +1,8 @@
 FROM ubuntu:bionic
 
+ARG DOCKER_GROUP_ID=2000
+RUN groupadd --gid $DOCKER_GROUP_ID --force --non-unique --system docker
+
 RUN    apt-get update        \
     && apt-get install --yes \
         bison                \
@@ -32,10 +35,8 @@ RUN curl -sSL https://get.haskellstack.org/ | sh
 
 ARG USER_ID=1000
 ARG GROUP_ID=1000
-ARG DOCKERISH_GROUP_ID=2000
-RUN    groupadd -g $GROUP_ID user                                         \
-    && groupadd -g $DOCKERISH_GROUP_ID dockerish                          \
-    && useradd -m -u $USER_ID -s /bin/sh -g user -G docker,dockerish user
+RUN    groupadd -g $GROUP_ID user                               \
+    && useradd -m -u $USER_ID -s /bin/sh -g user -G docker user
 
 USER user:user
 
