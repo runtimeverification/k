@@ -402,7 +402,7 @@ public class RuleGrammarGenerator {
                           newAtts.add(Att.ORIGINAL_PRD(), Production.class, ul.pList));
                   // Ne#Es ::= E "" Es#Terminator [klabel('_,_)]
                   prod3 = Production(ul.klabel, Sort("Ne#" + ul.sort.name(), ul.sort.params()),
-                          Seq(NonTerminal(Sort(ul.sort.name() + "#Terminator", ul.sort.params())), Terminal(""), NonTerminal(ul.childSort)),
+                          Seq(NonTerminal(ul.childSort), Terminal(""), NonTerminal(Sort(ul.sort.name() + "#Terminator", ul.sort.params()))),
                           newAtts.add(Att.ORIGINAL_PRD(), Production.class, ul.pList));
                   // Es ::= Ne#Es
                   prod4 = Production(Seq(), ul.sort, Seq(NonTerminal(Sort("Ne#" + ul.sort.name(), ul.sort.params()))), Att().add(NOT_INJECTION));
