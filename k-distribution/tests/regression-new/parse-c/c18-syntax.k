@@ -23,7 +23,7 @@ endmodule
 
 module C18-COMMON
   imports C-LEXICAL-SORTS
-  
+
   // \section(A.2.1)
 
   syntax Exp ::= Identifier
@@ -108,7 +108,7 @@ module C18-COMMON
                 | Exps "," Exp [assignExp]
 
   // \section(A.2.2)
-  
+
   syntax Decl ::= DeclSpecifiers InitDecls ";"
                 | DeclSpecifiers ";"
                 | StaticAssertDecl
@@ -272,7 +272,7 @@ module C18-COMMON
   syntax StaticAssertDecl ::= "_Static_assert" "(" Exp "," StringLiteral ")" ";"
 
   // \section(A.2.3)
-  
+
   syntax Stmt ::= Identifier ":" Stmt
                 | "case" Exp ":" Stmt
                 | "default" ":" Stmt
@@ -319,7 +319,7 @@ module C18-COMMON
                    | DeclSpecifiers FunctionDeclarator CompoundStmt [format(%1 %2 %3)]
 
   syntax Decls ::= NeList{Decl,""}
-  
+
 endmodule
 
 module C18-BASE
