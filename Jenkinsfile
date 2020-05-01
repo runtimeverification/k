@@ -391,13 +391,7 @@ pipeline {
       }
       stages {
         stage('DockerHub Images') {
-          agent {
-            dockerfile {
-              additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg DOCKER_GROUP_ID=$(stat -c %g /var/run/docker.sock)'
-              args '-v /var/run/docker.sock:/var/run/docker.sock'
-              reuseNode true
-            }
-          }
+          agent { label 'docker' }
           environment { DOCKERHUB_TOKEN = credentials('rvdockerhub') }
           steps {
             dir('bionic') { unstash 'bionic' }
