@@ -464,7 +464,7 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
             try {
                 CharSequence left = translateTerm(equality.leftHandSide());
                 CharSequence right = translateTerm(equality.rightHandSide());
-                sb.append("\n\t(= ");
+                sb.append("\n    (= ");
                 sb.append(left);
                 sb.append(" ");
                 sb.append(right);
@@ -483,7 +483,7 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
         if (isEmptyAdd) {
             sb.append(" true");
         }
-        sb.append(")");
+        sb.append("\n  )");
         return new SMTLibTerm(sb);
     }
 
