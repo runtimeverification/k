@@ -20,16 +20,9 @@ RUN    git clone 'https://github.com/z3prover/z3' --branch=z3-4.8.6 \
     && cd ../..                                                     \
     && rm -rf z3
 
-ARG USER_ID=1000
-ARG GROUP_ID=1000
-RUN    echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers    \
-    && groupadd -g $GROUP_ID user                             \
-    && useradd -m -u $USER_ID -s /bin/sh -g user -G sudo user
+COPY kframework_amd64_bionic.deb /kframework_amd64_bionic.deb
+RUN    apt-get update                                     \
+    && apt-get upgrade --yes                              \
+    && apt-get install --yes /kframework_amd64_bionic.deb
 
-USER user:user
-WORKDIR /home/user
-
-COPY --chown=user:user kframework_amd64_bionic.deb kframework_amd64_bionic.deb
-RUN    sudo apt-get update                                      \
-    && sudo apt-get upgrade --yes                               \
-    && sudo apt-get install --yes ./kframework_amd64_bionic.deb
+RUN rm -rf /kframework_amd64_bionic.deb
