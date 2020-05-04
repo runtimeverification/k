@@ -34,41 +34,6 @@ pipeline {
         stash name: 'src', includes: "kframework-${env.VERSION}-src.tar.gz"
       }
     }
-    stage('Update Submodules (non-release)') {
-      when { branch 'master' }
-      steps {
-        build job: 'rv-devops/master', propagate: false, wait: false                                   \
-            , parameters: [ booleanParam(name: 'UPDATE_DEPS_SUBMODULE', value: true)                   \
-                          , string(name: 'PR_REVIEWER', value: 'ehildenb')                             \
-                          , string(name: 'UPDATE_DEPS_REPOSITORY', value: 'kframework/wasm-semantics') \
-                          , string(name: 'UPDATE_DEPS_SUBMODULE_DIR', value: 'deps/k')                 \
-                          ]
-        build job: 'rv-devops/master', propagate: false, wait: false                                               \
-            , parameters: [ booleanParam(name: 'UPDATE_DEPS_SUBMODULE', value: true)                               \
-                          , string(name: 'PR_REVIEWER', value: 'malturki')                                         \
-                          , string(name: 'UPDATE_DEPS_REPOSITORY', value: 'runtimeverification/beacon-chain-spec') \
-                          , string(name: 'UPDATE_DEPS_SUBMODULE_DIR', value: 'deps/k')                             \
-                          ]
-        build job: 'rv-devops/master', propagate: false, wait: false                                          \
-            , parameters: [ booleanParam(name: 'UPDATE_DEPS_SUBMODULE', value: true)                          \
-                          , string(name: 'PR_REVIEWER', value: 'ehildenb')                                    \
-                          , string(name: 'UPDATE_DEPS_REPOSITORY', value: 'runtimeverification/mkr-mcd-spec') \
-                          , string(name: 'UPDATE_DEPS_SUBMODULE_DIR', value: 'deps/k')                        \
-                          ]
-        build job: 'rv-devops/master', propagate: false, wait: false                                                       \
-            , parameters: [ booleanParam(name: 'UPDATE_DEPS_SUBMODULE', value: true)                                       \
-                          , string(name: 'PR_REVIEWER', value: 'daejunpark')                                               \
-                          , string(name: 'UPDATE_DEPS_REPOSITORY', value: 'runtimeverification/beacon-chain-verification') \
-                          , string(name: 'UPDATE_DEPS_SUBMODULE_DIR', value: 'deps/k')                                     \
-                          ]
-        build job: 'rv-devops/master', propagate: false, wait: false                                                 \
-            , parameters: [ booleanParam(name: 'UPDATE_DEPS_SUBMODULE', value: true)                                 \
-                          , string(name: 'PR_REVIEWER', value: 'sskeirik')                                           \
-                          , string(name: 'UPDATE_DEPS_REPOSITORY', value: 'runtimeverification/michelson-semantics') \
-                          , string(name: 'UPDATE_DEPS_SUBMODULE_DIR', value: 'ext/k')                                \
-                          ]
-      }
-    }
     stage('Build and Package K') {
       failFast true
       parallel {
@@ -500,6 +465,36 @@ pipeline {
     stage('Update Submodules (release)') {
       when { branch 'master' }
       steps {
+        build job: 'rv-devops/master', propagate: false, wait: false                                   \
+            , parameters: [ booleanParam(name: 'UPDATE_DEPS_SUBMODULE', value: true)                   \
+                          , string(name: 'PR_REVIEWER', value: 'ehildenb')                             \
+                          , string(name: 'UPDATE_DEPS_REPOSITORY', value: 'kframework/wasm-semantics') \
+                          , string(name: 'UPDATE_DEPS_SUBMODULE_DIR', value: 'deps/k')                 \
+                          ]
+        build job: 'rv-devops/master', propagate: false, wait: false                                               \
+            , parameters: [ booleanParam(name: 'UPDATE_DEPS_SUBMODULE', value: true)                               \
+                          , string(name: 'PR_REVIEWER', value: 'malturki')                                         \
+                          , string(name: 'UPDATE_DEPS_REPOSITORY', value: 'runtimeverification/beacon-chain-spec') \
+                          , string(name: 'UPDATE_DEPS_SUBMODULE_DIR', value: 'deps/k')                             \
+                          ]
+        build job: 'rv-devops/master', propagate: false, wait: false                                          \
+            , parameters: [ booleanParam(name: 'UPDATE_DEPS_SUBMODULE', value: true)                          \
+                          , string(name: 'PR_REVIEWER', value: 'ehildenb')                                    \
+                          , string(name: 'UPDATE_DEPS_REPOSITORY', value: 'runtimeverification/mkr-mcd-spec') \
+                          , string(name: 'UPDATE_DEPS_SUBMODULE_DIR', value: 'deps/k')                        \
+                          ]
+        build job: 'rv-devops/master', propagate: false, wait: false                                                       \
+            , parameters: [ booleanParam(name: 'UPDATE_DEPS_SUBMODULE', value: true)                                       \
+                          , string(name: 'PR_REVIEWER', value: 'daejunpark')                                               \
+                          , string(name: 'UPDATE_DEPS_REPOSITORY', value: 'runtimeverification/beacon-chain-verification') \
+                          , string(name: 'UPDATE_DEPS_SUBMODULE_DIR', value: 'deps/k')                                     \
+                          ]
+        build job: 'rv-devops/master', propagate: false, wait: false                                                 \
+            , parameters: [ booleanParam(name: 'UPDATE_DEPS_SUBMODULE', value: true)                                 \
+                          , string(name: 'PR_REVIEWER', value: 'sskeirik')                                           \
+                          , string(name: 'UPDATE_DEPS_REPOSITORY', value: 'runtimeverification/michelson-semantics') \
+                          , string(name: 'UPDATE_DEPS_SUBMODULE_DIR', value: 'ext/k')                                \
+                          ]
         build job: 'rv-devops/master', propagate: false, wait: false                                  \
             , parameters: [ booleanParam(name: 'UPDATE_DEPS_SUBMODULE', value: true)                  \
                           , string(name: 'PR_REVIEWER', value: 'ehildenb')                            \
