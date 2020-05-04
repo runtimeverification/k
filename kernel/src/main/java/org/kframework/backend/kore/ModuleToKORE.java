@@ -1010,14 +1010,6 @@ public class ModuleToKORE {
                 .stream().collect(Collectors.toMap(KVariable::name, Function.identity()));
         if (ruleInfo.isEquation) {
             assertNoExistentials(rule, existentials);
-            if (!constructorBased) {
-                if (!consideredAttributes.containsKey(Att.SIMPLIFICATION())) {
-                    consideredAttributes.put(Att.SIMPLIFICATION(), false);
-                }
-                if (!rule.att().contains(Att.SIMPLIFICATION())) {
-                    rule = rule.withAtt(rule.att().add(Att.SIMPLIFICATION()));
-                }
-            }
             sb.append("  axiom{R");
             Option<Set> sortParams = rule.att().getOption("sortParams", Set.class);
             if (sortParams.nonEmpty()) {
