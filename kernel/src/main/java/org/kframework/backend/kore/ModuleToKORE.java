@@ -1121,12 +1121,42 @@ public class ModuleToKORE {
                 convert(consideredAttributes, rule.att(), sb, freeVarsMap, rule);
                 sb.append("\n\n");
             } else {
-                sb.append("\\implies{R} (\n    ");
+                sb.append("\\implies{R} (\n    \\and{R}(\n      ");
                 convertSideCondition(requires, sb);
-                sb.append(",\n    \\and{R} (\n      \\equals{");
+                sb.append(",\n      ");
+
+                for (int childIdx = 0; childIdx < ruleInfo.leftChildren.size(); childIdx++) {
+                    sb.append("\\and{R} (");
+                    sb.append("\n          ");
+                    sb.append("\\in{");
+                    Sort childSort = ruleInfo.prodChildrenSorts.get(childIdx);
+                    convert(childSort, ruleInfo.production.params(), sb);
+                    sb.append(", R} (");
+                    sb.append("\n            ");
+                    sb.append("X").append(childIdx).append(":");
+                    convert(childSort, ruleInfo.production.params(), sb);
+                    sb.append(",\n            ");
+                    convert(ruleInfo.leftChildren.get(childIdx), sb);
+                    sb.append("\n          ),");
+                }
+                sb.append("\n          \\top{R} ()");
+                sb.append("\n        ");
+                for (int childIdx = 0; childIdx < ruleInfo.leftChildren.size(); childIdx++) {
+                    sb.append(')');
+                }
+                sb.append("),\n    \\and{R} (\n      \\equals{");
                 sb.append(ruleInfo.productionSortStr);
                 sb.append(",R} (\n        ");
-                convert(left, sb);
+                convert(ruleInfo.productionLabel, sb);
+                sb.append("(");
+                String conn = "";
+                for (int childIdx = 0; childIdx < ruleInfo.leftChildren.size(); childIdx++) {
+                    sb.append(conn).append("X").append(childIdx).append(":");
+                    Sort childSort = ruleInfo.prodChildrenSorts.get(childIdx);
+                    convert(childSort, ruleInfo.production.params(), sb);
+                    conn = ",";
+                }
+                sb.append(")");
                 sb.append(",\n        ");
                 convert(right, sb);
                 sb.append("),\n      ");
