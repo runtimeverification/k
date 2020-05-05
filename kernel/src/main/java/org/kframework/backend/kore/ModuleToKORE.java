@@ -292,7 +292,7 @@ public class ModuleToKORE {
                     // priority for owise rule is 200
                     priorities.add(200);
                 } else {
-                    Optional<String> priority = att.getOptional("priority");
+                    Optional<String> priority = att.getOptional(Att.PRIORITY());
                     if (priority.isPresent()) {
                         priorities.add(Integer.valueOf(priority.get()));
                     } else {
@@ -919,7 +919,7 @@ public class ModuleToKORE {
         sb.append(" []\n");
         sb.append("\n\n// claims\n");
         HashMap<String, Boolean> consideredAttributes = new HashMap<>();
-        consideredAttributes.put("priority", true);
+        consideredAttributes.put(Att.PRIORITY(), true);
         consideredAttributes.put(Att.LABEL(), true);
 
         for (Sentence sentence : iterable(spec.sentencesExcept(definition))) {
@@ -1183,7 +1183,7 @@ public class ModuleToKORE {
                 // LHS for semantics rules
                 String ruleAliasName = String.format("rule%dLHS", ruleIndex);
                 // default priority for semantics rules is 50
-                Integer priority = Integer.valueOf(rule.att().getOptional("priority").orElse("50"));
+                Integer priority = Integer.valueOf(rule.att().getOptional(Att.PRIORITY()).orElse("50"));
                 // priority for owise rule is 200
                 if(ruleInfo.isOwise) {
                     priority = 200;

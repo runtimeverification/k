@@ -8,6 +8,7 @@ import org.kframework.attributes.Source;
 import org.kframework.backend.Backends;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.*;
+import org.kframework.compile.checks.CheckAtt;
 import org.kframework.compile.checks.CheckConfigurationCells;
 import org.kframework.compile.checks.CheckFunctions;
 import org.kframework.compile.checks.CheckHOLE;
@@ -285,6 +286,8 @@ public class Kompile {
     public void structuralChecks(scala.collection.Set<Module> modules, Module mainModule, Option<Module> kModule, Set<String> excludedModuleTags, boolean _throw) {
         CheckRHSVariables checkRHSVariables = new CheckRHSVariables(errors);
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(checkRHSVariables::check));
+
+        stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckAtt(errors, m)::check));
 
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckConfigurationCells(errors, m)::check));
 
