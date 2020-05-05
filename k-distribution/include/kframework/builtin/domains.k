@@ -827,11 +827,11 @@ module BYTES-IN-K
   syntax Bytes ::= padRightBytes(Bytes, Int, Int) [function]
                  | padLeftBytes(Bytes, Int, Int) [function]
   rule padRightBytes(BS, LEN, VAL) => reverseBytes(padLeftBytes(reverseBytes(BS), LEN, VAL))
-  rule padLeftBytes(BS, LEN, VAL) => BS requires lengthBytes(BS) >=Int LEN
-  rule padLeftBytes(BS, LEN, VAL) => padLeftBytes(VAL : BS, LEN, VAL) requires lengthBytes(BS) <Int LEN
+  rule padLeftBytes(BS, LEN, VAL) => BS requires lengthBytes(BS) >=Int LEN andBool 0 <= LEN
+  rule padLeftBytes(BS, LEN, VAL) => padLeftBytes(VAL : BS, LEN, VAL) requires lengthBytes(BS) <Int LEN andBool 0 <= LEN
 
-  rule #Ceil(padRightBytes(_,_, VAL)) => {(0 <=Int VAL andBool VAL <Int 256) #Equals true} [anywhere, simplification]
-  rule #Ceil(padLeftBytes(_,_, VAL))  => {(0 <=Int VAL andBool VAL <Int 256) #Equals true} [anywhere, simplification]
+  rule #Ceil(padRightBytes(_, LEN, VAL)) => {(0 <= LEN andBool 0 <=Int VAL andBool VAL <Int 256) #Equals true} [anywhere, simplification]
+  rule #Ceil(padLeftBytes(_, LEN, VAL))  => {(0 <= LEN andBool 0 <=Int VAL andBool VAL <Int 256) #Equals true} [anywhere, simplification]
 
   syntax Bytes ::= reverseBytes(Bytes) [function, functional]
   syntax Bytes ::= reverseBytes(Bytes, Bytes) [function, klabel(reverseBytesAux)]
