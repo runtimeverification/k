@@ -1120,6 +1120,21 @@ public class ModuleToKORE {
                 sb.append("))\n  ");
                 convert(consideredAttributes, rule.att(), sb, freeVarsMap, rule);
                 sb.append("\n\n");
+            } else if (rule.att().contains(Att.SIMPLIFICATION())) {
+                sb.append("\\implies{R} (\n    ");
+                convertSideCondition(requires, sb);
+                sb.append(",\n    \\and{R} (\n      \\equals{");
+                sb.append(ruleInfo.productionSortStr);
+                sb.append(",R} (\n        ");
+                convert(left, sb);
+                sb.append(",\n        ");
+                convert(right, sb);
+                sb.append("),\n      ");
+                convertSideCondition(ensures, sb);
+                sb.append("))\n  ");
+                convert(consideredAttributes, rule.att(), sb, freeVarsMap, rule);
+                sb.append("\n\n");
+
             } else {
                 sb.append("\\implies{R} (\n    \\and{R}(\n      ");
                 convertSideCondition(requires, sb);
