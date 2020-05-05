@@ -20,6 +20,8 @@ KSERVER=$(abspath $(MAKEFILE_PATH)/../bin/kserver)
 KSEARCH=$(abspath $(MAKEFILE_PATH)/../bin/krun) --search-all
 # and kast
 KAST=$(abspath $(MAKEFILE_PATH)/../bin/kast)
+# and kprint
+KPRINT=$(abspath $(MAKEFILE_PATH)/../bin/kprint)
 # path relative to current definition of test programs
 TESTDIR?=tests
 # path to put -kompiled directory in

@@ -183,7 +183,8 @@ public class ParserUtils {
             List<File> lookupDirectories,
             Set<File> requiredFiles,
             boolean kore,
-            boolean preprocess) {
+            boolean preprocess,
+            boolean leftAssoc) {
 
         List<org.kframework.kil.Module> kilModules =
                 slurp(definitionText, source, currentDirectory, lookupDirectories, requiredFiles);
@@ -219,7 +220,7 @@ public class ParserUtils {
           System.out.println(def.toString());
         }
 
-        KILtoKORE kilToKore = new KILtoKORE(context, false, kore);
+        KILtoKORE kilToKore = new KILtoKORE(context, false, kore, leftAssoc);
 
         HashMap<String, Module> koreModules = new HashMap<>();
         koreModules.putAll(previousModules.stream().collect(Collectors.toMap(Module::name, m -> m)));
@@ -242,8 +243,9 @@ public class ParserUtils {
             File currentDirectory,
             List<File> lookupDirectories,
             boolean kore,
-            boolean preprocess) {
-        Set<Module> modules = loadModules(previousModules, new Context(), definitionText, source, currentDirectory, lookupDirectories, new HashSet<>(), kore, preprocess);
+            boolean preprocess,
+            boolean leftAssoc) {
+        Set<Module> modules = loadModules(previousModules, new Context(), definitionText, source, currentDirectory, lookupDirectories, new HashSet<>(), kore, preprocess, leftAssoc);
         Set<Module> allModules = new HashSet<>(modules);
         allModules.addAll(previousModules);
         Module mainModule = getMainModule(mainModuleName, allModules);
@@ -259,10 +261,11 @@ public class ParserUtils {
             List<File> lookupDirectories,
             boolean autoImportDomains,
             boolean kore,
-            boolean preprocess) {
+            boolean preprocess,
+            boolean leftAssoc) {
         return loadDefinition(mainModuleName, syntaxModuleName, definitionText,
                 Source.apply(source.getAbsolutePath()),
-                currentDirectory, lookupDirectories, autoImportDomains, kore, preprocess);
+                currentDirectory, lookupDirectories, autoImportDomains, kore, preprocess, leftAssoc);
     }
 
     public org.kframework.definition.Definition loadDefinition(
@@ -274,13 +277,14 @@ public class ParserUtils {
             List<File> lookupDirectories,
             boolean autoImportDomains,
             boolean kore,
-            boolean preprocess) {
+            boolean preprocess,
+            boolean leftAssoc) {
         Set<Module> previousModules = new HashSet<>();
         Set<File> requiredFiles = new HashSet<>();
         Context context = new Context();
         if (autoImportDomains)
-            previousModules.addAll(loadModules(new HashSet<>(), context, Kompile.REQUIRE_PRELUDE_K, source, currentDirectory, lookupDirectories, requiredFiles, kore, preprocess));
-        Set<Module> modules = loadModules(previousModules, context, definitionText, source, currentDirectory, lookupDirectories, requiredFiles, kore, preprocess);
+            previousModules.addAll(loadModules(new HashSet<>(), context, Kompile.REQUIRE_PRELUDE_K, source, currentDirectory, lookupDirectories, requiredFiles, kore, preprocess, leftAssoc));
+        Set<Module> modules = loadModules(previousModules, context, definitionText, source, currentDirectory, lookupDirectories, requiredFiles, kore, preprocess, leftAssoc);
         if (preprocess) {
           System.exit(0);
         }

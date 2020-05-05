@@ -113,19 +113,28 @@ public class KSyntax2Bison {
     return Module(module.name(), module.imports(), immutable(sentences), module.att());
   }
 
-  public static void writeParser(Module module, Scanner scanner, Sort start, File path) {
+  public static void writeParser(Module module, Scanner scanner, Sort start, File path, boolean glr) {
     module = transformByPriorityAndAssociativity(module);
     StringBuilder bison = new StringBuilder();
     bison.append("%{\n" +
         "#include <stdio.h>\n" +
         "#include \"node.h\"\n" +
         "#include \"parser.tab.h\"\n" +
-        "int yylex(void);\n" +
-        "void yyerror(const char *);\n" +
+        "int yylex(YYSTYPE *, YYLTYPE *, void *);\n" +
+        "void yyerror(YYLTYPE *, void *, const char *);\n" +
         "char *enquote(char *);\n" +
+        "YYSTYPE mergeAmb(YYSTYPE x0, YYSTYPE x1);\n" +
         "node *result;\n" +
         "%}\n\n");
-    bison.append("%define api.value.type union\n");
+    bison.append("%define api.value.type {union value_type}\n");
+    bison.append("%define api.pure\n");
+    bison.append("%define lr.type ielr\n");
+    bison.append("%lex-param {void *scanner} \n");
+    bison.append("%parse-param {void *scanner} \n");
+    bison.append("%locations\n");
+    if (glr) {
+      bison.append("%glr-parser\n");
+    }
     bison.append("%define parse.error verbose\n");
     for (int kind : scanner.kinds()) {
       TerminalLike tok = scanner.getTokenByKind(kind);
@@ -135,10 +144,10 @@ public class KSyntax2Bison {
       } else {
         val = ((RegexTerminal)tok).regex();
       }
-      bison.append("%token <char *> TOK_" + kind + " " + (kind+1) + " " + StringUtil.enquoteCString(val) + "\n");
+      bison.append("%token TOK_" + kind + " " + (kind+1) + " " + StringUtil.enquoteCString(val) + "\n");
     }
     for (Sort sort : iterable(module.allSorts())) {
-      bison.append("%nterm <node *> ");
+      bison.append("%nterm ");
       encode(sort, bison);
       bison.append("\n");
     }
@@ -147,23 +156,24 @@ public class KSyntax2Bison {
     bison.append("\n%%\n");
     bison.append("top: ");
     encode(start, bison);
-    bison.append(" { result = $1; } ;\n");
+    bison.append(" { result = $1.nterm; } ;\n");
     Map<Sort, List<Production>> prods = stream(module.productions()).collect(Collectors.groupingBy(p -> p.sort()));
     for (Sort sort : iterable(module.allSorts())) {
       encode(sort, bison);
       bison.append(":\n");
       String conn = "";
       for (Production prod : Optional.ofNullable(prods.get(sort)).orElse(java.util.Collections.emptyList())) {
+        if (prod.att().contains("projection")) continue;
         bison.append("  " + conn);
-        processProduction(prod, module, scanner, bison);
+        processProduction(prod, module, scanner, bison, glr);
         conn = "|";
       }
       bison.append(";\n");
     }
     bison.append("\n%%\n");
     bison.append("\n" +
-        "void yyerror (const char *s) {\n" +
-        "    fprintf (stderr, \"%s\\n\", s);\n" +
+        "void yyerror (YYLTYPE *loc, void *scanner, const char *s) {\n" +
+        "    fprintf (stderr, \"%d:%d:%d:%d:%s\\n\", loc->first_line, loc->first_column, loc->last_line, loc->last_column, s);\n" +
         "}\n");
     try {
       FileUtils.write(path, bison);
@@ -187,7 +197,7 @@ public class KSyntax2Bison {
     sb.append("_");
   }
 
-  private static void processProduction(Production prod, Module module, Scanner scanner, StringBuilder bison) {
+  private static void processProduction(Production prod, Module module, Scanner scanner, StringBuilder bison, boolean glr) {
     int i = 1;
     List<Integer> nts = new ArrayList<>();
     for (ProductionItem item : iterable(prod.items())) {
@@ -215,7 +225,7 @@ public class KSyntax2Bison {
       if (!isString) {
         bison.append("enquote(");
       }
-      bison.append("$1");
+      bison.append("$1.token");
       if (!isString) {
         bison.append(")");
       }
@@ -226,10 +236,14 @@ public class KSyntax2Bison {
           "  n2->symbol = \"\\\\dv{");
       encodeKore(prod.sort(), bison);
       bison.append("}\";\n" +
+          "  n2->sort = \"");
+      encodeKore(prod.sort(), bison);
+      bison.append("\";\n" +
           "  n2->str = false;\n" +
           "  n2->nchildren = 1;\n" +
           "  n2->children[0] = n;\n" +
-          "  $$ = n2;\n" +
+          "  value_type result = {.nterm = n2};\n" +
+          "  $$ = result;\n" +
           "}\n");
     } else if (!prod.att().contains("token") && prod.isSubsort() && !prod.att().contains(RuleGrammarGenerator.NOT_INJECTION)) {
       bison.append("{\n" +
@@ -239,21 +253,59 @@ public class KSyntax2Bison {
       bison.append(", ");
       encodeKore(prod.sort(), bison);
       bison.append("}\";\n" +
+          "  n->sort = \"");
+      encodeKore(prod.sort(), bison);
+      bison.append("\";\n" +
           "  n->str = false;\n" +
           "  n->nchildren = 1;\n" +
-          "  n->children[0] = $1;\n" +
-          "  $$ = n;\n" +
+          "  n->children[0] = $1.nterm;\n");
+      if (prod.att().contains("userListTerminator")) {
+        KLabel nil = KLabel(prod.att().get("userListTerminator"));
+        KLabel cons = KLabel(prod.att().get("userList"));
+        bison.append(
+          "  node *n2 = malloc(sizeof(node));\n" +
+          "  n2->symbol = \"");
+        encodeKore(nil, bison);
+        bison.append("\";\n" +
+          "  n2->str = false;\n" +
+          "  n2->nchildren = 0;\n" +
+          "  n2->sort = \"");
+        encodeKore(prod.sort(), bison);
+        bison.append("\";\n" +
+          "  node *n3 = malloc(sizeof(node) + 2*sizeof(node *));\n" +
+          "  n3->symbol = \"");
+        encodeKore(cons, bison);
+        bison.append("\";\n" +
+          "  n3->str = false;\n" +
+          "  n3->nchildren = 2;\n" +
+          "  n3->children[0] = n2;\n" +
+          "  n3->children[1] = $1.nterm;\n" +
+          "  n3->sort = \"");
+        encodeKore(prod.getSubsortSort(), bison);
+        bison.append("\";\n" +
+          "  value_type result = {.nterm = n3};\n" +
+          "  $$ = result;\n" +
           "}\n");
+      } else {
+        bison.append("  value_type result = {.nterm = n};\n" +
+          "  $$ = result;\n" +
+          "}\n");
+      }
+
     } else if (prod.att().contains("token") && prod.isSubsort()) {
       bison.append("{\n" +
           "  node *n = malloc(sizeof(node) + sizeof(node *));\n" +
           "  n->symbol = \"\\\\dv{");
       encodeKore(prod.sort(), bison);
       bison.append("}\";\n" +
+          "  n->sort = \"");
+      encodeKore(prod.sort(), bison);
+      bison.append("\";\n" +
           "  n->str = false;\n" +
           "  n->nchildren = 1;\n" +
-          "  n->children[0] = $1->children[0];\n" +
-          "  $$ = n;\n" +
+          "  n->children[0] = $1.nterm->children[0];\n" +
+          "  value_type result = {.nterm = n};\n" +
+          "  $$ = result;\n" +
           "}\n");
     } else if (prod.klabel().isDefined()) {
       bison.append("{\n" +
@@ -261,19 +313,33 @@ public class KSyntax2Bison {
           "  n->symbol = \"");
       encodeKore(prod.klabel().get(), bison);
       bison.append("\";\n" +
+          "  n->sort = \"");
+      encodeKore(prod.sort(), bison);
+      bison.append("\";\n" +
           "  n->str = false;\n" +
           "  n->nchildren = ").append(nts.size()).append(";\n");
       for (i = 0; i < nts.size(); i++) {
         bison.append(
-          "  n->children[").append(i).append("] = $").append(nts.get(i)).append(";\n");
+          "  n->children[").append(i).append("] = $").append(nts.get(i)).append(".nterm;\n");
       }
       bison.append(
-          "  $$ = n;\n" +
+          "  value_type result = {.nterm = n};\n" +
+          "  $$ = result;\n" +
           "}\n");
     } else if (prod.att().contains("bracket")) {
       bison.append("{\n" +
           "  $$ = $").append(nts.get(0)).append(";\n" +
           "}\n");
+    }
+    if (glr) {
+      bison.append("%merge <mergeAmb> ");
+      if (prod.att().contains("prefer")) {
+        bison.append("%dprec 3\n");
+      } else if (prod.att().contains("avoid")) {
+        bison.append("%dprec 1\n");
+      } else {
+        bison.append("%dprec 2\n");
+      }
     }
     bison.append("\n");
   }

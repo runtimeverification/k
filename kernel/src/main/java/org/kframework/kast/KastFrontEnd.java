@@ -89,7 +89,7 @@ public class KastFrontEnd extends FrontEnd {
         try {
             Reader stringToParse = null;
             File outputFile = null;
-            if (!options.genParser) {
+            if (!(options.genParser || options.genGlrParser)) {
               stringToParse = options.stringToParse();
             } else {
               outputFile = options.outputFile();
@@ -130,8 +130,8 @@ public class KastFrontEnd extends FrontEnd {
             }
             Module parsingMod = maybeMod.get();
 
-            if (options.genParser) {
-              kread.createBisonParser(parsingMod, sort, outputFile);
+            if (options.genParser || options.genGlrParser) {
+              kread.createBisonParser(parsingMod, sort, outputFile, options.genGlrParser);
             } else {
               K parsed = kread.prettyRead(parsingMod, sort, def, source, FileUtil.read(stringToParse));
 

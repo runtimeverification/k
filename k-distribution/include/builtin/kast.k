@@ -276,6 +276,12 @@ module K
                 | K ":/=K" K          [function, functional, klabel(_:/=K_), symbol, notEqualEqualK]
 endmodule
 
+module K-AMBIGUITIES
+
+  syntax {Sort} Sort ::= amb(Sort, Sort) [symbol]
+
+endmodule
+
 // To be used to parse terms in full K
 module K-TERM
   imports KSEQ-SYMBOLIC
