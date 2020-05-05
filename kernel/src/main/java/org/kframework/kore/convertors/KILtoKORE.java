@@ -306,7 +306,7 @@ public class KILtoKORE extends KILTransformation<Object> {
         if (bisonLists) {
           prod1 = Production(KLabel(p.getKLabel(kore), immutable(p.getParams())), sort,
                   Seq(NonTerminal(sort), Terminal(userList.getSeparator()), NonTerminal(elementSort)),
-                  attrs.add("right"));
+                  attrs.add("left"));
         } else {
           prod1 = Production(KLabel(p.getKLabel(kore), immutable(p.getParams())), sort,
                   Seq(NonTerminal(elementSort), Terminal(userList.getSeparator()), NonTerminal(sort)),
