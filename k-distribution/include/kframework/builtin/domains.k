@@ -216,7 +216,7 @@ module SET
    of unique items). */
 
   /*@ Construct a new Set as the concatenation (disjoint union) of two different sets
-   *  Concatenating two sets is undefined if their intersection is non-empty, use USet for normal set union.
+   *  Concatenating two sets is undefined if their intersection is non-empty, use |Set for normal set union.
    * */
   syntax Set ::= Set Set                  [left, function, functional, hook(SET.concat), klabel(_Set_), symbol, assoc, comm, unit(.Set), idem, element(SetItem), format(%1%n%2)]
   /*@ Construct an empty Set */
@@ -246,8 +246,8 @@ module SET
   syntax KItem ::= choice(Set)                [function, hook(SET.choice), klabel(Set:choice)]
 
   /*@ Get the union of two sets ($A \cup B$) */
-  syntax Set ::= Set "USet" Set            [function, functional, hook(SET.union)]
-  rule S1:Set USet S2:Set => S1 (S2 -Set S1)
+  syntax Set ::= Set "|Set" Set            [function, functional, hook(SET.union)]
+  rule S1:Set |Set S2:Set => S1 (S2 -Set S1)
 endmodule
 
 module LIST
