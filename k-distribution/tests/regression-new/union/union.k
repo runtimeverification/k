@@ -19,7 +19,7 @@ module UNION
   rule #IntsToSetAux(I Is, S) => #IntsToSetAux(Is, S)            requires (I in S)
   rule #IntsToSetAux(I Is, S) => #IntsToSetAux(Is, SetItem(I) S) requires notBool(I in S)
 
-  rule <k> I1 ; I2 => #IntsToSet(I1) USet #IntsToSet(I2) </k>
+  rule <k> I1 ; I2 => #IntsToSet(I1) |Set #IntsToSet(I2) </k>
 
   configuration <k> $PGM:Pgm </k>
 endmodule
