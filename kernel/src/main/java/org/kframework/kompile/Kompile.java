@@ -154,6 +154,11 @@ public class Kompile {
 
         if (kompileOptions.experimental.genBisonParser || kompileOptions.experimental.genGlrBisonParser) {
             new KRead(kem, files, InputModes.PROGRAM).createBisonParser(def.programParsingModuleFor(def.mainSyntaxModuleName(), kem).get(), def.programStartSymbol, files.resolveKompiled("parser_PGM"), kompileOptions.experimental.genGlrBisonParser);
+            for (Module mod : iterable(def.getParsedDefinition().entryModules())) {
+              if (mod.att().contains("parser")) {
+                new KRead(kem, files, InputModes.PROGRAM).createBisonParser(def.programParsingModuleFor(mod.name(), kem).get(), def.configurationVariableDefaultSorts.getOrDefault("$" + mod.att().get("parser"), Sorts.K()), files.resolveKompiled("parser_" + mod.att().get("parser")), kompileOptions.experimental.genGlrBisonParser);
+              }
+            }
         }
 
         return def;
