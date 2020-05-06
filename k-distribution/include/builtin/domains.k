@@ -870,6 +870,11 @@ module BYTES-SYMBOLIC [symbolic, kast]
        { lengthBytes(@B) <=Int @END #Equals true }
        #And #Ceil(@B) #And #Ceil(@START) #And #Ceil(@END)
     [anywhere]
+
+    rule substrBytes(B, START, END) => B
+      requires START ==Int 0
+       andBool lengthBytes(B) ==Int END
+      [simplification]
 endmodule
 
 module BYTES
