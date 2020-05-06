@@ -875,6 +875,22 @@ module BYTES-SYMBOLIC [symbolic, kast]
       requires START ==Int 0
        andBool lengthBytes(B) ==Int END
       [simplification]
+
+    rule substrBytes(B1 +Bytes B2, START, END) => substrBytes(B1, START, END)
+      requires END <=Int lengthBytes(B1)
+      [simplification]
+
+    rule substrBytes(B1 +Bytes B2, START, END) => substrBytes(B2, START -Int lengthBytes(B1), END -Int lengthBytes(B1))
+      requires lengthBytes(B1) <=Int START
+      [simplification]
+
+    rule substrBytes(B1 +Bytes B2, START, END)
+      => substrBytes(B1, START,                               lengthBytes(B1))
+         +Bytes
+         substrBytes(B2, START -Int lengthBytes(B1), END -Int lengthBytes(B1))
+      requires notBool (lengthBytes(B1) >=Int END)
+       andBool notBool (lengthBytes(B1) <=Int START)
+      [simplification]
 endmodule
 
 module BYTES
