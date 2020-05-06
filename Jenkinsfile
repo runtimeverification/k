@@ -471,6 +471,12 @@ pipeline {
                           , string(name: 'UPDATE_DEPS_REPOSITORY', value: 'kframework/wasm-semantics') \
                           , string(name: 'UPDATE_DEPS_SUBMODULE_DIR', value: 'deps/k')                 \
                           ]
+        build job: 'rv-devops/master', propagate: false, wait: false                                   \
+            , parameters: [ booleanParam(name: 'UPDATE_DEPS_SUBMODULE', value: true)                   \
+                          , string(name: 'PR_REVIEWER', value: 'dwightguth')                           \
+                          , string(name: 'UPDATE_DEPS_REPOSITORY', value: 'kframework/c-semantics')    \
+                          , string(name: 'UPDATE_DEPS_SUBMODULE_DIR', value: '.build/k')               \
+                          ]
         build job: 'rv-devops/master', propagate: false, wait: false                                               \
             , parameters: [ booleanParam(name: 'UPDATE_DEPS_SUBMODULE', value: true)                               \
                           , string(name: 'PR_REVIEWER', value: 'malturki')                                         \
