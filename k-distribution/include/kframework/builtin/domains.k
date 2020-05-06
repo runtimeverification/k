@@ -830,9 +830,6 @@ module BYTES-IN-K
   rule padLeftBytes(BS, LEN, VAL) => BS requires lengthBytes(BS) >=Int LEN andBool 0 <=Int LEN
   rule padLeftBytes(BS, LEN, VAL) => padLeftBytes(VAL : BS, LEN, VAL) requires lengthBytes(BS) <Int LEN andBool 0 <=Int LEN
 
-  rule #Ceil(padRightBytes(_, LEN, VAL)) => {(0 <=Int LEN andBool 0 <=Int VAL andBool VAL <Int 256) #Equals true} [anywhere, simplification]
-  rule #Ceil(padLeftBytes(_, LEN, VAL))  => {(0 <=Int LEN andBool 0 <=Int VAL andBool VAL <Int 256) #Equals true} [anywhere, simplification]
-
   syntax Bytes ::= reverseBytes(Bytes) [function, functional]
   syntax Bytes ::= reverseBytes(Bytes, Bytes) [function, klabel(reverseBytesAux)]
   rule reverseBytes(BS) => reverseBytes(BS, nilBytes)
@@ -860,6 +857,10 @@ endmodule
 
 module BYTES-SYMBOLIC [symbolic, kast]
   imports BYTES-IN-K
+
+  rule #Ceil(padRightBytes(_, LEN, VAL)) => {(0 <=Int LEN andBool 0 <=Int VAL andBool VAL <Int 256) #Equals true} [anywhere, simplification]
+  rule #Ceil(padLeftBytes(_, LEN, VAL))  => {(0 <=Int LEN andBool 0 <=Int VAL andBool VAL <Int 256) #Equals true} [anywhere, simplification]
+
 endmodule
 
 module BYTES
