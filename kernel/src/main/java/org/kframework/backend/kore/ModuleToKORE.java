@@ -123,7 +123,7 @@ public class ModuleToKORE {
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(module);
         Sort topCellSort = configInfo.getRootCell();
         String topCellSortStr = getSortStr(topCellSort);
-        String prelude = files.loadFromKBase("include/kore/prelude.kore");
+        String prelude = files.loadFromKIncludeDir("kore/prelude.kore");
         sb.append("[topCellInitializer{}(");
         convert(topCellInitializer, sb);
         sb.append("())]\n\n");
