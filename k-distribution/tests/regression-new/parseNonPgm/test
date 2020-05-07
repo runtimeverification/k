@@ -1,5 +1,5 @@
 #!/bin/bash
-export PATH=$PATH:"$(dirname "$0")"/../../../../bin
+export PATH=$PATH:"$(dirname "$0")"/../../../bin
 pgm="$1"
 mode="$2"
 shift; shift; shift; shift; shift
