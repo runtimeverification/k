@@ -1685,12 +1685,15 @@ This can be done one of two different ways.
    `kompile` will decide the sorts to use as start symbols based on the sorts
    in the configuration declaration for the configuration variables. The $PGM
    configuration variable will be generated based on the main syntax module
-   of the definition. The user must explicitly annotate other modules with the
-   configuration variables that they should be used to parse as attributes.
-   For example, `module TEST [parser(FOO)]` will tell `kompile` to parse the 
-   $FOO configuration variable using the syntax in the TEST module. If the user
-   forgets to annotate the modules with the configuration variables, only the 
-   $PGM parser will be generated.
+   of the definition. The user must explicitly annotate the configuration
+   declaration with the other modules to use to parse the other configuration
+   variables as attributes. For example, if I have the following cell in the
+   configuration declaration: `<cell> foo($FOO:Foo, $BAR:Bar) </cell>`,
+   One might annotate it with the attribute pair `parser="FOO, TEST; BAR, TEST2"`
+   to indicate that configuration variable `$FOO` should be parsed in the
+   `TEST` module, and configuration variable `$BAR` should be parsed in the
+   `TEST2` moducle. If the user forgets to annotate the declaration with the
+   parser attribute, only the $PGM parser will be generated.
 
 Bison-generated parsers are extremely fast compared to `kast`, but they have
 some important limitations:
