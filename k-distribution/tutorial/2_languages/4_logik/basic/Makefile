@@ -5,7 +5,7 @@ KOMPILE_BACKEND?=java
 KRUN_FLAGS=--search --pattern "<solution> Solution:Map </solution>"
 
 include $(MAKEFILE_PATH)/../../../find-k.mak
-include ${K_HOME}/include/ktest.mak
+include ${K_HOME}/include/kframework/ktest.mak
 
 tests/reverse-slow-2.logik: kompile
 	cat $@.in 2>/dev/null | $(KRUN) $@ -d $(DEFDIR) $(KRUN_FLAGS) --bound 1 $(CHECK) $@.out

@@ -16,7 +16,7 @@ import java.util.Date;
 import java.util.jar.Manifest;
 
 public class JarInfo {
-    private static final String JAR_PATH = "k-distribution/target/release/k/lib/java/JAR_FILENAME_PLACEHOLDER.jar";
+    private static final String JAR_PATH = "k-distribution/target/release/k/lib/kframework/java/JAR_FILENAME_PLACEHOLDER.jar";
 
     /**
      * Returns the K installation directory
@@ -30,7 +30,7 @@ public class JarInfo {
             path = new File(path).getParentFile().getParentFile().getParentFile().getAbsolutePath() + "/" + JAR_PATH;
         try {
             String decodedPath = URLDecoder.decode(path, "UTF-8");
-            File parent = new File(decodedPath).getParentFile().getParentFile().getParentFile();
+            File parent = new File(decodedPath).getParentFile().getParentFile().getParentFile().getParentFile();
             return parent.getAbsolutePath();
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
@@ -59,7 +59,7 @@ public class JarInfo {
         if (!path.toFile().getAbsolutePath().endsWith(".jar") || path.getParent().getFileName().toString().equals("target")) {
             return path.getParent().resolve("../../k-distribution/include");
         } else {
-            return path.getParent().resolve("../../include");
+            return path.getParent().resolve("../../../include/kframework");
         }
     }
 

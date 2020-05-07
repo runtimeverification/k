@@ -5,15 +5,15 @@ script_dir=$(dirname $0)
 # the script will cleanup and quit when it receives any of these signals
 trap_signals="ALRM HUP INT PIPE QUIT TERM"
 
-. "${script_dir}/../lib/setenv"
+. "${script_dir}/../lib/kframework/setenv"
 ulimit -s $(ulimit -H -s)
-if ! "${script_dir}/../lib/checkJava"; then
+if ! "${script_dir}/../lib/kframework/checkJava"; then
 	exit 1
 fi
 
 trap 'kill -TERM $pid' $trap_signals
 java -Dfile.encoding=UTF-8 -Djava.awt.headless=true -Djansi.force=true \
-    $K_OPTS -ea -cp "${script_dir}/../lib/java/*" org.kframework.main.Main \
+    $K_OPTS -ea -cp "${script_dir}/../lib/kframework/java/*" org.kframework.main.Main \
    -kserver "$@" &
 pid=$!
 wait $pid
