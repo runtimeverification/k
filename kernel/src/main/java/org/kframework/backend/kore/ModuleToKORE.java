@@ -639,7 +639,7 @@ public class ModuleToKORE {
                 ),
                 BooleanUtils.TRUE,
                 BooleanUtils.TRUE,
-                Att.empty().add("owise")
+                Att.empty().add(Att.OWISE())
         );
         rules.add(inKeysRule2);
 
@@ -978,7 +978,7 @@ public class ModuleToKORE {
                 equation = true;
                 productionSortStr = topCellSortStr;
             }
-            owise = rule.att().contains("owise");
+            owise = rule.att().contains(Att.OWISE());
         }
 
         return new RuleInfo(equation, owise, kore, production,

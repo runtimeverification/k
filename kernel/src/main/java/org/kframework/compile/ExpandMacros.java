@@ -82,7 +82,7 @@ public class ExpandMacros {
         this.cover = kompileOptions.coverage;
         this.kompileOptions = kompileOptions;
         files.resolveKompiled(".").mkdirs();
-        List<Rule> allMacros = stream(mod.rules()).filter(r -> isMacro(r.att(), reverse)).sorted(Comparator.comparing(r -> r.att().contains("owise"))).collect(Collectors.toList());
+        List<Rule> allMacros = stream(mod.rules()).filter(r -> isMacro(r.att(), reverse)).sorted(Comparator.comparing(r -> r.att().contains(Att.OWISE()))).collect(Collectors.toList());
         macros = allMacros.stream().filter(r -> getLeft(r, reverse) instanceof KApply).collect(Collectors.groupingBy(r -> ((KApply)getLeft(r, reverse)).klabel()));
         macrosBySort = stream(mod.allSorts()).collect(Collectors.toMap(s -> s, s -> allMacros.stream().filter(r -> {
           K left = getLeft(r, reverse);
