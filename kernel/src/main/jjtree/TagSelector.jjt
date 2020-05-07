@@ -15,19 +15,21 @@ import org.kframework.utils.errorsystem.KEMException;
 
 /**
  * An Arithmetic Grammar.
+ * @author Radu Mereuta
  */
 public class TagSelector {
 
-  /** Main entry point. */
+  /** Run this to test the parser. */
   public static void main(String args[]) {
     System.out.println("Reading from standard input...");
-    TagSelector t = new TagSelector(new StringReader("a|!b&"));
+    TagSelector t = new TagSelector(new StringReader("a|!b&c"));
     try {
-      ASTTagListStart result = t.TagListStart();
+      //SimpleNode result = t.ExpressionStart();
+      SimpleNode result = t.TagListStart();
       result.dump("");
-      System.out.println("Thank you.");
+      System.out.println("Success.");
     } catch (Exception e) {
-      System.out.println("Oops.");
+      System.out.println("Error:");
       System.out.println(e.getMessage());
       e.printStackTrace();
     }
@@ -68,7 +70,7 @@ public class TagSelector {
           return eval(exp.jjtGetChild(0), tagList) && eval(exp.jjtGetChild(1), tagList);
       else if (exp instanceof ASTNot)
           return !eval(exp.jjtGetChild(0), tagList);
-      else if (exp instanceof ASTIdentifier || exp instanceof ASTInteger)
+      else if (exp instanceof ASTTag)
           return tagList.contains(((SimpleNode) exp).value.toString());
       throw KEMException.compilerError("Unknown ASTNode type: " + exp.getClass() + " when evaluating selector tags.");
   }
@@ -85,29 +87,15 @@ SKIP :
 | <"/*" (~["*"])* "*" (~["/"] (~["*"])* "*")* "/">
 }
 
-TOKEN : /* LITERALS */
+TOKEN : /* TAG */
 {
-  < INTEGER_LITERAL:
-        <DECIMAL_LITERAL> (["l","L"])?
-      | <HEX_LITERAL> (["l","L"])?
-      | <OCTAL_LITERAL> (["l","L"])?
-  >
-|  < #DECIMAL_LITERAL: ["1"-"9"] (["0"-"9"])* >
-|  < #HEX_LITERAL: "0" ["x","X"] (["0"-"9","a"-"f","A"-"F"])+ >
-|  < #OCTAL_LITERAL: "0" (["0"-"7"])* >
-}
-
-TOKEN : /* IDENTIFIERS */
-{
-  < IDENTIFIER: <LETTER> (<LETTER>|<DIGIT>)* >
-|  < #LETTER: ["_","a"-"z","A"-"Z"] >
-|  < #DIGIT: ["0"-"9"] >
+  <TAG: (["_","a"-"z","A"-"Z","0"-"9","#","$","%","^","*","+","."])+>
 }
 
 /** Main tag list production. */
 ASTTagListStart TagListStart() : {}
 {
-  ("{" ( Identifier() | Integer() )+ "}" | Identifier())
+  ("{" ( Tag() )+ "}" | Tag())
   { return jjtThis; }
 }
 
@@ -140,19 +128,12 @@ void NotExpression() #void : {}
 
 void UnaryExpression() #void : {}
 {
-  "(" Expression() ")" | Identifier() | Integer()
+  "(" Expression() ")" | Tag()
 }
 
-void Identifier() :
+void Tag() :
 { Token t; }
 {
-  t=<IDENTIFIER>
-  { jjtThis.jjtSetValue(t.image); }
-}
-
-void Integer() :
-{ Token t; }
-{
-  t=<INTEGER_LITERAL>
+  t=<TAG>
   { jjtThis.jjtSetValue(t.image); }
 }
