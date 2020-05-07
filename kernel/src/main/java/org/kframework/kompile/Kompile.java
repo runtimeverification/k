@@ -154,10 +154,24 @@ public class Kompile {
 
         if (kompileOptions.experimental.genBisonParser || kompileOptions.experimental.genGlrBisonParser) {
             new KRead(kem, files, InputModes.PROGRAM).createBisonParser(def.programParsingModuleFor(def.mainSyntaxModuleName(), kem).get(), def.programStartSymbol, files.resolveKompiled("parser_PGM"), kompileOptions.experimental.genGlrBisonParser);
-            for (Module mod : iterable(def.getParsedDefinition().entryModules())) {
-              if (mod.att().contains("parser")) {
-                new KRead(kem, files, InputModes.PROGRAM).createBisonParser(def.programParsingModuleFor(mod.name(), kem).get(), def.configurationVariableDefaultSorts.getOrDefault("$" + mod.att().get("parser"), Sorts.K()), files.resolveKompiled("parser_" + mod.att().get("parser")), kompileOptions.experimental.genGlrBisonParser);
-              }
+            for (Production prod : iterable(kompiledDefinition.mainModule().productions())) {
+                if (prod.att().contains("cell") && prod.att().contains("parser")) {
+                    String att = prod.att().get("parser");
+                    String[] parts = att.trim().split(";");
+                    for (String part : parts) {
+                        String[] subparts = part.trim().split(",");
+                        if (subparts.length != 2) {
+                            throw KEMException.compilerError("Invalid value for parser attribute: " + att, prod);
+                        }
+                        String name = subparts[0].trim();
+                        String module = subparts[1].trim();
+                        Option<Module> mod = def.programParsingModuleFor(module, kem);
+                        if (!mod.isDefined()) {
+                            throw KEMException.compilerError("Could not find module referenced by parser attribute: " + module, prod);
+                        }
+                        new KRead(kem, files, InputModes.PROGRAM).createBisonParser(mod.get(), def.configurationVariableDefaultSorts.getOrDefault("$" + name, Sorts.K()), files.resolveKompiled("parser_" + name), kompileOptions.experimental.genGlrBisonParser);
+                    }
+                }
             }
         }
 

@@ -10,7 +10,7 @@ module TEST-SYNTAX
                | Exp "+" Exp [left, strict]
 endmodule
 
-module MODE [parser(MODE)]
+module MODE
 
   syntax Mode ::= "print" | "noprint"
 
@@ -22,7 +22,7 @@ module TEST
   imports INT
   imports K-IO
 
-  configuration <k> $PGM:Pgm </k> <mode> $MODE:Mode </mode>
+  configuration <k> $PGM:Pgm </k> <mode parser="MODE, MODE"> $MODE:Mode </mode>
 
   syntax KResult ::= Int
 
