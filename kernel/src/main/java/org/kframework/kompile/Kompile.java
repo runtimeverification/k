@@ -31,6 +31,7 @@ import org.kframework.parser.inner.ParserUtils;
 import org.kframework.parser.inner.generator.RuleGrammarGenerator;
 import org.kframework.unparser.ToJson;
 import org.kframework.utils.Stopwatch;
+import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
@@ -157,14 +158,13 @@ public class Kompile {
             for (Production prod : iterable(kompiledDefinition.mainModule().productions())) {
                 if (prod.att().contains("cell") && prod.att().contains("parser")) {
                     String att = prod.att().get("parser");
-                    String[] parts = att.trim().split(";");
-                    for (String part : parts) {
-                        String[] subparts = part.trim().split(",");
-                        if (subparts.length != 2) {
+                    String[][] parts = StringUtil.splitTwoDimensionalAtt(att);
+                    for (String[] part : parts) {
+                        if (part.length != 2) {
                             throw KEMException.compilerError("Invalid value for parser attribute: " + att, prod);
                         }
-                        String name = subparts[0].trim();
-                        String module = subparts[1].trim();
+                        String name = part[0];
+                        String module = part[1];
                         Option<Module> mod = def.programParsingModuleFor(module, kem);
                         if (!mod.isDefined()) {
                             throw KEMException.compilerError("Could not find module referenced by parser attribute: " + module, prod);
