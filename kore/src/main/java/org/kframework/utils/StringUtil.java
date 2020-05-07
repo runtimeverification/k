@@ -699,4 +699,22 @@ public class StringUtil {
         }
         return encoded;
     }
+
+    public static String[] splitOneDimensionalAtt(String att) {
+        String[] splitted = att.trim().split(",");
+        for (int i = 0; i < splitted.length; i++) {
+            splitted[i] = splitted[i].trim();
+        }
+        return splitted;
+    }
+
+    public static String[][] splitTwoDimensionalAtt(String att) {
+        String[] parts = att.trim().split(";");
+        String[][] splitted = new String[parts.length][];
+        for (int i = 0; i < parts.length; i++) {
+            String[] subparts = splitOneDimensionalAtt(parts[i]);
+            splitted[i] = subparts;
+        }
+        return splitted;
+    }
 }
