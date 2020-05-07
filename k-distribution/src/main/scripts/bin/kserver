@@ -5,15 +5,6 @@ script_dir=$(dirname $0)
 # the script will cleanup and quit when it receives any of these signals
 trap_signals="ALRM HUP INT PIPE QUIT TERM"
 
-case $(uname) in
-*MINGW*|*MSYS*|*CYGWIN*)
-	"${script_dir}/kserver.bat" "$@"
-	exit $?
-	;;
-*)
-	;;
-esac
-
 . "${script_dir}/../lib/setenv"
 ulimit -s $(ulimit -H -s)
 if ! "${script_dir}/../lib/checkJava"; then
