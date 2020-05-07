@@ -5,7 +5,7 @@ module TEST-SYNTAX
 
   syntax Stmt ::= Exp ";" [strict]
 
-  syntax Exp ::= Int 
+  syntax Exp ::= Int
                | "-" Int
                | Exp "+" Exp [left, strict]
 endmodule
