@@ -82,7 +82,7 @@ public class ExpandMacros {
         this.cover = kompileOptions.coverage;
         this.kompileOptions = kompileOptions;
         files.resolveKompiled(".").mkdirs();
-        List<Rule> allMacros = stream(mod.rules()).filter(r -> isMacro(r.att(), reverse)).sorted(Comparator.comparing(r -> r.att().contains(Att.OWISE()))).collect(Collectors.toList());
+        List<Rule> allMacros = stream(mod.rules()).filter(r -> isMacro(r.att(), reverse)).sorted(Comparator.comparing(r -> getPriority(r.att()))).collect(Collectors.toList());
         macros = allMacros.stream().filter(r -> getLeft(r, reverse) instanceof KApply).collect(Collectors.groupingBy(r -> ((KApply)getLeft(r, reverse)).klabel()));
         macrosBySort = stream(mod.allSorts()).collect(Collectors.toMap(s -> s, s -> allMacros.stream().filter(r -> {
           K left = getLeft(r, reverse);
@@ -105,6 +105,19 @@ public class ExpandMacros {
             channel = null;
             coverage = null;
         }
+    }
+
+    private int getPriority(Att att) {
+      if (att.contains(Att.PRIORITY())) {
+        try {
+          return Integer.parseInt(att.get(Att.PRIORITY()));
+        } catch (NumberFormatException e) {
+          throw KEMException.compilerError("Invalid value for priority attribute: " + att.get(Att.PRIORITY()) + ". Must be an integer.", e);
+        }
+      if (att.contains(Att.OWISE())) {
+        return 200;
+      }
+      return 50;
     }
 
     private K getLeft(Rule r, boolean reverse) {
