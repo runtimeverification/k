@@ -57,7 +57,7 @@ public class JarInfo {
             return null;
         }
         if (!path.toFile().getAbsolutePath().endsWith(".jar") || path.getParent().getFileName().toString().equals("target")) {
-            return path.getParent().resolve("../../k-distribution/include");
+            return path.getParent().resolve("../../k-distribution/include/kframework");
         } else {
             return path.getParent().resolve("../../../include/kframework");
         }
