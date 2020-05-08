@@ -9,7 +9,7 @@ else
   fi
   OS=linux
 fi
-K_LIB_DIR="$(cd $(dirname "$0"); pwd)"
+K_LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 export PATH="$K_LIB_DIR/../bin:$PATH"
 

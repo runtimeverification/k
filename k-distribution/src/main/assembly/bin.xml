@@ -31,9 +31,9 @@
     </fileSet>
     <fileSet>
       <directory>${project.basedir}/include</directory>
-      <outputDirectory>/include/kframework</outputDirectory>
+      <outputDirectory>/include</outputDirectory>
       <excludes>
-        <exclude>kore/**</exclude>
+        <exclude>kframework/kore/**</exclude>
       </excludes>
     </fileSet>
     <fileSet>
