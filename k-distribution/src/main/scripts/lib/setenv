@@ -11,7 +11,7 @@ else
 fi
 K_LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-export PATH="$K_LIB_DIR/../bin:$PATH"
+export PATH="$K_LIB_DIR/../../bin:$PATH"
 
 source "$K_LIB_DIR/checkJava" # sets ARCH and JAVA
 
