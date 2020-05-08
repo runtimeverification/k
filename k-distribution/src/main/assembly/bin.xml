@@ -69,11 +69,11 @@
     </fileSet>
     <fileSet>
       <directory>${project.basedir}/../llvm-backend/target/build/install/lib</directory>
-      <outputDirectory>/lib/kframework</outputDirectory>
+      <outputDirectory>/lib</outputDirectory>
     </fileSet>
     <fileSet>
       <directory>${project.basedir}/../llvm-backend/target/build/install/include</directory>
-      <outputDirectory>/include/kframework</outputDirectory>
+      <outputDirectory>/include</outputDirectory>
     </fileSet>
     <fileSet>
       <directory>${project.basedir}/../llvm-backend/src/main/native/llvm-backend/cmake</directory>

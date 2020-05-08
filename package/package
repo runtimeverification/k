@@ -1,12 +1,10 @@
 #!/bin/bash
 mkdir -p $DESTDIR$PREFIX/bin
-mkdir -p $DESTDIR$PREFIX/include/kframework
-mkdir -p $DESTDIR$PREFIX/lib/cmake/kframework
-mkdir -p $DESTDIR$PREFIX/lib/kframework
-mkdir -p $DESTDIR$PREFIX/share/kframework
+mkdir -p $DESTDIR$PREFIX/include
+mkdir -p $DESTDIR$PREFIX/lib
+mkdir -p $DESTDIR$PREFIX/share
 cp -R k-distribution/target/release/k/bin/* $DESTDIR$PREFIX/bin
-cp -R k-distribution/target/release/k/include/kframework/* $DESTDIR$PREFIX/include/kframework
-cp -R k-distribution/target/release/k/lib/cmake/kframework/* $DESTDIR$PREFIX/lib/cmake/kframework
-cp -R k-distribution/target/release/k/lib/kframework/* $DESTDIR$PREFIX/lib/kframework
-cp -R k-distribution/target/release/k/share/kframework/* $DESTDIR$PREFIX/share/kframework
+cp -R k-distribution/target/release/k/include/* $DESTDIR$PREFIX/include
+cp -R k-distribution/target/release/k/lib/* $DESTDIR$PREFIX/lib
+cp -R k-distribution/target/release/k/share/* $DESTDIR$PREFIX/share
 ( cd llvm-backend/target/build && make install )
