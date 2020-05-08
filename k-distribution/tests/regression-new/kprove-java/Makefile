@@ -7,4 +7,4 @@ KPROVE_FLAGS=--def-module VERIFICATION
 export KOMPILE_BACKEND
 export KPROVE_FLAGS
 
-include ../../../include/ktest.mak
+include ../../../include/kframework/ktest.mak

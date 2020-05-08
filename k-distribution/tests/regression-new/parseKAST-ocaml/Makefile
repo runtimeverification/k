@@ -4,4 +4,4 @@ TESTDIR=../parseKAST-java
 KOMPILE_BACKEND=ocaml
 PREPARE=./prepare.sh
 
-include ../../../include/ktest.mak
+include ../../../include/kframework/ktest.mak

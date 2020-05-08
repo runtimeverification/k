@@ -3,4 +3,4 @@ EXT=llvmint
 TESTDIR=.
 KOMPILE_BACKEND=llvm
 
-include ../../../include/ktest.mak
+include ../../../include/kframework/ktest.mak
