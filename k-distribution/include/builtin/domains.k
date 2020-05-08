@@ -863,7 +863,11 @@ endmodule
 
 module BYTES-SYMBOLIC [symbolic, kast]
   imports BYTES-IN-K
+endmodule
 
+module BYTES-KORE-SYMBOLIC [kore, symbolic]
+  import BYTES-IN-K
+  
   rule #Ceil(substrBytes(@B, @START, @END))
     => { @START <=Int @END #Equals true }
        #And
