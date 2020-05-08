@@ -1692,7 +1692,7 @@ This can be done one of two different ways.
    One might annotate it with the attribute pair `parser="FOO, TEST; BAR, TEST2"`
    to indicate that configuration variable `$FOO` should be parsed in the
    `TEST` module, and configuration variable `$BAR` should be parsed in the
-   `TEST2` moducle. If the user forgets to annotate the declaration with the
+   `TEST2` module. If the user forgets to annotate the declaration with the
    parser attribute, only the $PGM parser will be generated.
 
 Bison-generated parsers are extremely fast compared to `kast`, but they have
