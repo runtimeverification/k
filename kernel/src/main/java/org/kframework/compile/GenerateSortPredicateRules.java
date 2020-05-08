@@ -133,7 +133,7 @@ public class GenerateSortPredicateRules {
                 res.addAll(predicateRules.stream().filter(r -> isPredicateFor(r, s)).filter(this::isTruePredicate).map(r -> promotePredicate(r, sort)).collect(Collectors.toList()));
             }
         });
-        res.add(Rule(KRewrite(KApply(KLabel("is" + sort.toString()), KVariable("K")), BooleanUtils.FALSE), BooleanUtils.TRUE, BooleanUtils.TRUE, Att().add("owise")));
+        res.add(Rule(KRewrite(KApply(KLabel("is" + sort.toString()), KVariable("K")), BooleanUtils.FALSE), BooleanUtils.TRUE, BooleanUtils.TRUE, Att().add(Att.OWISE())));
         return res.stream();
     }
 
@@ -143,7 +143,7 @@ public class GenerateSortPredicateRules {
         } else {
             List<Sentence> res = new ArrayList<>();
             res.add(Rule(KRewrite(KApply(KLabel("is" + sort.toString()), KVariable(sort.name(), Att().add(Sort.class, sort))), BooleanUtils.TRUE), BooleanUtils.TRUE, BooleanUtils.TRUE));
-            res.add(Rule(KRewrite(KApply(KLabel("is" + sort.toString()), KVariable("K")), BooleanUtils.FALSE), BooleanUtils.TRUE, BooleanUtils.TRUE, Att().add("owise")));
+            res.add(Rule(KRewrite(KApply(KLabel("is" + sort.toString()), KVariable("K")), BooleanUtils.FALSE), BooleanUtils.TRUE, BooleanUtils.TRUE, Att().add(Att.OWISE())));
             return res.stream();
         }
     }
