@@ -351,11 +351,11 @@ pipeline {
                       sh '${WORKSPACE}/package/macos/brew-install-bottle'
                     }
                     sh '''
-                      cp -R /usr/local/lib/kframework/tutorial ~
+                      cp -R /usr/local/share/kframework/tutorial ~
                       WD=`pwd`
                       cd
                       echo 'Starting kserver...'
-                      /usr/local/lib/kframework/bin/spawn-kserver $WD/kserver.log
+                      spawn-kserver $WD/kserver.log
                       cd tutorial
                       echo 'Testing tutorial in user environment...'
                       make -j`sysctl -n hw.ncpu` ${MAKE_EXTRA_ARGS}

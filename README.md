@@ -109,13 +109,13 @@ ubuntu1804
     
     `$ sudo apt-get install ./kframework_5.0.0_amd64_bionic.deb`
         This will install ~1.4GB of dependencies and will take some time.
-        K will be installed to `/usr/lib/kframework`
+        K will be installed to `/usr`
 
 5. Copy the tutorial to some work directory, for example `/mnt/d/k-tutorial`. Otherwise, you won't be able to run the
 examples from default installation dir if you are not `root`:
 
 ```    
-$ cp -R /usr/lib/kframework/tutorial /mnt/d/k-tutorial
+$ cp -R /usr/share/kframework/tutorial /mnt/d/k-tutorial
 ```
 
 6. Now you can try to run some programs:
