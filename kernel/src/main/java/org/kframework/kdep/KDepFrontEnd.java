@@ -80,7 +80,7 @@ public class KDepFrontEnd extends FrontEnd {
 
     @Override
     protected int run() {
-        ParserUtils parser = new ParserUtils(files.get()::resolveWorkingDirectory, kem, globalOptions, options);
+        ParserUtils parser = new ParserUtils(files.get(), kem, globalOptions, options);
         List<org.kframework.kil.Module> modules = new ArrayList<>();
         Source source = Source.apply(options.mainDefinitionFile(files.get()).getAbsolutePath());
         File currentDirectory = options.mainDefinitionFile(files.get()).getParentFile();

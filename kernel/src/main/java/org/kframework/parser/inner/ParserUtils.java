@@ -20,6 +20,7 @@ import org.kframework.parser.tagSelector.ASTExpressionStart;
 import org.kframework.parser.tagSelector.TagSelector;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.options.OuterParsingOptions;
 
 import java.io.File;
@@ -31,7 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -45,22 +45,19 @@ public class ParserUtils {
 
     private final KExceptionManager kem;
     private final GlobalOptions options;
-    private Function<File, File> makeAbsolute;
     private final ASTExpressionStart mdSelectorAST;
+    private final FileUtil files;
 
-    public ParserUtils(Function<File, File> makeAbsolute, KExceptionManager kem) {
-        this(makeAbsolute, kem, new GlobalOptions(), new OuterParsingOptions());
+    public ParserUtils(FileUtil files, KExceptionManager kem) {
+        this(files, kem, new GlobalOptions(), new OuterParsingOptions());
     }
 
-    /**
-     * @throws org.kframework.parser.tagSelector.ParseException
-     */
-    public ParserUtils(Function<File, File> makeAbsolute, KExceptionManager kem, GlobalOptions options, OuterParsingOptions outerParsingOptions) {
-        this.makeAbsolute = makeAbsolute;
+    public ParserUtils(FileUtil files, KExceptionManager kem, GlobalOptions options, OuterParsingOptions outerParsingOptions) {
         this.kem = kem;
         this.options = options;
         // parse once and throw any exception
         mdSelectorAST = TagSelector.parseSelectorExp(outerParsingOptions.mdSelector);
+        this.files = files;
     }
 
     public static K parseWithFile(String theTextToParse,
@@ -127,8 +124,14 @@ public class ParserUtils {
             File currentDirectory,
             List<File> lookupDirectories,
             Set<File> requiredFiles) {
-        if (source.source().endsWith(".md"))
+        if (source.source().endsWith(".md")) {
             definitionText = ExtractFencedKCodeFromMarkdown.extract(definitionText, mdSelectorAST);
+            if (options.debug()) { // save .k files in -kompiled directory
+                String fname = new File(source.source()).getName();
+                fname = fname.substring(0, fname.lastIndexOf(".md")) + ".k";
+                files.saveToKompiled(".md2.k/" + fname, definitionText);
+            }
+        }
         List<DefinitionItem> items = Outer.parse(source, definitionText, null);
         if (options.verbose) {
             System.out.println("Importing: " + source);
@@ -179,7 +182,7 @@ public class ParserUtils {
 
     private String loadDefinitionText(File definitionFile) {
         try {
-            return FileUtils.readFileToString(makeAbsolute.apply(definitionFile));
+            return FileUtils.readFileToString(files.resolveWorkingDirectory(definitionFile));
         } catch (IOException e) {
             throw KEMException.criticalError(e.getMessage(), e);
         }

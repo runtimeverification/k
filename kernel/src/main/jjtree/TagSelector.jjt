@@ -70,8 +70,11 @@ public class TagSelector {
           return eval(exp.jjtGetChild(0), tagList) && eval(exp.jjtGetChild(1), tagList);
       else if (exp instanceof ASTNot)
           return !eval(exp.jjtGetChild(0), tagList);
-      else if (exp instanceof ASTTag)
-          return tagList.contains(((SimpleNode) exp).value.toString());
+      else if (exp instanceof ASTTag) {
+          String tag = ((SimpleNode) exp).value.toString();
+          if (tag.equals("*")) return true;
+          return tagList.contains(tag);
+      }
       throw KEMException.compilerError("Unknown ASTNode type: " + exp.getClass() + " when evaluating selector tags.");
   }
 }
@@ -89,7 +92,7 @@ SKIP :
 
 TOKEN : /* TAG */
 {
-  <TAG: (["_","a"-"z","A"-"Z","0"-"9","#","$","%","^","*","+","."])+>
+  <TAG: (["_","a"-"z","A"-"Z","0"-"9","#","$","%","^","*","+",".","-"])+>
 }
 
 /** Main tag list production. */

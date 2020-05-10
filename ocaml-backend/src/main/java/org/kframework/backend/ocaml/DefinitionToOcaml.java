@@ -1093,7 +1093,7 @@ public class DefinitionToOcaml implements Serializable {
         File definitionFile = files.resolveWorkingDirectory(options.klabels).getAbsoluteFile();
         List<File> lookupDirectories = kompileOptions.outerParsing.includes.stream().map(files::resolveWorkingDirectory).collect(Collectors.toList());
         lookupDirectories.add(Kompile.BUILTIN_DIRECTORY);
-        java.util.Set<Module> mods = new ParserUtils(files::resolveWorkingDirectory, kem, globalOptions, kompileOptions.outerParsing).loadModules(
+        java.util.Set<Module> mods = new ParserUtils(files, kem, globalOptions, kompileOptions.outerParsing).loadModules(
                 new HashSet<>(),
                 new Context(),
                 "require " + StringUtil.enquoteCString(definitionFile.getPath()),

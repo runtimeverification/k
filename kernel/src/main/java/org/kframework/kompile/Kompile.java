@@ -92,7 +92,7 @@ public class Kompile {
         this.files = files;
         this.kem = kem;
         this.errors = new HashSet<>();
-        this.parser = new ParserUtils(files::resolveWorkingDirectory, kem, kem.options, kompileOptions.outerParsing);
+        this.parser = new ParserUtils(files, kem, kem.options, kompileOptions.outerParsing);
         List<File> lookupDirectories = kompileOptions.outerParsing.includes.stream().map(files::resolveWorkingDirectory).collect(Collectors.toList());
         // these directories should be relative to the current working directory if we refer to them later after the WD has changed.
         kompileOptions.outerParsing.includes = lookupDirectories.stream().map(File::getAbsolutePath).collect(Collectors.toList());
