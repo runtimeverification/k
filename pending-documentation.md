@@ -1677,13 +1677,13 @@ This can be done one of two different ways.
    `kast --gen-glr-parser <outputFile>` respectively. `kast` will then create a
    parser based on the same command line flags that govern on-the-fly parsing,
    like `-s` to specify the starting sort, and `-m` to specify the module to
-   parse under. By default, this generates a parser for the sort of the $PGM
+   parse under. By default, this generates a parser for the sort of the `$PGM`
    configuration variable in the main syntax module of the definition.
 2. You can request that a specific set of parsers be generated for all the
    configuration variables of your definition by passing the
    `--gen-bison-parser` or `--gen-glr-bison-parser` flags to `kompile`.
    `kompile` will decide the sorts to use as start symbols based on the sorts
-   in the configuration declaration for the configuration variables. The $PGM
+   in the configuration declaration for the configuration variables. The `$PGM`
    configuration variable will be generated based on the main syntax module
    of the definition. The user must explicitly annotate the configuration
    declaration with the other modules to use to parse the other configuration
@@ -1693,12 +1693,12 @@ This can be done one of two different ways.
    to indicate that configuration variable `$FOO` should be parsed in the
    `TEST` module, and configuration variable `$BAR` should be parsed in the
    `TEST2` module. If the user forgets to annotate the declaration with the
-   parser attribute, only the $PGM parser will be generated.
+   parser attribute, only the `$PGM` parser will be generated.
 
 Bison-generated parsers are extremely fast compared to `kast`, but they have
 some important limitations:
 
-* Bison parsers will always output kore. You can then pass the resulting AST
+* Bison parsers will always output Kore. You can then pass the resulting AST
   directly to `llvm-krun` or `kore-exec` and bypass the `krun` frontend, making
   them very fast, but lower-level.
 * Bison parsers do not yet support macros. This may change in a future release.
@@ -1724,7 +1724,7 @@ some important limitations:
   necessary. One tool that can be used to facilitate this is to pass
   `--bison-lists` to kompile. This will disable support for the `List{Sort}`
   syntax production, and it will make `NeList{Sort}` left associative, but the
-  resulting productions generated for NeList will be LR(1) and use bounded
+  resulting productions generated for `NeList{Sort}` will be LR(1) and use bounded
   stack space.
 * If the grammar you are parsing is context-sensitive (for example, because
   it requires a symbol table to parse), one thing you can do to make this 
