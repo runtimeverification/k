@@ -243,11 +243,19 @@ module RECORD-PRODUCTIONS
   // to their nonterminal's names
 endmodule
 
+module SORT-PREDICATES
+  // if this module is imported, the Bool sort will be annotated with
+  // syntax Bool ::= isSort(K) [function]
+  // and all sorts will be annotated with
+  // syntax Sort ::= project:Sort(K) [function]
+endmodule
+
 // To be used to parse semantic rules
 module K
   imports KSEQ-SYMBOLIC
   imports REQUIRES-ENSURES
   imports RECORD-PRODUCTIONS
+  imports SORT-PREDICATES
   imports K-SORT-LATTICE
   imports AUTO-CASTS
   imports AUTO-FOLLOW
@@ -286,6 +294,7 @@ endmodule
 module K-TERM
   imports KSEQ-SYMBOLIC
   imports RECORD-PRODUCTIONS
+  imports SORT-PREDICATES
   imports K-SORT-LATTICE
   imports AUTO-CASTS
   imports AUTO-FOLLOW
