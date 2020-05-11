@@ -87,6 +87,7 @@ object Att {
   val UNBOUND_VARIABLES = "unboundVariables"
   val BAG = "bag"
   val OWISE = "owise"
+  val PRIORITY = "priority"
   val HEAT = "heat"
   val COOL = "cool"
   val TAG = "tag"
