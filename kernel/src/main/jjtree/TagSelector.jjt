@@ -41,8 +41,12 @@ public class TagSelector {
     try {
       ASTTagListStart result = t.TagListStart();
       for (Node n : result.children)
-        if (n instanceof SimpleNode)
-          tags.add(((SimpleNode) n).value.toString());
+        if (n instanceof SimpleNode) {
+            String tag = ((SimpleNode) n).value.toString();
+            if (tag.charAt(0) == '.')
+                tag = tag.substring(1);
+            tags.add(tag);
+        }
     } catch (Exception e) {
       // ignore: e.printStackTrace();
     }
@@ -72,6 +76,8 @@ public class TagSelector {
           return !eval(exp.jjtGetChild(0), tagList);
       else if (exp instanceof ASTTag) {
           String tag = ((SimpleNode) exp).value.toString();
+          if (tag.charAt(0) == '.')
+              tag = tag.substring(1);
           if (tag.equals("*")) return true;
           return tagList.contains(tag);
       }
