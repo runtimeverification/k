@@ -632,41 +632,6 @@ List<Tag> KLabels() :
 | <PIPE: "|">
 }
 
-/** Parses a complete RegEx and returns it as a String */
-String RegEx(StringBuilder follow): { StringBuilder reg = new StringBuilder(); }
-{ (Element(reg, follow))+ {
-    String regEx = reg.toString();
-    if (!regEx.endsWith("*") && !regEx.endsWith("+") && !regEx.endsWith("?"))
-        follow.setLength(0);
-    return reg.toString(); } }
-
-/** Parses a single RegEx Element and appends it to 'sb' */
-void Element(StringBuilder reg, StringBuilder follow) :
-{ StringBuilder sb = new StringBuilder(); }
-{
-  { follow.setLength(0); }
-  BasicElement(sb, follow)
-  (<PIPE> { sb.append(specialAndImage()); } BasicElement(sb, follow) { follow.setLength(0); })*
-  { reg.append(sb); }
-}
-
-/** Parses a single RegEx BasicElement and appends it to 'sb' */
-void BasicElement(StringBuilder sb, StringBuilder follow) : {}
-{
-( <STRING>  { sb.append(specialAndImage()); follow.setLength(0); }
-| <ID>      { sb.append(StringUtil.escapeSort(specialAndImage())+"Dz"); follow.setLength(0); }
-| Group(sb, REGEX_STATE) { follow.append(sb); }
-| "{"       { sb.append(specialAndImage()); }
-  Element(sb, follow)
-  <STRING>  { sb.append(specialAndImage()); }
-  "}" { sb.append(specialAndImage()); }
-  (("+" | "*") { sb.append(specialAndImage()); follow.setLength(0); })
-| "("       { sb.append(specialAndImage()); }
-  (Element(sb, follow))*
-  ")"       { sb.append(specialAndImage()); follow.setLength(0); }
-) (("+" | "*" | "?" ) { sb.append(specialAndImage()); })*
-}
-
 /*** RegEx Character Groups */
 
 <GROUP_STATE> TOKEN:
