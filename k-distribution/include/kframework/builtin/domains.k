@@ -853,14 +853,14 @@ endmodule
 
 module BYTES-KORE [kore]
   imports BYTES-HOOKED
+  imports INT
+
+  rule #Ceil(padRightBytes(_, LEN, VAL)) => {(0 <=Int LEN andBool 0 <=Int VAL andBool VAL <Int 256) #Equals true} [anywhere, simplification]
+  rule #Ceil(padLeftBytes(_, LEN, VAL))  => {(0 <=Int LEN andBool 0 <=Int VAL andBool VAL <Int 256) #Equals true} [anywhere, simplification]
 endmodule
 
 module BYTES-SYMBOLIC [symbolic, kast]
   imports BYTES-IN-K
-
-  rule #Ceil(padRightBytes(_, LEN, VAL)) => {(0 <=Int LEN andBool 0 <=Int VAL andBool VAL <Int 256) #Equals true} [anywhere, simplification]
-  rule #Ceil(padLeftBytes(_, LEN, VAL))  => {(0 <=Int LEN andBool 0 <=Int VAL andBool VAL <Int 256) #Equals true} [anywhere, simplification]
-
 endmodule
 
 module BYTES
