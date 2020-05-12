@@ -1,6 +1,6 @@
 add_repo() {
-  opam repository add k "$(dirname "$0")/../lib/opam" \
-   || opam repository set-url k "$(dirname "$0")/../lib/opam"
+  opam repository add k "$(dirname "$0")/../lib/kframework/opam" \
+   || opam repository set-url k "$(dirname "$0")/../lib/kframework/opam"
   opam update
 }
 

@@ -2140,7 +2140,7 @@ Backend features not yet given documentation:
 To get a complete list of hooks supported by K, you can run:
 
 ```
-grep -P -R "(?<=[^-])hook\([^)]*\)" k-distribution/include/builtin/ \
+grep -P -R "(?<=[^-])hook\([^)]*\)" k-distribution/include/kframework/builtin/ \
      --include "*.k" -ho | \
 sed 's/hook(//' | sed 's/)//' | sort | uniq | grep -v org.kframework
 ```
