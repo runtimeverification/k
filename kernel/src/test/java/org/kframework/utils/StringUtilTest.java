@@ -32,15 +32,6 @@ public class StringUtilTest {
     }
 
     @Test
-    public void StringUtilEscapeShell() throws Exception {
-        String[] cmd1 = new String[] {"foo", "bar \" baz"};
-        String[] cmd2 = new String[] {"'"};
-        Assert.assertEquals("\"foo\" \"bar \\\" baz\"", StringUtil.escapeShell(cmd1, OS.WINDOWS));
-        Assert.assertEquals("'foo' 'bar \" baz'", StringUtil.escapeShell(cmd1, OS.LINUX));
-        Assert.assertEquals("''\\'''", StringUtil.escapeShell(cmd2, OS.LINUX));
-    }
-
-    @Test
     public void testBijection() {
         char[] all = new char[256];
         for (int i = 0; i < 256; i++)
