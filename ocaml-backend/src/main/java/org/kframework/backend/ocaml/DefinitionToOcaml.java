@@ -218,7 +218,7 @@ public class DefinitionToOcaml implements Serializable {
         constants = serialized.constants;
         realStepFunctions = serialized.realStepFunctions;
         if (serialized.expandMacros == null) {
-            serialized.expandMacros = ExpandMacros.fromMainModule(def.executionModule(), files, kompileOptions, false);
+            serialized.expandMacros = ExpandMacros.fromMainModule(def.executionModule(), files, kem, kompileOptions, false, false);
         }
         if (serialized.convertDataStructure == null) {
             serialized.convertDataStructure = new ConvertDataStructureToLookup(def.executionModule(), true);
@@ -243,7 +243,7 @@ public class DefinitionToOcaml implements Serializable {
         this.convertDataStructure = new ConvertDataStructureToLookup(def.executionModule(), true);
         ModuleTransformer convertLookups = ModuleTransformer.fromSentenceTransformer(convertDataStructure::convert, "convert data structures to lookups");
         ModuleTransformer liftToKSequence = ModuleTransformer.fromSentenceTransformer(new LiftToKSequence()::lift, "lift K into KSequence");
-        this.expandMacros = ExpandMacros.fromMainModule(def.executionModule(), files, kompileOptions, false);
+        this.expandMacros = ExpandMacros.fromMainModule(def.executionModule(), files, kem, kompileOptions, false, false);
         ModuleTransformer expandMacros = ModuleTransformer.fromSentenceTransformer(this.expandMacros::expand, "expand macro rules");
         ModuleTransformer deconstructInts = ModuleTransformer.fromSentenceTransformer(new DeconstructIntegerAndFloatLiterals()::convert, "remove matches on integer literals in left hand side");
         this.threadCellExists = containsThreadCell(def);

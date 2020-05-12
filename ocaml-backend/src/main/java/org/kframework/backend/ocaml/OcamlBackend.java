@@ -163,7 +163,7 @@ public class OcamlBackend extends AbstractBackend {
 
     @Override
     public Function<Definition, Definition> steps() {
-        return Kompile.defaultSteps(kompileOptions, kem, files);
+        return Kompile.defaultSteps(kompileOptions, kem, files, false);
     }
 
     @Override
