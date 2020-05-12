@@ -49,7 +49,7 @@ ENV LD_LIBRARY_PATH=/usr/local/lib
 ENV PATH=/home/user/hub-linux-amd64-2.14.0/bin:$PATH
 
 ADD k-distribution/src/main/scripts/bin/k-configure-opam-dev k-distribution/src/main/scripts/bin/k-configure-opam-common /home/user/.tmp-opam/bin/
-ADD k-distribution/src/main/scripts/lib/opam                                                                             /home/user/.tmp-opam/lib/opam/
+ADD k-distribution/src/main/scripts/lib/opam                                                                             /home/user/.tmp-opam/lib/kframework/opam/
 RUN    cd /home/user                        \
     && ./.tmp-opam/bin/k-configure-opam-dev
 
