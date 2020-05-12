@@ -78,6 +78,7 @@ public class RuleGrammarGenerator {
     public static final String PROGRAM_LISTS = "PROGRAM-LISTS";
     public static final String RULE_LISTS = "RULE-LISTS";
     public static final String RECORD_PRODS = "RECORD-PRODUCTIONS";
+    public static final String SORT_PREDICATES = "SORT-PREDICATES";
 
     public static final String POSTFIX = "-PROGRAM-PARSING";
 
@@ -229,9 +230,11 @@ public class RuleGrammarGenerator {
             }
         }
 
-        for (Sort s : iterable(mod.allSorts())) {
-            prods.addAll(new GenerateSortPredicateSyntax().gen(mod, s));
-            prods.addAll(new GenerateSortProjections(mod).gen(s).collect(Collectors.toSet()));
+        if (mod.importedModuleNames().contains(SORT_PREDICATES)) {
+            for (Sort s : iterable(mod.allSorts())) {
+                prods.addAll(new GenerateSortPredicateSyntax().gen(mod, s));
+                prods.addAll(new GenerateSortProjections(mod).gen(s).collect(Collectors.toSet()));
+            }
         }
 
         for (Production p : iterable(mod.productions())) {
