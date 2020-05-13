@@ -52,6 +52,10 @@ pipeline {
                   stages {
                     stage('Checkout code') { steps { dir('k-exercises') { git url: 'git@github.com:kframework/k-exercises.git' } } }
                     stage('Build and Test K') {
+                      when {
+                        branch 'master'
+                        beforeAgent true
+                      }
                       options { timeout(time: 45, unit: 'MINUTES') }
                       steps {
                         sh '''
@@ -89,6 +93,10 @@ pipeline {
                   }
                 }
                 stage('Test Debian Package') {
+                      when {
+                        branch 'master'
+                        beforeAgent true
+                      }
                   agent {
                     docker {
                       image 'ubuntu:bionic'
@@ -111,10 +119,6 @@ pipeline {
               }
             }
             stage('DockerHub') {
-              when {
-                branch 'master'
-                beforeAgent true
-              }
               environment {
                 DOCKERHUB_TOKEN   = credentials('rvdockerhub')
                 BIONIC_COMMIT_TAG = "ubuntu-bionic-${env.SHORT_REV}"
