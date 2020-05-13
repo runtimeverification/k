@@ -4,6 +4,7 @@ package org.kframework.parser.inner.disambiguation;
 
 import com.google.common.collect.Sets;
 import org.kframework.POSet;
+import org.kframework.attributes.Att;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.AddSortInjections;
 import org.kframework.definition.Module;
@@ -114,7 +115,7 @@ public class AddEmptyLists extends SetsGeneralTransformer<KEMException, KEMExcep
             Sort childSort = getSort(child, expectedSort);
             if (listSorts.contains(expectedSort) &&
                     !(subsorts.lessThanEq(childSort, expectedSort) && listSorts.contains(childSort))) {
-                final boolean isBracket = child.production().att().contains("bracket");
+                final boolean isBracket = child.production().att().contains(Att.BRACKET());
                 if (isBracket
                         || (child.production().klabel().isDefined()
                         && child.production().klabel().get().name().equals("#KRewrite"))) {

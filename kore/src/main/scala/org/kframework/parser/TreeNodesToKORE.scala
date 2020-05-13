@@ -3,7 +3,7 @@ package org.kframework.parser
 import java.util
 import java.util.Optional
 
-import org.kframework.attributes._
+import org.kframework.attributes.{Att,Location,Source}
 import org.kframework.builtin.Sorts
 import org.kframework.definition.{NonTerminal, Production}
 import org.kframework.{kore => k}
@@ -16,17 +16,17 @@ import scala.collection.JavaConverters._
 
 class TreeNodesToKORE(parseSort: java.util.function.Function[String, Sort], strict: Boolean) {
 
-  import org.kframework.kore.KORE._
+  import org.kframework.kore.KORE.{KApply,KLabel,KList,KToken,KVariable,KSequence,KAs,KRewrite,InjectedKLabel}
 
   def apply(t: Term): K = t match {
     case c@Constant(s, p) => KToken(s, p.sort, locationToAtt(c.location, c.source))
     case t@TermCons(_, _) => termConsToKApply(t)
-    case Ambiguity(items) => KApply(KLabel("amb"), KList(items.asScala.toList map apply asJava), Att)
+    case Ambiguity(items) => KApply(KLabel("amb"), KList(items.asScala.toList map apply asJava), Att.empty)
   }
 
   def anonVar(sort: Sort): K = {
     val lbl = KLabel("#SemanticCastTo" + sort.toString())
-    if (strict) KApply(lbl, KList(KToken("_", Sorts.KVariable)), Att.add(classOf[Production], Production(lbl, Seq(), sort, Seq(NonTerminal(sort, None))))) else KToken("_", Sorts.KVariable)
+    if (strict) KApply(lbl, KList(KToken("_", Sorts.KVariable)), Att.empty.add(classOf[Production], Production(lbl, Seq(), sort, Seq(NonTerminal(sort, None))))) else KToken("_", Sorts.KVariable)
   }
 
   def termConsToKApply(t: TermCons): K = {
@@ -40,7 +40,7 @@ class TreeNodesToKORE(parseSort: java.util.function.Function[String, Sort], stri
       KApply(t.production.klabel.get.head, KList(realItems.asJava), locationToAtt(t.location, t.source).add(classOf[Production], realProd))
     } else {
       val realProd = if (t.production.att.contains("originalPrd", classOf[Production])) t.production.att.get("originalPrd", classOf[Production]) else t.production
-      if (t.production.att.contains("bracket"))
+      if (t.production.att.contains(Att.BRACKET))
         return apply(t.items.get(0))
       if (t.production.klabel.isEmpty)
         throw KEMException.internalError("Missing klabel in production: " + t.production, t)
@@ -109,7 +109,7 @@ class TreeNodesToKORE(parseSort: java.util.function.Function[String, Sort], stri
   }
 
   def locationToAtt(l: Optional[Location], s: Optional[Source]): Att = {
-    var a = Att
+    var a = Att.empty
     if (l.isPresent) a = a.add(classOf[Location], l.get)
     if (s.isPresent) a = a.add(classOf[Source], s.get)
     a

@@ -346,7 +346,7 @@ public class TypeInferencer implements AutoCloseable {
       return Optional.empty();
     }
     ProductionReference child = (ProductionReference)t;
-    while (child.production().att().contains("bracket")) {
+    while (child.production().att().contains(Att.BRACKET())) {
       if (((TermCons)child).get(0) instanceof Ambiguity) {
         return Optional.empty();
       }
@@ -358,7 +358,7 @@ public class TypeInferencer implements AutoCloseable {
       }
       child = (ProductionReference)((TermCons)child).get(0);
     }
-    while (child.production().att().contains("bracket")) {
+    while (child.production().att().contains(Att.BRACKET())) {
       if (((TermCons)child).get(0) instanceof Ambiguity) {
         return Optional.empty();
       }
