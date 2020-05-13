@@ -129,7 +129,7 @@ pipeline {
                     sh '''
                         mv bionic/kframework_${VERSION}_amd64.deb kframework_amd64_bionic.deb
                         docker login --username "${DOCKERHUB_TOKEN_USR}" --password "${DOCKERHUB_TOKEN_PSW}"
-                        docker image build . --file package/docker/Dockerfile.ubuntu-bionic --tag "${DOCKERHUB_REPO}:${BIONIC_COMMIT_TAG}"
+                        docker image build --squash --file package/docker/Dockerfile.ubuntu-bionic --tag "${DOCKERHUB_REPO}:${BIONIC_COMMIT_TAG}" .
                         docker image push "${DOCKERHUB_REPO}:${BIONIC_COMMIT_TAG}"
                         docker tag "${DOCKERHUB_REPO}:${BIONIC_COMMIT_TAG}" "${DOCKERHUB_REPO}:${BIONIC_BRANCH_TAG}"
                         docker push "${DOCKERHUB_REPO}:${BIONIC_BRANCH_TAG}"
