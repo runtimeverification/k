@@ -30,6 +30,7 @@ import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KAs;
 import org.kframework.kore.KLabel;
+import org.kframework.kore.KList;
 import org.kframework.kore.KORE;
 import org.kframework.kore.KRewrite;
 import org.kframework.kore.KSequence;
@@ -1406,7 +1407,9 @@ public class ModuleToKORE {
         String labelName = k.klabel().name();
         if (mlBinders.contains(labelName)) { // ML binders are not parametric in the variable so we remove it
             List<Sort> params = mutable(k.klabel().params());
-            params.remove(0);
+            if (!params.isEmpty()) {
+              params.remove(0);
+            }
             return KLabel(labelName, immutable(params));
         } else {
             return k.klabel();
@@ -1582,6 +1585,16 @@ public class ModuleToKORE {
                 convert(name, sb);
                 sb.append("{}(");
                 convert((K) val, sb);
+                sb.append(")");
+            } else if (clsName.equals(KList.class.getName())) {
+                convert(name, sb);
+                sb.append("{}(");
+                String conn2 = "";
+                for (K item : ((KList)val).items()) {
+                  sb.append(conn2);
+                  convert(item, sb);
+                  conn2 = ",";
+                }
                 sb.append(")");
             } else if (attributes.get(name) != null && attributes.get(name)) {
                 convert(name, sb);
