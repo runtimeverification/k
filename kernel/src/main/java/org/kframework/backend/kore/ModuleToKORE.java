@@ -335,29 +335,34 @@ public class ModuleToKORE {
             if (impurities.contains(prod.klabel().get())) {
                 impureFunctions.add(prod.klabel().get().name());
             }
-            sb.append("  ");
-            if (isFunction(prod) && prod.att().contains(Att.HOOK()) && isRealHook(prod.att())) {
-                sb.append("hooked-");
-            }
-            sb.append("symbol ");
-            convert(prod.klabel().get(), prod.params(), sb);
-            String conn;
-            sb.append("(");
-            conn = "";
-            for (NonTerminal nt : iterable(prod.nonterminals())) {
-                Sort sort = nt.sort();
-                sb.append(conn);
-                convert(sort, prod, sb);
-                conn = ", ";
-            }
-            sb.append(") : ");
-            convert(prod.sort(), prod, sb);
-            sb.append(" ");
-            Att koreAtt = addKoreAttributes(prod, functionRules, impurities, overloads);
-            convert(attributes, koreAtt, sb, null, null);
-            sb.append("\n");
+            translateSymbol(attributes, functionRules, impurities, overloads, prod.klabel().get(), prod, sb);
         }
     }
+
+    private void translateSymbol(Map<String, Boolean> attributes, SetMultimap<KLabel, Rule> functionRules, Set<KLabel> impurities, Set<Production> overloads, KLabel label, Production prod, StringBuilder sb) {
+        sb.append("  ");
+        if (isFunction(prod) && prod.att().contains(Att.HOOK()) && isRealHook(prod.att())) {
+            sb.append("hooked-");
+        }
+        sb.append("symbol ");
+        convert(label, prod.params(), sb);
+        String conn;
+        sb.append("(");
+        conn = "";
+        for (NonTerminal nt : iterable(prod.nonterminals())) {
+            Sort sort = nt.sort();
+            sb.append(conn);
+            convert(sort, prod, sb);
+            conn = ", ";
+        }
+        sb.append(") : ");
+        convert(prod.sort(), prod, sb);
+        sb.append(" ");
+        Att koreAtt = addKoreAttributes(prod, functionRules, impurities, overloads);
+        convert(attributes, koreAtt, sb, null, null);
+        sb.append("\n");
+    }
+ 
 
     private void genSubsortAxiom(Production prod, StringBuilder sb) {
         Production finalProd = prod;
