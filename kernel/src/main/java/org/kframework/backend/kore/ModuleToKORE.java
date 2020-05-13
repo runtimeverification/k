@@ -197,6 +197,26 @@ public class ModuleToKORE {
         }
         translateSymbols(attributes, functionRules, impurities, overloads, sb);
 
+        // print syntax definition
+        int length = sb.length();
+        for (Tuple2<Sort, scala.collection.immutable.List<Production>> sort : iterable(module.bracketProductionsFor())) {
+            for (Production prod : iterable(sort._2())) {
+                translateSymbol(attributes, functionRules, impurities, overloads, prod.att().get("bracketLabel", KLabel.class), prod, sb);
+            }
+            for (Production prod : iterable(module.sortedProductions())) {
+                if (isBuiltinProduction(prod)) {
+                    continue;
+                }
+                if (prod.isSubsort() && !prod.sort().equals(Sorts.K())) {
+                    genSubsortAxiom(prod, sb);
+                    continue;
+                }
+            }
+        }
+        sb.append("endmodule []\n");
+        files.saveToKompiled("syntaxDefinition.kore", sb.toString());
+        sb.setLength(length);
+
         sb.append("\n// generated axioms\n");
         Set<Tuple2<Production, Production>> noConfusion = new HashSet<>();
         for (Production prod : iterable(module.sortedProductions())) {
@@ -1316,9 +1336,11 @@ public class ModuleToKORE {
 
         boolean isMacro = false;
         boolean isAnywhere = overloads.contains(prod);
-        for (Rule r : functionRules.get(prod.klabel().get())) {
-            isMacro |= ExpandMacros.isMacro(r);
-            isAnywhere |= r.att().contains(Att.ANYWHERE());
+        if (prod.klabel().isDefined()) {
+            for (Rule r : functionRules.get(prod.klabel().get())) {
+                isMacro |= ExpandMacros.isMacro(r);
+                isAnywhere |= r.att().contains(Att.ANYWHERE());
+            }
         }
         isConstructor &= !isMacro;
         isConstructor &= !isAnywhere;
