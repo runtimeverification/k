@@ -110,6 +110,14 @@ public class Production extends ASTNode {
         return klabel.replace(" ", "");
     }
 
+    public String getBracketLabel(boolean kore) {
+        String klabel = getAttribute("klabel");
+        if (klabel == null || (kore && getAttribute("symbol") == null)) {
+            klabel = getPrefixLabel(kore);
+        }
+        return klabel.replace(" ", "");
+    }
+
     private String getPrefixLabel(boolean kore) {
         String label = "";
         List<String> sorts = new ArrayList<>();
