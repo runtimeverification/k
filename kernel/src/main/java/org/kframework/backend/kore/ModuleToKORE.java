@@ -21,8 +21,10 @@ import org.kframework.compile.RewriteToTop;
 import org.kframework.definition.Module;
 import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
+import org.kframework.definition.ProductionItem;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
+import org.kframework.definition.Tag;
 import org.kframework.definition.Terminal;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.InjectedKLabel;
@@ -136,6 +138,7 @@ public class ModuleToKORE {
         // Map attribute name to whether the attribute has a value
         Map<String, Boolean> attributes = new HashMap<>();
         attributes.put("nat", true);
+        attributes.put("terminals", true);
         Set<Integer> priorities = new HashSet<>();
         collectTokenSortsAndAttributes(tokenSorts, attributes, priorities, heatCoolEq, topCellSortStr);
         Map<Integer, String> priorityToPreviousGroup = new HashMap<>();
@@ -1343,23 +1346,72 @@ public class ModuleToKORE {
         String format = att.getOptional("format").orElse(Formatter.defaultFormat(prod.items().size()));
         int nt = 1;
         boolean hasFormat = true;
+        int terminals = 0;
         for (int i = 0; i < prod.items().size(); i++) {
           if (prod.items().apply(i) instanceof NonTerminal) {
             format = format.replaceAll("%" + (i+1) + "(?![0-9])", "%" + (nt++));
           } else if (prod.items().apply(i) instanceof Terminal) {
             format = format.replaceAll("%" + (i+1) + "(?![0-9])", "%c" + ((Terminal)prod.items().apply(i)).value().replace("\\", "\\\\").replace("$", "\\$") + "%r");
+            terminals++;
           } else {
             hasFormat = false;
           }
         }
         if (hasFormat) {
           att = att.add("format", format);
+          if (att.contains("color")) {
+            boolean escape = false;
+            StringBuilder colors = new StringBuilder();
+            String conn = "";
+            for (int i = 0; i < format.length(); i++) {
+              if (escape && format.charAt(i) == 'c') {
+                colors.append(conn).append(att.get("color"));
+                conn = ",";
+              }
+              if (format.charAt(i) == '%') {
+                escape = true;
+              } else {
+                escape = false;
+              }
+            }
+            att = att.add("colors", colors.toString());
+          }
+          StringBuilder sb = new StringBuilder();
+          for (ProductionItem pi : iterable(prod.items())) {
+            if (pi instanceof NonTerminal) {
+              sb.append('0');
+            } else {
+              sb.append('1');
+            }
+          }
+          att = att.add("terminals", sb.toString());
+          if (prod.klabel().isDefined()) {
+              List<K> lessThanK = new ArrayList<>();
+              Option<scala.collection.Set<Tag>> lessThan = module.priorities().relations().get(Tag(prod.klabel().get().name()));
+              if (lessThan.isDefined()) {
+                  for (Tag t : iterable(lessThan.get())) {
+                    if (ConstructorChecks.isBuiltinLabel(KLabel(t.name()))) {
+                        continue;
+                    }
+                    lessThanK.add(KApply(KLabel(t.name())));
+                  }
+              }
+              att = att.add("priorities", KList.class, KList(lessThanK));
+              att = att.remove("left");
+              att = att.remove("right");
+              att = att.add("left", KList.class, getAssoc(module.leftAssoc(), prod.klabel().get()));
+              att = att.add("right", KList.class, getAssoc(module.rightAssoc(), prod.klabel().get()));
+          }
         } else {
           att = att.remove("format");
         }
         // This attribute is a frontend attribute only and is removed from the kore
         // Since it has no meaning outside the frontend
         return att.remove(Att.ORIGINAL_PRD(), Production.class);
+    }
+
+    private KList getAssoc(scala.collection.Set<Tuple2<Tag, Tag>> assoc, KLabel klabel) {
+      return KList(stream(assoc).filter(t -> t._1().name().equals(klabel.name())).map(t -> KApply(KLabel(t._2().name()))).collect(Collectors.toList()));
     }
 
     private boolean isFunction(Production prod) {
