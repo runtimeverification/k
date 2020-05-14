@@ -203,16 +203,17 @@ public class ModuleToKORE {
             for (Production prod : iterable(sort._2())) {
                 translateSymbol(attributes, functionRules, impurities, overloads, prod.att().get("bracketLabel", KLabel.class), prod, sb);
             }
-            for (Production prod : iterable(module.sortedProductions())) {
-                if (isBuiltinProduction(prod)) {
-                    continue;
-                }
-                if (prod.isSubsort() && !prod.sort().equals(Sorts.K())) {
-                    genSubsortAxiom(prod, sb);
-                    continue;
-                }
+        }
+        for (Production prod : iterable(module.sortedProductions())) {
+            if (isBuiltinProduction(prod)) {
+                continue;
+            }
+            if (prod.isSubsort() && !prod.sort().equals(Sorts.K())) {
+                genSubsortAxiom(prod, sb);
+                continue;
             }
         }
+
         sb.append("endmodule []\n");
         files.saveToKompiled("syntaxDefinition.kore", sb.toString());
         sb.setLength(length);
