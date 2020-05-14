@@ -1,5 +1,5 @@
 // Copyright (c) 2015-2019 K Team. All Rights Reserved.
-package org.kframework.parser.inner;
+package org.kframework.parser;
 
 import org.apache.commons.io.FileUtils;
 import org.kframework.attributes.Att;
@@ -15,9 +15,13 @@ import org.kframework.kore.K;
 import org.kframework.kore.Sort;
 import org.kframework.kore.convertors.KILtoKORE;
 import org.kframework.main.GlobalOptions;
+import org.kframework.parser.inner.ApplySynonyms;
+import org.kframework.parser.inner.CollectProductionsVisitor;
+import org.kframework.parser.inner.ParseInModule;
+import org.kframework.parser.outer.ExtractFencedKCodeFromMarkdown;
 import org.kframework.parser.outer.Outer;
-import org.kframework.parser.tagSelector.ASTExpressionStart;
-import org.kframework.parser.tagSelector.TagSelector;
+import org.kframework.parser.markdown.ASTExpressionStart;
+import org.kframework.parser.markdown.TagSelector;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
@@ -126,10 +130,17 @@ public class ParserUtils {
             Set<File> requiredFiles) {
         if (source.source().endsWith(".md")) {
             definitionText = ExtractFencedKCodeFromMarkdown.extract(definitionText, mdSelectorAST);
-            if (options.debug()) { // save .k files in -kompiled directory
+            if (options.debug()) { // save .k files in temp directory
                 String fname = new File(source.source()).getName();
                 fname = fname.substring(0, fname.lastIndexOf(".md")) + ".k";
-                files.saveToKompiled(".md2.k/" + fname, definitionText);
+                File file = files.resolveTemp(".md2.k/" + fname);
+                // if multiple files exists with the same name, append an index
+                // and add a comment at the end of the file with the full path
+                // Note: the comment is not sent to the parser
+                int index = 2;
+                while (file.exists())
+                    file = files.resolveTemp(".md2.k/" + fname + "_" + index++);
+                FileUtil.save(file, definitionText + "\n// " + source.source() + "\n");
             }
         }
         List<DefinitionItem> items = Outer.parse(source, definitionText, null);

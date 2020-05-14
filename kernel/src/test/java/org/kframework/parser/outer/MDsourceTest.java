@@ -1,10 +1,10 @@
 // Copyright (c) 2015-2020 K Team. All Rights Reserved.
-package org.kframework.parser.inner;
+package org.kframework.parser.outer;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.kframework.parser.tagSelector.ASTExpressionStart;
-import org.kframework.parser.tagSelector.TagSelector;
+import org.kframework.parser.markdown.ASTExpressionStart;
+import org.kframework.parser.markdown.TagSelector;
 
 public class MDsourceTest {
     @Test

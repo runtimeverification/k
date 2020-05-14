@@ -1,5 +1,5 @@
 // Copyright (c) 2018-2019 K Team. All Rights Reserved.
-package org.kframework.parser.inner;
+package org.kframework.parser.outer;
 
 import com.vladsch.flexmark.ast.FencedCodeBlock;
 import com.vladsch.flexmark.parser.Parser;
@@ -8,8 +8,8 @@ import com.vladsch.flexmark.util.ast.NodeVisitor;
 import com.vladsch.flexmark.util.ast.VisitHandler;
 import com.vladsch.flexmark.util.data.MutableDataSet;
 import org.jetbrains.annotations.NotNull;
-import org.kframework.parser.tagSelector.ASTExpressionStart;
-import org.kframework.parser.tagSelector.TagSelector;
+import org.kframework.parser.markdown.ASTExpressionStart;
+import org.kframework.parser.markdown.TagSelector;
 
 import java.util.Set;
 
@@ -40,7 +40,7 @@ public class ExtractFencedKCodeFromMarkdown {
             // interested only in code blocks marked as valid by the mdSelector expression
             if (TagSelector.eval(mdSelector, tags)) {
                 // navigate from previous offset to the current one and
-                // mark make every character as whitespace to preserve location info
+                // copy every whitespace character to preserve location info
                 while (lastOffset < block.getContentChars().getStartOffset()) {
                     if (Character.isWhitespace(mdText.charAt(lastOffset)))
                         sb.append(mdText.charAt(lastOffset));
@@ -63,6 +63,13 @@ public class ExtractFencedKCodeFromMarkdown {
             lastOffset = 0;
             sb = new StringBuilder();
             visitor.visit(doc);
+            // copy remaining whitespace character to preserve location info for end of file errors
+            while (lastOffset < mdText.length()) {
+                if (Character.isWhitespace(mdText.charAt(lastOffset)))
+                    sb.append(mdText.charAt(lastOffset));
+                lastOffset++;
+            }
+
             return sb.toString();
         }
     }

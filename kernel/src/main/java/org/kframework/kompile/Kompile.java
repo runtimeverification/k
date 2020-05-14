@@ -27,7 +27,7 @@ import org.kframework.kore.KLabel;
 import org.kframework.kore.Sort;
 import org.kframework.parser.InputModes;
 import org.kframework.parser.KRead;
-import org.kframework.parser.inner.ParserUtils;
+import org.kframework.parser.ParserUtils;
 import org.kframework.parser.inner.generator.RuleGrammarGenerator;
 import org.kframework.unparser.ToJson;
 import org.kframework.utils.Stopwatch;
