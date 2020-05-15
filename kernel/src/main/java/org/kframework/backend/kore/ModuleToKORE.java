@@ -139,6 +139,7 @@ public class ModuleToKORE {
         Map<String, Boolean> attributes = new HashMap<>();
         attributes.put("nat", true);
         attributes.put("terminals", true);
+        attributes.put("colors", true);
         Set<Integer> priorities = new HashSet<>();
         collectTokenSortsAndAttributes(tokenSorts, attributes, priorities, heatCoolEq, topCellSortStr);
         Map<Integer, String> priorityToPreviousGroup = new HashMap<>();
