@@ -589,69 +589,33 @@ public class ModuleToKORE {
         Seq<NonTerminal> nonterminals = elementProd.nonterminals();
         Sort sortParam = Sort(AddSortInjections.SORTPARAM_NAME, Sort("Q"));
 
-        List<K> args = new ArrayList<>();
-        for (int i = 0; i< nonterminals.length(); i++) {
-            Sort sort = nonterminals.apply(i).sort();
-            args.add(KVariable("K" + i, Att.empty().add(Sort.class, sort)));
-        } // variable arguments for MapItem (K1 is the key)
-        Seq<K> argsSeq = JavaConverters.iterableAsScalaIterable(args).toSeq();
-        K restMap = KVariable("Rest", Att.empty().add(Sort.class, mapSort));
-
-        // rule K1:KItem in_keys(MapItem(K1, K2, .., Kn) Rest:Map) => true
-        Rule inKeysRule1 = Rule(
-                KRewrite(
-                        KApply(prod.klabel().get(),
-                                args.get(0),
-                                KApply(concatProd.klabel().get(),
-                                        KApply(elementProd.klabel().get(),
-                                                argsSeq,
-                                                Att.empty()
-                                        ),
-                                        restMap
-                                )
-                        ),
-                        BooleanUtils.TRUE
-                ),
-                BooleanUtils.TRUE,
-                BooleanUtils.TRUE
-        );
-        rules.add(inKeysRule1);
-
-        // rule K1:KItem in_keys(Rest:Map) => false [owise]
-        Rule inKeysRule2 = Rule(
-                KRewrite(
-                        KApply(prod.klabel().get(),
-                                args.get(0),
-                                restMap
-                        ),
-                        BooleanUtils.FALSE
-                ),
-                BooleanUtils.TRUE,
-                BooleanUtils.TRUE,
-                Att.empty().add(Att.OWISE())
-        );
-        rules.add(inKeysRule2);
+        // rule
+        //   #Ceil(MapItem(K1, K2, ..., Kn) Rest:Map)
+        // =>
+        //  {(@K1 in_keys(@Rest)) #Equals false} #And #Ceil(@K2) #And ... #And #Ceil(@Kn)
+        // Note: The {_ in_keys(_) #Equals false} condition implies
+        // #Ceil(@K1) and #Ceil(@Rest).
+        // [anywhere, simplification]
 
         K restMapSet = KVariable("@Rest", Att.empty().add(Sort.class, mapSort));
         KLabel ceilMapLabel = KLabel(KLabels.ML_CEIL.name(), mapSort, sortParam);
         KLabel andLabel = KLabel(KLabels.ML_AND.name(), sortParam);
-        K setArgsCeil = KApply(ceilMapLabel, restMapSet); //ceil constraints
+
+        // arguments of MapItem and their #Ceils
         List<K> setArgs = new ArrayList<>();
-        for (int i = 0; i< nonterminals.length(); i++) {
+        K setArgsCeil = KApply(KLabel(KLabels.ML_TRUE.name(), sortParam));
+        for (int i = 0; i < nonterminals.length(); i++) {
             Sort sort = nonterminals.apply(i).sort();
             KVariable setVar = KVariable("@K" + i, Att.empty().add(Sort.class, sort));
             setArgs.add(setVar);
-            KLabel ceilVarLabel = KLabel(KLabels.ML_CEIL.name(), sort, sortParam);
-            setArgsCeil = KApply(andLabel, setArgsCeil, KApply(ceilVarLabel, setVar));
-        } // set variable arguments for MapItem (@K1 is the key) and ceil constraints for them
+            if (i > 0) {
+                KLabel ceil = KLabel(KLabels.ML_CEIL.name(), sort, sortParam);
+                setArgsCeil = KApply(andLabel, setArgsCeil, KApply(ceil, setVar));
+            }
+        }
         Seq<K> setArgsSeq = JavaConverters.iterableAsScalaIterable(setArgs).toSeq();
 
-        // rule
-        //   #Ceil(MapItem(K1, K2, .., Kn) Rest:Map)
-        // =>
-        //  {(@K1 in_keys(@Rest)) #Equals false} #And #Ceil(@Rest) #And #Ceil(@K1) #And ... #And #Ceil(@Kn)
-        // [anywhere, simplification]
-        KLabel equalsLabel = KLabel("#Equals", Sorts.Bool(), sortParam);
+        KLabel equalsLabel = KLabel(KLabels.ML_EQUALS.name(), Sorts.Bool(), sortParam);
         Rule ceilMapRule =
                 Rule(
                         KRewrite(
