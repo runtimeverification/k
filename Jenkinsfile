@@ -514,6 +514,13 @@ pipeline {
                           , string(name: 'UPDATE_DEPS_RELEASE_FILE', value: 'deps/k_release')           \
                           , string(name: 'UPDATE_DEPS_RELEASE_TAG_SPEC', value: "${env.K_RELEASE_TAG}") \
                           ]
+        build job: 'rv-devops/master', propagate: false, wait: false                                                 \
+            , parameters: [ booleanParam(name: 'UPDATE_DEPS_RELEASE_TAG', value: true)                               \
+                          , string(name: 'PR_REVIEWER', value: 'ehildenb')                                           \
+                          , string(name: 'UPDATE_DEPS_REPOSITORY', value: 'runtimeverification/blockchain-k-plugin') \
+                          , string(name: 'UPDATE_DEPS_RELEASE_FILE', value: 'deps/k_release')                        \
+                          , string(name: 'UPDATE_DEPS_RELEASE_TAG_SPEC', value: "${env.K_RELEASE_TAG}")              \
+                          ]
       }
     }
   }
