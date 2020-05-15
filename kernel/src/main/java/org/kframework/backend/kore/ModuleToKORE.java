@@ -166,12 +166,14 @@ public class ModuleToKORE {
         translateSorts(tokenSorts, attributes, collectionSorts, sb);
 
         List<Rule> sortedRules = new ArrayList<>(JavaConverters.seqAsJavaList(module.sortedRules()));
-        module.sortedProductions().toStream().filter(this::isGeneratedInKeysOp).foreach(
-                prod -> {
-                    genMapCeilAxioms(prod, sortedRules);
-                    return prod;
-                }
-        );
+        if (options.backend.equals("haskell")) {
+            module.sortedProductions().toStream().filter(this::isGeneratedInKeysOp).foreach(
+                    prod -> {
+                        genMapCeilAxioms(prod, sortedRules);
+                        return prod;
+                    }
+            );
+        }
         SetMultimap<KLabel, Rule> functionRules = HashMultimap.create();
         for (Rule rule : sortedRules) {
             K left = RewriteToTop.toLeft(rule.body());
@@ -286,18 +288,7 @@ public class ModuleToKORE {
             RuleInfo ruleInfo = getRuleInfo(r, heatCoolEq, topCellSortStr);
             // only collect priorities of semantics rules
             if (!ruleInfo.isEquation && !ruleInfo.isKore && !ExpandMacros.isMacro(r)) {
-                if(ruleInfo.isOwise) {
-                    // priority for owise rule is 200
-                    priorities.add(200);
-                } else {
-                    Optional<String> priority = att.getOptional("priority");
-                    if (priority.isPresent()) {
-                        priorities.add(Integer.valueOf(priority.get()));
-                    } else {
-                        // default priority for semantics rules is 50
-                        priorities.add(50);
-                    }
-                }
+                priorities.add(getPriority(att));
             }
         }
     }
@@ -723,6 +714,19 @@ public class ModuleToKORE {
         }
     }
 
+    public static int getPriority(Att att) {
+        if (att.contains(Att.PRIORITY())) {
+            try {
+                return Integer.parseInt(att.get(Att.PRIORITY()));
+            } catch (NumberFormatException e) {
+                throw KEMException.compilerError("Invalid value for priority attribute: " + att.get(Att.PRIORITY()) + ". Must be an integer.", e);
+            }
+        } else if (att.contains(Att.OWISE())) {
+            return 200;
+        }
+        return 50;
+    }
+
     private void genNoJunkAxiom(Sort sort, StringBuilder sb) {
         sb.append("  axiom{} ");
         boolean hasToken = false;
@@ -881,7 +885,7 @@ public class ModuleToKORE {
         sb.append(" []\n");
         sb.append("\n\n// claims\n");
         HashMap<String, Boolean> consideredAttributes = new HashMap<>();
-        consideredAttributes.put("priority", true);
+        consideredAttributes.put(Att.PRIORITY(), true);
         consideredAttributes.put(Att.LABEL(), true);
 
         for (Sentence sentence : iterable(spec.sentencesExcept(definition))) {
@@ -940,7 +944,7 @@ public class ModuleToKORE {
                 equation = true;
                 productionSortStr = topCellSortStr;
             }
-            owise = rule.att().contains("owise");
+            owise = rule.att().contains(Att.OWISE());
         }
 
         return new RuleInfo(equation, owise, kore, production,
@@ -1093,12 +1097,7 @@ public class ModuleToKORE {
             if (!isRuleClaim) {
                 // LHS for semantics rules
                 String ruleAliasName = String.format("rule%dLHS", ruleIndex);
-                // default priority for semantics rules is 50
-                Integer priority = Integer.valueOf(rule.att().getOptional("priority").orElse("50"));
-                // priority for owise rule is 200
-                if(ruleInfo.isOwise) {
-                    priority = 200;
-                }
+                int priority = getPriority(rule.att());
                 List<KVariable> freeVars = new ArrayList<>(freeVariables);
                 Comparator<KVariable> compareByName = (KVariable v1, KVariable v2) -> v1.name().compareTo(v2.name());
                 java.util.Collections.sort(freeVars, compareByName);
@@ -1419,9 +1418,9 @@ public class ModuleToKORE {
         boolean hasFormat = true;
         for (int i = 0; i < prod.items().size(); i++) {
           if (prod.items().apply(i) instanceof NonTerminal) {
-            format = format.replace("%" + (i+1), "%" + (nt++));
+            format = format.replaceAll("%" + (i+1) + "(?![0-9])", "%" + (nt++));
           } else if (prod.items().apply(i) instanceof Terminal) {
-            format = format.replace("%" + (i+1), "%c" + ((Terminal)prod.items().apply(i)).value() + "%r");
+            format = format.replaceAll("%" + (i+1) + "(?![0-9])", "%c" + ((Terminal)prod.items().apply(i)).value().replace("\\", "\\\\").replace("$", "\\$") + "%r");
           } else {
             hasFormat = false;
           }

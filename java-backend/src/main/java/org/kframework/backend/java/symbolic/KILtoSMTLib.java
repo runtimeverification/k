@@ -38,6 +38,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Stack;
 
 
 public class    KILtoSMTLib extends CopyOnWriteTransformer {
@@ -243,6 +244,7 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
     private final LinkedHashSet<Variable> variables;
     private final LinkedHashMap<Term, Variable> termAbstractionMap;
     private final LinkedHashMap<UninterpretedToken, Integer> tokenEncoding;
+    private final Stack<Term> binders;
 
     private KILtoSMTLib(boolean allowNewVars, GlobalContext global) {
         this(allowNewVars, global.getDefinition(), global.krunOptions, global, new LinkedHashMap<>());
@@ -267,6 +269,7 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
         this.termAbstractionMap = termAbstractionMap;
         variables = new LinkedHashSet<>();
         tokenEncoding = new LinkedHashMap<>();
+        binders = new Stack<>();
     }
 
     private SMTLibTerm translate(JavaSymbolicObject object) {
@@ -461,7 +464,7 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
             try {
                 CharSequence left = translateTerm(equality.leftHandSide());
                 CharSequence right = translateTerm(equality.rightHandSide());
-                sb.append("\n\t(= ");
+                sb.append("\n    (= ");
                 sb.append(left);
                 sb.append(" ");
                 sb.append(right);
@@ -480,7 +483,7 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
         if (isEmptyAdd) {
             sb.append(" true");
         }
-        sb.append(")");
+        sb.append("\n  )");
         return new SMTLibTerm(sb);
     }
 
@@ -523,6 +526,29 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
         if (kList.hasFrame()) {
             throw new UnsupportedOperationException();
         }
+
+        if (kLabel.isBinder()) {
+            for (Integer keyIndex : kLabel.getBinderMap().keySet()) {
+                Term binderKVar = kList.get(keyIndex);
+                if (binderKVar instanceof UninterpretedToken && binderKVar.sort() == Sort.KVARIABLE) {
+                    binders.push(binderKVar);
+                } else {
+                    throw new UnsupportedOperationException();
+                }
+            }
+        }
+        SMTLibTerm smtLibTerm = transformSupportedKItem(kItem);
+        if (kLabel.isBinder()) {
+            for (Integer keyIndex : kLabel.getBinderMap().keySet()) {
+                binders.pop();
+            }
+        }
+        return smtLibTerm;
+    }
+
+    private SMTLibTerm transformSupportedKItem(KItem kItem) {
+        KLabelConstant kLabel = (KLabelConstant) kItem.kLabel();
+        KList kList = (KList) kItem.kList();
 
         String label = kLabel.smtlib();
         if (kLabel.label().equals("Map:lookup") && krunOptions.experimental.smt.mapAsIntArray) {
@@ -656,6 +682,13 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
 
     @Override
     public SMTLibTerm transform(UninterpretedToken uninterpretedToken) {
+        if (uninterpretedToken.sort() == Sort.KVARIABLE) {
+            if (binders.contains(uninterpretedToken)) {
+                return new SMTLibTerm(uninterpretedToken.javaBackendValue());
+            } else {
+                throw new SMTTranslationFailure("unbounded K variable: " + uninterpretedToken);
+            }
+        }
         if (tokenEncoding.get(uninterpretedToken) == null) {
             tokenEncoding.put(uninterpretedToken, tokenEncoding.size());
         }
