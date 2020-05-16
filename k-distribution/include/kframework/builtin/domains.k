@@ -452,6 +452,9 @@ module INT-SYMBOLIC [symbolic, kore]
   rule #Ceil(@I1:Int <<Int  @I2:Int) => {(@I2 >=Int 0)  #Equals true} #And #Ceil(@I1) #And #Ceil(@I2) [anywhere, simplification]
 
   // Arithmetic Normalization
+  rule I +Int 0 => I [simplification]
+  rule I -Int 0 => I [simplification]
+
   rule I +Int B => B +Int I          [concrete(I), symbolic(B), priority(51), simplification]
   rule A -Int I => A +Int (0 -Int I) [concrete(I), symbolic(A), priority(51), simplification]
 
