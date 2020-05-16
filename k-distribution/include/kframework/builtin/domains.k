@@ -465,7 +465,16 @@ module INT-SYMBOLIC [symbolic, kore]
   rule I1 -Int (I2 -Int C) => (I1 -Int I2) +Int C [concrete(I1, I2), symbolic(C), simplification]
   rule (C -Int I2) -Int I3 => C -Int (I2 +Int I3) [concrete(I2, I3), symbolic(C), simplification]
 
+  rule X modInt N => X requires 0 <=Int X andBool X <Int N [simplification]
+  rule X   %Int N => X requires 0 <=Int X andBool X <Int N [simplification]
+
   rule I1 &Int (I2 &Int C) => (I1 &Int I2) &Int C [concrete(I1, I2), symbolic(C), simplification]
+
+  // Bit-shifts
+  rule X <<Int 0 => X [simplification]
+  rule 0 <<Int X => 0 [simplification]
+  rule X >>Int 0 => X [simplification]
+  rule 0 >>Int X => 0 [simplification]
 endmodule
 
 module INT-KAST [kast]
