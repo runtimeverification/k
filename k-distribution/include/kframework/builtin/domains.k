@@ -441,42 +441,15 @@ module INT-COMMON
 endmodule
 
 module INT-SYMBOLIC [symbolic, kore]
-  imports  INT-COMMON
+  imports INT-COMMON
   imports ML-SYNTAX
 
-  /**
-   * Definability conditions
-   */
-
-  rule
-    #Ceil(@I1:Int /Int @I2:Int)
-  =>
-    {(@I2 =/=Int 0) #Equals true} #And #Ceil(@I1) #And #Ceil(@I2)
-  [anywhere, simplification]
-
-  rule
-    #Ceil(@I1:Int %Int @I2:Int)
-  =>
-    {(@I2 =/=Int 0) #Equals true} #And #Ceil(@I1) #And #Ceil(@I2)
-  [anywhere, simplification]
-
-  rule
-    #Ceil(@I1:Int modInt @I2:Int)
-  =>
-    {(@I2 =/=Int 0) #Equals true} #And #Ceil(@I1) #And #Ceil(@I2)
-  [anywhere, simplification]
-
-  rule
-    #Ceil(@I1:Int >>Int @I2:Int)
-  =>
-    {(@I2 >=Int 0) #Equals true} #And #Ceil(@I1) #And #Ceil(@I2)
-  [anywhere, simplification]
-
-  rule
-    #Ceil(@I1:Int <<Int @I2:Int)
-  =>
-    {(@I2 >=Int 0) #Equals true} #And #Ceil(@I1) #And #Ceil(@I2)
-  [anywhere, simplification]
+  // Definability Conditions
+  rule #Ceil(@I1:Int /Int   @I2:Int) => {(@I2 =/=Int 0) #Equals true} #And #Ceil(@I1) #And #Ceil(@I2) [anywhere, simplification]
+  rule #Ceil(@I1:Int %Int   @I2:Int) => {(@I2 =/=Int 0) #Equals true} #And #Ceil(@I1) #And #Ceil(@I2) [anywhere, simplification]
+  rule #Ceil(@I1:Int modInt @I2:Int) => {(@I2 =/=Int 0) #Equals true} #And #Ceil(@I1) #And #Ceil(@I2) [anywhere, simplification]
+  rule #Ceil(@I1:Int >>Int  @I2:Int) => {(@I2 >=Int 0)  #Equals true} #And #Ceil(@I1) #And #Ceil(@I2) [anywhere, simplification]
+  rule #Ceil(@I1:Int <<Int  @I2:Int) => {(@I2 >=Int 0)  #Equals true} #And #Ceil(@I1) #And #Ceil(@I2) [anywhere, simplification]
 endmodule
 
 module INT-KAST [kast]
