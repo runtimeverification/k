@@ -17,6 +17,8 @@ module DOMAINS-LEMMAS-NO-SMT-SPEC
     rule <k> (5 -Int X) +Int 3   => 8 -Int X          ... </k>
     rule <k> 5 -Int (3 +Int X)   => 2 -Int X          ... </k>
     rule <k> 5 -Int (3 -Int X)   => 2 +Int X          ... </k>
+    rule <k> (X +Int I) -Int X   => I                 ... </k>
+    rule <k> (I +Int X) -Int X   => I                 ... </k>
     rule <k> (X -Int 5) -Int 3   => X -Int 8          ... </k>
     rule <k> 5 &Int (3 &Int X)   => 1 &Int X          ... </k>
     rule <k> ((X +Int 1) +Int 1) => X +Int 2          ... </k>
