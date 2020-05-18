@@ -7,19 +7,19 @@ add_repo() {
 case "$(opam --version)" in
 1.*)
         OCAML_VERSION="4.06.1+k$1"
-	echo Detected Opam version 1
-	opam init $INIT_ARGS
-	add_repo
-	opam switch "$OCAML_VERSION"
-	;;
+        echo Detected Opam version 1
+        opam init $INIT_ARGS
+        add_repo
+        opam switch "$OCAML_VERSION"
+        ;;
 2.*)
         OCAML_VERSION="4.10.0$1"
-	echo Detected Opam version 2
-	opam init $INIT_ARGS --disable-sandboxing
-	add_repo
-	opam switch create "$OCAML_VERSION" --repositories k,default
-	;;
+        echo Detected Opam version 2
+        opam init $INIT_ARGS --disable-sandboxing
+        add_repo
+        opam switch create "$OCAML_VERSION" --repositories k,default
+        ;;
 *)
-	echo Unknown version of Opam
+        echo Unknown version of Opam
 esac
 
