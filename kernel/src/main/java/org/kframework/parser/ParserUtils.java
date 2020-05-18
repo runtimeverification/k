@@ -20,8 +20,6 @@ import org.kframework.parser.inner.CollectProductionsVisitor;
 import org.kframework.parser.inner.ParseInModule;
 import org.kframework.parser.outer.ExtractFencedKCodeFromMarkdown;
 import org.kframework.parser.outer.Outer;
-import org.kframework.parser.markdown.ASTExpressionStart;
-import org.kframework.parser.markdown.TagSelector;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
@@ -49,8 +47,8 @@ public class ParserUtils {
 
     private final KExceptionManager kem;
     private final GlobalOptions options;
-    private final ASTExpressionStart mdSelectorAST;
     private final FileUtil files;
+    private final ExtractFencedKCodeFromMarkdown mdExtractor;
 
     public ParserUtils(FileUtil files, KExceptionManager kem) {
         this(files, kem, new GlobalOptions(), new OuterParsingOptions());
@@ -59,9 +57,8 @@ public class ParserUtils {
     public ParserUtils(FileUtil files, KExceptionManager kem, GlobalOptions options, OuterParsingOptions outerParsingOptions) {
         this.kem = kem;
         this.options = options;
-        // parse once and throw any exception
-        mdSelectorAST = TagSelector.parseSelectorExp(outerParsingOptions.mdSelector);
         this.files = files;
+        mdExtractor = new ExtractFencedKCodeFromMarkdown(this.kem, outerParsingOptions.mdSelector);
     }
 
     public static K parseWithFile(String theTextToParse,
@@ -129,7 +126,7 @@ public class ParserUtils {
             List<File> lookupDirectories,
             Set<File> requiredFiles) {
         if (source.source().endsWith(".md")) {
-            definitionText = ExtractFencedKCodeFromMarkdown.extract(definitionText, mdSelectorAST);
+            definitionText = mdExtractor.extract(definitionText, source);
             if (options.debug()) { // save .k files in temp directory
                 String fname = new File(source.source()).getName();
                 fname = fname.substring(0, fname.lastIndexOf(".md")) + ".k";

@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2019 K Team. All Rights Reserved.
+<!--- Copyright (c) 2014-2019 K Team. All Rights Reserved. --->
 
 IMP
 ===
@@ -208,7 +208,7 @@ Note that we preferred to make the rule below structural.
 
 ### Programs
 The semantics of an IMP program is that its body statement is executed
-in a state initializing all its global variables to 0.  Since \K's
+in a state initializing all its global variables to 0.  Since **K**'s
 syntactic lists are internally interpreted as cons-lists (i.e., lists
 constructed with a head element followed by a tail list), we need to
 distinguish two cases, one when the list has at least one element and

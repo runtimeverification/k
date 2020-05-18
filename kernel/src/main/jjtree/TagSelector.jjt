@@ -40,21 +40,41 @@ public class TagSelector {
     }
   }
 
-  public static Set<String> parseTags(String input) {
+  public static Set<String> parseTags(String input, Source source) {
     TagSelector t = new TagSelector(new StringReader(input));
-    Set<String> tags = new HashSet<String>();
+    Set<String> tags = new HashSet();
     try {
       ASTTagListStart result = t.TagListStart();
-      for (Node n : result.children)
-        if (n instanceof SimpleNode) {
-            String tag = ((SimpleNode) n).value.toString();
-            if (tag.charAt(0) == '.')
-                tag = tag.substring(1);
-            tags.add(tag);
-        }
-    } catch (Exception e) {
-      // ignore: e.printStackTrace();
-    }
+      if (result.children != null)
+        for (Node n : result.children)
+          if (n instanceof SimpleNode) {
+              String tag = ((SimpleNode) n).value.toString();
+              if (tag.charAt(0) == '.') // remove leading dot for consistency
+                  tag = tag.substring(1);
+              tags.add(tag);
+          }
+    } catch (ParseException e) {
+        throw KEMException.outerParserHiddenWarning("Malformed Markdown code block annotation. Encountered "
+              + e.tokenImage[e.currentToken.next.kind]
+              + ".\nWas expecting one of: " + Stream.of(e.expectedTokenSequences)
+              // using an anonymous class because JavaCC doesn't support Java 8 syntax.
+                .map(new Function<int[], String>() {
+                  public String apply(int[] is) {
+                    StringBuilder sb = new StringBuilder();
+                    for (int i : is) {
+                      sb.append(e.tokenImage[i]);
+                      sb.append(" ");
+                    }
+                    sb.deleteCharAt(sb.length() - 1);
+                    return sb.toString();
+                  }
+                }).collect(Collectors.toList()).toString(), e, source,
+              new Location(e.currentToken.next.beginLine, e.currentToken.next.beginColumn,
+                           e.currentToken.next.endLine, e.currentToken.next.endColumn));
+      } catch (TokenMgrError e) {
+        // TODO: report location
+        throw KEMException.outerParserError(e.getMessage(), e, source, null);
+      }
     return tags;
   }
 
@@ -125,14 +145,14 @@ TOKEN : /* TAG */
 /** Main tag list production. */
 ASTTagListStart TagListStart() : {}
 {
-  ("{" ( Tag() )+ "}" | Tag())
+  ("{" ( Tag() )+ "}" | (Tag())?) <EOF>
   { return jjtThis; }
 }
 
 /** Main Expression production. */
 ASTExpressionStart ExpressionStart() : {}
 {
-  Expression()
+  Expression() <EOF>
   { return jjtThis; }
 }
 
