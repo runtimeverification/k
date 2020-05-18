@@ -318,9 +318,7 @@ pipeline {
                   agent { label 'anka' }
                   steps {
                     unstash 'src'
-                    dir('kframework') {
-                      checkout scm
-                    }
+                    dir('kframework') { checkout scm }
                     dir('homebrew-k') {
                       git url: 'git@github.com:kframework/homebrew-k.git'
                       sh '''
