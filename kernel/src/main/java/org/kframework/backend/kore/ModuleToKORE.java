@@ -388,7 +388,7 @@ public class ModuleToKORE {
         convert(attributes, koreAtt, sb, null, null);
         sb.append("\n");
     }
- 
+
 
     private void genSubsortAxiom(Production prod, StringBuilder sb) {
         Production finalProd = prod;
