@@ -70,7 +70,7 @@ public class TagSelector {
                   }
                 }).collect(Collectors.toList()).toString(), e, source,
               new Location(e.currentToken.next.beginLine, e.currentToken.next.beginColumn,
-                           e.currentToken.next.endLine, e.currentToken.next.endColumn));
+                           e.currentToken.next.endLine, e.currentToken.next.endColumn + 1));
       } catch (TokenMgrError e) {
         // TODO: report location
         throw KEMException.outerParserError(e.getMessage(), e, source, null);
@@ -99,7 +99,7 @@ public class TagSelector {
                   return sb.toString();
                 }
               }).collect(Collectors.toList()).toString(), e, source,
-            new Location(e.currentToken.next.beginLine, e.currentToken.next.beginColumn, e.currentToken.next.endLine, e.currentToken.next.endColumn));
+            new Location(e.currentToken.next.beginLine, e.currentToken.next.beginColumn, e.currentToken.next.endLine, e.currentToken.next.endColumn + 1));
     } catch (TokenMgrError e) {
       // TODO: report location
       throw KEMException.outerParserError(e.getMessage(), e, source, null);
