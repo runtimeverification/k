@@ -74,6 +74,7 @@
                 <exec executable="stack" dir="${project.basedir}/src/main/native/haskell-backend" failonerror="true">
                   <arg value="build" />
                   <arg value="--only-dependencies" />
+                  <arg value="--allow-different-user" />
                 </exec>
                 <mkdir dir="${project.build.directory}/stack-install" />
                 <exec executable="stack" dir="${project.basedir}/src/main/native/haskell-backend" failonerror="true">
