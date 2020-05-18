@@ -33,7 +33,9 @@ public class MDsourceTest {
                 "\n" +
                 "```{y k}\n" +
                 "endmodule";
-        KExceptionManager kem = new KExceptionManager(new GlobalOptions());
+        GlobalOptions go = new GlobalOptions();
+        go.warnings = GlobalOptions.Warnings.ALL;
+        KExceptionManager kem = new KExceptionManager(go);
         ExtractFencedKCodeFromMarkdown mdExtractor = new ExtractFencedKCodeFromMarkdown(kem, selectExp);
         String kTxt = mdExtractor.extract(mdTxt, new Source(MDsourceTest.class.toString()));
         String expectedK = "\n" +
