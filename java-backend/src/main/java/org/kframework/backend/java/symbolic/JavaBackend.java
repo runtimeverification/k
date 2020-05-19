@@ -94,7 +94,7 @@ public class JavaBackend extends AbstractBackend {
                 .andThen(DefinitionTransformer.from(AddBottomSortForListsWithIdenticalLabels.singleton(), "add bottom sorts for lists"))
                 .andThen(d2 -> {
                   ResolveFunctionWithConfig transformer = new ResolveFunctionWithConfig(d2, false);
-                  return DefinitionTransformer.fromSentenceTransformer((m, s) -> new ExpandMacros(transformer, m, files, kompileOptions, false).expand(s), "expand macros").apply(d2);
+                  return DefinitionTransformer.fromSentenceTransformer((m, s) -> new ExpandMacros(transformer, m, files, kem, kompileOptions, false, true).expand(s), "expand macros").apply(d2);
                 })
                 .andThen(DefinitionTransformer.fromSentenceTransformer(new NormalizeAssoc(KORE.c()), "normalize assoc"))
                 .andThen(convertDataStructureToLookup)
@@ -106,7 +106,7 @@ public class JavaBackend extends AbstractBackend {
                 .andThen(DefinitionTransformer.fromSentenceTransformer(JavaBackend::markSingleVariables, "mark single variables"))
                 .andThen(DefinitionTransformer.from(new AssocCommToAssoc(), "convert AC matching to A matching"))
                 .andThen(DefinitionTransformer.from(new MergeRules(MAIN_AUTOMATON, Att.TOP_RULE()), "merge regular rules into one rule with or clauses"))
-                .apply(Kompile.defaultSteps(kompileOptions, kem, files).apply(d));
+                .apply(Kompile.defaultSteps(kompileOptions, kem, files, true).apply(d));
              // .andThen(KoreToMiniToKore::apply) // for serialization/deserialization test
     }
 
@@ -127,7 +127,7 @@ public class JavaBackend extends AbstractBackend {
                 .andThen(AddBottomSortForListsWithIdenticalLabels.singleton())
                 .andThen(m2 -> {
                   ResolveFunctionWithConfig transformer = new ResolveFunctionWithConfig(m2, false);
-                  return ModuleTransformer.fromSentenceTransformer((mod, s) -> new ExpandMacros(transformer, mod, files, kompileOptions, false).expand(s), "expand macros").apply(m2);
+                  return ModuleTransformer.fromSentenceTransformer((mod, s) -> new ExpandMacros(transformer, mod, files, kem, kompileOptions, false, true).expand(s), "expand macros").apply(m2);
                 })
                 //.andThen(ModuleTransformer.fromSentenceTransformer(new NormalizeAssoc(KORE.c()), "normalize assoc"))
 
