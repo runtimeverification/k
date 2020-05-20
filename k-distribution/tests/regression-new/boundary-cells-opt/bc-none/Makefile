@@ -8,4 +8,4 @@ KOMPILE_BACKEND?=java
 
 KPROVE_FLAGS=
 
-include ../../../../include/ktest.mak
+include ../../../../include/kframework/ktest.mak

@@ -5,4 +5,4 @@ KOMPILE_BACKEND=llvm
 KOMPILE_FLAGS=--syntax-module A
 KPROVE_FLAGS=
 
-include ../../../../../include/ktest.mak
+include ../../../../../include/kframework/ktest.mak

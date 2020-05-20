@@ -4,4 +4,4 @@ TESTDIR=../io-java
 KOMPILE_BACKEND=llvm
 PREPARE=./prepare.sh
 
-include ../../../include/ktest.mak
+include ../../../include/kframework/ktest.mak

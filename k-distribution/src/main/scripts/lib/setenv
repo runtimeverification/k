@@ -1,25 +1,21 @@
 #!/usr/bin/env bash
 if [ `uname` = 'Darwin' ]; then
   OS=osx
-elif [[ `uname` == *MINGW* || `uname` == *MSYS* || `uname` == *CYGWIN* ]]; then
-  OS=windows
 else
   if [ `uname` != 'Linux' ]; then
     echo "Warning: unsupported OS detected. Defaulting to Linux mode, but errors may occur." 1>&2
   fi
   OS=linux
 fi
-K_LIB_DIR="$(cd $(dirname "$0")/../lib; pwd)"
+K_LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-export PATH="$K_LIB_DIR/../bin:$PATH"
+export PATH="$K_LIB_DIR/../../bin:$PATH"
 
 source "$K_LIB_DIR/checkJava" # sets ARCH and JAVA
 
 if [ `uname` = 'Darwin' ]; then
   export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:"$K_LIB_DIR/native/osx"
   export PATH="/usr/local/opt/bison/bin:$PATH"
-elif [[ `uname` == *MINGW* || `uname` == *MSYS* || `uname` == *CYGWIN* ]]; then
-  export PATH="$K_LIB_DIR/native/windows$ARCH":"$K_LIB_DIR/native/$ARCH":$PATH
 else
   export PATH="$K_LIB_DIR/native/linux$ARCH":$PATH
   export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"$K_LIB_DIR/native/linux$ARCH"
@@ -29,7 +25,6 @@ if [ -d "$K_LIB_DIR/opamroot" ]; then
   eval `opam config env --root="$K_LIB_DIR/opamroot"`
 fi
 
-export CYGWIN=nodosfilewarning
 export LC_ALL=C  # sets locale to C to avoid issues with numeric formats
 if [ -n "${TERM}" ]; then
   export TERM;

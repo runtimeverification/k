@@ -1,6 +1,6 @@
 K_RELEASE := $(abspath ../../target/release/k)
 K_BIN     := $(K_RELEASE)/bin
-K_LIB     := $(K_RELEASE)/lib
+K_LIB     := $(K_RELEASE)/lib/kframework
 
 KOMPILE = $(K_BIN)/kompile
 KAST    = $(K_BIN)/kast

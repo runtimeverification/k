@@ -1,2 +1,2 @@
 SUBDIRS=test1 test2
-include ../../../include/ktest-group.mak
+include ../../../include/kframework/ktest-group.mak

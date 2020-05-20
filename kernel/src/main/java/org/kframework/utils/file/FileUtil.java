@@ -154,8 +154,8 @@ public class FileUtil {
         save(resolveTemp(file), content);
     }
 
-    public String loadFromKBase(String file) {
-        return load(resolveKBase(file));
+    public String loadFromKIncludeDir(String file) {
+        return load(resolveKInclude(file));
     }
 
     public File resolveTemp(String file) {
@@ -182,6 +182,11 @@ public class FileUtil {
         return new File(workingDir, file.getPath());
     }
 
+    public File resolveKInclude(String file) {
+        return new File(JarInfo.getKIncludeDir().toFile(), file);
+    }
+
+    // don't use this if you want a file in the include directory. Use resolveKInclude.
     public File resolveKBase(String file) {
         return new File(JarInfo.getKBase(), file);
     }

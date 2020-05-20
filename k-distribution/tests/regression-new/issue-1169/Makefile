@@ -3,7 +3,7 @@ DEF2=test2
 EXT=test
 TESTDIR=.
 
-include ../../../include/ktest.mak
+include ../../../include/kframework/ktest.mak
 
 $(KOMPILED_DIR)/timestamp: $(DEF).k
 	$(KOMPILE) $(DEF).k -E > $(DEF2).k

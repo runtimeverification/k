@@ -3,4 +3,4 @@ EXT=col
 TESTDIR=.
 KOMPILE_BACKEND?=java
 
-include ../../../include/ktest.mak
+include ../../../include/kframework/ktest.mak

@@ -4,4 +4,4 @@ TESTDIR=.
 KOMPILE_BACKEND=llvm
 export KOMPILE_BACKEND
 
-include ../../../include/ktest.mak
+include ../../../include/kframework/ktest.mak
