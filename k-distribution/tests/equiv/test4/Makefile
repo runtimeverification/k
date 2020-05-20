@@ -6,4 +6,4 @@ SPEC2=1-lambda-spec.k
 MODULE1=PLUS-IMP-SPEC
 MODULE2=PLUS-LAMBDA-SPEC
 
-include ../../../include/ktest-keq.mak
+include ../../../include/kframework/ktest-keq.mak

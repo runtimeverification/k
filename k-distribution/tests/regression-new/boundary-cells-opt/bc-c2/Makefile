@@ -8,4 +8,4 @@ KOMPILE_BACKEND?=java
 
 KPROVE_FLAGS=--boundary-cells c2
 
-include ../../../../include/ktest.mak
+include ../../../../include/kframework/ktest.mak

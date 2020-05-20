@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
-source "$(dirname "$0")/../lib/setenv"
+source "$(dirname "$0")/../lib/kframework/setenv"
 "$(dirname "$0")/kserver" --socket "$KSERVER_SOCKET" >> "$1" 2>&1 &

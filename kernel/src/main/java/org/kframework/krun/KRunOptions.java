@@ -131,9 +131,6 @@ public final class KRunOptions {
 
     private static String getKast(FileUtil files) {
         String binary = "kast";
-        if (OS.current() == OS.WINDOWS) {
-            binary = "kast.bat";
-        }
         return files.resolveKBase("bin/" + binary).getAbsolutePath();
     }
 

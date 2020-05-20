@@ -1114,8 +1114,7 @@ module K-IO
 // ------------------------------
 // System
 
-  // executes the given command line with `sh -c cmd:String` on unix or
-  // `cmd /c cmd:String` on windows and returns #systemResult
+  // executes the given command line with `sh -c cmd:String`
   syntax KItem ::= #system ( String ) [function, hook(IO.system), impure]
                  | "#systemResult" "(" Int /* exit code */ "," String /* stdout */ "," String /* stderr */ ")" [klabel(#systemResult), symbol]
 

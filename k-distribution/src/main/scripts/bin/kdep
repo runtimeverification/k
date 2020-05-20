@@ -1,2 +1,2 @@
 #!/usr/bin/env sh
-"$(dirname "$0")/../lib/k" -kdep "$@"
+"$(dirname "$0")/../lib/kframework/k" -kdep "$@"

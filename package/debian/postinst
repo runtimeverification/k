@@ -20,8 +20,8 @@ set -e
 
 case "$1" in
     configure)
-    export OPAMROOT=/usr/lib/kframework/lib/opamroot
-    /usr/lib/kframework/bin/k-configure-opam
+    export OPAMROOT=/usr/lib/kframework/opamroot
+    /usr/bin/k-configure-opam
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)

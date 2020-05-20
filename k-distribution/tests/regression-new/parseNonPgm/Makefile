@@ -4,6 +4,6 @@ TESTDIR=.
 KOMPILE_FLAGS+=--gen-bison-parser
 KRUN_FLAGS+=print
 
-include ../../../include/ktest.mak
+include ../../../include/kframework/ktest.mak
 
 KRUN=./test

@@ -318,15 +318,14 @@ pipeline {
                   agent { label 'anka' }
                   steps {
                     unstash 'src'
+                    dir('kframework') { checkout scm }
                     dir('homebrew-k') {
                       git url: 'git@github.com:kframework/homebrew-k.git'
                       sh '''
                         git config --global user.email 'admin@runtimeverification.com'
                         git config --global user.name  'RV Jenkins'
-                        git remote add k-repo 'https://github.com/kframework/k.git'
-                        git fetch --all
                         # Note: double-backslash in sed-command is for Jenkins benefit.
-                        brew_base_branch=$(git log -n1 --format=%s k-repo/master | sed -n 's!.*\\[brew-staging: \\(.*\\)\\].*!\\1!p')
+                        brew_base_branch=$(cd ../kframework && git log -n1 --format=%s HEAD | sed -n 's!.*\\[brew-staging: \\(.*\\)\\].*!\\1!p')
                         [ "$brew_base_branch" != '' ] || brew_base_branch=master
                         git show-ref --verify refs/remotes/origin/$brew_base_branch
                         git push -d origin brew-release-$PACKAGE || true
@@ -351,11 +350,11 @@ pipeline {
                       sh '${WORKSPACE}/package/macos/brew-install-bottle'
                     }
                     sh '''
-                      cp -R /usr/local/lib/kframework/tutorial ~
+                      cp -R /usr/local/share/kframework/tutorial ~
                       WD=`pwd`
                       cd
                       echo 'Starting kserver...'
-                      /usr/local/lib/kframework/bin/spawn-kserver $WD/kserver.log
+                      spawn-kserver $WD/kserver.log
                       cd tutorial
                       echo 'Testing tutorial in user environment...'
                       make -j`sysctl -n hw.ncpu` ${MAKE_EXTRA_ARGS}
