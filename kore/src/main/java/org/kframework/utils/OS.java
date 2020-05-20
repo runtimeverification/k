@@ -31,7 +31,7 @@ public enum OS {
                             "Please contact K developers with details of your OS.");
         }
         if (this == WINDOWS) {
-            executable = executable + ".exe";
+            throw KEMException.internalError("K is not supported on native windows. Please use the Windows Subsystem for Linux.");
         }
         return executable;
     }

@@ -57,15 +57,15 @@ public class OcamlBackend extends AbstractBackend {
         files.saveToKompiled("realdef.ml", ocaml);
         new BinaryLoader(kem).saveOrDie(files.resolveKompiled("ocaml_converter.bin"), def);
         try {
-            FileUtils.copyFile(files.resolveKBase("include/ocaml/prelude.ml"), files.resolveKompiled("prelude.ml"));
-            FileUtils.copyFile(files.resolveKBase("include/ocaml/lexer.mll"), files.resolveKompiled("lexer.mll"));
-            FileUtils.copyFile(files.resolveKBase("include/ocaml/parser.mly"), files.resolveKompiled("parser.mly"));
-            FileUtils.copyFile(files.resolveKBase("include/ocaml/hooks.ml"), files.resolveKompiled("hooks.ml"));
-            FileUtils.copyFile(files.resolveKBase("include/ocaml/run.ml"), files.resolveKompiled("run.ml"));
-            FileUtils.copyFile(files.resolveKBase("include/ocaml/marshalvalue.ml"), files.resolveKompiled("marshalvalue.ml"));
-            FileUtils.copyFile(files.resolveKBase("include/ocaml/plugin.ml"), files.resolveKompiled("plugin.ml"));
-            FileUtils.copyFile(files.resolveKBase("include/ocaml/load_terms.c"), files.resolveKompiled("load_terms.c"));
-            FileUtils.copyFile(files.resolveKBase("include/ocaml/fake_load_terms.c"), files.resolveKompiled("fake_load_terms.c"));
+            FileUtils.copyFile(files.resolveKInclude("ocaml/prelude.ml"), files.resolveKompiled("prelude.ml"));
+            FileUtils.copyFile(files.resolveKInclude("ocaml/lexer.mll"), files.resolveKompiled("lexer.mll"));
+            FileUtils.copyFile(files.resolveKInclude("ocaml/parser.mly"), files.resolveKompiled("parser.mly"));
+            FileUtils.copyFile(files.resolveKInclude("ocaml/hooks.ml"), files.resolveKompiled("hooks.ml"));
+            FileUtils.copyFile(files.resolveKInclude("ocaml/run.ml"), files.resolveKompiled("run.ml"));
+            FileUtils.copyFile(files.resolveKInclude("ocaml/marshalvalue.ml"), files.resolveKompiled("marshalvalue.ml"));
+            FileUtils.copyFile(files.resolveKInclude("ocaml/plugin.ml"), files.resolveKompiled("plugin.ml"));
+            FileUtils.copyFile(files.resolveKInclude("ocaml/load_terms.c"), files.resolveKompiled("load_terms.c"));
+            FileUtils.copyFile(files.resolveKInclude("ocaml/fake_load_terms.c"), files.resolveKompiled("fake_load_terms.c"));
             String execution_pmg_ocaml = def.ocamlCompile(compiledDefinition.topCellInitializer, compiledDefinition.exitCodePattern, options.dumpExitCode);
             files.saveToKompiled("execution_pgm.ml", execution_pmg_ocaml);
 

@@ -5,4 +5,4 @@ TESTDIR=tests
 KOMPILE_BACKEND?=java
 KRUN_FLAGS=--pattern "<k> V:K </k>"
 
-include $(MAKEFILE_PATH)/../../../../../../include/ktest.mak
+include $(MAKEFILE_PATH)/../../../../../../include/kframework/ktest.mak

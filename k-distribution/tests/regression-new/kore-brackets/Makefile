@@ -5,4 +5,4 @@ KOMPILE_BACKEND=kore
 export KOMPILE_BACKEND
 DEBUG=--debug
 
-include ../../../include/ktest.mak
+include ../../../include/kframework/ktest.mak

@@ -1,1 +1,1 @@
-include ../../../include/ktest-fail.mak
+include ../../../include/kframework/ktest-fail.mak

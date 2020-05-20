@@ -1,2 +1,2 @@
 #!/usr/bin/env sh
-"$(dirname "$0")/../lib/k" -kast "$@"
+"$(dirname "$0")/../lib/kframework/k" -kast "$@"

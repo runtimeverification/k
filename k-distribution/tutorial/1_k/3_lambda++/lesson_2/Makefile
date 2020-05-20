@@ -6,4 +6,4 @@ KOMPILE_BACKEND=java
 KRUN_FLAGS=--search --pattern "<k> V:K </k>"
 
 include $(MAKEFILE_PATH)/../../../find-k.mak
-include ${K_HOME}/include/ktest.mak
+include ${K_HOME}/include/kframework/ktest.mak

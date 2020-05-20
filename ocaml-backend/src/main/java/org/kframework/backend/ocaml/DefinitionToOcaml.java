@@ -392,7 +392,7 @@ public class DefinitionToOcaml implements Serializable {
 
     public String execute(K k, int depth, String file) {
         StringBuilder sb = new StringBuilder();
-        ocamlProgramHeader(sb, true);
+        ocamlProgramHeader(sb, false);
         ocamlTermInput(new KRun.InitialConfiguration(k), sb); //declares input
         ocamlOpenFile("out", file, sb); //declares out
         runAndPrint(depth, sb); //calls run and prints to out
@@ -401,7 +401,7 @@ public class DefinitionToOcaml implements Serializable {
 
     public String match(K k, Rule r, String file) {
         StringBuilder sb = new StringBuilder();
-        ocamlProgramHeader(sb, true);
+        ocamlProgramHeader(sb, false);
         ocamlMatchPattern(r, sb); //declares try_match
         ocamlTermInput(new KRun.InitialConfiguration(k), sb); //declares input
         ocamlOpenFile("subst", file, sb); //declares subst
@@ -428,7 +428,7 @@ public class DefinitionToOcaml implements Serializable {
 
     public String executeAndMatch(K k, int depth, Rule r, String file, String substFile) {
         StringBuilder sb = new StringBuilder();
-        ocamlProgramHeader(sb, true);
+        ocamlProgramHeader(sb, false);
         ocamlMatchPattern(r, sb);  //declares try_match
         ocamlTermInput(new KRun.InitialConfiguration(k), sb);  //declares input
         ocamlOpenFile("out", file, sb); //declares out
