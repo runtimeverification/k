@@ -186,7 +186,7 @@ public class DefinitionParsing {
         Definition trimmed = Definition(parsedDefinition.mainModule(), modules.collect(Collections.toSet()),
                 parsedDefinition.att());
         trimmed = Kompile.excludeModulesByTag(excludedModuleTags).apply(trimmed);
-        Definition afterResolvingConfigBubbles = resolveConfigBubbles(trimmed, parsedDefinition.getModule("DEFAULT-CONFIGURATION").get());
+        Definition afterResolvingConfigBubbles = resolveConfigBubbles(trimmed, parsedDefinition.getModule("DEFAULT-CONFIGURATION").get(), parsedDefinition.getModule("MAP").get());
         RuleGrammarGenerator gen = new RuleGrammarGenerator(afterResolvingConfigBubbles);
         Definition afterResolvingAllOtherBubbles = resolveNonConfigBubbles(afterResolvingConfigBubbles, afterResolvingConfigBubbles.mainModule(), gen);
         saveCachesAndReportParsingErrors();
@@ -216,7 +216,7 @@ public class DefinitionParsing {
         return options.coverage ? Definition(Module(m.name(), (Set<Module>)m.imports().$bar(Set(definition.getModule("K-IO").get())), m.localSentences(), m.att()), definition.entryModules(), definition.att()) : definition;
     }
 
-    protected Definition resolveConfigBubbles(Definition definition, Module defaultConfiguration) {
+    protected Definition resolveConfigBubbles(Definition definition, Module defaultConfiguration, Module mapModule) {
         boolean hasConfigDecl = stream(definition.mainModule().sentences())
                 .filter(s -> s instanceof Bubble)
                 .map(b -> (Bubble) b)
@@ -229,6 +229,7 @@ public class DefinitionParsing {
                 if (mod == definition.mainModule()) {
                     java.util.Set<Module> imports = mutable(mod.imports());
                     imports.add(defaultConfiguration);
+                    imports.add(mapModule);
                     return Module(mod.name(), (Set<Module>) immutable(imports), mod.localSentences(), mod.att());
                 }
                 return mod;
