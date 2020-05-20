@@ -7,7 +7,7 @@ test: test.kore
 
 test.kore: test.c kompile
 	./c18-translation-kompiled/parser_PGM test.c > test.kore
-include ../../../include/ktest.mak
+include ../../../include/kframework/ktest.mak
 
 clean:
 	rm -rf test.kore c18-translation-kompiled

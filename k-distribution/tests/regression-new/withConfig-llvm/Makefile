@@ -3,4 +3,4 @@ EXT=test
 TESTDIR=../withConfig
 KOMPILE_BACKEND=llvm
 
-include ../../../include/ktest.mak
+include ../../../include/kframework/ktest.mak

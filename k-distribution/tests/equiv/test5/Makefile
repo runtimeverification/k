@@ -6,4 +6,4 @@ SPEC2=basic-imp2-spec.k
 MODULE1=BASIC-IMP-SPEC
 MODULE2=BASIC-IMP2-SPEC
 
-include ../../../include/ktest-keq.mak
+include ../../../include/kframework/ktest-keq.mak

@@ -90,11 +90,11 @@ public class KRead {
                 }
                 exit = files.getProcessBuilder()
                   .command("gcc",
-                      files.resolveKBase("include/cparser/main.c").getAbsolutePath(),
+                      files.resolveKInclude("cparser/main.c").getAbsolutePath(),
                       files.resolveTemp("lex.yy.c").getAbsolutePath(),
                       files.resolveTemp("parser.tab.c").getAbsolutePath(),
                       "-iquote", files.resolveTemp(".").getAbsolutePath(),
-                      "-iquote", files.resolveKBase("include/cparser").getAbsolutePath(),
+                      "-iquote", files.resolveKInclude("cparser").getAbsolutePath(),
                       "-o", outputFile.getAbsolutePath())
                   .inheritIO()
                   .start()

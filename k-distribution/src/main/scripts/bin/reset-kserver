@@ -1,7 +1,3 @@
 #!/usr/bin/env bash
-if [[ `uname` == *MINGW* || `uname` == *MSYS* || `uname` == *CYGWIN* ]]; then
-  "$(dirname "$0")/reset-kserver.bat" "$@"
-else
-  source "$(dirname "$0")/../lib/setenv"
-  $KSERVER_INSTANCE org.kframework.kserver.KServerFrontEnd reset
-fi
+source "$(dirname "$0")/../lib/kframework/setenv"
+$KSERVER_INSTANCE org.kframework.kserver.KServerFrontEnd reset

@@ -1,2 +1,2 @@
 SUBDIRS=deposit
-include ../../../include/ktest-group.mak
+include ../../../include/kframework/ktest-group.mak

@@ -98,6 +98,3 @@ In the PL semantics book, define print(AExps) to have the same semantics as in
 IMP++: evaluates and prints each of its arguments in order (as opposed to
 first evaluate all of them and then print them---for example, if the second
 argument performs a division by zero, I still want to print the first argument.)
-
-Windows user currently need to replace "kast" with "kast.bat" everywhere in their
-config.xml files.  Hopefully this will be fixed soon.

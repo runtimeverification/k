@@ -1,9 +1,9 @@
 # path to the current makefile
 MAKEFILE_PATH := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 # path to the kompile binary of this distribuition
-KOMPILE=$(abspath $(MAKEFILE_PATH)/../bin/kompile)
+KOMPILE=$(abspath $(MAKEFILE_PATH)/../../bin/kompile)
 # and kdep
-KDEP=$(abspath $(MAKEFILE_PATH)/../bin/kdep)
+KDEP=$(abspath $(MAKEFILE_PATH)/../../bin/kdep)
 # path to put -kompiled directory in
 DEFDIR?=.
 # all tests in test directory with matching file extension

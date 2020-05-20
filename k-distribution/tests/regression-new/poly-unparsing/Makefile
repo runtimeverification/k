@@ -4,4 +4,4 @@ TESTDIR=.
 KOMPILE_BACKEND=haskell
 KAST_FLAGS=--expand-macros --input kore --output pretty
 
-include ../../../include/ktest.mak
+include ../../../include/kframework/ktest.mak
