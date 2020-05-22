@@ -325,7 +325,7 @@ public class KSyntax2Bison {
           "  value_type result = {.nterm = n};\n" +
           "  $$ = result;\n" +
           "}\n");
-    } else if (prod.att().contains("bracket")) {
+    } else if (prod.att().contains(Att.BRACKET())) {
       bison.append("{\n" +
           "  $$ = $").append(nts.get(0)).append(";\n" +
           "}\n");

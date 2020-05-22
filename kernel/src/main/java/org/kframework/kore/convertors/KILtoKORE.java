@@ -18,6 +18,7 @@ import org.kframework.kil.Module;
 import org.kframework.kil.NonTerminal;
 import org.kframework.kil.Production;
 import org.kframework.kil.Terminal;
+import org.kframework.kore.KLabel;
 import org.kframework.utils.errorsystem.KEMException;
 import scala.Tuple2;
 import scala.collection.JavaConverters;
@@ -234,6 +235,9 @@ public class KILtoKORE extends KILTransformation<Object> {
                     }
 
                     org.kframework.attributes.Att attrs = convertAttributes(p);
+                    if (attrs.contains(Att.BRACKET())) {
+                      attrs = attrs.add("bracketLabel", KLabel.class, KLabel(p.getBracketLabel(kore), immutable(p.getParams())));
+                    }
 
                     org.kframework.definition.Production prod;
                     if (p.getKLabel(kore) == null)

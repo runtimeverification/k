@@ -2,6 +2,7 @@
 package org.kframework.kil;
 
 import org.kframework.kore.Sort;
+import org.kframework.attributes.Att;
 
 import com.google.common.collect.Multimap;
 import org.kframework.utils.StringUtil;
@@ -101,9 +102,17 @@ public class Production extends ASTNode {
      */
     public String getKLabel(boolean kore) {
         String klabel = getAttribute("klabel");
-        if (klabel == null && (isSyntacticSubsort() || containsAttribute("token") || containsAttribute("bracket"))) {
+        if (klabel == null && (isSyntacticSubsort() || containsAttribute("token") || containsAttribute(Att.BRACKET()))) {
             return null;
         } else if (klabel == null || (kore && getAttribute("symbol") == null)) {
+            klabel = getPrefixLabel(kore);
+        }
+        return klabel.replace(" ", "");
+    }
+
+    public String getBracketLabel(boolean kore) {
+        String klabel = getAttribute("klabel");
+        if (klabel == null || (kore && getAttribute("symbol") == null)) {
             klabel = getPrefixLabel(kore);
         }
         return klabel.replace(" ", "");
