@@ -135,7 +135,14 @@ public class KExceptionManager {
     }
 
     public void registerThrown(KEMException e) {
-        exceptions.add(e.exception);
+        KException exception = e.exception;
+        if (!options.warnings.includesExceptionType(exception.type))
+            return;
+        if (options.warnings2errors) {
+            exceptions.add(new KException(ExceptionType.ERROR, exception.exceptionGroup, exception.getMessage(), exception.getSource(), exception.getLocation(), exception.getException()));
+        } else {
+            exceptions.add(exception);
+        }
     }
 
     public List<KException> getExceptions() {

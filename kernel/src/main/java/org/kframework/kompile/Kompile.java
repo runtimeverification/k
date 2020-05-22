@@ -27,7 +27,7 @@ import org.kframework.kore.KLabel;
 import org.kframework.kore.Sort;
 import org.kframework.parser.InputModes;
 import org.kframework.parser.KRead;
-import org.kframework.parser.inner.ParserUtils;
+import org.kframework.parser.ParserUtils;
 import org.kframework.parser.inner.generator.RuleGrammarGenerator;
 import org.kframework.unparser.ToJson;
 import org.kframework.utils.Stopwatch;
@@ -92,7 +92,7 @@ public class Kompile {
         this.files = files;
         this.kem = kem;
         this.errors = new HashSet<>();
-        this.parser = new ParserUtils(files::resolveWorkingDirectory, kem, kem.options);
+        this.parser = new ParserUtils(files, kem, kem.options, kompileOptions.outerParsing);
         List<File> lookupDirectories = kompileOptions.outerParsing.includes.stream().map(files::resolveWorkingDirectory).collect(Collectors.toList());
         // these directories should be relative to the current working directory if we refer to them later after the WD has changed.
         kompileOptions.outerParsing.includes = lookupDirectories.stream().map(File::getAbsolutePath).collect(Collectors.toList());

@@ -17,7 +17,7 @@ import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.Sort;
 import org.kframework.main.GlobalOptions;
-import org.kframework.parser.inner.ParserUtils;
+import org.kframework.parser.ParserUtils;
 import org.kframework.parser.inner.generator.RuleGrammarGenerator;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -42,7 +42,7 @@ public class GenerateSentencesFromConfigDeclTest {
     public void setUp() {
         String definitionText;
         FileUtil files = FileUtil.testFileUtil();
-        ParserUtils parser = new ParserUtils(files::resolveWorkingDirectory, new KExceptionManager(new GlobalOptions()));
+        ParserUtils parser = new ParserUtils(files, new KExceptionManager(new GlobalOptions()));
         File definitionFile = new File(Kompile.BUILTIN_DIRECTORY.toString() + "/kast.k");
         definitionText = files.loadFromWorkingDirectory(definitionFile.getPath());
 
