@@ -18,7 +18,7 @@ import org.kframework.kore.KLabel;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.inner.ParseInModule;
-import org.kframework.parser.inner.ParserUtils;
+import org.kframework.parser.ParserUtils;
 import org.kframework.parser.inner.generator.RuleGrammarGenerator;
 import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KEMException;
@@ -51,7 +51,7 @@ public class AddEmptyListsTest {
     private RuleGrammarGenerator makeRuleGrammarGenerator() {
         String definitionText;
         FileUtil files = FileUtil.testFileUtil();
-        ParserUtils parser = new ParserUtils(files::resolveWorkingDirectory, new KExceptionManager(new GlobalOptions()));
+        ParserUtils parser = new ParserUtils(files, new KExceptionManager(new GlobalOptions()));
         File definitionFile = new File(Kompile.BUILTIN_DIRECTORY.toString() + "/kast.k");
         definitionText = files.loadFromWorkingDirectory(definitionFile.getPath());
 

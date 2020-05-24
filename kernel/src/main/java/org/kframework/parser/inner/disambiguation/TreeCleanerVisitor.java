@@ -2,6 +2,7 @@
 package org.kframework.parser.inner.disambiguation;
 
 import com.google.common.collect.Sets;
+import org.kframework.attributes.Att;
 import org.kframework.parser.KList;
 import org.kframework.parser.SetsTransformerWithErrors;
 import org.kframework.parser.Term;
@@ -23,7 +24,7 @@ public class TreeCleanerVisitor extends SetsTransformerWithErrors<KEMException> 
         if (tc.production().isSyntacticSubsort() && tc.production().klabel().isEmpty()) {
             // eliminating syntactic subsort
             vis = apply(tc.get(0));
-        } else if (!tc.production().att().contains("bracket") && tc.production().klabel().isEmpty()) {
+        } else if (!tc.production().att().contains(Att.BRACKET()) && tc.production().klabel().isEmpty()) {
             return Left.apply(Sets.newHashSet(KEMException.innerParserError(
                     "Only subsort productions are allowed to have no #klabel attribute", tc)));
         } else {

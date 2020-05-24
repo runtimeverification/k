@@ -45,6 +45,7 @@ object Att {
 
   val empty: Att = Att(Map.empty)
 
+  val BRACKET = "bracket"
   val FUNCTION = "function"
   val FUNCTIONAL = "functional"
   val SIMPLIFICATION = "simplification"

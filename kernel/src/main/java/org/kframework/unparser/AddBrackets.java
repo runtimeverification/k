@@ -48,8 +48,6 @@ public class AddBrackets {
         List<Term> newItems = new ArrayList<>();
         for (Term t2 : outer.items()) {
             ProductionReference inner = (ProductionReference) t2;
-            EnumSet<Fixity> fixity = getFixity(outer);
-            int position = getPosition(inner, outer);
             ProductionReference leftCapture = getLeftCapture(previousLeftCapture, outer, inner);
             ProductionReference rightCapture = getRightCapture(previousRightCapture, outer, inner);
             ProductionReference newInner = addBrackets(inner, outer, leftCapture, rightCapture);
