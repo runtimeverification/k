@@ -225,20 +225,17 @@ public class DefinitionParsing {
                 .filter(b -> b.sentenceType().equals("config"))
                 .findFirst().isPresent();
 
-        Definition definitionWithConfigBubble;
-        if (!hasConfigDecl) {
-            definitionWithConfigBubble = DefinitionTransformer.from(mod -> {
-                if (mod == definition.mainModule()) {
-                    java.util.Set<Module> imports = mutable(mod.imports());
+        Definition definitionWithConfigBubble = DefinitionTransformer.from(mod -> {
+            if (mod == definition.mainModule()) {
+                java.util.Set<Module> imports = mutable(mod.imports());
+                if (!hasConfigDecl) {
                     imports.add(defaultConfiguration);
-                    imports.add(mapModule);
-                    return Module(mod.name(), (Set<Module>) immutable(imports), mod.localSentences(), mod.att());
                 }
-                return mod;
-            }, "adding default configuration").apply(definition);
-        } else {
-            definitionWithConfigBubble = definition;
-        }
+                imports.add(mapModule);
+                return Module(mod.name(), (Set<Module>) immutable(imports), mod.localSentences(), mod.att());
+            }
+            return mod;
+        }, "adding default configuration").apply(definition);
 
         errors = java.util.Collections.synchronizedSet(Sets.newHashSet());
         caches = loadCaches();
