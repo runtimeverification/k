@@ -112,6 +112,10 @@ public class KEMException extends RuntimeException {
         return create(ExceptionType.ERROR, KExceptionGroup.OUTER_PARSER, message, e, location, source);
     }
 
+    public static KEMException outerParserHiddenWarning(String message, Throwable e, Source source, Location location) {
+        return create(ExceptionType.HIDDENWARNING, KExceptionGroup.OUTER_PARSER, message, e, location, source);
+    }
+
     public static KEMException asError(KEMException warning) {
         return new KEMException(warning.exception, ExceptionType.ERROR);
     }

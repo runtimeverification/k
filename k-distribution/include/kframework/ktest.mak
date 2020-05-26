@@ -39,6 +39,9 @@ STRAT_TESTS?=$(wildcard $(TESTDIR)/*.strat)
 KAST_TESTS?=$(wildcard $(TESTDIR)/*.kast)
 # default KOMPILE_BACKEND
 KOMPILE_BACKEND?=llvm
+# check if .k file exists, if not, check if .md file exists
+# if not, default to .k to give error message
+SOURCE_EXT?=$(or $(and $(wildcard $(DEF).k), k), $(or $(and $(wildcard $(DEF).md), md), k))
 
 CHECK=| diff -
 REMOVE_PATHS=| sed 's!'`pwd`'/\(\./\)\{0,1\}!!g'
@@ -52,7 +55,7 @@ all: kompile krun proofs bmc searches strat kast
 # run only kompile
 kompile: $(KOMPILED_DIR)/timestamp
 
-$(KOMPILED_DIR)/timestamp: $(DEF).k
+$(KOMPILED_DIR)/timestamp: $(DEF).$(SOURCE_EXT)
 	$(KOMPILE) $(KOMPILE_FLAGS) --backend $(KOMPILE_BACKEND) $(DEBUG) $< -d $(DEFDIR)
 
 krun: $(TESTS)
@@ -124,10 +127,10 @@ else
 endif
 
 clean:
-	rm -rf $(KOMPILED_DIR)
+	rm -rf $(KOMPILED_DIR) .depend-tmp .depend
 
 .depend:
-	@$(KDEP) $(DEF).k > .depend-tmp
+	@$(KDEP) $(DEF).$(SOURCE_EXT) > .depend-tmp
 	@mv .depend-tmp .depend
 
 -include .depend

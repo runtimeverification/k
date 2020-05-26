@@ -1,5 +1,5 @@
 // Copyright (c) 2015-2019 K Team. All Rights Reserved.
-package org.kframework.parser.inner;
+package org.kframework.parser;
 
 import org.apache.commons.io.FileUtils;
 import org.kframework.attributes.Att;
@@ -15,9 +15,15 @@ import org.kframework.kore.K;
 import org.kframework.kore.Sort;
 import org.kframework.kore.convertors.KILtoKORE;
 import org.kframework.main.GlobalOptions;
+import org.kframework.parser.inner.ApplySynonyms;
+import org.kframework.parser.inner.CollectProductionsVisitor;
+import org.kframework.parser.inner.ParseInModule;
+import org.kframework.parser.outer.ExtractFencedKCodeFromMarkdown;
 import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.file.FileUtil;
+import org.kframework.utils.options.OuterParsingOptions;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,7 +34,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -42,16 +47,18 @@ public class ParserUtils {
 
     private final KExceptionManager kem;
     private final GlobalOptions options;
-    private Function<File, File> makeAbsolute;
+    private final FileUtil files;
+    private final ExtractFencedKCodeFromMarkdown mdExtractor;
 
-    public ParserUtils(Function<File, File> makeAbsolute, KExceptionManager kem) {
-        this(makeAbsolute, kem, new GlobalOptions());
+    public ParserUtils(FileUtil files, KExceptionManager kem) {
+        this(files, kem, new GlobalOptions(), new OuterParsingOptions());
     }
 
-    public ParserUtils(Function<File, File> makeAbsolute, KExceptionManager kem, GlobalOptions options) {
-        this.makeAbsolute = makeAbsolute;
+    public ParserUtils(FileUtil files, KExceptionManager kem, GlobalOptions options, OuterParsingOptions outerParsingOptions) {
         this.kem = kem;
         this.options = options;
+        this.files = files;
+        mdExtractor = new ExtractFencedKCodeFromMarkdown(this.kem, outerParsingOptions.mdSelector);
     }
 
     public static K parseWithFile(String theTextToParse,
@@ -118,6 +125,21 @@ public class ParserUtils {
             File currentDirectory,
             List<File> lookupDirectories,
             Set<File> requiredFiles) {
+        if (source.source().endsWith(".md")) {
+            definitionText = mdExtractor.extract(definitionText, source);
+            if (options.debug()) { // save .k files in temp directory
+                String fname = new File(source.source()).getName();
+                fname = fname.substring(0, fname.lastIndexOf(".md")) + ".k";
+                File file = files.resolveTemp(".md2.k/" + fname);
+                // if multiple files exists with the same name, append an index
+                // and add a comment at the end of the file with the full path
+                // Note: the comment is not sent to the parser
+                int index = 2;
+                while (file.exists())
+                    file = files.resolveTemp(".md2.k/" + fname + "_" + index++);
+                FileUtil.save(file, definitionText + "\n// " + source.source() + "\n");
+            }
+        }
         List<DefinitionItem> items = Outer.parse(source, definitionText, null);
         if (options.verbose) {
             System.out.println("Importing: " + source);
@@ -168,7 +190,7 @@ public class ParserUtils {
 
     private String loadDefinitionText(File definitionFile) {
         try {
-            return FileUtils.readFileToString(makeAbsolute.apply(definitionFile));
+            return FileUtils.readFileToString(files.resolveWorkingDirectory(definitionFile));
         } catch (IOException e) {
             throw KEMException.criticalError(e.getMessage(), e);
         }
@@ -283,7 +305,7 @@ public class ParserUtils {
         Set<File> requiredFiles = new HashSet<>();
         Context context = new Context();
         if (autoImportDomains)
-            previousModules.addAll(loadModules(new HashSet<>(), context, Kompile.REQUIRE_PRELUDE_K, source, currentDirectory, lookupDirectories, requiredFiles, kore, preprocess, leftAssoc));
+            previousModules.addAll(loadModules(new HashSet<>(), context, Kompile.REQUIRE_PRELUDE_K, Source.apply("Auto imported prelude"), currentDirectory, lookupDirectories, requiredFiles, kore, preprocess, leftAssoc));
         Set<Module> modules = loadModules(previousModules, context, definitionText, source, currentDirectory, lookupDirectories, requiredFiles, kore, preprocess, leftAssoc);
         if (preprocess) {
           System.exit(0);
