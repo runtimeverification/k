@@ -137,7 +137,12 @@ public class AddEmptyLists extends SetsGeneralTransformer<KEMException, KEMExcep
                     UserList ulTerm = lists.get(leastTerm.iterator().next()).get(0);
                     TermCons terminator = TermCons.apply(ConsPStack.empty(), ulTerm.pTerminator, child.location(), child.source());
                     // TermCons with PStack requires the elements to be in the reverse order
-                    TermCons newTc = TermCons.apply(ConsPStack.from(Arrays.asList(terminator, child)), ul.pList, child.location(), child.source());
+                    TermCons newTc;
+                    if (ul.leftAssoc) {
+                        newTc = TermCons.apply(ConsPStack.from(Arrays.asList(child, terminator)), ul.pList, child.location(), child.source());
+                    } else {
+                        newTc = TermCons.apply(ConsPStack.from(Arrays.asList(terminator, child)), ul.pList, child.location(), child.source());
+                    }
                     newItems.add(newTc);
                     changed = true;
                 }
