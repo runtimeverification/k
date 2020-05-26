@@ -44,6 +44,6 @@ module FFI
   rule #ffiCall(false, Addr::Int, Args::List, Types::List, _, Ret::FFIType) => #ffiCall(Addr, Args, Types, Ret)
   rule #ffiCall(true, Addr::Int, Args::List, Types::List, NFixed::Int, Ret::FFIType) => #ffiCall(Addr, Args, range(Types, 0, size(Types) -Int NFixed), range(Types, NFixed, 0), Ret)
 
-  syntax Bytes ::= "#alloc" "(" KItem "," Int ")" [function, hook(FFI.alloc)]
+  syntax Bytes ::= "#alloc" "(" KItem "," Int "," Int ")" [function, hook(FFI.alloc)]
   syntax Int ::= "#address" "(" Bytes ")" [function, hook(FFI.bytes_address)]
 endmodule
