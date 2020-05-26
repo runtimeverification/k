@@ -10,7 +10,7 @@ import org.kframework.attributes.Source;
 import org.kframework.kompile.Kompile;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
-import org.kframework.parser.inner.ParserUtils;
+import org.kframework.parser.ParserUtils;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
@@ -80,7 +80,7 @@ public class KDepFrontEnd extends FrontEnd {
 
     @Override
     protected int run() {
-        ParserUtils parser = new ParserUtils(files.get()::resolveWorkingDirectory, kem, globalOptions);
+        ParserUtils parser = new ParserUtils(files.get(), kem, globalOptions, options);
         List<org.kframework.kil.Module> modules = new ArrayList<>();
         Source source = Source.apply(options.mainDefinitionFile(files.get()).getAbsolutePath());
         File currentDirectory = options.mainDefinitionFile(files.get()).getParentFile();
