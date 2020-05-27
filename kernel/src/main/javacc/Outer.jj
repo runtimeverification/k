@@ -451,8 +451,6 @@ PARSER_END(Outer)
 
 | "List"
 | "NeList"
-| "Lexer"
-| "Token"
 
 | "require"
 | "requires"
@@ -467,7 +465,7 @@ Token unlike the default UPPER_ID.
 */
 void UpperId() : {}
 {
-  <UPPER_ID> | "List" | "NeList" | "Lexer" | "Token"
+  <UPPER_ID> | "List" | "NeList"
 }
 
 /** Parses a string literal and returns the decoded value of that string. */
@@ -508,7 +506,7 @@ Sort SimpleSort() : { String str; Sort sort; List<Sort> params = new ArrayList<S
 | <NAT> { str = image(); return Sort(str, params); }
 }
 
-/** Parses and returns a NonTerminal but not a List, NeList, Lexer, or Token */
+/** Parses and returns a NonTerminal but not a List or NeList */
 NonTerminal SimpleSortID() : { Location loc = startLoc(); Sort sort; Optional<String> name = Optional.empty(); }
 {
   (LOOKAHEAD((<UPPER_ID> | <LOWER_ID>) ":")
@@ -606,60 +604,6 @@ List<Tag> KLabels() :
   (<KLABEL> { list.add(new Tag(image())); })+
   // TODO: check if need context
   { return list; }
-}
-
-/**** RegEx ****/
-
-<REGEX_STATE> SPECIAL_TOKEN: {
-  <([" ", "\t", "\r", "\n"])+>
-| <REGEX_COMMENT: <COMMENT>> {}
-}
-
-<REGEX_STATE> TOKEN:
-{
-  <ID: ["A"-"Z"](["a"-"z", "A"-"Z", "0"-"9"])*>
-| <REGEX_STRING: <STRING>> { matchedToken.kind = STRING; }
-| "(" { matchedToken.kind = LPAREN; }
-| ")" { matchedToken.kind = RPAREN; }
-| "{" { matchedToken.kind = LCURLY; }
-| "}" { matchedToken.kind = RCURLY; }
-| "[" { matchedToken.kind = LSQUARE; }
-| "]" { matchedToken.kind = RSQUARE; }
-| "+" { matchedToken.kind = PLUS; }
-| "*" { matchedToken.kind = TIMES; }
-| "?" { matchedToken.kind = QUESTION; }
-| "~" { matchedToken.kind = TILDE; }
-| <PIPE: "|">
-}
-
-/*** RegEx Character Groups */
-
-<GROUP_STATE> TOKEN:
-{ <GROUP: ( ["a"-"z", "A"-"Z", "0"-"9"]
-          | "-" | "\t" | "\n" | "\r" | " "
-          | "\\" ["t", "n", "r", " "]
-          | "\\" ~["a"-"z", "A"-"Z", "\t"])*>
-    { if (image.length() > 0)
-      if (image.charAt(0) == '-' ||
-    		(image.charAt(image.length() - 1) == '-'
-    		 && image.charAt(image.length() - 2) != '\\')) {
-        throw new TokenMgrError(
-          "Lexical error at line " + matchedToken.beginLine +
-          ", column " + matchedToken.beginColumn + ". Found \"-\" at " +
-          (image.charAt(0) == '-' ? "start" : "end") +
-          " of character group in regular expression.",
-          TokenMgrError.LEXICAL_ERROR);
-      }
-    }
-}
-
-/** Parses a single character group and appends it to 'sb' */
-void Group(StringBuilder sb, int state) : {}
-{
-  "~"      { sb.append(specialAndImage()); } Group(sb, state)
-| "["      { sb.append(specialAndImage()); SwitchTo(GROUP_STATE); }
-  (<GROUP> { sb.append(specialAndImage()); })? { SwitchTo(state); }
-  "]"      { sb.append(specialAndImage()); }
 }
 
 /*** Attributes ***/
