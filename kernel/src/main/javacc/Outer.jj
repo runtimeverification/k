@@ -92,8 +92,6 @@ States:
  - Secondary States: (switch based on grammar context)
    - ATTR_STATE: used in body of Attributes (SPECIAL_TOKEN include whitespace)
    - TAG_STATE: used in body of Tags
-   - REGEX_STATE: used in body of RegEx (SPECIAL_TOKEN includes whitespace)
-   - GROUP_STATE: used in body of Group (i.e., a character class)
 
  - Tertiary States: (switch for one token)
    - MODNAME_STATE: used after "module", "imports"
