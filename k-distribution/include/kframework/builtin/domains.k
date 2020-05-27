@@ -452,31 +452,31 @@ module INT-SYMBOLIC [symbolic, kore]
     #Ceil(@I1:Int /Int @I2:Int)
   =>
     {(@I2 =/=Int 0) #Equals true} #And #Ceil(@I1) #And #Ceil(@I2)
-  [anywhere]
+  [anywhere, simplification]
 
   rule
     #Ceil(@I1:Int %Int @I2:Int)
   =>
     {(@I2 =/=Int 0) #Equals true} #And #Ceil(@I1) #And #Ceil(@I2)
-  [anywhere]
+  [anywhere, simplification]
 
   rule
     #Ceil(@I1:Int modInt @I2:Int)
   =>
     {(@I2 =/=Int 0) #Equals true} #And #Ceil(@I1) #And #Ceil(@I2)
-  [anywhere]
+  [anywhere, simplification]
 
   rule
     #Ceil(@I1:Int >>Int @I2:Int)
   =>
     {(@I2 >=Int 0) #Equals true} #And #Ceil(@I1) #And #Ceil(@I2)
-  [anywhere]
+  [anywhere, simplification]
 
   rule
     #Ceil(@I1:Int <<Int @I2:Int)
   =>
     {(@I2 >=Int 0) #Equals true} #And #Ceil(@I1) #And #Ceil(@I2)
-  [anywhere]
+  [anywhere, simplification]
 endmodule
 
 module INT-KAST [kast]
