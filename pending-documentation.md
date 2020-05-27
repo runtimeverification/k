@@ -400,6 +400,20 @@ being added to the definition of `isKResult`:
 rule isKResult(BE1:BExp || BE2:BExp) => true requires isKResult(BE1)
 ```
 
+Sometimes you wish to declare a production hybrid with respect to a predicate
+other than `isKResult`. You can do this by specifying a sort as the body of the
+`hybrid` attribute, e.g.:
+
+```k
+syntax BExp ::= BExp "||" BExp [strict(1), hybrid(Foo)]
+```
+
+generates the rule:
+
+```k
+rule isFoo(BE1:BExp || BE2:BExp) => true requires isFoo(BE1)
+```
+
 ### Context aliases
 
 Sometimes it is necessary to define a fairly complicated evaluation strategy
@@ -446,6 +460,20 @@ a `strict` attribute given with the following context alias:
 
 ```k
 context alias [default]: <k> HERE:K ... </k>
+```
+
+One syntactic convenience that is provided is that if you wish to declare the following context:
+
+```k
+context foo(HOLE => bar(HOLE))
+```
+
+you can simply write the following:
+
+```k
+syntax Foo ::= foo(Bar) [strict(alias)]
+
+context alias [alias]: HERE [context(bar)]
 ```
 
 Configuration Declaration
