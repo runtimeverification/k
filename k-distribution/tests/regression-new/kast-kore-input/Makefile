@@ -5,4 +5,4 @@ KOMPILE_BACKEND=haskell
 export KOMPILE_BACKEND
 KAST_FLAGS=--input kore --output pretty
 
-include ../../../include/ktest.mak
+include ../../../include/kframework/ktest.mak

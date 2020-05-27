@@ -53,7 +53,7 @@ import org.kframework.kore.VisitK;
 import org.kframework.kore.TransformK;
 import org.kframework.krun.KRun;
 import org.kframework.main.GlobalOptions;
-import org.kframework.parser.inner.ParserUtils;
+import org.kframework.parser.ParserUtils;
 import org.kframework.parser.outer.Outer;
 import org.kframework.unparser.ToBinary;
 import org.kframework.unparser.ToKast;
@@ -392,7 +392,7 @@ public class DefinitionToOcaml implements Serializable {
 
     public String execute(K k, int depth, String file) {
         StringBuilder sb = new StringBuilder();
-        ocamlProgramHeader(sb, true);
+        ocamlProgramHeader(sb, false);
         ocamlTermInput(new KRun.InitialConfiguration(k), sb); //declares input
         ocamlOpenFile("out", file, sb); //declares out
         runAndPrint(depth, sb); //calls run and prints to out
@@ -401,7 +401,7 @@ public class DefinitionToOcaml implements Serializable {
 
     public String match(K k, Rule r, String file) {
         StringBuilder sb = new StringBuilder();
-        ocamlProgramHeader(sb, true);
+        ocamlProgramHeader(sb, false);
         ocamlMatchPattern(r, sb); //declares try_match
         ocamlTermInput(new KRun.InitialConfiguration(k), sb); //declares input
         ocamlOpenFile("subst", file, sb); //declares subst
@@ -428,7 +428,7 @@ public class DefinitionToOcaml implements Serializable {
 
     public String executeAndMatch(K k, int depth, Rule r, String file, String substFile) {
         StringBuilder sb = new StringBuilder();
-        ocamlProgramHeader(sb, true);
+        ocamlProgramHeader(sb, false);
         ocamlMatchPattern(r, sb);  //declares try_match
         ocamlTermInput(new KRun.InitialConfiguration(k), sb);  //declares input
         ocamlOpenFile("out", file, sb); //declares out
@@ -1093,7 +1093,7 @@ public class DefinitionToOcaml implements Serializable {
         File definitionFile = files.resolveWorkingDirectory(options.klabels).getAbsoluteFile();
         List<File> lookupDirectories = kompileOptions.outerParsing.includes.stream().map(files::resolveWorkingDirectory).collect(Collectors.toList());
         lookupDirectories.add(Kompile.BUILTIN_DIRECTORY);
-        java.util.Set<Module> mods = new ParserUtils(files::resolveWorkingDirectory, kem, globalOptions).loadModules(
+        java.util.Set<Module> mods = new ParserUtils(files, kem, globalOptions, kompileOptions.outerParsing).loadModules(
                 new HashSet<>(),
                 new Context(),
                 "require " + StringUtil.enquoteCString(definitionFile.getPath()),

@@ -2,4 +2,4 @@ DEF=macro-vars
 EXT=macro-vars
 TESTDIR=.
 
-include ../../../include/ktest.mak
+include ../../../include/kframework/ktest.mak

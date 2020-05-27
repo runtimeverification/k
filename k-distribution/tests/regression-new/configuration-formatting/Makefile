@@ -2,4 +2,4 @@ DEF=test
 EXT=test
 TESTDIR=.
 
-include ../../../include/ktest.mak
+include ../../../include/kframework/ktest.mak

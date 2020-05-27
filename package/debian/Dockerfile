@@ -41,7 +41,7 @@ RUN    groupadd -g $GROUP_ID user                     \
 USER $USER_ID:$GROUP_ID
 
 ADD k-distribution/src/main/scripts/bin/k-configure-opam-dev k-distribution/src/main/scripts/bin/k-configure-opam-common /home/user/.tmp-opam/bin/
-ADD k-distribution/src/main/scripts/lib/opam                                                                             /home/user/.tmp-opam/lib/opam/
+ADD k-distribution/src/main/scripts/lib/opam                                                                             /home/user/.tmp-opam/lib/kframework/opam/
 RUN    cd /home/user                        \
     && ./.tmp-opam/bin/k-configure-opam-dev
 

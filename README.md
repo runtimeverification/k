@@ -32,9 +32,6 @@ If you install this list of dependencies, continue directly to the Install secti
 Linux:
 *   Download from package manager (e.g. `sudo apt-get install openjdk-8-jdk`)
 
-Mac/Windows:
-*   Download the JDK [here](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
-
 To make sure that everything works you should be able to call `java -version` and
 `javac -version` from a Terminal.
 
@@ -46,11 +43,6 @@ Linux:
 Mac:
 *   Download it from a package manager or from
     http://maven.apache.org/download.cgi and follow the instructions on the webpage.
-
-Windows:
-*   Go to http://maven.apache.org/download.cgi and download the zip with the 
-    binary distribution. Unzip it in your desired location and follow the 
-    installation instructions on the webpage.
 
 Maven usually requires setting an environment variable `JAVA_HOME` pointing
 to the installation directory of the JDK (not to be mistaken with JRE).
@@ -109,13 +101,13 @@ ubuntu1804
     
     `$ sudo apt-get install ./kframework_5.0.0_amd64_bionic.deb`
         This will install ~1.4GB of dependencies and will take some time.
-        K will be installed to `/usr/lib/kframework`
+        K will be installed to `/usr`
 
 5. Copy the tutorial to some work directory, for example `/mnt/d/k-tutorial`. Otherwise, you won't be able to run the
 examples from default installation dir if you are not `root`:
 
 ```    
-$ cp -R /usr/lib/kframework/tutorial /mnt/d/k-tutorial
+$ cp -R /usr/share/kframework/tutorial /mnt/d/k-tutorial
 ```
 
 6. Now you can try to run some programs:

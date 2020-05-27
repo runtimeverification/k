@@ -19,7 +19,7 @@ set -e
 
 case "$1" in
     remove|upgrade|deconfigure)
-    rm -rf /usr/lib/kframework/lib/opamroot
+    rm -rf /usr/lib/kframework/opamroot
     ;;
 
     failed-upgrade)

@@ -18,7 +18,7 @@ export DEB_BUILD_MAINT_OPTIONS=hardening=-stackprotector
 	dh $@ 
 
 override_dh_auto_build:
-	mvn --batch-mode package -DskipTests -Dllvm.backend.prefix=/usr/lib/kframework -Dllvm.backend.destdir=$(shell pwd)/debian/kframework
+	mvn --batch-mode package -DskipTests -Dllvm.backend.prefix=/usr -Dllvm.backend.destdir=$(shell pwd)/debian/kframework
 
 override_dh_auto_install:
 	DESTDIR=$(shell pwd)/debian/kframework PREFIX=/usr package/package

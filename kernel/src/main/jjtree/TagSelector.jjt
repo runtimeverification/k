@@ -1,0 +1,189 @@
+// Copyright (c) 2013-2020 K Team. All Rights Reserved.
+options {
+  MULTI=true;
+  STATIC = false;
+  UNICODE_INPUT = true;
+}
+PARSER_BEGIN(TagSelector)
+package org.kframework.parser.markdown;
+
+import java.lang.String;
+import java.io.StringReader;
+import java.util.Set;
+import java.util.HashSet;
+import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.attributes.Source;
+import org.kframework.attributes.Location;
+import java.util.function.Function;
+import java.util.stream.Stream;
+import java.util.stream.Collectors;
+
+/**
+ * An Arithmetic Grammar.
+ * @author Radu Mereuta
+ */
+public class TagSelector {
+
+  /** Run this to test the parser. */
+  public static void main(String args[]) {
+    System.out.println("Reading from standard input...");
+    TagSelector t = new TagSelector(new StringReader("a|!b&c"));
+    try {
+      //SimpleNode result = t.ExpressionStart();
+      SimpleNode result = t.TagListStart();
+      result.dump("");
+      System.out.println("Success.");
+    } catch (Exception e) {
+      System.out.println("Error:");
+      System.out.println(e.getMessage());
+      e.printStackTrace();
+    }
+  }
+
+  public static Set<String> parseTags(String input, Source source) {
+    TagSelector t = new TagSelector(new StringReader(input));
+    Set<String> tags = new HashSet();
+    try {
+      ASTTagListStart result = t.TagListStart();
+      if (result.children != null)
+        for (Node n : result.children)
+          if (n instanceof SimpleNode) {
+              String tag = ((SimpleNode) n).value.toString();
+              if (tag.charAt(0) == '.') // remove leading dot for consistency
+                  tag = tag.substring(1);
+              tags.add(tag);
+          }
+    } catch (ParseException e) {
+        throw KEMException.outerParserHiddenWarning("Malformed Markdown code block annotation. Encountered "
+              + e.tokenImage[e.currentToken.next.kind]
+              + ".\nWas expecting one of: " + Stream.of(e.expectedTokenSequences)
+              // using an anonymous class because JavaCC doesn't support Java 8 syntax.
+                .map(new Function<int[], String>() {
+                  public String apply(int[] is) {
+                    StringBuilder sb = new StringBuilder();
+                    for (int i : is) {
+                      sb.append(e.tokenImage[i]);
+                      sb.append(" ");
+                    }
+                    sb.deleteCharAt(sb.length() - 1);
+                    return sb.toString();
+                  }
+                }).collect(Collectors.toList()).toString(), e, source,
+              new Location(e.currentToken.next.beginLine, e.currentToken.next.beginColumn,
+                           e.currentToken.next.endLine, e.currentToken.next.endColumn + 1));
+      } catch (TokenMgrError e) {
+        // TODO: report location
+        throw KEMException.outerParserError(e.getMessage(), e, source, null);
+      }
+    return tags;
+  }
+
+  public static ASTExpressionStart parseSelectorExp(String input) {
+    TagSelector t = new TagSelector(new StringReader(input));
+    Source source = new Source("Command line");
+    try {
+      ASTExpressionStart result = t.ExpressionStart();
+      return result;
+    } catch (ParseException e) {
+      throw KEMException.outerParserError("Encountered " + e.tokenImage[e.currentToken.next.kind]
+            + ".\nWas expecting one of: " + Stream.of(e.expectedTokenSequences)
+            // using an anonymous class because JavaCC doesn't support Java 8 syntax.
+              .map(new Function<int[], String>() {
+                public String apply(int[] is) {
+                  StringBuilder sb = new StringBuilder();
+                  for (int i : is) {
+                    sb.append(e.tokenImage[i]);
+                    sb.append(" ");
+                  }
+                  sb.deleteCharAt(sb.length() - 1);
+                  return sb.toString();
+                }
+              }).collect(Collectors.toList()).toString(), e, source,
+            new Location(e.currentToken.next.beginLine, e.currentToken.next.beginColumn, e.currentToken.next.endLine, e.currentToken.next.endColumn + 1));
+    } catch (TokenMgrError e) {
+      // TODO: report location
+      throw KEMException.outerParserError(e.getMessage(), e, source, null);
+    }
+  }
+
+  public static boolean eval(Node exp, Set<String> tagList) {
+      if (exp instanceof ASTExpressionStart)
+          return eval(exp.jjtGetChild(0), tagList);
+      else if (exp instanceof ASTOr)
+          return eval(exp.jjtGetChild(0), tagList) || eval(exp.jjtGetChild(1), tagList);
+      else if (exp instanceof ASTAnd)
+          return eval(exp.jjtGetChild(0), tagList) && eval(exp.jjtGetChild(1), tagList);
+      else if (exp instanceof ASTNot)
+          return !eval(exp.jjtGetChild(0), tagList);
+      else if (exp instanceof ASTTag) {
+          String tag = ((SimpleNode) exp).value.toString();
+          if (tag.charAt(0) == '.')
+              tag = tag.substring(1);
+          if (tag.equals("*")) return true;
+          return tagList.contains(tag);
+      }
+      throw KEMException.compilerError("Unknown ASTNode type: " + exp.getClass() + " when evaluating selector tags.");
+  }
+}
+PARSER_END(TagSelector)
+
+
+SKIP :
+{
+  " "
+| "\t"
+| "\n"
+| "\r"
+| <"/*" (~["*"])* "*" (~["/"] (~["*"])* "*")* "/">
+}
+
+TOKEN : /* TAG */
+{
+  <TAG: (["_","a"-"z","A"-"Z","0"-"9","#","$","%","^","*","+",".","-"])+>
+}
+
+/** Main tag list production. */
+ASTTagListStart TagListStart() : {}
+{
+  ("{" ( Tag() )+ "}" | (Tag())?) <EOF>
+  { return jjtThis; }
+}
+
+/** Main Expression production. */
+ASTExpressionStart ExpressionStart() : {}
+{
+  Expression() <EOF>
+  { return jjtThis; }
+}
+
+void Expression() #void : {}
+{
+  OrExpression()
+}
+
+void OrExpression() #void : {}
+{
+  ( AndExpression() ("|" OrExpression())? ) #Or(>1) // if it has two elements create an #Or node, otherwise omit it from the ast
+}
+
+void AndExpression() #void : {}
+{
+  ( NotExpression() ("&" AndExpression())? ) #And(>1)
+}
+
+void NotExpression() #void : {}
+{
+  ( "!" UnaryExpression() ) #Not | UnaryExpression()
+}
+
+void UnaryExpression() #void : {}
+{
+  "(" Expression() ")" | Tag()
+}
+
+void Tag() :
+{ Token t; }
+{
+  t=<TAG>
+  { jjtThis.jjtSetValue(t.image); }
+}

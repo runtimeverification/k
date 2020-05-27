@@ -3,4 +3,4 @@ EXT=test
 TESTDIR=../or-llvm
 KOMPILE_BACKEND=haskell
 
-include ../../../include/ktest.mak
+include ../../../include/kframework/ktest.mak

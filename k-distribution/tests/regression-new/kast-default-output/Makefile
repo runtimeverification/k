@@ -5,4 +5,4 @@ KOMPILE_BACKEND=java
 export KOMPILE_BACKEND
 KAST_FLAGS=--expand-macros
 
-include ../../../include/ktest.mak
+include ../../../include/kframework/ktest.mak
