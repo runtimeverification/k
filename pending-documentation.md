@@ -401,7 +401,7 @@ rule isKResult(BE1:BExp || BE2:BExp) => true requires isKResult(BE1)
 ```
 
 Sometimes you wish to declare a production hybrid with respect to a predicate
-other than isKResult. You can do this by specifying a sort as the body of the
+other than `isKResult`. You can do this by specifying a sort as the body of the
 `hybrid` attribute, e.g.:
 
 ```k
