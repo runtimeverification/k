@@ -543,7 +543,6 @@ module FLOAT
   syntax Bool ::= signFloat(Float)      [function, functional, hook(FLOAT.sign)]
                 | isNaN(Float)          [function, functional, smt-hook(fp.isNaN), hook(FLOAT.isNaN)]
                 | isInfinite(Float)     [function, functional]
-  syntax MInt ::= significandFloat(Float) [function, hook(FLOAT.significand)]
 
   syntax Float ::= "--Float" Float             [function, functional, smt-hook(fp.neg), hook(FLOAT.neg)]
                  > Float "^Float" Float        [function, left, latex({#1}^{#2}), hook(FLOAT.pow)]
