@@ -16,6 +16,8 @@ import org.kframework.kore.KVariable;
 import org.kframework.kore.VisitK;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
+import static org.kframework.kore.KORE.*;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -81,9 +83,9 @@ public class CheckAnonymous {
             gatherVars(c.body());
             gatherVars(c.requires());
         }
-        for (Multiset.Entry entry : vars.entrySet()) {
+        for (Multiset.Entry<String> entry : vars.entrySet()) {
             if (entry.getCount() == 1) {
-                if (!(entry.getElement().equals(ResolveAnonVar.ANON_VAR.name()) || entry.getElement().equals(ResolveAnonVar.FRESH_ANON_VAR.name()))) {
+                if (!(ResolveAnonVar.isAnonVar(KVariable(entry.getElement())))) {
                     if (s instanceof ContextAlias && entry.getElement().equals("HERE")) {
                         continue;
                     }
