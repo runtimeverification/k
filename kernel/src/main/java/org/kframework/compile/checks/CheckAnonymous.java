@@ -81,13 +81,15 @@ public class CheckAnonymous {
             gatherVars(c.body());
             gatherVars(c.requires());
         }
-        check();
-    }
-
-    private void check() {
         for (Multiset.Entry entry : vars.entrySet()) {
             if (entry.getCount() == 1) {
                 if (!(entry.getElement().equals(ResolveAnonVar.ANON_VAR.name()) || entry.getElement().equals(ResolveAnonVar.FRESH_ANON_VAR.name()))) {
+                    if (s instanceof ContextAlias && entry.getElement().equals("HERE")) {
+                        continue;
+                    }
+                    if (s instanceof Context && entry.getElement().equals("HOLE")) {
+                        continue;
+                    }
                     kem.registerCompilerWarning("Variable '" + entry.getElement() + "' defined but not used.", loc.get(entry.getElement()));
                 }
             }
