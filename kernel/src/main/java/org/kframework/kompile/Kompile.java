@@ -309,12 +309,10 @@ public class Kompile {
 
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckRewrite(errors, m)::check));
 
-        stream(modules).forEach(new CheckImports(mainModule, kem)::check);
-
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckHOLE(errors, m)::check));
 
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(
-                new CheckFunctions(errors, m, excludedModuleTags.contains(Att.CONCRETE()))::check));
+              new CheckFunctions(errors, m, excludedModuleTags.contains(Att.CONCRETE()))::check));
 
         Set<String> moduleNames = new HashSet<>();
         stream(modules).forEach(m -> {

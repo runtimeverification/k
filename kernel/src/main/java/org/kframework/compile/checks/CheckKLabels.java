@@ -4,6 +4,7 @@ package org.kframework.compile.checks;
 import com.google.common.collect.ImmutableSet;
 import org.kframework.attributes.Source;
 import org.kframework.definition.Context;
+import org.kframework.definition.ContextAlias;
 import org.kframework.definition.Module;
 import org.kframework.definition.Production;
 import org.kframework.definition.Rule;
@@ -74,6 +75,10 @@ public class CheckKLabels {
             checkKLabels.apply(rl.ensures());
         } else if (sentence instanceof Context) {
             Context ctx = (Context) sentence;
+            checkKLabels.apply(ctx.body());
+            checkKLabels.apply(ctx.requires());
+        } else if (sentence instanceof ContextAlias) {
+            ContextAlias ctx = (ContextAlias) sentence;
             checkKLabels.apply(ctx.body());
             checkKLabels.apply(ctx.requires());
         } else if (sentence instanceof Production) {
