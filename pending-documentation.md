@@ -414,7 +414,7 @@ generates the rule:
 rule isFoo(BE1:BExp || BE2:BExp) => true requires isFoo(BE1)
 ```
 
-Properly speaking, `hybrid` takes an optional comma-separatedlist of sort
+Properly speaking, `hybrid` takes an optional comma-separated list of sort
 names. If the list is empty, the attribute is equivalent to `hybrid(KResult)`.
 Otherwise, it generates hybrid predicates for exactly the sorts named.
 
