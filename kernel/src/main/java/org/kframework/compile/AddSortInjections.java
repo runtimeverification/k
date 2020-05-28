@@ -60,8 +60,6 @@ public class AddSortInjections {
     public Sentence addInjections(Sentence s) {
         if (s instanceof Rule) {
             return addInjections((Rule) s);
-        } else if (s instanceof Context) {
-            return addInjections((Context) s);
         } else {
             return s;
         }
