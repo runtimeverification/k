@@ -46,4 +46,5 @@ module FFI
 
   syntax Bytes ::= "#alloc" "(" KItem "," Int "," Int ")" [function, hook(FFI.alloc)]
   syntax Int ::= "#address" "(" Bytes ")" [function, hook(FFI.bytes_address)]
+  syntax K ::= "#free" "(" KItem ")" [function, hook(FFI.free)]
 endmodule
