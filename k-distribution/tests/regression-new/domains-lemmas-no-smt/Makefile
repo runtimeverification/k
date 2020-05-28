@@ -4,4 +4,4 @@ TESTDIR=.
 KOMPILE_BACKEND=haskell
 KPROVE_FLAGS=--def-module DOMAINS-LEMMAS-NO-SMT --smt none
 
-include ../../../include/ktest.mak
+include ../../../include/kframework/ktest.mak
