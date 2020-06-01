@@ -468,9 +468,9 @@ module INT-SYMBOLIC [symbolic, kore]
 
   // Bit-shifts
   rule X <<Int 0 => X [simplification]
-  rule 0 <<Int X => 0 [simplification]
+  rule 0 <<Int _ => 0 [simplification]
   rule X >>Int 0 => X [simplification]
-  rule 0 >>Int X => 0 [simplification]
+  rule 0 >>Int _ => 0 [simplification]
 endmodule
 
 module INT-KAST [kast]
