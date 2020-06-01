@@ -444,6 +444,7 @@ public class RuleGrammarGenerator {
         Module extensionM = new Module(mod.name() + "-EXTENSION", Set(mod), immutable(extensionProds), mod.att());
         Module disambM = new Module(mod.name() + "-DISAMB", Set(), immutable(disambProds), mod.att());
         Module parseM = new Module(mod.name() + "-PARSER", Set(), immutable(parseProds), mod.att());
+        parseM.subsorts();
         return Tuple3.apply(extensionM, disambM, parseM);
     }
 
