@@ -156,10 +156,6 @@ pipeline {
               }
             }
             stage('Build and Package on Ubuntu Focal') {
-              when {
-                branch 'master'
-                beforeAgent true
-              }
               stages {
                 stage('Build on Ubuntu Focal') {
                   agent {
