@@ -1,4 +1,7 @@
 #True
+[Warning] Compiler: Variable 'A' defined but not used.
+	Source(rhs-vars-broken-spec.k)
+	Location(12,20,12,21)
 [Warning] Critical: Found variable A on right hand side of rule, not bound on
 left hand side. Did you mean "?A"?
 Note: this warning will become an error in subsequent releases.
