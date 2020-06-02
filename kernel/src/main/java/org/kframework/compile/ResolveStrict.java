@@ -18,6 +18,7 @@ import org.kframework.kore.KLabel;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
 import org.kframework.kore.TransformK;
+import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.Collections;
 
@@ -193,30 +194,36 @@ public class ResolveStrict {
             }
         }
         if (production.att().contains("hybrid")) {
-            KLabel result = KLabel("isKResult");
+            List<KLabel> results = new ArrayList<>();
             if (!production.att().get("hybrid").equals("")) {
-              result = KLabel("is" + production.att().get("hybrid"));
-            }
-            final KLabel finalResult = result;
-            List<K> items = new ArrayList<>();
-            for (int j = 0; j < arity; j++) {
-                if (kompileOptions.strict()) {
-                    // Preserve sort information of the production
-                    items.add(cast(production.nonterminal(j).sort(), KVariable("K" + j)));
-                } else {
-                    items.add(KVariable("K" + j));
-                }
-            }
-            K term = KApply(production.klabel().get(), KList(items));
-            Optional<KApply> sideCondition = strictnessPositions.stream().map(j -> KApply(finalResult, KVariable("K" + (j - 1)))).reduce(BooleanUtils::and);
-            K requires;
-            if (!sideCondition.isPresent()) {
-                requires = BooleanUtils.TRUE;
+              String[] sorts = StringUtil.splitOneDimensionalAtt(production.att().get("hybrid"));
+              for (String sort : sorts) {
+                results.add(KLabel("is" + sort));
+              }
             } else {
-                requires = sideCondition.get();
+              results.add(KLabel("isKResult"));
             }
-            Rule hybrid = Rule(KRewrite(KApply(result, term), BooleanUtils.TRUE), requires, BooleanUtils.TRUE);
-            sentences.add(hybrid);
+            for (KLabel result : results) {
+                List<K> items = new ArrayList<>();
+                for (int j = 0; j < arity; j++) {
+                    if (kompileOptions.strict()) {
+                        // Preserve sort information of the production
+                        items.add(cast(production.nonterminal(j).sort(), KVariable("K" + j)));
+                    } else {
+                        items.add(KVariable("K" + j));
+                    }
+                }
+                K term = KApply(production.klabel().get(), KList(items));
+                Optional<KApply> sideCondition = strictnessPositions.stream().map(j -> KApply(result, KVariable("K" + (j - 1)))).reduce(BooleanUtils::and);
+                K requires;
+                if (!sideCondition.isPresent()) {
+                    requires = BooleanUtils.TRUE;
+                } else {
+                    requires = sideCondition.get();
+                }
+                Rule hybrid = Rule(KRewrite(KApply(result, term), BooleanUtils.TRUE), requires, BooleanUtils.TRUE);
+                sentences.add(hybrid);
+            }
         }
         return sentences;
     }
