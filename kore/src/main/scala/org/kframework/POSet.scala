@@ -1,11 +1,11 @@
 // Copyright (c) 2015-2019 K Team. All Rights Reserved.
 package org.kframework
 
+import org.kframework.utils.errorsystem.KEMException
+
 import java.util
 import java.util.Optional
 import collection._
-
-case class CircularityException[T](cycle: Seq[T]) extends Exception(cycle.mkString(" < "))
 
 /**
  * A partially ordered set based on an initial set of direct relations.
@@ -45,9 +45,9 @@ class POSet[T](val directRelations: Set[(T, T)]) extends Serializable {
   private def constructAndThrowCycleException(start: T, current: T, path: Seq[T]) {
     val currentPath = path :+ current
     val succs = directRelationsMap.getOrElse(current, Set())
-    if (succs.contains(start))
-      throw new CircularityException(currentPath :+ start)
-
+    if (succs.contains(start)) {
+      throw KEMException.compilerError("Illegal circular relation: " + (currentPath :+ start).mkString(" < "));
+    }
     succs foreach { constructAndThrowCycleException(start, _, currentPath) }
   }
 
