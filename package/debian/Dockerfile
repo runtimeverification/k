@@ -4,6 +4,9 @@ ARG BASE_IMAGE
 
 ARG LLVM_VERSION=8
 
+ENV TZ America/Chicago
+ENV DEBIAN_FRONTEND=noninteractive
+
 RUN    apt-get update            \
     && apt-get install --yes     \
         bison                    \
