@@ -99,8 +99,8 @@ public class ModuleToKORE {
         ALL_PATH
     }
 
-    public static final String ONE_PATH_OP = "weakExistsFinally";
-    public static final String ALL_PATH_OP = "weakAlwaysFinally";
+    public static final String ONE_PATH_OP = KLabels.RL_wEF.name();
+    public static final String ALL_PATH_OP = KLabels.RL_wAF.name();
     public static final String HAS_DOMAIN_VALUES = "hasDomainValues";
     private final Module module;
     private final FileUtil files;
@@ -1550,7 +1550,9 @@ public class ModuleToKORE {
       case "#AG":
         return "allPathGlobally";
       case "weakExistsFinally":
-        return "weakExistsFinally";
+        return ONE_PATH_OP;
+      case "weakAlwaysFinally":
+        return ALL_PATH_OP;
       default:
         throw KEMException.compilerError("Unsuppored kore connective in rule: " + klabel);
       }
