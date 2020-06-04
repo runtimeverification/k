@@ -5,4 +5,4 @@ KOMPILE_BACKEND=llvm
 export KOMPILE_BACKEND
 KRUN_FLAGS=--parser "cat"
 
-include ../../../include/ktest.mak
+include ../../../include/kframework/ktest.mak

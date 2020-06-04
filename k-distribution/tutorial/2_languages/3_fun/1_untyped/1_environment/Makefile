@@ -11,4 +11,4 @@ KRUN_FLAGS?=--pattern "<k> V:K </k>"
 	cat tests/references-5.fun.in 2>/dev/null | $(KRUN) $@ -d $(DEFDIR) --search --pattern "<k> V:K </k>" $(CHECK) tests/references-5.fun.out
 
 include $(MAKEFILE_PATH)/../../../../find-k.mak
-include ${K_HOME}/include/ktest.mak
+include ${K_HOME}/include/kframework/ktest.mak

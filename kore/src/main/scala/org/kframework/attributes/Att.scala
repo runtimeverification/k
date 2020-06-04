@@ -45,6 +45,7 @@ object Att {
 
   val empty: Att = Att(Map.empty)
 
+  val BRACKET = "bracket"
   val FUNCTION = "function"
   val FUNCTIONAL = "functional"
   val SIMPLIFICATION = "simplification"
@@ -87,6 +88,7 @@ object Att {
   val UNBOUND_VARIABLES = "unboundVariables"
   val BAG = "bag"
   val OWISE = "owise"
+  val PRIORITY = "priority"
   val HEAT = "heat"
   val COOL = "cool"
   val TAG = "tag"

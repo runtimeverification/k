@@ -1,2 +1,2 @@
 SUBDIRS=imp-imp imp-lambda
-include ../../../../../include/ktest-group.mak
+include ../../../../../include/kframework/ktest-group.mak

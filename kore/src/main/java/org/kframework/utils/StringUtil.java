@@ -63,10 +63,6 @@ public class StringUtil {
         return sb.toString();
     }
 
-    public static String makeProper(String str) {
-        return Character.toUpperCase(str.charAt(0)) + str.substring(1);
-    }
-
     /**
      * Takes the internal representation of a string, and creates the textual representation
      * that is ready to be printed.
@@ -376,108 +372,6 @@ public class StringUtil {
     }
 
     /**
-     * Creates an SDF safe representation of a Sort name.
-     * @param str String representation of the sort.
-     * @return textual representation of the Sort name.
-     */
-    public static String escapeSort(String str) {
-        str = str.replace("D", "Dd");
-        str = str.replace("#", "Dz");
-        return str;
-    }
-
-    public static String unEscapeSortName(String str) {
-        str = str.replace("Dz", "#");
-        str = str.replace("Dd", "D");
-        return str;
-    }
-
-    public static String getSortNameFromCons(String str) {
-        String ret = "";
-        int idx = str.lastIndexOf("1");
-
-        if (idx > 0) {
-            ret = str.substring(0, idx);
-        }
-        return StringUtil.unEscapeSortName(ret);
-    }
-
-    /**
-     * Takes a string as input and creates a continuous token for the maude lexer.
-     * Adds a backquote character to the following characters: ( ) [ ] { } , `
-     * @param tag Input string.
-     * @return A string that would be parsed as a continuous token by maude.
-     */
-    public static String escapeMaude(String tag) {
-        // TODO [andreis]: current implementation appears wrong to me, i.e. '`(`) stays the same rather than becoming '```(```)
-        tag = tag.replaceAll("(?<!`)`", "BKQT");
-        return tag.replaceAll("(?<!`)([\\(\\)\\[\\]\\{\\},])", "`$1");
-    }
-
-    /**
-     * Removes the escaping backqotes required by the maude lexer.
-     * Removes backquote from in front of teh following characters: ( ) [ ] { } , `
-     * @param str A maude specific string representation of a token.
-     * @return String representation of the token without the backquote escaping.
-     */
-    public static String unescapeMaude(String str) {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < str.length(); i++) {
-            if (str.charAt(i) == '`') {
-                if (str.charAt(i + 1) == '`')
-                    sb.append('`');
-                else if (str.charAt(i + 1) == '(')
-                    sb.append('(');
-                else if (str.charAt(i + 1) == ')')
-                    sb.append(')');
-                else if (str.charAt(i + 1) == '[')
-                    sb.append('[');
-                else if (str.charAt(i + 1) == ']')
-                    sb.append(']');
-                else if (str.charAt(i + 1) == '{')
-                    sb.append('{');
-                else if (str.charAt(i + 1) == '}')
-                    sb.append('}');
-                else if (str.charAt(i + 1) == ',')
-                    sb.append(',');
-                else
-                    sb.append(' ');
-                i++;
-            } else {
-                if (i + 3 < str.length() && str.charAt(i) == 'B' && str.charAt(i + 1) == 'K' && str.charAt(i + 2) == 'Q' && str.charAt(i + 3) == 'T') {
-                    sb.append('`');
-                    i += 3;
-                } else {
-                    sb.append(str.charAt(i));
-                }
-            }
-        }
-
-        return sb.toString();
-    }
-
-    public static String latexify(String name) {
-        return name.replace("\\", "\\textbackslash ").replace("_", "\\_").replace("{", "\\{").replace("}", "\\}").replace("#", "\\#").replace("%", "\\%").replace("$", "\\$")
-                .replace("&", "\\&").replace("~", "\\mbox{\\~{}}").replace("^", "\\mbox{\\^{}}").replace("`", "\\mbox{\\`{}}");
-    }
-
-    public static String emptyIfNull(String string) {
-        if (string == null)
-            return "";
-        return string;
-    }
-
-    public static int getStartLineFromLocation(String location) {
-        String[] str = location.split("[\\(,\\)]");
-        return Integer.parseInt(str[0 + 1]);
-    }
-
-    public static int getStartColFromLocation(String location) {
-        String[] str = location.split("[\\(,\\)]");
-        return Integer.parseInt(str[1 + 1]);
-    }
-
-    /**
      * split string to lines in a way that no lines will exceed 80 columns
      * NOTE: strings split only at whitespace character ' ', if string contains no ' ', it's returned as is
      * @param str string to split
@@ -571,23 +465,6 @@ public class StringUtil {
             }
         }
         return new String[] {mainOptions.toString(), experimentalOptions.toString()};
-    }
-
-    public static String escapeShell(String arg, OS os) {
-        if (os.isPosix) {
-            return "'" + StringUtils.replace(arg, "'", "'\\''") + "'";
-        } else if (os == OS.WINDOWS) {
-            return '"' + StringUtils.replace(arg, "\"", "\\\"") + '"';
-        }
-        throw new IllegalArgumentException("unsupported OS");
-    }
-
-    public static String escapeShell(String[] args, OS os) {
-        String[] args1 = new String[args.length];
-        for (int i = 0; i < args.length; i++) {
-            args1[i] = StringUtil.escapeShell(args[i], os);
-        }
-        return StringUtils.join(args1, ' ');
     }
 
     /**
@@ -821,5 +698,23 @@ public class StringUtil {
             encoded = encoded.replaceAll(encoding, String.valueOf((char) i));
         }
         return encoded;
+    }
+
+    public static String[] splitOneDimensionalAtt(String att) {
+        String[] splitted = att.trim().split(",");
+        for (int i = 0; i < splitted.length; i++) {
+            splitted[i] = splitted[i].trim();
+        }
+        return splitted;
+    }
+
+    public static String[][] splitTwoDimensionalAtt(String att) {
+        String[] parts = att.trim().split(";");
+        String[][] splitted = new String[parts.length][];
+        for (int i = 0; i < parts.length; i++) {
+            String[] subparts = splitOneDimensionalAtt(parts[i]);
+            splitted[i] = subparts;
+        }
+        return splitted;
     }
 }
