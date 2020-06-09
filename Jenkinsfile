@@ -498,7 +498,7 @@ pipeline {
             hub release create                                                                         \
                 --attach kframework-${VERSION}-src.tar.gz'#Source tar.gz'                              \
                 --attach bionic/kframework_${VERSION}_amd64_bionic.deb'#Ubuntu Bionic (18.04) Package' \
-                --attach focal/kframework_${VERSION}_amd64_focal.deb'#Ubuntu Focal (20.04) Package' \
+                --attach focal/kframework_${VERSION}_amd64_focal.deb'#Ubuntu Focal (20.04) Package'    \
                 --attach buster/kframework_${VERSION}_amd64_buster.deb'#Debian Buster (10) Package'    \
                 --attach arch/kframework-git-${VERSION}-1-x86_64.pkg.tar.xz'#Arch Package'             \
                 --attach mojave/$BOTTLE_NAME'#Mac OS X Homebrew Bottle'                                \
