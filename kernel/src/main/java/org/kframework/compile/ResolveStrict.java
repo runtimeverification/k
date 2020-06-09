@@ -178,6 +178,8 @@ public class ResolveStrict {
                 strictnessPositions.add(i);
             }
             aliases.add(DEFAULT_ALIAS);
+            resolve(sequential, sentences, arity, strictnessPositions, allPositions, aliases, production);
+            allPositions.addAll(strictnessPositions);
         } else {
             String[] components = attribute.split(";");
             if (components.length == 1) {
