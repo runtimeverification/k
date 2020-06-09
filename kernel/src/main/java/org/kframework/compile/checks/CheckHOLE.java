@@ -63,8 +63,10 @@ public class CheckHOLE {
                             strictnessPositions.add(i);
                         }
                     }
-                } else if (components.length == 2) {
-                    ResolveStrict.setPositions(components[1].trim(), strictnessPositions, arity, prod);
+                } else if (components.length % 2 == 0) {
+                    for (int i = 0; i < components.length; i += 2) {
+                        ResolveStrict.setPositions(components[i+1].trim(), strictnessPositions, arity, prod);
+                    }
                 } else {
                     errors.add(KEMException.compilerError("Invalid strict attribute containing multiple semicolons.", prod));
                 }

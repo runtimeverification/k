@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import scala.Option;
 
@@ -109,42 +110,7 @@ public class ResolveStrict {
 
     private static final ContextAlias DEFAULT_ALIAS = ContextAlias(KVariable("HERE"), BooleanUtils.TRUE, Att.empty());
 
-    public Set<Sentence> resolve(Production production, boolean sequential) {
-        long arity = production.nonterminals().size();
-        List<Integer> strictnessPositions = new ArrayList<>();
-        Set<ContextAlias> aliases = new HashSet<>();
-        String attribute;
-        if (sequential) {
-            attribute = production.att().get(Att.SEQSTRICT());
-        } else {
-            attribute = production.att().get(Att.STRICT());
-        }
-        if (attribute.isEmpty()) {
-            for (int i = 1; i <= arity; i++) {
-                strictnessPositions.add(i);
-            }
-            aliases.add(DEFAULT_ALIAS);
-        } else {
-            String[] components = attribute.split(";");
-            if (components.length == 1) {
-                if (Character.isDigit(components[0].trim().charAt(0))) {
-                    aliases.add(DEFAULT_ALIAS);
-                    setPositions(components[0].trim(), strictnessPositions, arity, production);
-                } else {
-                    for (int i = 1; i <= arity; i++) {
-                        strictnessPositions.add(i);
-                    }
-                    setAliases(components[0].trim(), aliases, production);
-                }
-            } else if (components.length == 2) {
-                setAliases(components[0].trim(), aliases, production);
-                setPositions(components[1].trim(), strictnessPositions, arity, production);
-            } else {
-                throw KEMException.compilerError("Invalid strict attribute containing multiple semicolons.", production);
-            }
-        }
-
-        Set<Sentence> sentences = new HashSet<>();
+    private void resolve(boolean sequential, Set<Sentence> sentences, long arity, List<Integer> strictnessPositions, List<Integer> allPositions, Set<ContextAlias> aliases, Production production) {
         for (int i = 0; i < strictnessPositions.size(); i++) {
             List<K> items = new ArrayList<>();
             for (int j = 0; j < arity; j++) {
@@ -165,7 +131,7 @@ public class ResolveStrict {
             }
 
             // is seqstrict the elements before the argument should be KResult
-            Optional<KApply> sideCondition = strictnessPositions.subList(0, i).stream().map(j -> KApply(KLabel("isKResult"), KVariable("K" + (j - 1)))).reduce(BooleanUtils::and);
+            Optional<KApply> sideCondition = Stream.concat(allPositions.stream(), strictnessPositions.subList(0, i).stream()).map(j -> KApply(KLabel("isKResult"), KVariable("K" + (j - 1)))).reduce(BooleanUtils::and);
             K requires;
             if (!sideCondition.isPresent() || !sequential) {
                 requires = BooleanUtils.TRUE;
@@ -193,6 +159,52 @@ public class ResolveStrict {
                 sentences.add(ctx);
             }
         }
+    }
+
+    public Set<Sentence> resolve(Production production, boolean sequential) {
+        long arity = production.nonterminals().size();
+        List<Integer> strictnessPositions = new ArrayList<>();
+        List<Integer> allPositions = new ArrayList<>();
+        Set<ContextAlias> aliases = new HashSet<>();
+        String attribute;
+        Set<Sentence> sentences = new HashSet<>();
+        if (sequential) {
+            attribute = production.att().get(Att.SEQSTRICT());
+        } else {
+            attribute = production.att().get(Att.STRICT());
+        }
+        if (attribute.isEmpty()) {
+            for (int i = 1; i <= arity; i++) {
+                strictnessPositions.add(i);
+            }
+            aliases.add(DEFAULT_ALIAS);
+        } else {
+            String[] components = attribute.split(";");
+            if (components.length == 1) {
+                if (Character.isDigit(components[0].trim().charAt(0))) {
+                    aliases.add(DEFAULT_ALIAS);
+                    setPositions(components[0].trim(), strictnessPositions, arity, production);
+                } else {
+                    for (int i = 1; i <= arity; i++) {
+                        strictnessPositions.add(i);
+                    }
+                    setAliases(components[0].trim(), aliases, production);
+                }
+                resolve(sequential, sentences, arity, strictnessPositions, allPositions, aliases, production);
+            } else if (components.length % 2 == 0) {
+                for (int i = 0; i < components.length; i+=2) {
+                    setAliases(components[i].trim(), aliases, production);
+                    setPositions(components[i+1].trim(), strictnessPositions, arity, production);
+                    resolve(sequential, sentences, arity, strictnessPositions, allPositions, aliases, production);
+                    aliases.clear();
+                    allPositions.addAll(strictnessPositions);
+                    strictnessPositions.clear();
+                }
+            } else {
+                throw KEMException.compilerError("Invalid strict attribute containing multiple semicolons.", production);
+            }
+        }
+
         if (production.att().contains("hybrid")) {
             List<KLabel> results = new ArrayList<>();
             if (!production.att().get("hybrid").equals("")) {
@@ -214,7 +226,7 @@ public class ResolveStrict {
                     }
                 }
                 K term = KApply(production.klabel().get(), KList(items));
-                Optional<KApply> sideCondition = strictnessPositions.stream().map(j -> KApply(result, KVariable("K" + (j - 1)))).reduce(BooleanUtils::and);
+                Optional<KApply> sideCondition = allPositions.stream().map(j -> KApply(result, KVariable("K" + (j - 1)))).reduce(BooleanUtils::and);
                 K requires;
                 if (!sideCondition.isPresent()) {
                     requires = BooleanUtils.TRUE;
