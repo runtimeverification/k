@@ -79,7 +79,7 @@ pipeline {
                           checkout scm
                           sh '''
                             mv package/debian ./debian
-                            mv debian/control.ubuntu debian/control
+                            mv debian/control.bionic debian/control
                             dpkg-buildpackage
                           '''
                         }
@@ -172,7 +172,7 @@ pipeline {
                           checkout scm
                           sh '''
                             mv package/debian ./debian
-                            mv debian/control.ubuntu debian/control
+                            mv debian/control.focal debian/control
                             dpkg-buildpackage
                           '''
                         }
