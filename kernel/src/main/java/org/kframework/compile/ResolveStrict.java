@@ -191,6 +191,7 @@ public class ResolveStrict {
                     setAliases(components[0].trim(), aliases, production);
                 }
                 resolve(sequential, sentences, arity, strictnessPositions, allPositions, aliases, production);
+                allPositions.addAll(strictnessPositions);
             } else if (components.length % 2 == 0) {
                 for (int i = 0; i < components.length; i+=2) {
                     setAliases(components[i].trim(), aliases, production);
