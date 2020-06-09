@@ -315,7 +315,7 @@ public class Kompile {
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(
               new CheckFunctions(errors, m, excludedModuleTags.contains(Att.CONCRETE()))::check));
 
-        stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckAnonymous(m, kem)::check));
+        stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckAnonymous(errors, m, kem)::check));
 
         Set<String> moduleNames = new HashSet<>();
         stream(modules).forEach(m -> {

@@ -14,19 +14,23 @@ import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.VisitK;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
 import static org.kframework.kore.KORE.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class CheckAnonymous {
 
+    private final Set<KEMException> errors;
     private final KExceptionManager kem;
     private final Module module;
 
-    public CheckAnonymous(Module module, KExceptionManager kem) {
+    public CheckAnonymous(Set<KEMException> errors, Module module, KExceptionManager kem) {
+        this.errors = errors;
         this.kem = kem;
         this.module = module;
     }
@@ -92,7 +96,7 @@ public class CheckAnonymous {
                     if (s instanceof Context && entry.getElement().equals("HOLE")) {
                         continue;
                     }
-                    kem.registerCompilerWarning("Variable '" + entry.getElement() + "' defined but not used.", loc.get(entry.getElement()));
+                    kem.registerCompilerWarning(errors, "Variable '" + entry.getElement() + "' defined but not used.", loc.get(entry.getElement()));
                 }
             }
         }
