@@ -3,6 +3,7 @@ package org.kframework.backend.kore
 
 import org.junit.Assert._
 import org.junit.Test
+import org.kframework.builtin.KLabels
 import org.kframework.parser.kore._
 
 class ClaimAttributes extends KoreTest {
@@ -20,9 +21,9 @@ class ClaimAttributes extends KoreTest {
     for (claim <- claims)  {
       if (this.hasAttribute(claim.att, "one-path")) {
         one_path=one_path+1;
-        assertEquals("weakExistsFinally", claim.pattern.asInstanceOf[Implies]._2.asInstanceOf[Application].head.ctr);
+        assertEquals(KLabels.RL_wEF.name, claim.pattern.asInstanceOf[Implies]._2.asInstanceOf[Application].head.ctr);
       } else {
-        assertEquals("weakAlwaysFinally", claim.pattern.asInstanceOf[Implies]._2.asInstanceOf[Application].head.ctr);
+        assertEquals(KLabels.RL_wAF.name, claim.pattern.asInstanceOf[Implies]._2.asInstanceOf[Application].head.ctr);
         all_path=all_path+1;
       }
     }
