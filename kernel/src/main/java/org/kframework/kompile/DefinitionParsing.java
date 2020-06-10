@@ -496,8 +496,9 @@ public class DefinitionParsing {
                         errors.add(KEMException.asError(err));
                     }
                 }
-            } else
+            } else {
                 kem.addAllKException(parse.getWarnings().stream().map(e -> e.getKException()).collect(Collectors.toList()));
+            }
             Att att = parse.getParse().att().addAll(b.att().remove("contentStartLine").remove("contentStartColumn").remove(Source.class).remove(Location.class));
             return Stream.of(new AddAtt(a -> att).apply(parse.getParse()));
         }
