@@ -4,7 +4,7 @@ module INTOPERATIONINLHS
 
 syntax Int ::= "foo" "(" Int ")" [function]
 
-rule foo(A +Int 1) => 0
+rule foo(_ +Int 1) => 0
 
 syntax Int ::= bar(Map) [function]
 

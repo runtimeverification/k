@@ -130,7 +130,7 @@ module RAT
    * exponentiation
    */
 
-  rule X ^Rat 0 => 1
+  rule _ ^Rat 0 => 1
   rule 0 ^Rat N => 0 requires N =/=Int 0
 
   rule < I , J >Rat ^Rat N => powRat(< I , J >Rat, N) requires N >Int 0
