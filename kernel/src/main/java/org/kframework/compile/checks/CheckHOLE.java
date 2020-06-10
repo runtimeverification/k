@@ -68,7 +68,7 @@ public class CheckHOLE {
                         ResolveStrict.setPositions(components[i+1].trim(), strictnessPositions, arity, prod);
                     }
                 } else {
-                    errors.add(KEMException.compilerError("Invalid strict attribute containing multiple semicolons.", prod));
+                    errors.add(KEMException.compilerError("Invalid strict attribute containing invalid semicolons. Must contain 0, 1, 2, or an even number of components.", prod));
                 }
             } catch (KEMException e) {
                 errors.add(e);
