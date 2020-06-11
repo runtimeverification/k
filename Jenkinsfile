@@ -79,7 +79,7 @@ pipeline {
                           checkout scm
                           sh '''
                             mv package/debian ./debian
-                            mv debian/control.ubuntu debian/control
+                            mv debian/control.bionic debian/control
                             dpkg-buildpackage
                           '''
                         }
@@ -152,6 +152,61 @@ pipeline {
                       kompile test.k --backend haskell
                     '''
                   }
+                }
+              }
+            }
+            stage('Build and Package on Ubuntu Focal') {
+              stages {
+                stage('Build on Ubuntu Focal') {
+                  agent {
+                    dockerfile {
+                      filename 'package/debian/Dockerfile'
+                      additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=ubuntu:focal --build-arg LLVM_VERSION=10'
+                      reuseNode true
+                    }
+                  }
+                  stages {
+                    stage('Build Debian Package') {
+                      steps {
+                        dir("kframework-${env.VERSION}") {
+                          checkout scm
+                          sh '''
+                            mv package/debian ./debian
+                            mv debian/control.focal debian/control
+                            dpkg-buildpackage
+                          '''
+                        }
+                        stash name: 'focal', includes: "kframework_${env.VERSION}_amd64.deb"
+                      }
+                    }
+                  }
+                }
+                stage('Test Debian Package') {
+                  agent {
+                    docker {
+                      image 'ubuntu:focal'
+                      args '-u 0'
+                      reuseNode true
+                    }
+                  }
+                  options { skipDefaultCheckout() }
+                  steps {
+                    unstash 'focal'
+                    sh 'src/main/scripts/test-in-container-debian'
+                  }
+                  post {
+                    always {
+                      sh 'stop-kserver || true'
+                      archiveArtifacts 'kserver.log,k-distribution/target/kserver.log'
+                    }
+                  }
+                }
+              }
+              post {
+                failure {
+                  slackSend color: '#cb2431'                                             \
+                          , channel: '#k'                                                \
+                          , message: "Ubuntu Focal Packaging Failed: ${env.BUILD_URL}"
                 }
               }
             }
@@ -421,6 +476,7 @@ pipeline {
         unstash 'src'
         unstash 'binary'
         dir('bionic') { unstash 'bionic' }
+        dir('focal')  { unstash 'focal' }
         dir('buster') { unstash 'buster' }
         dir('arch')   { unstash 'arch'   }
         dir('mojave') { unstash 'mojave' }
@@ -431,6 +487,7 @@ pipeline {
             git push release "${K_RELEASE_TAG}"
 
             mv bionic/kframework_${VERSION}_amd64.deb bionic/kframework_${VERSION}_amd64_bionic.deb
+            mv focal/kframework_${VERSION}_amd64.deb focal/kframework_${VERSION}_amd64_focal.deb
             mv buster/kframework_${VERSION}_amd64.deb buster/kframework_${VERSION}_amd64_buster.deb
             LOCAL_BOTTLE_NAME=$(echo mojave/kframework--${VERSION}.mojave.bottle*.tar.gz)
             BOTTLE_NAME=`cd mojave && echo kframework--${VERSION}.mojave.bottle*.tar.gz | sed 's!kframework--!kframework-!'`
@@ -441,6 +498,7 @@ pipeline {
             hub release create                                                                         \
                 --attach kframework-${VERSION}-src.tar.gz'#Source tar.gz'                              \
                 --attach bionic/kframework_${VERSION}_amd64_bionic.deb'#Ubuntu Bionic (18.04) Package' \
+                --attach focal/kframework_${VERSION}_amd64_focal.deb'#Ubuntu Focal (20.04) Package'    \
                 --attach buster/kframework_${VERSION}_amd64_buster.deb'#Debian Buster (10) Package'    \
                 --attach arch/kframework-git-${VERSION}-1-x86_64.pkg.tar.xz'#Arch Package'             \
                 --attach mojave/$BOTTLE_NAME'#Mac OS X Homebrew Bottle'                                \

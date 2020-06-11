@@ -4,6 +4,7 @@ package org.kframework.compile.checks;
 import com.google.common.collect.Sets;
 import org.kframework.attributes.Att;
 import org.kframework.definition.Context;
+import org.kframework.definition.ContextAlias;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.K;
@@ -51,11 +52,21 @@ public class CheckRHSVariables {
         check(context.requires(), false, new HashSet<>());
     }
 
+    private void check(ContextAlias context) {
+        resetVars();
+        gatherVars(true, context.body());
+        gatherVars(false, context.requires());
+        check(context.body(), true, new HashSet<>());
+        check(context.requires(), false, new HashSet<>());
+    }
+
     public void check(Sentence s) {
         if (s instanceof Rule) {
             check((Rule) s);
         } else if (s instanceof Context) {
             check((Context) s);
+        } else if (s instanceof ContextAlias) {
+            check((ContextAlias) s);
         }
     }
 

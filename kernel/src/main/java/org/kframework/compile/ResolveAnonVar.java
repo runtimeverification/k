@@ -17,6 +17,11 @@ public class ResolveAnonVar {
 
     public static KVariable ANON_VAR = KVariable("_");
     public static KVariable FRESH_ANON_VAR = KVariable("?_");
+    public static KVariable FRESH_ANON_CONSTANT = KVariable("!_");
+
+    public static boolean isAnonVar(KVariable var) {
+        return var.equals(ANON_VAR) || var.equals(FRESH_ANON_VAR) || var.equals(FRESH_ANON_CONSTANT);
+    }
 
     private Set<KVariable> vars = new HashSet<>();
 
@@ -90,10 +95,13 @@ public class ResolveAnonVar {
             @Override
             public K apply(KVariable k) {
                 if (ANON_VAR.equals(k)) {
-                    return newDotVariable(false);
+                    return newDotVariable("");
                 }
                 if (FRESH_ANON_VAR.equals(k)) {
-                    return newDotVariable(true);
+                    return newDotVariable("?");
+                }
+                if (FRESH_ANON_CONSTANT.equals(k)) {
+                    return newDotVariable("!");
                 }
                 return super.apply(k);
             }
@@ -101,14 +109,14 @@ public class ResolveAnonVar {
     }
 
     private int counter = 0;
-    KVariable newDotVariable(boolean isFresh) {
+    KVariable newDotVariable(String prefix) {
         KVariable newLabel;
         Att att = Att().add("anonymous");
-        if (isFresh) {
+        if (prefix.equals("?")) {
             att = att.add("fresh");
         }
         do {
-            newLabel = KVariable("_" + (counter++), att);
+            newLabel = KVariable(prefix + "_" + (counter++), att);
         } while (vars.contains(newLabel));
         vars.add(newLabel);
         return newLabel;

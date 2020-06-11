@@ -20,7 +20,7 @@ public class GatherVarsVisitor extends RewriteAwareVisitor {
 
     @Override
     public void apply(KVariable v) {
-        if (isLHS() && !v.equals(ResolveAnonVar.ANON_VAR) && !v.equals(ResolveAnonVar.FRESH_ANON_VAR))
+        if (isLHS() && !ResolveAnonVar.isAnonVar(v))
             vars.add(v);
         super.apply(v);
     }
