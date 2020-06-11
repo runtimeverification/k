@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import org.kframework.attributes.Att;
 import org.kframework.compile.RewriteAwareVisitor;
 import org.kframework.definition.Context;
+import org.kframework.definition.ContextAlias;
 import org.kframework.definition.Module;
 import org.kframework.definition.Production;
 import org.kframework.definition.Rule;
@@ -45,6 +46,9 @@ public class CheckFunctions {
             check(rl.body());
         } else if (sentence instanceof Context) {
             Context ctx = (Context) sentence;
+            check(ctx.body());
+        } else if (sentence instanceof ContextAlias) {
+            ContextAlias ctx = (ContextAlias) sentence;
             check(ctx.body());
         }
     }

@@ -13,10 +13,10 @@
 	Location(30,6,30,19)
 [Error] Compiler: Potentially useless rule detected.
 	Source(test.k)
-	Location(34,6,34,20)
+	Location(34,6,34,35)
 [Error] Compiler: Potentially useless rule detected.
 	Source(test.k)
-	Location(35,6,35,20)
+	Location(35,6,35,35)
 [Error] Compiler: Potentially useless rule detected.
 	Source(test.k)
 	Location(38,6,38,28)
@@ -58,7 +58,7 @@
 	Location(83,6,83,19)
 [Error] Compiler: Potentially useless rule detected.
 	Source(test.k)
-	Location(87,6,87,21)
+	Location(87,6,87,58)
 [Error] Compiler: Potentially useless rule detected.
 	Source(test.k)
-	Location(88,6,88,21)
+	Location(88,6,88,58)

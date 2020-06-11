@@ -8,6 +8,7 @@ import org.kframework.attributes.Source;
 import org.kframework.backend.Backends;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.*;
+import org.kframework.compile.checks.CheckAnonymous;
 import org.kframework.compile.checks.CheckConfigurationCells;
 import org.kframework.compile.checks.CheckFunctions;
 import org.kframework.compile.checks.CheckHOLE;
@@ -309,12 +310,12 @@ public class Kompile {
 
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckRewrite(errors, m)::check));
 
-        stream(modules).forEach(new CheckImports(mainModule, kem)::check);
-
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckHOLE(errors, m)::check));
 
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(
-                new CheckFunctions(errors, m, excludedModuleTags.contains(Att.CONCRETE()))::check));
+              new CheckFunctions(errors, m, excludedModuleTags.contains(Att.CONCRETE()))::check));
+
+        stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckAnonymous(errors, m, kem)::check));
 
         Set<String> moduleNames = new HashSet<>();
         stream(modules).forEach(m -> {
