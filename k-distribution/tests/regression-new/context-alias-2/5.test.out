@@ -55,7 +55,7 @@
   #Equals
     <generatedTop>
       <k>
-        r ( x ) ~> #freezerqux(_,_,_)_TEST_Exp_Exp_Exp_Exp2_2 ( x = 1 , x = 2 )
+        r ( x ) ~> #freezerqux(_,_,_)_TEST_Exp_Exp_Exp_Exp1_ ( x = 1 , x = 2 )
       </k>
       <state>
         .Map
