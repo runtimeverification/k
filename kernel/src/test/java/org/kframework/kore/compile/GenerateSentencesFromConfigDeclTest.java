@@ -91,7 +91,7 @@ public class GenerateSentencesFromConfigDeclTest {
                         Att().add("cell").add("cellName", "thread").add("multiplicity","*").add("format", "%1%i%n%2%n%3%d%n%4")),
                 Production(KLabel("<k>"), Sort("KCell"),
                         Seq(Terminal("<k>"), NonTerminal(Sort("K")), Terminal("</k>")),
-                        Att().add("cell").add("cellName", "k").add("maincell").add("format", "%1%i%n%2%d%n%3")),
+                        Att().add("cell").add("cellName", "k").add(Att.MAINCELL()).add("format", "%1%i%n%2%d%n%3")),
                 Production(KLabel("<opt>"), Sort("OptCell"),
                         Seq(Terminal("<opt>"), NonTerminal(Sort("OptCellContent")), Terminal("</opt>")),
                         Att().add("cell").add("cellName", "opt").add("multiplicity","?").add("unit",".OptCell").add("format", "%1%i%n%2%d%n%3")),

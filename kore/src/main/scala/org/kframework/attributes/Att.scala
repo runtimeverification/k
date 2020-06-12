@@ -79,6 +79,7 @@ object Att {
   val CELL = "cell"
   val CELL_FRAGMENT = "cellFragment"
   val CELL_OPT_ABSENT = "cellOptAbsent"
+  val MAINCELL = "maincell"
   val IMPURE = "impure"
   val STRICT = "strict"
   val SEQSTRICT = "seqstrict"

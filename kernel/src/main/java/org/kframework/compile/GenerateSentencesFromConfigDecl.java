@@ -319,7 +319,7 @@ public class GenerateSentencesFromConfigDecl {
         String sortName = getSortOfCell(cellName);
         Sort sort = Sort(sortName);
 
-        if (cellProperties.contains("maincell")) {
+        if (cellProperties.contains(Att.MAINCELL())) {
             assert isLeaf;
             assert childSorts.size() == 1;
             childSorts = Lists.newArrayList(Sorts.K());
@@ -549,7 +549,7 @@ public class GenerateSentencesFromConfigDecl {
     private static Att getCellPropertiesAsAtt(K k, String cellName, K ensures) {
         Att att = Att();
         if (cellName.equals("k")) {
-            att = att.add("maincell");
+            att = att.add(Att.MAINCELL());
         }
         if (ensures != null) {
             att = att.add("topcell");

@@ -2,6 +2,7 @@
 package org.kframework.compile;
 
 import org.kframework.Collections;
+import org.kframework.attributes.Att;
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Context;
@@ -88,7 +89,7 @@ public class ResolveContexts {
         boolean hasMainCell = new FoldK<Boolean>() {
             @Override
             public Boolean apply(KApply k) {
-                if (input.attributesFor().getOrElse(k.klabel(), () -> Att()).contains("maincell")) {
+                if (input.attributesFor().getOrElse(k.klabel(), () -> Att()).contains(Att.MAINCELL())) {
                     return true;
                 }
                 return super.apply(k);
@@ -142,13 +143,13 @@ public class ResolveContexts {
 
             @Override
             public void apply(KApply k) {
-                if (input.attributesFor().getOrElse(k.klabel(), () -> Att()).contains("maincell")) {
+                if (input.attributesFor().getOrElse(k.klabel(), () -> Att()).contains(Att.MAINCELL())) {
                     inMainCell = true;
                 }
                 if (k.klabel() instanceof KVariable && (inMainCell || !hasMainCell))
                     vars.put((KVariable) k.klabel(), InjectedKLabel(k.klabel()));
                 super.apply(k);
-                if (input.attributesFor().getOrElse(k.klabel(), () -> Att()).contains("maincell")) {
+                if (input.attributesFor().getOrElse(k.klabel(), () -> Att()).contains(Att.MAINCELL())) {
                     inMainCell = false;
                 }
             }
@@ -165,7 +166,7 @@ public class ResolveContexts {
 
             @Override
             public void apply(KApply k) {
-                if (input.attributesFor().getOrElse(k.klabel(), () -> Att()).contains("maincell")) {
+                if (input.attributesFor().getOrElse(k.klabel(), () -> Att()).contains(Att.MAINCELL())) {
                   cooled = k.items().get(1);
                 }
                 super.apply(k);
@@ -212,7 +213,7 @@ public class ResolveContexts {
       K inserted = new TransformK() {
           @Override
           public K apply(KApply k) {
-              if (mod.attributesFor().getOrElse(k.klabel(), () -> Att()).contains("maincell")) {
+              if (mod.attributesFor().getOrElse(k.klabel(), () -> Att()).contains(Att.MAINCELL())) {
                   h.found = true;
                   return KApply(k.klabel(), k.items().get(0), rewrite, k.items().get(2));
               }
