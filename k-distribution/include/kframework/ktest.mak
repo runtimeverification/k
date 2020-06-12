@@ -32,8 +32,8 @@ KOMPILED_DIR=$(DEFDIR)/$(notdir $(DEF))-kompiled
 RESULTDIR?=$(TESTDIR)
 # all tests in test directory with matching file extension
 TESTS?=$(wildcard $(TESTDIR)/*.$(EXT))
-PROOF_TESTS?=$(wildcard $(TESTDIR)/*-spec.k)
-BMC_TESTS?=$(wildcard $(TESTDIR)/*-spec-bmc.k)
+PROOF_TESTS?=$(wildcard $(TESTDIR)/*-spec.k) $(wildcard $(TESTDIR)/*-spec.md)
+BMC_TESTS?=$(wildcard $(TESTDIR)/*-spec-bmc.k) $(wildcard $(TESTDIR)/*-spec-bmc.md)
 SEARCH_TESTS?=$(wildcard $(TESTDIR)/*.$(EXT).search)
 STRAT_TESTS?=$(wildcard $(TESTDIR)/*.strat)
 KAST_TESTS?=$(wildcard $(TESTDIR)/*.kast)
@@ -84,21 +84,21 @@ else
 	cat $(RESULTDIR)/$(notdir $@).in 2>/dev/null | $(KRUN) $@ $(KRUN_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $(RESULTDIR)/$(notdir $@).out
 endif
 
-%-spec.k: kompile
+%-spec.k %-spec.md: kompile
 ifeq ($(TESTDIR),$(RESULTDIR))
 	$(KPROVE) $@ $(KPROVE_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $@.out
 else
 	$(KPROVE) $@ $(KPROVE_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $(RESULTDIR)/$(notdir $@).out
 endif
 
-%-broken-spec.k: kompile
+%-broken-spec.k %-broken-spec.md: kompile
 ifeq ($(TESTDIR),$(RESULTDIR))
 	$(KPROVE) $@ $(KPROVE_FLAGS) $(DEBUG) -d $(DEFDIR) $(CONSIDER_ERRORS) $(REMOVE_PATHS) $(CHECK) $@.out
 else
 	$(KPROVE) $@ $(KPROVE_FLAGS) $(DEBUG) -d $(DEFDIR) $(CONSIDER_ERRORS) $(REMOVE_PATHS) $(CHECK) $(RESULTDIR)/$(notdir $@).out
 endif
 
-%-spec-bmc.k: kompile
+%-spec-bmc.k %-spec-bmc.md: kompile
 ifeq ($(TESTDIR),$(RESULTDIR))
 	$(KBMC) --raw-spec $@ $(KBMC_FLAGS) $(DEBUG) -d $(DEFDIR) --depth 20 $(CHECK) $@.out
 else
