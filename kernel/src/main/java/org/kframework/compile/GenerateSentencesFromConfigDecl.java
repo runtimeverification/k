@@ -461,7 +461,7 @@ public class GenerateSentencesFromConfigDecl {
                 throw KEMException.compilerError("Unexpected type for multiplicity * cell: " + cellName
                         + ". Should be one of: Set, Bag, List, Map");
             }
-            SyntaxSort sortDecl = SyntaxSort(Seq(), bagSort, Att().add("hook", type.toUpperCase() + '.' + type));
+            SyntaxSort sortDecl = SyntaxSort(Seq(), bagSort, Att().add("hook", type.toUpperCase() + '.' + type).add("cellCollection"));
             Sentence bagSubsort = Production(Seq(), bagSort, Seq(NonTerminal(sort)));
             Sentence bagElement;
             if (type.equals("Map")) {

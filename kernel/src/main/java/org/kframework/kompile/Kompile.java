@@ -325,7 +325,7 @@ public class Kompile {
             moduleNames.add(m.name());
         });
 
-        CheckKLabels checkKLabels = new CheckKLabels(errors, kompileOptions.isKore());
+        CheckKLabels checkKLabels = new CheckKLabels(errors, kem, kompileOptions.isKore(), files);
         Set<String> checkedModules = new HashSet<>();
         // only check imported modules because otherwise we might have false positives
         Consumer<Module> checkModuleKLabels = m -> {
@@ -341,6 +341,7 @@ public class Kompile {
         }
         stream(mainModule.importedModules()).forEach(checkModuleKLabels);
         checkModuleKLabels.accept(mainModule);
+        checkKLabels.check();
 
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckLabels(errors)::check));
 
