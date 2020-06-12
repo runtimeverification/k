@@ -1,0 +1,21 @@
+// Copyright (c) 2020 K Team. All Rights Reserved.
+
+module SMTLEMMANOSMTLIB
+    imports DOMAINS
+
+    configuration <k> $PGM:Pgm </k>
+
+    syntax Pgm ::= "step" Int
+                 | "ok"
+                 | "fail"
+    rule <k> step I => ok ...</k>
+      requires I <Int 1
+    rule <k> step I => ok ...</k>
+      requires I ==Int 1
+    rule <k> step I => fail ...</k> [owise]
+
+    syntax Int ::= foo( Int )       [function]
+    rule foo(I) => I %Int 2         [concrete]
+    rule foo(_) <Int 2 => true      [simplification, smt-lemma]
+
+endmodule
