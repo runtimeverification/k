@@ -459,6 +459,20 @@ each argument of the production, whereas `strict(c; 1)` will instantiate it
 only for the first argument. The special variable `HERE` is used to tell the
 compiler where you want to place the production that is to be heated or cooled.
 
+You can also specify multiple context aliases for different parts of a production,
+for example:
+
+```k
+syntax Exp ::= foo(Exp, Exp) [strict(left; 1; right; 2)]
+```
+
+This says that we can evaluate the left and right arguments in either order, but to evaluate
+the left using the `left` context alias and the right using the `right` context alias.
+
+We can also say `seqstrict(left; 1; right; 2)`, in which case we additionally must evaluate
+the left argument before the right argument. Note, all strict positions are considered collectively
+when determining the evaluation order of `seqstrict` or the `hybrid` predicates.
+
 A `strict` attribute with no rule label associated with it is equivalent to
 a `strict` attribute given with the following context alias:
 
