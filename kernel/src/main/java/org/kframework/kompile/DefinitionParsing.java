@@ -107,7 +107,7 @@ public class DefinitionParsing {
         Definition def = parser.loadDefinition(
                 mainModule,
                 mutable(definition.getParsedDefinition().modules()),
-                "require " + StringUtil.enquoteCString(definitionFile.getPath()),
+                FileUtil.load(definitionFile),
                 Source.apply(definitionFile.getAbsolutePath()),
                 definitionFile.getParentFile(),
                 ListUtils.union(lookupDirectories,
