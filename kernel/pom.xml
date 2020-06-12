@@ -99,11 +99,6 @@
       <version>1.10</version>
     </dependency>
     <dependency>
-      <groupId>org.kframework.dependencies</groupId>
-      <artifactId>jcommander</artifactId>
-      <version>1.35-custom</version>
-    </dependency>
-    <dependency>
       <groupId>net.sf.jung</groupId>
       <artifactId>jung-graph-impl</artifactId>
       <version>2.0.1</version>

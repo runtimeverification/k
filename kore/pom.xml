@@ -41,9 +41,9 @@
       <version>3.0.0</version>
     </dependency>
     <dependency>
-      <groupId>org.kframework.dependencies</groupId>
+      <groupId>com.beust</groupId>
       <artifactId>jcommander</artifactId>
-      <version>1.35-custom</version>
+      <version>1.78</version>
     </dependency>
   </dependencies>
 
