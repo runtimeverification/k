@@ -11,15 +11,15 @@ from .coverage   import *
 from .definition import *
 
 def _teeProcessStdout(args, tee = True, buffer_size = 80, timeout = None):
-        process = subprocess.Popen(args, stdout = subprocess.PIPE, stderr = subprocess.PIPE, universal_newlines = True)
-        try:
-            (stdout_data, stderr_data) = process.communicate(input = None, timeout = timeout)
-        except TimeoutExpired:
-            process.kill()
-            sys.stderr.write("TIMED OUT")
-            sys.stderr.flush()
-            return (-1, "", "")
-        return (process.returncode, stdout_data, stderr_data)
+    process = subprocess.Popen(args, stdout = subprocess.PIPE, stderr = subprocess.PIPE, universal_newlines = True)
+    try:
+        (stdout_data, stderr_data) = process.communicate(input = None, timeout = timeout)
+    except TimeoutExpired:
+        process.kill()
+        sys.stderr.write("TIMED OUT")
+        sys.stderr.flush()
+        return (-1, "", "")
+    return (process.returncode, stdout_data, stderr_data)
 
 def _runK(command, definition, inputFile, kArgs = [], teeOutput = True, kRelease = None):
     if kRelease is not None:
