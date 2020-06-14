@@ -84,12 +84,17 @@ def rewriteAnywhereWith(rule, pattern):
     return traverseBottomUp(pattern, lambda p: rewriteWith(rule, p))
 
 def mlPredToBool(k):
-    klabelMap = { "#And"    : "_andBool_"
-                , "#Or"     : "_orBool_"
-                , "#Not"    : "notBool_"
-                , "#Equals" : '_==K_'
-                }
-    return replaceKLabels(k, klabelMap)
+    mlPredToBoolRules = [ (KApply('#True', [])  , KToken('true', 'Bool'))
+                        , (KApply('#False', []) , KToken('false', 'Bool'))
+                        , (KApply('#And'    , [KVarible('#V1'), KVariable('#V2')]) , KApply('_andBool_' , [KVariable('#V1'), KVariable('#V2')]))
+                        , (KApply('#Or'     , [KVarible('#V1'), KVariable('#V2')]) , KApply('_orBool_'  , [KVariable('#V1'), KVariable('#V2')]))
+                        , (KApply('#Not'    , [KVarible('#V1')])                   , KApply('notBool_'  , [KVariable('#V1')]))
+                        , (KApply('#Equals' , [KVarible('#V1'), KVariable('#V2')]) , KApply('_==K_'     , [KVariable('#V1'), KVariable('#V2')]))
+                        ]
+    newK = k
+    for rule in mlPredToBoolRules:
+        newK = rewriteAnywhereWith(rule, newK)
+    return newK
 
 def simplifyBool(k):
     simplifyRules = [ (KApply("_==K_", [KVariable("#LHS"), KToken("true", "Bool")]),  KVariable("#LHS"))
@@ -104,7 +109,6 @@ def simplifyBool(k):
                     , (KApply("_orBool_", [KVariable("#REST"), KToken("true", "Bool")]), KToken("true", "Bool"))
                     , (KApply("notBool_", [KToken("false", "Bool")]), KToken("true", "Bool"))
                     , (KApply("notBool_", [KToken("true", "Bool") ]), KToken("false", "Bool"))
-                    , (KApply("#True", []), KToken("true", "Bool"))
                     ]
     newK = k
     for rule in simplifyRules:
@@ -293,7 +297,9 @@ def minimizeRule(rule):
             ruleRequires = KApply("_andBool_", [ruleRequires, constraint])
 
         ruleBody = substitute(ruleBody, substitutions)
+
         ruleRequires = simplifyBool(mlPredToBool(ruleRequires))
+        ruleEnsures  = simplifyBool(mlPredToBool(ruleEnsures))
 
     ruleBody = inlineCellMaps(ruleBody)
     ruleBody = removeSemanticCasts(ruleBody)
