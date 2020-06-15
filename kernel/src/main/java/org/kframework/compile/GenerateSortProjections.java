@@ -1,33 +1,25 @@
 // Copyright (c) 2015-2019 K Team. All Rights Reserved.
 package org.kframework.compile;
 
-import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.kframework.attributes.Att;
 import org.kframework.Collections;
 import org.kframework.builtin.BooleanUtils;
-import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
-import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
-import org.kframework.kil.Attribute;
 import org.kframework.kore.K;
-import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
-import org.kframework.kore.KRewrite;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
-import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
+import org.kframework.parser.inner.generator.RuleGrammarGenerator;
 import scala.collection.Set;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.kframework.Collections.*;
@@ -62,7 +54,7 @@ public class GenerateSortProjections {
     }
 
     public Stream<? extends Sentence> gen(Sort sort) {
-        if (RuleGrammarGenerator.isParserSort(sort) && !sort.equals(Sorts.KItem())) {
+        if (RuleGrammarGenerator.isParserSort(sort) && !sort.equals(Sorts.KItem()) && !sort.equals(Sorts.K())) {
             return Stream.empty();
         }
         KLabel lbl = getProjectLbl(sort, mod);
@@ -75,7 +67,7 @@ public class GenerateSortProjections {
     }
 
     public Stream<? extends Sentence> gen(Production prod) {
-      if (prod.att().contains(Attribute.FUNCTION_KEY)) {
+      if (prod.att().contains(Att.FUNCTION())) {
         return Stream.empty();
       }
       java.util.Set<Sentence> sentences = new HashSet<>();

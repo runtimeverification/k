@@ -4,6 +4,7 @@ package org.kframework.compile.checks;
 import com.google.common.collect.ImmutableSet;
 import org.kframework.attributes.Source;
 import org.kframework.definition.Context;
+import org.kframework.definition.ContextAlias;
 import org.kframework.definition.Module;
 import org.kframework.definition.Production;
 import org.kframework.definition.Rule;
@@ -76,6 +77,10 @@ public class CheckKLabels {
             Context ctx = (Context) sentence;
             checkKLabels.apply(ctx.body());
             checkKLabels.apply(ctx.requires());
+        } else if (sentence instanceof ContextAlias) {
+            ContextAlias ctx = (ContextAlias) sentence;
+            checkKLabels.apply(ctx.body());
+            checkKLabels.apply(ctx.requires());
         } else if (sentence instanceof Production) {
             Production prod = (Production) sentence;
             if (prod.klabel().isDefined()) {
@@ -83,11 +88,7 @@ public class CheckKLabels {
                 if (klabels.containsKey(klabel) && !m.equals(klabels.get(klabel)) && !kore) {
                     errors.add(KEMException.compilerError("KLabel " + klabel.name() + " defined in multiple modules: " + klabels.get(klabel).name() + " and " + m.name() + ".", prod));
                 }
-                File kast_k = JarInfo.getKIncludeDir().resolve("builtin").resolve("kast.k").toFile();
-                try {
-                    kast_k = kast_k.getCanonicalFile();
-                } catch (IOException e) {}
-                if (klabelProds.containsKey(klabel.name()) && kore && !prod.att().get(Source.class).source().equals(kast_k.getAbsolutePath())) {
+                if (klabelProds.containsKey(klabel.name()) && kore && !internalDuplicates.contains(klabel.name())) {
                     errors.add(KEMException.compilerError("Symbol " + klabel.name() + " is not unique. Previously defined as: " + klabelProds.get(klabel.name()), prod));
                 }
                 klabels.put(klabel, m);
@@ -95,6 +96,8 @@ public class CheckKLabels {
             }
         }
     }
+
+    private static final ImmutableSet<String> internalDuplicates = ImmutableSet.of("#EmptyKList", "#EmptyK", "#ruleRequires", "#ruleRequiresEnsures");
 
     private static final ImmutableSet<String> internalNames = ImmutableSet.of("#cells", "#dots", "#noDots", "#Or", "#fun2", "#fun3", "#withConfig", "<generatedTop>", "#SemanticCastToBag", "_:=K_", "_:/=K_");
 

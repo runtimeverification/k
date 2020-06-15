@@ -2,6 +2,7 @@
 package org.kframework.kil;
 
 import org.kframework.kore.Sort;
+import org.kframework.attributes.Att;
 
 import com.google.common.collect.Multimap;
 import org.kframework.utils.StringUtil;
@@ -80,13 +81,6 @@ public class Production extends ASTNode {
         return items.size() == 1 && items.get(0) instanceof Terminal;
     }
 
-    public Production(Production node) {
-        super(node);
-        this.items = node.items;
-        this.sort = node.sort;
-        this.ownerModuleName = node.ownerModuleName;
-    }
-
     public Production(NonTerminal sort, java.util.List<ProductionItem> items) {
         super();
         this.items = items;
@@ -108,9 +102,17 @@ public class Production extends ASTNode {
      */
     public String getKLabel(boolean kore) {
         String klabel = getAttribute("klabel");
-        if (klabel == null && (isSyntacticSubsort() || containsAttribute("token") || containsAttribute("bracket"))) {
+        if (klabel == null && (isSyntacticSubsort() || containsAttribute("token") || containsAttribute(Att.BRACKET()))) {
             return null;
         } else if (klabel == null || (kore && getAttribute("symbol") == null)) {
+            klabel = getPrefixLabel(kore);
+        }
+        return klabel.replace(" ", "");
+    }
+
+    public String getBracketLabel(boolean kore) {
+        String klabel = getAttribute("klabel");
+        if (klabel == null || (kore && getAttribute("symbol") == null)) {
             klabel = getPrefixLabel(kore);
         }
         return klabel.replace(" ", "");
@@ -238,17 +240,13 @@ public class Production extends ASTNode {
         return result;
     }
 
-    public String toString() {
-        String content = "";
-        for (ProductionItem i : items)
-            content += i + " ";
-
-        return content;
-    }
-
     @Override
-    public Production shallowCopy() {
-        return new Production(this);
+    public void toString(StringBuilder sb) {
+        for (ProductionItem i : items) {
+            i.toString(sb);
+            sb.append(" ");
+        }
+        sb.append(getAttributes());
     }
 
     public void setOwnerModuleName(String ownerModuleName) {

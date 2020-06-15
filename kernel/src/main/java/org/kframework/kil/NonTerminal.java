@@ -19,12 +19,6 @@ public class NonTerminal extends ProductionItem {
         this.name = name;
     }
 
-    public NonTerminal(NonTerminal nonTerminal) {
-        super(nonTerminal);
-        this.sort = nonTerminal.sort;
-        this.name = nonTerminal.name;
-    }
-
     public Option<String> getName() {
         if (name.isPresent()) {
             return Option.apply(name.get());
@@ -45,8 +39,11 @@ public class NonTerminal extends ProductionItem {
     }
 
     @Override
-    public String toString() {
-        return sort.toString();
+    public void toString(StringBuilder sb) {
+        if (name.isPresent()) {
+          sb.append(name.get()).append(": ");
+        }
+        sb.append(sort);
     }
 
     @Override
@@ -70,8 +67,4 @@ public class NonTerminal extends ProductionItem {
         return sort.hashCode();
     }
 
-    @Override
-    public NonTerminal shallowCopy() {
-        return new NonTerminal(this);
-    }
 }

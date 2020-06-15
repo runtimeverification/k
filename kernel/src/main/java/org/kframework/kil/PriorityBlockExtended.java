@@ -4,7 +4,6 @@ package org.kframework.kil;
 import org.kframework.definition.Tag;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /** A group within a {@code syntax priorities} declaration.
  * @see PriorityExtended */
@@ -20,26 +19,17 @@ public class PriorityBlockExtended extends ASTNode {
         this.productions = productions;
     }
 
-    public PriorityBlockExtended(PriorityBlockExtended node) {
-        super(node);
-        this.productions.addAll(node.productions);
-    }
-
     public PriorityBlockExtended(java.util.List<Tag> productions) {
         super();
         this.productions.addAll(productions);
     }
 
     @Override
-    public String toString() {
-        String content = "";
-        for (Tag production : productions)
-            content += production + " ";
-
-        if (content.length() > 2)
-            content = content.substring(0, content.length() - 1);
-
-        return content;
+    public void toString(StringBuilder sb) {
+        for (Tag production : productions) {
+            sb.append(production);
+            sb.append(" ");
+        }
     }
 
     @Override
@@ -72,8 +62,4 @@ public class PriorityBlockExtended extends ASTNode {
         return hash;
     }
 
-    @Override
-    public PriorityBlockExtended shallowCopy() {
-        return new PriorityBlockExtended(this);
-    }
 }

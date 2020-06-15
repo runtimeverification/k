@@ -1,5 +1,6 @@
 module TEST
   imports DOMAINS
+  imports K-REFLECTION
 
   syntax Exp ::= abc(Int) [klabel(abc), symbol]
 

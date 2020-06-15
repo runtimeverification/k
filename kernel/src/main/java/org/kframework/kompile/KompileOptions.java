@@ -89,6 +89,11 @@ public class KompileOptions implements Serializable {
     @Parameter(names="-O3", description="Optimize aggressively in ways that significantly improve performance, but interfere with debugging significantly and also increase compilation time and code size substantially.")
     public boolean optimize3;
 
+    @Parameter(names="-E", description="Perform outer parsing and then stop and pretty print the definition to standard output. Useful for converting a K definition into a completely self-contained file when reporting a bug.")
+    public boolean preprocess;
+    @Parameter(names="--bison-lists", description="Make List and NeList left associative. This is useful for creating Bison parsers that use bounded stack space.")
+    public boolean bisonLists;
+
     @ParametersDelegate
     public Experimental experimental = new Experimental();
 
@@ -131,6 +136,9 @@ public class KompileOptions implements Serializable {
 
         @Parameter(names="--gen-bison-parser", description="Emit bison parser for the PGM configuration variable within the syntax module of your definition into the kompiled definition.")
         public boolean genBisonParser;
+
+        @Parameter(names="--gen-glr-bison-parser", description="Emit GLR bison parser for the PGM configuration variable within the syntax module of your definition into the kompiled definition.")
+        public boolean genGlrBisonParser;
 
         @Parameter(names="--transition", listConverter=StringListConverter.class, description="<string> is a whitespace-separated list of tags designating rules to become transitions.")
         public List<String> transition = Collections.singletonList(DEFAULT_TRANSITION);

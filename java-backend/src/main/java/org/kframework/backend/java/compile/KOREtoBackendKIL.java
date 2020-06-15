@@ -13,7 +13,6 @@ import org.kframework.builtin.Sorts;
 import org.kframework.compile.RewriteToTop;
 import org.kframework.definition.Module;
 import org.kframework.definition.Production;
-import org.kframework.kil.Attribute;
 import org.kframework.kore.Assoc;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -113,7 +112,7 @@ public class KOREtoBackendKIL {
             BuiltinList.Builder builder = BuiltinList.builder(
                     Sort.of(module.productionsFor().get(klabel).get().head().sort()),
                     (KLabelConstant) convertedKLabel,
-                    KLabelConstant.of(org.kframework.backend.java.kil.KLabel.parse(module.attributesFor().get(klabel).get().<String>get(Att.unit())), global.getDefinition()),
+                    KLabelConstant.of(org.kframework.backend.java.kil.KLabel.parse(module.attributesFor().get(klabel).get().<String>get(Att.UNIT())), global.getDefinition()),
                     global);
             // this assumes there are no KList variables in the KList
             return builder.addAll(convertedKList.getContents()).build();
@@ -136,30 +135,30 @@ public class KOREtoBackendKIL {
         }
 
         // make assoc-comm operators right-associative
-        if (definition.kLabelAttributesOf(klabel).contains(Att.assoc())
-                && definition.kLabelAttributesOf(klabel).contains(Att.comm())) {
+        if (definition.kLabelAttributesOf(klabel).contains(Att.ASSOC())
+                && definition.kLabelAttributesOf(klabel).contains(Att.COMM())) {
             return convertedKList.getContents().stream().reduce((a, b) -> KItem.of(convertedKLabel, KList.concatenate(a, b), global)).get();
         }
 
         // we've encountered a regular KApply
         BitSet[] childrenDontCareRuleMask = constructDontCareRuleMask(convertedKList);
         KItem kItem = KItem.of(convertedKLabel, convertedKList, global, childrenDontCareRuleMask == null ? null : childrenDontCareRuleMask);
-        if (att.contains(Att.transition())) {
-            kItem.addAttribute(Att.transition(), "");
+        if (att.contains(Att.TRANSITION())) {
+            kItem.addAttribute(Att.TRANSITION(), "");
         }
         return kItem;
     }
 
     private Optional<KLabel> getAssocKLabelForUnit(KLabel klabel) {
         return definition.kLabelAttributes().entrySet().stream()
-                .filter(e -> effectivelyAssocAttributes(e.getValue()) && e.getValue().get(Att.unit()).equals(klabel.name()))
+                .filter(e -> effectivelyAssocAttributes(e.getValue()) && e.getValue().get(Att.UNIT()).equals(klabel.name()))
                 .map(e -> KORE.KLabel(e.getKey()))
                 .findAny();
     }
 
     private static boolean effectivelyAssocAttributes(Att attributes) {
-        return attributes.contains(Att.assoc()) && !attributes.contains(Att.comm())
-                || attributes.contains(Att.bag());
+        return attributes.contains(Att.ASSOC()) && !attributes.contains(Att.COMM())
+                || attributes.contains(Att.BAG());
     }
 
     /**
@@ -246,7 +245,7 @@ public class KOREtoBackendKIL {
                 .findAny();
         Sort sort = sortAtt;
         if (collectionProduction.isPresent()) {
-            switch (collectionProduction.get().att().get(Attribute.HOOK_KEY)) {
+            switch (collectionProduction.get().att().get(Att.HOOK())) {
                 case "LIST.concat":
                     sort = Sort.LIST;
                     break;
@@ -324,13 +323,13 @@ public class KOREtoBackendKIL {
         Att att = rule.att();
 
         if (module != null) {
-            if (leftHandSide instanceof KApply && module.attributesFor().apply(((KApply) leftHandSide).klabel()).contains(Attribute.FUNCTION_KEY)) {
-                att = att.add(Attribute.FUNCTION_KEY);
+            if (leftHandSide instanceof KApply && module.attributesFor().apply(((KApply) leftHandSide).klabel()).contains(Att.FUNCTION())) {
+                att = att.add(Att.FUNCTION());
             }
         }
 
         Term convertedLeftHandSide = convert(leftHandSide);
-        if (att.contains(Attribute.PATTERN_KEY) || att.contains(Attribute.PATTERN_FOLDING_KEY)) {
+        if (att.contains(Att.PATTERN()) || att.contains(Att.PATTERN_FOLDING())) {
             convertedLeftHandSide = convertedLeftHandSide.evaluate(TermContext.builder(global).build());
         }
 
@@ -391,10 +390,10 @@ public class KOREtoBackendKIL {
         );
         /* rename variables in function, anywhere, and pattern rules to avoid name conflicts
         with automaton variables and with each other */
-        if (backendKILRule.att().contains(Attribute.FUNCTION_KEY)
-                || backendKILRule.att().contains(Attribute.ANYWHERE_KEY)
-                || backendKILRule.att().contains(Attribute.PATTERN_KEY)
-                || backendKILRule.att().contains(Attribute.PATTERN_FOLDING_KEY)) {
+        if (backendKILRule.att().contains(Att.FUNCTION())
+                || backendKILRule.att().contains(Att.ANYWHERE())
+                || backendKILRule.att().contains(Att.PATTERN())
+                || backendKILRule.att().contains(Att.PATTERN_FOLDING())) {
             backendKILRule = backendKILRule.renameVariables();
         }
 

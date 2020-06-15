@@ -16,13 +16,6 @@ public class Module extends DefinitionItem {
     // lazily computed set of sorts.
     private Set<Sort> sorts;
 
-    public Module(Module m) {
-        super(m);
-        this.name = m.name;
-        this.items = m.items;
-        this.sorts = m.sorts;
-    }
-
     public Module() {
         super();
     }
@@ -55,27 +48,14 @@ public class Module extends DefinitionItem {
     }
 
     @Override
-    public String toString() {
-        String content = "";
-        List<ModuleItem> sortedItems = new ArrayList<ModuleItem>(items);
-
-        sortedItems.sort(new Comparator<ModuleItem>() {
-            @Override
-            public int compare(ModuleItem o1, ModuleItem o2) {
-                return o1.toString().compareTo(o2.toString());
-            }
-        });
-
-        for (ModuleItem i : sortedItems)
-            content += i + " \n";
-
-        return "module " + name + "\n" + content + "\nendmodule";
+    public void toString(StringBuilder sb) {
+        sb.append("module ").append(name).append(" ").append(getAttributes()).append("\n");
+        for (ModuleItem i : items) {
+            i.toString(sb);
+            sb.append("\n");
+        }
+        sb.append("endmodule");
     }
 
-
-    @Override
-    public Module shallowCopy() {
-        return new Module(this);
-    }
 
 }

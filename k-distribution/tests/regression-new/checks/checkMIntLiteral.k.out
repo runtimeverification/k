@@ -1,6 +1,6 @@
 [Error] Compiler: Had 1 parsing errors.
 [Error] Inner Parser: Unexpected sort MInt{32} for term parsed as production
-syntax MInt{32} ::= r"[\\+-]?[0-9]+[pP][0-9]+" [hook(MINT.literal) prec(2)
-token()]. Expected: MInt{6}
+syntax MInt{32} ::= r"[\\+-]?[0-9]+[pP][0-9]+" [hook(MINT.literal), prec(2),
+token]. Expected: MInt{6}
 	Source(checkMIntLiteral.k)
 	Location(12,12,12,16)

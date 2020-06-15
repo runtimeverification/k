@@ -7,7 +7,7 @@ import org.junit.Rule;
 import org.junit.rules.TestName;
 import org.kframework.attributes.Source;
 import org.kframework.kil.Definition;
-import org.kframework.parser.concrete2kore.CollectProductionsVisitor;
+import org.kframework.parser.inner.CollectProductionsVisitor;
 import org.kframework.kil.loader.Context;
 import org.kframework.parser.outer.Outer;
 

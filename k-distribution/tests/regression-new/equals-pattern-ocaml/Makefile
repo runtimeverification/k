@@ -3,4 +3,4 @@ EXT=test
 TESTDIR=../equals-pattern
 KOMPILE_BACKEND?=ocaml
 
-include ../../../include/ktest.mak
+include ../../../include/kframework/ktest.mak

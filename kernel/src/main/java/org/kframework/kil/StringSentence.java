@@ -22,13 +22,23 @@ public class StringSentence extends ModuleItem {
         this.label = label;
     }
 
-    public StringSentence(StringSentence node) {
-        super(node);
-        this.content = node.content;
-    }
-
-    public String toString() {
-        return type+"["+label+"]:"+content;
+    @Override
+    public void toString(StringBuilder sb) {
+        switch(type) {
+        case "config":
+          sb.append("  configuration ");
+          break;
+        case "alias":
+          sb.append("  context alias ");
+          break;
+        default:
+          sb.append("  ").append(type).append(" ");
+          break;
+        }
+        if (!label.equals("")) {
+          sb.append("[").append(label).append("]: ");
+        }
+        sb.append(content).append(" ").append(getAttributes());
     }
 
     public String getContent() {
@@ -37,11 +47,6 @@ public class StringSentence extends ModuleItem {
 
     public void setContent(String content) {
         this.content = content;
-    }
-
-    @Override
-    public StringSentence shallowCopy() {
-        return new StringSentence(this);
     }
 
     public void setType(String type) {

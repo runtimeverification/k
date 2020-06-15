@@ -13,7 +13,6 @@ import org.kframework.definition.Context;
 import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
-import org.kframework.kil.Attribute;
 import org.kframework.kore.Assoc;
 import org.kframework.kore.FoldK;
 import org.kframework.kore.K;
@@ -107,12 +106,12 @@ public class ConvertDataStructureToLookup {
 
     public static Map<KLabel, KLabel> collectionFor(Module m) {
         return stream(m.productions())
-                .filter(p -> p.att().contains(Attribute.ASSOCIATIVE_KEY) && p.att().contains("element"))
+                .filter(p -> p.att().contains(Att.ASSOC()) && p.att().contains("element"))
                 .flatMap(p -> {
                     Set<Tuple2<KLabel, KLabel>> set = new HashSet<>();
                     set.add(Tuple2.apply(p.klabel().get(), p.klabel().get()));
-                    if (p.att().contains(Attribute.UNIT_KEY)) {
-                        set.add(Tuple2.apply(KLabel(p.att().get(Attribute.UNIT_KEY)), p.klabel().get()));
+                    if (p.att().contains(Att.UNIT())) {
+                        set.add(Tuple2.apply(KLabel(p.att().get(Att.UNIT())), p.klabel().get()));
                     }
                     if (p.att().contains("element")) {
                         set.add(Tuple2.apply(KLabel(p.att().get("element")), p.klabel().get()));
@@ -129,7 +128,7 @@ public class ConvertDataStructureToLookup {
 
     public static Set<KLabel> filteredMapConstructors(Module m) {
         return stream(m.productions())
-                .filter(p -> p.att().contains(Attribute.ASSOCIATIVE_KEY) && p.att().contains("filterElement"))
+                .filter(p -> p.att().contains(Att.ASSOC()) && p.att().contains("filterElement"))
                 .map(p -> p.klabel().get())
                 .distinct()
                 .collect(Collectors.toSet());
@@ -270,9 +269,9 @@ public class ConvertDataStructureToLookup {
     }
 
     public boolean collectionIsMap(KLabel collectionLabel) {
-        return m.attributesFor().apply(collectionLabel).contains(Attribute.COMMUTATIVE_KEY)
-                && !m.attributesFor().apply(collectionLabel).contains(Attribute.IDEMPOTENT_KEY)
-                && !m.attributesFor().apply(collectionLabel).contains(Att.bag());
+        return m.attributesFor().apply(collectionLabel).contains(Att.COMM())
+                && !m.attributesFor().apply(collectionLabel).contains(Att.IDEM())
+                && !m.attributesFor().apply(collectionLabel).contains(Att.BAG());
     }
 
     private boolean isThread = false;
@@ -311,12 +310,12 @@ public class ConvertDataStructureToLookup {
                         //assumed assoc
                         KApply left = (KApply) RewriteToTop.toLeft(k);
                         List<K> components = Assoc.flatten(collectionLabel, Collections.singletonList(left), m);
-                        if (att.contains(Attribute.COMMUTATIVE_KEY)) {
-                            if (att.contains(Attribute.IDEMPOTENT_KEY)) {
+                        if (att.contains(Att.COMM())) {
+                            if (att.contains(Att.IDEM())) {
                                 // Set
                                 return convertSet(k, collectionLabel, components);
                             } else {
-                                if (att.contains(Att.bag()))
+                                if (att.contains(Att.BAG()))
                                     // Bag
                                     // TODO(dwightguth): handle bags
                                     return super.apply(k);
@@ -380,7 +379,7 @@ public class ConvertDataStructureToLookup {
                     if (elementsRight.size() == 0 && matchOnConsList) {
                         K tail;
                         if (frame == null) {
-                            tail = KApply(KLabel(m.attributesFor().apply(collectionLabel).get(Attribute.UNIT_KEY)));
+                            tail = KApply(KLabel(m.attributesFor().apply(collectionLabel).get(Att.UNIT())));
                         } else {
                             tail = frame;
                         }
@@ -620,9 +619,9 @@ public class ConvertDataStructureToLookup {
 
 
     public Sentence convert(Sentence s) {
-        if (s.att().contains(Attribute.LEMMA_KEY)
-                || s.att().contains(Attribute.SMT_LEMMA_KEY)
-                || s.att().contains(Attribute.PATTERN_FOLDING_KEY)) {
+        if (s.att().contains(Att.LEMMA())
+                || s.att().contains(Att.SMT_LEMMA())
+                || s.att().contains(Att.PATTERN_FOLDING())) {
             return s;
         } else if (s instanceof Rule) {
             return convert((Rule) s);

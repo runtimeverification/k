@@ -1,15 +1,12 @@
 // Copyright (c) 2012-2019 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import org.kframework.utils.errorsystem.KExceptionManager;
-
 import com.google.inject.Inject;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -35,29 +32,12 @@ public class Definition extends ASTNode {
     @Inject
     public Definition(Void v) {}
 
-    public Definition(Definition d) {
-        super(d);
-        this.mainFile = d.mainFile;
-        this.mainModule = d.mainModule;
-        this.mainSyntaxModule = d.mainSyntaxModule;
-        this.items = d.items;
-        this.locations = d.locations;
-    }
-
     @Override
-    public String toString() {
-        String content = "";
-        List<DefinitionItem> sortedItems = new ArrayList<>(items);
-        sortedItems.sort(new Comparator<DefinitionItem>() {
-            @Override
-            public int compare(DefinitionItem o1, DefinitionItem o2) {
-                return o1.toString().compareTo(o2.toString());
-            }
-        });
-        for (DefinitionItem di : sortedItems)
-            content += di + " \n";
-
-        return "DEF: " + mainFile + " -> " + mainModule + "\n" + content;
+    public void toString(StringBuilder sb) {
+        for (DefinitionItem di : items) {
+            di.toString(sb);
+            sb.append("\n\n");
+        }
     }
 
     public void setItems(List<DefinitionItem> items) {
@@ -78,11 +58,6 @@ public class Definition extends ASTNode {
 
     public void setMainSyntaxModule(String mainSyntaxModule) {
         this.mainSyntaxModule = mainSyntaxModule;
-    }
-
-    @Override
-    public Definition shallowCopy() {
-        return new Definition(this);
     }
 
 }

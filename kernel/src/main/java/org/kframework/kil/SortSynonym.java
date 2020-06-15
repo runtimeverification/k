@@ -3,21 +3,10 @@ package org.kframework.kil;
 
 import org.kframework.kore.Sort;
 
-import org.kframework.utils.StringUtil;
-
-import java.util.ArrayList;
-import java.util.List;
-
 public class SortSynonym extends ModuleItem {
 
     public final Sort newSort;
     public final Sort oldSort;
-
-    public SortSynonym(SortSynonym node) {
-        super(node);
-        this.newSort = node.newSort;
-        this.oldSort = node.oldSort;
-    }
 
     public SortSynonym(NonTerminal newSort, NonTerminal oldSort) {
         super();
@@ -51,7 +40,8 @@ public class SortSynonym extends ModuleItem {
     }
 
     @Override
-    public SortSynonym shallowCopy() {
-        return new SortSynonym(this);
+    public void toString(StringBuilder sb) {
+      sb.append("  syntax ").append(newSort).append(" = ").append(oldSort).append(" ").append(getAttributes());
     }
+
 }

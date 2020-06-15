@@ -1,7 +1,6 @@
 // Copyright (c) 2013-2019 K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.inject.Provider;
 import org.kframework.attributes.Att;
@@ -26,7 +25,6 @@ import org.kframework.backend.java.util.RuleSourceUtil;
 import org.kframework.backend.java.util.Subsorts;
 import org.kframework.backend.java.utils.BitSet;
 import org.kframework.builtin.KLabels;
-import org.kframework.kil.Attribute;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -542,7 +540,7 @@ public class KItem extends Term implements KItemRepresentation {
                                 rightHandSide.isCacheable = false;
                             }
 
-                            if (rule.att().contains("owise")) {
+                            if (rule.att().contains(Att.OWISE())) {
                                 if (owiseResult != null) {
                                     throw KEMException.criticalError("Found multiple [owise] rules for the function with KLabel " + kItem.kLabel, rule);
                                 }
@@ -632,7 +630,7 @@ public class KItem extends Term implements KItemRepresentation {
                  * of the left-hand-sides of the other rules (no other rule may apply)
                  */
                 for (Rule rule : rulesForKLabel) {
-                    if (rule.att().contains("owise")) {
+                    if (rule.att().contains(Att.OWISE())) {
                         continue;
                     }
 
@@ -872,13 +870,13 @@ public class KItem extends Term implements KItemRepresentation {
 
     public List<Term> getPatternInput() {
         assert kLabel instanceof KLabelConstant && ((KLabelConstant) kLabel).isPattern() && kList instanceof KList;
-        int inputCount = Integer.parseInt(((KLabelConstant) kLabel).getAttr(Attribute.PATTERN_KEY));
+        int inputCount = Integer.parseInt(((KLabelConstant) kLabel).getAttr(Att.PATTERN()));
         return ((KList) kList).getContents().subList(0, inputCount);
     }
 
     public List<Term> getPatternOutput() {
         assert kLabel instanceof KLabelConstant && ((KLabelConstant) kLabel).isPattern() && kList instanceof KList;
-        int inputCount = Integer.parseInt(((KLabelConstant) kLabel).getAttr(Attribute.PATTERN_KEY));
+        int inputCount = Integer.parseInt(((KLabelConstant) kLabel).getAttr(Att.PATTERN()));
         return ((KList) kList).getContents().subList(inputCount, ((KList) kList).getContents().size());
     }
 

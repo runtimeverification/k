@@ -16,11 +16,6 @@ public class Import extends ModuleItem {
         name = importName;
     }
 
-    public Import(Import import1) {
-        super(import1);
-        this.name = import1.name;
-    }
-
     public Import(String importName, Location loc, Source source) {
         super(loc, source);
         this.name = importName;
@@ -31,8 +26,14 @@ public class Import extends ModuleItem {
     }
 
     @Override
-    public String toString() {
-        return "  imports " + name;
+    public void toString(StringBuilder sb) {
+        sb.append("  imports ");
+        if (name.endsWith(IMPORTS_SYNTAX_SUFFIX)) {
+          sb.append("syntax ");
+          sb.append(name.substring(0, name.length()-IMPORTS_SYNTAX_SUFFIX.length()));
+        } else {
+          sb.append(name);
+        }
     }
 
     public String getName() {
@@ -41,11 +42,6 @@ public class Import extends ModuleItem {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    @Override
-    public Import shallowCopy() {
-        return new Import(this);
     }
 
     public boolean isImportSyntax() {

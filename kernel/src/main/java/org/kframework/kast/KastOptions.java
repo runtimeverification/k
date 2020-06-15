@@ -95,6 +95,9 @@ public final class KastOptions {
     @Parameter(names={"--gen-parser"}, description="Generate a Bison/Flex parser for the specified module and sort.")
     public boolean genParser;
 
+    @Parameter(names={"--gen-glr-parser"}, description="Generate a Bison/Flex GLR parser for the specified module and sort.")
+    public boolean genGlrParser;
+
     public File outputFile() {
         checkSingleFile();
         return files.get().resolveWorkingDirectory(parameters.get(0));

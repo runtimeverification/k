@@ -10,7 +10,6 @@ import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
-import org.kframework.kil.Attribute;
 import org.kframework.kore.FoldK;
 import org.kframework.kore.InjectedKLabel;
 import org.kframework.kore.K;
@@ -22,7 +21,6 @@ import org.kframework.kore.KSequence;
 import org.kframework.kore.KToken;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
-import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KEMException;
 
@@ -62,8 +60,6 @@ public class AddSortInjections {
     public Sentence addInjections(Sentence s) {
         if (s instanceof Rule) {
             return addInjections((Rule) s);
-        } else if (s instanceof Context) {
-            return addInjections((Context) s);
         } else {
             return s;
         }
@@ -93,9 +89,9 @@ public class AddSortInjections {
     }
 
     private boolean collectionIsMap(KLabel collectionLabel) {
-        return mod.attributesFor().apply(collectionLabel).contains(Attribute.COMMUTATIVE_KEY)
-                && !mod.attributesFor().apply(collectionLabel).contains(Attribute.IDEMPOTENT_KEY)
-                && !mod.attributesFor().apply(collectionLabel).contains(Att.bag());
+        return mod.attributesFor().apply(collectionLabel).contains(Att.COMM())
+                && !mod.attributesFor().apply(collectionLabel).contains(Att.IDEM())
+                && !mod.attributesFor().apply(collectionLabel).contains(Att.BAG());
     }
 
     private K addTopSortInjections(K body) {

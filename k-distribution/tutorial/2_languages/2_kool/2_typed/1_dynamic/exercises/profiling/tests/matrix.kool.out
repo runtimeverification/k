@@ -16,20 +16,21 @@ Line 1 (3 elements): 17 22 27
 Line 2 (3 elements): 22 29 36
 Line 3 (3 elements): 27 36 45
 Done.
-
-==========
-Statistics
-==========
-
-Objects created:
-   Main |-> 1
-   Matrix |-> 3
-
-Methods invoked:
-   Matrix.copy |-> 2
-   Main.Main |-> 1
-   Matrix.multiply |-> 2
-   Matrix.printMatrix |-> 5
-   Matrix.readMatrix |-> 1
-   Matrix.Matrix |-> 3
-   Matrix.transpose |-> 1
+<generatedTop>
+  .TCell
+  <statistics>
+    <object-count>
+      Main |-> 1
+      Matrix |-> 3
+    </object-count>
+    <method-count>
+      Main . Main |-> 1
+      Matrix . Matrix |-> 3
+      Matrix . copy |-> 2
+      Matrix . multiply |-> 2
+      Matrix . printMatrix |-> 5
+      Matrix . readMatrix |-> 1
+      Matrix . transpose |-> 1
+    </method-count>
+  </statistics>
+</generatedTop>

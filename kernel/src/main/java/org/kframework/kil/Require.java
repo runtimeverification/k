@@ -1,15 +1,12 @@
 // Copyright (c) 2012-2019 K Team. All Rights Reserved.
 package org.kframework.kil;
 
+import org.kframework.utils.StringUtil;
+
 /** A require directive */
 public class Require extends DefinitionItem {
     /** The string argument to {@code require}, as written in the input file. */
     private String value;
-
-    public Require(Require require) {
-        super(require);
-        value = require.value;
-    }
 
     public Require(String value) {
         super();
@@ -25,12 +22,8 @@ public class Require extends DefinitionItem {
     }
 
     @Override
-    public Require shallowCopy() {
-        return new Require(this);
+    public void toString(StringBuilder sb) {
+        sb.append("require ");
+        sb.append(StringUtil.enquoteCString(value));
     }
-
-    @Override
-        public String toString() {
-          return "require \""+value+"\"";
-        }
 }

@@ -1,7 +1,5 @@
 #!/bin/bash
-in=$(mktemp)
-out=$(mktemp)
-"$(dirname "$0")"/imp-kompiled/parser_PGM "$1" > "$in"
-export PATH=$PATH:/usr/local/lib/kframework/bin:/usr/lib/kframework/bin:"$(dirname "$0")"/../../../../bin
-llvm-krun -d "$(dirname "$0")/imp-kompiled" -c PGM "$in" Pgm korefile -o "$out"
-kast --input kore --output pretty "$out"
+export PATH=$PATH:"$(dirname "$0")"/../../../../bin
+pgm=$1
+shift
+llvm-krun -c PGM "$pgm" Pgm prettyfile -p "$@" -d "$(dirname "$0")/imp-kompiled"

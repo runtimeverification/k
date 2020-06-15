@@ -5,4 +5,4 @@ KOMPILE_BACKEND=java
 KOMPILE_FLAGS=
 KPROVE_FLAGS=-m IH
 
-include ../../../../include/ktest.mak
+include ../../../../include/kframework/ktest.mak

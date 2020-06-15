@@ -62,7 +62,7 @@ public class ProofDefinitionBuilder {
                 specModuleName == null ? FilenameUtils.getBaseName(specFile.getName()).toUpperCase() : specModuleName;
         File absSpecFile = files.resolveWorkingDirectory(specFile).getAbsoluteFile();
 
-        Set<Module> modules = kompile.parseModules(compiledDefinition, defModuleNameUpdated, absSpecFile,
+        Set<Module> modules = kompile.parseModules(compiledDefinition, defModuleNameUpdated, specModuleNameUpdated, absSpecFile,
                 backend.excludedModuleTags());
         Map<String, Module> modulesMap = modules.stream().collect(Collectors.toMap(Module::name, m -> m));
         Definition parsedDefinition = compiledDefinition.getParsedDefinition();

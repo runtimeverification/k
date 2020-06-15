@@ -28,6 +28,37 @@
     </dependency>
   </dependencies>
 
+  <properties>
+    <haskell.backend.flags.release>-release</haskell.backend.flags.release>
+  </properties>
+
+  <profiles>
+    <profile>
+      <id>haskell.backend.Release</id>
+      <activation>
+        <property>
+          <name>project.build.type</name>
+          <value>Release</value>
+        </property>
+      </activation>
+      <properties>
+        <haskell.backend.flags.release>release</haskell.backend.flags.release>
+      </properties>
+    </profile>
+    <profile>
+      <id>haskell.backend.RelWithDebug</id>
+      <activation>
+        <property>
+          <name>project.build.type</name>
+          <value>RelWithDebug</value>
+        </property>
+      </activation>
+      <properties>
+        <haskell.backend.flags.release>release</haskell.backend.flags.release>
+      </properties>
+    </profile>
+  </profiles>
+
   <build>
     <plugins>
       <plugin>
@@ -43,6 +74,7 @@
                 <exec executable="stack" dir="${project.basedir}/src/main/native/haskell-backend" failonerror="true">
                   <arg value="build" />
                   <arg value="--only-dependencies" />
+                  <arg value="--allow-different-user" />
                 </exec>
                 <mkdir dir="${project.build.directory}/stack-install" />
                 <exec executable="stack" dir="${project.basedir}/src/main/native/haskell-backend" failonerror="true">
@@ -50,6 +82,8 @@
                   <arg value="--ghc-options=-j" />
                   <arg value="--local-bin-path" />
                   <arg value="${project.build.directory}/stack-install" />
+                  <arg value="--flag" />
+                  <arg value="kore:${haskell.backend.flags.release}" />
                 </exec>
               </target>
             </configuration>

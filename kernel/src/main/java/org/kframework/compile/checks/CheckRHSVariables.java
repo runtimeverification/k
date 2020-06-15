@@ -2,10 +2,11 @@
 package org.kframework.compile.checks;
 
 import com.google.common.collect.Sets;
+import org.kframework.attributes.Att;
 import org.kframework.definition.Context;
+import org.kframework.definition.ContextAlias;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
-import org.kframework.kil.Attribute;
 import org.kframework.kore.K;
 import org.kframework.kore.KVariable;
 import org.kframework.compile.GatherVarsVisitor;
@@ -23,7 +24,7 @@ import java.util.Set;
  * variable, if it is on the right hand side of a rewrite operator, it is an error if it does not appear anywhere on the
  * left hand side of the rule, and does not signify a fresh variable or constant.
  *
- * Exception: this check takes into account the {@code Attribute.UNBOUND_VARIABLES_KEY} attribute and allows the
+ * Exception: this check takes into account the {@code Att.UNBOUND_VARIABLES()} attribute and allows the
  * variables whose names are specified by the attribute to be unbound in the LHS.
  */
 public class CheckRHSVariables {
@@ -51,16 +52,26 @@ public class CheckRHSVariables {
         check(context.requires(), false, new HashSet<>());
     }
 
+    private void check(ContextAlias context) {
+        resetVars();
+        gatherVars(true, context.body());
+        gatherVars(false, context.requires());
+        check(context.body(), true, new HashSet<>());
+        check(context.requires(), false, new HashSet<>());
+    }
+
     public void check(Sentence s) {
         if (s instanceof Rule) {
             check((Rule) s);
         } else if (s instanceof Context) {
             check((Context) s);
+        } else if (s instanceof ContextAlias) {
+            check((ContextAlias) s);
         }
     }
 
     private Set<String> getUnboundVarNames(Rule rule) {
-        Option<String> unboundVariablesString = rule.att().getOption(Attribute.UNBOUND_VARIABLES_KEY);
+        Option<String> unboundVariablesString = rule.att().getOption(Att.UNBOUND_VARIABLES());
         Set<String> unboundVariableNames = new HashSet<>();
         if (unboundVariablesString.nonEmpty()) {
             String[] components = unboundVariablesString.get().split(",");

@@ -20,9 +20,8 @@ import org.kframework.backend.java.util.Subsorts;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.ExpandMacros;
 import org.kframework.definition.Module;
-import org.kframework.kil.Attribute;
 import org.kframework.kil.loader.Context;
-import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
+import org.kframework.parser.inner.generator.RuleGrammarGenerator;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import scala.collection.JavaConversions;
@@ -152,19 +151,19 @@ public class Definition extends JavaSymbolicObject {
     private Map<String, DataStructureSort> getDataStructureSorts(Module module) {
         ImmutableMap.Builder<String, DataStructureSort> builder = ImmutableMap.builder();
         for (org.kframework.definition.Production prod : iterable(module.productions())) {
-            Optional<?> assoc = prod.att().getOptional(Attribute.ASSOCIATIVE_KEY);
-            Optional<?> comm = prod.att().getOptional(Attribute.COMMUTATIVE_KEY);
-            Optional<?> idem = prod.att().getOptional(Attribute.IDEMPOTENT_KEY);
+            Optional<?> assoc = prod.att().getOptional(Att.ASSOC());
+            Optional<?> comm = prod.att().getOptional(Att.COMM());
+            Optional<?> idem = prod.att().getOptional(Att.IDEM());
 
             if (prod.sort().equals(Sorts.KList()) || prod.sort().equals(Sorts.KBott()))
                 continue;
             if (assoc.isPresent() && !comm.isPresent() && !idem.isPresent()) {
-                if (!prod.att().contains(Attribute.HOOK_KEY))
+                if (!prod.att().contains(Att.HOOK()))
                     continue;
             } else if (assoc.isPresent() && comm.isPresent() && idem.isPresent()) {
             } else if (assoc.isPresent() && comm.isPresent() && !idem.isPresent()) {
                 //TODO(dwightguth): distinguish between Bag and Map
-                if (!prod.att().contains(Attribute.HOOK_KEY))
+                if (!prod.att().contains(Att.HOOK()))
                     continue;
             } else if (!assoc.isPresent() && !comm.isPresent() && !idem.isPresent()) {
                 continue;
@@ -175,7 +174,7 @@ public class Definition extends JavaSymbolicObject {
             DataStructureSort sort = new DataStructureSort(
                     prod.klabel().get(),
                     KLabel.parse(prod.att().<String>get("element")),
-                    KLabel.parse(prod.att().<String>get(Attribute.UNIT_KEY)),
+                    KLabel.parse(prod.att().<String>get(Att.UNIT())),
                     new HashMap<>());
             builder.put(prod.sort().toString(), sort);
         }
@@ -185,7 +184,7 @@ public class Definition extends JavaSymbolicObject {
     private Set<Sort> getSmtPreludeSorts(Module module) {
         ImmutableSet.Builder<Sort> builder = ImmutableSet.builder();
         for (org.kframework.definition.SyntaxSort decl : iterable(module.sortDeclarations())) {
-            Optional<?> isSmtPreludeSort = decl.att().getOptional(Attribute.SMT_PRELUDE_KEY);
+            Optional<?> isSmtPreludeSort = decl.att().getOptional(Att.SMT_PRELUDE());
             if (isSmtPreludeSort.isPresent()) {
                 builder.add(Sort.of(decl.sort()));
             }
@@ -233,7 +232,7 @@ public class Definition extends JavaSymbolicObject {
         }
 
         addRule(convertedRule);
-        if (rule.att().contains(Att.topRule()) || rule.att().contains(Att.specification())) {
+        if (rule.att().contains(Att.TOP_RULE()) || rule.att().contains(Att.SPECIFICATION())) {
             reverseRuleTable.put(rule.hashCode(), reverseRuleTable.size());
             ruleTable.put(reverseRuleTable.get(rule.hashCode()), convertedRule);
         }
@@ -282,13 +281,13 @@ public class Definition extends JavaSymbolicObject {
             if (rule.isSortPredicate()) {
                 sortPredicateRules.put((KLabelConstant) rule.sortPredicateArgument().kLabel(), rule);
             }
-        } else if (rule.att().contains(Attribute.PATTERN_KEY)) {
+        } else if (rule.att().contains(Att.PATTERN())) {
             patternRules.put(rule.definedKLabel(), rule);
-        } else if (rule.att().contains(Attribute.PATTERN_FOLDING_KEY)) {
+        } else if (rule.att().contains(Att.PATTERN_FOLDING())) {
             patternFoldingRules.add(rule);
         } else if (ExpandMacros.isMacro(rule)) {
             macros.add(rule);
-        } else if (rule.att().contains(Attribute.ANYWHERE_KEY)) {
+        } else if (rule.att().contains(Att.ANYWHERE())) {
             if (!(rule.leftHandSide() instanceof KItem)) {
                 kem.registerCriticalWarning(
                         "The Java backend only supports [anywhere] rule that rewrites KItem; but found:\n\t"
@@ -299,7 +298,7 @@ public class Definition extends JavaSymbolicObject {
             anywhereRules.put(rule.anywhereKLabel(), rule);
         } else {
             rules.add(rule);
-            if (rule.att().contains(Att.specification())) {
+            if (rule.att().contains(Att.SPECIFICATION())) {
                 specRules.add(rule);
             }
         }

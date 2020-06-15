@@ -45,28 +45,63 @@ object Att {
 
   val empty: Att = Att(Map.empty)
 
-  /**
-   * attribute marking the top rule label
-   */
-  val topRule = "topRule"
-  val specification = "specification"
-  val userList = "userList"
-  val generatedByListSubsorting = "generatedByListSubsorting"
-  val generatedBy = "generatedBy"
-  val ClassFromUp = "classType"
-  val Location = "location"
-  val Function = "function"
-  val transition = "transition"
-  val heat = "heat"
-  val cool = "cool"
-  val refers_THIS_CONFIGURATION = "refers_THIS_CONFIGURATION"
-  val refers_RESTORE_CONFIGURATION = "refers_RESTORE_CONFIGURATION"
-  val assoc = "assoc"
-  val comm = "comm"
-  val unit = "unit"
-  val bag = "bag"
-  val syntaxModule = "syntaxModule"
-  val variable = "variable"
+  val BRACKET = "bracket"
+  val FUNCTION = "function"
+  val FUNCTIONAL = "functional"
+  val SIMPLIFICATION = "simplification"
+  val ASSOC = "assoc"
+  val COMM = "comm"
+  val IDEM = "idem"
+  val PROJ = "proj"
+  val UNIT = "unit"
+  val PREDICATE = "predicate"
+  val KORE = "kore"
+  val ANYWHERE = "anywhere"
+  val PATTERN = "pattern"
+  val PATTERN_FOLDING = "pattern-folding"
+  val HOOK = "hook"
+  val MACRO = "macro"
+  val ALIAS = "alias"
+  val MACRO_REC = "macro-rec"
+  val ALIAS_REC = "alias-rec"
+  val LEMMA = "lemma"
+  val TRUSTED = "trusted"
+  val MATCHING = "matching"
+  val BITWIDTH = "bitwidth"
+  val EXPONENT = "exponent"
+  val SIGNIFICAND = "significand"
+  val SMT_HOOK = "smt-hook"
+  val SMTLIB = "smtlib"
+  val SMT_LEMMA = "smt-lemma"
+  val SMT_PRELUDE = "smt-prelude"
+  val ONE_PATH = "one-path"
+  val ALL_PATH = "all-path"
+  val CELL = "cell"
+  val CELL_FRAGMENT = "cellFragment"
+  val CELL_OPT_ABSENT = "cellOptAbsent"
+  val IMPURE = "impure"
+  val STRICT = "strict"
+  val SEQSTRICT = "seqstrict"
+  val CONCRETE = "concrete"
+  val SYMBOLIC = "symbolic"
+  val LABEL = "label"
+  val UNBOUND_VARIABLES = "unboundVariables"
+  val BAG = "bag"
+  val OWISE = "owise"
+  val PRIORITY = "priority"
+  val HEAT = "heat"
+  val COOL = "cool"
+  val TAG = "tag"
+  val USER_LIST = "userList"
+  val GENERATED_BY_LIST_SUBSORTING = "generatedByListSubsorting"
+  val TRANSITION = "transition"
+  val SYNTAX_MODULE = "syntaxModule"
+  val SPECIFICATION = "specification"
+  val REFERS_THIS_CONFIGURATION = "refers_THIS_CONFIGURATION";
+  val REFERS_RESTORE_CONFIGURATION = "refers_RESTORE_CONFIGURATION";
+  val TOP_RULE = "topRule";
+  val ORIGINAL_PRD = "originalPrd"
+  val RECORD_PRD = "recordPrd"
 
   private val stringClassName = classOf[String].getName
 
@@ -77,13 +112,23 @@ object Att {
 trait AttributesToString {
   self: Att =>
 
-  override def toString: String = "[" + toStrings.sorted.mkString(" ") + "]"
+  override def toString: String = {
+    if (att.isEmpty) {
+      ""
+    } else {
+      "[" + toStrings.sorted.mkString(", ") + "]"
+    }
+  }
 
   def postfixString: String = {
     if (toStrings.isEmpty) "" else " " + toString()
   }
 
-  lazy val toStrings: List[String] =
+
+  lazy val toStrings: List[String] = {
+    val stringClassName = classOf[String].getName
     att filter { case (("productionId", _), _) => false; case _ => true } map
-      { case ((key, _), value) => key + "(" + value + ")" } toList
+      { case ((key, `stringClassName`), "") => key
+        case ((key, _), value) => key + "(" + value + ")" } toList
+  }
 }

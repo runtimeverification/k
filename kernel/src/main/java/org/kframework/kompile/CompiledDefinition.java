@@ -19,8 +19,8 @@ import org.kframework.kore.KToken;
 import org.kframework.kore.Sort;
 import org.kframework.kore.VisitK;
 import org.kframework.parser.TreeNodesToKORE;
-import org.kframework.parser.concrete2kore.ParseInModule;
-import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
+import org.kframework.parser.inner.ParseInModule;
+import org.kframework.parser.inner.generator.RuleGrammarGenerator;
 import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -133,7 +133,7 @@ public class CompiledDefinition implements Serializable {
         return kompiledDefinition.mainModule();
     }
 
-    public String mainSyntaxModuleName() { return parsedDefinition.att().<String>getOptional(Att.syntaxModule()).get(); }
+    public String mainSyntaxModuleName() { return parsedDefinition.att().<String>getOptional(Att.SYNTAX_MODULE()).get(); }
 
     /**
      * @return the module used for generating the program (i.e. ground) parser for the module named moduleName

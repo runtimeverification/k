@@ -1,7 +1,0 @@
-#!/bin/sh -exu
-REV=$(cd .. && git rev-parse --short=7 HEAD)
-brew bottle --json $PACKAGE --root-url="$ROOT_URL/v$VERSION-$REV/"
-cat *.bottle.json
-brew bottle --merge --write --no-commit *.bottle.json
-cp $(brew formula $PACKAGE) Formula/$PACKAGE.rb
-git commit Formula/$PACKAGE.rb -m "Update $PACKAGE to $REV: part 2"

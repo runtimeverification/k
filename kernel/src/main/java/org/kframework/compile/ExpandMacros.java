@@ -2,17 +2,16 @@
 package org.kframework.compile;
 
 import org.kframework.attributes.Att;
-import org.kframework.attributes.Location;
-import org.kframework.attributes.Source;
+import org.kframework.backend.kore.ModuleToKORE;
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.Sorts;
+import org.kframework.compile.checks.CheckFunctions;
 import org.kframework.definition.Context;
 import org.kframework.definition.HasAtt;
 import org.kframework.definition.Module;
 import org.kframework.definition.Production;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
-import org.kframework.kil.Attribute;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -24,8 +23,6 @@ import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
 import org.kframework.kore.TransformK;
 import org.kframework.kore.VisitK;
-import org.kframework.main.GlobalOptions;
-import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
@@ -39,7 +36,6 @@ import java.io.PrintWriter;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -68,28 +64,32 @@ public class ExpandMacros {
     private final PrintWriter coverage;
     private final FileChannel channel;
     private final boolean reverse;
+    private final boolean isSymbolic;
     private final ResolveFunctionWithConfig transformer;
     private final KompileOptions kompileOptions;
+    private final KExceptionManager kem;
 
-    public static ExpandMacros fromMainModule(Module mod, FileUtil files, KompileOptions kompileOptions, boolean reverse) {
-        return new ExpandMacros(mod, files, kompileOptions, reverse, true);
+    public static ExpandMacros fromMainModule(Module mod, FileUtil files, KExceptionManager kem, KompileOptions kompileOptions, boolean reverse, boolean isSymbolic) {
+        return new ExpandMacros(mod, files, kem, kompileOptions, reverse, true, isSymbolic);
     }
 
     public static ExpandMacros forNonSentences(Module mod, FileUtil files, KompileOptions kompileOptions, boolean reverse) {
-        return new ExpandMacros(mod, files, kompileOptions, reverse, false);
+        return new ExpandMacros(mod, files, null, kompileOptions, reverse, false, true);
     }
 
-    private ExpandMacros(Module mod, FileUtil files, KompileOptions kompileOptions, boolean reverse, boolean sentences) {
-        this(sentences ? new ResolveFunctionWithConfig(mod, kompileOptions.isKore()) : null, mod, files, kompileOptions, reverse);
+    private ExpandMacros(Module mod, FileUtil files, KExceptionManager kem, KompileOptions kompileOptions, boolean reverse, boolean sentences, boolean isSymbolic) {
+        this(sentences ? new ResolveFunctionWithConfig(mod, kompileOptions.isKore()) : null, mod, files, kem, kompileOptions, reverse, isSymbolic);
     }
 
-    public ExpandMacros(ResolveFunctionWithConfig transformer, Module mod, FileUtil files, KompileOptions kompileOptions, boolean reverse) {
+    public ExpandMacros(ResolveFunctionWithConfig transformer, Module mod, FileUtil files, KExceptionManager kem, KompileOptions kompileOptions, boolean reverse, boolean isSymbolic) {
         this.mod = mod;
         this.reverse = reverse;
         this.cover = kompileOptions.coverage;
         this.kompileOptions = kompileOptions;
+        this.isSymbolic = isSymbolic;
+        this.kem = kem;
         files.resolveKompiled(".").mkdirs();
-        List<Rule> allMacros = stream(mod.rules()).filter(r -> isMacro(r.att(), reverse)).sorted(Comparator.comparing(r -> r.att().contains("owise"))).collect(Collectors.toList());
+        List<Rule> allMacros = stream(mod.rules()).filter(r -> isMacro(r.att(), reverse)).sorted(Comparator.comparingInt(r -> ModuleToKORE.getPriority(r.att()))).collect(Collectors.toList());
         macros = allMacros.stream().filter(r -> getLeft(r, reverse) instanceof KApply).collect(Collectors.groupingBy(r -> ((KApply)getLeft(r, reverse)).klabel()));
         macrosBySort = stream(mod.allSorts()).collect(Collectors.toMap(s -> s, s -> allMacros.stream().filter(r -> {
           K left = getLeft(r, reverse);
@@ -122,7 +122,7 @@ public class ExpandMacros {
     }
 
     private boolean isMacro(Att att, boolean reverse) {
-        return att.contains(Attribute.ALIAS_REC_KEY) || att.contains(Attribute.ALIAS_KEY) || (!reverse && (att.contains(Attribute.MACRO_KEY) || att.contains(Attribute.MACRO_REC_KEY)));
+        return att.contains(Att.ALIAS_REC()) || att.contains(Att.ALIAS()) || (!reverse && (att.contains(Att.MACRO()) || att.contains(Att.MACRO_REC())));
     }
 
     private Set<KVariable> vars = new HashSet<>();
@@ -156,20 +156,32 @@ public class ExpandMacros {
         gatherVars(rule.body());
         gatherVars(rule.requires());
         gatherVars(rule.ensures());
-        return Rule(expand(rule.body()),
+        Rule result = Rule(expand(rule.body()),
                 expand(rule.requires()),
                 expand(rule.ensures()),
                 rule.att());
+        return (Rule)check(result);
     }
 
     private Context expand(Context context) {
         resetVars();
         gatherVars(context.body());
         gatherVars(context.requires());
-        return Context(
+        Context result = Context(
                 expand(context.body()),
                 expand(context.requires()),
                 context.att());
+        return (Context)check(result);
+    }
+
+    private Sentence check(Sentence s) {
+        Set<KEMException> errors = new HashSet<>();
+        new CheckFunctions(errors, mod, isSymbolic).check(s);
+        if (!errors.isEmpty()) {
+          kem.addAllKException(errors.stream().map(e -> e.exception).collect(Collectors.toList()));
+          throw KEMException.compilerError("Had " + errors.size() + " structural errors after macro expansion.");
+        }
+        return s;
     }
 
     public K expand(K term) {
@@ -209,7 +221,7 @@ public class ExpandMacros {
                             right = tmp;
                         }
                         final Map<KVariable, K> subst = new HashMap<>();
-                        if (match(subst, left, applied, r) && (r.att().contains(Attribute.MACRO_REC_KEY) || r.att().contains(Attribute.ALIAS_REC_KEY) || !appliedRules.contains(r))) {
+                        if (match(subst, left, applied, r) && (r.att().contains(Att.MACRO_REC()) || r.att().contains(Att.ALIAS_REC()) || !appliedRules.contains(r))) {
                             if (cover) {
                                 if (!r.att().contains("UNIQUE_ID")) System.out.println(r.toString());
                                 coverage.println(r.att().get("UNIQUE_ID"));
@@ -358,7 +370,7 @@ public class ExpandMacros {
     }
 
     public static boolean isMacro(HasAtt s) {
-      return s.att().contains(Attribute.MACRO_KEY) || s.att().contains(Attribute.MACRO_REC_KEY) || s.att().contains(Attribute.ALIAS_REC_KEY) || s.att().contains(Attribute.ALIAS_KEY);
+      return s.att().contains(Att.MACRO()) || s.att().contains(Att.MACRO_REC()) || s.att().contains(Att.ALIAS_REC()) || s.att().contains(Att.ALIAS());
     }
 
     public Sentence expand(Sentence s) {

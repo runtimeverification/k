@@ -8,17 +8,17 @@ import org.kframework.definition.Context;
 import org.kframework.definition.ContextAlias;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
-import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
-import org.kframework.kil.Attribute;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
+import org.kframework.kore.KLabel;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
 import org.kframework.kore.TransformK;
+import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.Collections;
 
@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import scala.Option;
 
@@ -52,10 +53,10 @@ public class ResolveStrict {
             if (!prod.klabel().isDefined()) {
                 throw KEMException.compilerError("Only productions with a KLabel can be strict.", prod);
             }
-            if (prod.att().contains(Attribute.STRICT_KEY)) {
+            if (prod.att().contains(Att.STRICT())) {
                 sentences.addAll(resolve(prod, false));
             }
-            if (prod.att().contains(Attribute.SEQSTRICT_KEY)) {
+            if (prod.att().contains(Att.SEQSTRICT())) {
                 sentences.addAll(resolve(prod, true));
             }
         }
@@ -109,21 +110,76 @@ public class ResolveStrict {
 
     private static final ContextAlias DEFAULT_ALIAS = ContextAlias(KVariable("HERE"), BooleanUtils.TRUE, Att.empty());
 
+    private void resolve(boolean sequential, Set<Sentence> sentences, long arity, List<Integer> strictnessPositions, List<Integer> allPositions, Set<ContextAlias> aliases, Production production) {
+        for (int i = 0; i < strictnessPositions.size(); i++) {
+            List<K> items = new ArrayList<>();
+            for (int j = 0; j < arity; j++) {
+                if (kompileOptions.strict()) {
+                    // Preserve sort information of the production
+                    items.add(cast(production.nonterminal(j).sort(), KVariable("K" + j)));
+                } else {
+                    items.add(KVariable("K" + j));
+                }
+            }
+            int strictnessPosition = strictnessPositions.get(i) - 1;
+            K hole;
+            if (kompileOptions.strict()) {
+                // Preserve sort information of the production
+                hole = cast(production.nonterminal(strictnessPosition).sort(), KVariable("HOLE"));
+            } else {
+                hole = cast(Sorts.KItem(), KVariable("HOLE"));
+            }
+
+            // is seqstrict the elements before the argument should be KResult
+            Optional<KApply> sideCondition = Stream.concat(allPositions.stream(), strictnessPositions.subList(0, i).stream()).map(j -> KApply(KLabel("isKResult"), KVariable("K" + (j - 1)))).reduce(BooleanUtils::and);
+            K requires;
+            if (!sideCondition.isPresent() || !sequential) {
+                requires = BooleanUtils.TRUE;
+            } else {
+                requires = sideCondition.get();
+            }
+
+            for (ContextAlias alias : aliases) {
+                K body = new TransformK() {
+                    @Override
+                    public K apply(KVariable var) {
+                      if (var.name().equals("HERE")) {
+                        K thisHole = hole;
+                        if (alias.att().contains("context")) {
+                            KLabel contextLabel = KLabel(alias.att().get("context"));
+                            thisHole = KRewrite(hole, KApply(contextLabel, hole));
+                        }
+                        items.set(strictnessPosition, thisHole);
+                        return KApply(production.klabel().get(), KList(items));
+                      }
+                      return var;
+                    }
+                }.apply(alias.body());
+                Context ctx = Context(body, BooleanUtils.and(requires, alias.requires()), production.att().addAll(alias.att()).remove("label"));
+                sentences.add(ctx);
+            }
+        }
+    }
+
     public Set<Sentence> resolve(Production production, boolean sequential) {
         long arity = production.nonterminals().size();
         List<Integer> strictnessPositions = new ArrayList<>();
+        List<Integer> allPositions = new ArrayList<>();
         Set<ContextAlias> aliases = new HashSet<>();
         String attribute;
+        Set<Sentence> sentences = new HashSet<>();
         if (sequential) {
-            attribute = production.att().get(Attribute.SEQSTRICT_KEY);
+            attribute = production.att().get(Att.SEQSTRICT());
         } else {
-            attribute = production.att().get(Attribute.STRICT_KEY);
+            attribute = production.att().get(Att.STRICT());
         }
         if (attribute.isEmpty()) {
             for (int i = 1; i <= arity; i++) {
                 strictnessPositions.add(i);
             }
             aliases.add(DEFAULT_ALIAS);
+            resolve(sequential, sentences, arity, strictnessPositions, allPositions, aliases, production);
+            allPositions.addAll(strictnessPositions);
         } else {
             String[] components = attribute.split(";");
             if (components.length == 1) {
@@ -136,76 +192,53 @@ public class ResolveStrict {
                     }
                     setAliases(components[0].trim(), aliases, production);
                 }
-            } else if (components.length == 2) {
-                setAliases(components[0].trim(), aliases, production);
-                setPositions(components[1].trim(), strictnessPositions, arity, production);
+                resolve(sequential, sentences, arity, strictnessPositions, allPositions, aliases, production);
+                allPositions.addAll(strictnessPositions);
+            } else if (components.length % 2 == 0) {
+                for (int i = 0; i < components.length; i+=2) {
+                    setAliases(components[i].trim(), aliases, production);
+                    setPositions(components[i+1].trim(), strictnessPositions, arity, production);
+                    resolve(sequential, sentences, arity, strictnessPositions, allPositions, aliases, production);
+                    aliases.clear();
+                    allPositions.addAll(strictnessPositions);
+                    strictnessPositions.clear();
+                }
             } else {
                 throw KEMException.compilerError("Invalid strict attribute containing multiple semicolons.", production);
             }
         }
 
-        Set<Sentence> sentences = new HashSet<>();
-        for (int i = 0; i < strictnessPositions.size(); i++) {
-            List<K> items = new ArrayList<>();
-            for (int j = 0; j < arity; j++) {
-                if (kompileOptions.strict()) {
-                    // Preserve sort information of the production
-                    items.add(cast(production.nonterminal(j).sort(), KVariable("K" + j)));
-                } else {
-                    items.add(KVariable("K" + j));
-                }
-            }
-            int strictnessPosition = strictnessPositions.get(i) - 1;
-            if (kompileOptions.strict()) {
-                // Preserve sort information of the production
-                items.set(strictnessPosition, cast(production.nonterminal(strictnessPosition).sort(), KVariable("HOLE")));
-            } else {
-                items.set(strictnessPosition, cast(Sorts.KItem(), KVariable("HOLE")));
-            }
-
-            // is seqstrict the elements before the argument should be KResult
-            Optional<KApply> sideCondition = strictnessPositions.subList(0, i).stream().map(j -> KApply(KLabel("isKResult"), KVariable("K" + (j - 1)))).reduce(BooleanUtils::and);
-            K requires;
-            if (!sideCondition.isPresent() || !sequential) {
-                requires = BooleanUtils.TRUE;
-            } else {
-                requires = sideCondition.get();
-            }
-            K here = KApply(production.klabel().get(), KList(items));
-            for (ContextAlias alias : aliases) {
-                K body = new TransformK() {
-                    @Override
-                    public K apply(KVariable var) {
-                      if (var.name().equals("HERE")) {
-                        return here;
-                      }
-                      return var;
-                    }
-                }.apply(alias.body());
-                Context ctx = Context(body, BooleanUtils.and(requires, alias.requires()), production.att().addAll(alias.att()).remove("label"));
-                sentences.add(ctx);
-            }
-        }
         if (production.att().contains("hybrid")) {
-            List<K> items = new ArrayList<>();
-            for (int j = 0; j < arity; j++) {
-                if (kompileOptions.strict()) {
-                    // Preserve sort information of the production
-                    items.add(cast(production.nonterminal(j).sort(), KVariable("K" + j)));
-                } else {
-                    items.add(KVariable("K" + j));
-                }
-            }
-            K term = KApply(production.klabel().get(), KList(items));
-            Optional<KApply> sideCondition = strictnessPositions.stream().map(j -> KApply(KLabel("isKResult"), KVariable("K" + (j - 1)))).reduce(BooleanUtils::and);
-            K requires;
-            if (!sideCondition.isPresent()) {
-                requires = BooleanUtils.TRUE;
+            List<KLabel> results = new ArrayList<>();
+            if (!production.att().get("hybrid").equals("")) {
+              String[] sorts = StringUtil.splitOneDimensionalAtt(production.att().get("hybrid"));
+              for (String sort : sorts) {
+                results.add(KLabel("is" + sort));
+              }
             } else {
-                requires = sideCondition.get();
+              results.add(KLabel("isKResult"));
             }
-            Rule hybrid = Rule(KRewrite(KApply(KLabel("isKResult"), term), BooleanUtils.TRUE), requires, BooleanUtils.TRUE);
-            sentences.add(hybrid);
+            for (KLabel result : results) {
+                List<K> items = new ArrayList<>();
+                for (int j = 0; j < arity; j++) {
+                    if (kompileOptions.strict()) {
+                        // Preserve sort information of the production
+                        items.add(cast(production.nonterminal(j).sort(), KVariable("K" + j)));
+                    } else {
+                        items.add(KVariable("K" + j));
+                    }
+                }
+                K term = KApply(production.klabel().get(), KList(items));
+                Optional<KApply> sideCondition = allPositions.stream().map(j -> KApply(result, KVariable("K" + (j - 1)))).reduce(BooleanUtils::and);
+                K requires;
+                if (!sideCondition.isPresent()) {
+                    requires = BooleanUtils.TRUE;
+                } else {
+                    requires = sideCondition.get();
+                }
+                Rule hybrid = Rule(KRewrite(KApply(result, term), BooleanUtils.TRUE), requires, BooleanUtils.TRUE);
+                sentences.add(hybrid);
+            }
         }
         return sentences;
     }

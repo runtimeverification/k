@@ -1,19 +1,20 @@
 1 100 100 1 2 2
-
-==========
-Statistics
-==========
-
-Objects created:
-   Main |-> 1
-   C2 |-> 1
-   C1 |-> 1
-
-Methods invoked:
-   C1.m3 |-> 2
-   C1.m1 |-> 2
-   C1.C1 |-> 1
-   C1.m2 |-> 2
-   C2.m2 |-> 2
-   Main.Main |-> 1
-   C2.C2 |-> 1
+<generatedTop>
+  .TCell
+  <statistics>
+    <object-count>
+      C1 |-> 1
+      C2 |-> 1
+      Main |-> 1
+    </object-count>
+    <method-count>
+      C1 . C1 |-> 1
+      C1 . m1 |-> 2
+      C1 . m2 |-> 2
+      C1 . m3 |-> 2
+      C2 . C2 |-> 1
+      C2 . m2 |-> 2
+      Main . Main |-> 1
+    </method-count>
+  </statistics>
+</generatedTop>

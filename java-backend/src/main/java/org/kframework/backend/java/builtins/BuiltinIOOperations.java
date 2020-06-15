@@ -109,8 +109,7 @@ public class BuiltinIOOperations {
     }
 
     /**
-     * Executes the given command line with `sh -c 'cmd'` on unix
-     * and `cmd /c 'cmd'` on windows.
+     * Executes the given command line with `sh -c 'cmd'`
      * @param term
      * @param termContext
      * @return a #systemResult term containing the exit code, stdout:String, stderr:Stringh
@@ -118,13 +117,8 @@ public class BuiltinIOOperations {
     public static Term system(StringToken term, TermContext termContext) {
         Map<String, String> environment = termContext.global().files.getEnv();
         String[] args = new String[3];
-        if (OS.current() == OS.WINDOWS) {
-            args[0] = "cmd";
-            args[1] = "/c";
-        } else {
-            args[0] = "sh";
-            args[1] = "-c";
-        }
+        args[0] = "sh";
+        args[1] = "-c";
         args[2] = term.stringValue();
         ProcessOutput output = RunProcess.execute(environment, termContext.global().files.getProcessBuilder(), args);
 

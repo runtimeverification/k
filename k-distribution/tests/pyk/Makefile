@@ -1,6 +1,6 @@
 K_RELEASE := $(abspath ../../target/release/k)
 K_BIN     := $(K_RELEASE)/bin
-K_LIB     := $(K_RELEASE)/lib
+K_LIB     := $(K_RELEASE)/lib/kframework
 
 KOMPILE = $(K_BIN)/kompile
 KAST    = $(K_BIN)/kast
@@ -12,7 +12,8 @@ PYTHONPATH := $(K_LIB)
 export PYTHONPATH
 
 .PHONY: all clean pyk                                 \
-        test test-defn test-defn-kast test-defn-prove
+        test test-defn test-defn-kast test-defn-prove \
+        test-kpyk test-kpyk-coverage-log
 
 all: test
 
@@ -78,9 +79,14 @@ $(defn_tests)/proof-tests/%-spec.json.prove: $(defn_tests)/proof-tests/%-spec.k 
 
 ## kpyk runner tests
 
+sum_to_n_coverage := kpyk-tests/sum-to-n.imp.coverage
+
 test-kpyk: test-kpyk-coverage-log
 
-test-kpyk-coverage-log: $(llvm_imp_kompiled)
+$(sum_to_n_coverage): $(llvm_imp_kompiled) kpyk-tests/sum-to-n.imp
 	rm -rf $(llvm_dir)/imp-kompiled/*_coverage.txt
 	$(KRUN) --directory $(llvm_dir) kpyk-tests/sum-to-n.imp
-	$(KPYK) coverage-log --coverage-file $(llvm_dir)/imp-kompiled/*_coverage.txt --definition $(llvm_dir)/imp-kompiled
+	mv $(llvm_dir)/imp-kompiled/*_coverage.txt $@
+
+test-kpyk-coverage-log: $(sum_to_n_coverage)
+	$(KPYK) $(llvm_dir)/imp-kompiled coverage $(sum_to_n_coverage)

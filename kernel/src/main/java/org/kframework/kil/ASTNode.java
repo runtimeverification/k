@@ -1,19 +1,13 @@
 // Copyright (c) 2014-2019 K Team. All Rights Reserved.
 package org.kframework.kil;
 
-import com.google.common.reflect.TypeToken;
-import com.google.inject.name.Names;
+import org.kframework.attributes.Att;
 import org.kframework.attributes.HasLocation;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
-import org.kframework.kil.Attribute.Key;
-import org.kframework.kil.loader.Constants;
-import org.w3c.dom.Element;
 
 import java.io.Serializable;
-import java.lang.annotation.Annotation;
 import java.util.Optional;
-import java.util.Scanner;
 
 /**
  * Base class for K AST. Useful for Visitors and Transformers.
@@ -26,60 +20,10 @@ public abstract class ASTNode implements Serializable, HasLocation {
     /**
      * Used on any node for metadata also used on {@link Rule} and {@link Production} for the attribute list.
      */
-    private Attributes attributes;
+    private Att att = Att.empty();
 
     private Source source;
     private Location location;
-
-    /**
-     * Initializes an ASTNode from XML describing the parse tree
-     *
-     * @param elem
-     *            The XML element describing the ASTNode
-     */
-    public ASTNode(Element elem) {
-        this(getElementLocation(elem), getElementSource(elem));
-    }
-
-    /**
-     * Retrieves the location from an XML element
-     *
-     * @param elem
-     * @return the location stored in XML or Constants.GENERATED_LOCATION if no location found.
-     */
-    public static Location getElementLocation(Element elem) {
-        if (elem != null && elem.hasAttribute(Constants.LOC_loc_ATTR)) {
-            Scanner scanner = new Scanner(elem.getAttribute(Constants.LOC_loc_ATTR)).useDelimiter("[,)]").skip("\\(");
-            int beginLine = scanner.nextInt();
-            int beginCol = scanner.nextInt();
-            int endLine = scanner.nextInt();
-            int endCol = scanner.nextInt();
-            return new Location(beginLine, beginCol, endLine, endCol);
-        }
-        else
-            return null;
-    }
-
-    /**
-     * Retrieves the file name from an XML element
-     *
-     * @param elem
-     * @return the file name stored in XML or Constants.GENERATED_FILENAME if no filename found.
-     */
-    public static Source getElementSource(Element elem) {
-        return (Source) elem.getUserData(Constants.SOURCE_ATTR);
-    }
-
-    /**
-     * Copy constructor
-     *
-     * @param astNode
-     */
-    public ASTNode(ASTNode astNode) {
-        copyAttributesFrom(astNode);
-        location = astNode.location;
-        source = astNode.source;
-    }
 
     /**
      * Default constructor (generated at runtime)
@@ -149,47 +93,7 @@ public abstract class ASTNode implements Serializable, HasLocation {
      * @param val
      */
     public void addAttribute(String key, String val) {
-        addAttribute(Attribute.of(key, val));
-    }
-
-    public <T> void addAttribute(Key<T> key, T val) {
-        addAttribute(new Attribute<>(key, val));
-    }
-
-    public <T> void addAttribute(Class<T> key, T val) {
-        addAttribute(Key.get(key), val);
-    }
-
-    public <T> void addAttribute(TypeToken<T> key, T val) {
-        addAttribute(Key.get(key), val);
-    }
-
-    public <T> void addAttribute(TypeToken<T> key, Annotation annotation, T val) {
-        addAttribute(Key.get(key, annotation), val);
-    }
-
-    public <T> void addAttribute(TypeToken<T> key, String annotation, T val) {
-        addAttribute(Key.get(key, Names.named(annotation)), val);
-    }
-
-    public <T> void addAttribute(Class<T> key, Annotation annotation, T val) {
-        addAttribute(Key.get(key, annotation), val);
-    }
-
-    public <T> void addAttribute(Class<T> key, String annotation, T val) {
-        addAttribute(Key.get(key, Names.named(annotation)), val);
-    }
-
-    /**
-     * Appends an attribute to the list of attributes.
-     *
-     * @param attr
-     */
-    public void addAttribute(Attribute<?> attr) {
-        if (attributes == null)
-            attributes = new Attributes();
-
-        attributes.add(attr);
+        att = att.add(key, val);
     }
 
     /**
@@ -197,23 +101,9 @@ public abstract class ASTNode implements Serializable, HasLocation {
      * @return whether the attribute key occurs in the list of attributes.
      */
     public boolean containsAttribute(String key) {
-        if (attributes == null)
-            return false;
-
-        return attributes.containsKey(Attribute.keyOf(key));
+        return att.contains(key);
     }
 
-
-    /**
-     * @param key
-     * @return whether the attribute key occurs in the list of attributes.
-     */
-    public boolean containsAttribute(Key<?> key) {
-        if (attributes == null)
-            return false;
-
-        return attributes.containsKey(key);
-    }
 
     /**
      * Retrieves the attribute by key from the list of attributes
@@ -222,97 +112,23 @@ public abstract class ASTNode implements Serializable, HasLocation {
      * @return a value for key in the list of attributes or the default value.
      */
     public String getAttribute(String key) {
-        return getAttribute(Attribute.keyOf(key));
-    }
-
-    /**
-     * Retrieves the attribute by key from the list of attributes
-     *
-     * @param key
-     * @return a value for key in the list of attributes or the default value.
-     */
-    public <T> T getAttribute(Key<T> key) {
-        if (attributes == null)
-            return null;
-        final Attribute<T> value = (Attribute<T>) attributes.get(key);
-        if (value == null)
-            return null;
-        return value.getValue();
-    }
-
-    public <T> T getAttribute(Class<T> cls) {
-        return getAttribute(Key.get(cls));
-    }
-
-    public <T> T getAttribute(Class<T> cls, Annotation annotation) {
-        return getAttribute(Key.get(cls, annotation));
-    }
-
-    public <T> T getAttribute(Class<T> cls, String annotation) {
-        return getAttribute(Key.get(cls, Names.named(annotation)));
-    }
-
-    public <T> T getAttribute(TypeToken<T> type) {
-        return getAttribute(Key.get(type));
-    }
-
-    public <T> T getAttribute(TypeToken<T> type, Annotation annotation) {
-        return getAttribute(Key.get(type, annotation));
-    }
-
-    public <T> T getAttribute(TypeToken<T> type, String annotation) {
-        return getAttribute(Key.get(type, Names.named(annotation)));
-    }
-
-    /**
-     * Updates the value of an attribute in the list of attributes.
-     *get
-     * @param key
-     * @param val
-     */
-    public void putAttribute(String key, String val) {
-        addAttribute(key, val);
-    }
-
-    public void removeAttribute(String key) {
-        getAttributes().remove(Attribute.keyOf(key));
+        return att.getOptional(key).orElse(null);
     }
 
     /**
      * @return the attributes object associated to this ASTNode. Constructs one if it is
      * not already created.
      */
-    public Attributes getAttributes() {
-        if (attributes == null) {
-            attributes = new Attributes();
-        }
-        return attributes;
+    public Att getAttributes() {
+        return att;
     }
 
-    /**
-     * Copies attributes from another node into this node.
-     * Use this in preference to {@link ASTNode#getAttributes} where appropriate because
-     * the latter will create a new object if no attributes exist.
-     * @param node The ASTNode to copy all attributes from.
-     */
-    public void copyAttributesFrom(ASTNode node) {
-        if (node.attributes == null)
-            return;
-        this.getAttributes().putAll(node.attributes);
+    public abstract void toString(StringBuilder sb);
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        toString(sb);
+        return sb.toString();
     }
-
-    /**
-     * Sets the attributes object associated to this ASTNode.
-     *
-     * @param attrs
-     */
-    public void setAttributes(Attributes attrs) {
-        attributes = attrs;
-    }
-
-    /**
-     * @return a copy of the ASTNode containing the same fields.
-     */
-    public abstract ASTNode shallowCopy();
-
 }

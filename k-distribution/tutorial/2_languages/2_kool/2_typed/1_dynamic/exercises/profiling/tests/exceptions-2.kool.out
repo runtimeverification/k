@@ -1,16 +1,17 @@
 Exception 5 thrown!
 5
-
-==========
-Statistics
-==========
-
-Objects created:
-   Main |-> 1
-   Exception |-> 1
-
-Methods invoked:
-   Main.Main |-> 1
-   Exception.Exception |-> 1
-   Main.foo |-> 1
-   Exception.get |-> 1
+<generatedTop>
+  .TCell
+  <statistics>
+    <object-count>
+      Exception |-> 1
+      Main |-> 1
+    </object-count>
+    <method-count>
+      Exception . Exception |-> 1
+      Exception . get |-> 1
+      Main . Main |-> 1
+      Main . foo |-> 1
+    </method-count>
+  </statistics>
+</generatedTop>

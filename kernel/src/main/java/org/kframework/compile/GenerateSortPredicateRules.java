@@ -3,16 +3,14 @@ package org.kframework.compile;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.kframework.Collections;
+import org.kframework.attributes.Att;
 import org.kframework.builtin.BooleanUtils;
-import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
-import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
-import org.kframework.kil.Attribute;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
@@ -69,7 +67,7 @@ public class GenerateSortPredicateRules {
         List<Sentence> res = new ArrayList<>();
         Production prod = Production(KLabel("is" + sort.toString()), Sorts.Bool(),
                 Seq(Terminal("is" + sort.toString()), Terminal("("), NonTerminal(Sorts.K()), Terminal(")")),
-                Att().add(Attribute.FUNCTION_KEY).add(Attribute.PREDICATE_KEY, Sort.class, sort));
+                Att().add(Att.FUNCTION()).add(Att.PREDICATE(), Sort.class, sort));
         res.add(prod);
         java.util.Set<Sort> nonProtectingSubsorts = new HashSet<>();
         nonProtectingSubsorts.add(sort);
@@ -104,7 +102,7 @@ public class GenerateSortPredicateRules {
             }
         });
         stream(mod.productions()).filter(p -> mod.subsorts().lessThanEq(p.sort(), sort)).filter(p -> nonProtectingSubsorts.contains(p.sort())).distinct().forEach(p -> {
-            if (p.klabel().isDefined() && !p.att().contains(Attribute.FUNCTION_KEY)) {
+            if (p.klabel().isDefined() && !p.att().contains(Att.FUNCTION())) {
                 List<K> klist = new ArrayList<>();
                 List<K> side = new ArrayList<>();
                 int i = 0;
@@ -135,7 +133,7 @@ public class GenerateSortPredicateRules {
                 res.addAll(predicateRules.stream().filter(r -> isPredicateFor(r, s)).filter(this::isTruePredicate).map(r -> promotePredicate(r, sort)).collect(Collectors.toList()));
             }
         });
-        res.add(Rule(KRewrite(KApply(KLabel("is" + sort.toString()), KVariable("K")), BooleanUtils.FALSE), BooleanUtils.TRUE, BooleanUtils.TRUE, Att().add("owise")));
+        res.add(Rule(KRewrite(KApply(KLabel("is" + sort.toString()), KVariable("K")), BooleanUtils.FALSE), BooleanUtils.TRUE, BooleanUtils.TRUE, Att().add(Att.OWISE())));
         return res.stream();
     }
 
@@ -145,7 +143,7 @@ public class GenerateSortPredicateRules {
         } else {
             List<Sentence> res = new ArrayList<>();
             res.add(Rule(KRewrite(KApply(KLabel("is" + sort.toString()), KVariable(sort.name(), Att().add(Sort.class, sort))), BooleanUtils.TRUE), BooleanUtils.TRUE, BooleanUtils.TRUE));
-            res.add(Rule(KRewrite(KApply(KLabel("is" + sort.toString()), KVariable("K")), BooleanUtils.FALSE), BooleanUtils.TRUE, BooleanUtils.TRUE, Att().add("owise")));
+            res.add(Rule(KRewrite(KApply(KLabel("is" + sort.toString()), KVariable("K")), BooleanUtils.FALSE), BooleanUtils.TRUE, BooleanUtils.TRUE, Att().add(Att.OWISE())));
             return res.stream();
         }
     }
@@ -168,12 +166,12 @@ public class GenerateSortPredicateRules {
         Optional<Sort> sort;
         if (r.body() instanceof KApply) {
             topKLabel = ((KApply) r.body()).klabel();
-            sort = mod.attributesFor().apply(topKLabel).getOptional(Attribute.PREDICATE_KEY, Sort.class);
+            sort = mod.attributesFor().apply(topKLabel).getOptional(Att.PREDICATE(), Sort.class);
         } else if (r.body() instanceof KRewrite) {
             KRewrite rw = (KRewrite) r.body();
             if (rw.left() instanceof KApply) {
                 topKLabel = ((KApply) rw.left()).klabel();
-                sort = mod.attributesFor().apply(topKLabel).getOptional(Attribute.PREDICATE_KEY, Sort.class);
+                sort = mod.attributesFor().apply(topKLabel).getOptional(Att.PREDICATE(), Sort.class);
             } else {
                 sort = Optional.empty();
             }

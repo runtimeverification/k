@@ -15,8 +15,6 @@ import org.kframework.definition.ProductionItem;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.definition.SyntaxSort;
-import org.kframework.kil.Attribute;
-import org.kframework.kil.loader.Constants;
 import org.kframework.kore.*;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
@@ -103,7 +101,7 @@ public class GenerateSentencesFromConfigDecl {
 
                                 boolean isLeafCell = childResult._4();
                                 Tuple4<Set<Sentence>, Sort, K, Boolean> myResult = computeSentencesOfWellFormedCell(isLeafCell, isStream, kore, multiplicity, cfgAtt, m, cellName, cellProperties,
-                                        childResult._2(), childResult._3(), ensures, hasConfigOrRegularVariable(cellContents));
+                                        childResult._2(), childResult._3(), ensures, hasConfigOrRegularVariable(cellContents, m));
                                 return Tuple4.apply((Set<Sentence>)childResult._1().$bar(myResult._1()), Lists.newArrayList(myResult._2()), myResult._3(), false);
                             }
                         }
@@ -121,7 +119,7 @@ public class GenerateSentencesFromConfigDecl {
                             Option<Set<Production>> initializerProduction = m.productionsFor().get(KLabel(getInitLabel(sort)));
                             if (initializerProduction.isDefined()) {
                                 Set<Production> realProds = stream(initializerProduction.get())
-                                        .filter(p -> !p.att().contains(Constants.RECORD_PRD, Production.class))
+                                        .filter(p -> !p.att().contains(Att.RECORD_PRD(), Production.class))
                                         .collect(Collections.toSet());
                                 if (realProds.size() == 1) { // should be only a single initializer
                                     if (realProds.head().items().size() == 1) {
@@ -136,7 +134,7 @@ public class GenerateSentencesFromConfigDecl {
                         }
                     }
                 }
-                throw KEMException.compilerError("Malformed io cell in configuration declaration.", term);
+                throw KEMException.compilerError("Malformed external cell in configuration declaration.", term);
             } else if (KLabels.CELLS.equals(kapp.klabel())) {
                 //is a cell bag, and thus represents the multiple children of its parent cell
                 if (ensures != null) {
@@ -188,14 +186,21 @@ public class GenerateSentencesFromConfigDecl {
      * Returns true if the specified term has a configuration or regular variable
      * @param contents
      */
-    private static boolean hasConfigOrRegularVariable(K contents) {
-        FindConfigOrRegularVar visitor = new FindConfigOrRegularVar();
+    private static boolean hasConfigOrRegularVariable(K contents, Module m) {
+        FindConfigOrRegularVar visitor = new FindConfigOrRegularVar(m);
         visitor.apply(contents);
         return visitor.hasConfigVar;
     }
 
     private static class FindConfigOrRegularVar extends VisitK {
+
+        private final Module m;
         boolean hasConfigVar;
+
+        public FindConfigOrRegularVar(Module m) {
+            this.m = m;
+        }
+
         @Override
         public void apply(KToken k) {
             if (k.sort().equals(Sorts.KConfigVar())) {
@@ -204,11 +209,31 @@ public class GenerateSentencesFromConfigDecl {
         }
 
         @Override
-        public void apply(KApply k) {
-            if (k.klabel().name().equals("#externalCell")) {
-                hasConfigVar = true;
+        public void apply(KApply kapp) {
+            if (kapp.klabel().name().equals("#externalCell")) {
+                if (kapp.klist().size() == 1) {
+                    K startLabel = kapp.klist().items().get(0);
+                    if (startLabel instanceof KToken) {
+                        KToken label = (KToken) startLabel;
+                        if (label.sort().equals(Sort("#CellName"))) {
+                            String cellName = label.s();
+                            Sort sort = Sort(getSortOfCell(cellName));
+                            Option<Set<Production>> initializerProduction = m.productionsFor().get(KLabel(getInitLabel(sort)));
+                            if (initializerProduction.isDefined()) {
+                                Set<Production> realProds = stream(initializerProduction.get())
+                                        .filter(p -> !p.att().contains(Att.RECORD_PRD(), Production.class))
+                                        .collect(Collections.toSet());
+                                if (realProds.size() == 1) { // should be only a single initializer
+                                    if (realProds.head().items().size() == 4) {
+                                      hasConfigVar = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
-            super.apply(k);
+            super.apply(kapp);
         }
 
         @Override
@@ -377,14 +402,14 @@ public class GenerateSentencesFromConfigDecl {
                     sentences.add(Production(Seq(), childOptSort, List(NonTerminal(childSort))));
                     if (!m.definedKLabels().contains(KLabel("no"+childSort.toString()))) {
                         sentences.add(Production(KLabel("no"+childSort.toString()), childOptSort, List(Terminal("no"+childSort.toString())),
-                                Att().add(Attribute.CELL_OPT_ABSENT_KEY,Sort.class,childSort)));
+                                Att().add(Att.CELL_OPT_ABSENT(),Sort.class,childSort)));
                     }
                 }
             }
             fragmentItems.add(Terminal("</"+cellName+">-fragment"));
             if (!m.definedKLabels().contains(KLabel("<" + cellName + ">-fragment"))) {
                 sentences.add(Production(KLabel("<" + cellName + ">-fragment"), fragmentSort, immutable(fragmentItems),
-                        Att().add(Attribute.CELL_FRAGMENT_KEY, Sort.class, Sort(sortName))));
+                        Att().add(Att.CELL_FRAGMENT(), Sort.class, Sort(sortName))));
             }
         }
 
@@ -411,24 +436,24 @@ public class GenerateSentencesFromConfigDecl {
             String type = cellProperties.<String>getOptional("type").orElse("Bag");
             Sort bagSort = Sort(sortName + type);
             Att bagAtt = Att()
-                    .add(Attribute.ASSOCIATIVE_KEY, "")
+                    .add(Att.ASSOC(), "")
                     .add("cellCollection")
                     .add("element", bagSort.name() + "Item")
                     .add("wrapElement", "<" + cellName + ">")
-                    .add(Attribute.UNIT_KEY, "." + bagSort.name())
-                    .add(Attribute.HOOK_KEY, type.toUpperCase() + ".concat")
+                    .add(Att.UNIT(), "." + bagSort.name())
+                    .add(Att.HOOK(), type.toUpperCase() + ".concat")
                     .add("avoid") // needed to ensure cell collections are parsed as Bag instead of CellBag
-                    .add(Attribute.FUNCTION_KEY);
+                    .add(Att.FUNCTION());
             String unitHook = type.toUpperCase() + ".unit", elementHook = type.toUpperCase() + ".element";
             switch(type) {
             case "Set":
-                bagAtt = bagAtt.add(Attribute.IDEMPOTENT_KEY, "");
+                bagAtt = bagAtt.add(Att.IDEM(), "");
                 // fall through
             case "Map":
-                bagAtt = bagAtt.add(Attribute.COMMUTATIVE_KEY, "");
+                bagAtt = bagAtt.add(Att.COMM(), "");
                 break;
             case "Bag":
-                bagAtt = bagAtt.add(Attribute.COMMUTATIVE_KEY, "").add(Att.bag() + "");
+                bagAtt = bagAtt.add(Att.COMM(), "").add(Att.BAG() + "");
                 break;
             case "List":
                 break;
@@ -446,15 +471,15 @@ public class GenerateSentencesFromConfigDecl {
                         NonTerminal(childSorts.get(0)),
                         Terminal(","),
                         NonTerminal(sort),
-                        Terminal(")")), Att().add(Attribute.HOOK_KEY, elementHook).add(Attribute.FUNCTION_KEY).add("format", "%5"));
+                        Terminal(")")), Att().add(Att.HOOK(), elementHook).add(Att.FUNCTION()).add("format", "%5"));
             } else {
                 bagElement = Production(KLabel(bagSort.name() + "Item"), bagSort, Seq(
                         Terminal(bagSort.name() + "Item"),
                         Terminal("("),
                         NonTerminal(sort),
-                        Terminal(")")), Att().add(Attribute.HOOK_KEY, elementHook).add(Attribute.FUNCTION_KEY).add("format", "%3"));
+                        Terminal(")")), Att().add(Att.HOOK(), elementHook).add(Att.FUNCTION()).add("format", "%3"));
             }
-            Sentence bagUnit = Production(KLabel("." + bagSort.name()), bagSort, Seq(Terminal("." + bagSort.name())), Att().add(Attribute.HOOK_KEY, unitHook).add(Attribute.FUNCTION_KEY));
+            Sentence bagUnit = Production(KLabel("." + bagSort.name()), bagSort, Seq(Terminal("." + bagSort.name())), Att().add(Att.HOOK(), unitHook).add(Att.FUNCTION()));
             Sentence bag = Production(KLabel("_" + bagSort + "_"), bagSort, Seq(NonTerminal(bagSort), NonTerminal(bagSort)),
                     bagAtt);
             sentences.add(sortDecl);
@@ -462,6 +487,9 @@ public class GenerateSentencesFromConfigDecl {
             sentences.add(bagElement);
             sentences.add(bagUnit);
             sentences.add(bag);
+            if (type.equals("Map")) {
+                sentences.add(Production(KLabel(bagSort.name() + ":in_keys"), Sorts.Bool(), Seq(NonTerminal(childSorts.get(0)), Terminal("in_keys"), Terminal("("), NonTerminal(bagSort), Terminal(")")), Att().add(Att.HOOK(), "MAP.in_keys").add(Att.FUNCTION()).add(Att.FUNCTIONAL())));
+            }
             // rule initCell => .CellBag
             // -or-
             // rule initCell(Init) => <cell> Context[$var] </cell>
@@ -471,9 +499,9 @@ public class GenerateSentencesFromConfigDecl {
             // syntax Cell ::= ".Cell"
             Production cellUnit = Production(KLabel("." + sortName), sort, Seq(Terminal("." + sortName)));
             sentences.add(cellUnit);
-            // add UNIT_KEY attribute to cell production.
+            // add UNIT attribute to cell production.
             if(!m.definedKLabels().contains(KLabel(klabel))) {
-                Production cellProduction = Production(KLabel(klabel), sort, immutable(items), att.add(Attribute.UNIT_KEY, cellUnit.klabel().get().name()));
+                Production cellProduction = Production(KLabel(klabel), sort, immutable(items), att.add(Att.UNIT(), cellUnit.klabel().get().name()));
                 sentences.add(cellProduction);
             }
             // rule initCell => .CellBag

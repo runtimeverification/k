@@ -1,5 +1,7 @@
 package org.kframework
 
+import org.kframework.utils.errorsystem.KEMException
+
 import org.junit.Test
 import org.junit.Assert._
 
@@ -20,23 +22,19 @@ class POSetTest {
     assertFalse(b1 < b4)
   }
 
-  @Test(expected = classOf[CircularityException[_]])
+  @Test(expected = classOf[KEMException])
   def circularityTestFail() {
     POSet(b1 -> b2, b2 -> b1)
   }
 
-  @Test(expected = classOf[CircularityException[_]])
+  @Test(expected = classOf[KEMException])
   def circularityTestFailId() {
     POSet(b1 -> b1)
   }
 
-  @Test
+  @Test(expected = classOf[KEMException])
   def circularityTestFailThree() {
-    try {
-      POSet(b1 -> b2, b2 -> b3, b3 -> b2)
-    } catch {
-      case CircularityException(Seq(`b3`, `b2`, `b3`)) =>
-    }
+    POSet(b1 -> b2, b2 -> b3, b3 -> b2)
   }
 
   @Test def lub() {

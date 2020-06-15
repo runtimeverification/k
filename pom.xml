@@ -77,6 +77,7 @@
     <skipCheckstyleOnWindows>true</skipCheckstyleOnWindows>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <scala.version>2.12.4</scala.version>
+    <project.build.type>FastBuild</project.build.type>
   </properties>
 
   <dependencies>
@@ -363,42 +364,6 @@
         <native.exe.extension />
 	<native.script.extension />
 	<prefix.path>/usr/local/opt/llvm/;/usr/local/opt/flex;/usr/local/opt/libffi</prefix.path>
-      </properties>
-    </profile>
-    <profile>
-      <id>windows64</id>
-      <activation>
-        <os>
-          <family>windows</family>
-          <arch>amd64</arch>
-        </os>
-      </activation>
-      <properties>
-        <native.arch.classifier>64</native.arch.classifier>
-        <native.classifier>windows64</native.classifier>
-        <native.os.classifier>windows</native.os.classifier>
-        <native.exe.type>exe</native.exe.type>
-        <native.exe.extension>.exe</native.exe.extension>
-        <native.script.extension>.bat</native.script.extension>
-        <checkstyle.skip>${skipCheckstyleOnWindows}</checkstyle.skip>
-      </properties>
-    </profile>
-    <profile>
-      <id>windows32</id>
-      <activation>
-        <os>
-          <family>windows</family>
-          <arch>x86</arch>
-        </os>
-      </activation>
-      <properties>
-        <native.arch.classifier>32</native.arch.classifier>
-        <native.classifier>windows32</native.classifier>
-        <native.os.classifier>windows</native.os.classifier>
-        <native.exe.type>exe</native.exe.type>
-        <native.exe.extension>.exe</native.exe.extension>
-        <native.script.extension>.bat</native.script.extension>
-        <checkstyle.skip>${skipCheckstyleOnWindows}</checkstyle.skip>
       </properties>
     </profile>
   </profiles>

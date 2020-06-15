@@ -12,14 +12,13 @@ import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.definition.Production;
 import org.kframework.definition.Sentence;
-import org.kframework.kil.Attribute;
 import org.kframework.kompile.Kompile;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.Sort;
 import org.kframework.main.GlobalOptions;
-import org.kframework.parser.concrete2kore.ParserUtils;
-import org.kframework.parser.concrete2kore.generator.RuleGrammarGenerator;
+import org.kframework.parser.ParserUtils;
+import org.kframework.parser.inner.generator.RuleGrammarGenerator;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
@@ -43,7 +42,7 @@ public class GenerateSentencesFromConfigDeclTest {
     public void setUp() {
         String definitionText;
         FileUtil files = FileUtil.testFileUtil();
-        ParserUtils parser = new ParserUtils(files::resolveWorkingDirectory, new KExceptionManager(new GlobalOptions()));
+        ParserUtils parser = new ParserUtils(files, new KExceptionManager(new GlobalOptions()));
         File definitionFile = new File(Kompile.BUILTIN_DIRECTORY.toString() + "/kast.k");
         definitionText = files.loadFromWorkingDirectory(definitionFile.getPath());
 
@@ -52,7 +51,7 @@ public class GenerateSentencesFromConfigDeclTest {
                         definitionFile,
                         definitionFile.getParentFile(),
                         Lists.newArrayList(Kompile.BUILTIN_DIRECTORY),
-                        false, false);
+                        false, false, false, false);
     }
 
     @Test
@@ -129,14 +128,14 @@ public class GenerateSentencesFromConfigDeclTest {
                         BooleanUtils.TRUE, BooleanUtils.TRUE, initializerAtts),
                 Production(KLabel("<threads>-fragment"), Sort("ThreadsCellFragment"),
                         Seq(Terminal("<threads>-fragment"),NonTerminal(Sort("ThreadCellBag")),Terminal("</threads>-fragment")),
-                        Att().add(Attribute.CELL_FRAGMENT_KEY,Sort.class,Sort("ThreadsCell"))),
+                        Att().add(Att.CELL_FRAGMENT(),Sort.class,Sort("ThreadsCell"))),
                 Production(KLabel("<thread>-fragment"), Sort("ThreadCellFragment"),
                         Seq(Terminal("<thread>-fragment"),NonTerminal(Sort("KCellOpt")),NonTerminal(Sort("OptCellOpt")),Terminal("</thread>-fragment")),
-                        Att().add(Attribute.CELL_FRAGMENT_KEY,Sort.class,Sort("ThreadCell"))),
+                        Att().add(Att.CELL_FRAGMENT(),Sort.class,Sort("ThreadCell"))),
                 Production(Seq(), Sort("OptCellOpt"), Seq(NonTerminal(Sort("OptCell")))),
-                Production(KLabel("noOptCell"), Sort("OptCellOpt"), Seq(Terminal("noOptCell")),Att().add(Attribute.CELL_OPT_ABSENT_KEY, Sort.class, Sort("OptCell"))),
+                Production(KLabel("noOptCell"), Sort("OptCellOpt"), Seq(Terminal("noOptCell")),Att().add(Att.CELL_OPT_ABSENT(), Sort.class, Sort("OptCell"))),
                 Production(Seq(), Sort("KCellOpt"), Seq(NonTerminal(Sort("KCell")))),
-                Production(KLabel("noKCell"), Sort("KCellOpt"), Seq(Terminal("noKCell")),Att().add(Attribute.CELL_OPT_ABSENT_KEY, Sort.class, Sort("KCell")))
+                Production(KLabel("noKCell"), Sort("KCellOpt"), Seq(Terminal("noKCell")),Att().add(Att.CELL_OPT_ABSENT(), Sort.class, Sort("KCell")))
             );
 
         assertEquals("Produced unexpected productions", Set(), gen.$amp$tilde(reference));

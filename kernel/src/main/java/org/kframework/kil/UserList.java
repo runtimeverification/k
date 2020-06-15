@@ -27,19 +27,13 @@ public class UserList extends ProductionItem {
         this.listType = listType;
     }
 
-    public UserList(UserList userList) {
-        super(userList);
-        sort = userList.sort;
-        separator = userList.separator.trim();
-        listType = userList.listType;
-    }
-
     @Override
-    public String toString() {
-        if (listType.equals(ZERO_OR_MORE))
-            return "List{" + sort + "," + StringUtil.enquoteCString(separator) + "} ";
-        else
-            return "NeList{" + sort + "," + StringUtil.enquoteCString(separator) + "} ";
+    public void toString(StringBuilder sb) {
+        if (listType.equals(ZERO_OR_MORE)) {
+            sb.append("List{").append(sort).append(",").append(StringUtil.enquoteCString(separator)).append("}");
+        } else {
+            sb.append("NeList{").append(sort).append(",").append(StringUtil.enquoteCString(separator)).append("}");
+        }
     }
 
     public Sort getSort() {
@@ -79,11 +73,6 @@ public class UserList extends ProductionItem {
     @Override
     public int hashCode() {
         return this.separator.hashCode() + this.sort.hashCode();
-    }
-
-    @Override
-    public UserList shallowCopy() {
-        return new UserList(this);
     }
 
     public String getListType() {
