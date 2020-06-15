@@ -5,6 +5,3 @@
 [Error] Inner Parser: Parse error: unexpected token '['.
 	Source(nestedFunctionContext.k)
 	Location(14,8,14,9)
-[Warning] Compiler: Could not find main syntax module with name
-NESTEDFUNCTIONCONTEXT-SYNTAX in definition.  Use --syntax-module to specify
-one. Using NESTEDFUNCTIONCONTEXT as default.
