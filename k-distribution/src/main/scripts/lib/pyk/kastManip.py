@@ -305,6 +305,9 @@ def minimizeRule(rule):
         ruleRequires = simplifyBool(mlPredToBool(ruleRequires))
         ruleEnsures  = simplifyBool(mlPredToBool(ruleEnsures))
 
+        ruleRequires = None if ruleRequires == KToken('true', 'Bool') else ruleRequires
+        ruleEnsures  = None if ruleEnsures  == KToken('true', 'Bool') else ruleEnsures
+
     ruleBody = inlineCellMaps(ruleBody)
     ruleBody = removeSemanticCasts(ruleBody)
     ruleBody = uselessVarsToDots(ruleBody, requires = ruleRequires, ensures = ruleEnsures)
