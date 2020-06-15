@@ -193,6 +193,8 @@ def pushDownRewrites(kast):
                 if lhs['items'][-1] == rhs['items'][-1]:
                     lowerRewrite = KRewrite(KSequence(lhs['items'][0:-1]), KSequence(rhs['items'][0:-1]))
                     return KSequence([lowerRewrite, lhs['items'][-1]])
+            if isKSequence(lhs) and len(lhs['items']) > 0 and isKVariable(lhs['items'][-1]) and isKVariable(rhs) and lhs['items'][-1] == rhs:
+                return KSequence([KRewrite(KSequence(lhs['items'][0:-1]), KConstant(klabelEmptyK)), rhs])
         return _kast
     return traverseTopDown(kast, _pushDownRewrites)
 
