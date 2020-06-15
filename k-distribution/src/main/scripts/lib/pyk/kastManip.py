@@ -86,10 +86,10 @@ def rewriteAnywhereWith(rule, pattern):
 def mlPredToBool(k):
     mlPredToBoolRules = [ (KApply('#True', [])  , KToken('true', 'Bool'))
                         , (KApply('#False', []) , KToken('false', 'Bool'))
-                        , (KApply('#And'    , [KVarible('#V1'), KVariable('#V2')]) , KApply('_andBool_' , [KVariable('#V1'), KVariable('#V2')]))
-                        , (KApply('#Or'     , [KVarible('#V1'), KVariable('#V2')]) , KApply('_orBool_'  , [KVariable('#V1'), KVariable('#V2')]))
-                        , (KApply('#Not'    , [KVarible('#V1')])                   , KApply('notBool_'  , [KVariable('#V1')]))
-                        , (KApply('#Equals' , [KVarible('#V1'), KVariable('#V2')]) , KApply('_==K_'     , [KVariable('#V1'), KVariable('#V2')]))
+                        , (KApply('#And'    , [KVariable('#V1'), KVariable('#V2')]) , KApply('_andBool_' , [KVariable('#V1'), KVariable('#V2')]))
+                        , (KApply('#Or'     , [KVariable('#V1'), KVariable('#V2')]) , KApply('_orBool_'  , [KVariable('#V1'), KVariable('#V2')]))
+                        , (KApply('#Not'    , [KVariable('#V1')])                   , KApply('notBool_'  , [KVariable('#V1')]))
+                        , (KApply('#Equals' , [KVariable('#V1'), KVariable('#V2')]) , KApply('_==K_'     , [KVariable('#V1'), KVariable('#V2')]))
                         ]
     newK = k
     for rule in mlPredToBoolRules:
