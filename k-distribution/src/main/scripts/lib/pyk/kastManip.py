@@ -84,6 +84,8 @@ def rewriteAnywhereWith(rule, pattern):
     return traverseBottomUp(pattern, lambda p: rewriteWith(rule, p))
 
 def mlPredToBool(k):
+    if k is None:
+        return None
     mlPredToBoolRules = [ (KApply('#True', [])  , KToken('true', 'Bool'))
                         , (KApply('#False', []) , KToken('false', 'Bool'))
                         , (KApply('#And'    , [KVariable('#V1'), KVariable('#V2')]) , KApply('_andBool_' , [KVariable('#V1'), KVariable('#V2')]))
@@ -97,6 +99,8 @@ def mlPredToBool(k):
     return newK
 
 def simplifyBool(k):
+    if k is None:
+        return None
     simplifyRules = [ (KApply('_==K_', [KVariable('#LHS'), KToken('true', 'Bool')]), KVariable('#LHS'))
                     , (KApply('_==K_', [KToken('true', 'Bool'), KVariable('#RHS')]), KVariable('#RHS'))
                     , (KApply('_==K_', [KVariable('#LHS'), KToken('false', 'Bool')]), KApply('notBool_', [KVariable('#LHS')]))
