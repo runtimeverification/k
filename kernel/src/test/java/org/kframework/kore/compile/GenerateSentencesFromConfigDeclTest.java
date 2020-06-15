@@ -72,7 +72,7 @@ public class GenerateSentencesFromConfigDeclTest {
         Set<Sentence> reference = Set(Production(KLabel("<threads>"), Sort("ThreadsCell"),
                         Seq(Terminal("<threads>"), NonTerminal(Sort("ThreadCellBag")), Terminal("</threads>")),
                         Att().add("cell").add("cellName", "threads").add("topcell").add("format", "%1%i%n%2%d%n%3")),
-                SyntaxSort(Seq(), Sort("ThreadCellBag"), Att().add("hook", "BAG.Bag")),
+                SyntaxSort(Seq(), Sort("ThreadCellBag"), Att().add("hook", "BAG.Bag").add("cellCollection")),
                 Production(KLabel("_ThreadCellBag_"), Sort("ThreadCellBag"),
                         Seq(NonTerminal(Sort("ThreadCellBag")), NonTerminal(Sort("ThreadCellBag"))),
                         Att().add("assoc","").add("comm","").add("unit",".ThreadCellBag")
