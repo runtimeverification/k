@@ -97,18 +97,22 @@ def mlPredToBool(k):
     return newK
 
 def simplifyBool(k):
-    simplifyRules = [ (KApply("_==K_", [KVariable("#LHS"), KToken("true", "Bool")]),  KVariable("#LHS"))
-                    , (KApply("_==K_", [KVariable("#LHS"), KToken("false", "Bool")]), KApply("notBool_", [KVariable("#LHS")]))
-                    , (KApply("_andBool_", [KToken("true", "Bool"), KVariable("#REST")]), KVariable("#REST"))
-                    , (KApply("_andBool_", [KVariable("#REST"), KToken("true", "Bool")]), KVariable("#REST"))
-                    , (KApply("_andBool_", [KToken("false", "Bool"), KVariable("#REST")]), KToken("false", "Bool"))
-                    , (KApply("_andBool_", [KVariable("#REST"), KToken("false", "Bool")]), KToken("false", "Bool"))
-                    , (KApply("_orBool_", [KToken("false", "Bool"), KVariable("#REST")]), KVariable("#REST"))
-                    , (KApply("_orBool_", [KVariable("#REST"), KToken("false", "Bool")]), KVariable("#REST"))
-                    , (KApply("_orBool_", [KToken("true", "Bool"), KVariable("#REST")]), KToken("true", "Bool"))
-                    , (KApply("_orBool_", [KVariable("#REST"), KToken("true", "Bool")]), KToken("true", "Bool"))
-                    , (KApply("notBool_", [KToken("false", "Bool")]), KToken("true", "Bool"))
-                    , (KApply("notBool_", [KToken("true", "Bool") ]), KToken("false", "Bool"))
+    simplifyRules = [ (KApply('_==K_', [KVariable('#LHS'), KToken('true', 'Bool')]), KVariable('#LHS'))
+                    , (KApply('_==K_', [KToken('true', 'Bool'), KVariable('#RHS')]), KVariable('#RHS'))
+                    , (KApply('_==K_', [KVariable('#LHS'), KToken('false', 'Bool')]), KApply('notBool_', [KVariable('#LHS')]))
+                    , (KApply('_==K_', [KToken('false', 'Bool'), KVariable('#RHS')]), KApply('notBool_', [KVariable('#RHS')]))
+                    , (KApply('_andBool_', [KToken('true', 'Bool'), KVariable('#REST')]), KVariable('#REST'))
+                    , (KApply('_andBool_', [KVariable('#REST'), KToken('true', 'Bool')]), KVariable('#REST'))
+                    , (KApply('_andBool_', [KToken('false', 'Bool'), KVariable('#REST')]), KToken('false', 'Bool'))
+                    , (KApply('_andBool_', [KVariable('#REST'), KToken('false', 'Bool')]), KToken('false', 'Bool'))
+                    , (KApply('_orBool_', [KToken('false', 'Bool'), KVariable('#REST')]), KVariable('#REST'))
+                    , (KApply('_orBool_', [KVariable('#REST'), KToken('false', 'Bool')]), KVariable('#REST'))
+                    , (KApply('_orBool_', [KToken('true', 'Bool'), KVariable('#REST')]), KToken('true', 'Bool'))
+                    , (KApply('_orBool_', [KVariable('#REST'), KToken('true', 'Bool')]), KToken('true', 'Bool'))
+                    , (KApply('notBool_', [KToken('false', 'Bool')]), KToken('true', 'Bool'))
+                    , (KApply('notBool_', [KToken('true', 'Bool') ]), KToken('false', 'Bool'))
+                    , (KApply('notBool_', [KApply('_==K_' , [KVariable('#V1'), KVariable('#V2')])]), KApply('_=/=K_', [KVariable('#V1'), KVariable('#V2')]))
+                    , (KApply('notBool_', [KApply('_=/=K_', [KVariable('#V1'), KVariable('#V2')])]), KApply('_==K_' , [KVariable('#V1'), KVariable('#V2')]))
                     ]
     newK = k
     for rule in simplifyRules:
