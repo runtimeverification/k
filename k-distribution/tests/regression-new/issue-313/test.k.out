@@ -5,3 +5,9 @@ klabel <topCell2>
 	Location(16,6,20,17)
 [Warning] Compiler: Could not find main syntax module with name TEST-SYNTAX in
 definition.  Use --syntax-module to specify one. Using TEST as default.
+[Warning] Compiler: Symbol '<foos>' defined but not used.
+	Source(test.k)
+	Location(7,3,13,14)
+[Warning] Compiler: Symbol '<topCell1>' defined but not used.
+	Source(test.k)
+	Location(7,3,13,14)
