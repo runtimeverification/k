@@ -91,17 +91,12 @@
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-collections4</artifactId>
-      <version>4.0</version>
+      <version>4.1</version>
     </dependency>
     <dependency>
       <groupId>commons-codec</groupId>
       <artifactId>commons-codec</artifactId>
       <version>1.10</version>
-    </dependency>
-    <dependency>
-      <groupId>org.kframework.dependencies</groupId>
-      <artifactId>jcommander</artifactId>
-      <version>1.35-custom</version>
     </dependency>
     <dependency>
       <groupId>net.sf.jung</groupId>

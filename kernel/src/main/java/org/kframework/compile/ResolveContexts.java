@@ -132,10 +132,10 @@ public class ResolveContexts {
                 if (inMainCell || !hasMainCell) {
                     if (!k.name().equals("HOLE")) {
                         vars.put(k, k);
-                        finalHolePosition[0] = currentHolePosition[0];
+                        currentHolePosition[0]++;
                     } else {
                         holeVar = k;
-                        currentHolePosition[0]++;
+                        finalHolePosition[0] = currentHolePosition[0];
                     }
                 }
                 super.apply(k);

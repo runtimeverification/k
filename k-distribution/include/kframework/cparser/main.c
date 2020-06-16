@@ -30,12 +30,23 @@ char *enquote(char *str) {
         } else {
           char buf[5];
           sprintf(buf, "\\x%02hhx", (unsigned char)c);
-	  append(res, &bufidx, buf, 4);
+          append(res, &bufidx, buf, 4);
         }
     }
   }
   append(res, &bufidx, "\"", 2);
   return res;
+}
+
+static bool equalsSymbol(node *x0, node *x1) {
+  if (strncmp(x0->symbol, "inj{", 4) == 0 && strncmp(x1->symbol, "inj{", 4) == 0) {
+    node *c0 = x0->children[0];
+    node *c1 = x1->children[0];
+    if (strcmp(c0->sort, c1->sort) == 0) {
+      return true;
+    }
+  }
+  return strcmp(x0->symbol, x1->symbol) == 0;
 }
 
 bool equalsNode(node *x0, node *x1) {
@@ -45,7 +56,16 @@ bool equalsNode(node *x0, node *x1) {
   if (x0->str) {
     return strcmp(x0->symbol, x1->symbol) == 0;
   } else {
-    if (!(strcmp(x0->symbol, x1->symbol) == 0 && x0->nchildren == x1->nchildren)) {
+    if (strncmp(x0->symbol, "inj{", 4) == 0 && strncmp(x1->symbol, "inj{", 4) == 0) {
+      node *c0 = x0->children[0];
+      node *c1 = x1->children[0];
+      if (!c0->str && !c1->str && strncmp(c0->symbol, "inj{", 4) == 0 && strncmp(c1->symbol, "inj{", 4) == 0) {
+        if (equalsNode(c0, c1)) {
+          return true;
+        }
+      } 
+    }
+    if (!(equalsSymbol(x0, x1) && x0->nchildren == x1->nchildren)) {
       return false;
     }
     for (size_t i = 0; i < x0->nchildren; i++) {
@@ -80,7 +100,7 @@ YYSTYPE mergeAmb(YYSTYPE x0, YYSTYPE x1) {
   YYSTYPE result = {.nterm = n};
   return result;
 }
-	
+
 void print(node *current) {
   printf("%s", current->symbol);
   if (!current->str) {

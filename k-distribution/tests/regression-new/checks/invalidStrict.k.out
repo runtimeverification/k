@@ -24,6 +24,7 @@ position in [2]
 	Source(invalidStrict.k)
 	Location(6,16,6,35)
 [Error] Compiler: Had 8 structural errors.
-[Error] Compiler: Invalid strict attribute containing multiple semicolons.
+[Error] Compiler: Invalid strict attribute containing invalid semicolons. Must
+contain 0, 1, 2, or an even number of components.
 	Source(invalidStrict.k)
 	Location(8,16,8,45)

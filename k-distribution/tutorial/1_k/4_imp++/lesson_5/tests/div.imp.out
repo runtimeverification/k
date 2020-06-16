@@ -1,6 +1,6 @@
   Result ==K <T>
     <k>
-      3 / 0 ~> #freezer_=_;_IMP-SYNTAX0_ ( y )
+      3 / 0 ~> #freezer_=_;_IMP-SYNTAX1_ ( y )
     </k>
     <env>
       x |-> 1
