@@ -83,7 +83,12 @@ def rewriteWith(rule, pattern):
 def rewriteAnywhereWith(rule, pattern):
     return traverseBottomUp(pattern, lambda p: rewriteWith(rule, p))
 
-def mlPredToBool(k):
+def unsafeMlPredToBool(k):
+    """Attempt to convert an ML Predicate back into a boolean expression.
+
+    This is unsafe in general because not every ML Predicate can be represented correctly as a boolean expression.
+    This function just makes a best-effort to do this.
+    """
     if k is None:
         return None
     mlPredToBoolRules = [ (KApply('#True', [])  , KToken('true', 'Bool'))
@@ -310,8 +315,8 @@ def minimizeRule(rule):
 
         ruleBody = substitute(ruleBody, substitutions)
 
-        ruleRequires = simplifyBool(mlPredToBool(ruleRequires))
-        ruleEnsures  = simplifyBool(mlPredToBool(ruleEnsures))
+        ruleRequires = simplifyBool(unsafeMlPredToBool(ruleRequires))
+        ruleEnsures  = simplifyBool(unsafeMlPredToBool(ruleEnsures))
 
         ruleRequires = None if ruleRequires == KToken('true', 'Bool') else ruleRequires
         ruleEnsures  = None if ruleEnsures  == KToken('true', 'Bool') else ruleEnsures
