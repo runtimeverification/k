@@ -631,7 +631,13 @@ void AttributesBodyEOF(ASTNode node) : {} {
   { SwitchTo(ATTR_STATE); } AttributesBody(node) <EOF> { SwitchTo(DEFAULT); } }
 
 /** Parses a set of attributes and adds them to 'node' */
-void AttributesBody(ASTNode node) : {} { Tag(node) ("," Tag(node))* }
+void AttributesBody(ASTNode node) : {} { Tag(node) ("," Tag(node))* 
+  {
+    if (node.getAttributes().contains("cell") && node.getAttributes().contains("stream")) {
+      module.addAttribute("stream", "");
+    }
+  }
+}
 void Attributes(ASTNode node) : {}
 {
   "[" { SwitchTo(ATTR_STATE); }

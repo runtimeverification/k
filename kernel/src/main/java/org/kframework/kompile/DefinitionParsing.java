@@ -180,9 +180,14 @@ public class DefinitionParsing {
             modules = Stream.concat(modules, Stream.of(syntaxModule.get()));
             modules = Stream.concat(modules, stream(syntaxModule.get().importedModules()));
         }
-        modules = Stream.concat(modules, Stream.of(parsedDefinition.getModule("K-REFLECTION").get()));
-        modules = Stream.concat(modules, Stream.of(parsedDefinition.getModule("STDIN-STREAM").get()));
-        modules = Stream.concat(modules, Stream.of(parsedDefinition.getModule("STDOUT-STREAM").get()));
+        boolean hasStream = stream(parsedDefinition.entryModules()).anyMatch(m -> m.att().contains("stream"));
+        if (!kore || hasStream) {
+            modules = Stream.concat(modules, Stream.of(parsedDefinition.getModule("K-REFLECTION").get()));
+        }
+        if (hasStream) {
+            modules = Stream.concat(modules, Stream.of(parsedDefinition.getModule("STDIN-STREAM").get()));
+            modules = Stream.concat(modules, Stream.of(parsedDefinition.getModule("STDOUT-STREAM").get()));
+        }
         modules = Stream.concat(modules,
                 stream(parsedDefinition.entryModules()).filter(m -> !stream(m.sentences()).anyMatch(s -> s instanceof Bubble)));
         Definition trimmed = Definition(parsedDefinition.mainModule(), modules.collect(Collections.toSet()),
